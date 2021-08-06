@@ -1,12 +1,12 @@
 use super::state::*;
-use std::rc::Rc;
-use dominator::{html, clone, Dom};
-use utils::prelude::*;
-use futures_signals::signal::SignalExt;
 use components::{
     image::search::dom::render as render_image_search,
     text_editor::dom::render_controls as render_text_editor,
 };
+use dominator::{clone, html, Dom};
+use futures_signals::signal::SignalExt;
+use std::rc::Rc;
+use utils::prelude::*;
 
 mod video;
 
@@ -36,8 +36,7 @@ pub fn render(state: Rc<Step2>) -> Dom {
     })
 }
 
-
-fn render_tab(state: Rc<Step2>, tab_kind:TabKind) -> Dom {
+fn render_tab(state: Rc<Step2>, tab_kind: TabKind) -> Dom {
     html!("menu-tab-with-title", {
         .property("slot", "tabs")
         .property("kind", tab_kind.as_str())

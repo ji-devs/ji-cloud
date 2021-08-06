@@ -1,7 +1,17 @@
-use shared::domain::jig::{Jig, JigId, module::{ModuleId, body::{Instructions, _groups::design::{Backgrounds, Sticker}, video::{Mode, ModuleData as RawData, PlaySettings, Step}}}};
 use components::{audio_mixer::AudioMixer, module::_common::play::prelude::*};
-use utils::prelude::*;
+use shared::domain::jig::{
+    module::{
+        body::{
+            Instructions,
+            _groups::design::{Backgrounds, Sticker},
+            video::{Mode, ModuleData as RawData, PlaySettings, Step},
+        },
+        ModuleId,
+    },
+    Jig, JigId,
+};
 use std::rc::Rc;
+use utils::prelude::*;
 
 pub struct Base {
     pub jig_id: JigId,
@@ -16,9 +26,7 @@ pub struct Base {
 }
 
 impl Base {
-
     pub async fn new(init_args: InitFromRawArgs<RawData, Mode, Step>) -> Rc<Self> {
-
         let InitFromRawArgs {
             jig_id,
             module_id,
@@ -30,9 +38,7 @@ impl Base {
         } = init_args;
 
         let content = raw.content.unwrap_ji();
-        let base_content = content.base; 
-
-
+        let base_content = content.base;
 
         Rc::new(Self {
             jig_id,

@@ -1,36 +1,31 @@
-use components::{module::_common::edit::prelude::*, stickers::video::state::Video};
-use futures_signals::signal_vec::{SignalVecExt, VecDiff};
-use wasm_bindgen_futures::spawn_local;
-use std::rc::Rc;
-use shared::domain::jig::{
-    JigId,
-    module::{
-        ModuleId,
-        body::{
-            Instructions,
-            ThemeChoice,
-            video::{ModuleData as RawData, PlaySettings as RawPlaySettings, DoneAction, Step, Mode}
-        }
-    }
-};
-use futures_signals::signal::{self, Signal, SignalExt, ReadOnlyMutable, Mutable};
-use utils::prelude::*;
 use components::{
-    text_editor::{
-        state::State as TextEditorState,
-        callbacks::Callbacks as TextEditorCallbacks
-    },
+    backgrounds::{callbacks::Callbacks as BackgroundsCallbacks, state::Backgrounds},
     stickers::{
-        state::{Stickers, Sticker},
-        callbacks::Callbacks as StickersCallbacks
+        callbacks::Callbacks as StickersCallbacks,
+        state::{Sticker, Stickers},
     },
-    backgrounds::{
-        state::Backgrounds,
-        callbacks::Callbacks as BackgroundsCallbacks,
-    },
+    text_editor::{callbacks::Callbacks as TextEditorCallbacks, state::State as TextEditorState},
 };
+use components::{module::_common::edit::prelude::*, stickers::video::state::Video};
 use dominator::clone;
+use futures_signals::signal::{self, Mutable, ReadOnlyMutable, Signal, SignalExt};
+use futures_signals::signal_vec::{SignalVecExt, VecDiff};
+use shared::domain::jig::{
+    module::{
+        body::{
+            video::{
+                DoneAction, Mode, ModuleData as RawData, PlaySettings as RawPlaySettings, Step,
+            },
+            Instructions, ThemeChoice,
+        },
+        ModuleId,
+    },
+    JigId,
+};
 use std::cell::RefCell;
+use std::rc::Rc;
+use utils::prelude::*;
+use wasm_bindgen_futures::spawn_local;
 pub struct Base {
     pub history: Rc<HistoryStateImpl<RawData>>,
     pub step: ReadOnlyMutable<Step>,
@@ -41,8 +36,8 @@ pub struct Base {
     pub module_id: ModuleId,
     pub jig_theme_id: Mutable<ThemeId>,
     // Video-specific
-    pub backgrounds: Rc<Backgrounds>, 
-    pub stickers: Rc<Stickers<Sticker>>, 
+    pub backgrounds: Rc<Backgrounds>,
+    pub stickers: Rc<Stickers<Sticker>>,
     pub text_editor: Rc<TextEditorState>,
     pub play_settings: PlaySettings,
 
@@ -77,12 +72,9 @@ impl PlaySettings {
     }
 }
 
-
 impl Base {
-
     pub async fn new(init_args: BaseInitFromRawArgs<RawData, Mode, Step>) -> Rc<Self> {
-
-        let BaseInitFromRawArgs { 
+        let BaseInitFromRawArgs {
             raw,
             jig_id,
             jig_theme_id,
@@ -95,17 +87,17 @@ impl Base {
         } = init_args;
 
         let content = raw.content.unwrap_ji();
-        let base_content = content.base; 
+        let base_content = content.base;
 
-        let _self_ref:Rc<RefCell<Option<Rc<Self>>>> = Rc::new(RefCell::new(None));
+        let _self_ref: Rc<RefCell<Option<Rc<Self>>>> = Rc::new(RefCell::new(None));
 
         let instructions = Mutable::new(base_content.instructions);
-      
-        let stickers_ref:Rc<RefCell<Option<Rc<Stickers<Sticker>>>>> = Rc::new(RefCell::new(None));
+
+        let stickers_ref: Rc<RefCell<Option<Rc<Stickers<Sticker>>>>> = Rc::new(RefCell::new(None));
 
         let text_editor = TextEditorState::new(
             theme_id.clone(),
-            None, 
+            None,
             TextEditorCallbacks::new(
                 //New text
                 Some(clone!(stickers_ref => move |value:&str| {
@@ -124,54 +116,48 @@ impl Base {
                     if let Some(stickers) = stickers_ref.borrow().as_ref() {
                         stickers.stop_current_text_editing();
                     }
-                }))
-        ));
-
+                })),
+            ),
+        );
 
         let backgrounds = Rc::new(Backgrounds::from_raw(
-                &base_content.backgrounds,
-                theme_id.clone(),
-                BackgroundsCallbacks::new(
-                    Some(clone!(history => move |raw_bgs| {
-                        history.push_modify(|raw| {
-                            if let Some(content) = &mut raw.content {
-                                content.base.backgrounds = raw_bgs;
-                            }
-                        });
-                    }))
-                )
+            &base_content.backgrounds,
+            theme_id.clone(),
+            BackgroundsCallbacks::new(Some(clone!(history => move |raw_bgs| {
+                history.push_modify(|raw| {
+                    if let Some(content) = &mut raw.content {
+                        content.base.backgrounds = raw_bgs;
+                    }
+                });
+            }))),
         ));
 
         let stickers = Stickers::new(
-                text_editor.clone(),
-                StickersCallbacks::new(
-                    Some(clone!(history => move |stickers:&[Sticker]| {
-                        history.push_modify(|raw| {
-                            if let Some(content) = &mut raw.content {
-                                content.base.stickers = stickers 
-                                    .iter()
-                                    .map(|sticker| {
-                                        sticker.to_raw()
-                                    })
-                                    .collect();
-                            }
-                        });
-                    }))
-                )
+            text_editor.clone(),
+            StickersCallbacks::new(Some(clone!(history => move |stickers:&[Sticker]| {
+                history.push_modify(|raw| {
+                    if let Some(content) = &mut raw.content {
+                        content.base.stickers = stickers
+                            .iter()
+                            .map(|sticker| {
+                                sticker.to_raw()
+                            })
+                            .collect();
+                    }
+                });
+            }))),
         );
-       
+
         stickers.replace_all(
-            base_content.stickers.clone()
+            base_content
+                .stickers
+                .clone()
                 .iter()
-                .map(|raw_sticker| {
-                    Sticker::new(stickers.clone(), raw_sticker)
-                })
-                .collect::<Vec<Sticker>>()
+                .map(|raw_sticker| Sticker::new(stickers.clone(), raw_sticker))
+                .collect::<Vec<Sticker>>(),
         );
 
         *stickers_ref.borrow_mut() = Some(stickers.clone());
-
-
 
         let _self = Rc::new(Self {
             jig_id,
@@ -192,53 +178,55 @@ impl Base {
         *_self_ref.borrow_mut() = Some(_self.clone());
 
         // this listens for changes in the stickers list and updates _self.video whenever there is a video
-        spawn_local(_self.stickers.list.signal_vec_cloned().for_each(clone!(_self => move |diff| {
-            match diff {
-                VecDiff::Replace {..} |
-                VecDiff::RemoveAt {..} |
-                VecDiff::Pop {..} => {
-                    // check if video in vec
-                    let stickers = _self.stickers.list.lock_ref();
-                    let video_sticker = stickers.iter().find(|sticker| {
-                        matches!(sticker, Sticker::Video(_))
-                    });
+        spawn_local(_self.stickers.list.signal_vec_cloned().for_each(
+            clone!(_self => move |diff| {
+                match diff {
+                    VecDiff::Replace {..} |
+                    VecDiff::RemoveAt {..} |
+                    VecDiff::Pop {..} => {
+                        // check if video in vec
+                        let stickers = _self.stickers.list.lock_ref();
+                        let video_sticker = stickers.iter().find(|sticker| {
+                            matches!(sticker, Sticker::Video(_))
+                        });
 
-                    match video_sticker {
-                        None => {
-                            _self.video.set(None);
-                        },
-                        Some(Sticker::Video(video)) => {
-                            _self.video.set(Some(Rc::clone(video)));
-                        },
-                        _ => unreachable!(),
-                    }
-                },
+                        match video_sticker {
+                            None => {
+                                _self.video.set(None);
+                            },
+                            Some(Sticker::Video(video)) => {
+                                _self.video.set(Some(Rc::clone(video)));
+                            },
+                            _ => unreachable!(),
+                        }
+                    },
 
-                VecDiff::InsertAt { value, .. } |
-                VecDiff::UpdateAt { value, .. } |
-                VecDiff::Push { value } => {
-                    // if value is a video, set
-                    if let Sticker::Video(video) = value {
-                        _self.video.set(Some(video));
-                    };
-                },
-                VecDiff::Clear { .. } => {
-                    // remove video
-                    _self.video.set(None);
-                },
+                    VecDiff::InsertAt { value, .. } |
+                    VecDiff::UpdateAt { value, .. } |
+                    VecDiff::Push { value } => {
+                        // if value is a video, set
+                        if let Sticker::Video(video) = value {
+                            _self.video.set(Some(video));
+                        };
+                    },
+                    VecDiff::Clear { .. } => {
+                        // remove video
+                        _self.video.set(None);
+                    },
 
-                VecDiff::Move { .. } => {
-                    // do nothing
-                },
+                    VecDiff::Move { .. } => {
+                        // do nothing
+                    },
 
-            };
-            async {}
-        })));
+                };
+                async {}
+            }),
+        ));
 
         _self
     }
 
-    pub fn theme_id_str_signal(&self) -> impl Signal<Item = &'static str> { 
+    pub fn theme_id_str_signal(&self) -> impl Signal<Item = &'static str> {
         self.theme_id.signal().map(|id| id.as_str_id())
     }
 }
@@ -246,7 +234,7 @@ impl Base {
 impl BaseExt<Step> for Base {
     type NextStepAllowedSignal = impl Signal<Item = bool>;
 
-    fn allowed_step_change(&self, _from:Step, _to:Step) -> bool {
+    fn allowed_step_change(&self, _from: Step, _to: Step) -> bool {
         true
     }
 

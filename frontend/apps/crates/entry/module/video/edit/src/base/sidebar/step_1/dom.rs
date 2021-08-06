@@ -1,12 +1,12 @@
 use super::state::*;
-use std::rc::Rc;
-use dominator::{html, clone, Dom};
-use utils::prelude::*;
-use futures_signals::signal::SignalExt;
 use components::{
+    color_select::dom::render as render_color_picker,
     image::search::dom::render as render_image_search,
-    color_select::dom::render as render_color_picker
 };
+use dominator::{clone, html, Dom};
+use futures_signals::signal::SignalExt;
+use std::rc::Rc;
+use utils::prelude::*;
 
 pub fn render(state: Rc<Step1>) -> Dom {
     html!("menu-tabs", {
@@ -34,8 +34,7 @@ pub fn render(state: Rc<Step1>) -> Dom {
     })
 }
 
-
-fn render_tab(state: Rc<Step1>, tab_kind:TabKind) -> Dom {
+fn render_tab(state: Rc<Step1>, tab_kind: TabKind) -> Dom {
     html!("menu-tab-with-title", {
         .property("slot", "tabs")
         .property("kind", tab_kind.as_str())

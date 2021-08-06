@@ -1,39 +1,32 @@
-
 use crate::base::state::Base;
-use std::rc::Rc;
-use futures_signals::signal::Mutable;
-use dominator::clone;
 use components::{
     image::search::{
-        state::{State as ImageSearchState, ImageSearchOptions},
-        callbacks::Callbacks as ImageSearchCallbacks
+        callbacks::Callbacks as ImageSearchCallbacks,
+        state::{ImageSearchOptions, State as ImageSearchState},
     },
     stickers::state::Stickers,
 };
+use dominator::clone;
+use futures_signals::signal::Mutable;
+use std::rc::Rc;
 
 pub struct Step2 {
     pub base: Rc<Base>,
     pub tab: Mutable<Tab>,
 }
 
-
 impl Step2 {
     pub fn new(base: Rc<Base>) -> Rc<Self> {
-
         let kind = match crate::debug::settings().content_tab {
             Some(kind) => kind,
-            None => TabKind::Video
+            None => TabKind::Video,
         };
 
         let tab = Mutable::new(Tab::new(base.clone(), kind));
 
-        Rc::new(Self {
-            base,
-            tab
-        })
+        Rc::new(Self { base, tab })
     }
 }
-
 
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub enum TabKind {
@@ -52,7 +45,6 @@ impl TabKind {
     }
 }
 
-
 #[derive(Clone)]
 pub enum Tab {
     Video,
@@ -61,34 +53,27 @@ pub enum Tab {
 }
 
 impl Tab {
-    pub fn new(base: Rc<Base>, kind:TabKind) -> Self {
+    pub fn new(base: Rc<Base>, kind: TabKind) -> Self {
         match kind {
-            TabKind::Video => {
-                Self::Video
-            },
-            TabKind::Text=> {
-                Self::Text
-            },
-            TabKind::Image=> {
+            TabKind::Video => Self::Video,
+            TabKind::Text => Self::Text,
+            TabKind::Image => {
                 let opts = ImageSearchOptions {
                     background_only: Some(true),
-                    upload: true, 
-                    filters: true, 
+                    upload: true,
+                    filters: true,
                 };
 
-                let callbacks = ImageSearchCallbacks::new(
-                    Some(clone!(base => move |image| {
-                        log::info!("{:?}", image);
-                        Stickers::add_sprite(base.stickers.clone(), image);
-                    }))
-                );
+                let callbacks = ImageSearchCallbacks::new(Some(clone!(base => move |image| {
+                    log::info!("{:?}", image);
+                    Stickers::add_sprite(base.stickers.clone(), image);
+                })));
                 let state = ImageSearchState::new(opts, callbacks);
 
                 Self::Image(Rc::new(state))
             }
         }
     }
-
 
     pub fn kind(&self) -> TabKind {
         match self {
@@ -98,4 +83,3 @@ impl Tab {
         }
     }
 }
-

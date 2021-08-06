@@ -1,19 +1,17 @@
+use crate::base::actions;
 use components::{
     backgrounds::dom::render_backgrounds_raw,
     module::_common::play::prelude::DomRenderable,
     stickers::{
-        sprite::dom::render_sticker_sprite_raw,
-        text::dom::render_sticker_text_raw,
-        video::dom::render_sticker_video_raw
-    }
+        sprite::dom::render_sticker_sprite_raw, text::dom::render_sticker_text_raw,
+        video::dom::render_sticker_video_raw,
+    },
 };
-use dominator::{Dom, clone, html};
+use dominator::{clone, html, Dom};
 use shared::domain::jig::module::body::_groups::design::Sticker as RawSticker;
 use std::rc::Rc;
-use crate::base::actions;
 
 use super::state::*;
-
 
 impl DomRenderable for Base {
     fn render(state: Rc<Base>) -> Dom {
