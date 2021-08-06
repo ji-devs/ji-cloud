@@ -71,6 +71,15 @@ pub fn render(state: Rc<State>) -> Dom {
                 html!("home-search-section-select", {
                     .property("slot", "language")
                     .property_signal("value", language_value_signal(state.clone()))
+                    .child(html!("input-select-option", {
+                        .text(STR_ALL_LANGUAGES)
+                        .property_signal("selected", state.search_selected.language.signal_cloned().map(|lang| lang.is_none()))
+                        .event(clone!(state => move |evt: events::CustomSelectedChange| {
+                            if evt.selected() {
+                                state.search_selected.language.set(None);
+                            }
+                        }))
+                    }))
                     .children(
                         state
                             .search_options
