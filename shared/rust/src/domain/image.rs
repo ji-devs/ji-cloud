@@ -61,6 +61,22 @@ impl ImageKind {
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct ImageId(pub Uuid);
 
+/// Wrapper type around [`i16`](std::i16), represents the index of an image tag.
+///
+/// This is used instead of UUIDs for image tags as they aren't created dynamically and
+/// a simple and consistent way to identify them is desired.
+#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[cfg_attr(feature = "backend", sqlx(transparent))]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+pub struct ImageTagIndex(pub i16);
+
+impl From<ImageTagIndex> for i16 {
+    fn from(value: ImageTagIndex) -> Self {
+        value.0
+    }
+}
+
 // todo: # errors doc section
 /// Request to create a new image.
 #[derive(Serialize, Deserialize, Debug)]
@@ -90,7 +106,7 @@ pub struct ImageCreateRequest {
     pub affiliations: Vec<AffiliationId>,
 
     /// The image's tags.
-    pub tags: Vec<TagId>,
+    pub tags: Vec<ImageTagIndex>,
 
     /// The image's categories.
     pub categories: Vec<CategoryId>,
@@ -148,10 +164,13 @@ pub struct ImageUpdateRequest {
 
     /// If `Some` replace the image's tags with these.
     #[serde(default)]
-    pub tags: Option<Vec<TagId>>,
+    pub tags: Option<Vec<ImageTagIndex>>,
 }
 
 /// Search for images via the given query string.
+///
+/// * `kind` field must match the case as represented in the returned json body (`PascalCase`?).
+/// * Vector fields, such as `age_ranges` should be given as a comma separated vector (CSV).
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct ImageSearchQuery {
@@ -196,12 +215,48 @@ pub struct ImageSearchQuery {
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub categories: Vec<CategoryId>,
 
-    /// Optionally filter by `tags`
+    /// Optionally order by `tags`. `tags[0]` has the highest priority.
+    ///
+    /// # Notes on priority:
+    /// Consider a request with 4 tags, `[clothing, food, red, sports]`.
+    ///
+    /// "Priority ordering" means that all items tagged as `clothing` will appear before those
+    /// without it, and that `[clothing, food]` will appear before `[clothing]` or `[clothing, red]`.
+    ///
+    /// ## Assigning scores
+    /// The priority is achieved by using Algolia's [filter scoring](https://www.algolia.com/doc/guides/managing-results/refine-results/filtering/in-depth/filter-scoring/) feature with `"sumOrFiltersScore": true`.
+    ///
+    /// Scores are weighted exponentially by a factor of 2. The lowest priority tag is given a score of 1,
+    /// and the `i`th highest priority tag is given a score of `2.pow(i)`. This assignment is *provably*
+    /// correct that we get the desired ranking.
+    ///
+    /// *NOTE*: this means that with `i64` range supported by Algolia, we can only assign priority for
+    /// the first 62 tags. The rest are all given a score of 1.  
+    ///
+    /// ## Example
+    /// For a example request `[clothing, food, red, sports]`, we assign the scores:
+    ///
+    /// | tag name  | score |
+    /// |-----------|-------|
+    /// | clothing  | 8     |
+    /// | food      | 4     |
+    /// | red       | 2     |
+    /// | sports    | 1     |
+    ///
+    /// This means that the entries will be returned in the following order, based on their tags:
+    ///
+    /// | position  | entry name | tag names    | score |
+    /// |-----------|------------|--------------|-------|
+    /// | 1         | cherry     | red, food    | 6     |
+    /// | 2         | cucumber   | green, food  | 4     |
+    /// | 3         | stop sign  | red          | 2     |
+    /// | 4         | basketball | sports       | 1     |
+    /// | 5         | wallet     | [no tags]    | 0     |
     #[serde(default)]
-    #[serde(serialize_with = "super::csv_encode_uuids")]
+    #[serde(serialize_with = "super::csv_encode_i16_indices")]
     #[serde(deserialize_with = "super::from_csv")]
     #[serde(skip_serializing_if = "Vec::is_empty")]
-    pub tags: Vec<TagId>,
+    pub tags: Vec<ImageTagIndex>,
 
     /// Optionally filter by `is_premium`
     #[serde(default)]
@@ -315,7 +370,7 @@ pub struct ImageMetadata {
     pub styles: Vec<ImageStyleId>,
 
     /// The tags associated with the image.
-    pub tags: Vec<TagId>,
+    pub tags: Vec<ImageTagIndex>,
 
     /// The age ranges associated with the image.
     pub age_ranges: Vec<AgeRangeId>,
@@ -388,7 +443,7 @@ struct DbImage {
     pub age_ranges: Vec<(AgeRangeId,)>,
     pub affiliations: Vec<(AffiliationId,)>,
     pub categories: Vec<(CategoryId,)>,
-    pub tags: Vec<(TagId,)>,
+    pub tags: Vec<(ImageTagIndex,)>,
     pub created_at: DateTime<Utc>,
     pub updated_at: Option<DateTime<Utc>>,
 }
