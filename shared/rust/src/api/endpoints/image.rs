@@ -31,12 +31,13 @@ impl ApiEndpoint for Get {
 
 /// Search for images.
 ///
-/// # Request
-/// The request should be supplied as a URL query string.
-/// * `kind` field must match the case as represented in the returned json body (`PascalCase`?).
-/// * Vector fields, such as `age_ranges` should be given as a comma separated vector (CSV).
+/// The request should be supplied as a URL query string. This is handled by `serde` if using a `to_string` call.
+/// See [`ImageSearchQuery`](::domain::image::ImageSearchQuery) for more more usage details.
 ///
 /// Ex: `?age_ranges=b873b584-efd0-11eb-b4b7-b791fd521ed5,b8388824-efd0-11eb-b4b7-c335e6a1139f,b778a054-efd0-11eb-b4b7-6f7305d76205&page=0`
+///
+/// # Authorization
+/// Standard
 ///
 /// # Errors:
 ///

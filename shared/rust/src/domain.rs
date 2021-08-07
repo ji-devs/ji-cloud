@@ -43,7 +43,7 @@ pub mod auth {
 use chrono::Utc;
 #[cfg(feature = "backend")]
 use paperclip::actix::Apiv2Schema;
-use ser::{csv_encode_uuids, deserialize_optional_field, from_csv};
+use ser::{csv_encode_i16_indices, csv_encode_uuids, deserialize_optional_field, from_csv};
 use uuid::Uuid;
 
 /// Serialize/Deserialize wrapper for Base64 encoded content.
@@ -66,7 +66,7 @@ impl<'de, E: std::fmt::Debug, T: std::str::FromStr<Err = E>> serde::Deserialize<
     where
         D: serde::Deserializer<'de>,
     {
-        Ok(Self(deserializer.deserialize_str(ser::FromStrVisiter(
+        Ok(Self(deserializer.deserialize_str(ser::FromStrVisitor(
             std::marker::PhantomData,
         ))?))
     }

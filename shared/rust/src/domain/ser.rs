@@ -22,6 +22,10 @@ where
     Ok(Some(serde::Deserialize::deserialize(deserializer)?))
 }
 
+/// Serializes a slice of hyphenated UUIDs into CSV format
+///
+/// ## Note:
+/// * Algolia takes CSV format arrays: https://www.algolia.com/doc/rest-api/search/#arrays
 pub(super) fn csv_encode_uuids<T: Into<Uuid> + Copy, S>(
     uuids: &[T],
     serializer: S,
@@ -44,6 +48,37 @@ where
 
     for item in iter {
         write!(&mut out, ",{}", item.to_hyphenated())
+            .expect("`String` call to `write!` shouldn't fail");
+    }
+
+    serializer.serialize_str(&out)
+}
+
+/// ASSUMING this is only going to be used for resources identified by index, which is
+/// a non-negative integer which begins counting up from 0.
+///
+/// In most cases for this project, i16 is used instead of u16 because PostgreSQL does not have
+/// unsigned integer types.
+pub(super) fn csv_encode_i16_indices<T: Into<i16> + Copy, S>(
+    values: &[T],
+    serializer: S,
+) -> Result<S::Ok, S::Error>
+where
+    S: serde::Serializer,
+{
+    // i16 has range [-32768, 32767].
+    // We are making the assumption here that the values are >= 0.
+    let len = values.len() * 5 + values.len().saturating_sub(1);
+
+    let mut out = String::with_capacity(len);
+    let mut iter = values.iter().copied().map(<T as Into<i16>>::into);
+    if let Some(item) = iter.next() {
+        write!(&mut out, "{}", item.to_string())
+            .expect("`String` call to `write!` shouldn't fail.");
+    }
+
+    for item in iter {
+        write!(&mut out, ",{}", item.to_string())
             .expect("`String` call to `write!` shouldn't fail");
     }
 
@@ -88,6 +123,8 @@ impl<'de, T: DeserializeOwned> serde::de::Visitor<'de> for CSVVecVisitor<T> {
     }
 }
 
+// // I think this is commented out to avoid repeated writer re-allocations? the csv_encode_* functions
+// // above preallocate. Not 100% certain if this is the reason, or if the performance impact is noticeable
 // pub(super) fn vec_encode_csv<T: Serialize, S>(v: &Vec<T>, serializer: S) -> Result<S::Ok, S::Error>
 // where
 //     S: serde::Serializer,
@@ -106,9 +143,9 @@ impl<'de, T: DeserializeOwned> serde::de::Visitor<'de> for CSVVecVisitor<T> {
 //     serializer.serialize_str(s)
 // }
 
-pub(super) struct FromStrVisiter<T>(pub PhantomData<T>);
+pub(super) struct FromStrVisitor<T>(pub PhantomData<T>);
 
-impl<'de, TErr: std::fmt::Debug, T: FromStr<Err = TErr>> Visitor<'de> for FromStrVisiter<T> {
+impl<'de, TErr: std::fmt::Debug, T: FromStr<Err = TErr>> Visitor<'de> for FromStrVisitor<T> {
     type Value = T;
 
     fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
