@@ -14,7 +14,8 @@ actix-http = "2.1.0"
 actix-rt = "1.0.0"
 actix-service = "1.0.5"
 actix-web = "3.0.0"
-algolia = { git = "https://gitlab.com/izik1/algolia-rs.git", rev = "f5ab9b32121f51f0ff8b0a5cef0656ada0f477e4" }
+# temp algolia = { git = "https://gitlab.com/izik1/algolia-rs.git", rev = "f5ab9b32121f51f0ff8b0a5cef0656ada0f477e4" }
+algolia = { git = "https://gitlab.com/rrcwang/algolia-rs.git", rev = "b976ec28366eca22c56cf28c5c54a42833e4a988" }
 anyhow = "1.0.32"
 chrono = "0.4.13"
 chrono-tz = "0.5.3"
