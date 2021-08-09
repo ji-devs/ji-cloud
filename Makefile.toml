@@ -207,6 +207,7 @@ script = ["gcloud functions deploy purgeUploadsSandbox --project ji-cloud-develo
 run_task = [{name = [
     "deploy-release-screenshot-save",
     "deploy-release-screenshot-show",
+	"deploy-release-screenshot-queue",
 ]}]
 
 
@@ -218,12 +219,17 @@ script = ["gcloud functions deploy saveScreenshotRelease --trigger-http --projec
 script_runner = "@shell"
 script = ["gcloud functions deploy showScreenshotRelease --trigger-http --project=ji-cloud --region=europe-west1 --source backend/screenshot --memory=1024MB --runtime=nodejs10 --timeout=540s"]
 
+[tasks.deploy-release-screenshot-queue]
+script_runner = "@shell"
+script = ["gcloud functions deploy queueScreenshotRelease --trigger-http --project=ji-cloud --region=europe-west1 --source backend/screenshot --runtime=nodejs10 --timeout=540s"]
+
 #------Sandbox-----------#
 
 [tasks.sandbox-screenshot]
 run_task = [{name = [
     "deploy-sandbox-screenshot-save",
     "deploy-sandbox-screenshot-show",
+	"deploy-sandbox-screenshot-queue",
 ]}]
 
 
@@ -235,7 +241,9 @@ script = ["gcloud functions deploy saveScreenshotSandbox --trigger-http --projec
 script_runner = "@shell"
 script = ["gcloud functions deploy showScreenshotSandbox --trigger-http --project=ji-cloud-developer-sandbox --region=europe-west1 --source backend/screenshot --memory=1024MB --runtime=nodejs10 --timeout=540s"]
 
-
+[tasks.deploy-sandbox-screenshot-queue]
+script_runner = "@shell"
+script = ["gcloud functions deploy queueScreenshotSandbox --trigger-http --project=ji-cloud-developer-sandbox --region=europe-west1 --source backend/screenshot --runtime=nodejs10 --timeout=540s"]
 
 
 

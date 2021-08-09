@@ -13,7 +13,7 @@ const STR_DELETE: &'static str = "Delete";
 const STR_DUPLICATE: &'static str = "Duplicate";
 const STR_SEARCH: &'static str = "Search";
 const STR_SHOW_JIG_ALL: &'static str = "Show all my JIGs";
-const STR_SHOW_JIG_PUBLISHED: &'static str = "Show published Jigs";
+const STR_SHOW_JIG_PUBLISHED: &'static str = "Show published JIGs";
 const STR_SHOW_JIG_DRAFT: &'static str = "Show drafts";
 
 impl GalleryDom {

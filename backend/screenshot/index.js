@@ -1,5 +1,6 @@
 const fetch = require('node-fetch');
 const {Storage} = require('@google-cloud/storage');
+const {CloudTasksClient} = require('@google-cloud/tasks');
 const storage = new Storage();
 const puppeteer = require("puppeteer");
 const _gm = require("gm");
@@ -20,8 +21,62 @@ exports.showScreenshotRelease = makeShowScreenshot("https://jigzi.org");
 exports.showScreenshotSandbox = makeShowScreenshot("https://sandbox.jigzi.org");
 exports.saveScreenshotRelease = makeSaveScreenshot("https://jigzi.org", "ji-cloud-uploads-origin-eu-001");
 exports.saveScreenshotSandbox = makeSaveScreenshot("https://sandbox.jigzi.org", "ji-cloud-sandbox-uploads-origin-eu-001");
+exports.queueScreenshotRelease = queueScreenshot("ji-cloud", "https://europe-west1-ji-cloud.cloudfunctions.net", "saveScreenshotRelease", "https://uploads.jicloud.org");
+exports.queueScreenshotSandbox = queueScreenshot("ji-cloud-developer-sandbox", "https://europe-west1-ji-cloud-developer-sandbox.cloudfunctions.net", "saveScreenshotSandbox", "https://uploads.sandbox.jicloud.org");
 
 /*** Factory functions for release vs. sandbox ***/
+
+let _tasksClient;
+
+function queueScreenshot(project, baseUrl, endpoint, finalUrl) {
+    return wrapCors((req, res) => {
+        const {respondError, respondJson} = makeResponders(res);
+
+        return parseQuery(req.query)
+            .then(({jig, module, kind}) => {
+                if(_tasksClient == undefined) {
+                    _tasksClient = new CloudTasksClient();
+                }
+
+                const client = _tasksClient;
+
+                const LOCATION = "europe-west1";
+                const QUEUE = "screenshot";
+                const parent = client.queuePath(project, LOCATION, QUEUE);
+                
+                const url = `${baseUrl}/${endpoint}?jig=${jig}&module=${module}&kind=${kind}`;
+
+                const task = {
+                    httpRequest: {
+                        httpMethod: 'POST',
+                        url 
+                    },
+                };
+
+                //task.httpRequest.body = Buffer.from(payload).toString('base64');
+                //task.scheduleTime = { seconds: inSeconds + Date.now() / 1000, };
+
+                const request = {parent, task};
+                return client.createTask(request)
+                    .then(([response]) => {
+                        return {
+                            jpg: `${finalUrl}/screenshot/${jig}/${module}/full.jpg`,
+                            taskUrl: url,
+                            taskName: response.name
+                        }
+                    });
+            })
+            .then(
+                resp => {
+                    respondJson(resp);
+                },
+                err => {
+                    respondError(err);
+                }
+            );
+    });
+}
+
 function makeShowScreenshot(baseUrl) {
     return wrapCors((req, res) => {
         const {respondError, respondBuffer} = makeResponders(res);

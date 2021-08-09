@@ -5,15 +5,17 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "dev": "watchexec -w index.js -r -s SIGKILL \"npm run _dev:save\"",
+    "dev": "watchexec -w index.js -r -s SIGKILL \"npm run _dev:queue\"",
     "_dev:show": "functions-framework --target=showScreenshotSandbox --port=8081",
     "_dev:save": "functions-framework --target=saveScreenshotSandbox --port=8081",
+    "_dev:queue": "functions-framework --target=queueScreenshotSandbox --port=8081",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@google-cloud/storage": "^5.1.1",
+    "@google-cloud/tasks": "^2.3.6",
     "dotenv": "^10.0.0",
     "gm": "^1.23.1",
     "imagemagick": "^0.1.3",
