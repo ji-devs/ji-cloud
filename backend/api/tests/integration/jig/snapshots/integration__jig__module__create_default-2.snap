@@ -1,0 +1,33 @@
+---
+source: tests/integration/jig/module.rs
+expression: body
+
+---
+{
+  "module": {
+    "id": "[id]",
+    "body": {
+      "cover": {
+        "content": {
+          "editor_state": {
+            "step": "One",
+            "steps_completed": []
+          },
+          "base": {
+            "instructions": {
+              "text": null,
+              "audio": null
+            },
+            "theme": "Jig",
+            "backgrounds": {
+              "layer_1": null,
+              "layer_2": null
+            },
+            "stickers": []
+          }
+        }
+      }
+    },
+    "is_complete": false
+  }
+}
