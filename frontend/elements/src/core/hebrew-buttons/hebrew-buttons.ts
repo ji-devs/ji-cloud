@@ -3,10 +3,14 @@ import { nothing } from "lit-html";
 import { classMap } from "lit-html/directives/class-map";
 import "../drag/container";
 import "./hebrew-keyboard/hebrew-keyboard";
+import "@elements/core/overlays/anchored-overlay";
 
 type Button = "sefaria" | "dicta" | "keyboard";
 
 export const KEYBOARD_HEIGHT = 216;
+
+const SEFARIA_URL = "https://www.sefaria.org/texts/Tanakh";
+const DICTA_URL = "https://embed.dicta.org.il/";
 
 @customElement("hebrew-buttons")
 export class _ extends LitElement {
@@ -49,6 +53,15 @@ export class _ extends LitElement {
                 }
                 :host([full]) .no-short, :host(:hover) .no-short, .full .no-short {
                     display: inline-block;
+                }
+                .iframe-wrapper {
+                    width: 550px;
+                    height: 665px;
+                }
+                .iframe-wrapper iframe {
+                    height: 100%;
+                    width: 100%;
+                    border: 0;
                 }
             `,
         ];
@@ -111,19 +124,36 @@ export class _ extends LitElement {
         `;
     }
 
+    private getIframeUrl(): string {
+        return this.active === "sefaria" ? SEFARIA_URL
+            : this.active === "dicta" ? DICTA_URL
+            : "";
+    }
+
     render() {
         const classes = classMap({
             "full": Boolean(this.active),
         });
 
         return html`
-            <div id="buttons-wrapper" part="buttons-wrapper" class="${classes}">
-                ${this.renderButton("sefaria", true)}
-                <div class="divider no-short"></div>
-                ${this.renderButton("dicta", true)}
-                <div class="divider no-short"></div>
-                ${this.renderButton("keyboard", false)}
-            </div>
+            <anchored-overlay
+                positionY="bottom-out"
+                positionX="left-in"
+                .styled=${true}
+                .autoClose=${false}
+                ?open=${this.active === "dicta" || this.active === "sefaria"}
+            >
+                <div slot="anchor" id="buttons-wrapper" part="buttons-wrapper" class="${classes}">
+                    ${this.renderButton("sefaria", true)}
+                    <div class="divider no-short"></div>
+                    ${this.renderButton("dicta", true)}
+                    <div class="divider no-short"></div>
+                    ${this.renderButton("keyboard", false)}
+                </div>
+                <div slot="overlay" class="iframe-wrapper">
+                    <iframe src="${this.getIframeUrl()}"></iframe>
+                </div>
+            </anchored-overlay>
             ${
                 this.active === "keyboard" ? this.renderHebrewKeyboard()
                     : nothing
