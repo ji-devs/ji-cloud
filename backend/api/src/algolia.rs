@@ -511,7 +511,9 @@ fn filters_for_ids<T: Into<Uuid> + Copy>(
 /// Filter with ordered priority.
 ///
 /// If using priority scoring, this can only rank the first 62 items.
-/// This is because scores are weighted exponentially and i64::MAX = 2^63-1.
+/// This is because scores are weighted exponentially and i64::MAX = 2^63-1. 63 less one so that
+/// it does not overflow when summed with lesser scores.
+///
 /// The remaining will be assigned a score of 1, which is the default score for all filters.
 fn filters_for_ints_with_scoring(
     filters: &mut Vec<Box<dyn AndFilterable>>,
@@ -520,7 +522,7 @@ fn filters_for_ints_with_scoring(
 ) {
     let count = ints.len() as u32;
 
-    // score for the highest priority tag
+    // start with the score for the highest priority tag
     let mut score = match count > i64::BITS - 1 {
         true => 1_i64 << (i64::BITS - 2), // 2_i64.pow(i64::BITS - 1),
         false if count == 0 => return,
