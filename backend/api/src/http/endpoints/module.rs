@@ -1,7 +1,7 @@
 use paperclip::actix::{
     api_v2_operation,
     web::{self, Data, Json, Path, ServiceConfig},
-    NoContent,
+    CreatedJson, NoContent,
 };
 use shared::{
     api::{endpoints::jig::module, ApiEndpoint},
@@ -24,15 +24,16 @@ async fn create(
     auth: TokenUser,
     parent: Path<JigId>,
     req: Json<<module::Create as ApiEndpoint>::Req>,
-) -> Result<Json<<module::Create as ApiEndpoint>::Res>, error::Auth> {
+) -> Result<CreatedJson<<module::Create as ApiEndpoint>::Res>, error::Auth> {
     let parent_id = parent.into_inner();
 
     db::jig::authz(&*db, auth.0.user_id, Some(parent_id)).await?;
 
     let req = req.into_inner();
+
     let (id, _index) = db::module::create(&*db, parent_id, req.body).await?;
 
-    Ok(Json(CreateResponse { id }))
+    Ok(CreatedJson(CreateResponse { id }))
 }
 
 /// Delete a module.

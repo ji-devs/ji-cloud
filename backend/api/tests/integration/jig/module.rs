@@ -1,11 +1,57 @@
 use http::StatusCode;
 
-use shared::domain::jig::module::{body::memory, ModuleBody, ModuleUpdateRequest};
+use shared::domain::jig::module::{
+    body::memory, ModuleBody, ModuleCreateRequest, ModuleUpdateRequest,
+};
 
 use crate::{
     fixture::Fixture,
     helpers::{initialize_server, LoginExt},
 };
+
+#[actix_rt::test]
+async fn create_default() -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::Jig], &[]).await;
+
+    let port = app.port();
+
+    let client = reqwest::Client::new();
+
+    let resp = client
+        .post(&format!(
+            "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008/module",
+            port
+        ))
+        .json(&ModuleCreateRequest::default())
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    assert_eq!(resp.status(), StatusCode::CREATED);
+
+    let body: serde_json::Value = resp.json().await?;
+
+    insta::assert_json_snapshot!(body, {".**.id" => "[id]"});
+
+    let id = body.get("id").unwrap().as_str().unwrap();
+
+    let resp = client
+        .get(&format!(
+            "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008/module/{}",
+            port, id,
+        ))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    let body: serde_json::Value = resp.json().await?;
+
+    insta::assert_json_snapshot!(body, {".**.id" => "[id]"});
+
+    Ok(())
+}
 
 #[actix_rt::test]
 async fn update_empty() -> anyhow::Result<()> {
