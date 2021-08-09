@@ -12,10 +12,13 @@ use super::{actions, state::State};
 const STR_SIGN_UP: &'static str = "Sign up";
 const STR_LOGIN: &'static str = "Login";
 
-pub fn render(state: Rc<State>) -> Dom {
+pub fn render(state: Rc<State>, slot: Option<&str>) -> Dom {
     actions::fetch_profile(Rc::clone(&state));
 
     html!("page-header", {
+        .apply_if(slot.is_some(), |dom| {
+            dom.property("slot", slot.unwrap())
+        })
         .children(&mut [
             html!("page-header-link", {
                 .property("slot", "links")

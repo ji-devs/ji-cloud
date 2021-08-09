@@ -24,7 +24,12 @@ export class _ extends LitElement {
             css`
                 :host {
                     display: grid;
+                    grid-template-rows: auto 1fr;
                     grid-template-columns: 400px 1fr;
+                    height: 100vh;
+                }
+                ::slotted([slot=page-header]) {
+                    grid-column: 1 / -1;
                 }
                 aside {
                     background-color: var(--light-blue-2);
@@ -65,7 +70,6 @@ export class _ extends LitElement {
                 }
                 main {
                     background-color: var(--light-blue-1);
-                    height: 100vh;
                     overflow-y: auto;
                 }
                 .main-width-holder {
@@ -223,6 +227,7 @@ export class _ extends LitElement {
 
     render() {
         return html`
+            <slot name="page-header"></slot>
             <aside>
                 <div class="profile-image">
                     <slot name="profile-image"></slot>

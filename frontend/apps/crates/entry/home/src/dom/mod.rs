@@ -13,7 +13,7 @@ mod search_section;
 
 pub fn render(state: Rc<State>) -> Dom {
     html!("home-full", {
-        .child(page_header::dom::render(Rc::new(page_header::state::State::new())))
+        .child(page_header::dom::render(Rc::new(page_header::state::State::new()), None))
         .children(&mut [
             search_section::render(state.clone()),
             html!("empty-fragment", {
