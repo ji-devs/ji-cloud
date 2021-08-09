@@ -1,4 +1,4 @@
-// Trigger CI 001
+import "@elements/_bundles/_sub-bundles/page/header";
 import "@elements/entry/admin/shell";
 import "@elements/entry/admin/sidebar";
 import "@elements/entry/admin/category/pages/landing";

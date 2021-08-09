@@ -1,3 +1,4 @@
+import "@elements/_bundles/_sub-bundles/page/header";
 import "@elements/entry/jig/edit/sidebar/sidebar";
 import "@elements/entry/jig/edit/pages/landing";
 import "@elements/entry/jig/edit/selection/card";
