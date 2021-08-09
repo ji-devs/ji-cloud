@@ -1,28 +1,27 @@
-use dominator::{Dom, html, clone, with_node};
-use futures_signals::{
-    map_ref,
-    signal::always,
-    signal_vec::SignalVecExt
-};
+use dominator::{clone, html, with_node, Dom};
+use futures_signals::signal::SignalExt;
 use std::rc::Rc;
 use utils::prelude::*;
-use futures_signals::signal::{Signal, SignalExt};
-use crate::module::_common::edit::history::state::HistoryState;
-use web_sys::HtmlElement;
+
 use super::state::*;
 use utils::resize::resize_info_signal;
-use wasm_bindgen::prelude::*;
+use web_sys::HtmlElement;
+
 use wasm_bindgen::JsCast;
 
-pub fn render_transform(state: Rc<TransformState>, resize_level: ResizeLevel, get_menu_contents: Option<impl Fn() -> Dom + 'static>) -> Dom {
+pub fn render_transform(
+    state: Rc<TransformState>,
+    resize_level: ResizeLevel,
+    get_menu_contents: Option<impl Fn() -> Dom + 'static>,
+) -> Dom {
     html!("empty-fragment", {
         .child(
             html!("transform-box", {
                 .after_inserted(clone!(state => move |elem| {
                     *state.dom_ref.borrow_mut() = Some(elem.unchecked_into());
                 }))
-                .after_removed(clone!(state => move |elem| {
-                    *state.dom_ref.borrow_mut() = None; 
+                .after_removed(clone!(state => move |_elem| {
+                    *state.dom_ref.borrow_mut() = None;
                 }))
                 .child(html!("button-icon" => HtmlElement, {
                     .property("slot", "menu-btn")
@@ -30,7 +29,7 @@ pub fn render_transform(state: Rc<TransformState>, resize_level: ResizeLevel, ge
                     .style("display", "block")
                     .style_signal("transform", state.invert_rotation_matrix_string_signal())
                     .with_node!(elem => {
-                        .event(clone!(state => move |evt:events::Click| {
+                        .event(clone!(state => move |_evt:events::Click| {
                             let dom_rect = elem.get_bounding_client_rect();
                             let x = dom_rect.x();
                             let y = dom_rect.y();
@@ -51,8 +50,8 @@ pub fn render_transform(state: Rc<TransformState>, resize_level: ResizeLevel, ge
                 .property("resizeLevel", resize_level.to_str())
                 .property_signal("width", state.width_px_signal())
                 .property_signal("height", state.height_px_signal())
-                .property_signal("screenScale", resize_info_signal().map(|resize| resize.scale)) 
-                .event(clone!(state => move |evt:super::events::RectDblClick| {
+                .property_signal("screenScale", resize_info_signal().map(|resize| resize.scale))
+                .event(clone!(state => move |_evt:super::events::RectDblClick| {
                     if let Some(on_double_click) = &state.callbacks.on_double_click {
                         (on_double_click) ();
                     }
@@ -76,12 +75,12 @@ pub fn render_transform(state: Rc<TransformState>, resize_level: ResizeLevel, ge
                 .global_event(clone!(state => move |evt:events::KeyDown| {
                     if evt.key() == "Alt" {
                         *state.alt_pressed.borrow_mut() = true;
-                    } 
+                    }
                 }))
                 .global_event(clone!(state => move |evt:events::KeyUp| {
                     if evt.key() == "Alt" {
                         *state.alt_pressed.borrow_mut() = false;
-                    } 
+                    }
                 }))
 
                 .global_event_preventable(clone!(state => move |evt:events::MouseUp| {
@@ -105,7 +104,7 @@ pub fn render_transform(state: Rc<TransformState>, resize_level: ResizeLevel, ge
                                 .child(html!("menu-container", {
                                     .child(get_menu_contents())
                                 }))
-                                .event(clone!(state => move |evt:events::Close| {
+                                .event(clone!(state => move |_evt:events::Close| {
                                     log::info!("GOT CLOSE!");
                                     state.menu_pos.set(None);
                                 }))

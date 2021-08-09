@@ -1,18 +1,19 @@
-use std::rc::Rc;
-use dominator::{html, Dom, clone};
+use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
+use std::rc::Rc;
 
-use super::state::{State, HomePageMode};
+use components::page_header;
 
+use super::state::{HomePageMode, State};
 
-mod search_section;
+mod footer;
 mod home_sections;
 mod search_results;
-mod footer;
-
+mod search_section;
 
 pub fn render(state: Rc<State>) -> Dom {
     html!("home-full", {
+        .child(page_header::dom::render(Rc::new(page_header::state::State::new())))
         .children(&mut [
             search_section::render(state.clone()),
             html!("empty-fragment", {

@@ -9,6 +9,9 @@ use crate::{
 };
 
 /// Get a tree of categories.
+///
+/// # Authorization
+/// No authorization required.
 pub struct Get;
 impl ApiEndpoint for Get {
     type Req = GetCategoryRequest;
@@ -19,6 +22,9 @@ impl ApiEndpoint for Get {
 }
 
 /// Create a category.
+///
+/// # Authorization
+/// Standard + [`UserScope::ManageCategory`](crate::domain::user::UserScope).
 pub struct Create;
 impl ApiEndpoint for Create {
     type Req = CreateCategoryRequest;
@@ -29,6 +35,9 @@ impl ApiEndpoint for Create {
 }
 
 /// Update a category.
+///
+/// # Authorization
+/// Standard + [`UserScope::ManageCategory`](crate::domain::user::UserScope).
 pub struct Update;
 impl ApiEndpoint for Update {
     type Req = UpdateCategoryRequest;
@@ -39,6 +48,9 @@ impl ApiEndpoint for Update {
 }
 
 /// Delete a category.
+///
+/// # Authorization
+/// Standard + [`UserScope::ManageCategory`](crate::domain::user::UserScope).
 pub struct Delete;
 impl ApiEndpoint for Delete {
     type Req = ();

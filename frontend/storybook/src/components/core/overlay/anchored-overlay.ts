@@ -1,35 +1,41 @@
-import {argsToAttrs} from "@utils/attributes";
+import { argsToAttrs } from "@utils/attributes";
 import "@elements/core/overlays/anchored-overlay";
+import { arrayCount, mapToString } from "@utils/array";
+
 export default {
     title: "Core / Overlays"
 }
 
 interface Args {
-    autoClose: boolean;
-    open: boolean;
+    open: boolean,
     positionY: string,
     positionX: string,
+    autoClose: boolean;
+    scrollClose: boolean;
 }
 
-const DEFAULT_ARGS:Args = {
-    autoClose: true,
+const DEFAULT_ARGS: Args = {
     open: true,
-    positionY: "top-in",
-    positionX: "right-out",
+    positionY: "bottom-out",
+    positionX: "center",
+    autoClose: true,
+    scrollClose: true,
 }
 
-export const AnchoredOverlay = (props?:Args) => {
-
-    props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
-    const {} = props
+export const AnchoredOverlay = (props?: Partial<Args>) => {
+    props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
 
     return `
-        <div style="margin: 50px">
+        <div style="padding: 100px 100px 1000px 100px">
+            <h1>Something</h1>
             <anchored-overlay ${argsToAttrs(props)}>
-                <input slot="anchor" style="width: 300px;" value="The overlay is anchored to this input element">
-                <div slot="overlay" style="padding: 10px;">Overlay body</div>
+                <button slot="anchor" style="padding: 20px">Toggle</button>
+                <div slot="overlay">
+                    overlay
+                </div>
             </anchored-overlay>
         </div>
+        <progress></progress>
     `;
 }
 
@@ -38,13 +44,13 @@ AnchoredOverlay.argTypes = {
     positionY: {
         control: {
             type: 'inline-radio',
-            options: ['top-out', 'top-in', 'bottom-out', 'bottom-in', 'center'],
+            options: ['center', 'top-out', 'top-in', 'bottom-out', 'bottom-in'],
         }
     },
     positionX: {
         control: {
             type: 'inline-radio',
-            options: ['left-out', 'left-in', 'right-out', 'right-in', 'center'],
+            options: ['center', 'left-out', 'left-in', 'right-out', 'right-in'],
         }
     },
 }

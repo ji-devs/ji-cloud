@@ -1,14 +1,12 @@
-use dominator::{Dom, DomBuilder, clone, html};
+use dominator::{html, Dom, DomBuilder};
 use utils::prelude::*;
 use web_sys::HtmlElement;
-use crate::module::_groups::cards::lookup::{self, Side};
-use shared::domain::jig::module::body::{ModeExt, Transform, _groups::cards::{Mode, Step, Card}};
-use futures_signals::signal::{Signal, SignalExt, Always};
+
 use super::common::*;
 
 pub enum EmptyKind {
     Question,
-    Translucent
+    Translucent,
 }
 
 impl EmptyKind {
@@ -20,16 +18,15 @@ impl EmptyKind {
     }
 }
 
-
-pub struct EmptyCardOptions <'a> {
+pub struct EmptyCardOptions<'a> {
     pub kind: EmptyKind,
     pub theme_id: ThemeId,
     pub size: Size,
     pub active: bool,
-    pub slot: Option<&'a str>
+    pub slot: Option<&'a str>,
 }
 
-impl <'a> EmptyCardOptions <'a> {
+impl<'a> EmptyCardOptions<'a> {
     pub fn new(kind: EmptyKind, theme_id: ThemeId, size: Size) -> Self {
         Self {
             kind,
@@ -43,21 +40,23 @@ impl <'a> EmptyCardOptions <'a> {
 }
 
 pub fn render_empty_card(options: EmptyCardOptions) -> Dom {
-    _render_empty_card(options, None::<fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>>)
+    _render_empty_card(
+        options,
+        None::<fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>>,
+    )
 }
 
-pub fn render_empty_card_mixin<F>(options: EmptyCardOptions, mixin: F) -> Dom 
-    where
-        F: FnOnce(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>
+pub fn render_empty_card_mixin<F>(options: EmptyCardOptions, mixin: F) -> Dom
+where
+    F: FnOnce(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>,
 {
     _render_empty_card(options, Some(mixin))
 }
 
-fn _render_empty_card<F>(options: EmptyCardOptions, mixin: Option<F>) -> Dom 
-    where
-        F: FnOnce(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>
+fn _render_empty_card<F>(options: EmptyCardOptions, mixin: Option<F>) -> Dom
+where
+    F: FnOnce(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>,
 {
-
     let EmptyCardOptions {
         kind,
         theme_id,
@@ -67,7 +66,7 @@ fn _render_empty_card<F>(options: EmptyCardOptions, mixin: Option<F>) -> Dom
     } = options;
 
     html!("empty-card", {
-        .apply_if(slot.is_some(), |dom| 
+        .apply_if(slot.is_some(), |dom|
             dom.property("slot", slot.unwrap_ji())
         )
         .property("active", active)
@@ -78,6 +77,4 @@ fn _render_empty_card<F>(options: EmptyCardOptions, mixin: Option<F>) -> Dom
             (mixin.unwrap_ji()) (dom)
         })
     })
-
 }
-

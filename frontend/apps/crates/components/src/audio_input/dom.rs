@@ -1,19 +1,16 @@
-use dominator::{Dom, clone, html};
-use futures_signals::{map_ref, signal::SignalExt};
-use std::rc::Rc;
 use super::{
-    components::{main_content, add_method, delete, main_action},
+    components::{add_method, delete, main_action, main_content},
     state::*,
 };
+use dominator::{clone, html, Dom};
+use futures_signals::{map_ref, signal::SignalExt};
+use std::rc::Rc;
 use utils::prelude::*;
-use futures_signals::signal::Signal;
-use shared::domain::jig::module::body::Audio;
 
 /// Note - the external audio signal will only be valid for first render
 /// This can be fixed by instead storing an AsyncLoader which reacts to the
 /// Signal changes and sets an internal Mutable
-pub fn render (state: Rc<State>, slot: Option<&str>) -> Dom {
-
+pub fn render(state: Rc<State>, slot: Option<&str>) -> Dom {
     html!("audio-input", {
         .apply_if(slot.is_some(), move |dom| {
             dom.property("slot", slot.unwrap_ji())

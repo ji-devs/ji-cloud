@@ -1,35 +1,30 @@
-use dominator::{html, clone, Dom};
-use dominator_helpers::futures::AsyncLoader;
+use dominator::{clone, html, Dom};
+
+use super::{
+    dragging::{actions as drag_actions, dom::DraggingDom},
+    header::dom::HeaderDom,
+    module::dom::ModuleDom,
+    state::*,
+    {actions, debug},
+};
 use futures_signals::{
     map_ref,
     signal::{Mutable, SignalExt},
-    signal_vec::{MutableVec, SignalVecExt},
+    signal_vec::SignalVecExt,
 };
-use std::rc::Rc;
+use shared::domain::jig::{Jig, JigId};
 use std::cell::RefCell;
-use shared::domain::jig::{Jig, JigId, module::ModuleId};
-use super::{
-    {actions, debug},
-    header::dom::HeaderDom,
-    module::dom::ModuleDom,
-    dragging::{
-        dom::DraggingDom,
-        actions as drag_actions
-    },
-    state::*,
-};
+use std::rc::Rc;
 use uuid::Uuid;
-use wasm_bindgen::prelude::*;
+
 use utils::prelude::*;
 
-pub struct SidebarDom {
-}
+pub struct SidebarDom {}
 
 impl SidebarDom {
     pub fn render(jig_id: JigId, route: Mutable<JigEditRoute>) -> Dom {
         let is_loading = Mutable::new(true);
         let jig = Rc::new(RefCell::new(None));
-
 
         html!("empty-fragment", {
             .property("slot", "sidebar")
@@ -51,13 +46,10 @@ impl SidebarDom {
                 }
             })))
         })
-
-
     }
 
     fn render_loaded(jig: Jig, route: Mutable<JigEditRoute>) -> Dom {
         let state = Rc::new(State::new(jig, route));
-
 
         html!("empty-fragment", {
             .child(html!("jig-edit-sidebar", {
@@ -98,7 +90,7 @@ impl SidebarDom {
                                 (
                                     index.unwrap_or_default(),
                                     *len,
-                                    *drag_target_index, 
+                                    *drag_target_index,
                                     module.clone()
                                 )
                             }
@@ -121,19 +113,19 @@ impl SidebarDom {
 }
 
 /*
- *
-        <jig-edit-sidebar ${slot && `slot="${slot}"`}>
-        <jig-edit-sidebar-header slot="header"> </jig-edit-sidebar-header>
-        ${mapToString(arrayIndex(nModules), index => {
-            return Module({
-                module: index === 0 ? "cover" : "memory",
-                rawIndex: index,
-                menuOpen: false,
-                slot: index === 0 ? "cover-module" : "modules",
-                selected: index === 1,
-                makeDemoRoomAtTop: false,
-                lastBottomDecoration: index === nModules-1
-            });
-        })}
-        </jig-edit-sidebar>
-        */
+*
+       <jig-edit-sidebar ${slot && `slot="${slot}"`}>
+       <jig-edit-sidebar-header slot="header"> </jig-edit-sidebar-header>
+       ${mapToString(arrayIndex(nModules), index => {
+           return Module({
+               module: index === 0 ? "cover" : "memory",
+               rawIndex: index,
+               menuOpen: false,
+               slot: index === 0 ? "cover-module" : "modules",
+               selected: index === 1,
+               makeDemoRoomAtTop: false,
+               lastBottomDecoration: index === nModules-1
+           });
+       })}
+       </jig-edit-sidebar>
+       */

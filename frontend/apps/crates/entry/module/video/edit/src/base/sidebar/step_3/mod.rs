@@ -1,4 +1,4 @@
-pub mod dom;
-pub mod state;
 pub mod actions;
+pub mod dom;
 mod play_settings;
+pub mod state;

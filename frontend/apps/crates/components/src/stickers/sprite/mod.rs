@@ -1,5 +1,5 @@
-pub mod dom;
-pub mod menu;
-pub mod ext;
-pub mod state;
 pub mod actions;
+pub mod dom;
+pub mod ext;
+pub mod menu;
+pub mod state;

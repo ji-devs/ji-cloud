@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use dominator::{Dom, html};
+use dominator::{html, Dom};
 
 use super::super::state::State;
 

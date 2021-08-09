@@ -1,5 +1,4 @@
 #![feature(type_alias_impl_trait)]
-
 //see: https://github.com/rust-lang/cargo/issues/8010
 #![cfg_attr(feature = "quiet", allow(warnings))]
 
@@ -7,22 +6,20 @@
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
-mod router;
-mod debug;
-mod strings;
-mod state;
 mod base;
-mod config;
+mod debug;
+mod router;
+mod state;
 
 use cfg_if::cfg_if;
-use wasm_bindgen::prelude::*;
-use std::rc::Rc;
 use router::Router;
+use std::rc::Rc;
+use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen(start)]
 pub async fn main_js() {
     setup_logger();
-    let settings = utils::settings::init();
+    let _settings = utils::settings::init();
 
     let router = Rc::new(Router::new());
 
@@ -30,9 +27,6 @@ pub async fn main_js() {
 
     //std::mem::forget(Box::new(router));
 }
-
-
-
 
 // enable logging and panic hook only during debug builds
 cfg_if! {
@@ -49,4 +43,3 @@ cfg_if! {
         }
     }
 }
-

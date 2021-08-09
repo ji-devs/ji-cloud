@@ -1,9 +1,9 @@
-use dominator::{html, clone, Dom};
-use futures_signals::signal::Mutable;
-use shared::domain::jig::ModuleKind;
-use super::module::dom::ModuleDom;
+use dominator::{html, Dom};
 
-static MODULE_KINDS:&[ModuleKind] = &[
+use super::module::dom::ModuleDom;
+use shared::domain::jig::ModuleKind;
+
+static MODULE_KINDS: &[ModuleKind] = &[
     //ModuleKind::Cover,
     ModuleKind::Flashcards,
     ModuleKind::Matching,
@@ -17,8 +17,7 @@ static MODULE_KINDS:&[ModuleKind] = &[
     //ModuleKind::VisualQuiz,
 ];
 
-pub struct SelectionDom {
-}
+pub struct SelectionDom {}
 
 impl SelectionDom {
     pub fn render() -> Dom {

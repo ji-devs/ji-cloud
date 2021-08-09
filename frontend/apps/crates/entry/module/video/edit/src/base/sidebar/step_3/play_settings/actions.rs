@@ -1,5 +1,5 @@
-use shared::domain::jig::module::body::video::DoneAction;
 use super::state::State;
+use shared::domain::jig::module::body::video::DoneAction;
 
 impl State {
     pub fn toggle_captions(&self) {
@@ -38,7 +38,6 @@ impl State {
     }
 
     pub fn set_unset_next_action(&self, done_action: Option<DoneAction>) {
-
         // Set to none if already set to this action
         let done_action = if *self.base.play_settings.done_action.lock_ref() == done_action {
             None

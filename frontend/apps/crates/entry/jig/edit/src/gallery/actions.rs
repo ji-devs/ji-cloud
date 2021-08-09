@@ -1,10 +1,13 @@
+use super::state::*;
 use dominator::clone;
 use futures::join;
-use shared::{api::endpoints::{ApiEndpoint, jig::*, meta}, domain::{CreateResponse, jig::*, meta::MetadataResponse}, error::{EmptyError, MetadataNotFound}};
+use shared::{
+    api::endpoints::{jig::*, meta, ApiEndpoint},
+    domain::{jig::*, meta::MetadataResponse, CreateResponse},
+    error::{EmptyError, MetadataNotFound},
+};
 use std::rc::Rc;
-use super::state::*;
 use utils::prelude::*;
-
 
 pub fn load_data(state: Rc<State>) {
     state.loader.load(clone!(state => async move {
@@ -28,20 +31,28 @@ async fn load_jigs(state: Rc<State>) {
         page: None,
     });
 
-    match api_with_auth::<JigBrowseResponse, EmptyError, _>(&Browse::PATH, Browse::METHOD, req).await {
+    match api_with_auth::<JigBrowseResponse, EmptyError, _>(&Browse::PATH, Browse::METHOD, req)
+        .await
+    {
         Ok(resp) => {
             state.jigs.lock_mut().replace_cloned(resp.jigs);
-        },
-        Err(_) => {},
+        }
+        Err(_) => {}
     }
 }
 
 async fn load_ages(state: Rc<State>) {
-    match api_with_auth::<MetadataResponse, EmptyError, ()>(meta::Get::PATH, meta::Get::METHOD, None).await {
-        Err(e) => {},
+    match api_with_auth::<MetadataResponse, EmptyError, ()>(
+        meta::Get::PATH,
+        meta::Get::METHOD,
+        None,
+    )
+    .await
+    {
+        Err(_e) => {}
         Ok(res) => {
             state.age_ranges.set(res.age_ranges);
-        },
+        }
     }
 }
 
@@ -74,7 +85,6 @@ pub fn load_jigs_regular(state: Rc<State>) {
 
 pub fn create_jig(state: Rc<State>) {
     state.loader.load(clone!(state => async move {
-        
         let req = Some(JigCreateRequest::default());
 
         match api_with_auth::<CreateResponse<JigId>, MetadataNotFound, _>(&Create::PATH, Create::METHOD, req).await {
@@ -85,7 +95,6 @@ pub fn create_jig(state: Rc<State>) {
             Err(_) => {},
         }
     }));
-
 }
 
 pub fn copy_jig(state: Rc<State>, jig_id: &JigId) {
@@ -109,7 +118,6 @@ pub fn copy_jig(state: Rc<State>, jig_id: &JigId) {
     }));
 }
 
-
 pub fn delete_jig(state: Rc<State>, jig_id: JigId) {
     state.loader.load(clone!(state => async move {
         let path = Delete::PATH.replace("{id}",&jig_id.0.to_string());
@@ -122,5 +130,4 @@ pub fn delete_jig(state: Rc<State>, jig_id: JigId) {
             Err(_) => {}
         }
     }));
-
 }

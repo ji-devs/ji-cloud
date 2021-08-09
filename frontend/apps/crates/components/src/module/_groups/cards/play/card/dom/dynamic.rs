@@ -1,13 +1,16 @@
-use dominator::{Dom, DomBuilder, clone, html};
+use super::common::*;
+use crate::module::_groups::cards::lookup::Side;
+use dominator::{html, Dom, DomBuilder};
+use futures_signals::signal::{Always, Signal, SignalExt};
+use shared::domain::jig::module::body::{
+    ModeExt,
+    _groups::cards::{Card, Mode},
+};
 use utils::prelude::*;
 use web_sys::HtmlElement;
-use crate::module::_groups::cards::lookup::{self, Side};
-use shared::domain::jig::module::body::{ModeExt, Transform, _groups::cards::{Mode, Step, Card}};
-use futures_signals::signal::{Signal, SignalExt, Always};
-use super::common::*;
 
 //For the use case when things are driven by Signals
-pub struct DynamicCardOptions <'a, F, T, H, S, SOut> 
+pub struct DynamicCardOptions<'a, F, T, H, S, SOut>
 where
     F: Signal<Item = bool> + 'static,
     T: Signal<Item = bool> + 'static,
@@ -28,34 +31,32 @@ where
     pub style_kind: StyleKind,
     //should be set to match card and back_card will automatically
     //use the opposite
-    pub side: Side, 
-    pub slot: Option<&'a str>
+    pub side: Side,
+    pub slot: Option<&'a str>,
 }
 
 //To make it easier to pass None::<NoTransform> for the get_simple_transform arg
 //others can simply use always()
 pub type NoTransform = fn() -> Always<Option<SimpleTransform>>;
 
-impl <'a, F, T, H, S, SOut> DynamicCardOptions <'a, F, T, H, S, SOut> 
+impl<'a, F, T, H, S, SOut> DynamicCardOptions<'a, F, T, H, S, SOut>
 where
     F: Signal<Item = bool> + 'static,
     T: Signal<Item = bool> + 'static,
     H: Signal<Item = bool> + 'static,
     S: Fn() -> SOut + 'static,
     SOut: Signal<Item = Option<SimpleTransform>> + 'static,
-
 {
     pub fn new(
-        card:&'a Card, 
-        theme_id: 
-        ThemeId, 
-        mode: Mode, 
-        side: Side, 
+        card: &'a Card,
+        theme_id: ThemeId,
+        mode: Mode,
+        side: Side,
         size: Size,
         flipped: F,
         transparent: T,
         hidden: H,
-        get_simple_transform: Option<S>
+        get_simple_transform: Option<S>,
     ) -> Self {
         Self {
             card,
@@ -72,14 +73,11 @@ where
             flip_on_hover: false,
             slot: None,
             style_kind: StyleKind::Theme,
-
         }
     }
-
 }
 
-pub fn render_dynamic_card<F, T, H, S, SOut>(options: DynamicCardOptions<F, T, H, S, SOut>) -> Dom 
-
+pub fn render_dynamic_card<F, T, H, S, SOut>(options: DynamicCardOptions<F, T, H, S, SOut>) -> Dom
 where
     F: Signal<Item = bool> + 'static,
     T: Signal<Item = bool> + 'static,
@@ -87,50 +85,58 @@ where
     S: Fn() -> SOut + 'static,
     SOut: Signal<Item = Option<SimpleTransform>> + 'static,
 {
-    _render_dynamic_card(options, None::<fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>>)
+    _render_dynamic_card(
+        options,
+        None::<fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>>,
+    )
 }
 
-pub fn render_dynamic_card_mixin<F, T, H, S, SOut, M>(options: DynamicCardOptions<F, T, H, S, SOut>, mixin: M) -> Dom 
-    where
-        F: Signal<Item = bool> + 'static,
-        T: Signal<Item = bool> + 'static,
-        H: Signal<Item = bool> + 'static,
-        S: Fn() -> SOut + 'static,
-        SOut: Signal<Item = Option<SimpleTransform>> + 'static,
-        M: FnOnce(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>
+pub fn render_dynamic_card_mixin<F, T, H, S, SOut, M>(
+    options: DynamicCardOptions<F, T, H, S, SOut>,
+    mixin: M,
+) -> Dom
+where
+    F: Signal<Item = bool> + 'static,
+    T: Signal<Item = bool> + 'static,
+    H: Signal<Item = bool> + 'static,
+    S: Fn() -> SOut + 'static,
+    SOut: Signal<Item = Option<SimpleTransform>> + 'static,
+    M: FnOnce(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>,
 {
     _render_dynamic_card(options, Some(mixin))
 }
 
-fn _render_dynamic_card<F, T, H, S, SOut, M>(options: DynamicCardOptions<F, T, H, S, SOut>, mixin: Option<M>) -> Dom 
-    where
-        F: Signal<Item = bool> + 'static,
-        T: Signal<Item = bool> + 'static,
-        H: Signal<Item = bool> + 'static,
-        S: Fn() -> SOut + 'static,
-        SOut: Signal<Item = Option<SimpleTransform>> + 'static,
-        M: FnOnce(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>
+fn _render_dynamic_card<F, T, H, S, SOut, M>(
+    options: DynamicCardOptions<F, T, H, S, SOut>,
+    mixin: Option<M>,
+) -> Dom
+where
+    F: Signal<Item = bool> + 'static,
+    T: Signal<Item = bool> + 'static,
+    H: Signal<Item = bool> + 'static,
+    S: Fn() -> SOut + 'static,
+    SOut: Signal<Item = Option<SimpleTransform>> + 'static,
+    M: FnOnce(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>,
 {
-
     let DynamicCardOptions {
-        card, 
-        back_card, 
-        flip_on_hover, 
-        flipped, 
+        card,
+        back_card,
+        flip_on_hover,
+        flipped,
         transparent,
         hidden,
         get_simple_transform,
-        theme_id, 
-        mode, 
-        size, 
+        theme_id,
+        mode,
+        size,
         side,
         slot,
         style_kind,
     } = options;
 
     html!("play-card", {
-        .style("visibility", "visible") 
-        .apply_if(slot.is_some(), |dom| 
+        .style("visibility", "visible")
+        .apply_if(slot.is_some(), |dom|
             dom.property("slot", slot.unwrap_ji())
         )
         .property("styleKind", style_kind.as_str_id())
@@ -176,5 +182,4 @@ fn _render_dynamic_card<F, T, H, S, SOut, M>(options: DynamicCardOptions<F, T, H
             (mixin.unwrap_ji()) (dom)
         })
     })
-
 }

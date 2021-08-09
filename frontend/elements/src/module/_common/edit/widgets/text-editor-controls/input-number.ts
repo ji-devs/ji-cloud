@@ -90,22 +90,9 @@ export class _ extends LitElement {
         }
     }
 
-    private onInput = (e: InputEvent) => {
-        let newValue = (e.target as HTMLInputElement).valueAsNumber;
-        if(!Number.isNaN(newValue)) {
-            if (newValue > this.max) // too high
-                this.value = this.max;
-            else if (newValue < this.min) // to low
-                this.value = this.min;
-            else
-                this.value = newValue;
-
-            this.changed();
-        }
-    }
-
     private onSelectChange = (e: any) => {
         this.value = parseInt(e.target.value);
+        this.changed();
     }
 
     private getSelectOptions(): number [] {

@@ -1,48 +1,40 @@
 #![feature(type_alias_impl_trait)]
+use dominator::clone;
 use futures_signals::{
-    map_ref,
-    signal::{self, Mutable, ReadOnlyMutable,  SignalExt, Signal},
-    signal_vec::{MutableVec, SignalVecExt, SignalVec},
-    CancelableFutureHandle, 
+    signal::{Mutable, Signal, SignalExt},
 };
 use uuid::Uuid;
-use dominator::{DomBuilder, Dom, html, events, clone, apply_methods, with_node};
-use wasm_bindgen::prelude::*;
-use web_sys::AudioContext;
+
 use std::cell::RefCell;
-use std::rc::Rc;
 use std::convert::{TryFrom, TryInto};
 use std::future::Future;
-use itertools::Itertools;
-use std::fmt::Write;
-use serde::{Serialize, de::DeserializeOwned};
-use crate::module::_common::edit::{
-    prelude::*,
-    history::state::HistoryState
-};
-use dominator_helpers::{
-    signals::DefaultSignal,
-    futures::AsyncLoader,
-};
-use wasm_bindgen_futures::spawn_local;
+use std::rc::Rc;
+
+use crate::module::_common::edit::history::state::HistoryState;
+use dominator_helpers::{futures::AsyncLoader, signals::DefaultSignal};
+
 //use super::actions::{HistoryChangeFn, HistoryUndoRedoFn};
-use shared::domain::jig::{JigId, module::{ModuleId, body::{BodyExt, StepExt}}};
-use super::{
-    actions::*,
-    base::state::*,
-    choose::state::*,
+use super::{actions::*, base::state::*, choose::state::*};
+use shared::domain::jig::{
+    module::{
+        body::{BodyExt, StepExt},
+        ModuleId,
+    },
+    JigId,
 };
 use shared::{
-    api::endpoints::{ApiEndpoint, self, jig::module::*},
-    error::{EmptyError, MetadataNotFound},
-    domain::jig::{*, module::{*, body::{ModeExt, Body}}},
+    api::endpoints::{self, jig::module::*, ApiEndpoint},
+    domain::jig::{
+        module::{body::ModeExt, *},
+        *,
+    },
+    error::EmptyError,
 };
-use utils::{languages::LANGUAGE_CODE_EN, prelude::*, settings::SETTINGS};
-use std::marker::PhantomData;
-use crate::audio_mixer::AudioMixer;
-use std::collections::HashSet;
+use utils::{languages::LANGUAGE_CODE_EN, prelude::*};
 
-pub struct GenericState <Mode, Step, RawData, Base, Main, Sidebar, Header, Footer, Overlay> 
+use crate::audio_mixer::AudioMixer;
+
+pub struct GenericState<Mode, Step, RawData, Base, Main, Sidebar, Header, Footer, Overlay>
 where
     RawData: BodyExt<Mode, Step> + 'static,
     Mode: ModeExt + 'static,
@@ -54,7 +46,8 @@ where
     Footer: FooterExt + 'static,
     Overlay: OverlayExt + 'static,
 {
-    pub phase: Mutable<Rc<Phase<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>>,
+    pub phase:
+        Mutable<Rc<Phase<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>>,
     pub(super) jig: RefCell<Option<Jig>>,
     pub(super) opts: StateOpts<RawData>,
     pub(super) raw_loader: AsyncLoader,
@@ -64,11 +57,11 @@ where
     pub(super) raw_loaded: Mutable<bool>,
     pub(super) page_body_switcher: AsyncLoader,
     pub(super) reset_from_history_loader: AsyncLoader,
-    pub(super) audio_mixer: AudioMixer, 
+    pub(super) audio_mixer: AudioMixer,
     pub(super) on_init_ready: RefCell<Option<Box<dyn Fn()>>>,
 }
 
-pub enum Phase <RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay> 
+pub enum Phase<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>
 where
     RawData: BodyExt<Mode, Step> + 'static,
     Mode: ModeExt + 'static,
@@ -93,10 +86,10 @@ pub struct StateOpts<RawData> {
     pub module_id: ModuleId,
     //the step which is for previewing
     pub is_main_scrollable: bool,
-    pub force_raw: Option<RawData>, 
+    pub force_raw: Option<RawData>,
 }
 
-impl <RawData> StateOpts<RawData> {
+impl<RawData> StateOpts<RawData> {
     pub fn new(jig_id: JigId, module_id: ModuleId) -> Self {
         Self {
             skip_save_for_debug: false,
@@ -108,7 +101,6 @@ impl <RawData> StateOpts<RawData> {
         }
     }
 }
-
 
 /*
  * Note: the idea is to create the top-level state
@@ -123,8 +115,8 @@ pub enum InitSource {
     ChooseMode,
 }
 
-
-impl <Mode, Step, RawData, Base, Main, Sidebar, Header, Footer, Overlay> GenericState <Mode, Step, RawData, Base, Main, Sidebar, Header, Footer, Overlay> 
+impl<Mode, Step, RawData, Base, Main, Sidebar, Header, Footer, Overlay>
+    GenericState<Mode, Step, RawData, Base, Main, Sidebar, Header, Footer, Overlay>
 where
     Mode: ModeExt + 'static,
     Step: StepExt + 'static,
@@ -134,23 +126,23 @@ where
     Header: HeaderExt + 'static,
     Footer: FooterExt + 'static,
     Overlay: OverlayExt + 'static,
-    RawData: BodyExt<Mode, Step> + 'static, 
+    RawData: BodyExt<Mode, Step> + 'static,
 {
     pub fn new<BaseInitFromRawFn, BaseInitFromRawOutput>(
-        opts: StateOpts<RawData>, 
-        init_from_raw: BaseInitFromRawFn, 
+        opts: StateOpts<RawData>,
+        init_from_raw: BaseInitFromRawFn,
     ) -> Rc<Self>
     where
-        BaseInitFromRawFn: Fn(BaseInitFromRawArgs<RawData, Mode, Step>) -> BaseInitFromRawOutput + Clone + 'static,
-        BaseInitFromRawOutput: Future<Output = BaseInit<Step, Base, Main, Sidebar, Header, Footer, Overlay>>,
-        <RawData as TryFrom<ModuleBody>>::Error: std::fmt::Debug
+        BaseInitFromRawFn:
+            Fn(BaseInitFromRawArgs<RawData, Mode, Step>) -> BaseInitFromRawOutput + Clone + 'static,
+        BaseInitFromRawOutput:
+            Future<Output = BaseInit<Step, Base, Main, Sidebar, Header, Footer, Overlay>>,
+        <RawData as TryFrom<ModuleBody>>::Error: std::fmt::Debug,
     {
-
-
         let _self = Rc::new(Self {
             opts,
             jig: RefCell::new(None),
-            phase: Mutable::new(Rc::new(Phase::Init)), 
+            phase: Mutable::new(Rc::new(Phase::Init)),
             history: RefCell::new(None),
             raw_loaded: Mutable::new(false),
             raw_loader: AsyncLoader::new(),
@@ -158,11 +150,9 @@ where
             save_loader: Rc::new(AsyncLoader::new()),
             page_body_switcher: AsyncLoader::new(),
             reset_from_history_loader: AsyncLoader::new(),
-            audio_mixer: AudioMixer::new(None), 
-            on_init_ready: RefCell::new(None)
+            audio_mixer: AudioMixer::new(None),
+            on_init_ready: RefCell::new(None),
         });
-
-
 
         *_self.on_init_ready.borrow_mut() = Some(Box::new(clone!(_self => move || {
             _self.raw_loader.load(clone!(_self, init_from_raw => async move {
@@ -254,13 +244,13 @@ where
                         _self.clone(),
                         init_from_raw.clone(),
                         BaseInitFromRawArgs::new(
-                            _self.audio_mixer.clone(), 
-                            jig_id, 
-                            module_id, 
-                            jig, 
-                            raw, 
-                            init_source, 
-                            history.clone() 
+                            _self.audio_mixer.clone(),
+                            jig_id,
+                            module_id,
+                            jig,
+                            raw,
+                            init_source,
+                            history.clone()
                         )
                     ).await;
                 }
@@ -272,25 +262,25 @@ where
         //for editor we'll just init right away, no need to create the audio context
         //reverting is very easy if that becomes a problem (just create the audio context above and
         //uncomment this):
-        (_self.on_init_ready.borrow().as_ref().unwrap_ji()) ();
+        (_self.on_init_ready.borrow().as_ref().unwrap_ji())();
         _self
     }
 
     pub fn is_preview_signal(&self) -> impl Signal<Item = bool> {
-        self.phase.signal_cloned()
-            .switch(|phase| {
-                match phase.as_ref() {
-                    Phase::Choose(_) => DefaultSignal::new(false, None),
-                    Phase::Init => DefaultSignal::new(false, None),
-                    Phase::Base(app_base) => {
-                        DefaultSignal::new(false, Some(
-                            app_base.preview_mode.signal_cloned()
-                                .map(|preview_mode| preview_mode.is_some())
-                        ))
-                    }
-                }
+        self.phase
+            .signal_cloned()
+            .switch(|phase| match phase.as_ref() {
+                Phase::Choose(_) => DefaultSignal::new(false, None),
+                Phase::Init => DefaultSignal::new(false, None),
+                Phase::Base(app_base) => DefaultSignal::new(
+                    false,
+                    Some(
+                        app_base
+                            .preview_mode
+                            .signal_cloned()
+                            .map(|preview_mode| preview_mode.is_some()),
+                    ),
+                ),
             })
-            
     }
-
 }

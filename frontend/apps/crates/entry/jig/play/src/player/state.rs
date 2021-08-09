@@ -2,7 +2,7 @@ use std::{cell::RefCell, rc::Rc};
 
 use awsm_web::loaders::helpers::AsyncLoader;
 use futures_signals::signal::Mutable;
-use shared::domain::jig::{Jig, JigId, JigPlayerSettings, module::ModuleId};
+use shared::domain::jig::{module::ModuleId, Jig, JigId, JigPlayerSettings};
 use web_sys::HtmlIFrameElement;
 
 use super::timer::Timer;
@@ -18,11 +18,15 @@ pub struct State {
     pub points: Mutable<u32>,
     pub iframe: Rc<RefCell<Option<HtmlIFrameElement>>>,
     pub paused: Mutable<bool>,
-    pub player_settings: JigPlayerSettings
+    pub player_settings: JigPlayerSettings,
 }
 
 impl State {
-    pub fn new(jig_id: JigId, _module_id: Option<ModuleId>, player_settings: JigPlayerSettings) -> Self {
+    pub fn new(
+        jig_id: JigId,
+        _module_id: Option<ModuleId>,
+        player_settings: JigPlayerSettings,
+    ) -> Self {
         Self {
             is_teacher: true,
             jig_id,

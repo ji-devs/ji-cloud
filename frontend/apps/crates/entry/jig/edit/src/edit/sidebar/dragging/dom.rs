@@ -1,15 +1,13 @@
-use dominator::{html, Dom, clone};
-use shared::domain::jig::Jig;
+use dominator::{html, Dom};
+
 use std::rc::Rc;
-use wasm_bindgen::prelude::*;
+
 use crate::edit::sidebar::state::State as SidebarState;
-use futures_signals::{map_ref, signal::{Signal, SignalExt}};
-use super::state::*;
-use super::actions;
+use futures_signals::signal::SignalExt;
+
 use super::super::module::state::State as ModuleState;
 
-pub struct DraggingDom {
-}
+pub struct DraggingDom {}
 
 impl DraggingDom {
     pub fn render(sidebar: Rc<SidebarState>) -> Dom {

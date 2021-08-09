@@ -3,7 +3,7 @@ use shared::domain::jig::module::body::{ThemeId, _groups::cards::*};
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum Side {
     Left,
-    Right
+    Right,
 }
 
 impl Side {
@@ -23,7 +23,7 @@ impl Side {
     }
 }
 
-pub fn get_card_font_size(length: usize, theme_id: ThemeId, mode: Mode) -> usize {
+pub fn get_card_font_size(_length: usize, _theme_id: ThemeId, _mode: Mode) -> usize {
     //Todo - evaluate this...
     40
 }

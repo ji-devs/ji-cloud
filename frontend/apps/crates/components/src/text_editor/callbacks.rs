@@ -6,9 +6,9 @@ pub struct Callbacks {
 
 impl Callbacks {
     pub fn new(
-        on_new_text: Option<impl Fn(&str) + 'static>, 
-        on_change: Option<impl Fn(&str) + 'static>, 
-        on_blur: Option<impl Fn() + 'static>, 
+        on_new_text: Option<impl Fn(&str) + 'static>,
+        on_change: Option<impl Fn(&str) + 'static>,
+        on_blur: Option<impl Fn() + 'static>,
     ) -> Self {
         Self {
             on_new_text: on_new_text.map(|f| Box::new(f) as _),

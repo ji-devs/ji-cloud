@@ -1,29 +1,16 @@
-use super::{
-    super::{
-        state::*,
-        nav::dom::render_nav
-    },
-    super::super::actions::HistoryStateImpl,
-    super::super::strings
-};
+use super::super::{nav::dom::render_nav, state::*};
 
+use dominator::{clone, html, Dom};
 use std::rc::Rc;
-use dominator::{html, clone, Dom, with_node};
-use serde::{Serialize, de::DeserializeOwned};
-use std::collections::HashSet;
-use futures_signals::{
-    map_ref,
-    signal::{Mutable, SignalExt, Signal},
-    signal_vec::{MutableVec, SignalVecExt, SignalVec},
-};
-use wasm_bindgen::prelude::*;
+
 use crate::module::_common::edit::header::controller::dom::ControllerDom;
 
-use shared::domain::jig::{JigId, module::{ModuleKind, ModuleId, body::{BodyExt, ModeExt, StepExt}}};
-use utils::{prelude::*, iframe::{IframeInit, EmptyMessage}}; 
-use dominator_helpers::events::Message;
+use shared::domain::jig::module::body::{BodyExt, ModeExt, StepExt};
+use utils::prelude::*;
 
-pub fn render_main_bg<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(state: Rc<AppBase<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>) -> Dom 
+pub fn render_main_bg<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(
+    state: Rc<AppBase<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>,
+) -> Dom
 where
     RawData: BodyExt<Mode, Step> + 'static,
     Mode: ModeExt + 'static,
@@ -35,15 +22,16 @@ where
     Footer: FooterExt + 'static,
     Overlay: OverlayExt + 'static,
 {
-
     let dom = match Main::render_bg(state.main.clone()) {
         Some(dom) => dom,
-        None => html!("empty-fragment")
+        None => html!("empty-fragment"),
     };
 
     add_slot_to_dom(dom, "main-bg")
 }
-pub fn render_main<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(state: Rc<AppBase<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>) -> Dom 
+pub fn render_main<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(
+    state: Rc<AppBase<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>,
+) -> Dom
 where
     RawData: BodyExt<Mode, Step> + 'static,
     Mode: ModeExt + 'static,
@@ -58,7 +46,9 @@ where
     add_slot_to_dom(Main::render(state.main.clone()), "main")
 }
 
-pub fn render_sidebar<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(state: Rc<AppBase<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>) -> Dom 
+pub fn render_sidebar<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(
+    state: Rc<AppBase<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>,
+) -> Dom
 where
     RawData: BodyExt<Mode, Step> + 'static,
     Mode: ModeExt + 'static,
@@ -77,7 +67,9 @@ where
     })
 }
 
-pub fn render_header<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(state: Rc<AppBase<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>) -> Dom 
+pub fn render_header<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(
+    state: Rc<AppBase<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>,
+) -> Dom
 where
     RawData: BodyExt<Mode, Step> + 'static,
     Mode: ModeExt + 'static,
@@ -102,7 +94,9 @@ where
     })
 }
 
-pub fn render_footer<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(state: Rc<AppBase<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>) -> Dom 
+pub fn render_footer<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(
+    state: Rc<AppBase<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>,
+) -> Dom
 where
     RawData: BodyExt<Mode, Step> + 'static,
     Mode: ModeExt + 'static,
@@ -120,14 +114,16 @@ where
         .child(html!("module-footer-continue-button", {
             .property("slot", "btn")
             .property_signal("enabled", state.base.next_step_allowed_signal())
-            .event(clone!(state => move |evt:events::Next| {
+            .event(clone!(state => move |_evt:events::Next| {
                 state.try_next_step();
             }))
         }))
     })
 }
 
-pub fn render_overlay<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(state: Rc<AppBase<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>) -> Dom 
+pub fn render_overlay<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(
+    state: Rc<AppBase<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>,
+) -> Dom
 where
     RawData: BodyExt<Mode, Step> + 'static,
     Mode: ModeExt + 'static,
@@ -142,8 +138,7 @@ where
     add_slot_to_dom(Overlay::render(state.overlay.clone()), "overlay")
 }
 
-fn add_slot_to_dom(dom:Dom, slot:&str) -> Dom 
-{
+fn add_slot_to_dom(dom: Dom, slot: &str) -> Dom {
     //there might be a better way, like Dom->DomBuilder->Dom
     html!("empty-fragment", {
         .property("slot", slot)

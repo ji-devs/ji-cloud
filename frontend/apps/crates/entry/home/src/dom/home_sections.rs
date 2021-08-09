@@ -1,5 +1,5 @@
+use dominator::{clone, html, Dom};
 use std::rc::Rc;
-use dominator::{Dom, clone, html};
 use utils::events;
 
 use crate::{actions::search, state::Testimonial};

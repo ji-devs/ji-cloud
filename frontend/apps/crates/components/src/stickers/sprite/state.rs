@@ -1,13 +1,14 @@
 use futures_signals::{
     map_ref,
     signal::{Mutable, Signal, SignalExt},
-    signal_vec::{MutableVec, SignalVecExt},
+};
+use shared::domain::jig::module::body::{
+    Image, Transform,
+    _groups::design::{Sprite as RawSprite, SpriteEffect},
 };
 use std::rc::Rc;
-use shared::{domain::{image::ImageId, jig::module::body::{Image, Transform, _groups::design::{SpriteEffect, Sprite as RawSprite}}}, media::MediaLibrary};
-use std::cell::RefCell;
-use crate::transform::state::{TransformState, TransformCallbacks};
-use utils::resize::resize_info_signal;
+
+use crate::transform::state::{TransformCallbacks, TransformState};
 
 #[derive(Clone)]
 pub struct Sprite {
@@ -19,18 +20,21 @@ pub struct Sprite {
     pub flip_vertical: Mutable<bool>,
 }
 
-
-
 impl Sprite {
-    pub fn new(raw:&RawSprite, on_transform_finished: Option<impl Fn(Transform) + 'static>) -> Self {
+    pub fn new(
+        raw: &RawSprite,
+        on_transform_finished: Option<impl Fn(Transform) + 'static>,
+    ) -> Self {
         let raw = raw.clone();
-        let transform_callbacks = TransformCallbacks::new(
-            on_transform_finished,
-            None::<fn()>
-        );
+        let transform_callbacks = TransformCallbacks::new(on_transform_finished, None::<fn()>);
         Self {
             image: Mutable::new(raw.image),
-            transform: Rc::new(TransformState::new(raw.transform, None, true, transform_callbacks)),
+            transform: Rc::new(TransformState::new(
+                raw.transform,
+                None,
+                true,
+                transform_callbacks,
+            )),
             src: Mutable::new(None),
             effects: Mutable::new(raw.effects),
             flip_horizontal: Mutable::new(raw.flip_horizontal),
@@ -67,25 +71,18 @@ impl Sprite {
                 }
         }
     }
-
 }
 
 pub fn width_signal(size: impl Signal<Item = Option<(f64, f64)>>) -> impl Signal<Item = String> {
-    size.map(|size| {
-        match size {
-            None => "0".to_string(),
-            Some(size) => format!("{}rem", size.0)
-        }
-        
+    size.map(|size| match size {
+        None => "0".to_string(),
+        Some(size) => format!("{}rem", size.0),
     })
 }
 
 pub fn height_signal(size: impl Signal<Item = Option<(f64, f64)>>) -> impl Signal<Item = String> {
-    size.map(|size| {
-        match size {
-            None => "0".to_string(),
-            Some(size) => format!("{}rem", size.1)
-        }
-        
+    size.map(|size| match size {
+        None => "0".to_string(),
+        Some(size) => format!("{}rem", size.1),
     })
 }

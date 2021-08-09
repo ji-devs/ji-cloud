@@ -1,16 +1,14 @@
-use std::rc::Rc;
-use utils::{
-    math::{BoundsF64, bounds, quat, vec2},
-    prelude::*,
-    resize::get_resize_info
+use awsm_web::{canvas::get_2d_context, dom::StyleExt};
+use shared::domain::jig::module::body::{
+    Transform,
+    _groups::design::{Sticker, Trace},
 };
-use shared::domain::jig::module::body::{Transform, _groups::design::{Sticker, Trace}};
-use awsm_web::{dom::StyleExt, canvas::get_2d_context};
-use web_sys::HtmlCanvasElement;
-use wasm_bindgen::JsCast;
-use wasm_bindgen::prelude::*;
-use std::collections::HashMap;
 use std::borrow::Cow;
+use std::collections::HashMap;
+use utils::{math::bounds, prelude::*, resize::get_resize_info};
+use wasm_bindgen::prelude::*;
+use wasm_bindgen::JsCast;
+use web_sys::HtmlCanvasElement;
 
 cfg_if::cfg_if! {
     if #[cfg(debug_assertions)] {
@@ -33,7 +31,7 @@ cfg_if::cfg_if! {
 //the sprite as loaded too
 //
 
-pub struct StickerHitSource <'a> {
+pub struct StickerHitSource<'a> {
     pub sticker: Cow<'a, Sticker>,
     pub size: (f64, f64),
     pub bounds_kind: StickerBoundsKind,
@@ -47,14 +45,23 @@ pub enum StickerBoundsKind {
     Auto,
 }
 
-pub async fn get_hit_index<'a, V: AsRef<Trace>>(source: StickerHitSource<'a>, traces: &[V]) -> Option<usize> {
-
-    let start = if !DEBUGGING_HIT_PERFORMANCE { 0.0 } else { web_sys::window().unwrap_ji().performance().unwrap_ji().now() }; 
-
+pub async fn get_hit_index<'a, V: AsRef<Trace>>(
+    source: StickerHitSource<'a>,
+    traces: &[V],
+) -> Option<usize> {
+    let start = if !DEBUGGING_HIT_PERFORMANCE {
+        0.0
+    } else {
+        web_sys::window()
+            .unwrap_ji()
+            .performance()
+            .unwrap_ji()
+            .now()
+    };
 
     let resize_info = get_resize_info();
 
-    let canvas:HtmlCanvasElement = web_sys::window()
+    let canvas: HtmlCanvasElement = web_sys::window()
         .unwrap_ji()
         .document()
         .unwrap_ji()
@@ -86,7 +93,6 @@ pub async fn get_hit_index<'a, V: AsRef<Trace>>(source: StickerHitSource<'a>, tr
             format!("#{:02x}{:02x}{:02x}", r, g, b)
         };
 
-
         crate::traces::canvas::draw_trace(&ctx, &resize_info, trace.as_ref());
 
         ctx.set_fill_style(&JsValue::from_str(&color));
@@ -97,8 +103,8 @@ pub async fn get_hit_index<'a, V: AsRef<Trace>>(source: StickerHitSource<'a>, tr
         sticker,
         size,
         bounds_kind,
-        transform_override
-    } = source ;
+        transform_override,
+    } = source;
 
     let sticker = &*sticker;
 
@@ -113,18 +119,18 @@ pub async fn get_hit_index<'a, V: AsRef<Trace>>(source: StickerHitSource<'a>, tr
             match sticker {
                 Sticker::Text(_) => StickerBoundsKind::BoundingBox,
                 Sticker::Video(_) => StickerBoundsKind::BoundingBox,
-                Sticker::Sprite(_) => StickerBoundsKind::BoundingBox //TODO - change to media when sticker.draw_to_canvas() exists
+                Sticker::Sprite(_) => StickerBoundsKind::BoundingBox, //TODO - change to media when sticker.draw_to_canvas() exists
             }
-        },
+        }
         StickerBoundsKind::BoundingBox => StickerBoundsKind::BoundingBox,
         StickerBoundsKind::Media => {
             match sticker {
                 Sticker::Text(_) => {
                     //TODO - kick this down to sticker.draw_to_canvas() when it exists
                     panic!("can't get bounds for text media!");
-                },
+                }
                 Sticker::Sprite(_) => StickerBoundsKind::Media,
-                Sticker::Video(_) => StickerBoundsKind::Media
+                Sticker::Video(_) => StickerBoundsKind::Media,
             }
         }
     };
@@ -143,31 +149,29 @@ pub async fn get_hit_index<'a, V: AsRef<Trace>>(source: StickerHitSource<'a>, tr
         }
 
         if !DEBUGGING_HIT || DEBUGGING_HIT_CLIP {
-            ctx.set_global_composite_operation(&"destination-in");
-        } 
+            let _ = ctx.set_global_composite_operation(&"destination-in");
+        }
     } else {
         panic!("sticker.draw_to_canvas() doesn't exist yet!");
     }
 
-
     ctx.fill();
     ctx.restore();
-
 
     //Use the bottom of the aabb instead of the top for getting the image data
     //just setting invert_y won't work (bug?) - maybe look into that or add an invert()
     //method
-    let data = ctx.get_image_data(aabb.left(), aabb.bottom(), aabb.width, aabb.height) 
+    let data = ctx
+        .get_image_data(aabb.left(), aabb.bottom(), aabb.width, aabb.height)
         .unwrap_ji()
         .data()
         .to_vec();
-
 
     let width = aabb.width as usize;
     let height = aabb.height as usize;
 
     //accumulate the number of hits for each target index
-    let mut hits:HashMap<u32, usize> = HashMap::new(); 
+    let mut hits: HashMap<u32, usize> = HashMap::new();
 
     for x in 0..width {
         for y in 0..height {
@@ -179,7 +183,7 @@ pub async fn get_hit_index<'a, V: AsRef<Trace>>(source: StickerHitSource<'a>, tr
 
             //we use alpha just to check if there _is_ a hit
             if a != 0 {
-                let index = ((r << 16) | (g << 8) | b);
+                let index = (r << 16) | (g << 8) | b;
 
                 let counter = hits.entry(index).or_insert(0);
                 *counter += 1;
@@ -196,7 +200,7 @@ pub async fn get_hit_index<'a, V: AsRef<Trace>>(source: StickerHitSource<'a>, tr
 
             let better = {
                 if n_hits > 0 {
-                    if let Some((curr_index, curr_n_hits)) = acc {
+                    if let Some((_curr_index, curr_n_hits)) = acc {
                         if n_hits > curr_n_hits {
                             true
                         } else {
@@ -218,16 +222,21 @@ pub async fn get_hit_index<'a, V: AsRef<Trace>>(source: StickerHitSource<'a>, tr
         })
         .map(|(index, _)| index as usize);
 
-
     if DEBUGGING_HIT {
         //Just for testing - to see the canvas
         canvas.set_style("position", "fixed");
         //canvas.set_style("opacity", "0.5");
         canvas.set_style("pointer-events", "none");
-        canvas.set_style("left", &format!("{}px", resize_info.x + resize_info.content_x));
-        canvas.set_style("top", &format!("{}px", resize_info.y + resize_info.content_y));
+        canvas.set_style(
+            "left",
+            &format!("{}px", resize_info.x + resize_info.content_x),
+        );
+        canvas.set_style(
+            "top",
+            &format!("{}px", resize_info.y + resize_info.content_y),
+        );
 
-        web_sys::window()
+        let _ = web_sys::window()
             .unwrap_ji()
             .document()
             .unwrap_ji()
@@ -237,15 +246,23 @@ pub async fn get_hit_index<'a, V: AsRef<Trace>>(source: StickerHitSource<'a>, tr
     }
 
     if DEBUGGING_HIT_PERFORMANCE {
-        log::info!("hit detection took {}ms", web_sys::window().unwrap_ji().performance().unwrap_ji().now() - start);
-    }; 
+        log::info!(
+            "hit detection took {}ms",
+            web_sys::window()
+                .unwrap_ji()
+                .performance()
+                .unwrap_ji()
+                .now()
+                - start
+        );
+    };
     best_hit
 }
 
-pub fn debug_render_hit_trace<V: AsRef<Trace>>(index:usize, traces: &[V]) {
+pub fn debug_render_hit_trace<V: AsRef<Trace>>(index: usize, traces: &[V]) {
     let resize_info = get_resize_info();
 
-    let canvas:HtmlCanvasElement = web_sys::window()
+    let canvas: HtmlCanvasElement = web_sys::window()
         .unwrap_ji()
         .document()
         .unwrap_ji()
@@ -270,10 +287,16 @@ pub fn debug_render_hit_trace<V: AsRef<Trace>>(index:usize, traces: &[V]) {
     canvas.set_style("position", "fixed");
     //canvas.set_style("opacity", "0.5");
     canvas.set_style("pointer-events", "none");
-    canvas.set_style("left", &format!("{}px", resize_info.x + resize_info.content_x));
-    canvas.set_style("top", &format!("{}px", resize_info.y + resize_info.content_y));
+    canvas.set_style(
+        "left",
+        &format!("{}px", resize_info.x + resize_info.content_x),
+    );
+    canvas.set_style(
+        "top",
+        &format!("{}px", resize_info.y + resize_info.content_y),
+    );
 
-    web_sys::window()
+    let _= web_sys::window()
         .unwrap_ji()
         .document()
         .unwrap_ji()
@@ -281,4 +304,3 @@ pub fn debug_render_hit_trace<V: AsRef<Trace>>(index:usize, traces: &[V]) {
         .unwrap_ji()
         .append_child(&canvas);
 }
-

@@ -1,13 +1,13 @@
 use std::{rc::Rc, str::FromStr};
 
 use dominator::clone;
-use shared::domain::jig::{JigId, module::ModuleId};
+use shared::domain::jig::{module::ModuleId, JigId};
 use utils::{storage::get_local_storage, unwrap::UnwrapJiExt};
 use uuid::Uuid;
 
 use super::state::State;
 
-pub const COPY_MODULE_KEY:&'static str = "COPY_MODULE";
+pub const COPY_MODULE_KEY: &'static str = "COPY_MODULE";
 pub fn copy_module(state: Rc<State>, module_id: &ModuleId) {
     let value = format!("{},{}", &state.jig.id.0, &module_id.0);
 
@@ -20,7 +20,7 @@ fn get_module_to_paste() -> Option<(JigId, ModuleId)> {
         .unwrap_ji()
         .get(COPY_MODULE_KEY)
         .unwrap_ji();
-    
+
     match value {
         None => None,
         Some(value) => {

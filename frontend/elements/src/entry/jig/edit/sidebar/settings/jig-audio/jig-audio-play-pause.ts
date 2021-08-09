@@ -19,7 +19,7 @@ export class _ extends LitElement {
     }
 
     @property({ reflect: true })
-    new: Mode = "pause";
+    mode: Mode = "pause";
 
     render() {
         return html`

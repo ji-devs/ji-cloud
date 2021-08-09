@@ -1,24 +1,22 @@
-use futures_signals::{
-    map_ref,
-    signal_vec::{SignalVecExt, SignalVec, MutableVec},
-    signal::{Signal, SignalExt, Mutable, ReadOnlyMutable},
+use futures_signals::signal::{Mutable, ReadOnlyMutable};
+
+use super::callbacks::Callbacks;
+use shared::domain::jig::module::body::{
+    Background, ThemeId, _groups::design::Backgrounds as RawBackgrounds,
 };
 
-use std::rc::Rc;
-use std::cell::RefCell;
-use shared::domain::jig::module::body::{ThemeId, Background, _groups::design::Backgrounds as RawBackgrounds};
-use super::callbacks::Callbacks;
-
-pub struct Backgrounds 
-{
+pub struct Backgrounds {
     pub theme_id: ReadOnlyMutable<ThemeId>,
     pub layer_1: Mutable<Option<Background>>,
     pub layer_2: Mutable<Option<Background>>,
     pub(super) callbacks: Callbacks,
 }
 impl Backgrounds {
-    pub fn from_raw(raw:&RawBackgrounds, theme_id: ReadOnlyMutable<ThemeId>, callbacks: Callbacks) -> Self {
-   
+    pub fn from_raw(
+        raw: &RawBackgrounds,
+        theme_id: ReadOnlyMutable<ThemeId>,
+        callbacks: Callbacks,
+    ) -> Self {
         Self {
             theme_id,
             layer_1: Mutable::new(raw.layer_1.clone()),
@@ -34,4 +32,3 @@ impl Backgrounds {
         }
     }
 }
-

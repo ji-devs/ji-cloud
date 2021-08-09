@@ -1,13 +1,11 @@
-use std::rc::Rc;
 use dominator::clone;
 use futures::future::ready;
 use futures_signals::signal::{Mutable, ReadOnlyMutable, SignalExt};
 use futures_signals::signal_vec::MutableVec;
 use rgb::RGBA8;
-use utils::{prelude::*, colors::*};
+use std::rc::Rc;
+use utils::{colors::*, prelude::*};
 use wasm_bindgen_futures::spawn_local;
-
-
 
 static SYSTEM_COLORS: &'static [&str] = &[
     "#00000000",
@@ -46,22 +44,31 @@ pub struct State {
 }
 
 impl State {
-    pub fn new(theme_id: ReadOnlyMutable<ThemeId>, init_value: Option<RGBA8>, on_select: Option<impl Fn(Option<RGBA8>) + 'static>) -> Self {
+    pub fn new(
+        theme_id: ReadOnlyMutable<ThemeId>,
+        init_value: Option<RGBA8>,
+        on_select: Option<impl Fn(Option<RGBA8>) + 'static>,
+    ) -> Self {
         Self {
             value: Mutable::new(init_value),
             theme_id,
             system_colors: Rc::new(SYSTEM_COLORS.iter().map(|c| hex_to_rgba8(*c)).collect()),
             theme_colors: Mutable::new(vec![]),
             user_colors: Rc::new(MutableVec::new()),
-            on_select: on_select.map(|f| Box::new(f) as _)
+            on_select: on_select.map(|f| Box::new(f) as _),
         }
     }
 
-    pub fn handle_theme(state: Rc<State>, ) {
-        spawn_local(state.theme_id.signal_cloned().for_each(clone!(state => move |theme_id| {
-            state.theme_colors.set(Self::get_theme_colors(theme_id));
-            ready(())
-        })));
+    pub fn handle_theme(state: Rc<State>) {
+        spawn_local(
+            state
+                .theme_id
+                .signal_cloned()
+                .for_each(clone!(state => move |theme_id| {
+                    state.theme_colors.set(Self::get_theme_colors(theme_id));
+                    ready(())
+                })),
+        );
     }
 
     pub fn set_value(&self, value: Option<RGBA8>) {

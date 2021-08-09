@@ -1,20 +1,13 @@
-use dominator::{html, Dom};
-use std::rc::Rc;
 use super::state::*;
-use futures_signals::{
-    map_ref,
-    signal::{Signal, SignalExt},
-    signal_vec::{SignalVec, SignalVecExt}
-};
 use crate::{
-    module::{
-        _groups::cards::edit::state::*,
-        _common::edit::prelude::*,
-    },
+    module::{_common::edit::prelude::*, _groups::cards::edit::state::*},
     tooltip::dom::render as render_tooltip,
 };
+use dominator::{html, Dom};
+use futures_signals::{map_ref, signal::SignalExt};
+use std::rc::Rc;
 
-impl <RawData: RawDataExt, E: ExtraExt> DomRenderable for Overlay<RawData, E> {
+impl<RawData: RawDataExt, E: ExtraExt> DomRenderable for Overlay<RawData, E> {
     fn render(state: Rc<Overlay<RawData, E>>) -> Dom {
         let sig = map_ref! {
             let delete = state.base.tooltips.delete.signal_cloned(),

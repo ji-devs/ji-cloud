@@ -1,53 +1,28 @@
 use std::rc::Rc;
-use std::cell::RefCell;
-use std::borrow::Borrow;
-use std::marker::PhantomData;
-use wasm_bindgen::prelude::*;
-use wasm_bindgen::JsCast;
-use futures_signals::{
-    map_ref,
-    signal::{Mutable,ReadOnlyMutable, SignalExt, Signal, always},
-    signal_vec::{self, MutableVec, SignalVec, SignalVecExt},
-    CancelableFutureHandle, 
-};
-use web_sys::{Url, HtmlElement, Element, HtmlInputElement};
-use dominator::{DomBuilder, Dom, html, events, with_node, clone, apply_methods};
-use dominator_helpers::{dynamic_class_signal, futures::{spawn_future, AsyncLoader}, make_custom_event_serde, signals::{DefaultSignal, OptionSignal}, with_data_id};
-use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
-use utils::{
-    iframe::*,
-    resize::*,
-    events::ModuleResizeEvent,
-    prelude::*,
-};
-use awsm_web::dom::resize::*;
-use std::future::Future;
-use async_trait::async_trait;
-use std::pin::Pin;
-use std::marker::Unpin;
-use std::task::{Context, Poll};
-use discard::DiscardOnDrop;
-use super::{
-    state::*,
-    loading::dom::render_loading,
-};
-use crate::{
-    module::_common::play::prelude::*,
-    instructions::player::{
-        state::InstructionsPlayer,
-        dom::render_instructions_player
-    }
-};
-use shared::domain::jig::module::body::{ModeExt, BodyExt, StepExt};
 
-pub fn render_page_body<RawData, Mode, Step, Base> (state:Rc<GenericState<RawData, Mode, Step, Base>>)
-where
+use futures_signals::{
+    signal::{Mutable, SignalExt},
+};
+
+use dominator::{clone, events, html, Dom};
+
+use utils::{events::ModuleResizeEvent, iframe::*, prelude::*, resize::*};
+
+use super::{loading::dom::render_loading, state::*};
+use crate::{
+    instructions::player::{dom::render_instructions_player, state::InstructionsPlayer},
+    module::_common::play::prelude::*,
+};
+use shared::domain::jig::module::body::{BodyExt, ModeExt, StepExt};
+
+pub fn render_page_body<RawData, Mode, Step, Base>(
+    state: Rc<GenericState<RawData, Mode, Step, Base>>,
+) where
     Base: BaseExt + 'static,
-    RawData: BodyExt<Mode, Step> + 'static, 
+    RawData: BodyExt<Mode, Step> + 'static,
     Mode: ModeExt + 'static,
     Step: StepExt + 'static,
 {
-
     let sig =
             state.phase.signal_cloned().map(clone!(state => move |phase| {
                 let page_kind = match phase.as_ref() {
@@ -94,27 +69,25 @@ where
             }));
 
     state.page_body_switcher.load(sig.for_each(|dom| {
-
         let body = dominator::body();
         body.set_inner_html("");
         dominator::append_dom(&body, dom);
         async move {}
     }));
-
-
 }
-
 
 //This is just a placeholder to get messages
 //It'll be replaced when the iframe data arrives
-fn render_iframe_wait_raw<RawData, Mode, Step, Base> (state:Rc<GenericState<RawData, Mode, Step, Base>>, on_raw: Rc<Box<dyn Fn(RawData)>>) -> Dom
+fn render_iframe_wait_raw<RawData, Mode, Step, Base>(
+    state: Rc<GenericState<RawData, Mode, Step, Base>>,
+    on_raw: Rc<Box<dyn Fn(RawData)>>,
+) -> Dom
 where
     Base: BaseExt + 'static,
-    RawData: BodyExt<Mode, Step> + 'static, 
+    RawData: BodyExt<Mode, Step> + 'static,
     Mode: ModeExt + 'static,
-    Step: StepExt + 'static
+    Step: StepExt + 'static,
 {
-
     html!("empty-fragment", {
         .global_event(clone!(state, on_raw => move |evt:dominator_helpers::events::Message| {
             if let Ok(msg) = evt.try_serde_data::<IframeInit<RawData>>() {
@@ -125,7 +98,7 @@ where
                 log::info!("hmmm got other iframe message...");
             }
         }))
-        .after_inserted(clone!(state => move |elem| {
+        .after_inserted(clone!(state => move |_elem| {
             let parent = web_sys::window()
                 .unwrap_ji()
                 .parent()
@@ -134,18 +107,22 @@ where
             //On mount - send an empty IframeInit message to let the parent know we're ready
             let msg = IframeInit::empty();
 
-            parent.post_message(&msg.into(), "*");
+            let _ = parent.post_message(&msg.into(), "*");
         }))
     })
-
 }
 
-fn render_player<RawData, Mode, Step, Base> (state:Rc<GenericState<RawData, Mode, Step, Base>>, base: Rc<Base>, jig_player: bool, play_started: Mutable<bool>) -> Dom
+fn render_player<RawData, Mode, Step, Base>(
+    state: Rc<GenericState<RawData, Mode, Step, Base>>,
+    base: Rc<Base>,
+    jig_player: bool,
+    play_started: Mutable<bool>,
+) -> Dom
 where
     Base: BaseExt + 'static,
-    RawData: BodyExt<Mode, Step> + 'static, 
+    RawData: BodyExt<Mode, Step> + 'static,
     Mode: ModeExt + 'static,
-    Step: StepExt + 'static
+    Step: StepExt + 'static,
 {
     let instructions = base.get_instructions();
     let is_screenshot = utils::screenshot::is_screenshot_url();
@@ -185,7 +162,7 @@ where
                         log::info!("hmmm got other iframe message...");
                     }
                 }))
-                .after_inserted(clone!(state => move |elem| {
+                .after_inserted(clone!(state => move |_elem| {
                     let parent = web_sys::window()
                         .unwrap_ji()
                         .parent()
@@ -194,7 +171,7 @@ where
                     //On mount - send an empty IframeInit message to let the parent know we're ready
                     let msg = IframeInit::empty();
 
-                    parent.post_message(&msg.into(), "*");
+                    let _ = parent.post_message(&msg.into(), "*");
                 }))
         })
 
@@ -202,17 +179,17 @@ where
             dom.child_signal(play_started.signal().map(clone!(play_started => move |has_started| {
                 if !has_started {
                     Some(html!("module-play-button", {
-                        .event(clone!(base, play_started => move |evt:events::Click| {
+                        .event(clone!(base, play_started => move |_evt:events::Click| {
                             start_playback(base.clone(), &play_started);
                         }))
-                        .after_inserted(clone!(state, base, play_started => move |elem| {
+                        .after_inserted(clone!(state, base, play_started => move |_elem| {
                             if state.opts.skip_play {
                                 start_playback(base.clone(), &play_started);
                             }
                         }))
                     }))
                 } else {
-                    
+
                     if jig_player {
                         let parent = web_sys::window()
                             .unwrap_ji()
@@ -220,21 +197,19 @@ where
                             .unwrap_ji()
                             .unwrap_ji();
                         let msg = IframeAction::new(ModuleToJigMessage::Start(base.get_timer_seconds()));
-                        parent.post_message(&msg.into(), "*");
+                        let _ = parent.post_message(&msg.into(), "*");
                     }
                     None
                 }
             })))
         })
     })
-
 }
 
-fn start_playback<Base>(base: Rc<Base>, play_started:&Mutable<bool>) 
+fn start_playback<Base>(base: Rc<Base>, play_started: &Mutable<bool>)
 where
     Base: BaseExt + 'static,
 {
     play_started.set_neq(true);
     Base::play(base);
 }
-

@@ -1,2 +1,2 @@
-pub mod dom;
 pub(super) mod actions;
+pub mod dom;

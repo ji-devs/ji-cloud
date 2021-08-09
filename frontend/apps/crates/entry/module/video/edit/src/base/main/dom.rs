@@ -1,9 +1,18 @@
-use dominator::{Dom, clone, html};
-use futures_signals::{signal::SignalExt, signal_vec::SignalVecExt};
-use wasm_bindgen_futures::spawn_local;
-use std::rc::Rc;
+use dominator::{clone, html, Dom};
+use futures_signals::signal_vec::SignalVecExt;
+
 use super::state::*;
-use components::{backgrounds::dom::render_backgrounds, module::_common::edit::prelude::*, stickers::{sprite::dom::render_sticker_sprite, state::Sticker, text::dom::render_sticker_text, video::dom::{VideoRenderOptions, render_sticker_video}}};
+use components::{
+    backgrounds::dom::render_backgrounds,
+    module::_common::edit::prelude::*,
+    stickers::{
+        sprite::dom::render_sticker_sprite,
+        state::Sticker,
+        text::dom::render_sticker_text,
+        video::dom::{render_sticker_video, VideoRenderOptions},
+    },
+};
+use std::rc::Rc;
 
 impl DomRenderable for Main {
     fn render(state: Rc<Main>) -> Dom {

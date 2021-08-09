@@ -1,14 +1,14 @@
-use dominator::{Dom, html, clone};
-use std::rc::Rc;
-use utils::prelude::*;
-use futures_signals::{signal::SignalExt, signal_vec::SignalVecExt};
-use strum::IntoEnumIterator;
 use crate::text_editor::config::STR_NEW_TEXT;
 use crate::text_editor::font_css_converter::font_to_css;
 use crate::text_editor::wysiwyg_types::ControlsChange;
+use dominator::{clone, html, Dom};
+use futures_signals::{signal::SignalExt, signal_vec::SignalVecExt};
+use std::rc::Rc;
+use strum::IntoEnumIterator;
+use utils::prelude::*;
 
-use super::super::super::wysiwyg_types::{Align, ElementType, Font, Weight, BOLD_WEIGHT};
 use super::super::super::state::State;
+use super::super::super::wysiwyg_types::{Align, ElementType, Font, Weight, BOLD_WEIGHT};
 use super::color_controls;
 
 const STR_WEIGHT_LABEL: &'static str = "Weight";
@@ -19,7 +19,6 @@ const STR_WEIGHT_400: &'static str = "Regular";
 const STR_WEIGHT_700: &'static str = "Bold";
 const STR_WEIGHT_900: &'static str = "Bolder";
 const STR_WEIGHT_CUSTOM: &'static str = "Custom";
-
 
 const WEIGHT_OPTIONS: &'static [u16] = &[200, 400, 700, 900];
 
@@ -156,7 +155,6 @@ pub fn render(state: Rc<State>) -> Dom {
     })
 }
 
-
 fn render_element_option(state: Rc<State>, element: ElementType) -> Dom {
     html!("text-editor-controls-button", {
         .property("kind", element.to_string().to_lowercase())
@@ -200,7 +198,7 @@ fn render_align_option(state: Rc<State>, align: Align) -> Dom {
 }
 
 fn render_weight_option(state: Rc<State>, weight: Weight) -> Dom {
-    html!("li-check", {
+    html!("input-select-option", {
         .style("font-weight", weight.to_string())
         .property_signal("selected", state.controls.signal_cloned().map(clone!(weight => move |controls| {
             if controls.weight == weight {
@@ -210,14 +208,16 @@ fn render_weight_option(state: Rc<State>, weight: Weight) -> Dom {
             }
         })))
         .text(readable_weight(weight))
-        .event(clone!(state, weight => move |_: events::Click| {
-            state.set_control_value(ControlsChange::Weight(weight))
+        .event(clone!(state, weight => move |evt: events::CustomSelectedChange| {
+            if evt.selected() {
+                state.set_control_value(ControlsChange::Weight(weight))
+            }
         }))
     })
 }
 
 fn render_font_option(state: Rc<State>, font: &Font) -> Dom {
-    html!("li-check", {
+    html!("input-select-option", {
         .style("font-family", font_to_css(font))
         .property_signal("selected", state.controls.signal_cloned().map(clone!(font => move |controls| {
             if controls.font == font {
@@ -227,8 +227,10 @@ fn render_font_option(state: Rc<State>, font: &Font) -> Dom {
             }
         })))
         .text(&font.to_string())
-        .event(clone!(state, font => move |_: events::Click| {
-            state.set_control_value(ControlsChange::Font(font.clone()))
+        .event(clone!(state, font => move |evt: events::CustomSelectedChange| {
+            if evt.selected() {
+                state.set_control_value(ControlsChange::Font(font.clone()))
+            }
         }))
     })
 }

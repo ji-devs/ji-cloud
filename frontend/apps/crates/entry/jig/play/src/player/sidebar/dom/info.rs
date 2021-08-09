@@ -1,16 +1,23 @@
 use std::rc::Rc;
 
-use dominator::{Dom, clone, html};
-use futures_signals::{map_ref, signal::{Signal, SignalExt}};
+use dominator::{clone, html, Dom};
+use futures_signals::{
+    map_ref,
+    signal::{Signal, SignalExt},
+};
 use shared::domain::jig::Jig;
-use utils::{events, ages::AgeRangeVecExt};
+use utils::{ages::AgeRangeVecExt, events};
 
-use super::{report, super::state::{ActivePopup, State}};
+use super::{
+    super::state::{ActivePopup, State},
+    report,
+};
 
 pub fn render(state: Rc<State>) -> Dom {
     html!("anchored-overlay", {
         .property("positionY", "bottom-out")
         .property("positionX", "left-in")
+        .property("styled", true)
         .property("slot", "actions")
         .property_signal("open", info_open_signal(Rc::clone(&state)))
         .event(clone!(state => move |_: events::Close| {
@@ -47,12 +54,13 @@ pub fn render(state: Rc<State>) -> Dom {
 }
 
 fn info_open_signal(state: Rc<State>) -> impl Signal<Item = bool> {
-    state.active_popup.signal_cloned().map(|active_popup| {
-        match active_popup {
+    state
+        .active_popup
+        .signal_cloned()
+        .map(|active_popup| match active_popup {
             ActivePopup::JigInfo => true,
             _ => false,
-        }
-    })
+        })
 }
 
 fn render_jig_info(state: Rc<State>, jig: &Jig) -> Dom {

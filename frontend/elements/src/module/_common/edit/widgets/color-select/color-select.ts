@@ -1,6 +1,6 @@
 import { LitElement, html, css, customElement, property } from 'lit-element';
 
-@customElement('color-select')
+@customElement("color-select")
 export class _ extends LitElement {
 
     static get styles() {
@@ -13,6 +13,7 @@ export class _ extends LitElement {
                 grid-column: 1 / -1;
             }
             :host {
+                padding: 16px;
                 display: grid;
                 grid-template-columns: 1fr auto 1fr;
                 row-gap: 32px;

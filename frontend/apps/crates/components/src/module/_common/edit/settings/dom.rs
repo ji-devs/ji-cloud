@@ -1,25 +1,26 @@
-use dominator::{DomBuilder, Dom, html, clone};
-use std::rc::Rc;
-use super::state::*;
-use web_sys::HtmlElement;
 use super::button::dom::render_button;
+use super::state::*;
+use dominator::{html, Dom, DomBuilder};
+use std::rc::Rc;
+use web_sys::HtmlElement;
 
 pub fn render_settings(state: Rc<ModuleSettings>) -> Dom {
-    _render_mixin(state, None::<fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>>) 
+    _render_mixin(
+        state,
+        None::<fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>>,
+    )
 }
 
-pub fn render_button_mixin<F>(state: Rc<ModuleSettings>, mixin: F) -> Dom 
-    where
-        F: FnOnce(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>,
-
+pub fn render_button_mixin<F>(state: Rc<ModuleSettings>, mixin: F) -> Dom
+where
+    F: FnOnce(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>,
 {
     _render_mixin(state, Some(mixin))
 }
 
-fn _render_mixin<F>(state: Rc<ModuleSettings>, mixin: Option<F>) -> Dom 
-    where
-        F: FnOnce(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>,
-
+fn _render_mixin<F>(state: Rc<ModuleSettings>, _mixin: Option<F>) -> Dom
+where
+    F: FnOnce(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>,
 {
     html!("module-settings-container", {
         .children(

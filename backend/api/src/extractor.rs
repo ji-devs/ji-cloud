@@ -451,7 +451,6 @@ from user_auth_basic where email = $1::text
                         let _ = password_hasher.hash_password(
                             password.as_bytes(),
                             None,
-                            None,
                             crate::ARGON2_DEFAULT_PARAMS,
                             salt.as_salt(),
                         );

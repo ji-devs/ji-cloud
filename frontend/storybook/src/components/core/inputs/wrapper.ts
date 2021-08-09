@@ -33,14 +33,6 @@ export const Wrapper = (props?: Partial<Args>) => {
         <input-wrapper ${argsToAttrs(props)}>
             <textarea ${argsToAttrs(props)}></textarea>
         </input-wrapper>
-        <br>
-        <input-wrapper ${argsToAttrs(props)}>
-            <input-base-select value="value">
-                ${mapToString(arrayCount(10), i => {
-                    return `<li-check>item ${i}</li-check>`;
-                })}
-            </input-base-select>
-        </input-wrapper>
     `;
 }
 

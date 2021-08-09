@@ -1,21 +1,17 @@
-use std::rc::Rc;
-use futures_signals::signal::{Mutable, SignalExt};
-use dominator::clone;
 use crate::{
     instructions::editor::{
+        callbacks::Callbacks as InstructionsEditorCallbacks,
         state::State as InstructionsEditorState,
-        callbacks::Callbacks as InstructionsEditorCallbacks
     },
-    module::_groups::cards::edit::{
-        state::*,
-        config,
-        strings
-    }
+    module::_groups::cards::edit::state::*,
 };
+use dominator::clone;
+use futures_signals::signal::Mutable;
+use std::rc::Rc;
 
-pub struct Step3<RawData, E, GetSettingsStateFn, SettingsState> 
+pub struct Step3<RawData, E, GetSettingsStateFn, SettingsState>
 where
-    RawData: RawDataExt, 
+    RawData: RawDataExt,
     E: ExtraExt,
     GetSettingsStateFn: Fn(Rc<CardsBase<RawData, E>>) -> SettingsState + Clone + 'static,
     SettingsState: 'static,
@@ -25,10 +21,10 @@ where
     pub get_settings: GetSettingsStateFn,
 }
 
-
-impl <RawData, E, GetSettingsStateFn, SettingsState> Step3<RawData, E, GetSettingsStateFn, SettingsState> 
+impl<RawData, E, GetSettingsStateFn, SettingsState>
+    Step3<RawData, E, GetSettingsStateFn, SettingsState>
 where
-    RawData: RawDataExt, 
+    RawData: RawDataExt,
     E: ExtraExt,
     GetSettingsStateFn: Fn(Rc<CardsBase<RawData, E>>) -> SettingsState + Clone + 'static,
     SettingsState: 'static,
@@ -36,7 +32,7 @@ where
     pub fn new(base: Rc<CardsBase<RawData, E>>, get_settings: GetSettingsStateFn) -> Rc<Self> {
         let kind = match base.debug.step3_tab {
             Some(kind) => kind,
-            None => TabKind::Settings
+            None => TabKind::Settings,
         };
 
         let tab = Mutable::new(Tab::new(base.clone(), kind, get_settings.clone()));
@@ -44,7 +40,7 @@ where
         Rc::new(Self {
             base,
             tab,
-            get_settings
+            get_settings,
         })
     }
 }
@@ -70,7 +66,7 @@ pub enum Tab<SettingsState> {
 }
 
 //the generic makes the auto derive break
-impl <SettingsState> Clone for Tab<SettingsState> {
+impl<SettingsState> Clone for Tab<SettingsState> {
     fn clone(&self) -> Self {
         match self {
             Self::Settings(state) => Self::Settings(state.clone()),
@@ -79,38 +75,42 @@ impl <SettingsState> Clone for Tab<SettingsState> {
     }
 }
 
-impl <SettingsState> Tab <SettingsState> {
-    pub fn new<RawData, E, GetSettingsStateFn>(base: Rc<CardsBase<RawData, E>>, kind:TabKind, get_settings: GetSettingsStateFn) -> Self 
+impl<SettingsState> Tab<SettingsState> {
+    pub fn new<RawData, E, GetSettingsStateFn>(
+        base: Rc<CardsBase<RawData, E>>,
+        kind: TabKind,
+        get_settings: GetSettingsStateFn,
+    ) -> Self
     where
-        RawData: RawDataExt, 
+        RawData: RawDataExt,
         E: ExtraExt,
         GetSettingsStateFn: Fn(Rc<CardsBase<RawData, E>>) -> SettingsState + Clone + 'static,
     {
         match kind {
-            TabKind::Settings => {
-                Self::Settings(Rc::new(get_settings(base.clone())))
-            },
+            TabKind::Settings => Self::Settings(Rc::new(get_settings(base.clone()))),
             TabKind::Instructions => {
-                let callbacks = InstructionsEditorCallbacks::new(clone!(base => move |instructions, also_history| {
-                    if(also_history) {
-                        base.history.push_modify(|raw| {
-                            if let Some(content) = raw.get_content_mut() {
-                                content.instructions = instructions;
-                            }
-                        });
-                    } else {
-                        base.history.save_current_modify(|raw| {
-                            if let Some(content) = raw.get_content_mut() {
-                                content.instructions = instructions;
-                            }
-                        });
-                    }
-                }));
+                let callbacks = InstructionsEditorCallbacks::new(
+                    clone!(base => move |instructions, also_history| {
+                        if also_history {
+                            base.history.push_modify(|raw| {
+                                if let Some(content) = raw.get_content_mut() {
+                                    content.instructions = instructions;
+                                }
+                            });
+                        } else {
+                            base.history.save_current_modify(|raw| {
+                                if let Some(content) = raw.get_content_mut() {
+                                    content.instructions = instructions;
+                                }
+                            });
+                        }
+                    }),
+                );
 
                 let state = InstructionsEditorState::new(base.instructions.clone(), callbacks);
 
                 Self::Instructions(Rc::new(state))
-            },
+            }
         }
     }
 

@@ -1,20 +1,14 @@
 use super::state::*;
-use std::rc::Rc;
-use dominator::{html, clone, Dom, with_node};
-use utils::prelude::*;
-use futures_signals::signal::SignalExt;
+use dominator::{clone, html, Dom};
 use futures_signals::signal::Mutable;
+use futures_signals::signal::SignalExt;
+use std::rc::Rc;
+use utils::prelude::*;
 
 use crate::{
     image::search::dom::render as render_image_search,
-    lists::{
-        single::dom::render as render_single_list,
-        dual::dom::render as render_dual_list,
-    },
-    module::_groups::cards::edit::{
-        state::*,
-        strings
-    }
+    lists::{dual::dom::render as render_dual_list, single::dom::render as render_single_list},
+    module::_groups::cards::edit::{state::*, strings},
 };
 
 pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<Step1<RawData, E>>) -> Dom {
@@ -83,7 +77,7 @@ fn render_non_empty<RawData: RawDataExt, E: ExtraExt>(state: Rc<Step1<RawData, E
                 .property("slot", "clear")
                 .property("kind", "text")
                 .text(strings::STR_CREATE_NEW_LIST)
-                .event(clone!(state => move |evt:events::Click| {
+                .event(clone!(state => move |_evt:events::Click| {
                     state.base.clear_all();
                 }))
             })
@@ -91,16 +85,19 @@ fn render_non_empty<RawData: RawDataExt, E: ExtraExt>(state: Rc<Step1<RawData, E
     })
 }
 
-fn render_tab<RawData: RawDataExt, E: ExtraExt>(state: Rc<Step1<RawData, E>>, tab: Mutable<Tab>, tab_kind:TabKind) -> Dom {
+fn render_tab<RawData: RawDataExt, E: ExtraExt>(
+    state: Rc<Step1<RawData, E>>,
+    tab: Mutable<Tab>,
+    tab_kind: TabKind,
+) -> Dom {
     html!("menu-tab-with-title", {
         .property("slot", "tabs")
         .property_signal("active", tab.signal_ref(clone!(tab_kind => move |curr| {
             curr.kind() == tab_kind
         })))
         .property("kind", tab_kind.as_str())
-        .event(clone!(state, tab_kind, tab => move |evt:events::Click| {
+        .event(clone!(state, tab_kind, tab => move |_evt:events::Click| {
             tab.set(Tab::new(state.base.clone(), tab_kind));
         }))
     })
 }
-

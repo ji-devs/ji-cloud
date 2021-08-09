@@ -29,9 +29,9 @@ export const Gallery = (props?:Partial<Args>) => {
             <jig-gallery-template slot="jig-templates" ages="5-8" kind="parsha"></jig-gallery-template>
             <jig-gallery-template slot="jig-templates" ages="5-8" kind="vocabulary"></jig-gallery-template>
             <input-select slot="filters" value="Show all my JIGs">
-                <li-check selected>Show all my JIGs</li-check>
-                <li-check>Show published Jigs</li-check>
-                <li-check>Show drafts</li-check>
+                <input-select-option selected>Show all my JIGs</input-select-option>
+                <input-select-option>Show published Jigs</input-select-option>
+                <input-select-option>Show drafts</input-select-option>
             </input-select>
             <input-search slot="search-input"></input-search>
             ${mapToString(arrayCount(props.recentCount), recent)}

@@ -1,14 +1,13 @@
-use futures_signals::{
-    map_ref,
-    signal_vec::{MutableVec, SignalVecExt, SignalVec},
-    signal::{Signal, SignalExt, Mutable, ReadOnlyMutable},
-};
+use futures_signals::signal::Mutable;
 
 use std::rc::Rc;
-use std::cell::RefCell;
-use shared::domain::jig::module::body::{Transform, _groups::design::{Trace as RawTrace, TraceShape as RawTraceShape}};
-use crate::transform::state::{TransformState, TransformCallbacks};
-use dominator::clone;
+
+use crate::transform::state::{TransformCallbacks, TransformState};
+use shared::domain::jig::module::body::{
+    Transform,
+    _groups::design::{Trace as RawTrace, TraceShape as RawTraceShape},
+};
+
 use utils::{math::BoundsF64, prelude::*};
 
 #[derive(Clone)]
@@ -21,27 +20,25 @@ impl DrawTrace {
     pub fn new(raw: Option<RawTrace>, on_change_cb: Rc<Box<dyn Fn()>>) -> Self {
         let raw = match raw {
             Some(raw) => raw,
-            None => {
-                RawTrace {
-                    transform: Transform::identity(),
-                    shape: RawTraceShape::Path(Vec::new()) 
-                }
-            }
+            None => RawTrace {
+                transform: Transform::identity(),
+                shape: RawTraceShape::Path(Vec::new()),
+            },
         };
 
         Self {
             transform: Rc::new(TransformState::new(
                 raw.transform,
-                None, 
+                None,
                 false,
                 TransformCallbacks::new(
                     Some(move |_| {
                         on_change_cb();
                     }),
-                    None::<fn()>
-                )
+                    None::<fn()>,
+                ),
             )),
-            shape: Mutable::new(raw.shape.into()) 
+            shape: Mutable::new(raw.shape.into()),
         }
     }
 }
@@ -50,11 +47,11 @@ impl crate::traces::utils::TraceExt for DrawTrace {
     fn to_raw(&self) -> RawTrace {
         RawTrace {
             transform: self.transform.get_inner_clone(),
-            shape: self.shape.get_cloned().into()
+            shape: self.shape.get_cloned().into(),
         }
     }
 
-    fn calc_bounds(&self, add_offset : bool) -> Option<BoundsF64> {
+    fn calc_bounds(&self, add_offset: bool) -> Option<BoundsF64> {
         use crate::traces::utils::{calc_bounds, ShapeRef};
 
         let offset = if add_offset {
@@ -64,31 +61,23 @@ impl crate::traces::utils::TraceExt for DrawTrace {
         };
 
         match &*self.shape.lock_ref() {
-            TraceShape::Path(path) => {
-                calc_bounds(
-                    ShapeRef::Path(&path.lock_ref()), 
-                    offset 
-                )
-            },
+            TraceShape::Path(path) => calc_bounds(ShapeRef::Path(&path.lock_ref()), offset),
 
             TraceShape::Ellipse(radius_x, radius_y) => {
                 calc_bounds(ShapeRef::Ellipse(*radius_x, *radius_y), offset)
-            },
-            TraceShape::Rect(width, height) => {
-                calc_bounds(ShapeRef::Rect(*width, *height), offset)
             }
+            TraceShape::Rect(width, height) => calc_bounds(ShapeRef::Rect(*width, *height), offset),
         }
-
     }
 }
 #[derive(Clone)]
 pub enum TraceShape {
     /// width and height
     Rect(f64, f64),
-    /// radius 
+    /// radius
     Ellipse(f64, f64),
     /// points - all rendered at once so no benefit to MutableVec
-    Path(Mutable<Vec<(f64, f64)>>)
+    Path(Mutable<Vec<(f64, f64)>>),
 }
 
 impl From<RawTraceShape> for TraceShape {
@@ -96,7 +85,7 @@ impl From<RawTraceShape> for TraceShape {
         match raw {
             RawTraceShape::Rect(width, height) => Self::Rect(width, height),
             RawTraceShape::Ellipse(radius_x, radius_y) => Self::Ellipse(radius_x, radius_y),
-            RawTraceShape::Path(path) => Self::Path(Mutable::new(path))
+            RawTraceShape::Path(path) => Self::Path(Mutable::new(path)),
         }
     }
 }
@@ -111,8 +100,7 @@ impl From<TraceShape> for RawTraceShape {
     }
 }
 impl TraceShape {
-
-    pub fn new_path(path:Vec<(f64, f64)>) -> Self {
+    pub fn new_path(path: Vec<(f64, f64)>) -> Self {
         Self::Path(Mutable::new(path))
     }
     /*
@@ -127,5 +115,4 @@ impl TraceShape {
         })
     }
     */
-
 }

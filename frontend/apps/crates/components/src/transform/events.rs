@@ -1,9 +1,8 @@
+use dominator_helpers::make_custom_event_serde;
 use serde::Deserialize;
-use dominator_helpers::{temp_make_event, make_custom_event_serde, make_custom_event};
-use web_sys::{File, DomRect};
-use wasm_bindgen::prelude::*;
-use wasm_bindgen::JsCast;
+
 use super::state::ScaleFrom;
+use wasm_bindgen::prelude::*;
 
 #[derive(Deserialize, Debug)]
 pub struct RectDblClickData {
@@ -29,7 +28,6 @@ pub struct RotateData {
 
 make_custom_event_serde!("transform-rotate-start", Rotate, RotateData);
 
-
 #[derive(Deserialize, Debug)]
 pub struct ResizeData {
     pub pos: String,
@@ -50,7 +48,7 @@ impl ResizeData {
             "b" => ScaleFrom::Bottom,
             "br" => ScaleFrom::BottomRight,
             "r" => ScaleFrom::Right,
-            _ => panic!("unknown scale from!")
+            _ => panic!("unknown scale from!"),
         }
     }
 }

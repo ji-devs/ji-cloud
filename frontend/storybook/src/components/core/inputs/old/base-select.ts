@@ -1,10 +1,10 @@
 import {argsToAttrs} from "@utils/attributes";
 import {mapToString, arrayCount} from "@utils/array";
-import "@elements/core/inputs/primitives/base-select";
+import "@elements/core/inputs/old/base-select";
 import "@elements/core/lists/li-check";
 
 export default {
-    title: "Core / Inputs / Primitives"
+    title: "Core / Inputs / Old"
 }
 
 interface Args {

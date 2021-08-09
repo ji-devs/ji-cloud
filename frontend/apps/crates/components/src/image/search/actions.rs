@@ -1,24 +1,25 @@
-use std::rc::Rc;
-use dominator::{clone};
+use super::super::upload::upload_image;
+use super::state::{State, BACKGROUND_NAME};
+use crate::image::tag::ImageTag;
+use dominator::clone;
 use shared::{
-    api::{ApiEndpoint, endpoints}, 
+    api::{endpoints, ApiEndpoint},
     domain::{
         image::{
+            tag::{ImageTagListResponse, ImageTagResponse},
             *,
-            tag::{ImageTagListResponse, ImageTagResponse}
-        }, 
-        jig::module::body::Image, meta::*
-    }, 
-    error::{EmptyError, MetadataNotFound}, 
-    media::MediaLibrary
+        },
+        jig::module::body::Image,
+        meta::*,
+    },
+    error::EmptyError,
+    media::MediaLibrary,
 };
+use std::collections::HashMap;
+use std::rc::Rc;
+use strum::IntoEnumIterator;
 use utils::prelude::*;
 use web_sys::File;
-use super::state::{BACKGROUND_NAME, State};
-use super::super::upload::upload_image;
-use crate::image::tag::ImageTag;
-use std::collections::HashMap;
-use strum::IntoEnumIterator;
 
 impl State {
     pub fn set_selected(&self, image: Image) {
@@ -32,28 +33,34 @@ pub async fn get_styles() -> Vec<ImageStyle> {
     let res = api_with_auth::<MetadataResponse, (), ()>(
         &endpoints::meta::Get::PATH,
         endpoints::meta::Get::METHOD,
-        None
-    ).await;
+        None,
+    )
+    .await;
     res.unwrap_ji().image_styles
 }
 
 pub async fn get_tag_id_lookup() -> HashMap<ImageTag, TagId> {
-    let list:Vec<ImageTagResponse> = api_with_auth::<ImageTagListResponse, EmptyError, _>(
+    let list: Vec<ImageTagResponse> = api_with_auth::<ImageTagListResponse, EmptyError, _>(
         &endpoints::image::tag::List::PATH,
         endpoints::image::tag::List::METHOD,
-        None::<()>
-    ).await.unwrap_ji().image_tags;
+        None::<()>,
+    )
+    .await
+    .unwrap_ji()
+    .image_tags;
 
     let mut hash_map = HashMap::new();
 
     for tag in ImageTag::iter() {
-        let db_tag = list.iter().find(|item| item.index == tag.as_index()).unwrap_ji();
+        let db_tag = list
+            .iter()
+            .find(|item| item.index == tag.as_index())
+            .unwrap_ji();
 
         hash_map.insert(tag, db_tag.id);
     }
 
     hash_map
-
 }
 
 pub fn get_background_id(styles: &Vec<ImageStyle>) -> ImageStyleId {
@@ -69,7 +76,8 @@ pub fn search(state: Rc<State>) {
     let search_query = ImageSearchQuery {
         q: state.query.lock_ref().clone(),
         page: state.page.lock_ref().clone(),
-        styles: state.selected_styles
+        styles: state
+            .selected_styles
             .borrow()
             .iter()
             .map(|style_id| style_id.clone())
@@ -98,14 +106,23 @@ pub fn search(state: Rc<State>) {
 }
 
 pub async fn upload_file(state: Rc<State>, file: File) {
-    match api_with_auth::<CreateResponse, EmptyError, _>(endpoints::image::user::Create::PATH, endpoints::image::user::Create::METHOD, None::<()>).await {
+    match api_with_auth::<CreateResponse, EmptyError, _>(
+        endpoints::image::user::Create::PATH,
+        endpoints::image::user::Create::METHOD,
+        None::<()>,
+    )
+    .await
+    {
         Ok(resp) => {
             let CreateResponse { id } = resp;
 
             match upload_image(id, MediaLibrary::User, &file, None).await {
                 Ok(_) => {
-                    state.set_selected(Image {id, lib: MediaLibrary::User}); 
-                },
+                    state.set_selected(Image {
+                        id,
+                        lib: MediaLibrary::User,
+                    });
+                }
                 Err(err) => {
                     if err.is_abort() {
                         log::info!("aborted!");
@@ -114,11 +131,9 @@ pub async fn upload_file(state: Rc<State>, file: File) {
                     }
                 }
             }
-        },
+        }
         Err(_) => {
             log::error!("error creating image db!")
         }
     }
 }
-
-

@@ -1,7 +1,10 @@
-use std::rc::Rc;
-use dominator::{Dom, clone, html};
-use futures_signals::{map_ref, signal::{Signal, SignalExt}};
+use dominator::{clone, html, Dom};
+use futures_signals::{
+    map_ref,
+    signal::{Signal, SignalExt},
+};
 use shared::domain::meta::Goal;
+use std::rc::Rc;
 use utils::{events, unwrap::UnwrapJiExt};
 
 use super::super::state::State;
@@ -14,6 +17,7 @@ pub fn render(state: Rc<State>) -> Dom {
         .property("slot", "goal")
         .property("label", STR_TEACHING_GOAL_LABEL)
         .property("placeholder", STR_TEACHING_GOAL_PLACEHOLDER)
+        .property("multiple", true)
         .property_signal("value", goal_value_signal(state.clone()))
         .property_signal("error", {
             (map_ref! {
@@ -34,24 +38,24 @@ pub fn render(state: Rc<State>) -> Dom {
                     }).collect()
                 },
             }
-            
+
         })).to_signal_vec())
     })
 }
 
 fn render_goal(goal: &Goal, state: Rc<State>) -> Dom {
     let goal_id = goal.id.clone();
-    html!("li-check", {
+    html!("input-select-option", {
         .text(&goal.display_name)
         .property_signal("selected", state.jig.goals.signal_cloned().map(clone!(goal_id => move |goals| {
             goals.contains(&goal_id)
         })))
-        .event(clone!(state => move |_: events::Click| {
+        .event(clone!(state => move |_: events::CustomSelectedChange| {
             let mut goals = state.jig.goals.lock_mut();
             if goals.contains(&goal_id) {
                 goals.remove(&goal_id);
             } else {
-                goals.insert(goal_id); 
+                goals.insert(goal_id);
             }
         }))
     })
@@ -70,6 +74,6 @@ fn goal_value_signal(state: Rc<State>) -> impl Signal<Item = String> {
             }
             output.join(", ")
         }
-        
+
     }
 }

@@ -1,16 +1,18 @@
-use dominator::{Dom, html, clone};
-use futures_signals::signal_vec::SignalVecExt;
+use dominator::{clone, html, Dom};
+
 use std::rc::Rc;
 use utils::events;
-use futures_signals::signal::SignalExt;
+
 use crate::module::_common::edit::history::state::HistoryState;
 
-pub struct ControllerDom {
-}
+pub struct ControllerDom {}
 
 //TODO - move on_undoredo into HistoryState itself
 impl ControllerDom {
-    pub fn render<T, OnChangeFn, OnUndoRedoFn, OnPreviewFn>(history: Rc<HistoryState<T, OnChangeFn, OnUndoRedoFn>>, on_preview: OnPreviewFn) -> Dom 
+    pub fn render<T, OnChangeFn, OnUndoRedoFn, OnPreviewFn>(
+        history: Rc<HistoryState<T, OnChangeFn, OnUndoRedoFn>>,
+        on_preview: OnPreviewFn,
+    ) -> Dom
     where
         T: Clone + 'static,
         OnChangeFn: Fn(T) + 'static,

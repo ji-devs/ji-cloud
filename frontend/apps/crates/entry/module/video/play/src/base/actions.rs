@@ -2,7 +2,6 @@ use components::stickers::video::dom::VideoRawRenderOptions;
 use futures_signals::signal::Mutable;
 use shared::domain::jig::module::body::video::{DoneAction, PlaySettings};
 
-
 pub fn create_video_sticker_options(play_settings: &PlaySettings) -> VideoRawRenderOptions {
     VideoRawRenderOptions {
         captions: Mutable::new(play_settings.captions),

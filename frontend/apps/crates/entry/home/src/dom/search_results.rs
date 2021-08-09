@@ -1,11 +1,13 @@
-use std::rc::Rc;
-use dominator::{Dom, clone, html};
-use futures_signals::{signal::SignalExt, signal_vec::{MutableVec, SignalVecExt}};
+use dominator::{clone, html, Dom};
+use futures_signals::{
+    signal::SignalExt,
+    signal_vec::{MutableVec, SignalVecExt},
+};
 use shared::domain::jig::Jig;
+use std::rc::Rc;
 use utils::ages::AgeRangeVecExt;
 
 use crate::state::State;
-
 
 pub fn render(state: Rc<State>, query: String, jigs: Rc<MutableVec<Jig>>) -> Dom {
     html!("home-search-results", {
@@ -14,6 +16,7 @@ pub fn render(state: Rc<State>, query: String, jigs: Rc<MutableVec<Jig>>) -> Dom
         .child(
             html!("home-search-results-section", {
                 .property("slot", "sections")
+                .property_signal("resultsCount", jigs.signal_vec_cloned().len().map(|len| len as u32))
                 .children_signal_vec(jigs.signal_vec_cloned().map(clone!(state => move |jig| {
                     render_result(state.clone(), &jig)
                 })))

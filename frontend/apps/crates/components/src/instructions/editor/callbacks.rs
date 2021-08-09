@@ -1,4 +1,4 @@
-use shared::domain::jig::module::body::{Audio, Instructions};
+use shared::domain::jig::module::body::Instructions;
 
 pub struct Callbacks {
     pub save: Box<dyn Fn(Instructions, bool)>, //the flag indicates whether it should be pushed to history too
@@ -7,7 +7,7 @@ pub struct Callbacks {
 impl Callbacks {
     pub fn new(save: impl Fn(Instructions, bool) + 'static) -> Self {
         Self {
-            save: Box::new(save)
+            save: Box::new(save),
         }
     }
 }

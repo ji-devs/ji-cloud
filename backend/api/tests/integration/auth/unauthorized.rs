@@ -32,19 +32,6 @@ async fn get_image() -> anyhow::Result<()> {
 }
 
 #[actix_rt::test]
-async fn get_module() -> anyhow::Result<()> {
-    unauthorized(
-        "v1/jig/00000000-0000-0000-0000-000000000000/module/00000000-0000-0000-0000-000000000000",
-    )
-    .await
-}
-
-#[actix_rt::test]
 async fn get_animation() -> anyhow::Result<()> {
     unauthorized("v1/animation/00000000-0000-0000-0000-000000000000").await
-}
-
-#[actix_rt::test]
-async fn get_category() -> anyhow::Result<()> {
-    unauthorized("v1/category?ids=00000000-0000-0000-0000-000000000000").await
 }

@@ -1,26 +1,25 @@
-use std::rc::Rc;
-use dominator::{Dom, html, clone};
 use super::super::super::state::State;
+use crate::{
+    color_select::{self, state::State as ColorPickerState},
+    text_editor::wysiwyg_types::ControlsChange,
+};
+use dominator::{clone, html, Dom};
 use futures_signals::signal::Mutable;
-use utils::{prelude::*, colors::*};
 use futures_signals::signal::SignalExt;
 use rgb::RGBA8;
-use crate::{color_select::{
-    self,
-    state::State as ColorPickerState,
-}, text_editor::wysiwyg_types::ControlsChange};
+use std::rc::Rc;
+use utils::{colors::*, prelude::*};
 
 pub struct ColorState {
     pub select_for: Mutable<Option<ColorSelectFor>>,
     pub picker: Rc<ColorPickerState>,
 }
 
-
 impl ColorState {
-    pub fn new(state:Rc<State>) -> Self {
+    pub fn new(state: Rc<State>) -> Self {
         let picker = Rc::new(ColorPickerState::new(
             (*state).theme_id.clone(),
-            None, 
+            None,
             Some(clone!(state => move |color| {
                 let color = rgba8_to_hex_optional(&color);
                 let select_for = {
@@ -33,7 +32,7 @@ impl ColorState {
                     Some(ColorSelectFor::Box) => {state.set_control_value(ControlsChange::BoxColor(color))},
                     None => {}
                 };
-            }))
+            })),
         ));
 
         Self {
@@ -41,7 +40,6 @@ impl ColorState {
             picker,
         }
     }
-    
 }
 
 #[derive(Clone, Copy)]
@@ -57,6 +55,8 @@ pub fn render(state: Rc<State>) -> Dom {
     html!("anchored-overlay", {
         .property("slot", "colors")
         .property("positionY", "top-in")
+        .property("positionX", "right-out")
+        .property("styled", true)
         .property_signal("open", color_state.select_for.signal_cloned().map(|select_for| select_for.is_some()))
         .event(clone!(color_state => move |_: events::Close| {
             color_state.select_for.set(None);
@@ -67,6 +67,9 @@ pub fn render(state: Rc<State>) -> Dom {
             .children(&mut [
                 html!("text-editor-controls-button", {
                     .property("kind", "color")
+                    .property_signal("active", color_state.select_for.signal_cloned().map(|select_for| {
+                        matches!(select_for, Some(ColorSelectFor::Text))
+                    }))
                     .event(clone!(state, color_state => move |_: events::Click| {
                         color_state.select_for.set(Some(ColorSelectFor::Text));
                         let color = { state.controls.lock_ref().color.clone() };
@@ -75,6 +78,9 @@ pub fn render(state: Rc<State>) -> Dom {
                 }),
                 html!("text-editor-controls-button", {
                     .property("kind", "highlight-color")
+                    .property_signal("active", color_state.select_for.signal_cloned().map(|select_for| {
+                        matches!(select_for, Some(ColorSelectFor::Highlight))
+                    }))
                     .event(clone!(state, color_state => move |_: events::Click| {
                         color_state.select_for.set(Some(ColorSelectFor::Highlight));
                         let color = { state.controls.lock_ref().highlight_color.clone() };
@@ -83,6 +89,9 @@ pub fn render(state: Rc<State>) -> Dom {
                 }),
                 html!("text-editor-controls-button", {
                     .property("kind", "box-color")
+                    .property_signal("active", color_state.select_for.signal_cloned().map(|select_for| {
+                        matches!(select_for, Some(ColorSelectFor::Box))
+                    }))
                     .event(clone!(state, color_state => move |_: events::Click| {
                         color_state.select_for.set(Some(ColorSelectFor::Box));
                         let color = { state.controls.lock_ref().box_color.clone() };
@@ -91,13 +100,9 @@ pub fn render(state: Rc<State>) -> Dom {
                 }),
             ])
         }))
-        .child(html!("text-editor-controls-overlay-shadow", {
-            .property("slot", "overlay")
-            .child(color_select::dom::render(color_state.picker.clone(), None))
-        }))
+        .child(color_select::dom::render(color_state.picker.clone(), Some("overlay")))
     })
 }
-
 
 fn hex_to_rgba8_optional(color: &Option<String>) -> Option<RGBA8> {
     match color {

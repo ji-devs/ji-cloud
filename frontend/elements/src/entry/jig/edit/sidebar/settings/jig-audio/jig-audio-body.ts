@@ -15,6 +15,9 @@ export class _ extends LitElement {
     static get styles() {
         return [
             css`
+                popup-body {
+                    width: 424px;
+                }
                 .search-and-custom {
                     display: grid;
                     grid-template-columns: 1fr auto;

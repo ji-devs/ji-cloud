@@ -1,6 +1,6 @@
-pub mod dom;
 pub mod actions;
-pub mod state;
-pub mod draw;
 pub mod all;
 pub mod callbacks;
+pub mod dom;
+pub mod draw;
+pub mod state;

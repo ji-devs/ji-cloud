@@ -1,16 +1,12 @@
 pub use super::page_kind::*;
 pub use shared::{
-    api::endpoints::{ApiEndpoint, self},
-    error::{EmptyError, MetadataNotFound},
+    api::endpoints::{self, ApiEndpoint},
     domain::jig::{
-        JigId, 
         module::{
-            ModuleId, 
-            body::{
-                Audio,
-                Image,
-                ThemeChoice,
-            }
-        }
+            body::{Audio, Image, ThemeChoice},
+            ModuleId,
+        },
+        JigId,
     },
+    error::{EmptyError, MetadataNotFound},
 };

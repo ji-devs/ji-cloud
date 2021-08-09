@@ -216,6 +216,18 @@ pub enum AudioBackground {
     #[allow(missing_docs)]
     Placeholder4 = 4,
 }
+impl AudioBackground {
+    /// Get all enum variants
+    pub fn variants() -> Vec<AudioBackground> {
+        vec![
+            AudioBackground::Placeholder0,
+            AudioBackground::Placeholder1,
+            AudioBackground::Placeholder2,
+            AudioBackground::Placeholder3,
+            AudioBackground::Placeholder4,
+        ]
+    }
+}
 
 /// Audio Effects
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
@@ -245,6 +257,18 @@ pub enum AudioFeedbackNegative {
     #[allow(missing_docs)]
     Placeholder4 = 4,
 }
+impl AudioFeedbackNegative {
+    /// Get all enum variants
+    pub fn variants() -> Vec<AudioFeedbackNegative> {
+        vec![
+            AudioFeedbackNegative::Placeholder0,
+            AudioFeedbackNegative::Placeholder1,
+            AudioFeedbackNegative::Placeholder2,
+            AudioFeedbackNegative::Placeholder3,
+            AudioFeedbackNegative::Placeholder4,
+        ]
+    }
+}
 
 /// Positive Audio Feedback
 #[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq, Hash)]
@@ -262,6 +286,18 @@ pub enum AudioFeedbackPositive {
     Placeholder3 = 3,
     #[allow(missing_docs)]
     Placeholder4 = 4,
+}
+impl AudioFeedbackPositive {
+    /// Get all enum variants
+    pub fn variants() -> Vec<AudioFeedbackPositive> {
+        vec![
+            AudioFeedbackPositive::Placeholder0,
+            AudioFeedbackPositive::Placeholder1,
+            AudioFeedbackPositive::Placeholder2,
+            AudioFeedbackPositive::Placeholder3,
+            AudioFeedbackPositive::Placeholder4,
+        ]
+    }
 }
 
 /// The response returned when a request for `GET`ing a jig is successful.
@@ -458,7 +494,7 @@ pub struct JigSearchResponse {
     pub pages: u32,
 
     /// The total number of jigs found
-    pub total_image_count: u64,
+    pub total_jig_count: u64,
 }
 
 /// Response for successfully finding the draft of a jig.

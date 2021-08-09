@@ -1,10 +1,10 @@
 import { html, css, customElement, property, query } from "lit-element";
-import "../primitives/base-select";
-import { BaseSelect } from "../primitives/base-select";
+import "./base-select";
+import { BaseSelect } from "./base-select";
 import "@elements/core/images/ui";
 import "../wrapper";
 
-@customElement("input-select")
+@customElement("input-select-old")
 export class _ extends BaseSelect {
     static get styles() {
         return [

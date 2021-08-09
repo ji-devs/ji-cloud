@@ -1,6 +1,6 @@
 pub use super::{
-    choose::state::*,
+    actions::HistoryStateImpl,
     base::state::*,
-    state::{GenericState, StateOpts, InitSource},
-    actions::HistoryStateImpl
+    choose::state::*,
+    state::{GenericState, InitSource, StateOpts},
 };

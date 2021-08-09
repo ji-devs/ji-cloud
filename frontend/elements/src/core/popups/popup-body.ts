@@ -9,9 +9,6 @@ export class _ extends LitElement {
             css`
                 :host {
                     display: grid;
-                    border-radius: 16px;
-                    box-shadow: 0 3px 16px 0 rgba(0, 0, 0, 0.25);
-                    background-color: #ffffff;
                 }
                 header {
                     padding: 16px;
@@ -19,9 +16,6 @@ export class _ extends LitElement {
                 nav {
                     display: flex;
                     justify-content: space-between
-                }
-                .inner {
-                    padding: 16px;
                 }
                 ::slotted([slot=back]) {
                     /* only add margin in back exists */
@@ -31,6 +25,10 @@ export class _ extends LitElement {
                     font-size: 24px;
                     color: var(--dark-gray-5);
                     font-weight: 300;
+                }
+                ::slotted(button-icon[slot=close]) {
+                    width: 12px;
+                    height: 12px;
                 }
                 ::slotted([slot=heading]) {
                     color: #fd7076;

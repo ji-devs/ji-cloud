@@ -13,6 +13,8 @@ interface Args {
     italic: boolean,
     submit: boolean,
     disabled: boolean,
+    href: string,
+    target: string,
 
     iconBefore?: IconBefore,
     iconAfter?: IconAfter,
@@ -27,6 +29,8 @@ const DEFAULT_ARGS:Args = {
     italic: false,
     submit: false,
     disabled: false,
+    href: "",
+    target: "",
 
     iconBefore: undefined,
     iconAfter: undefined,

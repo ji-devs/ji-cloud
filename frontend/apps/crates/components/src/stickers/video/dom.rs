@@ -1,15 +1,32 @@
-use dominator::{html, Dom, DomBuilder, clone, with_node};
+use super::{
+    super::state::{AsSticker, Stickers},
+    config::{YOUTUBE_VIDEO_HEIGHT, YOUTUBE_VIDEO_WIDTH},
+    menu::dom::render_sticker_video_menu,
+    state::Video,
+};
+use crate::{
+    stickers::{
+        dom::{BaseRawRenderOptions, BaseRenderOptions},
+        video::ext::YoutubeUrlExt,
+    },
+    transform::{
+        dom::render_transform,
+        state::{ResizeLevel, TransformState},
+    },
+};
+use dominator::{clone, html, with_node, Dom, DomBuilder};
 use dominator_helpers::signals::DefaultSignal;
+use futures_signals::signal::{Mutable, ReadOnlyMutable, SignalExt};
 use gloo_timers::future::TimeoutFuture;
 use js_sys::Reflect;
-use wasm_bindgen::{JsCast, JsValue};
-use wasm_bindgen_futures::spawn_local;
+use shared::domain::jig::module::body::{
+    _groups::design::{Video as RawVideo, VideoHost, YoutubeUrl},
+    video::DoneAction,
+};
 use std::rc::Rc;
 use utils::{math::transform_signals, prelude::*};
-use futures_signals::signal::{Mutable, ReadOnlyMutable, SignalExt};
-use shared::domain::jig::module::body::{_groups::design::{Video as RawVideo, VideoHost, YoutubeUrl}, video::DoneAction};
-use crate::{stickers::{dom::{BaseRawRenderOptions, BaseRenderOptions}, video::ext::YoutubeUrlExt}, transform::{dom::render_transform, state::{ResizeLevel, TransformState}}};
-use super::{super::state::{Stickers, AsSticker}, config::{YOUTUBE_VIDEO_HEIGHT, YOUTUBE_VIDEO_WIDTH}, menu::dom::render_sticker_video_menu, state::Video};
+use wasm_bindgen::{JsCast, JsValue};
+use wasm_bindgen_futures::spawn_local;
 use web_sys::HtmlElement;
 
 pub struct VideoRenderOptions {
@@ -39,7 +56,11 @@ pub struct VideoRawRenderOptions {
     pub _loop: Mutable<bool>,
 }
 
-fn render_youtube_video(youtube: &YoutubeUrl, video: Rc<Video>, opts: Rc<VideoRenderOptions>) -> Dom {
+fn render_youtube_video(
+    youtube: &YoutubeUrl,
+    video: Rc<Video>,
+    opts: Rc<VideoRenderOptions>,
+) -> Dom {
     html!("video-youtube-player" => HtmlElement, {
         .with_node!(elem => {
             .future(clone!(elem, video => async move {
@@ -105,18 +126,30 @@ fn render_youtube_video(youtube: &YoutubeUrl, video: Rc<Video>, opts: Rc<VideoRe
     })
 }
 
-fn apply_transform<A: AsRef<HtmlElement>>(dom:DomBuilder<A>, transform: &TransformState) -> DomBuilder<A> {
-    dom
-        .style("position", "absolute")
+fn apply_transform<A: AsRef<HtmlElement>>(
+    dom: DomBuilder<A>,
+    transform: &TransformState,
+) -> DomBuilder<A> {
+    dom.style("position", "absolute")
         .style_signal("transform", transform.rotation_matrix_string_signal())
         .style_signal("top", transform.y_px_signal().map(|x| format!("{}px", x)))
         .style_signal("left", transform.x_px_signal().map(|x| format!("{}px", x)))
-        .style_signal("width", transform.width_px_signal().map(|x| format!("{}px", x)))
-        .style_signal("height", transform.height_px_signal().map(|x| format!("{}px", x)))
+        .style_signal(
+            "width",
+            transform.width_px_signal().map(|x| format!("{}px", x)),
+        )
+        .style_signal(
+            "height",
+            transform.height_px_signal().map(|x| format!("{}px", x)),
+        )
 }
 
-pub fn render_sticker_video<T: AsSticker>(stickers:Rc<Stickers<T>>, index: ReadOnlyMutable<Option<usize>>, video: Rc<Video>, opts: Option<VideoRenderOptions>) -> Dom {
-
+pub fn render_sticker_video<T: AsSticker>(
+    stickers: Rc<Stickers<T>>,
+    index: ReadOnlyMutable<Option<usize>>,
+    video: Rc<Video>,
+    opts: Option<VideoRenderOptions>,
+) -> Dom {
     let opts = Rc::new(opts.unwrap_or_default());
 
     html!("document-fragment", {
@@ -174,18 +207,19 @@ pub fn render_sticker_video<T: AsSticker>(stickers:Rc<Stickers<T>>, index: ReadO
                 },
             }
         })))
-        
+
     })
 }
 
-
-
 pub fn render_sticker_video_raw(video: &RawVideo, opts: Option<VideoRawRenderOptions>) -> Dom {
-    const COORDS_IN_CENTER:bool = true;
+    const COORDS_IN_CENTER: bool = true;
 
     let opts = opts.unwrap_or_default();
 
-    let parent = opts.base.parent.unwrap_or_else(|| DomBuilder::new_html("empty-fragment"));
+    let parent = opts
+        .base
+        .parent
+        .unwrap_or_else(|| DomBuilder::new_html("empty-fragment"));
 
     let size = opts.base.size.unwrap_or_else(|| Mutable::new(None));
     size.set(Some((YOUTUBE_VIDEO_WIDTH, YOUTUBE_VIDEO_HEIGHT)));
@@ -202,31 +236,34 @@ pub fn render_sticker_video_raw(video: &RawVideo, opts: Option<VideoRawRenderOpt
     });
 
     let x_signal = transform_signals::x_px(
-        COORDS_IN_CENTER, 
-        get_transform_signal(), 
-        size.signal_cloned(), 
+        COORDS_IN_CENTER,
+        get_transform_signal(),
+        size.signal_cloned(),
     );
     let y_signal = transform_signals::y_px(
-        COORDS_IN_CENTER, 
-        get_transform_signal(), 
-        size.signal_cloned(), 
+        COORDS_IN_CENTER,
+        get_transform_signal(),
+        size.signal_cloned(),
     );
     let width_signal = transform_signals::width_px(
-        COORDS_IN_CENTER, 
-        get_transform_signal(), 
-        size.signal_cloned(), 
+        COORDS_IN_CENTER,
+        get_transform_signal(),
+        size.signal_cloned(),
     );
     let height_signal = transform_signals::height_px(
-        COORDS_IN_CENTER, 
-        get_transform_signal(), 
-        size.signal_cloned(), 
+        COORDS_IN_CENTER,
+        get_transform_signal(),
+        size.signal_cloned(),
     );
 
     let mixin = opts.base.mixin;
 
     parent
         .style("position", "absolute")
-        .style_signal("transform", get_transform_signal().map(|t| t.rotation_matrix_string()))
+        .style_signal(
+            "transform",
+            get_transform_signal().map(|t| t.rotation_matrix_string()),
+        )
         .style_signal("left", x_signal.map(|x| format!("{}px", x)))
         .style_signal("top", y_signal.map(|x| format!("{}px", x)))
         .style_signal("width", width_signal.map(|x| format!("{}px", x)))
@@ -245,7 +282,7 @@ pub fn render_sticker_video_raw(video: &RawVideo, opts: Option<VideoRawRenderOpt
                         .style("width", "100%")
                         .style("height", "100%")
                     })
-                },
+                }
             }
         })
         .apply_if(mixin.is_some(), move |dom| dom.apply(mixin.unwrap_ji()))

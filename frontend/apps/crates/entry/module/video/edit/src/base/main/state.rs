@@ -1,5 +1,5 @@
-use components::module::_common::edit::prelude::*;
 use crate::base::state::Base;
+use components::module::_common::edit::prelude::*;
 use std::rc::Rc;
 
 pub struct Main {
@@ -8,14 +8,8 @@ pub struct Main {
 
 impl Main {
     pub fn new(base: Rc<Base>) -> Self {
-        Self {
-            base,
-        }
+        Self { base }
     }
-
 }
 
-impl MainExt for Main {
-}
-
-
+impl MainExt for Main {}

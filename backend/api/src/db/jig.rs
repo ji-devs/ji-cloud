@@ -64,8 +64,8 @@ returning id
 
     let default_modules = [(
         ModuleKind::Cover,
-        serde_json::to_value(ModuleBody::Cover(cover::ModuleData::default()))?,
-        // should never error as long as ModuleBody::Cover doesn't break during serialization
+        serde_json::to_value(ModuleBody::Cover(cover::ModuleData::default()))
+            .expect("default cover module failed to serialize while creating jig"),
     )];
 
     // todo: batch

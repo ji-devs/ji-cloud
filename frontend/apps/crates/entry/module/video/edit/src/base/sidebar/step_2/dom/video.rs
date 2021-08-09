@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use components::stickers::video::ext::YoutubeUrlExt;
-use dominator::{Dom, clone, html, with_node};
+use dominator::{clone, html, with_node, Dom};
 use futures_signals::signal::SignalExt;
 use shared::domain::jig::module::body::_groups::design::{VideoHost, YoutubeUrl};
 use utils::events;

@@ -5,14 +5,12 @@
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
-mod router;
 mod edit;
 mod gallery;
+mod router;
 
 use cfg_if::cfg_if;
 use wasm_bindgen::prelude::*;
-use std::rc::Rc;
-use web_sys::{window, Element};
 
 /*
 mod page;
@@ -22,7 +20,7 @@ mod header;
 #[wasm_bindgen(start)]
 pub fn main_js() {
     setup_logger();
-    let settings = utils::settings::init();
+    let _settings = utils::settings::init();
     //init dom stuff
 
     let router = router::Router::new();
@@ -32,11 +30,8 @@ pub fn main_js() {
     let page = page::Page::new();
 
     dominator::append_dom(&dominator::body(), page.render());
-	*/
+    */
 }
-
-
-
 
 // enable logging and panic hook only during debug builds
 cfg_if! {
@@ -53,4 +48,3 @@ cfg_if! {
         }
     }
 }
-

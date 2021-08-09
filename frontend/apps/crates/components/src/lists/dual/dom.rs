@@ -1,19 +1,21 @@
-use dominator::{html, Dom, clone};
+use dominator::{clone, html, Dom};
 use std::rc::Rc;
 use utils::prelude::*;
-use wasm_bindgen::prelude::*;
+
+use super::state::*;
+use crate::tooltip::{
+    callbacks::TooltipErrorCallbacks,
+    state::{
+        MoveStrategy, Placement, State as TooltipState, TooltipData, TooltipError, TooltipTarget,
+    },
+};
 use futures_signals::{
     map_ref,
     signal::{Mutable, SignalExt},
-    signal_vec::{MutableVec, SignalVec, SignalVecExt},
+    signal_vec::{MutableVec, SignalVecExt},
 };
-use crate::tooltip::{
-    state::{State as TooltipState, TooltipTarget, TooltipData, TooltipError, MoveStrategy, Placement},
-    callbacks::{TooltipErrorCallbacks, TooltipConfirmCallbacks}
-};
-use super::state::*;
 
-pub fn render(state: Rc<State>) -> Dom { 
+pub fn render(state: Rc<State>) -> Dom {
     html!("sidebar-widget-dual-list", {
         .children(&mut [
 
@@ -21,7 +23,7 @@ pub fn render(state: Rc<State>) -> Dom {
                 .property("slot", "clear")
                 .property("kind", "text")
                 .text(super::strings::STR_CLEAR)
-                .event(clone!(state => move |evt:events::Click| {
+                .event(clone!(state => move |_evt:events::Click| {
                     state.clear();
                 }))
             }),
@@ -51,12 +53,12 @@ pub fn render(state: Rc<State>) -> Dom {
                 .property("iconAfter", "done")
                 .property("slot", "done-btn")
                 .text(super::strings::STR_DONE)
-                .event(clone!(state => move |evt:events::Click| {
+                .event(clone!(state => move |_evt:events::Click| {
                     match state.derive_list() {
                         Ok(list) => {
                             (state.callbacks.replace_list) (list);
                         },
-                        Err(err) => {
+                        Err(_err) => {
 
                             (state.callbacks.set_tooltip_error) (Some(
                                     Rc::new(TooltipState::new(
@@ -67,12 +69,12 @@ pub fn render(state: Rc<State>) -> Dom {
 
                                         TooltipData::Error(Rc::new(TooltipError {
                                             max_width: Some(185.0),
-                                            placement: Placement::Right, 
+                                            placement: Placement::Right,
                                             slot: None,
                                             body: super::strings::error::STR_NUM_WORDS.to_string(),
                                             callbacks: TooltipErrorCallbacks::new(
                                                 Some(clone!(state => move || {
-                                                    (state.callbacks.set_tooltip_error) (None); 
+                                                    (state.callbacks.set_tooltip_error) (None);
                                                 }))
                                             )
                                         }))
@@ -91,7 +93,7 @@ pub fn render(state: Rc<State>) -> Dom {
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub enum ColumnSide {
     Left,
-    Right
+    Right,
 }
 
 impl ColumnSide {
@@ -101,23 +103,22 @@ impl ColumnSide {
             Self::Right => "right",
         }
     }
-    fn col_index(&self) -> usize { 
+    fn col_index(&self) -> usize {
         match self {
-            Self::Left => 0, 
-            Self::Right => 1, 
+            Self::Left => 0,
+            Self::Right => 1,
         }
     }
 
-    fn mutable(&self, state:&State) -> Rc<MutableVec<Mutable<String>>> {
+    fn mutable(&self, state: &State) -> Rc<MutableVec<Mutable<String>>> {
         match self {
             Self::Left => state.left.clone(),
-            Self::Right => state.right.clone() 
+            Self::Right => state.right.clone(),
         }
     }
 }
 
 fn render_column(state: Rc<State>, side: ColumnSide) -> Dom {
-
     html!("sidebar-widget-dual-list-column", {
         .property("slot", side.side_prop())
         .property("side", side.side_prop())
@@ -145,7 +146,7 @@ fn render_column(state: Rc<State>, side: ColumnSide) -> Dom {
                         })
                         .property("constrain", state.callbacks.constrain.as_ref())
                         .property_signal("placeholder", state.is_placeholder.signal())
-                        .event(clone!(state => move |evt:events::Focus| {
+                        .event(clone!(state => move |_evt:events::Focus| {
                             //log::info!("got focus!");
                             state.is_placeholder.set_neq(false);
                         }))

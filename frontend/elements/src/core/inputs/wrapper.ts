@@ -32,7 +32,7 @@ export class _ extends LitElement {
                     z-index: 1;
                     background-color: #fff;
                 }
-                .wrapper:focus-within {
+                .wrapper:focus-within, :host([focus-within]) .wrapper {
                     border-color: var(--dark-blue-3);
                     border-width: 2px;
                     /* removing one pixel to account for thicker border */
@@ -48,7 +48,7 @@ export class _ extends LitElement {
                     color: var(--main-blue);
                     font-weight: 500;
                 }
-                .wrapper:focus-within .label {
+                .label:focus-within, :host([focus-within]) .label {
                     color: var(--dark-blue-3);
                 }
                 ::slotted([slot=icon]) {

@@ -1,5 +1,5 @@
-pub mod dom;
-pub mod types;
-pub mod state;
-pub mod callbacks;
 pub(super) mod actions;
+pub mod callbacks;
+pub mod dom;
+pub mod state;
+pub mod types;

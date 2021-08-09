@@ -1,14 +1,13 @@
 use super::state::*;
-use std::rc::Rc;
-use dominator::{html, clone, Dom};
-use utils::prelude::*;
-use futures_signals::signal::SignalExt;
 use crate::{
-    image::search::dom::render as render_image_search,
     color_select::dom::render as render_color_picker,
+    image::search::dom::render as render_image_search, module::_groups::cards::edit::state::*,
     theme_selector::dom::render_cards as render_theme_selector,
-    module::_groups::cards::edit::state::*
 };
+use dominator::{clone, html, Dom};
+use futures_signals::signal::SignalExt;
+use std::rc::Rc;
+use utils::prelude::*;
 
 pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<Step2<RawData, E>>) -> Dom {
     html!("menu-tabs", {
@@ -36,15 +35,17 @@ pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<Step2<RawData, E>>) ->
     })
 }
 
-
-fn render_tab<RawData: RawDataExt, E: ExtraExt>(state: Rc<Step2<RawData, E>>, tab_kind:TabKind) -> Dom {
+fn render_tab<RawData: RawDataExt, E: ExtraExt>(
+    state: Rc<Step2<RawData, E>>,
+    tab_kind: TabKind,
+) -> Dom {
     html!("menu-tab-with-title", {
         .property("slot", "tabs")
         .property_signal("active", state.tab.signal_ref(clone!(tab_kind => move |curr| {
             curr.kind() == tab_kind
         })))
         .property("kind", tab_kind.as_str())
-        .event(clone!(state, tab_kind => move |evt:events::Click| {
+        .event(clone!(state, tab_kind => move |_evt:events::Click| {
             state.tab.set(Tab::new(state.base.clone(), tab_kind));
         }))
     })

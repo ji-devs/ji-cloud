@@ -1,20 +1,23 @@
 use super::state::*;
-use std::rc::Rc;
-use dominator::{html, clone, Dom};
-use utils::prelude::*;
-use futures_signals::signal::SignalExt;
 use crate::{
     instructions::editor::dom::render as render_instructions,
-    module::_groups::cards::edit::state::*
+    module::_groups::cards::edit::state::*,
 };
+use dominator::{clone, html, Dom};
+use futures_signals::signal::SignalExt;
+use std::rc::Rc;
+use utils::prelude::*;
 
-pub fn render<RawData, E, GetSettingsStateFn, SettingsState, RenderSettingsFn>(state: Rc<Step3<RawData, E, GetSettingsStateFn, SettingsState>>, render_settings: RenderSettingsFn) -> Dom 
+pub fn render<RawData, E, GetSettingsStateFn, SettingsState, RenderSettingsFn>(
+    state: Rc<Step3<RawData, E, GetSettingsStateFn, SettingsState>>,
+    render_settings: RenderSettingsFn,
+) -> Dom
 where
-    RawData: RawDataExt, 
+    RawData: RawDataExt,
     E: ExtraExt,
     GetSettingsStateFn: Fn(Rc<CardsBase<RawData, E>>) -> SettingsState + Clone + 'static,
     SettingsState: 'static,
-    RenderSettingsFn: Fn(Rc<SettingsState>) -> Dom + Clone + 'static
+    RenderSettingsFn: Fn(Rc<SettingsState>) -> Dom + Clone + 'static,
 {
     html!("menu-tabs", {
         .children(&mut [
@@ -37,10 +40,12 @@ where
     })
 }
 
-
-fn render_tab<RawData, E, GetSettingsStateFn, SettingsState>(state: Rc<Step3<RawData, E, GetSettingsStateFn, SettingsState>>, tab_kind: TabKind) -> Dom 
+fn render_tab<RawData, E, GetSettingsStateFn, SettingsState>(
+    state: Rc<Step3<RawData, E, GetSettingsStateFn, SettingsState>>,
+    tab_kind: TabKind,
+) -> Dom
 where
-    RawData: RawDataExt, 
+    RawData: RawDataExt,
     E: ExtraExt,
     GetSettingsStateFn: Fn(Rc<CardsBase<RawData, E>>) -> SettingsState + Clone + 'static,
     SettingsState: 'static,
@@ -51,7 +56,7 @@ where
             curr.kind() == tab_kind
         })))
         .property("kind", tab_kind.as_str())
-        .event(clone!(state, tab_kind => move |evt:events::Click| {
+        .event(clone!(state, tab_kind => move |_evt:events::Click| {
             state.tab.set(Tab::new(state.base.clone(), tab_kind, state.get_settings.clone()));
         }))
     })

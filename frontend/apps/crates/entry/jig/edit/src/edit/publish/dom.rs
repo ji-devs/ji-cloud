@@ -1,31 +1,33 @@
-use dominator::{Dom, clone, html, with_node};
+use dominator::{clone, html, with_node, Dom};
 use futures_signals::{map_ref, signal::SignalExt};
 use shared::domain::jig::JigId;
 use utils::events;
-use web_sys::HtmlElement;
+use web_sys::{HtmlElement, HtmlInputElement, HtmlTextAreaElement};
 
 use super::{
-    components::{
-        categories_select::render as CategoriesSelectRender,
-        categories_pills::render as CategoriesPillsRender,
-        goal::render as GoalRender,
-        age::render as AgeRender,
-        language::render as LanguageRender,
-        additional_resources::render as AdditionalResourcesRender,
-    },
     actions,
-    state::*
+    components::{
+        additional_resources::render as AdditionalResourcesRender, age::render as AgeRender,
+        categories_pills::render as CategoriesPillsRender,
+        categories_select::render as CategoriesSelectRender, goal::render as GoalRender,
+        language::render as LanguageRender,
+    },
+    state::*,
+};
+use components::tooltip::{
+    callbacks::TooltipErrorCallbacks,
+    dom::render as TooltipDom,
+    state::{
+        MoveStrategy, Placement, State as TooltipState, TooltipData, TooltipError, TooltipTarget,
+    },
 };
 use std::rc::Rc;
-use components::tooltip::{callbacks::TooltipErrorCallbacks, dom::render as TooltipDom, state::{Placement, State as TooltipState, TooltipData, MoveStrategy, TooltipError, TooltipTarget}};
 
 const STR_PUBLISH_JIG: &'static str = "Publish JIG";
 const STR_PUBLIC_LABEL: &'static str = "My JIG is public";
 const STR_NAME_LABEL: &'static str = "JIG’s name";
 const STR_DESCRIPTION_LABEL: &'static str = "Description";
 const STR_MISSING_INFO_TOOLTIP: &'static str = "Please fill in the missing information.";
-
-
 
 pub fn render(jig_id: JigId) -> Dom {
     let state = Rc::new(State::new(jig_id));
@@ -39,7 +41,6 @@ pub fn render(jig_id: JigId) -> Dom {
         }))
     })
 }
-
 
 fn render_page(state: Rc<State>) -> Dom {
     html!("jig-edit-publish", {
@@ -76,12 +77,14 @@ fn render_page(state: Rc<State>) -> Dom {
                             submission_tried && value.is_empty()
                         })
                 })
-                .child(html!("input", {
-                    .property_signal("value", state.jig.display_name.signal_cloned())
-                    .event(clone!(state => move |evt: events::Input| {
-                        let value = evt.value().unwrap_or_default();
-                        state.jig.display_name.set(value);
-                    }))
+                .child(html!("input" => HtmlInputElement, {
+                    .with_node!(elem => {
+                        .property_signal("value", state.jig.display_name.signal_cloned())
+                        .event(clone!(state => move |_evt: events::Input| {
+                            let value = elem.value();
+                            state.jig.display_name.set(value);
+                        }))
+                    })
                 }))
             }),
             html!("input-wrapper", {
@@ -98,12 +101,14 @@ fn render_page(state: Rc<State>) -> Dom {
                             submission_tried && value.is_empty()
                         })
                 })
-                .child(html!("textarea", {
-                    .text_signal(state.jig.description.signal_cloned())
-                    .event(clone!(state => move |evt: events::Input| {
-                        let value = evt.value().unwrap_or_default();
-                        state.jig.description.set(value);
-                    }))
+                .child(html!("textarea" => HtmlTextAreaElement, {
+                    .with_node!(elem => {
+                        .text_signal(state.jig.description.signal_cloned())
+                        .event(clone!(state => move |_: events::Input| {
+                            let value = elem.value();
+                            state.jig.description.set(value);
+                        }))
+                    })
                 }))
             }),
 

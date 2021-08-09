@@ -4,11 +4,10 @@ import "@elements/module/_groups/design/edit/sidebar/widgets/theme-selector/opti
 //wysiwyg text editor
 import "@elements/module/_common/edit/widgets/text-editor-controls/text-editor-controls";
 import "@elements/module/_common/edit/widgets/text-editor-controls/button";
-import "@elements/module/_common/edit/widgets/text-editor-controls/overlay-shadow";
 import "@elements/module/_common/edit/widgets/text-editor-controls/input-number";
 import "@elements/module/_common/edit/widgets/text-editor-controls/insert-button";
-import "@elements/core/inputs/composed/select";
-import "@elements/core/lists/li-check";
+import "@elements/core/inputs/composed/select/select";
+import "@elements/core/inputs/composed/select/option";
 import "@elements/core/overlays/anchored-overlay";
 
 import "@elements/core/wysiwyg/wysiwyg-base";

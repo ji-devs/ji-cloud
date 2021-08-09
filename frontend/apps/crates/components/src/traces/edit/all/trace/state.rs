@@ -1,17 +1,15 @@
-use futures_signals::{
-    map_ref,
-    signal_vec::{MutableVec, SignalVecExt, SignalVec},
-    signal::{Signal, SignalExt, Mutable, ReadOnlyMutable},
-};
+use futures_signals::signal::Mutable;
 
-use std::rc::Rc;
+use shared::domain::jig::module::body::{
+    Transform,
+    _groups::design::{Trace as RawTrace, TraceShape},
+};
 use std::cell::RefCell;
-use shared::domain::jig::module::body::{Transform, _groups::design::{Trace as RawTrace, TraceShape}};
-use crate::transform::state::TransformState;
-use dominator::clone;
-use utils::{math::BoundsF64, prelude::*, resize::ResizeInfo};
-use crate::traces::utils::TraceExt;
+use std::rc::Rc;
+
 use super::super::select_box::state::*;
+use crate::traces::utils::TraceExt;
+use utils::{math::BoundsF64, prelude::*, resize::ResizeInfo};
 use web_sys::SvgElement;
 
 pub struct AllTrace {
@@ -24,17 +22,15 @@ pub struct AllTrace {
 }
 
 impl AllTrace {
-    pub fn new(raw:RawTrace, resize_info: &ResizeInfo) -> Self {
-
+    pub fn new(raw: RawTrace, resize_info: &ResizeInfo) -> Self {
         let mut _self = Self {
             transform: raw.transform,
             shape: raw.shape,
             size: (0.0, 0.0),
-            select_box: Rc::new(SelectBox::new()), 
+            select_box: Rc::new(SelectBox::new()),
             elem: RefCell::new(None),
             bounds: Mutable::new(None),
         };
-
 
         if let Some(bounds) = _self.calc_bounds(true) {
             _self.size = resize_info.get_size_full(bounds.width, bounds.height);
@@ -42,15 +38,13 @@ impl AllTrace {
 
         _self
     }
-
 }
-
 
 impl TraceExt for AllTrace {
     fn to_raw(&self) -> RawTrace {
         RawTrace {
             transform: self.transform.clone(),
-            shape: self.shape.clone()
+            shape: self.shape.clone(),
         }
     }
 
@@ -64,17 +58,12 @@ impl TraceExt for AllTrace {
         };
 
         match &self.shape {
-            TraceShape::Path(path) => {
-                calc_bounds(ShapeRef::Path(&path), offset)
-            },
+            TraceShape::Path(path) => calc_bounds(ShapeRef::Path(&path), offset),
 
             TraceShape::Ellipse(radius_x, radius_y) => {
                 calc_bounds(ShapeRef::Ellipse(*radius_x, *radius_y), offset)
-            },
-            TraceShape::Rect(width, height) => {
-                calc_bounds(ShapeRef::Rect(*width, *height), offset)
             }
+            TraceShape::Rect(width, height) => calc_bounds(ShapeRef::Rect(*width, *height), offset),
         }
-
     }
 }

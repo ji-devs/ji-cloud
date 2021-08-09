@@ -1,5 +1,5 @@
 export function withSlot(slot:string, html:string):string {
-    const getInsertPos = ():number => {
+    const getInsertPos = ():any => {
         for(let i = 1; i < html.length; i++) {
             if(!isNaN(html[i] as any)) {
                 return i;
@@ -10,6 +10,44 @@ export function withSlot(slot:string, html:string):string {
     const part_1 = html.substr(0, splitPos);
     const part_2 = html.substr(splitPos);
     return `${part_1} slot="${slot}" ${part_2}`;
+}
+
+// difference between closestPierceShadow and closestPierceSlot:
+// closestPierceShadow starts in a shadow and crawls out, while closestPierceSlot starts outside of the shadow on crawls in
+
+export function closestPierceShadow(node: Node | null, selector: string) : HTMLElement | null {
+    if (!node) {
+        return null;
+    }
+    if (node instanceof ShadowRoot) {
+        return closestPierceShadow(node.host, selector);
+    }
+    if (node instanceof HTMLElement) {
+        if (node.matches(selector)) {
+            return node;
+        } else {
+            return closestPierceShadow(node.parentNode, selector);
+        }
+    }
+    return closestPierceShadow(node.parentNode, selector);
+}
+
+export function closestPierceSlot(node: Node | null, selector: string) : Node | null {
+    if (!node) {
+        return null;
+    } else {
+        if (node instanceof ShadowRoot){
+            return closestPierceSlot(node.host, selector);
+        }
+        if (node instanceof HTMLElement) {
+            if (node.matches(selector)) {
+                return node;
+            } else {
+                return closestPierceSlot(node.assignedSlot || node.parentNode, selector);
+            }
+        }
+        return node.parentNode; // not sure if this is reachable
+    }
 }
 
 /* not using any of these any more

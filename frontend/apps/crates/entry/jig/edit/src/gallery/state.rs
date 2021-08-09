@@ -1,11 +1,18 @@
 use std::rc::Rc;
 
-use shared::domain::{jig::Jig, meta::AgeRange};
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::{signal::Mutable, signal_vec::MutableVec};
-use strum_macros::{EnumIter, Display, EnumString};
+use shared::domain::{jig::Jig, meta::AgeRange};
+use strum_macros::{Display, EnumIter, EnumString};
 
-pub const TEMPLATE_KINDS: &[&str] = &["vocabulary", "parsha", "parsha", "vocabulary", "parsha", "parsha"];
+pub const TEMPLATE_KINDS: &[&str] = &[
+    "vocabulary",
+    "parsha",
+    "parsha",
+    "vocabulary",
+    "parsha",
+    "parsha",
+];
 
 #[derive(Debug, Clone, PartialEq, EnumIter, Display, EnumString)]
 pub enum VisibleJigs {

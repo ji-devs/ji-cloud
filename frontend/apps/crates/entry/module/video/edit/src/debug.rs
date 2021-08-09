@@ -1,53 +1,38 @@
-use cfg_if::cfg_if;
-use futures_signals::{
-    map_ref,
-    signal::{Mutable, SignalExt, Signal},
-    signal_vec::{MutableVec, SignalVecExt},
-    CancelableFutureHandle, 
-};
-use wasm_bindgen::prelude::*;
-use wasm_bindgen::JsCast;
-use std::cell::RefCell;
-use std::rc::Rc;
+#![allow(dead_code)]
+
+use components::stickers::{sprite::ext::*, text::ext::*};
 use once_cell::sync::OnceCell;
-use utils::{prelude::*, colors::*};
-use uuid::Uuid;
 use shared::{
     domain::{
+        image::ImageId,
         jig::{
             module::body::{
-                Image,
-                ThemeChoice,
-                Background,
-                Instructions, 
-                Transform,
-                video::{Content, Mode, Step, ModuleData as RawData},
-                _groups::design::{BaseContent, Sticker, Text, Trace, TraceShape, Backgrounds, Sprite}
+                Image, Instructions, ThemeChoice,
+                _groups::design::{Backgrounds, BaseContent, Sprite, Sticker, Text},
+                video::{Content, Mode, ModuleData as RawData, Step},
             },
-            JigId, module::ModuleId
+            module::ModuleId,
+            JigId,
         },
-        image::ImageId,
-        audio::AudioId
     },
-    media::MediaLibrary
+    media::MediaLibrary,
 };
-use components::stickers::{sprite::ext::*, text::ext::*};
+use utils::prelude::*;
+use uuid::Uuid;
 
 use crate::base::sidebar::step_1::state::TabKind as BgTabKind;
 use crate::base::sidebar::step_2::state::TabKind as ContentTabKind;
-use components::traces::edit::state::DebugOptions as TracesOptions;
-pub static SETTINGS:OnceCell<DebugSettings> = OnceCell::new();
 
-const IMAGE_UUID:&'static str = "e84dd7fe-c92d-11eb-8c82-cfd1d3fd13ff";
+pub static SETTINGS: OnceCell<DebugSettings> = OnceCell::new();
 
+const IMAGE_UUID: &'static str = "e84dd7fe-c92d-11eb-8c82-cfd1d3fd13ff";
 
 pub const DEBUG_TEXT:&'static str = "{\"version\":\"0.1.0\",\"content\":[{\"children\":[{\"text\":\"text from rust\",\"element\":\"P1\"}]}]}";
 
-
 #[derive(Debug, Default)]
 pub struct DebugSettings {
-    pub data:Option<RawData>,
-    pub step:Option<Step>,
+    pub data: Option<RawData>,
+    pub step: Option<Step>,
     pub skip_save: bool,
     pub skip_load_jig: bool,
     pub bg_tab: Option<BgTabKind>,
@@ -76,37 +61,37 @@ impl DebugSettings {
         DebugSettings {
             //debug always has to have some data
             //otherwise it will fail at load time
-            data: Some(
-                if let Some(init_data) = init_data {
-                    RawData{
-                        content: Some(Content {
-                            mode: Mode::Video,
-                            base: BaseContent {
-                                theme: ThemeChoice::Override(ThemeId::Chalkboard), 
-                                instructions: Instructions::default(),
-                                stickers: init_data.stickers.iter().map(|init| {
-                                    match init {
-                                        InitSticker::Text => Sticker::Text(Text::new(DEBUG_TEXT.to_string())),
-                                        InitSticker::Sprite => Sticker::Sprite(Sprite::new(Image {
-                                            id: ImageId(Uuid::parse_str(IMAGE_UUID).unwrap_ji()), 
-                                            lib: MediaLibrary::Global
-                                        }))
+            data: Some(if let Some(init_data) = init_data {
+                RawData {
+                    content: Some(Content {
+                        mode: Mode::Video,
+                        base: BaseContent {
+                            theme: ThemeChoice::Override(ThemeId::Chalkboard),
+                            instructions: Instructions::default(),
+                            stickers: init_data
+                                .stickers
+                                .iter()
+                                .map(|init| match init {
+                                    InitSticker::Text => {
+                                        Sticker::Text(Text::new(DEBUG_TEXT.to_string()))
                                     }
-                                }).collect(),
-                                backgrounds: Backgrounds {
-                                    layer_1: None, //Some(Background::Color(hex_to_rgba8("#ff0000"))),
-                                    layer_2: None,
-                                },
+                                    InitSticker::Sprite => Sticker::Sprite(Sprite::new(Image {
+                                        id: ImageId(Uuid::parse_str(IMAGE_UUID).unwrap_ji()),
+                                        lib: MediaLibrary::Global,
+                                    })),
+                                })
+                                .collect(),
+                            backgrounds: Backgrounds {
+                                layer_1: None, //Some(Background::Color(hex_to_rgba8("#ff0000"))),
+                                layer_2: None,
                             },
-                            ..Content::default()
-                        })
-                    }
-                } else {
-                    RawData{
-                        content: None                    
-                    }
+                        },
+                        ..Content::default()
+                    }),
                 }
-            ),
+            } else {
+                RawData { content: None }
+            }),
             step: Some(Step::One),
             skip_save: true,
             skip_load_jig: true,
@@ -116,14 +101,16 @@ impl DebugSettings {
     }
 }
 
-pub fn init(jig_id: JigId, module_id: ModuleId) {
+pub fn init(jig_id: JigId, _module_id: ModuleId) {
     if jig_id == JigId(Uuid::from_u128(0)) {
-        SETTINGS.set(DebugSettings::debug(Some(InitData{
-            stickers: vec![
-                // InitSticker::Text, InitSticker::Sprite
-            ],
-        }))).unwrap_ji();
-        
+        SETTINGS
+            .set(DebugSettings::debug(Some(InitData {
+                stickers: vec![
+                    // InitSticker::Text, InitSticker::Sprite
+                ],
+            })))
+            .unwrap_ji();
+
         //SETTINGS.set(DebugSettings::debug(None)).unwrap_ji();
     } else {
         SETTINGS.set(DebugSettings::default()).unwrap_ji();

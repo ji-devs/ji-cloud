@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use dominator::{Dom, clone, html};
+use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
 use utils::events;
 
@@ -8,13 +8,11 @@ use crate::player::sidebar::actions::load_ages;
 
 use super::state::State;
 
-pub(super) mod share;
 pub(super) mod info;
 pub(super) mod report;
-
+pub(super) mod share;
 
 pub fn render(state: Rc<State>) -> Dom {
-
     load_ages(Rc::clone(&state));
 
     html!("jig-play-sidebar", {

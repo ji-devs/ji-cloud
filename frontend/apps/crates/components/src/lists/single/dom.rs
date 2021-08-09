@@ -1,21 +1,17 @@
-
-use dominator::{html, Dom, clone};
+use dominator::{clone, html, Dom};
 use std::rc::Rc;
 use utils::prelude::*;
-use wasm_bindgen::prelude::*;
-use futures_signals::{
-    map_ref,
-    signal::{Mutable, SignalExt},
-    signal_vec::{MutableVec, SignalVec, SignalVecExt},
-};
+
 use super::state::*;
 use crate::tooltip::{
-    state::{State as TooltipState, TooltipTarget, TooltipData, TooltipError, MoveStrategy, Placement},
-    callbacks::{TooltipErrorCallbacks, TooltipConfirmCallbacks}
+    callbacks::TooltipErrorCallbacks,
+    state::{
+        MoveStrategy, Placement, State as TooltipState, TooltipData, TooltipError, TooltipTarget,
+    },
 };
+use futures_signals::{map_ref, signal::SignalExt, signal_vec::SignalVecExt};
 
-pub fn render(state: Rc<State>) -> Dom { 
-
+pub fn render(state: Rc<State>) -> Dom {
     html!("sidebar-widget-single-list", {
         .children(&mut [
 
@@ -23,7 +19,7 @@ pub fn render(state: Rc<State>) -> Dom {
                 .property("slot", "clear")
                 .property("kind", "text")
                 .text(super::strings::STR_CLEAR)
-                .event(clone!(state => move |evt:events::Click| {
+                .event(clone!(state => move |_evt:events::Click| {
                     state.clear();
                 }))
             }),
@@ -53,12 +49,12 @@ pub fn render(state: Rc<State>) -> Dom {
                 .property("iconAfter", "done")
                 .property("slot", "done-btn")
                 .text(super::strings::STR_DONE)
-                .event(clone!(state => move |evt:events::Click| {
+                .event(clone!(state => move |_evt:events::Click| {
                     match state.derive_list() {
                         Ok(list) => {
                             (state.callbacks.replace_list) (list);
                         },
-                        Err(err) => {
+                        Err(_err) => {
                             (state.callbacks.set_tooltip_error) (Some(
                                     Rc::new(TooltipState::new(
                                         TooltipTarget::Element(
@@ -68,12 +64,12 @@ pub fn render(state: Rc<State>) -> Dom {
 
                                         TooltipData::Error(Rc::new(TooltipError {
                                             max_width: Some(185.0),
-                                            placement: Placement::Right, 
+                                            placement: Placement::Right,
                                             slot: None,
                                             body: super::strings::error::STR_NUM_WORDS.to_string(),
                                             callbacks: TooltipErrorCallbacks::new(
                                                 Some(clone!(state => move || {
-                                                    (state.callbacks.set_tooltip_error) (None); 
+                                                    (state.callbacks.set_tooltip_error) (None);
                                                 }))
                                             )
                                         }))
@@ -108,7 +104,7 @@ pub fn render(state: Rc<State>) -> Dom {
                             })
                             .property("constrain", state.callbacks.constrain.as_ref())
                             .property_signal("placeholder", state.is_placeholder.signal())
-                            .event(clone!(state => move |evt:events::Focus| {
+                            .event(clone!(state => move |_evt:events::Focus| {
                                 //log::info!("got focus!");
                                 state.is_placeholder.set_neq(false);
                             }))

@@ -1,9 +1,8 @@
-use dominator::{Dom, DomBuilder, clone, html};
+use dominator::{html, Dom};
 use utils::prelude::*;
-use web_sys::HtmlElement;
-use crate::module::_groups::cards::lookup::{self, Side};
-use shared::domain::jig::module::body::{ModeExt, Transform, _groups::cards::{Mode, Step, Card}};
-use futures_signals::signal::{Signal, SignalExt, Always};
+
+use crate::module::_groups::cards::lookup::{self};
+use shared::domain::jig::module::body::_groups::cards::{Card, Mode};
 
 //must match @elements/module/_groups/cards/play/card/styles.ts
 //export type Size = "memory" | "flashcards" | "quiz-option" | "quiz-target" | "matching";
@@ -12,7 +11,7 @@ pub enum Size {
     Flashcards,
     QuizOption,
     QuizTarget,
-    Matching
+    Matching,
 }
 
 impl Size {
@@ -22,7 +21,7 @@ impl Size {
             Self::Flashcards => "flashcards",
             Self::QuizOption => "quiz-option",
             Self::QuizTarget => "quiz-target",
-            Self::Matching => "matching"
+            Self::Matching => "matching",
         }
     }
 }
@@ -30,7 +29,7 @@ impl Size {
 pub enum StyleKind {
     Theme,
     None,
-    Dragging
+    Dragging,
 }
 
 impl StyleKind {
@@ -48,8 +47,7 @@ pub struct SimpleTransform {
     pub scale: f64,
 }
 
-
-pub(super) fn render_media(card:&Card, mode: Mode, theme_id: ThemeId, slot: Option<&str>) -> Dom {
+pub(super) fn render_media(card: &Card, mode: Mode, theme_id: ThemeId, slot: Option<&str>) -> Dom {
     match &card {
         Card::Text(s) => {
             html!("card-text", {
@@ -62,20 +60,16 @@ pub(super) fn render_media(card:&Card, mode: Mode, theme_id: ThemeId, slot: Opti
                     format!("{}rem", font_size)
                 })
             })
-        },
-        Card::Image(image) => {
-            match image {
-                Some(image) => {
-                    image.render(slot)
-                },
-                None => {
-                    html!("img-ui", {
-                        .apply_if(slot.is_some(), |dom| {
-                            dom.property("slot", slot.unwrap_ji())
-                        })
-                        .property("path", "core/_common/image-empty.svg")
+        }
+        Card::Image(image) => match image {
+            Some(image) => image.render(slot),
+            None => {
+                html!("img-ui", {
+                    .apply_if(slot.is_some(), |dom| {
+                        dom.property("slot", slot.unwrap_ji())
                     })
-                }
+                    .property("path", "core/_common/image-empty.svg")
+                })
             }
         },
     }

@@ -40,6 +40,7 @@ export class _ extends LitElement {
                 display: grid;
                 grid-template-columns: repeat(3, 250px);
                 grid-gap: 32px;
+                align-items: start;
             }
             .search-button-wrapper {
                 display: grid;

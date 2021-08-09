@@ -6,6 +6,4 @@ impl Video {
     pub fn set_value(&self, host: VideoHost) {
         self.host.set_neq(host);
     }
-
 }
-

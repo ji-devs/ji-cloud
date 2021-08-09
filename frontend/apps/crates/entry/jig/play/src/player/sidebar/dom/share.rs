@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use dominator::{Dom, clone, html};
+use dominator::{clone, html, Dom};
 use futures_signals::signal::{Signal, SignalExt};
 use utils::{clipboard, events};
 
@@ -12,6 +12,7 @@ pub fn render(state: Rc<State>) -> Dom {
     html!("anchored-overlay", {
         .property("positionY", "bottom-out")
         .property("positionX", "left-in")
+        .property("styled", true)
         .property("slot", "actions")
         .property_signal("open", share_open_signal(Rc::clone(&state)))
         .event(clone!(state => move |_: events::Close| {
@@ -47,12 +48,13 @@ pub fn render(state: Rc<State>) -> Dom {
 }
 
 fn share_open_signal(state: Rc<State>) -> impl Signal<Item = bool> {
-    state.active_popup.signal_cloned().map(|active_popup| {
-        match active_popup {
+    state
+        .active_popup
+        .signal_cloned()
+        .map(|active_popup| match active_popup {
             ActivePopup::ShareMain | ActivePopup::ShareStudents | ActivePopup::ShareEmbed => true,
             _ => false,
-        }
-    })
+        })
 }
 
 fn render_share_main(state: Rc<State>) -> Dom {

@@ -1,5 +1,6 @@
 import { LitElement, html, css, customElement, property } from 'lit-element';
 import { nothing } from 'lit-html';
+import { ifDefined } from 'lit-html/directives/if-defined';
 import { Color, Size } from './rectangle';
 
 export type IconAfter = "arrow" | "done";
@@ -36,6 +37,12 @@ export class _ extends LitElement {
 
     @property({ type: Boolean })
     submit: boolean = false;
+
+    @property()
+    href?: string;
+
+    @property()
+    target?: string;
 
     @property()
     iconBefore?: IconBefore;
@@ -77,6 +84,8 @@ export class _ extends LitElement {
                 ?disabled="${this.disabled}"
                 ?bold="${this.bold}"
                 ?italic="${this.italic}"
+                href="${ifDefined(this.href)}"
+                target="${ifDefined(this.target)}"
             >
                 ${iconBefore && html`<img-ui path="${iconBeforePath}"></img-ui>`}
                 <slot></slot>
