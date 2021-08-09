@@ -1,11 +1,9 @@
+import "@elements/_bundles/_sub-bundles/page/header";
 import "@elements/core/images/ui";
 import "@elements/core/images/ji";
 import "@elements/core/inputs/composed/select/select";
 import "@elements/core/inputs/composed/select/option";
 import "@elements/core/inputs/composed/select/option-group";
-import "@elements/core/page-header/page-header";
-import "@elements/core/page-header/page-header-link";
-import "@elements/core/page-header/page-header-profile";
 import "@elements/entry/home/home-full";
 import "@elements/entry/home/search-section/search-section";
 import "@elements/entry/home/search-section/search-bar";
