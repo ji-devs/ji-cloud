@@ -215,7 +215,7 @@ pub struct ImageSearchQuery {
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub categories: Vec<CategoryId>,
 
-    /// Optionally order by `tags`. `tags[0]` has the highest priority.
+    /// Optionally order by `tags`, given in decreasing priority.
     ///
     /// # Notes on priority:
     /// Consider a request with 4 tags, `[clothing, food, red, sports]`.
@@ -231,7 +231,7 @@ pub struct ImageSearchQuery {
     /// correct that we get the desired ranking.
     ///
     /// *NOTE*: this means that with `i64` range supported by Algolia, we can only assign priority for
-    /// the first 62 tags. The rest are all given a score of 1.  
+    /// the first 62 tags. The remaining are all given a score of 1.  
     ///
     /// ## Example
     /// For a example request `[clothing, food, red, sports]`, we assign the scores:
@@ -247,6 +247,7 @@ pub struct ImageSearchQuery {
     ///
     /// | position  | entry name | tag names    | score |
     /// |-----------|------------|--------------|-------|
+    /// | 0         | hat        | clothing     | 8     |
     /// | 1         | cherry     | red, food    | 6     |
     /// | 2         | cucumber   | green, food  | 4     |
     /// | 3         | stop sign  | red          | 2     |
