@@ -1,4 +1,4 @@
-import { LitElement, html, css, customElement, property } from 'lit-element';
+import { LitElement, html, css, customElement, property, unsafeCSS } from 'lit-element';
 import { nothing } from 'lit-html';
 
 const STR_PLAYED = "Played";
@@ -31,6 +31,8 @@ export class _ extends LitElement {
             .main, .hover {
                 width: 100%;
                 height: 100%;
+                /* prefix required for safari https://caniuse.com/?search=backface-visibility */
+                -webkit-backface-visibility: hidden;
                 backface-visibility: hidden;
                 border-radius: 20px;
                 box-shadow: 0 3px 12px 0 rgba(0, 0, 0, 0.12);
@@ -103,7 +105,6 @@ export class _ extends LitElement {
                 display: grid;
                 grid-template-rows: 1fr auto;
                 transform: rotateY(180deg);
-                backface-visibility: hidden;
             }
             .hover .scrollable-content {
                 padding: 16px 24px;
