@@ -13,17 +13,15 @@ pub struct State {
     pub meta: Rc<MetaState>,
     pub image: Rc<MutableImage>,
     pub metadata: Rc<MetadataResponse>,
-    pub tag_list: Rc<Vec<(ImageTag, TagId)>>,
 }
 
 
 impl State {
-    pub fn new(meta: Rc<MetaState>, image: Rc<MutableImage>, metadata: Rc<MetadataResponse>, tag_list: Rc<Vec<(ImageTag, TagId)>>) -> Self {
+    pub fn new(meta: Rc<MetaState>, image: Rc<MutableImage>, metadata: Rc<MetadataResponse>) -> Self {
         Self {
             meta,
             image,
             metadata,
-            tag_list,
         }
     }
 
@@ -38,7 +36,7 @@ impl State {
         self.image.affiliations.signal_ref(move |affiliations| affiliations.contains(&id))
     }
 
-    pub fn tag_selected(&self, tag_id: TagId) -> impl Signal<Item = bool> {
-        self.image.tag_ids.signal_ref(move |tag_ids| tag_ids.contains(&tag_id))
+    pub fn tag_selected(&self, tag_index: i16) -> impl Signal<Item = bool> {
+        self.image.tag_indices.signal_ref(move |tag_indices| tag_indices.contains(&tag_index))
     }
 }

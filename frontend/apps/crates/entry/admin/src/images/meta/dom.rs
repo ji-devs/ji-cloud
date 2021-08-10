@@ -39,7 +39,7 @@ impl ImageMetaPage {
             .child_signal(
                 state.loaded.signal().map(clone!(state, initial_data => move |loaded| {
                     if loaded {
-                        let (image, categories, metadata, tag_list) = initial_data.borrow_mut().take().unwrap_throw();
+                        let (image, categories, metadata) = initial_data.borrow_mut().take().unwrap_throw();
 
                         Some(html!("image-meta-page", {
                             .event(|evt:events::CustomRoute| {
@@ -162,11 +162,11 @@ impl ImageMetaPage {
                                 }),
                                 html!("div", {
                                     .property("slot", "right")
-                                    .child_signal(state.section.signal().map(clone!(state, image, categories, metadata, tag_list => move |section| {
+                                    .child_signal(state.section.signal().map(clone!(state, image, categories, metadata => move |section| {
                                         match section {
-                                            Section::One => Some(Section1Dom::render(state.clone(), image.clone(), metadata.clone(), tag_list.clone())),
+                                            Section::One => Some(Section1Dom::render(state.clone(), image.clone(), metadata.clone())),
                                             Section::Two => Some(Section2Dom::render(state.clone(), image.clone(), categories.clone())),
-                                            Section::Three => Some(Section3Dom::render(state.clone(), image.clone(), metadata.clone(), categories.clone(), tag_list.clone())),
+                                            Section::Three => Some(Section3Dom::render(state.clone(), image.clone(), metadata.clone(), categories.clone())),
                                         }
                                     })))
                                 }),

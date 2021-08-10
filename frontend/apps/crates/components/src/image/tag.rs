@@ -19,3 +19,10 @@ impl ImageTag {
         *self as i16
     }
 }
+
+//it's up to the caller to ensure a valid value!
+impl From<i16> for ImageTag {
+    fn from(value:i16) -> Self {
+        unsafe { std::mem::transmute(value) }
+    }
+}

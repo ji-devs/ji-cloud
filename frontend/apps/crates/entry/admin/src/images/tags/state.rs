@@ -5,10 +5,7 @@ use futures_signals::{
     signal::{Mutable, Signal, SignalExt},
     signal_vec::{MutableVec, SignalVec, SignalVecExt},
 };
-use shared::domain::{
-    meta::TagId,
-    image::tag::ImageTagResponse
-};
+use shared::domain::image::tag::ImageTagResponse;
 
 pub struct ImageTags {
     pub loader: AsyncLoader,

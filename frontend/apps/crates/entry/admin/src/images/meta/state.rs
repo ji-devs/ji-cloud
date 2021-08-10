@@ -1,5 +1,5 @@
 use shared::domain::{
-    meta::{ImageStyleId, AffiliationId, AgeRangeId, TagId},
+    meta::{ImageStyleId, AffiliationId, AgeRangeId},
     category::CategoryId,
     image::{ImageId, ImageSearchQuery, ImageMetadata},
 };
@@ -56,7 +56,7 @@ pub struct MutableImage {
     pub styles: Mutable<HashSet<ImageStyleId>>,
     pub age_ranges: Mutable<HashSet<AgeRangeId>>,
     pub affiliations: Mutable<HashSet<AffiliationId>>,
-    pub tag_ids: Mutable<HashSet<TagId>>,
+    pub tag_indices: Mutable<HashSet<i16>>,
     pub categories: Mutable<HashSet<CategoryId>>,
 }
 
@@ -88,12 +88,12 @@ impl From<ImageMetadata> for MutableImage {
                 }
                 Mutable::new(affiliations)
             },
-            tag_ids: {
-                let mut tag_ids = HashSet::with_capacity(image.tags.len());
+            tag_indices: {
+                let mut tag_indices = HashSet::with_capacity(image.tags.len());
                 for id in image.tags.into_iter() {
-                    tag_ids.insert(id);
+                    tag_indices.insert(id.0);
                 }
-                Mutable::new(tag_ids)
+                Mutable::new(tag_indices)
             },
             categories: {
                 let mut categories = HashSet::with_capacity(image.categories.len());

@@ -1,4 +1,4 @@
-use super::actions::{get_styles, get_tag_id_lookup};
+use super::actions::get_styles;
 use super::callbacks::Callbacks;
 use crate::image::tag::ImageTag;
 use dominator::clone;
@@ -22,7 +22,6 @@ pub struct State {
     pub query: Mutable<String>,
     pub page: Mutable<Option<u32>>,
     pub styles: Rc<RefCell<Option<Vec<ImageStyle>>>>,
-    pub tag_id_lookup: Rc<RefCell<Option<HashMap<ImageTag, TagId>>>>,
     pub selected_styles: Rc<RefCell<HashSet<ImageStyleId>>>,
     pub callbacks: Callbacks,
 }
@@ -30,7 +29,6 @@ pub struct State {
 impl State {
     pub fn new(image_search_options: ImageSearchOptions, callbacks: Callbacks) -> Self {
         let styles = Rc::new(RefCell::new(None));
-        let tag_id_lookup = Rc::new(RefCell::new(None));
         let selected_styles = HashSet::new();
 
         if image_search_options.background_only.is_some()
@@ -44,9 +42,8 @@ impl State {
         }
 
         let init_loader = AsyncLoader::new();
-        init_loader.load(clone!(styles, tag_id_lookup => async move {
+        init_loader.load(clone!(styles => async move {
             *styles.borrow_mut() = Some(get_styles().await);
-            *tag_id_lookup.borrow_mut() = Some(get_tag_id_lookup().await);
         }));
 
         Self {
@@ -60,7 +57,6 @@ impl State {
             query: Mutable::new(String::new()),
             page: Mutable::new(None),
             styles,
-            tag_id_lookup,
             callbacks,
         }
     }
