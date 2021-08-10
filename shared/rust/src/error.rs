@@ -70,8 +70,7 @@ pub struct EmptyError {}
 /// Metadata associated with this operation could not be found.
 #[derive(Serialize, Deserialize, Debug)]
 pub struct MetadataNotFound {
-    /// The (Optional) id of the item. This can be either a Uuid or an index as required by the
-    /// metadata type.
+    /// The (Optional) id of the item.
     pub id: Option<uuid::Uuid>,
     /// The (Optional) index of the item.
     pub index: Option<i16>,

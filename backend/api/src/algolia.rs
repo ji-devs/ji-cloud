@@ -12,9 +12,9 @@ use serde::Serialize;
 use shared::{
     domain::{
         category::CategoryId,
-        image::{ImageId, ImageKind, ImageTagIndex},
+        image::{ImageId, ImageKind},
         jig::JigId,
-        meta::{AffiliationId, AgeRangeId, GoalId, ImageStyleId},
+        meta::{AffiliationId, AgeRangeId, GoalId, ImageStyleId, ImageTagIndex},
     },
     media::MediaGroupKind,
 };
@@ -387,11 +387,11 @@ select id,
            where image_category.image_id = image_metadata.id))                               as "category_names!",
     array((select index 
            from image_tag 
-               inner join image_tag_join on image_tag.id = image_tag_join.tag_id
+               inner join image_tag_join on image_tag.index = image_tag_join.tag_index
            where image_tag_join.image_id = image_metadata.id))                               as "tags!",
-    array((select name
+    array((select display_name
            from image_tag
-                    inner join image_tag_join on image_tag.id = image_tag_join.tag_id
+                    inner join image_tag_join on image_tag.index = image_tag_join.tag_index
            where image_tag_join.image_id = image_metadata.id))                               as "tag_names!",
     (publish_at < now() is true) as "is_published!",
     is_premium

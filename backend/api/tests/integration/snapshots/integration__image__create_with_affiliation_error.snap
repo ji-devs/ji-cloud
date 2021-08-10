@@ -7,5 +7,7 @@ expression: body
   "code": 422,
   "message": "Metadata not Found",
   "id": "6389eaa0-de76-11ea-b7ab-0399bcf84df2",
-  "kind": "Affiliation"
+  "index": null,
+  "kind": "Affiliation",
+  "media_group_kind": null
 }

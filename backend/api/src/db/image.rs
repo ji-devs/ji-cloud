@@ -4,7 +4,7 @@ use futures::stream::BoxStream;
 use shared::domain::{
     category::CategoryId,
     image::{ImageId, ImageKind, ImageMetadata},
-    meta::{AffiliationId, AgeRangeId, ImageStyleId, TagId},
+    meta::{AffiliationId, AgeRangeId, ImageStyleId, ImageTagIndex},
 };
 use sqlx::{PgConnection, PgPool};
 use uuid::Uuid;
@@ -48,9 +48,9 @@ pub async fn update_metadata(
     image: ImageId,
     affiliations: Option<&[AffiliationId]>,
     age_ranges: Option<&[AgeRangeId]>,
-    styles: Option<&[ImageStyleId]>,
+    image_styles: Option<&[ImageStyleId]>,
     categories: Option<&[CategoryId]>,
-    tags: Option<&[TagId]>,
+    image_tags: Option<&[ImageTagIndex]>,
 ) -> sqlx::Result<()> {
     const TABLE: &str = "image";
 
@@ -62,11 +62,11 @@ pub async fn update_metadata(
         recycle_metadata(&mut *conn, TABLE, image.0, age_ranges).await?;
     }
 
-    if let Some(styles) = styles {
+    if let Some(styles) = image_styles {
         recycle_metadata(&mut *conn, TABLE, image.0, styles).await?;
     }
 
-    if let Some(tags) = tags {
+    if let Some(tags) = image_tags {
         recycle_tags(&mut *conn, TABLE, image.0, tags).await?;
     }
 
@@ -110,6 +110,7 @@ where id = $1 and $2 is distinct from publish_at"#,
     }
 
     sqlx::query!(
+        //language=SQL
         r#"
 update image_metadata
 set name        = coalesce($2, name),
@@ -146,7 +147,7 @@ select id,
        array((select row (style_id) from image_style where image_id = id))             as styles,
        array((select row (age_range_id) from image_age_range where image_id = id))     as age_ranges,
        array((select row (affiliation_id) from image_affiliation where image_id = id)) as affiliations,
-       array((select row (tag_id) from image_tag_join where image_id = id))            as tags
+       array((select row (tag_index) from image_tag_join where image_id = id))         as tags
 from image_metadata
          join image_upload on id = image_id
 where id = $1
@@ -177,7 +178,7 @@ select id,
        array((select row (style_id) from image_style where image_id = id))             as styles,
        array((select row (age_range_id) from image_age_range where image_id = id))     as age_ranges,
        array((select row (affiliation_id) from image_affiliation where image_id = id)) as affiliations,
-       array((select row (tag_id) from image_tag_join where image_id = id))            as tags
+       array((select row (tag_index) from image_tag_join where image_id = id))         as tags
 from (image_metadata
          inner join image_upload on image_id = id)
 where processing_result is not distinct from true 
@@ -228,7 +229,7 @@ select id,
        array((select row (style_id) from image_style where image_id = id))             as styles,
        array((select row (age_range_id) from image_age_range where image_id = id))     as age_ranges,
        array((select row (affiliation_id) from image_affiliation where image_id = id)) as affiliations,
-       array((select row (tag_id) from image_tag_join where image_id = id))            as tags
+       array((select row (tag_index) from image_tag_join where image_id = id))         as tags
 from image_metadata
          inner join image_upload on image_id = id
          inner join unnest($1::uuid[])

@@ -1,14 +1,25 @@
 use crate::error;
 use paperclip::actix::NoContent;
-use shared::domain::{image::tag::ImageTagResponse, meta::TagId};
-use sqlx::postgres::PgDatabaseError;
-use sqlx::PgPool;
+use shared::domain::{image::tag::ImageTagResponse, meta::ImageTagIndex};
+use sqlx::{postgres::PgDatabaseError, PgPool};
+
+pub fn handle_tag_err(err: sqlx::Error) -> error::Tag {
+    match err {
+        sqlx::Error::Database(err)
+            if err.downcast_ref::<PgDatabaseError>().constraint()
+                == Some("image_tag_index_pkey") =>
+        {
+            error::Tag::TakenIndex
+        }
+        e => e.into(),
+    }
+}
 
 pub async fn list(db: &PgPool) -> sqlx::Result<Vec<ImageTagResponse>> {
     sqlx::query_as!(
         ImageTagResponse,
         r#"
-select id as "id: TagId", display_name, index from "image_tag"
+select index as "index: ImageTagIndex", display_name from "image_tag"
 order by index
             "#
     )
@@ -18,9 +29,9 @@ order by index
 
 pub async fn create(
     db: &PgPool,
-    index: i16,
+    index: ImageTagIndex,
     display_name: &str,
-) -> Result<(i16, String, TagId), error::Tag> {
+) -> Result<(ImageTagIndex, String), error::Tag> {
     let mut txn = db.begin().await?;
 
     let res = sqlx::query!(
@@ -28,25 +39,18 @@ pub async fn create(
         r#"
 insert into image_tag (index, display_name)
 values ($1, $2)
-returning id as "id: TagId", index as "index: i16", display_name
+returning index as "index: ImageTagIndex", display_name
             "#,
-        index,
+        index.0,
         display_name,
     )
     .fetch_one(&mut txn)
-    .await?;
+    .await
+    .map_err(handle_tag_err)?;
 
-    txn.commit().await.map_err(|err| match err {
-        sqlx::Error::Database(err)
-            if err.downcast_ref::<PgDatabaseError>().constraint()
-                == Some("image_tag_index_key") =>
-        {
-            error::Tag::TakenIndex
-        }
-        e => e.into(),
-    })?;
+    txn.commit().await?;
 
-    Ok((res.index, res.display_name, res.id))
+    Ok((res.index, res.display_name))
 }
 
 pub async fn update(
@@ -88,18 +92,11 @@ pub async fn update(
             new_index
         )
         .execute(&mut txn)
-        .await?;
+        .await
+        .map_err(handle_tag_err)?;
     }
 
-    txn.commit().await.map_err(|err| match err {
-        sqlx::Error::Database(err)
-            if err.downcast_ref::<PgDatabaseError>().constraint()
-                == Some("image_tag_index_key") =>
-        {
-            error::Tag::TakenIndex
-        }
-        e => e.into(),
-    })?;
+    txn.commit().await?;
 
     Ok(NoContent)
 }

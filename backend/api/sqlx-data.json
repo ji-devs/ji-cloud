@@ -637,6 +637,114 @@
       ]
     }
   },
+  "196981a36982a10e68661c8f04cdf39471687a1f2a3c9d92601aad9eee65d74e": {
+    "query": "\nselect id,\n    name,\n    kind as \"kind: ImageKind\",\n    description,\n    array((select affiliation_id from image_affiliation where image_id = image_metadata.id)) as \"affiliations!\",\n    array((select affiliation.display_name\n           from affiliation\n                    inner join image_affiliation on affiliation.id = image_affiliation.affiliation_id\n           where image_affiliation.image_id = image_metadata.id))                            as \"affiliation_names!\",\n           array((select style_id from image_style where image_id = image_metadata.id))             as \"styles!\",\n           array((select style.display_name\n                  from style\n                           inner join image_style on style.id = image_style.style_id\n           where image_style.image_id = image_metadata.id))                                  as \"style_names!\",\n    array((select age_range_id from image_age_range where image_id = image_metadata.id))     as \"age_ranges!\",\n    array((select age_range.display_name\n           from age_range\n                    inner join image_age_range on age_range.id = image_age_range.age_range_id\n           where image_age_range.image_id = image_metadata.id))                              as \"age_range_names!\",\n    array((select category_id from image_category where image_id = image_metadata.id))       as \"categories!\",\n    array((select name\n           from category\n                    inner join image_category on category.id = image_category.category_id\n           where image_category.image_id = image_metadata.id))                               as \"category_names!\",\n    array((select index \n           from image_tag \n               inner join image_tag_join on image_tag.index = image_tag_join.tag_index\n           where image_tag_join.image_id = image_metadata.id))                               as \"tags!\",\n    array((select display_name\n           from image_tag\n                    inner join image_tag_join on image_tag.index = image_tag_join.tag_index\n           where image_tag_join.image_id = image_metadata.id))                               as \"tag_names!\",\n    (publish_at < now() is true) as \"is_published!\",\n    is_premium\nfrom image_metadata\nwhere \n    last_synced_at is null or\n    (updated_at is not null and last_synced_at < updated_at) or\n    (publish_at < now() is true and last_synced_at < publish_at)\nlimit 100\nfor no key update skip locked;\n     ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "kind: ImageKind",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 3,
+          "name": "description",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "affiliations!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 5,
+          "name": "affiliation_names!",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 6,
+          "name": "styles!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 7,
+          "name": "style_names!",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 8,
+          "name": "age_ranges!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 9,
+          "name": "age_range_names!",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 10,
+          "name": "categories!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 11,
+          "name": "category_names!",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 12,
+          "name": "tags!",
+          "type_info": "Int2Array"
+        },
+        {
+          "ordinal": 13,
+          "name": "tag_names!",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 14,
+          "name": "is_published!",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 15,
+          "name": "is_premium",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        false
+      ]
+    }
+  },
   "19e13d35722d768bfabd2104aaabd88c7c6b7436ac230485dfe370a6b4609aee": {
     "query": "insert into user_auth_google (user_id, google_id) values ($1, $2)",
     "describe": {
@@ -2323,6 +2431,42 @@
       ]
     }
   },
+  "758bee136eaae799c8beef0e069597d0f67cfc590d5ecc6a4353d24b3474e39b": {
+    "query": "\n        select index as \"index: ImageTagIndex\", display_name, created_at, updated_at from \"image_tag\"\n        order by index\n    ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "index: ImageTagIndex",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 1,
+          "name": "display_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 3,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        true
+      ]
+    }
+  },
   "760185608bd03a9a30aba9100ecc18e170aed0b1008c5f51ad0c7c6f564b090e": {
     "query": "select user_id from user_auth_google where google_id = $1",
     "describe": {
@@ -2343,31 +2487,28 @@
       ]
     }
   },
-  "7f13eff963b91007e55a4a80fc4e32b866781dab9548bb01db0d20a12cb664ed": {
-    "query": "\nselect id as \"id: TagId\", display_name, index from \"image_tag\"\norder by index\n            ",
+  "76f5138776b2544741d5bd7a20298dd4309fa398f23fac98b74873899a0f88b3": {
+    "query": "\ninsert into image_tag (index, display_name)\nvalues ($1, $2)\nreturning index as \"index: ImageTagIndex\", display_name\n            ",
     "describe": {
       "columns": [
         {
           "ordinal": 0,
-          "name": "id: TagId",
-          "type_info": "Uuid"
+          "name": "index: ImageTagIndex",
+          "type_info": "Int2"
         },
         {
           "ordinal": 1,
           "name": "display_name",
           "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "index",
-          "type_info": "Int2"
         }
       ],
       "parameters": {
-        "Left": []
+        "Left": [
+          "Int2",
+          "Text"
+        ]
       },
       "nullable": [
-        false,
         false,
         false
       ]
@@ -3242,6 +3383,30 @@
       ]
     }
   },
+  "a85530d1d83a7f3cd3786da68f5b489fbddbf411d735cf114817e4417768520b": {
+    "query": "\nselect index as \"index: ImageTagIndex\", display_name from \"image_tag\"\norder by index\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "index: ImageTagIndex",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 1,
+          "name": "display_name",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        false
+      ]
+    }
+  },
   "a87ea4169f26518cbf7f88c1777bd15bbf72f938d6352567cd549bbe970db5f2": {
     "query": "\nupdate user_color\nset index = index - 1\nwhere index > $2 and user_id = $1\n",
     "describe": {
@@ -3533,114 +3698,6 @@
       "nullable": []
     }
   },
-  "bc780ffba7cd48b5c9b829c87ef663b4dc398986888f9f5285b413b1563db729": {
-    "query": "\nselect id,\n    name,\n    kind as \"kind: ImageKind\",\n    description,\n    array((select affiliation_id from image_affiliation where image_id = image_metadata.id)) as \"affiliations!\",\n    array((select affiliation.display_name\n           from affiliation\n                    inner join image_affiliation on affiliation.id = image_affiliation.affiliation_id\n           where image_affiliation.image_id = image_metadata.id))                            as \"affiliation_names!\",\n           array((select style_id from image_style where image_id = image_metadata.id))             as \"styles!\",\n           array((select style.display_name\n                  from style\n                           inner join image_style on style.id = image_style.style_id\n           where image_style.image_id = image_metadata.id))                                  as \"style_names!\",\n    array((select age_range_id from image_age_range where image_id = image_metadata.id))     as \"age_ranges!\",\n    array((select age_range.display_name\n           from age_range\n                    inner join image_age_range on age_range.id = image_age_range.age_range_id\n           where image_age_range.image_id = image_metadata.id))                              as \"age_range_names!\",\n    array((select category_id from image_category where image_id = image_metadata.id))       as \"categories!\",\n    array((select name\n           from category\n                    inner join image_category on category.id = image_category.category_id\n           where image_category.image_id = image_metadata.id))                               as \"category_names!\",\n    array((select tag_id from image_tag_join where image_id = image_metadata.id))       as \"tags!\",\n    array((select name\n           from image_tag\n                    inner join image_tag_join on image_tag.id = image_tag_join.tag_id\n           where image_tag_join.image_id = image_metadata.id))                               as \"tag_names!\",\n    (publish_at < now() is true) as \"is_published!\",\n    is_premium\nfrom image_metadata\nwhere \n    last_synced_at is null or\n    (updated_at is not null and last_synced_at < updated_at) or\n    (publish_at < now() is true and last_synced_at < publish_at)\nlimit 100\nfor no key update skip locked;\n     ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "kind: ImageKind",
-          "type_info": "Int2"
-        },
-        {
-          "ordinal": 3,
-          "name": "description",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 4,
-          "name": "affiliations!",
-          "type_info": "UuidArray"
-        },
-        {
-          "ordinal": 5,
-          "name": "affiliation_names!",
-          "type_info": "TextArray"
-        },
-        {
-          "ordinal": 6,
-          "name": "styles!",
-          "type_info": "UuidArray"
-        },
-        {
-          "ordinal": 7,
-          "name": "style_names!",
-          "type_info": "TextArray"
-        },
-        {
-          "ordinal": 8,
-          "name": "age_ranges!",
-          "type_info": "UuidArray"
-        },
-        {
-          "ordinal": 9,
-          "name": "age_range_names!",
-          "type_info": "TextArray"
-        },
-        {
-          "ordinal": 10,
-          "name": "categories!",
-          "type_info": "UuidArray"
-        },
-        {
-          "ordinal": 11,
-          "name": "category_names!",
-          "type_info": "TextArray"
-        },
-        {
-          "ordinal": 12,
-          "name": "tags!",
-          "type_info": "UuidArray"
-        },
-        {
-          "ordinal": 13,
-          "name": "tag_names!",
-          "type_info": "TextArray"
-        },
-        {
-          "ordinal": 14,
-          "name": "is_published!",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 15,
-          "name": "is_premium",
-          "type_info": "Bool"
-        }
-      ],
-      "parameters": {
-        "Left": []
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        false
-      ]
-    }
-  },
   "bdedb2c9dea3363859d3dbe22b6665efda3bf686a9c1eca1ffc9fb298de68d6f": {
     "query": "\n            select id as \"id: AgeRangeId\", display_name, created_at, updated_at from age_range\n            order by index\n        ",
     "describe": {
@@ -3765,48 +3822,6 @@
         ]
       },
       "nullable": [
-        false
-      ]
-    }
-  },
-  "d24c286c6094e2009d400e4f366ffb3ba255c34bf4848598a30a63c2f1106889": {
-    "query": "\n        select id as \"id: TagId\", display_name, created_at, updated_at, index from \"image_tag\"\n        order by index\n    ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id: TagId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "display_name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "created_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 3,
-          "name": "updated_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 4,
-          "name": "index",
-          "type_info": "Int2"
-        }
-      ],
-      "parameters": {
-        "Left": []
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        true,
         false
       ]
     }
@@ -4584,39 +4599,6 @@
         true,
         null,
         null
-      ]
-    }
-  },
-  "f952ba3dea24e228c56c46db14e1db511e5325d96026dfe1ba8cd06cb2864e62": {
-    "query": "\ninsert into image_tag (index, display_name)\nvalues ($1, $2)\nreturning id as \"id: TagId\", index as \"index: i16\", display_name\n            ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id: TagId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "index: i16",
-          "type_info": "Int2"
-        },
-        {
-          "ordinal": 2,
-          "name": "display_name",
-          "type_info": "Text"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int2",
-          "Text"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false
       ]
     }
   },

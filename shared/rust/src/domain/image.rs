@@ -6,7 +6,7 @@ pub mod user;
 
 use super::{
     category::CategoryId,
-    meta::{AffiliationId, AgeRangeId, ImageStyleId, TagId},
+    meta::{AffiliationId, AgeRangeId, ImageStyleId, ImageTagIndex},
     Publish,
 };
 use chrono::{DateTime, Utc};
@@ -60,22 +60,6 @@ impl ImageKind {
 #[cfg_attr(feature = "backend", sqlx(transparent))]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct ImageId(pub Uuid);
-
-/// Wrapper type around [`i16`](std::i16), represents the index of an image tag.
-///
-/// This is used instead of UUIDs for image tags as they aren't created dynamically and
-/// a simple and consistent way to identify them is desired.
-#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[cfg_attr(feature = "backend", sqlx(transparent))]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-pub struct ImageTagIndex(pub i16);
-
-impl From<ImageTagIndex> for i16 {
-    fn from(value: ImageTagIndex) -> Self {
-        value.0
-    }
-}
 
 // todo: # errors doc section
 /// Request to create a new image.
@@ -217,7 +201,7 @@ pub struct ImageSearchQuery {
 
     /// Optionally order by `tags`, given in decreasing priority.
     ///
-    /// # Notes on priority:
+    /// # Notes on priority
     /// Consider a request with 4 tags, `[clothing, food, red, sports]`.
     ///
     /// "Priority ordering" means that all items tagged as `clothing` will appear before those
@@ -228,7 +212,7 @@ pub struct ImageSearchQuery {
     ///
     /// Scores are weighted exponentially by a factor of 2. The lowest priority tag is given a score of 1,
     /// and the `i`th highest priority tag is given a score of `2.pow(i)`. This assignment is *provably*
-    /// correct that we get the desired ranking.
+    /// correct that we get the desired ranking. This can also be interpreted as bit vector with comparison.
     ///
     /// *NOTE*: this means that with `i64` range supported by Algolia, we can only assign priority for
     /// the first 62 tags. The remaining are all given a score of 1.  
@@ -236,23 +220,23 @@ pub struct ImageSearchQuery {
     /// ## Example
     /// For a example request `[clothing, food, red, sports]`, we assign the scores:
     ///
-    /// | tag name  | score |
-    /// |-----------|-------|
-    /// | clothing  | 8     |
-    /// | food      | 4     |
-    /// | red       | 2     |
-    /// | sports    | 1     |
+    /// | tag name  | score | (truncated) bit vector score  |
+    /// |-----------|-------|-------------------------------|
+    /// | clothing  | 8     | `0b_1000`                     |
+    /// | food      | 4     | `0b_0100`                     |
+    /// | red       | 2     | `0b_0010`                     |
+    /// | sports    | 1     | `0b_0001`                     |
     ///
     /// This means that the entries will be returned in the following order, based on their tags:
     ///
-    /// | position  | entry name | tag names    | score |
-    /// |-----------|------------|--------------|-------|
-    /// | 0         | hat        | clothing     | 8     |
-    /// | 1         | cherry     | red, food    | 6     |
-    /// | 2         | cucumber   | green, food  | 4     |
-    /// | 3         | stop sign  | red          | 2     |
-    /// | 4         | basketball | sports       | 1     |
-    /// | 5         | wallet     | [no tags]    | 0     |
+    /// | position  | entry name | tag names    | score | (truncated) bit vector score  |
+    /// |-----------|------------|--------------|-------|-------------------------------|
+    /// | 0         | hat        | clothing     | 8     | `0b_1000`                     |
+    /// | 1         | cherry     | red, food    | 6     | `0b_0110`                     |
+    /// | 2         | cucumber   | green, food  | 4     | `0b_0100`                     |
+    /// | 3         | stop sign  | red          | 2     | `0b_0010`                     |
+    /// | 4         | basketball | sports       | 1     | `0b_0001`                     |
+    /// | 5         | wallet     | [no tags]    | 0     | `0b_0000`                     |
     #[serde(default)]
     #[serde(serialize_with = "super::csv_encode_i16_indices")]
     #[serde(deserialize_with = "super::from_csv")]
