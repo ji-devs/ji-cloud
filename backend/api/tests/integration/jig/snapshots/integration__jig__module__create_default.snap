@@ -1,0 +1,8 @@
+---
+source: tests/integration/jig/module.rs
+expression: body
+
+---
+{
+  "id": "[id]"
+}

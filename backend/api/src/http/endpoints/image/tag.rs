@@ -10,6 +10,7 @@ use paperclip::actix::{
     CreatedJson, NoContent,
 };
 use shared::domain::image::tag::ImageTagResponse;
+use shared::domain::meta::ImageTagIndex;
 use shared::{
     api::{endpoints, ApiEndpoint},
     domain::image::tag::ImageTagListResponse,
@@ -30,7 +31,7 @@ pub(super) async fn list(
 pub(super) async fn create(
     db: Data<PgPool>,
     _claims: TokenUserWithScope<ScopeAdmin>,
-    index: Path<i16>,
+    index: Path<ImageTagIndex>,
     req: Json<<endpoints::image::tag::Create as ApiEndpoint>::Req>,
 ) -> Result<CreatedJson<<endpoints::image::tag::Create as ApiEndpoint>::Res>, error::Tag> {
     let res =
@@ -39,7 +40,6 @@ pub(super) async fn create(
     Ok(CreatedJson(ImageTagResponse {
         index: res.0,
         display_name: res.1,
-        id: res.2,
     }))
 }
 
@@ -56,7 +56,7 @@ pub(super) async fn update(
         db.as_ref(),
         index.into_inner(),
         req.display_name.as_deref(),
-        req.index,
+        req.index.map(|it| it.0),
     )
     .await?;
 

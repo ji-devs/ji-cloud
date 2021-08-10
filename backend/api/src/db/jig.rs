@@ -6,7 +6,7 @@ use shared::domain::{
         additional_resource::AdditionalResourceId,
         module::{
             body::{cover, ThemeId},
-            ModuleBody, ModuleId,
+            ModuleId,
         },
         AudioBackground, AudioEffects, AudioFeedbackNegative, AudioFeedbackPositive, Jig, JigId,
         JigPlayerSettings, LiteModule, ModuleKind, TextDirection,
@@ -64,7 +64,7 @@ returning id
 
     let default_modules = [(
         ModuleKind::Cover,
-        serde_json::to_value(ModuleBody::Cover(cover::ModuleData::default()))
+        serde_json::to_value(cover::ModuleData::default())
             .expect("default cover module failed to serialize while creating jig"),
     )];
 

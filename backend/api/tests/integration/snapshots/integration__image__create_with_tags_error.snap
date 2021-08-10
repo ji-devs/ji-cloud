@@ -6,6 +6,10 @@ expression: body
 {
   "code": 422,
   "message": "Metadata not Found",
-  "id": "6389eaa0-de76-11ea-b7ab-0399bcf84df2",
-  "kind": "Tag"
+  "id": null,
+  "index": 22,
+  "kind": "Tag",
+  "media_group_kind": {
+    "media_kind": "image"
+  }
 }

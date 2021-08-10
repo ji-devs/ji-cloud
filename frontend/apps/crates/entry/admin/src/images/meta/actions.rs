@@ -16,7 +16,7 @@ use components::image::upload::{upload_image};
 use super::sections::common::categories::MutableCategory;
 use components::image::tag::ImageTag;
 
-pub fn load_initial(state: Rc<State>) -> Rc<RefCell<Option<(Rc<MutableImage>, Rc<Vec<Rc<MutableCategory>>>, Rc<MetadataResponse>, Rc<Vec<(ImageTag, TagId)>>)>>> {
+pub fn load_initial(state: Rc<State>) -> Rc<RefCell<Option<(Rc<MutableImage>, Rc<Vec<Rc<MutableCategory>>>, Rc<MetadataResponse>)>>> {
     let ret = Rc::new(RefCell::new(None));
 
     state.loader.load(clone!(state, ret => async move {
@@ -42,18 +42,20 @@ pub fn load_initial(state: Rc<State>) -> Rc<RefCell<Option<(Rc<MutableImage>, Rc
 
                 let meta:Rc<MetadataResponse> = Rc::new(meta_resp);
 
-                let tag_list:Rc<Vec<(ImageTag, TagId)>> = Rc::new(tag_list_resp.image_tags
-                    .into_iter()
-                    .map(|db_tag| {
-                        let tag = ImageTag::iter().find(|tag| tag.as_index() == db_tag.index).expect_ji(&format!("Tag for {} must exist!", db_tag.display_name));
-                        let tag_id = db_tag.id;
+                //Sanity check the tag list
+                for db_tag in tag_list_resp.image_tags.iter() {
+                    let _ = ImageTag::iter()
+                        .find(|tag| tag.as_index() == db_tag.index.0)
+                        .expect_ji(&format!("Image tag {} was in DB but not Rust!", db_tag.display_name));
+                }
 
-                        (tag, tag_id)
-                    })
-                    .collect()
-                );
+                for rust_tag in ImageTag::iter() {
+                    let _ = tag_list_resp.image_tags.iter()
+                        .find(|db_tag| db_tag.index.0 == rust_tag.as_index())
+                        .expect_ji(&format!("Image tag {} was in Rust but not Db!", rust_tag.STR_DISPLAY_NAME()));
+                }
 
-                *ret.borrow_mut() = Some((image, categories, meta, tag_list));
+                *ret.borrow_mut() = Some((image, categories, meta));
                 state.loaded.set(true);
             },
             errors => {

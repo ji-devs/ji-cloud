@@ -100,7 +100,9 @@ export class _ extends LitElement {
                 </div>
             </div>
             <div class="logo-nav-wrapper">
-                <img-ui class="logo collapsing-phase" path="entry/jig/logo-jigzi.svg"></img-ui>
+                <a href="/">
+                    <img-ui class="logo collapsing-phase" path="entry/jig/logo-jigzi.svg"></img-ui>
+                </a>
                 <nav class="open-only">
                     <slot name="gallery"></slot>
                     ${ this.isModulePage ? nothing : (html`

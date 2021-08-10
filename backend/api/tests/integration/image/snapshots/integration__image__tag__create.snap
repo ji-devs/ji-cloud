@@ -5,6 +5,5 @@ expression: body
 ---
 {
   "index": 3,
-  "display_name": "test name",
-  "id": "[id]"
+  "display_name": "test name"
 }

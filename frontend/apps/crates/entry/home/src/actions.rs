@@ -45,15 +45,6 @@ async fn fetch_total_jigs_count(state: Rc<State>) {
 
 async fn fetch_metadata(state: Rc<State>) {
     state.search_options.populate_options().await;
-
-    // if ages are not yet populated from profile set to default
-    let mut age_options = state.search_selected.age_ranges.lock_mut();
-    if age_options.len() == 0 {
-        let default_age = state.search_options.age_ranges.lock_ref()[0].id.clone();
-        age_options.insert(default_age);
-    };
-
-    // TODO: deal with goal/subject
 }
 
 async fn fetch_profile(state: Rc<State>) {

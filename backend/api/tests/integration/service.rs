@@ -2,7 +2,6 @@ use core::{
     env::req_env,
     settings::{EmailClientSettings, GoogleCloudStorageSettings},
 };
-use futures::future::Remote;
 use ji_cloud_api::{
     s3,
     service::{mail, storage},

@@ -25,7 +25,7 @@ use crate::{
 /// 2. Clamping to within the digit range requirement. For n = 4 digits with a range of `[0000, 9999]`,
 /// this is done as `code = abs(acc % 10000)`.
 /// 3. If the code is unique, stop.
-///     * Else there already exists a different player session with the same code. Rehash as `code_(i+1) = clamp(code_i + 2.pow(k))` where `k` is the # of attempts.
+///     * Else there already exists a different player session with the same code. Rehash as `code_(i+1) = clamp(code_i + 2.pow(i))` where `i` is the # of rehash attempts.
 pub struct Create;
 impl ApiEndpoint for Create {
     type Req = JigPlayerSessionCreateRequest;

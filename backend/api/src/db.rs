@@ -13,7 +13,9 @@ pub(crate) mod user;
 use core::config::DB_POOL_CONNECTIONS;
 use shared::domain::{
     category::CategoryId,
-    meta::{AffiliationId, AgeRangeId, AnimationStyleId, GoalId, ImageStyleId, SubjectId, TagId},
+    meta::{
+        AffiliationId, AgeRangeId, AnimationStyleId, GoalId, ImageStyleId, ImageTagIndex, SubjectId,
+    },
 };
 use sqlx::{
     postgres::{PgConnectOptions, PgPool, PgPoolOptions},
@@ -113,11 +115,15 @@ fn generate_metadata_insert(base_table: &str, meta_kind: &str, binds: usize) -> 
     s
 }
 
-async fn recycle_tags(
+trait TagIndex: Into<i16> + Copy {}
+
+impl TagIndex for ImageTagIndex {}
+
+async fn recycle_tags<T: TagIndex>(
     conn: &mut PgConnection,
     table: &str,
     id: Uuid,
-    meta: &[TagId],
+    tag_index: &[T],
 ) -> sqlx::Result<()> {
     sqlx::query(&format!(
         "delete from {0}_tag_join where {0}_id = $1",
@@ -127,13 +133,14 @@ async fn recycle_tags(
     .execute(&mut *conn)
     .await?;
 
-    for meta in meta.chunks(i16::MAX as usize - 1) {
-        let query = generate_tag_insert(table, meta.len());
+    for chunk in tag_index.chunks(i16::MAX as usize - 1) {
+        let query = generate_tag_insert(table, chunk.len());
+
         let mut query = sqlx::query(&query).bind(id);
 
-        for meta in meta {
-            let uuid: Uuid = meta.clone().into();
-            query = query.bind(uuid);
+        for tag in chunk {
+            let tag: i16 = tag.clone().into();
+            query = query.bind(tag);
         }
 
         query.execute(&mut *conn).await?;
@@ -147,7 +154,7 @@ fn generate_tag_insert(base_table: &str, binds: usize) -> String {
     debug_assert_ne!(binds, i16::MAX as usize);
 
     let mut s = format!(
-        "insert into {0}_tag_join ({0}_id, tag_id) values($1, $2)",
+        "insert into {0}_tag_join ({0}_id, tag_index) values($1, $2)",
         base_table,
     );
 

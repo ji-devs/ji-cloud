@@ -13,7 +13,7 @@ static MODULE_KINDS: &[ModuleKind] = &[
     ModuleKind::TappingBoard,
     ModuleKind::DragDrop,
     //ModuleKind::Tracing,
-    //ModuleKind::Video,
+    ModuleKind::Video,
     //ModuleKind::VisualQuiz,
 ];
 

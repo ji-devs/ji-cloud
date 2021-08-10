@@ -3,6 +3,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::domain::meta::MetaKind;
+use crate::media::MediaGroupKind;
 
 /// auth errors
 #[deprecated]
@@ -67,10 +68,15 @@ impl<T> ApiError<T> {}
 pub struct EmptyError {}
 
 /// Metadata associated with this operation could not be found.
-#[derive(serde::Serialize, serde::Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct MetadataNotFound {
     /// The (Optional) id of the item.
     pub id: Option<uuid::Uuid>,
+    /// The (Optional) index of the item.
+    pub index: Option<i16>,
     /// The item's kind.
     pub kind: MetaKind,
+    /// The (Optional) media group of the item where the error originated, for metadata types that
+    /// are split per media group kind.
+    pub media_group_kind: Option<MediaGroupKind>,
 }

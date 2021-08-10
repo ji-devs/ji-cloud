@@ -23,10 +23,10 @@ values ('533898ea-3367-11eb-a473-8f2df3b13671', 'Lesson Component', 0, '2020-11-
        ('533899b2-3367-11eb-a473-ef2577a4de84', 'Full Lesson', 1, '2020-11-30 23:54:39.198381+00'),
        ('53389a20-3367-11eb-a473-bbdc8773362a', 'Assessment', 2, '2020-11-30 23:54:39.198381+00');
 
-insert into "image_tag" (id, display_name, index, created_at)
-values ('591a2a64-a3a4-11eb-96e7-6bc0e819bc5f', 'A', 0, '2021-04-22 19:53:37.997394+00'),
-       ('5b032222-a3a4-11eb-96e7-dbc5742f1640', 'B', 1, '2021-04-22 19:53:37.997394+00'),
-       ('5e72c62e-a3a4-11eb-96e7-c78c34eb32ee', 'C', 2, '2021-04-22 19:53:37.997394+00');
+insert into "image_tag" (index, display_name, created_at)
+values (0, 'A', '2021-04-22 19:53:37.997394+00'),
+       (1, 'B', '2021-04-22 19:53:37.997394+00'),
+       (2, 'C', '2021-04-22 19:53:37.997394+00');
 
 insert into "animation_tag" (id, display_name, index, created_at)
 values ('73f5daac-adec-11eb-ab06-5b9996c1d1a8', 'A', 0, '2021-05-05 21:45:56.665492+00'),

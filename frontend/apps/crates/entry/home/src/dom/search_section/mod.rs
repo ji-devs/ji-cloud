@@ -18,6 +18,7 @@ mod advanced_search;
 mod categories_select;
 
 const STR_ALL_LANGUAGES: &'static str = "All languages";
+const STR_ALL_AGES: &'static str = "All ages";
 
 pub fn render(state: Rc<State>) -> Dom {
     fetch_data(state.clone());
@@ -130,7 +131,11 @@ fn age_value_signal(state: Rc<State>) -> impl Signal<Item = String> {
                     output.push(age.display_name.clone());
                 }
             });
-            output.join(", ")
+            if output.len() > 0 {
+                output.join(", ")
+            } else {
+                STR_ALL_AGES.to_string()
+            }
         }
     }
 }

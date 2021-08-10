@@ -3,9 +3,9 @@ use futures_signals::{
     signal::SignalExt,
     signal_vec::{MutableVec, SignalVecExt},
 };
-use shared::domain::jig::Jig;
+use shared::domain::jig::{Jig, JigPlayerSettings};
 use std::rc::Rc;
-use utils::ages::AgeRangeVecExt;
+use utils::{ages::AgeRangeVecExt, routes::{JigRoute, Route}};
 
 use crate::state::State;
 
@@ -61,8 +61,11 @@ fn render_result(state: Rc<State>, jig: &Jig) -> Dom {
             }),
             html!("button-rect", {
                 .property("slot", "play-button")
-                .property("color", "bluewhite")
+                .property("color", "blue")
+                // .property("kind", "outline")
                 .property("bold", true)
+                .property("target", "_blank")
+                .property("href", Route::Jig(JigRoute::Play(jig.id, None, JigPlayerSettings::default())).to_string())
                 .text("Play")
             }),
         ])

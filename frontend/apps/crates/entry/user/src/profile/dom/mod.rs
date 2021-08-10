@@ -1,4 +1,5 @@
 use std::rc::Rc;
+use components::page_header;
 use dominator::{Dom, clone, html, with_node};
 use futures_signals::{map_ref, signal::{Signal, SignalExt}, signal_vec::SignalVecExt};
 use shared::domain::meta::{Affiliation, AffiliationId, AgeRange, AgeRangeId, Subject, SubjectId};
@@ -24,6 +25,7 @@ impl ProfilePage {
         actions::load_initial_data(state.clone());
 
         html!("user-profile", {
+            .child(page_header::dom::render(Rc::new(page_header::state::State::new()), Some("page-header")))
             .property_signal("email", state.user.email.signal_cloned())
             .property_signal("name", full_name_signal(Rc::clone(&state)))
             .children(&mut [

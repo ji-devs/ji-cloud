@@ -7,18 +7,15 @@ expression: body
   "image_tags": [
     {
       "index": 0,
-      "display_name": "A",
-      "id": "[id]"
+      "display_name": "A"
     },
     {
       "index": 2,
-      "display_name": "C",
-      "id": "[id]"
+      "display_name": "C"
     },
     {
       "index": 15,
-      "display_name": "test",
-      "id": "[id]"
+      "display_name": "test"
     }
   ]
 }

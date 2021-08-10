@@ -11,8 +11,7 @@ pub async fn create(
     parent: JigId,
     body: ModuleBody,
 ) -> anyhow::Result<(ModuleId, u16)> {
-    let kind = body.kind();
-    let body = serde_json::to_value(body)?;
+    let (kind, body) = map_module_contents(&body)?;
 
     sqlx::query!(
         r#"

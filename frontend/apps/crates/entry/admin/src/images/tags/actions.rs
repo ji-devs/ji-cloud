@@ -45,7 +45,7 @@ impl ImageTags {
             let mut curr_list = state.list.lock_mut();
 
             for tag in ImageTag::iter() {
-                if let Some((index, curr)) = curr_list.iter().enumerate().find(|(index, curr)| curr.index == tag.as_index()) {
+                if let Some((index, curr)) = curr_list.iter().enumerate().find(|(index, curr)| curr.index.0 == tag.as_index()) {
                     if curr.display_name != tag.STR_DISPLAY_NAME() {
                         let req = ImageTagUpdateRequest {
                             display_name: Some(tag.STR_DISPLAY_NAME().to_string()),
@@ -56,7 +56,6 @@ impl ImageTags {
 
                         curr_list.set_cloned(index, Rc::new(ImageTagResponse {
                             index: curr.index,
-                            id: curr.id,
                             display_name: tag.STR_DISPLAY_NAME().to_string(),
                         }));
                     }
@@ -77,10 +76,10 @@ impl ImageTags {
 
             curr_list
                 .retain(|curr| {
-                    let flag = ImageTag::iter().find(|tag| tag.as_index() == curr.index).is_some();
+                    let flag = ImageTag::iter().find(|tag| tag.as_index() == curr.index.0).is_some();
                     
                     if !flag {
-                        to_remove.push(curr.index);
+                        to_remove.push(curr.index.0);
                     }
                     flag
                 });

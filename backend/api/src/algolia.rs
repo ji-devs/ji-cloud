@@ -1,5 +1,5 @@
 use algolia::{
-    filter::{AndFilterable, CommonFilter, FacetFilter, TagFilter},
+    filter::{AndFilterable, CommonFilter, FacetFilter, ScoredFacetFilter, TagFilter},
     request::{BatchWriteRequests, SearchQuery, VirtualKeyRestrictions},
     response::SearchResponse,
     ApiKey, AppId, Client as Inner,
@@ -14,9 +14,7 @@ use shared::{
         category::CategoryId,
         image::{ImageId, ImageKind},
         jig::JigId,
-        meta::AffiliationId,
-        meta::AgeRangeId,
-        meta::{GoalId, ImageStyleId, TagId},
+        meta::{AffiliationId, AgeRangeId, GoalId, ImageStyleId, ImageTagIndex},
     },
     media::MediaGroupKind,
 };
@@ -62,7 +60,7 @@ struct BatchImage<'a> {
     affiliation_names: &'a [String],
     categories: &'a [Uuid],
     category_names: &'a [String],
-    image_tags: &'a [Uuid],
+    image_tags: &'a [i16],
     image_tag_names: &'a [String],
     media_subkind: &'a str,
     #[serde(rename = "_tags")]
@@ -361,6 +359,7 @@ for no key update skip locked;
 
         // todo: allow for some way to do a partial update (for example, by having a channel for queueing partial updates)
         let requests: Vec<_> = sqlx::query!(
+            //language=SQL
             r#"
 select id,
     name,
@@ -386,10 +385,13 @@ select id,
            from category
                     inner join image_category on category.id = image_category.category_id
            where image_category.image_id = image_metadata.id))                               as "category_names!",
-    array((select tag_id from image_tag_join where image_id = image_metadata.id))       as "tags!",
-    array((select name
+    array((select index 
+           from image_tag 
+               inner join image_tag_join on image_tag.index = image_tag_join.tag_index
+           where image_tag_join.image_id = image_metadata.id))                               as "tags!",
+    array((select display_name
            from image_tag
-                    inner join image_tag_join on image_tag.id = image_tag_join.tag_id
+                    inner join image_tag_join on image_tag.index = image_tag_join.tag_index
            where image_tag_join.image_id = image_metadata.id))                               as "tag_names!",
     (publish_at < now() is true) as "is_published!",
     is_premium
@@ -506,22 +508,47 @@ fn filters_for_ids<T: Into<Uuid> + Copy>(
     }
 }
 
-// fn fitlers_for_int_ids<T: Into<i64> + Copy>(
-//     filters: &mut Vec<Box<dyn AndFilterable>>,
-//     facet_name: &str,
-//     ids: &[T],
-// ) {
-//     for id in ids.iter().copied() {
-//         let id: i64 = id.into();
-//         filters.push(Box::new(CommonFilter {
-//             filter: FacetFilter {
-//                 facet_name: facet_name.to_owned(),
-//                 value: id.to_string(),
-//             },
-//             invert: false,
-//         }))
-//     }
-// }
+/// Filter with ordered priority.
+///
+/// If using priority scoring, this can only rank the first 62 items.
+/// This is because scores are weighted exponentially and i64::MAX = 2^63-1. 63 less one so that
+/// it does not overflow when summed with lesser scores.
+///
+/// The remaining will be assigned a score of 1, which is the default score for all filters.
+fn filters_for_ints_with_scoring(
+    filters: &mut Vec<Box<dyn AndFilterable>>,
+    facet_name: &str,
+    ints: &[i64],
+) {
+    const I64_BITS: u32 = 64;
+    let count = ints.len() as u32;
+
+    // start with the score for the highest priority tag
+    let mut score = match count > I64_BITS - 1 {
+        true => 1_i64 << (I64_BITS - 2), // 2_i64.pow(i64::BITS - 1),
+        false if count == 0 => return,
+        false => 1_i64 << (count - 1),
+    };
+
+    // computes the score for the next lower priority tag
+    let next_score = |score: &mut i64| match *score > 1 {
+        true => *score = *score >> 1,
+        false => *score = 1,
+    };
+
+    for v in ints.iter() {
+        filters.push(Box::new(CommonFilter {
+            filter: ScoredFacetFilter {
+                facet_name: facet_name.to_owned(),
+                value: v.to_string(),
+                score,
+            },
+            invert: false,
+        }));
+
+        next_score(&mut score)
+    }
+}
 
 fn media_filter(kind: MediaGroupKind, invert: bool) -> CommonFilter<FacetFilter> {
     CommonFilter {
@@ -577,7 +604,7 @@ impl Client {
         age_ranges: &[AgeRangeId],
         affiliations: &[AffiliationId],
         categories: &[CategoryId],
-        tags: &[TagId],
+        tags: &[ImageTagIndex],
     ) -> anyhow::Result<Option<(Vec<Uuid>, u32, u64)>> {
         let mut filters = algolia::filter::AndFilter {
             filters: vec![Box::new(media_filter(MediaGroupKind::Image, false))],
@@ -601,7 +628,14 @@ impl Client {
         filters_for_ids(&mut filters.filters, "age_ranges", age_ranges);
         filters_for_ids(&mut filters.filters, "affiliations", affiliations);
         filters_for_ids(&mut filters.filters, "categories", categories);
-        filters_for_ids(&mut filters.filters, "image_tags", tags);
+        filters_for_ints_with_scoring(
+            &mut filters.filters,
+            "image_tags",
+            tags.iter()
+                .map(|it| it.0 as i64)
+                .collect::<Vec<i64>>()
+                .as_ref(),
+        );
 
         let results: SearchResponse = self
             .inner
@@ -613,6 +647,7 @@ impl Client {
                     get_ranking_info: true,
                     filters: Some(filters),
                     hits_per_page: None,
+                    sum_or_filters_scores: true,
                 },
             )
             .await?;
@@ -697,6 +732,7 @@ impl Client {
                     get_ranking_info: true,
                     filters: Some(filters),
                     hits_per_page: None,
+                    sum_or_filters_scores: false,
                 },
             )
             .await?;

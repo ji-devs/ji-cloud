@@ -12,24 +12,23 @@ use shared::domain::category::*;
 use shared::domain::meta::*;
 use dominator::{html, clone, Dom};
 use components::image::tag::ImageTag;
+use strum::IntoEnumIterator;
 
 pub struct State {
     pub meta: Rc<MetaState>,
     pub image: Rc<MutableImage>,
     pub metadata: Rc<MetadataResponse>,
     pub categories: Rc<Vec<Rc<MutableCategory>>>,
-    pub tag_list: Rc<Vec<(ImageTag, TagId)>>,
 }
 
 
 impl State {
-    pub fn new(meta: Rc<MetaState>, image: Rc<MutableImage>, metadata: Rc<MetadataResponse>, categories: Rc<Vec<Rc<MutableCategory>>>, tag_list: Rc<Vec<(ImageTag, TagId)>>) -> Self {
+    pub fn new(meta: Rc<MetaState>, image: Rc<MutableImage>, metadata: Rc<MetadataResponse>, categories: Rc<Vec<Rc<MutableCategory>>>) -> Self {
         Self {
             meta,
             image,
             metadata,
             categories,
-            tag_list,
         }
     }
 
@@ -78,18 +77,14 @@ impl State {
     }
 
     pub fn tags(&self) -> impl SignalVec<Item = String>  {
-        let tag_list = self.tag_list.clone();
-
-        self.image.tag_ids.signal_ref(clone!(tag_list => move |ids| {
-            ids
+        self.image.tag_indices.signal_ref(|tag_indices| {
+            tag_indices
                 .iter()
-                .map(|id| {
-                    tag_list.iter().find(|(_, tag_id)| *tag_id == *id)
-                        .map(|(tag, _)| tag.STR_DISPLAY_NAME().to_string())
-                        .unwrap_or_default()
+                .map(|tag_index| {
+                    ImageTag::from(*tag_index).STR_DISPLAY_NAME().to_string()
                 })
                 .collect::<Vec<String>>()
-        }))
+        })
         .to_signal_vec()
     }
 }
