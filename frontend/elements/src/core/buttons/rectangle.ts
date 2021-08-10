@@ -84,9 +84,10 @@ export class _ extends LitElement {
                 }
 
                 button, a {
-                    all: inherit;
-                    /* not sure why but color is not inherited with all */
+                    all: initial;
+                    font-family: inherit;
                     color: inherit;
+                    cursor: inherit;
                 }
             `
         ];
@@ -130,14 +131,14 @@ export class _ extends LitElement {
 
     private renderButton() {
         return html`
-            <button class="inner" type="${this.submit ? 'submit' : 'button' }" ?disabled="${this.disabled}">
+            <button part="button" class="inner" type="${this.submit ? 'submit' : 'button' }" ?disabled="${this.disabled}">
                 <slot></slot>
             </button>
         `;
     }
     private renderLink() {
         return html`
-            <a class="inner" href=${this.href!} @click=${this.onClick} target=${ifDefined(this.target as any)}>
+            <a part="a" class="inner" href=${this.href!} @click=${this.onClick} target=${ifDefined(this.target as any)}>
                 <slot></slot>
             </a>
         `;
