@@ -191,6 +191,17 @@ impl RemoteTarget {
         }
     }
 
+    pub fn screenshot_url(&self) -> String {
+        match self {
+            Self::Local | Self::Sandbox => {
+                format!("{}/queueScreenshotSandbox", self.cloud_functions_url())
+            }
+            Self::Release => {
+                format!("{}/queueScreenshotRelease", self.cloud_functions_url())
+            }
+        }
+    }
+
     pub const fn cloud_functions_url(&self) -> &'static str {
         match self {
             Self::Local | Self::Sandbox => {

@@ -34,14 +34,9 @@ struct ScreenshotResponse {
 }
 
 pub async fn call_screenshot_service(jig_id: JigId, module_id: ModuleId, kind: ModuleKind) {
-    let cloud_functions_url = SETTINGS.get().unwrap_ji().remote_target.cloud_functions_url();
+    let screenshot_url = SETTINGS.get().unwrap_ji().remote_target.screenshot_url();
 
-    //TIP: swap endpoint with "showScreenshotSandbox" to debug url in browser and see the image
-    //or "saveScreenshotSandbox" to save it
-    let endpoint = "queueScreenshotSandbox"; 
-
-    let url = format!("{}/{}?jig={}&module={}&kind={}", cloud_functions_url, endpoint, jig_id.0.to_string(), module_id.0.to_string(), kind.as_str());
-
+    let url = format!("{}?jig={}&module={}&kind={}", screenshot_url, jig_id.0.to_string(), module_id.0.to_string(), kind.as_str());
 
     match fetch_url(&url).await {
         Ok(resp) => {
