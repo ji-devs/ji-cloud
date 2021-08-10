@@ -520,11 +520,12 @@ fn filters_for_ints_with_scoring(
     facet_name: &str,
     ints: &[i64],
 ) {
+    const I64_BITS: u32 = 64;
     let count = ints.len() as u32;
 
     // start with the score for the highest priority tag
-    let mut score = match count > i64::BITS - 1 {
-        true => 1_i64 << (i64::BITS - 2), // 2_i64.pow(i64::BITS - 1),
+    let mut score = match count > I64_BITS - 1 {
+        true => 1_i64 << (I64_BITS - 2), // 2_i64.pow(i64::BITS - 1),
         false if count == 0 => return,
         false => 1_i64 << (count - 1),
     };
