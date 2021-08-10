@@ -2,7 +2,7 @@ use dominator::{Dom, html};
 use futures_signals::signal::Signal;
 use std::rc::Rc;
 use utils::routes::{HomeRoute, Route};
-use super::home;
+use super::{home, student_code};
 
 
 pub struct Router {
@@ -30,7 +30,7 @@ impl Router {
                                 Some(home::dom::render(Rc::new(home::state::State::new())))
                             },
                             HomeRoute::StudentCode => {
-                                Some(html!("progress"))
+                                Some(student_code::dom::render(Rc::new(student_code::state::State::new())))
                             },
                         }
                     }

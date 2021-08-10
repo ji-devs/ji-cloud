@@ -1,6 +1,6 @@
 import { LitElement, html, css, customElement, query, internalProperty } from 'lit-element';
 import "@elements/core/carousel/single";
-import "@elements/entry/home/icon-arrow";
+import "@elements/entry/home/home/icon-arrow";
 import { CarouselSingle } from '@elements/core/carousel/single';
 
 

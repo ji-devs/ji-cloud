@@ -1,8 +1,8 @@
-import "@elements/entry/home/why-ji/home-why-ji";
+import "@elements/entry/home/home/why-ji/home-why-ji";
 
 
 export default {
-    title: 'Entry/ Home / Why Ji',
+    title: 'Entry / Home / Home / Why Ji',
 }
 
 

@@ -1,11 +1,11 @@
-import "@elements/entry/home/whats-new/home-whats-new";
+import "@elements/entry/home/home/whats-new/home-whats-new";
 import "@elements/core/titles/variants/title-section";
 import { WhatsNewItem } from "./whats-new-item";
 import { arrayCount, mapToString } from "@utils/array";
 
 
 export default {
-    title: "Entry/ Home / What's new",
+    title: "Entry / Home / Home / What's new",
 }
 
 interface Args {

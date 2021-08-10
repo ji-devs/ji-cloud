@@ -1,9 +1,9 @@
 import {argsToAttrs} from "@utils/attributes";
-import "@elements/entry/home/search-results/search-results";
+import "@elements/entry/home/home/search-results/search-results";
 import { ResultsSection } from "./search-results-section";
 
 export default {
-    title: "Entry / Home / Search results"
+    title: "Entry / Home / Home / Search results"
 }
 
 interface Args {

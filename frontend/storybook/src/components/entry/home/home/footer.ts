@@ -1,7 +1,7 @@
-import "@elements/entry/home/footer/footer";
+import "@elements/entry/home/home/footer/footer";
 
 export default {
-    title: 'Entry/ Home / Footer',
+    title: 'Entry / Home / Home / Footer',
 }
 
 export const Footer = () => {

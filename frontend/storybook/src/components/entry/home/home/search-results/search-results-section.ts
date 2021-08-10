@@ -1,10 +1,10 @@
 import {argsToAttrs} from "@utils/attributes";
-import "@elements/entry/home/search-results/search-results-section";
-import { Kind } from "@elements/entry/home/search-results/search-results-section";
+import "@elements/entry/home/home/search-results/search-results-section";
+import { Kind } from "@elements/entry/home/home/search-results/search-results-section";
 import { SearchResult } from "./search-result";
 
 export default {
-    title: "Entry / Home / Search results"
+    title: "Entry / Home / Home / Search results"
 }
 
 interface Args {

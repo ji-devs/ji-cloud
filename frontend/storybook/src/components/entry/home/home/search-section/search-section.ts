@@ -1,10 +1,10 @@
-import "@elements/entry/home/search-section/search-section";
-import { Mode } from "@elements/entry/home/search-section/search-section";
-import "@elements/entry/home/search-section/search-section-help";
+import "@elements/entry/home/home/search-section/search-section";
+import { Mode } from "@elements/entry/home/home/search-section/search-section";
+import "@elements/entry/home/home/search-section/search-section-help";
 import { argsToAttrs } from "@utils/attributes";
-import { SearchBar } from "~/components/entry/home/search-section/search-bar";
+import { SearchBar } from "~/components/entry/home/home/search-section/search-bar";
 export default {
-    title: 'Entry / Home / Search section',
+    title: 'Entry / Home / Home / Search section',
 }
 
 

@@ -1,9 +1,9 @@
-import "@elements/entry/home/whats-new/home-new-item";
+import "@elements/entry/home/home/whats-new/home-new-item";
 
 
 
 export default {
-    title: "Entry/ Home / What's new",
+    title: "Entry / Home / Home / What's new",
 }
 
 const STR_SUBTITLE = "HOP TV - New Hebrew Series";

@@ -1,7 +1,7 @@
-import "@elements/entry/home/quick-search/quick-search-item";
+import "@elements/entry/home/home/quick-search/quick-search-item";
 
 export default {
-    title: 'Entry / Home / Quick search',
+    title: 'Entry / Home / Home / Quick search',
 }
 
 export const QuickSearchItem = () => {

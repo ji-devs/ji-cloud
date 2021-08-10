@@ -1,11 +1,11 @@
 import {argsToAttrs} from "@utils/attributes";
-import "@elements/entry/home/search-results/search-result";
-import "@elements/entry/home/search-results/search-result-details";
-import "@elements/entry/home/search-results/search-result-category";
+import "@elements/entry/home/home/search-results/search-result";
+import "@elements/entry/home/home/search-results/search-result-details";
+import "@elements/entry/home/home/search-results/search-result-category";
 import { Details } from "./search-result-details";
 
 export default {
-    title: "Entry / Home / Search results"
+    title: "Entry / Home / Home / Search results"
 }
 
 interface Args {

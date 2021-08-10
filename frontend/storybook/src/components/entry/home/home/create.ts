@@ -1,7 +1,7 @@
-import "@elements/entry/home/create/home-create";
+import "@elements/entry/home/home/create/home-create";
 
 export default {
-    title: 'Entry/ Home / Create',
+    title: 'Entry / Home / Home / Create',
 }
 
 export const Create = () => {

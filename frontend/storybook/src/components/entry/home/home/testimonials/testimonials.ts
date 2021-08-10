@@ -1,11 +1,11 @@
-import "@elements/entry/home/testimonials/testimonials";
+import "@elements/entry/home/home/testimonials/testimonials";
 import { TestimonialItem } from "./testimonial-item";
 import { arrayCount, mapToString } from "@utils/array";
 
 
 
 export default {
-    title: 'Entry/ Home / Testimonial',
+    title: 'Entry / Home / Home / Testimonial',
 }
 
 interface Args {

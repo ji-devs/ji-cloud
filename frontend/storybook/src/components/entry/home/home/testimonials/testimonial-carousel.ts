@@ -1,10 +1,10 @@
-import "@elements/entry/home/testimonials/testimonial-carousel";
+import "@elements/entry/home/home/testimonials/testimonial-carousel";
 import { arrayCount, mapToString } from "@utils/array";
 import { TestimonialItem } from "./testimonial-item";
 
 
 export default {
-    title: 'Entry/ Home / Testimonial',
+    title: 'Entry / Home / Home / Testimonial',
 }
 
 interface Args {

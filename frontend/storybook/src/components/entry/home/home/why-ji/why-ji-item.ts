@@ -1,9 +1,9 @@
-import "@elements/entry/home/why-ji/home-why-ji-item";
-import { Kind } from "@elements/entry/home/why-ji/home-why-ji-item";
+import "@elements/entry/home/home/why-ji/home-why-ji-item";
+import { Kind } from "@elements/entry/home/home/why-ji/home-why-ji-item";
 import { argsToAttrs } from "@utils/attributes";
 
 export default {
-    title: 'Entry/ Home / Why Ji',
+    title: 'Entry / Home / Home / Why Ji',
 }
 
 interface ParagraphArgs {

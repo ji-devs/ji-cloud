@@ -1,8 +1,8 @@
-import "@elements/entry/home/testimonials/testimonial-item";
+import "@elements/entry/home/home/testimonials/testimonial-item";
 
 
 export default {
-    title: 'Entry/ Home / Testimonial',
+    title: 'Entry / Home / Home / Testimonial',
 }
 
 interface Args {

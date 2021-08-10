@@ -1,6 +1,6 @@
-import "@elements/entry/home/search-section/search-section-help";
+import "@elements/entry/home/home/search-section/search-section-help";
 export default {
-    title: 'Entry / Home / Search section',
+    title: 'Entry / Home / Home / Search section',
 }
 
 
