@@ -34,7 +34,6 @@ pub async fn create(
 #[api_v2_operation]
 pub async fn get(
     db: Data<PgPool>,
-    _claims: TokenUser,
     path: web::Path<i16>,
 ) -> Result<Json<<player::Get as ApiEndpoint>::Res>, error::JigCode> {
     let code = path.into_inner();
