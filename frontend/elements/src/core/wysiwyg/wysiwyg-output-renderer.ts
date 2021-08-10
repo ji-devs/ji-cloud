@@ -20,9 +20,7 @@ export class _ extends LitElement {
     static get styles() {
         return [baseStyles, css`
             :host {
-                /* TO FIX:
-                    white-space: pre-wrap;
-                */
+                white-space: pre-wrap;
                 overflow-wrap: break-word;
             }
         `];
@@ -51,34 +49,22 @@ export class _ extends LitElement {
         else this.value = JSON.parse(v);
     }
 
+    // keep the render functions in one line since we're using `white-space: pre-wrap` so every extra new-line or whitespace will be reflected on the output
+
     private renderElement(element: EditorElement) {
         const styles = getElementStyles(element) as StyleInfo;
-        return html`
-            <p style=${styleMap(styles)}>
-                ${ element.children.map(leaf => {
-                    return this.renderLeaf(leaf);
-                }) }
-            </p>
-        `;
+        return html`<p style=${styleMap(styles)}>${ element.children.map(leaf => {return this.renderLeaf(leaf);}) }</p>`;
     }
 
     private renderLeaf(leaf: EditorText) {
         const styles = getLeafStyles(leaf) as StyleInfo;
-        return html`
-            <span style=${styleMap(styles)} type="${ifDefined(leaf.element)}">
-                ${ leaf.text === "" ? html`<br>` : leaf.text }
-            </span>
-        `;
+        return html`<span style=${styleMap(styles)} type="${ifDefined(leaf.element)}">${ leaf.text === "" ? html`<br>` : leaf.text }</span>`;
     }
 
     public render() {
-        return html`
-            ${getRootStyles(this.value)}
-
-            ${ this.value.content.map(element => {
-                return this.renderElement(element);
-            }) }
-        `;
+        return html`${getRootStyles(this.value)}${ this.value.content.map(element => {
+            return this.renderElement(element);
+        }) }`;
     }
 
 }
