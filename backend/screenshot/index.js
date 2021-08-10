@@ -16,7 +16,7 @@ const THUMB_WIDTH = BROWSER_WIDTH * (THUMB_HEIGHT / BROWSER_HEIGHT);
 require('dotenv').config();
 
 //TEST URL: http://localhost:8081/?jig=d46ca2d2-eeef-11eb-8c76-77f818ce2b73&module=d9f674c6-eeef-11eb-b38c-e75f7ef16f01&kind=tapping-board
-//
+
 exports.showScreenshotRelease = makeShowScreenshot("https://jigzi.org");
 exports.showScreenshotSandbox = makeShowScreenshot("https://sandbox.jigzi.org");
 exports.saveScreenshotRelease = makeSaveScreenshot("https://jigzi.org", "ji-cloud-uploads-origin-eu-001");
