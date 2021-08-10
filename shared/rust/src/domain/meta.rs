@@ -56,22 +56,30 @@ pub struct SubjectId(pub Uuid);
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct GoalId(pub Uuid);
 
-/// Wrapper type around [`Uuid`], represents [`Tag::id`].
-#[derive(Hash, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[cfg_attr(feature = "backend", sqlx(transparent))]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-pub struct TagId(pub Uuid);
-
 into_uuid!(
     ImageStyleId,
     AnimationStyleId,
     AffiliationId,
     AgeRangeId,
     SubjectId,
-    GoalId,
-    TagId
+    GoalId
 );
+
+/// Wrapper type around [`i16`](std::i16), represents the index of an image tag.
+///
+/// This is used instead of UUIDs for image tags as they aren't created dynamically and
+/// a simple and consistent way to identify them is desired.
+#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[cfg_attr(feature = "backend", sqlx(transparent))]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+pub struct ImageTagIndex(pub i16);
+
+impl From<ImageTagIndex> for i16 {
+    fn from(value: ImageTagIndex) -> Self {
+        value.0
+    }
+}
 
 /// Represents an image style.
 #[derive(Serialize, Deserialize, Debug)]
@@ -178,12 +186,9 @@ pub struct Goal {
 /// Represents a tag.
 #[derive(Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-pub struct Tag {
+pub struct ImageTag {
     /// Index of the tag.
-    pub index: i16,
-
-    /// The id of the tag.
-    pub id: TagId,
+    pub index: ImageTagIndex,
 
     /// The tag's name.
     pub display_name: String,
@@ -221,7 +226,7 @@ pub struct MetadataResponse {
     pub goals: Vec<Goal>,
 
     /// All tags for images.
-    pub image_tags: Vec<Tag>,
+    pub image_tags: Vec<ImageTag>,
 }
 
 /// Metadata kinds.

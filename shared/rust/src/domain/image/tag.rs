@@ -1,9 +1,10 @@
 //! Types to manage image tags.
 
-use crate::domain::meta::TagId;
 #[cfg(feature = "backend")]
 use paperclip::actix::Apiv2Schema;
 use serde::{Deserialize, Serialize};
+
+use crate::domain::meta::ImageTagIndex;
 
 /// Request to create an image tag.
 #[derive(Serialize, Deserialize, Debug)]
@@ -17,7 +18,7 @@ pub struct ImageTagCreateRequest {
 #[derive(Serialize, Deserialize)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct ImageTagListResponse {
-    /// Indexes and ids for all the image tags.
+    /// Indices for all the image tags.
     pub image_tags: Vec<ImageTagResponse>,
 }
 
@@ -26,13 +27,10 @@ pub struct ImageTagListResponse {
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct ImageTagResponse {
     /// The index of the image tag found.
-    pub index: i16,
+    pub index: ImageTagIndex,
 
     /// The display name of the image tag found.
     pub display_name: String,
-
-    /// The id of the image tag found.
-    pub id: TagId,
 }
 
 /// Request to update an image tag.
@@ -46,5 +44,5 @@ pub struct ImageTagUpdateRequest {
     /// change the indexing.
     ///
     /// If `index` is [`None`] then it will not be updated.
-    pub index: Option<i16>,
+    pub index: Option<ImageTagIndex>,
 }

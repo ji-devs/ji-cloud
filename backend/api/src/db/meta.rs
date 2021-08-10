@@ -1,7 +1,8 @@
 use shared::domain::meta::{
     Affiliation, AffiliationId, AgeRange, AgeRangeId, AnimationStyle, AnimationStyleId, Goal,
-    GoalId, ImageStyle, ImageStyleId, MetaKind, Subject, SubjectId, Tag, TagId,
+    GoalId, ImageStyle, ImageStyleId, ImageTag, ImageTagIndex, MetaKind, Subject, SubjectId,
 };
+use shared::media::MediaGroupKind;
 use sqlx::{postgres::PgDatabaseError, PgPool};
 use uuid::Uuid;
 
@@ -87,11 +88,11 @@ order by index
     .await
 }
 
-pub async fn get_image_tags(db: &PgPool) -> sqlx::Result<Vec<Tag>> {
+pub async fn get_image_tags(db: &PgPool) -> sqlx::Result<Vec<ImageTag>> {
     sqlx::query_as!(
-        Tag,
+        ImageTag,
         r#"
-        select id as "id: TagId", display_name, created_at, updated_at, index from "image_tag"
+        select index as "index: ImageTagIndex", display_name, created_at, updated_at from "image_tag"
         order by index
     "#
     )
@@ -108,11 +109,28 @@ fn extract_uuid(s: &str) -> Option<Uuid> {
     s.parse().ok()
 }
 
+// attempts to grab an i16 out of a string in the shape:
+// Key (<key>)=(<integer>)<postfix>
+fn extract_index(s: &str) -> Option<i16> {
+    // <int>)<postfix)
+    let s = s.split('(').nth(2)?;
+    i16::from_str_radix(&s[0..s.find(')')?], 10).ok()
+}
+
 // "WrapperError isn't a good description."
+//
+// WARN: unstable. will most likely be updated as
 #[allow(clippy::module_name_repetitions)]
 pub enum MetaWrapperError {
     Sqlx(sqlx::Error),
-    MissingMetadata { id: Option<Uuid>, kind: MetaKind },
+    MissingMetadata {
+        id: Option<Uuid>,
+        kind: MetaKind,
+    },
+    MissingTag {
+        index: Option<i16>,
+        media_group_kind: MediaGroupKind,
+    },
 }
 
 pub fn handle_metadata_err(err: sqlx::Error) -> MetaWrapperError {
@@ -129,7 +147,13 @@ pub fn handle_metadata_err(err: sqlx::Error) -> MetaWrapperError {
         Some("image_style_style_id_fkey") => MetaKind::ImageStyle,
         Some("image_category_category_id_fkey") => MetaKind::Category,
         Some("jig_goal_goal_id_fkey") => MetaKind::Goal,
-        Some("image_tag_join_tag_id_fkey") => MetaKind::Tag,
+        Some("image_tag_join_tag_index_fkey") => {
+            let index = db_err.detail().and_then(extract_index);
+            return MetaWrapperError::MissingTag {
+                index,
+                media_group_kind: MediaGroupKind::Image,
+            };
+        }
 
         _ => return MetaWrapperError::Sqlx(err),
     };

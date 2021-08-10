@@ -4,6 +4,7 @@ use crate::{
 };
 use http::StatusCode;
 use shared::domain::image::tag::{ImageTagCreateRequest, ImageTagUpdateRequest};
+use shared::domain::meta::ImageTagIndex;
 
 #[actix_rt::test]
 async fn create() -> anyhow::Result<()> {
@@ -139,7 +140,7 @@ async fn update_with_index() -> anyhow::Result<()> {
         1,
         ImageTagUpdateRequest {
             display_name: Some("test".to_owned()),
-            index: Some(15),
+            index: Some(ImageTagIndex(15)),
         },
     )
     .await
@@ -163,7 +164,7 @@ async fn update_only_index() -> anyhow::Result<()> {
         1,
         ImageTagUpdateRequest {
             display_name: None,
-            index: Some(3),
+            index: Some(ImageTagIndex(3)),
         },
     )
     .await
@@ -181,7 +182,7 @@ async fn update_conflict() -> anyhow::Result<()> {
         .patch(&format!("http://0.0.0.0:{}/v1/image/tag/{}", port, 1))
         .json(&ImageTagUpdateRequest {
             display_name: None,
-            index: Some(0),
+            index: Some(ImageTagIndex(0)),
         })
         .login()
         .send()

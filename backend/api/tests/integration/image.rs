@@ -17,7 +17,7 @@ async fn create(
     age_ranges: &[Uuid],
     affiliations: &[Uuid],
     categories: &[Uuid],
-    tags: &[Uuid],
+    tags: &[i16],
 ) -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::MetaKinds], &[]).await;
 
@@ -82,12 +82,49 @@ async fn create_with_meta() -> anyhow::Result<()> {
         &["f3722790-de76-11ea-b7ab-77b45e9af3ef".parse()?],
         &["c0cd4446-de76-11ea-b7ab-93987e8aa112".parse()?],
         &[],
-        &["5e72c62e-a3a4-11eb-96e7-c78c34eb32ee".parse()?],
+        &[1],
     )
     .await
 }
 
 async fn create_error(kind: &str, id: &str) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User], &[]).await;
+
+    let port = app.port();
+
+    let client = reqwest::Client::new();
+
+    let resp = client
+        .post(&format!("http://0.0.0.0:{}/v1/image", port))
+        .login()
+        .json(&json!({
+            "name": "test",
+            "description": "testest",
+            "is_premium": false,
+            "publish_at": null,
+            "styles": [],
+            "age_ranges": [],
+            "affiliations": [],
+            "categories": [],
+            "tags": [],
+            "kind": "Canvas",
+            kind: [id],
+        }))
+        .send()
+        .await?;
+
+    assert_eq!(resp.status(), StatusCode::UNPROCESSABLE_ENTITY);
+
+    let body: serde_json::Value = resp.json().await?;
+
+    app.stop(false).await;
+
+    insta::assert_json_snapshot!(body);
+
+    Ok(())
+}
+
+async fn create_error_tag(kind: &str, id: &i16) -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User], &[]).await;
 
     let port = app.port();
@@ -146,7 +183,7 @@ async fn create_with_category_error() -> anyhow::Result<()> {
 
 #[actix_rt::test]
 async fn create_with_tags_error() -> anyhow::Result<()> {
-    create_error("tags", "6389eaa0-de76-11ea-b7ab-0399bcf84df2").await
+    create_error_tag("tags", &22).await
 }
 
 #[actix_rt::test]
@@ -199,6 +236,8 @@ async fn update(req: &serde_json::Value) -> anyhow::Result<()> {
 
     let client = reqwest::Client::new();
 
+    log::info!("{:?}", req);
+
     let resp = client
         .patch(&format!(
             "http://0.0.0.0:{}/v1/image/3095d05e-f2c7-11ea-89c3-3b621dd74a1f",
@@ -250,7 +289,7 @@ async fn update_styles() -> anyhow::Result<()> {
 
 #[actix_rt::test]
 async fn update_tags() -> anyhow::Result<()> {
-    update(&json!({"tags": ["591a2a64-a3a4-11eb-96e7-6bc0e819bc5f", "5b032222-a3a4-11eb-96e7-dbc5742f1640"]})).await
+    update(&json!({"tags": [0, 2]})).await
 }
 
 #[actix_rt::test]
