@@ -218,7 +218,7 @@ pub struct ImageSearchQuery {
     /// the first 62 tags. The remaining are all given a score of 1.  
     ///
     /// ## Example
-    /// For a example request `[clothing, food, red, sports]`, we assign the scores:
+    /// For an example request `[clothing, food, red, sports]`, we assign the scores:
     ///
     /// | tag name  | score | (truncated) bit vector score  |
     /// |-----------|-------|-------------------------------|
