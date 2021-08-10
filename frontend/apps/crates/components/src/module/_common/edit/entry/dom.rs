@@ -27,6 +27,7 @@ pub fn render_page_body<Mode, Step, RawData, Base, Main, Sidebar, Header, Footer
     Step: StepExt + 'static,
     RawData: BodyExt<Mode, Step> + 'static,
 {
+
     let sig = map_ref! {
         let phase = state.phase.signal_cloned(),
         let is_preview = state.is_preview_signal()
