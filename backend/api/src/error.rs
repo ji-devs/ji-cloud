@@ -26,6 +26,7 @@ pub use user::{
 
 pub mod event_arc;
 pub use event_arc::EventArc;
+use shared::domain::meta::MetaKind;
 
 /// Represents an error returned by the api.
 // mostly used in this module
@@ -501,8 +502,22 @@ impl From<MetaWrapperError> for CreateWithMetadata {
         match e {
             MetaWrapperError::Sqlx(e) => Self::InternalServerError(e.into()),
             MetaWrapperError::MissingMetadata { id, kind } => {
-                Self::MissingMetadata(MetadataNotFound { id, kind })
+                Self::MissingMetadata(MetadataNotFound {
+                    id,
+                    index: None,
+                    kind,
+                    media_group_kind: None,
+                })
             }
+            MetaWrapperError::MissingTag {
+                index,
+                media_group_kind,
+            } => Self::MissingMetadata(MetadataNotFound {
+                id: None,
+                index,
+                kind: MetaKind::Tag,
+                media_group_kind: Some(media_group_kind),
+            }),
         }
     }
 }
@@ -512,8 +527,22 @@ impl From<MetaWrapperError> for UpdateWithMetadata {
         match e {
             MetaWrapperError::Sqlx(e) => Self::InternalServerError(e.into()),
             MetaWrapperError::MissingMetadata { id, kind } => {
-                Self::MissingMetadata(MetadataNotFound { id, kind })
+                Self::MissingMetadata(MetadataNotFound {
+                    id,
+                    index: None,
+                    kind,
+                    media_group_kind: None,
+                })
             }
+            MetaWrapperError::MissingTag {
+                index,
+                media_group_kind,
+            } => Self::MissingMetadata(MetadataNotFound {
+                id: None,
+                index,
+                kind: MetaKind::Tag,
+                media_group_kind: Some(media_group_kind),
+            }),
         }
     }
 }
