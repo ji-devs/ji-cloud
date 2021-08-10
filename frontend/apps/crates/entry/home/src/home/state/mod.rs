@@ -1,9 +1,11 @@
 use std::{iter, rc::Rc};
 
-use super::search_state::{SearchOptions, SearchSelected};
+use search_state::{SearchOptions, SearchSelected};
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::{signal::Mutable, signal_vec::MutableVec};
 use shared::domain::jig::Jig;
+
+mod search_state;
 
 pub struct State {
     pub loader: AsyncLoader,

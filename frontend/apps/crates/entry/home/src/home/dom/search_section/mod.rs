@@ -7,7 +7,7 @@ use std::rc::Rc;
 use utils::{events, unwrap::UnwrapJiExt};
 use web_sys::HtmlInputElement;
 
-use crate::state::HomePageMode;
+use super::super::state::HomePageMode;
 
 use super::super::{
     actions::{fetch_data, search},

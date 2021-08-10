@@ -17,11 +17,17 @@ pub enum Route {
     NoAuth,
     User(UserRoute),
     Admin(AdminRoute),
-    Home,
+    Home(HomeRoute),
     Jig(JigRoute),
     Legacy(LegacyRoute),
     Module(ModuleRoute),
 	Dev(DevRoute),
+}
+
+#[derive(Debug, Clone)]
+pub enum HomeRoute {
+    Home,
+    StudentCode,
 }
 
 #[derive(Debug, Clone)]
@@ -130,7 +136,8 @@ impl Route {
         let json_query = params.get("data");
 
         match paths {
-            [""] => Self::Home,
+            [""] => Self::Home(HomeRoute::Home),
+            ["code"] => Self::Home(HomeRoute::StudentCode),
 			["dev", "showcase", id] => {
                 let page = params.get("page").unwrap_or_default();
                 Self::Dev(DevRoute::Showcase(id.to_string(), page))
@@ -261,7 +268,12 @@ impl From<Route> for String {
 impl From<&Route> for String {
     fn from(route:&Route) -> Self {
         match route {
-            Route::Home => "/".to_string(),
+			Route::Home(route) => {
+                match route {
+                    HomeRoute::Home => "/".to_string(),
+                    HomeRoute::StudentCode => "/code".to_string(),
+				}
+			},
             Route::NoAuth => "/no-auth".to_string(),
 			Route::Dev(route) => {
                 match route {

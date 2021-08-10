@@ -3,7 +3,7 @@ use std::rc::Rc;
 use dominator::{html, Dom};
 use futures_signals::signal::SignalExt;
 use shared::domain::user::UserProfile;
-use utils::routes::{JigRoute, ProfileSection, Route, UserRoute};
+use utils::routes::{HomeRoute, JigRoute, ProfileSection, Route, UserRoute};
 
 use crate::page_header::state::LoggedInState;
 
@@ -24,7 +24,7 @@ pub fn render(state: Rc<State>, slot: Option<&str>) -> Dom {
                 .property("slot", "links")
                 .property("kind", "home")
                 .property("active", true)
-                .property("href", &Route::Home.to_string())
+                .property("href", &Route::Home(HomeRoute::Home).to_string())
             }),
             html!("page-header-link", {
                 .property("slot", "links")

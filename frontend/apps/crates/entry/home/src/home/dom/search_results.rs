@@ -7,7 +7,7 @@ use shared::domain::jig::{Jig, JigPlayerSettings};
 use std::rc::Rc;
 use utils::{ages::AgeRangeVecExt, routes::{JigRoute, Route}};
 
-use crate::state::State;
+use super::super::state::State;
 
 pub fn render(state: Rc<State>, query: String, jigs: Rc<MutableVec<Jig>>) -> Dom {
     html!("home-search-results", {

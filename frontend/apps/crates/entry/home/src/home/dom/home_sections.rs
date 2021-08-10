@@ -2,7 +2,7 @@ use dominator::{clone, html, Dom};
 use std::rc::Rc;
 use utils::events;
 
-use crate::{actions::search, state::Testimonial};
+use super::super::{actions::search, state::Testimonial};
 
 use super::super::state::State;
 

@@ -1,4 +1,4 @@
-use crate::state::HomePageMode;
+use super::state::HomePageMode;
 use dominator::clone;
 use futures::join;
 use futures_signals::signal_vec::MutableVec;

@@ -8,7 +8,7 @@ use utils::{events, unwrap::UnwrapJiExt};
 
 use super::categories_select;
 
-use crate::{actions::search, state::State};
+use super::super::super::{actions::search, state::State};
 
 const STR_SEARCH: &'static str = "Search";
 const STR_ADVANCED: &'static str = "Advanced";
