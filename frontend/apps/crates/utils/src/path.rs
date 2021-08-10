@@ -11,6 +11,10 @@ pub fn ui<T: AsRef<str>>(path:T) -> String {
     media_url(&format!("ui/{}", path.as_ref()))
 }
 
+pub fn audio<T: AsRef<str>>(path:T) -> String {
+    media_url(&format!("audio/{}", path.as_ref()))
+}
+
 pub fn audio_lib_url(library_kind: MediaLibrary, id:AudioId) -> String {
     let path = media_key(library_kind, id.0, FileKind::AudioMp3);
 
