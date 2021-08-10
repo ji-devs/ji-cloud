@@ -26,7 +26,11 @@ pub fn is_screenshot_url() -> bool {
 
 #[derive(Deserialize)]
 struct ScreenshotResponse {
-    saved: bool
+    jpg: String,
+    #[serde(rename="taskName")]
+    task_name: String,
+    #[serde(rename="taskUrl")]
+    task_url: String
 }
 
 pub async fn call_screenshot_service(jig_id: JigId, module_id: ModuleId, kind: ModuleKind) {
