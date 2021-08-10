@@ -173,6 +173,10 @@ impl RemoteTarget {
         format!("{}/ui", self.media_url())
     }
 
+    pub fn media_audio_url(&self) -> String {
+        format!("{}/audio", self.media_url())
+    }
+
     pub fn replace_media_ui<S: AsRef<str>>(&self, s: S) -> String {
         s.as_ref()
             .replace("%MEDIA_UI%", &format!("{}/ui", self.media_url()))

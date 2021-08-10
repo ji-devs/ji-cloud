@@ -1,8 +1,14 @@
 use serde::{Serialize, Deserialize, de::DeserializeOwned};
 use wasm_bindgen::prelude::*;
 use crate::unwrap::UnwrapJiExt;
+use shared::domain::jig::module::{ModuleId, ModuleKind};
 
 pub const IFRAME_DATA_PARAM:&'static str = "iframe_data";
+
+#[wasm_bindgen(inline_js = "export function is_in_iframe() { return window && window.parent && window.location !== window.parent.location; }")]
+extern "C" {
+    pub fn is_in_iframe() -> bool;
+}
 
 /// Init is used for bootstrapping and passing initial loaded data
 #[derive(Serialize, Deserialize, Debug)]
@@ -65,13 +71,26 @@ pub fn should_get_iframe_data() -> bool {
 
 /// Action is used for passing runtime messages 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct IframeAction<T> {
+pub struct IframeAction<T> 
+{
     pub data: T
 }
 
 impl <T> IframeAction <T> {
     pub fn new(data: T) -> Self {
         Self { data }
+    }
+}
+
+impl <T: Serialize> IframeAction <T> {
+
+    pub fn try_post_message_to_parent(&self) -> Result<(), JsValue> {
+        let window = web_sys::window().unwrap_ji();
+        let parent = window.parent()?.unwrap_ji();
+
+        let value = serde_wasm_bindgen::to_value(self).unwrap_ji();
+
+        parent.post_message(&value, "*")
     }
 }
 
@@ -104,4 +123,9 @@ pub enum JigToModuleMessage {
 pub enum ModuleToJigMessage {
     AddPoints(u32),
     Start(Option<u32>),
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub enum ModuleToJigEditorMessage {
+    AppendModule(ModuleKind, ModuleId),
 }

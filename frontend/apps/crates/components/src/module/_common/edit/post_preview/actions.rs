@@ -13,7 +13,7 @@ use shared::{
     },
     error::EmptyError,
 };
-use utils::prelude::*;
+use utils::{prelude::*, iframe::{IframeAction, ModuleToJigEditorMessage}};
 
 impl PostPreview {
     pub fn duplicate_module<RawData, Mode, Step>(&self, target_kind: ModuleKind, raw_data: RawData)
@@ -39,9 +39,18 @@ impl PostPreview {
 
             match res {
                 Ok(res) => {
-                    let route: String =
-                        Route::Jig(JigRoute::Edit(jig_id, JigEditRoute::Module(res.id))).into();
-                    dominator::routing::go_to_url(&route);
+                    let module_id = res.id;
+                    let module_kind = target_kind;
+
+
+                    let msg = IframeAction::new(ModuleToJigEditorMessage::AppendModule(module_kind, module_id));
+                    if let Err(_) = msg.try_post_message_to_parent() {
+                        log::info!("Couldn't post message to parent... redirect!");
+                        let route: String =
+                            Route::Jig(JigRoute::Edit(jig_id, JigEditRoute::Module(module_id))).into();
+                        dominator::routing::go_to_url(&route);
+                    }
+
                 }
                 Err(_) => {
                     log::error!("request to create module failed!");
