@@ -125,7 +125,6 @@ pub async fn upload_image(
         id.0.to_string()
     );
 
-    log::info!("BP 4");
     if firebase::wait_for_upload_ready(&id.0, lib, abort_controller).await {
         Ok(())
     } else {
