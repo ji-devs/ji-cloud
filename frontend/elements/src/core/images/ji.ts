@@ -53,7 +53,7 @@ export class _ extends LitElement {
         );
     }
 
-    onError(evt: Event) {
+    onError(_evt: Event) {
         this.fallbackVisible = true;
     }
 

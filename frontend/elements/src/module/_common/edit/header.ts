@@ -2,31 +2,11 @@ import { LitElement, html, css, customElement, property } from 'lit-element';
 import {classMap} from "lit-html/directives/class-map";
 import {nothing} from "lit-html";
 import "@elements/core/tooltips/info";
-import {ModuleKind} from "@elements/module/_common/types";
+import {ModuleKind, STR_MODULE_DISPLAY_NAME, STR_MODULE_HEADER_TOOLTIP_BODY} from "@elements/module/_common/types";
 
-const STR_TITLE:{[key in ModuleKind]:string} = {
-    "memory": "Memory Game",
-    "flashcards": "Flashcards",
-    "card-quiz": "Quiz",
-    "matching": "Matching",
-    "poster": "Poster",
-    "tapping-board": "Tapping Board",
-    "drag-drop": "Drag & Drop",
-    "cover": "Cover Page",
-};
 
 const STR_TOOLTIP_GETTING_STARTED = "Getting started";
 
-const STR_TOOLTIP_BODY:{[key in ModuleKind]:string} = {
-    "memory": "Add your words to the list on the left. You can either type the words or paste them in.",
-    "flashcards": "Flashcards intro here",
-    "card-quiz": "Quiz intro here",
-    "matching": "Matching intro here",
-    "poster": "Poster intro here",
-    "tapping-board": "Tapping Board intro here",
-    "drag-drop": "Drag & Drop intro here",
-    "cover": "Cover intro here",
-};
 
 @customElement('module-header')
 export class _ extends LitElement {
@@ -65,7 +45,7 @@ export class _ extends LitElement {
   render() {
       const {imgRef, moduleKind} = this;
 
-      const title = STR_TITLE[moduleKind];
+      const title = STR_MODULE_DISPLAY_NAME[moduleKind];
 
       return html`
           <section>
@@ -82,7 +62,7 @@ export class _ extends LitElement {
 }
 
 function renderTooltip(moduleKind:ModuleKind, targetRef:HTMLElement) {
-    const body = STR_TOOLTIP_BODY[moduleKind];
+    const body = STR_MODULE_HEADER_TOOLTIP_BODY[moduleKind];
     if(!body) {
         return nothing;
     }

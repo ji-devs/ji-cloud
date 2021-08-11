@@ -25,7 +25,7 @@ const imagePrefix = (lib:MediaLibOptions):string => {
     }
 }
 
-const imageSuffix = (lib:MediaLibOptions, size: MediaSizeOptions):string => {
+const imageSuffix = (lib:MediaLibOptions, _size: MediaSizeOptions):string => {
     switch(lib) {
         case "global":
         case "user":

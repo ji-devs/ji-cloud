@@ -2,7 +2,7 @@ import { LitElement, html, css, customElement, property } from "lit-element";
 import { classMap } from "lit-html/directives/class-map";
 import { nothing } from "lit-html";
 import "@elements/core/images/ui";
-import {ModuleKind, GET_STR_MODULE} from "@elements/module/_common/types";
+import {ModuleKind, STR_MODULE_DISPLAY_NAME} from "@elements/module/_common/types";
 
 @customElement("jig-edit-module-card")
 export class _ extends LitElement {
@@ -79,7 +79,7 @@ export class _ extends LitElement {
                   <img-ui path="${iconPath}"></img-ui>
                 </div>
                 <div class="bottom">
-                    ${GET_STR_MODULE(module)}
+                    ${STR_MODULE_DISPLAY_NAME[module]}
               </div>
           </section>
         `;

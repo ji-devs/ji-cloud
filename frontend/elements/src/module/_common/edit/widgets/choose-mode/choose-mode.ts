@@ -1,7 +1,7 @@
 import { mediaUi } from '@utils/path';
 import { LitElement, html, css, customElement, property, query, unsafeCSS } from 'lit-element';
 import { nothing } from 'lit-html';
-import {ModuleKind} from "@elements/module/_common/types";
+import {ModuleKind, STR_MODULE_CHOOSE_HEADER} from "@elements/module/_common/types";
 
 const STR_SUBTITLE = "What do you want to do?";
 
@@ -9,16 +9,7 @@ type ScrollPosition = 'left' | 'right' | null;
 
 const NAV_BUTTON_WIDTH = 80;
 
-const STR_TITLE:{[key in ModuleKind]:string} = {
-    "memory": "Create a Memory Game",
-    "flashcards": "Create a Flashcards Game",
-    "card-quiz": "Create a Quiz Game",
-    "matching": "Create a Quiz Game",
-    "tapping-board": "Create a Tapping Board",
-    "poster": "Create a Poster",
-    "drag-drop": "Create a Drag and Drop",
-    "cover": "" //not used
-};
+
 @customElement('choose-mode')
 export class _ extends LitElement {
     static get styles() {
@@ -198,7 +189,7 @@ export class _ extends LitElement {
     render() {
         const {module} = this;
 
-        const title = STR_TITLE[module];
+        const title = STR_MODULE_CHOOSE_HEADER[module];
 
         return html`
         ${nothing 

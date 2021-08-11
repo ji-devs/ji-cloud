@@ -1,17 +1,11 @@
 import { LitElement, html, css, customElement, property } from 'lit-element';
 import '@elements/core/images/ui';
-import {ModuleKind} from "@elements/module/_common/types";
+import {ModuleKind, STR_MODULE_DISPLAY_NAME} from "@elements/module/_common/types";
 
 export type Kind = ModuleKind | 'print' | 'continue';
+
 const STR_LABEL_LOOKUP:{[key in Kind]:string} = {
-    "memory": "Memory Game",
-    "flashcards": "Flashcards",
-    "card-quiz": "Quiz",
-    "matching": "Matching",
-    "poster": "Poster",
-    "tapping-board": "Tapping Board",
-    "drag-drop": "Drag & Drop",
-    "cover": "Cover Page",
+    ...STR_MODULE_DISPLAY_NAME,
     'print': 'Print the cards',
     'continue': 'Continue',
 };

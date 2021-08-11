@@ -1,23 +1,12 @@
 import { LitElement, html, css, customElement, property } from 'lit-element';
 import {classMap} from "lit-html/directives/class-map";
 import {nothing} from "lit-html";
-import {ModuleKind} from "@elements/module/_common/types";
+import {ModuleKind, STR_MODULE_PREVIEW_TOOLTIP_BODY} from "@elements/module/_common/types";
 
 const STR_TITLE = "Preview Mode";
 
 const STR_TOOLTIP_CONTINUE = "Click to continue";
 const STR_TOOLTIP_GETTING_STARTED = "Time to play!";
-
-const STR_TOOLTIP_BODY:{[key in ModuleKind]:string} = {
-    "memory": "Here’s your memory game for you to play. Want to change something? Just go back and edit!",
-    "card-quiz": "Here’s your quiz for you to play. Want to change something? Just go back and edit!",
-    "flashcards": "Here’s your flashcards for you to play. Want to change something? Just go back and edit!",
-    "matching": "Here’s your matching game for you to play. Want to change something? Just go back and edit!",
-    "poster": "Here’s your poster for you to play. Want to change something? Just go back and edit!",
-    "tapping-board": "Here’s your Tapping Board for you to play. Want to change something? Just go back and edit!",
-    "drag-drop": "Here’s your Drag & Drop for you to play. Want to change something? Just go back and edit!",
-    "cover": "Here’s your cover page for you to play. Want to change something? Just go back and edit!",
-};
 
 @customElement('module-preview-header')
 export class _ extends LitElement {
@@ -91,7 +80,7 @@ export class _ extends LitElement {
 }
 
 function renderIntroTooltip(moduleKind:ModuleKind, targetRef:HTMLElement) {
-    const body = STR_TOOLTIP_BODY[moduleKind];
+    const body = STR_MODULE_PREVIEW_TOOLTIP_BODY[moduleKind];
     if(!body) {
         return nothing;
     }

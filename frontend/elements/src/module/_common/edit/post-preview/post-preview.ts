@@ -1,17 +1,6 @@
 import { LitElement, html, css, customElement, property } from 'lit-element';
 import '@elements/core/images/ui';
-import { GET_STR_MODULE, ModuleKind } from '@elements/module/_common/types';
-
-const STR_LABEL_LOOKUP:Partial<{[key in ModuleKind]:string}> = {
-    "memory": "Memory Game",
-    "flashcards": "Flashcards",
-    "card-quiz": "Quiz",
-    "matching": "Matching",
-    "poster": "Poster",
-    "tapping-board": "Tapping Board",
-    "drag-drop": "Drag & Drop",
-    "cover": "Cover Page",
-};
+import { ModuleKind, STR_MODULE_DISPLAY_NAME} from '@elements/module/_common/types';
 
 const STR_ACTION_HEADER = "What do you want to do next?";
 const STR_USE_IN_PREFIX = "Use the content from this";
@@ -111,7 +100,7 @@ export class _ extends LitElement {
                 <img-ui path="module/_common/edit/post-preview/splash.png"></img-ui>
                 <div class="message">
                     ${STR_HEADER_LINE_1_PREFIX}
-                    ${GET_STR_MODULE(this.module)}
+                    ${STR_MODULE_DISPLAY_NAME[this.module]}
                     ${STR_HEADER_LINE_1_SUFFIX}
                     <br>
                     ${STR_HEADER_LINE_2}
@@ -119,7 +108,7 @@ export class _ extends LitElement {
             </div>
             <div class="bottom-section">
                 <h3 class="action-header">${STR_ACTION_HEADER}</h3>
-                <h4 class="action-use-in-header">${STR_USE_IN_PREFIX} ${STR_LABEL_LOOKUP[module]} ${STR_USE_IN_SUFFIX}</h4>
+                <h4 class="action-use-in-header">${STR_USE_IN_PREFIX} ${STR_MODULE_DISPLAY_NAME[module]} ${STR_USE_IN_SUFFIX}</h4>
                 <slot class="module-1" name="module-1"></slot>
                 <slot class="module-2" name="module-2"></slot>
                 <slot class="module-3" name="module-3"></slot>
