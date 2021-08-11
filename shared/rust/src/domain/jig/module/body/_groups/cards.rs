@@ -104,7 +104,7 @@ pub enum Mode {
 
     // todo(@dakom): document this
     #[allow(missing_docs)]
-    Synonymns = 6,
+    Synonyms = 6,
 
     /// Translate from one language to another.
     Translate = 7,
@@ -125,7 +125,7 @@ impl ModeExt for Mode {
             Self::Lettering,
             Self::Riddles,
             Self::Opposites,
-            Self::Synonymns,
+            Self::Synonyms,
             Self::Translate,
         ]
     }
@@ -138,7 +138,7 @@ impl ModeExt for Mode {
             Self::Lettering => "lettering",
             Self::Riddles => "riddles",
             Self::Opposites => "opposites",
-            Self::Synonymns => "synonymns",
+            Self::Synonyms => "synonyms",
             Self::Translate => "translate",
         }
     }
@@ -150,7 +150,7 @@ impl ModeExt for Mode {
         const STR_LETTERING: &'static str = "Lettering";
         const STR_RIDDLES: &'static str = "Riddles";
         const STR_OPPOSITES: &'static str = "Opposites";
-        const STR_SYNONYMNS: &'static str = "Synonymns";
+        const STR_SYNONYMS: &'static str = "Synonyms";
         const STR_TRANSLATE: &'static str = "Translate";
 
         match self {
@@ -160,7 +160,7 @@ impl ModeExt for Mode {
             Self::Lettering => STR_LETTERING,
             Self::Riddles => STR_RIDDLES,
             Self::Opposites => STR_OPPOSITES,
-            Self::Synonymns => STR_SYNONYMNS,
+            Self::Synonyms => STR_SYNONYMS,
             Self::Translate => STR_TRANSLATE,
         }
     }
