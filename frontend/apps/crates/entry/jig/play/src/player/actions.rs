@@ -11,7 +11,7 @@ use shared::{
 use utils::{
     iframe::{IframeAction, JigToModuleMessage, ModuleToJigMessage},
     prelude::{api_no_auth, SETTINGS},
-    routes::Route,
+    routes::{Route, HomeRoute},
     unwrap::UnwrapJiExt,
 };
 use wasm_bindgen_futures::spawn_local;
@@ -66,7 +66,7 @@ pub fn toggle_paused(state: Rc<State>) {
 }
 
 pub fn sent_iframe_message(state: Rc<State>, data: JigToModuleMessage) {
-    let iframe_origin: String = Route::Home.into();
+    let iframe_origin: String = Route::Home(HomeRoute::Home).into();
     let iframe_origin = unsafe {
         SETTINGS
             .get_unchecked()

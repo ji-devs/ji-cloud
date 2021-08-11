@@ -4,6 +4,7 @@ use dominator_helpers::{events::Message, signals::DefaultSignal};
 use futures_signals::map_ref;
 use futures_signals::signal::{Signal, SignalExt};
 use js_sys::Reflect;
+use shared::domain::jig::Jig;
 use std::rc::Rc;
 use utils::{
     iframe::{IframeAction, ModuleToJigMessage},
@@ -52,8 +53,8 @@ pub fn render(state: Rc<State>) -> Dom {
             html!("iframe" => HtmlIFrameElement, {
                 .property("allow", "autoplay; fullscreen")
                 .property("slot", "iframe")
-                .property_signal("src", state.active_module.signal_cloned().map(clone!(state => move|active_module_index| {
-                    match &*state.jig.lock_ref() {
+                .property_signal("src", jig_and_active_module_signal(Rc::clone(&state)).map(clone!(state => move|(jig, active_module_index)| {
+                    match jig {
                         None => String::new(),
                         Some(jig) => {
                             let active_module = &jig.modules[active_module_index];
@@ -137,6 +138,15 @@ pub fn render(state: Rc<State>) -> Dom {
         // .child_signal(render_done_popup(Rc::clone(&state)))
         .child_signal(render_time_up_popup(Rc::clone(&state)))
     })
+}
+
+fn jig_and_active_module_signal(state: Rc<State>) -> impl Signal<Item = (Option<Jig>, usize)> {
+    map_ref! {
+        let jig = state.jig.signal_cloned(),
+        let active_module = state.active_module.signal_cloned() => (
+            jig.clone(), active_module.clone()
+        )
+    }
 }
 
 fn ten_sec_signal(state: Rc<State>) -> impl Signal<Item = bool> {
