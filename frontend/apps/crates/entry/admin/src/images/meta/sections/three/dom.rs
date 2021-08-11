@@ -4,21 +4,33 @@ use crate::images::meta::{
     state::{State as MetaState, MutableImage},
     sections::common::categories::MutableCategory
 };
-use super::{state::*, actions};
+use super::{state::*, actions::{self, DateTimeStrings}};
 use crate::images::meta::{state::Section, sections::common::categories::*};
 use utils::events;
-use futures_signals::signal_vec::SignalVecExt;
+use futures_signals::{
+    signal::{Mutable, SignalExt},
+    signal_vec::SignalVecExt
+};
 use shared::domain::meta::MetadataResponse;
 use components::image::tag::ImageTag;
 
 pub struct Section3Dom {
 }
 
+//Latest updated doesn't reflect changes made while viewing at the same time, e.g. changing name while viewing summary page
+
 impl Section3Dom {
     pub fn render(meta_state: Rc<MetaState>, image: Rc<MutableImage>, metadata: Rc<MetadataResponse>, categories: Rc<Vec<Rc<MutableCategory>>>) -> Dom {
         let state = Rc::new(State::new(meta_state, image, metadata, categories));
+        
+        let id = state.image.orig.id.clone();
+
+        let date_time_strings:Mutable<Option<DateTimeStrings>> = Mutable::new(None);
 
         html!("image-meta-section-3", {
+            .future(clone!(date_time_strings => async move {
+                date_time_strings.set(Some(actions::load_date_time_strings(id).await));
+            }))
             .children(&mut [
                 html!("div", {
                     .property("slot", "category-report")
@@ -93,7 +105,36 @@ impl Section3Dom {
                                 })
                             })
                     )
-                })
+                }),
+
+                html!("div", {
+                    .property("slot", "date-time")
+                    .children_signal_vec(
+                        date_time_strings.signal_cloned()
+                            .map(|x| {
+                                match x {
+                                    Some(x) => {
+                                        vec![
+                                            html!("title-ji", {
+                                                .property("color", "black")
+                                                .text(&format!("Created: {}", x.created))
+                                            }),
+                                            html!("title-ji", {
+                                                .property("color", "black")
+                                                .text(&format!("Publish: {}", x.publish))
+                                            }),
+                                            html!("title-ji", {
+                                                .property("color", "black")
+                                                .text(&format!("Updated: {}", x.updated))
+                                            }),
+                                        ]
+                                    },
+                                    None => Vec::new()
+                                }
+                            })
+                            .to_signal_vec()
+                    )
+                }),
             ])
         })
     }

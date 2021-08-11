@@ -12,6 +12,7 @@ const STR_USED = "To be used only for";
 const STR_AGE = "Suitable for age";
 const STR_STREAM = "Suitable for jewish stream";
 const STR_TAGS = "Tags (internal use only)";
+const STR_DATE_TIME = "Date and time (automatic)";
 
 const STR_CATEGORIES_REPORT = "Categories summary";
 @customElement('image-meta-section-3')
@@ -85,6 +86,10 @@ export class _ extends LitElement {
                     <title-ji color="blue" class="summary-title">${STR_TAGS}</title-ji>
                     <div class="summary">
                         <slot name="tags"></slot>
+                    </div>
+                    <title-ji color="blue" class="summary-title">${STR_DATE_TIME}</title-ji>
+                    <div class="summary">
+                        <slot name="date-time"></slot>
                     </div>
                 </card-blue>
         </div>
