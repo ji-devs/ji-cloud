@@ -96,7 +96,7 @@ export class _ extends LitElement {
                     ` : this.state === "complete" ? html`
                         <img-ui path="core/buttons/icon/circle-check-green.svg"></img-ui>
                     ` : this.state === "published" ? html`
-                        TODO: <img-ji></img-ji>
+                        <slot name="thumbnail"></slot>
                     `: nothing
                 }
             </div>
