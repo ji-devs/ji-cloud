@@ -128,4 +128,5 @@ pub enum ModuleToJigMessage {
 #[derive(Debug, Serialize, Deserialize)]
 pub enum ModuleToJigEditorMessage {
     AppendModule(ModuleKind, ModuleId),
+    Next 
 }
