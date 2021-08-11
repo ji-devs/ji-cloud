@@ -16,6 +16,17 @@ use shared::{
 use utils::{prelude::*, iframe::{IframeAction, ModuleToJigEditorMessage}};
 
 impl PostPreview {
+    pub fn next(&self) {
+        let msg = IframeAction::new(ModuleToJigEditorMessage::Next);
+
+        if let Err(_) = msg.try_post_message_to_parent() {
+            log::info!("Couldn't post message to parent... redirect!");
+
+            let route:String = Route::Jig(JigRoute::Edit(self.jig_id, JigEditRoute::Landing)).into();
+            dominator::routing::go_to_url(&route);
+        }
+    }
+
     pub fn duplicate_module<RawData, Mode, Step>(&self, target_kind: ModuleKind, raw_data: RawData)
     where
         RawData: BodyExt<Mode, Step> + 'static,

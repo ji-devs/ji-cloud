@@ -49,8 +49,7 @@ where
                     .property("slot", "action-continue")
                     .property("kind", "continue")
                     .event(clone!(state => move |_evt:events::Click| {
-                        let route:String = Route::Jig(JigRoute::Edit(state.jig_id, JigEditRoute::Landing)).into();
-                        dominator::routing::go_to_url(&route);
+                        state.next();
                     }))
                 })
             )

@@ -43,8 +43,7 @@ cfg_if::cfg_if! {
         }
     } else {
         fn init() {
-            _init("release");
-            //_init("sandbox");
+            _init("sandbox");
         }
     }
 }

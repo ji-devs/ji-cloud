@@ -22,7 +22,7 @@ export type Mode =
         | "lettering"
         | "riddles"
         | "opposites"
-        | "synonymns"
+        | "synonyms"
         | "translate"
 
 export const getEmptyStyle = (theme:ThemeId, active: boolean, bgOpacity: number = 1.0) => {

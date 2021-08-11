@@ -8,7 +8,7 @@ use shared::domain::jig::{
             Background,
             Instructions,
             _groups::cards::{Mode, Step, CardPair as RawCardPair},
-            memory::{ModuleData as RawData, Content as RawContent}, 
+            memory::{ModuleData as RawData, Content as RawContent, PlayerSettings}, 
         }
     }
 };
@@ -46,7 +46,8 @@ pub struct Base {
     pub flip_state: Mutable<FlipState>,
     pub found_pairs: RefCell<Vec<(usize, usize)>>, 
     pub instructions: Instructions,
-    pub audio_mixer: AudioMixer
+    pub audio_mixer: AudioMixer,
+    pub settings: PlayerSettings,
 }
 
 #[derive(Debug, Clone)]
@@ -115,6 +116,7 @@ impl Base {
             flip_state: Mutable::new(FlipState::None), 
             found_pairs: RefCell::new(Vec::new()),
             instructions: content.base.instructions,
+            settings: content.player_settings,
             audio_mixer,
         })
     }
@@ -147,5 +149,9 @@ impl Base {
 impl BaseExt for Base {
     fn get_instructions(&self) -> Option<Instructions> {
         Some(self.instructions.clone())
+    }
+
+    fn get_timer_minutes(&self) -> Option<u32> {
+        self.settings.time_limit
     }
 }

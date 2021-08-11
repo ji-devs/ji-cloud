@@ -95,4 +95,8 @@ impl BaseExt for Base {
     fn get_instructions(&self) -> Option<Instructions> {
         Some(self.instructions.clone())
     }
+
+    fn get_timer_minutes(&self) -> Option<u32> {
+        self.settings.time_limit
+    }
 }

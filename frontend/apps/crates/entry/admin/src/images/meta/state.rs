@@ -58,10 +58,14 @@ pub struct MutableImage {
     pub affiliations: Mutable<HashSet<AffiliationId>>,
     pub tag_indices: Mutable<HashSet<i16>>,
     pub categories: Mutable<HashSet<CategoryId>>,
+    pub orig: ImageMetadata,
 }
 
 impl From<ImageMetadata> for MutableImage {
     fn from(image:ImageMetadata) -> Self {
+
+        let orig = image.clone();
+
         Self {
             id: Mutable::new(image.id),
             name: Mutable::new(image.name),
@@ -102,6 +106,8 @@ impl From<ImageMetadata> for MutableImage {
                 }
                 Mutable::new(categories)
             },
+
+            orig
         }
     }
 }

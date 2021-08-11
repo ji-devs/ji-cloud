@@ -24,6 +24,7 @@ pub struct State {
 
 impl State {
     pub fn new(meta: Rc<MetaState>, image: Rc<MutableImage>, metadata: Rc<MetadataResponse>, categories: Rc<Vec<Rc<MutableCategory>>>) -> Self {
+        
         Self {
             meta,
             image,
