@@ -1,4 +1,4 @@
-import { moduleKinds, ModuleKind } from "@elements/entry/jig/module-types";
+import { moduleKinds, ModuleKind } from "@elements/module/_common/types";
 import "@elements/module/_common/edit/post-preview/post-preview";
 import "@elements/module/_common/edit/post-preview/post-preview-action";
 import { argsToAttrs } from "@utils/attributes";

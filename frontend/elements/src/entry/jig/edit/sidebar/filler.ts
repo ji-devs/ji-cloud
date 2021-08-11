@@ -3,7 +3,7 @@ import { classMap } from "lit-html/directives/class-map";
 import { nothing } from "lit-html";
 import "@elements/core/images/ui";
 import "@elements/core/buttons/icon";
-import {ModuleKind, GET_STR_MODULE} from "@elements/entry/jig/module-types";
+import {ModuleKind, GET_STR_MODULE} from "@elements/module/_common/types";
 
 @customElement("jig-edit-sidebar-filler")
 export class _ extends LitElement {

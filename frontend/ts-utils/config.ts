@@ -15,6 +15,10 @@ export {STAGE_PLAYER, STAGE_EDIT, STAGE_LEGACY};
 
 const getUrl = (envKey:string, fallback: string):string => {
 	const value = (process as any).env[envKey];
+
+        console.log("FOO", process.env.STORYBOOK_DATA_KEY);
+        console.log(`VALUE for [${envKey}]:`, value);
+
 	return value == undefined || value == "" ? fallback : value;
 }
 

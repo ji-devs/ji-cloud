@@ -25,3 +25,4 @@ import "@elements/entry/jig/play/sidebar/share-main";
 import "@elements/entry/jig/play/sidebar/share-option";
 import "@elements/entry/jig/play/sidebar/share-students";
 import "@elements/entry/jig/play/sidebar/sidebar";
+import "@elements/core/images/composed/module-screenshot";

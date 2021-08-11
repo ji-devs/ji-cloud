@@ -1,6 +1,6 @@
 import { LitElement, html, css, customElement, property } from 'lit-element';
 import '@elements/core/images/ui';
-import { GET_STR_MODULE, ModuleKind } from '@elements/entry/jig/module-types';
+import { GET_STR_MODULE, ModuleKind } from '@elements/module/_common/types';
 
 const STR_LABEL_LOOKUP:Partial<{[key in ModuleKind]:string}> = {
     "memory": "Memory Game",

@@ -2,7 +2,7 @@ import { LitElement, html, css, customElement, property } from "lit-element";
 import { classMap } from "lit-html/directives/class-map";
 import { nothing } from "lit-html";
 import "@elements/core/images/ui";
-import {ModuleKind, GET_STR_MODULE} from "@elements/entry/jig/module-types";
+import {ModuleKind, GET_STR_MODULE} from "@elements/module/_common/types";
 
 @customElement("jig-edit-module-card")
 export class _ extends LitElement {

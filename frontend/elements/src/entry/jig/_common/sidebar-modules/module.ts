@@ -4,7 +4,7 @@ import { nothing } from "lit-html";
 import "@elements/core/images/ui";
 import "@elements/core/buttons/icon";
 import "@elements/core/buttons/rectangle";
-import { ModuleKind, GET_STR_MODULE } from "@elements/entry/jig/module-types";
+import { ModuleKind, GET_STR_MODULE } from "@elements/module/_common/types";
 import { collapseStyles } from "./collapse-styles";
 
 @customElement("jig-sidebar-module")

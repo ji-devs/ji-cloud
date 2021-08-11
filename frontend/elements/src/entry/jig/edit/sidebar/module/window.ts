@@ -1,6 +1,6 @@
 import { LitElement, html, css, customElement, property, query } from "lit-element";
 import { nothing } from "lit-html";
-import { ModuleKind, moduleKinds } from "@elements/entry/jig/module-types";
+import { ModuleKind, moduleKinds } from "@elements/module/_common/types";
 import "@elements/core/images/ui";
 
 

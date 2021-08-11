@@ -2,7 +2,7 @@ import {argsToAttrs} from "@utils/attributes";
 import "@elements/entry/jig/edit/sidebar/publish";
 import "@elements/entry/jig/edit/sidebar/module/window";
 import { ModuleState } from "@elements/entry/jig/edit/sidebar/module/window";
-import { ModuleKind, moduleKinds } from "@elements/entry/jig/module-types";
+import { ModuleKind, moduleKinds } from "@elements/module/_common/types";
 
 export default {
     title: "Entry / Jig / Edit / Sidebar"
