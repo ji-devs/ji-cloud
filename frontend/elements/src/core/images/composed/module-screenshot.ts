@@ -23,7 +23,7 @@ export class _ extends LitElement {
 
 	    return html`
 	    	<img-ji lib="screenshot" id="${jigId}/${moduleId}" size="${size}">
-  			<img-ui path="module/${fallbackKind}/thumb-placeholder.jpg" slot="fallback"></img-ui>
+  			<img-ui path="module/${fallbackKind}/thumb-placeholder.svg" slot="fallback"></img-ui>
 		</img-ji>
 	    `;
     }
