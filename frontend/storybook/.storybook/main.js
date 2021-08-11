@@ -64,7 +64,9 @@ async function makeWebpackFinal(config, { configType }) {
   config.plugins.push(new LiveReloadPlugin());
   
   //add dotenv (see https://github.com/storybookjs/storybook/issues/12270#issuecomment-755398949)
-    const plugin = config.plugins.find(plugin => plugin.definitions?.['process.env']);
+    const plugin = config.plugins.find(plugin => {
+      return plugin.definitions != null && plugin.definitions['process.env'] != null
+    });
     if(plugin) {
       Object.keys(extraEnv).forEach(key => {
         plugin.definitions['process.env'][key] = JSON.stringify(extraEnv[key]);
