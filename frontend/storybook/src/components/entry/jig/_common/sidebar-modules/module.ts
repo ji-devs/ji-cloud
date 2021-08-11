@@ -5,7 +5,7 @@ import "@elements/entry/jig/edit/sidebar/module/menu";
 import "@elements/core/buttons/icon";
 import "@elements/core/menu/kebab";
 import "@elements/core/menu/menu-line";
-import {ModuleKind, moduleKinds} from "@elements/entry/jig/module-types";
+import {ModuleKind, moduleKinds} from "@elements/module/_common/types";
 
 const STR_CUSTOM_COPY = "Copy to another Jig";
 

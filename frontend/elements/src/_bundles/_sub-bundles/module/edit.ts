@@ -60,3 +60,5 @@ import "@elements/module/_common/edit/widgets/theme-selector/jig";
 import "@elements/_bundles/_sub-bundles/components/image_search/imports";
 import "@elements/_bundles/_sub-bundles/components/audio_input/imports";
 
+
+import "@elements/core/images/composed/module-screenshot";

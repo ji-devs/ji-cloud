@@ -45,3 +45,4 @@ import "@elements/entry/jig/edit/publish/publish";
 import "@elements/entry/jig/edit/publish/add-resource";
 import "@elements/entry/jig/edit/publish/add-resource-method";
 import "@elements/module/_groups/design/edit/sidebar/widgets/theme-selector/option";
+import "@elements/core/images/composed/module-screenshot";

@@ -11,12 +11,13 @@ export const mediaUi = (path:string):string => `${MEDIA_UI}/${path}`;
 
 const mediaUploads = (path:string):string => `${MEDIA_UPLOADS}/${path}`;
 
-export type MediaLibOptions = "global" | "user" | "web" | "mock";
+export type MediaLibOptions = "global" | "user" | "web" | "screenshot" | "mock";
 export type MediaSizeOptions = "original" | "full" | "thumb";
 
 const imagePrefix = (lib:MediaLibOptions):string => {
     switch(lib) {
-        case "mock": return "mock";
+        case "mock": 
+        case "screenshot": return lib;
         case "global": return "media/global";
         case "user": return "media/user";
         case "web": return "media/web";
@@ -24,6 +25,18 @@ const imagePrefix = (lib:MediaLibOptions):string => {
     }
 }
 
+const imageSuffix = (lib:MediaLibOptions, _size: MediaSizeOptions):string => {
+    switch(lib) {
+        case "global":
+        case "user":
+        case "web":
+        case "mock": 
+            return ".png";
+        case "screenshot": 
+            return ".jpg";
+		default: return "";
+    }
+}
 const audioPrefix = (lib:MediaLibOptions):string => {
     switch(lib) {
         case "global": return "audio/global";
@@ -33,22 +46,30 @@ const audioPrefix = (lib:MediaLibOptions):string => {
     }
 }
 
-const sizeVariant = (size:MediaSizeOptions):string => {
-    switch(size) {
-        case "original": return "original";
-        case "full": return "resized";
-        case "thumb": return "thumbnail";
-		default: return "";
+const sizeVariant = (lib: MediaLibOptions, size:MediaSizeOptions):string => {
+    if(lib === "screenshot") {
+        switch(size) {
+            case "original": return "full";
+            default: return size;
+        }
+    } else {
+        switch(size) {
+            case "original": return "original";
+            case "full": return "resized";
+            case "thumb": return "thumbnail";
+            default: return "";
+        }
     }
 }
 
 export const imageLib = ({lib, size, id}:{lib: MediaLibOptions, size: MediaSizeOptions, id: string}) => {
     const prefix = imagePrefix(lib);
-    const variant = sizeVariant(size);
+    const suffix = imageSuffix(lib, size);
+    const variant = sizeVariant(lib, size);
 
     return lib === "mock" 
         ? mediaUi(`${prefix}/${variant}/${id}`)
-        : mediaUploads(`${prefix}/${id}/${variant}.png`);
+        : mediaUploads(`${prefix}/${id}/${variant + suffix}`);
 }
 
 interface LegacyMedia {

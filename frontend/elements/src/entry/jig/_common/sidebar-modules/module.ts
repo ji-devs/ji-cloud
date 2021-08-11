@@ -4,7 +4,7 @@ import { nothing } from "lit-html";
 import "@elements/core/images/ui";
 import "@elements/core/buttons/icon";
 import "@elements/core/buttons/rectangle";
-import { ModuleKind, GET_STR_MODULE } from "@elements/entry/jig/module-types";
+import { ModuleKind, STR_MODULE_DISPLAY_NAME} from "@elements/module/_common/types";
 import { collapseStyles } from "./collapse-styles";
 
 @customElement("jig-sidebar-module")
@@ -198,7 +198,7 @@ export class _ extends LitElement {
         const title = (index+1).toString().padStart(2, '0');
 
         const subtitle = module === "" ? "" 
-            : GET_STR_MODULE(module);
+            : STR_MODULE_DISPLAY_NAME[module];
 
         const iconPath = module === "" ? "" 
             : `entry/jig/modules/small/${module}.svg`;

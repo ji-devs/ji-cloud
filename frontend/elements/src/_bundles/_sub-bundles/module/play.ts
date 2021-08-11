@@ -9,3 +9,5 @@ import "@elements/core/tooltips/error";
 import "@elements/core/tooltips/bubble";
 import "@elements/module/_common/edit/instructions-banner";
 import "@elements/module/_common/play/play-button";
+
+import "@elements/core/images/composed/module-screenshot";

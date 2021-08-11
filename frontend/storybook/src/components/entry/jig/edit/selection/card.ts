@@ -1,7 +1,7 @@
 import {argsToAttrs} from "@utils/attributes";
 import "@elements/entry/jig/edit/selection/card";
 import {mapToString, arrayIndex} from "@utils/array";
-import {ModuleKind, moduleKinds} from "@elements/entry/jig/module-types";
+import {ModuleKind, moduleKinds} from "@elements/module/_common/types";
 
 export default {
     title: "Entry / Jig / Edit / Selection"
