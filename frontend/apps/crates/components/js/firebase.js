@@ -51,6 +51,8 @@ export function waitForUploadReady(mediaId, libId, abortController) {
             }
         }
 
+        let hasBeenNotReady = false;
+
         onSnapshot(ref, doc => {
             if(abortController == null || !abortController.signal.aborted) {
                 const data = doc.data();
@@ -67,7 +69,13 @@ export function waitForUploadReady(mediaId, libId, abortController) {
                 console.log(status);
 
                 if(status.ready) {
-                    resolve();
+                    if(hasBeenNotReady) {
+                        resolve();
+                    } else {
+                        console.log("technically ready but never wasn't, waiting for next ready");
+                    }
+                } else {
+                    hasBeenNotReady = true;
                 }
             }
         });
