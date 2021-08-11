@@ -196,7 +196,16 @@ where
                             .parent()
                             .unwrap_ji()
                             .unwrap_ji();
-                        let msg = IframeAction::new(ModuleToJigMessage::Start(base.get_timer_seconds()));
+
+                        let timer_seconds = base.get_timer_minutes().map(|minutes| minutes * 60);
+
+                        let msg = IframeAction::new(ModuleToJigMessage::Start(timer_seconds));
+
+                        match timer_seconds {
+                            Some(x) => log::info!("Starting with a {} seconds timer", x),
+                            None => log::info!("Starting without a timer")
+                        }
+
                         let _ = parent.post_message(&msg.into(), "*");
                     }
                     None

@@ -323,7 +323,7 @@ pub trait BaseExt: DomRenderable {
     fn get_instructions(&self) -> Option<Instructions> {
         None
     }
-    fn get_timer_seconds(&self) -> Option<u32> {
+    fn get_timer_minutes(&self) -> Option<u32> {
         None
     }
 }
