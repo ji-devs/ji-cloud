@@ -21,14 +21,19 @@ exports.showScreenshotRelease = makeShowScreenshot("https://jigzi.org");
 exports.showScreenshotSandbox = makeShowScreenshot("https://sandbox.jigzi.org");
 exports.saveScreenshotRelease = makeSaveScreenshot("https://jigzi.org", "ji-cloud-uploads-origin-eu-001");
 exports.saveScreenshotSandbox = makeSaveScreenshot("https://sandbox.jigzi.org", "ji-cloud-sandbox-uploads-origin-eu-001");
-exports.queueScreenshotRelease = queueScreenshot("ji-cloud", "https://europe-west1-ji-cloud.cloudfunctions.net", "saveScreenshotRelease", "https://uploads.jicloud.org");
-exports.queueScreenshotSandbox = queueScreenshot("ji-cloud-developer-sandbox", "https://europe-west1-ji-cloud-developer-sandbox.cloudfunctions.net", "saveScreenshotSandbox", "https://uploads.sandbox.jicloud.org");
+exports.queueScreenshotRelease = queueScreenshot("us-central1", "ji-cloud", "https://europe-west1-ji-cloud.cloudfunctions.net", "saveScreenshotRelease", "https://uploads.jicloud.org");
+exports.queueScreenshotSandbox = queueScreenshot("europe-west1", "ji-cloud-developer-sandbox", "https://europe-west1-ji-cloud-developer-sandbox.cloudfunctions.net", "saveScreenshotSandbox", "https://uploads.sandbox.jicloud.org");
 
 /*** Factory functions for release vs. sandbox ***/
 
 let _tasksClient;
 
-function queueScreenshot(project, baseUrl, endpoint, finalUrl) {
+//The task location unfortunately MUST be in the app-engine region, and the app-engine region can't be changed
+//We aren't even using an app engine instance at this point... not sure why the release has it set to us-central1
+//But it's only for queing tasks, the actual heavy lifting of generating and writing the screenshot is all in europe-west1
+//i.e. same region as storage (and cloud run etc.)
+//So no biggie, just a slight inconvenience
+function queueScreenshot(location, project, baseUrl, endpoint, finalUrl) {
     return wrapCors((req, res) => {
         const {respondError, respondJson} = makeResponders(res);
 
@@ -40,9 +45,8 @@ function queueScreenshot(project, baseUrl, endpoint, finalUrl) {
 
                 const client = _tasksClient;
 
-                const LOCATION = "europe-west1";
                 const QUEUE = "screenshot";
-                const parent = client.queuePath(project, LOCATION, QUEUE);
+                const parent = client.queuePath(project, location, QUEUE);
                 
                 const url = `${baseUrl}/${endpoint}?jig=${jig}&module=${module}&kind=${kind}`;
 
