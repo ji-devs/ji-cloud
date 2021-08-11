@@ -6,7 +6,8 @@
             "http://localhost:8080", 
             "http://localhost:8081",
             "http://localhost:4104",
-            "http://localhost:4105"
+            "http://localhost:4105",
+			"http://localhost:6006"
         ],
         "responseHeader": [
             "Origin", 
