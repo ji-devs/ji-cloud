@@ -25,4 +25,20 @@ pub mod register {
         pub const STR_18:&'static str = "I am over 18*";
         pub const STR_CONTINUE:&'static str = "Continue";
     }
+
+    pub mod step_2 {
+        pub const STR_SUBMIT:&'static str = "Submit";
+        pub const STR_LOCATION_LABEL:&'static str = "Location*";
+        pub const STR_TERMS_LABEL:&'static str = "I have read the terms and conditions (legal text…)";
+        pub const STR_LANGUAGE_LABEL:&'static str = "Preferred language of communication";
+        pub const STR_MARKETING_LABEL:&'static str = "I would like to receive educational resources (GDPR legal text….)";
+
+    }
+
+    pub mod step_3 {
+        pub const STR_SUBMIT:&'static str = "Submit";
+        pub const STR_AGE_LABEL:&'static str = "Which age group are you interested in?";
+        pub const STR_AFFILIATION_LABEL:&'static str = "Content from which streams of Judaism do you want to see?";
+    }
+
 }

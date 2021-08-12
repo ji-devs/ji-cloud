@@ -11,6 +11,16 @@ pub fn submit(state: Rc<State>) {
         ready = false;
     } 
 
+    let location_error = match &*state.location_json.borrow() {
+        None => true,
+        Some(x) => x.is_empty()
+    };
+
+    state.location_error.set(location_error);
+    if location_error {
+        ready = false;
+    }
+
     if !ready {
         return;
     }
@@ -21,7 +31,7 @@ pub fn submit(state: Rc<State>) {
 fn next_step(state: Rc<State>) {
     state.step.set(Step::Three(Step2Data{
         step_1: state.step_1.clone(), 
-        location_json: state.location_json.borrow().clone(), 
+        location_json: state.location_json.borrow().clone(),
         language: state.language.borrow().clone(), 
         marketing: state.marketing.borrow().clone(), 
     }));
