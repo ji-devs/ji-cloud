@@ -6,7 +6,8 @@ import { Create } from "~/components/entry/home/home/create";
 import { WhyJi } from "~/components/entry/home/home/why-ji/why-ji";
 import { WhatsNew } from "~/components/entry/home/home/whats-new/whats-new";
 import { Testimonials } from "~/components/entry/home/home/testimonials/testimonials";
-import { Footer } from "~/components/entry/home/home/footer";
+import { PageFooter } from "~/components/core/page-footer/page-footer";
+import { PageHeader } from "~/components/core/page-header/page-header";
 import { SearchResults } from "~/components/entry/home/home/search-results/search-results";
 
 export default {
@@ -27,6 +28,7 @@ export const HomePageFull = (props?:Args) => {
     const {} = props
 
     return `<home-full ${argsToAttrs(props)}>
+        ${PageHeader()}
         ${SearchSection({mode: props.page as any})}
         ${ 
             props.page === "home" ? (
@@ -39,7 +41,7 @@ export const HomePageFull = (props?:Args) => {
                 SearchResults()
             )
         }
-        ${Footer()}
+        ${PageFooter()}
     
     </home-full>`;
 }
