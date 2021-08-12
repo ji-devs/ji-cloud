@@ -14,14 +14,17 @@ impl CompletePage {
 
         html!("page-register-complete", {
             .child(
-                html!("button-rect", {
+                html!("a", {
                     .property("slot", "button")
-                    .property("color", "red")
-                    .property("size", "medium")
-                    .text(STR_SUBMIT)
-                    .event(|evt:events::Click| {
-                        dominator::routing::go_to_url("/");
-                    })
+                    .attribute("href", "/")
+                    .style("text-decoration", "none")
+                    .child(
+                        html!("button-rect", {
+                            .property("color", "red")
+                            .property("size", "medium")
+                            .text(STR_SUBMIT)
+                        })
+                    )
                 })
             )
         })
