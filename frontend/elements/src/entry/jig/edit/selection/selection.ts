@@ -31,8 +31,10 @@ export class _ extends LitElement {
             letter-spacing: normal;
             text-align: left;
             color: var(--dark-blue-4);
+            margin-bottom: 8px;
         }
         .title2 {
+            margin-bottom: 4px;
             font-size: 24px;
             font-weight: normal;
             font-stretch: normal;
