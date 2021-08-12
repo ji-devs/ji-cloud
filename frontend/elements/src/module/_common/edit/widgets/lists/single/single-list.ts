@@ -2,6 +2,7 @@ import { LitElement, html, css, customElement, property } from 'lit-element';
 import {classMap} from "lit-html/directives/class-map";
 import {nothing} from "lit-html";
 import {arrayIndex} from "@utils/array";
+import "@elements/core/hebrew-buttons/hebrew-buttons";
 
 const STR_ADD_WORDS = "Add Your Words";
 const STR_INPUT_FOOTER = "2 to 14 words";
@@ -20,7 +21,7 @@ export class _ extends LitElement {
               margin-top: 34px;
               margin-bottom: 24px;
               display: flex;
-              justify-content: space-between;
+              justify-content: flex-end;
           }
 
           .input-footer {
@@ -60,7 +61,7 @@ export class _ extends LitElement {
               <div><slot name="clear"></slot></div>
           </header>
           <div class="input-buttons">
-              <slot name="input-buttons"></slot>
+              <hebrew-buttons full></hebrew-buttons>
           </div>
         <div class="list">
             <slot></slot>
