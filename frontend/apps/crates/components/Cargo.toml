@@ -100,6 +100,7 @@ module_groups_cards = []
 collision = []
 firebase = []
 page_header = []
+page_footer = []
 
 default = ["all"]
 all= [
@@ -125,5 +126,6 @@ all= [
     "module_groups_cards",
     "collision",
     "firebase",
-    "page_header"
+    "page_header",
+    "page_footer"
 ]

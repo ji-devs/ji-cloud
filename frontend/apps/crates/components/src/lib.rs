@@ -29,6 +29,8 @@ pub mod lists;
 pub mod module;
 #[cfg(feature = "page_header")]
 pub mod page_header;
+#[cfg(feature = "page_footer")]
+pub mod page_footer;
 #[cfg(feature = "stickers")]
 pub mod stickers;
 #[cfg(feature = "text_editor")]
