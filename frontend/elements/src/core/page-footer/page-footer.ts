@@ -1,6 +1,6 @@
 import { LitElement, html, css, customElement, property } from 'lit-element';
 import '@elements/core/buttons/rectangle';
-import { homeStyles } from '../styles';
+import { homeStyles } from '../../entry/home/home/styles';
 
 const STR_TITLE_JI = "Jewish Interactive";
 const STR_TITLE_ABOUT = "About Us";
@@ -65,7 +65,7 @@ const STR_PRIVACY = "Privacy Policy";
 const STR_TERMS = "Terms & Conditions";
 
 
-@customElement('home-footer')
+@customElement('page-footer')
 export class _ extends LitElement {
     static get styles() {
         return [homeStyles, css`

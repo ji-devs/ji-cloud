@@ -1,6 +1,7 @@
 use std::rc::Rc;
 
 use super::debug::DebugSettings;
+use dominator_helpers::signals::EitherSignal;
 use crate::{
     audio_mixer::AudioMixer, module::_common::edit::prelude::*,
     tooltip::state::State as TooltipState,
@@ -157,12 +158,13 @@ impl<RawData: RawDataExt, E: ExtraExt> CardsBase<RawData, E> {
             .collect()
     }
 
-    pub fn pairs_len_signal(&self) -> impl Signal<Item = usize> {
-        self.pairs.signal_vec_cloned().len()
-    }
 
     pub fn is_empty_signal(&self) -> impl Signal<Item = bool> {
-        self.pairs_len_signal().map(|len| len <= 0).dedupe()
+        self.pairs
+            .signal_vec_cloned()
+            .len()
+            .map(|len| len <= 0)
+            .dedupe()
     }
 
     pub fn theme_id_str_signal(&self) -> impl Signal<Item = &'static str> {
@@ -178,25 +180,35 @@ impl<RawData: RawDataExt, E: ExtraExt> BaseExt<Step> for CardsBase<RawData, E> {
     type NextStepAllowedSignal = impl Signal<Item = bool>;
 
     fn allowed_step_change(&self, _from: Step, _to: Step) -> bool {
-        if self.pairs.lock_ref().len() >= 2 {
-            true
-        } else {
-            false
-        }
+        self.pairs
+            .lock_ref()
+            .iter()
+            .filter(|(card_1, card_2)| {
+                card_1.get_is_valid_data() && card_2.get_is_valid_data()            
+            })
+            .count() >= 2
     }
 
     fn next_step_allowed_signal(&self) -> Self::NextStepAllowedSignal {
-        map_ref! {
-            let pairs_len = self.pairs_len_signal(),
-            let _step = self.step.signal()
-                => {
-                    if *pairs_len >= 2 {
-                        true
-                    } else {
-                        false
-                    }
+        let mode = self.mode;
+
+        self.pairs
+            .signal_vec_cloned()
+            .map_signal(|(card_1, card_2)| {
+                map_ref! {
+                    let card_1_valid = card_1.is_valid_data_signal(),
+                    let card_2_valid = card_2.is_valid_data_signal()
+                        => {
+                            *card_1_valid && *card_2_valid
+                        }
                 }
-        }
+            })
+            .to_signal_map(|xs| {
+                xs
+                    .iter()
+                    .filter(|x| **x)
+                    .count() >= 2
+            })
     }
 
     fn get_post_preview(&self) -> Option<PostPreview> {
@@ -207,6 +219,7 @@ impl<RawData: RawDataExt, E: ExtraExt> BaseExt<Step> for CardsBase<RawData, E> {
         ))
     }
 }
+
 
 #[derive(Debug, Clone)]
 pub enum Card {
@@ -232,6 +245,20 @@ impl Card {
         match self {
             Self::Image(m) => m,
             _ => panic!("not an image type!"),
+        }
+    }
+
+    pub fn get_is_valid_data(&self) -> bool {
+        match self {
+            Self::Text(text) => !text.lock_ref().is_empty(),
+            Self::Image(image) => image.lock_ref().is_some()
+        }
+    }
+
+    pub fn is_valid_data_signal(&self) -> impl Signal<Item = bool> {
+        match self {
+            Self::Text(text) => EitherSignal::Left(text.signal_ref(|text| !text.is_empty())),
+            Self::Image(image) => EitherSignal::Right(image.signal_ref(|image| image.is_some()))
         }
     }
 }

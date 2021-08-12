@@ -16,14 +16,17 @@ export class _ extends LitElement {
     size: MediaSizeOptions = "thumb";
 
     @property()
-    fallbackKind: ModuleKind = "cover";
+    fallbackKind: ModuleKind | "" = "";
 
     render() {
 	    const {jigId, moduleId, fallbackKind, size} = this;
 
+        const fallbackPath = fallbackKind == ""
+            ? `jig/thumb-placeholder.svg` 
+            : `module/${fallbackKind}/thumb-placeholder.svg`;
 	    return html`
 	    	<img-ji lib="screenshot" id="${jigId}/${moduleId}" size="${size}">
-  			<img-ui path="module/${fallbackKind}/thumb-placeholder.svg" slot="fallback"></img-ui>
+  			<img-ui path="${fallbackPath}" slot="fallback"></img-ui>
 		</img-ji>
 	    `;
     }

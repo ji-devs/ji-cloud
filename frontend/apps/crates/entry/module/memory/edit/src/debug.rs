@@ -73,7 +73,7 @@ impl DebugSettings {
             //otherwise it will fail at load time
             data: Some(
                 if let Some(init_data) = init_data {
-                    let mode = Mode::Lettering;
+                    let mode = Mode::WordsAndImages;
 
                     RawData{
                         content: Some(Content {
@@ -85,6 +85,7 @@ impl DebugSettings {
                                 pairs: if init_data.with_pairs {
                                     config::get_debug_pairs(mode)
                                         .into_iter()
+                                        .take(2)
                                         .map(|(word_1, word_2)| {
                                             match mode {
                                                 Mode::WordsAndImages => {
@@ -115,7 +116,7 @@ impl DebugSettings {
                 step2_tab: Some(Step2TabKind::Theme),
                 step3_tab: Some(Step3TabKind::Settings),
             }),
-            step: Some(Step::Four),
+            step: Some(Step::One),
             skip_save: true,
             skip_load_jig: true,
         }
