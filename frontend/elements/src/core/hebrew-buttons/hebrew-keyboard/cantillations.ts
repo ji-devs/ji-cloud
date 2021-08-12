@@ -1,6 +1,6 @@
 import { css, html } from "lit-element";
 import { Cantillation, cantillations, CANTILLATION_INFO } from "./data";
-import "@elements/core/overlays/anchored-overlay";
+import "@elements/core/overlays/anchored-overlay-absolute";
 
 const STR_TAAMAI_MIKRA = "Taamai mikra";
 
@@ -11,7 +11,7 @@ export const cantillationsStyles = css`
 
 export function renderCantillations(onClick: (char: string) => void, toggleOpen: () => void) {
     return html`
-        <anchored-overlay id="cantillations" positionY="center" positionX="left-out">
+        <anchored-overlay-absolute id="cantillations" positionY="center" positionX="left-out">
             <div slot="overlay">
                 ${cantillations.map(cantillation => {
                     return renderCantillation(cantillation, onClick);
@@ -21,7 +21,7 @@ export function renderCantillations(onClick: (char: string) => void, toggleOpen:
                 <span class="tooltip">${STR_TAAMAI_MIKRA}</span>
                 טעמי מקרא
             </button>
-        </anchored-overlay>
+        </anchored-overlay-absolute>
     `;
 }
 

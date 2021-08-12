@@ -17,6 +17,9 @@ export class _ extends LitElement {
     static get styles() {
         return [
             css`
+                anchored-overlay {
+                    display: block;
+                }
                 #buttons-wrapper {
                     display: inline-flex;
                     grid-gap: 12px;
