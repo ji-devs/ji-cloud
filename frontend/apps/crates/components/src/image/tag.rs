@@ -5,13 +5,21 @@ use strum_macros::EnumIter;
 pub enum ImageTag {
     BackgroundLayer1,
     BackgroundLayer2,
+    Ispy,
+    MultipleChoice,
+    DragAndDrop,
+    Video
 }
 
 impl ImageTag {
     pub const fn STR_DISPLAY_NAME(&self) -> &'static str {
         match self {
             Self::BackgroundLayer1 => "Background Layer 1",
-            Self::BackgroundLayer2 => "Background Layer 2",
+            Self::BackgroundLayer2 => "Background Layer 2 (a.k.a. \"Overlay\")",
+            Self::Ispy => "I Spy",
+            Self::MultipleChoice => "Multiple Choice",
+            Self::DragAndDrop => "Drag and Drop",
+            Self::Video => "Video"
         }
     }
 
