@@ -31,6 +31,7 @@ export class _ extends LitElement {
           }
 
           .list {
+              height: 100%;
               width: calc(100% - 4px);
               border-radius: 16px;
               border: solid 2px var(--light-blue-4);
@@ -61,9 +62,9 @@ export class _ extends LitElement {
           <div class="input-buttons">
               <slot name="input-buttons"></slot>
           </div>
-          <div class="list">
-              <slot></slot>
-          </div>
+        <div class="list">
+            <slot></slot>
+        </div>
           <div class="input-footer">${STR_INPUT_FOOTER}</div>
           <div class="done-btn">
               <slot name="done-btn"></slot>

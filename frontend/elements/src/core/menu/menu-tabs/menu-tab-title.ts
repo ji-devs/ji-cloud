@@ -58,6 +58,9 @@ export class _ extends LitElement {
         .highlight {
           color: var(--main-blue);
         }
+        .disabled {
+          color: #ccc;
+        }
 
         img-ui {
           max-width: 24px;
@@ -90,6 +93,9 @@ export class _ extends LitElement {
   @property({ type: Boolean, reflect: true })
   active: boolean = false;
 
+  @property({ type: Boolean, reflect: true })
+  disabled: boolean = false;
+
   connectedCallback() {
     super.connectedCallback();
 
@@ -105,7 +111,7 @@ export class _ extends LitElement {
   }
 
   render() {
-    const { kind, active, hover } = this;
+    const { kind, active, hover, disabled} = this;
 
     const highlight = active || hover;
 
@@ -116,7 +122,7 @@ export class _ extends LitElement {
     const regularClass = classMap({ hidden: highlight });
     const activeClass = classMap({ hidden: !highlight });
 
-    const labelClass = classMap({ highlight });
+    const labelClass = classMap({ highlight: highlight && !disabled, disabled });
     return html`
       ${this.kind === ""
         ? nothing
