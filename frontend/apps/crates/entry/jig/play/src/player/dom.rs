@@ -98,14 +98,17 @@ pub fn render(state: Rc<State>) -> Dom {
             html!("jig-play-move-button", {
                 .property("slot", "back")
                 .property("kind", "back")
-                .visible_signal(state.active_module.signal().map(|active_module| {
-                    active_module != 0
+                .visible_signal(jig_and_active_module_signal(Rc::clone(&state)).map(|(jig, active_module)| {
+                    // if module already loaded and not first module
+                    match jig {
+                        None => false,
+                        Some(_jig) => {
+                            active_module != 0
+                        },
+                    }
                 }))
                 .event(clone!(state => move |_: events::Click| {
-                    let mut active_module = state.active_module.lock_mut();
-                    if *active_module != 0 {
-                        *active_module -= 1;
-                    }
+                    actions::navigate_back(Rc::clone(&state));
                 }))
             }),
             html!("jig-play-progress-bar", {
@@ -115,22 +118,17 @@ pub fn render(state: Rc<State>) -> Dom {
             html!("jig-play-move-button", {
                 .property("slot", "forward")
                 .property("kind", "forward")
-                .visible_signal(state.active_module.signal().map(clone!(state => move |active_module| {
-                    match &*state.jig.lock_ref() {
-                        None => true,
+                .visible_signal(jig_and_active_module_signal(Rc::clone(&state)).map(|(jig, active_module)| {
+                    match jig {
+                        None => false,
                         Some(jig) => {
                             let module_length = jig.modules.len();
                             active_module != module_length - 1
                         },
                     }
-                })))
+                }))
                 .event(clone!(state => move |_: events::Click| {
-                    let mut active_module = state.active_module.lock_mut();
-                    if let Some(jig) = &*state.jig.lock_ref() {
-                        if *active_module < jig.modules.len() - 1 {
-                            *active_module += 1;
-                        }
-                    }
+                    actions::navigate_forward(Rc::clone(&state));
                 }))
             }),
         ])

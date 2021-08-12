@@ -16,6 +16,26 @@ use utils::{
 };
 use wasm_bindgen_futures::spawn_local;
 
+pub fn navigate_forward(state: Rc<State>) {
+    let mut active_module = state.active_module.lock_mut();
+    if let Some(jig) = &*state.jig.lock_ref() {
+        if *active_module < jig.modules.len() - 1 {
+
+            *active_module += 1;
+            state.timer.set(None);
+
+        }
+    }
+}
+
+pub fn navigate_back(state: Rc<State>) {
+    let mut active_module = state.active_module.lock_mut();
+    if *active_module != 0 {
+        *active_module -= 1;
+        state.timer.set(None);
+    }
+}
+
 pub fn load_jig(state: Rc<State>) {
     state.loader.load(clone!(state => async move {
         let path = jig::Get::PATH.replace("{id}", &state.jig_id.0.to_string());
