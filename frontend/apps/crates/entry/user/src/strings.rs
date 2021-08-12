@@ -42,7 +42,7 @@ pub mod register {
     pub mod step_3 {
         pub const STR_SUBMIT:&'static str = "Submit";
         pub const STR_AGE_LABEL:&'static str = "Which age group are you interested in?";
-        pub const STR_AFFILIATION_LABEL:&'static str = "Content from which streams of Judaism do you want to see?";
+        pub const STR_AFFILIATION_LABEL:&'static str = "Content from which affiliations do you want to see?";
     }
 
 }
