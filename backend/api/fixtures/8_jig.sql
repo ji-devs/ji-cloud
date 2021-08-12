@@ -36,3 +36,6 @@ values ('0cc084bc-7c83-11eb-9f77-e3218dffb008', '41b8d0b4-aaff-4942-88ba-1a32fec
 
 insert into jig_player_session (index, jig_id, created_at, direction, display_score, track_assessments, drag_assist)
 values (1234, '0cc084bc-7c83-11eb-9f77-e3218dffb008', '2021-03-04 00:46:26.134651+00', 0, true, true, true);
+
+insert into jig_play_count (jig_id, play_count)
+values ('0cc084bc-7c83-11eb-9f77-e3218dffb008', 0);

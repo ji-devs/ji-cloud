@@ -40,7 +40,7 @@ bitflags::bitflags! {
     }
 }
 
-fn validate_token(
+pub fn validate_token(
     token_string: &str,
     footer: &str,
     token_key: &[u8; 32],
@@ -182,7 +182,7 @@ fn create_cookie(token: String, local_insecure: bool, ttl: time::Duration) -> Co
 }
 
 #[must_use]
-fn generate_csrf() -> String {
+pub fn generate_csrf() -> String {
     let mut bytes = [0_u8; 32];
     rand::thread_rng().fill(&mut bytes[..]);
     base64::encode_config(&bytes, base64::URL_SAFE)
