@@ -79,8 +79,8 @@ pub fn toggle_paused(state: Rc<State>) {
 
     // let iframe know that paused
     let iframe_message = match paused {
-        true => JigToModuleMessage::Play,
-        false => JigToModuleMessage::Pause,
+        false => JigToModuleMessage::Play,
+        true => JigToModuleMessage::Pause,
     };
     sent_iframe_message(Rc::clone(&state), iframe_message);
 }

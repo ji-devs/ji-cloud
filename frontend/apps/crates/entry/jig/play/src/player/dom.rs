@@ -84,8 +84,8 @@ pub fn render(state: Rc<State>) -> Dom {
                 .property("slot", "play-pause-button")
                 .property_signal("mode", state.paused.signal().map(|paused| {
                     match paused {
-                        true =>  "pause",
-                        false =>  "play",
+                        true =>  "play",
+                        false =>  "pause",
                     }
                 }))
                 .event(clone!(state => move |_:events::Click| {
