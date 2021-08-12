@@ -3,13 +3,13 @@ import "@elements/entry/user/register/pages/step1";
 import "@elements/entry/user/register/footer/login";
 import "@elements/core/buttons/rectangle";
 
-const STR_FIRSTNAME_LABEL = "First name";
+const STR_FIRSTNAME_LABEL = "First name*";
 const STR_FIRSTNAME_PLACEHOLDER = "Type your first name";
-const STR_LASTNAME_LABEL = "Last name";
+const STR_LASTNAME_LABEL = "Last name*";
 const STR_LASTNAME_PLACEHOLDER = "Type your last name";
 const STR_USERNAME_LABEL = "Create a User Name*";
 const STR_USERNAME_PLACEHOLDER = "This will be your public name on JI";
-const STR_18 = "I am over 18";
+const STR_18 = "I am over 18*";
 const STR_CONTINUE = "Continue";
 
 export default {

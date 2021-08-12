@@ -13,3 +13,16 @@ pub const STR_EMPTY_USERNAME:&'static str = "Empty username!";
 
 pub const STR_PASSWORD_LABEL:&'static str = "Password";
 pub const STR_PASSWORD_FORGOTTEN:&'static str ="Forgot your Password?";
+
+pub mod register {
+    pub mod step_1 {
+        pub const STR_FIRSTNAME_LABEL:&'static str = "First name*";
+        pub const STR_FIRSTNAME_PLACEHOLDER:&'static str = "Type your first name";
+        pub const STR_LASTNAME_LABEL:&'static str = "Last name*";
+        pub const STR_LASTNAME_PLACEHOLDER:&'static str = "Type your last name";
+        pub const STR_USERNAME_LABEL:&'static str = "Create a User Name*";
+        pub const STR_USERNAME_PLACEHOLDER:&'static str = "This will be your public name on JI";
+        pub const STR_18:&'static str = "I am over 18*";
+        pub const STR_CONTINUE:&'static str = "Continue";
+    }
+}

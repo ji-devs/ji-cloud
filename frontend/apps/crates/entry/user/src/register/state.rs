@@ -10,8 +10,8 @@ impl State {
     cfg_if! {
         if #[cfg(all(feature = "local"))] {
             pub fn new(step:Option<Step>) -> Self {
-                Self { step: Mutable::new(step.unwrap_or(Step::Start)), }
-                //Self::debug_step_3()
+                //Self { step: Mutable::new(step.unwrap_or(Step::Start)), }
+                Self::debug_step_1()
             }
 
             fn debug_step_1() -> Self {
