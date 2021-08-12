@@ -1,4 +1,5 @@
 use crate::error;
+use crate::extractor::IPAddress;
 use core::config::JIG_PLAYER_SESSION_CODE_MAX;
 use shared::domain::jig::player::JigPlayerSettings;
 use shared::domain::jig::{JigId, TextDirection};
@@ -35,6 +36,7 @@ pub async fn create(
             r#"
 insert into jig_player_session (jig_id, index, direction, display_score, track_assessments, drag_assist)
 values ($1, $2, $3, $4, $5, $6)
+
 "#,
             jig_id.0,
             index,
@@ -87,6 +89,107 @@ values ($1, $2, $3, $4, $5, $6)
             },
         }
     }
+}
+
+/// Creates new jig player session for a player
+// TODO: Fixme
+// TODO: Add Settings?
+pub async fn create_user_session(
+    db: &PgPool,
+    session_index: i16,
+    ip_addr: IPAddress,
+) -> Result<String, error::JigCode> {
+    let mut txn = db.begin().await?;
+
+    let jig_id = sqlx::query!(
+        //language=SQL
+        r#"
+        select jig_id
+        from jig_player_session
+        where index=$1
+        "#,
+        session_index
+    )
+    .fetch_optional(&mut txn)
+    .await?
+    .ok_or(error::JigCode::ResourceNotFound)?;
+
+    // get the user agent header and ip address
+    let ip_address = ip_addr.ip_addr.ok_or(error::JigCode::ResourceNotFound)?;
+    let user_agent = ip_addr.user_agent.ok_or(error::JigCode::ResourceNotFound)?;
+
+    // insert into the jig_player_session_instance table returning the instance_id
+    let jig_player_session_instance_id = sqlx::query!(
+        //language=SQL
+        r#"
+        insert into jig_player_session_instance (index, jig_id, ip_addr, user_agent)
+        values ($1, $2, $3, $4)
+        returning instance_id as "id: Uuid"
+        "#,
+        session_index,
+        jig_id.jig_id,
+        ip_address,
+        user_agent
+    )
+    .fetch_one(&mut txn)
+    .await?;
+
+    txn.commit().await?;
+
+    Ok(jig_player_session_instance_id.id.to_string())
+}
+
+/// Completes a jig player session for a player and updates play count
+pub async fn complete_user_session(
+    db: &PgPool,
+    jig_id: JigId,
+    ip_addr: IPAddress,
+    session_id: &str,
+) -> Result<(), error::JigCode> {
+    let txn = db.begin().await?;
+
+    let instance_id = Uuid::parse_str(&session_id).unwrap();
+
+    let jig_session_index_query = sqlx::query!(
+        //language=SQL
+        r#"
+        select *
+        from jig_player_session_instance
+        where instance_id = $1
+        "#,
+        instance_id,
+    )
+    .fetch_optional(db)
+    .await?
+    .ok_or(error::JigCode::ResourceNotFound)?;
+
+    // get the user agent header and ip address and check validity
+    let ip_address = ip_addr.ip_addr.ok_or(error::JigCode::ResourceNotFound)?;
+    let user_agent = ip_addr.user_agent.ok_or(error::JigCode::ResourceNotFound)?;
+
+    // unwrap because invalid ip/user agents are checked before putting them into the db
+    // confirms user agent and ip address match
+    if (jig_session_index_query.user_agent.unwrap()).ne(&user_agent)
+        | (jig_session_index_query.ip_addr.unwrap()).ne(&ip_address)
+    {
+        return Err(error::JigCode::ResourceNotFound);
+    }
+
+    sqlx::query!(
+        //language=SQL
+        r#"
+        update jig_play_count
+        set play_count = play_count + 1
+        where jig_id = $1
+        "#,
+        jig_id.0,
+    )
+    .execute(db)
+    .await?;
+
+    txn.commit().await?;
+
+    Ok(())
 }
 
 /// Hashes a Uuid by

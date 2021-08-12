@@ -136,3 +136,17 @@ impl ApiEndpoint for Count {
     const PATH: &'static str = "/v1/jig/count";
     const METHOD: Method = Method::Get;
 }
+
+/// Count of numner of times a JIG was played.
+///
+/// # Authorization
+/// * None
+pub struct PlayCount;
+impl ApiEndpoint for PlayCount {
+    type Req = ();
+    type Res = ();
+    type Err = EmptyError;
+    const PATH: &'static str = "/v1/jig/{id}/play-count";
+    const METHOD: Method = Method::Post;
+}
+

@@ -40,7 +40,7 @@ pub async fn create(
         // language=SQL
         r#"
 insert into jig
-    (display_name, creator_id, author_id, publish_at, language, description, direction, display_score, track_assessments, drag_assist)
+   (display_name, creator_id, author_id, publish_at, language, description, direction, display_score, track_assessments, drag_assist)
 values ($1, $2, $2, $3, $4, $5, $6, $7, $8, $9)
 returning id
 "#,
@@ -82,6 +82,18 @@ values ($1, $2, $3, $4)"#,
         .execute(&mut transaction)
         .await?;
     }
+
+    // todo add play_count table
+    sqlx::query!(
+        // language=SQL
+        r#"
+insert into jig_play_count (jig_id, play_count)
+values ($1, 0)
+        "#,
+        jig.id
+    )
+    .execute(&mut transaction)
+    .await?;
 
     transaction.commit().await?;
 
@@ -923,6 +935,25 @@ where id = $4
     .await?;
 
     txn.commit().await?;
+
+    Ok(())
+}
+
+pub async fn increase_play_count(db: &PgPool, id: JigId) -> anyhow::Result<()> {
+    let mut transaction = db.begin().await?;
+
+    sqlx::query!(
+        // language=SQL
+        r#"
+update jig_play_count
+set play_count = play_count + 1
+where jig_id = $1
+returning play_count;
+            "#,
+        id.0,
+    )
+    .fetch_one(&mut transaction)
+    .await?;
 
     Ok(())
 }

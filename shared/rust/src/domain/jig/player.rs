@@ -60,6 +60,22 @@ pub struct JigPlayerSessionCreateRequest {
     pub settings: JigPlayerSettings,
 }
 
+/// Request to create a player (who is not the author) session for a jig.
+#[derive(Serialize, Deserialize, Debug)]
+pub struct JigPlayerSessionCreateRequestForPlayer {
+    /// Four-digit code identifying a Jig player session
+    pub session_index: i16,
+}
+
+/// Request to complete a player session for a jig.
+#[derive(Serialize, Deserialize, Debug)]
+pub struct JigPlayerSessionCompleteRequest {
+    /// ID of the Jig that the session is for
+    pub jig_id: JigId,
+    /// Token that will be passed to confirm a jig was played all the way through
+    pub token: String,
+}
+
 /// Response for creating or fetching the code associated with a jig.
 #[derive(Serialize, Deserialize, Debug)]
 pub struct JigPlayerSessionCode {
@@ -74,4 +90,18 @@ pub struct JigPlayerSession {
     pub jig_id: JigId,
     /// Settings for the player session.
     pub settings: JigPlayerSettings,
+}
+
+/// Response for creating a session for a jig play as a player. contains the token
+#[derive(Serialize, Deserialize, Debug)]
+pub struct JigPlayerSessionToken {
+    /// Token that will be passed to confirm a jig was played all the way through
+    pub token: String,
+}
+
+/// Response for completing a session for a jig play as a player and updating the jig play count
+#[derive(Serialize, Deserialize, Debug)]
+pub struct JigPlayCount {
+    /// Number of times a jig was completed
+    pub play_count: i64,
 }

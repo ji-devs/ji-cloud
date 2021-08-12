@@ -1,0 +1,8 @@
+---
+source: tests/integration/jig/player.rs
+expression: body
+
+---
+{
+  "token": "v2.local.CRvtwYHVktdmdfwJFojhg8MSilEK2xP7I3RM86b-fmZnS6vi_vK9AeyAlOhMAaohIx5IiSfN-bsB4-Nxm-u48TwBc_b3fnFhyGJDd09kDsxVmBov-4hvKWnXP1UqbJfZCP3-0lTkhtQ-CrNB0XsZsScUwt--DK7h_r8YNxX6WGsYw6HljDH9NxFHu_GM7MsWkwZK3r95ZA_0OSe-r3vmDHcOLCj-wAucHQewimXIcsvH4v3yiysrvCMl9WHmxU-Mwo6IsacUJTt589AXSQNfDOk0kcY-eDshg68gcwjyzhg1r4M7zUKqOZIfwcd48t-U_mQZ9ZhVjUZeIosSjlAk4ZU.YXV0aG9yaXplZA"
+}

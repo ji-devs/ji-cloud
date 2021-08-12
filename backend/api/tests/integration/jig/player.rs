@@ -3,7 +3,7 @@ use crate::{
     helpers::{initialize_server, LoginExt},
 };
 use http::StatusCode;
-use shared::domain::jig::player::{JigPlayerSession, JigPlayerSessionCode};
+use shared::domain::jig::player::{JigPlayerSession, JigPlayerSessionCode, JigPlayerSessionToken};
 
 #[actix_rt::test]
 async fn get() -> anyhow::Result<()> {
@@ -92,6 +92,55 @@ async fn create() -> anyhow::Result<()> {
     let body: JigPlayerSession = resp.json().await?;
 
     insta::assert_json_snapshot!(body);
+
+    Ok(())
+}
+
+#[actix_rt::test]
+async fn create_player_session() -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::Jig], &[]).await;
+
+    let port = app.port();
+
+    let client: reqwest::Client = reqwest::ClientBuilder::new()
+        .user_agent("USER_AGENT")
+        .connect_timeout(std::time::Duration::from_secs(5))
+        .timeout(std::time::Duration::from_secs(10))
+        .build()?;
+
+    let resp = client
+        .post(&format!("http://0.0.0.0:{}/v1/jig/player/instance", port))
+        .json(&serde_json::json!({
+            "session_index": 1234,
+        }))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    assert_eq!(resp.status(), StatusCode::CREATED);
+
+    let body: JigPlayerSessionToken = resp.json().await?;
+
+    let token = body.token;
+
+    println!("{}", token);
+
+    let token_resp = client
+        .post(&format!(
+            "http://0.0.0.0:{}/v1/jig/player/instance/complete",
+            port
+        ))
+        .json(&serde_json::json!({
+            "jig_id": "0cc084bc-7c83-11eb-9f77-e3218dffb008",
+            "token": token,
+        }))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    assert_eq!(token_resp.status(), StatusCode::NO_CONTENT);
 
     Ok(())
 }

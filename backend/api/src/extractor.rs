@@ -6,6 +6,7 @@ use crate::{
 };
 
 use actix_http::Payload;
+use actix_web::http::header;
 use actix_web::{
     cookie::Cookie, http::HeaderMap, web::Data, Either, FromRequest, HttpMessage, HttpRequest,
 };
@@ -469,6 +470,42 @@ impl FromRequest for RequestOrigin {
             let origin = origin;
 
             Ok(Self { origin })
+        }
+        .boxed()
+        .into()
+    }
+}
+
+pub struct IPAddress {
+    pub ip_addr: Option<String>,
+    pub user_agent: Option<String>,
+}
+
+impl FromRequest for IPAddress {
+    type Error = actix_web::Error;
+    type Future = ReadyOrNot<'static, Result<Self, Self::Error>>;
+    type Config = ();
+    fn from_request(req: &HttpRequest, _payload: &mut Payload) -> Self::Future {
+        //USER_AGENT
+        let val = req.connection_info();
+
+        let ip_addr = val.realip_remote_addr().map(|s| s.to_string());
+
+        let user_agent = req
+            .headers()
+            .get(header::USER_AGENT)
+            .map(|it| it.to_str().ok())
+            .flatten()
+            .map(ToOwned::to_owned);
+
+        async move {
+            let ip_addr = ip_addr;
+            let user_agent = user_agent;
+
+            Ok(Self {
+                ip_addr,
+                user_agent,
+            })
         }
         .boxed()
         .into()

@@ -7,3 +7,4 @@ create table jig_category (
 alter table jig add column language text not null default 'en';
 
 alter table jig alter column language drop default;
+

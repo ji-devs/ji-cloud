@@ -1,7 +1,7 @@
 use super::ApiEndpoint;
 use crate::{
     api::Method,
-    domain::jig::player::{JigPlayerSession, JigPlayerSessionCode, JigPlayerSessionCreateRequest},
+    domain::jig::player::{JigPlayerSession, JigPlayerSessionCode, JigPlayerSessionCreateRequest, JigPlayerSessionToken, JigPlayerSessionCompleteRequest, JigPlayCount, JigPlayerSessionCreateRequestForPlayer},
     error::EmptyError,
 };
 
@@ -32,6 +32,40 @@ impl ApiEndpoint for Create {
     type Res = JigPlayerSessionCode;
     type Err = EmptyError;
     const PATH: &'static str = "/v1/jig/player";
+    const METHOD: Method = Method::Post;
+}
+
+/// Create a session for a user who isn't the author
+///
+/// # Errors
+///
+/// * [`400 - BadRequest`](http::StatusCode::BAD_REQUEST) if the request is malformed.
+/// * [`401 - Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.
+/// * [`403 - Forbidden`](http::StatusCode::FORBIDDEN) if the user does not have sufficient permission to perform the action.
+/// * ['404 - NotFound'](http::StatusCode::NOT_FOUND) if the jig does not exist.
+pub struct CreatePlayerSession;
+impl ApiEndpoint for CreatePlayerSession {
+    type Req = JigPlayerSessionCreateRequestForPlayer;
+    type Res = JigPlayerSessionToken;
+    type Err = EmptyError;
+    const PATH: &'static str = "/v1/jig/player/instance";
+    const METHOD: Method = Method::Post;
+}
+
+/// Complete a session for a user who isn't the author and update the jig play count
+///
+/// # Errors
+///
+/// * [`400 - BadRequest`](http::StatusCode::BAD_REQUEST) if the request is malformed.
+/// * [`401 - Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.
+/// * [`403 - Forbidden`](http::StatusCode::FORBIDDEN) if the user does not have sufficient permission to perform the action.
+/// * ['404 - NotFound'](http::StatusCode::NOT_FOUND) if the jig does not exist.
+pub struct CompletePlayerSession;
+impl ApiEndpoint for CompletePlayerSession {
+    type Req = JigPlayerSessionCompleteRequest;
+    type Res = ();
+    type Err = EmptyError;
+    const PATH: &'static str = "/v1/jig/player/instance/complete";
     const METHOD: Method = Method::Post;
 }
 
