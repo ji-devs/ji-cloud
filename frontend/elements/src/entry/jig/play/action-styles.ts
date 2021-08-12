@@ -3,7 +3,7 @@ import { css } from "lit-element";
 export const actionStyles = css`
     .action {
         cursor: pointer;
-        display: inline-grid;
+        display: inline-flex;
         place-content: center;
         box-sizing: border-box;
         border: solid var(--light-blue-3) 1px;

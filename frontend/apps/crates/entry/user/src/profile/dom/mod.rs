@@ -15,6 +15,15 @@ mod options_popup;
 const STR_EDIT: &'static str = " Edit";
 const STR_REMOVE_IMAGE: &'static str = "remove image";
 
+const STR_AFFILIATION_HEADER: &'static str = "Affiliation";
+const STR_AFFILIATION_SUBHEADER: &'static str = "What type of content do you want to access?";
+
+const STR_SUBJECT_HEADER: &'static str = "Relevant Subjects";
+const STR_SUBJECT_SUBHEADER: &'static str = "Which subjects are you interested in?";
+
+const STR_AGE_HEADER: &'static str = "Relevant Age Group";
+const STR_AGE_SUBHEADER: &'static str = "Which age group are you interested in?";
+
 pub struct ProfilePage {
 }
 
@@ -302,9 +311,6 @@ fn render_popups(state: Rc<State>) -> impl Signal<Item = Option<Dom>> {
                         let child = match active_popup {
                             ActivePopup::None => unreachable!(),
                             ActivePopup::Affiliation => {
-                                let header = "Affiliation";
-                                let subheader = "What type of content do you want to access?";
-
                                 let callbacks = PopupCallbacks {
                                     get_options_list: Box::new(|meta| {
                                         &meta.affiliations
@@ -320,12 +326,9 @@ fn render_popups(state: Rc<State>) -> impl Signal<Item = Option<Dom>> {
                                     }),
                                 };
 
-                                options_popup::render::<AffiliationId, Affiliation>(Rc::clone(&state), header, subheader, callbacks)
+                                options_popup::render::<AffiliationId, Affiliation>(Rc::clone(&state), STR_AFFILIATION_HEADER, STR_AFFILIATION_SUBHEADER, callbacks)
                             },
                             ActivePopup::Subjects => {
-                                let header = "??";
-                                let subheader = "???";
-
                                 let callbacks = PopupCallbacks {
                                     get_options_list: Box::new(|meta| {
                                         &meta.subjects
@@ -341,12 +344,9 @@ fn render_popups(state: Rc<State>) -> impl Signal<Item = Option<Dom>> {
                                     }),
                                 };
 
-                                options_popup::render::<SubjectId, Subject>(Rc::clone(&state), header, subheader, callbacks)
+                                options_popup::render::<SubjectId, Subject>(Rc::clone(&state), STR_SUBJECT_HEADER, STR_SUBJECT_SUBHEADER, callbacks)
                             },
                             ActivePopup::Age => {
-                                let header = "Relevant Age Group";
-                                let subheader = "Which age group are you interested in?";
-
                                 let callbacks = PopupCallbacks {
                                     get_options_list: Box::new(|meta| {
                                         &meta.age_ranges
@@ -362,7 +362,7 @@ fn render_popups(state: Rc<State>) -> impl Signal<Item = Option<Dom>> {
                                     }),
                                 };
 
-                                options_popup::render::<AgeRangeId, AgeRange>(Rc::clone(&state), header, subheader, callbacks)
+                                options_popup::render::<AgeRangeId, AgeRange>(Rc::clone(&state), STR_AGE_HEADER, STR_AGE_SUBHEADER, callbacks)
                             },
                             ActivePopup::ResetPassword => {
                                 // let state = Rc::new(change_password::state::State::new());

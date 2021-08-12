@@ -1,5 +1,5 @@
 import { LitElement, html, css, customElement, property } from 'lit-element';
-import "@elements/entry/home/search-section/search-bar";
+import "@elements/entry/home/home/search-section/search-bar";
 
 @customElement('search-header')
 export class _ extends LitElement {

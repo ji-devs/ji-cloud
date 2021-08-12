@@ -6,22 +6,15 @@
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
-mod actions;
-mod dom;
 mod router;
-mod search_state;
-mod state;
+mod home;
+mod student_code;
 
 use cfg_if::cfg_if;
 use std::rc::Rc;
 use wasm_bindgen::prelude::*;
 
 use router::Router;
-/*
-mod page;
-mod pages;
-mod header;
-*/
 
 #[wasm_bindgen(start)]
 pub async fn main_js() {
@@ -30,7 +23,7 @@ pub async fn main_js() {
 
     let router = Rc::new(Router::new());
 
-    router::render(router.clone());
+    dominator::append_dom(&dominator::body(), Router::render());
 
     std::mem::forget(Box::new(router));
 }

@@ -1,42 +1,41 @@
-use super::dom;
-use super::state::State;
-use dominator::clone;
-use dominator_helpers::futures::AsyncLoader;
-use futures_signals::signal::SignalExt;
-use std::cell::RefCell;
+use dominator::{Dom, html};
+use futures_signals::signal::Signal;
 use std::rc::Rc;
-use utils::routes::Route;
+use utils::routes::{HomeRoute, Route};
+use super::{home, student_code};
+
 
 pub struct Router {
-    loader: AsyncLoader,
-    app: RefCell<Option<Rc<State>>>,
 }
 
 impl Router {
     pub fn new() -> Self {
-        Self {
-            loader: AsyncLoader::new(),
-            app: RefCell::new(None),
-        }
+        Self { }
     }
-}
 
-pub fn render(state: Rc<Router>) {
-    state.clone().loader.load(
+    pub fn render() -> Dom {
+        html!("main", {
+            .child_signal(Self::dom_signal())
+        })
+    }
+
+    fn dom_signal() -> impl Signal<Item = Option<Dom>> {
         dominator::routing::url()
-            .signal_ref(|url| Route::from_url(&url))
-            .for_each(clone!(state => move |route| {
+            .signal_ref(|url| {
+                let route = Route::from_url(&url);
                 match route {
-                    Route::Home => {
-                        let app_state = Rc::new(State::new());
-                        *state.app.borrow_mut() = Some(app_state.clone());
-                        let body = dominator::body();
-                        body.set_inner_html("");
-                        dominator::append_dom(&body, dom::render(app_state.clone()));
-                    },
-                    _ => {}
-                };
-                async {}
-            })),
-    );
+                    Route::Home(route) => {
+                        match route {
+                            HomeRoute::Home => {
+                                Some(home::dom::render(Rc::new(home::state::State::new())))
+                            },
+                            HomeRoute::StudentCode => {
+                                Some(student_code::dom::render(Rc::new(student_code::state::State::new())))
+                            },
+                        }
+                    }
+                    _ => None
+                }
+            })
+    }
 }

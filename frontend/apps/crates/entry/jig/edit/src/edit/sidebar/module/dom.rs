@@ -82,6 +82,17 @@ impl ModuleDom {
                     .event(clone!(state => move |_evt:events::Click| {
                         actions::edit(state.clone());
                     }))
+                    .apply(|mut dom| {
+                        if let Some(module) = &*module {
+                            dom = dom.child(html!("img-module-screenshot", {
+                                .property("slot", "thumbnail")
+                                .property("jigId", state.sidebar.jig.id.0.to_string())
+                                .property("moduleId", module.id.0.to_string())
+                                .property("fallbackKind", state.kind_str())
+                            }));
+                        }
+                        dom
+                    })
                 }))
                 .after_inserted(clone!(state => move |dom| {
                     *state.elem.borrow_mut() = Some(dom);
