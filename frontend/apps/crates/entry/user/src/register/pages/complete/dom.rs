@@ -3,8 +3,7 @@ use futures_signals::signal::Mutable;
 use std::rc::Rc;
 use web_sys::HtmlInputElement;
 use utils::{events, routes::*};
-
-const STR_SUBMIT:&'static str = "Go to JI home";
+use crate::strings::register::complete::*;
 
 pub struct CompletePage {
 }
