@@ -8,7 +8,8 @@ pub enum ImageTag {
     Ispy,
     MultipleChoice,
     DragAndDrop,
-    Video
+    Video,
+    NavigationButton
 }
 
 impl ImageTag {
@@ -19,7 +20,8 @@ impl ImageTag {
             Self::Ispy => "I Spy",
             Self::MultipleChoice => "Multiple Choice",
             Self::DragAndDrop => "Drag and Drop",
-            Self::Video => "Video"
+            Self::Video => "Video",
+            Self::NavigationButton => "Navigation Button"
         }
     }
 
