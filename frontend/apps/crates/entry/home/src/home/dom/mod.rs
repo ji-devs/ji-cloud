@@ -2,11 +2,10 @@ use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
 use std::rc::Rc;
 
-use components::page_header;
+use components::{page_header, page_footer};
 
 use super::state::{HomePageMode, State};
 
-mod footer;
 mod home_sections;
 mod search_results;
 mod search_section;
@@ -24,7 +23,7 @@ pub fn render(state: Rc<State>) -> Dom {
                     }
                 })))
             }),
-            footer::render(state.clone()),
+            page_footer::dom::render(None),
         ])
     })
 }
