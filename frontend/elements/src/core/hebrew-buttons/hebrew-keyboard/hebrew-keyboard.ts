@@ -153,6 +153,8 @@ export class _ extends LitElement {
             // for wysiwyg
             input.setTextAtSelection(char);
         }
+        input.dispatchEvent(new Event("input"));
+        input.dispatchEvent(new Event("change"));
     }
 
     private deepActiveElementOrWysiwyg() {
@@ -178,6 +180,8 @@ export class _ extends LitElement {
             // for wysiwyg
             input.triggerBackspace();
         }
+        input.dispatchEvent(new Event("input"));
+        input.dispatchEvent(new Event("change"));
     }
 
     @query("anchored-overlay#cantillations")
@@ -241,7 +245,16 @@ export class _ extends LitElement {
         this.removeEventListener("focusin", this.onFocus)
     }
     private onFocus(e: FocusEvent) {
-        (e.relatedTarget as any)?.focus();
+        let relatedTarget = e.relatedTarget as HTMLElement | null;
+
+        while (relatedTarget) {
+            relatedTarget.focus();
+            if(relatedTarget.matches(":focus")) {
+                break;
+            } else {
+                relatedTarget = relatedTarget.shadowRoot?.querySelector("input, textarea, [contentediable]") as HTMLElement | null;
+            }
+        }
     }
 
     render() {
