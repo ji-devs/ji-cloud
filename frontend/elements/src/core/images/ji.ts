@@ -70,9 +70,9 @@ export class _ extends LitElement {
             return html`<slot name="fallback"><div>[MISSING IMAGE]</div></slot>`;
         } else {
             if (sameOrigin(src)) {
-                return html`<img .draggable=${draggable} .src="${src}" @error=${this.onError} @load="${this.onLoad}" ></img>`;
+                return html`<img .draggable=${draggable} .src="${src}" @error=${this.onError} @load="${this.onLoad}" />`;
             } else {
-                return html`<img .draggable=${draggable} .src="${src}" crossorigin="anonymous" @error=${this.onError} @load="${this.onLoad}" ></img>`;
+                return html`<img .draggable=${draggable} .src="${src}" crossorigin="anonymous" @error=${this.onError} @load="${this.onLoad}" />`;
             }
         }
     }

@@ -1,8 +1,12 @@
 [
     {
         "origin": [
-            "https://sandbox.jigzi.org", 
+            "https://sandbox.jigzi.org",
             "https://jigzi.org", 
+			"https://storybook.sandbox.jigzi.org",
+			"https://sandbox.jigzi.org",
+			"https://storybook.sandbox.jicloud.org",
+			"https://sandbox.jicloud.org",
             "http://localhost:8080", 
             "http://localhost:8081",
             "http://localhost:4104",
