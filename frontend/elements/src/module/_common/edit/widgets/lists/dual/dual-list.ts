@@ -25,7 +25,7 @@ export class _ extends LitElement {
               margin-top: 34px;
               margin-bottom: 24px;
               display: flex;
-              justify-content: space-between;
+              justify-content: flex-end;
           }
 
           .input-footer {
@@ -51,7 +51,7 @@ export class _ extends LitElement {
               <div><slot name="clear"></slot></div>
           </header>
           <div class="input-buttons">
-              <slot name="input-buttons"></slot>
+              <hebrew-buttons full></hebrew-buttons>
           </div>
           <div class="lists">
               <slot name="left"></slot>

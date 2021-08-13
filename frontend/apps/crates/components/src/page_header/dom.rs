@@ -1,9 +1,9 @@
 use std::rc::Rc;
 
 use dominator::{html, Dom};
-use futures_signals::signal::SignalExt;
-use shared::domain::user::UserProfile;
-use utils::routes::{HomeRoute, JigRoute, ProfileSection, Route, UserRoute};
+use futures_signals::signal::{Signal, SignalExt};
+use shared::domain::user::{UserProfile, UserScope};
+use utils::routes::{AdminRoute, HomeRoute, JigRoute, ProfileSection, Route, UserRoute};
 
 use crate::page_header::state::LoggedInState;
 
@@ -51,10 +51,25 @@ pub fn render(state: Rc<State>, slot: Option<&str>) -> Dom {
                 .property("slot", "donate")
                 .property("color", "green")
                 .property("size", "small")
-                .property("bold", "")
+                .property("bold", true)
                 .text("Donate")
             }),
         ])
+        .child_signal(admin_privileges(Rc::clone(&state)).map(|admin_privileges| {
+            match admin_privileges {
+                false => None,
+                true => {
+                    Some(html!("button-rect", {
+                        .property("slot", "links")
+                        .property("kind", "text")
+                        .property("size", "small")
+                        .property("bold", true)
+                        .property("href", &Route::Admin(AdminRoute::Landing).to_string())
+                        .text("Admin")
+                    }))
+                }
+            }
+        }))
         .children_signal_vec(state.logged_in.signal_cloned().map(|logged_in| {
             match logged_in {
                 LoggedInState::LoggedIn(user) => render_logged_in(&user),
@@ -62,6 +77,15 @@ pub fn render(state: Rc<State>, slot: Option<&str>) -> Dom {
                 LoggedInState::Loading => vec![],
             }
         }).to_signal_vec())
+    })
+}
+
+fn admin_privileges(state: Rc<State>) -> impl Signal<Item = bool> {
+    state.logged_in.signal_ref(|logged_in_state| {
+        match logged_in_state {
+            LoggedInState::LoggedIn(profile) if profile.scopes.contains(&UserScope::Admin) => true,
+            _ => false
+        }
     })
 }
 

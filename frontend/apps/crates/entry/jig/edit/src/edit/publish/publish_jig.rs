@@ -3,6 +3,7 @@ use std::iter::FromIterator;
 
 use futures_signals::signal::Mutable;
 use shared::domain::Publish;
+use shared::domain::jig::LiteModule;
 use shared::domain::{
     category::CategoryId,
     jig::{Jig, JigId, JigUpdateRequest},
@@ -11,6 +12,8 @@ use shared::domain::{
 
 pub struct PublishJig {
     pub id: JigId,
+    // modules only for read
+    pub modules: Mutable<Vec<LiteModule>>,
     pub display_name: Mutable<String>,
     pub description: Mutable<String>,
     pub age_ranges: Mutable<HashSet<AgeRangeId>>,
@@ -25,6 +28,7 @@ impl From<Jig> for PublishJig {
     fn from(jig: Jig) -> Self {
         Self {
             id: jig.id,
+            modules: Mutable::new(jig.modules),
             display_name: Mutable::new(jig.display_name),
             description: Mutable::new(jig.description.clone()),
             age_ranges: Mutable::new(HashSet::from_iter(jig.age_ranges)),
@@ -40,6 +44,7 @@ impl PublishJig {
     pub fn new_empty(jig_id: JigId) -> Self {
         Self {
             id: jig_id,
+            modules: Mutable::new(vec![]),
             display_name: Mutable::new(String::new()),
             description: Mutable::new(String::new()),
             age_ranges: Mutable::new(HashSet::new()),
@@ -52,6 +57,7 @@ impl PublishJig {
 
     pub fn fill_from_jig(&self, jig: Jig) {
         self.display_name.set(jig.display_name);
+        self.modules.set(jig.modules);
         self.description.set(jig.description);
         self.age_ranges.set(HashSet::from_iter(jig.age_ranges));
         self.goals.set(HashSet::from_iter(jig.goals));

@@ -4,16 +4,13 @@ use std::rc::Rc;
 use super::{state::*, actions};
 use web_sys::HtmlInputElement;
 use utils::{events, routes::*};
-use crate::register::{
-    state::{Step, Step1Data},
-    components::footer::Footer
+use crate::{
+    strings::register::step_2::*,
+    register::{
+        state::{Step, Step1Data},
+        components::footer::Footer
+    }
 };
-
-const STR_SUBMIT:&'static str = "Submit";
-const STR_LOCATION_LABEL:&'static str = "Location*";
-const STR_TERMS_LABEL:&'static str = "I have read the terms and conditions (legal text…)";
-const STR_LANGUAGE_LABEL:&'static str = "Preferred language of communication*";
-const STR_MARKETING_LABEL:&'static str = "I would like to receive educational resources (GDPR legal text….)";
 
 pub struct Step2Page {
 }
@@ -27,6 +24,7 @@ impl Step2Page {
                 html!("input-wrapper", {
                     .property("slot", "location")
                     .property("label", STR_LOCATION_LABEL)
+                    .property_signal("error", state.location_error.signal())
                     .child(html!("input-location", {
                         .event(clone!(state => move |evt:events::GoogleLocation| {
                             *state.location_json.borrow_mut() = evt.raw_json();

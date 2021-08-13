@@ -8,11 +8,11 @@ const STR_GENERAL_SUMMARY = "General Summary";
 const STR_IMAGENAME = "Image name";
 const STR_DESCRIPTIONTITLE = "Image description";
 const STR_STYLETITLE = "Image style";
-const STR_USED = "To be used only for";
 const STR_AGE = "Suitable for age";
 const STR_STREAM = "Suitable for jewish stream";
 const STR_TAGS = "Tags (internal use only)";
 const STR_DATE_TIME = "Date and time (automatic)";
+//FUTURE: const STR_USED = "To be used only for";
 
 const STR_CATEGORIES_REPORT = "Categories summary";
 @customElement('image-meta-section-3')
@@ -70,10 +70,6 @@ export class _ extends LitElement {
                     <title-ji color="blue" class="summary-title">${STR_STYLETITLE}</title-ji>
                     <div class="summary">
                         <slot name="style"></slot>
-                    </div>
-                    <title-ji color="blue" class="summary-title">${STR_USED}</title-ji>
-                    <div class="summary">
-                        <slot name="used"></slot>
                     </div>
                     <title-ji color="blue" class="summary-title">${STR_AGE}</title-ji>
                     <div class="summary">

@@ -44,25 +44,17 @@ impl State {
         }
     }
     pub fn window_state_signal(state: Rc<State>) -> impl Signal<Item = &'static str> {
-        // TODO: add done state
-        map_ref! {
-            let publish_at = state.sidebar.publish_at.signal_cloned(),
-            let route = state.sidebar.route.signal_cloned()
-                => move {
-                    if publish_at.is_some() {
-                        return "published";
-                    };
-                    match &*state.module {
-                        None => return "empty",
-                        Some(this_module) => {
-                            match route {
-                                JigEditRoute::Module(module_id) if *module_id == this_module.id => return "active",
-                                _ => return "draft",
-                            }
-                        }
-                    };
+        state.sidebar.route.signal_cloned().map(clone!(state => move |route| {
+            match &*state.module {
+                None => return "empty",
+                Some(this_module) => {
+                    match route {
+                        JigEditRoute::Module(module_id) if module_id == this_module.id => return "active",
+                        _ => return "thumbnail",
+                    }
                 }
-        }
+            };
+        }))
     }
 
     pub fn drag_overlap_signal(_self: Rc<Self>) -> impl Signal<Item = bool> {

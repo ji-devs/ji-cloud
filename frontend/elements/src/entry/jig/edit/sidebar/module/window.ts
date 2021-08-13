@@ -4,7 +4,8 @@ import { ModuleKind, moduleKinds } from "@elements/module/_common/types";
 import "@elements/core/images/ui";
 
 
-export type ModuleState = "empty" | "draft" | "active" | "complete" | "published";
+// export type ModuleState = "empty" | "draft" | "active" | "complete" | "published";
+export type ModuleState = "empty" | "active" | "thumbnail";
 const STR_EMPTY = "Drag\nactivity\nhere"
 
 @customElement("jig-edit-sidebar-module-window")
@@ -26,22 +27,25 @@ export class _ extends LitElement {
                 :host([state=empty]) .wrapper.drag-over {
                     background-color: var(--dark-blue-1);
                 }
-                :host([state=draft]) .wrapper {
+                /* :host([state=draft]) .wrapper {
                     background-color: var(--light-blue-2);
                     border: solid 2px #d8e7f9;
-                }
+                } */
                 :host([state=active]) .wrapper {
                     background-color: var(--light-blue-5);
                 }
                 :host([state=active]) img-ui {
                     height: 100px;
                 }
-                :host([state=complete]) {
+                /* :host([state=complete]) {
                     background-color: #d5f0de;
                     border: solid 2px #c5e9d2;
+                } */
+                slot[name=thumbnail] {
+                    display: none;
                 }
-                :host([state=published]) {
-                    
+                :host([state=thumbnail]) slot[name=thumbnail] {
+                    display: revert;
                 }
 
                 .drag-here-text {
@@ -65,7 +69,7 @@ export class _ extends LitElement {
     }
 
     @property({reflect: true})
-    state: ModuleState = "draft";
+    state: ModuleState = "active";
 
     @property()
     activeModuleKind: ModuleKind = "cover";
@@ -89,13 +93,9 @@ export class _ extends LitElement {
                 ${
                     this.state === "empty" ? html`
                         <p class="drag-here-text">${STR_EMPTY}</p>
-                    `: this.state === "draft" ? html`
-                        <img-ui path="core/buttons/icon/circle-pencil-blue.svg"></img-ui>
                     ` : this.state === "active" ? html`
                         <img-ui path="entry/jig/modules/large/${this.activeModuleKind}-hover.svg"></img-ui>
-                    ` : this.state === "complete" ? html`
-                        <img-ui path="core/buttons/icon/circle-check-green.svg"></img-ui>
-                    ` : this.state === "published" ? html`
+                    ` : this.state === "thumbnail" ? html`
                         <slot name="thumbnail"></slot>
                     `: nothing
                 }

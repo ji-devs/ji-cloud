@@ -45,11 +45,16 @@ pub fn render(jig_id: JigId) -> Dom {
 fn render_page(state: Rc<State>) -> Dom {
     html!("jig-edit-publish", {
         .children(&mut [
-            html!("img-ji", {
+            html!("img-module-screenshot", {
+                .property("slot", "thumbnail")
                 .property("slot", "img")
-                .property("lib", "mock")
-                .property("size", "full")
-                .property("id", "jig-gallery.jpg")
+                .property("jigId", state.jig.id.0.to_string())
+                .property_signal("moduleId", state.jig.modules.signal_ref(|modules| {
+                    match modules.len() {
+                        0 => String::new(),
+                        _ => modules[0].id.0.to_string()
+                    }
+                }))
             }),
             html!("label", {
                 .property("slot", "public")

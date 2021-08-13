@@ -52,6 +52,12 @@ impl ModuleDom {
                 .property("module", state.kind_str())
                 .property("index", index as u32)
                 .property_signal("collapsed", state.sidebar.collapsed.signal())
+                .property_signal("selected", state.sidebar.route.signal_ref(clone!(module => move |route| {
+                    match (&*module, route) {
+                        (Some(module), JigEditRoute::Module(module_id)) if module_id == &module.id => true,
+                        _ => false,
+                    }
+                })))
                 .property("lastBottomDecoration", index == total_len-1)
                 .event(clone!(state => move |_evt:events::MouseDown| {
                     // TODO:
@@ -82,17 +88,20 @@ impl ModuleDom {
                     .event(clone!(state => move |_evt:events::Click| {
                         actions::edit(state.clone());
                     }))
-                    .apply(|mut dom| {
-                        if let Some(module) = &*module {
-                            dom = dom.child(html!("img-module-screenshot", {
-                                .property("slot", "thumbnail")
-                                .property("jigId", state.sidebar.jig.id.0.to_string())
-                                .property("moduleId", module.id.0.to_string())
-                                .property("fallbackKind", state.kind_str())
-                            }));
+                    .child_signal(state.sidebar.route.signal_ref(clone!(state, module => move |route| {
+                        match (&*module, route) {
+                            (Some(module), JigEditRoute::Module(module_id)) if module_id == &module.id => None,
+                            (Some(module), _) => {
+                                Some(html!("img-module-screenshot", {
+                                    .property("slot", "thumbnail")
+                                    .property("jigId", state.sidebar.jig.id.0.to_string())
+                                    .property("moduleId", module.id.0.to_string())
+                                    .property("fallbackKind", state.kind_str())
+                                }))
+                            },
+                            _ => None,
                         }
-                        dom
-                    })
+                    })))
                 }))
                 .after_inserted(clone!(state => move |dom| {
                     *state.elem.borrow_mut() = Some(dom);

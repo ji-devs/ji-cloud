@@ -6,12 +6,11 @@ use std::rc::Rc;
 use super::{state::*, actions};
 use web_sys::HtmlInputElement;
 use utils::{events, routes::*, api_helpers::meta::MetaOptions};
-use crate::register::state::{Step, Step2Data};
+use crate::{
+    strings::register::step_3::*,
+    register::state::{Step, Step2Data}
+};
 use wasm_bindgen::prelude::*;
-
-const STR_SUBMIT:&'static str = "Submit";
-const STR_AGE_LABEL:&'static str = "Which age group are you interested in?";
-const STR_AFFILIATION_LABEL:&'static str = "Content from which streams of Judaism do you want to see?";
 
 pub struct Step3Page {
 }

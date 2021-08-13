@@ -4,19 +4,14 @@ use std::rc::Rc;
 use super::{state::*, actions};
 use web_sys::HtmlInputElement;
 use utils::{events, routes::*};
-use crate::register::{
-    state::Step,
-    components::footer::Footer
+use crate::{
+    strings::register::step_1::*,
+    register::{
+        state::Step,
+        components::footer::Footer
+    }
 };
 
-const STR_FIRSTNAME_LABEL:&'static str = "First name";
-const STR_FIRSTNAME_PLACEHOLDER:&'static str = "Type your first name";
-const STR_LASTNAME_LABEL:&'static str = "Last name";
-const STR_LASTNAME_PLACEHOLDER:&'static str = "Type your last name";
-const STR_USERNAME_LABEL:&'static str = "Create a User Name*";
-const STR_USERNAME_PLACEHOLDER:&'static str = "This will be your public name on JI";
-const STR_18:&'static str = "I am over 18";
-const STR_CONTINUE:&'static str = "Continue";
 
 pub struct Step1Page {
 }

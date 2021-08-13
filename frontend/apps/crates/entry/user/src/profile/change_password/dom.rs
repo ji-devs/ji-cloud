@@ -3,13 +3,13 @@ use std::rc::Rc;
 use dominator::{Dom, clone, html};
 use utils::events;
 
-use crate::profile::state::ActivePopup;
+use crate::{
+    strings::profile::*,
+    profile::state::ActivePopup
+};
 
 use super::super::state::State;
 
-const STR_FORGOT_PASSWORD: &'static str = "Forgot your password?";
-const STR_SAVE: &'static str = "Save";
-const STR_CANCEL: &'static str = "Cancel";
 
 pub fn render(state: Rc<State>) -> Dom {
     html!("user-profile-reset-password-popup", {
@@ -23,8 +23,8 @@ pub fn render(state: Rc<State>) -> Dom {
             }),
             html!("input-password", {
                 .property("slot", "inputs")
-                .property("label", "Current password")
-                .property("placeholder", "Type your password")
+                .property("label", STR_CURRENT_PASSWORD_LABEL)
+                .property("placeholder", STR_PASSWORD_PLACEHOLDER)
             }),
             html!("button-rect", {
                 .property("slot", "inputs")
@@ -34,13 +34,13 @@ pub fn render(state: Rc<State>) -> Dom {
             }),
             html!("input-password", {
                 .property("slot", "inputs")
-                .property("label", "New password")
-                .property("placeholder", "Type your password")
+                .property("label", STR_NEW_PASSWORD_LABEL)
+                .property("placeholder", STR_PASSWORD_PLACEHOLDER)
             }),
             html!("input-password", {
                 .property("slot", "inputs")
-                .property("label", "Retype new password")
-                .property("placeholder", "Type your password")
+                .property("label", STR_RETYPE_NEW_PASSWORD_LABEL)
+                .property("placeholder", STR_PASSWORD_PLACEHOLDER)
             }),
             html!("button-text", {
                 .property("slot", "cancel")

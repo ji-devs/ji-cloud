@@ -43,6 +43,7 @@ impl LoginPage {
                     html!("input-password", {
                         .property("slot", "password")
                         .property("label", crate::strings::STR_PASSWORD_LABEL)
+                        .property("placeholder", crate::strings::STR_PASSWORD_PLACEHOLDER)
                         .property_signal("hint", state.password_error())
                         .property_signal("error", state.password_error().map(|err| {
                             !err.is_empty()

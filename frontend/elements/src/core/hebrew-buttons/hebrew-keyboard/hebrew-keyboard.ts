@@ -5,7 +5,7 @@ import { render as renderPunctuation, styles as punctuationStyles } from './punc
 import { letters, niqquds, punctuations } from './data';
 import { enderStyles, renderDelete, renderEnder, renderSpace } from './buttons';
 import { cantillationsStyles, renderCantillations } from './cantillations';
-import { AnchoredOverlay } from '@elements/core/overlays/anchored-overlay';
+import { AnchoredOverlayAbsolute } from '@elements/core/overlays/anchored-overlay-absolute';
 
 @customElement('hebrew-keyboard')
 export class _ extends LitElement {
@@ -87,10 +87,10 @@ export class _ extends LitElement {
                     grid-row: 1;
                     grid-column: 1;
                 }
-                anchored-overlay button[slot=anchor] {
+                anchored-overlay-absolute button[slot=anchor] {
                     width: 100%;
                 }
-                anchored-overlay[open] button[slot=anchor] {
+                anchored-overlay-absolute[open] button[slot=anchor] {
                     background-color: var(--light-blue-3);
                 }
                 .tooltip {
@@ -129,7 +129,7 @@ export class _ extends LitElement {
                     top: calc(100% - 5px);
                     transform: translateX(-50%) rotate(45deg);
                 }
-                anchored-overlay [slot=overlay] {
+                anchored-overlay-absolute [slot=overlay] {
                     background-color: #ffffff;
                     padding: 8px;
                     box-sizing: border-box;
@@ -138,7 +138,7 @@ export class _ extends LitElement {
                     display: flex;
                     column-gap: 8px;
                 }
-                anchored-overlay [slot=overlay] button {
+                anchored-overlay-absolute [slot=overlay] button {
                     width: 32px;
                 }
             `
@@ -153,6 +153,8 @@ export class _ extends LitElement {
             // for wysiwyg
             input.setTextAtSelection(char);
         }
+        input.dispatchEvent(new Event("input"));
+        input.dispatchEvent(new Event("change"));
     }
 
     private deepActiveElementOrWysiwyg() {
@@ -178,10 +180,12 @@ export class _ extends LitElement {
             // for wysiwyg
             input.triggerBackspace();
         }
+        input.dispatchEvent(new Event("input"));
+        input.dispatchEvent(new Event("change"));
     }
 
-    @query("anchored-overlay#cantillations")
-    private cantillationsOverlay!: AnchoredOverlay;
+    @query("anchored-overlay-absolute#cantillations")
+    private cantillationsOverlay!: AnchoredOverlayAbsolute;
 
     private toggleCantillationsOpen = () => {
         this.cantillationsOverlay.open = !this.cantillationsOverlay.open;
@@ -241,7 +245,16 @@ export class _ extends LitElement {
         this.removeEventListener("focusin", this.onFocus)
     }
     private onFocus(e: FocusEvent) {
-        (e.relatedTarget as any)?.focus();
+        let relatedTarget = e.relatedTarget as HTMLElement | null;
+
+        while (relatedTarget) {
+            relatedTarget.focus();
+            if(relatedTarget.matches(":focus")) {
+                break;
+            } else {
+                relatedTarget = relatedTarget.shadowRoot?.querySelector("input, textarea, [contentediable]") as HTMLElement | null;
+            }
+        }
     }
 
     render() {
