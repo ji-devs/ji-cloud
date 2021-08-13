@@ -3,7 +3,7 @@ pub const STR_CHANGE_EMAIL:&'static str = "Change email account";
 pub const STR_SUBMIT:&'static str = "Submit";
 pub const STR_EMAIL_LABEL:&'static str = "Email*";
 pub const STR_EMAIL_PLACEHOLDER:&'static str = "Type or paste your email";
-pub const STR_PASSWORD_CREATE_LABEL:&'static str = "Create Password*";
+pub const STR_PASSWORD_CREATE_LABEL:&'static str = "Create password*";
 pub const STR_PASSWORD_PLACEHOLDER:&'static str ="********";
 
 pub const STR_NOT_AUTHORIZED:&'static str = "Not authorized!";
@@ -13,6 +13,16 @@ pub const STR_EMPTY_USERNAME:&'static str = "Empty username!";
 
 pub const STR_PASSWORD_LABEL:&'static str = "Password*";
 pub const STR_PASSWORD_FORGOTTEN:&'static str ="Forgot your Password?";
+
+pub mod profile {
+    pub const STR_FORGOT_PASSWORD: &'static str = "Forgot your password?";
+    pub const STR_SAVE: &'static str = "Save";
+    pub const STR_CANCEL: &'static str = "Cancel";
+    pub const STR_CURRENT_PASSWORD_LABEL:&'static str = "Current password";
+    pub const STR_NEW_PASSWORD_LABEL:&'static str = "New password";
+    pub const STR_RETYPE_NEW_PASSWORD_LABEL:&'static str = "Retype new password";
+    pub const STR_PASSWORD_PLACEHOLDER:&'static str = "Type your password";
+}
 
 pub mod register {
     pub mod complete {

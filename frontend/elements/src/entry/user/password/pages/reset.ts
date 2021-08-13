@@ -3,7 +3,7 @@ import { LitElement, html, css, customElement, property } from "lit-element";
 import "@elements/entry/user/_common/base-page";
 import {Strength as PasswordStrength} from "@elements/entry/user/register/widgets/password-strength";
 
-const STR_TITLE = "Create a New password";
+const STR_TITLE = "Create a new password";
 //const STR_AFTER = "You’ll be logged in automatically after this";
 const STR_AFTER = "You will need to log in after this";
 
