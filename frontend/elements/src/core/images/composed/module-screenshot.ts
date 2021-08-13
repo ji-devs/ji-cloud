@@ -6,6 +6,15 @@ import { ModuleKind } from "@elements/module/_common/types";
 
 @customElement("img-module-screenshot")
 export class _ extends LitElement {
+    static get styles() {
+        return [css`
+            img-ui, img-ji {
+                height: 100%;
+                width: 100%;
+            }
+        `]
+    }
+
     @property()
     jigId: string = "";
 
