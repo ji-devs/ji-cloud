@@ -3,7 +3,7 @@ import "@elements/core/popups/popup-body";
 
 const STR_SHARING_OPTIONS = "Sharing Options";
 
-@customElement("jig-play-sidebar-share-main")
+@customElement("share-jig-main")
 export class _ extends LitElement {
     static get styles() {
         return [

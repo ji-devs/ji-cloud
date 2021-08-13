@@ -16,9 +16,9 @@ const STR_REPORT_TYPE_PRIVACY: &'static str = "Privacy";
 const STR_REPORT_TYPE_OTHER: &'static str = "Other";
 
 pub struct State {
-    pub active_popup: Mutable<ActivePopup>,
     pub sidebar_open: Mutable<bool>,
     pub player_state: Rc<PlayerState>,
+    pub info_popup_active: Mutable<bool>,
     pub report_status: Mutable<ReportStatus>,
     pub report_type: Mutable<Option<ReportType>>,
     pub all_ages: Mutable<Vec<AgeRange>>,
@@ -28,7 +28,7 @@ pub struct State {
 impl State {
     pub fn new(player_state: Rc<PlayerState>) -> Self {
         Self {
-            active_popup: Mutable::new(ActivePopup::None),
+            info_popup_active: Mutable::new(false),
             sidebar_open: Mutable::new(false),
             player_state,
             report_status: Mutable::new(ReportStatus::Default),
@@ -37,15 +37,6 @@ impl State {
             loader: AsyncLoader::new(),
         }
     }
-}
-
-#[derive(Clone)]
-pub enum ActivePopup {
-    None,
-    ShareMain,
-    ShareStudents,
-    ShareEmbed,
-    JigInfo,
 }
 
 #[derive(Clone, PartialEq, Eq)]

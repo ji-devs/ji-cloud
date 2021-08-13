@@ -8,7 +8,7 @@ const STR_STUDENTS_URL_LINK = "Go to site";
 const STR_STUDENTS_CODE_LABEL = "Student code:";
 const STR_STUDENTS_CODE_VALID_UNTIL = "Valid for a week until NOV 10th";
 
-@customElement("jig-play-sidebar-share-students")
+@customElement("share-jig-students")
 export class _ extends LitElement {
     static get styles() {
         return [

@@ -101,6 +101,7 @@ collision = []
 firebase = []
 page_header = []
 page_footer = []
+share_jig = []
 
 default = ["all"]
 all= [
@@ -127,5 +128,6 @@ all= [
     "collision",
     "firebase",
     "page_header",
-    "page_footer"
+    "page_footer",
+    "share_jig"
 ]

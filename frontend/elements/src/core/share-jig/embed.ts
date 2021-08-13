@@ -4,7 +4,7 @@ import "@elements/core/popups/popup-body";
 const STR_EMBED_HEADER = "Embed this JIG";
 const STR_EMBED_CODE = "Embed code:";
 
-@customElement("jig-play-sidebar-share-embed")
+@customElement("share-jig-embed")
 export class _ extends LitElement {
     static get styles() {
         return [

@@ -1,8 +1,8 @@
 import {argsToAttrs} from "@utils/attributes";
-import "@elements/entry/jig/play/sidebar/share-embed";
+import "@elements/core/share-jig/embed";
 
 export default {
-    title: "Entry / Jig / Play / Sidebar"
+    title: "Core / Share jig"
 }
 
 interface Args {
@@ -14,15 +14,15 @@ const DEFAULT_ARGS:Args = {
 }
 
 
-export const ShareEmbed = (props?:Partial<Args>) => {
+export const Embed = (props?:Partial<Args>) => {
     props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
 
     return `
-        <jig-play-sidebar-share-embed ${argsToAttrs(props)}>
+        <share-jig-embed ${argsToAttrs(props)}>
             <button-rect kind="text" slot="back">< Back</button-rect>
             <button-empty slot="close">&times;</button-empty>
             <button-rect kind="text" slot="copy">Copy code</button-rect>
-        </jig-play-sidebar-share-embed>
+        </share-jig-embed>
     `;
 }
-ShareEmbed.args = DEFAULT_ARGS;
+Embed.args = DEFAULT_ARGS;
