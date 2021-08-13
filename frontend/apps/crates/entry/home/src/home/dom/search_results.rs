@@ -38,11 +38,10 @@ fn render_result(state: Rc<State>, jig: &Jig) -> Dom {
         }))
         .property("description", jig.description.clone())
         .children(&mut [
-            html!("img-ji", {
-                .property("lib", "mock")
-                .property("size", "full")
-                .property("id", "jig-gallery.jpg")
+            html!("img-module-screenshot", {
                 .property("slot", "image")
+                .property("jigId", jig.id.0.to_string())
+                .property("moduleId", jig.modules[0].id.0.to_string())
             }),
             html!("home-search-result-details", {
                 .property("slot", "categories")
