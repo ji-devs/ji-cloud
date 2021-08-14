@@ -1,3 +1,5 @@
+//! Types and decoding for authenticating users through Google OAuth
+
 use anyhow::Context;
 use core::settings::GoogleOAuth;
 use http::StatusCode;
