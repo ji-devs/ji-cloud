@@ -7,7 +7,6 @@ pub mod image;
 pub mod jig;
 pub mod locale;
 pub mod media;
-pub mod media_watch;
 pub mod meta;
 pub mod module;
 pub mod search;

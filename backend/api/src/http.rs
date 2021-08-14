@@ -109,6 +109,7 @@ pub async fn build_and_run(
     pool: PgPool,
     settings: RuntimeSettings,
     s3: Option<s3::Client>,
+    gcp_key_store: Option<service::GcpAccessKeyStore>,
     gcs: Option<service::storage::Client>,
     algolia: Option<crate::algolia::Client>,
     algolia_key_store: Option<crate::algolia::SearchKeyStore>,
@@ -119,6 +120,7 @@ pub async fn build_and_run(
         pool,
         settings,
         s3,
+        gcp_key_store,
         gcs,
         algolia,
         algolia_key_store,
@@ -134,6 +136,7 @@ pub fn build(
     pool: PgPool,
     settings: RuntimeSettings,
     s3: Option<s3::Client>,
+    gcp_key_store: Option<service::GcpAccessKeyStore>,
     gcs: Option<service::storage::Client>,
     algolia: Option<crate::algolia::Client>,
     algolia_key_store: Option<crate::algolia::SearchKeyStore>,
@@ -144,6 +147,7 @@ pub fn build(
     let api_port = settings.api_port;
 
     let s3 = s3.map(ServiceData::new);
+    let gcp_key_store = gcp_key_store.map(ServiceData::new);
     let gcs = gcs.map(ServiceData::new);
     let algolia = algolia.map(ServiceData::new);
     let algolia_key_store = algolia_key_store.map(ServiceData::new);
@@ -156,6 +160,11 @@ pub fn build(
 
         let server = match s3.clone() {
             Some(s3) => server.app_data(s3),
+            None => server,
+        };
+
+        let server = match gcp_key_store.clone() {
+            Some(gcp_key_store) => server.app_data(gcp_key_store),
             None => server,
         };
 

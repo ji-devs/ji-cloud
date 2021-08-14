@@ -10,7 +10,6 @@ use uuid::Uuid;
 
 #[derive(Debug)]
 pub struct Client {
-    oauth2_token: String,
     project_id: String,
     storage_service_name: String,
     media_uploaded_topic: String,
@@ -20,7 +19,6 @@ pub struct Client {
 impl Client {
     pub fn new(settings: GoogleCloudEventArcSettings) -> anyhow::Result<Self> {
         let GoogleCloudEventArcSettings {
-            oauth2_token,
             project_id,
             storage_service_name,
             media_uploaded_topic,
@@ -28,7 +26,6 @@ impl Client {
         } = settings;
 
         Ok(Self {
-            oauth2_token,
             project_id,
             storage_service_name,
             media_uploaded_topic,

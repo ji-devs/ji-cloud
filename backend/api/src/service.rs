@@ -1,17 +1,17 @@
-use std::{
-    future::{ready, Ready},
-    ops::Deref,
-    sync::Arc,
-};
+use std::{ops::Deref, sync::Arc};
 
 use actix_web::FromRequest;
+use chrono::{DateTime, Duration, Utc};
+use futures::future::{ready, Ready};
 use paperclip::{actix::OperationModifier, v2::schema::Apiv2Schema};
+use tokio::sync::RwLock;
 
 use crate::error;
-
-pub mod mail;
+use crate::error::ServiceKind;
+use core::google::GoogleAccessTokenResponse;
 
 pub mod event_arc;
+pub mod mail;
 pub mod notifications;
 pub mod storage;
 pub mod uploads;
@@ -38,11 +38,15 @@ impl Service for storage::Client {
 }
 
 impl Service for crate::service::event_arc::Client {
-    const DISABLED_ERROR: error::ServiceKind = error::ServiceKind::GoogleCloudStorage;
+    const DISABLED_ERROR: error::ServiceKind = error::ServiceKind::GoogleCloudEventArc;
 }
 
 impl Service for crate::service::notifications::Client {
     const DISABLED_ERROR: error::ServiceKind = error::ServiceKind::FirebaseCloudMessaging;
+}
+
+impl Service for GcpAccessKeyStore {
+    const DISABLED_ERROR: ServiceKind = ServiceKind::Algolia;
 }
 
 #[derive(Debug)]
@@ -99,5 +103,97 @@ impl<T: Service + ?Sized + 'static> FromRequest for ServiceData<T> {
             .ok_or(error::Service::DisabledService(T::DISABLED_ERROR));
 
         ready(data)
+    }
+}
+
+#[derive(Debug)]
+pub struct GcpAccessKey {
+    pub access_token: String,
+    pub expires_at: Option<DateTime<Utc>>,
+}
+
+impl GcpAccessKey {
+    const KEY_EXPIRATION_PAD_SECONDS: i64 = 360;
+
+    /// checks if the key is stale
+    ///
+    /// returns `None` if there is no information about expiry time
+    pub fn is_stale(&self) -> Option<bool> {
+        if let Some(expires_at) = self.expires_at {
+            let is_stale =
+                Utc::now() >= (expires_at - Duration::seconds(Self::KEY_EXPIRATION_PAD_SECONDS));
+
+            Some(is_stale)
+        } else {
+            None
+        }
+    }
+}
+
+/// GCP auth token store, for calling other GCP services from the Cloud Run instance.
+///
+/// This shouldn't be invoked directly when handling requests, but instead let the the `GcpServiceData`
+/// handler pass it as part of fetching the service data and check whether the token is still valid.
+#[derive(Debug)]
+pub struct GcpAccessKeyStore(RwLock<GcpAccessKey>);
+
+impl GcpAccessKeyStore {
+    pub fn new(resp: GoogleAccessTokenResponse) -> anyhow::Result<Self> {
+        let key = GcpAccessKey {
+            access_token: resp
+                .access_token
+                .expect("should have a token once reached here"),
+            expires_at: resp.expires_at,
+        };
+
+        Ok(Self(RwLock::new(key)))
+    }
+
+    pub async fn fetch_token(&self) -> anyhow::Result<String> {
+        let key = self.0.read().await;
+
+        match key.is_stale() {
+            Some(false) => {
+                // not stale
+                let token = key.access_token.clone();
+                return Ok(token);
+            }
+            None => {
+                // not using gcp internal metaserver to fetch auth?
+                anyhow::bail!("no GCP access token expiry info found");
+            }
+            Some(true) => {
+                // continue
+            }
+        }
+
+        self.update_stale_token().await?;
+
+        let access_token = self.0.read().await.access_token.clone();
+
+        Ok(access_token)
+    }
+
+    async fn update_stale_token(&self) -> anyhow::Result<()> {
+        let mut key_handler = self.0.write().await;
+
+        // if the key is not stale, then we don't need to refresh it. some other request might have updated it
+        // by the time the write lock was acquired
+        match key_handler.is_stale() {
+            None => {
+                // not using gcp internal metaserver to fetch auth
+            }
+            Some(true) => {}
+            Some(false) => return Ok(()),
+        }
+
+        let token_response = core::google::get_google_token_response_from_metadata_server().await?;
+
+        key_handler.access_token = token_response
+            .access_token
+            .expect("should fetch valid token on cloud");
+        key_handler.expires_at = token_response.expires_at;
+
+        Ok(())
     }
 }

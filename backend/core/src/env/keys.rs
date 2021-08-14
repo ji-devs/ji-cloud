@@ -18,7 +18,6 @@ pub mod s3 {
     /// The s3 bucket that should be used for media to be processed.
     /// Is optional. If missing, all s3 related services will be disabled,
     /// all related routes will return "501 - Not Implemented" and a warning will be emitted.
-
     pub const PROCESSING_BUCKET: &str = "S3_PROCESSING_BUCKET";
 
     /// The s3 access key.

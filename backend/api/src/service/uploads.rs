@@ -260,10 +260,13 @@ skip locked
 }
 
 pub async fn finalize_upload(
+    access_token: &str,
     notifications: &service::notifications::Client,
     library: MediaLibrary,
     id: Uuid,
 ) -> anyhow::Result<()> {
-    notifications.signal_status_ready(library, &id).await?;
+    notifications
+        .signal_status_ready(access_token, library, &id)
+        .await?;
     Ok(())
 }

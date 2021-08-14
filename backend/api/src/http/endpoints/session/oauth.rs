@@ -19,7 +19,7 @@ use shared::{
 
 use crate::{
     db, error,
-    google::{self, oauth_url},
+    google_oauth::{self, oauth_url},
     jwk,
     token::{create_auth_token, SessionMask},
 };
@@ -124,9 +124,9 @@ async fn handle_google_oauth(
     remote_target: RemoteTarget,
     redirect_kind: OAuthUrlKind,
 ) -> Result<(CreateSessionResponse, Cookie<'static>), error::OAuth> {
-    let redirect_url = google::oauth_url(remote_target, redirect_kind);
+    let redirect_url = google_oauth::oauth_url(remote_target, redirect_kind);
 
-    let tokens = google::convert_oauth_code(config, code, &redirect_url).await?;
+    let tokens = google_oauth::convert_oauth_code(config, code, &redirect_url).await?;
 
     let claims = jwks.verify_oauth(&tokens.id_token, 3).await?;
 

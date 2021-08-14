@@ -65,10 +65,12 @@ impl TestServicesSettings {
             }
             _ => {
                 log::info!("Falling back to json file for google cloud auth");
-                let (token, project_id) = core::google::get_access_token_and_project_id(
+                let (token, project_id) = core::google::get_access_token_response_and_project_id(
                     RemoteTarget::Local.google_credentials_env_name(),
                 )
                 .await?;
+
+                let token = token.access_token.unwrap();
 
                 (token, project_id)
             }

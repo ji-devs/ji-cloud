@@ -6,7 +6,6 @@ use uuid::Uuid;
 
 #[derive(Debug)]
 pub struct Client {
-    oauth2_token: String,
     project_id: String,
 }
 
@@ -14,19 +13,14 @@ pub struct Client {
 /// Current implementation is _very_ limited in scope for updating media upload processing.    
 impl Client {
     pub fn new(settings: FirebaseSettings) -> anyhow::Result<Self> {
-        let FirebaseSettings {
-            oauth2_token,
-            project_id,
-        } = settings;
+        let FirebaseSettings { project_id } = settings;
 
-        Ok(Self {
-            oauth2_token,
-            project_id,
-        })
+        Ok(Self { project_id })
     }
 
     pub async fn signal_status(
         &self,
+        access_token: &str,
         library: MediaLibrary,
         id: &Uuid,
         status: ProcessingStatus,
@@ -54,7 +48,7 @@ impl Client {
             ))
             .header(
                 header::AUTHORIZATION,
-                format!("Bearer {}", self.oauth2_token.to_owned()),
+                format!("Bearer {}", access_token.to_owned()),
             )
             .query(&update_mask_query)
             .json(&document)
@@ -80,6 +74,7 @@ impl Client {
 
     pub async fn signal_status_processing(
         &self,
+        access_token: &str,
         library: MediaLibrary,
         id: &Uuid,
     ) -> anyhow::Result<()> {
@@ -89,13 +84,15 @@ impl Client {
         };
         let update_mask = &["processing", "ready"];
 
-        self.signal_status(library, id, status, update_mask).await?;
+        self.signal_status(access_token, library, id, status, update_mask)
+            .await?;
 
         Ok(())
     }
 
     pub async fn signal_status_ready(
         &self,
+        access_token: &str,
         library: MediaLibrary,
         id: &Uuid,
     ) -> anyhow::Result<()> {
@@ -105,7 +102,8 @@ impl Client {
         };
         let update_mask = &["ready"];
 
-        self.signal_status(library, id, status, update_mask).await?;
+        self.signal_status(access_token, library, id, status, update_mask)
+            .await?;
 
         Ok(())
     }

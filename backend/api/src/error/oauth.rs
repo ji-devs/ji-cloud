@@ -1,6 +1,6 @@
 use paperclip::actix::api_v2_errors;
 
-use crate::google;
+use crate::google_oauth;
 
 use super::BasicError;
 
@@ -49,26 +49,28 @@ pub enum GoogleOAuth {
     UnverifiedEmail,
 }
 
-impl From<google::TokenErrorResponse> for GoogleOAuth {
-    fn from(err: google::TokenErrorResponse) -> Self {
+impl From<google_oauth::TokenErrorResponse> for GoogleOAuth {
+    fn from(err: google_oauth::TokenErrorResponse) -> Self {
         match err {
-            google::TokenErrorResponse::Unknown(map) => anyhow::anyhow!("Unknown {:?}", map).into(),
-            google::TokenErrorResponse::Known(it) => Self::from(it),
+            google_oauth::TokenErrorResponse::Unknown(map) => {
+                anyhow::anyhow!("Unknown {:?}", map).into()
+            }
+            google_oauth::TokenErrorResponse::Known(it) => Self::from(it),
         }
     }
 }
 
-impl From<google::TokenErrorKind> for GoogleOAuth {
-    fn from(err: google::TokenErrorKind) -> Self {
+impl From<google_oauth::TokenErrorKind> for GoogleOAuth {
+    fn from(err: google_oauth::TokenErrorKind) -> Self {
         match err {
-            google::TokenErrorKind::InvalidClient { error_description } => {
+            google_oauth::TokenErrorKind::InvalidClient { error_description } => {
                 anyhow::anyhow!(error_description)
                     .context("invalid client")
                     .into()
             }
 
-            google::TokenErrorKind::InvalidGrant => Self::InvalidCode,
-            google::TokenErrorKind::RedirectUriMismatch => Self::RedirectUriMismatch,
+            google_oauth::TokenErrorKind::InvalidGrant => Self::InvalidCode,
+            google_oauth::TokenErrorKind::RedirectUriMismatch => Self::RedirectUriMismatch,
         }
     }
 }
