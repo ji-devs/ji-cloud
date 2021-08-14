@@ -27,7 +27,7 @@ impl<T: Into<anyhow::Error>> From<T> for EventArc {
 impl Into<actix_web::Error> for EventArc {
     fn into(self) -> actix_web::Error {
         match self {
-            Self::Disabled => super::ServiceKind::GoogleEventArc.into(),
+            Self::Disabled => super::ServiceKind::GoogleCloudEventArc.into(),
             Self::InvalidEventSource => BasicError::with_message(
                 StatusCode::NO_CONTENT,
                 "Non-supported event type received".to_owned(),

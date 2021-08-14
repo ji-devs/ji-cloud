@@ -1,6 +1,6 @@
 use actix_web::{error::ErrorInternalServerError, web::Data, HttpResponse};
 use askama::Template;
-use core::google::{get_access_token_and_project_id, get_secret};
+use core::google::{get_access_token_response_and_project_id, get_secret};
 use core::settings::RuntimeSettings;
 
 struct Role {
@@ -18,10 +18,13 @@ struct Info {
 }
 
 pub async fn info_template(settings: Data<RuntimeSettings>) -> actix_web::Result<HttpResponse> {
-    let (token, project_id) =
-        get_access_token_and_project_id(settings.remote_target().google_credentials_env_name())
-            .await
-            .expect("couldn't get access token and project id!");
+    let (token_resp, project_id) = get_access_token_response_and_project_id(
+        settings.remote_target().google_credentials_env_name(),
+    )
+    .await
+    .expect("couldn't get access token and project id!");
+
+    let token = token_resp.access_token.expect("couldn't get access token!");
 
     let secret_test = get_secret(token.as_ref(), &project_id, "SANITY_TEST")
         .await

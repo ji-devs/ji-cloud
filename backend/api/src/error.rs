@@ -115,8 +115,9 @@ pub enum ServiceKind {
     Algolia,
     S3,
     GoogleCloudStorage,
-    GoogleEventArc,
+    GoogleCloudEventArc,
     GoogleOAuth,
+    GoogleCloudAccessKeyStore,
     Mail,
     FirebaseCloudMessaging,
 }
@@ -127,8 +128,9 @@ impl ServiceKind {
             Self::Algolia => "Algolia",
             Self::S3 => "S3",
             Self::GoogleCloudStorage => "Google Cloud Storage",
-            Self::GoogleEventArc => "Google EventArc",
+            Self::GoogleCloudEventArc => "Google Cloud EventArc",
             Self::GoogleOAuth => "Google OAuth",
+            Self::GoogleCloudAccessKeyStore => "Google Cloud Access Key Store",
             Self::Mail => "Sendgrid Mail",
             Self::FirebaseCloudMessaging => "Firebase Cloud Messaging",
         }

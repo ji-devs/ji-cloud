@@ -35,7 +35,7 @@ pub mod db;
 mod domain;
 pub mod error;
 mod extractor;
-pub mod google;
+pub mod google_oauth;
 pub mod http;
 mod image_ops;
 pub mod image_search;

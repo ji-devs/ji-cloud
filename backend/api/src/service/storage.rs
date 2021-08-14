@@ -18,8 +18,7 @@ use shared::{
 };
 
 pub struct Client {
-    oauth2_token: String,
-    #[allow(dead_code)]
+    #[allow(dead_code)] // not used until migrate away from Rusoto
     media_bucket: String,
     processing_bucket: String,
 }
@@ -27,13 +26,11 @@ pub struct Client {
 impl Client {
     pub fn new(settings: GoogleCloudStorageSettings) -> anyhow::Result<Self> {
         let GoogleCloudStorageSettings {
-            oauth2_token,
             media_bucket,
             processing_bucket,
         } = settings;
 
         Ok(Self {
-            oauth2_token,
             media_bucket,
             processing_bucket,
         })
@@ -41,6 +38,7 @@ impl Client {
 
     pub async fn get_url_for_resumable_upload(
         &self,
+        access_token: &str,
         bucket: &str,
         upload_content_length: usize,
         library: MediaLibrary,
@@ -60,7 +58,7 @@ impl Client {
             .header("X-Upload-Content-Type", file_kind.content_type().to_owned())
             .header(
                 header::AUTHORIZATION,
-                format!("Bearer {}", self.oauth2_token.to_owned()),
+                format!("Bearer {}", access_token.to_owned()),
             )
             .header(header::CONTENT_LENGTH, "0");
 
@@ -115,6 +113,7 @@ impl Client {
     // https://cloud.google.com/storage/docs/performing-resumable-uploads#initiate-session
     pub async fn get_url_for_resumable_upload_for_processing(
         &self,
+        access_token: &str,
         upload_content_length: usize,
         library: MediaLibrary,
         id: Uuid,
@@ -122,6 +121,7 @@ impl Client {
         origin: RequestOrigin,
     ) -> Result<String, error::Storage> {
         self.get_url_for_resumable_upload(
+            access_token,
             &self.processing_bucket,
             upload_content_length,
             library,
@@ -134,6 +134,7 @@ impl Client {
 
     pub async fn get_url_for_resumable_upload_for_media(
         &self,
+        access_token: &str,
         upload_content_length: usize,
         library: MediaLibrary,
         id: Uuid,
@@ -141,6 +142,7 @@ impl Client {
         origin: RequestOrigin,
     ) -> Result<String, error::Storage> {
         self.get_url_for_resumable_upload(
+            access_token,
             &self.processing_bucket,
             upload_content_length,
             library,

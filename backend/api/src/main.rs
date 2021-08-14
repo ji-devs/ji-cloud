@@ -27,6 +27,7 @@ async fn main() -> anyhow::Result<()> {
     let (
         runtime_settings,
         s3,
+        gcp_key_store,
         gcs,
         algolia_client,
         algolia_key_store,
@@ -49,6 +50,12 @@ async fn main() -> anyhow::Result<()> {
             .s3_settings()
             .await?
             .map(s3::Client::new)
+            .transpose()?;
+
+        let gcp_key_store = settings
+            .google_cloud_serivce_token()
+            .await?
+            .map(service::GcpAccessKeyStore::new)
             .transpose()?;
 
         let gcs = settings
@@ -93,6 +100,7 @@ async fn main() -> anyhow::Result<()> {
         (
             runtime_settings,
             s3,
+            gcp_key_store,
             gcs,
             algolia_client,
             algolia_key_store,
@@ -119,6 +127,7 @@ async fn main() -> anyhow::Result<()> {
             db_pool,
             runtime_settings,
             s3,
+            gcp_key_store,
             gcs,
             algolia_client,
             algolia_key_store,
