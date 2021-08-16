@@ -492,14 +492,7 @@ fn blocking_error(err: BlockingError<Either<BasicError, anyhow::Error>>) -> acti
     }
 }
 
-#[derive(Apiv2Security)]
-#[openapi(
-    origin,
-    alias = "origin",
-    in = "header",
-    name = "Request Origin",
-    description = "Domain of cross-origin requestor"
-)]
+#[derive(Apiv2Schema)]
 pub struct RequestOrigin {
     pub origin: Option<String>,
 }

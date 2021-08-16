@@ -7,22 +7,16 @@ use paperclip::actix::{
 use shared::{
     api::{endpoints::animation, ApiEndpoint},
     domain::{
-        animation::{AnimationId, AnimationKind, AnimationResponse},
+        animation::{AnimationId, AnimationKind, AnimationResponse, AnimationUploadResponse},
         CreateResponse,
     },
     media::{FileKind, MediaLibrary},
 };
 use sqlx::{postgres::PgDatabaseError, PgPool};
 
-use crate::extractor::RequestOrigin;
-use crate::service::storage;
-use crate::{
-    db, error,
-    extractor::{ScopeManageAnimation, TokenUser, TokenUserWithScope},
-    s3,
-    service::ServiceData,
-};
-use shared::domain::animation::AnimationUploadResponse;
+use crate::extractor::{RequestOrigin, ScopeManageAnimation, TokenUser, TokenUserWithScope};
+use crate::service::{storage, GcpAccessKeyStore, ServiceData};
+use crate::{db, error, s3};
 
 fn check_conflict_delete(err: sqlx::Error) -> error::Delete {
     match err {
@@ -102,6 +96,7 @@ async fn create(
 #[api_v2_operation]
 async fn upload(
     db: Data<PgPool>,
+    gcp_key_store: ServiceData<GcpAccessKeyStore>,
     gcs: ServiceData<storage::Client>,
     _claims: TokenUserWithScope<ScopeManageAnimation>,
     Path(id): Path<AnimationId>,
@@ -129,8 +124,11 @@ async fn upload(
         }
     }
 
+    let access_token = gcp_key_store.fetch_token().await?;
+
     let resp = gcs
         .get_url_for_resumable_upload_for_processing(
+            &access_token,
             upload_content_length,
             MediaLibrary::Global,
             id.0,

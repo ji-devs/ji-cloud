@@ -19,8 +19,8 @@ use crate::{
     db::{self, meta::handle_metadata_err, nul_if_empty},
     error::{self, ServiceKind},
     extractor::{RequestOrigin, ScopeManageImage, TokenUser, TokenUserWithScope},
-    s3, service,
-    service::ServiceData,
+    s3,
+    service::{self, ServiceData},
 };
 
 pub mod recent;
@@ -69,6 +69,7 @@ async fn create(
 #[api_v2_operation]
 async fn upload(
     db: Data<PgPool>,
+    gcp_key_store: ServiceData<service::GcpAccessKeyStore>,
     gcs: ServiceData<service::storage::Client>,
     _claims: TokenUserWithScope<ScopeManageImage>,
     Path(id): Path<ImageId>,
@@ -96,8 +97,11 @@ async fn upload(
         }
     }
 
+    let access_token = gcp_key_store.fetch_token().await?.to_owned();
+
     let resp = gcs
         .get_url_for_resumable_upload_for_processing(
+            &access_token,
             upload_content_length,
             MediaLibrary::Global,
             id.0,

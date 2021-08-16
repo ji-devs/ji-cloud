@@ -85,7 +85,7 @@ fn parse_max_age_value(cache_control_value: &str) -> anyhow::Result<Duration> {
         }
     }
 
-    bail!("No max-age specified");
+    Err(anyhow!("No max-age specified"))
 }
 
 #[derive(Debug, Deserialize)]

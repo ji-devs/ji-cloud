@@ -36,7 +36,7 @@ use ji_cloud_api::{
     logger, s3,
     service::{
         event_arc::{self, audit_log, EventResource, EventSource},
-        notifications, uploads, ServiceData,
+        notifications, uploads, GcpAccessKeyStore, ServiceData,
     },
 };
 use shared::media::{FileKind, MediaLibrary, PngImageFile};
@@ -50,7 +50,7 @@ async fn main() -> anyhow::Result<()> {
 
     logger::init()?;
 
-    let (s3, event_arc, notifications, db_pool, runtime_settings) = {
+    let (s3, gcp_key_store, event_arc, notifications, db_pool, runtime_settings) = {
         log::trace!("initializing settings and processes");
         let remote_target = settings::read_remote_target()?;
 
@@ -69,6 +69,12 @@ async fn main() -> anyhow::Result<()> {
             .map(s3::Client::new)
             .transpose()?;
 
+        let gcp_key_store = settings
+            .google_cloud_serivce_token()
+            .await?
+            .map(GcpAccessKeyStore::new)
+            .transpose()?;
+
         let event_arc = settings
             .google_cloud_eventarc_settings()
             .await?
@@ -83,11 +89,25 @@ async fn main() -> anyhow::Result<()> {
 
         let runtime_settings = settings.runtime_settings().await?;
 
-        (s3, event_arc, notifications, db_pool, runtime_settings)
+        (
+            s3,
+            gcp_key_store,
+            event_arc,
+            notifications,
+            db_pool,
+            runtime_settings,
+        )
     };
 
     let handle = std::thread::spawn(|| {
-        build_and_run_media_watch(db_pool, runtime_settings, s3, event_arc, notifications)
+        build_and_run_media_watch(
+            db_pool,
+            runtime_settings,
+            s3,
+            gcp_key_store,
+            event_arc,
+            notifications,
+        )
     });
 
     log::info!("media watch started!");
@@ -104,10 +124,18 @@ pub async fn build_and_run_media_watch(
     db_pool: PgPool,
     runtime_settings: RuntimeSettings,
     s3: Option<s3::Client>,
+    gcp_key_store: Option<GcpAccessKeyStore>,
     event_arc: Option<event_arc::Client>,
     notifications: Option<notifications::Client>,
 ) -> anyhow::Result<()> {
-    let app = build_media_watch(runtime_settings, db_pool, s3, event_arc, notifications)?;
+    let app = build_media_watch(
+        runtime_settings,
+        db_pool,
+        s3,
+        gcp_key_store,
+        event_arc,
+        notifications,
+    )?;
     app.run_until_stopped().await?;
 
     Ok(())
@@ -117,6 +145,7 @@ fn build_media_watch(
     runtime_settings: RuntimeSettings,
     db_pool: PgPool,
     s3: Option<s3::Client>,
+    gcp_key_store: Option<GcpAccessKeyStore>,
     event_arc: Option<event_arc::Client>,
     notifications: Option<notifications::Client>,
 ) -> anyhow::Result<Application> {
@@ -124,6 +153,7 @@ fn build_media_watch(
     let media_watch_port = runtime_settings.media_watch_port;
 
     let s3 = s3.map(ServiceData::new);
+    let gcp_key_store = gcp_key_store.map(ServiceData::new);
     let event_arc = event_arc.map(ServiceData::new);
     let notifications = notifications.map(ServiceData::new);
 
@@ -137,6 +167,11 @@ fn build_media_watch(
 
         let server = match s3.clone() {
             Some(s3) => server.app_data(s3),
+            None => server,
+        };
+
+        let server = match gcp_key_store.clone() {
+            Some(gcp_key_store) => server.app_data(gcp_key_store),
             None => server,
         };
 
@@ -183,6 +218,7 @@ fn build_media_watch(
 #[post("/v1/media-watch")]
 async fn process_uploaded_media_trigger(
     db: Data<PgPool>,
+    gcp_key_store: ServiceData<GcpAccessKeyStore>,
     s3: ServiceData<s3::Client>,
     notifications: ServiceData<notifications::Client>,
     event_arc: ServiceData<event_arc::Client>,
@@ -218,13 +254,19 @@ async fn process_uploaded_media_trigger(
     let event_resource: EventResource =
         EventResource::from_str(&event_data.proto_payload.resource_name)?;
 
+    let access_token = gcp_key_store.fetch_token().await?;
+
     // TODO: use gcs instead of S3
     let res = match event_resource.file_kind {
         FileKind::ImagePng(PngImageFile::Original) => match event_resource.library {
             MediaLibrary::Global => {
                 log::info!("beginning processing...");
                 notifications
-                    .signal_status_processing(MediaLibrary::Global, &event_resource.id)
+                    .signal_status_processing(
+                        &access_token,
+                        MediaLibrary::Global,
+                        &event_resource.id,
+                    )
                     .await?;
 
                 uploads::process_image(&db, &s3, event_resource.id)
@@ -233,7 +275,7 @@ async fn process_uploaded_media_trigger(
             }
             MediaLibrary::User => {
                 notifications
-                    .signal_status_processing(MediaLibrary::User, &event_resource.id)
+                    .signal_status_processing(&access_token, MediaLibrary::User, &event_resource.id)
                     .await?;
 
                 uploads::process_user_image(&db, &s3, event_resource.id)
@@ -244,7 +286,7 @@ async fn process_uploaded_media_trigger(
         },
         FileKind::AnimationGif => {
             notifications
-                .signal_status_processing(MediaLibrary::Global, &event_resource.id)
+                .signal_status_processing(&access_token, MediaLibrary::Global, &event_resource.id)
                 .await?;
 
             uploads::process_animation(&db, &s3, event_resource.id)
@@ -257,7 +299,13 @@ async fn process_uploaded_media_trigger(
     if res == true {
         log::info!("Finalizing upload...");
 
-        uploads::finalize_upload(&notifications, event_resource.library, event_resource.id).await?;
+        uploads::finalize_upload(
+            &access_token,
+            &notifications,
+            event_resource.library,
+            event_resource.id,
+        )
+        .await?;
         Ok(Json(()))
     } else {
         Err(Error::NotProcessed)

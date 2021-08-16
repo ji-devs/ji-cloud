@@ -1,5 +1,7 @@
 use crate::env::req_env;
+
 use anyhow::{anyhow, Context};
+use chrono::{DateTime, Duration, Utc};
 use reqwest::StatusCode;
 use serde::Deserialize;
 use yup_oauth2::{AccessToken, ServiceAccountAuthenticator, ServiceAccountKey};
@@ -8,6 +10,7 @@ use yup_oauth2::{AccessToken, ServiceAccountAuthenticator, ServiceAccountKey};
 pub(crate) struct GoogleSecretResponse {
     pub payload: GoogleSecretResponsePayload,
 }
+
 #[derive(Deserialize)]
 pub(crate) struct GoogleSecretResponsePayload {
     pub data: String,
@@ -26,12 +29,26 @@ pub async fn get_google_token_from_credentials(
     Ok(token)
 }
 
+/// Represents the response for fetching an access token from the google metadata server in a remote
+/// container.
+pub struct GoogleAccessTokenResponse {
+    /// Token to call GCP services with.
+    /// TODO: make this an Enum over Metadata, Service Account json key
+    pub access_token: Option<String>,
+    /// Time that the token expires at. If `None` this does not mean that the token does not expire.
+    pub expires_at: Option<DateTime<Utc>>,
+}
+
 /// Attempts to load an access token and project id from the given env var.
-pub async fn get_access_token_and_project_id(
+///
+/// This will include an `expires_in` (seconds) field when fetched from the google metadata
+/// server when running inside Cloud Run `RemoteTarget::Sandbox | RemoteTarget::Relase`.
+pub async fn get_access_token_response_and_project_id(
     credentials_env_key: &str,
-) -> anyhow::Result<(String, String)> {
+) -> anyhow::Result<(GoogleAccessTokenResponse, String)> {
     match req_env(credentials_env_key) {
         Ok(credentials_file) => {
+            // TODO: handle expiry, token refresh when reading from service account
             let credentials = yup_oauth2::read_service_account_key(credentials_file).await?;
 
             let project_id = credentials
@@ -41,30 +58,45 @@ pub async fn get_access_token_and_project_id(
 
             let token = get_google_token_from_credentials(credentials).await?;
 
-            Ok((token.as_str().to_owned(), project_id))
+            let access_token = Some(token.as_str().to_owned());
+            let expires_at = token.expiration_time();
+
+            Ok((
+                GoogleAccessTokenResponse {
+                    access_token,
+                    expires_at,
+                },
+                project_id,
+            ))
         }
 
         Err(_) => {
-            let token = get_google_token_from_metaserver().await.with_context(|| {
-                anyhow::anyhow!("couldn't get google access token from metaserver",)
-            })?;
+            let token_response = get_google_token_response_from_metadata_server()
+                .await
+                .with_context(|| {
+                    anyhow::anyhow!("couldn't get google access token from metaserver",)
+                })?;
 
             let project_id = req_env("PROJECT_ID")?;
 
-            Ok((token, project_id))
+            Ok((token_response, project_id))
         }
     }
 }
 
-pub(crate) async fn get_google_token_from_metaserver() -> anyhow::Result<String> {
+/// Attempts to load an access token from the google metadata server. This is only available when
+/// when running inside Cloud Run `RemoteTarget::Sandbox | RemoteTarget::Release`.
+pub async fn get_google_token_response_from_metadata_server(
+) -> anyhow::Result<GoogleAccessTokenResponse> {
     #[derive(Deserialize)]
-    struct GoogleAccessTokenResponse {
+    struct InnerGoogleAccessTokenResponse {
         access_token: String,
+        expires_in: i64,
     }
 
     let url = "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token";
 
-    let token_response: GoogleAccessTokenResponse = reqwest::Client::new()
+    let token_response: InnerGoogleAccessTokenResponse = reqwest::Client::new()
         .get(url)
         .header("Metadata-Flavor", "Google")
         .send()
@@ -72,7 +104,12 @@ pub(crate) async fn get_google_token_from_metaserver() -> anyhow::Result<String>
         .json()
         .await?;
 
-    Ok(token_response.access_token)
+    let expires_in = Utc::now() + Duration::seconds(token_response.expires_in);
+
+    Ok(GoogleAccessTokenResponse {
+        access_token: Some(token_response.access_token),
+        expires_at: Some(expires_in),
+    })
 }
 
 /// Gets `secret_name` from GCS via the given `token` and `project_id`, returning `None` if the secret doesn't exist.

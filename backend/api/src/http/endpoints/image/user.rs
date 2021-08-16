@@ -1,6 +1,12 @@
 use crate::extractor::RequestOrigin;
 use crate::service::storage;
-use crate::{db, error, extractor::TokenUser, s3, service::ServiceData};
+use crate::{
+    db, error,
+    extractor::TokenUser,
+    s3,
+    service::{GcpAccessKeyStore, ServiceData},
+};
+
 use futures::TryStreamExt;
 use paperclip::actix::{
     api_v2_operation,
@@ -35,6 +41,7 @@ pub(super) async fn create(
 #[api_v2_operation]
 pub(super) async fn upload(
     db: Data<PgPool>,
+    gcp_key_store: ServiceData<GcpAccessKeyStore>,
     gcs: ServiceData<storage::Client>,
     _claims: TokenUser,
     Path(id): Path<ImageId>,
@@ -59,8 +66,11 @@ pub(super) async fn upload(
         }
     }
 
+    let access_token = gcp_key_store.fetch_token().await?;
+
     let resp = gcs
         .get_url_for_resumable_upload_for_processing(
+            &access_token,
             upload_content_length,
             MediaLibrary::User,
             id.0,

@@ -9,16 +9,19 @@ use crate::config::{
 
 use crate::{
     env::{keys, req_env},
-    google::{get_access_token_and_project_id, get_optional_secret},
+    google::{
+        get_access_token_response_and_project_id, get_optional_secret, GoogleAccessTokenResponse,
+    },
 };
 
 use anyhow::Context;
+use chrono::{DateTime, Utc};
 use shared::config::RemoteTarget;
-use std::str::FromStr;
 use std::{
     convert::TryInto,
     env::VarError,
-    time::{Duration, SystemTime, UNIX_EPOCH},
+    str::FromStr,
+    time::{SystemTime, UNIX_EPOCH},
 };
 
 /// Reads a `RemoteTarget` from the arguments passed to the command.
@@ -75,7 +78,7 @@ pub struct RuntimeSettings {
     pub media_watch_port: u16,
 
     /// When the server started.
-    pub epoch: Duration,
+    pub epoch: std::time::Duration,
 
     /// Used to search for images via the bing image search api
     ///
@@ -245,8 +248,6 @@ pub struct EmailClientSettings {
 /// Settings for the Google Cloud Storage client
 #[derive(Clone, Debug)]
 pub struct GoogleCloudStorageSettings {
-    /// Google cloud oauth2 token to authenticate with Google Cloud API.
-    pub oauth2_token: String,
     /// Bucket for processed media.
     pub media_bucket: String,
     /// Bucket for raw media uploads.
@@ -256,8 +257,6 @@ pub struct GoogleCloudStorageSettings {
 /// Settings for handling Google EventArc triggers
 #[derive(Clone, Debug)]
 pub struct GoogleCloudEventArcSettings {
-    /// Google cloud oauth2 token to authenticate with Google Cloud API.
-    pub oauth2_token: String,
     /// Service name for Google Cloud storage
     pub storage_service_name: String,
     /// ID of the GCP project
@@ -271,8 +270,6 @@ pub struct GoogleCloudEventArcSettings {
 /// Firebase client, for Firestore
 #[derive(Clone, Debug)]
 pub struct FirebaseSettings {
-    /// Google cloud oauth2 token to authenticate with Google Cloud API.
-    pub oauth2_token: String,
     /// ID of the GCP project
     pub project_id: String,
 }
@@ -280,6 +277,7 @@ pub struct FirebaseSettings {
 /// Manages access to settings.
 pub struct SettingsManager {
     token: Option<String>,
+    expires_at: Option<DateTime<Utc>>,
     project_id: String,
     remote_target: RemoteTarget,
 }
@@ -362,19 +360,25 @@ impl SettingsManager {
     pub async fn new(remote_target: RemoteTarget) -> anyhow::Result<Self> {
         let use_google_cloud = !crate::env::env_bool(keys::google::DISABLE);
 
-        let (token, project_id) = if use_google_cloud {
-            let (token, project_id) =
-                get_access_token_and_project_id(remote_target.google_credentials_env_name())
-                    .await?;
+        let (token, expires_at, project_id) = if use_google_cloud {
+            let (token_response, project_id) = get_access_token_response_and_project_id(
+                remote_target.google_credentials_env_name(),
+            )
+            .await?;
 
-            (Some(token), project_id)
+            (
+                token_response.access_token,
+                token_response.expires_at,
+                project_id,
+            )
         } else {
             let project_id = req_env(keys::google::PROJECT_ID)?;
-            (None, project_id)
+            (None, None, project_id)
         };
 
         Ok(Self {
             token,
+            expires_at,
             project_id,
             remote_target,
         })
@@ -550,12 +554,25 @@ impl SettingsManager {
         }))
     }
 
+    /// Load the valid google access token information
+    pub async fn google_cloud_serivce_token(
+        &self,
+    ) -> anyhow::Result<Option<GoogleAccessTokenResponse>> {
+        let response = match (self.token.clone(), self.expires_at.clone()) {
+            (None, None) => None,
+            (access_token, expires_at) => Some(GoogleAccessTokenResponse {
+                access_token,
+                expires_at,
+            }),
+        };
+
+        Ok(response)
+    }
+
     /// Load the google cloud storage Client settings
     pub async fn google_cloud_storage_settings(
         &self,
     ) -> anyhow::Result<Option<GoogleCloudStorageSettings>> {
-        let oauth2_token = self.token.clone();
-
         // buckets are the same as those for S3, but uses the GCS API instead of S3 interop
         let media_bucket = match self.remote_target.s3_bucket() {
             Some(bucket) => Some(bucket.to_string()),
@@ -567,14 +584,11 @@ impl SettingsManager {
             None => self.get_varying_secret(keys::s3::PROCESSING_BUCKET).await?,
         };
 
-        match (oauth2_token, media_bucket, processing_bucket) {
-            (Some(oauth2_token), Some(media_bucket), Some(processing_bucket)) => {
-                Ok(Some(GoogleCloudStorageSettings {
-                    oauth2_token,
-                    media_bucket,
-                    processing_bucket,
-                }))
-            }
+        match (media_bucket, processing_bucket) {
+            (Some(media_bucket), Some(processing_bucket)) => Ok(Some(GoogleCloudStorageSettings {
+                media_bucket,
+                processing_bucket,
+            })),
 
             _ => return Ok(None),
         }
@@ -584,8 +598,6 @@ impl SettingsManager {
     pub async fn google_cloud_eventarc_settings(
         &self,
     ) -> anyhow::Result<Option<GoogleCloudEventArcSettings>> {
-        let oauth2_token = self.token.clone();
-
         let project_id = Some(self.project_id.clone());
 
         let storage_service_name = Some(EVENTARC_AUDITLOG_SERVICE_NAME.to_owned());
@@ -608,20 +620,17 @@ impl SettingsManager {
         };
 
         match (
-            oauth2_token,
             project_id,
             storage_service_name,
             media_uploaded_topic,
             media_processed_topic,
         ) {
             (
-                Some(oauth2_token),
                 Some(project_id),
                 Some(storage_service_name),
                 Some(media_uploaded_topic),
                 Some(media_processed_topic),
             ) => Ok(Some(GoogleCloudEventArcSettings {
-                oauth2_token,
                 media_uploaded_topic,
                 media_processed_topic,
                 storage_service_name,
@@ -633,15 +642,10 @@ impl SettingsManager {
 
     /// Load the settings for firebase
     pub async fn firebase_settings(&self) -> anyhow::Result<Option<FirebaseSettings>> {
-        let oauth2_token = self.token.clone();
-
         let project_id = Some(self.project_id.clone());
 
-        match (oauth2_token, project_id) {
-            (Some(oauth2_token), Some(project_id)) => Ok(Some(FirebaseSettings {
-                oauth2_token,
-                project_id,
-            })),
+        match project_id {
+            Some(project_id) => Ok(Some(FirebaseSettings { project_id })),
             _ => Ok(None),
         }
     }
@@ -692,7 +696,7 @@ impl SettingsManager {
     }
 }
 
-fn get_epoch() -> Duration {
+fn get_epoch() -> std::time::Duration {
     SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .expect("Time went backwards")
