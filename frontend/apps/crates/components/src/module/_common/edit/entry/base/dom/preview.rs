@@ -1,5 +1,5 @@
 use super::super::{
-    super::{super::post_preview::dom::render_post_preview, strings},
+    super::{super::post_preview::{state::PostPreview, dom::render_post_preview}, strings},
     nav::dom::render_nav,
     state::*,
 };
@@ -7,7 +7,6 @@ use dominator::{clone, html, with_node, Dom};
 use std::rc::Rc;
 
 use futures_signals::signal::SignalExt;
-
 use dominator_helpers::events::Message;
 use shared::domain::jig::{
     module::{
@@ -36,29 +35,28 @@ where
     Footer: FooterExt + 'static,
     Overlay: OverlayExt + 'static,
 {
-    let post_preview = state.base.get_post_preview();
-    let has_post_preview = post_preview.is_some();
+
+    let post_preview = Rc::new(PostPreview::new(
+        RawData::kind(),
+        state.base.get_jig_id(),
+        state.base.get_module_id(),
+    ));
 
     html!("module-preview-header", {
         .property("slot", "header")
         .property("moduleKind", module_kind.as_str())
         .child(render_nav(state.clone()))
+        .child(html!("button-rect", {
+            .property("slot", "btn")
+            .property("size", "small")
+            .property("iconAfter", "arrow")
+            .text(strings::STR_DONE)
+            .event(clone!(state, post_preview => move |_evt:events::Click| {
+                state.preview_mode.set(Some(PreviewMode::PostPreview(post_preview.clone())));
 
-        .apply_if(has_post_preview, clone!(state => move |dom| {
-            let post_preview = Rc::new(post_preview.unwrap_ji());
-
-            dom
-                .child(html!("button-rect", {
-                    .property("slot", "btn")
-                    .property("size", "small")
-                    .property("iconAfter", "arrow")
-                    .text(strings::STR_DONE)
-                    .event(clone!(state, post_preview => move |_evt:events::Click| {
-                        state.preview_mode.set(Some(PreviewMode::PostPreview(post_preview.clone())));
-
-                    }))
-                }))
+            }))
         }))
+        /*
         .apply_if(!has_post_preview, clone!(state => move |dom| {
             dom
                 .child(html!("button-rect", {
@@ -72,6 +70,7 @@ where
                     }))
                 }))
         }))
+        */
     })
 }
 

@@ -295,5 +295,11 @@ impl BaseExt<Step> for Base {
         signal::always(true)
     }
 
+    fn get_jig_id(&self) -> JigId {
+        self.jig_id
+    }
+    fn get_module_id(&self) -> ModuleId {
+        self.module_id
+    }
 
 }
