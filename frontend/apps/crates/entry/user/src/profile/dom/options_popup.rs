@@ -12,8 +12,7 @@ use crate::profile::{
 
 use super::super::state::{ProfilePageUser, State};
 
-const STR_CANCEL: &'static str = "Cancel";
-const STR_SAVE: &'static str = "Save";
+const STR_DONE: &'static str = "Done";
 
 
 pub struct PopupCallbacks<I, S> {
@@ -39,22 +38,15 @@ where
                 .text("×")
                 .event(clone!(state => move |_: events::Click| {
                     state.active_popup.set(ActivePopup::None);
-                }))
-            }),
-            html!("button-text", {
-                .property("slot", "cancel")
-                .text(STR_CANCEL)
-                .event(clone!(state => move |_: events::Click| {
-                    state.active_popup.set(ActivePopup::None);
+                    actions::save_profile(Rc::clone(&state));
                 }))
             }),
             html!("button-rect", {
-                .property("slot", "save")
+                .property("slot", "done")
                 .property("color", "blue")
-                .text(STR_SAVE)
+                .text(STR_DONE)
                 .event(clone!(state => move |_: events::Click| {
                     state.active_popup.set(ActivePopup::None);
-                    actions::save_profile(Rc::clone(&state));
                 }))
             }),
         ])
