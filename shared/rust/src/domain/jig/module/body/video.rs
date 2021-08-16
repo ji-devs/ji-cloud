@@ -116,13 +116,13 @@ pub struct EditorState {
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 /// The mode
 pub enum Mode {
-    /// Introduction 
+    /// Introduction
     Introduction,
-    /// Story 
+    /// Story
     Story,
-    /// Song 
+    /// Song
     Song,
-    /// Howto 
+    /// Howto
     Howto,
 }
 
@@ -134,12 +134,7 @@ impl Default for Mode {
 
 impl ModeExt for Mode {
     fn get_list() -> Vec<Self> {
-        vec![
-            Self::Introduction,
-            Self::Story,
-            Self::Song,
-            Self::Howto,
-        ]
+        vec![Self::Introduction, Self::Story, Self::Song, Self::Howto]
     }
 
     fn as_str_id(&self) -> &'static str {
