@@ -18,7 +18,8 @@ export class _ extends LitElement {
     @property()
     jigId: string = "";
 
-    @property()
+    //use with cacheBust true to force reloading when id changes to the same thing
+    @property({ hasChanged: () => true })
     moduleId: string = "";
 
     @property()
@@ -27,14 +28,18 @@ export class _ extends LitElement {
     @property()
     moduleKind: ModuleKind | "" = "";
 
+    @property({type: Boolean})
+    cacheBust:boolean = false;
+
     render() {
-	    const {jigId, moduleId, moduleKind, size} = this;
+
+	    const {jigId, moduleId, moduleKind, size, cacheBust} = this;
 
         const fallbackPath = moduleKind == ""
             ? `jig/thumb-placeholder.svg` 
             : `module/${moduleKind}/thumb-placeholder.svg`;
 	    return html`
-	    	<img-ji lib="screenshot" id="${jigId}/${moduleId}" size="${size}">
+	    	<img-ji lib="screenshot" id="${jigId}/${moduleId}" size="${size}" .cacheBust=${cacheBust ? Date.now() : false}>
   			<img-ui path="${fallbackPath}" slot="fallback"></img-ui>
 		</img-ji>
 	    `;

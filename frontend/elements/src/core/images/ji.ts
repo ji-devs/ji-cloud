@@ -26,8 +26,8 @@ export class _ extends LitElement {
     @property({ type: Boolean })
     draggable: boolean = true;
 
-    @property({ type: Boolean })
-    cacheBust: boolean = false;
+    @property()
+    cacheBust: any = false;
 
     @property()
     lib: MediaLibOptions = "global";
