@@ -7,7 +7,7 @@ use js_sys::Reflect;
 use shared::domain::jig::Jig;
 use std::rc::Rc;
 use utils::{
-    iframe::{IframeAction, ModuleToJigMessage},
+    iframe::{IframeAction, ModuleToJigPlayerMessage},
     prelude::SETTINGS,
     routes::{ModuleRoute, Route},
     unwrap::UnwrapJiExt,
@@ -23,7 +23,7 @@ pub fn render(state: Rc<State>) -> Dom {
     html!("jig-play-landing", {
         .property_signal("paused", state.paused.signal())
         .global_event(clone!(state => move |evt:Message| {
-            match evt.try_serde_data::<IframeAction<ModuleToJigMessage>>() {
+            match evt.try_serde_data::<IframeAction<ModuleToJigPlayerMessage>>() {
                 Err(_) => {},
                 Ok(m) => {
                     actions::on_iframe_message(Rc::clone(&state), m.data)

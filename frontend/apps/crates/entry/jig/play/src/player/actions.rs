@@ -9,7 +9,7 @@ use shared::{
     error::EmptyError,
 };
 use utils::{
-    iframe::{IframeAction, JigToModuleMessage, ModuleToJigMessage},
+    iframe::{IframeAction, JigToModulePlayerMessage, ModuleToJigPlayerMessage},
     prelude::{api_no_auth, SETTINGS},
     routes::{Route, HomeRoute},
     unwrap::UnwrapJiExt,
@@ -55,7 +55,7 @@ pub fn start_timer(state: Rc<State>, time: u32) {
 
     spawn_local(timer.time.signal().for_each(clone!(state => move|time| {
         if time == 0 {
-            sent_iframe_message(Rc::clone(&state), JigToModuleMessage::TimerDone);
+            sent_iframe_message(Rc::clone(&state), JigToModulePlayerMessage::TimerDone);
         }
         async {}
     })));
@@ -79,13 +79,13 @@ pub fn toggle_paused(state: Rc<State>) {
 
     // let iframe know that paused
     let iframe_message = match paused {
-        false => JigToModuleMessage::Play,
-        true => JigToModuleMessage::Pause,
+        false => JigToModulePlayerMessage::Play,
+        true => JigToModulePlayerMessage::Pause,
     };
     sent_iframe_message(Rc::clone(&state), iframe_message);
 }
 
-pub fn sent_iframe_message(state: Rc<State>, data: JigToModuleMessage) {
+pub fn sent_iframe_message(state: Rc<State>, data: JigToModulePlayerMessage) {
     let iframe_origin: String = Route::Home(HomeRoute::Home).into();
     let iframe_origin = unsafe {
         SETTINGS
@@ -106,13 +106,13 @@ pub fn sent_iframe_message(state: Rc<State>, data: JigToModuleMessage) {
     };
 }
 
-pub fn on_iframe_message(state: Rc<State>, message: ModuleToJigMessage) {
+pub fn on_iframe_message(state: Rc<State>, message: ModuleToJigPlayerMessage) {
     match message {
-        ModuleToJigMessage::AddPoints(amount) => {
+        ModuleToJigPlayerMessage::AddPoints(amount) => {
             let mut points = state.points.lock_mut();
             *points += amount;
         }
-        ModuleToJigMessage::Start(time) => {
+        ModuleToJigPlayerMessage::Start(time) => {
             if let Some(time) = time {
                 start_timer(Rc::clone(&state), time);
             }
