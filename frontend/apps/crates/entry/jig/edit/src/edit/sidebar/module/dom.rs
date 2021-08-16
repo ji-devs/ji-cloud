@@ -97,6 +97,7 @@ impl ModuleDom {
                                         Rc::new(ModuleThumbnail {
                                             jig_id: state.sidebar.jig.id.clone(),
                                             module: module.clone(), 
+                                            is_jig_fallback: false,
                                         }),
                                         Some("thumbnail")
                                 ))

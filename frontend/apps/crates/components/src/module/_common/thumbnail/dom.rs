@@ -13,18 +13,9 @@ impl ModuleThumbnail {
             })
             .property("jigId", state.jig_id.0.to_string())
             .property("moduleId", state.module.id.0.to_string())
-            .property("fallbackKind", state.module.kind.as_str())
-        })
-    }
-
-    pub fn render_signal_fn(state_signal_fn: RcSignalFn<Self>, slot: Option<&str>) -> Dom {
-        html!("img-module-screenshot", {
-            .apply_if(slot.is_some(), |dom| {
-                dom.property("slot", slot.unwrap_ji())
+            .apply_if(!state.is_jig_fallback, |dom| {
+                dom.property("moduleKind", state.module.kind.as_str())
             })
-            .property_signal("jigId", state_signal_fn().map(|state| state.jig_id.0.to_string()))
-            .property_signal("moduleId", state_signal_fn().map(|state| state.module.id.0.to_string()))
-            .property_signal("fallbackKind", state_signal_fn().map(|state| state.module.kind.as_str()))
         })
     }
 }
