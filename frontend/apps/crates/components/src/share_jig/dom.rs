@@ -137,6 +137,7 @@ fn render_share_students(state: Rc<State>) -> Dom {
 fn render_share_embed(state: Rc<State>) -> Dom {
     html!("share-jig-embed", {
         .property("slot", "overlay")
+        .property("value", state.embed_code())
         .children(&mut [
             html!("button-empty", {
                 .property("slot", "close")
@@ -158,6 +159,9 @@ fn render_share_embed(state: Rc<State>) -> Dom {
                 .property("slot", "copy")
                 .property("kind", "text")
                 .text("Copy code")
+                .event(clone!(state => move |_: events::Click| {
+                    clipboard::write_text(&state.embed_code());
+                }))
             })
         ])
     })
