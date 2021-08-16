@@ -13,25 +13,31 @@ use super::publish_jig::PublishJig;
 
 pub struct State {
     pub loader: AsyncLoader,
-    pub categories: Mutable<Option<Vec<Category>>>,
+    pub categories: Mutable<Vec<Category>>,
     // categories has label lookup since it's both more complex to lookup and used more then others (pills)
-    pub category_label_lookup: Mutable<Option<HashMap<CategoryId, String>>>,
-    pub goals: Mutable<Option<Vec<Goal>>>,
-    pub ages: Mutable<Option<Vec<AgeRange>>>,
+    pub category_label_lookup: Mutable<HashMap<CategoryId, String>>,
+    pub goals: Mutable<Vec<Goal>>,
+    pub ages: Mutable<Vec<AgeRange>>,
     pub jig: PublishJig,
     pub submission_tried: Mutable<bool>,
     pub languages: Vec<Language>,
 }
 
 impl State {
-    pub fn new(jig_id: JigId) -> Self {
+    pub fn new(
+        jig: PublishJig, 
+        categories: Vec<Category>,
+        category_label_lookup: HashMap<CategoryId, String>,
+        goals: Vec<Goal>,
+        ages: Vec<AgeRange>,
+    ) -> Self {
         Self {
             loader: AsyncLoader::new(),
-            categories: Mutable::new(None),
-            category_label_lookup: Mutable::new(None),
-            goals: Mutable::new(None),
-            ages: Mutable::new(None),
-            jig: PublishJig::new_empty(jig_id),
+            jig,
+            categories: Mutable::new(categories),
+            category_label_lookup: Mutable::new(category_label_lookup),
+            goals: Mutable::new(goals),
+            ages: Mutable::new(ages),
             submission_tried: Mutable::new(false),
             languages: LANGUAGES.clone(),
         }

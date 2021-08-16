@@ -10,6 +10,7 @@ use shared::domain::{
     meta::{AgeRangeId, GoalId},
 };
 
+#[derive(Clone)]
 pub struct PublishJig {
     pub id: JigId,
     // modules only for read
@@ -41,29 +42,18 @@ impl From<Jig> for PublishJig {
 }
 
 impl PublishJig {
-    pub fn new_empty(jig_id: JigId) -> Self {
+    pub fn new(jig: Jig) -> Self {
         Self {
-            id: jig_id,
-            modules: Mutable::new(vec![]),
-            display_name: Mutable::new(String::new()),
-            description: Mutable::new(String::new()),
-            age_ranges: Mutable::new(HashSet::new()),
-            goals: Mutable::new(HashSet::new()),
-            language: Mutable::new(String::new()),
-            categories: Mutable::new(HashSet::new()),
-            is_public: Mutable::new(false),
+            id: jig.id,
+            display_name: Mutable::new(jig.display_name),
+            modules: Mutable::new(jig.modules),
+            description: Mutable::new(jig.description),
+            age_ranges: Mutable::new(HashSet::from_iter(jig.age_ranges)),
+            goals: Mutable::new(HashSet::from_iter(jig.goals)),
+            language: Mutable::new(jig.language),
+            categories: Mutable::new(HashSet::from_iter(jig.categories)),
+            is_public: Mutable::new(jig.is_public),
         }
-    }
-
-    pub fn fill_from_jig(&self, jig: Jig) {
-        self.display_name.set(jig.display_name);
-        self.modules.set(jig.modules);
-        self.description.set(jig.description);
-        self.age_ranges.set(HashSet::from_iter(jig.age_ranges));
-        self.goals.set(HashSet::from_iter(jig.goals));
-        self.language.set(jig.language);
-        self.categories.set(HashSet::from_iter(jig.categories));
-        self.is_public.set(jig.is_public);
     }
 
     pub fn to_jig_update_request(&self) -> JigUpdateRequest {
