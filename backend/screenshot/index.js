@@ -1,6 +1,7 @@
 const fetch = require('node-fetch');
 const {Storage} = require('@google-cloud/storage');
 const {CloudTasksClient} = require('@google-cloud/tasks');
+const {Firestore} = require('@google-cloud/firestore');
 const storage = new Storage();
 const puppeteer = require("puppeteer");
 const _gm = require("gm");
@@ -13,21 +14,24 @@ const BROWSER_HEIGHT = 576;
 const THUMB_HEIGHT = 168;
 const THUMB_WIDTH = BROWSER_WIDTH * (THUMB_HEIGHT / BROWSER_HEIGHT);
 
+const FINAL_URL_SANDBOX = "https://uploads.sandbox.jicloud.org";
+const FINAL_URL_RELEASE = "https://uploads.jicloud.org";
+
 require('dotenv').config();
 
 //TEST URL: http://localhost:8081/?jig=d46ca2d2-eeef-11eb-8c76-77f818ce2b73&module=d9f674c6-eeef-11eb-b38c-e75f7ef16f01&kind=tapping-board
 
 exports.showScreenshotRelease = makeShowScreenshot("https://jigzi.org");
 exports.showScreenshotSandbox = makeShowScreenshot("https://sandbox.jigzi.org");
-exports.saveScreenshotRelease = makeSaveScreenshot("https://jigzi.org", "ji-cloud-uploads-origin-eu-001");
-exports.saveScreenshotSandbox = makeSaveScreenshot("https://sandbox.jigzi.org", "ji-cloud-sandbox-uploads-origin-eu-001");
-exports.queueScreenshotRelease = queueScreenshot("us-central1", "ji-cloud", "https://europe-west1-ji-cloud.cloudfunctions.net", "saveScreenshotRelease", "https://uploads.jicloud.org");
-exports.queueScreenshotSandbox = queueScreenshot("europe-west1", "ji-cloud-developer-sandbox", "https://europe-west1-ji-cloud-developer-sandbox.cloudfunctions.net", "saveScreenshotSandbox", "https://uploads.sandbox.jicloud.org");
+exports.saveScreenshotRelease = makeSaveScreenshot("https://jigzi.org", "ji-cloud-uploads-origin-eu-001", FINAL_URL_RELEASE);
+exports.saveScreenshotSandbox = makeSaveScreenshot("https://sandbox.jigzi.org", "ji-cloud-sandbox-uploads-origin-eu-001", FINAL_URL_SANDBOX);
+exports.queueScreenshotRelease = queueScreenshot("us-central1", "ji-cloud", "https://europe-west1-ji-cloud.cloudfunctions.net", "saveScreenshotRelease", FINAL_URL_RELEASE);
+exports.queueScreenshotSandbox = queueScreenshot("europe-west1", "ji-cloud-developer-sandbox", "https://europe-west1-ji-cloud-developer-sandbox.cloudfunctions.net", "saveScreenshotSandbox", FINAL_URL_SANDBOX);
 
 /*** Factory functions for release vs. sandbox ***/
 
 let _tasksClient;
-
+let _firestore;
 //The task location unfortunately MUST be in the app-engine region, and the app-engine region can't be changed
 //We aren't even using an app engine instance at this point... not sure why the release has it set to us-central1
 //But it's only for queing tasks, the actual heavy lifting of generating and writing the screenshot is all in europe-west1
@@ -98,7 +102,8 @@ function makeShowScreenshot(baseUrl) {
     });
 }
 
-function makeSaveScreenshot(baseUrl, bucketName) {
+
+function makeSaveScreenshot(baseUrl, bucketName, finalUrl) {
     return wrapCors((req, res) => {
         const {respondError, respondJson} = makeResponders(res);
              
@@ -115,9 +120,25 @@ function makeSaveScreenshot(baseUrl, bucketName) {
                             .then(() => writeJpegToFile({file: thumbFile, data: thumbBuffer}));
                     })
             })
+            .then(() => parseQuery(req.query).then(({jig, module, kind}) => {
+                const db = initFirestore();
+
+                const data = {
+                    updated: Date.now()
+                };
+
+                return db.collection('screenshot').doc(jig).collection("modules").doc(module).set(data)
+                    .then(() => {
+                        return Object.assign(data, {
+                            jpg: `${finalUrl}/screenshot/${jig}/${module}/full.jpg`
+                        })
+                    })
+            }))
             .then(
-                () => {
-                    respondJson({saved: true})
+                (data) => {
+                    respondJson(Object.assign(data, {
+                        saved: true
+                    }))
                 },
                 err => {
                     respondError(err);
@@ -216,6 +237,14 @@ function writePngToFile({file, data}) {
 /*** utils ***/
 
 //Convert a gm stream to buffer
+function initFirestore() {
+    if(_firestore == undefined) {
+        _firestore = new Firestore();
+    }
+
+    return _firestore;
+}
+
 function gmToBuffer(data) {
   return new Promise((resolve, reject) => {
     data.stream((err, stdout, stderr) => {

@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "dev": "watchexec -w index.js -r -s SIGKILL \"npm run _dev:queue\"",
+    "dev": "watchexec -w index.js -r -s SIGKILL \"npm run _dev:save\"",
     "_dev:show": "functions-framework --target=showScreenshotSandbox --port=8081",
     "_dev:save": "functions-framework --target=saveScreenshotSandbox --port=8081",
     "_dev:queue": "functions-framework --target=queueScreenshotSandbox --port=8081",
@@ -14,6 +14,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@google-cloud/firestore": "^4.14.1",
     "@google-cloud/storage": "^5.1.1",
     "@google-cloud/tasks": "^2.3.6",
     "dotenv": "^10.0.0",
