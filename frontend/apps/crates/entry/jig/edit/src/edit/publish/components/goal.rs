@@ -30,15 +30,9 @@ pub fn render(state: Rc<State>) -> Dom {
                 })
         })
         .children_signal_vec(state.goals.signal_cloned().map(clone!(state => move |goals| {
-            match goals {
-                None => vec![],
-                Some(goals) => {
-                    goals.iter().map(|goal| {
-                        render_goal(&goal, state.clone())
-                    }).collect()
-                },
-            }
-
+            goals.iter().map(|goal| {
+                render_goal(&goal, state.clone())
+            }).collect()
         })).to_signal_vec())
     })
 }
@@ -66,12 +60,10 @@ fn goal_value_signal(state: Rc<State>) -> impl Signal<Item = String> {
         let selected_goals = state.jig.goals.signal_cloned(),
         let available_goals = state.goals.signal_cloned() => {
             let mut output = vec![];
-            if let Some(available_goals) = available_goals {
-                selected_goals.iter().for_each(|goal_id| {
-                    let goal = available_goals.iter().find(|goal| goal.id == *goal_id).unwrap_ji();
-                    output.push(goal.display_name.clone());
-                })
-            }
+            selected_goals.iter().for_each(|goal_id| {
+                let goal = available_goals.iter().find(|goal| goal.id == *goal_id).unwrap_ji();
+                output.push(goal.display_name.clone());
+            });
             output.join(", ")
         }
 

@@ -1,8 +1,9 @@
 use dominator::{clone, html, with_node, Dom};
-use futures_signals::{map_ref, signal::SignalExt};
+use futures_signals::{map_ref, signal::{Mutable, SignalExt}};
 use shared::domain::jig::JigId;
 use utils::events;
 use web_sys::{HtmlElement, HtmlInputElement, HtmlTextAreaElement};
+use components::module::_common::thumbnail::ModuleThumbnail;
 
 use super::{
     actions,
@@ -30,14 +31,19 @@ const STR_DESCRIPTION_LABEL: &'static str = "Description";
 const STR_MISSING_INFO_TOOLTIP: &'static str = "Please fill in the missing information.";
 
 pub fn render(jig_id: JigId) -> Dom {
-    let state = Rc::new(State::new(jig_id));
-    actions::load_data(state.clone(), jig_id);
+    let state:Mutable<Option<Rc<State>>> = Mutable::new(None);
 
     html!("empty-fragment", {
+        .future(clone!(state, jig_id => async move {
+            let _state = State::load_new(jig_id).await;
+            state.set(Some(Rc::new(_state)));
+        }))
         .property("slot", "main")
-        .child(render_page(state.clone()))
+        .child_signal(state.signal_cloned().map(|state| {
+            state.map(|state| render_page(state.clone()))
+        }))
         .child(html!("window-loader-block", {
-            .property_signal("visible", state.loader.is_loading())
+            .property_signal("visible", state.signal_ref(|state| state.is_none()))
         }))
     })
 }
@@ -45,17 +51,14 @@ pub fn render(jig_id: JigId) -> Dom {
 fn render_page(state: Rc<State>) -> Dom {
     html!("jig-edit-publish", {
         .children(&mut [
-            html!("img-module-screenshot", {
-                .property("slot", "thumbnail")
-                .property("slot", "img")
-                .property("jigId", state.jig.id.0.to_string())
-                .property_signal("moduleId", state.jig.modules.signal_ref(|modules| {
-                    match modules.len() {
-                        0 => String::new(),
-                        _ => modules[0].id.0.to_string()
-                    }
-                }))
-            }),
+            ModuleThumbnail::render(
+                Rc::new(ModuleThumbnail {
+                    jig_id: state.jig.id.clone(),
+                    //Cover module (first module) is guaranteed to exist
+                    module: state.jig.modules.lock_ref()[0].clone()
+                }),
+                Some("img")
+            ),
             html!("label", {
                 .property("slot", "public")
                 .text(STR_PUBLIC_LABEL)

@@ -30,15 +30,9 @@ pub fn render(state: Rc<State>) -> Dom {
                 })
         })
         .children_signal_vec(state.ages.signal_cloned().map(clone!(state => move |ages| {
-            match ages {
-                None => vec![],
-                Some(ages) => {
-                    ages.iter().map(|age| {
-                        render_age(&age, state.clone())
-                    }).collect()
-                },
-            }
-
+            ages.iter().map(|age| {
+                render_age(&age, state.clone())
+            }).collect()
         })).to_signal_vec())
     })
 }
@@ -66,12 +60,10 @@ fn age_value_signal(state: Rc<State>) -> impl Signal<Item = String> {
         let selected_ages = state.jig.age_ranges.signal_cloned(),
         let available_ages = state.ages.signal_cloned() => {
             let mut output = vec![];
-            if let Some(available_ages) = available_ages {
-                selected_ages.iter().for_each(|age_id| {
-                    let age = available_ages.iter().find(|age| age.id == *age_id).unwrap_ji();
-                    output.push(age.display_name.clone());
-                })
-            }
+            selected_ages.iter().for_each(|age_id| {
+                let age = available_ages.iter().find(|age| age.id == *age_id).unwrap_ji();
+                output.push(age.display_name.clone());
+            });
             output.join(", ")
         }
 

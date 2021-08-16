@@ -20,13 +20,9 @@ pub fn render(state: Rc<State>) -> Dom {
 fn render_pill(state: Rc<State>, category_id: CategoryId) -> Dom {
     html!("pill-close", {
         .property_signal("label", state.category_label_lookup.signal_cloned().map(move |category_label_lookup| {
-            match category_label_lookup {
-                None => String::new(),
-                Some(category_label_lookup) => {
-                    log::info!("{:?}", category_label_lookup.get(&category_id));
-                    category_label_lookup.get(&category_id).unwrap_ji().clone()
-                }
-            }
+
+            log::info!("{:?}", category_label_lookup.get(&category_id));
+            category_label_lookup.get(&category_id).unwrap_ji().clone()
         }))
     })
 }

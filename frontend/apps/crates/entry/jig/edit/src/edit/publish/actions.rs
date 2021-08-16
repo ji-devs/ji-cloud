@@ -13,33 +13,32 @@ use shared::{
 };
 use utils::prelude::{api_with_auth, api_with_auth_empty, UnwrapJiExt};
 
-use super::state::State;
+use super::{publish_jig::PublishJig, state::State};
 
-pub fn load_data(state: Rc<State>, jig_id: JigId) {
-    state.loader.load(clone!(state => async move {
-
+impl State {
+    pub async fn load_new(jig_id:JigId) -> Self {
         let jig = load_jig(jig_id);
         let categories = load_categories();
         let meta = load_metadata();
 
         let (jig, categories, meta) = join!(jig, categories, meta);
 
-        let jig = jig.unwrap_ji();
-        state.jig.display_name.set(jig.display_name.clone());
-        state.jig.fill_from_jig(jig);
-
         let categories = categories.unwrap_ji();
         let mut category_label_lookup = HashMap::new();
         get_categories_labels(&categories, &mut category_label_lookup, "");
-        state.categories.set(Some(categories));
-
-        state.category_label_lookup.set(Some(category_label_lookup));
-
+        
         let meta = meta.unwrap_ji();
-        state.goals.set(Some(meta.goals));
-        state.ages.set(Some(meta.age_ranges));
-    }));
+
+        Self::new(
+            PublishJig::new(jig.unwrap_ji()),
+            categories,
+            category_label_lookup,
+            meta.goals,
+            meta.age_ranges
+        )
+    }
 }
+
 
 fn get_categories_labels(
     categories: &Vec<Category>,
