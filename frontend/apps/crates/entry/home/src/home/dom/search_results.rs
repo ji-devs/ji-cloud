@@ -6,6 +6,7 @@ use futures_signals::{
 use shared::domain::jig::{Jig, JigPlayerSettings};
 use std::rc::Rc;
 use utils::{ages::AgeRangeVecExt, routes::{JigRoute, Route}};
+use components::module::_common::thumbnail::ModuleThumbnail;
 
 use super::super::state::State;
 
@@ -38,11 +39,14 @@ fn render_result(state: Rc<State>, jig: &Jig) -> Dom {
         }))
         .property("description", jig.description.clone())
         .children(&mut [
-            html!("img-module-screenshot", {
-                .property("slot", "image")
-                .property("jigId", jig.id.0.to_string())
-                .property("moduleId", jig.modules[0].id.0.to_string())
-            }),
+            ModuleThumbnail::render(
+                Rc::new(ModuleThumbnail {
+                    jig_id: jig.id.clone(),
+                    module: jig.modules[0].clone(),
+                }),
+                Some("image")
+            ),
+
             html!("home-search-result-details", {
                 .property("slot", "categories")
                 .children(jig.categories.iter().map(|category_id| {
