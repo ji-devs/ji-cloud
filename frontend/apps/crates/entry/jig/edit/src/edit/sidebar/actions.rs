@@ -4,14 +4,10 @@ use futures_signals::{
     map_ref,
     signal::{Signal, SignalExt},
 };
-use shared::{
-    api::endpoints::{self, ApiEndpoint},
-    domain::jig::{module::ModuleId, Jig, JigId, JigPlayerSettings, JigResponse, JigUpdateRequest},
-    error::EmptyError,
-};
+use shared::{api::endpoints::{self, ApiEndpoint}, domain::jig::{Jig, JigId, JigPlayerSettings, JigResponse, JigUpdateRequest, LiteModule, module::ModuleId}, error::EmptyError};
 use std::cell::RefCell;
 use std::rc::Rc;
-use utils::prelude::*;
+use utils::{iframe::ModuleToJigEditorMessage, prelude::*};
 
 pub async fn load_jig(jig_id: JigId, jig_cell: Rc<RefCell<Option<Jig>>>) {
     let path = endpoints::jig::Get::PATH.replace("{id}", &jig_id.0.to_string());
@@ -85,4 +81,18 @@ pub fn player_settings_change_signal(state: Rc<State>) -> impl Signal<Item = Jig
             drag_assist: drag_assist.clone(),
         },
     )
+}
+
+pub fn on_iframe_message(state: Rc<State>, message: ModuleToJigEditorMessage) {
+    match message {
+        ModuleToJigEditorMessage::AppendModule(module) => {
+            log::info!("{:?}", module);
+            populate_added_module(Rc::clone(&state), module);
+        },
+        ModuleToJigEditorMessage::Next => todo!(),
+    }
+}
+
+fn populate_added_module(state: Rc<State>, module: LiteModule) {
+    state.modules.lock_mut().push_cloned(Rc::new(Some(module)));
 }

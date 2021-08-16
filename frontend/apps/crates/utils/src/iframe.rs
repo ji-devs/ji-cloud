@@ -1,7 +1,7 @@
 use serde::{Serialize, Deserialize, de::DeserializeOwned};
 use wasm_bindgen::prelude::*;
 use crate::unwrap::UnwrapJiExt;
-use shared::domain::jig::module::{ModuleId, ModuleKind};
+use shared::domain::jig::{LiteModule, module::{ModuleId, ModuleKind}};
 
 pub const IFRAME_DATA_PARAM:&'static str = "iframe_data";
 
@@ -127,6 +127,6 @@ pub enum ModuleToJigPlayerMessage {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub enum ModuleToJigEditorMessage {
-    AppendModule(ModuleKind, ModuleId),
+    AppendModule(LiteModule),
     Next 
 }
