@@ -13,12 +13,15 @@ use super::{
     },
     state::*,
 };
-use components::tooltip::{
-    callbacks::TooltipErrorCallbacks,
-    dom::render as TooltipDom,
-    state::{
-        MoveStrategy, Placement, State as TooltipState, TooltipData, TooltipError, TooltipTarget,
-    },
+use components::{
+    module::_common::thumbnail::ModuleThumbnail,
+    tooltip::{
+        callbacks::TooltipErrorCallbacks,
+        dom::render as TooltipDom,
+        state::{
+            MoveStrategy, Placement, State as TooltipState, TooltipData, TooltipError, TooltipTarget,
+        },
+    }
 };
 use std::rc::Rc;
 use super::super::state::State as JigEditState;
