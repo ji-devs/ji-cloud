@@ -1,17 +1,20 @@
+use std::rc::Rc;
+
 use super::{
-    iframe::dom::IframeDom, publish::dom::render as render_publish, selection::dom::SelectionDom,
+    iframe::dom::IframeDom, publish::dom::render as render_publish, post_publish::dom::render as render_post_publish, selection::dom::SelectionDom,
     sidebar::dom::SidebarDom,
 };
 use dominator::{clone, html, Dom};
-use futures_signals::signal::{Mutable, SignalExt};
+use futures_signals::signal::SignalExt;
 use shared::domain::jig::JigId;
 use utils::prelude::*;
+use super::state::State;
 
 pub struct EditPage {}
 
 impl EditPage {
     pub fn render(jig_id: JigId, route: JigEditRoute) -> Dom {
-        let route = Mutable::new(route);
+        let state = Rc::new(State::new(jig_id, route));
 
         html!("jig-edit-page", {
             /*
@@ -33,8 +36,8 @@ impl EditPage {
                 async {}
             })))
             */
-            .child(SidebarDom::render(jig_id.clone(), route.clone()))
-            .child_signal(route.signal_cloned().map(clone!(jig_id => move |route| {
+            .child(SidebarDom::render(jig_id.clone(), state.route.clone()))
+            .child_signal(state.route.signal_cloned().map(clone!(jig_id => move |route| {
                 match route {
                     JigEditRoute::Landing => {
                         Some(SelectionDom::render())
@@ -43,7 +46,10 @@ impl EditPage {
                         Some(IframeDom::render(jig_id.clone(), module_id.clone()))
                     },
                     JigEditRoute::Publish => {
-                        Some(render_publish(jig_id.clone()))
+                        Some(render_publish(Rc::clone(&state)))
+                    }
+                    JigEditRoute::PostPublish => {
+                        Some(render_post_publish(jig_id.clone()))
                     }
                 }
             })))

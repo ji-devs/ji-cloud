@@ -1,9 +1,7 @@
 use dominator::{clone, html, with_node, Dom};
 use futures_signals::{map_ref, signal::{Mutable, SignalExt}};
-use shared::domain::jig::JigId;
 use utils::events;
 use web_sys::{HtmlElement, HtmlInputElement, HtmlTextAreaElement};
-use components::module::_common::thumbnail::ModuleThumbnail;
 
 use super::{
     actions,
@@ -23,6 +21,7 @@ use components::tooltip::{
     },
 };
 use std::rc::Rc;
+use super::super::state::State as JigEditState;
 
 const STR_PUBLISH_JIG: &'static str = "Publish JIG";
 const STR_PUBLIC_LABEL: &'static str = "My JIG is public";
@@ -30,12 +29,12 @@ const STR_NAME_LABEL: &'static str = "JIG’s name";
 const STR_DESCRIPTION_LABEL: &'static str = "Description";
 const STR_MISSING_INFO_TOOLTIP: &'static str = "Please fill in the missing information.";
 
-pub fn render(jig_id: JigId) -> Dom {
-    let state:Mutable<Option<Rc<State>>> = Mutable::new(None);
+pub fn render(jig_edit_state: Rc<JigEditState>) -> Dom {
+    let state: Mutable<Option<Rc<State>>> = Mutable::new(None);
 
     html!("empty-fragment", {
-        .future(clone!(state, jig_id => async move {
-            let _state = State::load_new(jig_id).await;
+        .future(clone!(state => async move {
+            let _state = State::load_new(jig_edit_state).await;
             state.set(Some(Rc::new(_state)));
         }))
         .property("slot", "main")

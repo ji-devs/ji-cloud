@@ -78,6 +78,7 @@ pub enum JigEditRoute {
     Landing,
     Module(ModuleId),
     Publish,
+    PostPublish,
 }
 
 #[derive(Debug, Clone)]
@@ -193,6 +194,10 @@ impl Route {
             ["jig", "edit", jig_id, "publish"] => Self::Jig(JigRoute::Edit(
                 JigId(Uuid::from_str(jig_id).unwrap_ji()),
                 JigEditRoute::Publish
+            )),
+            ["jig", "edit", jig_id, "post-publish"] => Self::Jig(JigRoute::Edit(
+                JigId(Uuid::from_str(jig_id).unwrap_ji()),
+                JigEditRoute::PostPublish
             )),
             ["jig", "edit", "debug"] => Self::Jig(JigRoute::Edit(
                     JigId(Uuid::from_u128(0)),
@@ -325,6 +330,7 @@ impl From<&Route> for String {
                             JigEditRoute::Landing => format!("/jig/edit/{}", jig_id.0.to_string()),
                             JigEditRoute::Module(module_id) => format!("/jig/edit/{}/{}", jig_id.0.to_string(), module_id.0.to_string()),
                             JigEditRoute::Publish => format!("/jig/edit/{}/publish", jig_id.0.to_string()),
+                            JigEditRoute::PostPublish => format!("/jig/edit/{}/post-publish", jig_id.0.to_string()),
                         }
                     }
                     JigRoute::Play(jig_id, module_id, player_settings) => {

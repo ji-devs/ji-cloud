@@ -11,13 +11,14 @@ use shared::{
     },
     error::{EmptyError, MetadataNotFound},
 };
-use utils::prelude::{api_with_auth, api_with_auth_empty, UnwrapJiExt};
+use utils::{prelude::{api_with_auth, api_with_auth_empty, UnwrapJiExt}, routes::{JigEditRoute, JigRoute, Route}};
 
 use super::{publish_jig::PublishJig, state::State};
+use super::super::state::State as JigEditState;
 
 impl State {
-    pub async fn load_new(jig_id:JigId) -> Self {
-        let jig = load_jig(jig_id);
+    pub async fn load_new(jig_edit_state: Rc<JigEditState>) -> Self {
+        let jig = load_jig(jig_edit_state.jig_id);
         let categories = load_categories();
         let meta = load_metadata();
 
@@ -34,7 +35,8 @@ impl State {
             categories,
             category_label_lookup,
             meta.goals,
-            meta.age_ranges
+            meta.age_ranges,
+            jig_edit_state
         )
     }
 }
@@ -104,6 +106,16 @@ pub fn save_jig(state: Rc<State>) {
         match api_with_auth_empty::<MetadataNotFound, JigUpdateRequest>(&path, jig::Update::METHOD, Some(req)).await {
             Ok(_) => {
                 state.submission_tried.set(false);
+
+                state.jig_edit_state.route.set_neq(JigEditRoute::PostPublish);
+
+                let url: String = Route::Jig(JigRoute::Edit(state.jig.id, JigEditRoute::PostPublish)).into();
+                log::info!("{}", url);
+
+                /* this will cause a full refresh - but preserves history
+                 * see the .future in EditPage too
+                dominator::routing::go_to_url(&url);
+                 */
             },
             Err(_) => {
             }
