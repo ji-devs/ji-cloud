@@ -64,7 +64,7 @@ impl DebugSettings {
             data: Some(if let Some(init_data) = init_data {
                 RawData {
                     content: Some(Content {
-                        mode: Mode::Video,
+                        mode: Mode::Introduction,
                         base: BaseContent {
                             theme: ThemeChoice::Override(ThemeId::Chalkboard),
                             instructions: Instructions::default(),
@@ -110,7 +110,6 @@ pub fn init(jig_id: JigId, _module_id: ModuleId) {
                 ],
             })))
             .unwrap_ji();
-
         //SETTINGS.set(DebugSettings::debug(None)).unwrap_ji();
     } else {
         SETTINGS.set(DebugSettings::default()).unwrap_ji();
