@@ -89,7 +89,9 @@ pub fn on_iframe_message(state: Rc<State>, message: ModuleToJigEditorMessage) {
             log::info!("{:?}", module);
             populate_added_module(Rc::clone(&state), module);
         },
-        ModuleToJigEditorMessage::Next => todo!(),
+        ModuleToJigEditorMessage::Next => {
+            state.collapsed.set(false);
+        },
     }
 }
 
