@@ -8,18 +8,19 @@ use super::{
     components::{
         additional_resources::render as AdditionalResourcesRender, age::render as AgeRender,
         categories_pills::render as CategoriesPillsRender,
-        categories_select::render as CategoriesSelectRender, goal::render as GoalRender,
+        categories_select::render as CategoriesSelectRender,
+        goal::render as GoalRender,
         language::render as LanguageRender,
     },
     state::*,
 };
-use components::tooltip::{
+use components::{module::_common::thumbnail::ModuleThumbnail, tooltip::{
     callbacks::TooltipErrorCallbacks,
     dom::render as TooltipDom,
     state::{
         MoveStrategy, Placement, State as TooltipState, TooltipData, TooltipError, TooltipTarget,
     },
-};
+}};
 use std::rc::Rc;
 use super::super::state::State as JigEditState;
 

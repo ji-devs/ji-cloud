@@ -1,17 +1,22 @@
-use std::{collections::HashMap, rc::Rc};
+use std::{collections::{HashMap, HashSet}, iter::FromIterator, rc::Rc};
 
 use dominator::clone;
 use futures::join;
+// <<<<<<< HEAD
 use shared::{
     api::endpoints::{category, jig, meta, ApiEndpoint},
     domain::{
         category::{Category, CategoryId, CategoryResponse, CategoryTreeScope, GetCategoryRequest},
         jig::{Jig, JigId, JigResponse, JigUpdateRequest},
-        meta::MetadataResponse,
+        meta::{MetadataResponse, Affiliation, AffiliationId},
     },
     error::{EmptyError, MetadataNotFound},
 };
 use utils::{prelude::{api_with_auth, api_with_auth_empty, UnwrapJiExt}, routes::{JigEditRoute, JigRoute, Route}};
+// =======
+// use shared::{api::endpoints::{category, jig, meta, ApiEndpoint}, domain::{category::{Category, CategoryId, CategoryResponse, CategoryTreeScope, GetCategoryRequest}, jig::{Jig, JigId, JigResponse, JigUpdateRequest}, meta::{Affiliation, AffiliationId, MetadataResponse}}, error::{EmptyError, MetadataNotFound}};
+// use utils::prelude::{api_with_auth, api_with_auth_empty, UnwrapJiExt};
+// >>>>>>> 81386686 (feat(frontend/jig/edit): add all to jig affiliations on publish)
 
 use super::{publish_jig::PublishJig, state::State};
 use super::super::state::State as JigEditState;
@@ -24,23 +29,35 @@ impl State {
 
         let (jig, categories, meta) = join!(jig, categories, meta);
 
+        let mut jig = jig.unwrap_ji();
+
         let categories = categories.unwrap_ji();
         let mut category_label_lookup = HashMap::new();
         get_categories_labels(&categories, &mut category_label_lookup, "");
         
         let meta = meta.unwrap_ji();
 
+        // set all affiliations for unpublished jigs
+        if jig.publish_at.is_none() {
+            let available_affiliations = meta.affiliations
+                .iter()
+                .map(|affiliation| affiliation.id.clone())
+                .collect();
+
+            jig.affiliations = available_affiliations;
+        }
+
         Self::new(
-            PublishJig::new(jig.unwrap_ji()),
+            PublishJig::new(jig),
             categories,
             category_label_lookup,
             meta.goals,
             meta.age_ranges,
+            meta.affiliations,
             jig_edit_state
         )
     }
 }
-
 
 fn get_categories_labels(
     categories: &Vec<Category>,
