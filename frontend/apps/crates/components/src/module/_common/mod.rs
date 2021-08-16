@@ -4,3 +4,5 @@ pub mod page_kind;
 #[cfg(feature = "module_play")]
 pub mod play;
 pub mod prelude;
+
+pub mod thumbnail;

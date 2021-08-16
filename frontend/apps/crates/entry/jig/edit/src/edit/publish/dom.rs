@@ -3,6 +3,7 @@ use futures_signals::{map_ref, signal::SignalExt};
 use shared::domain::jig::JigId;
 use utils::events;
 use web_sys::{HtmlElement, HtmlInputElement, HtmlTextAreaElement};
+use components::module::_common::thumbnail::ModuleThumbnail;
 
 use super::{
     actions,
@@ -45,17 +46,14 @@ pub fn render(jig_id: JigId) -> Dom {
 fn render_page(state: Rc<State>) -> Dom {
     html!("jig-edit-publish", {
         .children(&mut [
-            html!("img-module-screenshot", {
-                .property("slot", "thumbnail")
-                .property("slot", "img")
-                .property("jigId", state.jig.id.0.to_string())
-                .property_signal("moduleId", state.jig.modules.signal_ref(|modules| {
-                    match modules.len() {
-                        0 => String::new(),
-                        _ => modules[0].id.0.to_string()
-                    }
-                }))
-            }),
+            ModuleThumbnail::render(
+                Rc::new(ModuleThumbnail {
+                    jig_id: state.jig.id.clone(),
+                    //Cover module (first module) is guaranteed to exist
+                    module: state.jig.modules.lock_ref()[0].clone()
+                }),
+                Some("img")
+            ),
             html!("label", {
                 .property("slot", "public")
                 .text(STR_PUBLIC_LABEL)

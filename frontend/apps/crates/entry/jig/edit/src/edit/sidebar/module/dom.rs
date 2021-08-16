@@ -9,6 +9,7 @@ use std::rc::Rc;
 use std::str::FromStr;
 use utils::prelude::*;
 use wasm_bindgen::prelude::*;
+use components::module::_common::thumbnail::ModuleThumbnail;
 pub struct ModuleDom {}
 
 impl ModuleDom {
@@ -92,12 +93,13 @@ impl ModuleDom {
                         match (&*module, route) {
                             (Some(module), JigEditRoute::Module(module_id)) if module_id == &module.id => None,
                             (Some(module), _) => {
-                                Some(html!("img-module-screenshot", {
-                                    .property("slot", "thumbnail")
-                                    .property("jigId", state.sidebar.jig.id.0.to_string())
-                                    .property("moduleId", module.id.0.to_string())
-                                    .property("fallbackKind", state.kind_str())
-                                }))
+                                Some(ModuleThumbnail::render(
+                                        Rc::new(ModuleThumbnail {
+                                            jig_id: state.sidebar.jig.id.clone(),
+                                            module: module.clone(), 
+                                        }),
+                                        Some("thumbnail")
+                                ))
                             },
                             _ => None,
                         }
