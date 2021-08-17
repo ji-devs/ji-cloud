@@ -94,7 +94,7 @@ impl Body {
     }
 
     /// Convert this container to a Body wrapper of a specific kind
-    fn convert_to_body(&self, kind: ModuleKind) -> Result<Self, &'static str> {
+    pub fn convert_to_body(&self, kind: ModuleKind) -> Result<Self, &'static str> {
         match self {
             Self::MemoryGame(data) => data.convert_to_body(kind),
             Self::Matching(data) => data.convert_to_body(kind),

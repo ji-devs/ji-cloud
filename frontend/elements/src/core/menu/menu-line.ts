@@ -1,21 +1,22 @@
-import { LitElement, html, css, customElement, property } from 'lit-element';
-import {classMap} from "lit-html/directives/class-map";
-import {nothing} from "lit-html";
+import { LitElement, html, css, customElement, property } from "lit-element";
+import { classMap } from "lit-html/directives/class-map";
+import { nothing } from "lit-html";
 import "@elements/core/images/ui";
 
-type IconKind = ""
-| "copy"
-| "delete"
-| "duplicate"
-| "edit"
-| "move-down"
-| "move-up"
-| "paste"
-| "print"
-| "reuse"
-| "set-jig-theme";
+type IconKind =
+    | ""
+    | "copy"
+    | "delete"
+    | "duplicate"
+    | "edit"
+    | "move-down"
+    | "move-up"
+    | "paste"
+    | "print"
+    | "reuse"
+    | "set-jig-theme";
 
-const STR_LABEL_LOOKUP:any = {
+const STR_LABEL_LOOKUP: any = {
     copy: "Copy",
     paste: "Paste",
     delete: "Delete",
@@ -48,75 +49,85 @@ const STR_LABEL_LOOKUP:any = {
     ["set-jig-theme"]: "Set JIG theme",
 };
 
-@customElement('menu-line')
+@customElement("menu-line")
 export class _ extends LitElement {
-  static get styles() {
-      return [css`
-          section {
-              display: flex;
-              cursor: pointer;
-          }
+    static get styles() {
+        return [
+            css`
+                section {
+                    display: flex;
+                    cursor: pointer;
+                }
 
-          .img {
-              width: 24px;
-              height: 24px;
-              margin-right: 13px;
-              display: flex;
-              justify-content: center;
-              align-items: center;
-          }
+                .img {
+                    width: 24px;
+                    height: 24px;
+                    margin-right: 13px;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                }
 
-          .hover {
-              color: #5590fc;
-          }
+                :host([active]), .hover {
+                    color: #5590fc;
+                }
 
-          .delete {
-            color: #f84f57;
-          }
-
-    `];
-  }
-
-  onEnter() {
-    this.hover = true;
-  }
-
-  onLeave() {
-    this.hover = false;
-  }
-
-  @property({type: Boolean})
-  hover:boolean = false;
-
-  @property()
-  icon: IconKind = "";
-
-  @property()
-  customLabel: string = "";
-
-  render() {
-    let {icon, customLabel, hover} = this;
-
-    if(icon === "delete") {
-        hover = false;
+                .delete {
+                    color: #f84f57;
+                }
+            `,
+        ];
     }
-    const label = customLabel !== "" ? customLabel
-        : STR_LABEL_LOOKUP[icon]; 
 
-    const labelClasses = classMap({label, hover, delete: icon === "delete"});
+    onEnter() {
+        this.hover = true;
+    }
 
-    const filename = hover ? `${icon}-hover` : icon;
+    onLeave() {
+        this.hover = false;
+    }
 
-    return html`
+    @property({ type: Boolean })
+    hover: boolean = false;
 
-        <section @mouseenter="${this.onEnter}" @mouseleave="${this.onLeave}">
-        <section>
-            ${icon === "" ? nothing
-                : html`<div class="img"><img-ui path="core/menus/${filename}.svg" /></div>`
-            }
-            <div class="${labelClasses}">${label}</div>
-        </section>
-      `
-        
-  }
+    @property()
+    icon: IconKind = "";
+
+    @property()
+    customLabel: string = "";
+
+    @property({ type: Boolean, reflect: true })
+    active: boolean = false;
+
+    render() {
+        let { icon, customLabel, hover, active } = this;
+
+        if (icon === "delete") {
+            hover = false;
+        }
+
+        const label = customLabel !== "" ? customLabel : STR_LABEL_LOOKUP[icon];
+
+        const labelClasses = classMap({
+            label,
+            hover,
+            delete: icon === "delete",
+        });
+
+        const filename = hover || active ? `${icon}-hover` : icon;
+
+        return html`
+            <section
+                @mouseenter="${this.onEnter}"
+                @mouseleave="${this.onLeave}"
+            >
+                <div class="img">
+                    ${icon === "" ? nothing : html`
+                        <img-ui path="core/menus/${filename}.svg"></img-ui>
+                    `}
+                </div>
+                <div class="${labelClasses}">${label}</div>
+            </section>
+        `;
+    }
 }

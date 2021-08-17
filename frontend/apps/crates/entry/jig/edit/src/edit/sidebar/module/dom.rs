@@ -135,7 +135,7 @@ impl ModuleDom {
                             v.push(MenuDom::item_delete(menu_state.clone(), state.clone()));
                             if let Some(module) = &*module {
                                 v.push(MenuDom::item_copy(menu_state.clone(), sidebar_state.clone(), module.id));
-                                v.push(MenuDom::item_duplicate_as(menu_state.clone()));
+                                v.push(MenuDom::item_duplicate_as(menu_state.clone(), sidebar_state.clone(), module));
                             }
                             v
                         }

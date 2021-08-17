@@ -1,6 +1,6 @@
 use super::state::*;
 use crate::edit::sidebar::{
-    actions::duplicate_module,
+    actions::{duplicate_module, use_module_as},
     copy_paste_module::{copy_module, paste_module},
     module::{
         actions::{self, MoveTarget},
@@ -10,7 +10,7 @@ use crate::edit::sidebar::{
     state::State as SidebarState,
 };
 use dominator::{clone, html, Dom};
-use shared::domain::jig::module::ModuleId;
+use shared::domain::jig::{LiteModule, ModuleKind, module::ModuleId};
 use std::rc::Rc;
 use utils::events;
 
@@ -114,14 +114,45 @@ pub fn item_paste(state: Rc<State>, sidebar_state: Rc<SidebarState>) -> Dom {
     })
 }
 
-pub fn item_duplicate_as(state: Rc<State>) -> Dom {
-    html!("menu-line", {
+pub fn item_duplicate_as(state: Rc<State>, sidebar_state: Rc<SidebarState>, module: &LiteModule) -> Dom {
+    let card_kinds = vec![
+        ModuleKind::Memory,
+        ModuleKind::Flashcards,
+        ModuleKind::Matching,
+        ModuleKind::CardQuiz,
+    ];
+
+    let is_card = card_kinds.contains(&module.kind);
+
+    let card_kinds = card_kinds.into_iter().filter(|kind| {
+        &module.kind != kind
+    });
+
+    let module_id = module.id;
+
+    html!("empty-fragment", {
         .property("slot", "advanced")
-        .property("customLabel", STR_DUPLICATE_AS)
-        .property("icon", "reuse")
-        .event(clone!(state => move |_:events::Click| {
-            state.close_menu();
-        }))
+        .apply_if(is_card, |dom| {
+            dom.child(html!("menu-line", {
+                .property("customLabel", STR_DUPLICATE_AS)
+                .property("icon", "reuse")
+                .property_signal("active", state.dup_as_active.signal())
+                .event(clone!(state => move |_:events::Click| {
+                    let mut dup_as_active = state.dup_as_active.lock_mut();
+                    *dup_as_active = !*dup_as_active;
+                }))
+            }))
+            .children(card_kinds.map(|card_kind| {
+                html!("menu-line", {
+                    .visible_signal(state.dup_as_active.signal())
+                    .property("customLabel", String::from("• ") + card_kind.as_str())
+                    .event(clone!(state, sidebar_state, module_id => move |_:events::Click| {
+                        use_module_as(Rc::clone(&sidebar_state), card_kind, module_id);
+                        state.close_menu();
+                    }))
+                })
+            }))
+        })
     })
 }
 

@@ -4,7 +4,7 @@ use futures_signals::{
     map_ref,
     signal::{Signal, SignalExt},
 };
-use shared::{api::endpoints::{self, ApiEndpoint}, domain::jig::{Jig, JigId, JigPlayerSettings, JigResponse, JigUpdateRequest, LiteModule, module::ModuleId}, error::EmptyError};
+use shared::{api::endpoints::{self, ApiEndpoint}, domain::{CreateResponse, jig::{Jig, JigId, JigPlayerSettings, JigResponse, JigUpdateRequest, LiteModule, ModuleKind, module::{ModuleCreateRequest, ModuleId, ModuleResponse}}}, error::EmptyError};
 use std::cell::RefCell;
 use std::rc::Rc;
 use utils::{iframe::ModuleToJigEditorMessage, prelude::*};
@@ -97,4 +97,49 @@ pub fn on_iframe_message(state: Rc<State>, message: ModuleToJigEditorMessage) {
 
 fn populate_added_module(state: Rc<State>, module: LiteModule) {
     state.modules.lock_mut().push_cloned(Rc::new(Some(module)));
+}
+
+pub fn use_module_as(state: Rc<State>, target_kind: ModuleKind, source_module_id: ModuleId) {
+    state.loader.load(clone!(state => async move {
+        let target_module_id: Result<ModuleId, EmptyError> = async {
+            let path = endpoints::jig::module::Get::PATH
+                .replace("{id}", &state.jig.id.0.to_string())
+                .replace("{module_id}", &source_module_id.0.to_string());
+
+            let source_module = api_with_auth::<ModuleResponse, EmptyError, ()>(
+                &path,
+                endpoints::jig::module::Get::METHOD,
+                None
+            ).await?.module;
+
+            let target_body = source_module.body.convert_to_body(target_kind).unwrap_ji();
+
+            let path = endpoints::jig::module::Create::PATH
+                .replace("{id}", &state.jig.id.0.to_string());
+
+            let req = ModuleCreateRequest { body: target_body };
+
+            let res = api_with_auth::<CreateResponse<ModuleId>, EmptyError, ModuleCreateRequest>(
+                &path,
+                endpoints::jig::module::Create::METHOD,
+                Some(req),
+            )
+            .await?;
+
+            Ok(res.id)
+        }.await;
+
+        match target_module_id {
+            Err(_) => {
+                log::error!("request to create module failed!");
+            },
+            Ok(target_module_id) => {
+                let lite_module = LiteModule {
+                    id: target_module_id,
+                    kind: target_kind,
+                };
+                populate_added_module(Rc::clone(&state), lite_module);
+            },
+        };
+    }));
 }
