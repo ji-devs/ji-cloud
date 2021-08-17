@@ -74,7 +74,13 @@ pub fn render(state: Rc<Router>) {
                 if let Some(dom) = dom {
                     let body = dominator::body();
                     body.set_inner_html("");
-                    dominator::append_dom(&body, dom);
+                    dominator::append_dom(&body, html!("div", {
+                        .child(components::page_header::dom::render(
+                                Rc::new(components::page_header::state::State::new()),
+                                None
+                        ))
+                        .child(dom)
+                    }));
                 }
 
                 async {}
