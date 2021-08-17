@@ -17,7 +17,7 @@
 #![warn(clippy::use_self)]
 #![warn(clippy::useless_let_if_seq)]
 
-use std::net::TcpListener;
+use std::{convert::TryFrom, net::TcpListener, str::FromStr};
 
 use actix_web::{
     post,
@@ -25,6 +25,9 @@ use actix_web::{
 };
 use anyhow::Context;
 use cloudevents::Event;
+use sqlx::PgPool;
+use uuid::Uuid;
+
 use core::{
     config::JSON_BODY_LIMIT,
     http::{get_addr, get_tcp_fd},
@@ -40,9 +43,6 @@ use ji_cloud_api::{
     },
 };
 use shared::media::{FileKind, MediaLibrary, PngImageFile};
-use sqlx::PgPool;
-use std::convert::TryFrom;
-use std::str::FromStr;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -256,58 +256,61 @@ async fn process_uploaded_media_trigger(
 
     let access_token = gcp_key_store.fetch_token().await?;
 
-    // TODO: use gcs instead of S3
-    let res = match event_resource.file_kind {
-        FileKind::ImagePng(PngImageFile::Original) => match event_resource.library {
-            MediaLibrary::Global => {
-                log::info!("beginning processing...");
-                notifications
-                    .signal_status_processing(
-                        &access_token,
-                        MediaLibrary::Global,
-                        &event_resource.id,
-                    )
-                    .await?;
-
-                uploads::process_image(&db, &s3, event_resource.id)
-                    .await
-                    .map_err(|_| Error::NotProcessed)?
-            }
-            MediaLibrary::User => {
-                notifications
-                    .signal_status_processing(&access_token, MediaLibrary::User, &event_resource.id)
-                    .await?;
-
-                uploads::process_user_image(&db, &s3, event_resource.id)
-                    .await
-                    .map_err(|_| Error::NotProcessed)?
-            }
-            _ => return Err(Error::InvalidEventResource),
-        },
-        FileKind::AnimationGif => {
-            notifications
-                .signal_status_processing(&access_token, MediaLibrary::Global, &event_resource.id)
-                .await?;
-
-            uploads::process_animation(&db, &s3, event_resource.id)
-                .await
-                .map_err(|_| Error::NotProcessed)?
-        }
-        _ => return Err(Error::InvalidEventResource),
-    };
+    let res = signal_status_and_process_media(
+        &access_token,
+        &db,
+        &s3,
+        &notifications,
+        &event_resource.library,
+        &event_resource.id,
+        &event_resource.file_kind,
+    )
+    .await?;
 
     if res == true {
         log::info!("Finalizing upload...");
 
+        // should the token be fetched here or should i pass a ref to the key store to `finalize_upload()`?
+        let access_token = gcp_key_store.fetch_token().await?;
+
         uploads::finalize_upload(
             &access_token,
             &notifications,
-            event_resource.library,
-            event_resource.id,
+            &event_resource.library,
+            &event_resource.id,
         )
         .await?;
+
         Ok(Json(()))
     } else {
         Err(Error::NotProcessed)
     }
+}
+
+pub async fn signal_status_and_process_media(
+    access_token: &str,
+    db: &PgPool,
+    s3: &s3::Client,
+    notifications: &notifications::Client,
+    library: &MediaLibrary,
+    id: &Uuid,
+    file_kind: &FileKind,
+) -> Result<bool, error::EventArc> {
+    notifications
+        .signal_status_processing(access_token, library, id)
+        .await?;
+
+    let res = match file_kind {
+        FileKind::ImagePng(PngImageFile::Original) => match library {
+            MediaLibrary::Global => uploads::process_image(&db, &s3, *id).await,
+            MediaLibrary::User => uploads::process_user_image(&db, &s3, *id).await,
+            _ => return Err(error::EventArc::InvalidEventResource),
+        },
+        FileKind::AnimationGif => uploads::process_animation(db, s3, *id).await,
+        FileKind::AudioMp3 => uploads::process_user_audio(db, s3, *id).await,
+
+        _ => return Err(error::EventArc::InvalidEventResource),
+    };
+
+    res.map_err(|_| error::EventArc::NotProcessed)
 }

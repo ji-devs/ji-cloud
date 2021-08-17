@@ -14,18 +14,19 @@ fn check_conflict_delete(err: sqlx::Error) -> error::Delete {
 }
 
 pub mod user {
-    use crate::{db, error, extractor::TokenUser, s3, service::ServiceData};
     use futures::TryStreamExt;
     use paperclip::actix::{
         api_v2_operation,
-        web::{Bytes, Data, Json, Path},
+        web::{Data, Json, Path},
         CreatedJson, NoContent,
     };
     use shared::{
         api::{endpoints, ApiEndpoint},
         domain::{
             audio::{
-                user::{UserAudio, UserAudioListResponse, UserAudioResponse},
+                user::{
+                    UserAudio, UserAudioListResponse, UserAudioResponse, UserAudioUploadResponse,
+                },
                 AudioId,
             },
             CreateResponse,
@@ -33,6 +34,13 @@ pub mod user {
         media::{FileKind, MediaLibrary},
     };
     use sqlx::PgPool;
+
+    use crate::{
+        db, error,
+        extractor::{RequestOrigin, TokenUser},
+        s3,
+        service::{self, ServiceData},
+    };
 
     /// Create a audio file in the user's audio library.
     #[api_v2_operation]
@@ -49,44 +57,57 @@ pub mod user {
     #[api_v2_operation]
     pub(super) async fn upload(
         db: Data<PgPool>,
-        s3: ServiceData<s3::Client>,
+        gcp_key_store: ServiceData<service::GcpAccessKeyStore>,
+        gcs: ServiceData<service::storage::Client>,
         _claims: TokenUser,
         Path(id): Path<AudioId>,
-        bytes: Bytes,
-    ) -> Result<NoContent, error::Upload> {
+        origin: RequestOrigin,
+        req: Json<<endpoints::audio::user::Upload as ApiEndpoint>::Req>,
+    ) -> Result<Json<<endpoints::audio::user::Upload as ApiEndpoint>::Res>, error::Upload> {
         let mut txn = db.begin().await?;
 
-        sqlx::query!(
-            r#"select 1 as discard from user_audio_library where id = $1 for update"#,
-            id.0
-        )
-        .fetch_optional(&mut txn)
-        .await?
-        .ok_or(error::Upload::ResourceNotFound)?;
+        let exists = sqlx::query!(
+        r#"select exists(select 1 from user_audio_upload where audio_id = $1 for no key update) as "exists!""#,
+        id.0
+    )
+            .fetch_one(&mut txn)
+            .await?.exists;
 
-        // todo: use the duration
-        let _duration = {
-            let bytes = bytes.clone();
-            tokio::task::spawn_blocking(move || {
-                mp3_metadata::read_from_slice(&bytes).map_err(|_it| error::Upload::InvalidMedia)
-            })
-            .await
-            .unwrap()?
-        };
+        if !exists {
+            return Err(error::Upload::ResourceNotFound);
+        }
 
-        s3.upload_media(bytes.to_vec(), MediaLibrary::User, id.0, FileKind::AudioMp3)
+        let upload_content_length = req.into_inner().file_size;
+
+        if let Some(file_limit) = gcs.file_size_limit(&FileKind::AudioMp3) {
+            if file_limit < upload_content_length {
+                return Err(error::Upload::FileTooLarge);
+            }
+        }
+
+        let access_token = gcp_key_store.fetch_token().await?.to_owned();
+
+        let resp = gcs
+            .get_url_for_resumable_upload_for_processing(
+                &access_token,
+                upload_content_length,
+                MediaLibrary::User,
+                id.0,
+                FileKind::AudioMp3,
+                origin,
+            )
             .await?;
 
         sqlx::query!(
-            "update user_audio_library set uploaded_at = now() where id = $1",
-            id.0
-        )
+        "update user_audio_upload set uploaded_at = now(), processing_result = null where audio_id = $1",
+        id.0
+    )
         .execute(&mut txn)
         .await?;
 
         txn.commit().await?;
 
-        Ok(NoContent)
+        Ok(Json(UserAudioUploadResponse { session_uri: resp }))
     }
 
     /// Delete a audio file from the user's audio library.

@@ -259,14 +259,83 @@ skip locked
     Ok(true)
 }
 
+pub async fn process_user_audio(
+    db: &PgPool,
+    s3: &crate::s3::Client,
+    id: Uuid,
+) -> anyhow::Result<bool> {
+    let mut txn = db.begin().await?;
+
+    let exists = sqlx::query!(
+        //language=SQL
+        r#"
+select exists(select 1
+from user_audio_library
+inner join user_audio_upload on user_audio_library.id = user_audio_upload.audio_id
+where (id = $1 and uploaded_at is not null and processed_at >= uploaded_at is not true)
+for no key update of user_audio_upload
+for share of user_audio_library
+skip locked
+) as "exists!"
+        "#,
+        id
+    )
+    .fetch_one(&mut txn)
+    .await?
+    .exists;
+
+    if !exists {
+        txn.rollback().await?;
+        return Ok(false);
+    }
+
+    let file = s3
+        .download_media_for_processing(MediaLibrary::User, id, FileKind::AudioMp3)
+        .await?;
+
+    // todo: use the duration
+    // let _duration = {
+    //     let bytes = bytes.clone();
+    //     tokio::task::spawn_blocking(move || {
+    //         mp3_metadata::read_from_slice(&bytes).map_err(|_it| error::Upload::InvalidMedia)
+    //     })
+    //         .await
+    //         .unwrap()?
+    // };
+
+    let file = match file {
+        Some(it) => it,
+        None => {
+            sqlx::query!("update user_audio_upload set processed_at = now(), processing_result = false where audio_id = $1", id)
+                .execute(&mut txn)
+                .await?;
+
+            log::warn!("Audio wasn't uploaded properly before processing?");
+            txn.commit().await?;
+            return Ok(true);
+        }
+    };
+
+    // todo: processing
+
+    s3.upload_media(file, MediaLibrary::User, id, FileKind::AudioMp3)
+        .await?;
+
+    sqlx::query!("update user_audio_upload set processed_at = now(), processing_result = true where audio_id = $1", id).execute(&mut txn).await?;
+
+    txn.commit().await?;
+
+    Ok(true)
+}
+
 pub async fn finalize_upload(
     access_token: &str,
     notifications: &service::notifications::Client,
-    library: MediaLibrary,
-    id: Uuid,
+    library: &MediaLibrary,
+    id: &Uuid,
 ) -> anyhow::Result<()> {
     notifications
-        .signal_status_ready(access_token, library, &id)
+        .signal_status_ready(access_token, library, id)
         .await?;
     Ok(())
 }
