@@ -136,7 +136,7 @@ export class _ extends LitElement {
                             </div>
                         </div>
                         <div class="column-4 additional-resources">
-                            <h4>Additional resources (Optional)</h4>
+                            <h4>Additional resources (Coming soon!)</h4>
                             <div class="additional-resources-items">
                                 <slot name="additional-resources"></slot>
                             </div>

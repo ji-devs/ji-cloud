@@ -26,18 +26,24 @@ export class _ extends LitElement {
                 font-size: 24px;
                 font-weight: 300;
             }
-            :host(:hover) .circle {
-                background-color: var(--main-blue);
-                color: white;
-            }
+            /*
+                temporarily disabled
+                :host(:hover) .circle {
+                    background-color: var(--main-blue);
+                    color: white;
+                }
+            */
             .label {
                 font-size: 13px;
                 font-weight: 500;
                 color: var(--dark-gray-6);
             }
-            :host(:hover) .label {
-                color: var(--main-blue);
-            }
+            /*
+                temporarily disabled
+                :host(:hover) .label {
+                    color: var(--main-blue);
+                }
+            */
             .popup {
                 display: none;
                 position: absolute;
@@ -49,9 +55,12 @@ export class _ extends LitElement {
                 left: 40px;
                 min-width: 245px;
             }
-            :host(:hover) .popup {
-                display: block;
-            }
+            /*
+                temporarily disabled
+                :host(:hover) .popup {
+                    display: block;
+                }
+            */
       `];
     }
 
