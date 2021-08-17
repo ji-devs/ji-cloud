@@ -1,4 +1,5 @@
-import "@elements/entry/admin/images/meta/pages/landing";
+import "@elements/entry/admin/images/meta/container";
+import "@elements/entry/admin/images/meta/header";
 import { Rectangle } from "~/components/core/buttons/rectangle";
 
 import {Ji as MockJiImage} from "~/components/core/images/ji";
@@ -16,8 +17,9 @@ const STR_DESCRIPTION = "Image description"
 const STR_NEXT = "Next";
 
 
-export const Landing = ({content}) => {
-    return `<image-meta-page>
+export const Container = ({content, section}) => {
+    return `<image-meta-container>
+      <image-meta-header section="${section}" slot="header"></image-meta-header>
       ${MockJiImage({size: "thumb", slot: "image"})}
       <button-rect kind="text" slot="replace" color="blue" size="small">${STR_REPLACE}</button-rect>
       <button-rect kind="text" slot="delete" color="blue" size="small">${STR_DELETE}</button-rect>
@@ -31,7 +33,7 @@ export const Landing = ({content}) => {
       <div slot="right">
         ${content ? content : ""}
       </div>
-    </image-meta-page>`;
+    </image-meta-container>`;
 }
 
 

@@ -6,9 +6,9 @@ use super::{
     actions, 
     state::*, 
     sections::{
-        one::dom::Section1Dom,
-        two::dom::Section2Dom,
-        three::dom::Section3Dom,
+        categories::dom::CategoriesDom,
+        general::dom::GeneralDom,
+        summary::dom::SummaryDom,
     }
 };
 use utils::{routes::*, events};
@@ -41,7 +41,7 @@ impl ImageMetaPage {
                     if loaded {
                         let (image, categories, metadata) = initial_data.borrow_mut().take().unwrap_throw();
 
-                        Some(html!("image-meta-page", {
+                        Some(html!("image-meta-container", {
                             .event(|evt:events::CustomRoute| {
                                 match evt.route().as_ref() {
                                     "add" => {
@@ -52,6 +52,7 @@ impl ImageMetaPage {
                                     }
                                 }
                             })
+
                             .event(|evt:events::CustomSearch| {
                                 let q:String = evt.query();
                                 let query = ImageSearchQuery {
@@ -70,6 +71,25 @@ impl ImageMetaPage {
                                 dominator::routing::go_to_url(&route);
                             })
                             .children(&mut [
+                                html!("image-meta-header", {
+                                    .event(clone!(state => move |evt:events::CustomRoute| {
+                                        let route = evt.route();
+                                        let route:&str = route.as_ref();
+
+                                        match route {
+                                            "publish" => {
+                                                actions::publish(state.clone())
+                                            },
+                                            _ => {
+                                                let section:Section = route.into();
+                                                state.section.set_neq(section);
+                                            }
+                                        }
+                                    }))
+                                    .property("slot", "header")
+                                    .property_signal("section", state.section.signal_ref(|x| x.as_str()))
+                                }),
+
                                 html!("img-ji", {
                                     .property("slot", "image")
                                     .property("size", "thumb")
@@ -130,15 +150,15 @@ impl ImageMetaPage {
                                     .property("size", "medium")
                                     .text_signal(state.section.signal().map(|section| {
                                         match section {
-                                            Section::One | Section::Two => STR_NEXT,
-                                            Section::Three => STR_PUBLISH
+                                            Section::General | Section::Categories => STR_NEXT,
+                                            Section::Summary => STR_PUBLISH
                                         }
                                     }))
                                     .event(clone!(state => move |evt:events::Click| {
                                         match state.section.get() {
-                                            Section::One => state.section.set(Section::Two), 
-                                            Section::Two => state.section.set(Section::Three), 
-                                            Section::Three => actions::publish(state.clone())
+                                            Section::General => state.section.set(Section::Categories), 
+                                            Section::Categories => state.section.set(Section::Summary), 
+                                            Section::Summary => actions::publish(state.clone())
                                         }
                                     }))
                                 }),
@@ -164,9 +184,9 @@ impl ImageMetaPage {
                                     .property("slot", "right")
                                     .child_signal(state.section.signal().map(clone!(state, image, categories, metadata => move |section| {
                                         match section {
-                                            Section::One => Some(Section1Dom::render(state.clone(), image.clone(), metadata.clone())),
-                                            Section::Two => Some(Section2Dom::render(state.clone(), image.clone(), categories.clone())),
-                                            Section::Three => Some(Section3Dom::render(state.clone(), image.clone(), metadata.clone(), categories.clone())),
+                                            Section::General => Some(GeneralDom::render(state.clone(), image.clone(), metadata.clone())),
+                                            Section::Categories => Some(CategoriesDom::render(state.clone(), image.clone(), categories.clone())),
+                                            Section::Summary => Some(SummaryDom::render(state.clone(), image.clone(), metadata.clone(), categories.clone())),
                                         }
                                     })))
                                 }),

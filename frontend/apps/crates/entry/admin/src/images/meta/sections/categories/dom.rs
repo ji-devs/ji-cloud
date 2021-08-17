@@ -11,15 +11,15 @@ use futures_signals::{
 use shared::domain::category::Category;
 use crate::images::meta::sections::common::categories::*;
 
-pub struct Section2Dom {
+pub struct CategoriesDom {
 }
 
-impl Section2Dom {
+impl CategoriesDom {
     pub fn render(meta_state: Rc<MetaState>, image: Rc<MutableImage>, categories: Rc<Vec<Rc<MutableCategory>>>) -> Dom {
         let state = Rc::new(State::new(meta_state, image, categories));
 
 
-        html!("image-meta-section-2", {
+        html!("image-meta-section-categories", {
             .children(&mut [
                 html!("div", {
                     .property("slot", "category-select")
