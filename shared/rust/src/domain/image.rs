@@ -288,6 +288,7 @@ pub struct ImageBrowseQuery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub page: Option<u32>,
 }
+
 /// Response for [`Browse`](crate::api::endpoints::image::Browse).
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
@@ -320,10 +321,9 @@ pub struct ImageUploadRequest {
     pub file_size: usize,
 }
 
-/// URL to upload an image, supports resumable uploading.
+/// URL to upload an image. Supports resumable uploading.
 #[derive(Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-#[cfg_attr(feature = "backend", openapi(empty))]
 pub struct ImageUploadResponse {
     /// The session URI used for uploading, including the query for uploader ID
     pub session_uri: String,
@@ -373,7 +373,7 @@ pub struct ImageMetadata {
     pub updated_at: Option<DateTime<Utc>>,
 }
 
-/// Response for successfuly creating a Image.
+/// Response for successfully creating a Image.
 pub type CreateResponse = super::CreateResponse<ImageId>;
 
 // HACK: we can't get `Vec<_>` directly from the DB, so we have to work around it for now.

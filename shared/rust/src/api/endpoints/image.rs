@@ -121,7 +121,7 @@ impl ApiEndpoint for Upload {
     type Res = ImageUploadResponse;
     type Err = EmptyError;
     const PATH: &'static str = "/v1/image/{id}/raw";
-    const METHOD: Method = Method::Patch;
+    const METHOD: Method = Method::Put;
 }
 
 /// Update an image's metadata.
