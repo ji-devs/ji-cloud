@@ -28,7 +28,7 @@ pub async fn create(
 ) -> sqlx::Result<AnimationId> {
     let id: AnimationId = sqlx::query!(
         r#"
-insert into animation_metadata (name, description, is_premium, publish_at, kind, looping) values ($1, $2, $3, $4, $5, $6)
+insert into animation_metadata (name, description, is_premium, publish_at, kind, is_looping) values ($1, $2, $3, $4, $5, $6)
 returning id as "id: AnimationId"
         "#,
         name,
@@ -56,7 +56,7 @@ select  id,
         created_at,
         updated_at,
         kind,
-        looping         as is_looping,
+        is_looping,
         array((select row (style_id) from animation_style where animation_id = animation_metadata.id)) as styles
 from animation_metadata inner join global_animation_upload gau on animation_id=id
 where id = $1 and processing_result is true
