@@ -1,27 +1,35 @@
-use std::{collections::HashMap, rc::Rc};
+use std::{collections::{HashMap, HashSet}, iter::FromIterator, rc::Rc};
 
 use dominator::clone;
 use futures::join;
+// <<<<<<< HEAD
 use shared::{
     api::endpoints::{category, jig, meta, ApiEndpoint},
     domain::{
         category::{Category, CategoryId, CategoryResponse, CategoryTreeScope, GetCategoryRequest},
         jig::{Jig, JigId, JigResponse, JigUpdateRequest},
-        meta::MetadataResponse,
+        meta::{MetadataResponse, Affiliation, AffiliationId},
     },
     error::{EmptyError, MetadataNotFound},
 };
-use utils::prelude::{api_with_auth, api_with_auth_empty, UnwrapJiExt};
+use utils::{prelude::{api_with_auth, api_with_auth_empty, UnwrapJiExt}, routes::{JigEditRoute, JigRoute, Route}};
+// =======
+// use shared::{api::endpoints::{category, jig, meta, ApiEndpoint}, domain::{category::{Category, CategoryId, CategoryResponse, CategoryTreeScope, GetCategoryRequest}, jig::{Jig, JigId, JigResponse, JigUpdateRequest}, meta::{Affiliation, AffiliationId, MetadataResponse}}, error::{EmptyError, MetadataNotFound}};
+// use utils::prelude::{api_with_auth, api_with_auth_empty, UnwrapJiExt};
+// >>>>>>> 81386686 (feat(frontend/jig/edit): add all to jig affiliations on publish)
 
 use super::{publish_jig::PublishJig, state::State};
+use super::super::state::State as JigEditState;
 
 impl State {
-    pub async fn load_new(jig_id:JigId) -> Self {
-        let jig = load_jig(jig_id);
+    pub async fn load_new(jig_edit_state: Rc<JigEditState>) -> Self {
+        let jig = load_jig(jig_edit_state.jig_id);
         let categories = load_categories();
         let meta = load_metadata();
 
         let (jig, categories, meta) = join!(jig, categories, meta);
+
+        let mut jig = jig.unwrap_ji();
 
         let categories = categories.unwrap_ji();
         let mut category_label_lookup = HashMap::new();
@@ -29,16 +37,27 @@ impl State {
         
         let meta = meta.unwrap_ji();
 
+        // set all affiliations for unpublished jigs
+        if jig.publish_at.is_none() {
+            let available_affiliations = meta.affiliations
+                .iter()
+                .map(|affiliation| affiliation.id.clone())
+                .collect();
+
+            jig.affiliations = available_affiliations;
+        }
+
         Self::new(
-            PublishJig::new(jig.unwrap_ji()),
+            PublishJig::new(jig),
             categories,
             category_label_lookup,
             meta.goals,
-            meta.age_ranges
+            meta.age_ranges,
+            meta.affiliations,
+            jig_edit_state
         )
     }
 }
-
 
 fn get_categories_labels(
     categories: &Vec<Category>,
@@ -104,6 +123,16 @@ pub fn save_jig(state: Rc<State>) {
         match api_with_auth_empty::<MetadataNotFound, JigUpdateRequest>(&path, jig::Update::METHOD, Some(req)).await {
             Ok(_) => {
                 state.submission_tried.set(false);
+
+                state.jig_edit_state.route.set_neq(JigEditRoute::PostPublish);
+
+                let url: String = Route::Jig(JigRoute::Edit(state.jig.id, JigEditRoute::PostPublish)).into();
+                log::info!("{}", url);
+
+                /* this will cause a full refresh - but preserves history
+                 * see the .future in EditPage too
+                dominator::routing::go_to_url(&url);
+                 */
             },
             Err(_) => {
             }

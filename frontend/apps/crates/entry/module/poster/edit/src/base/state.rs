@@ -192,4 +192,11 @@ impl BaseExt<Step> for Base {
     fn next_step_allowed_signal(&self) -> Self::NextStepAllowedSignal {
         signal::always(true)
     }
+
+    fn get_jig_id(&self) -> JigId {
+        self.jig_id
+    }
+    fn get_module_id(&self) -> ModuleId {
+        self.module_id
+    }
 }

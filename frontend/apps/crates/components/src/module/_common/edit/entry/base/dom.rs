@@ -17,7 +17,7 @@ use shared::domain::jig::{
 };
 
 pub fn render<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(
-    is_preview: bool,
+    preview_mode: Option<PreviewMode>,
     jig_id: JigId,
     module_id: ModuleId,
     state: Rc<AppBase<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>,
@@ -33,20 +33,32 @@ where
     Footer: FooterExt + 'static,
     Overlay: OverlayExt + 'static,
 {
-    if is_preview {
-        vec![
-            render_preview_header(RawData::kind(), state.clone()),
-            render_preview_main(RawData::kind(), jig_id, module_id, state.clone()),
-            render_preview_overlay(RawData::kind(), jig_id, module_id, state.clone()),
-        ]
-    } else {
-        vec![
-            render_main_bg(state.clone()),
-            render_main(state.clone()),
-            render_sidebar(state.clone()),
-            render_header(state.clone()),
-            render_footer(state.clone()),
-            render_overlay(state.clone()),
-        ]
+    match preview_mode {
+        Some(preview_mode) => {
+            match preview_mode {
+                PreviewMode::Preview => {
+                    vec![
+                        render_preview_header(RawData::kind(), state.clone()),
+                        render_preview_main(RawData::kind(), jig_id, module_id, state.clone()),
+                        render_preview_overlay(RawData::kind(), jig_id, module_id, state.clone()),
+                    ]
+                },
+                PreviewMode::PostPreview(_) => {
+                    vec![
+                        render_preview_overlay(RawData::kind(), jig_id, module_id, state.clone()),
+                    ]
+                }
+            }
+        },
+        None => {
+            vec![
+                render_main_bg(state.clone()),
+                render_main(state.clone()),
+                render_sidebar(state.clone()),
+                render_header(state.clone()),
+                render_footer(state.clone()),
+                render_overlay(state.clone()),
+            ]
+        }
     }
 }

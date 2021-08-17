@@ -4,7 +4,7 @@ select id as "id!",
         when 0 then 3
         -- PngStickerImage
         when 1 then 0
-    end::int2 "kind!: MediaKind", 
+    end::int2 "kind!: MediaKind",
     created_at as "created_at!",
     updated_at,
     uploaded_at,
@@ -18,7 +18,7 @@ select id as "id!",
         when 0 then 1
         -- SpritesheetAnimation
         when 1 then 2
-    end::int2 "kind!: MediaKind", 
+    end::int2 "kind!: MediaKind",
     created_at as "created_at!",
     updated_at,
     uploaded_at,
@@ -44,6 +44,7 @@ select id as "id!",
     uploaded_at,
     1::int2 as "library!: MediaLibrary" -- user
 from user_audio_library
+left join user_audio_upload on audio_id = id
 union all
 select id as "id!",
     kind as "kind!: MediaKind",

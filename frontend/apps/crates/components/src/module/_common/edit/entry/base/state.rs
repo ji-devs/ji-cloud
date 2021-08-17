@@ -260,9 +260,9 @@ pub trait BaseExt<Step: StepExt> {
 
     fn next_step_allowed_signal(&self) -> Self::NextStepAllowedSignal;
 
-    fn get_post_preview(&self) -> Option<PostPreview> {
-        None
-    }
+    fn get_jig_id(&self) -> JigId;
+
+    fn get_module_id(&self) -> ModuleId;
 }
 
 pub trait MainExt: MainDomRenderable {}

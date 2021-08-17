@@ -66,18 +66,38 @@ export function waitForUploadReady(mediaId, libId, abortController) {
                         processing: data.processing === true
                     };
 
-                console.log(status);
 
                 if(status.ready) {
                     if(hasBeenNotReady) {
                         resolve();
                     } else {
-                        console.log("technically ready but never wasn't, waiting for next ready");
+                        //console.log("technically ready but never wasn't, waiting for next ready");
                     }
                 } else {
                     hasBeenNotReady = true;
                 }
             }
         });
+    });
+}
+
+//This set is used to ignore dropped listeners
+//Clear is called via Drop on the Rust side
+let activeScreenshotListeners = new Set();
+export function clearScreenshotListener(listenerId) {
+    activeScreenshotListeners.delete(listenerId);
+}
+
+export function listenForScreenshotUpdates(jigId, moduleId, listenerId, onUpdated) {
+    activeScreenshotListeners.add(listenerId);
+
+    const ref = doc(db, "screenshot", jigId, "modules", moduleId);
+    onSnapshot(ref, doc => {
+        const data = doc.data();
+        if(data != null) {
+            if(activeScreenshotListeners.has(listenerId)) {
+                onUpdated();
+            } 
+        }
     });
 }

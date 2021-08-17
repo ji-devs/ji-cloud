@@ -43,6 +43,7 @@ fn render_result(state: Rc<State>, jig: &Jig) -> Dom {
                 Rc::new(ModuleThumbnail {
                     jig_id: jig.id.clone(),
                     module: jig.modules[0].clone(),
+                    is_jig_fallback: true,
                 }),
                 Some("image")
             ),

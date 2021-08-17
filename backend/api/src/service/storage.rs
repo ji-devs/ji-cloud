@@ -9,7 +9,7 @@ use reqwest::{self, header};
 use uuid::Uuid;
 
 use core::{
-    config::{ANIMATION_BODY_SIZE_LIMIT, IMAGE_BODY_SIZE_LIMIT},
+    config::{ANIMATION_BODY_SIZE_LIMIT, AUDIO_BODY_SIZE_LIMIT, IMAGE_BODY_SIZE_LIMIT},
     settings::GoogleCloudStorageSettings,
 };
 use shared::{
@@ -157,6 +157,7 @@ impl Client {
         match file_kind {
             FileKind::AnimationGif => Some(ANIMATION_BODY_SIZE_LIMIT),
             FileKind::ImagePng(PngImageFile::Original) => Some(IMAGE_BODY_SIZE_LIMIT),
+            FileKind::AudioMp3 => Some(AUDIO_BODY_SIZE_LIMIT),
             _ => unimplemented!("File type size limit undefined!"),
         }
     }

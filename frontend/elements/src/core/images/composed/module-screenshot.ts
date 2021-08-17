@@ -18,23 +18,28 @@ export class _ extends LitElement {
     @property()
     jigId: string = "";
 
-    @property()
+    //use with cacheBust true to force reloading when id changes to the same thing
+    @property({ hasChanged: () => true })
     moduleId: string = "";
 
     @property()
     size: MediaSizeOptions = "thumb";
 
     @property()
-    fallbackKind: ModuleKind | "" = "";
+    moduleKind: ModuleKind | "" = "";
+
+    @property({type: Boolean})
+    cacheBust:boolean = false;
 
     render() {
-	    const {jigId, moduleId, fallbackKind, size} = this;
 
-        const fallbackPath = fallbackKind == ""
+	    const {jigId, moduleId, moduleKind, size, cacheBust} = this;
+
+        const fallbackPath = moduleKind == ""
             ? `jig/thumb-placeholder.svg` 
-            : `module/${fallbackKind}/thumb-placeholder.svg`;
+            : `module/${moduleKind}/thumb-placeholder.svg`;
 	    return html`
-	    	<img-ji lib="screenshot" id="${jigId}/${moduleId}" size="${size}">
+	    	<img-ji lib="screenshot" id="${jigId}/${moduleId}" size="${size}" .cacheBust=${cacheBust ? Date.now() : false}>
   			<img-ui path="${fallbackPath}" slot="fallback"></img-ui>
 		</img-ji>
 	    `;

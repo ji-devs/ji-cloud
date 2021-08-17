@@ -42,6 +42,23 @@ pub mod user {
         pub id: AudioId,
         // more fields to be added
     }
+
+    /// Request indicating the size of an image for upload.
+    #[derive(Serialize, Deserialize, Debug)]
+    #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+    pub struct UserAudioUploadRequest {
+        /// The size of the audio to be uploaded in bytes. Allows the API server to check that the file size is
+        /// within limits and as a verification at GCS that the entire file was uploaded
+        pub file_size: usize,
+    }
+
+    /// URL to upload an audio. Supports resumable uploading.
+    #[derive(Serialize, Deserialize, Debug)]
+    #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+    pub struct UserAudioUploadResponse {
+        /// The session URI used for uploading, including the query for uploader ID
+        pub session_uri: String,
+    }
 }
 
 /// Wrapper type around [`Uuid`](Uuid), represents the ID of an audio file.

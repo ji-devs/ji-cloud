@@ -63,7 +63,7 @@ impl DebugSettings {
             data: Some(if let Some(init_data) = init_data {
                 RawData {
                     content: Some(Content {
-                        mode: Mode::Video,
+                        mode: Mode::Introduction,
                         base: BaseContent {
                             theme: ThemeChoice::Override(ThemeId::Chalkboard),
                             instructions: Instructions {

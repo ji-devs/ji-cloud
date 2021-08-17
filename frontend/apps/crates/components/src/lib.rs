@@ -43,3 +43,5 @@ pub mod tooltip;
 pub mod traces;
 #[cfg(feature = "transform")]
 pub mod transform;
+#[cfg(feature = "share_jig")]
+pub mod share_jig;

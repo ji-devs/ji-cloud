@@ -1,9 +1,9 @@
 import {argsToAttrs} from "@utils/attributes";
-import "@elements/entry/jig/play/sidebar/share-option";
-import { Kind } from "@elements/entry/jig/play/sidebar/share-option";
+import "@elements/core/share-jig/option";
+import { Kind } from "@elements/core/share-jig/option";
 
 export default {
-    title: "Entry / Jig / Play / Sidebar"
+    title: "Core / Share jig"
 }
 
 interface Args {
@@ -15,15 +15,15 @@ const DEFAULT_ARGS:Args = {
 }
 
 
-export const ShareOption = (props?:Partial<Args>) => {
+export const Option = (props?:Partial<Args>) => {
     props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
 
     return `
-        <jig-play-sidebar-share-option ${argsToAttrs(props)}></jig-play-sidebar-share-option>
+        <share-jig-option ${argsToAttrs(props)}></share-jig-option>
     `;
 }
-ShareOption.args = DEFAULT_ARGS;
-ShareOption.argTypes = {
+Option.args = DEFAULT_ARGS;
+Option.argTypes = {
     kind: {
         control: {
             type: 'inline-radio',

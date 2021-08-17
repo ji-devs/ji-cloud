@@ -33,6 +33,8 @@ pub const IMAGE_BODY_SIZE_LIMIT: usize = 1024 * 1024 * 10;
 /// Animation file size limit. 15 MB
 /// Animations are reasonably expected to be larger than normal images?
 pub const ANIMATION_BODY_SIZE_LIMIT: usize = 1024 * 1024 * 15;
+/// Audio file size limit. 10 MB
+pub const AUDIO_BODY_SIZE_LIMIT: usize = 1024 * 1024 * 10;
 /// JSON body size limit for both requests and responses
 pub const JSON_BODY_LIMIT: u64 = 1024 * 16; // 16
 

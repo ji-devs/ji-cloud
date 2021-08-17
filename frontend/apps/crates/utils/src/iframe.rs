@@ -113,14 +113,14 @@ impl <T: DeserializeOwned> From<JsValue> for IframeAction<T> {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub enum JigToModuleMessage {
+pub enum JigToModulePlayerMessage {
     TimerDone,
     Play,
     Pause,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub enum ModuleToJigMessage {
+pub enum ModuleToJigPlayerMessage {
     AddPoints(u32),
     Start(Option<u32>),
 }

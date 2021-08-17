@@ -57,7 +57,7 @@ base64 = "0.13.0"
 rgb = "0.8.25"
 
 [dependencies.sendgrid]
-version = "0.17.2"
+version = "^0.15"
 default-features = false
 features = ["native-tls", "async"]
 

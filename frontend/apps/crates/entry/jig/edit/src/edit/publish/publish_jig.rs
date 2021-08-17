@@ -4,6 +4,7 @@ use std::iter::FromIterator;
 use futures_signals::signal::Mutable;
 use shared::domain::Publish;
 use shared::domain::jig::LiteModule;
+use shared::domain::meta::AffiliationId;
 use shared::domain::{
     category::CategoryId,
     jig::{Jig, JigId, JigUpdateRequest},
@@ -21,6 +22,7 @@ pub struct PublishJig {
     pub goals: Mutable<HashSet<GoalId>>,
     pub language: Mutable<String>,
     pub categories: Mutable<HashSet<CategoryId>>,
+    pub affiliations: Mutable<HashSet<AffiliationId>>,
     // pub additional_resources: Mutable<HashSet<AdditionalResourceId>>,
     pub is_public: Mutable<bool>,
 }
@@ -36,6 +38,7 @@ impl From<Jig> for PublishJig {
             goals: Mutable::new(HashSet::from_iter(jig.goals)),
             language: Mutable::new(jig.language),
             categories: Mutable::new(HashSet::from_iter(jig.categories)),
+            affiliations: Mutable::new(HashSet::from_iter(jig.affiliations)),
             is_public: Mutable::new(jig.is_public),
         }
     }
@@ -52,6 +55,7 @@ impl PublishJig {
             goals: Mutable::new(HashSet::from_iter(jig.goals)),
             language: Mutable::new(jig.language),
             categories: Mutable::new(HashSet::from_iter(jig.categories)),
+            affiliations: Mutable::new(HashSet::from_iter(jig.affiliations)),
             is_public: Mutable::new(jig.is_public),
         }
     }
@@ -65,6 +69,7 @@ impl PublishJig {
             language: Some(self.language.get_cloned()),
             categories: Some(self.categories.get_cloned().into_iter().collect()),
             is_public: Some(self.is_public.get_cloned()),
+            affiliations: Some(self.affiliations.get_cloned().into_iter().collect()),
             publish_at: Some(Some(Publish::now())),
             ..Default::default()
         }

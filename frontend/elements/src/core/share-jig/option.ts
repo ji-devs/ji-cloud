@@ -11,7 +11,7 @@ const STR_LABEL_LOOKUP: {
 };
 
 
-@customElement("jig-play-sidebar-share-option")
+@customElement("share-jig-option")
 export class _ extends LitElement {
     static get styles() {
         return [
@@ -47,7 +47,7 @@ export class _ extends LitElement {
         return html`
             <slot slot="back" name="back"></slot>
             <slot slot="close" name="close"></slot>
-            <img-ui path="entry/jig/play/sidebar/share-${this.kind}.svg"></img-ui>
+            <img-ui path="core/share-jig/${this.kind}.svg"></img-ui>
             <span class="label">${STR_LABEL_LOOKUP[this.kind]}</span>
             <span class="help">?</span>
         `;

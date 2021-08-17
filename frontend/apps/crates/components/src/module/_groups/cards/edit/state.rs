@@ -179,6 +179,14 @@ impl<RawData: RawDataExt, E: ExtraExt> CardsBase<RawData, E> {
 impl<RawData: RawDataExt, E: ExtraExt> BaseExt<Step> for CardsBase<RawData, E> {
     type NextStepAllowedSignal = impl Signal<Item = bool>;
 
+    fn get_jig_id(&self) -> JigId {
+        self.jig_id
+    }
+
+    fn get_module_id(&self) -> ModuleId {
+        self.module_id
+    }
+
     fn allowed_step_change(&self, _from: Step, _to: Step) -> bool {
         self.pairs
             .lock_ref()
@@ -211,13 +219,6 @@ impl<RawData: RawDataExt, E: ExtraExt> BaseExt<Step> for CardsBase<RawData, E> {
             })
     }
 
-    fn get_post_preview(&self) -> Option<PostPreview> {
-        Some(PostPreview::new(
-            RawData::kind(),
-            self.jig_id,
-            self.module_id,
-        ))
-    }
 }
 
 

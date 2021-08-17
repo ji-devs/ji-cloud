@@ -11,7 +11,7 @@ use std::future::Future;
 use std::rc::Rc;
 
 use crate::module::_common::edit::history::state::HistoryState;
-use dominator_helpers::{futures::AsyncLoader, signals::DefaultSignal};
+use dominator_helpers::{futures::AsyncLoader, signals::OptionSignal};
 
 //use super::actions::{HistoryChangeFn, HistoryUndoRedoFn};
 use super::{actions::*, base::state::*, choose::state::*};
@@ -266,21 +266,21 @@ where
         _self
     }
 
-    pub fn is_preview_signal(&self) -> impl Signal<Item = bool> {
+    pub fn preview_mode_signal(&self) -> impl Signal<Item = Option<PreviewMode>> {
         self.phase
             .signal_cloned()
             .switch(|phase| match phase.as_ref() {
-                Phase::Choose(_) => DefaultSignal::new(false, None),
-                Phase::Init => DefaultSignal::new(false, None),
-                Phase::Base(app_base) => DefaultSignal::new(
-                    false,
-                    Some(
-                        app_base
-                            .preview_mode
-                            .signal_cloned()
-                            .map(|preview_mode| preview_mode.is_some()),
-                    ),
-                ),
+                Phase::Choose(_) => OptionSignal::new(None),
+                Phase::Init => OptionSignal::new(None),
+                Phase::Base(app_base) => OptionSignal::new(
+                    Some(app_base.preview_mode.signal_cloned())
+                )
             })
+            .map(|x| x.flatten())
+            
+    }
+
+    pub fn is_preview_signal(&self) -> impl Signal<Item = bool> {
+        self.preview_mode_signal().map(|x| x.is_some())
     }
 }

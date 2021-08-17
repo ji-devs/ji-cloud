@@ -16,6 +16,7 @@ export class _ extends LitElement {
         return [css`
             :host {
                 height: 800px;
+                width: 90%;
                 max-width: 1232px;
                 display: grid;
                 grid-template-rows: 440px 360px;
@@ -43,6 +44,15 @@ export class _ extends LitElement {
                 background-color: var(--light-orange-1);
                 display: grid;
                 grid-template-columns: repeat(3, 116px) 1px repeat(2, 116px);
+                column-gap: 48px;
+                justify-content: center;
+                align-items: center;
+                padding: 46px 0;
+            }
+            .bottom-section-centered {
+                background-color: var(--light-orange-1);
+                display: flex;
+                flex-direction: column;
                 column-gap: 48px;
                 justify-content: center;
                 align-items: center;
@@ -92,8 +102,11 @@ export class _ extends LitElement {
     @property()
     module: ModuleKind = "memory";
 
+    @property({type: Boolean})
+    hasConvertable: boolean = false;
+
     render() {
-        const {module} = this;
+        const {module, hasConvertable} = this;
 
         return html`
             <div class="top-section">
@@ -106,6 +119,23 @@ export class _ extends LitElement {
                     ${STR_HEADER_LINE_2}
                 </div>
             </div>
+            ${hasConvertable ? renderConvertable(module) : renderNonConvertable()}
+            <slot name="loader"></slot>
+        `;
+    }
+}
+
+function renderNonConvertable() {
+    return html`
+            <div class="bottom-section-centered">
+                <h3 class="action-header">${STR_ACTION_HEADER}</h3>
+                <slot class="action-print" name="action-print"></slot>
+                <slot class="action-continue" name="action-continue"></slot>
+            </div>
+        `;
+}
+function renderConvertable(module:ModuleKind) {
+    return html`
             <div class="bottom-section">
                 <h3 class="action-header">${STR_ACTION_HEADER}</h3>
                 <h4 class="action-use-in-header">${STR_USE_IN_PREFIX} ${STR_MODULE_DISPLAY_NAME[module]} ${STR_USE_IN_SUFFIX}</h4>
@@ -116,7 +146,5 @@ export class _ extends LitElement {
                 <slot class="action-print" name="action-print"></slot>
                 <slot class="action-continue" name="action-continue"></slot>
             </div>
-            <slot name="loader"></slot>
         `;
-    }
 }

@@ -116,64 +116,47 @@ pub struct EditorState {
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 /// The mode
 pub enum Mode {
-    /// Printables
-    Printables,
-    /// TalkingPictures
-    TalkingPictures,
-    /// Comics
-    Comics,
-    /// Timeline
-    Timeline,
-    /// Family Tree
-    FamilyTree,
-    /// Video
-    Video,
+    /// Introduction
+    Introduction,
+    /// Story
+    Story,
+    /// Song
+    Song,
+    /// Howto
+    Howto,
 }
 
 impl Default for Mode {
     fn default() -> Self {
-        Self::Video
+        Self::Introduction
     }
 }
 
 impl ModeExt for Mode {
     fn get_list() -> Vec<Self> {
-        vec![
-            Self::Printables,
-            Self::TalkingPictures,
-            Self::Comics,
-            Self::Timeline,
-            Self::FamilyTree,
-            Self::Video,
-        ]
+        vec![Self::Introduction, Self::Story, Self::Song, Self::Howto]
     }
 
     fn as_str_id(&self) -> &'static str {
         match self {
-            Self::Printables => "printables",
-            Self::TalkingPictures => "talking-pictures",
-            Self::Comics => "comics",
-            Self::Timeline => "timeline",
-            Self::FamilyTree => "family-tree",
-            Self::Video => "video",
+            Self::Introduction => "introduction",
+            Self::Story => "story",
+            Self::Song => "song",
+            Self::Howto => "howto",
         }
     }
 
     fn label(&self) -> &'static str {
-        const STR_PRINTABLES_LABEL: &'static str = "Printables";
-        const STR_TALKING_PICTURES_LABEL: &'static str = "Talking Pictures";
-        const STR_COMICS_LABEL: &'static str = "Comics";
-        const STR_TIMELINE_LABEL: &'static str = "Timeline";
-        const STR_FAMILY_TREE_LABEL: &'static str = "Family Tree";
-        const STR_VIDEO_LABEL: &'static str = "Video";
+        const STR_INTRODUCTION_LABEL: &'static str = "Introduction";
+        const STR_STORY_LABEL: &'static str = "Story";
+        const STR_SONG_LABEL: &'static str = "Song";
+        const STR_HOWTO_LABEL: &'static str = "How to";
 
         match self {
-            Self::Printables => STR_PRINTABLES_LABEL,
-            Self::TalkingPictures => STR_TALKING_PICTURES_LABEL,
-            Self::Comics => STR_COMICS_LABEL,
-            Self::Timeline => STR_TIMELINE_LABEL,
-            Self::FamilyTree => STR_FAMILY_TREE_LABEL,
-            Self::Video => STR_VIDEO_LABEL,
+            Self::Introduction => STR_INTRODUCTION_LABEL,
+            Self::Story => STR_STORY_LABEL,
+            Self::Song => STR_SONG_LABEL,
+            Self::Howto => STR_HOWTO_LABEL,
         }
     }
 }

@@ -147,15 +147,15 @@ where
         .apply_if(jig_player, |dom| {
             dom
                 .global_event(clone!(state, base => move |evt:dominator_helpers::events::Message| {
-                    if let Ok(msg) = evt.try_serde_data::<IframeAction<JigToModuleMessage>>() {
+                    if let Ok(msg) = evt.try_serde_data::<IframeAction<JigToModulePlayerMessage>>() {
                         match msg.data {
-                            JigToModuleMessage::Play => {
+                            JigToModulePlayerMessage::Play => {
                                 state.audio_mixer.play_all();
                             },
-                            JigToModuleMessage::Pause => {
+                            JigToModulePlayerMessage::Pause => {
                                 state.audio_mixer.pause_all();
                             },
-                            JigToModuleMessage::TimerDone => {
+                            JigToModulePlayerMessage::TimerDone => {
                             }
                         }
                     } else {
@@ -199,7 +199,7 @@ where
 
                         let timer_seconds = base.get_timer_minutes().map(|minutes| minutes * 60);
 
-                        let msg = IframeAction::new(ModuleToJigMessage::Start(timer_seconds));
+                        let msg = IframeAction::new(ModuleToJigPlayerMessage::Start(timer_seconds));
 
                         match timer_seconds {
                             Some(x) => log::info!("Starting with a {} seconds timer", x),

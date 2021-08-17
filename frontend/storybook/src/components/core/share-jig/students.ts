@@ -1,8 +1,8 @@
 import {argsToAttrs} from "@utils/attributes";
-import "@elements/entry/jig/play/sidebar/share-students";
+import "@elements/core/share-jig/students";
 
 export default {
-    title: "Entry / Jig / Play / Sidebar"
+    title: "Core / Share jig"
 }
 
 interface Args {
@@ -16,16 +16,16 @@ const DEFAULT_ARGS:Args = {
 }
 
 
-export const ShareStudents = (props?:Partial<Args>) => {
+export const Students = (props?:Partial<Args>) => {
     props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
 
     return `
-        <jig-play-sidebar-share-students ${argsToAttrs(props)}>
+        <share-jig-students ${argsToAttrs(props)}>
             <button-rect kind="text" slot="back">< Back</button-rect>
             <button-empty slot="close">&times;</button-empty>
             <button-rect kind="text" slot="copy-url">Copy URL</button-rect>
             <button-rect kind="text" slot="copy-code">Copy Code</button-rect>
-        </jig-play-sidebar-share-students>
+        </share-jig-students>
     `;
 }
-ShareStudents.args = DEFAULT_ARGS;
+Students.args = DEFAULT_ARGS;

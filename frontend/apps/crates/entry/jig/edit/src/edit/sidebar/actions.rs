@@ -36,7 +36,7 @@ pub fn navigate_to_publish(state: Rc<State>) {
 
     /* this will cause a full refresh - but preserves history
      * see the .future in EditPage too
-    dominator::routing::go_to_url(&url);
+        dominator::routing::go_to_url(&url);
      */
 }
 

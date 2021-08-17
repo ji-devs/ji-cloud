@@ -9,7 +9,7 @@ use shared::domain::jig::Jig;
 use utils::{ages::AgeRangeVecExt, events};
 
 use super::{
-    super::state::{ActivePopup, State},
+    super::state::State,
     report,
 };
 
@@ -21,29 +21,26 @@ pub fn render(state: Rc<State>) -> Dom {
         .property("slot", "actions")
         .property_signal("open", info_open_signal(Rc::clone(&state)))
         .event(clone!(state => move |_: events::Close| {
-            state.active_popup.set(ActivePopup::None);
+            state.info_popup_active.set(false);
         }))
         .child(html!("jig-play-sidebar-action", {
             .property("slot", "anchor")
             .property("kind", "info")
             .property_signal("active", info_open_signal(Rc::clone(&state)))
             .event(clone!(state => move |_: events::Click| {
-                let new_value = match &*state.active_popup.lock_ref() {
-                    ActivePopup::JigInfo => ActivePopup::None,
-                    _ => ActivePopup::JigInfo
-                };
-                state.active_popup.set(new_value);
+                let mut info_popup_active = state.info_popup_active.lock_mut();
+                *info_popup_active = !*info_popup_active;
             }))
         }))
         .child_signal({
             (map_ref!{
-                let active_popup = state.active_popup.signal_cloned(),
+                let info_popup_active = state.info_popup_active.signal_cloned(),
                 let jig = state.player_state.jig.signal_cloned() => {
-                    (active_popup.clone(), jig.clone())
+                    (info_popup_active.clone(), jig.clone())
                 }
-            }).map(move|(active_popup, jig)| {
-                match (active_popup, jig) {
-                    (ActivePopup::JigInfo, Some(jig)) => {
+            }).map(move|(info_popup_active, jig)| {
+                match (info_popup_active, jig) {
+                    (true, Some(jig)) => {
                         Some(render_jig_info(Rc::clone(&state), &jig))
                     },
                     _ => None,
@@ -55,12 +52,8 @@ pub fn render(state: Rc<State>) -> Dom {
 
 fn info_open_signal(state: Rc<State>) -> impl Signal<Item = bool> {
     state
-        .active_popup
+        .info_popup_active
         .signal_cloned()
-        .map(|active_popup| match active_popup {
-            ActivePopup::JigInfo => true,
-            _ => false,
-        })
 }
 
 fn render_jig_info(state: Rc<State>, jig: &Jig) -> Dom {
@@ -79,7 +72,7 @@ fn render_jig_info(state: Rc<State>, jig: &Jig) -> Dom {
             .property("slot", "close")
             .text("×")
             .event(clone!(state => move |_: events::Click| {
-                state.active_popup.set(ActivePopup::None);
+                state.info_popup_active.set(false);
             }))
         }))
         .children(jig.categories.iter().map(|category_id| {

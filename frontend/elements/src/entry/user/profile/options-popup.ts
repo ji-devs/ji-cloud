@@ -17,6 +17,9 @@ export class _ extends LitElement {
                     margin-bottom: 10px;
                     color: var(--main-blue);
                 }
+                .actions {
+                    justify-content: flex-end;
+                }
             `,
         ];
     }
@@ -38,8 +41,7 @@ export class _ extends LitElement {
             </div>
             <div class="divider"></div>
             <div class="actions">
-                <slot name="cancel"></slot>
-                <slot name="save"></slot>
+                <slot name="done"></slot>
             </div>
         `;
     }

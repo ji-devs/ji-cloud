@@ -1,15 +1,15 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, rc::Rc};
 
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::Mutable;
 use shared::domain::{
     category::{Category, CategoryId},
-    jig::JigId,
-    meta::{AgeRange, Goal},
+    meta::{AgeRange, Goal, Affiliation},
 };
 use utils::languages::{Language, LANGUAGES};
 
 use super::publish_jig::PublishJig;
+use super::super::state::State as JigEditState;
 
 pub struct State {
     pub loader: AsyncLoader,
@@ -18,9 +18,11 @@ pub struct State {
     pub category_label_lookup: Mutable<HashMap<CategoryId, String>>,
     pub goals: Mutable<Vec<Goal>>,
     pub ages: Mutable<Vec<AgeRange>>,
+    pub affiliations: Mutable<Vec<Affiliation>>,
     pub jig: PublishJig,
     pub submission_tried: Mutable<bool>,
     pub languages: Vec<Language>,
+    pub jig_edit_state: Rc<JigEditState>,
 }
 
 impl State {
@@ -30,6 +32,8 @@ impl State {
         category_label_lookup: HashMap<CategoryId, String>,
         goals: Vec<Goal>,
         ages: Vec<AgeRange>,
+        affiliations: Vec<Affiliation>,
+        jig_edit_state: Rc<JigEditState>,
     ) -> Self {
         Self {
             loader: AsyncLoader::new(),
@@ -38,8 +42,10 @@ impl State {
             category_label_lookup: Mutable::new(category_label_lookup),
             goals: Mutable::new(goals),
             ages: Mutable::new(ages),
+            affiliations: Mutable::new(affiliations),
             submission_tried: Mutable::new(false),
             languages: LANGUAGES.clone(),
+            jig_edit_state
         }
     }
 }

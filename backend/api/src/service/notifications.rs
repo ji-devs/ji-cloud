@@ -21,7 +21,7 @@ impl Client {
     pub async fn signal_status(
         &self,
         access_token: &str,
-        library: MediaLibrary,
+        library: &MediaLibrary,
         id: &Uuid,
         status: ProcessingStatus,
         update_mask: &[&str],
@@ -75,7 +75,7 @@ impl Client {
     pub async fn signal_status_processing(
         &self,
         access_token: &str,
-        library: MediaLibrary,
+        library: &MediaLibrary,
         id: &Uuid,
     ) -> anyhow::Result<()> {
         let status = ProcessingStatus {
@@ -93,7 +93,7 @@ impl Client {
     pub async fn signal_status_ready(
         &self,
         access_token: &str,
-        library: MediaLibrary,
+        library: &MediaLibrary,
         id: &Uuid,
     ) -> anyhow::Result<()> {
         let status = ProcessingStatus {

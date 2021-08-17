@@ -1,28 +1,28 @@
 use dominator::{clone, html, with_node, Dom};
 use futures_signals::{map_ref, signal::{Mutable, SignalExt}};
-use shared::domain::jig::JigId;
 use utils::events;
 use web_sys::{HtmlElement, HtmlInputElement, HtmlTextAreaElement};
-use components::module::_common::thumbnail::ModuleThumbnail;
 
 use super::{
     actions,
     components::{
         additional_resources::render as AdditionalResourcesRender, age::render as AgeRender,
         categories_pills::render as CategoriesPillsRender,
-        categories_select::render as CategoriesSelectRender, goal::render as GoalRender,
+        categories_select::render as CategoriesSelectRender,
+        goal::render as GoalRender,
         language::render as LanguageRender,
     },
     state::*,
 };
-use components::tooltip::{
+use components::{module::_common::thumbnail::ModuleThumbnail, tooltip::{
     callbacks::TooltipErrorCallbacks,
     dom::render as TooltipDom,
     state::{
         MoveStrategy, Placement, State as TooltipState, TooltipData, TooltipError, TooltipTarget,
     },
-};
+}};
 use std::rc::Rc;
+use super::super::state::State as JigEditState;
 
 const STR_PUBLISH_JIG: &'static str = "Publish JIG";
 const STR_PUBLIC_LABEL: &'static str = "My JIG is public";
@@ -30,12 +30,12 @@ const STR_NAME_LABEL: &'static str = "JIG’s name";
 const STR_DESCRIPTION_LABEL: &'static str = "Description";
 const STR_MISSING_INFO_TOOLTIP: &'static str = "Please fill in the missing information.";
 
-pub fn render(jig_id: JigId) -> Dom {
-    let state:Mutable<Option<Rc<State>>> = Mutable::new(None);
+pub fn render(jig_edit_state: Rc<JigEditState>) -> Dom {
+    let state: Mutable<Option<Rc<State>>> = Mutable::new(None);
 
     html!("empty-fragment", {
-        .future(clone!(state, jig_id => async move {
-            let _state = State::load_new(jig_id).await;
+        .future(clone!(state => async move {
+            let _state = State::load_new(jig_edit_state).await;
             state.set(Some(Rc::new(_state)));
         }))
         .property("slot", "main")
@@ -55,7 +55,8 @@ fn render_page(state: Rc<State>) -> Dom {
                 Rc::new(ModuleThumbnail {
                     jig_id: state.jig.id.clone(),
                     //Cover module (first module) is guaranteed to exist
-                    module: state.jig.modules.lock_ref()[0].clone()
+                    module: state.jig.modules.lock_ref()[0].clone(),
+                    is_jig_fallback: true,
                 }),
                 Some("img")
             ),
