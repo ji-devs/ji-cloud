@@ -41,6 +41,9 @@ export class _ extends LitElement {
                     --color: #46ba6f;
                 }
 
+                :host([color=orange]) {
+                    --color: #fc7551;
+                }
                 :host([kind=filled]) {
                     background-color: var(--color);
                     color: #ffffff;

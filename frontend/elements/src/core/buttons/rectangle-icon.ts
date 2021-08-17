@@ -11,10 +11,11 @@ export class _ extends LitElement {
     static get styles() {
         return [
             css`
-                button-rect {
+                .content {
                     display: inline-flex;
                     column-gap: 8px;
                     align-items: center;
+                    justify-content: center;
                 }
             `
         ];
@@ -87,9 +88,11 @@ export class _ extends LitElement {
                 href="${ifDefined(this.href)}"
                 target="${ifDefined(this.target)}"
             >
-                ${iconBefore && html`<img-ui path="${iconBeforePath}"></img-ui>`}
-                <slot></slot>
-                ${iconAfter && html`<img-ui path="${iconAfterPath}"></img-ui>`}
+                <div class="content">
+                    ${iconBefore && html`<img-ui path="${iconBeforePath}"></img-ui>`}
+                    <slot></slot>
+                    ${iconAfter && html`<img-ui path="${iconAfterPath}"></img-ui>`}
+                </div>
             </button-rect>
         `;
     }

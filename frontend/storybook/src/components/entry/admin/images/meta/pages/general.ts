@@ -1,7 +1,6 @@
-import "@elements/entry/admin/images/meta/pages/landing";
-import "@elements/entry/admin/images/meta/sections/section-1";
+import "@elements/entry/admin/images/meta/sections/general";
 import {AGE_OPTIONS, STYLE_OPTIONS, AFFILIATION_OPTIONS} from "~/mock/meta";
-import {Landing} from "./landing";
+import {Container} from "./container";
 import {mapToString} from "@utils/array";
 
 export default {
@@ -9,10 +8,11 @@ export default {
 }
 
 
-export const ImageMeta1 = () => {
-    return Landing({
+export const ImageMetaGeneral = () => {
+    return Container({
+        section: "general",
         content: `
-            <image-meta-section-1>
+            <image-meta-section-general>
             ${mapToString(AGE_OPTIONS, label => {
                 return `<input-checkbox slot="age_ranges" label="${label}"></input-checkbox>`
             })}
@@ -22,7 +22,7 @@ export const ImageMeta1 = () => {
             ${mapToString(AFFILIATION_OPTIONS, label => {
                 return `<input-checkbox slot="affiliations" label="${label}"></input-checkbox>`
             })}
-            </image-meta-section-1>
+            </image-meta-section-general>
         `
     })
 }

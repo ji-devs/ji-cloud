@@ -66,7 +66,17 @@ impl SidebarItem {
             Some(user) => !target_route.allowed_user_scope(&user.scopes) 
         };
 
-        let selected = std::mem::discriminant(&target_route) == std::mem::discriminant(curr_route);
+        let selected = match curr_route {
+            AdminRoute::ImageMeta(_, _) | AdminRoute::ImageSearch(_) => {
+                match target_route {
+                    AdminRoute::ImageMeta(_, _) | AdminRoute::ImageSearch(_) => true,
+                    _ => false
+                }
+            },
+            _ => {
+                std::mem::discriminant(&target_route) == std::mem::discriminant(curr_route)
+            }
+        };
 
 
         Rc::new(Self {

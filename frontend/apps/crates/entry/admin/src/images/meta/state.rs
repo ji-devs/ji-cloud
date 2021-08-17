@@ -24,9 +24,9 @@ impl State {
 
         let section = {
             if is_new 
-                { Section::One}
+                { Section::General}
             else
-                { Section::Three}
+                { Section::Summary}
         };
 
         Self {
@@ -40,11 +40,32 @@ impl State {
     }
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Section {
-    One,
-    Two,
-    Three
+    General,
+    Categories,
+    Summary 
+}
+
+impl Section {
+    pub const fn as_str(&self) -> &'static str {
+        match self {
+            Self::General => "general",
+            Self::Categories => "categories",
+            Self::Summary => "summary",
+        }
+    }
+}
+
+impl From<&str> for Section {
+    fn from(value: &str) -> Self { 
+        match value {
+            "general" => Self::General,
+            "categories" => Self::Categories,
+            "summary" => Self::Summary,
+            _ => panic!("unknown value!")
+        }
+    }
 }
 
 #[derive(Clone)]

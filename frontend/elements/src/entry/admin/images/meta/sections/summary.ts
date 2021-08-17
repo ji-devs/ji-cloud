@@ -1,5 +1,4 @@
 import { LitElement, html, css, customElement, property } from 'lit-element';
-import "@elements/entry/admin/images/base-page";
 import "@elements/core/titles/ji";
 import "@elements/core/inputs/composed/search";
 import { nothing } from "lit-html";
@@ -15,7 +14,7 @@ const STR_DATE_TIME = "Date and time (automatic)";
 //FUTURE: const STR_USED = "To be used only for";
 
 const STR_CATEGORIES_REPORT = "Categories summary";
-@customElement('image-meta-section-3')
+@customElement('image-meta-section-summary')
 export class _ extends LitElement {
   static get styles() {
     return [css`
@@ -56,7 +55,7 @@ export class _ extends LitElement {
         <div class="label-info">
             <div class="summary-line">
                 <header>${STR_GENERAL_SUMMARY}</header>
-                <slot name="edit"></slot>
+                <slot name="edit-general"></slot>
             </div>
                 <card-blue>
                     <title-ji color="blue" class="summary-title">${STR_IMAGENAME}</title-ji>
@@ -91,7 +90,10 @@ export class _ extends LitElement {
         </div>
 
         <div>
-            <header>${STR_CATEGORIES_REPORT}</header>
+            <div class="summary-line">
+                <header>${STR_CATEGORIES_REPORT}</header>
+                <slot name="edit-categories"></slot>
+            </div>
             <card-blue>
                 <slot name="category-report"></slot>
             </card-blue>
