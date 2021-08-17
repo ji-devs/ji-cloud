@@ -27,7 +27,9 @@ use super::super::state::State as JigEditState;
 const STR_PUBLISH_JIG: &'static str = "Publish JIG";
 const STR_PUBLIC_LABEL: &'static str = "My JIG is public";
 const STR_NAME_LABEL: &'static str = "JIG’s name";
+const STR_NAME_PLACEHOLDER: &'static str = "Type your JIG’s name here";
 const STR_DESCRIPTION_LABEL: &'static str = "Description";
+const STR_DESCRIPTION_PLACEHOLDER: &'static str = "This JIG is about… (include words that will help others find this JIG easily)";
 const STR_MISSING_INFO_TOOLTIP: &'static str = "Please fill in the missing information.";
 
 pub fn render(jig_edit_state: Rc<JigEditState>) -> Dom {
@@ -88,6 +90,7 @@ fn render_page(state: Rc<State>) -> Dom {
                 })
                 .child(html!("input" => HtmlInputElement, {
                     .with_node!(elem => {
+                        .property("placeholder", STR_NAME_PLACEHOLDER)
                         .property_signal("value", state.jig.display_name.signal_cloned())
                         .event(clone!(state => move |_evt: events::Input| {
                             let value = elem.value();
@@ -112,6 +115,7 @@ fn render_page(state: Rc<State>) -> Dom {
                 })
                 .child(html!("textarea" => HtmlTextAreaElement, {
                     .with_node!(elem => {
+                        .property("placeholder", STR_DESCRIPTION_PLACEHOLDER)
                         .text_signal(state.jig.description.signal_cloned())
                         .event(clone!(state => move |_: events::Input| {
                             let value = elem.value();

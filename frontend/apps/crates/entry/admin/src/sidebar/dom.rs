@@ -1,54 +1,32 @@
-use dominator::{html, Dom};
-use utils::{routes::*, events};
+use dominator::{html, Dom, clone};
+use utils::prelude::*;
+use super::state::*;
+use std::rc::Rc;
+use futures_signals::{
+    signal::SignalExt,
+    signal_vec::SignalVecExt
+};
 
-pub struct SidebarDom {}
-impl SidebarDom {
-    pub fn render(route: AdminRoute) -> Dom {
-
+impl Sidebar {
+    pub fn render(state: Rc<Self>) -> Dom {
         html!("admin-sidebar", {
-            .property("section", {
-                match route {
-                    AdminRoute::Categories => "category", 
-                    AdminRoute::Locale => "locale", 
-                    AdminRoute::ImageAdd => "image-add", 
-                    AdminRoute::ImageTags => "image-tags", 
-                    AdminRoute::ImageMeta(id, is_new) => "image-search", 
-                    AdminRoute::ImageSearch(query) => "image-search",
-                    _ => ""
-                }
-            })
-            .event(|evt:events::CustomRoute| {
-                match evt.route().as_ref() {
-                    "image-add" => {
-                        let route:String = Route::Admin(AdminRoute::ImageAdd).into();
-                        dominator::routing::go_to_url(&route);
-                    },
-                    "image-search" => {
-                        let route:String = Route::Admin(AdminRoute::ImageSearch(None)).into();
-                        dominator::routing::go_to_url(&route);
-                    },
-                    "image-tags" => {
-                        let route:String = Route::Admin(AdminRoute::ImageTags).into();
-                        dominator::routing::go_to_url(&route);
-                    },
-                    "jig" => {
-                        /*
-                        let route:String = Route::Admin(AdminRoute::ImageAdd).into();
-                        dominator::routing::go_to_url(&route);
-                        */
-                    },
-                    "category" => {
-                        let route:String = Route::Admin(AdminRoute::Categories).into();
-                        dominator::routing::go_to_url(&route);
-                    },
-                    "locale" => {
-                        let route:String = Route::Admin(AdminRoute::Locale).into();
-                        dominator::routing::go_to_url(&route);
-                    },
-                    _ => {
-                    }
-                }
-            })
+            .children_signal_vec(
+                state.item_signal_vec()
+                    .map(SidebarItem::render)
+            )
+        })
+    }
+}
+
+impl SidebarItem {
+    pub fn render(state: Rc<Self>) -> Dom {
+        html!("admin-sidebar-item", {
+            .property("id", state.id)
+            .property("locked", state.locked)
+            .property("selected", state.selected)
+            .event(clone!(state => move |evt:events::Click| {
+                state.on_click();
+            }))
         })
     }
 }

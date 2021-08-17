@@ -1,4 +1,5 @@
 use dominator::{clone, html, Dom};
+use dominator_helpers::events::Message;
 
 use super::{
     dragging::{actions as drag_actions, dom::DraggingDom},
@@ -17,7 +18,7 @@ use std::cell::RefCell;
 use std::rc::Rc;
 use uuid::Uuid;
 
-use utils::prelude::*;
+use utils::{iframe::{IframeAction, ModuleToJigEditorMessage}, prelude::*};
 
 pub struct SidebarDom {}
 
@@ -52,6 +53,16 @@ impl SidebarDom {
         let state = Rc::new(State::new(jig, route));
 
         html!("empty-fragment", {
+            .global_event(clone!(state => move |evt: Message| {
+                match evt.try_serde_data::<IframeAction<ModuleToJigEditorMessage>>() {
+                    Err(_e) => {
+                        log::info!("{:?}", _e);
+                    },
+                    Ok(m) => {
+                        actions::on_iframe_message(Rc::clone(&state), m.data)
+                    },
+                };
+            }))
             .child(html!("jig-edit-sidebar", {
                 .property_signal("collapsed", state.collapsed.signal())
                 .property_signal("isModulePage", state.route.signal_cloned().map(|route| {

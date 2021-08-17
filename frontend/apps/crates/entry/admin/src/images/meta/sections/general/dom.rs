@@ -12,14 +12,14 @@ use shared::domain::meta::MetadataResponse;
 use strum::IntoEnumIterator;
 use components::image::tag::ImageTag;
 
-pub struct Section1Dom {
+pub struct GeneralDom {
 }
 
-impl Section1Dom {
+impl GeneralDom {
     pub fn render(meta_state: Rc<MetaState>, image: Rc<MutableImage>, metadata: Rc<MetadataResponse>) -> Dom {
         let state = Rc::new(State::new(meta_state, image, metadata));
 
-        html!("image-meta-section-1", {
+        html!("image-meta-section-general", {
             .children(state.metadata.image_styles.iter().map(|style| {
                 let id = style.id;
                 html!("input-checkbox", {

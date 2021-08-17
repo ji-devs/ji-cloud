@@ -92,6 +92,21 @@ impl Body {
             _ => unimplemented!("TODO!"),
         }
     }
+
+    /// Convert this container to a Body wrapper of a specific kind
+    pub fn convert_to_body(&self, kind: ModuleKind) -> Result<Self, &'static str> {
+        match self {
+            Self::MemoryGame(data) => data.convert_to_body(kind),
+            Self::Matching(data) => data.convert_to_body(kind),
+            Self::Flashcards(data) => data.convert_to_body(kind),
+            Self::CardQuiz(data) => data.convert_to_body(kind),
+            Self::Poster(data) => data.convert_to_body(kind),
+            Self::Video(data) => data.convert_to_body(kind),
+            Self::TappingBoard(data) => data.convert_to_body(kind),
+            Self::DragDrop(data) => data.convert_to_body(kind),
+            Self::Cover(data) => data.convert_to_body(kind),
+        }
+    }
 }
 
 /// Extension trait for interop

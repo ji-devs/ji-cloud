@@ -1,3 +1,4 @@
+use futures_signals::signal::Mutable;
 use js_sys::Reflect;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -6,12 +7,14 @@ use web_sys::HtmlElement;
 
 pub struct State {
     pub menu_ref: Rc<RefCell<Option<HtmlElement>>>,
+    pub dup_as_active: Mutable<bool>,
 }
 
 impl State {
     pub fn new() -> Self {
         Self {
             menu_ref: Rc::new(RefCell::new(None)),
+            dup_as_active: Mutable::new(false),
         }
     }
 
@@ -23,5 +26,6 @@ impl State {
                 &JsValue::from_bool(false),
             );
         }
+        self.dup_as_active.set(false);
     }
 }

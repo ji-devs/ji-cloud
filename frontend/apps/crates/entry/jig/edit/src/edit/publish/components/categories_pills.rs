@@ -2,7 +2,7 @@ use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
 use shared::domain::category::CategoryId;
 use std::rc::Rc;
-use utils::unwrap::UnwrapJiExt;
+use utils::{events, unwrap::UnwrapJiExt};
 
 use super::super::state::State;
 
@@ -20,9 +20,13 @@ pub fn render(state: Rc<State>) -> Dom {
 fn render_pill(state: Rc<State>, category_id: CategoryId) -> Dom {
     html!("pill-close", {
         .property_signal("label", state.category_label_lookup.signal_cloned().map(move |category_label_lookup| {
-
-            log::info!("{:?}", category_label_lookup.get(&category_id));
             category_label_lookup.get(&category_id).unwrap_ji().clone()
+        }))
+        .child(html!("pill-close-delete", {
+            .property("slot", "delete")
+            .event(clone!(state => move |_: events::Click| {
+                state.jig.categories.lock_mut().remove(&category_id);
+            }))
         }))
     })
 }

@@ -25,12 +25,14 @@ export class _ extends LitElement {
                     padding: 8px 16px;
                     display: grid;
                     grid-template-columns: 1fr min-content;
+                    grid-template-rows: min-content 1fr;
                     column-gap: 2px;
                     font-size: 16px;
                     line-height: 1.5;
                     cursor: pointer;
                     z-index: 1;
                     background-color: #fff;
+                    height: 100%;
                 }
                 .wrapper:focus-within, :host([focus-within]) .wrapper {
                     border-color: var(--dark-blue-3);

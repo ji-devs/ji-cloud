@@ -14,6 +14,7 @@ import "@elements/core/images/ji";
 import "@elements/core/images/composed/module-screenshot";
 import "@elements/core/overlays/anchored-overlay";
 import "@elements/core/pills/pill-close";
+import "@elements/core/pills/pill-close-delete";
 import "@elements/core/tooltips/error";
 import "@elements/core/page-footer/page-footer";
 import "@elements/core/share-jig/main";

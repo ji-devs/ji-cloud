@@ -1,18 +1,8 @@
 use super::state::*;
-use shared::{
-    api::endpoints::{self, ApiEndpoint},
-    domain::{
-        jig::{
-            module::{
+use shared::{api::endpoints::{self, ApiEndpoint}, domain::{CreateResponse, jig::{LiteModule, ModuleKind, module::{
                 body::{BodyExt, ModeExt, StepExt},
                 ModuleCreateRequest, ModuleId,
-            },
-            ModuleKind,
-        },
-        CreateResponse,
-    },
-    error::EmptyError,
-};
+            }}}, error::EmptyError};
 use utils::{prelude::*, iframe::{IframeAction, ModuleToJigEditorMessage}};
 
 impl PostPreview {
@@ -51,10 +41,13 @@ impl PostPreview {
             match res {
                 Ok(res) => {
                     let module_id = res.id;
-                    let module_kind = target_kind;
 
+                    let module = LiteModule {
+                        id: module_id.clone(),
+                        kind: target_kind,
+                    };
 
-                    let msg = IframeAction::new(ModuleToJigEditorMessage::AppendModule(module_kind, module_id));
+                    let msg = IframeAction::new(ModuleToJigEditorMessage::AppendModule(module));
                     if let Err(_) = msg.try_post_message_to_parent() {
                         log::info!("Couldn't post message to parent... redirect!");
                         let route: String =

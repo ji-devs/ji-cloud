@@ -1,12 +1,11 @@
 import { LitElement, html, css, customElement, property } from 'lit-element';
-import "@elements/entry/admin/images/base-page";
 import "@elements/core/titles/ji";
 import { nothing } from "lit-html";
 
 const STR_CATEGORIES_SELECT = "Categories";
 const STR_CATEGORIES_REPORT = "Categories summary";
 
-@customElement('image-meta-section-2')
+@customElement('image-meta-section-categories')
 export class _ extends LitElement {
   static get styles() {
       return [css`

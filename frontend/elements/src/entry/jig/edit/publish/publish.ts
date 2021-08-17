@@ -64,6 +64,9 @@ export class _ extends LitElement {
                 align-items: flex-start;
                 row-gap: 86px;
             }
+            ::slotted([slot=description]) {
+                height: 170px;
+            }
             .column-3 {
                 display: grid;
                 align-items: flex-start;
@@ -73,7 +76,7 @@ export class _ extends LitElement {
                 display: grid;
                 row-gap: 16px;
             }
-            .category-labels {
+            ::slotted([slot=category-labels]) {
                 display: flex;
                 flex-wrap: wrap;
                 column-gap: 8px;
@@ -127,13 +130,11 @@ export class _ extends LitElement {
                             <slot name="goal"></slot>
                             <div class="catagories">
                                 <slot name="catagories-select"></slot>
-                                <div class="category-labels">
-                                    <slot name="category-labels"></slot>
-                                </div>
+                                <slot name="category-labels"></slot>
                             </div>
                         </div>
                         <div class="column-4 additional-resources">
-                            <h4>Additional resources (Optional)</h4>
+                            <h4>Additional resources (Coming soon!)</h4>
                             <div class="additional-resources-items">
                                 <slot name="additional-resources"></slot>
                             </div>

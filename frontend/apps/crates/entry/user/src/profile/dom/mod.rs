@@ -194,7 +194,6 @@ impl ProfilePage {
                     .property("slot", "age-groups")
                     .children_signal_vec(state.user.age_ranges.signal_vec_cloned().map(clone!(state => move|age_range_id| {
                         html!("pill-close", {
-                            .property("label", age_range_id.0.to_string())
                             .property_signal("label", state.metadata.signal_ref(clone!(age_range_id => move |metadata| {
                                 match metadata {
                                     None => String::new(),
@@ -227,7 +226,6 @@ impl ProfilePage {
                     .property("slot", "relevant-subjects")
                     .children_signal_vec(state.user.subjects.signal_vec_cloned().map(clone!(state => move|subject_id| {
                         html!("pill-close", {
-                            .property("label", subject_id.0.to_string())
                             .property_signal("label", state.metadata.signal_ref(clone!(subject_id => move |metadata| {
                                 match metadata {
                                     None => String::new(),
@@ -260,7 +258,6 @@ impl ProfilePage {
                     .property("slot", "affiliations")
                     .children_signal_vec(state.user.affiliations.signal_vec_cloned().map(clone!(state => move|affiliation_id| {
                         html!("pill-close", {
-                            .property("label", affiliation_id.0.to_string())
                             .property_signal("label", state.metadata.signal_ref(clone!(affiliation_id => move |metadata| {
                                 match metadata {
                                     None => String::new(),

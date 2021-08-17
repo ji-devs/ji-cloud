@@ -64,7 +64,7 @@ fn api_get_query<'a, T: Serialize>(endpoint:&'a str, method:Method, data: Option
 pub async fn upload_file_gcs(url:&str, file:&File, abort_controller: Option<&AbortController>) -> Result<(), awsm_web::errors::Error> {
     let (resp, status) = upload_file_gcs_status(url, file, abort_controller).await;
 
-    side_effect_error(status);
+    side_effect_status_code(status);
 
     resp
 }
@@ -91,7 +91,7 @@ pub async fn upload_file_gcs_status(url:&str, file:&File, abort_controller: Opti
 pub async fn api_upload_file(endpoint:&str, file:&File, method:Method) -> Result<(), ()> {
     let (resp, status) = api_upload_file_status(endpoint, file, method).await;
 
-    side_effect_error(status);
+    side_effect_status_code(status);
 
     resp
 
@@ -117,7 +117,7 @@ pub async fn api_no_auth<T, E, Payload>(endpoint: &str, method:Method, data:Opti
 where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload: Serialize {
     let (resp, status) = api_no_auth_status(endpoint, method, data).await;
 
-    side_effect_error(status);
+    side_effect_status_code(status);
 
     resp 
 }
@@ -146,7 +146,7 @@ where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload:
 {
     let (resp, status) = api_no_auth_with_credentials_status(endpoint, method, data).await;
 
-    side_effect_error(status);
+    side_effect_status_code(status);
 
     resp
 }
@@ -173,7 +173,7 @@ where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload:
 {
     let (resp, status) = api_with_token_status(endpoint, token, method, data).await;
     
-    side_effect_error(status);
+    side_effect_status_code(status);
 
     resp
 }
@@ -216,7 +216,7 @@ where E: DeserializeOwned + Serialize, Payload: Serialize
 {
     let (resp, status) = api_with_token_empty_status(endpoint, token, method, data).await;
 
-    side_effect_error(status);
+    side_effect_status_code(status);
 
     resp
 }
@@ -247,7 +247,7 @@ where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload:
         .map(|res| {
             let (resp, status) = res;
 
-            side_effect_error(status);
+            side_effect_status_code(status);
 
             resp
         })
@@ -257,7 +257,7 @@ where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload:
 {
     let (resp, status) = api_with_auth_status(endpoint, method, data).await;
     
-    side_effect_error(status);
+    side_effect_status_code(status);
 
     resp
 }
@@ -305,7 +305,7 @@ where E: DeserializeOwned + Serialize, Payload: Serialize
 {
     let (resp, status) = api_with_auth_empty_status(endpoint, method, data).await;
 
-    side_effect_error(status);
+    side_effect_status_code(status);
 
     resp
 }
@@ -339,7 +339,7 @@ pub async fn api_no_auth_empty<E, Payload>(endpoint: &str, method:Method, data:O
 where E: DeserializeOwned + Serialize, Payload: Serialize {
     let (resp, status) = api_no_auth_empty_status(endpoint, method, data).await;
 
-    side_effect_error(status);
+    side_effect_status_code(status);
 
     resp
 }
@@ -369,7 +369,7 @@ where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload:
 {
     let (resp, status) = api_with_basic_token_status(endpoint, user_id, password, method, data).await;
 
-    side_effect_error(status);
+    side_effect_status_code(status);
 
     resp
 }
@@ -399,14 +399,14 @@ where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload:
 
 
 
-fn side_effect_error(status_code:u16) -> bool {
+pub fn side_effect_status_code(status_code:u16) {
     match status_code {
         403 | 401 => {
             Route::NoAuth.redirect();
             //web_sys::window().unwrap_ji().alert_with_message(crate::strings::STR_AUTH_ALERT);
-            true
         },
-        _ => false
+        _ => {
+        }
     }
 } 
 
