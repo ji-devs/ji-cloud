@@ -64,6 +64,9 @@ export class _ extends LitElement {
                 align-items: flex-start;
                 row-gap: 86px;
             }
+            ::slotted([slot=description]) {
+                height: 170px;
+            }
             .column-3 {
                 display: grid;
                 align-items: flex-start;
