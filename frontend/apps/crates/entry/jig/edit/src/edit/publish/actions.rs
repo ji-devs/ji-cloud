@@ -1,22 +1,17 @@
-use std::{collections::{HashMap, HashSet}, iter::FromIterator, rc::Rc};
+use std::{collections::HashMap, rc::Rc};
 
 use dominator::clone;
 use futures::join;
-// <<<<<<< HEAD
 use shared::{
     api::endpoints::{category, jig, meta, ApiEndpoint},
     domain::{
         category::{Category, CategoryId, CategoryResponse, CategoryTreeScope, GetCategoryRequest},
         jig::{Jig, JigId, JigResponse, JigUpdateRequest},
-        meta::{MetadataResponse, Affiliation, AffiliationId},
+        meta::MetadataResponse,
     },
     error::{EmptyError, MetadataNotFound},
 };
 use utils::{prelude::{api_with_auth, api_with_auth_empty, UnwrapJiExt}, routes::{JigEditRoute, JigRoute, Route}};
-// =======
-// use shared::{api::endpoints::{category, jig, meta, ApiEndpoint}, domain::{category::{Category, CategoryId, CategoryResponse, CategoryTreeScope, GetCategoryRequest}, jig::{Jig, JigId, JigResponse, JigUpdateRequest}, meta::{Affiliation, AffiliationId, MetadataResponse}}, error::{EmptyError, MetadataNotFound}};
-// use utils::prelude::{api_with_auth, api_with_auth_empty, UnwrapJiExt};
-// >>>>>>> 81386686 (feat(frontend/jig/edit): add all to jig affiliations on publish)
 
 use super::{publish_jig::PublishJig, state::State};
 use super::super::state::State as JigEditState;
@@ -45,6 +40,16 @@ impl State {
                 .collect();
 
             jig.affiliations = available_affiliations;
+        }
+
+        // set all ages for unpublished jigs
+        if jig.publish_at.is_none() {
+            let available_ages = meta.age_ranges
+                .iter()
+                .map(|age| age.id.clone())
+                .collect();
+
+            jig.age_ranges = available_ages;
         }
 
         Self::new(
