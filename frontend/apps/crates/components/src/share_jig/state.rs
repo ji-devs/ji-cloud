@@ -7,6 +7,7 @@ use utils::prelude::*;
 pub struct State {
     pub active_popup: Mutable<Option<ActivePopup>>,
     pub jig_id: JigId,
+    pub copied_embed: Mutable<bool>,
 }
 
 impl State {
@@ -14,6 +15,7 @@ impl State {
         Self {
             jig_id,
             active_popup: Mutable::new(None),
+            copied_embed: Mutable::new(false),
         }
     }
 
