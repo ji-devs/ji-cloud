@@ -3,6 +3,7 @@ use wasm_bindgen::prelude::*;
 use shared::domain::{
     image::{ImageId, ImageSearchQuery}, 
     jig::{JigId, JigPlayerSettings, module::ModuleId, ModuleKind}, 
+    user::UserScope,
 };
 use serde::{Serialize, Deserialize};
 use std::{fmt::Debug, str::FromStr};
@@ -55,10 +56,29 @@ pub enum AdminRoute {
     Landing,
     Categories,
     Locale,
+    Jigs,
     ImageSearch(Option<ImageSearchQuery>),
     ImageAdd,
     ImageTags,
     ImageMeta(ImageId, bool), //flag is for if it's a new image
+}
+
+impl AdminRoute {
+    pub fn allowed_user_scope(&self, scopes: &[UserScope]) -> bool {
+        if scopes.contains(&UserScope::Admin) {
+            return true;
+        }
+
+        match self {
+            Self::Landing => true,
+            Self::Categories => scopes.contains(&UserScope::ManageCategory),
+            Self::Locale => false,
+            Self::Jigs => scopes.contains(&UserScope::AdminJig),
+            Self::ImageSearch(_) | Self::ImageAdd | Self::ImageTags | Self::ImageMeta(_, _) => {
+                scopes.contains(&UserScope::ManageImage)
+            }
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -173,6 +193,7 @@ impl Route {
             ["user", "verify-email", token] => Self::User(UserRoute::VerifyEmail(token.to_string())),
             ["user", "password-reset", token] => Self::User(UserRoute::PasswordReset(token.to_string())),
             ["user", "register-complete"] => Self::User(UserRoute::RegisterComplete),
+            ["admin", "jigs"] => Self::Admin(AdminRoute::Jigs),
             ["admin", "locale"] => Self::Admin(AdminRoute::Locale),
             ["admin", "categories"] => Self::Admin(AdminRoute::Categories),
             ["admin", "image-search"] => {
@@ -304,6 +325,7 @@ impl From<&Route> for String {
             Route::Admin(route) => {
                 match route {
                     AdminRoute::Landing => "/admin".to_string(),
+                    AdminRoute::Jigs => "/admin/jigs".to_string(),
                     AdminRoute::Locale => "/admin/locale".to_string(),
                     AdminRoute::Categories => "/admin/categories".to_string(),
                     AdminRoute::ImageSearch(search) => {

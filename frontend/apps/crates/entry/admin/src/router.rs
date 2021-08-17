@@ -1,5 +1,9 @@
 use utils::{prelude::*, routes::{Route, ModuleRoute, AdminRoute}};
-use shared::domain::jig::ModuleKind;
+use shared::{
+    api::{endpoints::user::Profile, ApiEndpoint},
+    domain::user::UserProfile,
+    error::EmptyError,
+};
 use std::rc::Rc;
 use wasm_bindgen::UnwrapThrowExt;
 use web_sys::Url;
@@ -22,19 +26,19 @@ use crate::{
         search::dom::ImageSearchPage,
         tags::ImageTags,
     },
-    sidebar::dom::SidebarDom,
+    sidebar::Sidebar,
 };
 pub struct Router {
-    loader: AsyncLoader,
-    app: RefCell<Option<AppState>>
+    app: RefCell<Option<AppState>>,
+    profile: Mutable<Option<Option<UserProfile>>>,
 }
 
 impl Router {
-    pub fn new() -> Self {
-        Self {
-            loader: AsyncLoader::new(),
-            app: RefCell::new(None)
-        }
+    pub fn new() -> Rc<Self> {
+        Rc::new(Self {
+            app: RefCell::new(None),
+            profile: Mutable::new(None),
+        })
     }
 }
 
@@ -42,118 +46,92 @@ pub enum AppState {
     Locale(Rc<LocaleLoaderState>)
 }
 
-pub fn render(state: Rc<Router>) {
+impl Router {
+    pub fn render(state: Rc<Self>) -> Dom {
 
-    state.clone().loader.load(
-        dominator::routing::url()
-            .signal_ref(|url| Route::from_url(&url))
-            .for_each(clone!(state => move |route| {
-                state.app.borrow_mut().take();
+        html!("div", {
+            .future(clone!(state => async move {
+                let (result, status) = api_with_auth_status::<UserProfile, EmptyError, ()>(&Profile::PATH, Profile::METHOD, None).await;
 
-                let dom = match route {
-                    Route::Admin(route_ref) => {
-                        let route = route_ref.clone();
-                        match route_ref {
-                            AdminRoute::Categories=> Some(with_child(route, CategoriesPage::render())),
-                            AdminRoute::Locale => {
-                                let app_state = Rc::new(LocaleLoaderState::new());
-                                *state.app.borrow_mut() = Some(AppState::Locale(app_state.clone()));
-                                Some(with_child(route, LocalePage::render(app_state.clone())))
+                match status  {
+                    401 | 403 => {
+                        state.profile.set(Some(None));
+                    }
+                    _ => {
+                        match result {
+                            Err(_) => {
+                                log::info!("error fetching profile");
                             },
-                            AdminRoute::ImageAdd => Some(with_child(route, ImageAddPage::render())),
-                            AdminRoute::ImageMeta(id, is_new) => Some(with_child(route, ImageMetaPage::render(id, is_new))),
-                            AdminRoute::ImageSearch(query) => Some(with_child(route, ImageSearchPage::render(query))),
-                            AdminRoute::ImageTags => Some(with_child(route, ImageTags::render(ImageTags::new()))),
-                            _ => Some(with_child(route, html!("empty-fragment"))),
+                            Ok(profile) => {
+                                state.profile.set(Some(Some(profile)));
+                            }
                         }
                     }
-                    _ => None
-
                 };
-                
-                if let Some(dom) = dom {
-                    let body = dominator::body();
-                    body.set_inner_html("");
-                    dominator::append_dom(&body, html!("div", {
-                        .child(components::page_header::dom::render(
-                                Rc::new(components::page_header::state::State::new()),
-                                None
-                        ))
-                        .child(dom)
-                    }));
-                }
-
-                async {}
             }))
-    );
-}
+            .children_signal_vec(
+                map_ref!{
+                    let route = dominator::routing::url().signal_ref(|url| Route::from_url(&url)),
+                    let profile = state.profile.signal_cloned()
+                        => move {
+                            let mut children:Vec<Dom> = Vec::new();
 
-fn with_child(route: AdminRoute, dom:Dom) -> Dom {
-    html!("admin-shell", { 
-        .child(SidebarDom::render(route))
-        .child(dom)
-    })
-}
+                            children.push(components::page_header::dom::render(
+                                    Rc::new(components::page_header::state::State::new()),
+                                    None
+                            ));
 
+                            if let Some(profile) = profile {
+                                let dom = match route.clone() {
+                                    Route::Admin(route) => {
+                                        let locked = match profile {
+                                            None => true, 
+                                            Some(user) => !route.allowed_user_scope(&user.scopes) 
+                                        };
 
+                                        if locked {
+                                            Some(state.with_child(route, html!("h1", {
+                                                .text("Not Authorized")
+                                            })))
+                                        } else {
+                                            match route.clone() {
+                                                AdminRoute::Categories=> Some(state.with_child(route, CategoriesPage::render())),
+                                                AdminRoute::Locale => {
+                                                    let app_state = Rc::new(LocaleLoaderState::new());
+                                                    *state.app.borrow_mut() = Some(AppState::Locale(app_state.clone()));
+                                                    Some(state.with_child(route, LocalePage::render(app_state.clone())))
+                                                },
+                                                AdminRoute::ImageAdd => Some(state.with_child(route, ImageAddPage::render())),
+                                                AdminRoute::ImageMeta(id, is_new) => Some(state.with_child(route, ImageMetaPage::render(id, is_new))),
+                                                AdminRoute::ImageSearch(query) => Some(state.with_child(route, ImageSearchPage::render(query))),
+                                                AdminRoute::ImageTags => Some(state.with_child(route, ImageTags::render(ImageTags::new()))),
+                                                _ => Some(state.with_child(route, html!("empty-fragment"))),
+                                            }
+                                        }
+                                    }
+                                    _ => None
 
+                                };
 
+                                if let Some(dom) = dom {
+                                    children.push(dom);
+                                }
 
+                            }
 
-/*
-use utils::routes::{Route, AdminRoute};
-use std::rc::Rc;
-use wasm_bindgen::UnwrapThrowExt;
-use web_sys::Url;
-use futures_signals::{
-    map_ref,
-    signal::{Mutable, SignalExt, Signal}
-};
-use dominator::{Dom, html};
-
-pub struct Router {
-}
-
-impl Router {
-    pub fn new() -> Self {
-        Self { }
-    }
-    pub fn render(&self) -> Dom {
-        html!("empty_fragment", {
-            .child_signal(Self::dom_signal())
+                            children
+                        }
+                }
+                .to_signal_vec()
+            )
         })
     }
 
-    fn route_signal() -> impl Signal<Item = Route> {
-        dominator::routing::url()
-            .signal_ref(|url| Route::from_url(&url))
-    }
-
-    fn dom_signal() -> impl Signal<Item = Option<Dom>> {
-            Self::route_signal()
-                .map(|route| {
-                    match route {
-                        Route::Admin(route_ref) => {
-                            let route = route_ref.clone();
-                            match route_ref {
-                                AdminRoute::Categories=> Some(Self::with_child(route, CategoriesPage::render())),
-                                AdminRoute::Locale => Some(Self::with_child(route, LocalePage::render())),
-                                AdminRoute::ImageAdd => Some(Self::with_child(route, ImageAddPage::render())),
-                                AdminRoute::ImageMeta(id, is_new) => Some(Self::with_child(route, ImageMetaPage::render(id, is_new))),
-                                AdminRoute::ImageSearch(query) => Some(Self::with_child(route, ImageSearchPage::render(query))),
-                                _ => Some(Self::with_child(route, html!("empty-fragment"))),
-                            }
-                        }
-                        _ => None
-                    }
-                })
-    }
-
-    fn with_child(route: AdminRoute, dom:Dom) -> Dom {
+    fn with_child(&self, route: AdminRoute, dom:Dom) -> Dom {
         html!("admin-shell", { 
-            .child(SidebarDom::render(route))
+            .child(Sidebar::render(Sidebar::new(route, self.profile.read_only())))
             .child(dom)
         })
     }
 }
-*/
+

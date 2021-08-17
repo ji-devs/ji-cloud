@@ -1,14 +1,14 @@
 import {argsToAttrs} from "@utils/attributes";
 import "@elements/entry/admin/sidebar/container";
 import "@elements/entry/admin/sidebar/item";
-import {SECTION} from "@elements/entry/admin/sidebar/item";
+import {ID} from "@elements/entry/admin/sidebar/item";
 import { mapToString } from "@utils/array";
 
-const sections:Array<SECTION> = [
+const ids:Array<ID> = [
 	"image-add",
 	"image-tags",
 	"image-search",
-	"jig",
+	"jigs",
 	"category",
 	"locale",
 ];
@@ -18,7 +18,7 @@ export default {
 }
 
 interface Args {
-    selected: SECTION | "",
+    selected: ID | "",
 }
 
 const DEFAULT_ARGS:Args = {
@@ -33,10 +33,10 @@ export const Sidebar = (props?:Partial<Args>) => {
 
     return `<admin-sidebar ${argsToAttrs(adminProps)}>
         ${
-            mapToString(sections, (section, idx) => {
+            mapToString(ids, (id, idx) => {
                 const itemProps = {
-                    section,
-                    selected: selected === section,
+                    id,
+                    selected: selected === id,
                     locked: idx % 2 == 0
                 };
                 return `<admin-sidebar-item ${argsToAttrs(itemProps)}></admin-sidebar-item>`
@@ -50,7 +50,7 @@ Sidebar.argTypes = {
     selected: {
         control: {
             type: 'inline-radio',
-            options: ["", ...sections]
+            options: ["", ...ids]
         }
     }
 }

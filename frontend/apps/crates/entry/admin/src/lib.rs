@@ -16,25 +16,16 @@ use cfg_if::cfg_if;
 use wasm_bindgen::prelude::*;
 use std::rc::Rc;
 use web_sys::{window, Element};
+use router::Router;
 
-/*
-mod page;
-mod pages;
-mod header;
-*/
 
 #[wasm_bindgen(start)]
 pub async fn main_js() {
     setup_logger();
 
-
     let settings = utils::settings::init();
 
-    let r = Rc::new(router::Router::new());
-
-    router::render(r.clone());
-
-    std::mem::forget(Box::new(r));
+    dominator::append_dom(&dominator::body(), Router::render(Router::new())); 
 }
 
 // enable logging and panic hook only during debug builds

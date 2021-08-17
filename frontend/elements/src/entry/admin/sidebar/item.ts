@@ -2,13 +2,13 @@ import { LitElement, html, css, customElement, property } from 'lit-element';
 import {classMap} from "lit-html/directives/class-map";
 import {nothing} from "lit-html";
 
-export type SECTION = "locale" | "image-add" | "image-search" | "jig" | "category" | "image-tags";
+export type ID = "locale" | "image-add" | "image-search" | "jigs" | "category" | "image-tags";
 
-const STR_LABEL_LOOKUP:{[key in SECTION]:string} = {
+const STR_LABEL_LOOKUP:{[key in ID]:string} = {
 	"image-add": "Add image",
 	"image-tags": "Image tags",
 	"image-search": "Edit images",
-	"jig": "Label JIGs",
+	"jigs": "Label JIGs",
 	"category": "Edit categories",
 	"locale": "Localization",
 };
@@ -50,7 +50,7 @@ export class _ extends LitElement {
 
 
   @property()
-  section:SECTION = "image-add";
+  id:ID = "image-add";
 
   @property({type: Boolean, reflect: true})
   locked: boolean = false;
@@ -59,9 +59,9 @@ export class _ extends LitElement {
   selected: boolean = false;
 
   render() {
-	const {section, locked} = this;
+	const {id, locked} = this;
 
-	const label = STR_LABEL_LOOKUP[section];
+	const label = STR_LABEL_LOOKUP[id];
 
 	return html`
 		<section>
