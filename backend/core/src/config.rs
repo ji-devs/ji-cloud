@@ -28,13 +28,13 @@ pub const SQL_PROXY_PORT: u16 = 6432;
 // Requests
 /// Timeout interval for media uploading
 pub const MEDIA_UPLOAD_TIMEOUT_SECS: u64 = 300;
-/// Image file size limit. 10 MB
-pub const IMAGE_BODY_SIZE_LIMIT: usize = 1024 * 1024 * 10;
-/// Animation file size limit. 15 MB
+/// Image file size limit. 30 MB
+pub const IMAGE_BODY_SIZE_LIMIT: usize = 1024 * 1024 * 30;
+/// Animation file size limit. 40 MB
 /// Animations are reasonably expected to be larger than normal images?
-pub const ANIMATION_BODY_SIZE_LIMIT: usize = 1024 * 1024 * 15;
-/// Audio file size limit. 10 MB
-pub const AUDIO_BODY_SIZE_LIMIT: usize = 1024 * 1024 * 10;
+pub const ANIMATION_BODY_SIZE_LIMIT: usize = 1024 * 1024 * 40;
+/// Audio file size limit. 30 MB
+pub const AUDIO_BODY_SIZE_LIMIT: usize = 1024 * 1024 * 30;
 /// JSON body size limit for both requests and responses
 pub const JSON_BODY_LIMIT: u64 = 1024 * 16; // 16
 
