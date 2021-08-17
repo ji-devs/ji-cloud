@@ -57,6 +57,9 @@ export class DropdownTree extends LitElement {
         cursor: pointer;
         margin-right: 5px;
       }
+      .arrowContainer {
+        padding: 5px;
+      }
 
       .children-visible {
         display: block;
@@ -67,6 +70,7 @@ export class DropdownTree extends LitElement {
 
       .content-line {
         display: flex;
+        align-items: center;
       }
     `,
     ];
@@ -138,7 +142,7 @@ function renderArrow(self: DropdownTree) {
   }
 
   return expanded ? html`<img-ui @click="${self.toggleExpand}" class="arrow" path="core/inputs/chevron-circle-down-green.svg" alt=""></img-ui>`
-    : html`<img-ui @click="${self.toggleExpand}" class="arrow" path="core/_common/chevron-right-grey.svg" alt=""></img-ui>`
+    : html`<div class="arrow arrowContainer" @click="${self.toggleExpand}"><img-ui path="core/_common/chevron-right-grey.svg" alt=""></img-ui></div>`
 }
 
 function multiColorClasses(self: DropdownTree) {

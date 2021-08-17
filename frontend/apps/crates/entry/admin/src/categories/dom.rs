@@ -155,6 +155,8 @@ impl MenuDom {
             .children(&mut [
                 html!("button-rect", {
                     .property("kind", "text")
+                    .property("color", "darkGray")
+                    .property("hoverColor", "blue")
                     .text("add")
                     .event(clone!(content_state => move |evt:events::Click| {
                         actions::add_category_child(content_state.clone());
@@ -162,6 +164,8 @@ impl MenuDom {
                 }),
                 html!("button-rect", {
                     .property("kind", "text")
+                    .property("color", "darkGray")
+                    .property("hoverColor", "blue")
                     .text("delete")
                     .event(clone!(content_state => move |evt:events::Click| {
                         actions::delete_category(content_state.clone());
@@ -169,6 +173,8 @@ impl MenuDom {
                 }),
                 html!("button-rect", {
                     .property("kind", "text")
+                    .property("color", "darkGray")
+                    .property("hoverColor", "blue")
                     .text("move up")
                     .event(clone!(content_state => move |evt:events::Click| {
                         actions::move_category(content_state.clone(), actions::Direction::Up);
@@ -176,6 +182,8 @@ impl MenuDom {
                 }),
                 html!("button-rect", {
                     .property("kind", "text")
+                    .property("color", "darkGray")
+                    .property("hoverColor", "blue")
                     .text("move down")
                     .event(clone!(content_state => move |evt:events::Click| {
                         actions::move_category(content_state.clone(), actions::Direction::Down);
@@ -183,6 +191,8 @@ impl MenuDom {
                 }),
                 html!("button-rect", {
                     .property("kind", "text")
+                    .property("color", "darkGray")
+                    .property("hoverColor", "blue")
                     .text("rename")
                     .event(clone!(content_state => move |evt:events::Click| {
                         //These are only DOM changes
