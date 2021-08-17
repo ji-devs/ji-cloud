@@ -1,6 +1,7 @@
 import "@elements/_bundles/_sub-bundles/page/header";
 import "@elements/entry/admin/shell";
-import "@elements/entry/admin/sidebar";
+import "@elements/entry/admin/sidebar/container";
+import "@elements/entry/admin/sidebar/item";
 import "@elements/entry/admin/category/pages/landing";
 import "@elements/entry/admin/category/buttons/add";
 import "@elements/entry/admin/images/add/pages/landing";
