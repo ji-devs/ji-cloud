@@ -493,31 +493,6 @@
       ]
     }
   },
-  "126e08105a23b5307bb59af3363cd531195cf690ad14bba8da23b4fd2eec96c1": {
-    "query": "\ninsert into animation_metadata (name, description, is_premium, publish_at, kind, looping) values ($1, $2, $3, $4, $5, $6)\nreturning id as \"id: AnimationId\"\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id: AnimationId",
-          "type_info": "Uuid"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Text",
-          "Bool",
-          "Timestamptz",
-          "Int2",
-          "Bool"
-        ]
-      },
-      "nullable": [
-        false
-      ]
-    }
-  },
   "12733111814b439e48d7e9f8ce720e88382a2e0a92dc6ec1dc077c09ad4a47a9": {
     "query": "select exists (select 1 from \"user\" where id = $1) as \"exists!\"",
     "describe": {
@@ -559,6 +534,18 @@
       "nullable": [
         null
       ]
+    }
+  },
+  "145cde06bc00df1855bd4307423b6f6f7f36a4560ed6e354a127f166d0d21011": {
+    "query": "update user_audio_upload set uploaded_at = now(), processing_result = null where audio_id = $1",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": []
     }
   },
   "16b8e7596de9c8c57e8a50d4b6788e6d7874603ce815762fae2380223a4ddfc0": {
@@ -633,6 +620,114 @@
         ]
       },
       "nullable": [
+        false
+      ]
+    }
+  },
+  "196981a36982a10e68661c8f04cdf39471687a1f2a3c9d92601aad9eee65d74e": {
+    "query": "\nselect id,\n    name,\n    kind as \"kind: ImageKind\",\n    description,\n    array((select affiliation_id from image_affiliation where image_id = image_metadata.id)) as \"affiliations!\",\n    array((select affiliation.display_name\n           from affiliation\n                    inner join image_affiliation on affiliation.id = image_affiliation.affiliation_id\n           where image_affiliation.image_id = image_metadata.id))                            as \"affiliation_names!\",\n           array((select style_id from image_style where image_id = image_metadata.id))             as \"styles!\",\n           array((select style.display_name\n                  from style\n                           inner join image_style on style.id = image_style.style_id\n           where image_style.image_id = image_metadata.id))                                  as \"style_names!\",\n    array((select age_range_id from image_age_range where image_id = image_metadata.id))     as \"age_ranges!\",\n    array((select age_range.display_name\n           from age_range\n                    inner join image_age_range on age_range.id = image_age_range.age_range_id\n           where image_age_range.image_id = image_metadata.id))                              as \"age_range_names!\",\n    array((select category_id from image_category where image_id = image_metadata.id))       as \"categories!\",\n    array((select name\n           from category\n                    inner join image_category on category.id = image_category.category_id\n           where image_category.image_id = image_metadata.id))                               as \"category_names!\",\n    array((select index \n           from image_tag \n               inner join image_tag_join on image_tag.index = image_tag_join.tag_index\n           where image_tag_join.image_id = image_metadata.id))                               as \"tags!\",\n    array((select display_name\n           from image_tag\n                    inner join image_tag_join on image_tag.index = image_tag_join.tag_index\n           where image_tag_join.image_id = image_metadata.id))                               as \"tag_names!\",\n    (publish_at < now() is true) as \"is_published!\",\n    is_premium\nfrom image_metadata\nwhere \n    last_synced_at is null or\n    (updated_at is not null and last_synced_at < updated_at) or\n    (publish_at < now() is true and last_synced_at < publish_at)\nlimit 100\nfor no key update skip locked;\n     ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "kind: ImageKind",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 3,
+          "name": "description",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "affiliations!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 5,
+          "name": "affiliation_names!",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 6,
+          "name": "styles!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 7,
+          "name": "style_names!",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 8,
+          "name": "age_ranges!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 9,
+          "name": "age_range_names!",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 10,
+          "name": "categories!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 11,
+          "name": "category_names!",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 12,
+          "name": "tags!",
+          "type_info": "Int2Array"
+        },
+        {
+          "ordinal": 13,
+          "name": "tag_names!",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 14,
+          "name": "is_published!",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 15,
+          "name": "is_premium",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
         false
       ]
     }
@@ -838,6 +933,33 @@
       "nullable": []
     }
   },
+  "228687aa01cb6d5780d804f5ddf78a5e070fc552dbb3b3f8e5224b8a6a9e9b18": {
+    "query": "\nselect id as \"id: ImageId\", kind as \"kind: ImageKind\"\nfrom user_image_library\n         join user_image_upload\n              on user_image_library.id = user_image_upload.image_id\nwhere processing_result is true\n  and user_id = $1\n  and (kind is not distinct from $2 or $2 is null)\norder by created_at desc\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: ImageId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "kind: ImageKind",
+          "type_info": "Int2"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2"
+        ]
+      },
+      "nullable": [
+        false,
+        false
+      ]
+    }
+  },
   "23873843756ff7baeccd6cae63c9d074287664e7bdfad98ee684de92962f1a88": {
     "query": "\ninsert into jig_age_range(jig_id, age_range_id)\nselect $1, age_range_id from jig_age_range where jig_id = $2\n",
     "describe": {
@@ -891,18 +1013,6 @@
       "nullable": [
         false
       ]
-    }
-  },
-  "2968c111bb7c6cd6a2974b52a5b80e4cf7fd4264cc519edcd68b2b6779a4ca2b": {
-    "query": "delete from user_image_library where id = $1",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      },
-      "nullable": []
     }
   },
   "2fc15a774a3c774d8fbe0e1c9479a021c7491224421b3d51a739126b2f38a252": {
@@ -1182,18 +1292,6 @@
       "nullable": []
     }
   },
-  "3fba9bb8028fc134499ea67c056c4018692bde07b26c5d578c54017fec5f95dd": {
-    "query": "update user_audio_library set uploaded_at = now() where id = $1",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      },
-      "nullable": []
-    }
-  },
   "4185902c16ca74f35ce932d41c8c6d9d16c49d6d1937cb30d6966b0f0dd6cb18": {
     "query": "\nselect draft_id as \"id: JigId\" from jig_draft_join where live_id = $1\n        ",
     "describe": {
@@ -1238,6 +1336,18 @@
           "Uuid",
           "Timestamptz",
           "Int2"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "4783cc4d1b317c1b58f392738ab9399d63ec4926354e35348c91fa13564f016d": {
+    "query": "update user_audio_upload set processed_at = now(), processing_result = true where audio_id = $1",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
         ]
       },
       "nullable": []
@@ -1393,23 +1503,13 @@
       ]
     }
   },
-  "4ece7de8525ff491823831df2bebf0d78e258fe95d1432e01ed0df448d04587f": {
-    "query": "\ninsert into user_profile\n    (user_id, username, over_18, given_name, family_name, language, locale, timezone, opt_into_edu_resources, organization, location) \nvalues \n    ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)\non conflict (user_id) do update\nset\n    over_18 = $3,\n    given_name = $4,\n    family_name = $5,\n    language = $6,\n    locale = $7,\n    timezone = $8,\n    opt_into_edu_resources = $9,\n    organization = $10,\n    location = $11\n",
+  "4ce0b3cd3acb70b250136f3b5d951fb79e8cfec345f875c95582f5b276cbca72": {
+    "query": "update user_audio_upload set processed_at = now(), processing_result = false where audio_id = $1",
     "describe": {
       "columns": [],
       "parameters": {
         "Left": [
-          "Uuid",
-          "Text",
-          "Bool",
-          "Text",
-          "Text",
-          "Text",
-          "Text",
-          "Text",
-          "Bool",
-          "Text",
-          "Jsonb"
+          "Uuid"
         ]
       },
       "nullable": []
@@ -1486,26 +1586,6 @@
       ]
     }
   },
-  "5379816dbbb936c2fa84c55000f10298f1b22286f2523b5f70dbab56b7e06d9f": {
-    "query": "\nselect id as \"id: ImageId\" \nfrom user_image_library inner join user_image_upload \n    on user_image_library.id = user_image_upload.image_id \nwhere id = $1 and processing_result is true\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id: ImageId",
-          "type_info": "Uuid"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      },
-      "nullable": [
-        false
-      ]
-    }
-  },
   "539bfa401960f946b1f9dab2156b13e1c5b69fea237777f05c9a26d6adb6caab": {
     "query": "select exists(select 1 from jig_draft_join where draft_id = $1) as \"exists!\"",
     "describe": {
@@ -1524,6 +1604,18 @@
       "nullable": [
         null
       ]
+    }
+  },
+  "57b72bbdece8deb3ac84c44b94157afbd3d50d16c893613f54145b9ca7e255d0": {
+    "query": "insert into user_audio_upload (audio_id) values($1)",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": []
     }
   },
   "5842389dd9a03ba291f04a518e3eccc249eb3664c1ecd12b294de7a81d132a59": {
@@ -1640,50 +1732,23 @@
       ]
     }
   },
-  "61b01c313aa1a78e790d69c2d6d2f4f429ac009a2003ee664acd626749de6fe3": {
-    "query": "select id as \"id!\",\n    case kind\n        -- PngCanvasImage\n        when 0 then 3\n        -- PngStickerImage\n        when 1 then 0\n    end::int2 \"kind!: MediaKind\", \n    created_at as \"created_at!\",\n    updated_at,\n    uploaded_at,\n    0::int2 as \"library!: MediaLibrary\" -- global\nfrom image_metadata\nleft join image_upload on image_id = id\nunion all\nselect id as \"id!\",\n    case kind\n        -- GifAnimation\n        when 0 then 1\n        -- SpritesheetAnimation\n        when 1 then 2\n    end::int2 \"kind!: MediaKind\", \n    created_at as \"created_at!\",\n    updated_at,\n    uploaded_at,\n    0::int2 as \"library!: MediaLibrary\" -- global\nfrom animation_metadata\nleft join global_animation_upload on animation_id = id\nunion all\nselect id as \"id!\",\n    -- PngStickerImage\n    0::int2 as \"kind!: MediaKind\",\n    created_at as \"created_at!\",\n    updated_at,\n    uploaded_at,\n    1::int2 as \"library!: MediaLibrary\" -- user\nfrom user_image_library\nleft join user_image_upload on image_id = id\nunion all\nselect id as \"id!\",\n    -- Mp3Audio\n    4::int2 as \"kind!: MediaKind\",\n    created_at as \"created_at!\",\n    updated_at,\n    uploaded_at,\n    1::int2 as \"library!: MediaLibrary\" -- user\nfrom user_audio_library\nunion all\nselect id as \"id!\",\n    kind as \"kind!: MediaKind\",\n    created_at as \"created_at!\",\n    updated_at,\n    uploaded_at,\n    2::int2 as \"library!: MediaLibrary\" -- web\nfrom web_media_library\n",
+  "620638cd11c57d625c799e1d5ada2d57161cb59e06559bc3bd7ee3e3e3a8d5ee": {
+    "query": "\nselect exists(select 1 from user_image_library where user_id = $1 and id = $2) as \"exists!\"\n    ",
     "describe": {
       "columns": [
         {
           "ordinal": 0,
-          "name": "id!",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "kind!: MediaKind",
-          "type_info": "Int2"
-        },
-        {
-          "ordinal": 2,
-          "name": "created_at!",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 3,
-          "name": "updated_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 4,
-          "name": "uploaded_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 5,
-          "name": "library!: MediaLibrary",
-          "type_info": "Int2"
+          "name": "exists!",
+          "type_info": "Bool"
         }
       ],
       "parameters": {
-        "Left": []
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
       },
       "nullable": [
-        null,
-        null,
-        null,
-        null,
-        null,
         null
       ]
     }
@@ -1991,18 +2056,6 @@
       ]
     }
   },
-  "6e208fc3bc2f8b325a05f5db6826eb909e13fe012d6070451078d646101e6723": {
-    "query": "insert into user_image_upload (image_id) values($1)",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      },
-      "nullable": []
-    }
-  },
   "6f2efac54ea432d33d9d1a74ef07c9fb09eb8082a80cf4d36784f480b7eb8bb9": {
     "query": "\ninsert into user_recent_image (user_id, image_id, media_library)\nvalues ($1, $2, $3)\nreturning image_id as \"id: ImageId\", media_library as \"library: MediaLibrary\", last_used as \"last_used: DateTime<Utc>\";\n            ",
     "describe": {
@@ -2136,6 +2189,43 @@
       ],
       "parameters": {
         "Left": []
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
+  "7325c7ed63eb3cf5405a37c590c086cb0f1c457f27f6b53eacd26bb6dac849ec": {
+    "query": "insert into user_image_upload (image_id) values ($1)",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "73f764f872bffc9e08fe85ba34a7b52d7c9e645095e3b1e4cec6a0b1d5b27d2d": {
+    "query": "\ninsert into animation_metadata (name, description, is_premium, publish_at, kind, is_looping) values ($1, $2, $3, $4, $5, $6)\nreturning id as \"id: AnimationId\"\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: AnimationId",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text",
+          "Bool",
+          "Timestamptz",
+          "Int2",
+          "Bool"
+        ]
       },
       "nullable": [
         false
@@ -2316,6 +2406,42 @@
       ]
     }
   },
+  "758bee136eaae799c8beef0e069597d0f67cfc590d5ecc6a4353d24b3474e39b": {
+    "query": "\n        select index as \"index: ImageTagIndex\", display_name, created_at, updated_at from \"image_tag\"\n        order by index\n    ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "index: ImageTagIndex",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 1,
+          "name": "display_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 3,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        true
+      ]
+    }
+  },
   "760185608bd03a9a30aba9100ecc18e170aed0b1008c5f51ad0c7c6f564b090e": {
     "query": "select user_id from user_auth_google where google_id = $1",
     "describe": {
@@ -2336,31 +2462,28 @@
       ]
     }
   },
-  "7f13eff963b91007e55a4a80fc4e32b866781dab9548bb01db0d20a12cb664ed": {
-    "query": "\nselect id as \"id: TagId\", display_name, index from \"image_tag\"\norder by index\n            ",
+  "76f5138776b2544741d5bd7a20298dd4309fa398f23fac98b74873899a0f88b3": {
+    "query": "\ninsert into image_tag (index, display_name)\nvalues ($1, $2)\nreturning index as \"index: ImageTagIndex\", display_name\n            ",
     "describe": {
       "columns": [
         {
           "ordinal": 0,
-          "name": "id: TagId",
-          "type_info": "Uuid"
+          "name": "index: ImageTagIndex",
+          "type_info": "Int2"
         },
         {
           "ordinal": 1,
           "name": "display_name",
           "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "index",
-          "type_info": "Int2"
         }
       ],
       "parameters": {
-        "Left": []
+        "Left": [
+          "Int2",
+          "Text"
+        ]
       },
       "nullable": [
-        false,
         false,
         false
       ]
@@ -2536,6 +2659,27 @@
       },
       "nullable": [
         null
+      ]
+    }
+  },
+  "87fc2b6aae796b62d4bca602b3d6d99d961677cc1fa42b96b112015927be1d6e": {
+    "query": "\ninsert into user_image_library (user_id, kind)\nvalues ($1, $2)\nreturning id as \"id: ImageId\"\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: ImageId",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2"
+        ]
+      },
+      "nullable": [
+        false
       ]
     }
   },
@@ -3084,8 +3228,61 @@
       ]
     }
   },
+  "986130a83ea19f3782aa5e5c1c0a0a260c515e4aad15cc17d63aba20db572b2f": {
+    "query": "delete from user_image_library where user_id = $1 and id = $2",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "9b861485e86da04aaa69d4863da15659c65606df112805e833c162510b8aad6d": {
+    "query": "\nselect exists(select 1\nfrom user_audio_library\ninner join user_audio_upload on user_audio_library.id = user_audio_upload.audio_id\nwhere (id = $1 and uploaded_at is not null and processed_at >= uploaded_at is not true)\nfor no key update of user_audio_upload\nfor share of user_audio_library\nskip locked\n) as \"exists!\"\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "exists!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
   "9baca0e0cc5e462bafb40e834a5c894d9f02dbb61ec75d81609cc32c946f5857": {
     "query": "select exists(select 1 from image_metadata where id = $1) as \"exists!\"",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "exists!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
+  "9d166e1174a30bbd4c9c87544cf9c8403e5fb1dfc00fb312db75c795436f9ea3": {
+    "query": "select exists(select 1 from user_audio_upload where audio_id = $1 for no key update) as \"exists!\"",
     "describe": {
       "columns": [
         {
@@ -3190,24 +3387,6 @@
       "nullable": []
     }
   },
-  "a17d100505aa7d8a6310b6a8d8db590654d9b5fbba1fd339851c9a95effe0af6": {
-    "query": "\nselect id as \"id: ImageId\" \nfrom user_image_library join user_image_upload \n    on user_image_library.id = user_image_upload.image_id\nwhere processing_result is true\norder by created_at desc\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id: ImageId",
-          "type_info": "Uuid"
-        }
-      ],
-      "parameters": {
-        "Left": []
-      },
-      "nullable": [
-        false
-      ]
-    }
-  },
   "a196efbd15600fad1de6cd53a5fbdcc2f070b122f30811275dd7d5567f455346": {
     "query": "\ninsert into jig_additional_resource(jig_id, url)\nselect $1, url from jig_additional_resource where jig_id = $2\n        ",
     "describe": {
@@ -3251,6 +3430,30 @@
         ]
       },
       "nullable": [
+        false
+      ]
+    }
+  },
+  "a85530d1d83a7f3cd3786da68f5b489fbddbf411d735cf114817e4417768520b": {
+    "query": "\nselect index as \"index: ImageTagIndex\", display_name from \"image_tag\"\norder by index\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "index: ImageTagIndex",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 1,
+          "name": "display_name",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
         false
       ]
     }
@@ -3387,26 +3590,6 @@
         ]
       },
       "nullable": []
-    }
-  },
-  "af84d5780cd749a90a3f26b3606bb5a737bcbe2c08998a9c5e7deb28310d9ead": {
-    "query": "select 1 as discard from user_audio_library where id = $1 for update",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "discard",
-          "type_info": "Int4"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      },
-      "nullable": [
-        null
-      ]
     }
   },
   "b093762d4b40e825b57962cb833a8144a57270a3029f0cd6362d956b701e0651": {
@@ -3674,114 +3857,6 @@
       "nullable": []
     }
   },
-  "bc780ffba7cd48b5c9b829c87ef663b4dc398986888f9f5285b413b1563db729": {
-    "query": "\nselect id,\n    name,\n    kind as \"kind: ImageKind\",\n    description,\n    array((select affiliation_id from image_affiliation where image_id = image_metadata.id)) as \"affiliations!\",\n    array((select affiliation.display_name\n           from affiliation\n                    inner join image_affiliation on affiliation.id = image_affiliation.affiliation_id\n           where image_affiliation.image_id = image_metadata.id))                            as \"affiliation_names!\",\n           array((select style_id from image_style where image_id = image_metadata.id))             as \"styles!\",\n           array((select style.display_name\n                  from style\n                           inner join image_style on style.id = image_style.style_id\n           where image_style.image_id = image_metadata.id))                                  as \"style_names!\",\n    array((select age_range_id from image_age_range where image_id = image_metadata.id))     as \"age_ranges!\",\n    array((select age_range.display_name\n           from age_range\n                    inner join image_age_range on age_range.id = image_age_range.age_range_id\n           where image_age_range.image_id = image_metadata.id))                              as \"age_range_names!\",\n    array((select category_id from image_category where image_id = image_metadata.id))       as \"categories!\",\n    array((select name\n           from category\n                    inner join image_category on category.id = image_category.category_id\n           where image_category.image_id = image_metadata.id))                               as \"category_names!\",\n    array((select tag_id from image_tag_join where image_id = image_metadata.id))       as \"tags!\",\n    array((select name\n           from image_tag\n                    inner join image_tag_join on image_tag.id = image_tag_join.tag_id\n           where image_tag_join.image_id = image_metadata.id))                               as \"tag_names!\",\n    (publish_at < now() is true) as \"is_published!\",\n    is_premium\nfrom image_metadata\nwhere \n    last_synced_at is null or\n    (updated_at is not null and last_synced_at < updated_at) or\n    (publish_at < now() is true and last_synced_at < publish_at)\nlimit 100\nfor no key update skip locked;\n     ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "kind: ImageKind",
-          "type_info": "Int2"
-        },
-        {
-          "ordinal": 3,
-          "name": "description",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 4,
-          "name": "affiliations!",
-          "type_info": "UuidArray"
-        },
-        {
-          "ordinal": 5,
-          "name": "affiliation_names!",
-          "type_info": "TextArray"
-        },
-        {
-          "ordinal": 6,
-          "name": "styles!",
-          "type_info": "UuidArray"
-        },
-        {
-          "ordinal": 7,
-          "name": "style_names!",
-          "type_info": "TextArray"
-        },
-        {
-          "ordinal": 8,
-          "name": "age_ranges!",
-          "type_info": "UuidArray"
-        },
-        {
-          "ordinal": 9,
-          "name": "age_range_names!",
-          "type_info": "TextArray"
-        },
-        {
-          "ordinal": 10,
-          "name": "categories!",
-          "type_info": "UuidArray"
-        },
-        {
-          "ordinal": 11,
-          "name": "category_names!",
-          "type_info": "TextArray"
-        },
-        {
-          "ordinal": 12,
-          "name": "tags!",
-          "type_info": "UuidArray"
-        },
-        {
-          "ordinal": 13,
-          "name": "tag_names!",
-          "type_info": "TextArray"
-        },
-        {
-          "ordinal": 14,
-          "name": "is_published!",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 15,
-          "name": "is_premium",
-          "type_info": "Bool"
-        }
-      ],
-      "parameters": {
-        "Left": []
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        false
-      ]
-    }
-  },
   "bdedb2c9dea3363859d3dbe22b6665efda3bf686a9c1eca1ffc9fb298de68d6f": {
     "query": "\n            select id as \"id: AgeRangeId\", display_name, created_at, updated_at from age_range\n            order by index\n        ",
     "describe": {
@@ -3843,6 +3918,33 @@
         ]
       },
       "nullable": []
+    }
+  },
+  "c84c613c4d8af5d5228646ffb25c2cd2825699626313634127fc09341ed715ac": {
+    "query": "\nselect id as \"id: ImageId\", kind as \"kind: ImageKind\"\nfrom user_image_library\n         inner join user_image_upload\n                    on user_image_library.id = user_image_upload.image_id\nwhere user_id = $1\n  and id = $2\n  and processing_result is true\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: ImageId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "kind: ImageKind",
+          "type_info": "Int2"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false,
+        false
+      ]
     }
   },
   "c9871e12739d5ae1acd8e3026e00ed927a54f717d5e5cd12f78456b99a7aa23b": {
@@ -3910,48 +4012,6 @@
       ]
     }
   },
-  "d24c286c6094e2009d400e4f366ffb3ba255c34bf4848598a30a63c2f1106889": {
-    "query": "\n        select id as \"id: TagId\", display_name, created_at, updated_at, index from \"image_tag\"\n        order by index\n    ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id: TagId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "display_name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "created_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 3,
-          "name": "updated_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 4,
-          "name": "index",
-          "type_info": "Int2"
-        }
-      ],
-      "parameters": {
-        "Left": []
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        true,
-        false
-      ]
-    }
-  },
   "d32e3899d7c0ea60a1ea6d88446a9b182763d14c95a5c7f3084d2928aa286406": {
     "query": "\nwith cte as (\n    insert into user_color\n    (user_id, color, index)\n    values ($1, $2, (select count(*) from user_color where user_id = $1)) returning color\n), colors as (\n    select color\n    from user_color\n    where user_id = $1\n    order by index\n)\nselect color as \"color!\" from colors\nunion all\nselect color as \"color!\" from cte\n    ",
     "describe": {
@@ -4002,26 +4062,6 @@
         "Left": [
           "Bool",
           "Int2"
-        ]
-      },
-      "nullable": [
-        null
-      ]
-    }
-  },
-  "daa77824c0c1372877839ffbc0bd3b0d8b4a0a9754a5e98d1e0bd1e9c15640c7": {
-    "query": "select exists(select 1 from user_image_upload where image_id = $1 for no key update) as \"exists!\"",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "exists!",
-          "type_info": "Bool"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
         ]
       },
       "nullable": [
@@ -4198,21 +4238,51 @@
       "nullable": []
     }
   },
-  "e53665c81494eec03a5148d47f3a8e68b49071f7e69717c95e91dee992efa6bf": {
-    "query": "\ninsert into user_image_library default values\nreturning id as \"id: ImageId\"\n",
+  "e7b414859b52186188a99c58f582e19b132f586d976eabf098c40f1fe356982d": {
+    "query": "select id as \"id!\",\n    case kind\n        -- PngCanvasImage\n        when 0 then 3\n        -- PngStickerImage\n        when 1 then 0\n    end::int2 \"kind!: MediaKind\",\n    created_at as \"created_at!\",\n    updated_at,\n    uploaded_at,\n    0::int2 as \"library!: MediaLibrary\" -- global\nfrom image_metadata\nleft join image_upload on image_id = id\nunion all\nselect id as \"id!\",\n    case kind\n        -- GifAnimation\n        when 0 then 1\n        -- SpritesheetAnimation\n        when 1 then 2\n    end::int2 \"kind!: MediaKind\",\n    created_at as \"created_at!\",\n    updated_at,\n    uploaded_at,\n    0::int2 as \"library!: MediaLibrary\" -- global\nfrom animation_metadata\nleft join global_animation_upload on animation_id = id\nunion all\nselect id as \"id!\",\n    -- PngStickerImage\n    0::int2 as \"kind!: MediaKind\",\n    created_at as \"created_at!\",\n    updated_at,\n    uploaded_at,\n    1::int2 as \"library!: MediaLibrary\" -- user\nfrom user_image_library\nleft join user_image_upload on image_id = id\nunion all\nselect id as \"id!\",\n    -- Mp3Audio\n    4::int2 as \"kind!: MediaKind\",\n    created_at as \"created_at!\",\n    updated_at,\n    uploaded_at,\n    1::int2 as \"library!: MediaLibrary\" -- user\nfrom user_audio_library\nleft join user_audio_upload on audio_id = id\nunion all\nselect id as \"id!\",\n    kind as \"kind!: MediaKind\",\n    created_at as \"created_at!\",\n    updated_at,\n    uploaded_at,\n    2::int2 as \"library!: MediaLibrary\" -- web\nfrom web_media_library\n",
     "describe": {
       "columns": [
         {
           "ordinal": 0,
-          "name": "id: ImageId",
+          "name": "id!",
           "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "kind!: MediaKind",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 2,
+          "name": "created_at!",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 3,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 4,
+          "name": "uploaded_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 5,
+          "name": "library!: MediaLibrary",
+          "type_info": "Int2"
         }
       ],
       "parameters": {
         "Left": []
       },
       "nullable": [
-        false
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
       ]
     }
   },
@@ -4626,39 +4696,6 @@
         true,
         null,
         null
-      ]
-    }
-  },
-  "f952ba3dea24e228c56c46db14e1db511e5325d96026dfe1ba8cd06cb2864e62": {
-    "query": "\ninsert into image_tag (index, display_name)\nvalues ($1, $2)\nreturning id as \"id: TagId\", index as \"index: i16\", display_name\n            ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id: TagId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "index: i16",
-          "type_info": "Int2"
-        },
-        {
-          "ordinal": 2,
-          "name": "display_name",
-          "type_info": "Text"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int2",
-          "Text"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false
       ]
     }
   },
