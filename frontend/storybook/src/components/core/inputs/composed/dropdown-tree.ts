@@ -54,7 +54,7 @@ export const DropdownTree = (props?:Partial<Args>) => {
       return `<menu-ellipses slot="content" ${menuContents ? "visible" : ""} hover>
         ${content}
         <div slot="menu-content">
-          Menu Here!
+          <button-rect kind="text" color="darkGray" hoverColor="blue">Menu Here!</button-rect>
         </div>
       </menu-ellipses>`
     }

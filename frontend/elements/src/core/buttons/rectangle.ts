@@ -1,7 +1,7 @@
 import { LitElement, html, css, customElement, property } from 'lit-element';
 import { ifDefined } from 'lit-html/directives/if-defined';
 
-export type Color = "red" | "blue" | "green";
+export type Color = "red" | "blue" | "green" | "darkGray";
 export type Size = "small" | "medium" | "large";
 export type Kind = "filled" | "text" | "outline";
 
@@ -22,6 +22,10 @@ export class _ extends LitElement {
                     padding: 0;
                 }
 
+                :host([color=darkGray]) {
+                    /* Just taken from the first time it was needed... */
+                    color: #4a4a4a;
+                }
                 :host([color=red]) {
                     --color: #fd6b71;
                 }
@@ -31,7 +35,8 @@ export class _ extends LitElement {
                 :host([color=blue]) {
                     --color: #5590fc;
                 }
-                :host([color=blue]:hover) {
+
+                :host([color=blue]:hover), :host([hoverColor=blue]:hover) {
                     --color: #387af4;
                 }
                 :host([color=green]) {
@@ -101,6 +106,9 @@ export class _ extends LitElement {
 
     @property({ reflect: true })
     color: Color = "red";
+
+    @property({ reflect: true })
+    hoverColor: Color | "" = "";
 
     @property({ reflect: true })
     kind: Kind = "filled";
