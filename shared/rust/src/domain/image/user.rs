@@ -4,7 +4,27 @@
 use paperclip::actix::Apiv2Schema;
 use serde::{Deserialize, Serialize};
 
-use super::ImageId;
+use super::{ImageId, ImageKind};
+
+/// Request for creating a user image profile
+#[derive(Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+pub struct UserImageCreateRequest {
+    /// The kind of the image. Most relevant for uploading user profile images
+    pub kind: ImageKind,
+}
+
+/// Query for listing. This is optional. If used, should be included as part of the query string.
+///
+/// * `kind` field must match the case as represented in the returned json body (`PascalCase`?).
+#[derive(Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+pub struct UserImageListQuery {
+    /// Optionally filter by image kind. If included it will only return results of the corresponding
+    /// kinds listed.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub kind: Option<ImageKind>,
+}
 
 /// Response for listing.
 #[derive(Serialize, Deserialize, Debug)]
@@ -28,6 +48,8 @@ pub struct UserImageResponse {
 pub struct UserImage {
     /// The image's ID.
     pub id: ImageId,
+    /// The image kind
+    pub kind: ImageKind,
     // more fields to be added
 }
 

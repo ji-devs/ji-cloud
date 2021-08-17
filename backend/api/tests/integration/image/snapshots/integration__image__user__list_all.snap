@@ -1,0 +1,33 @@
+---
+source: tests/integration/image/user.rs
+expression: body
+
+---
+{
+  "images": [
+    {
+      "metadata": {
+        "id": "89125d88-ffaa-11eb-86a5-9fd50ab8d8df",
+        "kind": "Sticker"
+      }
+    },
+    {
+      "metadata": {
+        "id": "89fa4c10-ffaa-11eb-86a5-870d6a01dc37",
+        "kind": "Sticker"
+      }
+    },
+    {
+      "metadata": {
+        "id": "8a2469b4-ffaa-11eb-86a5-330f321d2a3f",
+        "kind": "Sticker"
+      }
+    },
+    {
+      "metadata": {
+        "id": "8a473dd6-ffaa-11eb-86a5-dba3538e5a15",
+        "kind": "UserProfile"
+      }
+    }
+  ]
+}

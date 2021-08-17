@@ -1,4 +1,3 @@
-use crate::{error, service};
 use shared::{
     domain::{animation::AnimationKind, image::ImageKind},
     media::{FileKind, MediaLibrary, PngImageFile},
@@ -6,9 +5,11 @@ use shared::{
 use sqlx::PgPool;
 use uuid::Uuid;
 
+use crate::{error, service};
+
 pub async fn process_image(
     db: &PgPool,
-    s3: &crate::service::s3::Client,
+    s3: &service::s3::Client,
     id: Uuid,
 ) -> anyhow::Result<bool> {
     log::info!("Processing image {}", id);
@@ -98,7 +99,7 @@ skip locked
 
 pub async fn process_user_image(
     db: &PgPool,
-    s3: &crate::service::s3::Client,
+    s3: &service::s3::Client,
     id: Uuid,
 ) -> anyhow::Result<bool> {
     let mut txn = db.begin().await?;
@@ -267,7 +268,7 @@ skip locked
 
 pub async fn process_user_audio(
     db: &PgPool,
-    s3: &crate::s3::Client,
+    s3: &service::s3::Client,
     id: Uuid,
 ) -> anyhow::Result<bool> {
     let mut txn = db.begin().await?;

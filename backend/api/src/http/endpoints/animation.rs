@@ -7,10 +7,7 @@ use paperclip::actix::{
 use shared::{
     api::{endpoints::animation, ApiEndpoint},
     domain::{
-        animation::{
-            AnimationId, AnimationKind, AnimationResponse, AnimationUploadRequest,
-            AnimationUploadResponse,
-        },
+        animation::{AnimationId, AnimationKind, AnimationResponse, AnimationUploadResponse},
         CreateResponse,
     },
     media::{FileKind, MediaLibrary},
