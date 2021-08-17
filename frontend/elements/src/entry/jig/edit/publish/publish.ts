@@ -76,7 +76,7 @@ export class _ extends LitElement {
                 display: grid;
                 row-gap: 16px;
             }
-            .category-labels {
+            ::slotted([slot=category-labels]) {
                 display: flex;
                 flex-wrap: wrap;
                 column-gap: 8px;
@@ -130,9 +130,7 @@ export class _ extends LitElement {
                             <slot name="goal"></slot>
                             <div class="catagories">
                                 <slot name="catagories-select"></slot>
-                                <div class="category-labels">
-                                    <slot name="category-labels"></slot>
-                                </div>
+                                <slot name="category-labels"></slot>
                             </div>
                         </div>
                         <div class="column-4 additional-resources">

@@ -4,7 +4,7 @@ import { LitElement, html, css, customElement, property } from 'lit-element';
 export class _ extends LitElement {
     static get styles() {
         return [css`
-            .wrapper {
+            :host {
                 border-radius: 12px;
                 border: solid 1px #b0ccf2;
                 background-color: #f3f8fe;
@@ -12,48 +12,35 @@ export class _ extends LitElement {
                 justify-content: center;
                 align-items: center;
                 font-size: 14px;
-                height: 24px;
+                line-height: 24px;
                 color: #387af4;
                 position: relative;
-                padding: 5px 12px;
+                padding: 0 12px;
                 box-sizing: border-box;
+                position: relative;
             }
-
-            img-ui {
-                position: absolute;
-                top: -7px;
-                left: 80px;
+            :host(:hover) {
+                border-color: #5893f9;
+            }
+            ::slotted([slot=delete]) {
                 display: none;
-                height: 16px;
-                width: 16px;
             }
-
-            .wrapper:hover img-ui {
-                display: block;
-                cursor: pointer;
-            }
-
-            .negative {
-                border: solid 1px #6ea3f9;
-                color: #afcbf4;
-                background-color: inherit;
+            :host(:hover) ::slotted([slot=delete]) {
+                display: inline-block;
+                position: absolute;
+                right: -8px;
+                top: -8px;
             }
         `];
     }
-    @property({ type: Boolean })
-    negative: boolean = false;
 
     @property()
     label: string = "";
 
     render() {
-        const { negative, label } = this;
-
         return html`
-            <div class="wrapper ${negative ? 'negative' : ''}">
-                <span>${label}</span>
-                <img-ui path="icn-delete-tab.svg"></img-ui>
-            </div>
+            <span>${this.label}</span>
+            <slot name="delete"></slot>
         `;
     }
 }
