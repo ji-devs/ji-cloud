@@ -1,5 +1,5 @@
 use shared::domain::jig::{Jig, JigId, module::{ModuleId, body::{_groups::design::{Backgrounds, Sticker}, ThemeChoice, Instructions, tapping_board::{Mode, Step, ModuleData as RawData, PlaySettings, TappingTrace}}}};
-use components::{audio_mixer::AudioMixer, module::_common::play::prelude::*};
+use components::{audio::mixer::AudioMixer, module::_common::play::prelude::*};
 use utils::prelude::*;
 use web_sys::AudioContext;
 use std::rc::Rc;

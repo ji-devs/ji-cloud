@@ -1,11 +1,11 @@
 use std::rc::Rc;
 
-use crate::audio_input::state::{AudioInputMode, State};
+use crate::audio::input::state::{AudioInputMode, AudioInput};
 use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
 use utils::events;
 
-pub fn render(state: Rc<State>) -> Dom {
+pub fn render(state: Rc<AudioInput>) -> Dom {
     html!("audio-input-delete", {
         .property("slot", "delete")
         .visible_signal(state.mode.signal_cloned().map(|mode| {

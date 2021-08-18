@@ -1,11 +1,11 @@
 use shared::domain::jig::module::body::Audio;
 
-pub struct Callbacks {
+pub struct AudioInputCallbacks {
     pub on_add: Option<Box<dyn Fn(Audio)>>,
     pub on_delete: Option<Box<dyn Fn()>>,
 }
 
-impl Callbacks {
+impl AudioInputCallbacks {
     pub fn new(
         on_add: Option<impl Fn(Audio) + 'static>,
         on_delete: Option<impl Fn() + 'static>,

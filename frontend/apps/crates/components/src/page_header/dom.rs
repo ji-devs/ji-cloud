@@ -1,9 +1,9 @@
 use std::rc::Rc;
 
-use dominator::{html, Dom};
+use dominator::{Dom, clone, html};
 use futures_signals::signal::{Signal, SignalExt};
 use shared::domain::user::{UserProfile, UserScope};
-use utils::routes::{AdminRoute, HomeRoute, JigRoute, ProfileSection, Route, UserRoute};
+use utils::{events, routes::{AdminRoute, HomeRoute, JigRoute, Route, UserRoute}};
 
 use crate::page_header::state::LoggedInState;
 
@@ -11,6 +11,8 @@ use super::{actions, state::State};
 
 const STR_SIGN_UP: &'static str = "Sign up";
 const STR_LOGIN: &'static str = "Login";
+const STR_LOGOUT: &'static str = "Logout";
+const STR_DONATE: &'static str = "Donate";
 
 pub fn render(state: Rc<State>, slot: Option<&str>) -> Dom {
     actions::fetch_profile(Rc::clone(&state));
@@ -52,7 +54,7 @@ pub fn render(state: Rc<State>, slot: Option<&str>) -> Dom {
                 .property("color", "green")
                 .property("size", "small")
                 .property("bold", true)
-                .text("Donate")
+                .text(STR_DONATE)
             }),
         ])
         .child_signal(admin_privileges(Rc::clone(&state)).map(|admin_privileges| {
@@ -70,13 +72,13 @@ pub fn render(state: Rc<State>, slot: Option<&str>) -> Dom {
                 }
             }
         }))
-        .children_signal_vec(state.logged_in.signal_cloned().map(|logged_in| {
+        .children_signal_vec(state.logged_in.signal_cloned().map(clone!(state => move|logged_in| {
             match logged_in {
-                LoggedInState::LoggedIn(user) => render_logged_in(&user),
+                LoggedInState::LoggedIn(user) => render_logged_in(Rc::clone(&state), &user),
                 LoggedInState::LoggedOut => render_logged_out(),
                 LoggedInState::Loading => vec![],
             }
-        }).to_signal_vec())
+        })).to_signal_vec())
     })
 }
 
@@ -89,14 +91,20 @@ fn admin_privileges(state: Rc<State>) -> impl Signal<Item = bool> {
     })
 }
 
-fn render_logged_in(user: &UserProfile) -> Vec<Dom> {
-    vec![html!("a", {
+fn render_logged_in(state: Rc<State>, user: &UserProfile) -> Vec<Dom> {
+    vec![html!("page-header-profile", {
         .property("slot", "user")
-        .property("href", &Route::User(UserRoute::Profile(ProfileSection::Landing)).to_string())
-        .style("text-decoration", "none")
-        .child(html!("page-header-profile", {
-            .style("cursor", "pointer")
-            .property("name", &user.given_name)
+        .property("name", &user.given_name)
+        .property("email", &user.email)
+        .child(html!("button-rect", {
+            .property("slot", "logout")
+            .property("kind", "outline")
+            .property("size", "small")
+            .property("color", "blue")
+            .text(STR_LOGOUT)
+            .event(clone!(state => move |_: events::Click| {
+                actions::logout(Rc::clone(&state));
+            }))
         }))
     })]
 }

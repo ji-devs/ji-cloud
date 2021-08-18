@@ -4,7 +4,7 @@ use std::rc::Rc;
 use utils::prelude::*;
 
 use super::state::*;
-use crate::audio_mixer::AudioMixer;
+use crate::audio::mixer::AudioMixer;
 
 pub fn render_instructions_player(state: Rc<InstructionsPlayer>, mixer: &AudioMixer) -> Dom {
     *state.audio.borrow_mut() = state

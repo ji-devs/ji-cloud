@@ -1,8 +1,8 @@
 use std::rc::Rc;
 
+use components::module::_common::thumbnail::ModuleThumbnail;
 use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
-use shared::api::endpoints::jig;
 use utils::events;
 
 use crate::player::sidebar::actions::load_ages;
@@ -76,14 +76,14 @@ pub fn render(state: Rc<State>) -> Dom {
                                 .event(clone!(state => move |_: events::Click| {
                                     state.player_state.active_module.set(i);
                                 }))
-                                .children(&mut [
-                                    html!("img-ji", {
-                                        .property("slot", "window")
-                                        .property("size", "original")
-                                        .property("lib", "mock")
-                                        .property("id", "something.jpg")
+                                .child(ModuleThumbnail::render(
+                                    Rc::new(ModuleThumbnail {
+                                        jig_id: state.player_state.jig_id.clone(),
+                                        module: module.clone(), 
+                                        is_jig_fallback: false,
                                     }),
-                                ])
+                                    Some("window")
+                                ))
                             })
                         }).collect::<Vec<Dom>>())
                     }))

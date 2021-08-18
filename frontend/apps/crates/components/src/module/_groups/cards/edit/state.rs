@@ -3,7 +3,7 @@ use std::rc::Rc;
 use super::debug::DebugSettings;
 use dominator_helpers::signals::EitherSignal;
 use crate::{
-    audio_mixer::AudioMixer, module::_common::edit::prelude::*,
+    audio::mixer::AudioMixer, module::_common::edit::prelude::*,
     tooltip::state::State as TooltipState,
 };
 use futures_signals::{

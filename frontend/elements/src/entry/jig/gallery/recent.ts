@@ -47,7 +47,7 @@ export class _ extends LitElement {
                     grid-template-rows: 16px auto 1fr;
                     grid-template-columns: 1fr auto 16px;
                 }
-                .top-section img-ui {
+                .top-section ::slotted([slot=thumbnail]) {
                     grid-column: 1 / -1;
                     grid-row: 1 / -1;
                 }
@@ -82,9 +82,6 @@ export class _ extends LitElement {
     @property()
     label: string = "";
 
-    @property()
-    img: string = "";
-
     @property({type: Boolean, reflect: true})
     draft = false;
 
@@ -111,7 +108,7 @@ export class _ extends LitElement {
                 ) : nothing }
                 <div class="card">
                     <div class="top-section">
-                        <img-ui path="${this.img}"></img-ui>
+                        <slot name="thumbnail"></slot>
                         <menu-kebab
                             class="menu ${classMap({"menu-open": this.menuOpen})}"
                             @open="${() => this.menuOpen = true}"

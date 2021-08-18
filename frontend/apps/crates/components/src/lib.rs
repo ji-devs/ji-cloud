@@ -6,16 +6,13 @@
 /// these are always enabled
 pub mod input;
 
-/// image itself is always enabled
-/// but image_search is gated behind that
+/// these are always enabled
+/// with sub-modules gated 
 pub mod image;
+pub mod audio;
 
 #[cfg(feature = "animation")]
 pub mod animation;
-#[cfg(feature = "audio_input")]
-pub mod audio_input;
-#[cfg(feature = "audio_mixer")]
-pub mod audio_mixer;
 #[cfg(feature = "backgrounds")]
 pub mod backgrounds;
 #[cfg(feature = "collision")]

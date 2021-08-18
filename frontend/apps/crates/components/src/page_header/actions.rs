@@ -31,3 +31,10 @@ pub fn fetch_profile(state: Rc<State>) {
         };
     }));
 }
+
+pub fn logout(_state: Rc<State>) {
+    // state.loader.load(clone!(state => async move {
+        
+    // }));
+    let _ = web_sys::window().unwrap().alert_with_message("not implemented");
+}

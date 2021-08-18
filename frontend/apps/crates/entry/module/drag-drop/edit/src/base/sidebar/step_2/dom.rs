@@ -6,7 +6,7 @@ use futures_signals::signal::{Signal, SignalExt};
 use components::{
     image::search::dom::render as render_image_search,
     text_editor::dom::render_controls as render_text_editor,
-    audio_input::{state::State as AudioInputState, dom::render as render_audio_input},
+    audio::input::AudioInput,
 };
 
 pub fn render_step_2(state: Rc<Step2>) -> Dom {
@@ -45,12 +45,12 @@ fn render_tab(state: Rc<Step2>, tab_kind:TabKind) -> Dom {
     })
 }
 
-fn render_audio(state: Rc<Step2>, audio_state_signal: impl Signal<Item = Option<Rc<AudioInputState>>> + 'static) -> Dom {
+fn render_audio(state: Rc<Step2>, audio_state_signal: impl Signal<Item = Option<Rc<AudioInput>>> + 'static) -> Dom {
     html!("empty-fragment", {
         .child_signal(audio_state_signal.map(|audio_state| Some({
             match audio_state {
                 Some(audio_state) => {
-                    render_audio_input(audio_state, None)
+                    AudioInput::render(audio_state, None)
                 },
                 None => {
                     html!("div", {.text("TODO! (disabled audio input)") })

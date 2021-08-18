@@ -1,4 +1,5 @@
 use super::{actions, state::*};
+use components::module::_common::thumbnail::ModuleThumbnail;
 use components::{page_header, page_footer};
 use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
@@ -66,7 +67,7 @@ impl GalleryDom {
                             html!("input-select-option", {
                                 .property("value", &option.to_string())
                                 .text(Self::visible_jigs_option_string(&option))
-                                .property_signal("selected", state.visible_jigs.signal_cloned().map(clone!(state, option => move |visible_jigs| {
+                                .property_signal("selected", state.visible_jigs.signal_cloned().map(clone!(option => move |visible_jigs| {
                                     if visible_jigs == option {
                                         true
                                     } else {
@@ -94,11 +95,18 @@ impl GalleryDom {
                             .property("href", jig.id.0.to_string())
                             .property("draft", "")
                             .property("label", jig.display_name.clone())
-                            .property("img", "mock/resized/jig-gallery.jpg")
                             .property_signal("ages", state.age_ranges.signal_cloned().map(move|age_ranges| {
                                 age_ranges.range_string(&jig_ages)
                             }))
                             .property("lastEdited", "???")
+                            .child(ModuleThumbnail::render(
+                                Rc::new(ModuleThumbnail {
+                                    jig_id: jig.id.clone(),
+                                    module: jig.modules[0].clone(), 
+                                    is_jig_fallback: true,
+                                }),
+                                Some("thumbnail")
+                            ))
                             .children(&mut [
                                 html!("menu-line", {
                                     .property("slot", "menu-content")

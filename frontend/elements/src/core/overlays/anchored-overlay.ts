@@ -154,7 +154,7 @@ export class AnchoredOverlay extends LitElement {
         });
 
         return html`
-            <div class="anchor">
+            <div part="anchor" class="anchor">
                 <slot name="anchor"></slot>
             </div>
             ${ this.open ? html`

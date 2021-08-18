@@ -16,7 +16,7 @@ use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
 use components::{
     // image_search::{self, state::ImageSearchOptions},
-    audio_input::{self, options::AudioInputOptions, state::State as AudioState},
+    audio::input::{self, AudioInputOptions, AudioInput},
     color_select,
     text_editor,
 };
@@ -108,7 +108,7 @@ fn render_button(step:u32, label:&str, state:Rc<State>) -> Dom {
 
 //     html!("div", {
 //         .style("padding", "30px")
-//         .child(audio_input::dom::render(state.clone(), None))
+//         .child(audio::input::dom::render(state.clone(), None))
 //         .child(html!("button", {
 //             .text("Set to Some")
 //             .event(clone!(state => move |_: events::Click| {

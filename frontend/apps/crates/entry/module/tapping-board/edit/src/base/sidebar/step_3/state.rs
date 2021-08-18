@@ -8,10 +8,10 @@ use futures_signals::{
 use dominator::clone;
 use components::{
     image::search::state::{State as ImageSearchState, ImageSearchOptions},
-    audio_input::{
-        options::AudioInputOptions,
-        state::State as AudioInputState,
-        callbacks::Callbacks as AudioCallbacks,
+    audio::input::{
+        AudioInputOptions,
+        AudioInput,
+        AudioInputCallbacks,
     },
     stickers::state::Stickers,
 };
@@ -98,7 +98,7 @@ impl TabKind {
 #[derive(Clone)]
 pub enum Tab {
     Text(usize, Mutable<Option<String>>),
-    Audio(Rc<AudioInputState>)
+    Audio(Rc<AudioInput>)
 }
 
 impl Tab {
@@ -115,7 +115,7 @@ impl Tab {
                 );
 
 
-                let callbacks = AudioCallbacks::new(
+                let callbacks = AudioInputCallbacks::new(
                     Some(clone!(base, index => move |audio:Audio| {
                         base.set_trace_meta_audio(index, Some(audio));
                     })),
@@ -124,7 +124,7 @@ impl Tab {
                     })),
                 );
 
-                let state = AudioInputState::new(opts, callbacks);
+                let state = AudioInput::new(opts, callbacks);
 
                 Self::Audio(state)
             }

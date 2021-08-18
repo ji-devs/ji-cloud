@@ -32,7 +32,7 @@ use super::card::state::*;
 use std::future::Future;
 use futures::future::join_all;
 use gloo_timers::future::TimeoutFuture;
-use components::audio_mixer::AudioMixer;
+use components::audio::mixer::AudioMixer;
 
 pub struct Base {
     pub jig_id: JigId,

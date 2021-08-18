@@ -18,7 +18,7 @@ use shared::domain::jig::{
 use std::future::Future;
 use utils::prelude::*;
 
-use crate::{audio_mixer::AudioMixer, module::_common::edit::post_preview::state::PostPreview};
+use crate::{audio::mixer::AudioMixer, module::_common::edit::post_preview::state::PostPreview};
 
 use wasm_bindgen_futures::spawn_local;
 
