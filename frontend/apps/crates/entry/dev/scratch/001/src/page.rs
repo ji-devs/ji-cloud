@@ -16,7 +16,7 @@ use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
 use components::{
     // image_search::{self, state::ImageSearchOptions},
-    audio::input::{self, options::AudioInputOptions, state::State as AudioState},
+    audio::input::{self, AudioInputOptions, AudioInput},
     color_select,
     text_editor,
 };

@@ -9,7 +9,7 @@ use components::{
         callbacks::Callbacks as ImageSearchCallbacks
     },
     audio::input::{
-        options::AudioInputOptions,
+        AudioInputOptions,
         AudioInput,
         AudioInputCallbacks,
     },
