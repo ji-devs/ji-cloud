@@ -18,7 +18,7 @@ use utils::prelude::*;
 use std::future::Future;
 use futures::future::join_all;
 use gloo_timers::future::TimeoutFuture;
-use components::audio_mixer::AudioMixer;
+use components::audio::mixer::AudioMixer;
 use super::{
     game::state::Game,
     ending::state::Ending

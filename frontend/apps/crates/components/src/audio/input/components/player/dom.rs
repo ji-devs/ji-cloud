@@ -1,4 +1,4 @@
-use crate::audio_input::state::State;
+use crate::audio::input::state::AudioInput;
 use dominator::{clone, html, with_node, Dom};
 use futures_signals::signal::Mutable;
 use shared::domain::jig::module::body::Audio;
@@ -6,7 +6,7 @@ use std::rc::Rc;
 use utils::{path::audio_lib_url, prelude::*};
 use web_sys::HtmlAudioElement;
 
-pub fn render(state: Rc<State>, audio: Audio) -> Dom {
+pub fn render(state: Rc<AudioInput>, audio: Audio) -> Dom {
     let current_time = Mutable::new(0);
     html!("progress-bar", {
         .property("slot", "main-content")

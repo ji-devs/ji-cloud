@@ -1,4 +1,4 @@
-use crate::audio_input::state::{AudioInputMode, State};
+use crate::audio::input::state::{AudioInputMode, AudioInput};
 use futures_signals::signal::Mutable;
 use shared::domain::jig::module::body::Audio;
 use web_sys::HtmlAudioElement;
@@ -8,7 +8,7 @@ pub fn on_time_update(player: &HtmlAudioElement, current_time: &Mutable<i32>) {
     current_time.set(time as i32);
 }
 
-pub fn on_ended(state: &State, audio: Audio) {
+pub fn on_ended(state: &AudioInput, audio: Audio) {
     state.mode.set(AudioInputMode::Stopped(audio));
 }
 

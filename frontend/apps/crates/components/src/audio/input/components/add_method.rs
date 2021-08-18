@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use crate::audio_input::state::{AudioInputAddMethod, State};
+use crate::audio::input::state::{AudioInputAddMethod, AudioInput};
 use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
 use utils::events;
@@ -8,7 +8,7 @@ use utils::events;
 pub const STR_OPTION_RECORD: &'static str = "Record";
 pub const STR_OPTION_UPLOAD: &'static str = "Upload a file";
 
-pub fn render(state: Rc<State>, add_method: AudioInputAddMethod) -> Dom {
+pub fn render(state: Rc<AudioInput>, add_method: AudioInputAddMethod) -> Dom {
     html!("label", {
         .property("slot", "options")
         .child(html!("input", {

@@ -1,5 +1,5 @@
 use crate::animation::fade::*;
-use crate::audio_mixer::AudioHandle;
+use crate::audio::mixer::AudioHandle;
 use crate::tooltip::state::MoveStrategy;
 use crate::tooltip::state::{
     Placement, State as TooltipState, TooltipBubble, TooltipData, TooltipTarget,

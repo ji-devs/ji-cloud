@@ -32,7 +32,7 @@ use shared::{
 };
 use utils::{languages::LANGUAGE_CODE_EN, prelude::*};
 
-use crate::audio_mixer::AudioMixer;
+use crate::audio::mixer::AudioMixer;
 
 pub struct GenericState<Mode, Step, RawData, Base, Main, Sidebar, Header, Footer, Overlay>
 where

@@ -7,10 +7,10 @@ use components::{
         state::{State as ImageSearchState, ImageSearchOptions},
         callbacks::Callbacks as ImageSearchCallbacks
     },
-    audio_input::{
-        options::AudioInputOptions,
-        state::State as AudioInputState,
-        callbacks::Callbacks as AudioCallbacks,
+    audio::input::{
+        AudioInputOptions,
+        AudioInput,
+        AudioInputCallbacks,
     },
     stickers::state::Stickers,
 };

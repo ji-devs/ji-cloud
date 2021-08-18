@@ -4,9 +4,10 @@ use utils::prelude::*;
 use web_sys::HtmlTextAreaElement;
 
 use super::state::State;
-use crate::audio_input::{
-    callbacks::Callbacks as AudioCallbacks, dom::render as render_audio_input,
-    options::AudioInputOptions, state::State as AudioState,
+use crate::audio::input::{
+    AudioInputCallbacks,
+    AudioInputOptions,
+    AudioInput
 };
 use futures_signals::signal::SignalExt;
 use shared::domain::jig::module::body::Audio;
@@ -63,7 +64,7 @@ pub fn render_audio(state: Rc<State>) -> Dom {
             .map(|instructions| instructions.audio),
     ));
 
-    let callbacks = AudioCallbacks::new(
+    let callbacks = AudioInputCallbacks::new(
         Some(clone!(state => move |audio:Audio| {
             let mut lock = state.instructions.lock_mut();
             lock.audio = Some(audio);
@@ -76,7 +77,5 @@ pub fn render_audio(state: Rc<State>) -> Dom {
         })),
     );
 
-    let audio_state = AudioState::new(opts, callbacks);
-
-    render_audio_input(audio_state, None)
+    AudioInput::render(AudioInput::new(opts, callbacks), None)
 }

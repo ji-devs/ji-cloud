@@ -7,9 +7,9 @@ use utils::events;
 use wasm_bindgen_futures::spawn_local;
 
 use super::{super::actions::file_change, player};
-use crate::audio_input::state::{AudioInputAddMethod, AudioInputMode, State};
+use crate::audio::input::state::{AudioInputAddMethod, AudioInputMode, AudioInput};
 
-pub fn render(state: Rc<State>, mode: AudioInputMode, add_method: AudioInputAddMethod) -> Dom {
+pub fn render(state: Rc<AudioInput>, mode: AudioInputMode, add_method: AudioInputAddMethod) -> Dom {
     match mode {
         AudioInputMode::Playing(audio) => player::dom::render(state.clone(), audio),
         AudioInputMode::Stopped(_) => render_input_icon("success"),
@@ -19,7 +19,7 @@ pub fn render(state: Rc<State>, mode: AudioInputMode, add_method: AudioInputAddM
     }
 }
 
-fn render_start(state: Rc<State>, add_method: AudioInputAddMethod) -> Dom {
+fn render_start(state: Rc<AudioInput>, add_method: AudioInputAddMethod) -> Dom {
     match add_method {
         AudioInputAddMethod::Record => render_input_icon("record"),
         AudioInputAddMethod::Upload => {

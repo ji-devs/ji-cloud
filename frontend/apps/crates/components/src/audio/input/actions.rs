@@ -1,4 +1,4 @@
-use super::state::{AudioInputMode, State};
+use super::state::{AudioInputMode, AudioInput};
 use shared::{
     api::{endpoints, ApiEndpoint},
     domain::{audio::AudioId, jig::module::body::Audio, CreateResponse},
@@ -9,7 +9,7 @@ use std::rc::Rc;
 use utils::prelude::*;
 use web_sys::File;
 
-impl State {
+impl AudioInput {
     //Internal only - when the audio is changed via recording/uploading
     //Will call the callbacks
     pub(super) fn set_audio(&self, audio: Option<Audio>) {
@@ -47,7 +47,7 @@ impl State {
     }
 }
 
-pub async fn file_change(state: Rc<State>, file: File) {
+pub async fn file_change(state: Rc<AudioInput>, file: File) {
     state.mode.set(AudioInputMode::Uploading);
     let res = upload_file(file).await;
     if let Ok(audio_id) = res {

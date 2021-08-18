@@ -4,7 +4,7 @@ use crate::animation::fade::*;
 use shared::domain::jig::module::body::Instructions;
 use std::cell::RefCell;
 
-use crate::audio_mixer::AudioHandle;
+use crate::audio::mixer::AudioHandle;
 
 pub struct InstructionsPlayer {
     pub(super) data: Instructions,

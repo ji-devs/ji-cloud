@@ -6,7 +6,7 @@ use futures_signals::signal::SignalExt;
 use components::{
     image::search::dom::render as render_image_search,
     text_editor::dom::render_controls as render_text_editor,
-    audio_input::dom::render as render_audio_input,
+    audio::input::AudioInput
 };
 
 pub fn render(state: Rc<Step3>) -> Dom {
@@ -26,7 +26,7 @@ pub fn render(state: Rc<Step3>) -> Dom {
                             Some(render_image_search(state.clone(), None))
                         },
                         Tab::Audio(state) => {
-                            Some(render_audio_input(state.clone(), None))
+                            Some(AudioInput::render(state.clone(), None))
                         },
                     }
                 })))

@@ -1,4 +1,4 @@
-use crate::audio_mixer::AudioMixer;
+use crate::audio::mixer::AudioMixer;
 use dominator::{clone, Dom};
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::Mutable;

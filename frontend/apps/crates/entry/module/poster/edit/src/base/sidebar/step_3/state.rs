@@ -8,10 +8,10 @@ use components::{
         state::{State as ImageSearchState, ImageSearchOptions},
         callbacks::Callbacks as ImageSearchCallbacks
     },
-    audio_input::{
-        options::AudioInputOptions,
-        state::State as AudioInputState,
-        callbacks::Callbacks as AudioCallbacks,
+    audio::input::{
+        AudioInputOptions,
+        AudioInput,
+        AudioInputCallbacks,
     },
     stickers::state::Stickers,
 };
@@ -65,7 +65,7 @@ use std::pin::Pin;
 pub enum Tab {
     Text, // uses top-level state since it must be toggled from main too
     Image(Rc<ImageSearchState>),
-    Audio(Rc<AudioInputState>),
+    Audio(Rc<AudioInput>),
 }
 
 impl Tab {
@@ -96,7 +96,7 @@ impl Tab {
                     Some(base.instructions.signal_cloned().map(|instructions| instructions.audio))
                 );
 
-                let callbacks = AudioCallbacks::new(
+                let callbacks = AudioInputCallbacks::new(
                     Some(clone!(base => move |audio:Audio| {
                         base.set_instructions_audio(Some(audio));
                     })),
@@ -105,7 +105,7 @@ impl Tab {
                     })),
                 );
 
-                let state = AudioInputState::new(opts, callbacks);
+                let state = AudioInput::new(opts, callbacks);
 
                 Self::Audio(state)
             },

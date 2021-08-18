@@ -1,4 +1,4 @@
-use components::{audio_mixer::AudioMixer, module::_common::play::prelude::*};
+use components::{audio::mixer::AudioMixer, module::_common::play::prelude::*};
 use shared::domain::jig::{
     module::{
         body::{

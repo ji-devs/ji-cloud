@@ -29,7 +29,7 @@ use futures_signals::signal::{ReadOnlyMutable, Mutable};
 use utils::prelude::*;
 use components::{
     text_editor::state::State as TextEditorState,
-    audio_mixer::AudioMixer,
+    audio::mixer::AudioMixer,
 };
 
 pub async fn init_from_raw(init_args: BaseInitFromRawArgs<RawData, Mode, Step>) -> BaseInit<Step, Base, Main, Sidebar, Header, Footer, Overlay> {
