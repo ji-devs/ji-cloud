@@ -27,6 +27,7 @@ pub async fn lookup(
 
 pub async fn profile(db: &sqlx::PgPool, id: Uuid) -> anyhow::Result<Option<UserProfile>> {
     let row = sqlx::query!(
+        //language=SQL
         r#"
 select user_id as "id",
     username,
@@ -42,6 +43,7 @@ select user_id as "id",
     user_profile.created_at,
     user_profile.updated_at,
     organization,
+    persona,
     location,
     array(select scope from user_scope where user_scope.user_id = "user".id) as "scopes!: Vec<i16>",
     array(select subject_id from user_subject where user_subject.user_id = "user".id) as "subjects!: Vec<Uuid>",
@@ -81,6 +83,7 @@ where id = $1"#,
         created_at: row.created_at,
         updated_at: row.updated_at,
         organization: row.organization,
+        persona: row.persona,
         location: row.location,
         subjects: row.subjects.into_iter().map(SubjectId).collect(),
         age_ranges: row.age_ranges.into_iter().map(AgeRangeId).collect(),
@@ -107,9 +110,9 @@ pub async fn upsert_profile(
         //language=SQL
         r#"
 insert into user_profile
-    (user_id, username, over_18, given_name, family_name, profile_image, language, locale, timezone, opt_into_edu_resources, organization, location) 
+    (user_id, username, over_18, given_name, family_name, profile_image, language, locale, timezone, opt_into_edu_resources, organization, persona, location) 
 values 
-    ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+    ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
 on conflict (user_id) do update
 set
     over_18 = $3,
@@ -121,7 +124,8 @@ set
     timezone = $9,
     opt_into_edu_resources = $10,
     organization = $11,
-    location = $12
+    persona = $12,
+    location = $13
 "#,
         user_id,
         &req.username,
@@ -134,6 +138,7 @@ set
         req.timezone.name(),
         req.opt_into_edu_resources,
         req.organization.as_deref(),
+        req.persona.as_deref(),
         req.location.as_ref(),
     )
     .execute(&mut *txn)
@@ -165,8 +170,6 @@ pub async fn update_profile(
     req: PatchProfileRequest,
 ) -> Result<(), error::UserUpdate> {
     let mut txn = db.begin().await?;
-
-    log::info!("asd");
 
     if !sqlx::query!(
         //language=SQL
@@ -222,6 +225,21 @@ where user_id = $1 and profile_image is distinct from $2
         "#,
             user_id,
             profile_image
+        )
+        .execute(&mut txn)
+        .await?;
+    }
+
+    if let Some(persona) = req.persona {
+        sqlx::query!(
+            //language=SQL
+            r#"
+update user_profile
+set persona = $2
+where user_id = $1 and persona is distinct from $2
+        "#,
+            user_id,
+            persona
         )
         .execute(&mut txn)
         .await?;

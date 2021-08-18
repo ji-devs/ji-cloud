@@ -140,6 +140,11 @@ pub struct UserProfile {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub organization: Option<String>,
 
+    /// The persona of the user
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub persona: Option<String>,
+
     /// The user's taught subjects.
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
@@ -222,6 +227,11 @@ pub struct PutProfileRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub organization: Option<String>,
 
+    /// The persona of the user
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub persona: Option<String>,
+
     /// The user's taught subjects.
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
@@ -297,13 +307,20 @@ pub struct PatchProfileRequest {
     pub opt_into_edu_resources: Option<bool>,
 
     /// The organization that the user belongs to.
-    /// * If the outer `Option` is `None`, then no update is done,
-    /// * If `Some(None)`, sets the location to `None`,
-    /// * If `Some(Some(_))`, updates the user organization to `Some(_)`.
+    ///
+    /// Field is updated if `Some(_)` with the inner contents.
     #[serde(default)]
     #[serde(deserialize_with = "super::deserialize_optional_field")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub organization: Option<Option<String>>,
+
+    /// The persona of the user.
+    ///
+    /// Field is updated if `Some(_)` with the inner contents.
+    #[serde(default)]
+    #[serde(deserialize_with = "super::deserialize_optional_field")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub persona: Option<Option<String>>,
 
     /// The user's taught subjects.
     ///
