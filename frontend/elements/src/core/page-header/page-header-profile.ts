@@ -34,6 +34,7 @@ export class _ extends LitElement {
                 z-index: 2;
                 left: 50%;
                 box-shadow: rgb(0 0 0 / 7%) -3px -3px 3px 0px;
+                border-top-left-radius: 8px;
             }
             .main img-ji {
                 display: inline-block;
