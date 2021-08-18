@@ -11,14 +11,14 @@ use crate::{
         components::footer::Footer
     }
 };
-
+use shared::domain::session::OAuthUserProfile;
 
 pub struct Step1Page {
 }
 
 impl Step1Page {
-    pub fn render(step: Mutable<Step>) -> Dom {
-        let state = Rc::new(State::new(step));
+    pub fn render(step: Mutable<Step>, oauth_profile: Option<OAuthUserProfile>) -> Dom {
+        let state = Rc::new(State::new(step, oauth_profile));
 
         html!("page-register-step1", {
             .children(vec![
@@ -31,6 +31,7 @@ impl Step1Page {
                     .property_signal("hint", state.firstname_error())
                     .child(html!("input", {
                         .property("placeholder", STR_FIRSTNAME_PLACEHOLDER)
+                        .property("value", &*state.firstname.borrow())
                         .event(clone!(state => move |evt:events::Input| {
                             state.clear_firstname_status();
                             *state.firstname.borrow_mut() = evt.value().unwrap_or_default();
@@ -46,6 +47,7 @@ impl Step1Page {
                     .property_signal("hint", state.lastname_error())
                     .child(html!("input", {
                         .property("placeholder", STR_LASTNAME_PLACEHOLDER)
+                        .property("value", &*state.lastname.borrow())
                         .event(clone!(state => move |evt:events::Input| {
                             state.clear_lastname_status();
                             *state.lastname.borrow_mut() = evt.value().unwrap_or_default();
@@ -61,6 +63,7 @@ impl Step1Page {
                     .property_signal("hint", state.username_error())
                     .child(html!("input", {
                         .property("placeholder", STR_USERNAME_PLACEHOLDER)
+                        .property("value", &*state.username.borrow())
                         .event(clone!(state => move |evt:events::Input| {
                             state.clear_username_status();
                             *state.username.borrow_mut() = evt.value().unwrap_or_default();

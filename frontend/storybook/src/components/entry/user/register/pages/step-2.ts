@@ -1,12 +1,18 @@
 import {argsToAttrs} from "@utils/attributes";
+
 import "@elements/entry/user/register/pages/step2";
 import "@elements/entry/user/register/footer/login";
 import "@elements/core/buttons/rectangle";
+import "@elements/core/inputs/wrapper";
 
 const STR_SUBMIT = "One more step"
 const STR_TERMS_LABEL = "I have read the terms and conditions (legal text…)";
-const STR_LANGUAGE_LABEL = "Preferred language of communication*";
 const STR_MARKETING_LABEL = "I would like to receive educational resources (GDPR legal text….)";
+const STR_LOCATION_LABEL = "Location*";
+const STR_PERSONA_LABEL = "I sign up as a...*";
+const STR_ORGANIZATION_LABEL = "School/Organization*";
+const STR_LANGUAGE_LABEL = "Language of communication*";
+
 
 export default {
   title: 'Entry / User / Register / Pages',
@@ -23,9 +29,18 @@ export const Step2 = (props?:Partial<Args>) => {
 
     return `
         <page-register-step2>
-            <input-location slot="location"></input-location>
-            <input-wrapper slot="language" label="${STR_LANGUAGE_LABEL}"">
-                <input>
+            <input-wrapper slot="location" label="${STR_LOCATION_LABEL}"">
+                <input-location></input-location>
+            </input-wrapper>
+
+            <input-select slot="language" label="${STR_LANGUAGE_LABEL}" value="English">
+                <input-select-option>Spanish</input-select-option>
+            </input-select>
+            <input-select slot="persona" label="${STR_PERSONA_LABEL}" value="Teacher" >
+                <input-select-option>Student</input-select-option>
+            </input-select>
+            <input-wrapper slot="organization" label="${STR_ORGANIZATION_LABEL}"">
+                <input type="text" />
             </input-wrapper>
             <input-checkbox slot="checkbox" label="${STR_TERMS_LABEL}"></input-checkbox>
             <input-checkbox slot="checkbox" label="${STR_MARKETING_LABEL}"></input-checkbox>

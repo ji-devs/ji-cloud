@@ -26,16 +26,4 @@ impl State {
         }
     }
 
-    pub fn set_from_meta(&self, meta:&MetaOptions) {
-        let affiliations = &mut *self.affiliations.borrow_mut();
-        let age_ranges = &mut *self.age_ranges.borrow_mut();
-
-        for (id, _) in meta.affiliations.iter() {
-            affiliations.insert(id.clone());    
-        }
-
-        for (id, _) in meta.age_ranges.iter() {
-            age_ranges.insert(id.clone());    
-        }
-    }
 }

@@ -32,7 +32,7 @@ pub fn signin_email(state: Rc<State>) {
                     CreateSessionResponse::Login(resp) => {
                         do_success(&resp.csrf);
                     },
-                    CreateSessionResponse::Register(resp) => {
+                    CreateSessionResponse::Register{response, oauth_profile} => {
                         panic!("didn't expect register response here!");
                     }
                 }

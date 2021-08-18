@@ -25,7 +25,7 @@ impl VerifyEmailPage {
                         let csrf = resp.csrf;
 
                         storage::save_csrf_token(&csrf);
-                        let route:String = Route::User(UserRoute::ContinueRegistration).into();
+                        let route:String = Route::User(UserRoute::ContinueRegistration(None)).into();
                         dominator::routing::go_to_url(&route);
                     },
                     None => {

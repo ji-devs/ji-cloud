@@ -2,6 +2,7 @@ use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::{Mutable, Signal, SignalExt};
 use crate::register::state::Step;
 use std::cell::RefCell;
+use shared::domain::session::OAuthUserProfile;
 
 pub struct State {
     pub step: Mutable<Step>,
@@ -14,19 +15,36 @@ pub struct State {
     pub username_status: Mutable<Option<NameError>>,
     pub over_18: RefCell<bool>,
     pub over_18_status: Mutable<Option<Over18Error>>,
+    pub oauth_profile: Option<OAuthUserProfile>,
 
 }
 
 impl State {
-    pub fn new(step: Mutable<Step>) -> Self {
+    pub fn new(step: Mutable<Step>, oauth_profile: Option<OAuthUserProfile>) -> Self {
+        let (firstname, lastname) = match oauth_profile.clone() {
+            None => {
+                (
+                    RefCell::new("".to_string()),
+                    RefCell::new("".to_string()),
+                )
+            },
+            Some(oauth_profile) => {
+                (
+                    RefCell::new(oauth_profile.given_name.unwrap_or_default()),
+                    RefCell::new(oauth_profile.family_name.unwrap_or_default()),
+                )
+            }
+        };
+                
         Self {
             step,
-            username_taken_loader: AsyncLoader::new(),
-            firstname: RefCell::new("".to_string()),
-            firstname_status: Mutable::new(None),
-            lastname: RefCell::new("".to_string()),
-            lastname_status: Mutable::new(None),
+            oauth_profile,
+            firstname,
+            lastname,
             username: RefCell::new("".to_string()),
+            username_taken_loader: AsyncLoader::new(),
+            firstname_status: Mutable::new(None),
+            lastname_status: Mutable::new(None),
             username_status: Mutable::new(None),
             over_18: RefCell::new(false),
             over_18_status: Mutable::new(None),

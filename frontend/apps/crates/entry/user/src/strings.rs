@@ -43,9 +43,16 @@ pub mod register {
     pub mod step_2 {
         pub const STR_SUBMIT:&'static str = "Submit";
         pub const STR_LOCATION_LABEL:&'static str = "Location*";
+        pub const STR_PERSONA_LABEL:&'static str = "I sign up as a...*";
+        pub const STR_ORGANIZATION_LABEL:&'static str = "School/Organization*";
         pub const STR_TERMS_LABEL:&'static str = "I have read the terms and conditions (legal text…)";
-        pub const STR_LANGUAGE_LABEL:&'static str = "Preferred language of communication";
+        pub const STR_LANGUAGE_LABEL:&'static str = "Language of communication*";
         pub const STR_MARKETING_LABEL:&'static str = "I would like to receive educational resources (GDPR legal text….)";
+
+        pub const STR_LANGUAGE_PLACEHOLDER:&'static str = "Select from the list";
+        pub const STR_LANGUAGE_OPTIONS: &'static [&'static str] = &["English", "Hebrew", "Spanish", "French", "Russian"];
+        pub const STR_PERSONA_OPTIONS: &'static [&'static str] = &["Teacher", "Parent", "Therapist", "Grandparent", "School leader", "Administrator", "Shaliach", "Tutor"];
+        pub const STR_PERSONA_PLACEHOLDER:&'static str = "Select from the list";
 
     }
 

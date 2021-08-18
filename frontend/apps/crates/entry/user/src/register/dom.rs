@@ -22,7 +22,7 @@ impl RegisterPage {
             .child_signal(state.step.signal_cloned().map(clone!(state => move |step| {
                 match step {
                     Step::Start => Some(StartPage::render(state.step.clone())),
-                    Step::One => Some(Step1Page::render(state.step.clone())),
+                    Step::One(data) => Some(Step1Page::render(state.step.clone(), data)),
                     Step::Two(data) => Some(Step2Page::render(state.step.clone(), data)),
                     Step::Three(data) => Some(Step3Page::render(state.step.clone(), data)),
                 }

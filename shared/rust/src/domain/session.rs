@@ -77,7 +77,7 @@ pub enum CreateSessionResponse {
 
 /// User's profile info fetched from the OAuth service. Returned as part of the identity claims
 /// to be used as defaults for populating a `PutProfile` request.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct OAuthUserProfile {
