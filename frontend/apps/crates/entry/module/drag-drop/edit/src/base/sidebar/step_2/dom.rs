@@ -45,7 +45,7 @@ fn render_tab(state: Rc<Step2>, tab_kind:TabKind) -> Dom {
     })
 }
 
-fn render_audio(state: Rc<Step2>, audio_state_signal: impl Signal<Item = Option<Rc<AudioInputState>>> + 'static) -> Dom {
+fn render_audio(state: Rc<Step2>, audio_state_signal: impl Signal<Item = Option<Rc<AudioInput>>> + 'static) -> Dom {
     html!("empty-fragment", {
         .child_signal(audio_state_signal.map(|audio_state| Some({
             match audio_state {
