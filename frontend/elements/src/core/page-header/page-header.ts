@@ -23,6 +23,8 @@ export class _ extends LitElement {
             .user {
                 display: flex;
                 column-gap: 16px;
+                height: 100%;
+                align-items: center;
             }
         `];
     }
