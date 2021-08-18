@@ -92,11 +92,12 @@ impl Step2Page {
                         *state.marketing.borrow_mut() = evt.value();
                     }))
                 }),
-                html!("button-rect", {
+                html!("button-rect-icon", {
                     .property("slot", "submit")
                     .property("color", "red")
                     .property("size", "medium")
-                    .text(STR_SUBMIT)
+                    .property("iconAfter", "arrow")
+                    .text(STR_ONE_MORE_STEP)
                     .event(clone!(state => move |evt:events::Click| {
                         actions::submit(state.clone());
                     }))

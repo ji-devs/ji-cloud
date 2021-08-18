@@ -1,6 +1,7 @@
 pub const STR_AUTH_OAUTH_LOGIN_FAIL:&'static str = "Create an account first :)";
 pub const STR_CHANGE_EMAIL:&'static str = "Change email account";
 pub const STR_SUBMIT:&'static str = "Submit";
+pub const STR_CONTINUE:&'static str = "Continue";
 pub const STR_EMAIL_LABEL:&'static str = "Email*";
 pub const STR_EMAIL_PLACEHOLDER:&'static str = "Type or paste your email";
 pub const STR_PASSWORD_CREATE_LABEL:&'static str = "Create password*";
@@ -38,6 +39,7 @@ pub mod register {
         pub const STR_USERNAME_PLACEHOLDER:&'static str = "This will be your public name on Jigzi";
         pub const STR_18:&'static str = "I am over 18*";
         pub const STR_CONTINUE:&'static str = "Continue";
+        pub const STR_NEXT:&'static str = "Next";
     }
 
     pub mod step_2 {
@@ -53,6 +55,7 @@ pub mod register {
         pub const STR_LANGUAGE_OPTIONS: &'static [&'static str] = &["English", "Hebrew", "Spanish", "French", "Russian"];
         pub const STR_PERSONA_OPTIONS: &'static [&'static str] = &["Teacher", "Parent", "Therapist", "Grandparent", "School leader", "Administrator", "Shaliach", "Tutor"];
         pub const STR_PERSONA_PLACEHOLDER:&'static str = "Select from the list";
+        pub const STR_ONE_MORE_STEP:&'static str = "One more step";
 
     }
 

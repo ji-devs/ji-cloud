@@ -10,29 +10,40 @@ export class _ extends LitElement {
   static get styles() {
     return [
       css`
-        .content-wrapper {
+      :host {
+          display: block;
+          height: 100vh;
+          overflow-y: hidden;
+      }
+        .content {
           display: flex;
           justify-content: center;
           width: 100%;
           flex-direction: column;
           align-items: center;
+          margin-bottom: 80px;
         }
-        .side-image {
-          width: 100vw;
-          height: 685px;
+        .footer {
+          width: 100%;
+          height: 100%;
           background-color: #def4ff;
+          overflow: hidden;
+          display: flex;
+          justify-content: center;
         }
+
+        .content-inner {
+        
+        }
+        .title {
+          text-align: left;
+          margin-bottom: 56px;
+        }
+
         h1 {
           font-size: 32px;
           font-weight: 900;
           color: #5662a3;
-        }
-        .title {
-          margin-bottom: 80px;
-        }
-        ::slotted([slot="button"]) {
-          margin-top: 60px;
-          display:block;
         }
       `,
     ];
@@ -41,17 +52,19 @@ export class _ extends LitElement {
   render() {
 
     return html`
-      <div class="wrapper">
-        <div class="content-wrapper">
-          <div class="title">
-            <h1>${STR_TITLE}</h1>
-            <title-ji size="subMedium" color="black">${STR_SUB}</title-ji>
-            <title-ji size="subMedium" color="black">${STR_SUBSUB}</title-ji>
-            <slot name="button"></slot>
+        <div class="content">
+          <div class="content-inner">
+              <div class="title">
+                <h1>${STR_TITLE}</h1>
+                <title-ji size="subMedium" color="black">${STR_SUB}</title-ji>
+                <title-ji size="subMedium" color="black">${STR_SUBSUB}</title-ji>
+              </div>
+              <slot name="button"></slot>
           </div>
         </div>
-        <div class="side-image"></div>
-      </div>
+        <div class="footer">
+            <img-ui path="entry/user/register-complete/jigglings.png"></img-ui>
+        </div>
     `;
   }
 }

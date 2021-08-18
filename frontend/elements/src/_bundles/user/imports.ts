@@ -16,6 +16,7 @@ import "@elements/entry/user/profile/landing";
 import "@elements/entry/user/profile/options-popup";
 import "@elements/entry/user/profile/reset-password-popup";
 import "@elements/core/buttons/rectangle";
+import "@elements/core/buttons/rectangle-icon";
 import "@elements/core/inputs/composed/checkbox";
 import "@elements/core/inputs/composed/select/select";
 import "@elements/core/inputs/composed/select/option";

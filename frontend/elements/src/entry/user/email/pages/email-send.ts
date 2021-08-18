@@ -16,10 +16,18 @@ export class _ extends LitElement {
         .inside-wrapper {
           width: 624px;
         }
-        h1 {
+        .title {
           font-size: 32px;
           font-weight: 900;
           color: #5662a3;
+        }
+
+        .subtitle {
+          font-size: 20px;
+          font-weight: 300;
+          text-align: left;
+          color: #4a4a4a;
+          margin-bottom: 40px;
         }
 
         footer-contact {
@@ -48,9 +56,8 @@ export class _ extends LitElement {
 
     return html`
         <base-page>
-          <h1>${STR_TITLE}</h1>
-          <title-ji size="subMedium">${STR_SUBTITLE}<br/>${STR_SUBSUBTITLE}</title-ji>
-          <slot name="change"></slot>
+          <div class="title">${STR_TITLE}</div>
+          <div class="subtitle">${STR_SUBTITLE}<br/>${STR_SUBSUBTITLE}</div>
           <slot name="send"></slot>
           <slot name="submit"></slot>
           <footer-contact></footer-contact>
