@@ -58,8 +58,15 @@ async fn load_ages(state: Rc<State>) {
 
 pub fn search_jigs(state: Rc<State>, q: String) {
     state.loader.load(clone!(state => async move {
+        let is_published = match *state.visible_jigs.lock_ref() {
+            VisibleJigs::All => None,
+            VisibleJigs::Published => Some(true),
+            VisibleJigs::Draft => Some(false),
+        };
+
         let req = Some(JigSearchQuery {
             q,
+            is_published,
             ..Default::default()
         });
 

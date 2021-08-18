@@ -20,9 +20,10 @@ use shared::{
 use crate::{
     db, error,
     google_oauth::{self, oauth_url},
-    jwk,
+    jwk::{self, IdentityClaims},
     token::{create_auth_token, SessionMask},
 };
+use shared::domain::session::OAuthUserProfile;
 
 fn handle_user_email_error(e: sqlx::Error) -> error::OAuth {
     let db_err = match &e {
@@ -128,7 +129,7 @@ async fn handle_google_oauth(
 
     let tokens = google_oauth::convert_oauth_code(config, code, &redirect_url).await?;
 
-    let claims = jwks.verify_oauth(&tokens.id_token, 3).await?;
+    let claims: IdentityClaims = jwks.verify_oauth(&tokens.id_token, 3).await?;
 
     let mut txn = db.begin().await?;
 
@@ -205,7 +206,19 @@ async fn handle_google_oauth(
     let response = NewSessionResponse { csrf };
 
     let response = if !mask.contains(SessionMask::GENERAL) {
-        CreateSessionResponse::Register(response)
+        let profile = OAuthUserProfile {
+            email: claims.email.clone(),
+            name: claims.name,
+            profile_picture: claims.profile_picture,
+            given_name: claims.given_name,
+            family_name: claims.family_name,
+            locale: claims.locale,
+        };
+
+        CreateSessionResponse::Register {
+            response,
+            oauth_profile: Some(profile),
+        }
     } else {
         CreateSessionResponse::Login(response)
     };

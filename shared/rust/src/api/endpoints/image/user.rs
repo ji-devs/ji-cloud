@@ -5,8 +5,8 @@ use crate::{
     domain::{
         image::{
             user::{
-                UserImageListResponse, UserImageResponse, UserImageUploadRequest,
-                UserImageUploadResponse,
+                UserImageCreateRequest, UserImageListQuery, UserImageListResponse,
+                UserImageResponse, UserImageUploadRequest, UserImageUploadResponse,
             },
             ImageId,
         },
@@ -16,9 +16,12 @@ use crate::{
 };
 
 /// List user library images.
+///
+/// # Notes
+/// * Request includes an optional query, called as a query string.
 pub struct List;
 impl ApiEndpoint for List {
-    type Req = ();
+    type Req = UserImageListQuery;
     type Res = UserImageListResponse;
     type Err = EmptyError;
     const PATH: &'static str = "/v1/user/me/image";
@@ -26,6 +29,12 @@ impl ApiEndpoint for List {
 }
 
 /// Get an user library image by ID.
+///
+/// # Errors
+/// * [`NotFound`](http::StatusCode::NOT_FOUND) if the image with the requested ID is not found for the user.
+/// Note that it will still return NOT_FOUND if an user image with the ID exists but is not owner by the
+/// requesting user.
+/// * TODO other errors here...
 pub struct Get;
 impl ApiEndpoint for Get {
     type Req = ();
@@ -38,7 +47,7 @@ impl ApiEndpoint for Get {
 /// Create an user library image.
 pub struct Create;
 impl ApiEndpoint for Create {
-    type Req = ();
+    type Req = UserImageCreateRequest;
     type Res = CreateResponse<ImageId>;
     type Err = EmptyError;
     const PATH: &'static str = "/v1/user/me/image";
@@ -76,6 +85,12 @@ impl ApiEndpoint for Upload {
 }
 
 /// Delete an image from the user library.
+///
+/// # Errors
+/// * [`NotFound`](http::StatusCode::NOT_FOUND) if the image with the requested ID is not found for the user.
+/// Note that it will still return NOT_FOUND if an user image with the ID exists but is not owner by the
+/// requesting user.
+/// * TODO other errors here...
 pub struct Delete;
 impl ApiEndpoint for Delete {
     type Req = ();

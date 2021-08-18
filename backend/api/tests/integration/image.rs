@@ -1,5 +1,6 @@
 mod recent;
 mod tag;
+mod user;
 
 use http::StatusCode;
 use serde_json::json;

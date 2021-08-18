@@ -1,11 +1,3 @@
-use crate::{
-    db::{self, user::upsert_profile},
-    domain::NoContentClearAuth,
-    error,
-    extractor::{SessionDelete, SessionPutProfile, TokenSessionOf, TokenUser},
-    service::{mail, ServiceData},
-    token::{create_auth_token, SessionMask},
-};
 use actix_http::error::BlockingError;
 use actix_web::HttpResponse;
 use argon2::{password_hash::SaltString, Argon2, PasswordHasher};
@@ -34,6 +26,15 @@ use shared::{
 };
 use sqlx::{postgres::PgDatabaseError, Acquire, PgConnection, PgPool};
 use uuid::Uuid;
+
+use crate::{
+    db::{self, user::upsert_profile},
+    domain::NoContentClearAuth,
+    error,
+    extractor::{SessionDelete, SessionPutProfile, TokenSessionOf, TokenUser},
+    service::{mail, ServiceData},
+    token::{create_auth_token, SessionMask},
+};
 
 mod color;
 mod font;
@@ -405,8 +406,6 @@ async fn patch_profile(
     req: Json<<PatchProfile as ApiEndpoint>::Req>,
 ) -> Result<NoContent, error::UserUpdate> {
     validate_patch_profile_req(&req)?;
-
-    log::info!("reached");
 
     db::user::update_profile(&*db, claims.0.user_id, req.into_inner()).await?;
 

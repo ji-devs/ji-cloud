@@ -19,8 +19,7 @@ use crate::{
     db::{self, meta::handle_metadata_err, nul_if_empty},
     error::{self, ServiceKind},
     extractor::{RequestOrigin, ScopeManageImage, TokenUser, TokenUserWithScope},
-    s3,
-    service::{self, ServiceData},
+    service::{self, s3, ServiceData},
 };
 
 pub mod recent;

@@ -1,4 +1,3 @@
-use crate::{db, error};
 use paperclip::actix::{
     api_v2_operation,
     web::{Data, Json, ServiceConfig},
@@ -8,6 +7,8 @@ use shared::{
     domain::meta::MetadataResponse,
 };
 use sqlx::PgPool;
+
+use crate::{db, error};
 
 // TODO: Should have cache headers
 /// Get a list of all available metadata of all kinds (sans categories)

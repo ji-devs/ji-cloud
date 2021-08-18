@@ -2,6 +2,7 @@ use std::rc::Rc;
 
 use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
+use shared::api::endpoints::jig;
 use utils::events;
 
 use crate::player::sidebar::actions::load_ages;
@@ -44,14 +45,20 @@ pub fn render(state: Rc<State>) -> Dom {
                 state.sidebar_open.set(false);
             }))
         }))
-        .children(&mut [
-            html!("jig-play-sidebar-action", {
-                .property("slot", "actions")
-                .property("kind", "like")
-            }),
-            share::render(Rc::clone(&state)),
-            info::render(Rc::clone(&state)),
-        ])
+        .child(html!("jig-play-sidebar-action", {
+            .property("slot", "actions")
+            .property("kind", "like")
+        }))
+        .child_signal(state.player_state.jig.signal_ref(clone!(state => move |jig| {
+            // only show share options if jig is published
+            match jig {
+                Some(jig) if jig.publish_at.is_some() => {
+                    Some(share::render(Rc::clone(&state)))
+                },
+                _ => None,
+            }
+        })))
+        .child(info::render(Rc::clone(&state)))
         .child_signal(state.player_state.jig.signal_cloned().map(clone!(state => move|jig| {
             match jig {
                 None => None,

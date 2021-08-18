@@ -9,6 +9,7 @@ import "@elements/core/share-jig/embed";
 import "@elements/core/share-jig/main";
 import "@elements/core/share-jig/option";
 import "@elements/core/share-jig/students";
+import "@elements/core/tooltips/bubble";
 import "@elements/entry/jig/play/background-music";
 import "@elements/entry/jig/play/landing";
 import "@elements/entry/jig/play/move-button";

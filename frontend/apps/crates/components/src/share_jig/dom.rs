@@ -1,12 +1,18 @@
 use std::rc::Rc;
 
-use dominator::{clone, html, Dom};
+use dominator::{Dom, clone, html, with_node};
 use futures_signals::signal::{Signal, SignalExt};
 use utils::{clipboard, events};
+
+use crate::{animation::fade::{Fade, FadeKind}, tooltip::{
+    state::{MoveStrategy, Placement, State as TooltipState, TooltipBubble, TooltipData, TooltipTarget},
+    dom::render as TooltipDom
+}};
 
 use super::state::{ActivePopup, State};
 
 const STR_BACK: &'static str = "Back";
+const STR_COPIED: &'static str = "Copied to the clipboard";
 
 pub fn render(state: Rc<State>, anchor: Dom, slot: Option<&str>) -> Dom {
     html!("anchored-overlay", {
@@ -137,6 +143,7 @@ fn render_share_students(state: Rc<State>) -> Dom {
 fn render_share_embed(state: Rc<State>) -> Dom {
     html!("share-jig-embed", {
         .property("slot", "overlay")
+        .property("value", state.embed_code())
         .children(&mut [
             html!("button-empty", {
                 .property("slot", "close")
@@ -154,10 +161,55 @@ fn render_share_embed(state: Rc<State>) -> Dom {
                     state.active_popup.set(Some(ActivePopup::ShareMain));
                 }))
             }),
-            html!("button-rect", {
-                .property("slot", "copy")
-                .property("kind", "text")
-                .text("Copy code")
+            html!("div", {
+                .with_node!(elem => {
+                    .property("slot", "copy")
+                    .child(html!("button-rect", {
+                        .property("kind", "text")
+                        .text("Copy code")
+                        .event(clone!(state => move |_: events::Click| {
+                            clipboard::write_text(&state.embed_code());
+                            state.copied_embed.set(true);
+                        }))
+                    }))
+                    .child_signal(state.copied_embed.signal().map(move |copied_embed| {
+                        match copied_embed {
+                            false => None,
+                            true => {
+                                let fade = Fade::new(
+                                    FadeKind::Out,
+                                    500.0,
+                                    false,
+                                    Some(4000.0),
+                                    Some(clone!(state => move || {
+                                        state.copied_embed.set(false);
+                                    }))
+                                );
+        
+                                Some(html!("div", {
+                                    .apply(|dom| fade.render(dom))
+                                    .child({
+                                        let tooltip = TooltipData::Bubble(Rc::new(TooltipBubble {
+                                            placement: Placement::Right,
+                                            slot: Some(String::from("copy")),
+                                            body: String::from(STR_COPIED),
+                                            max_width: None,
+                                        }));
+        
+                                        let target = TooltipTarget::Element(elem.clone(), MoveStrategy::Track);
+        
+                                        TooltipDom(Rc::new(TooltipState::new(target, tooltip)))
+                                    })
+                                }))
+                            }
+                        }
+                    }))
+                })
+                .event(|_evt: events::Click| {
+                    // stop close event from propagating to the anchored-overlay
+                    // TODO: this needs to be enabled once dominator allows it
+                    // evt.stop_propagation();
+                })
             })
         ])
     })

@@ -17,8 +17,7 @@ use sqlx::postgres::PgPool;
 
 use crate::{
     error::BasicError,
-    s3, service,
-    service::{mail, ServiceData},
+    service::{self, mail, s3, ServiceData},
 };
 
 mod cors;

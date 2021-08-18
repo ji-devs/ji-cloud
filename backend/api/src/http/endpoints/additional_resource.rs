@@ -6,14 +6,16 @@ use paperclip::actix::{
 use shared::{
     api::{endpoints::jig::additional_resource, ApiEndpoint},
     domain::{
-        jig::{additional_resource::AdditionalResourceId, JigId},
+        jig::{
+            additional_resource::{AdditionalResourceId, AdditionalResourceResponse},
+            JigId,
+        },
         CreateResponse,
     },
 };
 use sqlx::PgPool;
 
 use crate::{db, error, extractor::TokenUser};
-use shared::domain::jig::additional_resource::AdditionalResourceResponse;
 
 /// Create a new additional resource.
 #[api_v2_operation]

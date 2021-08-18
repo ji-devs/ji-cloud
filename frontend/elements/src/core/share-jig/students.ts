@@ -81,7 +81,7 @@ export class _ extends LitElement {
                             <input readonly value="${this.url}">
                         </label>
                         <div class="under">
-                            <a href="${this.url}"><button-rect kind="text">${STR_STUDENTS_URL_LINK}</button-rect></a>
+                            <button-rect href="${this.url}" kind="text">${STR_STUDENTS_URL_LINK}</button-rect>
                             <span class="divider"></span>
                             <slot name="copy-url"></slot>
                         </div>

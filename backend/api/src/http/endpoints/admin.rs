@@ -1,11 +1,10 @@
-use core::settings::RuntimeSettings;
-
 use actix_http::{
     error::BlockingError,
     http::header::{self, EntityTag, Header, IfMatch, IfNoneMatch},
 };
 use actix_web::{web::Json, HttpResponse};
 use chrono::{DateTime, Duration, Utc};
+use core::settings::RuntimeSettings;
 use futures::TryStreamExt;
 use paperclip::actix::{
     api_v2_operation,
@@ -28,8 +27,7 @@ use crate::{
     db, error,
     extractor::{ScopeAdmin, TokenUserWithScope},
     image_ops::{regenerate_images, MediaKind},
-    s3,
-    service::ServiceData,
+    service::{s3, ServiceData},
     token::{create_auth_token, SessionMask},
 };
 

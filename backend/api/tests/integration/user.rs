@@ -85,11 +85,13 @@ async fn put_profile() -> anyhow::Result<()> {
             over_18: true,
             given_name: "name".to_owned(),
             family_name: "nameson".to_owned(),
+            profile_image: None,
             language: "en_US".to_owned(),
             locale: "en_US".to_owned(),
             timezone: chrono_tz::America::Los_Angeles,
             opt_into_edu_resources: true,
             organization: None,
+            persona: Some("personesaa".to_owned()),
             subjects: Vec::<SubjectId>::new(),
             age_ranges: Vec::<AgeRangeId>::new(),
             affiliations: Vec::<AffiliationId>::new(),
@@ -125,11 +127,13 @@ async fn patch_profile() -> anyhow::Result<()> {
             over_18: Some(false),
             given_name: Some("name".to_owned()),
             family_name: Some("nameson".to_owned()),
+            profile_image: Some(Some("this.is.a/url".to_owned())),
             language: Some("en_US".to_owned()),
             locale: Some("en_US".to_owned()),
             timezone: None,
             opt_into_edu_resources: Some(false),
             organization: Some(None),
+            persona: Some(Some("persona".to_owned())),
             subjects: None,
             age_ranges: None,
             affiliations: Some(Vec::<AffiliationId>::new()),
@@ -267,11 +271,13 @@ async fn basic_auth_flow_no_login() -> anyhow::Result<()> {
             over_18: true,
             given_name: "name".to_owned(),
             family_name: "nameson".to_owned(),
+            profile_image: None,
             language: "en_US".to_owned(),
             locale: "en_US".to_owned(),
             timezone: chrono_tz::America::Los_Angeles,
             opt_into_edu_resources: true,
             organization: None,
+            persona: Some("personesaa".to_owned()),
             subjects: Vec::<SubjectId>::new(),
             age_ranges: Vec::<AgeRangeId>::new(),
             affiliations: Vec::<AffiliationId>::new(),
@@ -381,7 +387,13 @@ async fn basic_auth_flow() -> anyhow::Result<()> {
     let body = resp.json::<CreateSessionResponse>().await?;
 
     let csrf = match body {
-        CreateSessionResponse::Register(resp) => resp.csrf,
+        CreateSessionResponse::Register {
+            response,
+            oauth_profile,
+        } => {
+            assert!(oauth_profile.is_none());
+            response.csrf
+        }
         _ => {
             return Err(anyhow::anyhow!(
                 "invalid session response to create a user profile!"
@@ -399,11 +411,13 @@ async fn basic_auth_flow() -> anyhow::Result<()> {
             over_18: true,
             given_name: "name".to_owned(),
             family_name: "nameson".to_owned(),
+            profile_image: None,
             language: "en_US".to_owned(),
             locale: "en_US".to_owned(),
             timezone: chrono_tz::America::Los_Angeles,
             opt_into_edu_resources: true,
             organization: None,
+            persona: Some("put persona".to_owned()),
             subjects: Vec::<SubjectId>::new(),
             age_ranges: Vec::<AgeRangeId>::new(),
             affiliations: Vec::<AffiliationId>::new(),
