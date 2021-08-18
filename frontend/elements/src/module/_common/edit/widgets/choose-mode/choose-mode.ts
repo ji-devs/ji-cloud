@@ -1,5 +1,5 @@
 import { mediaUi } from '@utils/path';
-import { LitElement, html, css, customElement, property, query, unsafeCSS } from 'lit-element';
+import { LitElement, html, css, customElement, property, query, unsafeCSS, internalProperty } from 'lit-element';
 import { nothing } from 'lit-html';
 import {ModuleKind, STR_MODULE_CHOOSE_HEADER} from "@elements/module/_common/types";
 
@@ -165,26 +165,28 @@ export class _ extends LitElement {
         });
     }
 
-    getScrollPosition() : ScrollPosition {
+    recalculatePosition() {
         const carousel = this.carousel;
-        if(!carousel || !carousel.scrollLeft) {
-            return 'left';
+        this.leftEnd = false;
+        this.rightEnd = false;
+
+        if(!carousel || carousel.scrollWidth <= carousel.clientWidth) {
+            this.leftEnd = true;
+            this.rightEnd = true;
+        } else if(!carousel.scrollLeft) {
+            this.leftEnd = true;
         } else if (carousel.scrollWidth - carousel.scrollLeft - carousel.clientWidth - NAV_BUTTON_WIDTH < 1) {
-            return 'right';
-        } else {
-            return null;
+            this.rightEnd = true;
         }
     }
 
-    @property({ type: String })
-    scrollPosition: ScrollPosition = 'left';
+    @internalProperty()
+    leftEnd: boolean = true;
+    @internalProperty()
+    rightEnd: boolean = true;
 
     @property()
     module:ModuleKind = "memory";
-
-    private onScroll() {
-        this.scrollPosition = this.getScrollPosition();
-    }
 
     render() {
         const {module} = this;
@@ -207,13 +209,13 @@ export class _ extends LitElement {
             </header>
             <div class="carousel-wrapper">
                 <div class="nav-button left" @click="${this.back}">
-                    <img-ui path="core/_common/chevron-left-${this.scrollPosition === 'left' ? 'grey' : 'blue'}-large.svg"></img-ui>
+                    <img-ui path="core/_common/chevron-left-${ this.leftEnd ? 'grey' : 'blue' }-large.svg"></img-ui>
                 </div>
-                <div class="carousel" @scroll="${this.onScroll}">
-                    <slot></slot>
+                <div class="carousel" @scroll="${this.recalculatePosition}">
+                    <slot @slotchange=${this.recalculatePosition}></slot>
                 </div>
                 <div class="nav-button right" @click="${this.forward}">
-                    <img-ui path="core/_common/chevron-right-${this.scrollPosition === 'right' ? 'grey' : 'blue'}-large.svg"></img-ui>
+                    <img-ui path="core/_common/chevron-right-${ this.rightEnd ? 'grey' : 'blue' }-large.svg"></img-ui>
                 </div>
             </div>
         `;

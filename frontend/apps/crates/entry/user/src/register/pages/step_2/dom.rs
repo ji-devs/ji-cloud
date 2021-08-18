@@ -12,6 +12,8 @@ use crate::{
     }
 };
 
+use components::input::simple_select::SimpleSelect;
+
 pub struct Step2Page {
 }
 
@@ -31,22 +33,56 @@ impl Step2Page {
                         }))
                     }))
                 }),
+                SimpleSelect::render_mixin(
+                    SimpleSelect::new(
+                        Some(STR_LANGUAGE_LABEL),
+                        Some(STR_LANGUAGE_PLACEHOLDER),
+                        None,
+                        STR_LANGUAGE_OPTIONS.to_vec(), 
+                        clone!(state => move |value| {
+                            *state.language.borrow_mut() = value.map(|x| x.to_string()); 
+                            state.evaluate_language_error();
+                        })
+                    ),
+                    Some("language"),
+                    clone!(state => move |dom| {
+                        dom.property_signal("error", state.language_error.signal())
+                    })
+                ),
+                SimpleSelect::render_mixin(
+                    SimpleSelect::new(
+                        Some(STR_PERSONA_LABEL),
+                        Some(STR_PERSONA_PLACEHOLDER),
+                        None,
+                        STR_PERSONA_OPTIONS.to_vec(), 
+                        clone!(state => move |value| {
+                            *state.persona.borrow_mut() = value.map(|x| x.to_string()); 
+                            state.evaluate_persona_error();
+                        })
+                    ),
+                    Some("persona"),
+                    clone!(state => move |dom| {
+                        dom.property_signal("error", state.persona_error.signal())
+                    })
+                ),
                 html!("input-wrapper", {
-                    .property("slot", "language")
-                    .property("label", STR_LANGUAGE_LABEL)
+                    .property("slot", "organization")
+                    .property("label", STR_ORGANIZATION_LABEL)
                     .child(html!("input", {
                         .event(clone!(state => move |evt:events::Input| {
-                            *state.language.borrow_mut() = evt.value().unwrap_or_default();
+                            *state.organization.borrow_mut() = evt.value().and_then(|x| {
+                                if x.is_empty() { None } else { Some(x) }
+                            })
                         }))
                     }))
                 }),
                 html!("input-checkbox", {
                     .property("slot", "checkbox")
-                    .property_signal("error", state.terms_error())
+                    .property_signal("error", state.terms_error_str())
                     .property("label", STR_TERMS_LABEL)
                     .event(clone!(state => move |evt:events::CustomToggle| {
-                        state.clear_terms_status();
                         *state.terms.borrow_mut() = evt.value();
+                        state.evaluate_terms_error();
                     }))
                 }),
                 html!("input-checkbox", {

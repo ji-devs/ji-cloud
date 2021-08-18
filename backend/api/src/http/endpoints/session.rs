@@ -55,7 +55,10 @@ async fn create_session(
     let response = NewSessionResponse { csrf };
 
     let response = if !mask.contains(SessionMask::GENERAL) {
-        CreateSessionResponse::Register(response)
+        CreateSessionResponse::Register {
+            response,
+            oauth_profile: None,
+        }
     } else {
         CreateSessionResponse::Login(response)
     };

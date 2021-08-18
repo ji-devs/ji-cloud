@@ -13,6 +13,7 @@ use core::google::GoogleAccessTokenResponse;
 pub mod event_arc;
 pub mod mail;
 pub mod notifications;
+pub mod s3;
 pub mod storage;
 pub mod uploads;
 
@@ -29,7 +30,7 @@ impl Service for crate::algolia::SearchKeyStore {
     const DISABLED_ERROR: error::ServiceKind = error::ServiceKind::Algolia;
 }
 
-impl Service for crate::s3::Client {
+impl Service for s3::Client {
     const DISABLED_ERROR: error::ServiceKind = error::ServiceKind::S3;
 }
 

@@ -18,9 +18,12 @@ pub const CSRF_HEADER_NAME: &str = "X-CSRF";
 #[deprecated(note = "use NewSessionResponse")]
 pub use NewSessionResponse as CreateSessionSuccess;
 
-/// Response for creating a session
+/// Response for creating a session.
 ///
-/// Note: This response *also* includes a cookie.
+/// Notes:
+/// * When creating a `Register` session through OAuth, the API also returns user profile info
+/// given as part of the identity claims from the OAuth provider (e.g. Google).
+/// * This response *also* includes a cookie.
 ///
 /// Returned cookie auth token can be passed to the API in three ways in requests.
 /// They are listed below in order of precedence (i.e. if 1 exists then 2, 3 are ignored):
@@ -36,8 +39,70 @@ pub enum CreateSessionResponse {
     /// A new session was successfully created and the user may use the api as normal.
     Login(NewSessionResponse),
 
-    /// The user has no profile, a token for creating one has been returned
-    Register(NewSessionResponse),
+    /// The user has no profile, a token for creating one has been returned.
+    /// * If using OAuth, then a [`Some(OAuthUserProfile)`](OAuthUserProfile) is included as well
+    /// containing known information about the user.
+    /// * If using Basic auth, then the `oauth_profile` field will be `None` and not be serialized.
+    ///
+    /// ## Json response without OAuth profile:
+    /// ```json
+    /// {
+    ///     "register": {
+    ///         "csrf": <CSRF_TOKEN>,
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ## Json response with OAuth profile:
+    /// ```json
+    /// {
+    ///     "register": {
+    ///         "csrf": <CSRF_TOKEN>,
+    ///         "oauth_profile": {
+    ///             "email": <EMAIL>,
+    ///             ... # other optional profile fields
+    ///         }
+    ///     }
+    /// }
+    /// ```
+    Register {
+        /// Csrf token. Note that this field is "flattened" into it's contents when (de)serialized. See example above.
+        #[serde(flatten)]
+        response: NewSessionResponse,
+        /// Oauth profile
+        #[serde(skip_serializing_if = "Option::is_none")]
+        oauth_profile: Option<OAuthUserProfile>,
+    },
+}
+
+/// User's profile info fetched from the OAuth service. Returned as part of the identity claims
+/// to be used as defaults for populating a `PutProfile` request.
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+pub struct OAuthUserProfile {
+    /// The user's email
+    pub email: String,
+
+    /// The user's name
+    #[serde(default)]
+    pub name: Option<String>,
+
+    /// the user's profile picture
+    #[serde(default)]
+    pub profile_picture: Option<String>,
+
+    /// The user's given / first name
+    #[serde(default)]
+    pub given_name: Option<String>,
+
+    /// The user's family / last name
+    #[serde(default)]
+    pub family_name: Option<String>,
+
+    /// The user's locale
+    #[serde(default)]
+    pub locale: Option<String>,
 }
 
 /// Response for successfully creating a session.

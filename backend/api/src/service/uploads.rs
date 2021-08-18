@@ -1,4 +1,3 @@
-use crate::{error, service};
 use shared::{
     domain::{animation::AnimationKind, image::ImageKind},
     media::{FileKind, MediaLibrary, PngImageFile},
@@ -6,7 +5,13 @@ use shared::{
 use sqlx::PgPool;
 use uuid::Uuid;
 
-pub async fn process_image(db: &PgPool, s3: &crate::s3::Client, id: Uuid) -> anyhow::Result<bool> {
+use crate::{error, service};
+
+pub async fn process_image(
+    db: &PgPool,
+    s3: &service::s3::Client,
+    id: Uuid,
+) -> anyhow::Result<bool> {
     log::info!("Processing image {}", id);
 
     let mut txn = db.begin().await?;
@@ -94,32 +99,37 @@ skip locked
 
 pub async fn process_user_image(
     db: &PgPool,
-    s3: &crate::s3::Client,
+    s3: &service::s3::Client,
     id: Uuid,
 ) -> anyhow::Result<bool> {
     let mut txn = db.begin().await?;
 
-    let exists = sqlx::query!(
+    let kind = sqlx::query!(
+        //language=SQL
         r#"
-select exists(select 1
+select kind as "kind: ImageKind"
 from user_image_library
 inner join user_image_upload on user_image_library.id = user_image_upload.image_id
 where (id = $1 and uploaded_at is not null and processed_at >= uploaded_at is not true)
 for no key update of user_image_upload
 for share of user_image_library
 skip locked
-) as "exists!"
         "#,
         id
     )
-    .fetch_one(&mut txn)
+    .fetch_optional(&mut txn)
     .await?
-    .exists;
+    .map(|it| it.kind);
 
-    if !exists {
-        txn.rollback().await?;
-        return Ok(false);
-    }
+    let kind = match kind {
+        Some(row) => row,
+        None => {
+            log::info!("Unprocessed user image upload not found in database!");
+
+            txn.rollback().await?;
+            return Ok(false);
+        }
+    };
 
     let file = s3
         .download_media_for_processing(
@@ -144,10 +154,7 @@ skip locked
 
     let processed = tokio::task::spawn_blocking(move || -> Result<_, error::Upload> {
         let original = image::load_from_memory(&file).map_err(|_| error::Upload::InvalidMedia)?;
-        Ok(crate::image_ops::regenerate_images(
-            &original,
-            ImageKind::Sticker,
-        )?)
+        Ok(crate::image_ops::regenerate_images(&original, kind)?)
     })
     .await
     .unwrap();
@@ -178,7 +185,7 @@ skip locked
 
 pub async fn process_animation(
     db: &PgPool,
-    s3: &crate::s3::Client,
+    s3: &crate::service::s3::Client,
     id: Uuid,
 ) -> anyhow::Result<bool> {
     let mut txn = db.begin().await?;
@@ -261,7 +268,7 @@ skip locked
 
 pub async fn process_user_audio(
     db: &PgPool,
-    s3: &crate::s3::Client,
+    s3: &service::s3::Client,
     id: Uuid,
 ) -> anyhow::Result<bool> {
     let mut txn = db.begin().await?;

@@ -933,6 +933,33 @@
       "nullable": []
     }
   },
+  "228687aa01cb6d5780d804f5ddf78a5e070fc552dbb3b3f8e5224b8a6a9e9b18": {
+    "query": "\nselect id as \"id: ImageId\", kind as \"kind: ImageKind\"\nfrom user_image_library\n         join user_image_upload\n              on user_image_library.id = user_image_upload.image_id\nwhere processing_result is true\n  and user_id = $1\n  and (kind is not distinct from $2 or $2 is null)\norder by created_at desc\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: ImageId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "kind: ImageKind",
+          "type_info": "Int2"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2"
+        ]
+      },
+      "nullable": [
+        false,
+        false
+      ]
+    }
+  },
   "23873843756ff7baeccd6cae63c9d074287664e7bdfad98ee684de92962f1a88": {
     "query": "\ninsert into jig_age_range(jig_id, age_range_id)\nselect $1, age_range_id from jig_age_range where jig_id = $2\n",
     "describe": {
@@ -988,38 +1015,6 @@
       ]
     }
   },
-  "2968c111bb7c6cd6a2974b52a5b80e4cf7fd4264cc519edcd68b2b6779a4ca2b": {
-    "query": "delete from user_image_library where id = $1",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      },
-      "nullable": []
-    }
-  },
-  "2f543f437b0d296a8b9263739f1cbba78aab12d93475a5bb013776da3dfab539": {
-    "query": "\nselect exists(select 1\nfrom user_image_library\ninner join user_image_upload on user_image_library.id = user_image_upload.image_id\nwhere (id = $1 and uploaded_at is not null and processed_at >= uploaded_at is not true)\nfor no key update of user_image_upload\nfor share of user_image_library\nskip locked\n) as \"exists!\"\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "exists!",
-          "type_info": "Bool"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      },
-      "nullable": [
-        null
-      ]
-    }
-  },
   "2fc15a774a3c774d8fbe0e1c9479a021c7491224421b3d51a739126b2f38a252": {
     "query": "\nupdate image_metadata\nset name        = coalesce($2, name),\n    description = coalesce($3, description),\n    is_premium  = coalesce($4, is_premium),\n    updated_at  = now()\nwhere id = $1\n  and (($2::text is not null and $2 is distinct from name) or\n       ($3::text is not null and $3 is distinct from description) or\n       ($4::boolean is not null and $4 is distinct from is_premium))",
     "describe": {
@@ -1030,6 +1025,19 @@
           "Text",
           "Text",
           "Bool"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "3095307b310af8dc3e105f59d2f027a3b8dd43ab328535c893f18a6a4439782e": {
+    "query": "\nupdate user_profile\nset profile_image = $2\nwhere user_id = $1 and profile_image is distinct from $2\n        ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text"
         ]
       },
       "nullable": []
@@ -1239,6 +1247,30 @@
         false,
         true
       ]
+    }
+  },
+  "3b383348054bcbdbce27902393a10d63de48e33930e464eac991d95395886abd": {
+    "query": "\ninsert into user_profile\n    (user_id, username, over_18, given_name, family_name, profile_image, language, locale, timezone, opt_into_edu_resources, organization, persona, location) \nvalues \n    ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)\non conflict (user_id) do update\nset\n    over_18 = $3,\n    given_name = $4,\n    family_name = $5,\n    profile_image = $6,\n    language = $7,\n    locale = $8,\n    timezone = $9,\n    opt_into_edu_resources = $10,\n    organization = $11,\n    persona = $12,\n    location = $13\n",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Bool",
+          "Text",
+          "Text",
+          "Text",
+          "Text",
+          "Text",
+          "Text",
+          "Bool",
+          "Text",
+          "Text",
+          "Jsonb"
+        ]
+      },
+      "nullable": []
     }
   },
   "3cfa772cac043b6accabfde5a1fd872956182b08d67b5a9ab2e35a6bb95405b3": {
@@ -1507,28 +1539,6 @@
       "nullable": []
     }
   },
-  "4ece7de8525ff491823831df2bebf0d78e258fe95d1432e01ed0df448d04587f": {
-    "query": "\ninsert into user_profile\n    (user_id, username, over_18, given_name, family_name, language, locale, timezone, opt_into_edu_resources, organization, location) \nvalues \n    ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)\non conflict (user_id) do update\nset\n    over_18 = $3,\n    given_name = $4,\n    family_name = $5,\n    language = $6,\n    locale = $7,\n    timezone = $8,\n    opt_into_edu_resources = $9,\n    organization = $10,\n    location = $11\n",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Text",
-          "Bool",
-          "Text",
-          "Text",
-          "Text",
-          "Text",
-          "Text",
-          "Bool",
-          "Text",
-          "Jsonb"
-        ]
-      },
-      "nullable": []
-    }
-  },
   "50ff48a8d492e560f61066b5217a70876d23552f79fcb6d43dbbcd5331da14ef": {
     "query": "delete from animation_metadata where id = $1 returning kind as \"kind: AnimationKind\"",
     "describe": {
@@ -1597,26 +1607,6 @@
       },
       "nullable": [
         null
-      ]
-    }
-  },
-  "5379816dbbb936c2fa84c55000f10298f1b22286f2523b5f70dbab56b7e06d9f": {
-    "query": "\nselect id as \"id: ImageId\" \nfrom user_image_library inner join user_image_upload \n    on user_image_library.id = user_image_upload.image_id \nwhere id = $1 and processing_result is true\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id: ImageId",
-          "type_info": "Uuid"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      },
-      "nullable": [
-        false
       ]
     }
   },
@@ -1762,6 +1752,27 @@
         false,
         false,
         true,
+        null
+      ]
+    }
+  },
+  "620638cd11c57d625c799e1d5ada2d57161cb59e06559bc3bd7ee3e3e3a8d5ee": {
+    "query": "\nselect exists(select 1 from user_image_library where user_id = $1 and id = $2) as \"exists!\"\n    ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "exists!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      },
+      "nullable": [
         null
       ]
     }
@@ -2069,18 +2080,6 @@
       ]
     }
   },
-  "6e208fc3bc2f8b325a05f5db6826eb909e13fe012d6070451078d646101e6723": {
-    "query": "insert into user_image_upload (image_id) values($1)",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      },
-      "nullable": []
-    }
-  },
   "6f2efac54ea432d33d9d1a74ef07c9fb09eb8082a80cf4d36784f480b7eb8bb9": {
     "query": "\ninsert into user_recent_image (user_id, image_id, media_library)\nvalues ($1, $2, $3)\nreturning image_id as \"id: ImageId\", media_library as \"library: MediaLibrary\", last_used as \"last_used: DateTime<Utc>\";\n            ",
     "describe": {
@@ -2218,6 +2217,18 @@
       "nullable": [
         false
       ]
+    }
+  },
+  "7325c7ed63eb3cf5405a37c590c086cb0f1c457f27f6b53eacd26bb6dac849ec": {
+    "query": "insert into user_image_upload (image_id) values ($1)",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": []
     }
   },
   "73f764f872bffc9e08fe85ba34a7b52d7c9e645095e3b1e4cec6a0b1d5b27d2d": {
@@ -2672,6 +2683,27 @@
       },
       "nullable": [
         null
+      ]
+    }
+  },
+  "87fc2b6aae796b62d4bca602b3d6d99d961677cc1fa42b96b112015927be1d6e": {
+    "query": "\ninsert into user_image_library (user_id, kind)\nvalues ($1, $2)\nreturning id as \"id: ImageId\"\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: ImageId",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2"
+        ]
+      },
+      "nullable": [
+        false
       ]
     }
   },
@@ -3200,6 +3232,39 @@
       ]
     }
   },
+  "97c54af61fbd13ad8dc24d896a8ea0d71f754666e4c81a1b07f6f9aca6c20f26": {
+    "query": "\nselect kind as \"kind: ImageKind\"\nfrom user_image_library\ninner join user_image_upload on user_image_library.id = user_image_upload.image_id\nwhere (id = $1 and uploaded_at is not null and processed_at >= uploaded_at is not true)\nfor no key update of user_image_upload\nfor share of user_image_library\nskip locked\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "kind: ImageKind",
+          "type_info": "Int2"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
+  "986130a83ea19f3782aa5e5c1c0a0a260c515e4aad15cc17d63aba20db572b2f": {
+    "query": "delete from user_image_library where user_id = $1 and id = $2",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "9b861485e86da04aaa69d4863da15659c65606df112805e833c162510b8aad6d": {
     "query": "\nselect exists(select 1\nfrom user_audio_library\ninner join user_audio_upload on user_audio_library.id = user_audio_upload.audio_id\nwhere (id = $1 and uploaded_at is not null and processed_at >= uploaded_at is not true)\nfor no key update of user_audio_upload\nfor share of user_audio_library\nskip locked\n) as \"exists!\"\n        ",
     "describe": {
@@ -3344,24 +3409,6 @@
         ]
       },
       "nullable": []
-    }
-  },
-  "a17d100505aa7d8a6310b6a8d8db590654d9b5fbba1fd339851c9a95effe0af6": {
-    "query": "\nselect id as \"id: ImageId\" \nfrom user_image_library join user_image_upload \n    on user_image_library.id = user_image_upload.image_id\nwhere processing_result is true\norder by created_at desc\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id: ImageId",
-          "type_info": "Uuid"
-        }
-      ],
-      "parameters": {
-        "Left": []
-      },
-      "nullable": [
-        false
-      ]
     }
   },
   "a196efbd15600fad1de6cd53a5fbdcc2f070b122f30811275dd7d5567f455346": {
@@ -3769,6 +3816,33 @@
       "nullable": []
     }
   },
+  "c84c613c4d8af5d5228646ffb25c2cd2825699626313634127fc09341ed715ac": {
+    "query": "\nselect id as \"id: ImageId\", kind as \"kind: ImageKind\"\nfrom user_image_library\n         inner join user_image_upload\n                    on user_image_library.id = user_image_upload.image_id\nwhere user_id = $1\n  and id = $2\n  and processing_result is true\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: ImageId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "kind: ImageKind",
+          "type_info": "Int2"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false,
+        false
+      ]
+    }
+  },
   "c9871e12739d5ae1acd8e3026e00ed927a54f717d5e5cd12f78456b99a7aa23b": {
     "query": "delete from session where user_id = $1",
     "describe": {
@@ -3891,26 +3965,6 @@
       ]
     }
   },
-  "daa77824c0c1372877839ffbc0bd3b0d8b4a0a9754a5e98d1e0bd1e9c15640c7": {
-    "query": "select exists(select 1 from user_image_upload where image_id = $1 for no key update) as \"exists!\"",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "exists!",
-          "type_info": "Bool"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      },
-      "nullable": [
-        null
-      ]
-    }
-  },
   "dce1ba23b612bd8fa029a70a2e43b93f5158cbf0f24377b079e70d5d6c29a97c": {
     "query": "\nupdate user_profile\nset organization = $2\nwhere user_id = $1 and organization is distinct from $2",
     "describe": {
@@ -3941,128 +3995,6 @@
       },
       "nullable": [
         true
-      ]
-    }
-  },
-  "e13fed8948ad863f394fefbda8a3b5a002208ed80892e3a5751742eb6d938815": {
-    "query": "\nselect user_id as \"id\",\n    username,\n    user_email.email::text                                                              as \"email!\",\n    given_name,\n    family_name,\n    language,\n    locale,\n    opt_into_edu_resources,\n    over_18,\n    timezone,\n    user_profile.created_at,\n    user_profile.updated_at,\n    organization,\n    location,\n    array(select scope from user_scope where user_scope.user_id = \"user\".id) as \"scopes!: Vec<i16>\",\n    array(select subject_id from user_subject where user_subject.user_id = \"user\".id) as \"subjects!: Vec<Uuid>\",\n    array(select affiliation_id from user_affiliation where user_affiliation.user_id = \"user\".id) as \"affiliations!: Vec<Uuid>\",\n    array(select age_range_id from user_age_range where user_age_range.user_id = \"user\".id) as \"age_ranges!: Vec<Uuid>\"\nfrom \"user\"\ninner join user_profile on \"user\".id = user_profile.user_id\ninner join user_email using(user_id)\nwhere id = $1",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "username",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "email!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 3,
-          "name": "given_name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 4,
-          "name": "family_name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 5,
-          "name": "language",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 6,
-          "name": "locale",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 7,
-          "name": "opt_into_edu_resources",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 8,
-          "name": "over_18",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 9,
-          "name": "timezone",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 10,
-          "name": "created_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 11,
-          "name": "updated_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 12,
-          "name": "organization",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 13,
-          "name": "location",
-          "type_info": "Jsonb"
-        },
-        {
-          "ordinal": 14,
-          "name": "scopes!: Vec<i16>",
-          "type_info": "Int2Array"
-        },
-        {
-          "ordinal": 15,
-          "name": "subjects!: Vec<Uuid>",
-          "type_info": "UuidArray"
-        },
-        {
-          "ordinal": 16,
-          "name": "affiliations!: Vec<Uuid>",
-          "type_info": "UuidArray"
-        },
-        {
-          "ordinal": 17,
-          "name": "age_ranges!: Vec<Uuid>",
-          "type_info": "UuidArray"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        null,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        true,
-        true,
-        true,
-        null,
-        null,
-        null,
-        null
       ]
     }
   },
@@ -4129,6 +4061,19 @@
       "nullable": []
     }
   },
+  "e3c98457c7018a7cdea192aea153a3581104136a7aa2a2c7f02a5c884f8e517e": {
+    "query": "\nupdate user_profile\nset persona = $2\nwhere user_id = $1 and persona is distinct from $2\n        ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "e3d429cb70f383b9088a61bd28fca38365ac88aa817d1e6825397e77f0a20bef": {
     "query": "\nupdate jig_module\nset\n    index = case when index = $2 then $3 else index + 1 end,\n    updated_at = now()\nwhere jig_id = $1 and index between $3 and $2\n",
     "describe": {
@@ -4177,24 +4122,6 @@
         ]
       },
       "nullable": []
-    }
-  },
-  "e53665c81494eec03a5148d47f3a8e68b49071f7e69717c95e91dee992efa6bf": {
-    "query": "\ninsert into user_image_library default values\nreturning id as \"id: ImageId\"\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id: ImageId",
-          "type_info": "Uuid"
-        }
-      ],
-      "parameters": {
-        "Left": []
-      },
-      "nullable": [
-        false
-      ]
     }
   },
   "e7b414859b52186188a99c58f582e19b132f586d976eabf098c40f1fe356982d": {
@@ -4546,6 +4473,140 @@
         ]
       },
       "nullable": []
+    }
+  },
+  "f735bc2469a7d6e197f6c887ad1a5161135bac669634623626e1b5f8558a1b7a": {
+    "query": "\nselect user_id as \"id\",\n    username,\n    user_email.email::text                                                              as \"email!\",\n    given_name,\n    family_name,\n    profile_image,\n    language,\n    locale,\n    opt_into_edu_resources,\n    over_18,\n    timezone,\n    user_profile.created_at,\n    user_profile.updated_at,\n    organization,\n    persona,\n    location,\n    array(select scope from user_scope where user_scope.user_id = \"user\".id) as \"scopes!: Vec<i16>\",\n    array(select subject_id from user_subject where user_subject.user_id = \"user\".id) as \"subjects!: Vec<Uuid>\",\n    array(select affiliation_id from user_affiliation where user_affiliation.user_id = \"user\".id) as \"affiliations!: Vec<Uuid>\",\n    array(select age_range_id from user_age_range where user_age_range.user_id = \"user\".id) as \"age_ranges!: Vec<Uuid>\"\nfrom \"user\"\n    inner join user_profile on \"user\".id = user_profile.user_id\n    inner join user_email using(user_id)\nwhere id = $1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "username",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "email!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "given_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "family_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 5,
+          "name": "profile_image",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 6,
+          "name": "language",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 7,
+          "name": "locale",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 8,
+          "name": "opt_into_edu_resources",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 9,
+          "name": "over_18",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 10,
+          "name": "timezone",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 11,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 12,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 13,
+          "name": "organization",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 14,
+          "name": "persona",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 15,
+          "name": "location",
+          "type_info": "Jsonb"
+        },
+        {
+          "ordinal": 16,
+          "name": "scopes!: Vec<i16>",
+          "type_info": "Int2Array"
+        },
+        {
+          "ordinal": 17,
+          "name": "subjects!: Vec<Uuid>",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 18,
+          "name": "affiliations!: Vec<Uuid>",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 19,
+          "name": "age_ranges!: Vec<Uuid>",
+          "type_info": "UuidArray"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        null,
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        true,
+        true,
+        null,
+        null,
+        null,
+        null
+      ]
     }
   },
   "f7803338a676de1c4fad713fa774406743480aea8ceb9a4b6ba8ec80b74f9b3d": {

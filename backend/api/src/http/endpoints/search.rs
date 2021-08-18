@@ -1,4 +1,3 @@
-use crate::{error, extractor::TokenUser, service::ServiceData};
 use core::settings::RuntimeSettings;
 use paperclip::actix::{
     api_v2_operation,
@@ -9,6 +8,8 @@ use shared::{
     api::{endpoints::search, ApiEndpoint},
     domain::search::{CreateSearchKeyResponse, WebImageSearchResponse},
 };
+
+use crate::{error, extractor::TokenUser, service::ServiceData};
 
 /// Create an Algolia search key based on the user's auth. Currently expires after 15 minutes, but that number is subject to change.
 /// # Errors

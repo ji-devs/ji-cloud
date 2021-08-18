@@ -24,7 +24,7 @@ impl Step3Page {
         html!("page-register-step3", {
             .future(clone!(state, meta_options => async move {
                 let meta = MetaOptions::load().await.unwrap_throw();
-                state.set_from_meta(&meta);
+                state.pre_select(&meta);
 
                 meta_options.set(Some(meta));
             }))
@@ -65,6 +65,22 @@ impl Step3Page {
                                         state.affiliations.borrow_mut().insert(id.clone());
                                     } else {
                                         state.affiliations.borrow_mut().remove(&id);
+                                    }
+                                }))
+                            })
+                        )
+                    }
+                    for (id, label) in options.subjects.iter() {
+                        children.push(
+                            html!("input-checkbox", {
+                                .property("slot", "subjects")
+                                .property("label", label)
+                                .property("checked", state.subjects.borrow().contains(id))
+                                .event(clone!(state, id => move |evt:events::CustomToggle| {
+                                    if evt.value() {
+                                        state.subjects.borrow_mut().insert(id.clone());
+                                    } else {
+                                        state.subjects.borrow_mut().remove(&id);
                                     }
                                 }))
                             })

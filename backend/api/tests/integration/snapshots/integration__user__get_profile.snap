@@ -9,6 +9,7 @@ expression: body
   "email": "test@test.test",
   "given_name": "Bobby",
   "family_name": "Tables",
+  "profile_image": null,
   "language": "en_US",
   "locale": "en_US",
   "opt_into_edu_resources": true,
