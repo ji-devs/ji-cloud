@@ -11,10 +11,10 @@ use components::{
         state::{State as ImageSearchState, ImageSearchOptions},
         callbacks::Callbacks as ImageSearchCallbacks
     },
-    audio_input::{
-        options::AudioInputOptions,
-        state::State as AudioInputState,
-        callbacks::Callbacks as AudioCallbacks,
+    audio::input::{
+        AudioInputOptions,
+        AudioInput,
+        AudioInputCallbacks,
     },
     stickers::state::Stickers,
 };
@@ -63,7 +63,7 @@ impl TabKind {
 #[derive(Clone)]
 pub enum Tab {
     Select,
-    Audio(RcSignalFn<Option<Rc<AudioInputState>>>),
+    Audio(RcSignalFn<Option<Rc<AudioInput>>>),
 }
 
 impl Tab {
@@ -84,7 +84,7 @@ impl Tab {
                                             Some(data.audio.signal_cloned())
                                         );
 
-                                        let callbacks = AudioCallbacks::new(
+                                        let callbacks = AudioInputCallbacks::new(
                                             Some(clone!(base => move |audio:Audio| {
                                                base.set_drag_item_audio(index, Some(audio));
                                             })),
@@ -93,7 +93,7 @@ impl Tab {
                                             })),
                                         );
 
-                                        Some(AudioInputState::new(opts, callbacks))
+                                        Some(AudioInput::new(opts, callbacks))
                                     }
                                 }
                             })

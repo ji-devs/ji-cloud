@@ -1,4 +1,4 @@
-use super::callbacks::Callbacks;
+use super::callbacks::AudioInputCallbacks;
 use super::options::*;
 use super::recorder::AudioRecorder;
 use dominator::clone;
@@ -24,16 +24,16 @@ pub enum AudioInputAddMethod {
     Upload,
 }
 
-pub struct State {
-    pub callbacks: Callbacks,
+pub struct AudioInput {
+    pub callbacks: AudioInputCallbacks,
     pub mode: Mutable<AudioInputMode>,
     pub add_method: Mutable<AudioInputAddMethod>,
     pub recorder: AudioRecorder,
     ext_audio_handle: RefCell<Option<FutureHandle>>,
 }
 
-impl State {
-    pub fn new<S>(opts: AudioInputOptions<S>, callbacks: Callbacks) -> Rc<Self>
+impl AudioInput {
+    pub fn new<S>(opts: AudioInputOptions<S>, callbacks: AudioInputCallbacks) -> Rc<Self>
     where
         S: Signal<Item = Option<Audio>> + 'static,
     {

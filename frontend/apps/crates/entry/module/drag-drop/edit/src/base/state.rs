@@ -1,5 +1,5 @@
 use components::{module::_common::edit::prelude::*, stickers::state::Sticker};
-use components::audio_mixer::AudioMixer;
+use components::audio::mixer::AudioMixer;
 use dominator_helpers::signals::OptionSignal;
 use utils::drag::Drag;
 use uuid::Uuid;

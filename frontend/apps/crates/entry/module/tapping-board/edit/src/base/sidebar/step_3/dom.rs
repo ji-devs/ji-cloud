@@ -6,9 +6,7 @@ use futures_signals::{
     map_ref,
     signal::{Mutable, SignalExt}
 };
-use components::{
-    audio_input::dom::render as render_audio_input,
-};
+use components::audio::input::AudioInput;
 use web_sys::HtmlTextAreaElement;
 
 pub fn render(state: Rc<Step3>) -> Dom {
@@ -102,7 +100,7 @@ fn render_tab_body(state: Rc<Step3>, tab: Tab) -> Dom {
             })
         },
         Tab::Audio(audio_state) => {
-            render_audio_input(audio_state.clone(), None)
+            AudioInput::render(audio_state.clone(), None)
         }
     }
 }

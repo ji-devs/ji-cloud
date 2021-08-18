@@ -3,7 +3,7 @@ use dominator::{html, Dom, DomBuilder};
 use std::rc::Rc;
 
 use super::state::*;
-use crate::audio_mixer::AudioMixer;
+use crate::audio::mixer::AudioMixer;
 use crate::tooltip::dom::render_mixin as render_tooltip_mixin;
 use web_sys::HtmlElement;
 

@@ -1,4 +1,7 @@
-use super::state::{AudioInputMode, State};
+use super::{
+    super::upload::{upload_audio, UploadError},
+    state::{AudioInputMode, AudioInput}
+};
 use shared::{
     api::{endpoints, ApiEndpoint},
     domain::{audio::AudioId, jig::module::body::Audio, CreateResponse},
@@ -9,7 +12,7 @@ use std::rc::Rc;
 use utils::prelude::*;
 use web_sys::File;
 
-impl State {
+impl AudioInput {
     //Internal only - when the audio is changed via recording/uploading
     //Will call the callbacks
     pub(super) fn set_audio(&self, audio: Option<Audio>) {
@@ -47,37 +50,40 @@ impl State {
     }
 }
 
-pub async fn file_change(state: Rc<State>, file: File) {
+pub async fn file_change(state: Rc<AudioInput>, file: File) {
     state.mode.set(AudioInputMode::Uploading);
-    let res = upload_file(file).await;
-    if let Ok(audio_id) = res {
-        state.set_audio(Some(Audio {
-            id: audio_id,
-            lib: MediaLibrary::User,
-        }));
-    } else {
-        log::error!("Error uploading audio file");
-        state.mode.set(AudioInputMode::Empty);
-    }
-}
 
-async fn upload_file(file: File) -> Result<AudioId, ()> {
-    match api_with_auth::<CreateResponse<AudioId>, EmptyError, ()>(
-        &endpoints::audio::user::Create::PATH,
-        endpoints::audio::user::Create::METHOD,
-        None,
-    )
-    .await
-    {
-        Ok(resp) => {
-            let CreateResponse { id } = resp;
+    let lib = MediaLibrary::User;
 
-            let path = endpoints::audio::user::Upload::PATH.replace("{id}", &id.0.to_string());
-            match api_upload_file(&path, &file, endpoints::audio::user::Upload::METHOD).await {
-                Ok(_) => Ok(resp.id),
-                Err(_) => Err(()),
+    let err = {
+        match api_with_auth::<CreateResponse<AudioId>, EmptyError, ()>(
+            &endpoints::audio::user::Create::PATH,
+            endpoints::audio::user::Create::METHOD,
+            None,
+        )
+        .await {
+            Err(_) => {
+                Some(UploadError::Other(awsm_web::errors::Error::Empty))
+            },
+
+            Ok(resp) => {
+                let CreateResponse { id } = resp;
+                match upload_audio(id, lib, &file, None).await {
+                    Err(err) => Some(err),
+                    Ok(_) => {
+                        state.set_audio(Some(Audio {
+                            id,
+                            lib
+                        }));
+                        None
+                    }
+                }
             }
         }
-        Err(_) => Err(()),
+    };
+
+    if let Some(err) = err {
+        log::error!("Error uploading audio file");
+        state.mode.set(AudioInputMode::Empty);
     }
 }
