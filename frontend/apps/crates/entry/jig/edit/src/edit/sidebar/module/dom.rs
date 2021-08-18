@@ -93,7 +93,7 @@ impl ModuleDom {
                         match (&*module, route) {
                             (Some(module), JigEditRoute::Module(module_id)) if module_id == &module.id => None,
                             (Some(module), _) => {
-                                Some(ModuleThumbnail::render(
+                                Some(ModuleThumbnail::render_live(
                                         Rc::new(ModuleThumbnail {
                                             jig_id: state.sidebar.jig.id.clone(),
                                             module: module.clone(), 

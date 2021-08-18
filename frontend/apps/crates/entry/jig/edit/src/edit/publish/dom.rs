@@ -53,7 +53,7 @@ pub fn render(jig_edit_state: Rc<JigEditState>) -> Dom {
 fn render_page(state: Rc<State>) -> Dom {
     html!("jig-edit-publish", {
         .children(&mut [
-            ModuleThumbnail::render(
+            ModuleThumbnail::render_live(
                 Rc::new(ModuleThumbnail {
                     jig_id: state.jig.id.clone(),
                     //Cover module (first module) is guaranteed to exist
