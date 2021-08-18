@@ -45,13 +45,13 @@ pub async fn finalize(req: CreateSessionOAuthRequest, url_kind: OAuthUrlKind) {
             CreateSessionResponse::Login(resp) => {
                 crate::login::actions::do_success(&resp.csrf);
             },
-            CreateSessionResponse::Register(resp) => {
-                let csrf = resp.csrf;
+            CreateSessionResponse::Register {response, oauth_profile}  => {
+                let csrf = response.csrf;
 
                 match url_kind {
                     OAuthUrlKind::Register => {
                         storage::save_csrf_token(&csrf);
-                        let route:String = Route::User(UserRoute::ContinueRegistration).into();
+                        let route:String = Route::User(UserRoute::ContinueRegistration(oauth_profile)).into();
                         dominator::routing::go_to_url(&route);
                     }
                     OAuthUrlKind::Login => {

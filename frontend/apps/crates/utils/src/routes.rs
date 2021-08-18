@@ -4,6 +4,7 @@ use shared::domain::{
     image::{ImageId, ImageSearchQuery}, 
     jig::{JigId, JigPlayerSettings, module::ModuleId, ModuleKind}, 
     user::UserScope,
+    session::OAuthUserProfile
 };
 use serde::{Serialize, Deserialize};
 use std::{fmt::Debug, str::FromStr};
@@ -38,7 +39,7 @@ pub enum UserRoute {
     LoginOauth(OauthData),
     Login,
     Register,
-    ContinueRegistration,
+    ContinueRegistration(Option<OAuthUserProfile>),
     SendEmailConfirmation(String), //the email address
     VerifyEmail(String), //the token 
     PasswordReset(String), //the token 
@@ -188,7 +189,14 @@ impl Route {
                     Self::NoAuth
                 }
             }
-            ["user", "continue-registration"] => Self::User(UserRoute::ContinueRegistration),
+            ["user", "continue-registration"] => {
+                if let Some(oauth_profile_str) = json_query {
+                    let oauth_profile:Option<OAuthUserProfile> = serde_json::from_str(&oauth_profile_str).ok();
+                    Self::User(UserRoute::ContinueRegistration(oauth_profile))
+                } else {
+                    Self::User(UserRoute::ContinueRegistration(None))
+                }
+            },
             ["user", "send-email-confirmation", email] => Self::User(UserRoute::SendEmailConfirmation(email.to_string())),
             ["user", "verify-email", token] => Self::User(UserRoute::VerifyEmail(token.to_string())),
             ["user", "password-reset", token] => Self::User(UserRoute::PasswordReset(token.to_string())),
@@ -311,7 +319,17 @@ impl From<&Route> for String {
                 match route {
                     UserRoute::Profile(ProfileSection::Landing) => "/user/profile".to_string(),
                     UserRoute::Profile(ProfileSection::ChangeEmail) => "/user/profile/change-email".to_string(),
-                    UserRoute::ContinueRegistration => "/user/continue-registration".to_string(),
+                    UserRoute::ContinueRegistration(oauth_profile) => {
+                        match oauth_profile {
+                            None => "/user/continue-registration".to_string(),
+                            Some(oauth_profile) => {
+                                let data = serde_json::to_string(&oauth_profile).unwrap_ji();
+                                let query = JsonQuery { data };
+                                let query = serde_qs::to_string(&query).unwrap_ji();
+                                format!("/user/continue-registration?{}", query)
+                            }
+                        }
+                    },
                     UserRoute::Login => "/user/login".to_string(),
                     UserRoute::Register => "/user/register".to_string(),
                     UserRoute::RegisterOauth(_) => "/user/register-oauth".to_string(),

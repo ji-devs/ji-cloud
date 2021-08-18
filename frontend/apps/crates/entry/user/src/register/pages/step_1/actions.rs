@@ -58,6 +58,7 @@ fn next_step(state: Rc<State>) {
         firstname: state.firstname.borrow().clone(),
         lastname: state.lastname.borrow().clone(),
         username: state.username.borrow().clone(),
+        oauth_profile: state.oauth_profile.clone(),
     }));
 }
 async fn username_exists(name:String) -> bool {

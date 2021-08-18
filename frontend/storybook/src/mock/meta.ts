@@ -30,6 +30,15 @@ export const AFFILIATION_OPTIONS = [
     "Israeli Secular content",
 ]
 
+export const SUBJECT_OPTIONS = [
+    "Hebrew Language",
+    "Jewish Holidays",
+    "Jewish Texts",
+    "Israel",
+    "Jewish Life",
+    "Prayer",
+]
+
 export const SCHOOL_OPTIONS = [
     "AlEtz Chaiml",
     "Kerem",

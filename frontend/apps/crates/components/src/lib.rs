@@ -3,6 +3,9 @@
 //see: https://github.com/rust-lang/cargo/issues/8010
 #![cfg_attr(feature = "quiet", allow(warnings))]
 
+/// these are always enabled
+pub mod input;
+
 /// image itself is always enabled
 /// but image_search is gated behind that
 pub mod image;

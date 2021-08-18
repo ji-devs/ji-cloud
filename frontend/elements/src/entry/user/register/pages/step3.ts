@@ -10,12 +10,28 @@ const STR_SUBTITLE = "We want to tailor the content that you find to your intere
 const STR_SUBSUBTITLE = "You can select as many as you like now and edit it later it in your profile page";
 const STR_AGES_LABEL = "Which age group are you interested in?";
 const STR_AFFILIATIONS_LABEL = "Content from which streams of Judaism do you want to see?";
+const STR_SUBJECTS_LABEL = "Which subjects do you teach?";
 
 @customElement("page-register-step3")
 export class _ extends LitElement {
   static get styles() {
     return [
       css`
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 1fr 1fr;
+        gap: 32px 31px;
+        grid-auto-flow: row;
+        grid-template-areas:
+          "tl tr"
+          "bottom bottom";
+      }
+
+      .ages { grid-area: tl; }
+      .subjects { grid-area: tr; }
+      .affiliations { grid-area: bottom; }
+
         .card-grey {
             padding: 32px 32px 32px 32px;
             border-radius: 14px;
@@ -45,15 +61,22 @@ export class _ extends LitElement {
                   <h1>${STR_TITLE}</h1>
 
                   <title-ji class="subtitle" size="subMedium">${STR_SUBTITLE}<br/>${STR_SUBSUBTITLE}</title-ji>
-                  <div class="card-grey">
-                      <list-horizontal label="${STR_AGES_LABEL}">
-                          <slot name="ages"></slot>
-                      </list-horizontal>
-                  </div>
-                  <div class="card-grey">
-                      <list-vertical label="${STR_AFFILIATIONS_LABEL}">
-                          <slot name="affiliations"></slot>
-                      </list-vertical>
+                  <div class="grid">
+                    <div class="ages card-grey">
+                        <list-vertical label="${STR_AGES_LABEL}">
+                            <slot name="ages"></slot>
+                        </list-vertical>
+                    </div>
+                    <div class="subjects card-grey">
+                        <list-vertical label="${STR_SUBJECTS_LABEL}">
+                            <slot name="subjects"></slot>
+                        </list-vertical>
+                    </div>
+                    <div class="affiliations card-grey">
+                        <list-vertical label="${STR_AFFILIATIONS_LABEL}">
+                            <slot name="affiliations"></slot>
+                        </list-vertical>
+                    </div>
                   </div>
                   <div class="submit">
                       <slot name="submit"></slot>

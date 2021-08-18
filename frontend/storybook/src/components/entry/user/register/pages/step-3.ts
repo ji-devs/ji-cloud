@@ -5,7 +5,7 @@ import "@elements/core/lists/list-vertical";
 import "@elements/core/lists/list-horizontal";
 import "@elements/core/inputs/composed/checkbox";
 import {Rectangle as RectangleButton} from "~/components/core/buttons/rectangle";
-import {AFFILIATION_OPTIONS, AGE_OPTIONS} from "~/mock/meta";
+import {AFFILIATION_OPTIONS, AGE_OPTIONS, SUBJECT_OPTIONS} from "~/mock/meta";
 import {mapToString} from "@utils/array";
 
 export default {
@@ -27,6 +27,9 @@ export const Step3 = (props?:Partial<Args>) => {
         <page-register-step3>
             ${mapToString(AGE_OPTIONS, label => {
                 return `<input-checkbox label="${label}" slot="ages"></input-checkbox>`
+            })}
+            ${mapToString(SUBJECT_OPTIONS, label => {
+                return `<input-checkbox label="${label}" slot="subjects"></input-checkbox>`
             })}
             ${mapToString(AFFILIATION_OPTIONS, label => {
                 return `<input-checkbox label="${label}" slot="affiliations"></input-checkbox>`

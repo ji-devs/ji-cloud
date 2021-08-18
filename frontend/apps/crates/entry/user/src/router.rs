@@ -45,7 +45,7 @@ impl Router {
                             UserRoute::Login => Some(LoginPage::render()),
                             UserRoute::Profile(ProfileSection::Landing) => Some(ProfilePage::render()),
                             UserRoute::RegisterComplete => Some(RegisterCompletePage::render()),
-                            UserRoute::ContinueRegistration => Some(RegisterPage::render(Some(Step::One))),
+                            UserRoute::ContinueRegistration(oauth_profile) => Some(RegisterPage::render(Some(Step::One(oauth_profile)))),
                             UserRoute::SendEmailConfirmation(email) => Some(SendEmailConfirmationPage::render(SendEmailConfirmationPage::new(email))),
                             UserRoute::VerifyEmail(token) => Some(VerifyEmailPage::render(VerifyEmailPage::new(token))),
                             UserRoute::PasswordReset(token) => Some(PasswordResetPage::render(PasswordResetPage::new(token))),
