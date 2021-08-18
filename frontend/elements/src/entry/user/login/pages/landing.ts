@@ -64,6 +64,7 @@ export class _ extends LitElement {
         }
         ::slotted([slot="password-forgot"]){
           margin-top:16px;
+          margin-bottom:56px;
           display:block;
         }
       `,

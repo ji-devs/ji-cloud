@@ -18,7 +18,7 @@ export class _ extends LitElement {
     return html`
       <p>
       ${STR_CONTACT} &nbsp;
-        <a href="mailto:info@jewishinteractive.org">info@jewishinteractive.org</a>
+        <a href="mailto:support@jigzi.org">support@jigzi.org</a>
       </p>
     `;
   }

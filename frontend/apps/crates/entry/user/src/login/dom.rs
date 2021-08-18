@@ -68,11 +68,12 @@ impl LoginPage {
                             actions::forgot_password(state.clone())
                         }))
                     }),
-                    html!("button-rect", {
+                    html!("button-rect-icon", {
                         .property("slot", "submit")
                         .property("color", "red")
                         .property("size", "medium")
-                        .text(crate::strings::STR_SUBMIT)
+                        .property("iconAfter", "arrow")
+                        .text(crate::strings::STR_CONTINUE)
                         .event(clone!(state => move |evt:events::Click| {
                             actions::signin_email(state.clone())
                         }))

@@ -79,17 +79,16 @@ impl Step1Page {
                         *state.over_18.borrow_mut() = evt.value();
                     }))
                 }),
-                html!("button-rect", {
+                html!("button-rect-icon", {
                     .property("slot", "submit")
-                    .property("iconAfter", "arrow")
                     .property("color", "red")
                     .property("size", "medium")
-                    .text(STR_CONTINUE)
+                    .property("iconAfter", "arrow")
+                    .text(STR_NEXT)
                     .event(clone!(state => move |evt:events::Click| {
                         actions::submit(state.clone());
                     }))
                 }),
-                Footer::render()
             ])
         })
     }

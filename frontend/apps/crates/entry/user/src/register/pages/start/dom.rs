@@ -62,11 +62,12 @@ impl StartPage {
                             actions::register_google(state.clone())
                         }))
                     }),
-                    html!("button-rect", {
+                    html!("button-rect-icon", {
                         .property("slot", "submit")
                         .property("color", "red")
                         .property("size", "medium")
-                        .text(strings::STR_SUBMIT)
+                        .property("iconAfter", "arrow")
+                        .text(strings::STR_CONTINUE)
                         .event(clone!(state => move |evt:events::Click| {
                             actions::register_email(state.clone())
                         }))

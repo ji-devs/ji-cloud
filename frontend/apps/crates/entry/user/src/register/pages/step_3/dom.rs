@@ -88,10 +88,11 @@ impl Step3Page {
                     }
 
                     children.push(
-                        html!("button-rect", {
+                        html!("button-rect-icon", {
                             .property("slot", "submit")
                             .property("color", "red")
                             .property("size", "medium")
+                            .property("iconAfter", "arrow")
                             .text(STR_SUBMIT)
                             .event(clone!(state => move |evt:events::Click| {
                                 actions::submit(state.clone());

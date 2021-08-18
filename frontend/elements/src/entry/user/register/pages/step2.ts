@@ -16,6 +16,7 @@ export class _ extends LitElement {
         }
 
         .rows {
+          max-width: 800px;
           display: flex;
           flex-direction: column;
           gap: 40px;

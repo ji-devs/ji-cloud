@@ -60,25 +60,3 @@ impl <T: AsStr + Clone + 'static, P: AsStr + 'static, L: AsStr + 'static> Simple
         })
     }
 }
-
-/*
-                html!("input-select", {
-                    .property("slot", "persona")
-                    .property("label", STR_PERSONA_LABEL)
-                    .property_signal("error", state.persona_error.signal())
-                    .property("value", "Teacher")
-                    .children(&mut [
-                              html!("input-select-option", {
-                                  .text("Teacher")
-                              }),
-                              html!("input-select-option", {
-                                  .text("Student")
-                              })
-                    ])
-                    .event(clone!(state => move |evt:events::Input| {
-                        *state.persona.borrow_mut() = evt.value().and_then(|x| {
-                            if x.is_empty() { None } else { Some(x) }
-                        })
-                    }))
-                }),
-                */

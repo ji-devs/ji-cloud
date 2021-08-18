@@ -48,7 +48,7 @@ export class _ extends LitElement {
         }
 
         .submit {
-            align-self: flex-end;
+            align-self: flex-start;
         }
       `,
     ];

@@ -20,7 +20,6 @@ export const EmailSend = (props?:Partial<Args>) => {
 
     return `
         <page-email-send>
-            <button-rect kind="text" slot="change" color="blue">${STR_CHANGE}</button-rect>
             <button-email-send slot="send"></button-email-send>
         </page-email-send>
     `
