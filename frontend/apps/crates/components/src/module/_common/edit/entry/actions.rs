@@ -134,13 +134,7 @@ where
                 jig_id,
                 module_id,
             );
-        } else {
-            //TODO - remove this! Is just here for debugging!
-            screenshot_loader.load(async move {
-                log::info!("DEBUGGING - SCREENSHOT!");
-                call_screenshot_service(jig_id, module_id, RawData::kind()).await;
-            });
-        }
+        } 
     })
 }
 
