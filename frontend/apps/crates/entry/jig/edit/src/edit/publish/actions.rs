@@ -29,27 +29,11 @@ impl State {
         let categories = categories.unwrap_ji();
         let mut category_label_lookup = HashMap::new();
         get_categories_labels(&categories, &mut category_label_lookup, "");
-        
+
         let meta = meta.unwrap_ji();
 
-        // set all affiliations for unpublished jigs
         if jig.publish_at.is_none() {
-            let available_affiliations = meta.affiliations
-                .iter()
-                .map(|affiliation| affiliation.id.clone())
-                .collect();
-
-            jig.affiliations = available_affiliations;
-        }
-
-        // set all ages for unpublished jigs
-        if jig.publish_at.is_none() {
-            let available_ages = meta.age_ranges
-                .iter()
-                .map(|age| age.id.clone())
-                .collect();
-
-            jig.age_ranges = available_ages;
+            set_default_values(&mut jig, &meta);
         }
 
         Self::new(
@@ -61,6 +45,7 @@ impl State {
             meta.affiliations,
             jig_edit_state
         )
+
     }
 }
 
@@ -76,6 +61,22 @@ fn get_categories_labels(
         let base_name = name + "/";
         get_categories_labels(&category.children, lookup, &base_name);
     }
+}
+
+fn set_default_values(jig: &mut Jig, meta: &MetadataResponse) {
+    let available_affiliations = meta.affiliations
+        .iter()
+        .map(|affiliation| affiliation.id.clone())
+        .collect();
+    jig.affiliations = available_affiliations;
+
+    let available_ages = meta.age_ranges
+        .iter()
+        .map(|age| age.id.clone())
+        .collect();
+    jig.age_ranges = available_ages;
+
+    jig.is_public = true;
 }
 
 async fn load_jig(jig_id: JigId) -> Result<Jig, EmptyError> {
