@@ -10,7 +10,7 @@ use utils::{events::ModuleResizeEvent, iframe::*, prelude::*, resize::*};
 
 use super::{loading::dom::render_loading, state::*};
 use crate::{
-    instructions::player::{dom::render_instructions_player, state::InstructionsPlayer},
+    instructions::player::InstructionsPlayer,
     module::_common::play::prelude::*,
 };
 use shared::domain::jig::module::body::{BodyExt, ModeExt, StepExt};
@@ -134,7 +134,7 @@ where
             dom
                 .child_signal(play_started.signal().map(clone!(state, base => move |has_started| {
                     if has_started {
-                        Some(render_instructions_player(
+                        Some(InstructionsPlayer::render(
                             Rc::new(InstructionsPlayer::new(base.get_instructions().unwrap_ji())),
                             &state.audio_mixer
                         ))
