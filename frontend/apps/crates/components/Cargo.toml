@@ -65,7 +65,7 @@ web-sys = { version = "0.3.52", features = [
     'HtmlSelectElement',
     'Performance',
 ] }
-awsm_web = { version = "0.24.2", features = ["loaders", "serde_iso", "dom", "image", "audio", "canvas"] }
+awsm_web = { version = "0.25.0", features = ["loaders", "serde_iso", "dom", "image", "audio", "canvas"] }
 anyhow = "1.0.43"
 gloo-timers = "0.2.1"
 rgb = "0.8.27"
