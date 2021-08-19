@@ -1,2 +1,5 @@
-pub mod dom;
-pub mod state;
+mod dom;
+mod state;
+
+pub use dom::*;
+pub use state::*;

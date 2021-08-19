@@ -1,4 +1,4 @@
-use dominator::{html, Dom};
+use dominator::{html, Dom, clone};
 
 use std::rc::Rc;
 use utils::prelude::*;
@@ -6,22 +6,29 @@ use utils::prelude::*;
 use super::state::*;
 use crate::audio::mixer::AudioMixer;
 
-pub fn render_instructions_player(state: Rc<InstructionsPlayer>, mixer: &AudioMixer) -> Dom {
-    *state.audio.borrow_mut() = state
-        .data
-        .audio
-        .as_ref()
-        .map(|audio| mixer.play(audio.clone(), false));
-    html!("empty-fragment", {
-        .apply_if(state.data.text.is_some(), |dom| {
-            let text = state.data.text.as_ref().unwrap_ji();
+impl InstructionsPlayer {
+    pub fn render(state: Rc<Self>, mixer: &AudioMixer) -> Dom {
 
-            state.fade.render(dom.child(
-                html!("instructions-banner", {
-                    .text(text)
-                })
-            ))
+        *state.audio.borrow_mut() = state
+            .data
+            .audio
+            .as_ref()
+            .map(|audio| mixer.play(audio.clone(), false));
 
+        html!("empty-fragment", {
+            .apply_if(state.data.text.is_some(), |dom| {
+                let text = state.data.text.as_ref().unwrap_ji();
+
+                state.fade.render(dom.child(
+                    html!("instructions-banner", {
+                        .text(text)
+                    })
+                ))
+
+            })
+            .after_removed(clone!(state => move |elem| {
+                *state.audio.borrow_mut() = None;
+            }))
         })
-    })
+    }
 }

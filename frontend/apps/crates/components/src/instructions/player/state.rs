@@ -12,6 +12,12 @@ pub struct InstructionsPlayer {
     pub(super) audio: RefCell<Option<AudioHandle>>,
 }
 
+impl Drop for InstructionsPlayer {
+    fn drop(&mut self) {
+        log::info!("Instructions player dropped...");
+    }
+}
+
 impl InstructionsPlayer {
     pub fn new(data: Instructions) -> Self {
         /*
@@ -20,6 +26,8 @@ impl InstructionsPlayer {
             audio: None
         };
         */
+        log::info!("Instructions Player created...");
+
         let _animation = MutableAnimation::new(1000.0);
         Self {
             data,
