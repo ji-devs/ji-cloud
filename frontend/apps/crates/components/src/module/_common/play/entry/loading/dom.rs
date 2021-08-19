@@ -13,12 +13,11 @@ where
     Mode: ModeExt + 'static,
     Step: StepExt + 'static,
 {
-    //TODO - make this a custom element
+    //TODO - make this a custom element with some visual indicator of loading progress
     html!("div", {
         .style("position", "absolute")
         .style("width", "100%")
         .style("height", "100%")
-        .style("background-color", "red")
         .property("slot", "main")
     })
 }
