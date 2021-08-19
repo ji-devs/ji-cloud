@@ -11,8 +11,6 @@ pub mod player;
 pub use player::{JigPlayerSettings, TextDirection};
 
 use chrono::{DateTime, Utc};
-#[cfg(feature = "backend")]
-use paperclip::actix::Apiv2Schema;
 use serde::{Deserialize, Serialize};
 use std::{collections::HashSet, fmt, str::FromStr};
 use uuid::Uuid;
@@ -28,12 +26,10 @@ use crate::domain::jig::module::body::ThemeId;
 #[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct JigId(pub Uuid);
 
 /// Special parameter for allowing implicit `me` as a user.
 #[derive(Clone, Eq, PartialEq, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub enum UserOrMe {
     /// We should use the user found in the session auth.
     Me,
@@ -88,7 +84,6 @@ impl<'de> serde::Deserialize<'de> for UserOrMe {
 
 /// Request to create a new JIG.
 #[derive(Serialize, Deserialize, Debug, Default)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct JigCreateRequest {
     /// The JIG's name.
     #[serde(default)]
@@ -137,7 +132,6 @@ pub struct JigCreateRequest {
 
 /// The over-the-wire representation of a JIG.
 #[derive(Serialize, Deserialize, Clone, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct Jig {
     /// The ID of the JIG.
     pub id: JigId,
@@ -202,7 +196,6 @@ pub struct Jig {
 /// Audio for background music
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, Eq, PartialEq)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 #[repr(i16)]
 pub enum AudioBackground {
     #[allow(missing_docs)]
@@ -231,7 +224,6 @@ impl AudioBackground {
 
 /// Audio Effects
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct AudioEffects {
     /// Positive audio feedback
     pub feedback_positive: HashSet<AudioFeedbackPositive>,
@@ -243,7 +235,6 @@ pub struct AudioEffects {
 /// Negative Audio Feedback
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 #[repr(i16)]
 pub enum AudioFeedbackNegative {
     #[allow(missing_docs)]
@@ -273,7 +264,6 @@ impl AudioFeedbackNegative {
 /// Positive Audio Feedback
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 #[repr(i16)]
 pub enum AudioFeedbackPositive {
     #[allow(missing_docs)]
@@ -302,7 +292,6 @@ impl AudioFeedbackPositive {
 
 /// The response returned when a request for `GET`ing a jig is successful.
 #[derive(Serialize, Deserialize, Debug, Clone)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct JigResponse {
     /// The requested JIG.
     pub jig: Jig,
@@ -310,7 +299,6 @@ pub struct JigResponse {
 
 /// Request for updating a JIG.
 #[derive(Serialize, Deserialize, Debug, Default)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct JigUpdateRequest {
     /// The JIG's name.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -394,7 +382,6 @@ pub struct JigUpdateRequest {
 
 /// Query for [`Browse`](crate::api::endpoints::jig::Browse).
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 #[serde(rename_all = "camelCase")]
 pub struct JigBrowseQuery {
     /// Optionally filter by `is_published`
@@ -415,7 +402,6 @@ pub struct JigBrowseQuery {
 
 /// Response for [`Browse`](crate::api::endpoints::jig::Browse).
 #[derive(Serialize, Deserialize, Clone, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 #[serde(rename_all = "camelCase")]
 pub struct JigBrowseResponse {
     /// the jigs returned.
@@ -430,7 +416,6 @@ pub struct JigBrowseResponse {
 
 /// Search for jigs via the given query string.
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct JigSearchQuery {
     /// The query string.
     pub q: String,
@@ -485,7 +470,6 @@ pub struct JigSearchQuery {
 
 /// Response for successful search.
 #[derive(Serialize, Deserialize, Clone, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct JigSearchResponse {
     /// the jigs returned.
     pub jigs: Vec<JigResponse>,
@@ -499,7 +483,6 @@ pub struct JigSearchResponse {
 
 /// Response for successfully finding the draft of a jig.
 #[derive(Serialize, Deserialize, Clone, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct JigDraftResponse {
     /// The ID of the jig
     pub id: JigId,
@@ -507,7 +490,6 @@ pub struct JigDraftResponse {
 
 /// Response for total count of public and published jig.
 #[derive(Serialize, Deserialize, Clone, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct JigCountResponse {
     /// Total number of public and published jigs.
     pub total_count: u64,

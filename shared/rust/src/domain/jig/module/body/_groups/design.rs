@@ -1,11 +1,8 @@
 use crate::domain::jig::module::body::{Background, Image, Instructions, ThemeChoice, Transform};
-#[cfg(feature = "backend")]
-use paperclip::actix::Apiv2Schema;
 use serde::{Deserialize, Serialize};
 
 /// The base content for design modules that don't need custom Sticker wrappers
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct BaseContent {
     /// The instructions for the module.
     pub instructions: Instructions,
@@ -21,7 +18,6 @@ pub struct BaseContent {
 }
 
 #[derive(Clone, Default, Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 /// Background
 /// although it's simply a list of layers
 /// the number of layers is predefined
@@ -34,7 +30,6 @@ pub struct Backgrounds {
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 /// Stickers are things that can be rendered and transformed
 pub enum Sticker {
     /// Sprites
@@ -57,7 +52,6 @@ impl Sticker {
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 /// Text are serialized text things
 pub struct Text {
     /// the raw text
@@ -67,7 +61,6 @@ pub struct Text {
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 /// Sprites are a combo of image + transform
 pub struct Sprite {
     /// The Image
@@ -85,7 +78,6 @@ pub struct Sprite {
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 /// Sprite Effects
 pub enum SpriteEffect {
     /// Remove White
@@ -93,7 +85,6 @@ pub enum SpriteEffect {
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 /// Video
 /// Text are serialized text things
 pub struct Video {
@@ -105,7 +96,6 @@ pub struct Video {
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 /// Host of video
 pub enum VideoHost {
     /// YouTube
@@ -113,7 +103,6 @@ pub enum VideoHost {
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 /// YouTube host video url
 pub struct YoutubeUrl(pub String);
 
@@ -121,7 +110,6 @@ pub struct YoutubeUrl(pub String);
 pub type YoutubeUrlError = String;
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 /// Trace
 pub struct Trace {
     /// The Transform
@@ -137,7 +125,6 @@ impl AsRef<Trace> for Trace {
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 /// Trace shape
 pub enum TraceShape {
     /// width and height

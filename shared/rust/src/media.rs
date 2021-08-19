@@ -8,7 +8,6 @@ use uuid::Uuid;
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 #[serde(tag = "media_kind")]
 #[serde(rename_all = "camelCase")]
-#[cfg_attr(feature = "backend", derive(paperclip::actix::Apiv2Schema))]
 pub enum MediaGroupKind {
     /// Media is audio
     Audio,
@@ -48,7 +47,6 @@ pub enum PngImageFile {
 /// Media Libraries
 #[derive(Debug, Copy, Clone, Serialize, Deserialize, Eq, PartialEq)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[cfg_attr(feature = "backend", derive(paperclip::actix::Apiv2Schema))]
 #[repr(i16)]
 pub enum MediaLibrary {
     /// The default / global library
@@ -88,7 +86,6 @@ impl std::str::FromStr for MediaLibrary {
 
 /// Kinds of media used with the web media library
 #[derive(Serialize, Deserialize, Debug, Copy, Clone)]
-#[cfg_attr(feature = "backend", derive(paperclip::actix::Apiv2Schema))]
 pub enum MediaKind {
     /// media is an Animation
     Animation(AnimationKind),

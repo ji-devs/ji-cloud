@@ -2,15 +2,12 @@ use crate::domain::jig::module::{
     body::{Body, BodyConvert, BodyExt, ThemeChoice, _groups::cards::*},
     ModuleKind,
 };
-#[cfg(feature = "backend")]
-use paperclip::actix::Apiv2Schema;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::convert::TryFrom;
 
 /// The body for [`Flashcards`](crate::domain::jig::module::ModuleKind::Flashcards) modules.
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct ModuleData {
     /// The content
     pub content: Option<Content>,
@@ -18,7 +15,6 @@ pub struct ModuleData {
 
 /// The content for [`Flashcards`](crate::domain::jig::module::ModuleKind::Flashcards) modules.
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct Content {
     /// The base content for all cards modules
     pub base: BaseContent,
@@ -28,7 +24,6 @@ pub struct Content {
 
 /// Player settings
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct PlayerSettings {
     /// display mode
     pub display_mode: DisplayMode,
@@ -36,7 +31,6 @@ pub struct PlayerSettings {
 
 /// Display Mode
 #[derive(Clone, Copy, Serialize, Deserialize, Debug, Eq, PartialEq)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub enum DisplayMode {
     /// Single sided cards
     Single,

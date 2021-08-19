@@ -10,8 +10,6 @@ use super::{
     Publish,
 };
 use chrono::{DateTime, Utc};
-#[cfg(feature = "backend")]
-use paperclip::actix::Apiv2Schema;
 use serde::{Deserialize, Serialize};
 #[cfg(feature = "backend")]
 use sqlx::postgres::PgRow;
@@ -20,7 +18,6 @@ use uuid::Uuid;
 /// Represents different kinds of images (which affects how the size is stored in the db)
 #[derive(Serialize, Deserialize, Copy, Clone, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 #[repr(i16)]
 pub enum ImageKind {
     /// The image is a canvas (background) image
@@ -62,13 +59,11 @@ impl ImageKind {
 #[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct ImageId(pub Uuid);
 
 // todo: # errors doc section
 /// Request to create a new image.
 #[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct ImageCreateRequest {
     /// The name of the image.
     pub name: String,
@@ -105,7 +100,6 @@ pub struct ImageCreateRequest {
 
 // todo: # errors doc section.
 #[derive(Serialize, Deserialize, Debug, Default)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 /// Request to update an image.
 ///
 /// All fields are optional, any field that is [`None`] will not be updated.
@@ -160,7 +154,6 @@ pub struct ImageUpdateRequest {
 /// * `kind` field must match the case as represented in the returned json body (`PascalCase`?).
 /// * Vector fields, such as `age_ranges` should be given as a comma separated vector (CSV).
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct ImageSearchQuery {
     /// The query string.
     pub q: String,
@@ -260,7 +253,6 @@ pub struct ImageSearchQuery {
 
 /// Response for successful search.
 #[derive(Serialize, Deserialize, Clone, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct ImageSearchResponse {
     /// the images returned.
     pub images: Vec<ImageResponse>,
@@ -274,7 +266,6 @@ pub struct ImageSearchResponse {
 
 /// Query for [`Browse`](crate::api::endpoints::image::Browse).
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 #[serde(rename_all = "camelCase")]
 pub struct ImageBrowseQuery {
     /// Optionally filter by `is_published`
@@ -295,7 +286,6 @@ pub struct ImageBrowseQuery {
 
 /// Response for [`Browse`](crate::api::endpoints::image::Browse).
 #[derive(Serialize, Deserialize, Clone, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 #[serde(rename_all = "camelCase")]
 pub struct ImageBrowseResponse {
     /// the images returned.
@@ -310,7 +300,6 @@ pub struct ImageBrowseResponse {
 
 /// Response for getting a single image.
 #[derive(Serialize, Deserialize, Clone, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct ImageResponse {
     /// The image metadata.
     pub metadata: ImageMetadata,
@@ -318,7 +307,6 @@ pub struct ImageResponse {
 
 /// Request to indicate the size of an image for upload.
 #[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct ImageUploadRequest {
     /// The size of the image to be uploaded in bytes. Allows the API server to check that the file size is
     /// within limits and as a verification at GCS that the entire file was uploaded
@@ -327,7 +315,6 @@ pub struct ImageUploadRequest {
 
 /// URL to upload an image. Supports resumable uploading.
 #[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct ImageUploadResponse {
     /// The session URI used for uploading, including the query for uploader ID
     pub session_uri: String,
@@ -335,7 +322,6 @@ pub struct ImageUploadResponse {
 
 /// Over the wire representation of an image's metadata.
 #[derive(Serialize, Deserialize, Clone, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct ImageMetadata {
     /// The image's ID.
     pub id: ImageId,
