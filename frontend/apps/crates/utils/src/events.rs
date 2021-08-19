@@ -32,6 +32,7 @@ temp_make_event!(CollapseAll, "collapse-all" => web_sys::Event);
 
 temp_make_event!(CustomBlur, "custom-blur" => web_sys::Event);
 
+
 make_custom_event_serde!("module-resize", ModuleResizeEvent, ResizeInfo);
 
 // Custom Bounds 
@@ -155,7 +156,7 @@ impl CustomFile {
     }
 }
 
-// Image Load 
+// Image Load  and Error
 #[derive(Deserialize, Debug)]
 pub struct ImageLoadData {
     pub width: f64,
@@ -171,7 +172,7 @@ impl ImageLoad {
     }
 }
 
-
+temp_make_event!(ImageError, "image-error" => web_sys::Event);
 
 // Custom Direction 
 #[derive(Deserialize, Debug)]

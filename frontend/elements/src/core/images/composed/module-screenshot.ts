@@ -40,8 +40,8 @@ export class _ extends LitElement {
             : `module/${moduleKind}/thumb-placeholder.svg`;
 	    return html`
 	    	<img-ji lib="screenshot" id="${jigId}/${moduleId}" size="${size}" .cacheBust=${cacheBust ? Date.now() : false}>
-  			<img-ui path="${fallbackPath}" slot="fallback"></img-ui>
-		</img-ji>
+  			    <img-ui path="${fallbackPath}" slot="fallback"></img-ui>
+		    </img-ji>
 	    `;
     }
 }

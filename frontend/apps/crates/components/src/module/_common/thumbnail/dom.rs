@@ -3,9 +3,10 @@ use std::rc::Rc;
 use utils::prelude::*;
 use super::state::*;
 use futures_signals::signal::{Mutable, Signal, SignalExt};
-use dominator_helpers::signals::RcSignalFn;
+use wasm_bindgen_futures::spawn_local;
 use dominator::clone;
 use std::cell::RefCell;
+use utils::screenshot::call_screenshot_service;
 
 impl ModuleThumbnail {
     pub fn render(state: Rc<Self>, slot: Option<&str>) -> Dom {
@@ -13,6 +14,11 @@ impl ModuleThumbnail {
             .apply_if(slot.is_some(), |dom| {
                 dom.property("slot", slot.unwrap_ji())
             })
+            .event(clone!(state => move |evt:events::ImageError| {
+                spawn_local(clone!(state => async move {
+                    call_screenshot_service(state.jig_id, state.module.id, state.module.kind).await;
+                }))
+            }))
             .property("jigId", state.jig_id.0.to_string())
             .property("moduleId", state.module.id.0.to_string())
             .apply_if(!state.is_jig_fallback, |dom| {
@@ -36,6 +42,11 @@ impl ModuleThumbnail {
             .apply_if(slot.is_some(), |dom| {
                 dom.property("slot", slot.unwrap_ji())
             })
+            .event(clone!(state => move |evt:events::ImageError| {
+                spawn_local(clone!(state => async move {
+                    call_screenshot_service(state.jig_id, state.module.id, state.module.kind).await;
+                }))
+            }))
             .property("jigId", state.jig_id.0.to_string())
             .property_signal("moduleId", module_id.signal_ref(|id| id.0.to_string())) 
             .property("cacheBust", true)

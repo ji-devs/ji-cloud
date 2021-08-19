@@ -54,6 +54,12 @@ export class _ extends LitElement {
     }
 
     onError(_evt: Event) {
+        this.dispatchEvent(
+            new Event("image-error", {
+                bubbles: true,
+                composed: true,
+            })
+        );
         this.fallbackVisible = true;
     }
 
