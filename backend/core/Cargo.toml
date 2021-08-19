@@ -9,23 +9,22 @@ edition = "2018"
 publish = false
 
 [dependencies]
-anyhow = "1.0.32"
-base64 = "0.13"
+anyhow = "1.0.43"
+base64 = "0.13.0"
 chrono = "0.4.19"
 # config = {path = "../../config/rust"}
-hex = "0.4.2"
-listenfd = { version = "0.3.3", optional = true }
-log = "0.4.11"
-reqwest = {version = "0.10", features = ["json"]}
-shared = {path = "../../shared/rust", features = ["backend"]}
-serde = { version = "1.0", features = ["derive"] }
-sqlx = { version = "0.4.0", default-features = false, features = ["postgres", "runtime-tokio-native-tls"], optional = true }
-yup-oauth2 = "4.1.2"
+hex = "0.4.3"
+listenfd = { version = "0.3.5", optional = true }
+log = "0.4.14"
+reqwest = { version = "0.11.4", features = ["json"] }
+shared = { path = "../../shared/rust", features = ["backend"] }
+serde = { version = "1.0.127", features = ["derive"] }
+sqlx = { version = "0.5.6", default-features = false, features = ["postgres", "runtime-tokio-native-tls"], optional = true }
+yup-oauth2 = "5.1.0"
 
 [features]
 db = ["sqlx"]
 
-
 [dependencies.sentry]
-version = "0.21.0"
+version = "0.23.0"
 features = ["anyhow", "backtrace", "contexts", "panic", "transport"]
