@@ -11,6 +11,7 @@ use wasm_bindgen::prelude::*;
 use std::collections::HashMap;
 use components::collision::stickers_traces::pixels::{get_hit_index, StickerHitSource, StickerBoundsKind, debug_render_hit_trace};
 use wasm_bindgen_futures::spawn_local;
+use components::audio::mixer::AudioPath;
 
 cfg_if::cfg_if! {
     if #[cfg(debug_assertions)] {
@@ -54,10 +55,10 @@ impl PlayState {
 
         spawn_local(async move {
             let mut move_back = false;
+            let mut is_correct = false;
             if let Some(target_index) = item.target_index.borrow().as_ref() {
                 let target_index = *target_index;
 
-                let mut is_correct = false;
 
                 if let Some(hit_source) = item.get_hit_source(Some(SourceTransformOverride::Current)) {
 
@@ -85,14 +86,55 @@ impl PlayState {
             if move_back {
                 item.move_back_to_origin();
             }
+
+            if is_correct {
+                item.play_audio(AudioEffect::Correct);
+            } else {
+                item.play_audio(AudioEffect::Wrong);
+            }
         });
 
     }
 }
 
+pub enum AudioEffect {
+    Drag,
+    Correct,
+    Wrong
+}
+
+impl AudioEffect {
+    pub fn is_loop(&self) -> bool {
+        match self {
+            AudioEffect::Drag => true, 
+            _ => false
+        }
+    }
+
+    pub fn as_path(&self) -> AudioPath<'_> {
+        let filename = match self {
+            AudioEffect::Drag => "drag-loop",
+            AudioEffect::Correct => "correct",
+            AudioEffect::Wrong => "wrong"
+        };
+
+        AudioPath::new_cdn(format!("module/drag-drop/{}.mp3", filename))
+    }
+}
+
 impl InteractiveItem {
 
+    pub fn play_audio(&self, effect: AudioEffect) {
+        *self.audio_effect_handle.borrow_mut() = Some(self.audio_mixer.play(effect.as_path(), effect.is_loop()));
+    }
+
+    pub fn stop_audio(&self) {
+        *self.audio_effect_handle.borrow_mut() = None; 
+    }
+
     pub fn start_drag(&self, x: i32, y: i32) {
+        self.play_audio(AudioEffect::Drag);
+
         self.drag.set(Some(Rc::new(Drag::new(x, y, 0.0, 0.0, true))));
     }
 
@@ -113,6 +155,8 @@ impl InteractiveItem {
     }
 
     pub fn try_end_drag(&self, x: i32, y: i32) -> bool {
+        self.stop_audio();
+
         if self.drag.lock_ref().is_some() {
             let drag = self.drag.lock_mut().take().unwrap_ji();
             //self.curr_offset.set((0.0, 0.0));

@@ -7,6 +7,7 @@ use futures_signals::{
     signal_vec::{self, SignalVec, SignalVecExt},
 };
 use components::{
+    audio::mixer::{AudioMixer, AudioHandle},
     traces::{
         utils::TraceExt,
         bubble::state::TraceBubble,
@@ -22,6 +23,7 @@ use std::borrow::Cow;
 pub struct PlayState {
     pub game: Rc<Game>,
     pub items: Vec<PlayItem>,
+
 }
 
 impl PlayState {
@@ -34,7 +36,7 @@ impl PlayState {
                 match item.kind {
                     ItemKind::Static => PlayItem::Static(item.sticker),
                     ItemKind::Interactive(data) => {
-                        PlayItem::Interactive(InteractiveItem::new(item.sticker, data))
+                        PlayItem::Interactive(InteractiveItem::new(item.sticker, data, game.base.audio_mixer.clone()))
                     }
                 }
             })
@@ -85,7 +87,9 @@ impl PlayItem {
 
 pub struct InteractiveItem {
     pub sticker: Sticker,
+    pub audio_mixer:AudioMixer,
     pub audio: Option<Audio>,
+    pub audio_effect_handle: RefCell<Option<AudioHandle>>,
     pub target_transform: Transform, 
     pub curr_transform: Mutable<Transform>,
     pub drag: Mutable<Option<Rc<Drag>>>,
@@ -99,9 +103,10 @@ pub enum SourceTransformOverride {
 }
 
 impl InteractiveItem {
-    pub fn new(sticker: Sticker, data: Interactive) -> Rc<Self> {
+    pub fn new(sticker: Sticker, data: Interactive, audio_mixer: AudioMixer) -> Rc<Self> {
         let transform = sticker.transform().clone();
         Rc::new(Self {
+            audio_mixer,
             sticker,
             audio: data.audio,
             target_transform: data.target_transform.unwrap_or_else(clone!(transform => move || transform)),
@@ -109,6 +114,7 @@ impl InteractiveItem {
             drag: Mutable::new(None),
             size: Mutable::new(None),
             target_index: RefCell::new(None),
+            audio_effect_handle: RefCell::new(None),
         })
     }
 

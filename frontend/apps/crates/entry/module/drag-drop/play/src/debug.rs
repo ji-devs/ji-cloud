@@ -45,8 +45,8 @@ use shared::{
 };
 use components::stickers::{sprite::ext::*, text::ext::*};
 pub static SETTINGS:OnceCell<DebugSettings> = OnceCell::new();
-
-const IMAGE_UUID:&'static str = "e84dd7fe-c92d-11eb-8c82-cfd1d3fd13ff";
+const IMAGE_UUID:&'static str = "f2e63cf2-ee11-11eb-9b68-4bf1f063ab1c";
+//const IMAGE_UUID:&'static str = "e84dd7fe-c92d-11eb-8c82-cfd1d3fd13ff";
 
 pub const DEBUG_TEXT:&'static str = "Hello World this is a long line of text";
 

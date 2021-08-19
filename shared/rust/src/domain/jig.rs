@@ -200,7 +200,7 @@ pub struct Jig {
 }
 
 /// Audio for background music
-#[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, Eq, PartialEq)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 #[repr(i16)]
@@ -241,7 +241,7 @@ pub struct AudioEffects {
 }
 
 /// Negative Audio Feedback
-#[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 #[repr(i16)]
@@ -271,7 +271,7 @@ impl AudioFeedbackNegative {
 }
 
 /// Positive Audio Feedback
-#[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 #[repr(i16)]

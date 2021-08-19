@@ -11,7 +11,7 @@ pub fn ui<T: AsRef<str>>(path:T) -> String {
     media_url(&format!("ui/{}", path.as_ref()))
 }
 
-pub fn audio<T: AsRef<str>>(path:T) -> String {
+pub fn audio_cdn_url<T: AsRef<str>>(path:T) -> String {
     media_url(&format!("audio/{}", path.as_ref()))
 }
 

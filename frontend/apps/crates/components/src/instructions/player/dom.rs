@@ -4,7 +4,7 @@ use std::rc::Rc;
 use utils::prelude::*;
 
 use super::state::*;
-use crate::audio::mixer::AudioMixer;
+use crate::audio::mixer::{AudioMixer, AudioPath};
 
 impl InstructionsPlayer {
     pub fn render(state: Rc<Self>, mixer: &AudioMixer) -> Dom {
@@ -13,7 +13,7 @@ impl InstructionsPlayer {
             .data
             .audio
             .as_ref()
-            .map(|audio| mixer.play(audio.clone(), false));
+            .map(|audio| mixer.play(AudioPath::Lib(audio.clone()), false));
 
         html!("empty-fragment", {
             .apply_if(state.data.text.is_some(), |dom| {
