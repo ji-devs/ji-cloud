@@ -60,7 +60,8 @@ export class _ extends LitElement {
                 overflow: hidden;
             }
             ::slotted([slot=public]) {
-                display: flex;
+                display: grid;
+                grid-template-columns: auto auto;
                 place-content: space-between;
                 margin-top: 24px;
                 padding: 0 16px;

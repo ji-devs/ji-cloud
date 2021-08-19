@@ -47,6 +47,7 @@ export class _ extends LitElement {
 
     onClose = () => {
         this.closed = true;
+        this.dispatchEvent(new Event("close"));
     }
 
     @property({type: Boolean})
@@ -67,7 +68,7 @@ export class _ extends LitElement {
 
 
     //pass through
-    @property()
+    @property({attribute: false})
     container:Element | Window = window;
 
     @property()
@@ -109,7 +110,7 @@ export class _ extends LitElement {
                     ${title !== "" ? html`<div class="title">${title}</div>` : nothing}
                     ${body !== "" ? html`<section class="body">${body}</section>` : nothing}
                     ${showId !== "" ? renderShowId(showId, this.onClose) : nothing}       
-                <section>
+                </section>
             </tooltip-base>
 
         `;
@@ -131,5 +132,5 @@ function renderShowId(showId:string, onClose: () => any) {
 
         onClose();
     }
-    return html`<div @click=${onClick} class="noshow">${STR_NO_SHOW_AGAIN}<div>`;
+    return html`<div @click=${onClick} class="noshow">${STR_NO_SHOW_AGAIN}</div>`;
 }
