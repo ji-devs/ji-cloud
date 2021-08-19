@@ -11,6 +11,7 @@ const STR_PASSWORD = "Password";
 const STR_FIRST_NAME = "First name";
 const STR_FAMILY_NAME = "Family name";
 const STR_USER_NAME = "User name";
+const STR_PERSONA = "Persona";
 const STR_PREFERRED_LANGUAGE = "Preferred language of communication";
 const STR_SCHOOL_ORGANIZATION = "School/Organization";
 const STR_RELEVANT_AGE_GROUPS = "Relevant age groups";
@@ -268,6 +269,10 @@ export class _ extends LitElement {
                             <label>
                                 <span>${STR_USER_NAME}</span>
                                 <slot name="username"></slot>
+                            </label>
+                            <label>
+                                <span>${STR_PERSONA}</span>
+                                <slot name="persona"></slot>
                             </label>
                         </div>
                         <div class="right-side">

@@ -21,7 +21,7 @@ checksum = "28ae2b3dec75a406790005a200b1bd89785afc02517a00ca99ecfe093ee9e6cf"
 name = "app-admin"
 version = "0.1.0"
 dependencies = [
- "awsm_web 0.24.2",
+ "awsm_web 0.25.0",
  "cfg-if 1.0.0",
  "components",
  "console_error_panic_hook",
@@ -59,7 +59,7 @@ name = "app-card-quiz-edit"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "awsm_web 0.24.2",
+ "awsm_web 0.25.0",
  "cfg-if 1.0.0",
  "components",
  "console_error_panic_hook",
@@ -95,7 +95,7 @@ name = "app-card-quiz-play"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "awsm_web 0.24.2",
+ "awsm_web 0.25.0",
  "cfg-if 1.0.0",
  "components",
  "console_error_panic_hook",
@@ -131,7 +131,7 @@ name = "app-cover-edit"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "awsm_web 0.24.2",
+ "awsm_web 0.25.0",
  "cfg-if 1.0.0",
  "components",
  "console_error_panic_hook",
@@ -166,7 +166,7 @@ name = "app-cover-play"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "awsm_web 0.24.2",
+ "awsm_web 0.25.0",
  "cfg-if 1.0.0",
  "components",
  "console_error_panic_hook",
@@ -201,7 +201,7 @@ name = "app-drag-drop-edit"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "awsm_web 0.24.2",
+ "awsm_web 0.25.0",
  "cfg-if 1.0.0",
  "components",
  "console_error_panic_hook",
@@ -236,7 +236,7 @@ name = "app-drag-drop-play"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "awsm_web 0.24.2",
+ "awsm_web 0.25.0",
  "cfg-if 1.0.0",
  "components",
  "console_error_panic_hook",
@@ -271,7 +271,7 @@ name = "app-flashcards-edit"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "awsm_web 0.24.2",
+ "awsm_web 0.25.0",
  "cfg-if 1.0.0",
  "components",
  "console_error_panic_hook",
@@ -307,7 +307,7 @@ name = "app-flashcards-play"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "awsm_web 0.24.2",
+ "awsm_web 0.25.0",
  "cfg-if 1.0.0",
  "components",
  "console_error_panic_hook",
@@ -342,7 +342,7 @@ dependencies = [
 name = "app-home"
 version = "0.1.0"
 dependencies = [
- "awsm_web 0.24.2",
+ "awsm_web 0.25.0",
  "cfg-if 1.0.0",
  "chrono",
  "chrono-tz",
@@ -377,7 +377,7 @@ dependencies = [
 name = "app-jig-edit"
 version = "0.1.0"
 dependencies = [
- "awsm_web 0.24.2",
+ "awsm_web 0.25.0",
  "cfg-if 1.0.0",
  "chrono",
  "components",
@@ -414,7 +414,7 @@ name = "app-matching-edit"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "awsm_web 0.24.2",
+ "awsm_web 0.25.0",
  "cfg-if 1.0.0",
  "components",
  "console_error_panic_hook",
@@ -450,7 +450,7 @@ name = "app-matching-play"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "awsm_web 0.24.2",
+ "awsm_web 0.25.0",
  "cfg-if 1.0.0",
  "components",
  "console_error_panic_hook",
@@ -486,7 +486,7 @@ name = "app-memory-edit"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "awsm_web 0.24.2",
+ "awsm_web 0.25.0",
  "cfg-if 1.0.0",
  "components",
  "console_error_panic_hook",
@@ -521,7 +521,7 @@ name = "app-memory-play"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "awsm_web 0.24.2",
+ "awsm_web 0.25.0",
  "cfg-if 1.0.0",
  "components",
  "console_error_panic_hook",
@@ -557,7 +557,7 @@ name = "app-poster-edit"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "awsm_web 0.24.2",
+ "awsm_web 0.25.0",
  "cfg-if 1.0.0",
  "components",
  "console_error_panic_hook",
@@ -592,7 +592,7 @@ name = "app-poster-play"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "awsm_web 0.24.2",
+ "awsm_web 0.25.0",
  "cfg-if 1.0.0",
  "components",
  "console_error_panic_hook",
@@ -627,7 +627,7 @@ name = "app-tapping-board-edit"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "awsm_web 0.24.2",
+ "awsm_web 0.25.0",
  "cfg-if 1.0.0",
  "components",
  "console_error_panic_hook",
@@ -662,7 +662,7 @@ name = "app-tapping-board-play"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "awsm_web 0.24.2",
+ "awsm_web 0.25.0",
  "cfg-if 1.0.0",
  "components",
  "console_error_panic_hook",
@@ -696,7 +696,7 @@ dependencies = [
 name = "app-user"
 version = "0.1.0"
 dependencies = [
- "awsm_web 0.24.2",
+ "awsm_web 0.25.0",
  "cfg-if 1.0.0",
  "chrono",
  "chrono-tz",
@@ -733,7 +733,7 @@ name = "app-video-edit"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "awsm_web 0.24.2",
+ "awsm_web 0.25.0",
  "cfg-if 1.0.0",
  "components",
  "console_error_panic_hook",
@@ -768,7 +768,7 @@ name = "app-video-play"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "awsm_web 0.24.2",
+ "awsm_web 0.25.0",
  "cfg-if 1.0.0",
  "components",
  "console_error_panic_hook",
@@ -829,9 +829,9 @@ dependencies = [
 
 [[package]]
 name = "awsm_web"
-version = "0.24.2"
+version = "0.25.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6e07619f0868d3e1b8c8e3a15eb09525d8480206be51f9ff9905ed160999c11b"
+checksum = "2904b01170e5edb750dc846501b04166bb4cbe59bbc7b29eff1fd3956af1bddf"
 dependencies = [
  "beach_map",
  "discard",
@@ -961,7 +961,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "async-trait",
- "awsm_web 0.24.2",
+ "awsm_web 0.25.0",
  "beach_map",
  "cfg-if 1.0.0",
  "chrono",
@@ -1482,7 +1482,7 @@ checksum = "dd25036021b0de88a0aff6b850051563c6516d0bf53f8638938edbb9de732736"
 name = "jig-play"
 version = "0.1.0"
 dependencies = [
- "awsm_web 0.24.2",
+ "awsm_web 0.25.0",
  "cfg-if 1.0.0",
  "components",
  "console_error_panic_hook",
@@ -1557,7 +1557,7 @@ dependencies = [
 name = "legacy-play"
 version = "0.1.0"
 dependencies = [
- "awsm_web 0.24.2",
+ "awsm_web 0.25.0",
  "cfg-if 1.0.0",
  "components",
  "console_error_panic_hook",
@@ -1855,7 +1855,7 @@ name = "scratch-001"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "awsm_web 0.24.2",
+ "awsm_web 0.25.0",
  "cfg-if 1.0.0",
  "components",
  "console_error_panic_hook",
@@ -2141,7 +2141,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "async-trait",
- "awsm_web 0.24.2",
+ "awsm_web 0.25.0",
  "base64 0.13.0",
  "cfg-if 1.0.0",
  "chrono",

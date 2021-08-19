@@ -42,6 +42,9 @@ export class _ extends LitElement {
                 grid-gap: 32px;
                 align-items: start;
             }
+            ::slotted(input-select) {
+                --background-color: #ffffff;
+            }
             .search-button-wrapper {
                 display: grid;
                 place-content: center;

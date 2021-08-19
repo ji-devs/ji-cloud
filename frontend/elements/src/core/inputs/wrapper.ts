@@ -31,7 +31,7 @@ export class _ extends LitElement {
                     line-height: 1.5;
                     cursor: pointer;
                     z-index: 1;
-                    background-color: #fff;
+                    background-color: var(--background-color);
                     height: 100%;
                 }
                 .wrapper:focus-within, :host([focus-within]) .wrapper {

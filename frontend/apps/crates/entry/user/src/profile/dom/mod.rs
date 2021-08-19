@@ -139,6 +139,22 @@ impl ProfilePage {
                     })
                 }),
                 html!("input-wrapper", {
+                    .property("slot", "persona")
+                    .child(html!("input" => HtmlInputElement, {
+                        .with_node!(elem => {
+                            .property_signal("value", state.user.persona.signal_cloned().map(|p| p.unwrap_or_default()))
+                            .event(clone!(state => move |_: events::Input| {
+                                state.user.persona.set(Some(elem.value()));
+                                actions::save_profile(Rc::clone(&state));
+                            }))
+                        })
+                    }))
+                    .child(html!("img-ui", {
+                        .property("slot", "icon")
+                        .property("path", "core/inputs/pencil-blue-darker.svg")
+                    }))
+                }),
+                html!("input-wrapper", {
                     .property("slot", "location")
                     .child(html!("input-location", {
                         .property_signal("locationAsString", state.user.location.signal_cloned().map(|location| {
