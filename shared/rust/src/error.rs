@@ -32,7 +32,8 @@ pub struct ApiError<T> {
 #[cfg(feature = "backend")]
 impl<T: Serialize> From<ApiError<T>> for actix_web::Error {
     fn from(e: ApiError<T>) -> Self {
-        actix_web::HttpResponse::build(e.code).json(e).into()
+        let resp = actix_web::HttpResponse::build(e.code).json(e);
+        actix_web::error::InternalError::from_response("", resp).into()
     }
 }
 

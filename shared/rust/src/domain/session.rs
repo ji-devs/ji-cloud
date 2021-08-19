@@ -2,8 +2,6 @@
 
 use std::fmt;
 
-#[cfg(feature = "backend")]
-use paperclip::actix::Apiv2Schema;
 use serde::{Deserialize, Serialize};
 
 /// The query key for
@@ -34,7 +32,6 @@ pub use NewSessionResponse as CreateSessionSuccess;
 /// header.
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub enum CreateSessionResponse {
     /// A new session was successfully created and the user may use the api as normal.
     Login(NewSessionResponse),
@@ -79,7 +76,6 @@ pub enum CreateSessionResponse {
 /// to be used as defaults for populating a `PutProfile` request.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct OAuthUserProfile {
     /// The user's email
     pub email: String,
@@ -110,7 +106,6 @@ pub struct OAuthUserProfile {
 /// Note: This response *also* includes a cookie.
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct NewSessionResponse {
     /// A transparent CSRF token to use for this Session.
     pub csrf: String,
@@ -119,7 +114,6 @@ pub struct NewSessionResponse {
 /// Which URL to use for OAuth callback.
 #[derive(Serialize, Deserialize, Debug, Copy, Clone)]
 #[serde(rename_all = "camelCase")]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub enum OAuthUrlKind {
     /// Get OAuth Url for login
     Login,
@@ -130,7 +124,6 @@ pub enum OAuthUrlKind {
 /// Which *service* to use for OAuth Url generation.
 #[derive(Serialize, Deserialize, Debug, Copy, Clone)]
 #[serde(rename_all = "camelCase")]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 #[non_exhaustive]
 pub enum GetOAuthUrlServiceKind {
     /// Google OAuth v2
@@ -140,7 +133,6 @@ pub enum GetOAuthUrlServiceKind {
 /// Response for what URL to use for OAuth callback.
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct GetOAuthUrlResponse {
     ///  URL to use for OAuth callback
     pub url: String,
@@ -149,7 +141,6 @@ pub struct GetOAuthUrlResponse {
 /// Request for Creating a Session / signing in via oauth.
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 #[non_exhaustive]
 pub enum CreateSessionOAuthRequest {
     /// OAuth with google
@@ -164,7 +155,6 @@ pub enum CreateSessionOAuthRequest {
 
 /// Optional query used as the first option for authentication with the API
 #[derive(Serialize, Deserialize)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct SessionTokenQuery {
     /// The token to be used for authentication
     pub access_token: Option<String>,

@@ -5,9 +5,6 @@ use serde::{Deserialize, Serialize};
 use std::convert::TryFrom;
 use uuid::Uuid;
 
-#[cfg(feature = "backend")]
-use paperclip::actix::Apiv2Schema;
-
 use super::meta::{AffiliationId, AgeRangeId, SubjectId};
 
 /// Represents a user's permissions.
@@ -16,7 +13,6 @@ use super::meta::{AffiliationId, AgeRangeId, SubjectId};
 #[derive(Deserialize, Serialize, PartialEq, Debug, Clone)]
 #[non_exhaustive]
 #[repr(i16)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub enum UserScope {
     /// The user has access to everything, implies all other scopes.
     Admin = 1,
@@ -65,7 +61,6 @@ impl TryFrom<i16> for UserScope {
 /// no filters will return that the user does not exist.
 /// multiple filters will act as a logical `OR` of them (multiple choices will return an arbitrary user).
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct UserLookupQuery {
     /// The user ID we're filtering by.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -78,7 +73,6 @@ pub struct UserLookupQuery {
 
 /// Publicly accessible information about a user.
 #[derive(Debug, Serialize, Deserialize, Clone)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct OtherUser {
     /// The user's id.
     pub id: Uuid,
@@ -86,8 +80,6 @@ pub struct OtherUser {
 
 /// A user's profile.
 #[derive(Debug, Serialize, Deserialize, Clone)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-#[cfg_attr(feature = "backend", openapi(empty))]
 pub struct UserProfile {
     /// The user's id.
     pub id: Uuid,
@@ -168,7 +160,6 @@ pub struct UserProfile {
 
 /// Request for [`VerifyEmail`](crate::api::endpoints::user::VerifyEmail)
 #[derive(Debug, Serialize, Deserialize, Clone)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 #[serde(rename_all = "camelCase")]
 pub enum VerifyEmailRequest {
     /// Attempt to verify the email
@@ -186,8 +177,6 @@ pub enum VerifyEmailRequest {
 
 /// Request for [`PutProfile`](crate::api::endpoints::user::PutProfile)
 #[derive(Debug, Serialize, Deserialize)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-#[cfg_attr(feature = "backend", openapi(empty))]
 pub struct PutProfileRequest {
     /// The user's username.
     ///
@@ -255,8 +244,6 @@ pub struct PutProfileRequest {
 
 /// Request for [`PatchProfile`](crate::api::endpoints::user::PatchProfile)
 #[derive(Debug, Default, Serialize, Deserialize)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-#[cfg_attr(feature = "backend", openapi(empty))]
 pub struct PatchProfileRequest {
     /// The user's username.
     ///
@@ -355,7 +342,6 @@ pub struct PatchProfileRequest {
 
 /// Request for [`Create`](crate::api::endpoints::user::Create)
 #[derive(Debug, Serialize, Deserialize)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct CreateUserRequest {
     /// The new user's email
     pub email: String,
@@ -366,7 +352,6 @@ pub struct CreateUserRequest {
 
 /// Request for [`ResetPassword`](crate::api::endpoints::user::ResetPassword)
 #[derive(Debug, Serialize, Deserialize)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct ResetPasswordRequest {
     /// The email to request a password reset for
     pub email: String,
@@ -374,7 +359,6 @@ pub struct ResetPasswordRequest {
 
 /// Request for [`ChangePassword`](crate::api::endpoints::user::ChangePassword)
 #[derive(Debug, Serialize, Deserialize)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 #[serde(rename_all = "camelCase")]
 pub enum ChangePasswordRequest {
     /// Change the email
@@ -392,8 +376,6 @@ pub enum ChangePasswordRequest {
 
 /// Request for [`CreateColor`](crate::api::endpoints::user::CreateColor), [`UpdateColor`](crate::api::endpoints::user::UpdateColor)
 #[derive(Debug, Serialize, Deserialize)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-#[cfg_attr(feature = "backend", openapi(empty))]
 pub struct UserColorValueRequest {
     /// the color to add/change to.
     pub color: rgb::RGBA8,
@@ -401,8 +383,6 @@ pub struct UserColorValueRequest {
 
 /// Response for [`GetColors`](crate::api::endpoints::user::GetColors)
 #[derive(Debug, Serialize, Deserialize)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-#[cfg_attr(feature = "backend", openapi(empty))]
 pub struct UserColorResponse {
     /// The user's colors.
     pub colors: Vec<rgb::RGBA8>,
@@ -410,7 +390,6 @@ pub struct UserColorResponse {
 
 /// Request for [`CreateFont`](crate::api::endpoints::user::CreateFont), [`UpdateFont`](crate::api::endpoints::user::UpdateFont)
 #[derive(Debug, Serialize, Deserialize)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct UserFontNameRequest {
     /// Name of the font to add/change.
     pub name: String,
@@ -418,7 +397,6 @@ pub struct UserFontNameRequest {
 
 /// Response for [`GetFonts`](crate::api::endpoints::user::GetFonts)
 #[derive(Debug, Serialize, Deserialize)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct UserFontResponse {
     /// Names of the user's fonts.
     pub names: Vec<String>,

@@ -5,8 +5,6 @@ use crate::domain::jig::module::{
     },
     ModuleKind,
 };
-#[cfg(feature = "backend")]
-use paperclip::actix::Apiv2Schema;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::convert::TryFrom;
@@ -16,7 +14,6 @@ pub use play_settings::*;
 
 /// The body for [`TappingBoard`](crate::domain::jig::module::ModuleKind::TappingBoard) modules.
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct ModuleData {
     /// The content
     pub content: Option<Content>,
@@ -91,7 +88,6 @@ impl TryFrom<Body> for ModuleData {
 
 /// The body for [`TappingBoard`](crate::domain::jig::module::ModuleKind::TappingBoard) modules.
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct Content {
     /// The base content for all design modules
     pub base: BaseContent,
@@ -111,7 +107,6 @@ pub struct Content {
 
 /// Editor state
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct EditorState {
     /// the current step
     pub step: Step,
@@ -122,7 +117,6 @@ pub struct EditorState {
 
 /// Tapping board trace w/ metadata
 #[derive(Clone, Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct TappingTrace {
     /// the trace
     pub trace: Trace,
@@ -135,7 +129,6 @@ pub struct TappingTrace {
 }
 
 #[derive(Clone, Copy, Serialize, Deserialize, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 /// The mode
 pub enum Mode {
     /// Words mode
@@ -208,7 +201,6 @@ impl ModeExt for Mode {
 
 /// The Steps
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub enum Step {
     /// Step 1
     One,

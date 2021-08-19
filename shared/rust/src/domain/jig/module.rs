@@ -1,7 +1,5 @@
 //! Types for jig Modules.
 
-#[cfg(feature = "backend")]
-use paperclip::actix::Apiv2Schema;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 use uuid::Uuid;
@@ -15,12 +13,10 @@ pub use body::Body as ModuleBody;
 #[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct ModuleId(pub Uuid);
 
 /// Which way of finding a module to use when looking it up.
 #[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 #[serde(untagged)]
 pub enum ModuleIdOrIndex {
     /// By offset into its parent jig
@@ -51,7 +47,6 @@ impl ModuleIdOrIndex {
 #[repr(i16)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[derive(Serialize, Deserialize, Debug, Copy, Clone, PartialEq, Eq)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub enum ModuleKind {
     /// This is a sort of special module, every jig has one and it can't be deleted
     Cover = 0,
@@ -131,7 +126,6 @@ impl FromStr for ModuleKind {
 
 /// Minimal information about a module.
 #[derive(Clone, Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct LiteModule {
     /// The module's ID.
     pub id: ModuleId,
@@ -142,7 +136,6 @@ pub struct LiteModule {
 
 /// Over the wire representation of a module.
 #[derive(Serialize, Deserialize, Debug, Clone)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct Module {
     /// The module's ID.
     pub id: ModuleId,
@@ -156,7 +149,6 @@ pub struct Module {
 
 /// Request to create a new `Module`.
 #[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct ModuleCreateRequest {
     /// The module's body.
     pub body: ModuleBody,
@@ -172,7 +164,6 @@ impl Default for ModuleCreateRequest {
 
 /// Response for successfully finding a module
 #[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct ModuleResponse {
     /// The module we found
     pub module: Module,
@@ -181,7 +172,6 @@ pub struct ModuleResponse {
 /// Request to update a `Module`.
 /// note: fields here cannot be nulled out (`None` means "don't change").
 #[derive(Serialize, Deserialize, Debug, Default)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct ModuleUpdateRequest {
     /// The module's body.
     pub body: Option<ModuleBody>,

@@ -1,5 +1,5 @@
 #[cfg(feature = "backend")]
-use paperclip::actix::web::{self, Route};
+use actix_web::{web, Route};
 
 /// Represents a http method.
 #[derive(Copy, Clone, Eq, PartialEq)]

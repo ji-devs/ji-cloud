@@ -1,10 +1,7 @@
-#[cfg(feature = "backend")]
-use paperclip::actix::Apiv2Schema;
 use serde::{Deserialize, Serialize};
 
 /// Play settings
 #[derive(Clone, Default, Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct PlaySettings {
     /// hint style
     pub hint: Hint,
@@ -15,7 +12,6 @@ pub struct PlaySettings {
 
 /// Hint
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub enum Hint {
     /// None
     None,
@@ -32,7 +28,6 @@ impl Default for Hint {
 
 /// Next
 #[derive(Clone, Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub enum Next {
     /// Continue
     Continue,

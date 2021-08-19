@@ -2,8 +2,6 @@
 
 use super::{meta::AnimationStyleId, Publish};
 use chrono::{DateTime, Utc};
-#[cfg(feature = "backend")]
-use paperclip::actix::Apiv2Schema;
 use serde::{Deserialize, Serialize};
 #[cfg(feature = "backend")]
 use sqlx::postgres::PgRow;
@@ -12,7 +10,6 @@ use uuid::Uuid;
 /// Animation Kinds
 #[derive(Debug, Copy, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[cfg_attr(feature = "backend", derive(paperclip::actix::Apiv2Schema))]
 #[repr(i16)]
 pub enum AnimationKind {
     /// Gif Animation
@@ -36,12 +33,10 @@ impl AnimationKind {
 #[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct AnimationId(pub Uuid);
 
 /// Response for getting a single animation file.
 #[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct AnimationResponse {
     /// The animation's metadata.
     pub metadata: AnimationMetadata,
@@ -49,7 +44,6 @@ pub struct AnimationResponse {
 
 /// Over the wire representation of an animation's metadata.
 #[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct AnimationMetadata {
     /// The animation's ID.
     pub id: AnimationId,
@@ -132,7 +126,6 @@ struct DbAnimation {
 // todo: # errors doc section
 /// Request to create a new animation.
 #[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct AnimationCreateRequest {
     /// The name of the animation.
     pub name: String,
@@ -160,7 +153,6 @@ pub struct AnimationCreateRequest {
 
 /// Request to indicate the size of an user library image for upload.
 #[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct AnimationUploadRequest {
     /// The size of the image to be uploaded in bytes.
     pub file_size: usize,
@@ -168,8 +160,6 @@ pub struct AnimationUploadRequest {
 
 /// URL to upload an user library image, supports resumable uploading.
 #[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-#[cfg_attr(feature = "backend", openapi(empty))]
 pub struct AnimationUploadResponse {
     /// The session URI used for uploading, including the query for uploader ID
     pub session_uri: String,

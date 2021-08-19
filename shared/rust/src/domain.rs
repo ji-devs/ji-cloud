@@ -41,14 +41,10 @@ pub mod auth {
 }
 
 use chrono::Utc;
-#[cfg(feature = "backend")]
-use paperclip::actix::Apiv2Schema;
 use ser::{csv_encode_i16_indices, csv_encode_uuids, deserialize_optional_field, from_csv};
 use uuid::Uuid;
 
 /// Serialize/Deserialize wrapper for Base64 encoded content.
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-#[cfg_attr(feature = "backend", openapi(empty))]
 #[derive(Debug)]
 pub struct Base64<T>(pub T);
 
@@ -73,7 +69,6 @@ impl<'de, E: std::fmt::Debug, T: std::str::FromStr<Err = E>> serde::Deserialize<
 }
 /// Response for successfuly creating a Resource.
 #[derive(Debug, serde::Serialize, serde::Deserialize, Clone)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct CreateResponse<T: Into<Uuid>> {
     /// The newly created resource's ID.
     pub id: T,
@@ -81,7 +76,6 @@ pub struct CreateResponse<T: Into<Uuid>> {
 
 /// Represents when to publish an image.
 #[derive(Copy, Clone, Eq, PartialEq, serde::Serialize, serde::Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub enum Publish {
     /// Publish the image *at* the given time.
     At(chrono::DateTime<Utc>),

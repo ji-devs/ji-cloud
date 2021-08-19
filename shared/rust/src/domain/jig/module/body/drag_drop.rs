@@ -5,8 +5,6 @@ use crate::domain::jig::module::{
     },
     ModuleKind,
 };
-#[cfg(feature = "backend")]
-use paperclip::actix::Apiv2Schema;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::convert::TryFrom;
@@ -17,7 +15,6 @@ pub use play_settings::*;
 
 /// The body for [`DragDrop`](crate::domain::jig::module::ModuleKind::DragDrop) modules.
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct ModuleData {
     /// The content
     pub content: Option<Content>,
@@ -92,7 +89,6 @@ impl TryFrom<Body> for ModuleData {
 
 /// The body for [`DragDrop`](crate::domain::jig::module::ModuleKind::DragDrop) modules.
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct Content {
     /// The instructions for the module.
     pub instructions: Instructions,
@@ -124,7 +120,6 @@ pub struct Content {
 
 /// Editor state
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct EditorState {
     /// the current step
     pub step: Step,
@@ -135,7 +130,6 @@ pub struct EditorState {
 
 /// drag and drop sticker w/ metadata
 #[derive(Clone, Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct Item {
     /// the sticker
     pub sticker: Sticker,
@@ -145,7 +139,6 @@ pub struct Item {
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 /// The mode
 pub enum ItemKind {
     /// Just part of the scene
@@ -156,7 +149,6 @@ pub enum ItemKind {
 
 /// drag and drop sticker w/ metadata
 #[derive(Clone, Serialize, Deserialize, Debug, Default)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct Interactive {
     /// audio
     pub audio: Option<Audio>,
@@ -167,7 +159,6 @@ pub struct Interactive {
 
 /// drag and drop trace w/ metadata
 #[derive(Clone, Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct TargetArea {
     /// the trace
     pub trace: Trace,
@@ -177,7 +168,6 @@ pub struct TargetArea {
 }
 
 #[derive(Clone, Copy, Serialize, Deserialize, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 /// The mode
 pub enum Mode {
     #[allow(missing_docs)]
@@ -238,7 +228,6 @@ impl ModeExt for Mode {
 
 /// The Steps
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub enum Step {
     /// Step 1
     One,

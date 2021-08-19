@@ -2,8 +2,6 @@ use crate::domain::jig::module::{
     body::{Body, BodyExt, ModeExt, StepExt, ThemeChoice, _groups::design::*},
     ModuleKind,
 };
-#[cfg(feature = "backend")]
-use paperclip::actix::Apiv2Schema;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::convert::TryFrom;
@@ -12,7 +10,6 @@ use super::BodyConvert;
 
 /// The body for [`Video`](crate::domain::jig::module::ModuleKind::Video) modules.
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct ModuleData {
     /// The content
     pub content: Option<Content>,
@@ -86,7 +83,6 @@ impl TryFrom<Body> for ModuleData {
 
 /// The body for [`Video`](crate::domain::jig::module::ModuleKind::Video) modules.
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct Content {
     /// The editor state
     pub editor_state: EditorState,
@@ -103,7 +99,6 @@ pub struct Content {
 
 /// Editor state
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct EditorState {
     /// the current step
     pub step: Step,
@@ -113,7 +108,6 @@ pub struct EditorState {
 }
 
 #[derive(Clone, Copy, Serialize, Deserialize, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 /// The mode
 pub enum Mode {
     /// Introduction
@@ -163,7 +157,6 @@ impl ModeExt for Mode {
 
 /// The Steps
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub enum Step {
     /// Step 1
     One,
@@ -225,7 +218,6 @@ impl StepExt for Step {
 
 /// Video play settings
 #[derive(Default, Clone, Debug, Serialize, Deserialize)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct PlaySettings {
     /// show captions
     pub captions: bool,
@@ -242,7 +234,6 @@ pub struct PlaySettings {
 
 /// what to do when done playing video
 #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub enum DoneAction {
     /// loop the video
     Loop,

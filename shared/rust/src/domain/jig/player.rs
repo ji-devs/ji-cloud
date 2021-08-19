@@ -1,13 +1,10 @@
 //! Types for Jig short codes for sharing
 
 use super::JigId;
-#[cfg(feature = "backend")]
-use paperclip::actix::Apiv2Schema;
 use serde::{Deserialize, Serialize};
 
 /// Settings for the player session.
 #[derive(Serialize, Deserialize, Clone, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct JigPlayerSettings {
     /// Text direction, left-to-right or right-to-left
     pub direction: TextDirection,
@@ -33,7 +30,6 @@ impl Default for JigPlayerSettings {
 /// Sets text direction for the jig
 #[derive(Serialize, Deserialize, Copy, Clone, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 #[repr(i16)]
 pub enum TextDirection {
     /// left to right
@@ -53,7 +49,6 @@ impl Default for TextDirection {
 
 /// Request to create a player session for a jig.
 #[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct JigPlayerSessionCreateRequest {
     /// ID of the Jig that the session is for
     pub jig_id: JigId,
@@ -63,7 +58,6 @@ pub struct JigPlayerSessionCreateRequest {
 
 /// Response for creating or fetching the code associated with a jig.
 #[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct JigPlayerSessionCode {
     /// Four-digit code identifying a Jig player session
     pub index: i16,
@@ -71,7 +65,6 @@ pub struct JigPlayerSessionCode {
 
 /// Over-the-wire representation of a player session.
 #[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct JigPlayerSession {
     /// ID of the Jig that the session is for
     pub jig_id: JigId,

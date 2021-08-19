@@ -9,7 +9,6 @@ use crate::media::{MediaKind, MediaLibrary};
 /// Response for [`ListMedia`](crate::api::endpoints::admin::ListMedia)
 /// Super unstable, may change at any time, for any reason.
 #[derive(Serialize, Deserialize, Debug, Clone)]
-#[cfg_attr(feature = "backend", derive(paperclip::actix::Apiv2Schema))]
 pub struct AdminListMediaResponse {
     /// A list of all media items
     pub media: Vec<AdminMediaItem>,
@@ -17,7 +16,6 @@ pub struct AdminListMediaResponse {
 
 /// Item of media
 #[derive(Serialize, Deserialize, Debug, Clone)]
-#[cfg_attr(feature = "backend", derive(paperclip::actix::Apiv2Schema))]
 pub struct AdminMediaItem {
     /// The ID of the media
     pub id: Uuid,

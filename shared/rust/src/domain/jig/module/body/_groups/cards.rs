@@ -5,14 +5,11 @@
 use crate::domain::jig::module::body::{
     Background, Image, Instructions, ModeExt, StepExt, ThemeChoice,
 };
-#[cfg(feature = "backend")]
-use paperclip::actix::Apiv2Schema;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 
 /// The base content for card modules
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct BaseContent {
     /// The editor state
     pub editor_state: EditorState,
@@ -45,7 +42,6 @@ impl BaseContent {
 
 /// Editor state
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct EditorState {
     /// the current step
     pub step: Step,
@@ -56,12 +52,10 @@ pub struct EditorState {
 
 /// A pair of cards
 #[derive(Clone, Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct CardPair(pub Card, pub Card);
 
 /// An individual card.
 #[derive(Clone, Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub enum Card {
     // todo(@dakom): document this
     #[allow(missing_docs)]
@@ -74,7 +68,6 @@ pub enum Card {
 
 /// What mode the module runs in.
 #[derive(Clone, Copy, Serialize, Deserialize, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 #[repr(i16)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 pub enum Mode {
@@ -168,7 +161,6 @@ impl ModeExt for Mode {
 
 /// The Steps
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub enum Step {
     /// Step 1
     One,

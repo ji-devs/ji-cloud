@@ -2,8 +2,6 @@
 
 use super::meta::AudioStyleId;
 use chrono::{DateTime, Utc};
-#[cfg(feature = "backend")]
-use paperclip::actix::Apiv2Schema;
 use serde::{Deserialize, Serialize};
 #[cfg(feature = "backend")]
 use sqlx::postgres::PgRow;
@@ -11,16 +9,12 @@ use uuid::Uuid;
 
 /// Types for user audio library.
 pub mod user {
-    #[cfg(feature = "backend")]
-    use paperclip::actix::Apiv2Schema;
-
     use serde::{Deserialize, Serialize};
 
     use super::AudioId;
 
     /// Response for listing.
     #[derive(Serialize, Deserialize, Debug)]
-    #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
     pub struct UserAudioListResponse {
         /// the audio files returned.
         pub audio_files: Vec<UserAudioResponse>,
@@ -28,7 +22,6 @@ pub mod user {
 
     /// Response for getting a single audio file.
     #[derive(Serialize, Deserialize, Debug)]
-    #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
     pub struct UserAudioResponse {
         /// The audio file's metadata.
         pub metadata: UserAudio,
@@ -36,7 +29,6 @@ pub mod user {
 
     /// Over the wire representation of an audio file's metadata.
     #[derive(Serialize, Deserialize, Debug)]
-    #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
     pub struct UserAudio {
         /// The audio file's ID.
         pub id: AudioId,
@@ -45,7 +37,6 @@ pub mod user {
 
     /// Request indicating the size of an image for upload.
     #[derive(Serialize, Deserialize, Debug)]
-    #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
     pub struct UserAudioUploadRequest {
         /// The size of the audio to be uploaded in bytes. Allows the API server to check that the file size is
         /// within limits and as a verification at GCS that the entire file was uploaded
@@ -54,7 +45,6 @@ pub mod user {
 
     /// URL to upload an audio. Supports resumable uploading.
     #[derive(Serialize, Deserialize, Debug)]
-    #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
     pub struct UserAudioUploadResponse {
         /// The session URI used for uploading, including the query for uploader ID
         pub session_uri: String,
@@ -65,13 +55,11 @@ pub mod user {
 #[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct AudioId(pub Uuid);
 
 /// Represents different kinds of audio.
 #[derive(Serialize, Deserialize, Copy, Clone, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 #[repr(i16)]
 pub enum AudioKind {
     /// Audio is an Mp3
@@ -80,7 +68,6 @@ pub enum AudioKind {
 
 /// Response for getting a single audio file.
 #[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct AudioResponse {
     /// The audio's metadata.
     pub metadata: AudioMetadata,
@@ -88,7 +75,6 @@ pub struct AudioResponse {
 
 /// Over the wire representation of an audio file's metadata.
 #[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct AudioMetadata {
     /// The audio's ID.
     pub id: AudioId,
