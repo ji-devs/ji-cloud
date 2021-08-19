@@ -37,7 +37,7 @@ export class _ extends LitElement {
 
         const fallbackPath = moduleKind == ""
             ? `jig/thumb-placeholder.svg` 
-            : `module/${moduleKind}/thumb-placeholder.svg`;
+            : `module/_common/thumb-placeholder.svg`;
 	    return html`
 	    	<img-ji lib="screenshot" id="${jigId}/${moduleId}" size="${size}" .cacheBust=${cacheBust ? Date.now() : false}>
   			    <img-ui path="${fallbackPath}" slot="fallback"></img-ui>
