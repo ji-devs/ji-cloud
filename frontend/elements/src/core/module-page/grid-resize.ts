@@ -85,7 +85,7 @@ export class _ extends BgBlue {
 
         aside {
             grid-area: sidebar;
-            z-index: 1;
+            z-index: 2;
         }
 
         header {
