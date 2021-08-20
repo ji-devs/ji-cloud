@@ -1,16 +1,11 @@
-use actix_http::{
-    error::BlockingError,
+use actix_web::{
     http::header::{self, EntityTag, Header, IfMatch, IfNoneMatch},
+    web::{Data, HttpRequest, Json, Path, ServiceConfig},
+    HttpResponse,
 };
-use actix_web::{web::Json, HttpResponse};
 use chrono::{DateTime, Duration, Utc};
 use core::settings::RuntimeSettings;
 use futures::TryStreamExt;
-use paperclip::actix::{
-    api_v2_operation,
-    web::{Data, HttpRequest, Path, ServiceConfig},
-    NoContent,
-};
 use shared::{
     api::{endpoints::admin, ApiEndpoint},
     domain::{
@@ -32,7 +27,6 @@ use crate::{
 };
 
 /// Impersonate another user
-#[api_v2_operation]
 async fn impersonate(
     auth: TokenUserWithScope<ScopeAdmin>,
     settings: Data<RuntimeSettings>,
@@ -74,14 +68,17 @@ async fn impersonate(
 
 /// Forcefully refresh an item of media (as if it was just uploaded)
 /// Note: this request can be conditional on `If-Match`
-#[api_v2_operation]
 async fn refresh_image_files(
     _auth: TokenUserWithScope<ScopeAdmin>,
     s3: ServiceData<s3::Client>,
     db: Data<PgPool>,
-    Path((library, id)): Path<(MediaLibrary, Uuid)>,
+    path: Path<(MediaLibrary, Uuid)>,
     req: HttpRequest,
-) -> actix_web::Result<NoContent, error::Refresh> {
+) -> actix_web::Result<HttpResponse, error::Refresh> {
+    let (library, id) = path.into_inner();
+
+    // TODO parse headers using new method??
+
     let if_match = IfMatch::parse(&req)
         .ok()
         .filter(|_| req.headers().contains_key(header::IF_MATCH));
@@ -181,7 +178,7 @@ async fn refresh_image_files(
             .execute(&mut txn)
             .await?;
 
-            return Ok(NoContent);
+            return Ok(HttpResponse::NoContent().finish());
         }
 
         MediaLibrary::User => {
@@ -192,7 +189,7 @@ async fn refresh_image_files(
             .execute(&mut txn)
             .await?;
 
-            return Ok(NoContent);
+            return Ok(HttpResponse::NoContent().finish());
         }
 
         _ => {}
@@ -201,13 +198,9 @@ async fn refresh_image_files(
     let (resized, thumbnail) = actix_web::web::block(move || -> Result<_, error::Refresh> {
         let original = image::load_from_memory(&original)?;
 
-        Ok(regenerate_images(&original, kind)?)
+        regenerate_images(&original, kind).map_err(|e| error::Refresh::from(e))
     })
-    .await
-    .map_err(|err| match err {
-        BlockingError::Canceled => anyhow::anyhow!("Thread pool is gone").into(),
-        BlockingError::Error(e) => e,
-    })?;
+    .await??;
 
     s3.upload_png_images_resized_thumb(library, id, resized, thumbnail)
         .await?;
@@ -226,10 +219,9 @@ async fn refresh_image_files(
 
     txn.commit().await?;
 
-    Ok(NoContent)
+    Ok(HttpResponse::NoContent().finish())
 }
 
-#[api_v2_operation]
 async fn list_media(
     _auth: TokenUserWithScope<ScopeAdmin>,
     db: Data<PgPool>,
@@ -260,7 +252,7 @@ async fn list_media(
     Ok(Json(AdminListMediaResponse { media: items }))
 }
 
-pub fn configure(cfg: &mut ServiceConfig<'_>) {
+pub fn configure(cfg: &mut ServiceConfig) {
     cfg.route(
         admin::Impersonate::PATH,
         admin::Impersonate::METHOD.route().to(impersonate),

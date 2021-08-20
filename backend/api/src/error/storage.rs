@@ -1,11 +1,8 @@
-use paperclip::actix::api_v2_errors;
-
 use crate::service::storage;
 
 use super::{ise, BasicError};
 use http::StatusCode;
 
-#[api_v2_errors(code = 400, code = 401, code = 404, code = 501)]
 #[derive(Debug)]
 pub enum Storage {
     InternalServerError(anyhow::Error),

@@ -1,7 +1,6 @@
-use paperclip::actix::{
-    api_v2_operation,
+use actix_web::{
     web::{self, Data, Json},
-    CreatedJson,
+    HttpResponse,
 };
 use sqlx::PgPool;
 
@@ -15,23 +14,21 @@ use shared::{
 };
 
 /// Create a jig player session, if one does not exist already.
-#[api_v2_operation]
 pub async fn create(
     db: Data<PgPool>,
     claims: TokenUser,
     req: Json<<player::Create as ApiEndpoint>::Req>,
-) -> Result<CreatedJson<<player::Create as ApiEndpoint>::Res>, error::JigCode> {
+) -> Result<HttpResponse, error::JigCode> {
     let req = req.into_inner();
 
     db::jig::authz(&*db, claims.0.user_id, Some(req.jig_id.clone())).await?;
 
     let index = db::jig::player::create(&db, req.jig_id, req.settings).await?;
 
-    Ok(CreatedJson(JigPlayerSessionCode { index }))
+    Ok(HttpResponse::Created().json(JigPlayerSessionCode { index }))
 }
 
 /// Get the player session identified by the code, if it exists.
-#[api_v2_operation]
 pub async fn get(
     db: Data<PgPool>,
     path: web::Path<i16>,
@@ -49,7 +46,6 @@ pub async fn get(
 }
 
 /// Fetch a jig player session code from it's jig if it exists.
-#[api_v2_operation]
 pub async fn get_code(
     db: Data<PgPool>,
     _claims: TokenUser,

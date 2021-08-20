@@ -4,7 +4,7 @@ use crate::{
 };
 use futures::TryStreamExt;
 use shared::domain::category::{Category, CategoryId};
-use sqlx::{Done as _, Executor, PgPool};
+use sqlx::{Executor, PgPool};
 use uuid::Uuid;
 
 pub async fn get_top_level(db: &sqlx::PgPool) -> anyhow::Result<Vec<Category>> {
@@ -38,14 +38,14 @@ order by index
 
 pub async fn get_exact(db: &sqlx::PgPool, ids: &[Uuid]) -> sqlx::Result<Vec<Category>> {
     sqlx::query!(
+        //language=SQL
         r#"
-select id                                                                 as "id: CategoryId",
-       name,
-       created_at,
+select id                                                                 as "id!: CategoryId",
+       name                                                               as "name!",
+       created_at                                                         as "created_at!",
        updated_at,
        (select count(*)::int8 from image_category where category_id = id) as "image_count!",
-       (select count(*)::int8 from jig_category where category_id = id) as "jig_count!"
-
+       (select count(*)::int8 from jig_category where category_id = id)   as "jig_count!"
 from category
          inner join unnest($1::uuid[]) with ordinality t(id, ord) USING (id)
 order by t.ord
@@ -55,9 +55,9 @@ order by t.ord
     .fetch(db)
     .map_ok(|it| Category {
         id: it.id,
+        name: it.name,
         created_at: it.created_at,
         updated_at: it.updated_at,
-        name: it.name,
         children: vec![],
         image_count: it.image_count as u64,
         jig_count: it.jig_count as u64,

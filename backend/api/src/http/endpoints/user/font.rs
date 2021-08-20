@@ -1,38 +1,32 @@
 use crate::{db, error, extractor::TokenUser};
 
-use paperclip::actix::{
-    api_v2_operation,
+use actix_web::{
     web::{Data, Json, Path},
-    CreatedJson, NoContent,
+    HttpResponse,
 };
 use shared::{
-    api::endpoints::{
-        user::{CreateFont, GetFonts},
-        ApiEndpoint,
-    },
+    api::endpoints::{user, ApiEndpoint},
     domain::user::{UserFontNameRequest, UserFontResponse},
 };
 use sqlx::PgPool;
 
-#[api_v2_operation]
 pub async fn create(
     db: Data<PgPool>,
     claims: TokenUser,
     req: Json<UserFontNameRequest>,
-) -> Result<CreatedJson<<CreateFont as ApiEndpoint>::Res>, error::Server> {
+) -> Result<HttpResponse, error::Server> {
     let user_id = claims.0.user_id;
 
     let names = db::user::create_font(db.as_ref(), user_id, req.into_inner().name).await?;
-    Ok(CreatedJson(UserFontResponse { names }))
+    Ok(HttpResponse::Created().json(UserFontResponse { names }))
 }
 
-#[api_v2_operation]
 pub async fn update(
     db: Data<PgPool>,
     claims: TokenUser,
     req: Json<UserFontNameRequest>,
     index: Path<u16>,
-) -> Result<NoContent, error::NotFound> {
+) -> Result<HttpResponse, error::NotFound> {
     let user_id = claims.0.user_id;
 
     let exists = db::user::update_font(db.as_ref(), user_id, *index, req.into_inner().name).await?;
@@ -41,29 +35,27 @@ pub async fn update(
         return Err(error::NotFound::ResourceNotFound);
     }
 
-    Ok(NoContent)
+    Ok(HttpResponse::NoContent().finish())
 }
 
-#[api_v2_operation]
 pub async fn get(
     db: Data<PgPool>,
     claims: TokenUser,
-) -> Result<Json<<GetFonts as ApiEndpoint>::Res>, error::Server> {
+) -> Result<Json<<user::GetFonts as ApiEndpoint>::Res>, error::Server> {
     let user_id = claims.0.user_id;
 
     let names = db::user::get_fonts(db.as_ref(), user_id).await?;
     Ok(Json(UserFontResponse { names }))
 }
 
-#[api_v2_operation]
 pub async fn delete(
     db: Data<PgPool>,
     claims: TokenUser,
     index: Path<u16>,
-) -> Result<NoContent, error::Delete> {
+) -> Result<HttpResponse, error::Delete> {
     let user_id = claims.0.user_id;
 
     db::user::delete_font(db.as_ref(), user_id, *index).await?;
 
-    Ok(NoContent)
+    Ok(HttpResponse::NoContent().finish())
 }

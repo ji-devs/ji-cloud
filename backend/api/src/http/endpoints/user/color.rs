@@ -1,38 +1,32 @@
 use crate::{db, error, extractor::TokenUser};
 
-use paperclip::actix::{
-    api_v2_operation,
+use actix_web::{
     web::{Data, Json, Path},
-    CreatedJson, NoContent,
+    HttpResponse,
 };
 use shared::{
-    api::endpoints::{
-        user::{CreateColor, GetColors},
-        ApiEndpoint,
-    },
+    api::endpoints::{user::GetColors, ApiEndpoint},
     domain::user::{UserColorResponse, UserColorValueRequest},
 };
 use sqlx::PgPool;
 
-#[api_v2_operation]
 pub async fn create(
     db: Data<PgPool>,
     claims: TokenUser,
     req: Json<UserColorValueRequest>,
-) -> Result<CreatedJson<<CreateColor as ApiEndpoint>::Res>, error::Server> {
+) -> Result<HttpResponse, error::Server> {
     let user_id = claims.0.user_id;
 
     let colors = db::user::create_color(db.as_ref(), user_id, req.into_inner().color).await?;
-    Ok(CreatedJson(UserColorResponse { colors }))
+    Ok(HttpResponse::Created().json(UserColorResponse { colors }))
 }
 
-#[api_v2_operation]
 pub async fn update(
     db: Data<PgPool>,
     claims: TokenUser,
     req: Json<UserColorValueRequest>,
     index: Path<u16>,
-) -> Result<NoContent, error::NotFound> {
+) -> Result<HttpResponse, error::NotFound> {
     let user_id = claims.0.user_id;
 
     let exists = db::user::update_color(
@@ -47,10 +41,9 @@ pub async fn update(
         return Err(error::NotFound::ResourceNotFound);
     }
 
-    Ok(NoContent)
+    Ok(HttpResponse::NoContent().finish())
 }
 
-#[api_v2_operation]
 pub async fn get(
     db: Data<PgPool>,
     claims: TokenUser,
@@ -61,15 +54,14 @@ pub async fn get(
     Ok(Json(UserColorResponse { colors }))
 }
 
-#[api_v2_operation]
 pub async fn delete(
     db: Data<PgPool>,
     claims: TokenUser,
     index: Path<u16>,
-) -> Result<NoContent, error::Delete> {
+) -> Result<HttpResponse, error::Delete> {
     let user_id = claims.0.user_id;
 
     db::user::delete_color(db.as_ref(), user_id, index.into_inner()).await?;
 
-    Ok(NoContent)
+    Ok(HttpResponse::NoContent().finish())
 }

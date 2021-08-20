@@ -110,37 +110,39 @@ impl From<serde_json::Error> for CreateJigError {
 pub async fn get_by_ids(db: &PgPool, ids: &[Uuid]) -> sqlx::Result<Vec<Jig>> {
     let v = sqlx::query!( //language=SQL
 r#"
-select
-    id as "id: JigId",
-    display_name,
-    creator_id,
-    author_id,
-    publish_at,
-    updated_at,
-    language,
-    description,
-    is_public,
-    direction as "direction: TextDirection",
-    display_score,
-    track_assessments,
-    drag_assist,
-    theme as "theme: ThemeId",
-    audio_background as "audio_background!: Option<AudioBackground>",
-    array(select row(unnest(audio_feedback_positive))) as "audio_feedback_positive!: Vec<(AudioFeedbackPositive,)>", -- TODO: fix ugly!
-    array(select row(unnest(audio_feedback_negative))) as "audio_feedback_negative!: Vec<(AudioFeedbackNegative,)>",
-    array(
-        select row (id, kind)
-        from jig_module
-        where jig_id = jig.id
-        order by "index"
-    ) as "modules!: Vec<(ModuleId, ModuleKind)>",
-    array(select row(goal_id) from jig_goal where jig_id = jig.id) as "goals!: Vec<(GoalId,)>",
-    array(select row(category_id) from jig_category where jig_id = jig.id) as "categories!: Vec<(CategoryId,)>",
-    array(select row(affiliation_id) from jig_affiliation where jig_id = jig.id) as "affiliations!: Vec<(AffiliationId,)>",
-    array(select row(age_range_id) from jig_age_range where jig_id = jig.id) as "age_ranges!: Vec<(AgeRangeId,)>",
-    array(select row(id) from jig_additional_resource where jig_id = jig.id) as "additional_resources!: Vec<(AdditionalResourceId,)>"
+select id                                                                            as "id!: JigId",
+       display_name                                                                  as "display_name!",
+       creator_id,
+       author_id,
+       publish_at,
+       updated_at,
+       language                                                                      as "language!",
+       description                                                                   as "description!",
+       is_public                                                                     as "is_public!",
+       direction                                                                     as "direction!: TextDirection",
+       display_score                                                                 as "display_score!",
+       track_assessments                                                             as "track_assessments!",
+       drag_assist                                                                   as "drag_assist!",
+       theme                                                                         as "theme!: ThemeId",
+       audio_background                                                              as "audio_background!: Option<AudioBackground>",
+       array
+           (select row (unnest(audio_feedback_positive)))
+                                                                                     as "audio_feedback_positive!: Vec<(AudioFeedbackPositive,)>", -- TODO: fix ugly!
+       array(select row (unnest(audio_feedback_negative)))                           as "audio_feedback_negative!: Vec<(AudioFeedbackNegative,)>",
+       array(
+               select row (id, kind)
+               from jig_module
+               where jig_id = jig.id
+               order by "index"
+           )                                                                         as "modules!: Vec<(ModuleId, ModuleKind)>",
+       array(select row (goal_id) from jig_goal where jig_id = jig.id)               as "goals!: Vec<(GoalId,)>",
+       array(select row (category_id) from jig_category where jig_id = jig.id)       as "categories!: Vec<(CategoryId,)>",
+       array(select row (affiliation_id) from jig_affiliation where jig_id = jig.id) as "affiliations!: Vec<(AffiliationId,)>",
+       array(select row (age_range_id) from jig_age_range where jig_id = jig.id)     as "age_ranges!: Vec<(AgeRangeId,)>",
+       array(select row (id) from jig_additional_resource where jig_id = jig.id)     as "additional_resources!: Vec<(AdditionalResourceId,)>"
 from jig
-inner join unnest($1::uuid[]) with ordinality t(id, ord) USING (id)
+         inner join unnest($1::uuid[])
+    with ordinality t(id, ord) USING (id)
 order by t.ord
 "#, ids)
         .fetch_all(db).await?;

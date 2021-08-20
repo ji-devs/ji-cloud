@@ -1,4 +1,4 @@
-use paperclip::actix::web::ServiceConfig;
+use actix_web::web::ServiceConfig;
 use shared::api::{endpoints::audio, ApiEndpoint};
 use sqlx::postgres::PgDatabaseError;
 
@@ -14,12 +14,11 @@ fn check_conflict_delete(err: sqlx::Error) -> error::Delete {
 }
 
 pub mod user {
-    use futures::TryStreamExt;
-    use paperclip::actix::{
-        api_v2_operation,
+    use actix_web::{
         web::{Data, Json, Path},
-        CreatedJson, NoContent,
+        HttpResponse,
     };
+    use futures::TryStreamExt;
     use shared::{
         api::{endpoints, ApiEndpoint},
         domain::{
@@ -42,27 +41,26 @@ pub mod user {
     };
 
     /// Create a audio file in the user's audio library.
-    #[api_v2_operation]
     pub(super) async fn create(
         db: Data<PgPool>,
         _claims: TokenUser,
-    ) -> Result<CreatedJson<<endpoints::audio::user::Create as ApiEndpoint>::Res>, error::NotFound>
-    {
+    ) -> Result<HttpResponse, error::NotFound> {
         let id = db::audio::user::create(db.as_ref()).await?;
-        Ok(CreatedJson(CreateResponse { id }))
+        Ok(HttpResponse::Created().json(CreateResponse { id }))
     }
 
     /// upload a audio file to the user's audio library.
-    #[api_v2_operation]
     pub(super) async fn upload(
         db: Data<PgPool>,
         gcp_key_store: ServiceData<GcpAccessKeyStore>,
         gcs: ServiceData<storage::Client>,
         _claims: TokenUser,
-        Path(id): Path<AudioId>,
+        id: Path<AudioId>,
         origin: RequestOrigin,
         req: Json<<endpoints::audio::user::Upload as ApiEndpoint>::Req>,
     ) -> Result<Json<<endpoints::audio::user::Upload as ApiEndpoint>::Res>, error::Upload> {
+        let id = id.into_inner();
+
         let mut txn = db.begin().await?;
 
         let exists = sqlx::query!(
@@ -110,13 +108,12 @@ pub mod user {
     }
 
     /// Delete a audio file from the user's audio library.
-    #[api_v2_operation]
     pub(super) async fn delete(
         db: Data<PgPool>,
         _claims: TokenUser,
         req: Path<AudioId>,
         s3: ServiceData<s3::Client>,
-    ) -> Result<NoContent, error::Delete> {
+    ) -> Result<HttpResponse, error::Delete> {
         let audio = req.into_inner();
         db::audio::user::delete(&db, audio)
             .await
@@ -125,11 +122,10 @@ pub mod user {
         s3.delete_media(MediaLibrary::User, FileKind::AudioMp3, audio.0)
             .await;
 
-        Ok(NoContent)
+        Ok(HttpResponse::NoContent().finish())
     }
 
     /// Get a audio file from the user's audio library.
-    #[api_v2_operation]
     pub(super) async fn get(
         db: Data<PgPool>,
         _claims: TokenUser,
@@ -143,7 +139,6 @@ pub mod user {
     }
 
     /// List audio files from the user's audio library.
-    #[api_v2_operation]
     pub(super) async fn list(
         db: Data<PgPool>,
         _claims: TokenUser,
@@ -158,7 +153,7 @@ pub mod user {
     }
 }
 
-pub fn configure(cfg: &mut ServiceConfig<'_>) {
+pub fn configure(cfg: &mut ServiceConfig) {
     cfg.route(
         audio::user::Create::PATH,
         audio::user::Create::METHOD.route().to(self::user::create),

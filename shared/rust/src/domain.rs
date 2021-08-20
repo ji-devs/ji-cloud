@@ -104,3 +104,20 @@ impl From<Publish> for chrono::DateTime<Utc> {
         }
     }
 }
+
+// use actix_web::{
+//     http::{header::IntoHeaderPair, StatusCode},
+//     HttpRequest, HttpResponse,
+// };
+
+// FIXME
+// #[cfg(feature = "backend")]
+// impl actix_web::Responder for CreateResponse<T: Into<Uuid>> {
+//     type Future = futures::ready::Ready<HttpResponse>;
+//
+//     fn respond_to(self, _: &HttpRequest) -> Self::Future {
+//         ready(Ok(HttpResponse::build(StatusCode::NO_CONTENT)
+//             .content_type("application/json")
+//             .finish()))
+//     }
+// }

@@ -4,7 +4,7 @@ use crate::{
     more_futures::ReadyOrNot,
     token::{check_login_token, SessionClaims, SessionMask},
 };
-use actix_http::error::BlockingError;
+
 use actix_http::Payload;
 use actix_web::{
     cookie::Cookie, http::HeaderMap, web::Data, Either, FromRequest, HttpMessage, HttpRequest,
@@ -17,7 +17,6 @@ use argon2::{
 use core::settings::RuntimeSettings;
 use futures::future::{self, FutureExt};
 use http::StatusCode;
-use paperclip::actix::{Apiv2Schema, Apiv2Security};
 use rand::thread_rng;
 use shared::domain::{
     session::{SessionTokenQuery, AUTH_COOKIE_NAME, CSRF_HEADER_NAME},
@@ -84,13 +83,6 @@ fn check_cookie_csrf<'a>(
     }
 }
 
-#[derive(Apiv2Security)]
-#[openapi(
-    apiKey,
-    in = "header",
-    name = "Authorization",
-    description = "Use format 'Bearer TOKEN'"
-)]
 #[repr(transparent)]
 pub struct TokenUser(pub SessionClaims);
 
@@ -147,7 +139,6 @@ pub trait Scope {
     fn scope() -> UserScope;
 }
 
-#[derive(Apiv2Schema)]
 pub struct ScopeManageCategory;
 
 impl Scope for ScopeManageCategory {
@@ -156,7 +147,6 @@ impl Scope for ScopeManageCategory {
     }
 }
 
-#[derive(Apiv2Schema)]
 pub struct ScopeManageImage;
 
 impl Scope for ScopeManageImage {
@@ -165,7 +155,6 @@ impl Scope for ScopeManageImage {
     }
 }
 
-#[derive(Apiv2Schema)]
 pub struct ScopeAdminJig;
 
 impl Scope for ScopeAdminJig {
@@ -174,7 +163,6 @@ impl Scope for ScopeAdminJig {
     }
 }
 
-#[derive(Apiv2Schema)]
 pub struct ScopeAdmin;
 
 impl Scope for ScopeAdmin {
@@ -183,7 +171,6 @@ impl Scope for ScopeAdmin {
     }
 }
 
-#[derive(Apiv2Schema)]
 pub struct ScopeManageAnimation;
 
 impl Scope for ScopeManageAnimation {
@@ -192,7 +179,6 @@ impl Scope for ScopeManageAnimation {
     }
 }
 
-#[derive(Apiv2Schema)]
 pub struct ScopeManageManageEntry;
 
 impl Scope for ScopeManageManageEntry {
@@ -200,7 +186,6 @@ impl Scope for ScopeManageManageEntry {
         UserScope::ManageEntry
     }
 }
-#[derive(Apiv2Schema)]
 pub struct ScopeManageAudio;
 
 impl Scope for ScopeManageAudio {
@@ -209,14 +194,6 @@ impl Scope for ScopeManageAudio {
     }
 }
 
-#[derive(Apiv2Security)]
-#[openapi(
-    apiKey,
-    alias = "scopedApiKey",
-    in = "header",
-    name = "Authorization",
-    description = "Use format 'Bearer TOKEN'"
-)]
 #[repr(transparent)]
 pub struct TokenUserWithScope<S: Scope> {
     pub claims: SessionClaims,
@@ -295,44 +272,31 @@ pub trait SessionMaskRequirement {
     const REQUIREMENTS: SessionMask;
 }
 
-#[derive(Apiv2Schema)]
 pub struct SessionPutProfile;
 impl SessionMaskRequirement for SessionPutProfile {
     const REQUIREMENTS: SessionMask = SessionMask::PUT_PROFILE;
 }
 
-#[derive(Apiv2Schema)]
 pub struct SessionChangePassword;
 impl SessionMaskRequirement for SessionChangePassword {
     const REQUIREMENTS: SessionMask = SessionMask::CHANGE_PASSWORD;
 }
 
-#[derive(Apiv2Schema)]
 pub struct SessionVerifyEmail;
 impl SessionMaskRequirement for SessionVerifyEmail {
     const REQUIREMENTS: SessionMask = SessionMask::VERIFY_EMAIL;
 }
 
-#[derive(Apiv2Schema)]
 pub struct SessionAny;
 impl SessionMaskRequirement for SessionAny {
     const REQUIREMENTS: SessionMask = SessionMask::empty();
 }
 
-#[derive(Apiv2Schema)]
 pub struct SessionDelete;
 impl SessionMaskRequirement for SessionDelete {
     const REQUIREMENTS: SessionMask = SessionMask::DELETE_ACCOUNT;
 }
 
-#[derive(Apiv2Security)]
-#[openapi(
-    apiKey,
-    alias = "temporaryApiKey",
-    in = "header",
-    name = "Authorization",
-    description = "Use format 'Bearer TOKEN'"
-)]
 #[repr(transparent)]
 pub struct TokenSessionOf<S: SessionMaskRequirement> {
     pub claims: SessionClaims,
@@ -390,23 +354,15 @@ impl<S: SessionMaskRequirement> FromRequest for TokenSessionOf<S> {
     }
 }
 
-#[derive(Apiv2Security)]
-#[openapi(
-    apiKey,
-    alias = "BasicApi",
-    in = "header",
-    name = "Authorization",
-    description = "Use format 'Basic email:password'"
-)]
 pub struct EmailBasicUser {
     pub id: Uuid,
     pub registration_status: RegistrationStatus,
 }
 
 impl FromRequest for EmailBasicUser {
+    type Config = ();
     type Error = actix_web::Error;
     type Future = ReadyOrNot<'static, Result<Self, Self::Error>>;
-    type Config = ();
     fn from_request(
         req: &actix_web::HttpRequest,
         _payload: &mut actix_web::dev::Payload,
@@ -441,7 +397,8 @@ from user_auth_basic where email = $1::text
             .map_err(Into::into)
             .map_err(crate::error::ise)?;
 
-            actix_web::web::block(move || {
+            // FIXME handle nested error result with error enum?
+            let res = actix_web::web::block(move || -> Result<Self, Either<BasicError, anyhow::Error>> {
                 let password_hasher = Argon2::default();
 
                 let user = match user {
@@ -455,20 +412,22 @@ from user_auth_basic where email = $1::text
                             salt.as_salt(),
                         );
 
-                        return Err(Either::A(BasicError::new(StatusCode::UNAUTHORIZED)));
+                        return Err(Either::Left(BasicError::new(StatusCode::UNAUTHORIZED)));
                     }
                 };
 
-                let hash = argon2::PasswordHash::parse(&user.password, Encoding::default())
-                    .map_err(|it| Either::B(anyhow::anyhow!("{}", it)))?;
+                let hash = match argon2::PasswordHash::parse(&user.password, Encoding::default()) {
+                    Ok(hash) => hash,
+                    Err(err) => return Err(Either::Right(anyhow::anyhow!("{}", err))),
+                };
 
                 password_hasher
                     .verify_password(password.as_bytes(), &hash)
-                    .map_err(|_| Either::A(BasicError::new(StatusCode::UNAUTHORIZED)))?;
+                    .map_err(|_| Either::Left(BasicError::new(StatusCode::UNAUTHORIZED)))?;
 
                 let registration_status = match (user.has_verified_email, user.has_profile) {
                     // todo: "???"
-                    (false, _) => return Err(Either::A(BasicError::new(StatusCode::FORBIDDEN))),
+                    (false, _) => return Err(Either::Left(BasicError::new(StatusCode::FORBIDDEN))),
                     // (false, _) => RegistrationStatus::New,
                     (true, false) => RegistrationStatus::Validated,
                     (true, true) => RegistrationStatus::Complete,
@@ -476,31 +435,28 @@ from user_auth_basic where email = $1::text
 
                 Ok(Self { id: user.user_id, registration_status })
             })
-            .await
-            .map_err(blocking_error)
+            .await;
+
+            match res {
+                Ok(Ok(res)) => Ok(res),
+                Ok(Err(Either::Right(e))) => Err(crate::error::ise(e)),
+                Ok(Err(Either::Left(e))) => Err(e.into()),
+                Err(e) => Err(crate::error::ise(anyhow::anyhow!("{}", e))),
+            }
         }
         .boxed()
         .into()
     }
 }
 
-fn blocking_error(err: BlockingError<Either<BasicError, anyhow::Error>>) -> actix_web::Error {
-    match err {
-        BlockingError::Canceled => crate::error::ise(anyhow::anyhow!("Thread pool is gone")),
-        BlockingError::Error(Either::B(e)) => crate::error::ise(e),
-        BlockingError::Error(Either::A(e)) => e.into(),
-    }
-}
-
-#[derive(Apiv2Schema)]
 pub struct RequestOrigin {
     pub origin: Option<String>,
 }
 
 impl FromRequest for RequestOrigin {
+    type Config = ();
     type Error = actix_web::Error;
     type Future = ReadyOrNot<'static, Result<Self, Self::Error>>;
-    type Config = ();
     fn from_request(req: &HttpRequest, _payload: &mut Payload) -> Self::Future {
         let origin: Option<String> = req
             .headers()

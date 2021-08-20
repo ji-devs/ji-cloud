@@ -1,23 +1,14 @@
-use actix_http::cookie::{Cookie, SameSite};
-use actix_web::Responder;
+use actix_web::{
+    cookie::{Cookie, SameSite},
+    HttpResponse, Responder,
+};
 use chrono::{DateTime, Utc};
 use http::StatusCode;
-use paperclip::{
-    actix::OperationModifier,
-    v2::{
-        models::{DefaultOperationRaw, Either, Response},
-        schema::Apiv2Schema,
-    },
-};
 use shared::domain::{
     category::{Category, CategoryId},
     session::AUTH_COOKIE_NAME,
 };
-use std::{
-    collections::HashMap,
-    fmt,
-    future::{ready, Ready},
-};
+use std::{collections::HashMap, fmt};
 use uuid::Uuid;
 
 #[derive(Debug)]
@@ -54,12 +45,12 @@ fn build_tree_recursive(
     categories: &mut Vec<RawCategory>,
     seed_id: Option<Uuid>,
 ) -> Vec<Category> {
-    let indecies = match parent_to_id_index.get(&seed_id) {
+    let indices = match parent_to_id_index.get(&seed_id) {
         Some(indecies) => indecies,
         None => return Vec::new(),
     };
 
-    indecies
+    indices
         .iter()
         .copied()
         .map(|category_index| {
@@ -125,34 +116,15 @@ impl fmt::Display for NoContentClearAuth {
 }
 
 impl Responder for NoContentClearAuth {
-    type Error = actix_web::Error;
-    type Future = Ready<Result<actix_web::HttpResponse, Self::Error>>;
-
-    fn respond_to(self, _: &actix_web::HttpRequest) -> Self::Future {
+    fn respond_to(self, _: &actix_web::HttpRequest) -> HttpResponse {
         let mut cookie = Cookie::named(AUTH_COOKIE_NAME);
         cookie.set_max_age(time::Duration::seconds(0));
         cookie.set_http_only(true);
         cookie.set_same_site(SameSite::Strict);
 
-        ready(Ok(actix_web::HttpResponse::build(StatusCode::NO_CONTENT)
+        actix_web::HttpResponse::build(StatusCode::NO_CONTENT)
             .content_type("application/octet-stream")
             .cookie(cookie)
-            .finish()))
-    }
-}
-
-impl Apiv2Schema for NoContentClearAuth {}
-
-impl OperationModifier for NoContentClearAuth {
-    fn update_response(op: &mut DefaultOperationRaw) {
-        let status = StatusCode::NO_CONTENT;
-        op.responses.insert(
-            status.as_str().into(),
-            Either::Right(Response {
-                description: status.canonical_reason().map(ToString::to_string),
-                schema: None,
-                ..Default::default()
-            }),
-        );
+            .finish()
     }
 }

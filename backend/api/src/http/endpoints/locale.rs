@@ -1,5 +1,4 @@
-use actix_web::web::{Data, Json};
-use paperclip::actix::{api_v2_operation, web::ServiceConfig};
+use actix_web::web::{Data, Json, ServiceConfig};
 use shared::{
     api::{endpoints::locale, ApiEndpoint},
     domain::locale::{Bundle, ItemKind, ListBundleResponse, ListItemKindResponse},
@@ -8,7 +7,6 @@ use sqlx::PgPool;
 
 use crate::error;
 
-#[api_v2_operation]
 async fn list_bundles(db: Data<PgPool>) -> Result<Json<ListBundleResponse>, error::Server> {
     let bundles = sqlx::query_as!(
         Bundle,
@@ -20,7 +18,6 @@ async fn list_bundles(db: Data<PgPool>) -> Result<Json<ListBundleResponse>, erro
     Ok(Json(ListBundleResponse { bundles }))
 }
 
-#[api_v2_operation]
 async fn list_item_kinds(db: Data<PgPool>) -> Result<Json<ListItemKindResponse>, error::Server> {
     let item_kinds = sqlx::query_as!(
         ItemKind,
@@ -35,10 +32,9 @@ async fn list_item_kinds(db: Data<PgPool>) -> Result<Json<ListItemKindResponse>,
 mod entry {
     use std::collections::BTreeMap;
 
-    use paperclip::actix::{
-        api_v2_operation,
+    use actix_web::{
         web::{Data, Json, Path, Query},
-        CreatedJson, NoContent,
+        HttpResponse,
     };
     use shared::domain::locale::{
         CreateEntryRequest, CreateEntryResponse, Entry, EntryStatus, GetEntryResponse,
@@ -51,12 +47,11 @@ mod entry {
         extractor::{ScopeManageManageEntry, TokenUserWithScope},
     };
 
-    #[api_v2_operation]
     pub async fn create(
         _user: TokenUserWithScope<ScopeManageManageEntry>,
         db: Data<PgPool>,
         req: Json<CreateEntryRequest>,
-    ) -> Result<CreatedJson<CreateEntryResponse>, error::NotFound> {
+    ) -> Result<HttpResponse, error::NotFound> {
         let req = req.into_inner();
         let entry = sqlx::query!(
             r#"
@@ -68,12 +63,11 @@ returning id
         .fetch_one(db.as_ref())
         .await?;
 
-        Ok(CreatedJson(CreateEntryResponse {
+        Ok(HttpResponse::Created().json(CreateEntryResponse {
             id: entry.id as u32,
         }))
     }
 
-    #[api_v2_operation]
     pub async fn list(
         db: Data<PgPool>,
         query: Option<Query<ListEntryQuery>>,
@@ -123,7 +117,6 @@ order by id
         }
     }
 
-    #[api_v2_operation]
     pub async fn get(
         db: Data<PgPool>,
         id: Path<u32>,
@@ -156,13 +149,12 @@ where id = $1
         Ok(Json(GetEntryResponse { entry }))
     }
 
-    #[api_v2_operation]
     pub async fn update(
         _user: TokenUserWithScope<ScopeManageManageEntry>,
         db: Data<PgPool>,
         id: Path<u32>,
         req: Json<UpdateEntryRequest>,
-    ) -> Result<NoContent, error::NotFound> {
+    ) -> Result<HttpResponse, error::NotFound> {
         // todo: use a more descriptive error.
         let id = id.into_inner() as i32;
         let req = req.into_inner();
@@ -171,15 +163,15 @@ where id = $1
         db::locale::update_entry(&mut txn, id, req).await?;
         txn.commit().await?;
 
-        Ok(NoContent)
+        Ok(HttpResponse::NoContent().finish())
     }
 
-    #[api_v2_operation]
     pub async fn delete(
         _user: TokenUserWithScope<ScopeManageManageEntry>,
         db: Data<PgPool>,
         id: Path<u32>,
-    ) -> Result<NoContent, error::Delete> {
+    ) -> Result<HttpResponse, error::Delete> {
+        // TODO this?
         sqlx::query!(
             "delete from locale_entry where id = $1",
             id.into_inner() as i32
@@ -187,11 +179,11 @@ where id = $1
         .execute(db.as_ref())
         .await?;
 
-        Ok(NoContent)
+        Ok(HttpResponse::NoContent().finish())
     }
 }
 
-pub fn configure(cfg: &mut ServiceConfig<'_>) {
+pub fn configure(cfg: &mut ServiceConfig) {
     cfg.route(
         locale::bundle::List::PATH,
         locale::bundle::List::METHOD.route().to(list_bundles),

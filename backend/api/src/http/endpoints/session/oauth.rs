@@ -4,7 +4,6 @@ use actix_web::{
     HttpRequest, HttpResponse,
 };
 use chrono::{Duration, Utc};
-use paperclip::actix::api_v2_operation;
 use reqwest::Url;
 use sqlx::{postgres::PgDatabaseError, PgPool};
 
@@ -38,12 +37,13 @@ fn handle_user_email_error(e: sqlx::Error) -> error::OAuth {
     }
 }
 
-#[api_v2_operation]
 pub async fn get_url(
     req: HttpRequest,
     config: Data<RuntimeSettings>,
-    Path((service_kind, url_kind)): Path<(GetOAuthUrlServiceKind, OAuthUrlKind)>,
+    path: Path<(GetOAuthUrlServiceKind, OAuthUrlKind)>,
 ) -> Result<Json<GetOAuthUrlResponse>, error::Service> {
+    let (service_kind, url_kind) = path.into_inner();
+
     match service_kind {
         GetOAuthUrlServiceKind::Google => {}
         it => return Err(anyhow::anyhow!("Unsupported OAuth service kind: {:?}", it).into()),
@@ -75,7 +75,6 @@ pub async fn get_url(
     Ok(Json(GetOAuthUrlResponse { url }))
 }
 
-#[api_v2_operation]
 /// Login with OAuth
 /// May return resources for *signing up* if the user doesn't exist.
 pub async fn create(

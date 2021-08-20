@@ -17,9 +17,9 @@ use sentry::types::protocol::v7::value::Value as JsonValue;
 fn log_ise<B: MessageBody, T>(
     req: ServiceRequest,
     srv: &T,
-) -> impl std::future::Future<Output=actix_web::Result<T::Response>>
-    where
-        T: Service<ServiceRequest, Response=ServiceResponse<B>, Error=actix_web::Error>,
+) -> impl std::future::Future<Output = actix_web::Result<T::Response>>
+where
+    T: Service<ServiceRequest, Response = ServiceResponse<B>, Error = actix_web::Error>,
 {
     let uri: JsonValue = req.uri().to_string().into();
     let method: JsonValue = req.method().to_string().into();

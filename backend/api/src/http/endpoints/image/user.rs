@@ -1,9 +1,8 @@
-use futures::TryStreamExt;
-use paperclip::actix::{
-    api_v2_operation,
+use actix_web::{
     web::{Data, Json, Path, Query},
-    CreatedJson, NoContent,
+    HttpResponse,
 };
+use futures::TryStreamExt;
 use shared::{
     api::{endpoints, ApiEndpoint},
     domain::{
@@ -24,32 +23,32 @@ use crate::{
 };
 
 /// Create a image in the user's image library.
-#[api_v2_operation]
 pub(super) async fn create(
     db: Data<PgPool>,
     claims: TokenUser,
     query: Json<<endpoints::image::user::Create as ApiEndpoint>::Req>,
-) -> Result<CreatedJson<<endpoints::image::user::Create as ApiEndpoint>::Res>, error::Server> {
+) -> Result<HttpResponse, error::Server> {
     let kind = query.kind;
 
     let user_id = claims.0.user_id;
 
     let id = db::image::user::create(db.as_ref(), &user_id, kind).await?;
 
-    Ok(CreatedJson(CreateResponse { id }))
+    Ok(HttpResponse::Created().json(CreateResponse { id }))
 }
 
 /// Upload an image to the user's image library.
-#[api_v2_operation]
 pub(super) async fn upload(
     db: Data<PgPool>,
     gcp_key_store: ServiceData<GcpAccessKeyStore>,
     gcs: ServiceData<storage::Client>,
     claims: TokenUser,
-    Path(id): Path<ImageId>,
+    path: Path<ImageId>,
     origin: RequestOrigin,
     req: Json<<endpoints::image::user::Upload as ApiEndpoint>::Req>,
 ) -> Result<Json<<endpoints::image::user::Upload as ApiEndpoint>::Res>, error::Upload> {
+    let id = path.into_inner();
+
     let mut txn = db.begin().await?;
 
     db::image::user::auth_user_image(&mut txn, &claims.0.user_id, &id).await?;
@@ -88,14 +87,13 @@ pub(super) async fn upload(
 }
 
 /// Delete an image from the user's image library.
-#[api_v2_operation]
 pub(super) async fn delete(
     db: Data<PgPool>,
     claims: TokenUser,
-    req: Path<ImageId>,
+    path: Path<ImageId>,
     s3: ServiceData<s3::Client>,
-) -> Result<NoContent, error::Delete> {
-    let id = req.into_inner();
+) -> Result<HttpResponse, error::Delete> {
+    let id = path.into_inner();
 
     db::image::user::delete(&db, claims.0.user_id, id)
         .await
@@ -109,17 +107,16 @@ pub(super) async fn delete(
     )
     .await;
 
-    Ok(NoContent)
+    Ok(HttpResponse::NoContent().finish())
 }
 
 /// Get an image from the user's image library.
-#[api_v2_operation]
 pub(super) async fn get(
     db: Data<PgPool>,
     claims: TokenUser,
-    req: Path<ImageId>,
+    path: Path<ImageId>,
 ) -> Result<Json<<endpoints::image::user::Get as ApiEndpoint>::Res>, error::NotFound> {
-    let image_id = req.into_inner();
+    let image_id = path.into_inner();
 
     let metadata = db::image::user::get(&db, claims.0.user_id, image_id)
         .await?
@@ -129,13 +126,12 @@ pub(super) async fn get(
 }
 
 /// List images from the user's image library.
-#[api_v2_operation]
 pub(super) async fn list(
     db: Data<PgPool>,
     claims: TokenUser,
-    req: Query<<endpoints::image::user::List as ApiEndpoint>::Req>,
+    query: Query<<endpoints::image::user::List as ApiEndpoint>::Req>,
 ) -> Result<Json<<endpoints::image::user::List as ApiEndpoint>::Res>, error::Server> {
-    let images: Vec<_> = db::image::user::list(db.as_ref(), claims.0.user_id, req.kind)
+    let images: Vec<_> = db::image::user::list(db.as_ref(), claims.0.user_id, query.kind)
         .err_into::<error::Server>()
         .and_then(|metadata: UserImage| async { Ok(UserImageResponse { metadata }) })
         .try_collect()
