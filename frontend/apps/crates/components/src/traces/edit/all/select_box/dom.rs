@@ -35,62 +35,29 @@ pub fn render_select_box(
     });
 
     html!("empty-fragment", {
-        /*
-         * Now using the real SVG path
-         * though it doesn't seem to make much of a difference
-        .child({
-            //First throw a dummy div over where the transform box would be
-            //it's totally transparent, just to enable getting a DomRect easily
-            let bounds = trace.calc_bounds(false).unwrap_ji();
-            let bounds = bounds.denormalize(resize_info);
-            html!("div" => web_sys::HtmlElement, {
-                .style("pointer-events", "none")
-                .style("position", "absolute")
-                .style("opacity", "0")
-                .style("transform", trace.transform.denormalize_matrix_string(resize_info))
-                .style("left", &format!("{}px", bounds.x))
-                .style("top", &format!("{}px", bounds.y))
-                .style("width", &format!("{}px", bounds.width))
-                .style("height", &format!("{}px", bounds.height))
-                .after_inserted(clone!(select_box, resize_info => move |elem| {
-                    //stash the domrect as a BoundsF64 of normalized coordinates
-                    //technically we re-render this whenever resize_info changes
-                    //but it's still a bit cleaner to stash this way
-                    let rect = elem.get_bounding_client_rect();
-                    select_box.bounds.set(Some(BoundsF64::new_from_dom_normalized(&rect, &resize_info)));
-                }))
-                .after_removed(clone!(select_box => move |elem| {
-                    select_box.bounds.set(None);
-                }))
-            })
-        })
-        */
-        //can get rid of this nesting with dominator update
-        .child(html!("empty-fragment", {
 
-            .child_signal(
-                select_box
-                    .menu_pos_signal(get_selected_signal())
-                    .map(clone!(state, select_box => move |pos| {
-                        pos.map(|pos| {
-                            html!("drag-container", {
-                                .style("position", "fixed")
-                                .style("top", "0")
-                                .style("left", "0")
-                                .property("x", pos.0 + 32.0)
-                                .property("y", pos.1)
-                                .child(html!("menu-container", {
-                                    .child(render_menu(state.clone(), index.clone()))
-                                }))
-                                .event(clone!(select_box => move |_evt:events::Close| {
-                                    log::info!("GOT CLOSE!");
-                                    select_box.menu_pos.set(None);
-                                }))
-                            })
+        .child_signal(
+            select_box
+                .menu_pos_signal(get_selected_signal())
+                .map(clone!(state, select_box => move |pos| {
+                    pos.map(|pos| {
+                        html!("drag-container", {
+                            .style("position", "fixed")
+                            .style("top", "0")
+                            .style("left", "0")
+                            .property("x", pos.0 + 32.0)
+                            .property("y", pos.1)
+                            .child(html!("menu-container", {
+                                .child(render_menu(state.clone(), index.clone()))
+                            }))
+                            .event(clone!(select_box => move |_evt:events::Close| {
+                                log::info!("GOT CLOSE!");
+                                select_box.menu_pos.set(None);
+                            }))
                         })
-                    }))
-            )
-        }))
+                    })
+                }))
+        )
         .child_signal(trace.bounds.signal_cloned().map(clone!(resize_info, select_box => move |bounds| {
             bounds.map(|bounds| {
                 //then draw our actual box
@@ -101,6 +68,20 @@ pub fn render_select_box(
                     .style("top", &format!("{}px", bounds.y))
                     .style("width", &format!("{}px", bounds.width))
                     .style("height", &format!("{}px", bounds.height))
+
+                    .event(clone!(state => move |evt:events::MouseDown| {
+                        log::info!("mouse down...");
+                        //item.start_drag(evt.x() as i32, evt.y() as i32);
+                    }))
+                    /*
+                    .global_event_preventable(clone!(item => move |evt:events::MouseUp| {
+                        //item.try_end_drag(evt.x() as i32, evt.y() as i32);
+
+                    }))
+                    .global_event_preventable(clone!(item => move |evt:events::MouseMove| {
+                        //item.try_move_drag(evt.x() as i32, evt.y() as i32);
+                    }))
+                    */
                     .child(html!("button-icon" => web_sys::HtmlElement, {
                         .property("slot", "menu-btn")
                         .property("icon", "circle-kebab-grey")
