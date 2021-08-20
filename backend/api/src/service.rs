@@ -146,21 +146,18 @@ impl GcpAccessKeyStore {
         Ok(Self(RwLock::new(key)))
     }
 
+    /// Fetch an access token.
     pub async fn fetch_token(&self) -> anyhow::Result<String> {
         let key = self.0.read().await;
 
         match key.is_stale() {
             Some(false) => {
-                // not stale
                 let token = key.access_token.clone();
                 return Ok(token);
             }
+            Some(true) => {}
             None => {
-                // not using gcp internal metaserver to fetch auth?
                 anyhow::bail!("no GCP access token expiry info found");
-            }
-            Some(true) => {
-                // continue
             }
         }
 

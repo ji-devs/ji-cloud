@@ -325,7 +325,7 @@ async fn browse() -> anyhow::Result<()> {
 #[ignore]
 #[actix_rt::test]
 async fn upload_with_url() -> anyhow::Result<()> {
-    let file: Vec<u8> = include_bytes!("../../fixtures/ji-logo.png").to_vec();
+    let file: Vec<u8> = include_bytes!("../../fixtures/images/ji-logo.png").to_vec();
 
     let app = initialize_server(
         &[Fixture::User, Fixture::Image],
