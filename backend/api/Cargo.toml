@@ -16,7 +16,7 @@ actix-service = "2.0.0"
 actix-web = "4.0.0-beta.8"
 actix-web-httpauth = "0.6.0-beta.2"
 
-algolia = { git = "https://github.com/rrcwang/algolia-rs", rev = "b69e22d2ef86a2c15045fb4ec24aa4a0eafe8e02" }
+algolia = { git = "https://github.com/rrcwang/algolia-rs", rev = "b4441a8cab5963d5a11eeb54fee128f5c73d6a1a" }
 anyhow = "1.0.43"
 argon2 = "0.2.3"
 base64 = "0.13.0"
