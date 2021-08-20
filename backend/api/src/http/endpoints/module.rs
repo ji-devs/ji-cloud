@@ -1,7 +1,6 @@
-use paperclip::actix::{
-    api_v2_operation,
+use actix_web::{
     web::{self, Data, Json, Path, ServiceConfig},
-    CreatedJson, NoContent,
+    HttpResponse,
 };
 use shared::{
     api::{endpoints::jig::module, ApiEndpoint},
@@ -18,13 +17,12 @@ use sqlx::PgPool;
 use crate::{db, error, extractor::TokenUser};
 
 /// Create a new module.
-#[api_v2_operation]
 async fn create(
     db: Data<PgPool>,
     auth: TokenUser,
     parent: Path<JigId>,
     req: Json<<module::Create as ApiEndpoint>::Req>,
-) -> Result<CreatedJson<<module::Create as ApiEndpoint>::Res>, error::Auth> {
+) -> Result<HttpResponse, error::Auth> {
     let parent_id = parent.into_inner();
 
     db::jig::authz(&*db, auth.0.user_id, Some(parent_id)).await?;
@@ -33,33 +31,31 @@ async fn create(
 
     let (id, _index) = db::module::create(&*db, parent_id, req.body).await?;
 
-    Ok(CreatedJson(CreateResponse { id }))
+    Ok(HttpResponse::Created().json(CreateResponse { id }))
 }
 
 /// Delete a module.
-#[api_v2_operation]
 async fn delete(
     db: Data<PgPool>,
     auth: TokenUser,
     path: web::Path<(JigId, ModuleId)>,
-) -> Result<NoContent, error::Delete> {
+) -> Result<HttpResponse, error::Delete> {
     let (parent_id, module) = path.into_inner();
 
     db::jig::authz(&*db, auth.0.user_id, Some(parent_id)).await?;
 
     db::module::delete(&*db, parent_id, ModuleIdOrIndex::Id(module)).await?;
 
-    Ok(NoContent)
+    Ok(HttpResponse::NoContent().finish())
 }
 
 /// Update a module.
-#[api_v2_operation]
 async fn update(
     db: Data<PgPool>,
     auth: TokenUser,
     req: Option<Json<<module::Update as ApiEndpoint>::Req>>,
     path: web::Path<(JigId, ModuleId)>,
-) -> Result<NoContent, error::NotFound> {
+) -> Result<HttpResponse, error::NotFound> {
     let (parent_id, module) = path.into_inner();
 
     db::jig::authz(&*db, auth.0.user_id, Some(parent_id)).await?;
@@ -79,11 +75,10 @@ async fn update(
         return Err(error::NotFound::ResourceNotFound);
     }
 
-    Ok(NoContent)
+    Ok(HttpResponse::NoContent().finish())
 }
 
 /// Get a module.
-#[api_v2_operation]
 async fn get(
     db: Data<PgPool>,
     path: web::Path<(JigId, ModuleId)>,
@@ -97,7 +92,7 @@ async fn get(
     Ok(Json(ModuleResponse { module }))
 }
 
-pub fn configure(cfg: &mut ServiceConfig<'_>) {
+pub fn configure(cfg: &mut ServiceConfig) {
     cfg.route(module::Get::PATH, module::Get::METHOD.route().to(get))
         .route(
             module::Create::PATH,

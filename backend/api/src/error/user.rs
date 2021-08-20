@@ -1,15 +1,6 @@
 use super::{ise, BasicError, Service, ServiceSession};
-use actix_http::Error;
 use http::StatusCode;
-use paperclip::actix::api_v2_errors;
 
-#[api_v2_errors(
-    code = 401,
-    code = 403,
-    code = 404,
-    description = "Not Found: User not Found",
-    code = 500
-)]
 pub enum NotFound {
     UserNotFound,
     InternalServerError(anyhow::Error),
@@ -32,16 +23,6 @@ impl Into<actix_web::Error> for NotFound {
     }
 }
 
-#[api_v2_errors(
-    code = 400,
-    code = 404,
-    code = 409,
-    description = "Conflict: Another user with the provided username already exists",
-    code = 420,
-    description = "Unprocessable Entity: No username or email was provided",
-    code = 500,
-    code = 501
-)]
 pub enum Update {
     InternalServerError(anyhow::Error),
     Username(Username),
@@ -55,7 +36,7 @@ impl<T: Into<anyhow::Error>> From<T> for Update {
 }
 
 impl Into<actix_web::Error> for Update {
-    fn into(self) -> Error {
+    fn into(self) -> actix_web::Error {
         match self {
             Self::InternalServerError(e) => ise(e),
             Self::Username(e) => match e {
@@ -76,15 +57,6 @@ impl Into<actix_web::Error> for Update {
     }
 }
 
-#[api_v2_errors(
-    code = 400,
-    code = 409,
-    description = "Conflict: Another user with the provided username or email already exists",
-    code = 420,
-    description = "Unprocessable Entity: No username or email was provided",
-    code = 500,
-    code = 501
-)]
 pub enum Register {
     InternalServerError(anyhow::Error),
     Username(Username),
@@ -146,15 +118,6 @@ pub enum Email {
     Empty,
 }
 
-#[api_v2_errors(
-    code = 400,
-    code = 409,
-    description = "Conflict: Another user with the provided email already exists",
-    code = 420,
-    description = "Unprocessable Entity: No email was provided",
-    code = 500,
-    code = 501
-)]
 pub enum VerifyEmail {
     InternalServerError(anyhow::Error),
     Email(Email),

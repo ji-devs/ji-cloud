@@ -1,5 +1,4 @@
 use core::settings::EmailClientSettings;
-
 use sendgrid::v3::{Email, Message, Personalization, SGMap, Sender};
 
 use crate::error;

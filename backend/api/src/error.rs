@@ -6,9 +6,7 @@
 //!     * `actix_web::Error` -- server errors, used by actix for error logging
 //!     * `anyhow::Error` -- general intermediate error representation
 
-use actix_web::error::BlockingError;
 use actix_web::HttpResponse;
-use paperclip::actix::api_v2_errors;
 use shared::error::{ApiError, EmptyError, MetadataNotFound};
 
 use crate::db::meta::MetaWrapperError;
@@ -34,7 +32,6 @@ use shared::domain::meta::MetaKind;
 pub type BasicError = ApiError<EmptyError>;
 
 #[non_exhaustive]
-#[api_v2_errors(code = 401, code = 403, code = 404, code = 500)]
 pub enum Auth {
     InternalServerError(anyhow::Error),
     Forbidden,
@@ -55,15 +52,15 @@ impl Into<actix_web::Error> for Auth {
     }
 }
 
+// FIXME
 pub fn ise(e: anyhow::Error) -> actix_web::Error {
     let mut resp = HttpResponse::InternalServerError();
     resp.extensions_mut().insert(e);
-    resp.json(BasicError::new(http::StatusCode::INTERNAL_SERVER_ERROR))
-        .into()
+    resp.json(BasicError::new(http::StatusCode::INTERNAL_SERVER_ERROR));
+    actix_web::error::InternalError::from_response("", resp.finish()).into()
 }
 
 #[non_exhaustive]
-#[api_v2_errors(code = 401, code = 403, code = 404, code = 500)]
 pub enum Delete {
     Conflict,
     Forbidden,
@@ -95,7 +92,6 @@ impl Into<actix_web::Error> for Delete {
     }
 }
 
-#[api_v2_errors(code = 400, code = 401, code = 403, code = 500)]
 pub struct Server(pub anyhow::Error);
 
 impl<T: Into<anyhow::Error>> From<T> for Server {
@@ -147,7 +143,6 @@ impl Into<actix_web::Error> for ServiceKind {
     }
 }
 
-#[api_v2_errors(code = 400, code = 401, code = 403, code = 500, code = 501)]
 #[derive(Debug)]
 pub enum Service {
     InternalServerError(anyhow::Error),
@@ -169,7 +164,6 @@ impl Into<actix_web::Error> for Service {
     }
 }
 
-#[api_v2_errors(code = 400, code = 401, code = 403, code = 500, code = 501)]
 #[derive(Debug)]
 pub enum ServiceSession {
     InternalServerError(anyhow::Error),
@@ -193,16 +187,6 @@ impl Into<actix_web::Error> for ServiceSession {
     }
 }
 
-#[api_v2_errors(
-    code = 400,
-    code = 401,
-    code = 403,
-    code = 404,
-    description = "Not Found: Resource Not Found",
-    code = 412,
-    code = 500,
-    code = 501
-)]
 #[derive(Debug)]
 pub enum Refresh {
     InternalServerError(anyhow::Error),
@@ -232,14 +216,6 @@ impl Into<actix_web::Error> for Refresh {
     }
 }
 
-#[api_v2_errors(
-    code = 400,
-    code = 401,
-    code = 403,
-    code = 404,
-    description = "Not Found: Resource Not Found",
-    code = 500
-)]
 pub enum NotFound {
     ResourceNotFound,
     Forbidden,
@@ -275,16 +251,6 @@ impl Into<actix_web::Error> for NotFound {
     }
 }
 
-#[api_v2_errors(
-    code = 400,
-    code = 401,
-    code = 403,
-    code = 404,
-    description = "Not Found: Parent Category Not Found OR category not found",
-    code = 420,
-    description = "Unprocessable Entity: Cycle OR OutOfRange",
-    code = 500
-)]
 pub enum CategoryUpdate {
     CategoryNotFound,
     ParentCategoryNotFound,
@@ -331,16 +297,6 @@ impl Into<actix_web::Error> for CategoryUpdate {
     }
 }
 
-#[api_v2_errors(
-    code = 400,
-    code = 401,
-    code = 403,
-    code = 404,
-    description = "Not Found: Resource Not Found",
-    code = 420,
-    description = "Unprocessable Entity: Invalid Content",
-    code = 500
-)]
 #[derive(Debug)]
 pub enum Upload {
     ResourceNotFound,
@@ -348,16 +304,6 @@ pub enum Upload {
     FileTooLarge,
     StorageClient(Storage),
     InternalServerError(anyhow::Error),
-}
-
-impl Upload {
-    #[allow(dead_code)]
-    pub fn blocking_error(err: BlockingError<Self>) -> Self {
-        match err {
-            BlockingError::Canceled => anyhow::anyhow!("Thread pool is gone").into(),
-            BlockingError::Error(e) => e,
-        }
-    }
 }
 
 impl<T: Into<anyhow::Error>> From<T> for Upload {
@@ -400,14 +346,6 @@ impl From<Storage> for Upload {
     }
 }
 
-#[api_v2_errors(
-    code = 400,
-    code = 401,
-    code = 403,
-    code = 420,
-    description = "Unprocessable Entity: Metadata not Found",
-    code = 500
-)]
 pub enum CreateWithMetadata {
     InternalServerError(anyhow::Error),
     Forbidden,
@@ -444,16 +382,6 @@ impl Into<actix_web::Error> for CreateWithMetadata {
     }
 }
 
-#[api_v2_errors(
-    code = 400,
-    code = 401,
-    code = 403,
-    code = 404,
-    description = "Not Found: Resource Not Found",
-    code = 420,
-    description = "Unprocessable Entity: Metadata not Found",
-    code = 500
-)]
 pub enum UpdateWithMetadata {
     ResourceNotFound,
     InternalServerError(anyhow::Error),
@@ -549,15 +477,6 @@ impl From<MetaWrapperError> for UpdateWithMetadata {
     }
 }
 
-#[api_v2_errors(
-    code = 400,
-    code = 403,
-    code = 404,
-    description = "Not Found: Resource Not Found",
-    code = 409,
-    description = "Conflict: Another tag with the provided index already exists",
-    code = 500
-)]
 pub enum Tag {
     TakenIndex,
     ResourceNotFound,
@@ -590,13 +509,6 @@ impl Into<actix_web::Error> for Tag {
     }
 }
 
-#[api_v2_errors(
-    code = 400,
-    code = 404,
-    code = 409,
-    description = "Conflict: an image with the same ID already exists for this user",
-    code = 500
-)]
 pub enum UserRecentImage {
     ResourceNotFound,
     Conflict,
@@ -630,13 +542,6 @@ impl Into<actix_web::Error> for UserRecentImage {
     }
 }
 
-#[api_v2_errors(
-    code = 404,
-    code = 404,
-    code = 409,
-    description = "Conflict: a draft already exists for this jig",
-    code = 500
-)]
 pub enum JigCloneDraft {
     ResourceNotFound,
     IsDraft,
@@ -688,15 +593,6 @@ impl Into<actix_web::Error> for JigCloneDraft {
     }
 }
 
-#[api_v2_errors(
-    code = 400,
-    code = 409,
-    description = "Conflict: Another user with the provided username already exists",
-    code = 420,
-    description = "Unprocessable Entity: No username was provided",
-    code = 500,
-    code = 501
-)]
 pub enum MediaProcessing {
     InternalServerError(anyhow::Error),
     EventArc(EventArc),
@@ -725,8 +621,6 @@ impl Into<actix_web::Error> for MediaProcessing {
     }
 }
 
-// TODO
-#[api_v2_errors(code = 400, code = 404)]
 pub enum JigCode {
     InternalServerError(anyhow::Error),
     ResourceNotFound,

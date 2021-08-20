@@ -1,10 +1,9 @@
+use actix_web::{
+    web::{Data, Json, Path, Query, ServiceConfig},
+    HttpResponse,
+};
 use chrono::{DateTime, Utc};
 use futures::TryStreamExt;
-use paperclip::actix::{
-    api_v2_operation,
-    web::{Data, Json, Path, Query, ServiceConfig},
-    CreatedJson, NoContent,
-};
 use shared::{
     api::{endpoints, ApiEndpoint},
     domain::image::{
@@ -27,13 +26,11 @@ pub mod tag;
 pub mod user;
 
 /// Create an image in the global image library.
-#[api_v2_operation]
 async fn create(
     db: Data<PgPool>,
     _claims: TokenUserWithScope<ScopeManageImage>,
     req: Json<<endpoints::image::Create as ApiEndpoint>::Req>,
-) -> Result<CreatedJson<<endpoints::image::Create as ApiEndpoint>::Res>, error::CreateWithMetadata>
-{
+) -> Result<HttpResponse, error::CreateWithMetadata> {
     let req = req.into_inner();
 
     let mut txn = db.begin().await?;
@@ -61,21 +58,22 @@ async fn create(
 
     txn.commit().await?;
 
-    Ok(CreatedJson(CreateResponse { id }))
+    Ok(HttpResponse::Created().json(CreateResponse { id }))
 }
 
 /// Upload an image to the global image library.
-#[api_v2_operation]
 async fn upload(
     db: Data<PgPool>,
     gcp_key_store: ServiceData<service::GcpAccessKeyStore>,
     gcs: ServiceData<service::storage::Client>,
     _claims: TokenUserWithScope<ScopeManageImage>,
-    Path(id): Path<ImageId>,
+    path: Path<ImageId>,
     origin: RequestOrigin,
     req: Json<<endpoints::image::Upload as ApiEndpoint>::Req>,
 ) -> Result<Json<<endpoints::image::Upload as ApiEndpoint>::Res>, error::Upload> {
     let mut txn = db.begin().await?;
+
+    let id = path.into_inner();
 
     let exists = sqlx::query!(
         r#"select exists(select 1 from image_upload where image_id = $1 for no key update) as "exists!""#,
@@ -122,7 +120,6 @@ async fn upload(
 }
 
 /// Get an image from the global image library.
-#[api_v2_operation]
 async fn get_one(
     db: Data<PgPool>,
     _claims: TokenUser,
@@ -136,7 +133,6 @@ async fn get_one(
 }
 
 /// Search for images in the global image library.
-#[api_v2_operation]
 async fn search(
     db: Data<PgPool>,
     algolia: ServiceData<crate::algolia::Client>,
@@ -173,7 +169,6 @@ async fn search(
     }))
 }
 
-#[api_v2_operation]
 async fn browse(
     db: Data<PgPool>,
     _claims: TokenUserWithScope<ScopeManageImage>,
@@ -205,13 +200,12 @@ async fn browse(
 }
 
 /// Update an image in the global image library.
-#[api_v2_operation]
 async fn update(
     db: Data<PgPool>,
     _claims: TokenUserWithScope<ScopeManageImage>,
     req: Option<Json<<endpoints::image::UpdateMetadata as ApiEndpoint>::Req>>,
     id: Path<ImageId>,
-) -> Result<NoContent, error::UpdateWithMetadata> {
+) -> Result<HttpResponse, error::UpdateWithMetadata> {
     let req = req.map_or_else(ImageUpdateRequest::default, Json::into_inner);
     let id = id.into_inner();
     let mut txn = db.begin().await?;
@@ -244,7 +238,7 @@ async fn update(
 
     txn.commit().await?;
 
-    Ok(NoContent)
+    Ok(HttpResponse::NoContent().finish())
 }
 
 fn check_conflict_delete(err: sqlx::Error) -> error::Delete {
@@ -257,14 +251,13 @@ fn check_conflict_delete(err: sqlx::Error) -> error::Delete {
 }
 
 /// Delete an image from the global image library.
-#[api_v2_operation]
 async fn delete(
     db: Data<PgPool>,
     algolia: ServiceData<crate::algolia::Client>,
     _claims: TokenUserWithScope<ScopeManageImage>,
     req: Path<ImageId>,
     s3: ServiceData<s3::Client>,
-) -> Result<NoContent, error::Delete> {
+) -> Result<HttpResponse, error::Delete> {
     let image = req.into_inner();
     db::image::delete(&db, image)
         .await
@@ -281,10 +274,10 @@ async fn delete(
     )
     .await;
 
-    Ok(NoContent)
+    Ok(HttpResponse::NoContent().finish())
 }
 
-pub fn configure(cfg: &mut ServiceConfig<'_>) {
+pub fn configure(cfg: &mut ServiceConfig) {
     use endpoints::image;
     cfg.route(
         image::Create::PATH,

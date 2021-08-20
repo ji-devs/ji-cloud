@@ -1,9 +1,8 @@
-use core::settings::RuntimeSettings;
-use paperclip::actix::{
-    api_v2_operation,
+use actix_web::{
+    http::StatusCode,
     web::{Data, Json, Query, ServiceConfig},
-    CreatedJson,
 };
+use core::settings::RuntimeSettings;
 use shared::{
     api::{endpoints::search, ApiEndpoint},
     domain::search::{CreateSearchKeyResponse, WebImageSearchResponse},
@@ -14,19 +13,21 @@ use crate::{error, extractor::TokenUser, service::ServiceData};
 /// Create an Algolia search key based on the user's auth. Currently expires after 15 minutes, but that number is subject to change.
 /// # Errors
 /// 501: If the server doesn't have algolia enabled, or it doesn't have a key to derive for the frontend.
-#[api_v2_operation]
 async fn create_key(
     algolia: ServiceData<crate::algolia::SearchKeyStore>,
     claims: TokenUser,
-) -> actix_web::Result<CreatedJson<<search::CreateKey as ApiEndpoint>::Res>, error::Service> {
+) -> actix_web::Result<(Json<<search::CreateKey as ApiEndpoint>::Res>, StatusCode), error::Service> // TODO check this
+{
     let key =
         algolia.generate_virtual_key(Some(claims.0.user_id), Some(chrono::Duration::minutes(15)));
 
-    Ok(CreatedJson(CreateSearchKeyResponse { key: key.0 }))
+    Ok((
+        Json(CreateSearchKeyResponse { key: key.0 }),
+        StatusCode::CREATED,
+    ))
 }
 
 /// Search for images over the web.
-#[api_v2_operation]
 pub async fn search_web_images(
     runtime_settings: Data<RuntimeSettings>,
     _claims: TokenUser,
@@ -44,7 +45,7 @@ pub async fn search_web_images(
     Ok(Json(res))
 }
 
-pub fn configure(cfg: &mut ServiceConfig<'_>) {
+pub fn configure(cfg: &mut ServiceConfig) {
     cfg.route(
         search::CreateKey::PATH,
         search::CreateKey::METHOD.route().to(create_key),

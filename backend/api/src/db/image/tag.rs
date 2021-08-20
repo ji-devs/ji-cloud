@@ -1,5 +1,4 @@
 use crate::error;
-use paperclip::actix::NoContent;
 use shared::domain::{image::tag::ImageTagResponse, meta::ImageTagIndex};
 use sqlx::{postgres::PgDatabaseError, PgPool};
 
@@ -58,7 +57,7 @@ pub async fn update(
     curr_index: i16,
     display_name: Option<&str>,
     new_index: Option<i16>,
-) -> Result<NoContent, error::Tag> {
+) -> Result<(), error::Tag> {
     let mut txn = db.begin().await?;
 
     let res = sqlx::query!(
@@ -98,7 +97,7 @@ pub async fn update(
 
     txn.commit().await?;
 
-    Ok(NoContent)
+    Ok(())
 }
 
 pub async fn delete(db: &PgPool, index: i16) -> sqlx::Result<()> {

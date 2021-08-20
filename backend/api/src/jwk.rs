@@ -202,7 +202,7 @@ impl JwkVerifier {
                     return Ok(claims);
                 }
                 Ok(None) => bail!("invalid KID"),
-                Err(delay_until) => tokio::time::delay_until(delay_until.into()).await,
+                Err(sleep_until) => tokio::time::sleep_until(sleep_until.into()).await,
             }
         }
 
@@ -242,13 +242,13 @@ pub fn run_task(verifier: Arc<JwkVerifier>) -> JoinHandle<()> {
 
                     verifier.set_keys(keys).await;
 
-                    tokio::time::delay_until(refresh_at.into()).await;
+                    tokio::time::sleep_until(refresh_at.into()).await;
                 }
 
                 Err(e) => {
                     log::error!("{:?}", e);
                     sentry::integrations::anyhow::capture_anyhow(&e);
-                    tokio::time::delay_for(Duration::from_secs(5)).await;
+                    tokio::time::sleep(Duration::from_secs(5)).await;
                 }
             };
         }

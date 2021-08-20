@@ -12,7 +12,6 @@ use core::{
     settings::RuntimeSettings,
 };
 use futures::Future;
-use paperclip::actix::{api_v2_operation, NoContent, OpenApiExt};
 use sqlx::postgres::PgPool;
 
 use crate::{
@@ -25,10 +24,10 @@ mod endpoints;
 
 fn log_ise<B: MessageBody, T>(
     request: ServiceRequest,
-    srv: &mut T,
+    srv: &T,
 ) -> impl Future<Output = actix_web::Result<T::Response>>
 where
-    T: Service<Request = ServiceRequest, Response = ServiceResponse<B>, Error = actix_web::Error>,
+    T: Service<ServiceRequest, Response = ServiceResponse<B>, Error = actix_web::Error>,
 {
     let uri: serde_json::Value = request.uri().to_string().into();
     let method: serde_json::Value = request.method().to_string().into();
@@ -37,7 +36,7 @@ where
     async {
         let mut result = future.await?;
         if result.status() == 500 {
-            let response: &mut actix_http::Response<_> = result.response_mut();
+            let response: &mut actix_web::HttpResponse<_> = result.response_mut();
 
             if let Some(err) = response.extensions_mut().remove::<anyhow::Error>() {
                 log::error!("ISE while responding to request: {:?}", err);
@@ -153,46 +152,44 @@ pub fn build(
     let mail_client = mail_client.map(ServiceData::new);
 
     let server = actix_web::HttpServer::new(move || {
-        let server = actix_web::App::new()
-            .data(pool.clone())
-            .data(settings.clone());
+        let app = actix_web::App::new()
+            .app_data(Data::new(pool.clone()))
+            .app_data(Data::new(settings.clone()));
 
-        let server = match s3.clone() {
-            Some(s3) => server.app_data(s3),
-            None => server,
+        let app = match s3.clone() {
+            Some(s3) => app.app_data(s3),
+            None => app,
         };
 
-        let server = match gcp_key_store.clone() {
-            Some(gcp_key_store) => server.app_data(gcp_key_store),
-            None => server,
+        let app = match gcp_key_store.clone() {
+            Some(gcp_key_store) => app.app_data(gcp_key_store),
+            None => app,
         };
 
-        let server = match gcs.clone() {
-            Some(gcs) => server.app_data(gcs),
-            None => server,
+        let app = match gcs.clone() {
+            Some(gcs) => app.app_data(gcs),
+            None => app,
         };
 
-        let server = match algolia.clone() {
-            Some(algolia) => server.app_data(algolia),
-            None => server,
+        let app = match algolia.clone() {
+            Some(algolia) => app.app_data(algolia),
+            None => app,
         };
 
-        let server = match algolia_key_store.clone() {
-            Some(algolia_key_store) => server.app_data(algolia_key_store),
-            None => server,
+        let app = match algolia_key_store.clone() {
+            Some(algolia_key_store) => app.app_data(algolia_key_store),
+            None => app,
         };
 
-        let server = match mail_client.clone() {
-            Some(mail_client) => server.app_data(mail_client),
-            None => server,
+        let app = match mail_client.clone() {
+            Some(mail_client) => app.app_data(mail_client),
+            None => app,
         };
 
-        server
-            .app_data(Data::from(jwk_verifier.clone()))
+        app.app_data(Data::from(jwk_verifier.clone()))
+            .wrap(cors::get(local_insecure))
             .wrap(actix_web::middleware::Logger::default())
             .wrap_fn(log_ise)
-            .wrap(cors::get(local_insecure))
-            .service(get_spec)
             .app_data(
                 actix_web::web::JsonConfig::default()
                     .limit(JSON_BODY_LIMIT as usize)
@@ -209,7 +206,6 @@ pub fn build(
                 "https://accounts.google.com/o/oauth2/v2/auth",
             )
             .default_service(actix_web::web::to(default_route))
-            .wrap_api()
             .configure(endpoints::user::configure)
             .configure(endpoints::category::configure)
             .configure(endpoints::image::configure)
@@ -224,9 +220,7 @@ pub fn build(
             .configure(endpoints::session::configure)
             .configure(endpoints::locale::configure)
             .configure(endpoints::additional_resource::configure)
-            .route("/", paperclip::actix::web::get().to(no_content_response))
-            .with_json_spec_at("/spec.json")
-            .build()
+            .route("/", actix_web::web::get().to(no_content_response))
     });
 
     // if listenfd doesn't take a TcpListener (i.e. we're not running via
@@ -245,13 +239,6 @@ pub fn build(
     Ok(Application::new(port, server.run()))
 }
 
-#[actix_web::get("/spec")]
-async fn get_spec() -> HttpResponse {
-    HttpResponse::Ok()
-        .content_type("text/html")
-        .body(include_str!("../static/spec-explorer.html"))
-}
-
 fn default_route() -> HttpResponse {
     HttpResponse::NotFound().json(BasicError::with_message(
         http::StatusCode::NOT_FOUND,
@@ -259,9 +246,8 @@ fn default_route() -> HttpResponse {
     ))
 }
 
-#[api_v2_operation]
-async fn no_content_response() -> NoContent {
-    NoContent
+async fn no_content_response() -> HttpResponse {
+    HttpResponse::NoContent().finish()
 }
 
 pub fn bad_request_handler() -> actix_web::Error {

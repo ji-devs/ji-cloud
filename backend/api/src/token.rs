@@ -1,4 +1,4 @@
-use actix_http::cookie::{Cookie, CookieBuilder, SameSite};
+use actix_web::cookie::{Cookie, CookieBuilder, SameSite};
 use chrono::{DateTime, Duration, Utc};
 use http::StatusCode;
 use paseto::{PasetoBuilder, TimeBackend};
