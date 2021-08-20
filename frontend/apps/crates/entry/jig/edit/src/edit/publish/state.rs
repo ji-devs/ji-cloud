@@ -23,6 +23,7 @@ pub struct State {
     pub submission_tried: Mutable<bool>,
     pub languages: Vec<Language>,
     pub jig_edit_state: Rc<JigEditState>,
+    pub show_public_popup: Mutable<bool>,
 }
 
 impl State {
@@ -45,6 +46,7 @@ impl State {
             affiliations: Mutable::new(affiliations),
             submission_tried: Mutable::new(false),
             languages: LANGUAGES.clone(),
+            show_public_popup: Mutable::new(false),
             jig_edit_state
         }
     }

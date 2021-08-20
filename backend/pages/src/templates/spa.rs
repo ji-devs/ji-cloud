@@ -101,47 +101,45 @@ pub async fn admin_template(settings: Data<RuntimeSettings>) -> actix_web::Resul
 
 pub async fn jig_template(
     settings: Data<RuntimeSettings>,
-    Path((page_kind, _jig_id)): Path<(ModuleJigPageKind, String)>,
+    path: Path<(ModuleJigPageKind, String)>,
 ) -> actix_web::Result<HttpResponse> {
+    let (page_kind, _jig_id) = path.into_inner();
     spa_template(&settings, SpaPage::Jig(page_kind))
 }
 
 pub async fn jig_template_with_module(
     settings: Data<RuntimeSettings>,
-    Path((page_kind, _jig_id, _module_id)): Path<(ModuleJigPageKind, String, String)>,
+    path: Path<(ModuleJigPageKind, String, String)>,
 ) -> actix_web::Result<HttpResponse> {
+    let (page_kind, _jig_id, _module_id) = path.into_inner();
     spa_template(&settings, SpaPage::Jig(page_kind))
 }
 
 pub async fn legacy_template(
     settings: Data<RuntimeSettings>,
-    Path(_jig_id): Path<String>,
+    _path: Path<String>, // (jig_id)
 ) -> actix_web::Result<HttpResponse> {
     spa_template(&settings, SpaPage::LegacyJig)
 }
 
 pub async fn legacy_template_with_module(
     settings: Data<RuntimeSettings>,
-    Path((_jig_id, _module_id)): Path<(String, String)>,
+    _path: Path<(String, String)>, // (_jig_id, _module_id)
 ) -> actix_web::Result<HttpResponse> {
     spa_template(&settings, SpaPage::LegacyJig)
 }
 
 pub async fn module_template(
     settings: Data<RuntimeSettings>,
-    Path((module_kind, page_kind, _jig_id, _module_id)): Path<(
-        String,
-        ModuleJigPageKind,
-        String,
-        String,
-    )>,
+    path: Path<(String, ModuleJigPageKind, String, String)>,
 ) -> actix_web::Result<HttpResponse> {
+    let (module_kind, page_kind, _jig_id, _module_id) = path.into_inner();
     spa_template(&settings, SpaPage::Module(module_kind, page_kind))
 }
 
 pub async fn dev_template(
     settings: Data<RuntimeSettings>,
-    Path(path): Path<String>,
+    path: Path<String>,
 ) -> actix_web::Result<HttpResponse> {
-    spa_template(&settings, SpaPage::Dev(path))
+    spa_template(&settings, SpaPage::Dev(path.into_inner()))
 }

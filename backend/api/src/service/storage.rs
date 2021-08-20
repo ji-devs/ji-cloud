@@ -1,12 +1,12 @@
 //! Google Cloud Storage
 use std::ops::Deref;
 
-use crate::error;
-use crate::extractor::RequestOrigin;
 use anyhow::Context;
 use http::StatusCode;
-use reqwest::{self, header};
+use reqwest;
 use uuid::Uuid;
+
+use crate::{error, extractor::RequestOrigin};
 
 use core::{
     config::{ANIMATION_BODY_SIZE_LIMIT, AUDIO_BODY_SIZE_LIMIT, IMAGE_BODY_SIZE_LIMIT},
@@ -57,14 +57,14 @@ impl Client {
             .header("X-Upload-Content-Length", upload_content_length.to_string())
             .header("X-Upload-Content-Type", file_kind.content_type().to_owned())
             .header(
-                header::AUTHORIZATION,
+                reqwest::header::AUTHORIZATION,
                 format!("Bearer {}", access_token.to_owned()),
             )
-            .header(header::CONTENT_LENGTH, "0");
+            .header(reqwest::header::CONTENT_LENGTH, "0");
 
         let req = match origin.origin {
             Some(origin) if CORS_ORIGINS.contains(&origin.deref()) => {
-                req.header(header::ORIGIN, origin)
+                req.header(reqwest::header::ORIGIN, origin)
             }
             _ => req,
         };

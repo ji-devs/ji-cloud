@@ -1,14 +1,11 @@
 //! Types for user image library.
 
-#[cfg(feature = "backend")]
-use paperclip::actix::Apiv2Schema;
 use serde::{Deserialize, Serialize};
 
 use super::{ImageId, ImageKind};
 
 /// Request for creating a user image profile
 #[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct UserImageCreateRequest {
     /// The kind of the image. Most relevant for uploading user profile images
     pub kind: ImageKind,
@@ -18,7 +15,6 @@ pub struct UserImageCreateRequest {
 ///
 /// * `kind` field must match the case as represented in the returned json body (`PascalCase`?).
 #[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct UserImageListQuery {
     /// Optionally filter by image kind. If included it will only return results of the corresponding
     /// kinds listed.
@@ -28,7 +24,6 @@ pub struct UserImageListQuery {
 
 /// Response for listing.
 #[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct UserImageListResponse {
     /// the images returned.
     pub images: Vec<UserImageResponse>,
@@ -36,7 +31,6 @@ pub struct UserImageListResponse {
 
 /// Response for getting a single image.
 #[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct UserImageResponse {
     /// The image metadata.
     pub metadata: UserImage,
@@ -44,7 +38,6 @@ pub struct UserImageResponse {
 
 /// Over the wire representation of an image's metadata.
 #[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct UserImage {
     /// The image's ID.
     pub id: ImageId,
@@ -55,7 +48,6 @@ pub struct UserImage {
 
 /// Request to indicate the size of an user library image for upload.
 #[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct UserImageUploadRequest {
     /// The size of the image to be uploaded in bytes.
     pub file_size: usize,
@@ -63,8 +55,6 @@ pub struct UserImageUploadRequest {
 
 /// URL to upload an user library image, supports resumable uploading.
 #[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-#[cfg_attr(feature = "backend", openapi(empty))]
 pub struct UserImageUploadResponse {
     /// The session URI used for uploading, including the query for uploader ID
     pub session_uri: String,

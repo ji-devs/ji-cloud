@@ -1,7 +1,6 @@
-use paperclip::actix::{
-    api_v2_operation,
+use actix_web::{
     web::{Data, Json, Path, ServiceConfig},
-    CreatedJson, NoContent,
+    HttpResponse,
 };
 use shared::{
     api::{endpoints::jig::additional_resource, ApiEndpoint},
@@ -18,13 +17,19 @@ use sqlx::PgPool;
 use crate::{db, error, extractor::TokenUser};
 
 /// Create a new additional resource.
-#[api_v2_operation]
 async fn create(
     db: Data<PgPool>,
     auth: TokenUser,
     parent: Path<JigId>,
     req: Json<<additional_resource::Create as ApiEndpoint>::Req>,
-) -> Result<CreatedJson<<additional_resource::Create as ApiEndpoint>::Res>, error::Auth> {
+) -> Result<
+    (
+        // TODO double check this
+        Json<<additional_resource::Create as ApiEndpoint>::Res>,
+        http::StatusCode,
+    ),
+    error::Auth,
+> {
     let parent_id = parent.into_inner();
 
     db::jig::authz(&*db, auth.0.user_id, Some(parent_id)).await?;
@@ -33,11 +38,10 @@ async fn create(
 
     let id = db::additional_resource::create(&*db, parent_id, req.url).await?;
 
-    Ok(CreatedJson(CreateResponse { id }))
+    Ok((Json(CreateResponse { id }), http::StatusCode::CREATED))
 }
 
 /// Get an additional resource.
-#[api_v2_operation]
 async fn get(
     db: Data<PgPool>,
     _auth: TokenUser,
@@ -53,13 +57,12 @@ async fn get(
 }
 
 /// Update an additional resource.
-#[api_v2_operation]
 async fn update(
     db: Data<PgPool>,
     auth: TokenUser,
     path: Path<(JigId, AdditionalResourceId)>,
     url: Option<String>,
-) -> Result<NoContent, error::NotFound> {
+) -> Result<HttpResponse, error::NotFound> {
     let (parent_id, additional_resource_id) = path.into_inner();
 
     db::jig::authz(&*db, auth.0.user_id, Some(parent_id)).await?;
@@ -68,28 +71,28 @@ async fn update(
         db::additional_resource::update(&*db, parent_id, additional_resource_id, url).await?;
 
     match exists {
-        true => Ok(NoContent),
+        true => Ok(HttpResponse::NoContent().finish()),
         false => Err(error::NotFound::ResourceNotFound),
     }
 }
 
 /// Delete an additional resource.
-#[api_v2_operation]
 async fn delete(
     db: Data<PgPool>,
     auth: TokenUser,
     path: Path<(JigId, AdditionalResourceId)>,
-) -> Result<NoContent, error::Delete> {
+) -> Result<HttpResponse, error::Delete> {
+    //
     let (parent_id, additional_resource_id) = path.into_inner();
 
     db::jig::authz(&*db, auth.0.user_id, Some(parent_id)).await?;
 
     db::additional_resource::delete(&*db, parent_id, additional_resource_id).await?;
 
-    Ok(NoContent)
+    Ok(HttpResponse::NoContent().finish())
 }
 
-pub fn configure(cfg: &mut ServiceConfig<'_>) {
+pub fn configure(cfg: &mut ServiceConfig) {
     cfg.route(
         additional_resource::Create::PATH,
         additional_resource::Create::METHOD.route().to(create),

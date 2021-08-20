@@ -3,7 +3,6 @@ use std::{ops::Deref, sync::Arc};
 use actix_web::FromRequest;
 use chrono::{DateTime, Duration, Utc};
 use futures::future::{ready, Ready};
-use paperclip::{actix::OperationModifier, v2::schema::Apiv2Schema};
 use tokio::sync::RwLock;
 
 use crate::error;
@@ -52,9 +51,6 @@ impl Service for GcpAccessKeyStore {
 
 #[derive(Debug)]
 pub struct ServiceData<T: ?Sized>(Arc<T>);
-
-impl<T> Apiv2Schema for ServiceData<T> {}
-impl<T> OperationModifier for ServiceData<T> {}
 
 impl<T: Service> ServiceData<T> {
     pub fn new(service: T) -> Self {

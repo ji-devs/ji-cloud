@@ -138,7 +138,7 @@ impl Manager {
                     }
                 }
 
-                tokio::time::delay_until((iteration_start + Duration::from_secs(5)).into()).await;
+                tokio::time::sleep_until((iteration_start + Duration::from_secs(5)).into()).await;
             }
         })
     }
@@ -363,7 +363,7 @@ for no key update skip locked;
             r#"
 select id,
     name,
-    kind as "kind: ImageKind",
+    kind as "kind!: ImageKind",
     description,
     array((select affiliation_id from image_affiliation where image_id = image_metadata.id)) as "affiliations!",
     array((select affiliation.display_name

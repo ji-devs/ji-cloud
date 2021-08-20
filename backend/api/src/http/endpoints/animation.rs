@@ -1,9 +1,8 @@
-use chrono::{DateTime, Utc};
-use paperclip::actix::{
-    api_v2_operation,
+use actix_web::{
     web::{Data, Json, Path, ServiceConfig},
-    CreatedJson, NoContent,
+    HttpResponse,
 };
+use chrono::{DateTime, Utc};
 use shared::{
     api::{endpoints::animation, ApiEndpoint},
     domain::{
@@ -28,13 +27,12 @@ fn check_conflict_delete(err: sqlx::Error) -> error::Delete {
 }
 
 /// Delete an animation from the global animation library.
-#[api_v2_operation]
 async fn delete(
     db: Data<PgPool>,
     _claims: TokenUserWithScope<ScopeManageAnimation>,
     req: Path<AnimationId>,
     s3: ServiceData<s3::Client>,
-) -> Result<NoContent, error::Delete> {
+) -> Result<HttpResponse, error::Delete> {
     let animation = req.into_inner();
     let kind = db::animation::delete(&db, animation)
         .await
@@ -51,16 +49,15 @@ async fn delete(
             .await;
     }
 
-    Ok(NoContent)
+    Ok(HttpResponse::NoContent().finish())
 }
 
 /// Create an animation in the global animation library.
-#[api_v2_operation]
 async fn create(
     db: Data<PgPool>,
     _claims: TokenUserWithScope<ScopeManageAnimation>,
     req: Json<<animation::Create as ApiEndpoint>::Req>,
-) -> Result<CreatedJson<<animation::Create as ApiEndpoint>::Res>, error::CreateWithMetadata> {
+) -> Result<HttpResponse, error::CreateWithMetadata> {
     let req = req.into_inner();
 
     let mut txn = db.begin().await?;
@@ -89,21 +86,22 @@ async fn create(
 
     txn.commit().await?;
 
-    Ok(CreatedJson(CreateResponse { id }))
+    Ok(HttpResponse::Created().json(CreateResponse { id }))
 }
 
 /// Upload an animation to the global animation library.
-#[api_v2_operation]
 async fn upload(
     db: Data<PgPool>,
     gcp_key_store: ServiceData<GcpAccessKeyStore>,
     gcs: ServiceData<storage::Client>,
     _claims: TokenUserWithScope<ScopeManageAnimation>,
-    Path(id): Path<AnimationId>,
+    path: Path<AnimationId>,
     origin: RequestOrigin,
     req: Json<<animation::Upload as ApiEndpoint>::Req>,
 ) -> Result<Json<<animation::Upload as ApiEndpoint>::Res>, error::Upload> {
     let mut txn = db.begin().await?;
+
+    let id = path.into_inner();
 
     let exists = sqlx::query!(
         r#"select exists(select 1 from global_animation_upload where animation_id = $1 for no key update) as "exists!""#,
@@ -150,20 +148,19 @@ async fn upload(
 }
 
 /// Get an animation from the global animation library.
-#[api_v2_operation]
 async fn get_one(
     db: Data<PgPool>,
     _claims: TokenUser,
-    req: Path<AnimationId>,
+    path: Path<AnimationId>,
 ) -> Result<Json<<animation::Get as ApiEndpoint>::Res>, error::NotFound> {
-    let metadata = db::animation::get_one(&db, req.into_inner())
+    let metadata = db::animation::get_one(&db, path.into_inner())
         .await?
         .ok_or(error::NotFound::ResourceNotFound)?;
 
     Ok(Json(AnimationResponse { metadata }))
 }
 
-pub fn configure(cfg: &mut ServiceConfig<'_>) {
+pub fn configure(cfg: &mut ServiceConfig) {
     cfg.route(
         animation::Create::PATH,
         animation::Create::METHOD.route().to(create),

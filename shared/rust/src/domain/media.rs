@@ -1,8 +1,6 @@
 //! Types for Media.
 
 use chrono::{DateTime, Utc};
-#[cfg(feature = "backend")]
-use paperclip::actix::Apiv2Schema;
 use serde::{Deserialize, Serialize};
 use url::Url;
 use uuid::Uuid;
@@ -11,7 +9,6 @@ use crate::media::MediaKind;
 
 /// Response for adding a URL to the Web Media Library
 #[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct UrlCreatedResponse {
     /// The ID of the media.
     pub id: Uuid,
@@ -22,8 +19,6 @@ pub struct UrlCreatedResponse {
 
 /// Request for adding a URL to the Web Media Library
 #[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-#[cfg_attr(feature = "backend", openapi(empty))]
 pub struct WebMediaUrlCreateRequest {
     /// The url.
     pub url: Url,
@@ -31,8 +26,6 @@ pub struct WebMediaUrlCreateRequest {
 
 /// Response for getting metadata for media from the web media library.
 #[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-#[cfg_attr(feature = "backend", openapi(empty))]
 pub struct WebMediaMetadataResponse {
     /// The ID of the media
     pub id: Uuid,

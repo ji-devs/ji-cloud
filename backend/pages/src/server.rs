@@ -4,10 +4,10 @@ mod routes;
 use crate::templates::direct;
 use actix_web::{
     dev::{MessageBody, Service, ServiceRequest, ServiceResponse},
-    web,
+    web::{self, Data},
 };
-use core::config::JSON_BODY_LIMIT;
 use core::{
+    config::JSON_BODY_LIMIT,
     http::{get_addr, get_tcp_fd},
     settings::RuntimeSettings,
 };
@@ -16,10 +16,10 @@ use sentry::types::protocol::v7::value::Value as JsonValue;
 // todo: dedup this with api
 fn log_ise<B: MessageBody, T>(
     req: ServiceRequest,
-    srv: &mut T,
+    srv: &T,
 ) -> impl std::future::Future<Output = actix_web::Result<T::Response>>
 where
-    T: Service<Request = ServiceRequest, Response = ServiceResponse<B>, Error = actix_web::Error>,
+    T: Service<ServiceRequest, Response = ServiceResponse<B>, Error = actix_web::Error>,
 {
     let uri: JsonValue = req.uri().to_string().into();
     let method: JsonValue = req.method().to_string().into();
@@ -57,10 +57,10 @@ pub async fn run(settings: RuntimeSettings) -> anyhow::Result<()> {
     let pages_port = settings.pages_port;
     let server = actix_web::HttpServer::new(move || {
         actix_web::App::new()
-            .data(settings.clone())
+            .app_data(Data::new(settings.clone()))
+            .wrap(cors::get(local_insecure))
             .wrap(actix_web::middleware::Logger::default())
             .wrap_fn(log_ise)
-            .wrap(cors::get(local_insecure))
             .app_data(actix_web::web::JsonConfig::default().limit(JSON_BODY_LIMIT as usize))
             .configure(routes::configure)
             .service(actix_files::Files::new("/static", "./public"))

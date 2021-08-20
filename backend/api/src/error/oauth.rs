@@ -1,10 +1,7 @@
-use paperclip::actix::api_v2_errors;
-
 use crate::google_oauth;
 
 use super::BasicError;
 
-#[api_v2_errors(code = 400, code = 401, code = 409, code = 403, code = 500, code = 501)]
 #[derive(Debug)]
 pub enum OAuth {
     InternalServerError(anyhow::Error),
@@ -38,7 +35,6 @@ impl Into<actix_web::Error> for OAuth {
     }
 }
 
-#[api_v2_errors(code = 400, code = 401, code = 403, code = 500, code = 501)]
 #[derive(Debug)]
 pub enum GoogleOAuth {
     InternalServerError(anyhow::Error),

@@ -2,15 +2,12 @@ use crate::domain::jig::module::{
     body::{Body, BodyConvert, BodyExt, ModeExt, StepExt, ThemeChoice, _groups::design::*},
     ModuleKind,
 };
-#[cfg(feature = "backend")]
-use paperclip::actix::Apiv2Schema;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::convert::TryFrom;
 
 /// The body for [`Poster`](crate::domain::jig::module::ModuleKind::Poster) modules.
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct ModuleData {
     /// The content
     pub content: Option<Content>,
@@ -84,7 +81,6 @@ impl TryFrom<Body> for ModuleData {
 
 /// The body for [`Poster`](crate::domain::jig::module::ModuleKind::Poster) modules.
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct Content {
     /// The editor state
     pub editor_state: EditorState,
@@ -98,7 +94,6 @@ pub struct Content {
 
 /// Editor state
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct EditorState {
     /// the current step
     pub step: Step,
@@ -108,7 +103,6 @@ pub struct EditorState {
 }
 
 #[derive(Clone, Copy, Serialize, Deserialize, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 /// The mode
 pub enum Mode {
     /// Printables
@@ -175,7 +169,6 @@ impl ModeExt for Mode {
 
 /// The Steps
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub enum Step {
     /// Step 1
     One,

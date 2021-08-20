@@ -30,6 +30,8 @@ const STR_NAME_LABEL: &'static str = "JIG’s name";
 const STR_NAME_PLACEHOLDER: &'static str = "Type your JIG’s name here";
 const STR_DESCRIPTION_LABEL: &'static str = "Description";
 const STR_DESCRIPTION_PLACEHOLDER: &'static str = "This JIG is about… (include words that will help others find this JIG easily)";
+const STR_PUBLIC_POPUP_TITLE: &'static str = "Sharing is Caring!";
+const STR_PUBLIC_POPUP_BODY: &'static str = "Are you sure you want to keep this JIG private? Please consider sharing your JIG with the Jigzi community.";
 const STR_MISSING_INFO_TOOLTIP: &'static str = "Please fill in the missing information.";
 
 pub fn render(jig_edit_state: Rc<JigEditState>) -> Dom {
@@ -63,17 +65,41 @@ fn render_page(state: Rc<State>) -> Dom {
                 Some("img")
             ),
             html!("label", {
-                .property("slot", "public")
-                .text(STR_PUBLIC_LABEL)
-                .child(html!("input-switch", {
-                    .property_signal("enabled", state.jig.is_public.signal_cloned())
-                    .event(clone!(state => move |evt: events::CustomToggle| {
-                        let value = evt.value();
-                        state.jig.is_public.set(value);
+                .with_node!(elem => {
+                    .property("slot", "public")
+                    .text(STR_PUBLIC_LABEL)
+                    .child(html!("input-switch", {
+                        .property_signal("enabled", state.jig.is_public.signal_cloned())
+                        .event(clone!(state => move |evt: events::CustomToggle| {
+                            let value = evt.value();
+                            state.jig.is_public.set(value);
+                            if value {
+                                state.show_public_popup.set(false);
+                            } else {
+                                state.show_public_popup.set(true);
+                            }
+                        }))
                     }))
-                }))
-            })
-            ,
+                    .child_signal(state.show_public_popup.signal_ref(clone!(state => move |show_public_popup| {
+                        match show_public_popup {
+                            false => None,
+                            true => {
+                                Some(html!("tooltip-info", {
+                                
+                                    .property("title", STR_PUBLIC_POPUP_TITLE)
+                                    .property("body", STR_PUBLIC_POPUP_BODY)
+                                    .property("closeable", true)
+                                    .property("target", elem.clone())
+                                    .property("placement", "bottom")
+                                    .event(clone!(state => move |_: events::Close| {
+                                        state.show_public_popup.set(false);
+                                    }))
+                                }))
+                            }
+                        }
+                    })))
+                })
+            }),
             html!("input-wrapper", {
                 .property("slot", "name")
                 .property("label", STR_NAME_LABEL)

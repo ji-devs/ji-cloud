@@ -1,7 +1,5 @@
-//! Types for additional resrouces for JIGs.
+//! Types for additional resources for JIGs.
 
-#[cfg(feature = "backend")]
-use paperclip::actix::Apiv2Schema;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -9,11 +7,9 @@ use uuid::Uuid;
 #[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct AdditionalResourceId(pub Uuid);
 
 #[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 /// Over-the-wire representation of a JIG additional resource.
 pub struct AdditionalResource {
     /// The additional resources's ID.
@@ -28,7 +24,6 @@ pub struct AdditionalResource {
 ///
 /// [`CreateAdditionalResource`](crate::api::endpoints::jig::CreateAdditionalResource)
 #[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct AdditionalResourceCreateRequest {
     /// The URL of the additional resource.
     /// Stored as a `String`.
@@ -37,7 +32,6 @@ pub struct AdditionalResourceCreateRequest {
 
 /// Response for successfully requesting an additional resource.
 #[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct AdditionalResourceResponse {
     /// The additional resource found.
     pub url: String,
@@ -46,7 +40,6 @@ pub struct AdditionalResourceResponse {
 /// Request to update an `AdditionalResource`
 /// Note: URL field cannot be nulled out (`None` means "do not change").
 #[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct AdditionalResourceUpdateRequest {
     /// The additional resource's URL.
     pub url: Option<String>,

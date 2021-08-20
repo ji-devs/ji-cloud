@@ -16,6 +16,7 @@ import "@elements/core/overlays/anchored-overlay";
 import "@elements/core/pills/pill-close";
 import "@elements/core/pills/pill-close-delete";
 import "@elements/core/tooltips/error";
+import "@elements/core/tooltips/info";
 import "@elements/core/page-footer/page-footer";
 import "@elements/core/share-jig/main";
 import "@elements/core/share-jig/embed";

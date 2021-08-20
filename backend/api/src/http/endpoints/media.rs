@@ -1,12 +1,10 @@
 use std::sync::Arc;
 
-use actix_web::web::Path;
-use core::config::{ANIMATION_BODY_SIZE_LIMIT, IMAGE_BODY_SIZE_LIMIT};
-use paperclip::actix::{
-    api_v2_operation,
-    web::{Bytes, Data, Json, ServiceConfig},
-    CreatedJson, NoContent,
+use actix_web::{
+    web::{Bytes, Data, Json, Path, ServiceConfig},
+    HttpResponse,
 };
+use core::config::{ANIMATION_BODY_SIZE_LIMIT, IMAGE_BODY_SIZE_LIMIT};
 use sha2::Digest as _;
 use shared::{
     api::{endpoints, ApiEndpoint},
@@ -37,13 +35,13 @@ const fn max(a: usize, b: usize) -> usize {
     }
 }
 
-#[api_v2_operation]
+// FIXME break this function up a bit, split ou the DB queries into `src/db`
 pub async fn create(
     pool: Data<PgPool>,
     _claims: TokenUser,
     s3: ServiceData<s3::Client>,
     request: Json<WebMediaUrlCreateRequest>,
-) -> Result<CreatedJson<UrlCreatedResponse>, error::Server> {
+) -> Result<HttpResponse, error::Server> {
     let url = request.into_inner().url;
 
     const MAX_RESPONSE_SIZE: usize = max(ANIMATION_BODY_SIZE_LIMIT, IMAGE_BODY_SIZE_LIMIT);
@@ -65,7 +63,7 @@ where media_url = $1"#,
     {
         log::trace!("Found the url");
 
-        return Ok(CreatedJson(UrlCreatedResponse {
+        return Ok(HttpResponse::Created().json(UrlCreatedResponse {
             id: record.media_id,
             kind: record.kind.to_shared(),
         }));
@@ -129,7 +127,7 @@ for update
 
         log::trace!("Found the hash");
 
-        return Ok(CreatedJson(UrlCreatedResponse {
+        return Ok(HttpResponse::Created().json(UrlCreatedResponse {
             id,
             kind: record.kind.to_shared(),
         }));
@@ -141,7 +139,7 @@ for update
         let data = data.clone();
         move || crate::image_ops::detect_image_kind(&data)
     })
-    .await?;
+    .await??;
 
     log::debug!("detected image kind as: {:?}", kind);
 
@@ -178,7 +176,7 @@ for update
                 let original = image::load_from_memory(&data)?;
                 crate::image_ops::generate_images(&original, ImageKind::Sticker)
             })
-            .await?;
+            .await??;
 
             s3.upload_png_images(MediaLibrary::Web, id, original, resized, thumbnail)
                 .await?;
@@ -196,7 +194,7 @@ for update
 
     txn.commit().await?;
 
-    Ok(CreatedJson(UrlCreatedResponse {
+    Ok(HttpResponse::Created().json(UrlCreatedResponse {
         id,
         kind: kind.to_shared(),
     }))
@@ -206,13 +204,14 @@ for update
 // list route (with filter & pagation)
 // async fn list() {}
 
-#[api_v2_operation]
 async fn delete_media(
     pool: Data<PgPool>,
     _auth: TokenUserWithScope<ScopeAdmin>,
     s3: ServiceData<s3::Client>,
-    Path(id): Path<Uuid>,
-) -> Result<NoContent, error::Server> {
+    path: Path<Uuid>,
+) -> Result<HttpResponse, error::Server> {
+    let id = path.into_inner();
+
     let record = sqlx::query!(
         r#"delete from web_media_library where id = $1 returning kind as "kind: MediaKind""#,
         id
@@ -222,7 +221,7 @@ async fn delete_media(
 
     let kind = match record {
         Some(record) => record.kind,
-        None => return Ok(NoContent),
+        None => return Ok(HttpResponse::NoContent().finish()),
     };
 
     let delete = |file_kind| s3.delete_media(MediaLibrary::Web, file_kind, id);
@@ -243,15 +242,14 @@ async fn delete_media(
         kind => return Err(anyhow::anyhow!("unsupported media kind {:?}", kind).into()),
     }
 
-    Ok(NoContent)
+    Ok(HttpResponse::NoContent().finish())
 }
 
-#[api_v2_operation]
 async fn delete_url(
     pool: Data<PgPool>,
     _auth: TokenUserWithScope<ScopeAdmin>,
     url: Path<Base64<Url>>,
-) -> Result<NoContent, error::Server> {
+) -> Result<HttpResponse, error::Server> {
     let url = url.into_inner().0;
     sqlx::query!(
         "delete from web_media_library_url where media_url = $1",
@@ -260,15 +258,16 @@ async fn delete_url(
     .execute(pool.as_ref())
     .await?;
 
-    Ok(NoContent)
+    Ok(HttpResponse::NoContent().finish())
 }
 
-#[api_v2_operation]
 async fn get(
     pool: Data<PgPool>,
     _claims: TokenUser,
-    Path(id): Path<Uuid>,
+    path: Path<Uuid>,
 ) -> Result<Json<WebMediaMetadataResponse>, error::NotFound> {
+    let id = path.into_inner();
+
     let media = sqlx::query!(
         r#"
 select id,
@@ -297,13 +296,17 @@ where id = $1"#,
     }))
 }
 
-#[api_v2_operation]
 async fn get_by_url(
     pool: Data<PgPool>,
     _claims: TokenUser,
-    Path(Base64(url)): Path<Base64<Url>>,
+    path: Path<Base64<Url>>, // FIXME
 ) -> Result<Json<WebMediaMetadataResponse>, error::NotFound> {
+    let Base64(url) = path.into_inner();
+
+    // let url = Base64::decode()
+
     let media = sqlx::query!(
+        //language=SQL
         r#"
 select id,
        kind as "kind: MediaKind",
@@ -332,7 +335,7 @@ where id = (select media_id from web_media_library_url where media_url = $1)
     }))
 }
 
-pub fn configure(cfg: &mut ServiceConfig<'_>) {
+pub fn configure(cfg: &mut ServiceConfig) {
     cfg.route(
         endpoints::media::Create::PATH,
         endpoints::media::Create::METHOD.route().to(create),

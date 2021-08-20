@@ -3,11 +3,9 @@ use crate::{
     db, error,
     extractor::{ScopeAdmin, TokenUserWithScope},
 };
-use paperclip::actix::web::Path;
-use paperclip::actix::{
-    api_v2_operation,
-    web::{Data, Json},
-    CreatedJson, NoContent,
+use actix_web::{
+    web::{Data, Json, Path},
+    HttpResponse,
 };
 use shared::domain::image::tag::ImageTagResponse;
 use shared::domain::meta::ImageTagIndex;
@@ -17,7 +15,6 @@ use shared::{
 };
 use sqlx::PgPool;
 
-#[api_v2_operation]
 pub(super) async fn list(
     db: Data<PgPool>,
     _claims: TokenUserWithScope<ScopeAdmin>,
@@ -27,32 +24,30 @@ pub(super) async fn list(
     Ok(Json(ImageTagListResponse { image_tags }))
 }
 
-#[api_v2_operation]
 pub(super) async fn create(
     db: Data<PgPool>,
     _claims: TokenUserWithScope<ScopeAdmin>,
     index: Path<ImageTagIndex>,
     req: Json<<endpoints::image::tag::Create as ApiEndpoint>::Req>,
-) -> Result<CreatedJson<<endpoints::image::tag::Create as ApiEndpoint>::Res>, error::Tag> {
+) -> Result<HttpResponse, error::Tag> {
     let res =
         db::image::tag::create(db.as_ref(), index.into_inner(), req.display_name.as_str()).await?;
 
-    Ok(CreatedJson(ImageTagResponse {
+    Ok(HttpResponse::Created().json(ImageTagResponse {
         index: res.0,
         display_name: res.1,
     }))
 }
 
-#[api_v2_operation]
 pub(super) async fn update(
     db: Data<PgPool>,
     _claims: TokenUserWithScope<ScopeAdmin>,
     index: Path<i16>,
     req: Json<<endpoints::image::tag::Update as ApiEndpoint>::Req>,
-) -> Result<NoContent, error::Tag> {
+) -> Result<HttpResponse, error::Tag> {
     let req = req.into_inner();
 
-    let _resp = db::image::tag::update(
+    db::image::tag::update(
         db.as_ref(),
         index.into_inner(),
         req.display_name.as_deref(),
@@ -60,16 +55,15 @@ pub(super) async fn update(
     )
     .await?;
 
-    Ok(NoContent)
+    Ok(HttpResponse::NoContent().finish())
 }
 
-#[api_v2_operation]
 pub(super) async fn delete(
     db: Data<PgPool>,
     _claims: TokenUserWithScope<ScopeAdmin>,
     req: Path<i16>,
-) -> Result<NoContent, error::Tag> {
+) -> Result<HttpResponse, error::Tag> {
     db::image::tag::delete(db.as_ref(), req.into_inner()).await?;
 
-    Ok(NoContent)
+    Ok(HttpResponse::NoContent().finish())
 }

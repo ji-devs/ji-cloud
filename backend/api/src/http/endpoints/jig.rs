@@ -1,10 +1,8 @@
-use actix_web::web::Query;
-use chrono::{DateTime, Utc};
-use paperclip::actix::{
-    api_v2_operation,
-    web::{self, Data, Json, ServiceConfig},
-    CreatedJson, NoContent,
+use actix_web::{
+    web::{self, Data, Json, Query, ServiceConfig},
+    HttpResponse,
 };
+use chrono::{DateTime, Utc};
 use shared::{
     api::{endpoints::jig, ApiEndpoint},
     domain::{
@@ -27,12 +25,17 @@ use crate::{
 mod player;
 
 /// Create a jig.
-#[api_v2_operation]
 async fn create(
     db: Data<PgPool>,
     auth: TokenUser,
     req: Option<Json<<jig::Create as ApiEndpoint>::Req>>,
-) -> Result<CreatedJson<<jig::Create as ApiEndpoint>::Res>, error::CreateWithMetadata> {
+) -> Result<
+    (
+        Json<<jig::Create as ApiEndpoint>::Res>,
+        actix_web::http::StatusCode,
+    ),
+    error::CreateWithMetadata,
+> {
     let db = db.as_ref();
     db::jig::authz(db, auth.0.user_id, None).await?;
 
@@ -73,31 +76,32 @@ async fn create(
         CreateJigError::Sqlx(e) => db::meta::handle_metadata_err(e).into(),
     })?;
 
-    Ok(CreatedJson(CreateResponse { id }))
+    Ok((
+        Json(CreateResponse { id }),
+        actix_web::http::StatusCode::CREATED, // FIXME this
+    ))
 }
 
 /// Clone a jig
-#[api_v2_operation]
 async fn clone(
     db: Data<PgPool>,
     claims: TokenUser,
     parent: web::Path<JigId>,
-) -> Result<CreatedJson<<jig::Create as ApiEndpoint>::Res>, error::JigCloneDraft> {
+) -> Result<HttpResponse, error::JigCloneDraft> {
     db::jig::authz(&*db, claims.0.user_id, None).await?;
 
     let id = db::jig::clone(&*db, parent.into_inner(), claims.0.user_id).await?;
 
-    Ok(CreatedJson(CreateResponse { id }))
+    Ok(HttpResponse::Created().json(CreateResponse { id }))
 }
 
 /// Delete a jig.
-#[api_v2_operation]
 async fn delete(
     db: Data<PgPool>,
     claims: TokenUser,
     path: web::Path<JigId>,
     algolia: ServiceData<crate::algolia::Client>,
-) -> Result<NoContent, error::Delete> {
+) -> Result<HttpResponse, error::Delete> {
     let id = path.into_inner();
 
     db::jig::authz(&*db, claims.0.user_id, Some(id)).await?;
@@ -106,17 +110,16 @@ async fn delete(
 
     algolia.delete_jig(id).await;
 
-    Ok(NoContent)
+    Ok(HttpResponse::NoContent().finish())
 }
 
 /// Update a jig.
-#[api_v2_operation]
 async fn update(
     db: Data<PgPool>,
     claims: TokenUser,
     req: Option<Json<<jig::Update as ApiEndpoint>::Req>>,
     path: web::Path<JigId>,
-) -> Result<NoContent, error::UpdateWithMetadata> {
+) -> Result<HttpResponse, error::UpdateWithMetadata> {
     let id = path.into_inner();
 
     db::jig::authz(&*db, claims.0.user_id, Some(id)).await?;
@@ -143,11 +146,10 @@ async fn update(
     )
     .await?;
 
-    Ok(NoContent)
+    Ok(HttpResponse::NoContent().finish())
 }
 
 /// Get a jig.
-#[api_v2_operation]
 async fn get(
     db: Data<PgPool>,
     path: web::Path<JigId>,
@@ -159,7 +161,6 @@ async fn get(
     Ok(Json(JigResponse { jig }))
 }
 
-#[api_v2_operation]
 async fn browse(
     db: Data<PgPool>,
     claims: TokenUser,
@@ -194,7 +195,6 @@ async fn browse(
 }
 
 /// Search for jigs.
-#[api_v2_operation]
 async fn search(
     db: Data<PgPool>,
     algolia: ServiceData<crate::algolia::Client>,
@@ -230,23 +230,21 @@ async fn search(
 }
 
 /// Create a draft of a published jig
-#[api_v2_operation]
 async fn create_draft(
     db: Data<PgPool>,
     claims: TokenUser,
     live_id: web::Path<JigId>,
-) -> Result<CreatedJson<<jig::draft::Create as ApiEndpoint>::Res>, error::JigCloneDraft> {
+) -> Result<HttpResponse, error::JigCloneDraft> {
     let live_id = live_id.into_inner();
 
     db::jig::authz(&*db, claims.0.user_id, Some(live_id)).await?;
 
     let id = db::jig::create_draft(&*db, live_id).await?;
 
-    Ok(CreatedJson(CreateResponse { id }))
+    Ok(HttpResponse::Created().json(CreateResponse { id }))
 }
 
 /// Get the id for the draft of a published jig
-#[api_v2_operation]
 async fn get_draft(
     db: Data<PgPool>,
     claims: TokenUser,
@@ -262,7 +260,6 @@ async fn get_draft(
 }
 
 /// Publish the draft version of a jig.
-#[api_v2_operation]
 async fn publish_draft(
     db: Data<PgPool>,
     claims: TokenUser,
@@ -277,14 +274,13 @@ async fn publish_draft(
     Ok(Json(()))
 }
 
-#[api_v2_operation]
 async fn count(db: Data<PgPool>) -> Result<Json<<jig::Count as ApiEndpoint>::Res>, error::Server> {
     let total_count: u64 = db::jig::filtered_count(&*db, Some(true), None).await?;
 
     Ok(Json(JigCountResponse { total_count }))
 }
 
-pub fn configure(cfg: &mut ServiceConfig<'_>) {
+pub fn configure(cfg: &mut ServiceConfig) {
     cfg.route(jig::Browse::PATH, jig::Browse::METHOD.route().to(browse))
         .route(jig::Count::PATH, jig::Count::METHOD.route().to(count))
         .route(

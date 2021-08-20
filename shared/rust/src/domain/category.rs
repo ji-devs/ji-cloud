@@ -1,13 +1,8 @@
 //! Types for categories.
 
 use chrono::{DateTime, Utc};
-#[cfg(feature = "backend")]
-use paperclip::actix::Apiv2Schema;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-
-#[cfg(feature = "backend")]
-mod paperclip_impl;
 
 /// Wrapper type around [`Uuid`], represents the ID of a category.
 ///
@@ -15,13 +10,11 @@ mod paperclip_impl;
 #[derive(Hash, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct CategoryId(pub Uuid);
 
 into_uuid!(CategoryId);
 
 #[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 /// The response returned when a request for categories is successful.
 pub struct CategoryResponse {
     /// The categories returned.
@@ -56,7 +49,6 @@ pub struct Category {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 /// When getting a tree of categories, which direction should the categories be followed?
 pub enum CategoryTreeScope {
     /// Follow the parents up to the root.
@@ -67,7 +59,6 @@ pub enum CategoryTreeScope {
 }
 
 #[derive(Serialize, Deserialize)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 /// Request to create a category.
 pub struct CreateCategoryRequest {
     /// The name of the new category.
@@ -125,7 +116,6 @@ pub struct GetCategoryRequest {
 }
 
 #[derive(Serialize, Deserialize)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 /// Response returned when a new category is created.
 pub struct NewCategoryResponse {
     /// The offset visual offset into the parent category.
@@ -136,7 +126,6 @@ pub struct NewCategoryResponse {
 }
 
 #[derive(Serialize, Deserialize, Default, Eq, PartialEq)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 /// Request to update a category.
 ///
 /// All fields are optional, any field that is [`None`] will not be updated.

@@ -1,7 +1,9 @@
-use actix_web::{web::Data, HttpResponse};
+use actix_web::{
+    web::{Data, ServiceConfig},
+    HttpResponse,
+};
 use chrono::{Duration, Utc};
 use core::settings::RuntimeSettings;
-use paperclip::actix::{api_v2_operation, web::ServiceConfig};
 use shared::{
     api::{endpoints::session, ApiEndpoint},
     domain::session::{CreateSessionResponse, NewSessionResponse},
@@ -20,7 +22,6 @@ mod oauth;
 
 /// Login with basic authorization.
 /// May return resources for *signing up* if the user doesn't have a profile.
-#[api_v2_operation]
 async fn create_session(
     db: Data<PgPool>,
     settings: Data<RuntimeSettings>,
@@ -67,7 +68,6 @@ async fn create_session(
 }
 
 /// Logout
-#[api_v2_operation]
 async fn delete_session(
     db: Data<PgPool>,
     session: TokenSessionOf<SessionAny>,
@@ -79,7 +79,7 @@ async fn delete_session(
     Ok(NoContentClearAuth)
 }
 
-pub fn configure(cfg: &mut ServiceConfig<'_>) {
+pub fn configure(cfg: &mut ServiceConfig) {
     cfg.route(
         session::GetOAuthUrl::PATH,
         session::GetOAuthUrl::METHOD.route().to(oauth::get_url),

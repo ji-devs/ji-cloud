@@ -1,7 +1,4 @@
-use paperclip::actix::{
-    api_v2_operation,
-    web::{Data, Json, ServiceConfig},
-};
+use actix_web::web::{Data, Json, ServiceConfig};
 use shared::{
     api::{endpoints::meta::Get, ApiEndpoint},
     domain::meta::MetadataResponse,
@@ -12,7 +9,6 @@ use crate::{db, error};
 
 // TODO: Should have cache headers
 /// Get a list of all available metadata of all kinds (sans categories)
-#[api_v2_operation]
 async fn get(db: Data<PgPool>) -> Result<Json<<Get as ApiEndpoint>::Res>, error::Server> {
     let affiliations = db::meta::get_affiliations(&db).await?;
     let age_ranges = db::meta::get_age_ranges(&db).await?;
@@ -33,6 +29,6 @@ async fn get(db: Data<PgPool>) -> Result<Json<<Get as ApiEndpoint>::Res>, error:
     }))
 }
 
-pub fn configure(cfg: &mut ServiceConfig<'_>) {
+pub fn configure(cfg: &mut ServiceConfig) {
     cfg.route(Get::PATH, Get::METHOD.route().to(get));
 }

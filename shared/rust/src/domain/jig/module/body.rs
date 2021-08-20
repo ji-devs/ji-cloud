@@ -3,8 +3,6 @@ use crate::{
     domain::{audio::AudioId, image::ImageId},
     media::MediaLibrary,
 };
-#[cfg(feature = "backend")]
-use paperclip::actix::Apiv2Schema;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use std::{collections::HashSet, convert::TryFrom, fmt::Debug, hash::Hash};
 
@@ -40,7 +38,6 @@ pub mod _groups;
 
 /// Body kinds for Modules.
 #[derive(Clone, Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
 pub enum Body {
@@ -309,7 +306,6 @@ pub trait StepExt: Copy + Default + PartialEq + Eq + Hash {
 /// Theme Ids. Used in various modules
 /// See the frontend extension trait for more info
 #[derive(Clone, Copy, Eq, PartialEq, Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 #[repr(i16)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 pub enum ThemeId {
@@ -383,7 +379,6 @@ impl Default for ThemeId {
 
 /// Theme choice, either jig or override
 #[derive(Clone, Copy, Eq, PartialEq, Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub enum ThemeChoice {
     /// Use the jig's theme
     Jig,
@@ -399,7 +394,6 @@ impl Default for ThemeChoice {
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, Eq, PartialEq)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 /// Audio
 pub struct Audio {
     /// The Audio Id
@@ -410,7 +404,6 @@ pub struct Audio {
 
 /// Instructions for a module.
 #[derive(Clone, Default, Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct Instructions {
     /// Text displayed in banner
     pub text: Option<String>,
@@ -420,7 +413,6 @@ pub struct Instructions {
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 /// Background
 pub enum Background {
     /// Color
@@ -430,7 +422,6 @@ pub enum Background {
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 /// Images need id and lib
 pub struct Image {
     /// The Image Id
@@ -440,7 +431,6 @@ pub struct Image {
 }
 
 #[derive(Clone, Default, Serialize, Deserialize, Debug, PartialEq)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 /// Vector of 2 floats
 pub struct Vec2(pub [f64; 2]);
 
@@ -457,7 +447,6 @@ impl From<Vec2> for (f64, f64) {
 }
 
 #[derive(Clone, Default, Serialize, Deserialize, Debug, PartialEq)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 /// Vector of 3 floats
 pub struct Vec3(pub [f64; 3]);
 
@@ -474,7 +463,6 @@ impl From<Vec3> for (f64, f64, f64) {
 }
 
 #[derive(Clone, Default, Serialize, Deserialize, Debug, PartialEq)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 /// Vector of 4 floats, also used as a Quaternion
 pub struct Vec4(pub [f64; 4]);
 
@@ -491,7 +479,6 @@ impl From<Vec4> for (f64, f64, f64, f64) {
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 /// Visual Transform
 pub struct Transform {
     /// Translation

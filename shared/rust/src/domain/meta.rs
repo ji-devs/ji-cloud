@@ -4,56 +4,46 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-#[cfg(feature = "backend")]
-use paperclip::actix::Apiv2Schema;
-
 /// Wrapper type around [`Uuid`], represents [`ImageStyle::id`].
 #[derive(Hash, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct ImageStyleId(pub Uuid);
 
 /// Wrapper type around [`Uuid`], represents [`AnimationStyle::id`].
 #[derive(Hash, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct AnimationStyleId(pub Uuid);
 
 /// Wrapper type around [`Uuid`], represents [`AudioStyle::id`].
 #[derive(Hash, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct AudioStyleId(pub Uuid);
 
 /// Wrapper type around [`Uuid`], represents [`AgeRange::id`].
 #[derive(Hash, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct AgeRangeId(pub Uuid);
 
 /// Wrapper type around [`Uuid`], represents [`Affiliation::id`].
 #[derive(Hash, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct AffiliationId(pub Uuid);
 
 /// Wrapper type around [`Uuid`], represents [`Subject::id`].
 #[derive(Hash, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct SubjectId(pub Uuid);
 
 /// Wrapper type around [`Uuid`], represents [`Goal::id`].
 #[derive(Hash, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct GoalId(pub Uuid);
 
 into_uuid!(
@@ -72,7 +62,6 @@ into_uuid!(
 #[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct ImageTagIndex(pub i16);
 
 impl From<ImageTagIndex> for i16 {
@@ -83,7 +72,6 @@ impl From<ImageTagIndex> for i16 {
 
 /// Represents an image style.
 #[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct ImageStyle {
     /// The id of the image style.
     pub id: ImageStyleId,
@@ -100,7 +88,6 @@ pub struct ImageStyle {
 
 /// Represents an animation style.
 #[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct AnimationStyle {
     /// The id of the animation style.
     pub id: AnimationStyleId,
@@ -117,7 +104,6 @@ pub struct AnimationStyle {
 
 /// Represents a age range.
 #[derive(Clone, Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct AgeRange {
     /// The id of the age range.
     pub id: AgeRangeId,
@@ -134,7 +120,6 @@ pub struct AgeRange {
 
 /// Represents an affiliation.
 #[derive(Serialize, Deserialize, Debug, Clone)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct Affiliation {
     /// The id of the affiliation.
     pub id: AffiliationId,
@@ -151,7 +136,6 @@ pub struct Affiliation {
 
 /// Represents a subject.
 #[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct Subject {
     /// The id of the subject.
     pub id: SubjectId,
@@ -168,7 +152,6 @@ pub struct Subject {
 
 /// Represents a goal.
 #[derive(Clone, Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct Goal {
     /// The id of the goal.
     pub id: GoalId,
@@ -185,7 +168,6 @@ pub struct Goal {
 
 /// Represents a tag.
 #[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct ImageTag {
     /// Index of the tag.
     pub index: ImageTagIndex,
@@ -202,7 +184,6 @@ pub struct ImageTag {
 
 /// Response for fetching all metadata.
 #[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct MetadataResponse {
     /// All image styles the server has.
     pub image_styles: Vec<ImageStyle>,
@@ -231,7 +212,6 @@ pub struct MetadataResponse {
 
 /// Metadata kinds.
 #[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub enum MetaKind {
     /// [`Affiliation`]
     Affiliation,

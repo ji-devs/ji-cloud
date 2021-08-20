@@ -162,8 +162,8 @@ fn build_media_watch(
     // if this is changed in the future
     let server = actix_web::HttpServer::new(move || {
         let server = actix_web::App::new()
-            .data(db_pool.clone())
-            .data(runtime_settings.clone());
+            .app_data(Data::new(db_pool.clone()))
+            .app_data(Data::new(runtime_settings.clone()));
 
         let server = match s3.clone() {
             Some(s3) => server.app_data(s3),
@@ -187,7 +187,6 @@ fn build_media_watch(
 
         server
             .wrap(actix_web::middleware::Logger::default())
-            .wrap(actix_cors::Cors::permissive())
             .app_data(
                 actix_web::web::JsonConfig::default()
                     .limit(JSON_BODY_LIMIT as usize)

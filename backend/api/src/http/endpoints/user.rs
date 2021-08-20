@@ -1,13 +1,10 @@
-use actix_http::error::BlockingError;
-use actix_web::HttpResponse;
+use actix_web::{
+    web::{Data, Json, Query, ServiceConfig},
+    HttpResponse,
+};
 use argon2::{password_hash::SaltString, Argon2, PasswordHasher};
 use chrono::{Duration, Utc};
 use core::settings::RuntimeSettings;
-use paperclip::actix::{
-    api_v2_operation,
-    web::{Data, Json, Query, ServiceConfig},
-    NoContent,
-};
 use rand::thread_rng;
 use sendgrid::v3::Email;
 use shared::{
@@ -96,7 +93,7 @@ async fn send_password_email(
 }
 
 async fn hash_password(pass: String) -> anyhow::Result<String> {
-    let res = actix_web::web::block(move || {
+    let pass_hash = actix_web::web::block(move || {
         let password_hasher = Argon2::default();
 
         let salt = SaltString::generate(thread_rng());
@@ -110,25 +107,18 @@ async fn hash_password(pass: String) -> anyhow::Result<String> {
             .map_err(|it| anyhow::anyhow!("{}", it))
             .map(|it| it.to_string())
     })
-    .await;
-
-    let pass_hash = match res {
-        Ok(hash) => hash,
-        Err(BlockingError::Canceled) => return Err(anyhow::anyhow!("Thread pool is gone").into()),
-        Err(BlockingError::Error(e)) => return Err(anyhow::anyhow!("{}", e).into()),
-    };
+    .await??;
 
     Ok(pass_hash)
 }
 
 /// Create a user
-#[api_v2_operation]
 async fn create_user(
     config: Data<RuntimeSettings>,
     mail: ServiceData<mail::Client>,
     db: Data<PgPool>,
     req: Json<<Create as ApiEndpoint>::Req>,
-) -> Result<NoContent, error::Register> {
+) -> Result<HttpResponse, error::Register> {
     let req = req.into_inner();
 
     if req.password.is_empty() {
@@ -191,11 +181,10 @@ async fn create_user(
 
     txn.commit().await?;
 
-    Ok(NoContent)
+    Ok(HttpResponse::NoContent().finish())
 }
 
 /// Verify emails
-#[api_v2_operation]
 async fn verify_email(
     config: Data<RuntimeSettings>,
     mail: ServiceData<mail::Client>,
@@ -319,7 +308,6 @@ returning user_id
 }
 
 /// Lookup a user.
-#[api_v2_operation]
 async fn user_lookup(
     db: Data<PgPool>,
     query: Query<UserLookupQuery>,
@@ -341,7 +329,6 @@ fn validate_register_req(req: &PutProfileRequest) -> Result<(), error::UserUpdat
 }
 
 /// Create or replace your profile.
-#[api_v2_operation]
 async fn put_profile(
     settings: Data<RuntimeSettings>,
     db: Data<PgPool>,
@@ -399,21 +386,19 @@ fn validate_patch_profile_req(
 }
 
 /// Update your profile.
-#[api_v2_operation]
 async fn patch_profile(
     db: Data<PgPool>,
     claims: TokenUser,
     req: Json<<PatchProfile as ApiEndpoint>::Req>,
-) -> Result<NoContent, error::UserUpdate> {
+) -> Result<HttpResponse, error::UserUpdate> {
     validate_patch_profile_req(&req)?;
 
     db::user::update_profile(&*db, claims.0.user_id, req.into_inner()).await?;
 
-    Ok(NoContent)
+    Ok(HttpResponse::NoContent().finish())
 }
 
 /// Get a user's profile.
-#[api_v2_operation]
 async fn get_profile(
     db: Data<PgPool>,
     claims: TokenUser,
@@ -427,7 +412,6 @@ async fn get_profile(
 }
 
 /// Delete your account
-#[api_v2_operation]
 async fn delete(
     db: Data<PgPool>,
     session: TokenSessionOf<SessionDelete>,
@@ -443,13 +427,12 @@ async fn delete(
 }
 
 /// Reset password
-#[api_v2_operation]
 async fn reset_password(
     config: Data<RuntimeSettings>,
     req: Json<<ResetPassword as ApiEndpoint>::Req>,
     db: Data<PgPool>,
     mail: ServiceData<mail::Client>,
-) -> Result<NoContent, error::Service> {
+) -> Result<HttpResponse, error::Service> {
     let req = req.into_inner();
 
     let mut txn = db.begin().await?;
@@ -463,7 +446,7 @@ async fn reset_password(
 
     let user_id = match user {
         Some(user) => user.user_id,
-        None => return Ok(NoContent),
+        None => return Ok(HttpResponse::NoContent().finish()),
     };
 
     send_password_email(
@@ -477,15 +460,14 @@ async fn reset_password(
 
     txn.commit().await?;
 
-    Ok(NoContent)
+    Ok(HttpResponse::NoContent().finish())
 }
 
 /// Change password
-#[api_v2_operation]
 async fn put_password(
     db: Data<PgPool>,
     req: Json<<ChangePassword as ApiEndpoint>::Req>,
-) -> Result<NoContent, error::ServiceSession> {
+) -> Result<HttpResponse, error::ServiceSession> {
     let ChangePasswordRequest::Change {
         password,
         force_logout,
@@ -559,10 +541,10 @@ values ($1, $2::text, $3)
 
     txn.commit().await?;
 
-    Ok(NoContent)
+    Ok(HttpResponse::NoContent().finish())
 }
 
-pub fn configure(cfg: &mut ServiceConfig<'_>) {
+pub fn configure(cfg: &mut ServiceConfig) {
     cfg.route(Profile::PATH, Profile::METHOD.route().to(get_profile))
         .route(Create::PATH, Create::METHOD.route().to(create_user))
         .route(

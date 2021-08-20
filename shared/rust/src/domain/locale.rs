@@ -5,13 +5,9 @@ use std::collections::BTreeMap;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-#[cfg(feature = "backend")]
-use paperclip::actix::Apiv2Schema;
-
 /// A bundle of [`Entry`]s
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[serde(rename_all = "camelCase")]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct Bundle {
     /// The bundle's id
     pub id: Uuid,
@@ -23,7 +19,6 @@ pub struct Bundle {
 /// What kind of item an [`Entry`] is.
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct ItemKind {
     /// The item kind's id
     pub id: Uuid,
@@ -36,7 +31,6 @@ pub struct ItemKind {
 #[derive(Serialize, Deserialize, Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 #[serde(rename_all = "camelCase")]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 #[repr(i16)]
 pub enum EntryStatus {
     /// The entry has been approved.
@@ -54,7 +48,6 @@ pub enum EntryStatus {
 /// An entry into the ?
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct Entry {
     /// This entry's id
     pub id: u32,
@@ -96,7 +89,6 @@ pub struct Entry {
 /// Request for creating an entry.
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct CreateEntryRequest {
     /// This entry's parent [`Bundle`]'s id
     pub bundle_id: Uuid,
@@ -135,7 +127,6 @@ pub struct CreateEntryRequest {
 /// Response for successful creation of an entry.
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct CreateEntryResponse {
     /// The newly created [`Entry`]'s id.
     pub id: u32,
@@ -144,7 +135,6 @@ pub struct CreateEntryResponse {
 /// Group by modifier for listing entries
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 #[non_exhaustive]
 pub enum ListEntryGroupBy {
     /// No grouping, just return a plain list
@@ -175,7 +165,6 @@ impl Default for ListEntryGroupBy {
 /// Query for listing [`entries`](Entry)
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
 #[serde(rename_all = "camelCase")]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct ListEntryQuery {
     /// The [`Bundle`]s to filter to (empty means "all")
     #[serde(skip_serializing_if = "Vec::is_empty")]
@@ -196,7 +185,6 @@ pub struct ListEntryQuery {
 /// Response for listing entries
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub enum ListEntryResponse {
     /// Entries grouped by [`Bundle`]
     Bundles(BTreeMap<Uuid, Vec<Entry>>),
@@ -208,7 +196,6 @@ pub enum ListEntryResponse {
 /// Response for getting a individual entry.
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct GetEntryResponse {
     /// The requested entry.
     pub entry: Entry,
@@ -217,7 +204,6 @@ pub struct GetEntryResponse {
 /// Request for updating an [`Entry`]
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct UpdateEntryRequest {
     /// This entry's parent [`Bundle`]'s id
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -281,7 +267,6 @@ pub struct UpdateEntryRequest {
 /// Response for listing bundles
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct ListBundleResponse {
     /// A list of bundles
     pub bundles: Vec<Bundle>,
@@ -290,7 +275,6 @@ pub struct ListBundleResponse {
 /// Response for listing item kinds
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct ListItemKindResponse {
     /// A list of item kinds
     pub item_kinds: Vec<ItemKind>,
