@@ -1,5 +1,5 @@
 use actix_web::http::{header, Method};
-use shared::config::CORS_ORIGINS;
+use core::config::CORS_ORIGINS;
 
 pub fn get(local_insecure: bool) -> actix_cors::Cors {
     let mut cors = actix_cors::Cors::default()
