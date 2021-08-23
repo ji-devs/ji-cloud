@@ -8,11 +8,11 @@ pub fn render_traces_edit(state: Rc<TracesEdit>) -> Dom {
     html!("empty-fragment", {
         .child_signal(state.phase.signal_cloned().map(clone!(state => move |phase| {
             match phase {
-                Phase::All => {
-                    Some(super::all::dom::render_traces_all(state.clone()))
+                Phase::Selectable => {
+                    Some(TracesEdit::render_selectable(state.clone()))
                 },
                 Phase::Draw(draw) => {
-                    Some(super::draw::dom::render_traces_draw(draw.clone(), state.list.lock_ref()))
+                    Some(TracesEdit::render_draw(state.clone(), draw.clone()))
                 }
             }
         })))

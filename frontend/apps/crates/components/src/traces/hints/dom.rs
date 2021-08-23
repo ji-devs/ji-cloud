@@ -3,7 +3,7 @@ use std::rc::Rc;
 use utils::resize::{resize_info_signal, ResizeInfo};
 
 use crate::traces::{
-    svg::{self, ShapeStyle, ShapeStyleBase, SvgCallbacks},
+    svg::{self, ShapeStyle, ShapeStyleBase, SvgCallbacks, TransformSize},
     utils::*,
 };
 use futures_signals::{
@@ -53,11 +53,11 @@ pub fn render_trace_hint(
     style: &ShapeStyle,
     resize_info: &ResizeInfo,
     trace: &Trace,
-    callbacks: SvgCallbacks,
+    callbacks: Rc<SvgCallbacks>,
 ) -> Dom {
     let transform_size = trace
         .calc_size(resize_info)
-        .map(|size| (&trace.transform, size));
+        .map(|size| TransformSize::new_static(&trace.transform, size));
 
     match trace.shape {
         TraceShape::Path(ref path) => {

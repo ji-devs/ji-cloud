@@ -8,12 +8,12 @@ use std::rc::Rc;
 
 use shared::domain::jig::module::body::_groups::design::Trace as RawTrace;
 
-use super::{all::trace::state::*, callbacks::*, draw::state::*};
+use super::{select::trace::state::*, callbacks::*, draw::state::*};
 use crate::traces::utils::TraceExt;
 use utils::resize::get_resize_info;
 
 pub struct TracesEdit {
-    pub list: MutableVec<Rc<AllTrace>>,
+    pub list: MutableVec<Rc<SelectTrace>>,
     pub selected_index: Mutable<Option<usize>>,
     pub phase: Mutable<Phase>,
     pub callbacks: Callbacks,
@@ -21,7 +21,7 @@ pub struct TracesEdit {
 
 #[derive(Clone)]
 pub enum Phase {
-    All,
+    Selectable,
     Draw(Rc<Draw>),
 }
 
@@ -49,7 +49,7 @@ impl TracesEdit {
         let _self = Rc::new(Self {
             list: MutableVec::new(),
             selected_index: Mutable::new(None),
-            phase: Mutable::new(Phase::All),
+            phase: Mutable::new(Phase::Selectable),
             callbacks,
         });
 
@@ -57,7 +57,7 @@ impl TracesEdit {
             let resize_info = get_resize_info();
             _self.list.lock_mut().replace_cloned(
                 raw.into_iter()
-                    .map(|trace| Rc::new(AllTrace::new(trace.clone(), &resize_info)))
+                    .map(|trace| Rc::new(SelectTrace::new(trace.clone(), &resize_info)))
                     .collect(),
             );
         }
@@ -69,11 +69,11 @@ impl TracesEdit {
         _self
     }
 
-    pub fn get_current(&self) -> Option<Rc<AllTrace>> {
+    pub fn get_current(&self) -> Option<Rc<SelectTrace>> {
         self.selected_index.get_cloned().and_then(|i| self.get(i))
     }
 
-    pub fn get(&self, index: usize) -> Option<Rc<AllTrace>> {
+    pub fn get(&self, index: usize) -> Option<Rc<SelectTrace>> {
         self.list.lock_ref().get(index).map(|x| x.clone())
     }
 
