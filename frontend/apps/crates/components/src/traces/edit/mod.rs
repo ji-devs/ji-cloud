@@ -1,5 +1,5 @@
 pub mod actions;
-pub mod all;
+pub mod select;
 pub mod callbacks;
 pub mod dom;
 pub mod draw;

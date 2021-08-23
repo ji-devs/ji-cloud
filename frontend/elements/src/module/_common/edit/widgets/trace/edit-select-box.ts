@@ -27,6 +27,14 @@ export class _ extends LitElement {
               display: flex;
               justify-content: space-between;
           }
+          
+        ::slotted([slot=click-area]) {
+            position: absolute;
+            top: 0; 
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
 
     `]
   }
@@ -40,6 +48,7 @@ export class _ extends LitElement {
         const menuClasses = classMap({hidden: !selected});
 
       return html`
+          <slot name="click-area"></slot>
           <section class="menu-buttons">
               <slot name="status-btn"><div>&nbsp;</div></slot>
               <div class=${menuClasses}><slot name="menu-btn"></slot></div>

@@ -12,6 +12,7 @@ const ALLOWED_APP_NAMES = [
 	"user",
 	"admin",
 	"home",
+	"kids",
 	"jig/edit",
 	"jig/play",
 	"legacy/play",

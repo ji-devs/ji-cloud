@@ -8,6 +8,7 @@ members = [
     "crates/entry/user",
     "crates/entry/admin",
     "crates/entry/home",
+    "crates/entry/kids",
     "crates/entry/jig/edit",
     "crates/entry/jig/play",
 	"crates/entry/legacy/_common",

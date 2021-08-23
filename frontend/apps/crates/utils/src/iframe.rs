@@ -90,7 +90,12 @@ impl <T: Serialize> IframeAction <T> {
 
         let value = serde_wasm_bindgen::to_value(self).unwrap_ji();
 
-        parent.post_message(&value, "*")
+        let res = parent.post_message(&value, "*");
+
+        if let Err(ref err) = res {
+            log::info!("Got error posting message: {:?}", err);
+        }
+        res
     }
 }
 

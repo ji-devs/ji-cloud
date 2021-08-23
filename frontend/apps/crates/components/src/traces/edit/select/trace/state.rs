@@ -1,4 +1,4 @@
-use futures_signals::signal::Mutable;
+use futures_signals::signal::{Signal, SignalExt, Mutable};
 
 use shared::domain::jig::module::body::{
     Transform,
@@ -7,29 +7,27 @@ use shared::domain::jig::module::body::{
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use super::super::select_box::state::*;
+use super::super::select_box::*;
 use crate::traces::utils::TraceExt;
 use utils::{math::BoundsF64, prelude::*, resize::ResizeInfo};
 use web_sys::SvgElement;
 
-pub struct AllTrace {
+pub struct SelectTrace {
     pub transform: Transform,
     pub shape: TraceShape,
     pub size: (f64, f64),
     pub select_box: Rc<SelectBox>,
     pub elem: RefCell<Option<SvgElement>>,
-    pub bounds: Mutable<Option<BoundsF64>>,
 }
 
-impl AllTrace {
+impl SelectTrace {
     pub fn new(raw: RawTrace, resize_info: &ResizeInfo) -> Self {
         let mut _self = Self {
-            transform: raw.transform,
+            transform: raw.transform.clone(),
             shape: raw.shape,
             size: (0.0, 0.0),
-            select_box: Rc::new(SelectBox::new()),
+            select_box: Rc::new(SelectBox::new(raw.transform)),
             elem: RefCell::new(None),
-            bounds: Mutable::new(None),
         };
 
         if let Some(bounds) = _self.calc_bounds(true) {
@@ -38,9 +36,11 @@ impl AllTrace {
 
         _self
     }
+
+
 }
 
-impl TraceExt for AllTrace {
+impl TraceExt for SelectTrace {
     fn to_raw(&self) -> RawTrace {
         RawTrace {
             transform: self.transform.clone(),

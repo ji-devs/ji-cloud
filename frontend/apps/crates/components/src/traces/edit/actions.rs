@@ -1,8 +1,8 @@
 use std::rc::Rc;
 
-use shared::domain::jig::module::body::_groups::design::Trace as RawTrace;
+use shared::domain::jig::module::body::{Transform, _groups::design::Trace as RawTrace};
 
-use super::{all::trace::state::*, draw::state::*, state::*};
+use super::{select::trace::state::*, draw::state::*, state::*};
 use crate::traces::utils::TraceExt;
 use dominator::clone;
 use utils::{prelude::*, resize::get_resize_info};
@@ -29,7 +29,7 @@ impl TracesEdit {
 
     pub fn add(&self, raw_trace: RawTrace) {
         let resize_info = get_resize_info();
-        let trace = Rc::new(AllTrace::new(raw_trace.clone(), &resize_info));
+        let trace = Rc::new(SelectTrace::new(raw_trace.clone(), &resize_info));
 
         {
             let mut list = self.list.lock_mut();
@@ -42,9 +42,19 @@ impl TracesEdit {
         }
     }
 
+    pub fn change_transform(&self, index: usize, transform: Transform) {
+        let raw_trace = {
+            let mut raw_trace = self.list.lock_ref().get(index).unwrap_ji().to_raw();
+            raw_trace.transform = transform;
+            raw_trace
+        };
+
+        self.change(index, raw_trace);
+    }
+
     pub fn change(&self, index: usize, raw_trace: RawTrace) {
         let resize_info = get_resize_info();
-        let trace = Rc::new(AllTrace::new(raw_trace.clone(), &resize_info));
+        let trace = Rc::new(SelectTrace::new(raw_trace.clone(), &resize_info));
 
         {
             let mut list = self.list.lock_mut();
@@ -90,7 +100,7 @@ impl TracesEdit {
                         Some(index) => _self.change(index, raw_trace)
                     }
                 }
-                _self.phase.set(Phase::All);
+                _self.phase.set(Phase::Selectable);
             }),
         );
 

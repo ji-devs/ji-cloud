@@ -2,7 +2,7 @@ use dominator::{clone, html, Dom};
 use std::rc::Rc;
 use utils::resize::resize_info_signal;
 
-use crate::traces::svg::{self, ShapeStyle, ShapeStyleBase, SvgCallbacks};
+use crate::traces::svg::{self, ShapeStyle, ShapeStyleBase, SvgCallbacks, TransformSize};
 use futures_signals::signal::SignalExt;
 
 use super::trace::*;
@@ -24,7 +24,7 @@ pub fn render_traces_select(traces: Vec<SelectTrace>) -> Dom {
                         None::<fn(web_sys::SvgElement)>,
                         None::<fn(web_sys::SvgElement)>,
                     );
-                    svg::render_single_shape(&style, &resize_info, &trace.inner, None, callbacks)
+                    svg::render_single_shape(&style, &resize_info, &trace.inner, TransformSize::none(), callbacks)
                 })
                 .collect::<Vec<Dom>>()
         }))
