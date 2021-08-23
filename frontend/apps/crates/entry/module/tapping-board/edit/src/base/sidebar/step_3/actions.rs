@@ -14,6 +14,7 @@ impl Step3 {
             .traces
             .get(index)
             .unwrap_ji()
+            .select_box
             .bounds
             .get()
             .unwrap_ji()
