@@ -9,13 +9,12 @@ use uuid::Uuid;
 use crate::{error, extractor::RequestOrigin};
 
 use core::{
-    config::{ANIMATION_BODY_SIZE_LIMIT, AUDIO_BODY_SIZE_LIMIT, IMAGE_BODY_SIZE_LIMIT},
+    config::{
+        ANIMATION_BODY_SIZE_LIMIT, AUDIO_BODY_SIZE_LIMIT, CORS_ORIGINS, IMAGE_BODY_SIZE_LIMIT,
+    },
     settings::GoogleCloudStorageSettings,
 };
-use shared::{
-    config::CORS_ORIGINS,
-    media::{self, FileKind, MediaLibrary, PngImageFile},
-};
+use shared::media::{self, FileKind, MediaLibrary, PngImageFile};
 
 pub struct Client {
     #[allow(dead_code)] // not used until migrate away from Rusoto

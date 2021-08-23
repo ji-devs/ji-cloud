@@ -2,15 +2,6 @@
 
 use std::env::VarError;
 
-pub const CORS_ORIGINS: &[&str] = &[
-    "https://jigzi.org",
-    "https://sandbox.jigzi.org",
-    "https://api.jigzi.org",
-    "https://api.sandbox.jigzi.org",
-    "http://localhost:4104",
-    "http://localhost:4105",
-];
-
 #[derive(Debug, PartialEq, Eq, Copy, Clone)]
 pub enum RemoteTarget {
     Local,

@@ -63,7 +63,7 @@ pub fn regenerate_images(
         let new_image = match kind {
             ImageKind::Canvas => original.resize_exact(width, height, FilterType::Nearest),
 
-            ImageKind::Sticker if (width <= original.width() && height <= original.height()) => {
+            ImageKind::Sticker if (width >= original.width() && height >= original.height()) => {
                 original.clone()
             }
 
@@ -102,4 +102,43 @@ pub fn generate_images(
     };
 
     Ok((original, resized, thumbnail))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[ignore] // slow
+    #[test]
+    fn regenerate_sticker_square() -> anyhow::Result<()> {
+        let original = include_bytes!("../fixtures/images/large-sticker.png");
+        let original = image::load_from_memory(original)?;
+
+        assert_eq!((1523, 1524), original.dimensions());
+
+        let (resized, thumbnail) = regenerate_images(&original, ImageKind::Sticker)?;
+
+        let resized = image::load_from_memory(&resized)?;
+
+        assert_eq!((809, 810), resized.dimensions());
+
+        Ok(())
+    }
+
+    #[ignore] // slow
+    #[test]
+    fn regenerate_sticker_tall() -> anyhow::Result<()> {
+        let original = include_bytes!("../fixtures/images/city-wide.png");
+        let original = image::load_from_memory(original)?;
+
+        assert_eq!((1500, 418), original.dimensions());
+
+        let (resized, thumbnail) = regenerate_images(&original, ImageKind::Sticker)?;
+
+        let resized = image::load_from_memory(&resized)?;
+
+        assert_eq!((1440, 401), resized.dimensions());
+
+        Ok(())
+    }
 }
