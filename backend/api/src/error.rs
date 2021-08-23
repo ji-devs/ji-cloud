@@ -52,12 +52,14 @@ impl Into<actix_web::Error> for Auth {
     }
 }
 
-// FIXME
 pub fn ise(e: anyhow::Error) -> actix_web::Error {
     let mut resp = HttpResponse::InternalServerError();
     resp.extensions_mut().insert(e);
-    resp.json(BasicError::new(http::StatusCode::INTERNAL_SERVER_ERROR));
-    actix_web::error::InternalError::from_response("", resp.finish()).into()
+    actix_web::error::InternalError::from_response(
+        "",
+        resp.json(BasicError::new(http::StatusCode::INTERNAL_SERVER_ERROR)),
+    )
+    .into()
 }
 
 #[non_exhaustive]
