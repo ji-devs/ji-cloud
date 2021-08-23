@@ -86,7 +86,6 @@ pub fn player_settings_change_signal(state: Rc<State>) -> impl Signal<Item = Jig
 pub fn on_iframe_message(state: Rc<State>, message: ModuleToJigEditorMessage) {
     match message {
         ModuleToJigEditorMessage::AppendModule(module) => {
-            log::info!("{:?}", module);
             populate_added_module(Rc::clone(&state), module);
         },
         ModuleToJigEditorMessage::Next => {
@@ -96,7 +95,8 @@ pub fn on_iframe_message(state: Rc<State>, message: ModuleToJigEditorMessage) {
 }
 
 fn populate_added_module(state: Rc<State>, module: LiteModule) {
-    state.modules.lock_mut().push_cloned(Rc::new(Some(module)));
+    state.modules.lock_mut().push_cloned(Rc::new(Some(module.clone())));
+    state.route.set_neq(JigEditRoute::Module(module.id));
 }
 
 pub fn use_module_as(state: Rc<State>, target_kind: ModuleKind, source_module_id: ModuleId) {

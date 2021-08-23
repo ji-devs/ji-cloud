@@ -158,10 +158,10 @@ impl DebugSettings {
                     }
                 }
             ),
-            step: Some(Step::Five),
+            step: Some(Step::Three),
             skip_save: true,
             skip_load_jig: true,
-            step_1_tab: Some(Step1TabKind::StickerText),
+            step_1_tab: Some(Step1TabKind::StickerImage),
             step_2_tab: Some(Step2TabKind::Select),
             step_5_tab: Some(Step5TabKind::Settings),
             trace_opts: Some(TracesOptions {
@@ -173,7 +173,6 @@ impl DebugSettings {
 
 pub fn init(jig_id: JigId, module_id: ModuleId) {
     if jig_id == JigId(Uuid::from_u128(0)) {
-        /*
          SETTINGS.set(DebugSettings::debug(Some(InitData{
 
             stickers: vec![
@@ -183,7 +182,7 @@ pub fn init(jig_id: JigId, module_id: ModuleId) {
                     ItemKind::Interactive(
                         Interactive {
                             audio: None,
-                            target_offset: (0.0, 0.0).into()
+                            target_transform: None,
                         }
                     ),
                     (-0.3, -0.3)
@@ -194,8 +193,7 @@ pub fn init(jig_id: JigId, module_id: ModuleId) {
                 InitTrace::Ellipse(0.3, 0.4, 0.2, 0.1)
             ]
         }))).unwrap_ji();
-        */
-        SETTINGS.set(DebugSettings::debug(None)).unwrap_ji();
+        //SETTINGS.set(DebugSettings::debug(None)).unwrap_ji();
     } else {
         SETTINGS.set(DebugSettings::default()).unwrap_ji();
     }

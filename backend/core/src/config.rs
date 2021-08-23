@@ -37,6 +37,15 @@ pub const ANIMATION_BODY_SIZE_LIMIT: usize = 1024 * 1024 * 40;
 pub const AUDIO_BODY_SIZE_LIMIT: usize = 1024 * 1024 * 30;
 /// JSON body size limit for both requests and responses
 pub const JSON_BODY_LIMIT: u64 = 1024 * 16; // 16
+/// Allowed CORS origins
+pub const CORS_ORIGINS: &[&str] = &[
+    "https://jigzi.org",
+    "https://sandbox.jigzi.org",
+    "https://api.jigzi.org",
+    "https://api.sandbox.jigzi.org",
+    "http://localhost:4104",
+    "http://localhost:4105",
+];
 
 //////////////
 // Other
