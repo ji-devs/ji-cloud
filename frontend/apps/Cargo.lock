@@ -410,6 +410,38 @@ dependencies = [
 ]
 
 [[package]]
+name = "app-kids"
+version = "0.1.0"
+dependencies = [
+ "awsm_web 0.25.0",
+ "cfg-if 1.0.0",
+ "components",
+ "console_error_panic_hook",
+ "discard",
+ "dominator",
+ "dominator_helpers",
+ "futures",
+ "futures-signals",
+ "gloo-timers",
+ "htmlescape",
+ "js-sys",
+ "log",
+ "once_cell",
+ "serde",
+ "serde-wasm-bindgen",
+ "serde_json",
+ "shared",
+ "simple-html-template",
+ "utils",
+ "uuid",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "wasm-logger",
+ "web-sys",
+ "wee_alloc",
+]
+
+[[package]]
 name = "app-matching-edit"
 version = "0.1.0"
 dependencies = [

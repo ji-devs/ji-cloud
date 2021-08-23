@@ -18,6 +18,7 @@ pub enum Route {
     NotFound,
     NoAuth,
     User(UserRoute),
+    Kids(KidsRoute),
     Admin(AdminRoute),
     Home(HomeRoute),
     Jig(JigRoute),
@@ -44,6 +45,12 @@ pub enum UserRoute {
     VerifyEmail(String), //the token 
     PasswordReset(String), //the token 
     RegisterComplete,
+}
+
+#[derive(Debug, Clone)]
+pub enum KidsRoute {
+    Landing,
+    Code
 }
 
 #[derive(Debug, Clone)]
@@ -160,6 +167,8 @@ impl Route {
         match paths {
             [""] => Self::Home(HomeRoute::Home),
             ["code"] => Self::Home(HomeRoute::StudentCode),
+            ["kids"] => Self::Kids(KidsRoute::Landing),
+            ["kids", "code"] => Self::Kids(KidsRoute::Code),
 			["dev", "showcase", id] => {
                 let page = params.get("page").unwrap_or_default();
                 Self::Dev(DevRoute::Showcase(id.to_string(), page))
@@ -306,6 +315,12 @@ impl From<&Route> for String {
                 match route {
                     HomeRoute::Home => "/".to_string(),
                     HomeRoute::StudentCode => "/code".to_string(),
+				}
+			},
+			Route::Kids(route) => {
+                match route {
+                    KidsRoute::Landing => "/kids".to_string(),
+                    KidsRoute::Code => "/kids/code".to_string(),
 				}
 			},
             Route::NoAuth => "/no-auth".to_string(),

@@ -55,7 +55,7 @@ jobs:
 
     strategy:
       matrix:
-        app: [admin, home, jig/edit, jig/play, user]
+        app: [admin, home, jig/edit, jig/play, user, kids]
     steps:
 
       - name: checkout repo

@@ -29,6 +29,7 @@ pub enum SpaPage {
     Home,
     User,
     Admin,
+    Kids,
     Jig(ModuleJigPageKind),
     Module(String, ModuleJigPageKind),
     Dev(String),
@@ -41,6 +42,7 @@ impl SpaPage {
             Self::Home => Cow::Borrowed("home"),
             Self::User => Cow::Borrowed("user"),
             Self::Admin => Cow::Borrowed("admin"),
+            Self::Kids => Cow::Borrowed("kids"),
             Self::Jig(page_kind) => Cow::Owned(format!("jig/{}", page_kind.as_str())),
             Self::Module(kind, page_kind) => {
                 Cow::Owned(format!("module/{}/{}", kind, page_kind.as_str()))
@@ -93,6 +95,10 @@ pub async fn home_template(settings: Data<RuntimeSettings>) -> actix_web::Result
 
 pub async fn user_template(settings: Data<RuntimeSettings>) -> actix_web::Result<HttpResponse> {
     spa_template(&settings, SpaPage::User)
+}
+
+pub async fn kids_template(settings: Data<RuntimeSettings>) -> actix_web::Result<HttpResponse> {
+    spa_template(&settings, SpaPage::Kids)
 }
 
 pub async fn admin_template(settings: Data<RuntimeSettings>) -> actix_web::Result<HttpResponse> {
