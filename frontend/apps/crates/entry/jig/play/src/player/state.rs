@@ -18,6 +18,7 @@ pub struct State {
     pub points: Mutable<u32>,
     pub iframe: Rc<RefCell<Option<HtmlIFrameElement>>>,
     pub paused: Mutable<bool>,
+    pub done: Mutable<bool>,
     pub player_settings: JigPlayerSettings,
 }
 
@@ -39,6 +40,7 @@ impl State {
             // background_music: Mutable::new(None),
             iframe: Rc::new(RefCell::new(None)),
             paused: Mutable::new(false),
+            done: Mutable::new(false),
             player_settings,
         }
     }

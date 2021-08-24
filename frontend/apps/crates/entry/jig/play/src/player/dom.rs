@@ -133,7 +133,7 @@ pub fn render(state: Rc<State>) -> Dom {
             }),
         ])
         .child_signal(render_time_indicator(Rc::clone(&state)))
-        // .child_signal(render_done_popup(Rc::clone(&state)))
+        .child_signal(render_done_popup(Rc::clone(&state)))
         .child_signal(render_time_up_popup(Rc::clone(&state)))
     })
 }
@@ -183,30 +183,36 @@ fn progress_signal(state: Rc<State>) -> impl Signal<Item = u32> {
 }
 
 fn render_done_popup(state: Rc<State>) -> impl Signal<Item = Option<Dom>> {
-    state.active_module.signal().map(clone!(state => move |_| {
-        Some(html!("dialog-overlay", {
-            .property("slot", "dialog")
-            .property("open", true)
-            .property("autoClose", false)
-            .child(html!("jig-play-done-popup", {
-                .apply(|mut dom| {
-                    if state.player_settings.display_score {
-                        dom = dom.property_signal("score", state.points.signal());
-                    };
-                    if !state.player_settings.track_assessments {
-                        dom = dom.child(
-                            html!("jig-play-replay", {
-                                .property("slot", "actions")
-                                .event(clone!(state => move |_: events::Click| {
-                                    actions::reload_iframe(Rc::clone(&state));
-                                }))
-                            })
-                        );
-                    }
-                    dom
-                })
-            }))
-        }))
+    state.done.signal().map(clone!(state => move |done| {
+        match done {
+            false => None,
+            true => {
+                Some(html!("dialog-overlay", {
+                    .property("slot", "dialog")
+                    .property("open", true)
+                    .property("autoClose", false)
+                    .child(html!("jig-play-done-popup", {
+                        .apply(|mut dom| {
+                            if state.player_settings.display_score {
+                                dom = dom.property_signal("score", state.points.signal());
+                            };
+                            if !state.player_settings.track_assessments {
+                                dom = dom.child(
+                                    html!("jig-play-replay", {
+                                        .property("slot", "actions")
+                                        .event(clone!(state => move |_: events::Click| {
+                                            state.active_module.set(0);
+                                            state.done.set(false);
+                                        }))
+                                    })
+                                );
+                            }
+                            dom
+                        })
+                    }))
+                }))
+            },
+        }
     }))
 }
 

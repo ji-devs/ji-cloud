@@ -24,6 +24,10 @@ pub fn navigate_forward(state: Rc<State>) {
             *active_module += 1;
             state.timer.set(None);
 
+        } else {
+
+            state.done.set(true);
+
         }
     }
 }
@@ -117,7 +121,9 @@ pub fn on_iframe_message(state: Rc<State>, message: ModuleToJigPlayerMessage) {
                 start_timer(Rc::clone(&state), time);
             }
         }
-        ModuleToJigPlayerMessage::Next => todo!(),
+        ModuleToJigPlayerMessage::Next => {
+            navigate_forward(Rc::clone(&state));
+        },
     };
 }
 
