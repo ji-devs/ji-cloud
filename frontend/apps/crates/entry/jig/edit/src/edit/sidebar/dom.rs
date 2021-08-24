@@ -7,6 +7,7 @@ use super::{
     module::dom::ModuleDom,
     state::*,
     {actions, debug},
+    super::state::State as JigEditState,
 };
 use futures_signals::{
     map_ref,
@@ -23,7 +24,7 @@ use utils::{iframe::{IframeAction, ModuleToJigEditorMessage}, prelude::*};
 pub struct SidebarDom {}
 
 impl SidebarDom {
-    pub fn render(jig_id: JigId, route: Mutable<JigEditRoute>) -> Dom {
+    pub fn render(jig_id: JigId, jig_edit_state: Rc<JigEditState>) -> Dom {
         let is_loading = Mutable::new(true);
         let jig = Rc::new(RefCell::new(None));
 
@@ -39,18 +40,18 @@ impl SidebarDom {
                 is_loading.set_neq(false);
 
             }))
-            .child_signal(is_loading.signal().map(clone!(jig, route => move |loading| {
+            .child_signal(is_loading.signal().map(clone!(jig, jig_edit_state => move |loading| {
                 if loading {
                     None
                 } else {
-                    Some(Self::render_loaded(jig.borrow_mut().take().unwrap_ji(), route.clone()))
+                    Some(Self::render_loaded(jig.borrow_mut().take().unwrap_ji(), Rc::clone(&jig_edit_state)))
                 }
             })))
         })
     }
 
-    fn render_loaded(jig: Jig, route: Mutable<JigEditRoute>) -> Dom {
-        let state = Rc::new(State::new(jig, route));
+    fn render_loaded(jig: Jig, jig_edit_state: Rc<JigEditState>) -> Dom {
+        let state = Rc::new(State::new(jig, jig_edit_state));
 
         html!("empty-fragment", {
             .global_event(clone!(state => move |evt: Message| {
@@ -65,7 +66,7 @@ impl SidebarDom {
             }))
             .child(html!("jig-edit-sidebar", {
                 .property_signal("collapsed", state.collapsed.signal())
-                .property_signal("isModulePage", state.route.signal_cloned().map(|route| {
+                .property_signal("isModulePage", state.jig_edit_state.route.signal_cloned().map(|route| {
                     matches!(route, JigEditRoute::Landing)
                 }))
                 .property_signal("loading", state.loader.is_loading())
@@ -76,7 +77,7 @@ impl SidebarDom {
                         publish_at.is_some()
                     }))
                     .property_signal("collapsed", state.collapsed.signal())
-                    .property_signal("selected", state.route.signal_cloned().map(|route| {
+                    .property_signal("selected", state.jig_edit_state.route.signal_cloned().map(|route| {
                         matches!(route, JigEditRoute::Publish)
                     }))
                     .event(clone!(state => move |_ :events::Click| {

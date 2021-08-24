@@ -10,9 +10,11 @@ use utils::{math::PointI32, routes::JigEditRoute};
 
 use chrono::{DateTime, Utc};
 
+use super::super::state::State as JigEditState;
+
 pub struct State {
     pub jig: Jig,
-    pub route: Mutable<JigEditRoute>,
+    pub jig_edit_state: Rc<JigEditState>,
     pub name: Mutable<String>,
     pub publish_at: Mutable<Option<DateTime<Utc>>>,
     pub modules: MutableVec<Rc<Option<LiteModule>>>,
@@ -24,7 +26,7 @@ pub struct State {
 }
 
 impl State {
-    pub fn new(jig: Jig, route: Mutable<JigEditRoute>) -> Self {
+    pub fn new(jig: Jig, jig_edit_state: Rc<JigEditState>) -> Self {
         let mut modules: Vec<Rc<Option<LiteModule>>> = jig
             .modules
             .iter()
@@ -37,7 +39,7 @@ impl State {
         };
 
         Self {
-            route,
+            jig_edit_state,
             name: Mutable::new(jig.display_name.clone()),
             publish_at: Mutable::new(jig.publish_at.clone()),
             modules: MutableVec::new_with_values(modules),

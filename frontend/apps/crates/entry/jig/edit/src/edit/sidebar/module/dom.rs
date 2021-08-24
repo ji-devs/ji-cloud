@@ -53,7 +53,7 @@ impl ModuleDom {
                 .property("module", state.kind_str())
                 .property("index", index as u32)
                 .property_signal("collapsed", state.sidebar.collapsed.signal())
-                .property_signal("selected", state.sidebar.route.signal_ref(clone!(module => move |route| {
+                .property_signal("selected", state.sidebar.jig_edit_state.route.signal_ref(clone!(module => move |route| {
                     match (&*module, route) {
                         (Some(module), JigEditRoute::Module(module_id)) if module_id == &module.id => true,
                         _ => false,
@@ -89,7 +89,7 @@ impl ModuleDom {
                     .event(clone!(state => move |_evt:events::Click| {
                         actions::edit(state.clone());
                     }))
-                    .child_signal(state.sidebar.route.signal_ref(clone!(state, module => move |route| {
+                    .child_signal(state.sidebar.jig_edit_state.route.signal_ref(clone!(state, module => move |route| {
                         match (&*module, route) {
                             (Some(module), JigEditRoute::Module(module_id)) if module_id == &module.id => None,
                             (Some(module), _) => {

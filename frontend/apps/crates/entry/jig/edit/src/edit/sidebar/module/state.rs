@@ -44,7 +44,7 @@ impl State {
         }
     }
     pub fn window_state_signal(state: Rc<State>) -> impl Signal<Item = &'static str> {
-        state.sidebar.route.signal_cloned().map(clone!(state => move |route| {
+        state.sidebar.jig_edit_state.route.signal_cloned().map(clone!(state => move |route| {
             match &*state.module {
                 None => return "empty",
                 Some(this_module) => {

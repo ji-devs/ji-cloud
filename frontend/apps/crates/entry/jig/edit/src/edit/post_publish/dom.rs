@@ -6,13 +6,14 @@ use utils::{events, routes::{JigRoute, Route}};
 use super::{
     actions,
     state::*,
+    super::state::State as JigEditState,
 };
 use components::share_jig;
 use std::rc::Rc;
 
 
-pub fn render(jig_id: JigId) -> Dom {
-    let state = Rc::new(State::new(jig_id));
+pub fn render(jig_id: JigId, jig_edit_state: Rc<JigEditState>) -> Dom {
+    let state = Rc::new(State::new(jig_id, jig_edit_state));
 
     let share_anchor = html!("post-publish-action", {
         .property("kind", "share")
@@ -30,12 +31,11 @@ pub fn render(jig_id: JigId) -> Dom {
                     actions::create_jig(Rc::clone(&state));
                 }))
             }),
-            html!("a", {
+            html!("post-publish-action", {
+                .property("kind", "play-jig")
                 .property("slot", "actions")
-                .style("text-decoration", "none")
-                .property("href", Route::Jig(JigRoute::Play(jig_id, None, JigPlayerSettings::default())).to_string())
-                .child(html!("post-publish-action", {
-                    .property("kind", "play-jig")
+                .event(clone!(state => move |_: events::Click| {
+                    state.jig_edit_state.play_jig.set(Some(JigPlayerSettings::default()));
                 }))
             }),
         ])

@@ -33,7 +33,7 @@ pub fn mouse_down(state: Rc<State>, x: i32, y: i32) {
 pub fn edit(state: Rc<State>) {
     if let Some(module) = &*state.module {
         let module_id = module.id;
-        state.sidebar.route.set_neq(JigEditRoute::Module(module_id));
+        state.sidebar.jig_edit_state.route.set_neq(JigEditRoute::Module(module_id));
         state.sidebar.collapsed.set(true);
 
         let jig_id = state.sidebar.jig.id;
@@ -95,7 +95,7 @@ pub fn assign_kind(state: Rc<State>, kind: ModuleKind) {
 
                 match update_module(&state.sidebar.jig.id, &id, req).await {
                     Ok(_) => {
-                        state.sidebar.route.set(JigEditRoute::Module(id));
+                        state.sidebar.jig_edit_state.route.set(JigEditRoute::Module(id));
                         state.sidebar.collapsed.set(true);
                     },
                     Err(_) => {},

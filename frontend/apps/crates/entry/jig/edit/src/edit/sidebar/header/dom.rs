@@ -1,8 +1,10 @@
-use crate::edit::sidebar::actions::player_settings_change_signal;
+use crate::edit::sidebar::actions::{player_settings_change_signal, get_player_settings};
 use dominator::{clone, html, with_node, Dom};
 use futures_signals::signal::SignalExt;
 use std::rc::Rc;
 use web_sys::HtmlInputElement;
+
+use components::player_popup::{PlayerPopup, PreviewPopupCallbacks};
 
 use super::super::{actions as sidebar_actions, settings, state::State as SidebarState};
 use utils::prelude::*;
@@ -17,7 +19,7 @@ impl HeaderDom {
         html!("jig-edit-sidebar-header", {
             .property("slot", "header")
             .property_signal("collapsed", sidebar_state.collapsed.signal())
-            .property_signal("isModulePage", sidebar_state.route.signal_cloned().map(|route| {
+            .property_signal("isModulePage", sidebar_state.jig_edit_state.route.signal_cloned().map(|route| {
                 matches!(route, JigEditRoute::Landing)
             }))
             .children(&mut [
@@ -44,7 +46,7 @@ impl HeaderDom {
                     .property("slot", "modules")
                     .property("kind", "modules")
                     .event(clone!(sidebar_state => move |_:events::Click| {
-                        sidebar_state.route.set_neq(JigEditRoute::Landing);
+                        sidebar_state.jig_edit_state.route.set_neq(JigEditRoute::Landing);
                         let url:String = Route::Jig(JigRoute::Edit(sidebar_state.jig.id.clone(), JigEditRoute::Landing)).into();
                         dominator::routing::go_to_url(&url);
                     }))
@@ -68,19 +70,12 @@ impl HeaderDom {
                 }),
                 html!("jig-edit-sidebar-preview-button", {
                     .property("slot", "preview")
-                    .property_signal("href", player_settings_change_signal(Rc::clone(&sidebar_state)).map(clone!(sidebar_state => move|player_settings| {
-                        let route: String = Route::Jig(JigRoute::Play(sidebar_state.jig.id, None, player_settings)).into();
-                        route
-                    })))
+                    .event(clone!(sidebar_state => move |_: events::Click| {
+                        let settings = get_player_settings(Rc::clone(&sidebar_state));
+                        sidebar_state.jig_edit_state.play_jig.set(Some(settings));
+                    }))
                 }),
             ])
         })
     }
 }
-/*
-<jig-edit-sidebar-header slot="header">
-    <button-icon slot="close" icon="x"></button-icon>
-    <button-text slot="gallery" color="blue" weight="medium">${STR_MY_JIGS}</button-text>
-    <input-text-pencil slot="input"></input-text-pencil>
-</jig-edit-sidebar-header>
-*/

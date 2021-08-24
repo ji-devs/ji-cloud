@@ -23,7 +23,7 @@ pub async fn load_jig(jig_id: JigId, jig_cell: Rc<RefCell<Option<Jig>>>) {
 }
 
 pub fn navigate_to_publish(state: Rc<State>) {
-    state.route.set_neq(JigEditRoute::Publish);
+    state.jig_edit_state.route.set_neq(JigEditRoute::Publish);
     state.collapsed.set(true);
 
     let jig_id = state.jig.id;
@@ -81,6 +81,20 @@ pub fn player_settings_change_signal(state: Rc<State>) -> impl Signal<Item = Jig
             drag_assist: drag_assist.clone(),
         },
     )
+}
+
+pub fn get_player_settings(state: Rc<State>) -> JigPlayerSettings {
+    let direction = state.settings.direction.get_cloned();
+    let display_score = state.settings.display_score.get();
+    let track_assessments = state.settings.track_assessments.get();
+    let drag_assist = state.settings.drag_assist.get();
+
+    JigPlayerSettings {
+        direction: direction,
+        display_score: display_score,
+        track_assessments: track_assessments,
+        drag_assist: drag_assist,
+    }
 }
 
 pub fn on_iframe_message(state: Rc<State>, message: ModuleToJigEditorMessage) {

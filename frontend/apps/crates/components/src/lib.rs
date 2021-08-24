@@ -45,3 +45,5 @@ pub mod traces;
 pub mod transform;
 #[cfg(feature = "share_jig")]
 pub mod share_jig;
+#[cfg(feature = "player_popup")]
+pub mod player_popup;

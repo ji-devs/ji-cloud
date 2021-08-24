@@ -5,8 +5,11 @@ use futures_signals::{
 };
 use shared::domain::jig::{Jig, JigPlayerSettings};
 use std::rc::Rc;
-use utils::{ages::AgeRangeVecExt, routes::{JigRoute, Route}};
-use components::module::_common::thumbnail::ModuleThumbnail;
+use utils::{ages::AgeRangeVecExt, events, routes::{JigRoute, Route}};
+use components::{
+    module::_common::thumbnail::ModuleThumbnail,
+    player_popup::{PlayerPopup, PreviewPopupCallbacks},
+};
 
 use super::super::state::State;
 
@@ -66,11 +69,14 @@ fn render_result(state: Rc<State>, jig: &Jig) -> Dom {
             html!("button-rect", {
                 .property("slot", "play-button")
                 .property("color", "blue")
-                // .property("kind", "outline")
                 .property("bold", true)
-                .property("target", "_blank")
-                .property("href", Route::Jig(JigRoute::Play(jig.id, None, JigPlayerSettings::default())).to_string())
                 .text("Play")
+                .event({
+                    let jig_id = jig.id;
+                    clone!(state => move |_: events::Click| {
+                        state.play_jig.set(Some(jig_id));
+                    })
+                })
             }),
         ])
     })

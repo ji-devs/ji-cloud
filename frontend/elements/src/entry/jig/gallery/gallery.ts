@@ -146,6 +146,7 @@ export class _ extends LitElement {
             ::slotted([slot=filters]) {
                 justify-self: end;
                 min-width: 300px;
+                --background-color: #ffffff;
             }
             .recent-items {
                 display: grid;

@@ -1,8 +1,9 @@
 use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
+use shared::domain::jig::JigPlayerSettings;
 use std::rc::Rc;
 
-use components::{page_header, page_footer};
+use components::{page_footer, page_header, player_popup::{PlayerPopup, PreviewPopupCallbacks}};
 
 use super::state::{HomePageMode, State};
 
@@ -25,5 +26,16 @@ pub fn render(state: Rc<State>) -> Dom {
             }),
             page_footer::dom::render(None),
         ])
+        .child_signal(state.play_jig.signal_cloned().map(clone!(state => move|play_jig| {
+            play_jig.map(|jig_id| {
+                let close = clone!(state => move || {
+                    state.play_jig.set(None);
+                });
+                PlayerPopup::render(
+                    Rc::new(PlayerPopup::new(jig_id, JigPlayerSettings::default(), PreviewPopupCallbacks::new(close))),
+                    None
+                )
+            })
+        })))
     })
 }

@@ -22,6 +22,7 @@ import "@elements/core/share-jig/main";
 import "@elements/core/share-jig/embed";
 import "@elements/core/share-jig/option";
 import "@elements/core/share-jig/students";
+import "@elements/core/player-popup/player-popup";
 import "@elements/entry/jig/edit/sidebar/sidebar";
 import "@elements/entry/jig/edit/pages/landing";
 import "@elements/entry/jig/edit/selection/card";

@@ -5,6 +5,7 @@ import "@elements/core/inputs/composed/select/select";
 import "@elements/core/inputs/composed/select/option";
 import "@elements/core/inputs/composed/select/option-group";
 import "@elements/core/images/composed/module-screenshot";
+import "@elements/core/player-popup/player-popup";
 import "@elements/entry/home/home/home-full";
 import "@elements/entry/home/home/search-section/search-section";
 import "@elements/entry/home/home/search-section/search-bar";

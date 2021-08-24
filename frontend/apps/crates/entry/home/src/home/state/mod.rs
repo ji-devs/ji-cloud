@@ -1,9 +1,9 @@
-use std::{iter, rc::Rc};
+use std::{iter, ops::MulAssign, rc::Rc};
 
 use search_state::{SearchOptions, SearchSelected};
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::{signal::Mutable, signal_vec::MutableVec};
-use shared::domain::jig::Jig;
+use shared::domain::jig::{Jig, JigId};
 
 mod search_state;
 
@@ -18,6 +18,7 @@ pub struct State {
     pub parents_testimonials: Vec<Testimonial>,
     pub teachers_testimonials: Vec<Testimonial>,
     pub total_jigs_count: Mutable<u64>,
+    pub play_jig: Mutable<Option<JigId>>,
 }
 
 impl State {
@@ -33,6 +34,7 @@ impl State {
             parents_testimonials: Self::get_parents_testimonials(),
             teachers_testimonials: Self::get_teachers_testimonials(),
             total_jigs_count: Mutable::new(0),
+            play_jig: Mutable::new(None),
         }
     }
 
