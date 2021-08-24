@@ -10,6 +10,14 @@ const STR_LABEL_LOOKUP:{[key in Kind]:string} = {
     'play-jig': 'Play the JIG',
 };
 
+const ext: {
+    [key in Kind]: string
+} = {
+    'share': 'svg',
+    'new-jig': 'png',
+    'play-jig': 'svg',
+};
+
 
 @customElement('post-publish-action')
 export class _ extends LitElement {
@@ -50,7 +58,7 @@ export class _ extends LitElement {
     render() {
         return html`
             <div class="circle">
-                <img-ui path="jig/edit/post-publish/action-${this.kind}.svg"></img-ui>
+                <img-ui path="jig/edit/post-publish/action-${this.kind}.${ext[this.kind]}"></img-ui>
             </div>
             <span class="label">${STR_LABEL_LOOKUP[this.kind]}</span>
         `;
