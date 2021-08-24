@@ -22,6 +22,15 @@ impl <T> IframeInit <T> {
     }
 }
 
+impl <T: Serialize> IframeInit <T> {
+
+    pub fn try_post_message_to_top(&self) -> Result<(), JsValue> {
+        let window = web_sys::window().unwrap_ji();
+        let parent = window.top()?.unwrap_ji();
+
+        parent.post_message(&self.into(), "*")
+    }
+}
 impl IframeInit <EmptyMessage> {
     pub fn empty() -> IframeInit<EmptyMessage> {
         IframeInit { data: EmptyMessage {}}
@@ -88,7 +97,7 @@ extern "C" {
 }
 impl <T: Serialize> IframeAction <T> {
 
-    pub fn try_post_message_to_parent(&self) -> Result<(), JsValue> {
+    pub fn try_post_message_to_top(&self) -> Result<(), JsValue> {
         let window = web_sys::window().unwrap_ji();
         let parent = window.top()?.unwrap_ji();
 

@@ -9,8 +9,8 @@ impl PostPreview {
     pub fn next(&self) {
         let msg = IframeAction::new(ModuleToJigEditorMessage::Next);
 
-        if let Err(_) = msg.try_post_message_to_parent() {
-            log::info!("Couldn't post message to parent... redirect!");
+        if let Err(_) = msg.try_post_message_to_top() {
+            log::info!("Couldn't post message to top... redirect!");
 
             let route:String = Route::Jig(JigRoute::Edit(self.jig_id, JigEditRoute::Landing)).into();
             dominator::routing::go_to_url(&route);
@@ -48,7 +48,7 @@ impl PostPreview {
                     };
 
                     let msg = IframeAction::new(ModuleToJigEditorMessage::AppendModule(module));
-                    if let Err(_) = msg.try_post_message_to_parent() {
+                    if let Err(_) = msg.try_post_message_to_top() {
                         log::info!("Couldn't post message to parent... redirect!");
                         let route: String =
                             Route::Jig(JigRoute::Edit(jig_id, JigEditRoute::Module(module_id))).into();

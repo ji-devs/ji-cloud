@@ -99,15 +99,10 @@ where
             }
         }))
         .after_inserted(clone!(state => move |_elem| {
-            let parent = web_sys::window()
-                .unwrap_ji()
-                .parent()
-                .unwrap_ji()
-                .unwrap_ji();
             //On mount - send an empty IframeInit message to let the parent know we're ready
-            let msg = IframeInit::empty();
-
-            let _ = parent.post_message(&msg.into(), "*");
+            IframeInit::empty()
+                .try_post_message_to_top()
+                .unwrap_ji();
         }))
     })
 }
@@ -163,15 +158,10 @@ where
                     }
                 }))
                 .after_inserted(clone!(state => move |_elem| {
-                    let parent = web_sys::window()
-                        .unwrap_ji()
-                        .parent()
-                        .unwrap_ji()
-                        .unwrap_ji();
                     //On mount - send an empty IframeInit message to let the parent know we're ready
-                    let msg = IframeInit::empty();
-
-                    let _ = parent.post_message(&msg.into(), "*");
+                    IframeInit::empty()
+                        .try_post_message_to_top()
+                        .unwrap_ji();
                 }))
         })
 
@@ -191,12 +181,6 @@ where
                 } else {
 
                     if jig_player {
-                        let parent = web_sys::window()
-                            .unwrap_ji()
-                            .parent()
-                            .unwrap_ji()
-                            .unwrap_ji();
-
                         let timer_seconds = base.get_timer_minutes().map(|minutes| minutes * 60);
 
                         let msg = IframeAction::new(ModuleToJigPlayerMessage::Start(timer_seconds));
@@ -206,7 +190,7 @@ where
                             None => log::info!("Starting without a timer")
                         }
 
-                        let _ = parent.post_message(&msg.into(), "*");
+                        msg.try_post_message_to_top().unwrap_ji();
                     }
                     None
                 }
