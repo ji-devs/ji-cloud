@@ -12,6 +12,7 @@ use super::{actions, state::State};
 const STR_SIGN_UP: &'static str = "Sign up";
 const STR_LOGIN: &'static str = "Login";
 const STR_LOGOUT: &'static str = "Logout";
+const STR_ADMIN: &'static str = "Admin";
 const STR_DONATE: &'static str = "Donate";
 
 pub fn render(state: Rc<State>, slot: Option<&str>) -> Dom {
@@ -55,6 +56,9 @@ pub fn render(state: Rc<State>, slot: Option<&str>) -> Dom {
                 .property("size", "small")
                 .property("bold", true)
                 .text(STR_DONATE)
+            }),
+            html!("page-header-student-code", {
+                .property("slot", "student-code")
             }),
         ])
         .child_signal(admin_privileges(Rc::clone(&state)).map(|admin_privileges| {
@@ -105,6 +109,14 @@ fn render_logged_in(state: Rc<State>, user: &UserProfile) -> Vec<Dom> {
             .event(clone!(state => move |_: events::Click| {
                 actions::logout(Rc::clone(&state));
             }))
+        }))
+        .child(html!("a", {
+            .property("slot", "admin")
+            .property("href", {
+                let url: String = Route::Admin(AdminRoute::Landing).into();
+                url
+            })
+            .text(STR_ADMIN)
         }))
     })]
 }

@@ -7,7 +7,8 @@ export class _ extends LitElement {
             :host {
                 height: 88px;
                 display: grid;
-                grid-template-columns: auto auto 1fr auto;
+                grid-template-columns: repeat(5, auto);
+                justify-content: space-between;
                 align-items: center;
                 padding: 0 40px;
             }
@@ -37,6 +38,9 @@ export class _ extends LitElement {
             </nav>
             <div class="donate">
                 <slot name="donate"></slot>
+            </div>
+            <div class="student-code">
+                <slot name="student-code"></slot>
             </div>
             <div class="user">
                 <slot name="user"></slot>

@@ -10,6 +10,7 @@ export class _ extends LitElement {
         return [css`
             :host {
                 height: 100%;
+                position: relative;
             }
             anchored-overlay, anchored-overlay::part(anchor) {
                 height: 100%;
@@ -101,6 +102,21 @@ export class _ extends LitElement {
                 font-weight: 500;
                 text-decoration: none;
             }
+            ::slotted([slot=admin]) {
+                position: absolute;
+                background-color: var(--dark-blue-5);
+                color: #ffffff;
+                text-align: center;
+                width: 100%;
+                line-height: 34px;
+                right: 0;
+                bottom: 0;
+                transform: translateY(100%);
+                font-size: 13px;
+                font-weight: 600;
+                text-decoration: none;
+                border-radius: 0 0 12px 12px;
+            }
         `];
     }
 
@@ -155,6 +171,7 @@ export class _ extends LitElement {
                     </div>
                 </div>
             </anchored-overlay>
+            <slot name="admin"></slot>
         `;
     }
 }
