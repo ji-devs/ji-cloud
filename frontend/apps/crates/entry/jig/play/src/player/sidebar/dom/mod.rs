@@ -76,7 +76,7 @@ pub fn render(state: Rc<State>) -> Dom {
                                 .event(clone!(state => move |_: events::Click| {
                                     state.player_state.active_module.set(i);
                                 }))
-                                .child(ModuleThumbnail::render(
+                                .child(ModuleThumbnail::render_live(
                                     Rc::new(ModuleThumbnail {
                                         jig_id: state.player_state.jig_id.clone(),
                                         module: module.clone(), 
