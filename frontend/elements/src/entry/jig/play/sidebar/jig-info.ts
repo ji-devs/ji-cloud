@@ -175,16 +175,21 @@ export class _ extends LitElement {
                     <section class="additional-resources-section">
                         <h4>${STR_ADDITIONAL_RESOURCES}</h4>
                         <div class="resources-section">
-                            <slot name="resources-section"></slot>
+                            <!-- TODO: enable when ready -->
+                            <!-- <slot name="resources-section"></slot> -->
+                            Coming soon!
                         </div>
                     </section>
                     <section class="courses-section">
                         <div>
                             <h4>${STR_COURSES}</h4>
-                            <h5>${STR_COURSES_SUBHEADING}</h5>
+                            <!-- TODO: enable when ready -->
+                            <!-- <h5>${STR_COURSES_SUBHEADING}</h5> -->
                         </div>
                         <div class="courses">
-                            <slot name="courses"></slot>
+                            <!-- TODO: enable when ready -->
+                            <!-- <slot name="courses"></slot> -->
+                            Coming soon!
                         </div>
                     </section>
                     <section class="report-section">
