@@ -117,6 +117,7 @@ pub fn on_iframe_message(state: Rc<State>, message: ModuleToJigPlayerMessage) {
                 start_timer(Rc::clone(&state), time);
             }
         }
+        ModuleToJigPlayerMessage::Next => todo!(),
     };
 }
 
