@@ -34,6 +34,7 @@ pub fn render_traces_hint(traces: Vec<Trace>) -> Dom {
         .to_signal_vec();
 
     html!("empty-fragment", {
+        .style("pointer-events", "none")
         .child(
             svg::render_masks(
                 mask_children,

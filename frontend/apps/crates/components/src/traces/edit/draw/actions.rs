@@ -42,6 +42,7 @@ impl Draw {
 
     pub fn recreate_deco(&self) {
         if let Some(bounds) = self.trace.calc_bounds(true) {
+
             let resize_info = get_resize_info();
             let (width, height) = resize_info.get_size_full(bounds.width, bounds.height);
 

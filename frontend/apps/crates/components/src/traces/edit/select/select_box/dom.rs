@@ -12,10 +12,10 @@ use crate::traces::edit::state::*;
 
 //see https://www.loom.com/share/c9ec53482ad94a97bff74d143a5a8cd2
 
-impl SelectTrace {
+impl EditSelectTrace {
     pub fn render_select_box(
         parent: Rc<TracesEdit>,
-        state: Rc<SelectTrace>,
+        state: Rc<EditSelectTrace>,
         index: ReadOnlyMutable<Option<usize>>,
         resize_info: &ResizeInfo,
     ) -> Dom {
