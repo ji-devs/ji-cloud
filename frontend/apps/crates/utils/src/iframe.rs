@@ -92,6 +92,9 @@ impl <T: Serialize> IframeAction <T> {
         let window = web_sys::window().unwrap_ji();
         let parent = window.parent()?.unwrap_ji();
 
+        log::info!("PARENT:");
+        temp_log(&parent);
+
         let value = serde_wasm_bindgen::to_value(self).unwrap_ji();
 
         let res = parent.post_message(&value, "*");
