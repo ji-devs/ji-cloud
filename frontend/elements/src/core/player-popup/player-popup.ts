@@ -49,9 +49,10 @@ export class _ extends LitElement {
                     height: 40px;
                     width: 40px;
                     cursor: pointer;
-                    font-size: 36px;
+                    font-size: 32px;
                     line-height: 1em;
                     font-family: 'OpenSans-light';
+                    z-index: 1;
                 }
             `
         ];
@@ -68,7 +69,7 @@ export class _ extends LitElement {
         super.disconnectedCallback();
 
         stylesheet.sheet!.deleteRule(0);
-        stylesheet.sheet!.deleteRule(1);
+        stylesheet.sheet!.deleteRule(0);
     }
 
     render() {
