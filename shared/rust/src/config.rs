@@ -2,6 +2,9 @@
 
 use std::env::VarError;
 
+// currently set to 14 days
+pub const JIG_PLAYER_SESSION_VALID_DURATION_SECS: u32 = 60 * 60 * 24 * 14;
+
 #[derive(Debug, PartialEq, Eq, Copy, Clone)]
 pub enum RemoteTarget {
     Local,

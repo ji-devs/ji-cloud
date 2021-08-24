@@ -1,12 +1,22 @@
-import { LitElement, html, css, customElement, property } from "lit-element";
+import { LitElement, html, css, customElement, property, internalProperty, PropertyValues } from "lit-element";
 import "@elements/core/popups/popup-body";
 import "@elements/core/buttons/rectangle";
+import { nothing } from "lit-html";
 
 const STR_STUDENTS_HEADER = "Share with Students";
 const STR_STUDENTS_URL_LABEL = "Ask the students to go to:";
 const STR_STUDENTS_URL_LINK = "Go to site";
 const STR_STUDENTS_CODE_LABEL = "Student code:";
-const STR_STUDENTS_CODE_VALID_UNTIL = "Valid for a week until NOV 10th";
+const STR_STUDENTS_CODE_VALID_FOR = "Valid for";
+const STR_WEEK_SINGULAR = "a week";
+const STR_WEEK_PLURAL = "weeks";
+const STR_STUDENTS_CODE_VALID_UNTIL = "until";
+
+const SECS_IN_WEEK = 60 * 60 * 24 * 7;
+
+const formatter = new Intl.DateTimeFormat('en-US', {
+    month: 'short', day: '2-digit'
+});
 
 @customElement("share-jig-students")
 export class _ extends LitElement {
@@ -68,6 +78,33 @@ export class _ extends LitElement {
     @property()
     code: string = "";
 
+    @property({ type: Number })
+    secondsToExpire?: number;
+
+    @internalProperty()
+    exprWeeks?: number;
+
+    @internalProperty()
+    exprDateLabel?: string;
+
+    updated(changedProperties: PropertyValues) {
+        if (changedProperties.has('secondsToExpire')) {
+            this.exprUpdated();
+        }
+    }
+
+    private exprUpdated() {
+        if(this.secondsToExpire) {
+            let date = new Date();
+            date.setSeconds(date.getSeconds() + this.secondsToExpire);
+            this.exprDateLabel = formatter.format(date);
+
+            this.exprWeeks = this.secondsToExpire / SECS_IN_WEEK;
+        } else {
+            this.exprDateLabel = "";
+        }
+    }
+
     render() {
         return html`
             <popup-body>
@@ -92,7 +129,21 @@ export class _ extends LitElement {
                             <input readonly value="${this.code}">
                         </label>
                         <div class="under">
-                            <span class="valid-until">${STR_STUDENTS_CODE_VALID_UNTIL}</span>
+                            ${ this.exprWeeks ? html`
+                                <span class="valid-until">
+                                    ${STR_STUDENTS_CODE_VALID_FOR}
+                                    ${
+                                        this.exprWeeks === 1 ? html`
+                                            ${STR_WEEK_SINGULAR}
+                                        ` : html`
+                                            ${this.exprWeeks}
+                                            ${STR_WEEK_PLURAL}
+                                        `
+                                    }
+                                    ${STR_STUDENTS_CODE_VALID_UNTIL}
+                                    ${this.exprDateLabel}
+                                </span>
+                            ` : nothing }
                             <slot name="copy-code"></slot>
                         </div>
                     </div>
