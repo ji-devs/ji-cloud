@@ -25,6 +25,10 @@ export class _ extends LitElement {
               border-bottom-right-radius: 8px;
                 width: 51px; 
           }
+
+          :host([bothSidesRounded]) .confirm-btn {
+            border-radius: 8px;
+          }
           
           svg {
               fill: #bcbcbc;
@@ -34,6 +38,9 @@ export class _ extends LitElement {
           }
     `]
   }
+
+  @property({type: Boolean, reflect: true})
+  bothSidesRounded:boolean = false;
 
   @property()
   kind:Kind = "free";

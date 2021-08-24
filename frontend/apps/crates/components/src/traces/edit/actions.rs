@@ -29,7 +29,7 @@ impl TracesEdit {
 
     pub fn add(&self, raw_trace: RawTrace) {
         let resize_info = get_resize_info();
-        let trace = Rc::new(SelectTrace::new(raw_trace.clone(), &resize_info));
+        let trace = Rc::new(EditSelectTrace::new(raw_trace.clone(), &resize_info));
 
         {
             let mut list = self.list.lock_mut();
@@ -54,7 +54,7 @@ impl TracesEdit {
 
     pub fn change(&self, index: usize, raw_trace: RawTrace) {
         let resize_info = get_resize_info();
-        let trace = Rc::new(SelectTrace::new(raw_trace.clone(), &resize_info));
+        let trace = Rc::new(EditSelectTrace::new(raw_trace.clone(), &resize_info));
 
         {
             let mut list = self.list.lock_mut();

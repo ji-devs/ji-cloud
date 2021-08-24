@@ -113,7 +113,7 @@ impl DebugSettings {
                                     }
                                 };
 
-                                TargetArea { trace, id: Uuid::new_v4() }
+                                TargetArea { trace }
                             }).collect(),
                             items: init_data.stickers.iter().map(|(sticker_kind, item_kind, (translation_x, translation_y))| {
                                 let sticker = {

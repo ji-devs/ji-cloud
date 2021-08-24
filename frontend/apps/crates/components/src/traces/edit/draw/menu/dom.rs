@@ -20,6 +20,7 @@ pub fn render_draw_menu(state: Rc<Draw>, menu: Menu, resize_info: &ResizeInfo) -
 
     html!("trace-edit-reshape-menu", {
 
+        .property_signal("noGap", state.reshape_menu_options_signal().map(|x| !x))
         .visible_signal(state.trace.transform.is_transforming.signal().map(|x| !x))
         .style("left", format!("{}px", x))
         .style("top", format!("{}px", y + 24.0 /* nudge a bit for close button */))
@@ -47,18 +48,20 @@ pub fn render_draw_menu(state: Rc<Draw>, menu: Menu, resize_info: &ResizeInfo) -
               }),
               html!("trace-edit-reshape-menu-btn", {
                   .property("kind", "confirm")
+                  .property_signal("bothSidesRounded", state.reshape_menu_options_signal().map(|x| !x))
                   .event(clone!(state => move |_evt:events::Click| {
                       state.done();
                   }))
-                  .visible_signal(state.reshape_menu_options_signal())
+                  //.visible_signal(state.reshape_menu_options_signal())
               }),
 
               html!("button-icon", {
                   .property("icon", "circle-x-blue")
-                    .property("slot", "close")
+                  .property("slot", "close")
                   .event(clone!(state => move |_evt:events::Click| {
                       state.cancel();
                   }))
+                  .visible_signal(state.reshape_menu_options_signal())
               }),
         ])
     })

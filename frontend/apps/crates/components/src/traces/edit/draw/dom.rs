@@ -23,9 +23,9 @@ use crate::transform::dom::render_transform;
 
 impl TracesEdit {
     pub fn render_draw(parent: Rc<Self>, state: Rc<Draw>) -> Dom {
-        let full_list:MutableVecLockRef<Rc<SelectTrace>> = parent.list.lock_ref();
+        let full_list:MutableVecLockRef<Rc<EditSelectTrace>> = parent.list.lock_ref();
 
-        let shadow_traces: Vec<Rc<SelectTrace>> = full_list
+        let shadow_traces: Vec<Rc<EditSelectTrace>> = full_list
             .iter()
             .enumerate()
             .filter(|(idx, _value)| Some(*idx) != state.init_index)
@@ -150,7 +150,7 @@ impl TracesEdit {
 fn render_trace(
     style: &ShapeStyle,
     resize_info: &ResizeInfo,
-    trace: &SelectTrace,
+    trace: &EditSelectTrace,
     callbacks: Rc<SvgCallbacks>,
 ) -> Dom {
     let transform_size = Some(TransformSize::new_static(&trace.transform, trace.size.clone()));

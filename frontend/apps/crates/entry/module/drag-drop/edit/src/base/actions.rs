@@ -11,7 +11,7 @@ use shared::domain::jig::{
             Instructions,
             Vec2,
             Transform,
-            drag_drop::{Mode, Step, Content as RawContent, ModuleData as RawData, ItemKind as RawItemKind, Interactive as RawInteractive},
+            drag_drop::{Mode, Step, TargetArea, Content as RawContent, ModuleData as RawData, ItemKind as RawItemKind, Interactive as RawInteractive},
             _groups::design::Trace as RawTrace,
         }
     }
@@ -65,41 +65,30 @@ impl Base {
      * meta and history
      */
     pub fn on_trace_added(&self, raw_trace: RawTrace) {
-        /*
-        self.traces_meta.lock_mut().push_cloned(TraceMeta::new(None, None));
 
         self.history.push_modify(move |raw| {
             if let Some(content) = &mut raw.content {
-                content.traces.push(DragDropTrace {
+                content.target_areas.push(TargetArea {
                     trace: raw_trace,
-                    audio: None,
-                    text: None,
                 })
             }
         });
-        */
     }
 
     pub fn on_trace_deleted(&self, index: usize) {
-        /*
-        self.traces_meta.lock_mut().remove(index);
-
         self.history.push_modify(move |raw| {
             if let Some(content) = &mut raw.content {
-                content.traces.remove(index);
+                content.target_areas.remove(index);
             }
         });
-        */
     }
 
     pub fn on_trace_changed(&self, index: usize, raw_trace: RawTrace) {
-        /*
         self.history.push_modify(move |raw| {
             if let Some(content) = &mut raw.content {
-                content.traces[index].trace = raw_trace;
+                content.target_areas[index].trace = raw_trace;
             }
         });
-        */
     }
 
     pub fn set_drag_item_selected(&self, index: usize) {

@@ -29,8 +29,16 @@ export class _ extends LitElement {
               padding-left: 16px;
           }
 
+          :host([noGap]) section {
+              gap: 0;
+              padding-left: 0;
+          }
+
     `]
   }
+
+  @property({type: Boolean, reflect: true})
+  noGap:boolean = false;
 
   render() {
       return html`

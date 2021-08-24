@@ -77,7 +77,6 @@ pub struct Base {
     pub backgrounds: Rc<Backgrounds>, 
     pub stickers: Rc<Stickers<Item>>, 
     pub traces: Rc<TracesEdit>,
-    pub targets_meta: Mutable<Vec<TargetMeta>>,
     pub text_editor: Rc<TextEditorState>,
     pub audio_mixer: AudioMixer,
     pub play_settings: Rc<PlaySettings>,
@@ -172,22 +171,6 @@ impl AsSticker for Item {
 impl AsRef<Sticker> for Item {
     fn as_ref(&self) -> &Sticker {
         &self.sticker
-    }
-}
-
-#[derive(Clone)]
-pub struct TargetMeta {
-    pub id: Uuid,
-}
-
-impl TargetMeta {
-    pub fn new(raw: Option<&RawTargetArea>) -> Self {
-        Self {
-            id: match raw {
-                Some(raw) => raw.id,
-                None => Uuid::new_v4() 
-            }
-        }
     }
 }
 
@@ -334,15 +317,6 @@ impl Base {
             )
         );
 
-        let targets_meta = Mutable::new(
-            content.target_areas
-                .iter()
-                .map(|target_area| {
-                    TargetMeta::new(Some(target_area))
-                })
-                .collect()
-        );
-
         let _self = Rc::new(Self {
             jig_id,
             module_id,
@@ -356,7 +330,6 @@ impl Base {
             backgrounds,
             stickers,
             traces,
-            targets_meta,
             audio_mixer,
             play_settings: Rc::new(PlaySettings::new(content.play_settings.clone())),
             drag_item_selected_index: Mutable::new(None),

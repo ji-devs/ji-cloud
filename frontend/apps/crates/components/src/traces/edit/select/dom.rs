@@ -63,7 +63,7 @@ impl TracesEdit {
                     .signal_vec_cloned()
                     .enumerate()
                     .map(clone!(state, resize_info => move |(index, trace)| {
-                        SelectTrace::render_select_box(state.clone(), trace.clone(), index, &resize_info)
+                        EditSelectTrace::render_select_box(state.clone(), trace.clone(), index, &resize_info)
                     }))
             }));
 
@@ -89,7 +89,7 @@ impl TracesEdit {
 fn render_trace(
     style: &ShapeStyle,
     resize_info: &ResizeInfo,
-    trace: &SelectTrace,
+    trace: &EditSelectTrace,
     callbacks: Rc<SvgCallbacks>,
 ) -> Dom {
     let trace_size = trace.size.clone();

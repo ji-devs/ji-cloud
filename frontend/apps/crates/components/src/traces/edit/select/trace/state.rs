@@ -12,7 +12,7 @@ use crate::traces::utils::TraceExt;
 use utils::{math::BoundsF64, prelude::*, resize::ResizeInfo};
 use web_sys::SvgElement;
 
-pub struct SelectTrace {
+pub struct EditSelectTrace {
     pub transform: Transform,
     pub shape: TraceShape,
     pub size: (f64, f64),
@@ -20,7 +20,7 @@ pub struct SelectTrace {
     pub elem: RefCell<Option<SvgElement>>,
 }
 
-impl SelectTrace {
+impl EditSelectTrace {
     pub fn new(raw: RawTrace, resize_info: &ResizeInfo) -> Self {
         let mut _self = Self {
             transform: raw.transform.clone(),
@@ -40,7 +40,7 @@ impl SelectTrace {
 
 }
 
-impl TraceExt for SelectTrace {
+impl TraceExt for EditSelectTrace {
     fn to_raw(&self) -> RawTrace {
         RawTrace {
             transform: self.transform.clone(),

@@ -8,7 +8,6 @@ use crate::domain::jig::module::{
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::convert::TryFrom;
-use uuid::Uuid;
 
 mod play_settings;
 pub use play_settings::*;
@@ -162,9 +161,6 @@ pub struct Interactive {
 pub struct TargetArea {
     /// the trace
     pub trace: Trace,
-
-    /// unique id for trace
-    pub id: Uuid,
 }
 
 #[derive(Clone, Copy, Serialize, Deserialize, Debug, PartialEq, Eq, Hash)]
