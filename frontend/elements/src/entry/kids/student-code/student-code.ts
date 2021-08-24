@@ -2,7 +2,7 @@ import { LitElement, html, css, customElement, queryAll } from 'lit-element';
 
 const STR_TYPE_THE_CODE = "Type in the code your teacher gave you";
 
-@customElement('home-student-code')
+@customElement('kids-student-code')
 export class _ extends LitElement {
     static get styles() {
         return [css`

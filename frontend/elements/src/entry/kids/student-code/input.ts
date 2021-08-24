@@ -2,7 +2,7 @@ import { LitElement, html, css, customElement, queryAll, property } from 'lit-el
 
 const STR_CLEAR = "Clear";
 
-@customElement('home-student-code-input')
+@customElement('kids-student-code-input')
 export class _ extends LitElement {
     static get styles() {
         return [css`

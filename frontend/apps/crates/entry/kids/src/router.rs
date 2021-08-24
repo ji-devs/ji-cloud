@@ -1,19 +1,16 @@
-use utils::{prelude::*, routes::{Route, ModuleRoute, KidsRoute}};
+use utils::{prelude::*, routes::{Route, KidsRoute}};
 use shared::{
     api::{endpoints::user::Profile, ApiEndpoint},
     domain::user::UserProfile,
     error::EmptyError,
 };
 use std::rc::Rc;
-use wasm_bindgen::UnwrapThrowExt;
-use web_sys::Url;
 use futures_signals::{
     map_ref,
-    signal::{Mutable, SignalExt, Signal}
+    signal::{Mutable, SignalExt}
 };
 use dominator::{Dom, html, clone};
-use dominator_helpers::futures::AsyncLoader;
-use std::cell::RefCell;
+use super::student_code;
 
 pub struct Router {
     profile: Mutable<Option<Option<UserProfile>>>,
@@ -65,9 +62,9 @@ impl Router {
                             let dom = match route.clone() {
                                 Route::Kids(route) => {
                                     match route.clone() {
-                                        KidsRoute::Landing => Some(html!("h1", {.text("Hello World!") })),
-                                        KidsRoute::Code => Some(html!("h1", {.text("Enter code!") })),
-                                        _ => None 
+                                        KidsRoute::StudentCode => {
+                                            Some(student_code::dom::render(Rc::new(student_code::state::State::new())))
+                                        },
                                     }
                                 }
                                 _ => None

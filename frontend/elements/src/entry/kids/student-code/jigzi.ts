@@ -2,7 +2,7 @@ import { LitElement, html, css, customElement, property } from 'lit-element';
 
 export type Mode = "default" | "try-again" | "help";
 
-@customElement('home-student-code-jigzi')
+@customElement('kids-student-code-jigzi')
 export class _ extends LitElement {
     static get styles() {
         return [css`

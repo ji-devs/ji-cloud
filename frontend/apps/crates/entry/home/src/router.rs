@@ -2,7 +2,7 @@ use dominator::{Dom, html};
 use futures_signals::signal::Signal;
 use std::rc::Rc;
 use utils::routes::{HomeRoute, Route};
-use super::{home, student_code};
+use super::home;
 
 
 pub struct Router {
@@ -28,9 +28,6 @@ impl Router {
                         match route {
                             HomeRoute::Home => {
                                 Some(home::dom::render(Rc::new(home::state::State::new())))
-                            },
-                            HomeRoute::StudentCode => {
-                                Some(student_code::dom::render(Rc::new(student_code::state::State::new())))
                             },
                         }
                     }

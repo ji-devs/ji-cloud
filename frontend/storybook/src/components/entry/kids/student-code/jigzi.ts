@@ -1,9 +1,9 @@
 import {argsToAttrs} from "@utils/attributes";
-import "@elements/entry/home/student-code/jigzi";
+import "@elements/entry/kids/student-code/jigzi";
 import { Mode } from "@elements/entry/home/student-code/jigzi";
 
 export default {
-    title: "Entry / Home / Student Code"
+    title: "Entry / Kids / Student Code"
 }
 
 interface Args {
@@ -19,10 +19,10 @@ export const Jigzi = (props?:Args) => {
     props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
 
     return `
-        <home-student-code-jigzi slot="jigzi" ${argsToAttrs(props)}>
+        <kids-student-code-jigzi slot="jigzi" ${argsToAttrs(props)}>
             <button slot="help" onclick="console.log('help)">Ask for help</button>
             <button slot="try-again" onclick="console.log('try again')">Try again</button>
-        </home-student-code-jigzi>
+        </kids-student-code-jigzi>
     `;
 }
 

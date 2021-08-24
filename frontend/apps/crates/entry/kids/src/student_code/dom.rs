@@ -3,7 +3,6 @@ use std::rc::Rc;
 use components::player_popup::{PlayerPopup, PreviewPopupCallbacks};
 use dominator::{Dom, clone, html};
 use futures_signals::signal::SignalExt;
-use shared::domain::jig::JigPlayerSettings;
 use utils::events;
 
 use crate::student_code::actions::submit_code;
@@ -15,15 +14,15 @@ const STR_HELP: &'static str = "Ask for help";
 
 pub fn render(state: Rc<State>) -> Dom {
     html!("empty-fragment", {
-        .child(html!("home-student-code", {
-            .child(html!("home-student-code-input", {
+        .child(html!("kids-student-code", {
+            .child(html!("kids-student-code-input", {
                 .property("slot", "input")
                 .property_signal("error", state.error.signal())
                 .event(clone!(state => move |evt: events::CustomInput| {
                     submit_code(Rc::clone(&state), evt.value());
                 }))
             }))
-            .child(html!("home-student-code-jigzi", {
+            .child(html!("kids-student-code-jigzi", {
                 .property("slot", "jigzi")
                 .property_signal("mode", state.error.signal().map(|error| {
                     match error {

@@ -1,8 +1,8 @@
 import {argsToAttrs} from "@utils/attributes";
-import "@elements/entry/home/student-code/input";
+import "@elements/entry/kids/student-code/input";
 
 export default {
-    title: "Entry / Home / Student Code"
+    title: "Entry / Kids / Student Code"
 }
 
 interface Args {
@@ -18,7 +18,7 @@ export const Input = (props?:Args) => {
     props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
 
     return `
-        <home-student-code-input slot="input" ${argsToAttrs(props)}></home-student-code-input>
+        <kids-student-code-input slot="input" ${argsToAttrs(props)}></kids-student-code-input>
     `;
 }
 
