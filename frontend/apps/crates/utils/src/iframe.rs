@@ -82,6 +82,10 @@ impl <T> IframeAction <T> {
     }
 }
 
+#[wasm_bindgen(inline_js = "export function temp_log(val) { console.log(val); }")]
+extern "C" {
+    fn temp_log(val:&JsValue);
+}
 impl <T: Serialize> IframeAction <T> {
 
     pub fn try_post_message_to_parent(&self) -> Result<(), JsValue> {
@@ -93,7 +97,9 @@ impl <T: Serialize> IframeAction <T> {
         let res = parent.post_message(&value, "*");
 
         if let Err(ref err) = res {
-            log::info!("Got error posting message: {:?}", err);
+            log::info!("Got error posting message...");
+            temp_log(err);
+            log::info!("{:?}", err);
         }
         res
     }
