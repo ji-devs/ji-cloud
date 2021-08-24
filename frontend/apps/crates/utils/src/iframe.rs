@@ -1,5 +1,6 @@
 use serde::{Serialize, Deserialize, de::DeserializeOwned};
 use wasm_bindgen::prelude::*;
+use wasm_bindgen::JsCast;
 use crate::unwrap::UnwrapJiExt;
 use shared::domain::jig::{LiteModule, module::{ModuleId, ModuleKind}};
 
@@ -9,6 +10,20 @@ pub const IFRAME_DATA_PARAM:&'static str = "iframe_data";
 extern "C" {
     pub fn is_in_iframe() -> bool;
 }
+
+pub trait IframeMessageExt {
+    fn try_post_message_to_top<'a>(&'a self) -> Result<(), JsValue> 
+    where &'a Self: Into<JsValue>
+    {
+        let window = web_sys::window().unwrap_ji();
+        let parent = window.top()?.unwrap_ji();
+
+        parent.post_message(&self.into(), "*")
+    }
+}
+
+impl <T: Serialize> IframeMessageExt for IframeInit<T> {}
+impl <T: Serialize> IframeMessageExt for IframeAction<T> {}
 
 /// Init is used for bootstrapping and passing initial loaded data
 #[derive(Serialize, Deserialize, Debug)]
@@ -22,15 +37,7 @@ impl <T> IframeInit <T> {
     }
 }
 
-impl <T: Serialize> IframeInit <T> {
 
-    pub fn try_post_message_to_top(&self) -> Result<(), JsValue> {
-        let window = web_sys::window().unwrap_ji();
-        let parent = window.top()?.unwrap_ji();
-
-        parent.post_message(&self.into(), "*")
-    }
-}
 impl IframeInit <EmptyMessage> {
     pub fn empty() -> IframeInit<EmptyMessage> {
         IframeInit { data: EmptyMessage {}}
@@ -95,25 +102,7 @@ impl <T> IframeAction <T> {
 extern "C" {
     fn temp_log(val:&JsValue);
 }
-impl <T: Serialize> IframeAction <T> {
 
-    pub fn try_post_message_to_top(&self) -> Result<(), JsValue> {
-        let window = web_sys::window().unwrap_ji();
-        let parent = window.top()?.unwrap_ji();
-
-        log::info!("PARENT:");
-        temp_log(&parent);
-
-        let res = parent.post_message(&self.into(), "*");
-
-        if let Err(ref err) = res {
-            log::info!("Got error posting message...");
-            temp_log(err);
-            log::info!("{:?}", err);
-        }
-        res
-    }
-}
 
 impl <T: Serialize> From<IframeAction<T>> for JsValue {
     fn from(msg:IframeAction<T>) -> Self {

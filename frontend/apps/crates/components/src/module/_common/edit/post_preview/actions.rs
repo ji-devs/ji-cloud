@@ -3,7 +3,7 @@ use shared::{api::endpoints::{self, ApiEndpoint}, domain::{CreateResponse, jig::
                 body::{BodyExt, ModeExt, StepExt},
                 ModuleCreateRequest, ModuleId,
             }}}, error::EmptyError};
-use utils::{prelude::*, iframe::{IframeAction, ModuleToJigEditorMessage}};
+use utils::{prelude::*, iframe::{IframeAction, ModuleToJigEditorMessage, IframeMessageExt}};
 
 impl PostPreview {
     pub fn next(&self) {
