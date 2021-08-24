@@ -69,12 +69,20 @@ fn category_value_signal(state: Rc<State>) -> impl Signal<Item = String> {
     map_ref! {
         let selected_categories = state.jig.categories.signal_cloned(),
         let category_label_lookup = state.category_label_lookup.signal_cloned() => {
-            let mut output = vec![];
-            selected_categories.iter().for_each(|category_id| {
-                let category_name = category_label_lookup.get(category_id).unwrap_ji();
-                output.push(category_name.clone());
-            });
-            output.join(", ")
+
+            let len = selected_categories.len();
+            if len == 0 {
+                String::new()
+            } else {
+                let category = selected_categories.iter().next().unwrap_ji();
+                let first_category_label = category_label_lookup.get(category).unwrap_ji().clone();
+                if len == 1 {
+                    first_category_label
+                } else {
+                    format!("{} +{}", first_category_label, len-1)
+                }
+            }
+
         }
     }
 }
