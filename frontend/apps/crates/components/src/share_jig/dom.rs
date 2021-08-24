@@ -2,14 +2,18 @@ use std::rc::Rc;
 
 use dominator::{Dom, clone, html, with_node};
 use futures_signals::signal::{Signal, SignalExt};
-use utils::{clipboard, events};
+use shared::config::JIG_PLAYER_SESSION_VALID_DURATION_SECS;
+use utils::{clipboard, events, unwrap::UnwrapJiExt};
 
 use crate::{animation::fade::{Fade, FadeKind}, tooltip::{
     state::{MoveStrategy, Placement, State as TooltipState, TooltipBubble, TooltipData, TooltipTarget},
     dom::render as TooltipDom
 }};
 
-use super::state::{ActivePopup, State};
+use super::{
+    state::{ActivePopup, State},
+    actions,
+};
 
 const STR_BACK: &'static str = "Back";
 const STR_COPIED: &'static str = "Copied to the clipboard";
@@ -102,7 +106,15 @@ fn render_share_students(state: Rc<State>) -> Dom {
     html!("share-jig-students", {
         .property("slot", "overlay")
         .property("url", "????")
-        .property("code", "???")
+        .property_signal("code", state.student_code.signal_cloned().map(|student_code| {
+            match student_code {
+                None => String::new(),
+                Some(student_code) => student_code,
+            }
+        }))
+        .property_signal("secondsToExpire", state.student_code.signal_cloned().map(|student_code| {
+            student_code.map(|_| JIG_PLAYER_SESSION_VALID_DURATION_SECS)
+        }))
         .children(&mut [
             html!("button-empty", {
                 .property("slot", "close")
@@ -128,13 +140,23 @@ fn render_share_students(state: Rc<State>) -> Dom {
                     clipboard::write_text("???");
                 })
             }),
+            html!("button", {
+                .property("slot", "copy-code")
+                .property_signal("disabled", state.student_code.signal_ref(|x| x.is_some()))
+                .text("Generate Code")
+                .event(clone!(state => move|_: events::Click| {
+                    actions::generate_student_code(Rc::clone(&state));
+                }))
+            }),
             html!("button-rect", {
                 .property("slot", "copy-code")
                 .property("kind", "text")
+                .property_signal("disabled", state.student_code.signal_ref(|x| x.is_none()))
                 .text("Copy Code")
-                .event(|_: events::Click| {
-                    clipboard::write_text("???");
-                })
+                .event(clone!(state => move|_: events::Click| {
+                    let student_code = state.student_code.get_cloned().unwrap_ji();
+                    clipboard::write_text(&student_code);
+                }))
             }),
         ])
     })

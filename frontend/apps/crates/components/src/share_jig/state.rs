@@ -1,3 +1,4 @@
+use awsm_web::loaders::helpers::AsyncLoader;
 use futures_signals::signal::Mutable;
 use shared::domain::jig::{JigId, JigPlayerSettings};
 use utils::routes::{JigRoute, Route};
@@ -6,6 +7,8 @@ use utils::prelude::*;
 
 pub struct State {
     pub active_popup: Mutable<Option<ActivePopup>>,
+    pub student_code: Mutable<Option<String>>,
+    pub loader: AsyncLoader,
     pub jig_id: JigId,
     pub copied_embed: Mutable<bool>,
 }
@@ -14,6 +17,8 @@ impl State {
     pub fn new(jig_id: JigId) -> Self {
         Self {
             jig_id,
+            student_code: Mutable::new(None),
+            loader: AsyncLoader::new(),
             active_popup: Mutable::new(None),
             copied_embed: Mutable::new(false),
         }
