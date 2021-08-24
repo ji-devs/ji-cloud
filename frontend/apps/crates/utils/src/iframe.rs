@@ -90,14 +90,12 @@ impl <T: Serialize> IframeAction <T> {
 
     pub fn try_post_message_to_parent(&self) -> Result<(), JsValue> {
         let window = web_sys::window().unwrap_ji();
-        let parent = window.parent()?.unwrap_ji();
+        let parent = window.top()?.unwrap_ji();
 
         log::info!("PARENT:");
         temp_log(&parent);
 
-        let value = serde_wasm_bindgen::to_value(self).unwrap_ji();
-
-        let res = parent.post_message(&value, "*");
+        let res = parent.post_message(&self.into(), "*");
 
         if let Err(ref err) = res {
             log::info!("Got error posting message...");
