@@ -153,6 +153,9 @@ export class _ extends LitElement {
             .hover .collapsibles {
                 margin: 20px 0;
             }
+            .hover .description {
+                font-size: 14px;
+            }
             .hover h4, .hover .author-section {
                 font-size: 14px;
                 font-weight: 500;
@@ -256,7 +259,7 @@ export class _ extends LitElement {
                             <slot name="categories"></slot>
                             <home-search-result-details>
                                 <h4>${STR_DESCRIPTION}</h4>
-                                <p>${this.description}</p>
+                                <p class="description">${this.description}</p>
                             </home-search-result-details>
                             <home-search-result-details>
                                 <h4>${STR_ADDITIONAL_RESOURCES}</h4>
