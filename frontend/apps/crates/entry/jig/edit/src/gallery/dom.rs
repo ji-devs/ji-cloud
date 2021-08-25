@@ -4,6 +4,7 @@ use components::{page_header, page_footer};
 use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
 use futures_signals::signal_vec::SignalVecExt;
+use utils::jig::published_at_string;
 use std::rc::Rc;
 use strum::IntoEnumIterator;
 use utils::ages::AgeRangeVecExt;
@@ -93,12 +94,20 @@ impl GalleryDom {
                         html!("jig-gallery-recent", {
                             .property("slot", "recent-items")
                             .property("href", jig.id.0.to_string())
-                            .property("draft", "")
                             .property("label", jig.display_name.clone())
                             .property_signal("ages", state.age_ranges.signal_cloned().map(move|age_ranges| {
                                 age_ranges.range_string(&jig_ages)
                             }))
-                            .property("lastEdited", "???")
+                            .apply(|dom| {
+                                match jig.publish_at {
+                                    None => {
+                                        dom.property("draft", true)
+                                    },
+                                    Some(publish_at) => {
+                                        dom.property("publishedAt", published_at_string(publish_at, true))
+                                    },
+                                }
+                            })
                             .child(ModuleThumbnail::render(
                                 Rc::new(ModuleThumbnail {
                                     jig_id: jig.id.clone(),

@@ -10,7 +10,7 @@ interface Args {
     label: string;
     img: string;
     ages: string;
-    lastEdited: string;
+    publishedAt: string;
     href: string
 }
 
@@ -19,7 +19,7 @@ const DEFAULT_ARGS:Args = {
     label: "Teach New Vocabulary",
     img: "mock/resized/jig-gallery.jpg",
     ages: "5-8",
-    lastEdited: "3 W ago",
+    publishedAt: "3 W ago",
     href: "https://google.com",
 }
 

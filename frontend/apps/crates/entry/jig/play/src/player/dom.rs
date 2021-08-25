@@ -118,15 +118,6 @@ pub fn render(state: Rc<State>) -> Dom {
             html!("jig-play-move-button", {
                 .property("slot", "forward")
                 .property("kind", "forward")
-                .visible_signal(jig_and_active_module_signal(Rc::clone(&state)).map(|(jig, active_module)| {
-                    match jig {
-                        None => false,
-                        Some(jig) => {
-                            let module_length = jig.modules.len();
-                            active_module != module_length - 1
-                        },
-                    }
-                }))
                 .event(clone!(state => move |_: events::Click| {
                     actions::navigate_forward(Rc::clone(&state));
                 }))

@@ -7,8 +7,6 @@ use std::rc::Rc;
 use utils::{events, unwrap::UnwrapJiExt};
 use web_sys::HtmlInputElement;
 
-use super::super::state::HomePageMode;
-
 use super::super::{
     actions::{fetch_data, search},
     state::State,
@@ -19,17 +17,20 @@ mod categories_select;
 
 const STR_ALL_LANGUAGES: &'static str = "All languages";
 const STR_ALL_AGES: &'static str = "All ages";
+const STR_SEARCH: &'static str = "Search";
+const STR_WHAT_ARE_YOU_LOOKING_FOR: &'static str = "What are you looking for?";
 
 pub fn render(state: Rc<State>) -> Dom {
     fetch_data(state.clone());
 
     html!("home-search-section", {
-        .property_signal("mode", state.mode.signal_cloned().map(|mode| {
-            match mode {
-                HomePageMode::Home => "home",
-                HomePageMode::Search(_, _) => "results",
-            }
-        }))
+        // TODO: Enable once ready
+        // .property_signal("mode", state.mode.signal_cloned().map(|mode| {
+        //     match mode {
+        //         HomePageMode::Home => "home",
+        //         HomePageMode::Search(_, _) => "results",
+        //     }
+        // }))
         .property_signal("resultsCount", state.total_jigs_count.signal().map(|x| x as f64))
         .child(html!("home-search-section-help", {
             .property("slot", "help")
@@ -40,7 +41,7 @@ pub fn render(state: Rc<State>) -> Dom {
                 html!("input" => HtmlInputElement, {
                     .with_node!(elem => {
                         .property("slot", "query")
-                        .property("placeholder", "search")
+                        .property("placeholder", STR_WHAT_ARE_YOU_LOOKING_FOR)
                         .event(clone!(state => move |_: events::Input| {
                             let v = elem.value();
                             state.search_selected.query.set(v)
@@ -108,7 +109,7 @@ pub fn render(state: Rc<State>) -> Dom {
                 html!("button-rect", {
                     .property("slot", "button")
                     .property("bold", true)
-                    .text("Search")
+                    .text(STR_SEARCH)
                     .event(clone!(state => move |_: events::Click| {
                         search(Rc::clone(&state));
                     }))

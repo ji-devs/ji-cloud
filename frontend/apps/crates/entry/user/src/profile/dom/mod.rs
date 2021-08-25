@@ -6,7 +6,7 @@ use shared::domain::meta::{Affiliation, AffiliationId, AgeRange, AgeRangeId, Sub
 use utils::{events, languages::{LANGUAGES, Language}, unwrap::UnwrapJiExt};
 use web_sys::{HtmlElement, HtmlInputElement};
 
-use crate::profile::{change_password, dom::options_popup::PopupCallbacks, state::ActivePopup};
+use crate::{profile::{change_password, dom::options_popup::PopupCallbacks, state::ActivePopup}, strings::register::step_2::STR_PERSONA_OPTIONS};
 
 use super::{actions, state::State};
 
@@ -138,20 +138,17 @@ impl ProfilePage {
                         }))
                     })
                 }),
-                html!("input-wrapper", {
+                html!("input-select", {
                     .property("slot", "persona")
-                    .child(html!("input" => HtmlInputElement, {
-                        .with_node!(elem => {
-                            .property_signal("value", state.user.persona.signal_cloned().map(|p| p.unwrap_or_default()))
-                            .event(clone!(state => move |_: events::Input| {
-                                state.user.persona.set(Some(elem.value()));
+                    .property_signal("value", state.user.persona.signal_cloned().map(|persona| persona.unwrap_or_default()))
+                    .children(STR_PERSONA_OPTIONS.iter().map(|persona| {
+                        html!("input-select-option", {
+                            .text(persona)
+                            .event(clone!(state => move |_: events::CustomSelectedChange| {
+                                state.user.persona.set(Some(persona.to_string()));
                                 actions::save_profile(Rc::clone(&state));
                             }))
                         })
-                    }))
-                    .child(html!("img-ui", {
-                        .property("slot", "icon")
-                        .property("path", "core/inputs/pencil-blue-darker.svg")
                     }))
                 }),
                 html!("input-wrapper", {

@@ -1,4 +1,4 @@
-use std::{iter, ops::MulAssign, rc::Rc};
+use std::{iter, rc::Rc};
 
 use search_state::{SearchOptions, SearchSelected};
 use dominator_helpers::futures::AsyncLoader;

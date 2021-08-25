@@ -89,7 +89,7 @@ export class _ extends LitElement {
     ages: string = "";
 
     @property()
-    lastEdited: string = "";
+    publishedAt: string = "";
 
     @property()
     href: string = "";
@@ -124,7 +124,7 @@ export class _ extends LitElement {
                             <img-ui path="entry/jig/gallery/age-icon${this.draft ? "-draft" : ""}.svg"></img-ui>
                             ${this.ages}
                         </span>
-                        <span class="last-edited">${this.lastEdited}</span>
+                        <span class="last-edited">${this.publishedAt}</span>
                     </div>
                 </div>
             </a>

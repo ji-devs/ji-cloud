@@ -31,7 +31,7 @@ export class _ extends LitElement {
                 font-size: 20px;
                 color: var(--dark-gray-6);
             }
-            ::slotted([slot=query]::placeholder) {
+            ::slotted([slot=query])::placeholder {
                 color: var(--light-gray-4);
             }
             ::slotted([slot=query]:focus) {

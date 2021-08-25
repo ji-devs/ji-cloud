@@ -27,7 +27,7 @@ export class _ extends LitElement {
                 background-position: 100% 100%;
                 background-size: 400px;
                 width: 1000px;
-                height: 600px;
+                height: 400px;
                 box-sizing: border-box;
             }
             h2 {

@@ -6,7 +6,7 @@ use futures_signals::{
     signal::{Signal, SignalExt},
 };
 use shared::domain::jig::Jig;
-use utils::{ages::AgeRangeVecExt, events};
+use utils::{ages::AgeRangeVecExt, events, jig::published_at_string};
 
 use super::{
     super::state::State,
@@ -64,6 +64,12 @@ fn render_jig_info(state: Rc<State>, jig: &Jig) -> Dom {
         .property("likedCount", "?")
         .property("language", &jig.language)
         // .property("author", jig.author_id)
+        .property("publishedAt", {
+            match jig.publish_at {
+                Some(publish_at) => published_at_string(publish_at, false),
+                None => String::new(),
+            }
+        })
         .property("description", &jig.description)
         .property_signal("ages", state.all_ages.signal_cloned().map(clone!(jig => move|all_ages| {
             all_ages.range_string(&jig.age_ranges)
