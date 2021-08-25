@@ -50,7 +50,7 @@ function recent() {
             label="Teach New Vocabulary"
             img="mock/resized/jig-gallery.jpg"
             ages="5-8"
-            lastEdited="3 W ago"
+            publishedAt="3 W ago"
         >
             <menu-line slot="menu-content" icon="delete">Delete</menu-line>
         </jig-gallery-recent>

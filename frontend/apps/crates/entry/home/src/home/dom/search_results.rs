@@ -5,7 +5,7 @@ use futures_signals::{
 };
 use shared::domain::jig::Jig;
 use std::rc::Rc;
-use utils::{ages::AgeRangeVecExt, events};
+use utils::{ages::AgeRangeVecExt, events, jig::published_at_string};
 use components::module::_common::thumbnail::ModuleThumbnail;
 
 use super::super::state::State;
@@ -33,6 +33,12 @@ fn render_result(state: Rc<State>, jig: &Jig) -> Dom {
         .property("title", &jig.display_name)
         .property("playedCount", "???")
         .property("likedCount", "???")
+        .property("publishedAt", {
+            match jig.publish_at {
+                Some(publish_at) => published_at_string(publish_at, false),
+                None => String::new(),
+            }
+        })
         .property("language", &jig.language)
         .property_signal("ages", state.search_options.age_ranges.signal_cloned().map(move |age_ranges| {
             age_ranges.range_string(&jig_ages)

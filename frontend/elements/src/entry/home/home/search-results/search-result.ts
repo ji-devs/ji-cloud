@@ -205,6 +205,9 @@ export class _ extends LitElement {
     author: string = "";
 
     @property()
+    publishedAt: string = "";
+
+    @property()
     description: string = "";
 
     render() {
@@ -247,7 +250,7 @@ export class _ extends LitElement {
                         <h3 class="title">${this.title}</h3>
                         <p class="published-at">
                             <img-ui path="entry/home/search-results/time.svg"></img-ui>
-                            2 weeks ago
+                            ${this.publishedAt}
                         </p>
                         <div class="collapsibles">
                             <slot name="categories"></slot>
