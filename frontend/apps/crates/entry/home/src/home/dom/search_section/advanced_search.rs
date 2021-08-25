@@ -26,9 +26,9 @@ pub fn render(state: Rc<State>) -> Dom {
                 .property("kind", "text")
                 .property("color", "white")
                 .property("bold", true)
-                .text(STR_SEARCH)
-                .child(html!("br"))
                 .text(STR_ADVANCED)
+                .child(html!("br"))
+                .text(STR_SEARCH)
             }),
 
             html!("input-select", {

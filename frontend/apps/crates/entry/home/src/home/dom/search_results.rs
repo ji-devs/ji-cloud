@@ -3,13 +3,10 @@ use futures_signals::{
     signal::SignalExt,
     signal_vec::{MutableVec, SignalVecExt},
 };
-use shared::domain::jig::{Jig, JigPlayerSettings};
+use shared::domain::jig::Jig;
 use std::rc::Rc;
-use utils::{ages::AgeRangeVecExt, events, routes::{JigRoute, Route}};
-use components::{
-    module::_common::thumbnail::ModuleThumbnail,
-    player_popup::{PlayerPopup, PreviewPopupCallbacks},
-};
+use utils::{ages::AgeRangeVecExt, events};
+use components::module::_common::thumbnail::ModuleThumbnail;
 
 use super::super::state::State;
 
