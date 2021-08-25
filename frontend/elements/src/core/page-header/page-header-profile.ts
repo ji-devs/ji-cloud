@@ -107,7 +107,7 @@ export class _ extends LitElement {
                 background-color: var(--dark-blue-5);
                 color: #ffffff;
                 text-align: center;
-                width: 100%;
+                width: 124px;
                 line-height: 34px;
                 right: 0;
                 bottom: 0;
