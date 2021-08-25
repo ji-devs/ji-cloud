@@ -54,7 +54,7 @@ pub fn center_rem(size: Option<(f64, f64)>, resize_info: &ResizeInfo) -> Option<
 
 pub fn oobb_transform_px(coords_in_center: bool, transform: &Transform, size: Option<(f64, f64)>, resize_info: &ResizeInfo) -> OobbF64 {
 
-    let bounds = aabb_transform_px(coords_in_center, &transform, size, &resize_info);
+    let bounds = aabb_no_rotation_transform_px(coords_in_center, &transform, size, &resize_info);
   
     let invert_y = bounds.invert_y;
 
@@ -97,6 +97,9 @@ pub fn oobb_transform_px(coords_in_center: bool, transform: &Transform, size: Op
 }
 
 pub fn aabb_transform_px(coords_in_center: bool, transform: &Transform, size: Option<(f64, f64)>, resize_info: &ResizeInfo) -> BoundsF64 {
+    oobb_transform_px(coords_in_center, transform, size, resize_info).to_aabb()
+}
+pub fn aabb_no_rotation_transform_px(coords_in_center: bool, transform: &Transform, size: Option<(f64, f64)>, resize_info: &ResizeInfo) -> BoundsF64 {
 
     if let Some(size) = size {
         let (mut x, mut y) = transform
@@ -177,6 +180,18 @@ impl BoundsF64 {
             invert_y: true
         }
     }
+
+    pub fn set_invert_y(&mut self, invert_y: bool) {
+        if self.invert_y != invert_y {
+            if invert_y {
+                self.y = self.y - self.height
+            } else {
+                self.y = self.y + self.height
+            }
+            self.invert_y = invert_y;
+        }
+    }
+
     pub fn new() -> Self {
         Self {
             x: 0.0,
@@ -427,6 +442,20 @@ impl OobbF64 {
         ctx.restore();
     }
 
+    pub fn set_invert_y(&mut self, invert_y: bool) {
+        if self.invert_y != invert_y {
+            let stash_bl = self.bl;
+            let stash_br = self.br;
+
+            self.bl = self.tl;
+            self.br = self.tr;
+
+            self.tl = stash_bl;
+            self.tr = stash_br;
+
+            self.invert_y = invert_y;
+        }
+    }
     pub fn to_aabb(&self) -> BoundsF64 {
         //invert_y is untested
 
@@ -459,6 +488,7 @@ impl OobbF64 {
             invert_y: self.invert_y
         }
     }
+
 }
 /*
     pub fn top(&self) -> f64 {

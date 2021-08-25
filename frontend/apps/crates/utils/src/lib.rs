@@ -27,5 +27,6 @@ pub mod fonts;
 pub mod screenshot;
 pub mod languages;
 pub mod jig;
+pub mod mixin;
 
 pub(crate) mod strings;

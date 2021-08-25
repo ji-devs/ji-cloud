@@ -11,7 +11,7 @@ import { nothing } from "lit-html";
 
 export type Color = "blue";
 
-@customElement("box-outline")
+@customElement("box-outline-container")
 export class _ extends LitElement {
     static get styles() {
         return [

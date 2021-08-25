@@ -118,22 +118,30 @@ pub fn render_sticker_sprite_raw(sprite: &RawSprite, opts: Option<SpriteRawRende
 
     let transform_override = opts.base.transform_override;
 
-    let transform_signal = DefaultSignal::new(
-        transform.clone(),
-        transform_override.map(|t| t.get_signal(transform)),
-    );
+    let get_transform_signal = clone!(transform, transform_override => move || {
+        DefaultSignal::new(
+            transform.clone(),
+            transform_override.clone().map(clone!(transform => move |t| t.get_signal(transform)))
+        )
+    });
 
     let mixin = opts.base.mixin;
 
-    parent
+    parent 
         .style_signal("width", width_signal(size.signal_cloned()))
         .style_signal("height", height_signal(size.signal_cloned()))
         .style_signal("top", bounds::size_height_center_rem_signal(size.signal()))
         .style_signal("left", bounds::size_width_center_rem_signal(size.signal()))
-        .style_signal(
-            "transform",
-            transform_signals::denormalize_matrix_string(transform_signal),
-        )
+        .style_signal("transform", transform_signals::denormalize_matrix_string(get_transform_signal()))
+
+        /*
+        .apply_if(!has_parent, |dom| {
+            dom.style_signal(
+                "transform",
+                transform_signals::denormalize_matrix_string(transform_signal),
+            )
+        })
+        */
         .style("display", "block")
         .style("position", "absolute")
         .future(clone!(src, size, image, effects => async move {

@@ -51,9 +51,7 @@ use crate::base::sidebar::step_5::state::TabKind as Step5TabKind;
 use components::traces::edit::state::DebugOptions as TracesOptions;
 pub static SETTINGS:OnceCell<DebugSettings> = OnceCell::new();
 
-//const IMAGE_UUID:&'static str = "bf2fe548-7ffd-11eb-b3ab-579026da8b36";
-const IMAGE_UUID:&'static str = "9da11e0a-c17b-11eb-b863-570eea18a3bd";
-
+const IMAGE_UUID:&'static str = "f2e63cf2-ee11-11eb-9b68-4bf1f063ab1c";
 
 pub const DEBUG_TEXT:&'static str = "Debug Text"; 
 
@@ -127,10 +125,17 @@ impl DebugSettings {
 
                                             Sticker::Text(text)
                                         },
-                                        InitSticker::Sprite => Sticker::Sprite(Sprite::new(Image {
-                                            id: ImageId(Uuid::parse_str(IMAGE_UUID).unwrap_ji()), 
-                                            lib: MediaLibrary::Global
-                                        }))
+                                        InitSticker::Sprite => {
+                                            let mut sprite = Sprite::new(Image {
+                                                id: ImageId(Uuid::parse_str(IMAGE_UUID).unwrap_ji()), 
+                                                lib: MediaLibrary::Global
+                                            });
+
+                                            sprite.transform.set_scale_2d(0.3, 0.3);
+                                            sprite.transform.set_translation_2d(*translation_x, *translation_y);
+                                            sprite.transform.rotate_z(1.5);
+                                            Sticker::Sprite(sprite)
+                                        }
                                     }
                                 };
 
@@ -186,6 +191,16 @@ pub fn init(jig_id: JigId, module_id: ModuleId) {
                         }
                     ),
                     (-0.3, -0.3)
+                ),
+                (
+                    InitSticker::Sprite, 
+                    ItemKind::Interactive(
+                        Interactive {
+                            audio: None,
+                            target_transform: None,
+                        }
+                    ),
+                    (-0.3, 0.1)
                 ),
                 //( InitSticker::Sprite, ItemKind::Static)
             ],

@@ -169,11 +169,11 @@ impl TransformState {
         })
     }
 
-    pub fn get_aabb_bounds_px(&self, coords_in_center: bool) -> BoundsF64 {
+    pub fn get_aabb_no_rotation_bounds_px(&self, coords_in_center: bool) -> BoundsF64 {
         let resize_info = get_resize_info();
         let size = self.size.get_cloned();
 
-        bounds::aabb_transform_px(
+        bounds::aabb_no_rotation_transform_px(
             coords_in_center,
             &self.get_inner_clone(),
             size,
@@ -194,16 +194,16 @@ impl TransformState {
     }
 
     pub fn get_x_px(&self, coords_in_center: bool) -> f64 {
-        self.get_aabb_bounds_px(coords_in_center).x
+        self.get_aabb_no_rotation_bounds_px(coords_in_center).x
     }
     pub fn get_y_px(&self, coords_in_center: bool) -> f64 {
-        self.get_aabb_bounds_px(coords_in_center).y
+        self.get_aabb_no_rotation_bounds_px(coords_in_center).y
     }
     pub fn get_width_px(&self, coords_in_center: bool) -> f64 {
-        self.get_aabb_bounds_px(coords_in_center).width
+        self.get_aabb_no_rotation_bounds_px(coords_in_center).width
     }
     pub fn get_height_px(&self, coords_in_center: bool) -> f64 {
-        self.get_aabb_bounds_px(coords_in_center).height
+        self.get_aabb_no_rotation_bounds_px(coords_in_center).height
     }
 
     pub fn x_px_signal(&self) -> impl Signal<Item = f64> {

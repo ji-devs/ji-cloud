@@ -19,4 +19,3 @@ import "@elements/module/_common/edit/widgets/transform/box";
 //trace
 import "@elements/module/_common/edit/widgets/trace/edit-reshape-menu";
 import "@elements/module/_common/edit/widgets/trace/edit-reshape-menu-btn";
-import "@elements/module/_common/edit/widgets/trace/edit-select-box";

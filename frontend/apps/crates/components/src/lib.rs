@@ -47,3 +47,7 @@ pub mod transform;
 pub mod share_jig;
 #[cfg(feature = "player_popup")]
 pub mod player_popup;
+#[cfg(feature = "box_outline")]
+pub mod box_outline;
+#[cfg(feature = "buttons")]
+pub mod buttons;

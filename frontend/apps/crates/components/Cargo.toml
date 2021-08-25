@@ -103,6 +103,8 @@ page_header = []
 page_footer = []
 share_jig = []
 player_popup = []
+box_outline = []
+buttons = []
 
 default = ["all"]
 all= [
@@ -131,5 +133,7 @@ all= [
     "page_header",
     "page_footer",
     "share_jig",
-    "player_popup"
+    "player_popup",
+    "box_outline",
+    "buttons"
 ]

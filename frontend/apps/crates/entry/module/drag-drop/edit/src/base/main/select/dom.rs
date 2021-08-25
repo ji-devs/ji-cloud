@@ -6,6 +6,8 @@ use crate::base::state::*;
 use super::state::*;
 use utils::prelude::*;
 use components::{
+    buttons::{Button, ButtonStyle, ButtonStyleIcon},
+    box_outline::{BoxOutline,BoxOutlineMixins},
     backgrounds::dom::render_backgrounds, 
     stickers::dom::{render_stickers, mixin_sticker_button, StickerRawRenderOptions, BaseRawRenderOptions, render_sticker_raw},
     traces::edit::dom::render_traces_edit
@@ -13,7 +15,7 @@ use components::{
 
 use futures_signals::{
     signal_vec::{always, SignalVecExt},
-    signal::{SignalExt}
+    signal::{Mutable, SignalExt}
 };
 
 impl MainSelect {
@@ -47,39 +49,68 @@ impl MainSelect {
 
     pub fn render_interactive(state: Rc<Self>, theme_id: ThemeId, item: SelectItem, data: Interactive) -> Dom {
         let mut opts = BaseRawRenderOptions::default();
+        let size:Mutable<Option<(f64, f64)>> = Mutable::new(None);
         let index = item.index;
 
-        opts.set_parent(
-            apply_methods!(DomBuilder::new_html("box-outline"), {
-                .property_signal("thick", state.is_selected(index))
-                .event(clone!(state, index => move |evt:events::Close| {
-                    state.base.set_drag_item_deselected(index)
-                }))
-            })
-        );
-       
         opts.set_transform_override(item.get_transform_override());
 
         opts.set_mixin(clone!(state, index, item => move |dom| {
             dom
                 .apply(Self::mixin_click(state.clone(), index))
-                .event(clone!(item => move |evt:events::MouseDown| {
-                    item.start_drag(evt.x() as i32, evt.y() as i32);
-                }))
-                .global_event_preventable(clone!(item => move |evt:events::MouseUp| {
-                    item.try_end_drag(evt.x() as i32, evt.y() as i32);
-
-                }))
-                .global_event_preventable(clone!(item => move |evt:events::MouseMove| {
-                    item.try_move_drag(evt.x() as i32, evt.y() as i32);
-                }))
         }));
+
+        opts.set_size(size.clone());
 
         let raw_sticker = &item.raw_sticker();
 
         let opts = StickerRawRenderOptions::new(&raw_sticker, Some(opts));
 
-        render_sticker_raw(&raw_sticker, theme_id, Some(opts))
+        let transform = raw_sticker.transform().clone();
+        let transform_override = item.get_transform_override();
+        html!("empty-fragment", {
+            .child(render_sticker_raw(&raw_sticker, theme_id, Some(opts)))
+            .child(BoxOutline::render_mixins(
+                    {
+                        let mut box_outline = BoxOutline::new_transform_size(
+                            move || transform_override.get_signal(transform.clone()),
+                            move || size.signal_cloned()
+                        );
+
+                        box_outline.set_top_right_hover_only(true);
+
+                        box_outline
+                    },
+                    None,
+                    BoxOutlineMixins {
+                        click_area: Some(clone!(state, index, item => move |dom:DomBuilder<HtmlElement>| {
+                            dom
+                                .event(clone!(item => move |evt:events::MouseDown| {
+                                    item.start_drag(evt.x() as i32, evt.y() as i32);
+                                }))
+                                .global_event_preventable(clone!(item => move |evt:events::MouseUp| {
+                                    item.try_end_drag(evt.x() as i32, evt.y() as i32);
+
+                                }))
+                                .global_event_preventable(clone!(item => move |evt:events::MouseMove| {
+                                    item.try_move_drag(evt.x() as i32, evt.y() as i32);
+                                }))
+                        })),
+
+                        //adds a close button to the top-right corner 
+                        top_right: Some(clone!(state, index => move |dom:DomBuilder<HtmlElement>| {
+                            dom.child(Button::render(
+                                Button::new(
+                                    ButtonStyle::Icon(ButtonStyleIcon::BlueX),
+                                    clone!(state, index => move || { 
+                                        state.base.set_drag_item_deselected(index)
+                                    })
+                                ),
+                                None
+                            ))
+                        }))
+                    }
+            ))
+        })
 
     }
 

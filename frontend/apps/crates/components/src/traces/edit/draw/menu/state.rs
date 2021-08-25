@@ -22,7 +22,7 @@ impl Menu {
             Some(bounds) => bounds,
             None => {
                 //without the real DomRects, do our best with the basic transform bounds
-                let mut bounds = self.trace.transform.get_aabb_bounds_px(false);
+                let mut bounds = self.trace.transform.get_aabb_no_rotation_bounds_px(false);
                 bounds.y += 10.0; //dunno why this shift happens..
                 bounds
             }

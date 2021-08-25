@@ -7,4 +7,5 @@ pub use crate::{
     themes::*,
     math::transform_ext::*,
     image::ImageExt,
+    mixin::MixinStub,
 };

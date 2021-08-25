@@ -1,5 +1,6 @@
-use dominator::{clone, html, with_node, Dom};
+use dominator::{clone, html, with_node, Dom, DomBuilder};
 use std::rc::Rc;
+use web_sys::HtmlElement;
 use utils::{prelude::*, resize::{resize_info_signal, ResizeInfo}};
 
 use futures_signals::{
@@ -8,8 +9,11 @@ use futures_signals::{
 };
 
 use super::{super::trace::state::*, menu::dom::render_menu};
-use crate::traces::edit::state::*;
-
+use crate::{
+    traces::edit::state::*,
+    box_outline::{BoxOutline,BoxOutlineMixins},
+    buttons::{Button, ButtonStyle, ButtonStyleIcon}
+};
 //see https://www.loom.com/share/c9ec53482ad94a97bff74d143a5a8cd2
 
 impl EditSelectTrace {
@@ -36,10 +40,11 @@ impl EditSelectTrace {
             }
         });
 
-        let bounds_index_signal = map_ref! {
-            let bounds = select_box.bounds.signal_cloned(),
+        let selected_has_bounds_index_signal = map_ref! {
+            let selected = get_selected_signal(), 
+            let has_bounds = select_box.bounds.signal_cloned().map(|b| b.is_some()).dedupe(),
             let index = index.signal()
-                => (bounds.clone(), *index)
+                => (*selected, *has_bounds, *index)
         };
 
         html!("empty-fragment", {
@@ -74,61 +79,66 @@ impl EditSelectTrace {
                                     .child(render_menu(parent.clone(), index.clone()))
                                 }))
                                 .event(clone!(select_box => move |_evt:events::Close| {
-                                    log::info!("GOT CLOSE!");
                                     select_box.menu_pos.set(None);
                                 }))
                             })
                         })
                     }))
             )
-            .child_signal(bounds_index_signal.map(clone!(resize_info, select_box => move |(bounds, index)| {
-                bounds.map(|bounds| {
-                    //then draw our actual box
-                    let bounds = bounds.denormalize(&resize_info);
-                    html!("trace-edit-select-box", {
-                        .property_signal("selected", get_selected_signal())
-                        .style("left", &format!("{}px", bounds.x))
-                        .style("top", &format!("{}px", bounds.y))
-                        .style("width", &format!("{}px", bounds.width))
-                        .style("height", &format!("{}px", bounds.height))
+            .child_signal(selected_has_bounds_index_signal.map(clone!(parent, resize_info, select_box => move |(is_selected, has_bounds, index)| {
+                if !is_selected || !has_bounds {
+                    None
+                } else {
+                    Some(
+                        BoxOutline::render_mixins(
+                                BoxOutline::new(
+                                    clone!(resize_info, select_box => move || select_box.bounds.signal_cloned().map(clone!(resize_info => move |bounds| {
+                                        bounds.unwrap_ji().denormalize(&resize_info)
+                                    })))
+                                ),
+                                None,
+                                BoxOutlineMixins {
+                                    //handle movement
+                                    click_area: Some(clone!(parent, select_box => move |dom:DomBuilder<HtmlElement>| {
+                                        dom
+                                            .event(clone!(select_box => move |evt:events::MouseDown| {
+                                                select_box.start_drag(evt.x() as i32, evt.y() as i32);
+                                            }))
+                                            .global_event_preventable(clone!(select_box => move |evt:events::MouseMove| {
+                                                select_box.try_move_drag(evt.x() as i32, evt.y() as i32);
+                                            }))
+                                            .global_event_preventable(clone!(parent, select_box => move |evt:events::MouseUp| {
+                                                if let Some(transform) = select_box.try_end_drag(evt.x() as i32, evt.y() as i32) {
+                                                    if let Some(index) = index {
+                                                        parent.change_transform(index, transform);
+                                                    }
+                                                }
+                                            }))
+                                    })),
 
-                        .child(
-                            //Select area - to exclude the buttons
-                            html!("div", {
-                                .property("slot", "click-area")
+                                    //adds a menu button to the top-right corner 
+                                    top_right: Some(clone!(resize_info, select_box => move |dom:DomBuilder<HtmlElement>| {
+                                        dom
+                                            .child(
+                                                Button::render(
+                                                    Button::new(
+                                                        ButtonStyle::Icon(ButtonStyleIcon::GreyKebab),
+                                                        clone!(resize_info, select_box => move || { 
+                                                            let bounds = select_box.bounds.get_cloned().unwrap_ji().denormalize(&resize_info);
 
-                                .event(clone!(select_box => move |evt:events::MouseDown| {
-                                    select_box.start_drag(evt.x() as i32, evt.y() as i32);
-                                }))
-                                .global_event_preventable(clone!(select_box => move |evt:events::MouseMove| {
-                                    select_box.try_move_drag(evt.x() as i32, evt.y() as i32);
-                                }))
-                                .global_event_preventable(clone!(parent, select_box => move |evt:events::MouseUp| {
-                                    if let Some(transform) = select_box.try_end_drag(evt.x() as i32, evt.y() as i32) {
-                                        if let Some(index) = index {
-                                            parent.change_transform(index, transform);
-                                        }
-                                    }
-                                }))
-                            })
-                        )
-                        .child(html!("button-icon" => web_sys::HtmlElement, {
-                            .property("slot", "menu-btn")
-                            .property("icon", "circle-kebab-grey")
-                            .style("display", "block")
-                            .with_node!(elem => {
-                                .event(clone!(select_box => move |_evt:events::Click| {
-                                    let dom_rect = elem.get_bounding_client_rect();
-                                    let x = dom_rect.x();
-                                    let y = dom_rect.y();
-                                    select_box.menu_pos.set(Some((x, y)));
-                                }))
-                            })
-                        }))
-                    })
-                })
+                                                            let (x, y) = resize_info.get_fixed_pos_px(bounds.x + bounds.width, bounds.y);
+
+                                                            select_box.menu_pos.set(Some((x, y)));
+                                                        })
+                                                    ),
+                                                    None
+                                                )
+                                            )
+                                    }))
+                                }
+                        ))
+                }
             })))
-
         })
     }
 }
