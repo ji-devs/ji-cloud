@@ -99,9 +99,10 @@ where
             }
         }))
         .after_inserted(clone!(state => move |_elem| {
-            //On mount - send an empty IframeInit message to let the parent know we're ready
+            //On mount - send an empty IframeInit message to let the *parent* know we're ready
+            //parent here is probably the editor window (i.e. we've been told to wait for raw data)
             IframeInit::empty()
-                .try_post_message_to_top()
+                .try_post_message_to_parent()
                 .unwrap_ji();
         }))
     })
@@ -158,7 +159,8 @@ where
                     }
                 }))
                 .after_inserted(clone!(state => move |_elem| {
-                    //On mount - send an empty IframeInit message to let the parent know we're ready
+                    //On mount - send an empty IframeInit message to let the *top* know we're ready
+                    //top here should be the jig player
                     IframeInit::empty()
                         .try_post_message_to_top()
                         .unwrap_ji();
@@ -190,6 +192,7 @@ where
                             None => log::info!("Starting without a timer")
                         }
 
+                        //let the player know we're starting 
                         msg.try_post_message_to_top().unwrap_ji();
                     }
                     None

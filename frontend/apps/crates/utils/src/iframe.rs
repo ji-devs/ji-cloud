@@ -16,7 +16,15 @@ pub trait IframeMessageExt {
     where &'a Self: Into<JsValue>
     {
         let window = web_sys::window().unwrap_ji();
-        let parent = window.top()?.unwrap_ji();
+        let top = window.top()?.unwrap_ji();
+
+        top.post_message(&self.into(), "*")
+    }
+    fn try_post_message_to_parent<'a>(&'a self) -> Result<(), JsValue> 
+    where &'a Self: Into<JsValue>
+    {
+        let window = web_sys::window().unwrap_ji();
+        let parent = window.parent()?.unwrap_ji();
 
         parent.post_message(&self.into(), "*")
     }
