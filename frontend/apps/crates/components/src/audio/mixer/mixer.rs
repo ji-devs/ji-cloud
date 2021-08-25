@@ -38,7 +38,7 @@ impl AudioSettings {
 impl Default for AudioSettings {
     fn default() -> Self {
         Self {
-            bg: jig::AudioBackground::Placeholder0
+            bg: jig::AudioBackground::FunForKids
         }
     }
 }
@@ -67,7 +67,28 @@ impl <'a> From<AudioPath<'a>> for AudioSource {
 impl From<jig::AudioBackground> for AudioPath<'_> {
     fn from(bg:jig::AudioBackground) -> Self {
         Self::Cdn(Cow::Borrowed(match bg {
-            _ => "jig/background-000.mp3",
+            jig::AudioBackground::FunForKids => "music-loop/fun-for-kids.mp3",
+            jig::AudioBackground::SukkotLoop => "music-loop/sukkot-loop.mp3",
+        }))
+    }
+}
+
+impl From<jig::AudioFeedbackPositive> for AudioPath<'_> {
+    fn from(p:jig::AudioFeedbackPositive) -> Self {
+        Self::Cdn(Cow::Borrowed(match p {
+            jig::AudioFeedbackPositive::Magic => "module/feedback-positive/magic.mp3",
+            jig::AudioFeedbackPositive::StarPing => "module/feedback-positive/star-ping.mp3",
+            jig::AudioFeedbackPositive::Ting => "module/feedback-positive/ting.mp3",
+        }))
+    }
+}
+
+impl From<jig::AudioFeedbackNegative> for AudioPath<'_> {
+    fn from(n:jig::AudioFeedbackNegative) -> Self {
+        Self::Cdn(Cow::Borrowed(match n {
+            jig::AudioFeedbackNegative::Boing => "module/feedback-negative/boing.mp3",
+            jig::AudioFeedbackNegative::Incorrect => "module/feedback-negative/incorrect.mp3",
+            jig::AudioFeedbackNegative::JumpWrong => "module/feedback-negative/jump-wrong.mp3",
         }))
     }
 }

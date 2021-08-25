@@ -199,25 +199,16 @@ pub struct Jig {
 #[repr(i16)]
 pub enum AudioBackground {
     #[allow(missing_docs)]
-    Placeholder0 = 0,
+    FunForKids = 0,
     #[allow(missing_docs)]
-    Placeholder1 = 1,
-    #[allow(missing_docs)]
-    Placeholder2 = 2,
-    #[allow(missing_docs)]
-    Placeholder3 = 3,
-    #[allow(missing_docs)]
-    Placeholder4 = 4,
+    SukkotLoop = 1,
 }
 impl AudioBackground {
     /// Get all enum variants
     pub fn variants() -> Vec<AudioBackground> {
         vec![
-            AudioBackground::Placeholder0,
-            AudioBackground::Placeholder1,
-            AudioBackground::Placeholder2,
-            AudioBackground::Placeholder3,
-            AudioBackground::Placeholder4,
+            AudioBackground::FunForKids,
+            AudioBackground::SukkotLoop,
         ]
     }
 }
@@ -238,25 +229,19 @@ pub struct AudioEffects {
 #[repr(i16)]
 pub enum AudioFeedbackNegative {
     #[allow(missing_docs)]
-    Placeholder0 = 0,
+    Boing = 0,
     #[allow(missing_docs)]
-    Placeholder1 = 1,
+    Incorrect = 1,
     #[allow(missing_docs)]
-    Placeholder2 = 2,
-    #[allow(missing_docs)]
-    Placeholder3 = 3,
-    #[allow(missing_docs)]
-    Placeholder4 = 4,
+    JumpWrong = 2,
 }
 impl AudioFeedbackNegative {
     /// Get all enum variants
     pub fn variants() -> Vec<AudioFeedbackNegative> {
         vec![
-            AudioFeedbackNegative::Placeholder0,
-            AudioFeedbackNegative::Placeholder1,
-            AudioFeedbackNegative::Placeholder2,
-            AudioFeedbackNegative::Placeholder3,
-            AudioFeedbackNegative::Placeholder4,
+            AudioFeedbackNegative::Boing,
+            AudioFeedbackNegative::Incorrect,
+            AudioFeedbackNegative::JumpWrong,
         ]
     }
 }
@@ -267,25 +252,19 @@ impl AudioFeedbackNegative {
 #[repr(i16)]
 pub enum AudioFeedbackPositive {
     #[allow(missing_docs)]
-    Placeholder0 = 0,
+    Magic = 0,
     #[allow(missing_docs)]
-    Placeholder1 = 1,
+    StarPing = 1,
     #[allow(missing_docs)]
-    Placeholder2 = 2,
-    #[allow(missing_docs)]
-    Placeholder3 = 3,
-    #[allow(missing_docs)]
-    Placeholder4 = 4,
+    Ting = 2,
 }
 impl AudioFeedbackPositive {
     /// Get all enum variants
     pub fn variants() -> Vec<AudioFeedbackPositive> {
         vec![
-            AudioFeedbackPositive::Placeholder0,
-            AudioFeedbackPositive::Placeholder1,
-            AudioFeedbackPositive::Placeholder2,
-            AudioFeedbackPositive::Placeholder3,
-            AudioFeedbackPositive::Placeholder4,
+            AudioFeedbackPositive::Magic,
+            AudioFeedbackPositive::StarPing,
+            AudioFeedbackPositive::Ting,
         ]
     }
 }

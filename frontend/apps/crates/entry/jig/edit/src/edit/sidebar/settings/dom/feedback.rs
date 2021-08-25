@@ -1,17 +1,20 @@
-use std::rc::Rc;
+use core::hash::Hash;
+use std::{collections::HashSet, rc::Rc};
 
-use dominator::{clone, html, Dom};
+use awsm_web::audio::AudioClipOptions;
+use components::audio::mixer::{AudioMixer, AudioPath, AudioHandle};
+use dominator::{Dom, clone, html};
 
 use crate::edit::sidebar::settings::{
-    actions::set_active_popup,
+    actions::{set_active_popup, update_jig_settings},
     dom::STR_BACK_TO_SETTINGS,
     state::{ActiveSettingsPopup, FeedbackTab},
 };
-use futures_signals::signal::SignalExt;
+use futures_signals::signal::{Mutable, MutableLockMut, SignalExt};
 use shared::domain::jig::{AudioFeedbackNegative, AudioFeedbackPositive};
 use utils::{
     events,
-    jig::{AudioFeedbackNegativeExt, AudioFeedbackPositiveExt},
+    jig::JigAudioExt,
 };
 
 use super::super::state::State;
@@ -70,13 +73,19 @@ pub fn render(state: Rc<State>, tab: FeedbackTab) -> Dom {
         .apply(|dom| {
             match tab {
                 FeedbackTab::Positive => {
-                    dom.children(AudioFeedbackPositive::variants().iter().map(clone!(state => move|option| {
-                        line_positive(Rc::clone(&state), option)
+                    let audio_handles: Vec<Mutable<Option<AudioHandle>>> = AudioFeedbackPositive::variants().iter().map(|_| Mutable::new(None)).collect();
+                    let audio_handles = Rc::new(audio_handles);
+
+                    dom.children(AudioFeedbackPositive::variants().iter().enumerate().map(clone!(state => move|(index, option)| {
+                        line(Rc::clone(&state), state.feedback_positive.clone(), option, audio_handles.clone(), index)
                     })).collect::<Vec<Dom>>())
                 },
                 FeedbackTab::Negative => {
-                    dom.children(AudioFeedbackNegative::variants().iter().map(clone!(state => move|option| {
-                        line_negative(Rc::clone(&state), option)
+                    let audio_handles: Vec<Mutable<Option<AudioHandle>>> = AudioFeedbackNegative::variants().iter().map(|_| Mutable::new(None)).collect();
+                    let audio_handles = Rc::new(audio_handles);
+
+                    dom.children(AudioFeedbackNegative::variants().iter().enumerate().map(clone!(state => move|(index, option)| {
+                        line(Rc::clone(&state), state.feedback_negative.clone(), option, audio_handles.clone(), index)
                     })).collect::<Vec<Dom>>())
                 },
             }
@@ -84,47 +93,66 @@ pub fn render(state: Rc<State>, tab: FeedbackTab) -> Dom {
     })
 }
 
-fn line_positive(state: Rc<State>, option: &AudioFeedbackPositive) -> Dom {
-    html!("jig-audio-line", {
-        .property("slot", "lines")
-        .property("label", option.display_name())
-        .property_signal("selected", state.feedback_positive.signal_cloned().map(clone!(option => move|feedback_positive| {
-            feedback_positive.contains(&option)
-        })))
-        .event(clone!(state, option => move |_ :events::Click| {
-            let mut feedback_positive = state.feedback_positive.lock_mut();
-            match feedback_positive.contains(&option) {
-                true => feedback_positive.remove(&option),
-                false => feedback_positive.insert(option.clone()),
-            };
-        }))
-        .children(&mut [
-            html!("jig-audio-play-pause", {
-                .property("mode", "play")
-                .property("slot", "play-pause")
-            }),
-        ])
-    })
-}
+fn line<'a, T>(state: Rc<State>, list: Mutable<HashSet<T>>, option: &T, audio_handles: Rc<Vec<Mutable<Option<AudioHandle>>>>, index: usize) -> Dom
+    where T: Hash + Eq + Clone  + JigAudioExt + Into<AudioPath<'a>> + std::fmt::Debug + 'static,
+{
+    let audio_handle = &audio_handles[index];
 
-fn line_negative(state: Rc<State>, option: &AudioFeedbackNegative) -> Dom {
     html!("jig-audio-line", {
         .property("slot", "lines")
         .property("label", option.display_name())
-        .property_signal("selected", state.feedback_negative.signal_cloned().map(clone!(option => move|feedback_negative| {
-            feedback_negative.contains(&option)
-        })))
-        .event(clone!(state, option => move |_ :events::Click| {
-            let mut feedback_negative = state.feedback_negative.lock_mut();
-            match feedback_negative.contains(&option) {
-                true => feedback_negative.remove(&option),
-                false => feedback_negative.insert(option.clone()),
-            };
-        }))
+        .property_signal("playing", audio_handle.signal_ref(|x| x.is_some()))
         .children(&mut [
+            html!("input", {
+                .property("slot", "checkbox")
+                .property("type", "checkbox")
+                .property_signal("checked", list.signal_cloned().map(clone!(option => move|list| {
+                    list.contains(&option)
+                })))
+                .event(clone!(state, option => move |_ :events::Click| {
+                    let mut list = list.lock_mut();
+                    match list.contains(&option) {
+                        true => list.remove(&option),
+                        false => list.insert(option.clone()),
+                    };
+                    drop(list);
+                    update_jig_settings(Rc::clone(&state));
+                }))
+            }),
             html!("jig-audio-play-pause", {
-                .property("mode", "play")
                 .property("slot", "play-pause")
+                .property_signal("mode", audio_handle.signal_ref(|audio_handle| {
+                    match audio_handle {
+                        Some(_) => "pause",
+                        None => "play",
+                    }
+                }))
+                .event(clone!(option, audio_handles => move |_ :events::Click| {
+                    let on_ended = Some(clone!(audio_handles => move|| {
+                        audio_handles[index].set(None);
+                    }));
+    
+                    let mut audio_handles = audio_handles.iter().map(|x| x.lock_mut()).collect::<Vec<MutableLockMut<Option<AudioHandle>>>>();
+    
+                    match *audio_handles[index] {
+                        Some(_) => *audio_handles[index] = None,
+                        None => {
+                            audio_handles = audio_handles.into_iter().map(|mut o| {
+                                *o = None;
+                                o
+                            }).collect();
+    
+                            let mixer = AudioMixer::new(None);
+                            let path: AudioPath = option.clone().into();
+                            let handle = mixer.add_source(path, AudioClipOptions {
+                                auto_play: true,
+                                is_loop: false,
+                                on_ended: on_ended,
+                            });
+                            *audio_handles[index] = Some(handle);
+                        },
+                    };
+                }))
             }),
         ])
     })

@@ -39,6 +39,7 @@ export class _ extends LitElement {
                     grid-column: 1 / -1;
                     max-height: 340px;
                     overflow: auto;
+                    padding-bottom: 16px;
                 }
             `,
         ];

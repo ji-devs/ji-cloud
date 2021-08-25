@@ -15,7 +15,6 @@ export class _ extends LitElement {
                     grid-template-columns: auto auto;
                     justify-content: space-between;
                     height: 48px;
-                    cursor: pointer;
                     align-items: center;
                     padding: 0 32px;
                 }
@@ -44,6 +43,14 @@ export class _ extends LitElement {
                     background-color: var(--main-blue);
                     border: 0;
                     color: white;
+                }
+                ::slotted([slot=checkbox]) {
+                    border: solid 1px #c7d3db;
+                    height: 16px;
+                    width: 16px;
+                    border-radius: 3px;
+                    box-sizing: border-box;
+                    cursor: pointer;
                 }
                 .name {
                     color: #4a4a4a;
@@ -85,7 +92,7 @@ export class _ extends LitElement {
     render() {
         return html`
             <div class="start">
-                <span class="checkbox">${ this.selected ? '✔' : nothing }</span>
+                <slot name="checkbox"></slot>
                 <div class="name">
                     ${ this.label }
                     <span class="new">${STR_NEW}</span>
