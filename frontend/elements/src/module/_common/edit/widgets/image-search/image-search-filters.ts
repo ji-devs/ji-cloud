@@ -1,4 +1,5 @@
 import { LitElement, html, css, customElement, property } from 'lit-element';
+import '@elements/core/overlays/anchored-overlay';
 
 const STR_FILTER = "Filter";
 const STR_SEARCH_IN = "Search in";
@@ -9,12 +10,6 @@ export class _ extends LitElement {
 
     static get styles() {
         return [css`
-            :host {
-                position: relative;
-                display: flex;
-                flex-direction: column;
-                align-items: flex-end;
-            }
             button {
                 font-family: Poppins;
                 font-size: 16px;
@@ -36,17 +31,7 @@ export class _ extends LitElement {
                 transform: rotate(180deg);
             }
             .overlay {
-                position: absolute;
-                box-shadow: rgb(0 0 0 / 20%) 0px 0px 5px;
-                background-color: #fff;
                 width: 235px;
-                right: 0;
-                top: 25px;
-                border-radius: 14px;
-                display: none;
-            }
-            :host([open]) .overlay {
-                display: block;
             }
             .source-options {
                 display: flex;
@@ -84,24 +69,32 @@ export class _ extends LitElement {
 
     render() {
         return html`
-            <button @click="${this.openClick}">
-                ${STR_FILTER}
-                <img-ui class="caret" path="module/_common/edit/widgets/sidebar/image-select/open-filters-icon.svg"></img-ui>
-            </button>
-            <div class="overlay">
-                <section class="source-section">
-                    <h4>${STR_SEARCH_IN}</h4>
-                    <div class="source-options">
-                        <slot name="source-options"></slot>
-                    </div>
-                </section>
-                <section class="style-section">
-                    <h4>${STR_IMAGE_STYLE}</h4>
-                    <div class="style-options">
-                        <slot name="style-options"></slot>
-                    </div>
-                </section>
-            </div>
+            <anchored-overlay
+                .open=${this.open}
+                .autoClose=${false}
+                @close=${() => this.open = false}
+                .styled=${true}
+                positionX="right-in"
+            >
+                <button slot="anchor" @click="${this.openClick}">
+                    ${STR_FILTER}
+                    <img-ui class="caret" path="module/_common/edit/widgets/sidebar/image-select/open-filters-icon.svg"></img-ui>
+                </button>
+                <div slot="overlay" class="overlay">
+                    <section class="source-section">
+                        <h4>${STR_SEARCH_IN}</h4>
+                        <div class="source-options">
+                            <slot name="source-options"></slot>
+                        </div>
+                    </section>
+                    <section class="style-section">
+                        <h4>${STR_IMAGE_STYLE}</h4>
+                        <div class="style-options">
+                            <slot name="style-options"></slot>
+                        </div>
+                    </section>
+                </div>
+            </anchored-overlay>
         `;
     }
 }
