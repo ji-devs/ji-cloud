@@ -29,6 +29,7 @@ mod migration;
 
 const PREMIUM_TAG: &'static str = "premium";
 const PUBLISHED_TAG: &'static str = "published";
+const PUBLIC_TAG: &'static str = "public";
 const HAS_AUTHOR_TAG: &'static str = "hasAuthor";
 
 #[derive(Serialize)]
@@ -250,6 +251,7 @@ select algolia_index_version as "algolia_index_version!" from "settings"
 
         // todo: allow for some way to do a partial update (for example, by having a channel for queueing partial updates)
         let requests: Vec<_> = sqlx::query!(
+            //language=SQL
             r#"
 select id,
     display_name as "name",
@@ -274,6 +276,7 @@ select id,
                     inner join jig_category on category.id = jig_category.category_id
            where jig_category.jig_id = jig.id))                               as "category_names!",
     (publish_at < now() is true) as "is_published!",
+    is_public as "is_public!",
     author_id as "author"
 from jig
 where
@@ -289,6 +292,10 @@ for no key update skip locked;
             let mut tags = Vec::new();
             if row.is_published {
                 tags.push(PUBLISHED_TAG);
+            }
+
+            if row.is_public {
+                tags.push(PUBLIC_TAG);
             }
 
             if row.author.is_some() {
@@ -687,6 +694,8 @@ impl Client {
         query: &str,
         page: Option<u32>,
         is_published: Option<bool>,
+        is_public: Option<bool>,
+
         age_ranges: &[AgeRangeId],
         affiliations: &[AffiliationId],
         categories: &[CategoryId],
@@ -714,6 +723,13 @@ impl Client {
             filters.filters.push(Box::new(CommonFilter {
                 filter: TagFilter(PUBLISHED_TAG.to_owned()),
                 invert: !is_published,
+            }))
+        }
+
+        if let Some(is_public) = is_public {
+            filters.filters.push(Box::new(CommonFilter {
+                filter: TagFilter(PUBLIC_TAG.to_owned()),
+                invert: !is_public,
             }))
         }
 
