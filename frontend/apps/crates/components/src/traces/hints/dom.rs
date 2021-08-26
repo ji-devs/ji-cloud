@@ -3,11 +3,11 @@ use std::rc::Rc;
 use utils::resize::{resize_info_signal, ResizeInfo};
 
 use crate::traces::{
-    svg::{self, ShapeStyle, ShapeStyleBase, SvgCallbacks, TransformSize},
+    svg::{self, ShapeStyleVar, ShapeStyle, ShapeStyleKind, SvgCallbacks, TransformSize},
     utils::*,
 };
 use futures_signals::{
-    signal::SignalExt,
+    signal::{Signal, SignalExt},
     signal_vec,
 };
 
@@ -21,13 +21,14 @@ pub fn render_traces_hint(traces: Vec<Trace>) -> Dom {
             traces.
                 iter()
                 .map(move |trace| {
-                    let style = ShapeStyle::new(ShapeStyleBase::Mask);
+                    let shape_style = ShapeStyleVar::new_static(ShapeStyle::new_mask());
+
                     let callbacks = SvgCallbacks::new(
                         None::<fn()>,
                         None::<fn(web_sys::SvgElement)>,
                         None::<fn(web_sys::SvgElement)>,
                     );
-                    render_trace_hint(&style, &resize_info, &trace, callbacks)
+                    render_trace_hint(shape_style, &resize_info, &trace, callbacks)
                 })
                 .collect::<Vec<Dom>>()
         }))
@@ -50,23 +51,30 @@ pub fn render_traces_hint(traces: Vec<Trace>) -> Dom {
     })
 }
 
-pub fn render_trace_hint(
-    style: &ShapeStyle,
+pub fn render_trace_hint<S>(
+    shape_style: ShapeStyleVar<S>,
     resize_info: &ResizeInfo,
     trace: &Trace,
     callbacks: Rc<SvgCallbacks>,
-) -> Dom {
+) -> Dom 
+where
+      S: Signal<Item = ShapeStyle> + 'static
+{
     let transform_size = trace
         .calc_size(resize_info)
         .map(|size| TransformSize::new_static(&trace.transform, size));
 
     match trace.shape {
-        TraceShape::Path(ref path) => {
-            svg::render_path(&style, &resize_info, transform_size, &path, callbacks)
-        }
+        TraceShape::Path(ref path) => svg::render_path(
+            shape_style, 
+            &resize_info, 
+            transform_size, 
+            &path, 
+            callbacks
+        ),
 
         TraceShape::Rect(width, height) => svg::render_rect(
-            &style,
+            shape_style,
             &resize_info,
             transform_size,
             width,
@@ -74,7 +82,7 @@ pub fn render_trace_hint(
             callbacks,
         ),
         TraceShape::Ellipse(radius_x, radius_y) => svg::render_ellipse(
-            &style,
+            shape_style,
             &resize_info,
             transform_size,
             radius_x,

@@ -205,7 +205,7 @@ pub fn init(jig_id: JigId, module_id: ModuleId) {
                 //( InitSticker::Sprite, ItemKind::Static)
             ],
             traces: vec![
-                InitTrace::Ellipse(0.3, 0.4, 0.2, 0.1)
+                //InitTrace::Ellipse(0.3, 0.4, 0.2, 0.1)
             ]
         }))).unwrap_ji();
         //SETTINGS.set(DebugSettings::debug(None)).unwrap_ji();

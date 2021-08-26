@@ -8,13 +8,13 @@ use crate::{
             state::*,
             select::trace::state::*
         },
-        svg::{self, ShapeStyle, ShapeStyleBase, SvgCallbacks, TransformSize},
+        svg::{self, ShapeStyleVar, ShapeStyle, ShapeStyleKind, ShapeStyleState, SvgCallbacks, TransformSize},
     },
     transform::state::ResizeLevel,
 };
 use futures_signals::{
     map_ref,
-    signal::SignalExt,
+    signal::{Signal, SignalExt},
     signal_vec::MutableVecLockRef,
 };
 use shared::domain::jig::module::body::_groups::design::TraceShape as RawTraceShape;
@@ -32,7 +32,7 @@ impl TracesEdit {
             .map(|(_, value)| value.clone())
             .collect();
 
-        let trace_signal = map_ref! {
+        let trace_signal = || map_ref! {
             let resize_info = resize_info_signal(),
             let shape = state.trace.shape.signal_cloned(),
             let draw_points = state.draw_points.signal_cloned(),
@@ -47,56 +47,96 @@ impl TracesEdit {
 
 
         let mask_children = 
-            trace_signal.map(clone!(state, shadow_traces => move |(resize_info, size, display_trace, draw_points, shape, transform)| {
+            trace_signal().map(clone!(state, shadow_traces => move |(resize_info, size, display_trace, draw_points, shape, transform)| {
 
                 let mut elements:Vec<Dom> = Vec::new();
                 elements.push({
-                    let style = ShapeStyle::new(ShapeStyleBase::Mask);
+                    let shape_style = ShapeStyleVar::new_static(ShapeStyle::new_mask());
 
                     if !display_trace {
-                        svg::render_path(&style, &resize_info, TransformSize::none(), &draw_points, SvgCallbacks::none())
+                        svg::render_path(shape_style, &resize_info, TransformSize::none(), &draw_points, SvgCallbacks::none())
                     } else {
                         let transform_size = size.map(|size| TransformSize::new_static(&transform, size));
                         match shape {
 
                             TraceShape::Path(path) => {
-                                svg::render_path_signal(&style, resize_info.clone(), transform_size, &path)
+                                svg::render_path_signal(shape_style, resize_info.clone(), transform_size, &path)
                             },
 
                             TraceShape::Rect(width, height) => {
-                                svg::render_rect(&style, &resize_info, transform_size, width, height,SvgCallbacks::none())
+                                svg::render_rect(shape_style, &resize_info, transform_size, width, height,SvgCallbacks::none())
                             }
                             TraceShape::Ellipse(radius_x, radius_y) => {
-                                svg::render_ellipse(&style, &resize_info, transform_size, radius_x, radius_y,SvgCallbacks::none())
+                                svg::render_ellipse(shape_style, &resize_info, transform_size, radius_x, radius_y,SvgCallbacks::none())
                             }
                         }
                     }
                 });
 
                 for trace in shadow_traces.iter() {
-                    let style = ShapeStyle::new(ShapeStyleBase::Mask);
-                    elements.push(render_trace(&style, &resize_info, trace,SvgCallbacks::none()))
+                    let shape_style = ShapeStyleVar::new_static(ShapeStyle::new_mask());
+                    elements.push(render_trace(shape_style, &resize_info, trace,SvgCallbacks::none()))
                 }
 
                 elements
             }))
             .to_signal_vec();
 
-        let shadow_children = resize_info_signal()
-            .map(move |resize_info| {
-                shadow_traces
+        let draw_children = 
+            trace_signal().map(clone!(shadow_traces => move |(resize_info, size, display_trace, draw_points, shape, transform)| {
+                let mut elements = shadow_traces
                     .iter()
                     .map(|trace| {
-                        let style = ShapeStyle::new(ShapeStyleBase::Shadow);
+                        let shape_style = ShapeStyleVar::new_static(
+                            ShapeStyle {
+                                interactive: false,
+                                mode: None,
+                                kind: Some(ShapeStyleKind::Regular),
+                                state: Some(ShapeStyleState::Deselected)
+                            }
+                        );
+
                         render_trace(
-                            &style,
+                            shape_style,
                             &resize_info,
                             trace,
                             SvgCallbacks::none(),
                         )
                     })
-                    .collect::<Vec<Dom>>()
-            })
+                    .collect::<Vec<Dom>>();
+
+                elements.push({
+                    let shape_style = ShapeStyleVar::new_static(
+                        ShapeStyle {
+                            interactive: false,
+                            mode: None,
+                            kind: Some(ShapeStyleKind::Regular),
+                            state: Some(ShapeStyleState::Drawing)
+                        }
+                    );
+
+                    if !display_trace {
+                        svg::render_path(shape_style, &resize_info, TransformSize::none(), &draw_points, SvgCallbacks::none())
+                    } else {
+                        let transform_size = size.map(|size| TransformSize::new_static(&transform, size));
+                        match shape {
+
+                            TraceShape::Path(path) => {
+                                svg::render_path_signal(shape_style, resize_info.clone(), transform_size, &path)
+                            },
+
+                            TraceShape::Rect(width, height) => {
+                                svg::render_rect(shape_style, &resize_info, transform_size, width, height,SvgCallbacks::none())
+                            }
+                            TraceShape::Ellipse(radius_x, radius_y) => {
+                                svg::render_ellipse(shape_style, &resize_info, transform_size, radius_x, radius_y,SvgCallbacks::none())
+                            }
+                        }
+                    }
+                });
+
+                elements
+            }))
             .to_signal_vec();
 
         let menu_signal = map_ref! {
@@ -112,7 +152,7 @@ impl TracesEdit {
             .child(
                 svg::render_masks(
                     mask_children,
-                    shadow_children,
+                    draw_children,
                     clone!(state => move |x, y| {
                         state.start_draw(x, y);
                     }),
@@ -147,21 +187,28 @@ impl TracesEdit {
 
 
 //Ignores drag_offset
-fn render_trace(
-    style: &ShapeStyle,
+fn render_trace<S>(
+    shape_style: ShapeStyleVar<S>,
     resize_info: &ResizeInfo,
     trace: &EditSelectTrace,
     callbacks: Rc<SvgCallbacks>,
-) -> Dom {
+) -> Dom 
+where
+      S: Signal<Item = ShapeStyle> + 'static
+{
     let transform_size = Some(TransformSize::new_static(&trace.transform, trace.size.clone()));
 
     match trace.shape {
-        RawTraceShape::Path(ref path) => {
-            svg::render_path(&style, &resize_info, transform_size, &path, callbacks)
-        }
+        RawTraceShape::Path(ref path) => svg::render_path(
+            shape_style, 
+            &resize_info, 
+            transform_size, 
+            &path, 
+            callbacks
+        ),
 
         RawTraceShape::Rect(width, height) => svg::render_rect(
-            &style,
+            shape_style,
             &resize_info,
             transform_size,
             width,
@@ -169,7 +216,7 @@ fn render_trace(
             callbacks,
         ),
         RawTraceShape::Ellipse(radius_x, radius_y) => svg::render_ellipse(
-            &style,
+            shape_style,
             &resize_info,
             transform_size,
             radius_x,

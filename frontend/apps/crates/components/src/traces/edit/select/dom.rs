@@ -8,9 +8,9 @@ use shared::domain::jig::module::body::Transform;
 use super::{select_box::*, trace::state::*};
 use crate::traces::{
     edit::state::*,
-    svg::{self, TransformSize, ShapeStyle, ShapeStyleBase, SvgCallbacks},
+    svg::{self, TransformSize, ShapeStyleVar, ShapeStyle, ShapeStyleKind, ShapeStyleState, SvgCallbacks},
 };
-use futures_signals::{signal::{Signal, SignalExt}, signal_vec::{SignalVec, SignalVecExt}};
+use futures_signals::{map_ref, signal::{Signal, SignalExt}, signal_vec::{SignalVec, SignalVecExt}};
 
 use shared::domain::jig::module::body::_groups::design::TraceShape;
 use web_sys::SvgElement;
@@ -22,23 +22,47 @@ impl TracesEdit {
                 state.list
                     .signal_vec_cloned()
                     .map(clone!(resize_info, state => move |trace| {
-                        let style = ShapeStyle::new(ShapeStyleBase::Mask);
+                        let shape_style = ShapeStyleVar::new_static(ShapeStyle::new_mask());
                         let callbacks = SvgCallbacks::new(
                             None::<fn()>,
                             None::<fn(web_sys::SvgElement)>,
                             None::<fn(web_sys::SvgElement)>,
                         );
-                        render_trace(&style, &resize_info, &trace, callbacks)
+                        render_trace(shape_style, &resize_info, &trace, callbacks)
                     }))
             }));
 
-        let click_children = resize_info_signal()
+
+        let draw_children = 
+            resize_info_signal()
             .switch_signal_vec(clone!(state => move |resize_info| {
                 state.list
                     .signal_vec_cloned()
                     .enumerate()
                     .map(clone!(resize_info, state => move |(index, trace)| {
-                        let style = ShapeStyle::new(ShapeStyleBase::Transparent);
+                        let shape_style_signal = map_ref!{
+                            let selected_index = state.selected_index.signal_cloned(),
+                            let index = index.signal_cloned()
+                                => {
+                                    (*selected_index, *index)
+                                }
+                        }.map(|(selected_index, index)| {
+                            ShapeStyle {
+                                interactive: true,
+                                mode: None,
+                                kind: Some(ShapeStyleKind::Regular),
+                                state: Some(
+                                    if index == selected_index {
+                                        ShapeStyleState::Selected
+                                    } else {
+                                        ShapeStyleState::Deselected
+                                    }
+                                )
+                            }
+                        });
+
+                        let shape_style = ShapeStyleVar::Dynamic(shape_style_signal);
+
                         let callbacks = SvgCallbacks::new(
                             Some(clone!(state, index => move || {
                                 if let Some(index) = index.get_cloned() {
@@ -53,7 +77,7 @@ impl TracesEdit {
                                 trace.select_box.bounds.set(None);
                             })),
                         );
-                        render_trace(&style, &resize_info, &trace, callbacks)
+                        render_trace(shape_style, &resize_info, &trace, callbacks)
                     }))
             }));
 
@@ -71,7 +95,7 @@ impl TracesEdit {
             .child(
                 svg::render_masks(
                     mask_children,
-                    click_children,
+                    draw_children,
                     clone!(state => move |x, y| {
                         TracesEdit::start_draw(state.clone(), None, Some((x, y)));
                     }),
@@ -86,24 +110,32 @@ impl TracesEdit {
     }
 }
 
-fn render_trace(
-    style: &ShapeStyle,
+fn render_trace<S>(
+    shape_style: ShapeStyleVar<S>,
     resize_info: &ResizeInfo,
     trace: &EditSelectTrace,
     callbacks: Rc<SvgCallbacks>,
-) -> Dom {
+) -> Dom 
+where
+      S: Signal<Item = ShapeStyle> + 'static
+
+{
     let trace_size = trace.size.clone();
 
     let transform_size = Some(TransformSize::Dynamic(trace.select_box.transform_override.signal_cloned().map(move |t| {
         (t, trace_size)
     })));
     match trace.shape {
-        TraceShape::Path(ref path) => {
-            svg::render_path(&style, &resize_info, transform_size, &path, callbacks)
-        },
+        TraceShape::Path(ref path) => svg::render_path(
+            shape_style, 
+            &resize_info, 
+            transform_size, 
+            &path, 
+            callbacks
+        ),
 
         TraceShape::Rect(width, height) => svg::render_rect(
-            &style,
+            shape_style,
             &resize_info,
             transform_size,
             width,
@@ -112,7 +144,7 @@ fn render_trace(
         ),
 
         TraceShape::Ellipse(radius_x, radius_y) => svg::render_ellipse(
-            &style,
+            shape_style,
             &resize_info,
             transform_size,
             radius_x,

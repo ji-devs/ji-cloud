@@ -1,4 +1,4 @@
-use dominator::{class, clone, svg, Dom, DomBuilder};
+use dominator::{class, clone, svg, Dom, DomBuilder, traits::MultiStr};
 use std::rc::Rc;
 use utils::{
     prelude::*,
@@ -11,7 +11,11 @@ use futures_signals::{
 };
 use web_sys::SvgElement;
 
-use super::utils::*;
+use super::{
+    super::utils::*,
+    state::*,
+    styles::*,
+};
 use once_cell::sync::Lazy;
 use shared::domain::jig::module::body::{
     Transform,
@@ -19,89 +23,16 @@ use shared::domain::jig::module::body::{
 };
 use std::fmt::Write;
 
-static SVG_CLASS: Lazy<String> = Lazy::new(|| {
-    class! {
-        .style("position", "absolute")
-        .style("top", "0")
-    }
-});
-static BG_CLASS: Lazy<String> = Lazy::new(|| {
-    class! {
-        .style("fill", "black")
-        .style("fill-opacity", "0.5")
-    }
-});
 
-static MASK_RECT_CLASS: Lazy<String> = Lazy::new(|| {
-    class! {
-        .style("fill", "white")
-    }
-});
-static SHAPE_MASK_CLASS: Lazy<String> = Lazy::new(|| {
-    class! {
-        .style("fill", "black")
-        .style("cursor", "pointer")
-    }
-});
-
-static SHAPE_SHADOW_CLASS: Lazy<String> = Lazy::new(|| {
-    class! {
-        .style("fill", "blue")
-        .style("cursor", "pointer")
-    }
-});
-
-static SHAPE_OUTLINE_CLASS: Lazy<String> = Lazy::new(|| {
-    class! {
-        .style("fill-opacity", "0")
-        .style("stroke", "blue")
-        .style("stroke-width", "5")
-        .style("stroke-dasharray", "5,5")
-        .style("cursor", "pointer")
-    }
-});
-
-static SHAPE_TRANSPARENT_CLASS: Lazy<String> = Lazy::new(|| {
-    class! {
-        .style("fill-opacity", "0")
-        .style("cursor", "pointer")
-    }
-});
-
-#[derive(Clone, Copy, Eq, PartialEq, Debug)]
-pub struct ShapeStyle {
-    pub base: ShapeStyleBase,
-}
-
-#[derive(Clone, Copy, Eq, PartialEq, Debug)]
-pub enum ShapeStyleBase {
-    Mask,
-    Shadow,
-    Transparent,
-    Outline,
-}
-
-impl ShapeStyle {
-    pub fn new(base: ShapeStyleBase) -> Self {
-        Self { base }
-    }
-
-    pub fn class(&self) -> &'static str {
-        match self.base {
-            ShapeStyleBase::Mask => &SHAPE_MASK_CLASS,
-            ShapeStyleBase::Shadow => &SHAPE_SHADOW_CLASS,
-            ShapeStyleBase::Outline => &SHAPE_OUTLINE_CLASS,
-            ShapeStyleBase::Transparent => &SHAPE_TRANSPARENT_CLASS,
-        }
-    }
-}
-
-pub fn render_single_trace(
-    style: &ShapeStyle,
+pub fn render_single_trace<S>(
+    shape_style: ShapeStyleVar<S>,
     resize_info: &ResizeInfo,
     trace: &Trace,
     callbacks: Rc<SvgCallbacks>,
-) -> Option<Dom> {
+) -> Option<Dom> 
+where 
+      S: Signal<Item = ShapeStyle> + 'static
+{
     trace.calc_size(resize_info)
         .map(|size| {
             let (width, height) = size;
@@ -121,18 +52,20 @@ pub fn render_single_trace(
                 .attribute("style", &styles)
                 .attribute("width", &format!("{}px", width + 100.0))
                 .attribute("height", &format!("{}px", height + 100.0))
-                .child(render_single_shape(style, resize_info, trace, Some(TransformSize::new_static(&transform, size)), callbacks))
+                .child(render_single_shape(shape_style, resize_info, trace, Some(TransformSize::new_static(&transform, size)), callbacks))
             })
         })
 }
-pub fn render_single_shape<S>(
-    style: &ShapeStyle,
+
+pub fn render_single_shape<T, S>(
+    shape_style: ShapeStyleVar<S>,
     resize_info: &ResizeInfo,
     trace: &Trace,
-    transform_size: Option<TransformSize<'_, S>>,
+    transform_size: Option<TransformSize<'_, T>>,
     callbacks: Rc<SvgCallbacks>,
 ) -> Dom 
-where S: Signal<Item = (Transform, (f64, f64))> + 'static
+where T: Signal<Item = (Transform, (f64, f64))> + 'static,
+      S: Signal<Item = ShapeStyle> + 'static
 {
     //TODO - make this nicer with a macro!
     //the inner match trace.shape is identical 100%
@@ -143,11 +76,11 @@ where S: Signal<Item = (Transform, (f64, f64))> + 'static
 
             match trace.shape {
                 TraceShape::Path(ref path) => {
-                    render_path(&style, &resize_info, transform_size, &path, callbacks)
+                    render_path(shape_style, &resize_info, transform_size, &path, callbacks)
                 }
 
                 TraceShape::Rect(width, height) => render_rect(
-                    &style,
+                    shape_style,
                     &resize_info,
                     transform_size,
                     width,
@@ -155,7 +88,7 @@ where S: Signal<Item = (Transform, (f64, f64))> + 'static
                     callbacks,
                 ),
                 TraceShape::Ellipse(radius_x, radius_y) => render_ellipse(
-                    &style,
+                    shape_style,
                     &resize_info,
                     transform_size,
                     radius_x,
@@ -171,11 +104,11 @@ where S: Signal<Item = (Transform, (f64, f64))> + 'static
 
             match trace.shape {
                 TraceShape::Path(ref path) => {
-                    render_path(&style, &resize_info, transform_size, &path, callbacks)
+                    render_path(shape_style, &resize_info, transform_size, &path, callbacks)
                 }
 
                 TraceShape::Rect(width, height) => render_rect(
-                    &style,
+                    shape_style,
                     &resize_info,
                     transform_size,
                     width,
@@ -183,7 +116,7 @@ where S: Signal<Item = (Transform, (f64, f64))> + 'static
                     callbacks,
                 ),
                 TraceShape::Ellipse(radius_x, radius_y) => render_ellipse(
-                    &style,
+                    shape_style,
                     &resize_info,
                     transform_size,
                     radius_x,
@@ -234,7 +167,7 @@ where
             .attribute_signal("height", resize_info_signal().map(|info| {
                 format!("{}px", info.height)
             }))
-            .class(&*BG_CLASS)
+            .class(&*BG_FILL_CLASS)
             .event(clone!(on_mouse_down => move |evt:events::MouseDown| {
                 on_mouse_down(evt.x() as i32, evt.y() as i32);
             }))
@@ -251,7 +184,7 @@ where
                     .attribute_signal("height", resize_info_signal().map(|info| {
                         format!("{}px", info.height)
                     }))
-                    .class(&*MASK_RECT_CLASS)
+                    .class(&*BG_MASK_CLASS)
                 }))
                 .children_signal_vec(children_mask)
             }))
@@ -298,144 +231,15 @@ where
     })
 }
 
-fn apply_transform<A: AsRef<web_sys::Element>>(
-    dom: DomBuilder<A>,
-    resize_info: &ResizeInfo,
-    transform_size: Option<(&Transform, (f64, f64))>,
-) -> DomBuilder<A> {
-    dom.apply_if(transform_size.is_some(), |dom| {
-        let (transform, size) = transform_size.unwrap_ji();
-        let (width, height) = resize_info.get_size_px(size.0, size.1);
-        let style = format!(
-            "transform: {}; transform-origin: {}px {}px;width: {}px; height: {}px;",
-            transform.denormalize_matrix_string(&resize_info),
-            width / 2.0,
-            height / 2.0,
-            width,
-            height
-        );
 
-        dom.attribute("style", &style)
-    })
-}
-
-pub struct SvgCallbacks {
-    pub on_select: Option<Box<dyn Fn()>>,
-    pub on_mount: Option<Box<dyn Fn(web_sys::SvgElement)>>,
-    pub on_unmount: Option<Box<dyn Fn(web_sys::SvgElement)>>,
-}
-
-pub enum TransformSize<'a, S> 
-where S: Signal<Item = (Transform, (f64, f64))>
-{
-    Static(&'a Transform, (f64, f64)),
-    Dynamic(S)
-}
-
-type PlaceholderSignal = futures_signals::signal::Always<(Transform, (f64, f64))>;
-
-impl <'a> TransformSize<'a, PlaceholderSignal> {
-    pub fn new_static(transform:&'a Transform, size: (f64, f64)) -> TransformSize<'a, PlaceholderSignal> {
-        Self::Static(transform, size)
-    }
-    pub fn none() -> Option<TransformSize<'a, PlaceholderSignal>> {
-        None
-    }
-}
-
-impl <'a, S> TransformSize<'a, S> 
-where S: Signal<Item = (Transform, (f64, f64))> + 'static
-{
-    pub fn mixin(self, dom: DomBuilder<web_sys::SvgElement>, resize_info: &ResizeInfo) -> DomBuilder<web_sys::SvgElement> {
-        match self {
-            Self::Static(transform, size) => {
-                let style = Self::get_style_string(transform, size, resize_info);
-                dom
-                    .attribute("style", &style)
-            },
-            Self::Dynamic(s) => {
-                dom.attribute_signal("style", s.map(clone!(resize_info => move |(transform, size)| {
-                    Self::get_style_string(&transform, size, &resize_info)
-                })))
-            }
-        }
-    }
-
-    fn get_style_string(transform:&Transform, size:(f64, f64), resize_info:&ResizeInfo) -> String {
-        let (width, height) = resize_info.get_size_px(size.0, size.1);
-        format!(
-            "transform: {}; transform-origin: {}px {}px;width: {}px; height: {}px;",
-            transform.denormalize_matrix_string(&resize_info),
-            width / 2.0,
-            height / 2.0,
-            width,
-            height
-        )
-    }
-}
-
-impl SvgCallbacks {
-    pub fn new(
-        on_select: Option<impl Fn() + 'static>,
-        on_mount: Option<impl Fn(web_sys::SvgElement) + 'static>,
-        on_unmount: Option<impl Fn(web_sys::SvgElement) + 'static>,
-    ) -> Rc<Self> {
-        Rc::new(Self {
-            on_select: on_select.map(|f| Box::new(f) as _),
-            on_mount: on_mount.map(|f| Box::new(f) as _),
-            on_unmount: on_unmount.map(|f| Box::new(f) as _),
-        })
-    }
-
-    pub fn select(on_select: impl Fn() + 'static) -> Rc<Self> {
-        Self::new(
-            Some(on_select),
-            None::<fn(web_sys::SvgElement)>,
-            None::<fn(web_sys::SvgElement)>,
-        )
-    }
-
-    pub fn none() -> Rc<Self> {
-        Self::new(
-            None::<fn()>,
-            None::<fn(web_sys::SvgElement)>,
-            None::<fn(web_sys::SvgElement)>,
-        )
-    }
-
-    pub fn mixin(callbacks: Rc<Self>, dom: DomBuilder<web_sys::SvgElement>) -> DomBuilder<web_sys::SvgElement> {
-        dom
-            .apply_if(callbacks.on_select.is_some(), |dom| {
-                dom.event(clone!(callbacks => move |_evt:events::Click| {
-                    if let Some(on_select) = &callbacks.on_select {
-                        (on_select)();
-                    }
-                }))
-            })
-            .apply_if(callbacks.on_mount.is_some(), |dom| {
-                dom.after_inserted(clone!(callbacks => move |elem| {
-                    if let Some(on_mount) = &callbacks.on_mount {
-                        (on_mount)(elem);
-                    }
-                }))
-            })
-            .apply_if(callbacks.on_unmount.is_some(), |dom| {
-                dom.after_removed(clone!(callbacks => move |elem| {
-                    if let Some(on_unmount) = &callbacks.on_unmount {
-                        (on_unmount)(elem);
-                    }
-                }))
-            })
-    }
-}
-
-pub fn render_path_signal<S>(
-    shape_style: &ShapeStyle,
+pub fn render_path_signal<T, S>(
+    shape_style: ShapeStyleVar<S>,
     resize_info: ResizeInfo,
-    transform_size: Option<TransformSize<'_, S>>,
+    transform_size: Option<TransformSize<'_, T>>,
     points: &Mutable<Vec<(f64, f64)>>,
 ) -> Dom 
-where S: Signal<Item = (Transform, (f64, f64))> + 'static
+where T: Signal<Item = (Transform, (f64, f64))> + 'static,
+      S: Signal<Item = ShapeStyle> + 'static
 {
     let path_string = points.signal_ref(clone!(resize_info => move |points| {
         if points.len() < 2 {
@@ -452,7 +256,7 @@ where S: Signal<Item = (Transform, (f64, f64))> + 'static
     }));
 
     svg!("path", {
-        .class(shape_style.class())
+        .apply(|dom| shape_style.apply(dom)) 
         .attribute_signal("d", path_string)
         .apply_if(transform_size.is_some(), |dom| {
             transform_size.unwrap_ji().mixin(dom, &resize_info)
@@ -460,14 +264,15 @@ where S: Signal<Item = (Transform, (f64, f64))> + 'static
     })
 }
 
-pub fn render_path<S>(
-    shape_style: &ShapeStyle,
+pub fn render_path<T, S>(
+    shape_style: ShapeStyleVar<S>,
     resize_info: &ResizeInfo,
-    transform_size: Option<TransformSize<'_, S>>,
+    transform_size: Option<TransformSize<'_, T>>,
     points: &[(f64, f64)],
     callbacks: Rc<SvgCallbacks>,
 ) -> Dom 
-where S: Signal<Item = (Transform, (f64, f64))> + 'static
+where T: Signal<Item = (Transform, (f64, f64))> + 'static,
+      S: Signal<Item = ShapeStyle> + 'static
 {
     let path_string = {
         if points.len() < 2 {
@@ -482,7 +287,7 @@ where S: Signal<Item = (Transform, (f64, f64))> + 'static
     };
 
     svg!("path" => SvgElement, {
-        .class(shape_style.class())
+        .apply(|dom| shape_style.apply(dom)) 
         .attribute("d", &path_string)
         .apply_if(transform_size.is_some(), |dom| {
             transform_size.unwrap_ji().mixin(dom, resize_info)
@@ -491,20 +296,22 @@ where S: Signal<Item = (Transform, (f64, f64))> + 'static
     })
 }
 
-pub fn render_rect<S>(
-    shape_style: &ShapeStyle,
+
+pub fn render_rect<T, S>(
+    shape_style: ShapeStyleVar<S>,
     resize_info: &ResizeInfo,
-    transform_size: Option<TransformSize<'_, S>>,
+    transform_size: Option<TransformSize<'_, T>>,
     width: f64,
     height: f64,
     callbacks: Rc<SvgCallbacks>,
 ) -> Dom 
-where S: Signal<Item = (Transform, (f64, f64))> + 'static
+where T: Signal<Item = (Transform, (f64, f64))> + 'static,
+      S: Signal<Item = ShapeStyle> + 'static
 {
     let (width, height) = resize_info.get_pos_denormalized(width, height);
 
     svg!("rect", {
-        .class(shape_style.class())
+        .apply(|dom| shape_style.apply(dom)) 
         .attribute("width", &format!("{}px", width))
         .attribute("height", &format!("{}px", height))
         .apply_if(transform_size.is_some(), |dom| {
@@ -514,21 +321,23 @@ where S: Signal<Item = (Transform, (f64, f64))> + 'static
     })
 }
 
-pub fn render_ellipse<S>(
-    shape_style: &ShapeStyle,
+
+pub fn render_ellipse<T, S>(
+    shape_style: ShapeStyleVar<S>,
     resize_info: &ResizeInfo,
-    transform_size: Option<TransformSize<'_, S>>,
+    transform_size: Option<TransformSize<'_, T>>,
     radius_x: f64,
     radius_y: f64,
     callbacks: Rc<SvgCallbacks>,
 ) -> Dom 
-where S: Signal<Item = (Transform, (f64, f64))> + 'static
+where T: Signal<Item = (Transform, (f64, f64))> + 'static,
+      S: Signal<Item = ShapeStyle> + 'static
 {
     let (radius_x, radius_y) = resize_info.get_pos_denormalized(radius_x, radius_y);
 
 
     svg!("ellipse", {
-        .class(shape_style.class())
+        .apply(|dom| shape_style.apply(dom)) 
         .attribute("cx", &format!("{}px", radius_x))
         .attribute("cy", &format!("{}px", radius_y))
         .attribute("rx", &format!("{}px", radius_x))

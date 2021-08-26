@@ -12,6 +12,9 @@ use futures_signals::signal::Mutable;
 use futures_signals::signal::Signal;
 
 static RESIZE_INFO: Lazy<Mutable<ResizeInfo>> = Lazy::new(|| Mutable::new(ResizeInfo::default()));
+
+
+
 // This event data is sent from the custom element
 // And then stashed in a global for when we need it at runtime
 #[derive(Deserialize, Debug, Clone, Default)]
