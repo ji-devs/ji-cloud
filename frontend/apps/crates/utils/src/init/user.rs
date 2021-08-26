@@ -58,3 +58,7 @@ pub fn user_logged_in_signal() -> impl Signal<Item = bool> {
 pub fn get_user() -> Option<UserProfile> {
     USER.get().unwrap_ji().get_cloned()
 }
+
+pub fn map_user<A>(f: impl FnOnce(&UserProfile) -> A + 'static) -> Option<A> {
+    USER.get().unwrap_ji().lock_ref().as_ref().map(f)
+}
