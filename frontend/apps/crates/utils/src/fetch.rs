@@ -17,7 +17,7 @@ use js_sys::Promise;
 use wasm_bindgen::JsCast;
 use awsm_web::loaders::fetch::{fetch_with_headers_and_data, fetch_with_headers_and_data_abortable, fetch_upload_file, fetch_upload_file_abortable, fetch_with_data , fetch_upload_blob_with_headers, fetch_upload_file_with_headers};
 use web_sys::{File, Blob};
-use super::settings::SETTINGS;
+use super::init::settings::SETTINGS;
 use async_trait::async_trait;
 
 pub use awsm_web::loaders::helpers::{spawn_handle, FutureHandle, AbortController};

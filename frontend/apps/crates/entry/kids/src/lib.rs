@@ -15,7 +15,7 @@ use router::Router;
 #[wasm_bindgen(start)]
 pub async fn main_js() {
     setup_logger();
-    let _settings = utils::settings::init();
+    let _settings = utils::init::init();
 
     dominator::append_dom(&dominator::body(), Router::render(Router::new()));
 }

@@ -18,7 +18,7 @@ use web_sys::{window, Element};
 #[wasm_bindgen(start)]
 pub fn main_js() {
     setup_logger();
-    let settings = utils::settings::init();
+    let settings = utils::init::init();
     router::Router::render();
 }
 

@@ -1,4 +1,4 @@
-use super::settings::SETTINGS;
+use super::init::settings::SETTINGS;
 use shared::{
     media::{media_key,MediaLibrary, FileKind, PngImageFile},
     domain::image::ImageId,

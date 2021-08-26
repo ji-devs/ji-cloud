@@ -16,26 +16,26 @@ pub struct Settings {
 
 cfg_if! {
     if #[cfg(feature = "local")] {
-        pub fn init() -> Settings {
-            _init(RemoteTarget::Local)
+        pub(crate) async fn init() -> Settings {
+            _init(RemoteTarget::Local).await
         }
     } else if #[cfg(feature = "sandbox")] {
-		pub fn init() -> Settings { 
-            _init(RemoteTarget::Sandbox)
+		pub(crate) async fn init() -> Settings { 
+            _init(RemoteTarget::Sandbox).await
         }
         
     } else if #[cfg(feature = "release")] {
-        pub fn init() -> Settings { 
-            _init(RemoteTarget::Release)
+        pub(crate) async fn init() -> Settings { 
+            _init(RemoteTarget::Release).await
         }
     } else {
-        pub fn init() -> Settings { 
+        pub(crate) async fn init() -> Settings { 
             panic!("set a feature target!");
         }
     } 
 }
 
-fn _init(remote_target:RemoteTarget) -> Settings {
+async fn _init(remote_target:RemoteTarget) -> Settings {
     let settings = Settings {
         remote_target
     };
@@ -64,6 +64,8 @@ fn _init(remote_target:RemoteTarget) -> Settings {
     }
     */
     SETTINGS.set(settings.clone()).expect_ji("couldn't set settings!");
+
+    
 
     settings
 }

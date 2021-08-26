@@ -19,7 +19,7 @@ use wasm_bindgen::prelude::*;
 #[wasm_bindgen(start)]
 pub async fn main_js() {
     setup_logger();
-    let _settings = utils::settings::init();
+    let _settings = utils::init::init();
 
     let router = Rc::new(Router::new());
 

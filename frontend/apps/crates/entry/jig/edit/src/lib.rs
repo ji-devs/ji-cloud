@@ -20,7 +20,7 @@ mod header;
 #[wasm_bindgen(start)]
 pub fn main_js() {
     setup_logger();
-    let _settings = utils::settings::init();
+    let _settings = utils::init::init();
     //init dom stuff
 
     let router = router::Router::new();

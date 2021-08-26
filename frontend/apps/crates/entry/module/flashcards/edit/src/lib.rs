@@ -22,7 +22,7 @@ use router::Router;
 pub async fn main_js() {
     setup_logger();
     components::module::_groups::cards::edit::config::init();
-    let settings = utils::settings::init();
+    let settings = utils::init::init();
 
     let router = Rc::new(Router::new());
 

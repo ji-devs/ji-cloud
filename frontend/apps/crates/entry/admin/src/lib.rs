@@ -23,7 +23,7 @@ use router::Router;
 pub async fn main_js() {
     setup_logger();
 
-    let settings = utils::settings::init();
+    let settings = utils::init::init();
 
     dominator::append_dom(&dominator::body(), Router::render(Router::new())); 
 }

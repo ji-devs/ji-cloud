@@ -1,7 +1,7 @@
 use serde::{Serialize, Deserialize, de::DeserializeOwned};
 use wasm_bindgen::prelude::*;
 use crate::unwrap::UnwrapJiExt;
-use super::settings::SETTINGS;
+use super::init::settings::SETTINGS;
 use shared::domain::jig::{JigId, ModuleKind, module::ModuleId};
 use awsm_web::loaders::fetch::fetch_url;
 

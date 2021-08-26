@@ -26,7 +26,7 @@ pub async fn main_js() {
     setup_logger();
     crate::debug::init();
 
-    let settings = utils::settings::init();
+    let settings = utils::init::init();
 
     let router = router::Router::new();
     dominator::append_dom(&dominator::body(), router.render());

@@ -3,7 +3,10 @@ pub use crate::{
     events,
     fetch::*,
     routes::*,
-    settings::SETTINGS,
+    init::{
+        settings::SETTINGS,
+        user::*,
+    },
     themes::*,
     math::transform_ext::*,
     image::ImageExt,
