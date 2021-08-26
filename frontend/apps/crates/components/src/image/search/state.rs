@@ -5,6 +5,7 @@ use dominator::clone;
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::Mutable;
 use futures_signals::signal_vec::MutableVec;
+use shared::domain::user::UserProfile;
 use shared::domain::{image::*, meta::*};
 use std::collections::HashMap;
 use std::{cell::RefCell, collections::HashSet, rc::Rc};
@@ -24,6 +25,7 @@ pub struct State {
     pub styles: Rc<RefCell<Option<Vec<ImageStyle>>>>,
     pub selected_styles: Rc<RefCell<HashSet<ImageStyleId>>>,
     pub callbacks: Callbacks,
+    pub user: Rc<RefCell<Option<UserProfile>>>,
 }
 
 impl State {
@@ -58,6 +60,7 @@ impl State {
             page: Mutable::new(None),
             styles,
             callbacks,
+            user: Rc::new(RefCell::new(None)),
         }
     }
 }
