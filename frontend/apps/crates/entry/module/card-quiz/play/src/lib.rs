@@ -23,7 +23,7 @@ use router::Router;
 #[wasm_bindgen(start)]
 pub async fn main_js() {
     setup_logger();
-    let settings = utils::init::init();
+    utils::init::init().await;
 
     components::module::_groups::cards::play::config::init();
     let router = Rc::new(Router::new());

@@ -26,7 +26,7 @@ mod header;
 #[wasm_bindgen(start)]
 pub fn main_js() {
     setup_logger();
-    let settings = utils::init::init();
+    utils::init::init().await;
     //init dom stuff
 
     let router = router::Router::new();
