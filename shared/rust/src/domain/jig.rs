@@ -206,10 +206,7 @@ pub enum AudioBackground {
 impl AudioBackground {
     /// Get all enum variants
     pub fn variants() -> Vec<AudioBackground> {
-        vec![
-            AudioBackground::FunForKids,
-            AudioBackground::SukkotLoop,
-        ]
+        vec![AudioBackground::FunForKids, AudioBackground::SukkotLoop]
     }
 }
 

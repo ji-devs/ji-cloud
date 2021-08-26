@@ -94,7 +94,7 @@ expression: body
       "additional_resources": [],
       "description": "test description",
       "last_edited": "[last_edited]",
-      "is_public": false,
+      "is_public": true,
       "default_player_settings": {
         "direction": "ltr",
         "display_score": false,

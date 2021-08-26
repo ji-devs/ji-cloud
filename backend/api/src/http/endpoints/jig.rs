@@ -183,7 +183,8 @@ async fn browse(
     )
     .await?;
 
-    let total_count = db::jig::filtered_count(db.as_ref(), query.is_published, author_id).await?;
+    let total_count =
+        db::jig::filtered_count(db.as_ref(), query.is_published, None, author_id).await?;
 
     let pages = (total_count / 20 + (total_count % 20 != 0) as u64) as u32;
 
@@ -275,7 +276,7 @@ async fn publish_draft(
 }
 
 async fn count(db: Data<PgPool>) -> Result<Json<<jig::Count as ApiEndpoint>::Res>, error::Server> {
-    let total_count: u64 = db::jig::filtered_count(&*db, Some(true), None).await?;
+    let total_count: u64 = db::jig::filtered_count(&*db, Some(true), Some(true), None).await?;
 
     Ok(Json(JigCountResponse { total_count }))
 }
