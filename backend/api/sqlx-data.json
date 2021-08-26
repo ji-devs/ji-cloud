@@ -1380,6 +1380,28 @@
       ]
     }
   },
+  "41f682ef68944913eb0dcc84f1b77241fc360d3756cfcfca0664e600aead67e8": {
+    "query": "\nselect count(*) as \"count!: i64\"\nfrom jig\nwhere\n    (publish_at < now() is not distinct from $1 or $1 is null)\n    and (is_public is not distinct from $2 or $2 is null)\n    and (author_id is not distinct from $3 or $3 is null)\n    and id not in (select draft_id as id from jig_draft_join) \n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "count!: i64",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Bool",
+          "Bool",
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
   "43fe8702f219dcd783e0f253f7dfe3c1786829a7dc2d043a8e79eb3deaf061e9": {
     "query": "\nupdate user_font\nset index = index - 1\nwhere index > $2 and user_id = $1\n        ",
     "describe": {
@@ -1631,27 +1653,6 @@
         ]
       },
       "nullable": []
-    }
-  },
-  "536bd460b497959a9f8de8240ab2fcb368eeac0f7a5b125ff9cce16f5e751621": {
-    "query": "\nselect count(*) as \"count!: i64\"\nfrom jig\nwhere\n    (publish_at < now() is not distinct from $1 or $1 is null)\n    and (author_id is not distinct from $2 or $2 is null)\n    and id not in (select draft_id as id from jig_draft_join) \n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "count!: i64",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Bool",
-          "Uuid"
-        ]
-      },
-      "nullable": [
-        null
-      ]
     }
   },
   "539bfa401960f946b1f9dab2156b13e1c5b69fea237777f05c9a26d6adb6caab": {

@@ -2,7 +2,7 @@ insert into jig (id, creator_id, author_id, created_at, language, description, i
                  audio_feedback_positive, audio_feedback_negative)
 values ('0cc084bc-7c83-11eb-9f77-e3218dffb008', '1f241e1b-b537-493f-a230-075cb16315be',
         '1f241e1b-b537-493f-a230-075cb16315be', '2021-03-04 00:46:26.134651+00', 'en', 'test description', true, null,
-        array [0, 1], array [0, 1, 4]),
+        array [0, 1], array [0, 1, 2]),
        ('3a71522a-cd77-11eb-8dc1-af3e35f7c743', '1f241e1b-b537-493f-a230-075cb16315be',
         '1f241e1b-b537-493f-a230-075cb16315be', '2021-03-04 00:46:26.134651+00', 'en', 'test description', true, 1,
         array []::smallint[], array []::smallint[]);
