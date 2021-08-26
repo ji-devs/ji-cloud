@@ -27,7 +27,7 @@ expression: body
       "drag_assist": false
     },
     "theme": "Blank",
-    "audio_background": "Placeholder1",
+    "audio_background": "SukkotLoop",
     "audio_effects": {
       "feedback_positive": [],
       "feedback_negative": []
