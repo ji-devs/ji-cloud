@@ -16,7 +16,7 @@ use std::rc::Rc;
 use web_sys::{window, Element};
 
 #[wasm_bindgen(start)]
-pub fn main_js() {
+pub async fn main_js() {
     setup_logger();
     utils::init::init().await;
 
