@@ -208,7 +208,7 @@ async fn search(
             &query.q,
             query.page,
             query.is_published,
-            Some(true), // FIXME
+            None, // FIXME
             &query.age_ranges,
             &query.affiliations,
             &query.categories,
