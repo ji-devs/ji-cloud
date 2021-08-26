@@ -87,9 +87,9 @@ fn check_cookie_csrf<'a>(
 pub struct TokenUser(pub SessionClaims);
 
 impl FromRequest for TokenUser {
+    type Config = ();
     type Error = actix_web::Error;
     type Future = ReadyOrNot<'static, Result<Self, Self::Error>>;
-    type Config = ();
     fn from_request(
         req: &actix_web::HttpRequest,
         _payload: &mut actix_web::dev::Payload,
@@ -201,9 +201,9 @@ pub struct TokenUserWithScope<S: Scope> {
 }
 
 impl<S: Scope> FromRequest for TokenUserWithScope<S> {
+    type Config = ();
     type Error = actix_web::Error;
     type Future = ReadyOrNot<'static, Result<Self, Self::Error>>;
-    type Config = ();
     fn from_request(
         req: &actix_web::HttpRequest,
         _payload: &mut actix_web::dev::Payload,
@@ -304,9 +304,9 @@ pub struct TokenSessionOf<S: SessionMaskRequirement> {
 }
 
 impl<S: SessionMaskRequirement> FromRequest for TokenSessionOf<S> {
+    type Config = ();
     type Error = actix_web::Error;
     type Future = ReadyOrNot<'static, Result<Self, Self::Error>>;
-    type Config = ();
     fn from_request(
         req: &actix_web::HttpRequest,
         _payload: &mut actix_web::dev::Payload,

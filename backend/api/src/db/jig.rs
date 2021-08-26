@@ -336,6 +336,7 @@ where id = $1 and $2 is distinct from audio_background
 
     if let Some(audio_effects) = audio_effects {
         sqlx::query!(
+            //language=SQL
             r#"
 update jig
 set audio_feedback_positive = $2,
@@ -549,18 +550,22 @@ limit 20 offset 20 * $2
 pub async fn filtered_count(
     db: &PgPool,
     is_published: Option<bool>,
+    is_public: Option<bool>,
     author_id: Option<Uuid>,
 ) -> sqlx::Result<u64> {
     sqlx::query!(
+        //language=SQL
         r#"
 select count(*) as "count!: i64"
 from jig
 where
     (publish_at < now() is not distinct from $1 or $1 is null)
-    and (author_id is not distinct from $2 or $2 is null)
+    and (is_public is not distinct from $2 or $2 is null)
+    and (author_id is not distinct from $3 or $3 is null)
     and id not in (select draft_id as id from jig_draft_join) 
 "#,
         is_published,
+        is_public,
         author_id,
     )
     .fetch_one(db)
