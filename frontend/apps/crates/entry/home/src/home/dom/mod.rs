@@ -3,7 +3,7 @@ use futures_signals::signal::SignalExt;
 use shared::domain::jig::JigPlayerSettings;
 use std::rc::Rc;
 
-use components::{page_footer, page_header, player_popup::{PlayerPopup, PreviewPopupCallbacks}};
+use components::{page_footer, page_header::{self, state::PageLinks}, player_popup::{PlayerPopup, PreviewPopupCallbacks}};
 
 use super::state::{HomePageMode, State};
 
@@ -13,7 +13,7 @@ mod search_section;
 
 pub fn render(state: Rc<State>) -> Dom {
     html!("home-full", {
-        .child(page_header::dom::render(Rc::new(page_header::state::State::new()), None))
+        .child(page_header::dom::render(Rc::new(page_header::state::State::new()), None, Some(PageLinks::Home)))
         .children(&mut [
             search_section::render(state.clone()),
             html!("empty-fragment", {

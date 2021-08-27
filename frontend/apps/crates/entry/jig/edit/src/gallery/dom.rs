@@ -1,5 +1,6 @@
 use super::{actions, state::*};
 use components::module::_common::thumbnail::ModuleThumbnail;
+use components::page_header::state::PageLinks;
 use components::{page_header, page_footer};
 use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
@@ -34,7 +35,7 @@ impl GalleryDom {
         actions::load_data(state.clone());
 
         html!("empty-fragment", {
-            .child(page_header::dom::render(Rc::new(page_header::state::State::new()), None))
+            .child(page_header::dom::render(Rc::new(page_header::state::State::new()), None, Some(PageLinks::Create)))
             .child(
                 html!("jig-gallery", {
                     .child(html!("jig-gallery-create", {

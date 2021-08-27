@@ -3,9 +3,10 @@ use std::rc::Rc;
 use dominator::{Dom, clone, html};
 use futures_signals::signal::{Signal, SignalExt};
 use shared::domain::user::{UserProfile, UserScope};
+use strum::IntoEnumIterator;
 use utils::{events, routes::{AdminRoute, HomeRoute, JigRoute, Route, UserRoute}};
 
-use crate::page_header::state::LoggedInState;
+use crate::page_header::state::{LoggedInState, PageLinks};
 
 use super::{actions, state::State};
 
@@ -15,41 +16,25 @@ const STR_LOGOUT: &'static str = "Logout";
 const STR_ADMIN: &'static str = "Admin";
 const STR_DONATE: &'static str = "Donate";
 
-pub fn render(state: Rc<State>, slot: Option<&str>) -> Dom {
+pub fn render(state: Rc<State>, slot: Option<&str>, active_page: Option<PageLinks>) -> Dom {
     actions::fetch_profile(Rc::clone(&state));
 
     html!("page-header", {
         .apply_if(slot.is_some(), |dom| {
             dom.property("slot", slot.unwrap())
         })
+        .children(PageLinks::iter().map(|page_link| {
+            html!("page-header-link", {
+                .property("slot", "links")
+                .property("kind", page_link.kind_str())
+                .property("active", match &active_page {
+                    Some(active_page) if active_page == &page_link => true,
+                    _ => false,
+                })
+                .property("href", &page_link.route().to_string())
+            })
+        }))
         .children(&mut [
-            html!("page-header-link", {
-                .property("slot", "links")
-                .property("kind", "home")
-                .property("active", true)
-                .property("href", &Route::Home(HomeRoute::Home).to_string())
-            }),
-            html!("page-header-link", {
-                .property("slot", "links")
-                .property("kind", "content")
-            }),
-            html!("page-header-link", {
-                .property("slot", "links")
-                .property("kind", "create")
-                .property("href", &Route::Jig(JigRoute::Gallery).to_string())
-            }),
-            html!("page-header-link", {
-                .property("slot", "links")
-                .property("kind", "community")
-            }),
-            html!("page-header-link", {
-                .property("slot", "links")
-                .property("kind", "classroom")
-            }),
-            html!("page-header-link", {
-                .property("slot", "links")
-                .property("kind", "about")
-            }),
             html!("button-rect", {
                 .property("slot", "donate")
                 .property("color", "green")

@@ -55,8 +55,9 @@ impl Router {
                             let mut children:Vec<Dom> = Vec::new();
 
                             children.push(components::page_header::dom::render(
-                                    Rc::new(components::page_header::state::State::new()),
-                                    None
+                                Rc::new(components::page_header::state::State::new()),
+                                None,
+                                None,
                             ));
 
                             let dom = match route.clone() {
