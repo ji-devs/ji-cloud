@@ -196,6 +196,13 @@ pub struct ImageSearchQuery {
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub categories: Vec<CategoryId>,
 
+    /// Optionally filter by `tags`
+    #[serde(default)]
+    #[serde(serialize_with = "super::csv_encode_i16_indices")]
+    #[serde(deserialize_with = "super::from_csv")]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub tags: Vec<ImageTagIndex>,
+
     /// Optionally order by `tags`, given in decreasing priority.
     ///
     /// # Notes on priority
@@ -238,7 +245,7 @@ pub struct ImageSearchQuery {
     #[serde(serialize_with = "super::csv_encode_i16_indices")]
     #[serde(deserialize_with = "super::from_csv")]
     #[serde(skip_serializing_if = "Vec::is_empty")]
-    pub tags: Vec<ImageTagIndex>,
+    pub tags_priority: Vec<ImageTagIndex>,
 
     /// Optionally filter by `is_premium`
     #[serde(default)]

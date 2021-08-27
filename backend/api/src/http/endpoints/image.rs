@@ -152,6 +152,7 @@ async fn search(
             &query.affiliations,
             &query.categories,
             &query.tags,
+            &query.tags_priority,
         )
         .await?
         .ok_or_else(|| error::Service::DisabledService(ServiceKind::Algolia))?;

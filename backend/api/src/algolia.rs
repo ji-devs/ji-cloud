@@ -1,5 +1,5 @@
 use algolia::{
-    filter::{AndFilterable, CommonFilter, FacetFilter, ScoredFacetFilter, TagFilter},
+    filter::{AndFilterable, CommonFilter, FacetFilter, OrFilter, ScoredFacetFilter, TagFilter},
     request::{BatchWriteRequests, SearchQuery, VirtualKeyRestrictions},
     response::SearchResponse,
     ApiKey, AppId, Client as Inner,
@@ -498,6 +498,7 @@ impl SearchKeyStore {
     }
 }
 
+/// Appends UUIDs to AND filter for a named facet
 fn filters_for_ids<T: Into<Uuid> + Copy>(
     filters: &mut Vec<Box<dyn AndFilterable>>,
     facet_name: &str,
@@ -515,6 +516,24 @@ fn filters_for_ids<T: Into<Uuid> + Copy>(
     }
 }
 
+/// Appends int-based IDs to AND filter for a named facet
+fn filters_for_ints<T: Into<i64> + Copy>(
+    filters: &mut Vec<Box<dyn AndFilterable>>,
+    facet_name: &str,
+    ints: &[T],
+) {
+    for v in ints {
+        let v: i64 = (*v).into();
+        filters.push(Box::new(CommonFilter {
+            filter: FacetFilter {
+                facet_name: facet_name.to_owned(),
+                value: v.to_string(),
+            },
+            invert: false,
+        }))
+    }
+}
+
 /// Filter with ordered priority.
 ///
 /// If using priority scoring, this can only rank the first 62 items.
@@ -522,18 +541,16 @@ fn filters_for_ids<T: Into<Uuid> + Copy>(
 /// it does not overflow when summed with lesser scores.
 ///
 /// The remaining will be assigned a score of 1, which is the default score for all filters.
-fn filters_for_ints_with_scoring(
-    filters: &mut Vec<Box<dyn AndFilterable>>,
-    facet_name: &str,
-    ints: &[i64],
-) {
+fn scored_int_filtering(facet_name: &str, ints: &[i64]) -> OrFilter<ScoredFacetFilter> {
+    let mut filters = Vec::new();
+
     const I64_BITS: u32 = 64;
     let count = ints.len() as u32;
 
     // start with the score for the highest priority tag
     let mut score = match count > I64_BITS - 1 {
         true => 1_i64 << (I64_BITS - 2), // 2_i64.pow(i64::BITS - 1),
-        false if count == 0 => return,
+        false if count == 0 => return OrFilter { filters: vec![] },
         false => 1_i64 << (count - 1),
     };
 
@@ -544,17 +561,19 @@ fn filters_for_ints_with_scoring(
     };
 
     for v in ints.iter() {
-        filters.push(Box::new(CommonFilter {
+        filters.push(CommonFilter {
             filter: ScoredFacetFilter {
                 facet_name: facet_name.to_owned(),
                 value: v.to_string(),
                 score,
             },
             invert: false,
-        }));
+        });
 
         next_score(&mut score)
     }
+
+    OrFilter { filters }
 }
 
 fn media_filter(kind: MediaGroupKind, invert: bool) -> CommonFilter<FacetFilter> {
@@ -600,6 +619,32 @@ impl Client {
         }
     }
 
+    fn filters_for_image_tag_priority(
+        filters: &mut Vec<Box<dyn AndFilterable>>,
+        tags_priority: &[ImageTagIndex],
+    ) {
+        if tags_priority.len() > 0 {
+            let tag_priority = scored_int_filtering(
+                "image_tags",
+                &tags_priority
+                    .iter()
+                    .map(|it| it.0 as i64)
+                    .collect::<Vec<i64>>(),
+            );
+
+            let tag_priority = if filters.len() == 0 {
+                format!("({})", tag_priority)
+            } else {
+                format!("{}", tag_priority)
+            };
+
+            filters.push(Box::new(CommonFilter {
+                filter: tag_priority,
+                invert: false,
+            }));
+        }
+    }
+
     // todo: return ImageId (can't because of repr issues in sqlx)
     pub async fn search_image(
         &self,
@@ -612,6 +657,7 @@ impl Client {
         affiliations: &[AffiliationId],
         categories: &[CategoryId],
         tags: &[ImageTagIndex],
+        tags_priority: &[ImageTagIndex],
     ) -> anyhow::Result<Option<(Vec<Uuid>, u32, u64)>> {
         let mut filters = algolia::filter::AndFilter {
             filters: vec![Box::new(media_filter(MediaGroupKind::Image, false))],
@@ -635,14 +681,8 @@ impl Client {
         filters_for_ids(&mut filters.filters, "age_ranges", age_ranges);
         filters_for_ids(&mut filters.filters, "affiliations", affiliations);
         filters_for_ids(&mut filters.filters, "categories", categories);
-        filters_for_ints_with_scoring(
-            &mut filters.filters,
-            "image_tags",
-            tags.iter()
-                .map(|it| it.0 as i64)
-                .collect::<Vec<i64>>()
-                .as_ref(),
-        );
+        filters_for_ints(&mut filters.filters, "tags", tags);
+        Self::filters_for_image_tag_priority(&mut filters.filters, tags_priority);
 
         let results: SearchResponse = self
             .inner
