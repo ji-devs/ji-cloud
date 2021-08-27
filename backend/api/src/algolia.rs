@@ -1,5 +1,5 @@
 use algolia::{
-    filter::{AndFilterable, CommonFilter, FacetFilter, OrFilter, ScoredFacetFilter, TagFilter},
+    filter::{AndFilter, AndFilterable, CommonFilter, FacetFilter, ScoredFacetFilter, TagFilter},
     request::{BatchWriteRequests, SearchQuery, VirtualKeyRestrictions},
     response::SearchResponse,
     ApiKey, AppId, Client as Inner,
@@ -541,7 +541,7 @@ fn filters_for_ints<T: Into<i64> + Copy>(
 /// it does not overflow when summed with lesser scores.
 ///
 /// The remaining will be assigned a score of 1, which is the default score for all filters.
-fn scored_int_filtering(facet_name: &str, ints: &[i64]) -> OrFilter<ScoredFacetFilter> {
+fn scored_int_filtering(facet_name: &str, ints: &[i64]) -> Vec<CommonFilter<ScoredFacetFilter>> {
     let mut filters = Vec::new();
 
     const I64_BITS: u32 = 64;
@@ -550,7 +550,7 @@ fn scored_int_filtering(facet_name: &str, ints: &[i64]) -> OrFilter<ScoredFacetF
     // start with the score for the highest priority tag
     let mut score = match count > I64_BITS - 1 {
         true => 1_i64 << (I64_BITS - 2), // 2_i64.pow(i64::BITS - 1),
-        false if count == 0 => return OrFilter { filters: vec![] },
+        false if count == 0 => return vec![],
         false => 1_i64 << (count - 1),
     };
 
@@ -573,7 +573,7 @@ fn scored_int_filtering(facet_name: &str, ints: &[i64]) -> OrFilter<ScoredFacetF
         next_score(&mut score)
     }
 
-    OrFilter { filters }
+    filters
 }
 
 fn media_filter(kind: MediaGroupKind, invert: bool) -> CommonFilter<FacetFilter> {
@@ -619,32 +619,6 @@ impl Client {
         }
     }
 
-    fn filters_for_image_tag_priority(
-        filters: &mut Vec<Box<dyn AndFilterable>>,
-        tags_priority: &[ImageTagIndex],
-    ) {
-        if tags_priority.len() > 0 {
-            let tag_priority = scored_int_filtering(
-                "image_tags",
-                &tags_priority
-                    .iter()
-                    .map(|it| it.0 as i64)
-                    .collect::<Vec<i64>>(),
-            );
-
-            let tag_priority = if filters.len() == 0 {
-                format!("({})", tag_priority)
-            } else {
-                format!("{}", tag_priority)
-            };
-
-            filters.push(Box::new(CommonFilter {
-                filter: tag_priority,
-                invert: false,
-            }));
-        }
-    }
-
     // todo: return ImageId (can't because of repr issues in sqlx)
     pub async fn search_image(
         &self,
@@ -682,7 +656,14 @@ impl Client {
         filters_for_ids(&mut filters.filters, "affiliations", affiliations);
         filters_for_ids(&mut filters.filters, "categories", categories);
         filters_for_ints(&mut filters.filters, "image_tags", tags);
-        Self::filters_for_image_tag_priority(&mut filters.filters, tags_priority);
+
+        let optional_filters = scored_int_filtering(
+            "image_tags",
+            &tags_priority
+                .iter()
+                .map(|it| it.0 as i64)
+                .collect::<Vec<i64>>(),
+        );
 
         let results: SearchResponse = self
             .inner
@@ -693,6 +674,7 @@ impl Client {
                     page,
                     get_ranking_info: true,
                     filters: Some(filters),
+                    optional_filters: Some(optional_filters),
                     hits_per_page: None,
                     sum_or_filters_scores: true,
                 },
@@ -782,11 +764,12 @@ impl Client {
             .inner
             .search(
                 &self.jig_index,
-                SearchQuery {
+                SearchQuery::<'_, String, AndFilter> {
                     query: Some(query),
                     page,
                     get_ranking_info: true,
                     filters: Some(filters),
+                    optional_filters: None,
                     hits_per_page: None,
                     sum_or_filters_scores: false,
                 },
