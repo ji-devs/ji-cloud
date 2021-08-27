@@ -64,6 +64,12 @@ export class _ extends LitElement {
                 display: grid;
                 place-content: center;
                 cursor: pointer;
+                border-radius: 4px;
+                transition: transform .2s, box-shadow .2s;
+            }
+            ::slotted([slot=images]:hover) {
+                transform: scale(1.02);
+                box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
             }
         `];
     }

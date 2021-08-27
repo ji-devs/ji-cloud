@@ -61,21 +61,6 @@ pub fn render(state: Rc<State>, slot: Option<&str>) -> Dom {
                 .property("slot", "student-code")
             }),
         ])
-        .child_signal(admin_privileges(Rc::clone(&state)).map(|admin_privileges| {
-            match admin_privileges {
-                false => None,
-                true => {
-                    Some(html!("button-rect", {
-                        .property("slot", "links")
-                        .property("kind", "text")
-                        .property("size", "small")
-                        .property("bold", true)
-                        .property("href", &Route::Admin(AdminRoute::Landing).to_string())
-                        .text("Admin")
-                    }))
-                }
-            }
-        }))
         .children_signal_vec(state.logged_in.signal_cloned().map(clone!(state => move|logged_in| {
             match logged_in {
                 LoggedInState::LoggedIn(user) => render_logged_in(Rc::clone(&state), &user),
@@ -110,13 +95,20 @@ fn render_logged_in(state: Rc<State>, user: &UserProfile) -> Vec<Dom> {
                 actions::logout(Rc::clone(&state));
             }))
         }))
-        .child(html!("a", {
-            .property("slot", "admin")
-            .property("href", {
-                let url: String = Route::Admin(AdminRoute::Landing).into();
-                url
-            })
-            .text(STR_ADMIN)
+        .child_signal(admin_privileges(Rc::clone(&state)).map(|admin_privileges| {
+            match admin_privileges {
+                false => None,
+                true => {
+                    Some(html!("a", {
+                        .property("slot", "admin")
+                        .property("href", {
+                            let url: String = Route::Admin(AdminRoute::Landing).into();
+                            url
+                        })
+                        .text(STR_ADMIN)
+                    }))
+                }
+            }
         }))
     })]
 }

@@ -16,7 +16,7 @@ actix-service = "2.0.0"
 actix-web = "4.0.0-beta.8"
 actix-web-httpauth = "0.6.0-beta.2"
 
-algolia = { git = "https://github.com/rrcwang/algolia-rs", rev = "b4441a8cab5963d5a11eeb54fee128f5c73d6a1a" }
+algolia = { git = "https://github.com/rrcwang/algolia-rs", rev = "34a5d4f7b4260cc245c751da4ec1212bacbe9804" }
 anyhow = "1.0.43"
 argon2 = "0.2.3"
 base64 = "0.13.0"
@@ -90,5 +90,4 @@ yup-oauth2 = "5.1.0"
 
 # temp for actix4 support, until it comes out of beta: https://github.com/cloudevents/sdk-rust/pull/147
 [patch.crates-io]
-
 cloudevents-sdk = { git = "https://github.com/cloudevents/sdk-rust", branch = "actix-web-4.0.0-beta.8" }

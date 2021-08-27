@@ -70,6 +70,12 @@ impl From<ImageTagIndex> for i16 {
     }
 }
 
+impl From<ImageTagIndex> for i64 {
+    fn from(value: ImageTagIndex) -> Self {
+        value.0 as i64
+    }
+}
+
 /// Represents an image style.
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ImageStyle {

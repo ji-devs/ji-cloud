@@ -49,24 +49,32 @@ pub fn get_background_id(styles: &Vec<ImageStyle>) -> ImageStyleId {
 }
 
 pub fn search(state: Rc<State>) {
-    let search_query = ImageSearchQuery {
-        q: state.query.lock_ref().clone(),
-        page: state.page.lock_ref().clone(),
-        styles: state
-            .selected_styles
-            .borrow()
-            .iter()
-            .map(|style_id| style_id.clone())
-            .collect(),
-        kind: Some(ImageKind::Sticker),
-        ..Default::default()
-    };
     state.loader.load(clone!(state => async move {
-        let res = api_with_auth::<ImageSearchResponse, EmptyError, _>(
-            &endpoints::image::Search::PATH,
-            endpoints::image::Search::METHOD,
-            Some(search_query)
-        ).await;
+        if state.user.borrow().is_none() {
+            get_user(Rc::clone(&state)).await;
+        }
+
+        let affiliations = match &*state.user.borrow() {
+            Some(user) => user.affiliations.clone(),
+            None => unreachable!("User should be here now"),
+        };
+
+        let search_query = ImageSearchQuery {
+            q: state.query.lock_ref().clone(),
+            page: state.page.lock_ref().clone(),
+            styles: state
+                .selected_styles
+                .borrow()
+                .iter()
+                .map(|style_id| style_id.clone())
+                .collect(),
+            kind: Some(ImageKind::Sticker),
+            affiliations,
+            ..Default::default()
+        };
+
+        let res = endpoints::image::Search::api_with_auth(Some(search_query)).await;
+
         match res {
             Ok(res) => {
                 state.image_list
@@ -79,6 +87,16 @@ pub fn search(state: Rc<State>) {
             }
         }
     }));
+}
+
+async fn get_user(state: Rc<State>) {
+    match endpoints::user::Profile::api_with_auth(None).await {
+        Err(_) => todo!(),
+        Ok(user) => {
+            log::info!("{:?}", user);
+            *state.user.borrow_mut() = Some(user);
+        },
+    }
 }
 
 pub async fn upload_file(state: Rc<State>, file: File) {
