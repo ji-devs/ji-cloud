@@ -37,13 +37,7 @@ pub(super) static SHAPE_MODE_MASK_CLASS: Lazy<String> = Lazy::new(|| {
     }
 });
 
-pub(super) static SHAPE_MODE_TRANSPARENT_CLASS: Lazy<String> = Lazy::new(|| {
-    class! {
-        .style("fill-opacity", "0")
-    }
-});
-
-pub(super) static SHAPE_MODE_DEFAULT_CLASS: Lazy<String> = Lazy::new(|| {
+pub(super) static SHAPE_MODE_EMPTY_FILL_CLASS: Lazy<String> = Lazy::new(|| {
     class! {
         .style("fill-opacity", "0")
     }
@@ -61,7 +55,7 @@ pub(super) static SHAPE_STATE_KIND_WRONG_DESELECTED_CLASS: Lazy<String> = Lazy::
     class! {
     }
 });
-pub(super) static SHAPE_STATE_KIND_WRONG_OUTLINE_CLASS: Lazy<String> = Lazy::new(|| {
+pub(super) static SHAPE_MODE_SOLID_KIND_WRONG_CLASS: Lazy<String> = Lazy::new(|| {
     class! {
     }
 });
@@ -79,7 +73,7 @@ pub(super) static SHAPE_STATE_KIND_CORRECT_DESELECTED_CLASS: Lazy<String> = Lazy
     class! {
     }
 });
-pub(super) static SHAPE_STATE_KIND_CORRECT_OUTLINE_CLASS: Lazy<String> = Lazy::new(|| {
+pub(super) static SHAPE_MODE_SOLID_KIND_CORRECT_CLASS: Lazy<String> = Lazy::new(|| {
     class! {
     }
 });
@@ -104,7 +98,7 @@ pub(super) static SHAPE_STATE_KIND_REGULAR_DESELECTED_CLASS: Lazy<String> = Lazy
         .style("stroke-width", "8")
     }
 });
-pub(super) static SHAPE_STATE_KIND_REGULAR_OUTLINE_CLASS: Lazy<String> = Lazy::new(|| {
+pub(super) static SHAPE_MODE_SOLID_KIND_REGULAR_CLASS: Lazy<String> = Lazy::new(|| {
     class! {
         .style("stroke", "#AFCBF4")
         .style("stroke-width", "8")

@@ -19,7 +19,7 @@ pub fn render_traces_select(traces: Vec<SelectTrace>) -> Dom {
                         interactive: true,
                         mode: None,
                         kind: Some(ShapeStyleKind::Regular),
-                        state: Some(ShapeStyleState::Outline)
+                        state: Some(ShapeStyleState::Selected)
                     };
 
                     let on_select = trace.on_select.clone();

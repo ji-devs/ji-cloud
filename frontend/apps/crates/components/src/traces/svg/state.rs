@@ -55,6 +55,7 @@ pub struct ShapeStyle {
 pub enum ShapeStyleMode {
     Mask,
     Transparent,
+    Solid
 }
 
 #[derive(Clone, Copy, Eq, PartialEq, Debug)]
@@ -69,7 +70,6 @@ pub enum ShapeStyleState {
     Drawing,
     Selected,
     Deselected,
-    Outline,
 }
 
 impl ShapeStyle {
@@ -85,13 +85,26 @@ impl ShapeStyle {
     pub fn classes(&self) -> Vec<&'static str> {
         let mut classes = Vec::with_capacity(3);
 
-        classes.push(match self.mode {
-            Some(mode) => match mode {
-                ShapeStyleMode::Mask => SHAPE_MODE_MASK_CLASS.as_str(),
-                ShapeStyleMode::Transparent => SHAPE_MODE_TRANSPARENT_CLASS.as_str(),
-            },
-            _ => SHAPE_MODE_DEFAULT_CLASS.as_str(),
-        });
+        match self.mode {
+            None => classes.push(SHAPE_MODE_EMPTY_FILL_CLASS.as_str()),
+            Some(mode) => {
+                if mode == ShapeStyleMode::Mask {
+                    classes.push(SHAPE_MODE_MASK_CLASS.as_str());
+                } else {
+                    classes.push(SHAPE_MODE_EMPTY_FILL_CLASS.as_str());
+
+                    if mode == ShapeStyleMode::Solid {
+                        if let Some(kind) = self.kind {
+                            classes.push(match kind {
+                                ShapeStyleKind::Wrong => SHAPE_MODE_SOLID_KIND_WRONG_CLASS.as_str(),
+                                ShapeStyleKind::Correct => SHAPE_MODE_SOLID_KIND_CORRECT_CLASS.as_str(),
+                                ShapeStyleKind::Regular => SHAPE_MODE_SOLID_KIND_REGULAR_CLASS.as_str(),
+                            });
+                        }
+                    }
+                }
+            }
+        }
 
 
         if(self.kind.is_some() && self.state.is_some()) {
@@ -102,19 +115,16 @@ impl ShapeStyle {
                     ShapeStyleState::Drawing => SHAPE_STATE_KIND_WRONG_DRAWING_CLASS.as_str(),
                     ShapeStyleState::Selected => SHAPE_STATE_KIND_WRONG_SELECTED_CLASS.as_str(),
                     ShapeStyleState::Deselected => SHAPE_STATE_KIND_WRONG_DESELECTED_CLASS.as_str(),
-                    ShapeStyleState::Outline => SHAPE_STATE_KIND_WRONG_OUTLINE_CLASS.as_str(),
                 },
                 ShapeStyleKind::Correct => match state {
                     ShapeStyleState::Drawing => SHAPE_STATE_KIND_CORRECT_DRAWING_CLASS.as_str(),
                     ShapeStyleState::Selected => SHAPE_STATE_KIND_CORRECT_SELECTED_CLASS.as_str(),
                     ShapeStyleState::Deselected => SHAPE_STATE_KIND_CORRECT_DESELECTED_CLASS.as_str(),
-                    ShapeStyleState::Outline => SHAPE_STATE_KIND_CORRECT_OUTLINE_CLASS.as_str(),
                 },
                 ShapeStyleKind::Regular => match state {
                     ShapeStyleState::Drawing => SHAPE_STATE_KIND_REGULAR_DRAWING_CLASS.as_str(),
                     ShapeStyleState::Selected => SHAPE_STATE_KIND_REGULAR_SELECTED_CLASS.as_str(),
                     ShapeStyleState::Deselected => SHAPE_STATE_KIND_REGULAR_DESELECTED_CLASS.as_str(),
-                    ShapeStyleState::Outline => SHAPE_STATE_KIND_REGULAR_OUTLINE_CLASS.as_str(),
                 },
             });
         }
