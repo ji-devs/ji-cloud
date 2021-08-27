@@ -681,7 +681,7 @@ impl Client {
         filters_for_ids(&mut filters.filters, "age_ranges", age_ranges);
         filters_for_ids(&mut filters.filters, "affiliations", affiliations);
         filters_for_ids(&mut filters.filters, "categories", categories);
-        filters_for_ints(&mut filters.filters, "tags", tags);
+        filters_for_ints(&mut filters.filters, "image_tags", tags);
         Self::filters_for_image_tag_priority(&mut filters.filters, tags_priority);
 
         let results: SearchResponse = self
