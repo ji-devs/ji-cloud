@@ -22,6 +22,13 @@ pub fn save_csrf_token(csrf:&str) {
 
     local_storage.set(CSRF_STORAGE_NAME, csrf).unwrap_ji()
 }
+
+pub fn delete_csrf_token() -> Result<(), JsValue> {
+    let local_storage = get_local_storage().unwrap_ji();
+
+    local_storage.remove_item(CSRF_STORAGE_NAME)
+}
+
 pub fn get_local_storage() -> Result<Storage, JsValue> {
     window().unwrap_ji()
         .local_storage()?

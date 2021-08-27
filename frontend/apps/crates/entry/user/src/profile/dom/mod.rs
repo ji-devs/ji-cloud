@@ -34,7 +34,7 @@ impl ProfilePage {
         actions::load_initial_data(state.clone());
 
         html!("user-profile", {
-            .child(page_header::dom::render(Rc::new(page_header::state::State::new()), Some("page-header")))
+            .child(page_header::dom::render(Rc::new(page_header::state::State::new()), Some("page-header"), None))
             .property_signal("email", state.user.email.signal_cloned())
             .property_signal("name", full_name_signal(Rc::clone(&state)))
             .children(&mut [
