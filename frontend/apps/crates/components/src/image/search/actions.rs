@@ -1,23 +1,18 @@
 use super::super::upload::upload_image;
 use super::state::{State, BACKGROUND_NAME};
-use crate::image::tag::ImageTag;
 use dominator::clone;
+use shared::domain::image::user::UserImageCreateRequest;
 use shared::{
     api::{endpoints, ApiEndpoint},
     domain::{
-        image::{
-            tag::{ImageTagListResponse, ImageTagResponse},
-            *,
-        },
+        image::*,
         jig::module::body::Image,
         meta::*,
     },
     error::EmptyError,
     media::MediaLibrary,
 };
-use std::collections::HashMap;
 use std::rc::Rc;
-use strum::IntoEnumIterator;
 use utils::prelude::*;
 use web_sys::File;
 
@@ -100,10 +95,14 @@ async fn get_user(state: Rc<State>) {
 }
 
 pub async fn upload_file(state: Rc<State>, file: File) {
+    let req = UserImageCreateRequest {
+        kind: ImageKind::Sticker,
+    };
+
     match api_with_auth::<CreateResponse, EmptyError, _>(
         endpoints::image::user::Create::PATH,
         endpoints::image::user::Create::METHOD,
-        None::<()>,
+        Some(req),
     )
     .await
     {
