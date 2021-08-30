@@ -1,5 +1,5 @@
 use super::super::actions::file_change;
-use crate::audio::input::state::{AudioInputAddMethod, AudioInputMode, AudioInput};
+use crate::audio::input::{actions, state::{AudioInputAddMethod, AudioInputMode, AudioInput}};
 use dominator::{clone, html, Dom};
 use std::rc::Rc;
 use utils::prelude::*;
@@ -12,7 +12,7 @@ pub fn render(state: Rc<AudioInput>, mode: AudioInputMode, add_method: AudioInpu
             .property("kind", "text")
             .text("Cancel")
             .event(clone!(state => move |_: events::Click| {
-                todo!();
+                actions::cancel_upload(Rc::clone(&state));
             }))
         })
     } else {

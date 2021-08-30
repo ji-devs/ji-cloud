@@ -29,6 +29,7 @@ pub struct AudioInput {
     pub mode: Mutable<AudioInputMode>,
     pub add_method: Mutable<AudioInputAddMethod>,
     pub recorder: AudioRecorder,
+    pub aborter: RefCell<AbortController>,
     ext_audio_handle: RefCell<Option<FutureHandle>>,
 }
 
@@ -42,6 +43,7 @@ impl AudioInput {
             mode: Mutable::new(AudioInputMode::Empty),
             recorder: AudioRecorder::new(),
             add_method: Mutable::new(AudioInputAddMethod::Record),
+            aborter: RefCell::new(AbortController::new()),
             ext_audio_handle: RefCell::new(None),
         });
 

@@ -53,22 +53,21 @@ impl AudioInput {
 pub async fn file_change(state: Rc<AudioInput>, file: File) {
     state.mode.set(AudioInputMode::Uploading);
 
+    *state.aborter.borrow_mut() = AbortController::new();
+
     let lib = MediaLibrary::User;
 
     let err = {
-        match api_with_auth::<CreateResponse<AudioId>, EmptyError, ()>(
+        match api_with_auth_abortable::<CreateResponse<AudioId>, EmptyError, ()>(
             &endpoints::audio::user::Create::PATH,
             endpoints::audio::user::Create::METHOD,
+            Some(&*state.aborter.borrow()),
             None,
         )
         .await {
-            Err(_) => {
-                Some(UploadError::Other(awsm_web::errors::Error::Empty))
-            },
-
-            Ok(resp) => {
+            Ok(Ok(resp)) => {
                 let CreateResponse { id } = resp;
-                match upload_audio(id, lib, &file, None).await {
+                match upload_audio(id, lib, &file, Some(&*state.aborter.borrow())).await {
                     Err(err) => Some(err),
                     Ok(_) => {
                         state.set_audio(Some(Audio {
@@ -79,11 +78,24 @@ pub async fn file_change(state: Rc<AudioInput>, file: File) {
                     }
                 }
             }
+            Err(true) => {
+                // Not really and error, it's an abort 
+                log::info!("Cancelled uploading audio file");
+                Some(UploadError::Other(awsm_web::errors::Error::Empty))
+            }
+            _ => {
+                log::error!("Error uploading audio file");
+                Some(UploadError::Other(awsm_web::errors::Error::Empty))
+            },
         }
     };
 
-    if let Some(err) = err {
-        log::error!("Error uploading audio file");
+    if let Some(_) = err {
         state.mode.set(AudioInputMode::Empty);
     }
+}
+
+
+pub fn cancel_upload(state: Rc<AudioInput>) {
+    state.aborter.borrow().abort();
 }
