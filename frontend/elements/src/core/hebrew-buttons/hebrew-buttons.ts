@@ -60,6 +60,25 @@ export class _ extends LitElement {
                 .iframe-wrapper {
                     width: 550px;
                     height: 665px;
+                    /* position: relative; */
+                }
+                .close {
+                    position: absolute;
+                    background-color: var(--main-blue);
+                    color: #ffffff;
+                    height: 32px;
+                    width: 32px;
+                    font-size: 26px;
+                    border-radius: 50%;
+                    transform: translate(50%, -50%);
+                    z-index: 1;
+                }
+                .iframe-close {
+                    /* offset by width of iframe */
+                    left: 550px;
+                }
+                .keyboard-close {
+                    right: 0;
                 }
                 .iframe-wrapper iframe {
                     height: 100%;
@@ -103,6 +122,7 @@ export class _ extends LitElement {
 
         return html`
             <drag-container y="${pos.y}" x="${pos.x}">
+                <button class="close keyboard-close" @click=${() => this.active = undefined}>&times;</button>
                 <hebrew-keyboard></hebrew-keyboard>
             </drag-container>
         `;
@@ -157,6 +177,18 @@ export class _ extends LitElement {
                     <iframe src="${this.getIframeUrl()}"></iframe>
                 </div>
             </anchored-overlay>
+            ${
+                this.active === "dicta" || this.active === "sefaria" ? (
+                        html`
+                            <button
+                                class="close iframe-close"
+                                @click=${() => this.active = undefined}
+                            >&times;</button>
+                        `
+                    ) : (
+                        nothing
+                    )
+            }
             ${
                 this.active === "keyboard" ? this.renderHebrewKeyboard()
                     : nothing
