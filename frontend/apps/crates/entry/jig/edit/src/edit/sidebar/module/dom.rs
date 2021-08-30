@@ -87,7 +87,14 @@ impl ModuleDom {
                         }
                     }))
                     .event(clone!(state => move |_evt:events::Click| {
-                        actions::edit(state.clone());
+                        match &*state.module {
+                            Some(_) => {
+                                actions::edit(state.clone())
+                            },
+                            None =>  {
+                                state.sidebar.jig_edit_state.route.set_neq(JigEditRoute::Landing);
+                            },
+                        };
                     }))
                     .child_signal(state.sidebar.jig_edit_state.route.signal_ref(clone!(state, module => move |route| {
                         match (&*module, route) {

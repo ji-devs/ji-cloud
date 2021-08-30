@@ -71,6 +71,7 @@ pub fn add_empty_module_after(state: Rc<State>) {
         .modules
         .lock_mut()
         .insert_cloned(state.index + 1, Rc::new(None));
+    state.sidebar.jig_edit_state.route.set_neq(JigEditRoute::Landing);
 }
 pub fn assign_kind(state: Rc<State>, kind: ModuleKind) {
     state.sidebar.loader.load(clone!(state => async move {
