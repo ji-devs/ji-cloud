@@ -41,7 +41,7 @@ pub struct GoogleAccessTokenResponse {
 
 /// Attempts to load an access token and project id from the given env var.
 ///
-/// This will include an `expires_in` (seconds) field when fetched from the google metadata
+/// This will include an `expires_at` (Utc) field when fetched from the google metadata
 /// server when running inside Cloud Run `RemoteTarget::Sandbox | RemoteTarget::Relase`.
 pub async fn get_access_token_response_and_project_id(
     credentials_env_key: &str,
@@ -104,11 +104,11 @@ pub async fn get_google_token_response_from_metadata_server(
         .json()
         .await?;
 
-    let expires_in = Utc::now() + Duration::seconds(token_response.expires_in);
+    let expires_at = Utc::now() + Duration::seconds(token_response.expires_in);
 
     Ok(GoogleAccessTokenResponse {
         access_token: Some(token_response.access_token),
-        expires_at: Some(expires_in),
+        expires_at: Some(expires_at),
     })
 }
 

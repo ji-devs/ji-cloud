@@ -112,6 +112,13 @@ pub struct GcpAccessKey {
 impl GcpAccessKey {
     const KEY_EXPIRATION_PAD_SECONDS: i64 = 360;
 
+    fn new(access_token: String, expires_at: Option<DateTime<Utc>>) -> Self {
+        Self {
+            access_token,
+            expires_at,
+        }
+    }
+
     /// checks if the key is stale
     ///
     /// returns `None` if there is no information about expiry time
@@ -119,11 +126,19 @@ impl GcpAccessKey {
         if let Some(expires_at) = self.expires_at {
             let is_stale =
                 Utc::now() >= (expires_at - Duration::seconds(Self::KEY_EXPIRATION_PAD_SECONDS));
-
+            log::debug!(
+                "GCP key is stale in: {:?}",
+                expires_at - Duration::seconds(Self::KEY_EXPIRATION_PAD_SECONDS) - Utc::now()
+            );
             Some(is_stale)
         } else {
             None
         }
+    }
+
+    fn update(&mut self, access_token: String, expires_at: Option<DateTime<Utc>>) {
+        self.access_token = access_token;
+        self.expires_at = expires_at;
     }
 }
 
@@ -151,14 +166,15 @@ impl GcpAccessKeyStore {
         let key = self.0.read().await;
 
         match key.is_stale() {
+            None => {
+                drop(key);
+                return Err(anyhow::anyhow!("No token expiry info found?"));
+            }
             Some(false) => {
                 let token = key.access_token.clone();
                 return Ok(token);
             }
-            Some(true) => {}
-            None => {
-                anyhow::bail!("no GCP access token expiry info found");
-            }
+            Some(true) => drop(key),
         }
 
         self.update_stale_token().await?;
@@ -169,24 +185,33 @@ impl GcpAccessKeyStore {
     }
 
     async fn update_stale_token(&self) -> anyhow::Result<()> {
-        let mut key_handler = self.0.write().await;
+        let key_handler = self.0.read().await;
 
         // if the key is not stale, then we don't need to refresh it. some other request might have updated it
         // by the time the write lock was acquired
         match key_handler.is_stale() {
             None => {
-                // not using gcp internal metaserver to fetch auth
+                return Err(anyhow::anyhow!("No token expiry info found?"));
             }
-            Some(true) => {}
-            Some(false) => return Ok(()),
+            Some(false) => {
+                log::debug!("GCP token is not stale, will not update.");
+                return Ok(());
+            }
+            Some(true) => {
+                log::debug!("GCP token is stale, fetching new token");
+            }
         }
+
+        drop(key_handler);
 
         let token_response = core::google::get_google_token_response_from_metadata_server().await?;
 
-        key_handler.access_token = token_response
-            .access_token
-            .expect("should fetch valid token on cloud");
-        key_handler.expires_at = token_response.expires_at;
+        (*self.0.write().await).update(
+            token_response
+                .access_token
+                .expect("should fetch valid token on cloud"),
+            token_response.expires_at,
+        );
 
         Ok(())
     }

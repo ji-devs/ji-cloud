@@ -75,6 +75,8 @@ enum BatchMedia<'a> {
     Image(BatchImage<'a>),
 }
 
+/// Manager for background task that reads updated jigs or media from the database, then
+/// performs batch updates to the indices.
 pub struct Manager {
     pub db: PgPool,
     pub inner: Inner,
@@ -586,6 +588,8 @@ fn media_filter(kind: MediaGroupKind, invert: bool) -> CommonFilter<FacetFilter>
     }
 }
 
+/// Client for handling operations that operate on single objects during http requests, such as
+/// searching or deleting a single item.
 #[derive(Clone)]
 pub struct Client {
     inner: Inner,
