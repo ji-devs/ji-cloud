@@ -19,7 +19,7 @@ use std::collections::HashSet;
 pub struct PlayState {
     pub game: Rc<Game>,
     pub traces: Vec<Rc<PlayTrace>>,
-    pub selected_set: RefCell<HashSet<usize>>
+    pub selected_set: Mutable<HashSet<usize>>,
 }
 
 impl PlayState {
@@ -34,7 +34,7 @@ impl PlayState {
         Rc::new(Self {
             game,
             traces,
-            selected_set: RefCell::new(HashSet::new())
+            selected_set: Mutable::new(HashSet::new())
         })
     }
 
@@ -48,7 +48,7 @@ impl PlayState {
             }
         }
         // mark the selected set
-        let mut selected_set = self.selected_set.borrow_mut();
+        let mut selected_set = self.selected_set.lock_mut();
 
         selected_set.insert(index);
 

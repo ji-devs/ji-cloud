@@ -1,14 +1,14 @@
 use dominator::{clone, html, Dom};
 use std::rc::Rc;
 use utils::resize::{resize_info_signal, ResizeInfo};
-
+use dominator_helpers::signals::EitherSignal;
 use crate::traces::{
     svg::{self, ShapeStyleVar, ShapeStyle, ShapeStyleState, ShapeStyleMode, SvgCallbacks, TransformSize},
     utils::*,
 };
 use futures_signals::{
     map_ref,
-    signal::{Signal, SignalExt},
+    signal::{always, Signal, SignalExt},
     signal_vec,
 };
 
@@ -18,18 +18,10 @@ use super::state::*;
 impl TracesShow {
     pub fn render(state: Rc<Self>) -> Dom {
 
-    let mode_resize_info_signal = map_ref! {
-        let mode = state.mode.signal_cloned(),
-        let resize_info = resize_info_signal()
-            => {
-                (mode.clone(), resize_info.clone())
-            }
-    };
-
         html!("empty-fragment", {
             .apply_if(state.on_select.is_none(), |dom| dom.style("pointer-events", "none"))
-            .child_signal(mode_resize_info_signal.map(clone!(state => move |(mode, resize_info)| {
-
+            .child_signal(resize_info_signal().map(clone!(state => move |resize_info| {
+                let mode = state.mode.clone();
 
                 let draw_children = signal_vec::always(
                     state.traces
@@ -40,10 +32,10 @@ impl TracesShow {
 
                         let shape_style_signal = state.selected_index
                             .signal_cloned()
-                            .map(clone!(state, mode => move |selected_index| {
-                                match mode {
+                            .switch(clone!(state, mode => move |selected_index| {
+                                match &mode {
                                     TracesShowMode::Cutout => {
-                                        ShapeStyle {
+                                        EitherSignal::Left(always(ShapeStyle {
                                             interactive: state.on_select.is_some(),
                                             mode: None,
                                             kind: Some(trace_kind),
@@ -54,25 +46,43 @@ impl TracesShow {
                                                     ShapeStyleState::Deselected
                                                 }
                                             )
-                                        }
+                                        }))
                                     },
 
                                     TracesShowMode::Solid=> {
-                                        ShapeStyle {
+                                        EitherSignal::Left(always(ShapeStyle {
                                             interactive: state.on_select.is_some(),
                                             mode: Some(ShapeStyleMode::Solid),
                                             kind: Some(trace_kind),
                                             state: None
-                                        }
+                                        }))
                                     },
 
                                     TracesShowMode::Hidden => {
-                                        ShapeStyle {
+                                        EitherSignal::Left(always(ShapeStyle {
                                             interactive: state.on_select.is_some(),
                                             mode: Some(ShapeStyleMode::Transparent),
                                             kind: Some(trace_kind),
                                             state: None 
-                                        }
+                                        }))
+                                    }
+
+                                    TracesShowMode::HiddenSolidMap(lookup) => {
+                                        let interactive = state.on_select.is_some();
+                                        EitherSignal::Right(lookup.signal_ref(move |lookup| {
+                                            ShapeStyle {
+                                                interactive,
+                                                mode: Some({
+                                                    if lookup.contains(&index) {
+                                                        ShapeStyleMode::Solid
+                                                    } else {
+                                                        ShapeStyleMode::Transparent
+                                                    }
+                                                }),
+                                                kind: Some(trace_kind),
+                                                state: None 
+                                            }
+                                        }))
                                     }
                                 }
                             }));
@@ -122,7 +132,7 @@ impl TracesShow {
                             },
                         ))
                     },
-                    TracesShowMode::Solid | TracesShowMode::Hidden => {
+                    _ => {
                         Some(svg::render_simple(
                             draw_children,
                             |_x, _y| {
