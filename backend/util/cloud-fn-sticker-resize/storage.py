@@ -29,7 +29,7 @@ def download_blob_to_temp_file(media_bucket: Bucket, file_key) -> Optional[str]:
 
     try:
         media_bucket.blob(file_key).download_to_filename(temp_local_filename)
-        print(f"Image {file_key} was downloaded to {temp_local_filename}")
+        # print(f"Image {file_key} was downloaded to {temp_local_filename}")
         return temp_local_filename
 
     except exceptions.NotFound:
@@ -39,4 +39,4 @@ def download_blob_to_temp_file(media_bucket: Bucket, file_key) -> Optional[str]:
 
 
 def upload_file_to_blob(media_bucket: Bucket, bucket_file_key, local_filename):
-    media_bucket.blob(bucket_file_key).upload_from_filename(filename=local_filename)
+    media_bucket.blob(bucket_file_key).upload_from_filename(filename=local_filename, content_type='image/png')

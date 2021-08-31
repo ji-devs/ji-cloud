@@ -21,35 +21,26 @@ def init_db_pool() -> engine.Engine:
     cloud_sql_connection_name = os.environ[
         "CLOUD_SQL_CONNECTION_NAME"
     ]  # i.e "<PROJECT-NAME>:<INSTANCE-REGION>:<INSTANCE-NAME>"
-
-    # pool = sqlalchemy.create_engine(
-    #     engine.url.URL.create(
-    #         drivername="postgresql+pg8000",
-    #         username=db_user,
-    #         password=db_pass,
-    #         database=db_name,
-    #         query={
-    #             "unix_sock": f"{db_socket_dir}/{cloud_sql_connection_name}/.s.PGSQL.5432"
-    #         },
-    #     ),
-    #     **db_config,
-    # )
     
-    pool = sqlalchemy.create_engine(f"postgresql+pg8000://{db_user}:{db_pass}@/{db_name}?unix_sock={db_socket_dir}/{cloud_sql_connection_name}/.s.PGSQL.5432")
+    print(f"postgresql+pg8000://{db_user}:{db_pass}@/{db_name}?unix_sock={db_socket_dir}/{cloud_sql_connection_name}/.s.PGSQL.5432")
+
+    pool = sqlalchemy.create_engine(
+        f"postgresql+pg8000://{db_user}:{db_pass}@/{db_name}?unix_sock={db_socket_dir}/{cloud_sql_connection_name}/.s.PGSQL.5432"
+    )
 
     return pool
 
 
 global_image_query = sqlalchemy.text(
-    "select id"
-    "from image_upload"
-    "where (processing_result is not distinct from true) and (kind = 1) and processed_at < '2021-08-22T12:36:50.371709Z'" 
+    "select id "
+    "from image_upload inner join image_metadata on image_id = id "
+    "where (processing_result is not distinct from true) and (kind = 1) and processed_at < '2021-08-22T12:36:50.371709Z'"
 )
 
 user_image_query = sqlalchemy.text(
-    "select id"
-    "from user_image_upload"
-    "where (processing_result is not distinct from true) and (kind = 1) and processed_at < '2021-08-22T12:36:50.371709Z'" 
+    "select id "
+    "from user_image_upload inner join user_image_library on image_id = id "
+    "where (processing_result is not distinct from true) and (kind = 1) and processed_at < '2021-08-22T12:36:50.371709Z'"
 )
 
 
@@ -58,7 +49,7 @@ def fetch_global_stickers(db_pool: engine.Engine) -> List[str]:
     with db_pool.begin() as conn:
         old_image_ids = conn.execute(global_image_query).fetchall()
 
-    return [row for row in old_image_ids]
+    return [str(row).split("'")[1] for row in old_image_ids]
 
 
 def fetch_user_stickers(db_pool: engine.Engine) -> List[str]:
@@ -66,4 +57,4 @@ def fetch_user_stickers(db_pool: engine.Engine) -> List[str]:
     with db_pool.begin() as conn:
         old_image_ids = conn.execute(user_image_query).fetchall()
 
-    return [row for row in old_image_ids]
+    return [str(row).split("'")[1] for row in old_image_ids]
