@@ -31,6 +31,7 @@ impl ImageAddPage {
                     age_ranges: Vec::new(),
                     affiliations: Vec::new(),
                     categories: Vec::new(),
+                    tags_priority: Vec::new(),
                     is_premium: None,
                     is_published: None,
                     kind: None,
