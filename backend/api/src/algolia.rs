@@ -35,7 +35,7 @@ const HAS_AUTHOR_TAG: &'static str = "hasAuthor";
 #[derive(Serialize)]
 struct BatchJig<'a> {
     name: &'a str,
-    // language: &'a str,
+    language: &'a str,
     age_ranges: &'a [Uuid],
     age_range_names: &'a [String],
     affiliations: &'a [Uuid],
@@ -45,6 +45,7 @@ struct BatchJig<'a> {
     categories: &'a [Uuid],
     category_names: &'a [String],
     author: Option<Uuid>,
+    author_name: Option<String>,
     #[serde(rename = "_tags")]
     tags: Vec<&'static str>,
 }
@@ -257,6 +258,7 @@ select algolia_index_version as "algolia_index_version!" from "settings"
             r#"
 select id,
     display_name as "name",
+    language as "language!",
     array((select affiliation_id from jig_affiliation where jig_id = jig.id)) as "affiliations!",
     array((select affiliation.display_name
            from affiliation
@@ -279,7 +281,8 @@ select id,
            where jig_category.jig_id = jig.id))                               as "category_names!",
     (publish_at < now() is true) as "is_published!",
     is_public as "is_public!",
-    author_id as "author"
+    author_id as "author",
+    (select given_name || ' '::text || family_name from "user" join user_profile up on "user".id = up.user_id where id = jig.author_id) as "author_name"
 from jig
 where
     last_synced_at is null or
@@ -307,6 +310,7 @@ for no key update skip locked;
             algolia::request::BatchWriteRequest::UpdateObject {
             body: match serde_json::to_value(&BatchJig {
                 name: &row.name,
+                language: &row.language,
                 goals: &row.goals,
                 goal_names: &row.goal_names,
                 age_ranges: &row.age_ranges,
@@ -316,6 +320,7 @@ for no key update skip locked;
                 categories: &row.categories,
                 category_names: &row.category_names,
                 author: row.author,
+                author_name: row.author_name,
                 tags
             })
             .expect("failed to serialize BatchImage to json")
@@ -721,12 +726,13 @@ impl Client {
         page: Option<u32>,
         is_published: Option<bool>,
         is_public: Option<bool>,
-
+        language: Option<String>,
         age_ranges: &[AgeRangeId],
         affiliations: &[AffiliationId],
         categories: &[CategoryId],
         goals: &[GoalId],
         author: Option<Uuid>,
+        author_name: Option<String>,
     ) -> anyhow::Result<Option<(Vec<Uuid>, u32, u64)>> {
         let mut filters = algolia::filter::AndFilter { filters: vec![] };
 
@@ -756,6 +762,26 @@ impl Client {
             filters.filters.push(Box::new(CommonFilter {
                 filter: TagFilter(PUBLIC_TAG.to_owned()),
                 invert: !is_public,
+            }))
+        }
+
+        if let Some(language) = language {
+            filters.filters.push(Box::new(CommonFilter {
+                filter: FacetFilter {
+                    facet_name: "language".to_owned(),
+                    value: language,
+                },
+                invert: false,
+            }))
+        }
+
+        if let Some(author_name) = author_name {
+            filters.filters.push(Box::new(CommonFilter {
+                filter: FacetFilter {
+                    facet_name: "author_name".to_owned(),
+                    value: author_name,
+                },
+                invert: false,
             }))
         }
 

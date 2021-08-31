@@ -209,11 +209,13 @@ async fn search(
             query.page,
             query.is_published,
             None, // FIXME
+            query.language,
             &query.age_ranges,
             &query.affiliations,
             &query.categories,
             &query.goals,
             query.author,
+            query.author_name,
         )
         .await?
         .ok_or_else(|| error::Service::DisabledService(ServiceKind::Algolia))?;

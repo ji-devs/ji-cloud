@@ -2183,96 +2183,6 @@
       ]
     }
   },
-  "6fde9ecd16e7392f6e8261a4c8b01ac7f1f8286762032055b4ea8d703485cace": {
-    "query": "\nselect id,\n    display_name as \"name\",\n    array((select affiliation_id from jig_affiliation where jig_id = jig.id)) as \"affiliations!\",\n    array((select affiliation.display_name\n           from affiliation\n                    inner join jig_affiliation on affiliation.id = jig_affiliation.affiliation_id\n           where jig_affiliation.jig_id = jig.id))                            as \"affiliation_names!\",\n    array((select age_range_id from jig_age_range where jig_id = jig.id))     as \"age_ranges!\",\n    array((select age_range.display_name\n           from age_range\n                    inner join jig_age_range on age_range.id = jig_age_range.age_range_id\n           where jig_age_range.jig_id = jig.id))                              as \"age_range_names!\",\n    array((select goal_id from jig_goal where jig_id = jig.id))     as \"goals!\",\n    array((select goal.display_name\n           from goal\n                    inner join jig_goal on goal.id = jig_goal.goal_id\n           where jig_goal.jig_id = jig.id))                              as \"goal_names!\",\n    array((select category_id from jig_category where jig_id = jig.id))       as \"categories!\",\n    array((select name\n           from category\n                    inner join jig_category on category.id = jig_category.category_id\n           where jig_category.jig_id = jig.id))                               as \"category_names!\",\n    (publish_at < now() is true) as \"is_published!\",\n    is_public as \"is_public!\",\n    author_id as \"author\"\nfrom jig\nwhere\n    last_synced_at is null or\n    (updated_at is not null and last_synced_at < updated_at) or\n    (publish_at < now() is true and last_synced_at < publish_at)\nlimit 100\nfor no key update skip locked;\n     ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "affiliations!",
-          "type_info": "UuidArray"
-        },
-        {
-          "ordinal": 3,
-          "name": "affiliation_names!",
-          "type_info": "TextArray"
-        },
-        {
-          "ordinal": 4,
-          "name": "age_ranges!",
-          "type_info": "UuidArray"
-        },
-        {
-          "ordinal": 5,
-          "name": "age_range_names!",
-          "type_info": "TextArray"
-        },
-        {
-          "ordinal": 6,
-          "name": "goals!",
-          "type_info": "UuidArray"
-        },
-        {
-          "ordinal": 7,
-          "name": "goal_names!",
-          "type_info": "TextArray"
-        },
-        {
-          "ordinal": 8,
-          "name": "categories!",
-          "type_info": "UuidArray"
-        },
-        {
-          "ordinal": 9,
-          "name": "category_names!",
-          "type_info": "TextArray"
-        },
-        {
-          "ordinal": 10,
-          "name": "is_published!",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 11,
-          "name": "is_public!",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 12,
-          "name": "author",
-          "type_info": "Uuid"
-        }
-      ],
-      "parameters": {
-        "Left": []
-      },
-      "nullable": [
-        false,
-        false,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        false,
-        true
-      ]
-    }
-  },
   "701de512b57a7bb90c579f09319277ac921dff5152c1fb8a2bc1d8bc0548504a": {
     "query": "\nselect exists(\n        select 1\n        from user_color\n        where user_id = $1\n            and index = $2\n        for update\n) as \"exists!\"",
     "describe": {
@@ -4105,6 +4015,108 @@
         ]
       },
       "nullable": []
+    }
+  },
+  "e3f4b2d31e4597c969d99882c2f5c59150e58d8e5043baece6404fe440b9c6a8": {
+    "query": "\nselect id,\n    display_name as \"name\",\n    language as \"language!\",\n    array((select affiliation_id from jig_affiliation where jig_id = jig.id)) as \"affiliations!\",\n    array((select affiliation.display_name\n           from affiliation\n                    inner join jig_affiliation on affiliation.id = jig_affiliation.affiliation_id\n           where jig_affiliation.jig_id = jig.id))                            as \"affiliation_names!\",\n    array((select age_range_id from jig_age_range where jig_id = jig.id))     as \"age_ranges!\",\n    array((select age_range.display_name\n           from age_range\n                    inner join jig_age_range on age_range.id = jig_age_range.age_range_id\n           where jig_age_range.jig_id = jig.id))                              as \"age_range_names!\",\n    array((select goal_id from jig_goal where jig_id = jig.id))     as \"goals!\",\n    array((select goal.display_name\n           from goal\n                    inner join jig_goal on goal.id = jig_goal.goal_id\n           where jig_goal.jig_id = jig.id))                              as \"goal_names!\",\n    array((select category_id from jig_category where jig_id = jig.id))       as \"categories!\",\n    array((select name\n           from category\n                    inner join jig_category on category.id = jig_category.category_id\n           where jig_category.jig_id = jig.id))                               as \"category_names!\",\n    (publish_at < now() is true) as \"is_published!\",\n    is_public as \"is_public!\",\n    author_id as \"author\",\n    (select given_name || ' '::text || family_name from \"user\" join user_profile up on \"user\".id = up.user_id where id = jig.author_id) as \"author_name\"\nfrom jig\nwhere\n    last_synced_at is null or\n    (updated_at is not null and last_synced_at < updated_at) or\n    (publish_at < now() is true and last_synced_at < publish_at)\nlimit 100\nfor no key update skip locked;\n     ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "language!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "affiliations!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 4,
+          "name": "affiliation_names!",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 5,
+          "name": "age_ranges!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 6,
+          "name": "age_range_names!",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 7,
+          "name": "goals!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 8,
+          "name": "goal_names!",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 9,
+          "name": "categories!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 10,
+          "name": "category_names!",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 11,
+          "name": "is_published!",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 12,
+          "name": "is_public!",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 13,
+          "name": "author",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 14,
+          "name": "author_name",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        false,
+        true,
+        null
+      ]
     }
   },
   "e418a5ae9bbbbfa0526d7d90d699ae1e4d2edb798ecf3434a1ed4529770c8faf": {

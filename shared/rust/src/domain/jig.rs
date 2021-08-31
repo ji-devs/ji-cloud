@@ -403,6 +403,11 @@ pub struct JigSearchQuery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub page: Option<u32>,
 
+    /// Optionally filter by `language`
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub language: Option<String>,
+
     /// Optionally filter by `age_ranges`
     ///
     /// Note: Currently does nothing
@@ -444,6 +449,11 @@ pub struct JigSearchQuery {
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub author: Option<Uuid>,
+
+    /// Optionally filter by the author's name
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub author_name: Option<String>,
 }
 
 /// Response for successful search.
