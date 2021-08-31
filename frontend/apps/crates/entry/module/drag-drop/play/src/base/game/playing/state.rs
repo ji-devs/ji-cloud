@@ -8,10 +8,7 @@ use futures_signals::{
 };
 use components::{
     audio::mixer::{AudioMixer, AudioHandle},
-    traces::{
-        utils::TraceExt,
-        bubble::state::TraceBubble,
-    }
+    traces::utils::TraceExt,
 };
 use utils::{prelude::*, drag::Drag};
 use shared::domain::jig::module::body::{Audio, Transform, _groups::design::{Sticker, Trace}, drag_drop::{Interactive, ItemKind, Next}};

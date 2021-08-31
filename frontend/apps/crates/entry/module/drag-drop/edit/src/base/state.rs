@@ -55,10 +55,7 @@ use components::{
         state::Backgrounds,
         callbacks::Callbacks as BackgroundsCallbacks,
     },
-    traces::{
-        bubble::state::TraceBubble,
-        edit::{TracesEdit, TracesEditCallbacks},
-    },
+    traces::edit::{TracesEdit, TracesEditCallbacks},
     tooltip::state::State as TooltipState
 };
 use dominator::clone;
