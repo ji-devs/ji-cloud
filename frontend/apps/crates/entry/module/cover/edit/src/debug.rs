@@ -35,7 +35,6 @@ use components::stickers::{sprite::ext::*, text::ext::*};
 
 use crate::base::sidebar::step_2::state::TabKind as BgTabKind;
 use crate::base::sidebar::step_3::state::TabKind as ContentTabKind;
-use components::traces::edit::state::DebugOptions as TracesOptions;
 pub static SETTINGS:OnceCell<DebugSettings> = OnceCell::new();
 
 const IMAGE_UUID:&'static str = "e84dd7fe-c92d-11eb-8c82-cfd1d3fd13ff";

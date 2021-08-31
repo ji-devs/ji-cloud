@@ -5,10 +5,6 @@ use components::{
     module::_common::edit::prelude::*,
     backgrounds::dom::render_backgrounds, 
     stickers::dom::{render_stickers, render_stickers_raw},
-    traces::{
-        edit::dom::render_traces_edit,
-        bubble::dom::render_trace_bubble
-    }
 };
 use futures_signals::{
     signal_vec::SignalVecExt,
