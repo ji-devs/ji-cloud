@@ -1,8 +1,4 @@
 use components::module::_common::edit::prelude::*;
-use components::traces::{
-    bubble::state::TraceBubble,
-    edit::state::TracesEdit
-};
 use crate::base::state::Base;
 use std::rc::Rc;
 use dominator_helpers::futures::AsyncLoader;
