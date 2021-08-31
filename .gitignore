@@ -56,3 +56,8 @@ $RECYCLE.BIN/
 backend/core/Cargo.lock
 shared/rust/Cargo.lock
 config/rust/Cargo.lock
+
+# Python
+venv
+__pycache__
+
