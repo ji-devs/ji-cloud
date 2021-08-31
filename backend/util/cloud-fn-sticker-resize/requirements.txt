@@ -1,0 +1,4 @@
+google-cloud-storage==1.42.0
+SQLAlchemy==1.4.23
+wand==0.6.7
+pg8000==1.21.1
