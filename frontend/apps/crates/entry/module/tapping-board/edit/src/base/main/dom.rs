@@ -6,8 +6,8 @@ use components::{
     backgrounds::dom::render_backgrounds, 
     stickers::dom::{render_stickers, render_stickers_raw},
     traces::{
-        edit::dom::render_traces_edit,
-        bubble::dom::render_trace_bubble
+        edit::TracesEdit,
+        bubble::TraceBubble,
     }
 };
 use futures_signals::{
@@ -32,12 +32,12 @@ impl DomRenderable for Main {
 
                             vec![
                                 render_stickers_raw(&raw_stickers, theme_id),
-                                render_traces_edit(state.base.traces.clone()),
+                                TracesEdit::render(state.base.traces.clone()),
                                 html!("empty-fragment", {
                                     .children_signal_vec(
                                         state.trace_bubbles()
                                             .map(clone!(state => move |bubble| {
-                                                render_trace_bubble(bubble, &state.base.audio_mixer)
+                                                TraceBubble::render(bubble, &state.base.audio_mixer)
                                             }))
                                     )
                                 })

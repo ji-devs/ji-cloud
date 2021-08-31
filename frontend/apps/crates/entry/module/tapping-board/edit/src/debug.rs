@@ -22,7 +22,7 @@ use shared::{
                 Instructions, 
                 Transform,
                 tapping_board::{Content, Mode, Step, ModuleData as RawData, TappingTrace},
-                _groups::design::{Sticker, Text, Trace, Backgrounds, Sprite, TraceShape, BaseContent }
+                _groups::design::{Sticker, Text, Trace, Backgrounds, Sprite, TraceShape, BaseContent, TraceKind }
             },
             JigId, module::ModuleId
         },
@@ -36,7 +36,6 @@ use crate::base::sidebar::step_1::state::TabKind as BgTabKind;
 use crate::base::sidebar::step_2::state::TabKind as ContentTabKind;
 use crate::base::sidebar::step_3::state::TabKind as InteractionTabKind;
 use crate::base::sidebar::step_4::state::TabKind as SettingsTabKind;
-use components::traces::edit::state::DebugOptions as TracesOptions;
 pub static SETTINGS:OnceCell<DebugSettings> = OnceCell::new();
 
 //const IMAGE_UUID:&'static str = "bf2fe548-7ffd-11eb-b3ab-579026da8b36";
@@ -56,7 +55,7 @@ pub struct DebugSettings {
     pub content_tab: Option<ContentTabKind>,
     pub interaction_tab: Option<InteractionTabKind>,
     pub settings_tab: Option<SettingsTabKind>,
-    pub trace_opts: Option<TracesOptions>,
+    pub draw_kind: Option<TraceKind>,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -95,7 +94,9 @@ impl DebugSettings {
                                             transform.set_translation_2d(*x, *y);
                                             Trace {
                                                 shape: TraceShape::Ellipse(*w, *h),
-                                                transform
+                                                transform,
+                                                kind: TraceKind::Regular,
+                                                audio: None,
                                             }
                                         }
                                     }
@@ -136,9 +137,7 @@ impl DebugSettings {
             content_tab: Some(ContentTabKind::Text),
             interaction_tab: Some(InteractionTabKind::Audio),
             settings_tab: Some(SettingsTabKind::Settings),
-            trace_opts: Some(TracesOptions {
-                start_in_phase_draw: false
-            })
+            draw_kind: None,
         }
     }
 }

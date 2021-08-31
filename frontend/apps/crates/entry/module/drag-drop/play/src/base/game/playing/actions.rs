@@ -15,11 +15,11 @@ use components::audio::mixer::AudioPath;
 
 cfg_if::cfg_if! {
     if #[cfg(debug_assertions)] {
-        const DEBUGGING_EVALUATION_RESULT:bool = true;
-        const DEBUGGING_EVALUATION_RESULT_ONLY_MATCH:bool = true;
+        const DEBUGGING_EVALUATION_RESULT:bool = false;
+        const DEBUGGING_EVALUATION_RESULT_ONLY_MATCH:bool = false;
     } else {
         const DEBUGGING_EVALUATION_RESULT:bool = false;
-        const DEBUGGING_EVALUATION_RESULT_ONLY_MATCH:bool = true;
+        const DEBUGGING_EVALUATION_RESULT_ONLY_MATCH:bool = false;
     }
 }
 
@@ -88,6 +88,7 @@ impl PlayState {
             }
 
             if is_correct {
+                item.locked.set_neq(true);
                 item.play_audio(AudioEffect::Correct);
             } else {
                 item.play_audio(AudioEffect::Wrong);
@@ -133,9 +134,11 @@ impl InteractiveItem {
     }
 
     pub fn start_drag(&self, x: i32, y: i32) {
-        self.play_audio(AudioEffect::Drag);
+        if !self.locked.get() {
+            self.play_audio(AudioEffect::Drag);
 
-        self.drag.set(Some(Rc::new(Drag::new(x, y, 0.0, 0.0, true))));
+            self.drag.set(Some(Rc::new(Drag::new(x, y, 0.0, 0.0, true))));
+        }
     }
 
     pub fn try_move_drag(&self, x: i32, y: i32) {

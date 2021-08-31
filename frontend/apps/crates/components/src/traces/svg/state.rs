@@ -17,7 +17,7 @@ use super::{
 use once_cell::sync::Lazy;
 use shared::domain::jig::module::body::{
     Transform,
-    _groups::design::{Trace, TraceShape},
+    _groups::design::{Trace, TraceShape, TraceKind},
 };
 use std::fmt::Write;
 type PlaceholderSignal<T> = futures_signals::signal::Always<T>;
@@ -47,7 +47,7 @@ impl ShapeStyleVar<PlaceholderShapeStyleSignal> {
 pub struct ShapeStyle {
     pub interactive: bool,
     pub mode: Option<ShapeStyleMode>,
-    pub kind: Option<ShapeStyleKind>,
+    pub kind: Option<TraceKind>,
     pub state: Option<ShapeStyleState>,
 }
 
@@ -58,12 +58,6 @@ pub enum ShapeStyleMode {
     Solid
 }
 
-#[derive(Clone, Copy, Eq, PartialEq, Debug)]
-pub enum ShapeStyleKind {
-    Wrong,
-    Correct,
-    Regular,
-}
 
 #[derive(Clone, Copy, Eq, PartialEq, Debug)]
 pub enum ShapeStyleState {
@@ -82,65 +76,6 @@ impl ShapeStyle {
         }
     }
 
-    pub fn classes(&self) -> Vec<&'static str> {
-        let mut classes = Vec::with_capacity(3);
-
-        match self.mode {
-            None => classes.push(SHAPE_MODE_EMPTY_FILL_CLASS.as_str()),
-            Some(mode) => {
-                if mode == ShapeStyleMode::Mask {
-                    classes.push(SHAPE_MODE_MASK_CLASS.as_str());
-                } else {
-                    classes.push(SHAPE_MODE_EMPTY_FILL_CLASS.as_str());
-
-                    if mode == ShapeStyleMode::Solid {
-                        if let Some(kind) = self.kind {
-                            classes.push(match kind {
-                                ShapeStyleKind::Wrong => SHAPE_MODE_SOLID_KIND_WRONG_CLASS.as_str(),
-                                ShapeStyleKind::Correct => SHAPE_MODE_SOLID_KIND_CORRECT_CLASS.as_str(),
-                                ShapeStyleKind::Regular => SHAPE_MODE_SOLID_KIND_REGULAR_CLASS.as_str(),
-                            });
-                        }
-                    }
-                }
-            }
-        }
-
-
-        if(self.kind.is_some() && self.state.is_some()) {
-            let state = self.state.unwrap_ji();
-
-            classes.push(match self.kind.unwrap_ji() {
-                ShapeStyleKind::Wrong => match state {
-                    ShapeStyleState::Drawing => SHAPE_STATE_KIND_WRONG_DRAWING_CLASS.as_str(),
-                    ShapeStyleState::Selected => SHAPE_STATE_KIND_WRONG_SELECTED_CLASS.as_str(),
-                    ShapeStyleState::Deselected => SHAPE_STATE_KIND_WRONG_DESELECTED_CLASS.as_str(),
-                },
-                ShapeStyleKind::Correct => match state {
-                    ShapeStyleState::Drawing => SHAPE_STATE_KIND_CORRECT_DRAWING_CLASS.as_str(),
-                    ShapeStyleState::Selected => SHAPE_STATE_KIND_CORRECT_SELECTED_CLASS.as_str(),
-                    ShapeStyleState::Deselected => SHAPE_STATE_KIND_CORRECT_DESELECTED_CLASS.as_str(),
-                },
-                ShapeStyleKind::Regular => match state {
-                    ShapeStyleState::Drawing => SHAPE_STATE_KIND_REGULAR_DRAWING_CLASS.as_str(),
-                    ShapeStyleState::Selected => SHAPE_STATE_KIND_REGULAR_SELECTED_CLASS.as_str(),
-                    ShapeStyleState::Deselected => SHAPE_STATE_KIND_REGULAR_DESELECTED_CLASS.as_str(),
-                },
-            });
-        }
-
-        if self.interactive {
-            classes.push(SHAPE_INTERACTIVE_CLASS.as_str());
-        }
-
-        classes
-    }
-
-    pub fn classes_string(&self) -> String {
-        self.classes().iter().fold(String::new(), |acc, class_name| {
-            format!("{} {}", acc, class_name)
-        })
-    }
 }
 
 pub enum TransformSize<'a, S> 

@@ -31,6 +31,7 @@ use shared::domain::jig::{
                 Trace as RawTrace,
                 Sticker as RawSticker,
                 Backgrounds as RawBackgrounds, 
+                TraceKind,
             }
         }
     }
@@ -56,10 +57,7 @@ use components::{
     },
     traces::{
         bubble::state::TraceBubble,
-        edit::{
-            state::TracesEdit, 
-            callbacks::Callbacks as TracesCallbacks
-        }
+        edit::{TracesEdit, TracesEditCallbacks},
     },
     tooltip::state::State as TooltipState
 };
@@ -297,8 +295,8 @@ impl Base {
                     target_area.trace.clone()
                 })
                 .collect::<Vec<RawTrace>>(),
-            crate::debug::settings().trace_opts.clone(),
-            TracesCallbacks::new(
+            crate::debug::settings().draw_kind.unwrap_or(TraceKind::Regular),
+            TracesEditCallbacks::new(
                 Some(clone!(_self_ref => move |raw_trace| {
                     if let Some(_self) = _self_ref.borrow().as_ref() {
                         _self.on_trace_added(raw_trace);

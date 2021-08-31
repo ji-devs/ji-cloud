@@ -1,5 +1,70 @@
 use once_cell::sync::Lazy;
 use dominator::class;
+use super::state::*;
+use utils::prelude::*;
+use shared::domain::jig::module::body::_groups::design::{Trace, TraceShape, TraceKind};
+
+impl ShapeStyle {
+    pub fn classes(&self) -> Vec<&'static str> {
+        let mut classes = Vec::with_capacity(3);
+
+        match self.mode {
+            None => classes.push(SHAPE_MODE_EMPTY_FILL_CLASS.as_str()),
+            Some(mode) => {
+                if mode == ShapeStyleMode::Mask {
+                    classes.push(SHAPE_MODE_MASK_CLASS.as_str());
+                } else {
+                    classes.push(SHAPE_MODE_EMPTY_FILL_CLASS.as_str());
+
+                    if mode == ShapeStyleMode::Solid {
+                        if let Some(kind) = self.kind {
+                            classes.push(match kind {
+                                TraceKind::Wrong => SHAPE_MODE_SOLID_KIND_WRONG_CLASS.as_str(),
+                                TraceKind::Correct => SHAPE_MODE_SOLID_KIND_CORRECT_CLASS.as_str(),
+                                TraceKind::Regular => SHAPE_MODE_SOLID_KIND_REGULAR_CLASS.as_str(),
+                            });
+                        }
+                    }
+                }
+            }
+        }
+
+
+        if(self.kind.is_some() && self.state.is_some()) {
+            let state = self.state.unwrap_ji();
+
+            classes.push(match self.kind.unwrap_ji() {
+                TraceKind::Wrong => match state {
+                    ShapeStyleState::Drawing => SHAPE_STATE_KIND_WRONG_DRAWING_CLASS.as_str(),
+                    ShapeStyleState::Selected => SHAPE_STATE_KIND_WRONG_SELECTED_CLASS.as_str(),
+                    ShapeStyleState::Deselected => SHAPE_STATE_KIND_WRONG_DESELECTED_CLASS.as_str(),
+                },
+                TraceKind::Correct => match state {
+                    ShapeStyleState::Drawing => SHAPE_STATE_KIND_CORRECT_DRAWING_CLASS.as_str(),
+                    ShapeStyleState::Selected => SHAPE_STATE_KIND_CORRECT_SELECTED_CLASS.as_str(),
+                    ShapeStyleState::Deselected => SHAPE_STATE_KIND_CORRECT_DESELECTED_CLASS.as_str(),
+                },
+                TraceKind::Regular => match state {
+                    ShapeStyleState::Drawing => SHAPE_STATE_KIND_REGULAR_DRAWING_CLASS.as_str(),
+                    ShapeStyleState::Selected => SHAPE_STATE_KIND_REGULAR_SELECTED_CLASS.as_str(),
+                    ShapeStyleState::Deselected => SHAPE_STATE_KIND_REGULAR_DESELECTED_CLASS.as_str(),
+                },
+            });
+        }
+
+        if self.interactive {
+            classes.push(SHAPE_INTERACTIVE_CLASS.as_str());
+        }
+
+        classes
+    }
+
+    pub fn classes_string(&self) -> String {
+        self.classes().iter().fold(String::new(), |acc, class_name| {
+            format!("{} {}", acc, class_name)
+        })
+    }
+}
 
 pub(super) static SVG_CLASS: Lazy<String> = Lazy::new(|| {
     class! {

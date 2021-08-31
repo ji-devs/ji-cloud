@@ -2,7 +2,8 @@ use futures_signals::signal::{Signal, SignalExt, Mutable};
 
 use shared::domain::jig::module::body::{
     Transform,
-    _groups::design::{Trace as RawTrace, TraceShape},
+    Audio,
+    _groups::design::{Trace as RawTrace, TraceShape, TraceKind},
 };
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -15,6 +16,8 @@ use web_sys::SvgElement;
 pub struct EditSelectTrace {
     pub transform: Transform,
     pub shape: TraceShape,
+    pub kind: TraceKind,
+    pub audio: Option<Audio>,
     pub size: (f64, f64),
     pub select_box: Rc<SelectBox>,
     pub elem: RefCell<Option<SvgElement>>,
@@ -25,6 +28,8 @@ impl EditSelectTrace {
         let mut _self = Self {
             transform: raw.transform.clone(),
             shape: raw.shape,
+            kind: raw.kind,
+            audio: raw.audio,
             size: (0.0, 0.0),
             select_box: Rc::new(SelectBox::new(raw.transform)),
             elem: RefCell::new(None),
@@ -45,6 +50,8 @@ impl TraceExt for EditSelectTrace {
         RawTrace {
             transform: self.transform.clone(),
             shape: self.shape.clone(),
+            kind: self.kind,
+            audio: self.audio.clone(),
         }
     }
 

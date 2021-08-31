@@ -24,7 +24,7 @@ impl TraceBubble {
         audio: Option<Audio>,
         text: Option<String>,
         on_fade_end: Option<impl Fn() + 'static>,
-    ) -> Self {
+    ) -> Rc<Self> {
         let tooltip = text.map(|text| {
             Rc::new(TooltipState::new(
                 TooltipTarget::NormalizedBounds(bounds, MoveStrategy::Track),
@@ -37,12 +37,12 @@ impl TraceBubble {
             ))
         });
 
-        Self {
+        Rc::new(Self {
             audio,
             audio_handle: RefCell::new(None),
             tooltip,
             fade: Fade::new(FadeKind::Out, 6_000.0, true, None, on_fade_end),
-        }
+        })
     }
 
     //Will manage its own lifetime by way of a specific Mutable type
@@ -52,14 +52,14 @@ impl TraceBubble {
         text: Option<String>,
         mutable: Mutable<Option<Rc<TraceBubble>>>,
     ) {
-        let instance = Rc::new(TraceBubble::new(
+        let instance = TraceBubble::new(
             bounds,
             audio,
             text,
             Some(clone!(mutable => move || {
                 mutable.set(None)
             })),
-        ));
+        );
 
         mutable.set(Some(instance));
     }

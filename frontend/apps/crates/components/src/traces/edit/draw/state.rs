@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use super::{menu::state::*, trace::state::*};
 use dominator::clone;
-use shared::domain::jig::module::body::_groups::design::Trace as RawTrace;
+use shared::domain::jig::module::body::{Audio, _groups::design::{Trace as RawTrace, TraceKind}};
 
 use futures_signals::{
     signal::{Mutable, Signal},
@@ -17,11 +17,13 @@ pub struct Draw {
     pub menu: Mutable<Option<Menu>>,
     pub on_finished: Box<dyn Fn(Option<RawTrace>)>,
     pub init_index: Option<usize>,
+    pub default_kind: TraceKind,
 }
 
 impl Draw {
     pub fn new(
         init: Option<(usize, RawTrace)>,
+        default_kind: TraceKind,
         on_finished: impl Fn(Option<RawTrace>) + 'static,
     ) -> Self {
         let draw_points = Mutable::new(Vec::new());
@@ -36,6 +38,7 @@ impl Draw {
         let _self = Self {
             trace: DrawTrace::new(
                 init_trace.clone(),
+                default_kind,
                 Rc::new(Box::new(clone!(menu => move || {
                     //this will trigger menu re-positioning
                     if let Some(curr) = menu.get_cloned() {
@@ -43,6 +46,7 @@ impl Draw {
                     }
                 }))),
             ),
+            default_kind,
             menu,
             drag: Mutable::new(None),
             draw_points,

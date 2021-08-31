@@ -5,29 +5,44 @@ use futures_signals::{
 };
 
 use std::rc::Rc;
+use std::cell::RefCell;
+use shared::domain::jig::module::body::_groups::design::{Trace as RawTrace, TraceKind};
 
-use shared::domain::jig::module::body::_groups::design::Trace as RawTrace;
-
-use super::{select::trace::state::*, callbacks::*, draw::state::*};
+use super::{select::trace::state::*, draw::state::*};
 use crate::traces::utils::TraceExt;
 use utils::resize::get_resize_info;
 
 pub struct TracesEdit {
     pub list: MutableVec<Rc<EditSelectTrace>>,
     pub selected_index: Mutable<Option<usize>>,
-    pub phase: Mutable<Phase>,
-    pub callbacks: Callbacks,
+    pub phase: Mutable<TracesEditPhase>,
+    pub callbacks: TracesEditCallbacks,
+    pub draw_kind: RefCell<TraceKind>,
+}
+
+pub struct TracesEditCallbacks {
+    pub on_add: Option<Box<dyn Fn(RawTrace)>>,
+    pub on_delete: Option<Box<dyn Fn(usize)>>,
+    pub on_change: Option<Box<dyn Fn(usize, RawTrace)>>,
+}
+impl TracesEditCallbacks {
+    pub fn new(
+        on_add: Option<impl Fn(RawTrace) + 'static>,
+        on_delete: Option<impl Fn(usize) + 'static>,
+        on_change: Option<impl Fn(usize, RawTrace) + 'static>,
+    ) -> Self {
+        Self {
+            on_add: on_add.map(|f| Box::new(f) as _),
+            on_delete: on_delete.map(|f| Box::new(f) as _),
+            on_change: on_change.map(|f| Box::new(f) as _),
+        }
+    }
 }
 
 #[derive(Clone)]
-pub enum Phase {
+pub enum TracesEditPhase {
     Selectable,
     Draw(Rc<Draw>),
-}
-
-#[derive(Clone, Debug, Default)]
-pub struct DebugOptions {
-    pub start_in_phase_draw: bool,
 }
 
 impl TracesEdit {
@@ -41,16 +56,16 @@ impl TracesEdit {
 
     pub fn from_raw(
         raw: &[RawTrace],
-        debug_opts: Option<DebugOptions>,
-        callbacks: Callbacks,
+        draw_kind: TraceKind,
+        callbacks: TracesEditCallbacks,
     ) -> Rc<Self> {
-        let debug_opts = debug_opts.unwrap_or_default();
 
         let _self = Rc::new(Self {
             list: MutableVec::new(),
             selected_index: Mutable::new(None),
-            phase: Mutable::new(Phase::Selectable),
+            phase: Mutable::new(TracesEditPhase::Selectable),
             callbacks,
+            draw_kind: RefCell::new(draw_kind),
         });
 
         if raw.len() > 0 {
@@ -60,10 +75,6 @@ impl TracesEdit {
                     .map(|trace| Rc::new(EditSelectTrace::new(trace.clone(), &resize_info)))
                     .collect(),
             );
-        }
-
-        if debug_opts.start_in_phase_draw {
-            Self::start_draw(_self.clone(), None, None);
         }
 
         _self

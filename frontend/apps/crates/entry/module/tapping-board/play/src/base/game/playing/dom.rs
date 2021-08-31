@@ -9,21 +9,25 @@ use shared::domain::jig::module::body::tapping_board::TappingTrace;
 use utils::{prelude::*, resize::{resize_info_signal, ResizeInfo}};
 use components::traces::{
     utils::TraceExt,
-    svg::{render_single_trace, ShapeStyle, ShapeStyleBase, SvgCallbacks},
-    select::{
-        dom::render_traces_select,
-        trace::SelectTrace
-    },
-    bubble::{
-        dom::render_trace_bubble,
-        state::*
-    }
+    //svg::{render_single_trace, ShapeStyle, ShapeStyleBase, SvgCallbacks},
+    show::{TracesShow, TracesShowMode},
+    bubble::TraceBubble,
 };
 
 use super::state::*;
 
 //pub fn render(state: Rc<PlayState>, index: usize, full_trace: TappingTrace) -> Dom {
 pub fn render(state: Rc<PlayState>) -> Dom {
+    TracesShow::render(TracesShow::new(
+            state.game.base.traces
+                .iter()
+                .map(|t| t.trace.clone())
+                .collect(),
+            TracesShowMode::Cutout,
+            TracesShow::on_select_noop()
+    ))
+
+        /*
     html!("empty-fragment", {
         .children(
             state.traces
@@ -36,8 +40,10 @@ pub fn render(state: Rc<PlayState>) -> Dom {
         )
         
     })
+        */
 }
 
+/*
 pub fn render_trace(state: Rc<PlayState>, trace: Rc<PlayTrace>, index: usize) -> Dom {
     let sig = map_ref! {
         let play_phase = trace.phase.signal_cloned(),
@@ -71,7 +77,7 @@ pub fn render_trace(state: Rc<PlayState>, trace: Rc<PlayTrace>, index: usize) ->
 
                         match play_phase {
                             PlayPhase::Playing(bubble) => {
-                                children.push(render_trace_bubble(bubble, &state.game.base.audio_mixer));
+                                children.push(TraceBubble::render(bubble, &state.game.base.audio_mixer));
                             },
                             _ => {
                             }
@@ -85,3 +91,4 @@ pub fn render_trace(state: Rc<PlayState>, trace: Rc<PlayTrace>, index: usize) ->
         )
     })
 }
+*/

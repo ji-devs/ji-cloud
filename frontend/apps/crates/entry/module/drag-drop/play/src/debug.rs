@@ -37,7 +37,7 @@ use shared::{
                         Hint,
                         Next
                     },
-                    _groups::design::{Backgrounds, Sprite, Sticker, Text, Trace, TraceShape, BaseContent}
+                    _groups::design::{Backgrounds, Sprite, Sticker, Text, Trace, TraceKind, TraceShape, BaseContent}
                 }
             }
         }
@@ -100,7 +100,9 @@ impl DebugSettings {
                                             }
                                             Trace {
                                                 shape: TraceShape::Ellipse(*w, *h),
-                                                transform
+                                                transform,
+                                                kind: TraceKind::Regular,
+                                                audio: None,
                                             }
                                         },
                                         InitTrace::Path(x, y, path, transform_more) => {
@@ -112,7 +114,9 @@ impl DebugSettings {
                                             }
                                             Trace {
                                                 shape: TraceShape::Path(path.clone()),
-                                                transform
+                                                transform,
+                                                kind: TraceKind::Regular,
+                                                audio: None,
                                             }
                                         },
                                         InitTrace::Rect(x, y, width, height, transform_more) => {
@@ -124,7 +128,9 @@ impl DebugSettings {
                                             }
                                             Trace {
                                                 shape: TraceShape::Rect(*width, *height),
-                                                transform
+                                                transform,
+                                                kind: TraceKind::Regular,
+                                                audio: None,
                                             }
                                         }
                                     }

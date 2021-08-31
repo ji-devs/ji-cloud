@@ -10,7 +10,6 @@ use components::{
     box_outline::{BoxOutline,BoxOutlineMixins},
     backgrounds::dom::render_backgrounds, 
     stickers::dom::{render_stickers, mixin_sticker_button, StickerRawRenderOptions, BaseRawRenderOptions, render_sticker_raw},
-    traces::edit::dom::render_traces_edit
 };
 
 use futures_signals::{

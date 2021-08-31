@@ -6,7 +6,6 @@ use super::state::*;
 use components::{
     backgrounds::dom::render_backgrounds, 
     stickers::dom::{render_stickers, render_sticker_raw, BaseRawRenderOptions, StickerRawRenderOptions, mixin_sticker_button},
-    traces::edit::dom::render_traces_edit
 };
 use futures_signals::{
     signal_vec::SignalVecExt,

@@ -38,7 +38,7 @@ use shared::{
                         Next,
                         Step,
                     },
-                    _groups::design::{Backgrounds, Sprite, Sticker, Text, Trace, TraceShape, BaseContent}
+                    _groups::design::{Backgrounds, Sprite, Sticker, Text, Trace, TraceKind, TraceShape, BaseContent}
                 }
             }
         }
@@ -48,7 +48,6 @@ use components::stickers::{sprite::ext::*, text::ext::*};
 use crate::base::sidebar::step_1::state::TabKind as Step1TabKind;
 use crate::base::sidebar::step_2::state::TabKind as Step2TabKind;
 use crate::base::sidebar::step_5::state::TabKind as Step5TabKind;
-use components::traces::edit::state::DebugOptions as TracesOptions;
 pub static SETTINGS:OnceCell<DebugSettings> = OnceCell::new();
 
 const IMAGE_UUID:&'static str = "f2e63cf2-ee11-11eb-9b68-4bf1f063ab1c";
@@ -61,10 +60,10 @@ pub struct DebugSettings {
     pub step:Option<Step>,
     pub skip_save: bool,
     pub skip_load_jig: bool,
+    pub draw_kind: Option<TraceKind>,
     pub step_1_tab: Option<Step1TabKind>,
     pub step_2_tab: Option<Step2TabKind>,
     pub step_5_tab: Option<Step5TabKind>,
-    pub trace_opts: Option<TracesOptions>,
 }
 
 #[derive(Clone, Debug)]
@@ -105,7 +104,9 @@ impl DebugSettings {
                                             transform.set_translation_2d(*x, *y);
                                             Trace {
                                                 shape: TraceShape::Ellipse(*w, *h),
-                                                transform
+                                                transform,
+                                                kind: TraceKind::Regular,
+                                                audio: None,
                                             }
                                         }
                                     }
@@ -163,15 +164,13 @@ impl DebugSettings {
                     }
                 }
             ),
-            step: Some(Step::Three),
+            step: Some(Step::Four),
+            draw_kind: None,
             skip_save: true,
             skip_load_jig: true,
             step_1_tab: Some(Step1TabKind::StickerImage),
             step_2_tab: Some(Step2TabKind::Select),
             step_5_tab: Some(Step5TabKind::Settings),
-            trace_opts: Some(TracesOptions {
-                start_in_phase_draw: false
-            })
         }
     }
 }
@@ -205,7 +204,7 @@ pub fn init(jig_id: JigId, module_id: ModuleId) {
                 //( InitSticker::Sprite, ItemKind::Static)
             ],
             traces: vec![
-                //InitTrace::Ellipse(0.3, 0.4, 0.2, 0.1)
+                InitTrace::Ellipse(0.3, 0.4, 0.2, 0.1)
             ]
         }))).unwrap_ji();
         //SETTINGS.set(DebugSettings::debug(None)).unwrap_ji();

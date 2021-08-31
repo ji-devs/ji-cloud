@@ -7,8 +7,8 @@ use futures_signals::{
 };
 use utils::{prelude::*, resize::{resize_info_signal, ResizeInfo}};
 use components::{
-    traces::hints::dom::render_traces_hint,
-    stickers::dom::{render_sticker_raw, StickerRawRenderOptions,BaseRawRenderOptions ,TransformOverride, mixin_sticker_button}
+    traces::show::{TracesShow, TracesShowMode},
+    stickers::dom::{render_sticker_raw, StickerRawRenderOptions,BaseRawRenderOptions ,TransformOverride, mixin_sticker_button_signal}
 };
 
 use super::state::*;
@@ -29,12 +29,14 @@ pub fn render(state: Rc<PlayState>) -> Dom {
                 }
             })
         })))
-        .child(render_traces_hint(
+        .child(TracesShow::render(TracesShow::new(
                 state.game.base.target_areas
                     .iter()
                     .map(|area| area.trace.clone())
-                    .collect()
-        ))
+                    .collect(),
+                TracesShowMode::Hidden,
+                TracesShow::on_select_noop()
+        )))
         .children( {
             state.items
                 .iter()
@@ -53,7 +55,7 @@ pub fn render(state: Rc<PlayState>) -> Dom {
                             opts.set_mixin(
                                 clone!(state, item, targets_ready => move |dom| {
                                     apply_methods!(dom, {
-                                        .apply(mixin_sticker_button)
+                                        .apply(mixin_sticker_button_signal(item.locked.signal().map(|locked| !locked)))
                                         .apply(|dom| {
                                             dom
                                                 .style_signal("display", targets_ready.signal().map(|ready| {

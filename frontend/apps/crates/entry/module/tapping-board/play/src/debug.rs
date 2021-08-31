@@ -33,7 +33,7 @@ use shared::{
                         Hint,
                         Next
                     },
-                    _groups::design::{Backgrounds, Sprite, Sticker, Text, Trace, TraceShape, BaseContent}
+                    _groups::design::{Backgrounds, Sprite, TraceKind, Sticker, Text, Trace, TraceShape, BaseContent}
                 }
             }
         }
@@ -95,7 +95,9 @@ impl DebugSettings {
                                             transform.set_translation_2d(*x, *y);
                                             Trace {
                                                 shape: TraceShape::Ellipse(*w, *h),
-                                                transform
+                                                transform,
+                                                kind: TraceKind::Regular,
+                                                audio: None,
                                             }
                                         }
                                     }

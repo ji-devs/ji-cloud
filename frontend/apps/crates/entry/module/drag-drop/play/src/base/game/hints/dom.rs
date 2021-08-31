@@ -2,7 +2,7 @@ use super::state::*;
 use std::rc::Rc;
 use super::state::*;
 use components::{
-    traces::hints::dom::render_traces_hint,
+    traces::show::{TracesShow, TracesShowMode},
     stickers::dom::render_stickers_raw
 };
 use gloo_timers::future::TimeoutFuture;
@@ -27,11 +27,13 @@ pub fn render(state: Rc<Hints>) -> Dom {
                 .collect::<Vec<_>>(),
             state.game.base.theme_id
         ))
-        .child(render_traces_hint(
+        .child(TracesShow::render(TracesShow::new(
                 state.game.base.target_areas
                     .iter()
                     .map(|area| area.trace.clone())
-                    .collect()
-        ))
+                    .collect(),
+                TracesShowMode::Cutout,
+                TracesShow::on_select_noop()
+        )))
     })
 }

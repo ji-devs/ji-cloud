@@ -8,7 +8,7 @@ use shared::domain::jig::module::body::Transform;
 use super::{select_box::*, trace::state::*};
 use crate::traces::{
     edit::state::*,
-    svg::{self, TransformSize, ShapeStyleVar, ShapeStyle, ShapeStyleKind, ShapeStyleState, SvgCallbacks},
+    svg::{self, TransformSize, ShapeStyleVar, ShapeStyle, ShapeStyleState, SvgCallbacks},
 };
 use futures_signals::{map_ref, signal::{Signal, SignalExt}, signal_vec::{SignalVec, SignalVecExt}};
 
@@ -40,17 +40,19 @@ impl TracesEdit {
                     .signal_vec_cloned()
                     .enumerate()
                     .map(clone!(resize_info, state => move |(index, trace)| {
+                        let trace_kind = trace.kind;
+
                         let shape_style_signal = map_ref!{
                             let selected_index = state.selected_index.signal_cloned(),
                             let index = index.signal_cloned()
                                 => {
                                     (*selected_index, *index)
                                 }
-                        }.map(|(selected_index, index)| {
+                        }.map(move |(selected_index, index)| {
                             ShapeStyle {
                                 interactive: true,
                                 mode: None,
-                                kind: Some(ShapeStyleKind::Regular),
+                                kind: Some(trace_kind),
                                 state: Some(
                                     if index == selected_index {
                                         ShapeStyleState::Selected

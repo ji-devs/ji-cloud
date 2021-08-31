@@ -92,6 +92,7 @@ impl TracesEdit {
 
         let draw = Draw::new(
             init_trace_index,
+            *_self.draw_kind.borrow(),
             clone!(_self => move |raw_trace| {
                 //On finished
                 if let Some(raw_trace) = raw_trace {
@@ -100,13 +101,13 @@ impl TracesEdit {
                         Some(index) => _self.change(index, raw_trace)
                     }
                 }
-                _self.phase.set(Phase::Selectable);
+                _self.phase.set(TracesEditPhase::Selectable);
             }),
         );
 
         if let Some((x, y)) = init_point {
             draw.start_draw(x, y);
         }
-        _self.phase.set(Phase::Draw(Rc::new(draw)));
+        _self.phase.set(TracesEditPhase::Draw(Rc::new(draw)));
     }
 }

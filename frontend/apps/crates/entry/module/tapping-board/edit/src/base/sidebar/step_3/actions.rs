@@ -2,7 +2,7 @@ use super::state::*;
 use utils::prelude::*;
 use std::rc::Rc;
 use wasm_bindgen::JsCast;
-use components::traces::bubble::state::TraceBubble;
+use components::traces::bubble::TraceBubble;
 use dominator::clone;
 
 impl Step3 {

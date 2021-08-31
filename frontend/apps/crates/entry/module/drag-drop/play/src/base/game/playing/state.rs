@@ -87,6 +87,7 @@ impl PlayItem {
 
 pub struct InteractiveItem {
     pub sticker: Sticker,
+    pub locked: Mutable<bool>,
     pub audio_mixer:AudioMixer,
     pub audio: Option<Audio>,
     pub audio_effect_handle: RefCell<Option<AudioHandle>>,
@@ -108,6 +109,7 @@ impl InteractiveItem {
         Rc::new(Self {
             audio_mixer,
             sticker,
+            locked: Mutable::new(false),
             audio: data.audio,
             target_transform: data.target_transform.unwrap_or_else(clone!(transform => move || transform)),
             curr_transform: Mutable::new(transform),

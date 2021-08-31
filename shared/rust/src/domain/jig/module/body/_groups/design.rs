@@ -1,4 +1,4 @@
-use crate::domain::jig::module::body::{Background, Image, Instructions, ThemeChoice, Transform};
+use crate::domain::jig::module::body::{Background, Image, Audio, Instructions, ThemeChoice, Transform};
 use serde::{Deserialize, Serialize};
 
 /// The base content for design modules that don't need custom Sticker wrappers
@@ -116,6 +116,22 @@ pub struct Trace {
     pub transform: Transform,
     /// The Shape
     pub shape: TraceShape,
+    /// The Kind
+    pub kind: TraceKind,
+    /// Optional audio associated with this trace
+    pub audio: Option<Audio>,
+}
+
+
+#[derive(Clone, Copy, Serialize, Deserialize, Debug, PartialEq, Eq)]
+/// Trace kind
+pub enum TraceKind {
+    /// Wrong (red color)
+    Wrong,
+    /// Correct (green color)
+    Correct,
+    /// Regular (blue color)
+    Regular,
 }
 
 impl AsRef<Trace> for Trace {

@@ -5,7 +5,8 @@ use std::rc::Rc;
 use crate::transform::state::{TransformCallbacks, TransformState};
 use shared::domain::jig::module::body::{
     Transform,
-    _groups::design::{Trace as RawTrace, TraceShape as RawTraceShape},
+    Audio,
+    _groups::design::{Trace as RawTrace, TraceShape as RawTraceShape, TraceKind},
 };
 
 use utils::{math::BoundsF64, prelude::*};
@@ -14,15 +15,19 @@ use utils::{math::BoundsF64, prelude::*};
 pub struct DrawTrace {
     pub transform: Rc<TransformState>,
     pub shape: Mutable<TraceShape>,
+    pub kind: TraceKind,
+    pub audio: Option<Audio>,
 }
 
 impl DrawTrace {
-    pub fn new(raw: Option<RawTrace>, on_change_cb: Rc<Box<dyn Fn()>>) -> Self {
+    pub fn new(raw: Option<RawTrace>, default_kind: TraceKind, on_change_cb: Rc<Box<dyn Fn()>>) -> Self {
         let raw = match raw {
             Some(raw) => raw,
             None => RawTrace {
                 transform: Transform::identity(),
                 shape: RawTraceShape::Path(Vec::new()),
+                kind: default_kind,
+                audio: None,
             },
         };
 
@@ -39,6 +44,8 @@ impl DrawTrace {
                 ),
             )),
             shape: Mutable::new(raw.shape.into()),
+            kind: raw.kind,
+            audio: raw.audio
         }
     }
 }
@@ -48,6 +55,8 @@ impl crate::traces::utils::TraceExt for DrawTrace {
         RawTrace {
             transform: self.transform.get_inner_clone(),
             shape: self.shape.get_cloned().into(),
+            kind: self.kind,
+            audio: self.audio.clone()
         }
     }
 

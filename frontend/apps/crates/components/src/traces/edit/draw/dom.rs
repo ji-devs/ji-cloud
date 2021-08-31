@@ -8,7 +8,7 @@ use crate::{
             state::*,
             select::trace::state::*
         },
-        svg::{self, ShapeStyleVar, ShapeStyle, ShapeStyleKind, ShapeStyleState, SvgCallbacks, TransformSize},
+        svg::{self, ShapeStyleVar, ShapeStyle, ShapeStyleState, SvgCallbacks, TransformSize},
     },
     transform::state::ResizeLevel,
 };
@@ -17,7 +17,7 @@ use futures_signals::{
     signal::{Signal, SignalExt},
     signal_vec::MutableVecLockRef,
 };
-use shared::domain::jig::module::body::_groups::design::TraceShape as RawTraceShape;
+use shared::domain::jig::module::body::_groups::design::{TraceShape as RawTraceShape, TraceKind};
 
 use crate::transform::dom::render_transform;
 
@@ -82,8 +82,10 @@ impl TracesEdit {
             }))
             .to_signal_vec();
 
+        let draw_kind = state.default_kind;
+
         let draw_children = 
-            trace_signal().map(clone!(shadow_traces => move |(resize_info, size, display_trace, draw_points, shape, transform)| {
+            trace_signal().map(clone!(draw_kind, shadow_traces => move |(resize_info, size, display_trace, draw_points, shape, transform)| {
                 let mut elements = shadow_traces
                     .iter()
                     .map(|trace| {
@@ -91,7 +93,7 @@ impl TracesEdit {
                             ShapeStyle {
                                 interactive: false,
                                 mode: None,
-                                kind: Some(ShapeStyleKind::Regular),
+                                kind: Some(trace.kind),
                                 state: Some(ShapeStyleState::Deselected)
                             }
                         );
@@ -110,7 +112,7 @@ impl TracesEdit {
                         ShapeStyle {
                             interactive: false,
                             mode: None,
-                            kind: Some(ShapeStyleKind::Regular),
+                            kind: Some(draw_kind),
                             state: Some(ShapeStyleState::Drawing)
                         }
                     );

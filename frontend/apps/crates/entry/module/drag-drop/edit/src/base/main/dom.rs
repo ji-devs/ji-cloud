@@ -9,10 +9,7 @@ use super::{
 use components::{
     backgrounds::dom::render_backgrounds, 
     stickers::dom::{render_stickers, render_stickers_raw},
-    traces::{
-        edit::dom::render_traces_edit,
-        hints::dom::render_traces_hint,
-    }
+    traces::{edit::*, show::*}
 };
 use futures_signals::{
     signal_vec::SignalVecExt,
@@ -24,6 +21,22 @@ impl DomRenderable for Main {
         let theme_id = state.base.theme_id.get();
 
         html!("empty-fragment", {
+            .child_signal(
+                state.trace_phase_signal().map(clone!(state => move |trace_phase| {
+                    trace_phase.and_then(|trace_phase| {
+                        match trace_phase {
+                            TracePhase::Show => {
+                                Some(TracesShow::render(TracesShow::new(
+                                    state.base.traces.to_raw(),
+                                    TracesShowMode::Solid,
+                                    TracesShow::on_select_noop()
+                                )))
+                            },
+                            _ => None
+                        }
+                    })
+                }))
+            )
             .child_signal(
                 state.sticker_phase_signal().map(clone!(state => move |sticker_phase| Some({
                     match sticker_phase {
@@ -45,14 +58,12 @@ impl DomRenderable for Main {
             )
             .child_signal(
                 state.trace_phase_signal().map(clone!(state => move |trace_phase| {
-                    trace_phase.map(|trace_phase| {
+                    trace_phase.and_then(|trace_phase| {
                         match trace_phase {
                             TracePhase::Edit => {
-                                render_traces_edit(state.base.traces.clone())
+                                Some(TracesEdit::render(state.base.traces.clone()))
                             },
-                            TracePhase::Show => {
-                                render_traces_hint(state.base.traces.to_raw())
-                            }
+                            _ => None
                         }
                     })
                 }))

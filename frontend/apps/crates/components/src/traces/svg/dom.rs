@@ -202,7 +202,7 @@ where
 
 pub fn render_simple<ChildrenSignal, OnMouseDownFn, OnMouseUpFn, OnMouseMoveFn>(
     children: ChildrenSignal,
-    _on_mouse_down: OnMouseDownFn,
+    on_mouse_down: OnMouseDownFn,
     on_mouse_up: OnMouseUpFn,
     on_mouse_move: OnMouseMoveFn,
 ) -> Dom
@@ -221,6 +221,9 @@ where
             format!("{}px", info.height)
         }))
         .children_signal_vec(children)
+        .event(clone!(on_mouse_down => move |evt:events::MouseDown| {
+            on_mouse_down(evt.x() as i32, evt.y() as i32);
+        }))
 
         .global_event_preventable(clone!(on_mouse_up => move |evt:events::MouseUp| {
             on_mouse_up(evt.x() as i32, evt.y() as i32);

@@ -6,7 +6,7 @@ use futures_signals::{
 };
 use components::traces::{
     utils::TraceExt,
-    bubble::state::TraceBubble,
+    bubble::TraceBubble,
 };
 use shared::domain::jig::module::body::{
     Audio,
@@ -96,7 +96,7 @@ impl PlayTrace {
             self.phase.set(PlayPhase::IdleSelected);
         } else {
             if let Some(bounds)  = self.inner.calc_bounds(true) {
-                let bubble = Rc::new(TraceBubble::new(bounds, self.audio.clone(), self.text.clone(), None::<fn()>));
+                let bubble = TraceBubble::new(bounds, self.audio.clone(), self.text.clone(), None::<fn()>);
                 self.phase.set(PlayPhase::Playing(bubble));
             }
         }

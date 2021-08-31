@@ -22,6 +22,13 @@ use std::rc::Rc;
 use utils::prelude::*;
 use web_sys::HtmlElement;
 
+pub fn mixin_sticker_button_signal(is_button: impl Signal<Item = bool> + 'static) -> impl FnOnce(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement> {
+    move |dom| {
+        dom.style_signal("cursor", is_button.map(|is_button| if is_button { "pointer" } else { "initial" }))
+            .style("user-select", "none")
+            .style("-webkit-user-select", "none")
+    }
+}
 pub fn mixin_sticker_button(dom: DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement> {
     dom.style("cursor", "pointer")
         .style("user-select", "none")
