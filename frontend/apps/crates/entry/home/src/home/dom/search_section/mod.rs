@@ -20,8 +20,8 @@ const STR_ALL_AGES: &'static str = "All ages";
 const STR_SEARCH: &'static str = "Search";
 const STR_WHAT_ARE_YOU_LOOKING_FOR: &'static str = "What are you looking for?";
 
-pub fn render(state: Rc<State>) -> Dom {
-    fetch_data(state.clone());
+pub fn render(state: Rc<State>, auto_search: bool) -> Dom {
+    fetch_data(state.clone(), auto_search);
 
     html!("home-search-section", {
         // TODO: Enable once ready
@@ -42,6 +42,8 @@ pub fn render(state: Rc<State>) -> Dom {
                     .with_node!(elem => {
                         .property("slot", "query")
                         .property("placeholder", STR_WHAT_ARE_YOU_LOOKING_FOR)
+                        // set value on init from query param
+                        .property("value", &*state.search_selected.query.lock_ref())
                         .event(clone!(state => move |_: events::Input| {
                             let v = elem.value();
                             state.search_selected.query.set(v)

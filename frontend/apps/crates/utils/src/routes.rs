@@ -2,7 +2,7 @@ use web_sys::Url;
 use wasm_bindgen::prelude::*;
 use shared::domain::{
     image::{ImageId, ImageSearchQuery}, 
-    jig::{JigId, JigPlayerSettings, module::ModuleId, ModuleKind}, 
+    jig::{JigId, JigPlayerSettings, JigSearchQuery, module::ModuleId, ModuleKind}, 
     user::UserScope,
     session::OAuthUserProfile
 };
@@ -30,6 +30,7 @@ pub enum Route {
 #[derive(Debug, Clone)]
 pub enum HomeRoute {
     Home,
+    Search(Option<JigSearchQuery>),
 }
 
 #[derive(Debug, Clone)]
@@ -147,7 +148,7 @@ impl Route {
     pub fn replace_state(self) {
         let history = web_sys::window().unwrap_ji().history().unwrap_ji();
         let url:String = self.into();
-        history.replace_state_with_url(&JsValue::NULL, "", Some(&url));
+        let _ = history.replace_state_with_url(&JsValue::NULL, "", Some(&url));
     }
 
 	pub fn to_string(&self) -> String {
@@ -159,18 +160,27 @@ impl Route {
         let paths = url.pathname();
         let paths = paths.split("/").into_iter().skip(1).collect::<Vec<_>>();
         let paths = paths.as_slice();
-        let params = url.search_params();
-        let json_query = params.get("data");
+        let params_map = url.search_params();
+
+        let mut params_string = url.search();
+        if params_string.len() > 1 {
+            // if there's more then the the '?' than remove it
+            params_string = params_string[1..params_string.len()].to_string();
+        }
 
         match paths {
             [""] => Self::Home(HomeRoute::Home),
+            ["home", "search"] => {
+                let search:JigSearchQuery = serde_qs::from_str(&params_string).unwrap_ji();
+                Self::Home(HomeRoute::Search(Some(search)))
+            },
             ["kids"] => Self::Kids(KidsRoute::StudentCode),
 			["dev", "showcase", id] => {
-                let page = params.get("page").unwrap_or_default();
+                let page = params_map.get("page").unwrap_or_default();
                 Self::Dev(DevRoute::Showcase(id.to_string(), page))
             }
 			["dev", "scratch", id] => {
-                let page = params.get("page").unwrap_or_default();
+                let page = params_map.get("page").unwrap_or_default();
                 Self::Dev(DevRoute::Scratch(id.to_string(), page))
             }
             ["user", "profile"] => Self::User(UserRoute::Profile(ProfileSection::Landing)),
@@ -179,7 +189,7 @@ impl Route {
             ["user", "register"] => Self::User(UserRoute::Register),
 
             ["user", "register-oauth"] => {
-                if let Some(code) = params.get("code") {
+                if let Some(code) = params_map.get("code") {
                     let data = OauthData::Google(code);
                     Self::User(UserRoute::RegisterOauth(data))
                 } else {
@@ -187,7 +197,7 @@ impl Route {
                 }
             }
             ["user", "login-oauth"] => {
-                if let Some(code) = params.get("code") {
+                if let Some(code) = params_map.get("code") {
                     let data = OauthData::Google(code);
                     Self::User(UserRoute::LoginOauth(data))
                 } else {
@@ -195,11 +205,11 @@ impl Route {
                 }
             }
             ["user", "continue-registration"] => {
-                if let Some(oauth_profile_str) = json_query {
-                    let oauth_profile:Option<OAuthUserProfile> = serde_json::from_str(&oauth_profile_str).ok();
-                    Self::User(UserRoute::ContinueRegistration(oauth_profile))
-                } else {
+                if params_string.is_empty() {
                     Self::User(UserRoute::ContinueRegistration(None))
+                } else {
+                    let oauth_profile:Option<OAuthUserProfile> = serde_qs::from_str(&params_string).unwrap_ji();
+                    Self::User(UserRoute::ContinueRegistration(oauth_profile))
                 }
             },
             ["user", "send-email-confirmation", email] => Self::User(UserRoute::SendEmailConfirmation(email.to_string())),
@@ -210,11 +220,11 @@ impl Route {
             ["admin", "locale"] => Self::Admin(AdminRoute::Locale),
             ["admin", "categories"] => Self::Admin(AdminRoute::Categories),
             ["admin", "image-search"] => {
-                if let Some(search) = json_query {
-                    let search:ImageSearchQuery = serde_json::from_str(&search).unwrap_ji();
-                    Self::Admin(AdminRoute::ImageSearch(Some(search)))
-                } else {
+                if params_string.is_empty() {
                     Self::Admin(AdminRoute::ImageSearch(None))
+                } else {
+                    let search:ImageSearchQuery = serde_qs::from_str(&params_string).unwrap_ji();
+                    Self::Admin(AdminRoute::ImageSearch(Some(search)))
                 }
             },
             ["admin", "image-add"] => Self::Admin(AdminRoute::ImageAdd),
@@ -246,7 +256,7 @@ impl Route {
                     JigEditRoute::Module(ModuleId(Uuid::from_str(module_id).unwrap_ji()))
             )),
             ["jig", "play", jig_id] => {
-                let search: JigPlayerSettings = serde_json::from_str(&json_query.unwrap_or_default()).unwrap_or_default();
+                let search:JigPlayerSettings = serde_qs::from_str(&params_string).unwrap_ji();
                 Self::Jig(JigRoute::Play(
                     JigId(Uuid::from_str(jig_id).unwrap_ji()),
                     None,
@@ -254,7 +264,7 @@ impl Route {
                 ))
             },
             ["jig", "play", jig_id, module_id] => {
-                let search: JigPlayerSettings = serde_json::from_str(&json_query.unwrap_or_default()).unwrap_or_default();
+                let search:JigPlayerSettings = serde_qs::from_str(&params_string).unwrap_ji();
                 Self::Jig(JigRoute::Play(
                     JigId(Uuid::from_str(jig_id).unwrap_ji()),
                     Some(ModuleId(Uuid::from_str(module_id).unwrap_ji())),
@@ -310,6 +320,15 @@ impl From<&Route> for String {
 			Route::Home(route) => {
                 match route {
                     HomeRoute::Home => "/".to_string(),
+                    HomeRoute::Search(search) => {
+                        match search {
+                            None => "/home/search".to_string(),
+                            Some(search) => {
+                                let query = serde_qs::to_string(&search).unwrap_ji();
+                                format!("/home/search?{}", query)
+                            }
+                        }
+                    },
 				}
 			},
 			Route::Kids(route) => {
@@ -332,9 +351,7 @@ impl From<&Route> for String {
                         match oauth_profile {
                             None => "/user/continue-registration".to_string(),
                             Some(oauth_profile) => {
-                                let data = serde_json::to_string(&oauth_profile).unwrap_ji();
-                                let query = JsonQuery { data };
-                                let query = serde_qs::to_string(&query).unwrap_ji();
+                                let query = serde_qs::to_string(&oauth_profile).unwrap_ji();
                                 format!("/user/continue-registration?{}", query)
                             }
                         }
@@ -359,9 +376,7 @@ impl From<&Route> for String {
                         match search {
                             None => "/admin/image-search".to_string(),
                             Some(search) => {
-                                let data = serde_json::to_string(&search).unwrap_ji();
-                                let query = JsonQuery { data };
-                                let query = serde_qs::to_string(&query).unwrap_ji();
+                                let query = serde_qs::to_string(&search).unwrap_ji();
                                 format!("/admin/image-search?{}", query)
                             }
                         }
@@ -383,9 +398,7 @@ impl From<&Route> for String {
                         }
                     }
                     JigRoute::Play(jig_id, module_id, player_settings) => {
-                        let data = serde_json::to_string(&player_settings).unwrap_or_default();
-                        let query = JsonQuery { data };
-                        let query = serde_qs::to_string(&query).unwrap_ji();
+                        let query = serde_qs::to_string(&player_settings).unwrap_ji();
                         if let Some(module_id) = module_id {
                             format!("/jig/play/{}/{}?{}", jig_id.0.to_string(), module_id.0.to_string(), query)
                         } else {

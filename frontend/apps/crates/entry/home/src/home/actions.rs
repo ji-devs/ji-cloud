@@ -18,13 +18,25 @@ use utils::prelude::*;
 
 use super::state::State;
 
-pub fn fetch_data(state: Rc<State>) {
+pub fn fetch_data(state: Rc<State>, include_search: bool) {
     state.loader.load(clone!(state => async move {
-        join!(
-            fetch_total_jigs_count(Rc::clone(&state)),
-            fetch_metadata(Rc::clone(&state)),
-            fetch_profile(Rc::clone(&state)),
-        );
+        match include_search {
+            true => {
+                join!(
+                    fetch_total_jigs_count(Rc::clone(&state)),
+                    fetch_metadata(Rc::clone(&state)),
+                    fetch_profile(Rc::clone(&state)),
+                    search_async(Rc::clone(&state)),
+                );
+            },
+            false => {
+                join!(
+                    fetch_total_jigs_count(Rc::clone(&state)),
+                    fetch_metadata(Rc::clone(&state)),
+                    fetch_profile(Rc::clone(&state)),
+                );
+            },
+        };
     }));
 }
 
@@ -65,16 +77,23 @@ async fn fetch_profile(state: Rc<State>) {
     };
 }
 
+async fn search_async(state: Rc<State>) {
+    let req = state.search_selected.to_search_request();
+
+    Route::Home(HomeRoute::Search(Some(req.clone()))).replace_state();
+
+    let query = req.q.to_owned();
+    match api_no_auth::<JigSearchResponse, EmptyError, JigSearchQuery>(jig::Search::PATH, jig::Search::METHOD, Some(req)).await {
+        Err(_) => {},
+        Ok(res) => {
+            let jigs = res.jigs.into_iter().map(|jr| jr.jig).collect();
+            state.mode.set(HomePageMode::Search(query, Rc::new(MutableVec::new_with_values(jigs))));
+        },
+    };
+}
+
 pub fn search(state: Rc<State>) {
     state.loader.load(clone!(state => async move {
-        let req = state.search_selected.to_search_request();
-        let query = req.q.to_owned();
-        match api_no_auth::<JigSearchResponse, EmptyError, JigSearchQuery>(jig::Search::PATH, jig::Search::METHOD, Some(req)).await {
-            Err(_) => {},
-            Ok(res) => {
-                let jigs = res.jigs.into_iter().map(|jr| jr.jig).collect();
-                state.mode.set(HomePageMode::Search(query, Rc::new(MutableVec::new_with_values(jigs))));
-            },
-        };
+        search_async(state).await;
     }));
 }

@@ -11,11 +11,11 @@ mod home_sections;
 mod search_results;
 mod search_section;
 
-pub fn render(state: Rc<State>) -> Dom {
+pub fn render(state: Rc<State>, auto_search: bool) -> Dom {
     html!("home-full", {
         .child(page_header::dom::render(Rc::new(page_header::state::State::new()), None, Some(PageLinks::Home)))
         .children(&mut [
-            search_section::render(state.clone()),
+            search_section::render(state.clone(), auto_search),
             html!("empty-fragment", {
                 .child_signal(state.mode.signal_cloned().map(clone!(state => move |mode| {
                     match mode {

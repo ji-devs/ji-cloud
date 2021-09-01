@@ -3,7 +3,7 @@ use std::{iter, rc::Rc};
 use search_state::{SearchOptions, SearchSelected};
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::{signal::Mutable, signal_vec::MutableVec};
-use shared::domain::jig::{Jig, JigId};
+use shared::domain::jig::{Jig, JigId, JigSearchQuery};
 
 mod search_state;
 
@@ -23,12 +23,22 @@ pub struct State {
 
 impl State {
     pub fn new() -> Self {
+        Self::new_with_search_selected(SearchSelected::new())
+    }
+    pub fn new_search(query_params: Option<JigSearchQuery>) -> Self {
+        let search_selected = match query_params {
+            Some(query_params) => SearchSelected::from_search_request(query_params),
+            None => SearchSelected::new(),
+        };
+        Self::new_with_search_selected(search_selected)
+    }
+    fn new_with_search_selected(search_selected: SearchSelected) -> Self {
         Self {
+            search_selected,
             loader: AsyncLoader::new(),
             mode: Mutable::new(HomePageMode::Home),
             is_logged_in: Mutable::new(false),
             search_options: SearchOptions::new(),
-            search_selected: SearchSelected::new(),
             quick_searches: Self::get_quick_searches(),
             whats_new: Self::get_whats_new(),
             parents_testimonials: Self::get_parents_testimonials(),

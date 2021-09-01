@@ -394,6 +394,8 @@ pub struct JigBrowseResponse {
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
 pub struct JigSearchQuery {
     /// The query string.
+    #[serde(default)]
+    #[serde(skip_serializing_if = "String::is_empty")]
     pub q: String,
 
     /// The page number of the jigs to get.
