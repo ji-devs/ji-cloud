@@ -4,6 +4,7 @@ use dominator::{Dom, clone, html, with_node};
 use futures_signals::{map_ref, signal::{Signal, SignalExt}, signal_vec::SignalVecExt};
 use shared::domain::meta::{Affiliation, AffiliationId, AgeRange, AgeRangeId, Subject, SubjectId};
 use utils::{events, languages::{LANGUAGES, Language}, unwrap::UnwrapJiExt};
+use wasm_bindgen::JsValue;
 use web_sys::{HtmlElement, HtmlInputElement};
 
 use crate::{profile::{change_password, dom::options_popup::PopupCallbacks, state::ActivePopup}, strings::register::step_2::STR_PERSONA_OPTIONS};
@@ -38,27 +39,41 @@ impl ProfilePage {
             .property_signal("email", state.user.email.signal_cloned())
             .property_signal("name", full_name_signal(Rc::clone(&state)))
             .children(&mut [
-                html!("img-ji", {
+                html!("profile-image", {
                     .property("slot", "profile-image")
-                    .property("lib", "mock")
-                    .property("id", "face-round.webp")
-                    .property("size", "original")
+                    .property_signal("imageId", state.user.profile_image.signal_ref(|profile_image| {
+                        match profile_image {
+                            Some(image_id) => JsValue::from_str(image_id),
+                            None => JsValue::UNDEFINED,
+                        }
+                    }))
                 }),
-                html!("img-ji", {
+                html!("profile-image", {
                     .property("slot", "editable-profile-image")
-                    .property("lib", "mock")
-                    .property("id", "face-round.webp")
-                    .property("size", "original")
+                    .property_signal("imageId", state.user.profile_image.signal_ref(|profile_image| {
+                        match profile_image {
+                            Some(image_id) => JsValue::from_str(image_id),
+                            None => JsValue::UNDEFINED,
+                        }
+                    }))
                 }),
-                html!("button-empty", {
+                html!("input-file", {
                     .property("slot", "profile-image-edit")
                     .text("✎")
+                    .event(clone!(state => move |evt: events::CustomFile| {
+                        actions::set_profile_image(Rc::clone(&state), evt.file());
+                    }))
                 }),
                 html!("button-rect", {
+                    .visible_signal(state.user.profile_image.signal_ref(|image| image.is_some()))
                     .property("kind", "text")
                     .property("color", "blue")
                     .property("slot", "profile-image-delete")
                     .text(STR_REMOVE_IMAGE)
+                    .event(clone!(state => move |_: events::Click| {
+                        state.user.profile_image.set(None);
+                        actions::save_profile(Rc::clone(&state));
+                    }))
                 }),
                 html!("input-wrapper", {
                     .property("slot", "email")

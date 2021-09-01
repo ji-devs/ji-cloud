@@ -4,11 +4,14 @@ use dominator::{Dom, clone, html};
 use futures_signals::signal::{Signal, SignalExt};
 use shared::domain::user::{UserProfile, UserScope};
 use strum::IntoEnumIterator;
-use utils::{events, routes::{AdminRoute, HomeRoute, JigRoute, Route, UserRoute}};
+use utils::{events, routes::{AdminRoute, Route, UserRoute}};
+use wasm_bindgen::JsValue;
 
 use crate::page_header::state::{LoggedInState, PageLinks};
 
 use super::{actions, state::State};
+
+const DONATE_LINK: &'static str = "https://www.jewishinteractive.org/donate-to-ji-coronavirus/";
 
 const STR_SIGN_UP: &'static str = "Sign up";
 const STR_LOGIN: &'static str = "Login";
@@ -31,7 +34,8 @@ pub fn render(state: Rc<State>, slot: Option<&str>, active_page: Option<PageLink
                     Some(active_page) if active_page == &page_link => true,
                     _ => false,
                 })
-                .property("href", &page_link.route().to_string())
+                .property("href", &page_link.route())
+                .property("target", page_link.target())
             })
         }))
         .children(&mut [
@@ -40,6 +44,8 @@ pub fn render(state: Rc<State>, slot: Option<&str>, active_page: Option<PageLink
                 .property("color", "green")
                 .property("size", "small")
                 .property("bold", true)
+                .property("href", DONATE_LINK)
+                .property("target", "_black")
                 .text(STR_DONATE)
             }),
             html!("page-header-student-code", {
@@ -70,16 +76,36 @@ fn render_logged_in(state: Rc<State>, user: &UserProfile) -> Vec<Dom> {
         .property("slot", "user")
         .property("name", &user.given_name)
         .property("email", &user.email)
-        .child(html!("button-rect", {
-            .property("slot", "logout")
-            .property("kind", "outline")
-            .property("size", "small")
-            .property("color", "blue")
-            .text(STR_LOGOUT)
-            .event(clone!(state => move |_: events::Click| {
-                actions::logout(Rc::clone(&state));
-            }))
-        }))
+        .children(&mut [
+            html!("button-rect", {
+                .property("slot", "logout")
+                .property("kind", "outline")
+                .property("size", "small")
+                .property("color", "blue")
+                .text(STR_LOGOUT)
+                .event(clone!(state => move |_: events::Click| {
+                    actions::logout(Rc::clone(&state));
+                }))
+            }),
+            html!("profile-image", {
+                .property("slot", "profile-image")
+                .property("imageId", {
+                    match &user.profile_image {
+                        Some(image_id) => JsValue::from_str(&image_id),
+                        None => JsValue::UNDEFINED,
+                    }
+                })
+            }),
+            html!("profile-image", {
+                .property("slot", "overlay-profile-image")
+                .property("imageId", {
+                    match &user.profile_image {
+                        Some(image_id) => JsValue::from_str(&image_id),
+                        None => JsValue::UNDEFINED,
+                    }
+                })
+            }),
+        ])
         .child_signal(admin_privileges(Rc::clone(&state)).map(|admin_privileges| {
             match admin_privileges {
                 false => None,

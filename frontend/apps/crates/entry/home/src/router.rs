@@ -27,7 +27,11 @@ impl Router {
                     Route::Home(route) => {
                         match route {
                             HomeRoute::Home => {
-                                Some(home::dom::render(Rc::new(home::state::State::new())))
+                                Some(home::dom::render(Rc::new(home::state::State::new()), false))
+                            },
+                            HomeRoute::Search(search_query) => {
+                                let state = Rc::new(home::state::State::new_search(search_query));
+                                Some(home::dom::render(state, true))
                             },
                         }
                     }

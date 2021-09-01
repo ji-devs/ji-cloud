@@ -1,14 +1,12 @@
-use std::rc::Rc;
+use std::{error::Error, rc::Rc};
 
+use components::image::upload::upload_image;
 use dominator::clone;
 use futures::future::join;
-use shared::{
-    api::endpoints::{ApiEndpoint, meta, user},
-    domain::{meta::MetadataResponse, user::{PatchProfileRequest, UserProfile}},
-    error::EmptyError
-};
+use shared::{api::endpoints::{self, ApiEndpoint, meta, user}, domain::{image::{CreateResponse, ImageId, ImageKind, user::UserImageCreateRequest}, meta::MetadataResponse, user::{PatchProfileRequest, UserProfile}}, error::EmptyError, media::MediaLibrary};
 
 use utils::{fetch::api_with_auth, prelude::*, unwrap::UnwrapJiExt};
+use web_sys::File;
 use super::state::State;
 
 pub fn load_initial_data(state: Rc<State>) {
@@ -45,5 +43,38 @@ pub fn save_profile(state: Rc<State>) {
             Err(_) => {},
             Ok(_) => {},
         };
+    }));
+}
+
+async fn upload_profile_image(file: File) -> Result<ImageId, Box<dyn std::error::Error>> {
+    let req = UserImageCreateRequest {
+        kind: ImageKind::UserProfile
+    };
+
+    let image_id = endpoints::image::user::Create::api_with_auth(Some(req))
+        .await
+        .map_err(|_err| "Error creating image in db")?
+        .id;
+
+    upload_image(image_id.clone(), MediaLibrary::User, &file, None)
+        .await
+        .map_err(|_err| "Error uploading image")?;
+
+    Ok(image_id)
+}
+
+pub fn set_profile_image(state: Rc<State>, file: File) {
+    state.loader.load(clone!(state => async move {
+        match upload_profile_image(file).await {
+            Err(err) => {
+                log::error!("{}", err);
+            },
+            Ok(image_id) => {
+                // let url = format!("https://uploads.sandbox.jicloud.org/media/user/{}/thumbnail.png", image_id.0);
+                // log::info!("{}", url);
+                state.user.profile_image.set(Some(image_id.0.to_string()));
+                save_profile(Rc::clone(&state));
+            },
+        }
     }));
 }

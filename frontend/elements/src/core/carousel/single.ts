@@ -9,6 +9,7 @@ export class CarouselSingle extends LitElement {
             }
             .carousel {
                 display: grid;
+                align-items: center;
                 grid-auto-flow: column;
                 overflow-x: auto;
                 grid-auto-columns: 100%;

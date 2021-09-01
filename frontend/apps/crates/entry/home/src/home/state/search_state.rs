@@ -1,7 +1,4 @@
-use std::{
-    collections::{HashMap, HashSet},
-    rc::Rc,
-};
+use std::{collections::{HashMap, HashSet}, iter::FromIterator, rc::Rc};
 
 use futures::join;
 use futures_signals::signal::Mutable;
@@ -52,15 +49,28 @@ impl SearchSelected {
             affiliations.extend(profile.affiliations.clone());
         }
 
-        let mut age_ranges = self.age_ranges.lock_mut();
-        if profile.age_ranges.len() > 0 {
-            age_ranges.clear();
-            age_ranges.extend(profile.age_ranges.clone());
+        let mut state_age_ranges = self.age_ranges.lock_mut();
+        if profile.age_ranges.len() > 0 && state_age_ranges.len() == 0 {
+            state_age_ranges.clear();
+            state_age_ranges.extend(profile.age_ranges.clone());
         }
 
-        // TODO: deal with goal/subject
+        let mut state_language = self.language.lock_mut();
+        if state_language.is_none() {
+            *state_language = Some(profile.language.clone());
+        }
+    }
 
-        self.language.set(Some(profile.language.clone()));
+    pub fn from_search_request(search: JigSearchQuery) -> Self {
+        Self {
+            goals: Mutable::new(HashSet::from_iter(search.goals)),
+            affiliations: Mutable::new(HashSet::from_iter(search.affiliations)),
+            categories: Mutable::new(HashSet::from_iter(search.categories)),
+            age_ranges: Mutable::new(HashSet::from_iter(search.age_ranges)),
+            // language: Mutable::new(search.l),
+            language: Mutable::new(None),
+            query: Mutable::new(search.q),
+        }
     }
 
     pub fn to_search_request(&self) -> JigSearchQuery {

@@ -7,12 +7,16 @@ use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct JigPlayerSettings {
     /// Text direction, left-to-right or right-to-left
+    #[serde(default)]
     pub direction: TextDirection,
     /// Whether or not to display the score
+    #[serde(default)]
     pub display_score: bool,
     /// Whether or not to track assessments
+    #[serde(default)]
     pub track_assessments: bool,
     /// Whether or not to enable drag assist
+    #[serde(default)]
     pub drag_assist: bool,
 }
 

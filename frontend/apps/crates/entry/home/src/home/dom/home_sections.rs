@@ -1,4 +1,5 @@
 use dominator::{clone, html, Dom};
+use utils::routes::{JigRoute, Route};
 use std::rc::Rc;
 use utils::events;
 
@@ -9,10 +10,17 @@ use super::super::state::State;
 const STR_PLAY: &'static str = "Play Series";
 const STR_JIGS: &'static str = "JIGs";
 
+const STR_CONTENT_ACTION: &'static str = "See our library";
+const STR_CREATE_ACTION: &'static str = "Try it for free";
+const STR_CUSTOMIZE_ACTION: &'static str = "See our lesson outlines";
+const STR_COMMUNITY_ACTION: &'static str = "Get inspired";
+const STR_CLASSROOM_ACTION: &'static str = "Manage your class";
+
 pub fn render(state: Rc<State>) -> Dom {
     html!("empty-fragment", {
         .children(&mut [
             html!("home-quick-search", {
+                .visible(false)
                 .children(state.quick_searches.iter().map(clone!(state => move|item| {
                     html!("home-quick-search-item", {
                         .children(&mut [
@@ -40,7 +48,74 @@ pub fn render(state: Rc<State>) -> Dom {
                 })))
             }),
             html!("home-create"),
-            html!("home-why-ji"),
+            html!("home-why-ji", {
+                .children(&mut [
+                    html!("home-why-ji-item", {
+                        .property("kind", "content")
+                        .children(&mut [
+                            html!("button-rect", {
+                                .property("kind", "text")
+                                .property("color", "blue")
+                                .property("size", "small")
+                                .property("weight", "normal")
+                                .text(STR_CONTENT_ACTION)
+                            }),
+                        ])
+                    }),
+                    html!("home-why-ji-item", {
+                        .property("kind", "create")
+                        .children(&mut [
+                            html!("button-rect", {
+                                .property("kind", "text")
+                                .property("color", "blue")
+                                .property("size", "small")
+                                .property("weight", "normal")
+                                .property("href", &Route::Jig(JigRoute::Gallery).to_string())
+                                .text(STR_CREATE_ACTION)
+                            }),
+                        ])
+                    }),
+                    html!("home-why-ji-item", {
+                        .property("kind", "customize")
+                        .children(&mut [
+                            html!("button-rect", {
+                                .property("kind", "text")
+                                .property("color", "blue")
+                                .property("size", "small")
+                                .property("weight", "normal")
+                                .property("href", &Route::Jig(JigRoute::Gallery).to_string())
+                                .text(STR_CUSTOMIZE_ACTION)
+                            }),
+                        ])
+                    }),
+                    html!("home-why-ji-item", {
+                        .property("kind", "community")
+                        .children(&mut [
+                            html!("button-rect", {
+                                .property("kind", "text")
+                                .property("color", "blue")
+                                .property("size", "small")
+                                .property("weight", "normal")
+                                .property("href", "javascript:alert(\"Coming soon\")")
+                                .text(STR_COMMUNITY_ACTION)
+                            }),
+                        ])
+                    }),
+                    html!("home-why-ji-item", {
+                        .property("kind", "classroom")
+                        .children(&mut [
+                            html!("button-rect", {
+                                .property("kind", "text")
+                                .property("color", "blue")
+                                .property("size", "small")
+                                .property("weight", "normal")
+                                .property("href", "javascript:alert(\"Coming soon\")")
+                                .text(STR_CLASSROOM_ACTION)
+                            }),
+                        ])
+                    }),
+                ])
+            }),
             html!("home-whats-new", {
                 .property("pageCount", state.whats_new.len() as u32)
                 .children(state.whats_new.iter().map(|item| {
@@ -90,15 +165,18 @@ fn testimonial(testimonial: &Testimonial, slot: &str) -> Dom {
     html!("home-testimonial-item", {
         .property("slot", slot)
         .children(&mut [
-            html!("img-ji", {
+            html!("img-ui", {
                 .property("slot", "image")
-                .property("id", &testimonial.image_id)
-                .property("lib", &testimonial.image_lib)
+                .property("path", format!("entry/home/testimonials/{}", &testimonial.image_id))
                 .property("size", "original")
             }),
             html!("h4", {
-                .property("slot", "header")
-                .text(&testimonial.header)
+                .property("slot", "name")
+                .text(&testimonial.name)
+            }),
+            html!("h6", {
+                .property("slot", "bio")
+                .text(&testimonial.bio)
             }),
             html!("p", {
                 .property("slot", "paragraph")

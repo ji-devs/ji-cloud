@@ -47,13 +47,16 @@ export class _ extends LitElement {
     @property()
     href: string = "";
 
+    @property()
+    target: string = "";
+
     @property({ type: Boolean, reflect: true })
     active: boolean = false;
 
     render() {
         const path = `core/page-header/nav-icon-${this.kind}${this.active ? '-active' : ''}.svg`;
         return html`
-            <a href=${this.href}>
+            <a href=${this.href} .target=${this.target}>
                 <img-ui path="${path}"></img-ui>
                 <span>${STR_LABEL_LOOKUP[this.kind]}</span>
             </a>

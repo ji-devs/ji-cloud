@@ -38,6 +38,11 @@ export class _ extends LitElement {
             h2 .word-create {
                 color: #fd7076;
             }
+            h4 {
+                margin: 0;
+                font-weight: 400;
+                font-size: 20px;
+            }
             ul {
                 padding-inline-start: 20px;
                 margin: 48px 0;
@@ -53,11 +58,11 @@ export class _ extends LitElement {
         const STR_SUBTITLE = "Learning Through Creation";
         const STR_TITLE_CREATE = "Create";
         const STR_TITLE = "your own JIGs";
+        const STR_CREATE_YOUR_OWN = "Create your own JIGs";
 
-        const STR_LIBRARY = "Big content library";
-        const STR_INTERFACE = "Smart & friendly interface";
-        const STR_TEACHING = "Teaching through creation";
-        const STR_ALL = "All in one";
+        const STR_LIBRARY = "Large library of content";
+        const STR_INTERFACE = "Smart, friendly interface";
+        const STR_TEACHING = "Teaching through creation and engagement";
         const STR_START ="Start creating";
 
         return html`
@@ -71,13 +76,13 @@ export class _ extends LitElement {
                         <span class="word-create">${STR_TITLE_CREATE}</span>
                         ${STR_TITLE}
                     </h2>
+                    <h4>${STR_CREATE_YOUR_OWN}</h4>
                     <ul>
                         <li>${STR_LIBRARY}</li>
                         <li>${STR_INTERFACE}</li>
                         <li>${STR_TEACHING}</li>
-                        <li>${STR_ALL}</li>
                     </ul>
-                    <button-rect color="red">${STR_START}</button-rect>
+                    <button-rect color="red" href="/jig/edit/gallery">${STR_START}</button-rect>
                 </div>
             </div>
         `;
