@@ -2,7 +2,7 @@ use core::hash::Hash;
 use std::{collections::HashSet, rc::Rc};
 
 use awsm_web::audio::AudioClipOptions;
-use components::audio::mixer::{AudioMixer, AudioPath, AudioHandle};
+use components::audio::mixer::{AUDIO_MIXER, AudioPath, AudioHandle, AudioSourceExt};
 use dominator::{Dom, clone, html};
 
 use crate::edit::sidebar::settings::{
@@ -141,14 +141,14 @@ fn line<'a, T>(state: Rc<State>, list: Mutable<HashSet<T>>, option: &T, audio_ha
                                 *o = None;
                                 o
                             }).collect();
-    
-                            let mixer = AudioMixer::new(None);
-                            let path: AudioPath = option.clone().into();
-                            let handle = mixer.add_source(path, AudioClipOptions {
+   
+                            let path:AudioPath = option.clone().into();
+
+                            let handle = AUDIO_MIXER.with(move |mixer| mixer.add_source(path, AudioClipOptions {
                                 auto_play: true,
                                 is_loop: false,
                                 on_ended: on_ended,
-                            });
+                            }));
                             *audio_handles[index] = Some(handle);
                         },
                     };

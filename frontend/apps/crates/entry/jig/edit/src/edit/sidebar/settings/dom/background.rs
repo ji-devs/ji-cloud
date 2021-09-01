@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use awsm_web::audio::{AudioClipOptions, AudioHandle};
-use components::audio::mixer::{AudioMixer, AudioPath};
+use components::audio::mixer::{AUDIO_MIXER, AudioPath, AudioSourceExt};
 use dominator::{Dom, clone, html, with_node};
 use web_sys::HtmlInputElement;
 
@@ -99,13 +99,11 @@ fn line(state: Rc<State>, option: &AudioBackground, audio_handles: Rc<Vec<Mutabl
                                 o
                             }).collect();
     
-                            let mixer = AudioMixer::new(None);
-                            let path: AudioPath = option.clone().into();
-                            let handle = mixer.add_source(path, AudioClipOptions {
+                            let handle = AUDIO_MIXER.with(|mixer| mixer.add_source(option.as_source(), AudioClipOptions {
                                 auto_play: true,
                                 is_loop: false,
                                 on_ended: on_ended,
-                            });
+                            }));
                             *audio_handles[index] = Some(handle);
                         },
                     };
