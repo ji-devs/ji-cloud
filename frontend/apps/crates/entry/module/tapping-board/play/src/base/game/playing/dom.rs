@@ -5,7 +5,6 @@ use futures_signals::{
     signal_vec::{self, SignalVecExt},
     signal::{SignalExt}
 };
-use shared::domain::jig::module::body::tapping_board::TappingTrace;
 use utils::{prelude::*, resize::{resize_info_signal, ResizeInfo}};
 use components::traces::{
     utils::TraceExt,
@@ -20,9 +19,9 @@ pub fn render(state: Rc<PlayState>) -> Dom {
 
     html!("empty-fragment", {
         .child(TracesShow::render(TracesShow::new(
-                state.game.base.traces
+                state.traces
                     .iter()
-                    .map(|t| t.trace.clone())
+                    .map(|t| t.inner.clone())
                     .collect(),
                 TracesShowMode::HiddenSolidMap(state.selected_set.clone()),
                 Some(clone!(state => move |index| {

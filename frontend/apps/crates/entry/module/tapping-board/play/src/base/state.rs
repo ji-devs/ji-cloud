@@ -1,4 +1,4 @@
-use shared::domain::jig::{Jig, JigId, module::{ModuleId, body::{_groups::design::{Backgrounds, Sticker}, ThemeChoice, Instructions, tapping_board::{Mode, Step, ModuleData as RawData, PlaySettings, TappingTrace}}}};
+use shared::domain::jig::{Jig, JigId, module::{ModuleId, body::{_groups::design::{Backgrounds, Sticker, Trace}, ThemeChoice, Instructions, tapping_board::{Mode, Step, ModuleData as RawData, PlaySettings, }}}};
 use components::{audio::mixer::AudioMixer, module::_common::play::prelude::*};
 use utils::prelude::*;
 use web_sys::AudioContext;
@@ -14,7 +14,7 @@ pub struct Base {
     pub settings: PlaySettings,
     pub backgrounds: Backgrounds,
     pub stickers: Vec<Sticker>,
-    pub traces: Vec<TappingTrace>,
+    pub traces: Vec<Trace>,
 }
 
 impl Base {

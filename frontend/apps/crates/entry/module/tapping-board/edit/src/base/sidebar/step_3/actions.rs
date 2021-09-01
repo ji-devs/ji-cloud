@@ -9,11 +9,13 @@ impl Step3 {
 
     pub fn start_preview(&self, index: usize) {
 
-        let bounds = self
+        let trace = self
             .base
             .traces
             .get(index)
-            .unwrap_ji()
+            .unwrap_ji();
+
+        let bounds = trace 
             .select_box
             .bounds
             .get()
@@ -28,9 +30,6 @@ impl Step3 {
             .unwrap_ji()
             .clone();
 
-        let audio = trace_meta.audio.get_cloned();
-        let text = trace_meta.text.get_cloned();
-
-        TraceBubble::set_unset_mutable(bounds, audio, text, trace_meta.bubble.clone());
+        TraceBubble::set_unset_mutable(bounds, trace.audio.clone(), trace.text.clone(), trace_meta.bubble.clone());
     }
 }

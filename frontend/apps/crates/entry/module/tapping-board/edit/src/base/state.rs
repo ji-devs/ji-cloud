@@ -106,16 +106,12 @@ impl PlaySettings {
 
 #[derive(Clone)]
 pub struct TraceMeta {
-    pub audio: Mutable<Option<Audio>>,
-    pub text: Mutable<Option<String>>,
     pub bubble: Mutable<Option<Rc<TraceBubble>>>,
 }
 
 impl TraceMeta {
-    pub fn new(audio: Option<Audio>, text: Option<String>) -> Self {
+    pub fn new() -> Self {
         Self {
-            audio: Mutable::new(audio),
-            text: Mutable::new(text),
             bubble: Mutable::new(None)
         }
     }
@@ -215,13 +211,7 @@ impl Base {
 
 
         let traces = TracesEdit::from_raw(
-
-            &content.traces
-                .iter()
-                .map(|trace_meta| {
-                    trace_meta.trace.clone()
-                })
-                .collect::<Vec<RawTrace>>(),
+            &content.traces,
             crate::debug::settings().draw_kind.unwrap_or(TraceKind::Regular),
             TracesEditCallbacks::new(
                 Some(clone!(_self_ref => move |raw_trace| {
@@ -245,12 +235,7 @@ impl Base {
         let traces_meta = MutableVec::new_with_values(
             content.traces
                 .iter()
-                .map(|trace_meta| {
-                    TraceMeta::new(
-                        trace_meta.audio.clone(), 
-                        trace_meta.text.clone()
-                    )
-                })
+                .map(|trace_meta| TraceMeta::new())
                 .collect()
         );
 

@@ -1,4 +1,4 @@
-use std::{rc::Rc, cell::RefCell};
+use std::{ops::Deref, rc::Rc, cell::RefCell};
 use crate::base::game::state::*;
 use futures_signals::{
     map_ref,
@@ -11,7 +11,7 @@ use components::traces::{
 use shared::domain::jig::module::body::{
     Audio,
     _groups::design::Trace,
-    tapping_board::{Next, TappingTrace}
+    tapping_board::Next
 };
 use web_sys::AudioContext;
 use std::collections::HashSet;
@@ -76,18 +76,22 @@ pub struct PlayTrace {
     pub game: Rc<Game>,
     pub phase: Mutable<PlayPhase>,
     pub inner: Trace,
-    pub audio: Option<Audio>,
-    pub text: Option<String>,
+}
+
+impl Deref for PlayTrace {
+    type Target = Trace;
+
+    fn deref(&self) -> &Self::Target {
+        &self.inner
+    }
 }
 
 impl PlayTrace {
-    pub fn new(game: Rc<Game>, tapping_trace: TappingTrace) -> Rc<Self> {
+    pub fn new(game: Rc<Game>, trace: Trace) -> Rc<Self> {
         Rc::new(Self {
             game,
             phase: Mutable::new(PlayPhase::Waiting),
-            inner: tapping_trace.trace,
-            audio: tapping_trace.audio,
-            text: tapping_trace.text
+            inner: trace,
         })
     }
 

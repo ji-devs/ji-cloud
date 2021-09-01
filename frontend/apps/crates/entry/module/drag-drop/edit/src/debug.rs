@@ -107,6 +107,7 @@ impl DebugSettings {
                                                 transform,
                                                 kind: TraceKind::Regular,
                                                 audio: None,
+                                                text: None,
                                             }
                                         }
                                     }

@@ -105,22 +105,22 @@ impl Tab {
     pub fn new(base: Rc<Base>, kind:TabKind, index: usize) -> Self {
         match kind {
             TabKind::Text => {
-                let text = base.traces_meta.lock_ref()[index].text.get_cloned();
+                let text = base.traces.get_text(index);
                 Self::Text(index, Mutable::new(text))
             },
             TabKind::Audio => {
                 
                 let opts = AudioInputOptions::new(
-                    Some(base.traces_meta.lock_ref()[index].audio.signal_cloned())
+                    Some(base.traces.audio_signal(index))
                 );
 
 
                 let callbacks = AudioInputCallbacks::new(
                     Some(clone!(base, index => move |audio:Audio| {
-                        base.set_trace_meta_audio(index, Some(audio));
+                        base.traces.set_audio(index, Some(audio));
                     })),
                     Some(clone!(base, index => move || {
-                        base.set_trace_meta_audio(index, None);
+                        base.traces.set_audio(index, None);
                     })),
                 );
 

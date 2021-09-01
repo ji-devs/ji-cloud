@@ -17,11 +17,12 @@ use shared::{
         jig::{
             module::body::{
                 Image,
+                Audio,
                 ThemeChoice,
                 Background,
                 Instructions, 
                 Transform,
-                tapping_board::{Content, Mode, Step, ModuleData as RawData, TappingTrace},
+                tapping_board::{Content, Mode, Step, ModuleData as RawData},
                 _groups::design::{Sticker, Text, Trace, Backgrounds, Sprite, TraceShape, BaseContent, TraceKind }
             },
             JigId, module::ModuleId
@@ -40,7 +41,7 @@ pub static SETTINGS:OnceCell<DebugSettings> = OnceCell::new();
 
 //const IMAGE_UUID:&'static str = "bf2fe548-7ffd-11eb-b3ab-579026da8b36";
 const IMAGE_UUID:&'static str = "9da11e0a-c17b-11eb-b863-570eea18a3bd";
-
+const AUDIO_UUID:&'static str = "734314da-0b07-11ec-95f0-2b4855fa3cb8";
 
 pub const DEBUG_TEXT:&'static str = "{\"version\":\"0.1.0\",\"content\":[{\"children\":[{\"text\":\"text from rust\",\"element\":\"P1\"}]}]}";
 
@@ -87,22 +88,20 @@ impl DebugSettings {
                         content: Some(Content {
                             mode: Mode::Words,
                             traces: init_data.traces.iter().map(|init| {
-                                let trace = {
-                                    match init {
-                                        InitTrace::Ellipse(x, y, w, h) => {
-                                            let mut transform = Transform::identity();
-                                            transform.set_translation_2d(*x, *y);
-                                            Trace {
-                                                shape: TraceShape::Ellipse(*w, *h),
-                                                transform,
-                                                kind: TraceKind::Regular,
-                                                audio: None,
-                                            }
+                                match init {
+                                    InitTrace::Ellipse(x, y, w, h) => {
+                                        let mut transform = Transform::identity();
+                                        transform.set_translation_2d(*x, *y);
+                                        Trace {
+                                            shape: TraceShape::Ellipse(*w, *h),
+                                            transform,
+                                            kind: TraceKind::Regular,
+                                            audio: Some(Audio { id: AudioId(Uuid::parse_str(AUDIO_UUID).unwrap_ji()), lib: MediaLibrary::User}),
+                                            text: None,
                                         }
                                     }
-                                };
+                                }
 
-                                TappingTrace { trace, audio: None, text: None }
                             }).collect(),
                             base: BaseContent {
                                 theme: ThemeChoice::Override(ThemeId::Chalkboard), 
@@ -149,7 +148,7 @@ pub fn init(jig_id: JigId, module_id: ModuleId) {
                 InitSticker::Text, //InitSticker::Sprite
             ],
             traces: vec![
-                //InitTrace::Ellipse(0.3, 0.4, 0.2, 0.1)
+                InitTrace::Ellipse(0.3, 0.4, 0.2, 0.1)
             ]
         }))).unwrap_ji();
         //SETTINGS.set(DebugSettings::debug(None)).unwrap_ji();

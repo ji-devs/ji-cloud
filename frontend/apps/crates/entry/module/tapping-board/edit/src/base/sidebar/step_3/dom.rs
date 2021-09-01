@@ -87,7 +87,7 @@ fn render_tab_body(state: Rc<Step3>, tab: Tab) -> Dom {
                             let target = evt.dyn_target::<HtmlTextAreaElement>().unwrap();
                             let value = target.value();
 
-                            state.base.set_trace_meta_text(index, if value.is_empty() { None } else { Some(value) });
+                            state.base.traces.set_text(index, if value.is_empty() { None } else { Some(value) });
                         }))
                     }))
                 }))

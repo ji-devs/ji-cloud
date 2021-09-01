@@ -103,6 +103,7 @@ impl DebugSettings {
                                                 transform,
                                                 kind: TraceKind::Regular,
                                                 audio: None,
+                                                text: None,
                                             }
                                         },
                                         InitTrace::Path(x, y, path, transform_more) => {
@@ -117,6 +118,7 @@ impl DebugSettings {
                                                 transform,
                                                 kind: TraceKind::Regular,
                                                 audio: None,
+                                                text: None,
                                             }
                                         },
                                         InitTrace::Rect(x, y, width, height, transform_more) => {
@@ -131,6 +133,7 @@ impl DebugSettings {
                                                 transform,
                                                 kind: TraceKind::Regular,
                                                 audio: None,
+                                                text: None,
                                             }
                                         }
                                     }

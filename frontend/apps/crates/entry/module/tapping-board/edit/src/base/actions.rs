@@ -9,8 +9,8 @@ use shared::domain::jig::{
             ThemeChoice,
             Audio,
             Instructions,
-            tapping_board::{Mode, Step, TappingTrace, Content as RawContent, ModuleData as RawData},
-            _groups::design::Trace as RawTrace,
+            tapping_board::{Mode, Step, Content as RawContent, ModuleData as RawData},
+            _groups::design::Trace
         }
     }
 };
@@ -62,16 +62,12 @@ impl Base {
      * Callbacks here are fired from there and need only to manage
      * meta and history
      */
-    pub fn on_trace_added(&self, raw_trace: RawTrace) {
-        self.traces_meta.lock_mut().push_cloned(TraceMeta::new(None, None));
+    pub fn on_trace_added(&self, trace: Trace) {
+        self.traces_meta.lock_mut().push_cloned(TraceMeta::new());
 
         self.history.push_modify(move |raw| {
             if let Some(content) = &mut raw.content {
-                content.traces.push(TappingTrace {
-                    trace: raw_trace,
-                    audio: None,
-                    text: None,
-                })
+                content.traces.push(trace);
             }
         });
     }
@@ -86,29 +82,10 @@ impl Base {
         });
     }
 
-    pub fn on_trace_changed(&self, index: usize, raw_trace: RawTrace) {
+    pub fn on_trace_changed(&self, index: usize, raw_trace: Trace) {
         self.history.push_modify(move |raw| {
             if let Some(content) = &mut raw.content {
-                content.traces[index].trace = raw_trace;
-            }
-        });
-    }
-
-    pub fn set_trace_meta_audio(&self, index: usize, audio: Option<Audio>) {
-        self.traces_meta.lock_ref().as_slice()[index].audio.set(audio.clone());
-
-        self.history.push_modify(move |raw| {
-            if let Some(content) = &mut raw.content {
-                content.traces[index].audio = audio;
-            }
-        });
-    }
-    pub fn set_trace_meta_text(&self, index: usize, text: Option<String>) {
-        self.traces_meta.lock_ref().as_slice()[index].text.set(text.clone());
-
-        self.history.push_modify(move |raw| {
-            if let Some(content) = &mut raw.content {
-                content.traces[index].text = text;
+                content.traces[index] = raw_trace;
             }
         });
     }

@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use shared::domain::jig::module::body::{Transform, _groups::design::Trace as RawTrace};
+use shared::domain::jig::module::body::{Transform, Audio, _groups::design::Trace as RawTrace};
 
 use super::{select::trace::state::*, draw::state::*, state::*};
 use crate::traces::utils::TraceExt;
@@ -40,6 +40,26 @@ impl TracesEdit {
         if let Some(on_add) = self.callbacks.on_add.as_ref() {
             (on_add)(raw_trace);
         }
+    }
+
+    pub fn set_audio(&self, index: usize, audio: Option<Audio>) {
+        let raw_trace = {
+            let mut raw_trace = self.list.lock_ref().get(index).unwrap_ji().to_raw();
+            raw_trace.audio = audio;
+            raw_trace
+        };
+
+        self.change(index, raw_trace);
+    }
+
+    pub fn set_text(&self, index: usize, text: Option<String>) {
+        let raw_trace = {
+            let mut raw_trace = self.list.lock_ref().get(index).unwrap_ji().to_raw();
+            raw_trace.text = text;
+            raw_trace
+        };
+
+        self.change(index, raw_trace);
     }
 
     pub fn change_transform(&self, index: usize, transform: Transform) {

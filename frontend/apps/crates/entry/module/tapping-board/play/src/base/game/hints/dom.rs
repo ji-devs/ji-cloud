@@ -16,10 +16,7 @@ pub fn render(state: Rc<Hints>) -> Dom {
             state.finish();
         }))
         .child(TracesShow::render(TracesShow::new(
-                state.game.base.traces
-                    .iter()
-                    .map(|t| t.trace.clone())
-                    .collect(),
+                state.game.base.traces.clone(),
                 TracesShowMode::Cutout,
                 TracesShow::on_select_noop()
         )))

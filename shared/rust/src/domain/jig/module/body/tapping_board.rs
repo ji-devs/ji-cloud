@@ -99,7 +99,7 @@ pub struct Content {
     pub mode: Mode,
 
     /// Traces
-    pub traces: Vec<TappingTrace>,
+    pub traces: Vec<Trace>,
 
     /// play settings
     pub play_settings: PlaySettings,
@@ -115,18 +115,6 @@ pub struct EditorState {
     pub steps_completed: HashSet<Step>,
 }
 
-/// Tapping board trace w/ metadata
-#[derive(Clone, Serialize, Deserialize, Debug)]
-pub struct TappingTrace {
-    /// the trace
-    pub trace: Trace,
-
-    /// audio
-    pub audio: Option<Audio>,
-
-    /// text
-    pub text: Option<String>,
-}
 
 #[derive(Clone, Copy, Serialize, Deserialize, Debug, PartialEq, Eq, Hash)]
 /// The mode

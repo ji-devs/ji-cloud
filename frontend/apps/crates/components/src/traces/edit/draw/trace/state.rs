@@ -17,6 +17,7 @@ pub struct DrawTrace {
     pub shape: Mutable<TraceShape>,
     pub kind: TraceKind,
     pub audio: Option<Audio>,
+    pub text: Option<String>,
 }
 
 impl DrawTrace {
@@ -28,6 +29,7 @@ impl DrawTrace {
                 shape: RawTraceShape::Path(Vec::new()),
                 kind: default_kind,
                 audio: None,
+                text: None,
             },
         };
 
@@ -45,7 +47,8 @@ impl DrawTrace {
             )),
             shape: Mutable::new(raw.shape.into()),
             kind: raw.kind,
-            audio: raw.audio
+            audio: raw.audio,
+            text: raw.text,
         }
     }
 }
@@ -56,7 +59,8 @@ impl crate::traces::utils::TraceExt for DrawTrace {
             transform: self.transform.get_inner_clone(),
             shape: self.shape.get_cloned().into(),
             kind: self.kind,
-            audio: self.audio.clone()
+            audio: self.audio.clone(),
+            text: self.text.clone(),
         }
     }
 

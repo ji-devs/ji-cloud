@@ -4,7 +4,6 @@ use futures_signals::{
     signal_vec::SignalVecExt,
     signal::SignalExt
 };
-use shared::domain::jig::module::body::tapping_board::TappingTrace;
 use super::{
     state::*,
     hints::{

@@ -23,12 +23,13 @@ use shared::{
                 ModuleId, 
                 body::{
                     Image,
+                    Audio,
                     ThemeChoice,
                     Background,
                     Instructions,
                     Transform,
                     tapping_board::{
-                        Content, Mode, ModuleData as RawData, TappingTrace,
+                        Content, Mode, ModuleData as RawData,
                         PlaySettings,
                         Hint,
                         Next
@@ -44,7 +45,7 @@ pub static SETTINGS:OnceCell<DebugSettings> = OnceCell::new();
 
 //const IMAGE_UUID:&'static str = "bf2fe548-7ffd-11eb-b3ab-579026da8b36";
 const IMAGE_UUID:&'static str = "9da11e0a-c17b-11eb-b863-570eea18a3bd";
-
+const AUDIO_UUID:&'static str = "734314da-0b07-11ec-95f0-2b4855fa3cb8";
 
 pub const DEBUG_TEXT:&'static str = "{\"version\":\"0.1.0\",\"content\":[{\"children\":[{\"text\":\"text from rust\",\"element\":\"P1\"}]}]}";
 
@@ -88,26 +89,20 @@ impl DebugSettings {
                                 next: Next::Continue, 
                             },
                             traces: init_data.traces.iter().map(|init| {
-                                let trace = {
-                                    match init {
-                                        InitTrace::Ellipse(x, y, w, h) => {
-                                            let mut transform = Transform::identity();
-                                            transform.set_translation_2d(*x, *y);
-                                            Trace {
-                                                shape: TraceShape::Ellipse(*w, *h),
-                                                transform,
-                                                kind: TraceKind::Regular,
-                                                audio: None,
-                                            }
+                                match init {
+                                    InitTrace::Ellipse(x, y, w, h) => {
+                                        let mut transform = Transform::identity();
+                                        transform.set_translation_2d(*x, *y);
+                                        Trace {
+                                            shape: TraceShape::Ellipse(*w, *h),
+                                            transform,
+                                            kind: TraceKind::Regular,
+                                            audio: Some(Audio { id: AudioId(Uuid::parse_str(AUDIO_UUID).unwrap_ji()), lib: MediaLibrary::User}),
+                                            text: Some("hello world!".to_string()),
                                         }
                                     }
-                                };
-
-                                TappingTrace { 
-                                    trace, 
-                                    audio: None, 
-                                    text: Some("hello world!".to_string()),
                                 }
+
                             }).collect(),
                             base: BaseContent {
                                 theme: ThemeChoice::Override(ThemeId::Chalkboard), 

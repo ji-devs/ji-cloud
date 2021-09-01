@@ -18,6 +18,7 @@ pub struct EditSelectTrace {
     pub shape: TraceShape,
     pub kind: TraceKind,
     pub audio: Option<Audio>,
+    pub text: Option<String>,
     pub size: (f64, f64),
     pub select_box: Rc<SelectBox>,
     pub elem: RefCell<Option<SvgElement>>,
@@ -30,6 +31,7 @@ impl EditSelectTrace {
             shape: raw.shape,
             kind: raw.kind,
             audio: raw.audio,
+            text: raw.text,
             size: (0.0, 0.0),
             select_box: Rc::new(SelectBox::new(raw.transform)),
             elem: RefCell::new(None),
@@ -52,6 +54,7 @@ impl TraceExt for EditSelectTrace {
             shape: self.shape.clone(),
             kind: self.kind,
             audio: self.audio.clone(),
+            text: self.text.clone(),
         }
     }
 
