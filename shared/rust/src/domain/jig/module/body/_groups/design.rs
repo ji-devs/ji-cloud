@@ -1,4 +1,6 @@
-use crate::domain::jig::module::body::{Background, Image, Audio, Instructions, ThemeChoice, Transform};
+use crate::domain::jig::module::body::{
+    Audio, Background, Image, Instructions, ThemeChoice, Transform,
+};
 use serde::{Deserialize, Serialize};
 
 /// The base content for design modules that don't need custom Sticker wrappers
@@ -121,7 +123,6 @@ pub struct Trace {
     /// Optional audio associated with this trace
     pub audio: Option<Audio>,
 }
-
 
 #[derive(Clone, Copy, Serialize, Deserialize, Debug, PartialEq, Eq)]
 /// Trace kind

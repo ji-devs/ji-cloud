@@ -158,6 +158,15 @@ pub struct UserProfile {
     pub location: Option<serde_json::Value>,
 }
 
+impl UserProfile {
+    /// Returns the display name for UI purposes
+    pub fn display_name(&self) -> String {
+        format!("{} {}", self.given_name, self.family_name)
+            .trim()
+            .to_string()
+    }
+}
+
 /// Request for [`VerifyEmail`](crate::api::endpoints::user::VerifyEmail)
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
