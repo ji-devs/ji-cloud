@@ -4,12 +4,14 @@ use dominator::{Dom, clone, html};
 use futures_signals::signal::{Signal, SignalExt};
 use shared::domain::user::{UserProfile, UserScope};
 use strum::IntoEnumIterator;
-use utils::{events, routes::{AdminRoute, HomeRoute, JigRoute, Route, UserRoute}};
+use utils::{events, routes::{AdminRoute, Route, UserRoute}};
 use wasm_bindgen::JsValue;
 
 use crate::page_header::state::{LoggedInState, PageLinks};
 
 use super::{actions, state::State};
+
+const DONATE_LINK: &'static str = "https://www.jewishinteractive.org/donate-to-ji-coronavirus/";
 
 const STR_SIGN_UP: &'static str = "Sign up";
 const STR_LOGIN: &'static str = "Login";
@@ -32,7 +34,8 @@ pub fn render(state: Rc<State>, slot: Option<&str>, active_page: Option<PageLink
                     Some(active_page) if active_page == &page_link => true,
                     _ => false,
                 })
-                .property("href", &page_link.route().to_string())
+                .property("href", &page_link.route())
+                .property("target", page_link.target())
             })
         }))
         .children(&mut [
@@ -41,6 +44,8 @@ pub fn render(state: Rc<State>, slot: Option<&str>, active_page: Option<PageLink
                 .property("color", "green")
                 .property("size", "small")
                 .property("bold", true)
+                .property("href", DONATE_LINK)
+                .property("target", "_black")
                 .text(STR_DONATE)
             }),
             html!("page-header-student-code", {

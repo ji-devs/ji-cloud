@@ -32,17 +32,17 @@ export class _ extends LitElement {
     render() {
         const STR_CONTENT_ACTION = "See our templates";
         const STR_CREATE_ACTION = "Try it for free";
-        const STR_CUSTOMIZE_ACTION = "See our templates";
+        const STR_CUSTOMIZE_ACTION = "See our library";
         const STR_COMMUNITY_ACTION = "Get inspired";
         const STR_CLASSROOM_ACTION = "Manage your class";
-        const STR_TITLE = "Why Ji?";
+        const STR_TITLE = "Why Jigzi?";
 
         return html`
             <div class="width-holder">
                 <h2>${STR_TITLE}</h2>
 
                 <div class="items-wrapper">
-                    <home-why-ji-item kind="content">
+                    <!-- <home-why-ji-item kind="content">
                         <button-rect kind="text" color="blue" size="small" weight="normal">${STR_CONTENT_ACTION}</button-rect>
                     </home-why-ji-item>
                     <home-why-ji-item kind="create">
@@ -56,7 +56,8 @@ export class _ extends LitElement {
                     </home-why-ji-item>
                     <home-why-ji-item kind="classroom">
                         <button-rect kind="text" color="blue" size="small" weight="normal">${STR_CLASSROOM_ACTION}</button-rect>
-                    </home-why-ji-item>
+                    </home-why-ji-item> -->
+                    <slot></slot>
                 </div>
             </div>
         `;

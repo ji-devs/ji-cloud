@@ -4,6 +4,9 @@ use shared::domain::user::UserProfile;
 use strum_macros::EnumIter;
 use utils::routes::{HomeRoute, JigRoute, Route};
 
+const TARGET_SELF: &'static str = "_self";
+const TARGET_BLANK: &'static str = "_blank";
+
 pub struct State {
     pub logged_in: Mutable<LoggedInState>,
     pub loader: AsyncLoader,
@@ -46,14 +49,24 @@ impl PageLinks {
             Self::About => "about",
         }
     }
-    pub fn route(&self) -> &Route {
+    pub fn route(&self) -> String {
         match self {
-            Self::Home => &Route::Home(HomeRoute::Home),
-            Self::Content => &Route::Home(HomeRoute::Home),
-            Self::Create => &Route::Jig(JigRoute::Gallery),
-            Self::Community => &Route::Home(HomeRoute::Home),
-            Self::Classroom => &Route::Home(HomeRoute::Home),
-            Self::About => &Route::Home(HomeRoute::Home),
+            Self::Home => Route::Home(HomeRoute::Home).to_string(),
+            Self::Content => Route::Home(HomeRoute::Home).to_string(),
+            Self::Create => Route::Jig(JigRoute::Gallery).to_string(),
+            Self::Community => "javascript:alert(\"Coming soon\")".to_string(),
+            Self::Classroom => "javascript:alert(\"Coming soon\")".to_string(),
+            Self::About => "https://www.jewishinteractive.org/ji-about-us".to_string(),
+        }
+    }
+    pub fn target(&self) -> &'static str {
+        match self {
+            Self::Home => TARGET_SELF,
+            Self::Content => TARGET_SELF,
+            Self::Create => TARGET_SELF,
+            Self::Community => TARGET_SELF,
+            Self::Classroom => TARGET_SELF,
+            Self::About => TARGET_BLANK,
         }
     }
 }

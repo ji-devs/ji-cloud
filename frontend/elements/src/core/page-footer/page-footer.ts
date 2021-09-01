@@ -10,24 +10,24 @@ const STR_JIGS_TITLE = "JIGs";
 const STR_JIGS_HEBREW = "Hebrew JIGs";
 const STR_JIGS_JEWISH_HOLIDAYS = "Jewish holidays JIGs";
 const STR_JIGS_TORAH = "Torah JIGs";
-const STR_JIGS_J_STREAM = "J-Stream";
+const STR_JIGS_J_STREAM = "J-STEAM";
 const STR_JIGS_ISRAEL = "Israel";
 const STR_JIGS_SONGS = "Songs";
 
 
 const STR_PRODUCT_TITLE = "Product";
-const STR_PRODUCT_MANAGE = "Manage";
-const STR_PRODUCT_CLASSROOM = "Classroom";
+const STR_PRODUCT_MANAGE_CLASSROOM = "Manage Classroom";
 const STR_PRODUCT_CREATE_ACTIVITIES = "Create activities";
-const STR_PRODUCT_GO_PRO = "Go pro";
+const STR_PRODUCT_JOIN_COMMUNITY = "Join community";
 
 
 const STR_HELP_TITLE = "Help";
 const STR_HELP_SUPPORT = "Support & FAQ";
 const STR_HELP_TOUR = "Quick tour";
-const STR_HELP_TUTORIALS = "JI Tutorials";
+const STR_HELP_TUTORIALS = "Ji Tutorials";
 const STR_HELP_WEBINARS = "Online webinars";
 const STR_HELP_ACCESSIBILITY = "Accessibility";
+const STR_ACCESSIBILITY_ALERT = "We are working toward making JIGZY easy to access for children of all abilities.";
 
 
 const STR_CONTACT_TITLE = "Contact us";
@@ -51,19 +51,20 @@ const STR_DONATE = "Donate";
 const STR_SERVICES_TITLE = "Products & Services";
 const STR_SERVICES_TEACHERS = "Teachers";
 const STR_SERVICES_PARENTS = "Parents";
-const STR_SERVICES_BITES ="JI Bites";
-const STR_SERVICES_PRIME = "JI Prime";
-const STR_SERVICES_TAP = "JI Tap";
-const STR_SERVICES_STUDIO = "JI Studio";
-const STR_SERVICES_COLLECTION = "The JI Collection";
-const STR_SERVICES_J_STREAM = "J-Stream";
-const STR_SERVICES_BLOG = "JI Blog";
+const STR_SERVICES_BITES ="Ji Bites";
+const STR_SERVICES_PRIME = "Ji Prime";
+const STR_SERVICES_TAP = "Ji Tap";
+const STR_SERVICES_STUDIO = "Ji Studio";
+const STR_SERVICES_COLLECTION = "The Ji Collection";
+const STR_SERVICES_J_STREAM = "J-STEAM";
+const STR_SERVICES_BLOG = "Ji Blog";
 const STR_SERVICES_JOBS = "Jobs";
 
 
 const STR_PRIVACY = "Privacy Policy";
 const STR_TERMS = "Terms & Conditions";
 
+const COMING_SOON_ALERT = "javascript:alert('Coming soon')";
 
 @customElement('page-footer')
 export class _ extends LitElement {
@@ -153,7 +154,14 @@ export class _ extends LitElement {
                 align-items: center;
                 column-gap: 20px;
             }
+            .bottom-section .kid-safe img {
+                width: 156px;
+            }
         `];
+    }
+
+    private accessibilityClicked() {
+        alert(STR_ACCESSIBILITY_ALERT);
     }
 
     render() {
@@ -176,20 +184,19 @@ export class _ extends LitElement {
                         <div class="column">
                             <h4>${STR_PRODUCT_TITLE}</h4>
                             <ul>
-                                <li><a href="#">${STR_PRODUCT_MANAGE}</a></li>
-                                <li><a href="#">${STR_PRODUCT_CLASSROOM}</a></li>
-                                <li><a href="#">${STR_PRODUCT_CREATE_ACTIVITIES}</a></li>
-                                <li><a href="#">${STR_PRODUCT_GO_PRO}</a></li>
+                                <li><a href="${COMING_SOON_ALERT}">${STR_PRODUCT_MANAGE_CLASSROOM}</a></li>
+                                <li><a href="/jig/edit/gallery">${STR_PRODUCT_CREATE_ACTIVITIES}</a></li>
+                                <li><a href="${COMING_SOON_ALERT}">${STR_PRODUCT_JOIN_COMMUNITY}</a></li>
                             </ul>
                         </div>
                         <div class="column">
                             <h4>${STR_HELP_TITLE}</h4>
                             <ul>
-                                <li><a href="#">${STR_HELP_SUPPORT}</a></li>
-                                <li><a href="#">${STR_HELP_TOUR}</a></li>
-                                <li><a href="#">${STR_HELP_TUTORIALS}</a></li>
-                                <li><a href="#">${STR_HELP_WEBINARS}</a></li>
-                                <li><a href="#">${STR_HELP_ACCESSIBILITY}</a></li>
+                                <li><a href="mailto:jigzy@jewishinteractive.org">${STR_HELP_SUPPORT}</a></li>
+                                <li><a href="${COMING_SOON_ALERT}">${STR_HELP_TOUR}</a></li>
+                                <li><a href="https://www.jewishinteractive.org/pd-ji/" target="_blank">${STR_HELP_TUTORIALS}</a></li>
+                                <li><a href="${COMING_SOON_ALERT}">${STR_HELP_WEBINARS}</a></li>
+                                <li><a @click="${this.accessibilityClicked}">${STR_HELP_ACCESSIBILITY}</a></li>
                             </ul>
                         </div>
                         <div class="column">
@@ -218,16 +225,16 @@ export class _ extends LitElement {
                                 </dd>
                             </dl>
                             <div class="social">
-                                <a href="#">
+                                <a href="https://www.facebook.com/JewishInteractive" target="_blank">
                                     <img-ui path="entry/home/footer/social-icon-facebook.svg"></img-ui>
                                 </a>
-                                <a href="#">
+                                <a href="https://www.instagram.com/jewishinteractive" target="_blank">
                                     <img-ui path="entry/home/footer/social-icon-instagram.svg"></img-ui>
                                 </a>
-                                <a href="#">
+                                <a href="https://www.youtube.com/user/JewishInteractive" target="_blank">
                                     <img-ui path="entry/home/footer/social-icon-youtube.svg"></img-ui>
                                 </a>
-                                <a href="#">
+                                <a href="https://www.linkedin.com/company/jewish-interactive" target="_blank">
                                     <img-ui path="entry/home/footer/social-icon-linkdin.svg"></img-ui>
                                 </a>
                             </div>
@@ -243,32 +250,32 @@ export class _ extends LitElement {
                             ${STR_ABOUT_TEXT.split("\n").map(text => {
                                 return html`<p>${text}</p>`;
                             })}
-                            <a href="#" class="donate-link">
+                            <a href="https://www.jewishinteractive.org/donate-to-ji-coronavirus/" class="donate-link">
                                 <button-rect color="blue" bold>${STR_DONATE}</button-rect>
                             </a>
                         </div>
                         <div class="column">
                             <h4>${STR_SERVICES_TITLE}</h4>
                             <ul>
-                                <li><a href="#">${STR_SERVICES_TEACHERS}</a></li>
-                                <li><a href="#">${STR_SERVICES_PARENTS}</a></li>
-                                <li><a href="#">${STR_SERVICES_BITES}</a></li>
-                                <li><a href="#">${STR_SERVICES_PRIME}</a></li>
-                                <li><a href="#">${STR_SERVICES_TAP}</a></li>
-                                <li><a href="#">${STR_SERVICES_STUDIO}</a></li>
-                                <li><a href="#">${STR_SERVICES_COLLECTION}</a></li>
-                                <li><a href="#">${STR_SERVICES_J_STREAM}</a></li>
-                                <li><a href="#">${STR_SERVICES_BLOG}</a></li>
-                                <li><a href="#">${STR_SERVICES_JOBS}</a></li>
+                                <li><a href="https://www.jewishinteractive.org/ji-teachers/" target="_blank">${STR_SERVICES_TEACHERS}</a></li>
+                                <li><a href="https://www.jewishinteractive.org/ji-parents/" target="_blank">${STR_SERVICES_PARENTS}</a></li>
+                                <li><a href="https://bytes.jikids.org/" target="_blank">${STR_SERVICES_BITES}</a></li>
+                                <li><a href="https://www.jewishinteractive.org/ji-prime-initiatives/" target="_blank">${STR_SERVICES_PRIME}</a></li>
+                                <li><a href="https://www.jewishinteractive.org/ji-tap-schools/" target="_blank">${STR_SERVICES_TAP}</a></li>
+                                <li><a href="https://www.jewishinteractive.org/ji-studio-5/" target="_blank">${STR_SERVICES_STUDIO}</a></li>
+                                <li><a href="https://www.jewishinteractive.org/ji-products-services/the-ji-collection/" target="_blank">${STR_SERVICES_COLLECTION}</a></li>
+                                <li><a href="https://www.jewishinteractive.org/ji-products-services/jstem/" target="_blank">${STR_SERVICES_J_STREAM}</a></li>
+                                <li><a href="https://info.jewishinteractive.org/blog" target="_blank">${STR_SERVICES_BLOG}</a></li>
+                                <li><a href="https://www.jewishinteractive.org/positions-available-at-ji/" target="_blank">${STR_SERVICES_JOBS}</a></li>
                             </ul>
                         </div>
                     </div>
                 </section>
                 <section class="bottom-section">
-                        <img-ui path="entry/home/footer/kid-safe.png"></img-ui>
-                        <a href="#">${STR_PRIVACY}</a>
-                        <span>|</span>
-                        <a href="#">${STR_TERMS}</a>
+                    <a class="kid-safe" href="https://www.kidsafeseal.com/certifiedproducts/jitap_app.html" target="_blank"><img border="0" width="588" alt="Ji Tap - Create, Play & Inspire - Jewish games is certified by the kidSAFE Seal Program." src="https://www.kidsafeseal.com/sealimage/759811657582664246/jitap_app_extralarge_darktm.png"></a>
+                    <a href="https://www.jewishinteractive.org/privacy-policy/" target="_blank">${STR_PRIVACY}</a>
+                    <span>|</span>
+                    <a href="https://www.jewishinteractive.org/terms-and-conditions/" target="_blank">${STR_TERMS}</a>
                 </section>
             </div>
         `;

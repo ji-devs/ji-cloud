@@ -3,23 +3,23 @@ import { LitElement, html, css, customElement, property } from 'lit-element';
 export type Kind = 'content' | 'create' | 'customize' | 'community' | 'classroom';
 
 const STR_CONTENT_TITLE = "Content";
-const STR_CONTENT_PARAGRAPH = "A huge library of activities for the jewish holidays, Hebrew, culture, Tora and many more";
+const STR_CONTENT_PARAGRAPH = "A huge library of activities and lessons for the Jewish holidays, Hebrew, Israel, Torah and many more topics.";
 // const STR_CONTENT_ACTION = "See our templates";
 
 const STR_CREATE_TITLE = "Create";
-const STR_CREATE_PARAGRAPH = "Create your own activities, Teach your class to create their own games. The most fun way to learn something new.";
+const STR_CREATE_PARAGRAPH = "Create your own interactive lessons and games (JIGs), teach your class to create their own games. The most fun way to learn something new.";
 // const STR_CREATE_ACTION = "Try it for free";
 
 const STR_CUSTOMIZE_TITLE = "Customize";
-const STR_CUSTOMIZE_PARAGRAPH = "Easily, saving time way. Customize our templates for your needs. ";
+const STR_CUSTOMIZE_PARAGRAPH = "It’s easy and fast! Customize our ready-made lesson outlines for your needs.";
 // const STR_CUSTOMIZE_ACTION = "See our templates";
 
 const STR_COMMUNITY_TITLE = "Community";
-const STR_COMMUNITY_PARAGRAPH = "Meet X users around the world. See who plays now. Meet other teachers.";
+const STR_COMMUNITY_PARAGRAPH = "Join the Jigzi community to meet educators from around the world and share your thoughts and creativity.";
 // const STR_COMMUNITY_ACTION = "Get inspired";
 
 const STR_CLASSROOM_TITLE = "Classroom";
-const STR_CLASSROOM_PARAGRAPH = "track your students journey, manage your lessons, See which activities are more successful.";
+const STR_CLASSROOM_PARAGRAPH = "Create classes, assign JIGs to students, then track your students’ journeys.";
 // const STR_CLASSROOM_ACTION = "Manage your class";
 
 interface KindDetails {
