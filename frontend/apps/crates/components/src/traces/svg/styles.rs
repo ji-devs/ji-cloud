@@ -110,36 +110,54 @@ pub(super) static SHAPE_MODE_EMPTY_FILL_CLASS: Lazy<String> = Lazy::new(|| {
 //Wrong mode
 pub(super) static SHAPE_STATE_KIND_WRONG_DRAWING_CLASS: Lazy<String> = Lazy::new(|| {
     class! {
+        .style("stroke", "#fd7c44")
+        .style("stroke-width", "8")
+        .style("stroke-dasharray", "16,6")
     }
 });
 pub(super) static SHAPE_STATE_KIND_WRONG_SELECTED_CLASS: Lazy<String> = Lazy::new(|| {
     class! {
+        .style("stroke", "#fd7c44")
+        .style("stroke-width", "8")
     }
 });
 pub(super) static SHAPE_STATE_KIND_WRONG_DESELECTED_CLASS: Lazy<String> = Lazy::new(|| {
     class! {
+        .style("stroke", "#af6c27")
+        .style("stroke-width", "8")
     }
 });
 pub(super) static SHAPE_MODE_SOLID_KIND_WRONG_CLASS: Lazy<String> = Lazy::new(|| {
     class! {
+        .style("stroke", "#fea559")
+        .style("stroke-width", "8")
     }
 });
 
 //Correct mode
 pub(super) static SHAPE_STATE_KIND_CORRECT_DRAWING_CLASS: Lazy<String> = Lazy::new(|| {
     class! {
+        .style("stroke", "#46ba6f")
+        .style("stroke-width", "8")
+        .style("stroke-dasharray", "16,6")
     }
 });
 pub(super) static SHAPE_STATE_KIND_CORRECT_SELECTED_CLASS: Lazy<String> = Lazy::new(|| {
     class! {
+        .style("stroke", "#46ba6f")
+        .style("stroke-width", "8")
     }
 });
 pub(super) static SHAPE_STATE_KIND_CORRECT_DESELECTED_CLASS: Lazy<String> = Lazy::new(|| {
     class! {
+        .style("stroke", "#518973")
+        .style("stroke-width", "8")
     }
 });
 pub(super) static SHAPE_MODE_SOLID_KIND_CORRECT_CLASS: Lazy<String> = Lazy::new(|| {
     class! {
+        .style("stroke", "#9cddb2")
+        .style("stroke-width", "8")
     }
 });
 
