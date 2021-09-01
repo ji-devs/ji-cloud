@@ -3,7 +3,12 @@ import { nothing } from "lit-html";
 
 export type imageMode = 'image' | 'background';
 
-@customElement('image-select')
+const STR_MY_RECENT = "My recent";
+const STR_SEE_MORE = "See more";
+const STR_SEE_LESS = "See less";
+const STR_ALL_IMAGES = "All images";
+
+@customElement("image-select")
 export class _ extends LitElement {
 
     static get styles() {
@@ -51,23 +56,56 @@ export class _ extends LitElement {
             .bottom-row ::slotted([slot=upload]) {
                 grid-column: 2;
             }
+            .images-section {
+                padding: 20px 0;
+                display: grid;
+                grid-template-columns: auto auto;
+                justify-content: space-between;
+                row-gap: 24px;
+            }
+            :host([recent]) .images-section {
+                border-top: solid 1px #b0ccf2;
+            }
+            .images-section.recent {
+                max-height: 170px;
+                overflow: hidden;
+            }
+            :host([moreShown]) .images-section.recent {
+                max-height: revert;
+            }
+            .images-section h4 {
+                font-size: 16px;
+                font-weight: 600;
+                color: #4a4a4a;
+                margin: 0;
+            }
+            .images-section.recent button-rect .icon {
+                display: inline-block;
+                transform: rotate(90deg);
+                transition: transform .2s;
+            }
+            :host([moreShown]) .images-section.recent button-rect .icon {
+                transform: rotate(-90deg);
+            }
             .image-wrapper {
                 grid-column: 1 / -1;
                 display: grid;
                 grid-template-columns: repeat(auto-fit, var(--image-width));
                 grid-auto-rows: 118px;
-                gap: 15px;
+                row-gap: 24px;
+                column-gap: 15px;
                 justify-content: space-between;
-                margin-top: 16px;
             }
-            ::slotted([slot=images]) {
+            ::slotted([slot=images]),
+            ::slotted([slot=recent]) {
                 display: grid;
                 place-content: center;
                 cursor: pointer;
                 border-radius: 4px;
                 transition: transform .2s, box-shadow .2s;
             }
-            ::slotted([slot=images]:hover) {
+            ::slotted([slot=images]:hover),
+            ::slotted([slot=recent]:hover) {
                 transform: scale(1.02);
                 box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
             }
@@ -79,6 +117,12 @@ export class _ extends LitElement {
 
     @property({type: String, reflect: true})
     imageMode: imageMode = "image";
+
+    @property({type: Boolean, reflect: true})
+    recent: boolean = false;
+
+    @property({type: Boolean, reflect: true})
+    private moreShown: boolean = false;
 
     render() {
         return html`
@@ -94,9 +138,28 @@ export class _ extends LitElement {
                 <slot name="only-background-checkbox"></slot>
                 <slot name="upload"></slot>
             </div>
-            <div class="image-wrapper">
-                <slot name="images"></slot>
-            </div>
+            <section class="all-images">
+                <div class="images-section recent">
+                    <h4>${STR_MY_RECENT}</h4>
+                    <button-rect
+                        kind="text"
+                        color="blue"
+                        @click=${() => this.moreShown = !this.moreShown}
+                    >
+                        ${ this.moreShown ? STR_SEE_LESS : STR_SEE_MORE }
+                        <span class="icon">></span>
+                    </button-rect>
+                    <div class="image-wrapper">
+                        <slot name="recent"></slot>
+                    </div>
+                </div>
+                <div class="images-section main">
+                    <h4>${STR_ALL_IMAGES}</h4>
+                    <div class="image-wrapper">
+                        <slot name="images"></slot>
+                    </div>
+                </div>
+            </section>
         `;
     }
 }

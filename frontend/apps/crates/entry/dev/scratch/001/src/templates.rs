@@ -2,7 +2,6 @@ use simple_html_template::{TemplateCache, html_map};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::HtmlElement;
-use utils::settings::SETTINGS;
 use std::fmt;
 
 thread_local! {

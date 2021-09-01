@@ -1,20 +1,22 @@
 use super::actions::get_styles;
 use super::callbacks::Callbacks;
-use crate::image::tag::ImageTag;
 use dominator::clone;
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::Mutable;
 use futures_signals::signal_vec::MutableVec;
+use shared::domain::jig::module::body::Image;
 use shared::domain::user::UserProfile;
-use shared::domain::{image::*, meta::*};
-use std::collections::HashMap;
+use shared::domain::meta::*;
 use std::{cell::RefCell, collections::HashSet, rc::Rc};
 use utils::prelude::*;
 
 pub const BACKGROUND_NAME: &'static str = "Background";
 
+pub const RECENT_COUNT: u16 = 16;
+
 pub struct State {
-    pub image_list: MutableVec<ImageMetadata>,
+    pub image_list: MutableVec<Image>,
+    pub recent_list: MutableVec<Image>,
     pub search: Mutable<Option<String>>,
     pub options: ImageSearchOptions,
     pub init_loader: AsyncLoader,
@@ -52,6 +54,7 @@ impl State {
             options: image_search_options,
             search: Mutable::new(Some(String::new())),
             image_list: MutableVec::new(),
+            recent_list: MutableVec::new(),
             init_loader,
             loader: AsyncLoader::new(),
             selected_styles: Rc::new(RefCell::new(selected_styles)),
@@ -70,4 +73,5 @@ pub struct ImageSearchOptions {
     pub background_only: Option<bool>,
     pub upload: bool,
     pub filters: bool,
+    pub recent: bool,
 }

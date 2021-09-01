@@ -15,7 +15,7 @@ use awsm_web::dom::*;
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
 use components::{
-    // image_search::{self, state::ImageSearchOptions},
+    image::search::{self as image_search, state::ImageSearchOptions, callbacks::Callbacks as ImageSearchCallbacks},
     audio::input::{self, AudioInputOptions, AudioInput},
     color_select,
     text_editor,
@@ -29,7 +29,7 @@ pub struct Page { }
 
 impl Page {
     pub fn render() -> Dom {
-        render_text()
+        render_image_search()
     }
 }
 
@@ -77,20 +77,25 @@ fn render_button(step:u32, label:&str, state:Rc<State>) -> Dom {
     })
 }
 
-// pub fn render_image_search() -> Dom {
-//     let opts = ImageSearchOptions {
-//         background_only: Some(false),
-//         upload: Some(()),
-//         filters: Some(()),
-//         value: Mutable::new(None),
-//     };
-//     let state = image_search::state::State::new(opts, None);
+pub fn render_image_search() -> Dom {
+    let opts = ImageSearchOptions {
+        background_only: Some(false),
+        upload: true,
+        filters: true,
+        recent: true,
+    };
+    let callbacks = ImageSearchCallbacks::new(
+        Some(|image| {
+            log::info!("{:?}", image);
+        })
+    );
+    let state = image_search::state::State::new(opts, callbacks);
 
-//     html!("div", {
-//         .style("padding", "30px")
-//         .child(image_search::dom::render(state, None))
-//     })
-// }
+    html!("div", {
+        .style("padding", "30px")
+        .child(image_search::dom::render(Rc::new(state), None))
+    })
+}
 
 
 // pub fn render_audio_input() -> Dom {

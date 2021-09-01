@@ -1,5 +1,5 @@
 use super::{
-    actions::{get_background_id, search, upload_file},
+    actions::{get_background_id, search, fetch_init_data, upload_file},
     state::{State, BACKGROUND_NAME},
     types::*,
 };
@@ -27,48 +27,52 @@ pub fn render(state: Rc<State>, slot: Option<&str>) -> Dom {
 }
 
 pub fn render_loaded(state: Rc<State>) -> Dom {
-    state.loader.load(clone!(state => async move {
-        search(state);
-    }));
+    fetch_init_data(Rc::clone(&state));
 
     html!("image-select", {
         .property("label", "Select background")
+        .property("recent", true)
         .children(render_controls(state.clone()))
-        .children_signal_vec(state.image_list.signal_vec_cloned().map(clone!(state => move |image| {
-            html!("img-ji", {
-                .property("slot", "images")
-                .property("size", "thumb")
-                .property("id", image.id.0.to_string())
-                .event(clone!(state, image => move |_: events::Click| {
-                    //TODO - this should change if the library has changed
-                    state.set_selected(Image { id: image.id, lib: MediaLibrary::Global});
-                }))
-                .event(clone!(image => move |evt: events::DragStart| {
-                    if let Some(data_transfer) = evt.data_transfer() {
-                        let data = ImageDataTransfer {
-                            image: Image {
-                                id: image.id.clone(),
-                                //TODO - this should change if the library has changed
-                                lib: MediaLibrary::Global
-                            }
-                        };
-                        let json = serde_json::to_string(&data).unwrap_ji();
-                        let _ = data_transfer.set_data(IMAGE_SEARCH_DATA_TRANSFER, &json);
-                        data_transfer.set_drop_effect("all");
-                    } else {
-                        log::error!("no data transfer - use a real computer!!!");
-                    }
-                }))
-            })
+        .children_signal_vec(state.recent_list.signal_vec_cloned().map(clone!(state => move |image| {
+            render_image(Rc::clone(&state), image, "recent")
         })))
-        .child_signal(state.loader.is_loading().map(|is_loading| {
-            match is_loading {
-                false => None,
-                true => {
-                    Some(html!("p", {
-                        .text("Loading..")
-                    }))
-                },
+        .children_signal_vec(state.image_list.signal_vec_cloned().map(clone!(state => move |image| {
+            render_image(Rc::clone(&state), image, "images")
+        })))
+        .apply_if(state.options.recent, |dom| {
+            dom.child_signal(state.loader.is_loading().map(|is_loading| {
+                match is_loading {
+                    false => None,
+                    true => {
+                        Some(html!("p", {
+                            .text("Loading..")
+                        }))
+                    },
+                }
+            }))
+        })
+    })
+}
+
+fn render_image(state: Rc<State>, image: Image, slot: &str) -> Dom {
+    html!("img-ji", {
+        .property("slot", slot)
+        .property("size", "thumb")
+        .property("id", image.id.0.to_string())
+        .event(clone!(state, image => move |_: events::Click| {
+            //TODO - this should change if the library has changed
+            state.set_selected(Image { id: image.id, lib: MediaLibrary::Global});
+        }))
+        .event(clone!(image => move |evt: events::DragStart| {
+            if let Some(data_transfer) = evt.data_transfer() {
+                let data = ImageDataTransfer {
+                    image: image.clone()
+                };
+                let json = serde_json::to_string(&data).unwrap_ji();
+                let _ = data_transfer.set_data(IMAGE_SEARCH_DATA_TRANSFER, &json);
+                data_transfer.set_drop_effect("all");
+            } else {
+                log::error!("no data transfer - use a real computer!!!");
             }
         }))
     })
