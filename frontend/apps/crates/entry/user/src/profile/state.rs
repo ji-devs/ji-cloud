@@ -38,6 +38,7 @@ pub struct ProfilePageUser {
     pub email: Mutable<String>,
     pub given_name: Mutable<String>,
     pub family_name: Mutable<String>,
+    pub profile_image: Mutable<Option<String>>,
     pub language: Mutable<String>,
     // pub locale: Mutable<String>,
     pub location: Mutable<Option<serde_json::Value>>,
@@ -57,6 +58,7 @@ impl ProfilePageUser {
             email: Mutable::new(String::new()),
             given_name: Mutable::new(String::new()),
             family_name: Mutable::new(String::new()),
+            profile_image: Mutable::new(None),
             language: Mutable::new(String::new()),
             // locale: Mutable::new(String::new()),
             location: Mutable::new(None),
@@ -76,6 +78,7 @@ impl ProfilePageUser {
         self.email.set(user.email);
         self.given_name.set(user.given_name);
         self.family_name.set(user.family_name);
+        self.profile_image.set(user.profile_image);
         self.language.set(user.language);
         //self.locale.set(user.locale);
         self.location.set(user.location);
@@ -91,6 +94,7 @@ impl ProfilePageUser {
         PatchProfileRequest {
             given_name: Some(self.given_name.get_cloned()),
             family_name: Some(self.family_name.get_cloned()),
+            profile_image: Some(self.profile_image.get_cloned()),
             language: Some(self.language.get_cloned()),
             // locale: Some(self.locale.get_cloned()),
             organization: Some(self.organization.get_cloned()),

@@ -37,14 +37,13 @@ export class _ extends LitElement {
                 box-shadow: rgb(0 0 0 / 7%) -3px -3px 3px 0px;
                 border-top-left-radius: 8px;
             }
-            .main img-ji {
+            .main ::slotted([slot=profile-image]){
                 display: inline-block;
                 height: 48px;
                 width: 48px;
                 border-radius: 50%;
                 margin-right: 10px;
-                /* TODO: remove once we have profile images */
-                background-color: red;
+                overflow: hidden;
             }
             .main .name {
                 font-size: 14px;
@@ -76,14 +75,13 @@ export class _ extends LitElement {
                 row-gap: 4px;
                 column-gap: 24px;
             }
-            .overlay .info img-ji {
+            .overlay ::slotted([slot=overlay-profile-image]) {
                 display: inline-block;
                 height: 80px;
                 width: 80px;
                 border-radius: 50%;
                 grid-row: 1 / span 2;
-                /* TODO: remove once we have profile images */
-                background-color: red;
+                overflow: hidden;
             }
             .overlay .info .name {
                 font-size: 20px;
@@ -143,7 +141,7 @@ export class _ extends LitElement {
                 styled
             >
                 <div class="main" slot="anchor" @click=${this.toggleOpen}>
-                    <img-ji></img-ji>
+                    <slot name="profile-image"></slot>
                     <span class="name">
                         ${STR_SHALOM}
                         ${this.name}
@@ -152,7 +150,7 @@ export class _ extends LitElement {
                 </div>
                 <div slot="overlay" class="overlay">
                     <div class="info">
-                        <img-ji></img-ji>
+                        <slot name="overlay-profile-image"></slot>
                         <span class="name">${this.name}</span>
                         <span class="email">${this.email}</span>
                     </div>

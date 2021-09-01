@@ -5,6 +5,7 @@ use futures_signals::signal::{Signal, SignalExt};
 use shared::domain::user::{UserProfile, UserScope};
 use strum::IntoEnumIterator;
 use utils::{events, routes::{AdminRoute, HomeRoute, JigRoute, Route, UserRoute}};
+use wasm_bindgen::JsValue;
 
 use crate::page_header::state::{LoggedInState, PageLinks};
 
@@ -70,16 +71,36 @@ fn render_logged_in(state: Rc<State>, user: &UserProfile) -> Vec<Dom> {
         .property("slot", "user")
         .property("name", &user.given_name)
         .property("email", &user.email)
-        .child(html!("button-rect", {
-            .property("slot", "logout")
-            .property("kind", "outline")
-            .property("size", "small")
-            .property("color", "blue")
-            .text(STR_LOGOUT)
-            .event(clone!(state => move |_: events::Click| {
-                actions::logout(Rc::clone(&state));
-            }))
-        }))
+        .children(&mut [
+            html!("button-rect", {
+                .property("slot", "logout")
+                .property("kind", "outline")
+                .property("size", "small")
+                .property("color", "blue")
+                .text(STR_LOGOUT)
+                .event(clone!(state => move |_: events::Click| {
+                    actions::logout(Rc::clone(&state));
+                }))
+            }),
+            html!("profile-image", {
+                .property("slot", "profile-image")
+                .property("imageId", {
+                    match &user.profile_image {
+                        Some(image_id) => JsValue::from_str(&image_id),
+                        None => JsValue::UNDEFINED,
+                    }
+                })
+            }),
+            html!("profile-image", {
+                .property("slot", "overlay-profile-image")
+                .property("imageId", {
+                    match &user.profile_image {
+                        Some(image_id) => JsValue::from_str(&image_id),
+                        None => JsValue::UNDEFINED,
+                    }
+                })
+            }),
+        ])
         .child_signal(admin_privileges(Rc::clone(&state)).map(|admin_privileges| {
             match admin_privileges {
                 false => None,
