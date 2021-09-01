@@ -9,7 +9,6 @@ pub struct Base {
     pub module_id: ModuleId,
     pub jig: Jig,
     pub theme_id: ThemeId,
-    pub audio_mixer: AudioMixer,
     pub instructions: Instructions,
     pub settings: PlaySettings,
     pub backgrounds: Backgrounds,
@@ -24,7 +23,6 @@ impl Base {
         let InitFromRawArgs {
             jig_id,
             module_id,
-            audio_mixer,
             jig,
             raw,
             theme_id,
@@ -38,7 +36,6 @@ impl Base {
             module_id,
             jig,
             theme_id,
-            audio_mixer,
             instructions: content.base.instructions,
             settings: content.play_settings,
             backgrounds: content.base.backgrounds,

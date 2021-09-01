@@ -9,22 +9,22 @@ edition = "2018"
 [dependencies]
 shared = {path = "../../../../shared/rust", features = ["wasm"]}
 chrono = { version = "0.4.19", features = ["wasmbind"] }
-thiserror = "1.0.26"
-futures = "0.3.16"
+thiserror = "1.0.28"
+futures = "0.3.17"
 itertools = "0.10.1"
 async-trait = "0.1.51"
-serde = { version = "1.0.127", features = ["derive"] }
+serde = { version = "1.0.130", features = ["derive"] }
 serde_repr = "0.1.7"
 base64 = "0.13.0"
 strum = "0.21.0"
 strum_macros = "0.21.1"
 log = "0.4.14"
-serde_json = "1.0.66"
+serde_json = "1.0.67"
 cfg-if = "1.0.0"
-wasm-bindgen = "0.2.75"
-js-sys = "0.3.52"
-wasm-bindgen-futures = "0.4.25"
-serde-wasm-bindgen = "0.3.0"
+wasm-bindgen = "0.2.76"
+js-sys = "0.3.53"
+wasm-bindgen-futures = "0.4.26"
+serde-wasm-bindgen = "0.3.1"
 once_cell = "1.8.0"
 uuid = { version = "0.8.2", features = ["serde", "wasm-bindgen"] }
 url = "2.2.2"
@@ -35,7 +35,7 @@ dominator_helpers = "0.7.2"
 simple-html-template = { version = "0.2.4", features = ["wasm"] }
 htmlescape = "0.3.1"
 gloo-timers = "0.2.1"
-web-sys = { version = "0.3.52", features = [
+web-sys = { version = "0.3.53", features = [
     'Url',
     'Request',
     'RequestInit',
@@ -60,7 +60,7 @@ web-sys = { version = "0.3.52", features = [
     'ImageData',
     'Blob'
 ] }
-awsm_web = { version = "0.25.0", features = ["loaders", "image", "serde_iso", "canvas"] }
+awsm_web = { version = "0.28.1", features = ["loaders", "image", "serde_iso", "canvas"] }
 anyhow = "1.0.43"
 rgb = "0.8.27"
 lazy_static = "1.4.0"

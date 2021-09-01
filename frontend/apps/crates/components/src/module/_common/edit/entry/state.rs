@@ -32,7 +32,7 @@ use shared::{
 };
 use utils::{languages::LANGUAGE_CODE_EN, prelude::*};
 
-use crate::audio::mixer::AudioMixer;
+use crate::audio::mixer::AUDIO_MIXER;
 
 pub struct GenericState<Mode, Step, RawData, Base, Main, Sidebar, Header, Footer, Overlay>
 where
@@ -57,7 +57,6 @@ where
     pub(super) raw_loaded: Mutable<bool>,
     pub(super) page_body_switcher: AsyncLoader,
     pub(super) reset_from_history_loader: AsyncLoader,
-    pub(super) audio_mixer: AudioMixer,
     pub(super) on_init_ready: RefCell<Option<Box<dyn Fn()>>>,
 }
 
@@ -150,7 +149,6 @@ where
             save_loader: Rc::new(AsyncLoader::new()),
             page_body_switcher: AsyncLoader::new(),
             reset_from_history_loader: AsyncLoader::new(),
-            audio_mixer: AudioMixer::new(None),
             on_init_ready: RefCell::new(None),
         });
 
@@ -195,7 +193,7 @@ where
                 }
 
                 let jig = _self.jig.borrow().clone().unwrap_ji();
-                _self.audio_mixer.set_from_jig(&jig);
+                AUDIO_MIXER.with(|mixer| mixer.set_from_jig(&jig));
 
                 let (raw, init_source) = {
                     if let Some(force_raw) = _self.opts.force_raw.clone() {
@@ -244,7 +242,6 @@ where
                         _self.clone(),
                         init_from_raw.clone(),
                         BaseInitFromRawArgs::new(
-                            _self.audio_mixer.clone(),
                             jig_id,
                             module_id,
                             jig,

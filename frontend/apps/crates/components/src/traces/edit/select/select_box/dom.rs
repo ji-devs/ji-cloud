@@ -11,8 +11,9 @@ use futures_signals::{
 use super::{super::trace::state::*, menu::dom::render_menu};
 use crate::{
     traces::edit::state::*,
-    box_outline::{BoxOutline,BoxOutlineMixins},
-    buttons::{Button, ButtonStyle, ButtonStyleIcon}
+    box_outline::{BoxOutline,BoxOutlineMixins, BoxOutlineStyle},
+    buttons::{Button, ButtonStyle, ButtonStyleIcon},
+    audio::player_button::*,
 };
 //see https://www.loom.com/share/c9ec53482ad94a97bff74d143a5a8cd2
 
@@ -87,17 +88,53 @@ impl EditSelectTrace {
             )
             .child_signal(selected_has_bounds_index_signal.map(clone!(parent, resize_info, select_box => move |(is_selected, has_bounds, index)| {
                 if !is_selected || !has_bounds {
-                    None
-                } else {
                     Some(
                         BoxOutline::render_mixins(
                                 BoxOutline::new(
+                                    BoxOutlineStyle::Hidden,
                                     clone!(resize_info, select_box => move || select_box.bounds.signal_cloned().map(clone!(resize_info => move |bounds| {
                                         bounds.unwrap_ji().denormalize(&resize_info)
                                     })))
                                 ),
                                 None,
                                 BoxOutlineMixins {
+                                    main: None::<MixinStub>,
+
+                                    //handle selection 
+                                    click_area: Some(clone!(parent, index => move |dom:DomBuilder<HtmlElement>| {
+                                        dom
+                                            .event(clone!(parent, index => move |evt:events::Click| {
+                                                if let Some(index) = index {
+                                                    parent.select_index(index);
+                                                }
+                                            }))
+                                    })),
+
+                                    //adds a menu button to the top-right corner 
+                                    top_right: None::<MixinStub>,
+
+                                    //adds a menu button to the top-leftcorner 
+                                    top_left: Some(clone!(state => move |dom:DomBuilder<HtmlElement>| {
+                                        dom.apply_if(state.audio.is_some(), |dom| {
+                                            dom.child(
+                                                AudioPlayerButton::render(AudioPlayerButton::new(state.audio.as_ref().unwrap_ji().clone()))
+                                            )
+                                        })
+                                    }))
+                                }
+                        ))
+                } else {
+                    Some(
+                        BoxOutline::render_mixins(
+                                BoxOutline::new(
+                                    BoxOutlineStyle::Regular,
+                                    clone!(resize_info, select_box => move || select_box.bounds.signal_cloned().map(clone!(resize_info => move |bounds| {
+                                        bounds.unwrap_ji().denormalize(&resize_info)
+                                    })))
+                                ),
+                                None,
+                                BoxOutlineMixins {
+                                    main: None::<MixinStub>,
                                     //handle movement
                                     click_area: Some(clone!(parent, select_box => move |dom:DomBuilder<HtmlElement>| {
                                         dom
@@ -134,6 +171,14 @@ impl EditSelectTrace {
                                                     None
                                                 )
                                             )
+                                    })),
+
+                                    top_left: Some(clone!(state => move |dom:DomBuilder<HtmlElement>| {
+                                        dom.apply_if(state.audio.is_some(), |dom| {
+                                            dom.child(
+                                                AudioPlayerButton::render(AudioPlayerButton::new(state.audio.as_ref().unwrap_ji().clone()))
+                                            )
+                                        })
                                     }))
                                 }
                         ))

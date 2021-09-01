@@ -21,7 +21,7 @@ checksum = "28ae2b3dec75a406790005a200b1bd89785afc02517a00ca99ecfe093ee9e6cf"
 name = "app-admin"
 version = "0.1.0"
 dependencies = [
- "awsm_web 0.25.0",
+ "awsm_web 0.28.1",
  "cfg-if 1.0.0",
  "components",
  "console_error_panic_hook",
@@ -59,7 +59,7 @@ name = "app-card-quiz-edit"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "awsm_web 0.25.0",
+ "awsm_web 0.28.1",
  "cfg-if 1.0.0",
  "components",
  "console_error_panic_hook",
@@ -95,7 +95,7 @@ name = "app-card-quiz-play"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "awsm_web 0.25.0",
+ "awsm_web 0.28.1",
  "cfg-if 1.0.0",
  "components",
  "console_error_panic_hook",
@@ -131,7 +131,7 @@ name = "app-cover-edit"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "awsm_web 0.25.0",
+ "awsm_web 0.28.1",
  "cfg-if 1.0.0",
  "components",
  "console_error_panic_hook",
@@ -166,7 +166,7 @@ name = "app-cover-play"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "awsm_web 0.25.0",
+ "awsm_web 0.28.1",
  "cfg-if 1.0.0",
  "components",
  "console_error_panic_hook",
@@ -201,7 +201,7 @@ name = "app-drag-drop-edit"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "awsm_web 0.25.0",
+ "awsm_web 0.28.1",
  "cfg-if 1.0.0",
  "components",
  "console_error_panic_hook",
@@ -236,7 +236,7 @@ name = "app-drag-drop-play"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "awsm_web 0.25.0",
+ "awsm_web 0.28.1",
  "cfg-if 1.0.0",
  "components",
  "console_error_panic_hook",
@@ -271,7 +271,7 @@ name = "app-flashcards-edit"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "awsm_web 0.25.0",
+ "awsm_web 0.28.1",
  "cfg-if 1.0.0",
  "components",
  "console_error_panic_hook",
@@ -307,7 +307,7 @@ name = "app-flashcards-play"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "awsm_web 0.25.0",
+ "awsm_web 0.28.1",
  "cfg-if 1.0.0",
  "components",
  "console_error_panic_hook",
@@ -342,7 +342,7 @@ dependencies = [
 name = "app-home"
 version = "0.1.0"
 dependencies = [
- "awsm_web 0.25.0",
+ "awsm_web 0.28.1",
  "cfg-if 1.0.0",
  "chrono",
  "chrono-tz",
@@ -377,7 +377,7 @@ dependencies = [
 name = "app-jig-edit"
 version = "0.1.0"
 dependencies = [
- "awsm_web 0.25.0",
+ "awsm_web 0.28.1",
  "cfg-if 1.0.0",
  "chrono",
  "components",
@@ -413,7 +413,7 @@ dependencies = [
 name = "app-kids"
 version = "0.1.0"
 dependencies = [
- "awsm_web 0.25.0",
+ "awsm_web 0.28.1",
  "cfg-if 1.0.0",
  "components",
  "console_error_panic_hook",
@@ -446,7 +446,7 @@ name = "app-matching-edit"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "awsm_web 0.25.0",
+ "awsm_web 0.28.1",
  "cfg-if 1.0.0",
  "components",
  "console_error_panic_hook",
@@ -482,7 +482,7 @@ name = "app-matching-play"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "awsm_web 0.25.0",
+ "awsm_web 0.28.1",
  "cfg-if 1.0.0",
  "components",
  "console_error_panic_hook",
@@ -518,7 +518,7 @@ name = "app-memory-edit"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "awsm_web 0.25.0",
+ "awsm_web 0.28.1",
  "cfg-if 1.0.0",
  "components",
  "console_error_panic_hook",
@@ -553,7 +553,7 @@ name = "app-memory-play"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "awsm_web 0.25.0",
+ "awsm_web 0.28.1",
  "cfg-if 1.0.0",
  "components",
  "console_error_panic_hook",
@@ -589,7 +589,7 @@ name = "app-poster-edit"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "awsm_web 0.25.0",
+ "awsm_web 0.28.1",
  "cfg-if 1.0.0",
  "components",
  "console_error_panic_hook",
@@ -624,7 +624,7 @@ name = "app-poster-play"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "awsm_web 0.25.0",
+ "awsm_web 0.28.1",
  "cfg-if 1.0.0",
  "components",
  "console_error_panic_hook",
@@ -659,7 +659,7 @@ name = "app-tapping-board-edit"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "awsm_web 0.25.0",
+ "awsm_web 0.28.1",
  "cfg-if 1.0.0",
  "components",
  "console_error_panic_hook",
@@ -694,7 +694,7 @@ name = "app-tapping-board-play"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "awsm_web 0.25.0",
+ "awsm_web 0.28.1",
  "cfg-if 1.0.0",
  "components",
  "console_error_panic_hook",
@@ -728,7 +728,7 @@ dependencies = [
 name = "app-user"
 version = "0.1.0"
 dependencies = [
- "awsm_web 0.25.0",
+ "awsm_web 0.28.1",
  "cfg-if 1.0.0",
  "chrono",
  "chrono-tz",
@@ -765,7 +765,7 @@ name = "app-video-edit"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "awsm_web 0.25.0",
+ "awsm_web 0.28.1",
  "cfg-if 1.0.0",
  "components",
  "console_error_panic_hook",
@@ -800,7 +800,7 @@ name = "app-video-play"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "awsm_web 0.25.0",
+ "awsm_web 0.28.1",
  "cfg-if 1.0.0",
  "components",
  "console_error_panic_hook",
@@ -861,9 +861,9 @@ dependencies = [
 
 [[package]]
 name = "awsm_web"
-version = "0.25.0"
+version = "0.28.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2904b01170e5edb750dc846501b04166bb4cbe59bbc7b29eff1fd3956af1bddf"
+checksum = "cc4ab099e016a0647719e829f701bfc46e7add1338a2f79ed1e79b830abf4149"
 dependencies = [
  "beach_map",
  "discard",
@@ -993,7 +993,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "async-trait",
- "awsm_web 0.25.0",
+ "awsm_web 0.28.1",
  "beach_map",
  "cfg-if 1.0.0",
  "chrono",
@@ -1041,9 +1041,9 @@ dependencies = [
 
 [[package]]
 name = "const_format"
-version = "0.2.18"
+version = "0.2.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "49aad96768495418a04c9349327f32f2cd7e9bf8ac6b142534466048721c8ff5"
+checksum = "59c7d3aa11be45d56befebb10f4a8785fcb62aabddf5f33638efef922e505ec9"
 dependencies = [
  "const_format_proc_macros",
 ]
@@ -1218,9 +1218,9 @@ dependencies = [
 
 [[package]]
 name = "futures"
-version = "0.3.16"
+version = "0.3.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1adc00f486adfc9ce99f77d717836f0c5aa84965eb0b4f051f4e83f7cab53f8b"
+checksum = "a12aa0eb539080d55c3f2d45a67c3b58b6b0773c1a3ca2dfec66d58c97fd66ca"
 dependencies = [
  "futures-channel",
  "futures-core",
@@ -1233,9 +1233,9 @@ dependencies = [
 
 [[package]]
 name = "futures-channel"
-version = "0.3.16"
+version = "0.3.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "74ed2411805f6e4e3d9bc904c95d5d423b89b3b25dc0250aa74729de20629ff9"
+checksum = "5da6ba8c3bb3c165d3c7319fc1cc8304facf1fb8db99c5de877183c08a273888"
 dependencies = [
  "futures-core",
  "futures-sink",
@@ -1243,15 +1243,15 @@ dependencies = [
 
 [[package]]
 name = "futures-core"
-version = "0.3.16"
+version = "0.3.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "af51b1b4a7fdff033703db39de8802c673eb91855f2e0d47dcf3bf2c0ef01f99"
+checksum = "88d1c26957f23603395cd326b0ffe64124b818f4449552f960d815cfba83a53d"
 
 [[package]]
 name = "futures-executor"
-version = "0.3.16"
+version = "0.3.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4d0d535a57b87e1ae31437b892713aee90cd2d7b0ee48727cd11fc72ef54761c"
+checksum = "45025be030969d763025784f7f355043dc6bc74093e4ecc5000ca4dc50d8745c"
 dependencies = [
  "futures-core",
  "futures-task",
@@ -1260,15 +1260,15 @@ dependencies = [
 
 [[package]]
 name = "futures-io"
-version = "0.3.16"
+version = "0.3.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0b0e06c393068f3a6ef246c75cdca793d6a46347e75286933e5e75fd2fd11582"
+checksum = "522de2a0fe3e380f1bc577ba0474108faf3f6b18321dbf60b3b9c39a75073377"
 
 [[package]]
 name = "futures-macro"
-version = "0.3.16"
+version = "0.3.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c54913bae956fb8df7f4dc6fc90362aa72e69148e3f39041fbe8742d21e0ac57"
+checksum = "18e4a4b95cea4b4ccbcf1c5675ca7c4ee4e9e75eb79944d07defde18068f79bb"
 dependencies = [
  "autocfg",
  "proc-macro-hack",
@@ -1293,21 +1293,21 @@ dependencies = [
 
 [[package]]
 name = "futures-sink"
-version = "0.3.16"
+version = "0.3.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c0f30aaa67363d119812743aa5f33c201a7a66329f97d1a887022971feea4b53"
+checksum = "36ea153c13024fe480590b3e3d4cad89a0cfacecc24577b68f86c6ced9c2bc11"
 
 [[package]]
 name = "futures-task"
-version = "0.3.16"
+version = "0.3.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bbe54a98670017f3be909561f6ad13e810d9a51f3f061b902062ca3da80799f2"
+checksum = "1d3d00f4eddb73e498a54394f228cd55853bdf059259e8e7bc6e69d408892e99"
 
 [[package]]
 name = "futures-util"
-version = "0.3.16"
+version = "0.3.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "67eb846bfd58e44a8481a00049e82c43e0ccb5d61f8dc071057cb19249dd4d78"
+checksum = "36568465210a3a6ee45e1f165136d68671471a501e632e9a98d96872222b5481"
 dependencies = [
  "autocfg",
  "futures-channel",
@@ -1514,7 +1514,7 @@ checksum = "dd25036021b0de88a0aff6b850051563c6516d0bf53f8638938edbb9de732736"
 name = "jig-play"
 version = "0.1.0"
 dependencies = [
- "awsm_web 0.25.0",
+ "awsm_web 0.28.1",
  "cfg-if 1.0.0",
  "components",
  "console_error_panic_hook",
@@ -1589,7 +1589,7 @@ dependencies = [
 name = "legacy-play"
 version = "0.1.0"
 dependencies = [
- "awsm_web 0.25.0",
+ "awsm_web 0.28.1",
  "cfg-if 1.0.0",
  "components",
  "console_error_panic_hook",
@@ -1887,7 +1887,7 @@ name = "scratch-001"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "awsm_web 0.25.0",
+ "awsm_web 0.28.1",
  "cfg-if 1.0.0",
  "components",
  "console_error_panic_hook",
@@ -1919,18 +1919,18 @@ dependencies = [
 
 [[package]]
 name = "serde"
-version = "1.0.127"
+version = "1.0.130"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f03b9878abf6d14e6779d3f24f07b2cfa90352cfec4acc5aab8f1ac7f146fae8"
+checksum = "f12d06de37cf59146fbdecab66aa99f9fe4f78722e3607577a5375d66bd0c913"
 dependencies = [
  "serde_derive",
 ]
 
 [[package]]
 name = "serde-wasm-bindgen"
-version = "0.3.0"
+version = "0.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1102fa7714968fcf70fd8efa29fb3b189e20ef0e7701fbab9634384dda034bf3"
+checksum = "618365e8e586c22123d692b72a7d791d5ee697817b65a218cdf12a98870af0f7"
 dependencies = [
  "fnv",
  "js-sys",
@@ -1940,9 +1940,9 @@ dependencies = [
 
 [[package]]
 name = "serde_derive"
-version = "1.0.127"
+version = "1.0.130"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a024926d3432516606328597e0f224a51355a493b49fdd67e9209187cbe55ecc"
+checksum = "d7bc1a1ab1961464eae040d96713baa5a724a8152c1222492465b54322ec508b"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1951,9 +1951,9 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.66"
+version = "1.0.67"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "336b10da19a12ad094b59d870ebde26a45402e5b470add4b5fd03c5048a32127"
+checksum = "a7f9e390c27c3c0ce8bc5d725f6e4d30a29d26659494aa4b17535f7522c5c950"
 dependencies = [
  "itoa",
  "ryu",
@@ -2074,18 +2074,18 @@ dependencies = [
 
 [[package]]
 name = "thiserror"
-version = "1.0.26"
+version = "1.0.28"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "93119e4feac1cbe6c798c34d3a53ea0026b0b1de6a120deef895137c0529bfe2"
+checksum = "283d5230e63df9608ac7d9691adc1dfb6e701225436eb64d0b9a7f0a5a04f6ec"
 dependencies = [
  "thiserror-impl",
 ]
 
 [[package]]
 name = "thiserror-impl"
-version = "1.0.26"
+version = "1.0.28"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "060d69a0afe7796bf42e9e2ff91f5ee691fb15c53d38b4b62a9a53eb23164745"
+checksum = "fa3884228611f5cd3608e2d409bf7dce832e4eb3135e3f11addbd7e41bd68e71"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2173,7 +2173,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "async-trait",
- "awsm_web 0.25.0",
+ "awsm_web 0.28.1",
  "base64 0.13.0",
  "cfg-if 1.0.0",
  "chrono",
@@ -2251,9 +2251,9 @@ dependencies = [
 
 [[package]]
 name = "wasm-bindgen-futures"
-version = "0.4.25"
+version = "0.4.26"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "16646b21c3add8e13fdb8f20172f8a28c3dbf62f45406bcff0233188226cfe0c"
+checksum = "95fded345a6559c2cfee778d562300c581f7d4ff3edb9b0d230d69800d213972"
 dependencies = [
  "cfg-if 1.0.0",
  "js-sys",
@@ -2303,9 +2303,9 @@ dependencies = [
 
 [[package]]
 name = "web-sys"
-version = "0.3.52"
+version = "0.3.53"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "01c70a82d842c9979078c772d4a1344685045f1a5628f677c2b2eab4dd7d2696"
+checksum = "224b2f6b67919060055ef1a67807367c2066ed520c3862cc013d26cf893a783c"
 dependencies = [
  "js-sys",
  "wasm-bindgen",

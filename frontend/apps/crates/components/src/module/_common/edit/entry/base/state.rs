@@ -29,7 +29,6 @@ where
     Mode: ModeExt + 'static,
     Step: StepExt + 'static,
 {
-    pub audio_mixer: AudioMixer,
     pub step: Mutable<Step>, //not intended to be changed lower down, just for passing back really
     pub steps_completed: Mutable<HashSet<Step>>,
     pub theme_choice: Mutable<ThemeChoice>,
@@ -52,7 +51,6 @@ where
     Step: StepExt + 'static,
 {
     pub fn new(
-        audio_mixer: AudioMixer,
         jig_id: JigId,
         module_id: ModuleId,
         jig: Jig,
@@ -95,7 +93,6 @@ where
         }));
 
         Self {
-            audio_mixer,
             step,
             steps_completed,
             theme_choice,

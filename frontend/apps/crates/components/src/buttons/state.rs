@@ -13,6 +13,8 @@ pub enum ButtonStyle {
 
 pub enum ButtonStyleIcon {
     BlueX ,
+    Audio,
+    AudioStop,
     GreyKebab,
 }
 
@@ -20,6 +22,8 @@ impl ButtonStyleIcon {
     pub const fn as_str(&self) -> &'static str {
         match self {
             Self::BlueX => "circle-x-blue",
+            Self::Audio => "audio",
+            Self::AudioStop => "audio-stop",
             Self::GreyKebab => "circle-kebab-grey",
         }
     }

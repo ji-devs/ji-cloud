@@ -73,7 +73,6 @@ pub struct Base {
     pub stickers: Rc<Stickers<Item>>, 
     pub traces: Rc<TracesEdit>,
     pub text_editor: Rc<TextEditorState>,
-    pub audio_mixer: AudioMixer,
     pub play_settings: Rc<PlaySettings>,
 
     pub drag_item_selected_index: Mutable<Option<usize>>,
@@ -203,7 +202,6 @@ impl Base {
             step,
             theme_choice,
             theme_id,
-            audio_mixer,
             ..
         } = init_args;
 
@@ -325,7 +323,6 @@ impl Base {
             backgrounds,
             stickers,
             traces,
-            audio_mixer,
             play_settings: Rc::new(PlaySettings::new(content.play_settings.clone())),
             drag_item_selected_index: Mutable::new(None),
         });

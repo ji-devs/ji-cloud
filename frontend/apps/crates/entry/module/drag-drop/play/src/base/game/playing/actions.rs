@@ -11,7 +11,7 @@ use wasm_bindgen::prelude::*;
 use std::collections::HashMap;
 use components::collision::stickers_traces::pixels::{get_hit_index, StickerHitSource, StickerBoundsKind, debug_render_hit_trace};
 use wasm_bindgen_futures::spawn_local;
-use components::audio::mixer::AudioPath;
+use components::audio::mixer::{AUDIO_MIXER, AudioPath};
 
 cfg_if::cfg_if! {
     if #[cfg(debug_assertions)] {
@@ -126,7 +126,7 @@ impl AudioEffect {
 impl InteractiveItem {
 
     pub fn play_audio(&self, effect: AudioEffect) {
-        *self.audio_effect_handle.borrow_mut() = Some(self.audio_mixer.play(effect.as_path(), effect.is_loop()));
+        *self.audio_effect_handle.borrow_mut() = Some(AUDIO_MIXER.with(|mixer| mixer.play(effect.as_path(), effect.is_loop())));
     }
 
     pub fn stop_audio(&self) {

@@ -39,7 +39,7 @@ pub fn render(state: Rc<PlayState>) -> Dom {
                         .map(clone!(state => move |phase| {
                             match phase {
                                 PlayPhase::Playing(bubble) => {
-                                    Some(TraceBubble::render(bubble, &state.game.base.audio_mixer))
+                                    Some(TraceBubble::render(bubble))
                                 },
                                 _ => None
                             }

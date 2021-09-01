@@ -12,6 +12,7 @@ use super::{loading::dom::render_loading, state::*};
 use crate::{
     instructions::player::InstructionsPlayer,
     module::_common::play::prelude::*,
+    audio::mixer::AUDIO_MIXER,
 };
 use shared::domain::jig::module::body::{BodyExt, ModeExt, StepExt};
 
@@ -132,7 +133,6 @@ where
                     if has_started {
                         Some(InstructionsPlayer::render(
                             Rc::new(InstructionsPlayer::new(base.get_instructions().unwrap_ji())),
-                            &state.audio_mixer
                         ))
                     } else {
                         None
@@ -146,10 +146,10 @@ where
                     if let Ok(msg) = evt.try_serde_data::<IframeAction<JigToModulePlayerMessage>>() {
                         match msg.data {
                             JigToModulePlayerMessage::Play => {
-                                state.audio_mixer.play_all();
+                                AUDIO_MIXER.with(|mixer| mixer.play_all());
                             },
                             JigToModulePlayerMessage::Pause => {
-                                state.audio_mixer.pause_all();
+                                AUDIO_MIXER.with(|mixer| mixer.pause_all());
                             },
                             JigToModulePlayerMessage::TimerDone => {
                             }
@@ -175,7 +175,7 @@ where
                             start_playback(base.clone(), &play_started);
                         }))
                         .after_inserted(clone!(state, base, play_started => move |_elem| {
-                            if state.audio_mixer.context_available() || state.opts.skip_play {
+                            if AUDIO_MIXER.with(|mixer| mixer.context_available()) || state.opts.skip_play {
                                 start_playback(base.clone(), &play_started);
                             }
                         }))

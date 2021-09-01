@@ -7,8 +7,14 @@ use utils::{path, prelude::*};
 use web_sys::AudioContext;
 use std::borrow::Cow;
 use std::ops::Deref;
-
+use once_cell::unsync::Lazy;
 pub use awsm_web::audio::{AudioClip, AudioClipOptions, AudioHandle, AudioSource, Id};
+thread_local! {
+    pub static AUDIO_MIXER:AudioMixer = AudioMixer {
+        inner: Rc::new(AwsmAudioMixer::new(None)),
+        settings: Rc::new(RefCell::new(AudioSettings::default())),
+    }
+}
 
 //inherently cloneable, conceptually like it's wrapped in Rc itself
 #[derive(Clone)]
@@ -43,8 +49,27 @@ impl Default for AudioSettings {
     }
 }
 
+//This is a bit confusing...
+//but basically it lets us call .as_source()
+//on Audio, AudioBackground, etc.
+//it does it by way of the intermediate Into<AudioPath> impl
+pub trait AudioSourceExt<'a> {
+    fn as_source(&'a self) -> AudioSource;
+}
+
+impl <'a, F: 'a> AudioSourceExt<'a> for F 
+where
+    AudioPath<'a>: From<&'a F>
+{
+    fn as_source(&'a self) -> AudioSource {
+        let path:AudioPath = self.into();
+        path.into()
+    }
+}
+
+
 pub enum AudioPath<'a> {
-    Lib(Audio),
+    Lib(Cow<'a, Audio>),
     Cdn(Cow<'a, str>)
 }
 
@@ -63,7 +88,23 @@ impl <'a> From<AudioPath<'a>> for AudioSource {
     }
 }
 
+impl From<Audio> for AudioPath<'_> {
+    fn from(audio:Audio) -> Self {
+        Self::Lib(Cow::Owned(audio))
+    }
+}
+impl <'a> From<&'a Audio> for AudioPath<'a> {
+    fn from(audio:&'a Audio) -> Self {
+        Self::Lib(Cow::Borrowed(audio))
+    }
+}
 
+//TODO - make it nicer to implement both ref and owned with macros
+impl From<&jig::AudioBackground> for AudioPath<'_> {
+    fn from(bg:&jig::AudioBackground) -> Self {
+        bg.into()
+    }
+}
 impl From<jig::AudioBackground> for AudioPath<'_> {
     fn from(bg:jig::AudioBackground) -> Self {
         Self::Cdn(Cow::Borrowed(match bg {
@@ -73,6 +114,11 @@ impl From<jig::AudioBackground> for AudioPath<'_> {
     }
 }
 
+impl From<&jig::AudioFeedbackPositive> for AudioPath<'_> {
+    fn from(p:&jig::AudioFeedbackPositive) -> Self {
+        p.into()
+    }
+}
 impl From<jig::AudioFeedbackPositive> for AudioPath<'_> {
     fn from(p:jig::AudioFeedbackPositive) -> Self {
         Self::Cdn(Cow::Borrowed(match p {
@@ -83,6 +129,11 @@ impl From<jig::AudioFeedbackPositive> for AudioPath<'_> {
     }
 }
 
+impl From<&jig::AudioFeedbackNegative> for AudioPath<'_> {
+    fn from(n:&jig::AudioFeedbackNegative) -> Self {
+        n.into()
+    }
+}
 impl From<jig::AudioFeedbackNegative> for AudioPath<'_> {
     fn from(n:jig::AudioFeedbackNegative) -> Self {
         Self::Cdn(Cow::Borrowed(match n {
@@ -94,13 +145,6 @@ impl From<jig::AudioFeedbackNegative> for AudioPath<'_> {
 }
 
 impl AudioMixer {
-    pub fn new(ctx: Option<AudioContext>) -> Self {
-        //TODO - populate jig-level effects
-        Self {
-            inner: Rc::new(AwsmAudioMixer::new(ctx)),
-            settings: Rc::new(RefCell::new(AudioSettings::default())),
-        }
-    }
 
     pub fn set_from_jig(&self, jig: &Jig) {
         *self.settings.borrow_mut() = AudioSettings::new_from_jig(jig);
@@ -109,18 +153,34 @@ impl AudioMixer {
     /// Oneshots are AudioClips because they drop themselves
     /// They're intended solely to be kicked off and not being held anywhere
     /// However, if necessary, they can still be killed imperatively
-    pub fn play_oneshot<F, A: Into<AudioSource>>(&self, audio: A, on_ended: Option<F>) -> AudioClip
-    where
-        F: FnMut() -> () + 'static,
+    pub fn play_oneshot<A: Into<AudioSource>>(&self, audio: A) -> AudioClip
     {
         self.inner
-            .play_oneshot(audio.into(), on_ended)
+            .play_oneshot(audio.into())
+            .unwrap_ji()
+    }
+
+    pub fn play_oneshot_on_ended<F, A>(&self, audio: A, on_ended: F) -> AudioClip
+    where
+        F: FnMut() -> () + 'static,
+        A: Into<AudioSource>
+    {
+        self.inner
+            .play_oneshot_on_ended(audio.into(), on_ended)
             .unwrap_ji()
     }
 
     /// Play a clip and get a Handle to hold (simple API around add_source)
     pub fn play<A: Into<AudioSource>>(&self, audio: A, is_loop: bool) -> AudioHandle {
         self.inner.play(audio.into(), is_loop).unwrap_ji()
+    }
+
+    pub fn play_on_ended<F, A>(&self, audio: A, is_loop: bool, on_ended: F) -> AudioHandle 
+    where
+        F: FnMut() -> () + 'static,
+        A: Into<AudioSource>
+    {
+        self.inner.play_on_ended(audio.into(), is_loop, on_ended).unwrap_ji()
     }
 
     /// Add a source with various options and get a Handle to hold

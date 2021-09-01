@@ -68,7 +68,6 @@ pub struct Base {
     pub traces: Rc<TracesEdit>,
     pub traces_meta: MutableVec<TraceMeta>,
     pub text_editor: Rc<TextEditorState>,
-    pub audio_mixer: AudioMixer,
     pub play_settings: Rc<PlaySettings>,
 }
 
@@ -128,7 +127,6 @@ impl Base {
             step,
             theme_choice,
             theme_id,
-            audio_mixer,
             ..
         } = init_args;
 
@@ -252,7 +250,6 @@ impl Base {
             stickers,
             traces,
             traces_meta,
-            audio_mixer,
             play_settings: Rc::new(PlaySettings::new(content.play_settings.clone())),
         });
 

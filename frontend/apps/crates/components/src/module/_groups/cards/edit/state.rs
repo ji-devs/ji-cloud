@@ -72,7 +72,6 @@ pub struct CardsBase<RawData: RawDataExt, E: ExtraExt> {
     pub theme_choice: Mutable<ThemeChoice>,
     pub theme_id: ReadOnlyMutable<ThemeId>,
     pub instructions: Mutable<Instructions>,
-    pub audio_mixer: AudioMixer,
     pub mode: Mode,
     pub module_kind: ModuleKind,
     pub tooltips: Tooltips,
@@ -110,7 +109,6 @@ impl<RawData: RawDataExt, E: ExtraExt> CardsBase<RawData, E> {
             history,
             step,
             theme_choice,
-            audio_mixer,
             module_kind,
             ..
         } = init_args;
@@ -137,7 +135,6 @@ impl<RawData: RawDataExt, E: ExtraExt> CardsBase<RawData, E> {
             theme_choice,
             theme_id,
             instructions,
-            audio_mixer,
             mode,
             tooltips: Tooltips::new(),
             pairs: MutableVec::new_with_values(pairs),

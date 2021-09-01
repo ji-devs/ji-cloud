@@ -46,7 +46,6 @@ pub struct Base {
     pub flip_state: Mutable<FlipState>,
     pub found_pairs: RefCell<Vec<(usize, usize)>>, 
     pub instructions: Instructions,
-    pub audio_mixer: AudioMixer,
     pub settings: PlayerSettings,
 }
 
@@ -62,7 +61,6 @@ impl Base {
         let InitFromRawArgs {
             jig_id,
             module_id,
-            audio_mixer,
             jig,
             raw,
             theme_id,
@@ -117,7 +115,6 @@ impl Base {
             found_pairs: RefCell::new(Vec::new()),
             instructions: content.base.instructions,
             settings: content.player_settings,
-            audio_mixer,
         })
     }
 

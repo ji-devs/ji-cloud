@@ -37,7 +37,7 @@ impl DomRenderable for Main {
                                     .children_signal_vec(
                                         state.trace_bubbles()
                                             .map(clone!(state => move |bubble| {
-                                                TraceBubble::render(bubble, &state.base.audio_mixer)
+                                                TraceBubble::render(bubble)
                                             }))
                                     )
                                 })

@@ -7,7 +7,7 @@ use futures_signals::{
     signal_vec::{self, SignalVec, SignalVecExt},
 };
 use components::{
-    audio::mixer::{AudioMixer, AudioHandle},
+    audio::mixer::{AUDIO_MIXER, AudioHandle},
     traces::utils::TraceExt,
 };
 use utils::{prelude::*, drag::Drag};
@@ -33,7 +33,7 @@ impl PlayState {
                 match item.kind {
                     ItemKind::Static => PlayItem::Static(item.sticker),
                     ItemKind::Interactive(data) => {
-                        PlayItem::Interactive(InteractiveItem::new(item.sticker, data, game.base.audio_mixer.clone()))
+                        PlayItem::Interactive(InteractiveItem::new(item.sticker, data))
                     }
                 }
             })
@@ -85,7 +85,6 @@ impl PlayItem {
 pub struct InteractiveItem {
     pub sticker: Sticker,
     pub locked: Mutable<bool>,
-    pub audio_mixer:AudioMixer,
     pub audio: Option<Audio>,
     pub audio_effect_handle: RefCell<Option<AudioHandle>>,
     pub target_transform: Transform, 
@@ -101,10 +100,9 @@ pub enum SourceTransformOverride {
 }
 
 impl InteractiveItem {
-    pub fn new(sticker: Sticker, data: Interactive, audio_mixer: AudioMixer) -> Rc<Self> {
+    pub fn new(sticker: Sticker, data: Interactive) -> Rc<Self> {
         let transform = sticker.transform().clone();
         Rc::new(Self {
-            audio_mixer,
             sticker,
             locked: Mutable::new(false),
             audio: data.audio,

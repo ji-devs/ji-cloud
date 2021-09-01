@@ -18,7 +18,6 @@ pub struct Base {
     pub module_id: ModuleId,
     pub jig: Jig,
     pub theme_id: ThemeId,
-    pub audio_mixer: AudioMixer,
     pub instructions: Instructions,
     pub backgrounds: Backgrounds,
     pub stickers: Vec<Sticker>,
@@ -30,7 +29,6 @@ impl Base {
         let InitFromRawArgs {
             jig_id,
             module_id,
-            audio_mixer,
             jig,
             raw,
             theme_id,
@@ -45,7 +43,6 @@ impl Base {
             module_id,
             jig,
             theme_id,
-            audio_mixer,
             instructions: base_content.instructions,
             backgrounds: base_content.backgrounds,
             stickers: base_content.stickers,

@@ -79,7 +79,6 @@ where
                         app.clone(),
                         init_from_raw.clone(),
                         BaseInitFromRawArgs::new(
-                            app.audio_mixer.clone(),
                             jig_id,
                             module_id,
                             jig,

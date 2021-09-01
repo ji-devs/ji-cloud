@@ -6,8 +6,9 @@ use crate::base::state::*;
 use super::state::*;
 use utils::prelude::*;
 use components::{
+    audio::player_button::AudioPlayerButton,
     buttons::{Button, ButtonStyle, ButtonStyleIcon},
-    box_outline::{BoxOutline,BoxOutlineMixins},
+    box_outline::{BoxOutline,BoxOutlineMixins, BoxOutlineStyle},
     backgrounds::dom::render_backgrounds, 
     stickers::dom::{render_stickers, mixin_sticker_button, StickerRawRenderOptions, BaseRawRenderOptions, render_sticker_raw},
 };
@@ -71,6 +72,7 @@ impl MainSelect {
             .child(BoxOutline::render_mixins(
                     {
                         let mut box_outline = BoxOutline::new_transform_size(
+                            BoxOutlineStyle::Regular,
                             move || transform_override.get_signal(transform.clone()),
                             move || size.signal_cloned()
                         );
@@ -81,9 +83,14 @@ impl MainSelect {
                     },
                     None,
                     BoxOutlineMixins {
+                        main: Some(clone!(state, index => move |dom:DomBuilder<HtmlElement>| {
+                            dom.property_signal("lineThick", state.is_selected(index))
+                        })),
+
                         click_area: Some(clone!(state, index, item => move |dom:DomBuilder<HtmlElement>| {
                             dom
-                                .event(clone!(item => move |evt:events::MouseDown| {
+                                .event(clone!(state, index, item => move |evt:events::MouseDown| {
+                                    state.base.set_drag_item_selected(index);
                                     item.start_drag(evt.x() as i32, evt.y() as i32);
                                 }))
                                 .global_event_preventable(clone!(item => move |evt:events::MouseUp| {
@@ -106,6 +113,17 @@ impl MainSelect {
                                 ),
                                 None
                             ))
+                        })),
+
+                        top_left: Some(clone!(state, index => move |dom:DomBuilder<HtmlElement>| {
+                            dom.child_signal(
+                                data.audio.signal_cloned()
+                                    .map(|audio| {
+                                        audio.map(|audio| {
+                                            AudioPlayerButton::render(AudioPlayerButton::new(audio))
+                                        })
+                                    })
+                            )
                         }))
                     }
             ))

@@ -66,6 +66,8 @@ impl TracesEdit {
                         let shape_style = ShapeStyleVar::Dynamic(shape_style_signal);
 
                         let callbacks = SvgCallbacks::new(
+                            //I don't think this is actually being called anymore
+                            //since select_box is _always_ visible now
                             Some(clone!(state, index => move || {
                                 if let Some(index) = index.get_cloned() {
                                     state.select_index(index);

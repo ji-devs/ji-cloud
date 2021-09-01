@@ -1,4 +1,4 @@
-use crate::audio::mixer::AudioMixer;
+use crate::audio::mixer::AUDIO_MIXER;
 use dominator::{clone, Dom};
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::Mutable;
@@ -35,7 +35,6 @@ where
     pub(super) opts: StateOpts<RawData>,
     pub(super) raw_loader: AsyncLoader,
     pub(super) page_body_switcher: AsyncLoader,
-    pub(super) audio_mixer: AudioMixer,
     phantom: PhantomData<(Mode, Step)>,
 }
 
@@ -83,7 +82,6 @@ where
             phase: Mutable::new(Rc::new(Phase::Loading(loading_kind))),
             raw_loader: AsyncLoader::new(),
             page_body_switcher: AsyncLoader::new(),
-            audio_mixer: AudioMixer::new(None),
             phantom: PhantomData,
         });
 
@@ -128,7 +126,7 @@ where
 
             let jig = _self.jig.borrow().as_ref().unwrap_ji().clone();
 
-            _self.audio_mixer.set_from_jig(&jig);
+            AUDIO_MIXER.with(|mixer| mixer.set_from_jig(&jig));
 
             let raw_source_player = match _self.phase.get_cloned().loading_kind_unchecked() {
                 LoadingKind::Direct(raw) => Some((raw.clone(), InitSource::ForceRaw, false)),
@@ -142,7 +140,7 @@ where
                                     _self.opts.module_id.clone(),
                                     _self.jig.borrow().as_ref().unwrap_ji().clone()
                                 );
-                                let base = init_from_raw(InitFromRawArgs::new(_self.audio_mixer.clone(), jig_id, module_id, jig, raw, InitSource::IframeData)).await;
+                                let base = init_from_raw(InitFromRawArgs::new(jig_id, module_id, jig, raw, InitSource::IframeData)).await;
 
                                 _self.phase.set(Rc::new(Phase::Ready(Ready {
                                     base, 
@@ -179,7 +177,7 @@ where
                     _self.opts.module_id.clone(),
                     _self.jig.borrow().as_ref().unwrap_ji().clone()
                 );
-                let base = init_from_raw(InitFromRawArgs::new(_self.audio_mixer.clone(), jig_id, module_id, jig, raw, init_source)).await;
+                let base = init_from_raw(InitFromRawArgs::new(jig_id, module_id, jig, raw, init_source)).await;
 
                 _self.phase.set(Rc::new(Phase::Ready(Ready {
                     base, 
@@ -266,7 +264,6 @@ where
     Mode: ModeExt + 'static,
     Step: StepExt + 'static,
 {
-    pub audio_mixer: AudioMixer,
     pub jig_id: JigId,
     pub module_id: ModuleId,
     pub jig: Jig,
@@ -283,7 +280,6 @@ where
     Step: StepExt + 'static,
 {
     pub fn new(
-        audio_mixer: AudioMixer,
         jig_id: JigId,
         module_id: ModuleId,
         jig: Jig,
@@ -302,7 +298,6 @@ where
         };
 
         Self {
-            audio_mixer,
             jig_id,
             module_id,
             theme_id,

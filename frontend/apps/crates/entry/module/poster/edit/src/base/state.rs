@@ -57,7 +57,6 @@ pub struct Base {
     pub backgrounds: Rc<Backgrounds>, 
     pub stickers: Rc<Stickers<Sticker>>, 
     pub text_editor: Rc<TextEditorState>,
-    pub audio_mixer: AudioMixer,
 }
 
 
@@ -74,7 +73,6 @@ impl Base {
             history,
             step,
             theme_choice,
-            audio_mixer,
             ..
         } = init_args;
 
@@ -169,7 +167,6 @@ impl Base {
             text_editor,
             backgrounds,
             stickers,
-            audio_mixer,
         });
 
         *_self_ref.borrow_mut() = Some(_self.clone());

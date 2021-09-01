@@ -44,7 +44,6 @@ pub struct Base {
     pub theme_id: ThemeId,
     pub background: Option<Background>,
     pub instructions: Instructions,
-    pub audio_mixer: AudioMixer,
     pub settings: PlayerSettings,
     pub raw_pairs: Vec<CardPair>,
     pub phase: Mutable<Phase>
@@ -63,7 +62,6 @@ impl Base {
         let InitFromRawArgs {
             jig_id,
             module_id,
-            audio_mixer,
             jig,
             raw,
             theme_id,
@@ -79,7 +77,6 @@ impl Base {
             theme_id,
             background: content.base.background,
             instructions: content.base.instructions, 
-            audio_mixer,
             settings: content.player_settings,
             raw_pairs: content.base.pairs,
             phase: Mutable::new(Phase::Init),
