@@ -66,6 +66,15 @@ export class _ extends LitElement {
                 width: 100%;
                 object-fit: contain;
             }
+            .img-hover {
+                display: none;
+            }
+            :host(:hover) .img {
+                display: none;
+            }
+            :host(:hover) .img-hover {
+                display: inline-block;
+            }
             h4 {
                 font-size: 32px;
                 font-weight: 900;
@@ -93,6 +102,9 @@ export class _ extends LitElement {
                 margin-top: 10px;
                 margin: 0;
             }
+            ::slotted(button-rect) {
+                text-align: center;
+            }
         `]
     }
 
@@ -104,6 +116,7 @@ export class _ extends LitElement {
 
         return html`
             <img-ui class="img" path="entry/home/why-ji/${this.kind}.png"></img-ui>
+            <img-ui class="img-hover" path="entry/home/why-ji/${this.kind}-hover.png"></img-ui>
             <h4>${kindDetails.title}</h4>
             <p>${kindDetails.paragraph}</p>
             <slot></slot>

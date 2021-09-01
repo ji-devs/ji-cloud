@@ -8,7 +8,7 @@ export class _ extends LitElement {
                 display: grid;
                 row-gap: 3px;
                 width: 290px;
-                height: 350px;
+                height: 270px;
                 place-content: center;
                 justify-items: center;
                 text-decoration: none;
@@ -40,9 +40,12 @@ export class _ extends LitElement {
         `];
     }
 
+    @property()
+    href: string = "";
+
     render() {
         return html`
-            <a>
+            <a href="${this.href}">
                 <div class="image-wrapper">
                     <slot name="image"></slot>
                 </div>

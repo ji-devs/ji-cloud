@@ -42,21 +42,6 @@ export class _ extends LitElement {
                 <h2>${STR_TITLE}</h2>
 
                 <div class="items-wrapper">
-                    <!-- <home-why-ji-item kind="content">
-                        <button-rect kind="text" color="blue" size="small" weight="normal">${STR_CONTENT_ACTION}</button-rect>
-                    </home-why-ji-item>
-                    <home-why-ji-item kind="create">
-                        <button-rect kind="text" color="blue" size="small" weight="normal">${STR_CREATE_ACTION}</button-rect>
-                    </home-why-ji-item>
-                    <home-why-ji-item kind="customize">
-                        <button-rect kind="text" color="blue" size="small" weight="normal">${STR_CUSTOMIZE_ACTION}</button-rect>
-                    </home-why-ji-item>
-                    <home-why-ji-item kind="community">
-                        <button-rect kind="text" color="blue" size="small" weight="normal">${STR_COMMUNITY_ACTION}</button-rect>
-                    </home-why-ji-item>
-                    <home-why-ji-item kind="classroom">
-                        <button-rect kind="text" color="blue" size="small" weight="normal">${STR_CLASSROOM_ACTION}</button-rect>
-                    </home-why-ji-item> -->
                     <slot></slot>
                 </div>
             </div>

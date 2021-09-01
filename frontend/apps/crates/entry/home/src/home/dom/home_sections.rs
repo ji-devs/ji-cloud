@@ -1,9 +1,8 @@
-use dominator::{clone, html, Dom};
+use dominator::{html, Dom};
 use utils::routes::{JigRoute, Route};
 use std::rc::Rc;
-use utils::events;
 
-use super::super::{actions::search, state::Testimonial};
+use super::super::{actions, state::Testimonial};
 
 use super::super::state::State;
 
@@ -16,36 +15,34 @@ const STR_CUSTOMIZE_ACTION: &'static str = "See our lesson outlines";
 const STR_COMMUNITY_ACTION: &'static str = "Get inspired";
 const STR_CLASSROOM_ACTION: &'static str = "Manage your class";
 
+const STR_COMING_SOON: &'static str = "(coming soon!)";
+
 pub fn render(state: Rc<State>) -> Dom {
     html!("empty-fragment", {
         .children(&mut [
             html!("home-quick-search", {
-                .visible(false)
-                .children(state.quick_searches.iter().map(clone!(state => move|item| {
+                .children(state.quick_searches.iter().map(|item| {
                     html!("home-quick-search-item", {
+                        .property("href", actions::search_url(&item.search_term))
                         .children(&mut [
-                            html!("img-ji", {
+                            html!("img-ui", {
                                 .property("slot", "image")
-                                .property("id", &item.image_id)
-                                .property("lib", &item.image_lib)
-                                .property("size", "original")
+                                .property("path", {
+                                    format!("entry/home/quick-search/{}.svg", &item.search_term.to_lowercase().replace(" ", "-"))
+                                })
                             }),
                             html!("h4", {
                                 .property("slot", "title")
                                 .text(&item.search_term)
                             }),
-                            html!("h5", {
-                                .property("slot", "subtitle")
-                                .text(&item.jigs_count.to_string())
-                                .text(STR_JIGS)
-                            }),
+                            // html!("h5", {
+                            //     .property("slot", "subtitle")
+                            //     .text(&item.jigs_count.to_string())
+                            //     .text(STR_JIGS)
+                            // }),
                         ])
-                        .event(clone!(state, item => move |_: events::Click| {
-                            state.search_selected.query.set(item.search_term.clone());
-                            search(Rc::clone(&state));
-                        }))
                     })
-                })))
+                }))
             }),
             html!("home-create"),
             html!("home-why-ji", {
@@ -58,6 +55,7 @@ pub fn render(state: Rc<State>) -> Dom {
                                 .property("color", "blue")
                                 .property("size", "small")
                                 .property("weight", "normal")
+                                .property("href", actions::search_url(""))
                                 .text(STR_CONTENT_ACTION)
                             }),
                         ])
@@ -96,8 +94,9 @@ pub fn render(state: Rc<State>) -> Dom {
                                 .property("color", "blue")
                                 .property("size", "small")
                                 .property("weight", "normal")
-                                .property("href", "javascript:alert(\"Coming soon\")")
                                 .text(STR_COMMUNITY_ACTION)
+                                .child(html!("br"))
+                                .text(STR_COMING_SOON)
                             }),
                         ])
                     }),
@@ -109,8 +108,9 @@ pub fn render(state: Rc<State>) -> Dom {
                                 .property("color", "blue")
                                 .property("size", "small")
                                 .property("weight", "normal")
-                                .property("href", "javascript:alert(\"Coming soon\")")
                                 .text(STR_CLASSROOM_ACTION)
+                                .child(html!("br"))
+                                .text(STR_COMING_SOON)
                             }),
                         ])
                     }),

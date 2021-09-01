@@ -52,7 +52,7 @@ impl PageLinks {
     pub fn route(&self) -> String {
         match self {
             Self::Home => Route::Home(HomeRoute::Home).to_string(),
-            Self::Content => Route::Home(HomeRoute::Home).to_string(),
+            Self::Content => Route::Home(HomeRoute::Search(None)).to_string(),
             Self::Create => Route::Jig(JigRoute::Gallery).to_string(),
             Self::Community => "javascript:alert(\"Coming soon\")".to_string(),
             Self::Classroom => "javascript:alert(\"Coming soon\")".to_string(),

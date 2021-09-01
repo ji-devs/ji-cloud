@@ -18,6 +18,13 @@ use utils::prelude::*;
 
 use super::state::State;
 
+pub fn search_url(q: &str) -> String {
+    Route::Home(HomeRoute::Search(Some(shared::domain::jig::JigSearchQuery {
+        q: q.to_string(),
+        ..Default::default()
+    }))).to_string()
+}
+
 pub fn fetch_data(state: Rc<State>, include_search: bool) {
     state.loader.load(clone!(state => async move {
         match include_search {

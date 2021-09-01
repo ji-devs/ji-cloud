@@ -92,10 +92,8 @@ export class _ extends LitElement {
                 }
 
                 button, a {
-                    all: initial;
-                    font-family: inherit;
+                    all: unset;
                     color: inherit;
-                    cursor: inherit;
                 }
             `
         ];

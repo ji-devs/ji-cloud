@@ -11,7 +11,7 @@ use crate::page_header::state::{LoggedInState, PageLinks};
 
 use super::{actions, state::State};
 
-const DONATE_LINK: &'static str = "https://www.jewishinteractive.org/donate-to-ji-coronavirus/";
+const DONATE_LINK: &'static str = "https://www.jewishinteractive.org/donate/";
 
 const STR_SIGN_UP: &'static str = "Sign up";
 const STR_LOGIN: &'static str = "Login";

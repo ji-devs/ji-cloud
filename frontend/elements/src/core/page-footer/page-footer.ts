@@ -7,16 +7,16 @@ const STR_TITLE_ABOUT = "About Us";
 
 
 const STR_JIGS_TITLE = "JIGs";
-const STR_JIGS_HEBREW = "Hebrew JIGs";
-const STR_JIGS_JEWISH_HOLIDAYS = "Jewish holidays JIGs";
-const STR_JIGS_TORAH = "Torah JIGs";
+const STR_JIGS_HEBREW = "Hebrew";
+const STR_JIGS_JEWISH_HOLIDAYS = "Jewish holidays";
+const STR_JIGS_TORAH = "Torah";
 const STR_JIGS_J_STREAM = "J-STEAM";
 const STR_JIGS_ISRAEL = "Israel";
 const STR_JIGS_SONGS = "Songs";
 
 
 const STR_PRODUCT_TITLE = "Product";
-const STR_PRODUCT_MANAGE_CLASSROOM = "Manage Classroom";
+const STR_PRODUCT_MANAGE_CLASSROOM = "Manage classroom";
 const STR_PRODUCT_CREATE_ACTIVITIES = "Create activities";
 const STR_PRODUCT_JOIN_COMMUNITY = "Join community";
 
@@ -27,7 +27,7 @@ const STR_HELP_TOUR = "Quick tour";
 const STR_HELP_TUTORIALS = "Ji Tutorials";
 const STR_HELP_WEBINARS = "Online webinars";
 const STR_HELP_ACCESSIBILITY = "Accessibility";
-const STR_ACCESSIBILITY_ALERT = "We are working toward making JIGZY easy to access for children of all abilities.";
+const STR_ACCESSIBILITY_ALERT = "We are working toward making JIGZI easy to access for children of all abilities.";
 
 
 const STR_CONTACT_TITLE = "Contact us";
@@ -51,7 +51,7 @@ const STR_DONATE = "Donate";
 const STR_SERVICES_TITLE = "Products & Services";
 const STR_SERVICES_TEACHERS = "Teachers";
 const STR_SERVICES_PARENTS = "Parents";
-const STR_SERVICES_BITES ="Ji Bites";
+const STR_SERVICES_BITES ="Ji Bytes";
 const STR_SERVICES_PRIME = "Ji Prime";
 const STR_SERVICES_TAP = "Ji Tap";
 const STR_SERVICES_STUDIO = "Ji Studio";
@@ -63,8 +63,13 @@ const STR_SERVICES_JOBS = "Jobs";
 
 const STR_PRIVACY = "Privacy Policy";
 const STR_TERMS = "Terms & Conditions";
+const STR_CHILD_PROTECTION = "Child Protection Policy";
 
 const COMING_SOON_ALERT = "javascript:alert('Coming soon')";
+
+function searchLink(q: string): string {
+    return `/home/search?q=${q}`;
+}
 
 @customElement('page-footer')
 export class _ extends LitElement {
@@ -173,12 +178,12 @@ export class _ extends LitElement {
                         <div class="column">
                             <h4>${STR_JIGS_TITLE}</h4>
                             <ul>
-                                <li><a href="#">${STR_JIGS_HEBREW}</a></li>
-                                <li><a href="#">${STR_JIGS_JEWISH_HOLIDAYS}</a></li>
-                                <li><a href="#">${STR_JIGS_TORAH}</a></li>
-                                <li><a href="#">${STR_JIGS_J_STREAM}</a></li>
-                                <li><a href="#">${STR_JIGS_ISRAEL}</a></li>
-                                <li><a href="#">${STR_JIGS_SONGS}</a></li>
+                                <li><a href="${searchLink(STR_JIGS_HEBREW)}">${STR_JIGS_HEBREW}</a></li>
+                                <li><a href="${searchLink(STR_JIGS_JEWISH_HOLIDAYS)}">${STR_JIGS_JEWISH_HOLIDAYS}</a></li>
+                                <li><a href="${searchLink(STR_JIGS_TORAH)}">${STR_JIGS_TORAH}</a></li>
+                                <li><a href="${searchLink(STR_JIGS_J_STREAM)}">${STR_JIGS_J_STREAM}</a></li>
+                                <li><a href="${searchLink(STR_JIGS_ISRAEL)}">${STR_JIGS_ISRAEL}</a></li>
+                                <li><a href="${searchLink(STR_JIGS_SONGS)}">${STR_JIGS_SONGS}</a></li>
                             </ul>
                         </div>
                         <div class="column">
@@ -250,7 +255,7 @@ export class _ extends LitElement {
                             ${STR_ABOUT_TEXT.split("\n").map(text => {
                                 return html`<p>${text}</p>`;
                             })}
-                            <a href="https://www.jewishinteractive.org/donate-to-ji-coronavirus/" class="donate-link">
+                            <a href="https://www.jewishinteractive.org/donate/" class="donate-link">
                                 <button-rect color="blue" bold>${STR_DONATE}</button-rect>
                             </a>
                         </div>
@@ -276,6 +281,8 @@ export class _ extends LitElement {
                     <a href="https://www.jewishinteractive.org/privacy-policy/" target="_blank">${STR_PRIVACY}</a>
                     <span>|</span>
                     <a href="https://www.jewishinteractive.org/terms-and-conditions/" target="_blank">${STR_TERMS}</a>
+                    <span>|</span>
+                    <a href="https://www.jewishinteractive.org/jewish-interactive-child-protection-policy/" target="_blank">${STR_CHILD_PROTECTION}</a>
                 </section>
             </div>
         `;

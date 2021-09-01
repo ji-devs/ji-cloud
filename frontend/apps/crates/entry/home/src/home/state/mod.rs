@@ -49,14 +49,20 @@ impl State {
     }
 
     fn get_quick_searches() -> Vec<QuickSearch> {
-        iter::repeat(QuickSearch {
-            image_id: String::from("???"),
-            image_lib: String::from("mock"),
-            search_term: String::from("Chanukah"),
-            jigs_count: 355 as u32,
-        })
-        .take(5)
-        .collect()
+        vec![
+            QuickSearch {
+                search_term: String::from("Hebrew"),
+            },
+            QuickSearch {
+                search_term: String::from("Tishrei"),
+            },
+            QuickSearch {
+                search_term: String::from("Chanukah"),
+            },
+            QuickSearch {
+                search_term: String::from("Israel"),
+            },
+        ]
     }
 
     fn get_whats_new() -> Vec<WhatsNewItem> {
@@ -136,10 +142,7 @@ pub enum HomePageMode {
 
 #[derive(Clone)]
 pub struct QuickSearch {
-    pub image_id: String,
-    pub image_lib: String, // is this always the same?
     pub search_term: String,
-    pub jigs_count: u32,
 }
 
 #[derive(Clone)]

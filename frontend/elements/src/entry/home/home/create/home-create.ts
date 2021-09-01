@@ -58,7 +58,7 @@ export class _ extends LitElement {
         const STR_SUBTITLE = "Learning Through Creation";
         const STR_TITLE_CREATE = "Create";
         const STR_TITLE = "your own JIGs";
-        const STR_CREATE_YOUR_OWN = "Create your own JIGs";
+        const STR_JIG_EXPLAINER = "Create your own Jewish Interactive Games (JIGs) for your class in minutes!";
 
         const STR_LIBRARY = "Large library of content";
         const STR_INTERFACE = "Smart, friendly interface";
@@ -76,7 +76,7 @@ export class _ extends LitElement {
                         <span class="word-create">${STR_TITLE_CREATE}</span>
                         ${STR_TITLE}
                     </h2>
-                    <h4>${STR_CREATE_YOUR_OWN}</h4>
+                    <h4>${STR_JIG_EXPLAINER}</h4>
                     <ul>
                         <li>${STR_LIBRARY}</li>
                         <li>${STR_INTERFACE}</li>
