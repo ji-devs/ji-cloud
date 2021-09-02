@@ -15,7 +15,7 @@ use awsm_web::dom::*;
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
 use components::{
-    image::search::{self as image_search, state::ImageSearchOptions, callbacks::Callbacks as ImageSearchCallbacks},
+    image::search::{self as image_search, state::{ImageSearchOptions, ImageSearchCheckboxKind}, callbacks::Callbacks as ImageSearchCallbacks},
     audio::input::{self, AudioInputOptions, AudioInput},
     color_select,
     text_editor,
@@ -79,6 +79,7 @@ fn render_button(step:u32, label:&str, state:Rc<State>) -> Dom {
 
 pub fn render_image_search() -> Dom {
     let opts = ImageSearchOptions {
+        checkbox_kind: Some(ImageSearchCheckboxKind::BackgroundLayer1Filter),
         ..ImageSearchOptions::default()
     };
     let callbacks = ImageSearchCallbacks::new(

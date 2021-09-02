@@ -1,17 +1,19 @@
-use crate::image::search::state::RECENT_COUNT;
+use crate::image::search::state::{ImageSearchCheckboxKind, RECENT_COUNT};
+use crate::image::tag::ImageTag;
 
 use super::super::upload::upload_image;
-use super::state::{State, BACKGROUND_NAME};
+use super::state::State;
 use dominator::clone;
 use futures::future::join;
 use shared::api::endpoints::image;
 use shared::domain::image::{user::UserImageCreateRequest, recent::{UserRecentImageCreateRequest, UserRecentImageListRequest}};
+use shared::domain::meta::ImageTagIndex;
 use shared::{
     api::{endpoints, ApiEndpoint},
     domain::{
-        image::*,
+        image::{ImageSearchQuery, ImageKind, CreateResponse},
         jig::module::body::Image,
-        meta::*,
+        meta::{ImageStyle, MetadataResponse},
     },
     error::EmptyError,
     media::MediaLibrary,
@@ -37,15 +39,6 @@ pub async fn get_styles() -> Vec<ImageStyle> {
     )
     .await;
     res.unwrap_ji().image_styles
-}
-
-pub fn get_background_id(styles: &Vec<ImageStyle>) -> ImageStyleId {
-    styles
-        .iter()
-        .find(|s| s.display_name == BACKGROUND_NAME)
-        .expect_ji(&format!("set \"{}\" in the database!", BACKGROUND_NAME))
-        .id
-        .clone()
 }
 
 pub fn search(state: Rc<State>) {
@@ -78,6 +71,30 @@ async fn search_async(state: Rc<State>) {
         None => unreachable!("User should exist"),
     };
 
+    let kind = match &state.options.checkbox_kind {
+        Some(ImageSearchCheckboxKind::StickersFilter) if state.checkbox_checked.get() => Some(ImageKind::Sticker),
+        _ => None,
+    };
+
+    let mut tags = state.options.tags.clone().unwrap_or_default();
+    match &state.options.checkbox_kind {
+        Some(ImageSearchCheckboxKind::BackgroundLayer1Filter) | Some(ImageSearchCheckboxKind::BackgroundLayer2Filter) => {
+            let tag = match &state.options.checkbox_kind {
+                Some(ImageSearchCheckboxKind::BackgroundLayer1Filter) => ImageTag::BackgroundLayer1,
+                Some(ImageSearchCheckboxKind::BackgroundLayer2Filter) => ImageTag::BackgroundLayer2,
+                _ => unreachable!(),
+            };
+            if state.checkbox_checked.get() {
+                if !tags.contains(&tag) {
+                    tags.push(tag);
+                };
+            } else {
+                tags.retain(|t| t != &tag);
+            };
+        },
+        _ => {},
+    };
+
     let search_query = ImageSearchQuery {
         q: state.query.lock_ref().clone(),
         page: state.page.lock_ref().clone(),
@@ -87,10 +104,24 @@ async fn search_async(state: Rc<State>) {
             .iter()
             .map(|style_id| style_id.clone())
             .collect(),
-        kind: Some(ImageKind::Sticker),
         affiliations,
+        kind,
+        tags: tags
+            .iter()
+            .map(|x| ImageTagIndex(x.as_index()))
+            .collect(),
+        tags_priority: state
+            .options
+            .tags_priority
+            .clone()
+            .unwrap_or_default()
+            .iter()
+            .map(|x| ImageTagIndex(x.as_index()))
+            .collect(),
         ..Default::default()
     };
+
+    log::info!("{:?}", search_query);
 
     let res = endpoints::image::Search::api_with_auth(Some(search_query)).await;
 
@@ -99,7 +130,7 @@ async fn search_async(state: Rc<State>) {
             state.image_list.lock_mut().replace_cloned(res.images.iter().map(|i| {
                 Image {
                     id: i.metadata.id,
-                    lib: MediaLibrary::Global, // TODO: hard coded?
+                    lib: MediaLibrary::Global,
                 }
             }).collect());
         },

@@ -3,13 +3,13 @@ use strum_macros::EnumIter;
 #[repr(i16)]
 #[derive(EnumIter, Debug, PartialEq, Copy, Clone, Eq, Hash)]
 pub enum ImageTag {
-    BackgroundLayer1,
-    BackgroundLayer2,
-    Ispy,
-    MultipleChoice,
-    DragAndDrop,
-    Video,
-    NavigationButton
+    BackgroundLayer1 = 0,
+    BackgroundLayer2 = 1,
+    Ispy = 2,
+    MultipleChoice = 3,
+    DragAndDrop = 4,
+    Video = 5,
+    NavigationButton = 6
 }
 
 impl ImageTag {

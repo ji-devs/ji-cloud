@@ -73,12 +73,7 @@ impl Tab {
                 Self::Theme(Rc::new(state))
             }
             TabKind::Image => {
-                let opts = ImageSearchOptions {
-                    background_only: Some(true),
-                    upload: true,
-                    filters: true,
-                    recent: true,
-                };
+                let opts = ImageSearchOptions::default();
 
                 let callbacks = ImageSearchCallbacks::new(Some(clone!(base => move |image| {
                     base.set_bg(Background::Image(image));
