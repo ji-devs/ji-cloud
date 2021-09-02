@@ -371,46 +371,46 @@ for no key update skip locked;
             //language=SQL
             r#"
 select id,
-    name,
-    kind as "kind!: ImageKind",
-    description,
-    array((select affiliation_id from image_affiliation where image_id = image_metadata.id)) as "affiliations!",
-    array((select affiliation.display_name
-           from affiliation
-                    inner join image_affiliation on affiliation.id = image_affiliation.affiliation_id
-           where image_affiliation.image_id = image_metadata.id))                            as "affiliation_names!",
-           array((select style_id from image_style where image_id = image_metadata.id))             as "styles!",
-           array((select style.display_name
-                  from style
-                           inner join image_style on style.id = image_style.style_id
-           where image_style.image_id = image_metadata.id))                                  as "style_names!",
-    array((select age_range_id from image_age_range where image_id = image_metadata.id))     as "age_ranges!",
-    array((select age_range.display_name
-           from age_range
-                    inner join image_age_range on age_range.id = image_age_range.age_range_id
-           where image_age_range.image_id = image_metadata.id))                              as "age_range_names!",
-    array((select category_id from image_category where image_id = image_metadata.id))       as "categories!",
-    array((select name
-           from category
-                    inner join image_category on category.id = image_category.category_id
-           where image_category.image_id = image_metadata.id))                               as "category_names!",
-    array((select index 
-           from image_tag 
-               inner join image_tag_join on image_tag.index = image_tag_join.tag_index
-           where image_tag_join.image_id = image_metadata.id))                               as "tags!",
-    array((select display_name
-           from image_tag
-                    inner join image_tag_join on image_tag.index = image_tag_join.tag_index
-           where image_tag_join.image_id = image_metadata.id))                               as "tag_names!",
-    (publish_at < now() is true) as "is_published!",
-    is_premium
+       name,
+       kind                                                                                     as "kind!: ImageKind",
+       description,
+       array((select affiliation_id from image_affiliation where image_id = image_metadata.id)) as "affiliations!",
+       array((select affiliation.display_name
+              from affiliation
+                       inner join image_affiliation on affiliation.id = image_affiliation.affiliation_id
+              where image_affiliation.image_id = image_metadata.id))                            as "affiliation_names!",
+       array((select style_id from image_style where image_id = image_metadata.id))             as "styles!",
+       array((select style.display_name
+              from style
+                       inner join image_style on style.id = image_style.style_id
+              where image_style.image_id = image_metadata.id))                                  as "style_names!",
+       array((select age_range_id from image_age_range where image_id = image_metadata.id))     as "age_ranges!",
+       array((select age_range.display_name
+              from age_range
+                       inner join image_age_range on age_range.id = image_age_range.age_range_id
+              where image_age_range.image_id = image_metadata.id))                              as "age_range_names!",
+       array((select category_id from image_category where image_id = image_metadata.id))       as "categories!",
+       array((select name
+              from category
+                       inner join image_category on category.id = image_category.category_id
+              where image_category.image_id = image_metadata.id))                               as "category_names!",
+       array((select index
+              from image_tag
+                       inner join image_tag_join on image_tag.index = image_tag_join.tag_index
+              where image_tag_join.image_id = image_metadata.id))                               as "tags!",
+       array((select display_name
+              from image_tag
+                       inner join image_tag_join on image_tag.index = image_tag_join.tag_index
+              where image_tag_join.image_id = image_metadata.id))                               as "tag_names!",
+       (publish_at < now() is true)                                                             as "is_published!",
+       is_premium
 from image_metadata
-where 
-    last_synced_at is null or
-    (updated_at is not null and last_synced_at < updated_at) or
-    (publish_at < now() is true and last_synced_at < publish_at)
-limit 100
-for no key update skip locked;
+         join image_upload on id = image_id
+where (last_synced_at is null or
+       (updated_at is not null and last_synced_at < updated_at) or
+       (publish_at < now() is true and last_synced_at < publish_at))
+  and processed_at is not null
+limit 100 for no key update skip locked;
      "#
         )
         .fetch(&mut txn)
