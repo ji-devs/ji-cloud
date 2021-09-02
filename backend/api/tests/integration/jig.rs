@@ -281,3 +281,64 @@ async fn count() -> anyhow::Result<()> {
 
     Ok(())
 }
+
+#[actix_rt::test]
+async fn update() -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::Jig], &[]).await;
+
+    let port = app.port();
+
+    let client = reqwest::Client::new();
+
+    let resp = client
+        .get(&format!(
+            "http://0.0.0.0:{}/v1/jig/3a71522a-cd77-11eb-8dc1-af3e35f7c743",
+            port
+        ))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    let body: serde_json::Value = resp.json().await?;
+
+    insta::assert_json_snapshot!(body);
+
+    let resp = client
+        .patch(&format!(
+            "http://0.0.0.0:{}/v1/jig/3a71522a-cd77-11eb-8dc1-af3e35f7c743",
+            port
+        ))
+        .json(&json!({
+            "language": "en-us",
+            "audio_background": "SukkotLoop",
+            "audio_effects": {
+                "feedback_positive": [ "Magic" ],
+                "feedback_negative": [ "Boing" ]
+            }
+        }))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    assert_eq!(resp.status(), StatusCode::NO_CONTENT);
+
+    let resp = client
+        .get(&format!(
+            "http://0.0.0.0:{}/v1/jig/3a71522a-cd77-11eb-8dc1-af3e35f7c743",
+            port
+        ))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    let body: serde_json::Value = resp.json().await?;
+
+    app.stop(false).await;
+
+    insta::assert_json_snapshot!(body, {".**.last_edited" => "[timestamp]"});
+
+    Ok(())
+}

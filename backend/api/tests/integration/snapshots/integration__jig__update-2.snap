@@ -5,35 +5,22 @@ expression: body
 ---
 {
   "jig": {
-    "id": "[id]",
+    "id": "3a71522a-cd77-11eb-8dc1-af3e35f7c743",
     "display_name": "",
-    "modules": [
-      {
-        "id": "[id]",
-        "kind": "Cover"
-      },
-      {
-        "id": "[id]",
-        "kind": "Flashcards"
-      },
-      {
-        "id": "[id]",
-        "kind": "Memory"
-      }
-    ],
+    "modules": [],
     "age_ranges": [],
     "affiliations": [],
     "goals": [],
     "creator_id": "1f241e1b-b537-493f-a230-075cb16315be",
     "author_id": "1f241e1b-b537-493f-a230-075cb16315be",
     "author_name": "Bobby Tables",
-    "language": "en",
+    "language": "en-us",
     "categories": [],
     "publish_at": null,
-    "additional_resources": "[ids]",
+    "additional_resources": [],
     "description": "test description",
-    "last_edited": "[last_edited]",
-    "is_public": false,
+    "last_edited": "[timestamp]",
+    "is_public": true,
     "default_player_settings": {
       "direction": "ltr",
       "display_score": false,
@@ -41,10 +28,14 @@ expression: body
       "drag_assist": false
     },
     "theme": "Blank",
-    "audio_background": null,
+    "audio_background": "SukkotLoop",
     "audio_effects": {
-      "feedback_positive": "[audio]",
-      "feedback_negative": "[audio]"
+      "feedback_positive": [
+        "Magic"
+      ],
+      "feedback_negative": [
+        "Boing"
+      ]
     }
   }
 }

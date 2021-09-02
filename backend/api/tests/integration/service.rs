@@ -1,4 +1,3 @@
-use futures::future::Remote;
 use shared::config::RemoteTarget;
 
 use core::{
@@ -30,8 +29,6 @@ pub struct TestServicesSettings {
 }
 
 impl TestServicesSettings {
-    const TEST_SERVICE_ACCOUNT_JSON: &'static str = "TEST_SERVICE_ACCOUNT_JSON";
-
     const TEST_SENDGRID_API_KEY: &'static str = "TEST_SENDGRID_API_KEY";
     const TEST_SENDER_EMAIL: &'static str = "TEST_SENDER_EMAIL";
     const TEST_SIGNUP_VERIFY_TEMPLATE: &'static str = "TEST_SIGNUP_VERIFY_TEMPLATE";

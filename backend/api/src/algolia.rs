@@ -282,7 +282,7 @@ select id,
     (publish_at < now() is true) as "is_published!",
     is_public as "is_public!",
     author_id as "author",
-    (select given_name || ' '::text || family_name from "user" join user_profile up on "user".id = up.user_id where id = jig.author_id) as "author_name"
+    (select given_name || ' '::text || family_name from user_profile where user_profile.user_id = jig.author_id) as "author_name"
 from jig
 where
     last_synced_at is null or
