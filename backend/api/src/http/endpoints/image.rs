@@ -157,11 +157,21 @@ async fn search(
         .await?
         .ok_or_else(|| error::Service::DisabledService(ServiceKind::Algolia))?;
 
+    log::info!("ids: {}\n {:?}", ids.len(), ids);
+
     let images: Vec<_> = db::image::get(db.as_ref(), &ids)
         .err_into::<error::Service>()
         .and_then(|metadata: ImageMetadata| async { Ok(ImageResponse { metadata }) })
         .try_collect()
         .await?;
+
+    // DEBUG
+    let result_ids: Vec<_> = images
+        .iter()
+        .map(|it| it.metadata.id.0.to_string())
+        .collect();
+
+    log::info!("n images: {}\n {:?}", result_ids.len(), result_ids);
 
     Ok(Json(ImageSearchResponse {
         images,

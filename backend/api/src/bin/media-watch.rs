@@ -1,8 +1,4 @@
 //! Media watch and transform service binary
-//!
-//! https://github.com/meteatamel/cloudrun-tutorial/issues/35
-//!
-//!
 
 #![warn(rust_2018_idioms)]
 #![warn(future_incompatible)]
@@ -39,7 +35,7 @@ use ji_cloud_api::{
     logger,
     service::{
         event_arc::{self, audit_log, EventResource, EventSource},
-        notifications, s3, uploads, GcpAccessKeyStore, ServiceData,
+        notifications, s3, upload, GcpAccessKeyStore, ServiceData,
     },
 };
 use shared::media::{FileKind, MediaLibrary, PngImageFile};
@@ -50,11 +46,24 @@ async fn main() -> anyhow::Result<()> {
 
     logger::init()?;
 
-    let (s3, gcp_key_store, event_arc, notifications, db_pool, runtime_settings) = {
+    let (
+        s3,
+        gcp_key_store,
+        event_arc,
+        notifications,
+        db_pool,
+        media_upload_cleaner,
+        runtime_settings,
+        _sentry_guard,
+    ) = {
         log::trace!("initializing settings and processes");
         let remote_target = settings::read_remote_target()?;
 
         let settings: SettingsManager = SettingsManager::new(remote_target).await?;
+
+        // FIXME use a sentry DSN for a media-watch specific project
+        let sentry_guard =
+            core::sentry::init(settings.sentry_api_key().await?.as_deref(), remote_target)?;
 
         let db_pool = db::get_pool(
             settings
@@ -87,6 +96,9 @@ async fn main() -> anyhow::Result<()> {
             .map(notifications::Client::new)
             .transpose()?;
 
+        let media_upload_cleaner =
+            upload::cleaner::UploadCleaner::new(db_pool.clone(), db::UPLOADS_DB_SCHEMA);
+
         let runtime_settings = settings.runtime_settings().await?;
 
         (
@@ -95,9 +107,13 @@ async fn main() -> anyhow::Result<()> {
             event_arc,
             notifications,
             db_pool,
+            media_upload_cleaner,
             runtime_settings,
+            sentry_guard,
         )
     };
+
+    let _ = media_upload_cleaner.spawn();
 
     let handle = std::thread::spawn(|| {
         build_and_run_media_watch(
@@ -272,7 +288,7 @@ async fn process_uploaded_media_trigger(
         // should the token be fetched here or should i pass a ref to the key store to `finalize_upload()`?
         let access_token = gcp_key_store.fetch_token().await?;
 
-        uploads::finalize_upload(
+        upload::finalize_upload(
             &access_token,
             &notifications,
             &event_resource.library,
@@ -301,12 +317,12 @@ pub async fn signal_status_and_process_media(
 
     let res = match file_kind {
         FileKind::ImagePng(PngImageFile::Original) => match library {
-            MediaLibrary::Global => uploads::process_image(&db, &s3, *id).await,
-            MediaLibrary::User => uploads::process_user_image(&db, &s3, *id).await,
+            MediaLibrary::Global => upload::process_image(&db, &s3, *id).await,
+            MediaLibrary::User => upload::process_user_image(&db, &s3, *id).await,
             _ => return Err(error::EventArc::InvalidEventResource),
         },
-        FileKind::AnimationGif => uploads::process_animation(db, s3, *id).await,
-        FileKind::AudioMp3 => uploads::process_user_audio(db, s3, *id).await,
+        FileKind::AnimationGif => upload::process_animation(db, s3, *id).await,
+        FileKind::AudioMp3 => upload::process_user_audio(db, s3, *id).await,
 
         _ => return Err(error::EventArc::InvalidEventResource),
     };

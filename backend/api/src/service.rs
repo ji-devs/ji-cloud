@@ -14,7 +14,7 @@ pub mod mail;
 pub mod notifications;
 pub mod s3;
 pub mod storage;
-pub mod uploads;
+pub mod upload;
 
 pub trait Service {
     const DISABLED_ERROR: error::ServiceKind;
@@ -111,13 +111,6 @@ pub struct GcpAccessKey {
 
 impl GcpAccessKey {
     const KEY_EXPIRATION_PAD_SECONDS: i64 = 360;
-
-    fn new(access_token: String, expires_at: Option<DateTime<Utc>>) -> Self {
-        Self {
-            access_token,
-            expires_at,
-        }
-    }
 
     /// checks if the key is stale
     ///
