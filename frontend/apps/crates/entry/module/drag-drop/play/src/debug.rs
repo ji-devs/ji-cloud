@@ -27,6 +27,7 @@ use shared::{
                     Background,
                     Instructions,
                     Transform,
+                    Audio,
                     drag_drop::{
                         Content, Mode, ModuleData as RawData,
                         Item,
@@ -61,6 +62,7 @@ pub static SETTINGS:OnceCell<DebugSettings> = OnceCell::new();
 
 const IMAGE_UUID:&'static str = "f2e63cf2-ee11-11eb-9b68-4bf1f063ab1c";
 //const IMAGE_UUID:&'static str = "e84dd7fe-c92d-11eb-8c82-cfd1d3fd13ff";
+const AUDIO_UUID:&'static str = "734314da-0b07-11ec-95f0-2b4855fa3cb8";
 
 pub const DEBUG_TEXT:&'static str = "Hello World this is a long line of text";
 
@@ -234,7 +236,7 @@ pub fn init(jig_id: JigId, module_id: ModuleId) {
                     InitSticker::Sprite, 
                     ItemKind::Interactive(
                         Interactive {
-                            audio: None,
+                            audio: Some(Audio { id: AudioId(Uuid::parse_str(AUDIO_UUID).unwrap_ji()), lib: MediaLibrary::User}),
                             target_transform: {
                                 let mut t = Transform::identity();
                                 Some(t)

@@ -94,6 +94,7 @@ pub struct InteractiveItem {
     pub completed: Mutable<bool>,
     pub audio: Option<Audio>,
     pub audio_effect_handle: RefCell<Option<AudioHandle>>,
+    pub audio_user_handle: RefCell<Option<AudioHandle>>,
     pub target_transform: Transform, 
     pub curr_transform: Mutable<Transform>,
     pub drag: Mutable<Option<Rc<Drag>>>,
@@ -119,6 +120,7 @@ impl InteractiveItem {
             size: Mutable::new(None),
             target_index: RefCell::new(None),
             audio_effect_handle: RefCell::new(None),
+            audio_user_handle: RefCell::new(None),
         })
     }
 
