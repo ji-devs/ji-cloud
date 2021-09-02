@@ -77,6 +77,8 @@ where
                                         age_ranges.push_cloned(age_id.clone());
                                     },
                                 };
+
+                                actions::save_profile(Rc::clone(&state));
                             }))
                         })
                     })).collect::<Vec<Dom>>()
