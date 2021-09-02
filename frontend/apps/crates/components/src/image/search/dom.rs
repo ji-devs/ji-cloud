@@ -1,6 +1,8 @@
+use crate::image::search::state::ImageSearchCheckboxKind;
+
 use super::{
-    actions::{get_background_id, search, fetch_init_data, upload_file},
-    state::{State, BACKGROUND_NAME},
+    actions::{search, fetch_init_data, upload_file},
+    state::State,
     types::*,
 };
 use dominator::{clone, html, Dom};
@@ -8,6 +10,9 @@ use futures_signals::{signal::SignalExt, signal_vec::SignalVecExt};
 use shared::{domain::jig::module::body::Image, media::MediaLibrary};
 use std::rc::Rc;
 use utils::prelude::*;
+
+const STR_SHOW_ONLY_BACKGROUNDS: &'static str = "Show only background";
+const STR_DONT_INCLUDE_BACKGROUND: &'static str = "Do not include backgrounds";
 
 pub fn render(state: Rc<State>, slot: Option<&str>) -> Dom {
     html!("empty-fragment", {
@@ -82,17 +87,18 @@ fn render_controls(state: Rc<State>) -> Vec<Dom> {
     let options = &state.clone().options;
     let mut vec = Vec::new();
 
-    if options.background_only.is_some() {
+    if let Some(checkbox_kind) = &options.checkbox_kind {
         vec.push(html!("input-checkbox", {
-            .property("label", "Show only background")
+            .property("label", {
+                match checkbox_kind {
+                    ImageSearchCheckboxKind::BackgroundLayer1Filter | ImageSearchCheckboxKind::BackgroundLayer2Filter => STR_SHOW_ONLY_BACKGROUNDS,
+                    ImageSearchCheckboxKind::StickersFilter => STR_DONT_INCLUDE_BACKGROUND,
+                }
+            })
             .property("slot", "only-background-checkbox")
-            .property("checked", options.background_only.unwrap())
-            .event(clone!(state => move |e: events::CustomToggle| {
-                let style_id = get_background_id(&state.styles.borrow().as_ref().unwrap_ji());
-                match e.value() {
-                    true => state.selected_styles.as_ref().borrow_mut().insert(style_id),
-                    false => state.selected_styles.as_ref().borrow_mut().remove(&style_id),
-                };
+            .property("checked", true)
+            .event(clone!(state => move |evt: events::CustomToggle| {
+                state.checkbox_checked.set(evt.value());
                 search(state.clone());
             }))
         }));
@@ -158,7 +164,6 @@ fn render_filters(state: Rc<State>) -> Dom {
                 .as_ref()
                 .unwrap_ji()
                 .iter()
-                .filter(|style| style.display_name != BACKGROUND_NAME)
                 .map(clone!(state => move |style| {
                     html!("image-search-style-option", {
                         .property("slot", "style-options")

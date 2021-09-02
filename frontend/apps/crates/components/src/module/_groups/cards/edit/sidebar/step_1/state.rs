@@ -85,12 +85,7 @@ impl Tab {
     ) -> Self {
         match kind {
             TabKind::Image => {
-                let opts = ImageSearchOptions {
-                    background_only: Some(true),
-                    upload: true,
-                    filters: true,
-                    recent: true,
-                };
+                let opts = ImageSearchOptions::default();
 
                 let callbacks = ImageSearchCallbacks::new(None::<fn(Image)>);
                 let state = ImageSearchState::new(opts, callbacks);
