@@ -139,20 +139,26 @@ export class _ extends LitElement {
                 <slot name="upload"></slot>
             </div>
             <section class="all-images">
-                <div class="images-section recent">
-                    <h4>${STR_MY_RECENT}</h4>
-                    <button-rect
-                        kind="text"
-                        color="blue"
-                        @click=${() => this.moreShown = !this.moreShown}
-                    >
-                        ${ this.moreShown ? STR_SEE_LESS : STR_SEE_MORE }
-                        <span class="icon">></span>
-                    </button-rect>
-                    <div class="image-wrapper">
-                        <slot name="recent"></slot>
-                    </div>
-                </div>
+                ${
+                    this.recent ? (
+                        html`
+                            <div class="images-section recent">
+                                <h4>${STR_MY_RECENT}</h4>
+                                <button-rect
+                                    kind="text"
+                                    color="blue"
+                                    @click=${() => this.moreShown = !this.moreShown}
+                                >
+                                    ${ this.moreShown ? STR_SEE_LESS : STR_SEE_MORE }
+                                    <span class="icon">></span>
+                                </button-rect>
+                                <div class="image-wrapper">
+                                    <slot name="recent"></slot>
+                                </div>
+                            </div>
+                        `
+                    ) : nothing
+                }
                 <div class="images-section main">
                     <h4>${STR_ALL_IMAGES}</h4>
                     <div class="image-wrapper">

@@ -36,7 +36,9 @@ pub fn render_loaded(state: Rc<State>) -> Dom {
 
     html!("image-select", {
         .property("label", "Select background")
-        .property("recent", true)
+        .property_signal("recent", state.recent_list.signal_vec_cloned().len().map(|len| {
+            len > 0
+        }))
         .children(render_controls(state.clone()))
         .children_signal_vec(state.recent_list.signal_vec_cloned().map(clone!(state => move |image| {
             render_image(Rc::clone(&state), image, "recent")
