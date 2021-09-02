@@ -79,10 +79,7 @@ fn render_button(step:u32, label:&str, state:Rc<State>) -> Dom {
 
 pub fn render_image_search() -> Dom {
     let opts = ImageSearchOptions {
-        background_only: Some(false),
-        upload: true,
-        filters: true,
-        recent: true,
+        ..ImageSearchOptions::default()
     };
     let callbacks = ImageSearchCallbacks::new(
         Some(|image| {

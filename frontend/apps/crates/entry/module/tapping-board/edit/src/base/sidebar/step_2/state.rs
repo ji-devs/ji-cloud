@@ -69,9 +69,7 @@ impl Tab {
             },
             TabKind::Image=> {
                 let opts = ImageSearchOptions {
-                    background_only: Some(true),
-                    upload: true, 
-                    filters: true, 
+                    ..ImageSearchOptions::default()
                 };
 
                 let callbacks = ImageSearchCallbacks::new(

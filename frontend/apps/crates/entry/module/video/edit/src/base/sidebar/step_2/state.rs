@@ -59,9 +59,7 @@ impl Tab {
             TabKind::Text => Self::Text,
             TabKind::Image => {
                 let opts = ImageSearchOptions {
-                    background_only: Some(true),
-                    upload: true,
-                    filters: true,
+                    ..ImageSearchOptions::default()
                 };
 
                 let callbacks = ImageSearchCallbacks::new(Some(clone!(base => move |image| {

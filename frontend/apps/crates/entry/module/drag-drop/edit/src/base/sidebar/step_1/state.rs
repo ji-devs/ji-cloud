@@ -71,10 +71,7 @@ impl Tab {
         match kind {
             TabKind::BgImage => {
                 let opts = ImageSearchOptions {
-                    background_only: Some(true),
-                    upload: true, 
-                    filters: true, 
-                    recent: true,
+                    ..ImageSearchOptions::default()
                 };
 
                 let callbacks = ImageSearchCallbacks::new(
@@ -94,10 +91,7 @@ impl Tab {
             },
             TabKind::BgOverlay => {
                 let opts = ImageSearchOptions {
-                    background_only: Some(true),
-                    upload: true, 
-                    filters: true, 
-                    recent: true,
+                    ..ImageSearchOptions::default()
                 };
 
                 let callbacks = ImageSearchCallbacks::new(
@@ -112,10 +106,7 @@ impl Tab {
 
             TabKind::StickerImage => {
                 let opts = ImageSearchOptions {
-                    background_only: Some(true),
-                    upload: true, 
-                    filters: true, 
-                    recent: true,
+                    ..ImageSearchOptions::default()
                 };
 
                 let callbacks = ImageSearchCallbacks::new(

@@ -69,9 +69,26 @@ impl State {
 }
 
 // if some: control is visible and the some value is the default, if none: the control is not visible
+// TODO: 
+//     1. background_only should be removed and replaced with an optional CheckboxKind enum
+//     2. add list for image tag filters
+//     3. add list for image tag priority
+// see: https://github.com/ji-devs/ji-cloud/issues/1459#issuecomment-908245806
+
 pub struct ImageSearchOptions {
     pub background_only: Option<bool>,
     pub upload: bool,
     pub filters: bool,
     pub recent: bool,
+}
+
+impl Default for ImageSearchOptions {
+    fn default() -> Self {
+        Self {
+            background_only: None, //this will go away soon anyway
+            upload: true,
+            filters: true,
+            recent: true
+        }
+    }
 }
