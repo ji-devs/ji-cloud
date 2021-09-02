@@ -46,6 +46,9 @@ export class _ extends LitElement {
                 height: 100%;
                 row-gap: 8px;
             }
+            .main ::slotted([slot=image]) {
+                border-radius: 20px 20px 0 0;
+            }
             .main .title {
                 font-size: 22px;
                 font-weight: 600;

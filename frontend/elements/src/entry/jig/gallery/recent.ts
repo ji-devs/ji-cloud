@@ -50,6 +50,7 @@ export class _ extends LitElement {
                 .top-section ::slotted([slot=thumbnail]) {
                     grid-column: 1 / -1;
                     grid-row: 1 / -1;
+                    border-radius: 16px 16px 0 0;
                 }
                 .menu {
                     display: none;

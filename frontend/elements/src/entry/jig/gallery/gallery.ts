@@ -57,7 +57,7 @@ export class _ extends LitElement {
             }
             .new-jig-section {
                 display: grid;
-                grid-template-columns: repeat(auto-fit, 230px);
+                grid-template-columns: repeat(auto-fit, 232px);
                 gap: 32px;
                 justify-content: end;
             }

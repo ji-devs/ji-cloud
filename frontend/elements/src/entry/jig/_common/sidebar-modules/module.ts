@@ -114,9 +114,11 @@ export class _ extends LitElement {
                     position: relative;
                     z-index: 1;
                     width: 218px;
+                    overflow: hidden;
+                }
+                .window ::slotted([slot=window]) {
                     height: 123px;
                     border-radius: 16px;
-                    overflow: hidden;
                 }
                 .decorations {
                     position: relative;

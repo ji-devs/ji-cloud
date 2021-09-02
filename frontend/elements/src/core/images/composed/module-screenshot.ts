@@ -8,6 +8,12 @@ import { ModuleKind } from "@elements/module/_common/types";
 export class _ extends LitElement {
     static get styles() {
         return [css`
+            :host {
+                border: solid #a9b1b5 1px;
+                box-sizing: border-box;
+                overflow: hidden;
+                display: inline-block;
+            }
             img-ui, img-ji {
                 height: 100%;
                 width: 100%;

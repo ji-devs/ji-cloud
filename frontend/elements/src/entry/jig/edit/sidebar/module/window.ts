@@ -47,6 +47,9 @@ export class _ extends LitElement {
                 :host([state=thumbnail]) slot[name=thumbnail] {
                     display: revert;
                 }
+                ::slotted([slot=thumbnail]) {
+                    border-radius: 16px;
+                }
 
                 .drag-here-text {
                     color: white;
