@@ -78,13 +78,13 @@ RUN apk --no-cache add ca-certificates
 RUN mkdir /usr/local/bin/cloud-run-app
 
 COPY --from=api-builder \
-    /home/rust/src/backend/api/target/x86_64-unknown-linux-musl/release/watch-uploads \
-    /usr/local/bin/cloud-run-app/watch-uploads
+    /home/rust/src/backend/api/target/x86_64-unknown-linux-musl/release/media-watch \
+    /usr/local/bin/cloud-run-app/media-watch
 
 WORKDIR /usr/local/bin/cloud-run-app/
 
 
-CMD ["./watch-uploads", "release"]
+CMD ["./media-watch", "release"]
 
 #####################
 ## Sandbox (media) ##
@@ -100,10 +100,10 @@ RUN apk --no-cache add ca-certificates
 RUN mkdir /usr/local/bin/cloud-run-app
 
 COPY --from=api-builder \
-    /home/rust/src/backend/api/target/x86_64-unknown-linux-musl/release/watch-uploads \
-    /usr/local/bin/cloud-run-app/watch-uploads
+    /home/rust/src/backend/api/target/x86_64-unknown-linux-musl/release/media-watch \
+    /usr/local/bin/cloud-run-app/media-watch
 
 WORKDIR /usr/local/bin/cloud-run-app/
 
 
-CMD ["./watch-uploads", "sandbox"]
+CMD ["./media-watch", "sandbox"]
