@@ -165,7 +165,7 @@ impl DebugSettings {
                     }
                 }
             ),
-            step: Some(Step::Four),
+            step: Some(Step::Three),
             draw_kind: None,
             skip_save: true,
             skip_load_jig: true,

@@ -1,5 +1,7 @@
 pub(super) mod select;
 pub(super) mod draw;
+pub(super) mod config;
+
 mod actions;
 mod state;
 mod dom;

@@ -74,6 +74,7 @@ impl Tab {
                     background_only: Some(true),
                     upload: true, 
                     filters: true, 
+                    recent: true,
                 };
 
                 let callbacks = ImageSearchCallbacks::new(
@@ -96,6 +97,7 @@ impl Tab {
                     background_only: Some(true),
                     upload: true, 
                     filters: true, 
+                    recent: true,
                 };
 
                 let callbacks = ImageSearchCallbacks::new(
@@ -113,6 +115,7 @@ impl Tab {
                     background_only: Some(true),
                     upload: true, 
                     filters: true, 
+                    recent: true,
                 };
 
                 let callbacks = ImageSearchCallbacks::new(
