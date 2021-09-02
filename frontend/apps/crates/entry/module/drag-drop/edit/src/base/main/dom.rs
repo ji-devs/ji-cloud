@@ -22,22 +22,6 @@ impl DomRenderable for Main {
 
         html!("empty-fragment", {
             .child_signal(
-                state.trace_phase_signal().map(clone!(state => move |trace_phase| {
-                    trace_phase.and_then(|trace_phase| {
-                        match trace_phase {
-                            TracePhase::Show => {
-                                Some(TracesShow::render(TracesShow::new(
-                                    state.base.traces.to_raw(),
-                                    TracesShowMode::Solid,
-                                    TracesShow::on_select_noop()
-                                )))
-                            },
-                            _ => None
-                        }
-                    })
-                }))
-            )
-            .child_signal(
                 state.sticker_phase_signal().map(clone!(state => move |sticker_phase| Some({
                     match sticker_phase {
                         StickerPhase::Scene => {
@@ -63,7 +47,13 @@ impl DomRenderable for Main {
                             TracePhase::Edit => {
                                 Some(TracesEdit::render(state.base.traces.clone()))
                             },
-                            _ => None
+                            TracePhase::Show => {
+                                Some(TracesShow::render(TracesShow::new(
+                                    state.base.traces.to_raw(),
+                                    TracesShowMode::Solid,
+                                    TracesShow::on_select_noop()
+                                )))
+                            },
                         }
                     })
                 }))
