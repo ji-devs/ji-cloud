@@ -3,6 +3,7 @@ use std::rc::Rc;
 use futures_signals::signal::{Mutable, SignalExt};
 use dominator::clone;
 use components::{
+    tabs::MenuTabKind,
     backgrounds::actions::Layer,
     image::search::{
         state::{State as ImageSearchState, ImageSearchOptions},
@@ -23,7 +24,7 @@ impl Step1 {
 
         let kind = match crate::debug::settings().step_1_tab {
             Some(kind) => kind,
-            None => TabKind::BgImage
+            None => MenuTabKind::BackgroundImageFull
         };
 
         let tab = Mutable::new(Tab::new(base.clone(), kind));
@@ -36,26 +37,6 @@ impl Step1 {
 }
 
 
-#[derive(Clone, Copy, PartialEq, Debug)]
-pub enum TabKind {
-    BgImage,
-    BgColor,
-    BgOverlay,
-    StickerImage,
-    StickerText,
-}
-
-impl TabKind {
-    pub const fn as_str(&self) -> &'static str {
-        match self {
-            Self::BgImage => "image",
-            Self::BgColor => "color",
-            Self::BgOverlay => "overlay",
-            Self::StickerImage => "image",
-            Self::StickerText => "text",
-        }
-    }
-}
 
 #[derive(Clone)]
 pub enum Tab {
@@ -67,9 +48,9 @@ pub enum Tab {
 }
 
 impl Tab {
-    pub fn new(base: Rc<Base>, kind:TabKind) -> Self {
+    pub fn new(base: Rc<Base>, kind:MenuTabKind) -> Self {
         match kind {
-            TabKind::BgImage => {
+            MenuTabKind::BackgroundImageFull => {
                 let opts = ImageSearchOptions {
                     ..ImageSearchOptions::default()
                 };
@@ -83,13 +64,13 @@ impl Tab {
 
                 Self::BgImage(Rc::new(state))
             },
-            TabKind::BgColor => {
+            MenuTabKind::BackgroundColor => {
                 let state = ColorPickerState::new(base.theme_id.clone(), None, Some(clone!(base => move |color| {
                     base.backgrounds.set_layer(Layer::One, Background::Color(color));
                 })));
                 Self::BgColor(Rc::new(state))
             },
-            TabKind::BgOverlay => {
+            MenuTabKind::Overlay => {
                 let opts = ImageSearchOptions {
                     ..ImageSearchOptions::default()
                 };
@@ -104,7 +85,7 @@ impl Tab {
                 Self::BgOverlay(Rc::new(state))
             },
 
-            TabKind::StickerImage => {
+            MenuTabKind::Image => {
                 let opts = ImageSearchOptions {
                     ..ImageSearchOptions::default()
                 };
@@ -119,19 +100,21 @@ impl Tab {
                 Self::StickerImage(Rc::new(state))
             },
 
-            TabKind::StickerText=> {
+            MenuTabKind::Text=> {
                 Self::StickerText
             },
+
+            _ => unimplemented!("unsupported tab kind!")
         }
     }
 
-    pub fn kind(&self) -> TabKind {
+    pub fn kind(&self) -> MenuTabKind {
         match self {
-            Self::BgImage(_) => TabKind::BgImage,
-            Self::BgColor(_) => TabKind::BgColor,
-            Self::BgOverlay(_) => TabKind::BgOverlay,
-            Self::StickerImage(_) => TabKind::StickerImage,
-            Self::StickerText => TabKind::StickerText,
+            Self::BgImage(_) => MenuTabKind::BackgroundImageFull,
+            Self::BgColor(_) => MenuTabKind::BackgroundColor,
+            Self::BgOverlay(_) => MenuTabKind::Overlay,
+            Self::StickerImage(_) => MenuTabKind::Image,
+            Self::StickerText => MenuTabKind::Text,
         }
     }
 }

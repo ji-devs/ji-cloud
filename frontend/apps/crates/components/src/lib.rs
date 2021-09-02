@@ -51,3 +51,5 @@ pub mod player_popup;
 pub mod box_outline;
 #[cfg(feature = "buttons")]
 pub mod buttons;
+#[cfg(feature = "tabs")]
+pub mod tabs;

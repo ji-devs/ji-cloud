@@ -1,13 +1,13 @@
 import "@elements/core/menu/menu-tabs/menu-tab-title";
 import "@elements/core/buttons/circle";
 import { argsToAttrs } from "@utils/attributes";
-import { TitleKind } from "@elements/core/menu/menu-tabs/menu-tab-title";
+import { TabKind } from "@elements/core/menu/menu-tabs/menu-tab-title";
 export default {
     title: "Core / Menu / Menu Tab"
 }
 
 interface Args {
-    kind: TitleKind,
+    kind: TabKind,
     active: boolean,
 }
 

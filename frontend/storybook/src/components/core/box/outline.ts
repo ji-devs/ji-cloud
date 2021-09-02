@@ -1,6 +1,6 @@
 import {argsToAttrs} from "@utils/attributes";
-import "@elements/core/box/outline";
-import {Color} from "@elements/core/box/outline";
+import "@elements/core/box/outline-container";
+import {Color} from "@elements/core/box/outline-container";
 
 export default {
   title: 'Core / Box ',
@@ -17,21 +17,21 @@ const DEFAULT_ARGS:Args = {
     uncloseable: false, 
 }
 
-export const Outline = (props?:Partial<Args>) => {
+export const OutlineContainer = (props?:Partial<Args>) => {
     props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
 
     return `
 	<div style="display: flex; background-color: #ffe1a7; flex-direction: column; margin: 50px; gap: 30px;">
-    		<box-outline ${argsToAttrs(props)}><div>Hello World</div></box-outline>
-    		<box-outline ${argsToAttrs(props)} thick><div>Hello World</div></box-outline>
-    		<box-outline ${argsToAttrs(props)}><div>Hello World</div></box-outline>
+    		<box-outline-container ${argsToAttrs(props)}><div>Hello World</div></box-outline-container>
+    		<box-outline-container ${argsToAttrs(props)} thick><div>Hello World</div></box-outline-container>
+    		<box-outline-container ${argsToAttrs(props)}><div>Hello World</div></box-outline-container>
 	</div>
 	`;
 }
 
-Outline.args = DEFAULT_ARGS;
+OutlineContainer.args = DEFAULT_ARGS;
 
-Outline.argTypes = {
+OutlineContainer.argTypes = {
 	color: {
 		control: {
 			type: 'inline-radio',

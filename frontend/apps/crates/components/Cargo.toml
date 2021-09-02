@@ -106,6 +106,7 @@ share_jig = []
 player_popup = []
 box_outline = []
 buttons = []
+tabs = []
 
 default = ["all"]
 all= [
@@ -137,5 +138,6 @@ all= [
     "share_jig",
     "player_popup",
     "box_outline",
-    "buttons"
+    "buttons",
+    "tabs"
 ]

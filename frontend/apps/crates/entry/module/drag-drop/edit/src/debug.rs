@@ -45,7 +45,7 @@ use shared::{
     }
 };
 use components::stickers::{sprite::ext::*, text::ext::*};
-use crate::base::sidebar::step_1::state::TabKind as Step1TabKind;
+use components::tabs::MenuTabKind;
 use crate::base::sidebar::step_2::state::TabKind as Step2TabKind;
 use crate::base::sidebar::step_5::state::TabKind as Step5TabKind;
 pub static SETTINGS:OnceCell<DebugSettings> = OnceCell::new();
@@ -61,7 +61,7 @@ pub struct DebugSettings {
     pub skip_save: bool,
     pub skip_load_jig: bool,
     pub draw_kind: Option<TraceKind>,
-    pub step_1_tab: Option<Step1TabKind>,
+    pub step_1_tab: Option<MenuTabKind>,
     pub step_2_tab: Option<Step2TabKind>,
     pub step_5_tab: Option<Step5TabKind>,
 }
@@ -165,11 +165,11 @@ impl DebugSettings {
                     }
                 }
             ),
-            step: Some(Step::Four),
+            step: Some(Step::One),
             draw_kind: None,
             skip_save: true,
             skip_load_jig: true,
-            step_1_tab: Some(Step1TabKind::StickerImage),
+            step_1_tab: Some(MenuTabKind::Image),
             step_2_tab: Some(Step2TabKind::Select),
             step_5_tab: Some(Step5TabKind::Settings),
         }

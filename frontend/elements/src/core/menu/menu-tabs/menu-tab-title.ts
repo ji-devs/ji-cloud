@@ -3,43 +3,68 @@ import { classMap } from 'lit-html/directives/class-map';
 import { nothing } from "lit-html";
 import "@elements/core/images/ui";
 
-export type TitleKind = ""
-    | 'theme'
-    | 'background-image'
-    | 'background-color'
-    | 'color'
-    | 'overlay'
-    | 'text'
-    | 'image'
-    | 'audio'
-    | 'video'
-    | 'select'
-    | 'play-settings'
-    | 'instructions';
+export type TabKind = ""
+  | "answer"
+  | "audio"
+  | "audio-file"
+  | "audio-record"
+  | "background-color"
+  | "background-image"
+  | "background-image-full"
+  | "color"
+  | "feedback"
+  | "image"
+  | "instructions"
+  | "overlay"
+  | "play-settings"
+  | "question"
+  | "select"
+  | "text"
+  | "theme"
+  | "tooltip"
+  | "add-text"
+  | "video"
 
-const STR_LABEL_LOOKUP: {
-    [key in TitleKind]: string;
-} = {
-    ['']: '',
-    ['select']: 'Select',
-    ['theme']: 'Theme',
-    ['background-image']: 'Background image',
-    ['background-color']: 'Background color',
-    ['color']: 'Color',
-    ['overlay']: 'Overlay',
-    ['text']: 'Text',
-    ['image']: 'Image',
-    ['audio']: 'Audio',
-    ['video']: 'Video',
-    ['play-settings']: 'Play Settings',
-    ['instructions']: 'Instructions',
+const STR_ICON_OVERRIDE: Partial<{
+    [key in TabKind]: TabKind;
+}> = {
+  "add-text": "tooltip",
+  "background-image-full": "background-image"
 };
 
-const getIcon = (kind:TitleKind):TitleKind => {
-    if(kind === "background-color") {
-        return("color");
+const STR_LABEL_LOOKUP: {
+    [key in TabKind]: string;
+} = {
+  "": "",
+  "answer": "Answer",
+  "audio": "Add sound",
+  "audio-file": "", //not in Zeplin
+  "audio-record": "", //Not in Zeplin
+  "background-color": "Color",
+  "background-image": "Background",
+  "background-image-full": "Background image",
+  "color": "Color",
+  "feedback": "Final feedback",
+  "image": "Image",
+  "instructions": "Instructions",
+  "overlay": "Overlay",
+  "play-settings": "Play settings",
+  "question": "Question",
+  "select": "Select",
+  "text": "Text",
+  "theme": "Theme",
+  "tooltip": "Tooltip", //Not in zeplin
+  "add-text": "Add text box",
+  "video": "Video", //Not in Zeplin
+};
+
+const getIcon = (kind:TabKind):TabKind=> {
+    const override = STR_ICON_OVERRIDE[kind];
+
+    if(override != null) {
+      return override;
     } else {
-        return(kind);
+      return kind;
     }
 }
 
@@ -88,13 +113,16 @@ export class _ extends LitElement {
   hover: boolean = false;
 
   @property()
-  kind: TitleKind = "";
+  kind: TabKind = "";
 
   @property({ type: Boolean, reflect: true })
   active: boolean = false;
 
   @property({ type: Boolean, reflect: true })
   disabled: boolean = false;
+
+  @property({ type: Boolean})
+  small: boolean = false;
 
   connectedCallback() {
     super.connectedCallback();
@@ -111,7 +139,7 @@ export class _ extends LitElement {
   }
 
   render() {
-    const { kind, active, hover, disabled} = this;
+    const { kind, active, hover, disabled, small} = this;
 
     const highlight = active || hover;
 
@@ -130,7 +158,7 @@ export class _ extends LitElement {
             <img-ui class=${regularClass} path="${iconUrl}"></img-ui>
             <img-ui class=${activeClass} path="${iconUrlActive}"></img-ui>
           `}
-      <div class=${labelClass}>${label}</div>
+      ${small ? nothing : html`<div class=${labelClass}>${label}</div>`}
     `;
   }
 }
