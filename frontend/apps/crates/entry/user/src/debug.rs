@@ -23,7 +23,7 @@ impl DebugSettings {
     pub fn debug() -> DebugSettings {
         DebugSettings {
             skip_password_strength: true,
-            register_step: Some(DebugRegisterStep::Two),
+            register_step: None //Some(DebugRegisterStep::Two),
         }
     }
 }

@@ -16,7 +16,6 @@ pub type StringId = String;
 #[derive(Debug, Clone)]
 pub enum Route {
     NotFound,
-    NoAuth,
     User(UserRoute),
     Kids(KidsRoute),
     Admin(AdminRoute),
@@ -35,6 +34,7 @@ pub enum HomeRoute {
 
 #[derive(Debug, Clone)]
 pub enum UserRoute {
+    NoAuth,
     Profile(ProfileSection),
     RegisterOauth(OauthData),
     LoginOauth(OauthData),
@@ -193,7 +193,7 @@ impl Route {
                     let data = OauthData::Google(code);
                     Self::User(UserRoute::RegisterOauth(data))
                 } else {
-                    Self::NoAuth
+                    Self::User(UserRoute::NoAuth)
                 }
             }
             ["user", "login-oauth"] => {
@@ -201,7 +201,7 @@ impl Route {
                     let data = OauthData::Google(code);
                     Self::User(UserRoute::LoginOauth(data))
                 } else {
-                    Self::NoAuth
+                    Self::User(UserRoute::NoAuth)
                 }
             }
             ["user", "continue-registration"] => {
@@ -216,6 +216,7 @@ impl Route {
             ["user", "verify-email", token] => Self::User(UserRoute::VerifyEmail(token.to_string())),
             ["user", "password-reset", token] => Self::User(UserRoute::PasswordReset(token.to_string())),
             ["user", "register-complete"] => Self::User(UserRoute::RegisterComplete),
+            ["user", "no-auth"] => Self::User(UserRoute::NoAuth),
             ["admin", "jigs"] => Self::Admin(AdminRoute::Jigs),
             ["admin", "locale"] => Self::Admin(AdminRoute::Locale),
             ["admin", "categories"] => Self::Admin(AdminRoute::Categories),
@@ -301,7 +302,6 @@ impl Route {
                         ModuleId(Uuid::from_str(module_id).unwrap_ji()),
                 ))
             },
-            ["no-auth"] => Self::NoAuth,
 
             _ => Self::NotFound
         }
@@ -336,7 +336,6 @@ impl From<&Route> for String {
                     KidsRoute::StudentCode => "/kids".to_string(),
 				}
 			},
-            Route::NoAuth => "/no-auth".to_string(),
 			Route::Dev(route) => {
                 match route {
                     DevRoute::Showcase(id, page) => format!("/dev/showcase/{}?page={}", id, page),
@@ -364,6 +363,7 @@ impl From<&Route> for String {
                     UserRoute::VerifyEmail(token) => format!("/user/verify-email/{}", token),
                     UserRoute::PasswordReset(token) => format!("/user/password-reset/{}", token),
                     UserRoute::RegisterComplete => "/user/register-complete".to_string(),
+                    UserRoute::NoAuth => "/user/no-auth".to_string(),
                 }
             },
             Route::Admin(route) => {

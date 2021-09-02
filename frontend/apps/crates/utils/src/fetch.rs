@@ -12,7 +12,7 @@ use shared::api::{
 use serde::{de::DeserializeOwned, Serialize};
 use wasm_bindgen_futures::JsFuture;
 use shared::{api::ApiEndpoint, domain::auth::CSRF_HEADER_NAME};
-use crate::{env::env_var, routes::Route, storage::load_csrf_token, unwrap::UnwrapJiExt};
+use crate::{env::env_var, routes::{Route, UserRoute}, storage::load_csrf_token, unwrap::UnwrapJiExt};
 use js_sys::Promise;
 use wasm_bindgen::JsCast;
 use awsm_web::loaders::fetch::{fetch_with_headers_and_data, fetch_with_headers_and_data_abortable, fetch_upload_file, fetch_upload_file_abortable, fetch_with_data , fetch_upload_blob_with_headers, fetch_upload_file_with_headers};
@@ -511,7 +511,7 @@ fn api_get_query<'a, T: Serialize>(endpoint:&'a str, method:Method, data: Option
 pub fn side_effect_status_code(status_code:u16) {
     match status_code {
         403 | 401 => {
-            Route::NoAuth.redirect();
+            Route::User(UserRoute::NoAuth).redirect();
             //web_sys::window().unwrap_ji().alert_with_message(crate::strings::STR_AUTH_ALERT);
         },
         _ => {

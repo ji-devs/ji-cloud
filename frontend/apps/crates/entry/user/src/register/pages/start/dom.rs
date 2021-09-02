@@ -14,7 +14,7 @@ pub struct StartPage {
 }
 
 impl StartPage {
-    pub fn render(step: Mutable<Step>) -> Dom {
+    pub fn render(step: Mutable<Step>, is_no_auth: bool) -> Dom {
         let state = Rc::new(State::new(step));
 
         html!("empty-fragment", {

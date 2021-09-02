@@ -15,13 +15,13 @@ pub struct RegisterPage {
 }
 
 impl RegisterPage {
-    pub fn render(step: Option<Step>) -> Dom {
+    pub fn render(step: Option<Step>, is_no_auth: bool) -> Dom {
         let state = Rc::new(State::new(step));
 
         html!("empty-fragment", {
-            .child_signal(state.step.signal_cloned().map(clone!(state => move |step| {
+            .child_signal(state.step.signal_cloned().map(clone!(state, is_no_auth => move |step| {
                 match step {
-                    Step::Start => Some(StartPage::render(state.step.clone())),
+                    Step::Start => Some(StartPage::render(state.step.clone(), is_no_auth)),
                     Step::One(data) => Some(Step1Page::render(state.step.clone(), data)),
                     Step::Two(data) => Some(Step2Page::render(state.step.clone(), data)),
                     Step::Three(data) => Some(Step3Page::render(state.step.clone(), data)),
