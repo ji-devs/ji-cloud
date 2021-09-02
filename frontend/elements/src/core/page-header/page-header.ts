@@ -32,7 +32,9 @@ export class _ extends LitElement {
 
     render() {
         return html`
-            <img-ui class="logo" path="core/page-header/logo.svg"></img-ui>
+            <a href="/">
+                <img-ui class="logo" path="core/page-header/logo.svg"></img-ui>
+            </a>
             <nav>
                 <slot name="links"></slot>
             </nav>
