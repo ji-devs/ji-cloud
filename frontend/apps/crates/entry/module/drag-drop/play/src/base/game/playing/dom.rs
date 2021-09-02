@@ -55,7 +55,7 @@ pub fn render(state: Rc<PlayState>) -> Dom {
                             opts.set_mixin(
                                 clone!(state, item, targets_ready => move |dom| {
                                     apply_methods!(dom, {
-                                        .apply(mixin_sticker_button_signal(item.locked.signal().map(|locked| !locked)))
+                                        .apply(mixin_sticker_button_signal(item.completed.signal().map(|locked| !locked)))
                                         .apply(|dom| {
                                             dom
                                                 .style_signal("display", targets_ready.signal().map(|ready| {
@@ -70,7 +70,7 @@ pub fn render(state: Rc<PlayState>) -> Dom {
                                         }))
                                         .global_event_preventable(clone!(state, item => move |evt:events::MouseUp| {
                                             if item.try_end_drag(evt.x() as i32, evt.y() as i32) {
-                                                state.evaluate(item.clone());
+                                                PlayState::evaluate(state.clone(), item.clone());
                                             }
                                         }))
                                     })

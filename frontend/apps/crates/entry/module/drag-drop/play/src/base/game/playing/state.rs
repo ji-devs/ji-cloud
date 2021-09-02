@@ -80,11 +80,18 @@ impl PlayItem {
             _ => panic!("not interctive!")
         }
     }
+
+    pub fn is_interactive(&self) -> bool {
+        match self {
+            Self::Interactive(_) => true,
+            _ => false
+        }
+    }
 }
 
 pub struct InteractiveItem {
     pub sticker: Sticker,
-    pub locked: Mutable<bool>,
+    pub completed: Mutable<bool>,
     pub audio: Option<Audio>,
     pub audio_effect_handle: RefCell<Option<AudioHandle>>,
     pub target_transform: Transform, 
@@ -104,7 +111,7 @@ impl InteractiveItem {
         let transform = sticker.transform().clone();
         Rc::new(Self {
             sticker,
-            locked: Mutable::new(false),
+            completed: Mutable::new(false),
             audio: data.audio,
             target_transform: data.target_transform.unwrap_or_else(clone!(transform => move || transform)),
             curr_transform: Mutable::new(transform),

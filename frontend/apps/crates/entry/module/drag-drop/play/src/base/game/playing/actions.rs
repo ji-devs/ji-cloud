@@ -12,16 +12,7 @@ use std::collections::HashMap;
 use components::collision::stickers_traces::pixels::{get_hit_index, StickerHitSource, StickerBoundsKind, debug_render_hit_trace};
 use wasm_bindgen_futures::spawn_local;
 use components::audio::mixer::{AUDIO_MIXER, AudioPath};
-
-cfg_if::cfg_if! {
-    if #[cfg(debug_assertions)] {
-        const DEBUGGING_EVALUATION_RESULT:bool = false;
-        const DEBUGGING_EVALUATION_RESULT_ONLY_MATCH:bool = false;
-    } else {
-        const DEBUGGING_EVALUATION_RESULT:bool = false;
-        const DEBUGGING_EVALUATION_RESULT_ONLY_MATCH:bool = false;
-    }
-}
+use crate::debug::*;
 
 
 impl PlayState {
@@ -50,8 +41,20 @@ impl PlayState {
         }
     }
 
-    pub fn evaluate(&self, item: Rc<InteractiveItem>) {
-        let game = self.game.clone();
+    pub fn evaluate_all_completed(&self) -> bool {
+        let all_completed = self
+            .items
+            .iter()
+            .filter(|item| item.is_interactive())
+            .all(|item| item.get_interactive_unchecked().completed.get());
+
+        if all_completed {
+            log::info!("TODO: ALL COMPLETED!");
+        }
+        all_completed
+    }
+
+    pub fn evaluate(state: Rc<Self>, item: Rc<InteractiveItem>) {
 
         spawn_local(async move {
             let mut move_back = false;
@@ -62,7 +65,7 @@ impl PlayState {
 
                 if let Some(hit_source) = item.get_hit_source(Some(SourceTransformOverride::Current)) {
 
-                    let traces:Vec<&Trace> = game.base.target_areas.iter().map(|area| &area.trace).collect();
+                    let traces:Vec<&Trace> = state.game.base.target_areas.iter().map(|area| &area.trace).collect();
 
                     if let Some(index) = get_hit_index(hit_source, &traces).await {
                         if DEBUGGING_EVALUATION_RESULT {
@@ -88,8 +91,10 @@ impl PlayState {
             }
 
             if is_correct {
-                item.locked.set_neq(true);
-                item.play_audio(AudioEffect::Correct);
+                item.completed.set_neq(true);
+                if !state.evaluate_all_completed() {
+                    item.play_audio(AudioEffect::Correct);
+                }
             } else {
                 item.play_audio(AudioEffect::Wrong);
             }
@@ -134,7 +139,7 @@ impl InteractiveItem {
     }
 
     pub fn start_drag(&self, x: i32, y: i32) {
-        if !self.locked.get() {
+        if !self.completed.get() {
             self.play_audio(AudioEffect::Drag);
 
             self.drag.set(Some(Rc::new(Drag::new(x, y, 0.0, 0.0, true))));

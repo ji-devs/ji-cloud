@@ -44,7 +44,21 @@ use shared::{
     }
 };
 use components::stickers::{sprite::ext::*, text::ext::*};
+
+
+cfg_if::cfg_if! {
+    if #[cfg(debug_assertions)] {
+        pub const DEBUGGING_EVALUATION_RESULT:bool = true;
+        pub const DEBUGGING_EVALUATION_RESULT_ONLY_MATCH:bool = false;
+    } else {
+        pub const DEBUGGING_EVALUATION_RESULT:bool = false;
+        pub const DEBUGGING_EVALUATION_RESULT_ONLY_MATCH:bool = false;
+    }
+}
+
 pub static SETTINGS:OnceCell<DebugSettings> = OnceCell::new();
+
+
 const IMAGE_UUID:&'static str = "f2e63cf2-ee11-11eb-9b68-4bf1f063ab1c";
 //const IMAGE_UUID:&'static str = "e84dd7fe-c92d-11eb-8c82-cfd1d3fd13ff";
 

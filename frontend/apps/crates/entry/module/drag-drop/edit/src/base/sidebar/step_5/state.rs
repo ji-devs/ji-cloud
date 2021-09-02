@@ -96,15 +96,13 @@ impl Tab {
                     if(also_history) {
                         base.history.push_modify(|raw| {
                             if let Some(content) = raw.content.as_mut() {
-                                //Change me!
-                                //content.base.instructions = instructions;
+                                content.feedback = instructions;
                             }
                         });
                     } else {
                         base.history.save_current_modify(|raw| {
                             if let Some(content) = raw.content.as_mut() {
-                                //Change me!
-                                //content.base.instructions = instructions;
+                                content.feedback = instructions;
                             }
                         });
                     }
