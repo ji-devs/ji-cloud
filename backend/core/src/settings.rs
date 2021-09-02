@@ -364,7 +364,7 @@ impl SettingsManager {
             let (token_response, project_id) = get_access_token_response_and_project_id(
                 remote_target.google_credentials_env_name(),
             )
-            .await?;
+                .await?;
 
             (
                 token_response.access_token,

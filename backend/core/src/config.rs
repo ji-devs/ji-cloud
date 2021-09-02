@@ -35,8 +35,8 @@ pub const IMAGE_BODY_SIZE_LIMIT: usize = 1024 * 1024 * 30;
 pub const ANIMATION_BODY_SIZE_LIMIT: usize = 1024 * 1024 * 40;
 /// Audio file size limit. 30 MB
 pub const AUDIO_BODY_SIZE_LIMIT: usize = 1024 * 1024 * 30;
-/// JSON body size limit for both requests and responses
-pub const JSON_BODY_LIMIT: u64 = 1024 * 16; // 16
+/// JSON body size limit for both requests and responses. 16 KB
+pub const JSON_BODY_LIMIT: u64 = 1024 * 16;
 /// Allowed CORS origins
 pub const CORS_ORIGINS: &[&str] = &[
     "https://jigzi.org",
@@ -50,9 +50,17 @@ pub const CORS_ORIGINS: &[&str] = &[
 //////////////
 // Other
 /// Defines the range of possible values for Jig player session sharing codes
-/// /// means 0-9999 are possible. If this is changed then the DB's check constraint must also be updated.
+/// means 0-9999 are possible. If this is changed then the DB's check constraint must also be updated.
 pub const JIG_PLAYER_SESSION_CODE_MAX: i16 = 9999;
 /// `MAX_SIGNIN_COOKIE_DURATION` but as seconds,
 /// as there's no way to get the string number of seconds from it `const`ly
 #[deprecated = "use `MAX_SIGNIN_COOKIE_DURATION.whole_seconds()` instead"]
 pub const MAX_SIGNIN_COOKIE: &str = "1209600";
+
+//////////////
+// Media and uploads
+/// Runs cleanup on failed up loads. Should be less than the `UPLOAD_EXPIRY_TIME`.
+pub const EXPIRED_UPLOAD_CLEANUP_PERIOD: u64 = 60 * 60 * 6;
+/// Any media created at least this old will be deleted from the database if it has not successfully
+/// completed processing by the time the cleaning task has
+pub const UPLOAD_EXPIRY_TIME: u64 = 60 * 60 * 24 * 3;

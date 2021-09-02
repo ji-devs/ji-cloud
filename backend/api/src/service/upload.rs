@@ -7,6 +7,8 @@ use uuid::Uuid;
 
 use crate::{error, service};
 
+pub mod cleaner;
+
 pub async fn process_image(
     db: &PgPool,
     s3: &service::s3::Client,

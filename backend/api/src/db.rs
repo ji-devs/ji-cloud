@@ -24,6 +24,23 @@ use sqlx::{
 use std::fmt::Write as _;
 use uuid::Uuid;
 
+/// Mirrors the database schema for uploads for each media kind.
+///
+/// ## Tuple fields:
+/// * `0`: media table
+/// * `1`: upload status table
+/// * `2`: column name in status table, usually {media}_id
+pub const UPLOADS_DB_SCHEMA: &[(&str, &str, &str)] = &[
+    ("image_metadata", "image_upload", "image_id"),
+    ("user_image_library", "user_image_upload", "image_id"),
+    ("user_audio_library", "user_audio_upload", "audio_id"),
+    (
+        "animation_metadata",
+        "global_animation_upload",
+        "animation_id",
+    ),
+];
+
 pub async fn get_pool(connect_options: PgConnectOptions) -> anyhow::Result<PgPool> {
     let pool = PgPoolOptions::new()
         .max_connections(DB_POOL_CONNECTIONS)
