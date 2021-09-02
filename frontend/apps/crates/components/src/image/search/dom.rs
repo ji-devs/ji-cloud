@@ -63,6 +63,7 @@ fn render_image(state: Rc<State>, image: Image, slot: &str) -> Dom {
     html!("img-ji", {
         .property("slot", slot)
         .property("size", "thumb")
+        .property("lib", image.lib.to_str())
         .property("id", image.id.0.to_string())
         .event(clone!(state, image => move |_: events::Click| {
             //TODO - this should change if the library has changed
