@@ -157,6 +157,9 @@ pub struct Jig {
     /// The current author
     pub author_id: Option<Uuid>,
 
+    /// The author's name, as "{given_name} {family_name}".
+    pub author_name: Option<String>,
+
     /// The language the jig uses.
     ///
     /// NOTE: in the format `en`, `eng`, `en-US`, `eng-US` or `eng-USA`. To be replaced with a struct that enforces this.

@@ -141,8 +141,8 @@ async fn update(
         req.is_public.as_ref(),
         req.default_player_settings.as_ref(),
         req.theme.as_ref(),
-        req.audio_background,
-        req.audio_effects,
+        req.audio_background.as_ref(),
+        req.audio_effects.as_ref(),
     )
     .await?;
 

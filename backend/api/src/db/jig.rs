@@ -113,7 +113,10 @@ r#"
 select id                                                                            as "id!: JigId",
        display_name                                                                  as "display_name!",
        creator_id,
-       author_id,
+       author_id                                                                     as "author_id",
+       (select given_name || ' '::text || family_name
+        from user_profile
+        where user_profile.user_id = author_id)                                      as "author_name",
        publish_at,
        updated_at,
        language                                                                      as "language!",
@@ -125,9 +128,7 @@ select id                                                                       
        drag_assist                                                                   as "drag_assist!",
        theme                                                                         as "theme!: ThemeId",
        audio_background                                                              as "audio_background!: Option<AudioBackground>",
-       array
-           (select row (unnest(audio_feedback_positive)))
-                                                                                     as "audio_feedback_positive!: Vec<(AudioFeedbackPositive,)>", -- TODO: fix ugly!
+       array(select row (unnest(audio_feedback_positive)))                           as "audio_feedback_positive!: Vec<(AudioFeedbackPositive,)>",
        array(select row (unnest(audio_feedback_negative)))                           as "audio_feedback_negative!: Vec<(AudioFeedbackNegative,)>",
        array(
                select row (id, kind)
@@ -144,6 +145,7 @@ from jig
          inner join unnest($1::uuid[])
     with ordinality t(id, ord) USING (id)
 order by t.ord
+
 "#, ids)
         .fetch_all(db).await?;
 
@@ -160,6 +162,7 @@ order by t.ord
             goals: row.goals.into_iter().map(|(goal,)| goal).collect(),
             creator_id: row.creator_id,
             author_id: row.author_id,
+            author_name: row.author_name,
             language: row.language,
             categories: row.categories.into_iter().map(|(it,)| it).collect(),
             publish_at: row.publish_at,
@@ -202,35 +205,37 @@ order by t.ord
 pub async fn get(pool: &PgPool, id: JigId) -> anyhow::Result<Option<Jig>> {
     let jig = sqlx::query!( //language=SQL
         r#"
-select  
-    id as "id: JigId",
-    display_name,
-    creator_id,
-    author_id,
-    publish_at,
-    updated_at,
-    language,
-    description,
-    is_public,
-    direction as "direction: TextDirection",
-    display_score,
-    track_assessments,
-    drag_assist,
-    theme as "theme: ThemeId",
-    audio_background as "audio_background!: Option<AudioBackground>",
-    array(select row(unnest(audio_feedback_positive))) as "audio_feedback_positive!: Vec<(AudioFeedbackPositive,)>", -- TODO: fix ugly!
-    array(select row(unnest(audio_feedback_negative))) as "audio_feedback_negative!: Vec<(AudioFeedbackNegative,)>",
-    array(
-        select row (id, kind)
-        from jig_module
-        where jig_id = $1
-        order by "index"
-    ) as "modules!: Vec<(ModuleId, ModuleKind)>",
-    array(select row(goal_id) from jig_goal where jig_id = $1) as "goals!: Vec<(GoalId,)>",
-    array(select row(category_id) from jig_category where jig_id = $1) as "categories!: Vec<(CategoryId,)>",
-    array(select row(affiliation_id) from jig_affiliation where jig_id = jig.id) as "affiliations!: Vec<(AffiliationId,)>",
-    array(select row(age_range_id) from jig_age_range where jig_id = jig.id) as "age_ranges!: Vec<(AgeRangeId,)>",
-    array(select row(id) from jig_additional_resource where jig_id = $1) as "additional_resources!: Vec<(AdditionalResourceId,)>"
+select id                                                                            as "id: JigId",
+       display_name,
+       creator_id,
+       author_id,
+       (select given_name || ' '::text || family_name
+        from user_profile
+        where user_profile.user_id = author_id)                                      as "author_name",
+       publish_at,
+       updated_at,
+       language,
+       description,
+       is_public,
+       direction                                                                     as "direction: TextDirection",
+       display_score,
+       track_assessments,
+       drag_assist,
+       theme                                                                         as "theme: ThemeId",
+       audio_background                                                              as "audio_background!: Option<AudioBackground>",
+       array(select row (unnest(audio_feedback_positive)))                           as "audio_feedback_positive!: Vec<(AudioFeedbackPositive,)>",
+       array(select row (unnest(audio_feedback_negative)))                           as "audio_feedback_negative!: Vec<(AudioFeedbackNegative,)>",
+       array(
+               select row (id, kind)
+               from jig_module
+               where jig_id = $1
+               order by "index"
+           )                                                                         as "modules!: Vec<(ModuleId, ModuleKind)>",
+       array(select row (goal_id) from jig_goal where jig_id = $1)                   as "goals!: Vec<(GoalId,)>",
+       array(select row (category_id) from jig_category where jig_id = $1)           as "categories!: Vec<(CategoryId,)>",
+       array(select row (affiliation_id) from jig_affiliation where jig_id = jig.id) as "affiliations!: Vec<(AffiliationId,)>",
+       array(select row (age_range_id) from jig_age_range where jig_id = jig.id)     as "age_ranges!: Vec<(AgeRangeId,)>",
+       array(select row (id) from jig_additional_resource where jig_id = $1)         as "additional_resources!: Vec<(AdditionalResourceId,)>"
 from jig
 where id = $1"#,
         id.0
@@ -250,6 +255,7 @@ where id = $1"#,
             categories: row.categories.into_iter().map(|(it, )| it).collect(),
             creator_id: row.creator_id,
             author_id: row.author_id,
+            author_name: row.author_name,
             publish_at: row.publish_at,
             description: row.description,
             last_edited: row.updated_at,
@@ -289,8 +295,8 @@ pub async fn update(
     is_public: Option<&bool>,
     default_player_settings: Option<&JigPlayerSettings>,
     theme: Option<&ThemeId>,
-    audio_background: Option<Option<AudioBackground>>,
-    audio_effects: Option<AudioEffects>,
+    audio_background: Option<&Option<AudioBackground>>,
+    audio_effects: Option<&AudioEffects>,
 ) -> Result<(), error::UpdateWithMetadata> {
     let mut transaction = pool.begin().await?;
     if !sqlx::query!(
@@ -346,13 +352,13 @@ where id = $1 and ($2 <> audio_feedback_positive or $3 <> audio_feedback_negativ
             id.0,
             &audio_effects
                 .feedback_positive
-                .into_iter()
-                .map(|it| it as i16)
+                .iter()
+                .map(|it| *it as i16)
                 .collect::<Vec<_>>(),
             &audio_effects
                 .feedback_negative
-                .into_iter()
-                .map(|it| it as i16)
+                .iter()
+                .map(|it| *it as i16)
                 .collect::<Vec<_>>(),
         )
         .execute(&mut transaction)
@@ -468,40 +474,41 @@ pub async fn list(
     log::info!("{:?}", author_id);
     sqlx::query!( //language=SQL
         r#"
-select  
-    id as "id: JigId",
-    display_name,
-    creator_id,
-    author_id,
-    publish_at,
-    updated_at,
-    language,
-    description,
-    is_public,
-    direction as "direction: TextDirection",
-    display_score,
-    track_assessments,
-    drag_assist,
-    theme as "theme: ThemeId",
-    audio_background as "audio_background!: Option<AudioBackground>",
-    array(select row(unnest(audio_feedback_positive))) as "audio_feedback_positive!: Vec<(AudioFeedbackPositive,)>", -- TODO: fix ugly!
-    array(select row(unnest(audio_feedback_negative))) as "audio_feedback_negative!: Vec<(AudioFeedbackNegative,)>",
-    array(
-        select row (id, kind)
-        from jig_module
-        where jig_id = jig.id
-        order by "index"
-    ) as "modules!: Vec<(ModuleId, ModuleKind)>",
-    array(select row(goal_id) from jig_goal where jig_id = jig.id) as "goals!: Vec<(GoalId,)>",
-    array(select row(category_id) from jig_category where jig_id = jig.id) as "categories!: Vec<(CategoryId,)>",
-    array(select row(affiliation_id) from jig_affiliation where jig_id = jig.id) as "affiliations!: Vec<(AffiliationId,)>",
-    array(select row(age_range_id) from jig_age_range where jig_id = jig.id) as "age_ranges!: Vec<(AgeRangeId,)>",
-    array(select row(id) from jig_additional_resource where jig_id = jig.id) as "additional_resources!: Vec<(AdditionalResourceId,)>"
+select id                                                                            as "id: JigId",
+       display_name,
+       creator_id,
+       author_id,
+       (select given_name || ' '::text || family_name
+        from user_profile
+        where user_profile.user_id = author_id)                                      as "author_name",
+       publish_at,
+       updated_at,
+       language,
+       description,
+       is_public,
+       direction                                                                     as "direction: TextDirection",
+       display_score,
+       track_assessments,
+       drag_assist,
+       theme                                                                         as "theme: ThemeId",
+       audio_background                                                              as "audio_background!: Option<AudioBackground>",
+       array(select row (unnest(audio_feedback_positive)))                           as "audio_feedback_positive!: Vec<(AudioFeedbackPositive,)>",
+       array(select row (unnest(audio_feedback_negative)))                           as "audio_feedback_negative!: Vec<(AudioFeedbackNegative,)>",
+       array(
+               select row (id, kind)
+               from jig_module
+               where jig_id = jig.id
+               order by "index"
+           )                                                                         as "modules!: Vec<(ModuleId, ModuleKind)>",
+       array(select row (goal_id) from jig_goal where jig_id = jig.id)               as "goals!: Vec<(GoalId,)>",
+       array(select row (category_id) from jig_category where jig_id = jig.id)       as "categories!: Vec<(CategoryId,)>",
+       array(select row (affiliation_id) from jig_affiliation where jig_id = jig.id) as "affiliations!: Vec<(AffiliationId,)>",
+       array(select row (age_range_id) from jig_age_range where jig_id = jig.id)     as "age_ranges!: Vec<(AgeRangeId,)>",
+       array(select row (id) from jig_additional_resource where jig_id = jig.id)     as "additional_resources!: Vec<(AdditionalResourceId,)>"
 from jig
-where 
-    (publish_at < now() is not distinct from $1 or $1 is null)
-    and (author_id is not distinct from $3 or $3 is null)
-    and jig.id not in (select draft_id as id from jig_draft_join) -- check explain. is this slow?
+where (publish_at < now() is not distinct from $1 or $1 is null)
+  and (author_id is not distinct from $3 or $3 is null)
+  and jig.id not in (select draft_id as id from jig_draft_join)
 order by coalesce(updated_at, created_at) desc
 limit 20 offset 20 * $2
 "#,
@@ -523,6 +530,7 @@ limit 20 offset 20 * $2
             categories: row.categories.into_iter().map(|(it, )| it).collect(),
             creator_id: row.creator_id,
             author_id: row.author_id,
+            author_name: row.author_name,
             publish_at: row.publish_at,
             description: row.description,
             last_edited: row.updated_at,
