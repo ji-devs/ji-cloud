@@ -33,6 +33,7 @@ fn render_result(state: Rc<State>, jig: &Jig) -> Dom {
         .property("title", &jig.display_name)
         .property("playedCount", "???")
         .property("likedCount", "???")
+        .property("author", &jig.author_name.clone().unwrap_or_default())
         .property("publishedAt", {
             match jig.publish_at {
                 Some(publish_at) => published_at_string(publish_at, false),
@@ -87,11 +88,6 @@ fn render_result(state: Rc<State>, jig: &Jig) -> Dom {
 
 // new: false,
 // leaningPathJigCount: undefined,
-// // title: "The Big Gematria challenge",
-// // playedCount: 10,
-// // likedCount: 20,
-// ages: "5-8",
-// // language: "english",
+// playedCount: 10,
+// likedCount: 20,
 // byJiTeam: false,
-// author: "Corinne",
-// // description: "This game is about… using … Lorem Ipsum is simply dummy text of the printing and typesetting industry",
