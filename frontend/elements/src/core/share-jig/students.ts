@@ -2,6 +2,7 @@ import { LitElement, html, css, customElement, property, internalProperty, Prope
 import "@elements/core/popups/popup-body";
 import "@elements/core/buttons/rectangle";
 import { nothing } from "lit-html";
+import { classMap } from "lit-html/directives/class-map";
 
 const STR_STUDENTS_HEADER = "Share with Students";
 const STR_STUDENTS_URL_LABEL = "Ask the students to go to:";
@@ -34,9 +35,13 @@ export class _ extends LitElement {
                 }
                 label {
                     display: grid;
+                    color: var(--main-blue);
+                }
+                .no-code label {
+                    color: var(--light-blue-4);
                 }
                 input {
-                    background-color: #f7f7f7;
+                    background-color: var(--light-blue-2);
                     border-radius: 8px;
                     padding: 14px 18px;
                     font-size: 16px;
@@ -45,6 +50,9 @@ export class _ extends LitElement {
                     border: 0;
                     width: 100%;
                     box-sizing: border-box;
+                }
+                .no-code input {
+                    background-color: var(--light-blue-1);
                 }
                 .field-url .under {
                     display: flex;
@@ -67,6 +75,9 @@ export class _ extends LitElement {
                 .field-code .valid-until {
                     color: #4a4a4a;
                     font-size: 14px;
+                }
+                .field-code ::slotted([slot=copy-code]) {
+                    grid-column: 2;
                 }
             `,
         ];
@@ -107,18 +118,26 @@ export class _ extends LitElement {
 
     render() {
         return html`
-            <popup-body>
+            <popup-body class=${classMap({
+                "no-code": this.code === ""
+            })}>
                 <slot slot="back" name="back"></slot>
                 <slot slot="close" name="close"></slot>
                 <h3 slot="heading">${STR_STUDENTS_HEADER}</h3>
                 <div slot="body" class="body">
+                    <slot name="gen-code-button"></slot>
                     <div class="field-url">
                         <label>
                             ${STR_STUDENTS_URL_LABEL}
                             <input readonly value="${this.url}">
                         </label>
                         <div class="under">
-                            <button-rect href="${this.url}" kind="text">${STR_STUDENTS_URL_LINK}</button-rect>
+                            <button-rect
+                                href="${this.url}"
+                                kind="text"
+                                color="blue"
+                                ?disabled=${this.code === ""}
+                            >${STR_STUDENTS_URL_LINK}</button-rect>
                             <span class="divider"></span>
                             <slot name="copy-url"></slot>
                         </div>
@@ -129,8 +148,8 @@ export class _ extends LitElement {
                             <input readonly value="${this.code}">
                         </label>
                         <div class="under">
-                            ${ this.exprWeeks ? html`
-                                <span class="valid-until">
+                            <span class="valid-until">
+                                ${ this.exprWeeks ? html`
                                     ${STR_STUDENTS_CODE_VALID_FOR}
                                     ${
                                         this.exprWeeks === 1 ? html`
@@ -142,8 +161,8 @@ export class _ extends LitElement {
                                     }
                                     ${STR_STUDENTS_CODE_VALID_UNTIL}
                                     ${this.exprDateLabel}
-                                </span>
-                            ` : nothing }
+                                ` : nothing }
+                            </span>
                             <slot name="copy-code"></slot>
                         </div>
                     </div>

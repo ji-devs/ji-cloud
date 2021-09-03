@@ -22,7 +22,7 @@ export class _ extends LitElement {
                     display: grid;
                 }
                 textarea {
-                    background-color: #f7f7f7;
+                    background-color: var(--light-blue-2);
                     border-radius: 8px;
                     padding: 14px 18px;
                     font-size: 16px;

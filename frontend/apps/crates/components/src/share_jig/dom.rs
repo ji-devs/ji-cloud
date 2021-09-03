@@ -17,6 +17,7 @@ use super::{
 
 const STR_BACK: &'static str = "Back";
 const STR_COPIED: &'static str = "Copied to the clipboard";
+const STR_COPY_CODE: &'static str = "Copy Code";
 
 pub fn render(state: Rc<State>, anchor: Dom, slot: Option<&str>) -> Dom {
     html!("anchored-overlay", {
@@ -116,6 +117,13 @@ fn render_share_students(state: Rc<State>) -> Dom {
             student_code.map(|_| JIG_PLAYER_SESSION_VALID_DURATION_SECS)
         }))
         .children(&mut [
+            html!("share-jig-gen-code-button", {
+                .property("slot", "gen-code-button")
+                .property_signal("disabled", state.student_code.signal_ref(|x| x.is_some()))
+                .event(clone!(state => move |_: events::Click| {
+                    actions::generate_student_code(Rc::clone(&state));
+                }))
+            }),
             html!("button-empty", {
                 .property("slot", "close")
                 .text("×")
@@ -125,6 +133,7 @@ fn render_share_students(state: Rc<State>) -> Dom {
             }),
             html!("button-rect", {
                 .property("slot", "back")
+                .property("color", "blue")
                 .property("kind", "text")
                 .text("< ")
                 .text(STR_BACK)
@@ -134,25 +143,20 @@ fn render_share_students(state: Rc<State>) -> Dom {
             }),
             html!("button-rect", {
                 .property("slot", "copy-url")
+                .property("color", "blue")
                 .property("kind", "text")
                 .text("Copy URL")
+                .property_signal("disabled", state.student_code.signal_ref(|x| x.is_none()))
                 .event(|_: events::Click| {
                     clipboard::write_text("???");
                 })
             }),
-            html!("button", {
-                .property("slot", "copy-code")
-                .property_signal("disabled", state.student_code.signal_ref(|x| x.is_some()))
-                .text("Generate Code")
-                .event(clone!(state => move|_: events::Click| {
-                    actions::generate_student_code(Rc::clone(&state));
-                }))
-            }),
             html!("button-rect", {
                 .property("slot", "copy-code")
                 .property("kind", "text")
+                .property("color", "blue")
                 .property_signal("disabled", state.student_code.signal_ref(|x| x.is_none()))
-                .text("Copy Code")
+                .text(STR_COPY_CODE)
                 .event(clone!(state => move|_: events::Click| {
                     let student_code = state.student_code.get_cloned().unwrap_ji();
                     clipboard::write_text(&student_code);
