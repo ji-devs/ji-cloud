@@ -40,6 +40,7 @@ impl Base {
         sticker.host.set(host);
         sticker.playing_started.set_neq(false);
         sticker.is_playing.set_neq(false);
+        Stickers::call_change(&Rc::clone(&self.stickers));
     }
 
     pub fn delete_video(&self) {
