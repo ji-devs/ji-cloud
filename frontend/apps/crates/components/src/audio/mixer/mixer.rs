@@ -102,7 +102,7 @@ impl <'a> From<&'a Audio> for AudioPath<'a> {
 //TODO - make it nicer to implement both ref and owned with macros
 impl From<&jig::AudioBackground> for AudioPath<'_> {
     fn from(bg:&jig::AudioBackground) -> Self {
-        bg.into()
+        (*bg).into()
     }
 }
 impl From<jig::AudioBackground> for AudioPath<'_> {
@@ -116,7 +116,7 @@ impl From<jig::AudioBackground> for AudioPath<'_> {
 
 impl From<&jig::AudioFeedbackPositive> for AudioPath<'_> {
     fn from(p:&jig::AudioFeedbackPositive) -> Self {
-        p.into()
+        (*p).into()
     }
 }
 impl From<jig::AudioFeedbackPositive> for AudioPath<'_> {
@@ -131,7 +131,7 @@ impl From<jig::AudioFeedbackPositive> for AudioPath<'_> {
 
 impl From<&jig::AudioFeedbackNegative> for AudioPath<'_> {
     fn from(n:&jig::AudioFeedbackNegative) -> Self {
-        n.into()
+        (*n).into()
     }
 }
 impl From<jig::AudioFeedbackNegative> for AudioPath<'_> {
