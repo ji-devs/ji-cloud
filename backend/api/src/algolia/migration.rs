@@ -116,6 +116,7 @@ fn set_attributes_for_faceting_v5<'a>(
             FacetAttribute::filter_only(Attribute("categories".to_owned())),
             FacetAttribute::filter_only(Attribute("media_kind".to_owned())),
             FacetAttribute::filter_only(Attribute("media_subkind".to_owned())),
+            FacetAttribute::filter_only(Attribute("image_tags".to_owned())),
         ]),
     };
 
@@ -140,6 +141,8 @@ fn add_jig_index<'a>(
                     Attribute("affiliation_names".to_owned()),
                     Attribute("goal_names".to_owned()),
                 ])
+                .single(Attribute("author_name".to_owned()))
+                .single(Attribute("language".to_owned()))
                 .finish(),
         ),
         attributes_for_faceting: Some(vec![
