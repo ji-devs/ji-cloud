@@ -70,9 +70,7 @@ pub fn set_profile_image(state: Rc<State>, file: File) {
                 log::error!("{}", err);
             },
             Ok(image_id) => {
-                // let url = format!("https://uploads.sandbox.jicloud.org/media/user/{}/thumbnail.png", image_id.0);
-                // log::info!("{}", url);
-                state.user.profile_image.set(Some(image_id.0.to_string()));
+                state.user.profile_image_id.set(Some(image_id));
                 save_profile(Rc::clone(&state));
             },
         }
