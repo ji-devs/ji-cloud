@@ -1,7 +1,4 @@
-mod video;
-
-
-use super::state::*;
+use super::{video, state::*};
 use components::{
     tabs::{MenuTab, MenuTabKind},
     image::search::dom::render as render_image_search,
@@ -11,7 +8,6 @@ use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
 use std::rc::Rc;
 use utils::prelude::*;
-
 
 pub fn render(state: Rc<Step2>) -> Dom {
     html!("menu-tabs", {
