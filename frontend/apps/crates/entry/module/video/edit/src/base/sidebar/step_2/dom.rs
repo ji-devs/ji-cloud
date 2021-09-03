@@ -1,3 +1,6 @@
+mod video;
+
+
 use super::state::*;
 use components::{
     tabs::{MenuTab, MenuTabKind},
@@ -9,7 +12,6 @@ use futures_signals::signal::SignalExt;
 use std::rc::Rc;
 use utils::prelude::*;
 
-mod video;
 
 pub fn render(state: Rc<Step2>) -> Dom {
     html!("menu-tabs", {
