@@ -1,7 +1,8 @@
 use super::play_settings::state::State as PlaySettingsState;
 use crate::base::state::Base;
-use components::instructions::editor::{
-    callbacks::Callbacks as InstructionsEditorCallbacks, state::State as InstructionsEditorState,
+use components::{
+    tabs::MenuTabKind,
+    instructions::editor::{callbacks::Callbacks as InstructionsEditorCallbacks, state::State as InstructionsEditorState}
 };
 use dominator::clone;
 use futures_signals::signal::Mutable;
@@ -15,29 +16,14 @@ impl Step3 {
     pub fn new(base: Rc<Base>) -> Rc<Self> {
         // let kind = match crate::debug::settings().settings_tab {
         //     Some(kind) => kind,
-        //     None => TabKind::Settings
+        //     None => MenuTabKind::Settings
         // };
 
-        let kind = TabKind::Settings;
+        let kind = MenuTabKind::PlaySettings;
 
         let tab = Mutable::new(Tab::new(base.clone(), kind));
 
         Rc::new(Self { base, tab })
-    }
-}
-
-#[derive(Clone, Copy, PartialEq, Debug)]
-pub enum TabKind {
-    Settings,
-    Instructions,
-}
-
-impl TabKind {
-    pub const fn as_str(&self) -> &'static str {
-        match self {
-            Self::Settings => "play-settings",
-            Self::Instructions => "instructions",
-        }
     }
 }
 
@@ -48,10 +34,10 @@ pub enum Tab {
 }
 
 impl Tab {
-    pub fn new(base: Rc<Base>, kind: TabKind) -> Self {
+    pub fn new(base: Rc<Base>, kind: MenuTabKind) -> Self {
         match kind {
-            TabKind::Settings => Self::Settings(Rc::new(PlaySettingsState::new(base))),
-            TabKind::Instructions => {
+            MenuTabKind::PlaySettings => Self::Settings(Rc::new(PlaySettingsState::new(base))),
+            MenuTabKind::Instructions => {
                 let callbacks = InstructionsEditorCallbacks::new(
                     clone!(base => move |instructions, also_history| {
                         if also_history {
@@ -73,14 +59,16 @@ impl Tab {
                 let state = InstructionsEditorState::new(base.instructions.clone(), callbacks);
 
                 Self::Instructions(Rc::new(state))
-            }
+            },
+
+            _ => unimplemented!("unsupported tab kind!")
         }
     }
 
-    pub fn kind(&self) -> TabKind {
+    pub fn kind(&self) -> MenuTabKind {
         match self {
-            Self::Settings(_) => TabKind::Settings,
-            Self::Instructions(_) => TabKind::Instructions,
+            Self::Settings(_) => MenuTabKind::PlaySettings,
+            Self::Instructions(_) => MenuTabKind::Instructions,
         }
     }
 }

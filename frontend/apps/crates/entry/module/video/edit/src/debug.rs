@@ -19,9 +19,7 @@ use shared::{
 };
 use utils::prelude::*;
 use uuid::Uuid;
-
-use crate::base::sidebar::step_1::state::TabKind as BgTabKind;
-use crate::base::sidebar::step_2::state::TabKind as ContentTabKind;
+use components::tabs::MenuTabKind;
 
 pub static SETTINGS: OnceCell<DebugSettings> = OnceCell::new();
 
@@ -35,8 +33,8 @@ pub struct DebugSettings {
     pub step: Option<Step>,
     pub skip_save: bool,
     pub skip_load_jig: bool,
-    pub bg_tab: Option<BgTabKind>,
-    pub content_tab: Option<ContentTabKind>,
+    pub bg_tab: Option<MenuTabKind>,
+    pub content_tab: Option<MenuTabKind>,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -95,8 +93,8 @@ impl DebugSettings {
             step: Some(Step::One),
             skip_save: true,
             skip_load_jig: true,
-            bg_tab: Some(BgTabKind::Image),
-            content_tab: Some(ContentTabKind::Video),
+            bg_tab: Some(MenuTabKind::Image),
+            content_tab: Some(MenuTabKind::Video),
         }
     }
 }

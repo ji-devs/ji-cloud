@@ -3,18 +3,11 @@ use crate::base::state::Base;
 use std::rc::Rc;
 use futures_signals::signal::{Signal, Mutable, SignalExt};
 use dominator::clone;
-use components::{
-    image::search::{
-        state::{State as ImageSearchState, ImageSearchOptions},
-        callbacks::Callbacks as ImageSearchCallbacks
-    },
-    audio::input::{
+use components::{audio::input::{
         AudioInputOptions,
         AudioInput,
         AudioInputCallbacks,
-    },
-    stickers::state::Stickers,
-};
+    }, image::search::{callbacks::Callbacks as ImageSearchCallbacks, state::{ImageSearchCheckboxKind, ImageSearchOptions, State as ImageSearchState}}, stickers::state::Stickers, tabs::MenuTabKind};
 use shared::domain::jig::module::body::{Image, Audio};
 
 pub struct Step3 {
@@ -28,7 +21,7 @@ impl Step3 {
 
         let kind = match crate::debug::settings().content_tab {
             Some(kind) => kind,
-            None => TabKind::Text
+            None => MenuTabKind::Text
         };
 
         let tab = Mutable::new(Tab::new(base.clone(), kind));
@@ -40,27 +33,6 @@ impl Step3 {
     }
 }
 
-
-#[derive(Clone, Copy, PartialEq, Debug)]
-pub enum TabKind {
-    Text,
-    Image,
-    Audio,
-}
-
-impl TabKind {
-    pub const fn as_str(&self) -> &'static str {
-        match self {
-            Self::Text => "text",
-            Self::Image => "image",
-            Self::Audio => "audio",
-        }
-    }
-}
-
-use std::pin::Pin;
-
-
 #[derive(Clone)]
 pub enum Tab {
     Text, // uses top-level state since it must be toggled from main too
@@ -69,13 +41,14 @@ pub enum Tab {
 }
 
 impl Tab {
-    pub fn new(base: Rc<Base>, kind:TabKind) -> Self {
+    pub fn new(base: Rc<Base>, kind:MenuTabKind) -> Self {
         match kind {
-            TabKind::Text=> {
+            MenuTabKind::Text=> {
                 Self::Text
             },
-            TabKind::Image=> {
+            MenuTabKind::Image=> {
                 let opts = ImageSearchOptions {
+                    checkbox_kind: Some(ImageSearchCheckboxKind::StickersFilter),
                     ..ImageSearchOptions::default()
                 };
 
@@ -89,7 +62,7 @@ impl Tab {
 
                 Self::Image(Rc::new(state))
             }
-            TabKind::Audio => {
+            MenuTabKind::Audio => {
                 let opts = AudioInputOptions::new(
                     Some(base.instructions.signal_cloned().map(|instructions| instructions.audio))
                 );
@@ -107,15 +80,17 @@ impl Tab {
 
                 Self::Audio(state)
             },
+
+            _ => unimplemented!("unsupported tab kind!")
         }
     }
 
 
-    pub fn kind(&self) -> TabKind {
+    pub fn kind(&self) -> MenuTabKind {
         match self {
-            Self::Text => TabKind::Text,
-            Self::Image(_) => TabKind::Image,
-            Self::Audio(_) => TabKind::Audio,
+            Self::Text => MenuTabKind::Text,
+            Self::Image(_) => MenuTabKind::Image,
+            Self::Audio(_) => MenuTabKind::Audio,
         }
     }
 }

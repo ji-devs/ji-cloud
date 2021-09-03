@@ -7,6 +7,7 @@ use futures_signals::{
 };
 use dominator::clone;
 use components::{
+    tabs::MenuTabKind,
     image::search::state::{State as ImageSearchState, ImageSearchOptions},
     audio::input::{
         AudioInputOptions,
@@ -35,7 +36,7 @@ impl Step3 {
     }
 
     //The tab kind state is re-generated when selecting or deselecting a trace
-    pub fn selected_tab_signal(&self) -> impl Signal<Item = Mutable<Option<TabKind>>> {
+    pub fn selected_tab_signal(&self) -> impl Signal<Item = Mutable<Option<MenuTabKind>>> {
         self.trace_index_signal()
             .map(|index| index.is_some())
             .dedupe()
@@ -43,7 +44,7 @@ impl Step3 {
                 if has_index {
                     let kind = match crate::debug::settings().interaction_tab {
                         Some(kind) => kind,
-                        None => TabKind::Text
+                        None => MenuTabKind::Text
                     };
                     Mutable::new(Some(kind))
                 } else {
@@ -54,7 +55,7 @@ impl Step3 {
 
     //The tab signal is re-generated when either the tab is clicked (changing the kind_state)
     //or a new trace is selected
-    pub fn tab_signal(&self, selected_tab_signal: impl Signal<Item = Option<TabKind>>) -> impl Signal<Item = Option<Tab>> {
+    pub fn tab_signal(&self, selected_tab_signal: impl Signal<Item = Option<MenuTabKind>>) -> impl Signal<Item = Option<Tab>> {
 
         let base = self.base.clone();
 
@@ -79,22 +80,6 @@ impl Step3 {
 
 }
 
-
-#[derive(Clone, Copy, PartialEq, Debug)]
-pub enum TabKind {
-    Text,
-    Audio
-}
-
-impl TabKind {
-    pub const fn as_str(&self) -> &'static str {
-        match self {
-            Self::Text => "text",
-            Self::Audio => "audio",
-        }
-    }
-}
-
 #[derive(Clone)]
 pub enum Tab {
     Text(usize, Mutable<Option<String>>),
@@ -102,13 +87,13 @@ pub enum Tab {
 }
 
 impl Tab {
-    pub fn new(base: Rc<Base>, kind:TabKind, index: usize) -> Self {
+    pub fn new(base: Rc<Base>, kind:MenuTabKind, index: usize) -> Self {
         match kind {
-            TabKind::Text => {
+            MenuTabKind::Text => {
                 let text = base.traces.get_text(index);
                 Self::Text(index, Mutable::new(text))
             },
-            TabKind::Audio => {
+            MenuTabKind::Audio => {
                 
                 let opts = AudioInputOptions::new(
                     Some(base.traces.audio_signal(index))
@@ -127,14 +112,16 @@ impl Tab {
                 let state = AudioInput::new(opts, callbacks);
 
                 Self::Audio(state)
-            }
+            },
+
+            _ => unimplemented!("unsupported tab kind!")
         }
     }
 
-    pub fn kind(&self) -> TabKind {
+    pub fn kind(&self) -> MenuTabKind {
         match self {
-            Self::Text(_, _) => TabKind::Text,
-            Self::Audio(_) => TabKind::Audio,
+            Self::Text(_, _) => MenuTabKind::Text,
+            Self::Audio(_) => MenuTabKind::Audio,
         }
     }
 }

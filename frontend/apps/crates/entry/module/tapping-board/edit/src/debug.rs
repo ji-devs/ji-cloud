@@ -33,12 +33,8 @@ use shared::{
     media::MediaLibrary
 };
 use components::stickers::{sprite::ext::*, text::ext::*};
-use crate::base::sidebar::step_1::state::TabKind as BgTabKind;
-use crate::base::sidebar::step_2::state::TabKind as ContentTabKind;
-use crate::base::sidebar::step_3::state::TabKind as InteractionTabKind;
-use crate::base::sidebar::step_4::state::TabKind as SettingsTabKind;
+use components::tabs::MenuTabKind;
 pub static SETTINGS:OnceCell<DebugSettings> = OnceCell::new();
-
 //const IMAGE_UUID:&'static str = "bf2fe548-7ffd-11eb-b3ab-579026da8b36";
 const IMAGE_UUID:&'static str = "9da11e0a-c17b-11eb-b863-570eea18a3bd";
 const AUDIO_UUID:&'static str = "734314da-0b07-11ec-95f0-2b4855fa3cb8";
@@ -52,10 +48,10 @@ pub struct DebugSettings {
     pub step:Option<Step>,
     pub skip_save: bool,
     pub skip_load_jig: bool,
-    pub bg_tab: Option<BgTabKind>,
-    pub content_tab: Option<ContentTabKind>,
-    pub interaction_tab: Option<InteractionTabKind>,
-    pub settings_tab: Option<SettingsTabKind>,
+    pub bg_tab: Option<MenuTabKind>,
+    pub content_tab: Option<MenuTabKind>,
+    pub interaction_tab: Option<MenuTabKind>,
+    pub settings_tab: Option<MenuTabKind>,
     pub draw_kind: Option<TraceKind>,
 }
 
@@ -132,10 +128,10 @@ impl DebugSettings {
             step: Some(Step::Three),
             skip_save: true,
             skip_load_jig: true,
-            bg_tab: Some(BgTabKind::Image),
-            content_tab: Some(ContentTabKind::Text),
-            interaction_tab: Some(InteractionTabKind::Audio),
-            settings_tab: Some(SettingsTabKind::Settings),
+            bg_tab: Some(MenuTabKind::Image),
+            content_tab: Some(MenuTabKind::Text),
+            interaction_tab: Some(MenuTabKind::Audio),
+            settings_tab: Some(MenuTabKind::PlaySettings),
             draw_kind: None,
         }
     }

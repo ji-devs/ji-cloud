@@ -32,9 +32,8 @@ use shared::{
     media::MediaLibrary
 };
 use components::stickers::{sprite::ext::*, text::ext::*};
+use components::tabs::MenuTabKind;
 
-use crate::base::sidebar::step_2::state::TabKind as BgTabKind;
-use crate::base::sidebar::step_3::state::TabKind as ContentTabKind;
 pub static SETTINGS:OnceCell<DebugSettings> = OnceCell::new();
 
 const IMAGE_UUID:&'static str = "e84dd7fe-c92d-11eb-8c82-cfd1d3fd13ff";
@@ -49,8 +48,8 @@ pub struct DebugSettings {
     pub step:Option<Step>,
     pub skip_save: bool,
     pub skip_load_jig: bool,
-    pub bg_tab: Option<BgTabKind>,
-    pub content_tab: Option<ContentTabKind>,
+    pub bg_tab: Option<MenuTabKind>,
+    pub content_tab: Option<MenuTabKind>,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -112,8 +111,8 @@ impl DebugSettings {
             step: Some(Step::One),
             skip_save: true,
             skip_load_jig: true,
-            bg_tab: Some(BgTabKind::Image),
-            content_tab: Some(ContentTabKind::Text),
+            bg_tab: Some(MenuTabKind::Image),
+            content_tab: Some(MenuTabKind::Text),
         }
     }
 }

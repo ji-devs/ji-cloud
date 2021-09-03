@@ -1,12 +1,4 @@
-use crate::{
-    color_select::state::State as ColorPickerState,
-    image::search::{
-        callbacks::Callbacks as ImageSearchCallbacks,
-        state::{ImageSearchOptions, State as ImageSearchState},
-    },
-    module::_groups::cards::edit::state::*,
-    theme_selector::state::{ThemeSelector, ThemeSelectorCallbacks},
-};
+use crate::{color_select::state::State as ColorPickerState, image::search::{callbacks::Callbacks as ImageSearchCallbacks, state::{ImageSearchCheckboxKind, ImageSearchOptions, State as ImageSearchState}}, module::_groups::cards::edit::state::*, tabs::MenuTabKind, theme_selector::state::{ThemeSelector, ThemeSelectorCallbacks}};
 use dominator::clone;
 use futures_signals::signal::Mutable;
 use shared::domain::jig::module::body::Background;
@@ -21,29 +13,12 @@ impl<RawData: RawDataExt, E: ExtraExt> Step2<RawData, E> {
     pub fn new(base: Rc<CardsBase<RawData, E>>) -> Rc<Self> {
         let kind = match base.debug.step2_tab {
             Some(kind) => kind,
-            None => TabKind::Theme,
+            None => MenuTabKind::Theme,
         };
 
         let tab = Mutable::new(Tab::new(base.clone(), kind));
 
         Rc::new(Self { base, tab })
-    }
-}
-
-#[derive(Clone, Copy, PartialEq, Debug)]
-pub enum TabKind {
-    Theme,
-    Image,
-    Color,
-}
-
-impl TabKind {
-    pub const fn as_str(&self) -> &'static str {
-        match self {
-            Self::Theme => "theme",
-            Self::Image => "background-image",
-            Self::Color => "background-color",
-        }
     }
 }
 
@@ -57,10 +32,10 @@ pub enum Tab {
 impl Tab {
     pub fn new<RawData: RawDataExt, E: ExtraExt>(
         base: Rc<CardsBase<RawData, E>>,
-        kind: TabKind,
+        kind: MenuTabKind,
     ) -> Self {
         match kind {
-            TabKind::Theme => {
+            MenuTabKind::Theme => {
                 let callbacks = ThemeSelectorCallbacks::new(clone!(base => move |theme| {
                     base.set_theme(theme);
                 }));
@@ -72,8 +47,11 @@ impl Tab {
                 );
                 Self::Theme(Rc::new(state))
             }
-            TabKind::Image => {
-                let opts = ImageSearchOptions::default();
+            MenuTabKind::Image => {
+                let opts = ImageSearchOptions {
+                    checkbox_kind: Some(ImageSearchCheckboxKind::BackgroundLayer1Filter),
+                    ..ImageSearchOptions::default()
+                };
 
                 let callbacks = ImageSearchCallbacks::new(Some(clone!(base => move |image| {
                     base.set_bg(Background::Image(image));
@@ -83,7 +61,7 @@ impl Tab {
                 Self::Image(Rc::new(state))
             }
 
-            TabKind::Color => {
+            MenuTabKind::Color => {
                 let state = ColorPickerState::new(
                     base.theme_id.clone(),
                     None,
@@ -92,15 +70,17 @@ impl Tab {
                     })),
                 );
                 Self::Color(Rc::new(state))
-            }
+            },
+
+            _ => unimplemented!("unsupported tab kind!")
         }
     }
 
-    pub fn kind(&self) -> TabKind {
+    pub fn kind(&self) -> MenuTabKind {
         match self {
-            Self::Theme(_) => TabKind::Theme,
-            Self::Image(_) => TabKind::Image,
-            Self::Color(_) => TabKind::Color,
+            Self::Theme(_) => MenuTabKind::Theme,
+            Self::Image(_) => MenuTabKind::Image,
+            Self::Color(_) => MenuTabKind::Color,
         }
     }
 }

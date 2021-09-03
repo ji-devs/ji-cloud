@@ -35,13 +35,11 @@ use shared::{
         }
     }
 };
-use components::module::_groups::cards::edit::{
-    config,
-    debug::{
-        DebugSettings as BaseDebugSettings,
-        Step1TabKind,
-        Step2TabKind,
-        Step3TabKind
+use components::{
+    tabs::MenuTabKind,
+    module::_groups::cards::edit::{
+        config,
+        debug::DebugSettings as BaseDebugSettings,
     }
 };
 pub static SETTINGS:OnceCell<DebugSettings> = OnceCell::new();
@@ -72,7 +70,7 @@ impl DebugSettings {
             //otherwise it will fail at load time
             data: Some(
                 if let Some(init_data) = init_data {
-                    let mode = Mode::Translate;
+                    let mode = Mode::WordsAndImages;
 
                     RawData{
                         content: Some(Content {
@@ -110,11 +108,11 @@ impl DebugSettings {
                 }
             ),
             base: Some(BaseDebugSettings {
-                step1_tab: Some(Step1TabKind::Text),
-                step2_tab: Some(Step2TabKind::Theme),
-                step3_tab: Some(Step3TabKind::Settings),
+                step1_tab: Some(MenuTabKind::Text),
+                step2_tab: Some(MenuTabKind::Theme),
+                step3_tab: Some(MenuTabKind::PlaySettings),
             }),
-            step: Some(Step::Three),
+            step: Some(Step::One),
             skip_save: true,
             skip_load_jig: true,
         }

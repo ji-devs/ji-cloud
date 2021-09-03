@@ -1,4 +1,5 @@
 use crate::{
+    tabs::MenuTabKind,
     instructions::editor::{
         callbacks::Callbacks as InstructionsEditorCallbacks,
         state::State as InstructionsEditorState,
@@ -32,7 +33,7 @@ where
     pub fn new(base: Rc<CardsBase<RawData, E>>, get_settings: GetSettingsStateFn) -> Rc<Self> {
         let kind = match base.debug.step3_tab {
             Some(kind) => kind,
-            None => TabKind::Settings,
+            None => MenuTabKind::PlaySettings,
         };
 
         let tab = Mutable::new(Tab::new(base.clone(), kind, get_settings.clone()));
@@ -42,21 +43,6 @@ where
             tab,
             get_settings,
         })
-    }
-}
-
-#[derive(Clone, Copy, PartialEq, Debug)]
-pub enum TabKind {
-    Settings,
-    Instructions,
-}
-
-impl TabKind {
-    pub const fn as_str(&self) -> &'static str {
-        match self {
-            Self::Settings => "play-settings",
-            Self::Instructions => "instructions",
-        }
     }
 }
 
@@ -78,7 +64,7 @@ impl<SettingsState> Clone for Tab<SettingsState> {
 impl<SettingsState> Tab<SettingsState> {
     pub fn new<RawData, E, GetSettingsStateFn>(
         base: Rc<CardsBase<RawData, E>>,
-        kind: TabKind,
+        kind: MenuTabKind,
         get_settings: GetSettingsStateFn,
     ) -> Self
     where
@@ -87,8 +73,8 @@ impl<SettingsState> Tab<SettingsState> {
         GetSettingsStateFn: Fn(Rc<CardsBase<RawData, E>>) -> SettingsState + Clone + 'static,
     {
         match kind {
-            TabKind::Settings => Self::Settings(Rc::new(get_settings(base.clone()))),
-            TabKind::Instructions => {
+            MenuTabKind::PlaySettings => Self::Settings(Rc::new(get_settings(base.clone()))),
+            MenuTabKind::Instructions => {
                 let callbacks = InstructionsEditorCallbacks::new(
                     clone!(base => move |instructions, also_history| {
                         if also_history {
@@ -110,14 +96,16 @@ impl<SettingsState> Tab<SettingsState> {
                 let state = InstructionsEditorState::new(base.instructions.clone(), callbacks);
 
                 Self::Instructions(Rc::new(state))
-            }
+            },
+
+            _ => unimplemented!("unsupported tab kind!")
         }
     }
 
-    pub fn kind(&self) -> TabKind {
+    pub fn kind(&self) -> MenuTabKind {
         match self {
-            Self::Settings(_) => TabKind::Settings,
-            Self::Instructions(_) => TabKind::Instructions,
+            Self::Settings(_) => MenuTabKind::PlaySettings,
+            Self::Instructions(_) => MenuTabKind::Instructions,
         }
     }
 }

@@ -3,6 +3,7 @@ use std::rc::Rc;
 use futures_signals::signal::{Mutable, SignalExt};
 use dominator::clone;
 use components::{
+    tabs::MenuTabKind,
     instructions::editor::{
         state::State as InstructionsEditorState,
         callbacks::Callbacks as InstructionsEditorCallbacks
@@ -24,7 +25,7 @@ impl Step4 {
 
         let kind = match crate::debug::settings().settings_tab {
             Some(kind) => kind,
-            None => TabKind::Settings
+            None => MenuTabKind::PlaySettings
         };
 
         let tab = Mutable::new(Tab::new(base.clone(), kind));
@@ -36,22 +37,6 @@ impl Step4 {
     }
 }
 
-
-#[derive(Clone, Copy, PartialEq, Debug)]
-pub enum TabKind {
-    Settings,
-    Instructions,
-}
-
-impl TabKind {
-    pub const fn as_str(&self) -> &'static str {
-        match self {
-            Self::Settings => "play-settings",
-            Self::Instructions => "instructions",
-        }
-    }
-}
-
 #[derive(Clone)]
 pub enum Tab {
     Settings(Rc<PlaySettingsState>),
@@ -59,12 +44,12 @@ pub enum Tab {
 }
 
 impl Tab {
-    pub fn new(base: Rc<Base>, kind:TabKind) -> Self {
+    pub fn new(base: Rc<Base>, kind:MenuTabKind) -> Self {
         match kind {
-            TabKind::Settings => {
+            MenuTabKind::PlaySettings => {
                 Self::Settings(Rc::new(PlaySettingsState::new(base)))
             },
-            TabKind::Instructions => {
+            MenuTabKind::Instructions => {
                 let callbacks = InstructionsEditorCallbacks::new(clone!(base => move |instructions, also_history| {
                     if(also_history) {
                         base.history.push_modify(|raw| {
@@ -84,14 +69,16 @@ impl Tab {
                 let state = InstructionsEditorState::new(base.instructions.clone(), callbacks);
 
                 Self::Instructions(Rc::new(state))
-            }
+            },
+
+            _ => unimplemented!("unsupported tab kind!")
         }
     }
 
-    pub fn kind(&self) -> TabKind {
+    pub fn kind(&self) -> MenuTabKind {
         match self {
-            Self::Settings(_) => TabKind::Settings,
-            Self::Instructions(_) => TabKind::Instructions,
+            Self::Settings(_) => MenuTabKind::PlaySettings,
+            Self::Instructions(_) => MenuTabKind::Instructions,
         }
     }
 }

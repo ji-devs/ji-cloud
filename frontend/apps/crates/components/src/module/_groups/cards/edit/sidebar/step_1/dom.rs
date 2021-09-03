@@ -6,6 +6,7 @@ use std::rc::Rc;
 use utils::prelude::*;
 
 use crate::{
+    tabs::{MenuTab, MenuTabKind},
     image::search::dom::render as render_image_search,
     lists::{dual::dom::render as render_dual_list, single::dom::render as render_single_list},
     module::_groups::cards::edit::{state::*, strings},
@@ -43,8 +44,8 @@ pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<Step1<RawData, E>>) ->
                 Widget::Tabs(tab) => {
                     html!("menu-tabs", {
                         .children(&mut [
-                            render_tab(state.clone(), tab.clone(), TabKind::Text, true),
-                            render_tab(state.clone(), tab.clone(), TabKind::Image, !is_empty),
+                            render_tab(state.clone(), tab.clone(), MenuTabKind::Text, true),
+                            render_tab(state.clone(), tab.clone(), MenuTabKind::Image, !is_empty),
                             html!("module-sidebar-body", {
                                 .property("slot", "body")
                                 .child_signal(tab.signal_cloned().map(clone!(state, is_empty => move |tab| {
@@ -88,19 +89,20 @@ fn render_non_empty<RawData: RawDataExt, E: ExtraExt>(state: Rc<Step1<RawData, E
 fn render_tab<RawData: RawDataExt, E: ExtraExt>(
     state: Rc<Step1<RawData, E>>,
     tab: Mutable<Tab>,
-    tab_kind: TabKind,
+    tab_kind: MenuTabKind,
     enabled: bool
 ) -> Dom {
-    html!("menu-tab-with-title", {
-        .property("slot", "tabs")
-        .property("disabled", !enabled)
-        .property_signal("active", tab.signal_ref(clone!(tab_kind => move |curr| {
-            curr.kind() == tab_kind
-        })))
-        .property("kind", tab_kind.as_str())
-        .event(clone!(state, tab_kind, tab => move |_evt:events::Click| {
-
-            tab.set(Tab::new(state.base.clone(), tab_kind));
-        }))
-    })
+    MenuTab::render(
+        MenuTab::new(
+            tab_kind,
+            false,
+            clone!(tab => move || tab.signal_ref(clone!(tab_kind => move |curr| {
+                curr.kind() == tab_kind
+            }))),
+            clone!(state, tab_kind => move || {
+                tab.set(Tab::new(state.base.clone(), tab_kind));
+            })
+        ),
+        Some("tabs")
+    )
 }

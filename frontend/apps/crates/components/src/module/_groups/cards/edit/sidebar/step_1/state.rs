@@ -1,9 +1,4 @@
-use crate::{
-    image::search::{
-        callbacks::Callbacks as ImageSearchCallbacks,
-        state::{ImageSearchOptions, State as ImageSearchState},
-    },
-    lists::{
+use crate::{image::search::{callbacks::Callbacks as ImageSearchCallbacks, state::{ImageSearchCheckboxKind, ImageSearchOptions, State as ImageSearchState}}, lists::{
         dual::{
             callbacks::Callbacks as DualListCallbacks,
             state::{Options as DualListOptions, State as DualListState},
@@ -12,9 +7,7 @@ use crate::{
             callbacks::Callbacks as SingleListCallbacks,
             state::{Options as SingleListOptions, State as SingleListState},
         },
-    },
-    module::_groups::cards::edit::{config, state::*, strings},
-};
+    }, module::_groups::cards::edit::{config, state::*, strings}, tabs::MenuTabKind};
 use dominator::clone;
 use futures_signals::signal::Mutable;
 use shared::domain::jig::module::body::{Image, _groups::cards::Mode};
@@ -31,7 +24,7 @@ impl<RawData: RawDataExt, E: ExtraExt> Step1<RawData, E> {
             Mode::WordsAndImages => {
                 let kind = match base.debug.step1_tab {
                     Some(kind) => kind,
-                    None => TabKind::Text,
+                    None => MenuTabKind::Text,
                 };
 
                 let tab = Mutable::new(Tab::new(base.clone(), kind));
@@ -57,21 +50,6 @@ pub enum Widget {
     Tabs(Mutable<Tab>),
 }
 
-#[derive(Clone, Copy, PartialEq, Debug)]
-pub enum TabKind {
-    Text,
-    Image,
-}
-
-impl TabKind {
-    pub const fn as_str(&self) -> &'static str {
-        match self {
-            Self::Text => "text",
-            Self::Image => "image",
-        }
-    }
-}
-
 #[derive(Clone)]
 pub enum Tab {
     Text(Rc<SingleListState>),
@@ -81,25 +59,30 @@ pub enum Tab {
 impl Tab {
     pub fn new<RawData: RawDataExt, E: ExtraExt>(
         base: Rc<CardsBase<RawData, E>>,
-        kind: TabKind,
+        kind: MenuTabKind,
     ) -> Self {
         match kind {
-            TabKind::Image => {
-                let opts = ImageSearchOptions::default();
+            MenuTabKind::Image => {
+                let opts = ImageSearchOptions {
+                    checkbox_kind: Some(ImageSearchCheckboxKind::StickersFilter),
+                    ..ImageSearchOptions::default()
+                };
 
                 let callbacks = ImageSearchCallbacks::new(None::<fn(Image)>);
                 let state = ImageSearchState::new(opts, callbacks);
 
                 Self::Image(Rc::new(state))
             }
-            TabKind::Text => Self::Text(Rc::new(make_single_list(base.clone()))),
+            MenuTabKind::Text => Self::Text(Rc::new(make_single_list(base.clone()))),
+
+            _ => unimplemented!("unsupported tab kind!")
         }
     }
 
-    pub fn kind(&self) -> TabKind {
+    pub fn kind(&self) -> MenuTabKind {
         match self {
-            Self::Text(_) => TabKind::Text,
-            Self::Image(_) => TabKind::Image,
+            Self::Text(_) => MenuTabKind::Text,
+            Self::Image(_) => MenuTabKind::Image,
         }
     }
 }

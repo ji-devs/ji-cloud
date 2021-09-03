@@ -1,5 +1,6 @@
 use super::state::*;
 use crate::{
+    tabs::{MenuTab, MenuTabKind},
     instructions::editor::dom::render as render_instructions,
     module::_groups::cards::edit::state::*,
 };
@@ -21,8 +22,8 @@ where
 {
     html!("menu-tabs", {
         .children(&mut [
-            render_tab(state.clone(), TabKind::Settings),
-            render_tab(state.clone(), TabKind::Instructions),
+            render_tab(state.clone(), MenuTabKind::PlaySettings),
+            render_tab(state.clone(), MenuTabKind::Instructions),
             html!("module-sidebar-body", {
                 .property("slot", "body")
                 .child_signal(state.tab.signal_cloned().map(clone!(render_settings => move |tab| {
@@ -42,7 +43,7 @@ where
 
 fn render_tab<RawData, E, GetSettingsStateFn, SettingsState>(
     state: Rc<Step3<RawData, E, GetSettingsStateFn, SettingsState>>,
-    tab_kind: TabKind,
+    tab_kind: MenuTabKind,
 ) -> Dom
 where
     RawData: RawDataExt,
@@ -50,14 +51,18 @@ where
     GetSettingsStateFn: Fn(Rc<CardsBase<RawData, E>>) -> SettingsState + Clone + 'static,
     SettingsState: 'static,
 {
-    html!("menu-tab-with-title", {
-        .property("slot", "tabs")
-        .property_signal("active", state.tab.signal_ref(clone!(tab_kind => move |curr| {
-            curr.kind() == tab_kind
-        })))
-        .property("kind", tab_kind.as_str())
-        .event(clone!(state, tab_kind => move |_evt:events::Click| {
-            state.tab.set(Tab::new(state.base.clone(), tab_kind, state.get_settings.clone()));
-        }))
-    })
+
+    MenuTab::render(
+        MenuTab::new(
+            tab_kind,
+            false,
+            clone!(state => move || state.tab.signal_ref(clone!(tab_kind => move |curr| {
+                curr.kind() == tab_kind
+            }))),
+            clone!(state, tab_kind => move || {
+                state.tab.set(Tab::new(state.base.clone(), tab_kind, state.get_settings.clone()));
+            })
+        ),
+        Some("tabs")
+    )
 }

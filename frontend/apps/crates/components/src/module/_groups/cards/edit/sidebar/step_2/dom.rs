@@ -1,5 +1,6 @@
 use super::state::*;
 use crate::{
+    tabs::{MenuTab, MenuTabKind},
     color_select::dom::render as render_color_picker,
     image::search::dom::render as render_image_search, module::_groups::cards::edit::state::*,
     theme_selector::dom::render_cards as render_theme_selector,
@@ -12,9 +13,9 @@ use utils::prelude::*;
 pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<Step2<RawData, E>>) -> Dom {
     html!("menu-tabs", {
         .children(&mut [
-            render_tab(state.clone(), TabKind::Theme),
-            render_tab(state.clone(), TabKind::Image),
-            render_tab(state.clone(), TabKind::Color),
+            render_tab(state.clone(), MenuTabKind::Theme),
+            render_tab(state.clone(), MenuTabKind::Image),
+            render_tab(state.clone(), MenuTabKind::Color),
             html!("module-sidebar-body", {
                 .property("slot", "body")
                 .child_signal(state.tab.signal_cloned().map(|tab| {
@@ -37,16 +38,19 @@ pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<Step2<RawData, E>>) ->
 
 fn render_tab<RawData: RawDataExt, E: ExtraExt>(
     state: Rc<Step2<RawData, E>>,
-    tab_kind: TabKind,
+    tab_kind: MenuTabKind,
 ) -> Dom {
-    html!("menu-tab-with-title", {
-        .property("slot", "tabs")
-        .property_signal("active", state.tab.signal_ref(clone!(tab_kind => move |curr| {
-            curr.kind() == tab_kind
-        })))
-        .property("kind", tab_kind.as_str())
-        .event(clone!(state, tab_kind => move |_evt:events::Click| {
-            state.tab.set(Tab::new(state.base.clone(), tab_kind));
-        }))
-    })
+    MenuTab::render(
+        MenuTab::new(
+            tab_kind,
+            false,
+            clone!(state => move || state.tab.signal_ref(clone!(tab_kind => move |curr| {
+                curr.kind() == tab_kind
+            }))),
+            clone!(state, tab_kind => move || {
+                state.tab.set(Tab::new(state.base.clone(), tab_kind));
+            })
+        ),
+        Some("tabs")
+    )
 }

@@ -1,11 +1,5 @@
 use crate::base::state::Base;
-use components::{
-    image::search::{
-        callbacks::Callbacks as ImageSearchCallbacks,
-        state::{ImageSearchOptions, State as ImageSearchState},
-    },
-    stickers::state::Stickers,
-};
+use components::{image::search::{callbacks::Callbacks as ImageSearchCallbacks, state::{ImageSearchCheckboxKind, ImageSearchOptions, State as ImageSearchState}}, stickers::state::Stickers, tabs::MenuTabKind};
 use dominator::clone;
 use futures_signals::signal::Mutable;
 use std::rc::Rc;
@@ -19,29 +13,12 @@ impl Step2 {
     pub fn new(base: Rc<Base>) -> Rc<Self> {
         let kind = match crate::debug::settings().content_tab {
             Some(kind) => kind,
-            None => TabKind::Video,
+            None => MenuTabKind::Video,
         };
 
         let tab = Mutable::new(Tab::new(base.clone(), kind));
 
         Rc::new(Self { base, tab })
-    }
-}
-
-#[derive(Clone, Copy, PartialEq, Debug)]
-pub enum TabKind {
-    Video,
-    Text,
-    Image,
-}
-
-impl TabKind {
-    pub const fn as_str(&self) -> &'static str {
-        match self {
-            Self::Video => "video",
-            Self::Text => "text",
-            Self::Image => "image",
-        }
     }
 }
 
@@ -53,12 +30,13 @@ pub enum Tab {
 }
 
 impl Tab {
-    pub fn new(base: Rc<Base>, kind: TabKind) -> Self {
+    pub fn new(base: Rc<Base>, kind: MenuTabKind) -> Self {
         match kind {
-            TabKind::Video => Self::Video,
-            TabKind::Text => Self::Text,
-            TabKind::Image => {
+            MenuTabKind::Video => Self::Video,
+            MenuTabKind::Text => Self::Text,
+            MenuTabKind::Image => {
                 let opts = ImageSearchOptions {
+                    checkbox_kind: Some(ImageSearchCheckboxKind::StickersFilter),
                     ..ImageSearchOptions::default()
                 };
 
@@ -69,15 +47,17 @@ impl Tab {
                 let state = ImageSearchState::new(opts, callbacks);
 
                 Self::Image(Rc::new(state))
-            }
+            },
+
+            _ => unimplemented!("unsupported tab kind!")
         }
     }
 
-    pub fn kind(&self) -> TabKind {
+    pub fn kind(&self) -> MenuTabKind {
         match self {
-            Self::Video => TabKind::Video,
-            Self::Text => TabKind::Text,
-            Self::Image(_) => TabKind::Image,
+            Self::Video => MenuTabKind::Video,
+            Self::Text => MenuTabKind::Text,
+            Self::Image(_) => MenuTabKind::Image,
         }
     }
 }

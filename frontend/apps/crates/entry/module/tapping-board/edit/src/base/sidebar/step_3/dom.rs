@@ -6,7 +6,10 @@ use futures_signals::{
     map_ref,
     signal::{Mutable, SignalExt}
 };
-use components::audio::input::AudioInput;
+use components::{
+    tabs::{MenuTab, MenuTabKind},
+    audio::input::AudioInput
+};
 use web_sys::HtmlTextAreaElement;
 
 pub fn render(state: Rc<Step3>) -> Dom {
@@ -14,7 +17,7 @@ pub fn render(state: Rc<Step3>) -> Dom {
     html!("empty-fragment", {
         .child_signal(
             //we need both an ability to change tabs, and to know if we should show tabs
-            //so get a Mutable<Option<TabKind>>
+            //so get a Mutable<Option<MenuTabKind>>
             state.selected_tab_signal().map(clone!(state => move |selected_tab| {
                 selected_tab.signal_cloned().map(clone!(selected_tab, state => move |kind| {
                     //from selected_tab kind is a None, no trace is selected - don't show anything 
@@ -23,8 +26,8 @@ pub fn render(state: Rc<Step3>) -> Dom {
                         html!("menu-tabs", {
                             .children(&mut [
                                 //pass down our mutable so that we can switch tabs
-                                render_tab(state.clone(), TabKind::Audio, selected_tab.clone()),
-                                render_tab(state.clone(), TabKind::Text, selected_tab.clone()),
+                                render_tab(state.clone(), MenuTabKind::Audio, selected_tab.clone()),
+                                render_tab(state.clone(), MenuTabKind::Text, selected_tab.clone()),
                                 html!("module-sidebar-body", {
                                     .property("slot", "body")
                                     .child_signal(
@@ -49,20 +52,23 @@ pub fn render(state: Rc<Step3>) -> Dom {
 }
 
 
-fn render_tab(state: Rc<Step3>, tab_kind:TabKind, selected_tab: Mutable<Option<TabKind>>) -> Dom {
-    html!("menu-tab-with-title", {
-        .property("slot", "tabs")
-        .property("kind", tab_kind.as_str())
-        .property_signal("active", selected_tab.signal_ref(clone!(tab_kind => move |curr| {
-            match curr {
-                Some(curr) => *curr == tab_kind,
-                None => false
-            }
-        })))
-        .event(clone!(selected_tab, tab_kind => move |evt:events::Click| {
-            selected_tab.set_neq(Some(tab_kind));
-        }))
-    })
+fn render_tab(state: Rc<Step3>, tab_kind:MenuTabKind, selected_tab: Mutable<Option<MenuTabKind>>) -> Dom {
+    MenuTab::render(
+        MenuTab::new(
+            tab_kind,
+            false,
+            clone!(selected_tab => move || selected_tab.signal_ref(clone!(tab_kind => move |curr| {
+                match curr {
+                    Some(curr) => *curr == tab_kind,
+                    None => false
+                }
+            }))),
+            clone!(state, tab_kind => move || {
+                selected_tab.set_neq(Some(tab_kind));
+            })
+        ),
+        Some("tabs")
+    )
 }
 
 fn render_tab_body(state: Rc<Step3>, tab: Tab) -> Dom {

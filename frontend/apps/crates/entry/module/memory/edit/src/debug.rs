@@ -37,13 +37,10 @@ use shared::{
 };
 use components::module::_groups::cards::edit::{
     config,
-    debug::{
-        DebugSettings as BaseDebugSettings,
-        Step1TabKind,
-        Step2TabKind,
-        Step3TabKind
-    }
+    debug::DebugSettings as BaseDebugSettings
 };
+use components::tabs::MenuTabKind;
+
 pub static SETTINGS:OnceCell<DebugSettings> = OnceCell::new();
 
 //const IMAGE_UUID:&'static str = "bf2fe548-7ffd-11eb-b3ab-579026da8b36";
@@ -113,9 +110,9 @@ impl DebugSettings {
                 }
             ),
             base: Some(BaseDebugSettings {
-                step1_tab: Some(Step1TabKind::Text),
-                step2_tab: Some(Step2TabKind::Theme),
-                step3_tab: Some(Step3TabKind::Settings),
+                step1_tab: Some(MenuTabKind::Text),
+                step2_tab: Some(MenuTabKind::Theme),
+                step3_tab: Some(MenuTabKind::PlaySettings),
             }),
             step: Some(Step::One),
             skip_save: true,
