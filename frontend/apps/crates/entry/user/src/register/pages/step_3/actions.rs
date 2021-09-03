@@ -75,7 +75,9 @@ pub fn submit(state: Rc<State>) {
         opt_into_edu_resources: step_2.marketing,
         organization: Some(step_2.organization),
         persona: Some(step_2.persona),
-        profile_image: step_1.oauth_profile.and_then(|p| p.profile_picture),
+        //TODO: bring back when https://github.com/ji-devs/ji-cloud/issues/1513 is resolved
+        //profile_image: step_1.oauth_profile.and_then(|p| p.profile_picture),
+        profile_image_id: None,
         subjects,
         age_ranges,
         affiliations,
