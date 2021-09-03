@@ -18,8 +18,8 @@ impl Router {
     fn dom_signal() -> impl Signal<Item = Option<Dom>> {
         Self::signal().map(|route| match route {
             Route::Jig(route) => match route {
-                JigRoute::Play(jig_id, module_id, player_settings) => Some(player_render(Rc::new(
-                    PlayerState::new(jig_id, module_id, player_settings),
+                JigRoute::Play(jig_id, module_id, player_options) => Some(player_render(Rc::new(
+                    PlayerState::new(jig_id, module_id, player_options),
                 ))),
                 _ => None,
             },

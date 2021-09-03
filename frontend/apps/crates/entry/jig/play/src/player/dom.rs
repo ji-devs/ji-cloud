@@ -31,17 +31,17 @@ pub fn render(state: Rc<State>) -> Dom {
             };
         }))
         .apply(|dom| {
-            if state.is_teacher {
+            if state.player_options.is_student {
+                dom
+            } else {
                 let sidebar_state = Rc::new(sidebar::state::State::new(state.clone()));
                 dom.child(sidebar::dom::render(sidebar_state))
-            } else {
-                dom
             }
         })
         .apply(clone!(state => move|dom| {
-            if state.player_settings.display_score {
+            if state.player_options.display_score {
                 dom.child(html!("jig-play-points-indicator", {
-                    .visible(state.player_settings.display_score)
+                    .visible(state.player_options.display_score)
                     .property("slot", "indicators")
                     .property_signal("value", state.points.signal())
                 }))
@@ -184,10 +184,10 @@ fn render_done_popup(state: Rc<State>) -> impl Signal<Item = Option<Dom>> {
                     .property("autoClose", false)
                     .child(html!("jig-play-done-popup", {
                         .apply(|mut dom| {
-                            if state.player_settings.display_score {
+                            if state.player_options.display_score {
                                 dom = dom.property_signal("score", state.points.signal());
                             };
-                            if !state.player_settings.track_assessments {
+                            if !state.player_options.track_assessments {
                                 dom = dom.child(
                                     html!("jig-play-replay", {
                                         .property("slot", "actions")
@@ -231,7 +231,7 @@ fn render_time_up_popup(state: Rc<State>) -> impl Signal<Item = Option<Dom>> {
                     .property("autoClose", false)
                     .child(html!("jig-play-time-up-popup", {
                         .apply(|mut dom| {
-                            if !state.player_settings.track_assessments {
+                            if !state.player_options.track_assessments {
                                 dom = dom.child(
                                     html!("jig-play-replay", {
                                         .property("slot", "actions")

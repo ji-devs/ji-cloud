@@ -1,6 +1,7 @@
 use awsm_web::loaders::helpers::AsyncLoader;
 use futures_signals::signal::Mutable;
-use shared::domain::jig::{JigId, JigPlayerSettings};
+use shared::domain::jig::JigId;
+use utils::jig::JigPlayerOptions;
 use utils::routes::{JigRoute, Route};
 
 use utils::prelude::*;
@@ -25,7 +26,7 @@ impl State {
     }
 
     pub fn embed_code(&self) -> String {
-        let url = Route::Jig(JigRoute::Play(self.jig_id, None, JigPlayerSettings::default())).to_string();
+        let url = Route::Jig(JigRoute::Play(self.jig_id, None, JigPlayerOptions::default())).to_string();
         let origin = web_sys::window()
             .unwrap_ji()
             .location()

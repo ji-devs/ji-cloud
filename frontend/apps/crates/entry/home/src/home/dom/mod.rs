@@ -1,6 +1,7 @@
 use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
 use shared::domain::jig::JigPlayerSettings;
+use utils::jig::JigPlayerOptions;
 use std::rc::Rc;
 
 use components::{page_footer, page_header::{self, state::PageLinks}, player_popup::{PlayerPopup, PreviewPopupCallbacks}};
@@ -32,7 +33,7 @@ pub fn render(state: Rc<State>, auto_search: bool) -> Dom {
                     state.play_jig.set(None);
                 });
                 PlayerPopup::render(
-                    Rc::new(PlayerPopup::new(jig_id, JigPlayerSettings::default(), PreviewPopupCallbacks::new(close))),
+                    Rc::new(PlayerPopup::new(jig_id, JigPlayerOptions::default(), PreviewPopupCallbacks::new(close))),
                     None
                 )
             })

@@ -2,13 +2,15 @@ use web_sys::Url;
 use wasm_bindgen::prelude::*;
 use shared::domain::{
     image::{ImageId, ImageSearchQuery}, 
-    jig::{JigId, JigPlayerSettings, JigSearchQuery, module::ModuleId, ModuleKind}, 
+    jig::{JigId, JigSearchQuery, module::ModuleId, ModuleKind}, 
     user::UserScope,
     session::OAuthUserProfile
 };
 use serde::{Serialize, Deserialize};
 use std::{fmt::Debug, str::FromStr};
 use uuid::Uuid;
+use crate::jig::JigPlayerOptions;
+
 use super::unwrap::*;
 
 pub type StringId = String;
@@ -97,7 +99,7 @@ pub enum LegacyRoute {
 pub enum JigRoute {
     Gallery,
     Edit(JigId, JigEditRoute),
-    Play(JigId, Option<ModuleId>, JigPlayerSettings) 
+    Play(JigId, Option<ModuleId>, JigPlayerOptions) 
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -257,19 +259,21 @@ impl Route {
                     JigEditRoute::Module(ModuleId(Uuid::from_str(module_id).unwrap_ji()))
             )),
             ["jig", "play", jig_id] => {
-                let search:JigPlayerSettings = serde_qs::from_str(&params_string).unwrap_ji();
+                let search:JigPlayerOptions = serde_qs::from_str(&params_string).unwrap_ji();
+
                 Self::Jig(JigRoute::Play(
                     JigId(Uuid::from_str(jig_id).unwrap_ji()),
                     None,
-                    search
+                    search,
                 ))
             },
             ["jig", "play", jig_id, module_id] => {
-                let search:JigPlayerSettings = serde_qs::from_str(&params_string).unwrap_ji();
+                let search:JigPlayerOptions = serde_qs::from_str(&params_string).unwrap_ji();
+
                 Self::Jig(JigRoute::Play(
                     JigId(Uuid::from_str(jig_id).unwrap_ji()),
                     Some(ModuleId(Uuid::from_str(module_id).unwrap_ji())),
-                    search
+                    search,
                 ))
             },
             ["legacy", "play", jig_id] => Self::Legacy(LegacyRoute::Play(jig_id.to_string(), None)),

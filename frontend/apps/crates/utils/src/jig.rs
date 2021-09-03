@@ -1,5 +1,7 @@
 use chrono::{DateTime, Utc};
-use shared::domain::jig::{AudioBackground, AudioFeedbackPositive, AudioFeedbackNegative};
+use serde::{Serialize, Deserialize};
+
+use shared::domain::jig::{AudioBackground, AudioFeedbackNegative, AudioFeedbackPositive, JigPlayerSettings, TextDirection};
 
 
 pub trait JigAudioExt {
@@ -101,5 +103,52 @@ pub fn published_at_string(time: DateTime<Utc>, short: bool) -> String {
                 num => format!("{} {}s ago", num, unit.to_string_long()),
             }
         },
+    }
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct JigPlayerOptions {
+    #[serde(default)]
+    pub direction: TextDirection,
+
+    #[serde(default)]
+    pub display_score: bool,
+
+    #[serde(default)]
+    pub track_assessments: bool,
+
+    #[serde(default)]
+    pub drag_assist: bool,
+
+    #[serde(default)]
+    pub is_student: bool,
+}
+
+impl Default for JigPlayerOptions {
+    fn default() -> Self {
+        JigPlayerSettings::default().into()
+    }
+}
+
+impl From<JigPlayerOptions> for JigPlayerSettings {
+    fn from(options: JigPlayerOptions) -> Self {
+        Self {
+            direction: options.direction,
+            display_score: options.display_score,
+            track_assessments: options.track_assessments,
+            drag_assist: options.drag_assist,
+        }
+    }
+}
+
+impl From<JigPlayerSettings> for JigPlayerOptions {
+    fn from(settings: JigPlayerSettings) -> Self {
+        Self {
+            direction: settings.direction,
+            display_score: settings.display_score,
+            track_assessments: settings.track_assessments,
+            drag_assist: settings.drag_assist,
+            is_student: false,
+        }
     }
 }

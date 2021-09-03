@@ -1,14 +1,15 @@
 use std::{cell::RefCell, rc::Rc};
 
+use serde::{Serialize, Deserialize};
 use awsm_web::loaders::helpers::AsyncLoader;
 use futures_signals::signal::Mutable;
 use shared::domain::jig::{module::ModuleId, Jig, JigId, JigPlayerSettings};
+use utils::jig::JigPlayerOptions;
 use web_sys::HtmlIFrameElement;
 
 use super::timer::Timer;
 
 pub struct State {
-    pub is_teacher: bool,
     pub jig_id: JigId,
     pub jig: Mutable<Option<Jig>>,
     pub loader: AsyncLoader,
@@ -19,17 +20,16 @@ pub struct State {
     pub iframe: Rc<RefCell<Option<HtmlIFrameElement>>>,
     pub paused: Mutable<bool>,
     pub done: Mutable<bool>,
-    pub player_settings: JigPlayerSettings,
+    pub player_options: JigPlayerOptions,
 }
 
 impl State {
     pub fn new(
         jig_id: JigId,
         _module_id: Option<ModuleId>,
-        player_settings: JigPlayerSettings,
+        player_options: JigPlayerOptions,
     ) -> Self {
         Self {
-            is_teacher: true,
             jig_id,
             jig: Mutable::new(None),
             loader: AsyncLoader::new(),
@@ -41,7 +41,13 @@ impl State {
             iframe: Rc::new(RefCell::new(None)),
             paused: Mutable::new(false),
             done: Mutable::new(false),
-            player_settings,
+            player_options,
         }
     }
+}
+
+#[derive(Clone, Default, Serialize, Deserialize)]
+pub struct PlayerOptions {
+    settings: JigPlayerSettings,
+    is_student: bool,
 }

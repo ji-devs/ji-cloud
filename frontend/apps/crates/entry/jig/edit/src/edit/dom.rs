@@ -62,7 +62,7 @@ impl EditPage {
                         state.play_jig.set(None);
                     });
                     PlayerPopup::render(
-                        Rc::new(PlayerPopup::new(jig_id, settings, PreviewPopupCallbacks::new(close))),
+                        Rc::new(PlayerPopup::new(jig_id, settings.into(), PreviewPopupCallbacks::new(close))),
                         None
                     )
                 })

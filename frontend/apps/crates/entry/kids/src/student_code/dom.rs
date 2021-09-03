@@ -3,7 +3,7 @@ use std::rc::Rc;
 use components::player_popup::{PlayerPopup, PreviewPopupCallbacks};
 use dominator::{Dom, clone, html};
 use futures_signals::signal::SignalExt;
-use utils::events;
+use utils::{events, jig::JigPlayerOptions};
 
 use crate::student_code::actions::submit_code;
 
@@ -45,8 +45,10 @@ pub fn render(state: Rc<State>) -> Dom {
                 let close = clone!(state => move || {
                     state.play_jig.set(None);
                 });
+                let mut player_options: JigPlayerOptions = settings.into();
+                player_options.is_student = true;
                 PlayerPopup::render(
-                    Rc::new(PlayerPopup::new(jig_id, settings, PreviewPopupCallbacks::new(close))),
+                    Rc::new(PlayerPopup::new(jig_id, player_options, PreviewPopupCallbacks::new(close))),
                     None
                 )
             })
