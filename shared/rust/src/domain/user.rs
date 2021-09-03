@@ -6,6 +6,7 @@ use std::convert::TryFrom;
 use uuid::Uuid;
 
 use super::meta::{AffiliationId, AgeRangeId, SubjectId};
+use crate::domain::image::ImageId;
 
 /// Represents a user's permissions.
 ///
@@ -96,8 +97,8 @@ pub struct UserProfile {
     /// The user's family name (last name)
     pub family_name: String,
 
-    /// URL to the user's profile image.
-    pub profile_image: Option<String>,
+    /// `ImageId` references an entry in the user image library for the user's profile image.
+    pub profile_image_id: Option<ImageId>,
 
     /// The user's preferred language.
     pub language: String,
@@ -201,10 +202,10 @@ pub struct PutProfileRequest {
     /// The user's family name / "last name".
     pub family_name: String,
 
-    /// URL to the user's profile image.
+    /// `ImageId` references an entry in the user image library for the user's profile image.
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub profile_image: Option<String>,
+    pub profile_image_id: Option<ImageId>,
 
     // todo: create a struct that enforces format like `en_us`
     /// the language the user prefers to communicate with.
@@ -276,11 +277,11 @@ pub struct PatchProfileRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub family_name: Option<String>,
 
-    /// URL to the user's profile image.
+    /// `ImageId` references an entry in the user image library for the user's profile image.
     #[serde(default)]
     #[serde(deserialize_with = "super::deserialize_optional_field")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub profile_image: Option<Option<String>>,
+    pub profile_image_id: Option<Option<ImageId>>,
 
     // todo: create a struct that enforces format like `en_us`
     /// the language the user prefers to communicate with.

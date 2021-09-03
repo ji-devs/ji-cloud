@@ -1,10 +1,11 @@
 use crate::error;
 use chrono_tz::Tz;
 use shared::domain::{
+    image::ImageId,
     meta::{AffiliationId, AgeRangeId, SubjectId},
     user::{OtherUser, PatchProfileRequest, PutProfileRequest, UserProfile, UserScope},
 };
-use sqlx::{PgConnection, PgPool};
+use sqlx::{postgres::PgDatabaseError, PgConnection, PgPool};
 use std::{convert::TryFrom, str::FromStr};
 use uuid::Uuid;
 
@@ -34,7 +35,7 @@ select user_id as "id",
     user_email.email::text                                                              as "email!",
     given_name,
     family_name,
-    profile_image,
+    profile_image_id                                                                    as "profile_image_id: ImageId",
     language,
     locale,
     opt_into_edu_resources,
@@ -69,7 +70,7 @@ where id = $1"#,
         email: row.email,
         given_name: row.given_name,
         family_name: row.family_name,
-        profile_image: row.profile_image,
+        profile_image_id: row.profile_image_id,
         language: row.language,
         locale: row.locale,
         opt_into_edu_resources: row.opt_into_edu_resources,
@@ -110,7 +111,7 @@ pub async fn upsert_profile(
         //language=SQL
         r#"
 insert into user_profile
-    (user_id, username, over_18, given_name, family_name, profile_image, language, locale, timezone, opt_into_edu_resources, organization, persona, location) 
+    (user_id, username, over_18, given_name, family_name, profile_image_id, language, locale, timezone, opt_into_edu_resources, organization, persona, location) 
 values 
     ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
 on conflict (user_id) do update
@@ -118,7 +119,7 @@ set
     over_18 = $3,
     given_name = $4,
     family_name = $5,
-    profile_image = $6,
+    profile_image_id = $6,
     language = $7,
     locale = $8,
     timezone = $9,
@@ -132,7 +133,7 @@ set
         req.over_18,
         &req.given_name,
         &req.family_name,
-        req.profile_image.as_deref(),
+        req.profile_image_id.map(|it| it.0),
         &req.language,
         &req.locale,
         req.timezone.name(),
@@ -215,19 +216,28 @@ where user_id = $1 and location is distinct from $2"#,
         .await?;
     }
 
-    if let Some(profile_image) = req.profile_image {
+    if let Some(profile_image_id) = req.profile_image_id {
         sqlx::query!(
             //language=SQL
             r#"
 update user_profile
-set profile_image = $2
-where user_id = $1 and profile_image is distinct from $2
+set profile_image_id = $2
+where user_id = $1 and profile_image_id is distinct from $2
         "#,
             user_id,
-            profile_image
+            profile_image_id.map(|it| it.0),
         )
         .execute(&mut txn)
-        .await?;
+        .await
+        .map_err(|err| match err {
+            sqlx::Error::Database(e)
+                if e.downcast_ref::<PgDatabaseError>().constraint()
+                    == Some("user_profile_profile_image_id_fkey") =>
+            {
+                error::UserUpdate::ProfileImageNotFound
+            }
+            _ => error::UserUpdate::InternalServerError(err.into()),
+        })?;
     }
 
     if let Some(persona) = req.persona {

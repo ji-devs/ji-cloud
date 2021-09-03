@@ -7,12 +7,11 @@ use chrono::{Duration, Utc};
 use http::StatusCode;
 use ji_cloud_api::http::Application;
 use serde_json::json;
-use shared::domain::session::NewSessionResponse;
-use shared::domain::user::PatchProfileRequest;
 use shared::domain::{
+    image::ImageId,
     meta::{AffiliationId, AgeRangeId, SubjectId},
-    session::CreateSessionResponse,
-    user::PutProfileRequest,
+    session::{CreateSessionResponse, NewSessionResponse},
+    user::{PatchProfileRequest, PutProfileRequest},
 };
 use sqlx::PgPool;
 
@@ -85,7 +84,7 @@ async fn put_profile() -> anyhow::Result<()> {
             over_18: true,
             given_name: "name".to_owned(),
             family_name: "nameson".to_owned(),
-            profile_image: None,
+            profile_image_id: None,
             language: "en_US".to_owned(),
             locale: "en_US".to_owned(),
             timezone: chrono_tz::America::Los_Angeles,
@@ -114,7 +113,7 @@ async fn put_profile() -> anyhow::Result<()> {
 
 #[actix_rt::test]
 async fn patch_profile() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User], &[]).await;
+    let app = initialize_server(&[Fixture::User, Fixture::Image], &[]).await;
 
     let port = app.port();
 
@@ -127,7 +126,9 @@ async fn patch_profile() -> anyhow::Result<()> {
             over_18: Some(false),
             given_name: Some("name".to_owned()),
             family_name: Some("nameson".to_owned()),
-            profile_image: Some(Some("this.is.a/url".to_owned())),
+            profile_image_id: Some(Some(ImageId(uuid::Uuid::parse_str(
+                "8a473dd6-ffaa-11eb-86a5-dba3538e5a15",
+            )?))),
             language: Some("en_US".to_owned()),
             locale: Some("en_US".to_owned()),
             timezone: None,
@@ -271,7 +272,7 @@ async fn basic_auth_flow_no_login() -> anyhow::Result<()> {
             over_18: true,
             given_name: "name".to_owned(),
             family_name: "nameson".to_owned(),
-            profile_image: None,
+            profile_image_id: None,
             language: "en_US".to_owned(),
             locale: "en_US".to_owned(),
             timezone: chrono_tz::America::Los_Angeles,
@@ -411,7 +412,7 @@ async fn basic_auth_flow() -> anyhow::Result<()> {
             over_18: true,
             given_name: "name".to_owned(),
             family_name: "nameson".to_owned(),
-            profile_image: None,
+            profile_image_id: None,
             language: "en_US".to_owned(),
             locale: "en_US".to_owned(),
             timezone: chrono_tz::America::Los_Angeles,
