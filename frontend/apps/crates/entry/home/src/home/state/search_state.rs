@@ -67,7 +67,6 @@ impl SearchSelected {
             affiliations: Mutable::new(HashSet::from_iter(search.affiliations)),
             categories: Mutable::new(HashSet::from_iter(search.categories)),
             age_ranges: Mutable::new(HashSet::from_iter(search.age_ranges)),
-            // language: Mutable::new(search.l),
             language: Mutable::new(None),
             query: Mutable::new(search.q),
         }
@@ -87,6 +86,7 @@ impl SearchSelected {
             categories: self.categories.lock_ref().to_owned().into_iter().collect(),
             goals: self.goals.lock_ref().to_owned().into_iter().collect(),
             page: Some(0),
+            language: self.language.get_cloned(),
             ..Default::default()
         }
     }
