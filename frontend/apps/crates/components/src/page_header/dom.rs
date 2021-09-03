@@ -90,8 +90,8 @@ fn render_logged_in(state: Rc<State>, user: &UserProfile) -> Vec<Dom> {
             html!("profile-image", {
                 .property("slot", "profile-image")
                 .property("imageId", {
-                    match &user.profile_image {
-                        Some(image_id) => JsValue::from_str(&image_id),
+                    match &user.profile_image_id {
+                        Some(image_id) => JsValue::from_str(&image_id.0.to_string()),
                         None => JsValue::UNDEFINED,
                     }
                 })
@@ -99,8 +99,8 @@ fn render_logged_in(state: Rc<State>, user: &UserProfile) -> Vec<Dom> {
             html!("profile-image", {
                 .property("slot", "overlay-profile-image")
                 .property("imageId", {
-                    match &user.profile_image {
-                        Some(image_id) => JsValue::from_str(&image_id),
+                    match &user.profile_image_id {
+                        Some(image_id) => JsValue::from_str(&image_id.0.to_string()),
                         None => JsValue::UNDEFINED,
                     }
                 })

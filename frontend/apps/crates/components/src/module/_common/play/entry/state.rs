@@ -97,6 +97,7 @@ where
                         goals: Vec::new(),
                         creator_id: None,
                         author_id: None,
+                        author_name: None,
                         language: String::from(LANGUAGE_CODE_EN),
                         categories: Vec::new(),
                         publish_at: None,
