@@ -46,8 +46,6 @@ use shared::{
 };
 use components::stickers::{sprite::ext::*, text::ext::*};
 use components::tabs::MenuTabKind;
-use crate::base::sidebar::step_2::state::TabKind as Step2TabKind;
-use crate::base::sidebar::step_5::state::TabKind as Step5TabKind;
 pub static SETTINGS:OnceCell<DebugSettings> = OnceCell::new();
 
 const IMAGE_UUID:&'static str = "f2e63cf2-ee11-11eb-9b68-4bf1f063ab1c";
@@ -62,8 +60,8 @@ pub struct DebugSettings {
     pub skip_load_jig: bool,
     pub draw_kind: Option<TraceKind>,
     pub step_1_tab: Option<MenuTabKind>,
-    pub step_2_tab: Option<Step2TabKind>,
-    pub step_5_tab: Option<Step5TabKind>,
+    pub step_2_tab: Option<MenuTabKind>,
+    pub step_5_tab: Option<MenuTabKind>,
 }
 
 #[derive(Clone, Debug)]
@@ -165,13 +163,13 @@ impl DebugSettings {
                     }
                 }
             ),
-            step: Some(Step::One),
+            step: Some(Step::Two),
             draw_kind: None,
             skip_save: true,
             skip_load_jig: true,
             step_1_tab: Some(MenuTabKind::Image),
-            step_2_tab: Some(Step2TabKind::Select),
-            step_5_tab: Some(Step5TabKind::Settings),
+            step_2_tab: Some(MenuTabKind::Select),
+            step_5_tab: Some(MenuTabKind::PlaySettings),
         }
     }
 }

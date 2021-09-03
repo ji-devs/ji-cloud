@@ -7,6 +7,7 @@ use futures_signals::{
 };
 use dominator::clone;
 use components::{
+    tabs::MenuTabKind,
     image::search::{
         state::{State as ImageSearchState, ImageSearchOptions},
         callbacks::Callbacks as ImageSearchCallbacks
@@ -31,7 +32,7 @@ impl Step2 {
     pub fn new(base: Rc<Base>) -> Rc<Self> {
         let kind = match crate::debug::settings().step_2_tab {
             Some(kind) => kind,
-            None => TabKind::Select
+            None => MenuTabKind::Select
         };
         
         let tab = Mutable::new(Tab::new(base.clone(), kind));
@@ -45,21 +46,6 @@ impl Step2 {
 }
 
 
-#[derive(Clone, Copy, PartialEq, Debug)]
-pub enum TabKind {
-    Select,
-    Audio,
-}
-
-impl TabKind {
-    pub const fn as_str(&self) -> &'static str {
-        match self {
-            Self::Select => "select",
-            Self::Audio => "audio",
-        }
-    }
-}
-
 #[derive(Clone)]
 pub enum Tab {
     Select,
@@ -68,10 +54,10 @@ pub enum Tab {
 
 impl Tab {
 
-    pub fn new(base: Rc<Base>, kind:TabKind) -> Self {
+    pub fn new(base: Rc<Base>, kind:MenuTabKind) -> Self {
         match kind {
-            TabKind::Select => Self::Select,
-            TabKind::Audio => {
+            MenuTabKind::Select => Self::Select,
+            MenuTabKind::Audio => {
                 let cb = clone!(base => move || {
                     base.selected_item_kind_signal()
                         .map(clone!(base => move |index_item_kind| {
@@ -102,14 +88,16 @@ impl Tab {
 
                 Self::Audio(rc_signal_fn(cb))
 
-            }
+            },
+
+            _ => unimplemented!("unsupported tab kind!")
         }
     }
 
-    pub fn kind(&self) -> TabKind {
+    pub fn kind(&self) -> MenuTabKind {
         match self {
-            Self::Select => TabKind::Select,
-            Self::Audio(_) => TabKind::Audio,
+            Self::Select => MenuTabKind::Select,
+            Self::Audio(_) => MenuTabKind::Audio,
         }
     }
 }
