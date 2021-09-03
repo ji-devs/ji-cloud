@@ -24,6 +24,8 @@ impl ApiEndpoint for Get {
 /// # Errors
 /// * Invalid request - [`400 - Bad Request`](http::StatusCode::BAD_REQUEST)
 /// * Missing / bad auth - [`401 - Unauthorized`](http::StatusCode::UNAUTHORIZED)
+/// * User not found - [`404 - Not Found`](http::StatusCode::NOT_FOUND)
+/// * Profile image with ID not found - [`404 - Not Found`](http::StatusCode::NOT_FOUND)
 /// * Taken username - [`409 - Conflict`](http::StatusCode::CONFLICT)
 /// * Empty username - [`422 - Unprocessable Entity`](http::StatusCode::UNPROCESSABLE_ENTITY)
 pub struct Put;

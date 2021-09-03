@@ -9,7 +9,7 @@ expression: body
   "email": "test@test.test",
   "given_name": "name",
   "family_name": "nameson",
-  "profile_image": "this.is.a/url",
+  "profile_image_id": "8a473dd6-ffaa-11eb-86a5-dba3538e5a15",
   "language": "en_US",
   "locale": "en_US",
   "opt_into_edu_resources": false,

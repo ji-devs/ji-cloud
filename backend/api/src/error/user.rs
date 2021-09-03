@@ -27,6 +27,7 @@ pub enum Update {
     InternalServerError(anyhow::Error),
     Username(Username),
     UserNotFound,
+    ProfileImageNotFound,
 }
 
 impl<T: Into<anyhow::Error>> From<T> for Update {
@@ -53,6 +54,11 @@ impl Into<actix_web::Error> for Update {
             Self::UserNotFound => {
                 BasicError::with_message(StatusCode::NOT_FOUND, "User Not Found".to_owned()).into()
             }
+            Self::ProfileImageNotFound => BasicError::with_message(
+                StatusCode::NOT_FOUND,
+                "Profile Image Not Found in User Image Library".to_owned(),
+            )
+            .into(),
         }
     }
 }
