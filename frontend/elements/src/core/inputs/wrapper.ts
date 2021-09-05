@@ -10,16 +10,23 @@ export class _ extends LitElement {
                 :host {
                     display: block;
                 }
+                .outer-wrapper {
+                    height: 100%;
+                    display: grid;
+                    grid-template-rows: auto 1fr auto;
+                    z-index: 1;
+                }
                 hebrew-buttons {
                     display: block;
                     height: 0px;
+                    grid-row: 1;
                 }
                 hebrew-buttons::part(buttons-wrapper) {
                     display: flex;
                     justify-content: flex-end;
                     transform: translateY(-100%);
                 }
-                .wrapper {
+                .inner-wrapper {
                     border: solid 1px var(--light-blue-5);
                     border-radius: 14px;
                     padding: 8px 16px;
@@ -29,18 +36,16 @@ export class _ extends LitElement {
                     column-gap: 2px;
                     font-size: 16px;
                     line-height: 1.5;
-                    cursor: pointer;
-                    z-index: 1;
                     background-color: var(--background-color);
-                    height: 100%;
+                    grid-row: 2;
                 }
-                .wrapper:focus-within, :host([focus-within]) .wrapper {
+                .inner-wrapper:focus-within, :host([focus-within]) .inner-wrapper {
                     border-color: var(--dark-blue-3);
                     border-width: 2px;
                     /* removing one pixel to account for thicker border */
                     padding: 7px 15px;
                 }
-                :host([error]) .wrapper {
+                :host([error]) .inner-wrapper {
                     border-color: var(--red-alert);
                     background-color: var(--light-red-alert);
                 }
@@ -94,6 +99,7 @@ export class _ extends LitElement {
                     display: block;
                     margin: 0 8px;
                     color: #4a4a4a;
+                    grid-row: 3;
                 }
                 :host([error]) .hint {
                     color: var(--red-alert);
@@ -123,15 +129,17 @@ export class _ extends LitElement {
 
     render() {
         return html`
-            ${ this.withHebrewButtons ? html`
-                <hebrew-buttons></hebrew-buttons>
-            ` : nothing }
-            <label class="wrapper" @click="${this.focus}">
-                ${ this.label ? html`<span class="label">${this.label}</span>` : nothing }
-                <slot id="main-slot"></slot>
-                <slot name="icon"></slot>
-            </label>
-            <span class="hint">${this.hint}</span>
+            <div class="outer-wrapper">
+                ${ this.withHebrewButtons ? html`
+                    <hebrew-buttons></hebrew-buttons>
+                ` : nothing }
+                <label class="inner-wrapper" @click="${this.focus}">
+                    ${ this.label ? html`<span class="label">${this.label}</span>` : nothing }
+                    <slot id="main-slot"></slot>
+                    <slot name="icon"></slot>
+                </label>
+                <span class="hint">${this.hint}</span>
+            </div>
         `;
     }
 }
