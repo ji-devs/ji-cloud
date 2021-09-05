@@ -1,13 +1,11 @@
 use std::rc::Rc;
 
 use super::{state::State, timer::Timer};
+use awsm_web::audio::AudioClipOptions;
+use components::audio::mixer::{AUDIO_MIXER, AudioSourceExt};
 use dominator::clone;
 use futures_signals::signal::SignalExt;
-use shared::{
-    api::{endpoints::jig, ApiEndpoint},
-    domain::jig::JigResponse,
-    error::EmptyError,
-};
+use shared::{api::{endpoints::jig, ApiEndpoint}, domain::jig::{AudioBackground, JigResponse}, error::EmptyError};
 use utils::{
     iframe::{IframeAction, JigToModulePlayerMessage, ModuleToJigPlayerMessage},
     prelude::{api_no_auth, SETTINGS},
@@ -15,6 +13,32 @@ use utils::{
     unwrap::UnwrapJiExt,
 };
 use wasm_bindgen_futures::spawn_local;
+
+pub fn toggle_background_audio(state: Rc<State>, background_audio: AudioBackground) {
+    let mut bg_audio_handle = state.bg_audio_handle.borrow_mut();
+
+    match &*bg_audio_handle {
+        Some(bg_audio_handle) => {
+            if state.bg_audio_playing.get() {
+                bg_audio_handle.pause();
+                state.bg_audio_playing.set(false);
+            } else {
+                bg_audio_handle.play();
+                state.bg_audio_playing.set(true);
+            };
+        },
+        None => {
+            let handle = AUDIO_MIXER.with(|mixer| mixer.add_source(background_audio.as_source(), AudioClipOptions {
+                auto_play: true,
+                is_loop: true,
+                on_ended: None::<fn()>,
+            }));
+
+            *bg_audio_handle = Some(handle);
+            state.bg_audio_playing.set(true);
+        },
+    };
+}
 
 pub fn navigate_forward(state: Rc<State>) {
     let mut active_module = state.active_module.lock_mut();

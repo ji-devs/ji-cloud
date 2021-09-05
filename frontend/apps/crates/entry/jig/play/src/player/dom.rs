@@ -49,6 +49,29 @@ pub fn render(state: Rc<State>) -> Dom {
                 dom
             }
         }))
+        .child_signal(state.jig.signal_ref(clone!(state => move |jig| {
+            match jig {
+                None => None,
+                Some(jig) => {
+                    Some(html!("jig-play-background-music", {
+                        .property("slot", "background")
+                        .property_signal("playing", state.bg_audio_playing.signal())
+                        .apply(|dom| {
+                            match jig.audio_background {
+                                Some(audio_background) => {
+                                    dom.event(clone!(state, audio_background => move|_: events::Click| {
+                                        actions::toggle_background_audio(Rc::clone(&state), audio_background);
+                                    }))
+                                },
+                                None => {
+                                    dom.property("disabled", true)
+                                }
+                            }
+                        })
+                    }))
+                },
+            }
+        })))
         .children(&mut [
             html!("iframe" => HtmlIFrameElement, {
                 .property("allow", "autoplay; fullscreen")
@@ -91,9 +114,6 @@ pub fn render(state: Rc<State>) -> Dom {
                 .event(clone!(state => move |_:events::Click| {
                     actions::toggle_paused(Rc::clone(&state));
                 }))
-            }),
-            html!("jig-play-background-music", {
-                .property("slot", "background")
             }),
             html!("jig-play-move-button", {
                 .property("slot", "back")

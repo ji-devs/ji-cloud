@@ -1,7 +1,7 @@
 use std::{cell::RefCell, rc::Rc};
 
 use serde::{Serialize, Deserialize};
-use awsm_web::loaders::helpers::AsyncLoader;
+use awsm_web::{audio::AudioHandle, loaders::helpers::AsyncLoader};
 use futures_signals::signal::Mutable;
 use shared::domain::jig::{module::ModuleId, Jig, JigId, JigPlayerSettings};
 use utils::jig::JigPlayerOptions;
@@ -21,6 +21,8 @@ pub struct State {
     pub paused: Mutable<bool>,
     pub done: Mutable<bool>,
     pub player_options: JigPlayerOptions,
+    pub bg_audio_handle: Rc<RefCell<Option<AudioHandle>>>,
+    pub bg_audio_playing: Mutable<bool>,
 }
 
 impl State {
@@ -37,11 +39,12 @@ impl State {
             module_id: Mutable::new(None),
             timer: Mutable::new(None),
             points: Mutable::new(0),
-            // background_music: Mutable::new(None),
             iframe: Rc::new(RefCell::new(None)),
             paused: Mutable::new(false),
             done: Mutable::new(false),
             player_options,
+            bg_audio_handle: Rc::new(RefCell::new(None)),
+            bg_audio_playing: Mutable::new(false),
         }
     }
 }
