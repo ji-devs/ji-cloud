@@ -36,9 +36,6 @@ export const Dual = (props?:Partial<Args>) => {
     return `
     <sidebar-widget-dual-list>
         <button-rect kind="text" slot="clear">${STR_CLEAR}</button-rect>
-        <button-sidebar slot="input-buttons" mode="keyboard"></button-sidebar>
-        <button-sidebar slot="input-buttons" mode="dicta"></button-sidebar>
-        <button-sidebar slot="input-buttons" mode="sefaria"></button-sidebar>
         <button-rect disabled size="small" iconAfter="done" slot="done-btn">${STR_DONE}</button-rect>
         <sidebar-widget-dual-list-column side="left" slot="left" header="${leftHeader}">
             ${mapToString(arrayCount(nRows), row => {

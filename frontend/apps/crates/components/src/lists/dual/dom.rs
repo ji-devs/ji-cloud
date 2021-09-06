@@ -27,19 +27,6 @@ pub fn render(state: Rc<State>) -> Dom {
                     state.clear();
                 }))
             }),
-            // TODO:replace with new hebrew buttons
-            html!("button-sidebar", {
-                .property("slot", "input-buttons")
-                .property("mode", "keyboard")
-            }),
-            html!("button-sidebar", {
-                .property("slot", "input-buttons")
-                .property("mode", "dicta")
-            }),
-            html!("button-sidebar", {
-                .property("slot", "input-buttons")
-                .property("mode", "sefaria")
-            }),
             html!("button-rect", {
                 .property("color", "red") 
                 .property_signal("disabled", state.is_valid_signal().map(|ready| ready.is_err()))
