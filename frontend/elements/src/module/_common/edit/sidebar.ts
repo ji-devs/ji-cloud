@@ -24,9 +24,6 @@ export class _ extends LitElement {
                 height: 100%;
                 overflow-y: auto;
             }
-            .content ::slotted(*) {
-                min-height: 100%;
-            }
         `];
     }
 

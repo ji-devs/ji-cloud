@@ -9,6 +9,7 @@ export class _ extends LitElement {
             :host {
                 display: grid;
                 grid-template-rows: 51px 1fr;
+                height: 100%;
             }
             .body {
                 /* hard coded color?! Couldn't find color in zeplin */

@@ -14,6 +14,7 @@ use crate::{
 
 pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<Step1<RawData, E>>) -> Dom {
     html!("empty-fragment", {
+        .style("display", "contents")
         .child_signal(state.base.is_empty_signal().map(clone!(state => move |is_empty| {
             Some(match &*state.widget {
                 Widget::Single(single) => {
