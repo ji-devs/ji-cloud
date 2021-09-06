@@ -122,7 +122,7 @@ pub struct Trace {
     pub kind: TraceKind,
     /// Optional audio associated with this trace
     pub audio: Option<Audio>,
-    /// Optional text associated with this trace 
+    /// Optional text associated with this trace
     pub text: Option<String>,
 }
 

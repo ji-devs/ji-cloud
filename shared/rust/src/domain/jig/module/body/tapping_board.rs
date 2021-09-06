@@ -115,7 +115,6 @@ pub struct EditorState {
     pub steps_completed: HashSet<Step>,
 }
 
-
 #[derive(Clone, Copy, Serialize, Deserialize, Debug, PartialEq, Eq, Hash)]
 /// The mode
 pub enum Mode {
