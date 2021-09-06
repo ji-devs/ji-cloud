@@ -13,7 +13,8 @@ use components::collision::stickers_traces::pixels::{get_hit_index, StickerHitSo
 use wasm_bindgen_futures::spawn_local;
 use components::audio::mixer::{AUDIO_MIXER, AudioPath, AudioSourceExt};
 use crate::debug::*;
-
+use components::instructions::player::InstructionsPlayer;
+use utils::iframe::{IframeAction, ModuleToJigPlayerMessage, IframeMessageExt};
 
 impl PlayState {
     pub async fn set_targets(&self) {
@@ -49,7 +50,17 @@ impl PlayState {
             .all(|item| item.get_interactive_unchecked().completed.get());
 
         if all_completed {
-            log::info!("TODO: ALL COMPLETED!");
+            self.feedback_player.set(Some(
+                InstructionsPlayer::new(
+                    self.game.base.feedback.clone(),
+                    Some(|| {
+                        //let the player know we're done! 
+                        log::info!("game finished!");
+                        let msg = IframeAction::new(ModuleToJigPlayerMessage::Next);
+                        msg.try_post_message_to_top().unwrap_ji();
+                    })
+                )
+            ));
         }
         all_completed
     }

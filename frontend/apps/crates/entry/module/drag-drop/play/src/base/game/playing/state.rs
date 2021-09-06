@@ -16,10 +16,11 @@ use web_sys::AudioContext;
 use std::collections::HashSet;
 use components::collision::stickers_traces::pixels::{StickerHitSource, StickerBoundsKind};
 use std::borrow::Cow;
-
+use components::instructions::player::InstructionsPlayer;
 pub struct PlayState {
     pub game: Rc<Game>,
     pub items: Vec<PlayItem>,
+    pub feedback_player: Mutable<Option<Rc<InstructionsPlayer>>>
 
 }
 
@@ -42,6 +43,7 @@ impl PlayState {
         Rc::new(Self {
             game,
             items,
+            feedback_player: Mutable::new(None),
         })
     }
 

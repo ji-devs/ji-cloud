@@ -132,7 +132,7 @@ where
                 .child_signal(play_started.signal().map(clone!(state, base => move |has_started| {
                     if has_started {
                         Some(InstructionsPlayer::render(
-                            Rc::new(InstructionsPlayer::new(base.get_instructions().unwrap_ji())),
+                            InstructionsPlayer::new(base.get_instructions().unwrap_ji(), None::<fn()>),
                         ))
                     } else {
                         None

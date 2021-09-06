@@ -7,6 +7,7 @@ use futures_signals::{
 };
 use utils::{prelude::*, resize::{resize_info_signal, ResizeInfo}};
 use components::{
+    instructions::player::InstructionsPlayer,
     traces::show::{TracesShow, TracesShowMode},
     stickers::dom::{render_sticker_raw, StickerRawRenderOptions,BaseRawRenderOptions ,TransformOverride, mixin_sticker_button_signal}
 };
@@ -29,6 +30,9 @@ pub fn render(state: Rc<PlayState>) -> Dom {
                 }
             })
         })))
+        .child_signal(state.feedback_player.signal_cloned().map(|feedback| {
+            feedback.map(|feedback| InstructionsPlayer::render(feedback))
+        }))
         .child(TracesShow::render(TracesShow::new(
                 state.game.base.target_areas
                     .iter()

@@ -4,16 +4,12 @@ use std::rc::Rc;
 use utils::prelude::*;
 
 use super::state::*;
-use crate::audio::mixer::{AUDIO_MIXER, AudioPath, AudioSourceExt};
 
 impl InstructionsPlayer {
     pub fn render(state: Rc<Self>) -> Dom {
-
-        *state.audio.borrow_mut() = state
-            .data
-            .audio
-            .as_ref()
-            .map(|audio| AUDIO_MIXER.with(|mixer| mixer.play(audio.as_source(), false)));
+        state.reset_ended();
+        Self::play_audio(state.clone());
+        state.evaluate_all_ended();
 
         html!("empty-fragment", {
             .apply_if(state.data.text.is_some(), |dom| {

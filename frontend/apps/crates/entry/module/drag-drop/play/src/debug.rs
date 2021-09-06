@@ -191,6 +191,11 @@ impl DebugSettings {
                             }).collect(),
                             theme: ThemeChoice::Override(ThemeId::Chalkboard), 
                             instructions: Instructions::default(),
+                            //feedback: Instructions::default(),
+                            feedback: Instructions {
+                                text: Some("good job!".to_string()),
+                                audio: Some(Audio { id: AudioId(Uuid::parse_str(AUDIO_UUID).unwrap_ji()), lib: MediaLibrary::User}),
+                            },
                             backgrounds: Backgrounds {
                                 layer_1: None, //Some(Background::Color(hex_to_rgba8("#ff0000"))),
                                 layer_2: None,
@@ -219,6 +224,7 @@ pub fn init(jig_id: JigId, module_id: ModuleId) {
         SETTINGS.set(DebugSettings::debug(Some(InitData{
             stickers: vec![
                 (InitSticker::Text, ItemKind::Static, (0.3, 0.3)),
+                /*
                 (
                     InitSticker::Text, 
                     ItemKind::Interactive(
@@ -232,6 +238,7 @@ pub fn init(jig_id: JigId, module_id: ModuleId) {
                     ),
                     (-0.3, -0.3)
                 ),
+                */
                 (
                     InitSticker::Sprite, 
                     ItemKind::Interactive(
