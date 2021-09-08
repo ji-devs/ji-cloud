@@ -2,7 +2,7 @@ use crate::{
     api::{ApiEndpoint, Method},
     domain::{
         session::NewSessionResponse,
-        user::{PatchProfileRequest, PutProfileRequest, UserProfile},
+        user::{CreateProfileRequest, PatchProfileRequest, UserProfile},
     },
     error::EmptyError,
 };
@@ -17,9 +17,11 @@ impl ApiEndpoint for Get {
     const METHOD: Method = Method::Get;
 }
 
-/// Create or replace your user profile.
+/// Create or replace a user profile.
 ///
 /// # Flow
+/// *
+/// *
 ///
 /// # Errors
 /// * Invalid request - [`400 - Bad Request`](http::StatusCode::BAD_REQUEST)
@@ -28,16 +30,16 @@ impl ApiEndpoint for Get {
 /// * Profile image with ID not found - [`404 - Not Found`](http::StatusCode::NOT_FOUND)
 /// * Taken username - [`409 - Conflict`](http::StatusCode::CONFLICT)
 /// * Empty username - [`422 - Unprocessable Entity`](http::StatusCode::UNPROCESSABLE_ENTITY)
-pub struct Put;
-impl ApiEndpoint for Put {
-    type Req = PutProfileRequest;
+pub struct Create;
+impl ApiEndpoint for Create {
+    type Req = CreateProfileRequest;
     type Res = NewSessionResponse;
     type Err = EmptyError;
     const PATH: &'static str = "/v1/user/me/profile";
-    const METHOD: Method = Method::Put;
+    const METHOD: Method = Method::Post;
 }
 
-/// Update your user profile.
+/// Update a user profile.
 ///
 /// # Errors
 ///

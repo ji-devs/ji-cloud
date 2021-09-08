@@ -163,12 +163,6 @@ async fn search(
         .try_collect()
         .await?;
 
-    // DEBUG
-    let result_ids: Vec<_> = images
-        .iter()
-        .map(|it| it.metadata.id.0.to_string())
-        .collect();
-
     Ok(Json(ImageSearchResponse {
         images,
         pages,

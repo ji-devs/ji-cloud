@@ -272,8 +272,8 @@ pub trait SessionMaskRequirement {
     const REQUIREMENTS: SessionMask;
 }
 
-pub struct SessionPutProfile;
-impl SessionMaskRequirement for SessionPutProfile {
+pub struct SessionCreateProfile;
+impl SessionMaskRequirement for SessionCreateProfile {
     const REQUIREMENTS: SessionMask = SessionMask::PUT_PROFILE;
 }
 
