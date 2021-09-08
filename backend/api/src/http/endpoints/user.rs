@@ -10,15 +10,15 @@ use sendgrid::v3::Email;
 use shared::{
     api::endpoints::{
         user::{
-            ChangePassword, Create, CreateColor, CreateFont, Delete, DeleteColor, DeleteFont,
-            GetColors, GetFonts, PatchProfile, Profile, PutProfile, ResetPassword, UpdateColor,
+            ChangePassword, Create, CreateColor, CreateFont, CreateProfile, Delete, DeleteColor,
+            DeleteFont, GetColors, GetFonts, PatchProfile, Profile, ResetPassword, UpdateColor,
             UpdateFont, UserLookup, VerifyEmail,
         },
         ApiEndpoint,
     },
     domain::{
         session::NewSessionResponse,
-        user::{ChangePasswordRequest, PutProfileRequest, UserLookupQuery, VerifyEmailRequest},
+        user::{ChangePasswordRequest, CreateProfileRequest, UserLookupQuery, VerifyEmailRequest},
     },
 };
 use sqlx::{postgres::PgDatabaseError, Acquire, PgConnection, PgPool};
@@ -28,7 +28,7 @@ use crate::{
     db::{self, user::upsert_profile},
     domain::NoContentClearAuth,
     error,
-    extractor::{SessionDelete, SessionPutProfile, TokenSessionOf, TokenUser},
+    extractor::{SessionCreateProfile, SessionDelete, TokenSessionOf, TokenUser},
     service::{mail, ServiceData},
     token::{create_auth_token, SessionMask},
 };
@@ -320,7 +320,7 @@ async fn user_lookup(
         .ok_or(error::UserNotFound::UserNotFound)
 }
 
-fn validate_register_req(req: &PutProfileRequest) -> Result<(), error::UserUpdate> {
+fn validate_register_req(req: &CreateProfileRequest) -> Result<(), error::UserUpdate> {
     if req.username.is_empty() {
         return Err(error::UserUpdate::Username(error::Username::Empty));
     }
@@ -328,12 +328,12 @@ fn validate_register_req(req: &PutProfileRequest) -> Result<(), error::UserUpdat
     Ok(())
 }
 
-/// Create or replace your profile.
-async fn put_profile(
+/// Create a user profile.
+async fn create_profile(
     settings: Data<RuntimeSettings>,
     db: Data<PgPool>,
-    signup_user: TokenSessionOf<SessionPutProfile>,
-    req: Json<PutProfileRequest>,
+    signup_user: TokenSessionOf<SessionCreateProfile>,
+    req: Json<CreateProfileRequest>,
 ) -> actix_web::Result<HttpResponse, error::UserUpdate> {
     validate_register_req(&req)?;
 
@@ -405,7 +405,7 @@ async fn get_profile(
 ) -> Result<Json<<Profile as ApiEndpoint>::Res>, error::UserNotFound> {
     // todo: figure out how to do `<Profile as ApiEndpoint>::Err`
 
-    db::user::profile(db.as_ref(), claims.0.user_id)
+    db::user::get_profile(db.as_ref(), claims.0.user_id)
         .await?
         .map(Json)
         .ok_or(error::UserNotFound::UserNotFound)
@@ -559,7 +559,10 @@ pub fn configure(cfg: &mut ServiceConfig) {
             ChangePassword::PATH,
             ChangePassword::METHOD.route().to(put_password),
         )
-        .route(PutProfile::PATH, PutProfile::METHOD.route().to(put_profile))
+        .route(
+            CreateProfile::PATH,
+            CreateProfile::METHOD.route().to(create_profile),
+        )
         .route(
             PatchProfile::PATH,
             PatchProfile::METHOD.route().to(patch_profile),

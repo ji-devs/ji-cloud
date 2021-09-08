@@ -1,11 +1,10 @@
 use crate::error;
 use chrono_tz::Tz;
 use shared::domain::{
-    image::ImageId,
     meta::{AffiliationId, AgeRangeId, SubjectId},
-    user::{OtherUser, PatchProfileRequest, PutProfileRequest, UserProfile, UserScope},
+    user::{CreateProfileRequest, OtherUser, PatchProfileRequest, UserProfile, UserScope},
 };
-use sqlx::{postgres::PgDatabaseError, PgConnection, PgPool};
+use sqlx::{PgConnection, PgPool};
 use std::{convert::TryFrom, str::FromStr};
 use uuid::Uuid;
 
@@ -26,16 +25,15 @@ pub async fn lookup(
     .await?)
 }
 
-pub async fn profile(db: &sqlx::PgPool, id: Uuid) -> anyhow::Result<Option<UserProfile>> {
+pub async fn get_profile(db: &sqlx::PgPool, id: Uuid) -> anyhow::Result<Option<UserProfile>> {
     let row = sqlx::query!(
-        //language=SQL
         r#"
 select user_id as "id",
     username,
     user_email.email::text                                                              as "email!",
     given_name,
     family_name,
-    profile_image_id                                                                    as "profile_image_id: ImageId",
+    profile_image,
     language,
     locale,
     opt_into_edu_resources,
@@ -70,7 +68,7 @@ where id = $1"#,
         email: row.email,
         given_name: row.given_name,
         family_name: row.family_name,
-        profile_image_id: row.profile_image_id,
+        profile_image: row.profile_image,
         language: row.language,
         locale: row.locale,
         opt_into_edu_resources: row.opt_into_edu_resources,
@@ -104,14 +102,14 @@ pub async fn exists(db: &sqlx::PgPool, id: Uuid) -> sqlx::Result<bool> {
 
 pub async fn upsert_profile(
     txn: &mut sqlx::Transaction<'_, sqlx::Postgres>,
-    req: &PutProfileRequest,
+    req: &CreateProfileRequest,
     user_id: Uuid,
 ) -> Result<(), error::UserUpdate> {
     sqlx::query!(
         //language=SQL
         r#"
 insert into user_profile
-    (user_id, username, over_18, given_name, family_name, profile_image_id, language, locale, timezone, opt_into_edu_resources, organization, persona, location) 
+    (user_id, username, over_18, given_name, family_name, profile_image, language, locale, timezone, opt_into_edu_resources, organization, persona, location) 
 values 
     ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
 on conflict (user_id) do update
@@ -119,7 +117,7 @@ set
     over_18 = $3,
     given_name = $4,
     family_name = $5,
-    profile_image_id = $6,
+    profile_image = $6,
     language = $7,
     locale = $8,
     timezone = $9,
@@ -133,7 +131,7 @@ set
         req.over_18,
         &req.given_name,
         &req.family_name,
-        req.profile_image_id.map(|it| it.0),
+        req.profile_image,
         &req.language,
         &req.locale,
         req.timezone.name(),
@@ -216,28 +214,19 @@ where user_id = $1 and location is distinct from $2"#,
         .await?;
     }
 
-    if let Some(profile_image_id) = req.profile_image_id {
+    if let Some(profile_image) = req.profile_image {
         sqlx::query!(
             //language=SQL
             r#"
 update user_profile
-set profile_image_id = $2
-where user_id = $1 and profile_image_id is distinct from $2
+set profile_image = $2
+where user_id = $1 and profile_image is distinct from $2
         "#,
             user_id,
-            profile_image_id.map(|it| it.0),
+            profile_image,
         )
         .execute(&mut txn)
-        .await
-        .map_err(|err| match err {
-            sqlx::Error::Database(e)
-                if e.downcast_ref::<PgDatabaseError>().constraint()
-                    == Some("user_profile_profile_image_id_fkey") =>
-            {
-                error::UserUpdate::ProfileImageNotFound
-            }
-            _ => error::UserUpdate::InternalServerError(err.into()),
-        })?;
+        .await?;
     }
 
     if let Some(persona) = req.persona {
@@ -260,26 +249,23 @@ where user_id = $1 and persona is distinct from $2
         r#"
 update user_profile
 set username               = coalesce($2, username),
-    over_18                = coalesce($3, over_18),
-    given_name             = coalesce($4, given_name),
-    family_name            = coalesce($5, family_name),
-    language               = coalesce($6, language),
-    locale                 = coalesce($7, locale),
-    timezone               = coalesce($8, timezone),
-    opt_into_edu_resources = coalesce($9, opt_into_edu_resources)
+    given_name             = coalesce($3, given_name),
+    family_name            = coalesce($4, family_name),
+    language               = coalesce($5, language),
+    locale                 = coalesce($6, locale),
+    timezone               = coalesce($7, timezone),
+    opt_into_edu_resources = coalesce($8, opt_into_edu_resources)
 where user_id = $1
   and (($2::text is not null and $2 is distinct from username) or
-       ($3::bool is not null and $3 is distinct from over_18) or
-       ($4::text is not null and $4 is distinct from given_name) or
-       ($5::text is not null and $5 is distinct from family_name) or
-       ($6::text is not null and $6 is distinct from language) or
-       ($7::text is not null and $7 is distinct from locale) or
-       ($8::text is not null and $8 is distinct from timezone) or
-       ($9::bool is not null and $9 is distinct from opt_into_edu_resources) )
+       ($3::text is not null and $3 is distinct from given_name) or
+       ($4::text is not null and $4 is distinct from family_name) or
+       ($5::text is not null and $5 is distinct from language) or
+       ($6::text is not null and $6 is distinct from locale) or
+       ($7::text is not null and $7 is distinct from timezone) or
+       ($8::bool is not null and $8 is distinct from opt_into_edu_resources) )
     "#,
         user_id,
         req.username,
-        req.over_18,
         req.given_name,
         req.family_name,
         req.language,

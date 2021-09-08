@@ -6,7 +6,6 @@ use std::convert::TryFrom;
 use uuid::Uuid;
 
 use super::meta::{AffiliationId, AgeRangeId, SubjectId};
-use crate::domain::image::ImageId;
 
 /// Represents a user's permissions.
 ///
@@ -97,8 +96,8 @@ pub struct UserProfile {
     /// The user's family name (last name)
     pub family_name: String,
 
-    /// `ImageId` references an entry in the user image library for the user's profile image.
-    pub profile_image_id: Option<ImageId>,
+    /// URL to the user's profile image.
+    pub profile_image: Option<String>,
 
     /// The user's preferred language.
     pub language: String,
@@ -187,7 +186,7 @@ pub enum VerifyEmailRequest {
 
 /// Request for [`PutProfile`](crate::api::endpoints::user::PutProfile)
 #[derive(Debug, Serialize, Deserialize)]
-pub struct PutProfileRequest {
+pub struct CreateProfileRequest {
     /// The user's username.
     ///
     /// This must be unique.
@@ -202,10 +201,9 @@ pub struct PutProfileRequest {
     /// The user's family name / "last name".
     pub family_name: String,
 
-    /// `ImageId` references an entry in the user image library for the user's profile image.
-    #[serde(default)]
+    /// URL to the user's profile image.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub profile_image_id: Option<ImageId>,
+    pub profile_image: Option<String>,
 
     // todo: create a struct that enforces format like `en_us`
     /// the language the user prefers to communicate with.
@@ -262,11 +260,6 @@ pub struct PatchProfileRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub username: Option<String>,
 
-    /// Is the user >= 18 yeas old?
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub over_18: Option<bool>,
-
     /// The user's given name / "first name".
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -277,11 +270,11 @@ pub struct PatchProfileRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub family_name: Option<String>,
 
-    /// `ImageId` references an entry in the user image library for the user's profile image.
+    /// URL to the user's profile image.
     #[serde(default)]
     #[serde(deserialize_with = "super::deserialize_optional_field")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub profile_image_id: Option<Option<ImageId>>,
+    pub profile_image: Option<Option<String>>,
 
     // todo: create a struct that enforces format like `en_us`
     /// the language the user prefers to communicate with.

@@ -24,7 +24,7 @@ pub use fonts::{
     Create as CreateFont, Delete as DeleteFont, Get as GetFonts, Update as UpdateFont,
 };
 
-pub use profile::{Get as Profile, Patch as PatchProfile, Put as PutProfile};
+pub use profile::{Create as CreateProfile, Get as Profile, Patch as PatchProfile};
 
 /// Create a new user.
 ///

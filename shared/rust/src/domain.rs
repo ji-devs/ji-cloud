@@ -37,7 +37,7 @@ pub mod auth {
     pub use super::session::CSRF_HEADER_NAME;
 
     #[deprecated]
-    pub use super::user::PutProfileRequest as RegisterRequest;
+    pub use super::user::CreateProfileRequest as RegisterRequest;
 }
 
 use chrono::Utc;

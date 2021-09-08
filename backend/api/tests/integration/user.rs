@@ -11,7 +11,7 @@ use shared::domain::{
     image::ImageId,
     meta::{AffiliationId, AgeRangeId, SubjectId},
     session::{CreateSessionResponse, NewSessionResponse},
-    user::{PatchProfileRequest, PutProfileRequest},
+    user::{CreateProfileRequest, PatchProfileRequest},
 };
 use sqlx::PgPool;
 
@@ -45,7 +45,7 @@ async fn get_profile() -> anyhow::Result<()> {
 }
 
 #[actix_rt::test]
-async fn put_profile() -> anyhow::Result<()> {
+async fn post_profile() -> anyhow::Result<()> {
     if !service::email_test_guard() {
         return Ok(());
     }
@@ -74,17 +74,17 @@ async fn put_profile() -> anyhow::Result<()> {
 
     let client = reqwest::Client::new();
 
-    // put profile
+    // create user profile
     let resp = client
-        .put(&format!("http://0.0.0.0:{}/v1/user/me/profile", port))
+        .post(&format!("http://0.0.0.0:{}/v1/user/me/profile", port))
         .header("X-CSRF", csrf)
         .header("Cookie", format!("X-AUTH={}", token))
-        .json(&PutProfileRequest {
+        .json(&CreateProfileRequest {
             username: "test_user".to_owned(),
             over_18: true,
             given_name: "name".to_owned(),
             family_name: "nameson".to_owned(),
-            profile_image_id: None,
+            profile_image: None,
             language: "en_US".to_owned(),
             locale: "en_US".to_owned(),
             timezone: chrono_tz::America::Los_Angeles,
@@ -123,12 +123,9 @@ async fn patch_profile() -> anyhow::Result<()> {
         .patch(&format!("http://0.0.0.0:{}/v1/user/me/profile", port))
         .json(&PatchProfileRequest {
             username: Some("test_user".to_owned()),
-            over_18: Some(false),
             given_name: Some("name".to_owned()),
             family_name: Some("nameson".to_owned()),
-            profile_image_id: Some(Some(ImageId(uuid::Uuid::parse_str(
-                "8a473dd6-ffaa-11eb-86a5-dba3538e5a15",
-            )?))),
+            profile_image: Some(Some("this.is.a.url".to_owned())),
             language: Some("en_US".to_owned()),
             locale: Some("en_US".to_owned()),
             timezone: None,
@@ -262,17 +259,17 @@ async fn basic_auth_flow_no_login() -> anyhow::Result<()> {
     let body = resp.json::<NewSessionResponse>().await?;
     log::info!("{:?}", &body);
 
-    // 3.2. put profile
+    // 3.2. create profile
     let resp = client
-        .put(&format!("http://0.0.0.0:{}/v1/user/me/profile", port))
+        .post(&format!("http://0.0.0.0:{}/v1/user/me/profile", port))
         .header("X-CSRF", body.csrf.as_str())
         .header("Cookie", format!("X-AUTH={}", token))
-        .json(&PutProfileRequest {
+        .json(&CreateProfileRequest {
             username: "test_user".to_owned(),
             over_18: true,
             given_name: "name".to_owned(),
             family_name: "nameson".to_owned(),
-            profile_image_id: None,
+            profile_image: None,
             language: "en_US".to_owned(),
             locale: "en_US".to_owned(),
             timezone: chrono_tz::America::Los_Angeles,
@@ -402,23 +399,23 @@ async fn basic_auth_flow() -> anyhow::Result<()> {
         }
     };
 
-    // 4.2. put profile
+    // 4.2. create profile
     let resp = client
-        .put(&format!("http://0.0.0.0:{}/v1/user/me/profile", port))
+        .post(&format!("http://0.0.0.0:{}/v1/user/me/profile", port))
         .header("X-CSRF", csrf.as_str())
         .header("Cookie", format!("X-AUTH={}", token))
-        .json(&PutProfileRequest {
+        .json(&CreateProfileRequest {
             username: "test_user".to_owned(),
             over_18: true,
             given_name: "name".to_owned(),
             family_name: "nameson".to_owned(),
-            profile_image_id: None,
+            profile_image: None,
             language: "en_US".to_owned(),
             locale: "en_US".to_owned(),
             timezone: chrono_tz::America::Los_Angeles,
             opt_into_edu_resources: true,
             organization: None,
-            persona: Some("put persona".to_owned()),
+            persona: Some("added persona".to_owned()),
             subjects: Vec::<SubjectId>::new(),
             age_ranges: Vec::<AgeRangeId>::new(),
             affiliations: Vec::<AffiliationId>::new(),
