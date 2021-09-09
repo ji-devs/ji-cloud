@@ -44,7 +44,7 @@ impl Step3 {
                 if has_index {
                     let kind = match crate::debug::settings().interaction_tab {
                         Some(kind) => kind,
-                        None => MenuTabKind::Text
+                        None => MenuTabKind::Audio
                     };
                     Mutable::new(Some(kind))
                 } else {
