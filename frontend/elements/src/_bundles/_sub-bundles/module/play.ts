@@ -7,6 +7,8 @@ import "@elements/core/tooltips/info";
 import "@elements/core/tooltips/confirm";
 import "@elements/core/tooltips/error";
 import "@elements/core/tooltips/bubble";
+import "@elements/core/buttons/icon";
+import "@elements/core/buttons/icon-label";
 import "@elements/module/_common/edit/instructions-banner";
 import "@elements/module/_common/play/play-button";
 

@@ -13,6 +13,7 @@ export type IconKind =
   | "circle-kebab-blue" 
   | "circle-pencil"
   | "audio"
+  | "white-circle-blue-arrow"
   | "audio-stop"
   | "gears" 
   | "x";

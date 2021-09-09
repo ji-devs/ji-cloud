@@ -18,7 +18,16 @@ export class _ extends LitElement {
       }
         section {
           display: flex;
-          gap: 56px;
+          gap: 56rem;
+        }
+
+        ::slotted([slot="next"]) {
+          position: absolute;
+          bottom: 38rem;
+          right: 48rem;
+          width: 48rem;
+          height: 48rem;
+          filter: drop-shadow(0 3rem 12rem rgba(0,0,0,.24));
         }
     `];
   }
@@ -27,6 +36,7 @@ export class _ extends LitElement {
       return html`
         <section>
       	  <slot></slot>
+          <slot name="next"></slot>
         </section>
       `
   }

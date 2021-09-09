@@ -64,6 +64,13 @@ pub fn render(state: Rc<Game>) -> Dom {
                 }))
                 .to_signal_vec()
         )
+        .child(html!("button-icon", {
+            .property("icon", "white-circle-blue-arrow")
+            .property("slot", "next")
+            .event(clone!(state => move |evt:events::Click| {
+                state.next();
+            }))
+        }))
     })
 }
 
