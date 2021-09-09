@@ -78,7 +78,8 @@ impl ProfilePageUser {
         self.email.set(user.email);
         self.given_name.set(user.given_name);
         self.family_name.set(user.family_name);
-        self.profile_image_id.set(user.profile_image_id);
+        panic!("Waiting on API fix");
+        //self.profile_image_id.set(user.profile_image_id);
         self.language.set(user.language);
         //self.locale.set(user.locale);
         self.location.set(user.location);
@@ -91,10 +92,13 @@ impl ProfilePageUser {
     }
 
     pub fn to_update(&self) -> PatchProfileRequest {
+        panic!("Waiting on API fix");
         PatchProfileRequest {
             given_name: Some(self.given_name.get_cloned()),
             family_name: Some(self.family_name.get_cloned()),
-            profile_image_id: Some(self.profile_image_id.get_cloned()),
+            //FIXME!
+            profile_image: None,
+            //profile_image_id: Some(self.profile_image_id.get_cloned()),
             language: Some(self.language.get_cloned()),
             // locale: Some(self.locale.get_cloned()),
             organization: Some(self.organization.get_cloned()),
