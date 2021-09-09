@@ -3,6 +3,8 @@ import {nothing} from "lit-html";
 import { classMap } from 'lit-html/directives/class-map';
 import "@elements/core/images/ui";
 
+export type IconSize = "small" | "medium";
+
 export type IconKind = 
   "circle-x-blue" 
   | "circle-+-blue" 
@@ -36,6 +38,14 @@ export class _ extends LitElement {
           width: var(--button-width, 32px);
           height: var(--button-height, 32px);
         }
+        :host([size="small"]) {
+          width: 24px;
+          height: 24px;
+        }
+        :host([size="medium"]) {
+          width: 32px;
+          height: 32px;
+        }
 
         /* Used to create a wrapper that will still register
           pointer events even if the contents are smaller than the button size
@@ -58,12 +68,16 @@ export class _ extends LitElement {
                 height: inherit;
                 object-fit: inherit;
             }
+
       `,
     ];
   }
 
   @property()
   icon: IconKind = "circle-check";
+
+  @property({reflect: true})
+  size: IconSize | undefined;
 
   @property({type: Boolean, reflect: true})
   hover:boolean = false; 
@@ -99,7 +113,7 @@ export class _ extends LitElement {
   }
 
   render() {
-    const { icon, hover, active } = this;
+    const { icon, hover, active} = this;
 
     const filename = icon === "circle-check" ? "circle-check-green"
         : icon === "circle-kebab-grey" ? "circle-kebab-grey"

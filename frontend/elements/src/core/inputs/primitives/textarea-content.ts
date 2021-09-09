@@ -20,6 +20,16 @@ export type CLICK_MODE = "single" | "double" | "none";
 export class _ extends LitElement {
   static get styles() {
       return [css`
+        .hiddenClickAreaWrapper {
+          position: relative;
+          top: 0;
+          left: 0;
+        }
+        .hiddenClickAreaWrapper > * {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
           textarea, span {
               font-family: var(--font-family, Poppins);
               /*font-size: var(--font-size, 16px);*/
@@ -30,6 +40,7 @@ export class _ extends LitElement {
 
           span {
               white-space: pre-wrap;
+              user-select: none;
           }
           textarea {
               outline: 0;
@@ -58,6 +69,8 @@ export class _ extends LitElement {
   @property({ type: Boolean })
   editing: boolean = false;
 
+  @property({ type: Boolean })
+  disableFixedClickArea: boolean = false;
 
   @property({type: Number})
   constrainWidth:number = 0;
@@ -184,27 +197,49 @@ export class _ extends LitElement {
   }
 
   render() {
-    const { value, editing, clickMode} = this;
-
+    const { value, editing, clickMode, constrainWidth, constrainHeight, disableFixedClickArea} = this;
 
     const style = styleMap({
       fontSize: this.fontSize
     });
 
+    const hiddenClickAreaStyle = styleMap({
+      display: !editing && constrainWidth && constrainHeight ? "block" : "none",
+      width: `${constrainWidth}px`,
+      height: `${constrainHeight}px`,
+    });
+
     return html`
-        <textarea style=${style} class="${classMap({visible: editing})}" id="input" @input="${this.onInput}" @keyup="${this.onKey}" .value="${value}"></textarea>
-        <span style=${style} id="show" class="${classMap({visible: !editing})}"
-              @dblclick=${() => {
-                  if(clickMode === "double") {
-                    this.toggleEditing(true);
-                    }
-              }}
-              @click=${() => {
-                if(clickMode === "single") {
-                    this.toggleEditing(true);
-                }
-              }}
-              >${value}</span>
+        ${disableFixedClickArea ? nothing : html`
+          <div class="hiddenClickAreaWrapper">
+                <div class="hiddenClickArea" style=${hiddenClickAreaStyle}
+                      @dblclick=${() => {
+                          if(clickMode === "double") {
+                            this.toggleEditing(true);
+                            }
+                      }}
+                      @click=${() => {
+                        if(clickMode === "single") {
+                            this.toggleEditing(true);
+                        }
+                      }}>
+                </div>
+            </div>
+          `}
+          <textarea style=${style} class="${classMap({visible: editing})}" id="input" @input="${this.onInput}" @keyup="${this.onKey}" .value="${value}"></textarea>
+          <span style=${style} id="show" class="${classMap({visible: !editing})}"
+                @dblclick=${() => {
+                    if(clickMode === "double") {
+                      this.toggleEditing(true);
+                      }
+                }}
+                @click=${() => {
+                  if(clickMode === "single") {
+                      this.toggleEditing(true);
+                  }
+                }}
+                >${value}</span>
+        </div>
         <span style=${style} id="measure" class="measure">${value}</span>
         <span style=${style} id="measure-line" class="measure">&nbsp;</span>
         `;

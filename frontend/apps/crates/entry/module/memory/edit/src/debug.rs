@@ -72,6 +72,7 @@ impl DebugSettings {
                 if let Some(init_data) = init_data {
                     let mode = Mode::WordsAndImages;
                     //let mode = Mode::Synonyms;
+                    //let mode = Mode::Duplicate;
 
                     RawData{
                         content: Some(Content {

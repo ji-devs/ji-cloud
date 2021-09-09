@@ -59,7 +59,7 @@ export const Card= (props?:Partial<Args> & {slot?: string}) => {
 function getContent(contentMode: CONTENT_MODE, ioMode: IO_MODE, text: string) {
     const editing = ioMode === "edit"; 
     if(contentMode === "text") {
-        return `<input-textarea-content value="${text}" ${editing}></input-textarea-content>`;
+        return `<input-textarea-content value="${text}" ${editing} constrainWidth="150" constrainHeight="150"></input-textarea-content>`;
     } else if(contentMode === "image") {
         return MockJiImage({size: "thumb"})
     } else if(contentMode === "image-empty") {

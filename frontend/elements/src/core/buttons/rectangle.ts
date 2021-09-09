@@ -20,6 +20,11 @@ export class _ extends LitElement {
                     background-color: transparent;
                     box-sizing: border-box;
                     padding: 0;
+                    user-select: none;
+                }
+
+                :host([disabled]) {
+                    pointer-events: none;
                 }
 
                 :host([color=darkGray]) {

@@ -1,5 +1,5 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
-import {IconKind} from "./icon";
+import {IconKind, IconSize} from "./icon";
 import "./icon";
 
 export type LabelColor = "blue";
@@ -23,12 +23,22 @@ export class _ extends LitElement {
                 .label {
                     user-select: none;
                 }
+
+                :host([size="small"]) .label {
+                    font-size: 16px;
+                }
+                :host([size="medium"]) .label {
+                    font-size: 18px;
+                }
             `,
         ];
     }
 
     @property()
     icon: IconKind = "circle-check";
+
+    @property()
+    size: IconSize | undefined;
 
     @property({type: Boolean, reflect: true})
     hover:boolean = false; 
@@ -63,10 +73,10 @@ export class _ extends LitElement {
     }
 
     render() {
-        const {icon, active, hover, label} = this;
+        const {icon, active, hover, label, size} = this;
 
         return html`
-            <button-icon .icon=${icon} .active=${active} .hover=${hover} disableHover></button-icon>
+            <button-icon .icon=${icon} .active=${active} .hover=${hover} .size=${size} disableHover></button-icon>
             <div class="label">${label}</div>
         `;
     }

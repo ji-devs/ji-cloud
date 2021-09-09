@@ -1,6 +1,6 @@
 import {argsToAttrs} from "@utils/attributes";
 import "@elements/core/buttons/icon-label";
-import {IconKind} from "@elements/core/buttons/icon";
+import {IconKind, IconSize} from "@elements/core/buttons/icon";
 
 export default {
   title: 'Core / Buttons',
@@ -8,6 +8,7 @@ export default {
 
 interface Args {
     icon: IconKind,
+    size?: IconSize,
     label: string 
 }
 
@@ -29,6 +30,12 @@ IconLabel.argTypes = {
         control: {
             type: 'inline-radio',
             options: ["circle-x-blue", "circle-+-blue", "audio", "audio-stop", "circle-check", "circle-kebab-grey", "circle-kebab-blue", "circle-pencil", "gears", "x"]
+        }
+    },
+    size: {
+        control: {
+            type: 'inline-radio',
+            options: ["", "small", "medium"]
         }
     }
 }

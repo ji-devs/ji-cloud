@@ -41,14 +41,8 @@ pub fn render(state: Rc<State>) -> Dom {
                 .property("mode", "sefaria")
             }),
             html!("button-rect", {
-                // TODO: think should should be change from color to disabled
-                .property_signal("color", state.is_valid_signal().map(|ready| {
-                    if ready.is_ok() {
-                        "red"
-                    } else {
-                        "grey"
-                    }
-                }))
+                .property("color", "red") 
+                .property_signal("disabled", state.is_valid_signal().map(|ready| ready.is_err()))
                 .property("size", "small")
                 .property("iconAfter", "done")
                 .property("slot", "done-btn")
