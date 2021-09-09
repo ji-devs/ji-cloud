@@ -5,6 +5,7 @@ import "@elements/core/images/ui";
 
 export type IconKind = 
   "circle-x-blue" 
+  | "circle-+-blue" 
   | "circle-check" 
   | "circle-kebab-grey" 
   | "circle-kebab-blue" 
@@ -70,6 +71,8 @@ export class _ extends LitElement {
   @property({type: Boolean, reflect: true})
   active:boolean = false; 
 
+  @property({type: Boolean})
+  disableHover:boolean = false; 
 
   connectedCallback() {
     super.connectedCallback();
@@ -84,11 +87,15 @@ export class _ extends LitElement {
   }
 
   onMouseEnter() {
-    this.hover = true;
+    if(!this.disableHover) {
+      this.hover = true;
+    }
   }
 
   onMouseLeave() {
-    this.hover = false;
+    if(!this.disableHover) {
+      this.hover = false;
+    }
   }
 
   render() {
@@ -99,8 +106,6 @@ export class _ extends LitElement {
         : icon === "circle-kebab-blue" ? "circle-kebab-blue"
         : icon === "circle-pencil" ? "circle-pencil-blue"
         : icon === "gears" ? "gears-plus-blue"
-        : icon === "x" ? "x"
-        : icon === "circle-x-blue" ? "circle-x-blue"
         : icon;
 
     const basePath = `core/buttons/icon`;

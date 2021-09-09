@@ -5,6 +5,8 @@ use std::rc::Rc;
 
 impl<RawData: RawDataExt, E: ExtraExt> DomRenderable for Header<RawData, E> {
     fn render(_state: Rc<Header<RawData, E>>) -> Dom {
-        html!("empty-fragment")
+        html!("empty-fragment", {
+            .child(html!("h1", {.text("HELLO")}))
+        })
     }
 }
