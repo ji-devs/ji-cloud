@@ -1,5 +1,5 @@
 use crate::domain::jig::module::{
-    body::{Body, BodyConvert, BodyExt, ThemeChoice, _groups::cards::*},
+    body::{Body, ModeExt, BodyConvert, BodyExt, ThemeChoice, _groups::cards::*},
     ModuleKind,
 };
 use serde::{Deserialize, Serialize};
@@ -57,6 +57,13 @@ impl DisplayMode {
 impl BodyExt<Mode, Step> for ModuleData {
     fn as_body(&self) -> Body {
         Body::Flashcards(self.clone())
+    }
+
+    fn choose_mode_list() -> Vec<Mode> {
+        Mode::get_list()
+            .into_iter()
+            .filter(|mode| *mode != Mode::Duplicate)
+            .collect()
     }
 
     fn is_complete(&self) -> bool {
