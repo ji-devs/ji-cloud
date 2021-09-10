@@ -13,7 +13,9 @@ impl JigAudioExt for AudioBackground {
     fn display_name(&self) -> &'static str {
         match self {
             AudioBackground::FunForKids => "Fun for Kids",
-            AudioBackground::SukkotLoop => "Sukkout Loop",
+            AudioBackground::DancingHappy => "Dancing Happy",
+            AudioBackground::Jigzi1 => "Jigzi 1",
+            AudioBackground::Jigzi2 => "Jigzi 2",
         }
     }
 }
@@ -22,9 +24,18 @@ impl JigAudioExt for AudioBackground {
 impl JigAudioExt for AudioFeedbackPositive {
     fn display_name(&self) -> &'static str {
         match self {
+            AudioFeedbackPositive::Correct => "Correct",
+            AudioFeedbackPositive::Keys => "Keys",
             AudioFeedbackPositive::Magic => "Magic",
+            AudioFeedbackPositive::Notes => "Notes",
             AudioFeedbackPositive::StarPing => "Star Ping",
             AudioFeedbackPositive::Ting => "Ting",
+            AudioFeedbackPositive::Trumpet => "Trumpet",
+            AudioFeedbackPositive::VoiceAwesome => "Voice Awesome",
+            AudioFeedbackPositive::VoicesHurray => "Voices Hurray",
+            AudioFeedbackPositive::VoiceYippee => "Voice Yippee",
+            AudioFeedbackPositive::Xylophone => "Xylophone",
+            AudioFeedbackPositive::Yes => "Yes",
         }
     }
 }
@@ -33,9 +44,18 @@ impl JigAudioExt for AudioFeedbackPositive {
 impl JigAudioExt for AudioFeedbackNegative {
     fn display_name(&self) -> &'static str {
         match self {
+            AudioFeedbackNegative::Bang => "Bang",
             AudioFeedbackNegative::Boing => "Boing",
+            AudioFeedbackNegative::Buzz => "Buzz",
+            AudioFeedbackNegative::Buzzer => "Buzzer",
+            AudioFeedbackNegative::Clang => "Clang",
+            AudioFeedbackNegative::Clicks => "Clicks",
             AudioFeedbackNegative::Incorrect => "Incorrect",
             AudioFeedbackNegative::JumpWrong => "Jump Wrong",
+            AudioFeedbackNegative::NotRight => "Not Right",
+            AudioFeedbackNegative::OhNo => "Oh No",
+            AudioFeedbackNegative::ShortClang => "Short Clang",
+            AudioFeedbackNegative::Whir => "Whir",
         }
     }
 }
