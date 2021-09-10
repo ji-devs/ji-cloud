@@ -84,6 +84,8 @@ impl DebugSettings {
                                 pairs: if init_data.with_pairs {
                                     config::get_debug_pairs(mode)
                                         .into_iter()
+                                        .take(2)
+                                        .chain(config::get_debug_pairs(mode).into_iter())
                                         .map(|(word_1, word_2)| {
                                             match mode {
                                                 Mode::WordsAndImages => {

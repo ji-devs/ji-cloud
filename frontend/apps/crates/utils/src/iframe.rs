@@ -144,6 +144,7 @@ pub enum ModuleToJigPlayerMessage {
     Next,
 }
 
+
 #[derive(Debug, Serialize, Deserialize)]
 pub enum ModuleToJigEditorMessage {
     AppendModule(LiteModule),

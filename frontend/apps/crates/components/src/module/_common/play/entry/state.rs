@@ -30,7 +30,7 @@ where
     Base: BaseExt + 'static,
     Step: StepExt + 'static,
 {
-    pub(super) phase: Mutable<Rc<Phase<RawData, Base>>>,
+    pub(super) phase: Mutable<Rc<InitPhase<RawData, Base>>>,
     pub(super) jig: RefCell<Option<Jig>>,
     pub(super) opts: StateOpts<RawData>,
     pub(super) raw_loader: AsyncLoader,
@@ -79,7 +79,7 @@ where
         let _self = Rc::new(Self {
             opts,
             jig: RefCell::new(None),
-            phase: Mutable::new(Rc::new(Phase::Loading(loading_kind))),
+            phase: Mutable::new(Rc::new(InitPhase::Loading(loading_kind))),
             raw_loader: AsyncLoader::new(),
             page_body_switcher: AsyncLoader::new(),
             phantom: PhantomData,
@@ -132,7 +132,7 @@ where
             let raw_source_player = match _self.phase.get_cloned().loading_kind_unchecked() {
                 LoadingKind::Direct(raw) => Some((raw.clone(), InitSource::ForceRaw, false)),
                 LoadingKind::Iframe => {
-                    _self.phase.set(Rc::new(Phase::WaitingIframeRaw(
+                    _self.phase.set(Rc::new(InitPhase::WaitingIframeRaw(
                         Rc::new(Box::new(clone!(init_from_raw, _self => move |raw| {
                             _self.raw_loader.load(clone!(init_from_raw, _self => async move {
 
@@ -143,10 +143,9 @@ where
                                 );
                                 let base = init_from_raw(InitFromRawArgs::new(jig_id, module_id, jig, raw, InitSource::IframeData)).await;
 
-                                _self.phase.set(Rc::new(Phase::Ready(Ready {
+                                _self.phase.set(Rc::new(InitPhase::Ready(Ready {
                                     base, 
                                     jig_player: false,
-                                    play_started: Mutable::new(false)
                                 })));
                             }));
                         })))
@@ -180,16 +179,16 @@ where
                 );
                 let base = init_from_raw(InitFromRawArgs::new(jig_id, module_id, jig, raw, init_source)).await;
 
-                _self.phase.set(Rc::new(Phase::Ready(Ready {
+                _self.phase.set(Rc::new(InitPhase::Ready(Ready {
                     base, 
                     jig_player,
-                    play_started: Mutable::new(false)
                 })));
             }
         }));
 
         _self
     }
+
 }
 
 #[derive(Debug, Clone)]
@@ -217,7 +216,7 @@ impl<RawData> StateOpts<RawData> {
 
 pub type RawDirect = bool;
 
-pub enum Phase<RawData, Base> {
+pub enum InitPhase<RawData, Base> {
     Loading(LoadingKind<RawData>),
     WaitingIframeRaw(Rc<Box<dyn Fn(RawData)>>),
     Ready(Ready<Base>),
@@ -226,10 +225,9 @@ pub enum Phase<RawData, Base> {
 pub struct Ready<Base> {
     pub base: Rc<Base>,
     pub jig_player: bool,
-    pub play_started: Mutable<bool>,
 }
 
-impl<RawData, Base> Phase<RawData, Base> {
+impl<RawData, Base> InitPhase<RawData, Base> {
     pub fn waiting_iframe_raw(&self) -> bool {
         match self {
             Self::Loading(kind) => match kind {
@@ -259,6 +257,20 @@ pub enum InitSource {
     Load,
     IframeData,
 }
+
+
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub enum ModulePlayPhase {
+    Init,
+    Playing,
+    Ending(Option<ModuleEnding>)
+}
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub enum ModuleEnding {
+    Positive,
+    Negative
+}
+
 pub struct InitFromRawArgs<RawData, Mode, Step>
 where
     RawData: BodyExt<Mode, Step> + 'static,
@@ -271,6 +283,7 @@ where
     pub raw: RawData,
     pub source: InitSource,
     pub theme_id: ThemeId,
+    pub play_phase: Mutable<ModulePlayPhase>,
     phantom: PhantomData<(Mode, Step)>,
 }
 
@@ -305,6 +318,7 @@ where
             jig,
             raw,
             source,
+            play_phase: Mutable::new(ModulePlayPhase::Init),
             phantom: PhantomData,
         }
     }
@@ -322,4 +336,9 @@ pub trait BaseExt: DomRenderable {
     fn get_timer_minutes(&self) -> Option<u32> {
         None
     }
+
+    fn set_play_phase(&self, phase: ModulePlayPhase) {
+        self.play_phase().set_neq(phase);
+    }
+    fn play_phase(&self) -> Mutable<ModulePlayPhase>;
 }

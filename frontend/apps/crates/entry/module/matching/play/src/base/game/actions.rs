@@ -12,17 +12,28 @@ use futures_signals::{
 };
 use rand::prelude::*;
 use utils::prelude::*;
-use crate::base::{
-    state::Phase,
-    ending::state::Ending
-};
+use crate::base::state::Phase;
+use components::module::_common::play::prelude::*;
+use std::convert::TryInto;
 
 impl Game {
     pub fn next(_self: Rc<Self>) {
-        _self.current.set(Current::new(_self.clone()));
+        let has_ended = {
+            if _self.used.borrow().len() >= _self.base.settings.n_rounds.try_into().unwrap_ji() {
+                true
+            } else if _self.remaining.borrow().len() == 0 {
+                //DECK FINISHED! (this isn't supported in settings *yet*)
+                true
+            } else {
+                false
+            }
+        };
 
-        if _self.current.lock_ref().is_none() {
-            _self.base.phase.set(Phase::Ending(Rc::new(Ending::new(_self.base.clone()))));
+        if !has_ended {
+            _self.current.set(Some(Current::new(_self.clone())));
+        } else {
+            _self.base.phase.set(Phase::Ending);
+            _self.base.set_play_phase(ModulePlayPhase::Ending(Some(ModuleEnding::Positive)));
         }
     }
 }

@@ -8,7 +8,7 @@ use dominator::{clone, events, html, Dom};
 
 use utils::{events::ModuleResizeEvent, iframe::*, prelude::*, resize::*};
 
-use super::{loading::dom::render_loading, state::*};
+use super::{loading::dom::render_loading, ending::*, state::*};
 use crate::{
     instructions::player::InstructionsPlayer,
     module::_common::play::prelude::*,
@@ -27,8 +27,8 @@ pub fn render_page_body<RawData, Mode, Step, Base>(
     let sig =
             state.phase.signal_cloned().map(clone!(state => move |phase| {
                 let page_kind = match phase.as_ref() {
-                    Phase::Loading(_) | Phase::WaitingIframeRaw(_) => ModulePageKind::GridPlain,
-                    Phase::Ready(_) => ModulePageKind::Iframe
+                    InitPhase::Loading(_) | InitPhase::WaitingIframeRaw(_) => ModulePageKind::GridPlain,
+                    InitPhase::Ready(_) => ModulePageKind::Iframe
                 };
 
                 let has_resized_once = Mutable::new(!page_kind.is_resize());
@@ -52,14 +52,14 @@ pub fn render_page_body<RawData, Mode, Step, Base>(
                                         vec![]
                                     } else {
                                         match phase.as_ref() {
-                                            Phase::Loading(_) => {
+                                            InitPhase::Loading(_) => {
                                                 vec![render_loading(state.clone())]
                                             },
-                                            Phase::WaitingIframeRaw(on_raw) => {
+                                            InitPhase::WaitingIframeRaw(on_raw) => {
                                                 vec![render_iframe_wait_raw(state.clone(), on_raw.clone())]
                                             },
-                                            Phase::Ready(ready) => {
-                                                vec![render_player(state.clone(), ready.base.clone(), ready.jig_player, ready.play_started.clone())]
+                                            InitPhase::Ready(ready) => {
+                                                vec![render_player(state.clone(), ready.base.clone(), ready.jig_player)]
                                             },
                                         }
                                     }
@@ -113,7 +113,6 @@ fn render_player<RawData, Mode, Step, Base>(
     state: Rc<GenericState<RawData, Mode, Step, Base>>,
     base: Rc<Base>,
     jig_player: bool,
-    play_started: Mutable<bool>,
 ) -> Dom
 where
     Base: BaseExt + 'static,
@@ -127,15 +126,16 @@ where
     html!("empty-fragment", {
         .property("slot", "main")
         .child(Base::render(base.clone()))
-        .apply_if(instructions.is_some() && !is_screenshot, clone!(state, base, play_started => move |dom| {
+        .apply_if(instructions.is_some() && !is_screenshot, clone!(state, base => move |dom| {
             dom
-                .child_signal(play_started.signal().map(clone!(state, base => move |has_started| {
-                    if has_started {
-                        Some(InstructionsPlayer::render(
-                            InstructionsPlayer::new(base.get_instructions().unwrap_ji(), None::<fn()>),
-                        ))
-                    } else {
-                        None
+                .child_signal(base.play_phase().signal().map(clone!(state, base => move |curr_play_phase| {
+                    match curr_play_phase {
+                        ModulePlayPhase::Playing => {
+                            Some(InstructionsPlayer::render(
+                                InstructionsPlayer::new(base.get_instructions().unwrap_ji(), None::<fn()>),
+                            ))
+                        }
+                        _ => None
                     }
                 })))
         }))
@@ -168,44 +168,50 @@ where
         })
 
         .apply_if(!is_screenshot, |dom| {
-            dom.child_signal(play_started.signal().map(clone!(play_started => move |has_started| {
-                if !has_started {
-                    Some(html!("module-play-button", {
-                        .event(clone!(base, play_started => move |_evt:events::Click| {
-                            start_playback(base.clone(), &play_started);
+            dom.child_signal(base.play_phase().signal().map(clone!(base => move |curr_play_phase| {
+                match curr_play_phase {
+                    ModulePlayPhase::Init => {
+                        Some(html!("module-play-button", {
+                            .event(clone!(base => move |_evt:events::Click| {
+                                start_playback(base.clone());
+                            }))
+                            .after_inserted(clone!(state, base => move |_elem| {
+                                if AUDIO_MIXER.with(|mixer| mixer.context_available()) || state.opts.skip_play {
+                                    start_playback(base.clone());
+                                }
+                            }))
                         }))
-                        .after_inserted(clone!(state, base, play_started => move |_elem| {
-                            if AUDIO_MIXER.with(|mixer| mixer.context_available()) || state.opts.skip_play {
-                                start_playback(base.clone(), &play_started);
+                    },
+
+                    ModulePlayPhase::Playing => {
+                        if jig_player {
+                            let timer_seconds = base.get_timer_minutes().map(|minutes| minutes * 60);
+
+                            let msg = IframeAction::new(ModuleToJigPlayerMessage::Start(timer_seconds));
+
+                            match timer_seconds {
+                                Some(x) => log::info!("Starting with a {} seconds timer", x),
+                                None => log::info!("Starting without a timer")
                             }
-                        }))
-                    }))
-                } else {
 
-                    if jig_player {
-                        let timer_seconds = base.get_timer_minutes().map(|minutes| minutes * 60);
-
-                        let msg = IframeAction::new(ModuleToJigPlayerMessage::Start(timer_seconds));
-
-                        match timer_seconds {
-                            Some(x) => log::info!("Starting with a {} seconds timer", x),
-                            None => log::info!("Starting without a timer")
+                            //let the player know we're starting 
+                            msg.try_post_message_to_top().unwrap_ji();
                         }
-
-                        //let the player know we're starting 
-                        msg.try_post_message_to_top().unwrap_ji();
+                        None
+                    },
+                    ModulePlayPhase::Ending(ending) => {
+                        Some(Ending::render(Ending::new(ending)))
                     }
-                    None
                 }
             })))
         })
     })
 }
 
-fn start_playback<Base>(base: Rc<Base>, play_started: &Mutable<bool>)
+fn start_playback<Base>(base: Rc<Base>)
 where
     Base: BaseExt + 'static,
 {
-    play_started.set_neq(true);
+    base.play_phase().set_neq(ModulePlayPhase::Playing); 
     Base::play(base);
 }

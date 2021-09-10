@@ -16,39 +16,21 @@ use super::card::state::*;
 pub struct Game {
     pub base: Rc<Base>,
     pub rng: RefCell<ThreadRng>,
-    pub deck: RefCell<Vec<CardPairId>>,
+    pub remaining: RefCell<Vec<CardPairId>>,
+    pub used: RefCell<Vec<CardPairId>>,
     pub current: Mutable<Option<Rc<Current>>>,
 }
-
-#[derive(Clone)]
-pub struct CardPairId(pub Card, pub Card, pub usize);
-
-
-#[derive(Clone)]
-pub struct Current {
-    pub top: Vec<Rc<CardTop>>,
-    pub bottom: Vec<Rc<CardBottom>>,
-    pub drag: Mutable<Option<Rc<CardDrag>>>,
-}
-
-
 impl Game {
     pub fn new(base: Rc<Base>) -> Rc<Self> {
         let mut rng = thread_rng();
-        let mut deck:Vec<CardPairId> = base.raw_pairs
-            .iter()
-            .enumerate()
-            .map(|(index, pair)| {
-                CardPairId (pair.0.clone(), pair.1.clone(), index)
-            })
-            .collect();
-       
-        deck.shuffle(&mut rng); 
 
+        let remaining = get_new_deck(&base, &mut rng);
+        let used = Vec::with_capacity(remaining.len());
 
         let _self = Rc::new(Self { 
             base,
-            deck: RefCell::new(deck),
+            remaining: RefCell::new(remaining),
+            used: RefCell::new(used),
             rng: RefCell::new(rng),
             current: Mutable::new(None),
         });
@@ -63,40 +45,94 @@ impl Game {
     }
 }
 
+#[derive(Clone, Debug)]
+pub struct CardPairId(pub Card, pub Card, pub usize);
+
+
+#[derive(Clone)]
+pub struct Current {
+    pub top: Vec<Rc<CardTop>>,
+    pub bottom: Vec<Rc<CardBottom>>,
+    pub drag: Mutable<Option<Rc<CardDrag>>>,
+}
+
 impl Current {
-    pub fn new(game: Rc<Game>) -> Option<Rc<Self>> {
-        let deck_len = game.deck.borrow().len();
+    pub fn new(game: Rc<Game>) -> Rc<Self> {
+        let remaining = &mut *game.remaining.borrow_mut();
+        let used = &mut *game.used.borrow_mut();
+        let rng = &mut *game.rng.borrow_mut();
 
-        if deck_len < 2 {
-            None
-        } else {
-            let amount:usize = game.base.settings.n_choices.into();
-            let amount:usize = amount.min(deck_len);
+        let deck_len = (remaining.len() + used.len());
 
-            let mut top:Vec<Rc<CardTop>> = Vec::new();
-            let mut bottom:Vec<Rc<CardBottom>> = Vec::new();
+        let amount:usize = game.base.settings.n_choices.into();
+        let amount:usize = amount.min(game.base.raw_pairs.len());
 
-            let mut pairs:Vec<CardPairId> = game.deck.borrow_mut().drain(0..amount).collect();
+        // Remaining and used is split so that we can detect
+        // when the entire deck has been looped through
+        // which can be useful for educational purposes
+        // even though it technically isn't in play settings yet
+        let mut top:Vec<Rc<CardTop>> = Vec::new();
+        let mut bottom:Vec<Rc<CardBottom>> = Vec::new();
 
-            pairs.shuffle(&mut *game.rng.borrow_mut());
+        remaining.shuffle(rng);
+        used.shuffle(rng);
 
-            for (choice_id, pair) in pairs.iter().enumerate() {
-                top.push(Rc::new(CardChoice::<TopPhase>::new(game.clone(), pair.clone(), choice_id)));
-            }
+        log::info!("{:?}", remaining);
 
-            pairs.shuffle(&mut *game.rng.borrow_mut());
+        let choice = remaining.pop().unwrap_ji();
 
-            for (choice_id, pair) in pairs.iter().enumerate() {
-                bottom.push(Rc::new(CardChoice::<BottomPhase>::new(game.clone(), pair.clone(), choice_id)));
-            }
+        top.push(Rc::new(CardChoice::<TopPhase>::new(game.clone(), choice.clone())));
+        bottom.push(Rc::new(CardChoice::<BottomPhase>::new(game.clone(), choice.clone())));
 
+        for i in 0..amount-1 {
+            let pair = {
+                let (a, b) = if rng.gen_bool(0.5) {
+                    (&remaining, &used)
+                } else {
+                    (&used, &remaining)
+                };
 
-            Some(Rc::new(Self {
-                top,
-                bottom,
-                drag: Mutable::new(None),
-            }))
+                match a.get(i) {
+                    Some(pair) => pair,
+                    None => {
+                        match b.get(i) {
+                            Some(pair) => pair,
+                            None => {
+                                panic!("couldn't get a pair!");
+                            }
+                        }
+                    }
+                }
+            };
+
+            top.push(Rc::new(CardChoice::<TopPhase>::new(game.clone(), pair.clone())));
+            bottom.push(Rc::new(CardChoice::<BottomPhase>::new(game.clone(), pair.clone())));
         }
+
+        top.shuffle(rng);
+        bottom.shuffle(rng);
+
+        used.push(choice);
+
+        Rc::new(Self {
+            top,
+            bottom,
+            drag: Mutable::new(None),
+        })
     }
 }
 
+
+fn get_new_deck(base:&Base, rng: &mut ThreadRng) -> Vec<CardPairId> {
+    let mut deck:Vec<CardPairId> = base.raw_pairs
+        .iter()
+        .enumerate()
+        .map(|(index, pair)| {
+            CardPairId (pair.0.clone(), pair.1.clone(), index)
+        })
+        .collect();
+    
+    deck.shuffle(rng); 
+
+    deck
+}
