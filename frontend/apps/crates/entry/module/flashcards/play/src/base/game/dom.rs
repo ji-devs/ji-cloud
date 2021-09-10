@@ -55,7 +55,7 @@ pub fn render(state: Rc<Game>) -> Dom {
 
                         children.push(render_card(options));
 
-                        let mut options = CardOptions::new(&card, theme_id, mode, side, Size::Flashcards);
+                        let mut options = CardOptions::new(&other, theme_id, mode, side.negate(), Size::Flashcards);
 
                         children.push(render_card_mixin(options, flip_controller(state.clone(), false)));
                     }
