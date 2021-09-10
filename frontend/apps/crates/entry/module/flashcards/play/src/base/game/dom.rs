@@ -74,34 +74,18 @@ pub fn render(state: Rc<Game>) -> Dom {
     })
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-enum Gate {
-    Waiting,
-    Selected,
-    Finished
-}
 fn flip_controller(state: Rc<Game>, initial: bool) -> impl FnOnce(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement> {
     move |dom| {
-        let gate = Mutable::new(Gate::Waiting);
         dom
-            .property_signal("flipped", gate.signal().map(move |gate| {
-                if gate == Gate::Waiting || gate == Gate::Finished {
+            .property_signal("flipped", state.gate.signal().map(move |gate| {
+                if gate == Gate::Waiting || gate == Gate::FinishingFlip {
                     initial
                 } else {
                     !initial
                 }
             }))
-            .event(clone!(state, gate=> move |evt:events::Click| {
-                if gate.get() == Gate::Waiting {
-                    spawn_local(clone!(state, gate => async move {
-                        TimeoutFuture::new(crate::config::SHOW_TIME).await;
-                        gate.set(Gate::Finished);  
-                        TimeoutFuture::new(crate::config::FLIP_TIME).await;
-                        state.next();
-                    }));
-                    gate.set(Gate::Selected);
-                }
-
+            .event(clone!(state => move |evt:events::Click| {
+                Game::flip(state.clone());
             }))
     }
 }
