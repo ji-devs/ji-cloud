@@ -109,7 +109,9 @@ impl From<jig::AudioBackground> for AudioPath<'_> {
     fn from(bg:jig::AudioBackground) -> Self {
         Self::Cdn(Cow::Borrowed(match bg {
             jig::AudioBackground::FunForKids => "music-loop/fun-for-kids.mp3",
-            jig::AudioBackground::SukkotLoop => "music-loop/sukkot-loop.mp3",
+            jig::AudioBackground::DancingHappy => "music-loop/dancing-happy.mp3",
+            jig::AudioBackground::Jigzi1 => "music-loop/jigzi1.mp3",
+            jig::AudioBackground::Jigzi2 => "music-loop/jigzi2.mp3",
         }))
     }
 }
@@ -122,9 +124,18 @@ impl From<&jig::AudioFeedbackPositive> for AudioPath<'_> {
 impl From<jig::AudioFeedbackPositive> for AudioPath<'_> {
     fn from(p:jig::AudioFeedbackPositive) -> Self {
         Self::Cdn(Cow::Borrowed(match p {
+            jig::AudioFeedbackPositive::Correct => "module/feedback-positive/correct.mp3",
+            jig::AudioFeedbackPositive::Keys => "module/feedback-positive/keys.mp3",
             jig::AudioFeedbackPositive::Magic => "module/feedback-positive/magic.mp3",
+            jig::AudioFeedbackPositive::Notes => "module/feedback-positive/notes.mp3",
             jig::AudioFeedbackPositive::StarPing => "module/feedback-positive/star-ping.mp3",
             jig::AudioFeedbackPositive::Ting => "module/feedback-positive/ting.mp3",
+            jig::AudioFeedbackPositive::Trumpet => "module/feedback-positive/trumpet.mp3",
+            jig::AudioFeedbackPositive::VoiceAwesome => "module/feedback-positive/voice-awesome.mp3",
+            jig::AudioFeedbackPositive::VoicesHurray => "module/feedback-positive/voices-hurray.mp3",
+            jig::AudioFeedbackPositive::VoiceYippee => "module/feedback-positive/voice-yippee.mp3",
+            jig::AudioFeedbackPositive::Xylophone => "module/feedback-positive/xylophone.mp3",
+            jig::AudioFeedbackPositive::Yes => "module/feedback-positive/yes.mp3",
         }))
     }
 }
@@ -137,9 +148,18 @@ impl From<&jig::AudioFeedbackNegative> for AudioPath<'_> {
 impl From<jig::AudioFeedbackNegative> for AudioPath<'_> {
     fn from(n:jig::AudioFeedbackNegative) -> Self {
         Self::Cdn(Cow::Borrowed(match n {
+            jig::AudioFeedbackNegative::Bang => "module/feedback-negative/bang.mp3",
             jig::AudioFeedbackNegative::Boing => "module/feedback-negative/boing.mp3",
+            jig::AudioFeedbackNegative::Buzz => "module/feedback-negative/buzz.mp3",
+            jig::AudioFeedbackNegative::Buzzer => "module/feedback-negative/buzzer.mp3",
+            jig::AudioFeedbackNegative::Clang => "module/feedback-negative/clang.mp3",
+            jig::AudioFeedbackNegative::Clicks => "module/feedback-negative/clicks.mp3",
             jig::AudioFeedbackNegative::Incorrect => "module/feedback-negative/incorrect.mp3",
             jig::AudioFeedbackNegative::JumpWrong => "module/feedback-negative/jump-wrong.mp3",
+            jig::AudioFeedbackNegative::NotRight => "module/feedback-negative/not-right.mp3",
+            jig::AudioFeedbackNegative::OhNo => "module/feedback-negative/oh-no.mp3",
+            jig::AudioFeedbackNegative::ShortClang => "module/feedback-negative/short-clang.mp3",
+            jig::AudioFeedbackNegative::Whir => "module/feedback-negative/whir.mp3",
         }))
     }
 }

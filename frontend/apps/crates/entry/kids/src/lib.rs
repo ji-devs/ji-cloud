@@ -17,7 +17,7 @@ pub async fn main_js() {
     setup_logger();
     utils::init::init().await;
 
-    dominator::append_dom(&dominator::body(), Router::render(Router::new()));
+    dominator::append_dom(&dominator::body(), Router::render());
 }
 
 

@@ -204,12 +204,21 @@ pub enum AudioBackground {
     #[allow(missing_docs)]
     FunForKids = 0,
     #[allow(missing_docs)]
-    SukkotLoop = 1,
+    DancingHappy = 1,
+    #[allow(missing_docs)]
+    Jigzi1 = 2,
+    #[allow(missing_docs)]
+    Jigzi2 = 3,
 }
 impl AudioBackground {
     /// Get all enum variants
     pub fn variants() -> Vec<AudioBackground> {
-        vec![AudioBackground::FunForKids, AudioBackground::SukkotLoop]
+        vec![
+            AudioBackground::FunForKids,
+            AudioBackground::DancingHappy,
+            AudioBackground::Jigzi1,
+            AudioBackground::Jigzi2
+        ]
     }
 }
 
@@ -229,19 +238,46 @@ pub struct AudioEffects {
 #[repr(i16)]
 pub enum AudioFeedbackNegative {
     #[allow(missing_docs)]
-    Boing = 0,
+    Bang = 0,
     #[allow(missing_docs)]
-    Incorrect = 1,
+    Boing = 1,
     #[allow(missing_docs)]
-    JumpWrong = 2,
+    Buzz = 2,
+    #[allow(missing_docs)]
+    Buzzer = 3,
+    #[allow(missing_docs)]
+    Clang = 4,
+    #[allow(missing_docs)]
+    Clicks = 5,
+    #[allow(missing_docs)]
+    Incorrect = 6,
+    #[allow(missing_docs)]
+    JumpWrong = 7,
+    #[allow(missing_docs)]
+    NotRight = 8,
+    #[allow(missing_docs)]
+    OhNo = 9,
+    #[allow(missing_docs)]
+    ShortClang = 10,
+    #[allow(missing_docs)]
+    Whir = 11,
 }
 impl AudioFeedbackNegative {
     /// Get all enum variants
     pub fn variants() -> Vec<AudioFeedbackNegative> {
         vec![
+            AudioFeedbackNegative::Bang,
             AudioFeedbackNegative::Boing,
+            AudioFeedbackNegative::Buzz,
+            AudioFeedbackNegative::Buzzer,
+            AudioFeedbackNegative::Clang,
+            AudioFeedbackNegative::Clicks,
             AudioFeedbackNegative::Incorrect,
             AudioFeedbackNegative::JumpWrong,
+            AudioFeedbackNegative::NotRight,
+            AudioFeedbackNegative::OhNo,
+            AudioFeedbackNegative::ShortClang,
+            AudioFeedbackNegative::Whir,
         ]
     }
 }
@@ -252,19 +288,46 @@ impl AudioFeedbackNegative {
 #[repr(i16)]
 pub enum AudioFeedbackPositive {
     #[allow(missing_docs)]
-    Magic = 0,
+    Correct = 0,
     #[allow(missing_docs)]
-    StarPing = 1,
+    Keys = 1,
     #[allow(missing_docs)]
-    Ting = 2,
+    Magic = 2,
+    #[allow(missing_docs)]
+    Notes = 3,
+    #[allow(missing_docs)]
+    StarPing = 4,
+    #[allow(missing_docs)]
+    Ting = 5,
+    #[allow(missing_docs)]
+    Trumpet = 6,
+    #[allow(missing_docs)]
+    VoiceAwesome = 7,
+    #[allow(missing_docs)]
+    VoicesHurray = 8,
+    #[allow(missing_docs)]
+    VoiceYippee = 9,
+    #[allow(missing_docs)]
+    Xylophone = 10,
+    #[allow(missing_docs)]
+    Yes = 11,
 }
 impl AudioFeedbackPositive {
     /// Get all enum variants
     pub fn variants() -> Vec<AudioFeedbackPositive> {
         vec![
+            AudioFeedbackPositive::Correct,
+            AudioFeedbackPositive::Keys,
             AudioFeedbackPositive::Magic,
+            AudioFeedbackPositive::Notes,
             AudioFeedbackPositive::StarPing,
             AudioFeedbackPositive::Ting,
+            AudioFeedbackPositive::Trumpet,
+            AudioFeedbackPositive::VoiceAwesome,
+            AudioFeedbackPositive::VoicesHurray,
+            AudioFeedbackPositive::VoiceYippee,
+            AudioFeedbackPositive::Xylophone,
+            AudioFeedbackPositive::Yes,
         ]
     }
 }

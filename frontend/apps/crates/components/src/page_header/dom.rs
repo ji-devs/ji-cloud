@@ -5,7 +5,6 @@ use futures_signals::signal::{Signal, SignalExt};
 use shared::domain::user::{UserProfile, UserScope};
 use strum::IntoEnumIterator;
 use utils::{events, routes::{AdminRoute, Route, UserRoute}};
-use wasm_bindgen::JsValue;
 
 use crate::page_header::state::{LoggedInState, PageLinks};
 
@@ -38,20 +37,25 @@ pub fn render(state: Rc<State>, slot: Option<&str>, active_page: Option<PageLink
                 .property("target", page_link.target())
             })
         }))
-        .children(&mut [
-            html!("button-rect", {
-                .property("slot", "donate")
-                .property("color", "green")
-                .property("size", "small")
-                .property("bold", true)
-                .property("href", DONATE_LINK)
-                .property("target", "_black")
-                .text(STR_DONATE)
-            }),
-            html!("page-header-student-code", {
-                .property("slot", "student-code")
-            }),
-        ])
+        .child(html!("button-rect", {
+            .property("slot", "donate")
+            .property("color", "green")
+            .property("size", "small")
+            .property("bold", true)
+            .property("href", DONATE_LINK)
+            .property("target", "_black")
+            .text(STR_DONATE)
+        }))
+        .apply(|dom| {
+            if let Some(PageLinks::Home) = active_page {
+                dom.child(html!("page-header-student-code", {
+                    .property("slot", "student-code")
+                }))
+            } else {
+                dom
+            }
+            
+        })
         .children_signal_vec(state.logged_in.signal_cloned().map(clone!(state => move|logged_in| {
             match logged_in {
                 LoggedInState::LoggedIn(user) => render_logged_in(Rc::clone(&state), &user),
