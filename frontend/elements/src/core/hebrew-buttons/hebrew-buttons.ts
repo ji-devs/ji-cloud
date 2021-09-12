@@ -60,7 +60,6 @@ export class _ extends LitElement {
                 .iframe-wrapper {
                     width: 550px;
                     height: 665px;
-                    /* position: relative; */
                 }
                 .close {
                     position: absolute;
@@ -74,8 +73,8 @@ export class _ extends LitElement {
                     z-index: 1;
                 }
                 .iframe-close {
-                    /* offset by width of iframe */
-                    left: 550px;
+                    /* offset by width of iframe minus 50% of the button width */
+                    transform: translate(calc(550px - 50%), -50%);
                 }
                 .keyboard-close {
                     right: 0;
