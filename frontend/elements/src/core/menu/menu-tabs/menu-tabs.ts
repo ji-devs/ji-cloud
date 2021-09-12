@@ -8,11 +8,15 @@ export class _ extends LitElement {
         return [css`
             :host {
                 display: grid;
-                grid-template-rows: 51px 1fr;
+                /*
+                    using minmax(0, 1fr) instead of just 1fr to allow the items inside to overflow without growing the container.
+                    https://stackoverflow.com/a/52861514/5253155
+                    https://stackoverflow.com/a/43312314/5253155
+                */
+                grid-template-rows: 50px minmax(0, 1fr);
                 height: 100%;
             }
             .body {
-                /* hard coded color?! Couldn't find color in zeplin */
                 background-color: #e9eff8;
             }
         `];

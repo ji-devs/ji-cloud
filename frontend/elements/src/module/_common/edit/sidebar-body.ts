@@ -17,6 +17,8 @@ export class _ extends LitElement {
 
             section {
                 padding-top: 48px;
+                height: 100%;
+                box-sizing: border-box;
             }
         `];
     }
