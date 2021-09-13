@@ -12,6 +12,7 @@ use shared::domain::jig::{
 };
 use std::rc::Rc;
 use utils::prelude::*;
+use futures_signals::signal::Mutable;
 
 pub struct Base {
     pub jig_id: JigId,

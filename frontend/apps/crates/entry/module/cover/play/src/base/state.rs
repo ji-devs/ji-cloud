@@ -3,6 +3,7 @@ use components::{audio::mixer::AudioMixer, module::_common::play::prelude::*};
 use utils::prelude::*;
 use web_sys::AudioContext;
 use std::rc::Rc;
+use futures_signals::signal::Mutable;
 
 pub struct Base {
     pub jig_id: JigId,
