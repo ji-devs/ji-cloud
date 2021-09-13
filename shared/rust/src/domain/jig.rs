@@ -217,7 +217,7 @@ impl AudioBackground {
             AudioBackground::FunForKids,
             AudioBackground::DancingHappy,
             AudioBackground::Jigzi1,
-            AudioBackground::Jigzi2
+            AudioBackground::Jigzi2,
         ]
     }
 }

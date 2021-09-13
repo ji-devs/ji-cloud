@@ -1,5 +1,5 @@
 use crate::domain::jig::module::{
-    body::{Body, ModeExt, BodyConvert, BodyExt, ThemeChoice, _groups::cards::*},
+    body::{Body, BodyConvert, BodyExt, ModeExt, ThemeChoice, _groups::cards::*},
     ModuleKind,
 };
 use serde::{Deserialize, Serialize};
