@@ -46,7 +46,8 @@ pub struct Base {
     pub instructions: Instructions,
     pub settings: PlayerSettings,
     pub raw_pairs: Vec<CardPair>,
-    pub phase: Mutable<Phase>
+    pub phase: Mutable<Phase>,
+    pub module_phase: Mutable<ModulePlayPhase>,
 }
 
 #[derive(Clone)]
@@ -80,6 +81,7 @@ impl Base {
             settings: content.player_settings,
             raw_pairs: content.base.pairs,
             phase: Mutable::new(Phase::Init),
+            module_phase: init_args.play_phase,
         });
 
         _self.phase.set(Phase::Playing(Rc::new(Game::new(_self.clone()))));
@@ -95,5 +97,9 @@ impl BaseExt for Base {
 
     fn get_timer_minutes(&self) -> Option<u32> {
         self.settings.time_limit
+    }
+
+    fn play_phase(&self) -> Mutable<ModulePlayPhase> {
+        self.module_phase.clone()
     }
 }

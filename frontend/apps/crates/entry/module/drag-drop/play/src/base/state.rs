@@ -15,6 +15,7 @@ pub struct Base {
     pub backgrounds: Backgrounds,
     pub items: Vec<Item>,
     pub target_areas: Vec<TargetArea>,
+    pub module_phase: Mutable<ModulePlayPhase>,
 }
 
 impl Base {
@@ -43,6 +44,7 @@ impl Base {
             backgrounds: content.backgrounds,
             items: content.items,
             target_areas: content.target_areas,
+            module_phase: init_args.play_phase,
         })
     }
 }
@@ -54,5 +56,9 @@ impl BaseExt for Base {
 
     fn get_timer_minutes(&self) -> Option<u32> {
         self.settings.time_limit
+    }
+
+    fn play_phase(&self) -> Mutable<ModulePlayPhase> {
+        self.module_phase.clone()
     }
 }

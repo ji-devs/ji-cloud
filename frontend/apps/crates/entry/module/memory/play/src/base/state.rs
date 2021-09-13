@@ -47,6 +47,7 @@ pub struct Base {
     pub found_pairs: RefCell<Vec<(usize, usize)>>, 
     pub instructions: Instructions,
     pub settings: PlayerSettings,
+    pub module_phase: Mutable<ModulePlayPhase>,
 }
 
 #[derive(Debug, Clone)]
@@ -115,6 +116,7 @@ impl Base {
             found_pairs: RefCell::new(Vec::new()),
             instructions: content.base.instructions,
             settings: content.player_settings,
+            module_phase: init_args.play_phase,
         })
     }
 
@@ -150,5 +152,9 @@ impl BaseExt for Base {
 
     fn get_timer_minutes(&self) -> Option<u32> {
         self.settings.time_limit
+    }
+
+    fn play_phase(&self) -> Mutable<ModulePlayPhase> {
+        self.module_phase.clone()
     }
 }

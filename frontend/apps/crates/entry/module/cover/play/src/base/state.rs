@@ -12,6 +12,7 @@ pub struct Base {
     pub instructions: Instructions,
     pub backgrounds: Backgrounds,
     pub stickers: Vec<Sticker>,
+    pub module_phase: Mutable<ModulePlayPhase>,
 }
 
 impl Base {
@@ -40,6 +41,7 @@ impl Base {
             instructions: base_content.instructions,
             backgrounds: base_content.backgrounds,
             stickers: base_content.stickers,
+            module_phase: init_args.play_phase,
         })
     }
 }
@@ -47,5 +49,9 @@ impl Base {
 impl BaseExt for Base {
     fn get_instructions(&self) -> Option<Instructions> {
         Some(self.instructions.clone())
+    }
+
+    fn play_phase(&self) -> Mutable<ModulePlayPhase> {
+        self.module_phase.clone()
     }
 }
