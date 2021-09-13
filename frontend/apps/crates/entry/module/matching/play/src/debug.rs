@@ -75,6 +75,7 @@ impl DebugSettings {
                     RawData{
                         content: Some(Content {
                             player_settings: PlayerSettings {
+                                n_rounds: 8,
                                 ..PlayerSettings::default()
                             },
                             base: BaseContent {
