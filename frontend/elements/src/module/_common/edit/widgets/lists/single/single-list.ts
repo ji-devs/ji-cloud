@@ -25,7 +25,7 @@ export class _ extends LitElement {
                 }
                 .input-buttons {
                     margin-top: 34px;
-                    margin-bottom: 24px;
+                    margin-bottom: 18px;
                     display: flex;
                     justify-content: flex-end;
                 }
