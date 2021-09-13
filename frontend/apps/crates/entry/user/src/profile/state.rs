@@ -78,7 +78,7 @@ impl ProfilePageUser {
         self.email.set(user.email);
         self.given_name.set(user.given_name);
         self.family_name.set(user.family_name);
-        panic!("Waiting on API fix");
+        log::warn!("Waiting on API fix");
         //self.profile_image_id.set(user.profile_image_id);
         self.language.set(user.language);
         //self.locale.set(user.locale);
@@ -92,7 +92,7 @@ impl ProfilePageUser {
     }
 
     pub fn to_update(&self) -> PatchProfileRequest {
-        panic!("Waiting on API fix");
+        log::warn!("Waiting on API fix");
         PatchProfileRequest {
             given_name: Some(self.given_name.get_cloned()),
             family_name: Some(self.family_name.get_cloned()),
