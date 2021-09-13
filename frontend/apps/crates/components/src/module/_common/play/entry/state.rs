@@ -268,7 +268,8 @@ pub enum ModulePlayPhase {
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum ModuleEnding {
     Positive,
-    Negative
+    Negative,
+    Next
 }
 
 pub struct InitFromRawArgs<RawData, Mode, Step>

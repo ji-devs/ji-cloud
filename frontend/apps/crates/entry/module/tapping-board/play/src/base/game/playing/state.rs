@@ -4,6 +4,7 @@ use futures_signals::{
     map_ref,
     signal::{Signal, SignalExt, Mutable}
 };
+use dominator::clone;
 use components::traces::{
     utils::TraceExt,
     bubble::TraceBubble,
@@ -38,38 +39,6 @@ impl PlayState {
         })
     }
 
-    pub fn select(&self, index: usize) {
-
-        for (trace_index, trace) in self.traces.iter().enumerate() {
-            if trace_index == index {
-                trace.select();
-            } else {
-                trace.kill_playback();
-            }
-        }
-        // mark the selected set
-        let mut selected_set = self.selected_set.lock_mut();
-
-        selected_set.insert(index);
-
-        let n_selected = selected_set.len();
-
-        log::info!("{} SELECTED!", n_selected);
-
-        let n_target = {
-            match self.game.base.settings.next {
-                Next::SelectAll => Some(self.traces.len()),
-                Next::SelectSome(n) => Some(n),
-                Next::Continue => None
-            }
-        };
-
-        if let Some(n_target) = n_target {
-            if n_selected >= n_target {
-                log::warn!("TODO: GOING TO NEXT MODULE!");
-            }
-        }
-    }
 }
 
 pub struct PlayTrace {
@@ -95,12 +64,14 @@ impl PlayTrace {
         })
     }
 
-    pub fn select(&self) {
+    pub fn select(&self, play_state: Rc<PlayState>) {
         if self.audio.is_none() && self.text.is_none() {
             self.phase.set(PlayPhase::IdleSelected);
         } else {
             if let Some(bounds)  = self.inner.calc_bounds(true) {
-                let bubble = TraceBubble::new(bounds, self.audio.clone(), self.text.clone(), None::<fn()>);
+                let bubble = TraceBubble::new(bounds, self.audio.clone(), self.text.clone(), Some(clone!(play_state => move || {
+                    play_state.evaluate_end();
+                }))); 
                 self.phase.set(PlayPhase::Playing(bubble));
             }
         }

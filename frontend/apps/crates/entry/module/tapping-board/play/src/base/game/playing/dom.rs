@@ -25,7 +25,7 @@ pub fn render(state: Rc<PlayState>) -> Dom {
                     .collect(),
                 TracesShowMode::HiddenSolidMap(state.selected_set.clone()),
                 Some(clone!(state => move |index| {
-                    state.select(index);
+                    PlayState::select(state.clone(), index);
                 }))
         )))
 

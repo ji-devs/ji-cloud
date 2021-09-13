@@ -86,7 +86,8 @@ impl DebugSettings {
                             mode: Mode::Words,
                             play_settings: PlaySettings {
                                 hint: Hint::None, 
-                                next: Next::Continue, 
+                                //next: Next::SelectSome(1), 
+                                next: Next::SelectAll
                             },
                             traces: init_data.traces.iter().map(|init| {
                                 match init {

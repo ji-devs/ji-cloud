@@ -17,20 +17,34 @@ impl Ending {
             log::info!("Couldn't post message to top!");
         }
 
+        if let Some(kind) = state.kind {
+            match kind {
+                ModuleEnding::Next => {
+                    log::info!("ending is next, transitioning...");
+                    let msg = IframeAction::new(ModuleToJigPlayerMessage::Next);
+
+                    if let Err(_) = msg.try_post_message_to_top() {
+                        log::info!("Couldn't post message to top... redirect!");
+                    }
+                },
+                _ => {}
+            }
+        }
+
         html!("empty-fragment", {
             .future(state.ending_finished.signal().dedupe().for_each(clone!(state => move |finished| {
                 clone!(state, finished => async move {
                     if finished {
                         match state.kind {
-                            _ => {
-                                //if ending finished, automatically go next?
-                                /*
-                                let msg = IframeAction::new(ModuleToJigPlayerMessage::Next);
-
-                                if let Err(_) = msg.try_post_message_to_top() {
-                                    log::info!("Couldn't post message to top... redirect!");
+                            Some(kind) => {
+                                match kind {
+                                    _ => {
+                                        //if ending animation finished, automatically go next?
+                                    }
                                 }
-                                */
+                            },
+                            None => {
+                                //No ending, do nothing
                             }
                         }
                     }
