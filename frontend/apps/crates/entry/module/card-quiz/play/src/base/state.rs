@@ -32,10 +32,7 @@ use std::future::Future;
 use futures::future::join_all;
 use gloo_timers::future::TimeoutFuture;
 use components::audio::mixer::AudioMixer;
-use super::{
-    game::state::Game,
-    ending::state::Ending
-};
+use super::game::state::Game;
 
 pub struct Base {
     pub jig_id: JigId,
@@ -54,7 +51,7 @@ pub struct Base {
 pub enum Phase {
     Init,
     Playing(Rc<Game>),
-    Ending(Rc<Ending>), 
+    Ending
 }
 
 impl Base {
@@ -84,7 +81,7 @@ impl Base {
             module_phase: init_args.play_phase,
         });
 
-        _self.phase.set(Phase::Playing(Rc::new(Game::new(_self.clone()))));
+        _self.phase.set(Phase::Playing(Game::new(_self.clone())));
 
         _self
     }

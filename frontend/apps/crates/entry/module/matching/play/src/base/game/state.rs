@@ -74,17 +74,12 @@ impl Current {
         let mut top:Vec<Rc<CardTop>> = Vec::new();
         let mut bottom:Vec<Rc<CardBottom>> = Vec::new();
 
-        remaining.shuffle(rng);
-        used.shuffle(rng);
-
-        log::info!("{:?}", remaining);
-
         let choice = remaining.pop().unwrap_ji();
 
         top.push(Rc::new(CardChoice::<TopPhase>::new(game.clone(), choice.clone())));
         bottom.push(Rc::new(CardChoice::<BottomPhase>::new(game.clone(), choice.clone())));
 
-        for i in 0..amount-1 {
+        for _ in 0..amount-1 {
             let pair = {
                 let (a, b) = if rng.gen_bool(0.5) {
                     (&remaining, &used)
@@ -92,9 +87,15 @@ impl Current {
                     (&used, &remaining)
                 };
 
+                let a_len = a.len();
+                let b_len = b.len();
+
+                let i = if a_len > 0 { rng.gen_range(0..a.len()) } else { 0 };
+
                 match a.get(i) {
                     Some(pair) => pair,
                     None => {
+                        let i = if b_len > 0 { rng.gen_range(0..b.len()) } else { 0 };
                         match b.get(i) {
                             Some(pair) => pair,
                             None => {
@@ -109,6 +110,7 @@ impl Current {
             bottom.push(Rc::new(CardChoice::<BottomPhase>::new(game.clone(), pair.clone())));
         }
 
+        //why not
         top.shuffle(rng);
         bottom.shuffle(rng);
 

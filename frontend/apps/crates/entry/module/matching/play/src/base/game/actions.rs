@@ -23,6 +23,7 @@ impl Game {
                 true
             } else if _self.remaining.borrow().len() == 0 {
                 //DECK FINISHED! (this isn't supported in settings *yet*)
+                //should be very easy to just reset used/remaining with new deck
                 true
             } else {
                 false
