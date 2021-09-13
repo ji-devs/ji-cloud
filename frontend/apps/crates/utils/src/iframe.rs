@@ -141,6 +141,7 @@ pub enum JigToModulePlayerMessage {
 pub enum ModuleToJigPlayerMessage {
     AddPoints(u32),
     Start(Option<u32>),
+    Stop,
     Next,
 }
 
