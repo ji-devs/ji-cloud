@@ -28,6 +28,7 @@ export class _ extends LitElement {
                 height: 88px;
                 display: grid;
                 align-items: center;
+                justify-content: start;
                 padding: 0 25px;
             }
             h1 {
@@ -57,7 +58,9 @@ export class _ extends LitElement {
         return html`
             <main>
                 <header>
-                    <img-ui path="core/page-header/logo.svg"></img-ui>
+                    <a href="/">
+                        <img-ui path="core/page-header/logo.svg"></img-ui>
+                    </a>
                 </header>
                 <h1>${STR_TYPE_THE_CODE}</h1>
                 <slot name="input"></slot>

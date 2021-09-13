@@ -25,7 +25,7 @@ export class _ extends LitElement {
                 }
                 ::slotted([slot=iframe]),
                 .controls,
-                :host([paused]) .paused-backdrop,
+                .paused-backdrop,
                 .play-pause-button-layer,
                 ::slotted(dialog-overlay) {
                     grid-column: 1;
