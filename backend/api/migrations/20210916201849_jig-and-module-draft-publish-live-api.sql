@@ -1,0 +1,106 @@
+--
+--
+--
+--
+--
+--
+-- create or replace function make_drafts(uuid[]) returns void
+--     language plpgsql
+-- as
+-- $$
+-- declare
+--     it        uuid;
+--     new_id_it uuid;
+-- begin
+--     foreach it in array $1
+--         loop
+--             insert
+--             into jig (display_name, creator_id, author_id, created_at, updated_at, publish_at, parents, language,
+--                       last_synced_at, description, is_draft, privacy_level, direction, display_score, theme,
+--                       audio_background, audio_feedback_negative, audio_feedback_positive, track_assessments,
+--                       drag_assist)
+--                 (select display_name,
+--                         creator_id,
+--                         author_id,
+--                         created_at,
+--                         updated_at,
+--                         publish_at,
+--                         parents,
+--                         language,
+--                         last_synced_at,
+--                         description,
+--                         true,
+--                         privacy_level,
+--                         direction,
+--                         display_score,
+--                         theme,
+--                         audio_background,
+--                         audio_feedback_negative,
+--                         audio_feedback_positive,
+--                         track_assessments,
+--                         drag_assist
+--                  from jig
+--                  where id = it::uuid)
+--             returning id into new_id_it;
+--
+--             insert into jig_module ("index", jig_id, kind, contents)
+--             select "index", new_id_it as "jig_id", kind, contents
+--             from jig_module
+--             where jig_id = it;
+--
+--             insert into jig_affiliation(jig_id, affiliation_id)
+--             select new_id_it, affiliation_id
+--             from jig_affiliation
+--             where jig_id = it;
+--
+--             insert into jig_category(jig_id, category_id)
+--             select new_id_it, category_id
+--             from jig_category
+--             where jig_id = it;
+--
+--             insert into jig_goal(jig_id, goal_id)
+--             select new_id_it, goal_id
+--             from jig_goal
+--             where jig_id = it;
+--
+--             insert into jig_age_range(jig_id, age_range_id)
+--             select new_id_it, age_range_id
+--             from jig_age_range
+--             where jig_id = it;
+--
+--             insert into jig_additional_resource(jig_id, url)
+--             select new_id_it, url
+--             from jig_additional_resource
+--             where jig_id = it;
+--         end loop;
+-- end;
+-- $$;
+--
+-- with draftless_jig as (
+--     select array(select id
+--                  from jig
+--                           left join jig_draft_join on jig.id = jig_draft_join.live_id
+--                  where draft_id is null) as arr
+-- )
+-- select make_drafts(draftless_jig.arr)
+-- from draftless_jig;
+--
+-- alter table jig
+--     rename to jig_metadata;
+--
+-- create table jig
+-- (
+--     id       uuid default uuid_generate_v1mc() primary key,
+--     draft_id uuid not null references jig_metadata (id),
+--     live_id  uuid not null references jig_metadata (id),
+--     check (draft_id != live_id)
+-- );
+--
+-- insert into jig
+-- select live_id, draft_id
+-- from jig_draft_join;
+--
+-- drop table jig_draft_join;
+--
+--
+-- drop function

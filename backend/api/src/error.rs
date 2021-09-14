@@ -546,7 +546,7 @@ impl Into<actix_web::Error> for UserRecentImage {
 
 pub enum JigCloneDraft {
     ResourceNotFound,
-    IsDraft,
+    UnprocessableEntity,
     Conflict,
     Forbidden,
     InternalServerError(anyhow::Error),
@@ -576,9 +576,9 @@ impl Into<actix_web::Error> for JigCloneDraft {
             )
             .into(),
 
-            Self::IsDraft => BasicError::with_message(
-                http::StatusCode::BAD_REQUEST,
-                "Cannot create a draft from a draft".to_owned(),
+            Self::UnprocessableEntity => BasicError::with_message(
+                http::StatusCode::UNPROCESSABLE_ENTITY,
+                "Called method not allowed on this jig".to_owned(),
             )
             .into(),
 

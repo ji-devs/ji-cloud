@@ -6,32 +6,33 @@ expression: body
 {
   "jig": {
     "id": "[id]",
-    "display_name": "",
+    "displayName": "",
     "modules": [],
-    "age_ranges": [],
+    "ageRanges": [],
     "affiliations": [],
     "goals": [],
-    "creator_id": "1f241e1b-b537-493f-a230-075cb16315be",
-    "author_id": "1f241e1b-b537-493f-a230-075cb16315be",
-    "author_name": "Bobby Tables",
+    "creatorId": "1f241e1b-b537-493f-a230-075cb16315be",
+    "authorId": "1f241e1b-b537-493f-a230-075cb16315be",
+    "authorName": "Bobby Tables",
     "language": "en",
     "categories": [],
-    "publish_at": "9999-03-04T00:46:26.134651Z",
-    "additional_resources": [],
+    "publishAt": "9999-03-04T00:46:26.134651Z",
+    "isDraft": false,
+    "privacyLevel": "unlisted",
+    "additionalResources": [],
     "description": "updated draft description",
-    "last_edited": "[time_stamp]",
-    "is_public": false,
-    "default_player_settings": {
+    "lastEdited": "2021-09-13T21:47:14.861375Z",
+    "defaultPlayerSettings": {
       "direction": "ltr",
       "displayScore": false,
       "trackAssessments": false,
       "dragAssist": false
     },
     "theme": "Blank",
-    "audio_background": null,
-    "audio_effects": {
-      "feedback_positive": [],
-      "feedback_negative": []
+    "audioBackground": null,
+    "audioEffects": {
+      "feedbackPositive": [],
+      "feedbackNegative": []
     }
   }
 }
