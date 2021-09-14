@@ -64,17 +64,7 @@ into_uuid!(
 #[cfg_attr(feature = "backend", sqlx(transparent))]
 pub struct ImageTagIndex(pub i16);
 
-impl From<ImageTagIndex> for i16 {
-    fn from(value: ImageTagIndex) -> Self {
-        value.0
-    }
-}
-
-impl From<ImageTagIndex> for i64 {
-    fn from(value: ImageTagIndex) -> Self {
-        value.0 as i64
-    }
-}
+into_i16_index!(ImageTagIndex);
 
 /// Represents an image style.
 #[derive(Serialize, Deserialize, Debug)]

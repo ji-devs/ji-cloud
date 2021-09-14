@@ -34,7 +34,7 @@ impl Default for JigPlayerSettings {
     }
 }
 
-/// Sets text direction for the jig
+/// Sets text direction for the jig.
 #[derive(Serialize, Deserialize, Copy, Clone, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[repr(i16)]

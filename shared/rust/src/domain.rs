@@ -12,6 +12,25 @@ macro_rules! into_uuid {
     };
 }
 
+macro_rules! into_i16_index {
+    ( $( $t:ty ),+ $(,)? ) => {
+        $(
+            impl From<$t> for i16 {
+                fn from(t: $t) -> Self {
+                    t.0
+                }
+            }
+
+            /// Needed to cast i16 into i64 range for algolia indexing
+            impl From<$t> for i64 {
+                fn from(t: $t) -> Self {
+                    t.0 as i64
+                }
+            }
+        )+
+    };
+}
+
 pub mod admin;
 pub mod animation;
 pub mod audio;

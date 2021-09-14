@@ -42,6 +42,15 @@ async fn create_default() -> anyhow::Result<()> {
         .await?
         .error_for_status()?;
 
+    insta::assert_json_snapshot!(body, {".**.id" => "[id]", ".*.lastEdited" => "[time_stamp]"});
+
+    let resp = client
+        .get(&format!("http://0.0.0.0:{}/v1/jig/{}", port, body.id.0))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
     app.stop(false).await;
 
     let body: serde_json::Value = resp.json().await?;

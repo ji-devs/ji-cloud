@@ -24,6 +24,45 @@ pub mod draft;
 /// Endpoints for jig player sessions.
 pub mod player;
 
+/// Get a JIG's live by ID.
+///
+/// # Authorization
+/// * None
+pub struct GetLive;
+impl ApiEndpoint for GetLive {
+    type Req = ();
+    type Res = ();
+    type Err = EmptyError;
+    const PATH: &'static str = "/v1/jig/{id}/live";
+    const METHOD: Method = Method::Get;
+}
+
+/// Get a JIG's draft copy by ID.
+///
+/// # Authorization
+/// * None
+pub struct GetDraft;
+impl ApiEndpoint for GetDraft {
+    type Req = ();
+    type Res = ();
+    type Err = EmptyError;
+    const PATH: &'static str = "/v1/jig/{id}/draft";
+    const METHOD: Method = Method::Get;
+}
+
+/// Publish a JIG draft to live by copying over the jig and module data.
+///
+/// # Authorization
+/// * None
+pub struct Publish;
+impl ApiEndpoint for Publish {
+    type Req = ();
+    type Res = ();
+    type Err = EmptyError;
+    const PATH: &'static str = "/v1/jig/{id}/draft/publish";
+    const METHOD: Method = Method::Put;
+}
+
 /// Get a JIG by ID.
 ///
 /// # Authorization
@@ -63,7 +102,9 @@ impl ApiEndpoint for Search {
     const METHOD: Method = Method::Get;
 }
 
-/// Create a JIG.
+/// Create a jig.
+///
+/// * New jigs are all set to `PrivacyLevel::Unlisted` by default
 ///
 /// # Authorization
 /// * One of `Admin`, `AdminJig`, or `ManageSelfJig`
@@ -76,7 +117,7 @@ impl ApiEndpoint for Create {
     const METHOD: Method = Method::Post;
 }
 
-/// Clone a JIG.
+/// Clone a jig. This clones both the draft and live.
 ///
 /// # Authorization
 /// * One of `Admin`, `AdminJig`, or `ManageSelfJig`
@@ -98,7 +139,7 @@ impl ApiEndpoint for Clone {
     const METHOD: Method = Method::Post;
 }
 
-/// Update a JIG.
+/// Update the draft of a jig.
 ///
 /// # Authorization
 /// * One of `Admin`, `AdminJig`,, or `ManageSelfJig` for owned JIGs
@@ -111,7 +152,7 @@ impl ApiEndpoint for Update {
     const METHOD: Method = Method::Patch;
 }
 
-/// Delete a JIG.
+/// Delete a jig.
 ///
 /// # Authorization
 /// * One of `Admin`, `AdminJig`, or `ManageSelfJig` for owned JIGs
@@ -124,7 +165,7 @@ impl ApiEndpoint for Delete {
     const METHOD: Method = Method::Delete;
 }
 
-/// Count of public and published JIGs.
+/// Count of public and published jigs.
 ///
 /// # Authorization
 /// * None

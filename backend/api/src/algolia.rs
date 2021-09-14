@@ -13,7 +13,7 @@ use shared::{
     domain::{
         category::CategoryId,
         image::{ImageId, ImageKind},
-        jig::JigId,
+        jig::{JigId, PrivacyLevel},
         meta::{AffiliationId, AgeRangeId, GoalId, ImageStyleId, ImageTagIndex},
     },
     media::MediaGroupKind,
@@ -29,7 +29,6 @@ mod migration;
 
 const PREMIUM_TAG: &'static str = "premium";
 const PUBLISHED_TAG: &'static str = "published";
-const PUBLIC_TAG: &'static str = "public";
 const HAS_AUTHOR_TAG: &'static str = "hasAuthor";
 
 #[derive(Serialize)]
@@ -269,25 +268,25 @@ select id,
            from age_range
                     inner join jig_age_range on age_range.id = jig_age_range.age_range_id
            where jig_age_range.jig_id = jig.id))                              as "age_range_names!",
-    array((select goal_id from jig_goal where jig_id = jig.id))     as "goals!",
+    array((select goal_id from jig_goal where jig_id = jig.id))               as "goals!",
     array((select goal.display_name
            from goal
                     inner join jig_goal on goal.id = jig_goal.goal_id
-           where jig_goal.jig_id = jig.id))                              as "goal_names!",
+           where jig_goal.jig_id = jig.id))                                   as "goal_names!",
     array((select category_id from jig_category where jig_id = jig.id))       as "categories!",
     array((select name
            from category
                     inner join jig_category on category.id = jig_category.category_id
            where jig_category.jig_id = jig.id))                               as "category_names!",
-    (publish_at < now() is true) as "is_published!",
-    is_public as "is_public!",
-    author_id as "author",
+    is_draft                                                                  as "is_draft",
+    privacy_level                                                             as "privacy_level!: PrivacyLevel",
+    author_id                                                                 as "author",
     (select given_name || ' '::text || family_name from user_profile where user_profile.user_id = jig.author_id) as "author_name"
 from jig
 where
     last_synced_at is null or
-    (updated_at is not null and last_synced_at < updated_at) or
-    (publish_at < now() is true and last_synced_at < publish_at)
+    (updated_at is not null and last_synced_at < updated_at) or 
+    (privacy_level != 2) -- 2 is private
 limit 100
 for no key update skip locked;
      "#
@@ -295,13 +294,11 @@ for no key update skip locked;
         .fetch(&mut txn)
         .map_ok(|row| {
             let mut tags = Vec::new();
-            if row.is_published {
+            if !row.is_draft {
                 tags.push(PUBLISHED_TAG);
             }
 
-            if row.is_public {
-                tags.push(PUBLIC_TAG);
-            }
+            tags.push(row.privacy_level.as_str());
 
             if row.author.is_some() {
                 tags.push(HAS_AUTHOR_TAG);
@@ -323,10 +320,10 @@ for no key update skip locked;
                 author_name: row.author_name,
                 tags
             })
-            .expect("failed to serialize BatchImage to json")
+            .expect("failed to serialize BatchJig to json")
             {
                 serde_json::Value::Object(map) => map,
-                _ => panic!("failed to serialize BatchImage to json map"),
+                _ => panic!("failed to serialize BatchJig to json map"),
             },
             object_id: row.id.to_string(),
         }})
@@ -724,8 +721,8 @@ impl Client {
         &self,
         query: &str,
         page: Option<u32>,
-        is_published: Option<bool>,
-        is_public: Option<bool>,
+        is_draft: Option<bool>,
+        privacy_level: Option<PrivacyLevel>,
         language: Option<String>,
         age_ranges: &[AgeRangeId],
         affiliations: &[AffiliationId],
@@ -751,17 +748,18 @@ impl Client {
             }))
         }
 
-        if let Some(is_published) = is_published {
+        // FIXME
+        if let Some(is_draft) = is_draft {
             filters.filters.push(Box::new(CommonFilter {
                 filter: TagFilter(PUBLISHED_TAG.to_owned()),
-                invert: !is_published,
+                invert: !is_draft,
             }))
         }
 
-        if let Some(is_public) = is_public {
+        if let Some(privacy_level) = privacy_level {
             filters.filters.push(Box::new(CommonFilter {
-                filter: TagFilter(PUBLIC_TAG.to_owned()),
-                invert: !is_public,
+                filter: TagFilter(privacy_level.as_str().to_owned()),
+                invert: false,
             }))
         }
 
