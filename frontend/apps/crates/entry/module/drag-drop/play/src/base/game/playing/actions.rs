@@ -15,6 +15,8 @@ use components::audio::mixer::{AUDIO_MIXER, AudioPath, AudioSourceExt};
 use crate::debug::*;
 use components::instructions::player::InstructionsPlayer;
 use utils::iframe::{IframeAction, ModuleToJigPlayerMessage, IframeMessageExt};
+use shared::domain::jig::module::body::drag_drop::Next;
+use components::module::_common::play::prelude::*;
 
 impl PlayState {
     pub async fn set_targets(&self) {
@@ -42,23 +44,27 @@ impl PlayState {
         }
     }
 
-    pub fn evaluate_all_completed(&self) -> bool {
-        let all_completed = self
+    pub fn evaluate_all_completed(state: Rc<Self>) -> bool {
+        let all_completed = state 
             .items
             .iter()
             .filter(|item| item.is_interactive())
             .all(|item| item.get_interactive_unchecked().completed.get());
 
         if all_completed {
-            self.feedback_player.set(Some(
+            state.feedback_player.set(Some(
                 InstructionsPlayer::new(
-                    self.game.base.feedback.clone(),
-                    Some(|| {
-                        //let the player know we're done! 
-                        log::info!("game finished!");
-                        let msg = IframeAction::new(ModuleToJigPlayerMessage::Next);
-                        msg.try_post_message_to_top().unwrap_ji();
-                    })
+                    state.game.base.feedback.clone(),
+                    Some(clone!(state => move || {
+                        match state.game.base.settings.next {
+                            Next::PlaceAll => {
+                                state.game.base.set_play_phase(ModulePlayPhase::Ending(Some(ModuleEnding::Next)));
+                            },
+                            _ => {
+                                log::info!("game finished but settings is click to continue");
+                            }
+                        }
+                    }))
                 )
             ));
         }
@@ -103,7 +109,7 @@ impl PlayState {
 
             if is_correct {
                 item.completed.set_neq(true);
-                if !state.evaluate_all_completed() {
+                if !Self::evaluate_all_completed(state.clone()) {
                     item.play_audio_effect(AudioEffect::Correct);
                 }
             } else {

@@ -34,7 +34,9 @@ pub struct VideoRenderOptions {
     pub captions: ReadOnlyMutable<bool>,
     pub muted: ReadOnlyMutable<bool>,
     pub done_action: ReadOnlyMutable<Option<DoneAction>>,
+    pub on_ended: Option<Box<dyn Fn()>>,
 }
+
 impl Default for VideoRenderOptions {
     fn default() -> Self {
         let read_only_bool = Mutable::new(false).read_only();
@@ -43,6 +45,7 @@ impl Default for VideoRenderOptions {
             captions: read_only_bool.clone(),
             muted: read_only_bool.clone(),
             done_action: Mutable::new(None).read_only(),
+            on_ended: None,
         }
     }
 }
@@ -54,6 +57,7 @@ pub struct VideoRawRenderOptions {
     pub muted: Mutable<bool>,
     pub autoplay: Mutable<bool>,
     pub _loop: Mutable<bool>,
+    pub on_ended: Option<Rc<dyn Fn()>>,
 }
 
 fn render_youtube_video(
@@ -94,8 +98,11 @@ fn render_youtube_video(
             matches!(done_action, Some(DoneAction::Loop))
         }))
         .apply(|dom| apply_transform(dom, &video.transform))
-        .event(clone!(video => move |_: events::YoutubeEnded| {
+        .event(clone!(video, opts => move |_: events::YoutubeEnded| {
             video.is_playing.set_neq(false);
+            if let Some(on_ended) = opts.on_ended.as_ref() {
+                (on_ended) ();
+            }
         }))
         .event(clone!(video => move |evt: events::YoutubePaused| {
             spawn_local(clone!(video => async move {
@@ -258,6 +265,7 @@ pub fn render_sticker_video_raw(video: &RawVideo, opts: Option<VideoRawRenderOpt
 
     let mixin = opts.base.mixin;
 
+    let on_ended = opts.on_ended;
     parent
         .style("position", "absolute")
         .style_signal(
@@ -281,6 +289,11 @@ pub fn render_sticker_video_raw(video: &RawVideo, opts: Option<VideoRawRenderOpt
                         .style("display", "block")
                         .style("width", "100%")
                         .style("height", "100%")
+                        .event(clone!(on_ended => move |_: events::YoutubeEnded| {
+                            if let Some(on_ended) = on_ended.as_ref() {
+                                (on_ended) ();
+                            }
+                        }))
                     })
                 }
             }
