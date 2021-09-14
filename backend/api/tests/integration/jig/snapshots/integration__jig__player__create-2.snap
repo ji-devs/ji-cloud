@@ -4,11 +4,15 @@ expression: body
 
 ---
 {
-  "jig_id": "3a71522a-cd77-11eb-8dc1-af3e35f7c743",
-  "settings": {
-    "direction": "rtl",
-    "display_score": false,
-    "track_assessments": false,
-    "drag_assist": false
-  }
+  "sessions": [
+    {
+      "index": 1237,
+      "settings": {
+        "direction": "rtl",
+        "displayScore": false,
+        "trackAssessments": false,
+        "dragAssist": false
+      }
+    }
+  ]
 }

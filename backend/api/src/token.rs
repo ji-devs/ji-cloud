@@ -42,11 +42,10 @@ bitflags::bitflags! {
 
 pub fn validate_token(
     token_string: &str,
-    footer: &str,
+    footer: Option<&str>,
     token_key: &[u8; 32],
 ) -> Result<serde_json::Value, actix_web::Error> {
-    let token =
-        paseto::validate_local_token(token_string, Some(footer), token_key, &TimeBackend::Chrono);
+    let token = paseto::validate_local_token(token_string, footer, token_key, &TimeBackend::Chrono);
 
     let err = match token {
         Ok(token) => return Ok(token),
@@ -85,7 +84,7 @@ pub async fn check_login_token(
     token_key: &[u8; 32],
     min_mask: SessionMask,
 ) -> Result<SessionClaims, actix_web::Error> {
-    let token = validate_token(token_string, AUTHORIZED_FOOTER, token_key)?;
+    let token = validate_token(token_string, Some(AUTHORIZED_FOOTER), token_key)?;
 
     let claims: AuthorizedTokenClaims = serde_json::from_value(token)
         .map_err(Into::into)
@@ -186,4 +185,20 @@ pub fn generate_csrf() -> String {
     let mut bytes = [0_u8; 32];
     rand::thread_rng().fill(&mut bytes[..]);
     base64::encode_config(&bytes, base64::URL_SAFE)
+}
+
+pub fn create_player_session_instance_token(
+    token_secret: &[u8; 32],
+    valid_duration: Duration,
+    session_instance_id: &Uuid,
+    now: DateTime<Utc>,
+) -> anyhow::Result<String> {
+    PasetoBuilder::new()
+        .set_expiration(&(now + valid_duration))
+        .set_not_before(&now)
+        .set_issued_at(Some(now))
+        .set_encryption_key(token_secret)
+        .set_subject(&session_instance_id.to_string())
+        .build()
+        .map_err(|err| anyhow::anyhow!("failed to player session instance token: {}", err))
 }

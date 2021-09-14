@@ -4,5 +4,11 @@ expression: body
 
 ---
 {
-  "index": 7904
+  "index": 1237,
+  "settings": {
+    "direction": "rtl",
+    "displayScore": false,
+    "trackAssessments": false,
+    "dragAssist": false
+  }
 }

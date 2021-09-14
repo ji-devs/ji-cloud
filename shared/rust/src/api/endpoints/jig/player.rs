@@ -1,11 +1,25 @@
-use super::ApiEndpoint;
 use crate::{
-    api::Method,
-    domain::jig::player::{JigPlayerSession, JigPlayerSessionCode, JigPlayerSessionCreateRequest, JigPlayerSessionToken, JigPlayerSessionCompleteRequest, JigPlayCount, JigPlayerSessionCreateRequestForPlayer},
+    api::{ApiEndpoint, Method},
+    domain::jig::player::{
+        JigPlayerSessionCreateRequest, JigPlayerSessionCreateResponse, JigPlayerSessionListResponse,
+    },
     error::EmptyError,
 };
 
 /// Create a player session from a jig. Requestor needs permissions over the jig.
+///
+/// # Flow
+///
+/// 1. Author/admin creates a player session using [`POST /v1/jig/player`](Create)
+///     a. This is represented by a *session code/index*
+/// 2. Unauthed user instantiates the player session. This creates an instance of a session. [`POST /v1/jig/player/session`](instance::Create) returns:
+///     a. A short lived token, which identifies the user and the session instance.
+///     b. The player session settings.
+///     c. `JigId` of the JIG on which the session was created.
+/// 3. Unauthed user posts short lived token to complete the instance. [`POST /v1/jig/player/session/complete`](instance::Complete)
+///     a. This increments the play count of the jig.
+///
+/// The hierarchy here is Jig -> Player Session -> Session Instance, where each arrow is a one-to-many mapping.
 ///
 /// # Errors
 ///
@@ -29,13 +43,13 @@ use crate::{
 pub struct Create;
 impl ApiEndpoint for Create {
     type Req = JigPlayerSessionCreateRequest;
-    type Res = JigPlayerSessionCode;
+    type Res = JigPlayerSessionCreateResponse;
     type Err = EmptyError;
     const PATH: &'static str = "/v1/jig/player";
     const METHOD: Method = Method::Post;
 }
 
-/// Create a session for a user who isn't the author
+/// List the player session codes associated with a jig.
 ///
 /// # Errors
 ///
@@ -43,63 +57,64 @@ impl ApiEndpoint for Create {
 /// * [`401 - Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.
 /// * [`403 - Forbidden`](http::StatusCode::FORBIDDEN) if the user does not have sufficient permission to perform the action.
 /// * ['404 - NotFound'](http::StatusCode::NOT_FOUND) if the jig does not exist.
-pub struct CreatePlayerSession;
-impl ApiEndpoint for CreatePlayerSession {
-    type Req = JigPlayerSessionCreateRequestForPlayer;
-    type Res = JigPlayerSessionToken;
-    type Err = EmptyError;
-    const PATH: &'static str = "/v1/jig/player/instance";
-    const METHOD: Method = Method::Post;
-}
-
-/// Complete a session for a user who isn't the author and update the jig play count
-///
-/// # Errors
-///
-/// * [`400 - BadRequest`](http::StatusCode::BAD_REQUEST) if the request is malformed.
-/// * [`401 - Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.
-/// * [`403 - Forbidden`](http::StatusCode::FORBIDDEN) if the user does not have sufficient permission to perform the action.
-/// * ['404 - NotFound'](http::StatusCode::NOT_FOUND) if the jig does not exist.
-pub struct CompletePlayerSession;
-impl ApiEndpoint for CompletePlayerSession {
-    type Req = JigPlayerSessionCompleteRequest;
-    type Res = ();
-    type Err = EmptyError;
-    const PATH: &'static str = "/v1/jig/player/instance/complete";
-    const METHOD: Method = Method::Post;
-}
-
-/// Get a player session given it's code/index.
-///
-/// # Errors
-///
-/// * [`400 - BadRequest`](http::StatusCode::BAD_REQUEST) if the request is malformed.
-/// * [`401 - Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.
-/// * [`403 - Forbidden`](http::StatusCode::FORBIDDEN) if the user does not have sufficient permission to perform the action.
-/// * ['404 - NotFound'](http::StatusCode::NOT_FOUND) if the jig does not exist.
-pub struct Get;
-impl ApiEndpoint for Get {
+pub struct List;
+impl ApiEndpoint for List {
     type Req = ();
-    type Res = JigPlayerSession;
-    type Err = EmptyError;
-    const PATH: &'static str = "/v1/jig/player/{index}";
-    const METHOD: Method = Method::Get;
-}
-
-/// Fetch the player session code/index.
-///
-/// # Errors
-///
-/// * [`400 - BadRequest`](http::StatusCode::BAD_REQUEST) if the request is malformed.
-/// * [`401 - Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.
-/// * [`403 - Forbidden`](http::StatusCode::FORBIDDEN) if the user does not have sufficient permission to perform the action.
-/// * ['404 - NotFound'](http::StatusCode::NOT_FOUND) if the jig does not exist.
-/// * ['409 - Conflict'](http::StatusCode::CONFLICT) if a code already exists for this jig.
-pub struct GetPlayerSessionCode;
-impl ApiEndpoint for GetPlayerSessionCode {
-    type Req = ();
-    type Res = JigPlayerSessionCode;
+    type Res = JigPlayerSessionListResponse;
     type Err = EmptyError;
     const PATH: &'static str = "/v1/jig/{id}/player";
     const METHOD: Method = Method::Get;
+}
+
+/// Endpoints for unauthed users to access jig player sessions.
+pub mod instance {
+    use crate::{
+        api::{ApiEndpoint, Method},
+        domain::jig::player::instance::{
+            PlayerSessionInstanceCompleteRequest, PlayerSessionInstanceCreateRequest,
+            PlayerSessionInstanceResponse,
+        },
+        error::EmptyError,
+    };
+
+    /// Create a session instance
+    ///
+    /// # Auth
+    /// * No auth
+    /// * Returns a token that needs to be cached. See #Flow section under [`player::Create`](super::Create)
+    ///
+    /// # Errors
+    ///
+    /// * [`400 - BadRequest`](http::StatusCode::BAD_REQUEST) if the request is malformed.
+    /// * [`401 - Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.
+    /// * [`403 - Forbidden`](http::StatusCode::FORBIDDEN) if the user does not have sufficient permission to perform the action.
+    /// * ['404 - NotFound'](http::StatusCode::NOT_FOUND) if the jig player session does not exist.
+    pub struct Create;
+    impl ApiEndpoint for Create {
+        type Req = PlayerSessionInstanceCreateRequest;
+        type Res = PlayerSessionInstanceResponse;
+        type Err = EmptyError;
+        const PATH: &'static str = "/v1/jig/player/instance";
+        const METHOD: Method = Method::Post;
+    }
+
+    /// Complete a session instance and update the jig play count
+    ///
+    /// # Auth
+    /// * Requires the token returned in [`Create`](Create)
+    ///
+    /// # Errors
+    ///
+    /// * [`400 - BadRequest`](http::StatusCode::BAD_REQUEST) if the request is malformed.
+    /// * [`401 - Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.
+    /// * [`403 - Forbidden`](http::StatusCode::FORBIDDEN) if the user does not have sufficient permission to perform the action.
+    /// * ['404 - NotFound'](http::StatusCode::NOT_FOUND) if the jig player session instance stored in the token does not exist.
+    pub struct Complete;
+    impl ApiEndpoint for Complete {
+        type Req = PlayerSessionInstanceCompleteRequest;
+        type Res = ();
+        type Err = EmptyError;
+        const PATH: &'static str = "/v1/jig/player/instance/complete";
+        const METHOD: Method = Method::Post;
+    }
 }
