@@ -19,11 +19,27 @@ export class _ extends LitElement {
                 row-gap: 18px;
                 column-gap: 24px;
             }
+            @media (min-width: 1920px) {
+                :host {
+                    row-gap: 18px;
+                }
+            }
+            :host {
+                --image-height: 104px;
+            }
             :host([imageMode=image]) {
-                --image-width: 118px;
+                --image-width: var(--image-height);
             }
             :host([imageMode=background]) {
-                --image-width: 207px;
+                --image-width: 154px;
+            }
+            @media (min-width: 1920px) {
+                :host {
+                    --image-height: 118px;
+                }
+                :host([imageMode=background]) {
+                    --image-width: 207px;
+                }
             }
             .top-row {
                 grid-column: 1 / -1;
@@ -32,8 +48,12 @@ export class _ extends LitElement {
             }
             h2 {
                 margin: 0;  font-family: Poppins;
-                font-size: 18px;
+                font-size: 16px;
                 font-weight: normal;
+            }
+            .controls {
+                display: grid;
+                row-gap: 6px;
             }
             .search-row {
                 display: grid;
@@ -67,17 +87,27 @@ export class _ extends LitElement {
                 border-top: solid 1px #b0ccf2;
             }
             .images-section.recent {
-                max-height: 170px;
                 overflow: hidden;
+                max-height: 144px;
+            }
+            @media (min-width: 1920px) {
+                .images-section h4 {
+                    max-height: 170px;
+                }
             }
             :host([moreShown]) .images-section.recent {
                 max-height: revert;
             }
             .images-section h4 {
-                font-size: 16px;
                 font-weight: 600;
                 color: #4a4a4a;
                 margin: 0;
+                font-size: 15px;
+            }
+            @media (min-width: 1920px) {
+                .images-section h4 {
+                    font-size: 16px;
+                }
             }
             .images-section.recent button-rect .icon {
                 display: inline-block;
@@ -91,10 +121,16 @@ export class _ extends LitElement {
                 grid-column: 1 / -1;
                 display: grid;
                 grid-template-columns: repeat(auto-fit, var(--image-width));
-                grid-auto-rows: 118px;
-                row-gap: 24px;
-                column-gap: 15px;
                 justify-content: space-between;
+                grid-auto-rows: var(--image-height);
+                row-gap: 12px;
+                column-gap: 10px;
+            }
+            @media (min-width: 1920px) {
+                .images-section {
+                    row-gap: 24px;
+                    column-gap: 15px;
+                }
             }
             ::slotted([slot=images]),
             ::slotted([slot=recent]) {
@@ -130,13 +166,15 @@ export class _ extends LitElement {
                 <h2>${this.label || nothing}</h2>
                 <slot name="hide-overlay"></slot>
             </div>
-            <div class="search-row">
-                <slot name="search-input"></slot>
-                <slot name="filters"></slot>
-            </div>
-            <div class="bottom-row">
-                <slot name="only-background-checkbox"></slot>
-                <slot name="upload"></slot>
+            <div class="controls">
+                <div class="search-row">
+                    <slot name="search-input"></slot>
+                    <slot name="filters"></slot>
+                </div>
+                <div class="bottom-row">
+                    <slot name="only-background-checkbox"></slot>
+                    <slot name="upload"></slot>
+                </div>
             </div>
             <section class="all-images">
                 ${

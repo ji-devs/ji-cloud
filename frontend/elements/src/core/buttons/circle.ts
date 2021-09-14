@@ -46,11 +46,18 @@ export class CircleButton extends LitElement {
         }
 
         p.label {
-          font-size: 14px;
           font-weight: 500;
           letter-spacing: 0.14px;
           text-align: center;
           color: var(--dark-gray-3);
+          margin: 6px 0;
+          font-size: 12px;
+        }
+        @media (min-width: 1920px) {
+          p.label {
+            margin: 12px 0;
+            font-size: 14px;
+          }
         }
       `,
     ];

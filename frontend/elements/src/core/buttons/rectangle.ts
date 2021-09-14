@@ -14,13 +14,18 @@ export class _ extends LitElement {
                     border-radius: 24px;
                     border: none;
                     cursor: pointer;
-                    font-size: 16px;
                     display: inline-grid;
                     place-content: center;
                     background-color: transparent;
                     box-sizing: border-box;
                     padding: 0;
                     user-select: none;
+                    font-size: 14px;
+                }
+                @media (min-width: 1920px) {
+                    :host {
+                        font-size: 16px;
+                    }
                 }
 
                 :host([disabled]) {

@@ -10,6 +10,12 @@ export class _ extends LitElement {
         label {
           display: flex;
           align-items: baseline;
+          font-size: 14px;
+        }
+        @media (min-width: 1920px) {
+          label {
+            font-size: 16px;
+          }
         }
         input {
           margin-right: 1px;

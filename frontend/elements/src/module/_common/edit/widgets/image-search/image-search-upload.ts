@@ -14,6 +14,12 @@ export class _ extends LitElement {
                 cursor: pointer;
                 font-weight: 500;
                 color: var(--main-blue);
+                font-size: 14px;
+            }
+            @media (min-width: 1920px) {
+                label {
+                    font-size: 16px;
+                }
             }
             input {
                 display: none;

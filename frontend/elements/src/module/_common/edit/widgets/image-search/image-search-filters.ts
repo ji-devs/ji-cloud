@@ -12,7 +12,6 @@ export class _ extends LitElement {
         return [css`
             button {
                 font-family: Poppins;
-                font-size: 16px;
                 font-weight: 500;
                 font-stretch: normal;
                 font-style: normal;
@@ -23,6 +22,12 @@ export class _ extends LitElement {
                 display: flex;
                 align-items: center;
                 column-gap: 8px;
+                font-size: 14px;
+            }
+            @media (min-width: 1920px) {
+                button {
+                    font-size: 16px;
+                }
             }
             .caret {
                 transition: transform .2s;
