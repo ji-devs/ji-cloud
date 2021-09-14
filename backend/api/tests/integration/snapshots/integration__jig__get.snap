@@ -39,9 +39,9 @@ expression: body
     "is_public": true,
     "default_player_settings": {
       "direction": "ltr",
-      "display_score": false,
-      "track_assessments": false,
-      "drag_assist": false
+      "displayScore": false,
+      "trackAssessments": false,
+      "dragAssist": false
     },
     "theme": "Blank",
     "audio_background": null,

@@ -297,10 +297,6 @@ async fn play_count(
 pub fn configure(cfg: &mut ServiceConfig) {
     cfg.route(jig::Browse::PATH, jig::Browse::METHOD.route().to(browse))
         .route(jig::Count::PATH, jig::Count::METHOD.route().to(count))
-        .route(
-            jig::player::Get::PATH,
-            jig::player::Get::METHOD.route().to(player::get),
-        )
         .route(jig::Get::PATH, jig::Get::METHOD.route().to(get))
         .route(jig::Clone::PATH, jig::Clone::METHOD.route().to(clone))
         .route(jig::Create::PATH, jig::Create::METHOD.route().to(create))
@@ -312,22 +308,24 @@ pub fn configure(cfg: &mut ServiceConfig) {
             jig::player::Create::METHOD.route().to(player::create),
         )
         .route(
-            jig::player::CreatePlayerSession::PATH,
-            jig::player::CreatePlayerSession::METHOD
-                .route()
-                .to(player::create_player_session),
+            jig::player::Create::PATH,
+            jig::player::Create::METHOD.route().to(player::create),
         )
         .route(
-            jig::player::GetPlayerSessionCode::PATH,
-            jig::player::GetPlayerSessionCode::METHOD
-                .route()
-                .to(player::get_code),
+            jig::player::List::PATH,
+            jig::player::List::METHOD.route().to(player::list),
         )
         .route(
-            jig::player::CompletePlayerSession::PATH,
-            jig::player::CompletePlayerSession::METHOD
+            jig::player::instance::Create::PATH,
+            jig::player::instance::Create::METHOD
                 .route()
-                .to(player::complete_player_session),
+                .to(player::instance::create_session_instance),
+        )
+        .route(
+            jig::player::instance::Complete::PATH,
+            jig::player::instance::Complete::METHOD
+                .route()
+                .to(player::instance::complete_session_instance),
         )
         .route(
             jig::draft::Create::PATH,

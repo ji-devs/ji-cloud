@@ -11,6 +11,7 @@ use crate::{
 };
 
 use super::ApiEndpoint;
+use crate::domain::jig::player::JigPlayCountResponse;
 
 /// Endpoints for jig modules.
 pub mod module;
@@ -37,7 +38,7 @@ impl ApiEndpoint for Get {
     const METHOD: Method = Method::Get;
 }
 
-/// Browse jigs.
+/// Browse JIGs.
 ///
 /// # Authorization
 /// * One of `Admin`, `AdminJig`, or `ManageSelfJig`
@@ -50,7 +51,7 @@ impl ApiEndpoint for Browse {
     const METHOD: Method = Method::Get;
 }
 
-/// Search for jigs.
+/// Search for JIGs.
 ///
 /// # Authorization
 /// * None
@@ -88,7 +89,7 @@ impl ApiEndpoint for Create {
 ///
 /// ['NotFound'](http::StatusCode::NOT_FOUND) if the jig does not exist.
 ///
-/// ['BadRequest'](http::StatusCode::BAD_REQUEST) if the request is malformed or the jig is a draft.
+/// ['BadRequest'](http::StatusCode::BAD_REQUEST) if the request is malformed or the JIG is a draft.
 pub struct Clone;
 impl ApiEndpoint for Clone {
     type Req = ();
@@ -101,7 +102,7 @@ impl ApiEndpoint for Clone {
 /// Update a JIG.
 ///
 /// # Authorization
-/// * One of `Admin`, `AdminJig`,, or `ManageSelfJig` for owned Jigs
+/// * One of `Admin`, `AdminJig`,, or `ManageSelfJig` for owned JIGs
 pub struct Update;
 impl ApiEndpoint for Update {
     type Req = JigUpdateRequest;
@@ -114,7 +115,7 @@ impl ApiEndpoint for Update {
 /// Delete a JIG.
 ///
 /// # Authorization
-/// * One of `Admin`, `AdminJig`, or `ManageSelfJig` for owned Jigs
+/// * One of `Admin`, `AdminJig`, or `ManageSelfJig` for owned JIGs
 pub struct Delete;
 impl ApiEndpoint for Delete {
     type Req = ();
@@ -137,16 +138,15 @@ impl ApiEndpoint for Count {
     const METHOD: Method = Method::Get;
 }
 
-/// Count of numner of times a JIG was played.
+/// Number of times a JIG has been played.
 ///
 /// # Authorization
 /// * None
 pub struct PlayCount;
 impl ApiEndpoint for PlayCount {
     type Req = ();
-    type Res = ();
+    type Res = JigPlayCountResponse;
     type Err = EmptyError;
     const PATH: &'static str = "/v1/jig/{id}/play-count";
-    const METHOD: Method = Method::Post;
+    const METHOD: Method = Method::Get;
 }
-

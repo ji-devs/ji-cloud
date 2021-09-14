@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 
 /// Settings for the player session.
 #[derive(Serialize, Deserialize, Clone, Debug)]
+#[serde(rename_all = "camelCase")]
 pub struct JigPlayerSettings {
     /// Text direction, left-to-right or right-to-left
     #[serde(default)]
@@ -51,57 +52,91 @@ impl Default for TextDirection {
     }
 }
 
+/// Four-digit code identifying a Jig player session
+#[derive(Serialize, Deserialize, Debug, Copy, Clone)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[cfg_attr(feature = "backend", sqlx(transparent))]
+pub struct JigPlayerSessionIndex(pub i16);
+
 /// Request to create a player session for a jig.
 #[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
 pub struct JigPlayerSessionCreateRequest {
     /// ID of the Jig that the session is for
     pub jig_id: JigId,
+
     /// Settings for the session
     pub settings: JigPlayerSettings,
 }
 
-/// Request to create a player (who is not the author) session for a jig.
+/// Request to create a player session for a jig.
 #[derive(Serialize, Deserialize, Debug)]
-pub struct JigPlayerSessionCreateRequestForPlayer {
+#[serde(rename_all = "camelCase")]
+pub struct JigPlayerSessionCreateResponse {
     /// Four-digit code identifying a Jig player session
-    pub session_index: i16,
+    pub index: JigPlayerSessionIndex,
 }
 
-/// Request to complete a player session for a jig.
-#[derive(Serialize, Deserialize, Debug)]
-pub struct JigPlayerSessionCompleteRequest {
-    /// ID of the Jig that the session is for
-    pub jig_id: JigId,
-    /// Token that will be passed to confirm a jig was played all the way through
-    pub token: String,
-}
-
-/// Response for creating or fetching the code associated with a jig.
-#[derive(Serialize, Deserialize, Debug)]
-pub struct JigPlayerSessionCode {
-    /// Four-digit code identifying a Jig player session
-    pub index: i16,
-}
-
-/// Over-the-wire representation of a player session.
+/// Over-the-wire representation of a jig player session
 #[derive(Serialize, Deserialize, Debug)]
 pub struct JigPlayerSession {
-    /// ID of the Jig that the session is for
-    pub jig_id: JigId,
+    /// Four-digit code identifying a Jig player session
+    pub index: JigPlayerSessionIndex,
+
     /// Settings for the player session.
     pub settings: JigPlayerSettings,
 }
 
-/// Response for creating a session for a jig play as a player. contains the token
+/// Lists all jig player sessions associated with a jig
 #[derive(Serialize, Deserialize, Debug)]
-pub struct JigPlayerSessionToken {
-    /// Token that will be passed to confirm a jig was played all the way through
-    pub token: String,
+pub struct JigPlayerSessionListResponse {
+    /// Vector of the jig sessions
+    pub sessions: Vec<JigPlayerSession>,
 }
 
 /// Response for completing a session for a jig play as a player and updating the jig play count
 #[derive(Serialize, Deserialize, Debug)]
-pub struct JigPlayCount {
+#[serde(rename_all = "camelCase")]
+pub struct JigPlayCountResponse {
     /// Number of times a jig was completed
     pub play_count: i64,
+}
+
+/// Types for Jig session instance endpoints
+pub mod instance {
+    use serde::{Deserialize, Serialize};
+
+    use crate::domain::jig::{player::JigPlayerSessionIndex, JigId, JigPlayerSettings};
+
+    /// Request to create a player (who is not the author) session for a JIG.
+    #[derive(Serialize, Deserialize, Debug)]
+    pub struct PlayerSessionInstanceCreateRequest {
+        /// Four-digit code identifying a JIG player session
+        pub index: JigPlayerSessionIndex,
+    }
+
+    /// Response for successfully creating an instance of a JIG player session. contains the token
+    #[derive(Serialize, Deserialize, Debug)]
+    #[serde(rename_all = "camelCase")]
+    pub struct PlayerSessionInstanceResponse {
+        /// ID of the JIG that the session is for
+        pub jig_id: JigId,
+
+        /// Settings for the player session.
+        pub settings: JigPlayerSettings,
+
+        /// Token that will be passed to confirm a JIG was played all the way through
+        pub token: String,
+    }
+
+    /// Request to complete a player session for a JIG.
+    #[derive(Serialize, Deserialize, Debug)]
+    #[serde(rename_all = "camelCase")]
+    pub struct PlayerSessionInstanceCompleteRequest {
+        /// ID of the JIG that the session is for
+        pub jig_id: JigId,
+
+        /// Token that will be passed to confirm a JIG was played all the way through
+        pub token: String,
+    }
 }
