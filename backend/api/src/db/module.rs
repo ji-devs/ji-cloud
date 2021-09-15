@@ -192,8 +192,8 @@ where jig_id = $1 and (id is not distinct from $2 or index is not distinct from 
         id.map(|it| it.0),
         index.map(|it| it as i16)
     )
-        .fetch_optional(pool)
-        .await?;
+    .fetch_optional(pool)
+    .await?;
 
     let map_response = |body, kind| transform_response_kind(body, kind);
 

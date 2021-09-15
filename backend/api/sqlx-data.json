@@ -537,6 +537,58 @@
       "nullable": []
     }
   },
+  "1a7b7b6ce9d1d2a156aa997a7ebd71e57fda562f89b283535836ee25e6cb2dfa": {
+    "query": "\nselect\n    id as \"id: ModuleId\",\n    contents as \"body\",\n    created_at as \"created_at\",\n    updated_at as \"updated_at\",\n    kind as \"kind: ModuleKind\",\n    is_complete as \"is_complete\"\nfrom jig_module\nwhere jig_id = $1 and (id is not distinct from $2 or index is not distinct from $3)\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: ModuleId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "body",
+          "type_info": "Jsonb"
+        },
+        {
+          "ordinal": 2,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 3,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 4,
+          "name": "kind: ModuleKind",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 5,
+          "name": "is_complete",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid",
+          "Int2"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        true,
+        false,
+        false
+      ]
+    }
+  },
   "1a8b1e8b534e0c03972838146a54d715f11f647be57465718d61defdd7af242d": {
     "query": "update image_tag set display_name = $2 where index = $1",
     "describe": {
@@ -824,46 +876,6 @@
         ]
       },
       "nullable": [
-        false
-      ]
-    }
-  },
-  "1faa63098267504c5bf0c38977e850dc649dd5e357d7bfe6f893eeb03aafff5f": {
-    "query": "\nselect \n    id as \"id: ModuleId\",\n    contents as \"body\",\n    kind as \"kind: ModuleKind\",\n    is_complete as \"is_complete\"\nfrom jig_module\nwhere jig_id = $1 and (id is not distinct from $2 or index is not distinct from $3)\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id: ModuleId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "body",
-          "type_info": "Jsonb"
-        },
-        {
-          "ordinal": 2,
-          "name": "kind: ModuleKind",
-          "type_info": "Int2"
-        },
-        {
-          "ordinal": 3,
-          "name": "is_complete",
-          "type_info": "Bool"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid",
-          "Int2"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
         false
       ]
     }
