@@ -147,11 +147,14 @@ pub struct Module {
     /// Whether the module is complete or not.
     pub is_complete: bool,
 
+    /// Whether a jig has been updated.
+    pub is_updated: bool,
+
     /// When the module was originally created.
     pub created_at: DateTime<Utc>,
 
     /// When the module was last updated.
-    pub updated_at: Option<DateTime<Utc>>,
+    pub updated_at: DateTime<Utc>,
 }
 
 /// Request to create a new `Module`.
