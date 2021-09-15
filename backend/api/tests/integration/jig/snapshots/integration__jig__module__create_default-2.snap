@@ -29,6 +29,7 @@ expression: body
       }
     },
     "is_complete": false,
+    "is_updated": false,
     "created_at": "[created_at]",
     "updated_at": "[updated_at]"
   }

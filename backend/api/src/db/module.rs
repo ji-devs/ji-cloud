@@ -207,6 +207,7 @@ where jig_id = $1 and (id is not distinct from $2 or index is not distinct from 
                 it.kind
             ))?,
             is_complete: it.is_complete,
+            is_updated: it.created_at < it.updated_at,
         })),
         None => Ok(None),
     }

@@ -12,6 +12,7 @@ expression: body
       }
     },
     "is_complete": false,
+    "is_updated": true,
     "created_at": "2021-03-04T00:46:26.134651Z",
     "updated_at": "[timestamp]"
   }
