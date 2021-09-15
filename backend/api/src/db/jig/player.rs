@@ -1,5 +1,6 @@
-use core::config::JIG_PLAYER_SESSION_CODE_MAX;
+use chrono::{DateTime, Duration, Utc};
 use rand::{rngs::ThreadRng, Rng};
+use shared::config::{JIG_PLAYER_SESSION_CODE_MAX, JIG_PLAYER_SESSION_VALID_DURATION_SECS};
 use shared::domain::jig::{
     player::{JigPlayerSession, JigPlayerSessionIndex, JigPlayerSettings},
     JigId, TextDirection,
@@ -16,10 +17,12 @@ pub async fn create(
     db: &PgPool,
     jig_id: JigId,
     settings: &JigPlayerSettings,
-) -> Result<JigPlayerSessionIndex, error::JigCode> {
+) -> Result<(JigPlayerSessionIndex, DateTime<Utc>), error::JigCode> {
     let mut generator = rand::thread_rng();
 
     let mut index = generate_random_code(&mut generator);
+
+    let expires_at = Utc::now() + Duration::seconds(JIG_PLAYER_SESSION_VALID_DURATION_SECS as i64);
 
     // retry as many times as there are possible codes
     // NOTE: this is NOT guaranteed to successfully insert if there
@@ -28,8 +31,8 @@ pub async fn create(
         match sqlx::query!(
             //language=SQL
             r#"
-insert into jig_player_session (jig_id, index, direction, display_score, track_assessments, drag_assist)
-values ($1, $2, $3, $4, $5, $6)
+insert into jig_player_session (jig_id, index, direction, display_score, track_assessments, drag_assist, expires_at)
+values ($1, $2, $3, $4, $5, $6, $7)
 
 "#,
             jig_id.0,
@@ -38,12 +41,13 @@ values ($1, $2, $3, $4, $5, $6)
             settings.display_score,
             settings.track_assessments,
             settings.drag_assist,
+            expires_at,
         )
         .execute(db)
         .await
         {
             Ok(_) => { // insert successful
-                return Ok(JigPlayerSessionIndex(index));
+                return Ok((JigPlayerSessionIndex(index), expires_at));
             },
             Err(err) => match err {
                 sqlx::Error::Database(db_err) => {
@@ -89,7 +93,8 @@ select index     as "index!: i16",
        direction as "direction: TextDirection",
        display_score,
        track_assessments,
-       drag_assist
+       drag_assist,
+       expires_at as "expires_at: DateTime<Utc>"
 from jig_player_session
 where jig_id = $1
 "#,
@@ -106,6 +111,7 @@ where jig_id = $1
             track_assessments: it.track_assessments,
             drag_assist: it.drag_assist,
         },
+        expires_at: it.expires_at,
     })
     .collect();
 

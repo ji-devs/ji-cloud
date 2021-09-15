@@ -49,9 +49,6 @@ pub const CORS_ORIGINS: &[&str] = &[
 
 //////////////
 // Other
-/// Defines the range of possible values for Jig player session sharing codes
-/// means 0-9999 are possible. If this is changed then the DB's check constraint must also be updated.
-pub const JIG_PLAYER_SESSION_CODE_MAX: i16 = 9999;
 /// `MAX_SIGNIN_COOKIE_DURATION` but as seconds,
 /// as there's no way to get the string number of seconds from it `const`ly
 #[deprecated = "use `MAX_SIGNIN_COOKIE_DURATION.whole_seconds()` instead"]

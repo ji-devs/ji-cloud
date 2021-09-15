@@ -9,6 +9,34 @@ use shared::domain::jig::player::{
 };
 
 #[actix_rt::test]
+async fn list() -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::Jig], &[]).await;
+
+    let port = app.port();
+
+    let client = reqwest::Client::new();
+
+    let resp = client
+        .get(&format!(
+            "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008/player",
+            port
+        ))
+        .login()
+        .send()
+        .await?;
+
+    assert_eq!(resp.status(), StatusCode::OK);
+
+    let body: JigPlayerSessionListResponse = resp.json().await?;
+
+    app.stop(false).await;
+
+    insta::assert_json_snapshot!(body, { ".**.expires_at" => "[timestamp]" });
+
+    Ok(())
+}
+
+#[actix_rt::test]
 async fn create() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User, Fixture::Jig], &[]).await;
 
@@ -36,7 +64,7 @@ async fn create() -> anyhow::Result<()> {
 
     let body: JigPlayerSession = resp.json().await?;
 
-    insta::assert_json_snapshot!(body, { ".**.index" => "[index]" });
+    insta::assert_json_snapshot!(body, { ".**.index" => "[index]", ".**.expires_at" => "[timestamp]" });
 
     let _resp = client
         .post(&format!("http://0.0.0.0:{}/v1/jig/player", port))
@@ -69,7 +97,7 @@ async fn create() -> anyhow::Result<()> {
 
     app.stop(false).await;
 
-    insta::assert_json_snapshot!(body, { ".**.index" => "[index]" });
+    insta::assert_json_snapshot!(body, { ".**.index" => "[index]", ".**.expires_at" => "[timestamp]"  });
 
     Ok(())
 }
