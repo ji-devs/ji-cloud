@@ -12,15 +12,18 @@ use crate::{
 /// # Flow
 ///
 /// 1. Author/admin creates a player session using [`POST /v1/jig/player`](Create)
-///     a. This is represented by a *session code/index*
+///     * This is represented by a *session code/index*
 /// 2. Unauthed user instantiates the player session. This creates an instance of a session. [`POST /v1/jig/player/session`](instance::Create) returns:
-///     a. A short lived token, which identifies the user and the session instance.
-///     b. The player session settings.
-///     c. `JigId` of the JIG on which the session was created.
+///     * A short lived token, which identifies the guest user and the session instance.
+///     * The player session settings.
+///     * `JigId` of the JIG on which the session was created.
 /// 3. Unauthed user posts short lived token to complete the instance. [`POST /v1/jig/player/session/complete`](instance::Complete)
-///     a. This increments the play count of the jig.
+///     * This increments the play count of the jig.
+///     * Deletes the completed instance from the DB.
 ///
 /// The hierarchy here is Jig -> Player Session -> Session Instance, where each arrow is a one-to-many mapping.
+///
+/// Each level is uniquely identified by `JigId` -> `JigPlayerSessionIndex` -> token.
 ///
 /// # Errors
 ///
@@ -95,8 +98,6 @@ pub mod instance {
     /// # Errors
     ///
     /// * [`400 - BadRequest`](http::StatusCode::BAD_REQUEST) if the request is malformed.
-    /// * [`401 - Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.
-    /// * [`403 - Forbidden`](http::StatusCode::FORBIDDEN) if the user does not have sufficient permission to perform the action.
     /// * ['404 - NotFound'](http::StatusCode::NOT_FOUND) if the jig player session does not exist.
     pub struct Create;
     impl ApiEndpoint for Create {
@@ -115,8 +116,6 @@ pub mod instance {
     /// # Errors
     ///
     /// * [`400 - BadRequest`](http::StatusCode::BAD_REQUEST) if the request is malformed.
-    /// * [`401 - Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.
-    /// * [`403 - Forbidden`](http::StatusCode::FORBIDDEN) if the user does not have sufficient permission to perform the action.
     /// * ['404 - NotFound'](http::StatusCode::NOT_FOUND) if the jig player session instance stored in the token does not exist.
     pub struct Complete;
     impl ApiEndpoint for Complete {
