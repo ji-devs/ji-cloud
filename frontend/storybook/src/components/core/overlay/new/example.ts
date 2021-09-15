@@ -8,7 +8,7 @@ export default {
     title: "Core / Overlays / New"
 }
 
-type ContainerOptions = "window" | "main" | "none";
+type ContainerOptions = "window" | "#main" | "none";
 
 interface Args {
     flowTargetPlacement: Placement,
@@ -44,6 +44,8 @@ export const Example = (props?:Args) => {
 
 function makeMain(props:Args) {
 
+    const flowTargetContainer = props.flowTargetContainer === "none" ? "" : props.flowTargetContainer;
+    const absoluteTargetContainer = props.absoluteTargetContainer === "none" ? "" : props.absoluteTargetContainer;
   return `<div style="background-color: green; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center;">
         <div style="font-size: 200rem; color: white; text-align: center">Overlay Example</div>
         <div id="flowTarget" style="width: 100rem; height: 100rem; background-color: black; color: white">
@@ -59,10 +61,10 @@ function makeMain(props:Args) {
             </div>
         </div>
         <overlay-container>
-            <overlay-content target="#flowTarget" placement="${props.flowTargetPlacement}" strategy="${props.flowTargetStrategy}" margin="${props.flowTargetMargin}">
+            <overlay-content target="#flowTarget" placement="${props.flowTargetPlacement}" strategy="${props.flowTargetStrategy}" margin="${props.flowTargetMargin}" container="${flowTargetContainer}">
                 ${MenuContainer()}
             </overlay-content>
-            <overlay-content target="#absoluteTarget" placement="${props.absoluteTargetPlacement}" strategy="${props.absoluteTargetStrategy}" margin="${props.absoluteTargetMargin}">
+            <overlay-content target="#absoluteTarget" placement="${props.absoluteTargetPlacement}" strategy="${props.absoluteTargetStrategy}" margin="${props.absoluteTargetMargin}" container="${absoluteTargetContainer}">
                 ${MenuContainer()}
             </overlay-content>
         </overlay-container>
@@ -89,7 +91,7 @@ const placements = [  "top", "top-start", "top-end",
 ]
 
 const strategies = ["", "dispatchClose", "track"];
-const containers = ["window", "main", "none"]
+const containers = ["window", "#main", "none"]
 
 Example.argTypes = {
     flowTargetPlacement: {

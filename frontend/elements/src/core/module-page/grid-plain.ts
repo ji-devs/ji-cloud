@@ -86,15 +86,15 @@ export class _ extends BgBlue {
     return html`
         <div id="grid" class=${classes}>
 
-            <aside><slot name="sidebar"></slot></aside>
+            <aside id="sidebar"><slot name="sidebar"></slot></aside>
             
-            <header><slot name="header"></slot></header>
+            <header id="header"><slot name="header"></slot></header>
 
-            <main>
+            <main id="main">
                 <slot name="main"></slot>
             </main>
 
-            <footer><slot name="footer"></slot></footer>
+            <footer id="footer"><slot name="footer"></slot></footer>
         </div>
         <div id="overlay" class=${classes}><slot name="overlay"></slot></div>
     `;
