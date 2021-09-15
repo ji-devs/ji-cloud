@@ -11,7 +11,6 @@ use crate::{
 };
 
 use super::ApiEndpoint;
-use crate::domain::jig::player::JigPlayCountResponse;
 
 /// Endpoints for jig modules.
 pub mod module;
@@ -135,18 +134,5 @@ impl ApiEndpoint for Count {
     type Res = JigCountResponse;
     type Err = EmptyError;
     const PATH: &'static str = "/v1/jig/count";
-    const METHOD: Method = Method::Get;
-}
-
-/// Number of times a JIG has been played.
-///
-/// # Authorization
-/// * None
-pub struct PlayCount;
-impl ApiEndpoint for PlayCount {
-    type Req = ();
-    type Res = JigPlayCountResponse;
-    type Err = EmptyError;
-    const PATH: &'static str = "/v1/jig/{id}/play-count";
     const METHOD: Method = Method::Get;
 }

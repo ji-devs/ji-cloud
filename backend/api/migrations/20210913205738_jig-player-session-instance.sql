@@ -10,4 +10,5 @@ create index on jig_player_session_instance (session_index);
 
 alter table jig_player_session
     drop constraint jig_player_session_jig_id_key,
-    drop constraint jig_player_session_index_check;
+    drop constraint jig_player_session_index_check,
+    add constraint jig_player_session_index_check check (index >= 0);

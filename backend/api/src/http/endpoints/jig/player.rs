@@ -5,7 +5,7 @@ use actix_web::{
 use shared::{
     api::{endpoints::jig::player, ApiEndpoint},
     domain::jig::{
-        player::{JigPlayerSession, JigPlayerSessionListResponse},
+        player::{JigPlayCountResponse, JigPlayerSession, JigPlayerSessionListResponse},
         JigId,
     },
 };
@@ -20,8 +20,6 @@ pub async fn create(
     req: Json<<player::Create as ApiEndpoint>::Req>,
 ) -> Result<HttpResponse, error::JigCode> {
     let req = req.into_inner();
-
-    // let settings = req.settings.clone(); // FIXME get rid of this clone
 
     db::jig::authz(&*db, claims.0.user_id, Some(req.jig_id.clone())).await?;
 
@@ -44,6 +42,16 @@ pub async fn list(
     let sessions = db::jig::player::list_sessions(&*db, id).await?;
 
     Ok(Json(JigPlayerSessionListResponse { sessions }))
+}
+
+/// Post an increase in the number of times a jig was played
+pub async fn get_play_count(
+    db: Data<PgPool>,
+    path: web::Path<JigId>,
+) -> Result<Json<<player::PlayCount as ApiEndpoint>::Res>, error::NotFound> {
+    let play_count = db::jig::get_play_count(&*db, path.into_inner()).await?;
+
+    Ok(Json(JigPlayCountResponse { play_count }))
 }
 
 pub mod instance {
@@ -125,14 +133,8 @@ pub mod instance {
 
         let instance_token: InstanceToken = serde_json::from_value(token)?;
 
-        db::jig::player::complete_session_instance(
-            &db,
-            req.jig_id,
-            ip_address,
-            user_agent,
-            instance_token.sub,
-        )
-        .await?;
+        db::jig::player::complete_session_instance(&db, ip_address, user_agent, instance_token.sub)
+            .await?;
 
         Ok(HttpResponse::NoContent().finish())
     }

@@ -1,7 +1,8 @@
 use crate::{
     api::{ApiEndpoint, Method},
     domain::jig::player::{
-        JigPlayerSessionCreateRequest, JigPlayerSessionCreateResponse, JigPlayerSessionListResponse,
+        JigPlayCountResponse, JigPlayerSessionCreateRequest, JigPlayerSessionCreateResponse,
+        JigPlayerSessionListResponse,
     },
     error::EmptyError,
 };
@@ -63,6 +64,19 @@ impl ApiEndpoint for List {
     type Res = JigPlayerSessionListResponse;
     type Err = EmptyError;
     const PATH: &'static str = "/v1/jig/{id}/player";
+    const METHOD: Method = Method::Get;
+}
+
+/// Number of times a JIG has been played.
+///
+/// # Authorization
+/// * None
+pub struct PlayCount;
+impl ApiEndpoint for PlayCount {
+    type Req = ();
+    type Res = JigPlayCountResponse;
+    type Err = EmptyError;
+    const PATH: &'static str = "/v1/jig/{id}/play-count";
     const METHOD: Method = Method::Get;
 }
 

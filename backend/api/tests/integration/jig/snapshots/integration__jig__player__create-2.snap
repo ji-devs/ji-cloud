@@ -13,6 +13,15 @@ expression: body
         "trackAssessments": false,
         "dragAssist": false
       }
+    },
+    {
+      "index": 1241,
+      "settings": {
+        "direction": "rtl",
+        "displayScore": false,
+        "trackAssessments": false,
+        "dragAssist": false
+      }
     }
   ]
 }

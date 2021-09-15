@@ -284,16 +284,6 @@ async fn count(db: Data<PgPool>) -> Result<Json<<jig::Count as ApiEndpoint>::Res
     Ok(Json(JigCountResponse { total_count }))
 }
 
-/// Post an increase in the number of times a jig was played
-async fn play_count(
-    db: Data<PgPool>,
-    path: web::Path<JigId>,
-) -> Result<HttpResponse, error::Delete> {
-    db::jig::increase_play_count(&*db, path.into_inner()).await?;
-
-    Ok(HttpResponse::NoContent().finish())
-}
-
 pub fn configure(cfg: &mut ServiceConfig) {
     cfg.route(jig::Browse::PATH, jig::Browse::METHOD.route().to(browse))
         .route(jig::Count::PATH, jig::Count::METHOD.route().to(count))
@@ -340,7 +330,9 @@ pub fn configure(cfg: &mut ServiceConfig) {
             jig::draft::Publish::METHOD.route().to(publish_draft),
         )
         .route(
-            jig::PlayCount::PATH,
-            jig::PlayCount::METHOD.route().to(play_count),
+            jig::player::PlayCount::PATH,
+            jig::player::PlayCount::METHOD
+                .route()
+                .to(player::get_play_count),
         );
 }

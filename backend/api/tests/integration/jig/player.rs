@@ -39,6 +39,22 @@ async fn create() -> anyhow::Result<()> {
     insta::assert_json_snapshot!(body);
 
     let resp = client
+        .post(&format!("http://0.0.0.0:{}/v1/jig/player", port))
+        .json(&serde_json::json!({
+            "jigId": "3a71522a-cd77-11eb-8dc1-af3e35f7c743",
+            "settings": {
+                "direction": "rtl",
+                "display_score": true,
+                "track_assessments": false,
+                "drag_assist": false,
+            }
+        }))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    let resp = client
         .get(&format!(
             "http://0.0.0.0:{}/v1/jig/3a71522a-cd77-11eb-8dc1-af3e35f7c743/player",
             port
@@ -65,7 +81,7 @@ async fn session_instance_play_count_flow() -> anyhow::Result<()> {
     let port = app.port();
 
     let client: reqwest::Client = reqwest::ClientBuilder::new()
-        .user_agent("USER_AGENT")
+        .user_agent("mocked user agent")
         .connect_timeout(std::time::Duration::from_secs(5))
         .timeout(std::time::Duration::from_secs(10))
         .build()?;
@@ -86,7 +102,7 @@ async fn session_instance_play_count_flow() -> anyhow::Result<()> {
 
     let token = body.token.clone();
 
-    insta::assert_json_snapshot!(body, {"token" => "[short_lived_token]"});
+    insta::assert_json_snapshot!(body, {".**.token" => "[instance_token]"});
 
     let resp = client
         .post(&format!(

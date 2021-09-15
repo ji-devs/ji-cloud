@@ -242,14 +242,6 @@ async fn process_uploaded_media_trigger(
 ) -> Result<Json<()>, error::EventArc> {
     type Error = error::EventArc;
 
-    // if let Some(cloud_events_mode) = query.into_inner().cloud_events_mode {
-    //     if cloud_events_mode != "__CE_PUBSUB_BINDING" {
-    //         return Err(Error::InvalidEventSource);
-    //     }
-    // } else {
-    //     return Err(Error::InvalidEventSource);
-    // }
-
     let event: audit_log::Event = audit_log::Event::try_from(event)?;
 
     let event_source: EventSource = EventSource::from_str(&event.source)?;
