@@ -115,8 +115,6 @@ where jig_id = $1
     })
     .collect();
 
-    log::info!("{:?}", sessions);
-
     Ok(sessions)
 }
 
