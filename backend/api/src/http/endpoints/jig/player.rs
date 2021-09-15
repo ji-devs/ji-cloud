@@ -23,11 +23,12 @@ pub async fn create(
 
     db::jig::authz(&*db, claims.0.user_id, Some(req.jig_id.clone())).await?;
 
-    let index = db::jig::player::create(&db, req.jig_id, &req.settings).await?;
+    let (index, expires_at) = db::jig::player::create(&db, req.jig_id, &req.settings).await?;
 
     Ok(HttpResponse::Created().json(JigPlayerSession {
         index,
         settings: req.settings,
+        expires_at,
     }))
 }
 

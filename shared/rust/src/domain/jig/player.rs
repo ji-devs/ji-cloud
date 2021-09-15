@@ -1,7 +1,9 @@
 //! Types for Jig short codes for sharing
 
-use super::JigId;
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+
+use super::JigId;
 
 /// Settings for the player session.
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -85,6 +87,9 @@ pub struct JigPlayerSession {
 
     /// Settings for the player session.
     pub settings: JigPlayerSettings,
+
+    /// When the player session expires
+    pub expires_at: DateTime<Utc>,
 }
 
 /// Lists all jig player sessions associated with a jig

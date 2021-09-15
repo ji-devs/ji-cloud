@@ -10,5 +10,6 @@ expression: body
     "displayScore": false,
     "trackAssessments": false,
     "dragAssist": false
-  }
+  },
+  "expires_at": "[timestamp]"
 }
