@@ -939,23 +939,21 @@ where id = $4
     Ok(())
 }
 
-pub async fn increase_play_count(db: &PgPool, id: JigId) -> anyhow::Result<()> {
-    let mut transaction = db.begin().await?;
-
-    sqlx::query!(
+pub async fn get_play_count(db: &PgPool, id: JigId) -> Result<i64, error::NotFound> {
+    let play_count = sqlx::query!(
         // language=SQL
         r#"
-update jig_play_count
-set play_count = play_count + 1
-where jig_id = $1
-returning play_count;
+select play_count from jig_play_count 
+where jig_id = $1;
             "#,
         id.0,
     )
-    .fetch_one(&mut transaction)
-    .await?;
+    .fetch_optional(db)
+    .await?
+    .ok_or(error::NotFound::ResourceNotFound)?
+    .play_count;
 
-    Ok(())
+    Ok(play_count)
 }
 
 /////////

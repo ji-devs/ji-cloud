@@ -116,7 +116,7 @@ mod tests {
 
         assert_eq!((1523, 1524), original.dimensions());
 
-        let (resized, thumbnail) = regenerate_images(&original, ImageKind::Sticker)?;
+        let (resized, _thumbnail) = regenerate_images(&original, ImageKind::Sticker)?;
 
         let resized = image::load_from_memory(&resized)?;
 
@@ -133,7 +133,7 @@ mod tests {
 
         assert_eq!((1500, 418), original.dimensions());
 
-        let (resized, thumbnail) = regenerate_images(&original, ImageKind::Sticker)?;
+        let (resized, _thumbnail) = regenerate_images(&original, ImageKind::Sticker)?;
 
         let resized = image::load_from_memory(&resized)?;
 

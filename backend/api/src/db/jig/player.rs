@@ -203,18 +203,17 @@ pub async fn create_session_instance(
 /// Completes a jig player session for a player and updates play count
 pub async fn complete_session_instance(
     db: &PgPool,
-    jig_id: JigId,
     ip_address: IPAddress,
     user_agent: UserAgent,
     instance_id: Uuid,
 ) -> Result<(), error::JigCode> {
     let mut txn = db.begin().await?;
 
-    let jig_session_index_query = sqlx::query!(
+    let resp = sqlx::query!(
         //language=SQL
         r#"
-        select ip_address, user_agent
-        from jig_player_session_instance
+        select ip_address, user_agent, jig_id as "jig_id: JigId"
+        from jig_player_session_instance join jig_player_session on session_index = index
         where id = $1
         "#,
         instance_id,
@@ -224,9 +223,7 @@ pub async fn complete_session_instance(
     .ok_or(error::JigCode::ResourceNotFound)?;
 
     // FIXME
-    if (jig_session_index_query.user_agent).ne(&user_agent.0)
-        | (jig_session_index_query.ip_address).ne(&ip_address.0)
-    {
+    if (resp.user_agent).ne(&user_agent.0) | (resp.ip_address).ne(&ip_address.0) {
         return Err(error::JigCode::ResourceNotFound);
     }
 
@@ -237,7 +234,7 @@ pub async fn complete_session_instance(
         set play_count = play_count + 1
         where jig_id = $1
         "#,
-        jig_id.0,
+        resp.jig_id.0,
     )
     .execute(db)
     .await?;

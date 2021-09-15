@@ -181,54 +181,6 @@
       "nullable": []
     }
   },
-  "0acd9b24dcc288f70653f737d3e28f3b025aba62d42e915b74876248ad2f3791": {
-    "query": "select index as \"index!: i16\" from jig_player_session where jig_id = $1",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "index!: i16",
-          "type_info": "Int2"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      },
-      "nullable": [
-        false
-      ]
-    }
-  },
-  "0beb54954693d6c926c31a35c219b5490951a7ca4644edf12752a44428c8f34f": {
-    "query": "\ninsert into jig\n    (display_name, creator_id, author_id, publish_at, language, description, direction, display_score, track_assessments, drag_assist)\nvalues ($1, $2, $2, $3, $4, $5, $6, $7, $8, $9)\nreturning id\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id",
-          "type_info": "Uuid"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Uuid",
-          "Timestamptz",
-          "Text",
-          "Text",
-          "Int2",
-          "Bool",
-          "Bool",
-          "Bool"
-        ]
-      },
-      "nullable": [
-        false
-      ]
-    }
-  },
   "0d33ddd6d34bf4755b8ff298de37d678fc3d79222c8d193dc06d1e8fe25b2354": {
     "query": "insert into user_email (user_id, email) values ($1, $2::text)",
     "describe": {
@@ -1675,6 +1627,18 @@
       ]
     }
   },
+  "56567f2d09b683dfb6209093ff0ded597cda78b614466626b84956d955eb69c6": {
+    "query": "\n        update jig_play_count\n        set play_count = play_count + 1\n        where jig_id = $1\n        ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "57b72bbdece8deb3ac84c44b94157afbd3d50d16c893613f54145b9ca7e255d0": {
     "query": "insert into user_audio_upload (audio_id) values($1)",
     "describe": {
@@ -2621,6 +2585,26 @@
       ]
     }
   },
+  "76f1749aa649b506836f13b60788548e9252ce833b7bb8a7c1b09777a99ec947": {
+    "query": "\nselect play_count from jig_play_count \nwhere jig_id = $1;\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "play_count",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
   "76f5138776b2544741d5bd7a20298dd4309fa398f23fac98b74873899a0f88b3": {
     "query": "\ninsert into image_tag (index, display_name)\nvalues ($1, $2)\nreturning index as \"index: ImageTagIndex\", display_name\n            ",
     "describe": {
@@ -2752,6 +2736,50 @@
         null,
         null,
         null,
+        false
+      ]
+    }
+  },
+  "7fc1aef6a00aa47799aa01f4313417b431ea5230c52a4ceddcde7139305310b1": {
+    "query": "\n        select jig_id as \"jig_id: JigId\", \n               direction as \"direction: TextDirection\", \n               display_score, \n               track_assessments, \n               drag_assist\n        from jig_player_session\n        where index=$1\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "jig_id: JigId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "direction: TextDirection",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 2,
+          "name": "display_score",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 3,
+          "name": "track_assessments",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 4,
+          "name": "drag_assist",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int2"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
         false
       ]
     }
@@ -2943,6 +2971,28 @@
         "Left": [
           "Uuid",
           "Int2"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
+  "890c3176a91e4028feb349523c366a1ff87072efa205b953476e58a5358b3850": {
+    "query": "\n        insert into jig_player_session_instance (session_index, ip_address, user_agent)\n        values ($1, $2, $3)\n        returning id as \"id: Uuid\"\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: Uuid",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int2",
+          "Text",
+          "Text"
         ]
       },
       "nullable": [
@@ -3175,23 +3225,6 @@
       ]
     }
   },
-  "94e4420ec0b6dd0d9c27c6070baeda5e14f7c4fb45aa6c9a343b1448d84f9f8b": {
-    "query": "\ninsert into jig_player_session (jig_id, index, direction, display_score, track_assessments, drag_assist)\nvalues ($1, $2, $3, $4, $5, $6)\n",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int2",
-          "Int2",
-          "Bool",
-          "Bool",
-          "Bool"
-        ]
-      },
-      "nullable": []
-    }
-  },
   "95cc52570b87e1413c93a9588cee5f081824028c269803aba12a578cada7395b": {
     "query": "select user_id from user_auth_basic where user_id <> $1 and email = $2 for update",
     "describe": {
@@ -3312,20 +3345,8 @@
       ]
     }
   },
-  "98598b1e205261d9b5cfae051e7faba9ffbb8431d92ddd0373073bd826c32312": {
-    "query": "\ninsert into play_count (jig_id, play_count)\nvalues ($1, 0)\n        ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      },
-      "nullable": []
-    }
-  },
-  "9baca0e0cc5e462bafb40e834a5c894d9f02dbb61ec75d81609cc32c946f5857": {
-    "query": "select exists(select 1 from image_metadata where id = $1) as \"exists!\"",
+  "9d166e1174a30bbd4c9c87544cf9c8403e5fb1dfc00fb312db75c795436f9ea3": {
+    "query": "select exists(select 1 from user_audio_upload where audio_id = $1 for no key update) as \"exists!\"",
     "describe": {
       "columns": [
         {
@@ -3443,6 +3464,34 @@
       "nullable": []
     }
   },
+  "a295c46187fb257f420676050e914a77ac01dc4e03f0d89ce2271ddf735e97ca": {
+    "query": "\ninsert into jig\n   (display_name, creator_id, author_id, publish_at, language, description, direction, display_score, track_assessments, drag_assist)\nvalues ($1, $2, $2, $3, $4, $5, $6, $7, $8, $9)\nreturning id\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Uuid",
+          "Timestamptz",
+          "Text",
+          "Text",
+          "Int2",
+          "Bool",
+          "Bool",
+          "Bool"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
   "a3af2a61a6203066df29365b0df9b228de0f14c411b6fbe18094085479509b13": {
     "query": "\ninsert into jig_category(jig_id, category_id)\nselect $1, category_id from jig_category where jig_id = $2\n",
     "describe": {
@@ -3557,70 +3606,6 @@
         ]
       },
       "nullable": []
-    }
-  },
-  "ab4b6465897568f3fd6c16ac0bc72c4fa307ea7dd8894c09f6870bfec6562bf9": {
-    "query": "\nselect jig_id as \"id: JigId\",\n       direction as \"direction: TextDirection\",\n       display_score, \n       track_assessments, \n       drag_assist\nfrom jig_player_session \nwhere index = $1\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id: JigId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "direction: TextDirection",
-          "type_info": "Int2"
-        },
-        {
-          "ordinal": 2,
-          "name": "display_score",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 3,
-          "name": "track_assessments",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 4,
-          "name": "drag_assist",
-          "type_info": "Bool"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int2"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false
-      ]
-    }
-  },
-  "ae89aec9ddc826f2803836a31e377f0ac8c6ca56c9ae51e18a16934595b054a4": {
-    "query": "select exists(select 1 from jig_player_session where jig_id=$1) as \"exists!\"",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "exists!",
-          "type_info": "Bool"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      },
-      "nullable": [
-        null
-      ]
     }
   },
   "aec729ae876f9816b6a64f6527c6e8497140391a8bebb7a00fc5418cb07682a8": {
@@ -3770,6 +3755,50 @@
         ]
       },
       "nullable": []
+    }
+  },
+  "bc84749bdd188fa136434f493167225b5837007acc14695e8a8499fd34d7c95b": {
+    "query": "\nselect index     as \"index!: i16\",\n       direction as \"direction: TextDirection\",\n       display_score,\n       track_assessments,\n       drag_assist\nfrom jig_player_session\nwhere jig_id = $1\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "index!: i16",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 1,
+          "name": "direction: TextDirection",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 2,
+          "name": "display_score",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 3,
+          "name": "track_assessments",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 4,
+          "name": "drag_assist",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ]
     }
   },
   "bdedb2c9dea3363859d3dbe22b6665efda3bf686a9c1eca1ffc9fb298de68d6f": {
@@ -4143,6 +4172,38 @@
       "nullable": []
     }
   },
+  "e4e47f07a4a34f70f8a50d2a5537dea12f8c0858efad9b7deaf469db4a33ad8e": {
+    "query": "\n        select ip_address, user_agent, jig_id as \"jig_id: JigId\"\n        from jig_player_session_instance join jig_player_session on session_index = index\n        where id = $1\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "ip_address",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 1,
+          "name": "user_agent",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "jig_id: JigId",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        true,
+        true,
+        false
+      ]
+    }
+  },
   "e7b414859b52186188a99c58f582e19b132f586d976eabf098c40f1fe356982d": {
     "query": "select id as \"id!\",\n    case kind\n        -- PngCanvasImage\n        when 0 then 3\n        -- PngStickerImage\n        when 1 then 0\n    end::int2 \"kind!: MediaKind\",\n    created_at as \"created_at!\",\n    updated_at,\n    uploaded_at,\n    0::int2 as \"library!: MediaLibrary\" -- global\nfrom image_metadata\nleft join image_upload on image_id = id\nunion all\nselect id as \"id!\",\n    case kind\n        -- GifAnimation\n        when 0 then 1\n        -- SpritesheetAnimation\n        when 1 then 2\n    end::int2 \"kind!: MediaKind\",\n    created_at as \"created_at!\",\n    updated_at,\n    uploaded_at,\n    0::int2 as \"library!: MediaLibrary\" -- global\nfrom animation_metadata\nleft join global_animation_upload on animation_id = id\nunion all\nselect id as \"id!\",\n    -- PngStickerImage\n    0::int2 as \"kind!: MediaKind\",\n    created_at as \"created_at!\",\n    updated_at,\n    uploaded_at,\n    1::int2 as \"library!: MediaLibrary\" -- user\nfrom user_image_library\nleft join user_image_upload on image_id = id\nunion all\nselect id as \"id!\",\n    -- Mp3Audio\n    4::int2 as \"kind!: MediaKind\",\n    created_at as \"created_at!\",\n    updated_at,\n    uploaded_at,\n    1::int2 as \"library!: MediaLibrary\" -- user\nfrom user_audio_library\nleft join user_audio_upload on audio_id = id\nunion all\nselect id as \"id!\",\n    kind as \"kind!: MediaKind\",\n    created_at as \"created_at!\",\n    updated_at,\n    uploaded_at,\n    2::int2 as \"library!: MediaLibrary\" -- web\nfrom web_media_library\n",
     "describe": {
@@ -4266,24 +4327,21 @@
       ]
     }
   },
-  "eee1207cdc926de955342d4fc7e247162b5dc9ba9dfb925ca3a5328c2aa7c794": {
-    "query": "\nupdate play_count\nset play_count = play_count + 1\nwhere jig_id = $1\nreturning play_count;\n            ",
+  "eff9722983d7d9a7636fc9a8b5aef67fd42c540d3ab4c6e8538ea911f48ea839": {
+    "query": "\ninsert into jig_player_session (jig_id, index, direction, display_score, track_assessments, drag_assist)\nvalues ($1, $2, $3, $4, $5, $6)\n\n",
     "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "play_count",
-          "type_info": "Int8"
-        }
-      ],
+      "columns": [],
       "parameters": {
         "Left": [
-          "Uuid"
+          "Uuid",
+          "Int2",
+          "Int2",
+          "Bool",
+          "Bool",
+          "Bool"
         ]
       },
-      "nullable": [
-        false
-      ]
+      "nullable": []
     }
   },
   "f05685c3fed0dbbf0740d25d9efbeb5ae59949c24daf871334730bd6da4114f9": {
@@ -4694,6 +4752,18 @@
       "nullable": [
         null
       ]
+    }
+  },
+  "f92c14a182afb0bbc54cf4ce449d6d5c124ef1f3b7c364178247a28a1371fe4c": {
+    "query": "\ninsert into jig_play_count (jig_id, play_count)\nvalues ($1, 0)\n        ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": []
     }
   },
   "f9342b5ec8f32c20788dc706143f9506fcdee6a955105a81e1b13e2aee29e360": {

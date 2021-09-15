@@ -1,0 +1,15 @@
+---
+source: tests/integration/jig/player.rs
+expression: body
+
+---
+{
+  "jigId": "0cc084bc-7c83-11eb-9f77-e3218dffb008",
+  "settings": {
+    "direction": "ltr",
+    "displayScore": true,
+    "trackAssessments": true,
+    "dragAssist": true
+  },
+  "token": "[instance_token]"
+}

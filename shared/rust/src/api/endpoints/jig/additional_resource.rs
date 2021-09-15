@@ -50,7 +50,7 @@ impl ApiEndpoint for Create {
     const METHOD: Method = Method::Post;
 }
 
-/// Update an additional resource URL for a
+/// Update an additional resource URL for a JIG.
 ///
 /// # Authorization
 ///

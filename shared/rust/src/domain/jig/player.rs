@@ -133,9 +133,6 @@ pub mod instance {
     #[derive(Serialize, Deserialize, Debug)]
     #[serde(rename_all = "camelCase")]
     pub struct PlayerSessionInstanceCompleteRequest {
-        /// ID of the JIG that the session is for
-        pub jig_id: JigId,
-
         /// Token that will be passed to confirm a JIG was played all the way through
         pub token: String,
     }
