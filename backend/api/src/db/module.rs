@@ -176,10 +176,13 @@ pub async fn get(
     let (id, index) = (lookup.id(), lookup.index());
 
     let module = sqlx::query!(
+        //language=SQL
         r#"
-select 
+select
     id as "id: ModuleId",
     contents as "body",
+    created_at as "created_at",
+    updated_at as "updated_at",
     kind as "kind: ModuleKind",
     is_complete as "is_complete"
 from jig_module
@@ -189,14 +192,16 @@ where jig_id = $1 and (id is not distinct from $2 or index is not distinct from 
         id.map(|it| it.0),
         index.map(|it| it as i16)
     )
-    .fetch_optional(pool)
-    .await?;
+        .fetch_optional(pool)
+        .await?;
 
     let map_response = |body, kind| transform_response_kind(body, kind);
 
     match module {
         Some(it) => Ok(Some(Module {
             id: it.id,
+            created_at: it.created_at,
+            updated_at: it.updated_at,
             body: map_response(it.body, it.kind).context(anyhow::anyhow!(
                 "failed to transform module of kind {:?}",
                 it.kind

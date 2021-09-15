@@ -3,6 +3,7 @@
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 use uuid::Uuid;
+use chrono::{DateTime, Utc};
 
 /// Module bodies
 pub mod body;
@@ -145,6 +146,12 @@ pub struct Module {
 
     /// Whether the module is complete or not.
     pub is_complete: bool,
+
+    /// When the module was originally created.
+    pub created_at: DateTime<Utc>,
+
+    /// When the module was last updated.
+    pub updated_at: Option<DateTime<Utc>>,
 }
 
 /// Request to create a new `Module`.
