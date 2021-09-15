@@ -58,6 +58,7 @@ async fn create_default() -> anyhow::Result<()> {
     Ok(())
 }
 
+// requires algolia
 // #[actix_rt::test]
 // async fn delete() -> anyhow::Result<()> {
 //     let app = initialize_server(&[Fixture::User, Fixture::Jig]).await;

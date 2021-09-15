@@ -36,9 +36,9 @@ async fn create() -> anyhow::Result<()> {
 
     let body: JigPlayerSession = resp.json().await?;
 
-    insta::assert_json_snapshot!(body);
+    insta::assert_json_snapshot!(body, { ".**.index" => "[index]" });
 
-    let resp = client
+    let _resp = client
         .post(&format!("http://0.0.0.0:{}/v1/jig/player", port))
         .json(&serde_json::json!({
             "jigId": "3a71522a-cd77-11eb-8dc1-af3e35f7c743",
@@ -69,7 +69,7 @@ async fn create() -> anyhow::Result<()> {
 
     app.stop(false).await;
 
-    insta::assert_json_snapshot!(body);
+    insta::assert_json_snapshot!(body, { ".**.index" => "[index]" });
 
     Ok(())
 }

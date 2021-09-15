@@ -6,7 +6,7 @@ expression: body
 {
   "sessions": [
     {
-      "index": 1237,
+      "index": "[index]",
       "settings": {
         "direction": "rtl",
         "displayScore": false,
@@ -15,7 +15,7 @@ expression: body
       }
     },
     {
-      "index": 1241,
+      "index": "[index]",
       "settings": {
         "direction": "rtl",
         "displayScore": false,
