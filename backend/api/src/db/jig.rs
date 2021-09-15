@@ -353,7 +353,6 @@ where id = $1 and $2 is distinct from audio_background
         .await?;
     }
 
-    log::info!("{:?}", audio_effects);
     if let Some(audio_effects) = audio_effects {
         sqlx::query!(
             //language=SQL
