@@ -6,6 +6,7 @@ use crate::{
     fixture::Fixture,
     helpers::{initialize_server, LoginExt},
 };
+use shared::domain::jig::JigUpdateRequest;
 
 mod additional_resource;
 mod cover;
@@ -45,7 +46,14 @@ async fn create_default() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body, {".**.id" => "[id]", ".*.last_edited" => "[time_stamp]"});
+    insta::assert_json_snapshot!(
+        body, {
+            ".**.id" => "[id]",
+            ".**.lastEdited" => "[last_edited]",
+            ".**.feedbackPositive" => "[audio]",
+            ".**.feedbackNegative" => "[audio]"
+        }
+    );
 
     Ok(())
 }
@@ -142,10 +150,10 @@ async fn clone() -> anyhow::Result<()> {
     insta::assert_json_snapshot!(
         body, {
             ".**.id" => "[id]",
-            ".**.last_edited" => "[last_edited]",
-            ".**.feedback_positive" => "[audio]",
-            ".**.feedback_negative" => "[audio]",
-            ".**.additional_resources" => "[ids]"
+            ".**.lastEdited" => "[last_edited]",
+            ".**.feedbackPositive" => "[audio]",
+            ".**.feedbackNegative" => "[audio]",
+            ".**.additionalResources" => "[ids]"
         }
     );
 
@@ -178,9 +186,9 @@ async fn get() -> anyhow::Result<()> {
 
     insta::assert_json_snapshot!(
         body, {
-            ".**.last_edited" => "[last_edited]",
-            ".**.feedback_positive" => "[audio]",
-            ".**.feedback_negative" => "[audio]"
+            ".**.lastEdited" => "[last_edited]",
+            ".**.feedbackPositive" => "[audio]",
+            ".**.feedbackNegative" => "[audio]"
         }
     );
 
@@ -211,9 +219,9 @@ async fn browse_simple() -> anyhow::Result<()> {
 
     insta::assert_json_snapshot!(
         body, {
-            ".**.last_edited" => "[last_edited]",
-            ".**.feedback_positive" => "[audio]",
-            ".**.feedback_negative" => "[audio]"
+            ".**.lastEdited" => "[last_edited]",
+            ".**.feedbackPositive" => "[audio]",
+            ".**.feedbackNegative" => "[audio]"
         }
     );
 
@@ -247,9 +255,9 @@ async fn browse_own_simple() -> anyhow::Result<()> {
 
     insta::assert_json_snapshot!(
         body, {
-            ".**.last_edited" => "[last_edited]",
-            ".**.feedback_positive" => "[audio]",
-            ".**.feedback_negative" => "[audio]"
+            ".**.lastEdited" => "[last_edited]",
+            ".**.feedbackPositive" => "[audio]",
+            ".**.feedbackNegative" => "[audio]"
         }
     );
 
@@ -311,10 +319,10 @@ async fn update() -> anyhow::Result<()> {
         ))
         .json(&json!({
             "language": "en-us",
-            "audio_background": "SukkotLoop",
-            "audio_effects": {
-                "feedback_positive": [ "Magic" ],
-                "feedback_negative": [ "Boing" ]
+            "audioBackground": "FunForKids",
+            "audioEffects": {
+                "feedbackPositive": [ "Magic" ],
+                "feedbackNegative": [ "Boing" ]
             }
         }))
         .login()
@@ -338,7 +346,7 @@ async fn update() -> anyhow::Result<()> {
 
     app.stop(false).await;
 
-    insta::assert_json_snapshot!(body, {".**.last_edited" => "[timestamp]"});
+    insta::assert_json_snapshot!(body, {".**.lastEdited" => "[timestamp]"});
 
     Ok(())
 }

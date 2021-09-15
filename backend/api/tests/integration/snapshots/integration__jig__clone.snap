@@ -6,7 +6,7 @@ expression: body
 {
   "jig": {
     "id": "[id]",
-    "display_name": "",
+    "displayName": "",
     "modules": [
       {
         "id": "[id]",
@@ -21,30 +21,30 @@ expression: body
         "kind": "Memory"
       }
     ],
-    "age_ranges": [],
+    "ageRanges": [],
     "affiliations": [],
     "goals": [],
-    "creator_id": "1f241e1b-b537-493f-a230-075cb16315be",
-    "author_id": "1f241e1b-b537-493f-a230-075cb16315be",
-    "author_name": "Bobby Tables",
+    "creatorId": "1f241e1b-b537-493f-a230-075cb16315be",
+    "authorId": "1f241e1b-b537-493f-a230-075cb16315be",
+    "authorName": "Bobby Tables",
     "language": "en",
     "categories": [],
-    "publish_at": null,
-    "additional_resources": "[ids]",
+    "publishAt": null,
+    "additionalResources": "[ids]",
     "description": "test description",
-    "last_edited": "[last_edited]",
-    "is_public": false,
-    "default_player_settings": {
+    "lastEdited": "[last_edited]",
+    "isPublic": false,
+    "defaultPlayerSettings": {
       "direction": "ltr",
       "displayScore": false,
       "trackAssessments": false,
       "dragAssist": false
     },
     "theme": "Blank",
-    "audio_background": null,
-    "audio_effects": {
-      "feedback_positive": "[audio]",
-      "feedback_negative": "[audio]"
+    "audioBackground": null,
+    "audioEffects": {
+      "feedbackPositive": "[audio]",
+      "feedbackNegative": "[audio]"
     }
   }
 }

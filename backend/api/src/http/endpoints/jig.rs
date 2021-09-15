@@ -124,6 +124,9 @@ async fn update(
 
     db::jig::authz(&*db, claims.0.user_id, Some(id)).await?;
 
+    log::info!("ayayayayaya");
+    log::info!("{:?}", req);
+
     let req = req.map_or_else(Default::default, Json::into_inner);
 
     db::jig::update(
