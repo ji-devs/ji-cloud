@@ -32,7 +32,10 @@ async fn create_default() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body, {".**.id" => "[id]"});
+    insta::assert_json_snapshot!(body, {
+        ".**.id" => "[id]",
+        ".**.created_at" => "[created_at]",
+        ".**.updated_at" => "[updated_at]"});
 
     let id = body.get("id").unwrap().as_str().unwrap();
 
@@ -48,7 +51,10 @@ async fn create_default() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body, {".**.id" => "[id]"});
+    insta::assert_json_snapshot!(body, {
+        ".**.id" => "[id]",
+        ".**.created_at" => "[created_at]",
+        ".**.updated_at" => "[updated_at]"});
 
     Ok(())
 }
