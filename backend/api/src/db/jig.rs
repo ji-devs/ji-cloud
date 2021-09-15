@@ -311,6 +311,7 @@ pub async fn update(
     audio_effects: Option<&AudioEffects>,
 ) -> Result<(), error::UpdateWithMetadata> {
     let mut transaction = pool.begin().await?;
+
     if !sqlx::query!(
         r#"select exists(select 1 from jig where id = $1 for update) as "exists!""#,
         id.0
@@ -352,6 +353,7 @@ where id = $1 and $2 is distinct from audio_background
         .await?;
     }
 
+    log::info!("{:?}", audio_effects);
     if let Some(audio_effects) = audio_effects {
         sqlx::query!(
             //language=SQL

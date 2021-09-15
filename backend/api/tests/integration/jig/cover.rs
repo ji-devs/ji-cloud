@@ -20,7 +20,7 @@ async fn update_no_modules_changes() -> anyhow::Result<()> {
             port
         ))
         .json(&json! {{
-            "display_name": "test",
+            "displayName": "test",
         }})
         .login()
         .send()
@@ -41,7 +41,7 @@ async fn update_no_modules_changes() -> anyhow::Result<()> {
 
     app.stop(false).await;
 
-    insta::assert_json_snapshot!(body.jig, {".**.last_edited" => "[last_edited]", ".**.feedback_positive" => "[audio]", ".**.feedback_negative" => "[audio]"});
+    insta::assert_json_snapshot!(body.jig, {".**.lastEdited" => "[timestamp]", ".**.feedbackPositive" => "[audio]", ".**.feedbackNegative" => "[audio]"});
 
     Ok(())
 }

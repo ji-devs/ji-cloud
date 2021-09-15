@@ -7,7 +7,7 @@ expression: body
   "jigs": [
     {
       "id": "0cc084bc-7c83-11eb-9f77-e3218dffb008",
-      "display_name": "",
+      "displayName": "",
       "modules": [
         {
           "id": "0cbfdd82-7c83-11eb-9f77-d7d86264c3bc",
@@ -22,123 +22,123 @@ expression: body
           "kind": "Memory"
         }
       ],
-      "age_ranges": [],
+      "ageRanges": [],
       "affiliations": [],
       "goals": [],
-      "creator_id": "1f241e1b-b537-493f-a230-075cb16315be",
-      "author_id": "1f241e1b-b537-493f-a230-075cb16315be",
-      "author_name": "Bobby Tables",
+      "creatorId": "1f241e1b-b537-493f-a230-075cb16315be",
+      "authorId": "1f241e1b-b537-493f-a230-075cb16315be",
+      "authorName": "Bobby Tables",
       "language": "en",
       "categories": [],
-      "publish_at": null,
-      "additional_resources": [
+      "publishAt": null,
+      "additionalResources": [
         "41b8d0b4-aaff-4942-88ba-1a32fecdbd23",
         "7a227007-b957-4601-bf15-87a6b86da672"
       ],
       "description": "test description",
-      "last_edited": "[last_edited]",
-      "is_public": true,
-      "default_player_settings": {
+      "lastEdited": "[last_edited]",
+      "isPublic": true,
+      "defaultPlayerSettings": {
         "direction": "ltr",
         "displayScore": false,
         "trackAssessments": false,
         "dragAssist": false
       },
       "theme": "Blank",
-      "audio_background": null,
-      "audio_effects": {
-        "feedback_positive": "[audio]",
-        "feedback_negative": "[audio]"
+      "audioBackground": null,
+      "audioEffects": {
+        "feedbackPositive": "[audio]",
+        "feedbackNegative": "[audio]"
       }
     },
     {
       "id": "3a71522a-cd77-11eb-8dc1-af3e35f7c743",
-      "display_name": "",
+      "displayName": "",
       "modules": [],
-      "age_ranges": [],
+      "ageRanges": [],
       "affiliations": [],
       "goals": [],
-      "creator_id": "1f241e1b-b537-493f-a230-075cb16315be",
-      "author_id": "1f241e1b-b537-493f-a230-075cb16315be",
-      "author_name": "Bobby Tables",
+      "creatorId": "1f241e1b-b537-493f-a230-075cb16315be",
+      "authorId": "1f241e1b-b537-493f-a230-075cb16315be",
+      "authorName": "Bobby Tables",
       "language": "en",
       "categories": [],
-      "publish_at": null,
-      "additional_resources": [],
+      "publishAt": null,
+      "additionalResources": [],
       "description": "test description",
-      "last_edited": "[last_edited]",
-      "is_public": true,
-      "default_player_settings": {
+      "lastEdited": "[last_edited]",
+      "isPublic": true,
+      "defaultPlayerSettings": {
         "direction": "ltr",
         "displayScore": false,
         "trackAssessments": false,
         "dragAssist": false
       },
       "theme": "Blank",
-      "audio_background": "SukkotLoop",
-      "audio_effects": {
-        "feedback_positive": "[audio]",
-        "feedback_negative": "[audio]"
+      "audioBackground": "DancingHappy",
+      "audioEffects": {
+        "feedbackPositive": "[audio]",
+        "feedbackNegative": "[audio]"
       }
     },
     {
       "id": "bdc17474-d4a8-11eb-b8bc-0242ac130003",
-      "display_name": "",
+      "displayName": "",
       "modules": [],
-      "age_ranges": [],
+      "ageRanges": [],
       "affiliations": [],
       "goals": [],
-      "creator_id": "1f241e1b-b537-493f-a230-075cb16315be",
-      "author_id": "1f241e1b-b537-493f-a230-075cb16315be",
-      "author_name": "Bobby Tables",
+      "creatorId": "1f241e1b-b537-493f-a230-075cb16315be",
+      "authorId": "1f241e1b-b537-493f-a230-075cb16315be",
+      "authorName": "Bobby Tables",
       "language": "en",
       "categories": [],
-      "publish_at": "2021-03-04T00:46:26.134651Z",
-      "additional_resources": [],
+      "publishAt": "2021-03-04T00:46:26.134651Z",
+      "additionalResources": [],
       "description": "test description",
-      "last_edited": "[last_edited]",
-      "is_public": true,
-      "default_player_settings": {
+      "lastEdited": "[last_edited]",
+      "isPublic": true,
+      "defaultPlayerSettings": {
         "direction": "ltr",
         "displayScore": false,
         "trackAssessments": false,
         "dragAssist": false
       },
       "theme": "Blank",
-      "audio_background": null,
-      "audio_effects": {
-        "feedback_positive": "[audio]",
-        "feedback_negative": "[audio]"
+      "audioBackground": null,
+      "audioEffects": {
+        "feedbackPositive": "[audio]",
+        "feedbackNegative": "[audio]"
       }
     },
     {
       "id": "ce4edd68-d4a8-11eb-b8bc-0242ac130003",
-      "display_name": "",
+      "displayName": "",
       "modules": [],
-      "age_ranges": [],
+      "ageRanges": [],
       "affiliations": [],
       "goals": [],
-      "creator_id": "1f241e1b-b537-493f-a230-075cb16315be",
-      "author_id": "1f241e1b-b537-493f-a230-075cb16315be",
-      "author_name": "Bobby Tables",
+      "creatorId": "1f241e1b-b537-493f-a230-075cb16315be",
+      "authorId": "1f241e1b-b537-493f-a230-075cb16315be",
+      "authorName": "Bobby Tables",
       "language": "en",
       "categories": [],
-      "publish_at": "2021-03-04T00:46:26.134651Z",
-      "additional_resources": [],
+      "publishAt": "2021-03-04T00:46:26.134651Z",
+      "additionalResources": [],
       "description": "test description",
-      "last_edited": "[last_edited]",
-      "is_public": false,
-      "default_player_settings": {
+      "lastEdited": "[last_edited]",
+      "isPublic": false,
+      "defaultPlayerSettings": {
         "direction": "ltr",
         "displayScore": false,
         "trackAssessments": false,
         "dragAssist": false
       },
       "theme": "Blank",
-      "audio_background": null,
-      "audio_effects": {
-        "feedback_positive": "[audio]",
-        "feedback_negative": "[audio]"
+      "audioBackground": null,
+      "audioEffects": {
+        "feedbackPositive": "[audio]",
+        "feedbackNegative": "[audio]"
       }
     }
   ],

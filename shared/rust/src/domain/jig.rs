@@ -132,6 +132,7 @@ pub struct JigCreateRequest {
 
 /// The over-the-wire representation of a JIG.
 #[derive(Serialize, Deserialize, Clone, Debug)]
+#[serde(rename_all = "camelCase")]
 pub struct Jig {
     /// The ID of the JIG.
     pub id: JigId,
@@ -224,6 +225,7 @@ impl AudioBackground {
 
 /// Audio Effects
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
+#[serde(rename_all = "camelCase")]
 pub struct AudioEffects {
     /// Positive audio feedback
     pub feedback_positive: HashSet<AudioFeedbackPositive>,
@@ -341,6 +343,7 @@ pub struct JigResponse {
 
 /// Request for updating a JIG.
 #[derive(Serialize, Deserialize, Debug, Default)]
+#[serde(rename_all = "camelCase")]
 pub struct JigUpdateRequest {
     /// The JIG's name.
     #[serde(skip_serializing_if = "Option::is_none")]
