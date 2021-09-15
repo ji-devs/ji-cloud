@@ -1,4 +1,5 @@
 use core::config::JIG_PLAYER_SESSION_CODE_MAX;
+use rand::{rngs::ThreadRng, Rng};
 use shared::domain::jig::{
     player::{JigPlayerSession, JigPlayerSessionIndex, JigPlayerSettings},
     JigId, TextDirection,
@@ -16,12 +17,14 @@ pub async fn create(
     jig_id: JigId,
     settings: &JigPlayerSettings,
 ) -> Result<JigPlayerSessionIndex, error::JigCode> {
-    // retry until successful:
-    let mut index = hash_id_to_code(jig_id.0);
-    let mut n: i16 = 0;
+    let mut generator = rand::thread_rng();
 
-    loop {
-        log::info!("try insert with index {}", index);
+    let mut index = generate_random_code(&mut generator);
+
+    // retry as many times as there are possible codes
+    // NOTE: this is NOT guaranteed to successfully insert if there
+    for _ in 0..JIG_PLAYER_SESSION_CODE_MAX * 2 {
+        log::debug!("Try insert with index {}", index);
         match sqlx::query!(
             //language=SQL
             r#"
@@ -40,23 +43,20 @@ values ($1, $2, $3, $4, $5, $6)
         .await
         {
             Ok(_) => { // insert successful
-                log::info!("OK");
                 return Ok(JigPlayerSessionIndex(index));
             },
             Err(err) => match err {
                 sqlx::Error::Database(db_err) => {
                     session_create_error_or_continue(db_err)?;
-
-                    // here means retry with new index
-                    log::info!("how? {}", &index);
-                    index = rehash(index, &n);
-                    log::info!("newnew {}", &index);
-                    n += 1;
+                    // did not return error on previous line, retry with new index
+                    index = generate_random_code(&mut generator);
                 },
                 err => return Err(anyhow::anyhow!("sqlx error: {:?}", err).into()),
             },
         }
     }
+
+    Err(anyhow::anyhow!("Maximum retries reached for creating a new jig session").into())
 }
 
 fn session_create_error_or_continue(db_err: Box<dyn DatabaseError>) -> Result<(), error::JigCode> {
@@ -65,50 +65,20 @@ fn session_create_error_or_continue(db_err: Box<dyn DatabaseError>) -> Result<()
     match constraint {
         Some("jig_player_session_pkey") => {
             // same code but different jig. retry insert with a new code
-            log::info!("1");
-
             Ok(())
         }
         Some("jig_player_session_jig_id_fkey") => {
             // no jig with this id exists
-            log::info!("2");
             Err(error::JigCode::ResourceNotFound)
         }
-        db_err => {
-            log::info!("3");
-            Err(anyhow::anyhow!("{}", db_err.unwrap_or("unknown database error")).into())
-        }
+        db_err => Err(anyhow::anyhow!("{}", db_err.unwrap_or("unknown database error")).into()),
     }
 }
 
-/// Hashes a Uuid by
-/// 1. XORing every 2 bytes together as an i16,
-/// 2. clamping to within the digit requirement using mod (4 digits here),
-/// 3. taking the absolute value to get rid of negative numbers
-fn hash_id_to_code(id: Uuid) -> i16 {
-    let bytes_to_word = |a: &u8, b: &u8| *a as i16 + (*b as i16) << 8;
+fn generate_random_code(generator: &mut ThreadRng) -> i16 {
+    debug_assert!(JIG_PLAYER_SESSION_CODE_MAX > 0);
 
-    let hash = id
-        .as_bytes()
-        .windows(2)
-        .fold(0, |acc, w| acc ^ bytes_to_word(&w[0], &w[1]));
-
-    let result = (hash % 10000) as i16;
-
-    result.abs();
-
-    // FIXME temp debug
-    1234
-}
-
-/// Rehash by
-/// 1. adding 2.pow(attempt_number) to the previous conflicting hash:
-///      hash(j) = hash(j-1) + 2.pow(j-1),
-/// 2. clamping to within the digit requirement using mod (4 digits here),
-/// 3. taking the absolute value to get rid of negative numbers
-#[inline]
-fn rehash(hash: i16, attempt: &i16) -> i16 {
-    ((hash + (1 << attempt)) % (JIG_PLAYER_SESSION_CODE_MAX + 1)).abs()
+    generator.gen_range(0..JIG_PLAYER_SESSION_CODE_MAX)
 }
 
 pub async fn list_sessions(db: &PgPool, jig_id: JigId) -> sqlx::Result<Vec<JigPlayerSession>> {
@@ -212,9 +182,14 @@ pub async fn complete_session_instance(
     let resp = sqlx::query!(
         //language=SQL
         r#"
-        select ip_address, user_agent, jig_id as "jig_id: JigId"
-        from jig_player_session_instance join jig_player_session on session_index = index
-        where id = $1
+delete
+from jig_player_session_instance
+where id = $1
+returning ip_address, user_agent, (
+    select jig_id
+    from jig_player_session_instance
+             join jig_player_session on session_index = index
+) as "jig_id!: JigId"
         "#,
         instance_id,
     )
