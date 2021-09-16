@@ -27,23 +27,7 @@ impl ApiEndpoint for List {
     const METHOD: Method = Method::Get;
 }
 
-/// Add an entry to the list of recent user images.
-///
-/// # Errors
-/// * [`Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.
-///
-/// * ['BadRequest'](http::StatusCode::BAD_REQUEST) if the request is malformed (e.g. invalid uuid or ['MediaLibrary'](crate::media::MediaLibrary) enum given).
-pub struct Create;
-
-impl ApiEndpoint for Create {
-    type Req = UserRecentImageCreateRequest;
-    type Res = UserRecentImageResponse;
-    type Err = EmptyError;
-    const PATH: &'static str = "/v1/user/me/recent/image";
-    const METHOD: Method = Method::Post;
-}
-
-/// Update an entry in the list of recent user images.
+/// Update or add an entry in the list of recent user images.
 /// Invoking this bumps the entry to the top of the recent images list.
 ///
 /// # Errors
@@ -54,13 +38,15 @@ impl ApiEndpoint for Create {
 /// * ['BadRequest'](http::StatusCode::BAD_REQUEST) if the request is malformed.
 pub struct Update;
 
+// TODO: Move ID into request body
+// TODO: grab req/res from above
 impl ApiEndpoint for Update {
-    type Req = ();
-    type Res = ();
+    type Req = UserRecentImageCreateRequest;
+    type Res = UserRecentImageResponse;
     type Err = EmptyError;
     // uuid should be sufficient to identify an image, VERY unlikely to conflict across media libraries
-    const PATH: &'static str = "/v1/user/me/recent/image/{id}";
-    const METHOD: Method = Method::Patch;
+    const PATH: &'static str = "/v1/user/me/recent/image";
+    const METHOD: Method = Method::Put;
 }
 
 /// Remove an entry from the list of recent user images.

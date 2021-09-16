@@ -4,6 +4,7 @@ expression: body
 
 ---
 {
-  "code": 409,
-  "message": "An image with the same ID already exists in recent images list for user"
+  "id": "8cca6f3a-c4bb-11eb-8edf-13c75672da8f",
+  "library": "User",
+  "last_used": "[timestamp]"
 }
