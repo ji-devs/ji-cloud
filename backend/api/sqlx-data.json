@@ -3579,6 +3579,24 @@
       "nullable": []
     }
   },
+  "b093762d4b40e825b57962cb833a8144a57270a3029f0cd6362d956b701e0651": {
+    "query": "select token from \"session\" order by created_at limit 1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "token",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
   "b0abad8e6c605062d886f6f1e3dfd7aaab57f30c3615de97e484cd4c6645bba4": {
     "query": "\ninsert into jig_additional_resource (jig_id, url)\nvalues ($1, $2)\nreturning id\n        ",
     "describe": {
