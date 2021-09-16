@@ -14,31 +14,28 @@ use shared::{
 };
 use sqlx::PgPool;
 
-pub(in super::super) async fn create(
+pub(in super::super) async fn update(
     db: Data<PgPool>,
     claims: TokenUser,
-    req: Json<<recent::Create as ApiEndpoint>::Req>,
+    req: Json<<recent::Update as ApiEndpoint>::Req>,
 ) -> Result<HttpResponse, error::UserRecentImage> {
-    let req = req.into_inner();
+    // TODO: new: return created; updated: return Ok
+    let (id, library, last_used, is_updated): (ImageId, MediaLibrary, DateTime<Utc>, bool) =
+        db::image::recent::update(db.as_ref(), claims.0.user_id, req.id, req.library).await?;
 
-    let (id, library, last_used): (ImageId, MediaLibrary, DateTime<Utc>) =
-        db::image::recent::create(db.as_ref(), claims.0.user_id, req.id, req.library).await?;
+    if is_updated == true {
+        return Ok(HttpResponse::Ok().json(UserRecentImageResponse {
+            id,
+            library,
+            last_used,
+        }));
+    }
 
     Ok(HttpResponse::Created().json(UserRecentImageResponse {
         id,
         library,
         last_used,
     }))
-}
-
-pub(in super::super) async fn update(
-    db: Data<PgPool>,
-    claims: TokenUser,
-    req: Path<ImageId>,
-) -> Result<HttpResponse, error::UserRecentImage> {
-    db::image::recent::update(db.as_ref(), claims.0.user_id, req.into_inner()).await?;
-
-    Ok(HttpResponse::NoContent().finish())
 }
 
 pub(in super::super) async fn delete(
