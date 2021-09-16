@@ -1129,19 +1129,6 @@
       ]
     }
   },
-  "1e615fdd598c2e33192d23e3320cf6985e3d9a43ec58fbef8c24f92c79a66717": {
-    "query": "\nupdate user_recent_image\nset last_used = now()\nwhere user_id = $1 and image_id = $2\n            ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid"
-        ]
-      },
-      "nullable": []
-    }
-  },
   "1f632d95656642bf59d0e5223e62370d4bb13f7bdc65cb3aa9171e6b39114c6d": {
     "query": "select uploaded_at from image_upload where image_id = $1 for update",
     "describe": {
