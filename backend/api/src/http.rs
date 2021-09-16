@@ -1,10 +1,10 @@
 use std::{net::TcpListener, sync::Arc};
 
 use actix_service::Service;
-use actix_web::{dev::Server, HttpResponse};
 use actix_web::{
-    dev::{MessageBody, ServiceRequest, ServiceResponse},
-    web::Data,
+    dev::{MessageBody, Server, ServiceRequest, ServiceResponse},
+    web::{method, Data},
+    HttpResponse,
 };
 use core::{
     config::JSON_BODY_LIMIT,
@@ -16,7 +16,7 @@ use sqlx::postgres::PgPool;
 
 use crate::{
     error::BasicError,
-    service::{self, mail, s3, ServiceData},
+    service::{self, mail, s3, upload::cleaner, ServiceData},
 };
 
 mod cors;
@@ -113,6 +113,8 @@ pub async fn build_and_run(
     algolia_key_store: Option<crate::algolia::SearchKeyStore>,
     jwk_verifier: Arc<crate::jwk::JwkVerifier>,
     mail_client: Option<mail::Client>,
+    algolia_manager: Option<crate::algolia::Manager>,
+    media_upload_cleaner: Option<cleaner::UploadCleaner>,
 ) -> anyhow::Result<()> {
     let app = build(
         pool,
@@ -124,6 +126,8 @@ pub async fn build_and_run(
         algolia_key_store,
         jwk_verifier,
         mail_client,
+        algolia_manager,
+        media_upload_cleaner,
     )?;
     app.run_until_stopped().await?;
 
@@ -140,6 +144,8 @@ pub fn build(
     algolia_key_store: Option<crate::algolia::SearchKeyStore>,
     jwk_verifier: Arc<crate::jwk::JwkVerifier>,
     mail_client: Option<mail::Client>,
+    algolia_manager: Option<crate::algolia::Manager>,
+    media_upload_cleaner: Option<cleaner::UploadCleaner>,
 ) -> anyhow::Result<Application> {
     let local_insecure = settings.is_local();
     let api_port = settings.api_port;
@@ -150,6 +156,8 @@ pub fn build(
     let algolia = algolia.map(ServiceData::new);
     let algolia_key_store = algolia_key_store.map(ServiceData::new);
     let mail_client = mail_client.map(ServiceData::new);
+    let algolia_manager = algolia_manager.map(ServiceData::new);
+    let media_upload_cleaner = media_upload_cleaner.map(ServiceData::new);
 
     let server = actix_web::HttpServer::new(move || {
         let app = actix_web::App::new()
@@ -186,6 +194,15 @@ pub fn build(
             None => app,
         };
 
+        let app = match algolia_manager.clone() {
+            Some(algolia_manager) => app.app_data(algolia_manager),
+            None => app,
+        };
+
+        let app = match media_upload_cleaner.clone() {
+            Some(media_upload_cleaner) => app.app_data(media_upload_cleaner),
+            None => app,
+        };
         app.app_data(Data::from(jwk_verifier.clone()))
             .wrap(cors::get(local_insecure))
             .wrap(actix_web::middleware::Logger::default())
@@ -220,7 +237,8 @@ pub fn build(
             .configure(endpoints::media::configure)
             .configure(endpoints::session::configure)
             .configure(endpoints::locale::configure)
-            .route("/", actix_web::web::get().to(no_content_response))
+            .configure(endpoints::scheduler::configure)
+            .route("/", method(http::Method::GET).to(no_content_response))
     });
 
     // if listenfd doesn't take a TcpListener (i.e. we're not running via

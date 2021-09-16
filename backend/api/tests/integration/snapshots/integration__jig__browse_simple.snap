@@ -78,7 +78,7 @@ expression: body
           "trackAssessments": false,
           "dragAssist": false
         },
-        "theme": "Chalkboard",
+        "theme": "Jigzi",
         "audioBackground": "funForKids",
         "audioEffects": {
           "feedbackPositive": "[audio]",

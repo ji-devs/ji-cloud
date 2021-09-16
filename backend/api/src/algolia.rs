@@ -9,6 +9,7 @@ use chrono::Utc;
 use core::settings::AlgoliaSettings;
 use futures::TryStreamExt;
 use serde::Serialize;
+
 use shared::{
     domain::{
         category::CategoryId,
@@ -19,8 +20,7 @@ use shared::{
     media::MediaGroupKind,
 };
 use sqlx::PgPool;
-use std::{convert::TryInto, time::Duration, time::Instant};
-use tokio::task::JoinHandle;
+use std::convert::TryInto;
 use uuid::Uuid;
 
 use migration::ResyncKind;
@@ -77,6 +77,7 @@ enum BatchMedia<'a> {
 
 /// Manager for background task that reads updated jigs or media from the database, then
 /// performs batch updates to the indices.
+#[derive(Clone)]
 pub struct Manager {
     pub db: PgPool,
     pub inner: Inner,
@@ -108,42 +109,31 @@ impl Manager {
         }))
     }
 
-    #[must_use]
-    pub fn spawn(self) -> JoinHandle<()> {
-        // todo: be less hacky
+    pub async fn spawn_cron_jobs(&self) -> anyhow::Result<()> {
+        log::info!("reached updates for spawning jobs");
 
-        let mut turn_modulus: usize = 0;
+        for count in 0..2 {
+            let res = if count == 0 {
+                self.update_images()
+                    .await
+                    .context("update images task errored")
+            } else {
+                self.update_jigs().await.context("update jigs task errored")
+            };
 
-        tokio::task::spawn(async move {
-            loop {
-                let iteration_start = Instant::now();
-
-                let res = if turn_modulus % 2 == 0 {
-                    self.update_images()
-                        .await
-                        .context("update images task errored")
-                } else {
-                    self.update_jigs().await.context("update jigs task errored")
-                };
-
-                turn_modulus = (turn_modulus + 1) % 2;
-
-                match res {
-                    Ok(true) => {}
-                    Ok(false) => {
-                        log::info!("exiting algolia indexing task (out of date)");
-                        return;
-                    }
-
-                    Err(e) => {
-                        log::error!("{:?}", e);
-                        sentry::integrations::anyhow::capture_anyhow(&e);
-                    }
+            match res {
+                Ok(true) => {}
+                Ok(false) => {
+                    log::info!("exiting algolia indexing task (out of date)");
                 }
-
-                tokio::time::sleep_until((iteration_start + Duration::from_secs(5)).into()).await;
+                Err(e) => {
+                    log::error!("{:?}", e);
+                    sentry::integrations::anyhow::capture_anyhow(&e);
+                }
             }
-        })
+        }
+
+        Ok(())
     }
 
     pub async fn migrate(&self) -> anyhow::Result<()> {
@@ -237,6 +227,7 @@ select algolia_index_version as "algolia_index_version!" from "settings"
 
     // FIXME drafts
     async fn update_jigs(&self) -> anyhow::Result<bool> {
+        log::info!("reached update jigs");
         let mut txn = self.db.begin().await?;
 
         let is_outdated = sqlx::query!(
@@ -358,10 +349,13 @@ where jig_data.id = any (select live_id from jig where jig.id = any ($1))
 
         txn.commit().await?;
 
+        log::info!("completed update jigs");
+
         Ok(true)
     }
 
     async fn update_images(&self) -> anyhow::Result<bool> {
+        log::info!("reached update images");
         let mut txn = self.db.begin().await?;
 
         let is_outdated = sqlx::query!(
@@ -480,6 +474,8 @@ limit 100 for no key update skip locked;
         .await?;
 
         txn.commit().await?;
+
+        log::info!("completed update images");
 
         Ok(true)
     }

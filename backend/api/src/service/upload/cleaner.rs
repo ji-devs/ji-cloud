@@ -1,10 +1,6 @@
 use anyhow::Context;
-use core::config::{EXPIRED_UPLOAD_CLEANUP_PERIOD, UPLOAD_EXPIRY_TIME};
+use core::config::UPLOAD_EXPIRY_TIME;
 use sqlx::PgPool;
-use tokio::{
-    task::JoinHandle,
-    time::{Duration, Instant},
-};
 
 /// Generate query to delete failed old uploads
 ///
@@ -35,7 +31,7 @@ fn generate_query_purge_failed_media_uploads(
     )
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct MediaUploadDbSchema {
     /// Parent table for the media kind
     pub media_table: &'static str,
@@ -45,6 +41,7 @@ pub struct MediaUploadDbSchema {
     pub media_id_column: &'static str,
 }
 
+#[derive(Clone)]
 pub struct UploadCleaner {
     db: PgPool,
     /// information about which tables to clean from
@@ -52,7 +49,10 @@ pub struct UploadCleaner {
 }
 
 impl UploadCleaner {
-    pub fn new(db: PgPool, media_schema: &'static [(&str, &str, &str)]) -> Self {
+    pub fn new(
+        db: PgPool,
+        media_schema: &'static [(&str, &str, &str)],
+    ) -> anyhow::Result<Option<Self>> {
         let media_schema = media_schema
             .iter()
             .map(|it| MediaUploadDbSchema {
@@ -62,45 +62,34 @@ impl UploadCleaner {
             })
             .collect();
 
-        Self { db, media_schema }
+        Ok(Some(Self { db, media_schema }))
     }
 
-    #[must_use]
-    pub fn spawn(self) -> JoinHandle<()> {
-        log::debug!("spawning background expired media upload cleanup task");
-        let mut turn_modulus: usize = 0;
+    pub async fn spawn_cron_jobs(&self) -> anyhow::Result<()> {
+        log::debug!("reached media upload cleaning for spawning jobs");
 
-        tokio::task::spawn(async move {
-            loop {
-                let iteration_start = Instant::now();
+        for count in 0..self.media_schema.len() {
+            let media_type_schema = &self.media_schema[count];
+            log::debug!("Cleaning table {:?}", media_type_schema);
 
-                let media_type_schema = &self.media_schema[turn_modulus];
-                log::debug!("Cleaning table {:?}", media_type_schema);
+            let res = self
+                .clean_up_media(media_type_schema)
+                .await
+                .context(format!(
+                    "media upload DB cleanup task failed: {}",
+                    media_type_schema.media_table
+                ));
 
-                turn_modulus = (turn_modulus + 1) % &self.media_schema.len();
-
-                let res = self
-                    .clean_up_media(media_type_schema)
-                    .await
-                    .context(format!(
-                        "media upload DB cleanup task failed: {}",
-                        media_type_schema.media_table
-                    ));
-
-                match res {
-                    Ok(_) => {}
-                    Err(e) => {
-                        log::error!("{:?}", e);
-                        sentry::integrations::anyhow::capture_anyhow(&e);
-                    }
+            match res {
+                Ok(_) => {}
+                Err(e) => {
+                    log::error!("{:?}", e);
+                    sentry::integrations::anyhow::capture_anyhow(&e);
                 }
-
-                tokio::time::sleep_until(
-                    (iteration_start + Duration::from_secs(EXPIRED_UPLOAD_CLEANUP_PERIOD)).into(),
-                )
-                .await;
             }
-        })
+        }
+
+        Ok(())
     }
 
     async fn clean_up_media(&self, media_type_schema: &MediaUploadDbSchema) -> anyhow::Result<()> {

@@ -250,6 +250,7 @@ pub struct EmailClientSettings {
 pub struct GoogleCloudStorageSettings {
     /// Bucket for processed media.
     pub media_bucket: String,
+
     /// Bucket for raw media uploads.
     pub processing_bucket: String,
 }
@@ -259,10 +260,13 @@ pub struct GoogleCloudStorageSettings {
 pub struct GoogleCloudEventArcSettings {
     /// Service name for Google Cloud storage
     pub storage_service_name: String,
+
     /// ID of the GCP project
     pub project_id: String,
+
     /// Topic name for raw media upload event
     pub media_uploaded_topic: String,
+
     /// Topic name for completed media processing event
     pub media_processed_topic: String,
 }
@@ -272,6 +276,22 @@ pub struct GoogleCloudEventArcSettings {
 pub struct FirebaseSettings {
     /// ID of the GCP project
     pub project_id: String,
+}
+
+/// Sets the possible `aud` targets for GCP authenticated account requests. This can be for users (through
+/// OAuth2) or for GCP services invoking the Cloud Run instances directly by setting the `aud` target.
+///
+/// See:
+/// * https://cloud.google.com/run/docs/authenticating/service-to-service
+/// * https://stackoverflow.com/questions/58683365/google-cloud-run-authentication-service-to-service
+#[derive(Debug)]
+pub struct JwkAudiences {
+    /// OAuth user client ID
+    pub oauth_client: String,
+    /// URL to API instance on Cloud Run
+    pub api: String,
+    /// URL to media-watch instance on Cloud Run
+    pub media_watch: String,
 }
 
 /// Manages access to settings.
@@ -648,6 +668,24 @@ impl SettingsManager {
             Some(project_id) => Ok(Some(FirebaseSettings { project_id })),
             _ => Ok(None),
         }
+    }
+
+    /// Load the audience targets for
+    pub async fn jwk_audience_settings(
+        &self,
+        runtime_settings: &RuntimeSettings,
+    ) -> anyhow::Result<JwkAudiences> {
+        Ok(JwkAudiences {
+            oauth_client: runtime_settings
+                .google_oauth
+                .as_ref()
+                .map_or_else(String::new, |it| it.client.clone()),
+            api: self.remote_target.api_assigned_url(),
+            media_watch: self
+                .remote_target
+                .media_watch_assigned_url()
+                .map_or_else(String::new, |it| it.to_owned()),
+        })
     }
 
     /// Load the `RuntimeSettings`.

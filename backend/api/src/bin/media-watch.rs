@@ -46,16 +46,7 @@ async fn main() -> anyhow::Result<()> {
 
     logger::init()?;
 
-    let (
-        s3,
-        gcp_key_store,
-        event_arc,
-        notifications,
-        db_pool,
-        media_upload_cleaner,
-        runtime_settings,
-        _sentry_guard,
-    ) = {
+    let (s3, gcp_key_store, event_arc, notifications, db_pool, runtime_settings, _sentry_guard) = {
         log::trace!("initializing settings and processes");
         let remote_target = settings::read_remote_target()?;
 
@@ -96,9 +87,6 @@ async fn main() -> anyhow::Result<()> {
             .map(notifications::Client::new)
             .transpose()?;
 
-        let media_upload_cleaner =
-            upload::cleaner::UploadCleaner::new(db_pool.clone(), db::UPLOADS_DB_SCHEMA);
-
         let runtime_settings = settings.runtime_settings().await?;
 
         (
@@ -107,13 +95,10 @@ async fn main() -> anyhow::Result<()> {
             event_arc,
             notifications,
             db_pool,
-            media_upload_cleaner,
             runtime_settings,
             sentry_guard,
         )
     };
-
-    let _ = media_upload_cleaner.spawn();
 
     let handle = std::thread::spawn(|| {
         build_and_run_media_watch(
