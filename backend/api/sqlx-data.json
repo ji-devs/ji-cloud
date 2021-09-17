@@ -119,33 +119,6 @@
       ]
     }
   },
-  "09235acdd936537b2a819b15b7aed2df73de16cf7d6b685873f52e4b6d3a7a4d": {
-    "query": "\ninsert into category (index, parent_id, name)\nVALUES((select count(*)::int2 from category where parent_id is not distinct from $1), $1, $2)\nreturning index, id",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "index",
-          "type_info": "Int2"
-        },
-        {
-          "ordinal": 1,
-          "name": "id",
-          "type_info": "Uuid"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Text"
-        ]
-      },
-      "nullable": [
-        false,
-        false
-      ]
-    }
-  },
   "0978a2ae9cbe0c16d58c15229324bad8325b60d9128b982a6476980be6965677": {
     "query": "\nupdate category\nset updated_at = now(),\n    index = least((select count(*)::int2 from category c where c.parent_id is not distinct from parent_id), $1)\nwhere id = $2\n",
     "describe": {
@@ -602,6 +575,74 @@
       "nullable": []
     }
   },
+  "1c206c8361c0e27c8c66c9f7badc7c2616bfadef22720b47b04b1969d0d6ad34": {
+    "query": "with recursive links as\n                   (\n                       select id,\n                              parent_id\n                       from category co\n                       where id = any ($1::uuid[])\n                       union all\n                       select co.id,\n                              co.parent_id\n                       from category co\n                                inner join links ct on (ct.parent_id = co.id)\n                   )\n\nselect distinct id,\n       category.parent_id,\n       name,\n       category.index,\n       created_at,\n       updated_at,\n       (select count(*) from image_category where category_id = id)::int8 as \"image_count!\",\n       (select count(*)::int8 from jig_category where category_id = id) as \"jig_count!\",\n        user_scopes\nfrom category\n         inner join links using (id);\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "parent_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 2,
+          "name": "name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "index",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 4,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 5,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 6,
+          "name": "image_count!",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 7,
+          "name": "jig_count!",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 8,
+          "name": "user_scopes",
+          "type_info": "Int2Array"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "UuidArray"
+        ]
+      },
+      "nullable": [
+        false,
+        true,
+        false,
+        false,
+        false,
+        true,
+        null,
+        null,
+        false
+      ]
+    }
+  },
   "1c7400d27c33a6b7204302b5cf2ced8fb445de00304be5b424133f3b7afbf1cb": {
     "query": "insert into user_auth_basic (user_id, email, password) values ($1, $2::text, $3)",
     "describe": {
@@ -965,56 +1006,6 @@
         ]
       },
       "nullable": []
-    }
-  },
-  "24ab85fd958a9ca07575ebee23f079aa2efaabcf12c8c0e7eb4b412c79cd7944": {
-    "query": "\nselect id                                                                 as \"id!: CategoryId\",\n       name                                                               as \"name!\",\n       created_at                                                         as \"created_at!\",\n       updated_at,\n       (select count(*)::int8 from image_category where category_id = id) as \"image_count!\",\n       (select count(*)::int8 from jig_category where category_id = id)   as \"jig_count!\"\nfrom category\n         inner join unnest($1::uuid[]) with ordinality t(id, ord) USING (id)\norder by t.ord\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id!: CategoryId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "name!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "created_at!",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 3,
-          "name": "updated_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 4,
-          "name": "image_count!",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 5,
-          "name": "jig_count!",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "UuidArray"
-        ]
-      },
-      "nullable": [
-        true,
-        true,
-        true,
-        true,
-        true,
-        true
-      ]
     }
   },
   "254234fc9c471f3012eaf52ac8bd18308710e2b0675de50bd433d28768997d45": {
@@ -1443,6 +1434,74 @@
       "nullable": []
     }
   },
+  "47b532e7ff57ddcc8a2fde8c99c9657b111b297e1dc662cb8d886237cf60726f": {
+    "query": "with recursive path(id, index, parent_id) as (\n    select id, ord, null::uuid\n    from category\n             inner join unnest(\n            $1::uuid[]) with ordinality t(id, ord)\n                        using (id)\n    union all\n    select c.id, c.index, p.id\n    from path p\n             inner join category c on (c.parent_id = p.id)\n)\nselect distinct id as \"id!\",\n       path.index::int2 as \"index!\",\n       path.parent_id,\n       name,\n       created_at,\n       updated_at,\n       (select count(*) from image_category where category_id = id)::int8 as \"image_count!\",\n       (select count(*)::int8 from jig_category where category_id = id) as \"jig_count!\",\n       user_scopes\n\nfrom path\n         inner join category using (id);\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id!",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "index!",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 2,
+          "name": "parent_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 3,
+          "name": "name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 5,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 6,
+          "name": "image_count!",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 7,
+          "name": "jig_count!",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 8,
+          "name": "user_scopes",
+          "type_info": "Int2Array"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "UuidArray"
+        ]
+      },
+      "nullable": [
+        null,
+        null,
+        null,
+        false,
+        false,
+        true,
+        null,
+        null,
+        false
+      ]
+    }
+  },
   "47f87006d700bed96cbf873d8addacbd9c160cf71e5cd0a4543b1fd7754d563d": {
     "query": "\ndelete from user_recent_image\nwhere user_id = $1 and image_id = $2\n            ",
     "describe": {
@@ -1527,68 +1586,6 @@
         ]
       },
       "nullable": [
-        null
-      ]
-    }
-  },
-  "4cc40dca336bf39c9395b99de18e42ad0876523852d3c625a1c42bfd6a77a845": {
-    "query": "with recursive path(id, index, parent_id) as (\n    select id, ord, null::uuid\n    from category\n             inner join unnest(\n            $1::uuid[]) with ordinality t(id, ord)\n                        using (id)\n    union all\n    select c.id, c.index, p.id\n    from path p\n             inner join category c on (c.parent_id = p.id)\n)\nselect distinct id as \"id!\",\n       path.index::int2 as \"index!\",\n       path.parent_id,\n       name,\n       created_at,\n       updated_at,\n       (select count(*) from image_category where category_id = id)::int8 as \"image_count!\",\n       (select count(*)::int8 from jig_category where category_id = id) as \"jig_count!\"\n\nfrom path\n         inner join category using (id);\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id!",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "index!",
-          "type_info": "Int2"
-        },
-        {
-          "ordinal": 2,
-          "name": "parent_id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 3,
-          "name": "name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 4,
-          "name": "created_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 5,
-          "name": "updated_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 6,
-          "name": "image_count!",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 7,
-          "name": "jig_count!",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "UuidArray"
-        ]
-      },
-      "nullable": [
-        null,
-        null,
-        null,
-        false,
-        false,
-        true,
-        null,
         null
       ]
     }
@@ -1767,6 +1764,73 @@
         ]
       },
       "nullable": []
+    }
+  },
+  "5d7020b3759281d303b515cf05ae1445d421aabf48d2212565a20faf794e6fc2": {
+    "query": "update category set user_scopes= $1, updated_at = now() where id = $2",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Int2Array",
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "5e3b17f709b02dd112b9958614d7ce1f94d6873ab3848eb5251e6f3a5261c892": {
+    "query": "\nselect id                                                                 as \"id: CategoryId\",\n       name,\n       created_at,\n       updated_at,\n       (select count(*)::int8 from image_category where category_id = id) as \"image_count!\",\n       (select count(*)::int8 from jig_category where category_id = id) as \"jig_count!\",\n       user_scopes\nfrom category\nwhere parent_id is null\norder by index\n ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: CategoryId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 3,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 4,
+          "name": "image_count!",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 5,
+          "name": "jig_count!",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 6,
+          "name": "user_scopes",
+          "type_info": "Int2Array"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        true,
+        null,
+        null,
+        false
+      ]
     }
   },
   "5e4bfa7c86f036663500b75df28a943c55cbc671a2dd296514568680f1b3733f": {
@@ -2025,54 +2089,6 @@
         ]
       },
       "nullable": []
-    }
-  },
-  "6c4f45accd9f8fafcb6f26bf5a4fe6ec2c1a082585573cc3e1ead7ad9ac0fbee": {
-    "query": "\nselect id                                                                 as \"id: CategoryId\",\n       name,\n       created_at,\n       updated_at,\n       (select count(*)::int8 from image_category where category_id = id) as \"image_count!\",\n       (select count(*)::int8 from jig_category where category_id = id) as \"jig_count!\"\nfrom category\nwhere parent_id is null\norder by index\n ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id: CategoryId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "created_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 3,
-          "name": "updated_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 4,
-          "name": "image_count!",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 5,
-          "name": "jig_count!",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": []
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        true,
-        null,
-        null
-      ]
     }
   },
   "6db1735f61450670c2ca115000a413f3b2eb9d4874eeec7e749f6243b2db5f7d": {
@@ -2969,66 +2985,6 @@
       "nullable": []
     }
   },
-  "93d7d603f686856e0d93b5d1a99b75e6d829c974243d423c907e1c6a95b802f5": {
-    "query": "\nselect id,\n       parent_id,\n       name,\n       index,\n       created_at,\n       updated_at,\n       (select count(*) from image_category where category_id = id)::int8 as \"image_count!\",\n       (select count(*) from jig_category where category_id = id)::int8 as \"jig_count!\"\nfrom category\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "parent_id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 2,
-          "name": "name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 3,
-          "name": "index",
-          "type_info": "Int2"
-        },
-        {
-          "ordinal": 4,
-          "name": "created_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 5,
-          "name": "updated_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 6,
-          "name": "image_count!",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 7,
-          "name": "jig_count!",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": []
-      },
-      "nullable": [
-        false,
-        true,
-        false,
-        false,
-        false,
-        true,
-        null,
-        null
-      ]
-    }
-  },
   "95cc52570b87e1413c93a9588cee5f081824028c269803aba12a578cada7395b": {
     "query": "select user_id from user_auth_basic where user_id <> $1 and email = $2 for update",
     "describe": {
@@ -3219,6 +3175,33 @@
         ]
       },
       "nullable": [
+        false
+      ]
+    }
+  },
+  "a0f81385b9713d0c508a0a5e6658939c1edf5149c2440bd55c07e788dfc2ed2a": {
+    "query": "\ninsert into category (index, parent_id, name, user_scopes)\nVALUES((select count(*)::int2 from category where parent_id is not distinct from $1), $1, $2, array[]::smallint[])\nreturning index, id",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "index",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 1,
+          "name": "id",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
         false
       ]
     }
@@ -3460,6 +3443,128 @@
         ]
       },
       "nullable": []
+    }
+  },
+  "ae4a0e8449cf1ac585cda5e6a141a1bbb71449c7586784eaddfb279aab505b17": {
+    "query": "\nselect id,\n       parent_id,\n       name,\n       index,\n       created_at,\n       updated_at,\n       (select count(*) from image_category where category_id = id)::int8 as \"image_count!\",\n       (select count(*) from jig_category where category_id = id)::int8 as \"jig_count!\",\n       user_scopes\nfrom category\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "parent_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 2,
+          "name": "name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "index",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 4,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 5,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 6,
+          "name": "image_count!",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 7,
+          "name": "jig_count!",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 8,
+          "name": "user_scopes",
+          "type_info": "Int2Array"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        true,
+        false,
+        false,
+        false,
+        true,
+        null,
+        null,
+        false
+      ]
+    }
+  },
+  "ae71cd058b5d2c5f85d949bb5129e1b376fc414ffb33483d1b5568fa654760f3": {
+    "query": "\nselect id                                                                 as \"id!: CategoryId\",\n       name                                                               as \"name!\",\n       created_at                                                         as \"created_at!\",\n       updated_at,\n       (select count(*)::int8 from image_category where category_id = id) as \"image_count!\",\n       (select count(*)::int8 from jig_category where category_id = id)   as \"jig_count!\",\n       user_scopes                                                        as \"user_scopes!\"\nfrom category\n         inner join unnest($1::uuid[]) with ordinality t(id, ord) USING (id)\norder by t.ord\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id!: CategoryId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "name!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "created_at!",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 3,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 4,
+          "name": "image_count!",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 5,
+          "name": "jig_count!",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 6,
+          "name": "user_scopes!",
+          "type_info": "Int2Array"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "UuidArray"
+        ]
+      },
+      "nullable": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
     }
   },
   "aec729ae876f9816b6a64f6527c6e8497140391a8bebb7a00fc5418cb07682a8": {
@@ -4812,68 +4917,6 @@
         ]
       },
       "nullable": []
-    }
-  },
-  "f9342b5ec8f32c20788dc706143f9506fcdee6a955105a81e1b13e2aee29e360": {
-    "query": "with recursive links as\n                   (\n                       select id,\n                              parent_id\n                       from category co\n                       where id = any ($1::uuid[])\n                       union all\n                       select co.id,\n                              co.parent_id\n                       from category co\n                                inner join links ct on (ct.parent_id = co.id)\n                   )\n\nselect distinct id,\n       category.parent_id,\n       name,\n       category.index,\n       created_at,\n       updated_at,\n       (select count(*) from image_category where category_id = id)::int8 as \"image_count!\",\n       (select count(*)::int8 from jig_category where category_id = id) as \"jig_count!\"\nfrom category\n         inner join links using (id);\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "parent_id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 2,
-          "name": "name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 3,
-          "name": "index",
-          "type_info": "Int2"
-        },
-        {
-          "ordinal": 4,
-          "name": "created_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 5,
-          "name": "updated_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 6,
-          "name": "image_count!",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 7,
-          "name": "jig_count!",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "UuidArray"
-        ]
-      },
-      "nullable": [
-        false,
-        true,
-        false,
-        false,
-        false,
-        true,
-        null,
-        null
-      ]
     }
   },
   "f9df2f28e8d06b6804d2bfc813d94ee93bbebe9148b2d2f5e00857adfed502ed": {
