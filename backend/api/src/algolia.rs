@@ -9,6 +9,8 @@ use chrono::Utc;
 use core::settings::AlgoliaSettings;
 use futures::TryStreamExt;
 use serde::Serialize;
+use actix_web::{get, web, App, HttpServer, Responder};
+
 use shared::{
     domain::{
         category::CategoryId,
@@ -18,12 +20,13 @@ use shared::{
     },
     media::MediaGroupKind,
 };
-use sqlx::PgPool;
+use sqlx::{PgPool, PgConnection};
 use std::{convert::TryInto, time::Duration, time::Instant};
 use tokio::task::JoinHandle;
 use uuid::Uuid;
 
 use migration::ResyncKind;
+use crate::error;
 
 mod migration;
 
@@ -78,6 +81,7 @@ enum BatchMedia<'a> {
 
 /// Manager for background task that reads updated jigs or media from the database, then
 /// performs batch updates to the indices.
+#[derive(Clone)]
 pub struct Manager {
     pub db: PgPool,
     pub inner: Inner,
@@ -107,6 +111,22 @@ impl Manager {
             jig_index,
             db,
         }))
+    }
+
+    pub async fn spawn_cron_jobs(self) {
+        // Cron job:
+        let mut turn_modulus: usize = 0;
+
+        let res = if turn_modulus % 2 == 0 {
+            self.update_images()
+                .await
+                .context("update images task errored")
+        } else {
+            self.update_jigs().await.context("update jigs task errored")
+        };
+
+        turn_modulus = (turn_modulus + 1) % 2;
+
     }
 
     #[must_use]

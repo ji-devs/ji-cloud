@@ -113,6 +113,7 @@ pub async fn build_and_run(
     algolia_key_store: Option<crate::algolia::SearchKeyStore>,
     jwk_verifier: Arc<crate::jwk::JwkVerifier>,
     mail_client: Option<mail::Client>,
+    algolia_manager: Option<crate::algolia::Manager>,
 ) -> anyhow::Result<()> {
     let app = build(
         pool,
@@ -124,6 +125,7 @@ pub async fn build_and_run(
         algolia_key_store,
         jwk_verifier,
         mail_client,
+        algolia_manager,
     )?;
     app.run_until_stopped().await?;
 
@@ -140,6 +142,7 @@ pub fn build(
     algolia_key_store: Option<crate::algolia::SearchKeyStore>,
     jwk_verifier: Arc<crate::jwk::JwkVerifier>,
     mail_client: Option<mail::Client>,
+    algolia_manager: Option<crate::algolia::Manager>,
 ) -> anyhow::Result<Application> {
     let local_insecure = settings.is_local();
     let api_port = settings.api_port;
@@ -150,6 +153,7 @@ pub fn build(
     let algolia = algolia.map(ServiceData::new);
     let algolia_key_store = algolia_key_store.map(ServiceData::new);
     let mail_client = mail_client.map(ServiceData::new);
+    let algolia_manager = algolia_manager.map(ServiceData::new);
 
     let server = actix_web::HttpServer::new(move || {
         let app = actix_web::App::new()
@@ -183,6 +187,11 @@ pub fn build(
 
         let app = match mail_client.clone() {
             Some(mail_client) => app.app_data(mail_client),
+            None => app,
+        };
+
+        let app = match algolia_manager.clone() {
+            Some(algolia_manager) => app.app_data(algolia_manager),
             None => app,
         };
 
@@ -220,6 +229,7 @@ pub fn build(
             .configure(endpoints::session::configure)
             .configure(endpoints::locale::configure)
             .configure(endpoints::additional_resource::configure)
+            .configure(endpoints::algolia::batch_update)
             .route("/", actix_web::web::get().to(no_content_response))
     });
 

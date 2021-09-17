@@ -7,6 +7,7 @@ use tokio::sync::RwLock;
 
 use crate::error;
 use crate::error::ServiceKind;
+use crate::algolia;
 use core::google::GoogleAccessTokenResponse;
 
 pub mod event_arc;
@@ -20,11 +21,11 @@ pub trait Service {
     const DISABLED_ERROR: error::ServiceKind;
 }
 
-impl Service for crate::algolia::Client {
+impl Service for algolia::Client {
     const DISABLED_ERROR: error::ServiceKind = error::ServiceKind::Algolia;
 }
 
-impl Service for crate::algolia::SearchKeyStore {
+impl Service for algolia::SearchKeyStore {
     // todo: this should have a different error?
     const DISABLED_ERROR: error::ServiceKind = error::ServiceKind::Algolia;
 }
@@ -46,6 +47,11 @@ impl Service for crate::service::notifications::Client {
 }
 
 impl Service for GcpAccessKeyStore {
+    const DISABLED_ERROR: ServiceKind = ServiceKind::Algolia;
+}
+
+// TODO: set up for algolia
+impl Service for algolia::Manager {
     const DISABLED_ERROR: ServiceKind = ServiceKind::Algolia;
 }
 
