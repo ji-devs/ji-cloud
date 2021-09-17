@@ -54,6 +54,8 @@ pub fn render(state: Rc<State>, tab: FeedbackTab) -> Dom {
             html!("button-rect", {
                 .property("kind", "text")
                 .property("slot", "back")
+                .property("color", "blue")
+                .child(html!("fa-icon", {.property("icon", "fa-light fa-chevron-left")}))
                 .text(STR_BACK_TO_SETTINGS)
                 .event(clone!(state => move|_: events::Click| {
                     set_active_popup(Rc::clone(&state), ActiveSettingsPopup::Main);

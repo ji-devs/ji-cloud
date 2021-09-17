@@ -41,6 +41,9 @@ export class _ extends LitElement {
                     background-color: var(--main-blue);
                     color: white;
                 }
+                fa-icon {
+                    font-size: 12px;
+                }
             `,
         ];
     }
@@ -66,10 +69,10 @@ export class _ extends LitElement {
             <div @click=${this.toggleDirection} class="main">
                 <div class="pointers">
                     <span class="right-pointer">
-                        <i class="fa-solid fa-right"></i>
+                        <fa-icon icon="fa-solid fa-arrow-right"></fa-icon>
                     </span>
                     <span class="left-pointer">
-                        <i class="fa-solid fa-left"></i>
+                        <fa-icon icon="fa-solid fa-arrow-left"></fa-icon>
                     </span>
                 </div>
                 <label>

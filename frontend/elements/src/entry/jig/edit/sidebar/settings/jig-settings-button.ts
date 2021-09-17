@@ -67,7 +67,7 @@ export class _ extends LitElement {
                     <span>${STR_LABEL[this.kind]}</span>
                 </div>
 
-                <i class="fa-light fa-chevron-right"></i>
+                <fa-icon icon="fa-light fa-chevron-right"></fa-icon>
             </button>
         `;
     }
