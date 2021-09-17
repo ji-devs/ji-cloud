@@ -148,6 +148,9 @@ pub fn on_iframe_message(state: Rc<State>, message: ModuleToJigPlayerMessage) {
         ModuleToJigPlayerMessage::Next => {
             navigate_forward(Rc::clone(&state));
         },
+        ModuleToJigPlayerMessage::Stop => {
+            state.timer.set(None);
+        },
     };
 }
 
