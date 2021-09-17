@@ -11,11 +11,26 @@ export type TrackerProp = TrackerSource | string | (() => TrackerSource);
 export type TrackerSource = HTMLElement | DOMRect | Window;
 
 /*
+
+The main idea is we have 2 boxes, content and target:
+
 tl--tm--tr
 |       |
 ml--mm--mr
 |       |
 bl--bm--mr
+
+
+tl--tm--tr
+|       |
+ml--mm--mr
+|       |
+bl--bm--mr
+
+setting the position will make them match up. So origin and content both being tl will pin to the top-left corner
+as a helper, content can default to opposite across either axis
+
+Lastly, a container target can be supplied with will be used to reposition things up to 3 times to try and better fit inside it
 */
 
 
