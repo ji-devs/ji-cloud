@@ -2,7 +2,7 @@ import {argsToAttrs} from "@utils/attributes";
 import {GridResize} from "../../module-page";
 import "@elements/core/overlays/new/container";
 import "@elements/core/overlays/new/content";
-import {Placement, MoveStrategy} from "@elements/core/overlays/new/content";
+import {Placement, ContentPlacement, MoveStrategy} from "@elements/core/overlays/new/content";
 import {Container as MenuContainer} from "../../menu/container";
 export default {
     title: "Core / Overlays / New"
@@ -11,10 +11,12 @@ export default {
 type ContainerOptions = "window" | "#main" | "none";
 
 interface Args {
+    flowContentPlacement: ContentPlacement,
     flowTargetPlacement: Placement,
     flowTargetStrategy: MoveStrategy,
     flowTargetMargin: number,
     flowTargetContainer: ContainerOptions,
+    absoluteContentPlacement: ContentPlacement,
     absoluteTargetPlacement: Placement,
     absoluteTargetStrategy: MoveStrategy,
     absoluteTargetMargin: number,
@@ -22,11 +24,13 @@ interface Args {
 }
 
 const DEFAULT_ARGS:Args = {
-    flowTargetPlacement: "right-start",
+    flowContentPlacement: "tl",
+    flowTargetPlacement: "tr",
     flowTargetStrategy: "track", 
     flowTargetMargin: 0,
     flowTargetContainer: "window",
-    absoluteTargetPlacement: "right-start",
+    absoluteContentPlacement: "tl",
+    absoluteTargetPlacement: "tr",
     absoluteTargetStrategy: "track",
     absoluteTargetMargin: 0,
     absoluteTargetContainer: "window",
@@ -61,10 +65,10 @@ function makeMain(props:Args) {
             </div>
         </div>
         <overlay-container>
-            <overlay-content target="#flowTarget" placement="${props.flowTargetPlacement}" strategy="${props.flowTargetStrategy}" margin="${props.flowTargetMargin}" container="${flowTargetContainer}">
+            <overlay-content target="#flowTarget" targetPlacement="${props.flowTargetPlacement}" contentPlacement=${props.flowContentPlacement} strategy="${props.flowTargetStrategy}" margin="${props.flowTargetMargin}" container="${flowTargetContainer}">
                 ${MenuContainer()}
             </overlay-content>
-            <overlay-content target="#absoluteTarget" placement="${props.absoluteTargetPlacement}" strategy="${props.absoluteTargetStrategy}" margin="${props.absoluteTargetMargin}" container="${absoluteTargetContainer}">
+            <overlay-content target="#absoluteTarget" placement="${props.absoluteTargetPlacement}" contentPlacement=${props.absoluteContentPlacement} strategy="${props.absoluteTargetStrategy}" margin="${props.absoluteTargetMargin}" container="${absoluteTargetContainer}">
                 ${MenuContainer()}
             </overlay-content>
         </overlay-container>
@@ -84,20 +88,23 @@ function makeContentSquare() {
 
 Example.args = DEFAULT_ARGS;
 
-const placements = [  "top", "top-start", "top-end", 
-    "bottom", "bottom-start" , "bottom-end", 
-    "right", "right-start", "right-end", 
-    "left", "left-start" , "left-end"
-]
+const targetPlacementOptions = ["tl", "tm", "tr", "ml","mm", "mr", "bl", "bm", "br"];
+const contentPlacementOptions = targetPlacementOptions.concat(["oppositeV", "oppositeH", "oppositeVH"]);
 
 const strategies = ["", "dispatchClose", "track"];
 const containers = ["window", "#main", "none"]
 
 Example.argTypes = {
+    flowContentPlacement: {
+        control: {
+            type: 'inline-radio',
+            options: contentPlacementOptions 
+        }
+    },
     flowTargetPlacement: {
         control: {
             type: 'inline-radio',
-            options: placements 
+            options: targetPlacementOptions 
         }
     },
     flowTargetStrategy: {
@@ -112,10 +119,16 @@ Example.argTypes = {
             options: containers 
         }
     },
+    absoluteContentPlacement: {
+        control: {
+            type: 'inline-radio',
+            options: contentPlacementOptions 
+        }
+    },
     absoluteTargetPlacement: {
         control: {
             type: 'inline-radio',
-            options: placements 
+            options: targetPlacementOptions 
         }
     },
     absoluteTargetStrategy: {

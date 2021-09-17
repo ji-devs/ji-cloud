@@ -10,22 +10,24 @@ export type MoveStrategy = "" | "dispatchClose" | "track";
 export type TrackerProp = TrackerSource | string | (() => TrackerSource);
 export type TrackerSource = HTMLElement | DOMRect | Window;
 
+/*
+tl--tm--tr
+|       |
+ml--mm--mr
+|       |
+bl--bm--mr
+*/
+
+
 //match it in overlay.rs on the rust side
 export type Placement = 
-    "top"
-    | "top-start"
-    | "top-end"
-    | "bottom"
-    | "bottom-start"
-    | "bottom-end"
-    | "right"
-    | "right-start"
-    | "right-end"
-    | "left"
-    | "left-start"
-    | "left-end";
+    "tl" | "tm" | "tr" | "ml" | "mm" | "mr" | "bl" | "bm" | "mr";
 
+export type ContentPlacement = Placement | "oppositeV" | "oppositeH" | "oppositeVH";
 
+const MAX_RECURSE_DEPTH = 3;
+
+export type ZLayer = "menu" | "tooltip" | "modal"
 
 @customElement("overlay-content")
 export class _ extends LitElement {
@@ -36,8 +38,19 @@ export class _ extends LitElement {
                     position: absolute;
                     left: 0;
                     top: 0;
-                    display: inline-block;
+                    display: block;
                 }
+
+                :host([menu]) {
+                    z-index: 1;
+                }
+                :host([tooltip]) {
+                    z-index: 100;
+                }
+                :host([modal]) {
+                    z-index: 200;
+                }
+
             `
         ];
     }
@@ -53,9 +66,14 @@ export class _ extends LitElement {
     @property()
     strategy:MoveStrategy = "";
 
+    @property({reflect: true})
+    zLayer:ZLayer | undefined;
 
     @property()
-    placement:Placement = "left";
+    contentPlacement:ContentPlacement = "oppositeH";
+
+    @property()
+    targetPlacement:Placement = "tr";
 
     @property({type: Number})
     margin:number = 0;
@@ -65,6 +83,7 @@ export class _ extends LitElement {
     }
 
     updated(changed:any) {
+
         if(typeof changed.get("target") === "boolean") {
             this.bindInstance();
         }
@@ -78,7 +97,8 @@ export class _ extends LitElement {
                 target: new Tracker(this.target),
                 content: new Tracker(this),
                 container: new Tracker(this.container),
-                placement: this.placement,
+                targetPlacement: this.targetPlacement,
+                contentPlacement: this.contentPlacement,
                 margin: this.margin,
                 strategy: this.strategy,
                 dispatcher: this,
@@ -167,7 +187,8 @@ interface StateOpts {
     target: Tracker, 
     content: Tracker, 
     container: Tracker, 
-    placement: Placement,
+    contentPlacement: ContentPlacement,
+    targetPlacement: Placement,
     margin: number,
     strategy: MoveStrategy,
     dispatcher: EventTarget,
@@ -177,79 +198,134 @@ function createState(opts:StateOpts):State {
 
     const {target, margin, container, content, strategy} = opts;
 
-    const _recalc = (placement: Placement, recurseDepth: number) => {
+    const _recalc = (contentPlacement: ContentPlacement, targetPlacement:Placement, recurseDepth: number) => {
         if(recurseDepth === 0) {
             return;
         }
 
-        const splitIndex = placement.indexOf("-");
-        
-        type Side = "top" | "bottom" | "right" | "left";
-        const side:Side = 
-            splitIndex === -1 ? placement : placement.substr(0, splitIndex) as any;
+        type V = "t" | "m" | "b";
+        type H = "l" | "m" | "r";
+        let contentV:V = contentPlacement[0] as V;
+        let contentH:H = contentPlacement[1] as H;
+        const targetV:V = targetPlacement[0] as V;
+        const targetH:H = targetPlacement[1] as H;
 
-        type Align = "middle" | "start" | "end";
-        const align:Align = 
-            splitIndex === -1 ? "middle" : placement.substr(splitIndex+1) as any;
+        //should this keep flipping after first call? o_O
+        if(contentPlacement === "oppositeV" || contentPlacement === "oppositeVH") {
+            contentV = targetV === "t" ? "b" 
+                : targetV === "b" ? "t"
+                : "m";
+            if(contentPlacement !== "oppositeVH") {
+                contentH = targetH;
+            }
+        }
+        if(contentPlacement === "oppositeH" || contentPlacement === "oppositeVH") {
+            contentH = targetH === "l" ? "r" 
+                : targetH === "r" ? "l"
+                : "m";
+
+            if(contentPlacement !== "oppositeVH") {
+                contentV = targetV;
+            }
+        }
 
         const targetRect = target.domRect; 
         const contentRect = content.domRect; 
 
-        let x:number = targetRect.x;
-        let y:number = targetRect.y;
-        if(side === "top") {
-            y -= (contentRect.height + margin);
-        } else if(side === "bottom") {
-            y += (targetRect.height + margin);
-        } else if(side === "right") {
-            x += (targetRect.width + margin);
-        } else if(side === "left") {
-            x -= (contentRect.width + margin);
+
+        /// Horizontal axis
+        /// Margin only pushes from opposit sides
+        let x:number = 0;
+        if(targetH === "l") {
+            x = targetRect.x;
+        } else if(targetH === "m") {
+            x = targetRect.x + targetRect.width/2;
+        } else if(targetH === "r") {
+            x = targetRect.x + targetRect.width;
+        }
+        if(contentH === "l") {
+            if(targetH === "r") {
+                x += margin;
+            }
+        } else if(contentH === "m") {
+            x -= contentRect.width/2;
+        } else if(contentH === "r") {
+            x -= contentRect.width;
+            if(targetH === "l") {
+                x -= margin;
+            }
         }
 
-        if(align == "middle") {
-            if(side === "bottom" || side === "top") {
-                x = targetRect.left + ((targetRect.width - contentRect.width)/2);
-            } else {
-                y = targetRect.top + ((targetRect.height- contentRect.height)/2);
+        let y:number = 0;
+        if(targetV === "t") {
+            y = targetRect.y;
+        } else if(targetV === "m") {
+            y = targetRect.y + targetRect.height/2;
+        } else if(targetV === "b") {
+            y = targetRect.y + targetRect.height;
+        }
+        if(contentV === "t") {
+            if(targetV === "b") {
+                y += margin;
             }
-        } else if(align == "start") {
-            if(side === "bottom" || side === "top") {
-                x = targetRect.left;
-            } else {
-                y = targetRect.top;
-            }
-        } else if(align == "end") {
-            if(side === "bottom" || side === "top") {
-                x = (targetRect.right - contentRect.width);
-            } else {
-                y = (targetRect.bottom - contentRect.height);
+        } else if(contentV === "m") {
+            y -= contentRect.height/2;
+        } else if(contentV === "b") {
+            y -= contentRect.height;
+            if(targetV === "t") {
+                y -= margin;
             }
         }
 
         if(container.valid) {
             const containerRect = container.domRect; 
 
-            let newSide:string = "";
+            const lastResort:boolean = recurseDepth <= 1;
+
+            let newContentH:H | undefined; 
+            let newContentV:V | undefined; 
+            let newTargetH:H | undefined; 
+            let newTargetV:V | undefined; 
 
             if((x + contentRect.width) > containerRect.right) {
-                newSide = "left";
+                if(lastResort) {
+                    x = containerRect.right - (contentRect.width + margin);
+                } else {
+                    newTargetH = "l";
+                    newContentH = "r";
+                }
             }
             if((y + contentRect.height) > containerRect.bottom) {
-                newSide = "top";
+                if(lastResort) {
+                    y = containerRect.bottom - (contentRect.height + margin);
+                } else {
+                    newTargetV = "t";
+                    newContentV = "b";
+                }
             }
             if(x < containerRect.left) {
-                newSide = "right";
+                if(lastResort) {
+                    x = containerRect.x + margin;
+                } else {
+                    newTargetH = "r";
+                    newContentH = "l";
+                }
             }
             if(y < containerRect.top) {
-                newSide = "bottom";
+                if(lastResort) {
+                    y = containerRect.top + margin;
+                } else {
+                    newTargetV = "b";
+                    newContentV = "t";
+                }
             }
 
-            if(newSide !== "") {
-                _recalc(
-                    `${newSide}-${align}` as Placement,
-                    recurseDepth-1
-                );
+
+            if(newContentH || newContentV || newTargetV || newTargetV) {
+                let replaceContent = `${newContentV || contentV}${newContentH || contentH}`;
+                let replaceTarget = `${newTargetV || targetV}${newTargetH || targetH}`;
+
+                _recalc(replaceContent as Placement, replaceTarget as Placement, recurseDepth-1);
                 return;
             }
         }
@@ -259,10 +335,11 @@ function createState(opts:StateOpts):State {
 
             style.setProperty('top', `${y}px`);
             style.setProperty('left', `${x}px`);
+
         });
     }
 
-    const recalc = () => _recalc(opts.placement, 3);
+    const recalc = () => _recalc(opts.contentPlacement, opts.targetPlacement, MAX_RECURSE_DEPTH);
     // @ts-ignore
     const observer = new ResizeObserver(recalc);
 
