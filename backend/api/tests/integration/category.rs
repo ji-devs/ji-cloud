@@ -308,6 +308,15 @@ async fn update_move() -> anyhow::Result<()> {
 }
 
 #[actix_rt::test]
+async fn update_scope() -> anyhow::Result<()> {
+    update(
+        "81c4796a-e883-11ea-93f0-df2484ab6b11".parse()?,
+        &json!({"user_scopes": ["Admin", "ManageCategory", "ManageImage", "ManageAnimation"]}),
+    )
+    .await
+}
+
+#[actix_rt::test]
 async fn update_rename() -> anyhow::Result<()> {
     update(
         "81c4796a-e883-11ea-93f0-df2484ab6b11".parse()?,
