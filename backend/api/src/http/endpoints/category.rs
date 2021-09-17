@@ -88,6 +88,7 @@ async fn update_category(
         name,
         parent_id,
         index,
+        user_scopes,
     } = req.map_or_else(Default::default, Json::into_inner);
 
     db::category::update(
@@ -96,6 +97,7 @@ async fn update_category(
         parent_id,
         name.as_deref(),
         index.map(|it| it as i16),
+        user_scopes,
     )
     .await?;
 

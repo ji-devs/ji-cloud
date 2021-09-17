@@ -10,7 +10,7 @@ use super::meta::{AffiliationId, AgeRangeId, SubjectId};
 /// Represents a user's permissions.
 ///
 /// Note: 5 was "ManageModule", and has been deleted, but cannot be replaced(?)
-#[derive(Deserialize, Serialize, PartialEq, Debug, Clone)]
+#[derive(Deserialize, Serialize, PartialEq, Eq, Debug, Clone, Copy)]
 #[non_exhaustive]
 #[repr(i16)]
 pub enum UserScope {

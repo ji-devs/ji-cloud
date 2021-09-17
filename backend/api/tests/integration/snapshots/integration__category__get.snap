@@ -7,6 +7,11 @@ expression: body
   "categories": [
     {
       "id": "7e0cc6e2-e883-11ea-93f0-cb82f9b3da95",
+      "user_scopes": [
+        "Admin",
+        "ManageImage",
+        "AdminJig"
+      ],
       "name": "One",
       "created_at": "2020-08-27T16:36:44.133612Z",
       "updated_at": null,
@@ -15,6 +20,9 @@ expression: body
     },
     {
       "id": "7fe19326-e883-11ea-93f0-5343493c17c4",
+      "user_scopes": [
+        "ManageCategory"
+      ],
       "name": "Two",
       "created_at": "2020-08-27T16:36:47.206959Z",
       "updated_at": null,
@@ -23,6 +31,10 @@ expression: body
     },
     {
       "id": "81c4796a-e883-11ea-93f0-df2484ab6b11",
+      "user_scopes": [
+        "Admin",
+        "ManageAnimation"
+      ],
       "name": "Three",
       "created_at": "2020-08-27T16:36:50.371709Z",
       "updated_at": null,

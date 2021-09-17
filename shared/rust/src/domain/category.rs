@@ -4,6 +4,8 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
+use crate::domain::user::UserScope;
+
 /// Wrapper type around [`Uuid`], represents the ID of a category.
 ///
 /// [`Uuid`]: ../../uuid/struct.Uuid.html
@@ -26,6 +28,10 @@ pub struct CategoryResponse {
 pub struct Category {
     /// The category's id.
     pub id: CategoryId,
+
+    /// The category's user_scope.
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub user_scopes: Vec<UserScope>,
 
     /// The category's name.
     pub name: String,
@@ -152,4 +158,8 @@ pub struct UpdateCategoryRequest {
     /// # interactions
     /// If `index` is [`None`], and [`parent_id`](UpdateCategoryRequest::parent_id) is [`Some`] it will append to the end of the new parent.
     pub index: Option<u16>,
+
+    /// If [`Some`] add a user scope
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub user_scopes: Option<Vec<UserScope>>,
 }
