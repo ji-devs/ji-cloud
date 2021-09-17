@@ -4,10 +4,12 @@ use actix_web::{
 };
 use chrono::{DateTime, Utc};
 use http::StatusCode;
+use shared::domain::user::UserScope;
 use shared::domain::{
     category::{Category, CategoryId},
     session::AUTH_COOKIE_NAME,
 };
+use std::convert::TryFrom;
 use std::{collections::HashMap, fmt};
 use uuid::Uuid;
 
@@ -21,6 +23,7 @@ pub struct RawCategory {
     pub updated_at: Option<DateTime<Utc>>,
     pub image_count: i64,
     pub jig_count: i64,
+    pub user_scopes: Vec<i16>,
 }
 
 pub fn build_tree(mut categories: Vec<RawCategory>) -> Vec<Category> {
@@ -69,6 +72,13 @@ fn build_tree_recursive(
                 updated_at: raw.updated_at,
                 image_count: raw.image_count as u64,
                 jig_count: raw.jig_count as u64,
+                user_scopes: {
+                    raw.user_scopes
+                        .clone()
+                        .into_iter()
+                        .map(|x| UserScope::try_from(x).expect("detected an invalid user scope"))
+                        .collect()
+                },
                 children,
             }
         })
