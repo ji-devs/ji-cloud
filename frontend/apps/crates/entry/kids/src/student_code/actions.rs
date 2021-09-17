@@ -8,9 +8,10 @@ use super::state::State;
 
 pub fn submit_code(state: Rc<State>, number: String) {
     state.loader.load(clone!(state => async move {
-        let path = jig::player::Get::PATH.replace("{index}", &number);
+        panic!("fix needed");
+        let path = jig::player::instance::Create::PATH.replace("{index}", &number);
 
-        let (result, status) = api_no_auth_status::<JigPlayerSession, EmptyError, ()>(&path, jig::player::Get::METHOD, None).await;
+        let (result, status) = api_no_auth_status::<JigPlayerSession, EmptyError, ()>(&path, jig::player::instance::Create::METHOD, None).await;
 
         match status {
             404 => {
@@ -20,20 +21,10 @@ pub fn submit_code(state: Rc<State>, number: String) {
                 Err(_) => {}
                 Ok(res) => {
                     state.error.set_neq(false);
-                    state.play_jig.set(Some((res.jig_id, res.settings)));
+                    // state.play_jig.set(Some((res.jig_id, res.settings)));
                 }
             },
         };
-
-
-        // utils::prelude::api_with_auth::<shared::domain::jig::player::JigPlayerSessionCode,EmptyError,shared::domain::jig::player::JigPlayerSessionCreateRequest>(
-        //     jig::player::Create::PATH,
-        //     jig::player::Create::METHOD,
-        //     Some(shared::domain::jig::player::JigPlayerSessionCreateRequest {
-        //         jig_id: shared::domain::jig::JigId(uuid::Uuid::from_str("dea981c6-fac4-11eb-9876-b78e9706b646").unwrap()),
-        //         settings: shared::domain::jig::JigPlayerSettings::default(),
-        //     })
-        // ).await;
 
     }));
 }
