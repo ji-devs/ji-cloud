@@ -28,5 +28,7 @@ pub mod screenshot;
 pub mod languages;
 pub mod jig;
 pub mod mixin;
+pub mod panic_hook;
+pub mod logging;
 
 pub(crate) mod strings;

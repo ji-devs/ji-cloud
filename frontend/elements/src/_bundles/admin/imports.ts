@@ -22,6 +22,7 @@ import "@elements/entry/admin/locale/locale-hover-link";
 import "@elements/entry/admin/locale/locale-sort-button";
 import "@elements/entry/admin/locale/locale-select-columns";
 import "@elements/entry/admin/locale/locale-select-columns-item";
+import "@elements/core/panic/panic-message";
 import "@elements/core/titles/variants/underlined-title";
 import "@elements/core/titles/ji";
 import "@elements/core/inputs/composed/dropdown-tree";

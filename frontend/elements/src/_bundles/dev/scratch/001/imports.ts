@@ -6,6 +6,7 @@ import "@elements/core/images/ji";
 import "@elements/core/window/window-loader-block";
 import "@elements/core/buttons/rectangle";
 import "@elements/core/progress-bar/progress-bar";
+import "@elements/core/panic/panic-message";
 
 import "@elements/module/_common/edit/widgets/image-search/image-select";
 import "@elements/module/_common/edit/widgets/image-search/image-search-filters";

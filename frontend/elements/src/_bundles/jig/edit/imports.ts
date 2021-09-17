@@ -1,4 +1,5 @@
 import "@elements/_bundles/_sub-bundles/page/header";
+import "@elements/core/panic/panic-message";
 import "@elements/core/inputs/composed/search";
 import "@elements/core/inputs/composed/select/select";
 import "@elements/core/inputs/composed/select/option";
