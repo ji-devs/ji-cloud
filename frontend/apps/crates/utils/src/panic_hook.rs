@@ -1,6 +1,6 @@
 use std::{panic, sync::Once};
 
-use web_sys::window;
+use web_sys::{HtmlElement, window};
 use console_error_panic_hook;
 
 pub fn set_hook() {
@@ -12,16 +12,15 @@ pub fn set_hook() {
 
 fn hook(info: &panic::PanicInfo) {
     show_panic_message();
-
     console_error_panic_hook::hook(info);
 }
 
 fn show_panic_message() {
-    window()
-        .unwrap()
-        .document()
-        .unwrap()
-        .body()
-        .unwrap()
-        .set_inner_html("<panic-message></panic-message>");
+    if let Some(body) = get_body() {
+        body.set_inner_html("<panic-message></panic-message>");
+    } 
+}
+
+fn get_body() -> Option<HtmlElement> {
+    window()?.document()?.body()
 }
