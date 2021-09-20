@@ -114,7 +114,7 @@ impl State {
         let _ = Reflect::set(
             &wysiwyg_ref,
             &JsValue::from_str(ELEMENT_DEFAULT_KEY),
-            &JsValue::from_str(&ElementType::P1.to_string()),
+            &JsValue::from_str(&ElementType::default().to_string()),
         );
 
         self.update_wysiwyg_value(&wysiwyg_ref);

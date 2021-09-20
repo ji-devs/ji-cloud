@@ -16,12 +16,24 @@ pub enum ElementType {
     P2,
 }
 
+impl Default for ElementType {
+    fn default() -> Self {
+        Self::H1
+    }
+}
+
 #[derive(Clone, Debug, Display, EnumIter, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "PascalCase")]
 pub enum Align {
     Left,
     Center,
     Right,
+}
+
+impl Default for Align {
+    fn default() -> Self {
+        Self::Left
+    }
 }
 
 pub type FontSize = u8;
@@ -54,9 +66,9 @@ impl ControlsState {
     pub fn new() -> Self {
         Self {
             font: super::config::DEFAULT_FONT_FAMILY.to_string(),
-            element: ElementType::P1,
+            element: ElementType::default(),
             weight: REGULAR_WEIGHT,
-            align: Align::Left,
+            align: Align::default(),
             font_size: 16,
             color: None,
             highlight_color: None,
