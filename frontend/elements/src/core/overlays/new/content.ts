@@ -56,13 +56,13 @@ export class _ extends LitElement {
                     display: block;
                 }
 
-                :host([menu]) {
+                :host([zLayer="menu"]) {
                     z-index: 1;
                 }
-                :host([tooltip]) {
+                :host([zLayer="tooltip"]) {
                     z-index: 100;
                 }
-                :host([modal]) {
+                :host([zLayer="modal"]) {
                     z-index: 200;
                 }
 
