@@ -85,12 +85,15 @@ jobs:
       - name: install npm deps
         run: npm ci 
         working-directory: "./frontend/elements"
+        env:
+          FONTAWESOME_NPM_AUTH_TOKEN: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
 
       - name: build elements 
         run: npm run build:sandbox
         working-directory: "./frontend/elements"
         env: 
           APP_NAME: "${{ matrix.app }}"
+          FONTAWESOME_NPM_AUTH_TOKEN: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
 
       - name: install google cloud sdk
         uses: google-github-actions/setup-gcloud@master
