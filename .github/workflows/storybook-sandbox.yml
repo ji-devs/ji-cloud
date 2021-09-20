@@ -46,6 +46,8 @@ jobs:
       - name: test elements 
         run: npm run test 
         working-directory: "./frontend/elements"
+        env:
+          FONTAWESOME_NPM_AUTH_TOKEN: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
 
       - name: install npm deps
         run: npm install
@@ -58,6 +60,7 @@ jobs:
         working-directory: "./frontend/storybook"
         env:
           LOCAL_CDN_FRONTEND_DIR: ${{ github.workspace }}/frontend
+          FONTAWESOME_NPM_AUTH_TOKEN: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
 
       - name: deploy to firebase
         uses: w9jds/firebase-action@v1.0.1

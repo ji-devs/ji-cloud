@@ -42,6 +42,8 @@ jobs:
       - name: test elements 
         run: npm run test 
         working-directory: "./frontend/elements"
+        env:
+          FONTAWESOME_NPM_AUTH_TOKEN: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
 
       - name: Notify slack of all status
         uses: pullreminders/slack-action@master
