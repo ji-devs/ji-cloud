@@ -56,7 +56,7 @@ impl State {
     }
 
     pub fn text_to_value(text: &str) -> String {
-        format!("{{\"version\":\"0.1.0\",\"content\":[{{\"children\":[{{\"text\":\"{}\",\"element\":\"P1\"}}]}}]}}", text)
+        format!("{{\"version\":\"0.1.0\",\"content\":[{{\"children\":[{{\"text\":\"{}\",\"element\":\"H1\"}}]}}]}}", text)
     }
 
     pub fn set_value(&self, value: Option<String>) {
