@@ -64,6 +64,13 @@ fn render_page(state: Rc<State>) -> Dom {
                 }),
                 Some("img")
             ),
+            html!("fa-icon", {
+                .property("icon", "fa-thin fa-pen")
+                .property("slot", "edit-cover")
+                .event(clone!(state => move |_: events::Click| {
+                    state.navigate_to_cover();
+                }))
+            }),
             html!("label", {
                 .with_node!(elem => {
                     .property("slot", "public")

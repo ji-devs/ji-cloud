@@ -47,6 +47,14 @@ impl State {
         )
 
     }
+
+    pub fn navigate_to_cover(&self) {
+        let cover_module_id = self.jig.modules.lock_ref().first().map(|m| m.id.clone());
+
+        if let Some(cover_module_id) = cover_module_id {
+            self.jig_edit_state.route.set(JigEditRoute::Module(cover_module_id));
+        };
+    }
 }
 
 fn get_categories_labels(
