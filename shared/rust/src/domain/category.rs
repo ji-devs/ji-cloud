@@ -30,7 +30,6 @@ pub struct Category {
     pub id: CategoryId,
 
     /// The category's user_scope.
-    #[serde(skip_serializing_if = "Vec::is_empty")]
     pub user_scopes: Vec<UserScope>,
 
     /// The category's name.

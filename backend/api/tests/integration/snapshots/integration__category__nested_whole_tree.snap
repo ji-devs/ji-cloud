@@ -15,6 +15,7 @@ expression: body
       "children": [
         {
           "id": "e315d3b2-e90f-11ea-8281-73cd69c14821",
+          "user_scopes": [],
           "name": "A",
           "children": [
             {
