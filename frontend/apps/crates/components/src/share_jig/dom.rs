@@ -3,7 +3,7 @@ use std::rc::Rc;
 use dominator::{Dom, clone, html, with_node};
 use futures_signals::signal::{Signal, SignalExt};
 use shared::config::JIG_PLAYER_SESSION_VALID_DURATION_SECS;
-use utils::{clipboard, events, unwrap::UnwrapJiExt};
+use utils::{clipboard, events, routes::{KidsRoute, Route}, unwrap::UnwrapJiExt};
 
 use crate::{animation::fade::{Fade, FadeKind}, tooltip::{
     state::{MoveStrategy, Placement, State as TooltipState, TooltipBubble, TooltipData, TooltipTarget},
@@ -18,6 +18,7 @@ use super::{
 const STR_BACK: &'static str = "Back";
 const STR_COPIED: &'static str = "Copied to the clipboard";
 const STR_COPY_CODE: &'static str = "Copy Code";
+const JIGZI_BASE_URL: &'static str = "https://jigzi.org";
 
 pub fn render(state: Rc<State>, anchor: Dom, slot: Option<&str>) -> Dom {
     html!("anchored-overlay", {
@@ -106,7 +107,15 @@ fn render_share_main(state: Rc<State>) -> Dom {
 fn render_share_students(state: Rc<State>) -> Dom {
     html!("share-jig-students", {
         .property("slot", "overlay")
-        .property("url", "????")
+        .property_signal("url", state.student_code.signal_cloned().map(|student_code| {
+            match student_code {
+                None => String::new(),
+                Some(student_code) => {
+                    let url = String::from(JIGZI_BASE_URL);
+                    url + &Route::Kids(KidsRoute::StudentCode(Some(student_code))).to_string()
+                },
+            }
+        }))
         .property_signal("code", state.student_code.signal_cloned().map(|student_code| {
             match student_code {
                 None => String::new(),
@@ -147,9 +156,13 @@ fn render_share_students(state: Rc<State>) -> Dom {
                 .property("kind", "text")
                 .text("Copy URL")
                 .property_signal("disabled", state.student_code.signal_ref(|x| x.is_none()))
-                .event(|_: events::Click| {
-                    clipboard::write_text("???");
-                })
+                .event(clone!(state => move |_: events::Click| {
+                    if let Some(student_code) = &*state.student_code.lock_ref() {
+                        let url = String::from(JIGZI_BASE_URL);
+                        let url = url + &Route::Kids(KidsRoute::StudentCode(Some(student_code.clone()))).to_string();
+                        clipboard::write_text(&url);
+                    };
+                }))
             }),
             html!("button-rect", {
                 .property("slot", "copy-code")
