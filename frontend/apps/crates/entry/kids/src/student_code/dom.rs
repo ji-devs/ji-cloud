@@ -12,7 +12,11 @@ use super::state::State;
 const STR_TRY_AGAIN: &'static str = "Try again";
 const STR_HELP: &'static str = "Ask for help";
 
-pub fn render(state: Rc<State>) -> Dom {
+pub fn render(state: Rc<State>, code: Option<String>) -> Dom {
+    if let Some(code) = code {
+        submit_code(Rc::clone(&state), code);
+    };
+
     html!("empty-fragment", {
         .child(html!("kids-student-code", {
             .child(html!("kids-student-code-input", {

@@ -22,8 +22,8 @@ impl Router {
                 match route {
                     Route::Kids(route) => {
                         match route {
-                            KidsRoute::StudentCode => {
-                                Some(student_code::dom::render(Rc::new(student_code::state::State::new())))
+                            KidsRoute::StudentCode(code) => {
+                                Some(student_code::dom::render(Rc::new(student_code::state::State::new()), code))
                             },
                         }
                     }
