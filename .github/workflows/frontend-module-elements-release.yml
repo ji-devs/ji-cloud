@@ -36,6 +36,8 @@ jobs:
       - name: install npm deps
         run: npm ci 
         working-directory: "./frontend/elements"
+        env:
+          FONTAWESOME_NPM_AUTH_TOKEN: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
 
       - name: test elements 
         run: npm run test 
