@@ -83,12 +83,8 @@ async fn main() -> anyhow::Result<()> {
 
         let algolia_manager = crate::algolia::Manager::new(algolia_settings, db_pool.clone())?;
 
-        let jwk_verifier = jwk::create_verifier(
-            runtime_settings
-                .google_oauth
-                .as_ref()
-                .map_or_else(String::new, |it| it.client.clone()),
-        );
+        let jwk_verifier =
+            jwk::create_verifier(settings.jwk_audience_settings(&runtime_settings).await?);
 
         let _ = jwk::run_task(jwk_verifier.clone());
 
@@ -111,16 +107,6 @@ async fn main() -> anyhow::Result<()> {
             //guard,
         )
     };
-
-    // todo: find a better place for this...
-    // if let Some(algolia_manager) = algolia_manager {
-    //     algolia_manager
-    //         .migrate()
-    //         .await
-    //         .context("Algolia migration failed")?;
-    //
-    //     let _ = algolia_manager.spawn();
-    // }
 
     let handle = thread::spawn(|| {
         http::build_and_run(

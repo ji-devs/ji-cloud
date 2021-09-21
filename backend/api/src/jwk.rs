@@ -1,4 +1,5 @@
 use anyhow::{anyhow, bail, Context};
+use core::settings::JwkAudiences;
 use jsonwebtoken as jwt;
 use jwt::{Algorithm, DecodingKey, TokenData, Validation};
 use reqwest::{header, Response};
@@ -113,8 +114,8 @@ pub struct IdentityClaims {
     pub email_verified: bool,
 
     /// Hash of the user's access token
-    #[serde(rename = "at_hash")]
-    pub access_token_hash: String,
+    #[serde(rename = "at_hash", default)]
+    pub access_token_hash: Option<String>,
 
     /// The user's name
     #[serde(default)]
@@ -158,25 +159,47 @@ pub struct JwkVerifier {
     // _very_ few keys, so looking them up in a hashmap is likely slower.
     key_holder: RwLock<JwkKeys>,
     issuer: String,
-    audience: String,
+    audiences: JwkAudiences,
 }
 
 impl JwkVerifier {
-    fn new(issuer: String, audience: String) -> Self {
+    fn new(issuer: String, audiences: JwkAudiences) -> Self {
         Self {
             key_holder: RwLock::new(JwkKeys {
                 keys: vec![],
                 expiration_time: Instant::now(),
             }),
             issuer,
-            audience,
+            audiences,
         }
     }
 
-    pub async fn verify_oauth(
+    pub async fn verify_iam_api_invoker_oauth(
         &self,
         token: &str,
         max_attempts: usize,
+    ) -> anyhow::Result<IdentityClaims> {
+        self.verify_google_oauth(token, max_attempts, &self.audiences.api)
+            .await
+    }
+
+    pub async fn verify_google_user_oauth(
+        &self,
+        token: &str,
+        max_attempts: usize,
+    ) -> anyhow::Result<IdentityClaims> {
+        self.verify_google_oauth(token, max_attempts, &self.audiences.oauth_client)
+            .await
+    }
+
+    /// Decodes bearer token issued by Google and verifies that it is from the proper issuer and targets the correct audience
+    ///
+    /// * `validation_audience` is the value of the `aud` field validated against.
+    pub async fn verify_google_oauth(
+        &self,
+        token: &str,
+        max_attempts: usize,
+        validation_audience: &str,
     ) -> anyhow::Result<IdentityClaims> {
         // todo: replace with better errors (401, 403)
         let token_kid = jwt::decode_header(token)
@@ -187,8 +210,9 @@ impl JwkVerifier {
         for _ in 0..cmp::max(max_attempts, 1) {
             match self.key_holder.read().await.get_key(&token_kid) {
                 Ok(Some(key)) => {
-                    let claims: IdentityClaims =
-                        self.decode_identity_token_with_key(key, token)?.claims;
+                    let claims: IdentityClaims = self
+                        .decode_identity_token_with_key(key, token, validation_audience)?
+                        .claims;
                     let now = chrono::Utc::now().timestamp() as u64;
 
                     if claims.issued_at > now {
@@ -217,13 +241,16 @@ impl JwkVerifier {
         &self,
         key: &JwkKey,
         token: &str,
+        validation_audience: &str,
     ) -> anyhow::Result<TokenData<IdentityClaims>> {
         let mut validation = Validation::new(key.alg);
-        validation.set_audience(&[&self.audience]);
+        validation.set_audience(&[validation_audience]);
         validation.iss = Some(self.issuer.clone());
 
         let key = DecodingKey::from_rsa_components(&key.n, &key.e);
-        jwt::decode(token, &key, &validation).map_err(|e| anyhow!(e))
+
+        jwt::decode(token, &key, &validation)
+            .map_err(|e| anyhow!("error while decoding identity token: {}", e))
     }
 }
 
@@ -256,6 +283,6 @@ pub fn run_task(verifier: Arc<JwkVerifier>) -> JoinHandle<()> {
 }
 
 #[must_use]
-pub fn create_verifier(audience: String) -> Arc<JwkVerifier> {
-    Arc::new(JwkVerifier::new(JWK_ISSUER_URL.to_owned(), audience))
+pub fn create_verifier(audiences: JwkAudiences) -> Arc<JwkVerifier> {
+    Arc::new(JwkVerifier::new(JWK_ISSUER_URL.to_owned(), audiences))
 }

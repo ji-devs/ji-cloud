@@ -1,10 +1,10 @@
 use std::{net::TcpListener, sync::Arc};
 
 use actix_service::Service;
-use actix_web::{dev::Server, HttpResponse};
 use actix_web::{
-    dev::{MessageBody, ServiceRequest, ServiceResponse},
-    web::Data,
+    dev::{MessageBody, Server, ServiceRequest, ServiceResponse},
+    web::{method, Data},
+    HttpResponse,
 };
 use core::{
     config::JSON_BODY_LIMIT,
@@ -229,8 +229,8 @@ pub fn build(
             .configure(endpoints::session::configure)
             .configure(endpoints::locale::configure)
             .configure(endpoints::additional_resource::configure)
-            .configure(endpoints::algolia::configure)
-            .route("/", actix_web::web::get().to(no_content_response))
+            .configure(endpoints::algolia_manager::configure)
+            .route("/", method(http::Method::GET).to(no_content_response))
     });
 
     // if listenfd doesn't take a TcpListener (i.e. we're not running via

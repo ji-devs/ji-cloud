@@ -1,3 +1,4 @@
+use actix_web::{get, web, App, HttpServer, Responder};
 use algolia::{
     filter::{AndFilter, AndFilterable, CommonFilter, FacetFilter, ScoredFacetFilter, TagFilter},
     request::{BatchWriteRequests, SearchQuery, VirtualKeyRestrictions},
@@ -9,7 +10,6 @@ use chrono::Utc;
 use core::settings::AlgoliaSettings;
 use futures::TryStreamExt;
 use serde::Serialize;
-use actix_web::{get, web, App, HttpServer, Responder};
 
 use shared::{
     domain::{
@@ -20,13 +20,13 @@ use shared::{
     },
     media::MediaGroupKind,
 };
-use sqlx::{PgPool, PgConnection};
+use sqlx::{PgConnection, PgPool};
 use std::{convert::TryInto, time::Duration, time::Instant};
 use tokio::task::JoinHandle;
 use uuid::Uuid;
 
-use migration::ResyncKind;
 use crate::error;
+use migration::ResyncKind;
 
 mod migration;
 
@@ -114,7 +114,6 @@ impl Manager {
     }
 
     pub async fn spawn_cron_jobs(&self) -> anyhow::Result<()> {
-        // Cron job:
         log::info!("reached updates for spawning jobs");
         let mut turn_modulus: usize = 0;
 
@@ -128,46 +127,18 @@ impl Manager {
 
         turn_modulus = (turn_modulus + 1) % 2;
 
-        Ok(())
-
-    }
-
-    #[must_use]
-    pub fn spawn(self) -> JoinHandle<()> {
-        // todo: be less hacky
-
-        let mut turn_modulus: usize = 0;
-
-        tokio::task::spawn(async move {
-            loop {
-                let iteration_start = Instant::now();
-
-                let res = if turn_modulus % 2 == 0 {
-                    self.update_images()
-                        .await
-                        .context("update images task errored")
-                } else {
-                    self.update_jigs().await.context("update jigs task errored")
-                };
-
-                turn_modulus = (turn_modulus + 1) % 2;
-
-                match res {
-                    Ok(true) => {}
-                    Ok(false) => {
-                        log::info!("exiting algolia indexing task (out of date)");
-                        return;
-                    }
-
-                    Err(e) => {
-                        log::error!("{:?}", e);
-                        sentry::integrations::anyhow::capture_anyhow(&e);
-                    }
-                }
-
-                tokio::time::sleep_until((iteration_start + Duration::from_secs(5)).into()).await;
+        match res {
+            Ok(true) => {}
+            Ok(false) => {
+                log::info!("exiting algolia indexing task (out of date)");
             }
-        })
+            Err(e) => {
+                log::error!("{:?}", e);
+                sentry::integrations::anyhow::capture_anyhow(&e);
+            }
+        }
+
+        Ok(())
     }
 
     pub async fn migrate(&self) -> anyhow::Result<()> {

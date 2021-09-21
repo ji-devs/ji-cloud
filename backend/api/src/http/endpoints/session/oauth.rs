@@ -128,7 +128,7 @@ async fn handle_google_oauth(
 
     let tokens = google_oauth::convert_oauth_code(config, code, &redirect_url).await?;
 
-    let claims: IdentityClaims = jwks.verify_oauth(&tokens.id_token, 3).await?;
+    let claims: IdentityClaims = jwks.verify_google_user_oauth(&tokens.id_token, 3).await?;
 
     let mut txn = db.begin().await?;
 
