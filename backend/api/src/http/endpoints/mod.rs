@@ -12,3 +12,6 @@ pub mod module;
 pub mod search;
 pub mod session;
 pub mod user;
+
+// FIXME temporary
+pub mod iam_service_invoker;

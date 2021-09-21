@@ -220,6 +220,7 @@ pub fn build(
             .configure(endpoints::session::configure)
             .configure(endpoints::locale::configure)
             .configure(endpoints::additional_resource::configure)
+            .configure(endpoints::iam_service_invoker::configure)
             .route("/", actix_web::web::get().to(no_content_response))
     });
 

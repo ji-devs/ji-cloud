@@ -113,8 +113,8 @@ pub struct IdentityClaims {
     pub email_verified: bool,
 
     /// Hash of the user's access token
-    #[serde(rename = "at_hash")]
-    pub access_token_hash: String,
+    #[serde(rename = "at_hash", default)]
+    pub access_token_hash: Option<String>,
 
     /// The user's name
     #[serde(default)]
@@ -152,31 +152,67 @@ struct FirebaseClaims {
     pub auth_time: u64,
 }
 
+/// Sets the possible `aud` targets for GCP authenticated account requests. This can be for users through
+/// OAuth2 or GCP services invoking the API or media-watch services directly by setting the `aud` target
+/// to be the Cloud Run generated URL.
+///
+/// See:
+/// * https://cloud.google.com/run/docs/authenticating/service-to-service
+/// * https://stackoverflow.com/questions/58683365/google-cloud-run-authentication-service-to-service
+#[derive(Debug)]
+pub struct Audiences {
+    pub oauth_client: String,
+    pub api: String,
+    pub media_watch: String,
+}
+
 #[derive(Debug)]
 pub struct JwkVerifier {
     // use a vec instead of a hashmap because there are typically
     // _very_ few keys, so looking them up in a hashmap is likely slower.
     key_holder: RwLock<JwkKeys>,
     issuer: String,
-    audience: String,
+    audiences: Audiences,
 }
 
 impl JwkVerifier {
-    fn new(issuer: String, audience: String) -> Self {
+    fn new(issuer: String, audiences: Audiences) -> Self {
         Self {
             key_holder: RwLock::new(JwkKeys {
                 keys: vec![],
                 expiration_time: Instant::now(),
             }),
             issuer,
-            audience,
+            audiences,
         }
     }
 
-    pub async fn verify_oauth(
+    pub async fn verify_iam_service_account_oauth(
         &self,
         token: &str,
         max_attempts: usize,
+    ) -> anyhow::Result<IdentityClaims> {
+        self.verify_google_oauth(token, max_attempts, &self.audiences.api)
+            .await
+    }
+
+    pub async fn verify_google_user_oauth(
+        &self,
+        token: &str,
+        max_attempts: usize,
+    ) -> anyhow::Result<IdentityClaims> {
+        self.verify_google_oauth(token, max_attempts, &self.audiences.oauth_client)
+            .await
+    }
+
+    /// Decodes bearer token issued by Google and verifies that it is from the proper issuer and targets the correct audience
+    ///
+    /// * `validation_audience` is the value of the `aud` field validated against.
+    pub async fn verify_google_oauth(
+        &self,
+        token: &str,
+        max_attempts: usize,
+        validation_audience: &str,
     ) -> anyhow::Result<IdentityClaims> {
         // todo: replace with better errors (401, 403)
         let token_kid = jwt::decode_header(token)
@@ -187,9 +223,12 @@ impl JwkVerifier {
         for _ in 0..cmp::max(max_attempts, 1) {
             match self.key_holder.read().await.get_key(&token_kid) {
                 Ok(Some(key)) => {
-                    let claims: IdentityClaims =
-                        self.decode_identity_token_with_key(key, token)?.claims;
+                    let claims: IdentityClaims = self
+                        .decode_identity_token_with_key(key, token, validation_audience)?
+                        .claims;
                     let now = chrono::Utc::now().timestamp() as u64;
+
+                    log::info!("readed3");
 
                     if claims.issued_at > now {
                         bail!("token isn't valid yet")
@@ -217,13 +256,19 @@ impl JwkVerifier {
         &self,
         key: &JwkKey,
         token: &str,
+        validation_audience: &str,
     ) -> anyhow::Result<TokenData<IdentityClaims>> {
         let mut validation = Validation::new(key.alg);
-        validation.set_audience(&[&self.audience]);
+        validation.set_audience(&[validation_audience]);
         validation.iss = Some(self.issuer.clone());
 
+        log::info!("readed");
+
         let key = DecodingKey::from_rsa_components(&key.n, &key.e);
-        jwt::decode(token, &key, &validation).map_err(|e| anyhow!(e))
+
+        log::info!("{:#?}", &validation);
+        jwt::decode(token, &key, &validation)
+            .map_err(|e| anyhow!("error while decoding identity token: {}", e))
     }
 }
 
@@ -256,6 +301,6 @@ pub fn run_task(verifier: Arc<JwkVerifier>) -> JoinHandle<()> {
 }
 
 #[must_use]
-pub fn create_verifier(audience: String) -> Arc<JwkVerifier> {
-    Arc::new(JwkVerifier::new(JWK_ISSUER_URL.to_owned(), audience))
+pub fn create_verifier(audiences: Audiences) -> Arc<JwkVerifier> {
+    Arc::new(JwkVerifier::new(JWK_ISSUER_URL.to_owned(), audiences))
 }

@@ -250,6 +250,7 @@ pub struct EmailClientSettings {
 pub struct GoogleCloudStorageSettings {
     /// Bucket for processed media.
     pub media_bucket: String,
+
     /// Bucket for raw media uploads.
     pub processing_bucket: String,
 }
@@ -259,10 +260,13 @@ pub struct GoogleCloudStorageSettings {
 pub struct GoogleCloudEventArcSettings {
     /// Service name for Google Cloud storage
     pub storage_service_name: String,
+
     /// ID of the GCP project
     pub project_id: String,
+
     /// Topic name for raw media upload event
     pub media_uploaded_topic: String,
+
     /// Topic name for completed media processing event
     pub media_processed_topic: String,
 }

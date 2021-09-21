@@ -83,12 +83,19 @@ async fn main() -> anyhow::Result<()> {
 
         let algolia_manager = crate::algolia::Manager::new(algolia_settings, db_pool.clone())?;
 
-        let jwk_verifier = jwk::create_verifier(
-            runtime_settings
+        let jwk_audiences = jwk::Audiences {
+            // read from a different source because this is used at runtime for seeing whether OAuth logins are enabled
+            oauth_client: runtime_settings
                 .google_oauth
                 .as_ref()
                 .map_or_else(String::new, |it| it.client.clone()),
-        );
+            api: remote_target.api_assigned_url(),
+            media_watch: remote_target
+                .media_watch_assigned_url()
+                .map_or_else(String::new, |it| it.to_owned()),
+        };
+
+        let jwk_verifier = jwk::create_verifier(jwk_audiences);
 
         let _ = jwk::run_task(jwk_verifier.clone());
 
