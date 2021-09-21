@@ -113,7 +113,7 @@ impl Manager {
         }))
     }
 
-    pub async fn spawn_cron_jobs(self) {
+    pub async fn spawn_cron_jobs(self) -> anyhow::Result<()> {
         // Cron job:
         let mut turn_modulus: usize = 0;
 
@@ -126,6 +126,8 @@ impl Manager {
         };
 
         turn_modulus = (turn_modulus + 1) % 2;
+
+        Ok(())
 
     }
 

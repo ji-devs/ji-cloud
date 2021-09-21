@@ -11,6 +11,7 @@ mod meta;
 mod service;
 mod session;
 mod user;
+mod algolia;
 
 #[actix_rt::test]
 async fn pass() -> anyhow::Result<()> {

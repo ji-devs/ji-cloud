@@ -229,7 +229,7 @@ pub fn build(
             .configure(endpoints::session::configure)
             .configure(endpoints::locale::configure)
             .configure(endpoints::additional_resource::configure)
-            .configure(endpoints::algolia::batch_update)
+            .configure(endpoints::algolia::configure)
             .route("/", actix_web::web::get().to(no_content_response))
     });
 
