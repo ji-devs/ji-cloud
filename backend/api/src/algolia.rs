@@ -115,6 +115,7 @@ impl Manager {
 
     pub async fn spawn_cron_jobs(&self) -> anyhow::Result<()> {
         // Cron job:
+        log::info!("reached updates for spawning jobs");
         let mut turn_modulus: usize = 0;
 
         let res = if turn_modulus % 2 == 0 {
@@ -260,6 +261,7 @@ select algolia_index_version as "algolia_index_version!" from "settings"
 
     // todo: be less hacky about this
     async fn update_jigs(&self) -> anyhow::Result<bool> {
+        log::info!("reached update jigs");
         let mut txn = self.db.begin().await?;
 
         let is_outdated = sqlx::query!(
@@ -375,10 +377,13 @@ for no key update skip locked;
 
         txn.commit().await?;
 
+        log::info!("completed update jigs");
+
         Ok(true)
     }
 
     async fn update_images(&self) -> anyhow::Result<bool> {
+        log::info!("reached update images");
         let mut txn = self.db.begin().await?;
 
         let is_outdated = sqlx::query!(
@@ -497,6 +502,8 @@ limit 100 for no key update skip locked;
         .await?;
 
         txn.commit().await?;
+
+        log::info!("completed update images");
 
         Ok(true)
     }
