@@ -26,12 +26,15 @@ select exists(select 1 from user_recent_image where user_id = $1 and image_id = 
     .await?
     .exists;
 
-    if !exists {
-        let res = sqlx::query!(
+    let res = sqlx::query!(
             // language=SQL
             r#"
             insert into user_recent_image (user_id, image_id, media_library)
             values ($1, $2, $3)
+            ON CONFLICT (user_id, image_id) DO UPDATE
+              SET user_id = $1,
+                image_id = $2,
+                media_library = $3
             returning image_id as "id: ImageId", media_library as "library: MediaLibrary", last_used as "last_used: DateTime<Utc>";
             "#,
             user_id,
@@ -41,31 +44,9 @@ select exists(select 1 from user_recent_image where user_id = $1 and image_id = 
             .fetch_one(&mut txn)
             .await?;
 
-        txn.commit().await?;
-
-        return Ok((res.id, res.library, res.last_used, false));
-    }
-
-    let image = sqlx::query!(
-        // language=SQL
-        r#"
-        update user_recent_image
-        set last_used = now()
-        where user_id = $1 and image_id = $2
-        returning image_id as "id: ImageId", media_library as "library: MediaLibrary ", last_used as "last_used"
-        "#,
-        user_id,
-        image_id.0,
-    )
-    .fetch_one(&mut txn)
-    .await?;
-
-    // TODO: figure out what this is doing
-    //txn.commit().await.map_err(Into::into);
-
     txn.commit().await?;
 
-    Ok((image.id, image.library, image.last_used, true))
+    return Ok((res.id, res.library, res.last_used, exists));
 }
 
 pub async fn delete(db: &PgPool, user_id: Uuid, image_id: ImageId) -> sqlx::Result<()> {
