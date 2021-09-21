@@ -346,10 +346,10 @@ pub fn configure(cfg: &mut ServiceConfig) {
         image::recent::List::METHOD.route().to(self::recent::list),
     )
     .route(
-        image::recent::Update::PATH,
-        image::recent::Update::METHOD
+        image::recent::Put::PATH,
+        image::recent::Put::METHOD
             .route()
-            .to(self::recent::update),
+            .to(self::recent::put),
     )
     .route(
         image::recent::Delete::PATH,
