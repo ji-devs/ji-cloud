@@ -58,5 +58,3 @@ pub mod session;
 /// Locale endpoints
 pub mod locale;
 
-/// Background tasks for Algolia
-pub mod algolia;

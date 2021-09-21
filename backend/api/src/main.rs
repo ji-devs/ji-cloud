@@ -113,14 +113,14 @@ async fn main() -> anyhow::Result<()> {
     };
 
     // todo: find a better place for this...
-    if let Some(algolia_manager) = algolia_manager {
-        algolia_manager
-            .migrate()
-            .await
-            .context("Algolia migration failed")?;
-
-        let _ = algolia_manager.spawn();
-    }
+    // if let Some(algolia_manager) = algolia_manager {
+    //     algolia_manager
+    //         .migrate()
+    //         .await
+    //         .context("Algolia migration failed")?;
+    //
+    //     let _ = algolia_manager.spawn();
+    // }
 
     let handle = thread::spawn(|| {
         http::build_and_run(
@@ -133,6 +133,7 @@ async fn main() -> anyhow::Result<()> {
             algolia_key_store,
             jwk_verifier,
             mail_client,
+            algolia_manager,
         )
     });
 
