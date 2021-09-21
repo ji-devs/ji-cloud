@@ -142,6 +142,10 @@ async fn update() -> anyhow::Result<()> {
 
     assert_eq!(resp.status(), StatusCode::OK);
 
+    let body: serde_json::Value = resp.json().await?;
+
+    insta::assert_json_snapshot!(body, {".**.last_used" => "[timestamp]"});
+
     let resp = client
         .get(&format!("http://0.0.0.0:{}/v1/user/me/recent/image", port))
         .login()
@@ -151,11 +155,11 @@ async fn update() -> anyhow::Result<()> {
 
     assert_eq!(resp.status(), StatusCode::OK);
 
-    let body: serde_json::Value = resp.json().await?;
+    let body_2: serde_json::Value = resp.json().await?;
 
     app.stop(false).await;
 
-    insta::assert_json_snapshot!(body, {".**.last_used" => "[timestamp]"});
+    insta::assert_json_snapshot!(body_2, {".**.last_used" => "[timestamp]"});
 
     Ok(())
 }

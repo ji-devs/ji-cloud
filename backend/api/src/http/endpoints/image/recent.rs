@@ -14,14 +14,14 @@ use shared::{
 };
 use sqlx::PgPool;
 
-pub(in super::super) async fn update(
+pub(in super::super) async fn put(
     db: Data<PgPool>,
     claims: TokenUser,
-    req: Json<<recent::Update as ApiEndpoint>::Req>,
+    req: Json<<recent::Put as ApiEndpoint>::Req>,
 ) -> Result<HttpResponse, error::UserRecentImage> {
     // TODO: new: return created; updated: return Ok
     let (id, library, last_used, is_updated): (ImageId, MediaLibrary, DateTime<Utc>, bool) =
-        db::image::recent::update(db.as_ref(), claims.0.user_id, req.id, req.library).await?;
+        db::image::recent::upsert(db.as_ref(), claims.0.user_id, req.id, req.library).await?;
 
     if is_updated == true {
         return Ok(HttpResponse::Ok().json(UserRecentImageResponse {

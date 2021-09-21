@@ -4,26 +4,7 @@ expression: body
 
 ---
 {
-  "images": [
-    {
-      "id": "8cca6f3a-c4bb-11eb-8edf-13c75672da8f",
-      "library": "User",
-      "last_used": "[timestamp]"
-    },
-    {
-      "id": "8cca720a-c4bb-11eb-8edf-63da1d86939c",
-      "library": "User",
-      "last_used": "[timestamp]"
-    },
-    {
-      "id": "8cca719c-c4bb-11eb-8edf-f7accb638a15",
-      "library": "User",
-      "last_used": "[timestamp]"
-    },
-    {
-      "id": "8cca7124-c4bb-11eb-8edf-7b42383ed8f5",
-      "library": "User",
-      "last_used": "[timestamp]"
-    }
-  ]
+  "id": "8cca719c-c4bb-11eb-8edf-f7accb638a15",
+  "library": "User",
+  "last_used": "[timestamp]"
 }

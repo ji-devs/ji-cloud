@@ -4,7 +4,7 @@
 use crate::{
     api::{ApiEndpoint, Method},
     domain::image::recent::{
-        UserRecentImageCreateRequest, UserRecentImageListRequest, UserRecentImageListResponse,
+        UserRecentImageUpsertRequest, UserRecentImageListRequest, UserRecentImageListResponse,
         UserRecentImageResponse,
     },
     error::EmptyError,
@@ -36,12 +36,12 @@ impl ApiEndpoint for List {
 /// * [`NotFound`](http::StatusCode::NOT_FOUND) if the image doesn't exist in the user's recent images list.
 ///
 /// * ['BadRequest'](http::StatusCode::BAD_REQUEST) if the request is malformed.
-pub struct Update;
+pub struct Put;
 
 // TODO: Move ID into request body
 // TODO: grab req/res from above
-impl ApiEndpoint for Update {
-    type Req = UserRecentImageCreateRequest;
+impl ApiEndpoint for Put {
+    type Req = UserRecentImageUpsertRequest;
     type Res = UserRecentImageResponse;
     type Err = EmptyError;
     // uuid should be sufficient to identify an image, VERY unlikely to conflict across media libraries

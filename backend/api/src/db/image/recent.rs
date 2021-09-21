@@ -7,7 +7,7 @@ use shared::{
 use sqlx::PgPool;
 use uuid::Uuid;
 
-pub async fn update(
+pub async fn upsert(
     db: &PgPool,
     user_id: Uuid,
     image_id: ImageId,
