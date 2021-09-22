@@ -4457,8 +4457,8 @@
       ]
     }
   },
-  "c9871e12739d5ae1acd8e3026e00ed927a54f717d5e5cd12f78456b99a7aa23b": {
-    "query": "delete from session where user_id = $1",
+  "cd49cef54182b43dd7943bcd51fd3c535f4a8ec0dae95cbc8ceb39f7f757fe02": {
+    "query": "delete from locale_entry where id = $1",
     "describe": {
       "columns": [],
       "parameters": {
@@ -4869,6 +4869,65 @@
       "nullable": [
         null
       ]
+    }
+  },
+  "f013ee7b0afcb04a8e367f8c394ccaeeaf7a7383fb198faa0e1a45646307a6c6": {
+    "query": "\n        update user_recent_image\n        set last_used = now()\n        where user_id = $1 and image_id = $2\n        returning image_id as \"id: ImageId\", media_library as \"library: MediaLibrary \", last_used as \"last_used\"\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: ImageId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "library: MediaLibrary ",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 2,
+          "name": "last_used",
+          "type_info": "Timestamptz"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false
+      ]
+    }
+  },
+  "f113abb5ad8ed84da251652d0852b9e24e70e579fcb494e3644f4b1fdacfe0b1": {
+    "query": "\ninsert into jig_goal(jig_id, goal_id)\nselect $1, goal_id from jig_goal where jig_id = $2\n",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "f47f80cc6e3d0cdb4c122e3178a2e9a137b5d2192f80f5457d4f7d30954ba908": {
+    "query": "\ninsert into jig_module (\"index\", jig_id, kind, contents)\nselect \"index\", $2 as \"jig_id\", kind, contents\nfrom jig_module where jig_id = $1\n",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      },
+      "nullable": []
     }
   },
   "f4d6632fc60abf4351be966b89b2490a3c3aef6f9f59d9ab4ea2eecc68d8cb72": {

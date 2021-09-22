@@ -347,9 +347,7 @@ pub fn configure(cfg: &mut ServiceConfig) {
     )
     .route(
         image::recent::Put::PATH,
-        image::recent::Put::METHOD
-            .route()
-            .to(self::recent::put),
+        image::recent::Put::METHOD.route().to(self::recent::put),
     )
     .route(
         image::recent::Delete::PATH,
