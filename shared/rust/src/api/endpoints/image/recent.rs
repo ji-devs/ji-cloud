@@ -4,8 +4,8 @@
 use crate::{
     api::{ApiEndpoint, Method},
     domain::image::recent::{
-        UserRecentImageUpsertRequest, UserRecentImageListRequest, UserRecentImageListResponse,
-        UserRecentImageResponse,
+        UserRecentImageListRequest, UserRecentImageListResponse, UserRecentImageResponse,
+        UserRecentImageUpsertRequest,
     },
     error::EmptyError,
 };
