@@ -14,6 +14,7 @@ use shared::{
 };
 use sqlx::PgPool;
 
+use crate::db::jig;
 use crate::{db, error, extractor::TokenUser};
 
 /// Create a new module.
@@ -29,7 +30,7 @@ async fn create(
 
     let req = req.into_inner();
 
-    let (id, _index) = db::module::create(&*db, parent_id, req.body).await?;
+    let (id, _index) = jig::module::create(&*db, parent_id, req.body).await?;
 
     Ok(HttpResponse::Created().json(CreateResponse { id }))
 }
@@ -44,7 +45,7 @@ async fn delete(
 
     db::jig::authz(&*db, auth.0.user_id, Some(parent_id)).await?;
 
-    db::module::delete(&*db, parent_id, ModuleIdOrIndex::Id(module)).await?;
+    jig::module::delete(&*db, parent_id, ModuleIdOrIndex::Id(module)).await?;
 
     Ok(HttpResponse::NoContent().finish())
 }
@@ -61,7 +62,7 @@ async fn update(
     db::jig::authz(&*db, auth.0.user_id, Some(parent_id)).await?;
 
     let req = req.map_or_else(Default::default, Json::into_inner);
-    let exists = db::module::update(
+    let exists = jig::module::update(
         &*db,
         parent_id,
         ModuleIdOrIndex::Id(module),
@@ -85,7 +86,7 @@ async fn get(
 ) -> Result<Json<<module::Get as ApiEndpoint>::Res>, error::NotFound> {
     let (parent_id, module) = path.into_inner();
 
-    let module = db::module::get(&db, parent_id, ModuleIdOrIndex::Id(module))
+    let module = jig::module::get(&db, parent_id, ModuleIdOrIndex::Id(module))
         .await?
         .ok_or(error::NotFound::ResourceNotFound)?;
 

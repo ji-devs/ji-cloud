@@ -19,6 +19,7 @@ use uuid::Uuid;
 
 use crate::error;
 
+pub(crate) mod module;
 pub(crate) mod player;
 
 pub async fn create(
@@ -226,7 +227,7 @@ order by t.ord
     Ok(v)
 }
 
-pub async fn get(pool: &PgPool, id: JigId) -> anyhow::Result<Option<Jig>> {
+pub async fn get(pool: &PgPool, id: JigId, is_live: bool) -> anyhow::Result<Option<Jig>> {
     let jig = sqlx::query!( //language=SQL
         r#"
 select id                                                                            as "id: JigId",
