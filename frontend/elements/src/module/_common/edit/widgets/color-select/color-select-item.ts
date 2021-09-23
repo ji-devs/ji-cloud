@@ -7,13 +7,20 @@ export class _ extends LitElement {
     static get styles() {
         return [css`
             :host {
-                height: 56px;
-                width: 56px;
+                box-sizing: border-box;
                 border-radius: 50%;
                 display: inline-grid;
                 padding: 3px;
                 position: relative;
                 cursor: pointer;
+                height: 54px;
+                width: 54px;
+            }
+            @media (min-width: 1920px) {
+                :host {
+                    height: 56px;
+                    width: 56px;
+                }
             }
             :host(:focus) {
                 outline: none;

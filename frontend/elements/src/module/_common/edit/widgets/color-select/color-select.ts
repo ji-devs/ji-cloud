@@ -7,13 +7,11 @@ export class _ extends LitElement {
         return [css`
             h2 {
                 margin: 0;
-                font-size: 18px;
-                color: var(--dark-gray-6);
-                font-weight: 500;
+                font-size: 16px;
+                font-weight: normal;
                 grid-column: 1 / -1;
             }
             :host {
-                padding: 16px;
                 display: grid;
                 grid-template-columns: 1fr auto 1fr;
                 row-gap: 32px;

@@ -3,7 +3,7 @@ use crate::{
     color_select::{self, state::State as ColorPickerState},
     text_editor::wysiwyg_types::ControlsChange,
 };
-use dominator::{clone, html, Dom};
+use dominator::{Dom, class, clone, html, pseudo};
 use futures_signals::signal::Mutable;
 use futures_signals::signal::SignalExt;
 use rgb::RGBA8;
@@ -57,6 +57,11 @@ pub fn render(state: Rc<State>) -> Dom {
         .property("positionY", "top-in")
         .property("positionX", "right-out")
         .property("styled", true)
+        .class(class! {
+            .pseudo!("::part(overlay)", {
+                .style("padding", "16px")
+            })
+        })
         .property_signal("open", color_state.select_for.signal_cloned().map(|select_for| select_for.is_some()))
         .event(clone!(color_state => move |_: events::Close| {
             color_state.select_for.set(None);
