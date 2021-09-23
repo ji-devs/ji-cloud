@@ -23,6 +23,7 @@ use crate::{
 };
 
 mod draft;
+pub mod module;
 mod player;
 
 /// Create a jig.
