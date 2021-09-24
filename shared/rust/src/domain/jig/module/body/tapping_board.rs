@@ -1,6 +1,6 @@
 use crate::domain::jig::module::{
     body::{
-        Audio, Body, BodyConvert, BodyExt, ModeExt, StepExt, ThemeChoice,
+        Body, BodyConvert, BodyExt, ModeExt, StepExt, ThemeChoice,
         _groups::design::{BaseContent, Trace},
     },
     ModuleKind,

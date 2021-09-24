@@ -35,7 +35,7 @@ pub use profile::{Create as CreateProfile, Get as Profile, Patch as PatchProfile
 ///         2. email already exists - [`409 - Conflict`](http::StatusCode::CONFLICT)
 ///             * In the future this may contain information about *how* the email is registered.
 /// 2. [`POST /v1/user/verify-email`](VerifyEmail)
-/// 3. [`PUT /v1/user/me/profile`](PutProfile)
+/// 3. [`PUT /v1/user/me/profile`](profile::Create)
 pub struct Create;
 impl ApiEndpoint for Create {
     type Req = CreateUserRequest;

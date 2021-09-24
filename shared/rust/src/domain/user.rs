@@ -184,7 +184,7 @@ pub enum VerifyEmailRequest {
     },
 }
 
-/// Request for [`PutProfile`](crate::api::endpoints::user::PutProfile)
+/// Request for [`user::profile::Create`](crate::api::endpoints::user::CreateProfile)
 #[derive(Debug, Serialize, Deserialize)]
 pub struct CreateProfileRequest {
     /// The user's username.

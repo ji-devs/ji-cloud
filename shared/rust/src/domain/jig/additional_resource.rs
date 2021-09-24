@@ -22,7 +22,7 @@ pub struct AdditionalResource {
 
 /// Request to create a new `AdditionalResource`.
 ///
-/// [`CreateAdditionalResource`](crate::api::endpoints::jig::CreateAdditionalResource)
+/// [`additional_resource::Create`](crate::api::endpoints::jig::additional_resource::Create)
 #[derive(Serialize, Deserialize, Debug)]
 pub struct AdditionalResourceCreateRequest {
     /// The URL of the additional resource.
