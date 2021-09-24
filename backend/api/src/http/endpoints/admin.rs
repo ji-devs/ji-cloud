@@ -91,7 +91,11 @@ async fn refresh_image_files(
 
     let uploaded_at: Option<(Option<DateTime<Utc>>, ImageKind)> = match library {
         MediaLibrary::Web => sqlx::query!(
-            "select uploaded_at from web_media_library where kind = $1 and id = $2 for update",
+            r#"
+            select uploaded_at
+            from web_media_upload wmu
+            inner join web_media_library wml on wml.kind = $1 
+            where wmu.media_id = $2 for update"#,
             crate::image_ops::MediaKind::PngStickerImage as _,
             id
         )
@@ -206,16 +210,15 @@ async fn refresh_image_files(
         .await?;
 
     match library {
-            MediaLibrary::Web => sqlx::query!(
-                "update web_media_library set uploaded_at = now(), updated_at = now() where kind = $1 and id = $2",
-                crate::image_ops::MediaKind::PngStickerImage as _,
-                id
-            )
-            .execute(&mut txn)
-            .await?,
+        MediaLibrary::Web => sqlx::query!(
+            "update web_media_upload set uploaded_at = now(), processing_result = null where media_id = $1",
+            id
+        )
+        .execute(&mut txn)
+        .await?,
 
-            MediaLibrary::User | MediaLibrary::Global => unreachable!(),
-        };
+        MediaLibrary::User | MediaLibrary::Global => unreachable!(),
+    };
 
     txn.commit().await?;
 
