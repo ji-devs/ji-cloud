@@ -17,6 +17,16 @@ values ('d52b9ff8-cd74-11eb-8dc1-b760927dc672', '1f241e1b-b537-493f-a230-075cb16
         '1f241e1b-b537-493f-a230-075cb16315be', '2021-03-04 00:46:26.134651+00', 'en', 'test description', 0, false,
         '2021-03-04 00:46:26.134651+00');
 
+insert into jig (id, creator_id, author_id, created_at, language, description, audio_background,
+                 audio_feedback_positive, audio_feedback_negative)
+values ('0cc084bc-7c83-11eb-9f77-e3218dffb008', '1f241e1b-b537-493f-a230-075cb16315be',
+        '1f241e1b-b537-493f-a230-075cb16315be', '2021-03-04 00:46:26.134651+00', 'en', 'test description',
+        null,
+        array [0, 1], array [0, 1, 2]),
+       ('3a71522a-cd77-11eb-8dc1-af3e35f7c743', '1f241e1b-b537-493f-a230-075cb16315be',
+        '1f241e1b-b537-493f-a230-075cb16315be', '2021-03-04 00:46:26.134651+00', 'en', 'test description',  1,
+        array []::smallint[], array []::smallint[]);
+
 
 insert into jig_module (jig_id, id, index, kind, contents, created_at, is_complete)
 values ('0cc084bc-7c83-11eb-9f77-e3218dffb008', '0cbfdd82-7c83-11eb-9f77-d7d86264c3bc', 0, 0, '{}',
