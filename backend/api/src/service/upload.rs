@@ -5,7 +5,7 @@ use shared::{
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::{error, service};
+use crate::{error, image_ops::MediaKind, service};
 
 pub mod cleaner;
 
@@ -179,6 +179,85 @@ skip locked
         .await?;
 
     sqlx::query!("update user_image_upload set processed_at = now(), processing_result = true where image_id = $1", id).execute(&mut txn).await?;
+
+    txn.commit().await?;
+
+    Ok(true)
+}
+
+pub async fn process_web_media(
+    db: &PgPool,
+    s3: &service::s3::Client,
+    id: Uuid,
+) -> anyhow::Result<bool> {
+    let mut txn = db.begin().await?;
+
+    let kind = sqlx::query!(
+        //language=SQL
+        r#"
+select kind as "kind: MediaKind"
+from web_media_library
+inner join web_media_upload on web_media_library.id = web_media_upload.media_id
+where (id = $1 and uploaded_at is not null and processed_at >= uploaded_at is not true)
+for no key update of web_media_upload
+for share of web_media_library
+skip locked
+        "#,
+        id
+    )
+    .fetch_optional(&mut txn)
+    .await?
+    .map(|it| it.kind);
+
+    let kind = match kind {
+        Some(row) => row,
+        None => {
+            log::info!("Unprocessed web media upload not found in database!");
+
+            txn.rollback().await?;
+            return Ok(false);
+        }
+    };
+
+    // download raw media with ID
+    // Upload processed file to firestone by kind
+    match kind {
+        MediaKind::GifAnimation => {
+            let file = s3
+                .download_media_for_processing(MediaLibrary::Web, id, FileKind::AnimationGif)
+                .await?;
+
+            if let Some(data) = file {
+                s3.upload_media(data, MediaLibrary::Web, id, FileKind::AnimationGif)
+                    .await?;
+            }
+        }
+
+        MediaKind::PngStickerImage => {
+            let file = s3
+                .download_media_for_processing(
+                    MediaLibrary::Web,
+                    id,
+                    FileKind::ImagePng(PngImageFile::Original),
+                )
+                .await?;
+
+            if let Some(data) = file {
+                let (_original, resized, thumbnail) = actix_web::web::block(move || {
+                    let original = image::load_from_memory(&data)?;
+                    crate::image_ops::generate_images(&original, ImageKind::Sticker)
+                })
+                .await??;
+
+                s3.upload_png_images_copy_original(MediaLibrary::Web, id, resized, thumbnail)
+                    .await?;
+            }
+        }
+
+        kind => return Err(anyhow::anyhow!("unsupported media kind {:?}", kind).into()),
+    }
+
+    sqlx::query!("update web_media_upload set processed_at = now(), processing_result = true where media_id = $1", id).execute(&mut txn).await?;
 
     txn.commit().await?;
 
