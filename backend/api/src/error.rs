@@ -66,6 +66,7 @@ pub fn ise(e: anyhow::Error) -> actix_web::Error {
 pub enum Delete {
     Conflict,
     Forbidden,
+    ResourceNotFound,
     InternalServerError(anyhow::Error),
 }
 
@@ -89,6 +90,7 @@ impl Into<actix_web::Error> for Delete {
         match self {
             Self::Conflict => BasicError::new(http::StatusCode::CONFLICT).into(),
             Self::Forbidden => BasicError::new(http::StatusCode::FORBIDDEN).into(),
+            Self::ResourceNotFound => BasicError::new(http::StatusCode::NOT_FOUND).into(),
             Self::InternalServerError(e) => ise(e),
         }
     }

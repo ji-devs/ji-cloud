@@ -26,7 +26,7 @@ impl ApiEndpoint for Get {
     type Req = ();
     type Res = AdditionalResourceResponse;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/jig/{id}/additional-resource/{additional_resource_id}";
+    const PATH: &'static str = "/v1/jig/additional-resource/{additional_resource_id}";
     const METHOD: Method = Method::Get;
 }
 

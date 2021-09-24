@@ -17,7 +17,7 @@ select id                                                                 as "id
        created_at,
        updated_at,
        (select count(*)::int8 from image_category where category_id = id) as "image_count!",
-       (select count(*)::int8 from jig_category where category_id = id) as "jig_count!",
+       (select count(*)::int8 from jig_data_category where category_id = id) as "jig_count!",
        user_scopes
 from category
 where parent_id is null
@@ -57,7 +57,7 @@ select id                                                                 as "id
        created_at                                                         as "created_at!",
        updated_at,
        (select count(*)::int8 from image_category where category_id = id) as "image_count!",
-       (select count(*)::int8 from jig_category where category_id = id)   as "jig_count!",
+       (select count(*)::int8 from jig_data_category where category_id = id)   as "jig_count!",
        user_scopes                                                        as "user_scopes!"
 from category
          inner join unnest($1::uuid[]) with ordinality t(id, ord) USING (id)
@@ -103,7 +103,7 @@ select id,
        created_at,
        updated_at,
        (select count(*) from image_category where category_id = id)::int8 as "image_count!",
-       (select count(*) from jig_category where category_id = id)::int8 as "jig_count!",
+       (select count(*) from jig_data_category where category_id = id)::int8 as "jig_count!",
        user_scopes
 from category
 "#

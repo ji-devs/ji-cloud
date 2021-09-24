@@ -212,14 +212,14 @@ pub fn build(
             .configure(endpoints::audio::configure)
             .configure(endpoints::meta::configure)
             .configure(endpoints::jig::configure)
-            .configure(endpoints::module::configure)
+            .configure(endpoints::jig::module::configure)
+            .configure(endpoints::jig::additional_resource::configure)
             .configure(endpoints::admin::configure)
             .configure(endpoints::animation::configure)
             .configure(endpoints::search::configure)
             .configure(endpoints::media::configure)
             .configure(endpoints::session::configure)
             .configure(endpoints::locale::configure)
-            .configure(endpoints::additional_resource::configure)
             .route("/", actix_web::web::get().to(no_content_response))
     });
 

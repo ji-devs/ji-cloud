@@ -1,4 +1,3 @@
-pub mod additional_resource;
 pub mod admin;
 pub mod animation;
 pub mod audio;

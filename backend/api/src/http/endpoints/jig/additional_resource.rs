@@ -36,7 +36,7 @@ async fn create(
 
     let req = req.into_inner();
 
-    let id = db::additional_resource::create(&*db, parent_id, req.url).await?;
+    let id = db::jig::additional_resource::create(&*db, parent_id, req.url).await?;
 
     Ok((Json(CreateResponse { id }), http::StatusCode::CREATED))
 }
@@ -49,7 +49,7 @@ async fn get(
 ) -> Result<Json<<additional_resource::Get as ApiEndpoint>::Res>, error::NotFound> {
     let (parent_id, additional_resource_id) = path.into_inner();
 
-    let url = db::additional_resource::get(&db, parent_id, additional_resource_id)
+    let url = db::jig::additional_resource::get(&db, parent_id, additional_resource_id)
         .await?
         .ok_or(error::NotFound::ResourceNotFound)?;
 
@@ -68,7 +68,7 @@ async fn update(
     db::jig::authz(&*db, auth.0.user_id, Some(parent_id)).await?;
 
     let exists =
-        db::additional_resource::update(&*db, parent_id, additional_resource_id, url).await?;
+        db::jig::additional_resource::update(&*db, parent_id, additional_resource_id, url).await?;
 
     match exists {
         true => Ok(HttpResponse::NoContent().finish()),
@@ -87,7 +87,7 @@ async fn delete(
 
     db::jig::authz(&*db, auth.0.user_id, Some(parent_id)).await?;
 
-    db::additional_resource::delete(&*db, parent_id, additional_resource_id).await?;
+    db::jig::additional_resource::delete(&*db, parent_id, additional_resource_id).await?;
 
     Ok(HttpResponse::NoContent().finish())
 }

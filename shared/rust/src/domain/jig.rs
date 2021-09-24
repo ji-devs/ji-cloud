@@ -18,7 +18,6 @@ use uuid::Uuid;
 use super::{
     category::CategoryId,
     meta::{AffiliationId, AgeRangeId, GoalId},
-    Publish,
 };
 use crate::domain::jig::module::body::ThemeId;
 
@@ -110,6 +109,8 @@ impl PrivacyLevel {
 }
 
 /// Request to create a new JIG.
+///
+/// This creates the draft and live [JigData](JigData) copies with the requested info.
 #[derive(Serialize, Deserialize, Debug, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct JigCreateRequest {
@@ -117,12 +118,12 @@ pub struct JigCreateRequest {
     #[serde(default)]
     pub display_name: String,
 
-    /// The goals of this jig.
+    /// The goals of this JIG.
     #[serde(skip_serializing_if = "Vec::is_empty")]
     #[serde(default)]
     pub goals: Vec<GoalId>,
 
-    /// This jig's age ranges.
+    /// This JIG's age ranges.
     #[serde(skip_serializing_if = "Vec::is_empty")]
     #[serde(default)]
     pub age_ranges: Vec<AgeRangeId>,
@@ -144,11 +145,6 @@ pub struct JigCreateRequest {
     #[serde(default)]
     pub categories: Vec<CategoryId>,
 
-    /// When the JIG should be considered published (if at all).
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(default)]
-    pub publish_at: Option<Publish>,
-
     /// Description of the jig. Defaults to empty string.
     #[serde(default)]
     pub description: String,
@@ -158,12 +154,41 @@ pub struct JigCreateRequest {
     pub default_player_settings: JigPlayerSettings,
 }
 
-/// The over-the-wire representation of a JIG.
+/// Whether the data is draft or live.
+#[derive(Serialize, Deserialize, Clone, Copy, Debug)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[repr(i16)]
+pub enum DraftOrLive {
+    /// Represents a draft copy
+    Draft = 0,
+    /// Represents a live copy
+    Live = 1,
+}
+
+impl From<DraftOrLive> for bool {
+    fn from(draft_or_live: DraftOrLive) -> Self {
+        match draft_or_live {
+            DraftOrLive::Draft => false,
+            DraftOrLive::Live => true,
+        }
+    }
+}
+
+impl From<bool> for DraftOrLive {
+    fn from(draft_or_live: bool) -> Self {
+        match draft_or_live {
+            false => DraftOrLive::Draft,
+            true => DraftOrLive::Live,
+        }
+    }
+}
+
+/// The over-the-wire representation of a JIG's data. This can either be the live copy or the draft copy.
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
-pub struct Jig {
-    /// The ID of the JIG.
-    pub id: JigId,
+pub struct JigData {
+    /// Whether the JIG data is the live copy or the draft.
+    pub draft_or_live: DraftOrLive,
 
     /// The JIG's name.
     pub display_name: String,
@@ -180,15 +205,6 @@ pub struct Jig {
     /// The goals of this jig.
     pub goals: Vec<GoalId>,
 
-    /// The ID of the JIG's original creator ([`None`] if unknown).
-    pub creator_id: Option<Uuid>,
-
-    /// The current author
-    pub author_id: Option<Uuid>,
-
-    /// The author's name, as "{given_name} {family_name}".
-    pub author_name: Option<String>,
-
     /// The language the jig uses.
     ///
     /// NOTE: in the format `en`, `eng`, `en-US`, `eng-US` or `eng-USA`. To be replaced with a struct that enforces this.
@@ -196,15 +212,6 @@ pub struct Jig {
 
     /// The jig's categories.
     pub categories: Vec<CategoryId>,
-
-    /// When the JIG should be considered published (if at all).
-    pub publish_at: Option<DateTime<Utc>>,
-
-    /// Whether the jig is a draft.
-    pub is_draft: bool,
-
-    /// Privacy level for the jig.
-    pub privacy_level: PrivacyLevel,
 
     /// Additional resources of this JIG.
     pub additional_resources: Vec<AdditionalResourceId>,
@@ -371,15 +378,44 @@ impl AudioFeedbackPositive {
 
 /// The response returned when a request for `GET`ing a jig is successful.
 #[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct JigResponse {
-    /// The requested JIG.
-    pub jig: Jig,
+    /// The ID of the JIG.
+    pub id: JigId,
+
+    /// The privacy level on the JIG.
+    pub privacy_level: PrivacyLevel,
+
+    /// When (if at all) the JIG has published a draft to live.
+    pub published_at: Option<DateTime<Utc>>,
+
+    /// The ID of the JIG's original creator ([`None`] if unknown).
+    pub creator_id: Option<Uuid>,
+
+    /// The current author
+    pub author_id: Option<Uuid>,
+
+    /// The author's name, as "{given_name} {family_name}".
+    pub author_name: Option<String>,
+
+    /// The data of the requested JIG.
+    pub jig_data: JigData,
 }
 
-/// Request for updating a JIG.
+/// Request to update properties on the JIG.
 #[derive(Serialize, Deserialize, Debug, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct JigUpdateRequest {
+    /// Privacy level for the jig.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
+    pub privacy_level: Option<PrivacyLevel>,
+}
+
+/// Request for updating a JIG's draft data.
+#[derive(Serialize, Deserialize, Debug, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct JigUpdateDraftDataRequest {
     /// The JIG's name.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
@@ -416,17 +452,6 @@ pub struct JigUpdateRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub author_id: Option<Uuid>,
-
-    /// When the JIG should be considered published (if at all).
-    #[serde(deserialize_with = "super::deserialize_optional_field")]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(default)]
-    pub publish_at: Option<Option<Publish>>,
-
-    /// Privacy level for the jig.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(default)]
-    pub privacy_level: Option<PrivacyLevel>,
 
     /// Additional resources of this JIG.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -485,7 +510,7 @@ pub struct JigBrowseQuery {
 #[serde(rename_all = "camelCase")]
 pub struct JigBrowseResponse {
     /// the jigs returned.
-    pub jigs: Vec<Jig>,
+    pub jigs: Vec<JigResponse>,
 
     /// The number of pages found.
     pub pages: u32,
