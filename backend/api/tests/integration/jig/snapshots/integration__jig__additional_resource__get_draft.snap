@@ -4,5 +4,5 @@ expression: body
 
 ---
 {
-  "url": "{\"url\":\"url://updated.s.s\"}"
+  "url": "url://test.url.testst/s/s"
 }

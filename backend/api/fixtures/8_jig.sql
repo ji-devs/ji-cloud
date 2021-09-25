@@ -1,54 +1,42 @@
-insert into jig (id, creator_id, author_id, created_at, language, description, privacy_level, is_draft,
-                 audio_background,
-                 audio_feedback_positive, audio_feedback_negative)
+insert into jig (id, creator_id, author_id, privacy_level, live_id, draft_id)
 values ('0cc084bc-7c83-11eb-9f77-e3218dffb008', '1f241e1b-b537-493f-a230-075cb16315be',
-        '1f241e1b-b537-493f-a230-075cb16315be', '2021-03-04 00:46:26.134651+00', 'en', 'test description', 0, false,
-        null,
-        array [0, 1], array [0, 1, 2]),
+        '1f241e1b-b537-493f-a230-075cb16315be', 0, 'd4cad43c-1dd5-11ec-8426-83d4a42e3ac9',
+        'd4cad4c8-1dd5-11ec-8426-a37eda7ce03f'),
        ('3a71522a-cd77-11eb-8dc1-af3e35f7c743', '1f241e1b-b537-493f-a230-075cb16315be',
-        '1f241e1b-b537-493f-a230-075cb16315be', '2021-03-04 00:46:26.134651+00', 'en', 'test description', 0, false, 1,
-        array []::smallint[], array []::smallint[]);
+        '1f241e1b-b537-493f-a230-075cb16315be', 0, 'd4cad52c-1dd5-11ec-8426-f7f3e8ceccb2',
+        'd4cad586-1dd5-11ec-8426-fbcd3fd01e2a');
 
-insert into jig (id, creator_id, author_id, created_at, language, description, privacy_level, is_draft, publish_at)
-values ('d52b9ff8-cd74-11eb-8dc1-b760927dc672', '1f241e1b-b537-493f-a230-075cb16315be', -- draft jig
-        '1f241e1b-b537-493f-a230-075cb16315be', '2021-03-04 00:46:26.134651+00', 'en', 'test description', 1, false,
-        '9999-03-04 00:46:26.134651+00'),
-       ('bdc17474-d4a8-11eb-b8bc-0242ac130003', '1f241e1b-b537-493f-a230-075cb16315be',
-        '1f241e1b-b537-493f-a230-075cb16315be', '2021-03-04 00:46:26.134651+00', 'en', 'test description', 0, false,
-        '2021-03-04 00:46:26.134651+00');
+insert into jig_data (id, display_name, created_at, updated_at, language, last_synced_at, description, theme,
+                      audio_background, audio_feedback_negative, audio_feedback_positive, direction, display_score,
+                      drag_assist, track_assessments)
+values ('d4cad43c-1dd5-11ec-8426-83d4a42e3ac9', 'name', '2021-03-04 00:46:26.134651+00',                                -- live
+        '2021-03-04 00:46:26.134651+00', 'en', '2021-03-04 00:46:26.134651+00', 'test description', 0, null,
+        array [0, 1], array [0, 1, 2], 0, true, true, true),
+       ('d4cad4c8-1dd5-11ec-8426-a37eda7ce03f', 'name', '2021-03-04 00:46:26.134651+00',                                -- draft
+        '2021-03-04 00:46:26.134651+00', 'en', '2021-03-04 00:46:26.134651+00', 'test description', 0, null,
+        array [0, 1], array [0, 1, 2], 0, true, true, true),
+       ('d4cad52c-1dd5-11ec-8426-f7f3e8ceccb2', 'name', '2021-03-04 00:46:26.134651+00',                                -- live
+        '2021-03-04 00:46:26.134651+00', 'en', '2021-03-04 00:46:26.134651+00', 'test description', 0, null,
+        array [0, 1], array [0, 1, 2], 0, true, true, true),
+       ('d4cad586-1dd5-11ec-8426-fbcd3fd01e2a', 'draft name', '2021-03-06 00:46:26.134651+00',                          -- draft
+        '2021-03-06 00:46:26.134651+00', 'he', '2021-03-07 00:46:26.134651+00', 'draft test description', 1, 0,
+        array []::smallint[], array []::smallint[], 1, false, false, false)
+;
 
-insert into jig (id, creator_id, author_id, created_at, language, description, audio_background,
-                 audio_feedback_positive, audio_feedback_negative)
-values ('0cc084bc-7c83-11eb-9f77-e3218dffb008', '1f241e1b-b537-493f-a230-075cb16315be',
-        '1f241e1b-b537-493f-a230-075cb16315be', '2021-03-04 00:46:26.134651+00', 'en', 'test description',
-        null,
-        array [0, 1], array [0, 1, 2]),
-       ('3a71522a-cd77-11eb-8dc1-af3e35f7c743', '1f241e1b-b537-493f-a230-075cb16315be',
-        '1f241e1b-b537-493f-a230-075cb16315be', '2021-03-04 00:46:26.134651+00', 'en', 'test description',  1,
-        array []::smallint[], array []::smallint[]);
+insert into jig_data_module (id, stable_id, jig_data_id, index, kind, is_complete, contents, created_at)
+values ('a6b248f8-1dd7-11ec-8426-975953035335', '0cbfdd82-7c83-11eb-9f77-d7d86264c3bc', 'd4cad43c-1dd5-11ec-8426-83d4a42e3ac9', 0, 0, false, '{}', '2021-03-04 00:46:26.134651+00'),
+       ('a6b24970-1dd7-11ec-8426-57136b411853', '0cc03a02-7c83-11eb-9f77-f77f9ad65e9a', 'd4cad43c-1dd5-11ec-8426-83d4a42e3ac9', 1, 1, false, '{}', '2021-03-04 00:46:26.134651+00'),
+       ('a6b249c0-1dd7-11ec-8426-f77e58fd17c6', '5fac2632-cd4a-11eb-ae4e-7b9a797001a5', 'd4cad43c-1dd5-11ec-8426-83d4a42e3ac9', 2, 3, false, '{}', '2021-03-04 00:46:26.134651+00'),
+       ('a6b24a06-1dd7-11ec-8426-635a3a7ea572', '0cbfdd82-7c83-11eb-9f77-d7d86264c3bc', 'd4cad4c8-1dd5-11ec-8426-a37eda7ce03f', 0, 0, false, '{}', '2021-03-04 00:46:26.134651+00'),
+       ('a6b24a42-1dd7-11ec-8426-a7165f9281a2', '0cc03a02-7c83-11eb-9f77-f77f9ad65e9a', 'd4cad4c8-1dd5-11ec-8426-a37eda7ce03f', 1, 1, false, '{}', '2021-03-04 00:46:26.134651+00'),
+       ('a6b24a88-1dd7-11ec-8426-57525d09b22c', '5fac2632-cd4a-11eb-ae4e-7b9a797001a5', 'd4cad4c8-1dd5-11ec-8426-a37eda7ce03f', 2, 3, false, '{}', '2021-03-04 00:46:26.134651+00');
 
 
-insert into jig_module (jig_id, id, index, kind, contents, created_at, is_complete)
-values ('0cc084bc-7c83-11eb-9f77-e3218dffb008', '0cbfdd82-7c83-11eb-9f77-d7d86264c3bc', 0, 0, '{}',
-        '2021-03-04 00:46:26.134651+00', false),
-       ('0cc084bc-7c83-11eb-9f77-e3218dffb008', '0cc03a02-7c83-11eb-9f77-f77f9ad65e9a', 1, 1, '{}',
-        '2021-03-04 00:46:26.134651+00', false),
-       ('0cc084bc-7c83-11eb-9f77-e3218dffb008', '5fac2632-cd4a-11eb-ae4e-7b9a797001a5', 2, 3, '{
-         "content": null
-       }', '2021-03-04 00:46:26.134651+00', false);
-
-with draftless_jig as (
-    select array(select id
-                 from jig
-                          left join jig_draft_join on jig.id = jig_draft_join.live_id
-                 where draft_id is null) as arr
-)
-select make_drafts(draftless_jig.arr)
-from draftless_jig;
-
-insert into jig_additional_resource (jig_id, id, url)
-values ('0cc084bc-7c83-11eb-9f77-e3218dffb008', '41b8d0b4-aaff-4942-88ba-1a32fecdbd23', 'url://url.url.url/url'),
-       ('0cc084bc-7c83-11eb-9f77-e3218dffb008', '7a227007-b957-4601-bf15-87a6b86da672', 'url://test.url.testst/s/s');
+insert into jig_data_additional_resource (jig_data_id, id, url)
+values ('d4cad43c-1dd5-11ec-8426-83d4a42e3ac9', '286b828c-1dd9-11ec-8426-571b03b2d3df', 'url://url.url.url/url'), -- live
+       ('d4cad43c-1dd5-11ec-8426-83d4a42e3ac9', '286b82fa-1dd9-11ec-8426-2b6953011bae', 'url://test.url.testst/s/s'),
+       ('d4cad4c8-1dd5-11ec-8426-a37eda7ce03f', '286b834a-1dd9-11ec-8426-6f641a50e23f', 'url://url.url.url/url'), -- draft
+       ('d4cad4c8-1dd5-11ec-8426-a37eda7ce03f', '286b8390-1dd9-11ec-8426-fbeb80c504d9', 'url://test.url.testst/s/s');
 
 insert into jig_player_session (index, jig_id, created_at, expires_at, direction, display_score, track_assessments,
                                 drag_assist)

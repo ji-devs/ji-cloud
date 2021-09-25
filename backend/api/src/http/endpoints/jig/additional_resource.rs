@@ -7,7 +7,7 @@ use shared::{
     domain::{
         jig::{
             additional_resource::{AdditionalResourceId, AdditionalResourceResponse},
-            JigId,
+            DraftOrLive, JigId,
         },
         CreateResponse,
     },
@@ -41,39 +41,44 @@ async fn create(
     Ok((Json(CreateResponse { id }), http::StatusCode::CREATED))
 }
 
-/// Get an additional resource.
-async fn get(
+/// Get an additional resource on a draft jig.
+async fn get_draft(
     db: Data<PgPool>,
     _auth: TokenUser,
     path: Path<(JigId, AdditionalResourceId)>,
-) -> Result<Json<<additional_resource::Get as ApiEndpoint>::Res>, error::NotFound> {
+) -> Result<Json<<additional_resource::GetDraft as ApiEndpoint>::Res>, error::NotFound> {
     let (parent_id, additional_resource_id) = path.into_inner();
 
-    let url = db::jig::additional_resource::get(&db, parent_id, additional_resource_id)
-        .await?
-        .ok_or(error::NotFound::ResourceNotFound)?;
+    let url = db::jig::additional_resource::get(
+        &db,
+        parent_id,
+        DraftOrLive::Draft,
+        additional_resource_id,
+    )
+    .await?
+    .ok_or(error::NotFound::ResourceNotFound)?;
 
     Ok(Json(AdditionalResourceResponse { url }))
 }
 
-/// Update an additional resource.
-async fn update(
+/// Get an additional resource on a live jig.
+async fn get_live(
     db: Data<PgPool>,
-    auth: TokenUser,
+    _auth: TokenUser,
     path: Path<(JigId, AdditionalResourceId)>,
-    url: Option<String>,
-) -> Result<HttpResponse, error::NotFound> {
+) -> Result<Json<<additional_resource::GetDraft as ApiEndpoint>::Res>, error::NotFound> {
     let (parent_id, additional_resource_id) = path.into_inner();
 
-    db::jig::authz(&*db, auth.0.user_id, Some(parent_id)).await?;
+    let url = db::jig::additional_resource::get(
+        &db,
+        parent_id,
+        DraftOrLive::Live,
+        additional_resource_id,
+    )
+    .await?
+    .ok_or(error::NotFound::ResourceNotFound)?;
 
-    let exists =
-        db::jig::additional_resource::update(&*db, parent_id, additional_resource_id, url).await?;
-
-    match exists {
-        true => Ok(HttpResponse::NoContent().finish()),
-        false => Err(error::NotFound::ResourceNotFound),
-    }
+    Ok(Json(AdditionalResourceResponse { url }))
 }
 
 /// Delete an additional resource.
@@ -98,12 +103,12 @@ pub fn configure(cfg: &mut ServiceConfig) {
         additional_resource::Create::METHOD.route().to(create),
     )
     .route(
-        additional_resource::Get::PATH,
-        additional_resource::Get::METHOD.route().to(get),
+        additional_resource::GetDraft::PATH,
+        additional_resource::GetDraft::METHOD.route().to(get_draft),
     )
     .route(
-        additional_resource::Update::PATH,
-        additional_resource::Update::METHOD.route().to(update),
+        additional_resource::GetLive::PATH,
+        additional_resource::GetLive::METHOD.route().to(get_live),
     )
     .route(
         additional_resource::Delete::PATH,

@@ -29,7 +29,7 @@ async fn update_no_modules_changes() -> anyhow::Result<()> {
 
     let resp = client
         .get(&format!(
-            "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008",
+            "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008/draft",
             port
         ))
         .login()
@@ -41,7 +41,7 @@ async fn update_no_modules_changes() -> anyhow::Result<()> {
 
     app.stop(false).await;
 
-    insta::assert_json_snapshot!(body.jig, {".**.lastEdited" => "[timestamp]", ".**.feedbackPositive" => "[audio]", ".**.feedbackNegative" => "[audio]"});
+    insta::assert_json_snapshot!(body, {".**.lastEdited" => "[timestamp]", ".**.feedbackPositive" => "[audio]", ".**.feedbackNegative" => "[audio]"});
 
     Ok(())
 }

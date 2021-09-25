@@ -57,8 +57,8 @@ create table jig_data
 );
 
 alter table jig
-    add column live_id      uuid references jig_data (id) on delete restrict,
-    add column draft_id     uuid references jig_data (id) on delete restrict,
+    add column live_id      uuid references jig_data (id) on delete restrict initially deferred,
+    add column draft_id     uuid references jig_data (id) on delete restrict initially deferred,
     add column published_at timestamptz,
     add constraint jig_check check (live_id <> draft_id);
 

@@ -4,34 +4,29 @@ expression: body
 
 ---
 {
-  "id": "[id]",
-  "privacyLevel": "unlisted",
+  "id": "3a71522a-cd77-11eb-8dc1-af3e35f7c743",
+  "privacyLevel": "public",
   "publishedAt": null,
   "creatorId": "1f241e1b-b537-493f-a230-075cb16315be",
   "authorId": "1f241e1b-b537-493f-a230-075cb16315be",
   "authorName": "Bobby Tables",
   "jigData": {
-    "draftOrLive": "Draft",
-    "displayName": "",
-    "modules": [
-      {
-        "id": "[id]",
-        "kind": "Cover"
-      }
-    ],
+    "draftOrLive": "Live",
+    "displayName": "name",
+    "modules": [],
     "ageRanges": [],
     "affiliations": [],
     "goals": [],
-    "language": "en_US",
+    "language": "en",
     "categories": [],
     "additionalResources": [],
-    "description": "",
+    "description": "test description",
     "lastEdited": "[last_edited]",
     "defaultPlayerSettings": {
       "direction": "ltr",
-      "displayScore": false,
-      "trackAssessments": false,
-      "dragAssist": false
+      "displayScore": true,
+      "trackAssessments": true,
+      "dragAssist": true
     },
     "theme": "Blank",
     "audioBackground": null,

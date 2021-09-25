@@ -1,5 +1,5 @@
 ---
-source: tests/integration/jig/cover.rs
+source: tests/integration/jig.rs
 expression: body
 
 ---
@@ -11,19 +11,19 @@ expression: body
   "authorId": "1f241e1b-b537-493f-a230-075cb16315be",
   "authorName": "Bobby Tables",
   "jigData": {
-    "draftOrLive": "Draft",
+    "draftOrLive": "Live",
     "displayName": "name",
     "modules": [
       {
-        "id": "a6b24a06-1dd7-11ec-8426-635a3a7ea572",
+        "id": "a6b248f8-1dd7-11ec-8426-975953035335",
         "kind": "Cover"
       },
       {
-        "id": "a6b24a42-1dd7-11ec-8426-a7165f9281a2",
+        "id": "a6b24970-1dd7-11ec-8426-57136b411853",
         "kind": "Flashcards"
       },
       {
-        "id": "a6b24a88-1dd7-11ec-8426-57525d09b22c",
+        "id": "a6b249c0-1dd7-11ec-8426-f77e58fd17c6",
         "kind": "Memory"
       }
     ],
@@ -33,11 +33,11 @@ expression: body
     "language": "en",
     "categories": [],
     "additionalResources": [
-      "286b834a-1dd9-11ec-8426-6f641a50e23f",
-      "286b8390-1dd9-11ec-8426-fbeb80c504d9"
+      "286b828c-1dd9-11ec-8426-571b03b2d3df",
+      "286b82fa-1dd9-11ec-8426-2b6953011bae"
     ],
     "description": "test description",
-    "lastEdited": "[timestamp]",
+    "lastEdited": "[last_edited]",
     "defaultPlayerSettings": {
       "direction": "ltr",
       "displayScore": true,

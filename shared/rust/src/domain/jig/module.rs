@@ -18,6 +18,7 @@ pub use body::Body as ModuleBody;
 #[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
+#[serde(rename_all = "camelCase")]
 pub struct ModuleId(pub Uuid);
 
 /// Wrapper type around [`Uuid`](Uuid), represents the **stable ID** of a module.
@@ -34,6 +35,7 @@ pub struct ModuleId(pub Uuid);
 #[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
+#[serde(rename_all = "camelCase")]
 pub struct StableModuleId(pub Uuid);
 
 /// Which way of finding a module to use when looking it up.
@@ -41,6 +43,7 @@ pub struct StableModuleId(pub Uuid);
 /// # Note:
 /// The mapping between `ModuleId` and the triple `(JigId, DraftOrLive, StableModuleId)` is one-to-one.
 #[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
 pub enum StableOrUniqueId {
     /// Unique ID for the module.
     Unique(ModuleId),
@@ -58,7 +61,7 @@ pub enum StableOrUniqueId {
 
 impl StableOrUniqueId {
     /// Returns [`Some`] if `self` is `Self::Unique`, [`None`] otherwise.
-    pub fn id(self) -> Option<ModuleId> {
+    pub fn unique(self) -> Option<ModuleId> {
         match self {
             StableOrUniqueId::Unique(id) => Some(id),
             StableOrUniqueId::Stable(_) => None,
@@ -66,7 +69,7 @@ impl StableOrUniqueId {
     }
 
     /// Returns [`Some`] if `self` is `Self::Stable`, [`None`] otherwise.
-    pub fn index(self) -> Option<StableModuleId> {
+    pub fn stable(self) -> Option<StableModuleId> {
         match self {
             StableOrUniqueId::Unique(_) => None,
             StableOrUniqueId::Stable(id) => Some(id),
@@ -220,6 +223,7 @@ pub struct ModuleResponse {
 /// Request to update a `Module`.
 /// note: fields here cannot be nulled out (`None` means "don't change").
 #[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
 pub struct ModuleUpdateRequest {
     /// Identifies the module to be updated, either through the stable or unique ID.
     pub id: StableOrUniqueId,
@@ -242,6 +246,7 @@ pub struct ModuleUpdateRequest {
 
 /// Request to delete a `Module`.
 #[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
 pub struct ModuleDeleteRequest {
     /// Identifies the module to be updated, either through the stable or unique ID.
     pub id: StableOrUniqueId,

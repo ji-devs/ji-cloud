@@ -37,12 +37,4 @@ pub struct AdditionalResourceResponse {
     pub url: String,
 }
 
-/// Request to update an `AdditionalResource`
-/// Note: URL field cannot be nulled out (`None` means "do not change").
-#[derive(Serialize, Deserialize, Debug)]
-pub struct AdditionalResourceUpdateRequest {
-    /// The additional resource's URL.
-    pub url: Option<String>,
-}
-
 into_uuid![AdditionalResourceId];

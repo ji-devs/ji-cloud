@@ -6,6 +6,7 @@ expression: body
 {
   "module": {
     "id": "[id]",
+    "stable_id": "[stable_id]",
     "body": {
       "cover": {
         "content": {

@@ -2,12 +2,11 @@ use actix_web::{
     web::{self, Data, Json, Path, Query, ServiceConfig},
     HttpResponse,
 };
-use chrono::{DateTime, Utc};
 use shared::{
     api::{endpoints::jig, ApiEndpoint},
     domain::{
         jig::{
-            DraftOrLive, JigBrowseResponse, JigCountResponse, JigCreateRequest, JigId, JigResponse,
+            DraftOrLive, JigBrowseResponse, JigCountResponse, JigCreateRequest, JigId,
             JigSearchResponse, PrivacyLevel, UserOrMe,
         },
         CreateResponse,
@@ -117,6 +116,8 @@ async fn update(
 
     let req = req.map_or_else(Default::default, Json::into_inner);
 
+    db::jig::update(&*db, id, req.author_id, req.privacy_level).await?;
+
     Ok(HttpResponse::NoContent().finish())
 }
 
@@ -137,7 +138,6 @@ async fn update_draft(
         &*db,
         id,
         req.display_name.as_deref(),
-        req.author_id,
         req.goals.as_deref(),
         req.categories.as_deref(),
         req.age_ranges.as_deref(),
@@ -188,8 +188,7 @@ async fn browse(
 
     let jigs = db::jig::browse(db.as_ref(), author_id, query.page.unwrap_or(0) as i32).await?;
 
-    let total_count =
-        db::jig::filtered_count(db.as_ref(), query.is_published, None, author_id).await?;
+    let total_count = db::jig::filtered_count(db.as_ref(), None, author_id).await?;
 
     let pages = (total_count / 20 + (total_count % 20 != 0) as u64) as u32;
 
@@ -204,90 +203,96 @@ async fn browse(
 pub(super) async fn publish_draft_to_live(
     db: Data<PgPool>,
     claims: TokenUser,
-    draft_id: Path<JigId>,
-) -> Result<Json<<jig::draft::Publish as ApiEndpoint>::Res>, error::JigCloneDraft> {
-    let draft_id = draft_id.into_inner();
+    jig_id: Path<JigId>,
+) -> Result<Json<<jig::Publish as ApiEndpoint>::Res>, error::JigCloneDraft> {
+    let jig_id = jig_id.into_inner();
 
-    db::jig::authz(&*db, claims.0.user_id, Some(draft_id)).await?;
+    db::jig::authz(&*db, claims.0.user_id, Some(jig_id)).await?;
 
     let mut txn = db.begin().await?;
 
-    let live_id = db::jig::get_live(db.as_ref(), draft_id).await?;
+    let (draft_id, live_id) = db::jig::get_draft_and_live_ids(&mut *txn, jig_id)
+        .await
+        .ok_or(error::JigCloneDraft::ResourceNotFound)?;
 
-    db::jig::clone_one(
-        &mut txn,
-        &draft_id,
-        Some(live_id),
-        &claims.0.user_id,
-        false,
-        false,
+    let new_live_id = db::jig::clone_data(&mut txn, &draft_id).await?;
+
+    sqlx::query!(
+        //language=SQL
+        "update jig set live_id = $1, published_at = now() where id = $2",
+        new_live_id,
+        jig_id.0
     )
+    .execute(&mut *txn)
     .await?;
+
+    // should drop all the entries in the metadata tables that FK to the live jig_data row
+    sqlx::query!(
+        //language=SQL
+        r#"
+delete from jig_data where id = $1
+    "#,
+        live_id,
+    )
+    .execute(&mut *txn)
+    .await?;
+
+    log::info!("AOSIJDOAIJSD");
 
     txn.commit().await?;
 
-    Err(anyhow::anyhow!("asd").into())
+    Ok(Json(()))
 }
 
-// /// Clone a jig
-// ///
-// /// FIXME
-// async fn clone(
-//     db: Data<PgPool>,
-//     claims: TokenUser,
-//     parent: web::Path<JigId>,
-// ) -> Result<HttpResponse, error::JigCloneDraft> {
-//     db::jig::authz(&*db, claims.0.user_id, None).await?;
-//
-//     let id =
-//         db::jig::clone_jig_and_draft(db.as_ref(), parent.into_inner(), claims.0.user_id).await?;
-//
-//     Ok(HttpResponse::Created().json(CreateResponse { id }))
-// }
-//
+/// Clone a jig
+async fn clone(
+    db: Data<PgPool>,
+    claims: TokenUser,
+    parent: web::Path<JigId>,
+) -> Result<HttpResponse, error::JigCloneDraft> {
+    db::jig::authz(&*db, claims.0.user_id, None).await?;
 
-//
-// /// Search for jigs.
-// async fn search(
-//     db: Data<PgPool>,
-//     algolia: ServiceData<crate::algolia::Client>,
-//     query: Option<Query<<jig::Search as ApiEndpoint>::Req>>,
-// ) -> Result<Json<<jig::Search as ApiEndpoint>::Res>, error::Service> {
-//     let query = query.map_or_else(Default::default, Query::into_inner);
-//
-//     let (ids, pages, total_hits) = algolia
-//         .search_jig(
-//             &query.q,
-//             query.page,
-//             query.is_published,
-//             None, // FIXME
-//             query.language,
-//             &query.age_ranges,
-//             &query.affiliations,
-//             &query.categories,
-//             &query.goals,
-//             query.author,
-//             query.author_name,
-//         )
-//         .await?
-//         .ok_or_else(|| error::Service::DisabledService(ServiceKind::Algolia))?;
-//
-//     let jigs: Vec<_> = db::jig::get_by_ids(db.as_ref(), &ids, PrivacyLevel::Public, false)
-//         .await?
-//         .into_iter()
-//         .map(|jig: Jig| JigResponse { jig })
-//         .collect();
-//
-//     Ok(Json(JigSearchResponse {
-//         jigs,
-//         pages,
-//         total_jig_count: total_hits,
-//     }))
-// }
+    let id = db::jig::clone_jig(db.as_ref(), parent.into_inner(), claims.0.user_id).await?;
+
+    Ok(HttpResponse::Created().json(CreateResponse { id }))
+}
+
+/// Search for jigs.
+async fn search(
+    db: Data<PgPool>,
+    algolia: ServiceData<crate::algolia::Client>,
+    query: Option<Query<<jig::Search as ApiEndpoint>::Req>>,
+) -> Result<Json<<jig::Search as ApiEndpoint>::Res>, error::Service> {
+    let query = query.map_or_else(Default::default, Query::into_inner);
+
+    let (ids, pages, total_hits) = algolia
+        .search_jig(
+            &query.q,
+            query.page,
+            Some(PrivacyLevel::Public),
+            query.language,
+            &query.age_ranges,
+            &query.affiliations,
+            &query.categories,
+            &query.goals,
+            query.author,
+            query.author_name,
+        )
+        .await?
+        .ok_or_else(|| error::Service::DisabledService(ServiceKind::Algolia))?;
+
+    let jigs: Vec<_> =
+        db::jig::get_by_ids(db.as_ref(), &ids, PrivacyLevel::Public, DraftOrLive::Live).await?;
+
+    Ok(Json(JigSearchResponse {
+        jigs,
+        pages,
+        total_jig_count: total_hits,
+    }))
+}
 
 async fn count(db: Data<PgPool>) -> Result<Json<<jig::Count as ApiEndpoint>::Res>, error::Server> {
-    let total_count: u64 =
-        db::jig::filtered_count(&*db, Some(true), Some(PrivacyLevel::Public), None).await?;
+    let total_count: u64 = db::jig::filtered_count(&*db, Some(PrivacyLevel::Public), None).await?;
 
     Ok(Json(JigCountResponse { total_count }))
 }
@@ -303,16 +308,17 @@ pub fn configure(cfg: &mut ServiceConfig) {
             jig::GetDraft::PATH,
             jig::GetDraft::METHOD.route().to(get_draft),
         )
-        // .route(
-        //     jig::PublishDraftData::PATH,
-        //     jig::PublishDraftData::METHOD.route().to(publish_draft_to_live),
-        // )
-        // .route(jig::Clone::PATH, jig::Clone::METHOD.route().to(clone))
-        // .route(jig::Browse::PATH, jig::Browse::METHOD.route().to(browse))
-        // .route(jig::Search::PATH, jig::Search::METHOD.route().to(search))
         .route(
-            jig::Update::PATH,
-            jig::Update::METHOD.route().to(update_draft),
+            jig::Publish::PATH,
+            jig::Publish::METHOD.route().to(publish_draft_to_live),
+        )
+        .route(jig::Clone::PATH, jig::Clone::METHOD.route().to(clone))
+        .route(jig::Browse::PATH, jig::Browse::METHOD.route().to(browse))
+        .route(jig::Search::PATH, jig::Search::METHOD.route().to(search))
+        .route(jig::Update::PATH, jig::Update::METHOD.route().to(update))
+        .route(
+            jig::UpdateDraftData::PATH,
+            jig::UpdateDraftData::METHOD.route().to(update_draft),
         )
         .route(jig::Delete::PATH, jig::Delete::METHOD.route().to(delete))
         .route(

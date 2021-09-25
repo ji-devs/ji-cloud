@@ -1,26 +1,32 @@
 ---
-source: tests/integration/jig/draft.rs
+source: tests/integration/jig.rs
 expression: body
 
 ---
 {
-  "jig": {
-    "id": "[id]",
+  "id": "[id]",
+  "privacyLevel": "unlisted",
+  "publishedAt": null,
+  "creatorId": "1f241e1b-b537-493f-a230-075cb16315be",
+  "authorId": "1f241e1b-b537-493f-a230-075cb16315be",
+  "authorName": "Bobby Tables",
+  "jigData": {
+    "draftOrLive": "Live",
     "displayName": "",
-    "modules": [],
+    "modules": [
+      {
+        "id": "[id]",
+        "kind": "Cover"
+      }
+    ],
     "ageRanges": [],
     "affiliations": [],
     "goals": [],
-    "creatorId": "1f241e1b-b537-493f-a230-075cb16315be",
-    "authorId": "1f241e1b-b537-493f-a230-075cb16315be",
-    "authorName": "Bobby Tables",
-    "language": "en",
+    "language": "en_US",
     "categories": [],
-    "publishAt": "+262143-12-31T23:59:59.999999Z",
     "additionalResources": [],
-    "description": "test description",
+    "description": "",
     "lastEdited": "[last_edited]",
-    "isPublic": false,
     "defaultPlayerSettings": {
       "direction": "ltr",
       "displayScore": false,
@@ -28,7 +34,7 @@ expression: body
       "dragAssist": false
     },
     "theme": "Blank",
-    "audioBackground": "DancingHappy",
+    "audioBackground": null,
     "audioEffects": {
       "feedbackPositive": "[audio]",
       "feedbackNegative": "[audio]"
