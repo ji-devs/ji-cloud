@@ -78,7 +78,7 @@ async fn create(
 
     Ok((
         Json(CreateResponse { id }),
-        actix_web::http::StatusCode::CREATED, // FIXME this
+        actix_web::http::StatusCode::CREATED,
     ))
 }
 
