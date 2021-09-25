@@ -1,31 +1,32 @@
 ---
-source: tests/integration/jig/draft.rs
+source: tests/integration/jig.rs
 expression: body
 
 ---
 {
-  "jig": {
-    "id": "[id]",
-    "displayName": "",
+  "id": "[id]",
+  "privacyLevel": "unlisted",
+  "publishedAt": null,
+  "creatorId": "1f241e1b-b537-493f-a230-075cb16315be",
+  "authorId": "1f241e1b-b537-493f-a230-075cb16315be",
+  "authorName": "Bobby Tables",
+  "jigData": {
+    "draftOrLive": "Live",
+    "displayName": "name",
     "modules": [],
     "ageRanges": [],
     "affiliations": [],
     "goals": [],
-    "creatorId": "1f241e1b-b537-493f-a230-075cb16315be",
-    "authorId": "1f241e1b-b537-493f-a230-075cb16315be",
-    "authorName": "Bobby Tables",
     "language": "en",
     "categories": [],
-    "publishAt": "9999-03-04T00:46:26.134651Z",
-    "additionalResources": [],
+    "additionalResources": "[ids]",
     "description": "test description",
     "lastEdited": "[last_edited]",
-    "isPublic": false,
     "defaultPlayerSettings": {
       "direction": "ltr",
-      "displayScore": false,
-      "trackAssessments": false,
-      "dragAssist": false
+      "displayScore": true,
+      "trackAssessments": true,
+      "dragAssist": true
     },
     "theme": "Blank",
     "audioBackground": null,

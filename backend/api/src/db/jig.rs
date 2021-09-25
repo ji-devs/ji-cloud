@@ -1,4 +1,3 @@
-use chrono::{DateTime, Utc};
 use futures::TryStreamExt;
 use shared::domain::{
     category::CategoryId,
@@ -15,7 +14,7 @@ use shared::domain::{
     meta::{AffiliationId, AgeRangeId, GoalId},
     user::UserScope,
 };
-use sqlx::{postgres::PgDatabaseError, PgConnection, PgPool};
+use sqlx::{PgConnection, PgPool};
 use uuid::Uuid;
 
 use crate::error;
@@ -36,7 +35,7 @@ pub async fn create(
     description: &str,
     default_player_settings: &JigPlayerSettings,
 ) -> Result<JigId, CreateJigError> {
-    let mut transaction = pool.begin().await?;
+    let mut txn = pool.begin().await?;
 
     let default_modules = [(
         ModuleKind::Cover,
@@ -45,8 +44,7 @@ pub async fn create(
     )];
 
     let draft_id = create_jig_data(
-        &mut transaction,
-        DraftOrLive::Draft,
+        &mut txn,
         display_name,
         goals,
         categories,
@@ -73,15 +71,14 @@ returning stable_id as "stable_id: StableModuleId"
             (*kind) as i16,
             contents
         )
-        .fetch_one(&mut transaction)
+        .fetch_one(&mut txn)
         .await?;
 
         module_stable_ids.push(module.stable_id);
     }
 
     let live_id = create_jig_data(
-        &mut transaction,
-        DraftOrLive::Live,
+        &mut txn,
         display_name,
         goals,
         categories,
@@ -99,7 +96,7 @@ returning stable_id as "stable_id: StableModuleId"
         .map(|it| (&it.0 .0, &it.0 .1, it.1))
         .enumerate()
     {
-        let module = sqlx::query!(
+        sqlx::query!(
             //language=SQL
             r#"
 insert into jig_data_module (stable_id, jig_data_id, "index", kind, contents)
@@ -111,7 +108,7 @@ values ($1, $2, $3, $4, $5)
             (*kind) as i16,
             contents
         )
-        .fetch_all(&mut transaction)
+        .fetch_all(&mut txn)
         .await?;
     }
 
@@ -122,7 +119,7 @@ values ($1, $2, $3, $4, $5)
         live_id,
         draft_id,
     )
-    .fetch_one(&mut transaction)
+    .fetch_one(&mut txn)
     .await?;
 
     sqlx::query!(
@@ -133,10 +130,10 @@ values ($1, 0)
         "#,
         jig.id
     )
-    .execute(&mut transaction)
+    .execute(&mut txn)
     .await?;
 
-    transaction.commit().await?;
+    txn.commit().await?;
 
     Ok(JigId(jig.id))
 }
@@ -146,7 +143,6 @@ values ($1, 0)
 /// Otherwise if `None`, then create new stable ids and return them as a part of the response.
 pub async fn create_jig_data(
     txn: &mut PgConnection, // FIXME does this work?
-    draft_or_live: DraftOrLive,
     display_name: &str,
     goals: &[GoalId],
     categories: &[CategoryId],
@@ -323,22 +319,24 @@ pub async fn get_by_ids(
     let jig = sqlx::query!(
         //language=SQL
         r#"
-select id                                                                            as "id!: JigId",
+select id                                       as "id!: JigId",
        creator_id,
-       author_id                                                                     as "author_id",
+       author_id                                as "author_id",
        (select given_name || ' '::text || family_name
         from user_profile
-        where user_profile.user_id = author_id)                                      as "author_name",
-       privacy_level as "privacy_level!: PrivacyLevel",
-       live_id                                                                       as "live_id!",
-       draft_id                                                                      as "draft_id!",
+        where user_profile.user_id = author_id) as "author_name",
+       privacy_level                            as "privacy_level!: PrivacyLevel",
+       live_id                                  as "live_id!",
+       draft_id                                 as "draft_id!",
        published_at
 from jig
          inner join unnest($1::uuid[])
     with ordinality t(id, ord) using (id)
+where (privacy_level = $2 or $2 is null)
 order by t.ord
     "#,
-        ids
+        ids,
+        privacy_level as i16,
     )
     .fetch_all(&mut txn)
     .await?;
@@ -467,19 +465,24 @@ order by t.ord
 pub async fn update(
     pool: &PgPool,
     jig_id: JigId,
-    privacy_level: PrivacyLevel,
+    author_id: Option<Uuid>,
+    privacy_level: Option<PrivacyLevel>,
 ) -> Result<(), error::UpdateWithMetadata> {
     let mut txn = pool.begin().await?;
 
     sqlx::query!(
         //language=SQL
         r#"
-update jig 
-set privacy_level = $2
+update jig
+set author_id     = coalesce($2, author_id),
+    privacy_level = coalesce($3, privacy_level)
 where id = $1
+  and (($2 is distinct from author_id) or
+       ($3 is distinct from privacy_level))
     "#,
         jig_id.0,
-        privacy_level as i16,
+        author_id,
+        privacy_level.map(|it| it as i16),
     )
     .execute(&mut txn)
     .await?;
@@ -493,7 +496,6 @@ pub async fn update_draft(
     pool: &PgPool,
     id: JigId,
     display_name: Option<&str>,
-    author_id: Option<Uuid>,
     goals: Option<&[GoalId]>,
     categories: Option<&[CategoryId]>,
     age_ranges: Option<&[AgeRangeId]>,
@@ -510,7 +512,7 @@ pub async fn update_draft(
     let draft_id = sqlx::query!(
         //language=SQL
         r#"
-select draft_id from jig where id = $1
+select draft_id from jig join jig_data on jig.draft_id = jig_data.id where jig.id = $1 for update
 "#,
         id.0
     )
@@ -518,14 +520,6 @@ select draft_id from jig where id = $1
     .await?
     .ok_or(error::UpdateWithMetadata::ResourceNotFound)?
     .draft_id;
-
-    sqlx::query!(
-        //language=SQL
-        r#"select id from jig_data where id = $1 for update"#,
-        draft_id
-    )
-    .execute(&mut txn)
-    .await?;
 
     // update nullable fields
     if let Some(audio_background) = audio_background {
@@ -650,17 +644,9 @@ where id = $1
 pub async fn delete(pool: &PgPool, id: JigId) -> Result<(), error::Delete> {
     let mut txn = pool.begin().await?;
 
-    let (draft_id, live_id) = sqlx::query!(
-        //language=SQL
-        r#"
-select draft_id, live_id from jig where id = $1
-"#,
-        id.0
-    )
-    .fetch_optional(&mut txn)
-    .await?
-    .map(|it| (it.draft_id, it.live_id))
-    .ok_or(error::Delete::ResourceNotFound)?;
+    let (draft_id, live_id) = get_draft_and_live_ids(&mut txn, id)
+        .await
+        .ok_or(error::Delete::ResourceNotFound)?;
 
     sqlx::query!(
         //language=SQL
@@ -787,7 +773,6 @@ limit 20 offset 20 * $1
 /// `None` here means do not filter.
 pub async fn filtered_count(
     db: &PgPool,
-    is_draft: Option<bool>,
     privacy_level: Option<PrivacyLevel>,
     author_id: Option<Uuid>,
 ) -> sqlx::Result<u64> {
@@ -796,12 +781,9 @@ pub async fn filtered_count(
         r#"
 select count(*) as "count!: i64"
 from jig
-where
-    (is_draft is not distinct from $1 or $1 is null)
-    and (privacy_level is not distinct from $2 or $2 is null)
-    and (author_id is not distinct from $3 or $3 is null)
+where(privacy_level is not distinct from $1 or $1 is null)
+    and (author_id is not distinct from $2 or $2 is null)
 "#,
-        is_draft,
         privacy_level.map(|it| it as i16),
         author_id,
     )
@@ -810,209 +792,190 @@ where
     .map(|it| it.count as u64)
 }
 
-// FIXME make a struct for named live, draft jig?
-pub async fn clone_jig_and_draft(
+pub async fn get_draft_and_live_ids(txn: &mut PgConnection, jig_id: JigId) -> Option<(Uuid, Uuid)> {
+    sqlx::query!(
+        //language=SQL
+        r#"
+select draft_id, live_id from jig where id = $1
+"#,
+        jig_id.0
+    )
+    .fetch_optional(&mut *txn)
+    .await
+    .ok()?
+    .map(|it| (it.draft_id, it.live_id))
+}
+
+/// Clones a copy of the jig data and modules, preserving the module's stable IDs
+pub async fn clone_data(
+    txn: &mut PgConnection,
+    from_data_id: &Uuid,
+) -> Result<Uuid, error::JigCloneDraft> {
+    let new_id = sqlx::query!(
+        //language=SQL
+        r#"
+insert into jig_data
+(display_name, created_at, updated_at, language, last_synced_at, description, theme, audio_background,
+ audio_feedback_negative, audio_feedback_positive, direction, display_score, drag_assist, track_assessments)
+select display_name,
+       created_at,
+       updated_at,
+       language,
+       last_synced_at,
+       description,
+       theme,
+       audio_background,
+       audio_feedback_negative,
+       audio_feedback_positive,
+       direction,
+       display_score,
+       drag_assist,
+       track_assessments
+from jig_data
+where id = $1
+returning id
+        "#,
+        from_data_id,
+    )
+    .fetch_one(&mut *txn)
+    .await?
+    .id;
+
+    // copy metadata
+    sqlx::query!(
+        //language=SQL
+        r#"
+insert into jig_data_module (stable_id, "index", jig_data_id, kind, contents)
+select stable_id, "index", $2 as "jig_id", kind, contents
+from jig_data_module
+where jig_data_id = $1
+        "#,
+        from_data_id,
+        new_id,
+    )
+    .execute(&mut *txn)
+    .await?;
+
+    sqlx::query!(
+        //language=SQL
+        r#"
+insert into jig_data_additional_resource(jig_data_id, url)
+select $2, url
+from jig_data_additional_resource
+where jig_data_id = $1
+        "#,
+        from_data_id,
+        new_id,
+    )
+    .execute(&mut *txn)
+    .await?;
+
+    sqlx::query!(
+        //language=SQL
+        r#"
+insert into jig_data_affiliation(jig_data_id, affiliation_id)
+select $2, affiliation_id
+from jig_data_affiliation
+where jig_data_id = $1
+        "#,
+        from_data_id,
+        new_id,
+    )
+    .execute(&mut *txn)
+    .await?;
+
+    sqlx::query!(
+        //language=SQL
+        r#"
+insert into jig_data_age_range(jig_data_id, age_range_id)
+select $2, age_range_id
+from jig_data_age_range
+where jig_data_id = $1
+        "#,
+        from_data_id,
+        new_id,
+    )
+    .execute(&mut *txn)
+    .await?;
+
+    sqlx::query!(
+        //language=SQL
+        r#"
+insert into jig_data_category(jig_data_id, category_id)
+select $2, category_id
+from jig_data_category
+where jig_data_id = $1
+        "#,
+        from_data_id,
+        new_id,
+    )
+    .execute(&mut *txn)
+    .await?;
+
+    sqlx::query!(
+        //language=SQL
+        r#"
+insert into jig_data_goal(jig_data_id, goal_id)
+select $2, goal_id
+from jig_data_goal
+where jig_data_id = $1
+        "#,
+        from_data_id,
+        new_id,
+    )
+    .execute(&mut *txn)
+    .await?;
+
+    // copy modules
+
+    Ok(new_id)
+}
+
+pub async fn clone_jig(
     db: &PgPool,
     parent: JigId,
     user_id: Uuid,
 ) -> Result<JigId, error::JigCloneDraft> {
     let mut txn = db.begin().await?;
 
-    let new_live = clone_one(&mut txn, &parent, None, &user_id, false, true).await?;
+    let (draft_id, live_id) = get_draft_and_live_ids(&mut *txn, parent)
+        .await
+        .ok_or(error::JigCloneDraft::ResourceNotFound)?;
 
-    let new_draft = clone_one(&mut txn, &parent, None, &user_id, true, true).await?;
+    let new_draft_id = clone_data(&mut txn, &draft_id).await?;
+    let new_live_id = clone_data(&mut txn, &live_id).await?;
 
-    sqlx::query!(
+    let new_jig = sqlx::query!(
         //language=SQL
         r#"
-insert into jig_draft_join (live_id, draft_id)
-values ($1, $2)
+insert into jig (creator_id, author_id, parents, live_id, draft_id, published_at)
+select creator_id, $2, array_append(parents, $1), $3, $4, published_at
+from jig
+where id = $1
+returning id as "id!: JigId"
 "#,
-        new_live.0,
-        new_draft.0,
+        parent.0,
+        user_id,
+        new_live_id,
+        new_draft_id,
+    )
+    .fetch_one(&mut txn)
+    .await?;
+
+    sqlx::query!(
+        // language=SQL
+        r#"
+insert into jig_play_count (jig_id, play_count)
+values ($1, 0)
+        "#,
+        new_jig.id.0
     )
     .execute(&mut txn)
     .await?;
 
     txn.commit().await?;
 
-    Ok(new_draft)
-}
-
-/// Clones a copy of the jig data and modules, preserving the module's stable IDs
-pub async fn clone_data(
-    txn: &mut PgConnection,
-    parent_data_id: &Uuid,
-    target_data_id: &Option<Uuid>,
-    user_id: &Uuid,
-    target_type: DraftOrLive,
-) -> Result<(), error::JigCloneDraft> {
-    Ok(())
-}
-
-/// Clones a single jig. This should *only* be used with live jigs to avoid invalidating the
-/// `parents` chain.
-///
-/// # Arguments
-/// * `target_id` - if `None`, then generate a new ID to clone the
-pub async fn clone_one(
-    txn: &mut PgConnection,
-    parent_id: &JigId,
-    target_id: Option<JigId>,
-    user_id: &Uuid,
-    target_is_draft: bool,
-    append_parent: bool,
-) -> Result<JigId, error::JigCloneDraft> {
-    let target_id = match target_id {
-        Some(id) => id,
-        None => {
-            sqlx::query!(r#"select uuid_generate_v1mc() as "id!: JigId""#)
-                .fetch_one(&mut *txn)
-                .await?
-                .id
-        }
-    };
-
-    sqlx::query!(
-        // language=SQL
-        r#"
-insert into jig (id, display_name, parents, creator_id, author_id, language, description, direction, display_score,
-                 track_assessments, drag_assist, theme, audio_background, audio_feedback_positive,
-                 audio_feedback_negative, is_draft, privacy_level)
-select $2,
-       display_name,
-       array_append(parents, $1),
-       $3 as creator_id,
-       $3 as author_id,
-       language,
-       description,
-       direction,
-       display_score,
-       track_assessments,
-       drag_assist,
-       theme,
-       audio_background,
-       audio_feedback_positive,
-       audio_feedback_negative,
-       $4, 
-       $5
-from jig
-where id = $1
-        "#,
-        parent_id.0,
-        target_id.0,
-        user_id,
-        target_is_draft,
-        PrivacyLevel::Unlisted as i16,
-    )
-    .execute(&mut *txn)
-    .await
-    .map_err(|err| match err {
-        sqlx::Error::Database(err)
-        if err.downcast_ref::<PgDatabaseError>().constraint()
-            == Some("jig_pkey") =>
-            {
-                error::JigCloneDraft::Conflict
-            }
-        err => error::JigCloneDraft::InternalServerError(err.into()),
-    })?;
-
-    sqlx::query!(
-        //language=SQL
-        r#"
-update jig
-set parents = (
-    select case
-               when $3 = true then array_append(parents, null)
-               when $3 = false then parents
-               end
-
-    from jig
-    where id = $1
-)
-where id = $2
-        "#,
-        parent_id.0,
-        target_id.0,
-        append_parent,
-    )
-    .execute(&mut *txn)
-    .await?;
-
-    sqlx::query!(
-        //language=SQL
-        r#"
-insert into jig_module ("index", jig_id, kind, contents)
-select "index", $2 as "jig_id", kind, contents
-from jig_module where jig_id = $1
-        "#,
-        parent_id.0,
-        target_id.0
-    )
-    .execute(&mut *txn)
-    .await?;
-
-    sqlx::query!(
-        //language=SQL
-        r#"
-insert into jig_affiliation(jig_id, affiliation_id)
-select $2, affiliation_id from jig_affiliation where jig_id = $1
-        "#,
-        parent_id.0,
-        target_id.0,
-    )
-    .execute(&mut *txn)
-    .await?;
-
-    sqlx::query!(
-        //language=SQL
-        r#"
-insert into jig_category(jig_id, category_id)
-select $2, category_id from jig_category where jig_id = $1
-        "#,
-        parent_id.0,
-        target_id.0,
-    )
-    .execute(&mut *txn)
-    .await?;
-
-    sqlx::query!(
-        //language=SQL
-        r#"
-insert into jig_goal(jig_id, goal_id)
-select $2, goal_id from jig_goal where jig_id = $1
-        "#,
-        parent_id.0,
-        target_id.0,
-    )
-    .execute(&mut *txn)
-    .await?;
-
-    sqlx::query!(
-        //language=SQL
-        r#"
-insert into jig_age_range(jig_id, age_range_id)
-select $2, age_range_id from jig_age_range where jig_id = $1
-        "#,
-        parent_id.0,
-        target_id.0,
-    )
-    .execute(&mut *txn)
-    .await?;
-
-    sqlx::query!(
-        //language=SQL
-        r#"
-insert into jig_additional_resource(jig_id, url)
-select $2, url from jig_additional_resource where jig_id = $1
-        "#,
-        parent_id.0,
-        target_id.0,
-    )
-    .execute(&mut *txn)
-    .await?;
-
-    Ok(target_id)
+    Ok(new_jig.id)
 }
 
 pub async fn get_play_count(db: &PgPool, id: JigId) -> Result<i64, error::NotFound> {

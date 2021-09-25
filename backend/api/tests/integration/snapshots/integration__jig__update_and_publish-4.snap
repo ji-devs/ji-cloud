@@ -4,37 +4,32 @@ expression: body
 
 ---
 {
-  "id": "[id]",
-  "privacyLevel": "unlisted",
-  "publishedAt": null,
+  "id": "3a71522a-cd77-11eb-8dc1-af3e35f7c743",
+  "privacyLevel": "public",
+  "publishedAt": "[published_at]",
   "creatorId": "1f241e1b-b537-493f-a230-075cb16315be",
   "authorId": "1f241e1b-b537-493f-a230-075cb16315be",
   "authorName": "Bobby Tables",
   "jigData": {
-    "draftOrLive": "Draft",
-    "displayName": "",
-    "modules": [
-      {
-        "id": "[id]",
-        "kind": "Cover"
-      }
-    ],
+    "draftOrLive": "Live",
+    "displayName": "draft name",
+    "modules": [],
     "ageRanges": [],
     "affiliations": [],
     "goals": [],
-    "language": "en_US",
+    "language": "en-us",
     "categories": [],
     "additionalResources": [],
-    "description": "",
+    "description": "asdasdasd",
     "lastEdited": "[last_edited]",
     "defaultPlayerSettings": {
-      "direction": "ltr",
+      "direction": "rtl",
       "displayScore": false,
       "trackAssessments": false,
       "dragAssist": false
     },
-    "theme": "Blank",
-    "audioBackground": null,
+    "theme": "Chalkboard",
+    "audioBackground": "funForKids",
     "audioEffects": {
       "feedbackPositive": "[audio]",
       "feedbackNegative": "[audio]"
