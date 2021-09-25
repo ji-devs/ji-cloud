@@ -1,6 +1,6 @@
 use actix_web::{
     web::{Data, Json, Path, ServiceConfig},
-    HttpResponse,
+    HttpResponse, HttpResponseBuilder,
 };
 use shared::{
     api::{endpoints, ApiEndpoint},
@@ -31,12 +31,14 @@ pub async fn create(
 
     let url_string = request.url.to_string();
 
-    let (id, kind) = db::media::create(&pool, &s3, &url_string).await?;
+    let (id, kind, status_code) = db::media::create(&pool, &s3, &url_string).await?;
 
-    Ok(HttpResponse::Created().json(UrlCreatedResponse {
-        id,
-        kind: kind.to_shared(),
-    }))
+    Ok(
+        HttpResponseBuilder::new(status_code).json(UrlCreatedResponse {
+            id,
+            kind: kind.to_shared(),
+        }),
+    )
 }
 
 // filter by media type, etc

@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use crate::image_ops::MediaKind;
 use crate::service::{s3, ServiceData};
-use actix_web::web::Bytes;
+use actix_web::{http::StatusCode, web::Bytes};
 use anyhow::Context;
 use core::config::{ANIMATION_BODY_SIZE_LIMIT, IMAGE_BODY_SIZE_LIMIT};
 use sha2::Digest;
@@ -23,7 +23,7 @@ pub async fn create(
     pool: &PgPool,
     s3: &ServiceData<s3::Client>,
     url_string: &String,
-) -> anyhow::Result<(Uuid, MediaKind)> {
+) -> anyhow::Result<(Uuid, MediaKind, StatusCode)> {
     // If we can already find the image, return early.
     if let Some(record) = sqlx::query!(
         r#"
@@ -39,7 +39,7 @@ where media_url = $1"#,
     {
         log::trace!("Found the url");
 
-        return Ok((record.media_id, record.kind));
+        return Ok((record.media_id, record.kind, StatusCode::OK));
     }
 
     let data: Vec<u8> = download_media_file(&url_string)
@@ -53,7 +53,7 @@ where media_url = $1"#,
     if let (Some(id), Some(kind)) = (id, kind) {
         txn.commit().await?;
 
-        return Ok((id, kind));
+        return Ok((id, kind, StatusCode::OK));
     }
 
     // insert row for uploads
@@ -104,7 +104,7 @@ where media_url = $1"#,
     .await
     .context("failed to upload media for processing")?;
 
-    Ok((id, kind))
+    Ok((id, kind, StatusCode::CREATED))
 }
 
 async fn download_media_file(url_string: &str) -> anyhow::Result<Vec<u8>> {
