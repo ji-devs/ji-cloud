@@ -943,31 +943,6 @@
       ]
     }
   },
-  "21a74b49a0bc1fef8a461d87e9596df3418c161536cb490f6cbccf511c0ae3fe": {
-    "query": "update web_media_library set uploaded_at = now() where id = $1",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      },
-      "nullable": []
-    }
-  },
-  "2266d295d10564e03aeee172cc27e8ba9012753c1514649b3a83244750c1a1eb": {
-    "query": "update web_media_library set uploaded_at = now(), updated_at = now() where kind = $1 and id = $2",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Int2",
-          "Uuid"
-        ]
-      },
-      "nullable": []
-    }
-  },
   "228687aa01cb6d5780d804f5ddf78a5e070fc552dbb3b3f8e5224b8a6a9e9b18": {
     "query": "\nselect id as \"id: ImageId\", kind as \"kind: ImageKind\"\nfrom user_image_library\n         join user_image_upload\n              on user_image_library.id = user_image_upload.image_id\nwhere processing_result is true\n  and user_id = $1\n  and (kind is not distinct from $2 or $2 is null)\norder by created_at desc\n",
     "describe": {
@@ -1047,6 +1022,75 @@
       },
       "nullable": [
         false
+      ]
+    }
+  },
+  "29a0f9148a4fa42c0e68388554eca61b27aae6fd7ce9dda131ad6571523833ad": {
+    "query": "select\n  id as \"id!\",\n  case\n    kind -- PngCanvasImage\n    when 0 then 3 -- PngStickerImage\n    when 1 then 0\n  end :: int2 \"kind!: MediaKind\",\n  created_at as \"created_at!\",\n  updated_at,\n  uploaded_at,\n  0 :: int2 as \"library!: MediaLibrary\" -- global\nfrom\n  image_metadata\n  left join image_upload on image_id = id\nunion all\nselect\n  id as \"id!\",\n  case\n    kind -- GifAnimation\n    when 0 then 1 -- SpritesheetAnimation\n    when 1 then 2\n  end :: int2 \"kind!: MediaKind\",\n  created_at as \"created_at!\",\n  updated_at,\n  uploaded_at,\n  0 :: int2 as \"library!: MediaLibrary\" -- global\nfrom\n  animation_metadata\n  left join global_animation_upload on animation_id = id\nunion all\nselect\n  id as \"id!\",\n  -- PngStickerImage\n  0 :: int2 as \"kind!: MediaKind\",\n  created_at as \"created_at!\",\n  updated_at,\n  uploaded_at,\n  1 :: int2 as \"library!: MediaLibrary\" -- user\nfrom\n  user_image_library\n  left join user_image_upload on image_id = id\nunion all\nselect\n  id as \"id!\",\n  -- Mp3Audio\n  4 :: int2 as \"kind!: MediaKind\",\n  created_at as \"created_at!\",\n  updated_at,\n  uploaded_at,\n  1 :: int2 as \"library!: MediaLibrary\" -- user\nfrom\n  user_audio_library\n  left join user_audio_upload on audio_id = id\nunion all\nselect\n  id as \"id!\",\n  kind as \"kind!: MediaKind\",\n  created_at as \"created_at!\",\n  updated_at,\n  uploaded_at,\n  2 :: int2 as \"library!: MediaLibrary\" -- web\nfrom web_media_upload wmu\ninner join web_media_library wml on wml.kind = kind\nwhere wmu.media_id = media_id ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id!",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "kind!: MediaKind",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 2,
+          "name": "created_at!",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 3,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 4,
+          "name": "uploaded_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 5,
+          "name": "library!: MediaLibrary",
+          "type_info": "Int2"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    }
+  },
+  "2de098c6b9ee0874cf91614aff351a1538ddf0dbb477225708b253948abd264d": {
+    "query": "\n            select uploaded_at\n            from web_media_upload wmu\n            inner join web_media_library wml on wml.kind = $1 \n            where wmu.media_id = $2 for update",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "uploaded_at",
+          "type_info": "Timestamptz"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int2",
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        true
       ]
     }
   },
@@ -2304,6 +2348,18 @@
       "nullable": []
     }
   },
+  "739d2d716267f671e775806df135ccdcbbbc12e0fc4398a07de6235f71bddd6b": {
+    "query": "update web_media_upload set processed_at = now(), processing_result = true where media_id = $1",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "73f764f872bffc9e08fe85ba34a7b52d7c9e645095e3b1e4cec6a0b1d5b27d2d": {
     "query": "\ninsert into animation_metadata (name, description, is_premium, publish_at, kind, is_looping) values ($1, $2, $3, $4, $5, $6)\nreturning id as \"id: AnimationId\"\n        ",
     "describe": {
@@ -2450,6 +2506,18 @@
         false,
         false
       ]
+    }
+  },
+  "7a3746ec8866c890e58cd4e3cd5a876235b1b9b116d9f5fbb7aab1187000c86f": {
+    "query": "insert into web_media_upload (media_id, uploaded_at) values ($1, now())",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": []
     }
   },
   "7fc1aef6a00aa47799aa01f4313417b431ea5230c52a4ceddcde7139305310b1": {
@@ -2816,6 +2884,38 @@
         ]
       },
       "nullable": [
+        false
+      ]
+    }
+  },
+  "89a0dbe7265e411f69b9ea0dc06cb43f7c4290b23e7053af2b1583ae97cdd4ff": {
+    "query": "\nselect id,\n       hash,\n       kind as \"kind: MediaKind\"\nfrom web_media_library\nwhere hash = $1\nfor update\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "hash",
+          "type_info": "Bytea"
+        },
+        {
+          "ordinal": 2,
+          "name": "kind: MediaKind",
+          "type_info": "Int2"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Bytea"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
         false
       ]
     }
@@ -3985,6 +4085,26 @@
       ]
     }
   },
+  "c877be5757f8787c2da80469a4fc50641fb63358e6516d05c7159d9c8060ac52": {
+    "query": "\nselect kind as \"kind: MediaKind\"\nfrom web_media_library\ninner join web_media_upload on web_media_library.id = web_media_upload.media_id\nwhere (id = $1 and uploaded_at is not null and processed_at >= uploaded_at is not true)\nfor no key update of web_media_upload\nfor share of web_media_library\nskip locked\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "kind: MediaKind",
+          "type_info": "Int2"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
   "c9871e12739d5ae1acd8e3026e00ed927a54f717d5e5cd12f78456b99a7aa23b": {
     "query": "delete from session where user_id = $1",
     "describe": {
@@ -4048,6 +4168,18 @@
       "nullable": [
         false
       ]
+    }
+  },
+  "d29f849b3862377aad3694dc91bdff912732b6fe883120658234884ccf2d6ca6": {
+    "query": "update web_media_upload set uploaded_at = now(), processing_result = null where media_id = $1",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": []
     }
   },
   "d32e3899d7c0ea60a1ea6d88446a9b182763d14c95a5c7f3084d2928aa286406": {
@@ -4422,80 +4554,6 @@
         ]
       },
       "nullable": []
-    }
-  },
-  "e7b414859b52186188a99c58f582e19b132f586d976eabf098c40f1fe356982d": {
-    "query": "select id as \"id!\",\n    case kind\n        -- PngCanvasImage\n        when 0 then 3\n        -- PngStickerImage\n        when 1 then 0\n    end::int2 \"kind!: MediaKind\",\n    created_at as \"created_at!\",\n    updated_at,\n    uploaded_at,\n    0::int2 as \"library!: MediaLibrary\" -- global\nfrom image_metadata\nleft join image_upload on image_id = id\nunion all\nselect id as \"id!\",\n    case kind\n        -- GifAnimation\n        when 0 then 1\n        -- SpritesheetAnimation\n        when 1 then 2\n    end::int2 \"kind!: MediaKind\",\n    created_at as \"created_at!\",\n    updated_at,\n    uploaded_at,\n    0::int2 as \"library!: MediaLibrary\" -- global\nfrom animation_metadata\nleft join global_animation_upload on animation_id = id\nunion all\nselect id as \"id!\",\n    -- PngStickerImage\n    0::int2 as \"kind!: MediaKind\",\n    created_at as \"created_at!\",\n    updated_at,\n    uploaded_at,\n    1::int2 as \"library!: MediaLibrary\" -- user\nfrom user_image_library\nleft join user_image_upload on image_id = id\nunion all\nselect id as \"id!\",\n    -- Mp3Audio\n    4::int2 as \"kind!: MediaKind\",\n    created_at as \"created_at!\",\n    updated_at,\n    uploaded_at,\n    1::int2 as \"library!: MediaLibrary\" -- user\nfrom user_audio_library\nleft join user_audio_upload on audio_id = id\nunion all\nselect id as \"id!\",\n    kind as \"kind!: MediaKind\",\n    created_at as \"created_at!\",\n    updated_at,\n    uploaded_at,\n    2::int2 as \"library!: MediaLibrary\" -- web\nfrom web_media_library\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id!",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "kind!: MediaKind",
-          "type_info": "Int2"
-        },
-        {
-          "ordinal": 2,
-          "name": "created_at!",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 3,
-          "name": "updated_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 4,
-          "name": "uploaded_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 5,
-          "name": "library!: MediaLibrary",
-          "type_info": "Int2"
-        }
-      ],
-      "parameters": {
-        "Left": []
-      },
-      "nullable": [
-        null,
-        null,
-        null,
-        null,
-        null,
-        null
-      ]
-    }
-  },
-  "e805579cae1a6b599640e1bedcc0aa45db9538e223ae3a572a2bbb7d85510cf2": {
-    "query": "\nselect id,\n       kind as \"kind: MediaKind\"\nfrom web_media_library\nwhere hash = $1\nfor update\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "kind: MediaKind",
-          "type_info": "Int2"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Bytea"
-        ]
-      },
-      "nullable": [
-        false,
-        false
-      ]
     }
   },
   "e84b872096758317f1b40bf74ff81fafb5eb0b45a17137bdb67780f427e39011": {
@@ -4970,27 +5028,6 @@
         ]
       },
       "nullable": []
-    }
-  },
-  "fcd42906805bb3286c6bbc9c46b68140d5058bc71706c382081ab301a0c577e1": {
-    "query": "select uploaded_at from web_media_library where kind = $1 and id = $2 for update",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "uploaded_at",
-          "type_info": "Timestamptz"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int2",
-          "Uuid"
-        ]
-      },
-      "nullable": [
-        true
-      ]
     }
   },
   "fe196f274875c6e293c5e80be927ac1e35c46f7699975b24a28b8cc1c136881d": {
