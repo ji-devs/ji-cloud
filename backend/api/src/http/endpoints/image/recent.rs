@@ -1,5 +1,6 @@
 use crate::{db, error, extractor::TokenUser};
 use actix_web::{
+    http::StatusCode,
     web::{Data, Json, Path, Query},
     HttpResponse,
 };
@@ -23,19 +24,19 @@ pub(in super::super) async fn put(
     let (id, library, last_used, is_updated): (ImageId, MediaLibrary, DateTime<Utc>, bool) =
         db::image::recent::upsert(db.as_ref(), claims.0.user_id, req.id, req.library).await?;
 
-    if is_updated == true {
-        return Ok(HttpResponse::Ok().json(UserRecentImageResponse {
+    let status_code = if is_updated == true {
+        StatusCode::OK
+    } else {
+        StatusCode::CREATED
+    };
+
+    Ok(
+        HttpResponse::build(status_code).json(UserRecentImageResponse {
             id,
             library,
             last_used,
-        }));
-    }
-
-    Ok(HttpResponse::Created().json(UserRecentImageResponse {
-        id,
-        library,
-        last_used,
-    }))
+        }),
+    )
 }
 
 pub(in super::super) async fn delete(

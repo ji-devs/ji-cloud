@@ -28,21 +28,22 @@ select exists(select 1 from user_recent_image where user_id = $1 and image_id = 
 
     let res = sqlx::query!(
             // language=SQL
-            r#"
-            insert into user_recent_image (user_id, image_id, media_library)
-            values ($1, $2, $3)
-            ON CONFLICT (user_id, image_id) DO UPDATE
-              SET user_id = $1,
-                image_id = $2,
-                media_library = $3
-            returning image_id as "id: ImageId", media_library as "library: MediaLibrary", last_used as "last_used: DateTime<Utc>";
-            "#,
-            user_id,
-            image_id.0,
-            library as i16,
-        )
-            .fetch_one(&mut txn)
-            .await?;
+        r#"
+insert into user_recent_image (user_id, image_id, media_library)
+values ($1, $2, $3)
+ON CONFLICT (user_id, image_id) DO UPDATE
+  SET user_id = $1,
+    image_id = $2,
+    media_library = $3,
+    last_used = now()
+returning image_id as "id: ImageId", media_library as "library: MediaLibrary", last_used as "last_used: DateTime<Utc>";
+        "#,
+        user_id,
+        image_id.0,
+        library as i16,
+    )
+    .fetch_one(&mut txn)
+    .await?;
 
     txn.commit().await?;
 
