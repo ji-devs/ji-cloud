@@ -36,17 +36,41 @@ export class _ extends LitElement {
                 }
                 .row {
                     display: grid;
-                    column-gap: 22px;
                     justify-content: space-between;
+                    column-gap: 22px;
+                    row-gap: 22px;
                 }
                 .first {
-                    grid-template-columns: 1fr 1fr;
+                    grid-template-columns: 1fr min-content;
                 }
                 .second {
-                    grid-template-columns: 124px 124px 204px;
+                    grid-template-columns: 1fr 1fr;
+                }
+                .second .alignment {
+                    grid-column: 1 / -1;
                 }
                 .third {
-                    grid-template-columns: 1fr 1fr;
+                    grid-template-columns: 3fr 2fr;
+                }
+                @media (min-width: 1920px) {
+                    .first {
+                        grid-template-columns: 1fr 1fr;
+                    }
+                    .second {
+                        grid-template-columns: 124px 124px 200px;
+                    }
+                    .second .alignment {
+                        grid-column: unset;
+                    }
+                    .third {
+                        grid-template-columns: 1fr 1fr;
+                    }
+                }
+                ::slotted(anchored-overlay[slot=colors]) {
+                    display: block;
+                }
+                .button-collection.color {
+                    display: block;
                 }
             `,
         ];
@@ -90,10 +114,10 @@ export class _ extends LitElement {
                         <slot name="italic"></slot>
                         <slot name="underline"></slot>
                     </div>
-                    <div class="button-collection">
+                    <div class="button-collection color">
                         <slot name="colors"></slot>
                     </div>
-                    <div class="button-collection">
+                    <div class="button-collection alignment">
                         <slot name="align-left"></slot>
                         <slot name="align-center"></slot>
                         <slot name="align-right"></slot>

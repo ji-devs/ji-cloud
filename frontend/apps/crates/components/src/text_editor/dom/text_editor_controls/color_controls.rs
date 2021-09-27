@@ -69,6 +69,7 @@ pub fn render(state: Rc<State>) -> Dom {
         .child(html!("div", {
             .property("slot", "anchor")
             .style("display", "flex")
+            .style("justify-content", "space-evenly")
             .children(&mut [
                 html!("text-editor-controls-button", {
                     .property("kind", "color")
