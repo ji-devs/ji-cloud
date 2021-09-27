@@ -42,6 +42,9 @@ pub fn render(state: Rc<State>, slot: Option<&str>) -> Dom {
 
 pub fn render_loaded(state: Rc<State>) -> Dom {
     html!("color-select", {
+        .apply_if(state.label.is_some(), clone!(state => move |dom| {
+            dom.property("label", state.label.clone().unwrap_ji())
+        }))
         .child(html!("empty-fragment", { // TODO: once we can have multiple child signals we wont need this
             .property("slot", "sections")
             .child_signal(state.theme_colors.signal_cloned().map(clone!(state => move |theme_colors| {

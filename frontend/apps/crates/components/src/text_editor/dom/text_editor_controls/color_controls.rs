@@ -20,6 +20,7 @@ impl ColorState {
         let picker = Rc::new(ColorPickerState::new(
             (*state).theme_id.clone(),
             None,
+            None,
             Some(clone!(state => move |color| {
                 let color = rgba8_to_hex_optional(&color);
                 let select_for = {

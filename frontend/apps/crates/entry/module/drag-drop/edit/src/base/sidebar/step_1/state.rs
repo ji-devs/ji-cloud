@@ -13,6 +13,9 @@ use components::{
     stickers::state::Stickers,
 };
 use shared::domain::jig::module::body::{Background, Image};
+
+const STR_SELECT_BACKGROUND_COLOR: &'static str = "Select background color";
+
 pub struct Step1 {
     pub base: Rc<Base>,
     pub tab: Mutable<Tab>,
@@ -66,9 +69,14 @@ impl Tab {
                 Self::BgImage(Rc::new(state))
             },
             MenuTabKind::BackgroundColor => {
-                let state = ColorPickerState::new(base.theme_id.clone(), None, Some(clone!(base => move |color| {
-                    base.backgrounds.set_layer(Layer::One, Background::Color(color));
-                })));
+                let state = ColorPickerState::new(
+                    base.theme_id.clone(),
+                    None,
+                    Some(String::from(STR_SELECT_BACKGROUND_COLOR)),
+                    Some(clone!(base => move |color| {
+                        base.backgrounds.set_layer(Layer::One, Background::Color(color));
+                    }))
+                );
                 Self::BgColor(Rc::new(state))
             },
             MenuTabKind::Overlay => {
