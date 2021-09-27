@@ -13,13 +13,19 @@ export class _ extends LitElement {
           position: absolute;
           top: -15px;
           left: -4px; /*not sure why, otherwise it's off center*/
-          width: 232px; 
-          height: 196px;
           border-radius: 16px;
           border: solid 3px var(--light-orange-3);
           background-color: var(--light-orange-1);
           display: flex;
           justify-content: center;
+          width: 154px;
+          height: 140px;
+        }
+        @media (min-width: 1920px) {
+          :host {
+            width: 232px; 
+            height: 196px;
+          }
         }
 
         .title-container {
@@ -37,7 +43,12 @@ export class _ extends LitElement {
         .title {
           color: var(--dark-gray-6);
           font-weight: 600;
-          font-size: 14px;
+          font-size: 12px;
+        }
+        @media (min-width: 1920px) {
+          .title {
+            font-size: 14px;
+          }
         }
     `];
   }

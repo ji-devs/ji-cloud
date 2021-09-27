@@ -21,11 +21,17 @@ export class _ extends LitElement {
           }
           section {
             position: relative;
-            width: 232px;
-            height: 196px;
             border-radius: 16px;
             border: solid 3px rgba(0, 0, 0, 0);
             box-sizing: border-box;
+            width: 154px;
+            height: 140px;
+          }
+          @media (min-width: 1920px) {
+            section {
+              width: 232px;
+              height: 196px;
+            }
           }
 
           section.hover {
@@ -42,15 +48,27 @@ export class _ extends LitElement {
             position: relative;
             top: 0;
             left: 0;
-            margin-top: 30px;
             display: flex;
             flex-direction: column;
             align-items: center;
+            margin-top: 20px;
           }
+          @media (min-width: 1920px) {
+            .content {
+              margin-top: 30px;
+            }
+          }
+
           img-ui {
-            width: 200px;
-            height: 114px;
             margin-bottom: 16px;
+            width: 126px;
+            height: 70px;
+          }
+          @media (min-width: 1920px) {
+            img-ui {
+              width: 200px;
+              height: 114px;
+            }
           }
 
           .menu {
