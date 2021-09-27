@@ -12,7 +12,7 @@ export class _ extends LitElement {
                 /* also set height to allow descendants to take full height, feels hacky */
                 height: 100%;
                 min-height: 100%;
-                padding: 0 28px;
+                padding: 0 20px;
             }
             @media (min-width: 1920px) {
                 :host {
@@ -21,14 +21,8 @@ export class _ extends LitElement {
             }
 
             section {
-                padding-top: 48px;
                 height: 100%;
                 box-sizing: border-box;
-            }
-            @media (min-width: 1920px) {
-                section {
-                    padding-top: 40px;
-                }
             }
         `];
     }

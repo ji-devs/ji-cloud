@@ -18,6 +18,12 @@ export class _ extends LitElement {
             }
             .body {
                 background-color: #e9eff8;
+                padding-top: 40px;
+            }
+            @media (min-width: 1920px) {
+                .body {
+                    padding-top: 48px;
+                }
             }
         `];
     }
