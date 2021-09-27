@@ -5,7 +5,10 @@ use serde::{Deserialize, Serialize};
 use std::convert::TryFrom;
 use uuid::Uuid;
 
-use super::meta::{AffiliationId, AgeRangeId, SubjectId};
+use crate::domain::{
+    image::ImageId,
+    meta::{AffiliationId, AgeRangeId, SubjectId},
+};
 
 /// Represents a user's permissions.
 ///
@@ -96,8 +99,8 @@ pub struct UserProfile {
     /// The user's family name (last name)
     pub family_name: String,
 
-    /// URL to the user's profile image.
-    pub profile_image: Option<String>,
+    /// ID to the user's profile image in the user image library.
+    pub profile_image: Option<ImageId>,
 
     /// The user's preferred language.
     pub language: String,
@@ -201,9 +204,10 @@ pub struct CreateProfileRequest {
     /// The user's family name / "last name".
     pub family_name: String,
 
-    /// URL to the user's profile image.
+    /// URL to the user's profile image. The API server uploads and processes the image so that the
+    /// profile image is stored in Cloud Storage in the user image library.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub profile_image: Option<String>,
+    pub profile_image_url: Option<String>,
 
     // todo: create a struct that enforces format like `en_us`
     /// the language the user prefers to communicate with.
@@ -270,11 +274,11 @@ pub struct PatchProfileRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub family_name: Option<String>,
 
-    /// URL to the user's profile image.
+    /// ID to the user's profile image in the user image library.
     #[serde(default)]
     #[serde(deserialize_with = "super::deserialize_optional_field")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub profile_image: Option<Option<String>>,
+    pub profile_image: Option<Option<ImageId>>,
 
     // todo: create a struct that enforces format like `en_us`
     /// the language the user prefers to communicate with.
