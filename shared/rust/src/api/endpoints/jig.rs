@@ -22,9 +22,17 @@ pub mod additional_resource;
 /// Endpoints for jig player sessions.
 pub mod player;
 
-/// Create a JIG.
+/// Create a JIG and it's draft and live data copies.
 ///
 /// * New jigs are all set to `PrivacyLevel::Unlisted` by default
+///
+/// # Flow:
+/// 1. Create a JIG and its two data copies with [`Create`]
+/// 2. Optionally update JIG info such as privacy, author with [`Update`]
+/// 3. Make updates to draft data:
+///     a. Patch Jig data through [`UpdateDraftData`]
+///     b. Modify modules, through [`module::Update`]
+/// 4. Finalize draft changes by calling [`Publish`]
 ///
 /// # Authorization
 /// * One of `Admin`, `AdminJig`, or `ManageSelfJig`
@@ -37,8 +45,10 @@ impl ApiEndpoint for Create {
     const METHOD: Method = Method::Post;
 }
 
-/// Update a JIG. Note that this does not update the JIG's data.
+/// Update a JIG's info. Note that this does not update the JIG's data.
 ///
+/// The fields that can be updated through this route correspond to the modifiable fields in
+/// [`JigResponse`] that are not part of the `.jig_data` field.
 pub struct Update;
 impl ApiEndpoint for Update {
     type Req = JigUpdateRequest;
@@ -82,6 +92,13 @@ impl ApiEndpoint for GetDraft {
 }
 
 /// Update the draft data of a JIG.
+///
+/// Note that a copy of the JIG's draft or live data can not be fetched directly, but only as a part
+/// of one of the following routes:
+/// * [`GetLive`] fetches live copies
+/// * [`Search`]
+///
+/// See [`JigData`] for the over-the-wire representation.
 ///
 /// # Authorization
 /// * One of `Admin`, `AdminJig`,, or `ManageSelfJig` for owned JIGs

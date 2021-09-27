@@ -1,3 +1,5 @@
+//! Config constants
+
 #![allow(missing_docs)]
 
 use std::env::VarError;
