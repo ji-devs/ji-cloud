@@ -47,7 +47,7 @@ export class _ extends LitElement {
                 justify-content: space-between;
             }
             h2 {
-                margin: 0;  font-family: Poppins;
+                margin: 0;
                 font-size: 16px;
                 font-weight: normal;
             }
