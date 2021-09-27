@@ -9,8 +9,13 @@ export class _ extends LitElement {
             css`
                 :host {
                     display: grid;
-                    grid-template-rows: 24px 320px auto;
                     row-gap: 20px;
+                    grid-template-rows: 24px 220px auto;
+                }
+                @media (min-width: 1920px) {
+                    :host {
+                        grid-template-rows: 24px 320px auto;
+                    }
                 }
                 .options {
                     display: flex;
@@ -50,11 +55,12 @@ export class _ extends LitElement {
                 .actions {
                     padding: 0 26px;
                     display: grid;
-                    align-items: center;
-                    grid-template-columns: 1fr 2fr 1fr;
+                }
+                .actions ::slotted(*) {
+                    grid-column: 1;
+                    grid-row: 1;
                 }
                 ::slotted([slot=main-action]) {
-                    grid-column: 2;
                     justify-self: center;
                 }
             `,

@@ -7,6 +7,10 @@ export class _ extends LitElement {
     static get styles() {
         return [
             css`
+                :host {
+                    display: grid;
+                    justify-self: start;
+                }
                 .content {
                     display: flex;
                     align-items: center;
