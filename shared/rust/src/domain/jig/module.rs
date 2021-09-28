@@ -14,7 +14,7 @@ pub use body::Body as ModuleBody;
 ///
 /// This uniquely identifies a module. There is no other module that shares this ID.
 ///
-/// See also [`StableOrUniqueId`](StableOrModuleId) for the two ways to identify a specific module.
+/// See also [`StableOrUniqueId`] for the two ways to identify a specific module.
 #[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
@@ -29,9 +29,9 @@ pub struct ModuleId(pub Uuid);
 ///
 /// This ID remains stable when:
 /// * Publishing JIG data from draft to live
-/// * Cloning a JIG through [`jig::Clone`](super::Clone)
+/// * Cloning a JIG through [`jig::Clone`](crate::api::endpoints::jig::Clone)
 ///
-/// See also [`StableOrUniqueId`](StableOrModuleId) for the two ways to identify a specific module.
+/// See also [`StableOrUniqueId`] for the two ways to identify a specific module.
 #[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
@@ -54,8 +54,8 @@ pub enum StableOrUniqueId {
     /// `(JigId, DraftOrLive, StableModuleId)` uniquely identifies a specific module.
     ///
     /// This ID remains stable when:
-    /// * Publishing JIG data from draft to live with [`jig::PublishDraftData`](super::PublishDraftData)
-    /// * Cloning a JIG through [`jig::Clone`](super::Clone)
+    /// * Publishing JIG data from draft to live with [`jig::Publish`](crate::api::endpoints::jig::Publish)
+    /// * Cloning a JIG through [`jig::Clone`](crate::api::endpoints::jig::Clone)
     Stable(StableModuleId),
 }
 

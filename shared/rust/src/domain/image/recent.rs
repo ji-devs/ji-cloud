@@ -20,7 +20,7 @@ pub struct UserRecentImageResponse {
 }
 
 /// Request to add an entry to the recent user images list,
-/// see ['recent::Create'](crate::api::endpoints::image::recent::Create).
+/// see ['recent::Put'](crate::api::endpoints::image::recent::Put).
 #[derive(Serialize, Deserialize, Debug)]
 pub struct UserRecentImageUpsertRequest {
     /// The image's ID.
