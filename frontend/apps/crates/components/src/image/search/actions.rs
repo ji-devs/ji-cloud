@@ -6,7 +6,7 @@ use super::state::State;
 use dominator::clone;
 use futures::future::join;
 use shared::api::endpoints::image;
-use shared::domain::image::{user::UserImageCreateRequest, recent::{UserRecentImageCreateRequest, UserRecentImageListRequest}};
+use shared::domain::image::{user::UserImageCreateRequest, recent::{UserRecentImageUpsertRequest, UserRecentImageListRequest}};
 use shared::domain::meta::ImageTagIndex;
 use shared::{
     api::{endpoints, ApiEndpoint},
@@ -183,12 +183,12 @@ pub fn add_recent(state: &State, image: &Image) {
         }
     }
 
-    let req = UserRecentImageCreateRequest {
+    let req = UserRecentImageUpsertRequest {
         id: image.id.clone(),
         library: image.lib.clone(),
     };
     state.loader.load(async {
-        let _ = image::recent::Create::api_with_auth(Some(req)).await;
+        let _ = image::recent::Put::api_with_auth(Some(req)).await;
     });
 }
 
