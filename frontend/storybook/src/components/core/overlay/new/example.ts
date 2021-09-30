@@ -2,7 +2,8 @@ import {argsToAttrs} from "@utils/attributes";
 import {GridResize} from "../../module-page";
 import "@elements/core/overlays/new/container";
 import "@elements/core/overlays/new/content";
-import {Placement, ContentPlacement, MoveStrategy} from "@elements/core/overlays/new/content";
+import "@elements/core/overlays/new/tooltip/confirm";
+import {Anchor, ContentAnchor, MoveStrategy} from "@elements/core/overlays/new/content";
 import {Container as MenuContainer} from "../../menu/container";
 export default {
     title: "Core / Overlays / New"
@@ -11,26 +12,26 @@ export default {
 type ContainerOptions = "window" | "#main" | "none";
 
 interface Args {
-    flowContentPlacement: ContentPlacement,
-    flowTargetPlacement: Placement,
+    flowContentAnchor: ContentAnchor,
+    flowTargetAnchor: Anchor,
     flowTargetStrategy: MoveStrategy,
     flowTargetMargin: number,
     flowTargetContainer: ContainerOptions,
-    absoluteContentPlacement: ContentPlacement,
-    absoluteTargetPlacement: Placement,
+    absoluteContentAnchor: ContentAnchor,
+    absoluteTargetAnchor: Anchor,
     absoluteTargetStrategy: MoveStrategy,
     absoluteTargetMargin: number,
     absoluteTargetContainer: ContainerOptions, 
 }
 
 const DEFAULT_ARGS:Args = {
-    flowContentPlacement: "tl",
-    flowTargetPlacement: "tr",
+    flowContentAnchor: "tl",
+    flowTargetAnchor: "tr",
     flowTargetStrategy: "track", 
     flowTargetMargin: 0,
     flowTargetContainer: "window",
-    absoluteContentPlacement: "tl",
-    absoluteTargetPlacement: "tr",
+    absoluteContentAnchor: "tr",
+    absoluteTargetAnchor: "tl",
     absoluteTargetStrategy: "track",
     absoluteTargetMargin: 0,
     absoluteTargetContainer: "window",
@@ -65,12 +66,15 @@ function makeMain(props:Args) {
             </div>
         </div>
         <overlay-container>
-            <overlay-content target="#flowTarget" targetPlacement="${props.flowTargetPlacement}" contentPlacement=${props.flowContentPlacement} strategy="${props.flowTargetStrategy}" margin="${props.flowTargetMargin}" container="${flowTargetContainer}">
+            <overlay-content target="#flowTarget" targetAnchor="${props.flowTargetAnchor}" contentAnchor=${props.flowContentAnchor} strategy="${props.flowTargetStrategy}" margin="${props.flowTargetMargin}" container="${flowTargetContainer}">
                 ${MenuContainer()}
             </overlay-content>
-            <overlay-content target="#absoluteTarget" placement="${props.absoluteTargetPlacement}" contentPlacement=${props.absoluteContentPlacement} strategy="${props.absoluteTargetStrategy}" margin="${props.absoluteTargetMargin}" container="${absoluteTargetContainer}">
+            <overlay-content target="#absoluteTarget" placement="${props.absoluteTargetAnchor}" contentAnchor=${props.absoluteContentAnchor} strategy="${props.absoluteTargetStrategy}" margin="${props.absoluteTargetMargin}" container="${absoluteTargetContainer}">
                 ${MenuContainer()}
             </overlay-content>
+            <overlay-tooltip-confirm header="testing" confirmLabel="Confirm" cancelLabel="Cancel" target="#absoluteTarget" placement="${props.absoluteTargetAnchor}" contentAnchor=${props.absoluteContentAnchor} strategy="${props.absoluteTargetStrategy}" margin="${props.absoluteTargetMargin}" container="${absoluteTargetContainer}">
+            </overlay-tooltip-confirm>
+            
         </overlay-container>
 
     </div>`
@@ -88,23 +92,23 @@ function makeContentSquare() {
 
 Example.args = DEFAULT_ARGS;
 
-const targetPlacementOptions = ["tl", "tm", "tr", "ml","mm", "mr", "bl", "bm", "br"];
-const contentPlacementOptions = targetPlacementOptions.concat(["oppositeV", "oppositeH", "oppositeVH"]);
+const targetAnchorOptions = ["tl", "tm", "tr", "ml","mm", "mr", "bl", "bm", "br"];
+const contentAnchorOptions = targetAnchorOptions.concat(["oppositeV", "oppositeH", "oppositeVH"]);
 
 const strategies = ["", "dispatchClose", "track"];
 const containers = ["window", "#main", "none"]
 
 Example.argTypes = {
-    flowContentPlacement: {
+    flowContentAnchor: {
         control: {
             type: 'inline-radio',
-            options: contentPlacementOptions 
+            options: contentAnchorOptions 
         }
     },
-    flowTargetPlacement: {
+    flowTargetAnchor: {
         control: {
             type: 'inline-radio',
-            options: targetPlacementOptions 
+            options: targetAnchorOptions 
         }
     },
     flowTargetStrategy: {
@@ -119,16 +123,16 @@ Example.argTypes = {
             options: containers 
         }
     },
-    absoluteContentPlacement: {
+    absoluteContentAnchor: {
         control: {
             type: 'inline-radio',
-            options: contentPlacementOptions 
+            options: contentAnchorOptions 
         }
     },
-    absoluteTargetPlacement: {
+    absoluteTargetAnchor: {
         control: {
             type: 'inline-radio',
-            options: targetPlacementOptions 
+            options: targetAnchorOptions 
         }
     },
     absoluteTargetStrategy: {
