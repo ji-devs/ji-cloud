@@ -93,8 +93,7 @@ async fn search_async(state: Rc<State>) {
     match api_no_auth::<JigSearchResponse, EmptyError, JigSearchQuery>(jig::Search::PATH, jig::Search::METHOD, Some(req)).await {
         Err(_) => {},
         Ok(res) => {
-            let jigs = res.jigs.into_iter().map(|jr| jr.jig).collect();
-            state.mode.set(HomePageMode::Search(query, Rc::new(MutableVec::new_with_values(jigs))));
+            state.mode.set(HomePageMode::Search(query, Rc::new(MutableVec::new_with_values(res.jigs))));
         },
     };
 }

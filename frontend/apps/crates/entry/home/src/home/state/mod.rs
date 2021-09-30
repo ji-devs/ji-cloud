@@ -3,7 +3,7 @@ use std::{iter, rc::Rc};
 use search_state::{SearchOptions, SearchSelected};
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::{signal::Mutable, signal_vec::MutableVec};
-use shared::domain::jig::{Jig, JigId, JigSearchQuery};
+use shared::domain::jig::{JigResponse, JigId, JigSearchQuery};
 
 mod search_state;
 
@@ -137,7 +137,7 @@ impl State {
 #[derive(Clone)]
 pub enum HomePageMode {
     Home,
-    Search(String, Rc<MutableVec<Jig>>),
+    Search(String, Rc<MutableVec<JigResponse>>),
 }
 
 #[derive(Clone)]

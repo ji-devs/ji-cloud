@@ -3,14 +3,14 @@ use futures_signals::{
     signal::SignalExt,
     signal_vec::{MutableVec, SignalVecExt},
 };
-use shared::domain::jig::Jig;
+use shared::domain::jig::JigResponse;
 use std::rc::Rc;
 use utils::{ages::AgeRangeVecExt, events, jig::published_at_string};
 use components::module::_common::thumbnail::ModuleThumbnail;
 
 use super::super::state::State;
 
-pub fn render(state: Rc<State>, query: String, jigs: Rc<MutableVec<Jig>>) -> Dom {
+pub fn render(state: Rc<State>, query: String, jigs: Rc<MutableVec<JigResponse>>) -> Dom {
     html!("home-search-results", {
         .property_signal("resultsCount", jigs.signal_vec_cloned().len().map(|len| len as u32))
         .property("query", &query)
@@ -26,30 +26,30 @@ pub fn render(state: Rc<State>, query: String, jigs: Rc<MutableVec<Jig>>) -> Dom
     })
 }
 
-fn render_result(state: Rc<State>, jig: &Jig) -> Dom {
-    let jig_ages = jig.age_ranges.clone();
+fn render_result(state: Rc<State>, jig: &JigResponse) -> Dom {
+    let jig_ages = jig.jig_data.age_ranges.clone();
     html!("home-search-result", {
         .property("slot", "results")
-        .property("title", &jig.display_name)
+        .property("title", &jig.jig_data.display_name)
         .property("playedCount", "???")
         .property("likedCount", "???")
         .property("author", &jig.author_name.clone().unwrap_or_default())
         .property("publishedAt", {
-            match jig.publish_at {
+            match jig.published_at {
                 Some(publish_at) => published_at_string(publish_at, false),
                 None => String::new(),
             }
         })
-        .property("language", &jig.language)
+        .property("language", &jig.jig_data.language)
         .property_signal("ages", state.search_options.age_ranges.signal_cloned().map(move |age_ranges| {
             age_ranges.range_string(&jig_ages)
         }))
-        .property("description", jig.description.clone())
+        .property("description", jig.jig_data.description.clone())
         .children(&mut [
             ModuleThumbnail::render(
                 Rc::new(ModuleThumbnail {
                     jig_id: jig.id.clone(),
-                    module: jig.modules[0].clone(),
+                    module: jig.jig_data.modules[0].clone(),
                     is_jig_fallback: true,
                 }),
                 Some("image")
@@ -57,7 +57,7 @@ fn render_result(state: Rc<State>, jig: &Jig) -> Dom {
 
             html!("home-search-result-details", {
                 .property("slot", "categories")
-                .children(jig.categories.iter().map(|category_id| {
+                .children(jig.jig_data.categories.iter().map(|category_id| {
                     html!("home-search-result-category", {
                         .property_signal("label", {
                             state.search_options.category_label_lookup.signal_cloned().map(clone!(category_id => move |category_label_lookup| {
