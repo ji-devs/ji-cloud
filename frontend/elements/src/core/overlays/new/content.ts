@@ -10,6 +10,9 @@ export type MoveStrategy = "" | "dispatchClose" | "track";
 export type TrackerProp = TrackerSource | string | (() => TrackerSource);
 export type TrackerSource = HTMLElement | DOMRect | Window;
 
+export type V = "t" | "m" | "b";
+export type H = "l" | "m" | "r";
+
 /*
 
 The main idea is we have 2 boxes, content and target:
@@ -35,10 +38,10 @@ Lastly, a container target can be supplied with will be used to reposition thing
 
 
 //match it in overlay.rs on the rust side
-export type Placement = 
+export type Anchor = 
     "tl" | "tm" | "tr" | "ml" | "mm" | "mr" | "bl" | "bm" | "mr";
 
-export type ContentPlacement = Placement | "oppositeV" | "oppositeH" | "oppositeVH";
+export type ContentAnchor = Anchor | "oppositeV" | "oppositeH" | "oppositeVH";
 
 const MAX_RECURSE_DEPTH = 3;
 
@@ -54,6 +57,7 @@ export class _ extends LitElement {
                     left: 0;
                     top: 0;
                     display: block;
+                    z-index: 0;
                 }
 
                 :host([zLayer="menu"]) {
@@ -72,6 +76,7 @@ export class _ extends LitElement {
 
     state:State | undefined;
 
+
     @property()
     container:TrackerProp | undefined = window;
 
@@ -85,10 +90,10 @@ export class _ extends LitElement {
     zLayer:ZLayer | undefined;
 
     @property()
-    contentPlacement:ContentPlacement = "oppositeH";
+    contentAnchor:ContentAnchor = "oppositeH";
 
     @property()
-    targetPlacement:Placement = "tr";
+    targetAnchor:Anchor = "tr";
 
     @property({type: Number})
     margin:number = 0;
@@ -112,8 +117,8 @@ export class _ extends LitElement {
                 target: new Tracker(this.target),
                 content: new Tracker(this),
                 container: new Tracker(this.container),
-                targetPlacement: this.targetPlacement,
-                contentPlacement: this.contentPlacement,
+                targetAnchor: this.targetAnchor,
+                contentAnchor: this.contentAnchor,
                 margin: this.margin,
                 strategy: this.strategy,
                 dispatcher: this,
@@ -202,8 +207,8 @@ interface StateOpts {
     target: Tracker, 
     content: Tracker, 
     container: Tracker, 
-    contentPlacement: ContentPlacement,
-    targetPlacement: Placement,
+    contentAnchor: ContentAnchor,
+    targetAnchor: Anchor,
     margin: number,
     strategy: MoveStrategy,
     dispatcher: EventTarget,
@@ -211,38 +216,17 @@ interface StateOpts {
 function createState(opts:StateOpts):State {
     let lastTargetRect:DOMRect | undefined;
 
-    const {target, margin, container, content, strategy} = opts;
+    let lastAnchor:string = "";
 
-    const _recalc = (contentPlacement: ContentPlacement, targetPlacement:Placement, recurseDepth: number) => {
+    const {target, dispatcher, margin, container, content, strategy} = opts;
+
+    const _recalc = (contentAnchor: ContentAnchor, targetAnchor:Anchor, recurseDepth: number) => {
         if(recurseDepth === 0) {
             return;
         }
 
-        type V = "t" | "m" | "b";
-        type H = "l" | "m" | "r";
-        let contentV:V = contentPlacement[0] as V;
-        let contentH:H = contentPlacement[1] as H;
-        const targetV:V = targetPlacement[0] as V;
-        const targetH:H = targetPlacement[1] as H;
 
-        //should this keep flipping after first call? o_O
-        if(contentPlacement === "oppositeV" || contentPlacement === "oppositeVH") {
-            contentV = targetV === "t" ? "b" 
-                : targetV === "b" ? "t"
-                : "m";
-            if(contentPlacement !== "oppositeVH") {
-                contentH = targetH;
-            }
-        }
-        if(contentPlacement === "oppositeH" || contentPlacement === "oppositeVH") {
-            contentH = targetH === "l" ? "r" 
-                : targetH === "r" ? "l"
-                : "m";
-
-            if(contentPlacement !== "oppositeVH") {
-                contentV = targetV;
-            }
-        }
+        const {targetH, targetV, contentH, contentV} = getAnchors(contentAnchor, targetAnchor);
 
         const targetRect = target.domRect; 
         const contentRect = content.domRect; 
@@ -340,7 +324,7 @@ function createState(opts:StateOpts):State {
                 let replaceContent = `${newContentV || contentV}${newContentH || contentH}`;
                 let replaceTarget = `${newTargetV || targetV}${newTargetH || targetH}`;
 
-                _recalc(replaceContent as Placement, replaceTarget as Placement, recurseDepth-1);
+                _recalc(replaceContent as Anchor, replaceTarget as Anchor, recurseDepth-1);
                 return;
             }
         }
@@ -352,9 +336,19 @@ function createState(opts:StateOpts):State {
             style.setProperty('left', `${x}px`);
 
         });
+
+        const newAnchor = `${contentAnchor}-${targetAnchor}`;
+
+        if(lastAnchor !== newAnchor) {
+            dispatcher.dispatchEvent(new CustomEvent("anchor-changed", {
+                detail: { contentAnchor, targetAnchor},
+            }))
+
+            lastAnchor = newAnchor;
+        }
     }
 
-    const recalc = () => _recalc(opts.contentPlacement, opts.targetPlacement, MAX_RECURSE_DEPTH);
+    const recalc = () => _recalc(opts.contentAnchor, opts.targetAnchor, MAX_RECURSE_DEPTH);
     // @ts-ignore
     const observer = new ResizeObserver(recalc);
 
@@ -401,4 +395,33 @@ function createState(opts:StateOpts):State {
     return {
         destroy
     }
+}
+
+export function getAnchors(contentAnchor: ContentAnchor, targetAnchor:Anchor) {
+
+    let contentV:V = contentAnchor[0] as V;
+    let contentH:H = contentAnchor[1] as H;
+    const targetV:V = targetAnchor[0] as V;
+    const targetH:H = targetAnchor[1] as H;
+
+    //should this keep flipping after first call? o_O
+    if(contentAnchor === "oppositeV" || contentAnchor === "oppositeVH") {
+        contentV = targetV === "t" ? "b" 
+            : targetV === "b" ? "t"
+            : "m";
+        if(contentAnchor !== "oppositeVH") {
+            contentH = targetH;
+        }
+    }
+    if(contentAnchor === "oppositeH" || contentAnchor === "oppositeVH") {
+        contentH = targetH === "l" ? "r" 
+            : targetH === "r" ? "l"
+            : "m";
+
+        if(contentAnchor !== "oppositeVH") {
+            contentV = targetV;
+        }
+    }
+
+    return { contentV, contentH, targetV, targetH }
 }
