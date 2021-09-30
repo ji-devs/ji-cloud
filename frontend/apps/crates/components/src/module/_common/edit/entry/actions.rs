@@ -155,6 +155,7 @@ pub fn save<RawData, Mode, Step>(
             .replace("{module_id}", &module_id.0.to_string());
 
         let req = Some(ModuleUpdateRequest {
+            id: StableOrUniqueId::Unique(module_id.clone()),
             is_complete: Some(raw_data.is_complete()),
             index: None,
             body: Some(body),

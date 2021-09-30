@@ -31,7 +31,7 @@ where
     Step: StepExt + 'static,
 {
     pub(super) phase: Mutable<Rc<InitPhase<RawData, Base>>>,
-    pub(super) jig: RefCell<Option<Jig>>,
+    pub(super) jig: RefCell<Option<JigData>>,
     pub(super) opts: StateOpts<RawData>,
     pub(super) raw_loader: AsyncLoader,
     pub(super) page_body_switcher: AsyncLoader,
@@ -76,6 +76,8 @@ where
             }
         };
 
+        let is_draft:bool = true; //todo, get from url
+
         let _self = Rc::new(Self {
             opts,
             jig: RefCell::new(None),
@@ -88,34 +90,38 @@ where
         _self.raw_loader.load(clone!(_self, init_from_raw => async move {
             *_self.jig.borrow_mut() = {
                 if _self.opts.skip_load_jig {
-                    Some(Jig {
-                        id: JigId(Uuid::from_u128(0)),
+                    Some(JigData {
+                        draft_or_live: DraftOrLive::Draft,
                         display_name: String::from("debug!"),
                         modules: Vec::new(),
                         age_ranges: Vec::new(),
                         affiliations: Vec::new(),
                         goals: Vec::new(),
-                        creator_id: None,
-                        author_id: None,
-                        author_name: None,
                         language: String::from(LANGUAGE_CODE_EN),
                         categories: Vec::new(),
-                        publish_at: None,
                         additional_resources: Vec::new(),
                         description: String::from("debug"),
                         last_edited: None,
-                        is_public: false,
                         theme: ThemeId::default(),
                         audio_background: None,
                         audio_effects: AudioEffects::default(),
                         default_player_settings: JigPlayerSettings::default(),
                     })
                 } else {
-                    let path = endpoints::jig::Get::PATH.replace("{id}",&_self.opts.jig_id.0.to_string());
 
-                    match api_no_auth::<JigResponse, EmptyError, ()>(&path, endpoints::jig::Get::METHOD, None).await {
+                    let resp = {
+                        if is_draft {
+                            let path = endpoints::jig::GetDraft::PATH.replace("{id}",&_self.opts.jig_id.0.to_string());
+                            api_no_auth::<JigResponse, EmptyError, ()>(&path, endpoints::jig::GetDraft::METHOD, None).await
+                        } else {
+                            let path = endpoints::jig::GetLive::PATH.replace("{id}",&_self.opts.jig_id.0.to_string());
+                            api_no_auth::<JigResponse, EmptyError, ()>(&path, endpoints::jig::GetLive::METHOD, None).await
+                        }
+                    };
+
+                    match resp {
                         Ok(resp) => {
-                            Some(resp.jig)
+                            Some(resp.jig_data)
                         },
                         Err(_) => {
                             panic!("error loading jig!")
@@ -154,11 +160,24 @@ where
                     None
                 },
                 LoadingKind::Remote => {
-                    let path = Get::PATH
-                        .replace("{id}",&_self.opts.jig_id.0.to_string())
-                        .replace("{module_id}",&_self.opts.module_id.0.to_string());
 
-                    match api_no_auth::<ModuleResponse, EmptyError, ()>(&path, Get::METHOD, None).await {
+                    let resp = {
+                        if is_draft {
+                            let path = GetDraft::PATH
+                                .replace("{id}",&_self.opts.jig_id.0.to_string())
+                                .replace("{module_id}",&_self.opts.module_id.0.to_string());
+
+                            api_no_auth::<ModuleResponse, EmptyError, ()>(&path, GetDraft::METHOD, None).await
+                        } else {
+                            let path = GetLive::PATH
+                                .replace("{id}",&_self.opts.jig_id.0.to_string())
+                                .replace("{module_id}",&_self.opts.module_id.0.to_string());
+
+                            api_no_auth::<ModuleResponse, EmptyError, ()>(&path, GetLive::METHOD, None).await
+                        }
+                    };
+
+                    match resp {
                         Ok(resp) => {
                             let body = resp.module.body;
                             Some((body.try_into().unwrap_ji(), InitSource::Load, true))
@@ -280,7 +299,7 @@ where
 {
     pub jig_id: JigId,
     pub module_id: ModuleId,
-    pub jig: Jig,
+    pub jig: JigData,
     pub raw: RawData,
     pub source: InitSource,
     pub theme_id: ThemeId,
@@ -297,7 +316,7 @@ where
     pub fn new(
         jig_id: JigId,
         module_id: ModuleId,
-        jig: Jig,
+        jig: JigData,
         raw: RawData,
         source: InitSource,
     ) -> Self {

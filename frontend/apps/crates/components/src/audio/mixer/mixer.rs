@@ -1,6 +1,6 @@
 use awsm_web::audio::AudioMixer as AwsmAudioMixer;
 use shared::domain::jig::module::body::Audio;
-use shared::domain::jig::{Jig, self};
+use shared::domain::jig::{JigData, self};
 use std::cell::RefCell;
 use std::rc::Rc;
 use utils::{path, prelude::*};
@@ -28,7 +28,7 @@ pub struct AudioSettings {
 }
 
 impl AudioSettings {
-    pub fn new_from_jig(jig:&Jig) -> Self {
+    pub fn new_from_jig(jig:&JigData) -> Self {
         Self {
             //TODO...
             ..Self::default() 
@@ -166,7 +166,7 @@ impl From<jig::AudioFeedbackNegative> for AudioPath<'_> {
 
 impl AudioMixer {
 
-    pub fn set_from_jig(&self, jig: &Jig) {
+    pub fn set_from_jig(&self, jig: &JigData) {
         *self.settings.borrow_mut() = AudioSettings::new_from_jig(jig);
     }
 

@@ -48,7 +48,7 @@ where
 {
     pub phase:
         Mutable<Rc<Phase<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>>,
-    pub(super) jig: RefCell<Option<Jig>>,
+    pub(super) jig: RefCell<Option<JigData>>,
     pub(super) opts: StateOpts<RawData>,
     pub(super) raw_loader: AsyncLoader,
     pub(super) screenshot_loader: Rc<AsyncLoader>,
@@ -152,16 +152,27 @@ where
             on_init_ready: RefCell::new(None),
         });
 
+        let is_draft:bool = true; //todo, get from url
+
         *_self.on_init_ready.borrow_mut() = Some(Box::new(clone!(_self => move || {
-            _self.raw_loader.load(clone!(_self, init_from_raw => async move {
+            _self.raw_loader.load(clone!(_self, init_from_raw, is_draft => async move {
                 if !_self.opts.skip_load_jig {
                     *_self.jig.borrow_mut() = {
 
-                            let path = endpoints::jig::Get::PATH.replace("{id}",&_self.opts.jig_id.0.to_string());
 
-                            match api_with_auth::<JigResponse, EmptyError, ()>(&path, endpoints::jig::Get::METHOD, None).await {
+                            let resp = {
+                                if is_draft {
+                                    let path = endpoints::jig::GetDraft::PATH.replace("{id}",&_self.opts.jig_id.0.to_string());
+                                    api_no_auth::<JigResponse, EmptyError, ()>(&path, endpoints::jig::GetDraft::METHOD, None).await
+                                } else {
+                                    let path = endpoints::jig::GetLive::PATH.replace("{id}",&_self.opts.jig_id.0.to_string());
+                                    api_no_auth::<JigResponse, EmptyError, ()>(&path, endpoints::jig::GetLive::METHOD, None).await
+                                }
+                            };
+
+                            match resp {
                                 Ok(resp) => {
-                                    Some(resp.jig)
+                                    Some(resp.jig_data)
                                 },
                                 Err(_) => {
                                     panic!("error loading jig!")
@@ -169,23 +180,18 @@ where
                             }
                     };
                 } else {
-                    *_self.jig.borrow_mut() = Some(Jig {
-                        id: JigId(Uuid::from_u128(0)),
+                    *_self.jig.borrow_mut() = Some(JigData {
+                        draft_or_live: DraftOrLive::Draft,
                         display_name: String::from("debug!"),
                         modules: Vec::new(),
                         age_ranges: Vec::new(),
                         affiliations: Vec::new(),
                         goals: Vec::new(),
-                        creator_id: None,
-                        author_id: None,
-                        author_name: None, 
                         language: String::from(LANGUAGE_CODE_EN),
                         categories: Vec::new(),
-                        publish_at: None,
                         additional_resources: Vec::new(),
                         description: String::from("debug"),
                         last_edited: None,
-                        is_public: false,
                         theme: ThemeId::default(),
                         audio_background: None,
                         audio_effects: AudioEffects::default(),
@@ -200,11 +206,23 @@ where
                     if let Some(force_raw) = _self.opts.force_raw.clone() {
                         (force_raw, InitSource::ForceRaw)
                     } else {
-                        let path = Get::PATH
-                            .replace("{id}",&_self.opts.jig_id.0.to_string())
-                            .replace("{module_id}",&_self.opts.module_id.0.to_string());
+                        let resp = {
+                            if is_draft {
+                                let path = GetDraft::PATH
+                                    .replace("{id}",&_self.opts.jig_id.0.to_string())
+                                    .replace("{module_id}",&_self.opts.module_id.0.to_string());
 
-                        match api_with_auth::<ModuleResponse, EmptyError, ()>(&path, Get::METHOD, None).await {
+                                api_no_auth::<ModuleResponse, EmptyError, ()>(&path, GetDraft::METHOD, None).await
+                            } else {
+                                let path = GetLive::PATH
+                                    .replace("{id}",&_self.opts.jig_id.0.to_string())
+                                    .replace("{module_id}",&_self.opts.module_id.0.to_string());
+
+                                api_no_auth::<ModuleResponse, EmptyError, ()>(&path, GetLive::METHOD, None).await
+                            }
+                        };
+
+                        match resp {
                             Ok(resp) => {
                                 let body = resp.module.body;
                                 (body.try_into().unwrap_ji(), InitSource::Load)

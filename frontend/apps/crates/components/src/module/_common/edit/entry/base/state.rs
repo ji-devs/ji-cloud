@@ -13,7 +13,7 @@ use shared::domain::jig::{
         body::{BodyExt, ModeExt, StepExt, ThemeChoice},
         ModuleId,
     },
-    Jig, JigId, ModuleKind,
+    JigData, JigId, ModuleKind,
 };
 use std::future::Future;
 use utils::prelude::*;
@@ -36,7 +36,7 @@ where
     pub jig_theme_id: Mutable<ThemeId>,
     pub jig_id: JigId,
     pub module_id: ModuleId,
-    pub jig: Jig,
+    pub jig: JigData,
     pub raw: RawData,
     pub source: InitSource,
     pub history: Rc<HistoryStateImpl<RawData>>,
@@ -53,7 +53,7 @@ where
     pub fn new(
         jig_id: JigId,
         module_id: ModuleId,
-        jig: Jig,
+        jig: JigData,
         raw: RawData,
         source: InitSource,
         history: Rc<HistoryStateImpl<RawData>>,
@@ -128,7 +128,7 @@ where
 {
     pub preview_step_reactor: AsyncLoader,
     pub step: Mutable<Step>,
-    pub jig: Jig,
+    pub jig: JigData,
     pub base: Rc<Base>,
     pub main: Rc<Main>,
     pub sidebar: Rc<Sidebar>,
