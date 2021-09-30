@@ -3,7 +3,7 @@ use std::{cell::RefCell, rc::Rc};
 use serde::{Serialize, Deserialize};
 use awsm_web::{audio::AudioHandle, loaders::helpers::AsyncLoader};
 use futures_signals::signal::Mutable;
-use shared::domain::jig::{module::ModuleId, Jig, JigId, JigPlayerSettings};
+use shared::domain::jig::{module::ModuleId, JigResponse, JigId, JigPlayerSettings};
 use utils::jig::JigPlayerOptions;
 use web_sys::HtmlIFrameElement;
 
@@ -11,7 +11,7 @@ use super::timer::Timer;
 
 pub struct State {
     pub jig_id: JigId,
-    pub jig: Mutable<Option<Jig>>,
+    pub jig: Mutable<Option<JigResponse>>,
     pub loader: AsyncLoader,
     pub active_module: Mutable<usize>,
     pub module_id: Mutable<Option<ModuleId>>, // needed?
