@@ -76,15 +76,18 @@ fn render_page(state: Rc<State>) -> Dom {
                     .property("slot", "public")
                     .text(STR_PUBLIC_LABEL)
                     .child(html!("input-switch", {
-                        .property_signal("enabled", state.jig.is_public.signal_cloned())
+                        // .property_signal("enabled", state.jig.is_public.signal_cloned())// TODO: #1601
                         .event(clone!(state => move |evt: events::CustomToggle| {
-                            let value = evt.value();
-                            state.jig.is_public.set(value);
-                            if value {
-                                state.show_public_popup.set(false);
-                            } else {
-                                state.show_public_popup.set(true);
-                            }
+                            let _ = web_sys::window().unwrap().alert_with_message("This is broken!!");
+
+                            // TODO: #1601
+                            // let value = evt.value();
+                            // state.jig.is_public.set(value);
+                            // if value {
+                            //     state.show_public_popup.set(false);
+                            // } else {
+                            //     state.show_public_popup.set(true);
+                            // }
                         }))
                     }))
                     .child_signal(state.show_public_popup.signal_ref(clone!(state => move |show_public_popup| {

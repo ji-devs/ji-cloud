@@ -4,7 +4,7 @@ use futures_signals::{
     signal::{Mutable, Signal, SignalExt},
     signal_vec::MutableVec,
 };
-use shared::domain::jig::{Jig, LiteModule};
+use shared::domain::jig::{JigResponse, LiteModule};
 use std::rc::Rc;
 use utils::{math::PointI32, routes::JigEditRoute};
 
@@ -13,7 +13,7 @@ use chrono::{DateTime, Utc};
 use super::super::state::State as JigEditState;
 
 pub struct State {
-    pub jig: Jig,
+    pub jig: JigResponse,
     pub jig_edit_state: Rc<JigEditState>,
     pub name: Mutable<String>,
     pub publish_at: Mutable<Option<DateTime<Utc>>>,
@@ -26,8 +26,9 @@ pub struct State {
 }
 
 impl State {
-    pub fn new(jig: Jig, jig_edit_state: Rc<JigEditState>) -> Self {
+    pub fn new(jig: JigResponse, jig_edit_state: Rc<JigEditState>) -> Self {
         let mut modules: Vec<Rc<Option<LiteModule>>> = jig
+            .jig_data
             .modules
             .iter()
             .map(|module| Rc::new(Some(module.clone().into())))
@@ -40,8 +41,8 @@ impl State {
 
         Self {
             jig_edit_state,
-            name: Mutable::new(jig.display_name.clone()),
-            publish_at: Mutable::new(jig.publish_at.clone()),
+            name: Mutable::new(jig.jig_data.display_name.clone()),
+            publish_at: Mutable::new(jig.published_at.clone()),
             modules: MutableVec::new_with_values(modules),
             collapsed: Mutable::new(false),
             settings: Rc::new(SettingsState::new(&jig)),
