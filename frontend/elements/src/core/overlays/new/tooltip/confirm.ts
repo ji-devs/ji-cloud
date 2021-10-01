@@ -114,10 +114,10 @@ export class _ extends LitElement {
 
     
     @property({type: Number})
-    arrowOffset:number = 0;
+    arrowNudge:number = 0;
 
     render() {
-        const {container, target, strategy, zLayer,margin, contentAnchor, targetAnchor, header, confirmLabel, cancelLabel, maxWidth, arrowOffset} = this;
+        const {container, target, strategy, zLayer,margin, contentAnchor, targetAnchor, header, confirmLabel, cancelLabel, maxWidth, arrowNudge} = this;
 
         let bodyStyles:any = {
         };
@@ -145,6 +145,7 @@ export class _ extends LitElement {
                     id="tooltip"
                     .contentAnchor=${this.currContentAnchor}
                     .targetAnchor=${this.currTargetAnchor}
+                    .arrowNudge=${arrowNudge}
                 >
                     <article>
                         <img-ui path="core/tooltips/alert.svg"></img-ui>
