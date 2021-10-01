@@ -455,6 +455,80 @@ where image_id = $1
     Ok(profile_image_id)
 }
 
+/*
+    Logged in user hits an endpoint which requires a new email address
+    Backend sends an email to this address with a link containing a token
+    Frontend extracts this token from the link and sends it to VerifyEmail or similar
+    Backend requires that this last endpoint (VerifyEmail or similar) is the same logged-in user as the one who initiated the request. If not - it's an auth error
+    At this point, all is good, and email should be changed for the user
+ */
+
+/// Update user email.
+async fn update_user_email(
+    settings: Data<RuntimeSettings>,
+    mail: ServiceData<mail::Client>,
+    db: Data<PgPool>,
+    claims: TokenUser,
+    req: Json<UpdateUserEmailRequest>,
+) -> Result<HttpResponse, error::Register>  {
+    // add authorized user to get user id
+    let req = req.into_inner();
+
+    let mut txn = db.begin().await?;
+
+    // 0. validate the email
+    // FIXME simplify these queries - maybe make this a separate function to be used with update email
+    let exists_basic = sqlx::query!(
+        r#"select exists(select 1 from user_auth_basic where email = lower($1)) as "exists!""#,
+        &req.email
+    )
+        .fetch_one(&mut txn)
+        .await?
+        .exists;
+    let exists_google = sqlx::query!(
+        r#"select exists(select 1 from user_email where email = lower($1)) as "exists!""#,
+        &req.email
+    )
+        .fetch_one(&mut txn)
+        .await?
+        .exists;
+    match (exists_basic, exists_google) {
+        (true, _) => {
+            txn.rollback().await?;
+            return Err(error::Email::TakenBasic.into());
+        }
+        (false, true) => {
+            txn.rollback().await?;
+            return Err(error::Email::TakenGoogle.into());
+        }
+        (false, false) => (), // do nothing
+    }
+
+    // 1. Email is saved - this needs to be an update
+    sqlx::query!(
+        "update user_auth_basic set email = $2::text where user_id = $1",
+        claims.0.user_id,
+        &req.email,
+    )
+        .execute(&mut txn)
+        .await?;
+
+    // 2. Send verification email with token
+    send_verification_email(
+        &mut txn,
+        claims.0.user_id,
+        req.email,
+        &mail,
+        &settings.remote_target().pages_url(),
+    )
+        .await
+        .map_err(error::Register::from)?;
+
+    txn.commit().await?;
+
+    Ok(HttpResponse::NoContent().finish())
+}
+
 fn validate_patch_profile_req(
     req: &Json<<PatchProfile as ApiEndpoint>::Req>,
 ) -> Result<(), error::UserUpdate> {
