@@ -16,6 +16,7 @@ impl JigAudioExt for AudioBackground {
             AudioBackground::DancingHappy => "Dancing Happy",
             AudioBackground::Jigzi1 => "Jigzi 1",
             AudioBackground::Jigzi2 => "Jigzi 2",
+            AudioBackground::Jigzi3 => "Jigzi 3",
         }
     }
 }

@@ -112,6 +112,7 @@ impl From<jig::AudioBackground> for AudioPath<'_> {
             jig::AudioBackground::DancingHappy => "music-loop/dancing-happy.mp3",
             jig::AudioBackground::Jigzi1 => "music-loop/jigzi1.mp3",
             jig::AudioBackground::Jigzi2 => "music-loop/jigzi2.mp3",
+            jig::AudioBackground::Jigzi3 => "music-loop/jigzi3.mp3",
         }))
     }
 }
