@@ -1,4 +1,4 @@
-use shared::domain::jig::{Jig, JigId, module::{ModuleId, body::{Background, Instructions, ThemeChoice, _groups::cards::{Mode, Step, CardPair}, flashcards::{ModuleData as RawData, Content as RawContent, PlayerSettings}}}};
+use shared::domain::jig::{JigId, module::{ModuleId, body::{Background, Instructions, ThemeChoice, _groups::cards::{Mode, Step, CardPair}, flashcards::{ModuleData as RawData, Content as RawContent, PlayerSettings}}}};
 
 use futures_signals::{
     map_ref,
