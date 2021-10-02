@@ -233,6 +233,9 @@ pub struct JigData {
 
     /// Audio effects
     pub audio_effects: AudioEffects,
+
+    /// The privacy level on the JIG.
+    pub privacy_level: PrivacyLevel,
 }
 
 /// Audio for background music
@@ -386,9 +389,6 @@ pub struct JigResponse {
     /// The ID of the JIG.
     pub id: JigId,
 
-    /// The privacy level on the JIG.
-    pub privacy_level: PrivacyLevel,
-
     /// When (if at all) the JIG has published a draft to live.
     pub published_at: Option<DateTime<Utc>>,
 
@@ -413,11 +413,6 @@ pub struct JigUpdateRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub author_id: Option<Uuid>,
-
-    /// Privacy level for the jig.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(default)]
-    pub privacy_level: Option<PrivacyLevel>,
 }
 
 /// Request for updating a JIG's draft data.
@@ -491,6 +486,11 @@ pub struct JigUpdateDraftDataRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub audio_effects: Option<AudioEffects>,
+
+    /// Privacy level for the jig.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
+    pub privacy_level: Option<PrivacyLevel>,
 }
 
 /// Query for [`Browse`](crate::api::endpoints::jig::Browse).

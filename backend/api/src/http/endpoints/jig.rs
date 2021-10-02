@@ -116,7 +116,7 @@ async fn update(
 
     let req = req.map_or_else(Default::default, Json::into_inner);
 
-    db::jig::update(&*db, id, req.author_id, req.privacy_level).await?;
+    db::jig::update(&*db, id, req.author_id).await?;
 
     Ok(HttpResponse::NoContent().finish())
 }
@@ -148,6 +148,7 @@ async fn update_draft(
         req.theme.as_ref(),
         req.audio_background.as_ref(),
         req.audio_effects.as_ref(),
+        req.privacy_level,
     )
     .await?;
 
