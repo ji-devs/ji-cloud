@@ -169,6 +169,11 @@ function renderArrow(arrowAnchor:ArrowAnchor, userArrowNudge:number, isFirst: bo
         ttl: true,
         ttr: true,
         tr: false,
+        bl: true,
+        bm: false,
+        bbl: false,
+        bbr: false,
+        br: false,
     }
     if((isFirst && !FIRST_MAP[arrowAnchor]) || (!isFirst && FIRST_MAP[arrowAnchor])) {
         return nothing;
@@ -189,6 +194,11 @@ function renderArrow(arrowAnchor:ArrowAnchor, userArrowNudge:number, isFirst: bo
         ttl: 10,
         ttr: 10,
         tr: 10, 
+        bl: 10, 
+        bm: 0,
+        bbl: 10,
+        bbr: 10,
+        br: 10, 
     }
     const FLIP_ARROW_NUDGE:any = {
         tl: false, 

@@ -85,13 +85,13 @@ export class _ extends LitElement {
     private showSelectColumns() {
         // this.dialog.showModal();
         // cant get @query to work, dono why
-        this.renderRoot.querySelector("dialog")!.showModal();
+        (this.renderRoot.querySelector("dialog") as any)!.showModal();
     }
 
     private dismissSelectColumns() {
         // this.dialog.showModal();
         // cant get @query to work, dono why
-        this.renderRoot.querySelector("dialog")!.close();
+        (this.renderRoot.querySelector("dialog") as any)!.close();
     }
 
     public render() {
