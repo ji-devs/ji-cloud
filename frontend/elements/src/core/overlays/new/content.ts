@@ -39,7 +39,7 @@ Lastly, a container target can be supplied with will be used to reposition thing
 
 //match it in overlay.rs on the rust side
 export type Anchor = 
-    "tl" | "tm" | "tr" | "ml" | "mm" | "mr" | "bl" | "bm" | "mr";
+    "tl" | "tm" | "tr" | "ml" | "mm" | "mr" | "bl" | "bm" | "br";
 
 export type ContentAnchor = Anchor | "oppositeV" | "oppositeH" | "oppositeVH";
 

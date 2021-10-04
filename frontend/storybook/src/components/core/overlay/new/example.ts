@@ -22,6 +22,7 @@ interface Args {
     absoluteTargetStrategy: MoveStrategy,
     absoluteTargetMargin: number,
     absoluteTargetContainer: ContainerOptions, 
+    arrowNudge: number,
 }
 
 const DEFAULT_ARGS:Args = {
@@ -30,11 +31,12 @@ const DEFAULT_ARGS:Args = {
     flowTargetStrategy: "track", 
     flowTargetMargin: 0,
     flowTargetContainer: "window",
-    absoluteContentAnchor: "tr",
-    absoluteTargetAnchor: "tl",
+    absoluteContentAnchor: "br",
+    absoluteTargetAnchor: "tm",
     absoluteTargetStrategy: "track",
     absoluteTargetMargin: 0,
-    absoluteTargetContainer: "window",
+    absoluteTargetContainer: "none",
+    arrowNudge: 0,
 }
 
 export const Example = (props?:Args) => {
@@ -69,10 +71,10 @@ function makeMain(props:Args) {
             <overlay-content target="#flowTarget" targetAnchor="${props.flowTargetAnchor}" contentAnchor=${props.flowContentAnchor} strategy="${props.flowTargetStrategy}" margin="${props.flowTargetMargin}" container="${flowTargetContainer}">
                 ${MenuContainer()}
             </overlay-content>
-            <overlay-content target="#absoluteTarget" placement="${props.absoluteTargetAnchor}" contentAnchor=${props.absoluteContentAnchor} strategy="${props.absoluteTargetStrategy}" margin="${props.absoluteTargetMargin}" container="${absoluteTargetContainer}">
+            <overlay-content target="#absoluteTarget" targetAnchor="${props.absoluteTargetAnchor}" contentAnchor=${props.absoluteContentAnchor} strategy="${props.absoluteTargetStrategy}" margin="${props.absoluteTargetMargin}" container="${absoluteTargetContainer}">
                 ${MenuContainer()}
             </overlay-content>
-            <overlay-tooltip-confirm header="testing" confirmLabel="Confirm" cancelLabel="Cancel" target="#absoluteTarget" placement="${props.absoluteTargetAnchor}" contentAnchor=${props.absoluteContentAnchor} strategy="${props.absoluteTargetStrategy}" margin="${props.absoluteTargetMargin}" container="${absoluteTargetContainer}">
+            <overlay-tooltip-confirm header="testing" arrowNudge="${props.arrowNudge}" confirmLabel="Confirm" cancelLabel="Cancel" target="#absoluteTarget" targetAnchor="${props.absoluteTargetAnchor}" contentAnchor=${props.absoluteContentAnchor} strategy="${props.absoluteTargetStrategy}" margin="${props.absoluteTargetMargin}" container="${absoluteTargetContainer}">
             </overlay-tooltip-confirm>
             
         </overlay-container>
