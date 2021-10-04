@@ -14,7 +14,7 @@ use futures_signals::{
     signal::{Mutable, SignalExt},
     signal_vec::SignalVecExt,
 };
-use shared::domain::jig::{Jig, JigId};
+use shared::domain::jig::{JigResponse, JigId};
 use std::cell::RefCell;
 use std::rc::Rc;
 use uuid::Uuid;
@@ -50,7 +50,7 @@ impl SidebarDom {
         })
     }
 
-    fn render_loaded(jig: Jig, jig_edit_state: Rc<JigEditState>) -> Dom {
+    fn render_loaded(jig: JigResponse, jig_edit_state: Rc<JigEditState>) -> Dom {
         let state = Rc::new(State::new(jig, jig_edit_state));
 
         html!("empty-fragment", {

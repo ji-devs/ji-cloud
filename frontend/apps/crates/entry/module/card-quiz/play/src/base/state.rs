@@ -1,6 +1,5 @@
 use shared::domain::jig::{
     JigId, 
-    Jig, 
     module::{
         ModuleId, 
         body::{
@@ -60,7 +59,6 @@ impl Base {
         let InitFromRawArgs {
             jig_id,
             module_id,
-            jig,
             raw,
             theme_id,
             ..

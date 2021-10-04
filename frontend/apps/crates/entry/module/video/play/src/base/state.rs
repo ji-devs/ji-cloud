@@ -8,7 +8,7 @@ use shared::domain::jig::{
         },
         ModuleId,
     },
-    Jig, JigId,
+    JigId,
 };
 use std::rc::Rc;
 use utils::prelude::*;
@@ -17,7 +17,6 @@ use futures_signals::signal::Mutable;
 pub struct Base {
     pub jig_id: JigId,
     pub module_id: ModuleId,
-    pub jig: Jig,
     pub theme_id: ThemeId,
     pub instructions: Instructions,
     pub backgrounds: Backgrounds,
@@ -31,7 +30,6 @@ impl Base {
         let InitFromRawArgs {
             jig_id,
             module_id,
-            jig,
             raw,
             theme_id,
             ..
@@ -43,7 +41,6 @@ impl Base {
         Rc::new(Self {
             jig_id,
             module_id,
-            jig,
             theme_id,
             instructions: base_content.instructions,
             backgrounds: base_content.backgrounds,

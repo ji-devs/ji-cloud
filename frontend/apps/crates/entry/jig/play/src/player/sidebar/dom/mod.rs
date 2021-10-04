@@ -21,7 +21,7 @@ pub fn render(state: Rc<State>) -> Dom {
         .property_signal("jigName", state.player_state.jig.signal_cloned().map(|jig| {
             match jig {
                 None => String::new(),
-                Some(jig) => jig.display_name,
+                Some(jig) => jig.jig_data.display_name,
             }
         }))
         .property_signal("open", state.sidebar_open.signal())
@@ -52,7 +52,7 @@ pub fn render(state: Rc<State>) -> Dom {
         .child_signal(state.player_state.jig.signal_ref(clone!(state => move |jig| {
             // only show share options if jig is published
             match jig {
-                Some(jig) if jig.publish_at.is_some() => {
+                Some(jig) if jig.published_at.is_some() => {
                     Some(share::render(Rc::clone(&state)))
                 },
                 _ => None,
@@ -65,7 +65,7 @@ pub fn render(state: Rc<State>) -> Dom {
                 Some(jig) => {
                     Some(html!("empty-fragment", {
                         .property("slot", "modules")
-                        .children(jig.modules.iter().enumerate().map(|(i, module)| {
+                        .children(jig.jig_data.modules.iter().enumerate().map(|(i, module)| {
                             html!("jig-sidebar-module", {
                                 .property("module", module.kind.as_str())
                                 .property("index", i as u32)

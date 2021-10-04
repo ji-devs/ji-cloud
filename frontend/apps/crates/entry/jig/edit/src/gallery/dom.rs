@@ -91,28 +91,28 @@ impl GalleryDom {
                     //     .property_signal("visible", state.loader.is_loading())
                     // }))
                     .children_signal_vec(state.jigs.signal_vec_cloned().map(clone!(state => move |jig| {
-                        let jig_ages = jig.age_ranges.clone();
+                        let jig_ages = jig.jig_data.age_ranges.clone();
                         html!("jig-gallery-recent", {
                             .property("slot", "recent-items")
                             .property("href", jig.id.0.to_string())
-                            .property("label", jig.display_name.clone())
+                            .property("label", jig.jig_data.display_name.clone())
                             .property_signal("ages", state.age_ranges.signal_cloned().map(move|age_ranges| {
                                 age_ranges.range_string(&jig_ages)
                             }))
                             .apply(|dom| {
-                                match jig.publish_at {
+                                match jig.published_at {
                                     None => {
                                         dom.property("draft", true)
                                     },
-                                    Some(publish_at) => {
-                                        dom.property("publishedAt", published_at_string(publish_at, true))
+                                    Some(published_at) => {
+                                        dom.property("publishedAt", published_at_string(published_at, true))
                                     },
                                 }
                             })
                             .child(ModuleThumbnail::render(
                                 Rc::new(ModuleThumbnail {
                                     jig_id: jig.id.clone(),
-                                    module: jig.modules[0].clone(), 
+                                    module: jig.jig_data.modules[0].clone(), 
                                     is_jig_fallback: true,
                                 }),
                                 Some("thumbnail")

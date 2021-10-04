@@ -10,7 +10,6 @@ use web_sys::HtmlElement;
 
 use shared::domain::jig::{
     JigId, 
-    Jig, 
     module::{
         ModuleId, 
         body::{

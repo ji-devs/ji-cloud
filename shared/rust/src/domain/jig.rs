@@ -249,6 +249,8 @@ pub enum AudioBackground {
     Jigzi1 = 2,
     #[allow(missing_docs)]
     Jigzi2 = 3,
+    #[allow(missing_docs)]
+    Jigzi3 = 4,
 }
 
 impl AudioBackground {
@@ -259,6 +261,7 @@ impl AudioBackground {
             AudioBackground::DancingHappy,
             AudioBackground::Jigzi1,
             AudioBackground::Jigzi2,
+            AudioBackground::Jigzi3,
         ]
     }
 }

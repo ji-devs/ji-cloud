@@ -3,8 +3,8 @@ use std::{collections::HashSet, iter::FromIterator};
 use awsm_web::loaders::helpers::AsyncLoader;
 use futures_signals::signal::Mutable;
 use shared::domain::jig::{
-    AudioBackground, AudioEffects, AudioFeedbackNegative, AudioFeedbackPositive, Jig, JigId,
-    JigPlayerSettings, JigUpdateRequest, TextDirection,
+    AudioBackground, AudioEffects, AudioFeedbackNegative, AudioFeedbackPositive, JigResponse, JigId,
+    JigPlayerSettings, JigUpdateDraftDataRequest, TextDirection,
 };
 use utils::themes::ThemeId;
 
@@ -23,28 +23,28 @@ pub struct State {
 }
 
 impl State {
-    pub fn new(jig: &Jig) -> Self {
+    pub fn new(jig: &JigResponse) -> Self {
         Self {
-            theme: Mutable::new(jig.theme),
-            background_audio: Mutable::new(jig.audio_background.clone()),
+            theme: Mutable::new(jig.jig_data.theme),
+            background_audio: Mutable::new(jig.jig_data.audio_background.clone()),
             feedback_positive: Mutable::new(HashSet::from_iter(
-                jig.audio_effects.feedback_positive.iter().cloned(),
+                jig.jig_data.audio_effects.feedback_positive.iter().cloned(),
             )),
             feedback_negative: Mutable::new(HashSet::from_iter(
-                jig.audio_effects.feedback_negative.iter().cloned(),
+                jig.jig_data.audio_effects.feedback_negative.iter().cloned(),
             )),
-            direction: Mutable::new(jig.default_player_settings.direction),
-            display_score: Mutable::new(jig.default_player_settings.display_score),
-            track_assessments: Mutable::new(jig.default_player_settings.track_assessments),
-            drag_assist: Mutable::new(jig.default_player_settings.drag_assist),
+            direction: Mutable::new(jig.jig_data.default_player_settings.direction),
+            display_score: Mutable::new(jig.jig_data.default_player_settings.display_score),
+            track_assessments: Mutable::new(jig.jig_data.default_player_settings.track_assessments),
+            drag_assist: Mutable::new(jig.jig_data.default_player_settings.drag_assist),
             jig_id: jig.id.clone(),
             active_popup: Mutable::new(None),
             loader: AsyncLoader::new(),
         }
     }
 
-    pub fn get_jig_update_req(&self) -> JigUpdateRequest {
-        JigUpdateRequest {
+    pub fn get_jig_update_req(&self) -> JigUpdateDraftDataRequest {
+        JigUpdateDraftDataRequest {
             audio_background: Some(self.background_audio.get_cloned()),
             theme: Some(self.theme.get_cloned()),
             default_player_settings: Some(self.get_player_settings()),

@@ -3,11 +3,10 @@ use std::iter::FromIterator;
 
 use futures_signals::signal::Mutable;
 use shared::domain::Publish;
-use shared::domain::jig::LiteModule;
 use shared::domain::meta::AffiliationId;
 use shared::domain::{
     category::CategoryId,
-    jig::{Jig, JigId, JigUpdateRequest},
+    jig::{JigResponse, JigId, JigUpdateDraftDataRequest, LiteModule},
     meta::{AgeRangeId, GoalId},
 };
 
@@ -24,53 +23,53 @@ pub struct PublishJig {
     pub categories: Mutable<HashSet<CategoryId>>,
     pub affiliations: Mutable<HashSet<AffiliationId>>,
     // pub additional_resources: Mutable<HashSet<AdditionalResourceId>>,
-    pub is_public: Mutable<bool>,
+    // pub is_public: Mutable<bool>, // TODO: #1601
 }
 
-impl From<Jig> for PublishJig {
-    fn from(jig: Jig) -> Self {
+impl From<JigResponse> for PublishJig {
+    fn from(jig: JigResponse) -> Self {
         Self {
             id: jig.id,
-            modules: Mutable::new(jig.modules),
-            display_name: Mutable::new(jig.display_name),
-            description: Mutable::new(jig.description.clone()),
-            age_ranges: Mutable::new(HashSet::from_iter(jig.age_ranges)),
-            goals: Mutable::new(HashSet::from_iter(jig.goals)),
-            language: Mutable::new(jig.language),
-            categories: Mutable::new(HashSet::from_iter(jig.categories)),
-            affiliations: Mutable::new(HashSet::from_iter(jig.affiliations)),
-            is_public: Mutable::new(jig.is_public),
+            modules: Mutable::new(jig.jig_data.modules),
+            display_name: Mutable::new(jig.jig_data.display_name),
+            description: Mutable::new(jig.jig_data.description.clone()),
+            age_ranges: Mutable::new(HashSet::from_iter(jig.jig_data.age_ranges)),
+            goals: Mutable::new(HashSet::from_iter(jig.jig_data.goals)),
+            language: Mutable::new(jig.jig_data.language),
+            categories: Mutable::new(HashSet::from_iter(jig.jig_data.categories)),
+            affiliations: Mutable::new(HashSet::from_iter(jig.jig_data.affiliations)),
+            // is_public: Mutable::new(jig.is_public), TODO: #1601
         }
     }
 }
 
 impl PublishJig {
-    pub fn new(jig: Jig) -> Self {
+    pub fn new(jig: JigResponse) -> Self {
         Self {
             id: jig.id,
-            display_name: Mutable::new(jig.display_name),
-            modules: Mutable::new(jig.modules),
-            description: Mutable::new(jig.description),
-            age_ranges: Mutable::new(HashSet::from_iter(jig.age_ranges)),
-            goals: Mutable::new(HashSet::from_iter(jig.goals)),
-            language: Mutable::new(jig.language),
-            categories: Mutable::new(HashSet::from_iter(jig.categories)),
-            affiliations: Mutable::new(HashSet::from_iter(jig.affiliations)),
-            is_public: Mutable::new(jig.is_public),
+            display_name: Mutable::new(jig.jig_data.display_name),
+            modules: Mutable::new(jig.jig_data.modules),
+            description: Mutable::new(jig.jig_data.description),
+            age_ranges: Mutable::new(HashSet::from_iter(jig.jig_data.age_ranges)),
+            goals: Mutable::new(HashSet::from_iter(jig.jig_data.goals)),
+            language: Mutable::new(jig.jig_data.language),
+            categories: Mutable::new(HashSet::from_iter(jig.jig_data.categories)),
+            affiliations: Mutable::new(HashSet::from_iter(jig.jig_data.affiliations)),
+            // is_public: Mutable::new(jig.is_public), TODO: #1601
         }
     }
 
-    pub fn to_jig_update_request(&self) -> JigUpdateRequest {
-        JigUpdateRequest {
+    pub fn to_jig_update_request(&self) -> JigUpdateDraftDataRequest {
+        JigUpdateDraftDataRequest {
             display_name: Some(self.display_name.get_cloned()),
             description: Some(self.description.get_cloned()),
             age_ranges: Some(self.age_ranges.get_cloned().into_iter().collect()),
             goals: Some(self.goals.get_cloned().into_iter().collect()),
             language: Some(self.language.get_cloned()),
             categories: Some(self.categories.get_cloned().into_iter().collect()),
-            is_public: Some(self.is_public.get_cloned()),
+            // is_public: Some(self.is_public.get_cloned()), // TODO: #1601
             affiliations: Some(self.affiliations.get_cloned().into_iter().collect()),
-            publish_at: Some(Some(Publish::now())),
+            // publish_at: Some(Some(Publish::now())), // TODO: #1601
             ..Default::default()
         }
     }

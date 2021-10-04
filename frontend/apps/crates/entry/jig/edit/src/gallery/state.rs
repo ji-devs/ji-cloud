@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::{signal::Mutable, signal_vec::MutableVec};
-use shared::domain::{jig::Jig, meta::AgeRange};
+use shared::domain::{jig::JigResponse, meta::AgeRange};
 use strum_macros::{Display, EnumIter, EnumString};
 
 pub const TEMPLATE_KINDS: &[&str] = &[
@@ -23,7 +23,7 @@ pub enum VisibleJigs {
 
 pub struct State {
     pub loader: AsyncLoader,
-    pub jigs: MutableVec<Jig>,
+    pub jigs: MutableVec<JigResponse>,
     pub visible_jigs: Rc<Mutable<VisibleJigs>>,
     pub age_ranges: Mutable<Vec<AgeRange>>,
 }

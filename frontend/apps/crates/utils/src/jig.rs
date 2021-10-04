@@ -16,6 +16,7 @@ impl JigAudioExt for AudioBackground {
             AudioBackground::DancingHappy => "Dancing Happy",
             AudioBackground::Jigzi1 => "Jigzi 1",
             AudioBackground::Jigzi2 => "Jigzi 2",
+            AudioBackground::Jigzi3 => "Jigzi 3",
         }
     }
 }
@@ -142,6 +143,9 @@ pub struct JigPlayerOptions {
 
     #[serde(default)]
     pub is_student: bool,
+
+    #[serde(default)]
+    pub draft: bool,
 }
 
 impl Default for JigPlayerOptions {
@@ -169,6 +173,7 @@ impl From<JigPlayerSettings> for JigPlayerOptions {
             track_assessments: settings.track_assessments,
             drag_assist: settings.drag_assist,
             is_student: false,
+            draft: false,
         }
     }
 }

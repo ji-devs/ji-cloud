@@ -1,6 +1,5 @@
 use shared::domain::jig::{
     JigId, 
-    Jig, 
     module::{
         ModuleId, 
         body::{
