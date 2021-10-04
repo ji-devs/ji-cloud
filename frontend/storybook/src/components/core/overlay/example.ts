@@ -1,10 +1,10 @@
 import {argsToAttrs} from "@utils/attributes";
-import {GridResize} from "../../module-page";
-import "@elements/core/overlays/new/container";
-import "@elements/core/overlays/new/content";
-import "@elements/core/overlays/new/tooltip/confirm";
-import {Anchor, ContentAnchor, MoveStrategy} from "@elements/core/overlays/new/content";
-import {Container as MenuContainer} from "../../menu/container";
+import {GridResize} from "../module-page";
+import "@elements/core/overlays/container";
+import "@elements/core/overlays/content";
+import "@elements/core/overlays/tooltip/confirm";
+import {Anchor, ContentAnchor, MoveStrategy} from "@elements/core/overlays/content";
+import {Container as MenuContainer} from "../menu/container";
 export default {
     title: "Core / Overlays / New"
 }
@@ -31,8 +31,8 @@ const DEFAULT_ARGS:Args = {
     flowTargetStrategy: "track", 
     flowTargetMargin: 0,
     flowTargetContainer: "window",
-    absoluteContentAnchor: "br",
-    absoluteTargetAnchor: "tm",
+    absoluteContentAnchor: "ml",
+    absoluteTargetAnchor: "mr",
     absoluteTargetStrategy: "track",
     absoluteTargetMargin: 0,
     absoluteTargetContainer: "none",

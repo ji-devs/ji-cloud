@@ -64,3 +64,11 @@ import "@elements/_bundles/_sub-bundles/components/audio_input/imports";
 
 
 import "@elements/core/images/composed/module-screenshot";
+
+//overlays and tooltips
+import "@elements/core/overlays/container";
+import "@elements/core/overlays/content";
+import "@elements/core/overlays/tooltip/confirm";
+import "@elements/core/overlays/tooltip/bubble";
+import "@elements/core/overlays/tooltip/info";
+import "@elements/core/overlays/tooltip/error";

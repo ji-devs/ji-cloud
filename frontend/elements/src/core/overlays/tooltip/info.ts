@@ -1,49 +1,49 @@
 import { LitElement, html, css, customElement, property } from 'lit-element';
 import {nothing} from "lit-html";
 import { styleMap } from 'lit-html/directives/style-map';
-import "@elements/core/overlays/new/container";
-import "@elements/core/overlays/new/content";
-import {TrackerProp, ZLayer, Anchor, ContentAnchor, MoveStrategy} from "@elements/core/overlays/new/content";
+import "@elements/core/overlays/container";
+import "@elements/core/overlays/content";
+import {TrackerProp, ZLayer, Anchor, ContentAnchor, MoveStrategy} from "@elements/core/overlays/content";
 import "@elements/core/buttons/icon";
 import "./container";
+import {Color} from "./container";
 
-@customElement("overlay-tooltip-confirm")
+const STR_NO_SHOW_AGAIN = "Don't show again";
+
+@customElement("overlay-tooltip-info")
 export class _ extends LitElement {
     static get styles() {
         return [
             css`
                 :host {
                     display: inline-block;
-                }
+            }
+
+            .content {
+                display: flex;
+                flex-direction: column;
+            }
+
+            .close {
+                align-self: flex-end;
+            }
+            .title {
+              font-size: 28px;
+              font-weight: 900;
+              color: var(--dark-blue-4);
+            }
             .body {
-                font-size: 16px;
-                color: var(--dark-gray-6);
+              font-size: 18px;
+              font-weight: 300;
+              letter-spacing: -0.18px;
+              color: #383838;
+              width: 304px;
             }
-
-            .buttons {
-                display: flex;
-                margin-top: 37px;
-                gap: 31px;
-                align-items: center;
-            }
-
-            .buttons > * {
-                cursor: pointer;
-            }
-
-            .confirm {
-                color: var(--red-alert);
-            }
-
-            .cancel {
-                border: solid 1px #2a68d2;
-                color: var(--dark-blue-2);
-                border-radius: 16px;
-                padding: 5px 15px;
-            }
-            article {
-                display: flex;
-                gap: 16px;
+            .noshow {
+              font-size: 16px;
+              font-weight: 500;
+              color: var(--main-blue);
+              cursor: pointer;
             }
             `
         ];
@@ -71,17 +71,23 @@ export class _ extends LitElement {
         }
     }
 
-    @property({type: Number})
-    maxWidth:number = -1;
+    onClose = () => {
+        this.dispatchEvent(new Event("close"));
+    }
+
 
     @property()
-    header:string = "";
+    title:string = "";
 
     @property()
-    confirmLabel:string = "";
+    body:string = "";
 
     @property()
-    cancelLabel:string = "";
+    showId:string | "debug" = "";
+
+    @property({type: Boolean})
+    closeable:boolean = false;
+
 
     //internal
     @property()
@@ -112,19 +118,22 @@ export class _ extends LitElement {
     @property({type: Number})
     margin:number = 0;
 
+    @property()
+    color:Color = "beige";
     
     @property({type: Number})
     arrowNudge:number = 0;
 
     render() {
-        const {container, target, strategy, zLayer,margin, contentAnchor, targetAnchor, header, confirmLabel, cancelLabel, maxWidth, arrowNudge} = this;
+        const {container, target, strategy, zLayer,margin, contentAnchor, targetAnchor, closeable, title, body, showId, arrowNudge} = this;
 
-        let bodyStyles:any = {
-        };
-
-        if(maxWidth !== -1) {
-            bodyStyles.maxWidth = `${maxWidth}px`;
+        if(showId !== "" && showId !== "debug") {
+            if(sessionStorage.getItem("tooltip-" + showId) === "hidden") {
+                //hiding due to storage
+                return nothing;
+            }
         }
+
         return html`
 
             <overlay-content
@@ -143,23 +152,38 @@ export class _ extends LitElement {
             >
                 <tooltip-container
                     id="tooltip"
+                    .color=${this.color}
                     .contentAnchor=${this.currContentAnchor}
                     .targetAnchor=${this.currTargetAnchor}
                     .arrowNudge=${arrowNudge}
                 >
-                    <article>
-                        <img-ui path="core/tooltips/alert.svg"></img-ui>
-                        <div class="body" style="${styleMap(bodyStyles)}">
-                            <div class="header">${header}</div>
-                            <div class="buttons">
-                                <div class="confirm" @click=${this.onConfirm} >${confirmLabel}</div>
-                                <div class="cancel" @click=${this.onCancel} >${cancelLabel}</div>
-                            </div>
-                        </div>
-                    </article>
+                <section class="content">
+                    ${closeable ? renderClose(this.onClose) : nothing}
+                    ${title !== "" ? html`<div class="title">${title}</div>` : nothing}
+                    ${body !== "" ? html`<section class="body">${body}</section>` : nothing}
+                    ${showId !== "" ? renderShowId(showId, this.onClose) : nothing}       
+                </section>
                 </tooltip-container>
             </overlay-content>
 
         `;
     }
+}
+
+function renderClose(onClose: () => any) {
+    return html`<button-icon class="close" icon="circle-x-blue" @click=${onClose}></button-icon>`
+}
+
+function renderShowId(showId:string, onClose: () => any) {
+    const onClick = () => {
+        if(showId === "debug") {
+            //skipping showId action because it's debug
+        } else {
+            //setting ${showId}
+            sessionStorage.setItem("tooltip-" + showId, "hidden");
+        }
+
+        onClose();
+    }
+    return html`<div @click=${onClick} class="noshow">${STR_NO_SHOW_AGAIN}</div>`;
 }

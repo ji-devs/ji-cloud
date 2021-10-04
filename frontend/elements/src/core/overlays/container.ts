@@ -16,10 +16,10 @@ export class _ extends LitElement {
     }
 
     firstUpdated() {
-        const parentElement = queryPierceShadow(document, "#overlay");
+        let parentElement = queryPierceShadow(document, "#overlay");
         if(!parentElement) {
-            console.warn("couldn't find #overlay!");
-            return;
+            console.warn("couldn't find #overlay! using document.body");
+            parentElement = document.body;
         }
 
         parentElement.appendChild(this);
