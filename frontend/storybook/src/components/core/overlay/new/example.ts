@@ -31,11 +31,11 @@ const DEFAULT_ARGS:Args = {
     flowTargetStrategy: "track", 
     flowTargetMargin: 0,
     flowTargetContainer: "window",
-    absoluteContentAnchor: "tr",
-    absoluteTargetAnchor: "tl",
+    absoluteContentAnchor: "br",
+    absoluteTargetAnchor: "tm",
     absoluteTargetStrategy: "track",
     absoluteTargetMargin: 0,
-    absoluteTargetContainer: "window",
+    absoluteTargetContainer: "none",
     arrowNudge: 0,
 }
 

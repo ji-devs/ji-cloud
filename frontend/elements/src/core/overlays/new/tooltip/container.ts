@@ -1,3 +1,7 @@
+// This expands on overlay-content to allow for the arrows
+// internally it adds some additional anchors to allow positioning
+// the arrows on the top or vertical corners, above the content (like tm/bm)
+
 import { LitElement, svg, html, css, customElement, property } from "lit-element";
 import { nothing } from "lit-html";
 import { styleMap } from "lit-html/directives/style-map";
@@ -6,6 +10,8 @@ import { Anchor, ContentAnchor, getAnchors } from "@elements/core/overlays/new/c
 const TRIANGLE_WIDTH = 18;
 const TRIANGLE_HEIGHT = 10;
 const OUTLINE_SIZE = 3;
+
+type ArrowAnchor = Anchor | "ttr" | "ttl" | "bbr" | "bbl"
 
 @customElement("tooltip-container")
 export class _ extends LitElement {
@@ -24,7 +30,12 @@ export class _ extends LitElement {
                 {
                     flex-direction: row;
                     align-items: flex-start;
-                    justify-content: center;
+                }
+                :host([arrowAnchor="ttl"]) {
+                    align-items: flex-start;
+                }
+                :host([arrowAnchor="ttr"]) {
+                    align-items: flex-end;
                 }
 
                 :host([color="green"]) > .main {
@@ -58,15 +69,18 @@ export class _ extends LitElement {
                 :host([arrowAnchor="tl"]) > .main {
                     margin-left: ${TRIANGLE_HEIGHT}px;
                 }
-                :host([arrowAnchor="tm"]) > .main {
+                :host([arrowAnchor="tm"]) > .main,
+                :host([arrowAnchor="ttr"]) > .main,
+                :host([arrowAnchor="ttl"]) > .main,
+                {
                     margin-top: ${TRIANGLE_HEIGHT}px;
                 }
                 */
 
                 /* main */
                 .main {
-                    grid-area: mm;
                     border-radius: 25rem;
+                    padding: 10rem; 
                 }
 
                 /* triangle */
@@ -104,7 +118,13 @@ export class _ extends LitElement {
     }
 
     updateAnchor() {
-        const {targetH, targetV, contentH, contentV} = getAnchors(this.contentAnchor, this.targetAnchor);
+        let {targetH, targetV, contentH, contentV} = getAnchors(this.contentAnchor, this.targetAnchor);
+
+        if(contentV == "t" && contentH != "m" && targetV == "b") {
+            contentV += "t";
+        } else if(contentV == "b" && contentH != "m" && targetV == "t") {
+            contentV += "b";
+        }
         this.arrowAnchor = `${contentV}${contentH}` as Anchor;
     }
     
@@ -120,9 +140,9 @@ export class _ extends LitElement {
     @property({type: Number})
     arrowNudge: number = 0; 
 
-    //computed
+    //computed - do not set manually!
     @property({reflect: true})
-    arrowAnchor: Anchor | undefined;
+    arrowAnchor: ArrowAnchor | undefined;
     
     render() {
         const { arrowAnchor, arrowNudge, contentAnchor, targetAnchor } = this;
@@ -141,11 +161,13 @@ export class _ extends LitElement {
     }
 }
 
-function renderArrow(arrowAnchor:Anchor, userArrowNudge:number, isFirst: boolean) {
+function renderArrow(arrowAnchor:ArrowAnchor, userArrowNudge:number, isFirst: boolean) {
 
     const FIRST_MAP:any = {
         tl: true,
         tm: true,
+        ttl: true,
+        ttr: true,
         tr: false,
     }
     if((isFirst && !FIRST_MAP[arrowAnchor]) || (!isFirst && FIRST_MAP[arrowAnchor])) {
@@ -164,47 +186,73 @@ function renderArrow(arrowAnchor:Anchor, userArrowNudge:number, isFirst: boolean
     const DEFAULT_ARROW_NUDGE:any = {
         tl: 10, 
         tm: 0,
+        ttl: 10,
+        ttr: 10,
         tr: 10, 
     }
+    const FLIP_ARROW_NUDGE:any = {
+        tl: false, 
+        tm: false,
+        ttl: false,
+        ttr: true,
+        tr: false, 
+    }
 
-    const arrowNudge = DEFAULT_ARROW_NUDGE[arrowAnchor] + userArrowNudge;
+    let arrowNudge = DEFAULT_ARROW_NUDGE[arrowAnchor] + userArrowNudge;
+    if(FLIP_ARROW_NUDGE[arrowAnchor]) {
+        arrowNudge *= -1;
+    }
 
     const ROT_MAP:any = {
         tl: -90,
         tm: 0,
+        ttr: 0,
+        ttl: 0,
         tr: 90,
     }
 
     const TX_MAP:any = {
         tl: (boxHeight/2)+OUTLINE_SIZE,
         tm: arrowNudge,
+        ttl: arrowNudge,
+        ttr: arrowNudge,
         tr: -((boxHeight)+OUTLINE_SIZE),
     }
     const TY_MAP:any = {
         tl: arrowNudge,
         tm: boxHeight,
+        ttl: boxHeight,
+        ttr: boxHeight,
         tr: arrowNudge,
     }
     const CW_MAP:any = {
         tl: boxHeight,
         tm: boxWidth,
+        ttl: boxWidth,
+        ttr: boxWidth,
         tr: boxHeight,
     }
 
     const CH_MAP:any = {
         tl: boxWidth,
         tm: boxHeight,
+        ttl: boxHeight,
+        ttr: boxHeight,
         tr: boxWidth,
     }
     const IW_MAP:any = {
         tl: boxWidth,
         tm: boxWidth,
+        ttl: boxWidth,
+        ttr: boxWidth,
         tr: boxWidth,
     }
 
     const IH_MAP:any = {
         tl: boxHeight,
         tm: boxHeight,
+        ttl: boxHeight,
+        ttr: boxHeight,
         tr: boxHeight,
     }
 
