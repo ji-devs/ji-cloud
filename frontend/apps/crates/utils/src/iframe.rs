@@ -76,20 +76,7 @@ impl <T: DeserializeOwned> From<JsValue> for IframeInit<T> {
 }
 
 pub fn should_get_iframe_data() -> bool { 
-    let url:String = dominator::routing::url().get_cloned();
-    let url:web_sys::Url = web_sys::Url::new(&url).unwrap_ji();
-    let params = url.search_params();
-
-    match params.get(IFRAME_DATA_PARAM) {
-        None => false,
-        Some(value) => {
-            if value == "true" {
-                true
-            } else {
-                false
-            }
-        }
-    }
+    crate::routes::is_param_bool(IFRAME_DATA_PARAM)
 }
 
 

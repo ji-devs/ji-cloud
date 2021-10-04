@@ -76,7 +76,7 @@ where
             }
         };
 
-        let is_draft:bool = true; //todo, get from url
+        let is_draft:bool = utils::routes::is_param_bool("draft");
 
         let _self = Rc::new(Self {
             opts,
@@ -232,6 +232,7 @@ impl<RawData> StateOpts<RawData> {
             skip_play: false,
         }
     }
+        
 }
 
 pub type RawDirect = bool;

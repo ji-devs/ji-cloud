@@ -439,3 +439,20 @@ impl From<&Route> for String {
     }
 }
 
+
+pub fn is_param_bool(param: &str) -> bool { 
+    let url:String = dominator::routing::url().get_cloned();
+    let url:web_sys::Url = web_sys::Url::new(&url).unwrap_ji();
+    let params = url.search_params();
+
+    match params.get(param) {
+        None => false,
+        Some(value) => {
+            if value == "true" {
+                true
+            } else {
+                false
+            }
+        }
+    }
+}
