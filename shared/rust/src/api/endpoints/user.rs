@@ -81,6 +81,23 @@ impl ApiEndpoint for VerifyEmail {
     const METHOD: Method = Method::Post;
 }
 
+/// Update user email
+///
+/// # Flow
+/// 1. `POST` to this route
+///     * recieve one of:
+///         1. email gets sent to the user - [`204 - No Content`](http::StatusCode::NO_CONTENT)
+///         2. email already exists - [`409 - Conflict`](http::StatusCode::CONFLICT)
+/// 2. [`PATCH /v1/user/update-email`](UpdateEmail)
+pub struct UpdateEmail;
+impl ApiEndpoint for UpdateEmail {
+    type Req = UpdateUserEmailRequest;
+    type Res = ();
+    type Err = EmptyError;
+    const PATH: &'static str = "/v1/user/update-email";
+    const METHOD: Method = Method::Patch;
+}
+
 /// Reset a user's password.
 ///
 /// # Flow

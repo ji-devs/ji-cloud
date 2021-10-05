@@ -471,6 +471,7 @@ async fn update_user_email(
     claims: TokenUser,
     req: Json<UpdateUserEmailRequest>,
 ) -> Result<HttpResponse, error::Register>  {
+    println!("in update user email");
     // add authorized user to get user id
     let req = req.into_inner();
 
@@ -495,10 +496,12 @@ async fn update_user_email(
     match (exists_basic, exists_google) {
         (true, _) => {
             txn.rollback().await?;
+            println!("taken basic");
             return Err(error::Email::TakenBasic.into());
         }
         (false, true) => {
             txn.rollback().await?;
+            println!("taken google");
             return Err(error::Email::TakenGoogle.into());
         }
         (false, false) => (), // do nothing
@@ -512,6 +515,8 @@ async fn update_user_email(
     )
         .execute(&mut txn)
         .await?;
+
+    println!("success?");
 
     // 2. Send verification email with token
     send_verification_email(
@@ -700,7 +705,8 @@ values ($1, $2::text, $3)
 }
 
 pub fn configure(cfg: &mut ServiceConfig) {
-    cfg.route(Profile::PATH, Profile::METHOD.route().to(get_profile))
+    cfg.route(UpdateEmail::PATH, UpdateEmail::METHOD.route().to(update_user_email))
+        .route(Profile::PATH, Profile::METHOD.route().to(get_profile))
         .route(Create::PATH, Create::METHOD.route().to(create_user))
         .route(
             VerifyEmail::PATH,

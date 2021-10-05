@@ -11,7 +11,7 @@ use shared::domain::{
     image::ImageId,
     meta::{AffiliationId, AgeRangeId, SubjectId},
     session::{CreateSessionResponse, NewSessionResponse},
-    user::{CreateProfileRequest, PatchProfileRequest},
+    user::{CreateProfileRequest, PatchProfileRequest, UpdateUserEmailRequest},
 };
 use sqlx::PgPool;
 
@@ -194,7 +194,7 @@ async fn verify_email() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[ignore]
+//#[ignore]
 #[actix_rt::test]
 async fn basic_auth_flow_no_login() -> anyhow::Result<()> {
     if !service::email_test_guard() {
@@ -300,7 +300,7 @@ async fn basic_auth_flow_no_login() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[ignore]
+//#[ignore]
 #[actix_rt::test]
 async fn basic_auth_flow() -> anyhow::Result<()> {
     if !service::email_test_guard() {
@@ -436,6 +436,51 @@ async fn basic_auth_flow() -> anyhow::Result<()> {
     txn.commit().await?;
 
     insta::assert_json_snapshot!(body, {".csrf" => "[csrf]"});
+
+    Ok(())
+}
+
+#[actix_rt::test]
+async fn update_user_email() -> anyhow::Result<()> {
+    if !service::email_test_guard() {
+        return Ok(());
+    }
+
+    let app = initialize_server(&[Fixture::User], &[Service::Email]).await;
+
+    let port = app.port();
+
+    let client = reqwest::Client::new();
+
+    println!("here");
+
+    let resp = client
+        .patch(&format!("http://0.0.0.0:{}/v1/user/update-email", port))
+        .json(&UpdateUserEmailRequest {
+            email: "newemail@test.com".to_string(),
+        })
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    println!("response status: {:?}", resp.status());
+    assert_eq!(resp.status(), StatusCode::NO_CONTENT);
+
+    // let resp_2 = client
+    //     .get(&format!("http://0.0.0.0:{}/v1/user/me/profile", port))
+    //     .login()
+    //     .send()
+    //     .await?
+    //     .error_for_status()?;
+    //
+    // assert_eq!(resp_2.status(), StatusCode::OK);
+
+    let body: serde_json::Value = resp.json().await?;
+
+    app.stop(false).await;
+
+    insta::assert_json_snapshot!(body, { ".updated_at" => "[timestamptz]" });
 
     Ok(())
 }
