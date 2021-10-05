@@ -37,6 +37,7 @@ impl TestServicesSettings {
     pub async fn new() -> anyhow::Result<Self> {
         let (token, project_id) = match req_env("TEST_SERVICE_ACCOUNT_JSON") {
             Ok(key_json) => {
+                println!("key_json: {}", key_json);
                 let credentials =
                     match serde_json::from_str::<yup_oauth2::ServiceAccountKey>(&key_json) {
                         Ok(v) => v,
@@ -105,6 +106,7 @@ impl TestServicesSettings {
     }
 
     pub async fn create_test_mail_client(&self) -> Option<mail::Client> {
+        println!("create_test_mail_client");
         let api_key = self
             .get_gcp_managed_secret(Self::TEST_SENDGRID_API_KEY)
             .await

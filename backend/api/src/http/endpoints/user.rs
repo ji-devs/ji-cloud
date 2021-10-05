@@ -14,14 +14,17 @@ use shared::{
         user::{
             ChangePassword, Create, CreateColor, CreateFont, CreateProfile, Delete, DeleteColor,
             DeleteFont, GetColors, GetFonts, PatchProfile, Profile, ResetPassword, UpdateColor,
-            UpdateFont, UserLookup, VerifyEmail,
+            UpdateEmail, UpdateFont, UserLookup, VerifyEmail,
         },
         ApiEndpoint,
     },
     domain::{
         image::{ImageId, ImageKind},
         session::NewSessionResponse,
-        user::{ChangePasswordRequest, CreateProfileRequest, UserLookupQuery, VerifyEmailRequest},
+        user::{
+            ChangePasswordRequest, CreateProfileRequest, UpdateUserEmailRequest, UserLookupQuery,
+            VerifyEmailRequest,
+        },
     },
     media::MediaLibrary,
 };
@@ -456,12 +459,12 @@ where image_id = $1
 }
 
 /*
-    Logged in user hits an endpoint which requires a new email address
-    Backend sends an email to this address with a link containing a token
-    Frontend extracts this token from the link and sends it to VerifyEmail or similar
-    Backend requires that this last endpoint (VerifyEmail or similar) is the same logged-in user as the one who initiated the request. If not - it's an auth error
-    At this point, all is good, and email should be changed for the user
- */
+   Logged in user hits an endpoint which requires a new email address
+   Backend sends an email to this address with a link containing a token
+   Frontend extracts this token from the link and sends it to VerifyEmail or similar
+   Backend requires that this last endpoint (VerifyEmail or similar) is the same logged-in user as the one who initiated the request. If not - it's an auth error
+   At this point, all is good, and email should be changed for the user
+*/
 
 /// Update user email.
 async fn update_user_email(
@@ -470,7 +473,7 @@ async fn update_user_email(
     db: Data<PgPool>,
     claims: TokenUser,
     req: Json<UpdateUserEmailRequest>,
-) -> Result<HttpResponse, error::Register>  {
+) -> Result<HttpResponse, error::Register> {
     println!("in update user email");
     // add authorized user to get user id
     let req = req.into_inner();
@@ -483,16 +486,16 @@ async fn update_user_email(
         r#"select exists(select 1 from user_auth_basic where email = lower($1)) as "exists!""#,
         &req.email
     )
-        .fetch_one(&mut txn)
-        .await?
-        .exists;
+    .fetch_one(&mut txn)
+    .await?
+    .exists;
     let exists_google = sqlx::query!(
         r#"select exists(select 1 from user_email where email = lower($1)) as "exists!""#,
         &req.email
     )
-        .fetch_one(&mut txn)
-        .await?
-        .exists;
+    .fetch_one(&mut txn)
+    .await?
+    .exists;
     match (exists_basic, exists_google) {
         (true, _) => {
             txn.rollback().await?;
@@ -513,8 +516,8 @@ async fn update_user_email(
         claims.0.user_id,
         &req.email,
     )
-        .execute(&mut txn)
-        .await?;
+    .execute(&mut txn)
+    .await?;
 
     println!("success?");
 
@@ -526,8 +529,8 @@ async fn update_user_email(
         &mail,
         &settings.remote_target().pages_url(),
     )
-        .await
-        .map_err(error::Register::from)?;
+    .await
+    .map_err(error::Register::from)?;
 
     txn.commit().await?;
 
@@ -705,55 +708,58 @@ values ($1, $2::text, $3)
 }
 
 pub fn configure(cfg: &mut ServiceConfig) {
-    cfg.route(UpdateEmail::PATH, UpdateEmail::METHOD.route().to(update_user_email))
-        .route(Profile::PATH, Profile::METHOD.route().to(get_profile))
-        .route(Create::PATH, Create::METHOD.route().to(create_user))
-        .route(
-            VerifyEmail::PATH,
-            VerifyEmail::METHOD.route().to(verify_email),
-        )
-        .route(
-            ResetPassword::PATH,
-            ResetPassword::METHOD.route().to(reset_password),
-        )
-        .route(
-            ChangePassword::PATH,
-            ChangePassword::METHOD.route().to(put_password),
-        )
-        .route(
-            CreateProfile::PATH,
-            CreateProfile::METHOD.route().to(create_profile),
-        )
-        .route(
-            PatchProfile::PATH,
-            PatchProfile::METHOD.route().to(patch_profile),
-        )
-        .route(UserLookup::PATH, UserLookup::METHOD.route().to(user_lookup))
-        .route(Delete::PATH, Delete::METHOD.route().to(delete))
-        .route(GetColors::PATH, GetColors::METHOD.route().to(color::get))
-        .route(
-            UpdateColor::PATH,
-            UpdateColor::METHOD.route().to(color::update),
-        )
-        .route(
-            CreateColor::PATH,
-            CreateColor::METHOD.route().to(color::create),
-        )
-        .route(
-            DeleteColor::PATH,
-            DeleteColor::METHOD.route().to(color::delete),
-        )
-        .route(GetFonts::PATH, GetFonts::METHOD.route().to(font::get))
-        .route(
-            UpdateFont::PATH,
-            UpdateFont::METHOD.route().to(font::update),
-        )
-        .route(
-            CreateFont::PATH,
-            CreateFont::METHOD.route().to(font::create),
-        )
-        .route(
-            DeleteFont::PATH,
-            DeleteFont::METHOD.route().to(font::delete),
-        );
+    cfg.route(
+        UpdateEmail::PATH,
+        UpdateEmail::METHOD.route().to(update_user_email),
+    )
+    .route(Profile::PATH, Profile::METHOD.route().to(get_profile))
+    .route(Create::PATH, Create::METHOD.route().to(create_user))
+    .route(
+        VerifyEmail::PATH,
+        VerifyEmail::METHOD.route().to(verify_email),
+    )
+    .route(
+        ResetPassword::PATH,
+        ResetPassword::METHOD.route().to(reset_password),
+    )
+    .route(
+        ChangePassword::PATH,
+        ChangePassword::METHOD.route().to(put_password),
+    )
+    .route(
+        CreateProfile::PATH,
+        CreateProfile::METHOD.route().to(create_profile),
+    )
+    .route(
+        PatchProfile::PATH,
+        PatchProfile::METHOD.route().to(patch_profile),
+    )
+    .route(UserLookup::PATH, UserLookup::METHOD.route().to(user_lookup))
+    .route(Delete::PATH, Delete::METHOD.route().to(delete))
+    .route(GetColors::PATH, GetColors::METHOD.route().to(color::get))
+    .route(
+        UpdateColor::PATH,
+        UpdateColor::METHOD.route().to(color::update),
+    )
+    .route(
+        CreateColor::PATH,
+        CreateColor::METHOD.route().to(color::create),
+    )
+    .route(
+        DeleteColor::PATH,
+        DeleteColor::METHOD.route().to(color::delete),
+    )
+    .route(GetFonts::PATH, GetFonts::METHOD.route().to(font::get))
+    .route(
+        UpdateFont::PATH,
+        UpdateFont::METHOD.route().to(font::update),
+    )
+    .route(
+        CreateFont::PATH,
+        CreateFont::METHOD.route().to(font::create),
+    )
+    .route(
+        DeleteFont::PATH,
+        DeleteFont::METHOD.route().to(font::delete),
+    );
 }

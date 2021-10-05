@@ -6,7 +6,7 @@ use crate::{
         session::NewSessionResponse,
         user::{
             ChangePasswordRequest, CreateUserRequest, OtherUser, ResetPasswordRequest,
-            UserLookupQuery, VerifyEmailRequest,
+            UpdateUserEmailRequest, UserLookupQuery, VerifyEmailRequest,
         },
     },
     error::EmptyError,
