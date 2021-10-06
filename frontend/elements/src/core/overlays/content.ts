@@ -84,7 +84,7 @@ export class _ extends LitElement {
     target:TrackerProp | undefined;
 
     @property()
-    strategy:MoveStrategy = "";
+    strategy:MoveStrategy = "track";
 
     @property({reflect: true})
     zLayer:ZLayer | undefined;
@@ -96,7 +96,10 @@ export class _ extends LitElement {
     targetAnchor:Anchor = "tr";
 
     @property({type: Number})
-    margin:number = 0;
+    marginX:number = 0;
+
+    @property({type: Number})
+    marginY:number = 0;
 
     firstUpdated(_changed:any) {
         this.bindInstance();
@@ -119,7 +122,8 @@ export class _ extends LitElement {
                 container: new Tracker(this.container),
                 targetAnchor: this.targetAnchor,
                 contentAnchor: this.contentAnchor,
-                margin: this.margin,
+                marginX: this.marginX,
+                marginY: this.marginY,
                 strategy: this.strategy,
                 dispatcher: this,
             });
@@ -209,7 +213,8 @@ interface StateOpts {
     container: Tracker, 
     contentAnchor: ContentAnchor,
     targetAnchor: Anchor,
-    margin: number,
+    marginX: number,
+    marginY: number,
     strategy: MoveStrategy,
     dispatcher: EventTarget,
 }
@@ -218,7 +223,7 @@ function createState(opts:StateOpts):State {
 
     let lastAnchor:string = "";
 
-    const {target, dispatcher, margin, container, content, strategy} = opts;
+    const {target, dispatcher, marginX, marginY, container, content, strategy} = opts;
 
     const _recalc = (contentAnchor: ContentAnchor, targetAnchor:Anchor, recurseDepth: number) => {
         if(recurseDepth === 0) {
@@ -233,7 +238,8 @@ function createState(opts:StateOpts):State {
 
 
         /// Horizontal axis
-        /// Margin only pushes from opposit sides
+        /// Margin only pushes from opposite sides
+        /// middle is positive 
         let x:number = 0;
         if(targetH === "l") {
             x = targetRect.x;
@@ -243,16 +249,13 @@ function createState(opts:StateOpts):State {
             x = targetRect.x + targetRect.width;
         }
         if(contentH === "l") {
-            if(targetH === "r") {
-                x += margin;
-            }
+            x += marginX;
         } else if(contentH === "m") {
             x -= contentRect.width/2;
+            x += marginX;
         } else if(contentH === "r") {
             x -= contentRect.width;
-            if(targetH === "l") {
-                x -= margin;
-            }
+            x -= marginX;
         }
 
         let y:number = 0;
@@ -264,16 +267,13 @@ function createState(opts:StateOpts):State {
             y = targetRect.y + targetRect.height;
         }
         if(contentV === "t") {
-            if(targetV === "b") {
-                y += margin;
-            }
+            y += marginY;
         } else if(contentV === "m") {
             y -= contentRect.height/2;
+            y += marginY;
         } else if(contentV === "b") {
             y -= contentRect.height;
-            if(targetV === "t") {
-                y -= margin;
-            }
+            y -= marginY;
         }
 
         if(container.valid) {
@@ -288,7 +288,7 @@ function createState(opts:StateOpts):State {
 
             if((x + contentRect.width) > containerRect.right) {
                 if(lastResort) {
-                    x = containerRect.right - (contentRect.width + margin);
+                    x = containerRect.right - (contentRect.width + marginX);
                 } else {
                     newTargetH = "l";
                     newContentH = "r";
@@ -296,7 +296,7 @@ function createState(opts:StateOpts):State {
             }
             if((y + contentRect.height) > containerRect.bottom) {
                 if(lastResort) {
-                    y = containerRect.bottom - (contentRect.height + margin);
+                    y = containerRect.bottom - (contentRect.height + marginY);
                 } else {
                     newTargetV = "t";
                     newContentV = "b";
@@ -304,7 +304,7 @@ function createState(opts:StateOpts):State {
             }
             if(x < containerRect.left) {
                 if(lastResort) {
-                    x = containerRect.x + margin;
+                    x = containerRect.x + marginX;
                 } else {
                     newTargetH = "r";
                     newContentH = "l";
@@ -312,7 +312,7 @@ function createState(opts:StateOpts):State {
             }
             if(y < containerRect.top) {
                 if(lastResort) {
-                    y = containerRect.top + margin;
+                    y = containerRect.top + marginY;
                 } else {
                     newTargetV = "b";
                     newContentV = "t";

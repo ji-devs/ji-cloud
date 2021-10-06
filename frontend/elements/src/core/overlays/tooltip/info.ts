@@ -73,6 +73,7 @@ export class _ extends LitElement {
 
     onClose = () => {
         this.dispatchEvent(new Event("close"));
+        this.selfClosed = true;
     }
 
 
@@ -88,6 +89,8 @@ export class _ extends LitElement {
     @property({type: Boolean})
     closeable:boolean = false;
 
+    @property({type: Boolean})
+    selfClosed:boolean = false;
 
     //internal
     @property()
@@ -116,7 +119,10 @@ export class _ extends LitElement {
     targetAnchor:Anchor = "tr";
 
     @property({type: Number})
-    margin:number = 0;
+    marginX:number = 0;
+
+    @property({type: Number})
+    marginY:number = 0;
 
     @property()
     color:Color = "beige";
@@ -125,7 +131,11 @@ export class _ extends LitElement {
     arrowNudge:number = 0;
 
     render() {
-        const {container, target, strategy, zLayer,margin, contentAnchor, targetAnchor, closeable, title, body, showId, arrowNudge} = this;
+        const {container, selfClosed, target, strategy, zLayer,marginX, marginY, contentAnchor, targetAnchor, closeable, title, body, showId, arrowNudge} = this;
+
+        if(selfClosed) {
+            return(nothing);
+        }
 
         if(showId !== "" && showId !== "debug") {
             if(sessionStorage.getItem("tooltip-" + showId) === "hidden") {
@@ -143,7 +153,8 @@ export class _ extends LitElement {
              .zLayer=${zLayer}
              .contentAnchor=${contentAnchor}
              .targetAnchor=${targetAnchor}
-             .margin=${margin}
+             .marginX=${marginX}
+             .marginY=${marginY}
              @anchor-changed=${(evt:CustomEvent) => {
                 const {contentAnchor, targetAnchor} = evt.detail;
                  this.currContentAnchor = contentAnchor;

@@ -6,7 +6,7 @@ use shared::config::JIG_PLAYER_SESSION_VALID_DURATION_SECS;
 use utils::{clipboard, events, routes::{KidsRoute, Route}, unwrap::UnwrapJiExt};
 
 use crate::{animation::fade::{Fade, FadeKind}, tooltip::{
-    state::{MoveStrategy, Placement, State as TooltipState, TooltipBubble, TooltipData, TooltipTarget},
+    state::{MoveStrategy, Anchor, ContentAnchor, State as TooltipState, TooltipBubble, TooltipData, TooltipTarget},
     dom::render as TooltipDom
 }};
 
@@ -229,8 +229,9 @@ fn render_share_embed(state: Rc<State>) -> Dom {
                                     .apply(|dom| fade.render(dom))
                                     .child({
                                         let tooltip = TooltipData::Bubble(Rc::new(TooltipBubble {
-                                            placement: Placement::Right,
-                                            slot: Some(String::from("copy")),
+                                            target_anchor: Anchor::MiddleRight,
+                                            content_anchor: ContentAnchor::OppositeH,
+                                            //slot: Some(String::from("copy")),
                                             body: String::from(STR_COPIED),
                                             max_width: None,
                                         }));

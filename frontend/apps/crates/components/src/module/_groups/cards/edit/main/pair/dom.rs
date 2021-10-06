@@ -14,7 +14,7 @@ use crate::{
     tooltip::{
         callbacks::TooltipConfirmCallbacks,
         state::{
-            MoveStrategy, Placement, State as TooltipState, TooltipConfirm, TooltipData,
+            MoveStrategy,Anchor, ContentAnchor , State as TooltipState, TooltipConfirm, TooltipData,
             TooltipTarget,
         },
     },
@@ -44,8 +44,9 @@ pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<MainPair<RawData, E>>)
                             ),
 
                             TooltipData::Confirm(Rc::new(TooltipConfirm {
-                                placement: Placement::Right,
-                                slot: None,
+
+                                target_anchor: Anchor::MiddleRight,
+                                content_anchor: ContentAnchor::OppositeH,
                                 max_width: Some(180.0),
                                 header: strings::confirm::STR_DELETE_PAIR_HEADER.to_string(),
                                 confirm_label: strings::confirm::STR_DELETE_PAIR_CONFIRM.to_string(),

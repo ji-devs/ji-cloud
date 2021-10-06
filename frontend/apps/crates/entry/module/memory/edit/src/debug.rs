@@ -71,8 +71,8 @@ impl DebugSettings {
             data: Some(
                 if let Some(init_data) = init_data {
                     // let mode = Mode::Duplicate; // single list not tabs
-                    let mode = Mode::WordsAndImages; // single list with tabs
-                    // let mode = Mode::Synonyms; // double list not tabs
+                    //let mode = Mode::WordsAndImages; // single list with tabs
+                    let mode = Mode::Synonyms; // double list not tabs
 
                     RawData{
                         content: Some(Content {

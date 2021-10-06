@@ -87,14 +87,17 @@ export class _ extends LitElement {
     targetAnchor:Anchor = "tr";
 
     @property({type: Number})
-    margin:number = 0;
+    marginX:number = 0;
+
+    @property({type: Number})
+    marginY:number = 0;
 
     
     @property({type: Number})
     arrowNudge:number = 0;
 
     render() {
-        const {container, target, strategy, zLayer,margin, contentAnchor, targetAnchor, maxWidth, arrowNudge} = this;
+        const {container, target, strategy, zLayer,marginX, marginY, contentAnchor, targetAnchor, maxWidth, arrowNudge} = this;
 
         let bodyStyles:any = {
         };
@@ -111,7 +114,8 @@ export class _ extends LitElement {
              .zLayer=${zLayer}
              .contentAnchor=${contentAnchor}
              .targetAnchor=${targetAnchor}
-             .margin=${margin}
+             .marginX=${marginX}
+             .marginY=${marginY}
              @anchor-changed=${(evt:CustomEvent) => {
                 const {contentAnchor, targetAnchor} = evt.detail;
                  this.currContentAnchor = contentAnchor;

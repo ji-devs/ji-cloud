@@ -2,7 +2,7 @@ use crate::animation::fade::*;
 use crate::audio::mixer::AudioHandle;
 use crate::tooltip::state::MoveStrategy;
 use crate::tooltip::state::{
-    Placement, State as TooltipState, TooltipBubble, TooltipData, TooltipTarget,
+    Anchor,ContentAnchor, State as TooltipState, TooltipBubble, TooltipData, TooltipTarget,
 };
 use dominator::clone;
 use futures_signals::signal::Mutable;
@@ -45,8 +45,8 @@ impl TraceBubble {
             Rc::new(TooltipState::new(
                 TooltipTarget::NormalizedBounds(bounds, MoveStrategy::Track),
                 TooltipData::Bubble(Rc::new(TooltipBubble {
-                    placement: Placement::Bottom,
-                    slot: None,
+                    target_anchor: Anchor::Bottom,
+                    content_anchor: ContentAnchor::OppositeV,
                     body: text,
                     max_width: Some(200.0),
                 })),

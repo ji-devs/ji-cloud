@@ -15,12 +15,14 @@ interface Args {
     flowContentAnchor: ContentAnchor,
     flowTargetAnchor: Anchor,
     flowTargetStrategy: MoveStrategy,
-    flowTargetMargin: number,
+    flowTargetMarginX: number,
+    flowTargetMarginY: number,
     flowTargetContainer: ContainerOptions,
     absoluteContentAnchor: ContentAnchor,
     absoluteTargetAnchor: Anchor,
     absoluteTargetStrategy: MoveStrategy,
-    absoluteTargetMargin: number,
+    absoluteTargetMarginX: number,
+    absoluteTargetMarginY: number,
     absoluteTargetContainer: ContainerOptions, 
     arrowNudge: number,
 }
@@ -29,12 +31,14 @@ const DEFAULT_ARGS:Args = {
     flowContentAnchor: "tl",
     flowTargetAnchor: "tr",
     flowTargetStrategy: "track", 
-    flowTargetMargin: 0,
+    flowTargetMarginX: 0,
+    flowTargetMarginY: 0,
     flowTargetContainer: "window",
     absoluteContentAnchor: "ml",
     absoluteTargetAnchor: "mr",
     absoluteTargetStrategy: "track",
-    absoluteTargetMargin: 0,
+    absoluteTargetMarginX: 0,
+    absoluteTargetMarginY: 0,
     absoluteTargetContainer: "none",
     arrowNudge: 0,
 }
@@ -68,13 +72,13 @@ function makeMain(props:Args) {
             </div>
         </div>
         <overlay-container>
-            <overlay-content target="#flowTarget" targetAnchor="${props.flowTargetAnchor}" contentAnchor=${props.flowContentAnchor} strategy="${props.flowTargetStrategy}" margin="${props.flowTargetMargin}" container="${flowTargetContainer}">
+            <overlay-content target="#flowTarget" targetAnchor="${props.flowTargetAnchor}" contentAnchor=${props.flowContentAnchor} strategy="${props.flowTargetStrategy}" marginX="${props.flowTargetMarginX}" marginY="${props.flowTargetMarginY}" container="${flowTargetContainer}">
                 ${MenuContainer()}
             </overlay-content>
-            <overlay-content target="#absoluteTarget" targetAnchor="${props.absoluteTargetAnchor}" contentAnchor=${props.absoluteContentAnchor} strategy="${props.absoluteTargetStrategy}" margin="${props.absoluteTargetMargin}" container="${absoluteTargetContainer}">
+            <overlay-content target="#absoluteTarget" targetAnchor="${props.absoluteTargetAnchor}" contentAnchor=${props.absoluteContentAnchor} strategy="${props.absoluteTargetStrategy}" marginX="${props.absoluteTargetMarginX}" marginY="${props.absoluteTargetMarginY}" container="${absoluteTargetContainer}">
                 ${MenuContainer()}
             </overlay-content>
-            <overlay-tooltip-confirm header="testing" arrowNudge="${props.arrowNudge}" confirmLabel="Confirm" cancelLabel="Cancel" target="#absoluteTarget" targetAnchor="${props.absoluteTargetAnchor}" contentAnchor=${props.absoluteContentAnchor} strategy="${props.absoluteTargetStrategy}" margin="${props.absoluteTargetMargin}" container="${absoluteTargetContainer}">
+            <overlay-tooltip-confirm header="testing" arrowNudge="${props.arrowNudge}" confirmLabel="Confirm" cancelLabel="Cancel" target="#absoluteTarget" targetAnchor="${props.absoluteTargetAnchor}" contentAnchor=${props.absoluteContentAnchor} strategy="${props.absoluteTargetStrategy}" marginX="${props.absoluteTargetMarginX}" marginY="${props.absoluteTargetMarginY}" container="${absoluteTargetContainer}">
             </overlay-tooltip-confirm>
             
         </overlay-container>

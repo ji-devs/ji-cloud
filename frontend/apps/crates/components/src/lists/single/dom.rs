@@ -6,7 +6,7 @@ use super::state::*;
 use crate::tooltip::{
     callbacks::TooltipErrorCallbacks,
     state::{
-        MoveStrategy, Placement, State as TooltipState, TooltipData, TooltipError, TooltipTarget,
+        MoveStrategy, Anchor,ContentAnchor, State as TooltipState, TooltipData, TooltipError, TooltipTarget,
     },
 };
 use futures_signals::{map_ref, signal::SignalExt, signal_vec::SignalVecExt};
@@ -24,8 +24,14 @@ pub fn render(state: Rc<State>) -> Dom {
                 }))
             }),
             html!("button-rect", {
-                .property("color", "red") 
-                .property_signal("disabled", state.is_valid_signal().map(|ready| ready.is_err()))
+                .property_signal("color", state.is_valid_signal().map(|ready| {
+                    if ready.is_err() {
+                        "lightGray"
+                    } else {
+                        "red"
+                    }
+                }))
+                //.property_signal("disabled", state.is_valid_signal().map(|ready| ready.is_err()))
                 .property("size", "small")
                 .property("iconAfter", "done")
                 .property("slot", "done-btn")
@@ -45,8 +51,8 @@ pub fn render(state: Rc<State>) -> Dom {
 
                                         TooltipData::Error(Rc::new(TooltipError {
                                             max_width: Some(185.0),
-                                            placement: Placement::Right,
-                                            slot: None,
+                                            target_anchor: Anchor::MiddleRight,
+                                            content_anchor: ContentAnchor::OppositeH,
                                             body: super::strings::error::STR_NUM_WORDS.to_string(),
                                             callbacks: TooltipErrorCallbacks::new(
                                                 Some(clone!(state => move || {

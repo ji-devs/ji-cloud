@@ -16,10 +16,6 @@ import "@elements/core/menu/menu-tabs/menu-tab-with-title";
 import "@elements/core/window/window-loader-block";
 import "@elements/core/inputs/primitives/text-content";
 import "@elements/core/inputs/wrapper";
-import "@elements/core/tooltips/info";
-import "@elements/core/tooltips/confirm";
-import "@elements/core/tooltips/error";
-import "@elements/core/tooltips/bubble";
 import "@elements/core/drag/container";
 import "@elements/core/menu/container";
 import "@elements/core/menu/kebab";
@@ -64,11 +60,4 @@ import "@elements/_bundles/_sub-bundles/components/audio_input/imports";
 
 
 import "@elements/core/images/composed/module-screenshot";
-
-//overlays and tooltips
-import "@elements/core/overlays/container";
-import "@elements/core/overlays/content";
-import "@elements/core/overlays/tooltip/confirm";
-import "@elements/core/overlays/tooltip/bubble";
-import "@elements/core/overlays/tooltip/info";
-import "@elements/core/overlays/tooltip/error";
+import "@elements/_bundles/_sub-bundles/overlay"

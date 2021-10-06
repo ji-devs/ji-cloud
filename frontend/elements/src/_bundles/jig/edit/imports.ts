@@ -18,8 +18,6 @@ import "@elements/core/icon/fa-icon";
 import "@elements/core/overlays/anchored-overlay";
 import "@elements/core/pills/pill-close";
 import "@elements/core/pills/pill-close-delete";
-import "@elements/core/tooltips/error";
-import "@elements/core/tooltips/info";
 import "@elements/core/page-footer/page-footer";
 import "@elements/core/share-jig/main";
 import "@elements/core/share-jig/embed";
@@ -60,3 +58,5 @@ import "@elements/entry/jig/edit/publish/add-resource-method";
 import "@elements/entry/jig/edit/post-publish/post-publish";
 import "@elements/entry/jig/edit/post-publish/post-publish-action";
 import "@elements/module/_groups/design/edit/sidebar/widgets/theme-selector/option";
+
+import "@elements/_bundles/_sub-bundles/overlay"

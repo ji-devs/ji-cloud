@@ -15,7 +15,8 @@ interface Args {
     contentAnchor: ContentAnchor,
     targetAnchor: Anchor,
     strategy: MoveStrategy,
-    margin: number,
+    marginX: number,
+    marginY: number,
     arrowNudge: number,
     kind: "confirm" | "bubble" | "info" | "error"
 }
@@ -24,7 +25,8 @@ const DEFAULT_ARGS:Args = {
     contentAnchor: "oppositeH",
     targetAnchor: "tr",
     strategy: "track", 
-    margin: 0,
+    marginX: 0,
+    marginY: 0,
     arrowNudge: 0,
     kind: "confirm"
 }
@@ -35,20 +37,20 @@ export const Example = (props?:Args) => {
     const {kind} = props
 
     const renderConfirm = () => {
-        return `<overlay-tooltip-confirm header="testing"  confirmLabel="Confirm" cancelLabel="Cancel" target=".target" arrowNudge="${props.arrowNudge}" targetAnchor="${props.targetAnchor}" contentAnchor=${props.contentAnchor} strategy="${props.strategy}" margin="${props.margin}" ">
+        return `<overlay-tooltip-confirm header="testing"  confirmLabel="Confirm" cancelLabel="Cancel" target=".target" arrowNudge="${props.arrowNudge}" targetAnchor="${props.targetAnchor}" contentAnchor=${props.contentAnchor} strategy="${props.strategy}" marginX="${props.marginX}" marginY="${props.marginY}"">
             </overlay-tooltip-confirm>`;
     }
     const renderInfo = () => {
-        return `<overlay-tooltip-info showId="debug" title="Title here" body="Body here" closeable target=".target" arrowNudge="${props.arrowNudge}" targetAnchor="${props.targetAnchor}" contentAnchor=${props.contentAnchor} strategy="${props.strategy}" margin="${props.margin}" ">
+        return `<overlay-tooltip-info showId="debug" title="Title here" body="Body here" closeable target=".target" arrowNudge="${props.arrowNudge}" targetAnchor="${props.targetAnchor}" contentAnchor=${props.contentAnchor} strategy="${props.strategy}" marginX="${props.marginX}" marginY="${props.marginY}" ">
             </overlay-tooltip-info>`;
     }
     const renderBubble = () => {
-        return `<overlay-tooltip-bubble target=".target" arrowNudge="${props.arrowNudge}" targetAnchor="${props.targetAnchor}" contentAnchor=${props.contentAnchor} strategy="${props.strategy}" margin="${props.margin}" ">
+        return `<overlay-tooltip-bubble target=".target" arrowNudge="${props.arrowNudge}" targetAnchor="${props.targetAnchor}" contentAnchor=${props.contentAnchor} strategy="${props.strategy}" marginX="${props.marginX}" marginY="${props.marginY}" ">
             Body here
             </overlay-tooltip-bubble>`;
     }
     const renderError = () => {
-        return `<overlay-tooltip-error target=".target" arrowNudge="${props.arrowNudge}" targetAnchor="${props.targetAnchor}" contentAnchor=${props.contentAnchor} strategy="${props.strategy}" margin="${props.margin}" ">
+        return `<overlay-tooltip-error target=".target" arrowNudge="${props.arrowNudge}" targetAnchor="${props.targetAnchor}" contentAnchor=${props.contentAnchor} strategy="${props.strategy}" marginX="${props.marginX}" marginY="${props.marginY}" ">
             Body here
             </overlay-tooltip-error>`;
     }

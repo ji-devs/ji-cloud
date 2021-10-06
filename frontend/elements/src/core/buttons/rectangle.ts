@@ -36,6 +36,9 @@ export class _ extends LitElement {
                     /* Just taken from the first time it was needed... */
                     color: #4a4a4a;
                 }
+                :host([color=lightGray]) {
+                    --color: var(--light-gray-4);
+                }
                 :host([color=red]) {
                     --color: #fd6b71;
                 }
