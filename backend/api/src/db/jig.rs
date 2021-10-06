@@ -213,7 +213,6 @@ with cte as (
                when $2 = 0 then jig.draft_id
                when $2 = 1 then jig.live_id
                end as "draft_or_live_id",
-           privacy_level,
            published_at
     from jig
     where id = $1
@@ -269,7 +268,6 @@ from jig_data
         .await?
         .map(|row| JigResponse {
             id: row.jig_id,
-            privacy_level: row.privacy_level,
             published_at: row.published_at,
             creator_id: row.creator_id,
             author_id: row.author_id,
@@ -302,6 +300,8 @@ from jig_data
                     feedback_positive: row.audio_feedback_positive.into_iter().map(|(it, )| it).collect(),
                     feedback_negative: row.audio_feedback_negative.into_iter().map(|(it, )| it).collect(),
                 },
+                privacy_level: row.privacy_level,
+
             },
         });
 
@@ -319,20 +319,20 @@ pub async fn get_by_ids(
     let jig = sqlx::query!(
         //language=SQL
         r#"
-select id                                       as "id!: JigId",
+select jig.id                                       as "id!: JigId",
        creator_id,
        author_id                                as "author_id",
        (select given_name || ' '::text || family_name
         from user_profile
         where user_profile.user_id = author_id) as "author_name",
-       privacy_level                            as "privacy_level!: PrivacyLevel",
+       privacy_level                    as "privacy_level!: PrivacyLevel",
        live_id                                  as "live_id!",
        draft_id                                 as "draft_id!",
        published_at
-from jig
+from jig, jig_data jd
          inner join unnest($1::uuid[])
     with ordinality t(id, ord) using (id)
-where (privacy_level = $2 or $2 is null)
+where (privacy_level = $2 or $2 is null and jig.id = jd.id)
 order by t.ord
     "#,
         ids,
@@ -381,7 +381,8 @@ select id,
              where jig_data_id = jig_data.id)     as "age_ranges!: Vec<(AgeRangeId,)>",
        array(select row (jig_data_additional_resource.id)
              from jig_data_additional_resource
-             where jig_data_id = jig_data.id)     as "additional_resources!: Vec<(AdditionalResourceId,)>"
+             where jig_data_id = jig_data.id)     as "additional_resources!: Vec<(AdditionalResourceId,)>",
+       privacy_level                                       as "privacy_level!: PrivacyLevel"
 from jig_data
          inner join unnest($1::uuid[])
     with ordinality t(id, ord) using (id)
@@ -396,7 +397,6 @@ order by t.ord
         .zip(jig_data.into_iter())
         .map(|(jig_row, jig_data_row)| JigResponse {
             id: jig_row.id,
-            privacy_level: jig_row.privacy_level,
             published_at: jig_row.published_at,
             creator_id: jig_row.creator_id,
             author_id: jig_row.author_id,
@@ -453,6 +453,7 @@ order by t.ord
                         .map(|(it,)| it)
                         .collect(),
                 },
+                privacy_level: jig_data_row.privacy_level,
             },
         })
         .collect();
@@ -466,7 +467,6 @@ pub async fn update(
     pool: &PgPool,
     jig_id: JigId,
     author_id: Option<Uuid>,
-    privacy_level: Option<PrivacyLevel>,
 ) -> Result<(), error::UpdateWithMetadata> {
     let mut txn = pool.begin().await?;
 
@@ -474,15 +474,12 @@ pub async fn update(
         //language=SQL
         r#"
 update jig
-set author_id     = coalesce($2, author_id),
-    privacy_level = coalesce($3, privacy_level)
+set author_id = coalesce($2, author_id)
 where id = $1
-  and (($2 is distinct from author_id) or
-       ($3 is distinct from privacy_level))
+  and $2 is distinct from author_id
     "#,
         jig_id.0,
         author_id,
-        privacy_level.map(|it| it as i16),
     )
     .execute(&mut txn)
     .await?;
@@ -506,6 +503,7 @@ pub async fn update_draft(
     theme: Option<&ThemeId>,
     audio_background: Option<&Option<AudioBackground>>,
     audio_effects: Option<&AudioEffects>,
+    privacy_level: Option<PrivacyLevel>,
 ) -> Result<(), error::UpdateWithMetadata> {
     let mut txn = pool.begin().await?;
 
@@ -583,6 +581,22 @@ where id = $1 and
             settings.display_score,
             settings.track_assessments,
             settings.drag_assist,
+        )
+        .execute(&mut txn)
+        .await?;
+    }
+
+    if let Some(privacy_level) = privacy_level {
+        sqlx::query!(
+            //language=SQL
+            r#"
+update jig_data
+set privacy_level = coalesce($2, privacy_level)
+where id = $1
+  and $2 is distinct from privacy_level
+    "#,
+            draft_id,
+            privacy_level as i16,
         )
         .execute(&mut txn)
         .await?;
@@ -731,7 +745,6 @@ limit 20 offset 20 * $1
         .fetch(pool)
         .map_ok(|row| JigResponse {
             id: row.jig_id,
-            privacy_level: row.privacy_level,
             published_at: row.published_at,
             creator_id: row.creator_id,
             author_id: row.author_id,
@@ -764,6 +777,7 @@ limit 20 offset 20 * $1
                     feedback_positive: row.audio_feedback_positive.into_iter().map(|(it, )| it).collect(),
                     feedback_negative: row.audio_feedback_negative.into_iter().map(|(it, )| it).collect(),
                 },
+                privacy_level: row.privacy_level,
             },
         })
         .try_collect()
@@ -781,6 +795,7 @@ pub async fn filtered_count(
         r#"
 select count(*) as "count!: i64"
 from jig
+left join jig_data on jig.id = jig_data.id
 where(privacy_level is not distinct from $1 or $1 is null)
     and (author_id is not distinct from $2 or $2 is null)
 "#,
@@ -816,7 +831,7 @@ pub async fn clone_data(
         r#"
 insert into jig_data
 (display_name, created_at, updated_at, language, last_synced_at, description, theme, audio_background,
- audio_feedback_negative, audio_feedback_positive, direction, display_score, drag_assist, track_assessments)
+ audio_feedback_negative, audio_feedback_positive, direction, display_score, drag_assist, track_assessments, privacy_level)
 select display_name,
        created_at,
        updated_at,
@@ -830,7 +845,8 @@ select display_name,
        direction,
        display_score,
        drag_assist,
-       track_assessments
+       track_assessments,
+       privacy_level
 from jig_data
 where id = $1
 returning id

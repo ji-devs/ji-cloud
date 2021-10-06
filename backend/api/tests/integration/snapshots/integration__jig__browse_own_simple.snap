@@ -7,7 +7,6 @@ expression: body
   "jigs": [
     {
       "id": "0cc084bc-7c83-11eb-9f77-e3218dffb008",
-      "privacyLevel": "public",
       "publishedAt": null,
       "creatorId": "1f241e1b-b537-493f-a230-075cb16315be",
       "authorId": "1f241e1b-b537-493f-a230-075cb16315be",
@@ -51,12 +50,12 @@ expression: body
         "audioEffects": {
           "feedbackPositive": "[audio]",
           "feedbackNegative": "[audio]"
-        }
+        },
+        "privacyLevel": "unlisted"
       }
     },
     {
       "id": "3a71522a-cd77-11eb-8dc1-af3e35f7c743",
-      "privacyLevel": "public",
       "publishedAt": null,
       "creatorId": "1f241e1b-b537-493f-a230-075cb16315be",
       "authorId": "1f241e1b-b537-493f-a230-075cb16315be",
@@ -84,7 +83,8 @@ expression: body
         "audioEffects": {
           "feedbackPositive": "[audio]",
           "feedbackNegative": "[audio]"
-        }
+        },
+        "privacyLevel": "unlisted"
       }
     }
   ],
