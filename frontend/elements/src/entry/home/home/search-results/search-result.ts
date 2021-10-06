@@ -6,8 +6,7 @@ const STR_LIKED = "Liked";
 const STR_JI_TEAM = "Ji Team";
 const STR_DESCRIPTION = "Description";
 const STR_ADDITIONAL_RESOURCES = "Additional resources";
-const STR_SEE_ALL_1 = "See";
-const STR_SEE_ALL_2 = "JIGs";
+const STR_SEE_ALL = "See more JIGs by this author";
 
 @customElement('home-search-result')
 export class _ extends LitElement {
@@ -168,6 +167,7 @@ export class _ extends LitElement {
             .hover .author-section {
                 display: flex;
                 justify-content: space-between;
+                flex-wrap: wrap;
             }
             .hover .author-section .left-side {
                 display: flex;
@@ -277,10 +277,8 @@ export class _ extends LitElement {
                                     ${this.author}
                                 </span>
                                 <a>
-                                    ${STR_SEE_ALL_1}
-                                    ${this.author}
-                                    ${STR_SEE_ALL_2}
-                                    >
+                                    ${STR_SEE_ALL}
+                                    <fa-icon icon="fa-light fa-chevron-right"></fa-icon>
                                 </a>
                             </div>
                         </div>

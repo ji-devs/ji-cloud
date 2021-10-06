@@ -4,5 +4,6 @@ expression: body
 
 ---
 {
-  "csrf": "[csrf]"
+  "code": 501,
+  "message": "S3 is disabled"
 }
