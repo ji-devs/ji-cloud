@@ -76,6 +76,7 @@ export class _ extends LitElement {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
+		width: 100%;
 	}
 	.icon {
 	  position: relative;
@@ -117,12 +118,18 @@ export class _ extends LitElement {
 		width: 126px;
 		margin-top: 8px;
 		white-space: pre-wrap;
-		font-size: 14px;
 		line-height: 1.14;
 		letter-spacing: normal;
 		text-align: center;
 		color: var(--dark-gray-6);
+		white-space: nowrap;
+		font-size: 13px;
 	}
+    @media (min-width: 1920px) {
+        .label {
+            font-size: 14px;
+        }
+    }
 
 	/* Position the bubble origin so that it's in the middle here
 		the bubble will nudge itself to the left;

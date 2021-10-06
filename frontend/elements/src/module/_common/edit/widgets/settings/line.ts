@@ -33,21 +33,30 @@ export class _ extends LitElement {
     return [
       css`
         :host {
-		display: grid; 
-  		grid-template-columns: 123px 1fr; 
-  		gap: 0px 70px; 
-		  width: 491px;
+            display: grid;
+            grid-template-columns: 116px 1fr;
+            gap: 0px 32px;
         }
-
+        @media (min-width: 1920px) {
+            :host {
+                grid-template-columns: 123px 1fr;
+                gap: 0px 70px; 
+            }
+        }
 
 	.label {
 		margin-top: 11px;
-		font-size: 16px;
 		font-weight: 500;
-		line-height: 1.25;
+		line-height: 20px;
 		text-align: left;
 		color: var(--dark-gray-4);
+		font-size: 14px;
 	}
+    @media (min-width: 1920px) {
+        .label {
+            font-size: 16px;
+        }
+    }
 
 	.options {
 		display: grid; 
