@@ -15,7 +15,7 @@ import "@elements/entry/user/register/pages/step3";
 import "@elements/entry/user/profile/landing";
 import "@elements/entry/user/profile/options-popup";
 import "@elements/entry/user/profile/reset-password-popup";
-import "@elements/core/panic/panic-message";
+import "@elements/_bundles/_sub-bundles/all";
 import "@elements/core/buttons/rectangle";
 import "@elements/core/buttons/rectangle-icon";
 import "@elements/core/inputs/composed/checkbox";
