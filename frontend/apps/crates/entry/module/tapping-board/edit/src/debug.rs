@@ -93,7 +93,7 @@ impl DebugSettings {
                                             transform,
                                             kind: TraceKind::Regular,
                                             audio: Some(Audio { id: AudioId(Uuid::parse_str(AUDIO_UUID).unwrap_ji()), lib: MediaLibrary::User}),
-                                            text: None,
+                                            text: Some("hello world".to_string()),
                                         }
                                     }
                                 }
@@ -139,7 +139,7 @@ impl DebugSettings {
 
 pub fn init(jig_id: JigId, module_id: ModuleId) {
     if jig_id == JigId(Uuid::from_u128(0)) {
-        /*SETTINGS.set(DebugSettings::debug(Some(InitData{
+        SETTINGS.set(DebugSettings::debug(Some(InitData{
             stickers: vec![
                 InitSticker::Text, //InitSticker::Sprite
             ],
@@ -147,8 +147,7 @@ pub fn init(jig_id: JigId, module_id: ModuleId) {
                 InitTrace::Ellipse(0.3, 0.4, 0.2, 0.1)
             ]
         }))).unwrap_ji();
-        */
-        SETTINGS.set(DebugSettings::debug(None)).unwrap_ji();
+        //SETTINGS.set(DebugSettings::debug(None)).unwrap_ji();
     } else {
         SETTINGS.set(DebugSettings::default()).unwrap_ji();
     }

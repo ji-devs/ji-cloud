@@ -291,6 +291,7 @@ function renderArrow(arrowAnchor:ArrowAnchor, userArrowNudge:number, isFirst: bo
         ml: (boxHeight/2)+OUTLINE_SIZE,
         mr: -((boxHeight)+OUTLINE_SIZE),
         tl: (boxHeight/2)+OUTLINE_SIZE,
+        //tl: OUTLINE_SIZE * 1.5, 
         tm: arrowNudge,
         ttl: arrowNudge,
         ttr: arrowNudge,

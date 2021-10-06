@@ -1,6 +1,6 @@
 use crate::animation::fade::*;
 use crate::audio::mixer::AudioHandle;
-use crate::tooltip::state::MoveStrategy;
+use crate::tooltip::state::{MoveStrategy, TooltipContainer};
 use crate::tooltip::state::{
     Anchor,ContentAnchor, State as TooltipState, TooltipBubble, TooltipData, TooltipTarget,
 };
@@ -42,7 +42,7 @@ impl TraceBubble {
         on_ended: Option<impl Fn() + 'static>,
     ) -> Rc<Self> {
         let tooltip = text.map(|text| {
-            Rc::new(TooltipState::new(
+            let mut state = TooltipState::new(
                 TooltipTarget::NormalizedBounds(bounds, MoveStrategy::Track),
                 TooltipData::Bubble(Rc::new(TooltipBubble {
                     target_anchor: Anchor::Bottom,
@@ -50,7 +50,11 @@ impl TraceBubble {
                     body: text,
                     max_width: Some(200.0),
                 })),
-            ))
+            );
+
+            state.container = Some(TooltipContainer::MainOrWindow);
+
+            Rc::new(state)
         });
 
         let _self_ref:Rc<RefCell<Option<Rc<Self>>>> = Rc::new(RefCell::new(None));

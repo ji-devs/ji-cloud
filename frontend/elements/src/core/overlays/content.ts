@@ -6,6 +6,7 @@ export type MoveStrategy = "" | "dispatchClose" | "track";
 
 //if it's a string then it will work as a querySelector
 //unless it's "window" which will use the window (this is also the default for `container`) 
+//unless it's or "mainOrWindow" which will first try "#main" and fallback to window
 //the querySelector will work from the top of the document (and pierces through the shadowDom)
 export type TrackerProp = TrackerSource | string | (() => TrackerSource);
 export type TrackerSource = HTMLElement | DOMRect | Window;
@@ -56,7 +57,7 @@ export class _ extends LitElement {
                     position: absolute;
                     left: 0;
                     top: 0;
-                    display: block;
+                    display: inline-block;
                     z-index: 0;
                 }
 
@@ -158,6 +159,10 @@ class Tracker {
         if(prop != null && prop !== "") {
             if(prop === "window") {
                 this.source = window;
+            } else if(prop === "mainOrWindow") {
+                let source:TrackerSource | null = queryPierceShadow(document, "#main")
+
+                this.source = source == null ? window : source;
             }  else {
                 const source:TrackerSource | null = typeof prop === "string" ? queryPierceShadow(document, prop)
                     : typeof prop === "function" ? prop()

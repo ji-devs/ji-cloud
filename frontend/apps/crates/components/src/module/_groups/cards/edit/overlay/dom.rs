@@ -7,6 +7,10 @@ use dominator::{html, Dom};
 use futures_signals::{map_ref, signal::SignalExt};
 use std::rc::Rc;
 
+
+// This is really just because originally we didn't have self-managed overlays
+// it could be gotten rid of and tooltips rendered in-place
+
 impl<RawData: RawDataExt, E: ExtraExt> DomRenderable for Overlay<RawData, E> {
     fn render(state: Rc<Overlay<RawData, E>>) -> Dom {
         let sig = map_ref! {
@@ -25,7 +29,7 @@ impl<RawData: RawDataExt, E: ExtraExt> DomRenderable for Overlay<RawData, E> {
             }
         };
 
-        html!("empty-fragment", {
+        html!("overlay-container", {
             .children_signal_vec(sig.to_signal_vec())
         })
     }

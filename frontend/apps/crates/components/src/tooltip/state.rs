@@ -1,16 +1,18 @@
 use super::callbacks::*;
 use std::rc::Rc;
 use utils::math::BoundsF64;
+use wasm_bindgen::{JsCast, JsValue};
 use web_sys::HtmlElement;
 
 pub struct State {
     pub data: TooltipData,
     pub target: TooltipTarget,
+    pub container: Option<TooltipContainer>,
 }
 
 impl State {
     pub fn new(target: TooltipTarget, data: TooltipData) -> Self {
-        Self { data, target }
+        Self { data, target, container: None}
     }
 }
 
@@ -80,6 +82,20 @@ impl ContentAnchor {
 pub enum TooltipTarget {
     Element(HtmlElement, MoveStrategy),
     NormalizedBounds(BoundsF64, MoveStrategy),
+}
+
+pub enum TooltipContainer {
+    MainOrWindow,
+    Element(HtmlElement),
+}
+
+impl TooltipContainer {
+    pub fn as_value(&self) -> JsValue {
+        match self {
+            Self::Element(ref e) => e.clone().unchecked_into(),
+            Self::MainOrWindow => JsValue::from_str("mainOrWindow")
+        } 
+    }
 }
 
 pub enum TooltipData {

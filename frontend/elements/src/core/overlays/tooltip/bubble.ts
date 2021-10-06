@@ -17,17 +17,18 @@ export class _ extends LitElement {
                     display: inline-block;
                 }
 
-            .body {
-                font-size: 30rem;
-                font-weight: 600;
-              text-align: center;
-              color: var(--white);
-            }
-            article {
-                display: flex;
-                gap: 16rem;
-            }
-            `
+                .body {
+                    display: inline-block;
+                    font-size: 30rem;
+                    font-weight: 600;
+                    text-align: center;
+                    color: var(--white);
+                }
+                article {
+                    display: flex;
+                    gap: 16px;
+                }
+            `,
         ];
     }
 
@@ -54,7 +55,10 @@ export class _ extends LitElement {
     }
 
     @property({type: Number})
-    maxWidth:number = -1;
+    minWidth:number = 200;
+
+    @property({type: Number})
+    maxWidth:number = 1000;
 
 
     //internal
@@ -97,13 +101,16 @@ export class _ extends LitElement {
     arrowNudge:number = 0;
 
     render() {
-        const {container, target, strategy, zLayer,marginX, marginY, contentAnchor, targetAnchor, maxWidth, arrowNudge} = this;
+        const {container, target, strategy, zLayer,marginX, minWidth,marginY, contentAnchor, targetAnchor, maxWidth, arrowNudge} = this;
 
         let bodyStyles:any = {
         };
 
+        if(minWidth !== -1) {
+            bodyStyles.minWidth = `${minWidth}rem`;
+        }
         if(maxWidth !== -1) {
-            bodyStyles.maxWidth = `${maxWidth}px`;
+            bodyStyles.maxWidth = `${maxWidth}rem`;
         }
         return html`
 
@@ -129,9 +136,7 @@ export class _ extends LitElement {
                     .targetAnchor=${this.currTargetAnchor}
                     .arrowNudge=${arrowNudge}
                 >
-                <article>
-                    <div class="body" style="${styleMap(bodyStyles)}"><slot></slot></div>
-                </article>
+                    <article><div class="body" style="${styleMap(bodyStyles)}"><slot></slot></div></article>
                 </tooltip-container>
             </overlay-content>
 

@@ -71,6 +71,7 @@ function renderTooltip(moduleKind:ModuleKind, targetRef:HTMLElement) {
     const showId = `header-intro-${moduleKind}`;
     return html`<overlay-container>
         <overlay-tooltip-info .target=${targetRef} .marginX=${marginX} targetAnchor="bm" contentAnchor="tr" title="${STR_TOOLTIP_GETTING_STARTED}" body="${body}" showId="${showId}" closeable></overlay-tooltip-info>
+</overlay-container>
     `
             
 }

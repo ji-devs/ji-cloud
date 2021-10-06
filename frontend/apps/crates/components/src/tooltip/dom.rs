@@ -27,6 +27,10 @@ where
                 html!("overlay-tooltip-error", {
                     .apply(|dom| mixin(dom))
                     .text(&body)
+
+                    .apply_if(state.container.is_some(), |dom| {
+                        dom.property("container", state.container.as_ref().unwrap_ji().as_value())
+                    })
                     .property("target", elem)
                     .property("targetAnchor", target_anchor.as_str())
                     .property("contentAnchor", content_anchor.as_str())
@@ -60,6 +64,9 @@ where
                     .apply_if(max_width.is_some(), |dom| {
                         dom.property("maxWidth", max_width.unwrap_ji())
                     })
+                    .apply_if(state.container.is_some(), |dom| {
+                        dom.property("container", state.container.as_ref().unwrap_ji().as_value())
+                    })
                     .property("target", elem)
                     .property("targetAnchor", target_anchor.as_str())
                     .property("contentAnchor", content_anchor.as_str())
@@ -88,6 +95,9 @@ where
                 html!("overlay-tooltip-bubble", {
                     .apply(|dom| mixin(dom))
                     .text(&body)
+                    .apply_if(state.container.is_some(), |dom| {
+                        dom.property("container", state.container.as_ref().unwrap_ji().as_value())
+                    })
                     .property("target", elem)
                     .property("targetAnchor", target_anchor.as_str())
                     .property("contentAnchor", content_anchor.as_str())
@@ -118,6 +128,7 @@ where
                         .text(&body)
                         .property_signal("target", bounds.denormalize_fixed_signal().map(|bounds| {
                             let rect:DomRect = bounds.into();
+                            log::info!("{:?}", bounds);
                             rect
                         }))
                         /*
@@ -125,6 +136,9 @@ where
                             format!("scale({})", resize_info.scale)
                         }))
                         */
+                        .apply_if(state.container.is_some(), |dom| {
+                            dom.property("container", state.container.as_ref().unwrap_ji().as_value())
+                        })
                         .property("targetAnchor", target_anchor.as_str())
                         .property("contentAnchor", content_anchor.as_str())
                         .property("strategy", move_strategy.as_str())

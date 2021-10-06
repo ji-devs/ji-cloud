@@ -28,7 +28,7 @@ const DEFAULT_ARGS:Args = {
     marginX: 0,
     marginY: 0,
     arrowNudge: 0,
-    kind: "confirm"
+    kind: "bubble"
 }
 
 export const Example = (props?:Args) => {
