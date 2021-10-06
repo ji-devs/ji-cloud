@@ -2,7 +2,7 @@ import { LitElement, html, css, customElement, property } from 'lit-element';
 import {nothing} from "lit-html";
 import { queryPierceShadow} from '@utils/dom';
 
-export type MoveStrategy = "" | "dispatchClose" | "track";
+export type MoveStrategy = "" | "none" | "dispatchClose" | "track";
 
 //if it's a string then it will work as a querySelector
 //unless it's "window" which will use the window (this is also the default for `container`) 
@@ -46,7 +46,7 @@ export type ContentAnchor = Anchor | "oppositeV" | "oppositeH" | "oppositeVH";
 
 const MAX_RECURSE_DEPTH = 3;
 
-export type ZLayer = "menu" | "tooltip" | "modal"
+export type ZLayer = "drag" | "tooltip" | "modal"
 
 @customElement("overlay-content")
 export class _ extends LitElement {
@@ -61,14 +61,14 @@ export class _ extends LitElement {
                     z-index: 0;
                 }
 
-                :host([zLayer="menu"]) {
-                    z-index: 1;
-                }
-                :host([zLayer="tooltip"]) {
+                :host([zLayer="drag"]) {
                     z-index: 100;
                 }
-                :host([zLayer="modal"]) {
+                :host([zLayer="tooltip"]) {
                     z-index: 200;
+                }
+                :host([zLayer="modal"]) {
+                    z-index: 300;
                 }
 
             `
@@ -228,9 +228,9 @@ function createState(opts:StateOpts):State {
 
     let lastAnchor:string = "";
 
-    const {target, dispatcher, marginX, marginY, container, content, strategy} = opts;
+    const {target, dispatcher, container, content, strategy} = opts;
 
-    const _recalc = (contentAnchor: ContentAnchor, targetAnchor:Anchor, recurseDepth: number) => {
+    const _recalc = (contentAnchor: ContentAnchor, targetAnchor:Anchor, recurseDepth: number, marginX: number, marginY: number) => {
         if(recurseDepth === 0) {
             return;
         }
@@ -290,6 +290,8 @@ function createState(opts:StateOpts):State {
             let newContentV:V | undefined; 
             let newTargetH:H | undefined; 
             let newTargetV:V | undefined; 
+            let newMarginX:number | undefined; 
+            let newMarginY:number | undefined; 
 
             if((x + contentRect.width) > containerRect.right) {
                 if(lastResort) {
@@ -297,6 +299,7 @@ function createState(opts:StateOpts):State {
                 } else {
                     newTargetH = "l";
                     newContentH = "r";
+                    //newMarginX = marginX * -1;
                 }
             }
             if((y + contentRect.height) > containerRect.bottom) {
@@ -305,6 +308,7 @@ function createState(opts:StateOpts):State {
                 } else {
                     newTargetV = "t";
                     newContentV = "b";
+                    // newMarginY = marginY * -1;
                 }
             }
             if(x < containerRect.left) {
@@ -313,6 +317,7 @@ function createState(opts:StateOpts):State {
                 } else {
                     newTargetH = "r";
                     newContentH = "l";
+                    // newMarginX = marginX * -1;
                 }
             }
             if(y < containerRect.top) {
@@ -321,6 +326,7 @@ function createState(opts:StateOpts):State {
                 } else {
                     newTargetV = "b";
                     newContentV = "t";
+                    // newMarginY = marginY * -1;
                 }
             }
 
@@ -329,7 +335,9 @@ function createState(opts:StateOpts):State {
                 let replaceContent = `${newContentV || contentV}${newContentH || contentH}`;
                 let replaceTarget = `${newTargetV || targetV}${newTargetH || targetH}`;
 
-                _recalc(replaceContent as Anchor, replaceTarget as Anchor, recurseDepth-1);
+                let replaceMarginX = newMarginX == undefined ? marginX : newMarginX;
+                let replaceMarginY = newMarginY == undefined ? marginY : newMarginY;
+                _recalc(replaceContent as Anchor, replaceTarget as Anchor, recurseDepth-1, replaceMarginX, replaceMarginY);
                 return;
             }
         }
@@ -342,6 +350,7 @@ function createState(opts:StateOpts):State {
 
         });
 
+        console.log(x,y)
         const newAnchor = `${contentAnchor}-${targetAnchor}`;
 
         if(lastAnchor !== newAnchor) {
@@ -353,7 +362,7 @@ function createState(opts:StateOpts):State {
         }
     }
 
-    const recalc = () => _recalc(opts.contentAnchor, opts.targetAnchor, MAX_RECURSE_DEPTH);
+    const recalc = () => _recalc(opts.contentAnchor, opts.targetAnchor, MAX_RECURSE_DEPTH, opts.marginX, opts.marginY);
     // @ts-ignore
     const observer = new ResizeObserver(recalc);
 
@@ -363,7 +372,7 @@ function createState(opts:StateOpts):State {
 
     //very inefficient, but ResizeObserver doesn't take this into account
     let rafId:number | undefined;
-    if(strategy !== "") {
+    if(strategy !== "none" && (strategy as any) !== "") {
         const checkPosition = () => {
 
             const targetRect = target.domRect;

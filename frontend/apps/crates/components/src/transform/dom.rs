@@ -98,15 +98,15 @@ pub fn render_transform(
                 .map(clone!(state => move |pos| {
                     get_menu_contents.as_ref().and_then(|get_menu_contents| {
                         pos.map(|pos| {
-                            html!("drag-container", {
-                                .property("x", pos.0 + 32.0)
-                                .property("y", pos.1)
-                                .child(html!("menu-container", {
-                                    .child(get_menu_contents())
-                                }))
-                                .event(clone!(state => move |_evt:events::Close| {
-                                    log::info!("GOT CLOSE!");
-                                    state.menu_pos.set(None);
+                            html!("overlay-container", {
+                                .child(html!("overlay-drag", {
+                                    .property("target", web_sys::DomRect::new_with_x_and_y_and_width_and_height(pos.0 + 32.0, pos.1, 1.0, 1.0).unwrap_ji())
+                                    .child(html!("menu-container", {
+                                        .child(get_menu_contents())
+                                    }))
+                                    .event(clone!(state => move |_evt:events::Close| {
+                                        state.menu_pos.set(None);
+                                    }))
                                 }))
                             })
                         })
