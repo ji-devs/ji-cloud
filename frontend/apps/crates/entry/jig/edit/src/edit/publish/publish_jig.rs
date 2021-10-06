@@ -2,7 +2,7 @@ use std::collections::HashSet;
 use std::iter::FromIterator;
 
 use futures_signals::signal::Mutable;
-use shared::domain::Publish;
+use shared::domain::jig::PrivacyLevel;
 use shared::domain::meta::AffiliationId;
 use shared::domain::{
     category::CategoryId,
@@ -23,7 +23,7 @@ pub struct PublishJig {
     pub categories: Mutable<HashSet<CategoryId>>,
     pub affiliations: Mutable<HashSet<AffiliationId>>,
     // pub additional_resources: Mutable<HashSet<AdditionalResourceId>>,
-    // pub is_public: Mutable<bool>, // TODO: #1601
+    pub privacy_level: Mutable<PrivacyLevel>,
 }
 
 impl From<JigResponse> for PublishJig {
@@ -38,7 +38,7 @@ impl From<JigResponse> for PublishJig {
             language: Mutable::new(jig.jig_data.language),
             categories: Mutable::new(HashSet::from_iter(jig.jig_data.categories)),
             affiliations: Mutable::new(HashSet::from_iter(jig.jig_data.affiliations)),
-            // is_public: Mutable::new(jig.is_public), TODO: #1601
+            privacy_level: Mutable::new(jig.jig_data.privacy_level),
         }
     }
 }
@@ -55,7 +55,7 @@ impl PublishJig {
             language: Mutable::new(jig.jig_data.language),
             categories: Mutable::new(HashSet::from_iter(jig.jig_data.categories)),
             affiliations: Mutable::new(HashSet::from_iter(jig.jig_data.affiliations)),
-            // is_public: Mutable::new(jig.is_public), TODO: #1601
+            privacy_level: Mutable::new(jig.jig_data.privacy_level),
         }
     }
 
@@ -67,9 +67,8 @@ impl PublishJig {
             goals: Some(self.goals.get_cloned().into_iter().collect()),
             language: Some(self.language.get_cloned()),
             categories: Some(self.categories.get_cloned().into_iter().collect()),
-            // is_public: Some(self.is_public.get_cloned()), // TODO: #1601
             affiliations: Some(self.affiliations.get_cloned().into_iter().collect()),
-            // publish_at: Some(Some(Publish::now())), // TODO: #1601
+            privacy_level: Some(self.privacy_level.get()),
             ..Default::default()
         }
     }

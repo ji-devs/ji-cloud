@@ -196,6 +196,7 @@ where
                         audio_background: None,
                         audio_effects: AudioEffects::default(),
                         default_player_settings: JigPlayerSettings::default(),
+                        privacy_level: PrivacyLevel::default(),
                     });
                 }
 

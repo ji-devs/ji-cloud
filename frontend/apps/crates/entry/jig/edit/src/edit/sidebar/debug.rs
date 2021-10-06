@@ -10,7 +10,6 @@ pub fn get_jig() -> JigResponse {
         author_id: None,
         author_name: None,
         published_at: None,
-        privacy_level: PrivacyLevel::Private,
         jig_data: JigData {
             draft_or_live: DraftOrLive::Draft,
             display_name: "hello world".to_string(),
@@ -45,6 +44,7 @@ pub fn get_jig() -> JigResponse {
             audio_background: None,
             audio_effects: AudioEffects::default(),
             default_player_settings: JigPlayerSettings::default(),
+            privacy_level: PrivacyLevel::default(),
         },
     }
 }

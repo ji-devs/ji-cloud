@@ -108,6 +108,12 @@ impl PrivacyLevel {
     }
 }
 
+impl Default for PrivacyLevel {
+    fn default() -> Self {
+        Self::Public
+    }
+}
+
 /// Request to create a new JIG.
 ///
 /// This creates the draft and live [JigData](JigData) copies with the requested info.

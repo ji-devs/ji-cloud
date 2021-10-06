@@ -6,7 +6,7 @@ use shared::{
     api::endpoints::{category, jig, meta, ApiEndpoint},
     domain::{
         category::{Category, CategoryId, CategoryResponse, CategoryTreeScope, GetCategoryRequest},
-        jig::{JigId, JigResponse, JigData, JigUpdateDraftDataRequest},
+        jig::{JigId, JigResponse, JigData, JigUpdateDraftDataRequest, PrivacyLevel},
         meta::MetadataResponse,
     },
     error::{EmptyError, MetadataNotFound},
@@ -84,7 +84,7 @@ fn set_default_values(jig: &mut JigData, meta: &MetadataResponse) {
         .collect();
     jig.age_ranges = available_ages;
 
-    // jig.is_public = true; // TODO: #1601
+    jig.privacy_level = PrivacyLevel::default()
 }
 
 async fn load_jig(jig_id: JigId) -> Result<JigResponse, EmptyError> {
