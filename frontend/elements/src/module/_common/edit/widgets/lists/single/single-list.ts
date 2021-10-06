@@ -25,15 +25,27 @@ export class _ extends LitElement {
                 }
                 .input-buttons {
                     margin-top: 34px;
-                    margin-bottom: 18px;
                     display: flex;
                     justify-content: flex-end;
+                    margin-bottom: 12px;
+                    margin-right: 4px;
+                }
+                @media (min-width: 1920px) {
+                    .input-buttons {
+                        margin-bottom: 18px;
+                        margin-right: 0px;
+                    }
                 }
                 .input-footer {
-                    margin-top: 24px;
                     font-size: 16px;
                     text-align: center;
                     color: var(--light-blue-5);
+                    margin-top: 12px;
+                }
+                @media (min-width: 1920px) {
+                    .input-footer {
+                        margin-top: 24px;
+                    }
                 }
                 .list {
                     box-sizing: border-box;
