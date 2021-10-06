@@ -2,6 +2,7 @@
 
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use std::fmt;
 use std::str::FromStr;
 use uuid::Uuid;
 
@@ -57,6 +58,20 @@ pub enum StableOrUniqueId {
     /// * Publishing JIG data from draft to live with [`jig::Publish`](crate::api::endpoints::jig::Publish)
     /// * Cloning a JIG through [`jig::Clone`](crate::api::endpoints::jig::Clone)
     Stable(StableModuleId),
+}
+
+impl fmt::Display for StableOrUniqueId {
+    // Format IDs into a string
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            StableOrUniqueId::Unique(id) => {
+                write!(f, "{}", id.0)
+            }
+            StableOrUniqueId::Stable(id) => {
+                write!(f, "{}", id.0)
+            }
+        }
+    }
 }
 
 impl StableOrUniqueId {
@@ -158,9 +173,9 @@ impl FromStr for ModuleKind {
 
 /// Request for fetching a module.
 #[derive(Clone, Serialize, Deserialize, Debug)]
-pub struct ModuleGetRequest {
-    /// Identify the module either through the stable or unique ID.
-    pub id: StableOrUniqueId,
+pub struct ModuleGetQuery {
+    /// The type of the ID.
+    pub q: String,
 }
 
 /// Minimal information about a module.

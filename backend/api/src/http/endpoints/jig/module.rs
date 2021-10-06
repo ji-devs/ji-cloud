@@ -1,15 +1,20 @@
 use actix_web::{
-    web::{self, Data, Json, Path, ServiceConfig},
+    web::{self, Data, Json, Path, Query, ServiceConfig},
     HttpResponse,
 };
 use shared::{
     api::{endpoints::jig::module, ApiEndpoint},
     domain::{
-        jig::{module::ModuleResponse, JigId},
+        jig::{
+            module::{ModuleId, ModuleResponse, StableModuleId, StableOrUniqueId},
+            JigId,
+        },
         CreateResponse,
     },
 };
 use sqlx::PgPool;
+
+// use serde_qs::actix::QsQuery;
 
 use crate::{db, error, extractor::TokenUser};
 
@@ -34,12 +39,25 @@ async fn create(
 /// Get a module from a live JIG.
 async fn get_live(
     db: Data<PgPool>,
-    path: web::Path<JigId>,
-    req: Json<<module::GetLive as ApiEndpoint>::Req>,
+    path: web::Path<(JigId, String)>,
+    query: Query<<module::GetLive as ApiEndpoint>::Req>,
 ) -> Result<Json<<module::GetLive as ApiEndpoint>::Res>, error::NotFound> {
-    let parent_id = path.into_inner();
+    let path = path.into_inner();
+    let query = query.into_inner();
 
-    let module = db::jig::module::get_live(&db, parent_id, req.id)
+    let q: &str = &query.q;
+
+    let module_id = match q {
+        "stable" => StableOrUniqueId::Stable(StableModuleId(uuid::Uuid::parse_str(&path.1)?)),
+
+        "unique" => StableOrUniqueId::Unique(ModuleId(uuid::Uuid::parse_str(&path.1)?)),
+
+        _ => {
+            return Err(error::NotFound::ResourceNotFound);
+        }
+    };
+
+    let module = db::jig::module::get_live(&db, path.0, module_id)
         .await?
         .ok_or(error::NotFound::ResourceNotFound)?;
 
@@ -51,12 +69,25 @@ async fn get_live(
 /// FIXME dedup this from live JIG
 async fn get_draft(
     db: Data<PgPool>,
-    path: web::Path<JigId>,
-    req: Json<<module::GetLive as ApiEndpoint>::Req>,
+    path: web::Path<(JigId, String)>,
+    query: Query<<module::GetLive as ApiEndpoint>::Req>,
 ) -> Result<Json<<module::GetDraft as ApiEndpoint>::Res>, error::NotFound> {
-    let parent_id = path.into_inner();
+    let path = path.into_inner();
+    let query = query.into_inner();
 
-    let module = db::jig::module::get_draft(&db, parent_id, req.id)
+    let q: &str = &query.q;
+
+    let module_id = match q {
+        "stable" => StableOrUniqueId::Stable(StableModuleId(uuid::Uuid::parse_str(&path.1)?)),
+
+        "unique" => StableOrUniqueId::Unique(ModuleId(uuid::Uuid::parse_str(&path.1)?)),
+
+        _ => {
+            return Err(error::NotFound::ResourceNotFound);
+        }
+    };
+
+    let module = db::jig::module::get_draft(&db, path.0, module_id)
         .await?
         .ok_or(error::NotFound::ResourceNotFound)?;
 
