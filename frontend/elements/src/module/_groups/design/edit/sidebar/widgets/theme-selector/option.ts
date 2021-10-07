@@ -24,8 +24,8 @@ export class _ extends LitElement {
             border-radius: 16px;
             border: solid 3px rgba(0, 0, 0, 0);
             box-sizing: border-box;
-            width: 154px;
-            height: 140px;
+            width: 168px;
+            height: 150px;
           }
           @media (min-width: 1920px) {
             section {
@@ -60,14 +60,13 @@ export class _ extends LitElement {
           }
 
           img-ui {
-            margin-bottom: 16px;
-            width: 126px;
-            height: 70px;
+            margin-bottom: 14px;
+            width: 136px;
           }
           @media (min-width: 1920px) {
             img-ui {
+              margin-bottom: 16px;
               width: 200px;
-              height: 114px;
             }
           }
 
@@ -84,7 +83,6 @@ export class _ extends LitElement {
           }
           .label {
             text-align: center;
-            width: 229px;
             font-size: 14px;
             font-weight: 500;
             color: var(--dark-blue-8);

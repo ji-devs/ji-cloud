@@ -7,10 +7,11 @@ export class _ extends LitElement {
   static get styles() {
       return [css`
           .options {
-              margin-top: 93px;
+              margin-top: 48px;
               display: grid;
-              grid-template-columns: repeat(2, 1fr);
-              row-gap: 30px;
+              grid-template-columns: repeat(2, auto);
+              justify-content: space-between;
+              row-gap: 18px;
           }
           @media (min-width: 1920px) {
               .options {

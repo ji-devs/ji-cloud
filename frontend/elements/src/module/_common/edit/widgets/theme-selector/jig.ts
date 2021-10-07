@@ -11,20 +11,21 @@ export class _ extends LitElement {
 	      :host {
 
           position: absolute;
-          top: -15px;
+          top: -3px;
           left: -4px; /*not sure why, otherwise it's off center*/
           border-radius: 16px;
           border: solid 3px var(--light-orange-3);
           background-color: var(--light-orange-1);
           display: flex;
           justify-content: center;
-          width: 154px;
-          height: 140px;
+          box-sizing: border-box;
+          width: 168px;
+          height: 150px;
         }
         @media (min-width: 1920px) {
           :host {
             width: 232px; 
-            height: 196px;
+            height: 197px;
           }
         }
 

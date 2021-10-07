@@ -17,11 +17,17 @@ export class _ extends LitElement {
           }
           section {
             position: relative;
-            width: 232px;
-            height: 196px;
             border-radius: 16px;
             border: solid 3px rgba(0, 0, 0, 0);
             box-sizing: border-box;
+            width: 168px;
+            height: 150px;
+          }
+          @media (min-width: 1920px) {
+            section {
+              width: 232px;
+              height: 196px;
+            }
           }
 
           section.hover {
@@ -41,21 +47,33 @@ export class _ extends LitElement {
           }
           .left, .right {
             box-sizing: border-box;
-            width: 112px;
-            height: 112px;
+            width: 76px;
+            height: 76px;
+          }
+          @media (min-width: 1920px) {
+            .left, .right {
+              width: 112px;
+              height: 112px;
+            }
           }
           .left {
             position: absolute;
             top: 16px;
-            left: 13px;
+            left: 16px;
             border-radius: 16px;
             box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.16);
           }
 
           .right {
             position: absolute;
-            top: 32px;
-            left: calc(88px + 13px);
+            top: 28px;
+            left: calc(54px + 13px);
+          }
+          @media (min-width: 1920px) {
+            .right {
+              top: 32px;
+              left: calc(88px + 13px);
+            }
           }
 
           .right {
@@ -73,13 +91,18 @@ export class _ extends LitElement {
 
           .label {
             position: absolute;
-            top: 160px;
             left: 0px;
             text-align: center;
-            width: 229px;
+            width: 100%;
             font-size: 14px;
             font-weight: 500;
             color: var(--dark-blue-8);
+            top: 114px;
+          }
+          @media (min-width: 1920px) {
+            .label {
+              top: 160px;
+            }
           }
 
           .hidden {
