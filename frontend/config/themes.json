@@ -598,7 +598,7 @@
     "illuminating-hanukkah": {
         "id": "illuminating-hanukkah",
         "label": {
-            "en": "Illuminating Hanukkah"
+            "en": "Illuminating Chanukah"
         },
         "fontFamilies": [
             "'Tinos-Regular'",
@@ -898,6 +898,1281 @@
             "fontFamily": 3,
             "fontFamilyLetteringLeft": 3,
             "fontFamilyLetteringRight": 1
+        }
+    },
+    "abstract": {
+        "id": "abstract",
+        "label": {
+            "en": "Abstract"
+        },
+        "fontFamilies": [
+            "'VarelaRound-Regular', 'quicksand'"
+        ],
+        "colors": ["#5412B4", "#FFC301","#FFFFFF"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 2
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 2
+            },
+            "p1": {
+                "fontFamily": 0,
+                "fontSize": 45,
+                "fontColor": 2
+            },
+            "p2": {
+                "fontFamily": 0,
+                "fontSize": 35,
+                "fontColor": 2
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 0,
+            "borderColor": 0,
+            "fillColor": 1,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 0
+        }
+    },
+    "apple-with-honey": {
+        "id": "apple-with-honey",
+        "label": {
+            "en": "Apple with honey"
+        },
+        "fontFamilies": [
+            "'Tinos-Regular', 'Tinos-Regular'"
+        ],
+        "colors": ["#754112", "#FDF087","#23171B"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 2
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 2
+            },
+            "p1": {
+                "fontFamily": 0,
+                "fontSize": 45,
+                "fontColor": 2
+            },
+            "p2": {
+                "fontFamily": 0,
+                "fontSize": 35,
+                "fontColor": 2
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 0,
+            "borderColor": 0,
+            "fillColor": 1,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 0
+        }
+    },
+    "autumn": {
+        "id": "autumn",
+        "label": {
+            "en": "Autumn"
+        },
+        "fontFamilies": [
+            "'Bellefair-Regular', 'Merienda-Regular'"
+        ],
+        "colors": ["#754112", "#fffdf1","#754112"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 0
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 0
+            },
+            "p1": {
+                "fontFamily": 0,
+                "fontSize": 45,
+                "fontColor": 0
+            },
+            "p2": {
+                "fontFamily": 0,
+                "fontSize": 35,
+                "fontColor": 0
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 0,
+            "borderColor": 0,
+            "fillColor": 1,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 0
+        }
+    },
+    "my-workspace": {
+        "id": "my-workspace",
+        "label": {
+            "en": "My Workspace"
+        },
+        "fontFamilies": [
+            "'CabinSketch-bold','VarelaRound-Regular'",
+            "'CabinSketch-regular','VarelaRound-Regular'"
+        ],
+        "colors": ["#000000", "#fdfbee","#000000"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 130,
+                "fontColor": 0
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 90,
+                "fontColor": 0
+            },
+            "p1": {
+                "fontFamily": 1,
+                "fontSize": 65,
+                "fontColor": 0
+            },
+            "p2": {
+                "fontFamily": 1,
+                "fontSize": 45,
+                "fontColor": 0
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 0,
+            "borderColor": 0,
+            "fillColor": 1,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 0
+        }
+    },
+    "camping": {
+        "id": "camping",
+        "label": {
+            "en": "Camping"
+        },
+        "fontFamilies": [
+            "'VarelaRound-Heb', 'Laila-Medium'"
+        ],
+        "colors": ["#877253", "#F9F8E3","#FFFFFF"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 2
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 2
+            },
+            "p1": {
+                "fontFamily": 0,
+                "fontSize": 45,
+                "fontColor": 2
+            },
+            "p2": {
+                "fontFamily": 0,
+                "fontSize": 35,
+                "fontColor": 2
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 0,
+            "borderColor": 0,
+            "fillColor": 1,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 0
+        }
+    },
+    "chanukah": {
+        "id": "chanukah",
+        "label": {
+            "en": "Chanukah"
+        },
+        "fontFamilies": [
+            "'Tinos-Regular', 'Tinos-Regular'"
+        ],
+        "colors": ["#192150", "#ecfafd","#192150"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 0
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 0
+            },
+            "p1": {
+                "fontFamily": 0,
+                "fontSize": 45,
+                "fontColor": 0
+            },
+            "p2": {
+                "fontFamily": 0,
+                "fontSize": 35,
+                "fontColor": 0
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 0,
+            "borderColor": 0,
+            "fillColor": 1,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 0
+        }
+    },
+    "chanukah-lights": {
+        "id": "chanukah-lights",
+        "label": {
+            "en": "Chanukah lights"
+        },
+        "fontFamilies": [
+            "'Tinos-Regular', 'Tinos-Regular'"
+        ],
+        "colors": ["#a40d12", "#fcf3d0","#ffffff"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 2
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 2
+            },
+            "p1": {
+                "fontFamily": 0,
+                "fontSize": 45,
+                "fontColor": 2
+            },
+            "p2": {
+                "fontFamily": 0,
+                "fontSize": 35,
+                "fontColor": 2
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 0,
+            "borderColor": 0,
+            "fillColor": 1,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 0
+        }
+    },
+    "denim": {
+        "id": "denim",
+        "label": {
+            "en": "Denim"
+        },
+        "fontFamilies": [
+            "'SuezOne-Regular', 'CarterOne-Regular'"
+        ],
+        "colors": ["#192150", "#f7f8fd","#192150"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 0
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 0
+            },
+            "p1": {
+                "fontFamily": 0,
+                "fontSize": 45,
+                "fontColor": 0
+            },
+            "p2": {
+                "fontFamily": 0,
+                "fontSize": 35,
+                "fontColor": 0
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 0,
+            "borderColor": 0,
+            "fillColor": 1,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 0
+        }
+    },
+    "graffiti": {
+        "id": "graffiti",
+        "label": {
+            "en": "Graffiti"
+        },
+        "fontFamilies": [
+            "'SuezOne-Regular', 'CarterOne-Regular'"
+        ],
+        "colors": ["#fffbe7", "#000000","#000000"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 1
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 1
+            },
+            "p1": {
+                "fontFamily": 0,
+                "fontSize": 45,
+                "fontColor": 1
+            },
+            "p2": {
+                "fontFamily": 0,
+                "fontSize": 35,
+                "fontColor": 1
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 1,
+            "borderColor": 1,
+            "fillColor": 0,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 0
+        }
+    },
+    "happy-birthday": {
+        "id": "happy-birthday",
+        "label": {
+            "en": "Happy birthday"
+        },
+        "fontFamilies": [
+            "'Shesek - Regular', 'Itim-Regular'"
+        ],
+        "colors": ["#fffbdf", "#192150","#192150"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 1
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 1
+            },
+            "p1": {
+                "fontFamily": 0,
+                "fontSize": 45,
+                "fontColor": 1
+            },
+            "p2": {
+                "fontFamily": 0,
+                "fontSize": 35,
+                "fontColor": 1
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 1,
+            "borderColor": 1,
+            "fillColor": 0,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 0
+        }
+    },
+    "ice-age": {
+        "id": "ice-age",
+        "label": {
+            "en": "Ice age"
+        },
+        "fontFamilies": [
+            "'Assistant-SemiBold', 'Sunflower-Medium'",
+            "'Assistant-Regular', 'Sunflower-Light'"
+        ],
+        "colors": ["#192150", "#e8f2ff","#ffffff"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 2
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 2
+            },
+            "p1": {
+                "fontFamily": 1,
+                "fontSize": 45,
+                "fontColor": 2
+            },
+            "p2": {
+                "fontFamily": 1,
+                "fontSize": 35,
+                "fontColor": 2
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 0,
+            "borderColor": 0,
+            "fillColor": 1,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 0
+        }
+    },
+    "israel": {
+        "id": "israel",
+        "label": {
+            "en": "Israel"
+        },
+        "fontFamilies": [
+            "'VarelaRound-Regular'"
+        ],
+        "colors": ["#192150", "#f7f8fd","#ffffff"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 2
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 2
+            },
+            "p1": {
+                "fontFamily": 0,
+                "fontSize": 45,
+                "fontColor": 2
+            },
+            "p2": {
+                "fontFamily": 0,
+                "fontSize": 35,
+                "fontColor": 2
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 0,
+            "borderColor": 0,
+            "fillColor": 1,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 0
+        }
+    },
+    "jerusalem-city": {
+        "id": "jerusalem-city",
+        "label": {
+            "en": "Jerusalem city"
+        },
+        "fontFamilies": [
+            "'Tinos-Regular', 'Tinos-Regular'"
+        ],
+        "colors": ["#754112", "#fffdf1","#ffffff","#000000"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 3
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 3
+            },
+            "p1": {
+                "fontFamily": 0,
+                "fontSize": 45,
+                "fontColor": 3
+            },
+            "p2": {
+                "fontFamily": 0,
+                "fontSize": 35,
+                "fontColor": 3
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 0,
+            "borderColor": 0,
+            "fillColor": 1,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 0
+        }
+    },
+    "jerusalem-wall": {
+        "id": "jerusalem-wall",
+        "label": {
+            "en": "Jerusalem wall"
+        },
+        "fontFamilies": [
+            "'Tinos-Regular', 'Tinos-Regular'"
+        ],
+        "colors": ["#754112", "#fffdf1","#ffffff","#000000"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 3
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 3
+            },
+            "p1": {
+                "fontFamily": 0,
+                "fontSize": 45,
+                "fontColor": 3
+            },
+            "p2": {
+                "fontFamily": 0,
+                "fontSize": 35,
+                "fontColor": 3
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 0,
+            "borderColor": 0,
+            "fillColor": 1,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 0
+        }
+    },
+    "jungle": {
+        "id": "jungle",
+        "label": {
+            "en": "Jungle"
+        },
+        "fontFamilies": [
+            "'SuezOne-Regular', 'Acme-regular'"
+        ],
+        "colors": ["#112818", "#d7eede","#112818"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 0
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 0
+            },
+            "p1": {
+                "fontFamily": 0,
+                "fontSize": 45,
+                "fontColor": 0
+            },
+            "p2": {
+                "fontFamily": 0,
+                "fontSize": 35,
+                "fontColor": 0
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 0,
+            "borderColor": 0,
+            "fillColor": 1,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 0
+        }
+    },
+    "our-planet": {
+        "id": "our-planet",
+        "label": {
+            "en": "Our planet"
+        },
+        "fontFamilies": [
+            "'SecularOne-Regular', 'FredokaOne-regular'"
+        ],
+        "colors": ["#3c0e08", "#abff7b","#192150"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 2
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 2
+            },
+            "p1": {
+                "fontFamily": 0,
+                "fontSize": 45,
+                "fontColor": 2
+            },
+            "p2": {
+                "fontFamily": 0,
+                "fontSize": 35,
+                "fontColor": 2
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 0,
+            "borderColor": 0,
+            "fillColor": 1,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 0
+        }
+    },
+    "passover-matza": {
+        "id": "passover-matza",
+        "label": {
+            "en": "Passover matza"
+        },
+        "fontFamilies": [
+            "'Tinos-Regular'"
+        ],
+        "colors": ["#754112", "#fdf8f1","#754112"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 0
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 0
+            },
+            "p1": {
+                "fontFamily": 0,
+                "fontSize": 45,
+                "fontColor": 0
+            },
+            "p2": {
+                "fontFamily": 0,
+                "fontSize": 35,
+                "fontColor": 0
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 0,
+            "borderColor": 0,
+            "fillColor": 1,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 0
+        }
+    },
+    "passover-seder": {
+        "id": "passover-seder",
+        "label": {
+            "en": "Passover seder"
+        },
+        "fontFamilies": [
+            "'Tinos-Regular'"
+        ],
+        "colors": ["#754112", "#ecf8fb","#754112"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 0
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 0
+            },
+            "p1": {
+                "fontFamily": 0,
+                "fontSize": 45,
+                "fontColor": 0
+            },
+            "p2": {
+                "fontFamily": 0,
+                "fontSize": 35,
+                "fontColor": 0
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 0,
+            "borderColor": 0,
+            "fillColor": 1,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 0
+        }
+    },
+    "pomegranate": {
+        "id": "pomegranate",
+        "label": {
+            "en": "Pomegranate"
+        },
+        "fontFamilies": [
+            "'Tinos-Regular'"
+        ],
+        "colors": ["#a40d12", "#f5fbfb","#ffffff"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 2
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 2
+            },
+            "p1": {
+                "fontFamily": 0,
+                "fontSize": 45,
+                "fontColor": 2
+            },
+            "p2": {
+                "fontFamily": 0,
+                "fontSize": 35,
+                "fontColor": 2
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 0,
+            "borderColor": 0,
+            "fillColor": 1,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 0
+        }
+    },
+    "purim-feast": {
+        "id": "purim-feast",
+        "label": {
+            "en": "Purim feast"
+        },
+        "fontFamilies": [
+            "'Tinos-Regular'"
+        ],
+        "colors": ["#a40d12", "#fcfaea","#192150"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 2
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 2
+            },
+            "p1": {
+                "fontFamily": 0,
+                "fontSize": 45,
+                "fontColor": 2
+            },
+            "p2": {
+                "fontFamily": 0,
+                "fontSize": 35,
+                "fontColor": 2
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 0,
+            "borderColor": 0,
+            "fillColor": 1,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 0
+        }
+    },
+    "purim-sweets": {
+        "id": "purim-sweets",
+        "label": {
+            "en": "Purim sweets"
+        },
+        "fontFamilies": [
+            "'Tinos-Regular'"
+        ],
+        "colors": ["#fb4a46", "#ffffff","#23171B"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 2
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 2
+            },
+            "p1": {
+                "fontFamily": 10,
+                "fontSize": 45,
+                "fontColor": 2
+            },
+            "p2": {
+                "fontFamily": 0,
+                "fontSize": 35,
+                "fontColor": 2
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 1,
+            "borderColor": 1,
+            "fillColor": 0,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 0
+        }
+    },
+    "shavuot-dishes": {
+        "id": "shavuot-dishes",
+        "label": {
+            "en": "Shavuot dishes"
+        },
+        "fontFamilies": [
+            "'Tinos-Regular'"
+        ],
+        "colors": ["#754112", "#fcf3d0","#754112"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 0
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 0
+            },
+            "p1": {
+                "fontFamily": 0,
+                "fontSize": 45,
+                "fontColor": 0
+            },
+            "p2": {
+                "fontFamily": 0,
+                "fontSize": 35,
+                "fontColor": 0
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 0,
+            "borderColor": 0,
+            "fillColor": 1,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 0
+        }
+    },
+    "shavuot-fields": {
+        "id": "shavuot-fields",
+        "label": {
+            "en": "Shavuot fields"
+        },
+        "fontFamilies": [
+            "'Tinos-Regular'"
+        ],
+        "colors": ["#754112", "#f4d86b","#754112"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 0
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 0
+            },
+            "p1": {
+                "fontFamily": 0,
+                "fontSize": 45,
+                "fontColor": 0
+            },
+            "p2": {
+                "fontFamily": 0,
+                "fontSize": 35,
+                "fontColor": 0
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 0,
+            "borderColor": 0,
+            "fillColor": 1,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 0
+        }
+    },
+    "space": {
+        "id": "space",
+        "label": {
+            "en": "Spacewalk"
+        },
+        "fontFamilies": [
+            "'Alef-Heb', 'Goldman-Regular'",
+            "'Shesek - Regular', 'Caveat - Medium'",
+            "'Alef-Heb', 'Alef-Regular'"
+        ],
+        "colors": ["#7793a8", "#ffffff","#ffffff"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 1
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 1
+            },
+            "p1": {
+                "fontFamily": 0,
+                "fontSize": 45,
+                "fontColor": 1
+            },
+            "p2": {
+                "fontFamily": 0,
+                "fontSize": 35,
+                "fontColor": 1
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 1,
+            "borderColor": 1,
+            "fillColor": 0,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 0
+        }
+    },
+    "spring": {
+        "id": "spring",
+        "label": {
+            "en": "Spring"
+        },
+        "fontFamilies": [
+            "'VarelaRound-Heb', 'Courgette-Regular'"
+        ],
+        "colors": ["#23082b", "#faf7d6","#23082b","#06877a"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 0
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 0
+            },
+            "p1": {
+                "fontFamily": 0,
+                "fontSize": 45,
+                "fontColor": 0
+            },
+            "p2": {
+                "fontFamily": 0,
+                "fontSize": 35,
+                "fontColor": 0
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 0,
+            "borderColor": 0,
+            "fillColor": 1,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 0
+        }
+    },
+    "sukkot": {
+        "id": "sukkot",
+        "label": {
+            "en": "Sukkot"
+        },
+        "fontFamilies": [
+            "'Tinos-Regular'"
+        ],
+        "colors": ["#543e7e", "#fffae9","#543e7e"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 0
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 0
+            },
+            "p1": {
+                "fontFamily": 0,
+                "fontSize": 45,
+                "fontColor": 0
+            },
+            "p2": {
+                "fontFamily": 0,
+                "fontSize": 35,
+                "fontColor": 0
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 0,
+            "borderColor": 0,
+            "fillColor": 1,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 0
+        }
+    },
+    "summer-pool": {
+        "id": "summer-pool",
+        "label": {
+            "en": "Summer pool"
+        },
+        "fontFamilies": [
+            "'Shesek - Regular', 'Itim-Regular'"
+        ],
+        "colors": ["#ea2052", "#fffbe7","#192150"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 2
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 2
+            },
+            "p1": {
+                "fontFamily": 0,
+                "fontSize": 45,
+                "fontColor": 2
+            },
+            "p2": {
+                "fontFamily": 0,
+                "fontSize": 35,
+                "fontColor": 2
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 0,
+            "borderColor": 0,
+            "fillColor": 1,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 0
+        }
+    },
+    "surreal": {
+        "id": "surreal",
+        "label": {
+            "en": "Surreal"
+        },
+        "fontFamilies": [
+            "'VarelaRound-Heb', 'Courgette-Regular'"
+        ],
+        "colors": ["#657b88", "#fdf4f3","#192150"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 2
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 2
+            },
+            "p1": {
+                "fontFamily": 0,
+                "fontSize": 45,
+                "fontColor": 2
+            },
+            "p2": {
+                "fontFamily": 0,
+                "fontSize": 35,
+                "fontColor": 2
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 0,
+            "borderColor": 0,
+            "fillColor": 1,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 0
+        }
+    },
+    "theater": {
+        "id": "theater",
+        "label": {
+            "en": "Theater"
+        },
+        "fontFamilies": [
+            "'Alef-Heb', 'BerkshireSwash'"
+        ],
+        "colors": ["#0e2038", "#fdfbee","#fdfbee"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 1
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 1
+            },
+            "p1": {
+                "fontFamily": 0,
+                "fontSize": 45,
+                "fontColor": 1
+            },
+            "p2": {
+                "fontFamily": 0,
+                "fontSize": 35,
+                "fontColor": 1
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 0,
+            "borderColor": 0,
+            "fillColor": 1,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 0
+        }
+    },
+    "travel": {
+        "id": "travel",
+        "label": {
+            "en": "Travel"
+        },
+        "fontFamilies": [
+            "'Rubik', 'ArimaMadurai-regular'"
+        ],
+        "colors": ["#fffbe7", "#000000","#000000"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 2
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 2
+            },
+            "p1": {
+                "fontFamily": 0,
+                "fontSize": 45,
+                "fontColor": 2
+            },
+            "p2": {
+                "fontFamily": 0,
+                "fontSize": 35,
+                "fontColor": 2
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 1,
+            "borderColor": 1,
+            "fillColor": 0,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 0
+        }
+    },
+    "yom-kippur": {
+        "id": "yom-kippur",
+        "label": {
+            "en": "Yom Kippur"
+        },
+        "fontFamilies": [
+            "'Tinos-Regular'"
+        ],
+        "colors": ["#000000", "#f7e5b3","#000000"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 0
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 0
+            },
+            "p1": {
+                "fontFamily": 0,
+                "fontSize": 45,
+                "fontColor": 0
+            },
+            "p2": {
+                "fontFamily": 0,
+                "fontSize": 35,
+                "fontColor": 0
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 0,
+            "borderColor": 0,
+            "fillColor": 1,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 0
         }
     }
 }

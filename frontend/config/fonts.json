@@ -178,5 +178,43 @@
     "Laila-Regular": {
         "file": "Laila/Laila-Regular.ttf", 
         "format": "truetype"
+    },
+    "quicksand": {
+        "file": "quicksand-variablefont_wght.ttf", 
+        "format": "truetype"
+    },
+    "CabinSketch-bold": {
+        "file": "CabinSketch/CabinSketch-Bold.ttf", 
+        "format": "truetype"
+    },
+    "CabinSketch-regular": {
+        "file": "CabinSketch/CabinSketch-Regular.ttf", 
+        "format": "truetype"
+    },
+    "Acme-regular": {
+        "file": "Acme-Regular.ttf", 
+        "format": "truetype"
+    }    ,
+    "FredokaOne-regular": {
+        "file": "FredokaOne-Regular.ttf", 
+        "format": "truetype"
+    },
+    "SecularOne-Regular": {
+        "file": "SecularOne-Regular.ttf", 
+        "format": "truetype",
+        "range": "U+0590-05FF, U+FB1D-FB4F"
+    },
+    "Rubik": {
+        "file": "Rubik/Rubik-VariableFont_wght.ttf", 
+        "format": "truetype",
+        "range": "U+0590-05FF, U+FB1D-FB4F"
+    },
+    "BerkshireSwash": {
+        "file": "BerkshireSwash-Regular.ttf", 
+        "format": "truetype"
+    },
+    "ArimaMadurai-regular": {
+        "file": "Arima/ArimaMadurai-Regular.ttf", 
+        "format": "truetype"
     }
 }            
