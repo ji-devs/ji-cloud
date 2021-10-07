@@ -1,11 +1,7 @@
 import { LitElement, html, css, customElement, property } from 'lit-element';
 import {classMap} from "lit-html/directives/class-map";
 import {nothing} from "lit-html";
-import {ModuleKind, STR_MODULE_DISPLAY_NAME, STR_MODULE_HEADER_TOOLTIP_BODY} from "@elements/module/_common/types";
 import "@elements/_bundles/_sub-bundles/overlay"
-
-const STR_TOOLTIP_GETTING_STARTED = "Getting started";
-
 
 @customElement('module-header')
 export class _ extends LitElement {
@@ -31,7 +27,13 @@ export class _ extends LitElement {
   }
 
   @property()
-  moduleKind:ModuleKind = "memory";
+  headerTitle:string = "";
+
+  @property()
+  tooltipTitle:string = "";
+
+  @property()
+  tooltipBody:string = "";
 
   imgRef:HTMLElement | undefined;
 
@@ -42,35 +44,28 @@ export class _ extends LitElement {
   }
 
   render() {
-      const {imgRef, moduleKind} = this;
-
-      const title = STR_MODULE_DISPLAY_NAME[moduleKind];
+      const {imgRef, headerTitle, tooltipBody, tooltipTitle} = this;
 
       return html`
           <section>
                   <div class="topRight">
                       <slot name="controller"></slot>
                       <img-ui @image-load=${this.onImageLoaded} id="gear-img" path="module/_common/edit/header/jiggling-gear.png"></img-ui>
-                      ${imgRef ? renderTooltip(moduleKind, imgRef) : nothing} 
+                      ${imgRef ? renderTooltip(tooltipTitle, tooltipBody, imgRef) : nothing} 
                   </div>
-                  <div class="title">${title}</div>
+                  <div class="title">${headerTitle}</div>
                   <slot></slot>
           </section>
       `
   }
 }
 
-function renderTooltip(moduleKind:ModuleKind, targetRef:HTMLElement) {
-    const body = STR_MODULE_HEADER_TOOLTIP_BODY[moduleKind];
-    if(!body) {
-        return nothing;
-    }
-
+function renderTooltip(title:string, body:string, targetRef:HTMLElement) {
     const marginX = -33; 
 
-    const showId = `header-intro-${moduleKind}`;
+    const showId = `module-header`;
     return html`<overlay-container>
-        <overlay-tooltip-info .target=${targetRef} .marginX=${marginX} targetAnchor="bm" contentAnchor="tr" title="${STR_TOOLTIP_GETTING_STARTED}" body="${body}" showId="${showId}" closeable></overlay-tooltip-info>
+        <overlay-tooltip-info .target=${targetRef} .marginX=${marginX} targetAnchor="bm" contentAnchor="tr" title="${title}" body="${body}" showId="${showId}" closeable></overlay-tooltip-info>
 </overlay-container>
     `
             

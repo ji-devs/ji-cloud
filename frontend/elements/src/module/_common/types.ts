@@ -63,16 +63,3 @@ export const STR_MODULE_PREVIEW_TOOLTIP_BODY:{[key in ModuleKind]:string} = {
     "drag-drop": "Here’s your Drag & Drop for you to play. Want to change something? Just go back and edit!",
     "video": "Here’s your Video for you to play. Want to change something? Just go back and edit!",
 };
-
-export const STR_MODULE_HEADER_TOOLTIP_BODY:{[key in ModuleKind]:string} = {
-    "cover": "Cover intro here",
-    "flashcards": "Flashcards intro here",
-    "matching": "Matching intro here",
-    "memory": "Add your words to the list on the left. You can either type the words or paste them in.",
-    "card-quiz": "Quiz intro here",
-    "tapping-board": "Tapping Board intro here",
-    "poster": "Poster intro here",
-    "tracing": "Tracing intro here",
-    "drag-drop": "Drag & Drop intro here",
-    "video": "Video intro here",
-};

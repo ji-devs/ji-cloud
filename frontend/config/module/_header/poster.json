@@ -1,0 +1,13 @@
+{
+    "steps": [
+        {
+            "tabs": [
+                {
+                    "headerTitle": "header title",
+                    "tooltipTitle": "tooltip title",
+                    "tooltipBody": "tooltip body"
+                }
+            ]
+        }
+    ]
+}
