@@ -21,7 +21,7 @@ pub fn render(state: Rc<Step3>) -> Dom {
                 .child_signal(state.tab.signal_cloned().map(clone!(state => move |tab| {
                     match tab {
                         Tab::Text => {
-                            Some(render_text_editor(state.base.text_editor.clone()))
+                            Some(render_text_editor(state.sidebar.base.text_editor.clone()))
                         },
                         Tab::Image(state) => {
                             Some(render_image_search(state.clone(), None))
@@ -45,7 +45,9 @@ fn render_tab(state: Rc<Step3>, tab_kind:MenuTabKind) -> Dom {
                 curr.kind() == tab_kind
             }))),
             clone!(state, tab_kind => move || {
-                state.tab.set(Tab::new(state.base.clone(), tab_kind));
+                let tab = Tab::new(state.sidebar.base.clone(), tab_kind);
+                state.sidebar.tab_index.set(Some(tab.as_index()));
+                state.tab.set(tab);
             })
         ),
         Some("tabs")

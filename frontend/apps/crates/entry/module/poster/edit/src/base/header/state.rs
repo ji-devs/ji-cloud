@@ -1,4 +1,5 @@
 use components::module::_common::edit::prelude::*;
+use futures_signals::signal::{Signal, SignalExt};
 use super::super::state::Base;
 use std::rc::Rc;
 
@@ -15,5 +16,5 @@ impl Header {
     }
 }
 
-impl HeaderExt for Header{
+impl HeaderExt for Header {
 }

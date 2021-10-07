@@ -44,7 +44,9 @@ fn render_tab(state: Rc<Step2>, tab_kind:MenuTabKind) -> Dom {
                 curr.kind() == tab_kind
             }))),
             clone!(state, tab_kind => move || {
-                state.tab.set(Tab::new(state.base.clone(), tab_kind));
+                let tab = Tab::new(state.sidebar.base.clone(), tab_kind);
+                state.sidebar.tab_index.set(Some(tab.as_index()));
+                state.tab.set(tab);
             })
         ),
         Some("tabs")

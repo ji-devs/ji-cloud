@@ -22,6 +22,7 @@ use crate::{audio::mixer::AudioMixer, module::_common::edit::post_preview::state
 
 use wasm_bindgen_futures::spawn_local;
 
+
 /// This is passed *to* the consumer in order to get a BaseInit
 pub struct BaseInitFromRawArgs<RawData, Mode, Step>
 where
@@ -58,6 +59,7 @@ where
         source: InitSource,
         history: Rc<HistoryStateImpl<RawData>>,
     ) -> Self {
+
         let step = Mutable::new(raw.get_editor_state_step().unwrap_or_default());
         let steps_completed =
             Mutable::new(raw.get_editor_state_steps_completed().unwrap_or_default());
@@ -272,9 +274,14 @@ pub trait MainDomRenderable: DomRenderable {
     }
 }
 
-pub trait SidebarExt: DomRenderable {}
+pub trait SidebarExt: DomRenderable {
+    type TabIndexSignal: Signal<Item = Option<usize>>;
 
-pub trait HeaderExt: DomRenderable {}
+    fn tab_index(&self) -> Self::TabIndexSignal;
+}
+
+pub trait HeaderExt: DomRenderable {
+}
 
 pub trait FooterExt: DomRenderable {}
 
