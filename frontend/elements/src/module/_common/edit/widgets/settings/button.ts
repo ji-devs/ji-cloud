@@ -122,7 +122,7 @@ export class _ extends LitElement {
 		letter-spacing: normal;
 		text-align: center;
 		color: var(--dark-gray-6);
-		white-space: nowrap;
+		max-width: 100px;
 		font-size: 13px;
 	}
     @media (min-width: 1920px) {
