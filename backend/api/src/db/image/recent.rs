@@ -7,12 +7,12 @@ use shared::{
 use sqlx::PgPool;
 use uuid::Uuid;
 
-pub async fn create(
+pub async fn upsert(
     db: &PgPool,
     user_id: Uuid,
     image_id: ImageId,
     library: MediaLibrary,
-) -> anyhow::Result<(ImageId, MediaLibrary, DateTime<Utc>), error::UserRecentImage> {
+) -> anyhow::Result<(ImageId, MediaLibrary, DateTime<Utc>, bool), error::UserRecentImage> {
     let mut txn = db.begin().await?;
 
     let exists = sqlx::query!(
@@ -26,63 +26,28 @@ select exists(select 1 from user_recent_image where user_id = $1 and image_id = 
     .await?
     .exists;
 
-    if exists {
-        return Err(error::UserRecentImage::Conflict);
-    }
-
     let res = sqlx::query!(
-            r#"
+            // language=SQL
+        r#"
 insert into user_recent_image (user_id, image_id, media_library)
 values ($1, $2, $3)
+ON CONFLICT (user_id, image_id) DO UPDATE
+  SET user_id = $1,
+    image_id = $2,
+    media_library = $3,
+    last_used = now()
 returning image_id as "id: ImageId", media_library as "library: MediaLibrary", last_used as "last_used: DateTime<Utc>";
-            "#,
-            user_id,
-            image_id.0,
-            library as i16,
-        )
-        .fetch_one(&mut txn)
-        .await?;
+        "#,
+        user_id,
+        image_id.0,
+        library as i16,
+    )
+    .fetch_one(&mut txn)
+    .await?;
 
     txn.commit().await?;
 
-    Ok((res.id, res.library, res.last_used))
-}
-
-pub async fn update(
-    db: &PgPool,
-    user_id: Uuid,
-    image_id: ImageId,
-) -> anyhow::Result<(), error::UserRecentImage> {
-    let mut txn = db.begin().await?;
-
-    let exists = sqlx::query!(
-        r#"
-select exists(select 1 from user_recent_image where user_id = $1 and image_id = $2) as "exists!"
-            "#,
-        user_id,
-        image_id.0,
-    )
-    .fetch_one(&mut txn)
-    .await?
-    .exists;
-
-    if !exists {
-        return Err(error::UserRecentImage::ResourceNotFound);
-    }
-
-    sqlx::query!(
-        r#"
-update user_recent_image
-set last_used = now()
-where user_id = $1 and image_id = $2
-            "#,
-        user_id,
-        image_id.0,
-    )
-    .execute(&mut txn)
-    .await?;
-
-    txn.commit().await.map_err(Into::into)
+    return Ok((res.id, res.library, res.last_used, exists));
 }
 
 pub async fn delete(db: &PgPool, user_id: Uuid, image_id: ImageId) -> sqlx::Result<()> {

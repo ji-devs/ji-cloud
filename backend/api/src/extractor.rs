@@ -7,7 +7,10 @@ use crate::{
 
 use actix_http::Payload;
 use actix_web::{
-    cookie::Cookie, http::HeaderMap, web::Data, Either, FromRequest, HttpMessage, HttpRequest,
+    cookie::Cookie,
+    http::{header, HeaderMap},
+    web::Data,
+    Either, FromRequest, HttpMessage, HttpRequest,
 };
 use actix_web_httpauth::headers::authorization::{Authorization, Basic};
 use argon2::{
@@ -15,7 +18,7 @@ use argon2::{
     Argon2, PasswordHasher, PasswordVerifier,
 };
 use core::settings::RuntimeSettings;
-use futures::future::{self, FutureExt};
+use futures::future::{self, ready, FutureExt};
 use http::StatusCode;
 use rand::thread_rng;
 use shared::domain::{
@@ -449,28 +452,52 @@ from user_auth_basic where email = $1::text
     }
 }
 
-pub struct RequestOrigin {
-    pub origin: Option<String>,
-}
+pub struct RequestOrigin(pub Option<String>);
 
 impl FromRequest for RequestOrigin {
     type Config = ();
     type Error = actix_web::Error;
     type Future = ReadyOrNot<'static, Result<Self, Self::Error>>;
     fn from_request(req: &HttpRequest, _payload: &mut Payload) -> Self::Future {
-        let origin: Option<String> = req
+        let origin = req
             .headers()
-            .get("Origin")
-            .map(|it| it.to_str().ok())
-            .flatten()
+            .get(header::ORIGIN)
+            .and_then(|it| it.to_str().ok())
             .map(ToOwned::to_owned);
 
-        async move {
-            let origin = origin;
+        ready(Ok(Self(origin))).into()
+    }
+}
 
-            Ok(Self { origin })
-        }
-        .boxed()
-        .into()
+pub struct UserAgent(pub Option<String>);
+
+impl FromRequest for UserAgent {
+    type Config = ();
+    type Error = actix_web::Error;
+    type Future = ReadyOrNot<'static, Result<Self, Self::Error>>;
+    fn from_request(req: &HttpRequest, _payload: &mut Payload) -> Self::Future {
+        let user_agent = req
+            .headers()
+            .get(header::USER_AGENT)
+            .and_then(|it| it.to_str().ok())
+            .map(ToOwned::to_owned);
+
+        ready(Ok(Self(user_agent))).into()
+    }
+}
+
+pub struct IPAddress(pub Option<String>);
+
+impl FromRequest for IPAddress {
+    type Config = ();
+    type Error = actix_web::Error;
+    type Future = ReadyOrNot<'static, Result<Self, Self::Error>>;
+    fn from_request(req: &HttpRequest, _payload: &mut Payload) -> Self::Future {
+        let ip_address = req
+            .connection_info()
+            .realip_remote_addr()
+            .map(|s| s.to_string());
+
+        ready(Ok(Self(ip_address))).into()
     }
 }

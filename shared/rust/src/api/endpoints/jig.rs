@@ -3,7 +3,8 @@ use crate::{
     domain::{
         jig::{
             JigBrowseQuery, JigBrowseResponse, JigCountResponse, JigCreateRequest, JigId,
-            JigResponse, JigSearchQuery, JigSearchResponse, JigUpdateRequest,
+            JigResponse, JigSearchQuery, JigSearchResponse, JigUpdateDraftDataRequest,
+            JigUpdateRequest,
         },
         CreateResponse,
     },
@@ -18,52 +19,20 @@ pub mod module;
 /// Endpoints for jig additional resources.
 pub mod additional_resource;
 
-/// Endpoints for jig drafts.
-pub mod draft;
-
 /// Endpoints for jig player sessions.
 pub mod player;
 
-/// Get a JIG by ID.
+/// Create a JIG and it's draft and live data copies.
 ///
-/// # Authorization
-/// * None
-pub struct Get;
-impl ApiEndpoint for Get {
-    type Req = ();
-    type Res = JigResponse;
-    type Err = EmptyError;
-    const PATH: &'static str = "/v1/jig/{id}";
-    const METHOD: Method = Method::Get;
-}
-
-/// Browse jigs.
+/// * New jigs are all set to `PrivacyLevel::Unlisted` by default
 ///
-/// # Authorization
-/// * One of `Admin`, `AdminJig`, or `ManageSelfJig`
-pub struct Browse;
-impl ApiEndpoint for Browse {
-    type Req = JigBrowseQuery;
-    type Res = JigBrowseResponse;
-    type Err = EmptyError;
-    const PATH: &'static str = "/v1/jig/browse";
-    const METHOD: Method = Method::Get;
-}
-
-/// Search for jigs.
-///
-/// # Authorization
-/// * None
-pub struct Search;
-impl ApiEndpoint for Search {
-    type Req = JigSearchQuery;
-    type Res = JigSearchResponse;
-    type Err = EmptyError;
-    const PATH: &'static str = "/v1/jig";
-    const METHOD: Method = Method::Get;
-}
-
-/// Create a JIG.
+/// # Flow:
+/// 1. Create a JIG and its two data copies with [`Create`]
+/// 2. Optionally update JIG info such as privacy, author with [`Update`]
+/// 3. Make updates to draft data:
+///     a. Patch Jig data through [`UpdateDraftData`]
+///     b. Modify modules, through [`module::Update`]
+/// 4. Finalize draft changes by calling [`Publish`]
 ///
 /// # Authorization
 /// * One of `Admin`, `AdminJig`, or `ManageSelfJig`
@@ -76,19 +45,121 @@ impl ApiEndpoint for Create {
     const METHOD: Method = Method::Post;
 }
 
-/// Clone a JIG.
+/// Update a JIG's info. Note that this does not update the JIG's data.
+///
+/// The fields that can be updated through this route correspond to the modifiable fields in
+/// [`JigResponse`] that are not part of the `.jig_data` field.
+pub struct Update;
+impl ApiEndpoint for Update {
+    type Req = JigUpdateRequest;
+    type Res = ();
+    type Err = EmptyError;
+    const PATH: &'static str = "/v1/jig/{id}";
+    const METHOD: Method = Method::Patch;
+}
+
+/// Get a JIG's live data by ID.
+///
+/// # Authorization
+/// * None
+///
+/// # Errors
+/// * [`NotFound`](http::StatusCode::NOT_FOUND) if the module does not exist, or the parent jig doesn't exist.
+pub struct GetLive;
+impl ApiEndpoint for GetLive {
+    type Req = ();
+    type Res = JigResponse;
+    type Err = EmptyError;
+    const PATH: &'static str = "/v1/jig/{id}/live";
+    const METHOD: Method = Method::Get;
+}
+
+/// Get a JIG's draft data by ID.
+///
+/// # Authorization
+/// * One of `Admin`, `AdminJig`,, or `ManageSelfJig` for owned JIGs
+///
+/// # Errors
+/// * [`Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.
+/// * [`NotFound`](http::StatusCode::NOT_FOUND) if the module does not exist, or the parent jig doesn't exist.
+pub struct GetDraft;
+impl ApiEndpoint for GetDraft {
+    type Req = ();
+    type Res = JigResponse;
+    type Err = EmptyError;
+    const PATH: &'static str = "/v1/jig/{id}/draft";
+    const METHOD: Method = Method::Get;
+}
+
+/// Update the draft data of a JIG.
+///
+/// Note that a copy of the JIG's draft or live data can not be fetched directly, but only as a part
+/// of one of the following routes:
+/// * [`GetLive`] fetches live copies
+/// * [`Search`]
+///
+/// See [`JigData`](crate::domain::jig::JigData) for the over-the-wire representation.
+///
+/// # Authorization
+/// * One of `Admin`, `AdminJig`,, or `ManageSelfJig` for owned JIGs
+pub struct UpdateDraftData;
+impl ApiEndpoint for UpdateDraftData {
+    type Req = JigUpdateDraftDataRequest;
+    type Res = ();
+    type Err = MetadataNotFound;
+    const PATH: &'static str = "/v1/jig/{id}/draft";
+    const METHOD: Method = Method::Patch;
+}
+
+/// Publish a JIG draft to live by copying over the JIG and module data.
+///
+/// # Authorization
+/// * None
+pub struct Publish;
+impl ApiEndpoint for Publish {
+    type Req = ();
+    type Res = ();
+    type Err = EmptyError;
+    const PATH: &'static str = "/v1/jig/{id}/draft/publish";
+    const METHOD: Method = Method::Put;
+}
+
+/// Browse JIGs. Returns the draft data copies in the response.
+///
+/// # Authorization
+/// * One of `Admin`, `AdminJig`, or `ManageSelfJig`
+pub struct Browse;
+impl ApiEndpoint for Browse {
+    type Req = JigBrowseQuery;
+    type Res = JigBrowseResponse;
+    type Err = EmptyError;
+    const PATH: &'static str = "/v1/jig/browse";
+    const METHOD: Method = Method::Get;
+}
+
+/// Search for JIGs.
+///
+/// # Authorization
+/// * None
+pub struct Search;
+impl ApiEndpoint for Search {
+    type Req = JigSearchQuery;
+    type Res = JigSearchResponse;
+    type Err = EmptyError;
+    const PATH: &'static str = "/v1/jig";
+    const METHOD: Method = Method::Get;
+}
+
+/// Clone a JIG. This clones both the draft and live.
 ///
 /// # Authorization
 /// * One of `Admin`, `AdminJig`, or `ManageSelfJig`
 ///
 /// # Errors
-/// [`Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.
-///
-/// [`Forbidden`](http::StatusCode::FORBIDDEN) if the user does not have sufficient permission to perform the action.
-///
-/// ['NotFound'](http::StatusCode::NOT_FOUND) if the jig does not exist.
-///
-/// ['BadRequest'](http::StatusCode::BAD_REQUEST) if the request is malformed or the jig is a draft.
+/// * [`Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.
+/// * [`Forbidden`](http::StatusCode::FORBIDDEN) if the user does not have sufficient permission to perform the action.
+/// * ['NotFound'](http::StatusCode::NOT_FOUND) if the jig does not exist.
+/// * ['BadRequest'](http::StatusCode::BAD_REQUEST) if the request is malformed or the JIG is a draft.
 pub struct Clone;
 impl ApiEndpoint for Clone {
     type Req = ();
@@ -98,23 +169,10 @@ impl ApiEndpoint for Clone {
     const METHOD: Method = Method::Post;
 }
 
-/// Update a JIG.
-///
-/// # Authorization
-/// * One of `Admin`, `AdminJig`,, or `ManageSelfJig` for owned Jigs
-pub struct Update;
-impl ApiEndpoint for Update {
-    type Req = JigUpdateRequest;
-    type Res = ();
-    type Err = MetadataNotFound;
-    const PATH: &'static str = "/v1/jig/{id}";
-    const METHOD: Method = Method::Patch;
-}
-
 /// Delete a JIG.
 ///
 /// # Authorization
-/// * One of `Admin`, `AdminJig`, or `ManageSelfJig` for owned Jigs
+/// * One of `Admin`, `AdminJig`, or `ManageSelfJig` for owned JIGs
 pub struct Delete;
 impl ApiEndpoint for Delete {
     type Req = ();
@@ -124,7 +182,7 @@ impl ApiEndpoint for Delete {
     const METHOD: Method = Method::Delete;
 }
 
-/// Count of public and published JIGs.
+/// Count of all public JIGs. See [`PrivacyLevel`](crate::domain::jig::PrivacyLevel).
 ///
 /// # Authorization
 /// * None

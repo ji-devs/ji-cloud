@@ -30,8 +30,8 @@ where
     Base: BaseExt + 'static,
     Step: StepExt + 'static,
 {
-    pub(super) phase: Mutable<Rc<Phase<RawData, Base>>>,
-    pub(super) jig: RefCell<Option<Jig>>,
+    pub(super) phase: Mutable<Rc<InitPhase<RawData, Base>>>,
+    pub(super) jig: RefCell<Option<JigData>>,
     pub(super) opts: StateOpts<RawData>,
     pub(super) raw_loader: AsyncLoader,
     pub(super) page_body_switcher: AsyncLoader,
@@ -76,10 +76,12 @@ where
             }
         };
 
+        let is_draft:bool = utils::routes::is_param_bool("draft");
+
         let _self = Rc::new(Self {
             opts,
             jig: RefCell::new(None),
-            phase: Mutable::new(Rc::new(Phase::Loading(loading_kind))),
+            phase: Mutable::new(Rc::new(InitPhase::Loading(loading_kind))),
             raw_loader: AsyncLoader::new(),
             page_body_switcher: AsyncLoader::new(),
             phantom: PhantomData,
@@ -88,34 +90,39 @@ where
         _self.raw_loader.load(clone!(_self, init_from_raw => async move {
             *_self.jig.borrow_mut() = {
                 if _self.opts.skip_load_jig {
-                    Some(Jig {
-                        id: JigId(Uuid::from_u128(0)),
+                    Some(JigData {
+                        draft_or_live: DraftOrLive::Draft,
                         display_name: String::from("debug!"),
                         modules: Vec::new(),
                         age_ranges: Vec::new(),
                         affiliations: Vec::new(),
                         goals: Vec::new(),
-                        creator_id: None,
-                        author_id: None,
-                        author_name: None,
                         language: String::from(LANGUAGE_CODE_EN),
                         categories: Vec::new(),
-                        publish_at: None,
                         additional_resources: Vec::new(),
                         description: String::from("debug"),
                         last_edited: None,
-                        is_public: false,
                         theme: ThemeId::default(),
                         audio_background: None,
                         audio_effects: AudioEffects::default(),
                         default_player_settings: JigPlayerSettings::default(),
+                        privacy_level: PrivacyLevel::default(),
                     })
                 } else {
-                    let path = endpoints::jig::Get::PATH.replace("{id}",&_self.opts.jig_id.0.to_string());
 
-                    match api_no_auth::<JigResponse, EmptyError, ()>(&path, endpoints::jig::Get::METHOD, None).await {
+                    let resp = {
+                        if is_draft {
+                            let path = endpoints::jig::GetDraft::PATH.replace("{id}",&_self.opts.jig_id.0.to_string());
+                            api_no_auth::<JigResponse, EmptyError, ()>(&path, endpoints::jig::GetDraft::METHOD, None).await
+                        } else {
+                            let path = endpoints::jig::GetLive::PATH.replace("{id}",&_self.opts.jig_id.0.to_string());
+                            api_no_auth::<JigResponse, EmptyError, ()>(&path, endpoints::jig::GetLive::METHOD, None).await
+                        }
+                    };
+
+                    match resp {
                         Ok(resp) => {
-                            Some(resp.jig)
+                            Some(resp.jig_data)
                         },
                         Err(_) => {
                             panic!("error loading jig!")
@@ -132,7 +139,7 @@ where
             let raw_source_player = match _self.phase.get_cloned().loading_kind_unchecked() {
                 LoadingKind::Direct(raw) => Some((raw.clone(), InitSource::ForceRaw, false)),
                 LoadingKind::Iframe => {
-                    _self.phase.set(Rc::new(Phase::WaitingIframeRaw(
+                    _self.phase.set(Rc::new(InitPhase::WaitingIframeRaw(
                         Rc::new(Box::new(clone!(init_from_raw, _self => move |raw| {
                             _self.raw_loader.load(clone!(init_from_raw, _self => async move {
 
@@ -143,10 +150,9 @@ where
                                 );
                                 let base = init_from_raw(InitFromRawArgs::new(jig_id, module_id, jig, raw, InitSource::IframeData)).await;
 
-                                _self.phase.set(Rc::new(Phase::Ready(Ready {
+                                _self.phase.set(Rc::new(InitPhase::Ready(Ready {
                                     base, 
                                     jig_player: false,
-                                    play_started: Mutable::new(false)
                                 })));
                             }));
                         })))
@@ -155,11 +161,25 @@ where
                     None
                 },
                 LoadingKind::Remote => {
-                    let path = Get::PATH
-                        .replace("{id}",&_self.opts.jig_id.0.to_string())
-                        .replace("{module_id}",&_self.opts.module_id.0.to_string());
 
-                    match api_no_auth::<ModuleResponse, EmptyError, ()>(&path, Get::METHOD, None).await {
+                    let resp = {
+
+                        let req = Some(ModuleGetRequest { id: StableOrUniqueId::Unique(_self.opts.module_id) });
+
+                        if is_draft {
+                            let path = GetDraft::PATH
+                                .replace("{id}",&_self.opts.jig_id.0.to_string());
+
+                            api_no_auth::<ModuleResponse, EmptyError, _>(&path, GetDraft::METHOD, req).await
+                        } else {
+                            let path = GetLive::PATH
+                                .replace("{id}",&_self.opts.jig_id.0.to_string());
+
+                            api_no_auth::<ModuleResponse, EmptyError, _>(&path, GetLive::METHOD, req).await
+                        }
+                    };
+
+                    match resp {
                         Ok(resp) => {
                             let body = resp.module.body;
                             Some((body.try_into().unwrap_ji(), InitSource::Load, true))
@@ -180,16 +200,16 @@ where
                 );
                 let base = init_from_raw(InitFromRawArgs::new(jig_id, module_id, jig, raw, init_source)).await;
 
-                _self.phase.set(Rc::new(Phase::Ready(Ready {
+                _self.phase.set(Rc::new(InitPhase::Ready(Ready {
                     base, 
                     jig_player,
-                    play_started: Mutable::new(false)
                 })));
             }
         }));
 
         _self
     }
+
 }
 
 #[derive(Debug, Clone)]
@@ -213,11 +233,12 @@ impl<RawData> StateOpts<RawData> {
             skip_play: false,
         }
     }
+        
 }
 
 pub type RawDirect = bool;
 
-pub enum Phase<RawData, Base> {
+pub enum InitPhase<RawData, Base> {
     Loading(LoadingKind<RawData>),
     WaitingIframeRaw(Rc<Box<dyn Fn(RawData)>>),
     Ready(Ready<Base>),
@@ -226,10 +247,9 @@ pub enum Phase<RawData, Base> {
 pub struct Ready<Base> {
     pub base: Rc<Base>,
     pub jig_player: bool,
-    pub play_started: Mutable<bool>,
 }
 
-impl<RawData, Base> Phase<RawData, Base> {
+impl<RawData, Base> InitPhase<RawData, Base> {
     pub fn waiting_iframe_raw(&self) -> bool {
         match self {
             Self::Loading(kind) => match kind {
@@ -259,6 +279,21 @@ pub enum InitSource {
     Load,
     IframeData,
 }
+
+
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub enum ModulePlayPhase {
+    Init,
+    Playing,
+    Ending(Option<ModuleEnding>)
+}
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub enum ModuleEnding {
+    Positive,
+    Negative,
+    Next
+}
+
 pub struct InitFromRawArgs<RawData, Mode, Step>
 where
     RawData: BodyExt<Mode, Step> + 'static,
@@ -267,10 +302,11 @@ where
 {
     pub jig_id: JigId,
     pub module_id: ModuleId,
-    pub jig: Jig,
+    pub jig: JigData,
     pub raw: RawData,
     pub source: InitSource,
     pub theme_id: ThemeId,
+    pub play_phase: Mutable<ModulePlayPhase>,
     phantom: PhantomData<(Mode, Step)>,
 }
 
@@ -283,7 +319,7 @@ where
     pub fn new(
         jig_id: JigId,
         module_id: ModuleId,
-        jig: Jig,
+        jig: JigData,
         raw: RawData,
         source: InitSource,
     ) -> Self {
@@ -305,6 +341,7 @@ where
             jig,
             raw,
             source,
+            play_phase: Mutable::new(ModulePlayPhase::Init),
             phantom: PhantomData,
         }
     }
@@ -322,4 +359,9 @@ pub trait BaseExt: DomRenderable {
     fn get_timer_minutes(&self) -> Option<u32> {
         None
     }
+
+    fn set_play_phase(&self, phase: ModulePlayPhase) {
+        self.play_phase().set_neq(phase);
+    }
+    fn play_phase(&self) -> Mutable<ModulePlayPhase>;
 }

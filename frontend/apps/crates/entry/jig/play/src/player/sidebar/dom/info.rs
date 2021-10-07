@@ -5,7 +5,7 @@ use futures_signals::{
     map_ref,
     signal::{Signal, SignalExt},
 };
-use shared::domain::jig::Jig;
+use shared::domain::jig::JigResponse;
 use utils::{ages::AgeRangeVecExt, events, jig::published_at_string};
 
 use super::{
@@ -56,23 +56,23 @@ fn info_open_signal(state: Rc<State>) -> impl Signal<Item = bool> {
         .signal_cloned()
 }
 
-fn render_jig_info(state: Rc<State>, jig: &Jig) -> Dom {
+fn render_jig_info(state: Rc<State>, jig: &JigResponse) -> Dom {
     html!("jig-play-sidebar-jig-info", {
         .property("slot", "overlay")
-        .property("name", &jig.display_name)
+        .property("name", &jig.jig_data.display_name)
         .property("playedCount", "?")
         .property("likedCount", "?")
-        .property("language", &jig.language)
+        .property("language", &jig.jig_data.language)
         // .property("author", jig.author_id)
         .property("publishedAt", {
-            match jig.publish_at {
+            match jig.published_at {
                 Some(publish_at) => published_at_string(publish_at, false),
                 None => String::new(),
             }
         })
-        .property("description", &jig.description)
+        .property("description", &jig.jig_data.description)
         .property_signal("ages", state.all_ages.signal_cloned().map(clone!(jig => move|all_ages| {
-            all_ages.range_string(&jig.age_ranges)
+            all_ages.range_string(&jig.jig_data.age_ranges)
         })))
         .child(html!("button-empty", {
             .property("slot", "close")
@@ -81,7 +81,7 @@ fn render_jig_info(state: Rc<State>, jig: &Jig) -> Dom {
                 state.info_popup_active.set(false);
             }))
         }))
-        .children(jig.categories.iter().map(|category_id| {
+        .children(jig.jig_data.categories.iter().map(|category_id| {
             html!("pill-close", {
                 .property("slot", "categories")
                 .property("label", &category_id.0.to_string())

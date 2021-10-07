@@ -6,6 +6,7 @@ expression: body
 {
   "module": {
     "id": "[id]",
+    "stable_id": "[stable_id]",
     "body": {
       "cover": {
         "content": {
@@ -28,6 +29,9 @@ expression: body
         }
       }
     },
-    "is_complete": false
+    "is_complete": false,
+    "is_updated": false,
+    "created_at": "[created_at]",
+    "updated_at": "[updated_at]"
   }
 }

@@ -1,15 +1,10 @@
-use std::sync::Arc;
-
 use actix_web::{
-    web::{Bytes, Data, Json, Path, ServiceConfig},
+    web::{Data, Json, Path, ServiceConfig},
     HttpResponse,
 };
-use core::config::{ANIMATION_BODY_SIZE_LIMIT, IMAGE_BODY_SIZE_LIMIT};
-use sha2::Digest as _;
 use shared::{
     api::{endpoints, ApiEndpoint},
     domain::{
-        image::ImageKind,
         media::{UrlCreatedResponse, WebMediaMetadataResponse, WebMediaUrlCreateRequest},
         Base64,
     },
@@ -20,181 +15,25 @@ use url::Url;
 use uuid::Uuid;
 
 use crate::{
-    error,
+    db, error,
     extractor::{ScopeAdmin, TokenUser, TokenUserWithScope},
     image_ops::MediaKind,
     service::{s3, ServiceData},
 };
 
-#[inline]
-const fn max(a: usize, b: usize) -> usize {
-    if a > b {
-        a
-    } else {
-        b
-    }
-}
-
-// FIXME break this function up a bit, split ou the DB queries into `src/db`
 pub async fn create(
     pool: Data<PgPool>,
     _claims: TokenUser,
     s3: ServiceData<s3::Client>,
     request: Json<WebMediaUrlCreateRequest>,
 ) -> Result<HttpResponse, error::Server> {
-    let url = request.into_inner().url;
+    let request = request.into_inner();
 
-    const MAX_RESPONSE_SIZE: usize = max(ANIMATION_BODY_SIZE_LIMIT, IMAGE_BODY_SIZE_LIMIT);
+    let url_string = request.url.to_string();
 
-    let url_string = url.to_string();
+    let (id, kind, status_code) = db::media::create(&pool, &s3, &url_string).await?;
 
-    // If we can already find the image, return early.
-    if let Some(record) = sqlx::query!(
-        r#"
-select media_id,
-       kind as "kind: MediaKind"
-from web_media_library_url
-inner join web_media_library on id = media_id
-where media_url = $1"#,
-        &url_string
-    )
-    .fetch_optional(pool.as_ref())
-    .await?
-    {
-        log::trace!("Found the url");
-
-        return Ok(HttpResponse::Created().json(UrlCreatedResponse {
-            id: record.media_id,
-            kind: record.kind.to_shared(),
-        }));
-    }
-
-    let client: reqwest::Client = reqwest::ClientBuilder::new()
-        .connect_timeout(std::time::Duration::from_secs(5))
-        .timeout(std::time::Duration::from_secs(10))
-        .build()?;
-
-    // todo: this `?` should be a ClientError or "proxy/gateway error"
-    let mut response: reqwest::Response = client.get(url).send().await?;
-
-    let mut data = Vec::new();
-
-    while let Some(chunk) = response.chunk().await? {
-        let chunk: Bytes = chunk;
-        if data.len() + chunk.len() < MAX_RESPONSE_SIZE {
-            data.extend_from_slice(&chunk[..]);
-        } else {
-            return Err(anyhow::anyhow!("todo: better error here (data too big)").into());
-        }
-    }
-
-    log::trace!("data was {} bytes long", data.len());
-
-    let mut hasher = sha2::Sha384::new();
-
-    hasher.update(&data);
-
-    let hash = hasher.finalize().to_vec();
-
-    let mut txn = pool.begin().await?;
-
-    // If we can find the image by hash, return early.
-
-    let record = sqlx::query!(
-        r#"
-select id,
-       kind as "kind: MediaKind"
-from web_media_library
-where hash = $1
-for update
-"#,
-        &hash
-    )
-    .fetch_optional(&mut txn)
-    .await?;
-
-    if let Some(record) = record {
-        let id = record.id;
-        sqlx::query!(
-            "insert into web_media_library_url (media_id, media_url) values ($1, $2) on conflict (media_id, media_url) do nothing",
-            id,
-            &url_string
-        )
-        .execute(&mut txn)
-        .await?;
-
-        txn.commit().await?;
-
-        log::trace!("Found the hash");
-
-        return Ok(HttpResponse::Created().json(UrlCreatedResponse {
-            id,
-            kind: record.kind.to_shared(),
-        }));
-    }
-
-    let data = Arc::new(data);
-
-    let kind = actix_web::web::block({
-        let data = data.clone();
-        move || crate::image_ops::detect_image_kind(&data)
-    })
-    .await??;
-
-    log::debug!("detected image kind as: {:?}", kind);
-
-    let id = sqlx::query!(
-        r#"insert into web_media_library ("hash", kind) values($1, $2) returning id"#,
-        &hash,
-        kind as i16
-    )
-    .fetch_one(&mut txn)
-    .await?
-    .id;
-
-    sqlx::query!(
-        "insert into web_media_library_url (media_id, media_url) values ($1, $2)",
-        id,
-        &url_string
-    )
-    .execute(&mut txn)
-    .await?;
-
-    match kind {
-        MediaKind::GifAnimation => {
-            s3.upload_media(
-                Arc::try_unwrap(data).expect("This should be unique by now"),
-                MediaLibrary::Web,
-                id,
-                FileKind::AnimationGif,
-            )
-            .await?;
-        }
-
-        MediaKind::PngStickerImage => {
-            let (original, resized, thumbnail) = actix_web::web::block(move || {
-                let original = image::load_from_memory(&data)?;
-                crate::image_ops::generate_images(&original, ImageKind::Sticker)
-            })
-            .await??;
-
-            s3.upload_png_images(MediaLibrary::Web, id, original, resized, thumbnail)
-                .await?;
-        }
-
-        kind => return Err(anyhow::anyhow!("unsupported media kind {:?}", kind).into()),
-    }
-
-    sqlx::query!(
-        "update web_media_library set uploaded_at = now() where id = $1",
-        id
-    )
-    .execute(&mut txn)
-    .await?;
-
-    txn.commit().await?;
-
-    Ok(HttpResponse::Created().json(UrlCreatedResponse {
+    Ok(HttpResponse::build(status_code).json(UrlCreatedResponse {
         id,
         kind: kind.to_shared(),
     }))

@@ -342,20 +342,12 @@ pub fn configure(cfg: &mut ServiceConfig) {
         image::tag::List::METHOD.route().to(self::tag::list),
     )
     .route(
-        image::recent::Create::PATH,
-        image::recent::Create::METHOD
-            .route()
-            .to(self::recent::create),
-    )
-    .route(
         image::recent::List::PATH,
         image::recent::List::METHOD.route().to(self::recent::list),
     )
     .route(
-        image::recent::Update::PATH,
-        image::recent::Update::METHOD
-            .route()
-            .to(self::recent::update),
+        image::recent::Put::PATH,
+        image::recent::Put::METHOD.route().to(self::recent::put),
     )
     .route(
         image::recent::Delete::PATH,

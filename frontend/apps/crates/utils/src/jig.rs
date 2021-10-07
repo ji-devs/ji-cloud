@@ -13,7 +13,10 @@ impl JigAudioExt for AudioBackground {
     fn display_name(&self) -> &'static str {
         match self {
             AudioBackground::FunForKids => "Fun for Kids",
-            AudioBackground::SukkotLoop => "Sukkout Loop",
+            AudioBackground::DancingHappy => "Dancing Happy",
+            AudioBackground::Jigzi1 => "Jigzi 1",
+            AudioBackground::Jigzi2 => "Jigzi 2",
+            AudioBackground::Jigzi3 => "Jigzi 3",
         }
     }
 }
@@ -22,9 +25,18 @@ impl JigAudioExt for AudioBackground {
 impl JigAudioExt for AudioFeedbackPositive {
     fn display_name(&self) -> &'static str {
         match self {
+            AudioFeedbackPositive::Correct => "Correct",
+            AudioFeedbackPositive::Keys => "Keys",
             AudioFeedbackPositive::Magic => "Magic",
+            AudioFeedbackPositive::Notes => "Notes",
             AudioFeedbackPositive::StarPing => "Star Ping",
             AudioFeedbackPositive::Ting => "Ting",
+            AudioFeedbackPositive::Trumpet => "Trumpet",
+            AudioFeedbackPositive::VoiceAwesome => "Voice Awesome",
+            AudioFeedbackPositive::VoicesHurray => "Voices Hurray",
+            AudioFeedbackPositive::VoiceYippee => "Voice Yippee",
+            AudioFeedbackPositive::Xylophone => "Xylophone",
+            AudioFeedbackPositive::Yes => "Yes",
         }
     }
 }
@@ -33,9 +45,18 @@ impl JigAudioExt for AudioFeedbackPositive {
 impl JigAudioExt for AudioFeedbackNegative {
     fn display_name(&self) -> &'static str {
         match self {
+            AudioFeedbackNegative::Bang => "Bang",
             AudioFeedbackNegative::Boing => "Boing",
+            AudioFeedbackNegative::Buzz => "Buzz",
+            AudioFeedbackNegative::Buzzer => "Buzzer",
+            AudioFeedbackNegative::Clang => "Clang",
+            AudioFeedbackNegative::Clicks => "Clicks",
             AudioFeedbackNegative::Incorrect => "Incorrect",
             AudioFeedbackNegative::JumpWrong => "Jump Wrong",
+            AudioFeedbackNegative::NotRight => "Not Right",
+            AudioFeedbackNegative::OhNo => "Oh No",
+            AudioFeedbackNegative::ShortClang => "Short Clang",
+            AudioFeedbackNegative::Whir => "Whir",
         }
     }
 }
@@ -122,6 +143,9 @@ pub struct JigPlayerOptions {
 
     #[serde(default)]
     pub is_student: bool,
+
+    #[serde(default)]
+    pub draft: bool,
 }
 
 impl Default for JigPlayerOptions {
@@ -149,6 +173,7 @@ impl From<JigPlayerSettings> for JigPlayerOptions {
             track_assessments: settings.track_assessments,
             drag_assist: settings.drag_assist,
             is_student: false,
+            draft: false,
         }
     }
 }

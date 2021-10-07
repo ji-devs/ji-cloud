@@ -16,7 +16,7 @@ export class _ extends LitElement {
             baseStyles,
             css`
                 ::selection {
-                    background-color: #00000020;
+                    background-color: rgba(114, 207, 147, 45%);
                 }
             `,
         ];

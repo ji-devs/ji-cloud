@@ -242,14 +242,6 @@ async fn process_uploaded_media_trigger(
 ) -> Result<Json<()>, error::EventArc> {
     type Error = error::EventArc;
 
-    // if let Some(cloud_events_mode) = query.into_inner().cloud_events_mode {
-    //     if cloud_events_mode != "__CE_PUBSUB_BINDING" {
-    //         return Err(Error::InvalidEventSource);
-    //     }
-    // } else {
-    //     return Err(Error::InvalidEventSource);
-    // }
-
     let event: audit_log::Event = audit_log::Event::try_from(event)?;
 
     let event_source: EventSource = EventSource::from_str(&event.source)?;
@@ -319,7 +311,7 @@ pub async fn signal_status_and_process_media(
         FileKind::ImagePng(PngImageFile::Original) => match library {
             MediaLibrary::Global => upload::process_image(&db, &s3, *id).await,
             MediaLibrary::User => upload::process_user_image(&db, &s3, *id).await,
-            _ => return Err(error::EventArc::InvalidEventResource),
+            MediaLibrary::Web => upload::process_web_media(&db, &s3, *id).await,
         },
         FileKind::AnimationGif => upload::process_animation(db, s3, *id).await,
         FileKind::AudioMp3 => upload::process_user_audio(db, s3, *id).await,

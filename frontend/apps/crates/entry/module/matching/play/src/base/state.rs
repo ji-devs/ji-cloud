@@ -1,6 +1,5 @@
 use shared::domain::jig::{
     JigId, 
-    Jig, 
     module::{
         ModuleId, 
         body::{
@@ -32,10 +31,7 @@ use std::future::Future;
 use futures::future::join_all;
 use gloo_timers::future::TimeoutFuture;
 use components::audio::mixer::AudioMixer;
-use super::{
-    game::state::Game,
-    ending::state::Ending
-};
+use super::game::state::Game;
 
 pub struct Base {
     pub jig_id: JigId,
@@ -46,14 +42,15 @@ pub struct Base {
     pub instructions: Instructions,
     pub settings: PlayerSettings,
     pub raw_pairs: Vec<CardPair>,
-    pub phase: Mutable<Phase>
+    pub phase: Mutable<Phase>,
+    pub module_phase: Mutable<ModulePlayPhase>,
 }
 
 #[derive(Clone)]
 pub enum Phase {
     Init,
     Playing(Rc<Game>),
-    Ending(Rc<Ending>), 
+    Ending, 
 }
 
 impl Base {
@@ -79,6 +76,7 @@ impl Base {
             instructions: content.base.instructions, 
             settings: content.player_settings,
             raw_pairs: content.base.pairs,
+            module_phase: init_args.play_phase,
             phase: Mutable::new(Phase::Init),
         });
 
@@ -95,5 +93,9 @@ impl BaseExt for Base {
 
     fn get_timer_minutes(&self) -> Option<u32> {
         self.settings.time_limit
+    }
+
+    fn play_phase(&self) -> Mutable<ModulePlayPhase> {
+        self.module_phase.clone()
     }
 }

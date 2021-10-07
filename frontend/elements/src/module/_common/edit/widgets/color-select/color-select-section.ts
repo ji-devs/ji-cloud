@@ -7,18 +7,29 @@ export class _ extends LitElement {
         return [css`
             :host {
                 display: grid;
-                row-gap: 24px;
+                row-gap: 16px;
             }
-            h3 {
+            h4 {
                 margin: 0;
-                font-size: 16px;
+                font-weight: 600;
                 color: #4a4a4a;
-                font-weight: 500;
+                font-size: 15px;
+            }
+            @media (min-width: 1920px) {
+                h4 {
+                    font-size: 16px;
+                }
             }
             .items {
                 display: grid;
-                grid-template-columns: repeat(6, 62px);
-                gap: 24px;
+                gap: 16px;
+                grid-template-columns: repeat(5, 54px);
+            }
+            @media (min-width: 1920px) {
+                .items {
+                    gap: 24px;
+                    grid-template-columns: repeat(6, 56px);
+                }
             }
         `];
     }
@@ -28,7 +39,7 @@ export class _ extends LitElement {
 
     render() {
         return html`
-            <h3>${this.label}</h3>
+            <h4>${this.label}</h4>
             <div class="items">
                 <slot name="items"></slot>
             </div>

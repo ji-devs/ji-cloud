@@ -4,19 +4,19 @@ use futures_signals::{
     map_ref,
     signal::{Signal, SignalExt},
 };
-use shared::{api::endpoints::{self, ApiEndpoint}, domain::{CreateResponse, jig::{Jig, JigId, JigPlayerSettings, JigResponse, JigUpdateRequest, LiteModule, ModuleKind, module::{ModuleCreateRequest, ModuleId, ModuleResponse}}}, error::EmptyError};
+use shared::{api::endpoints::{self, ApiEndpoint}, domain::{CreateResponse, jig::{JigResponse, JigId, JigPlayerSettings, JigUpdateDraftDataRequest, LiteModule, ModuleKind, module::{ModuleCreateRequest, ModuleId, ModuleResponse}}}, error::EmptyError};
 use std::cell::RefCell;
 use std::rc::Rc;
 use utils::{iframe::ModuleToJigEditorMessage, prelude::*};
 
-pub async fn load_jig(jig_id: JigId, jig_cell: Rc<RefCell<Option<Jig>>>) {
-    let path = endpoints::jig::Get::PATH.replace("{id}", &jig_id.0.to_string());
+pub async fn load_jig(jig_id: JigId, jig_cell: Rc<RefCell<Option<JigResponse>>>) {
+    let path = endpoints::jig::GetDraft::PATH.replace("{id}", &jig_id.0.to_string());
 
-    match api_with_auth::<JigResponse, EmptyError, ()>(&path, endpoints::jig::Get::METHOD, None)
+    match api_with_auth::<JigResponse, EmptyError, ()>(&path, endpoints::jig::GetDraft::METHOD, None)
         .await
     {
         Ok(resp) => {
-            *jig_cell.borrow_mut() = Some(resp.jig);
+            *jig_cell.borrow_mut() = Some(resp);
         }
         Err(_) => {}
     }
@@ -36,7 +36,7 @@ pub fn navigate_to_publish(state: Rc<State>) {
      */
 }
 
-pub async fn update_jig(jig_id: &JigId, req: JigUpdateRequest) -> Result<(), EmptyError> {
+pub async fn update_jig(jig_id: &JigId, req: JigUpdateDraftDataRequest) -> Result<(), EmptyError> {
     let path = endpoints::jig::Update::PATH.replace("{id}", &jig_id.0.to_string());
     api_with_auth_empty::<EmptyError, _>(&path, endpoints::jig::Update::METHOD, Some(req)).await
 }
@@ -45,9 +45,9 @@ pub fn update_display_name(state: Rc<State>, value: String) {
     state.loader.load(clone!(state => async move {
         state.name.set(value.clone());
 
-        let req = JigUpdateRequest {
+        let req = JigUpdateDraftDataRequest {
             display_name: Some(value),
-            ..JigUpdateRequest::default()
+            ..Default::default()
         };
 
         match update_jig(&state.jig.id, req).await {
@@ -116,13 +116,13 @@ fn populate_added_module(state: Rc<State>, module: LiteModule) {
 pub fn use_module_as(state: Rc<State>, target_kind: ModuleKind, source_module_id: ModuleId) {
     state.loader.load(clone!(state => async move {
         let target_module_id: Result<ModuleId, EmptyError> = async {
-            let path = endpoints::jig::module::Get::PATH
+            let path = endpoints::jig::module::GetDraft::PATH
                 .replace("{id}", &state.jig.id.0.to_string())
                 .replace("{module_id}", &source_module_id.0.to_string());
 
             let source_module = api_with_auth::<ModuleResponse, EmptyError, ()>(
                 &path,
-                endpoints::jig::module::Get::METHOD,
+                endpoints::jig::module::GetDraft::METHOD,
                 None
             ).await?.module;
 

@@ -7,13 +7,11 @@ export default {
 
 interface Args {
   value:string,
-  editing: boolean
   width:number,
   height:number,
 }
 
 const DEFAULT_ARGS:Args = {
-    editing: true,
   value:"hello",
   width:300,
   height:300,
@@ -25,7 +23,7 @@ export const TextAreaContent = (props?:Partial<Args>) => {
 
     return `
         <div style="width:${width}px; height: ${height}px; background-color: beige;">
-            <input-textarea-content ${argsToAttrs(textProps)}></input-textarea-content>
+            <input-textarea-content ${argsToAttrs(textProps)} constrainWidth="${width}" constrainHeight="${height}"></input-textarea-content>
         </div>
     `;
 }

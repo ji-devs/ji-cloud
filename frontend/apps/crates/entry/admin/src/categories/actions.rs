@@ -168,7 +168,8 @@ pub fn move_category(content_state: Rc<ContentState>, dir: Direction) {
         let req = UpdateCategoryRequest {
             name: None,
             parent_id: None,
-            index: Some(target_index as u16) 
+            index: Some(target_index as u16),
+            user_scopes: None,
         };
         content_state.state.loader.load(async move {
 
@@ -217,7 +218,8 @@ pub fn rename_category(cat: &Rc<Category>, state: Rc<State>, name: String) {
         let req = UpdateCategoryRequest {
             name: Some(name),
             parent_id: None,
-            index: None
+            index: None,
+            user_scopes: None,
         };
 
         match api_with_auth_empty::<EmptyError, _>(&path, endpoints::category::Update::METHOD, Some(req)).await {

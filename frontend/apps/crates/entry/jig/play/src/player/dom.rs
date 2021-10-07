@@ -4,7 +4,7 @@ use dominator_helpers::{events::Message, signals::DefaultSignal};
 use futures_signals::map_ref;
 use futures_signals::signal::{Signal, SignalExt};
 use js_sys::Reflect;
-use shared::domain::jig::Jig;
+use shared::domain::jig::JigResponse;
 use std::rc::Rc;
 use utils::{
     iframe::{IframeAction, ModuleToJigPlayerMessage},
@@ -57,7 +57,7 @@ pub fn render(state: Rc<State>) -> Dom {
                         .property("slot", "background")
                         .property_signal("playing", state.bg_audio_playing.signal())
                         .apply(|dom| {
-                            match jig.audio_background {
+                            match jig.jig_data.audio_background {
                                 Some(audio_background) => {
                                     dom.event(clone!(state, audio_background => move|_: events::Click| {
                                         actions::toggle_background_audio(Rc::clone(&state), audio_background);
@@ -80,7 +80,7 @@ pub fn render(state: Rc<State>) -> Dom {
                     match jig {
                         None => String::new(),
                         Some(jig) => {
-                            let active_module = &jig.modules[active_module_index];
+                            let active_module = &jig.jig_data.modules[active_module_index];
 
                             let route: String = Route::Module(ModuleRoute::Play(
                                 active_module.kind,
@@ -149,7 +149,7 @@ pub fn render(state: Rc<State>) -> Dom {
     })
 }
 
-fn jig_and_active_module_signal(state: Rc<State>) -> impl Signal<Item = (Option<Jig>, usize)> {
+fn jig_and_active_module_signal(state: Rc<State>) -> impl Signal<Item = (Option<JigResponse>, usize)> {
     map_ref! {
         let jig = state.jig.signal_cloned(),
         let active_module = state.active_module.signal_cloned() => (
@@ -181,7 +181,7 @@ fn progress_signal(state: Rc<State>) -> impl Signal<Item = u32> {
         match jig {
             None => 0,
             Some(jig) => {
-                let len = jig.modules.len();
+                let len = jig.jig_data.modules.len();
                 let step_percent = 100f32 / len as f32;
                 let current_progress = active_module_index as f32 * step_percent;
                 // TODO: ask corrine if this should be here

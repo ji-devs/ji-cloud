@@ -237,8 +237,6 @@ async fn update(req: &serde_json::Value) -> anyhow::Result<()> {
 
     let client = reqwest::Client::new();
 
-    log::info!("{:?}", req);
-
     let resp = client
         .patch(&format!(
             "http://0.0.0.0:{}/v1/image/3095d05e-f2c7-11ea-89c3-3b621dd74a1f",

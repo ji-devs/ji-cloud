@@ -18,19 +18,23 @@ where
         TooltipTarget::Element(elem, move_strategy) => match &state.data {
             TooltipData::Error(data) => {
                 let TooltipError {
-                    placement,
-                    slot,
+                    target_anchor,
+                    content_anchor,
                     body,
                     max_width,
                     ..
                 } = &**data;
-                html!("tooltip-error", {
+                html!("overlay-tooltip-error", {
                     .apply(|dom| mixin(dom))
                     .text(&body)
-                    .apply_if(slot.is_some(), |dom| dom.property("slot", slot.as_ref().unwrap_ji()))
+
+                    .apply_if(state.container.is_some(), |dom| {
+                        dom.property("container", state.container.as_ref().unwrap_ji().as_value())
+                    })
                     .property("target", elem)
-                    .property("placement", placement.as_str())
-                    .property("moveStrategy", move_strategy.as_str())
+                    .property("targetAnchor", target_anchor.as_str())
+                    .property("contentAnchor", content_anchor.as_str())
+                    .property("strategy", move_strategy.as_str())
                     .apply_if(max_width.is_some(), |dom| {
                         dom.property("maxWidth", max_width.unwrap_ji())
                     })
@@ -44,26 +48,29 @@ where
 
             TooltipData::Confirm(data) => {
                 let TooltipConfirm {
-                    placement,
-                    slot,
+                    target_anchor,
+                    content_anchor,
                     header,
                     confirm_label,
                     max_width,
                     cancel_label,
                     ..
                 } = &**data;
-                html!("tooltip-confirm", {
+                html!("overlay-tooltip-confirm", {
                     .apply(|dom| mixin(dom))
-                    .apply_if(slot.is_some(), |dom| dom.property("slot", slot.as_ref().unwrap_ji()))
                     .property("header", header)
                     .property("confirmLabel", confirm_label)
                     .property("cancelLabel", cancel_label)
-                    .property("moveStrategy", move_strategy.as_str())
                     .apply_if(max_width.is_some(), |dom| {
                         dom.property("maxWidth", max_width.unwrap_ji())
                     })
+                    .apply_if(state.container.is_some(), |dom| {
+                        dom.property("container", state.container.as_ref().unwrap_ji().as_value())
+                    })
                     .property("target", elem)
-                    .property("placement", placement.as_str())
+                    .property("targetAnchor", target_anchor.as_str())
+                    .property("contentAnchor", content_anchor.as_str())
+                    .property("strategy", move_strategy.as_str())
                     .event(clone!(data => move |_evt:events::Accept| {
                         if let Some(on_confirm) = data.callbacks.on_confirm.as_ref() {
                             (on_confirm) ();
@@ -79,19 +86,22 @@ where
 
             TooltipData::Bubble(data) => {
                 let TooltipBubble {
-                    placement,
-                    slot,
+                    target_anchor,
+                    content_anchor,
                     body,
                     max_width,
                     ..
                 } = &**data;
-                html!("tooltip-bubble", {
+                html!("overlay-tooltip-bubble", {
                     .apply(|dom| mixin(dom))
                     .text(&body)
-                    .apply_if(slot.is_some(), |dom| dom.property("slot", slot.as_ref().unwrap_ji()))
+                    .apply_if(state.container.is_some(), |dom| {
+                        dom.property("container", state.container.as_ref().unwrap_ji().as_value())
+                    })
                     .property("target", elem)
-                    .property("placement", placement.as_str())
-                    .property("moveStrategy", move_strategy.as_str())
+                    .property("targetAnchor", target_anchor.as_str())
+                    .property("contentAnchor", content_anchor.as_str())
+                    .property("strategy", move_strategy.as_str())
                     .apply_if(max_width.is_some(), |dom| {
                         dom.property("maxWidth", max_width.unwrap_ji())
                     })
@@ -107,18 +117,18 @@ where
             match &state.data {
                 TooltipData::Bubble(data) => {
                     let TooltipBubble {
-                        placement,
-                        slot,
+                        target_anchor,
+                        content_anchor,
                         body,
                         max_width,
                         ..
                     } = &**data;
-                    html!("tooltip-bubble", {
+                    html!("overlay-tooltip-bubble", {
                         .apply(|dom| mixin(dom))
                         .text(&body)
-                        .apply_if(slot.is_some(), |dom| dom.property("slot", slot.as_ref().unwrap_ji()))
                         .property_signal("target", bounds.denormalize_fixed_signal().map(|bounds| {
                             let rect:DomRect = bounds.into();
+                            log::info!("{:?}", bounds);
                             rect
                         }))
                         /*
@@ -126,8 +136,12 @@ where
                             format!("scale({})", resize_info.scale)
                         }))
                         */
-                        .property("placement", placement.as_str())
-                        .property("moveStrategy", move_strategy.as_str())
+                        .apply_if(state.container.is_some(), |dom| {
+                            dom.property("container", state.container.as_ref().unwrap_ji().as_value())
+                        })
+                        .property("targetAnchor", target_anchor.as_str())
+                        .property("contentAnchor", content_anchor.as_str())
+                        .property("strategy", move_strategy.as_str())
                         .apply_if(max_width.is_some(), |dom| {
                             dom.property("maxWidth", max_width.unwrap_ji())
                         })

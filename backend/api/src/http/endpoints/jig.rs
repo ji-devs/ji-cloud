@@ -1,14 +1,13 @@
 use actix_web::{
-    web::{self, Data, Json, Query, ServiceConfig},
+    web::{self, Data, Json, Path, Query, ServiceConfig},
     HttpResponse,
 };
-use chrono::{DateTime, Utc};
 use shared::{
     api::{endpoints::jig, ApiEndpoint},
     domain::{
         jig::{
-            Jig, JigBrowseResponse, JigCountResponse, JigCreateRequest, JigDraftResponse, JigId,
-            JigResponse, JigSearchResponse, UserOrMe,
+            DraftOrLive, JigBrowseResponse, JigCountResponse, JigCreateRequest, JigId,
+            JigSearchResponse, PrivacyLevel, UserOrMe,
         },
         CreateResponse,
     },
@@ -22,6 +21,8 @@ use crate::{
     service::ServiceData,
 };
 
+pub mod additional_resource;
+pub mod module;
 mod player;
 
 /// Create a jig.
@@ -63,7 +64,6 @@ async fn create(
         &req.age_ranges,
         &req.affiliations,
         creator_id,
-        req.publish_at.map(DateTime::<Utc>::from),
         &language,
         &req.description,
         &req.default_player_settings,
@@ -78,21 +78,81 @@ async fn create(
 
     Ok((
         Json(CreateResponse { id }),
-        actix_web::http::StatusCode::CREATED, // FIXME this
+        actix_web::http::StatusCode::CREATED,
     ))
 }
 
-/// Clone a jig
-async fn clone(
+async fn get_live(
+    db: Data<PgPool>,
+    path: web::Path<JigId>,
+) -> Result<Json<<jig::GetLive as ApiEndpoint>::Res>, error::NotFound> {
+    let jig_response = db::jig::get_one(&db, path.into_inner(), DraftOrLive::Live)
+        .await?
+        .ok_or(error::NotFound::ResourceNotFound)?;
+
+    Ok(Json(jig_response))
+}
+
+async fn get_draft(
+    db: Data<PgPool>,
+    path: web::Path<JigId>,
+) -> Result<Json<<jig::GetDraft as ApiEndpoint>::Res>, error::NotFound> {
+    let jig_response = db::jig::get_one(&db, path.into_inner(), DraftOrLive::Draft)
+        .await?
+        .ok_or(error::NotFound::ResourceNotFound)?;
+
+    Ok(Json(jig_response))
+}
+
+async fn update(
     db: Data<PgPool>,
     claims: TokenUser,
-    parent: web::Path<JigId>,
-) -> Result<HttpResponse, error::JigCloneDraft> {
-    db::jig::authz(&*db, claims.0.user_id, None).await?;
+    req: Option<Json<<jig::Update as ApiEndpoint>::Req>>,
+    path: web::Path<JigId>,
+) -> Result<HttpResponse, error::UpdateWithMetadata> {
+    let id = path.into_inner();
 
-    let id = db::jig::clone(&*db, parent.into_inner(), claims.0.user_id).await?;
+    db::jig::authz(&*db, claims.0.user_id, Some(id)).await?;
 
-    Ok(HttpResponse::Created().json(CreateResponse { id }))
+    let req = req.map_or_else(Default::default, Json::into_inner);
+
+    db::jig::update(&*db, id, req.author_id).await?;
+
+    Ok(HttpResponse::NoContent().finish())
+}
+
+/// Update a JIG's draft data.
+async fn update_draft(
+    db: Data<PgPool>,
+    claims: TokenUser,
+    req: Option<Json<<jig::UpdateDraftData as ApiEndpoint>::Req>>,
+    path: web::Path<JigId>,
+) -> Result<HttpResponse, error::UpdateWithMetadata> {
+    let id = path.into_inner();
+
+    db::jig::authz(&*db, claims.0.user_id, Some(id)).await?;
+
+    let req = req.map_or_else(Default::default, Json::into_inner);
+
+    db::jig::update_draft(
+        &*db,
+        id,
+        req.display_name.as_deref(),
+        req.goals.as_deref(),
+        req.categories.as_deref(),
+        req.age_ranges.as_deref(),
+        req.affiliations.as_deref(),
+        req.language.as_deref(),
+        req.description.as_deref(),
+        req.default_player_settings.as_ref(),
+        req.theme.as_ref(),
+        req.audio_background.as_ref(),
+        req.audio_effects.as_ref(),
+        req.privacy_level,
+    )
+    .await?;
+
+    Ok(HttpResponse::NoContent().finish())
 }
 
 /// Delete a jig.
@@ -113,54 +173,6 @@ async fn delete(
     Ok(HttpResponse::NoContent().finish())
 }
 
-/// Update a jig.
-async fn update(
-    db: Data<PgPool>,
-    claims: TokenUser,
-    req: Option<Json<<jig::Update as ApiEndpoint>::Req>>,
-    path: web::Path<JigId>,
-) -> Result<HttpResponse, error::UpdateWithMetadata> {
-    let id = path.into_inner();
-
-    db::jig::authz(&*db, claims.0.user_id, Some(id)).await?;
-
-    let req = req.map_or_else(Default::default, Json::into_inner);
-
-    db::jig::update(
-        &*db,
-        id,
-        req.display_name.as_deref(),
-        req.author_id,
-        req.goals.as_deref(),
-        req.categories.as_deref(),
-        req.age_ranges.as_deref(),
-        req.affiliations.as_deref(),
-        req.publish_at.map(|it| it.map(DateTime::<Utc>::from)),
-        req.language.as_deref(),
-        req.description.as_deref(),
-        req.is_public.as_ref(),
-        req.default_player_settings.as_ref(),
-        req.theme.as_ref(),
-        req.audio_background.as_ref(),
-        req.audio_effects.as_ref(),
-    )
-    .await?;
-
-    Ok(HttpResponse::NoContent().finish())
-}
-
-/// Get a jig.
-async fn get(
-    db: Data<PgPool>,
-    path: web::Path<JigId>,
-) -> Result<Json<<jig::Get as ApiEndpoint>::Res>, error::NotFound> {
-    let jig = db::jig::get(&db, path.into_inner())
-        .await?
-        .ok_or(error::NotFound::ResourceNotFound)?;
-
-    Ok(Json(JigResponse { jig }))
-}
-
 async fn browse(
     db: Data<PgPool>,
     claims: TokenUser,
@@ -175,16 +187,9 @@ async fn browse(
 
     db::jig::authz_list(&*db, claims.0.user_id, author_id).await?;
 
-    let jigs = db::jig::list(
-        db.as_ref(),
-        query.is_published,
-        author_id,
-        query.page.unwrap_or(0) as i32,
-    )
-    .await?;
+    let jigs = db::jig::browse(db.as_ref(), author_id, query.page.unwrap_or(0) as i32).await?;
 
-    let total_count =
-        db::jig::filtered_count(db.as_ref(), query.is_published, None, author_id).await?;
+    let total_count = db::jig::filtered_count(db.as_ref(), None, author_id).await?;
 
     let pages = (total_count / 20 + (total_count % 20 != 0) as u64) as u32;
 
@@ -193,6 +198,64 @@ async fn browse(
         pages,
         total_jig_count: total_count,
     }))
+}
+
+/// Copies the contents of the draft jig data to live
+pub(super) async fn publish_draft_to_live(
+    db: Data<PgPool>,
+    claims: TokenUser,
+    jig_id: Path<JigId>,
+) -> Result<Json<<jig::Publish as ApiEndpoint>::Res>, error::JigCloneDraft> {
+    let jig_id = jig_id.into_inner();
+
+    db::jig::authz(&*db, claims.0.user_id, Some(jig_id)).await?;
+
+    let mut txn = db.begin().await?;
+
+    let (draft_id, live_id) = db::jig::get_draft_and_live_ids(&mut *txn, jig_id)
+        .await
+        .ok_or(error::JigCloneDraft::ResourceNotFound)?;
+
+    let new_live_id = db::jig::clone_data(&mut txn, &draft_id).await?;
+
+    sqlx::query!(
+        //language=SQL
+        "update jig set live_id = $1, published_at = now() where id = $2",
+        new_live_id,
+        jig_id.0
+    )
+    .execute(&mut *txn)
+    .await?;
+
+    // should drop all the entries in the metadata tables that FK to the live jig_data row
+    sqlx::query!(
+        //language=SQL
+        r#"
+delete from jig_data where id = $1
+    "#,
+        live_id,
+    )
+    .execute(&mut *txn)
+    .await?;
+
+    log::info!("AOSIJDOAIJSD");
+
+    txn.commit().await?;
+
+    Ok(Json(()))
+}
+
+/// Clone a jig
+async fn clone(
+    db: Data<PgPool>,
+    claims: TokenUser,
+    parent: web::Path<JigId>,
+) -> Result<HttpResponse, error::JigCloneDraft> {
+    db::jig::authz(&*db, claims.0.user_id, None).await?;
+
+    let id = db::jig::clone_jig(db.as_ref(), parent.into_inner(), claims.0.user_id).await?;
+
+    Ok(HttpResponse::Created().json(CreateResponse { id }))
 }
 
 /// Search for jigs.
@@ -207,8 +270,7 @@ async fn search(
         .search_jig(
             &query.q,
             query.page,
-            query.is_published,
-            None, // FIXME
+            Some(PrivacyLevel::Public),
             query.language,
             &query.age_ranges,
             &query.affiliations,
@@ -220,11 +282,8 @@ async fn search(
         .await?
         .ok_or_else(|| error::Service::DisabledService(ServiceKind::Algolia))?;
 
-    let jigs: Vec<_> = db::jig::get_by_ids(db.as_ref(), &ids)
-        .await?
-        .into_iter()
-        .map(|jig: Jig| JigResponse { jig })
-        .collect();
+    let jigs: Vec<_> =
+        db::jig::get_by_ids(db.as_ref(), &ids, PrivacyLevel::Public, DraftOrLive::Live).await?;
 
     Ok(Json(JigSearchResponse {
         jigs,
@@ -233,90 +292,64 @@ async fn search(
     }))
 }
 
-/// Create a draft of a published jig
-async fn create_draft(
-    db: Data<PgPool>,
-    claims: TokenUser,
-    live_id: web::Path<JigId>,
-) -> Result<HttpResponse, error::JigCloneDraft> {
-    let live_id = live_id.into_inner();
-
-    db::jig::authz(&*db, claims.0.user_id, Some(live_id)).await?;
-
-    let id = db::jig::create_draft(&*db, live_id).await?;
-
-    Ok(HttpResponse::Created().json(CreateResponse { id }))
-}
-
-/// Get the id for the draft of a published jig
-async fn get_draft(
-    db: Data<PgPool>,
-    claims: TokenUser,
-    live_id: web::Path<JigId>,
-) -> Result<Json<<jig::draft::Get as ApiEndpoint>::Res>, error::JigCloneDraft> {
-    let live_id = live_id.into_inner();
-
-    db::jig::authz(&*db, claims.0.user_id, Some(live_id)).await?;
-
-    let id = db::jig::get_draft(db.as_ref(), live_id).await?;
-
-    Ok(Json(JigDraftResponse { id }))
-}
-
-/// Publish the draft version of a jig.
-async fn publish_draft(
-    db: Data<PgPool>,
-    claims: TokenUser,
-    live_id: web::Path<JigId>,
-) -> Result<Json<<jig::draft::Publish as ApiEndpoint>::Res>, error::JigCloneDraft> {
-    let live_id = live_id.into_inner();
-
-    db::jig::authz(&*db, claims.0.user_id, Some(live_id)).await?;
-
-    db::jig::publish_draft_to_live(db.as_ref(), live_id).await?;
-
-    Ok(Json(()))
-}
-
 async fn count(db: Data<PgPool>) -> Result<Json<<jig::Count as ApiEndpoint>::Res>, error::Server> {
-    let total_count: u64 = db::jig::filtered_count(&*db, Some(true), Some(true), None).await?;
+    let total_count: u64 = db::jig::filtered_count(&*db, Some(PrivacyLevel::Public), None).await?;
 
     Ok(Json(JigCountResponse { total_count }))
 }
 
 pub fn configure(cfg: &mut ServiceConfig) {
-    cfg.route(jig::Browse::PATH, jig::Browse::METHOD.route().to(browse))
-        .route(jig::Count::PATH, jig::Count::METHOD.route().to(count))
-        .route(
-            jig::player::Get::PATH,
-            jig::player::Get::METHOD.route().to(player::get),
-        )
-        .route(jig::Get::PATH, jig::Get::METHOD.route().to(get))
-        .route(jig::Clone::PATH, jig::Clone::METHOD.route().to(clone))
+    cfg.route(jig::Count::PATH, jig::Count::METHOD.route().to(count))
         .route(jig::Create::PATH, jig::Create::METHOD.route().to(create))
+        .route(
+            jig::GetLive::PATH,
+            jig::GetLive::METHOD.route().to(get_live),
+        )
+        .route(
+            jig::GetDraft::PATH,
+            jig::GetDraft::METHOD.route().to(get_draft),
+        )
+        .route(
+            jig::Publish::PATH,
+            jig::Publish::METHOD.route().to(publish_draft_to_live),
+        )
+        .route(jig::Clone::PATH, jig::Clone::METHOD.route().to(clone))
+        .route(jig::Browse::PATH, jig::Browse::METHOD.route().to(browse))
         .route(jig::Search::PATH, jig::Search::METHOD.route().to(search))
         .route(jig::Update::PATH, jig::Update::METHOD.route().to(update))
+        .route(
+            jig::UpdateDraftData::PATH,
+            jig::UpdateDraftData::METHOD.route().to(update_draft),
+        )
         .route(jig::Delete::PATH, jig::Delete::METHOD.route().to(delete))
         .route(
             jig::player::Create::PATH,
             jig::player::Create::METHOD.route().to(player::create),
         )
         .route(
-            jig::player::GetPlayerSessionCode::PATH,
-            jig::player::GetPlayerSessionCode::METHOD
+            jig::player::Create::PATH,
+            jig::player::Create::METHOD.route().to(player::create),
+        )
+        .route(
+            jig::player::List::PATH,
+            jig::player::List::METHOD.route().to(player::list),
+        )
+        .route(
+            jig::player::instance::Create::PATH,
+            jig::player::instance::Create::METHOD
                 .route()
-                .to(player::get_code),
+                .to(player::instance::create_session_instance),
         )
         .route(
-            jig::draft::Create::PATH,
-            jig::draft::Create::METHOD.route().to(create_draft),
+            jig::player::instance::Complete::PATH,
+            jig::player::instance::Complete::METHOD
+                .route()
+                .to(player::instance::complete_session_instance),
         )
         .route(
-            jig::draft::Get::PATH,
-            jig::draft::Get::METHOD.route().to(get_draft),
-        )
-        .route(
-            jig::draft::Publish::PATH,
-            jig::draft::Publish::METHOD.route().to(publish_draft),
+            jig::player::PlayCount::PATH,
+            jig::player::PlayCount::METHOD
+                .route()
+                .to(player::get_play_count),
         );
 }

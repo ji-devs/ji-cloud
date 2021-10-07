@@ -6,6 +6,7 @@ use crate::{
     fixture::Fixture,
     helpers::{initialize_server, LoginExt},
 };
+use shared::domain::jig::module::{ModuleUpdateRequest, StableModuleId, StableOrUniqueId};
 
 async fn forbidden(
     route: &str,
@@ -148,7 +149,7 @@ async fn module_post() -> anyhow::Result<()> {
     use shared::domain::jig::module::ModuleCreateRequest;
 
     forbidden(
-        "v1/jig/00000000-0000-0000-0000-000000000000/module",
+        "v1/jig/00000000-0000-0000-0000-000000000000/draft/module",
         Some(&serde_json::to_value(ModuleCreateRequest::default())?),
         Method::POST,
     )
@@ -157,9 +158,21 @@ async fn module_post() -> anyhow::Result<()> {
 
 #[actix_rt::test]
 async fn module_patch() -> anyhow::Result<()> {
+    log::info!(
+        "{:?}",
+        ModuleUpdateRequest {
+            id: StableOrUniqueId::Stable(StableModuleId(uuid::Uuid::parse_str(
+                "00000000-0000-0000-0000-000000000000"
+            )?)),
+            index: None,
+            body: None,
+            is_complete: None,
+        }
+    );
+
     forbidden(
-        "v1/jig/00000000-0000-0000-0000-000000000000/module/00000000-0000-0000-0000-000000000000",
-        None,
+        "v1/jig/00000000-0000-0000-0000-000000000000/draft/module",
+        Some(&serde_json::json!({"id": { "stable": "00000000-0000-0000-0000-000000000000"}})),
         Method::PATCH,
     )
     .await
@@ -168,8 +181,8 @@ async fn module_patch() -> anyhow::Result<()> {
 #[actix_rt::test]
 async fn module_delete() -> anyhow::Result<()> {
     forbidden(
-        "v1/jig/00000000-0000-0000-0000-000000000000/module/00000000-0000-0000-0000-000000000000",
-        None,
+        "v1/jig/00000000-0000-0000-0000-000000000000/draft/module",
+        Some(&serde_json::json!({"id": { "stable": "00000000-0000-0000-0000-000000000000"}})),
         Method::DELETE,
     )
     .await

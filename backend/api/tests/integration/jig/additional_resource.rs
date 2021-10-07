@@ -15,7 +15,7 @@ async fn create() -> anyhow::Result<()> {
 
     let resp = client
         .post(&format!(
-            "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008/additional-resource",
+            "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008/draft/additional-resource",
             port
         ))
         .login()
@@ -38,7 +38,7 @@ async fn create() -> anyhow::Result<()> {
 }
 
 #[actix_rt::test]
-async fn get() -> anyhow::Result<()> {
+async fn get_draft() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User, Fixture::Jig], &[]).await;
 
     let port: u16 = app.port();
@@ -47,7 +47,7 @@ async fn get() -> anyhow::Result<()> {
 
     let resp = client
         .get(&format!(
-            "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008/additional-resource/41b8d0b4-aaff-4942-88ba-1a32fecdbd23",
+            "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008/draft/additional-resource/286b8390-1dd9-11ec-8426-fbeb80c504d9",
             port
         ))
         .login()
@@ -67,7 +67,7 @@ async fn get() -> anyhow::Result<()> {
 }
 
 #[actix_rt::test]
-async fn update() -> anyhow::Result<()> {
+async fn get_live() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User, Fixture::Jig], &[]).await;
 
     let port: u16 = app.port();
@@ -75,27 +75,16 @@ async fn update() -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
-        .patch(&format!(
-            "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008/additional-resource/41b8d0b4-aaff-4942-88ba-1a32fecdbd23",
-            port
-        ))
-        .login()
-        .json(&AdditionalResourceCreateRequest{ url: "url://updated.s.s".to_string() })
-        .send()
-        .await?
-        .error_for_status()?;
-
-    assert_eq!(resp.status(), StatusCode::NO_CONTENT);
-
-    let resp = client
         .get(&format!(
-            "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008/additional-resource/41b8d0b4-aaff-4942-88ba-1a32fecdbd23",
+            "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008/live/additional-resource/286b828c-1dd9-11ec-8426-571b03b2d3df",
             port
         ))
         .login()
         .send()
         .await?
         .error_for_status()?;
+
+    assert_eq!(resp.status(), StatusCode::OK);
 
     let body: serde_json::Value = resp.json().await?;
 
@@ -116,7 +105,7 @@ async fn delete() -> anyhow::Result<()> {
 
     let resp = client
         .delete(&format!(
-            "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008/additional-resource/41b8d0b4-aaff-4942-88ba-1a32fecdbd23",
+            "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008/draft/additional-resource/286b828c-1dd9-11ec-8426-571b03b2d3df",
             port
         ))
         .login()
@@ -128,7 +117,7 @@ async fn delete() -> anyhow::Result<()> {
 
     let resp = client
         .get(&format!(
-            "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008/additional-resource/41b8d0b4-aaff-4942-88ba-1a32fecdbd23",
+            "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008/draft/additional-resource/286b828c-1dd9-11ec-8426-571b03b2d3df",
             port
         ))
         .login()

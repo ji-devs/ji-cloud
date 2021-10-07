@@ -33,7 +33,7 @@ impl DomRenderable for Main {
                             vec![
                                 render_stickers_raw(&raw_stickers, theme_id),
                                 TracesEdit::render(state.base.traces.clone()),
-                                html!("empty-fragment", {
+                                html!("overlay-container", {
                                     .children_signal_vec(
                                         state.trace_bubbles()
                                             .map(clone!(state => move |bubble| {

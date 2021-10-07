@@ -5,7 +5,6 @@ use futures_signals::signal::{Signal, SignalExt};
 use shared::domain::user::{UserProfile, UserScope};
 use strum::IntoEnumIterator;
 use utils::{events, routes::{AdminRoute, Route, UserRoute}};
-use wasm_bindgen::JsValue;
 
 use crate::page_header::state::{LoggedInState, PageLinks};
 
@@ -38,20 +37,25 @@ pub fn render(state: Rc<State>, slot: Option<&str>, active_page: Option<PageLink
                 .property("target", page_link.target())
             })
         }))
-        .children(&mut [
-            html!("button-rect", {
-                .property("slot", "donate")
-                .property("color", "green")
-                .property("size", "small")
-                .property("bold", true)
-                .property("href", DONATE_LINK)
-                .property("target", "_black")
-                .text(STR_DONATE)
-            }),
-            html!("page-header-student-code", {
-                .property("slot", "student-code")
-            }),
-        ])
+        .child(html!("button-rect", {
+            .property("slot", "donate")
+            .property("color", "green")
+            .property("size", "small")
+            .property("bold", true)
+            .property("href", DONATE_LINK)
+            .property("target", "_black")
+            .text(STR_DONATE)
+        }))
+        .apply(|dom| {
+            if let Some(PageLinks::Home) = active_page {
+                dom.child(html!("page-header-student-code", {
+                    .property("slot", "student-code")
+                }))
+            } else {
+                dom
+            }
+            
+        })
         .children_signal_vec(state.logged_in.signal_cloned().map(clone!(state => move|logged_in| {
             match logged_in {
                 LoggedInState::LoggedIn(user) => render_logged_in(Rc::clone(&state), &user),
@@ -89,21 +93,25 @@ fn render_logged_in(state: Rc<State>, user: &UserProfile) -> Vec<Dom> {
             }),
             html!("profile-image", {
                 .property("slot", "profile-image")
+                /* TODO - waiting on API fix
                 .property("imageId", {
                     match &user.profile_image_id {
                         Some(image_id) => JsValue::from_str(&image_id.0.to_string()),
                         None => JsValue::UNDEFINED,
                     }
                 })
+                */
             }),
             html!("profile-image", {
                 .property("slot", "overlay-profile-image")
+                /* TODO - waiting on API fix
                 .property("imageId", {
                     match &user.profile_image_id {
                         Some(image_id) => JsValue::from_str(&image_id.0.to_string()),
                         None => JsValue::UNDEFINED,
                     }
                 })
+                */
             }),
         ])
         .child_signal(admin_privileges(Rc::clone(&state)).map(|admin_privileges| {

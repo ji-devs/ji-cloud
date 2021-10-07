@@ -4,6 +4,8 @@ use futures_signals::signal::Mutable;
 use shared::domain::jig::module::body::Background;
 use std::rc::Rc;
 
+const STR_SELECT_BACKGROUND_COLOR: &'static str = "Select background color";
+
 pub struct Step2<RawData: RawDataExt, E: ExtraExt> {
     pub base: Rc<CardsBase<RawData, E>>,
     pub tab: Mutable<Tab>,
@@ -65,6 +67,7 @@ impl Tab {
                 let state = ColorPickerState::new(
                     base.theme_id.clone(),
                     None,
+                    Some(String::from(STR_SELECT_BACKGROUND_COLOR)),
                     Some(clone!(base => move |color| {
                         base.set_bg(Background::Color(color));
                     })),

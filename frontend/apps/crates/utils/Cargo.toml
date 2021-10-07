@@ -35,6 +35,8 @@ dominator_helpers = "0.7.2"
 simple-html-template = { version = "0.2.4", features = ["wasm"] }
 htmlescape = "0.3.1"
 gloo-timers = "0.2.1"
+console_error_panic_hook = { version = "0.1.6" }
+wasm-logger = { version = "0.2.0", optional = true }
 web-sys = { version = "0.3.53", features = [
     'Url',
     'Request',
@@ -68,6 +70,6 @@ lazy_static = "1.4.0"
 [features]
 debug_log = []
 quiet = []
-local = ["quiet", "debug_log"]
+local = ["quiet", "debug_log", "wasm-logger"]
 release = []
-sandbox = ["debug_log"]
+sandbox = ["debug_log", "wasm-logger"]

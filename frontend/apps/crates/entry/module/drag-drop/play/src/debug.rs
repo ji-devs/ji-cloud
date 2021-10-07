@@ -201,7 +201,8 @@ impl DebugSettings {
                                 layer_2: None,
                             },
                             play_settings: PlaySettings {
-                                hint: Hint::None,
+                                hint: Hint::Highlight,
+                                next: Next::ClickContinue,
                                 ..PlaySettings::default()
                             },
                             ..Content::default()

@@ -4,50 +4,51 @@ expression: body
 
 ---
 {
-  "jig": {
-    "id": "0cc084bc-7c83-11eb-9f77-e3218dffb008",
-    "display_name": "",
+  "id": "0cc084bc-7c83-11eb-9f77-e3218dffb008",
+  "publishedAt": null,
+  "creatorId": "1f241e1b-b537-493f-a230-075cb16315be",
+  "authorId": "1f241e1b-b537-493f-a230-075cb16315be",
+  "authorName": "Bobby Tables",
+  "jigData": {
+    "draftOrLive": "Draft",
+    "displayName": "name",
     "modules": [
       {
-        "id": "0cbfdd82-7c83-11eb-9f77-d7d86264c3bc",
+        "id": "a6b24a06-1dd7-11ec-8426-635a3a7ea572",
         "kind": "Cover"
       },
       {
-        "id": "0cc03a02-7c83-11eb-9f77-f77f9ad65e9a",
+        "id": "a6b24a42-1dd7-11ec-8426-a7165f9281a2",
         "kind": "Flashcards"
       },
       {
-        "id": "5fac2632-cd4a-11eb-ae4e-7b9a797001a5",
+        "id": "a6b24a88-1dd7-11ec-8426-57525d09b22c",
         "kind": "Memory"
       }
     ],
-    "age_ranges": [],
+    "ageRanges": [],
     "affiliations": [],
     "goals": [],
-    "creator_id": "1f241e1b-b537-493f-a230-075cb16315be",
-    "author_id": "1f241e1b-b537-493f-a230-075cb16315be",
-    "author_name": "Bobby Tables",
     "language": "en",
     "categories": [],
-    "publish_at": null,
-    "additional_resources": [
-      "41b8d0b4-aaff-4942-88ba-1a32fecdbd23",
-      "7a227007-b957-4601-bf15-87a6b86da672"
+    "additionalResources": [
+      "286b834a-1dd9-11ec-8426-6f641a50e23f",
+      "286b8390-1dd9-11ec-8426-fbeb80c504d9"
     ],
     "description": "test description",
-    "last_edited": "[last_edited]",
-    "is_public": true,
-    "default_player_settings": {
+    "lastEdited": "[last_edited]",
+    "defaultPlayerSettings": {
       "direction": "ltr",
-      "display_score": false,
-      "track_assessments": false,
-      "drag_assist": false
+      "displayScore": true,
+      "trackAssessments": true,
+      "dragAssist": true
     },
     "theme": "Blank",
-    "audio_background": null,
-    "audio_effects": {
-      "feedback_positive": "[audio]",
-      "feedback_negative": "[audio]"
-    }
+    "audioBackground": null,
+    "audioEffects": {
+      "feedbackPositive": "[audio]",
+      "feedbackNegative": "[audio]"
+    },
+    "privacyLevel": "unlisted"
   }
 }

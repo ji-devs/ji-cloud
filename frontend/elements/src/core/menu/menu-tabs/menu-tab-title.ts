@@ -76,8 +76,14 @@ export class _ extends LitElement {
         :host {
           display: flex;
           font-family: Poppins;
-          font-size: 16px;
           font-weight: 500;
+          align-items: center;
+          font-size: 14px;
+        }
+        @media (min-width: 1920px) {
+          :host {
+            font-size: 16px;
+          }
         }
 
         .highlight {

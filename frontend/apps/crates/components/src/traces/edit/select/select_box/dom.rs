@@ -70,17 +70,15 @@ impl EditSelectTrace {
                     .menu_pos_signal(get_selected_signal())
                     .map(clone!(parent, state, select_box => move |pos| {
                         pos.map(|pos| {
-                            html!("drag-container", {
-                                .style("position", "fixed")
-                                .style("top", "0")
-                                .style("left", "0")
-                                .property("x", pos.0 + 32.0)
-                                .property("y", pos.1)
-                                .child(html!("menu-container", {
-                                    .child(render_menu(parent.clone(), index.clone()))
-                                }))
-                                .event(clone!(select_box => move |_evt:events::Close| {
-                                    select_box.menu_pos.set(None);
+                            html!("overlay-container", {
+                                .child(html!("overlay-drag", {
+                                    .property("target", web_sys::DomRect::new_with_x_and_y_and_width_and_height(pos.0 + 32.0, pos.1, 1.0, 1.0).unwrap_ji())
+                                    .child(html!("menu-container", {
+                                        .child(render_menu(parent.clone(), index.clone()))
+                                    }))
+                                    .event(clone!(select_box => move |_evt:events::Close| {
+                                        select_box.menu_pos.set(None);
+                                    }))
                                 }))
                             })
                         })

@@ -13,7 +13,6 @@ use utils::prelude::*;
 use super::{
     state::{Base, Phase},
     game::dom::render as render_game,
-    ending::dom::render as render_ending
 };
 
 
@@ -24,9 +23,8 @@ impl DomRenderable for Base {
             .child(render_single_background_raw(&state.background, state.theme_id, None))
             .child_signal(state.phase.signal_cloned().map(|phase| {
                 match phase {
-                    Phase::Init => None,
+                    Phase::Init | Phase::Ending => None,
                     Phase::Playing(game) => Some(render_game(game)),
-                    Phase::Ending(ending) => Some(render_ending(ending))
                 }
             }))
         })

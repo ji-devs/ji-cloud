@@ -6,7 +6,7 @@ use shared::{
     api::endpoints::{category, jig, meta, ApiEndpoint},
     domain::{
         category::{Category, CategoryId, CategoryResponse, CategoryTreeScope, GetCategoryRequest},
-        jig::{Jig, JigId, JigResponse, JigUpdateRequest},
+        jig::{JigId, JigResponse, JigData, JigUpdateDraftDataRequest, PrivacyLevel},
         meta::MetadataResponse,
     },
     error::{EmptyError, MetadataNotFound},
@@ -32,8 +32,8 @@ impl State {
 
         let meta = meta.unwrap_ji();
 
-        if jig.publish_at.is_none() {
-            set_default_values(&mut jig, &meta);
+        if jig.published_at.is_none() {
+            set_default_values(&mut jig.jig_data, &meta);
         }
 
         Self::new(
@@ -46,6 +46,14 @@ impl State {
             jig_edit_state
         )
 
+    }
+
+    pub fn navigate_to_cover(&self) {
+        let cover_module_id = self.jig.modules.lock_ref().first().map(|m| m.id.clone());
+
+        if let Some(cover_module_id) = cover_module_id {
+            self.jig_edit_state.route.set(JigEditRoute::Module(cover_module_id));
+        };
     }
 }
 
@@ -63,7 +71,7 @@ fn get_categories_labels(
     }
 }
 
-fn set_default_values(jig: &mut Jig, meta: &MetadataResponse) {
+fn set_default_values(jig: &mut JigData, meta: &MetadataResponse) {
     let available_affiliations = meta.affiliations
         .iter()
         .map(|affiliation| affiliation.id.clone())
@@ -76,14 +84,14 @@ fn set_default_values(jig: &mut Jig, meta: &MetadataResponse) {
         .collect();
     jig.age_ranges = available_ages;
 
-    jig.is_public = true;
+    jig.privacy_level = PrivacyLevel::default()
 }
 
-async fn load_jig(jig_id: JigId) -> Result<Jig, EmptyError> {
-    let path = jig::Get::PATH.replace("{id}", &jig_id.0.to_string());
+async fn load_jig(jig_id: JigId) -> Result<JigResponse, EmptyError> {
+    let path = jig::GetDraft::PATH.replace("{id}", &jig_id.0.to_string());
 
-    match api_with_auth::<JigResponse, EmptyError, ()>(&path, jig::Get::METHOD, None).await {
-        Ok(resp) => Ok(resp.jig),
+    match api_with_auth::<JigResponse, EmptyError, ()>(&path, jig::GetDraft::METHOD, None).await {
+        Ok(resp) => Ok(resp),
         Err(e) => Err(e),
     }
 }
@@ -115,6 +123,21 @@ fn form_invalid(state: Rc<State>) -> bool {
         || state.jig.categories.lock_ref().is_empty()
 }
 
+async fn save_and_publish(state: Rc<State>) -> Result<(), ()> {
+    let path = jig::Update::PATH.replace("{id}", &state.jig.id.0.to_string());
+    let req = state.jig.to_jig_update_request();
+    api_with_auth_empty::<MetadataNotFound, JigUpdateDraftDataRequest>(&path, jig::Update::METHOD, Some(req))
+        .await
+        .map_err(|_| ())?;
+
+    let path = jig::Publish::PATH.replace("{id}", &state.jig.id.0.to_string());
+    api_with_auth_empty::<EmptyError, ()>(&path, jig::Publish::METHOD, None)
+        .await
+        .map_err(|_| ())?;
+
+    Ok(())
+}
+
 pub fn save_jig(state: Rc<State>) {
     if form_invalid(Rc::clone(&state)) {
         state.submission_tried.set(true);
@@ -122,11 +145,7 @@ pub fn save_jig(state: Rc<State>) {
     };
 
     state.loader.load(clone!(state => async move {
-        let path = jig::Update::PATH.replace("{id}", &state.jig.id.0.to_string());
-
-        let req = state.jig.to_jig_update_request();
-
-        match api_with_auth_empty::<MetadataNotFound, JigUpdateRequest>(&path, jig::Update::METHOD, Some(req)).await {
+        match save_and_publish(Rc::clone(&state)).await {
             Ok(_) => {
                 state.submission_tried.set(false);
 
@@ -141,6 +160,7 @@ pub fn save_jig(state: Rc<State>) {
                  */
             },
             Err(_) => {
+                let _ = web_sys::window().unwrap().alert_with_message("Error!");
             }
         }
     }));

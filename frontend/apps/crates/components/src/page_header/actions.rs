@@ -30,8 +30,8 @@ pub fn fetch_profile(state: Rc<State>) {
 
 pub fn logout(state: Rc<State>) {
     state.loader.load(clone!(state => async move {
-        let local = delete_csrf_token();
         let server = endpoints::session::Delete::api_with_auth_empty(None).await;
+        let local = delete_csrf_token();
 
         match (local, server) {
             (Ok(_), Ok(_)) => {

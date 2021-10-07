@@ -4,6 +4,9 @@ use futures_signals::signal::{Mutable, SignalExt};
 use dominator::clone;
 use components::{backgrounds::actions::Layer, color_select::state::{State as ColorPickerState}, image::search::{callbacks::Callbacks as ImageSearchCallbacks, state::{ImageSearchCheckboxKind, ImageSearchOptions, State as ImageSearchState}}, tabs::MenuTabKind};
 use shared::domain::jig::module::body::{Background, Image};
+
+const STR_SELECT_BACKGROUND_COLOR: &'static str = "Select background color";
+
 pub struct Step2 {
     pub base: Rc<Base>,
     pub tab: Mutable<Tab>,
@@ -55,9 +58,14 @@ impl Tab {
                 Self::Image(Rc::new(state))
             },
             MenuTabKind::Color => {
-                let state = ColorPickerState::new(base.theme_id.clone(), None, Some(clone!(base => move |color| {
-                    base.backgrounds.set_layer(Layer::One, Background::Color(color));
-                })));
+                let state = ColorPickerState::new(
+                    base.theme_id.clone(),
+                    None,
+                    Some(String::from(STR_SELECT_BACKGROUND_COLOR)),
+                    Some(clone!(base => move |color| {
+                        base.backgrounds.set_layer(Layer::One, Background::Color(color));
+                    }))
+                );
                 Self::Color(Rc::new(state))
             },
             MenuTabKind::Overlay => {

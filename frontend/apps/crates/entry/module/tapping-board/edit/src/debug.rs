@@ -93,7 +93,7 @@ impl DebugSettings {
                                             transform,
                                             kind: TraceKind::Regular,
                                             audio: Some(Audio { id: AudioId(Uuid::parse_str(AUDIO_UUID).unwrap_ji()), lib: MediaLibrary::User}),
-                                            text: None,
+                                            text: Some("hello world".to_string()),
                                         }
                                     }
                                 }

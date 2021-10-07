@@ -44,7 +44,7 @@ export interface ControllerState {
 
 export const defaultState: ControllerState = {
     font: '"Roboto Slab - Regular"',
-    element: ElementType.P1,
+    element: ElementType.H1,
     weight: 400,
     align: Align.Left,
     fontSize: 16,

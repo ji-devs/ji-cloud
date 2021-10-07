@@ -4,5 +4,12 @@ expression: body
 
 ---
 {
-  "index": 7904
+  "index": "[index]",
+  "settings": {
+    "direction": "rtl",
+    "displayScore": false,
+    "trackAssessments": false,
+    "dragAssist": false
+  },
+  "expires_at": "[timestamp]"
 }

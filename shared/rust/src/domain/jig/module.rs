@@ -1,5 +1,6 @@
 //! Types for jig Modules.
 
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 use uuid::Uuid;
@@ -9,36 +10,69 @@ pub mod body;
 
 pub use body::Body as ModuleBody;
 
-/// Wrapper type around [`Uuid`](Uuid), represents the ID of a module.
+/// Wrapper type around [`Uuid`](Uuid), represents the **unique ID** of a module.
+///
+/// This uniquely identifies a module. There is no other module that shares this ID.
+///
+/// See also [`StableOrUniqueId`] for the two ways to identify a specific module.
 #[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
+#[serde(rename_all = "camelCase")]
 pub struct ModuleId(pub Uuid);
 
-/// Which way of finding a module to use when looking it up.
+/// Wrapper type around [`Uuid`](Uuid), represents the **stable ID** of a module.
+///
+/// # Notes
+/// This is unique for a specific [JIG data](super::JigData) copy (draft or live). In other words, the tuple
+/// `(JigId, DraftOrLive, StableModuleId)` uniquely identifies a specific module.
+///
+/// This ID remains stable when:
+/// * Publishing JIG data from draft to live
+/// * Cloning a JIG through [`jig::Clone`](crate::api::endpoints::jig::Clone)
+///
+/// See also [`StableOrUniqueId`] for the two ways to identify a specific module.
 #[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
-#[serde(untagged)]
-pub enum ModuleIdOrIndex {
-    /// By offset into its parent jig
-    Index(u16),
-    /// By id
-    Id(ModuleId),
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[cfg_attr(feature = "backend", sqlx(transparent))]
+#[serde(rename_all = "camelCase")]
+pub struct StableModuleId(pub Uuid);
+
+/// Which way of finding a module to use when looking it up.
+///
+/// # Note:
+/// The mapping between `ModuleId` and the triple `(JigId, DraftOrLive, StableModuleId)` is one-to-one.
+#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub enum StableOrUniqueId {
+    /// Unique ID for the module.
+    Unique(ModuleId),
+
+    /// Stable ID for the module.
+    ///
+    /// This is unique for a specific [JIG data](super::JigData) copy (draft or live). In other words, the tuple
+    /// `(JigId, DraftOrLive, StableModuleId)` uniquely identifies a specific module.
+    ///
+    /// This ID remains stable when:
+    /// * Publishing JIG data from draft to live with [`jig::Publish`](crate::api::endpoints::jig::Publish)
+    /// * Cloning a JIG through [`jig::Clone`](crate::api::endpoints::jig::Clone)
+    Stable(StableModuleId),
 }
 
-impl ModuleIdOrIndex {
-    /// Returns [`Some`] if `self` is `Self::Id`, [`None`] otherwise.
-    pub fn id(self) -> Option<ModuleId> {
+impl StableOrUniqueId {
+    /// Returns [`Some`] if `self` is `Self::Unique`, [`None`] otherwise.
+    pub fn unique(self) -> Option<ModuleId> {
         match self {
-            ModuleIdOrIndex::Id(id) => Some(id),
-            ModuleIdOrIndex::Index(_) => None,
+            StableOrUniqueId::Unique(id) => Some(id),
+            StableOrUniqueId::Stable(_) => None,
         }
     }
 
-    /// Returns [`Some`] if `self` is `Self::Index`, [`None`] otherwise.
-    pub fn index(self) -> Option<u16> {
+    /// Returns [`Some`] if `self` is `Self::Stable`, [`None`] otherwise.
+    pub fn stable(self) -> Option<StableModuleId> {
         match self {
-            ModuleIdOrIndex::Id(_) => None,
-            ModuleIdOrIndex::Index(index) => Some(index),
+            StableOrUniqueId::Unique(_) => None,
+            StableOrUniqueId::Stable(id) => Some(id),
         }
     }
 }
@@ -58,8 +92,6 @@ pub enum ModuleKind {
     Matching = 2,
 
     /// Memory Game
-    ///
-    /// Relates to [`MemoryGameBody`]
     Memory = 3,
 
     /// Poster
@@ -124,10 +156,17 @@ impl FromStr for ModuleKind {
     }
 }
 
+/// Request for fetching a module.
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct ModuleGetRequest {
+    /// Identify the module either through the stable or unique ID.
+    pub id: StableOrUniqueId,
+}
+
 /// Minimal information about a module.
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct LiteModule {
-    /// The module's ID.
+    /// The module's unique ID.
     pub id: ModuleId,
 
     /// Which kind of module this is.
@@ -137,14 +176,26 @@ pub struct LiteModule {
 /// Over the wire representation of a module.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Module {
-    /// The module's ID.
+    /// The module's unique ID.
     pub id: ModuleId,
+
+    /// The module's stable ID.
+    pub stable_id: StableModuleId,
 
     /// The module's body.
     pub body: ModuleBody,
 
     /// Whether the module is complete or not.
     pub is_complete: bool,
+
+    /// Whether a jig has been updated.
+    pub is_updated: bool,
+
+    /// When the module was originally created.
+    pub created_at: DateTime<Utc>,
+
+    /// When the module was last updated.
+    pub updated_at: DateTime<Utc>,
 }
 
 /// Request to create a new `Module`.
@@ -171,18 +222,34 @@ pub struct ModuleResponse {
 
 /// Request to update a `Module`.
 /// note: fields here cannot be nulled out (`None` means "don't change").
-#[derive(Serialize, Deserialize, Debug, Default)]
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
 pub struct ModuleUpdateRequest {
+    /// Identifies the module to be updated, either through the stable or unique ID.
+    pub id: StableOrUniqueId,
+
     /// The module's body.
+    #[serde(default)]
     pub body: Option<ModuleBody>,
 
-    /// Where to move this module to in the parent.
+    /// Where to move this module to in the parent. Relevant for the order that the modules
+    /// are returned when fetching JIG data.
     ///
-    /// Numbers larger than the parent jig's module count will move it to the *end*.
+    /// Numbers larger than the parent JIG's module count will move it to the *end*.
+    #[serde(default)]
     pub index: Option<u16>,
 
     /// Whether the module is complete or not.
+    #[serde(default)]
     pub is_complete: Option<bool>,
 }
 
-into_uuid![ModuleId];
+/// Request to delete a `Module`.
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct ModuleDeleteRequest {
+    /// Identifies the module to be updated, either through the stable or unique ID.
+    pub id: StableOrUniqueId,
+}
+
+into_uuid![ModuleId, StableModuleId];

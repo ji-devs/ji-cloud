@@ -134,6 +134,7 @@ pub fn render_color_select() -> Dom {
     let state = color_select::state::State::new(
         (*theme_id).clone(),
         None,
+        None,
         Some(|_| {})
     );
     html!("div", {

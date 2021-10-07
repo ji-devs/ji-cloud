@@ -3,7 +3,6 @@ use components::audio::mixer::AudioMixer;
 use std::rc::Rc;
 use shared::domain::jig::{
     JigId, 
-    Jig,
     module::{
         ModuleId, 
         body::{

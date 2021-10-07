@@ -51,7 +51,7 @@ pub enum UserRoute {
 
 #[derive(Debug, Clone)]
 pub enum KidsRoute {
-    StudentCode,
+    StudentCode(Option<String>),
 }
 
 #[derive(Debug, Clone)]
@@ -176,7 +176,8 @@ impl Route {
                 let search:JigSearchQuery = serde_qs::from_str(&params_string).unwrap_ji();
                 Self::Home(HomeRoute::Search(Some(search)))
             },
-            ["kids"] => Self::Kids(KidsRoute::StudentCode),
+            ["kids"] => Self::Kids(KidsRoute::StudentCode(None)),
+            ["kids", code] => Self::Kids(KidsRoute::StudentCode(Some(code.to_string()))),
 			["dev", "showcase", id] => {
                 let page = params_map.get("page").unwrap_or_default();
                 Self::Dev(DevRoute::Showcase(id.to_string(), page))
@@ -337,7 +338,12 @@ impl From<&Route> for String {
 			},
 			Route::Kids(route) => {
                 match route {
-                    KidsRoute::StudentCode => "/kids".to_string(),
+                    KidsRoute::StudentCode(code) => {
+                        match code {
+                            Some(code) => format!("/kids/{}", code),
+                            None => "/kids".to_string(),
+                        }
+                    },
 				}
 			},
 			Route::Dev(route) => {
@@ -433,3 +439,20 @@ impl From<&Route> for String {
     }
 }
 
+
+pub fn is_param_bool(param: &str) -> bool { 
+    let url:String = dominator::routing::url().get_cloned();
+    let url:web_sys::Url = web_sys::Url::new(&url).unwrap_ji();
+    let params = url.search_params();
+
+    match params.get(param) {
+        None => false,
+        Some(value) => {
+            if value == "true" {
+                true
+            } else {
+                false
+            }
+        }
+    }
+}

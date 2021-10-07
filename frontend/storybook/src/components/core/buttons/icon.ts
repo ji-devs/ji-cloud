@@ -26,7 +26,7 @@ Icon.argTypes = {
     icon: {
         control: {
             type: 'inline-radio',
-            options: ["circle-x-blue", "circle-check", "circle-kebab-grey", "circle-kebab-blue", "circle-pencil", "gears", "x"]
+            options: ["circle-x-blue", "circle-+-blue","audio", "audio-stop", "white-circle-blue-arrow", "circle-check", "circle-kebab-grey", "circle-kebab-blue", "circle-pencil", "gears", "x"]
         }
     }
 }

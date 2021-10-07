@@ -6,10 +6,10 @@ use crate::{
     fixture::Fixture,
     helpers::{initialize_server, LoginExt},
 };
+use shared::domain::jig::JigUpdateRequest;
 
 mod additional_resource;
 mod cover;
-mod draft;
 mod module;
 mod player;
 
@@ -34,8 +34,28 @@ async fn create_default() -> anyhow::Result<()> {
 
     insta::assert_json_snapshot!(body, {".id" => "[id]"});
 
+    let jig_id = body.id.0;
+
     let resp = client
-        .get(&format!("http://0.0.0.0:{}/v1/jig/{}", port, body.id.0))
+        .get(&format!("http://0.0.0.0:{}/v1/jig/{}/draft", port, jig_id))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    let body: serde_json::Value = resp.json().await?;
+
+    insta::assert_json_snapshot!(
+        body, {
+            ".**.id" => "[id]",
+            ".**.lastEdited" => "[last_edited]",
+            ".**.feedbackPositive" => "[audio]",
+            ".**.feedbackNegative" => "[audio]"
+        }
+    );
+
+    let resp = client
+        .get(&format!("http://0.0.0.0:{}/v1/jig/{}/live", port, jig_id))
         .login()
         .send()
         .await?
@@ -45,11 +65,19 @@ async fn create_default() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body, {".**.id" => "[id]", ".*.last_edited" => "[time_stamp]"});
+    insta::assert_json_snapshot!(
+        body, {
+            ".**.id" => "[id]",
+            ".**.lastEdited" => "[last_edited]",
+            ".**.feedbackPositive" => "[audio]",
+            ".**.feedbackNegative" => "[audio]"
+        }
+    );
 
     Ok(())
 }
 
+// requires algolia
 // #[actix_rt::test]
 // async fn delete() -> anyhow::Result<()> {
 //     let app = initialize_server(&[Fixture::User, Fixture::Jig]).await;
@@ -114,7 +142,7 @@ async fn clone() -> anyhow::Result<()> {
 
     let resp = client
         .post(&format!(
-            "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008/clone",
+            "http://0.0.0.0:{}/v1/jig/3a71522a-cd77-11eb-8dc1-af3e35f7c743/clone",
             port
         ))
         .login()
@@ -127,7 +155,7 @@ async fn clone() -> anyhow::Result<()> {
     let CreateResponse { id: JigId(id) } = resp.json().await?;
 
     let resp = client
-        .get(&format!("http://0.0.0.0:{}/v1/jig/{}", port, id))
+        .get(&format!("http://0.0.0.0:{}/v1/jig/{}/draft", port, id))
         .login()
         .send()
         .await?
@@ -137,17 +165,36 @@ async fn clone() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
+    insta::assert_json_snapshot!(
+        body, {
+            ".**.id" => "[id]",
+            ".**.lastEdited" => "[last_edited]",
+            ".**.additionalResources" => "[ids]"
+        }
+    );
+
+    let resp = client
+        .get(&format!("http://0.0.0.0:{}/v1/jig/{}/live", port, id))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    assert_eq!(resp.status(), StatusCode::OK);
+
+    let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
         body, {
             ".**.id" => "[id]",
-            ".**.last_edited" => "[last_edited]",
-            ".**.feedback_positive" => "[audio]",
-            ".**.feedback_negative" => "[audio]",
-            ".**.additional_resources" => "[ids]"
+            ".**.lastEdited" => "[last_edited]",
+            ".**.feedbackPositive" => "[audio]",
+            ".**.feedbackNegative" => "[audio]",
+            ".**.additionalResources" => "[ids]"
         }
     );
+
+    app.stop(false).await;
 
     Ok(())
 }
@@ -162,7 +209,7 @@ async fn get() -> anyhow::Result<()> {
 
     let resp = client
         .get(&format!(
-            "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008",
+            "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008/draft",
             port
         ))
         .login()
@@ -174,15 +221,37 @@ async fn get() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
+    insta::assert_json_snapshot!(
+        body, {
+            ".**.lastEdited" => "[last_edited]",
+            ".**.feedbackPositive" => "[audio]",
+            ".**.feedbackNegative" => "[audio]"
+        }
+    );
+
+    let resp = client
+        .get(&format!(
+            "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008/live",
+            port
+        ))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    assert_eq!(resp.status(), StatusCode::OK);
+
+    let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
         body, {
-            ".**.last_edited" => "[last_edited]",
-            ".**.feedback_positive" => "[audio]",
-            ".**.feedback_negative" => "[audio]"
+            ".**.lastEdited" => "[last_edited]",
+            ".**.feedbackPositive" => "[audio]",
+            ".**.feedbackNegative" => "[audio]"
         }
     );
+
+    app.stop(false).await;
 
     Ok(())
 }
@@ -211,9 +280,9 @@ async fn browse_simple() -> anyhow::Result<()> {
 
     insta::assert_json_snapshot!(
         body, {
-            ".**.last_edited" => "[last_edited]",
-            ".**.feedback_positive" => "[audio]",
-            ".**.feedback_negative" => "[audio]"
+            ".**.lastEdited" => "[last_edited]",
+            ".**.feedbackPositive" => "[audio]",
+            ".**.feedbackNegative" => "[audio]"
         }
     );
 
@@ -247,9 +316,9 @@ async fn browse_own_simple() -> anyhow::Result<()> {
 
     insta::assert_json_snapshot!(
         body, {
-            ".**.last_edited" => "[last_edited]",
-            ".**.feedback_positive" => "[audio]",
-            ".**.feedback_negative" => "[audio]"
+            ".**.lastEdited" => "[last_edited]",
+            ".**.feedbackPositive" => "[audio]",
+            ".**.feedbackNegative" => "[audio]"
         }
     );
 
@@ -283,7 +352,7 @@ async fn count() -> anyhow::Result<()> {
 }
 
 #[actix_rt::test]
-async fn update() -> anyhow::Result<()> {
+async fn update_and_publish() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User, Fixture::Jig], &[]).await;
 
     let port = app.port();
@@ -292,7 +361,7 @@ async fn update() -> anyhow::Result<()> {
 
     let resp = client
         .get(&format!(
-            "http://0.0.0.0:{}/v1/jig/3a71522a-cd77-11eb-8dc1-af3e35f7c743",
+            "http://0.0.0.0:{}/v1/jig/3a71522a-cd77-11eb-8dc1-af3e35f7c743/draft",
             port
         ))
         .login()
@@ -306,16 +375,12 @@ async fn update() -> anyhow::Result<()> {
 
     let resp = client
         .patch(&format!(
-            "http://0.0.0.0:{}/v1/jig/3a71522a-cd77-11eb-8dc1-af3e35f7c743",
+            "http://0.0.0.0:{}/v1/jig/3a71522a-cd77-11eb-8dc1-af3e35f7c743/draft",
             port
         ))
         .json(&json!({
-            "language": "en-us",
-            "audio_background": "SukkotLoop",
-            "audio_effects": {
-                "feedback_positive": [ "Magic" ],
-                "feedback_negative": [ "Boing" ]
-            }
+            "description": "asdasdasd",
+            "language": "en-us"
         }))
         .login()
         .send()
@@ -326,7 +391,7 @@ async fn update() -> anyhow::Result<()> {
 
     let resp = client
         .get(&format!(
-            "http://0.0.0.0:{}/v1/jig/3a71522a-cd77-11eb-8dc1-af3e35f7c743",
+            "http://0.0.0.0:{}/v1/jig/3a71522a-cd77-11eb-8dc1-af3e35f7c743/draft",
             port
         ))
         .login()
@@ -336,9 +401,60 @@ async fn update() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
+    insta::assert_json_snapshot!(body, {".**.lastEdited" => "[timestamp]"});
 
-    insta::assert_json_snapshot!(body, {".**.last_edited" => "[timestamp]"});
+    let resp = client
+        .get(&format!(
+            "http://0.0.0.0:{}/v1/jig/3a71522a-cd77-11eb-8dc1-af3e35f7c743/live",
+            port
+        ))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    let body: serde_json::Value = resp.json().await?;
+
+    insta::assert_json_snapshot!(
+        body, {
+            ".**.lastEdited" => "[last_edited]",
+            ".**.feedbackPositive" => "[audio]",
+            ".**.feedbackNegative" => "[audio]"
+        }
+    );
+
+    let resp = client
+        .put(&format!(
+            "http://0.0.0.0:{}/v1/jig/3a71522a-cd77-11eb-8dc1-af3e35f7c743/draft/publish",
+            port
+        ))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    let resp = client
+        .get(&format!(
+            "http://0.0.0.0:{}/v1/jig/3a71522a-cd77-11eb-8dc1-af3e35f7c743/live",
+            port
+        ))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    let body: serde_json::Value = resp.json().await?;
+
+    insta::assert_json_snapshot!(
+        body, {
+            ".**.lastEdited" => "[last_edited]",
+            ".**.publishedAt" => "[published_at]",
+            ".**.feedbackPositive" => "[audio]",
+            ".**.feedbackNegative" => "[audio]"
+        }
+    );
+
+    app.stop(false).await;
 
     Ok(())
 }

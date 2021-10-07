@@ -90,8 +90,10 @@ pub fn assign_kind(state: Rc<State>, kind: ModuleKind) {
                 }));
                 state.sidebar.modules.lock_mut().set_cloned(index, module);
                 let req = ModuleUpdateRequest {
+                    id: StableOrUniqueId::Unique(id.clone()),
                     index: Some(index.try_into().unwrap_ji()),
-                    ..Default::default()
+                    body: None,
+                    is_complete: None,
                 };
 
                 match update_module(&state.sidebar.jig.id, &id, req).await {
@@ -129,8 +131,10 @@ pub fn move_index(state: Rc<State>, move_target: MoveTarget) {
             } {
                 state.sidebar.modules.lock_mut().move_from_to(state.index, target);
                 let req = ModuleUpdateRequest {
+                    id: StableOrUniqueId::Unique(module.id.clone()),
                     index: Some(target.try_into().unwrap_ji()),
-                    ..Default::default()
+                    body: None,
+                    is_complete: None,
                 };
 
                 match update_module(&state.sidebar.jig.id, &module.id, req).await {

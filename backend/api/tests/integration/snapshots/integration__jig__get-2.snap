@@ -1,0 +1,54 @@
+---
+source: tests/integration/jig.rs
+expression: body
+
+---
+{
+  "id": "0cc084bc-7c83-11eb-9f77-e3218dffb008",
+  "publishedAt": null,
+  "creatorId": "1f241e1b-b537-493f-a230-075cb16315be",
+  "authorId": "1f241e1b-b537-493f-a230-075cb16315be",
+  "authorName": "Bobby Tables",
+  "jigData": {
+    "draftOrLive": "Live",
+    "displayName": "name",
+    "modules": [
+      {
+        "id": "a6b248f8-1dd7-11ec-8426-975953035335",
+        "kind": "Cover"
+      },
+      {
+        "id": "a6b24970-1dd7-11ec-8426-57136b411853",
+        "kind": "Flashcards"
+      },
+      {
+        "id": "a6b249c0-1dd7-11ec-8426-f77e58fd17c6",
+        "kind": "Memory"
+      }
+    ],
+    "ageRanges": [],
+    "affiliations": [],
+    "goals": [],
+    "language": "en",
+    "categories": [],
+    "additionalResources": [
+      "286b828c-1dd9-11ec-8426-571b03b2d3df",
+      "286b82fa-1dd9-11ec-8426-2b6953011bae"
+    ],
+    "description": "test description",
+    "lastEdited": "[last_edited]",
+    "defaultPlayerSettings": {
+      "direction": "ltr",
+      "displayScore": true,
+      "trackAssessments": true,
+      "dragAssist": true
+    },
+    "theme": "Blank",
+    "audioBackground": null,
+    "audioEffects": {
+      "feedbackPositive": "[audio]",
+      "feedbackNegative": "[audio]"
+    },
+    "privacyLevel": "public"
+  }
+}

@@ -7,10 +7,15 @@ expression: body
   "categories": [
     {
       "id": "afbce03c-e90f-11ea-8281-cfde02f6b582",
+      "user_scopes": [
+        "Admin",
+        "ManageAnimation"
+      ],
       "name": "Parent",
       "children": [
         {
           "id": "e315d3b2-e90f-11ea-8281-73cd69c14821",
+          "user_scopes": [],
           "name": "A",
           "created_at": "2020-08-28T09:21:43.186002Z",
           "updated_at": null,

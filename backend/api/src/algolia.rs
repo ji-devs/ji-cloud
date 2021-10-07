@@ -13,7 +13,7 @@ use shared::{
     domain::{
         category::CategoryId,
         image::{ImageId, ImageKind},
-        jig::JigId,
+        jig::{JigId, PrivacyLevel},
         meta::{AffiliationId, AgeRangeId, GoalId, ImageStyleId, ImageTagIndex},
     },
     media::MediaGroupKind,
@@ -28,8 +28,7 @@ use migration::ResyncKind;
 mod migration;
 
 const PREMIUM_TAG: &'static str = "premium";
-const PUBLISHED_TAG: &'static str = "published";
-const PUBLIC_TAG: &'static str = "public";
+const PUBLISHED_TAG: &'static str = "published"; // not currently used
 const HAS_AUTHOR_TAG: &'static str = "hasAuthor";
 
 #[derive(Serialize)]
@@ -236,7 +235,7 @@ select algolia_index_version as "algolia_index_version!" from "settings"
         Ok(ids?)
     }
 
-    // todo: be less hacky about this
+    // FIXME drafts
     async fn update_jigs(&self) -> anyhow::Result<bool> {
         let mut txn = self.db.begin().await?;
 
@@ -256,52 +255,53 @@ select algolia_index_version as "algolia_index_version!" from "settings"
         let requests: Vec<_> = sqlx::query!(
             //language=SQL
             r#"
-select id,
-    display_name as "name",
-    language as "language!",
-    array((select affiliation_id from jig_affiliation where jig_id = jig.id)) as "affiliations!",
-    array((select affiliation.display_name
-           from affiliation
-                    inner join jig_affiliation on affiliation.id = jig_affiliation.affiliation_id
-           where jig_affiliation.jig_id = jig.id))                            as "affiliation_names!",
-    array((select age_range_id from jig_age_range where jig_id = jig.id))     as "age_ranges!",
-    array((select age_range.display_name
-           from age_range
-                    inner join jig_age_range on age_range.id = jig_age_range.age_range_id
-           where jig_age_range.jig_id = jig.id))                              as "age_range_names!",
-    array((select goal_id from jig_goal where jig_id = jig.id))     as "goals!",
-    array((select goal.display_name
-           from goal
-                    inner join jig_goal on goal.id = jig_goal.goal_id
-           where jig_goal.jig_id = jig.id))                              as "goal_names!",
-    array((select category_id from jig_category where jig_id = jig.id))       as "categories!",
-    array((select name
-           from category
-                    inner join jig_category on category.id = jig_category.category_id
-           where jig_category.jig_id = jig.id))                               as "category_names!",
-    (publish_at < now() is true) as "is_published!",
-    is_public as "is_public!",
-    author_id as "author",
-    (select given_name || ' '::text || family_name from user_profile where user_profile.user_id = jig.author_id) as "author_name"
+select jig.id,
+       display_name                                                                                                 as "name",
+       language                                                                                                     as "language!",
+       array((select affiliation_id
+              from jig_data_affiliation
+              where jig_data_id = jig_data.id))                                                                     as "affiliations!",
+       array((select affiliation.display_name
+              from affiliation
+                       inner join jig_data_affiliation on affiliation.id = jig_data_affiliation.affiliation_id
+              where jig_data_affiliation.jig_data_id = jig_data.id))                                                as "affiliation_names!",
+       array((select age_range_id
+              from jig_data_age_range
+              where jig_data_id = jig_data.id))                                                                     as "age_ranges!",
+       array((select age_range.display_name
+              from age_range
+                       inner join jig_data_age_range on age_range.id = jig_data_age_range.age_range_id
+              where jig_data_age_range.jig_data_id = jig_data.id))                                                  as "age_range_names!",
+       array((select goal_id from jig_data_goal where jig_data_id = jig_data.id))                                   as "goals!",
+       array((select goal.display_name
+              from goal
+                       inner join jig_data_goal on goal.id = jig_data_goal.goal_id
+              where jig_data_goal.jig_data_id = jig_data.id))                                                       as "goal_names!",
+       array((select category_id
+              from jig_data_category
+              where jig_data_id = jig_data.id))                                                                     as "categories!",
+       array((select name
+              from category
+                       inner join jig_data_category on category.id = jig_data_category.category_id
+              where jig_data_category.jig_data_id = jig_data.id))                                                   as "category_names!",
+       privacy_level                                                                                                as "privacy_level!: PrivacyLevel",
+       author_id                                                                                                    as "author",
+       (select given_name || ' '::text || family_name
+        from user_profile
+        where user_profile.user_id = jig.author_id)                                                                 as "author_name"
 from jig
-where
-    last_synced_at is null or
-    (updated_at is not null and last_synced_at < updated_at) or
-    (publish_at < now() is true and last_synced_at < publish_at)
-limit 100
-for no key update skip locked;
+         inner join jig_data on live_id = jig_data.id
+where last_synced_at is null
+   or (updated_at is not null and last_synced_at < updated_at)
+   or (privacy_level != 2) -- 2 is private
+limit 100 for no key update skip locked;
      "#
         )
         .fetch(&mut txn)
         .map_ok(|row| {
             let mut tags = Vec::new();
-            if row.is_published {
-                tags.push(PUBLISHED_TAG);
-            }
 
-            if row.is_public {
-                tags.push(PUBLIC_TAG);
-            }
+            tags.push(row.privacy_level.as_str());
 
             if row.author.is_some() {
                 tags.push(HAS_AUTHOR_TAG);
@@ -323,10 +323,10 @@ for no key update skip locked;
                 author_name: row.author_name,
                 tags
             })
-            .expect("failed to serialize BatchImage to json")
+            .expect("failed to serialize BatchJig to json")
             {
                 serde_json::Value::Object(map) => map,
-                _ => panic!("failed to serialize BatchImage to json map"),
+                _ => panic!("failed to serialize BatchJig to json map"),
             },
             object_id: row.id.to_string(),
         }})
@@ -345,7 +345,12 @@ for no key update skip locked;
         log::debug!("Updated a batch of {} jigs(s)", ids.len());
 
         sqlx::query!(
-            "update jig set last_synced_at = now() where id = any($1)",
+            //language=SQL
+            r#"
+update jig_data
+set last_synced_at = now()
+where jig_data.id = any (select live_id from jig where jig.id = any ($1))
+"#,
             &ids
         )
         .execute(&mut txn)
@@ -724,8 +729,7 @@ impl Client {
         &self,
         query: &str,
         page: Option<u32>,
-        is_published: Option<bool>,
-        is_public: Option<bool>,
+        privacy_level: Option<PrivacyLevel>,
         language: Option<String>,
         age_ranges: &[AgeRangeId],
         affiliations: &[AffiliationId],
@@ -751,17 +755,20 @@ impl Client {
             }))
         }
 
-        if let Some(is_published) = is_published {
+        if let Some(author_name) = author_name {
             filters.filters.push(Box::new(CommonFilter {
-                filter: TagFilter(PUBLISHED_TAG.to_owned()),
-                invert: !is_published,
+                filter: FacetFilter {
+                    facet_name: "author_name".to_owned(),
+                    value: author_name,
+                },
+                invert: false,
             }))
         }
 
-        if let Some(is_public) = is_public {
+        if let Some(privacy_level) = privacy_level {
             filters.filters.push(Box::new(CommonFilter {
-                filter: TagFilter(PUBLIC_TAG.to_owned()),
-                invert: !is_public,
+                filter: TagFilter(privacy_level.as_str().to_owned()),
+                invert: false,
             }))
         }
 
@@ -770,16 +777,6 @@ impl Client {
                 filter: FacetFilter {
                     facet_name: "language".to_owned(),
                     value: language,
-                },
-                invert: false,
-            }))
-        }
-
-        if let Some(author_name) = author_name {
-            filters.filters.push(Box::new(CommonFilter {
-                filter: FacetFilter {
-                    facet_name: "author_name".to_owned(),
-                    value: author_name,
                 },
                 invert: false,
             }))

@@ -8,15 +8,21 @@ export class _ extends LitElement {
         return [css`
             :host {
                 display: block;
-                width: 492px;
-                margin: 0 auto;
+                overflow: auto;
                 /* also set height to allow descendants to take full height, feels hacky */
                 height: 100%;
                 min-height: 100%;
+                padding: 0 20px;
+            }
+            @media (min-width: 1920px) {
+                :host {
+                    padding: 0 32px;
+                }
             }
 
             section {
-                padding-top: 48px;
+                height: 100%;
+                box-sizing: border-box;
             }
         `];
     }

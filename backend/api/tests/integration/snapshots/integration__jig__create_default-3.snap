@@ -1,0 +1,43 @@
+---
+source: tests/integration/jig.rs
+expression: body
+
+---
+{
+  "id": "[id]",
+  "publishedAt": null,
+  "creatorId": "1f241e1b-b537-493f-a230-075cb16315be",
+  "authorId": "1f241e1b-b537-493f-a230-075cb16315be",
+  "authorName": "Bobby Tables",
+  "jigData": {
+    "draftOrLive": "Live",
+    "displayName": "",
+    "modules": [
+      {
+        "id": "[id]",
+        "kind": "Cover"
+      }
+    ],
+    "ageRanges": [],
+    "affiliations": [],
+    "goals": [],
+    "language": "en_US",
+    "categories": [],
+    "additionalResources": [],
+    "description": "",
+    "lastEdited": "[last_edited]",
+    "defaultPlayerSettings": {
+      "direction": "ltr",
+      "displayScore": false,
+      "trackAssessments": false,
+      "dragAssist": false
+    },
+    "theme": "Blank",
+    "audioBackground": null,
+    "audioEffects": {
+      "feedbackPositive": "[audio]",
+      "feedbackNegative": "[audio]"
+    },
+    "privacyLevel": "unlisted"
+  }
+}

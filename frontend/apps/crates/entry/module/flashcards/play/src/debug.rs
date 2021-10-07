@@ -69,7 +69,7 @@ impl DebugSettings {
             //otherwise it will fail at load time
             data: Some(
                 if let Some(init_data) = init_data {
-                    let mode = Mode::Translate;
+                    let mode = Mode::Lettering;
 
                     RawData{
                         content: Some(Content {

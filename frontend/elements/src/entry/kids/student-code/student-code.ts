@@ -12,10 +12,38 @@ export class _ extends LitElement {
                 background-color: var(--green-3);
                 height: 100vh;
                 width: 100vw;
-                padding-top: 160px;
                 box-sizing: border-box;
             }
+            main {
+                display: grid;
+                row-gap: 80px;
+                grid-column: 1;
+                grid-row: 1;
+                width: 100vw;
+                align-content: start;
+                z-index: 1;
+            }
+            header {
+                background-color: white;
+                height: 88px;
+                display: grid;
+                align-items: center;
+                justify-content: start;
+                padding: 0 25px;
+            }
+            h1 {
+                margin: 0;
+                margin-top: 80px;
+                font-size: 32px;
+                font-weight: 900;
+                color: var(--dark-blue-4);
+                text-align: center;
+            }
+            ::slotted(kids-student-code-input) {
+                justify-self: center;
+            }
             .jigzi-wrapper {
+                justify-self: center;
                 grid-column: 1;
                 grid-row: 1;
                 display: grid;
@@ -23,32 +51,23 @@ export class _ extends LitElement {
                 width: 1200px;
                 max-width: 100vw;
             }
-            main {
-                display: grid;
-                row-gap: 80px;
-                align-self: start;
-                justify-self: center;
-                grid-column: 1;
-                grid-row: 1;
-            }
-            h1 {
-                margin: 0;
-                font-size: 32px;
-                font-weight: 900;
-                color: var(--dark-blue-4);
-            }
         `];
     }
 
     render() {
         return html`
-            <div class="jigzi-wrapper">
-                <slot name="jigzi"></slot>
-            </div>
             <main>
+                <header>
+                    <a href="/">
+                        <img-ui path="core/page-header/logo.svg"></img-ui>
+                    </a>
+                </header>
                 <h1>${STR_TYPE_THE_CODE}</h1>
                 <slot name="input"></slot>
             </main>
+            <div class="jigzi-wrapper">
+                <slot name="jigzi"></slot>
+            </div>
         `;
     }
 }

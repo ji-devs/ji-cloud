@@ -3,7 +3,7 @@ use crate::{
     color_select::{self, state::State as ColorPickerState},
     text_editor::wysiwyg_types::ControlsChange,
 };
-use dominator::{clone, html, Dom};
+use dominator::{Dom, class, clone, html, pseudo};
 use futures_signals::signal::Mutable;
 use futures_signals::signal::SignalExt;
 use rgb::RGBA8;
@@ -19,6 +19,7 @@ impl ColorState {
     pub fn new(state: Rc<State>) -> Self {
         let picker = Rc::new(ColorPickerState::new(
             (*state).theme_id.clone(),
+            None,
             None,
             Some(clone!(state => move |color| {
                 let color = rgba8_to_hex_optional(&color);
@@ -57,6 +58,11 @@ pub fn render(state: Rc<State>) -> Dom {
         .property("positionY", "top-in")
         .property("positionX", "right-out")
         .property("styled", true)
+        .class(class! {
+            .pseudo!("::part(overlay)", {
+                .style("padding", "16px")
+            })
+        })
         .property_signal("open", color_state.select_for.signal_cloned().map(|select_for| select_for.is_some()))
         .event(clone!(color_state => move |_: events::Close| {
             color_state.select_for.set(None);
@@ -64,6 +70,7 @@ pub fn render(state: Rc<State>) -> Dom {
         .child(html!("div", {
             .property("slot", "anchor")
             .style("display", "flex")
+            .style("justify-content", "space-evenly")
             .children(&mut [
                 html!("text-editor-controls-button", {
                     .property("kind", "color")

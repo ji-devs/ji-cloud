@@ -1,9 +1,8 @@
 import { LitElement, html, css, customElement, property } from 'lit-element';
 import {classMap} from "lit-html/directives/class-map";
 import {nothing} from "lit-html";
-import "@elements/core/tooltips/info";
 import {ModuleKind, STR_MODULE_DISPLAY_NAME, STR_MODULE_HEADER_TOOLTIP_BODY} from "@elements/module/_common/types";
-
+import "@elements/_bundles/_sub-bundles/overlay"
 
 const STR_TOOLTIP_GETTING_STARTED = "Getting started";
 
@@ -67,6 +66,12 @@ function renderTooltip(moduleKind:ModuleKind, targetRef:HTMLElement) {
         return nothing;
     }
 
+    const marginX = -33; 
+
     const showId = `header-intro-${moduleKind}`;
-    return html`<tooltip-info placement="bottom-end" .target=${targetRef} .arrowOffset=${35} title="${STR_TOOLTIP_GETTING_STARTED}" body="${body}" showId="${showId}" closeable></tooltip-info>`
+    return html`<overlay-container>
+        <overlay-tooltip-info .target=${targetRef} .marginX=${marginX} targetAnchor="bm" contentAnchor="tr" title="${STR_TOOLTIP_GETTING_STARTED}" body="${body}" showId="${showId}" closeable></overlay-tooltip-info>
+</overlay-container>
+    `
+            
 }

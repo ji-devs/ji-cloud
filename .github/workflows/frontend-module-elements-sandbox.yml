@@ -36,10 +36,14 @@ jobs:
       - name: install npm deps
         run: npm ci 
         working-directory: "./frontend/elements"
+        env:
+          FONTAWESOME_NPM_AUTH_TOKEN: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
 
       - name: test elements 
         run: npm run test 
         working-directory: "./frontend/elements"
+        env:
+          FONTAWESOME_NPM_AUTH_TOKEN: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
 
       - name: Notify slack of all status
         uses: pullreminders/slack-action@master
@@ -82,12 +86,15 @@ jobs:
       - name: install npm deps
         run: npm ci 
         working-directory: "./frontend/elements"
+        env:
+          FONTAWESOME_NPM_AUTH_TOKEN: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
 
       - name: build elements 
         run: npm run build:sandbox
         working-directory: "./frontend/elements"
         env: 
           APP_NAME: "module/${{ matrix.app }}/${{ matrix.mode }}"
+          FONTAWESOME_NPM_AUTH_TOKEN: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
 
       - name: install google cloud sdk
         uses: google-github-actions/setup-gcloud@master

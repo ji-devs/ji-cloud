@@ -18,7 +18,6 @@ use uuid::Uuid;
 use super::{
     category::CategoryId,
     meta::{AffiliationId, AgeRangeId, GoalId},
-    Publish,
 };
 use crate::domain::jig::module::body::ThemeId;
 
@@ -82,19 +81,55 @@ impl<'de> serde::Deserialize<'de> for UserOrMe {
     }
 }
 
+/// Access level for the jig.
+#[derive(Serialize, Deserialize, Copy, Clone, Eq, PartialEq, Debug)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[serde(rename_all = "camelCase")]
+#[repr(i16)]
+pub enum PrivacyLevel {
+    /// Publicly available and indexed. Can be shared with others.
+    Public = 0,
+
+    /// Not indexed, but can be accessed by non-owners if the id is known. "Private" in the front-end
+    Unlisted = 1,
+
+    /// NOT IMPLEMENTED. Only available to the author.
+    Private = 2,
+}
+
+impl PrivacyLevel {
+    /// Represents the privacy level as a `str`. Relevant for Algolia tag filtering.
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Self::Public => "public",
+            Self::Unlisted => "unlisted",
+            Self::Private => "private",
+        }
+    }
+}
+
+impl Default for PrivacyLevel {
+    fn default() -> Self {
+        Self::Public
+    }
+}
+
 /// Request to create a new JIG.
+///
+/// This creates the draft and live [JigData](JigData) copies with the requested info.
 #[derive(Serialize, Deserialize, Debug, Default)]
+#[serde(rename_all = "camelCase")]
 pub struct JigCreateRequest {
     /// The JIG's name.
     #[serde(default)]
     pub display_name: String,
 
-    /// The goals of this jig.
+    /// The goals of this JIG.
     #[serde(skip_serializing_if = "Vec::is_empty")]
     #[serde(default)]
     pub goals: Vec<GoalId>,
 
-    /// This jig's age ranges.
+    /// This JIG's age ranges.
     #[serde(skip_serializing_if = "Vec::is_empty")]
     #[serde(default)]
     pub age_ranges: Vec<AgeRangeId>,
@@ -116,11 +151,6 @@ pub struct JigCreateRequest {
     #[serde(default)]
     pub categories: Vec<CategoryId>,
 
-    /// When the JIG should be considered published (if at all).
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(default)]
-    pub publish_at: Option<Publish>,
-
     /// Description of the jig. Defaults to empty string.
     #[serde(default)]
     pub description: String,
@@ -130,11 +160,41 @@ pub struct JigCreateRequest {
     pub default_player_settings: JigPlayerSettings,
 }
 
-/// The over-the-wire representation of a JIG.
+/// Whether the data is draft or live.
+#[derive(Serialize, Deserialize, Clone, Copy, Debug)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[repr(i16)]
+pub enum DraftOrLive {
+    /// Represents a draft copy
+    Draft = 0,
+    /// Represents a live copy
+    Live = 1,
+}
+
+impl From<DraftOrLive> for bool {
+    fn from(draft_or_live: DraftOrLive) -> Self {
+        match draft_or_live {
+            DraftOrLive::Draft => false,
+            DraftOrLive::Live => true,
+        }
+    }
+}
+
+impl From<bool> for DraftOrLive {
+    fn from(draft_or_live: bool) -> Self {
+        match draft_or_live {
+            false => DraftOrLive::Draft,
+            true => DraftOrLive::Live,
+        }
+    }
+}
+
+/// The over-the-wire representation of a JIG's data. This can either be the live copy or the draft copy.
 #[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct Jig {
-    /// The ID of the JIG.
-    pub id: JigId,
+#[serde(rename_all = "camelCase")]
+pub struct JigData {
+    /// Whether the JIG data is the live copy or the draft.
+    pub draft_or_live: DraftOrLive,
 
     /// The JIG's name.
     pub display_name: String,
@@ -151,15 +211,6 @@ pub struct Jig {
     /// The goals of this jig.
     pub goals: Vec<GoalId>,
 
-    /// The ID of the JIG's original creator ([`None`] if unknown).
-    pub creator_id: Option<Uuid>,
-
-    /// The current author
-    pub author_id: Option<Uuid>,
-
-    /// The author's name, as "{given_name} {family_name}".
-    pub author_name: Option<String>,
-
     /// The language the jig uses.
     ///
     /// NOTE: in the format `en`, `eng`, `en-US`, `eng-US` or `eng-USA`. To be replaced with a struct that enforces this.
@@ -167,9 +218,6 @@ pub struct Jig {
 
     /// The jig's categories.
     pub categories: Vec<CategoryId>,
-
-    /// When the JIG should be considered published (if at all).
-    pub publish_at: Option<DateTime<Utc>>,
 
     /// Additional resources of this JIG.
     pub additional_resources: Vec<AdditionalResourceId>,
@@ -179,9 +227,6 @@ pub struct Jig {
 
     /// When the jig was last edited
     pub last_edited: Option<DateTime<Utc>>,
-
-    /// Whether the jig is public or not.
-    pub is_public: bool,
 
     /// Default player settings for this jig.
     pub default_player_settings: JigPlayerSettings,
@@ -194,27 +239,45 @@ pub struct Jig {
 
     /// Audio effects
     pub audio_effects: AudioEffects,
+
+    /// The privacy level on the JIG.
+    pub privacy_level: PrivacyLevel,
 }
 
 /// Audio for background music
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, Eq, PartialEq)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[serde(rename_all = "camelCase")]
 #[repr(i16)]
 pub enum AudioBackground {
     #[allow(missing_docs)]
     FunForKids = 0,
     #[allow(missing_docs)]
-    SukkotLoop = 1,
+    DancingHappy = 1,
+    #[allow(missing_docs)]
+    Jigzi1 = 2,
+    #[allow(missing_docs)]
+    Jigzi2 = 3,
+    #[allow(missing_docs)]
+    Jigzi3 = 4,
 }
+
 impl AudioBackground {
     /// Get all enum variants
     pub fn variants() -> Vec<AudioBackground> {
-        vec![AudioBackground::FunForKids, AudioBackground::SukkotLoop]
+        vec![
+            AudioBackground::FunForKids,
+            AudioBackground::DancingHappy,
+            AudioBackground::Jigzi1,
+            AudioBackground::Jigzi2,
+            AudioBackground::Jigzi3,
+        ]
     }
 }
 
 /// Audio Effects
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
+#[serde(rename_all = "camelCase")]
 pub struct AudioEffects {
     /// Positive audio feedback
     pub feedback_positive: HashSet<AudioFeedbackPositive>,
@@ -226,22 +289,50 @@ pub struct AudioEffects {
 /// Negative Audio Feedback
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[serde(rename_all = "camelCase")]
 #[repr(i16)]
 pub enum AudioFeedbackNegative {
     #[allow(missing_docs)]
-    Boing = 0,
+    Bang = 0,
     #[allow(missing_docs)]
-    Incorrect = 1,
+    Boing = 1,
     #[allow(missing_docs)]
-    JumpWrong = 2,
+    Buzz = 2,
+    #[allow(missing_docs)]
+    Buzzer = 3,
+    #[allow(missing_docs)]
+    Clang = 4,
+    #[allow(missing_docs)]
+    Clicks = 5,
+    #[allow(missing_docs)]
+    Incorrect = 6,
+    #[allow(missing_docs)]
+    JumpWrong = 7,
+    #[allow(missing_docs)]
+    NotRight = 8,
+    #[allow(missing_docs)]
+    OhNo = 9,
+    #[allow(missing_docs)]
+    ShortClang = 10,
+    #[allow(missing_docs)]
+    Whir = 11,
 }
 impl AudioFeedbackNegative {
     /// Get all enum variants
     pub fn variants() -> Vec<AudioFeedbackNegative> {
         vec![
+            AudioFeedbackNegative::Bang,
             AudioFeedbackNegative::Boing,
+            AudioFeedbackNegative::Buzz,
+            AudioFeedbackNegative::Buzzer,
+            AudioFeedbackNegative::Clang,
+            AudioFeedbackNegative::Clicks,
             AudioFeedbackNegative::Incorrect,
             AudioFeedbackNegative::JumpWrong,
+            AudioFeedbackNegative::NotRight,
+            AudioFeedbackNegative::OhNo,
+            AudioFeedbackNegative::ShortClang,
+            AudioFeedbackNegative::Whir,
         ]
     }
 }
@@ -249,36 +340,91 @@ impl AudioFeedbackNegative {
 /// Positive Audio Feedback
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[serde(rename_all = "camelCase")]
 #[repr(i16)]
 pub enum AudioFeedbackPositive {
     #[allow(missing_docs)]
-    Magic = 0,
+    Correct = 0,
     #[allow(missing_docs)]
-    StarPing = 1,
+    Keys = 1,
     #[allow(missing_docs)]
-    Ting = 2,
+    Magic = 2,
+    #[allow(missing_docs)]
+    Notes = 3,
+    #[allow(missing_docs)]
+    StarPing = 4,
+    #[allow(missing_docs)]
+    Ting = 5,
+    #[allow(missing_docs)]
+    Trumpet = 6,
+    #[allow(missing_docs)]
+    VoiceAwesome = 7,
+    #[allow(missing_docs)]
+    VoicesHurray = 8,
+    #[allow(missing_docs)]
+    VoiceYippee = 9,
+    #[allow(missing_docs)]
+    Xylophone = 10,
+    #[allow(missing_docs)]
+    Yes = 11,
 }
 impl AudioFeedbackPositive {
     /// Get all enum variants
     pub fn variants() -> Vec<AudioFeedbackPositive> {
         vec![
+            AudioFeedbackPositive::Correct,
+            AudioFeedbackPositive::Keys,
             AudioFeedbackPositive::Magic,
+            AudioFeedbackPositive::Notes,
             AudioFeedbackPositive::StarPing,
             AudioFeedbackPositive::Ting,
+            AudioFeedbackPositive::Trumpet,
+            AudioFeedbackPositive::VoiceAwesome,
+            AudioFeedbackPositive::VoicesHurray,
+            AudioFeedbackPositive::VoiceYippee,
+            AudioFeedbackPositive::Xylophone,
+            AudioFeedbackPositive::Yes,
         ]
     }
 }
 
 /// The response returned when a request for `GET`ing a jig is successful.
 #[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct JigResponse {
-    /// The requested JIG.
-    pub jig: Jig,
+    /// The ID of the JIG.
+    pub id: JigId,
+
+    /// When (if at all) the JIG has published a draft to live.
+    pub published_at: Option<DateTime<Utc>>,
+
+    /// The ID of the JIG's original creator ([`None`] if unknown).
+    pub creator_id: Option<Uuid>,
+
+    /// The current author
+    pub author_id: Option<Uuid>,
+
+    /// The author's name, as "{given_name} {family_name}".
+    pub author_name: Option<String>,
+
+    /// The data of the requested JIG.
+    pub jig_data: JigData,
 }
 
-/// Request for updating a JIG.
+/// Request to update properties on the JIG.
 #[derive(Serialize, Deserialize, Debug, Default)]
+#[serde(rename_all = "camelCase")]
 pub struct JigUpdateRequest {
+    /// Author of the JIG.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
+    pub author_id: Option<Uuid>,
+}
+
+/// Request for updating a JIG's draft data.
+#[derive(Serialize, Deserialize, Debug, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct JigUpdateDraftDataRequest {
     /// The JIG's name.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
@@ -316,12 +462,6 @@ pub struct JigUpdateRequest {
     #[serde(default)]
     pub author_id: Option<Uuid>,
 
-    /// When the JIG should be considered published (if at all).
-    #[serde(deserialize_with = "super::deserialize_optional_field")]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(default)]
-    pub publish_at: Option<Option<Publish>>,
-
     /// Additional resources of this JIG.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
@@ -331,11 +471,6 @@ pub struct JigUpdateRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub description: Option<String>,
-
-    /// Whether the jig is public or not.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(default)]
-    pub is_public: Option<bool>,
 
     /// Default player settings for this jig.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -357,6 +492,11 @@ pub struct JigUpdateRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub audio_effects: Option<AudioEffects>,
+
+    /// Privacy level for the jig.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
+    pub privacy_level: Option<PrivacyLevel>,
 }
 
 /// Query for [`Browse`](crate::api::endpoints::jig::Browse).
@@ -384,7 +524,7 @@ pub struct JigBrowseQuery {
 #[serde(rename_all = "camelCase")]
 pub struct JigBrowseResponse {
     /// the jigs returned.
-    pub jigs: Vec<Jig>,
+    pub jigs: Vec<JigResponse>,
 
     /// The number of pages found.
     pub pages: u32,
@@ -395,6 +535,7 @@ pub struct JigBrowseResponse {
 
 /// Search for jigs via the given query string.
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
+#[serde(rename_all = "camelCase")]
 pub struct JigSearchQuery {
     /// The query string.
     #[serde(default)]
@@ -443,7 +584,7 @@ pub struct JigSearchQuery {
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub goals: Vec<GoalId>,
 
-    /// Optionally filter by `is_published`
+    /// Optionally filter by `is_published`. This means that the jig's `publish_at < now()`.
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub is_published: Option<bool>,
@@ -461,6 +602,7 @@ pub struct JigSearchQuery {
 
 /// Response for successful search.
 #[derive(Serialize, Deserialize, Clone, Debug)]
+#[serde(rename_all = "camelCase")]
 pub struct JigSearchResponse {
     /// the jigs returned.
     pub jigs: Vec<JigResponse>,
@@ -474,13 +616,15 @@ pub struct JigSearchResponse {
 
 /// Response for successfully finding the draft of a jig.
 #[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct JigDraftResponse {
+#[serde(rename_all = "camelCase")]
+pub struct JigIdResponse {
     /// The ID of the jig
     pub id: JigId,
 }
 
 /// Response for total count of public and published jig.
 #[derive(Serialize, Deserialize, Clone, Debug)]
+#[serde(rename_all = "camelCase")]
 pub struct JigCountResponse {
     /// Total number of public and published jigs.
     pub total_count: u64,

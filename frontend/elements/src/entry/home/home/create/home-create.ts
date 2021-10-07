@@ -18,6 +18,12 @@ export class _ extends LitElement {
             .video-wrapper {
                 background-color: #fee595;
             }
+            .video-wrapper img-ui {
+                object-fit: cover;
+                object-position: center center;
+                width: 100%;
+                height: 100%;
+            }
             .content {
                 padding: 72px;
                 display: grid;
@@ -68,7 +74,7 @@ export class _ extends LitElement {
         return html`
             <div class="width-holder">
                 <div class="video-wrapper">
-                    
+                    <img-ui path="entry/home/create/background.png"></img-ui>
                 </div>
                 <div class="content">
                     <h3>${STR_SUBTITLE}</h3>

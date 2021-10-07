@@ -22,7 +22,8 @@ where
     fn render(
         state: Rc<Sidebar<RawData, E, GetSettingsStateFn, RenderSettingsStateFn, SettingsState>>,
     ) -> Dom {
-        html!("div", {
+        html!("empty-fragment", {
+            .style("display", "contents")
             .child_signal(state.base.step.signal_cloned().map(clone!(state => move |step| {
                 match step {
                     Step::One => Some(render_step_1(Step1::new(state.base.clone()))),

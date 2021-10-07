@@ -2,7 +2,7 @@ use super::state::*;
 use shared::domain::jig::module::body::ThemeChoice;
 use shared::{
     api::endpoints::{self, ApiEndpoint},
-    domain::jig::JigUpdateRequest,
+    domain::jig::JigUpdateDraftDataRequest,
     error::EmptyError,
 };
 
@@ -18,13 +18,13 @@ impl ThemeSelector {
 
         let path = endpoints::jig::Update::PATH.replace("{id}", &self.jig_id.0.to_string());
 
-        let req = JigUpdateRequest {
+        let req = JigUpdateDraftDataRequest {
             theme: Some(theme_id),
-            ..JigUpdateRequest::default()
+            ..JigUpdateDraftDataRequest::default()
         };
 
         self.jig_id_saver.load(async move {
-            api_with_auth_empty::<EmptyError, _>(&path, endpoints::jig::Update::METHOD, Some(req))
+            api_with_auth_empty::<EmptyError, _>(&path, endpoints::jig::UpdateDraftData::METHOD, Some(req))
                 .await
                 .unwrap_ji();
         });

@@ -1,5 +1,6 @@
 use dominator::{clone, html, with_node, Dom};
 use futures_signals::{map_ref, signal::{Mutable, SignalExt}};
+use shared::domain::jig::PrivacyLevel;
 use utils::events;
 use web_sys::{HtmlElement, HtmlInputElement, HtmlTextAreaElement};
 
@@ -18,7 +19,7 @@ use components::{module::_common::thumbnail::ModuleThumbnail, tooltip::{
     callbacks::TooltipErrorCallbacks,
     dom::render as TooltipDom,
     state::{
-        MoveStrategy, Placement, State as TooltipState, TooltipData, TooltipError, TooltipTarget,
+        MoveStrategy, State as TooltipState, TooltipData, TooltipError, TooltipTarget, Anchor, ContentAnchor
     },
 }};
 use std::rc::Rc;
@@ -64,18 +65,28 @@ fn render_page(state: Rc<State>) -> Dom {
                 }),
                 Some("img")
             ),
+            html!("fa-icon", {
+                .property("icon", "fa-thin fa-pen")
+                .property("slot", "edit-cover")
+                .event(clone!(state => move |_: events::Click| {
+                    state.navigate_to_cover();
+                }))
+            }),
             html!("label", {
                 .with_node!(elem => {
                     .property("slot", "public")
                     .text(STR_PUBLIC_LABEL)
                     .child(html!("input-switch", {
-                        .property_signal("enabled", state.jig.is_public.signal_cloned())
+                        .property_signal("enabled", state.jig.privacy_level.signal().map(|privacy_level| {
+                            privacy_level == PrivacyLevel::Public
+                        }))
                         .event(clone!(state => move |evt: events::CustomToggle| {
                             let value = evt.value();
-                            state.jig.is_public.set(value);
                             if value {
+                                state.jig.privacy_level.set(PrivacyLevel::Public);
                                 state.show_public_popup.set(false);
                             } else {
+                                state.jig.privacy_level.set(PrivacyLevel::Unlisted);
                                 state.show_public_popup.set(true);
                             }
                         }))
@@ -170,8 +181,8 @@ fn render_page(state: Rc<State>) -> Dom {
                     .child_signal(state.submission_tried.signal().map(clone!(elem => move |submission_tried| {
                         if submission_tried {
                             let data = TooltipData::Error(Rc::new(TooltipError {
-                                placement: Placement::Bottom,
-                                slot: None,
+                                target_anchor: Anchor::Top,
+                                content_anchor: ContentAnchor::Bottom,
                                 body: String::from(STR_MISSING_INFO_TOOLTIP),
                                 max_width: None,
                                 callbacks: TooltipErrorCallbacks::new(Some(||{}))

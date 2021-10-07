@@ -56,7 +56,7 @@ impl State {
     }
 
     pub fn text_to_value(text: &str) -> String {
-        format!("{{\"version\":\"0.1.0\",\"content\":[{{\"children\":[{{\"text\":\"{}\",\"element\":\"P1\"}}]}}]}}", text)
+        format!("{{\"version\":\"0.1.0\",\"content\":[{{\"children\":[{{\"text\":\"{}\",\"element\":\"H1\"}}]}}]}}", text)
     }
 
     pub fn set_value(&self, value: Option<String>) {
@@ -114,7 +114,7 @@ impl State {
         let _ = Reflect::set(
             &wysiwyg_ref,
             &JsValue::from_str(ELEMENT_DEFAULT_KEY),
-            &JsValue::from_str(&ElementType::P1.to_string()),
+            &JsValue::from_str(&ElementType::default().to_string()),
         );
 
         self.update_wysiwyg_value(&wysiwyg_ref);

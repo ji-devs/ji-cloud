@@ -7,6 +7,8 @@ use components::{
         video::dom::render_sticker_video_raw,
     },
 };
+use components::module::_common::play::prelude::*;
+use shared::domain::jig::module::body::video::{DoneAction, PlaySettings};
 use dominator::{clone, html, Dom};
 use shared::domain::jig::module::body::_groups::design::Sticker as RawSticker;
 use std::rc::Rc;
@@ -28,7 +30,11 @@ impl DomRenderable for Base {
                             RawSticker::Sprite(sprite) => render_sticker_sprite_raw(sprite, None),
                             RawSticker::Text(text) => render_sticker_text_raw(text, state.theme_id, None),
                             RawSticker::Video(video) => {
-                                let opts = actions::create_video_sticker_options(&state.play_settings);
+                                let opts = actions::create_video_sticker_options(&state.play_settings, Some(clone!(state => move || {
+                                    if state.play_settings.done_action == Some(DoneAction::Next) {
+                                        state.set_play_phase(ModulePlayPhase::Ending(Some(ModuleEnding::Next)));
+                                    }
+                                })));
 
                                 render_sticker_video_raw(video, Some(opts))
                             },

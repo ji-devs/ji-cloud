@@ -1,10 +1,12 @@
+use std::sync::Arc;
+
 use actix_web::{
-    web::{Data, Json, Query, ServiceConfig},
+    web::{Bytes, Data, Json, Query, ServiceConfig},
     HttpResponse,
 };
 use argon2::{password_hash::SaltString, Argon2, PasswordHasher};
 use chrono::{Duration, Utc};
-use core::settings::RuntimeSettings;
+use core::{config::IMAGE_BODY_SIZE_LIMIT, settings::RuntimeSettings};
 use rand::thread_rng;
 use sendgrid::v3::Email;
 use shared::{
@@ -17,9 +19,11 @@ use shared::{
         ApiEndpoint,
     },
     domain::{
+        image::{ImageId, ImageKind},
         session::NewSessionResponse,
         user::{ChangePasswordRequest, CreateProfileRequest, UserLookupQuery, VerifyEmailRequest},
     },
+    media::MediaLibrary,
 };
 use sqlx::{postgres::PgDatabaseError, Acquire, PgConnection, PgPool};
 use uuid::Uuid;
@@ -29,7 +33,7 @@ use crate::{
     domain::NoContentClearAuth,
     error,
     extractor::{SessionCreateProfile, SessionDelete, TokenSessionOf, TokenUser},
-    service::{mail, ServiceData},
+    service::{mail, s3, ServiceData},
     token::{create_auth_token, SessionMask},
 };
 
@@ -332,16 +336,32 @@ fn validate_register_req(req: &CreateProfileRequest) -> Result<(), error::UserUp
 async fn create_profile(
     settings: Data<RuntimeSettings>,
     db: Data<PgPool>,
+    s3: ServiceData<s3::Client>,
     signup_user: TokenSessionOf<SessionCreateProfile>,
     req: Json<CreateProfileRequest>,
 ) -> actix_web::Result<HttpResponse, error::UserUpdate> {
     validate_register_req(&req)?;
 
+    let req = req.into_inner();
+
+    let profile_image_id: Option<ImageId> = match req.profile_image_url {
+        Some(ref url) => create_user_profile_image(&db, &s3, &url, &signup_user.claims.user_id)
+            .await
+            .ok(),
+        None => None,
+    };
+
     let mut txn = db.begin().await?;
 
     let mut upsert_txn = txn.begin().await?;
 
-    upsert_profile(&mut upsert_txn, &req, signup_user.claims.user_id).await?;
+    upsert_profile(
+        &mut upsert_txn,
+        &req,
+        profile_image_id,
+        signup_user.claims.user_id,
+    )
+    .await?;
 
     db::session::delete(&mut upsert_txn, &signup_user.claims.token).await?;
 
@@ -372,6 +392,72 @@ async fn create_profile(
     Ok(HttpResponse::Created()
         .cookie(cookie)
         .json(NewSessionResponse { csrf }))
+}
+
+async fn create_user_profile_image(
+    pool: &PgPool,
+    s3: &s3::Client,
+    url: &str,
+    user_id: &Uuid,
+) -> anyhow::Result<ImageId> {
+    // create entry in user library library -> ID
+    let profile_image_id = db::image::user::create(&*pool, user_id, ImageKind::UserProfile).await?;
+
+    let client: reqwest::Client = reqwest::ClientBuilder::new()
+        .connect_timeout(std::time::Duration::from_secs(5))
+        .timeout(std::time::Duration::from_secs(10))
+        .build()?;
+
+    // todo: this `?` should be a ClientError or "proxy/gateway error"
+    let mut response: reqwest::Response = client.get(url).send().await?;
+
+    let mut data = Vec::new();
+
+    while let Some(chunk) = response.chunk().await? {
+        let chunk: Bytes = chunk;
+        if data.len() + chunk.len() < IMAGE_BODY_SIZE_LIMIT {
+            data.extend_from_slice(&chunk[..]);
+        } else {
+            return Err(anyhow::anyhow!("todo: better error here (data too big)").into());
+        }
+    }
+
+    log::trace!("data was {} bytes long", data.len());
+
+    let data = Arc::new(data);
+
+    // process
+    let (original, resized, thumbnail) = actix_web::web::block(move || {
+        let original = image::load_from_memory(&data)?;
+        crate::image_ops::generate_images(&original, ImageKind::Sticker)
+    })
+    .await??;
+
+    // upload to ID
+    s3.upload_png_images(
+        MediaLibrary::User,
+        profile_image_id.0,
+        original,
+        resized,
+        thumbnail,
+    )
+    .await?;
+
+    sqlx::query!(
+        //language=SQL
+        r#"
+update user_image_upload
+set uploaded_at       = now(),
+    processed_at      = now(),
+    processing_result = true
+where image_id = $1
+"#,
+        profile_image_id.0
+    )
+    .execute(pool)
+    .await?;
+
+    Ok(profile_image_id)
 }
 
 fn validate_patch_profile_req(

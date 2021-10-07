@@ -3,6 +3,7 @@ import "@elements/core/images/ui";
 
 const STR_HEADER_FIRST = "Settings and JIG info.";
 const STR_HEADER_SECOND = "Last step before publishing";
+const STR_THUMBNAIL = "Thumbnail";
 
 @customElement('jig-edit-publish')
 export class _ extends LitElement {
@@ -53,7 +54,36 @@ export class _ extends LitElement {
                 justify-content: center;
                 align-items: start;
             }
+            .img-wrapper {
+                display: grid;
+            }
+            .img-wrapper h4 {
+                font-size: 16px;
+                font-weight: 500;
+                color: var(--main-blue);
+                grid-area: 1 / 1;
+                margin: 0;
+                transform: translateY(-2em);
+                padding-left: 16px;
+            }
+            ::slotted([slot=edit-cover]) {
+                grid-column: 1;
+                grid-row: 1;
+                width: 32px;
+                height: 32px;
+                border-radius: 50%;
+                background-color: var(--main-blue);
+                color: white;
+                box-shadow: 0 0 4px #00000060;
+                justify-self: end;
+                display: inline-grid;
+                place-content: center;
+                transform: translate(50%, -50%);
+                cursor: pointer;
+            }
             ::slotted([slot=img]) {
+                grid-column: 1;
+                grid-row: 1;
                 display: grid;
                 width: 100%;
                 border-radius: 16px;
@@ -123,7 +153,11 @@ export class _ extends LitElement {
                         </div>
                         <div class="main">
                             <div  class="column-1">
-                                <slot name="img"></slot>
+                                <div class="img-wrapper">
+                                    <h4>${STR_THUMBNAIL}</h4>
+                                    <slot name="edit-cover"></slot>
+                                    <slot name="img"></slot>
+                                </div>
                                 <div class="public">
                                     <slot name="public"></slot>
                                 </div>

@@ -63,13 +63,12 @@ export function getLeafStyles(text: EditorText) {
 
 export function getRootStyles(value: WysiwygValue) {
     if(value.boxColor) {
-        return html`
-            <style>
-                :host {
-                    background-color: ${value.boxColor}
-                }
-            </style>
-        `;
+        // no spaces outside of style element because of the `white-space: pre-wrap`
+        return html`<style>
+            :host {
+                background-color: ${value.boxColor}
+            }
+        </style>`;
     } else {
         return nothing;
     }

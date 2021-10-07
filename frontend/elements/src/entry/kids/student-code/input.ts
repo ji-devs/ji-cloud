@@ -8,7 +8,8 @@ export class _ extends LitElement {
         return [css`
             :host {
                 display: grid;
-                row-gap: 80px
+                row-gap: 80px;
+                width: 650px;
             }
             .inputs {
                 display: grid;

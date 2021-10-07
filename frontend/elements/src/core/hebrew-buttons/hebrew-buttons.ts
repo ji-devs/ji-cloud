@@ -58,9 +58,13 @@ export class _ extends LitElement {
                     display: inline-block;
                 }
                 .iframe-wrapper {
-                    width: 550px;
                     height: 665px;
-                    /* position: relative; */
+                }
+                :host([active=sefaria]) .iframe-wrapper {
+                    width: 700px;
+                }
+                :host([active=dicta]) .iframe-wrapper {
+                    width: 550px;
                 }
                 .close {
                     position: absolute;
@@ -73,9 +77,13 @@ export class _ extends LitElement {
                     transform: translate(50%, -50%);
                     z-index: 1;
                 }
-                .iframe-close {
-                    /* offset by width of iframe */
-                    left: 550px;
+                :host([active=sefaria]) .iframe-close {
+                    /* offset by width of iframe minus 50% of the button width */
+                    transform: translate(calc(700px - 50%), -50%);
+                }
+                :host([active=dicta]) .iframe-close {
+                    /* offset by width of iframe minus 50% of the button width */
+                    transform: translate(calc(550px - 50%), -50%);
                 }
                 .keyboard-close {
                     right: 0;
@@ -92,7 +100,7 @@ export class _ extends LitElement {
     @property({ type: Boolean })
     full: boolean = false;
 
-    @internalProperty()
+    @property({ reflect: true })
     active?: Button;
 
     @query("#buttons-wrapper")

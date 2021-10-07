@@ -1,0 +1,29 @@
+---
+source: tests/integration/jig/player.rs
+expression: body
+
+---
+{
+  "sessions": [
+    {
+      "index": 1234,
+      "settings": {
+        "direction": "ltr",
+        "displayScore": true,
+        "trackAssessments": true,
+        "dragAssist": true
+      },
+      "expires_at": "[timestamp]"
+    },
+    {
+      "index": 1235,
+      "settings": {
+        "direction": "ltr",
+        "displayScore": true,
+        "trackAssessments": true,
+        "dragAssist": true
+      },
+      "expires_at": "[timestamp]"
+    }
+  ]
+}

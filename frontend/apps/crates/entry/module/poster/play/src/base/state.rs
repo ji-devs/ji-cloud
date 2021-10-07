@@ -1,17 +1,19 @@
-use shared::domain::jig::{Jig, JigId, module::{ModuleId, body::{_groups::design::{Backgrounds, Sticker}, ThemeChoice, Instructions, poster::{Mode, Step, ModuleData as RawData}}}};
+use shared::domain::jig::{JigData, JigId, module::{ModuleId, body::{_groups::design::{Backgrounds, Sticker}, ThemeChoice, Instructions, poster::{Mode, Step, ModuleData as RawData}}}};
 use components::{audio::mixer::AudioMixer, module::_common::play::prelude::*};
 use utils::prelude::*;
 use web_sys::AudioContext;
 use std::rc::Rc;
+use futures_signals::signal::Mutable;
 
 pub struct Base {
     pub jig_id: JigId,
     pub module_id: ModuleId,
-    pub jig: Jig,
+    pub jig: JigData,
     pub theme_id: ThemeId,
     pub instructions: Instructions,
     pub backgrounds: Backgrounds,
     pub stickers: Vec<Sticker>,
+    pub module_phase: Mutable<ModulePlayPhase>,
 }
 
 impl Base {
@@ -40,6 +42,7 @@ impl Base {
             instructions: base_content.instructions,
             backgrounds: base_content.backgrounds,
             stickers: base_content.stickers,
+            module_phase: init_args.play_phase,
         })
     }
 }
@@ -47,5 +50,9 @@ impl Base {
 impl BaseExt for Base {
     fn get_instructions(&self) -> Option<Instructions> {
         Some(self.instructions.clone())
+    }
+
+    fn play_phase(&self) -> Mutable<ModulePlayPhase> {
+        self.module_phase.clone()
     }
 }

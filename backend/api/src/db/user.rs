@@ -1,6 +1,6 @@
-use crate::error;
 use chrono_tz::Tz;
 use shared::domain::{
+    image::ImageId,
     meta::{AffiliationId, AgeRangeId, SubjectId},
     user::{CreateProfileRequest, OtherUser, PatchProfileRequest, UserProfile, UserScope},
 };
@@ -9,6 +9,7 @@ use std::{convert::TryFrom, str::FromStr};
 use uuid::Uuid;
 
 use super::{nul_if_empty, recycle_metadata};
+use crate::error;
 
 pub async fn lookup(
     db: &sqlx::PgPool,
@@ -27,13 +28,14 @@ pub async fn lookup(
 
 pub async fn get_profile(db: &sqlx::PgPool, id: Uuid) -> anyhow::Result<Option<UserProfile>> {
     let row = sqlx::query!(
+        //language=SQL
         r#"
 select user_id as "id",
     username,
     user_email.email::text                                                              as "email!",
     given_name,
     family_name,
-    profile_image,
+    profile_image_id                                                                    as "profile_image?: ImageId",
     language,
     locale,
     opt_into_edu_resources,
@@ -103,13 +105,14 @@ pub async fn exists(db: &sqlx::PgPool, id: Uuid) -> sqlx::Result<bool> {
 pub async fn upsert_profile(
     txn: &mut sqlx::Transaction<'_, sqlx::Postgres>,
     req: &CreateProfileRequest,
+    profile_image_id: Option<ImageId>,
     user_id: Uuid,
 ) -> Result<(), error::UserUpdate> {
     sqlx::query!(
         //language=SQL
         r#"
 insert into user_profile
-    (user_id, username, over_18, given_name, family_name, profile_image, language, locale, timezone, opt_into_edu_resources, organization, persona, location) 
+    (user_id, username, over_18, given_name, family_name, profile_image_id, language, locale, timezone, opt_into_edu_resources, organization, persona, location) 
 values 
     ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
 on conflict (user_id) do update
@@ -117,7 +120,7 @@ set
     over_18 = $3,
     given_name = $4,
     family_name = $5,
-    profile_image = $6,
+    profile_image_id = $6,
     language = $7,
     locale = $8,
     timezone = $9,
@@ -131,7 +134,7 @@ set
         req.over_18,
         &req.given_name,
         &req.family_name,
-        req.profile_image,
+        profile_image_id.map(|it| it.0),
         &req.language,
         &req.locale,
         req.timezone.name(),
@@ -219,11 +222,11 @@ where user_id = $1 and location is distinct from $2"#,
             //language=SQL
             r#"
 update user_profile
-set profile_image = $2
-where user_id = $1 and profile_image is distinct from $2
+set profile_image_id = $2
+where user_id = $1 and profile_image_id is distinct from $2
         "#,
             user_id,
-            profile_image,
+            profile_image.map(|it| it.0),
         )
         .execute(&mut txn)
         .await?;

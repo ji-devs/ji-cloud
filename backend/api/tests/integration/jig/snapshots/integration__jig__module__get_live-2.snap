@@ -1,0 +1,20 @@
+---
+source: tests/integration/jig/module.rs
+expression: body
+
+---
+{
+  "module": {
+    "id": "a6b24970-1dd7-11ec-8426-57136b411853",
+    "stable_id": "0cc03a02-7c83-11eb-9f77-f77f9ad65e9a",
+    "body": {
+      "flashcards": {
+        "content": null
+      }
+    },
+    "is_complete": false,
+    "is_updated": true,
+    "created_at": "2021-03-04T00:46:26.134651Z",
+    "updated_at": "[timestamp]"
+  }
+}

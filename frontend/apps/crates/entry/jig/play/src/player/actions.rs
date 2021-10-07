@@ -43,7 +43,7 @@ pub fn toggle_background_audio(state: Rc<State>, background_audio: AudioBackgrou
 pub fn navigate_forward(state: Rc<State>) {
     let mut active_module = state.active_module.lock_mut();
     if let Some(jig) = &*state.jig.lock_ref() {
-        if *active_module < jig.modules.len() - 1 {
+        if *active_module < jig.jig_data.modules.len() - 1 {
 
             *active_module += 1;
             state.timer.set(None);
@@ -66,12 +66,22 @@ pub fn navigate_back(state: Rc<State>) {
 
 pub fn load_jig(state: Rc<State>) {
     state.loader.load(clone!(state => async move {
-        let path = jig::Get::PATH.replace("{id}", &state.jig_id.0.to_string());
 
-        match api_no_auth::<JigResponse, EmptyError, ()>(&path, jig::Get::METHOD, None).await {
+        let resp = match state.player_options.draft {
+            false => {
+                let path = jig::GetLive::PATH.replace("{id}", &state.jig_id.0.to_string());
+                api_no_auth::<JigResponse, EmptyError, ()>(&path, jig::GetLive::METHOD, None).await
+            },
+            true => {
+                let path = jig::GetDraft::PATH.replace("{id}", &state.jig_id.0.to_string());
+                api_no_auth::<JigResponse, EmptyError, ()>(&path, jig::GetDraft::METHOD, None).await
+            },
+        };
+
+        match resp {
             Ok(resp) => {
                 // state.active_module.set(Some(resp.jig.modules[0].clone()));
-                state.jig.set(Some(resp.jig));
+                state.jig.set(Some(resp));
             },
             Err(_) => {},
         }
@@ -147,6 +157,9 @@ pub fn on_iframe_message(state: Rc<State>, message: ModuleToJigPlayerMessage) {
         }
         ModuleToJigPlayerMessage::Next => {
             navigate_forward(Rc::clone(&state));
+        },
+        ModuleToJigPlayerMessage::Stop => {
+            state.timer.set(None);
         },
     };
 }

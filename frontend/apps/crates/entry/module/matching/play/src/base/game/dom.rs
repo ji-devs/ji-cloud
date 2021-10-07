@@ -39,10 +39,10 @@ pub fn render(state: Rc<Game>) -> Dom {
         .children_signal_vec(
             state.current.signal_cloned()
                 .map(clone!(state => move |current| {
+
                     let mut children:Vec<Dom> = Vec::new();
-
+                    
                     if let Some(current) = current {
-
                         for top in current.top.iter() {
                             children.push(render_top(top.clone()));
                         }

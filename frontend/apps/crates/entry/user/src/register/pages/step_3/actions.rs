@@ -7,7 +7,7 @@ use shared::{
     api::{ApiEndpoint, endpoints},
     domain::{
         meta::{AgeRangeId, AffiliationId, SubjectId},
-        user::PutProfileRequest,
+        user::CreateProfileRequest,
         session::NewSessionResponse,
     },
     error::EmptyError,
@@ -64,7 +64,7 @@ pub fn submit(state: Rc<State>) {
     let step_2 = state.step_2.clone();
     let step_1 = step_2.step_1;
 
-    let req = PutProfileRequest {
+    let req = CreateProfileRequest {
         username: step_1.username,
         over_18: true,
         given_name: step_1.firstname,
@@ -75,9 +75,7 @@ pub fn submit(state: Rc<State>) {
         opt_into_edu_resources: step_2.marketing,
         organization: Some(step_2.organization),
         persona: Some(step_2.persona),
-        //TODO: bring back when https://github.com/ji-devs/ji-cloud/issues/1513 is resolved
-        //profile_image: step_1.oauth_profile.and_then(|p| p.profile_picture),
-        profile_image_id: None,
+        profile_image_url: step_1.oauth_profile.and_then(|p| p.profile_picture),
         subjects,
         age_ranges,
         affiliations,
@@ -90,8 +88,8 @@ pub fn submit(state: Rc<State>) {
 
 
     state.register_loader.load(clone!(state => async move {
-        let (resp, status):(Result<NewSessionResponse, EmptyError>, u16) = api_with_auth_status(&endpoints::user::PutProfile::PATH, endpoints::user::PutProfile::METHOD, Some(req)).await;
-
+        let (resp, status) = endpoints::user::CreateProfile::api_with_auth_status(Some(req)).await;
+        
         match resp {
             Ok(resp) => {
                 storage::save_csrf_token(&resp.csrf);

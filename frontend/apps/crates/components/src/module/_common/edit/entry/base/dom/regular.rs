@@ -142,6 +142,7 @@ fn add_slot_to_dom(dom: Dom, slot: &str) -> Dom {
     //there might be a better way, like Dom->DomBuilder->Dom
     html!("empty-fragment", {
         .property("slot", slot)
+        .style("display", "contents")
         .child(dom)
     })
 }

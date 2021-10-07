@@ -12,8 +12,7 @@ use futures_signals::{
 use utils::prelude::*;
 use super::{
     state::{Base, Phase},
-    game::dom::render as render_game,
-    ending::dom::render as render_ending
+    game::state::Game,
 };
 
 
@@ -25,8 +24,8 @@ impl DomRenderable for Base {
             .child_signal(state.phase.signal_cloned().map(|phase| {
                 match phase {
                     Phase::Init => None,
-                    Phase::Playing(game) => Some(render_game(game)),
-                    Phase::Ending(ending) => Some(render_ending(ending))
+                    Phase::Playing(game) => Some(Game::render(game)),
+                    Phase::Ending => None, 
                 }
             }))
         })

@@ -1,6 +1,7 @@
 //! Google Cloud Storage
 use std::ops::Deref;
 
+use anyhow::Context;
 use http::StatusCode;
 use reqwest;
 use uuid::Uuid;
@@ -60,7 +61,7 @@ impl Client {
             )
             .header(reqwest::header::CONTENT_LENGTH, "0");
 
-        let req = match origin.origin {
+        let req = match origin.0 {
             Some(origin) if CORS_ORIGINS.contains(&origin.deref()) => {
                 req.header(reqwest::header::ORIGIN, origin)
             }
@@ -81,27 +82,17 @@ impl Client {
 
                 Ok(session_uri)
             }
-            // StatusCode::UNAUTHORIZED => Err(error::Storage::InvalidGrant),
+            StatusCode::UNAUTHORIZED => Err(error::Storage::InvalidGrant),
             _ => {
-                // FIXME
-                log::warn!(
-                    "{:?}",
-                    resp.json::<serde_json::Value>()
-                        .await
-                        .expect("debug error decode!")
-                );
-
-                // let err = resp
-                //     .json::<UploadUrlErrorResponse>()
-                //     .await
-                //     .with_context(|| {
-                //         anyhow::anyhow!(
-                //             "Failed to parse resumable upload URL from {}",
-                //             stringify!(UploadUrlErrorResponse)
-                //         )
-                //     })?;
-
-                let err = anyhow::anyhow!("see logs...");
+                let err = resp
+                    .json::<UploadUrlErrorResponse>()
+                    .await
+                    .with_context(|| {
+                        anyhow::anyhow!(
+                            "Failed to parse resumable upload URL from {}",
+                            stringify!(UploadUrlErrorResponse)
+                        )
+                    })?;
 
                 Err(err.into())
             }

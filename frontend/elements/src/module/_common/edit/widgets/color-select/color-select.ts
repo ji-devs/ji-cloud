@@ -5,31 +5,22 @@ export class _ extends LitElement {
 
     static get styles() {
         return [css`
-            h2 {
-                margin: 0;
-                font-size: 18px;
-                color: var(--dark-gray-6);
-                font-weight: 500;
-                grid-column: 1 / -1;
-            }
             :host {
-                padding: 16px;
                 display: grid;
-                grid-template-columns: 1fr auto 1fr;
                 row-gap: 32px;
             }
+            h2 {
+                margin: 0;
+                font-size: 16px;
+                font-weight: normal;
+            }
             .sections {
-                grid-column: 2;
                 display: grid;
                 row-gap: 32px;
             }
             hr {
                 width: 100%;
                 background: var(--light-gray-4);
-                grid-column: 1 / -1;
-            }
-            ::slotted([slot=add-color]) {
-                grid-column: 2;
             }
         `];
     }

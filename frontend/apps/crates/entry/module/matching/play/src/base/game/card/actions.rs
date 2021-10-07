@@ -8,8 +8,8 @@ use utils::{drag::Drag, math::BoundsF64, prelude::*, resize::get_resize_info};
 
 impl CardDrag {
     pub fn on_release(&self) {
-        if let Some(current) = self.game.get_current() {
 
+        if let Some(current) = self.game.get_current() {
 
             let choice = current.top.iter().find(|choice| {
                 choice.is_drag_over()
@@ -29,7 +29,7 @@ impl CardDrag {
             }
 
             if !found_match {
-                if let Some(target) = current.bottom.get(self.choice_id) {
+                if let Some(target) = current.bottom.iter().find(|choice| choice.pair_id == self.pair_id) {
                     target.phase.set(BottomPhase::Show);
                 }
             } else {

@@ -24,7 +24,6 @@ pub struct CardChoice<P: Clone> {
     pub card: Card,
     pub other: Card,
     pub pair_id: usize,
-    pub choice_id: usize,
     pub side: Side,
     pub theme_id: ThemeId,
     pub mode: Mode,
@@ -52,14 +51,13 @@ pub struct CardDrag {
     pub card: Card,
     pub other: Card,
     pub pair_id: usize,
-    pub choice_id: usize,
     pub side: Side,
     pub theme_id: ThemeId,
     pub mode: Mode,
 }
 
 impl CardChoice <TopPhase> {
-    pub fn new(game: Rc<Game>, pair: CardPairId, choice_id: usize) -> Self {
+    pub fn new(game: Rc<Game>, pair: CardPairId) -> Self {
         let theme_id = game.base.theme_id.clone();
         let mode = game.base.mode.clone();
         let swap = game.base.settings.swap;
@@ -76,7 +74,6 @@ impl CardChoice <TopPhase> {
             card,
             other,
             pair_id,
-            choice_id,
             side,
             theme_id,
             mode,
@@ -110,7 +107,7 @@ impl CardChoice <TopPhase> {
 }
 
 impl CardChoice <BottomPhase> {
-    pub fn new(game: Rc<Game>, pair: CardPairId, choice_id: usize) -> Self {
+    pub fn new(game: Rc<Game>, pair: CardPairId) -> Self {
         let theme_id = game.base.theme_id.clone();
         let mode = game.base.mode.clone();
         let swap = game.base.settings.swap;
@@ -127,7 +124,6 @@ impl CardChoice <BottomPhase> {
             card,
             other,
             pair_id,
-            choice_id,
             side,
             theme_id,
             mode,
@@ -138,7 +134,7 @@ impl CardChoice <BottomPhase> {
 
 impl CardDrag {
     pub fn new<S: Clone>(choice: CardChoice<S>, elem: HtmlElement, x: i32, y: i32) -> Self {
-        let CardChoice { game, phase, card, other, pair_id, choice_id, side, theme_id, mode, .. } = choice;
+        let CardChoice { game, phase, card, other, pair_id, side, theme_id, mode, .. } = choice;
 
         let drag = Drag::new_anchor_element_resize(x, y, &elem, true);
 
@@ -149,7 +145,6 @@ impl CardDrag {
             card,
             other,
             pair_id,
-            choice_id,
             side,
             theme_id,
             mode,

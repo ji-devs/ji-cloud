@@ -16,7 +16,7 @@ pub struct ImageStyleId(pub Uuid);
 #[cfg_attr(feature = "backend", sqlx(transparent))]
 pub struct AnimationStyleId(pub Uuid);
 
-/// Wrapper type around [`Uuid`], represents [`AudioStyle::id`].
+/// Wrapper type around [`Uuid`], represents [`AudioStyle::id`]. Note: not yet implemented
 #[derive(Hash, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
@@ -64,17 +64,7 @@ into_uuid!(
 #[cfg_attr(feature = "backend", sqlx(transparent))]
 pub struct ImageTagIndex(pub i16);
 
-impl From<ImageTagIndex> for i16 {
-    fn from(value: ImageTagIndex) -> Self {
-        value.0
-    }
-}
-
-impl From<ImageTagIndex> for i64 {
-    fn from(value: ImageTagIndex) -> Self {
-        value.0 as i64
-    }
-}
+into_i16_index!(ImageTagIndex);
 
 /// Represents an image style.
 #[derive(Serialize, Deserialize, Debug)]
@@ -240,6 +230,6 @@ pub enum MetaKind {
     /// [`Goal`]
     Goal,
 
-    /// [`Tag`]
+    /// [`ImageTag`]
     Tag,
 }

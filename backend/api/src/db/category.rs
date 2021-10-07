@@ -4,7 +4,9 @@ use crate::{
 };
 use futures::TryStreamExt;
 use shared::domain::category::{Category, CategoryId};
+use shared::domain::user::UserScope;
 use sqlx::{Executor, PgPool};
+use std::convert::TryFrom;
 use uuid::Uuid;
 
 pub async fn get_top_level(db: &sqlx::PgPool) -> anyhow::Result<Vec<Category>> {
@@ -15,7 +17,8 @@ select id                                                                 as "id
        created_at,
        updated_at,
        (select count(*)::int8 from image_category where category_id = id) as "image_count!",
-       (select count(*)::int8 from jig_category where category_id = id) as "jig_count!"
+       (select count(*)::int8 from jig_data_category where category_id = id) as "jig_count!",
+       user_scopes
 from category
 where parent_id is null
 order by index
@@ -30,6 +33,15 @@ order by index
         children: vec![],
         image_count: it.image_count as u64,
         jig_count: it.jig_count as u64,
+        user_scopes: {
+            let scopes = it
+                .user_scopes
+                .into_iter()
+                .map(|x| UserScope::try_from(x).expect("failed to convert to UserScope"))
+                .collect();
+
+            scopes
+        },
     })
     .try_collect()
     .await
@@ -45,7 +57,8 @@ select id                                                                 as "id
        created_at                                                         as "created_at!",
        updated_at,
        (select count(*)::int8 from image_category where category_id = id) as "image_count!",
-       (select count(*)::int8 from jig_category where category_id = id)   as "jig_count!"
+       (select count(*)::int8 from jig_data_category where category_id = id)   as "jig_count!",
+       user_scopes                                                        as "user_scopes!"
 from category
          inner join unnest($1::uuid[]) with ordinality t(id, ord) USING (id)
 order by t.ord
@@ -61,6 +74,12 @@ order by t.ord
         children: vec![],
         image_count: it.image_count as u64,
         jig_count: it.jig_count as u64,
+        user_scopes: {
+            it.user_scopes
+                .into_iter()
+                .map(|x| UserScope::try_from(x).expect("failed to convert to UserScope"))
+                .collect::<Vec<_>>()
+        },
     })
     .try_collect()
     .await
@@ -84,7 +103,8 @@ select id,
        created_at,
        updated_at,
        (select count(*) from image_category where category_id = id)::int8 as "image_count!",
-       (select count(*) from jig_category where category_id = id)::int8 as "jig_count!"
+       (select count(*) from jig_data_category where category_id = id)::int8 as "jig_count!",
+       user_scopes
 from category
 "#
     )
@@ -107,8 +127,8 @@ pub async fn create(
 ) -> sqlx::Result<(CategoryId, u16)> {
     let res = sqlx::query!(
         r#"
-insert into category (index, parent_id, name)
-VALUES((select count(*)::int2 from category where parent_id is not distinct from $1), $1, $2)
+insert into category (index, parent_id, name, user_scopes)
+VALUES((select count(*)::int2 from category where parent_id is not distinct from $1), $1, $2, array[]::smallint[])
 returning index, id"#,
         parent_id.map(|it| it.0),
         name,
@@ -278,6 +298,7 @@ pub async fn update(
     parent_id: Option<Option<CategoryId>>,
     name: Option<&str>,
     index: Option<i16>,
+    user_scopes: Option<Vec<UserScope>>,
 ) -> Result<(), error::CategoryUpdate> {
     // fast track for if we're only updating the `name`:
     // the reasoning is due to an observation:
@@ -288,6 +309,25 @@ pub async fn update(
             let rows_updated = sqlx::query!(
                 "update category set name = $1, updated_at = now() where id = $2",
                 name,
+                id
+            )
+            .execute(db)
+            .await?
+            .rows_affected();
+
+            match rows_updated {
+                0 => return Err(error::CategoryUpdate::CategoryNotFound),
+                1 => {}
+                _ => unreachable!(),
+            }
+        }
+
+        if let Some(user_scopes) = user_scopes {
+            let scopes: Vec<i16> = user_scopes.iter().map(|x| *x as i16).collect();
+
+            let rows_updated = sqlx::query!(
+                "update category set user_scopes= $1, updated_at = now() where id = $2",
+                scopes.as_slice(),
                 id
             )
             .execute(db)

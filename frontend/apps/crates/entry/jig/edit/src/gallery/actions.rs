@@ -72,12 +72,7 @@ pub fn search_jigs(state: Rc<State>, q: String) {
 
         match api_with_auth::<JigSearchResponse, EmptyError, _>(&Search::PATH, Search::METHOD, req).await {
             Ok(resp) => {
-                state.jigs.lock_mut().replace_cloned(
-                    resp.jigs
-                        .into_iter()
-                        .map(|jr| jr.jig)
-                        .collect()
-                    );
+                state.jigs.lock_mut().replace_cloned(resp.jigs);
             },
             Err(_) => {},
         }
@@ -111,10 +106,10 @@ pub fn copy_jig(state: Rc<State>, jig_id: &JigId) {
         match api_with_auth::<CreateResponse<JigId>, EmptyError, ()>(&path, Clone::METHOD, None).await {
             Ok(resp) => {
 
-                let path = Get::PATH.replace("{id}", &resp.id.0.to_string());
-                match api_with_auth::<JigResponse, EmptyError, ()>(&path, Get::METHOD, None).await {
+                let path = GetDraft::PATH.replace("{id}", &resp.id.0.to_string());
+                match api_with_auth::<JigResponse, EmptyError, ()>(&path, GetDraft::METHOD, None).await {
                     Ok(resp) => {
-                        state.jigs.lock_mut().push_cloned(resp.jig);
+                        state.jigs.lock_mut().push_cloned(resp);
                     },
                     Err(_) => {},
                 };

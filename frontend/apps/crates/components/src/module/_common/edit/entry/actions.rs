@@ -151,10 +151,10 @@ pub fn save<RawData, Mode, Step>(
     save_loader.load(async move {
         let body = raw_data.as_body();
         let path = Update::PATH
-            .replace("{id}", &jig_id.0.to_string())
-            .replace("{module_id}", &module_id.0.to_string());
+            .replace("{id}", &jig_id.0.to_string());
 
         let req = Some(ModuleUpdateRequest {
+            id: StableOrUniqueId::Unique(module_id.clone()),
             is_complete: Some(raw_data.is_complete()),
             index: None,
             body: Some(body),

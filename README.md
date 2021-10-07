@@ -1,6 +1,6 @@
 # Urls (release & sandbox)
 
-* Live site: https://jicloud.org & https://sandbox.jicloud.org
+* Live site: https://jigzi.org & https://sandbox.jigzi.org
 * Storybook: https://storybook.jicloud.org & https://storybook.sandbox.jicloud.org
 * Shared Crate Docs: https://docs.jicloud.org/crate/shared & https://docs.sandbox.jicloud.org/crate/shared
 * Swagger API: https://api.jigzi.org/spec & https://api.sandbox.jigzi.org/spec

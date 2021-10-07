@@ -21,6 +21,14 @@ export class _ extends LitElement {
                 display: contents;
             }
             a {
+                text-decoration: none;
+                color: inherit;
+                display: grid;
+            }
+            a:hover {
+                background-color: var(--light-blue-1);
+            }
+            .center {
                 box-sizing: border-box;
                 border-top: solid 6px transparent;
                 display: grid;
@@ -31,10 +39,8 @@ export class _ extends LitElement {
                 justify-content: space-between;
                 cursor: pointer;
                 font-weight: 500;
-                text-decoration: none;
-                color: inherit;
             }
-            :host([active]) a {
+            :host([active]) .center {
                 border-color: #fd7076;
                 color: var(--dark-red-1);
             }
@@ -57,8 +63,10 @@ export class _ extends LitElement {
         const path = `core/page-header/nav-icon-${this.kind}${this.active ? '-active' : ''}.svg`;
         return html`
             <a href=${this.href} .target=${this.target}>
-                <img-ui path="${path}"></img-ui>
-                <span>${STR_LABEL_LOOKUP[this.kind]}</span>
+                <div class="center">
+                    <img-ui path="${path}"></img-ui>
+                    <span>${STR_LABEL_LOOKUP[this.kind]}</span>
+                </div>
             </a>
         `;
     }

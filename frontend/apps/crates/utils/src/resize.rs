@@ -50,7 +50,7 @@ pub fn get_resize_info() -> ResizeInfo {
 
 
 impl ResizeInfo {
-    //given a px value relative to the viewport, get normalized coordinates 
+    /// given a px value relative to the viewport, get normalized coordinates 
     pub fn get_px_normalized(&self, x: f64, y: f64) -> (f64, f64) {
         let x = x / self.width;
         let y = y / self.height;
@@ -58,7 +58,7 @@ impl ResizeInfo {
         (x, y)
     }
 
-    //given normalized coordinates, get the current relative value in pixels
+    /// given normalized coordinates, get the current relative value in pixels
     pub fn get_px_denormalized(&self, x: f64, y: f64) -> (f64, f64) {
         (x * self.width, y * self.height)
     }
@@ -67,7 +67,7 @@ impl ResizeInfo {
         self.get_px_denormalized(x, y)
     }
 
-    //given absolute coordinates, get the coordinats within the viewport
+    /// given absolute coordinates, get the coordinats within the viewport
     pub fn get_pos_px(&self, x: f64, y: f64) -> (f64, f64) {
 
         //need to offset it by content space
@@ -86,7 +86,7 @@ impl ResizeInfo {
 
         (x, y)
     }
-    //given absolute coordinates, get normalized coordinates within the viewport
+    /// given absolute coordinates, get normalized coordinates within the viewport
     pub fn get_pos_normalized(&self, x: f64, y: f64) -> (f64, f64) {
         let (x, y) = self.get_pos_px(x, y);
         self.get_px_normalized(x, y)
@@ -96,31 +96,31 @@ impl ResizeInfo {
     }
 
 
-    //given current pixel size, get size in relative units
+    /// given current pixel size, get size in relative units
     pub fn get_size_rem(&self, width: f64, height: f64) -> (f64, f64) {
         (width / self.scale, height / self.scale)
     }
-    //given the full size, get current relative size in px
+    /// given the full size, get current relative size in px
     pub fn get_size_px(&self, width: f64, height: f64) -> (f64, f64) {
         (width * self.scale, height * self.scale)
     }
-    //given original size, get the relative size compared to original full-size
+    /// given original size, get the relative size compared to original full-size
     pub fn get_size_normalized(&self, width: f64, height: f64) -> (f64, f64) {
         let (full_width, full_height) = self.full_size();
 
         (width / full_width, height / full_height)
     }
 
-    //given normalized coordinates, get the original full-size
+    /// given normalized coordinates, get the original full-size
     pub fn get_size_full(&self, width: f64, height: f64) -> (f64, f64) {
         let (full_width, full_height) = self.full_size();
 
         (width * full_width, height * full_height)
     }
 
-    //"rem" really means consistent, 
-    //i.e. relative to our reference artboard size
-    //but we typically express that as css rem units so...
+    /// "rem" really means consistent, 
+    /// i.e. relative to our reference artboard size
+    /// but we typically express that as css rem units so...
     pub fn get_pos_rem(&self, x: f64, y: f64) -> (f64, f64) {
         let (x, y) = self.get_pos_px(x, y);
         let scale = self.scale; 

@@ -2,7 +2,6 @@ use components::module::_common::edit::prelude::*;
 use std::rc::Rc;
 use shared::domain::jig::{
     JigId, 
-    Jig,
     module::{
         ModuleId, 
         body::{

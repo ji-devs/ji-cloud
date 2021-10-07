@@ -1,4 +1,4 @@
-use shared::domain::jig::{Jig, JigId, module::{ModuleId, body::{Background, Instructions, ThemeChoice, _groups::cards::{Mode, Step, CardPair}, flashcards::{ModuleData as RawData, Content as RawContent, PlayerSettings}}}};
+use shared::domain::jig::{JigId, module::{ModuleId, body::{Background, Instructions, ThemeChoice, _groups::cards::{Mode, Step, CardPair}, flashcards::{ModuleData as RawData, Content as RawContent, PlayerSettings}}}};
 
 use futures_signals::{
     map_ref,
@@ -33,7 +33,8 @@ pub struct Base {
     pub instructions: Instructions,
     pub settings: PlayerSettings,
     pub raw_pairs: Vec<CardPair>,
-    pub phase: Mutable<Phase>
+    pub phase: Mutable<Phase>,
+    pub module_phase: Mutable<ModulePlayPhase>,
 }
 
 #[derive(Clone)]
@@ -67,6 +68,7 @@ impl Base {
             settings: content.player_settings,
             raw_pairs: content.base.pairs,
             phase: Mutable::new(Phase::Init),
+            module_phase: init_args.play_phase,
         });
 
         _self.phase.set(Phase::Playing(Rc::new(Game::new(_self.clone()))));
@@ -78,5 +80,9 @@ impl Base {
 impl BaseExt for Base {
     fn get_instructions(&self) -> Option<Instructions> {
         Some(self.instructions.clone())
+    }
+
+    fn play_phase(&self) -> Mutable<ModulePlayPhase> {
+        self.module_phase.clone()
     }
 }

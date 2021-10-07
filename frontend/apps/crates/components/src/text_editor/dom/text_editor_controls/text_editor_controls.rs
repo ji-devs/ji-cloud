@@ -132,18 +132,6 @@ pub fn render(state: Rc<State>) -> Dom {
                     controls.indent_count == 0
                 }))
             }),
-            html!("button-sidebar", {
-                .property("slot", "hebrew-keyboard")
-                .property("mode", "keyboard")
-            }),
-            html!("button-sidebar", {
-                .property("slot", "dicta")
-                .property("mode", "dicta")
-            }),
-            html!("button-sidebar", {
-                .property("slot", "sefaria")
-                .property("mode", "sefaria")
-            }),
             color_controls::render(state.clone()),
         ])
         .children(ElementType::iter()

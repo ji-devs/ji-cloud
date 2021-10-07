@@ -55,7 +55,7 @@ pub fn render(state: Rc<Game>) -> Dom {
 
                         children.push(render_card(options));
 
-                        let mut options = CardOptions::new(&card, theme_id, mode, side, Size::Flashcards);
+                        let mut options = CardOptions::new(&other, theme_id, mode, side.negate(), Size::Flashcards);
 
                         children.push(render_card_mixin(options, flip_controller(state.clone(), false)));
                     }
@@ -64,37 +64,28 @@ pub fn render(state: Rc<Game>) -> Dom {
                 }))
                 .to_signal_vec()
         )
+        .child(html!("button-icon", {
+            .property("icon", "white-circle-blue-arrow")
+            .property("slot", "next")
+            .event(clone!(state => move |evt:events::Click| {
+                state.next();
+            }))
+        }))
     })
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-enum Gate {
-    Waiting,
-    Selected,
-    Finished
-}
 fn flip_controller(state: Rc<Game>, initial: bool) -> impl FnOnce(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement> {
     move |dom| {
-        let gate = Mutable::new(Gate::Waiting);
         dom
-            .property_signal("flipped", gate.signal().map(move |gate| {
-                if gate == Gate::Waiting || gate == Gate::Finished {
+            .property_signal("flipped", state.gate.signal().map(move |gate| {
+                if gate == Gate::Waiting || gate == Gate::FinishingFlip {
                     initial
                 } else {
                     !initial
                 }
             }))
-            .event(clone!(state, gate=> move |evt:events::Click| {
-                if gate.get() == Gate::Waiting {
-                    spawn_local(clone!(state, gate => async move {
-                        TimeoutFuture::new(crate::config::SHOW_TIME).await;
-                        gate.set(Gate::Finished);  
-                        TimeoutFuture::new(crate::config::FLIP_TIME).await;
-                        state.next();
-                    }));
-                    gate.set(Gate::Selected);
-                }
-
+            .event(clone!(state => move |evt:events::Click| {
+                Game::flip(state.clone());
             }))
     }
 }

@@ -1,7 +1,10 @@
 use crate::{
     api::Method,
     domain::{
-        jig::module::{ModuleCreateRequest, ModuleId, ModuleResponse, ModuleUpdateRequest},
+        jig::module::{
+            ModuleCreateRequest, ModuleDeleteRequest, ModuleGetRequest, ModuleId, ModuleResponse,
+            ModuleUpdateRequest,
+        },
         CreateResponse,
     },
     error::EmptyError,
@@ -9,21 +12,36 @@ use crate::{
 
 use super::ApiEndpoint;
 
-/// Get a Module by index.
+/// Get a Module by it's concrete ID or stable ID.
 ///
 /// # Authorization
 /// No authorization required.
 ///
 /// # Errors
-/// [`Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.
-///
-/// [`NotFound`](http::StatusCode::NOT_FOUND) if the module does not exist, or the parent jig doesn't exist.
-pub struct Get;
-impl ApiEndpoint for Get {
-    type Req = ();
+/// * [`NotFound`](http::StatusCode::NOT_FOUND) if the module does not exist, or the parent jig doesn't exist.
+pub struct GetLive;
+impl ApiEndpoint for GetLive {
+    type Req = ModuleGetRequest;
     type Res = ModuleResponse;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/jig/{id}/module/{module_id}";
+    const PATH: &'static str = "/v1/jig/{id}/live/module";
+    const METHOD: Method = Method::Get;
+}
+
+/// Get a Module by it's concrete ID or stable ID.
+///
+/// # Authorization
+/// * One of `Admin`, `AdminJig`,, or `ManageSelfJig` for owned JIGs
+///
+/// # Errors
+/// * [`Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.
+/// * [`NotFound`](http::StatusCode::NOT_FOUND) if the module does not exist, or the parent jig doesn't exist.
+pub struct GetDraft;
+impl ApiEndpoint for GetDraft {
+    type Req = ModuleGetRequest;
+    type Res = ModuleResponse;
+    type Err = EmptyError;
+    const PATH: &'static str = "/v1/jig/{id}/draft/module";
     const METHOD: Method = Method::Get;
 }
 
@@ -42,7 +60,7 @@ impl ApiEndpoint for Create {
     type Req = ModuleCreateRequest;
     type Res = CreateResponse<ModuleId>;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/jig/{id}/module";
+    const PATH: &'static str = "/v1/jig/{id}/draft/module";
     const METHOD: Method = Method::Post;
 }
 
@@ -62,7 +80,7 @@ impl ApiEndpoint for Update {
     type Req = ModuleUpdateRequest;
     type Res = ();
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/jig/{id}/module/{module_id}";
+    const PATH: &'static str = "/v1/jig/{id}/draft/module";
     const METHOD: Method = Method::Patch;
 }
 
@@ -79,9 +97,9 @@ impl ApiEndpoint for Update {
 /// * [`BadRequest`](http::StatusCode::BAD_REQUEST) if the given `id` is not a [`Uuid`](uuid::Uuid).
 pub struct Delete;
 impl ApiEndpoint for Delete {
-    type Req = ();
+    type Req = ModuleDeleteRequest;
     type Res = ();
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/jig/{id}/module/{module_id}";
+    const PATH: &'static str = "/v1/jig/{id}/draft/module";
     const METHOD: Method = Method::Delete;
 }

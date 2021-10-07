@@ -12,9 +12,44 @@ export function withSlot(slot:string, html:string):string {
     return `${part_1} slot="${slot}" ${part_2}`;
 }
 
+/// From top down
+export function queryPierceShadowChildren(nodes: NodeList, selector: string) : HTMLElement | null {
+    //NodeList isn't Array, and Array.find() returns undefined instead of null
+    //so regular ol' for loop it is...
+    for(let i = 0; i < nodes.length; i++) {
+        const result = queryPierceShadow(nodes[i], selector);
+        if(result != null) {
+            return result;
+        }
+    }
+    return null;
+}
+export function queryPierceShadow(node: Node | null, selector: string) : HTMLElement | null {
+    if (!node) {
+        return null;
+    }
+    if (node instanceof ShadowRoot) {
+        return queryPierceShadow(node.host, selector);
+    }
+    
+    if (node instanceof HTMLElement) {
+        let result = node.shadowRoot?.querySelector(selector);
+        if(result instanceof HTMLElement) {
+            return result;
+        }
+        result = node.querySelector(selector);
+        if(result instanceof HTMLElement) {
+            return result;
+        }
+
+        return queryPierceShadowChildren(node.childNodes, selector);
+    }
+    return queryPierceShadowChildren(node.childNodes, selector);
+}
+
 // difference between closestPierceShadow and closestPierceSlot:
 // closestPierceShadow starts in a shadow and crawls out, while closestPierceSlot starts outside of the shadow on crawls in
-
+// TODO - clarify that note... closestPierceShot is still crawling up through parents...
 export function closestPierceShadow(node: Node | null, selector: string) : HTMLElement | null {
     if (!node) {
         return null;
@@ -50,10 +85,10 @@ export function closestPierceSlot(node: Node | null, selector: string) : Node | 
     }
 }
 
-/* not using any of these any more
 
 // https://stackoverflow.com/a/56105394/784519
-export function closestElement(selector: string, base: Element): Element | null {
+/*
+export function closestElement(selector: string, base: Element | Window | Document): Element | null {
   function __closestFrom(el: Element | Window | Document): Element | null{
     if (!el || el === document || el === window) return null;
     if ((el as any).assignedSlot) el = (el as any).assignedSlot;
@@ -64,7 +99,9 @@ export function closestElement(selector: string, base: Element): Element | null 
   }
   return __closestFrom(base);
 }
+*/
 
+/* not using any of these any more
 export function withSlot(slot:string, html:string):string {
     const getInsertPos = ():number => {
         for(let i = 1; i < html.length; i++) {

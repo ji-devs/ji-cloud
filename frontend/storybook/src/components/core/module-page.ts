@@ -7,7 +7,14 @@ export default {
   title: 'Core / Module Page',
 }
 
-export const GridResize = ({sidebar, header, main, footer}) => {
+export const GridResize = (inArgs?: any) => {
+    const args = Object.assign({}, resizeArgs);
+    if(inArgs) {
+      Object.assign(args, inArgs);
+    }
+
+    const {sidebar, header, main, footer} = args;
+
     return `
       <module-page-grid-resize>
         ${withSlot("sidebar", sidebar)}

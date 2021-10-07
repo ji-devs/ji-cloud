@@ -199,11 +199,11 @@ export class _ extends BgBlue {
         return html`
         <div class="${gridClass}">
         
-            <aside>
+            <aside id="sidebar">
                 <slot name="sidebar"></slot>
             </aside>
         
-            <header>
+            <header id="header">
                 <slot name="header"></slot>
             </header>
         
@@ -213,14 +213,14 @@ export class _ extends BgBlue {
                         <div class="main-bg">
                             <slot name="main-bg"></slot>
                         </div>
-                        <div class="main ${scrollStyle}">
+                        <div id="main" class="main ${scrollStyle}">
                             <slot name="main"></slot>
                         </div>
                     </div>
                 </div>
             </main>
         
-            <footer>
+            <footer id="footer">
                 <slot name="footer"></slot>
             </footer>
         </div>

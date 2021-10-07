@@ -1,9 +1,15 @@
+//! Config constants
+
 #![allow(missing_docs)]
 
 use std::env::VarError;
 
-// currently set to 14 days
+/// currently set to 14 days
 pub const JIG_PLAYER_SESSION_VALID_DURATION_SECS: u32 = 60 * 60 * 24 * 14;
+
+/// Defines the range of possible values for JIG player session sharing codes
+/// means 0-9999 are possible. If this is changed then the DB's check constraint must also be updated.
+pub const JIG_PLAYER_SESSION_CODE_MAX: i16 = 9999;
 
 #[derive(Debug, PartialEq, Eq, Copy, Clone)]
 pub enum RemoteTarget {
