@@ -1,11 +1,23 @@
 {
+    "title": "header title",
     "steps": [
         {
             "tabs": [
                 {
-                    "headerTitle": "header title",
-                    "tooltipTitle": "tooltip title",
-                    "tooltipBody": "tooltip body"
+                    "title": "tooltip title",
+                    "body": "tooltip body"
+                },
+                {
+                    "title": "tooltip title",
+                    "body": "tooltip body"
+                }
+            ]
+        },
+        {
+            "tabs": [
+                {
+                    "title": "tooltip title",
+                    "body": "tooltip body"
                 }
             ]
         }
