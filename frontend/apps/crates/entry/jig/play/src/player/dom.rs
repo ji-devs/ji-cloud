@@ -82,11 +82,16 @@ pub fn render(state: Rc<State>) -> Dom {
                         Some(jig) => {
                             let active_module = &jig.jig_data.modules[active_module_index];
 
-                            let route: String = Route::Module(ModuleRoute::Play(
+                            let mut route: String = Route::Module(ModuleRoute::Play(
                                 active_module.kind,
                                 state.jig_id,
                                 active_module.id
                             )).into();
+
+                            if state.player_options.draft {
+                                route = format!("{}?draft=true", route);
+                            }
+
                             let url = unsafe {
                                 SETTINGS.get_unchecked()
                                     .remote_target
