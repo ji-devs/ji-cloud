@@ -104,28 +104,54 @@ impl TestServicesSettings {
 
     pub async fn create_test_mail_client(&self) -> Option<mail::Client> {
         println!("create_test_mail_client");
-        let api_key = match self
-                .get_gcp_managed_secret(Self::TEST_SENDGRID_API_KEY)
-                .await
-                .ok() {
-            Ok(key) => api_key,
-            None => req_env("TEST_SENDGRID_API_KEY"),
+        let google_api_key = self
+            .get_gcp_managed_secret(Self::TEST_SENDGRID_API_KEY)
+            .await
+            .ok();
+
+        let env_api_key = req_env("TEST_SENDGRID_API_KEY").ok();
+
+        let api_key = match google_api_key {
+            Some(google_api_key) => Some(google_api_key),
+            None => env_api_key,
         };
 
-        let sender_email = self
+        let google_sender_email = self
             .get_gcp_managed_secret(Self::TEST_SENDER_EMAIL)
             .await
             .ok();
 
-        let signup_verify_template = self
+        let env_sender_email = req_env("TEST_SENDER_EMAIL").ok();
+
+        let sender_email = match google_sender_email {
+            Some(google_sender_email) => Some(google_sender_email),
+            None => env_sender_email,
+        };
+
+
+        let google_signup_verify_template = self
             .get_gcp_managed_secret(Self::TEST_SIGNUP_VERIFY_TEMPLATE)
             .await
             .ok();
 
-        let password_reset_template = self
+        let env_signup_verify_template = req_env("TEST_SIGNUP_VERIFY_TEMPLATE").ok();
+
+        let signup_verify_template = match google_signup_verify_template {
+            Some(google_signup_verify_template) => Some(google_signup_verify_template),
+            None => env_signup_verify_template,
+        };
+
+        let google_password_reset_template = self
             .get_gcp_managed_secret(Self::TEST_SIGNUP_PASSWORD_RESET_TEMPLATE)
             .await
             .ok();
+
+        let env_password_reset_template = req_env("TEST_PASSWORD_RESET_TEMPLATE").ok();
+
+        let password_reset_template = match google_password_reset_template {
+            Some(google_password_reset_template) => Some(google_password_reset_template),
+            None => env_password_reset_template,
+        };
 
         println!("end keys {:?} {:?} {:?} {:?}", api_key, sender_email, signup_verify_template, password_reset_template);
 
