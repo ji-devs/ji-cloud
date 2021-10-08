@@ -164,16 +164,18 @@ where
 
                     let resp = {
 
-                        let req = Some(ModuleGetRequest { id: StableOrUniqueId::Unique(_self.opts.module_id) });
+                        let req = Some(ModuleGetQuery { q: String::from("unique") });
 
                         if is_draft {
                             let path = GetDraft::PATH
-                                .replace("{id}",&_self.opts.jig_id.0.to_string());
+                                .replace("{id}",&_self.opts.jig_id.0.to_string())
+                                .replace("{module_id}",&_self.opts.module_id.0.to_string());
 
                             api_no_auth::<ModuleResponse, EmptyError, _>(&path, GetDraft::METHOD, req).await
                         } else {
                             let path = GetLive::PATH
-                                .replace("{id}",&_self.opts.jig_id.0.to_string());
+                                .replace("{id}",&_self.opts.jig_id.0.to_string())
+                                .replace("{module_id}",&_self.opts.module_id.0.to_string());
 
                             api_no_auth::<ModuleResponse, EmptyError, _>(&path, GetLive::METHOD, req).await
                         }
