@@ -37,11 +37,15 @@ impl TestServicesSettings {
     pub async fn new() -> anyhow::Result<Self> {
         let (token, project_id) = match req_env("TEST_SERVICE_ACCOUNT_JSON") {
             Ok(key_json) => {
-                let credentials = yup_oauth2::read_service_account_key(&key_json).await.map_err(|e| anyhow::anyhow!(
-                                "Could not parse service account json key {:?}. Len: {:?}",
-                                e,
-                                &key_json.len()
-                            ))?;
+                let credentials = yup_oauth2::read_service_account_key(&key_json)
+                    .await
+                    .map_err(|e| {
+                        anyhow::anyhow!(
+                            "Could not parse service account json key {:?}. Len: {:?}",
+                            e,
+                            &key_json.len()
+                        )
+                    })?;
 
                 let project_id = credentials
                     .project_id
@@ -128,7 +132,6 @@ impl TestServicesSettings {
             None => env_sender_email,
         };
 
-
         let google_signup_verify_template = self
             .get_gcp_managed_secret(Self::TEST_SIGNUP_VERIFY_TEMPLATE)
             .await
@@ -153,7 +156,10 @@ impl TestServicesSettings {
             None => env_password_reset_template,
         };
 
-        println!("end keys {:?} {:?} {:?} {:?}", api_key, sender_email, signup_verify_template, password_reset_template);
+        println!(
+            "end keys {:?} {:?} {:?} {:?}",
+            api_key, sender_email, signup_verify_template, password_reset_template
+        );
 
         let (api_key, sender_email) = match (api_key, sender_email) {
             (Some(api_key), Some(sender_email)) => (api_key, sender_email),

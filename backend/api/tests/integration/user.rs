@@ -165,7 +165,7 @@ async fn patch_profile() -> anyhow::Result<()> {
     Ok(())
 }
 
-//#[ignore]
+#[ignore]
 #[actix_rt::test]
 async fn verify_email() -> anyhow::Result<()> {
     if !service::email_test_guard() {
