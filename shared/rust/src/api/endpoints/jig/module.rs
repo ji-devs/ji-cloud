@@ -2,7 +2,7 @@ use crate::{
     api::Method,
     domain::{
         jig::module::{
-            ModuleCreateRequest, ModuleDeleteRequest, ModuleGetRequest, ModuleId, ModuleResponse,
+            ModuleCreateRequest, ModuleDeleteRequest, ModuleGetQuery, ModuleId, ModuleResponse,
             ModuleUpdateRequest,
         },
         CreateResponse,
@@ -21,10 +21,10 @@ use super::ApiEndpoint;
 /// * [`NotFound`](http::StatusCode::NOT_FOUND) if the module does not exist, or the parent jig doesn't exist.
 pub struct GetLive;
 impl ApiEndpoint for GetLive {
-    type Req = ModuleGetRequest;
+    type Req = ModuleGetQuery;
     type Res = ModuleResponse;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/jig/{id}/live/module";
+    const PATH: &'static str = "/v1/jig/{id}/live/module/{module_id}";
     const METHOD: Method = Method::Get;
 }
 
@@ -38,10 +38,10 @@ impl ApiEndpoint for GetLive {
 /// * [`NotFound`](http::StatusCode::NOT_FOUND) if the module does not exist, or the parent jig doesn't exist.
 pub struct GetDraft;
 impl ApiEndpoint for GetDraft {
-    type Req = ModuleGetRequest;
+    type Req = ModuleGetQuery;
     type Res = ModuleResponse;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/jig/{id}/draft/module";
+    const PATH: &'static str = "/v1/jig/{id}/draft/module/{module_id}";
     const METHOD: Method = Method::Get;
 }
 
