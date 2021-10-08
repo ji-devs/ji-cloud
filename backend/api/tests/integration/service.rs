@@ -37,18 +37,11 @@ impl TestServicesSettings {
     pub async fn new() -> anyhow::Result<Self> {
         let (token, project_id) = match req_env("TEST_SERVICE_ACCOUNT_JSON") {
             Ok(key_json) => {
-                println!("key_json: {}", key_json);
-                let credentials =
-                    match serde_json::from_str::<yup_oauth2::ServiceAccountKey>(&key_json) {
-                        Ok(v) => v,
-                        Err(e) => {
-                            return Err(anyhow::anyhow!(
+                let credentials = yup_oauth2::read_service_account_key(&key_json).await.map_err(|e| anyhow::anyhow!(
                                 "Could not parse service account json key {:?}. Len: {:?}",
                                 e,
                                 &key_json.len()
-                            ));
-                        }
-                    };
+                            ))?;
 
                 let project_id = credentials
                     .project_id
@@ -67,6 +60,9 @@ impl TestServicesSettings {
                 .await?;
 
                 let token = token.access_token.unwrap();
+
+                println!("token: {:?}", token);
+                println!("project id: {:?}", project_id);
 
                 (token, project_id)
             }
@@ -88,6 +84,7 @@ impl TestServicesSettings {
         Option<storage::Client>,
         Option<ji_cloud_api::algolia::Client>,
     ) {
+        println!("init_services");
         let services: std::collections::HashSet<&Service> = services.into_iter().collect();
 
         let mail = match services.contains(&Service::Email) {
@@ -107,10 +104,13 @@ impl TestServicesSettings {
 
     pub async fn create_test_mail_client(&self) -> Option<mail::Client> {
         println!("create_test_mail_client");
-        let api_key = self
-            .get_gcp_managed_secret(Self::TEST_SENDGRID_API_KEY)
-            .await
-            .ok();
+        let api_key = match self
+                .get_gcp_managed_secret(Self::TEST_SENDGRID_API_KEY)
+                .await
+                .ok() {
+            Ok(key) => api_key,
+            None => req_env("TEST_SENDGRID_API_KEY"),
+        };
 
         let sender_email = self
             .get_gcp_managed_secret(Self::TEST_SENDER_EMAIL)
@@ -126,6 +126,8 @@ impl TestServicesSettings {
             .get_gcp_managed_secret(Self::TEST_SIGNUP_PASSWORD_RESET_TEMPLATE)
             .await
             .ok();
+
+        println!("end keys {:?} {:?} {:?} {:?}", api_key, sender_email, signup_verify_template, password_reset_template);
 
         let (api_key, sender_email) = match (api_key, sender_email) {
             (Some(api_key), Some(sender_email)) => (api_key, sender_email),
