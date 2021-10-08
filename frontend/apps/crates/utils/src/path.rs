@@ -10,6 +10,9 @@ use crate::unwrap::UnwrapJiExt;
 pub fn ui<T: AsRef<str>>(path:T) -> String {
     media_url(&format!("ui/{}", path.as_ref()))
 }
+pub fn config_cdn_url<T: AsRef<str>>(path:T) -> String {
+    media_url(&format!("config/{}", path.as_ref()))
+}
 
 pub fn audio_cdn_url<T: AsRef<str>>(path:T) -> String {
     media_url(&format!("audio/{}", path.as_ref()))

@@ -16,10 +16,11 @@ use std::rc::Rc;
 pub struct Step1<RawData: RawDataExt, E: ExtraExt> {
     pub base: Rc<CardsBase<RawData, E>>,
     pub widget: Rc<Widget>,
+    pub tab_index: Mutable<Option<usize>>
 }
 
 impl<RawData: RawDataExt, E: ExtraExt> Step1<RawData, E> {
-    pub fn new(base: Rc<CardsBase<RawData, E>>) -> Rc<Self> {
+    pub fn new(base: Rc<CardsBase<RawData, E>>, tab_index: Mutable<Option<usize>>) -> Rc<Self> {
         let widget = match base.mode {
             Mode::WordsAndImages => {
                 let kind = match base.debug.step1_tab {
@@ -39,6 +40,7 @@ impl<RawData: RawDataExt, E: ExtraExt> Step1<RawData, E> {
         Rc::new(Self {
             base,
             widget: Rc::new(widget),
+            tab_index
         })
     }
 }
@@ -83,6 +85,12 @@ impl Tab {
         match self {
             Self::Text(_) => MenuTabKind::Text,
             Self::Image(_) => MenuTabKind::Image,
+        }
+    }
+    pub fn as_index(&self) -> usize {
+        match self {
+            Self::Text(_) => 0,
+            Self::Image(_) => 1,
         }
     }
 }

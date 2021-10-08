@@ -14,6 +14,7 @@ where
     pub base: Rc<CardsBase<RawData, E>>,
     pub get_settings: GetSettingsStateFn,
     pub render_settings: RenderSettingsStateFn,
+    pub tab_index: Mutable<Option<usize>>
 }
 
 impl<RawData, E, GetSettingsStateFn, RenderSettingsStateFn, SettingsState>
@@ -34,6 +35,7 @@ where
             base,
             get_settings,
             render_settings,
+            tab_index: Mutable::new(None)
         }
     }
 }
@@ -50,7 +52,7 @@ where
     type TabIndexSignal = impl Signal<Item = Option<usize>>;
 
     fn tab_index(&self) -> Self::TabIndexSignal {
-        futures_signals::signal::always(None)
+        self.tab_index.signal()
     }
 
 }

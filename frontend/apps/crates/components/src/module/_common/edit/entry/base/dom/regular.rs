@@ -87,7 +87,7 @@ where
     let module_kind = RawData::kind().as_str();
 
     //TODO - load from localization endpoint
-    let STR_config_url = format!("https://raw.githubusercontent.com/ji-devs/ji-cloud/sandbox/frontend/config/module/_header/{}.json", module_kind);
+    let STR_config_url = utils::path::config_cdn_url(format!("module/_header/{}.json", module_kind));
 
     #[derive(Deserialize, Default, Clone)] 
     struct HeaderConfig {
@@ -130,12 +130,17 @@ where
 
     html!("module-header", {
         .future(clone!(header_config => async move {
-            let data:HeaderConfig = fetch_url(&STR_config_url)
-                .await
-                .unwrap_ji()
-                .json_from_str()
-                .await
-                .unwrap_ji();
+            let data:HeaderConfig = match fetch_url(&STR_config_url).await {
+                Ok(resp) => {
+                    resp
+                        .json_from_str()
+                        .await
+                        .unwrap_or_default()
+                },
+                Err(_) => {
+                    HeaderConfig::default()
+                }
+            };
 
             header_config.set(data);
         }))

@@ -21,6 +21,10 @@ where
     RenderSettingsFn: Fn(Rc<SettingsState>) -> Dom + Clone + 'static,
 {
     html!("menu-tabs", {
+        .future(state.tab.signal_ref(|tab| tab.as_index()).dedupe().for_each(clone!(state => move |index| {
+            state.tab_index.set(Some(index));
+            async move {}
+        })))
         .children(&mut [
             render_tab(state.clone(), MenuTabKind::PlaySettings),
             render_tab(state.clone(), MenuTabKind::Instructions),
