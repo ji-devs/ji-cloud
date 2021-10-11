@@ -99,9 +99,13 @@ pub fn status_redirect(status:Option<Status>) {
 pub fn do_success(csrf:&str) {
     storage::save_csrf_token(&csrf);
 
-    let search_params = web_sys::window()
+    let location = web_sys::window()
         .unwrap_ji()
-        .location()
+        .location();
+    let origin = location
+        .origin()
+        .unwrap_ji();
+    let search_params = location
         .search()
         .unwrap_ji();
     let search_params = web_sys
@@ -112,16 +116,15 @@ pub fn do_success(csrf:&str) {
     let url = search_params
         .get("redirect")
         .unwrap_or_default();
-    let mut url: String = js_sys
+    let url: String = js_sys
         ::decode_uri_component(&url)
         .unwrap_ji()
         .into();
-    
-    if url.is_empty() {
-        url = String::from("/");
-    };
 
-    dominator::routing::go_to_url(&url);
+    let url = format!("{}{}", origin, url);
+
+    let _ = location.set_href(&url);
+    
 }
 
 
