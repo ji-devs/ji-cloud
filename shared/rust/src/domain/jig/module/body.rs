@@ -309,66 +309,112 @@ pub trait StepExt: Copy + Default + PartialEq + Eq + Hash {
 #[repr(i16)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 pub enum ThemeId {
-    /// Empty theme (white bg, no text, etc.)
-    Blank = 0,
-    /// Blueish theme
-    Chalkboard = 1,
-    /// Orangeish theme
-    HappyBrush = 2,
+
 
     #[allow(missing_docs)]
-    BackToSchool = 3,
-
+    Blank,
     #[allow(missing_docs)]
-    Comix = 4,
-
+    Jigzi,
     #[allow(missing_docs)]
-    ExcitingFall = 5,
-
+    Chalkboard,
     #[allow(missing_docs)]
-    HappyPassover = 6,
-
+    MyNotebook,
     #[allow(missing_docs)]
-    HappyShavuot = 7,
-
+    BackToSchool,
     #[allow(missing_docs)]
-    HappySukkot = 8,
-
+    MyWorkspace,
     #[allow(missing_docs)]
-    IlluminatingHanukkah = 9,
-
+    Comix,
     #[allow(missing_docs)]
-    JewishText = 10,
-
+    Surreal,
     #[allow(missing_docs)]
-    Jigzi = 11,
-
+    Abstract,
     #[allow(missing_docs)]
-    LostInSpace = 12,
-
+    Denim,
     #[allow(missing_docs)]
-    LovelySpring = 13,
-
+    HappyBrush,
     #[allow(missing_docs)]
-    MyNotebook = 14,
-
+    Graffiti,
     #[allow(missing_docs)]
-    OurIsrael = 15,
-
+    JewishText,
     #[allow(missing_docs)]
-    Purim = 16,
-
+    ShabbatShalom,
     #[allow(missing_docs)]
-    RoshHashana = 17,
-
+    RoshHashana,
     #[allow(missing_docs)]
-    ShabbatShalom = 18,
-
+    AppleWithHoney,
     #[allow(missing_docs)]
-    WatermelonSummer = 19,
-
+    Pomegranate,
     #[allow(missing_docs)]
-    WinterSnow = 20,
+    YomKippur,
+    #[allow(missing_docs)]
+    HappySukkot,
+    #[allow(missing_docs)]
+    Sukkot,
+    #[allow(missing_docs)]
+    IlluminatingHanukkah,
+    #[allow(missing_docs)]
+    Chanukah,
+    #[allow(missing_docs)]
+    ChanukahLights,
+    #[allow(missing_docs)]
+    Purim,
+    #[allow(missing_docs)]
+    PurimFeast,
+    #[allow(missing_docs)]
+    PurimSweets,
+    #[allow(missing_docs)]
+    HappyPassover,
+    #[allow(missing_docs)]
+    PassoveMatza,
+    #[allow(missing_docs)]
+    PassoverSeder,
+    #[allow(missing_docs)]
+    HappyShavuot,
+    #[allow(missing_docs)]
+    ShavuotDishes,
+    #[allow(missing_docs)]
+    ShavuotFields,
+    #[allow(missing_docs)]
+    OurIsrael,
+    #[allow(missing_docs)]
+    Israel,
+    #[allow(missing_docs)]
+    JerusalemCity,
+    #[allow(missing_docs)]
+    JerusalemWall,
+    #[allow(missing_docs)]
+    LovelySpring,
+    #[allow(missing_docs)]
+    Spring,
+    #[allow(missing_docs)]
+    WatermelonSummer,
+    #[allow(missing_docs)]
+    SummerPool,
+    #[allow(missing_docs)]
+    ExcitingFall,
+    #[allow(missing_docs)]
+    Autumn,
+    #[allow(missing_docs)]
+    WinterSnow,
+    #[allow(missing_docs)]
+    IceAge,
+    #[allow(missing_docs)]
+    LostInSpace,
+    #[allow(missing_docs)]
+    Space,
+    #[allow(missing_docs)]
+    Camping,
+    #[allow(missing_docs)]
+    HappyBirthday,
+    #[allow(missing_docs)]
+    Jungle,
+    #[allow(missing_docs)]
+    OurPlanet,
+    #[allow(missing_docs)]
+    Theater,
+    #[allow(missing_docs)]
+    Travel,
 }
 
 impl Default for ThemeId {
