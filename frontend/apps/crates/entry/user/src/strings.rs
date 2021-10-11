@@ -47,7 +47,10 @@ pub mod register {
         pub const STR_LOCATION_LABEL:&'static str = "Location*";
         pub const STR_PERSONA_LABEL:&'static str = "I sign up as a...*";
         pub const STR_ORGANIZATION_LABEL:&'static str = "School/Organization*";
-        pub const STR_TERMS_LABEL:&'static str = "I have read the terms and conditions (legal text…)";
+        pub const STR_TERMS_LABEL_ONE:&'static str = "I have read and accept the ";
+        pub const STR_TERMS_TERMS:&'static str = "terms & conditions";
+        pub const STR_TERMS_LABEL_TWO:&'static str = " and ";
+        pub const STR_TERMS_PRIVACY:&'static str = "privacy policy";
         pub const STR_LANGUAGE_LABEL:&'static str = "Language of communication*";
         pub const STR_MARKETING_LABEL:&'static str = "I would like to receive educational resources (GDPR legal text….)";
 
