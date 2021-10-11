@@ -53,6 +53,15 @@ export class _ extends LitElement {
     connectedCallback() {
         super.connectedCallback();
         window.addEventListener("mousedown", this.onGlobalMouseDown);
+
+        const {showId} = this;
+
+        if(showId !== "" && showId !== "debug") {
+            if(localStorage.getItem("tooltip-" + showId) === "hidden") {
+                //hiding due to storage
+                this.onClose();
+            }
+        }
     }
     disconnectedCallback() {
         super.disconnectedCallback();
@@ -137,12 +146,6 @@ export class _ extends LitElement {
             return(nothing);
         }
 
-        if(showId !== "" && showId !== "debug") {
-            if(sessionStorage.getItem("tooltip-" + showId) === "hidden") {
-                //hiding due to storage
-                return nothing;
-            }
-        }
 
         return html`
 
@@ -191,7 +194,7 @@ function renderShowId(showId:string, onClose: () => any) {
             //skipping showId action because it's debug
         } else {
             //setting ${showId}
-            sessionStorage.setItem("tooltip-" + showId, "hidden");
+            localStorage.setItem("tooltip-" + showId, "hidden");
         }
 
         onClose();
