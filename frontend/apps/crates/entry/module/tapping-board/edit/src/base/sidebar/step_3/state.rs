@@ -17,19 +17,19 @@ use components::{
     stickers::state::Stickers,
 };
 use dominator_helpers::futures::AsyncLoader;
-
+use super::super::state::Sidebar;
 use shared::domain::jig::module::body::Audio;
 
 pub struct Step3 {
-    pub base: Rc<Base>,
+    pub sidebar: Rc<Sidebar>,
 }
 
 
 impl Step3 {
-    pub fn new(base: Rc<Base>) -> Rc<Self> {
+    pub fn new(sidebar: Rc<Sidebar>) -> Rc<Self> {
 
         let _self = Rc::new(Self {
-            base,
+            sidebar,
         });
 
         _self
@@ -57,7 +57,7 @@ impl Step3 {
     //or a new trace is selected
     pub fn tab_signal(&self, selected_tab_signal: impl Signal<Item = Option<MenuTabKind>>) -> impl Signal<Item = Option<Tab>> {
 
-        let base = self.base.clone();
+        let base = self.sidebar.base.clone();
 
         map_ref! {
             let kind = selected_tab_signal,
@@ -75,7 +75,7 @@ impl Step3 {
     }
 
     pub fn trace_index_signal(&self) -> impl Signal<Item = Option<usize>> {
-        self.base.traces.selected_index.signal_cloned()
+        self.sidebar.base.traces.selected_index.signal_cloned()
     }
 
 }
@@ -122,6 +122,13 @@ impl Tab {
         match self {
             Self::Text(_, _) => MenuTabKind::Text,
             Self::Audio(_) => MenuTabKind::Audio,
+        }
+    }
+
+    pub fn as_index(&self) -> usize {
+        match self {
+            Self::Audio(_) => 0,
+            Self::Text(_, _) => 1,
         }
     }
 }

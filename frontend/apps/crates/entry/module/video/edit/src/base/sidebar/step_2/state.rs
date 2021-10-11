@@ -3,22 +3,23 @@ use components::{image::search::{callbacks::Callbacks as ImageSearchCallbacks, s
 use dominator::clone;
 use futures_signals::signal::Mutable;
 use std::rc::Rc;
+use super::super::state::Sidebar;
 
 pub struct Step2 {
-    pub base: Rc<Base>,
     pub tab: Mutable<Tab>,
+    pub sidebar: Rc<Sidebar>,
 }
 
 impl Step2 {
-    pub fn new(base: Rc<Base>) -> Rc<Self> {
+    pub fn new(sidebar: Rc<Sidebar>) -> Rc<Self> {
         let kind = match crate::debug::settings().content_tab {
             Some(kind) => kind,
             None => MenuTabKind::Video,
         };
 
-        let tab = Mutable::new(Tab::new(base.clone(), kind));
+        let tab = Mutable::new(Tab::new(sidebar.base.clone(), kind));
 
-        Rc::new(Self { base, tab })
+        Rc::new(Self { sidebar, tab })
     }
 }
 
@@ -58,6 +59,14 @@ impl Tab {
             Self::Video => MenuTabKind::Video,
             Self::Text => MenuTabKind::Text,
             Self::Image(_) => MenuTabKind::Image,
+        }
+    }
+
+    pub fn as_index(&self) -> usize {
+        match self {
+            Self::Video => 0,
+            Self::Text => 1,
+            Self::Image(_) => 2,
         }
     }
 }

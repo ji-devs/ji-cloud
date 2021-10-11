@@ -4,27 +4,28 @@ use futures_signals::signal::{Mutable, SignalExt};
 use dominator::clone;
 use components::{backgrounds::actions::Layer, color_select::state::{State as ColorPickerState}, image::search::{callbacks::Callbacks as ImageSearchCallbacks, state::{ImageSearchCheckboxKind, ImageSearchOptions, State as ImageSearchState}}, tabs::MenuTabKind};
 use shared::domain::jig::module::body::{Background, Image};
+use super::super::state::Sidebar;
 
 const STR_SELECT_BACKGROUND_COLOR: &'static str = "Select background color";
 
 pub struct Step1 {
-    pub base: Rc<Base>,
     pub tab: Mutable<Tab>,
+    pub sidebar: Rc<Sidebar>,
 }
 
 
 impl Step1 {
-    pub fn new(base: Rc<Base>) -> Rc<Self> {
+    pub fn new(sidebar: Rc<Sidebar>) -> Rc<Self> {
 
         let kind = match crate::debug::settings().bg_tab {
             Some(kind) => kind,
             None => MenuTabKind::Image
         };
 
-        let tab = Mutable::new(Tab::new(base.clone(), kind));
+        let tab = Mutable::new(Tab::new(sidebar.base.clone(), kind));
 
         Rc::new(Self {
-            base,
+            sidebar,
             tab
         })
     }
@@ -92,6 +93,14 @@ impl Tab {
             Self::Image(_) => MenuTabKind::Image,
             Self::Color(_) => MenuTabKind::Color,
             Self::Overlay(_) => MenuTabKind::Overlay,
+        }
+    }
+
+    pub fn as_index(&self) -> usize {
+        match self {
+            Self::Image(_) => 0,
+            Self::Color(_) => 1,
+            Self::Overlay(_) => 2,
         }
     }
 }

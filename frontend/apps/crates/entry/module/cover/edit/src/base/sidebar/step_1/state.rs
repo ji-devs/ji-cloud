@@ -12,23 +12,25 @@ use components::{
     theme_selector::state::{ThemeSelector, ThemeSelectorCallbacks},
 };
 use shared::domain::jig::module::body::{Background, Image};
+use super::super::state::Sidebar;
+
 pub struct Step1 {
-    pub base: Rc<Base>,
+    pub sidebar: Rc<Sidebar>,
     pub theme_selector: Rc<ThemeSelector>
 }
 
 
 impl Step1 {
-    pub fn new(base: Rc<Base>) -> Rc<Self> {
+    pub fn new(sidebar: Rc<Sidebar>) -> Rc<Self> {
         let callbacks = ThemeSelectorCallbacks::new(
-            clone!(base => move |theme_choice| {
-                base.set_theme(theme_choice);
+            clone!(sidebar => move |theme_choice| {
+                sidebar.base.set_theme(theme_choice);
             })
         );
-        let theme_selector = Rc::new(ThemeSelector::new(base.jig_id, base.jig_theme_id.clone(), base.theme_id.clone(), callbacks));
+        let theme_selector = Rc::new(ThemeSelector::new(sidebar.base.jig_id, sidebar.base.jig_theme_id.clone(), sidebar.base.theme_id.clone(), callbacks));
 
         Rc::new(Self {
-            base,
+            sidebar,
             theme_selector,
         })
     }

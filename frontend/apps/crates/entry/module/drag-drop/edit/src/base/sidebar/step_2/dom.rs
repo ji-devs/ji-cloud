@@ -12,6 +12,10 @@ use components::{
 
 pub fn render_step_2(state: Rc<Step2>) -> Dom {
     html!("menu-tabs", {
+        .future(state.tab.signal_ref(|tab| tab.as_index()).dedupe().for_each(clone!(state => move |index| {
+            state.sidebar.tab_index.set(Some(index));
+            async move {}
+        })))
         .children(&mut [
             render_tab(state.clone(), MenuTabKind::Select),
             render_tab(state.clone(), MenuTabKind::Audio),
@@ -42,7 +46,7 @@ fn render_tab(state: Rc<Step2>, tab_kind:MenuTabKind) -> Dom {
                 curr.kind() == tab_kind
             }))),
             clone!(state, tab_kind => move || {
-                state.tab.set(Tab::new(state.base.clone(), tab_kind));
+                state.tab.set(Tab::new(state.sidebar.base.clone(), tab_kind));
             })
         ),
         Some("tabs")
