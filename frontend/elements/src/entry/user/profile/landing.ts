@@ -67,7 +67,7 @@ export class _ extends LitElement {
                     text-decoration: none;
                 }
                 nav a.active {
-                    font-weight: bold;
+                    /* font-weight: bold; */
                 }
                 main {
                     background-color: var(--light-blue-1);
