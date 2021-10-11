@@ -3,7 +3,7 @@ use components::page_header;
 use dominator::{Dom, clone, html, with_node};
 use futures_signals::{map_ref, signal::{Signal, SignalExt}, signal_vec::SignalVecExt};
 use shared::domain::meta::{Affiliation, AffiliationId, AgeRange, AgeRangeId, Subject, SubjectId};
-use utils::{events, languages::{LANGUAGES, Language}, unwrap::UnwrapJiExt};
+use utils::{events, languages::{EMAIL_LANGUAGES, Language}, unwrap::UnwrapJiExt};
 use wasm_bindgen::JsValue;
 use web_sys::{HtmlElement, HtmlInputElement};
 
@@ -191,7 +191,7 @@ impl ProfilePage {
                     .property_signal("value", state.user.language.signal_cloned().map(|code| {
                         Language::code_to_display_name(&code)
                     }))
-                    .children(LANGUAGES.iter().map(|lang| {
+                    .children(EMAIL_LANGUAGES.iter().map(|lang| {
                         html!("input-select-option", {
                             .text(lang.display_name())
                             .event(clone!(state => move |_: events::CustomSelectedChange| {

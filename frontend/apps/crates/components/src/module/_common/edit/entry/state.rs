@@ -30,7 +30,7 @@ use shared::{
     },
     error::EmptyError,
 };
-use utils::{languages::LANGUAGE_CODE_EN, prelude::*};
+use utils::{languages::Language, prelude::*};
 
 use crate::audio::mixer::AUDIO_MIXER;
 
@@ -187,7 +187,7 @@ where
                         age_ranges: Vec::new(),
                         affiliations: Vec::new(),
                         goals: Vec::new(),
-                        language: String::from(LANGUAGE_CODE_EN),
+                        language: String::from(Language::default().code()),
                         categories: Vec::new(),
                         additional_resources: Vec::new(),
                         description: String::from("debug"),

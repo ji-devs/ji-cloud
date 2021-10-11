@@ -6,7 +6,7 @@ use shared::domain::{
     category::{Category, CategoryId},
     meta::{AgeRange, Goal, Affiliation},
 };
-use utils::languages::{Language, LANGUAGES};
+use utils::languages::{Language, JIG_LANGUAGES};
 
 use super::publish_jig::PublishJig;
 use super::super::state::State as JigEditState;
@@ -45,7 +45,7 @@ impl State {
             ages: Mutable::new(ages),
             affiliations: Mutable::new(affiliations),
             submission_tried: Mutable::new(false),
-            languages: LANGUAGES.clone(),
+            languages: JIG_LANGUAGES.clone(),
             show_public_popup: Mutable::new(false),
             jig_edit_state
         }

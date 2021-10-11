@@ -19,7 +19,7 @@ use std::convert::{TryFrom, TryInto};
 use std::future::Future;
 use std::marker::PhantomData;
 use std::rc::Rc;
-use utils::languages::LANGUAGE_CODE_EN;
+use utils::languages::Language;
 use utils::{iframe::*, prelude::*};
 use uuid::Uuid;
 
@@ -97,7 +97,7 @@ where
                         age_ranges: Vec::new(),
                         affiliations: Vec::new(),
                         goals: Vec::new(),
-                        language: String::from(LANGUAGE_CODE_EN),
+                        language: String::from(Language::default().code()),
                         categories: Vec::new(),
                         additional_resources: Vec::new(),
                         description: String::from("debug"),

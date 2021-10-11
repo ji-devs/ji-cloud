@@ -16,7 +16,7 @@ use shared::{
     error::EmptyError,
 };
 use utils::{
-    languages::{Language, LANGUAGES},
+    languages::{Language, JIG_LANGUAGES},
     prelude::*,
 };
 
@@ -53,11 +53,6 @@ impl SearchSelected {
         if profile.age_ranges.len() > 0 && state_age_ranges.len() == 0 {
             state_age_ranges.clear();
             state_age_ranges.extend(profile.age_ranges.clone());
-        }
-
-        let mut state_language = self.language.lock_mut();
-        if state_language.is_none() {
-            *state_language = Some(profile.language.clone());
         }
     }
 
@@ -109,7 +104,7 @@ impl SearchOptions {
             affiliations: Mutable::new(vec![]),
             categories: Mutable::new(vec![]),
             category_label_lookup: Mutable::new(HashMap::new()),
-            languages: Rc::new(LANGUAGES.clone()),
+            languages: Rc::new(JIG_LANGUAGES.clone()),
         }
     }
 
