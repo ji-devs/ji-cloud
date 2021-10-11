@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use dominator::clone;
 use shared::{api::{ApiEndpoint, endpoints::{self, user::Profile}}, domain::user::UserProfile, error::EmptyError};
-use utils::{prelude::{ApiEndpointExt, api_with_auth_status}, storage::delete_csrf_token};
+use utils::{prelude::{ApiEndpointExt, api_with_auth_status}, routes::{Route, UserRoute}, storage::delete_csrf_token, unwrap::UnwrapJiExt};
 
 use super::state::{LoggedInState, State};
 
@@ -42,4 +42,14 @@ pub fn logout(state: Rc<State>) {
             },
         }
     }));
+}
+
+pub fn navigate_to_login() {
+    let location = web_sys::window().unwrap_ji().location();
+
+    let redirect = format!("{}{}", location.pathname().unwrap_ji(), location.search().unwrap_ji());
+    let redirect: String = js_sys::encode_uri_component(&redirect).into();
+
+    let route: String = Route::User(UserRoute::Login(redirect)).to_string().into();
+    dominator::routing::go_to_url(&route);
 }

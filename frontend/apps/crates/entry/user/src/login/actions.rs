@@ -98,8 +98,30 @@ pub fn status_redirect(status:Option<Status>) {
 
 pub fn do_success(csrf:&str) {
     storage::save_csrf_token(&csrf);
-    let route:String = Route::User(UserRoute::Profile(ProfileSection::Landing)).into();
-    dominator::routing::go_to_url(&route);
+
+    let search_params = web_sys::window()
+        .unwrap_ji()
+        .location()
+        .search()
+        .unwrap_ji();
+    let search_params = web_sys
+        ::UrlSearchParams
+        ::new_with_str(&search_params)
+        .unwrap_ji();
+
+    let url = search_params
+        .get("redirect")
+        .unwrap_or_default();
+    let mut url: String = js_sys
+        ::decode_uri_component(&url)
+        .unwrap_ji()
+        .into();
+    
+    if url.is_empty() {
+        url = String::from("/");
+    };
+
+    dominator::routing::go_to_url(&url);
 }
 
 

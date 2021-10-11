@@ -40,7 +40,7 @@ pub enum UserRoute {
     Profile(ProfileSection),
     RegisterOauth(OauthData),
     LoginOauth(OauthData),
-    Login,
+    Login(String),
     Register,
     ContinueRegistration(Option<OAuthUserProfile>),
     SendEmailConfirmation(String), //the email address
@@ -166,7 +166,7 @@ impl Route {
 
         let mut params_string = url.search();
         if params_string.len() > 1 {
-            // if there's more then the the '?' than remove it
+            // if there's more then one char than it's a '?', so remove it
             params_string = params_string[1..params_string.len()].to_string();
         }
 
@@ -188,7 +188,10 @@ impl Route {
             }
             ["user", "profile"] => Self::User(UserRoute::Profile(ProfileSection::Landing)),
             ["user", "profile", "change-email"] => Self::User(UserRoute::Profile(ProfileSection::ChangeEmail)),
-            ["user", "login"] => Self::User(UserRoute::Login),
+            ["user", "login"] => {
+                let redirect = params_map.get("redirect").unwrap_or_default();
+                Self::User(UserRoute::Login(redirect))
+            },
             ["user", "register"] => Self::User(UserRoute::Register),
 
             ["user", "register-oauth"] => {
@@ -365,7 +368,9 @@ impl From<&Route> for String {
                             }
                         }
                     },
-                    UserRoute::Login => "/user/login".to_string(),
+                    UserRoute::Login(redirect) => {
+                        format!("/user/login?redirect={}", redirect)
+                    },
                     UserRoute::Register => "/user/register".to_string(),
                     UserRoute::RegisterOauth(_) => "/user/register-oauth".to_string(),
                     UserRoute::LoginOauth(_) => "/user/login-oauth".to_string(),
