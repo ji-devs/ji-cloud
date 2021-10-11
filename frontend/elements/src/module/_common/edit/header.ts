@@ -23,6 +23,10 @@ export class _ extends LitElement {
               text-align: left;
               color: var(--dark-blue-4);
           }
+
+          #gear-img {
+              cursor: pointer;
+          } 
     `];
   }
 
@@ -43,6 +47,12 @@ export class _ extends LitElement {
       this.requestUpdate();
   }
 
+  onGearClick() {
+      const tooltipRef = this.shadowRoot?.getElementById("tooltip");
+
+      (tooltipRef as any).selfClosed = false;
+  }
+
   render() {
       const {imgRef, headerTitle, tooltipBody, tooltipTitle} = this;
 
@@ -50,7 +60,7 @@ export class _ extends LitElement {
           <section>
                   <div class="topRight">
                       <slot name="controller"></slot>
-                      <img-ui @image-load=${this.onImageLoaded} id="gear-img" path="module/_common/edit/header/jiggling-gear.png"></img-ui>
+                      <img-ui @click=${this.onGearClick} @image-load=${this.onImageLoaded} id="gear-img" path="module/_common/edit/header/jiggling-gear.png"></img-ui>
                       ${imgRef ? renderTooltip(tooltipTitle, tooltipBody, imgRef) : nothing} 
                   </div>
                   <div class="title">${headerTitle}</div>
@@ -65,7 +75,7 @@ function renderTooltip(title:string, body:string, targetRef:HTMLElement) {
 
     const showId = `module-header`;
     return html`<overlay-container>
-        <overlay-tooltip-info .target=${targetRef} .marginX=${marginX} targetAnchor="bm" contentAnchor="tr" title="${title}" body="${body}" showId="${showId}" closeable></overlay-tooltip-info>
+        <overlay-tooltip-info id="tooltip" .target=${targetRef} .marginX=${marginX} targetAnchor="bm" contentAnchor="tr" title="${title}" body="${body}" showId="${showId}" closeable></overlay-tooltip-info>
 </overlay-container>
     `
             

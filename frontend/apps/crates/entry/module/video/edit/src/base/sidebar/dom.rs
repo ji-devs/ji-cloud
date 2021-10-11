@@ -14,12 +14,16 @@ use super::{
 impl DomRenderable for Sidebar {
     fn render(state: Rc<Sidebar>) -> Dom {
         html!("empty-fragment", {
+            .future(state.base.step.signal_cloned().dedupe().for_each(clone!(state => move |step| {
+                state.tab_index.set(None);
+                async move {}
+            })))
             .style("display", "contents")
             .child_signal(state.base.step.signal_cloned().map(clone!(state => move |step| {
                 match step {
-                    Step::One => Some(render_step_1(Step1::new(state.base.clone()))),
-                    Step::Two => Some(render_step_2(Step2::new(state.base.clone()))),
-                    Step::Three => Some(render_step_3(Step3::new(state.base.clone()))),
+                    Step::One => Some(render_step_1(Step1::new(state.clone()))),
+                    Step::Two => Some(render_step_2(Step2::new(state.clone()))),
+                    Step::Three => Some(render_step_3(Step3::new(state.clone()))),
                     _ => None
                 }
             })))

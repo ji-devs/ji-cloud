@@ -12,6 +12,10 @@ use utils::prelude::*;
 
 pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<Step2<RawData, E>>) -> Dom {
     html!("menu-tabs", {
+        .future(state.tab.signal_ref(|tab| tab.as_index()).dedupe().for_each(clone!(state => move |index| {
+            state.tab_index.set(Some(index));
+            async move {}
+        })))
         .children(&mut [
             render_tab(state.clone(), MenuTabKind::Theme),
             render_tab(state.clone(), MenuTabKind::Image),

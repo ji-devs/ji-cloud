@@ -9,26 +9,27 @@ use components::{audio::input::{
         AudioInputCallbacks,
     }, image::search::{callbacks::Callbacks as ImageSearchCallbacks, state::{ImageSearchCheckboxKind, ImageSearchOptions, State as ImageSearchState}}, stickers::state::Stickers, tabs::MenuTabKind};
 use shared::domain::jig::module::body::{Image, Audio};
+use super::super::state::Sidebar;
 
 pub struct Step3 {
-    pub base: Rc<Base>,
     pub tab: Mutable<Tab>,
+    pub sidebar: Rc<Sidebar>,
 }
 
 
 impl Step3 {
-    pub fn new(base: Rc<Base>) -> Rc<Self> {
+    pub fn new(sidebar: Rc<Sidebar>) -> Rc<Self> {
 
         let kind = match crate::debug::settings().content_tab {
             Some(kind) => kind,
             None => MenuTabKind::Text
         };
 
-        let tab = Mutable::new(Tab::new(base.clone(), kind));
+        let tab = Mutable::new(Tab::new(sidebar.base.clone(), kind));
 
         Rc::new(Self {
-            base,
-            tab
+            tab,
+            sidebar
         })
     }
 }
@@ -90,6 +91,14 @@ impl Tab {
             Self::Text => MenuTabKind::Text,
             Self::Image(_) => MenuTabKind::Image,
             Self::Audio(_) => MenuTabKind::Audio,
+        }
+    }
+
+    pub fn as_index(&self) -> usize {
+        match self {
+            Self::Text => 0,
+            Self::Image(_) => 1,
+            Self::Audio(_) => 2,
         }
     }
 }

@@ -9,10 +9,11 @@ const STR_SELECT_BACKGROUND_COLOR: &'static str = "Select background color";
 pub struct Step2<RawData: RawDataExt, E: ExtraExt> {
     pub base: Rc<CardsBase<RawData, E>>,
     pub tab: Mutable<Tab>,
+    pub tab_index: Mutable<Option<usize>>
 }
 
 impl<RawData: RawDataExt, E: ExtraExt> Step2<RawData, E> {
-    pub fn new(base: Rc<CardsBase<RawData, E>>) -> Rc<Self> {
+    pub fn new(base: Rc<CardsBase<RawData, E>>, tab_index: Mutable<Option<usize>>) -> Rc<Self> {
         let kind = match base.debug.step2_tab {
             Some(kind) => kind,
             None => MenuTabKind::Theme,
@@ -20,7 +21,7 @@ impl<RawData: RawDataExt, E: ExtraExt> Step2<RawData, E> {
 
         let tab = Mutable::new(Tab::new(base.clone(), kind));
 
-        Rc::new(Self { base, tab })
+        Rc::new(Self { base, tab, tab_index })
     }
 }
 
@@ -84,6 +85,13 @@ impl Tab {
             Self::Theme(_) => MenuTabKind::Theme,
             Self::Image(_) => MenuTabKind::Image,
             Self::Color(_) => MenuTabKind::Color,
+        }
+    }
+    pub fn as_index(&self) -> usize {
+        match self {
+            Self::Theme(_) => 0,
+            Self::Image(_) => 1,
+            Self::Color(_) => 2,
         }
     }
 }

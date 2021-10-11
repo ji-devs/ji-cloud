@@ -23,14 +23,18 @@ where
         state: Rc<Sidebar<RawData, E, GetSettingsStateFn, RenderSettingsStateFn, SettingsState>>,
     ) -> Dom {
         html!("empty-fragment", {
+            .future(state.base.step.signal_cloned().dedupe().for_each(clone!(state => move |step| {
+                state.tab_index.set(None);
+                async move {}
+            })))
             .style("display", "contents")
             .child_signal(state.base.step.signal_cloned().map(clone!(state => move |step| {
                 match step {
-                    Step::One => Some(render_step_1(Step1::new(state.base.clone()))),
-                    Step::Two => Some(render_step_2(Step2::new(state.base.clone()))),
+                    Step::One => Some(render_step_1(Step1::new(state.base.clone(), state.tab_index.clone()))),
+                    Step::Two => Some(render_step_2(Step2::new(state.base.clone(), state.tab_index.clone()))),
                     Step::Three => Some(
                         render_step_3(
-                            Step3::new(state.base.clone(), state.get_settings.clone()),
+                            Step3::new(state.base.clone(), state.get_settings.clone(), state.tab_index.clone()),
                             state.render_settings.clone()
                         )
                     ),

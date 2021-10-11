@@ -1,11 +1,13 @@
 use super::super::{nav::dom::render_nav, state::*};
-
+use awsm_web::loaders::fetch::fetch_url;
+use serde::Deserialize;
 use dominator::{clone, html, Dom};
 use std::rc::Rc;
+use futures_signals::{map_ref, signal::{Signal, SignalExt, Mutable}};
 
 use crate::module::_common::edit::header::controller::dom::ControllerDom;
 
-use shared::domain::jig::module::body::{BodyExt, ModeExt, StepExt};
+use shared::domain::jig::module::body::{BodyExt, ModeExt, StepExt, Vec2};
 use utils::prelude::*;
 
 pub fn render_main_bg<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(
@@ -81,9 +83,83 @@ where
     Footer: FooterExt + 'static,
     Overlay: OverlayExt + 'static,
 {
+
+    let module_kind = RawData::kind().as_str();
+
+    //TODO - load from localization endpoint
+    let STR_config_url = utils::path::config_cdn_url(format!("module/_header/{}.json", module_kind));
+
+    #[derive(Deserialize, Default, Clone)] 
+    struct HeaderConfig {
+        title: String,
+        steps: Vec<HeaderConfigStep> 
+    }
+    #[derive(Deserialize, Default, Clone)] 
+    struct HeaderConfigStep {
+        tabs: Vec<HeaderConfigTab> 
+    }
+    #[derive(Deserialize, Default, Clone)] 
+    struct HeaderConfigTab {
+        title: String,
+        body: String,
+    }
+
+    let header_config = Mutable::new(HeaderConfig::default());
+
+    let tab_config_sig = clone!(header_config, state => move || {
+        map_ref! {
+            let header_config = header_config.signal_cloned(),
+            let step = state.step.signal_cloned(),
+            let tab_index = state.sidebar.tab_index()
+            => {
+
+                let step_index = step.as_number() - 1;
+                let tab_index = tab_index.unwrap_or_default();
+
+                log::info!("step: {}, tab: {}", step_index, tab_index);
+
+                let tab_config = header_config.steps.get(step_index)
+                    .and_then(|step_config| {
+                        step_config.tabs.get(tab_index)
+                    } );
+
+                tab_config.map(|x| x.clone()).unwrap_or_default()
+            }
+        }
+    });
+
     html!("module-header", {
+        .future(clone!(header_config => async move {
+            let data:HeaderConfig = match fetch_url(&STR_config_url).await {
+                Ok(resp) => {
+                    resp
+                        .json_from_str()
+                        .await
+                        .unwrap_or_default()
+                },
+                Err(_) => {
+                    HeaderConfig::default()
+                }
+            };
+
+            header_config.set(data);
+        }))
         .property("slot", "header")
-        .property("moduleKind", RawData::kind().as_str())
+        .property_signal("headerTitle", {
+            header_config.signal_ref(|h| {
+                h.title.clone()
+            })
+        })
+        .property_signal("tooltipTitle", {
+            tab_config_sig().map(|t| {
+                t.title.clone()
+            })
+        })
+        .property_signal("tooltipBody", {
+            tab_config_sig().map(|t| {
+                t.body.clone()
+            })
+        })
         .child(ControllerDom::render(
             state.history.clone(),
             clone!(state => move || {

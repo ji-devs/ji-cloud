@@ -10,6 +10,7 @@ impl Step3 {
     pub fn start_preview(&self, index: usize) {
 
         let trace = self
+            .sidebar
             .base
             .traces
             .get(index)
@@ -23,6 +24,7 @@ impl Step3 {
             .clone();
 
         let trace_meta = self
+            .sidebar
             .base
             .traces_meta
             .lock_ref()

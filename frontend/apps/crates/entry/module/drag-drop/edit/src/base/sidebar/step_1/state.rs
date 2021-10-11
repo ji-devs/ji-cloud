@@ -13,27 +13,28 @@ use components::{
     stickers::state::Stickers,
 };
 use shared::domain::jig::module::body::{Background, Image};
+use super::super::state::Sidebar;
 
 const STR_SELECT_BACKGROUND_COLOR: &'static str = "Select background color";
 
 pub struct Step1 {
-    pub base: Rc<Base>,
     pub tab: Mutable<Tab>,
+    pub sidebar: Rc<Sidebar>,
 }
 
 
 impl Step1 {
-    pub fn new(base: Rc<Base>) -> Rc<Self> {
+    pub fn new(sidebar: Rc<Sidebar>) -> Rc<Self> {
 
         let kind = match crate::debug::settings().step_1_tab {
             Some(kind) => kind,
             None => MenuTabKind::BackgroundImageFull
         };
 
-        let tab = Mutable::new(Tab::new(base.clone(), kind));
+        let tab = Mutable::new(Tab::new(sidebar.base.clone(), kind));
 
         Rc::new(Self {
-            base,
+            sidebar,
             tab
         })
     }
@@ -126,6 +127,16 @@ impl Tab {
             Self::BgOverlay(_) => MenuTabKind::Overlay,
             Self::StickerImage(_) => MenuTabKind::Image,
             Self::StickerText => MenuTabKind::Text,
+        }
+    }
+
+    pub fn as_index(&self) -> usize {
+        match self {
+            Self::BgImage(_) => 0,
+            Self::BgColor(_) => 1,
+            Self::BgOverlay(_) => 2,
+            Self::StickerImage(_) => 3,
+            Self::StickerText => 4,
         }
     }
 }

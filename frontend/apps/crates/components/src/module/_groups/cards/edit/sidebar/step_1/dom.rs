@@ -44,6 +44,10 @@ pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<Step1<RawData, E>>) ->
                 },
                 Widget::Tabs(tab) => {
                     html!("menu-tabs", {
+                        .future(tab.signal_ref(|tab| tab.as_index()).dedupe().for_each(clone!(state => move |index| {
+                            state.tab_index.set(Some(index));
+                            async move {}
+                        })))
                         .children(&mut [
                             render_tab(state.clone(), tab.clone(), MenuTabKind::Text, true),
                             render_tab(state.clone(), tab.clone(), MenuTabKind::Image, !is_empty),

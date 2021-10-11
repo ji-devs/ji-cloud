@@ -12,6 +12,10 @@ use components::{
 
 pub fn render_step_1(state: Rc<Step1>) -> Dom {
     html!("menu-tabs", {
+        .future(state.tab.signal_ref(|tab| tab.as_index()).dedupe().for_each(clone!(state => move |index| {
+            state.sidebar.tab_index.set(Some(index));
+            async move {}
+        })))
         .children(&mut [
             render_tab(state.clone(), MenuTabKind::BackgroundImageFull),
             render_tab(state.clone(), MenuTabKind::BackgroundColor),
@@ -35,7 +39,7 @@ pub fn render_step_1(state: Rc<Step1>) -> Dom {
                             Some(render_image_search(state.clone(), None))
                         },
                         Tab::StickerText => {
-                            Some(render_text_editor(state.base.text_editor.clone()))
+                            Some(render_text_editor(state.sidebar.base.text_editor.clone()))
                         },
                     }
                 })))
@@ -54,7 +58,7 @@ fn render_tab(state: Rc<Step1>, tab_kind:MenuTabKind) -> Dom {
                 curr.kind() == tab_kind
             }))),
             clone!(state, tab_kind => move || {
-                state.tab.set(Tab::new(state.base.clone(), tab_kind));
+                state.tab.set(Tab::new(state.sidebar.base.clone(), tab_kind));
             })
         ),
         Some("tabs")

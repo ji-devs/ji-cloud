@@ -26,4 +26,5 @@ impl<RawData: RawDataExt, E: ExtraExt> Header<RawData, E> {
     }
 }
 
-impl<RawData: RawDataExt, E: ExtraExt> HeaderExt for Header<RawData, E> {}
+impl<RawData: RawDataExt, E: ExtraExt> HeaderExt for Header<RawData, E> {
+}

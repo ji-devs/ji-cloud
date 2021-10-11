@@ -21,7 +21,7 @@ pub fn render(state: Rc<Step2>) -> Dom {
                 .property("slot", "input")
                 .property("label", "Add a YouTube link")
                 .child(html!("input" => HtmlInputElement, {
-                    .property_signal("value", state.base.video.signal_cloned().map(|video| {
+                    .property_signal("value", state.sidebar.base.video.signal_cloned().map(|video| {
                         match video {
                             None => String::new(),
                             Some(video) => {
@@ -41,7 +41,7 @@ pub fn render(state: Rc<Step2>) -> Dom {
                                 Ok(youtube_url) => {
                                     actions::set_error(&wrapper, false);
                                     let host = VideoHost::Youtube(youtube_url);
-                                    state.base.on_link_change(host);
+                                    state.sidebar.base.on_link_change(host);
                                 },
                             };
                         }))
@@ -53,10 +53,10 @@ pub fn render(state: Rc<Step2>) -> Dom {
             .property("slot", "delete")
             .property("kind", "text")
             .property("color", "blue")
-            .visible_signal(state.base.video.signal_cloned().map(|video| video.is_some()))
+            .visible_signal(state.sidebar.base.video.signal_cloned().map(|video| video.is_some()))
             .text(STR_DELETE)
             .event(clone!(state => move |_: events::Click| {
-                state.base.delete_video();
+                state.sidebar.base.delete_video();
             }))
         }))
     })

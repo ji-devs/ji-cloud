@@ -1,5 +1,6 @@
 use super::state::*;
 use std::rc::Rc;
+use awsm_web::dom::DomSelector;
 use dominator::{html, clone, Dom};
 use utils::prelude::*;
 use futures_signals::{
@@ -21,9 +22,25 @@ pub fn render(state: Rc<Step3>) -> Dom {
             state.selected_tab_signal().map(clone!(state => move |selected_tab| {
                 selected_tab.signal_cloned().map(clone!(selected_tab, state => move |kind| {
                     //from selected_tab kind is a None, no trace is selected - don't show anything 
+                    //TODO- empty-fragment so we can set tab_index?
                     kind.map(|_| {
                         //otherwise, it means a trace is selected
                         html!("menu-tabs", {
+                            // just for setting the tooltip index
+                            .future(
+                                state
+                                    .tab_signal(selected_tab.signal())
+                                    .map(|tab| 
+                                        tab
+                                            .map(|tab| tab.as_index())
+                                            .unwrap_or_default()
+                                    )
+                                    .dedupe()
+                                    .for_each(clone!(state => move |index| {
+                                        state.sidebar.tab_index.set(Some(index));
+                                        async move {}
+                                    }))
+                            )
                             .children(&mut [
                                 //pass down our mutable so that we can switch tabs
                                 render_tab(state.clone(), MenuTabKind::Audio, selected_tab.clone()),
@@ -93,7 +110,7 @@ fn render_tab_body(state: Rc<Step3>, tab: Tab) -> Dom {
                             let target = evt.dyn_target::<HtmlTextAreaElement>().unwrap();
                             let value = target.value();
 
-                            state.base.traces.set_text(index, if value.is_empty() { None } else { Some(value) });
+                            state.sidebar.base.traces.set_text(index, if value.is_empty() { None } else { Some(value) });
                         }))
                     }))
                 }))

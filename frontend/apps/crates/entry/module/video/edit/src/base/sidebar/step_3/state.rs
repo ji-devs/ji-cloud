@@ -7,13 +7,15 @@ use components::{
 use dominator::clone;
 use futures_signals::signal::Mutable;
 use std::rc::Rc;
+use super::super::state::Sidebar;
+
 pub struct Step3 {
-    pub base: Rc<Base>,
     pub tab: Mutable<Tab>,
+    pub sidebar: Rc<Sidebar>,
 }
 
 impl Step3 {
-    pub fn new(base: Rc<Base>) -> Rc<Self> {
+    pub fn new(sidebar: Rc<Sidebar>) -> Rc<Self> {
         // let kind = match crate::debug::settings().settings_tab {
         //     Some(kind) => kind,
         //     None => MenuTabKind::Settings
@@ -21,9 +23,9 @@ impl Step3 {
 
         let kind = MenuTabKind::PlaySettings;
 
-        let tab = Mutable::new(Tab::new(base.clone(), kind));
+        let tab = Mutable::new(Tab::new(sidebar.base.clone(), kind));
 
-        Rc::new(Self { base, tab })
+        Rc::new(Self { sidebar, tab })
     }
 }
 
@@ -69,6 +71,13 @@ impl Tab {
         match self {
             Self::Settings(_) => MenuTabKind::PlaySettings,
             Self::Instructions(_) => MenuTabKind::Instructions,
+        }
+    }
+
+    pub fn as_index(&self) -> usize {
+        match self {
+            Self::Settings(_) => 0,
+            Self::Instructions(_) => 1,
         }
     }
 }
