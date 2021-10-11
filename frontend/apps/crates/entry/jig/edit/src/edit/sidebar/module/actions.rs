@@ -101,10 +101,14 @@ pub fn assign_kind(state: Rc<State>, kind: ModuleKind) {
                         state.sidebar.jig_edit_state.route.set(JigEditRoute::Module(id));
                         state.sidebar.collapsed.set(true);
                     },
-                    Err(_) => {},
+                    Err(e) => {
+                        log::error!("Error: {:?}", e);
+                    },
                 }
             },
-            Err(_) => {},
+            Err(e) => {
+                log::error!("Error: {:?}", e);
+            },
         }
     }));
 }

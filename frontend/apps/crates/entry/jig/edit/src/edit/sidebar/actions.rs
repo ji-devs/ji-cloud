@@ -7,7 +7,7 @@ use futures_signals::{
 use shared::{api::endpoints::{self, ApiEndpoint}, domain::{CreateResponse, jig::{JigResponse, JigId, JigPlayerSettings, JigUpdateDraftDataRequest, LiteModule, ModuleKind, module::{ModuleCreateRequest, ModuleId, ModuleResponse}}}, error::EmptyError};
 use std::cell::RefCell;
 use std::rc::Rc;
-use utils::{iframe::ModuleToJigEditorMessage, prelude::*};
+use utils::{iframe::ModuleToJigEditorMessage, jig::JigPlayerOptions, prelude::*};
 
 pub async fn load_jig(jig_id: JigId, jig_cell: Rc<RefCell<Option<JigResponse>>>) {
     let path = endpoints::jig::GetDraft::PATH.replace("{id}", &jig_id.0.to_string());
@@ -83,17 +83,19 @@ pub fn player_settings_change_signal(state: Rc<State>) -> impl Signal<Item = Jig
     )
 }
 
-pub fn get_player_settings(state: Rc<State>) -> JigPlayerSettings {
+pub fn get_player_settings(state: Rc<State>) -> JigPlayerOptions {
     let direction = state.settings.direction.get_cloned();
     let display_score = state.settings.display_score.get();
     let track_assessments = state.settings.track_assessments.get();
     let drag_assist = state.settings.drag_assist.get();
 
-    JigPlayerSettings {
+    JigPlayerOptions {
         direction: direction,
         display_score: display_score,
         track_assessments: track_assessments,
         drag_assist: drag_assist,
+        is_student: false,
+        draft: true,
     }
 }
 

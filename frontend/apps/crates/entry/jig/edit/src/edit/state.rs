@@ -1,11 +1,11 @@
 use futures_signals::signal::Mutable;
-use shared::domain::jig::{JigId, JigPlayerSettings};
-use utils::routes::JigEditRoute;
+use shared::domain::jig::JigId;
+use utils::{jig::JigPlayerOptions, routes::JigEditRoute};
 
 pub struct State {
     pub route: Mutable<JigEditRoute>,
     pub jig_id: JigId,
-    pub play_jig: Mutable<Option<JigPlayerSettings>>,
+    pub play_jig: Mutable<Option<JigPlayerOptions>>,
 }
 
 impl State {

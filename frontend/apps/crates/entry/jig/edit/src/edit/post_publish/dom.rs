@@ -1,7 +1,7 @@
 use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
-use shared::domain::jig::{JigId, JigPlayerSettings};
-use utils::{events, routes::{JigRoute, Route}};
+use shared::domain::jig::JigId;
+use utils::{events, jig::JigPlayerOptions};
 
 use super::{
     actions,
@@ -35,7 +35,7 @@ pub fn render(jig_id: JigId, jig_edit_state: Rc<JigEditState>) -> Dom {
                 .property("kind", "play-jig")
                 .property("slot", "actions")
                 .event(clone!(state => move |_: events::Click| {
-                    state.jig_edit_state.play_jig.set(Some(JigPlayerSettings::default()));
+                    state.jig_edit_state.play_jig.set(Some(JigPlayerOptions::default()));
                 }))
             }),
         ])
