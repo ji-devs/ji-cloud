@@ -1,19 +1,13 @@
 #[allow(missing_docs)]
-pub mod design;
-#[allow(missing_docs)]
 pub mod activity;
+#[allow(missing_docs)]
+pub mod design;
 #[allow(missing_docs)]
 pub mod path;
 
 use crate::domain::jig::module::{
-    body::{
-        Body, 
-        BodyConvert, 
-        BodyExt, 
-        ThemeChoice, 
-    },
+    body::{Body, BodyConvert, BodyExt, ThemeChoice},
     ModuleKind,
-
 };
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
@@ -26,15 +20,14 @@ pub struct Manifest {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub background_audio: Option<String>,
     /// list of original module ids
-    pub modules: Vec<String> 
+    pub modules: Vec<String>,
 }
-
 
 /// The body for [`Legacy`](crate::domain::jig::module::ModuleKind::Legacy) modules.
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]
 pub struct ModuleData {
-    /// base id for all file loading 
-    pub base_id: String, 
+    /// base id for all file loading
+    pub base_id: String,
     /// Design layer  
     pub design: design::Design,
 

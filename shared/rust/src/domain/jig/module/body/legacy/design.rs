@@ -1,6 +1,6 @@
-use serde::{Serialize, Deserialize};
-use serde_repr::*;
 pub use super::*;
+use serde::{Deserialize, Serialize};
+use serde_repr::*;
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct Design {
@@ -14,10 +14,10 @@ pub struct Design {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum Sticker {
-    /// images 
+    /// images
     Image(Image),
-    /// text 
-    Text(Text)
+    /// text
+    Text(Text),
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -25,8 +25,8 @@ pub struct Image {
     pub src: String,
     pub width: f64,
     pub height: f64,
-    pub transform: [f64;6],
-    pub show_kind: ShowKind, 
+    pub transform: [f64; 6],
+    pub show_kind: ShowKind,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -34,8 +34,8 @@ pub struct Text {
     pub html: String,
     pub width: f64,
     pub height: f64,
-    pub transform: [f64;6],
-    pub show_kind: ShowKind, 
+    pub transform: [f64; 6],
+    pub show_kind: ShowKind,
 }
 
 #[repr(u8)]
