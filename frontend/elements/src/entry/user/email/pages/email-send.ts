@@ -6,7 +6,7 @@ import "@elements/entry/user/_common/base-page";
 
 const STR_TITLE = "We just sent you an email";
 const STR_SUBTITLE = "Please open the email and click on the Verification button. If you cannot see the email in your inbox, check your promotion or spam folders.";
-const STR_SUBSUBTITLE = "I didn’t receive an email. Please send again";
+const STR_SUBSUBTITLE = "It may have been filtered into the promotion or spam folders";
 
 @customElement("page-email-send")
 export class _ extends LitElement {
