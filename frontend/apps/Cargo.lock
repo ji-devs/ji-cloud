@@ -2033,6 +2033,7 @@ dependencies = [
  "rgb",
  "serde",
  "serde_json",
+ "serde_repr",
  "url",
  "uuid",
  "wasm-bindgen",

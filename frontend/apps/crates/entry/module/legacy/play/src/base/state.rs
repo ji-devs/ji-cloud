@@ -11,6 +11,7 @@ pub struct Base {
     pub jig: JigData,
     pub theme_id: ThemeId,
     pub module_phase: Mutable<ModulePlayPhase>,
+    pub raw: RawData,
 }
 
 impl Base {
@@ -26,7 +27,9 @@ impl Base {
             ..
         } = init_args;
 
+
         Rc::new(Self {
+            raw,
             jig_id,
             module_id,
             jig,

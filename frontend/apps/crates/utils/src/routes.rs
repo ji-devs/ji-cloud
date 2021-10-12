@@ -454,13 +454,9 @@ impl From<&Route> for String {
     }
 }
 
-
+//todo - rename to get_* for consistency
 pub fn is_param_bool(param: &str) -> bool { 
-    let url:String = dominator::routing::url().get_cloned();
-    let url:web_sys::Url = web_sys::Url::new(&url).unwrap_ji();
-    let params = url.search_params();
-
-    match params.get(param) {
+    match get_param(param) {
         None => false,
         Some(value) => {
             if value == "true" {
@@ -470,4 +466,18 @@ pub fn is_param_bool(param: &str) -> bool {
             }
         }
     }
+}
+pub fn get_param_index(param: &str) -> Option<usize> { 
+    get_param(param)
+        .and_then(|x| {
+            x.parse().ok()
+        })
+}
+
+pub fn get_param(param: &str) -> Option<String>{ 
+    let url:String = dominator::routing::url().get_cloned();
+    let url:web_sys::Url = web_sys::Url::new(&url).unwrap_ji();
+    let params = url.search_params();
+
+    params.get(param)
 }
