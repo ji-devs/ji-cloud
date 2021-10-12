@@ -11,7 +11,7 @@ expression: body
   "authorName": "Bobby Tables",
   "jigData": {
     "draftOrLive": "Draft",
-    "displayName": "name",
+    "displayName": "test",
     "modules": [
       {
         "id": "a6b24a06-1dd7-11ec-8426-635a3a7ea572",

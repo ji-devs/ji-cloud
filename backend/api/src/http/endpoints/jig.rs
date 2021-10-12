@@ -104,23 +104,6 @@ async fn get_draft(
     Ok(Json(jig_response))
 }
 
-async fn update(
-    db: Data<PgPool>,
-    claims: TokenUser,
-    req: Option<Json<<jig::Update as ApiEndpoint>::Req>>,
-    path: web::Path<JigId>,
-) -> Result<HttpResponse, error::UpdateWithMetadata> {
-    let id = path.into_inner();
-
-    db::jig::authz(&*db, claims.0.user_id, Some(id)).await?;
-
-    let req = req.map_or_else(Default::default, Json::into_inner);
-
-    db::jig::update(&*db, id, req.author_id).await?;
-
-    Ok(HttpResponse::NoContent().finish())
-}
-
 /// Update a JIG's draft data.
 async fn update_draft(
     db: Data<PgPool>,
@@ -316,7 +299,6 @@ pub fn configure(cfg: &mut ServiceConfig) {
         .route(jig::Clone::PATH, jig::Clone::METHOD.route().to(clone))
         .route(jig::Browse::PATH, jig::Browse::METHOD.route().to(browse))
         .route(jig::Search::PATH, jig::Search::METHOD.route().to(search))
-        .route(jig::Update::PATH, jig::Update::METHOD.route().to(update))
         .route(
             jig::UpdateDraftData::PATH,
             jig::UpdateDraftData::METHOD.route().to(update_draft),

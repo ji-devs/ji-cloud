@@ -463,32 +463,6 @@ order by t.ord
     Ok(v)
 }
 
-pub async fn update(
-    pool: &PgPool,
-    jig_id: JigId,
-    author_id: Option<Uuid>,
-) -> Result<(), error::UpdateWithMetadata> {
-    let mut txn = pool.begin().await?;
-
-    sqlx::query!(
-        //language=SQL
-        r#"
-update jig
-set author_id = coalesce($2, author_id)
-where id = $1
-  and $2 is distinct from author_id
-    "#,
-        jig_id.0,
-        author_id,
-    )
-    .execute(&mut txn)
-    .await?;
-
-    txn.commit().await?;
-
-    Ok(())
-}
-
 pub async fn update_draft(
     pool: &PgPool,
     id: JigId,

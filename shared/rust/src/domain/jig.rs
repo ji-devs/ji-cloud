@@ -411,16 +411,6 @@ pub struct JigResponse {
     pub jig_data: JigData,
 }
 
-/// Request to update properties on the JIG.
-#[derive(Serialize, Deserialize, Debug, Default)]
-#[serde(rename_all = "camelCase")]
-pub struct JigUpdateRequest {
-    /// Author of the JIG.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(default)]
-    pub author_id: Option<Uuid>,
-}
-
 /// Request for updating a JIG's draft data.
 #[derive(Serialize, Deserialize, Debug, Default)]
 #[serde(rename_all = "camelCase")]
