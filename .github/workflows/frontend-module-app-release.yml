@@ -41,7 +41,7 @@ jobs:
       - name: install node
         uses: actions/setup-node@v1
         with:
-          node-version: '12'
+          node-version: '15'
 
       - name: download cargo-make
         run: curl -u jewish-interactive:"$GITHUB_TOKEN" -s https://api.github.com/repos/sagiegurari/cargo-make/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/' | xargs -I {} wget -c https://github.com/sagiegurari/cargo-make/releases/latest/download/cargo-make-v{}-x86_64-unknown-linux-musl.zip -O cargo-make.zip
