@@ -4,7 +4,6 @@ use crate::{
         jig::{
             JigBrowseQuery, JigBrowseResponse, JigCountResponse, JigCreateRequest, JigId,
             JigResponse, JigSearchQuery, JigSearchResponse, JigUpdateDraftDataRequest,
-            JigUpdateRequest,
         },
         CreateResponse,
     },
@@ -43,19 +42,6 @@ impl ApiEndpoint for Create {
     type Err = MetadataNotFound;
     const PATH: &'static str = "/v1/jig";
     const METHOD: Method = Method::Post;
-}
-
-/// Update a JIG's info. Note that this does not update the JIG's data.
-///
-/// The fields that can be updated through this route correspond to the modifiable fields in
-/// [`JigResponse`] that are not part of the `.jig_data` field.
-pub struct Update;
-impl ApiEndpoint for Update {
-    type Req = JigUpdateRequest;
-    type Res = ();
-    type Err = EmptyError;
-    const PATH: &'static str = "/v1/jig/{id}";
-    const METHOD: Method = Method::Patch;
 }
 
 /// Get a JIG's live data by ID.
@@ -107,7 +93,7 @@ impl ApiEndpoint for UpdateDraftData {
     type Req = JigUpdateDraftDataRequest;
     type Res = ();
     type Err = MetadataNotFound;
-    const PATH: &'static str = "/v1/jig/{id}/draft";
+    const PATH: &'static str = "/v1/jig/{id}";
     const METHOD: Method = Method::Patch;
 }
 
