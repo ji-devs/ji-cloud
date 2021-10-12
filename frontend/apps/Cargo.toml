@@ -31,6 +31,7 @@ members = [
     "crates/entry/module/tapping-board/play",
 	"crates/entry/module/drag-drop/edit",
     "crates/entry/module/drag-drop/play",
+	"crates/entry/module/legacy/play",
 ]
 
 [profile.release]

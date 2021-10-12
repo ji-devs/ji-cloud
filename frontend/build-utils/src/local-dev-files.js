@@ -36,6 +36,7 @@ const ALLOWED_APP_NAMES = [
 	"module/drag-drop/play",
 	"dev/scratch/001",
 	"dev/showcase/001",
+	"module/legacy/play",
 ]
 
 if(!APP_NAME) {

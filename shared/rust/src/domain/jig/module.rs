@@ -129,6 +129,9 @@ pub enum ModuleKind {
 
     /// Drag and Drop
     DragDrop = 10,
+
+    /// Legacy
+    Legacy = 11,
 }
 
 impl ModuleKind {
@@ -146,6 +149,7 @@ impl ModuleKind {
             Self::Tracing => "tracing",
             Self::Video => "video",
             Self::CardQuiz => "card-quiz",
+            Self::Legacy => "legacy",
         }
     }
 }
@@ -164,6 +168,7 @@ impl FromStr for ModuleKind {
             "tracing" => Self::Tracing,
             "video" => Self::Video,
             "card-quiz" => Self::CardQuiz,
+            "legacy" => Self::Legacy,
             _ => anyhow::bail!("Invalid ModuleKind: {}", s),
         };
 

@@ -40,6 +40,9 @@ pub fn render_page_body<RawData, Mode, Step, Base>(
                         .apply_if(page_kind.add_preview_attribute(), |dom| {
                             dom.property("preview", true)
                         })
+                        .apply_if(RawData::is_legacy(), |dom| {
+                            dom.property("legacy", true)
+                        })
                         .event(clone!(has_resized_once => move |event:ModuleResizeEvent| {
                             //in utils / global static
                             set_resize_info(event.data());

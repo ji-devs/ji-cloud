@@ -33,6 +33,9 @@ pub mod card_quiz;
 /// Matching
 pub mod matching;
 
+/// Legacy  
+pub mod legacy;
+
 /// Groups that share types
 pub mod _groups;
 
@@ -69,6 +72,9 @@ pub enum Body {
     ///
     /// DEPRECATED INFO: This exists as an empty enum because cover *needs* to exist, but it also isn't decided yet.
     Cover(cover::ModuleData),
+
+    /// Module is a legacy, and has a legacy's body.
+    Legacy(legacy::ModuleData),
 }
 
 impl Body {
@@ -86,6 +92,7 @@ impl Body {
                 Self::TappingBoard(tapping_board::ModuleData::default())
             }
             super::ModuleKind::DragDrop => Self::DragDrop(drag_drop::ModuleData::default()),
+            super::ModuleKind::Legacy => Self::Legacy(legacy::ModuleData::default()),
             _ => unimplemented!("TODO!"),
         }
     }
@@ -102,6 +109,7 @@ impl Body {
             Self::TappingBoard(data) => data.convert_to_body(kind),
             Self::DragDrop(data) => data.convert_to_body(kind),
             Self::Cover(data) => data.convert_to_body(kind),
+            Self::Legacy(data) => data.convert_to_body(kind),
         }
     }
 }
@@ -122,6 +130,11 @@ pub trait BodyExt<Mode: ModeExt, Step: StepExt>:
 
     /// is complete
     fn is_complete(&self) -> bool;
+
+    /// is legacy
+    fn is_legacy() -> bool {
+        false
+    }
 
     /// get the kind from the type itself
     fn kind() -> super::ModuleKind;
@@ -262,6 +275,7 @@ impl Body {
             Self::Video(_) => super::ModuleKind::Video,
             Self::TappingBoard(_) => super::ModuleKind::TappingBoard,
             Self::DragDrop(_) => super::ModuleKind::DragDrop,
+            Self::Legacy(_) => super::ModuleKind::Legacy,
         }
     }
 }
@@ -300,6 +314,28 @@ pub trait StepExt: Copy + Default + PartialEq + Eq + Hash {
     /// Auto-implemented, check whether current step is "preview"
     fn is_preview(&self) -> bool {
         *self == Self::get_preview()
+    }
+}
+
+/// impl StepExt for empty steps
+/// this is a special case and should only be used
+/// where the module genuinely ignores the step
+/// one example is the Legacy module
+impl StepExt for () {
+    fn next(&self) -> Option<Self> {
+        None
+    }
+    fn as_number(&self) -> usize {
+        0
+    }
+    fn label(&self) -> &'static str {
+        ""
+    }
+    fn get_list() -> Vec<Self> {
+        Vec::new()
+    }
+    fn get_preview() -> Self {
+        ()
     }
 }
 
