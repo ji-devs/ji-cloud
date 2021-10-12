@@ -78,7 +78,9 @@ pub fn render(state: Rc<State>) -> Dom {
                 .property("slot", "iframe")
                 .property_signal("src", jig_and_active_module_signal(Rc::clone(&state)).map(clone!(state => move|(jig, active_module_index)| {
                     match jig {
-                        None => String::new(),
+                        None => {
+                            crate::debug::settings().empty_module_url.to_string()
+                        },
                         Some(jig) => {
                             let active_module = &jig.jig_data.modules[active_module_index];
 

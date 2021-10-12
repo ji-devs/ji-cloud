@@ -1,18 +1,22 @@
 use cfg_if::cfg_if;
 
 #[derive(Default)]
-pub struct DebugSettings {}
+pub struct DebugSettings {
+    pub empty_module_url:&'static str
+}
 
 impl DebugSettings {
     pub fn local() -> Self {
-        Self {}
+        Self {
+            empty_module_url: "http://localhost:4105/module/legacy/play/debug"
+        }
     }
 }
 
 cfg_if! {
     if #[cfg(feature = "local")] {
         pub fn settings() -> DebugSettings {
-            DebugSettings::default()
+            DebugSettings::local()
         }
     } else {
         pub fn settings() -> DebugSettings {

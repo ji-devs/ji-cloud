@@ -262,6 +262,15 @@ impl Route {
                     JigId(Uuid::from_str(jig_id).unwrap_ji()),
                     JigEditRoute::Module(ModuleId(Uuid::from_str(module_id).unwrap_ji()))
             )),
+            ["jig", "play", "debug"] => {
+                let search:JigPlayerOptions = serde_qs::from_str(&params_string).unwrap_ji();
+
+                Self::Jig(JigRoute::Play(
+                    JigId(Uuid::from_u128(0)),
+                    Some(ModuleId(Uuid::from_u128(0))),
+                    search,
+                ))
+            },
             ["jig", "play", jig_id] => {
                 let search:JigPlayerOptions = serde_qs::from_str(&params_string).unwrap_ji();
 
@@ -271,6 +280,7 @@ impl Route {
                     search,
                 ))
             },
+
             ["jig", "play", jig_id, module_id] => {
                 let search:JigPlayerOptions = serde_qs::from_str(&params_string).unwrap_ji();
 
