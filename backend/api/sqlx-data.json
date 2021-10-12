@@ -1615,6 +1615,34 @@
       "nullable": []
     }
   },
+  "4485adb8cd789a26f1d0930478a2870c60300ec8612b076a059358c2baaa69a6": {
+    "query": "\ninsert into jig_data_module (jig_data_id, kind, contents, index)\nvalues ($1, $2, $3, (select count(*) from jig_data_module where jig_data_id = $1))\nreturning id, \"index\"\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "index",
+          "type_info": "Int2"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2",
+          "Jsonb"
+        ]
+      },
+      "nullable": [
+        false,
+        false
+      ]
+    }
+  },
   "4525dd6ca4c71dcfe23f0d502f4cd496b8e77752a41a53c5aaa0008334a22fd3": {
     "query": "\nselect id                                                                 as \"id!: CategoryId\",\n       name                                                               as \"name!\",\n       created_at                                                         as \"created_at!\",\n       updated_at,\n       (select count(*)::int8 from image_category where category_id = id) as \"image_count!\",\n       (select count(*)::int8 from jig_data_category where category_id = id)   as \"jig_count!\",\n       user_scopes                                                        as \"user_scopes!\"\nfrom category\n         inner join unnest($1::uuid[]) with ordinality t(id, ord) USING (id)\norder by t.ord\n",
     "describe": {
@@ -3516,34 +3544,6 @@
       },
       "nullable": [
         null
-      ]
-    }
-  },
-  "9e92f97ca612cf6a187475b1440e12d1062d26ec82dbf0c55da7998b4fbbc897": {
-    "query": "\ninsert into jig_data_module (jig_data_id, kind, contents, index)\nvalues ($1, $2, $3, (select count(*) from jig_data_module where jig_data_id = $1))\nreturning stable_id, \"index\"\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "stable_id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "index",
-          "type_info": "Int2"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int2",
-          "Jsonb"
-        ]
-      },
-      "nullable": [
-        false,
-        false
       ]
     }
   },
