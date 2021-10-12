@@ -116,7 +116,7 @@ where
                 let step_index = step.as_number() - 1;
                 let tab_index = tab_index.unwrap_or_default();
 
-                log::info!("step: {}, tab: {}", step_index, tab_index);
+                //log::info!("step: {}, tab: {}", step_index, tab_index);
 
                 let tab_config = header_config.steps.get(step_index)
                     .and_then(|step_config| {

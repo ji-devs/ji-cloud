@@ -86,8 +86,30 @@ function renderIntroTooltip(moduleKind:ModuleKind, targetRef:HTMLElement) {
     }
 
     const showId = `preview-header-intro-${moduleKind}`;
-    return html`<tooltip-info placement="bottom-start" .target=${targetRef} title="${STR_TOOLTIP_GETTING_STARTED}" body="${body}" showId="${showId}" closeable></tooltip-info>`
+
+    return html`<overlay-container>
+        <overlay-tooltip-info 
+            id="tooltip" 
+            .target=${targetRef} 
+            targetAnchor="bl" 
+            contentAnchor="tl" 
+            title="${STR_TOOLTIP_GETTING_STARTED}" 
+            body="${body}" 
+            showId="${showId}" 
+            closeable>
+       </overlay-tooltip-info>
+    </overlay-container>`
 }
 function renderContinueTooltip(targetRef:HTMLElement) {
-    return html`<tooltip-info placement="bottom-end" .target=${targetRef} title="" body="${STR_TOOLTIP_CONTINUE}" closeable></tooltip-info>`
+    return html`<overlay-container>
+        <overlay-tooltip-info 
+            id="tooltip" 
+            .target=${targetRef} 
+            targetAnchor="br" 
+            contentAnchor="tr" 
+            title="" 
+            body="${STR_TOOLTIP_CONTINUE}" 
+            closeable>
+       </overlay-tooltip-info>
+    </overlay-container>`
 }

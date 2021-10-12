@@ -56,21 +56,6 @@ where
 
             }))
         }))
-        /*
-        .apply_if(!has_post_preview, clone!(state => move |dom| {
-            dom
-                .child(html!("button-rect", {
-                    .property("slot", "btn")
-                    .property("size", "small")
-                    .property("iconAfter", "arrow")
-                    .text(strings::STR_DONE)
-                    .event(clone!(state => move |_evt:events::Click| {
-                        let route:String = Route::Jig(JigRoute::Edit(state.jig.id, JigEditRoute::Landing)).into();
-                        dominator::routing::go_to_url(&route);
-                    }))
-                }))
-        }))
-        */
     })
 }
 
