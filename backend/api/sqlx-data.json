@@ -1038,19 +1038,6 @@
       "nullable": []
     }
   },
-  "1a9809e6e1b5aff99d740bbd5c5e05f56ce49108cb700ea4e1154bd5263ffff6": {
-    "query": "\nupdate jig\nset author_id = coalesce($2, author_id)\nwhere id = $1\n  and $2 is distinct from author_id\n    ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid"
-        ]
-      },
-      "nullable": []
-    }
-  },
   "1c7400d27c33a6b7204302b5cf2ced8fb445de00304be5b424133f3b7afbf1cb": {
     "query": "insert into user_auth_basic (user_id, email, password) values ($1, $2::text, $3)",
     "describe": {
