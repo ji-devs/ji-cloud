@@ -5,9 +5,12 @@ use chrono::{DateTime, Duration, Utc};
 use futures::future::{ready, Ready};
 use tokio::sync::RwLock;
 
+use crate::algolia;
 use crate::error;
 use crate::error::ServiceKind;
 use core::google::GoogleAccessTokenResponse;
+
+use self::upload::cleaner::UploadCleaner;
 
 pub mod event_arc;
 pub mod mail;
@@ -20,11 +23,11 @@ pub trait Service {
     const DISABLED_ERROR: error::ServiceKind;
 }
 
-impl Service for crate::algolia::Client {
+impl Service for algolia::Client {
     const DISABLED_ERROR: error::ServiceKind = error::ServiceKind::Algolia;
 }
 
-impl Service for crate::algolia::SearchKeyStore {
+impl Service for algolia::SearchKeyStore {
     // todo: this should have a different error?
     const DISABLED_ERROR: error::ServiceKind = error::ServiceKind::Algolia;
 }
@@ -49,6 +52,14 @@ impl Service for GcpAccessKeyStore {
     const DISABLED_ERROR: ServiceKind = ServiceKind::Algolia;
 }
 
+// TODO: set up for algolia
+impl Service for algolia::Manager {
+    const DISABLED_ERROR: ServiceKind = ServiceKind::Algolia;
+}
+
+impl Service for UploadCleaner {
+    const DISABLED_ERROR: error::ServiceKind = error::ServiceKind::UploadCleaner;
+}
 #[derive(Debug)]
 pub struct ServiceData<T: ?Sized>(Arc<T>);
 

@@ -309,8 +309,6 @@ pub trait StepExt: Copy + Default + PartialEq + Eq + Hash {
 #[repr(i16)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 pub enum ThemeId {
-
-
     #[allow(missing_docs)]
     Blank,
     #[allow(missing_docs)]

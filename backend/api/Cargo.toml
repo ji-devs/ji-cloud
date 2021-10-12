@@ -43,9 +43,9 @@ reqwest = { version = "0.11.4", features = ["cookies", "json", "stream"] }
 rusoto_core = "0.47.0"
 rusoto_signature = "0.47.0"
 rusoto_s3 = "0.47.0"
-serde = { version = "1.0.127", features = ["derive"] }
+serde = { version = "1.0.130", features = ["derive"] }
 serde_derive = "1.0.127"
-serde_json = { version = "1.0.66", features = ["preserve_order"] }
+serde_json = { version = "1.0.68", features = ["preserve_order"] }
 serde_urlencoded = "0.7.0"
 sha2 = "0.9.5"
 time = "=0.2.25"
@@ -70,7 +70,6 @@ features = ["anyhow", "backtrace", "contexts", "panic", "transport"]
 version = "0.5.7"
 default-features = false
 features = ["runtime-tokio-native-tls", "macros", "postgres", "uuid", "json", "chrono", "offline", "migrate"]
-
 
 [features]
 default = ["listenfd", "core/listenfd"]

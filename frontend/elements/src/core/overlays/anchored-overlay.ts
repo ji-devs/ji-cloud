@@ -171,3 +171,4 @@ export class AnchoredOverlay extends LitElement {
 // if enough in preferred side: put there
 // // else if enough space other side put there
 // else if put at edge of screen that side
+// if overlay content is a custom element it can't figure out the height/width of the element

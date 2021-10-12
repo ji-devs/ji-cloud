@@ -7,6 +7,7 @@ pub mod jig;
 pub mod locale;
 pub mod media;
 pub mod meta;
+pub mod scheduler;
 pub mod search;
 pub mod session;
 pub mod user;

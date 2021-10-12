@@ -120,6 +120,7 @@ pub enum ServiceKind {
     GoogleCloudAccessKeyStore,
     Mail,
     FirebaseCloudMessaging,
+    UploadCleaner,
 }
 
 impl ServiceKind {
@@ -133,6 +134,7 @@ impl ServiceKind {
             Self::GoogleCloudAccessKeyStore => "Google Cloud Access Key Store",
             Self::Mail => "Sendgrid Mail",
             Self::FirebaseCloudMessaging => "Firebase Cloud Messaging",
+            Self::UploadCleaner => "Media Upload Cleaner",
         }
     }
 }

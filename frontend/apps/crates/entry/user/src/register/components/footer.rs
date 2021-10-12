@@ -26,6 +26,6 @@ impl Footer {
 }
 
 fn go_login() {
-    let route:String = Route::User(UserRoute::Login).into();
+    let route:String = Route::User(UserRoute::Login(String::new())).into();
     dominator::routing::go_to_url(&route);
 }

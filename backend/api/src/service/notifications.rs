@@ -55,7 +55,6 @@ impl Client {
             .send()
             .await
             .map_err(|e| {
-                log::warn!("?? {:?}", e);
                 anyhow::anyhow!("Unknown error during request to firestore: {:?}", e) }
             )?;
 

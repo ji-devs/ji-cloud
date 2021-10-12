@@ -36,7 +36,7 @@ pub fn change_password(state: Rc<PasswordResetPage>) {
         
         match resp {
             Ok(_) => {
-                let route:String = Route::User(UserRoute::Login).into();
+                let route:String = Route::User(UserRoute::Login(String::new())).into();
                 dominator::routing::go_to_url(&route);
             }, 
             Err(err) => {
