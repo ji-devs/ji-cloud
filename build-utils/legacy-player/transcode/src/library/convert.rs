@@ -1,4 +1,3 @@
-use legacy::*;
 use super::src_manifest::{
     SrcManifest,
     slide::Slide as SrcSlide,
@@ -13,10 +12,15 @@ use super::src_manifest::{
     layer::ShowKind as SrcShowKind,
 
 };
-use scan_fmt::scan_fmt;
+use shared::domain::jig::module::body::legacy::{
+    Manifest,
+    ModuleData,
+    design::*,
+    activity::*
+};
 
 impl SrcManifest {
-    pub fn convert(self) -> (Manifest, Vec<Module>) {
+    pub fn convert(self, base_id:&str) -> (Manifest, Vec<ModuleData>) {
         let src = self.structure;
 
         let background_audio = if src.music_file == "" { None } else { Some(src.music_file) };
@@ -36,7 +40,7 @@ impl SrcManifest {
                 .slides
                 .into_iter()
                 .map(|src_slide| {
-                    src_slide.convert()
+                    src_slide.convert(base_id)
                 })
                 .collect();
 
@@ -47,7 +51,7 @@ impl SrcManifest {
 }
 
 impl SrcSlide {
-    pub fn convert(self) -> Module {
+    pub fn convert(self, base_id: &str) -> ModuleData {
 
         let activities_len = self.activities.len();
         let layers_len = self.layers.len();
@@ -87,7 +91,8 @@ impl SrcSlide {
 
         let design = convert_design(self.layers);
 
-        Module {
+        ModuleData {
+            base_id: base_id.to_string(),
             id,
             image_full,
             image_thumb,

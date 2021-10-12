@@ -18,12 +18,13 @@ async fn main() {
     init_logger(opts.verbose);
     opts.sanitize();
 
-    let src_json = opts.src_path.join(opts.src_json);
+    let src_path = opts.src_path.join(&opts.base_id);
+    let src_json = src_path.join(opts.src_json);
 
     let src_manifest = SrcManifest::load(src_json);
-    let (dest_manifest, dest_modules) = src_manifest.convert();
+    let (dest_manifest, dest_modules) = src_manifest.convert(&opts.base_id);
 
-    let dest_path = opts.src_path.join(opts.dest_dir);
+    let dest_path = src_path.join(opts.dest_dir);
     std::fs::create_dir_all(&dest_path);
     let file = File::create(&dest_path.join("manifest.json")).unwrap();
 

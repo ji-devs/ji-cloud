@@ -32,6 +32,7 @@ members = [
 	"crates/entry/module/drag-drop/edit",
     "crates/entry/module/drag-drop/play",
 	"crates/entry/module/legacy/play",
+	"crates/entry/module/legacy/edit",
 ]
 
 [profile.release]

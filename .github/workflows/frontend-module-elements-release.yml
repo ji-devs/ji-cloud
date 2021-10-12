@@ -59,7 +59,7 @@ jobs:
 
     strategy:
       matrix:
-        app: [poster, video, tapping-board, drag-drop, memory, matching, flashcards, card-quiz, cover]
+        app: [poster, video, tapping-board, drag-drop, memory, matching, flashcards, card-quiz, cover, legacy]
         mode: [edit, play]
     steps:
 

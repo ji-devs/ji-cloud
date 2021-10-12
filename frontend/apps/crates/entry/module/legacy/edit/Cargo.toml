@@ -1,0 +1,77 @@
+[package]
+name = "app-legacy-edit"
+version = "0.1.0"
+description = "App"
+authors = ["David Komer <david.komer@gmail.com>"]
+categories = ["wasm"]
+readme = "README.md"
+license = "MIT"
+edition = "2018"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+once_cell = "1.8.0"
+utils = {path = "../../../../utils"}
+components = {path = "../../../../components"}
+shared = {path = "../../../../../../../shared/rust", features = ["wasm"]}
+wasm-logger = { version = "0.2.0", optional = true }
+wee_alloc = { version = "0.4.5", optional = true }
+console_error_panic_hook = { version = "0.1.6", optional = true }
+wasm-bindgen = { version = "0.2.76", features = ["nightly"] }
+js-sys = "0.3.53"
+web-sys = { version = "0.3.53", features = [
+    'Url',
+    'Request',
+    'RequestInit',
+    'Response',
+    'RequestMode',
+    'Headers',
+    'Document', 
+    'DocumentFragment',
+    'HtmlTemplateElement',
+    'Window',
+    'Storage',
+    'Location',
+    'Element',
+    'CssStyleDeclaration',
+    'DomTokenList',
+    'HtmlCollection',
+    'HtmlInputElement',
+    'HtmlImageElement',
+    'HtmlSelectElement',
+    'KeyboardEvent',
+    'MouseEvent',
+    'FileList',
+    'File',
+    'DomRect',
+    'HtmlIFrameElement'
+] }
+wasm-bindgen-futures = "0.4.26"
+dominator = "0.5.19"
+futures-signals = "0.3.22"
+dominator_helpers = "0.7.2"
+serde = { version = "1.0.130", features = ["derive"] }
+serde-wasm-bindgen = "0.3.1"
+serde_json = "1.0.67"
+futures = "0.3.17"
+log = "0.4.14"
+cfg-if = "1.0.0"
+awsm_web = { version = "0.28.1", features = ["dom", "loaders"] }
+discard = "1.0.4"
+uuid = { version = "0.8.2", features = ["serde", "wasm-bindgen"] }
+url = "2.2.2"
+gloo = "0.3.0"
+gloo-timers = { version = "0.2.1", features = ["futures"] }
+itertools = "0.10.1"
+async-trait = "0.1.51"
+unicode-segmentation = "1.8.0"
+
+[features]
+default = ["wee_alloc"]
+release = ["utils/release", "components/release"]
+sandbox = ["quiet", "wasm-logger", "console_error_panic_hook", "utils/sandbox"]
+ts_test = []
+quiet = ["utils/quiet", "components/quiet"]
+local = ["wasm-logger", "console_error_panic_hook", "utils/local"]

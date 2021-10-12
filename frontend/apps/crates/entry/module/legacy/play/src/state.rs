@@ -5,8 +5,8 @@ use shared::domain::jig::{JigId, module::{ModuleId, body::legacy::{ModuleData as
 pub type AppState = GenericState<RawData, (), (), Base>;
 
 
-pub fn create_state(jig_id: JigId, module_id: ModuleId) -> Rc<AppState> {
-    crate::debug::init(jig_id, module_id);
+pub async fn create_state(jig_id: JigId, module_id: ModuleId) -> Rc<AppState> {
+    crate::debug::init(jig_id, module_id).await;
 
     let mut opts = StateOpts::new( jig_id, module_id);
     opts.force_raw = crate::debug::settings().data.clone(); 

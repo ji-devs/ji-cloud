@@ -5,7 +5,10 @@ use components::{
 };
 use dominator::{html, Dom, clone};
 use std::rc::Rc;
-use super::state::*;
+use super::{
+    state::*,
+    design::*
+};
 use components::{backgrounds, stickers, traces};
 use futures_signals::{
     signal_vec::SignalVecExt,
@@ -17,6 +20,7 @@ impl DomRenderable for Base {
         html!("empty-fragment", {
             .property("slot", "main")
             .children(&mut [
+                state.render_design()
             ])
         })
     }

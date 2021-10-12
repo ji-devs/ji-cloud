@@ -1,11 +1,13 @@
 use structopt::StructOpt;
 use std::path::{Path, PathBuf};
-use config::RemoteTarget;
+use shared::config::RemoteTarget;
 
 #[derive(Debug, StructOpt)]
 #[structopt(name = "database migrations", about = "A little util to run database migrations")]
 pub struct Opts {
-    #[structopt(long, default_value="D:\\Dropbox (Jewish Interactive)\\ji-cloud-media\\legacy\\examples\\web-stress-test", parse(from_os_str))]
+    #[structopt(long, default_value="web-stress-test")]
+    pub base_id: String,
+    #[structopt(long, default_value="D:\\Dropbox (Jewish Interactive)\\ji-cloud-media\\legacy\\examples", parse(from_os_str))]
     pub src_path: PathBuf,
     #[structopt(long, default_value="game.json")]
     pub src_json: PathBuf,
