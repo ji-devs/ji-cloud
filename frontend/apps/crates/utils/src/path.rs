@@ -10,6 +10,23 @@ use crate::unwrap::UnwrapJiExt;
 pub fn ui<T: AsRef<str>>(path:T) -> String {
     media_url(&format!("ui/{}", path.as_ref()))
 }
+
+pub mod legacy {
+    pub fn layers_url<T: AsRef<str>>(base_id:&str, slide_id:&str, path:T) -> String {
+        slide_url(base_id, slide_id, &format!("layers/{}", path.as_ref()))
+    }
+    pub fn slide_url<T: AsRef<str>>(base_id:&str, slide_id:&str, path:T) -> String {
+        cdn_url(&format!("{}/slides/{}/{}", base_id, slide_id, path.as_ref()))
+    }
+    pub fn cdn_url<T: AsRef<str>>(path:T) -> String {
+        if crate::routes::get_param("example").is_some() {
+            super::media_url(&format!("legacy/examples/{}", path.as_ref()))
+        } else {
+            super::media_url(&format!("legacy/{}", path.as_ref()))
+        }
+    }
+}
+
 pub fn config_cdn_url<T: AsRef<str>>(path:T) -> String {
     media_url(&format!("config/{}", path.as_ref()))
 }

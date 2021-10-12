@@ -27,6 +27,7 @@ use shared::{
                     Background, 
                     Instructions, Transform,
                     legacy::{
+                        Manifest,
                         ModuleData as RawData
                     },
                     _groups::design::{Backgrounds,Sprite, Sticker, Text, Trace,BaseContent }
@@ -35,6 +36,7 @@ use shared::{
         }
     }
 };
+use awsm_web::loaders::fetch::fetch_url;
 use components::stickers::{sprite::ext::*, text::ext::*};
 pub static SETTINGS:OnceCell<DebugSettings> = OnceCell::new();
 
@@ -48,45 +50,46 @@ pub struct DebugSettings {
     pub skip_load_jig: bool,
 }
 
-#[derive(Clone, Debug, PartialEq)]
-pub struct InitData {
-    pub stickers: Vec<InitSticker>,
-}
-
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub enum InitSticker {
-    Text,
-    Sprite,
-}
-
-
 impl DebugSettings {
-    pub fn debug(init_data: Option<InitData>) -> DebugSettings {
+    pub fn debug(data: RawData) -> DebugSettings {
         DebugSettings {
-            //debug always has to have some data
-            //otherwise it will fail at load time
-            data: Some(
-                if let Some(init_data) = init_data {
-                    RawData{
-                    }
-                } else {
-                    RawData{
-                    }
-                }
-            ),
+            data: Some(data),
             skip_load_jig: true
         }
     }
 }
 
-pub fn init(jig_id: JigId, module_id: ModuleId) {
+pub async fn init(jig_id: JigId, module_id: ModuleId) {
     if jig_id == JigId(Uuid::from_u128(0)) {
-        SETTINGS.set(DebugSettings::debug(Some(InitData{
-            stickers: vec![
-                InitSticker::Text, //InitSticker::Sprite
-            ],
-        }))).unwrap_ji();
-        //SETTINGS.set(DebugSettings::debug(None)).unwrap_ji();
+        // http://localhost:4104/module/legacy/play/debug?example=web-stress-test&slide=0
+        let data = match utils::routes::get_param("example") {
+            Some(example_id) => {
+                let slide_index = utils::routes::get_param_index("slide").unwrap_or_default();
+                let url = utils::path::legacy::cdn_url(format!("{}/ji/manifest.json", example_id));
+
+                let manifest:Manifest = fetch_url(&url)
+                    .await
+                    .unwrap_ji()
+                    .json_from_str()
+                    .await
+                    .unwrap_ji();
+
+                
+                let url = utils::path::legacy::cdn_url(format!("{}/ji/module-{}.json", example_id, slide_index+1));
+
+                fetch_url(&url)
+                    .await
+                    .unwrap_ji()
+                    .json_from_str()
+                    .await
+                    .unwrap_ji()
+            },
+            None => {
+                RawData::default()
+            } 
+        };
+        
+        SETTINGS.set(DebugSettings::debug(data)).unwrap_ji();
     } else {
         SETTINGS.set(DebugSettings::default()).unwrap_ji();
     }
