@@ -49,7 +49,7 @@ pub async fn create(
     pool: &PgPool,
     parent: JigId,
     body: ModuleBody,
-) -> anyhow::Result<(StableModuleId, u16)> {
+) -> anyhow::Result<(ModuleId, u16)> {
     let (kind, body) = map_module_contents(&body)?;
 
     let mut txn = pool.begin().await?;
@@ -70,7 +70,7 @@ select draft_id from jig where jig.id = $1
         r#"
 insert into jig_data_module (jig_data_id, kind, contents, index)
 values ($1, $2, $3, (select count(*) from jig_data_module where jig_data_id = $1))
-returning stable_id, "index"
+returning id, "index"
 "#,
         draft_id,
         kind as i16,
@@ -78,7 +78,7 @@ returning stable_id, "index"
     )
     .fetch_one(&mut txn)
     .await
-    .map(|it| (StableModuleId(it.stable_id), it.index as u16))
+    .map(|it| (ModuleId(it.id), it.index as u16))
     .map_err(Into::into);
 
     txn.commit().await?;

@@ -96,7 +96,7 @@ async fn create_default() -> anyhow::Result<()> {
             "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008/draft/module/{}",
             port, id
         ))
-        .query(&[("q", "stable")])
+        .query(&[("q", "unique")])
         .login()
         .send()
         .await?
