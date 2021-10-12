@@ -442,6 +442,41 @@ dependencies = [
 ]
 
 [[package]]
+name = "app-legacy-edit"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "awsm_web 0.28.1",
+ "cfg-if 1.0.0",
+ "components",
+ "console_error_panic_hook",
+ "discard",
+ "dominator",
+ "dominator_helpers",
+ "futures",
+ "futures-signals",
+ "gloo",
+ "gloo-timers",
+ "itertools 0.10.1",
+ "js-sys",
+ "log",
+ "once_cell",
+ "serde",
+ "serde-wasm-bindgen",
+ "serde_json",
+ "shared",
+ "unicode-segmentation",
+ "url",
+ "utils",
+ "uuid",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "wasm-logger",
+ "web-sys",
+ "wee_alloc",
+]
+
+[[package]]
 name = "app-legacy-play"
 version = "0.1.0"
 dependencies = [

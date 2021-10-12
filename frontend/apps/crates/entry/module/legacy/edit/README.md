@@ -1,0 +1,1 @@
+Just a stub... legacy modules can't be edited
