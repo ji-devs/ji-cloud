@@ -1,7 +1,9 @@
 use std::{collections::HashSet, sync::Mutex};
 
 use chrono::{Duration, Utc};
-use core::settings::{EmailClientSettings, GoogleCloudStorageSettings, RuntimeSettings};
+use core::settings::{
+    EmailClientSettings, GoogleCloudStorageSettings, JwkAudiences, RuntimeSettings,
+};
 use ji_cloud_api::http::Application;
 use rand::Rng;
 use shared::config::RemoteTarget;
@@ -152,7 +154,11 @@ pub async fn initialize_server_and_get_db(
     let _ = dotenv::dotenv().ok();
 
     log_init();
-    let jwk_verifier = ji_cloud_api::jwk::create_verifier("".to_string());
+    let jwk_verifier = ji_cloud_api::jwk::create_verifier(JwkAudiences {
+        oauth_client: "".to_string(),
+        api: "".to_string(),
+        media_watch: "".to_string(),
+    });
 
     let db_name = DB_URL_MANAGER.create().await.expect("failed to create db");
 
@@ -204,6 +210,8 @@ pub async fn initialize_server_and_get_db(
         None,
         jwk_verifier,
         mail,
+        None,
+        None,
     )
     .expect("failed to initialize server");
 

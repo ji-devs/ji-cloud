@@ -90,6 +90,24 @@ impl RemoteTarget {
         }
     }
 
+    pub fn media_watch_assigned_url(&self) -> Option<&'static str> {
+        match self {
+            Self::Local => None,
+            Self::Sandbox => {
+                Some("https://ji-cloud-api-media-watch-sandbox-wlv5av7voq-ew.a.run.app")
+            }
+            Self::Release => Some("https://ji-cloud-api-media-watch-zkhkelxlzq-ew.a.run.app"),
+        }
+    }
+
+    pub fn api_assigned_url(&self) -> String {
+        match self {
+            Self::Local => env_var("LOCAL_API_URL").unwrap_or("http://localhost:8080".to_string()),
+            Self::Sandbox => "https://ji-cloud-api-sandbox-wlv5av7voq-ew.a.run.app".to_string(),
+            Self::Release => "https://ji-cloud-api-zkhkelxlzq-ew.a.run.app".to_string(),
+        }
+    }
+
     pub fn api_url(&self) -> String {
         match self {
             Self::Local => env_var("LOCAL_API_URL").unwrap_or("http://localhost:8080".to_string()),
