@@ -37,8 +37,8 @@ pub fn navigate_to_publish(state: Rc<State>) {
 }
 
 pub async fn update_jig(jig_id: &JigId, req: JigUpdateDraftDataRequest) -> Result<(), EmptyError> {
-    let path = endpoints::jig::Update::PATH.replace("{id}", &jig_id.0.to_string());
-    api_with_auth_empty::<EmptyError, _>(&path, endpoints::jig::Update::METHOD, Some(req)).await
+    let path = endpoints::jig::UpdateDraftData::PATH.replace("{id}", &jig_id.0.to_string());
+    api_with_auth_empty::<EmptyError, _>(&path, endpoints::jig::UpdateDraftData::METHOD, Some(req)).await
 }
 
 pub fn update_display_name(state: Rc<State>, value: String) {

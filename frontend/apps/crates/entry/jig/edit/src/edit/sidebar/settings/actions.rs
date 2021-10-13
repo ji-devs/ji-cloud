@@ -25,10 +25,10 @@ pub fn set_active_popup(state: Rc<State>, active_popup: ActiveSettingsPopup) {
 pub fn update_jig_settings(state: Rc<State>) {
     let req = state.get_jig_update_req();
 
-    let path = endpoints::jig::Update::PATH.replace("{id}", &state.jig_id.0.to_string());
+    let path = endpoints::jig::UpdateDraftData::PATH.replace("{id}", &state.jig_id.0.to_string());
 
     state.loader.load(async move {
-        match api_with_auth_empty::<EmptyError, _>(&path, endpoints::jig::Update::METHOD, Some(req)).await {
+        match api_with_auth_empty::<EmptyError, _>(&path, endpoints::jig::UpdateDraftData::METHOD, Some(req)).await {
             Ok(_) => {}
             Err(_) => {}
         };

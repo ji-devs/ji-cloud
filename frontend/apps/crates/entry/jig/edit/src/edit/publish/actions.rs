@@ -124,9 +124,9 @@ fn form_invalid(state: Rc<State>) -> bool {
 }
 
 async fn save_and_publish(state: Rc<State>) -> Result<(), ()> {
-    let path = jig::Update::PATH.replace("{id}", &state.jig.id.0.to_string());
+    let path = jig::UpdateDraftData::PATH.replace("{id}", &state.jig.id.0.to_string());
     let req = state.jig.to_jig_update_request();
-    api_with_auth_empty::<MetadataNotFound, JigUpdateDraftDataRequest>(&path, jig::Update::METHOD, Some(req))
+    api_with_auth_empty::<MetadataNotFound, JigUpdateDraftDataRequest>(&path, jig::UpdateDraftData::METHOD, Some(req))
         .await
         .map_err(|_| ())?;
 
