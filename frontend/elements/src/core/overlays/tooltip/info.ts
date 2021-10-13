@@ -34,6 +34,7 @@ export class _ extends LitElement {
                 padding: 0;
                 height: 24px;
                 width: 24px;
+                cursor: pointer;
             }
             .title {
               margin-top: 22px;
@@ -196,7 +197,7 @@ export class _ extends LitElement {
 function renderClose(onClose: () => any) {
     return html`
         <button class="close-button" @click=${onClose}>
-            <fa-icon icon="fa-regular fa-xmark"></fa-icon>
+            <fa-icon icon="fa-light fa-xmark"></fa-icon>
         </button>
     `
 }
