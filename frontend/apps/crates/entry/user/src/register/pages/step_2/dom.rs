@@ -120,6 +120,10 @@ impl Step2Page {
                         *state.marketing.borrow_mut() = evt.value();
                     }))
                 }),
+                html!("p", {
+                    .property("slot", "committed-to-privacy")
+                    .text(STR_PROTECTING_PRIVACY)
+                }),
                 html!("button-rect-icon", {
                     .property("slot", "submit")
                     .property("color", "red")

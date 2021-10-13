@@ -51,7 +51,7 @@ export class _ extends LitElement {
             <div class="bottom">
               <slot name="checkbox"> </slot>
 
-              <p></p>
+              <slot name="committed-to-privacy"></slot>
               <slot name="submit"></slot>
             </div>
       </base-page>

@@ -8,6 +8,8 @@ import "@elements/core/inputs/wrapper";
 const STR_SUBMIT = "One more step"
 const STR_TERMS_LABEL = "I have read the terms and conditions (legal text…)";
 const STR_MARKETING_LABEL = "I would like to receive educational resources (GDPR legal text….)";
+
+const STR_PROTECTING_PRIVACY = "Jewish Interactive (Ji) is committed to protecting and respecting your privacy, and we’ll only use your personal information to administer your account and to provide the products and services you requested from us.";
 const STR_LOCATION_LABEL = "Location*";
 const STR_PERSONA_LABEL = "I sign up as a...*";
 const STR_ORGANIZATION_LABEL = "School/Organization*";
@@ -44,6 +46,7 @@ export const Step2 = (props?:Partial<Args>) => {
             </input-wrapper>
             <input-checkbox slot="checkbox" label="${STR_TERMS_LABEL}"></input-checkbox>
             <input-checkbox slot="checkbox" label="${STR_MARKETING_LABEL}"></input-checkbox>
+            <p slot="committed-to-privacy">${STR_PROTECTING_PRIVACY}</p>
             <button-rect slot="submit" color="red" size="medium">${STR_SUBMIT}</button-rect> 
 
             <footer-register-login slot="footer"></footer-register-login>

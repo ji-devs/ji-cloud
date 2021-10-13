@@ -52,7 +52,8 @@ pub mod register {
         pub const STR_TERMS_LABEL_TWO:&'static str = " and ";
         pub const STR_TERMS_PRIVACY:&'static str = "privacy policy";
         pub const STR_LANGUAGE_LABEL:&'static str = "Language of communication*";
-        pub const STR_MARKETING_LABEL:&'static str = "I would like to receive educational resources (GDPR legal text….)";
+        pub const STR_MARKETING_LABEL:&'static str = "I would like to receive educational resources";
+        pub const STR_PROTECTING_PRIVACY:&'static str = "Jewish Interactive (Ji) is committed to protecting and respecting your privacy, and we’ll only use your personal information to administer your account and to provide the products and services you requested from us.";
 
         pub const STR_LANGUAGE_PLACEHOLDER:&'static str = "Select from the list";
         pub const STR_LANGUAGE_OPTIONS: &'static [&'static str] = &["English", "Hebrew", "Spanish", "French", "Russian"];
