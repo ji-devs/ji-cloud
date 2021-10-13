@@ -16,6 +16,9 @@ export class _ extends LitElement {
                 grid-template-rows: 50px minmax(0, 1fr);
                 height: 100%;
             }
+            .tabs-wrapper {
+                display: flex;
+            }
             .body {
                 background-color: #e9eff8;
                 padding-top: 40px;
@@ -30,7 +33,7 @@ export class _ extends LitElement {
 
     render() {
         return html`
-            <div>
+            <div class="tabs-wrapper">
                 <slot name="tabs"></slot>
             </div>
             <div class="body">
