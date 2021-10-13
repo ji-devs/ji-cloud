@@ -22,28 +22,37 @@ export class _ extends LitElement {
             .content {
                 display: flex;
                 flex-direction: column;
+                row-gap: 14px;
             }
 
-            .close {
+            .close-button {
                 align-self: flex-end;
+                background-color: transparent;
+                position: absolute;
+                font-size: 20px;
+                border: 0;
+                padding: 0;
+                height: 24px;
+                width: 24px;
             }
             .title {
-              font-size: 28px;
+              margin-top: 22px;
+              font-size: 18px;
               font-weight: 900;
               color: var(--dark-blue-4);
             }
             .body {
-              font-size: 18px;
-              font-weight: 300;
+              font-size: 14px;
               letter-spacing: -0.18px;
               color: #383838;
               width: 304px;
             }
             .noshow {
-              font-size: 16px;
+              font-size: 13px;
               font-weight: 500;
               color: var(--main-blue);
               cursor: pointer;
+              align-self: start;
             }
             `
         ];
@@ -185,7 +194,11 @@ export class _ extends LitElement {
 }
 
 function renderClose(onClose: () => any) {
-    return html`<button-icon class="close" icon="circle-x-blue" @click=${onClose}></button-icon>`
+    return html`
+        <button class="close-button" @click=${onClose}>
+            <fa-icon icon="fa-regular fa-xmark"></fa-icon>
+        </button>
+    `
 }
 
 function renderShowId(showId:string, onClose: () => any) {
