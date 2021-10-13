@@ -10,14 +10,17 @@ use super::src_manifest::{
     layer::LayerKind as SrcLayerKind,
     layer::PlayKind as SrcPlayKind,
     layer::ShowKind as SrcShowKind,
-
 };
-use shared::domain::jig::module::body::legacy::{
-    Manifest,
-    ModuleData,
-    design::*,
-    activity::*
+use shared::domain::jig::module::body::{
+    Transform,
+    legacy::{
+        Manifest,
+        ModuleData,
+        design::*,
+        activity::*
+    }
 };
+use utils::{math::mat4::Matrix4, prelude::*};
 
 impl SrcManifest {
     pub fn convert(self, base_id:&str) -> (Manifest, Vec<ModuleData>) {
@@ -104,19 +107,17 @@ impl SrcSlide {
 
 fn convert_design(layers: Vec<SrcLayer>) -> Design {
     let mut stickers: Vec<Sticker> = Vec::new();
-    let mut bg:Option<String> = None;
+    let mut bgs:Vec<String> = Vec::new();
    
     for layer in layers {
         match layer.kind {
             SrcLayerKind::Background => {
-                bg = Some(layer.filename.unwrap());
+                bgs.push(layer.filename.unwrap());
             },
             SrcLayerKind::Image | SrcLayerKind::Animation => {
-                let sticker = Image {
+                let sticker = Sprite { 
                     src: layer.filename.unwrap(),
-                    width: layer.width,
-                    height: layer.height,
-                    transform: layer.transform,
+                    transform_matrix: convert_transform(layer.transform),
                     show_kind: match layer.show_kind {
                         SrcShowKind::ShowOnLoad => ShowKind::ShowOnLoad,
                         SrcShowKind::HideOnTap => ShowKind::HideOnTap,
@@ -124,14 +125,14 @@ fn convert_design(layers: Vec<SrcLayer>) -> Design {
                     }
                 };
 
-                stickers.push(Sticker::Image(sticker));
+                stickers.push(Sticker::Sprite(sticker));
             },
             SrcLayerKind::Text => {
                 let sticker = Text {
                     html: layer.html.unwrap(),
                     width: layer.width,
                     height: layer.height,
-                    transform: layer.transform,
+                    transform_matrix: convert_transform(layer.transform),
                     show_kind: match layer.show_kind {
                         SrcShowKind::ShowOnLoad => ShowKind::ShowOnLoad,
                         SrcShowKind::HideOnTap => ShowKind::HideOnTap,
@@ -144,36 +145,30 @@ fn convert_design(layers: Vec<SrcLayer>) -> Design {
         }
     }
     Design {
-        bg,
+        bgs,
         stickers
     }
 }
 
-/*
-#[derive(Serialize, Deserialize, Debug)]
-pub struct Design {
-    pub bg: Option<String>,
-    pub stickers: Vec<Sticker>,
-}
+fn convert_transform(orig: [f64;6]) -> [f64;16] {
 
-#[derive(Serialize, Deserialize, Debug)]
-pub struct Sticker {
-    pub src: String,
-    pub width: f64,
-    pub height: f64,
-    pub transform: [f64;6],
-    pub show_kind: ShowKind, 
-}
+    let scale_x = orig[0];
+    let scale_y = orig[3];
+    let skew_x = orig[2];
+    let skew_y = orig[1];
+    let translate_x = orig[4] / 1024.0;
+    let translate_y = orig[5] / 768.0;
 
-#[repr(u8)]
-#[derive(Serialize_repr, Deserialize_repr, PartialEq, Debug, Clone, Copy)]
-pub enum ShowKind {
-    ShowOnLoad,
-    HideOnTap,
-    ShowOnTap,
-}
-*/
+    let mut m = Matrix4::identity();
 
+    m.translate(&[translate_x, translate_y, 0.0]);
+    m.scale(&[scale_x, scale_y, 1.0]);
+    m.skew_x(skew_x);
+    m.skew_y(skew_y);
+
+
+    m.values()
+}
 
 impl SrcActivity {
     pub fn convert_question(self) -> Question {

@@ -339,6 +339,120 @@ impl StepExt for () {
     }
 }
 
+/// Theme choice, either jig or override
+#[derive(Clone, Copy, Eq, PartialEq, Serialize, Deserialize, Debug)]
+pub enum ThemeChoice {
+    /// Use the jig's theme
+    Jig,
+
+    /// Override it with a per-module choice
+    Override(ThemeId),
+}
+
+impl Default for ThemeChoice {
+    fn default() -> Self {
+        Self::Jig
+    }
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug, Eq, PartialEq)]
+/// Audio
+pub struct Audio {
+    /// The Audio Id
+    pub id: AudioId,
+    /// The Media Library
+    pub lib: MediaLibrary,
+}
+
+/// Instructions for a module.
+#[derive(Clone, Default, Serialize, Deserialize, Debug)]
+pub struct Instructions {
+    /// Text displayed in banner
+    pub text: Option<String>,
+
+    /// Audio played on module start
+    pub audio: Option<Audio>,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+/// Background
+pub enum Background {
+    /// Color
+    Color(Option<rgb::RGBA8>),
+    /// Any other image
+    Image(Image),
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
+/// Images need id and lib
+pub struct Image {
+    /// The Image Id
+    pub id: ImageId,
+    /// The MediaLibrary
+    pub lib: MediaLibrary,
+}
+
+#[derive(Clone, Default, Serialize, Deserialize, Debug, PartialEq)]
+/// Vector of 2 floats
+pub struct Vec2(pub [f64; 2]);
+
+impl From<(f64, f64)> for Vec2 {
+    fn from((x, y): (f64, f64)) -> Self {
+        Self([x, y])
+    }
+}
+
+impl From<Vec2> for (f64, f64) {
+    fn from(v: Vec2) -> Self {
+        (v.0[0], v.0[1])
+    }
+}
+
+#[derive(Clone, Default, Serialize, Deserialize, Debug, PartialEq)]
+/// Vector of 3 floats
+pub struct Vec3(pub [f64; 3]);
+
+impl From<(f64, f64, f64)> for Vec3 {
+    fn from((x, y, z): (f64, f64, f64)) -> Self {
+        Self([x, y, z])
+    }
+}
+
+impl From<Vec3> for (f64, f64, f64) {
+    fn from(v: Vec3) -> Self {
+        (v.0[0], v.0[1], v.0[2])
+    }
+}
+
+#[derive(Clone, Default, Serialize, Deserialize, Debug, PartialEq)]
+/// Vector of 4 floats, also used as a Quaternion
+pub struct Vec4(pub [f64; 4]);
+
+impl From<(f64, f64, f64, f64)> for Vec4 {
+    fn from((x, y, z, w): (f64, f64, f64, f64)) -> Self {
+        Self([x, y, z, w])
+    }
+}
+
+impl From<Vec4> for (f64, f64, f64, f64) {
+    fn from(v: Vec4) -> Self {
+        (v.0[0], v.0[1], v.0[2], v.0[3])
+    }
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
+/// Visual Transform
+pub struct Transform {
+    /// Translation
+    pub translation: Vec3,
+    /// Rotation Quaternion
+    pub rotation: Vec4,
+    /// Scale for each axis
+    pub scale: Vec3,
+    /// Origin
+    pub origin: Vec3,
+}
+
 /// Theme Ids. Used in various modules
 /// See the frontend extension trait for more info
 #[derive(Clone, Copy, Eq, PartialEq, Serialize, Deserialize, Debug)]
@@ -455,118 +569,4 @@ impl Default for ThemeId {
     fn default() -> Self {
         Self::Blank
     }
-}
-
-/// Theme choice, either jig or override
-#[derive(Clone, Copy, Eq, PartialEq, Serialize, Deserialize, Debug)]
-pub enum ThemeChoice {
-    /// Use the jig's theme
-    Jig,
-
-    /// Override it with a per-module choice
-    Override(ThemeId),
-}
-
-impl Default for ThemeChoice {
-    fn default() -> Self {
-        Self::Jig
-    }
-}
-
-#[derive(Clone, Serialize, Deserialize, Debug, Eq, PartialEq)]
-/// Audio
-pub struct Audio {
-    /// The Audio Id
-    pub id: AudioId,
-    /// The Media Library
-    pub lib: MediaLibrary,
-}
-
-/// Instructions for a module.
-#[derive(Clone, Default, Serialize, Deserialize, Debug)]
-pub struct Instructions {
-    /// Text displayed in banner
-    pub text: Option<String>,
-
-    /// Audio played on module start
-    pub audio: Option<Audio>,
-}
-
-#[derive(Clone, Serialize, Deserialize, Debug)]
-/// Background
-pub enum Background {
-    /// Color
-    Color(Option<rgb::RGBA8>),
-    /// Any other image
-    Image(Image),
-}
-
-#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
-/// Images need id and lib
-pub struct Image {
-    /// The Image Id
-    pub id: ImageId,
-    /// The MediaLibrary
-    pub lib: MediaLibrary,
-}
-
-#[derive(Clone, Default, Serialize, Deserialize, Debug, PartialEq)]
-/// Vector of 2 floats
-pub struct Vec2(pub [f64; 2]);
-
-impl From<(f64, f64)> for Vec2 {
-    fn from((x, y): (f64, f64)) -> Self {
-        Self([x, y])
-    }
-}
-
-impl From<Vec2> for (f64, f64) {
-    fn from(v: Vec2) -> Self {
-        (v.0[0], v.0[1])
-    }
-}
-
-#[derive(Clone, Default, Serialize, Deserialize, Debug, PartialEq)]
-/// Vector of 3 floats
-pub struct Vec3(pub [f64; 3]);
-
-impl From<(f64, f64, f64)> for Vec3 {
-    fn from((x, y, z): (f64, f64, f64)) -> Self {
-        Self([x, y, z])
-    }
-}
-
-impl From<Vec3> for (f64, f64, f64) {
-    fn from(v: Vec3) -> Self {
-        (v.0[0], v.0[1], v.0[2])
-    }
-}
-
-#[derive(Clone, Default, Serialize, Deserialize, Debug, PartialEq)]
-/// Vector of 4 floats, also used as a Quaternion
-pub struct Vec4(pub [f64; 4]);
-
-impl From<(f64, f64, f64, f64)> for Vec4 {
-    fn from((x, y, z, w): (f64, f64, f64, f64)) -> Self {
-        Self([x, y, z, w])
-    }
-}
-
-impl From<Vec4> for (f64, f64, f64, f64) {
-    fn from(v: Vec4) -> Self {
-        (v.0[0], v.0[1], v.0[2], v.0[3])
-    }
-}
-
-#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
-/// Visual Transform
-pub struct Transform {
-    /// Translation
-    pub translation: Vec3,
-    /// Rotation Quaternion
-    pub rotation: Vec4,
-    /// Scale for each axis
-    pub scale: Vec3,
-    /// Origin
-    pub origin: Vec3,
 }

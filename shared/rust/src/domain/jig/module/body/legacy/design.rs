@@ -1,12 +1,12 @@
 pub use super::*;
+use crate::domain::jig::module::body::Transform;
 use serde::{Deserialize, Serialize};
 use serde_repr::*;
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct Design {
     /// Background layer
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub bg: Option<String>,
+    pub bgs: Vec<String>,
 
     /// Stickers layer
     pub stickers: Vec<Sticker>,
@@ -14,18 +14,16 @@ pub struct Design {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum Sticker {
-    /// images
-    Image(Image),
+    /// sprites
+    Sprite(Sprite),
     /// text
     Text(Text),
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Image {
+pub struct Sprite {
     pub src: String,
-    pub width: f64,
-    pub height: f64,
-    pub transform: [f64; 6],
+    pub transform_matrix: [f64; 16],
     pub show_kind: ShowKind,
 }
 
@@ -34,7 +32,7 @@ pub struct Text {
     pub html: String,
     pub width: f64,
     pub height: f64,
-    pub transform: [f64; 6],
+    pub transform_matrix: [f64; 16],
     pub show_kind: ShowKind,
 }
 

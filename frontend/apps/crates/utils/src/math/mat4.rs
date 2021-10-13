@@ -1,6 +1,7 @@
 use std::ops::{Mul, MulAssign, Deref, DerefMut};
 use std::convert::{AsRef, TryInto};
 use crate::unwrap::UnwrapJiExt;
+use crate::resize::ResizeInfo;
 
 #[derive(thiserror::Error, Debug)]
 pub enum MatrixError {
@@ -20,10 +21,22 @@ const MATRIX_IDENTITY:[f64;16] = [
 ];
 
 impl Matrix4 {
+    pub fn new_direct(values: [f64;16]) -> Self {
+        Self (values)
+    }
     pub fn identity() -> Self {
         MATRIX_IDENTITY.as_ref().into()
     }
 
+    pub fn denormalize(&mut self, resize_info: &ResizeInfo) {
+        let values = &mut self.0;
+
+        let (tx, ty) = resize_info.get_pos_denormalized(values[12], values[13]);
+
+        values[12] = tx; 
+        values[13] = ty; 
+
+    }
     pub fn as_matrix_string(&self) -> String {
         let mat = self;
 
@@ -96,6 +109,10 @@ impl Matrix4 {
         values[13] = translation[1] + oy - (out1 * ox + out5 * oy + out9 * oz);
         values[14] = translation[2] + oz - (out2 * ox + out6 * oy + out10 * oz);
         values[15] = 1.0;
+    }
+
+    pub fn values(&self) -> [f64;16] {
+        self.0
     }
 
     pub fn mul_assign(&mut self, other:&Self) {
@@ -205,6 +222,16 @@ impl Matrix4 {
         values[0] = scale[0];
         values[5] = scale[1];
         values[10] = scale[2];
+    }
+
+    // https://stackoverflow.com/questions/13206220/3d-skew-transformation-matrix-along-one-coordinate-axis
+    pub fn skew_x(&mut self, rad:f64) {
+        let values = &mut self.0;
+        values[4] = rad.tan();
+    }
+    pub fn skew_y(&mut self, rad:f64) {
+        let values = &mut self.0;
+        values[1] = rad.tan();
     }
 
     //translation, rotation, scale
