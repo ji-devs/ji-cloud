@@ -16,7 +16,7 @@ impl ThemeSelector {
     pub fn set_jig_theme_id(&self, theme_id: ThemeId) {
         self.jig_theme_id.set_neq(theme_id);
 
-        let path = endpoints::jig::Update::PATH.replace("{id}", &self.jig_id.0.to_string());
+        let path = endpoints::jig::UpdateDraftData::PATH.replace("{id}", &self.jig_id.0.to_string());
 
         let req = JigUpdateDraftDataRequest {
             theme: Some(theme_id),
