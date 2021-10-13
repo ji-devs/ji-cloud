@@ -23,7 +23,6 @@ pub enum Route {
     Admin(AdminRoute),
     Home(HomeRoute),
     Jig(JigRoute),
-    Legacy(LegacyRoute),
     Module(ModuleRoute),
 	Dev(DevRoute),
 }
@@ -88,11 +87,6 @@ impl AdminRoute {
             }
         }
     }
-}
-
-#[derive(Debug, Clone)]
-pub enum LegacyRoute {
-    Play(StringId, Option<StringId>) 
 }
 
 #[derive(Debug, Clone)]
@@ -290,9 +284,8 @@ impl Route {
                     search,
                 ))
             },
-            ["legacy", "play", jig_id] => Self::Legacy(LegacyRoute::Play(jig_id.to_string(), None)),
-            ["legacy", "play", jig_id, module_id] => Self::Legacy(LegacyRoute::Play(jig_id.to_string(), Some(module_id.to_string()))),
-            ["module", kind, "edit", "debug"] => {
+
+            ["module", kind, "edit", "debug"] | ["module", kind, "edit", "debug", "debug"] => {
                 Self::Module(ModuleRoute::Edit(
                         ModuleKind::from_str(kind).expect_ji("unknown module kind!"), 
                         JigId(Uuid::from_u128(0)),
@@ -306,7 +299,7 @@ impl Route {
                         ModuleId(Uuid::from_str(module_id).unwrap_ji()),
                 ))
             },
-            ["module", kind, "play", "debug"] => {
+            ["module", kind, "play", "debug"] | ["module", kind, "play", "debug", "debug"] => {
                 Self::Module(ModuleRoute::Play(
                         ModuleKind::from_str(kind).expect_ji("unknown module kind!"), 
                         JigId(Uuid::from_u128(0)),
@@ -428,17 +421,6 @@ impl From<&Route> for String {
                             format!("/jig/play/{}/{}?{}", jig_id.0.to_string(), module_id.0.to_string(), query)
                         } else {
                             format!("/jig/play/{}?{}", jig_id.0.to_string(), query)
-                        }
-                    }
-                }
-            },
-            Route::Legacy(route) => {
-                match route {
-                    LegacyRoute::Play(jig_id, module_id) => {
-                        if let Some(module_id) = module_id {
-                            format!("/legacy/play/{}/{}", jig_id, module_id)
-                        } else {
-                            format!("/legacy/play/{}", jig_id)
                         }
                     }
                 }
