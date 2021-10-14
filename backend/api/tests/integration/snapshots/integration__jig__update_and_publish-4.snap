@@ -17,7 +17,10 @@ expression: body
     "affiliations": [],
     "goals": [],
     "language": "en-us",
-    "categories": [],
+    "categories": [
+      "7fe19326-e883-11ea-93f0-5343493c17c4",
+      "81c4796a-e883-11ea-93f0-df2484ab6b11"
+    ],
     "additionalResources": [],
     "description": "asdasdasd",
     "lastEdited": "[last_edited]",

@@ -601,25 +601,25 @@ where id = $1
     .await?;
 
     if let Some(goals) = goals {
-        super::recycle_metadata(&mut txn, "jig_data", id.0, goals)
+        super::recycle_metadata(&mut txn, "jig_data", draft_id, goals)
             .await
             .map_err(super::meta::handle_metadata_err)?;
     }
 
     if let Some(categories) = categories {
-        super::recycle_metadata(&mut txn, "jig_data", id.0, categories)
+        super::recycle_metadata(&mut txn, "jig_data", draft_id, categories)
             .await
             .map_err(super::meta::handle_metadata_err)?;
     }
 
     if let Some(affiliations) = affiliations {
-        super::recycle_metadata(&mut txn, "jig_data", id.0, affiliations)
+        super::recycle_metadata(&mut txn, "jig_data", draft_id, affiliations)
             .await
             .map_err(super::meta::handle_metadata_err)?;
     }
 
     if let Some(age_ranges) = age_ranges {
-        super::recycle_metadata(&mut txn, "jig_data", id.0, age_ranges)
+        super::recycle_metadata(&mut txn, "jig_data", draft_id, age_ranges)
             .await
             .map_err(super::meta::handle_metadata_err)?;
     }

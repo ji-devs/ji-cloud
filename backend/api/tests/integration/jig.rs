@@ -352,7 +352,11 @@ async fn count() -> anyhow::Result<()> {
 
 #[actix_rt::test]
 async fn update_and_publish() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Jig], &[]).await;
+    let app = initialize_server(
+        &[Fixture::User, Fixture::Jig, Fixture::CategoryOrdering],
+        &[],
+    )
+    .await;
 
     let port = app.port();
 
@@ -379,7 +383,8 @@ async fn update_and_publish() -> anyhow::Result<()> {
         ))
         .json(&json!({
             "description": "asdasdasd",
-            "language": "en-us"
+            "language": "en-us",
+            "categories":["7fe19326-e883-11ea-93f0-5343493c17c4", "81c4796a-e883-11ea-93f0-df2484ab6b11"]
         }))
         .login()
         .send()
@@ -422,7 +427,7 @@ async fn update_and_publish() -> anyhow::Result<()> {
         }
     );
 
-    let resp = client
+    let _resp = client
         .put(&format!(
             "http://0.0.0.0:{}/v1/jig/3a71522a-cd77-11eb-8dc1-af3e35f7c743/draft/publish",
             port
