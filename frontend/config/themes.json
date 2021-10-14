@@ -2085,7 +2085,8 @@
             "en": "Theater"
         },
         "fontFamilies": [
-            "'Alef-Heb', 'BerkshireSwash'"
+            "'Alef-Heb', 'BerkshireSwash'",
+            "'Shesek - Regular', 'Caveat - Medium'"
         ],
         "colors": ["#0e2038", "#fdfbee","#fdfbee"],
         "textEditor": {
