@@ -4,8 +4,8 @@ import "@elements/entry/user/_common/footer/contact";
 import "@elements/entry/user/email/buttons/email-send";
 import "@elements/entry/user/_common/base-page";
 
-const STR_TITLE = "We Just Sent You an Email";
-const STR_SUBTITLE = "Open the email and click on the Verification button";
+const STR_TITLE = "We just sent you an email";
+const STR_SUBTITLE = "Please open the email and click on the Verification button. If you cannot see the email in your inbox, check your promotion or spam folders.";
 const STR_SUBSUBTITLE = "It may have been filtered into the promotion or spam folders";
 
 @customElement("page-email-send")
