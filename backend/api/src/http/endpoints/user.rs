@@ -474,7 +474,6 @@ async fn update_user_email(
     claims: TokenUser,
     req: Json<UpdateUserEmailRequest>,
 ) -> Result<HttpResponse, error::Register> {
-    println!("in update user email");
     // add authorized user to get user id
     let req = req.into_inner();
 
@@ -499,27 +498,23 @@ async fn update_user_email(
     match (exists_basic, exists_google) {
         (true, _) => {
             txn.rollback().await?;
-            println!("taken basic");
             return Err(error::Email::TakenBasic.into());
         }
         (false, true) => {
             txn.rollback().await?;
-            println!("taken google");
             return Err(error::Email::TakenGoogle.into());
         }
         (false, false) => (), // do nothing
     }
 
-    // 1. Email is saved - this needs to be an update
-    sqlx::query!(
-        "update user_auth_basic set email = $2::text where user_id = $1",
-        claims.0.user_id,
-        &req.email,
-    )
-    .execute(&mut txn)
-    .await?;
-
-    println!("success?");
+    // 1. Email is saved - move this to verify_update_email route
+    // sqlx::query!(
+    //     "update user_auth_basic set email = $2::text where user_id = $1",
+    //     claims.0.user_id,
+    //     &req.email,
+    // )
+    // .execute(&mut txn)
+    // .await?;
 
     // 2. Send verification email with token
     send_verification_email(
@@ -545,6 +540,130 @@ fn validate_patch_profile_req(
             Err(error::UserUpdate::Username(error::Username::Empty))
         }
         _ => Ok(()),
+    }
+}
+
+/// Verify emails
+async fn verify_update_email(
+    config: Data<RuntimeSettings>,
+    mail: ServiceData<mail::Client>,
+    db: Data<PgPool>,
+    req: Json<<VerifyEmail as ApiEndpoint>::Req>,
+) -> Result<HttpResponse, error::VerifyEmail> {
+    let req = req.into_inner();
+
+    match req {
+        VerifyEmailRequest::Resend { email } => {
+            let mut txn = db.begin().await?;
+
+            // todo: make this more future proof and exhaustive.
+
+            let user = sqlx::query!(
+                // this resends to the old email. not good
+                r#"
+select user_id
+from user_auth_basic
+where
+    email = $1::text and
+    not exists(select 1 from user_email where email = $1)
+"#,
+                email
+            )
+                .fetch_optional(&mut txn)
+                .await?;
+
+            let user = match user {
+                Some(user) => user,
+                None => return Ok(HttpResponse::NoContent().into()),
+            };
+
+            // make sure they can't use the old link anymore
+            db::session::clear_any(&mut txn, user.user_id, SessionMask::VERIFY_EMAIL).await?;
+
+            send_verification_email(
+                &mut txn,
+                user.user_id,
+                email,
+                &mail,
+                &config.remote_target().pages_url(),
+            )
+                .await
+                .map_err(|it| match it {
+                    error::Service::InternalServerError(it) => {
+                        error::VerifyEmail::InternalServerError(it)
+                    }
+                    error::Service::DisabledService(it) => {
+                        error::ServiceSession::DisabledService(it).into()
+                    }
+                })?;
+
+            txn.commit().await?;
+
+            Ok(HttpResponse::NoContent().into())
+        }
+
+        VerifyEmailRequest::Verify { token } => {
+            let mut txn = db.begin().await?;
+
+            // todo: make this more future proof and exhaustive.
+
+            let user = sqlx::query!(
+                r#"
+insert into user_email (user_id, email)
+select session.user_id, user_auth_basic.email
+from session
+inner join user_auth_basic on user_auth_basic.user_id = session.user_id
+where
+    session.token = $1 and
+    session.expires_at > now() and
+    (session.scope_mask & $2) = $2
+returning user_id
+"#,
+                token,
+                SessionMask::VERIFY_EMAIL.bits(),
+            )
+                .fetch_optional(&mut txn) // Result<Option<UserId>, Error>
+                .await
+                .map_err(|err| match err {
+                    sqlx::Error::Database(err)
+                    if err.downcast_ref::<PgDatabaseError>().constraint()
+                        == Some("user_email_email_key") =>
+                        {
+                            error::VerifyEmail::Email(error::Email::TakenBasic)
+                        }
+                    err => err.into(),
+                })?
+                .ok_or(error::VerifyEmail::ServiceSession(
+                    error::ServiceSession::Unauthorized,
+                ))?;
+
+            // make sure they can't use the link, now that they're verified.
+            db::session::clear_any(&mut txn, user.user_id, SessionMask::VERIFY_EMAIL).await?;
+
+            let login_ttl = config
+                .login_token_valid_duration
+                .unwrap_or(Duration::weeks(2));
+
+            let valid_until = Utc::now() + Duration::hours(1);
+
+            let session = db::session::create(
+                &mut txn,
+                user.user_id,
+                Some(&valid_until),
+                SessionMask::PUT_PROFILE,
+                None,
+            )
+                .await?;
+
+            txn.commit().await?;
+
+            let (csrf, cookie) =
+                create_auth_token(&config.token_secret, config.is_local(), login_ttl, &session)?;
+
+            Ok(HttpResponse::Created()
+                .cookie(cookie)
+                .json(NewSessionResponse { csrf }))
+        }
     }
 }
 
