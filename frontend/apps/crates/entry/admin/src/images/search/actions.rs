@@ -14,7 +14,7 @@ pub fn search(state: Rc<State>, query: ImageSearchQuery) {
     state.loader.load(clone!(state => async move {
         //update the address bar
         let route = Route::Admin(AdminRoute::ImageSearch(Some(query.clone())));
-        route.replace_state();
+        route.push_state();
 
         //search
         match api_with_auth::<ImageSearchResponse, EmptyError, _>(&endpoints::image::Search::PATH, endpoints::image::Search::METHOD, Some(query)).await {

@@ -141,10 +141,10 @@ impl Route {
         location.set_href(&s).unwrap_ji();
     }
 
-    pub fn replace_state(self) {
+    pub fn push_state(self) {
         let history = web_sys::window().unwrap_ji().history().unwrap_ji();
         let url:String = self.into();
-        let _ = history.replace_state_with_url(&JsValue::NULL, "", Some(&url));
+        let _ = history.push_state_with_url(&JsValue::NULL, "", Some(&url));
     }
 
 	pub fn to_string(&self) -> String {

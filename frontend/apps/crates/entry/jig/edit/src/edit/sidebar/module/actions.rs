@@ -37,14 +37,7 @@ pub fn edit(state: Rc<State>) {
         state.sidebar.collapsed.set(true);
 
         let jig_id = state.sidebar.jig.id;
-        let url: String =
-            Route::Jig(JigRoute::Edit(jig_id, JigEditRoute::Module(module_id))).into();
-        log::info!("{}", url);
-
-        /* this will cause a full refresh - but preserves history
-        * see the .future in EditPage too
-        dominator::routing::go_to_url(&url);
-        */
+        Route::push_state(Route::Jig(JigRoute::Edit(jig_id, JigEditRoute::Module(module_id))));
     }
 }
 

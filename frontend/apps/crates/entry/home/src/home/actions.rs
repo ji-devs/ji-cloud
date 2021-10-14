@@ -87,7 +87,7 @@ async fn fetch_profile(state: Rc<State>) {
 async fn search_async(state: Rc<State>) {
     let req = state.search_selected.to_search_request();
 
-    Route::Home(HomeRoute::Search(Some(req.clone()))).replace_state();
+    Route::Home(HomeRoute::Search(Some(req.clone()))).push_state();
 
     let query = req.q.to_owned();
     match api_no_auth::<JigSearchResponse, EmptyError, JigSearchQuery>(jig::Search::PATH, jig::Search::METHOD, Some(req)).await {
