@@ -25,13 +25,10 @@ async fn batch_update(
         return Err(error::ServiceSession::Unauthorized);
     }
 
-    let claims: IdentityClaims = jwks
+    let _claims: IdentityClaims = jwks
         .verify_iam_api_invoker_oauth(bearer_auth.token(), 3)
         .await?;
 
-    // check that claims are from the right target?
-
-    log::info!("{:#?}", claims);
     algolia_manager.spawn_cron_jobs().await?;
 
     Ok(HttpResponse::Ok().finish())
@@ -50,13 +47,10 @@ async fn media_clean(
         return Err(error::ServiceSession::Unauthorized);
     }
 
-    let claims: IdentityClaims = jwks
+    let _claims: IdentityClaims = jwks
         .verify_iam_api_invoker_oauth(bearer_auth.token(), 3)
         .await?;
 
-    // check that claims are from the right target?
-
-    log::info!("{:#?}", claims);
     media_upload_cleaner.spawn_cron_jobs().await?;
 
     Ok(HttpResponse::Ok().finish())

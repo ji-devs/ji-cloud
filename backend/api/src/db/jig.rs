@@ -311,7 +311,6 @@ from jig_data
 pub async fn get_by_ids(
     db: &PgPool,
     ids: &[Uuid],
-    privacy_level: PrivacyLevel,
     draft_or_live: DraftOrLive,
 ) -> sqlx::Result<Vec<JigResponse>> {
     let mut txn = db.begin().await?;
@@ -325,18 +324,15 @@ select jig.id                                       as "id!: JigId",
        (select given_name || ' '::text || family_name
         from user_profile
         where user_profile.user_id = author_id) as "author_name",
-       privacy_level                    as "privacy_level!: PrivacyLevel",
        live_id                                  as "live_id!",
        draft_id                                 as "draft_id!",
        published_at
-from jig, jig_data jd
+from jig 
          inner join unnest($1::uuid[])
     with ordinality t(id, ord) using (id)
-where (privacy_level = $2 or $2 is null and jig.id = jd.id)
 order by t.ord
     "#,
         ids,
-        privacy_level as i16,
     )
     .fetch_all(&mut txn)
     .await?;
@@ -388,7 +384,7 @@ from jig_data
     with ordinality t(id, ord) using (id)
 order by t.ord
 "#,
-        &jig_data_ids,
+        &jig_data_ids
     )
         .fetch_all(&mut txn).await?;
 

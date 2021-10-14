@@ -265,8 +265,7 @@ async fn search(
         .await?
         .ok_or_else(|| error::Service::DisabledService(ServiceKind::Algolia))?;
 
-    let jigs: Vec<_> =
-        db::jig::get_by_ids(db.as_ref(), &ids, PrivacyLevel::Public, DraftOrLive::Live).await?;
+    let jigs: Vec<_> = db::jig::get_by_ids(db.as_ref(), &ids, DraftOrLive::Live).await?;
 
     Ok(Json(JigSearchResponse {
         jigs,
