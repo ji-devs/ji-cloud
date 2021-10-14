@@ -47,9 +47,13 @@ pub fn delete(state: Rc<State>) {
     state.sidebar.loader.load(clone!(state => async move {
         if let Some(module) = &*state.module {
             let path = endpoints::jig::module::Delete::PATH
-                .replace("{id}",&state.sidebar.jig.id.0.to_string())
-                .replace("{module_id}",&module.id.0.to_string());
-            match api_with_auth_empty::<EmptyError, ()>(&path, endpoints::jig::module::Delete::METHOD, None).await {
+                .replace("{id}", &state.sidebar.jig.id.0.to_string());
+
+            let req = ModuleDeleteRequest {
+                id: StableOrUniqueId::Unique(module.id)
+            };
+
+            match api_with_auth_empty::<EmptyError, _>(&path, endpoints::jig::module::Delete::METHOD, Some(req)).await {
                 Ok(_) => {
                     state.sidebar.modules.lock_mut().remove(index);
                 },
