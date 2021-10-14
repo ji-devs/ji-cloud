@@ -81,6 +81,7 @@ pub enum PasswordStatus {
     EmptyPw,
     PwMismatch,
     PwWeak,
+    PwShort,
     ResetError,
     UnknownFirebase,
     Technical 
@@ -92,6 +93,7 @@ impl PasswordStatus {
             Self::EmptyPw => "supply a password!",
             Self::PwMismatch => "passwords don't match!",
             Self::PwWeak => "weak password!",
+            Self::PwShort => "Your password should be at least 6 characters.",
             Self::UnknownFirebase => "firebase error!",
             Self::ResetError => "unable to reset password!",
             Self::Technical => "technical error!",

@@ -28,8 +28,8 @@ pub fn register_email(state: Rc<State>) {
 
     let mut early_exit = false;
 
-    if state.password.strength.get() != PasswordStrength::Strong {
-        state.password.status.set(Some(PasswordStatus::PwWeak));
+    if state.password.value.borrow().len() < 6 {
+        state.password.status.set(Some(PasswordStatus::PwShort));
         early_exit = true;
     }
 
