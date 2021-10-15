@@ -208,8 +208,8 @@ impl Route {
                 if params_string.is_empty() {
                     Self::User(UserRoute::ContinueRegistration(None))
                 } else {
-                    let oauth_profile:Option<OAuthUserProfile> = serde_qs::from_str(&params_string).unwrap_ji();
-                    Self::User(UserRoute::ContinueRegistration(oauth_profile))
+                    let oauth_profile: OAuthUserProfile = serde_qs::from_str(&params_string).unwrap_ji();
+                    Self::User(UserRoute::ContinueRegistration(Some(oauth_profile)))
                 }
             },
             ["user", "send-email-confirmation", email] => Self::User(UserRoute::SendEmailConfirmation(email.to_string())),
