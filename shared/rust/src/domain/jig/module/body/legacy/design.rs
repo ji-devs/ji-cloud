@@ -1,5 +1,4 @@
 pub use super::*;
-use crate::domain::jig::module::body::Transform;
 use serde::{Deserialize, Serialize};
 use serde_repr::*;
 

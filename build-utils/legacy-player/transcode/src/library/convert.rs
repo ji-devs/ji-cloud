@@ -11,50 +11,64 @@ use super::src_manifest::{
     layer::PlayKind as SrcPlayKind,
     layer::ShowKind as SrcShowKind,
 };
-use shared::domain::jig::module::body::{
-    Transform,
-    legacy::{
-        Manifest,
-        ModuleData,
-        design::*,
-        activity::*
-    }
-};
+use shared::domain::jig::{JigCreateRequest, JigData, JigPlayerSettings, module::{ModuleCreateRequest, ModuleBody, body::{
+        Transform,
+        legacy::{
+            ModuleData,
+            slide::*,
+            design::*,
+            activity::*
+        }
+    }}};
+
 use utils::{math::mat4::Matrix4, prelude::*};
 
 impl SrcManifest {
-    pub fn convert(self, base_id:&str) -> (Manifest, Vec<ModuleData>) {
-        let src = self.structure;
 
-        let background_audio = if src.music_file == "" { None } else { Some(src.music_file) };
+    pub fn jig_req(&self) -> JigCreateRequest {
+        //let background_audio = if src.music_file == "" { None } else { Some(src.music_file) };
+        
+        // TODO- populate
+        JigCreateRequest { 
+            display_name: "".to_string(), 
+            goals: Vec::new(), 
+            age_ranges: Vec::new(), 
+            affiliations: Vec::new(), 
+            language: None, 
+            categories: Vec::new(), 
+            description: "".to_string(), 
+            default_player_settings: JigPlayerSettings::default()
+        }
+    }
 
-        let manifest = Manifest {
-            background_audio,
-            modules: src
-                .slides
-                .iter()
-                .map(|slide| slide.file_path.trim_matches('/').to_string())
-                .collect()
-        };
+    pub fn module_reqs(&self, game_id:&str) -> Vec<ModuleCreateRequest> {
+        self.structure
+            .slides
+            .iter()
+            .map(|slide| {
+                ModuleCreateRequest {
+                    body: ModuleBody::Legacy(
+                        ModuleData {
+                            game_id: game_id.to_string(),
+                            slide_id: slide.file_path.trim_matches('/').to_string()
+                        },
+                    )
+                }
+            })
+            .collect()
+    }
 
-
-        let slides = 
-            src
-                .slides
-                .into_iter()
-                .map(|src_slide| {
-                    src_slide.convert(base_id)
-                })
-                .collect();
-
-
-
-        (manifest, slides)
+    pub fn into_slides(self) -> Vec<Slide> {
+        self.structure
+            .slides
+            .into_iter()
+            .map(|slide| slide.convert())
+            .collect()
     }
 }
 
 impl SrcSlide {
-    pub fn convert(self, base_id: &str) -> ModuleData {
+    pub fn convert(self) -> Slide {
 
         let activities_len = self.activities.len();
         let layers_len = self.layers.len();
@@ -64,7 +78,6 @@ impl SrcSlide {
             panic!("{} is more than one activity and not ask a question?!", self.activities.len());
         }
 
-        let id = self.file_path.trim_matches('/').to_string();
         let image_full = strip_path(&self.image_full).to_string();
         let image_thumb = strip_path(&self.image_thumb).to_string();
 
@@ -94,11 +107,7 @@ impl SrcSlide {
 
         let design = convert_design(self.layers);
 
-        ModuleData {
-            base_id: base_id.to_string(),
-            id,
-            image_full,
-            image_thumb,
+        Slide {
             activity,
             design,
         }

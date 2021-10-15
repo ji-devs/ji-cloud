@@ -14,19 +14,13 @@ use super::styles;
 impl Base {
     pub fn render_design(self: Rc<Self>) -> Dom {
         html!("empty-fragment", {
-            .children(self.raw.design.bgs.iter().map(|src| {
-                let url = &path::legacy::layers_url(
-                    &self.raw.base_id,
-                    &self.raw.id,
-                    src 
-                );
-
+            .children(self.slide.design.bgs.iter().map(|src| {
                 html!("img", {
                     .class(&*styles::BG)
-                    .attribute("src", &url)
+                    .attribute("src", &self.layers_url(src))
                 })
             }))
-            .children(self.raw.design.stickers.iter().map(|sticker| {
+            .children(self.slide.design.stickers.iter().map(|sticker| {
                 match sticker {
                     Sticker::Sprite(sprite) => self.render_sprite(&sprite),
                     Sticker::Text(text) => {
@@ -41,13 +35,6 @@ impl Base {
     fn render_sprite(&self, sprite: &Sprite) -> Dom {
         let size = Mutable::new(None);
 
-
-        let url = &path::legacy::layers_url(
-            &self.raw.base_id,
-            &self.raw.id,
-            &sprite.src 
-        );
-
         let transform_matrix = Matrix4::new_direct(sprite.transform_matrix.clone());
         let transform_signal = resize_info_signal()
             .map(move |resize_info| {
@@ -57,7 +44,7 @@ impl Base {
             });
 
         html!("img" => web_sys:: HtmlImageElement, {
-            .attribute("src", &url)
+            .attribute("src", &self.layers_url(&sprite.src))
             .style("pointer-events", "none")
             .style("display", "block")
             .style("position", "absolute")

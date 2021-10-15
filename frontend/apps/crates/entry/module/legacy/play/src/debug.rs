@@ -12,30 +12,16 @@ use std::rc::Rc;
 use once_cell::sync::OnceCell;
 use utils::{prelude::*, colors::*};
 use uuid::Uuid;
-use shared::{
-    media::MediaLibrary,
-    domain::{
-        audio::AudioId, 
-        image::ImageId, 
-        jig::{
-            JigId, 
-            module::{
-                ModuleId, 
-                body::{
+use shared::{domain::{audio::AudioId, image::ImageId, jig::{JigId, module::{ModuleCreateRequest, ModuleId, ModuleBody, body::{
                     Image,
                     ThemeChoice,
                     Background, 
                     Instructions, Transform,
                     legacy::{
-                        Manifest,
                         ModuleData as RawData
                     },
                     _groups::design::{Backgrounds,Sprite, Sticker, Text, Trace,BaseContent }
-                }
-            }
-        }
-    }
-};
+                }}}}, media::MediaLibrary};
 use awsm_web::loaders::fetch::fetch_url;
 use components::stickers::{sprite::ext::*, text::ext::*};
 pub static SETTINGS:OnceCell<DebugSettings> = OnceCell::new();
@@ -61,28 +47,29 @@ impl DebugSettings {
 
 pub async fn init(jig_id: JigId, module_id: ModuleId) {
     if jig_id == JigId(Uuid::from_u128(0)) {
-        // http://localhost:4104/module/legacy/play/debug?example=web-stress-test&slide=0
-        let data = match utils::routes::get_param("example") {
-            Some(example_id) => {
-                let slide_index = utils::routes::get_param_index("slide").unwrap_or_default();
-                let url = utils::path::legacy::cdn_url(format!("{}/ji/manifest.json", example_id));
+        // http://localhost:4104/module/legacy/play/debug?game_id=web-stress-test&slide_index=0&example=true
+        let data = match utils::routes::get_param("game_id") {
+            Some(game_id) => {
+                let slide_index = utils::routes::get_param_index("slide_index").unwrap_or_default();
+                let url = utils::path::legacy_cdn_url(format!("{}/jigzi/requests/module-{}.json", game_id, slide_index));
 
-                let manifest:Manifest = fetch_url(&url)
+                let module_req:ModuleCreateRequest = fetch_url(&url)
                     .await
                     .unwrap_ji()
                     .json_from_str()
                     .await
                     .unwrap_ji();
 
-                
-                let url = utils::path::legacy::cdn_url(format!("{}/ji/module-{}.json", example_id, slide_index+1));
+                let slide_id = match module_req.body {
+                    ModuleBody::Legacy(legacy) => legacy.slide_id,
+                    _ => panic!("not a legacy module?!")
+                };
 
-                fetch_url(&url)
-                    .await
-                    .unwrap_ji()
-                    .json_from_str()
-                    .await
-                    .unwrap_ji()
+                RawData{
+                    game_id,
+                    slide_id
+                }
+                
             },
             None => {
                 RawData::default()
