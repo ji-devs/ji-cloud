@@ -4,12 +4,12 @@ use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::Mutable;
 use shared::domain::{
     category::{Category, CategoryId},
-    meta::{AgeRange, Goal, Affiliation},
+    meta::{Affiliation, AgeRange, Goal},
 };
 use utils::languages::{Language, JIG_LANGUAGES};
 
-use super::publish_jig::PublishJig;
 use super::super::state::State as JigEditState;
+use super::publish_jig::PublishJig;
 
 pub struct State {
     pub loader: AsyncLoader,
@@ -28,7 +28,7 @@ pub struct State {
 
 impl State {
     pub fn new(
-        jig: PublishJig, 
+        jig: PublishJig,
         categories: Vec<Category>,
         category_label_lookup: HashMap<CategoryId, String>,
         goals: Vec<Goal>,
@@ -47,7 +47,7 @@ impl State {
             submission_tried: Mutable::new(false),
             languages: JIG_LANGUAGES.clone(),
             show_public_popup: Mutable::new(false),
-            jig_edit_state
+            jig_edit_state,
         }
     }
 }

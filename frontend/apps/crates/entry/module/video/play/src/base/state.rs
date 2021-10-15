@@ -1,4 +1,5 @@
-use components::{audio::mixer::AudioMixer, module::_common::play::prelude::*};
+use components::module::_common::play::prelude::*;
+use futures_signals::signal::Mutable;
 use shared::domain::jig::{
     module::{
         body::{
@@ -12,7 +13,6 @@ use shared::domain::jig::{
 };
 use std::rc::Rc;
 use utils::prelude::*;
-use futures_signals::signal::Mutable;
 
 pub struct Base {
     pub jig_id: JigId,

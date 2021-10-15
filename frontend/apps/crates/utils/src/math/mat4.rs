@@ -1,28 +1,25 @@
-use std::ops::{Mul, MulAssign, Deref, DerefMut};
-use std::convert::{AsRef, TryInto};
-use crate::unwrap::UnwrapJiExt;
 use crate::resize::ResizeInfo;
+use crate::unwrap::UnwrapJiExt;
+use std::convert::{AsRef, TryInto};
+use std::ops::{Deref, DerefMut, Mul, MulAssign};
 
 #[derive(thiserror::Error, Debug)]
 pub enum MatrixError {
     #[error("cannot invert the matrix")]
-    Invert
+    Invert,
 }
 
 #[repr(C)]
 #[derive(PartialEq, Debug)]
-pub struct Matrix4 ([f64;16]);
+pub struct Matrix4([f64; 16]);
 
-const MATRIX_IDENTITY:[f64;16] = [
-    1.0,0.0,0.0,0.0,
-    0.0,1.0,0.0,0.0,
-    0.0,0.0,1.0,0.0,
-    0.0,0.0,0.0,1.0,
+const MATRIX_IDENTITY: [f64; 16] = [
+    1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,
 ];
 
 impl Matrix4 {
-    pub fn new_direct(values: [f64;16]) -> Self {
-        Self (values)
+    pub fn new_direct(values: [f64; 16]) -> Self {
+        Self(values)
     }
     pub fn identity() -> Self {
         MATRIX_IDENTITY.as_ref().into()
@@ -33,14 +30,14 @@ impl Matrix4 {
 
         let (tx, ty) = resize_info.get_pos_denormalized(values[12], values[13]);
 
-        values[12] = tx; 
-        values[13] = ty; 
-
+        values[12] = tx;
+        values[13] = ty;
     }
     pub fn as_matrix_string(&self) -> String {
         let mat = self;
 
-        format!("matrix3d({}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})",
+        format!(
+            "matrix3d({}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})",
             mat[0],
             mat[1],
             mat[2],
@@ -60,11 +57,17 @@ impl Matrix4 {
         )
     }
 
-    pub fn reset_from_trs_origin(&mut self, translation:&[f64], rotation:&[f64], scale:&[f64], origin:&[f64]) {
+    pub fn reset_from_trs_origin(
+        &mut self,
+        translation: &[f64],
+        rotation: &[f64],
+        scale: &[f64],
+        origin: &[f64],
+    ) {
         let values = &mut self.0;
         let x = rotation[0];
         let y = rotation[1];
-        let z = rotation[2]; 
+        let z = rotation[2];
         let w = rotation[3];
         let x2 = x + x;
         let y2 = y + y;
@@ -111,11 +114,11 @@ impl Matrix4 {
         values[15] = 1.0;
     }
 
-    pub fn values(&self) -> [f64;16] {
+    pub fn values(&self) -> [f64; 16] {
         self.0
     }
 
-    pub fn mul_assign(&mut self, other:&Self) {
+    pub fn mul_assign(&mut self, other: &Self) {
         *self *= other;
     }
     pub fn as_slice(&self) -> &[f64] {
@@ -126,17 +129,25 @@ impl Matrix4 {
         &mut self.0
     }
 
-    pub fn new( a:f64, b:f64, c:f64, d:f64,
-                e:f64, f:f64, g:f64, h:f64,  
-                i:f64, j:f64, k:f64, l:f64,
-                m:f64, n:f64, o:f64, p:f64,
-        ) -> Self {
-            Self([
-                a,b,c,d,
-                e,f,g,h,
-                i,j,k,l,
-                m,n,o,p,
-            ])
+    pub fn new(
+        a: f64,
+        b: f64,
+        c: f64,
+        d: f64,
+        e: f64,
+        f: f64,
+        g: f64,
+        h: f64,
+        i: f64,
+        j: f64,
+        k: f64,
+        l: f64,
+        m: f64,
+        n: f64,
+        o: f64,
+        p: f64,
+    ) -> Self {
+        Self([a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p])
     }
     pub fn reset(&mut self) {
         self.copy_from_slice(&MATRIX_IDENTITY);
@@ -148,12 +159,12 @@ impl Matrix4 {
         m
     }
 
-    pub fn reset_from_translation(&mut self, translation:&[f64]) {
+    pub fn reset_from_translation(&mut self, translation: &[f64]) {
         self.reset();
         self.translate(translation);
     }
 
-    pub fn translate(&mut self, translation:&[f64]) {
+    pub fn translate(&mut self, translation: &[f64]) {
         let values = &mut self.0;
         values[12] = translation[0];
         values[13] = translation[1];
@@ -166,11 +177,11 @@ impl Matrix4 {
         m.rotate(rotation);
         m
     }
-    pub fn reset_from_rotation(&mut self, rotation:&[f64]) {
+    pub fn reset_from_rotation(&mut self, rotation: &[f64]) {
         self.reset();
         self.rotate(rotation);
     }
-    pub fn rotate(&mut self, rotation:&[f64]) {
+    pub fn rotate(&mut self, rotation: &[f64]) {
         let values = &mut self.0;
         let x = rotation[0];
         let y = rotation[1];
@@ -207,17 +218,17 @@ impl Matrix4 {
     }
 
     //scale
-    pub fn new_from_scale(scale:&[f64]) -> Self {
+    pub fn new_from_scale(scale: &[f64]) -> Self {
         let mut m = Self::identity();
         m.scale(scale);
         m
     }
-    pub fn reset_from_scale(&mut self, scale:&[f64]) {
+    pub fn reset_from_scale(&mut self, scale: &[f64]) {
         self.reset();
         self.scale(scale);
     }
 
-    pub fn scale(&mut self, scale:&[f64]) {
+    pub fn scale(&mut self, scale: &[f64]) {
         let values = &mut self.0;
         values[0] = scale[0];
         values[5] = scale[1];
@@ -225,34 +236,39 @@ impl Matrix4 {
     }
 
     // https://stackoverflow.com/questions/13206220/3d-skew-transformation-matrix-along-one-coordinate-axis
-    pub fn skew_x(&mut self, rad:f64) {
+    pub fn skew_x(&mut self, rad: f64) {
         let values = &mut self.0;
         values[4] = rad.tan();
     }
-    pub fn skew_y(&mut self, rad:f64) {
+    pub fn skew_y(&mut self, rad: f64) {
         let values = &mut self.0;
         values[1] = rad.tan();
     }
 
     //translation, rotation, scale
-    pub fn new_from_trs(translation:&[f64], rotation:&[f64], scale:&[f64]) -> Self {
+    pub fn new_from_trs(translation: &[f64], rotation: &[f64], scale: &[f64]) -> Self {
         let mut m = Self::identity();
         m.set_trs(translation, rotation, scale);
         m
     }
-    pub fn new_from_trs_origin(translation:&[f64], rotation:&[f64], scale:&[f64], origin:&[f64]) -> Self {
+    pub fn new_from_trs_origin(
+        translation: &[f64],
+        rotation: &[f64],
+        scale: &[f64],
+        origin: &[f64],
+    ) -> Self {
         let mut m = Self::identity();
         Self::reset_from_trs_origin(&mut m, translation, rotation, scale, origin);
         m
     }
-    pub fn reset_from_trs(&mut self, translation:&[f64], rotation:&[f64], scale:&[f64]) {
+    pub fn reset_from_trs(&mut self, translation: &[f64], rotation: &[f64], scale: &[f64]) {
         self.reset();
         self.set_trs(translation, rotation, scale);
     }
-    pub fn set_trs(&mut self, translation:&[f64], rotation:&[f64], scale:&[f64]) {
+    pub fn set_trs(&mut self, translation: &[f64], rotation: &[f64], scale: &[f64]) {
         let values = &mut self.0;
         let x = rotation[0];
-        let y = rotation[1]; 
+        let y = rotation[1];
         let z = rotation[2];
         let w = rotation[3];
         let x2 = x + x;
@@ -288,27 +304,27 @@ impl Matrix4 {
         values[15] = 1.0;
     }
 
-    // arithmetic 
+    // arithmetic
 
     /// returns true if it was able to invert, false otherwise
     pub fn invert_mut(&mut self) -> Result<(), MatrixError> {
         let values = &mut self.0;
-        let a:&[f64] = values; 
-        let a00 = a[0]; 
-        let a01 = a[1]; 
-        let a02 = a[2]; 
+        let a: &[f64] = values;
+        let a00 = a[0];
+        let a01 = a[1];
+        let a02 = a[2];
         let a03 = a[3];
-        let a10 = a[4]; 
-        let a11 = a[5]; 
-        let a12 = a[6]; 
+        let a10 = a[4];
+        let a11 = a[5];
+        let a12 = a[6];
         let a13 = a[7];
-        let a20 = a[8]; 
-        let a21 = a[9]; 
-        let a22 = a[10]; 
+        let a20 = a[8];
+        let a21 = a[9];
+        let a22 = a[10];
         let a23 = a[11];
-        let a30 = a[12]; 
-        let a31 = a[13]; 
-        let a32 = a[14]; 
+        let a30 = a[12];
+        let a31 = a[13];
+        let a32 = a[14];
         let a33 = a[15];
         let b00 = a00 * a11 - a01 * a10;
         let b01 = a00 * a12 - a02 * a10;
@@ -353,24 +369,19 @@ impl Matrix4 {
         Ok(clone)
     }
 
-    pub fn transform_vec2(&self, v:&[f64]) -> [f64;2] {
-
+    pub fn transform_vec2(&self, v: &[f64]) -> [f64; 2] {
         let m = self.0;
 
         let x = v[0];
         let y = v[1];
-        [
-            m[0] * x + m[4] * y + m[12],
-            m[1] * x + m[5] * y + m[13]
-        ]
+        [m[0] * x + m[4] * y + m[12], m[1] * x + m[5] * y + m[13]]
     }
 
-    pub fn transform_vec3(&self, v:&[f64]) -> [f64;3] {
+    pub fn transform_vec3(&self, v: &[f64]) -> [f64; 3] {
         let m = self.0;
         let x = v[0];
         let y = v[1];
         let z = v[2];
-
 
         let w = m[3] * x + m[7] * y + m[11] * z + m[15];
         let w = if w == 0.0 { 1.0 } else { w };
@@ -380,17 +391,16 @@ impl Matrix4 {
             (m[2] * x + m[6] * y + m[10] * z + m[14]) / w,
         ]
     }
-
 }
 
 impl From<&[f64]> for Matrix4 {
-    fn from(values:&[f64]) -> Self {
-        let data:[f64;16] = values.try_into().unwrap_ji();
+    fn from(values: &[f64]) -> Self {
+        let data: [f64; 16] = values.try_into().unwrap_ji();
         Self(data)
     }
 }
 
-impl Deref for Matrix4 { 
+impl Deref for Matrix4 {
     type Target = [f64];
 
     fn deref(&self) -> &Self::Target {
@@ -415,7 +425,7 @@ impl AsRef<Matrix4> for Matrix4 {
         self
     }
 }
-impl <T: AsRef<Matrix4>> Mul<T> for Matrix4 {
+impl<T: AsRef<Matrix4>> Mul<T> for Matrix4 {
     type Output = Matrix4;
     fn mul(self, rhs: T) -> Self::Output {
         let mut clone = self.clone();
@@ -424,7 +434,7 @@ impl <T: AsRef<Matrix4>> Mul<T> for Matrix4 {
     }
 }
 
-impl <T: AsRef<Matrix4>> Mul<T> for &Matrix4 {
+impl<T: AsRef<Matrix4>> Mul<T> for &Matrix4 {
     type Output = Matrix4;
     fn mul(self, rhs: T) -> Self::Output {
         let mut clone = self.clone();
@@ -433,19 +443,18 @@ impl <T: AsRef<Matrix4>> Mul<T> for &Matrix4 {
     }
 }
 
-impl <T: AsRef<Matrix4>> MulAssign<T> for Matrix4 {
-
-    fn mul_assign(&mut self, other:T) {
+impl<T: AsRef<Matrix4>> MulAssign<T> for Matrix4 {
+    fn mul_assign(&mut self, other: T) {
         let values = &mut self.0;
-        let a:&[f64] = values; 
-        let b:&[f64] = other.as_ref().as_slice();
-        let a00 = a[0]; 
-        let a01 = a[1]; 
+        let a: &[f64] = values;
+        let b: &[f64] = other.as_ref().as_slice();
+        let a00 = a[0];
+        let a01 = a[1];
         let a02 = a[2];
         let a03 = a[3];
-        let a10 = a[4]; 
+        let a10 = a[4];
         let a11 = a[5];
-        let a12 = a[6]; 
+        let a12 = a[6];
         let a13 = a[7];
         let a20 = a[8];
         let a21 = a[9];
@@ -455,37 +464,41 @@ impl <T: AsRef<Matrix4>> MulAssign<T> for Matrix4 {
         let a31 = a[13];
         let a32 = a[14];
         let a33 = a[15];
-        let mut b0  = b[0];
+        let mut b0 = b[0];
         let mut b1 = b[1];
         let mut b2 = b[2];
         let mut b3 = b[3];
 
-        values[0] = b0*a00 + b1*a10 + b2*a20 + b3*a30;
-        values[1] = b0*a01 + b1*a11 + b2*a21 + b3*a31;
-        values[2] = b0*a02 + b1*a12 + b2*a22 + b3*a32;
-        values[3] = b0*a03 + b1*a13 + b2*a23 + b3*a33;
-        b0 = b[4]; b1 = b[5]; b2 = b[6]; b3 = b[7];
-        values[4] = b0*a00 + b1*a10 + b2*a20 + b3*a30;
-        values[5] = b0*a01 + b1*a11 + b2*a21 + b3*a31;
-        values[6] = b0*a02 + b1*a12 + b2*a22 + b3*a32;
-        values[7] = b0*a03 + b1*a13 + b2*a23 + b3*a33;
-        b0 = b[8]; b1 = b[9]; b2 = b[10]; b3 = b[11];
-        values[8] = b0*a00 + b1*a10 + b2*a20 + b3*a30;
-        values[9] = b0*a01 + b1*a11 + b2*a21 + b3*a31;
-        values[10] = b0*a02 + b1*a12 + b2*a22 + b3*a32;
-        values[11] = b0*a03 + b1*a13 + b2*a23 + b3*a33;
-        b0 = b[12]; b1 = b[13]; b2 = b[14]; b3 = b[15];
-        values[12] = b0*a00 + b1*a10 + b2*a20 + b3*a30;
-        values[13] = b0*a01 + b1*a11 + b2*a21 + b3*a31;
-        values[14] = b0*a02 + b1*a12 + b2*a22 + b3*a32;
-        values[15] = b0*a03 + b1*a13 + b2*a23 + b3*a33;
+        values[0] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
+        values[1] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
+        values[2] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
+        values[3] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
+        b0 = b[4];
+        b1 = b[5];
+        b2 = b[6];
+        b3 = b[7];
+        values[4] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
+        values[5] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
+        values[6] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
+        values[7] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
+        b0 = b[8];
+        b1 = b[9];
+        b2 = b[10];
+        b3 = b[11];
+        values[8] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
+        values[9] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
+        values[10] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
+        values[11] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
+        b0 = b[12];
+        b1 = b[13];
+        b2 = b[14];
+        b3 = b[15];
+        values[12] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
+        values[13] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
+        values[14] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
+        values[15] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
     }
-
-    
 }
-
-
-
 
 /*
 pub fn identity() -> [f64;16] {
@@ -587,7 +600,7 @@ pub fn trso_to_mat4_series( translation_vec: &[f64], rotation_quat: &[f64], scal
     scale(&mut mat, scale_vec);
     rotate(&mut mat, rotation_quat);
     /*
-    
+
     origin[0] = -(image.nativeWidth)/2;
     origin[1] = -(image.nativeHeight)/2;
 

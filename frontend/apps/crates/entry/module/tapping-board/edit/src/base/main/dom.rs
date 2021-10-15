@@ -1,19 +1,13 @@
-use dominator::{html, Dom, clone};
-use std::rc::Rc;
 use super::state::*;
 use components::{
+    backgrounds::dom::render_backgrounds,
     module::_common::edit::prelude::*,
-    backgrounds::dom::render_backgrounds, 
     stickers::dom::{render_stickers, render_stickers_raw},
-    traces::{
-        edit::TracesEdit,
-        bubble::TraceBubble,
-    }
+    traces::{bubble::TraceBubble, edit::TracesEdit},
 };
-use futures_signals::{
-    signal_vec::SignalVecExt,
-    signal::SignalExt
-};
+use dominator::{clone, html, Dom};
+use futures_signals::{signal::SignalExt, signal_vec::SignalVecExt};
+use std::rc::Rc;
 
 impl DomRenderable for Main {
     fn render(state: Rc<Main>) -> Dom {
@@ -36,9 +30,9 @@ impl DomRenderable for Main {
                                 html!("overlay-container", {
                                     .children_signal_vec(
                                         state.trace_bubbles()
-                                            .map(clone!(state => move |bubble| {
+                                            .map(|bubble| {
                                                 TraceBubble::render(bubble)
-                                            }))
+                                            })
                                     )
                                 })
                             ]

@@ -1,41 +1,33 @@
 use crate::base::state::Base;
-use std::rc::Rc;
-use futures_signals::signal::{Mutable, SignalExt};
-use dominator::clone;
 use components::{
-    tabs::MenuTabKind,
     instructions::editor::{
+        callbacks::Callbacks as InstructionsEditorCallbacks,
         state::State as InstructionsEditorState,
-        callbacks::Callbacks as InstructionsEditorCallbacks
     },
+    tabs::MenuTabKind,
 };
-use shared::domain::jig::module::body::{Image, Audio};
-use super::play_settings::{
-    state::State as PlaySettingsState,
-    dom::render as render_play_settings
-};
+use dominator::clone;
+use futures_signals::signal::Mutable;
+use std::rc::Rc;
+
 use super::super::state::Sidebar;
+use super::play_settings::state::State as PlaySettingsState;
 
 pub struct Step4 {
     pub tab: Mutable<Tab>,
     pub sidebar: Rc<Sidebar>,
 }
 
-
 impl Step4 {
     pub fn new(sidebar: Rc<Sidebar>) -> Rc<Self> {
-
         let kind = match crate::debug::settings().settings_tab {
             Some(kind) => kind,
-            None => MenuTabKind::PlaySettings
+            None => MenuTabKind::PlaySettings,
         };
 
         let tab = Mutable::new(Tab::new(sidebar.base.clone(), kind));
 
-        Rc::new(Self {
-            sidebar,
-            tab
-        })
+        Rc::new(Self { sidebar, tab })
     }
 }
 
@@ -46,34 +38,34 @@ pub enum Tab {
 }
 
 impl Tab {
-    pub fn new(base: Rc<Base>, kind:MenuTabKind) -> Self {
+    pub fn new(base: Rc<Base>, kind: MenuTabKind) -> Self {
         match kind {
-            MenuTabKind::PlaySettings => {
-                Self::Settings(Rc::new(PlaySettingsState::new(base)))
-            },
+            MenuTabKind::PlaySettings => Self::Settings(Rc::new(PlaySettingsState::new(base))),
             MenuTabKind::Instructions => {
-                let callbacks = InstructionsEditorCallbacks::new(clone!(base => move |instructions, also_history| {
-                    if(also_history) {
-                        base.history.push_modify(|raw| {
-                            if let Some(content) = raw.content.as_mut() {
-                                content.base.instructions = instructions;
-                            }
-                        });
-                    } else {
-                        base.history.save_current_modify(|raw| {
-                            if let Some(content) = raw.content.as_mut() {
-                                content.base.instructions = instructions;
-                            }
-                        });
-                    }
-                }));
+                let callbacks = InstructionsEditorCallbacks::new(
+                    clone!(base => move |instructions, also_history| {
+                        if also_history {
+                            base.history.push_modify(|raw| {
+                                if let Some(content) = raw.content.as_mut() {
+                                    content.base.instructions = instructions;
+                                }
+                            });
+                        } else {
+                            base.history.save_current_modify(|raw| {
+                                if let Some(content) = raw.content.as_mut() {
+                                    content.base.instructions = instructions;
+                                }
+                            });
+                        }
+                    }),
+                );
 
                 let state = InstructionsEditorState::new(base.instructions.clone(), callbacks);
 
                 Self::Instructions(Rc::new(state))
-            },
+            }
 
-            _ => unimplemented!("unsupported tab kind!")
+            _ => unimplemented!("unsupported tab kind!"),
         }
     }
 
@@ -91,4 +83,3 @@ impl Tab {
         }
     }
 }
-

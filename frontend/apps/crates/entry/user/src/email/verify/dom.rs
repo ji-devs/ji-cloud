@@ -1,7 +1,6 @@
-use dominator::{clone, Dom, html};
-use std::rc::Rc;
 use super::state::*;
-use utils::prelude::*;
+use dominator::{clone, html, Dom};
+use std::rc::Rc;
 
 impl VerifyEmailPage {
     pub fn render(state: Rc<VerifyEmailPage>) -> Dom {

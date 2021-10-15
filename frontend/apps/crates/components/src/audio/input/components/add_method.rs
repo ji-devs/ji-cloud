@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use crate::audio::input::state::{AudioInputAddMethod, AudioInput};
+use crate::audio::input::state::{AudioInput, AudioInputAddMethod};
 use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
 use utils::events;

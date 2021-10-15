@@ -1,23 +1,15 @@
-use dominator::{html, Dom, DomBuilder, clone};
-use web_sys::HtmlElement;
 use super::state::*;
+use components::module::_groups::cards::play::card::dom::{
+    render_card, render_card_mixin, render_empty_card, render_empty_card_mixin, CardOptions,
+    EmptyCardOptions, EmptyKind, Size, StyleKind,
+};
+use dominator::{clone, html, Dom};
+use futures_signals::signal::SignalExt;
 use std::rc::Rc;
-use futures_signals::{
-    map_ref,
-    signal::{Mutable, Signal, SignalExt, ReadOnlyMutable}
-};
-use components::module::_groups::cards::{
-    lookup::{self, Side},
-    play::card::dom::{render_card, render_card_mixin, CardOptions, render_empty_card, render_empty_card_mixin, EmptyCardOptions, EmptyKind, Size, StyleKind},
-    edit::{
-        config,
-        state::*
-    },
-};
-use utils::{prelude::*, drag::Drag};
+use utils::prelude::*;
+use web_sys::HtmlElement;
 
 pub fn render_top(state: Rc<CardTop>) -> Dom {
-    
     let theme_id = state.theme_id;
     let mode = state.mode;
     let side = state.side;
@@ -34,17 +26,17 @@ pub fn render_top(state: Rc<CardTop>) -> Dom {
 
             match phase {
                 TopPhase::Empty(is_drag_over) => {
-                    let mut options = EmptyCardOptions::new(EmptyKind::Question, theme_id, Size::Matching);
+                    let options = EmptyCardOptions::new(EmptyKind::Question, theme_id, Size::Matching);
                     Some(render_empty_card_mixin(options, |dom| {
                         dom
-                            .event(clone!(state => move |evt:events::Click| {
+                            .event(|_evt:events::Click| {
                                 log::info!("empty space clicked...")
-                            }))
+                            })
                             .property_signal("active", is_drag_over.signal())
                             .after_inserted(clone!(state => move |elem| {
                                 *state.elem.borrow_mut() = Some(elem);
                             }))
-                            .after_removed(clone!(state => move |elem| {
+                            .after_removed(clone!(state => move |_elem| {
                                 *state.elem.borrow_mut() = None;
                             }))
 
@@ -69,7 +61,7 @@ pub fn render_bottom(state: Rc<CardBottom>) -> Dom {
             let mode = state.mode;
             let side = state.side;
             let card = &state.card;
-            let other = &state.other;
+            let _other = &state.other;
             Some(match phase {
                 BottomPhase::Show => {
                     let mut options = CardOptions::new(card, theme_id, mode, side, Size::Matching);
@@ -84,7 +76,7 @@ pub fn render_bottom(state: Rc<CardBottom>) -> Dom {
                     })
                 },
                 BottomPhase::Remove => {
-                    let mut options = EmptyCardOptions::new(EmptyKind::Translucent, theme_id, Size::Matching);
+                    let options = EmptyCardOptions::new(EmptyKind::Translucent, theme_id, Size::Matching);
                     render_empty_card(options)
                 }
             })
@@ -92,35 +84,33 @@ pub fn render_bottom(state: Rc<CardBottom>) -> Dom {
     })
 }
 
-
 pub fn render_drag(state: Rc<CardDrag>) -> Dom {
     let theme_id = state.theme_id;
     let mode = state.mode;
     let side = state.side;
     let card = &state.card;
-    let other = &state.other;
+    let _other = &state.other;
 
     let mut options = CardOptions::new(card, theme_id, mode, side, Size::Matching);
     options.flipped = true;
     options.style_kind = StyleKind::Dragging;
 
     render_card_mixin(options, |dom| {
-        dom
-            .property("hasTransform", true)
+        dom.property("hasTransform", true)
             .style_signal("transform", state.drag.transform_signal())
-            .global_event_preventable(clone!(state => move |evt:events::MouseUp| {
-                state.on_release(); 
+            .global_event_preventable(clone!(state => move |_evt:events::MouseUp| {
+                state.on_release();
                 //on_mouse_up(evt.x() as i32, evt.y() as i32);
             }))
             .global_event_preventable(clone!(state => move |evt:events::MouseMove| {
-                if let Some(point) = state.drag.update(evt.x(), evt.y()) {
+                if let Some(_point) = state.drag.update(evt.x(), evt.y()) {
                     state.evaluate_drag_over();
                 }
             }))
             .after_inserted(clone!(state => move |elem| {
                 *state.elem.borrow_mut() = Some(elem);
             }))
-            .after_removed(clone!(state => move |elem| {
+            .after_removed(clone!(state => move |_elem| {
                 *state.elem.borrow_mut() = None;
             }))
     })

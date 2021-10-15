@@ -1,39 +1,23 @@
-use dominator::{class, clone, svg, Dom, DomBuilder, traits::MultiStr};
 use std::rc::Rc;
-use utils::{
-    prelude::*,
-    resize::{resize_info_signal, ResizeInfo},
-};
+use utils::{prelude::*, resize::ResizeInfo};
 
-use futures_signals::{
-    signal::{Mutable, SignalExt, Signal},
-    signal_vec::SignalVec,
-};
-use web_sys::SvgElement;
-use super::{
-    super::utils::*,
-    styles::*
-};
-use once_cell::sync::Lazy;
-use shared::domain::jig::module::body::{
-    Transform,
-    _groups::design::{Trace, TraceShape, TraceKind},
-};
-use std::fmt::Write;
+use futures_signals::signal::Signal;
+
+use shared::domain::jig::module::body::{Transform, _groups::design::TraceKind};
+
 type PlaceholderSignal<T> = futures_signals::signal::Always<T>;
 type PlaceholderTransformSizeSignal = PlaceholderSignal<(Transform, (f64, f64))>;
 type PlaceholderShapeStyleSignal = PlaceholderSignal<ShapeStyle>;
 
-pub enum ShapeStyleVar<S> 
-where 
-    S: Signal<Item = ShapeStyle>
+pub enum ShapeStyleVar<S>
+where
+    S: Signal<Item = ShapeStyle>,
 {
     Static(ShapeStyle),
-    Dynamic(S)
+    Dynamic(S),
 }
 impl ShapeStyleVar<PlaceholderShapeStyleSignal> {
-
-    pub fn new_static(shape_style:ShapeStyle) -> ShapeStyleVar<PlaceholderShapeStyleSignal> {
+    pub fn new_static(shape_style: ShapeStyle) -> ShapeStyleVar<PlaceholderShapeStyleSignal> {
         Self::Static(shape_style)
     }
 
@@ -41,7 +25,6 @@ impl ShapeStyleVar<PlaceholderShapeStyleSignal> {
         None
     }
 }
-
 
 #[derive(Clone, Copy, Eq, PartialEq, Debug)]
 pub struct ShapeStyle {
@@ -55,9 +38,8 @@ pub struct ShapeStyle {
 pub enum ShapeStyleMode {
     Mask,
     Transparent,
-    Solid
+    Solid,
 }
-
 
 #[derive(Clone, Copy, Eq, PartialEq, Debug)]
 pub enum ShapeStyleState {
@@ -75,19 +57,21 @@ impl ShapeStyle {
             state: None,
         }
     }
-
 }
 
-pub enum TransformSize<'a, S> 
-where 
-    S: Signal<Item = (Transform, (f64, f64))>
+pub enum TransformSize<'a, S>
+where
+    S: Signal<Item = (Transform, (f64, f64))>,
 {
     Static(&'a Transform, (f64, f64)),
-    Dynamic(S)
+    Dynamic(S),
 }
 
-impl <'a> TransformSize<'a, PlaceholderTransformSizeSignal> {
-    pub fn new_static(transform:&'a Transform, size: (f64, f64)) -> TransformSize<'a, PlaceholderTransformSizeSignal> {
+impl<'a> TransformSize<'a, PlaceholderTransformSizeSignal> {
+    pub fn new_static(
+        transform: &'a Transform,
+        size: (f64, f64),
+    ) -> TransformSize<'a, PlaceholderTransformSizeSignal> {
         Self::Static(transform, size)
     }
     pub fn none() -> Option<TransformSize<'a, PlaceholderTransformSizeSignal>> {
@@ -95,12 +79,15 @@ impl <'a> TransformSize<'a, PlaceholderTransformSizeSignal> {
     }
 }
 
-
-impl <'a, S> TransformSize<'a, S> 
-where 
-    S: Signal<Item = (Transform, (f64, f64))> + 'static
+impl<'a, S> TransformSize<'a, S>
+where
+    S: Signal<Item = (Transform, (f64, f64))> + 'static,
 {
-    pub fn get_style_string(transform:&Transform, size:(f64, f64), resize_info:&ResizeInfo) -> String {
+    pub fn get_style_string(
+        transform: &Transform,
+        size: (f64, f64),
+        resize_info: &ResizeInfo,
+    ) -> String {
         let (width, height) = resize_info.get_size_px(size.0, size.1);
         format!(
             "transform: {}; transform-origin: {}px {}px;width: {}px; height: {}px;",
@@ -112,7 +99,6 @@ where
         )
     }
 }
-
 
 pub struct SvgCallbacks {
     pub on_select: Option<Box<dyn Fn()>>,

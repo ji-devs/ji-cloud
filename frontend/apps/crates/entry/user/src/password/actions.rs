@@ -1,6 +1,6 @@
 use super::state::*;
-use zxcvbn::{zxcvbn, Entropy};
 use utils::prelude::*;
+use zxcvbn::zxcvbn;
 
 impl PasswordState {
     pub fn update_strength(&self) {
@@ -15,6 +15,5 @@ impl PasswordState {
                 self.strength.set(estimate.into());
             }
         }
-
     }
 }

@@ -1,31 +1,37 @@
-use dominator::{html, clone, Dom};
-use std::rc::Rc;
-use crate::images::meta::{
-    state::{State as MetaState, MutableImage},
-    sections::common::categories::MutableCategory
+use super::{
+    actions::{self, DateTimeStrings},
+    state::*,
 };
-use super::{state::*, actions::{self, DateTimeStrings}};
-use crate::images::meta::{state::Section, sections::common::categories::*};
-use utils::events;
+use crate::images::meta::{
+    sections::common::categories::MutableCategory,
+    state::{MutableImage, State as MetaState},
+};
+use crate::images::meta::{sections::common::categories::*, state::Section};
+use dominator::{clone, html, Dom};
 use futures_signals::{
     signal::{Mutable, SignalExt},
-    signal_vec::SignalVecExt
+    signal_vec::SignalVecExt,
 };
 use shared::domain::meta::MetadataResponse;
-use components::image::tag::ImageTag;
+use std::rc::Rc;
+use utils::events;
 
-pub struct SummaryDom {
-}
+pub struct SummaryDom {}
 
 //Latest updated doesn't reflect changes made while viewing at the same time, e.g. changing name while viewing summary page
 
 impl SummaryDom {
-    pub fn render(meta_state: Rc<MetaState>, image: Rc<MutableImage>, metadata: Rc<MetadataResponse>, categories: Rc<Vec<Rc<MutableCategory>>>) -> Dom {
+    pub fn render(
+        meta_state: Rc<MetaState>,
+        image: Rc<MutableImage>,
+        metadata: Rc<MetadataResponse>,
+        categories: Rc<Vec<Rc<MutableCategory>>>,
+    ) -> Dom {
         let state = Rc::new(State::new(meta_state, image, metadata, categories));
-        
+
         let id = state.image.orig.id.clone();
 
-        let date_time_strings:Mutable<Option<DateTimeStrings>> = Mutable::new(None);
+        let date_time_strings: Mutable<Option<DateTimeStrings>> = Mutable::new(None);
 
         html!("image-meta-section-summary", {
             .future(clone!(date_time_strings => async move {
@@ -44,7 +50,7 @@ impl SummaryDom {
                       .property("weight", "medium")
                       .property("slot", "edit-general")
                       .text(crate::strings::STR_EDIT)
-                      .event(clone!(state => move |evt:events::Click| {
+                      .event(clone!(state => move |_evt:events::Click| {
                           state.meta.section.set(Section::General);
                       }))
                 }),
@@ -54,7 +60,7 @@ impl SummaryDom {
                       .property("weight", "medium")
                       .property("slot", "edit-categories")
                       .text(crate::strings::STR_EDIT)
-                      .event(clone!(state => move |evt:events::Click| {
+                      .event(clone!(state => move |_evt:events::Click| {
                           state.meta.section.set(Section::Categories);
                       }))
                 }),

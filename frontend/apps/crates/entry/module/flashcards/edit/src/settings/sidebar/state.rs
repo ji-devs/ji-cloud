@@ -1,5 +1,5 @@
 use crate::state::*;
-use super::super::state::*;
+
 use std::rc::Rc;
 
 pub struct SidebarSettings {
@@ -8,8 +8,6 @@ pub struct SidebarSettings {
 
 impl SidebarSettings {
     pub fn new(base: Rc<Base>) -> Self {
-        Self {
-            base,
-        }
+        Self { base }
     }
 }

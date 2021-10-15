@@ -1,32 +1,32 @@
-use std::{rc::Rc, cell::RefCell};
 use crate::base::game::state::*;
+use components::audio::mixer::AudioHandle;
 use dominator::clone;
 use futures_signals::{
-    map_ref,
-    signal::{not, Signal, SignalExt, Mutable},
-    signal_vec::{self, SignalVec, SignalVecExt},
+    signal::{Mutable, Signal, SignalExt},
+    signal_vec::{self, SignalVecExt},
 };
-use components::{
-    audio::mixer::{AUDIO_MIXER, AudioHandle},
-    traces::utils::TraceExt,
+use shared::domain::jig::module::body::{
+    Audio, Transform,
+    _groups::design::Sticker,
+    drag_drop::{Interactive, ItemKind},
 };
-use utils::{prelude::*, drag::Drag};
-use shared::domain::jig::module::body::{Audio, Transform, _groups::design::{Sticker, Trace}, drag_drop::{Interactive, ItemKind, Next}};
-use web_sys::AudioContext;
-use std::collections::HashSet;
-use components::collision::stickers_traces::pixels::{StickerHitSource, StickerBoundsKind};
-use std::borrow::Cow;
+use std::{cell::RefCell, rc::Rc};
+use utils::{drag::Drag, prelude::*};
+
+use components::collision::stickers_traces::pixels::{StickerBoundsKind, StickerHitSource};
 use components::instructions::player::InstructionsPlayer;
+use std::borrow::Cow;
 pub struct PlayState {
     pub game: Rc<Game>,
     pub items: Vec<PlayItem>,
-    pub feedback_player: Mutable<Option<Rc<InstructionsPlayer>>>
-
+    pub feedback_player: Mutable<Option<Rc<InstructionsPlayer>>>,
 }
 
 impl PlayState {
     pub fn new(game: Rc<Game>) -> Rc<Self> {
-        let items = game.base.items
+        let items = game
+            .base
+            .items
             .iter()
             .map(|item| {
                 let item = item.clone();
@@ -51,42 +51,36 @@ impl PlayState {
         signal_vec::always(
             self.items
                 .iter()
-                .filter(|item| {
-                    match item {
-                        PlayItem::Interactive(_) => true,
-                        _ => false
-                    }
+                .filter(|item| match item {
+                    PlayItem::Interactive(_) => true,
+                    _ => false,
                 })
                 .map(|item| item.get_interactive_unchecked())
-                .collect::<Vec<Rc<InteractiveItem>>>()
-            )
-            .filter_signal_cloned(|data| {
-                data.size
-                    .signal_cloned()
-                    .map(|size| size.is_none())
-            })
-            .is_empty()
-            .dedupe()
+                .collect::<Vec<Rc<InteractiveItem>>>(),
+        )
+        .filter_signal_cloned(|data| data.size.signal_cloned().map(|size| size.is_none()))
+        .is_empty()
+        .dedupe()
     }
 }
 
 pub enum PlayItem {
     Static(Sticker),
-    Interactive(Rc<InteractiveItem>)
+    Interactive(Rc<InteractiveItem>),
 }
 
 impl PlayItem {
     pub fn get_interactive_unchecked(&self) -> Rc<InteractiveItem> {
         match self {
             Self::Interactive(data) => data.clone(),
-            _ => panic!("not interctive!")
+            _ => panic!("not interctive!"),
         }
     }
 
     pub fn is_interactive(&self) -> bool {
         match self {
             Self::Interactive(_) => true,
-            _ => false
+            _ => false,
         }
     }
 }
@@ -97,7 +91,7 @@ pub struct InteractiveItem {
     pub audio: Option<Audio>,
     pub audio_effect_handle: RefCell<Option<AudioHandle>>,
     pub audio_user_handle: RefCell<Option<AudioHandle>>,
-    pub target_transform: Transform, 
+    pub target_transform: Transform,
     pub curr_transform: Mutable<Transform>,
     pub drag: Mutable<Option<Rc<Drag>>>,
     pub size: Mutable<Option<(f64, f64)>>,
@@ -116,7 +110,9 @@ impl InteractiveItem {
             sticker,
             completed: Mutable::new(false),
             audio: data.audio,
-            target_transform: data.target_transform.unwrap_or_else(clone!(transform => move || transform)),
+            target_transform: data
+                .target_transform
+                .unwrap_or_else(clone!(transform => move || transform)),
             curr_transform: Mutable::new(transform),
             drag: Mutable::new(None),
             size: Mutable::new(None),
@@ -126,28 +122,25 @@ impl InteractiveItem {
         })
     }
 
-    pub fn get_hit_source(&self, transform_override: Option<SourceTransformOverride>) -> Option<StickerHitSource> {
-        self.size.get_cloned()
-            .map(|size| {
-                let transform_override = transform_override.map(|t| {
-                    match t {
-                        SourceTransformOverride::Current => {
-                            let transform = self.curr_transform.get_cloned();
-                            Cow::Owned(transform) 
-                        },
-                        SourceTransformOverride::Target => {
-                            Cow::Borrowed(&self.target_transform)
-                        },
-                    }
-                });
-
-                StickerHitSource {
-                    sticker: Cow::Borrowed(&self.sticker),
-                    size,
-                    transform_override,
-                    bounds_kind: StickerBoundsKind::Auto,
+    pub fn get_hit_source(
+        &self,
+        transform_override: Option<SourceTransformOverride>,
+    ) -> Option<StickerHitSource> {
+        self.size.get_cloned().map(|size| {
+            let transform_override = transform_override.map(|t| match t {
+                SourceTransformOverride::Current => {
+                    let transform = self.curr_transform.get_cloned();
+                    Cow::Owned(transform)
                 }
-            })
+                SourceTransformOverride::Target => Cow::Borrowed(&self.target_transform),
+            });
+
+            StickerHitSource {
+                sticker: Cow::Borrowed(&self.sticker),
+                size,
+                transform_override,
+                bounds_kind: StickerBoundsKind::Auto,
+            }
+        })
     }
 }
-

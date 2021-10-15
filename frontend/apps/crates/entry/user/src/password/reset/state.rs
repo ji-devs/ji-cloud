@@ -1,12 +1,12 @@
 use std::rc::Rc;
-use futures_signals::signal::{Mutable, Signal, SignalExt};
-use dominator_helpers::futures::AsyncLoader;
+
 use super::super::state::*;
+use dominator_helpers::futures::AsyncLoader;
 
 pub struct PasswordResetPage {
     pub token: String,
     pub loader: AsyncLoader,
-    pub password: PasswordState
+    pub password: PasswordState,
 }
 
 impl PasswordResetPage {
@@ -17,5 +17,4 @@ impl PasswordResetPage {
             password: PasswordState::new(),
         })
     }
-
 }

@@ -11,7 +11,7 @@ pub fn render_settings(state: Rc<ModuleSettings>) -> Dom {
     )
 }
 
-pub fn render_button_mixin<F>(state: Rc<ModuleSettings>, mixin: F) -> Dom
+pub fn _render_button_mixin<F>(state: Rc<ModuleSettings>, mixin: F) -> Dom
 where
     F: FnOnce(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>,
 {

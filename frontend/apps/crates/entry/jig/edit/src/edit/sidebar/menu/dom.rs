@@ -10,7 +10,7 @@ use crate::edit::sidebar::{
     state::State as SidebarState,
 };
 use dominator::{clone, html, Dom};
-use shared::domain::jig::{LiteModule, ModuleKind, module::ModuleId};
+use shared::domain::jig::{module::ModuleId, LiteModule, ModuleKind};
 use std::rc::Rc;
 use utils::events;
 
@@ -114,7 +114,11 @@ pub fn item_paste(state: Rc<State>, sidebar_state: Rc<SidebarState>) -> Dom {
     })
 }
 
-pub fn item_duplicate_as(state: Rc<State>, sidebar_state: Rc<SidebarState>, module: &LiteModule) -> Dom {
+pub fn item_duplicate_as(
+    state: Rc<State>,
+    sidebar_state: Rc<SidebarState>,
+    module: &LiteModule,
+) -> Dom {
     let card_kinds = vec![
         ModuleKind::Memory,
         ModuleKind::Flashcards,
@@ -124,9 +128,7 @@ pub fn item_duplicate_as(state: Rc<State>, sidebar_state: Rc<SidebarState>, modu
 
     let is_card = card_kinds.contains(&module.kind);
 
-    let card_kinds = card_kinds.into_iter().filter(|kind| {
-        &module.kind != kind
-    });
+    let card_kinds = card_kinds.into_iter().filter(|kind| &module.kind != kind);
 
     let module_id = module.id;
 

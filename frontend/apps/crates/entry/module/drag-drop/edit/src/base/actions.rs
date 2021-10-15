@@ -1,49 +1,31 @@
-use components::module::_common::edit::prelude::*;
-use std::rc::Rc;
-use shared::domain::jig::{
-    JigId, 
-    module::{
-        ModuleId, 
-        body::{
-            ThemeChoice,
-            Audio,
-            Instructions,
-            Vec2,
-            Transform,
-            drag_drop::{Mode, Step, TargetArea, Content as RawContent, ModuleData as RawData, ItemKind as RawItemKind, Interactive as RawInteractive},
-            _groups::design::Trace as RawTrace,
-        }
-    }
-};
 use super::{
-    state::*,
-    footer::state::Footer,
-    header::state::Header,
-    main::state::Main,
-    overlay::state::Overlay,
-    sidebar::state::Sidebar
+    footer::state::Footer, header::state::Header, main::state::Main, overlay::state::Overlay,
+    sidebar::state::Sidebar, state::*,
 };
-use dominator::clone;
-use futures_signals::signal::{ReadOnlyMutable, Mutable};
-use utils::prelude::*;
-use components::{
-    text_editor::state::State as TextEditorState,
-    audio::mixer::AudioMixer,
+use components::module::_common::edit::prelude::*;
+use shared::domain::jig::module::body::{
+    Audio, Transform,
+    _groups::design::Trace as RawTrace,
+    drag_drop::{
+        Interactive as RawInteractive, ItemKind as RawItemKind, Mode, ModuleData as RawData, Step,
+        TargetArea,
+    },
 };
+use std::rc::Rc;
 
-pub async fn init_from_raw(init_args: BaseInitFromRawArgs<RawData, Mode, Step>) -> BaseInit<Step, Base, Main, Sidebar, Header, Footer, Overlay> {
-
+pub async fn init_from_raw(
+    init_args: BaseInitFromRawArgs<RawData, Mode, Step>,
+) -> BaseInit<Step, Base, Main, Sidebar, Header, Footer, Overlay> {
     let force_step = {
-        if init_args.source == InitSource::ForceRaw { 
+        if init_args.source == InitSource::ForceRaw {
             crate::debug::settings().step
         } else {
             None
         }
     };
 
-
     let base = Base::new(init_args).await;
-    
+
     BaseInit {
         force_step,
         force_theme: None,
@@ -56,7 +38,6 @@ pub async fn init_from_raw(init_args: BaseInitFromRawArgs<RawData, Mode, Step>) 
     }
 }
 
-
 impl Base {
     /*
      * The traces themselves are managed by the component
@@ -64,12 +45,9 @@ impl Base {
      * meta and history
      */
     pub fn on_trace_added(&self, raw_trace: RawTrace) {
-
         self.history.push_modify(move |raw| {
             if let Some(content) = &mut raw.content {
-                content.target_areas.push(TargetArea {
-                    trace: raw_trace,
-                })
+                content.target_areas.push(TargetArea { trace: raw_trace })
             }
         });
     }
@@ -94,11 +72,10 @@ impl Base {
         let list = &*self.stickers.list.lock_ref();
         let kind = &list[index].kind;
 
-
         if std::mem::discriminant(&*kind.lock_ref()) == std::mem::discriminant(&ItemKind::Static) {
             let data = RawInteractive {
                 audio: None,
-                target_transform: None, 
+                target_transform: None,
             };
 
             kind.set(ItemKind::Interactive(Interactive::new(data.clone())));
@@ -139,10 +116,10 @@ impl Base {
                 match &mut content.items[index].kind {
                     RawItemKind::Interactive(data) => {
                         data.audio = audio;
-                    },
+                    }
                     RawItemKind::Static => {
                         panic!("saving audio on static item!?");
-                    },
+                    }
                 }
             }
         });
@@ -160,10 +137,10 @@ impl Base {
                 match &mut content.items[index].kind {
                     RawItemKind::Interactive(data) => {
                         data.target_transform = Some(transform);
-                    },
+                    }
                     RawItemKind::Static => {
                         panic!("saving offset on static item!?");
-                    },
+                    }
                 }
             }
         });

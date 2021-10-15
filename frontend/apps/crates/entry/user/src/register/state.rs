@@ -1,14 +1,13 @@
-use futures_signals::signal::{Mutable, Signal, SignalExt};
 use cfg_if::cfg_if;
-use crate::debug::DebugRegisterStep;
+use futures_signals::signal::Mutable;
+
 use shared::domain::session::OAuthUserProfile;
 
 pub struct State {
-    pub step: Mutable<Step>
+    pub step: Mutable<Step>,
 }
 
 impl State {
-
     cfg_if! {
         if #[cfg(all(feature = "local"))] {
             pub fn new(step:Option<Step>) -> Self {
@@ -20,8 +19,8 @@ impl State {
                         match debug_step {
                             DebugRegisterStep::Start => Step::Start,
                             DebugRegisterStep::One => Step::One(None),
-                            DebugRegisterStep::Two => Step::Two(Step1Data::debug()), 
-                            DebugRegisterStep::Three => Step::Three(Step2Data::debug()), 
+                            DebugRegisterStep::Two => Step::Two(Step1Data::debug()),
+                            DebugRegisterStep::Three => Step::Three(Step2Data::debug()),
 
                         }
                     }
@@ -40,7 +39,6 @@ impl State {
     }
 }
 
-
 #[derive(Clone, Debug)]
 pub enum Step {
     Start,
@@ -48,7 +46,6 @@ pub enum Step {
     Two(Step1Data),
     Three(Step2Data),
 }
-
 
 #[derive(Clone, Debug)]
 pub struct Step1Data {
@@ -69,7 +66,6 @@ impl Step1Data {
     }
 }
 
-
 #[derive(Clone, Debug)]
 pub struct Step2Data {
     pub step_1: Step1Data,
@@ -86,10 +82,9 @@ impl Step2Data {
             step_1: Step1Data::debug(),
             location_json: None,
             language: "english".to_string(),
-            persona: "Teacher".to_string(), 
-            organization: "Home".to_string(), 
+            persona: "Teacher".to_string(),
+            organization: "Home".to_string(),
             marketing: false,
         }
     }
 }
-

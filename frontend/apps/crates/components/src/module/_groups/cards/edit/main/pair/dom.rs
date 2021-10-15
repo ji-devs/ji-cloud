@@ -14,8 +14,8 @@ use crate::{
     tooltip::{
         callbacks::TooltipConfirmCallbacks,
         state::{
-            MoveStrategy,Anchor, ContentAnchor , State as TooltipState, TooltipConfirm, TooltipData,
-            TooltipTarget,
+            Anchor, ContentAnchor, MoveStrategy, State as TooltipState, TooltipConfirm,
+            TooltipData, TooltipTarget,
         },
     },
 };

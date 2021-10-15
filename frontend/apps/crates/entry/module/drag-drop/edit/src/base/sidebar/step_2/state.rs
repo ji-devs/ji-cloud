@@ -1,26 +1,14 @@
 use crate::base::state::*;
-use std::rc::Rc;
-use dominator_helpers::signals::{RcSignalFn, rc_signal_fn};
-use futures_signals::{
-    map_ref, 
-    signal::{Mutable, Signal, SignalExt}
+use components::{
+    audio::input::{AudioInput, AudioInputCallbacks, AudioInputOptions},
+    tabs::MenuTabKind,
 };
 use dominator::clone;
-use components::{
-    tabs::MenuTabKind,
-    image::search::{
-        state::{State as ImageSearchState, ImageSearchOptions},
-        callbacks::Callbacks as ImageSearchCallbacks
-    },
-    audio::input::{
-        AudioInputOptions,
-        AudioInput,
-        AudioInputCallbacks,
-    },
-    stickers::state::Stickers,
-};
-use shared::domain::jig::module::body::{Image, Audio};
-use std::pin::Pin;
+use dominator_helpers::signals::{rc_signal_fn, RcSignalFn};
+use futures_signals::signal::{Mutable, SignalExt};
+use shared::domain::jig::module::body::Audio;
+use std::rc::Rc;
+
 use super::super::state::Sidebar;
 
 pub struct Step2 {
@@ -28,24 +16,18 @@ pub struct Step2 {
     pub sidebar: Rc<Sidebar>,
 }
 
-
 impl Step2 {
     pub fn new(sidebar: Rc<Sidebar>) -> Rc<Self> {
         let kind = match crate::debug::settings().step_2_tab {
             Some(kind) => kind,
-            None => MenuTabKind::Select
+            None => MenuTabKind::Select,
         };
-        
+
         let tab = Mutable::new(Tab::new(sidebar.base.clone(), kind));
 
-        Rc::new(Self {
-            sidebar,
-            tab
-        })
+        Rc::new(Self { sidebar, tab })
     }
-
 }
-
 
 #[derive(Clone)]
 pub enum Tab {
@@ -54,8 +36,7 @@ pub enum Tab {
 }
 
 impl Tab {
-
-    pub fn new(base: Rc<Base>, kind:MenuTabKind) -> Self {
+    pub fn new(base: Rc<Base>, kind: MenuTabKind) -> Self {
         match kind {
             MenuTabKind::Select => Self::Select,
             MenuTabKind::Audio => {
@@ -88,10 +69,9 @@ impl Tab {
                 });
 
                 Self::Audio(rc_signal_fn(cb))
+            }
 
-            },
-
-            _ => unimplemented!("unsupported tab kind!")
+            _ => unimplemented!("unsupported tab kind!"),
         }
     }
 
@@ -109,4 +89,3 @@ impl Tab {
         }
     }
 }
-

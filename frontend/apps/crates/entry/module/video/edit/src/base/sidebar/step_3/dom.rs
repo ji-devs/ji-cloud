@@ -1,12 +1,11 @@
 use super::state::*;
 use components::{
+    instructions::editor::dom::render as render_instructions,
     tabs::{MenuTab, MenuTabKind},
-    instructions::editor::dom::render as render_instructions
 };
 use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
 use std::rc::Rc;
-use utils::prelude::*;
 
 pub fn render(state: Rc<Step3>) -> Dom {
     html!("menu-tabs", {
@@ -34,7 +33,7 @@ pub fn render(state: Rc<Step3>) -> Dom {
     })
 }
 
-fn render_tab(state: Rc<Step3>, tab_kind:MenuTabKind) -> Dom {
+fn render_tab(state: Rc<Step3>, tab_kind: MenuTabKind) -> Dom {
     MenuTab::render(
         MenuTab::new(
             tab_kind,
@@ -44,8 +43,8 @@ fn render_tab(state: Rc<Step3>, tab_kind:MenuTabKind) -> Dom {
             }))),
             clone!(state, tab_kind => move || {
                 state.tab.set(Tab::new(state.sidebar.base.clone(), tab_kind));
-            })
+            }),
         ),
-        Some("tabs")
+        Some("tabs"),
     )
 }

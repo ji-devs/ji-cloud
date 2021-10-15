@@ -1,19 +1,18 @@
-use dominator::{html, clone, Dom};
-use shared::domain::image::{ImageId, ImageSearchQuery};
-use std::rc::Rc;
-use std::cell::RefCell;
+use super::{actions, state::*};
+use dominator::{clone, html, Dom};
 use futures_signals::{signal::SignalExt, signal_vec::SignalVecExt};
-use utils::{routes::*, events};
+use shared::domain::image::ImageSearchQuery;
+use std::cell::RefCell;
+use std::rc::Rc;
+use utils::{events, routes::*};
 use wasm_bindgen::prelude::*;
-use web_sys::{HtmlInputElement, HtmlElement};
-use super::{state::*, actions};
+use web_sys::HtmlElement;
 
-pub struct ImageSearchPage {
-}
+pub struct ImageSearchPage {}
 
 impl ImageSearchPage {
     pub fn render(query: Option<ImageSearchQuery>) -> Dom {
-        let state:Rc<State> = Rc::new(query.into());
+        let state: Rc<State> = Rc::new(query.into());
 
         html!("empty-fragment", {
 
@@ -81,11 +80,10 @@ impl ImageSearchPage {
     }
 }
 
-struct PaginationDom {
-}
+struct PaginationDom {}
 
 impl PaginationDom {
-    pub fn render(state: Rc<State>, slot:&str) -> Dom {
+    pub fn render(state: Rc<State>, slot: &str) -> Dom {
         html!("pagination-widget", {
             .property_signal("page", state.page_signal())
             .property_signal("total", state.total_page_signal())
@@ -100,25 +98,21 @@ impl PaginationDom {
 }
 
 struct FilterDom {
-    pub elem_ref:RefCell<Option<HtmlElement>>
+    pub elem_ref: RefCell<Option<HtmlElement>>,
 }
 
 impl FilterDom {
     pub fn close_menu(&self) {
-        unsafe {
-            js_sys::Reflect::set(
-                self.elem_ref.borrow().as_ref().unwrap(), 
-                &JsValue::from_str("open"), 
-                &JsValue::from_bool(false)
-            );
-        }
-    }
-    pub fn render(state: Rc<State>, slot:&str) -> Dom {
-        let _self = Rc::new(
-            Self {
-                elem_ref: RefCell::new(None)
-            }
+        let _ = js_sys::Reflect::set(
+            self.elem_ref.borrow().as_ref().unwrap(),
+            &JsValue::from_str("open"),
+            &JsValue::from_bool(false),
         );
+    }
+    pub fn render(state: Rc<State>, slot: &str) -> Dom {
+        let _self = Rc::new(Self {
+            elem_ref: RefCell::new(None),
+        });
 
         html!("dropdown-underlined", {
             .property("slot", slot)
@@ -127,7 +121,7 @@ impl FilterDom {
                 html!("image-search-publish-filter", {
                     .property("slot", "options")
                     .property("mode", "all")
-                    .event(clone!(state, _self => move |evt:events::Click| {
+                    .event(clone!(state, _self => move |_evt:events::Click| {
                         let mut query = state.query.lock_mut();
                         query.is_published = None;
                         query.page = None;
@@ -137,7 +131,7 @@ impl FilterDom {
                 html!("image-search-publish-filter", {
                     .property("slot", "options")
                     .property("mode", "published")
-                    .event(clone!(state, _self => move |evt:events::Click| {
+                    .event(clone!(state, _self => move |_evt:events::Click| {
                         let mut query = state.query.lock_mut();
                         query.is_published = Some(true);
                         query.page = None;
@@ -147,7 +141,7 @@ impl FilterDom {
                 html!("image-search-publish-filter", {
                     .property("slot", "options")
                     .property("mode", "saved")
-                    .event(clone!(state, _self => move |evt:events::Click| {
+                    .event(clone!(state, _self => move |_evt:events::Click| {
                         let mut query = state.query.lock_mut();
                         query.is_published = Some(false);
                         query.page = None;

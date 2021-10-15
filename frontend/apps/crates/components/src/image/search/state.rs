@@ -7,8 +7,8 @@ use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::Mutable;
 use futures_signals::signal_vec::MutableVec;
 use shared::domain::meta::ImageStyle;
-use shared::domain::{jig::module::body::Image, meta::ImageStyleId};
 use shared::domain::user::UserProfile;
+use shared::domain::{jig::module::body::Image, meta::ImageStyleId};
 use std::{cell::RefCell, collections::HashSet, rc::Rc};
 
 pub const RECENT_COUNT: u16 = 16;
@@ -81,5 +81,5 @@ impl Default for ImageSearchOptions {
 pub enum ImageSearchCheckboxKind {
     BackgroundLayer1Filter, // adds TagId::BackgroundLayer1 to the image_tags filter
     BackgroundLayer2Filter, // adds TagId::BackgroundLayer2 to the image_tags filter
-    StickersFilter, // sets `kind` to Some(ImageKind::Sticker)
+    StickersFilter,         // sets `kind` to Some(ImageKind::Sticker)
 }

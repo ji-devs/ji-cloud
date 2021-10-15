@@ -1,22 +1,21 @@
-use dominator::{html, clone, Dom};
+use super::{actions, state::*};
+use crate::images::meta::state::{MutableImage, State as MetaState};
+use dominator::{clone, html, Dom};
 use std::rc::Rc;
-use crate::images::meta::state::{State as MetaState, MutableImage};
-use super::{state::*, actions};
-use utils::{events, routes::*, api_helpers::meta::MetaOptions};
-use wasm_bindgen::prelude::*;
-use futures_signals::{
-    signal_vec::SignalVecExt,
-    signal::SignalExt
-};
+use utils::events;
+
+use components::image::tag::ImageTag;
 use shared::domain::meta::MetadataResponse;
 use strum::IntoEnumIterator;
-use components::image::tag::ImageTag;
 
-pub struct GeneralDom {
-}
+pub struct GeneralDom {}
 
 impl GeneralDom {
-    pub fn render(meta_state: Rc<MetaState>, image: Rc<MutableImage>, metadata: Rc<MetadataResponse>) -> Dom {
+    pub fn render(
+        meta_state: Rc<MetaState>,
+        image: Rc<MutableImage>,
+        metadata: Rc<MetadataResponse>,
+    ) -> Dom {
         let state = Rc::new(State::new(meta_state, image, metadata));
 
         html!("image-meta-section-general", {

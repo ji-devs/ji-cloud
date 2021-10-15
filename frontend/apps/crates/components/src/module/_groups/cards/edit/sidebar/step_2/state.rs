@@ -1,4 +1,13 @@
-use crate::{color_select::state::State as ColorPickerState, image::search::{callbacks::Callbacks as ImageSearchCallbacks, state::{ImageSearchCheckboxKind, ImageSearchOptions, State as ImageSearchState}}, module::_groups::cards::edit::state::*, tabs::MenuTabKind, theme_selector::state::{ThemeSelector, ThemeSelectorCallbacks}};
+use crate::{
+    color_select::state::State as ColorPickerState,
+    image::search::{
+        callbacks::Callbacks as ImageSearchCallbacks,
+        state::{ImageSearchCheckboxKind, ImageSearchOptions, State as ImageSearchState},
+    },
+    module::_groups::cards::edit::state::*,
+    tabs::MenuTabKind,
+    theme_selector::state::{ThemeSelector, ThemeSelectorCallbacks},
+};
 use dominator::clone;
 use futures_signals::signal::Mutable;
 use shared::domain::jig::module::body::Background;
@@ -9,7 +18,7 @@ const STR_SELECT_BACKGROUND_COLOR: &'static str = "Select background color";
 pub struct Step2<RawData: RawDataExt, E: ExtraExt> {
     pub base: Rc<CardsBase<RawData, E>>,
     pub tab: Mutable<Tab>,
-    pub tab_index: Mutable<Option<usize>>
+    pub tab_index: Mutable<Option<usize>>,
 }
 
 impl<RawData: RawDataExt, E: ExtraExt> Step2<RawData, E> {
@@ -21,7 +30,11 @@ impl<RawData: RawDataExt, E: ExtraExt> Step2<RawData, E> {
 
         let tab = Mutable::new(Tab::new(base.clone(), kind));
 
-        Rc::new(Self { base, tab, tab_index })
+        Rc::new(Self {
+            base,
+            tab,
+            tab_index,
+        })
     }
 }
 
@@ -74,9 +87,9 @@ impl Tab {
                     })),
                 );
                 Self::Color(Rc::new(state))
-            },
+            }
 
-            _ => unimplemented!("unsupported tab kind!")
+            _ => unimplemented!("unsupported tab kind!"),
         }
     }
 

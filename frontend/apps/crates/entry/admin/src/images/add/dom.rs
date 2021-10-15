@@ -1,12 +1,11 @@
-use dominator::{html, Dom, clone};
-use shared::domain::image::{ImageId, ImageSearchQuery};
-use web_sys::{HtmlInputElement, File};
-use std::rc::Rc;
 use super::{actions, state::*};
-use utils::{routes::*, events};
+use dominator::{clone, html, Dom};
+use shared::domain::image::ImageSearchQuery;
+use std::rc::Rc;
+use utils::{events, routes::*};
+use web_sys::HtmlInputElement;
 
-pub struct ImageAddPage {
-}
+pub struct ImageAddPage {}
 
 impl ImageAddPage {
     pub fn render() -> Dom {
@@ -15,7 +14,7 @@ impl ImageAddPage {
         html!("image-add-page", {
             .child(html!("button-add", {
                 .property("slot", "button")
-                .event(clone!(state => move |evt:events::Click| {
+                .event(clone!(state => move |_evt:events::Click| {
                     if let Some(elem) = state.file_input.borrow().as_ref() {
                         elem.click();
                     }
@@ -25,7 +24,7 @@ impl ImageAddPage {
                 let q:String = evt.query();
                 let query = ImageSearchQuery {
                     q,
-                    page: None, 
+                    page: None,
                     tags: Vec::new(),
                     styles: Vec::new(),
                     age_ranges: Vec::new(),
@@ -68,4 +67,3 @@ impl ImageAddPage {
         })
     }
 }
-

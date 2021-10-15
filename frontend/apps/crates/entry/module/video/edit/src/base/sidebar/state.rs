@@ -1,18 +1,18 @@
 use crate::base::state::Base;
 use components::module::_common::edit::prelude::*;
-use futures_signals::signal::{Signal, Mutable, SignalExt};
+use futures_signals::signal::{Mutable, Signal};
 use std::rc::Rc;
 
 pub struct Sidebar {
     pub base: Rc<Base>,
-    pub tab_index: Mutable<Option<usize>>
+    pub tab_index: Mutable<Option<usize>>,
 }
 
 impl Sidebar {
     pub fn new(base: Rc<Base>) -> Self {
-        Self { 
+        Self {
             base,
-            tab_index: Mutable::new(None)
+            tab_index: Mutable::new(None),
         }
     }
 }

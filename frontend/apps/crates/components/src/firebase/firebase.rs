@@ -1,10 +1,13 @@
-use js_sys::Promise;
-use wasm_bindgen::prelude::*;
-use std::sync::atomic::{AtomicUsize, Ordering};
 use awsm_web::loaders::helpers::AbortController;
-use shared::{domain::jig::{JigId, module::ModuleId}, media::MediaLibrary};
+use js_sys::Promise;
+use shared::{
+    domain::jig::{module::ModuleId, JigId},
+    media::MediaLibrary,
+};
 use std::future::Future;
+use std::sync::atomic::{AtomicUsize, Ordering};
 use uuid::Uuid;
+use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::JsFuture;
 
 // If an AbortController is provided, then dropping it will cause the JS promise to reject and this
@@ -38,7 +41,7 @@ static GLOBAL_SCREENSHOT_LISTENER_COUNT: AtomicUsize = AtomicUsize::new(0);
 
 pub struct ScreenshotListener {
     pub(super) closure: Closure<dyn FnMut()>,
-    id: usize
+    id: usize,
 }
 
 impl ScreenshotListener {
@@ -46,10 +49,7 @@ impl ScreenshotListener {
         let id = GLOBAL_SCREENSHOT_LISTENER_COUNT.fetch_add(1, Ordering::SeqCst);
         let closure = Closure::wrap(Box::new(on_update) as Box<dyn FnMut()>);
 
-        Self {
-            closure,
-            id
-        }
+        Self { closure, id }
     }
 }
 
@@ -63,14 +63,14 @@ impl Drop for ScreenshotListener {
 pub fn listen_for_screenshot_updates(
     jig_id: &JigId,
     module_id: &ModuleId,
-    on_update: impl FnMut() + 'static
+    on_update: impl FnMut() + 'static,
 ) -> ScreenshotListener {
     init();
 
     let listener = ScreenshotListener::new(on_update);
 
     listenForScreenshotUpdates(
-        &jig_id.0.to_string(), 
+        &jig_id.0.to_string(),
         &module_id.0.to_string(),
         listener.id,
         &listener.closure,
@@ -107,7 +107,6 @@ extern "C" {
         module_id: &str,
         listener_id: usize,
         on_updated: &Closure<dyn FnMut()>,
-        
     );
 
     fn clearScreenshotListener(id: usize);

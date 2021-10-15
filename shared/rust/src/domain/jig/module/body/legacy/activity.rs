@@ -1,6 +1,5 @@
 pub use super::path::*;
 use serde::{Deserialize, Serialize};
-use serde_repr::*;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum Activity {

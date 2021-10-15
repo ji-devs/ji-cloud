@@ -1,9 +1,9 @@
 use std::{iter, rc::Rc};
 
-use search_state::{SearchOptions, SearchSelected};
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::{signal::Mutable, signal_vec::MutableVec};
-use shared::domain::jig::{JigResponse, JigId, JigSearchQuery};
+use search_state::{SearchOptions, SearchSelected};
+use shared::domain::jig::{JigId, JigResponse, JigSearchQuery};
 
 mod search_state;
 

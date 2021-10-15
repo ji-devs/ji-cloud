@@ -1,14 +1,19 @@
-use dominator::{Dom, html, clone};
-use utils::events;
-use std::rc::Rc;
-use futures_signals::{signal::Mutable, signal_vec::{MutableSignalVec, MutableVec}};
+use super::super::state::{Column, State};
+use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
 use futures_signals::signal_vec::SignalVecExt;
-use super::super::state::{State, Column};
+use futures_signals::{
+    signal::Mutable,
+    signal_vec::{MutableSignalVec, MutableVec},
+};
+use std::rc::Rc;
+use utils::events;
 
-
-
-fn render_list(slot: &str, list: MutableSignalVec<Column>, selected: Mutable<Option<Column>>) -> Dom {
+fn render_list(
+    slot: &str,
+    list: MutableSignalVec<Column>,
+    selected: Mutable<Option<Column>>,
+) -> Dom {
     html!("div", {
         .style("display", "contents")
         .property("slot", slot)
@@ -34,7 +39,12 @@ fn render_list(slot: &str, list: MutableSignalVec<Column>, selected: Mutable<Opt
     })
 }
 
-fn render_move_button(button_content: &str, list: Rc<MutableVec<Column>>, selected: Mutable<Option<Column>>, other_list: Rc<MutableVec<Column>>) -> Dom {
+fn render_move_button(
+    button_content: &str,
+    list: Rc<MutableVec<Column>>,
+    selected: Mutable<Option<Column>>,
+    other_list: Rc<MutableVec<Column>>,
+) -> Dom {
     html!("button-rect", {
         .text(button_content)
         .property("slot", "move-actions")
@@ -54,7 +64,12 @@ fn render_move_button(button_content: &str, list: Rc<MutableVec<Column>>, select
     })
 }
 
-fn render_sort_button(button_content: &str, list: Rc<MutableVec<Column>>, selected: Mutable<Option<Column>>, on_click: fn(usize, usize) -> Option<usize>) -> Dom {
+fn render_sort_button(
+    button_content: &str,
+    list: Rc<MutableVec<Column>>,
+    selected: Mutable<Option<Column>>,
+    on_click: fn(usize, usize) -> Option<usize>,
+) -> Dom {
     html!("button-rect", {
         .text(button_content)
         .property("slot", "sort-actions")
@@ -76,7 +91,6 @@ fn render_sort_button(button_content: &str, list: Rc<MutableVec<Column>>, select
         }))
     })
 }
-
 
 pub fn render(state: Rc<State>) -> Dom {
     let visible_selected: Mutable<Option<Column>> = Mutable::new(None);

@@ -1,14 +1,14 @@
-use crate::locale::state::{Column, SortKind, State};
-use crate::locale::state::Section;
 use crate::locale::actions::AsStringExt;
+use crate::locale::state::Section;
+use crate::locale::state::{Column, SortKind, State};
 use dominator::{clone, html, with_node, Dom};
 use futures_signals::{signal::SignalExt, signal_vec::SignalVecExt};
 use shared::domain::locale::ItemKind;
-use uuid::Uuid;
-use wasm_bindgen::{JsCast, UnwrapThrowExt};
-use std::collections::{BTreeMap, HashMap};
+use std::collections::BTreeMap;
 use std::rc::Rc;
 use utils::events;
+use uuid::Uuid;
+use wasm_bindgen::{JsCast, UnwrapThrowExt};
 use web_sys::{HtmlOptionElement, HtmlSelectElement};
 
 pub struct TableHeaderDom {}

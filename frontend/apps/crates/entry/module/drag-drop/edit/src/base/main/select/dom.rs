@@ -1,27 +1,28 @@
-use components::module::_common::edit::prelude::*;
-use dominator::{html, Dom, DomBuilder, clone, apply_methods};
-use web_sys::HtmlElement;
-use std::rc::Rc;
-use crate::base::state::*;
 use super::state::*;
-use utils::prelude::*;
+use crate::base::state::*;
+use components::module::_common::edit::prelude::*;
 use components::{
     audio::player_button::AudioPlayerButton,
+    box_outline::{BoxOutline, BoxOutlineMixins, BoxOutlineStyle},
     buttons::{Button, ButtonStyle, ButtonStyleIcon},
-    box_outline::{BoxOutline,BoxOutlineMixins, BoxOutlineStyle},
-    backgrounds::dom::render_backgrounds, 
-    stickers::dom::{render_stickers, mixin_sticker_button, StickerRawRenderOptions, BaseRawRenderOptions, render_sticker_raw},
+    stickers::dom::{
+        mixin_sticker_button, render_sticker_raw, BaseRawRenderOptions, StickerRawRenderOptions,
+    },
 };
+use dominator::{clone, html, Dom, DomBuilder};
+use std::rc::Rc;
+use utils::prelude::*;
+use web_sys::HtmlElement;
 
 use futures_signals::{
+    signal::{Mutable, SignalExt},
     signal_vec::{always, SignalVecExt},
-    signal::{Mutable, SignalExt}
 };
 
 impl MainSelect {
     pub fn render(state: Rc<Self>) -> Dom {
         let theme_id = state.base.theme_id.get();
-        
+
         html!("empty-fragment", {
             .children_signal_vec(
                 always(
@@ -47,14 +48,19 @@ impl MainSelect {
         })
     }
 
-    pub fn render_interactive(state: Rc<Self>, theme_id: ThemeId, item: SelectItem, data: Interactive) -> Dom {
+    pub fn render_interactive(
+        state: Rc<Self>,
+        theme_id: ThemeId,
+        item: SelectItem,
+        data: Interactive,
+    ) -> Dom {
         let mut opts = BaseRawRenderOptions::default();
-        let size:Mutable<Option<(f64, f64)>> = Mutable::new(None);
+        let size: Mutable<Option<(f64, f64)>> = Mutable::new(None);
         let index = item.index;
 
         opts.set_transform_override(item.get_transform_override());
 
-        opts.set_mixin(clone!(state, index, item => move |dom| {
+        opts.set_mixin(clone!(state, index => move |dom| {
             dom
                 .apply(Self::mixin_click(state.clone(), index))
         }));
@@ -71,7 +77,7 @@ impl MainSelect {
             .child(render_sticker_raw(&raw_sticker, theme_id, Some(opts)))
             .child(BoxOutline::render_mixins(
                     {
-                        let mut box_outline = BoxOutline::new_transform_size(
+                        let box_outline = BoxOutline::new_transform_size(
                             BoxOutlineStyle::Regular,
                             move || transform_override.get_signal(transform.clone()),
                             move || size.signal_cloned()
@@ -102,12 +108,12 @@ impl MainSelect {
                                 }))
                         })),
 
-                        //adds a close button to the top-right corner 
+                        //adds a close button to the top-right corner
                         top_right: Some(clone!(state, index => move |dom:DomBuilder<HtmlElement>| {
                             dom.child(Button::render(
                                 Button::new(
                                     ButtonStyle::Icon(ButtonStyleIcon::BlueX),
-                                    clone!(state, index => move || { 
+                                    clone!(state, index => move || {
                                         state.base.set_drag_item_deselected(index)
                                     })
                                 ),
@@ -115,7 +121,7 @@ impl MainSelect {
                             ))
                         })),
 
-                        top_left: Some(clone!(state, index => move |dom:DomBuilder<HtmlElement>| {
+                        top_left: Some(|dom:DomBuilder<HtmlElement>| {
                             dom.child_signal(
                                 data.audio.signal_cloned()
                                     .map(|audio| {
@@ -124,11 +130,10 @@ impl MainSelect {
                                         })
                                     })
                             )
-                        }))
+                        })
                     }
             ))
         })
-
     }
 
     pub fn render_static(state: Rc<Self>, theme_id: ThemeId, item: SelectItem) -> Dom {
@@ -142,13 +147,16 @@ impl MainSelect {
         render_sticker_raw(&raw_sticker, theme_id, Some(opts))
     }
 
-    pub fn mixin_click(state:Rc<Self>, index: usize) -> impl Fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement> {
+    pub fn mixin_click(
+        state: Rc<Self>,
+        index: usize,
+    ) -> impl Fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement> {
         move |dom| {
-            dom
-                .apply(mixin_sticker_button)
-                .event(clone!(state, index => move |evt:events::Click| {
+            dom.apply(mixin_sticker_button).event(
+                clone!(state, index => move |_evt:events::Click| {
                     state.base.set_drag_item_selected(index)
-                }))
+                }),
+            )
         }
     }
 }

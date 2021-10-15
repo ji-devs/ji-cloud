@@ -6,15 +6,18 @@ use shared::{
     api::endpoints::{category, jig, meta, ApiEndpoint},
     domain::{
         category::{Category, CategoryId, CategoryResponse, CategoryTreeScope, GetCategoryRequest},
-        jig::{JigId, JigResponse, JigData, JigUpdateDraftDataRequest, PrivacyLevel},
+        jig::{JigData, JigId, JigResponse, JigUpdateDraftDataRequest, PrivacyLevel},
         meta::MetadataResponse,
     },
     error::{EmptyError, MetadataNotFound},
 };
-use utils::{prelude::{api_with_auth, api_with_auth_empty, UnwrapJiExt}, routes::{JigEditRoute, JigRoute, Route}};
+use utils::{
+    prelude::{api_with_auth, api_with_auth_empty, UnwrapJiExt},
+    routes::{JigEditRoute, JigRoute, Route},
+};
 
-use super::{publish_jig::PublishJig, state::State};
 use super::super::state::State as JigEditState;
+use super::{publish_jig::PublishJig, state::State};
 
 impl State {
     pub async fn load_new(jig_edit_state: Rc<JigEditState>) -> Self {
@@ -43,16 +46,17 @@ impl State {
             meta.goals,
             meta.age_ranges,
             meta.affiliations,
-            jig_edit_state
+            jig_edit_state,
         )
-
     }
 
     pub fn navigate_to_cover(&self) {
         let cover_module_id = self.jig.modules.lock_ref().first().map(|m| m.id.clone());
 
         if let Some(cover_module_id) = cover_module_id {
-            self.jig_edit_state.route.set(JigEditRoute::Module(cover_module_id));
+            self.jig_edit_state
+                .route
+                .set(JigEditRoute::Module(cover_module_id));
         };
     }
 }
@@ -72,16 +76,14 @@ fn get_categories_labels(
 }
 
 fn set_default_values(jig: &mut JigData, meta: &MetadataResponse) {
-    let available_affiliations = meta.affiliations
+    let available_affiliations = meta
+        .affiliations
         .iter()
         .map(|affiliation| affiliation.id.clone())
         .collect();
     jig.affiliations = available_affiliations;
 
-    let available_ages = meta.age_ranges
-        .iter()
-        .map(|age| age.id.clone())
-        .collect();
+    let available_ages = meta.age_ranges.iter().map(|age| age.id.clone()).collect();
     jig.age_ranges = available_ages;
 
     jig.privacy_level = PrivacyLevel::default()
@@ -126,9 +128,13 @@ fn form_invalid(state: Rc<State>) -> bool {
 async fn save_and_publish(state: Rc<State>) -> Result<(), ()> {
     let path = jig::UpdateDraftData::PATH.replace("{id}", &state.jig.id.0.to_string());
     let req = state.jig.to_jig_update_request();
-    api_with_auth_empty::<MetadataNotFound, JigUpdateDraftDataRequest>(&path, jig::UpdateDraftData::METHOD, Some(req))
-        .await
-        .map_err(|_| ())?;
+    api_with_auth_empty::<MetadataNotFound, JigUpdateDraftDataRequest>(
+        &path,
+        jig::UpdateDraftData::METHOD,
+        Some(req),
+    )
+    .await
+    .map_err(|_| ())?;
 
     let path = jig::Publish::PATH.replace("{id}", &state.jig.id.0.to_string());
     api_with_auth_empty::<EmptyError, ()>(&path, jig::Publish::METHOD, None)

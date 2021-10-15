@@ -1,8 +1,5 @@
-use std::cell::RefCell;
-use std::rc::Rc;
-use crate::base::state::Base;
-use shared::domain::jig::module::body::drag_drop::{Next, Hint};
 use super::state::PlaySettingsState;
+use shared::domain::jig::module::body::drag_drop::{Hint, Next};
 
 impl PlaySettingsState {
     pub fn set_hint(&self, hint: Hint) {
@@ -24,17 +21,16 @@ impl PlaySettingsState {
         })
     }
 
-
     pub fn set_has_time_limit(&self, flag: bool) {
         self.base.play_settings.has_time_limit.set_neq(flag);
 
         self.base.history.push_modify(|raw| {
             if let Some(content) = &mut raw.content {
                 if !flag {
-                    content.play_settings.time_limit = None; 
+                    content.play_settings.time_limit = None;
                 } else {
                     let value = self.base.play_settings.time_limit.get();
-                    content.play_settings.time_limit = Some(value); 
+                    content.play_settings.time_limit = Some(value);
                 }
             }
         })

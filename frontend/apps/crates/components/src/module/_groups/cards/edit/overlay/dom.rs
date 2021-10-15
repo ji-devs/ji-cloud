@@ -7,7 +7,6 @@ use dominator::{html, Dom};
 use futures_signals::{map_ref, signal::SignalExt};
 use std::rc::Rc;
 
-
 // This is really just because originally we didn't have self-managed overlays
 // it could be gotten rid of and tooltips rendered in-place
 

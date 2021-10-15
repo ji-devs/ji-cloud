@@ -6,10 +6,10 @@ use std::rc::Rc;
 use utils::prelude::*;
 
 use crate::{
-    tabs::{MenuTab, MenuTabKind},
     image::search::dom::render as render_image_search,
     lists::{dual::dom::render as render_dual_list, single::dom::render as render_single_list},
     module::_groups::cards::edit::{state::*, strings},
+    tabs::{MenuTab, MenuTabKind},
 };
 
 pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<Step1<RawData, E>>) -> Dom {
@@ -95,7 +95,7 @@ fn render_tab<RawData: RawDataExt, E: ExtraExt>(
     state: Rc<Step1<RawData, E>>,
     tab: Mutable<Tab>,
     tab_kind: MenuTabKind,
-    enabled: bool
+    _enabled: bool,
 ) -> Dom {
     MenuTab::render(
         MenuTab::new(
@@ -106,8 +106,8 @@ fn render_tab<RawData: RawDataExt, E: ExtraExt>(
             }))),
             clone!(state, tab_kind => move || {
                 tab.set(Tab::new(state.base.clone(), tab_kind));
-            })
+            }),
         ),
-        Some("tabs")
+        Some("tabs"),
     )
 }

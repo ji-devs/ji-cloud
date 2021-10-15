@@ -1,11 +1,14 @@
 use crate::base::state::*;
-use dominator_helpers::signals::{DefaultSignal, OptionSignal};
-use shared::domain::jig::module::body::{Transform, _groups::design::Sticker as RawSticker};
-use utils::{drag::Drag, math::PointI32};
+
+use shared::domain::jig::module::body::_groups::design::Sticker as RawSticker;
 use std::rc::Rc;
-use dominator::clone;
-use futures_signals::{map_ref, signal::{Mutable, ReadOnlyMutable, Signal, SignalExt}, signal_vec::{SignalVec, SignalVecExt}};
+use utils::drag::Drag;
+
 use components::stickers::dom::TransformOverride;
+use futures_signals::{
+    signal::{Mutable, SignalExt},
+    signal_vec::SignalVecExt,
+};
 
 pub struct MainDrag {
     pub base: Rc<Base>,
@@ -14,24 +17,21 @@ pub struct MainDrag {
 
 impl MainDrag {
     pub fn new(base: Rc<Base>) -> Rc<Self> {
-
-        let items = base.stickers.list.lock_ref()
+        let items = base
+            .stickers
+            .list
+            .lock_ref()
             .iter()
             .enumerate()
-            .map(|(index, item)| {
-                DragItem {
-                    item: item.clone(),
-                    index,
-                    drag: Mutable::new(None),
-                    base: base.clone(),
-                }
+            .map(|(index, item)| DragItem {
+                item: item.clone(),
+                index,
+                drag: Mutable::new(None),
+                base: base.clone(),
             })
             .collect();
 
-        Rc::new(Self {
-            base,
-            items
-        })
+        Rc::new(Self { base, items })
     }
 }
 
@@ -51,12 +51,16 @@ impl DragItem {
     pub fn get_is_interactive(&self) -> bool {
         match &*self.item.kind.lock_ref() {
             ItemKind::Interactive(_) => true,
-            _ => false
+            _ => false,
         }
-
     }
 
-    pub fn get_transform_override(&self) -> TransformOverride { 
-        TransformOverride::Sometimes(self.item.get_interactive_unchecked().target_transform.read_only())
+    pub fn get_transform_override(&self) -> TransformOverride {
+        TransformOverride::Sometimes(
+            self.item
+                .get_interactive_unchecked()
+                .target_transform
+                .read_only(),
+        )
     }
 }

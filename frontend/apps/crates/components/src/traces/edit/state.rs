@@ -1,14 +1,17 @@
 use futures_signals::{
     map_ref,
-    signal::{Mutable, ReadOnlyMutable, Signal, SignalExt},
-    signal_vec::{MutableVec, SignalVec, SignalVecExt},
+    signal::{Mutable, ReadOnlyMutable, Signal},
+    signal_vec::{MutableVec, SignalVecExt},
 };
 
-use std::rc::Rc;
+use shared::domain::jig::module::body::{
+    Audio,
+    _groups::design::{Trace as RawTrace, TraceKind},
+};
 use std::cell::RefCell;
-use shared::domain::jig::module::body::{Audio, _groups::design::{Trace as RawTrace, TraceKind}};
+use std::rc::Rc;
 
-use super::{select::trace::state::*, draw::state::*};
+use super::{draw::state::*, select::trace::state::*};
 use crate::traces::utils::TraceExt;
 use utils::resize::get_resize_info;
 
@@ -59,7 +62,6 @@ impl TracesEdit {
         draw_kind: TraceKind,
         callbacks: TracesEditCallbacks,
     ) -> Rc<Self> {
-
         let _self = Rc::new(Self {
             list: MutableVec::new(),
             selected_index: Mutable::new(None),
@@ -96,21 +98,15 @@ impl TracesEdit {
     }
 
     pub fn audio_signal(&self, index: usize) -> impl Signal<Item = Option<Audio>> {
-        self.list.signal_vec_cloned()
-            .to_signal_map(move |traces| {
-                traces
-                    .get(index)
-                    .and_then(|trace| trace.audio.clone())
-            })
+        self.list
+            .signal_vec_cloned()
+            .to_signal_map(move |traces| traces.get(index).and_then(|trace| trace.audio.clone()))
     }
 
     pub fn text_signal(&self, index: usize) -> impl Signal<Item = Option<String>> {
-        self.list.signal_vec_cloned()
-            .to_signal_map(move |traces| {
-                traces
-                    .get(index)
-                    .and_then(|trace| trace.text.clone())
-            })
+        self.list
+            .signal_vec_cloned()
+            .to_signal_map(move |traces| traces.get(index).and_then(|trace| trace.text.clone()))
     }
 
     pub fn selected_signal(

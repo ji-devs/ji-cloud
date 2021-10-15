@@ -1,48 +1,28 @@
 use components::module::_common::edit::prelude::*;
-use components::audio::mixer::AudioMixer;
-use std::rc::Rc;
-use shared::domain::jig::{
-    JigId, 
-    module::{
-        ModuleId, 
-        body::{
-            ThemeChoice,
-            Audio,
-            Instructions,
-            _groups::design::Backgrounds as RawBackgrounds, 
-            poster::{
-                Step,
-                Mode,
-                Content as RawContent, 
-                ModuleData as RawData
-            },
 
-        }
-    }
-};
-use futures_signals::{
-    map_ref,
-    signal::{self, Signal, SignalExt, ReadOnlyMutable, Mutable},
-    signal_vec::MutableVec
-};
-use utils::prelude::*;
 use components::{
-    text_editor::{
-        state::State as TextEditorState,
-        callbacks::Callbacks as TextEditorCallbacks
-    },
+    backgrounds::{callbacks::Callbacks as BackgroundsCallbacks, state::Backgrounds},
     stickers::{
-        state::{Stickers, Sticker},
-        callbacks::Callbacks as StickersCallbacks
+        callbacks::Callbacks as StickersCallbacks,
+        state::{Sticker, Stickers},
     },
-    backgrounds::{
-        state::Backgrounds,
-        callbacks::Callbacks as BackgroundsCallbacks,
-    },
-    tooltip::state::State as TooltipState
+    text_editor::{callbacks::Callbacks as TextEditorCallbacks, state::State as TextEditorState},
 };
 use dominator::clone;
+use futures_signals::signal::{self, Mutable, ReadOnlyMutable, Signal, SignalExt};
+use shared::domain::jig::{
+    module::{
+        body::{
+            poster::{Mode, ModuleData as RawData, Step},
+            Instructions, ThemeChoice,
+        },
+        ModuleId,
+    },
+    JigId,
+};
 use std::cell::RefCell;
+use std::rc::Rc;
+use utils::prelude::*;
 pub struct Base {
     pub history: Rc<HistoryStateImpl<RawData>>,
     pub step: ReadOnlyMutable<Step>,
@@ -53,17 +33,14 @@ pub struct Base {
     pub module_id: ModuleId,
     pub jig_theme_id: Mutable<ThemeId>,
     // Poster-specific
-    pub backgrounds: Rc<Backgrounds>, 
-    pub stickers: Rc<Stickers<Sticker>>, 
+    pub backgrounds: Rc<Backgrounds>,
+    pub stickers: Rc<Stickers<Sticker>>,
     pub text_editor: Rc<TextEditorState>,
 }
 
-
 impl Base {
-
     pub async fn new(init_args: BaseInitFromRawArgs<RawData, Mode, Step>) -> Rc<Self> {
-
-        let BaseInitFromRawArgs { 
+        let BaseInitFromRawArgs {
             raw,
             jig_id,
             jig_theme_id,
@@ -76,17 +53,17 @@ impl Base {
         } = init_args;
 
         let content = raw.content.unwrap_ji();
-        let base_content = content.base; 
+        let base_content = content.base;
 
-        let _self_ref:Rc<RefCell<Option<Rc<Self>>>> = Rc::new(RefCell::new(None));
+        let _self_ref: Rc<RefCell<Option<Rc<Self>>>> = Rc::new(RefCell::new(None));
 
         let instructions = Mutable::new(base_content.instructions);
-      
-        let stickers_ref:Rc<RefCell<Option<Rc<Stickers<Sticker>>>>> = Rc::new(RefCell::new(None));
+
+        let stickers_ref: Rc<RefCell<Option<Rc<Stickers<Sticker>>>>> = Rc::new(RefCell::new(None));
 
         let text_editor = TextEditorState::new(
             theme_id.clone(),
-            None, 
+            None,
             TextEditorCallbacks::new(
                 //New text
                 Some(clone!(stickers_ref => move |value:&str| {
@@ -105,54 +82,48 @@ impl Base {
                     if let Some(stickers) = stickers_ref.borrow().as_ref() {
                         stickers.stop_current_text_editing();
                     }
-                }))
-        ));
-
+                })),
+            ),
+        );
 
         let backgrounds = Rc::new(Backgrounds::from_raw(
-                &base_content.backgrounds,
-                theme_id.clone(),
-                BackgroundsCallbacks::new(
-                    Some(clone!(history => move |raw_bgs| {
-                        history.push_modify(|raw| {
-                            if let Some(content) = &mut raw.content {
-                                content.base.backgrounds = raw_bgs;
-                            }
-                        });
-                    }))
-                )
+            &base_content.backgrounds,
+            theme_id.clone(),
+            BackgroundsCallbacks::new(Some(clone!(history => move |raw_bgs| {
+                history.push_modify(|raw| {
+                    if let Some(content) = &mut raw.content {
+                        content.base.backgrounds = raw_bgs;
+                    }
+                });
+            }))),
         ));
 
         let stickers = Stickers::new(
-                text_editor.clone(),
-                StickersCallbacks::new(
-                    Some(clone!(history => move |stickers:&[Sticker]| {
-                        history.push_modify(|raw| {
-                            if let Some(content) = &mut raw.content {
-                                content.base.stickers = stickers 
-                                    .iter()
-                                    .map(|sticker| {
-                                        sticker.to_raw()
-                                    })
-                                    .collect();
-                            }
-                        });
-                    }))
-                )
+            text_editor.clone(),
+            StickersCallbacks::new(Some(clone!(history => move |stickers:&[Sticker]| {
+                history.push_modify(|raw| {
+                    if let Some(content) = &mut raw.content {
+                        content.base.stickers = stickers
+                            .iter()
+                            .map(|sticker| {
+                                sticker.to_raw()
+                            })
+                            .collect();
+                    }
+                });
+            }))),
         );
-       
+
         stickers.replace_all(
-            base_content.stickers.clone()
+            base_content
+                .stickers
+                .clone()
                 .iter()
-                .map(|raw_sticker| {
-                    Sticker::new(stickers.clone(), raw_sticker)
-                })
-                .collect::<Vec<Sticker>>()
+                .map(|raw_sticker| Sticker::new(stickers.clone(), raw_sticker))
+                .collect::<Vec<Sticker>>(),
         );
 
         *stickers_ref.borrow_mut() = Some(stickers.clone());
-
-
 
         let _self = Rc::new(Self {
             jig_id,
@@ -173,7 +144,7 @@ impl Base {
         _self
     }
 
-    pub fn theme_id_str_signal(&self) -> impl Signal<Item = &'static str> { 
+    pub fn _theme_id_str_signal(&self) -> impl Signal<Item = &'static str> {
         self.theme_id.signal().map(|id| id.as_str_id())
     }
 }
@@ -181,7 +152,7 @@ impl Base {
 impl BaseExt<Step> for Base {
     type NextStepAllowedSignal = impl Signal<Item = bool>;
 
-    fn allowed_step_change(&self, from:Step, to:Step) -> bool {
+    fn allowed_step_change(&self, _from: Step, _to: Step) -> bool {
         true
     }
 

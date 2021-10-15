@@ -1,7 +1,7 @@
+use super::super::config::{MIN_HEIGHT_THRESHHOLD, MIN_WIDTH_THRESHHOLD};
 use super::{menu::state::*, state::*, trace::state::*};
 use crate::traces::utils::TraceExt;
 use utils::{drag::Drag, prelude::*, resize::get_resize_info};
-use super::super::config::{MIN_HEIGHT_THRESHHOLD, MIN_WIDTH_THRESHHOLD};
 
 impl Draw {
     ///
@@ -26,7 +26,6 @@ impl Draw {
             self.propogate_to_trace(true);
 
             if let Some(bounds) = self.trace.calc_bounds(false) {
-                
                 if bounds.width >= MIN_WIDTH_THRESHHOLD && bounds.height >= MIN_HEIGHT_THRESHHOLD {
                     self.display_trace.set_neq(true);
                     self.recreate_deco();
@@ -48,7 +47,6 @@ impl Draw {
 
     pub fn recreate_deco(&self) {
         if let Some(bounds) = self.trace.calc_bounds(true) {
-
             let resize_info = get_resize_info();
             let (width, height) = resize_info.get_size_full(bounds.width, bounds.height);
 

@@ -1,7 +1,7 @@
 use lazy_static::lazy_static;
 
 #[derive(Clone, Debug)]
-pub struct Language (pub &'static str, pub &'static str);
+pub struct Language(pub &'static str, pub &'static str);
 
 const LANGUAGE_ENGLISH_CODE: &'static str = "en";
 const STR_LANGUAGE_ENGLISH: &'static str = "English";
@@ -30,11 +30,9 @@ const STR_LANGUAGE_ITALIAN: &'static str = "Italian";
 const LANGUAGE_YIDDISH_CODE: &'static str = "yi";
 const STR_LANGUAGE_YIDDISH: &'static str = "Yiddish";
 
-
 lazy_static! {
-    pub static ref PLATFORM_LANGUAGES: Vec<Language> = vec![
-        Language(LANGUAGE_ENGLISH_CODE, STR_LANGUAGE_ENGLISH),
-    ];
+    pub static ref PLATFORM_LANGUAGES: Vec<Language> =
+        vec![Language(LANGUAGE_ENGLISH_CODE, STR_LANGUAGE_ENGLISH),];
     pub static ref EMAIL_LANGUAGES: Vec<Language> = vec![
         Language(LANGUAGE_ENGLISH_CODE, STR_LANGUAGE_ENGLISH),
         Language(LANGUAGE_HEBREW_CODE, STR_LANGUAGE_HEBREW),
@@ -73,7 +71,7 @@ impl Language {
             LANGUAGE_HUNGARIAN_CODE => STR_LANGUAGE_HUNGARIAN,
             LANGUAGE_ITALIAN_CODE => STR_LANGUAGE_ITALIAN,
             LANGUAGE_YIDDISH_CODE => STR_LANGUAGE_YIDDISH,
-            _ => "?"
+            _ => "?",
         }
     }
 
@@ -92,7 +90,7 @@ impl Language {
             STR_LANGUAGE_HUNGARIAN => LANGUAGE_HUNGARIAN_CODE,
             STR_LANGUAGE_ITALIAN => LANGUAGE_ITALIAN_CODE,
             STR_LANGUAGE_YIDDISH => LANGUAGE_YIDDISH_CODE,
-            _ => "?"
+            _ => "?",
         }
     }
 

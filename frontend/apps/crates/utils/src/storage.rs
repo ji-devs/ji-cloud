@@ -1,8 +1,8 @@
-use web_sys::{window, Storage};
-use wasm_bindgen::prelude::*;
 use crate::unwrap::UnwrapJiExt;
+use wasm_bindgen::prelude::*;
+use web_sys::{window, Storage};
 
-pub const CSRF_STORAGE_NAME:&'static str = "X-CSRF";
+pub const CSRF_STORAGE_NAME: &'static str = "X-CSRF";
 
 pub fn load_csrf_token() -> Option<String> {
     let res = get_local_storage()
@@ -17,7 +17,7 @@ pub fn load_csrf_token() -> Option<String> {
     res
 }
 
-pub fn save_csrf_token(csrf:&str) {
+pub fn save_csrf_token(csrf: &str) {
     let local_storage = get_local_storage().unwrap_ji();
 
     local_storage.set(CSRF_STORAGE_NAME, csrf).unwrap_ji()
@@ -30,7 +30,8 @@ pub fn delete_csrf_token() -> Result<(), JsValue> {
 }
 
 pub fn get_local_storage() -> Result<Storage, JsValue> {
-    window().unwrap_ji()
+    window()
+        .unwrap_ji()
         .local_storage()?
         .ok_or(JsValue::from_str("could not get local storage!"))
 }

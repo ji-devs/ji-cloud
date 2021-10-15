@@ -1,9 +1,6 @@
-use futures_signals::signal::{Signal, SignalExt, Mutable};
-
 use shared::domain::jig::module::body::{
-    Transform,
-    Audio,
-    _groups::design::{Trace as RawTrace, TraceShape, TraceKind},
+    Audio, Transform,
+    _groups::design::{Trace as RawTrace, TraceKind, TraceShape},
 };
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -43,8 +40,6 @@ impl EditSelectTrace {
 
         _self
     }
-
-
 }
 
 impl TraceExt for EditSelectTrace {

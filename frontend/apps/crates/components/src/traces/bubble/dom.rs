@@ -3,10 +3,10 @@ use dominator::{html, Dom, DomBuilder};
 use std::rc::Rc;
 
 use super::state::*;
-use crate::audio::mixer::{AUDIO_MIXER, AudioPath, AudioSourceExt};
+
 use crate::tooltip::dom::render_mixin as render_tooltip_mixin;
-use web_sys::HtmlElement;
 use dominator::clone;
+use web_sys::HtmlElement;
 
 impl TraceBubble {
     pub fn render(state: Rc<Self>) -> Dom {
@@ -20,15 +20,16 @@ impl TraceBubble {
 
         if let Some(tooltip) = state.tooltip.as_ref() {
             render_tooltip_mixin(tooltip.clone(), |dom: DomBuilder<HtmlElement>| {
-                state.fade
+                state
+                    .fade
                     .render(dom)
-                    .after_removed(clone!(state => move |elem| {
+                    .after_removed(clone!(state => move |_elem| {
                         *state.audio_handle.borrow_mut() = None;
                     }))
             })
         } else {
             html!("empty-fragment", {
-                .after_removed(clone!(state => move |elem| {
+                .after_removed(clone!(state => move |_elem| {
                     *state.audio_handle.borrow_mut() = None;
                 }))
             })

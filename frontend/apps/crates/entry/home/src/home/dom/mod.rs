@@ -1,10 +1,14 @@
 use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
-use shared::domain::jig::JigPlayerSettings;
-use utils::jig::JigPlayerOptions;
-use std::rc::Rc;
 
-use components::{page_footer, page_header::{self, state::PageLinks}, player_popup::{PlayerPopup, PreviewPopupCallbacks}};
+use std::rc::Rc;
+use utils::jig::JigPlayerOptions;
+
+use components::{
+    page_footer,
+    page_header::{self, state::PageLinks},
+    player_popup::{PlayerPopup, PreviewPopupCallbacks},
+};
 
 use super::state::{HomePageMode, State};
 

@@ -34,20 +34,21 @@ where
     Overlay: OverlayExt + 'static,
 {
     match preview_mode {
-        Some(preview_mode) => {
-            match preview_mode {
-                PreviewMode::Preview => {
-                    vec![
-                        render_preview_header(RawData::kind(), state.clone()),
-                        render_preview_main(RawData::kind(), jig_id, module_id, state.clone()),
-                        render_preview_overlay(RawData::kind(), jig_id, module_id, state.clone()),
-                    ]
-                },
-                PreviewMode::PostPreview(_) => {
-                    vec![
-                        render_preview_overlay(RawData::kind(), jig_id, module_id, state.clone()),
-                    ]
-                }
+        Some(preview_mode) => match preview_mode {
+            PreviewMode::Preview => {
+                vec![
+                    render_preview_header(RawData::kind(), state.clone()),
+                    render_preview_main(RawData::kind(), jig_id, module_id, state.clone()),
+                    render_preview_overlay(RawData::kind(), jig_id, module_id, state.clone()),
+                ]
+            }
+            PreviewMode::PostPreview(_) => {
+                vec![render_preview_overlay(
+                    RawData::kind(),
+                    jig_id,
+                    module_id,
+                    state.clone(),
+                )]
             }
         },
         None => {

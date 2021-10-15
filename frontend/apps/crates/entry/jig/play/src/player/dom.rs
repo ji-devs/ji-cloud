@@ -156,7 +156,9 @@ pub fn render(state: Rc<State>) -> Dom {
     })
 }
 
-fn jig_and_active_module_signal(state: Rc<State>) -> impl Signal<Item = (Option<JigResponse>, usize)> {
+fn jig_and_active_module_signal(
+    state: Rc<State>,
+) -> impl Signal<Item = (Option<JigResponse>, usize)> {
     map_ref! {
         let jig = state.jig.signal_cloned(),
         let active_module = state.active_module.signal_cloned() => (

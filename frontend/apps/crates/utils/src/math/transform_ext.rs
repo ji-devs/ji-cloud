@@ -12,10 +12,9 @@
  * or Matrix4, and handing that off to math utils (native or 3rd party)
  */
 
-use crate::resize::ResizeInfo;
-use shared::domain::jig::module::body::{Vec3, Vec4, Transform};
 use super::mat4::Matrix4;
-use futures_signals::signal::{Signal, SignalExt};
+use crate::resize::ResizeInfo;
+use shared::domain::jig::module::body::{Transform, Vec3, Vec4};
 
 pub trait TransformExt: Clone {
     fn to_mat4(&self) -> Matrix4;
@@ -24,8 +23,7 @@ pub trait TransformExt: Clone {
     fn identity() -> Self;
 
     /// rotate around the z axis, in radians
-    fn rotate_z(&mut self, angle:f64);
-
+    fn rotate_z(&mut self, angle: f64);
 
     fn get_translation_2d(&self) -> (f64, f64);
     fn set_translation_2d(&mut self, x: f64, y: f64);
@@ -35,7 +33,7 @@ pub trait TransformExt: Clone {
     }
 
     fn set_origin_2d(&mut self, x: f64, y: f64);
-    
+
     fn get_scale_2d(&self) -> (f64, f64);
     fn set_scale_2d(&mut self, x: f64, y: f64);
     fn set_scale_x(&mut self, x: f64);
@@ -76,11 +74,12 @@ pub trait RenderableMatrix {
     fn as_matrix_string(&self) -> String;
 }
 
-impl RenderableMatrix for [f64;16] {
+impl RenderableMatrix for [f64; 16] {
     fn as_matrix_string(&self) -> String {
         let mat = self;
 
-        format!("matrix3d({}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})",
+        format!(
+            "matrix3d({}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})",
             mat[0],
             mat[1],
             mat[2],
@@ -101,15 +100,11 @@ impl RenderableMatrix for [f64;16] {
     }
 }
 
-
-
-
 impl TransformExt for Transform {
-            //translation: Vec3([0.0, 0.0, 0.0]),
-            //rotation: Vec4([0.0, 0.0, 0.0, 1.0]),
-            //scale: Vec3([1.0, 1.0, 1.0]),
-            //origin: Vec3([0.0, 0.0, 0.0]),
-
+    //translation: Vec3([0.0, 0.0, 0.0]),
+    //rotation: Vec4([0.0, 0.0, 0.0, 1.0]),
+    //scale: Vec3([1.0, 1.0, 1.0]),
+    //origin: Vec3([0.0, 0.0, 0.0]),
 
     fn nudge_for_duplicate(&mut self) {
         let translation = &mut self.translation.0;
@@ -135,9 +130,7 @@ impl TransformExt for Transform {
     }
 
     fn scale_matrix_string(&self) -> String {
-        self.scale_only()
-            .to_mat4()
-            .as_matrix_string()
+        self.scale_only().to_mat4().as_matrix_string()
     }
     //CSS requires the full 4x4 or 6-element 2d matrix, so we return the whole thing
     //but set the scale and translation to identity
@@ -148,9 +141,7 @@ impl TransformExt for Transform {
         t
     }
     fn rotation_matrix_string(&self) -> String {
-        self.rotation_only()
-            .to_mat4()
-            .as_matrix_string()
+        self.rotation_only().to_mat4().as_matrix_string()
     }
     fn invert_rotation_matrix_string(&self) -> String {
         let mut t = self.clone();
@@ -179,14 +170,14 @@ impl TransformExt for Transform {
         self.rotation.0 = [0.0, 0.0, 0.0, 1.0];
     }
 
-    fn rotate_z(&mut self, mut rad:f64) {
+    fn rotate_z(&mut self, mut rad: f64) {
         let quat = &mut self.rotation.0;
         rad *= 0.5;
         let ax = quat[0];
         let ay = quat[1];
         let az = quat[2];
         let aw = quat[3];
-        let bz = rad.sin(); 
+        let bz = rad.sin();
         let bw = rad.cos();
         quat[0] = ax * bw + ay * bz;
         quat[1] = ay * bw - ax * bz;
@@ -233,27 +224,22 @@ impl TransformExt for Transform {
     }
     /// Takes into account that translation coordinates are normalized
     fn denormalize(&mut self, resize_info: &ResizeInfo) {
-
-
-        let mut translation = &mut self.translation.0;
-        let mut rotation = &mut self.rotation.0;
-        let mut scale = &mut self.scale.0;
-        let mut origin = &mut self.origin.0;
+        let translation = &mut self.translation.0;
+        let _rotation = &mut self.rotation.0;
+        let _scale = &mut self.scale.0;
+        let _origin = &mut self.origin.0;
 
         let (tx, ty) = resize_info.get_pos_denormalized(translation[0], translation[1]);
 
-
-        translation[0] = tx; 
-        translation[1] = ty; 
-
+        translation[0] = tx;
+        translation[1] = ty;
     }
     fn to_mat4(&self) -> Matrix4 {
         Matrix4::new_from_trs_origin(
-            &self.translation.0, 
-            &self.rotation.0, 
+            &self.translation.0,
+            &self.rotation.0,
             &self.scale.0,
-            &self.origin.0
+            &self.origin.0,
         )
     }
-
 }

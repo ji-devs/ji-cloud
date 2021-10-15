@@ -1,27 +1,12 @@
-use dominator::{html, Dom, DomBuilder, clone};
-use gloo_timers::future::TimeoutFuture;
-use wasm_bindgen_futures::spawn_local;
-use web_sys::HtmlElement;
-use std::rc::Rc;
-use super::state::*;
-use components::module::_groups::cards::{
-    lookup::{self, Side},
-    play::card::dom::{render_card, render_card_mixin, CardOptions, Size},
-    edit::{
-        config,
-        state::*
-    },
-};
-use futures_signals::{
-    map_ref,
-    signal::{Mutable, Signal, SignalExt, ReadOnlyMutable}
-};
+use dominator::{clone, html, Dom};
 
-use shared::domain::jig::module::body::{
-    ThemeId,
-    ModeExt,
-    _groups::cards::{Mode, Step, Card},
+use super::state::*;
+use components::module::_groups::cards::play::card::dom::{
+    render_card, render_card_mixin, CardOptions, Size,
 };
+use futures_signals::signal::SignalExt;
+use std::rc::Rc;
+
 use rand::prelude::*;
 
 use utils::prelude::*;
@@ -67,7 +52,7 @@ impl Game {
                                                 _ => true,
                                             }
                                         })))
-                                        .event(clone!(state, pair_id, phase => move |evt:events::Click| {
+                                        .event(clone!(state, pair_id, phase => move |_evt:events::Click| {
                                             Self::evaluate(state.clone(), pair_id, phase.clone());
                                         }))
                                 }));

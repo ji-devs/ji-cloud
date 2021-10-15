@@ -1,1 +1,1 @@
-pub const DEFAULT_TIME_LIMIT:u32 = 3;
+pub const DEFAULT_TIME_LIMIT: u32 = 3;

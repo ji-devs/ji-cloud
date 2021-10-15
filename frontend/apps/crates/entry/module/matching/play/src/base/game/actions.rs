@@ -1,21 +1,14 @@
 use super::state::*;
-use components::module::_groups::cards::lookup::Side;
-use gloo_timers::future::TimeoutFuture;
-use shared::domain::jig::module::body::_groups::cards::{CardPair, Card};
-use shared::domain::jig::module::body::matching::PlayerSettings;
-use wasm_bindgen_futures::spawn_local;
-use std::sync::atomic::{AtomicUsize, Ordering};
-use crate::base::state::Base;
-use std::cell::RefCell;
-use std::rc::Rc;
-use futures_signals::{
-    signal::{Mutable, Signal, SignalExt}
-};
-use rand::prelude::*;
-use utils::prelude::*;
+
+use std::sync::atomic::Ordering;
+
 use crate::base::state::Phase;
 use components::module::_common::play::prelude::*;
+use futures_signals::signal::SignalExt;
+use rand::prelude::*;
 use std::convert::TryInto;
+use std::rc::Rc;
+use utils::prelude::*;
 
 impl Game {
     pub fn next(state: Rc<Self>) {
@@ -35,26 +28,33 @@ impl Game {
 
         if !has_ended {
             state.current.set(Some(Current::new(state.clone())));
-            state.rounds_played.store(rounds_played+1, Ordering::SeqCst);
-            log::info!("playing round {} of {}", rounds_played+1, state.base.settings.n_rounds);
+            state
+                .rounds_played
+                .store(rounds_played + 1, Ordering::SeqCst);
+            log::info!(
+                "playing round {} of {}",
+                rounds_played + 1,
+                state.base.settings.n_rounds
+            );
         } else {
             log::info!("GAME OVER!");
             state.base.phase.set(Phase::Ending);
-            state.base.set_play_phase(ModulePlayPhase::Ending(Some(ModuleEnding::Positive)));
+            state
+                .base
+                .set_play_phase(ModulePlayPhase::Ending(Some(ModuleEnding::Positive)));
         }
     }
 
     pub fn reset_deck(state: Rc<Self>) {
-
-        let mut remaining:Vec<CardPairId> = state.base.raw_pairs
+        let mut remaining: Vec<CardPairId> = state
+            .base
+            .raw_pairs
             .iter()
             .enumerate()
-            .map(|(index, pair)| {
-                CardPairId (pair.0.clone(), pair.1.clone(), index)
-            })
+            .map(|(index, pair)| CardPairId(pair.0.clone(), pair.1.clone(), index))
             .collect();
 
-        remaining.shuffle(&mut *state.rng.borrow_mut()); 
+        remaining.shuffle(&mut *state.rng.borrow_mut());
 
         *state.used.borrow_mut() = Vec::with_capacity(remaining.len());
         *state.remaining.borrow_mut() = remaining;

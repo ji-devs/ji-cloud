@@ -4,7 +4,6 @@ use utils::jig::JigPlayerOptions;
 
 use super::PreviewPopupCallbacks;
 
-
 pub struct PlayerPopup {
     pub jig_id: JigId,
     pub player_options: JigPlayerOptions,
@@ -13,7 +12,11 @@ pub struct PlayerPopup {
 }
 
 impl PlayerPopup {
-    pub fn new(jig_id: JigId, player_options: JigPlayerOptions, callbacks: PreviewPopupCallbacks) -> Self {
+    pub fn new(
+        jig_id: JigId,
+        player_options: JigPlayerOptions,
+        callbacks: PreviewPopupCallbacks,
+    ) -> Self {
         Self {
             jig_id,
             player_options,

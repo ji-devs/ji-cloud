@@ -1,22 +1,31 @@
-use gloo::timers::future::TimeoutFuture;
-use shared::{
-    media::MediaLibrary,
-    api::{ApiEndpoint, endpoints},
-    domain::{Publish, image::*, image::tag::*, category::*, meta::*},
-    error::{EmptyError, MetadataNotFound},
-};
-use utils::{routes::*, prelude::*}; 
-use dominator::clone;
-use super::state::*;
-use std::rc::Rc;
-use std::cell::RefCell;
-use web_sys::File;
-use strum::IntoEnumIterator;
-use components::image::upload::{upload_image};
 use super::sections::common::categories::MutableCategory;
+use super::state::*;
 use components::image::tag::ImageTag;
+use components::image::upload::upload_image;
+use dominator::clone;
+use shared::{
+    api::{endpoints, ApiEndpoint},
+    domain::{category::*, image::tag::*, image::*, meta::*, Publish},
+    error::{EmptyError, MetadataNotFound},
+    media::MediaLibrary,
+};
+use std::cell::RefCell;
+use std::rc::Rc;
+use strum::IntoEnumIterator;
+use utils::{prelude::*, routes::*};
+use web_sys::File;
 
-pub fn load_initial(state: Rc<State>) -> Rc<RefCell<Option<(Rc<MutableImage>, Rc<Vec<Rc<MutableCategory>>>, Rc<MetadataResponse>)>>> {
+pub fn load_initial(
+    state: Rc<State>,
+) -> Rc<
+    RefCell<
+        Option<(
+            Rc<MutableImage>,
+            Rc<Vec<Rc<MutableCategory>>>,
+            Rc<MetadataResponse>,
+        )>,
+    >,
+> {
     let ret = Rc::new(RefCell::new(None));
 
     state.loader.load(clone!(state, ret => async move {
@@ -58,36 +67,35 @@ pub fn load_initial(state: Rc<State>) -> Rc<RefCell<Option<(Rc<MutableImage>, Rc
                 *ret.borrow_mut() = Some((image, categories, meta));
                 state.loaded.set(true);
             },
-            errors => {
+            _errors => {
                 log::error!("error loading initial data!")
             }
         }
     }));
 
-   ret 
+    ret
 }
 
-pub fn save(state: Rc<State>, req:ImageUpdateRequest) {
+pub fn save(state: Rc<State>, req: ImageUpdateRequest) {
     state.loader.load(clone!(state => async move {
    
         let path = endpoints::image::UpdateMetadata::PATH.replace("{id}",&state.id.0.to_string());
         match api_with_auth_empty::<MetadataNotFound, _>(&path, endpoints::image::UpdateMetadata::METHOD, Some(req)).await {
             Ok(_) => {
             },
-            Err(err) => {
+            Err(_err) => {
                 log::error!("couldn't save!");
             },
         }
     }));
 }
 
-
 pub fn on_file(state: Rc<State>, image: Rc<MutableImage>, file: File) {
     state.loader.load(clone!(state => async move {
 
         match upload_image(state.id, MediaLibrary::Global, &file, None).await {
             Ok(_) => {
-                //Trigger a re-render. 
+                //Trigger a re-render.
                 //To debug: this shouldn't be necessary, but it temp fixes!
                 //TimeoutFuture::new(5_000).await;
                 image.id.replace_with(|id| id.clone());
@@ -103,32 +111,37 @@ pub fn on_file(state: Rc<State>, image: Rc<MutableImage>, file: File) {
     }))
 }
 
-
-pub fn toggle_premium(state: Rc<State>, image: Rc<MutableImage>, is_premium:bool) {
+pub fn toggle_premium(state: Rc<State>, image: Rc<MutableImage>, is_premium: bool) {
     image.is_premium.set_neq(is_premium);
-    save(state, ImageUpdateRequest{
-        is_premium: Some(is_premium),
-        ..ImageUpdateRequest::default()
-
-    });
+    save(
+        state,
+        ImageUpdateRequest {
+            is_premium: Some(is_premium),
+            ..ImageUpdateRequest::default()
+        },
+    );
 }
 
-pub fn change_name(state: Rc<State>, image: Rc<MutableImage>, name:String) {
+pub fn change_name(state: Rc<State>, image: Rc<MutableImage>, name: String) {
     image.name.set_neq(name.clone());
-    save(state, ImageUpdateRequest{
-        name: Some(name),
-        ..ImageUpdateRequest::default()
-
-    });
+    save(
+        state,
+        ImageUpdateRequest {
+            name: Some(name),
+            ..ImageUpdateRequest::default()
+        },
+    );
 }
 
-pub fn change_description(state: Rc<State>, image: Rc<MutableImage>, description:String) {
+pub fn change_description(state: Rc<State>, image: Rc<MutableImage>, description: String) {
     image.description.set_neq(description.clone());
-    save(state, ImageUpdateRequest{
-        description: Some(description),
-        ..ImageUpdateRequest::default()
-
-    });
+    save(
+        state,
+        ImageUpdateRequest {
+            description: Some(description),
+            ..ImageUpdateRequest::default()
+        },
+    );
 }
 
 pub fn delete(state: Rc<State>) {
@@ -139,7 +152,7 @@ pub fn delete(state: Rc<State>) {
                 let route:String = Route::Admin(AdminRoute::ImageSearch(None)).into();
                 dominator::routing::go_to_url(&route);
             },
-            Err(err) => {
+            Err(_err) => {
                 log::error!("couldn't save!");
             },
         }
@@ -147,9 +160,11 @@ pub fn delete(state: Rc<State>) {
 }
 
 pub fn publish(state: Rc<State>) {
-    save(state, ImageUpdateRequest{
-        publish_at: Some(Some(Publish::now())), 
-        ..ImageUpdateRequest::default()
-
-    });
+    save(
+        state,
+        ImageUpdateRequest {
+            publish_at: Some(Some(Publish::now())),
+            ..ImageUpdateRequest::default()
+        },
+    );
 }

@@ -1,13 +1,16 @@
 use super::super::{
-    super::{super::post_preview::{state::PostPreview, dom::render_post_preview}, strings},
+    super::{
+        super::post_preview::{dom::render_post_preview, state::PostPreview},
+        strings,
+    },
     nav::dom::render_nav,
     state::*,
 };
 use dominator::{clone, html, with_node, Dom};
 use std::rc::Rc;
 
-use futures_signals::signal::SignalExt;
 use dominator_helpers::events::Message;
+use futures_signals::signal::SignalExt;
 use shared::domain::jig::{
     module::{
         body::{BodyExt, ModeExt, StepExt},
@@ -35,7 +38,6 @@ where
     Footer: FooterExt + 'static,
     Overlay: OverlayExt + 'static,
 {
-
     let post_preview = Rc::new(PostPreview::new(
         RawData::kind(),
         state.base.get_jig_id(),

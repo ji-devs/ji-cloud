@@ -1,7 +1,7 @@
 use crate::module::{_common::edit::prelude::*, _groups::cards::edit::state::*};
-use std::rc::Rc;
-use futures_signals::{map_ref, signal::{Signal, SignalExt, Mutable}};
+use futures_signals::{map_ref, signal::Signal};
 use shared::domain::jig::module::body::_groups::cards::Step;
+use std::rc::Rc;
 
 pub struct Header<RawData: RawDataExt, E: ExtraExt> {
     pub base: Rc<CardsBase<RawData, E>>,
@@ -26,5 +26,4 @@ impl<RawData: RawDataExt, E: ExtraExt> Header<RawData, E> {
     }
 }
 
-impl<RawData: RawDataExt, E: ExtraExt> HeaderExt for Header<RawData, E> {
-}
+impl<RawData: RawDataExt, E: ExtraExt> HeaderExt for Header<RawData, E> {}

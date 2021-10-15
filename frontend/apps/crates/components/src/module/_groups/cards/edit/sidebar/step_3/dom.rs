@@ -1,13 +1,12 @@
 use super::state::*;
 use crate::{
-    tabs::{MenuTab, MenuTabKind},
     instructions::editor::dom::render as render_instructions,
     module::_groups::cards::edit::state::*,
+    tabs::{MenuTab, MenuTabKind},
 };
 use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
 use std::rc::Rc;
-use utils::prelude::*;
 
 pub fn render<RawData, E, GetSettingsStateFn, SettingsState, RenderSettingsFn>(
     state: Rc<Step3<RawData, E, GetSettingsStateFn, SettingsState>>,
@@ -55,7 +54,6 @@ where
     GetSettingsStateFn: Fn(Rc<CardsBase<RawData, E>>) -> SettingsState + Clone + 'static,
     SettingsState: 'static,
 {
-
     MenuTab::render(
         MenuTab::new(
             tab_kind,
@@ -65,8 +63,8 @@ where
             }))),
             clone!(state, tab_kind => move || {
                 state.tab.set(Tab::new(state.base.clone(), tab_kind, state.get_settings.clone()));
-            })
+            }),
         ),
-        Some("tabs")
+        Some("tabs"),
     )
 }

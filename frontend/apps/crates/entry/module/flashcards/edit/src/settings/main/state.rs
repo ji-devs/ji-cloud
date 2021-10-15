@@ -1,15 +1,12 @@
-use crate::{
-    state::*,
-    settings::state::*
-};
+use crate::state::*;
 use futures_signals::signal::Mutable;
+use rand::{
+    distributions::{Distribution, Standard},
+    prelude::*,
+};
+use shared::domain::jig::module::body::{_groups::cards::Card, flashcards::DisplayMode};
 use std::rc::Rc;
 use utils::prelude::*;
-use shared::domain::jig::module::body::{
-    _groups::cards::Card,
-    flashcards::DisplayMode
-};
-use rand::{prelude::*, distributions::{Standard, Distribution}};
 
 pub struct MainSettings {
     pub base: Rc<Base>,
@@ -25,10 +22,7 @@ impl MainSettings {
         let (left, right) = {
             let pairs = base.pairs.lock_ref();
             let pair = pairs.get(0).unwrap_ji();
-            (
-                pair.0.clone().into(),
-                pair.1.clone().into()
-            )
+            (pair.0.clone().into(), pair.1.clone().into())
         };
 
         let display_mode = settings.display_mode.clone();
@@ -37,13 +31,13 @@ impl MainSettings {
             base,
             left,
             right,
-            display_mode
+            display_mode,
         }
     }
 
-    pub fn get_random<T>(&self) -> T 
-    where 
-        Standard: Distribution<T>
+    pub fn get_random<T>(&self) -> T
+    where
+        Standard: Distribution<T>,
     {
         self.base.extra.settings.rng.borrow_mut().gen::<T>()
     }

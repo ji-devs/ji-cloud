@@ -1,22 +1,18 @@
 use super::state::*;
-use components::module::_groups::cards::lookup::Side;
-use shared::domain::jig::module::body::_groups::cards::{CardPair, Card};
-use shared::domain::jig::module::body::card_quiz::PlayerSettings;
-use std::sync::atomic::{AtomicUsize, Ordering};
-use crate::base::state::Base;
+
+use std::sync::atomic::Ordering;
+
 use components::module::_common::play::prelude::*;
-use std::cell::RefCell;
-use std::rc::Rc;
-use futures_signals::{
-    signal::{Mutable, Signal, SignalExt}
-};
-use rand::prelude::*;
-use utils::prelude::*;
+
 use crate::base::state::Phase;
-use std::convert::TryInto;
 use dominator::clone;
-use wasm_bindgen_futures::spawn_local;
+use futures_signals::signal::{Mutable, SignalExt};
 use gloo_timers::future::TimeoutFuture;
+use rand::prelude::*;
+use std::convert::TryInto;
+use std::rc::Rc;
+use utils::prelude::*;
+use wasm_bindgen_futures::spawn_local;
 
 impl Game {
     pub fn next(state: Rc<Self>) {
@@ -36,43 +32,51 @@ impl Game {
 
         if !has_ended {
             state.current.set(Some(Current::new(state.clone())));
-            state.rounds_played.store(rounds_played+1, Ordering::SeqCst);
-            log::info!("playing round {} of {}", rounds_played+1, state.base.settings.n_rounds);
+            state
+                .rounds_played
+                .store(rounds_played + 1, Ordering::SeqCst);
+            log::info!(
+                "playing round {} of {}",
+                rounds_played + 1,
+                state.base.settings.n_rounds
+            );
         } else {
             log::info!("GAME OVER!");
             state.base.phase.set(Phase::Ending);
-            state.base.set_play_phase(ModulePlayPhase::Ending(Some(ModuleEnding::Positive)));
+            state
+                .base
+                .set_play_phase(ModulePlayPhase::Ending(Some(ModuleEnding::Positive)));
         }
     }
 
     pub fn reset_deck(state: Rc<Self>) {
-
-        let mut remaining:Vec<CardPairId> = state.base.raw_pairs
+        let mut remaining: Vec<CardPairId> = state
+            .base
+            .raw_pairs
             .iter()
             .enumerate()
             .map(|(index, pair)| {
-                CardPairId (
+                CardPairId(
                     CardId {
                         card: pair.0.clone(),
-                        pair_id: index
+                        pair_id: index,
                     },
                     CardId {
                         card: pair.1.clone(),
-                        pair_id: index
-                    }
+                        pair_id: index,
+                    },
                 )
             })
             .collect();
-        
-        remaining.shuffle(&mut *state.rng.borrow_mut()); 
+
+        remaining.shuffle(&mut *state.rng.borrow_mut());
 
         *state.used.borrow_mut() = Vec::with_capacity(remaining.len());
         *state.remaining.borrow_mut() = remaining;
         state.current.set(None);
     }
 
-    pub fn evaluate(state: Rc<Self>, pair_id: usize, phase:Mutable<CurrentPhase>) {
-
+    pub fn evaluate(state: Rc<Self>, pair_id: usize, phase: Mutable<CurrentPhase>) {
         if phase.get() == CurrentPhase::Waiting {
             spawn_local(clone!(state, pair_id, phase => async move {
                 if pair_id == state.current.lock_ref().as_ref().unwrap_ji().target.pair_id {
@@ -86,7 +90,6 @@ impl Game {
                 }
 
             }));
-        } 
+        }
     }
-
 }

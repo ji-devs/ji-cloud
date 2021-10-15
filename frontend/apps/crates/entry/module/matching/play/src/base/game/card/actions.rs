@@ -1,19 +1,12 @@
-use super::{
-    state::*,
-    super::state::*
-};
+use super::{super::state::*, state::*};
 use std::rc::Rc;
+use utils::math::BoundsF64;
 use web_sys::HtmlElement;
-use utils::{drag::Drag, math::BoundsF64, prelude::*, resize::get_resize_info};
 
 impl CardDrag {
     pub fn on_release(&self) {
-
         if let Some(current) = self.game.get_current() {
-
-            let choice = current.top.iter().find(|choice| {
-                choice.is_drag_over()
-            });
+            let choice = current.top.iter().find(|choice| choice.is_drag_over());
 
             let mut found_match = false;
 
@@ -29,7 +22,11 @@ impl CardDrag {
             }
 
             if !found_match {
-                if let Some(target) = current.bottom.iter().find(|choice| choice.pair_id == self.pair_id) {
+                if let Some(target) = current
+                    .bottom
+                    .iter()
+                    .find(|choice| choice.pair_id == self.pair_id)
+                {
                     target.phase.set(BottomPhase::Show);
                 }
             } else {
@@ -54,14 +51,14 @@ impl CardDrag {
                     } else {
                         let is_drag_over = {
                             if let Some(elem) = choice.elem.borrow().as_ref() {
-                                let target_bounds:BoundsF64 = elem.get_bounding_client_rect().into();
+                                let target_bounds: BoundsF64 =
+                                    elem.get_bounding_client_rect().into();
                                 if src_bounds.intersects(target_bounds) {
                                     found_drag_over = true;
                                     true
                                 } else {
                                     false
                                 }
-
                             } else {
                                 false
                             }
@@ -69,22 +66,18 @@ impl CardDrag {
 
                         choice.set_drag_over(is_drag_over);
                     }
-
                 }
             }
-            _ => {
-            }
+            _ => {}
         }
     }
 }
 
-
-
 pub fn start_drag(state: Rc<CardBottom>, elem: HtmlElement, x: i32, y: i32) {
     state.phase.set(BottomPhase::Remove);
     if let Some(current) = state.game.get_current() {
-        current.drag.set(Some(Rc::new(CardDrag::new((*state).clone(), elem, x, y))));
+        current
+            .drag
+            .set(Some(Rc::new(CardDrag::new((*state).clone(), elem, x, y))));
     }
 }
-
-

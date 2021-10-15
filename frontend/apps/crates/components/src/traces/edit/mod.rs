@@ -1,11 +1,11 @@
-pub(super) mod select;
-pub(super) mod draw;
 pub(super) mod config;
+pub(super) mod draw;
+pub(super) mod select;
 
 mod actions;
-mod state;
 mod dom;
+mod state;
 
 pub use actions::*;
-pub use state::*;
 pub use dom::*;
+pub use state::*;

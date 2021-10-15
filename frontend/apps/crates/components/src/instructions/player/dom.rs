@@ -1,4 +1,4 @@
-use dominator::{html, Dom, clone};
+use dominator::{clone, html, Dom};
 
 use std::rc::Rc;
 use utils::prelude::*;
@@ -22,7 +22,7 @@ impl InstructionsPlayer {
                 ))
 
             })
-            .after_removed(clone!(state => move |elem| {
+            .after_removed(clone!(state => move |_elem| {
                 *state.audio.borrow_mut() = None;
             }))
         })

@@ -86,17 +86,23 @@ pub fn load_jigs_regular(state: Rc<State>) {
 }
 
 pub fn create_jig(state: Rc<State>) {
-    state.loader.load(clone!(state => async move {
+    state.loader.load(async {
         let req = Some(JigCreateRequest::default());
 
-        match api_with_auth::<CreateResponse<JigId>, MetadataNotFound, _>(&Create::PATH, Create::METHOD, req).await {
+        match api_with_auth::<CreateResponse<JigId>, MetadataNotFound, _>(
+            &Create::PATH,
+            Create::METHOD,
+            req,
+        )
+        .await
+        {
             Ok(resp) => {
-                let url:String = Route::Jig(JigRoute::Edit(resp.id, JigEditRoute::Landing)).into();
+                let url: String = Route::Jig(JigRoute::Edit(resp.id, JigEditRoute::Landing)).into();
                 dominator::routing::go_to_url(&url);
-            },
-            Err(_) => {},
+            }
+            Err(_) => {}
         }
-    }));
+    });
 }
 
 pub fn copy_jig(state: Rc<State>, jig_id: &JigId) {

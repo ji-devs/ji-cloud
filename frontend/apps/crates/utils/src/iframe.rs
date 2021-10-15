@@ -1,27 +1,31 @@
-use serde::{Serialize, Deserialize, de::DeserializeOwned};
+use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
-use wasm_bindgen::JsCast;
+
 use crate::unwrap::UnwrapJiExt;
-use shared::domain::jig::{LiteModule, module::{ModuleId, ModuleKind}};
+use shared::domain::jig::LiteModule;
 
-pub const IFRAME_DATA_PARAM:&'static str = "iframe_data";
+pub const IFRAME_DATA_PARAM: &'static str = "iframe_data";
 
-#[wasm_bindgen(inline_js = "export function is_in_iframe() { return window && window.parent && window.location !== window.parent.location; }")]
+#[wasm_bindgen(
+    inline_js = "export function is_in_iframe() { return window && window.parent && window.location !== window.parent.location; }"
+)]
 extern "C" {
     pub fn is_in_iframe() -> bool;
 }
 
 pub trait IframeMessageExt {
-    fn try_post_message_to_top<'a>(&'a self) -> Result<(), JsValue> 
-    where &'a Self: Into<JsValue>
+    fn try_post_message_to_top<'a>(&'a self) -> Result<(), JsValue>
+    where
+        &'a Self: Into<JsValue>,
     {
         let window = web_sys::window().unwrap_ji();
         let top = window.top()?.unwrap_ji();
 
         top.post_message(&self.into(), "*")
     }
-    fn try_post_message_to_parent<'a>(&'a self) -> Result<(), JsValue> 
-    where &'a Self: Into<JsValue>
+    fn try_post_message_to_parent<'a>(&'a self) -> Result<(), JsValue>
+    where
+        &'a Self: Into<JsValue>,
     {
         let window = web_sys::window().unwrap_ji();
         let parent = window.parent()?.unwrap_ji();
@@ -30,25 +34,26 @@ pub trait IframeMessageExt {
     }
 }
 
-impl <T: Serialize> IframeMessageExt for IframeInit<T> {}
-impl <T: Serialize> IframeMessageExt for IframeAction<T> {}
+impl<T: Serialize> IframeMessageExt for IframeInit<T> {}
+impl<T: Serialize> IframeMessageExt for IframeAction<T> {}
 
 /// Init is used for bootstrapping and passing initial loaded data
 #[derive(Serialize, Deserialize, Debug)]
 pub struct IframeInit<T> {
-    pub data: T
+    pub data: T,
 }
 
-impl <T> IframeInit <T> {
+impl<T> IframeInit<T> {
     pub fn new(data: T) -> Self {
         Self { data }
     }
 }
 
-
-impl IframeInit <EmptyMessage> {
+impl IframeInit<EmptyMessage> {
     pub fn empty() -> IframeInit<EmptyMessage> {
-        IframeInit { data: EmptyMessage {}}
+        IframeInit {
+            data: EmptyMessage {},
+        }
     }
 }
 
@@ -57,37 +62,35 @@ impl IframeInit <EmptyMessage> {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct EmptyMessage {}
 
-impl <T: Serialize> From<IframeInit<T>> for JsValue {
-    fn from(msg:IframeInit<T>) -> Self {
+impl<T: Serialize> From<IframeInit<T>> for JsValue {
+    fn from(msg: IframeInit<T>) -> Self {
         (&msg).into()
     }
 }
 
-impl <T: Serialize> From<&IframeInit<T>> for JsValue {
-    fn from(msg:&IframeInit<T>) -> Self {
+impl<T: Serialize> From<&IframeInit<T>> for JsValue {
+    fn from(msg: &IframeInit<T>) -> Self {
         serde_wasm_bindgen::to_value(msg).unwrap_ji()
     }
 }
 
-impl <T: DeserializeOwned> From<JsValue> for IframeInit<T> {
-    fn from(msg:JsValue) -> Self {
+impl<T: DeserializeOwned> From<JsValue> for IframeInit<T> {
+    fn from(msg: JsValue) -> Self {
         serde_wasm_bindgen::from_value(msg).unwrap_ji()
     }
 }
 
-pub fn should_get_iframe_data() -> bool { 
+pub fn should_get_iframe_data() -> bool {
     crate::routes::is_param_bool(IFRAME_DATA_PARAM)
 }
 
-
-/// Action is used for passing runtime messages 
+/// Action is used for passing runtime messages
 #[derive(Serialize, Deserialize, Debug)]
-pub struct IframeAction<T> 
-{
-    pub data: T
+pub struct IframeAction<T> {
+    pub data: T,
 }
 
-impl <T> IframeAction <T> {
+impl<T> IframeAction<T> {
     pub fn new(data: T) -> Self {
         Self { data }
     }
@@ -95,24 +98,23 @@ impl <T> IframeAction <T> {
 
 #[wasm_bindgen(inline_js = "export function temp_log(val) { console.log(val); }")]
 extern "C" {
-    fn temp_log(val:&JsValue);
+    fn temp_log(val: &JsValue);
 }
 
-
-impl <T: Serialize> From<IframeAction<T>> for JsValue {
-    fn from(msg:IframeAction<T>) -> Self {
+impl<T: Serialize> From<IframeAction<T>> for JsValue {
+    fn from(msg: IframeAction<T>) -> Self {
         (&msg).into()
     }
 }
 
-impl <T: Serialize> From<&IframeAction<T>> for JsValue {
-    fn from(msg:&IframeAction<T>) -> Self {
+impl<T: Serialize> From<&IframeAction<T>> for JsValue {
+    fn from(msg: &IframeAction<T>) -> Self {
         serde_wasm_bindgen::to_value(msg).unwrap_ji()
     }
 }
 
-impl <T: DeserializeOwned> From<JsValue> for IframeAction<T> {
-    fn from(msg:JsValue) -> Self {
+impl<T: DeserializeOwned> From<JsValue> for IframeAction<T> {
+    fn from(msg: JsValue) -> Self {
         serde_wasm_bindgen::from_value(msg).unwrap_ji()
     }
 }
@@ -132,9 +134,8 @@ pub enum ModuleToJigPlayerMessage {
     Next,
 }
 
-
 #[derive(Debug, Serialize, Deserialize)]
 pub enum ModuleToJigEditorMessage {
     AppendModule(LiteModule),
-    Next 
+    Next,
 }

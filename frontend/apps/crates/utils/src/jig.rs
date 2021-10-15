@@ -1,13 +1,13 @@
 use chrono::{DateTime, Utc};
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
-use shared::domain::jig::{AudioBackground, AudioFeedbackNegative, AudioFeedbackPositive, JigPlayerSettings, TextDirection};
-
+use shared::domain::jig::{
+    AudioBackground, AudioFeedbackNegative, AudioFeedbackPositive, JigPlayerSettings, TextDirection,
+};
 
 pub trait JigAudioExt {
     fn display_name(&self) -> &'static str;
 }
-
 
 impl JigAudioExt for AudioBackground {
     fn display_name(&self) -> &'static str {
@@ -20,7 +20,6 @@ impl JigAudioExt for AudioBackground {
         }
     }
 }
-
 
 impl JigAudioExt for AudioFeedbackPositive {
     fn display_name(&self) -> &'static str {
@@ -41,7 +40,6 @@ impl JigAudioExt for AudioFeedbackPositive {
     }
 }
 
-
 impl JigAudioExt for AudioFeedbackNegative {
     fn display_name(&self) -> &'static str {
         match self {
@@ -60,7 +58,6 @@ impl JigAudioExt for AudioFeedbackNegative {
         }
     }
 }
-
 
 const HOUR: u64 = 1000 * 60 * 60;
 const DAY: u64 = HOUR * 24;
@@ -123,7 +120,7 @@ pub fn published_at_string(time: DateTime<Utc>, short: bool) -> String {
                 1 => format!("1 {} ago", unit.to_string_long()),
                 num => format!("{} {}s ago", num, unit.to_string_long()),
             }
-        },
+        }
     }
 }
 

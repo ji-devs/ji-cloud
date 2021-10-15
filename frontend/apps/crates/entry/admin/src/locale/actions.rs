@@ -1,8 +1,4 @@
-use std::collections::HashMap;
-
-use shared::domain::locale::{EntryStatus, ItemKind};
-use uuid::Uuid;
-use wasm_bindgen::UnwrapThrowExt;
+use shared::domain::locale::EntryStatus;
 
 pub trait AsStringExt {
     fn to_string(&self) -> String;

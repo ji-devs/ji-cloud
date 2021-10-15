@@ -1,9 +1,15 @@
-use shared::domain::jig::{JigData, JigId, module::{ModuleId, body::{_groups::design::{Backgrounds, Sticker}, ThemeChoice, Instructions, legacy::{ModuleData as RawData}}}};
-use components::{audio::mixer::AudioMixer, module::_common::play::prelude::*};
+use components::module::_common::play::prelude::*;
+use shared::domain::jig::{
+    module::{
+        body::{legacy::ModuleData as RawData, Instructions},
+        ModuleId,
+    },
+    JigData, JigId,
+};
 use utils::prelude::*;
-use web_sys::AudioContext;
-use std::rc::Rc;
+
 use futures_signals::signal::Mutable;
+use std::rc::Rc;
 
 pub struct Base {
     pub jig_id: JigId,
@@ -15,9 +21,7 @@ pub struct Base {
 }
 
 impl Base {
-
     pub async fn new(init_args: InitFromRawArgs<RawData, (), ()>) -> Rc<Self> {
-
         let InitFromRawArgs {
             jig_id,
             module_id,
@@ -26,7 +30,6 @@ impl Base {
             theme_id,
             ..
         } = init_args;
-
 
         Rc::new(Self {
             raw,

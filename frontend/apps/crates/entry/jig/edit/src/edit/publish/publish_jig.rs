@@ -6,7 +6,7 @@ use shared::domain::jig::PrivacyLevel;
 use shared::domain::meta::AffiliationId;
 use shared::domain::{
     category::CategoryId,
-    jig::{JigResponse, JigId, JigUpdateDraftDataRequest, LiteModule},
+    jig::{JigId, JigResponse, JigUpdateDraftDataRequest, LiteModule},
     meta::{AgeRangeId, GoalId},
 };
 

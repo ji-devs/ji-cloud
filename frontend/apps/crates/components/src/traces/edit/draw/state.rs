@@ -2,11 +2,9 @@ use std::rc::Rc;
 
 use super::{menu::state::*, trace::state::*};
 use dominator::clone;
-use shared::domain::jig::module::body::{Audio, _groups::design::{Trace as RawTrace, TraceKind}};
+use shared::domain::jig::module::body::_groups::design::{Trace as RawTrace, TraceKind};
 
-use futures_signals::{
-    signal::{Mutable, Signal},
-};
+use futures_signals::signal::{Mutable, Signal};
 use utils::drag::Drag;
 
 pub struct Draw {

@@ -2,8 +2,8 @@ use core::hash::Hash;
 use std::{collections::HashSet, rc::Rc};
 
 use awsm_web::audio::AudioClipOptions;
-use components::audio::mixer::{AUDIO_MIXER, AudioPath, AudioHandle, AudioSourceExt};
-use dominator::{Dom, clone, html};
+use components::audio::mixer::{AudioHandle, AudioPath, AUDIO_MIXER};
+use dominator::{clone, html, Dom};
 
 use crate::edit::sidebar::settings::{
     actions::{set_active_popup, update_jig_settings},
@@ -12,10 +12,7 @@ use crate::edit::sidebar::settings::{
 };
 use futures_signals::signal::{Mutable, MutableLockMut, SignalExt};
 use shared::domain::jig::{AudioFeedbackNegative, AudioFeedbackPositive};
-use utils::{
-    events,
-    jig::JigAudioExt,
-};
+use utils::{events, jig::JigAudioExt};
 
 use super::super::state::State;
 
@@ -95,8 +92,15 @@ pub fn render(state: Rc<State>, tab: FeedbackTab) -> Dom {
     })
 }
 
-fn line<'a, T>(state: Rc<State>, list: Mutable<HashSet<T>>, option: &T, audio_handles: Rc<Vec<Mutable<Option<AudioHandle>>>>, index: usize) -> Dom
-    where T: Hash + Eq + Clone  + JigAudioExt + Into<AudioPath<'a>> + std::fmt::Debug + 'static,
+fn line<'a, T>(
+    state: Rc<State>,
+    list: Mutable<HashSet<T>>,
+    option: &T,
+    audio_handles: Rc<Vec<Mutable<Option<AudioHandle>>>>,
+    index: usize,
+) -> Dom
+where
+    T: Hash + Eq + Clone + JigAudioExt + Into<AudioPath<'a>> + std::fmt::Debug + 'static,
 {
     let audio_handle = &audio_handles[index];
 
@@ -133,9 +137,9 @@ fn line<'a, T>(state: Rc<State>, list: Mutable<HashSet<T>>, option: &T, audio_ha
                     let on_ended = Some(clone!(audio_handles => move|| {
                         audio_handles[index].set(None);
                     }));
-    
+
                     let mut audio_handles = audio_handles.iter().map(|x| x.lock_mut()).collect::<Vec<MutableLockMut<Option<AudioHandle>>>>();
-    
+
                     match *audio_handles[index] {
                         Some(_) => *audio_handles[index] = None,
                         None => {
@@ -143,7 +147,7 @@ fn line<'a, T>(state: Rc<State>, list: Mutable<HashSet<T>>, option: &T, audio_ha
                                 *o = None;
                                 o
                             }).collect();
-   
+
                             let path:AudioPath = option.clone().into();
 
                             let handle = AUDIO_MIXER.with(move |mixer| mixer.add_source(path, AudioClipOptions {

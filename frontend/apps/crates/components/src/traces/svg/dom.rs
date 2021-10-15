@@ -1,4 +1,4 @@
-use dominator::{class, clone, svg, Dom, DomBuilder, traits::MultiStr};
+use dominator::{clone, svg, Dom};
 use std::rc::Rc;
 use utils::{
     prelude::*,
@@ -6,32 +6,27 @@ use utils::{
 };
 
 use futures_signals::{
-    signal::{Mutable, SignalExt, Signal},
+    signal::{Mutable, Signal, SignalExt},
     signal_vec::SignalVec,
 };
 use web_sys::SvgElement;
 
-use super::{
-    super::utils::*,
-    state::*,
-    styles::*,
-};
-use once_cell::sync::Lazy;
+use super::{super::utils::*, state::*, styles::*};
+
 use shared::domain::jig::module::body::{
     Transform,
     _groups::design::{Trace, TraceShape},
 };
 use std::fmt::Write;
 
-
 pub fn render_single_trace<S>(
     shape_style: ShapeStyleVar<S>,
     resize_info: &ResizeInfo,
     trace: &Trace,
     callbacks: Rc<SvgCallbacks>,
-) -> Option<Dom> 
-where 
-      S: Signal<Item = ShapeStyle> + 'static
+) -> Option<Dom>
+where
+    S: Signal<Item = ShapeStyle> + 'static,
 {
     trace.calc_size(resize_info)
         .map(|size| {
@@ -63,9 +58,10 @@ pub fn render_single_shape<T, S>(
     trace: &Trace,
     transform_size: Option<TransformSize<'_, T>>,
     callbacks: Rc<SvgCallbacks>,
-) -> Dom 
-where T: Signal<Item = (Transform, (f64, f64))> + 'static,
-      S: Signal<Item = ShapeStyle> + 'static
+) -> Dom
+where
+    T: Signal<Item = (Transform, (f64, f64))> + 'static,
+    S: Signal<Item = ShapeStyle> + 'static,
 {
     //TODO - make this nicer with a macro!
     //the inner match trace.shape is identical 100%
@@ -126,7 +122,6 @@ where T: Signal<Item = (Transform, (f64, f64))> + 'static,
             }
         }
     }
-
 }
 
 pub fn render_masks<
@@ -234,15 +229,15 @@ where
     })
 }
 
-
 pub fn render_path_signal<T, S>(
     shape_style: ShapeStyleVar<S>,
     resize_info: ResizeInfo,
     transform_size: Option<TransformSize<'_, T>>,
     points: &Mutable<Vec<(f64, f64)>>,
-) -> Dom 
-where T: Signal<Item = (Transform, (f64, f64))> + 'static,
-      S: Signal<Item = ShapeStyle> + 'static
+) -> Dom
+where
+    T: Signal<Item = (Transform, (f64, f64))> + 'static,
+    S: Signal<Item = ShapeStyle> + 'static,
 {
     let path_string = points.signal_ref(clone!(resize_info => move |points| {
         if points.len() < 2 {
@@ -259,7 +254,7 @@ where T: Signal<Item = (Transform, (f64, f64))> + 'static,
     }));
 
     svg!("path", {
-        .apply(|dom| shape_style.apply(dom)) 
+        .apply(|dom| shape_style.apply(dom))
         .attribute_signal("d", path_string)
         .apply_if(transform_size.is_some(), |dom| {
             transform_size.unwrap_ji().mixin(dom, &resize_info)
@@ -273,9 +268,10 @@ pub fn render_path<T, S>(
     transform_size: Option<TransformSize<'_, T>>,
     points: &[(f64, f64)],
     callbacks: Rc<SvgCallbacks>,
-) -> Dom 
-where T: Signal<Item = (Transform, (f64, f64))> + 'static,
-      S: Signal<Item = ShapeStyle> + 'static
+) -> Dom
+where
+    T: Signal<Item = (Transform, (f64, f64))> + 'static,
+    S: Signal<Item = ShapeStyle> + 'static,
 {
     let path_string = {
         if points.len() < 2 {
@@ -290,7 +286,7 @@ where T: Signal<Item = (Transform, (f64, f64))> + 'static,
     };
 
     svg!("path" => SvgElement, {
-        .apply(|dom| shape_style.apply(dom)) 
+        .apply(|dom| shape_style.apply(dom))
         .attribute("d", &path_string)
         .apply_if(transform_size.is_some(), |dom| {
             transform_size.unwrap_ji().mixin(dom, resize_info)
@@ -299,7 +295,6 @@ where T: Signal<Item = (Transform, (f64, f64))> + 'static,
     })
 }
 
-
 pub fn render_rect<T, S>(
     shape_style: ShapeStyleVar<S>,
     resize_info: &ResizeInfo,
@@ -307,14 +302,15 @@ pub fn render_rect<T, S>(
     width: f64,
     height: f64,
     callbacks: Rc<SvgCallbacks>,
-) -> Dom 
-where T: Signal<Item = (Transform, (f64, f64))> + 'static,
-      S: Signal<Item = ShapeStyle> + 'static
+) -> Dom
+where
+    T: Signal<Item = (Transform, (f64, f64))> + 'static,
+    S: Signal<Item = ShapeStyle> + 'static,
 {
     let (width, height) = resize_info.get_pos_denormalized(width, height);
 
     svg!("rect", {
-        .apply(|dom| shape_style.apply(dom)) 
+        .apply(|dom| shape_style.apply(dom))
         .attribute("width", &format!("{}px", width))
         .attribute("height", &format!("{}px", height))
         .apply_if(transform_size.is_some(), |dom| {
@@ -324,7 +320,6 @@ where T: Signal<Item = (Transform, (f64, f64))> + 'static,
     })
 }
 
-
 pub fn render_ellipse<T, S>(
     shape_style: ShapeStyleVar<S>,
     resize_info: &ResizeInfo,
@@ -332,15 +327,15 @@ pub fn render_ellipse<T, S>(
     radius_x: f64,
     radius_y: f64,
     callbacks: Rc<SvgCallbacks>,
-) -> Dom 
-where T: Signal<Item = (Transform, (f64, f64))> + 'static,
-      S: Signal<Item = ShapeStyle> + 'static
+) -> Dom
+where
+    T: Signal<Item = (Transform, (f64, f64))> + 'static,
+    S: Signal<Item = ShapeStyle> + 'static,
 {
     let (radius_x, radius_y) = resize_info.get_pos_denormalized(radius_x, radius_y);
 
-
     svg!("ellipse", {
-        .apply(|dom| shape_style.apply(dom)) 
+        .apply(|dom| shape_style.apply(dom))
         .attribute("cx", &format!("{}px", radius_x))
         .attribute("cy", &format!("{}px", radius_y))
         .attribute("rx", &format!("{}px", radius_x))

@@ -1,14 +1,12 @@
 use super::state::*;
-use std::rc::Rc;
-use dominator::{html, clone, Dom};
-use utils::prelude::*;
-use futures_signals::signal::{Signal, SignalExt};
 use components::{
-    tabs::{MenuTab, MenuTabKind},
-    image::search::dom::render as render_image_search,
-    text_editor::dom::render_controls as render_text_editor,
     audio::input::AudioInput,
+    tabs::{MenuTab, MenuTabKind},
 };
+use dominator::{clone, html, Dom};
+use futures_signals::signal::{Signal, SignalExt};
+use std::rc::Rc;
+use utils::prelude::*;
 
 pub fn render_step_2(state: Rc<Step2>) -> Dom {
     html!("menu-tabs", {
@@ -36,8 +34,7 @@ pub fn render_step_2(state: Rc<Step2>) -> Dom {
     })
 }
 
-
-fn render_tab(state: Rc<Step2>, tab_kind:MenuTabKind) -> Dom {
+fn render_tab(state: Rc<Step2>, tab_kind: MenuTabKind) -> Dom {
     MenuTab::render(
         MenuTab::new(
             tab_kind,
@@ -47,13 +44,16 @@ fn render_tab(state: Rc<Step2>, tab_kind:MenuTabKind) -> Dom {
             }))),
             clone!(state, tab_kind => move || {
                 state.tab.set(Tab::new(state.sidebar.base.clone(), tab_kind));
-            })
+            }),
         ),
-        Some("tabs")
+        Some("tabs"),
     )
 }
 
-fn render_audio(state: Rc<Step2>, audio_state_signal: impl Signal<Item = Option<Rc<AudioInput>>> + 'static) -> Dom {
+fn render_audio(
+    _state: Rc<Step2>,
+    audio_state_signal: impl Signal<Item = Option<Rc<AudioInput>>> + 'static,
+) -> Dom {
     html!("empty-fragment", {
         .child_signal(audio_state_signal.map(|audio_state| Some({
             match audio_state {

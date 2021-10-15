@@ -1,17 +1,16 @@
-use shared::domain::{
-    meta::{ImageStyleId, AffiliationId, AgeRangeId},
-    category::CategoryId,
-    image::{ImageId, ImageSearchQuery, ImageMetadata},
-};
-use futures_signals::signal::Mutable;
 use dominator_helpers::futures::AsyncLoader;
+use futures_signals::signal::Mutable;
+use shared::domain::{
+    category::CategoryId,
+    image::{ImageId, ImageMetadata},
+    meta::{AffiliationId, AgeRangeId, ImageStyleId},
+};
+use std::cell::RefCell;
 use std::collections::HashSet;
 use web_sys::HtmlInputElement;
-use std::cell::RefCell;
-use components::image::tag::ImageTag;
 
 pub struct State {
-    pub id: ImageId, 
+    pub id: ImageId,
     pub section: Mutable<Section>,
     pub loader: AsyncLoader,
     pub loaded: Mutable<bool>,
@@ -21,12 +20,12 @@ pub struct State {
 
 impl State {
     pub fn new(id: ImageId, is_new: bool) -> Self {
-
         let section = {
-            if is_new 
-                { Section::General}
-            else
-                { Section::Summary}
+            if is_new {
+                Section::General
+            } else {
+                Section::Summary
+            }
         };
 
         Self {
@@ -44,7 +43,7 @@ impl State {
 pub enum Section {
     General,
     Categories,
-    Summary 
+    Summary,
 }
 
 impl Section {
@@ -58,12 +57,12 @@ impl Section {
 }
 
 impl From<&str> for Section {
-    fn from(value: &str) -> Self { 
+    fn from(value: &str) -> Self {
         match value {
             "general" => Self::General,
             "categories" => Self::Categories,
             "summary" => Self::Summary,
-            _ => panic!("unknown value!")
+            _ => panic!("unknown value!"),
         }
     }
 }
@@ -83,8 +82,7 @@ pub struct MutableImage {
 }
 
 impl From<ImageMetadata> for MutableImage {
-    fn from(image:ImageMetadata) -> Self {
-
+    fn from(image: ImageMetadata) -> Self {
         let orig = image.clone();
 
         Self {
@@ -128,7 +126,7 @@ impl From<ImageMetadata> for MutableImage {
                 Mutable::new(categories)
             },
 
-            orig
+            orig,
         }
     }
 }

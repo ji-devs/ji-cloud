@@ -1,8 +1,7 @@
-use dominator::{clone, html, Dom, DomBuilder};
 use super::state::*;
+use dominator::{clone, html, Dom};
 use std::rc::Rc;
-use web_sys::HtmlElement;
-use wasm_bindgen::prelude::*; 
+
 use utils::prelude::*;
 
 impl Button {
@@ -22,12 +21,10 @@ impl Button {
                 dom.property("label", label.unwrap_ji())
             })
             .apply_if(state.on_click.is_some(), |dom| {
-                dom.event(clone!(state => move |evt:events::Click| {
+                dom.event(clone!(state => move |_evt:events::Click| {
                     (state.on_click.as_ref().unwrap_ji()) ();
                 }))
             })
         })
     }
-
 }
-

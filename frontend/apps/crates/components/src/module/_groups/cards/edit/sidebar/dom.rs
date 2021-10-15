@@ -23,7 +23,7 @@ where
         state: Rc<Sidebar<RawData, E, GetSettingsStateFn, RenderSettingsStateFn, SettingsState>>,
     ) -> Dom {
         html!("empty-fragment", {
-            .future(state.base.step.signal_cloned().dedupe().for_each(clone!(state => move |step| {
+            .future(state.base.step.signal_cloned().dedupe().for_each(clone!(state => move |_step| {
                 state.tab_index.set(None);
                 async move {}
             })))

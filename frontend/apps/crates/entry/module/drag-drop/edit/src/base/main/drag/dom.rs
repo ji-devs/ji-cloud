@@ -1,16 +1,11 @@
-use components::module::_common::edit::prelude::*;
-use dominator::{html, Dom, clone};
+use super::state::*;
+use components::stickers::dom::{
+    mixin_sticker_button, render_sticker_raw, BaseRawRenderOptions, StickerRawRenderOptions,
+};
+use dominator::{clone, html, Dom};
+use futures_signals::{signal::SignalExt, signal_vec::SignalVecExt};
 use std::rc::Rc;
 use utils::prelude::*;
-use super::state::*;
-use components::{
-    backgrounds::dom::render_backgrounds, 
-    stickers::dom::{render_stickers, render_sticker_raw, BaseRawRenderOptions, StickerRawRenderOptions, mixin_sticker_button},
-};
-use futures_signals::{
-    signal_vec::SignalVecExt,
-    signal::SignalExt
-};
 
 impl MainDrag {
     pub fn render(state: Rc<Self>) -> Dom {
@@ -30,7 +25,7 @@ impl MainDrag {
 
                                 opts.set_transform_override(item.get_transform_override());
 
-                                opts.set_mixin(clone!(state, item => move |dom| {
+                                opts.set_mixin(clone!(item => move |dom| {
                                     dom
                                         .apply(mixin_sticker_button)
                                         .event(clone!(item => move |evt:events::MouseDown| {
@@ -59,4 +54,3 @@ impl MainDrag {
         })
     }
 }
- 

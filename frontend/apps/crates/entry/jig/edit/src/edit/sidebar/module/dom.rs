@@ -3,13 +3,13 @@ use dominator::{clone, html, Dom};
 use super::super::menu::{dom as MenuDom, state::State as MenuState};
 use super::{actions, state::*};
 use crate::edit::sidebar::state::State as SidebarState;
+use components::module::_common::thumbnail::ModuleThumbnail;
 use futures_signals::signal::SignalExt;
 use shared::domain::jig::{LiteModule, ModuleKind};
 use std::rc::Rc;
 use std::str::FromStr;
 use utils::prelude::*;
 use wasm_bindgen::prelude::*;
-use components::module::_common::thumbnail::ModuleThumbnail;
 pub struct ModuleDom {}
 
 impl ModuleDom {
@@ -60,10 +60,10 @@ impl ModuleDom {
                     }
                 })))
                 .property("lastBottomDecoration", index == total_len-1)
-                .event(clone!(state => move |_evt:events::MouseDown| {
+                .event(|_evt:events::MouseDown| {
                     // TODO:
                     // actions::mouse_down(state.clone(), evt.x(), evt.y());
-                }))
+                })
                 .child(html!("jig-edit-sidebar-module-window", {
                     .property("slot", "window")
                     .property_signal("state", State::window_state_signal(Rc::clone(&state)))
@@ -103,7 +103,7 @@ impl ModuleDom {
                                 Some(ModuleThumbnail::render_live(
                                         Rc::new(ModuleThumbnail {
                                             jig_id: state.sidebar.jig.id.clone(),
-                                            module: module.clone(), 
+                                            module: module.clone(),
                                             is_jig_fallback: false,
                                         }),
                                         Some("thumbnail")

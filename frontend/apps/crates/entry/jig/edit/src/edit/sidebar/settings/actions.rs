@@ -9,7 +9,11 @@ use utils::prelude::api_with_auth_empty;
 
 use super::state::{ActiveSettingsPopup, State};
 
-pub fn on_background_audio_click(state: Rc<State>, selected: bool, audio_background: AudioBackground) {
+pub fn on_background_audio_click(
+    state: Rc<State>,
+    selected: bool,
+    audio_background: AudioBackground,
+) {
     if selected {
         state.background_audio.set(Some(audio_background));
     } else {
@@ -28,7 +32,13 @@ pub fn update_jig_settings(state: Rc<State>) {
     let path = endpoints::jig::UpdateDraftData::PATH.replace("{id}", &state.jig_id.0.to_string());
 
     state.loader.load(async move {
-        match api_with_auth_empty::<EmptyError, _>(&path, endpoints::jig::UpdateDraftData::METHOD, Some(req)).await {
+        match api_with_auth_empty::<EmptyError, _>(
+            &path,
+            endpoints::jig::UpdateDraftData::METHOD,
+            Some(req),
+        )
+        .await
+        {
             Ok(_) => {}
             Err(_) => {}
         };

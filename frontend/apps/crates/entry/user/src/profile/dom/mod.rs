@@ -1,13 +1,24 @@
-use std::rc::Rc;
 use components::page_header;
-use dominator::{Dom, clone, html, with_node};
-use futures_signals::{map_ref, signal::{Signal, SignalExt}, signal_vec::SignalVecExt};
+use dominator::{clone, html, with_node, Dom};
+use futures_signals::{
+    map_ref,
+    signal::{Signal, SignalExt},
+    signal_vec::SignalVecExt,
+};
 use shared::domain::meta::{Affiliation, AffiliationId, AgeRange, AgeRangeId, Subject, SubjectId};
-use utils::{events, languages::{EMAIL_LANGUAGES, Language}, unwrap::UnwrapJiExt};
+use std::rc::Rc;
+use utils::{
+    events,
+    languages::{Language, EMAIL_LANGUAGES},
+    unwrap::UnwrapJiExt,
+};
 use wasm_bindgen::JsValue;
 use web_sys::{HtmlElement, HtmlInputElement};
 
-use crate::{profile::{change_password, dom::options_popup::PopupCallbacks, state::ActivePopup}, strings::register::step_2::STR_PERSONA_OPTIONS};
+use crate::{
+    profile::{change_password, dom::options_popup::PopupCallbacks, state::ActivePopup},
+    strings::register::step_2::STR_PERSONA_OPTIONS,
+};
 
 use super::{actions, state::State};
 
@@ -25,8 +36,7 @@ const STR_SUBJECT_SUBHEADER: &'static str = "Which subjects are you interested i
 const STR_AGE_HEADER: &'static str = "Relevant Age Group";
 const STR_AGE_SUBHEADER: &'static str = "Which age group are you interested in?";
 
-pub struct ProfilePage {
-}
+pub struct ProfilePage {}
 
 impl ProfilePage {
     pub fn render() -> Dom {
@@ -408,7 +418,6 @@ fn full_name_signal(state: Rc<State>) -> impl Signal<Item = String> {
         let given_name = state.user.given_name.signal_cloned(),
         let family_name = state.user.family_name.signal_cloned() =>
             (given_name.clone(), family_name.clone())
-    }).map(move |(given_name, family_name)| {
-        format!("{} {}", given_name, family_name)
     })
+    .map(move |(given_name, family_name)| format!("{} {}", given_name, family_name))
 }

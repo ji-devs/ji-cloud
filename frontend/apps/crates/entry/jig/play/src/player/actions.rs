@@ -2,14 +2,18 @@ use std::rc::Rc;
 
 use super::{state::State, timer::Timer};
 use awsm_web::audio::AudioClipOptions;
-use components::audio::mixer::{AUDIO_MIXER, AudioSourceExt};
+use components::audio::mixer::{AudioSourceExt, AUDIO_MIXER};
 use dominator::clone;
 use futures_signals::signal::SignalExt;
-use shared::{api::{endpoints::jig, ApiEndpoint}, domain::jig::{AudioBackground, JigResponse}, error::EmptyError};
+use shared::{
+    api::{endpoints::jig, ApiEndpoint},
+    domain::jig::{AudioBackground, JigResponse},
+    error::EmptyError,
+};
 use utils::{
     iframe::{IframeAction, JigToModulePlayerMessage, ModuleToJigPlayerMessage},
     prelude::{api_no_auth, SETTINGS},
-    routes::{Route, HomeRoute},
+    routes::{HomeRoute, Route},
     unwrap::UnwrapJiExt,
 };
 use wasm_bindgen_futures::spawn_local;
@@ -26,17 +30,22 @@ pub fn toggle_background_audio(state: Rc<State>, background_audio: AudioBackgrou
                 bg_audio_handle.play();
                 state.bg_audio_playing.set(true);
             };
-        },
+        }
         None => {
-            let handle = AUDIO_MIXER.with(|mixer| mixer.add_source(background_audio.as_source(), AudioClipOptions {
-                auto_play: true,
-                is_loop: true,
-                on_ended: None::<fn()>,
-            }));
+            let handle = AUDIO_MIXER.with(|mixer| {
+                mixer.add_source(
+                    background_audio.as_source(),
+                    AudioClipOptions {
+                        auto_play: true,
+                        is_loop: true,
+                        on_ended: None::<fn()>,
+                    },
+                )
+            });
 
             *bg_audio_handle = Some(handle);
             state.bg_audio_playing.set(true);
-        },
+        }
     };
 }
 
@@ -44,14 +53,10 @@ pub fn navigate_forward(state: Rc<State>) {
     let mut active_module = state.active_module.lock_mut();
     if let Some(jig) = &*state.jig.lock_ref() {
         if *active_module < jig.jig_data.modules.len() - 1 {
-
             *active_module += 1;
             state.timer.set(None);
-
         } else {
-
             state.done.set(true);
-
         }
     }
 }
@@ -157,10 +162,10 @@ pub fn on_iframe_message(state: Rc<State>, message: ModuleToJigPlayerMessage) {
         }
         ModuleToJigPlayerMessage::Next => {
             navigate_forward(Rc::clone(&state));
-        },
+        }
         ModuleToJigPlayerMessage::Stop => {
             state.timer.set(None);
-        },
+        }
     };
 }
 

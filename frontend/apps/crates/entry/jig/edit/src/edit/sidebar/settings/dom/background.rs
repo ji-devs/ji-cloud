@@ -1,8 +1,8 @@
 use std::rc::Rc;
 
 use awsm_web::audio::{AudioClipOptions, AudioHandle};
-use components::audio::mixer::{AUDIO_MIXER, AudioPath, AudioSourceExt};
-use dominator::{Dom, clone, html, with_node};
+use components::audio::mixer::{AudioSourceExt, AUDIO_MIXER};
+use dominator::{clone, html, with_node, Dom};
 use web_sys::HtmlInputElement;
 
 use crate::edit::sidebar::settings::{
@@ -17,7 +17,10 @@ use utils::{events, jig::JigAudioExt};
 use super::super::state::State;
 
 pub fn render(state: Rc<State>) -> Dom {
-    let audio_handles: Vec<Mutable<Option<AudioHandle>>> = AudioBackground::variants().iter().map(|_| Mutable::new(None)).collect();
+    let audio_handles: Vec<Mutable<Option<AudioHandle>>> = AudioBackground::variants()
+        .iter()
+        .map(|_| Mutable::new(None))
+        .collect();
     let audio_handles = Rc::new(audio_handles);
 
     html!("jig-audio-body", {
@@ -51,7 +54,12 @@ pub fn render(state: Rc<State>) -> Dom {
     })
 }
 
-fn line(state: Rc<State>, option: &AudioBackground, audio_handles: Rc<Vec<Mutable<Option<AudioHandle>>>>, index: usize) -> Dom {
+fn line(
+    state: Rc<State>,
+    option: &AudioBackground,
+    audio_handles: Rc<Vec<Mutable<Option<AudioHandle>>>>,
+    index: usize,
+) -> Dom {
     let audio_handle = &audio_handles[index];
 
     html!("jig-audio-line", {
@@ -90,9 +98,9 @@ fn line(state: Rc<State>, option: &AudioBackground, audio_handles: Rc<Vec<Mutabl
                     let on_ended = Some(clone!(audio_handles => move|| {
                         audio_handles[index].set(None);
                     }));
-    
+
                     let mut audio_handles = audio_handles.iter().map(|x| x.lock_mut()).collect::<Vec<MutableLockMut<Option<AudioHandle>>>>();
-    
+
                     match *audio_handles[index] {
                         Some(_) => *audio_handles[index] = None,
                         None => {
@@ -100,7 +108,7 @@ fn line(state: Rc<State>, option: &AudioBackground, audio_handles: Rc<Vec<Mutabl
                                 *o = None;
                                 o
                             }).collect();
-    
+
                             let handle = AUDIO_MIXER.with(|mixer| mixer.add_source(option.as_source(), AudioClipOptions {
                                 auto_play: true,
                                 is_loop: false,

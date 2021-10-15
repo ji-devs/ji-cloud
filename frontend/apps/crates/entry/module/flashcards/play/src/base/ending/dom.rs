@@ -1,8 +1,8 @@
-use dominator::{html, Dom};
 use super::state::*;
+use dominator::{html, Dom};
 use std::rc::Rc;
 
-pub fn render(state: Rc<Ending>) -> Dom {
+pub fn render(_state: Rc<Ending>) -> Dom {
     html!("div", {
         .property("slot", "main")
         .style("position", "absolute")

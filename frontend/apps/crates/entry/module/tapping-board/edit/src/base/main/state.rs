@@ -1,17 +1,14 @@
-use components::module::_common::edit::prelude::*;
-use components::traces::{
-    bubble::TraceBubble,
-    edit::TracesEdit
-};
 use crate::base::state::Base;
+use components::module::_common::edit::prelude::*;
+use components::traces::bubble::TraceBubble;
 use std::rc::Rc;
-use dominator_helpers::futures::AsyncLoader;
+
 use futures_signals::{
-    signal::{Mutable, SignalExt, Signal},
-    signal_vec::{SignalVec, SignalVecExt}
+    signal::{Signal, SignalExt},
+    signal_vec::{SignalVec, SignalVecExt},
 };
 use utils::prelude::*;
-use dominator::clone;
+
 use shared::domain::jig::module::body::tapping_board::Step;
 
 pub struct Main {
@@ -20,13 +17,13 @@ pub struct Main {
 
 impl Main {
     pub fn new(base: Rc<Base>) -> Self {
-        Self {
-            base,
-        }
+        Self { base }
     }
 
     pub fn phase_signal(&self) -> impl Signal<Item = Phase> {
-        self.base.step.signal()
+        self.base
+            .step
+            .signal()
             .map(|step| step == Step::Three)
             .dedupe()
             .map(|is_step_three| {
@@ -51,11 +48,7 @@ impl Main {
 #[derive(Clone, Copy)]
 pub enum Phase {
     Layout,
-    Trace
+    Trace,
 }
 
-
-impl MainExt for Main {
-}
-
-
+impl MainExt for Main {}

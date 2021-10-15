@@ -1,10 +1,8 @@
-use crate::edit::sidebar::actions::{player_settings_change_signal, get_player_settings};
+use crate::edit::sidebar::actions::get_player_settings;
 use dominator::{clone, html, with_node, Dom};
 use futures_signals::signal::SignalExt;
 use std::rc::Rc;
 use web_sys::HtmlInputElement;
-
-use components::player_popup::{PlayerPopup, PreviewPopupCallbacks};
 
 use super::super::{actions as sidebar_actions, settings, state::State as SidebarState};
 use utils::prelude::*;

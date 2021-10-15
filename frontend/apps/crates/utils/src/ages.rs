@@ -1,16 +1,13 @@
-use shared::domain::meta::{AgeRange, AgeRangeId};
 pub use shared::domain::jig::module::body::ThemeId;
+use shared::domain::meta::{AgeRange, AgeRangeId};
 
 pub trait AgeRangeVecExt {
     fn range_string(&self, selected: &Vec<AgeRangeId>) -> String;
-
 }
 
 impl AgeRangeVecExt for Vec<AgeRange> {
     fn range_string(&self, selected: &Vec<AgeRangeId>) -> String {
-        let first_age = self.iter().find(|age| {
-            selected.contains(&age.id)
-        });
+        let first_age = self.iter().find(|age| selected.contains(&age.id));
 
         let mut result = String::new();
         if let Some(first_age) = first_age {

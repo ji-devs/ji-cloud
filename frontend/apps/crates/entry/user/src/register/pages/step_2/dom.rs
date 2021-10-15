@@ -1,21 +1,20 @@
-use dominator::{Dom, html, clone, with_node};
+use super::{actions, state::*};
+use dominator::{clone, html, Dom};
 use futures_signals::signal::Mutable;
 use std::rc::Rc;
-use super::{state::*, actions};
-use web_sys::HtmlInputElement;
-use utils::{events, routes::*};
+
 use crate::{
-    strings::register::step_2::*,
     register::{
+        components::footer::Footer,
         state::{Step, Step1Data},
-        components::footer::Footer
-    }
+    },
+    strings::register::step_2::*,
 };
+use utils::events;
 
 use components::input::simple_select::SimpleSelect;
 
-pub struct Step2Page {
-}
+pub struct Step2Page {}
 
 impl Step2Page {
     pub fn render(step: Mutable<Step>, step_1: Step1Data) -> Dom {
@@ -38,9 +37,9 @@ impl Step2Page {
                         Some(STR_LANGUAGE_LABEL),
                         Some(STR_LANGUAGE_PLACEHOLDER),
                         None,
-                        STR_LANGUAGE_OPTIONS.to_vec(), 
+                        STR_LANGUAGE_OPTIONS.to_vec(),
                         clone!(state => move |value| {
-                            *state.language.borrow_mut() = value.map(|x| x.to_string()); 
+                            *state.language.borrow_mut() = value.map(|x| x.to_string());
                             state.evaluate_language_error();
                         })
                     ),
@@ -54,9 +53,9 @@ impl Step2Page {
                         Some(STR_PERSONA_LABEL),
                         Some(STR_PERSONA_PLACEHOLDER),
                         None,
-                        STR_PERSONA_OPTIONS.to_vec(), 
+                        STR_PERSONA_OPTIONS.to_vec(),
                         clone!(state => move |value| {
-                            *state.persona.borrow_mut() = value.map(|x| x.to_string()); 
+                            *state.persona.borrow_mut() = value.map(|x| x.to_string());
                             state.evaluate_persona_error();
                         })
                     ),
@@ -91,7 +90,7 @@ impl Step2Page {
                     )
                     .child(
                         html!("div", {
-                            //whatever.. good enough for now 
+                            //whatever.. good enough for now
                             .style("display", "flex")
                             .style("gap", ".5em")
                             .style("margin-left", ".5em")
@@ -130,14 +129,12 @@ impl Step2Page {
                     .property("size", "medium")
                     .property("iconAfter", "arrow")
                     .text(STR_ONE_MORE_STEP)
-                    .event(clone!(state => move |evt:events::Click| {
+                    .event(clone!(state => move |_evt:events::Click| {
                         actions::submit(state.clone());
                     }))
                 }),
                 Footer::render()
             ])
         })
-            
     }
 }
-

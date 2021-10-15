@@ -1,7 +1,10 @@
-use dominator::{clone, html, with_node, Dom, DomBuilder};
+use dominator::{clone, html, Dom, DomBuilder};
 use std::rc::Rc;
+use utils::{
+    prelude::*,
+    resize::{resize_info_signal, ResizeInfo},
+};
 use web_sys::HtmlElement;
-use utils::{prelude::*, resize::{resize_info_signal, ResizeInfo}};
 
 use futures_signals::{
     map_ref,
@@ -10,10 +13,10 @@ use futures_signals::{
 
 use super::{super::trace::state::*, menu::dom::render_menu};
 use crate::{
-    traces::edit::state::*,
-    box_outline::{BoxOutline,BoxOutlineMixins, BoxOutlineStyle},
-    buttons::{Button, ButtonStyle, ButtonStyleIcon},
     audio::player_button::*,
+    box_outline::{BoxOutline, BoxOutlineMixins, BoxOutlineStyle},
+    buttons::{Button, ButtonStyle, ButtonStyleIcon},
+    traces::edit::state::*,
 };
 //see https://www.loom.com/share/c9ec53482ad94a97bff74d143a5a8cd2
 
@@ -26,7 +29,7 @@ impl EditSelectTrace {
     ) -> Dom {
         let select_box = state.select_box.clone();
 
-        let get_selected_signal = clone!(parent, state, index => move || {
+        let get_selected_signal = clone!(parent, index => move || {
             map_ref! {
                 let index = index.signal(),
                 let selected = parent.selected_index.signal()
@@ -42,7 +45,7 @@ impl EditSelectTrace {
         });
 
         let selected_has_bounds_index_signal = map_ref! {
-            let selected = get_selected_signal(), 
+            let selected = get_selected_signal(),
             let has_bounds = select_box.bounds.signal_cloned().map(|b| b.is_some()).dedupe(),
             let index = index.signal()
                 => (*selected, *has_bounds, *index)
@@ -56,8 +59,8 @@ impl EditSelectTrace {
                 //is bound to the same transform_override
                 let sig = map_ref!{
                     let resize_info = resize_info_signal(),
-                    let t = state.select_box.transform_override.signal_ref(|_| ())
-                        => (resize_info.clone())
+                    let _t = state.select_box.transform_override.signal_ref(|_| ())
+                        => resize_info.clone()
                 };
 
                 sig.for_each(clone!(state => move |resize_info| {
@@ -68,7 +71,7 @@ impl EditSelectTrace {
             .child_signal(
                 select_box
                     .menu_pos_signal(get_selected_signal())
-                    .map(clone!(parent, state, select_box => move |pos| {
+                    .map(clone!(parent, select_box => move |pos| {
                         pos.map(|pos| {
                             html!("overlay-container", {
                                 .child(html!("overlay-drag", {
@@ -98,20 +101,20 @@ impl EditSelectTrace {
                                 BoxOutlineMixins {
                                     main: None::<MixinStub>,
 
-                                    //handle selection 
+                                    //handle selection
                                     click_area: Some(clone!(parent, index => move |dom:DomBuilder<HtmlElement>| {
                                         dom
-                                            .event(clone!(parent, index => move |evt:events::Click| {
+                                            .event(clone!(parent, index => move |_evt:events::Click| {
                                                 if let Some(index) = index {
                                                     parent.select_index(index);
                                                 }
                                             }))
                                     })),
 
-                                    //adds a menu button to the top-right corner 
+                                    //adds a menu button to the top-right corner
                                     top_right: None::<MixinStub>,
 
-                                    //adds a menu button to the top-leftcorner 
+                                    //adds a menu button to the top-leftcorner
                                     top_left: Some(clone!(state => move |dom:DomBuilder<HtmlElement>| {
                                         dom.apply_if(state.audio.is_some(), |dom| {
                                             dom.child(
@@ -151,14 +154,14 @@ impl EditSelectTrace {
                                             }))
                                     })),
 
-                                    //adds a menu button to the top-right corner 
+                                    //adds a menu button to the top-right corner
                                     top_right: Some(clone!(resize_info, select_box => move |dom:DomBuilder<HtmlElement>| {
                                         dom
                                             .child(
                                                 Button::render(
                                                     Button::new(
                                                         ButtonStyle::Icon(ButtonStyleIcon::GreyKebab),
-                                                        clone!(resize_info, select_box => move || { 
+                                                        clone!(resize_info, select_box => move || {
                                                             let bounds = select_box.bounds.get_cloned().unwrap_ji().denormalize(&resize_info);
 
                                                             let (x, y) = resize_info.get_fixed_pos_px(bounds.x + bounds.width, bounds.y);

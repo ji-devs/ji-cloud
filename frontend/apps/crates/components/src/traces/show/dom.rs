@@ -1,23 +1,24 @@
-use dominator::{clone, html, Dom};
-use std::rc::Rc;
-use utils::resize::{resize_info_signal, ResizeInfo};
-use dominator_helpers::signals::EitherSignal;
 use crate::traces::{
-    svg::{self, ShapeStyleVar, ShapeStyle, ShapeStyleState, ShapeStyleMode, SvgCallbacks, TransformSize},
+    svg::{
+        self, ShapeStyle, ShapeStyleMode, ShapeStyleState, ShapeStyleVar, SvgCallbacks,
+        TransformSize,
+    },
     utils::*,
 };
+use dominator::{clone, html, Dom};
+use dominator_helpers::signals::EitherSignal;
 use futures_signals::{
-    map_ref,
     signal::{always, Signal, SignalExt},
     signal_vec,
 };
+use std::rc::Rc;
+use utils::resize::{resize_info_signal, ResizeInfo};
 
-use shared::domain::jig::module::body::_groups::design::{Trace, TraceShape};
 use super::state::*;
+use shared::domain::jig::module::body::_groups::design::{Trace, TraceShape};
 
 impl TracesShow {
     pub fn render(state: Rc<Self>) -> Dom {
-
         html!("empty-fragment", {
             .apply_if(state.on_select.is_none(), |dom| dom.style("pointer-events", "none"))
             .child_signal(resize_info_signal().map(clone!(state => move |resize_info| {
@@ -63,7 +64,7 @@ impl TracesShow {
                                             interactive: state.on_select.is_some(),
                                             mode: Some(ShapeStyleMode::Transparent),
                                             kind: Some(trace_kind),
-                                            state: None 
+                                            state: None
                                         }))
                                     }
 
@@ -80,7 +81,7 @@ impl TracesShow {
                                                     }
                                                 }),
                                                 kind: Some(trace_kind),
-                                                state: None 
+                                                state: None
                                             }
                                         }))
                                     }
@@ -146,7 +147,6 @@ impl TracesShow {
                 }
             })))
         })
-
     }
 }
 
@@ -155,22 +155,18 @@ fn render_trace<S>(
     resize_info: &ResizeInfo,
     trace: &Trace,
     callbacks: Rc<SvgCallbacks>,
-) -> Dom 
+) -> Dom
 where
-      S: Signal<Item = ShapeStyle> + 'static
+    S: Signal<Item = ShapeStyle> + 'static,
 {
     let transform_size = trace
         .calc_size(resize_info)
         .map(|size| TransformSize::new_static(&trace.transform, size));
 
     match trace.shape {
-        TraceShape::Path(ref path) => svg::render_path(
-            shape_style, 
-            &resize_info, 
-            transform_size, 
-            &path, 
-            callbacks
-        ),
+        TraceShape::Path(ref path) => {
+            svg::render_path(shape_style, &resize_info, transform_size, &path, callbacks)
+        }
 
         TraceShape::Rect(width, height) => svg::render_rect(
             shape_style,

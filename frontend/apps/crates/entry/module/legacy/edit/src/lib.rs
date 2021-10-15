@@ -1,5 +1,4 @@
 #![feature(type_alias_impl_trait)]
-
 //see: https://github.com/rust-lang/cargo/issues/8010
 #![cfg_attr(feature = "quiet", allow(warnings))]
 
@@ -8,7 +7,6 @@
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 use wasm_bindgen::prelude::*;
-use std::rc::Rc;
 
 #[wasm_bindgen(start)]
 pub async fn main_js() {

@@ -7,7 +7,7 @@ pub const STR_CONTINUE: &'static str = "Continue";
 
 pub const STR_CREATE_NEW_LIST: &'static str = "Create new list";
 
-pub const STR_HEADER_ADD_PAIR:&'static str = "Add pair";
+pub const STR_HEADER_ADD_PAIR: &'static str = "Add pair";
 
 pub mod steps_nav {
     pub const STR_CONTENT: &'static str = "Content";

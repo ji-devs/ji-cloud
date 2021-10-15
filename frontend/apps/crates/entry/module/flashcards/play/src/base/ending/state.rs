@@ -7,9 +7,6 @@ pub struct Ending {
 
 impl Ending {
     pub fn new(base: Rc<Base>) -> Self {
-        Self { 
-            base,
-        }
+        Self { base }
     }
 }
-

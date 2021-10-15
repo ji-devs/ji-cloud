@@ -79,7 +79,7 @@ pub fn render(state: Rc<State>) -> Dom {
                                 .child(ModuleThumbnail::render_live(
                                     Rc::new(ModuleThumbnail {
                                         jig_id: state.player_state.jig_id.clone(),
-                                        module: module.clone(), 
+                                        module: module.clone(),
                                         is_jig_fallback: false,
                                     }),
                                     Some("window")

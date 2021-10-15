@@ -1,6 +1,7 @@
 #![allow(dead_code)]
 
 use components::stickers::{sprite::ext::*, text::ext::*};
+use components::tabs::MenuTabKind;
 use once_cell::sync::OnceCell;
 use shared::{
     domain::{
@@ -19,7 +20,6 @@ use shared::{
 };
 use utils::prelude::*;
 use uuid::Uuid;
-use components::tabs::MenuTabKind;
 
 pub static SETTINGS: OnceCell<DebugSettings> = OnceCell::new();
 

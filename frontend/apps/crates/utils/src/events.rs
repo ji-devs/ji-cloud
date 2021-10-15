@@ -1,7 +1,7 @@
-use serde::Deserialize;
-use dominator_helpers::{temp_make_event, make_custom_event_serde, make_custom_event};
-use shared::domain::jig::TextDirection;
 use super::resize::*;
+use dominator_helpers::{make_custom_event, make_custom_event_serde, temp_make_event};
+use serde::Deserialize;
+use shared::domain::jig::TextDirection;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 
@@ -32,10 +32,9 @@ temp_make_event!(CollapseAll, "collapse-all" => web_sys::Event);
 
 temp_make_event!(CustomBlur, "custom-blur" => web_sys::Event);
 
-
 make_custom_event_serde!("module-resize", ModuleResizeEvent, ResizeInfo);
 
-// Custom Bounds 
+// Custom Bounds
 #[derive(Deserialize, Debug)]
 pub struct CustomBoundsData {
     pub x: f64,
@@ -46,7 +45,7 @@ pub struct CustomBoundsData {
 
 make_custom_event_serde!("custom-bounds", CustomBounds, CustomBoundsData);
 
-// Custom Change 
+// Custom Change
 #[derive(Deserialize, Debug)]
 pub struct CustomChangeData {
     pub value: String,
@@ -74,7 +73,7 @@ impl CustomInput {
     }
 }
 
-// Custom Toggle 
+// Custom Toggle
 #[derive(Deserialize, Debug)]
 pub struct CustomToggleData {
     pub value: bool,
@@ -88,7 +87,7 @@ impl CustomToggle {
     }
 }
 
-// Custom Route 
+// Custom Route
 #[derive(Deserialize, Debug)]
 pub struct CustomRouteData {
     pub route: String,
@@ -116,7 +115,7 @@ impl CustomString {
     }
 }
 
-// Custom Search 
+// Custom Search
 #[derive(Deserialize, Debug)]
 pub struct CustomSearchData {
     pub query: String,
@@ -130,13 +129,12 @@ impl CustomSearch {
     }
 }
 
-// Google Location 
+// Google Location
 #[derive(Deserialize, Debug)]
 pub struct GoogleLocationData {
     #[serde(rename = "rawJson")]
     pub raw_json: Option<String>,
     pub input: Option<String>,
-
     //not going to try and decode place
 }
 
@@ -167,14 +165,14 @@ make_custom_event_serde!("image-load", ImageLoad, ImageLoadData);
 
 impl ImageLoad {
     pub fn size(&self) -> (f64, f64) {
-        let ImageLoadData { width, height} = self.data();
+        let ImageLoadData { width, height } = self.data();
         (width, height)
     }
 }
 
 temp_make_event!(ImageError, "image-error" => web_sys::Event);
 
-// Custom Direction 
+// Custom Direction
 #[derive(Deserialize, Debug)]
 pub struct CustomDirectionData {
     pub direction: TextDirection,
@@ -188,13 +186,17 @@ impl CustomDirection {
     }
 }
 
-// Custom Selected 
+// Custom Selected
 #[derive(Deserialize, Debug)]
 pub struct CustomSelectedChangeData {
     pub selected: bool,
 }
 
-make_custom_event_serde!("custom-selected", CustomSelectedChange, CustomSelectedChangeData);
+make_custom_event_serde!(
+    "custom-selected",
+    CustomSelectedChange,
+    CustomSelectedChangeData
+);
 
 impl CustomSelectedChange {
     pub fn selected(&self) -> bool {

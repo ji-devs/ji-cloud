@@ -1,10 +1,18 @@
+use super::super::state::Sidebar;
 use crate::base::state::Base;
-use components::{backgrounds::actions::Layer, color_select::state::State as ColorPickerState, image::search::{callbacks::Callbacks as ImageSearchCallbacks, state::{ImageSearchCheckboxKind, ImageSearchOptions, State as ImageSearchState}}, tabs::MenuTabKind};
+use components::{
+    backgrounds::actions::Layer,
+    color_select::state::State as ColorPickerState,
+    image::search::{
+        callbacks::Callbacks as ImageSearchCallbacks,
+        state::{ImageSearchCheckboxKind, ImageSearchOptions, State as ImageSearchState},
+    },
+    tabs::MenuTabKind,
+};
 use dominator::clone;
 use futures_signals::signal::Mutable;
 use shared::domain::jig::module::body::Background;
 use std::rc::Rc;
-use super::super::state::Sidebar;
 
 const STR_SELECT_BACKGROUND_COLOR: &'static str = "Select background color";
 
@@ -73,9 +81,9 @@ impl Tab {
                 let state = ImageSearchState::new(opts, callbacks);
 
                 Self::Overlay(Rc::new(state))
-            },
+            }
 
-            _ => unimplemented!("unsupported tab kind!")
+            _ => unimplemented!("unsupported tab kind!"),
         }
     }
 

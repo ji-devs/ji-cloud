@@ -1,22 +1,16 @@
 use crate::base::state::Base;
 use std::rc::Rc;
-use std::cell::RefCell;
-use futures_signals::{
-    map_ref,
-    signal::{Mutable, Signal, SignalExt}
+
+use components::{
+    audio::input::{AudioInput, AudioInputCallbacks, AudioInputOptions},
+    tabs::MenuTabKind,
 };
 use dominator::clone;
-use components::{
-    tabs::MenuTabKind,
-    image::search::state::{State as ImageSearchState, ImageSearchOptions},
-    audio::input::{
-        AudioInputOptions,
-        AudioInput,
-        AudioInputCallbacks,
-    },
-    stickers::state::Stickers,
+use futures_signals::{
+    map_ref,
+    signal::{Mutable, Signal, SignalExt},
 };
-use dominator_helpers::futures::AsyncLoader;
+
 use super::super::state::Sidebar;
 use shared::domain::jig::module::body::Audio;
 
@@ -24,13 +18,9 @@ pub struct Step3 {
     pub sidebar: Rc<Sidebar>,
 }
 
-
 impl Step3 {
     pub fn new(sidebar: Rc<Sidebar>) -> Rc<Self> {
-
-        let _self = Rc::new(Self {
-            sidebar,
-        });
+        let _self = Rc::new(Self { sidebar });
 
         _self
     }
@@ -44,7 +34,7 @@ impl Step3 {
                 if has_index {
                     let kind = match crate::debug::settings().interaction_tab {
                         Some(kind) => kind,
-                        None => MenuTabKind::Audio
+                        None => MenuTabKind::Audio,
                     };
                     Mutable::new(Some(kind))
                 } else {
@@ -55,8 +45,10 @@ impl Step3 {
 
     //The tab signal is re-generated when either the tab is clicked (changing the kind_state)
     //or a new trace is selected
-    pub fn tab_signal(&self, selected_tab_signal: impl Signal<Item = Option<MenuTabKind>>) -> impl Signal<Item = Option<Tab>> {
-
+    pub fn tab_signal(
+        &self,
+        selected_tab_signal: impl Signal<Item = Option<MenuTabKind>>,
+    ) -> impl Signal<Item = Option<Tab>> {
         let base = self.sidebar.base.clone();
 
         map_ref! {
@@ -77,28 +69,23 @@ impl Step3 {
     pub fn trace_index_signal(&self) -> impl Signal<Item = Option<usize>> {
         self.sidebar.base.traces.selected_index.signal_cloned()
     }
-
 }
 
 #[derive(Clone)]
 pub enum Tab {
     Text(usize, Mutable<Option<String>>),
-    Audio(Rc<AudioInput>)
+    Audio(Rc<AudioInput>),
 }
 
 impl Tab {
-    pub fn new(base: Rc<Base>, kind:MenuTabKind, index: usize) -> Self {
+    pub fn new(base: Rc<Base>, kind: MenuTabKind, index: usize) -> Self {
         match kind {
             MenuTabKind::Text => {
                 let text = base.traces.get_text(index);
                 Self::Text(index, Mutable::new(text))
-            },
+            }
             MenuTabKind::Audio => {
-                
-                let opts = AudioInputOptions::new(
-                    Some(base.traces.audio_signal(index))
-                );
-
+                let opts = AudioInputOptions::new(Some(base.traces.audio_signal(index)));
 
                 let callbacks = AudioInputCallbacks::new(
                     Some(clone!(base, index => move |audio:Audio| {
@@ -112,9 +99,9 @@ impl Tab {
                 let state = AudioInput::new(opts, callbacks);
 
                 Self::Audio(state)
-            },
+            }
 
-            _ => unimplemented!("unsupported tab kind!")
+            _ => unimplemented!("unsupported tab kind!"),
         }
     }
 
@@ -132,4 +119,3 @@ impl Tab {
         }
     }
 }
-

@@ -1,14 +1,13 @@
+use futures_signals::signal::Mutable;
 use shared::domain::jig::module::body::_groups::design::Trace;
-use futures_signals::signal::{Mutable, Signal, SignalExt};
-use std::rc::Rc;
 use std::collections::HashSet;
+use std::rc::Rc;
 
 pub struct TracesShow {
     pub traces: Vec<Trace>,
     pub mode: TracesShowMode,
     pub on_select: Option<Box<dyn Fn(usize) + 'static>>,
     pub selected_index: Mutable<Option<usize>>,
-
 }
 
 #[derive(Clone, Debug)]
@@ -21,7 +20,11 @@ pub enum TracesShowMode {
 }
 
 impl TracesShow {
-    pub fn new(traces: Vec<Trace>, mode: TracesShowMode, on_select: Option<impl Fn(usize) + 'static>) -> Rc<Self> {
+    pub fn new(
+        traces: Vec<Trace>,
+        mode: TracesShowMode,
+        on_select: Option<impl Fn(usize) + 'static>,
+    ) -> Rc<Self> {
         Rc::new(Self {
             traces,
             mode,

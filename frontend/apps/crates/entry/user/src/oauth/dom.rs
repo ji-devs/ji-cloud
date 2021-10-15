@@ -1,17 +1,14 @@
-use dominator::{Dom, DomBuilder, html, clone, with_node};
+use dominator::{clone, html, Dom};
 use futures_signals::signal::{Mutable, SignalExt};
-use std::rc::Rc;
-use web_sys::HtmlInputElement;
-use utils::{events, routes::*};
-use dominator_helpers::futures::AsyncLoader;
+
+use utils::routes::*;
+
 use super::actions;
 use shared::domain::session::*;
-pub struct OauthPage {
-}
+pub struct OauthPage {}
 
 impl OauthPage {
     pub fn render(data: OauthData, redirect_kind: OAuthUrlKind) -> Dom {
-
         let is_loading = Mutable::new(true);
 
         html!("div", {
@@ -25,7 +22,7 @@ impl OauthPage {
                     }
                 };
                 actions::finalize(req, redirect_kind).await;
-                
+
                 is_loading.set_neq(false);
 
             }))

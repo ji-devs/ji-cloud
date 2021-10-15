@@ -1,11 +1,8 @@
 use std::rc::Rc;
 
 use super::debug::DebugSettings;
+use crate::{module::_common::edit::prelude::*, tooltip::state::State as TooltipState};
 use dominator_helpers::signals::EitherSignal;
-use crate::{
-    audio::mixer::AudioMixer, module::_common::edit::prelude::*,
-    tooltip::state::State as TooltipState,
-};
 use futures_signals::{
     map_ref,
     signal::{Mutable, ReadOnlyMutable, Signal, SignalExt},
@@ -155,7 +152,6 @@ impl<RawData: RawDataExt, E: ExtraExt> CardsBase<RawData, E> {
             .collect()
     }
 
-
     pub fn is_empty_signal(&self) -> impl Signal<Item = bool> {
         self.pairs
             .signal_vec_cloned()
@@ -188,14 +184,13 @@ impl<RawData: RawDataExt, E: ExtraExt> BaseExt<Step> for CardsBase<RawData, E> {
         self.pairs
             .lock_ref()
             .iter()
-            .filter(|(card_1, card_2)| {
-                card_1.get_is_valid_data() && card_2.get_is_valid_data()            
-            })
-            .count() >= 2
+            .filter(|(card_1, card_2)| card_1.get_is_valid_data() && card_2.get_is_valid_data())
+            .count()
+            >= 2
     }
 
     fn next_step_allowed_signal(&self) -> Self::NextStepAllowedSignal {
-        let mode = self.mode;
+        let _mode = self.mode;
 
         self.pairs
             .signal_vec_cloned()
@@ -208,16 +203,9 @@ impl<RawData: RawDataExt, E: ExtraExt> BaseExt<Step> for CardsBase<RawData, E> {
                         }
                 }
             })
-            .to_signal_map(|xs| {
-                xs
-                    .iter()
-                    .filter(|x| **x)
-                    .count() >= 2
-            })
+            .to_signal_map(|xs| xs.iter().filter(|x| **x).count() >= 2)
     }
-
 }
-
 
 #[derive(Debug, Clone)]
 pub enum Card {
@@ -249,14 +237,14 @@ impl Card {
     pub fn get_is_valid_data(&self) -> bool {
         match self {
             Self::Text(text) => !text.lock_ref().is_empty(),
-            Self::Image(image) => image.lock_ref().is_some()
+            Self::Image(image) => image.lock_ref().is_some(),
         }
     }
 
     pub fn is_valid_data_signal(&self) -> impl Signal<Item = bool> {
         match self {
             Self::Text(text) => EitherSignal::Left(text.signal_ref(|text| !text.is_empty())),
-            Self::Image(image) => EitherSignal::Right(image.signal_ref(|image| image.is_some()))
+            Self::Image(image) => EitherSignal::Right(image.signal_ref(|image| image.is_some())),
         }
     }
 }

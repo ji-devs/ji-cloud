@@ -41,6 +41,7 @@ web-sys = { version = "0.3.53", features = [
     'DomTokenList',
     'HtmlCollection',
     'HtmlInputElement',
+    'HtmlTextAreaElement',
     'HtmlSelectElement',
     'HtmlOptionElement',
     'HtmlOptionsCollection',

@@ -107,9 +107,6 @@ where
                     })
                 })
             }
-            _ => {
-                unimplemented!("don't know how to render other tooltips here!")
-            }
         },
 
         //This really means "in the canvas area" too...

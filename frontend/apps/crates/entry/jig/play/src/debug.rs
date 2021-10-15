@@ -2,13 +2,13 @@ use cfg_if::cfg_if;
 
 #[derive(Default)]
 pub struct DebugSettings {
-    pub empty_module_url:&'static str
+    pub empty_module_url: &'static str,
 }
 
 impl DebugSettings {
     pub fn local() -> Self {
         Self {
-            empty_module_url: "http://localhost:4105/module/legacy/play/debug"
+            empty_module_url: "http://localhost:4105/module/legacy/play/debug",
         }
     }
 }

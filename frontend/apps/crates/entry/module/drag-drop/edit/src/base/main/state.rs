@@ -1,18 +1,15 @@
-use components::module::_common::edit::prelude::*;
 use crate::base::state::Base;
+use components::module::_common::edit::prelude::*;
 use std::rc::Rc;
-use dominator_helpers::futures::AsyncLoader;
-use futures_signals::{
-    signal::{Mutable, SignalExt, Signal},
-    signal_vec::{SignalVec, SignalVecExt}
-};
-use utils::prelude::*;
+
+use super::{drag::*, select::*};
 use dominator::clone;
-use shared::domain::jig::module::body::drag_drop::Step;
-use super::{
-    drag::*,
-    select::*
+use futures_signals::{
+    signal::{Signal, SignalExt},
+    signal_vec::SignalVecExt,
 };
+use shared::domain::jig::module::body::drag_drop::Step;
+use utils::prelude::*;
 
 pub struct Main {
     pub base: Rc<Base>,
@@ -20,15 +17,15 @@ pub struct Main {
 
 impl Main {
     pub fn new(base: Rc<Base>) -> Self {
-        Self {
-            base,
-        }
+        Self { base }
     }
 
     pub fn sticker_phase_signal(&self) -> impl Signal<Item = StickerPhase> {
         let base = self.base.clone();
 
-        self.base.step.signal()
+        self.base
+            .step
+            .signal()
             .map(clone!(base => move |step| match step {
                 Step::One => StickerPhase::Scene,
                 Step::Two => StickerPhase::Select(MainSelect::new(base.clone())),
@@ -38,11 +35,13 @@ impl Main {
     }
 
     pub fn trace_phase_signal(&self) -> impl Signal<Item = Option<TracePhase>> {
-        self.base.step.signal()
+        self.base
+            .step
+            .signal()
             .map(|step| match step {
                 Step::Three => Some(TracePhase::Edit),
                 Step::Four => Some(TracePhase::Show),
-                _ => None
+                _ => None,
             })
             .dedupe()
     }
@@ -62,7 +61,4 @@ pub enum TracePhase {
     Show,
 }
 
-
-impl MainExt for Main {
-}
-
+impl MainExt for Main {}

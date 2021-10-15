@@ -3,7 +3,7 @@ use crate::{
     color_select::{self, state::State as ColorPickerState},
     text_editor::wysiwyg_types::ControlsChange,
 };
-use dominator::{Dom, class, clone, html, pseudo};
+use dominator::{class, clone, html, pseudo, Dom};
 use futures_signals::signal::Mutable;
 use futures_signals::signal::SignalExt;
 use rgb::RGBA8;

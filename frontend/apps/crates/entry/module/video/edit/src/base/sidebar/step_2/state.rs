@@ -1,9 +1,16 @@
+use super::super::state::Sidebar;
 use crate::base::state::Base;
-use components::{image::search::{callbacks::Callbacks as ImageSearchCallbacks, state::{ImageSearchCheckboxKind, ImageSearchOptions, State as ImageSearchState}}, stickers::state::Stickers, tabs::MenuTabKind};
+use components::{
+    image::search::{
+        callbacks::Callbacks as ImageSearchCallbacks,
+        state::{ImageSearchCheckboxKind, ImageSearchOptions, State as ImageSearchState},
+    },
+    stickers::state::Stickers,
+    tabs::MenuTabKind,
+};
 use dominator::clone;
 use futures_signals::signal::Mutable;
 use std::rc::Rc;
-use super::super::state::Sidebar;
 
 pub struct Step2 {
     pub tab: Mutable<Tab>,
@@ -48,9 +55,9 @@ impl Tab {
                 let state = ImageSearchState::new(opts, callbacks);
 
                 Self::Image(Rc::new(state))
-            },
+            }
 
-            _ => unimplemented!("unsupported tab kind!")
+            _ => unimplemented!("unsupported tab kind!"),
         }
     }
 

@@ -1,5 +1,4 @@
 use std::rc::Rc;
-use utils::prelude::*;
 
 pub struct Button {
     pub style: ButtonStyle,
@@ -11,15 +10,18 @@ impl Button {
     pub const fn icon_str(&self) -> Option<&'static str> {
         match &self.style {
             ButtonStyle::Icon(icon) | ButtonStyle::IconSized(icon, _) => Some(icon.as_str()),
-            _ => None
         }
     }
 
     pub const fn element_str(&self) -> &'static str {
         match &self.style {
             ButtonStyle::Icon(_) | ButtonStyle::IconSized(_, _) => {
-                if self.label.is_none() { "button-icon" } else { "button-icon-label" }
-            },
+                if self.label.is_none() {
+                    "button-icon"
+                } else {
+                    "button-icon-label"
+                }
+            }
         }
     }
 }
@@ -29,9 +31,8 @@ pub enum ButtonStyle {
     IconSized(ButtonStyleIcon, f64),
 }
 
-
 pub enum ButtonStyleIcon {
-    BlueX ,
+    BlueX,
     BluePlus,
     Audio,
     AudioStop,
@@ -55,14 +56,14 @@ impl Button {
         Rc::new(Self {
             style,
             label: None,
-            on_click: Some(Box::new(on_click))
+            on_click: Some(Box::new(on_click)),
         })
     }
     pub fn new_label(style: ButtonStyle, label: String, on_click: impl Fn() + 'static) -> Rc<Self> {
         Rc::new(Self {
             style,
             label: Some(label),
-            on_click: Some(Box::new(on_click))
+            on_click: Some(Box::new(on_click)),
         })
     }
 }

@@ -1,35 +1,29 @@
-use utils::routes::{Route, ModuleRoute};
 use shared::domain::jig::ModuleKind;
 use std::rc::Rc;
-use wasm_bindgen::UnwrapThrowExt;
-use web_sys::Url;
-use futures_signals::{
-    map_ref,
-    signal::{Mutable, SignalExt, Signal}
-};
-use dominator::{Dom, html, clone};
-use dominator_helpers::futures::AsyncLoader;
-use std::cell::RefCell;
+use utils::routes::{ModuleRoute, Route};
+
+use super::state::{create_state, AppState};
 use components::module::_common::play::entry::dom::render_page_body;
-use super::state::{AppState, create_state};
+use dominator::clone;
+use dominator_helpers::futures::AsyncLoader;
+use futures_signals::signal::SignalExt;
+use std::cell::RefCell;
 
 pub struct Router {
     loader: AsyncLoader,
-    app: RefCell<Option<Rc<AppState>>>
+    app: RefCell<Option<Rc<AppState>>>,
 }
 
 impl Router {
     pub fn new() -> Self {
         Self {
             loader: AsyncLoader::new(),
-            app: RefCell::new(None)
+            app: RefCell::new(None),
         }
     }
 }
 
-
 pub fn render(state: Rc<Router>) {
-
     state.clone().loader.load(
         dominator::routing::url()
             .signal_ref(|url| Route::from_url(&url))
@@ -57,6 +51,6 @@ pub fn render(state: Rc<Router>) {
                     _ => {}
                 };
                 async {}
-            }))
+            })),
     );
 }

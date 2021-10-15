@@ -41,7 +41,7 @@ pub struct State {
     pub theme_colors: Mutable<Vec<RGBA8>>,
     pub user_colors: Rc<MutableVec<RGBA8>>,
     pub on_select: Option<Box<dyn Fn(Option<RGBA8>)>>,
-    pub label: Option<String>
+    pub label: Option<String>,
 }
 
 impl State {

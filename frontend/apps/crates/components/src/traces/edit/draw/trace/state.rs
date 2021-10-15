@@ -4,9 +4,8 @@ use std::rc::Rc;
 
 use crate::transform::state::{TransformCallbacks, TransformState};
 use shared::domain::jig::module::body::{
-    Transform,
-    Audio,
-    _groups::design::{Trace as RawTrace, TraceShape as RawTraceShape, TraceKind},
+    Audio, Transform,
+    _groups::design::{Trace as RawTrace, TraceKind, TraceShape as RawTraceShape},
 };
 
 use utils::{math::BoundsF64, prelude::*};
@@ -21,7 +20,11 @@ pub struct DrawTrace {
 }
 
 impl DrawTrace {
-    pub fn new(raw: Option<RawTrace>, default_kind: TraceKind, on_change_cb: Rc<Box<dyn Fn()>>) -> Self {
+    pub fn new(
+        raw: Option<RawTrace>,
+        default_kind: TraceKind,
+        on_change_cb: Rc<Box<dyn Fn()>>,
+    ) -> Self {
         let raw = match raw {
             Some(raw) => raw,
             None => RawTrace {

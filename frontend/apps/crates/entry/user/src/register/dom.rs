@@ -1,18 +1,13 @@
-use dominator::{Dom, html, clone, with_node};
+use super::state::*;
+use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
 use std::rc::Rc;
-use super::state::*;
-use web_sys::HtmlInputElement;
-use utils::{events, routes::*};
+
 use super::pages::{
-    start::dom::StartPage,
-    step_1::dom::Step1Page,
-    step_2::dom::Step2Page,
-    step_3::dom::Step3Page,
+    start::dom::StartPage, step_1::dom::Step1Page, step_2::dom::Step2Page, step_3::dom::Step3Page,
 };
 
-pub struct RegisterPage {
-}
+pub struct RegisterPage {}
 
 impl RegisterPage {
     pub fn render(step: Option<Step>, is_no_auth: bool) -> Dom {
@@ -30,4 +25,3 @@ impl RegisterPage {
         })
     }
 }
-

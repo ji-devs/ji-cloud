@@ -1,10 +1,10 @@
-use super::state::*;
-use crate::module::{_common::edit::prelude::*, _groups::cards::edit::state::*};
-use dominator::{html, Dom, clone};
-use std::rc::Rc;
-use crate::buttons::{Button, ButtonStyle, ButtonStyleIcon};
 use super::super::strings::STR_HEADER_ADD_PAIR;
+use super::state::*;
+use crate::buttons::{Button, ButtonStyle, ButtonStyleIcon};
+use crate::module::{_common::edit::prelude::*, _groups::cards::edit::state::*};
+use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
+use std::rc::Rc;
 
 impl<RawData: RawDataExt, E: ExtraExt> DomRenderable for Header<RawData, E> {
     fn render(state: Rc<Header<RawData, E>>) -> Dom {

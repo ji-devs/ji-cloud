@@ -3,9 +3,7 @@ pub struct PreviewPopupCallbacks {
 }
 
 impl PreviewPopupCallbacks {
-    pub fn new(
-        close: impl Fn() + 'static,
-    ) -> Self {
+    pub fn new(close: impl Fn() + 'static) -> Self {
         Self {
             close: Box::new(close),
         }

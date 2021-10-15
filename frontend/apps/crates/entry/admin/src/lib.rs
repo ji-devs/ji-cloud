@@ -5,16 +5,15 @@
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
-mod router;
 mod categories;
 mod images;
-mod strings;
 mod locale;
+mod router;
 mod sidebar;
+mod strings;
 
-use wasm_bindgen::prelude::*;
 use router::Router;
-
+use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen(start)]
 pub async fn main_js() {
@@ -23,5 +22,5 @@ pub async fn main_js() {
 
     utils::init::init().await;
 
-    dominator::append_dom(&dominator::body(), Router::render(Router::new())); 
+    dominator::append_dom(&dominator::body(), Router::render(Router::new()));
 }

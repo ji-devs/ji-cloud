@@ -1,19 +1,18 @@
 use std::rc::Rc;
 
-use dominator::{Dom, clone, html};
-use futures_signals::{signal::SignalExt, signal_vec::{MutableVec, SignalVecExt}};
+use dominator::{clone, html, Dom};
+use futures_signals::{
+    signal::SignalExt,
+    signal_vec::{MutableVec, SignalVecExt},
+};
 use shared::domain::meta::MetadataResponse;
 use utils::events;
 
-use crate::profile::{
-    state::ActivePopup,
-    actions,
-};
+use crate::profile::{actions, state::ActivePopup};
 
 use super::super::state::{ProfilePageUser, State};
 
 const STR_DONE: &'static str = "Done";
-
 
 pub struct PopupCallbacks<I, S> {
     pub get_options_list: Box<dyn Fn(&MetadataResponse) -> &Vec<S>>,
@@ -22,11 +21,15 @@ pub struct PopupCallbacks<I, S> {
     pub get_display_name: Box<dyn Fn(&S) -> &str>,
 }
 
-
-pub fn render<I, S>(state: Rc<State>, header: &str, subheader: &str, callbacks: PopupCallbacks<I, S>) -> Dom
+pub fn render<I, S>(
+    state: Rc<State>,
+    header: &str,
+    subheader: &str,
+    callbacks: PopupCallbacks<I, S>,
+) -> Dom
 where
     I: 'static + Clone + PartialEq,
-    S: 'static
+    S: 'static,
 {
     let callbacks = Rc::new(callbacks);
     html!("user-profile-options-popup", {

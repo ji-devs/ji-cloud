@@ -1,58 +1,38 @@
 use components::module::_common::edit::prelude::*;
-use components::audio::mixer::AudioMixer;
-use std::rc::Rc;
-use shared::domain::jig::{
-    JigId, 
-    module::{
-        ModuleId, 
-        body::{
-            StepExt,
-            ThemeChoice,
-            Audio,
-            Instructions,
-            tapping_board::{
-                Step,
-                PlaySettings as RawPlaySettings, 
-                Hint, Next,
-                Mode, 
-                Content as RawContent, 
-                ModuleData as RawData
-            },
-            _groups::design::{
-                Trace as RawTrace,
-                Backgrounds as RawBackgrounds, 
-                TraceKind,
-            }
-        }
-    }
-};
-use futures_signals::{
-    map_ref,
-    signal::{self, Signal, SignalExt, ReadOnlyMutable, Mutable},
-    signal_vec::MutableVec
-};
-use utils::prelude::*;
+
 use components::{
-    text_editor::{
-        state::State as TextEditorState,
-        callbacks::Callbacks as TextEditorCallbacks
-    },
+    backgrounds::{callbacks::Callbacks as BackgroundsCallbacks, state::Backgrounds},
     stickers::{
-        state::{Stickers,Sticker},
-        callbacks::Callbacks as StickersCallbacks
+        callbacks::Callbacks as StickersCallbacks,
+        state::{Sticker, Stickers},
     },
-    backgrounds::{
-        state::Backgrounds,
-        callbacks::Callbacks as BackgroundsCallbacks,
-    },
+    text_editor::{callbacks::Callbacks as TextEditorCallbacks, state::State as TextEditorState},
     traces::{
         bubble::TraceBubble,
         edit::{TracesEdit, TracesEditCallbacks},
     },
-    tooltip::state::State as TooltipState
 };
 use dominator::clone;
+use futures_signals::{
+    signal::{self, Mutable, ReadOnlyMutable, Signal, SignalExt},
+    signal_vec::MutableVec,
+};
+use shared::domain::jig::{
+    module::{
+        body::{
+            Instructions, StepExt, ThemeChoice,
+            _groups::design::TraceKind,
+            tapping_board::{
+                Hint, Mode, ModuleData as RawData, Next, PlaySettings as RawPlaySettings, Step,
+            },
+        },
+        ModuleId,
+    },
+    JigId,
+};
 use std::cell::RefCell;
+use std::rc::Rc;
+use utils::prelude::*;
 pub struct Base {
     pub history: Rc<HistoryStateImpl<RawData>>,
     pub step: ReadOnlyMutable<Step>,
@@ -62,8 +42,8 @@ pub struct Base {
     pub module_id: ModuleId,
     // TappingBoard-specific
     pub theme_id: ReadOnlyMutable<ThemeId>,
-    pub backgrounds: Rc<Backgrounds>, 
-    pub stickers: Rc<Stickers<Sticker>>, 
+    pub backgrounds: Rc<Backgrounds>,
+    pub stickers: Rc<Stickers<Sticker>>,
     pub traces: Rc<TracesEdit>,
     pub traces_meta: MutableVec<TraceMeta>,
     pub text_editor: Rc<TextEditorState>,
@@ -73,24 +53,19 @@ pub struct Base {
 pub struct PlaySettings {
     pub hint: Mutable<Hint>,
     pub next: Mutable<Next>,
-    pub next_value: Mutable<usize>
+    pub next_value: Mutable<usize>,
 }
 
 impl PlaySettings {
-    pub fn new(settings:RawPlaySettings) -> Self {
-
-        let next_value = Mutable::new(
-                match &settings.next {
-                    Next::SelectSome(value) => *value,
-                    _ => {
-                        crate::config::DEFAULT_SELECT_AMOUNT
-                    }
-                },
-            );
+    pub fn new(settings: RawPlaySettings) -> Self {
+        let next_value = Mutable::new(match &settings.next {
+            Next::SelectSome(value) => *value,
+            _ => crate::config::DEFAULT_SELECT_AMOUNT,
+        });
         Self {
             hint: Mutable::new(settings.hint),
             next: Mutable::new(settings.next),
-            next_value
+            next_value,
         }
     }
 
@@ -110,15 +85,14 @@ pub struct TraceMeta {
 impl TraceMeta {
     pub fn new() -> Self {
         Self {
-            bubble: Mutable::new(None)
+            bubble: Mutable::new(None),
         }
     }
 }
 
 impl Base {
     pub async fn new(init_args: BaseInitFromRawArgs<RawData, Mode, Step>) -> Rc<Self> {
-
-        let BaseInitFromRawArgs { 
+        let BaseInitFromRawArgs {
             raw,
             jig_id,
             module_id,
@@ -131,15 +105,15 @@ impl Base {
 
         let content = raw.content.unwrap_ji();
 
-        let _self_ref:Rc<RefCell<Option<Rc<Self>>>> = Rc::new(RefCell::new(None));
+        let _self_ref: Rc<RefCell<Option<Rc<Self>>>> = Rc::new(RefCell::new(None));
 
         let instructions = Mutable::new(content.base.instructions);
-      
-        let stickers_ref:Rc<RefCell<Option<Rc<Stickers<Sticker>>>>> = Rc::new(RefCell::new(None));
+
+        let stickers_ref: Rc<RefCell<Option<Rc<Stickers<Sticker>>>>> = Rc::new(RefCell::new(None));
 
         let text_editor = TextEditorState::new(
             theme_id.clone(),
-            None, 
+            None,
             TextEditorCallbacks::new(
                 //New text
                 Some(clone!(stickers_ref => move |value:&str| {
@@ -158,58 +132,55 @@ impl Base {
                     if let Some(stickers) = stickers_ref.borrow().as_ref() {
                         stickers.stop_current_text_editing();
                     }
-                }))
-        ));
-
+                })),
+            ),
+        );
 
         let backgrounds = Rc::new(Backgrounds::from_raw(
-                &content.base.backgrounds,
-                theme_id.clone(),
-                BackgroundsCallbacks::new(
-                    Some(clone!(history => move |raw_bgs| {
-                        history.push_modify(|raw| {
-                            if let Some(content) = &mut raw.content {
-                                content.base.backgrounds = raw_bgs;
-                            }
-                        });
-                    }))
-                )
+            &content.base.backgrounds,
+            theme_id.clone(),
+            BackgroundsCallbacks::new(Some(clone!(history => move |raw_bgs| {
+                history.push_modify(|raw| {
+                    if let Some(content) = &mut raw.content {
+                        content.base.backgrounds = raw_bgs;
+                    }
+                });
+            }))),
         ));
 
-
         let stickers = Stickers::new(
-                text_editor.clone(),
-                StickersCallbacks::new(
-                    Some(clone!(history => move |stickers:&[Sticker]| {
-                        history.push_modify(|raw| {
-                            if let Some(content) = &mut raw.content {
-                                content.base.stickers = stickers 
-                                    .iter()
-                                    .map(|sticker| {
-                                        sticker.to_raw()
-                                    })
-                                    .collect();
-                            }
-                        });
-                    }))
-                )
+            text_editor.clone(),
+            StickersCallbacks::new(Some(clone!(history => move |stickers:&[Sticker]| {
+                history.push_modify(|raw| {
+                    if let Some(content) = &mut raw.content {
+                        content.base.stickers = stickers
+                            .iter()
+                            .map(|sticker| {
+                                sticker.to_raw()
+                            })
+                            .collect();
+                    }
+                });
+            }))),
         );
-       
+
         stickers.replace_all(
-            content.base.stickers.clone()
+            content
+                .base
+                .stickers
+                .clone()
                 .iter()
-                .map(|raw_sticker| {
-                    Sticker::new(stickers.clone(), raw_sticker)
-                })
-                .collect::<Vec<Sticker>>()
+                .map(|raw_sticker| Sticker::new(stickers.clone(), raw_sticker))
+                .collect::<Vec<Sticker>>(),
         );
 
         *stickers_ref.borrow_mut() = Some(stickers.clone());
 
-
         let traces = TracesEdit::from_raw(
             &content.traces,
-            crate::debug::settings().draw_kind.unwrap_or(TraceKind::Regular),
+            crate::debug::settings()
+                .draw_kind
+                .unwrap_or(TraceKind::Regular),
             TracesEditCallbacks::new(
                 Some(clone!(_self_ref => move |raw_trace| {
                     if let Some(_self) = _self_ref.borrow().as_ref() {
@@ -226,14 +197,15 @@ impl Base {
                         _self.on_trace_changed(index, raw_trace);
                     }
                 })),
-            )
+            ),
         );
 
         let traces_meta = MutableVec::new_with_values(
-            content.traces
+            content
+                .traces
                 .iter()
-                .map(|trace_meta| TraceMeta::new())
-                .collect()
+                .map(|_trace_meta| TraceMeta::new())
+                .collect(),
         );
 
         let _self = Rc::new(Self {
@@ -257,16 +229,15 @@ impl Base {
         _self
     }
 
-    pub fn theme_id_str_signal(&self) -> impl Signal<Item = &'static str> { 
+    pub fn theme_id_str_signal(&self) -> impl Signal<Item = &'static str> {
         self.theme_id.signal().map(|id| id.as_str_id())
     }
 }
 
-
 impl BaseExt<Step> for Base {
     type NextStepAllowedSignal = impl Signal<Item = bool>;
 
-    fn allowed_step_change(&self, from:Step, to:Step) -> bool {
+    fn allowed_step_change(&self, _from: Step, _to: Step) -> bool {
         true
     }
 
@@ -280,5 +251,4 @@ impl BaseExt<Step> for Base {
     fn get_module_id(&self) -> ModuleId {
         self.module_id
     }
-
 }

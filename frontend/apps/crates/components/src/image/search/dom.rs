@@ -1,7 +1,7 @@
 use crate::image::search::state::ImageSearchCheckboxKind;
 
 use super::{
-    actions::{search, fetch_init_data, upload_file},
+    actions::{fetch_init_data, search, upload_file},
     state::State,
     types::*,
 };

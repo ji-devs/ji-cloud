@@ -1,36 +1,43 @@
 use dominator::{clone, html, with_node, Dom};
-use futures_signals::{map_ref, signal::{Mutable, SignalExt}};
+use futures_signals::{
+    map_ref,
+    signal::{Mutable, SignalExt},
+};
 use shared::domain::jig::PrivacyLevel;
 use utils::events;
 use web_sys::{HtmlElement, HtmlInputElement, HtmlTextAreaElement};
 
+use super::super::state::State as JigEditState;
 use super::{
     actions,
     components::{
         additional_resources::render as AdditionalResourcesRender, age::render as AgeRender,
         categories_pills::render as CategoriesPillsRender,
-        categories_select::render as CategoriesSelectRender,
-        goal::render as GoalRender,
+        categories_select::render as CategoriesSelectRender, goal::render as GoalRender,
         language::render as LanguageRender,
     },
     state::*,
 };
-use components::{module::_common::thumbnail::ModuleThumbnail, tooltip::{
-    callbacks::TooltipErrorCallbacks,
-    dom::render as TooltipDom,
-    state::{
-        MoveStrategy, State as TooltipState, TooltipData, TooltipError, TooltipTarget, Anchor, ContentAnchor
+use components::{
+    module::_common::thumbnail::ModuleThumbnail,
+    tooltip::{
+        callbacks::TooltipErrorCallbacks,
+        dom::render as TooltipDom,
+        state::{
+            Anchor, ContentAnchor, MoveStrategy, State as TooltipState, TooltipData, TooltipError,
+            TooltipTarget,
+        },
     },
-}};
+};
 use std::rc::Rc;
-use super::super::state::State as JigEditState;
 
 const STR_PUBLISH_JIG: &'static str = "Publish JIG";
 const STR_PUBLIC_LABEL: &'static str = "My JIG is public";
 const STR_NAME_LABEL: &'static str = "JIG’s name";
 const STR_NAME_PLACEHOLDER: &'static str = "Type your JIG’s name here";
 const STR_DESCRIPTION_LABEL: &'static str = "Description";
-const STR_DESCRIPTION_PLACEHOLDER: &'static str = "This JIG is about… (include words that will help others find this JIG easily)";
+const STR_DESCRIPTION_PLACEHOLDER: &'static str =
+    "This JIG is about… (include words that will help others find this JIG easily)";
 const STR_PUBLIC_POPUP_TITLE: &'static str = "Sharing is Caring!";
 const STR_PUBLIC_POPUP_BODY: &'static str = "Are you sure you want to keep this JIG private? Please consider sharing your JIG with the Jigzi community.";
 const STR_MISSING_INFO_TOOLTIP: &'static str = "Please fill in the missing information.";
@@ -96,7 +103,7 @@ fn render_page(state: Rc<State>) -> Dom {
                             false => None,
                             true => {
                                 Some(html!("tooltip-info", {
-                                
+
                                     .property("title", STR_PUBLIC_POPUP_TITLE)
                                     .property("body", STR_PUBLIC_POPUP_BODY)
                                     .property("closeable", true)

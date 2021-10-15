@@ -296,7 +296,7 @@ pub fn debug_render_hit_trace<V: AsRef<Trace>>(index: usize, traces: &[V]) {
         &format!("{}px", resize_info.y + resize_info.content_y),
     );
 
-    let _= web_sys::window()
+    let _ = web_sys::window()
         .unwrap_ji()
         .document()
         .unwrap_ji()

@@ -1,61 +1,42 @@
-use cfg_if::cfg_if;
-use futures_signals::{
-    map_ref,
-    signal::{Mutable, SignalExt, Signal},
-    signal_vec::{MutableVec, SignalVecExt},
-    CancelableFutureHandle, 
-};
-use wasm_bindgen::prelude::*;
-use wasm_bindgen::JsCast;
-use std::cell::RefCell;
-use std::rc::Rc;
-use once_cell::sync::OnceCell;
-use utils::{prelude::*, colors::*};
-use uuid::Uuid;
-use shared::{
-    media::MediaLibrary,
-    domain::{
-        audio::AudioId, 
-        image::ImageId, 
-        jig::{
-            JigId, 
-            module::{
-                ModuleId, 
-                body::{
-                    Image,
-                    ThemeChoice,
-                    Background,
-                    Instructions,
-                    Transform,
-                    drag_drop::{
-                        Content, Mode, ModuleData as RawData,
-                        Item,
-                        TargetArea,
-                        ItemKind,
-                        Interactive,
-                        PlaySettings,
-                        Hint,
-                        Next,
-                        Step,
-                    },
-                    _groups::design::{Backgrounds, Sprite, Sticker, Text, Trace, TraceKind, TraceShape, BaseContent}
-                }
-            }
-        }
-    }
-};
+use futures_signals::{signal::SignalExt, signal_vec::SignalVecExt};
+
 use components::stickers::{sprite::ext::*, text::ext::*};
 use components::tabs::MenuTabKind;
-pub static SETTINGS:OnceCell<DebugSettings> = OnceCell::new();
+use once_cell::sync::OnceCell;
+use shared::{
+    domain::{
+        image::ImageId,
+        jig::{
+            module::{
+                body::{
+                    Image, Instructions, ThemeChoice, Transform,
+                    _groups::design::{
+                        Backgrounds, Sprite, Sticker, Text, Trace, TraceKind, TraceShape,
+                    },
+                    drag_drop::{
+                        Content, Hint, Interactive, Item, ItemKind, Mode, ModuleData as RawData,
+                        PlaySettings, Step, TargetArea,
+                    },
+                },
+                ModuleId,
+            },
+            JigId,
+        },
+    },
+    media::MediaLibrary,
+};
+use utils::prelude::*;
+use uuid::Uuid;
+pub static SETTINGS: OnceCell<DebugSettings> = OnceCell::new();
 
-const IMAGE_UUID:&'static str = "f2e63cf2-ee11-11eb-9b68-4bf1f063ab1c";
+const IMAGE_UUID: &'static str = "f2e63cf2-ee11-11eb-9b68-4bf1f063ab1c";
 
-pub const DEBUG_TEXT:&'static str = "Debug Text"; 
+pub const DEBUG_TEXT: &'static str = "Debug Text";
 
 #[derive(Debug, Default)]
 pub struct DebugSettings {
-    pub data:Option<RawData>,
-    pub step:Option<Step>,
+    pub data: Option<RawData>,
+    pub step: Option<Step>,
     pub skip_save: bool,
     pub skip_load_jig: bool,
     pub draw_kind: Option<TraceKind>,
@@ -67,7 +48,7 @@ pub struct DebugSettings {
 #[derive(Clone, Debug)]
 pub struct InitData {
     pub stickers: Vec<(InitSticker, ItemKind, (f64, f64))>, //last param is translation in the sticker's transform
-    pub traces: Vec<InitTrace>
+    pub traces: Vec<InitTrace>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -82,16 +63,13 @@ pub enum InitTrace {
     Ellipse(f64, f64, f64, f64),
 }
 
-
-
 impl DebugSettings {
     pub fn debug(init_data: Option<InitData>) -> DebugSettings {
         DebugSettings {
             //debug always has to have some data
             //otherwise it will fail at load time
-            data: Some(
-                if let Some(init_data) = init_data {
-                    RawData{
+            data: Some(if let Some(init_data) = init_data {
+                RawData{
                         content: Some(Content {
                             mode: Mode::SettingTable,
                             target_areas: init_data.traces.iter().map(|init| {
@@ -157,12 +135,9 @@ impl DebugSettings {
                             ..Content::default()
                         })
                     }
-                } else {
-                    RawData{
-                        content: None                    
-                    }
-                }
-            ),
+            } else {
+                RawData { content: None }
+            }),
             step: Some(Step::Two),
             draw_kind: None,
             skip_save: true,
@@ -174,38 +149,33 @@ impl DebugSettings {
     }
 }
 
-pub fn init(jig_id: JigId, module_id: ModuleId) {
+pub fn init(jig_id: JigId, _module_id: ModuleId) {
     if jig_id == JigId(Uuid::from_u128(0)) {
-         SETTINGS.set(DebugSettings::debug(Some(InitData{
-
-            stickers: vec![
-                (InitSticker::Text, ItemKind::Static, (0.3, 0.3)),
-                (
-                    InitSticker::Text, 
-                    ItemKind::Interactive(
-                        Interactive {
+        SETTINGS
+            .set(DebugSettings::debug(Some(InitData {
+                stickers: vec![
+                    (InitSticker::Text, ItemKind::Static, (0.3, 0.3)),
+                    (
+                        InitSticker::Text,
+                        ItemKind::Interactive(Interactive {
                             audio: None,
                             target_transform: None,
-                        }
+                        }),
+                        (-0.3, -0.3),
                     ),
-                    (-0.3, -0.3)
-                ),
-                (
-                    InitSticker::Sprite, 
-                    ItemKind::Interactive(
-                        Interactive {
+                    (
+                        InitSticker::Sprite,
+                        ItemKind::Interactive(Interactive {
                             audio: None,
                             target_transform: None,
-                        }
+                        }),
+                        (-0.3, 0.1),
                     ),
-                    (-0.3, 0.1)
-                ),
-                //( InitSticker::Sprite, ItemKind::Static)
-            ],
-            traces: vec![
-                InitTrace::Ellipse(0.3, 0.4, 0.2, 0.1)
-            ]
-        }))).unwrap_ji();
+                    //( InitSticker::Sprite, ItemKind::Static)
+                ],
+                traces: vec![InitTrace::Ellipse(0.3, 0.4, 0.2, 0.1)],
+            })))
+            .unwrap_ji();
         //SETTINGS.set(DebugSettings::debug(None)).unwrap_ji();
     } else {
         SETTINGS.set(DebugSettings::default()).unwrap_ji();

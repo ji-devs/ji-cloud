@@ -6,7 +6,8 @@ use super::state::*;
 use crate::tooltip::{
     callbacks::TooltipErrorCallbacks,
     state::{
-        MoveStrategy, Anchor,ContentAnchor, State as TooltipState, TooltipData, TooltipError, TooltipTarget,
+        Anchor, ContentAnchor, MoveStrategy, State as TooltipState, TooltipData, TooltipError,
+        TooltipTarget,
     },
 };
 use futures_signals::{
@@ -137,10 +138,10 @@ fn render_column(state: Rc<State>, side: ColumnSide) -> Dom {
                             //log::info!("got focus!");
                             state.is_placeholder.set_neq(false);
                         }))
-                        .event(clone!(state => move |evt:events::CustomInput| {
+                        .event(move |evt:events::CustomInput| {
                             value.set_neq(evt.value());
-                        }))
-                        .after_inserted(clone!(index, state, side => move |elem| {
+                        })
+                        .after_inserted(clone!(state, side => move |elem| {
                             if side == ColumnSide::Right && row == 2 {
                                 *state.error_element_ref.borrow_mut() = Some(elem);
                             }

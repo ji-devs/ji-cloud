@@ -1,31 +1,27 @@
+#![allow(unused_imports)]
+#![allow(dead_code)]
+
 use std::rc::Rc;
-use std::cell::RefCell;
-use futures_signals::signal::ReadOnlyMutable;
-use wasm_bindgen::UnwrapThrowExt;
-use wasm_bindgen::JsCast;
+
+use dominator::{clone, events, html, Dom};
 use futures_signals::{
-    map_ref,
-    signal::{Mutable, SignalExt, Signal, always},
-    signal_vec::{MutableVec, SignalVec, SignalVecExt},
-    CancelableFutureHandle, 
+    signal::{Mutable, SignalExt},
+    signal_vec::SignalVecExt,
 };
-use dominator::{DomBuilder, Dom, html, events, clone, apply_methods};
-use dominator_helpers::{elem, with_data_id};
-use awsm_web::dom::*;
-use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
-use futures::future::ready;
+
 use components::{
-    image::search::{self as image_search, state::{ImageSearchOptions, ImageSearchCheckboxKind}, callbacks::Callbacks as ImageSearchCallbacks},
-    audio::input::{self, AudioInputOptions, AudioInput},
     color_select,
+    image::search::{
+        self as image_search,
+        callbacks::Callbacks as ImageSearchCallbacks,
+        state::{ImageSearchCheckboxKind, ImageSearchOptions},
+    },
     text_editor,
 };
-use shared::domain::audio::AudioId;
-use std::pin::Pin;
-use web_sys::{HtmlElement, Element, HtmlInputElement, HtmlTemplateElement, DocumentFragment, Document};
+
 use utils::{prelude::*, themes::ThemeId};
 
-pub struct Page { }
+pub struct Page {}
 
 impl Page {
     pub fn render() -> Dom {
@@ -34,13 +30,13 @@ impl Page {
 }
 
 struct State {
-    pub current_step: Mutable<u32>
+    pub current_step: Mutable<u32>,
 }
 
 impl State {
-    pub fn new (initial_step:u32) -> Rc<Self> {
+    pub fn new(initial_step: u32) -> Rc<Self> {
         Rc::new(Self {
-            current_step: Mutable::new(initial_step)
+            current_step: Mutable::new(initial_step),
         })
     }
 }
@@ -59,7 +55,7 @@ pub fn render_steps() -> Dom {
     })
 }
 
-fn render_button(step:u32, label:&str, state:Rc<State>) -> Dom {
+fn render_button(step: u32, label: &str, state: Rc<State>) -> Dom {
     html!("circle-button", {
         .property("text", format!("{}", step))
         .property("label", label)
@@ -71,7 +67,7 @@ fn render_button(step:u32, label:&str, state:Rc<State>) -> Dom {
                 false
             }
         }))
-        .event(clone!(step, state => move |evt: events::Click| {
+        .event(clone!(step, state => move |_evt: events::Click| {
             state.current_step.set(step);
         }))
     })
@@ -82,11 +78,9 @@ pub fn render_image_search() -> Dom {
         checkbox_kind: Some(ImageSearchCheckboxKind::BackgroundLayer1Filter),
         ..ImageSearchOptions::default()
     };
-    let callbacks = ImageSearchCallbacks::new(
-        Some(|image| {
-            log::info!("{:?}", image);
-        })
-    );
+    let callbacks = ImageSearchCallbacks::new(Some(|image| {
+        log::info!("{:?}", image);
+    }));
     let state = image_search::state::State::new(opts, callbacks);
 
     html!("div", {
@@ -94,7 +88,6 @@ pub fn render_image_search() -> Dom {
         .child(image_search::dom::render(Rc::new(state), None))
     })
 }
-
 
 // pub fn render_audio_input() -> Dom {
 //     let opts:AudioInputOptions = AudioInputOptions {
@@ -128,15 +121,9 @@ pub fn render_image_search() -> Dom {
 //     })
 // }
 
-
 pub fn render_color_select() -> Dom {
     let theme_id = Mutable::new(ThemeId::HappyBrush);
-    let state = color_select::state::State::new(
-        (*theme_id).clone(),
-        None,
-        None,
-        Some(|_| {})
-    );
+    let state = color_select::state::State::new((*theme_id).clone(), None, None, Some(|_| {}));
     html!("div", {
         .style("padding", "30px")
         .child(color_select::dom::render(
@@ -145,7 +132,6 @@ pub fn render_color_select() -> Dom {
         ))
     })
 }
-
 
 pub fn render_text_editor_controls(state: Rc<text_editor::state::State>) -> Dom {
     html!("div", {
@@ -201,7 +187,6 @@ pub fn render_wysiwyg(state: Rc<text_editor::state::State>) -> Dom {
         .style("justify-self", "start")
         .child(text_editor::dom::render_wysiwyg(state))
     })
-    
 }
 pub fn render_wysiwyg_output(value: Rc<Mutable<Option<String>>>, theme: Mutable<ThemeId>) -> Dom {
     html!("div", {
@@ -225,22 +210,17 @@ fn render_text() -> Dom {
     let value_change = Rc::new(Mutable::new(value.clone()));
 
     let callbacks = text_editor::callbacks::Callbacks::new(
-        Some(Box::new(|_v: &str| {
-        })),
+        Some(Box::new(|_v: &str| {})),
         Some(Box::new(clone!(value_change => move |v: &str| {
             value_change.set(Some(v.to_string()));
             // log::info!("{:?}", v);
         }))),
         Some(Box::new(|| {
             log::info!("On blur");
-        }))
+        })),
     );
     let theme = Mutable::new(ThemeId::HappyBrush);
-    let state = text_editor::state::State::new(
-        (*theme).clone(),
-        value.clone(),
-        callbacks
-    );
+    let state = text_editor::state::State::new((*theme).clone(), value.clone(), callbacks);
 
     html!("div", {
         .style("display", "grid")

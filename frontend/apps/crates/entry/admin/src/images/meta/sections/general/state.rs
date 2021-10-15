@@ -1,13 +1,7 @@
-use crate::images::meta::state::{State as MetaState, MutableImage};
-use std::{collections::HashSet, rc::Rc};
-use futures_signals::{
-    map_ref,
-    signal_vec::{MutableVec, SignalVecExt, SignalVec},
-    signal::{Mutable, Signal, SignalExt}
-};
+use crate::images::meta::state::{MutableImage, State as MetaState};
+use futures_signals::signal::Signal;
 use shared::domain::meta::*;
-use dominator::clone;
-use components::image::tag::ImageTag;
+use std::rc::Rc;
 
 pub struct State {
     pub meta: Rc<MetaState>,
@@ -15,9 +9,12 @@ pub struct State {
     pub metadata: Rc<MetadataResponse>,
 }
 
-
 impl State {
-    pub fn new(meta: Rc<MetaState>, image: Rc<MutableImage>, metadata: Rc<MetadataResponse>) -> Self {
+    pub fn new(
+        meta: Rc<MetaState>,
+        image: Rc<MutableImage>,
+        metadata: Rc<MetadataResponse>,
+    ) -> Self {
         Self {
             meta,
             image,
@@ -26,17 +23,25 @@ impl State {
     }
 
     pub fn style_selected(&self, id: ImageStyleId) -> impl Signal<Item = bool> {
-        self.image.styles.signal_ref(move |styles| styles.contains(&id))
+        self.image
+            .styles
+            .signal_ref(move |styles| styles.contains(&id))
     }
 
     pub fn age_range_selected(&self, id: AgeRangeId) -> impl Signal<Item = bool> {
-        self.image.age_ranges.signal_ref(move |age_ranges| age_ranges.contains(&id))
+        self.image
+            .age_ranges
+            .signal_ref(move |age_ranges| age_ranges.contains(&id))
     }
     pub fn affiliation_selected(&self, id: AffiliationId) -> impl Signal<Item = bool> {
-        self.image.affiliations.signal_ref(move |affiliations| affiliations.contains(&id))
+        self.image
+            .affiliations
+            .signal_ref(move |affiliations| affiliations.contains(&id))
     }
 
     pub fn tag_selected(&self, tag_index: i16) -> impl Signal<Item = bool> {
-        self.image.tag_indices.signal_ref(move |tag_indices| tag_indices.contains(&tag_index))
+        self.image
+            .tag_indices
+            .signal_ref(move |tag_indices| tag_indices.contains(&tag_index))
     }
 }

@@ -1,14 +1,14 @@
 use super::state::*;
-use std::rc::Rc;
-use dominator::{html, clone, Dom};
-use utils::prelude::*;
-use futures_signals::signal::SignalExt;
 use components::{
-    tabs::{MenuTab, MenuTabKind},
+    audio::input::AudioInput,
     image::search::dom::render as render_image_search,
+    tabs::{MenuTab, MenuTabKind},
     text_editor::dom::render_controls as render_text_editor,
-    audio::input::AudioInput
 };
+use dominator::{clone, html, Dom};
+use futures_signals::signal::SignalExt;
+use std::rc::Rc;
+use utils::prelude::*;
 
 pub fn render(state: Rc<Step3>) -> Dom {
     html!("menu-tabs", {
@@ -40,7 +40,7 @@ pub fn render(state: Rc<Step3>) -> Dom {
     })
 }
 
-fn render_tab(state: Rc<Step3>, tab_kind:MenuTabKind) -> Dom {
+fn render_tab(state: Rc<Step3>, tab_kind: MenuTabKind) -> Dom {
     MenuTab::render(
         MenuTab::new(
             tab_kind,
@@ -50,8 +50,8 @@ fn render_tab(state: Rc<Step3>, tab_kind:MenuTabKind) -> Dom {
             }))),
             clone!(state, tab_kind => move || {
                 state.tab.set(Tab::new(state.sidebar.base.clone(), tab_kind));
-            })
+            }),
         ),
-        Some("tabs")
+        Some("tabs"),
     )
 }

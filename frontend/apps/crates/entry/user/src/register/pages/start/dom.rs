@@ -1,20 +1,19 @@
-use dominator::{Dom, html, clone, with_node};
+use super::{actions, state::*};
+use dominator::{clone, html, with_node, Dom};
 use futures_signals::signal::{Mutable, SignalExt};
 use std::rc::Rc;
-use super::{state::*, actions};
 use web_sys::HtmlInputElement;
-use utils::{events, routes::*};
-use crate::{strings, register::{
-    state::Step,
-    components::footer::Footer
-}};
 
+use crate::{
+    register::{components::footer::Footer, state::Step},
+    strings,
+};
+use utils::events;
 
-pub struct StartPage {
-}
+pub struct StartPage {}
 
 impl StartPage {
-    pub fn render(step: Mutable<Step>, is_no_auth: bool) -> Dom {
+    pub fn render(step: Mutable<Step>, _is_no_auth: bool) -> Dom {
         let state = Rc::new(State::new(step));
 
         html!("empty-fragment", {
@@ -31,14 +30,16 @@ impl StartPage {
                             !err.is_empty()
                         }))
                         .property_signal("hint", state.email_error())
-                        .child(html!("input", {
-                            .property("type", "email")
-                            .attribute("autocomplete", "email")
-                            .property("placeholder", strings::STR_EMAIL_PLACEHOLDER)
-                            .event(clone!(state => move |evt:events::Input| {
-                                state.clear_email_status();
-                                *state.email.borrow_mut() = evt.value().unwrap_or_default();
-                            }))
+                        .child(html!("input" => HtmlInputElement, {
+                            .with_node!(elem => {
+                                .property("type", "email")
+                                .attribute("autocomplete", "email")
+                                .property("placeholder", strings::STR_EMAIL_PLACEHOLDER)
+                                .event(clone!(state => move |_:events::Input| {
+                                    state.clear_email_status();
+                                    *state.email.borrow_mut() = elem.value();
+                                }))
+                            })
                         }))
                     }),
                     html!("input-password", {
@@ -58,7 +59,7 @@ impl StartPage {
                     }),
                     html!("button-google", {
                         .property("slot", "google")
-                        .event(clone!(state => move |evt:events::Click| {
+                        .event(clone!(state => move |_evt:events::Click| {
                             actions::register_google(state.clone())
                         }))
                     }),
@@ -68,7 +69,7 @@ impl StartPage {
                         .property("size", "medium")
                         .property("iconAfter", "arrow")
                         .text(strings::STR_CONTINUE)
-                        .event(clone!(state => move |evt:events::Click| {
+                        .event(clone!(state => move |_evt:events::Click| {
                             actions::register_email(state.clone())
                         }))
                     }),
@@ -78,4 +79,3 @@ impl StartPage {
         })
     }
 }
-

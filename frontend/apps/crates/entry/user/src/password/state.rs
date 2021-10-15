@@ -1,7 +1,6 @@
-use dominator_helpers::futures::AsyncLoader;
-use futures_signals::signal::{Signal, Mutable, SignalExt};
+use futures_signals::signal::{Mutable, Signal, SignalExt};
 use std::cell::RefCell;
-use crate::register::state::Step;
+
 use zxcvbn::Entropy;
 
 pub struct PasswordState {
@@ -20,9 +19,7 @@ impl PasswordState {
     }
 
     pub fn get_strength(&self) -> impl Signal<Item = &'static str> {
-        self.strength
-            .signal()
-            .map(|x| x.as_str())
+        self.strength.signal().map(|x| x.as_str())
     }
 
     pub fn clear_status(&self) {
@@ -32,11 +29,7 @@ impl PasswordState {
     pub fn error(&self) -> impl Signal<Item = &'static str> {
         self.status
             .signal_cloned()
-            .map(|err| {
-                err
-                    .map(|err| err.as_str())
-                    .unwrap_or("")
-            })
+            .map(|err| err.map(|err| err.as_str()).unwrap_or(""))
     }
 }
 
@@ -45,7 +38,7 @@ pub enum PasswordStrength {
     None,
     Weak,
     Average,
-    Strong
+    Strong,
 }
 
 impl PasswordStrength {
@@ -60,7 +53,7 @@ impl PasswordStrength {
 }
 
 impl From<Entropy> for PasswordStrength {
-    fn from(entropy:Entropy) -> Self {
+    fn from(entropy: Entropy) -> Self {
         if crate::debug::settings().skip_password_strength {
             Self::Strong
         } else {
@@ -84,7 +77,7 @@ pub enum PasswordStatus {
     PwShort,
     ResetError,
     UnknownFirebase,
-    Technical 
+    Technical,
 }
 
 impl PasswordStatus {

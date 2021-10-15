@@ -1,4 +1,4 @@
-use shared::domain::jig::{JigId, module::{LiteModule}};
+use shared::domain::jig::{module::LiteModule, JigId};
 
 pub struct ModuleThumbnail {
     pub jig_id: JigId,

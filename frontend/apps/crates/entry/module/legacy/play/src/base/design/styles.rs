@@ -1,7 +1,7 @@
-use dominator::{stylesheet, class};
+use dominator::class;
 use once_cell::sync::Lazy;
 
-pub const BG:Lazy<String> = Lazy::new(|| {
+pub const BG: Lazy<String> = Lazy::new(|| {
     class! {
         .style("position", "absolute")
         .style("top", "0")

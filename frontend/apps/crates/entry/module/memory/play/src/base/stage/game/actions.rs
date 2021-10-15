@@ -1,17 +1,8 @@
-use crate::base::{
-    state::*,
-    card::{
-        state::*,
-        animation::Animation
-    }
-};
+use crate::base::state::*;
 
 use gloo_timers::future::TimeoutFuture;
-use wasm_bindgen_futures::spawn_local;
 use std::rc::Rc;
-use web_sys::HtmlElement;
-use wasm_bindgen::prelude::*;
-use utils::prelude::*;
+use wasm_bindgen_futures::spawn_local;
 
 pub fn card_click(state: Rc<Base>, id: usize) -> Option<(usize, usize)> {
     let flip_state = &mut *state.flip_state.lock_mut();
@@ -29,8 +20,8 @@ pub fn card_click(state: Rc<Base>, id: usize) -> Option<(usize, usize)> {
             } else {
                 None
             }
-        },
-        _ => None
+        }
+        _ => None,
     }
 }
 pub fn evaluate(state: Rc<Base>, id_1: usize, id_2: usize) {

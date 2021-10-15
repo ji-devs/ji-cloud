@@ -1,8 +1,5 @@
-use std::cell::RefCell;
-use std::rc::Rc;
-use crate::base::state::Base;
-use shared::domain::jig::module::body::tapping_board::{Next, Hint};
 use super::state::State;
+use shared::domain::jig::module::body::tapping_board::{Hint, Next};
 
 impl State {
     pub fn set_hint(&self, hint: Hint) {
@@ -27,11 +24,11 @@ impl State {
     pub fn set_next_value(&self, amount: usize) {
         self.base.play_settings.next_value.set(amount);
 
-
         if std::mem::discriminant(&*self.base.play_settings.next.lock_ref())
-            == std::mem::discriminant(&Next::SelectSome(0)) {
-                self.set_next_some();
-            }
+            == std::mem::discriminant(&Next::SelectSome(0))
+        {
+            self.set_next_some();
+        }
     }
 
     pub fn set_next_some(&self) {

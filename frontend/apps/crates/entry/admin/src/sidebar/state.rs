@@ -1,30 +1,29 @@
-use std::rc::Rc;
-use utils::routes::*;
 use futures_signals::{
-    map_ref,
-    signal::{Mutable, Signal, SignalExt, ReadOnlyMutable},
-    signal_vec::{SignalVec, SignalVecExt}
+    signal::{ReadOnlyMutable, SignalExt},
+    signal_vec::SignalVec,
 };
 use shared::domain::user::UserProfile;
+use std::rc::Rc;
+use utils::routes::*;
 
 pub struct Sidebar {
     pub route: AdminRoute,
-    pub profile: ReadOnlyMutable<Option<Option<UserProfile>>>
+    pub profile: ReadOnlyMutable<Option<Option<UserProfile>>>,
 }
 
 impl Sidebar {
-    pub fn new(route: AdminRoute, profile: ReadOnlyMutable<Option<Option<UserProfile>>>) -> Rc<Self> {
-        Rc::new(Self {
-            route,
-            profile
-        })
+    pub fn new(
+        route: AdminRoute,
+        profile: ReadOnlyMutable<Option<Option<UserProfile>>>,
+    ) -> Rc<Self> {
+        Rc::new(Self { route, profile })
     }
 
     pub fn item_signal_vec(&self) -> impl SignalVec<Item = Rc<SidebarItem>> {
         let curr_route = self.route.clone();
 
-        self.profile.signal_ref(move |profile| {
-            match profile {
+        self.profile
+            .signal_ref(move |profile| match profile {
                 None => Vec::new(),
                 Some(profile) => vec![
                     SidebarItem::new(AdminRoute::ImageAdd, profile, &curr_route),
@@ -33,10 +32,9 @@ impl Sidebar {
                     SidebarItem::new(AdminRoute::Jigs, profile, &curr_route),
                     SidebarItem::new(AdminRoute::Categories, profile, &curr_route),
                     SidebarItem::new(AdminRoute::Locale, profile, &curr_route),
-                ]
-            }
-        })
-        .to_signal_vec()
+                ],
+            })
+            .to_signal_vec()
     }
 }
 
@@ -44,46 +42,44 @@ pub struct SidebarItem {
     pub locked: bool,
     pub selected: bool,
     pub id: &'static str,
-    pub route: AdminRoute
+    pub route: AdminRoute,
 }
 
 impl SidebarItem {
-    pub fn new(target_route: AdminRoute, profile: &Option<UserProfile>, curr_route: &AdminRoute) -> Rc<Self> {
-
+    pub fn new(
+        target_route: AdminRoute,
+        profile: &Option<UserProfile>,
+        curr_route: &AdminRoute,
+    ) -> Rc<Self> {
         let id = match target_route {
-            AdminRoute::Categories => "category", 
-            AdminRoute::Locale => "locale", 
-            AdminRoute::ImageAdd => "image-add", 
-            AdminRoute::ImageTags => "image-tags", 
-            AdminRoute::ImageMeta(_, _) => "image-search", 
+            AdminRoute::Categories => "category",
+            AdminRoute::Locale => "locale",
+            AdminRoute::ImageAdd => "image-add",
+            AdminRoute::ImageTags => "image-tags",
+            AdminRoute::ImageMeta(_, _) => "image-search",
             AdminRoute::ImageSearch(_) => "image-search",
             AdminRoute::Jigs => "jigs",
             AdminRoute::Landing => "",
         };
 
         let locked = match profile {
-            None => true, 
-            Some(user) => !target_route.allowed_user_scope(&user.scopes) 
+            None => true,
+            Some(user) => !target_route.allowed_user_scope(&user.scopes),
         };
 
         let selected = match curr_route {
-            AdminRoute::ImageMeta(_, _) | AdminRoute::ImageSearch(_) => {
-                match target_route {
-                    AdminRoute::ImageMeta(_, _) | AdminRoute::ImageSearch(_) => true,
-                    _ => false
-                }
+            AdminRoute::ImageMeta(_, _) | AdminRoute::ImageSearch(_) => match target_route {
+                AdminRoute::ImageMeta(_, _) | AdminRoute::ImageSearch(_) => true,
+                _ => false,
             },
-            _ => {
-                std::mem::discriminant(&target_route) == std::mem::discriminant(curr_route)
-            }
+            _ => std::mem::discriminant(&target_route) == std::mem::discriminant(curr_route),
         };
-
 
         Rc::new(Self {
             locked,
             selected,
             id,
-            route: target_route
+            route: target_route,
         })
     }
 }

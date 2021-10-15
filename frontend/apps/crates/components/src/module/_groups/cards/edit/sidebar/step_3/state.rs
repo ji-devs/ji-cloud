@@ -1,10 +1,10 @@
 use crate::{
-    tabs::MenuTabKind,
     instructions::editor::{
         callbacks::Callbacks as InstructionsEditorCallbacks,
         state::State as InstructionsEditorState,
     },
     module::_groups::cards::edit::state::*,
+    tabs::MenuTabKind,
 };
 use dominator::clone;
 use futures_signals::signal::Mutable;
@@ -20,7 +20,7 @@ where
     pub base: Rc<CardsBase<RawData, E>>,
     pub tab: Mutable<Tab<SettingsState>>,
     pub get_settings: GetSettingsStateFn,
-    pub tab_index: Mutable<Option<usize>>
+    pub tab_index: Mutable<Option<usize>>,
 }
 
 impl<RawData, E, GetSettingsStateFn, SettingsState>
@@ -31,7 +31,11 @@ where
     GetSettingsStateFn: Fn(Rc<CardsBase<RawData, E>>) -> SettingsState + Clone + 'static,
     SettingsState: 'static,
 {
-    pub fn new(base: Rc<CardsBase<RawData, E>>, get_settings: GetSettingsStateFn, tab_index: Mutable<Option<usize>>) -> Rc<Self> {
+    pub fn new(
+        base: Rc<CardsBase<RawData, E>>,
+        get_settings: GetSettingsStateFn,
+        tab_index: Mutable<Option<usize>>,
+    ) -> Rc<Self> {
         let kind = match base.debug.step3_tab {
             Some(kind) => kind,
             None => MenuTabKind::PlaySettings,
@@ -43,7 +47,7 @@ where
             base,
             tab,
             get_settings,
-            tab_index
+            tab_index,
         })
     }
 }
@@ -98,9 +102,9 @@ impl<SettingsState> Tab<SettingsState> {
                 let state = InstructionsEditorState::new(base.instructions.clone(), callbacks);
 
                 Self::Instructions(Rc::new(state))
-            },
+            }
 
-            _ => unimplemented!("unsupported tab kind!")
+            _ => unimplemented!("unsupported tab kind!"),
         }
     }
 

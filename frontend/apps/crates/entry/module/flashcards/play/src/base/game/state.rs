@@ -1,15 +1,13 @@
+use super::actions::*;
+use crate::base::state::Base;
 use components::module::_groups::cards::lookup::Side;
 use dominator_helpers::futures::AsyncLoader;
-use shared::domain::jig::module::body::{_groups::cards::{CardPair, Card}, flashcards::DisplayMode};
-use crate::base::state::Base;
+use futures_signals::signal::Mutable;
+use rand::prelude::*;
+use shared::domain::jig::module::body::_groups::cards::{Card, CardPair};
 use std::cell::RefCell;
 use std::rc::Rc;
-use futures_signals::{
-    signal::{Mutable, Signal, SignalExt}
-};
-use rand::prelude::*;
 use utils::prelude::*;
-use super::actions::*;
 
 pub struct Game {
     pub base: Rc<Base>,
@@ -20,12 +18,11 @@ pub struct Game {
     pub animation_loader: AsyncLoader,
 }
 
-
 #[derive(Clone)]
 pub struct Current {
     pub card: Card,
     pub other: Card,
-    pub side: Side, 
+    pub side: Side,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -38,11 +35,11 @@ impl Game {
     pub fn new(base: Rc<Base>) -> Self {
         let mut rng = thread_rng();
 
-        let mut deck = get_fresh_deck(&base, &mut rng); 
+        let mut deck = get_fresh_deck(&base, &mut rng);
 
         let current = get_current(&mut deck, &mut rng).unwrap_ji();
 
-        Self { 
+        Self {
             base,
             deck: RefCell::new(deck),
             rng: RefCell::new(rng),
@@ -51,5 +48,4 @@ impl Game {
             animation_loader: AsyncLoader::new(),
         }
     }
-
 }

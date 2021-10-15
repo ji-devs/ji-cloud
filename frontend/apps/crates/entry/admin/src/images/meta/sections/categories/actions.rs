@@ -1,14 +1,8 @@
-use shared::{
-    api::{ApiEndpoint, endpoints},
-    domain::{image::*, meta::*,category::*},
-    error::EmptyError,
-};
-use utils::fetch::{api_no_auth, api_with_auth, api_with_auth_empty};
-use dominator::clone;
+use shared::domain::{category::*, image::*};
+
 use super::state::*;
 use std::rc::Rc;
-use std::cell::RefCell;
-use wasm_bindgen::prelude::*;
+
 use crate::images::meta::sections::common::categories::*;
 
 pub fn toggle_expand_all(cat: &Rc<MutableCategory>, flag: bool) {
@@ -29,12 +23,19 @@ pub fn on_toggle(id: CategoryId, state: Rc<State>, flag: bool) {
         }
     }
 
-
     crate::images::meta::actions::save(
-        state.meta.clone(), 
+        state.meta.clone(),
         ImageUpdateRequest {
-            categories: Some(state.image.categories.lock_ref().iter().map(|x| x.clone()).collect()),
+            categories: Some(
+                state
+                    .image
+                    .categories
+                    .lock_ref()
+                    .iter()
+                    .map(|x| x.clone())
+                    .collect(),
+            ),
             ..ImageUpdateRequest::default()
-        }
+        },
     );
 }

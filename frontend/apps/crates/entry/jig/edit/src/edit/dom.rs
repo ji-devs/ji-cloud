@@ -1,15 +1,15 @@
 use std::rc::Rc;
 
+use super::state::State;
 use super::{
-    iframe::dom::IframeDom, publish::dom::render as render_publish, post_publish::dom::render as render_post_publish, selection::dom::SelectionDom,
-    sidebar::dom::SidebarDom,
+    iframe::dom::IframeDom, post_publish::dom::render as render_post_publish,
+    publish::dom::render as render_publish, selection::dom::SelectionDom, sidebar::dom::SidebarDom,
 };
 use components::player_popup::{PlayerPopup, PreviewPopupCallbacks};
 use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
 use shared::domain::jig::JigId;
 use utils::prelude::*;
-use super::state::State;
 
 pub struct EditPage {}
 
@@ -28,7 +28,7 @@ impl EditPage {
                  * but meh
                 .future(module_id.signal().for_each(clone!(jig_id => move |module_id| {
                     let url:String = Route::Jig(JigRoute::Edit(jig_id, module_id)).into();
-    
+
                     web_sys::window()
                         .unwrap_ji()
                         .history()

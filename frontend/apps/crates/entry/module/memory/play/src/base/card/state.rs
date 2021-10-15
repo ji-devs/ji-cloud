@@ -1,27 +1,15 @@
-use futures_signals::signal::{Mutable, Signal, SignalExt};
 use super::{
+    super::state::*,
     animation::{Animation, AnimationState},
-    super::state::*
 };
 use dominator::clone;
 use dominator_helpers::signals::{DefaultSignal, OptionSignal};
+use futures_signals::signal::{Mutable, Signal, SignalExt};
 use std::cell::RefCell;
 use web_sys::HtmlElement;
 
-use shared::domain::jig::{
-    JigId, 
-    module::{
-        ModuleId, 
-        body::{
-            ThemeChoice,
-            Audio,
-            Image,
-            _groups::cards::{CardPair as RawCardPair, Card}
-        }
-    }
-};
-use wasm_bindgen::prelude::*;
-use utils::prelude::*;
+use shared::domain::jig::module::body::_groups::cards::Card;
+
 use components::module::_groups::cards::lookup::Side;
 
 #[derive(Clone)]
@@ -31,13 +19,13 @@ pub struct CardState {
     pub other_id: usize,
     pub side: Side,
     pub found_index: Mutable<Option<usize>>,
-    pub animation: Mutable<Option<Animation>>, 
+    pub animation: Mutable<Option<Animation>>,
     pub main_elem: RefCell<Option<HtmlElement>>,
 }
 
 impl CardState {
-    pub fn new(card:Card, id: usize, other_id:usize, side:Side) -> Self {
-        Self { 
+    pub fn new(card: Card, id: usize, other_id: usize, side: Side) -> Self {
+        Self {
             card,
             id,
             other_id,
@@ -69,23 +57,17 @@ impl CardState {
     }
 
     pub fn animation_state_signal(&self) -> impl Signal<Item = Option<AnimationState>> {
-        self.animation.signal_ref(|anim| {
-            OptionSignal::new( 
-                anim.as_ref().map(|anim| anim.state_signal())
-            )
-        })
-        .flatten()
+        self.animation
+            .signal_ref(|anim| OptionSignal::new(anim.as_ref().map(|anim| anim.state_signal())))
+            .flatten()
     }
 
     //After found animation has completed
     pub fn ended_signal(&self) -> impl Signal<Item = bool> {
-        self.animation.signal_ref(|anim| {
-            DefaultSignal::new(
-                false,
-                anim.as_ref().map(|anim| anim.ended_signal())
-            )
-        })
-        .flatten()
+        self.animation
+            .signal_ref(|anim| {
+                DefaultSignal::new(false, anim.as_ref().map(|anim| anim.ended_signal()))
+            })
+            .flatten()
     }
 }
-

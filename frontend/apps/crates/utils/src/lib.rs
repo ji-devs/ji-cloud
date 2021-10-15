@@ -2,33 +2,33 @@
 #![cfg_attr(feature = "quiet", allow(warnings))]
 #![feature(type_alias_impl_trait)]
 
-pub mod image;
-pub mod fetch;
-pub mod storage;
-pub mod routes;
-pub mod init;
-pub mod path;
-pub mod firebase;
-pub mod iframe;
-pub mod resize;
-pub mod math;
-pub mod drag;
-pub mod events;
-pub mod api_helpers;
-pub mod prelude;
-pub mod unwrap;
-pub mod themes;
-pub mod colors;
-pub mod image_effects;
 pub mod ages;
+pub mod api_helpers;
 pub mod clipboard;
+pub mod colors;
+pub mod drag;
 pub mod env;
+pub mod events;
+pub mod fetch;
+pub mod firebase;
 pub mod fonts;
-pub mod screenshot;
-pub mod languages;
+pub mod iframe;
+pub mod image;
+pub mod image_effects;
+pub mod init;
 pub mod jig;
+pub mod languages;
+pub mod logging;
+pub mod math;
 pub mod mixin;
 pub mod panic_hook;
-pub mod logging;
+pub mod path;
+pub mod prelude;
+pub mod resize;
+pub mod routes;
+pub mod screenshot;
+pub mod storage;
+pub mod themes;
+pub mod unwrap;
 
 pub(crate) mod strings;

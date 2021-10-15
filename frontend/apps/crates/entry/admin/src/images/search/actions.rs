@@ -1,13 +1,13 @@
 use dominator::clone;
-use shared::domain::image::{ImageId, ImageSearchQuery};
+use shared::domain::image::ImageSearchQuery;
 use std::rc::Rc;
-use utils::{routes::*, fetch::api_with_auth};
-use wasm_bindgen::prelude::*;
+use utils::{fetch::api_with_auth, routes::*};
+
 use super::state::*;
 use shared::{
-    api::{ApiEndpoint, endpoints},
-    domain::{Publish, image::*, meta::*},
-    error::{EmptyError, MetadataNotFound},
+    api::{endpoints, ApiEndpoint},
+    domain::image::*,
+    error::EmptyError,
 };
 
 pub fn search(state: Rc<State>, query: ImageSearchQuery) {

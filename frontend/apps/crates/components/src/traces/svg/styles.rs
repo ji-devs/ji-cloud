@@ -1,8 +1,8 @@
-use once_cell::sync::Lazy;
-use dominator::class;
 use super::state::*;
+use dominator::class;
+use once_cell::sync::Lazy;
+use shared::domain::jig::module::body::_groups::design::TraceKind;
 use utils::prelude::*;
-use shared::domain::jig::module::body::_groups::design::{Trace, TraceShape, TraceKind};
 
 impl ShapeStyle {
     pub fn classes(&self) -> Vec<&'static str> {
@@ -29,8 +29,7 @@ impl ShapeStyle {
             }
         }
 
-
-        if(self.kind.is_some() && self.state.is_some()) {
+        if self.kind.is_some() && self.state.is_some() {
             let state = self.state.unwrap_ji();
 
             classes.push(match self.kind.unwrap_ji() {
@@ -42,12 +41,16 @@ impl ShapeStyle {
                 TraceKind::Correct => match state {
                     ShapeStyleState::Drawing => SHAPE_STATE_KIND_CORRECT_DRAWING_CLASS.as_str(),
                     ShapeStyleState::Selected => SHAPE_STATE_KIND_CORRECT_SELECTED_CLASS.as_str(),
-                    ShapeStyleState::Deselected => SHAPE_STATE_KIND_CORRECT_DESELECTED_CLASS.as_str(),
+                    ShapeStyleState::Deselected => {
+                        SHAPE_STATE_KIND_CORRECT_DESELECTED_CLASS.as_str()
+                    }
                 },
                 TraceKind::Regular => match state {
                     ShapeStyleState::Drawing => SHAPE_STATE_KIND_REGULAR_DRAWING_CLASS.as_str(),
                     ShapeStyleState::Selected => SHAPE_STATE_KIND_REGULAR_SELECTED_CLASS.as_str(),
-                    ShapeStyleState::Deselected => SHAPE_STATE_KIND_REGULAR_DESELECTED_CLASS.as_str(),
+                    ShapeStyleState::Deselected => {
+                        SHAPE_STATE_KIND_REGULAR_DESELECTED_CLASS.as_str()
+                    }
                 },
             });
         }
@@ -60,9 +63,11 @@ impl ShapeStyle {
     }
 
     pub fn classes_string(&self) -> String {
-        self.classes().iter().fold(String::new(), |acc, class_name| {
-            format!("{} {}", acc, class_name)
-        })
+        self.classes()
+            .iter()
+            .fold(String::new(), |acc, class_name| {
+                format!("{} {}", acc, class_name)
+            })
     }
 }
 
@@ -187,4 +192,3 @@ pub(super) static SHAPE_MODE_SOLID_KIND_REGULAR_CLASS: Lazy<String> = Lazy::new(
         .style("stroke-width", "8")
     }
 });
-

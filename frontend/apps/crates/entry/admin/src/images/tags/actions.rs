@@ -1,19 +1,14 @@
 use super::state::*;
+use components::image::tag::ImageTag;
 use dominator::clone;
-use std::rc::Rc;
 use shared::{
+    api::{endpoints, ApiEndpoint},
     domain::image::tag::*,
     error::*,
-    api::{ApiEndpoint, endpoints},
 };
-use futures_signals::{
-    map_ref,
-    signal::{Mutable, Signal, SignalExt},
-    signal_vec::{MutableVec, SignalVec, SignalVecExt},
-};
-use utils::prelude::*;
-use components::image::tag::ImageTag;
+use std::rc::Rc;
 use strum::IntoEnumIterator;
+use utils::prelude::*;
 
 //index is id. See https://github.com/ji-devs/ji-cloud/pull/1082
 impl ImageTags {
@@ -33,7 +28,6 @@ impl ImageTags {
         }));
     }
 
-
     //This syncs the defined ImageTags in components with the DB
     //it does *not* update anything that was already tagged
     //so be very careful with deletions (prefer deprecation instead!)
@@ -45,7 +39,7 @@ impl ImageTags {
             let mut curr_list = state.list.lock_mut();
 
             for tag in ImageTag::iter() {
-                if let Some((index, curr)) = curr_list.iter().enumerate().find(|(index, curr)| curr.index.0 == tag.as_index()) {
+                if let Some((index, curr)) = curr_list.iter().enumerate().find(|(_index, curr)| curr.index.0 == tag.as_index()) {
                     if curr.display_name != tag.STR_DISPLAY_NAME() {
                         let req = ImageTagUpdateRequest {
                             display_name: Some(tag.STR_DISPLAY_NAME().to_string()),

@@ -1,35 +1,38 @@
-use futures_signals::signal::Mutable;
-use uuid::Uuid;
 use super::state::DisplayableEntry;
-use wasm_bindgen::prelude::*;
-use utils::fetch::{api_with_auth, api_with_auth_empty};
+use futures_signals::signal::Mutable;
 use shared::{
-    api::{ApiEndpoint, endpoints},
-    domain::locale::{Bundle, CreateEntryRequest, CreateEntryResponse, Entry, EntryStatus, ListBundleResponse, ListEntryGroupBy, ListEntryQuery, ListEntryResponse, UpdateEntryRequest, ItemKind, ListItemKindResponse},
-    error::EmptyError
+    api::{endpoints, ApiEndpoint},
+    domain::locale::{
+        Bundle, CreateEntryRequest, CreateEntryResponse, Entry, EntryStatus, ItemKind,
+        ListBundleResponse, ListEntryGroupBy, ListEntryQuery, ListEntryResponse,
+        ListItemKindResponse, UpdateEntryRequest,
+    },
+    error::EmptyError,
 };
-
+use utils::fetch::{api_with_auth, api_with_auth_empty};
+use uuid::Uuid;
+use wasm_bindgen::prelude::*;
 
 pub async fn get_bundles() -> Vec<Bundle> {
     api_with_auth::<ListBundleResponse, EmptyError, ()>(
         &endpoints::locale::bundle::List::PATH,
         endpoints::locale::bundle::List::METHOD,
-        None
+        None,
     )
-        .await
-        .unwrap_throw()
-        .bundles
+    .await
+    .unwrap_throw()
+    .bundles
 }
 
 pub async fn get_item_kind() -> Vec<ItemKind> {
     api_with_auth::<ListItemKindResponse, EmptyError, ()>(
         &endpoints::locale::item_kind::List::PATH,
         endpoints::locale::item_kind::List::METHOD,
-        None
+        None,
     )
-        .await
-        .unwrap_throw()
-        .item_kinds
+    .await
+    .unwrap_throw()
+    .item_kinds
 }
 
 pub async fn get_entries(bundles: Vec<Uuid>) -> Vec<DisplayableEntry> {
@@ -40,23 +43,20 @@ pub async fn get_entries(bundles: Vec<Uuid>) -> Vec<DisplayableEntry> {
     let res = api_with_auth::<ListEntryResponse, EmptyError, ListEntryQuery>(
         &endpoints::locale::entry::List::PATH,
         endpoints::locale::entry::List::METHOD,
-        Some(query)
+        Some(query),
     )
-        .await
-        .unwrap_throw();
+    .await
+    .unwrap_throw();
 
     match res {
-        ListEntryResponse::Bundles(f) => panic!("Not what I need!"),
+        ListEntryResponse::Bundles(_f) => panic!("Not what I need!"),
         ListEntryResponse::List(list) => {
             let list: Vec<Entry> = list;
 
-            let list: Vec<DisplayableEntry> = list
-                .into_iter()
-                .map(|e| e.into())
-                .collect();
+            let list: Vec<DisplayableEntry> = list.into_iter().map(|e| e.into()).collect();
 
             list
-        },
+        }
     }
 }
 
@@ -83,10 +83,10 @@ pub async fn clone_entry(entry: &DisplayableEntry) -> DisplayableEntry {
     let res = api_with_auth::<CreateEntryResponse, EmptyError, CreateEntryRequest>(
         &endpoints::locale::entry::Create::PATH,
         endpoints::locale::entry::Create::METHOD,
-        Some(body)
+        Some(body),
     )
-        .await
-        .unwrap_throw();
+    .await
+    .unwrap_throw();
 
     let mut new_entry = entry.clone();
     new_entry.id = res.id;
@@ -111,42 +111,36 @@ pub async fn create_entry(bundle_id: Uuid) -> DisplayableEntry {
     let res = api_with_auth::<CreateEntryResponse, EmptyError, CreateEntryRequest>(
         &endpoints::locale::entry::Create::PATH,
         endpoints::locale::entry::Create::METHOD,
-        Some(body)
+        Some(body),
     )
-        .await
-        .unwrap_throw();
+    .await
+    .unwrap_throw();
 
     new_entry_with_id(res.id, bundle_id)
 }
 
 pub async fn save_entry(entry: &DisplayableEntry) {
-    let path = endpoints::locale::entry::Update::PATH.replace(
-        "{id}",
-        &entry.id.to_string(),
-    );
+    let path = endpoints::locale::entry::Update::PATH.replace("{id}", &entry.id.to_string());
     let body: UpdateEntryRequest = entry.clone().into();
     let res = api_with_auth_empty::<EmptyError, UpdateEntryRequest>(
         &path,
         endpoints::locale::entry::Update::METHOD,
-        Some(body)
+        Some(body),
     )
-        .await;
+    .await;
     if res.is_err() {
         panic!();
     }
 }
 
 pub async fn delete_entry(entry_id: u32) {
-    let path = endpoints::locale::entry::Delete::PATH.replace(
-        "{id}",
-        &entry_id.to_string(),
-    );
+    let path = endpoints::locale::entry::Delete::PATH.replace("{id}", &entry_id.to_string());
     let res = api_with_auth_empty::<(), UpdateEntryRequest>(
         &path,
         endpoints::locale::entry::Delete::METHOD,
-        None
+        None,
     )
-        .await;
+    .await;
     if res.is_err() {
         panic!();
     }

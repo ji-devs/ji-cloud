@@ -1,14 +1,10 @@
-use dominator::{Dom, clone, html, with_node};
+use dominator::{clone, html, with_node, Dom};
 use std::rc::Rc;
 use utils::prelude::*;
 use web_sys::HtmlTextAreaElement;
 
 use super::state::State;
-use crate::audio::input::{
-    AudioInputCallbacks,
-    AudioInputOptions,
-    AudioInput
-};
+use crate::audio::input::{AudioInput, AudioInputCallbacks, AudioInputOptions};
 use futures_signals::signal::SignalExt;
 use shared::domain::jig::module::body::Audio;
 

@@ -1,20 +1,12 @@
-use std::rc::Rc;
 use super::state::*;
-use shared::{
-    api::endpoints::{ApiEndpoint, user, session},
-    domain::{user::*, session::*},
-    error::EmptyError
-};
-use utils::{
-    routes::*,
-    storage,
-    prelude::*,
-};
 use dominator::clone;
-use wasm_bindgen::prelude::*;
-use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
-use futures_signals::signal::{Mutable, Signal, SignalExt};
-use futures::future::ready;
+use shared::{
+    api::endpoints::{session, user, ApiEndpoint},
+    domain::{session::*, user::*},
+    error::EmptyError,
+};
+use std::rc::Rc;
+use utils::{prelude::*, routes::*, storage};
 
 pub fn signin_email(state: Rc<State>) {
     state.clear_email_status();
@@ -32,12 +24,12 @@ pub fn signin_email(state: Rc<State>) {
                     CreateSessionResponse::Login(resp) => {
                         do_success(&resp.csrf);
                     },
-                    CreateSessionResponse::Register{response, oauth_profile} => {
+                    CreateSessionResponse::Register{response: _, oauth_profile: _} => {
                         panic!("didn't expect register response here!");
                     }
                 }
             }, 
-            Err(err) => {
+            Err(_err) => {
                 state.status.set(Some(Status::BadCredentials));
             }
         }
@@ -48,9 +40,9 @@ pub fn signin_google(state: Rc<State>) {
     state.clear_email_status();
     state.clear_password_status();
 
-    state.loader.load(clone!(state => async move {
+    state.loader.load(async {
         crate::oauth::actions::redirect(GetOAuthUrlServiceKind::Google, OAuthUrlKind::Login).await;
-    }));
+    });
 }
 
 pub fn forgot_password(state: Rc<State>) {
@@ -70,67 +62,43 @@ pub fn forgot_password(state: Rc<State>) {
             Ok(_) => {
                 state.status.set(Some(Status::PasswordResetSent));
             }, 
-            Err(err) => {
+            Err(_err) => {
                 log::error!("Got error!")
             }
         }
     }));
 }
 
-pub fn go_register(state: Rc<State>) {
-    let route:String = Route::User(UserRoute::Register).into();
+pub fn go_register(_state: Rc<State>) {
+    let route: String = Route::User(UserRoute::Register).into();
     dominator::routing::go_to_url(&route);
 }
 
-pub fn status_redirect(status:Option<Status>) {
+pub fn status_redirect(status: Option<Status>) {
     if let Some(status) = status {
         match status {
             Status::ConfirmEmail(email) => {
-                let route:String = Route::User(UserRoute::SendEmailConfirmation(email)).into();
+                let route: String = Route::User(UserRoute::SendEmailConfirmation(email)).into();
                 dominator::routing::go_to_url(&route);
-            },
+            }
             _ => {}
         }
     }
 }
 //// PRIVATE HELPERS /////
 
-
-pub fn do_success(csrf:&str) {
+pub fn do_success(csrf: &str) {
     storage::save_csrf_token(&csrf);
 
-    let location = web_sys::window()
-        .unwrap_ji()
-        .location();
-    let origin = location
-        .origin()
-        .unwrap_ji();
-    let search_params = location
-        .search()
-        .unwrap_ji();
-    let search_params = web_sys
-        ::UrlSearchParams
-        ::new_with_str(&search_params)
-        .unwrap_ji();
+    let location = web_sys::window().unwrap_ji().location();
+    let origin = location.origin().unwrap_ji();
+    let search_params = location.search().unwrap_ji();
+    let search_params = web_sys::UrlSearchParams::new_with_str(&search_params).unwrap_ji();
 
-    let url = search_params
-        .get("redirect")
-        .unwrap_or_default();
-    let url: String = js_sys
-        ::decode_uri_component(&url)
-        .unwrap_ji()
-        .into();
+    let url = search_params.get("redirect").unwrap_or_default();
+    let url: String = js_sys::decode_uri_component(&url).unwrap_ji().into();
 
     let url = format!("{}{}", origin, url);
 
     let _ = location.set_href(&url);
-    
 }
-
-
-#[derive(Debug, Clone, Copy, PartialEq)]
-enum SigninKind {
-    Google,
-    Email
-}
-

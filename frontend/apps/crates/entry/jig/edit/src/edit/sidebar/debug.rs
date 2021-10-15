@@ -1,4 +1,7 @@
-use shared::domain::jig::{AudioEffects, DraftOrLive, JigData, JigId, JigPlayerSettings, JigResponse, LiteModule, ModuleKind, PrivacyLevel, module::ModuleId};
+use shared::domain::jig::{
+    module::ModuleId, AudioEffects, DraftOrLive, JigData, JigId, JigPlayerSettings, JigResponse,
+    LiteModule, ModuleKind, PrivacyLevel,
+};
 use utils::themes::ThemeId;
 use uuid::Uuid;
 

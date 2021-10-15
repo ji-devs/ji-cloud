@@ -1,17 +1,17 @@
 use crate::animation::fade::*;
 use crate::audio::mixer::AudioHandle;
-use crate::tooltip::state::{MoveStrategy, TooltipContainer};
 use crate::tooltip::state::{
-    Anchor,ContentAnchor, State as TooltipState, TooltipBubble, TooltipData, TooltipTarget,
+    Anchor, ContentAnchor, State as TooltipState, TooltipBubble, TooltipData, TooltipTarget,
 };
+use crate::tooltip::state::{MoveStrategy, TooltipContainer};
 use dominator::clone;
 use futures_signals::signal::Mutable;
 use shared::domain::jig::module::body::Audio;
+use std::cell::Cell;
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::atomic::AtomicBool;
 use utils::math::bounds::BoundsF64;
-use std::cell::Cell;
 
 pub struct TraceBubble {
     pub audio: Option<Audio>,
@@ -31,7 +31,7 @@ pub enum EndPolicy {
     Any,
     All,
     //If audio exists, ends when that finishes. Otherwise fade
-    AudioThenFade
+    AudioThenFade,
 }
 
 impl TraceBubble {
@@ -57,18 +57,24 @@ impl TraceBubble {
             Rc::new(state)
         });
 
-        let _self_ref:Rc<RefCell<Option<Rc<Self>>>> = Rc::new(RefCell::new(None));
+        let _self_ref: Rc<RefCell<Option<Rc<Self>>>> = Rc::new(RefCell::new(None));
 
         let _self = Rc::new(Self {
             audio,
             audio_handle: RefCell::new(None),
             tooltip,
             end_policy: Cell::new(EndPolicy::AudioThenFade),
-            fade: Fade::new(FadeKind::Out, 6_000.0, true, None, Some(clone!(_self_ref => move || {
-                if let Some(_self) = _self_ref.borrow().as_ref() {
-                    _self.on_fade_ended();
-                }
-            }))),
+            fade: Fade::new(
+                FadeKind::Out,
+                6_000.0,
+                true,
+                None,
+                Some(clone!(_self_ref => move || {
+                    if let Some(_self) = _self_ref.borrow().as_ref() {
+                        _self.on_fade_ended();
+                    }
+                })),
+            ),
             on_ended: on_ended.map(|f| Box::new(f) as _),
             fade_ended: AtomicBool::new(false),
             audio_ended: AtomicBool::new(false),

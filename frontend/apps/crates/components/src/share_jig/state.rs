@@ -26,7 +26,12 @@ impl State {
     }
 
     pub fn embed_code(&self) -> String {
-        let url = Route::Jig(JigRoute::Play(self.jig_id, None, JigPlayerOptions::default())).to_string();
+        let url = Route::Jig(JigRoute::Play(
+            self.jig_id,
+            None,
+            JigPlayerOptions::default(),
+        ))
+        .to_string();
         let origin = web_sys::window()
             .unwrap_ji()
             .location()

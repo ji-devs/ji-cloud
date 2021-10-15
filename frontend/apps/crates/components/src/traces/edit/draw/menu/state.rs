@@ -1,5 +1,8 @@
 use crate::traces::edit::draw::trace::state::*;
-use utils::{resize::{ResizeInfo, get_resize_info}, unwrap::UnwrapJiExt};
+use utils::{
+    resize::{get_resize_info, ResizeInfo},
+    unwrap::UnwrapJiExt,
+};
 
 #[derive(Clone)]
 pub struct Menu {
@@ -33,7 +36,7 @@ impl Menu {
 
         let resize_info = get_resize_info();
 
-        let (x,y) = resize_info.get_fixed_pos_px(x,y);
+        let (x, y) = resize_info.get_fixed_pos_px(x, y);
 
         (x - (MENU_WIDTH / 2.0), y)
     }
@@ -48,14 +51,14 @@ impl Menu {
             }
         };
 
-
         let resize_info = get_resize_info();
 
-        let (mut x,y) = resize_info.get_fixed_pos_px(bounds.x - (bounds.width/2.0),bounds.y);
+        let (mut x, y) = resize_info.get_fixed_pos_px(bounds.x - (bounds.width / 2.0), bounds.y);
 
-        if bounds.width > MENU_WIDTH { 
-            x += (MENU_WIDTH / 2.0);
+        if bounds.width > MENU_WIDTH {
+            x += MENU_WIDTH / 2.0;
         }
-        web_sys::DomRect::new_with_x_and_y_and_width_and_height(x, y, bounds.width, bounds.height).unwrap_ji()
+        web_sys::DomRect::new_with_x_and_y_and_width_and_height(x, y, bounds.width, bounds.height)
+            .unwrap_ji()
     }
 }

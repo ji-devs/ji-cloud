@@ -12,7 +12,11 @@ pub struct State {
 
 impl State {
     pub fn new(target: TooltipTarget, data: TooltipData) -> Self {
-        Self { data, target, container: None}
+        Self {
+            data,
+            target,
+            container: None,
+        }
     }
 }
 
@@ -93,8 +97,8 @@ impl TooltipContainer {
     pub fn as_value(&self) -> JsValue {
         match self {
             Self::Element(ref e) => e.clone().unchecked_into(),
-            Self::MainOrWindow => JsValue::from_str("mainOrWindow")
-        } 
+            Self::MainOrWindow => JsValue::from_str("mainOrWindow"),
+        }
     }
 }
 

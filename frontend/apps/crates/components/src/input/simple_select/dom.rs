@@ -1,12 +1,12 @@
-use dominator::{traits::AsStr, html, Dom, clone, DomBuilder};
-use web_sys::HtmlElement;
 use super::state::*;
+use dominator::{clone, html, traits::AsStr, Dom, DomBuilder};
+use futures_signals::signal::SignalExt;
 use std::rc::Rc;
 use utils::prelude::*;
-use futures_signals::signal::SignalExt;
-use wasm_bindgen::prelude::*; 
+use wasm_bindgen::prelude::*;
+use web_sys::HtmlElement;
 
-impl <T: AsStr + Clone + 'static, P: AsStr + 'static, L: AsStr + 'static> SimpleSelect <T, P, L> {
+impl<T: AsStr + Clone + 'static, P: AsStr + 'static, L: AsStr + 'static> SimpleSelect<T, P, L> {
     pub fn render(state: Rc<Self>, slot: Option<&str>) -> Dom {
         Self::_render_mixin(
             state,
@@ -14,7 +14,7 @@ impl <T: AsStr + Clone + 'static, P: AsStr + 'static, L: AsStr + 'static> Simple
             None::<fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>>,
         )
     }
-    pub fn render_mixin<F>(state: Rc<Self>, slot: Option<&str>, mixin: F) -> Dom 
+    pub fn render_mixin<F>(state: Rc<Self>, slot: Option<&str>, mixin: F) -> Dom
     where
         F: FnOnce(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>,
     {

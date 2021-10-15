@@ -5,15 +5,15 @@
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
-mod router;
-mod register;
+mod debug;
+mod email;
 mod login;
 mod oauth;
-mod strings;
-mod profile;
-mod email;
 mod password;
-mod debug;
+mod profile;
+mod register;
+mod router;
+mod strings;
 
 use wasm_bindgen::prelude::*;
 

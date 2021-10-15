@@ -1,13 +1,16 @@
 use super::super::{nav::dom::render_nav, state::*};
 use awsm_web::loaders::fetch::fetch_url;
-use serde::Deserialize;
 use dominator::{clone, html, Dom};
+use futures_signals::{
+    map_ref,
+    signal::{Mutable, SignalExt},
+};
+use serde::Deserialize;
 use std::rc::Rc;
-use futures_signals::{map_ref, signal::{Signal, SignalExt, Mutable}};
 
 use crate::module::_common::edit::header::controller::dom::ControllerDom;
 
-use shared::domain::jig::module::body::{BodyExt, ModeExt, StepExt, Vec2};
+use shared::domain::jig::module::body::{BodyExt, ModeExt, StepExt};
 use utils::prelude::*;
 
 pub fn render_main_bg<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(
@@ -83,22 +86,22 @@ where
     Footer: FooterExt + 'static,
     Overlay: OverlayExt + 'static,
 {
-
     let module_kind = RawData::kind().as_str();
 
     //TODO - load from localization endpoint
-    let STR_config_url = utils::path::config_cdn_url(format!("module/_header/{}.json", module_kind));
+    let STR_config_url =
+        utils::path::config_cdn_url(format!("module/_header/{}.json", module_kind));
 
-    #[derive(Deserialize, Default, Clone)] 
+    #[derive(Deserialize, Default, Clone)]
     struct HeaderConfig {
         title: String,
-        steps: Vec<HeaderConfigStep> 
+        steps: Vec<HeaderConfigStep>,
     }
-    #[derive(Deserialize, Default, Clone)] 
+    #[derive(Deserialize, Default, Clone)]
     struct HeaderConfigStep {
-        tabs: Vec<HeaderConfigTab> 
+        tabs: Vec<HeaderConfigTab>,
     }
-    #[derive(Deserialize, Default, Clone)] 
+    #[derive(Deserialize, Default, Clone)]
     struct HeaderConfigTab {
         title: String,
         body: String,

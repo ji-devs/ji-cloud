@@ -1,20 +1,15 @@
 use components::{
-    module::_common::play::prelude::DomRenderable,
-    backgrounds::dom::render_single_background_raw
+    backgrounds::dom::render_single_background_raw, module::_common::play::prelude::DomRenderable,
 };
-use dominator::{html, Dom, clone};
+use dominator::{html, Dom};
 use std::rc::Rc;
-use components::backgrounds;
-use futures_signals::{
-    signal_vec::SignalVecExt,
-    signal::SignalExt
-};
-use utils::prelude::*;
-use super::{
-    state::{Base, Phase},
-    game::state::Game,
-};
 
+use super::{
+    game::state::Game,
+    state::{Base, Phase},
+};
+use futures_signals::{signal::SignalExt, signal_vec::SignalVecExt};
+use utils::prelude::*;
 
 impl DomRenderable for Base {
     fn render(state: Rc<Base>) -> Dom {
@@ -25,7 +20,7 @@ impl DomRenderable for Base {
                 match phase {
                     Phase::Init => None,
                     Phase::Playing(game) => Some(Game::render(game)),
-                    Phase::Ending => None, 
+                    Phase::Ending => None,
                 }
             }))
         })

@@ -1,9 +1,5 @@
-#![feature(type_alias_impl_trait)]
 use dominator::clone;
-use futures_signals::{
-    signal::{Mutable, Signal, SignalExt},
-};
-use uuid::Uuid;
+use futures_signals::signal::{Mutable, Signal, SignalExt};
 
 use std::cell::RefCell;
 use std::convert::{TryFrom, TryInto};
@@ -152,7 +148,7 @@ where
             on_init_ready: RefCell::new(None),
         });
 
-        let is_draft:bool = utils::routes::is_param_bool("draft");
+        let is_draft: bool = utils::routes::is_param_bool("draft");
 
         *_self.on_init_ready.borrow_mut() = Some(Box::new(clone!(_self => move || {
             _self.raw_loader.load(clone!(_self, init_from_raw, is_draft => async move {
@@ -294,12 +290,11 @@ where
             .switch(|phase| match phase.as_ref() {
                 Phase::Choose(_) => OptionSignal::new(None),
                 Phase::Init => OptionSignal::new(None),
-                Phase::Base(app_base) => OptionSignal::new(
-                    Some(app_base.preview_mode.signal_cloned())
-                )
+                Phase::Base(app_base) => {
+                    OptionSignal::new(Some(app_base.preview_mode.signal_cloned()))
+                }
             })
             .map(|x| x.flatten())
-            
     }
 
     pub fn is_preview_signal(&self) -> impl Signal<Item = bool> {

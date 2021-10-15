@@ -6,15 +6,19 @@
 /// these are always enabled
 pub mod input;
 
-/// these are always enabled
-/// with sub-modules gated 
-pub mod image;
 pub mod audio;
+/// these are always enabled
+/// with sub-modules gated
+pub mod image;
 
 #[cfg(feature = "animation")]
 pub mod animation;
 #[cfg(feature = "backgrounds")]
 pub mod backgrounds;
+#[cfg(feature = "box_outline")]
+pub mod box_outline;
+#[cfg(feature = "buttons")]
+pub mod buttons;
 #[cfg(feature = "collision")]
 pub mod collision;
 #[cfg(feature = "color_select")]
@@ -27,12 +31,18 @@ pub mod instructions;
 pub mod lists;
 #[cfg(feature = "module")]
 pub mod module;
-#[cfg(feature = "page_header")]
-pub mod page_header;
 #[cfg(feature = "page_footer")]
 pub mod page_footer;
+#[cfg(feature = "page_header")]
+pub mod page_header;
+#[cfg(feature = "player_popup")]
+pub mod player_popup;
+#[cfg(feature = "share_jig")]
+pub mod share_jig;
 #[cfg(feature = "stickers")]
 pub mod stickers;
+#[cfg(feature = "tabs")]
+pub mod tabs;
 #[cfg(feature = "text_editor")]
 pub mod text_editor;
 #[cfg(feature = "theme_selector")]
@@ -43,13 +53,3 @@ pub mod tooltip;
 pub mod traces;
 #[cfg(feature = "transform")]
 pub mod transform;
-#[cfg(feature = "share_jig")]
-pub mod share_jig;
-#[cfg(feature = "player_popup")]
-pub mod player_popup;
-#[cfg(feature = "box_outline")]
-pub mod box_outline;
-#[cfg(feature = "buttons")]
-pub mod buttons;
-#[cfg(feature = "tabs")]
-pub mod tabs;

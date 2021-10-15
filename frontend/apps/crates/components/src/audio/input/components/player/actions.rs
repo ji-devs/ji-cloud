@@ -1,4 +1,4 @@
-use crate::audio::input::state::{AudioInputMode, AudioInput};
+use crate::audio::input::state::{AudioInput, AudioInputMode};
 use futures_signals::signal::Mutable;
 use shared::domain::jig::module::body::Audio;
 use web_sys::HtmlAudioElement;

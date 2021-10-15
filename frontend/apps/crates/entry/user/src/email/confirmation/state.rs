@@ -1,6 +1,6 @@
-use std::rc::Rc;
-use futures_signals::signal::{Mutable, Signal, SignalExt};
 use dominator_helpers::futures::AsyncLoader;
+use futures_signals::signal::{Mutable, Signal, SignalExt};
+use std::rc::Rc;
 
 pub struct SendEmailConfirmationPage {
     pub email: String,
@@ -13,7 +13,7 @@ impl SendEmailConfirmationPage {
         Rc::new(Self {
             email,
             mode: Mutable::new(Mode::Send),
-            loader: AsyncLoader::new()
+            loader: AsyncLoader::new(),
         })
     }
 
@@ -23,9 +23,9 @@ impl SendEmailConfirmationPage {
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
-pub enum Mode { 
+pub enum Mode {
     Send,
-    Sent
+    Sent,
 }
 
 impl Mode {

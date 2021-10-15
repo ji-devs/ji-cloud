@@ -1,11 +1,10 @@
+use super::state::*;
 use components::module::_common::edit::prelude::*;
 use dominator::{html, Dom};
 use std::rc::Rc;
-use super::state::*;
-
 
 impl DomRenderable for Header {
-    fn render(state: Rc<Header>) -> Dom {
+    fn render(_state: Rc<Header>) -> Dom {
         html!("empty-fragment")
     }
 }

@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use components::player_popup::{PlayerPopup, PreviewPopupCallbacks};
-use dominator::{Dom, clone, html};
+use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
 use utils::{events, jig::JigPlayerOptions};
 

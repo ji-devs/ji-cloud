@@ -1,20 +1,14 @@
-use dominator::{Dom, html, clone, with_node};
+use super::{actions, state::*};
+use dominator::{clone, html, with_node, Dom};
 use futures_signals::signal::{Mutable, SignalExt};
 use std::rc::Rc;
-use super::{state::*, actions};
 use web_sys::HtmlInputElement;
-use utils::{events, routes::*};
-use crate::{
-    strings::register::step_1::*,
-    register::{
-        state::Step,
-        components::footer::Footer
-    }
-};
-use shared::domain::session::OAuthUserProfile;
 
-pub struct Step1Page {
-}
+use crate::{register::state::Step, strings::register::step_1::*};
+use shared::domain::session::OAuthUserProfile;
+use utils::events;
+
+pub struct Step1Page {}
 
 impl Step1Page {
     pub fn render(step: Mutable<Step>, oauth_profile: Option<OAuthUserProfile>) -> Dom {
@@ -29,7 +23,15 @@ impl Step1Page {
                         !err.is_empty()
                     }))
                     .property_signal("hint", state.firstname_error())
-                    .child(html!("input", {
+                    .child(html!("input" => HtmlInputElement, {
+                        .with_node!(elem => {
+                            .property("placeholder", STR_FIRSTNAME_PLACEHOLDER)
+                            .property("value", &*state.firstname.borrow())
+                            .event(clone!(state => move |_:events::Input| {
+                                state.clear_firstname_status();
+                                *state.firstname.borrow_mut() = elem.value();
+                            }))
+                        })
                         .property("placeholder", STR_FIRSTNAME_PLACEHOLDER)
                         .property("value", &*state.firstname.borrow())
                         .event(clone!(state => move |evt:events::Input| {
@@ -45,13 +47,15 @@ impl Step1Page {
                         !err.is_empty()
                     }))
                     .property_signal("hint", state.lastname_error())
-                    .child(html!("input", {
-                        .property("placeholder", STR_LASTNAME_PLACEHOLDER)
-                        .property("value", &*state.lastname.borrow())
-                        .event(clone!(state => move |evt:events::Input| {
-                            state.clear_lastname_status();
-                            *state.lastname.borrow_mut() = evt.value().unwrap_or_default();
-                        }))
+                    .child(html!("input" => HtmlInputElement, {
+                        .with_node!(elem => {
+                            .property("placeholder", STR_LASTNAME_PLACEHOLDER)
+                            .property("value", &*state.lastname.borrow())
+                            .event(clone!(state => move |_:events::Input| {
+                                state.clear_lastname_status();
+                                *state.lastname.borrow_mut() = elem.value();
+                            }))
+                        })
                     }))
                 }),
                 html!("input-wrapper", {
@@ -61,13 +65,15 @@ impl Step1Page {
                         !err.is_empty()
                     }))
                     .property_signal("hint", state.username_error())
-                    .child(html!("input", {
-                        .property("placeholder", STR_USERNAME_PLACEHOLDER)
-                        .property("value", &*state.username.borrow())
-                        .event(clone!(state => move |evt:events::Input| {
-                            state.clear_username_status();
-                            *state.username.borrow_mut() = evt.value().unwrap_or_default();
-                        }))
+                    .child(html!("input" => HtmlInputElement, {
+                        .with_node!(elem => {
+                            .property("placeholder", STR_USERNAME_PLACEHOLDER)
+                            .property("value", &*state.username.borrow())
+                            .event(clone!(state => move |_:events::Input| {
+                                state.clear_username_status();
+                                *state.username.borrow_mut() = elem.value();
+                            }))
+                        })
                     }))
                 }),
                 html!("input-checkbox", {
@@ -85,7 +91,7 @@ impl Step1Page {
                     .property("size", "medium")
                     .property("iconAfter", "arrow")
                     .text(STR_NEXT)
-                    .event(clone!(state => move |evt:events::Click| {
+                    .event(clone!(state => move |_evt:events::Click| {
                         actions::submit(state.clone());
                     }))
                 }),

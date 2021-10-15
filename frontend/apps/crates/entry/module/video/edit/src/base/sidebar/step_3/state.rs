@@ -1,13 +1,16 @@
+use super::super::state::Sidebar;
 use super::play_settings::state::State as PlaySettingsState;
 use crate::base::state::Base;
 use components::{
+    instructions::editor::{
+        callbacks::Callbacks as InstructionsEditorCallbacks,
+        state::State as InstructionsEditorState,
+    },
     tabs::MenuTabKind,
-    instructions::editor::{callbacks::Callbacks as InstructionsEditorCallbacks, state::State as InstructionsEditorState}
 };
 use dominator::clone;
 use futures_signals::signal::Mutable;
 use std::rc::Rc;
-use super::super::state::Sidebar;
 
 pub struct Step3 {
     pub tab: Mutable<Tab>,
@@ -61,9 +64,9 @@ impl Tab {
                 let state = InstructionsEditorState::new(base.instructions.clone(), callbacks);
 
                 Self::Instructions(Rc::new(state))
-            },
+            }
 
-            _ => unimplemented!("unsupported tab kind!")
+            _ => unimplemented!("unsupported tab kind!"),
         }
     }
 

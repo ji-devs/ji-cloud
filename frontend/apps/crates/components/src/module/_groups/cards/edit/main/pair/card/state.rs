@@ -1,6 +1,6 @@
 use super::callbacks::*;
 use crate::module::_groups::cards::{edit::state::*, lookup::Side};
-use dominator::clone;
+
 use futures_signals::signal::{Mutable, ReadOnlyMutable};
 use shared::domain::jig::module::body::_groups::cards::Step;
 use std::{cell::RefCell, rc::Rc};
@@ -35,8 +35,7 @@ impl<RawData: RawDataExt, E: ExtraExt> MainCard<RawData, E> {
 
         let callbacks = {
             if is_image {
-                CardCallbacks::new(Some(clone!(base => move || {
-                })))
+                CardCallbacks::new(Some(|| {}))
             } else {
                 CardCallbacks::new(None::<fn()>)
             }

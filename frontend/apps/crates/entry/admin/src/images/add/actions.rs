@@ -1,27 +1,24 @@
+use super::state::*;
+use components::image::upload::upload_image;
+use dominator::clone;
 use shared::{
-    media::MediaLibrary,
+    api::{endpoints, ApiEndpoint},
     domain::{image::*, meta::*},
     error::*,
-    api::{ApiEndpoint, endpoints},
+    media::MediaLibrary,
 };
-use utils::{
-    prelude::*,
-    routes::*
-};
-use dominator::clone;
-use super::state::*;
 use std::rc::Rc;
+use utils::prelude::*;
 use web_sys::File;
-use components::image::upload::{upload_image};
 
 pub fn on_change(state: Rc<State>, value: String) {
     match value.as_ref() {
         "sticker" => {
             *state.kind.borrow_mut() = ImageKind::Sticker;
-        },
+        }
         "canvas" => {
             *state.kind.borrow_mut() = ImageKind::Canvas;
-        },
+        }
         _ => {
             log::info!("unknown value [{}]", value);
         }
@@ -80,6 +77,6 @@ pub fn on_file(state: Rc<State>, file: File) {
     }))
 }
 
-async fn upload_file(file: File, id: ImageId, session_uri: &str) {
+async fn _upload_file(_file: File, id: ImageId, session_uri: &str) {
     log::info!("Uploading {} to {}", id.0.to_string(), session_uri);
 }

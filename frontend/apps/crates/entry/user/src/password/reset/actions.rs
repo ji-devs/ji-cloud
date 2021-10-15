@@ -1,18 +1,12 @@
-use super::{
-    state::*,
-    super::state::*
-};
-use std::rc::Rc;
+use super::{super::state::*, state::*};
 use dominator::clone;
 use shared::{
-    api::endpoints::{ApiEndpoint, user},
-    domain::{
-        user::ChangePasswordRequest,
-        session::NewSessionResponse,
-    },
-    error::EmptyError
+    api::endpoints::{user, ApiEndpoint},
+    domain::user::ChangePasswordRequest,
+    error::EmptyError,
 };
-use utils::{prelude::*, storage};
+use std::rc::Rc;
+use utils::prelude::*;
 
 pub fn change_password(state: Rc<PasswordResetPage>) {
     state.password.clear_status();
@@ -22,7 +16,6 @@ pub fn change_password(state: Rc<PasswordResetPage>) {
         return;
     }
 
-
     state.loader.load(clone!(state => async move {
         let password:String = state.password.value.borrow().clone();
         let query = ChangePasswordRequest::Change {
@@ -31,7 +24,7 @@ pub fn change_password(state: Rc<PasswordResetPage>) {
             force_logout: true
         };
 
-        let (resp, status):(Result<(), EmptyError>, u16) = api_no_auth_empty_status(&user::ChangePassword::PATH, user::ChangePassword::METHOD, Some(query)).await;
+        let (resp, _status):(Result<(), EmptyError>, u16) = api_no_auth_empty_status(&user::ChangePassword::PATH, user::ChangePassword::METHOD, Some(query)).await;
 
         
         match resp {
@@ -39,7 +32,7 @@ pub fn change_password(state: Rc<PasswordResetPage>) {
                 let route:String = Route::User(UserRoute::Login(String::new())).into();
                 dominator::routing::go_to_url(&route);
             }, 
-            Err(err) => {
+            Err(_err) => {
                 state.password.status.set(Some(PasswordStatus::ResetError));
             }
         }

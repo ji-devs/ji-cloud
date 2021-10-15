@@ -1,36 +1,21 @@
 use shared::domain::jig::{
-    JigId, 
     module::{
-        ModuleId, 
         body::{
-            ThemeChoice,
-            Background,
-            Instructions,
-            _groups::cards::{Mode, Step, CardPair},
-            matching::{ModuleData as RawData, Content as RawContent, PlayerSettings}, 
-        }
-    }
+            Background, Instructions,
+            _groups::cards::{CardPair, Mode, Step},
+            matching::{ModuleData as RawData, PlayerSettings},
+        },
+        ModuleId,
+    },
+    JigId,
 };
 
-use futures_signals::{
-    map_ref,
-    signal::{self, Signal, SignalExt, Mutable},
-    signal_vec::{SignalVec, SignalVecExt, MutableVec},
-};
-use std::{
-    rc::Rc,
-    cell::RefCell
-};
-use rand::prelude::*;
-use components::module::{
-    _common::play::prelude::*,
-    _groups::cards::lookup::Side
-};
+use futures_signals::signal::Mutable;
+use std::rc::Rc;
+
+use components::module::_common::play::prelude::*;
 use utils::prelude::*;
-use std::future::Future;
-use futures::future::join_all;
-use gloo_timers::future::TimeoutFuture;
-use components::audio::mixer::AudioMixer;
+
 use super::game::state::Game;
 
 pub struct Base {
@@ -50,16 +35,15 @@ pub struct Base {
 pub enum Phase {
     Init,
     Playing(Rc<Game>),
-    Ending, 
+    Ending,
 }
 
 impl Base {
     pub async fn new(init_args: InitFromRawArgs<RawData, Mode, Step>) -> Rc<Self> {
-
         let InitFromRawArgs {
             jig_id,
             module_id,
-            jig,
+            jig: _,
             raw,
             theme_id,
             ..
@@ -73,7 +57,7 @@ impl Base {
             mode: content.base.mode,
             theme_id,
             background: content.base.background,
-            instructions: content.base.instructions, 
+            instructions: content.base.instructions,
             settings: content.player_settings,
             raw_pairs: content.base.pairs,
             module_phase: init_args.play_phase,

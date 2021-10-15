@@ -1,12 +1,12 @@
 use super::state::*;
-use std::rc::Rc;
-use dominator::{html, clone, Dom};
-use utils::prelude::*;
-use futures_signals::signal::{Signal, SignalExt};
 use components::{
-    tabs::{MenuTab, MenuTabKind},
     instructions::editor::dom::render as render_instructions,
+    tabs::{MenuTab, MenuTabKind},
 };
+use dominator::{clone, html, Dom};
+use futures_signals::signal::SignalExt;
+use std::rc::Rc;
+use utils::prelude::*;
 
 pub fn render_step_5(state: Rc<Step5>) -> Dom {
     html!("menu-tabs", {
@@ -20,7 +20,7 @@ pub fn render_step_5(state: Rc<Step5>) -> Dom {
             render_tab(state.clone(), MenuTabKind::Feedback),
             html!("module-sidebar-body", {
                 .property("slot", "body")
-                .child_signal(state.tab.signal_cloned().map(clone!(state => move |tab| {
+                .child_signal(state.tab.signal_cloned().map(|tab| {
                     match tab {
 
                         Tab::Settings(state) => {
@@ -33,14 +33,13 @@ pub fn render_step_5(state: Rc<Step5>) -> Dom {
                             Some(render_instructions(state.clone()))
                         },
                     }
-                })))
+                }))
             })
         ])
     })
 }
 
-
-fn render_tab(state: Rc<Step5>, tab_kind:MenuTabKind) -> Dom {
+fn render_tab(state: Rc<Step5>, tab_kind: MenuTabKind) -> Dom {
     MenuTab::render(
         MenuTab::new(
             tab_kind,
@@ -50,8 +49,8 @@ fn render_tab(state: Rc<Step5>, tab_kind:MenuTabKind) -> Dom {
             }))),
             clone!(state, tab_kind => move || {
                 state.tab.set(Tab::new(state.sidebar.base.clone(), tab_kind));
-            })
+            }),
         ),
-        Some("tabs")
+        Some("tabs"),
     )
 }

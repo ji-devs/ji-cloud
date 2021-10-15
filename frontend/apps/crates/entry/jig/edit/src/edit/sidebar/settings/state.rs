@@ -3,8 +3,8 @@ use std::{collections::HashSet, iter::FromIterator};
 use awsm_web::loaders::helpers::AsyncLoader;
 use futures_signals::signal::Mutable;
 use shared::domain::jig::{
-    AudioBackground, AudioEffects, AudioFeedbackNegative, AudioFeedbackPositive, JigResponse, JigId,
-    JigPlayerSettings, JigUpdateDraftDataRequest, TextDirection,
+    AudioBackground, AudioEffects, AudioFeedbackNegative, AudioFeedbackPositive, JigId,
+    JigPlayerSettings, JigResponse, JigUpdateDraftDataRequest, TextDirection,
 };
 use utils::themes::ThemeId;
 

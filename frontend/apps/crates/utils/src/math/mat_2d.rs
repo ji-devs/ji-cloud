@@ -1,5 +1,3 @@
-
-
 // 2d matrix math taken from glmatrix: http://glmatrix.net/docs/mat2d.js.html
 
 //Broken?
@@ -18,7 +16,7 @@ pub fn from_mat4(mat:&[f64;16]) -> [f64;6] {
 }
 */
 
-pub fn translate_mut(transform:&mut [f64;6], x:f64, y: f64) {
+pub fn translate_mut(transform: &mut [f64; 6], x: f64, y: f64) {
     let a = transform;
     let a0 = a[0];
     let a1 = a[1];
@@ -36,7 +34,7 @@ pub fn translate_mut(transform:&mut [f64;6], x:f64, y: f64) {
     a[5] = a1 * v0 + a3 * v1 + a5;
 }
 
-pub fn scale_mut(transform:&mut [f64;6], x:f64, y: f64) {
+pub fn scale_mut(transform: &mut [f64; 6], x: f64, y: f64) {
     let a = transform;
     let a0 = a[0];
     let a1 = a[1];
@@ -54,7 +52,7 @@ pub fn scale_mut(transform:&mut [f64;6], x:f64, y: f64) {
     a[5] = a5;
 }
 
-pub fn mul_mut(transform:&mut [f64;6], other: &[f64;6]) {
+pub fn mul_mut(transform: &mut [f64; 6], other: &[f64; 6]) {
     let a = transform;
     let a0 = a[0];
     let a1 = a[1];
@@ -69,12 +67,12 @@ pub fn mul_mut(transform:&mut [f64;6], other: &[f64;6]) {
     let b3 = b[3];
     let b4 = b[4];
     let b5 = b[5];
-      a[0] = a0 * b0 + a2 * b1;
-      a[1] = a1 * b0 + a3 * b1;
-      a[2] = a0 * b2 + a2 * b3;
-      a[3] = a1 * b2 + a3 * b3;
-      a[4] = a0 * b4 + a2 * b5 + a4;
-      a[5] = a1 * b4 + a3 * b5 + a5;
+    a[0] = a0 * b0 + a2 * b1;
+    a[1] = a1 * b0 + a3 * b1;
+    a[2] = a0 * b2 + a2 * b3;
+    a[3] = a1 * b2 + a3 * b3;
+    a[4] = a0 * b4 + a2 * b5 + a4;
+    a[5] = a1 * b4 + a3 * b5 + a5;
 }
 /*
 export function multiply(out, a, b) {

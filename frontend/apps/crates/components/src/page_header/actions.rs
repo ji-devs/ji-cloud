@@ -1,8 +1,20 @@
 use std::rc::Rc;
 
 use dominator::clone;
-use shared::{api::{ApiEndpoint, endpoints::{self, user::Profile}}, domain::user::UserProfile, error::EmptyError};
-use utils::{prelude::{ApiEndpointExt, api_with_auth_status}, routes::{Route, UserRoute}, storage::delete_csrf_token, unwrap::UnwrapJiExt};
+use shared::{
+    api::{
+        endpoints::{self, user::Profile},
+        ApiEndpoint,
+    },
+    domain::user::UserProfile,
+    error::EmptyError,
+};
+use utils::{
+    prelude::{api_with_auth_status, ApiEndpointExt},
+    routes::{Route, UserRoute},
+    storage::delete_csrf_token,
+    unwrap::UnwrapJiExt,
+};
 
 use super::state::{LoggedInState, State};
 
@@ -48,7 +60,11 @@ pub fn navigate_to_login() {
     let location = web_sys::window().unwrap_ji().location();
     let origin = location.origin().unwrap_ji();
 
-    let redirect = format!("{}{}", location.pathname().unwrap_ji(), location.search().unwrap_ji());
+    let redirect = format!(
+        "{}{}",
+        location.pathname().unwrap_ji(),
+        location.search().unwrap_ji()
+    );
     let redirect: String = js_sys::encode_uri_component(&redirect).into();
 
     let route: String = Route::User(UserRoute::Login(redirect)).to_string().into();

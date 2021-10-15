@@ -1,18 +1,15 @@
 use std::rc::Rc;
 
-use futures_signals::{
-    signal::{Mutable, SignalExt},
-};
+use futures_signals::signal::{Mutable, SignalExt};
 
 use dominator::{clone, events, html, Dom};
 
 use utils::{events::ModuleResizeEvent, iframe::*, prelude::*, resize::*};
 
-use super::{loading::dom::render_loading, ending::*, state::*};
+use super::{ending::*, loading::dom::render_loading, state::*};
 use crate::{
-    instructions::player::InstructionsPlayer,
+    audio::mixer::AUDIO_MIXER, instructions::player::InstructionsPlayer,
     module::_common::play::prelude::*,
-    audio::mixer::AUDIO_MIXER,
 };
 use shared::domain::jig::module::body::{BodyExt, ModeExt, StepExt};
 
@@ -83,7 +80,7 @@ pub fn render_page_body<RawData, Mode, Step, Base>(
 //This is just a placeholder to get messages
 //It'll be replaced when the iframe data arrives
 fn render_iframe_wait_raw<RawData, Mode, Step, Base>(
-    state: Rc<GenericState<RawData, Mode, Step, Base>>,
+    _state: Rc<GenericState<RawData, Mode, Step, Base>>,
     on_raw: Rc<Box<dyn Fn(RawData)>>,
 ) -> Dom
 where
@@ -93,7 +90,7 @@ where
     Step: StepExt + 'static,
 {
     html!("empty-fragment", {
-        .global_event(clone!(state, on_raw => move |evt:dominator_helpers::events::Message| {
+        .global_event(clone!(on_raw => move |evt:dominator_helpers::events::Message| {
             if let Ok(msg) = evt.try_serde_data::<IframeInit<RawData>>() {
                 log::info!("got iframe data!");
                 //on_raw was stashed from the original State::new()
@@ -102,13 +99,13 @@ where
                 log::info!("hmmm got other iframe message...");
             }
         }))
-        .after_inserted(clone!(state => move |_elem| {
+        .after_inserted(|_elem| {
             //On mount - send an empty IframeInit message to let the *parent* know we're ready
             //parent here is probably the editor window (i.e. we've been told to wait for raw data)
             IframeInit::empty()
                 .try_post_message_to_parent()
                 .unwrap_ji();
-        }))
+        })
     })
 }
 
@@ -129,9 +126,9 @@ where
     html!("empty-fragment", {
         .property("slot", "main")
         .child(Base::render(base.clone()))
-        .apply_if(instructions.is_some() && !is_screenshot, clone!(state, base => move |dom| {
+        .apply_if(instructions.is_some() && !is_screenshot, clone!(base => move |dom| {
             dom
-                .child_signal(base.play_phase().signal().map(clone!(state, base => move |curr_play_phase| {
+                .child_signal(base.play_phase().signal().map(clone!(base => move |curr_play_phase| {
                     match curr_play_phase {
                         ModulePlayPhase::Playing => {
                             Some(InstructionsPlayer::render(
@@ -145,7 +142,7 @@ where
 
         .apply_if(jig_player, |dom| {
             dom
-                .global_event(clone!(state, base => move |evt:dominator_helpers::events::Message| {
+                .global_event(|evt:dominator_helpers::events::Message| {
                     if let Ok(msg) = evt.try_serde_data::<IframeAction<JigToModulePlayerMessage>>() {
                         match msg.data {
                             JigToModulePlayerMessage::Play => {
@@ -160,14 +157,14 @@ where
                     } else {
                         log::info!("hmmm got other iframe message...");
                     }
-                }))
-                .after_inserted(clone!(state => move |_elem| {
+                })
+                .after_inserted(|_elem| {
                     //On mount - send an empty IframeInit message to let the *top* know we're ready
                     //top here should be the jig player
                     IframeInit::empty()
                         .try_post_message_to_top()
                         .unwrap_ji();
-                }))
+                })
         })
 
         .apply_if(!is_screenshot, |dom| {
@@ -197,7 +194,7 @@ where
                                 None => log::info!("Starting without a timer")
                             }
 
-                            //let the player know we're starting 
+                            //let the player know we're starting
                             msg.try_post_message_to_top().unwrap_ji();
                         }
                         None
@@ -215,6 +212,6 @@ fn start_playback<Base>(base: Rc<Base>)
 where
     Base: BaseExt + 'static,
 {
-    base.play_phase().set_neq(ModulePlayPhase::Playing); 
+    base.play_phase().set_neq(ModulePlayPhase::Playing);
     Base::play(base);
 }

@@ -1,7 +1,7 @@
 use crate::module::{_common::edit::prelude::*, _groups::cards::edit::state::*};
 use dominator::Dom;
+use futures_signals::signal::{Mutable, Signal};
 use std::rc::Rc;
-use futures_signals::{map_ref, signal::{Signal, SignalExt, Mutable}};
 
 pub struct Sidebar<RawData, E, GetSettingsStateFn, RenderSettingsStateFn, SettingsState>
 where
@@ -14,7 +14,7 @@ where
     pub base: Rc<CardsBase<RawData, E>>,
     pub get_settings: GetSettingsStateFn,
     pub render_settings: RenderSettingsStateFn,
-    pub tab_index: Mutable<Option<usize>>
+    pub tab_index: Mutable<Option<usize>>,
 }
 
 impl<RawData, E, GetSettingsStateFn, RenderSettingsStateFn, SettingsState>
@@ -35,7 +35,7 @@ where
             base,
             get_settings,
             render_settings,
-            tab_index: Mutable::new(None)
+            tab_index: Mutable::new(None),
         }
     }
 }
@@ -54,5 +54,4 @@ where
     fn tab_index(&self) -> Self::TabIndexSignal {
         self.tab_index.signal()
     }
-
 }

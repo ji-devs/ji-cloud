@@ -19,10 +19,13 @@ use utils::prelude::*;
 use super::state::State;
 
 pub fn search_url(q: &str) -> String {
-    Route::Home(HomeRoute::Search(Some(shared::domain::jig::JigSearchQuery {
-        q: q.to_string(),
-        ..Default::default()
-    }))).to_string()
+    Route::Home(HomeRoute::Search(Some(
+        shared::domain::jig::JigSearchQuery {
+            q: q.to_string(),
+            ..Default::default()
+        },
+    )))
+    .to_string()
 }
 
 pub fn fetch_data(state: Rc<State>, include_search: bool) {
@@ -90,11 +93,20 @@ async fn search_async(state: Rc<State>) {
     Route::Home(HomeRoute::Search(Some(req.clone()))).push_state();
 
     let query = req.q.to_owned();
-    match api_no_auth::<JigSearchResponse, EmptyError, JigSearchQuery>(jig::Search::PATH, jig::Search::METHOD, Some(req)).await {
-        Err(_) => {},
+    match api_no_auth::<JigSearchResponse, EmptyError, JigSearchQuery>(
+        jig::Search::PATH,
+        jig::Search::METHOD,
+        Some(req),
+    )
+    .await
+    {
+        Err(_) => {}
         Ok(res) => {
-            state.mode.set(HomePageMode::Search(query, Rc::new(MutableVec::new_with_values(res.jigs))));
-        },
+            state.mode.set(HomePageMode::Search(
+                query,
+                Rc::new(MutableVec::new_with_values(res.jigs)),
+            ));
+        }
     };
 }
 

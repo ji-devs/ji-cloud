@@ -1,11 +1,8 @@
-use dominator::{html, Dom, clone};
-use std::rc::Rc;
-use futures_signals::{
-    signal_vec::SignalVecExt,
-    signal::SignalExt
-};
-use components::module::_common::play::prelude::*;
 use super::game::dom::render as render_game;
+use components::module::_common::play::prelude::*;
+use dominator::{clone, html, Dom};
+use futures_signals::signal::SignalExt;
+use std::rc::Rc;
 
 use crate::base::state::*;
 
@@ -20,9 +17,9 @@ pub fn render(state: Rc<Base>) -> Dom {
         .property("slot", "main")
         .child_signal(
             state.all_cards_ended_signal()
-                .map(clone!(state => move |ended| { 
+                .map(clone!(state => move |ended| {
                     if ended {
-                        None 
+                        None
                     } else {
                         Some(render_game(state.clone()))
                     }

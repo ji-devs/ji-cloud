@@ -1,5 +1,5 @@
-use futures_signals::signal::{Mutable, Signal, SignalExt};
 use crate::register::state::{Step, Step1Data};
+use futures_signals::signal::{Mutable, Signal, SignalExt};
 use std::cell::RefCell;
 
 pub struct State {
@@ -24,15 +24,15 @@ impl State {
             step,
             step_1,
             location_json: RefCell::new(None),
-            location_error: Mutable::new(false), 
+            location_error: Mutable::new(false),
             language: RefCell::new(None),
-            language_error: Mutable::new(false), 
+            language_error: Mutable::new(false),
             persona: RefCell::new(None),
-            persona_error: Mutable::new(false), 
+            persona_error: Mutable::new(false),
             organization: RefCell::new(None),
-            organization_error: Mutable::new(false), 
+            organization_error: Mutable::new(false),
             terms: RefCell::new(false),
-            terms_error: Mutable::new(None), 
+            terms_error: Mutable::new(None),
             marketing: RefCell::new(false),
         }
     }
@@ -40,14 +40,9 @@ impl State {
     pub fn terms_error_str(&self) -> impl Signal<Item = &'static str> {
         self.terms_error
             .signal_cloned()
-            .map(|err| {
-                err
-                    .map(|err| err.as_str())
-                    .unwrap_or("")
-            })
+            .map(|err| err.map(|err| err.as_str()).unwrap_or(""))
     }
 }
-
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum TermsError {

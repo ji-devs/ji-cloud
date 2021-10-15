@@ -139,7 +139,6 @@ pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<MainCard<RawData, E>>)
                             })
                     })))
                 },
-                _ => unimplemented!("no audio cards")
             }
         })
     })

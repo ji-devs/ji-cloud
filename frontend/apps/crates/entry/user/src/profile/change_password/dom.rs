@@ -1,15 +1,11 @@
 use std::rc::Rc;
 
-use dominator::{Dom, clone, html};
+use dominator::{clone, html, Dom};
 use utils::events;
 
-use crate::{
-    strings::profile::*,
-    profile::state::ActivePopup
-};
+use crate::{profile::state::ActivePopup, strings::profile::*};
 
 use super::super::state::State;
-
 
 pub fn render(state: Rc<State>) -> Dom {
     html!("user-profile-reset-password-popup", {

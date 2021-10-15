@@ -1,22 +1,10 @@
-use web_sys::{window, ImageData, HtmlImageElement, HtmlCanvasElement, CanvasRenderingContext2d, Blob};
-use awsm_web::canvas::{get_2d_context, Canvas2dContextOptions, CanvasToBlobFuture};
-use crate::{prelude::*, path::image_lib_url};
-use wasm_bindgen::prelude::*;
+use crate::{path::image_lib_url, prelude::*};
+use awsm_web::canvas::{get_2d_context, CanvasToBlobFuture};
+use web_sys::{window, Blob, CanvasRenderingContext2d, HtmlCanvasElement, ImageData};
+
 use wasm_bindgen::JsCast;
-use futures::channel::oneshot::{channel, Receiver, Sender};
-use std::task::{Context, Poll};
-use std::future::Future;
-use std::pin::Pin;
-use shared::{
-    api::{ApiEndpoint, endpoints},
-    error::{EmptyError, MetadataNotFound}, 
-    media::{MediaLibrary, PngImageFile},
-    domain::{
-        image::*,
-        meta::*,
-        jig::module::body::Image
-    },
-};
+
+use shared::{domain::jig::module::body::Image, media::PngImageFile};
 
 pub struct ImageEffect {
     pub src: Image,
@@ -24,7 +12,7 @@ pub struct ImageEffect {
     pub width: usize,
     pub height: usize,
     pub canvas: HtmlCanvasElement,
-    pub ctx: CanvasRenderingContext2d
+    pub ctx: CanvasRenderingContext2d,
 }
 
 impl ImageEffect {
@@ -40,7 +28,7 @@ impl ImageEffect {
 
         let width = img.natural_width() as usize;
         let height = img.natural_height() as usize;
-        let canvas:HtmlCanvasElement = window()
+        let canvas: HtmlCanvasElement = window()
             .unwrap_ji()
             .document()
             .unwrap_ji()
@@ -53,9 +41,11 @@ impl ImageEffect {
 
         let ctx = get_2d_context(&canvas, None).unwrap_ji();
 
-        ctx.draw_image_with_html_image_element(&img, 0.0, 0.0).unwrap_ji();
+        ctx.draw_image_with_html_image_element(&img, 0.0, 0.0)
+            .unwrap_ji();
 
-        let image_data_vec = ctx.get_image_data(0.0, 0.0, width as f64, height as f64)
+        let image_data_vec = ctx
+            .get_image_data(0.0, 0.0, width as f64, height as f64)
             .unwrap_ji()
             .data()
             .to_vec();
@@ -66,14 +56,14 @@ impl ImageEffect {
             width,
             height,
             canvas,
-            ctx
+            ctx,
         }
     }
 
     pub fn do_remove_white(&mut self) {
-        const THRESHHOLD:u8 = 250;
+        const THRESHHOLD: u8 = 250;
 
-        let data = &mut self.image_data_vec; 
+        let data = &mut self.image_data_vec;
 
         let width = self.width;
         let height = self.height;
@@ -90,41 +80,40 @@ impl ImageEffect {
                 }
             }
         }
-
     }
 
     pub fn do_flip_horizontal(&mut self) {
         /*
-    if(dir === "horizontal") {
-        for(let srcCol = 0; srcCol < width; srcCol++) {
-            const dstCol = (width - srcCol);
+        if(dir === "horizontal") {
+            for(let srcCol = 0; srcCol < width; srcCol++) {
+                const dstCol = (width - srcCol);
 
-            for(let row = 0; row < height; row++) {
-                const offset = row * (width * 4) + srcCol * 4;
-                const offsetFlip = row * (width * 4) + dstCol * 4;
-                imageDest.data[offsetFlip + 0] = imageData.data[offset + 0] ;
-                imageDest.data[offsetFlip + 1] = imageData.data[offset + 1] ;
-                imageDest.data[offsetFlip + 2] = imageData.data[offset + 2] ;
-                imageDest.data[offsetFlip + 3] = imageData.data[offset + 3] ;
+                for(let row = 0; row < height; row++) {
+                    const offset = row * (width * 4) + srcCol * 4;
+                    const offsetFlip = row * (width * 4) + dstCol * 4;
+                    imageDest.data[offsetFlip + 0] = imageData.data[offset + 0] ;
+                    imageDest.data[offsetFlip + 1] = imageData.data[offset + 1] ;
+                    imageDest.data[offsetFlip + 2] = imageData.data[offset + 2] ;
+                    imageDest.data[offsetFlip + 3] = imageData.data[offset + 3] ;
+                }
+            }
+        } else {
+            for(let srcRow = 0; srcRow < height; srcRow++) {
+                const dstRow = (height - srcRow);
+
+                for(let col = 0; col < width; col++) {
+                    const offset = srcRow * (width * 4) + col * 4;
+                    const offsetFlip = dstRow * (width * 4) + col * 4;
+                    imageDest.data[offsetFlip + 0] = imageData.data[offset + 0] ;
+                    imageDest.data[offsetFlip + 1] = imageData.data[offset + 1] ;
+                    imageDest.data[offsetFlip + 2] = imageData.data[offset + 2] ;
+                    imageDest.data[offsetFlip + 3] = imageData.data[offset + 3] ;
+                }
             }
         }
-    } else {
-        for(let srcRow = 0; srcRow < height; srcRow++) {
-            const dstRow = (height - srcRow);
-
-            for(let col = 0; col < width; col++) {
-                const offset = srcRow * (width * 4) + col * 4;
-                const offsetFlip = dstRow * (width * 4) + col * 4;
-                imageDest.data[offsetFlip + 0] = imageData.data[offset + 0] ;
-                imageDest.data[offsetFlip + 1] = imageData.data[offset + 1] ;
-                imageDest.data[offsetFlip + 2] = imageData.data[offset + 2] ;
-                imageDest.data[offsetFlip + 3] = imageData.data[offset + 3] ;
-            }
-        }
-    }
-    */
+        */
         /*
-        let data = &mut self.image_data_vec; 
+        let data = &mut self.image_data_vec;
         let Self {width, height, ..} = self;
 
         for src_col in 0..width {
@@ -140,12 +129,17 @@ impl ImageEffect {
             }
         }
         */
-
     }
     pub fn finalize(&self) {
-        let image_data = ImageData::new_with_u8_clamped_array_and_sh(wasm_bindgen::Clamped(&self.image_data_vec), self.width as u32, self.height as u32).unwrap_ji();
+        let image_data = ImageData::new_with_u8_clamped_array_and_sh(
+            wasm_bindgen::Clamped(&self.image_data_vec),
+            self.width as u32,
+            self.height as u32,
+        )
+        .unwrap_ji();
 
-        self.ctx.clear_rect(0.0, 0.0, self.width as f64, self.height as f64);
+        self.ctx
+            .clear_rect(0.0, 0.0, self.width as f64, self.height as f64);
         self.ctx.put_image_data(&image_data, 0.0, 0.0).unwrap_ji();
     }
 
@@ -160,8 +154,4 @@ impl ImageEffect {
         let blob = self.to_blob().await;
         web_sys::Url::create_object_url_with_blob(&blob).unwrap_ji()
     }
-
 }
-
-
-

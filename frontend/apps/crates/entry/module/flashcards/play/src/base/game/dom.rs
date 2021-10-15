@@ -1,29 +1,15 @@
-use dominator::{html, Dom, DomBuilder, clone};
-use gloo_timers::future::TimeoutFuture;
-use wasm_bindgen_futures::spawn_local;
-use web_sys::HtmlElement;
-use std::rc::Rc;
-use super::state::*;
-use components::module::_groups::cards::{
-    lookup::{self, Side},
-    play::card::dom::{render_card, render_card_mixin, CardOptions, Size},
-    edit::{
-        config,
-        state::*
-    },
-};
-use futures_signals::{
-    map_ref,
-    signal::{Mutable, Signal, SignalExt, ReadOnlyMutable}
-};
+use dominator::{clone, html, Dom, DomBuilder};
 
-use shared::domain::jig::module::body::{
-    ThemeId,
-    ModeExt,
-    _groups::cards::{Mode, Step, Card},
-    flashcards::DisplayMode,
+use super::state::*;
+use components::module::_groups::cards::play::card::dom::{
+    render_card, render_card_mixin, CardOptions, Size,
 };
+use futures_signals::signal::SignalExt;
+use std::rc::Rc;
+use web_sys::HtmlElement;
+
 use rand::prelude::*;
+use shared::domain::jig::module::body::flashcards::DisplayMode;
 
 use utils::prelude::*;
 
@@ -55,7 +41,7 @@ pub fn render(state: Rc<Game>) -> Dom {
 
                         children.push(render_card(options));
 
-                        let mut options = CardOptions::new(&other, theme_id, mode, side.negate(), Size::Flashcards);
+                        let options = CardOptions::new(&other, theme_id, mode, side.negate(), Size::Flashcards);
 
                         children.push(render_card_mixin(options, flip_controller(state.clone(), false)));
                     }
@@ -67,25 +53,30 @@ pub fn render(state: Rc<Game>) -> Dom {
         .child(html!("button-icon", {
             .property("icon", "white-circle-blue-arrow")
             .property("slot", "next")
-            .event(clone!(state => move |evt:events::Click| {
+            .event(clone!(state => move |_evt:events::Click| {
                 state.next();
             }))
         }))
     })
 }
 
-fn flip_controller(state: Rc<Game>, initial: bool) -> impl FnOnce(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement> {
+fn flip_controller(
+    state: Rc<Game>,
+    initial: bool,
+) -> impl FnOnce(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement> {
     move |dom| {
-        dom
-            .property_signal("flipped", state.gate.signal().map(move |gate| {
+        dom.property_signal(
+            "flipped",
+            state.gate.signal().map(move |gate| {
                 if gate == Gate::Waiting || gate == Gate::FinishingFlip {
                     initial
                 } else {
                     !initial
                 }
-            }))
-            .event(clone!(state => move |evt:events::Click| {
-                Game::flip(state.clone());
-            }))
+            }),
+        )
+        .event(clone!(state => move |_evt:events::Click| {
+            Game::flip(state.clone());
+        }))
     }
 }

@@ -6,8 +6,8 @@
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
-mod router;
 mod home;
+mod router;
 
 use std::rc::Rc;
 use wasm_bindgen::prelude::*;

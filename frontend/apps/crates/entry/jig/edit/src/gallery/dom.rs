@@ -1,14 +1,14 @@
 use super::{actions, state::*};
 use components::module::_common::thumbnail::ModuleThumbnail;
 use components::page_header::state::PageLinks;
-use components::{page_header, page_footer};
+use components::{page_footer, page_header};
 use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
 use futures_signals::signal_vec::SignalVecExt;
-use utils::jig::published_at_string;
 use std::rc::Rc;
 use strum::IntoEnumIterator;
 use utils::ages::AgeRangeVecExt;
+use utils::jig::published_at_string;
 use utils::prelude::*;
 
 pub struct GalleryDom {}
@@ -112,7 +112,7 @@ impl GalleryDom {
                             .child(ModuleThumbnail::render(
                                 Rc::new(ModuleThumbnail {
                                     jig_id: jig.id.clone(),
-                                    module: jig.jig_data.modules[0].clone(), 
+                                    module: jig.jig_data.modules[0].clone(),
                                     is_jig_fallback: true,
                                 }),
                                 Some("thumbnail")

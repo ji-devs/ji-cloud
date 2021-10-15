@@ -1,22 +1,22 @@
-use once_cell::sync::{Lazy, OnceCell};
+use crate::unwrap::UnwrapJiExt;
+use once_cell::sync::Lazy;
 use rgb::RGBA8;
 use serde::{
     de::{self, Deserializer},
-    Serialize,
     Deserialize,
 };
-use std::{fmt, marker::PhantomData};
-use crate::unwrap::UnwrapJiExt;
 pub use shared::domain::jig::module::body::ThemeId;
+use std::{fmt, marker::PhantomData};
 
 //Set lazily, first time as-needed
 static THEMES: Lazy<Themes> = Lazy::new(|| {
-        let themes:Themes = serde_json::from_str(include_str!("../../../../config/themes.json")).expect_ji("Invalid Themes");
-        
-        themes
+    let themes: Themes = serde_json::from_str(include_str!("../../../../config/themes.json"))
+        .expect_ji("Invalid Themes");
+
+    themes
 });
 
-pub const THEME_IDS:[ThemeId;52] = [
+pub const THEME_IDS: [ThemeId; 52] = [
     ThemeId::Blank,
     ThemeId::Jigzi,
     ThemeId::Chalkboard,
@@ -69,7 +69,6 @@ pub const THEME_IDS:[ThemeId;52] = [
     ThemeId::OurPlanet,
     ThemeId::Theater,
     ThemeId::Travel,
-
 ];
 
 pub trait ThemeIdExt {
@@ -80,19 +79,16 @@ pub trait ThemeIdExt {
     fn as_str_id(self) -> &'static str;
 
     //It's safe to just call this whenever, it will lazily init the config
-    fn map_theme<F, A>(self, mapper:F) -> A
+    fn map_theme<F, A>(self, mapper: F) -> A
     where
         F: FnOnce(&'static Theme) -> A;
-
 
     fn css_var_font_family(self, num: usize) -> String;
 
     fn css_var_color(self, num: usize) -> String;
-
 }
 
 impl ThemeIdExt for ThemeId {
-
     fn css_var_font_family(self, num: usize) -> String {
         format!("var(--theme-{}-font-family-{})", self.as_str_id(), num)
     }
@@ -167,17 +163,14 @@ impl ThemeIdExt for ThemeId {
     }
 
     //It's safe to just call this whenever, it will lazily init the config
-    fn map_theme<F, A>(self, mapper:F) -> A 
+    fn map_theme<F, A>(self, mapper: F) -> A
     where
-        F: FnOnce(&'static Theme) -> A
+        F: FnOnce(&'static Theme) -> A,
     {
-        let theme = THEMES
-            .get(self.as_str_id())
-            .unwrap_ji();
+        let theme = THEMES.get(self.as_str_id()).unwrap_ji();
 
         mapper(theme)
     }
-
 }
 
 //These are for storing the config statically
@@ -196,7 +189,7 @@ struct Themes {
 #[derive(Debug, Deserialize)]
 pub struct Theme {
     pub label: ThemeLabel,
-    
+
     pub id: String,
 
     #[serde(rename(deserialize = "fontFamilies"))]
@@ -224,18 +217,17 @@ pub struct TextEditor {
     pub p1: TextEditorVariant,
     pub p2: TextEditorVariant,
     #[serde(rename(deserialize = "fontList"))]
-    pub font_list: Vec<String>
+    pub font_list: Vec<String>,
 }
-
 
 #[derive(Debug, Deserialize)]
 pub struct TextEditorVariant {
     #[serde(rename(deserialize = "fontFamily"))]
-    pub font_family: FontFamilyMapping, 
+    pub font_family: FontFamilyMapping,
     #[serde(rename(deserialize = "fontColor"))]
-    pub font_color: ColorMapping, 
+    pub font_color: ColorMapping,
     #[serde(rename(deserialize = "fontSize"))]
-    pub font_size: f64, 
+    pub font_size: f64,
 }
 
 #[derive(Debug, Deserialize)]
@@ -256,8 +248,6 @@ pub struct Cards {
 
 pub type FontFamilyMapping = usize;
 pub type ColorMapping = usize;
-
-
 
 //Deserializes the colors from Vec<String> to Vec<RGBA8>
 //currently assumes all the strings are in the format 0xRRGGBB
@@ -301,5 +291,3 @@ where
 
     deserializer.deserialize_any(ColorVec(PhantomData))
 }
-
-

@@ -1,6 +1,10 @@
-use futures_signals::{signal::Mutable, signal_vec::MutableVec};
-use shared::domain::{image::ImageId, meta::{AffiliationId, AgeRangeId, MetadataResponse, SubjectId}, user::{PatchProfileRequest, UserProfile}};
 use dominator_helpers::futures::AsyncLoader;
+use futures_signals::{signal::Mutable, signal_vec::MutableVec};
+use shared::domain::{
+    image::ImageId,
+    meta::{AffiliationId, AgeRangeId, MetadataResponse, SubjectId},
+    user::{PatchProfileRequest, UserProfile},
+};
 use uuid::Uuid;
 
 pub struct State {
@@ -12,7 +16,7 @@ pub struct State {
 
 impl State {
     pub fn new() -> Self {
-        Self { 
+        Self {
             user: ProfilePageUser::empty(),
             active_popup: Mutable::new(ActivePopup::None),
             loader: AsyncLoader::new(),
@@ -21,14 +25,13 @@ impl State {
     }
 }
 
-
 #[derive(Clone)]
 pub enum ActivePopup {
     None,
     ResetPassword,
     Affiliation,
     Subjects,
-    Age
+    Age,
 }
 
 #[derive(Debug)]
@@ -68,7 +71,6 @@ impl ProfilePageUser {
             age_ranges: MutableVec::new(),
             affiliations: MutableVec::new(),
             persona: Mutable::new(None),
-
         }
     }
 
@@ -110,5 +112,4 @@ impl ProfilePageUser {
             ..Default::default()
         }
     }
-
 }

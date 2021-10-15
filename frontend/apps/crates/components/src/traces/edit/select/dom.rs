@@ -1,16 +1,17 @@
 use dominator::{clone, html, Dom};
 use std::rc::Rc;
-use utils::{
-    math::bounds::BoundsF64,
-    resize::{resize_info_signal, ResizeInfo},
-};
-use shared::domain::jig::module::body::Transform;
-use super::{select_box::*, trace::state::*};
+use utils::resize::{resize_info_signal, ResizeInfo};
+
+use super::trace::state::*;
 use crate::traces::{
     edit::state::*,
-    svg::{self, TransformSize, ShapeStyleVar, ShapeStyle, ShapeStyleState, SvgCallbacks},
+    svg::{self, ShapeStyle, ShapeStyleState, ShapeStyleVar, SvgCallbacks, TransformSize},
 };
-use futures_signals::{map_ref, signal::{Signal, SignalExt}, signal_vec::{SignalVec, SignalVecExt}};
+use futures_signals::{
+    map_ref,
+    signal::{Signal, SignalExt},
+    signal_vec::SignalVecExt,
+};
 
 use shared::domain::jig::module::body::_groups::design::TraceShape;
 use web_sys::SvgElement;
@@ -21,7 +22,7 @@ impl TracesEdit {
             resize_info_signal().switch_signal_vec(clone!(state => move |resize_info| {
                 state.list
                     .signal_vec_cloned()
-                    .map(clone!(resize_info, state => move |trace| {
+                    .map(clone!(resize_info => move |trace| {
                         let shape_style = ShapeStyleVar::new_static(ShapeStyle::new_mask());
                         let callbacks = SvgCallbacks::new(
                             None::<fn()>,
@@ -32,10 +33,8 @@ impl TracesEdit {
                     }))
             }));
 
-
-        let draw_children = 
-            resize_info_signal()
-            .switch_signal_vec(clone!(state => move |resize_info| {
+        let draw_children =
+            resize_info_signal().switch_signal_vec(clone!(state => move |resize_info| {
                 state.list
                     .signal_vec_cloned()
                     .enumerate()
@@ -73,11 +72,11 @@ impl TracesEdit {
                                     state.select_index(index);
                                 }
                             })),
-                            Some(clone!(trace, resize_info => move |elem:SvgElement| {
+                            Some(clone!(trace => move |elem:SvgElement| {
                                 *trace.select_box.elem.borrow_mut() = Some(elem);
                             })),
-                            Some(clone!(trace, resize_info => move |_elem| {
-                                *trace.select_box.elem.borrow_mut() = None; 
+                            Some(clone!(trace => move |_elem| {
+                                *trace.select_box.elem.borrow_mut() = None;
                                 trace.select_box.bounds.set(None);
                             })),
                         );
@@ -103,10 +102,8 @@ impl TracesEdit {
                     clone!(state => move |x, y| {
                         TracesEdit::start_draw(state.clone(), None, Some((x, y)));
                     }),
-                    clone!(state => move |_x, _y| {
-                    }),
-                    clone!(state => move |_x, _y| {
-                    }),
+                    |_x, _y| { },
+                    |_x, _y| { },
                 )
             )
             .children_signal_vec(menu_children)
@@ -119,24 +116,23 @@ fn render_trace<S>(
     resize_info: &ResizeInfo,
     trace: &EditSelectTrace,
     callbacks: Rc<SvgCallbacks>,
-) -> Dom 
+) -> Dom
 where
-      S: Signal<Item = ShapeStyle> + 'static
-
+    S: Signal<Item = ShapeStyle> + 'static,
 {
     let trace_size = trace.size.clone();
 
-    let transform_size = Some(TransformSize::Dynamic(trace.select_box.transform_override.signal_cloned().map(move |t| {
-        (t, trace_size)
-    })));
+    let transform_size = Some(TransformSize::Dynamic(
+        trace
+            .select_box
+            .transform_override
+            .signal_cloned()
+            .map(move |t| (t, trace_size)),
+    ));
     match trace.shape {
-        TraceShape::Path(ref path) => svg::render_path(
-            shape_style, 
-            &resize_info, 
-            transform_size, 
-            &path, 
-            callbacks
-        ),
+        TraceShape::Path(ref path) => {
+            svg::render_path(shape_style, &resize_info, transform_size, &path, callbacks)
+        }
 
         TraceShape::Rect(width, height) => svg::render_rect(
             shape_style,

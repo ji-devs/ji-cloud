@@ -1,18 +1,28 @@
 use std::rc::Rc;
 
-use dominator::{Dom, clone, html, with_node};
+use dominator::{clone, html, with_node, Dom};
 use futures_signals::signal::{Signal, SignalExt};
 use shared::config::JIG_PLAYER_SESSION_VALID_DURATION_SECS;
-use utils::{clipboard, events, routes::{KidsRoute, Route}, unwrap::UnwrapJiExt};
+use utils::{
+    clipboard, events,
+    routes::{KidsRoute, Route},
+    unwrap::UnwrapJiExt,
+};
 
-use crate::{animation::fade::{Fade, FadeKind}, tooltip::{
-    state::{MoveStrategy, Anchor, ContentAnchor, State as TooltipState, TooltipBubble, TooltipData, TooltipTarget},
-    dom::render as TooltipDom
-}};
+use crate::{
+    animation::fade::{Fade, FadeKind},
+    tooltip::{
+        dom::render as TooltipDom,
+        state::{
+            Anchor, ContentAnchor, MoveStrategy, State as TooltipState, TooltipBubble, TooltipData,
+            TooltipTarget,
+        },
+    },
+};
 
 use super::{
-    state::{ActivePopup, State},
     actions,
+    state::{ActivePopup, State},
 };
 
 const STR_BACK: &'static str = "Back";
@@ -224,7 +234,7 @@ fn render_share_embed(state: Rc<State>) -> Dom {
                                         state.copied_embed.set(false);
                                     }))
                                 );
-        
+
                                 Some(html!("div", {
                                     .apply(|dom| fade.render(dom))
                                     .child({
@@ -235,9 +245,9 @@ fn render_share_embed(state: Rc<State>) -> Dom {
                                             body: String::from(STR_COPIED),
                                             max_width: None,
                                         }));
-        
+
                                         let target = TooltipTarget::Element(elem.clone(), MoveStrategy::Track);
-        
+
                                         TooltipDom(Rc::new(TooltipState::new(target, tooltip)))
                                     })
                                 }))

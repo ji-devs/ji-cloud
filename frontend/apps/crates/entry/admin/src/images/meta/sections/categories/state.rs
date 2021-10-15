@@ -1,15 +1,8 @@
 use crate::images::meta::{
-    state::{State as MetaState, MutableImage},
-    sections::common::categories::MutableCategory
+    sections::common::categories::MutableCategory,
+    state::{MutableImage, State as MetaState},
 };
-use std::{collections::HashSet, rc::Rc};
-use futures_signals::{
-    map_ref,
-    signal_vec::{MutableVec, SignalVecExt, SignalVec},
-    signal::{Mutable, Signal, SignalExt}
-};
-use shared::domain::category::*;
-use dominator::clone;
+use std::rc::Rc;
 
 pub struct State {
     pub meta: Rc<MetaState>,
@@ -17,9 +10,12 @@ pub struct State {
     pub categories: Rc<Vec<Rc<MutableCategory>>>,
 }
 
-
 impl State {
-    pub fn new(meta: Rc<MetaState>, image: Rc<MutableImage>, categories: Rc<Vec<Rc<MutableCategory>>>) -> Self {
+    pub fn new(
+        meta: Rc<MetaState>,
+        image: Rc<MutableImage>,
+        categories: Rc<Vec<Rc<MutableCategory>>>,
+    ) -> Self {
         Self {
             meta,
             image,
@@ -27,5 +23,3 @@ impl State {
         }
     }
 }
-
-

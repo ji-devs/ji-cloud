@@ -1,26 +1,26 @@
-use std::str::FromStr;
-use std::collections::BTreeMap;
-use dominator_helpers::futures::AsyncLoader;
-use uuid::Uuid;
-use std::collections::HashMap;
-use super::{actions::AsStringExt, db_interface};
 use super::actions::EnumOptionsExt;
-use url::Url;
-use web_sys::{HtmlDialogElement, HtmlOptionElement, HtmlOptionsCollection};
-use std::rc::Rc;
-use std::clone::Clone;
-use serde_derive::{Deserialize, Serialize};
+use super::{actions::AsStringExt, db_interface};
+use dominator::clone;
+use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::Mutable;
 use futures_signals::signal_vec::MutableVec;
-use strum_macros::Display;
-use std::cmp::Ord;
-use wasm_bindgen::{JsCast, UnwrapThrowExt};
+use serde_derive::{Deserialize, Serialize};
 use shared::domain::locale::{Bundle, Entry, EntryStatus, ItemKind, UpdateEntryRequest};
-use dominator::clone;
+use std::clone::Clone;
+use std::cmp::Ord;
+use std::collections::BTreeMap;
+use std::collections::HashMap;
+use std::rc::Rc;
+use std::str::FromStr;
+use strum_macros::Display;
+use url::Url;
+use uuid::Uuid;
+use wasm_bindgen::{JsCast, UnwrapThrowExt};
+use web_sys::{HtmlDialogElement, HtmlOptionElement, HtmlOptionsCollection};
 
 pub struct LoaderState {
     pub loader: AsyncLoader,
-    pub inner: Mutable<Option<Rc<State>>> 
+    pub inner: Mutable<Option<Rc<State>>>,
 }
 
 impl LoaderState {
@@ -32,10 +32,7 @@ impl LoaderState {
             inner.set(Some(Rc::new(State::new().await)));
         }));
 
-        Self {
-            loader,
-            inner
-        }
+        Self { loader, inner }
     }
 }
 
@@ -64,16 +61,13 @@ impl State {
             .map(|bundle| (bundle.clone(), true))
             .collect();
 
-        let item_kind_options: Vec<ItemKind> = db_interface::get_item_kind()
-            .await;
+        let item_kind_options: Vec<ItemKind> = db_interface::get_item_kind().await;
 
         let mut item_kind_filter: HashMap<Option<Uuid>, bool> = item_kind_options
             .iter()
             .map(|item_kind| (Some(item_kind.id), true))
             .collect();
         item_kind_filter.insert(None, true);
-
-
 
         let visible_bundles: Vec<Uuid> = bundles
             .iter()
@@ -82,10 +76,17 @@ impl State {
             .collect();
         let entries = db_interface::get_entries(visible_bundles).await;
 
-        let section_options = Self::generate_options(&entries, |t| t.section.clone().unwrap_or_default());
-        let status_options = EntryStatus::options().into_iter().map(|s| (s, true)).collect::<BTreeMap<EntryStatus, bool>>();
+        let section_options =
+            Self::generate_options(&entries, |t| t.section.clone().unwrap_or_default());
+        let status_options = EntryStatus::options()
+            .into_iter()
+            .map(|s| (s, true))
+            .collect::<BTreeMap<EntryStatus, bool>>();
 
-        let entries = entries.iter().map(|i| Rc::new(Mutable::new(i.clone()))).collect();
+        let entries = entries
+            .iter()
+            .map(|i| Rc::new(Mutable::new(i.clone())))
+            .collect();
         let entries = MutableVec::new_with_values(entries);
 
         let mut columns = BTreeMap::new();
@@ -120,7 +121,6 @@ impl State {
             Column::Bundle,
         ]));
 
-
         Self {
             bundles: Mutable::new(bundles),
             entries,
@@ -143,7 +143,14 @@ impl State {
     }
 
     pub async fn add_entry(state: Rc<State>) {
-        let bundle_id = state.bundles.lock_ref().iter().find(|(_, selected)| **selected).unwrap_throw().0.id;
+        let bundle_id = state
+            .bundles
+            .lock_ref()
+            .iter()
+            .find(|(_, selected)| **selected)
+            .unwrap_throw()
+            .0
+            .id;
         let entry = db_interface::create_entry(bundle_id).await;
         let mut vec = state.entries.lock_mut();
         vec.push_cloned(Rc::new(Mutable::new(entry)));
@@ -162,7 +169,10 @@ impl State {
     pub async fn remove_entry(&self, entry_id: u32) {
         db_interface::delete_entry(entry_id).await;
         let mut vec = self.entries.lock_mut();
-        let index = vec.iter().position(|i| i.lock_ref().id == entry_id).unwrap();
+        let index = vec
+            .iter()
+            .position(|i| i.lock_ref().id == entry_id)
+            .unwrap();
         vec.remove(index);
     }
 
@@ -179,20 +189,35 @@ impl State {
         }
     }
 
-    // filter change might be combined 
-    pub fn filter_change<T>(options: &HtmlOptionsCollection, map: &mut BTreeMap<T, bool> ) where T: FromStr + Ord {
+    // filter change might be combined
+    pub fn filter_change<T>(options: &HtmlOptionsCollection, map: &mut BTreeMap<T, bool>)
+    where
+        T: FromStr + Ord,
+    {
         for i in 0..options.length() {
-            let option: HtmlOptionElement = options.get_with_index(i).unwrap().dyn_into::<HtmlOptionElement>().unwrap();
+            let option: HtmlOptionElement = options
+                .get_with_index(i)
+                .unwrap()
+                .dyn_into::<HtmlOptionElement>()
+                .unwrap();
 
-            let parsed = T::from_str(&option.value()).unwrap_or_else(|_| panic!("Invalid option in select"));
+            let parsed =
+                T::from_str(&option.value()).unwrap_or_else(|_| panic!("Invalid option in select"));
 
             map.insert(parsed, option.selected());
         }
     }
 
-    pub fn filter_change_str_ext<T>(options: &HtmlOptionsCollection, map: &mut BTreeMap<T, bool> ) where T: AsStringExt + Ord {
+    pub fn filter_change_str_ext<T>(options: &HtmlOptionsCollection, map: &mut BTreeMap<T, bool>)
+    where
+        T: AsStringExt + Ord,
+    {
         for i in 0..options.length() {
-            let option: HtmlOptionElement = options.get_with_index(i).unwrap().dyn_into::<HtmlOptionElement>().unwrap();
+            let option: HtmlOptionElement = options
+                .get_with_index(i)
+                .unwrap()
+                .dyn_into::<HtmlOptionElement>()
+                .unwrap();
 
             let parsed = T::from_str(&option.value());
 
@@ -203,39 +228,58 @@ impl State {
     pub async fn selected_bundles_change(&self, options: &HtmlOptionsCollection) {
         let mut visible_bundles = Vec::new();
         for i in 0..options.length() {
-            let option: HtmlOptionElement = options.get_with_index(i).unwrap().dyn_into::<HtmlOptionElement>().unwrap();
+            let option: HtmlOptionElement = options
+                .get_with_index(i)
+                .unwrap()
+                .dyn_into::<HtmlOptionElement>()
+                .unwrap();
             let uuid = Uuid::parse_str(&option.value()).unwrap_throw();
             let selected = option.selected();
             let mut bundles = self.bundles.lock_mut();
-            let bundle = bundles.iter().find(|(bundle, _)| bundle.id == uuid).unwrap_throw().0.clone();
+            let bundle = bundles
+                .iter()
+                .find(|(bundle, _)| bundle.id == uuid)
+                .unwrap_throw()
+                .0
+                .clone();
             bundles.insert(bundle, selected);
             if selected {
                 visible_bundles.push(uuid);
             }
-        };
+        }
 
-        let entries: Vec<Rc<Mutable<DisplayableEntry>>> = db_interface::get_entries(visible_bundles)
-            .await
-            .into_iter()
-            .map(|e| Rc::new(Mutable::new(e)))
-            .collect();
+        let entries: Vec<Rc<Mutable<DisplayableEntry>>> =
+            db_interface::get_entries(visible_bundles)
+                .await
+                .into_iter()
+                .map(|e| Rc::new(Mutable::new(e)))
+                .collect();
         self.entries.lock_mut().replace_cloned(entries);
     }
 
     pub fn regenerate_section_options(&self) {
-        let entries: Vec<DisplayableEntry> = self.entries.lock_ref().iter().map(|t| t.lock_ref().clone()).collect();
-        let section_options = Self::generate_options(&entries, |t| t.section.clone().unwrap_or_default());
+        let entries: Vec<DisplayableEntry> = self
+            .entries
+            .lock_ref()
+            .iter()
+            .map(|t| t.lock_ref().clone())
+            .collect();
+        let section_options =
+            Self::generate_options(&entries, |t| t.section.clone().unwrap_or_default());
         let mut lock = self.section_options.lock_mut();
         *lock = section_options;
     }
 
-    fn generate_options<T>(entry_vec: &Vec<DisplayableEntry>, f: fn(&DisplayableEntry) -> T) -> BTreeMap<T, bool>
-        where T: Ord
+    fn generate_options<T>(
+        entry_vec: &Vec<DisplayableEntry>,
+        f: fn(&DisplayableEntry) -> T,
+    ) -> BTreeMap<T, bool>
+    where
+        T: Ord,
     {
         entry_vec.iter().map(|t| (f(t), true)).collect()
     }
 }
-
 
 pub type Section = String;
 
@@ -280,7 +324,6 @@ impl From<Entry> for DisplayableEntry {
     }
 }
 
-
 impl From<DisplayableEntry> for Entry {
     fn from(displayable_entry: DisplayableEntry) -> Self {
         Entry {
@@ -304,7 +347,6 @@ impl From<DisplayableEntry> for Entry {
         }
     }
 }
-
 
 impl From<DisplayableEntry> for UpdateEntryRequest {
     fn from(entry: DisplayableEntry) -> Self {
@@ -352,7 +394,7 @@ pub enum SortOrder {
     Asc,
 
     #[strum(serialize = "desc")]
-    Desc
+    Desc,
 }
 
 #[derive(Clone, PartialEq, Display)]

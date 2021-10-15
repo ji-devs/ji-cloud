@@ -1,11 +1,8 @@
-use dominator::{html, Dom, clone};
-use utils::prelude::*;
 use super::state::*;
+use dominator::{clone, html, Dom};
+use futures_signals::signal_vec::SignalVecExt;
 use std::rc::Rc;
-use futures_signals::{
-    signal::SignalExt,
-    signal_vec::SignalVecExt
-};
+use utils::prelude::*;
 
 impl Sidebar {
     pub fn render(state: Rc<Self>) -> Dom {
@@ -24,7 +21,7 @@ impl SidebarItem {
             .property("id", state.id)
             .property("locked", state.locked)
             .property("selected", state.selected)
-            .event(clone!(state => move |evt:events::Click| {
+            .event(clone!(state => move |_evt:events::Click| {
                 state.on_click();
             }))
         })

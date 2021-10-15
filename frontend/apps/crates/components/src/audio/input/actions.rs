@@ -1,6 +1,6 @@
 use super::{
     super::upload::{upload_audio, UploadError},
-    state::{AudioInputMode, AudioInput}
+    state::{AudioInput, AudioInputMode},
 };
 use shared::{
     api::{endpoints, ApiEndpoint},
@@ -64,29 +64,27 @@ pub async fn file_change(state: Rc<AudioInput>, file: File) {
             Some(&*state.aborter.borrow()),
             None,
         )
-        .await {
+        .await
+        {
             Ok(Ok(resp)) => {
                 let CreateResponse { id } = resp;
                 match upload_audio(id, lib, &file, Some(&*state.aborter.borrow())).await {
                     Err(err) => Some(err),
                     Ok(_) => {
-                        state.set_audio(Some(Audio {
-                            id,
-                            lib
-                        }));
+                        state.set_audio(Some(Audio { id, lib }));
                         None
                     }
                 }
             }
             Err(true) => {
-                // Not really and error, it's an abort 
+                // Not really and error, it's an abort
                 log::info!("Cancelled uploading audio file");
                 Some(UploadError::Other(awsm_web::errors::Error::Empty))
             }
             _ => {
                 log::error!("Error uploading audio file");
                 Some(UploadError::Other(awsm_web::errors::Error::Empty))
-            },
+            }
         }
     };
 
@@ -94,7 +92,6 @@ pub async fn file_change(state: Rc<AudioInput>, file: File) {
         state.mode.set(AudioInputMode::Empty);
     }
 }
-
 
 pub fn cancel_upload(state: Rc<AudioInput>) {
     state.aborter.borrow().abort();

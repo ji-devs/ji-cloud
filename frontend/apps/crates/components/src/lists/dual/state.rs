@@ -39,8 +39,6 @@ impl Error {
     }
 }
 
-type IsPlaceholder = bool;
-
 impl State {
     pub fn new(opts: Options, callbacks: Callbacks) -> Self {
         Self {

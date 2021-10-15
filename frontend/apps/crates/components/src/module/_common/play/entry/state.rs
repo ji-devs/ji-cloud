@@ -21,7 +21,6 @@ use std::marker::PhantomData;
 use std::rc::Rc;
 use utils::languages::Language;
 use utils::{iframe::*, prelude::*};
-use uuid::Uuid;
 
 pub struct GenericState<RawData, Mode, Step, Base>
 where
@@ -76,7 +75,7 @@ where
             }
         };
 
-        let is_draft:bool = utils::routes::is_param_bool("draft");
+        let is_draft: bool = utils::routes::is_param_bool("draft");
 
         let _self = Rc::new(Self {
             opts,
@@ -211,7 +210,6 @@ where
 
         _self
     }
-
 }
 
 #[derive(Debug, Clone)]
@@ -235,7 +233,6 @@ impl<RawData> StateOpts<RawData> {
             skip_play: false,
         }
     }
-        
 }
 
 pub type RawDirect = bool;
@@ -282,18 +279,17 @@ pub enum InitSource {
     IframeData,
 }
 
-
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum ModulePlayPhase {
     Init,
     Playing,
-    Ending(Option<ModuleEnding>)
+    Ending(Option<ModuleEnding>),
 }
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum ModuleEnding {
     Positive,
     Negative,
-    Next
+    Next,
 }
 
 pub struct InitFromRawArgs<RawData, Mode, Step>

@@ -1,10 +1,8 @@
-use crate::state::Base;
-use std::rc::Rc;
-use std::cell::RefCell;
+use futures_signals::signal::Mutable;
 use rand::prelude::*;
 use shared::domain::jig::module::body::matching::Content;
-use futures_signals::signal::Mutable;
-use components::module::_groups::cards::lookup::Side;
+use std::cell::RefCell;
+use std::rc::Rc;
 
 pub struct Settings {
     pub rng: Rc<RefCell<ThreadRng>>,
@@ -24,7 +22,11 @@ impl Settings {
             n_choices: Mutable::new(settings.n_choices),
             swap: Mutable::new(settings.swap),
             n_rounds: Mutable::new(settings.n_rounds),
-            time_limit: Mutable::new(settings.time_limit.unwrap_or(crate::config::DEFAULT_TIME_LIMIT)),
+            time_limit: Mutable::new(
+                settings
+                    .time_limit
+                    .unwrap_or(crate::config::DEFAULT_TIME_LIMIT),
+            ),
             has_time_limit: Mutable::new(settings.time_limit.is_some()),
         }
     }

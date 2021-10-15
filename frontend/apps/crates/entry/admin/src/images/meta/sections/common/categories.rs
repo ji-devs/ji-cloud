@@ -1,7 +1,7 @@
-use dominator::{html, clone, Dom};
+use dominator::{html, Dom};
 use std::rc::Rc;
-use wasm_bindgen::prelude::*;
-use futures_signals::signal::{Signal, Mutable, SignalExt};
+
+use futures_signals::signal::{Mutable, Signal, SignalExt};
 use shared::domain::category::*;
 use std::collections::HashSet;
 
@@ -9,31 +9,36 @@ pub struct MutableCategory {
     pub id: CategoryId,
     pub name: String,
     pub expanded: Mutable<bool>,
-    pub children: Vec<Rc<MutableCategory>>
+    pub children: Vec<Rc<MutableCategory>>,
 }
 impl From<Category> for MutableCategory {
-    fn from(cat:Category) -> Self {
+    fn from(cat: Category) -> Self {
         Self {
             id: cat.id,
             name: cat.name,
             //only used in select view, but w/e
             expanded: Mutable::new(false),
-            children: cat.children
+            children: cat
+                .children
                 .into_iter()
                 .map(|child| Rc::new(child.into()))
-                .collect()
+                .collect(),
         }
     }
 }
-    
-pub fn category_selected(categories: Mutable<HashSet<CategoryId>>, cat: Rc<MutableCategory>) -> impl Signal<Item = bool> {
-    categories.signal_ref(move |lookup| {
-        lookup.contains(&cat.id)
-    })
+
+pub fn category_selected(
+    categories: Mutable<HashSet<CategoryId>>,
+    cat: Rc<MutableCategory>,
+) -> impl Signal<Item = bool> {
+    categories.signal_ref(move |lookup| lookup.contains(&cat.id))
 }
 
-pub fn category_descendents_selected(categories: Mutable<HashSet<CategoryId>>, cat: Rc<MutableCategory>) -> impl Signal<Item = bool> {
-    fn check(lookup: &HashSet<CategoryId>, cat:&Rc<MutableCategory>) -> bool {
+pub fn category_descendents_selected(
+    categories: Mutable<HashSet<CategoryId>>,
+    cat: Rc<MutableCategory>,
+) -> impl Signal<Item = bool> {
+    fn check(lookup: &HashSet<CategoryId>, cat: &Rc<MutableCategory>) -> bool {
         if lookup.contains(&cat.id) {
             true
         } else {
@@ -41,12 +46,14 @@ pub fn category_descendents_selected(categories: Mutable<HashSet<CategoryId>>, c
         }
     }
 
-    categories.signal_ref(move |lookup| {
-        check(&lookup, &cat)
-    })
+    categories.signal_ref(move |lookup| check(&lookup, &cat))
 }
 
-pub fn render_report(categories: Mutable<HashSet<CategoryId>>, parent: Option<Rc<MutableCategory>>, cat: Rc<MutableCategory>) -> Dom {
+pub fn render_report(
+    categories: Mutable<HashSet<CategoryId>>,
+    parent: Option<Rc<MutableCategory>>,
+    cat: Rc<MutableCategory>,
+) -> Dom {
     html!("report-tree", {
         .style_signal("display", category_descendents_selected(categories.clone(), cat.clone()).map(|selected| {
             if selected { "block" } else { "none" }

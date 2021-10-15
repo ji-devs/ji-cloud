@@ -12,7 +12,9 @@ pub async fn load_module_kind(
     module_id: ModuleId,
     module_kind: Rc<RefCell<Option<ModuleKind>>>,
 ) {
-    let req = ModuleGetQuery { q: String::from("unique") };
+    let req = ModuleGetQuery {
+        q: String::from("unique"),
+    };
 
     //TODO - API to just get module kind, so no need to load entire body here
     let path = GetDraft::PATH

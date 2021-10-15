@@ -1,8 +1,11 @@
 use std::rc::Rc;
 
-use dominator::{Dom, clone, html};
+use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
-use utils::{events, routes::{JigRoute, Route}};
+use utils::{
+    events,
+    routes::{JigRoute, Route},
+};
 
 use super::state::PlayerPopup;
 

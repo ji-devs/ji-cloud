@@ -1,29 +1,14 @@
-use dominator::{html, Dom, clone};
+use dominator::{clone, html, Dom};
 use std::rc::Rc;
-use crate::{
-    state::*,
-    settings::state::*
-};
+
 use super::state::*;
-use components::module::_groups::cards::{
-    lookup::{self, Side},
-    play::card::dom::{render_card, CardOptions, Size},
-    edit::{
-        config,
-        state::*
-    },
-};
+use components::module::_groups::cards::play::card::dom::{render_card, CardOptions, Size};
 use futures_signals::{
     map_ref,
-    signal::{Signal, SignalExt, ReadOnlyMutable},
+    signal::{Signal, SignalExt},
     signal_vec::{SignalVec, SignalVecExt},
 };
 
-use shared::domain::jig::module::body::{
-    ThemeId,
-    ModeExt,
-    _groups::cards::{Mode, Step, Card}
-};
 use rand::prelude::*;
 
 use utils::prelude::*;
@@ -37,7 +22,6 @@ pub fn render(state: Rc<MainSettings>) -> Dom {
 }
 
 fn render_top_card(state: Rc<MainSettings>) -> impl Signal<Item = Dom> {
-
     let sig = map_ref! {
         //theme_id won't have actually changed here, but w/e
         let theme_id = state.base.theme_id.signal_cloned(),
@@ -47,25 +31,23 @@ fn render_top_card(state: Rc<MainSettings>) -> impl Signal<Item = Dom> {
 
     let mode = state.base.mode.clone();
 
-    sig
-        .map(move |(theme_id, card, side)| {
-            let mut options = CardOptions::new(&card, theme_id, mode, side, Size::QuizTarget);
-            options.flipped = true;
-            options.slot = Some("target");
+    sig.map(move |(theme_id, card, side)| {
+        let mut options = CardOptions::new(&card, theme_id, mode, side, Size::QuizTarget);
+        options.flipped = true;
+        options.slot = Some("target");
 
-            render_card(options)
-        })
+        render_card(options)
+    })
 }
 
 fn render_choices(state: Rc<MainSettings>) -> impl SignalVec<Item = Dom> {
-
     state.choices_signal()
         .map_signal(clone!(state => move |choice| {
             let mode = state.base.mode.clone();
             //theme_id won't have actually changed here, but w/e
             state.base.theme_id.signal_cloned()
                 .map(move |theme_id| {
-                    let (card, side, is_correct) = &choice;
+                    let (card, side, _is_correct) = &choice;
                     let mut options = CardOptions::new(&card, theme_id, mode, *side, Size::QuizOption);
                     options.flipped = true;
                     options.slot = Some("options");

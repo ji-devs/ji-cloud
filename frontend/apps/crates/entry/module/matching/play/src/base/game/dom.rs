@@ -1,34 +1,13 @@
-use dominator::{html, Dom, DomBuilder, clone};
-use gloo_timers::future::TimeoutFuture;
-use wasm_bindgen_futures::spawn_local;
-use web_sys::HtmlElement;
-use std::rc::Rc;
+use dominator::{html, Dom};
+
 use super::{
+    card::dom::{render_bottom, render_drag, render_top},
     state::*,
-    card::{
-        state::CardChoice,
-        dom::{render_top, render_bottom, render_drag}
-    }
 };
+use std::rc::Rc;
 
-use components::module::_groups::cards::{
-    lookup::{self, Side},
-    play::card::dom::{render_card, render_card_mixin, CardOptions, render_empty_card, render_empty_card_mixin, EmptyCardOptions, EmptyKind, Size},
-    edit::{
-        config,
-        state::*
-    },
-};
-use futures_signals::{
-    map_ref,
-    signal::{Mutable, Signal, SignalExt, ReadOnlyMutable}
-};
+use futures_signals::signal::SignalExt;
 
-use shared::domain::jig::module::body::{
-    ThemeId,
-    ModeExt,
-    _groups::cards::{Mode, Step, Card},
-};
 use rand::prelude::*;
 
 use utils::prelude::*;
@@ -38,10 +17,10 @@ pub fn render(state: Rc<Game>) -> Dom {
         .property("slot", "main")
         .children_signal_vec(
             state.current.signal_cloned()
-                .map(clone!(state => move |current| {
+                .map(|current| {
 
                     let mut children:Vec<Dom> = Vec::new();
-                    
+
                     if let Some(current) = current {
                         for top in current.top.iter() {
                             children.push(render_top(top.clone()));
@@ -62,7 +41,7 @@ pub fn render(state: Rc<Game>) -> Dom {
                     }
 
                     children
-                }))
+                })
                 .to_signal_vec()
         )
     })

@@ -1,8 +1,11 @@
-use futures_signals::{map_ref, signal::{Mutable, ReadOnlyMutable, Signal}};
+use futures_signals::{
+    map_ref,
+    signal::{Mutable, Signal},
+};
 use shared::domain::jig::module::body::Transform;
-use utils::{drag::Drag, math::{BoundsF64, PointI32}};
 use std::rc::Rc;
-use dominator::clone;
+use utils::{drag::Drag, math::BoundsF64};
+
 use std::cell::RefCell;
 
 pub struct SelectBox {

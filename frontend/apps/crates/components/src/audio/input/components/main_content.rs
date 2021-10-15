@@ -7,7 +7,7 @@ use utils::events;
 use wasm_bindgen_futures::spawn_local;
 
 use super::{super::actions::file_change, player};
-use crate::audio::input::state::{AudioInputAddMethod, AudioInputMode, AudioInput};
+use crate::audio::input::state::{AudioInput, AudioInputAddMethod, AudioInputMode};
 
 pub fn render(state: Rc<AudioInput>, mode: AudioInputMode, add_method: AudioInputAddMethod) -> Dom {
     match mode {

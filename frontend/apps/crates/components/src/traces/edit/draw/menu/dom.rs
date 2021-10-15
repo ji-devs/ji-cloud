@@ -16,7 +16,6 @@ use super::{super::state::*, state::*};
 */
 
 pub fn render_draw_menu(state: Rc<Draw>, menu: Menu, resize_info: &ResizeInfo) -> Dom {
-
     html!("overlay-container", {
         .child(html!("overlay-drag", {
             .property("target", menu.get_dom_rect(&resize_info))

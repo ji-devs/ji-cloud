@@ -1,18 +1,18 @@
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Debug)]
 pub struct FirebaseError {
-    pub code: String 
+    pub code: String,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
 pub enum FirebaseUserInfo {
     Google(GoogleUserInfo),
-    Email(EmailUserInfo)
+    Email(EmailUserInfo),
 }
 
 impl FirebaseUserInfo {
-    pub fn email_verified (&self) -> bool {
+    pub fn email_verified(&self) -> bool {
         match self {
             Self::Google(user) => user.email_verified,
             Self::Email(user) => user.email_verified,

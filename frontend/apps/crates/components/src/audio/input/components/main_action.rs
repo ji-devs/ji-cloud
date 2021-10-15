@@ -1,5 +1,8 @@
 use super::super::actions::file_change;
-use crate::audio::input::{actions, state::{AudioInputAddMethod, AudioInputMode, AudioInput}};
+use crate::audio::input::{
+    actions,
+    state::{AudioInput, AudioInputAddMethod, AudioInputMode},
+};
 use dominator::{clone, html, Dom};
 use std::rc::Rc;
 use utils::prelude::*;

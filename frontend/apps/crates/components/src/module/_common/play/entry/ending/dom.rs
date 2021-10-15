@@ -1,15 +1,14 @@
-use dominator::{html, Dom, clone};
-use super::state::*;
-use std::rc::Rc;
 use super::super::state::ModuleEnding;
-use utils::{prelude::*, iframe::*};
+use super::state::*;
+use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
-use wasm_bindgen_futures::spawn_local;
+use std::rc::Rc;
+use utils::iframe::*;
+
 use gloo_timers::future::TimeoutFuture;
 
 impl Ending {
     pub fn render(state: Rc<Self>) -> Dom {
-
         log::info!("MODULE ENDED");
         let msg = IframeAction::new(ModuleToJigPlayerMessage::Stop);
 
@@ -26,7 +25,7 @@ impl Ending {
                     if let Err(_) = msg.try_post_message_to_top() {
                         log::info!("Couldn't post message to top... redirect!");
                     }
-                },
+                }
                 _ => {}
             }
         }

@@ -1,15 +1,10 @@
-use dominator::{html, Dom, clone};
-use std::rc::Rc;
 use super::state::*;
 use components::{
-    module::_common::edit::prelude::*,
-    backgrounds::dom::render_backgrounds, 
-    stickers::dom::{render_stickers, render_stickers_raw},
+    backgrounds::dom::render_backgrounds, module::_common::edit::prelude::*,
+    stickers::dom::render_stickers,
 };
-use futures_signals::{
-    signal_vec::SignalVecExt,
-    signal::SignalExt
-};
+use dominator::{html, Dom};
+use std::rc::Rc;
 
 impl DomRenderable for Main {
     fn render(state: Rc<Main>) -> Dom {

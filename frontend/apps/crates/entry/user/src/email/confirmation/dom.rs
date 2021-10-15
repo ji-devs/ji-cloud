@@ -1,6 +1,6 @@
-use dominator::{clone, Dom, html};
-use std::rc::Rc;
 use super::state::*;
+use dominator::{clone, html, Dom};
+use std::rc::Rc;
 use utils::prelude::*;
 
 impl SendEmailConfirmationPage {
@@ -21,7 +21,7 @@ impl SendEmailConfirmationPage {
             .child(html!("button-email-send", {
                 .property("slot", "send")
                 .property_signal("mode", state.mode_str())
-                .event(clone!(state => move |evt:events::Click| {
+                .event(clone!(state => move |_:events::Click| {
                     state.resend();
                 }))
             }))

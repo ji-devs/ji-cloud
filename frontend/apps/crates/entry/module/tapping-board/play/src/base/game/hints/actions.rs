@@ -1,14 +1,7 @@
-use super::{
-    state::*,
-    super::{
-        state::Phase,
-        playing::state::PlayState
-    }
-};
+use super::{super::state::Phase, state::*};
 
 impl Hints {
     pub fn finish(&self) {
         self.game.phase.set_neq(Phase::Playing);
     }
 }
-

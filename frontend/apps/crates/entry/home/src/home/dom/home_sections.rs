@@ -1,6 +1,6 @@
 use dominator::{html, Dom};
-use utils::routes::{JigRoute, Route};
 use std::rc::Rc;
+use utils::routes::{JigRoute, Route};
 
 use super::super::{actions, state::Testimonial};
 

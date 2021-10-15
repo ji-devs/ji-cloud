@@ -1,14 +1,12 @@
-use dominator::{Dom, html, clone, with_node};
+use super::{actions, state::*};
+use dominator::{clone, html, with_node, Dom};
 use futures_signals::signal::SignalExt;
 use std::rc::Rc;
-use super::{state::*, actions};
 use web_sys::HtmlInputElement;
-use utils::{events, routes::*};
 
+use utils::events;
 
-
-pub struct LoginPage {
-}
+pub struct LoginPage {}
 impl LoginPage {
     pub fn render() -> Dom {
         let state = Rc::new(State::new());
@@ -30,14 +28,16 @@ impl LoginPage {
                         .property_signal("error", state.email_error().map(|err| {
                             !err.is_empty()
                         }))
-                        .child(html!("input", {
-                            .property("type", "email")
-                            .property("placeholder", crate::strings::STR_EMAIL_PLACEHOLDER)
-                            .attribute("autocomplete", "email")
-                            .event(clone!(state => move |evt:events::Input| {
-                                state.clear_email_status();
-                                *state.email.borrow_mut() = evt.value().unwrap_or_default();
-                            }))
+                        .child(html!("input" => HtmlInputElement, {
+                            .with_node!(elem => {
+                                .property("type", "email")
+                                .property("placeholder", crate::strings::STR_EMAIL_PLACEHOLDER)
+                                .attribute("autocomplete", "email")
+                                .event(clone!(state => move |_:events::Input| {
+                                    state.clear_email_status();
+                                    *state.email.borrow_mut() = elem.value();
+                                }))
+                            })
                         }))
                     }),
                     html!("input-password", {
@@ -55,7 +55,7 @@ impl LoginPage {
                     }),
                     html!("button-google", {
                         .property("slot", "google")
-                        .event(clone!(state => move |evt:events::Click| {
+                        .event(clone!(state => move |_evt:events::Click| {
                             actions::signin_google(state.clone())
                         }))
                     }),
@@ -64,7 +64,7 @@ impl LoginPage {
                         .property("kind", "text")
                         .property("color", "blue")
                         .text(crate::strings::STR_PASSWORD_FORGOTTEN)
-                        .event(clone!(state => move |evt:events::Click| {
+                        .event(clone!(state => move |_evt:events::Click| {
                             actions::forgot_password(state.clone())
                         }))
                     }),
@@ -74,20 +74,18 @@ impl LoginPage {
                         .property("size", "medium")
                         .property("iconAfter", "arrow")
                         .text(crate::strings::STR_CONTINUE)
-                        .event(clone!(state => move |evt:events::Click| {
+                        .event(clone!(state => move |_evt:events::Click| {
                             actions::signin_email(state.clone())
                         }))
                     }),
                     html!("footer-login-register", {
                         .property("slot", "footer")
-                        .event(clone!(state => move |evt:events::Click| {
+                        .event(clone!(state => move |_evt:events::Click| {
                             actions::go_register(state.clone())
                         }))
                     }),
                 ])
             }))
         })
-
     }
 }
-

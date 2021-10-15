@@ -1,8 +1,7 @@
-use dominator_helpers::futures::AsyncLoader;
-use futures_signals::signal::{Signal, Mutable, SignalExt};
-use std::cell::RefCell;
 use crate::{password::state::PasswordState, register::state::Step};
-use zxcvbn::Entropy;
+use dominator_helpers::futures::AsyncLoader;
+use futures_signals::signal::{Mutable, Signal, SignalExt};
+use std::cell::RefCell;
 
 pub struct State {
     pub loader: AsyncLoader,
@@ -18,8 +17,8 @@ impl State {
             loader: AsyncLoader::new(),
             email: RefCell::new("".to_string()),
             email_status: Mutable::new(None),
-            password: PasswordState::new(), 
-            step
+            password: PasswordState::new(),
+            step,
         }
     }
 
@@ -30,13 +29,8 @@ impl State {
     pub fn email_error(&self) -> impl Signal<Item = &'static str> {
         self.email_status
             .signal_cloned()
-            .map(|err| {
-                err
-                    .map(|err| err.as_str())
-                    .unwrap_or("")
-            })
+            .map(|err| err.map(|err| err.as_str()).unwrap_or(""))
     }
-
 }
 
 #[derive(Debug, Clone)]
@@ -47,7 +41,7 @@ pub enum EmailStatus {
     IdExists,
     EmailExists,
     UnknownFirebase,
-    Technical 
+    Technical,
 }
 
 impl EmailStatus {

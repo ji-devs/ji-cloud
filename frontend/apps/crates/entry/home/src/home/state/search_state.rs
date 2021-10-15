@@ -1,4 +1,8 @@
-use std::{collections::{HashMap, HashSet}, iter::FromIterator, rc::Rc};
+use std::{
+    collections::{HashMap, HashSet},
+    iter::FromIterator,
+    rc::Rc,
+};
 
 use futures::join;
 use futures_signals::signal::Mutable;

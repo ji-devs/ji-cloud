@@ -19,7 +19,7 @@ impl State {
             jig_id: jig_id.clone(),
             loader: AsyncLoader::new(),
             share_state: Rc::new(ShareJigState::new(jig_id)),
-            jig_edit_state
+            jig_edit_state,
         }
     }
 }

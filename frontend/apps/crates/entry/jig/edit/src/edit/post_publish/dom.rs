@@ -3,14 +3,9 @@ use futures_signals::signal::SignalExt;
 use shared::domain::jig::JigId;
 use utils::{events, jig::JigPlayerOptions};
 
-use super::{
-    actions,
-    state::*,
-    super::state::State as JigEditState,
-};
+use super::{super::state::State as JigEditState, actions, state::*};
 use components::share_jig;
 use std::rc::Rc;
-
 
 pub fn render(jig_id: JigId, jig_edit_state: Rc<JigEditState>) -> Dom {
     let state = Rc::new(State::new(jig_id, jig_edit_state));

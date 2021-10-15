@@ -17,7 +17,7 @@ use shared::{
                         Backgrounds, BaseContent, Sprite, Sticker, Text, Video, VideoHost,
                         YoutubeUrl,
                     },
-                    video::{Content, Mode, ModuleData as RawData, PlaySettings, DoneAction},
+                    video::{Content, DoneAction, Mode, ModuleData as RawData, PlaySettings},
                 },
                 ModuleId,
             },
@@ -33,7 +33,7 @@ pub static SETTINGS: OnceCell<DebugSettings> = OnceCell::new();
 
 const IMAGE_UUID: &'static str = "e84dd7fe-c92d-11eb-8c82-cfd1d3fd13ff";
 
-pub const DEBUG_TEXT:&'static str = "Hello World this is a long line of text";
+pub const DEBUG_TEXT: &'static str = "Hello World this is a long line of text";
 
 #[derive(Debug, Default)]
 pub struct DebugSettings {
@@ -77,8 +77,11 @@ impl DebugSettings {
                                 .iter()
                                 .map(|init| match init {
                                     InitSticker::Text => {
-                                        let value = components::text_editor::state::State::text_to_value(DEBUG_TEXT);
-                                        let mut text = Text::new(value);
+                                        let value =
+                                            components::text_editor::state::State::text_to_value(
+                                                DEBUG_TEXT,
+                                            );
+                                        let text = Text::new(value);
                                         Sticker::Text(text)
                                     }
                                     InitSticker::Sprite => Sticker::Sprite(Sprite::new(Image {

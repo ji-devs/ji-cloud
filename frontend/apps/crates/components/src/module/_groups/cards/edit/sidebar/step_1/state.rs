@@ -1,4 +1,9 @@
-use crate::{image::search::{callbacks::Callbacks as ImageSearchCallbacks, state::{ImageSearchCheckboxKind, ImageSearchOptions, State as ImageSearchState}}, lists::{
+use crate::{
+    image::search::{
+        callbacks::Callbacks as ImageSearchCallbacks,
+        state::{ImageSearchCheckboxKind, ImageSearchOptions, State as ImageSearchState},
+    },
+    lists::{
         dual::{
             callbacks::Callbacks as DualListCallbacks,
             state::{Options as DualListOptions, State as DualListState},
@@ -7,7 +12,10 @@ use crate::{image::search::{callbacks::Callbacks as ImageSearchCallbacks, state:
             callbacks::Callbacks as SingleListCallbacks,
             state::{Options as SingleListOptions, State as SingleListState},
         },
-    }, module::_groups::cards::edit::{config, state::*, strings}, tabs::MenuTabKind};
+    },
+    module::_groups::cards::edit::{config, state::*, strings},
+    tabs::MenuTabKind,
+};
 use dominator::clone;
 use futures_signals::signal::Mutable;
 use shared::domain::jig::module::body::{Image, _groups::cards::Mode};
@@ -16,7 +24,7 @@ use std::rc::Rc;
 pub struct Step1<RawData: RawDataExt, E: ExtraExt> {
     pub base: Rc<CardsBase<RawData, E>>,
     pub widget: Rc<Widget>,
-    pub tab_index: Mutable<Option<usize>>
+    pub tab_index: Mutable<Option<usize>>,
 }
 
 impl<RawData: RawDataExt, E: ExtraExt> Step1<RawData, E> {
@@ -40,7 +48,7 @@ impl<RawData: RawDataExt, E: ExtraExt> Step1<RawData, E> {
         Rc::new(Self {
             base,
             widget: Rc::new(widget),
-            tab_index
+            tab_index,
         })
     }
 }
@@ -77,7 +85,7 @@ impl Tab {
             }
             MenuTabKind::Text => Self::Text(Rc::new(make_single_list(base.clone()))),
 
-            _ => unimplemented!("unsupported tab kind!")
+            _ => unimplemented!("unsupported tab kind!"),
         }
     }
 

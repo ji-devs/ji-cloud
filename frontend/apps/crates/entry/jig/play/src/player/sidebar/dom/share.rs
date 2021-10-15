@@ -7,7 +7,6 @@ use futures_signals::signal::SignalExt;
 use super::super::state::State;
 
 pub fn render(state: Rc<State>) -> Dom {
-
     let state = Rc::new(share_jig::state::State::new(state.player_state.jig_id));
 
     let anchor = html!("jig-play-sidebar-action", {

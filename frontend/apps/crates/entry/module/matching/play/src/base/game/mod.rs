@@ -1,4 +1,4 @@
-pub mod state;
-pub mod dom;
 pub mod actions;
 pub mod card;
+pub mod dom;
+pub mod state;

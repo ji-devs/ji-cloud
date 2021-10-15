@@ -1,35 +1,32 @@
-use dominator::{html, clone, Dom};
+use super::{
+    actions,
+    sections::{
+        categories::dom::CategoriesDom, general::dom::GeneralDom, summary::dom::SummaryDom,
+    },
+    state::*,
+};
+use dominator::{clone, html, Dom};
+use futures_signals::signal::SignalExt;
 use shared::domain::image::{ImageId, ImageSearchQuery};
 use std::rc::Rc;
-use futures_signals::signal::SignalExt;
-use super::{
-    actions, 
-    state::*, 
-    sections::{
-        categories::dom::CategoriesDom,
-        general::dom::GeneralDom,
-        summary::dom::SummaryDom,
-    }
-};
-use utils::{routes::*, events};
+use utils::{events, routes::*};
 use wasm_bindgen::prelude::*;
 use web_sys::HtmlInputElement;
 
-const STR_REPLACE:&'static str ="Replace";
-const STR_DELETE:&'static str = "Delete";
-const STR_PREMIUM:&'static str ="Premium";
-const STR_IMAGENAME:&'static str = "Image name";
-const STR_DESCRIPTION:&'static str = "Image description";
-const STR_NEXT:&'static str = "Next";
-const STR_PUBLISH:&'static str = "Publish";
+const STR_REPLACE: &'static str = "Replace";
+const STR_DELETE: &'static str = "Delete";
+const STR_PREMIUM: &'static str = "Premium";
+const STR_IMAGENAME: &'static str = "Image name";
+const STR_DESCRIPTION: &'static str = "Image description";
+const STR_NEXT: &'static str = "Next";
+const STR_PUBLISH: &'static str = "Publish";
 
-pub struct ImageMetaPage {
-}
+pub struct ImageMetaPage {}
 
 impl ImageMetaPage {
     pub fn render(id: ImageId, is_new: bool) -> Dom {
         let state = Rc::new(State::new(id, is_new));
-        
+
         let initial_data = actions::load_initial(state.clone());
 
         html!("empty-fragment", {
@@ -57,7 +54,7 @@ impl ImageMetaPage {
                                 let q:String = evt.query();
                                 let query = ImageSearchQuery {
                                     q,
-                                    page: None, 
+                                    page: None,
                                     styles: Vec::new(),
                                     tags: Vec::new(),
                                     age_ranges: Vec::new(),
@@ -105,7 +102,7 @@ impl ImageMetaPage {
                                     .property("color", "blue")
                                     .property("size", "small")
                                     .text(STR_REPLACE)
-                                    .event(clone!(state => move |evt:events::Click| {
+                                    .event(clone!(state => move |_evt:events::Click| {
                                         if let Some(elem) = state.file_input.borrow().as_ref() {
                                             elem.click();
                                         }
@@ -117,7 +114,7 @@ impl ImageMetaPage {
                                     .property("color", "blue")
                                     .property("size", "small")
                                     .text(STR_DELETE)
-                                    .event(clone!(state => move |evt:events::Click| {
+                                    .event(clone!(state => move |_evt:events::Click| {
                                         state.delete_modal.set_neq(true);
                                     }))
                                 }),
@@ -155,10 +152,10 @@ impl ImageMetaPage {
                                             Section::Summary => STR_PUBLISH
                                         }
                                     }))
-                                    .event(clone!(state => move |evt:events::Click| {
+                                    .event(clone!(state => move |_evt:events::Click| {
                                         match state.section.get() {
-                                            Section::General => state.section.set(Section::Categories), 
-                                            Section::Categories => state.section.set(Section::Summary), 
+                                            Section::General => state.section.set(Section::Categories),
+                                            Section::Categories => state.section.set(Section::Summary),
                                             Section::Summary => actions::publish(state.clone())
                                         }
                                     }))
@@ -195,7 +192,7 @@ impl ImageMetaPage {
                                     .property("mode", "deleteImage")
                                     .property_signal("visible", state.delete_modal.signal())
                                     .property("slot", "modal")
-                                    .event(clone!(state, image => move |evt:events::CustomToggle| {
+                                    .event(clone!(state => move |evt:events::CustomToggle| {
                                         state.delete_modal.set_neq(false);
                                         if evt.value() {
                                             actions::delete(state.clone());

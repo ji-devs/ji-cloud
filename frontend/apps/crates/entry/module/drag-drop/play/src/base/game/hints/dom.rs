@@ -1,18 +1,14 @@
 use super::state::*;
 use std::rc::Rc;
-use super::state::*;
-use components::{
-    traces::show::{TracesShow, TracesShowMode},
-    stickers::dom::render_stickers_raw
-};
-use gloo_timers::future::TimeoutFuture;
-use dominator::{clone, html, Dom};
-use futures_signals::{
-    signal_vec::SignalVecExt,
-    signal::SignalExt
-};
-pub fn render(state: Rc<Hints>) -> Dom {
 
+use components::{
+    stickers::dom::render_stickers_raw,
+    traces::show::{TracesShow, TracesShowMode},
+};
+use dominator::{clone, html, Dom};
+use futures_signals::{signal::SignalExt, signal_vec::SignalVecExt};
+use gloo_timers::future::TimeoutFuture;
+pub fn render(state: Rc<Hints>) -> Dom {
     html!("empty-fragment", {
         .future(clone!(state => async move {
             TimeoutFuture::new(crate::config::HINT_TIME).await;

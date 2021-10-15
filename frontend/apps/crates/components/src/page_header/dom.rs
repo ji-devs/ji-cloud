@@ -1,10 +1,13 @@
 use std::rc::Rc;
 
-use dominator::{Dom, clone, html};
+use dominator::{clone, html, Dom};
 use futures_signals::signal::{Signal, SignalExt};
 use shared::domain::user::{UserProfile, UserScope};
 use strum::IntoEnumIterator;
-use utils::{events, routes::{AdminRoute, Route, UserRoute}};
+use utils::{
+    events,
+    routes::{AdminRoute, Route, UserRoute},
+};
 
 use crate::page_header::state::{LoggedInState, PageLinks};
 
@@ -54,7 +57,7 @@ pub fn render(state: Rc<State>, slot: Option<&str>, active_page: Option<PageLink
             } else {
                 dom
             }
-            
+
         })
         .children_signal_vec(state.logged_in.signal_cloned().map(clone!(state => move|logged_in| {
             match logged_in {
@@ -67,12 +70,12 @@ pub fn render(state: Rc<State>, slot: Option<&str>, active_page: Option<PageLink
 }
 
 fn admin_privileges(state: Rc<State>) -> impl Signal<Item = bool> {
-    state.logged_in.signal_ref(|logged_in_state| {
-        match logged_in_state {
+    state
+        .logged_in
+        .signal_ref(|logged_in_state| match logged_in_state {
             LoggedInState::LoggedIn(profile) if profile.scopes.contains(&UserScope::Admin) => true,
-            _ => false
-        }
-    })
+            _ => false,
+        })
 }
 
 fn render_logged_in(state: Rc<State>, user: &UserProfile) -> Vec<Dom> {

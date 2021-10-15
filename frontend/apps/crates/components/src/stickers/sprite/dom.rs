@@ -127,13 +127,15 @@ pub fn render_sticker_sprite_raw(sprite: &RawSprite, opts: Option<SpriteRawRende
 
     let mixin = opts.base.mixin;
 
-    parent 
+    parent
         .style_signal("width", width_signal(size.signal_cloned()))
         .style_signal("height", height_signal(size.signal_cloned()))
         .style_signal("top", bounds::size_height_center_rem_signal(size.signal()))
         .style_signal("left", bounds::size_width_center_rem_signal(size.signal()))
-        .style_signal("transform", transform_signals::denormalize_matrix_string(get_transform_signal()))
-
+        .style_signal(
+            "transform",
+            transform_signals::denormalize_matrix_string(get_transform_signal()),
+        )
         /*
         .apply_if(!has_parent, |dom| {
             dom.style_signal(
@@ -149,8 +151,8 @@ pub fn render_sticker_sprite_raw(sprite: &RawSprite, opts: Option<SpriteRawRende
             size.set(Some((width, height)));
             src.set(Some(url));
         }))
-        .child_signal(src.signal_ref(
-            clone!(size, sprite, flip_horizontal, flip_vertical => move |src| {
+        .child_signal(
+            src.signal_ref(clone!(size, flip_horizontal, flip_vertical => move |src| {
                 src.as_ref().map(|src| {
                     html!("img", {
                         .attribute("src", src)
@@ -167,8 +169,8 @@ pub fn render_sticker_sprite_raw(sprite: &RawSprite, opts: Option<SpriteRawRende
                         })
                     })
                 })
-            }),
-        ))
+            })),
+        )
         .apply_if(mixin.is_some(), move |dom| dom.apply(mixin.unwrap_ji()))
         .into_dom()
 }

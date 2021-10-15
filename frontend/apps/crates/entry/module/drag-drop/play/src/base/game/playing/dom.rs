@@ -1,22 +1,22 @@
-use std::rc::Rc;
-use dominator::{clone, html, Dom, with_node, apply_methods};
-use futures_signals::{
-    map_ref,
-    signal_vec::SignalVecExt,
-    signal::{Mutable, SignalExt}
-};
-use utils::{prelude::*, resize::{resize_info_signal, ResizeInfo}};
 use components::{
     instructions::player::InstructionsPlayer,
+    stickers::dom::{
+        mixin_sticker_button_signal, render_sticker_raw, BaseRawRenderOptions,
+        StickerRawRenderOptions, TransformOverride,
+    },
     traces::show::{TracesShow, TracesShowMode},
-    stickers::dom::{render_sticker_raw, StickerRawRenderOptions,BaseRawRenderOptions ,TransformOverride, mixin_sticker_button_signal}
 };
+use dominator::{apply_methods, clone, html, Dom};
+use futures_signals::{
+    signal::{Mutable, SignalExt},
+    signal_vec::SignalVecExt,
+};
+use std::rc::Rc;
+use utils::prelude::*;
 
 use super::state::*;
 
 pub fn render(state: Rc<PlayState>) -> Dom {
-
-
     let theme_id = state.game.base.theme_id;
 
     let targets_ready = Mutable::new(false);
@@ -80,7 +80,7 @@ pub fn render(state: Rc<PlayState>) -> Dom {
                                     })
                                 })
                             );
-                            
+
                             let opts = StickerRawRenderOptions::new(&item.sticker, Some(opts));
 
                             render_sticker_raw(&item.sticker, theme_id, Some(opts))

@@ -1,9 +1,22 @@
 use super::state::*;
-use shared::{api::endpoints::{self, ApiEndpoint}, domain::{CreateResponse, jig::{LiteModule, ModuleKind, module::{
+use shared::{
+    api::endpoints::{self, ApiEndpoint},
+    domain::{
+        jig::{
+            module::{
                 body::{BodyExt, ModeExt, StepExt},
                 ModuleCreateRequest, ModuleId,
-            }}}, error::EmptyError};
-use utils::{prelude::*, iframe::{IframeAction, ModuleToJigEditorMessage, IframeMessageExt}};
+            },
+            LiteModule, ModuleKind,
+        },
+        CreateResponse,
+    },
+    error::EmptyError,
+};
+use utils::{
+    iframe::{IframeAction, IframeMessageExt, ModuleToJigEditorMessage},
+    prelude::*,
+};
 
 impl PostPreview {
     pub fn next(&self) {
@@ -12,7 +25,8 @@ impl PostPreview {
         if let Err(_) = msg.try_post_message_to_top() {
             log::info!("Couldn't post message to top... redirect!");
 
-            let route:String = Route::Jig(JigRoute::Edit(self.jig_id, JigEditRoute::Landing)).into();
+            let route: String =
+                Route::Jig(JigRoute::Edit(self.jig_id, JigEditRoute::Landing)).into();
             dominator::routing::go_to_url(&route);
         }
     }
@@ -51,10 +65,10 @@ impl PostPreview {
                     if let Err(_) = msg.try_post_message_to_top() {
                         log::info!("Couldn't post message to parent... redirect!");
                         let route: String =
-                            Route::Jig(JigRoute::Edit(jig_id, JigEditRoute::Module(module_id))).into();
+                            Route::Jig(JigRoute::Edit(jig_id, JigEditRoute::Module(module_id)))
+                                .into();
                         dominator::routing::go_to_url(&route);
                     }
-
                 }
                 Err(_) => {
                     log::error!("request to create module failed!");

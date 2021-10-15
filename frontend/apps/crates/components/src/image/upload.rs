@@ -11,7 +11,7 @@ use utils::prelude::*;
 
 use web_sys::File;
 
-const STR_IMAGE_TOO_LARGE:&'static str = "Image is too large, limit is 30MB";
+const STR_IMAGE_TOO_LARGE: &'static str = "Image is too large, limit is 30MB";
 
 #[derive(Debug)]
 pub enum UploadError {
@@ -33,7 +33,7 @@ impl UploadError {
     pub fn is_too_large(&self) -> bool {
         match self {
             Self::TooLarge => true,
-            _ => false
+            _ => false,
         }
     }
 }
@@ -57,7 +57,6 @@ pub async fn upload_image(
     file: &File,
     abort_controller: Option<&AbortController>,
 ) -> Result<(), UploadError> {
-
     let session_uri = {
         match lib {
             MediaLibrary::Global => {
@@ -83,7 +82,9 @@ pub async fn upload_image(
                 })
                 .and_then(|(resp, status)| {
                     if status == 413 {
-                        web_sys::window().unwrap_ji().alert_with_message(STR_IMAGE_TOO_LARGE);
+                        let _ = web_sys::window()
+                            .unwrap_ji()
+                            .alert_with_message(STR_IMAGE_TOO_LARGE);
                         Err(UploadError::TooLarge)
                     } else {
                         side_effect_status_code(status);
@@ -102,29 +103,32 @@ pub async fn upload_image(
 
                 let path = endpoints::image::user::Upload::PATH.replace("{id}", &id.0.to_string());
 
-                let resp = api_with_auth_status_abortable::<UserImageUploadResponse, EmptyError, _>(
-                    &path,
-                    endpoints::image::user::Upload::METHOD,
-                    abort_controller,
-                    Some(req),
-                )
-                .await
-                .map_err(|aborted| {
-                    if aborted {
-                        UploadError::Aborted
-                    } else {
-                        UploadError::Other(awsm_web::errors::Error::Empty)
-                    }
-                })
-                .and_then(|(resp, status)| {
-                    if status == 413 {
-                        web_sys::window().unwrap_ji().alert_with_message(STR_IMAGE_TOO_LARGE);
-                        Err(UploadError::TooLarge)
-                    } else {
-                        side_effect_status_code(status);
-                        resp.map_err(|_| UploadError::Other(awsm_web::errors::Error::Empty))
-                    }
-                })?;
+                let resp =
+                    api_with_auth_status_abortable::<UserImageUploadResponse, EmptyError, _>(
+                        &path,
+                        endpoints::image::user::Upload::METHOD,
+                        abort_controller,
+                        Some(req),
+                    )
+                    .await
+                    .map_err(|aborted| {
+                        if aborted {
+                            UploadError::Aborted
+                        } else {
+                            UploadError::Other(awsm_web::errors::Error::Empty)
+                        }
+                    })
+                    .and_then(|(resp, status)| {
+                        if status == 413 {
+                            let _ = web_sys::window()
+                                .unwrap_ji()
+                                .alert_with_message(STR_IMAGE_TOO_LARGE);
+                            Err(UploadError::TooLarge)
+                        } else {
+                            side_effect_status_code(status);
+                            resp.map_err(|_| UploadError::Other(awsm_web::errors::Error::Empty))
+                        }
+                    })?;
 
                 let UserImageUploadResponse { session_uri } = resp;
                 session_uri

@@ -1,8 +1,8 @@
-use dominator::{clone, html, Dom, DomBuilder};
 use super::state::*;
+use dominator::{html, Dom, DomBuilder};
 use std::rc::Rc;
 use web_sys::HtmlElement;
-use wasm_bindgen::prelude::*; 
+
 use utils::prelude::*;
 
 impl BoxOutline {
@@ -13,22 +13,29 @@ impl BoxOutline {
             None::<BoxOutlineMixins<MixinStub, MixinStub, MixinStub, MixinStub>>,
         )
     }
-    
-    pub fn render_mixins<A, B, C, D>(state: Rc<Self>, slot: Option<&str>, mixins: BoxOutlineMixins<A, B, C, D>) -> Dom 
+
+    pub fn render_mixins<A, B, C, D>(
+        state: Rc<Self>,
+        slot: Option<&str>,
+        mixins: BoxOutlineMixins<A, B, C, D>,
+    ) -> Dom
     where
         A: FnOnce(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>,
         B: FnOnce(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>,
         C: FnOnce(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>,
         D: FnOnce(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>,
-        
     {
         Self::_render_mixins(state, slot, Some(mixins))
     }
 
-    fn _render_mixins<A, B, C, D>(state: Rc<Self>, slot: Option<&str>, mixins: Option<BoxOutlineMixins<A, B, C, D>>) -> Dom
+    fn _render_mixins<A, B, C, D>(
+        state: Rc<Self>,
+        slot: Option<&str>,
+        mixins: Option<BoxOutlineMixins<A, B, C, D>>,
+    ) -> Dom
     where
         A: FnOnce(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>,
-        B: FnOnce(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>, 
+        B: FnOnce(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>,
         C: FnOnce(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>,
         D: FnOnce(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>,
     {
@@ -43,10 +50,10 @@ impl BoxOutline {
             .apply_if(state.get_top_left_hover_only(), |dom| {
                 dom.property("top-left-hover-only", true)
             })
-            .style_signal("top", state.top_style_signal()) 
-            .style_signal("left", state.left_style_signal()) 
-            .style_signal("width", state.width_style_signal()) 
-            .style_signal("height", state.height_style_signal()) 
+            .style_signal("top", state.top_style_signal())
+            .style_signal("left", state.left_style_signal())
+            .style_signal("width", state.width_style_signal())
+            .style_signal("height", state.height_style_signal())
             .apply_if(mixins.is_some(), |dom| {
                 let mixins = mixins.unwrap_ji();
 
@@ -82,19 +89,18 @@ impl BoxOutline {
             })
         })
     }
-
 }
 
-pub struct BoxOutlineMixins<A, B, C, D> 
-    where
-        A: FnOnce(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>,
-        B: FnOnce(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>,
-        C: FnOnce(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>,
-        D: FnOnce(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>,
+pub struct BoxOutlineMixins<A, B, C, D>
+where
+    A: FnOnce(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>,
+    B: FnOnce(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>,
+    C: FnOnce(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>,
+    D: FnOnce(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>,
 {
     //main mixin
     pub main: Option<A>,
-    //useful for attaching click events. 
+    //useful for attaching click events.
     //by default is sized to fit the box area
     pub click_area: Option<B>,
 
@@ -106,5 +112,3 @@ pub struct BoxOutlineMixins<A, B, C, D>
     //by default is nudged 16px outside the top-left corner
     pub top_left: Option<D>,
 }
-
-

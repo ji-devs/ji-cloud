@@ -1,36 +1,16 @@
-use dominator::{html, Dom, clone};
+use dominator::{clone, html, Dom};
 use std::rc::Rc;
-use crate::{
-    state::*,
-    settings::state::*
-};
+
 use super::state::*;
 use components::module::_groups::cards::{
-    lookup::{self, Side},
+    lookup::Side,
     play::card::dom::{render_card, CardOptions, Size},
-    edit::{
-        config,
-        state::*
-    },
 };
-use futures_signals::{
-    map_ref,
-    signal::{SignalExt, ReadOnlyMutable}
-};
+use futures_signals::signal::SignalExt;
 
-use shared::domain::jig::module::body::{
-    ThemeId,
-    ModeExt,
-    _groups::cards::{Mode, Step, Card},
-    flashcards::DisplayMode,
-};
-use rand::prelude::*;
-
-use utils::prelude::*;
+use shared::domain::jig::module::body::flashcards::DisplayMode;
 
 pub fn render(state: Rc<MainSettings>) -> Dom {
-
-
     html!("flashcards-main", {
         .property("slot", "main")
         .children_signal_vec(
@@ -39,7 +19,7 @@ pub fn render(state: Rc<MainSettings>) -> Dom {
                 .map(clone!(state => move |display_mode| {
                     let mut children:Vec<Dom> = Vec::new();
                     let (card, other, side) = {
-                        if state.get_random::<bool>() { 
+                        if state.get_random::<bool>() {
                             (&state.left, &state.right, Side::Left)
                         } else {
                             (&state.right, &state.left, Side::Right)

@@ -1,13 +1,11 @@
-use once_cell::sync::OnceCell;
-use std::fmt;
 use cfg_if::cfg_if;
+use once_cell::sync::OnceCell;
 use shared::config::RemoteTarget;
-use wasm_bindgen::prelude::*;
-use wasm_bindgen::JsCast;
-use shared::domain::auth::AUTH_COOKIE_NAME;
+use std::fmt;
+
 use crate::unwrap::UnwrapJiExt;
 
-pub static SETTINGS:OnceCell<Settings> = OnceCell::new();
+pub static SETTINGS: OnceCell<Settings> = OnceCell::new();
 
 #[derive(Clone)]
 pub struct Settings {
@@ -20,26 +18,24 @@ cfg_if! {
             _init(RemoteTarget::Local).await
         }
     } else if #[cfg(feature = "sandbox")] {
-		pub(crate) async fn init() -> Settings { 
+        pub(crate) async fn init() -> Settings {
             _init(RemoteTarget::Sandbox).await
         }
-        
+
     } else if #[cfg(feature = "release")] {
-        pub(crate) async fn init() -> Settings { 
+        pub(crate) async fn init() -> Settings {
             _init(RemoteTarget::Release).await
         }
     } else {
-        pub(crate) async fn init() -> Settings { 
+        pub(crate) async fn init() -> Settings {
             panic!("set a feature target!");
         }
-    } 
+    }
 }
 
-async fn _init(remote_target:RemoteTarget) -> Settings {
-    let settings = Settings {
-        remote_target
-    };
-   
+async fn _init(remote_target: RemoteTarget) -> Settings {
+    let settings = Settings { remote_target };
+
     /*
     if remote_target == RemoteTarget::Local {
         unsafe {
@@ -63,13 +59,12 @@ async fn _init(remote_target:RemoteTarget) -> Settings {
         }
     }
     */
-    SETTINGS.set(settings.clone()).expect_ji("couldn't set settings!");
-
-    
+    SETTINGS
+        .set(settings.clone())
+        .expect_ji("couldn't set settings!");
 
     settings
 }
-
 
 impl fmt::Debug for Settings {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

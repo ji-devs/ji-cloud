@@ -9,7 +9,7 @@ pub enum ImageTag {
     MultipleChoice = 3,
     DragAndDrop = 4,
     Video = 5,
-    NavigationButton = 6
+    NavigationButton = 6,
 }
 
 impl ImageTag {
@@ -21,7 +21,7 @@ impl ImageTag {
             Self::MultipleChoice => "Multiple Choice",
             Self::DragAndDrop => "Drag and Drop",
             Self::Video => "Video",
-            Self::NavigationButton => "Navigation Button"
+            Self::NavigationButton => "Navigation Button",
         }
     }
 
@@ -32,7 +32,7 @@ impl ImageTag {
 
 //it's up to the caller to ensure a valid value!
 impl From<i16> for ImageTag {
-    fn from(value:i16) -> Self {
+    fn from(value: i16) -> Self {
         unsafe { std::mem::transmute(value) }
     }
 }

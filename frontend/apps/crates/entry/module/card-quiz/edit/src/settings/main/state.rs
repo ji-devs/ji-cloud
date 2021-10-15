@@ -1,18 +1,18 @@
-use crate::{
-    state::*,
-    settings::state::*
-};
+use crate::state::*;
 use futures_signals::{
     map_ref,
-    signal::{Signal, SignalExt, Mutable},
-    signal_vec::{SignalVec, SignalVecExt}
+    signal::{Signal, SignalExt},
+    signal_vec::{SignalVec, SignalVecExt},
 };
 
+use components::module::_groups::cards::lookup::Side;
+use rand::{
+    distributions::{Distribution, Standard},
+    prelude::*,
+};
+use shared::domain::jig::module::body::_groups::cards::Card;
 use std::rc::Rc;
 use utils::prelude::*;
-use shared::domain::jig::module::body::_groups::cards::Card;
-use components::module::_groups::cards::lookup::Side;
-use rand::{prelude::*, distributions::{Standard, Distribution}};
 
 pub struct MainSettings {
     pub base: Rc<Base>,
@@ -20,10 +20,10 @@ pub struct MainSettings {
     pub wrong_bank: Rc<Vec<(Card, Card)>>,
 }
 
-    //pub pairs: MutableVec<(Card, Card)>,
+//pub pairs: MutableVec<(Card, Card)>,
 impl MainSettings {
     pub fn new(base: Rc<Base>) -> Self {
-        let settings = &base.extra.settings;
+        let _settings = &base.extra.settings;
 
         let mut pairs = base.clone_pairs_raw();
 
@@ -39,31 +39,30 @@ impl MainSettings {
     }
 
     pub fn top_side_signal(&self) -> impl Signal<Item = Side> {
-        self.base.extra.settings.swap.signal().map(|swap| {
-            if swap {
-                Side::Right
-            } else {
-                Side::Left
-            }
-        })
+        self.base.extra.settings.swap.signal().map(
+            |swap| {
+                if swap {
+                    Side::Right
+                } else {
+                    Side::Left
+                }
+            },
+        )
     }
 
     pub fn correct_signal(&self) -> impl Signal<Item = (Card, Side)> {
         let correct = self.correct.clone();
 
-        self.top_side_signal()
-            .map(move |top_side| {
-                if top_side == Side::Left { 
-                    (correct.0.clone(), top_side)
-                } else { 
-                    (correct.1.clone(), top_side)
-                }
-            })
+        self.top_side_signal().map(move |top_side| {
+            if top_side == Side::Left {
+                (correct.0.clone(), top_side)
+            } else {
+                (correct.1.clone(), top_side)
+            }
+        })
     }
 
     pub fn choices_signal(&self) -> impl SignalVec<Item = (Card, Side, bool)> {
-
-
         let wrong_bank = self.wrong_bank.clone();
         let correct = self.correct.clone();
 
@@ -75,36 +74,42 @@ impl MainSettings {
 
         let rng = self.base.extra.settings.rng.clone();
 
-        sig 
-            .map(move |(n_choices, top_side)| {
-                let n_choices = n_choices.max(1); //just a safety precaution
+        sig.map(move |(n_choices, top_side)| {
+            let n_choices = n_choices.max(1); //just a safety precaution
 
-                let bottom_side = top_side.negate(); 
+            let bottom_side = top_side.negate();
 
-                let mut choices:Vec<(Card, Side, bool)> = wrong_bank
-                    .iter()
-                    .take((n_choices - 1).into())
-                    .map(|pair| {
-                        let card = if bottom_side == Side::Left { &pair.0 } else { &pair.1 };
-                        (card.clone(), bottom_side, false)
-                    })
-                    .collect();
-               
-                let correct = if bottom_side == Side::Left { &correct.0 } else { &correct.1 };
+            let mut choices: Vec<(Card, Side, bool)> = wrong_bank
+                .iter()
+                .take((n_choices - 1).into())
+                .map(|pair| {
+                    let card = if bottom_side == Side::Left {
+                        &pair.0
+                    } else {
+                        &pair.1
+                    };
+                    (card.clone(), bottom_side, false)
+                })
+                .collect();
 
-                choices.push((correct.clone(), bottom_side, true));
-                
-                choices.shuffle(&mut *rng.borrow_mut());
+            let correct = if bottom_side == Side::Left {
+                &correct.0
+            } else {
+                &correct.1
+            };
 
-                choices
+            choices.push((correct.clone(), bottom_side, true));
 
-            })
-            .to_signal_vec()
+            choices.shuffle(&mut *rng.borrow_mut());
+
+            choices
+        })
+        .to_signal_vec()
     }
 
-    pub fn get_random<T>(&self) -> T 
-    where 
-        Standard: Distribution<T>
+    pub fn get_random<T>(&self) -> T
+    where
+        Standard: Distribution<T>,
     {
         self.base.extra.settings.rng.borrow_mut().gen::<T>()
     }

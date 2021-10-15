@@ -1,13 +1,10 @@
-use dominator::{Dom, html, clone, with_node};
-use futures_signals::signal::{Mutable, SignalExt};
+use super::{actions, state::*};
+use dominator::{clone, html, Dom};
+use futures_signals::signal::SignalExt;
 use std::rc::Rc;
-use super::{state::*, actions};
-use web_sys::HtmlInputElement;
-use utils::{events, routes::*};
-use crate::{strings, register::{
-    state::Step,
-    components::footer::Footer
-}};
+
+use crate::strings;
+use utils::events;
 
 impl PasswordResetPage {
     pub fn render(state: Rc<PasswordResetPage>) -> Dom {
@@ -39,7 +36,7 @@ impl PasswordResetPage {
                         .property("color", "red")
                         .property("size", "medium")
                         .text(strings::STR_SUBMIT)
-                        .event(clone!(state => move |evt:events::Click| {
+                        .event(clone!(state => move |_evt:events::Click| {
                             actions::change_password(state.clone())
                         }))
                     })

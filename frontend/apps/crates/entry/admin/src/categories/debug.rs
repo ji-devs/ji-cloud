@@ -9,4 +9,3 @@ cfg_if! {
         pub const INIT_EDITING:bool = false;
     }
 }
-

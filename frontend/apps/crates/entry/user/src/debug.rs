@@ -2,8 +2,7 @@ use cfg_if::cfg_if;
 use once_cell::sync::OnceCell;
 use utils::prelude::*;
 
-pub static SETTINGS:OnceCell<DebugSettings> = OnceCell::new();
-
+pub static SETTINGS: OnceCell<DebugSettings> = OnceCell::new();
 
 #[derive(Debug, Default)]
 pub struct DebugSettings {
@@ -16,7 +15,7 @@ pub enum DebugRegisterStep {
     Start,
     One,
     Two,
-    Three
+    Three,
 }
 
 impl DebugSettings {
@@ -24,7 +23,7 @@ impl DebugSettings {
         DebugSettings {
             skip_password_strength: true,
             //register_step: Some(DebugRegisterStep::Two),
-            register_step: None 
+            register_step: None,
         }
     }
 }
@@ -41,7 +40,6 @@ cfg_if! {
         }
     }
 }
-
 
 pub fn settings() -> &'static DebugSettings {
     unsafe { SETTINGS.get_unchecked() }

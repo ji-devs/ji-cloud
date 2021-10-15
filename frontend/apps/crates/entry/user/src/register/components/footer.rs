@@ -1,24 +1,22 @@
-use dominator::{Dom, html, clone, with_node};
-use futures_signals::signal::Mutable;
-use std::rc::Rc;
-use web_sys::HtmlInputElement;
+#![allow(dead_code)] // this should be remove eventually
+
+use dominator::{html, Dom};
+
 use utils::{events, routes::*};
-use crate::register::state::Step;
 
-const STR_SUBMIT:&'static str = "Submit";
-const STR_EMAIL_LABEL:&'static str = "Email";
-const STR_EMAIL_PLACEHOLDER:&'static str = "Type or paste your email";
-const STR_PASSWORD_LABEL:&'static str = "Create Password";
-const STR_PASSWORD_PLACEHOLDER:&'static str ="********";
+const STR_SUBMIT: &'static str = "Submit";
+const STR_EMAIL_LABEL: &'static str = "Email";
+const STR_EMAIL_PLACEHOLDER: &'static str = "Type or paste your email";
+const STR_PASSWORD_LABEL: &'static str = "Create Password";
+const STR_PASSWORD_PLACEHOLDER: &'static str = "********";
 
-pub struct Footer {
-}
+pub struct Footer {}
 
 impl Footer {
     pub fn render() -> Dom {
         html!("footer-register-login", {
             .property("slot", "footer")
-            .event(|evt:events::Click| {
+            .event(|_evt:events::Click| {
                 go_login()
             })
         })
@@ -26,6 +24,6 @@ impl Footer {
 }
 
 fn go_login() {
-    let route:String = Route::User(UserRoute::Login(String::new())).into();
+    let route: String = Route::User(UserRoute::Login(String::new())).into();
     dominator::routing::go_to_url(&route);
 }

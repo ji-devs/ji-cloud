@@ -1,18 +1,15 @@
-use components::module::_groups::cards::lookup::Side;
-use utils::math::BoundsF64;
-use web_sys::HtmlElement;
 use crate::base::game::state::{CardPairId, Game};
-use std::cell::RefCell;
-use std::rc::Rc;
-use futures_signals::{
-    signal::{Mutable, Signal, SignalExt}
-};
+use components::module::_groups::cards::lookup::Side;
+use futures_signals::signal::{Mutable, SignalExt};
 use shared::domain::jig::module::body::{
     ThemeId,
-    ModeExt,
-    _groups::cards::{Mode, Step, Card},
+    _groups::cards::{Card, Mode},
 };
-use utils::{prelude::*, drag::Drag};
+use std::cell::RefCell;
+use std::rc::Rc;
+use utils::math::BoundsF64;
+use utils::{drag::Drag, prelude::*};
+use web_sys::HtmlElement;
 
 pub type CardTop = CardChoice<TopPhase>;
 pub type CardBottom = CardChoice<BottomPhase>;
@@ -34,7 +31,7 @@ type IsDragOver = bool;
 #[derive(Clone)]
 pub enum TopPhase {
     Empty(Mutable<IsDragOver>),
-    Landed
+    Landed,
 }
 
 #[derive(Clone)]
@@ -56,17 +53,17 @@ pub struct CardDrag {
     pub mode: Mode,
 }
 
-impl CardChoice <TopPhase> {
+impl CardChoice<TopPhase> {
     pub fn new(game: Rc<Game>, pair: CardPairId) -> Self {
         let theme_id = game.base.theme_id.clone();
         let mode = game.base.mode.clone();
         let swap = game.base.settings.swap;
 
-        let CardPairId (card, other, pair_id) = pair;
+        let CardPairId(card, other, pair_id) = pair;
 
         let side = if !swap { Side::Left } else { Side::Right };
 
-        let (card, other) = if !swap { (card, other) } else { (other, card ) };
+        let (card, other) = if !swap { (card, other) } else { (other, card) };
 
         Self {
             game,
@@ -81,42 +78,40 @@ impl CardChoice <TopPhase> {
         }
     }
 
-    pub fn set_drag_over(&self, is_drag_over:bool) {
+    pub fn set_drag_over(&self, is_drag_over: bool) {
         match self.phase.get_cloned() {
             TopPhase::Empty(drag_over) => {
                 drag_over.set_neq(is_drag_over);
-            },
+            }
             _ => {}
         }
     }
 
     pub fn is_drag_over(&self) -> bool {
         match self.phase.get_cloned() {
-            TopPhase::Empty(drag_over) => {
-                drag_over.get()
-            },
-            _ => false
+            TopPhase::Empty(drag_over) => drag_over.get(),
+            _ => false,
         }
     }
     pub fn is_landed(&self) -> bool {
         match self.phase.get_cloned() {
             TopPhase::Landed => true,
-            _ => false
+            _ => false,
         }
     }
 }
 
-impl CardChoice <BottomPhase> {
+impl CardChoice<BottomPhase> {
     pub fn new(game: Rc<Game>, pair: CardPairId) -> Self {
         let theme_id = game.base.theme_id.clone();
         let mode = game.base.mode.clone();
         let swap = game.base.settings.swap;
 
-        let CardPairId (card, other, pair_id) = pair;
+        let CardPairId(card, other, pair_id) = pair;
 
-        let side = if !swap { Side:: Right } else { Side::Left };
+        let side = if !swap { Side::Right } else { Side::Left };
 
-        let (card, other) = if !swap { (other, card) } else { (card, other ) };
+        let (card, other) = if !swap { (other, card) } else { (card, other) };
 
         CardChoice {
             game,
@@ -134,7 +129,17 @@ impl CardChoice <BottomPhase> {
 
 impl CardDrag {
     pub fn new<S: Clone>(choice: CardChoice<S>, elem: HtmlElement, x: i32, y: i32) -> Self {
-        let CardChoice { game, phase, card, other, pair_id, side, theme_id, mode, .. } = choice;
+        let CardChoice {
+            game,
+            phase: _,
+            card,
+            other,
+            pair_id,
+            side,
+            theme_id,
+            mode,
+            ..
+        } = choice;
 
         let drag = Drag::new_anchor_element_resize(x, y, &elem, true);
 

@@ -1,13 +1,21 @@
-use std::{error::Error, rc::Rc};
+use std::rc::Rc;
 
 use components::image::upload::upload_image;
 use dominator::clone;
 use futures::future::join;
-use shared::{api::endpoints::{self, ApiEndpoint, meta, user}, domain::{image::{CreateResponse, ImageId, ImageKind, user::UserImageCreateRequest}, meta::MetadataResponse, user::{PatchProfileRequest, UserProfile}}, error::EmptyError, media::MediaLibrary};
+use shared::{
+    api::endpoints::{self, meta, user, ApiEndpoint},
+    domain::{
+        image::{user::UserImageCreateRequest, ImageId, ImageKind},
+        meta::MetadataResponse,
+    },
+    error::EmptyError,
+    media::MediaLibrary,
+};
 
+use super::state::State;
 use utils::{fetch::api_with_auth, prelude::*, unwrap::UnwrapJiExt};
 use web_sys::File;
-use super::state::State;
 
 pub fn load_initial_data(state: Rc<State>) {
     state.loader.load(clone!(state => async move {
@@ -26,11 +34,17 @@ async fn load_profile(state: Rc<State>) {
 }
 
 async fn load_metadata(state: Rc<State>) {
-    match api_with_auth::<MetadataResponse, EmptyError, ()>(meta::Get::PATH, meta::Get::METHOD, None).await {
-        Err(_) => {},
+    match api_with_auth::<MetadataResponse, EmptyError, ()>(
+        meta::Get::PATH,
+        meta::Get::METHOD,
+        None,
+    )
+    .await
+    {
+        Err(_) => {}
         Ok(res) => {
             state.metadata.set(Some(res));
-        },
+        }
     };
 }
 
@@ -48,7 +62,7 @@ pub fn save_profile(state: Rc<State>) {
 
 async fn upload_profile_image(file: File) -> Result<ImageId, Box<dyn std::error::Error>> {
     let req = UserImageCreateRequest {
-        kind: ImageKind::UserProfile
+        kind: ImageKind::UserProfile,
     };
 
     let image_id = endpoints::image::user::Create::api_with_auth(Some(req))

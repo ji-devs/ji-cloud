@@ -1,28 +1,26 @@
-use crate::{
-    state::*,
-    settings::state::*
-};
+use crate::state::*;
 use futures_signals::{
     map_ref,
-    signal::{Signal, SignalExt, Mutable},
-    signal_vec::{SignalVec, SignalVecExt}
+    signal::{Signal, SignalExt},
 };
 
-use std::rc::Rc;
-use utils::prelude::*;
-use shared::domain::jig::module::body::_groups::cards::Card;
 use components::module::_groups::cards::lookup::Side;
-use rand::{prelude::*, distributions::{Standard, Distribution}};
+use rand::{
+    distributions::{Distribution, Standard},
+    prelude::*,
+};
+use shared::domain::jig::module::body::_groups::cards::Card;
+use std::rc::Rc;
 
 pub struct MainSettings {
     pub base: Rc<Base>,
     pub pairs: Rc<Vec<(Card, Card)>>,
 }
 
-    //pub pairs: MutableVec<(Card, Card)>,
+//pub pairs: MutableVec<(Card, Card)>,
 impl MainSettings {
     pub fn new(base: Rc<Base>) -> Self {
-        let settings = &base.extra.settings;
+        let _settings = &base.extra.settings;
 
         let mut pairs = base.clone_pairs_raw();
 
@@ -51,11 +49,13 @@ impl MainSettings {
             } else {
                 Side::Right
             }
-
         }))
     }
 
-    fn choices_signal(&self, side_signal: impl Signal<Item = Side>) -> impl Signal<Item = Vec<(Card, Side)>> {
+    fn choices_signal(
+        &self,
+        side_signal: impl Signal<Item = Side>,
+    ) -> impl Signal<Item = Vec<(Card, Side)>> {
         let pairs = self.pairs.clone();
 
         let sig = map_ref! {
@@ -63,31 +63,29 @@ impl MainSettings {
             let n_choices = self.base.extra.settings.n_choices.signal()
                 => (*side, *n_choices)
         };
-       
-        sig
-            .map(move |(side, n_choices)| {
-                pairs
-                    .iter()
-                    .take(n_choices.into())
-                    .map(|pair| {
-                        let card = {
-                            if side == Side::Left {
-                                pair.0.clone()
-                            } else {
-                                pair.1.clone()
-                            }
-                        };
 
-                        (card, side)
-                    })
-                    .collect::<Vec<(Card, Side)>>()
-            })
+        sig.map(move |(side, n_choices)| {
+            pairs
+                .iter()
+                .take(n_choices.into())
+                .map(|pair| {
+                    let card = {
+                        if side == Side::Left {
+                            pair.0.clone()
+                        } else {
+                            pair.1.clone()
+                        }
+                    };
+
+                    (card, side)
+                })
+                .collect::<Vec<(Card, Side)>>()
+        })
     }
 
-
-    pub fn get_random<T>(&self) -> T 
-    where 
-        Standard: Distribution<T>
+    pub fn _get_random<T>(&self) -> T
+    where
+        Standard: Distribution<T>,
     {
         self.base.extra.settings.rng.borrow_mut().gen::<T>()
     }

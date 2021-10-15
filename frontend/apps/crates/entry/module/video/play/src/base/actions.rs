@@ -3,7 +3,10 @@ use futures_signals::signal::Mutable;
 use shared::domain::jig::module::body::video::{DoneAction, PlaySettings};
 use std::rc::Rc;
 
-pub fn create_video_sticker_options(play_settings: &PlaySettings, on_ended: Option<impl Fn() + 'static>) -> VideoRawRenderOptions {
+pub fn create_video_sticker_options(
+    play_settings: &PlaySettings,
+    on_ended: Option<impl Fn() + 'static>,
+) -> VideoRawRenderOptions {
     VideoRawRenderOptions {
         captions: Mutable::new(play_settings.captions),
         muted: Mutable::new(play_settings.muted),

@@ -8,8 +8,8 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 mod router;
 mod student_code;
 
-use wasm_bindgen::prelude::*;
 use router::Router;
+use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen(start)]
 pub async fn main_js() {

@@ -1,31 +1,22 @@
+use super::state::*;
 use components::module::_common::edit::prelude::*;
 use dominator::{clone, html, Dom};
-use std::rc::Rc;
-use super::state::*;
 use futures_signals::signal::SignalExt;
 use shared::domain::jig::module::body::drag_drop::Step;
+use std::rc::Rc;
 
 use super::{
-    step_1::{
-        dom::render_step_1,
-        state::Step1
-    },
-    step_2::{
-        dom::render_step_2,
-        state::Step2
-    },
+    step_1::{dom::render_step_1, state::Step1},
+    step_2::{dom::render_step_2, state::Step2},
     step_3::dom::render_step_3,
     step_4::dom::render_step_4,
-    step_5::{
-        dom::render_step_5,
-        state::Step5
-    },
+    step_5::{dom::render_step_5, state::Step5},
 };
 
 impl DomRenderable for Sidebar {
     fn render(state: Rc<Sidebar>) -> Dom {
         html!("empty-fragment", {
-            .future(state.base.step.signal_cloned().dedupe().for_each(clone!(state => move |step| {
+            .future(state.base.step.signal_cloned().dedupe().for_each(clone!(state => move |_step| {
                 state.tab_index.set(None);
                 async move {}
             })))

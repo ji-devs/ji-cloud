@@ -1,4 +1,5 @@
 use crate::base::actions;
+use components::module::_common::play::prelude::*;
 use components::{
     backgrounds::dom::render_backgrounds_raw,
     module::_common::play::prelude::DomRenderable,
@@ -7,10 +8,9 @@ use components::{
         video::dom::render_sticker_video_raw,
     },
 };
-use components::module::_common::play::prelude::*;
-use shared::domain::jig::module::body::video::{DoneAction, PlaySettings};
 use dominator::{clone, html, Dom};
 use shared::domain::jig::module::body::_groups::design::Sticker as RawSticker;
+use shared::domain::jig::module::body::video::DoneAction;
 use std::rc::Rc;
 
 use super::state::*;

@@ -6,7 +6,7 @@ use futures_signals::{
 };
 use shared::domain::jig::{JigResponse, LiteModule};
 use std::rc::Rc;
-use utils::{math::PointI32, routes::JigEditRoute};
+use utils::math::PointI32;
 
 use chrono::{DateTime, Utc};
 

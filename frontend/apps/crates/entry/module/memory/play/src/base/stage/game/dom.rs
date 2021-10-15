@@ -1,17 +1,14 @@
-use dominator::{html, Dom, clone};
+use crate::base::{card::state::*, state::*};
+use dominator::{clone, html, Dom};
+use futures_signals::signal::always;
 use std::rc::Rc;
-use futures_signals::{signal::{Always, SignalExt, always}, signal_vec::SignalVecExt};
 use utils::prelude::*;
-use crate::base::{
-    state::*,
-    card::state::*
-};
-use shared::domain::jig::module::body::ModeExt;
-use components::module::_groups::cards::play::card::dom::{render_dynamic_card_mixin, DynamicCardOptions, Size, NoTransform};
 
+use components::module::_groups::cards::play::card::dom::{
+    render_dynamic_card_mixin, DynamicCardOptions, NoTransform, Size,
+};
 
 pub fn render(state: Rc<Base>) -> Dom {
-
     html!("play-main", {
         .property("nCards", state.cards.len() as f64)
         .children(
@@ -29,7 +26,7 @@ pub fn render(state: Rc<Base>) -> Dom {
 fn render_main_card(state: Rc<Base>, card_state: Rc<CardState>) -> Dom {
     let card_id = &card_state.id;
     let card = &card_state.card;
-   
+
     let theme_id = state.theme_id;
     let mode = state.mode;
     let side = card_state.side;
@@ -40,7 +37,7 @@ fn render_main_card(state: Rc<Base>, card_state: Rc<CardState>) -> Dom {
     let hidden_signal = always(false);
     let get_simple_transform = None::<NoTransform>;
 
-    let mut options = DynamicCardOptions::new(
+    let options = DynamicCardOptions::new(
         card,
         theme_id,
         mode,
@@ -53,22 +50,20 @@ fn render_main_card(state: Rc<Base>, card_state: Rc<CardState>) -> Dom {
     );
 
     render_dynamic_card_mixin(options, |dom| {
-        dom
-            .event(clone!(state, card_id => move |evt:events::Click| {
-                if let Some((id_1, id_2)) = super::actions::card_click(state.clone(), card_id) {
-                    super::actions::evaluate(state.clone(), id_1, id_2);
-                }
-            }))
-            .after_inserted(clone!(card_state => move |elem| {
-                *card_state.main_elem.borrow_mut() = Some(elem);
-            }))
+        dom.event(clone!(state, card_id => move |_evt:events::Click| {
+            if let Some((id_1, id_2)) = super::actions::card_click(state.clone(), card_id) {
+                super::actions::evaluate(state.clone(), id_1, id_2);
+            }
+        }))
+        .after_inserted(clone!(card_state => move |elem| {
+            *card_state.main_elem.borrow_mut() = Some(elem);
+        }))
     })
 }
 
-
 /*
  *
-pub struct DynamicCardOptions <'a, F, T, H, S, SOut> 
+pub struct DynamicCardOptions <'a, F, T, H, S, SOut>
 where
     F: Signal<Item = bool> + 'static,
     T: Signal<Item = bool> + 'static,
@@ -88,9 +83,9 @@ where
     pub mode: Mode,
     //should be set to match card and back_card will automatically
     //use the opposite
-    pub side: Side, 
+    pub side: Side,
 }
-impl <'a, F, T, H, S, SOut> DynamicCardOptions <'a, F, T, H, S, SOut> 
+impl <'a, F, T, H, S, SOut> DynamicCardOptions <'a, F, T, H, S, SOut>
 where
     F: Signal<Item = bool> + 'static,
     T: Signal<Item = bool> + 'static,
@@ -100,11 +95,11 @@ where
 
 {
     pub fn new(
-        card:&'a Card, 
-        theme_id: 
-        ThemeId, 
-        mode: Mode, 
-        side: Side, 
+        card:&'a Card,
+        theme_id:
+        ThemeId,
+        mode: Mode,
+        side: Side,
         size: Size,
         flipped: F,
         transparent: T,
@@ -130,11 +125,6 @@ where
 }
 */
 
-
-
-
-
-
 /*
 pub struct CardOptions <'a> {
     pub card: &'a Card,
@@ -146,7 +136,7 @@ pub struct CardOptions <'a> {
     pub mode: Mode,
     //should be set to match card and back_card will automatically
     //use the opposite
-    pub side: Side, 
+    pub side: Side,
 }
 */
 /*
@@ -175,8 +165,8 @@ fn render_card(state: Rc<Base>, card: Rc<CardState>) -> Dom {
         .after_inserted(clone!(card => move |elem| {
             *card.main_elem.borrow_mut() = Some(elem);
         }))
-        
-        
+
+
     })
 }
 */

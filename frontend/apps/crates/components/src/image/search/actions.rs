@@ -6,12 +6,15 @@ use super::state::State;
 use dominator::clone;
 use futures::future::join;
 use shared::api::endpoints::image;
-use shared::domain::image::{user::UserImageCreateRequest, recent::{UserRecentImageUpsertRequest, UserRecentImageListRequest}};
+use shared::domain::image::{
+    recent::{UserRecentImageListRequest, UserRecentImageUpsertRequest},
+    user::UserImageCreateRequest,
+};
 use shared::domain::meta::ImageTagIndex;
 use shared::{
     api::{endpoints, ApiEndpoint},
     domain::{
-        image::{ImageSearchQuery, ImageKind, CreateResponse},
+        image::{CreateResponse, ImageKind, ImageSearchQuery},
         jig::module::body::Image,
         meta::{ImageStyle, MetadataResponse},
     },
@@ -72,13 +75,16 @@ async fn search_async(state: Rc<State>) {
     };
 
     let kind = match &state.options.checkbox_kind {
-        Some(ImageSearchCheckboxKind::StickersFilter) if state.checkbox_checked.get() => Some(ImageKind::Sticker),
+        Some(ImageSearchCheckboxKind::StickersFilter) if state.checkbox_checked.get() => {
+            Some(ImageKind::Sticker)
+        }
         _ => None,
     };
 
     let mut tags = state.options.tags.clone().unwrap_or_default();
     match &state.options.checkbox_kind {
-        Some(ImageSearchCheckboxKind::BackgroundLayer1Filter) | Some(ImageSearchCheckboxKind::BackgroundLayer2Filter) => {
+        Some(ImageSearchCheckboxKind::BackgroundLayer1Filter)
+        | Some(ImageSearchCheckboxKind::BackgroundLayer2Filter) => {
             let tag = match &state.options.checkbox_kind {
                 Some(ImageSearchCheckboxKind::BackgroundLayer1Filter) => ImageTag::BackgroundLayer1,
                 Some(ImageSearchCheckboxKind::BackgroundLayer2Filter) => ImageTag::BackgroundLayer2,
@@ -91,8 +97,8 @@ async fn search_async(state: Rc<State>) {
             } else {
                 tags.retain(|t| t != &tag);
             };
-        },
-        _ => {},
+        }
+        _ => {}
     };
 
     let search_query = ImageSearchQuery {
@@ -106,10 +112,7 @@ async fn search_async(state: Rc<State>) {
             .collect(),
         affiliations,
         kind,
-        tags: tags
-            .iter()
-            .map(|x| ImageTagIndex(x.as_index()))
-            .collect(),
+        tags: tags.iter().map(|x| ImageTagIndex(x.as_index())).collect(),
         tags_priority: state
             .options
             .tags_priority
@@ -127,13 +130,16 @@ async fn search_async(state: Rc<State>) {
 
     match res {
         Ok(res) => {
-            state.image_list.lock_mut().replace_cloned(res.images.iter().map(|i| {
-                Image {
-                    id: i.metadata.id,
-                    lib: MediaLibrary::Global,
-                }
-            }).collect());
-        },
+            state.image_list.lock_mut().replace_cloned(
+                res.images
+                    .iter()
+                    .map(|i| Image {
+                        id: i.metadata.id,
+                        lib: MediaLibrary::Global,
+                    })
+                    .collect(),
+            );
+        }
         Err(e) => {
             log::error!("{:#?}", e);
         }
@@ -146,7 +152,7 @@ async fn get_user(state: Rc<State>) {
         Ok(user) => {
             log::info!("{:?}", user);
             *state.user.borrow_mut() = Some(user);
-        },
+        }
     }
 }
 
@@ -158,13 +164,16 @@ async fn get_recent(state: Rc<State>) {
     match image::recent::List::api_with_auth(Some(req)).await {
         Err(_) => log::error!("Error getting recent images"),
         Ok(res) => {
-            state.recent_list.lock_mut().replace_cloned(res.images.iter().map(|i| {
-                Image {
-                    id: i.id,
-                    lib: i.library,
-                }
-            }).collect());
-        },
+            state.recent_list.lock_mut().replace_cloned(
+                res.images
+                    .iter()
+                    .map(|i| Image {
+                        id: i.id,
+                        lib: i.library,
+                    })
+                    .collect(),
+            );
+        }
     };
 }
 

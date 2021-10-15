@@ -1,28 +1,28 @@
 use dominator_helpers::signals::{box_signal_fn, BoxSignalFn};
-use futures_signals::signal::{Signal, SignalExt};
+use futures_signals::signal::Signal;
 use std::rc::Rc;
 
 pub struct MenuTab {
     pub kind: MenuTabKind,
     pub sizeable: bool,
     pub active_signal: BoxSignalFn<bool>,
-    pub on_click: Box<dyn Fn()>
+    pub on_click: Box<dyn Fn()>,
 }
 
 impl MenuTab {
     pub fn new<A, ASig, C>(
-        kind: MenuTabKind, 
+        kind: MenuTabKind,
         sizeable: bool,
         active_signal: A,
-        on_click: C
+        on_click: C,
     ) -> Rc<Self>
     where
         A: Fn() -> ASig + 'static,
         ASig: Signal<Item = bool> + 'static,
-        C: Fn() + 'static
+        C: Fn() + 'static,
     {
-        Rc::new(Self { 
-            kind, 
+        Rc::new(Self {
+            kind,
             sizeable,
             active_signal: box_signal_fn(active_signal),
             on_click: Box::new(on_click),

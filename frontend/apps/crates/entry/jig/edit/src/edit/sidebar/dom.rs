@@ -2,24 +2,27 @@ use dominator::{clone, html, Dom};
 use dominator_helpers::events::Message;
 
 use super::{
+    super::state::State as JigEditState,
     dragging::{actions as drag_actions, dom::DraggingDom},
     header::dom::HeaderDom,
     module::dom::ModuleDom,
     state::*,
     {actions, debug},
-    super::state::State as JigEditState,
 };
 use futures_signals::{
     map_ref,
     signal::{Mutable, SignalExt},
     signal_vec::SignalVecExt,
 };
-use shared::domain::jig::{JigResponse, JigId};
+use shared::domain::jig::{JigId, JigResponse};
 use std::cell::RefCell;
 use std::rc::Rc;
 use uuid::Uuid;
 
-use utils::{iframe::{IframeAction, ModuleToJigEditorMessage}, prelude::*};
+use utils::{
+    iframe::{IframeAction, ModuleToJigEditorMessage},
+    prelude::*,
+};
 
 pub struct SidebarDom {}
 

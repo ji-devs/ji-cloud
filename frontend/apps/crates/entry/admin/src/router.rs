@@ -1,33 +1,30 @@
-use utils::{prelude::*, routes::{Route, ModuleRoute, AdminRoute}};
 use shared::{
     api::{endpoints::user::Profile, ApiEndpoint},
     domain::user::UserProfile,
     error::EmptyError,
 };
 use std::rc::Rc;
-use wasm_bindgen::UnwrapThrowExt;
-use web_sys::Url;
+use utils::{
+    prelude::*,
+    routes::{AdminRoute, Route},
+};
+
+use dominator::{clone, html, Dom};
 use futures_signals::{
     map_ref,
-    signal::{Mutable, SignalExt, Signal}
+    signal::{Mutable, SignalExt},
 };
-use dominator::{Dom, html, clone};
-use dominator_helpers::futures::AsyncLoader;
-use std::cell::RefCell;
+
 use crate::{
     categories::dom::CategoriesPage,
-    locale::{
-        dom::LocalePage,
-        state::LoaderState as LocaleLoaderState
-    },
     images::{
-        add::dom::ImageAddPage,
-        meta::dom::ImageMetaPage,
-        search::dom::ImageSearchPage,
+        add::dom::ImageAddPage, meta::dom::ImageMetaPage, search::dom::ImageSearchPage,
         tags::ImageTags,
     },
+    locale::{dom::LocalePage, state::LoaderState as LocaleLoaderState},
     sidebar::Sidebar,
 };
+use std::cell::RefCell;
 pub struct Router {
     app: RefCell<Option<AppState>>,
     profile: Mutable<Option<Option<UserProfile>>>,
@@ -43,12 +40,11 @@ impl Router {
 }
 
 pub enum AppState {
-    Locale(Rc<LocaleLoaderState>)
+    Locale(Rc<LocaleLoaderState>),
 }
 
 impl Router {
     pub fn render(state: Rc<Self>) -> Dom {
-
         html!("div", {
             .future(clone!(state => async move {
                 let (result, status) = api_with_auth_status::<UserProfile, EmptyError, ()>(&Profile::PATH, Profile::METHOD, None).await;
@@ -86,8 +82,8 @@ impl Router {
                                 let dom = match route.clone() {
                                     Route::Admin(route) => {
                                         let locked = match profile {
-                                            None => true, 
-                                            Some(user) => !route.allowed_user_scope(&user.scopes) 
+                                            None => true,
+                                            Some(user) => !route.allowed_user_scope(&user.scopes)
                                         };
 
                                         if locked {
@@ -128,11 +124,10 @@ impl Router {
         })
     }
 
-    fn with_child(&self, route: AdminRoute, dom:Dom) -> Dom {
-        html!("admin-shell", { 
+    fn with_child(&self, route: AdminRoute, dom: Dom) -> Dom {
+        html!("admin-shell", {
             .child(Sidebar::render(Sidebar::new(route, self.profile.read_only())))
             .child(dom)
         })
     }
 }
-

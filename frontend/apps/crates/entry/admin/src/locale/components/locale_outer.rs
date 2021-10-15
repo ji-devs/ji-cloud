@@ -1,30 +1,33 @@
+use super::super::state::{SortKind, SortOrder, State};
+use crate::locale::actions::AsStringExt;
+use crate::locale::components::entry_row::EntryRow;
+use crate::locale::components::select_columns;
+use crate::locale::components::table_headers::TableHeaderDom;
+use dominator::{clone, html, with_node, Dom};
+use futures_signals::map_ref;
+use futures_signals::signal::SignalExt;
+use futures_signals::signal_vec::SignalVecExt;
 use shared::domain::locale::ItemKind;
+use std::rc::Rc;
 use utils::events;
 use uuid::Uuid;
 use wasm_bindgen::UnwrapThrowExt;
 use web_sys::HtmlSelectElement;
-use crate::locale::components::table_headers::TableHeaderDom;
-use crate::locale::components::entry_row::EntryRow;
-use crate::locale::components::select_columns;
-use crate::locale::actions::AsStringExt;
-use dominator::{Dom, html, clone, with_node};
-use std::{collections::HashMap, rc::Rc};
-use super::super::state::{State, SortKind, SortOrder};
-use futures_signals::signal::SignalExt;
-use futures_signals::signal_vec::SignalVecExt;
-use futures_signals::map_ref;
 
 const STR_ADD_ENTRY: &'static str = "Add a text";
 
-pub struct LocaleOuterDom {
-
-}
+pub struct LocaleOuterDom {}
 
 impl LocaleOuterDom {
     pub fn get_item_kind_name_by_id(map: &Vec<ItemKind>, id: Option<Uuid>) -> String {
         match id {
-            Some(id) => map.iter().find(|item_kind| item_kind.id == id).unwrap_throw().name.clone(),
-            None => String::new()
+            Some(id) => map
+                .iter()
+                .find(|item_kind| item_kind.id == id)
+                .unwrap_throw()
+                .name
+                .clone(),
+            None => String::new(),
         }
     }
 
@@ -125,7 +128,7 @@ impl LocaleOuterDom {
                                 })) =>
                                 *in_section && *in_item_kind && *in_status
                             }
-                            
+
                         }))
                         .map(clone!(state => move |entry| {
                             EntryRow::render(entry.clone(), state.clone())

@@ -1,32 +1,14 @@
-use dominator::{html, Dom, clone};
+use dominator::{clone, html, Dom};
 use std::rc::Rc;
-use crate::{
-    state::*,
-    settings::state::*
-};
+
 use super::state::*;
-use components::module::_groups::cards::{
-    lookup::{self, Side},
-    play::card::dom::{render_card, CardOptions, render_empty_card, EmptyCardOptions, EmptyKind, Size},
-    edit::{
-        config,
-        state::*
-    },
+use components::module::_groups::cards::play::card::dom::{
+    render_card, render_empty_card, CardOptions, EmptyCardOptions, EmptyKind, Size,
 };
 use futures_signals::{
-    map_ref,
-    signal::{Signal, SignalExt, ReadOnlyMutable},
-    signal_vec::{SignalVec, SignalVecExt}
+    signal::SignalExt,
+    signal_vec::{SignalVec, SignalVecExt},
 };
-
-use shared::domain::jig::module::body::{
-    ThemeId,
-    ModeExt,
-    _groups::cards::{Mode, Step, Card}
-};
-use rand::prelude::*;
-
-use utils::prelude::*;
 
 pub fn render(state: Rc<MainSettings>) -> Dom {
     html!("matching-main", {
@@ -55,7 +37,7 @@ fn render_top_choices(state: Rc<MainSettings>) -> impl SignalVec<Item = Dom> {
                             render_card(options)
                         })
                         .child({
-                            let mut options = EmptyCardOptions::new(EmptyKind::Question, theme_id, Size::Matching);
+                            let options = EmptyCardOptions::new(EmptyKind::Question, theme_id, Size::Matching);
                             render_empty_card(options)
                         })
                     })
@@ -79,15 +61,15 @@ fn render_bottom_choices(state: Rc<MainSettings>) -> impl SignalVec<Item = Dom> 
         }))
 }
 /*
- *      <module-page-grid-resize>
-        <matching-main slot="main" ${argsToAttrs(props)} ${style} >
-          ${mapToString(arrayCount(nPairs), idx => {
-            return renderTop(idx);
-          })}
-          ${mapToString(arrayCount(nPairs), idx => {
-            return renderBottom(idx);
-          })}
-          ${renderFloating()}
-        </matching-main>
-      </module-page-grid-resize>
-      */
+*      <module-page-grid-resize>
+       <matching-main slot="main" ${argsToAttrs(props)} ${style} >
+         ${mapToString(arrayCount(nPairs), idx => {
+           return renderTop(idx);
+         })}
+         ${mapToString(arrayCount(nPairs), idx => {
+           return renderBottom(idx);
+         })}
+         ${renderFloating()}
+       </matching-main>
+     </module-page-grid-resize>
+     */

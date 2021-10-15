@@ -1,26 +1,14 @@
-use std::rc::Rc;
 use super::state::*;
-use shared::{
-    api::endpoints::{ApiEndpoint, user, session::*},
-    domain::{user::CreateUserRequest, session::*},
-    error::EmptyError
-};
-use utils::{
-    routes::*,
-    firebase::*,
-    prelude::*,
-    storage,
-};
 use dominator::clone;
-use wasm_bindgen::prelude::*;
-use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
-use futures_signals::signal::{Mutable, Signal, SignalExt};
-use futures::future::ready;
-use crate::{
-    register::state::{Step},
-    password::state::*
+use shared::{
+    api::endpoints::{user, ApiEndpoint},
+    domain::{session::*, user::CreateUserRequest},
+    error::EmptyError,
 };
-use zxcvbn::zxcvbn;
+use std::rc::Rc;
+use utils::{prelude::*, routes::*};
+
+use crate::password::state::*;
 
 pub fn register_email(state: Rc<State>) {
     state.clear_email_status();
@@ -33,9 +21,8 @@ pub fn register_email(state: Rc<State>) {
         early_exit = true;
     }
 
-
-    let email:String = state.email.borrow().clone();
-    let password:String = state.password.value.borrow().clone();
+    let email: String = state.email.borrow().clone();
+    let password: String = state.password.value.borrow().clone();
 
     if email.is_empty() {
         state.email_status.set(Some(EmailStatus::EmptyEmail));
@@ -60,7 +47,7 @@ pub fn register_email(state: Rc<State>) {
                 let route:String = Route::User(UserRoute::SendEmailConfirmation(email)).into();
                 dominator::routing::go_to_url(&route);
             }, 
-            Err(err) => {
+            Err(_err) => {
                 if status == 409 {
                     state.email_status.set(Some(EmailStatus::EmailExists));
                 } else {
@@ -75,8 +62,8 @@ pub fn register_google(state: Rc<State>) {
     state.clear_email_status();
     state.password.clear_status();
 
-    state.loader.load(clone!(state => async move {
-        crate::oauth::actions::redirect(GetOAuthUrlServiceKind::Google, OAuthUrlKind::Register).await;
-    }));
+    state.loader.load(async {
+        crate::oauth::actions::redirect(GetOAuthUrlServiceKind::Google, OAuthUrlKind::Register)
+            .await;
+    });
 }
-

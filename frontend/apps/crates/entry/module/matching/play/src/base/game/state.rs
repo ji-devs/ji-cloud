@@ -1,18 +1,12 @@
-use components::module::_groups::cards::lookup::Side;
-use shared::domain::jig::module::body::{
-    _groups::cards::{CardPair, Card},
-    matching::PlayerSettings
-};
-use std::sync::atomic::{AtomicUsize, Ordering};
+use super::card::state::*;
 use crate::base::state::Base;
+use futures_signals::signal::{Mutable, SignalExt};
+use rand::prelude::*;
+use shared::domain::jig::module::body::_groups::cards::Card;
 use std::cell::RefCell;
 use std::rc::Rc;
-use futures_signals::{
-    signal::{Mutable, Signal, SignalExt}
-};
-use rand::prelude::*;
+use std::sync::atomic::AtomicUsize;
 use utils::prelude::*;
-use super::card::state::*;
 
 pub struct Game {
     pub base: Rc<Base>,
@@ -24,7 +18,7 @@ pub struct Game {
 }
 impl Game {
     pub fn new(base: Rc<Base>) -> Rc<Self> {
-        let _self = Rc::new(Self { 
+        let _self = Rc::new(Self {
             base,
             remaining: RefCell::new(Vec::new()),
             used: RefCell::new(Vec::new()),
@@ -46,7 +40,6 @@ impl Game {
 #[derive(Clone, Debug)]
 pub struct CardPairId(pub Card, pub Card, pub usize);
 
-
 #[derive(Clone)]
 pub struct Current {
     pub top: Vec<Rc<CardTop>>,
@@ -60,11 +53,10 @@ impl Current {
         let used = &mut *game.used.borrow_mut();
         let rng = &mut *game.rng.borrow_mut();
 
-        let deck_len = (remaining.len() + used.len());
+        let _deck_len = remaining.len() + used.len();
 
-        let amount:usize = game.base.settings.n_choices.into();
-        let amount:usize = amount.min(game.base.raw_pairs.len());
-
+        let amount: usize = game.base.settings.n_choices.into();
+        let amount: usize = amount.min(game.base.raw_pairs.len());
 
         // Remaining and used is split so that we can detect
         // when the entire deck has been looped through
@@ -75,41 +67,35 @@ impl Current {
         let target = remaining.pop().unwrap_ji();
 
         //first get all the potential choices
-        let mut others:Vec<&CardPairId> = remaining.iter().chain(used.iter()).collect();
+        let mut others: Vec<&CardPairId> = remaining.iter().chain(used.iter()).collect();
         //shuffle them up
         others.shuffle(rng);
 
         //take just what we need
-        let mut others:Vec<CardPairId> = others
+        let mut others: Vec<CardPairId> = others
             .into_iter()
-            .take(amount-1)
+            .take(amount - 1)
             .map(|x| x.clone())
             .collect();
 
-        //add in our target 
+        //add in our target
         others.push(target.clone());
 
-        //re-shuffle to move it 
+        //re-shuffle to move it
         others.shuffle(rng);
-        
+
         //add the target to the used buffer
         used.push(target.clone());
 
-
         /// clone into top/bottom
-
-        let mut top:Vec<Rc<CardTop>> = others
+        let mut top: Vec<Rc<CardTop>> = others
             .iter()
-            .map(|choice| {
-                Rc::new(CardChoice::<TopPhase>::new(game.clone(), choice.clone()))
-            })
+            .map(|choice| Rc::new(CardChoice::<TopPhase>::new(game.clone(), choice.clone())))
             .collect();
 
-        let mut bottom:Vec<Rc<CardBottom>> = others
+        let mut bottom: Vec<Rc<CardBottom>> = others
             .iter()
-            .map(|choice| {
-                Rc::new(CardChoice::<BottomPhase>::new(game.clone(), choice.clone()))
-            })
+            .map(|choice| Rc::new(CardChoice::<BottomPhase>::new(game.clone(), choice.clone())))
             .collect();
 
         //shuffle again so there's some horizontal difference

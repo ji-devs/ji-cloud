@@ -1,6 +1,6 @@
-use shared::domain::jig::module::body::Image;
-use dominator::{html, Dom};
 use crate::unwrap::UnwrapJiExt;
+use dominator::{html, Dom};
+use shared::domain::jig::module::body::Image;
 
 pub trait ImageExt {
     fn render(&self, slot: Option<&str>) -> Dom;

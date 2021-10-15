@@ -8,10 +8,7 @@ use futures_signals::{
 use shared::domain::jig::JigResponse;
 use utils::{ages::AgeRangeVecExt, events, jig::published_at_string};
 
-use super::{
-    super::state::State,
-    report,
-};
+use super::{super::state::State, report};
 
 pub fn render(state: Rc<State>) -> Dom {
     html!("anchored-overlay", {
@@ -51,9 +48,7 @@ pub fn render(state: Rc<State>) -> Dom {
 }
 
 fn info_open_signal(state: Rc<State>) -> impl Signal<Item = bool> {
-    state
-        .info_popup_active
-        .signal_cloned()
+    state.info_popup_active.signal_cloned()
 }
 
 fn render_jig_info(state: Rc<State>, jig: &JigResponse) -> Dom {

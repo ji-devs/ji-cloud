@@ -1,14 +1,4 @@
-use dominator::clone;
-use std::rc::Rc;
-use crate::{
-    state::*,
-    settings::state::*
-};
 use super::state::*;
-use utils::prelude::*;
-use shared::domain::jig::module::body::flashcards::DisplayMode;
-use components::module::_groups::cards::edit::state::RawDataExt;
-
 
 impl SidebarSettings {
     pub fn set_n_choices(&self, n_choices: u8) {
@@ -49,10 +39,10 @@ impl SidebarSettings {
         self.base.history.push_modify(|raw| {
             if let Some(content) = &mut raw.content {
                 if !flag {
-                    content.player_settings.time_limit = None; 
+                    content.player_settings.time_limit = None;
                 } else {
                     let value = self.base.extra.settings.time_limit.get();
-                    content.player_settings.time_limit = Some(value); 
+                    content.player_settings.time_limit = Some(value);
                 }
             }
         })

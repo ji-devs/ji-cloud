@@ -1,3 +1,4 @@
+use components::module::_common::thumbnail::ModuleThumbnail;
 use dominator::{clone, html, Dom};
 use futures_signals::{
     signal::SignalExt,
@@ -6,7 +7,6 @@ use futures_signals::{
 use shared::domain::jig::JigResponse;
 use std::rc::Rc;
 use utils::{ages::AgeRangeVecExt, events, jig::published_at_string};
-use components::module::_common::thumbnail::ModuleThumbnail;
 
 use super::super::state::State;
 

@@ -1,22 +1,24 @@
-use utils::{prelude::*, drag::*, resize::{ResizeInfo, get_resize_info}, math::BoundsF64};
-use shared::domain::jig::module::body::Transform;
 use super::state::*;
+use shared::domain::jig::module::body::Transform;
 use std::rc::Rc;
+use utils::{
+    drag::*,
+    math::BoundsF64,
+    prelude::*,
+    resize::{get_resize_info, ResizeInfo},
+};
 
 impl SelectBox {
-    pub fn reset_bounds(&self, resize_info:&ResizeInfo) {
-        self.bounds.set(
-            self.elem.borrow()
-                .as_ref()
-                .map(|elem| {
-                    let rect = elem.get_bounding_client_rect();
-                    BoundsF64::new_from_dom_normalized(&rect, &resize_info)
-                })
-        );
+    pub fn reset_bounds(&self, resize_info: &ResizeInfo) {
+        self.bounds.set(self.elem.borrow().as_ref().map(|elem| {
+            let rect = elem.get_bounding_client_rect();
+            BoundsF64::new_from_dom_normalized(&rect, &resize_info)
+        }));
     }
 
     pub fn start_drag(&self, x: i32, y: i32) {
-        self.drag.set(Some(Rc::new(Drag::new(x, y, 0.0, 0.0, true))));
+        self.drag
+            .set(Some(Rc::new(Drag::new(x, y, 0.0, 0.0, true))));
     }
 
     pub fn try_move_drag(&self, x: i32, y: i32) {
@@ -24,7 +26,7 @@ impl SelectBox {
             if let Some((_, diff)) = drag.update(x, y) {
                 let resize_info = get_resize_info();
                 let (diff_x, diff_y) = resize_info.get_px_normalized(diff.x as f64, diff.y as f64);
-    
+
                 self.transform_override.replace_with(|t| {
                     let mut t = t.clone();
                     t.add_translation_2d(diff_x * -1.0, diff_y * -1.0);
@@ -35,9 +37,9 @@ impl SelectBox {
         }
     }
 
-    pub fn try_end_drag(&self, x: i32, y: i32) -> Option<Transform> {
+    pub fn try_end_drag(&self, _x: i32, _y: i32) -> Option<Transform> {
         if self.drag.lock_ref().is_some() {
-            let drag = self.drag.lock_mut().take().unwrap_ji();
+            let _drag = self.drag.lock_mut().take().unwrap_ji();
             Some(self.transform_override.get_cloned())
         } else {
             None

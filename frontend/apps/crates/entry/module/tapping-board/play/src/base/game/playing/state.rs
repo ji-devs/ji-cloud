@@ -1,20 +1,10 @@
-use std::{ops::Deref, rc::Rc, cell::RefCell};
 use crate::base::game::state::*;
-use futures_signals::{
-    map_ref,
-    signal::{Signal, SignalExt, Mutable}
-};
+use components::traces::{bubble::TraceBubble, utils::TraceExt};
 use dominator::clone;
-use components::traces::{
-    utils::TraceExt,
-    bubble::TraceBubble,
-};
-use shared::domain::jig::module::body::{
-    Audio,
-    _groups::design::Trace,
-    tapping_board::Next
-};
-use web_sys::AudioContext;
+use futures_signals::signal::{Mutable, SignalExt};
+use shared::domain::jig::module::body::_groups::design::Trace;
+use std::{ops::Deref, rc::Rc};
+
 use std::collections::HashSet;
 
 pub struct PlayState {
@@ -25,20 +15,19 @@ pub struct PlayState {
 
 impl PlayState {
     pub fn new(game: Rc<Game>) -> Rc<Self> {
-
-            let traces =
-                game.base.traces
-                    .iter()
-                    .map(|trace| PlayTrace::new(game.clone(), trace.clone()))
-                    .collect();
+        let traces = game
+            .base
+            .traces
+            .iter()
+            .map(|trace| PlayTrace::new(game.clone(), trace.clone()))
+            .collect();
 
         Rc::new(Self {
             game,
             traces,
-            selected_set: Mutable::new(HashSet::new())
+            selected_set: Mutable::new(HashSet::new()),
         })
     }
-
 }
 
 pub struct PlayTrace {
@@ -68,10 +57,15 @@ impl PlayTrace {
         if self.audio.is_none() && self.text.is_none() {
             self.phase.set(PlayPhase::IdleSelected);
         } else {
-            if let Some(bounds)  = self.inner.calc_bounds(true) {
-                let bubble = TraceBubble::new(bounds, self.audio.clone(), self.text.clone(), Some(clone!(play_state => move || {
-                    play_state.evaluate_end();
-                }))); 
+            if let Some(bounds) = self.inner.calc_bounds(true) {
+                let bubble = TraceBubble::new(
+                    bounds,
+                    self.audio.clone(),
+                    self.text.clone(),
+                    Some(clone!(play_state => move || {
+                        play_state.evaluate_end();
+                    })),
+                );
                 self.phase.set(PlayPhase::Playing(bubble));
             }
         }
@@ -80,7 +74,7 @@ impl PlayTrace {
     pub fn kill_playback(&self) {
         self.phase.replace_with(|curr| match curr {
             PlayPhase::Waiting => PlayPhase::Waiting,
-            _ => PlayPhase::IdleSelected
+            _ => PlayPhase::IdleSelected,
         });
     }
 }
@@ -89,5 +83,5 @@ impl PlayTrace {
 pub enum PlayPhase {
     Waiting,
     Playing(Rc<TraceBubble>),
-    IdleSelected
+    IdleSelected,
 }

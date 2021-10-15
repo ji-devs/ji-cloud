@@ -4,7 +4,18 @@ use futures_signals::{
     map_ref,
     signal::{Signal, SignalExt},
 };
-use shared::{api::endpoints::{self, ApiEndpoint}, domain::{CreateResponse, jig::{JigResponse, JigId, JigPlayerSettings, JigUpdateDraftDataRequest, LiteModule, ModuleKind, module::{ModuleCreateRequest, ModuleId, ModuleResponse}}}, error::EmptyError};
+use shared::{
+    api::endpoints::{self, ApiEndpoint},
+    domain::{
+        jig::{
+            module::{ModuleCreateRequest, ModuleId, ModuleResponse},
+            JigId, JigPlayerSettings, JigResponse, JigUpdateDraftDataRequest, LiteModule,
+            ModuleKind,
+        },
+        CreateResponse,
+    },
+    error::EmptyError,
+};
 use std::cell::RefCell;
 use std::rc::Rc;
 use utils::{iframe::ModuleToJigEditorMessage, jig::JigPlayerOptions, prelude::*};
@@ -12,8 +23,12 @@ use utils::{iframe::ModuleToJigEditorMessage, jig::JigPlayerOptions, prelude::*}
 pub async fn load_jig(jig_id: JigId, jig_cell: Rc<RefCell<Option<JigResponse>>>) {
     let path = endpoints::jig::GetDraft::PATH.replace("{id}", &jig_id.0.to_string());
 
-    match api_with_auth::<JigResponse, EmptyError, ()>(&path, endpoints::jig::GetDraft::METHOD, None)
-        .await
+    match api_with_auth::<JigResponse, EmptyError, ()>(
+        &path,
+        endpoints::jig::GetDraft::METHOD,
+        None,
+    )
+    .await
     {
         Ok(resp) => {
             *jig_cell.borrow_mut() = Some(resp);
@@ -32,7 +47,8 @@ pub fn navigate_to_publish(state: Rc<State>) {
 
 pub async fn update_jig(jig_id: &JigId, req: JigUpdateDraftDataRequest) -> Result<(), EmptyError> {
     let path = endpoints::jig::UpdateDraftData::PATH.replace("{id}", &jig_id.0.to_string());
-    api_with_auth_empty::<EmptyError, _>(&path, endpoints::jig::UpdateDraftData::METHOD, Some(req)).await
+    api_with_auth_empty::<EmptyError, _>(&path, endpoints::jig::UpdateDraftData::METHOD, Some(req))
+        .await
 }
 
 pub fn update_display_name(state: Rc<State>, value: String) {
@@ -97,16 +113,22 @@ pub fn on_iframe_message(state: Rc<State>, message: ModuleToJigEditorMessage) {
     match message {
         ModuleToJigEditorMessage::AppendModule(module) => {
             populate_added_module(Rc::clone(&state), module);
-        },
+        }
         ModuleToJigEditorMessage::Next => {
             state.collapsed.set(false);
-        },
+        }
     }
 }
 
 fn populate_added_module(state: Rc<State>, module: LiteModule) {
-    state.modules.lock_mut().push_cloned(Rc::new(Some(module.clone())));
-    state.jig_edit_state.route.set_neq(JigEditRoute::Module(module.id));
+    state
+        .modules
+        .lock_mut()
+        .push_cloned(Rc::new(Some(module.clone())));
+    state
+        .jig_edit_state
+        .route
+        .set_neq(JigEditRoute::Module(module.id));
 }
 
 pub fn use_module_as(state: Rc<State>, target_kind: ModuleKind, source_module_id: ModuleId) {
