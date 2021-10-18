@@ -1,6 +1,7 @@
 use super::{actions, state::*};
-use dominator::{clone, html, Dom};
+use dominator::{Dom, clone, html, with_node};
 use futures_signals::signal::Mutable;
+use web_sys::HtmlInputElement;
 use std::rc::Rc;
 
 use crate::{
@@ -67,12 +68,18 @@ impl Step2Page {
                 html!("input-wrapper", {
                     .property("slot", "organization")
                     .property("label", STR_ORGANIZATION_LABEL)
-                    .child(html!("input", {
-                        .event(clone!(state => move |evt:events::Input| {
-                            *state.organization.borrow_mut() = evt.value().and_then(|x| {
-                                if x.is_empty() { None } else { Some(x) }
-                            })
-                        }))
+                    .property_signal("error", state.organization_error.signal())
+                    .child(html!("input" => HtmlInputElement, {
+                        .with_node!(elem => {
+                            .event(clone!(state => move |_:events::Input| {
+                                let value = elem.value();
+                                *state.organization.borrow_mut() = if value.is_empty() {
+                                    None
+                                } else {
+                                    Some(value)
+                                }
+                            }))
+                        })
                     }))
                 }),
                 html!("div", {

@@ -2,12 +2,32 @@ import { LitElement, html, css, customElement, property } from "lit-element";
 import { ModuleKind, STR_MODULE_DISPLAY_NAME } from "@elements/module/_common/types";
 import "@elements/core/images/ui";
 
+const SHAKE_TIME = 1000;
+const STR_DRAG_ME = "Drag me";
+
 @customElement("jig-edit-module-card")
 export class _ extends LitElement {
     static get styles() {
         return [
             css`
+                :host {
+                    display: inline-grid;
+                }
+                :host([overlayShown]) {
+                    transform: perspective(1px);
+                    animation: shake 0.15s linear infinite;
+                }
+                @keyframes shake {
+                    50% {
+                        transform: translateX(3px) rotate(2deg);
+                    }
+                    100% {
+                        transform: translateX(-3px) rotate(-2deg);
+                    }
+                }
                 section {
+                    grid-row: 1;
+                    grid-column: 1;
                     width: 248px;
                     height: 224px;
                     padding: 24px 0 0;
@@ -46,6 +66,26 @@ export class _ extends LitElement {
                 img-ui {
                     cursor: grab;
                 }
+
+                .overlay {
+                    display: none;
+                }
+                :host([overlayShown]) .overlay {
+                    grid-row: 1;
+                    grid-column: 1;
+                    pointer-events: none;
+                    display: grid;
+                    place-content: center;
+                    background-color: red;
+                    border-radius: 16px;
+                    background-color: rgba(32, 64, 163, .9);
+                }
+                .overlay p {
+                    margin: 0;
+                    color: #ffffff;
+                    font-size: 24px;
+                    font-weight: bold;
+                }
             `,
         ];
     }
@@ -67,6 +107,16 @@ export class _ extends LitElement {
     @property({ type: Boolean })
     hover: boolean = false;
 
+    @property({ type: Boolean, reflect: true })
+    private overlayShown: boolean = false;
+
+    private showOverlay() {
+        this.overlayShown = true;
+        setTimeout(() => {
+            this.overlayShown = false;
+        }, SHAKE_TIME);
+    }
+
     render() {
         const { module, drag, hover } = this;
 
@@ -74,12 +124,16 @@ export class _ extends LitElement {
 
         const iconPath = `entry/jig/modules/large/${module}${iconSuffix}.svg`;
         return html`
-            <section @mouseenter="${this.onEnter}" @mouseleave="${this.onLeave}">
+            <section @mouseenter="${this.onEnter}" @mouseleave="${this.onLeave}" @click=${this.showOverlay}>
                 <div class="top">
                     <img-ui path="${iconPath}"></img-ui>
                 </div>
                 <div class="bottom">${STR_MODULE_DISPLAY_NAME[module]}</div>
             </section>
+            <div class="overlay">
+                <p>${STR_DRAG_ME}</p>
+                <img-ui path="entry/jig/arrow-drag-me.svg"></img-ui>
+            </div>
         `;
     }
 }

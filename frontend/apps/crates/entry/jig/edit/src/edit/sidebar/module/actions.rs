@@ -106,8 +106,9 @@ pub fn assign_kind(state: Rc<State>, kind: ModuleKind) {
 
                 match update_module(&state.sidebar.jig.id, &id, req).await {
                     Ok(_) => {
-                        state.sidebar.jig_edit_state.route.set(JigEditRoute::Module(id));
                         state.sidebar.collapsed.set(true);
+                        state.sidebar.jig_edit_state.route.set(JigEditRoute::Module(id.clone()));
+                        Route::push_state(Route::Jig(JigRoute::Edit(state.sidebar.jig.id, JigEditRoute::Module(id))));
                     },
                     Err(e) => {
                         log::error!("Error: {:?}", e);
