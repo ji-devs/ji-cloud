@@ -5,6 +5,17 @@ export type Color = "red" | "blue" | "green" | "darkGray";
 export type Size = "small" | "medium" | "large";
 export type Kind = "filled" | "text" | "outline";
 
+/*
+Some thoughts, this comment can be removed once this is resolved
+problem: wanna be able to quickly style the inner element (button and a) without part
+    solution 1) make inner display contents so that you can put the styling on the :host
+        problem: in the case of a the link wont include the paddings on the side
+    solution 2) make inner inherit all styles from parent
+        problem: things like display, or percentage are going to be calculated for both :host and inner
+    solution 3) hybrid, make :host display contents and have inner inherit all properties from parent except display that should be set with a custom property
+        problem: will have to use this custom display property
+*/
+
 @customElement("button-rect")
 export class _ extends LitElement {
     static get styles() {
@@ -107,6 +118,8 @@ export class _ extends LitElement {
                 button, a {
                     all: unset;
                     color: inherit;
+                    display: flex;
+                    column-gap: 6px;
                 }
             `
         ];
