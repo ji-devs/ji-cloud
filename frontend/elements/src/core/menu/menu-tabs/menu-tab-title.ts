@@ -79,6 +79,7 @@ export class _ extends LitElement {
           font-weight: 500;
           align-items: center;
           font-size: 14px;
+          line-height: 1.2;
         }
         @media (min-width: 1920px) {
           :host {
@@ -135,13 +136,6 @@ export class _ extends LitElement {
 
     this.addEventListener("mouseenter", this.onEnter);
     this.addEventListener("mouseleave", this.onLeave);
-  }
-
-  disconnectedCallback() {
-    super.disconnectedCallback();
-
-    this.removeEventListener("mouseenter", this.onEnter);
-    this.removeEventListener("mouseleave", this.onLeave);
   }
 
   render() {
