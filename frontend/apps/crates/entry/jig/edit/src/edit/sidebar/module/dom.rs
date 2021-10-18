@@ -64,6 +64,19 @@ impl ModuleDom {
                     // TODO:
                     // actions::mouse_down(state.clone(), evt.x(), evt.y());
                 })
+                .event_with_options(
+                    &EventOptions::bubbles(),
+                    clone!(state => move |_evt:events::Click| {
+                        match &*state.module {
+                            Some(_) => {
+                                actions::edit(state.clone())
+                            },
+                            None =>  {
+                                state.sidebar.jig_edit_state.route.set_neq(JigEditRoute::Landing);
+                            },
+                        };
+                    })
+                )
                 .child(html!("jig-edit-sidebar-module-window", {
                     .property("slot", "window")
                     .property_signal("state", State::window_state_signal(Rc::clone(&state)))
@@ -87,16 +100,6 @@ impl ModuleDom {
                                 actions::assign_kind(state.clone(), kind);
                             }
                         }
-                    }))
-                    .event(clone!(state => move |_evt:events::Click| {
-                        match &*state.module {
-                            Some(_) => {
-                                actions::edit(state.clone())
-                            },
-                            None =>  {
-                                state.sidebar.jig_edit_state.route.set_neq(JigEditRoute::Landing);
-                            },
-                        };
                     }))
                     .child_signal(state.sidebar.jig_edit_state.route.signal_ref(clone!(state, module => move |route| {
                         match (&*module, route) {
