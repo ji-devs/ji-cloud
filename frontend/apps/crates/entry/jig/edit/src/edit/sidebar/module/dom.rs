@@ -93,7 +93,8 @@ impl ModuleDom {
                             }
                         })
                     )
-                    .event(clone!(state => move |evt:events::Drop| {
+                    .event_with_options(&EventOptions::preventable(), clone!(state => move |evt:events::Drop| {
+                        evt.prevent_default(); // needed so that Firefox doesn't open the image
                         if let Some(data_transfer) = evt.data_transfer() {
                             if let Some(module_kind) = data_transfer.get_data("module_kind").ok() {
                                 let kind:ModuleKind = ModuleKind::from_str(&module_kind).unwrap_ji();
