@@ -1,15 +1,9 @@
-use components::module::_common::play::prelude::*;
-use shared::domain::jig::{
-    module::{
-        body::{legacy::ModuleData as RawData, Instructions},
-        ModuleId,
-    },
-    JigData, JigId,
-};
+use shared::domain::jig::{JigData, JigId, module::{ModuleId, body::{_groups::design::{Backgrounds, Sticker}, ThemeChoice, Instructions, legacy::{slide::Slide, ModuleData as RawData}}}};
+use components::{audio::mixer::AudioMixer, module::_common::play::prelude::*};
 use utils::prelude::*;
 
 use futures_signals::signal::Mutable;
-use std::rc::Rc;
+use awsm_web::loaders::fetch::fetch_url;
 
 pub struct Base {
     pub jig_id: JigId,
@@ -17,7 +11,9 @@ pub struct Base {
     pub jig: JigData,
     pub theme_id: ThemeId,
     pub module_phase: Mutable<ModulePlayPhase>,
-    pub raw: RawData,
+    pub game_id: String,
+    pub slide_id: String,
+    pub slide: Slide,
 }
 
 impl Base {
@@ -31,14 +27,33 @@ impl Base {
             ..
         } = init_args;
 
+        let url = utils::path::legacy_cdn_url(format!("{}/jigzi/slides/{}.json", raw.game_id, raw.slide_id));
+
+        let slide:Slide = fetch_url(&url)
+            .await
+            .unwrap_ji()
+            .json_from_str()
+            .await
+            .unwrap_ji();
+
         Rc::new(Self {
-            raw,
             jig_id,
             module_id,
             jig,
             theme_id,
             module_phase: init_args.play_phase,
+            game_id: raw.game_id,
+            slide_id: raw.slide_id,
+            slide,
         })
+    }
+
+    pub fn layers_url<T: AsRef<str>>(&self, path:T) -> String {
+        self.slide_url(format!("layers/{}", path.as_ref()))
+    }
+
+    pub fn slide_url<T: AsRef<str>>(&self, path:T) -> String {
+        utils::path::legacy_cdn_url(&format!("{}/unzipped/{}/{}", self.game_id, self.slide_id, path.as_ref()))
     }
 }
 

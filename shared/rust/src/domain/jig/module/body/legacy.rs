@@ -4,6 +4,8 @@ pub mod activity;
 pub mod design;
 #[allow(missing_docs)]
 pub mod path;
+#[allow(missing_docs)]
+pub mod slide;
 
 use crate::domain::jig::module::{
     body::{Body, BodyConvert, BodyExt, ThemeChoice},
@@ -13,36 +15,15 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::convert::TryFrom;
 
-/// only used for transcoding purposes
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Manifest {
-    /// backround audio- may not have jig equivilent
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub background_audio: Option<String>,
-    /// list of original module ids
-    pub modules: Vec<String>,
-}
-
 /// The body for [`Legacy`](crate::domain::jig::module::ModuleKind::Legacy) modules.
+/// This just points to the folder where legacy slides are loaded
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]
 pub struct ModuleData {
     /// base id for all file loading
-    pub base_id: String,
-    /// Design layer  
-    pub design: design::Design,
+    pub game_id: String,
 
-    #[allow(missing_docs)]
-    pub id: String,
-
-    #[allow(missing_docs)]
-    pub image_full: String,
-
-    #[allow(missing_docs)]
-    pub image_thumb: String,
-
-    #[allow(missing_docs)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub activity: Option<activity::Activity>,
+    /// base id for all file loading
+    pub slide_id: String,
 }
 
 impl BodyExt<(), ()> for ModuleData {
