@@ -115,10 +115,10 @@ impl SidebarDom {
                         ModuleDom::render(state.clone(), index, drag_target_index, len, module)
                     }))
                 )
-                .global_event_preventable(clone!(state => move |evt:events::MouseUp| {
+                .global_event(clone!(state => move |evt:events::MouseUp| {
                     drag_actions::mouse_up(state.clone(), evt.x(), evt.y());
                 }))
-                .global_event_preventable(clone!(state => move |evt:events::MouseMove| {
+                .global_event(clone!(state => move |evt:events::MouseMove| {
                     drag_actions::mouse_move(state.clone(), evt.x(), evt.y());
                 }))
             }))

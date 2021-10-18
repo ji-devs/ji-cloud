@@ -98,11 +98,11 @@ pub fn render_drag(state: Rc<CardDrag>) -> Dom {
     render_card_mixin(options, |dom| {
         dom.property("hasTransform", true)
             .style_signal("transform", state.drag.transform_signal())
-            .global_event_preventable(clone!(state => move |_evt:events::MouseUp| {
+            .global_event(clone!(state => move |_evt:events::MouseUp| {
                 state.on_release();
                 //on_mouse_up(evt.x() as i32, evt.y() as i32);
             }))
-            .global_event_preventable(clone!(state => move |evt:events::MouseMove| {
+            .global_event(clone!(state => move |evt:events::MouseMove| {
                 if let Some(_point) = state.drag.update(evt.x(), evt.y()) {
                     state.evaluate_drag_over();
                 }

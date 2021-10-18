@@ -50,7 +50,7 @@ web-sys = { version = "0.3.53", features = [
     'HtmlTextAreaElement'
 ] }
 wasm-bindgen-futures = "0.4.26"
-dominator = "0.5.19"
+dominator = "0.5.21"
 futures-signals = "0.3.22"
 dominator_helpers = "0.7.2"
 serde = { version = "1.0.130", features = ["derive"] }

@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use dominator::{clone, html, Dom};
+use dominator::{Dom, EventOptions, clone, html};
 use futures_signals::signal::{Signal, SignalExt};
 use shared::domain::user::{UserProfile, UserScope};
 use strum::IntoEnumIterator;
@@ -150,11 +150,14 @@ fn render_logged_out() -> Vec<Dom> {
             .property("color", "black")
             .property("href", &Route::User(UserRoute::Login(String::new())).to_string())
             .text(STR_LOGIN)
-            .event_preventable(|e: events::Click| {
-                e.prevent_default();
+            .event_with_options(
+                &EventOptions::preventable(),
+                |e: events::Click| {
+                    e.prevent_default();
 
-                actions::navigate_to_login();
-            })
+                    actions::navigate_to_login();
+                }
+            )
         }),
     ]
 }
