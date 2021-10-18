@@ -68,6 +68,10 @@ export class _ extends LitElement {
                     align-items: center;
                 }
 
+                .label {
+                    white-space: nowrap;
+                }
+
                 :host([active]), .hover {
                     color: #5590fc;
                 }
@@ -126,7 +130,7 @@ export class _ extends LitElement {
                         <img-ui path="core/menus/${filename}.svg"></img-ui>
                     `}
                 </div>
-                <div class="${labelClasses}">${label}</div>
+                <div class="label ${labelClasses}">${label}</div>
             </section>
         `;
     }
