@@ -206,9 +206,6 @@ where
                         let resp = {
                             let req = Some(ModuleGetQuery { q: String::from("unique") });
 
-                            log::info!("{:?}", req);
-                            log::info!("{:?}", serde_json::to_string_pretty(&req));
-
                             if is_draft {
                                 let path = GetDraft::PATH
                                     .replace("{id}",&_self.opts.jig_id.0.to_string())
