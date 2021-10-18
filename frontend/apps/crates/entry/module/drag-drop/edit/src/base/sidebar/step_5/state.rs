@@ -84,7 +84,7 @@ impl Tab {
                     }),
                 );
 
-                let state = InstructionsEditorState::new(base.instructions.clone(), callbacks);
+                let state = InstructionsEditorState::new(base.feedback.clone(), callbacks);
 
                 Self::Feedback(Rc::new(state))
             }
