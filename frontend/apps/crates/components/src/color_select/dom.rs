@@ -14,6 +14,7 @@ use wasm_bindgen_futures::spawn_local;
 const STR_SYSTEM_COLORS_LABEL: &'static str = "General colors";
 const STR_THEME_COLORS_LABEL: &'static str = "Theme colors";
 const STR_USER_COLORS_LABEL: &'static str = "My colors";
+const STR_ADD_COLOR: &'static str = "Add color";
 
 pub fn render(state: Rc<State>, slot: Option<&str>) -> Dom {
     let init_loader = AsyncLoader::new();
@@ -125,7 +126,11 @@ fn render_add_color(state: Rc<State>) -> Dom {
         .property("slot", "add-color")
         .child(html!("button-rect", {
             .property("kind", "text")
-            .text("+ Add color")
+            .property("color", "blue")
+            .child(html!("fa-icon", {
+                .property("icon", "fa-solid fa-circle-plus")
+            }))
+            .text(STR_ADD_COLOR)
         }))
         .event(clone!(state => move |e: events::CustomChange| {
             let color = hex_to_rgba8(&e.value());
