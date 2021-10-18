@@ -107,6 +107,7 @@ player_popup = []
 box_outline = []
 buttons = []
 tabs = []
+overlay = []
 
 default = ["all"]
 all= [
@@ -139,5 +140,6 @@ all= [
     "player_popup",
     "box_outline",
     "buttons",
-    "tabs"
+    "tabs",
+    "overlay"
 ]

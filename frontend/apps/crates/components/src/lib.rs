@@ -53,3 +53,5 @@ pub mod tooltip;
 pub mod traces;
 #[cfg(feature = "transform")]
 pub mod transform;
+#[cfg(feature = "overlay")]
+pub mod overlay;

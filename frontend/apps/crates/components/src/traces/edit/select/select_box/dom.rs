@@ -16,6 +16,7 @@ use crate::{
     audio::player_button::*,
     box_outline::{BoxOutline, BoxOutlineMixins, BoxOutlineStyle},
     buttons::{Button, ButtonStyle, ButtonStyleIcon},
+    overlay::handle::OverlayHandle,
     traces::edit::state::*,
 };
 //see https://www.loom.com/share/c9ec53482ad94a97bff74d143a5a8cd2
@@ -73,16 +74,18 @@ impl EditSelectTrace {
                     .menu_pos_signal(get_selected_signal())
                     .map(clone!(parent, select_box => move |pos| {
                         pos.map(|pos| {
-                            html!("overlay-container", {
-                                .child(html!("overlay-drag", {
-                                    .property("target", web_sys::DomRect::new_with_x_and_y_and_width_and_height(pos.0 + 32.0, pos.1, 1.0, 1.0).unwrap_ji())
-                                    .child(html!("menu-container", {
-                                        .child(render_menu(parent.clone(), index.clone()))
+                            html!("empty-fragment", {
+                                .apply(OverlayHandle::lifecycle(
+                                    clone!(pos, parent, index, select_box => move || html!("overlay-drag", {
+                                        .property("target", web_sys::DomRect::new_with_x_and_y_and_width_and_height(pos.0 + 32.0, pos.1, 1.0, 1.0).unwrap_ji())
+                                        .child(html!("menu-container", {
+                                            .child(render_menu(parent.clone(), index.clone()))
+                                        }))
+                                        .event(clone!(select_box => move |_evt:events::Close| {
+                                            select_box.menu_pos.set(None);
+                                        }))
                                     }))
-                                    .event(clone!(select_box => move |_evt:events::Close| {
-                                        select_box.menu_pos.set(None);
-                                    }))
-                                }))
+                                ))
                             })
                         })
                     }))

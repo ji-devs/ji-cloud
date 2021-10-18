@@ -2,7 +2,7 @@ use dominator::{clone, html, with_node, Dom};
 use futures_signals::signal::SignalExt;
 use std::rc::Rc;
 use utils::prelude::*;
-
+use crate::overlay::handle::OverlayHandle;
 use super::state::*;
 use utils::resize::resize_info_signal;
 use web_sys::HtmlElement;
@@ -14,6 +14,8 @@ pub fn render_transform(
     resize_level: ResizeLevel,
     get_menu_contents: Option<impl Fn() -> Dom + 'static>,
 ) -> Dom {
+    let get_menu_contents = get_menu_contents.map(Rc::new);
+
     html!("empty-fragment", {
         .child(
             html!("transform-box", {
@@ -96,21 +98,28 @@ pub fn render_transform(
             state
                 .menu_pos.signal_cloned()
                 .map(clone!(state => move |pos| {
-                    get_menu_contents.as_ref().and_then(|get_menu_contents| {
-                        pos.map(|pos| {
-                            html!("overlay-container", {
-                                .child(html!("overlay-drag", {
-                                    .property("target", web_sys::DomRect::new_with_x_and_y_and_width_and_height(pos.0 + 32.0, pos.1, 1.0, 1.0).unwrap_ji())
-                                    .child(html!("menu-container", {
-                                        .child(get_menu_contents())
-                                    }))
-                                    .event(clone!(state => move |_evt:events::Close| {
-                                        state.menu_pos.set(None);
-                                    }))
-                                }))
+                    match get_menu_contents.as_ref() {
+                        None => None,
+                        Some(get_menu_contents) => {
+                            pos.map(|pos| {
+                                html!("empty-fragment", {
+                                    .apply(OverlayHandle::lifecycle(
+                                        clone!(pos, state, get_menu_contents => move || {
+                                            html!("overlay-drag", {
+                                                .property("target", web_sys::DomRect::new_with_x_and_y_and_width_and_height(pos.0 + 32.0, pos.1, 1.0, 1.0).unwrap_ji())
+                                                .child(html!("menu-container", {
+                                                    .child((get_menu_contents.as_ref())())
+                                                }))
+                                                .event(clone!(state => move |_evt:events::Close| {
+                                                    state.menu_pos.set(None);
+                                                }))
+                                            })
+                                        })
+                                    ))
+                                })
                             })
-                        })
-                    })
+                        }
+                    }
                 }))
         )
     })

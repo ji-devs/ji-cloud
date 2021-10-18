@@ -9,6 +9,7 @@ use std::borrow::Cow;
 use std::ops::Deref;
 
 pub use awsm_web::audio::{AudioClip, AudioClipOptions, AudioHandle, AudioSource, Id};
+
 thread_local! {
     pub static AUDIO_MIXER:AudioMixer = AudioMixer {
         inner: Rc::new(AwsmAudioMixer::new(None)),
