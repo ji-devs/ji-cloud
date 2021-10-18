@@ -1,7 +1,7 @@
 use shared::domain::jig::{JigData, JigId, module::{ModuleId, body::{_groups::design::{Backgrounds, Sticker}, ThemeChoice, Instructions, legacy::{slide::Slide, ModuleData as RawData}}}};
 use components::{audio::mixer::AudioMixer, module::_common::play::prelude::*};
 use utils::prelude::*;
-
+use std::rc::Rc;
 use futures_signals::signal::Mutable;
 use awsm_web::loaders::fetch::fetch_url;
 
