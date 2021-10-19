@@ -23,7 +23,12 @@ pub enum Sticker {
 pub struct Sprite {
     pub src: String,
     pub transform_matrix: [f64; 16],
-    pub show_kind: ShowKind,
+    /// start out hidden
+    pub hide: bool,
+    /// toggle hidden state
+    pub hide_toggle: Option<HideToggle>,
+    /// animation options
+    pub animation: Option<Animation>
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -32,13 +37,25 @@ pub struct Text {
     pub width: f64,
     pub height: f64,
     pub transform_matrix: [f64; 16],
-    pub show_kind: ShowKind,
+    /// start out hidden
+    pub hide: bool,
+    /// toggle hidden state
+    pub hide_toggle: Option<HideToggle>
 }
 
 #[repr(u8)]
 #[derive(Serialize_repr, Deserialize_repr, PartialEq, Debug, Clone, Copy)]
-pub enum ShowKind {
-    ShowOnLoad,
-    HideOnTap,
-    ShowOnTap,
+pub enum HideToggle{
+    /// only let the toggle fire once
+    Once,
+    /// let the toggle fire indefinitely
+    Always,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Animation {
+    /// do not let the animation loop
+    pub once: bool,
+    /// wait for tap before playing
+    pub tap: bool
 }

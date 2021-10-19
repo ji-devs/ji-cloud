@@ -8,7 +8,7 @@ use super::src_manifest::{
     shape::PathElementKind as SrcPathElementKind,
     layer::Layer as SrcLayer,
     layer::LayerKind as SrcLayerKind,
-    layer::PlayKind as SrcPlayKind,
+    layer::LoopKind as SrcLoopKind,
     layer::ShowKind as SrcShowKind,
 };
 use shared::domain::jig::{JigCreateRequest, JigData, JigPlayerSettings, module::{ModuleCreateRequest, ModuleBody, body::{
@@ -113,7 +113,9 @@ impl SrcSlide {
         }
     }
 }
-
+    // pub hide: bool,
+    // pub hide_toggle: Option<HideToggle>,
+    // pub animation: Option<Animation>
 fn convert_design(layers: Vec<SrcLayer>) -> Design {
     let mut stickers: Vec<Sticker> = Vec::new();
     let mut bgs:Vec<String> = Vec::new();
@@ -127,11 +129,51 @@ fn convert_design(layers: Vec<SrcLayer>) -> Design {
                 let sticker = Sprite { 
                     src: layer.filename.unwrap(),
                     transform_matrix: convert_transform(layer.transform),
-                    show_kind: match layer.show_kind {
-                        SrcShowKind::ShowOnLoad => ShowKind::ShowOnLoad,
-                        SrcShowKind::HideOnTap => ShowKind::HideOnTap,
-                        SrcShowKind::ShowOnTap => ShowKind::ShowOnTap,
+                    hide: match layer.show_kind {
+                        SrcShowKind::ShowOnLoad => false, 
+                        SrcShowKind::HideOnTap => false, 
+                        SrcShowKind::ShowOnTap => true, 
+                    },
+
+                    hide_toggle: match layer.show_kind {
+                        SrcShowKind::ShowOnLoad => None, 
+                        _ => Some(
+                            if layer.toggle_show {
+                                HideToggle::Always
+                            } else {
+                                HideToggle::Once
+                            }
+                        ), 
+                    },
+
+                    animation: {
+                        if layer.kind == SrcLayerKind::Animation {
+                            Some(
+                                match layer.loop_kind {
+                                    SrcLoopKind::PlayOnLoadLoop => Animation {
+                                        once: false,
+                                        tap: false 
+                                    },
+                                    SrcLoopKind::PlayOnLoadOnce => Animation {
+                                        once: true,
+                                        tap: false 
+                                    },
+                                    SrcLoopKind::PlayOnTapLoop => Animation {
+                                        once: false,
+                                        tap: true 
+                                    },
+                                    SrcLoopKind::PlayOnTapOnce => Animation {
+                                        once: true,
+                                        tap: true 
+                                    },
+                                }
+                            )
+                        } else {
+                            None
+                        }
                     }
+
+
                 };
 
                 stickers.push(Sticker::Sprite(sticker));
@@ -142,11 +184,24 @@ fn convert_design(layers: Vec<SrcLayer>) -> Design {
                     width: layer.width,
                     height: layer.height,
                     transform_matrix: convert_transform(layer.transform),
-                    show_kind: match layer.show_kind {
-                        SrcShowKind::ShowOnLoad => ShowKind::ShowOnLoad,
-                        SrcShowKind::HideOnTap => ShowKind::HideOnTap,
-                        SrcShowKind::ShowOnTap => ShowKind::ShowOnTap,
-                    }
+
+                    hide: match layer.show_kind {
+                        SrcShowKind::ShowOnLoad => false, 
+                        SrcShowKind::HideOnTap => false, 
+                        SrcShowKind::ShowOnTap => true, 
+                    },
+
+                    hide_toggle: match layer.show_kind {
+                        SrcShowKind::ShowOnLoad => None, 
+                        _ => Some(
+                            if layer.toggle_show {
+                                HideToggle::Always
+                            } else {
+                                HideToggle::Once
+                            }
+                        ), 
+                    },
+
                 };
 
                 stickers.push(Sticker::Text(sticker));

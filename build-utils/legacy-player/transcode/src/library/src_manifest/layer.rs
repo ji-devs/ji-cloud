@@ -12,7 +12,7 @@ pub struct Layer {
     pub transform: Transform,
 
     #[serde(rename="InteractiveLoopType")]
-    pub play_kind: PlayKind,
+    pub loop_kind: LoopKind,
 
     #[serde(rename="InteractiveShowType")]
     pub show_kind: ShowKind,
@@ -35,11 +35,11 @@ pub struct Layer {
 
 #[repr(u8)]
 #[derive(Deserialize_repr, PartialEq, Debug, Clone, Copy)]
-pub enum PlayKind {
-    LoopOnLoad,
-    LoopOnTap,
-    OnceOnTap,
-    OnceOnLoad,
+pub enum LoopKind {
+    PlayOnLoadLoop,
+    PlayOnTapLoop,
+    PlayOnTapOnce,
+    PlayOnLoadOnce,
 }
 
 #[repr(u8)]
