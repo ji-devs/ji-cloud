@@ -164,6 +164,8 @@ pub async fn initialize_server_and_get_db(
 
     let db_url = DB_URL_MANAGER.get_url(&db_name);
 
+    println!("{}", db_url);
+
     let db = ji_cloud_api::db::get_pool(db_url.parse().expect("db url was invalid"))
         .await
         .expect("failed to get db");

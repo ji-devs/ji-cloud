@@ -14,7 +14,7 @@ expression: body
   "locale": "en_US",
   "opt_into_edu_resources": false,
   "over_18": true,
-  "timezone": "US/Pacific-New",
+  "timezone": "US/Pacific",
   "scopes": [
     "Admin"
   ],

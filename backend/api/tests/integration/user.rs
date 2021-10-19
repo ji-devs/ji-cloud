@@ -143,6 +143,8 @@ async fn patch_profile() -> anyhow::Result<()> {
         .await?
         .error_for_status()?;
 
+    println!("{:?}", resp);
+
     assert_eq!(resp.status(), StatusCode::NO_CONTENT);
 
     let resp = client
