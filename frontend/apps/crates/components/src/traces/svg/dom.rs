@@ -1,4 +1,4 @@
-use dominator::{clone, svg, Dom};
+use dominator::{Dom, clone, svg};
 use std::rc::Rc;
 use utils::{
     prelude::*,
@@ -186,10 +186,10 @@ where
         }))
         .children_signal_vec(children_draw)
 
-        .global_event_preventable(clone!(on_mouse_up => move |evt:events::MouseUp| {
+        .global_event(clone!(on_mouse_up => move |evt:events::MouseUp| {
             on_mouse_up(evt.x() as i32, evt.y() as i32);
         }))
-        .global_event_preventable(clone!(on_mouse_move => move |evt:events::MouseMove| {
+        .global_event(clone!(on_mouse_move => move |evt:events::MouseMove| {
             on_mouse_move(evt.x() as i32, evt.y() as i32);
         }))
     })
@@ -220,10 +220,10 @@ where
             on_mouse_down(evt.x() as i32, evt.y() as i32);
         }))
 
-        .global_event_preventable(clone!(on_mouse_up => move |evt:events::MouseUp| {
+        .global_event(clone!(on_mouse_up => move |evt:events::MouseUp| {
             on_mouse_up(evt.x() as i32, evt.y() as i32);
         }))
-        .global_event_preventable(clone!(on_mouse_move => move |evt:events::MouseMove| {
+        .global_event(clone!(on_mouse_move => move |evt:events::MouseMove| {
             on_mouse_move(evt.x() as i32, evt.y() as i32);
         }))
     })

@@ -1,4 +1,4 @@
-use dominator::{clone, html, Dom};
+use dominator::{Dom, EventOptions, clone, html};
 
 use super::super::menu::{dom as MenuDom, state::State as MenuState};
 use super::{actions, state::*};
@@ -36,7 +36,7 @@ impl ModuleDom {
                     if is_filler { "block" } else {"none"}
                 })
             }))
-            .child( html!("jig-sidebar-module", {
+            .child(html!("jig-sidebar-module", {
                 .future(State::drag_overlap_signal(state.clone()).for_each(clone!(state => move |overlap| {
                     if overlap {
                         state.sidebar.drag_target_index.set(Some(state.index));
@@ -64,29 +64,9 @@ impl ModuleDom {
                     // TODO:
                     // actions::mouse_down(state.clone(), evt.x(), evt.y());
                 })
-                .child(html!("jig-edit-sidebar-module-window", {
-                    .property("slot", "window")
-                    .property_signal("state", State::window_state_signal(Rc::clone(&state)))
-                    .property("activeModuleKind", state.kind_str())
-                    .event_preventable(clone!(state => move |evt:events::DragOver| {
-                        if let Some(data_transfer) = evt.data_transfer() {
-                            if data_transfer.types().index_of(&JsValue::from_str("module_kind"), 0) != -1 {
-                                if state.module.is_none() {
-                                    evt.prevent_default();
-                                }
-                            }
-                        }
-
-                    }))
-                    .event(clone!(state => move |evt:events::Drop| {
-                        if let Some(data_transfer) = evt.data_transfer() {
-                            if let Some(module_kind) = data_transfer.get_data("module_kind").ok() {
-                                let kind:ModuleKind = ModuleKind::from_str(&module_kind).unwrap_ji();
-                                actions::assign_kind(state.clone(), kind);
-                            }
-                        }
-                    }))
-                    .event(clone!(state => move |_evt:events::Click| {
+                .event_with_options(
+                    &EventOptions::bubbles(),
+                    clone!(state => move |_evt:events::Click| {
                         match &*state.module {
                             Some(_) => {
                                 actions::edit(state.clone())
@@ -95,6 +75,32 @@ impl ModuleDom {
                                 state.sidebar.jig_edit_state.route.set_neq(JigEditRoute::Landing);
                             },
                         };
+                    })
+                )
+                .child(html!("jig-edit-sidebar-module-window", {
+                    .property("slot", "window")
+                    .property_signal("state", State::window_state_signal(Rc::clone(&state)))
+                    .property("activeModuleKind", state.kind_str())
+                    .event_with_options(
+                        &EventOptions::preventable(),
+                        clone!(state => move |evt:events::DragOver| {
+                            if let Some(data_transfer) = evt.data_transfer() {
+                                if data_transfer.types().index_of(&JsValue::from_str("module_kind"), 0) != -1 {
+                                    if state.module.is_none() {
+                                        evt.prevent_default();
+                                    }
+                                }
+                            }
+                        })
+                    )
+                    .event_with_options(&EventOptions::preventable(), clone!(state => move |evt:events::Drop| {
+                        evt.prevent_default(); // needed so that Firefox doesn't open the image
+                        if let Some(data_transfer) = evt.data_transfer() {
+                            if let Some(module_kind) = data_transfer.get_data("module_kind").ok() {
+                                let kind:ModuleKind = ModuleKind::from_str(&module_kind).unwrap_ji();
+                                actions::assign_kind(state.clone(), kind);
+                            }
+                        }
                     }))
                     .child_signal(state.sidebar.jig_edit_state.route.signal_ref(clone!(state, module => move |route| {
                         match (&*module, route) {

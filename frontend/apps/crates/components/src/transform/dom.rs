@@ -85,10 +85,10 @@ pub fn render_transform(
                     }
                 }))
 
-                .global_event_preventable(clone!(state => move |evt:events::MouseUp| {
+                .global_event(clone!(state => move |evt:events::MouseUp| {
                     state.stop_tracking_action(evt.x() as i32, evt.y() as i32);
                 }))
-                .global_event_preventable(clone!(state => move |evt:events::MouseMove| {
+                .global_event(clone!(state => move |evt:events::MouseMove| {
                     state.mouse_move(evt.x() as i32, evt.y() as i32);
                 }))
 

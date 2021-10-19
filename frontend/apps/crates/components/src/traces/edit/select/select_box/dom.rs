@@ -1,4 +1,4 @@
-use dominator::{clone, html, Dom, DomBuilder};
+use dominator::{Dom, DomBuilder, clone, html};
 use std::rc::Rc;
 use utils::{
     prelude::*,
@@ -145,10 +145,10 @@ impl EditSelectTrace {
                                             .event(clone!(select_box => move |evt:events::MouseDown| {
                                                 select_box.start_drag(evt.x() as i32, evt.y() as i32);
                                             }))
-                                            .global_event_preventable(clone!(select_box => move |evt:events::MouseMove| {
+                                            .global_event(clone!(select_box => move |evt:events::MouseMove| {
                                                 select_box.try_move_drag(evt.x() as i32, evt.y() as i32);
                                             }))
-                                            .global_event_preventable(clone!(parent, select_box => move |evt:events::MouseUp| {
+                                            .global_event(clone!(parent, select_box => move |evt:events::MouseUp| {
                                                 if let Some(transform) = select_box.try_end_drag(evt.x() as i32, evt.y() as i32) {
                                                     if let Some(index) = index {
                                                         parent.change_transform(index, transform);

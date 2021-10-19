@@ -1,4 +1,4 @@
-use dominator::{clone, html, Dom};
+use dominator::{clone, html, Dom, EventOptions};
 use std::rc::Rc;
 
 use utils::prelude::*;
@@ -105,15 +105,17 @@ pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<MainCard<RawData, E>>)
                                 None => {
                                     html!("img-ui", {
                                         .property("path", "core/_common/image-empty.svg")
-                                        .event_preventable(clone!(state => move |evt:events::DragOver| {
-                                            if let Some(data_transfer) = evt.data_transfer() {
-                                                if data_transfer.types().index_of(&JsValue::from_str(IMAGE_SEARCH_DATA_TRANSFER), 0) != -1 {
-                                                    evt.prevent_default();
-                                                    state.editing_active.set_neq(true);
+                                        .event_with_options(
+                                            &EventOptions::preventable(),
+                                            clone!(state => move |evt:events::DragOver| {
+                                                if let Some(data_transfer) = evt.data_transfer() {
+                                                    if data_transfer.types().index_of(&JsValue::from_str(IMAGE_SEARCH_DATA_TRANSFER), 0) != -1 {
+                                                        evt.prevent_default();
+                                                        state.editing_active.set_neq(true);
+                                                    }
                                                 }
-                                            }
-
-                                        }))
+                                            })
+                                        )
                                         .event(clone!(state => move |_evt:events::DragLeave| {
                                             state.editing_active.set_neq(false);
                                         }))
