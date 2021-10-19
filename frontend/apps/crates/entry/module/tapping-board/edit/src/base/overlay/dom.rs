@@ -8,6 +8,8 @@ use std::rc::Rc;
 
 impl DomRenderable for Overlay {
     fn render(_state: Rc<Overlay>) -> Dom {
-        OverlayContainer::new().render()
+        html!("empty-fragment", {
+
+        })
     }
 }

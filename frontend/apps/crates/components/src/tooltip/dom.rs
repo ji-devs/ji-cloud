@@ -6,6 +6,7 @@ use utils::prelude::*;
 use super::state::*;
 use web_sys::{DomRect, HtmlElement};
 
+//TODO - move all these to new style
 pub fn render(state: Rc<State>) -> Dom {
     render_mixin(state, |dom: DomBuilder<HtmlElement>| dom)
 }

@@ -11,7 +11,7 @@ use utils::{events::ModuleResizeEvent, resize::*};
 
 use super::base::state::*;
 use super::state::*;
-use crate::module::_common::edit::prelude::*;
+use crate::{module::_common::edit::prelude::*, overlay::container::OverlayContainer};
 use shared::domain::jig::module::body::{BodyExt, ModeExt, StepExt};
 
 pub fn render_page_body<Mode, Step, RawData, Base, Main, Sidebar, Header, Footer, Overlay>(
@@ -103,6 +103,7 @@ pub fn render_page_body<Mode, Step, RawData, Base, Main, Sidebar, Header, Footer
                         }))
                         .to_signal_vec()
                 })
+                .child(OverlayContainer::new().render(Some("overlay")))
         })
     }));
 
