@@ -47,6 +47,5 @@ pub mod token;
 
 // // todo: make this configurable?
 // const ARGON2_DEFAULT_PARAMS: argon2::Params = argon2::Params {
-//     m_cost: 4096,
-//     .. Default::default()
+//     ..argon2::Params::default()
 // };

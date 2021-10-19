@@ -61,7 +61,11 @@ where id = $1"#,
 
     let row = match row {
         Some(row) => row,
-        None => return Ok(None),
+        None => {
+            println!("after row");
+
+            return Ok(None);
+        }
     };
 
     Ok(Some(UserProfile {
