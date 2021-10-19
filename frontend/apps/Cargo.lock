@@ -345,7 +345,7 @@ dependencies = [
  "awsm_web 0.28.1",
  "cfg-if 1.0.0",
  "chrono",
- "chrono-tz 0.6.0",
+ "chrono-tz",
  "components",
  "console_error_panic_hook",
  "discard",
@@ -801,7 +801,7 @@ dependencies = [
  "awsm_web 0.28.1",
  "cfg-if 1.0.0",
  "chrono",
- "chrono-tz 0.6.0",
+ "chrono-tz",
  "components",
  "console_error_panic_hook",
  "discard",
@@ -1044,17 +1044,6 @@ dependencies = [
  "time",
  "wasm-bindgen",
  "winapi",
-]
-
-[[package]]
-name = "chrono-tz"
-version = "0.5.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2554a3155fec064362507487171dcc4edc3df60cb10f3a1fb10ed8094822b120"
-dependencies = [
- "chrono",
- "parse-zoneinfo",
- "serde",
 ]
 
 [[package]]
@@ -1549,9 +1538,9 @@ checksum = "e9025058dae765dee5070ec375f591e2ba14638c63feff74f13805a72e523163"
 
 [[package]]
 name = "http"
-version = "0.2.4"
+version = "0.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "527e8c9ac747e28542699a951517aa9a6945af506cd1f2e1b53a576c17b6cc11"
+checksum = "1323096b05d41827dadeaee54c9981958c0f94e670bc94ed80037d1a7b8b186b"
 dependencies = [
  "bytes",
  "fnv",
@@ -2119,7 +2108,7 @@ dependencies = [
  "base64 0.13.0",
  "cfg-if 1.0.0",
  "chrono",
- "chrono-tz 0.5.3",
+ "chrono-tz",
  "csv",
  "http",
  "http-serde",
