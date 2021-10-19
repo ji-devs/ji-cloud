@@ -28,7 +28,7 @@ pub struct Sprite {
     /// toggle hidden state
     pub hide_toggle: Option<HideToggle>,
     /// animation options
-    pub animation: Option<Animation>
+    pub animation: Option<Animation>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -40,12 +40,12 @@ pub struct Text {
     /// start out hidden
     pub hide: bool,
     /// toggle hidden state
-    pub hide_toggle: Option<HideToggle>
+    pub hide_toggle: Option<HideToggle>,
 }
 
 #[repr(u8)]
 #[derive(Serialize_repr, Deserialize_repr, PartialEq, Debug, Clone, Copy)]
-pub enum HideToggle{
+pub enum HideToggle {
     /// only let the toggle fire once
     Once,
     /// let the toggle fire indefinitely
@@ -57,5 +57,5 @@ pub struct Animation {
     /// do not let the animation loop
     pub once: bool,
     /// wait for tap before playing
-    pub tap: bool
+    pub tap: bool,
 }

@@ -410,9 +410,7 @@ from user_auth_basic where email = $1::text
                         let salt = SaltString::generate(thread_rng());
                         let _ = password_hasher.hash_password(
                             password.as_bytes(),
-                            None,
-                            crate::ARGON2_DEFAULT_PARAMS,
-                            salt.as_salt(),
+                            &salt.as_salt(),
                         );
 
                         return Err(Either::Left(BasicError::new(StatusCode::UNAUTHORIZED)));

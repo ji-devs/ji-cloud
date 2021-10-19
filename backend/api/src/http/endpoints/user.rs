@@ -102,12 +102,7 @@ async fn hash_password(pass: String) -> anyhow::Result<String> {
 
         let salt = SaltString::generate(thread_rng());
         password_hasher
-            .hash_password(
-                pass.as_bytes(),
-                None,
-                crate::ARGON2_DEFAULT_PARAMS,
-                salt.as_salt(),
-            )
+            .hash_password(pass.as_bytes(), &salt.as_salt())
             .map_err(|it| anyhow::anyhow!("{}", it))
             .map(|it| it.to_string())
     })
