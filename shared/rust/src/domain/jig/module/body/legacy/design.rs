@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 pub use super::*;
 use serde::{Deserialize, Serialize};
 use serde_repr::*;
@@ -21,7 +23,7 @@ pub enum Sticker {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Sprite {
-    pub src: String,
+    pub src: SpriteSource,
     pub transform_matrix: [f64; 16],
     /// start out hidden
     pub hide: bool,
@@ -31,6 +33,14 @@ pub struct Sprite {
     pub animation: Option<Animation>,
     // associated audio
     pub audio: Option<String>
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub enum SpriteSource {
+    /// the full image filename
+    Image(String),
+    /// without extension, so client can load .webm, .mp4, etc.
+    Animation(String)
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

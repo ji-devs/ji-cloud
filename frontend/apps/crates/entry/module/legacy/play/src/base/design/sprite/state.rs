@@ -6,6 +6,8 @@ use std::{cell::RefCell, rc::Rc};
 use web_sys::{Blob, CanvasRenderingContext2d, HtmlCanvasElement, HtmlImageElement, ImageData, window};
 use crate::base::state::Base;
 use super::player::SpritePlayer;
+use super::animation::Animation;
+use std::io::Cursor;
 
 pub struct Sprite {
     pub base: Rc<Base>,
@@ -33,7 +35,8 @@ impl Sprite {
 
 #[derive(Clone)]
 pub enum SpriteData {
-    Static(HtmlImageElement)
+    Static(HtmlImageElement),
+    Animation(Rc<Animation>)
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]

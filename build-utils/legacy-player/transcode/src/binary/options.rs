@@ -26,12 +26,24 @@ pub struct Opts {
     pub verbose: bool,
     
     /// download media 
-    #[structopt(long, parse(try_from_str), default_value = "false")]
+    #[structopt(long, parse(try_from_str), default_value = "true")]
     pub download_media: bool,
 
     /// write json
     #[structopt(long, parse(try_from_str), default_value = "true")]
     pub write_json: bool,
+
+    /// transcode media
+    #[structopt(long, parse(try_from_str), default_value = "true")]
+    pub transcode_media: bool,
+
+    /// skip files that already exist
+    #[structopt(long, parse(try_from_str), default_value = "true")]
+    pub skip_download_exists: bool,
+
+    /// skip files that already exist
+    #[structopt(long, parse(try_from_str), default_value = "true")]
+    pub skip_transcode_exists: bool,
 }
 
 impl Opts {

@@ -1,18 +1,18 @@
-use crate::base::{design::sprite::{SpriteData, player::SpritePlayer}, state::Base};
+use crate::base::{design::sprite::{SpriteData, animation::Animation, player::SpritePlayer}, state::Base};
 use dominator::{clone, html, with_node, Dom};
 use futures_signals::signal::{Mutable, Signal, SignalExt};
 
 use shared::domain::jig::module::body::legacy::design::{
     Sprite as RawSprite
 };
-use std::{borrow::Borrow, rc::Rc};
+use std::{borrow::Borrow, rc::Rc, cell::RefCell};
 use utils::{
     math::{bounds, mat4::Matrix4},
     path,
     prelude::*,
     resize::resize_info_signal,
 };
-use awsm_web::canvas::{get_2d_context, CanvasToBlobFuture};
+use awsm_web::{canvas::{get_2d_context, CanvasToBlobFuture}, data::ArrayBufferExt};
 use super::state::{Sprite, SpritePhase};
 
 impl Sprite {
@@ -24,22 +24,30 @@ impl Sprite {
 
                 let url = state.base.media_url(&state.raw.src);
 
-                //TODO - load GIF if animation
-                let img = match awsm_web::loaders::image::load(url).await {
-                    Ok(img) => img,
-                    Err(_) => {
-                        panic!("could not load image!");
-                    }
-                };
+                if state.raw.animation.is_some() {
 
-                state.size.set(Some((
-                    img.natural_width() as f64,
-                    img.natural_height() as f64,
-                )));
+                    let animation = Animation::load_gif(&url).await;
 
-                state.data.set(Some(
-                    SpriteData::Static(img)
-                ));
+                    state.size.set(Some((animation.width, animation.height)));
+                    state.data.set(Some(SpriteData::Animation(Rc::new(animation))));
+
+                } else {
+                    let img = match awsm_web::loaders::image::load(url).await {
+                        Ok(img) => img,
+                        Err(_) => {
+                            panic!("could not load image!");
+                        }
+                    };
+
+                    state.size.set(Some((
+                        img.natural_width() as f64,
+                        img.natural_height() as f64,
+                    )));
+
+                    state.data.set(Some(
+                        SpriteData::Static(img)
+                    ));
+                }
 
             }))
             .child_signal(state.data.signal_cloned().map(clone!(state => move |data| data.map(|data| {

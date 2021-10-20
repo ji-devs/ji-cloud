@@ -5,7 +5,7 @@ use std::{
     fs::File,
     fmt
 };
-use super::data::{
+use super::{MediaTranscode, data::{
     SrcManifest,
     Media,
     Slide as SrcSlide,
@@ -18,7 +18,7 @@ use super::data::{
     LayerKind as SrcLayerKind,
     LoopKind as SrcLoopKind,
     ShowKind as SrcShowKind,
-};
+}};
 
 use shared::domain::jig::{JigCreateRequest, JigData, JigPlayerSettings, module::{ModuleCreateRequest, ModuleBody, body::{
         Transform,
@@ -152,22 +152,33 @@ fn convert_design(game_id: &str, slide_id: &str, base_url: &str, mut medias: &mu
     let mut stickers: Vec<Sticker> = Vec::new();
     let mut bgs:Vec<String> = Vec::new();
   
-    let make_media = |filename:&str| -> Media {
+    let make_media = |filename:&str, transcode:Option<MediaTranscode>| -> Media {
         Media { 
             url: format!("{}/{}/layers/{}", base_url, slide_id, filename), 
             basepath: format!("slides/{}", slide_id), 
-            filename: filename.to_string() 
+            filename: filename.to_string(),
+            transcode
         }
     };
 
     for layer in layers {
 
         if let Some(filename) = layer.filename.as_ref() {
-            medias.push(make_media(&filename));
+            medias.push(make_media(&filename, {
+                if layer.kind == SrcLayerKind::Animation {
+                    Some(MediaTranscode::Animation)
+                } else {
+                    None
+                }
+            }));
         }
         if let Some(filename) = layer.audio.as_ref() {
-            medias.push(make_media(&filename));
+            medias.push(make_media(&filename, Some(MediaTranscode::Audio)));
         }
+
+        /// as of today, mp3 has full cross-browser support
+        /// but still leaving it up to the client to choose
+        let audio = layer.audio.as_ref().map(|audio| Path::new(&audio).file_stem().unwrap().to_str().unwrap().to_string());
 
         match layer.kind {
             SrcLayerKind::Background => {
@@ -175,7 +186,19 @@ fn convert_design(game_id: &str, slide_id: &str, base_url: &str, mut medias: &mu
             },
             SrcLayerKind::Image | SrcLayerKind::Animation => {
                 let sticker = Sprite { 
-                    src: layer.filename.unwrap(),
+                    src: {
+
+                        let filename = layer.filename.unwrap();
+                        if layer.kind == SrcLayerKind::Animation {
+                            /// as of today, client needs to load both webm and x265 to have alpha video
+                            /// so only stem name is set in the json
+                            let filename = Path::new(&filename).file_stem().unwrap().to_str().unwrap().to_string();
+                            SpriteSource::Animation(filename)
+                        } else {
+                            SpriteSource::Image(filename)
+                        }
+
+                    },
                     transform_matrix: convert_transform(layer.transform),
                     hide: match layer.show_kind {
                         SrcShowKind::ShowOnLoad => false, 
@@ -221,7 +244,7 @@ fn convert_design(game_id: &str, slide_id: &str, base_url: &str, mut medias: &mu
                         }
                     },
 
-                    audio: layer.audio,
+                    audio,
 
 
                 };
@@ -252,7 +275,7 @@ fn convert_design(game_id: &str, slide_id: &str, base_url: &str, mut medias: &mu
                         ), 
                     },
 
-                    audio: layer.audio,
+                    audio,
 
                 };
 

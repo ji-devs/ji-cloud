@@ -8,9 +8,16 @@ use dotenv::dotenv;
 use simplelog::*;
 use structopt::StructOpt;
 use std::fs::File;
+use std::io::Write;
 use options::*;
 use ::transcode::src_manifest::*;
 use shared::domain::jig::module::ModuleBody;
+use image::gif::{GifDecoder, GifEncoder};
+use image::{Frame, ImageDecoder, AnimationDecoder};
+use flate2::Compression;
+use flate2::write::ZlibEncoder;
+use std::process::Command;
+
 
 #[tokio::main]
 async fn main() {
@@ -70,21 +77,105 @@ async fn transcode_game(opts: &Opts) {
         let dest_path = dest_dir.join(&opts.dest_media_dir);
         std::fs::create_dir_all(&dest_path);
 
-        for media in medias {
-            let data = reqwest::get(&media.url)
-                .await
-                .unwrap()
-                .bytes()
-                .await
-                .unwrap();
+        for media in medias.iter() {
 
-            let mut cursor = std::io::Cursor::new(data);
 
-            let dest_dir = dest_path.join(&media.basepath);
-            std::fs::create_dir_all(&dest_dir);
+            if !opts.skip_download_exists || !dest_path.exists() {
+                let dest_path = dest_dir.join(&media.filename);
+                let data = reqwest::get(&media.url)
+                    .await
+                    .unwrap()
+                    .bytes()
+                    .await
+                    .unwrap();
 
-            let mut dest_file = std::fs::File::create(dest_dir.join(&media.filename)).unwrap();
-            std::io::copy(&mut cursor, &mut dest_file).unwrap();
+                let mut cursor = std::io::Cursor::new(data);
+
+                let dest_dir = dest_path.join(&media.basepath);
+                std::fs::create_dir_all(&dest_dir);
+
+
+                let mut dest_file = std::fs::File::create(&dest_path).unwrap();
+                std::io::copy(&mut cursor, &mut dest_file).unwrap();
+            }
+        }
+
+
+        if opts.transcode_media {
+
+            for media in medias.iter() {
+            
+                let dest_dir = dest_path.join(&media.basepath);
+                let src_file_path = dest_dir.join(&media.filename);
+                let src_file_path = src_file_path.to_str().unwrap();
+
+                if let Some(transcode) = media.transcode.as_ref() {
+                    match transcode {
+                        MediaTranscode::Audio => {
+
+                            let dest_file_path = dest_dir.join(&format!("{}.mp3", media.file_stem()));
+                            if !opts.skip_transcode_exists || !dest_file_path.exists() {
+                                let dest_file_path = dest_file_path.to_str().unwrap();
+                                log::info!("converting audio {} to {}...", media.file_stem(), dest_file_path);
+
+                                Command::new("ffmpeg")
+                                    .arg("-i")
+                                    .arg(src_file_path)
+                                    .arg("-acodec")
+                                    .arg("libmp3lame")
+                                    .arg(dest_file_path)
+                                    .output()
+                                    .expect("failed to execute process");
+                            }
+                        },
+                        MediaTranscode::Animation => {
+
+                            let dest_file_path = dest_dir.join(&format!("{}.webm", media.file_stem()));
+
+                            if !opts.skip_transcode_exists || !dest_file_path.exists() {
+                                let dest_file_path = dest_file_path.to_str().unwrap();
+                                log::info!("converting animation {} to {}...", media.file_stem(), dest_file_path);
+
+                                Command::new("ffmpeg")
+                                    .arg("-i")
+                                    .arg(src_file_path)
+                                    .arg("-c")
+                                    .arg("vp9")
+                                    .arg("-b:v")
+                                    .arg("0")
+                                    .arg("-crf")
+                                    .arg("26")
+                                    .arg(dest_file_path)
+                                    .output()
+                                    .expect("failed to execute process");
+                            }
+
+                            let dest_file_path = dest_dir.join(&format!("{}.mp4", media.file_stem()));
+
+                            if !opts.skip_transcode_exists || !dest_file_path.exists() {
+                                let dest_file_path = dest_file_path.to_str().unwrap();
+                                log::info!("converting animation {} to {}...", media.file_stem(), dest_file_path);
+                                Command::new("ffmpeg")
+                                    .arg("-i")
+                                    .arg(src_file_path)
+                                    .arg("-c")
+                                    .arg("libx265")
+                                    .arg("-vtag")
+                                    .arg("hvc1")
+                                    .arg("-preset")
+                                    .arg("slow")
+                                    .arg("-b:v")
+                                    .arg("0")
+                                    .arg("-crf")
+                                    .arg("26")
+                                    .arg(dest_file_path)
+                                    .output()
+                                    .expect("failed to execute process");
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 
