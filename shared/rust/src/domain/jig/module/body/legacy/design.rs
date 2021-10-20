@@ -29,6 +29,8 @@ pub struct Sprite {
     pub hide_toggle: Option<HideToggle>,
     /// animation options
     pub animation: Option<Animation>,
+    // associated audio
+    pub audio: Option<String>
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -41,6 +43,8 @@ pub struct Text {
     pub hide: bool,
     /// toggle hidden state
     pub hide_toggle: Option<HideToggle>,
+    // associated audio
+    pub audio: Option<String>
 }
 
 #[repr(u8)]

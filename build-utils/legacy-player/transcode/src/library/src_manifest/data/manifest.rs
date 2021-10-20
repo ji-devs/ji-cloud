@@ -1,35 +1,30 @@
 use serde::{de, Deserializer,Deserialize};
 use serde_repr::*;
-use std::path::{Path, PathBuf};
-use std::fs::File;
-use std::fmt;
-
-pub mod activity;
-use activity::*;
-
-pub mod shape;
-use shape::*;
-
-pub mod layer;
-use layer::*;
-
-
-pub mod slide;
-use slide::*;
-
+use std::{
+    path::{Path, PathBuf},
+    fs::File,
+    fmt
+};
+use super::{
+    slide::*,
+    activity::*,
+    layer::*,
+    shape::*
+};
 
 #[derive(Deserialize, Debug)]
 pub struct SrcManifest {
     /// Base url of the amazon bucket
     pub base_url: String,
 
-    pub structure: ManifestStructure
+    pub structure: ManifestStructure,
+
+    pub album_store: AlbumStore
 }
 
 impl SrcManifest {
-    pub fn load(json:PathBuf) -> Self {
-        let file = File::open(json).unwrap();
-        serde_json::from_reader(file).unwrap()
+    pub fn game_id(&self) -> String {
+        format!("{}", self.album_store.album.key)
     }
 }
 
@@ -53,13 +48,8 @@ pub struct ManifestStructure {
 
 #[derive(Deserialize, Debug)]
 pub struct ManifestSettings {
-    #[serde(rename="DisableEditing")]
-    pub disable_editing: u8,
-
     #[serde(rename="quizParameters")]
-    pub quiz: QuizSettings,
-
-
+    pub quiz: Option<QuizSettings>,
 }
 
 #[derive(Deserialize, Debug)]
@@ -89,3 +79,17 @@ pub enum ShuffleType {
 
 //see: https://developer.mozilla.org/en-US/docs/Web/CSS/transform-function/matrix
 pub type Transform = [f64;6];
+
+#[derive(Deserialize, Debug)]
+pub struct AlbumStore {
+    pub album: Album,
+
+    #[serde(rename="pk")]
+    pub key: PrimaryKey,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct Album {
+    #[serde(rename="pk")]
+    pub key: PrimaryKey,
+}

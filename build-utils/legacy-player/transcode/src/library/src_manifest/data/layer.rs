@@ -18,7 +18,7 @@ pub struct Layer {
     pub show_kind: ShowKind,
 
     #[serde(rename="interactiveLayerSound")]
-    pub audio: String,
+    pub audio: Option<String>,
 
     #[serde(rename="interactiveToggleShow")]
     pub toggle_show: bool,

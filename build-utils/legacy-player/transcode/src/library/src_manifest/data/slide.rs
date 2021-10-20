@@ -27,3 +27,8 @@ pub struct Slide {
     pub activities: Vec<Activity>,
 }
 
+impl Slide {
+    pub fn slide_id(&self) -> String {
+        self.file_path.trim_matches('/').to_string()
+    }
+}

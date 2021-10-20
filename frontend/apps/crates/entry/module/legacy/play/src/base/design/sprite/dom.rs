@@ -22,7 +22,7 @@ impl Sprite {
         html!("empty-fragment", {
             .future(clone!(state => async move {
 
-                let url = state.base.layers_url(&state.raw.src);
+                let url = state.base.media_url(&state.raw.src);
 
                 //TODO - load GIF if animation
                 let img = match awsm_web::loaders::image::load(url).await {

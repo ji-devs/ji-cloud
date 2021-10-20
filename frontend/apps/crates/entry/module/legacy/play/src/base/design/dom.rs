@@ -22,7 +22,7 @@ impl Base {
             .children(self.slide.design.bgs.iter().map(|src| {
                 html!("img", {
                     .class(&*styles::BG)
-                    .attribute("src", &self.layers_url(src))
+                    .attribute("src", &self.media_url(src))
                 })
             }))
             .children(self.slide.design.stickers.iter().map(|sticker| {

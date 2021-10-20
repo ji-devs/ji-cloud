@@ -27,7 +27,7 @@ impl Base {
             ..
         } = init_args;
 
-        let url = utils::path::legacy_cdn_url(format!("{}/jigzi/slides/{}.json", raw.game_id, raw.slide_id));
+        let url = utils::path::legacy_cdn_url(format!("{}/json/slides/{}.json", raw.game_id, raw.slide_id));
 
         let slide:Slide = fetch_url(&url)
             .await
@@ -48,12 +48,8 @@ impl Base {
         })
     }
 
-    pub fn layers_url<T: AsRef<str>>(&self, path:T) -> String {
-        self.slide_url(format!("layers/{}", path.as_ref()))
-    }
-
-    pub fn slide_url<T: AsRef<str>>(&self, path:T) -> String {
-        utils::path::legacy_cdn_url(&format!("{}/unzipped/{}/{}", self.game_id, self.slide_id, path.as_ref()))
+    pub fn media_url<T: AsRef<str>>(&self, path:T) -> String {
+        utils::path::legacy_cdn_url(&format!("{}/media/slides/{}/{}", self.game_id, self.slide_id, path.as_ref()))
     }
 }
 

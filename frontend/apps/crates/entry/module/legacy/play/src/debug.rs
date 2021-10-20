@@ -51,7 +51,7 @@ pub async fn init(jig_id: JigId, _module_id: ModuleId) {
         let data = match utils::routes::get_param("game_id") {
             Some(game_id) => {
                 let slide_index = utils::routes::get_param_index("slide_index").unwrap_or_default();
-                let url = utils::path::legacy_cdn_url(format!("{}/jigzi/requests/module-{}.json", game_id, slide_index));
+                let url = utils::path::legacy_cdn_url(format!("{}/json/requests/module-{}.json", game_id, slide_index));
 
                 let module_req:ModuleCreateRequest = fetch_url(&url)
                     .await

@@ -1,16 +1,25 @@
-use super::src_manifest::{
-    SrcManifest,
-    slide::Slide as SrcSlide,
-    activity::ActivityKind as SrcActivityKind,
-    activity::Activity as SrcActivity,
-    shape::Shape as SrcShape,
-    shape::PathPoint as SrcPathPoint,
-    shape::PathElementKind as SrcPathElementKind,
-    layer::Layer as SrcLayer,
-    layer::LayerKind as SrcLayerKind,
-    layer::LoopKind as SrcLoopKind,
-    layer::ShowKind as SrcShowKind,
+use serde::{de, Deserializer,Deserialize};
+use serde_repr::*;
+use std::{
+    path::{Path, PathBuf},
+    fs::File,
+    fmt
 };
+use super::data::{
+    SrcManifest,
+    Media,
+    Slide as SrcSlide,
+    ActivityKind as SrcActivityKind,
+    Activity as SrcActivity,
+    Shape as SrcShape,
+    PathPoint as SrcPathPoint,
+    PathElementKind as SrcPathElementKind,
+    Layer as SrcLayer,
+    LayerKind as SrcLayerKind,
+    LoopKind as SrcLoopKind,
+    ShowKind as SrcShowKind,
+};
+
 use shared::domain::jig::{JigCreateRequest, JigData, JigPlayerSettings, module::{ModuleCreateRequest, ModuleBody, body::{
         Transform,
         legacy::{
@@ -24,6 +33,19 @@ use shared::domain::jig::{JigCreateRequest, JigData, JigPlayerSettings, module::
 use utils::{math::mat4::Matrix4, prelude::*};
 
 impl SrcManifest {
+    pub fn load_file(path:PathBuf) -> Self {
+        let file = File::open(path).unwrap();
+        serde_json::from_reader(file).unwrap()
+    }
+
+    pub async fn load_url(url:&str) -> Self {
+        reqwest::get(url)
+            .await
+            .unwrap()
+            .json()
+            .await
+            .unwrap()
+    }
 
     pub fn jig_req(&self) -> JigCreateRequest {
         //let background_audio = if src.music_file == "" { None } else { Some(src.music_file) };
@@ -41,7 +63,7 @@ impl SrcManifest {
         }
     }
 
-    pub fn module_reqs(&self, game_id:&str) -> Vec<ModuleCreateRequest> {
+    pub fn module_reqs(&self) -> Vec<ModuleCreateRequest> {
         self.structure
             .slides
             .iter()
@@ -49,8 +71,8 @@ impl SrcManifest {
                 ModuleCreateRequest {
                     body: ModuleBody::Legacy(
                         ModuleData {
-                            game_id: game_id.to_string(),
-                            slide_id: slide.file_path.trim_matches('/').to_string()
+                            game_id: self.game_id(),
+                            slide_id: slide.slide_id()
                         },
                     )
                 }
@@ -58,17 +80,27 @@ impl SrcManifest {
             .collect()
     }
 
-    pub fn into_slides(self) -> Vec<Slide> {
-        self.structure
+    pub fn into_slides(self) -> (Vec<Slide>, Vec<Media>) {
+        let mut medias:Vec<Media> = Vec::new();
+
+        let game_id = self.game_id();
+        let base_url =  self.base_url.trim_matches('/').to_string();
+
+        let slides = self.structure
             .slides
             .into_iter()
-            .map(|slide| slide.convert())
-            .collect()
+            .map(|slide| slide.convert(&game_id, &base_url, &mut medias))
+            .collect();
+
+        (slides, medias)
     }
 }
 
+
 impl SrcSlide {
-    pub fn convert(self) -> Slide {
+    pub fn convert(self, game_id: &str, base_url: &str, mut medias: &mut Vec<Media>) -> Slide {
+
+        let slide_id =  self.file_path.trim_matches('/').to_string();
 
         let activities_len = self.activities.len();
         let layers_len = self.layers.len();
@@ -105,7 +137,7 @@ impl SrcSlide {
         };
 
 
-        let design = convert_design(self.layers);
+        let design = convert_design(&game_id, &slide_id, &base_url, &mut medias, self.layers);
 
         Slide {
             activity,
@@ -116,11 +148,27 @@ impl SrcSlide {
     // pub hide: bool,
     // pub hide_toggle: Option<HideToggle>,
     // pub animation: Option<Animation>
-fn convert_design(layers: Vec<SrcLayer>) -> Design {
+fn convert_design(game_id: &str, slide_id: &str, base_url: &str, mut medias: &mut Vec<Media>, layers: Vec<SrcLayer>) -> Design {
     let mut stickers: Vec<Sticker> = Vec::new();
     let mut bgs:Vec<String> = Vec::new();
-   
+  
+    let make_media = |filename:&str| -> Media {
+        Media { 
+            url: format!("{}/{}/layers/{}", base_url, slide_id, filename), 
+            basepath: format!("slides/{}", slide_id), 
+            filename: filename.to_string() 
+        }
+    };
+
     for layer in layers {
+
+        if let Some(filename) = layer.filename.as_ref() {
+            medias.push(make_media(&filename));
+        }
+        if let Some(filename) = layer.audio.as_ref() {
+            medias.push(make_media(&filename));
+        }
+
         match layer.kind {
             SrcLayerKind::Background => {
                 bgs.push(layer.filename.unwrap());
@@ -171,7 +219,9 @@ fn convert_design(layers: Vec<SrcLayer>) -> Design {
                         } else {
                             None
                         }
-                    }
+                    },
+
+                    audio: layer.audio,
 
 
                 };
@@ -201,6 +251,8 @@ fn convert_design(layers: Vec<SrcLayer>) -> Design {
                             }
                         ), 
                     },
+
+                    audio: layer.audio,
 
                 };
 
