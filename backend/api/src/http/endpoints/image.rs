@@ -18,7 +18,7 @@ use crate::{
     db::{self, meta::handle_metadata_err, nul_if_empty},
     error::{self, ServiceKind},
     extractor::{RequestOrigin, ScopeManageImage, TokenUser, TokenUserWithScope},
-    service::{self, s3, ServiceData},
+    service::{self, s3, GcpAccessKeyStore, ServiceData},
 };
 
 pub mod recent;
@@ -204,12 +204,14 @@ async fn browse(
 async fn update(
     db: Data<PgPool>,
     _claims: TokenUserWithScope<ScopeManageImage>,
+    gcp_key_store: ServiceData<GcpAccessKeyStore>,
     req: Option<Json<<endpoints::image::UpdateMetadata as ApiEndpoint>::Req>>,
     id: Path<ImageId>,
 ) -> Result<HttpResponse, error::UpdateWithMetadata> {
     let req = req.map_or_else(ImageUpdateRequest::default, Json::into_inner);
     let id = id.into_inner();
     let mut txn = db.begin().await?;
+    let access_token = gcp_key_store.fetch_token().await?;
 
     let exists = db::image::update(
         &mut txn,
@@ -218,6 +220,7 @@ async fn update(
         req.description.as_deref(),
         req.is_premium,
         req.publish_at.map(|it| it.map(DateTime::<Utc>::from)),
+        access_token,
     )
     .await?;
 
