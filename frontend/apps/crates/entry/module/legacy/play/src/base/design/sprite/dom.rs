@@ -13,7 +13,7 @@ use utils::{
     resize::resize_info_signal,
 };
 use awsm_web::{canvas::{get_2d_context, CanvasToBlobFuture}, data::ArrayBufferExt};
-use super::{AnimationPlayer, ImagePlayer, state::{Sprite}};
+use super::{animation::AnimationPlayer, ImagePlayer, state::{Sprite}};
 
 // http://localhost:4104/module/legacy/play/debug?game_id=17736&slide_index=0&example=true
 impl Sprite {
@@ -62,11 +62,46 @@ impl ImagePlayer {
     }
 }
 
+impl Drop for AnimationPlayer { 
+    fn drop(&mut self) {
+        log::info!("player dropped ");
+    }
+}
 impl AnimationPlayer { 
     pub fn render(self: Rc<Self>) -> Dom {
+        let state = self;
 
         html!("empty-fragment", {
+            .child_signal(state.size.signal_cloned().map(clone!(state => move |size| size.map(|size| {
+                let transform_matrix = Matrix4::new_direct(state.raw.transform_matrix.clone());
+                let transform_signal = resize_info_signal().map(move |resize_info| {
+                    let mut m = transform_matrix.clone();
+                    m.denormalize(&resize_info);
+                    m.as_matrix_string()
+                });
 
+                html!("canvas" => web_sys::HtmlCanvasElement, {
+                    .event(clone!(state => move |evt:events::Click| {
+                        log::info!("click")
+                    }))
+                    .style("cursor", "pointer")
+                    .style("display", "block")
+                    .style("position", "absolute")
+                    .style_signal("width", width_signal(state.size.signal_cloned()))
+                    .style_signal("height", height_signal(state.size.signal_cloned()))
+                    .style_signal("top", bounds::size_height_center_rem_signal(state.size.signal()))
+                    .style_signal("left", bounds::size_width_center_rem_signal(state.size.signal()))
+                    .style_signal("transform", transform_signal)
+
+                    .after_inserted(clone!(state, size => move |canvas| {
+                        let (natural_width, natural_height) = size; 
+
+                        canvas.set_width(natural_width as u32);
+                        canvas.set_height(natural_height as u32);
+                        *state.ctx.borrow_mut() = Some(get_2d_context(&canvas, None).unwrap_ji());
+                    }))
+                })
+            }))))
         })
 
         // let state = self;

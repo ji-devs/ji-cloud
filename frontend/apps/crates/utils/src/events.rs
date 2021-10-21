@@ -6,6 +6,7 @@ use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 
 pub use dominator::events::*;
+pub use dominator_helpers::events::{Message, Load};
 
 temp_make_event!(TimeUpdate, "timeupdate" => web_sys::Event);
 temp_make_event!(Ended, "ended" => web_sys::Event);
