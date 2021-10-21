@@ -1,6 +1,5 @@
 import { LitElement, html, css, customElement, property, query } from "lit-element";
 import { nothing } from "lit-html";
-import "@elements/core/hebrew-buttons/hebrew-buttons";
 
 @customElement("input-wrapper")
 export class _ extends LitElement {
@@ -8,20 +7,20 @@ export class _ extends LitElement {
         return [
             css`
                 :host {
-                    display: block;
+                    display: grid;
                 }
                 .outer-wrapper {
+                    grid-row: 1;
+                    grid-column: 1;
                     height: 100%;
                     display: grid;
                     grid-template-rows: auto 1fr auto;
                     z-index: 1;
                 }
-                hebrew-buttons {
-                    display: block;
-                    height: 0px;
+                ::slotted(hebrew-buttons) {
                     grid-row: 1;
-                }
-                hebrew-buttons::part(buttons-wrapper) {
+                    grid-column: 1;
+                    align-self: flex-start;
                     display: flex;
                     justify-content: flex-end;
                     transform: translateY(-100%);
@@ -117,9 +116,6 @@ export class _ extends LitElement {
     @property({ type: Boolean, reflect: true })
     error: boolean = false;
 
-    @property({ type: Boolean })
-    withHebrewButtons: boolean = false;
-
     @query("slot#main-slot")
     private mainSlot!: HTMLSlotElement;
 
@@ -129,10 +125,8 @@ export class _ extends LitElement {
 
     render() {
         return html`
+            <slot name="hebrew-inputs"></slot>
             <div class="outer-wrapper">
-                ${ this.withHebrewButtons ? html`
-                    <hebrew-buttons></hebrew-buttons>
-                ` : nothing }
                 <label class="inner-wrapper" @click="${this.focus}">
                     ${ this.label ? html`<span class="label">${this.label}</span>` : nothing }
                     <slot id="main-slot"></slot>

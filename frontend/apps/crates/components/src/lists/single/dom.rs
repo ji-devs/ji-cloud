@@ -3,19 +3,22 @@ use std::rc::Rc;
 use utils::prelude::*;
 
 use super::state::*;
-use crate::tooltip::{
-    callbacks::TooltipErrorCallbacks,
-    state::{
-        Anchor, ContentAnchor, MoveStrategy, State as TooltipState, TooltipData, TooltipError,
-        TooltipTarget,
-    },
+use crate::{
+    hebrew_buttons::HebrewButtons,
+    tooltip::{
+        callbacks::TooltipErrorCallbacks,
+        state::{
+            Anchor, ContentAnchor, MoveStrategy, State as TooltipState, TooltipData, TooltipError,
+            TooltipTarget,
+        },
+    }
 };
 use futures_signals::{map_ref, signal::SignalExt, signal_vec::SignalVecExt};
 
 pub fn render(state: Rc<State>) -> Dom {
     html!("sidebar-widget-single-list", {
         .children(&mut [
-
+            HebrewButtons::full().render(Some("hebrew-buttons")),
             html!("button-rect", {
                 .property("slot", "clear")
                 .property("kind", "text")

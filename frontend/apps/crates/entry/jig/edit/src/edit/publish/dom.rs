@@ -19,6 +19,7 @@ use super::{
     state::*,
 };
 use components::{
+    hebrew_buttons::HebrewButtons,
     module::_common::thumbnail::ModuleThumbnail,
     tooltip::{
         callbacks::TooltipErrorCallbacks,
@@ -27,7 +28,7 @@ use components::{
             Anchor, ContentAnchor, MoveStrategy, State as TooltipState, TooltipData, TooltipError,
             TooltipTarget,
         },
-    },
+    }
 };
 use std::rc::Rc;
 
@@ -121,7 +122,6 @@ fn render_page(state: Rc<State>) -> Dom {
             html!("input-wrapper", {
                 .property("slot", "name")
                 .property("label", STR_NAME_LABEL)
-                .property("withHebrewButtons", true)
                 .property_signal("error", {
                     (map_ref! {
                         let submission_tried = state.submission_tried.signal(),
@@ -131,6 +131,9 @@ fn render_page(state: Rc<State>) -> Dom {
                         .map(|(submission_tried, value)| {
                             submission_tried && value.is_empty()
                         })
+                })
+                .child({
+                    HebrewButtons::short().render(Some("hebrew-inputs"))
                 })
                 .child(html!("input" => HtmlInputElement, {
                     .with_node!(elem => {
@@ -146,7 +149,6 @@ fn render_page(state: Rc<State>) -> Dom {
             html!("input-wrapper", {
                 .property("slot", "description")
                 .property("label", STR_DESCRIPTION_LABEL)
-                .property("withHebrewButtons", true)
                 .property_signal("error", {
                     (map_ref! {
                         let submission_tried = state.submission_tried.signal(),
@@ -156,6 +158,9 @@ fn render_page(state: Rc<State>) -> Dom {
                         .map(|(submission_tried, value)| {
                             submission_tried && value.is_empty()
                         })
+                })
+                .child({
+                    HebrewButtons::short().render(Some("hebrew-inputs"))
                 })
                 .child(html!("textarea" => HtmlTextAreaElement, {
                     .with_node!(elem => {

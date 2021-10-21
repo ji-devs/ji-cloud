@@ -23,6 +23,8 @@ pub mod buttons;
 pub mod collision;
 #[cfg(feature = "color_select")]
 pub mod color_select;
+#[cfg(feature = "hebrew_buttons")]
+pub mod hebrew_buttons;
 #[cfg(feature = "firebase")]
 pub mod firebase;
 #[cfg(feature = "instructions")]

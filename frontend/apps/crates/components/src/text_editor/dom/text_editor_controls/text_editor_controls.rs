@@ -1,3 +1,4 @@
+use crate::hebrew_buttons::HebrewButtons;
 use crate::text_editor::config::STR_NEW_TEXT;
 use crate::text_editor::font_css_converter::font_to_css;
 use crate::text_editor::wysiwyg_types::ControlsChange;
@@ -36,6 +37,7 @@ pub fn render(state: Rc<State>) -> Dom {
     html!("text-editor-controls", {
         .property_signal("controlsDisabled", state.wysiwyg_ref.signal_ref(|x| x.is_none()))
         .children(&mut [
+            HebrewButtons::full().render(Some("hebrew-buttons")),
             html!("text-editor-controls-insert-button", {
                 .property("slot", "insert-button")
                 .property_signal("disabled", state.wysiwyg_ref.signal_ref(|x| x.is_some()))

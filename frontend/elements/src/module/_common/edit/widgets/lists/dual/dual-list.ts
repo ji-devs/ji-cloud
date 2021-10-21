@@ -94,7 +94,7 @@ export class _ extends LitElement {
                 <div><slot name="clear"></slot></div>
             </header>
             <div class="input-buttons">
-                <hebrew-buttons full></hebrew-buttons>
+                <slot name="hebrew-buttons"></slot>
             </div>
             <div class="lists-and-actions">
                 <div class="lists">

@@ -57,5 +57,4 @@ import "@elements/entry/jig/edit/publish/add-resource-method";
 import "@elements/entry/jig/edit/post-publish/post-publish";
 import "@elements/entry/jig/edit/post-publish/post-publish-action";
 import "@elements/module/_groups/design/edit/sidebar/widgets/theme-selector/option";
-
-import "@elements/_bundles/_sub-bundles/overlay"
+import "@elements/_bundles/_sub-bundles/hebrew-buttons";

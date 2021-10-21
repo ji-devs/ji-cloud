@@ -10,4 +10,3 @@ import "@elements/module/_common/play/play-button";
 
 import "@elements/core/images/composed/module-screenshot";
 
-import "@elements/_bundles/_sub-bundles/overlay"

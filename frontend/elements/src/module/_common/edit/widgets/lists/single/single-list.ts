@@ -1,5 +1,4 @@
 import { LitElement, html, css, customElement } from "lit-element";
-import "@elements/core/hebrew-buttons/hebrew-buttons";
 
 const STR_ADD_WORDS = "Add Your Words";
 const STR_INPUT_FOOTER = "2 to 14 words";
@@ -94,7 +93,7 @@ export class _ extends LitElement {
                 <div><slot name="clear"></slot></div>
             </header>
             <div class="input-buttons">
-                <hebrew-buttons full></hebrew-buttons>
+                <slot name="hebrew-buttons"></slot>
             </div>
             <div class="lists-and-actions">
                 <div class="list">

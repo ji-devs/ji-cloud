@@ -60,4 +60,3 @@ import "@elements/_bundles/_sub-bundles/components/audio_input/imports";
 
 
 import "@elements/core/images/composed/module-screenshot";
-import "@elements/_bundles/_sub-bundles/overlay"

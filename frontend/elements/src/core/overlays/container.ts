@@ -10,6 +10,7 @@ export class _ extends LitElement {
                     position: fixed;
                     top: 0;
                     left: 0;
+                    z-index: 1;
                 }
             `
         ];

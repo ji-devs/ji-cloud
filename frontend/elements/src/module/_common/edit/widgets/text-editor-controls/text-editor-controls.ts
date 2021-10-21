@@ -1,5 +1,4 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
-import "@elements/core/hebrew-buttons/hebrew-buttons";
 import { KEYBOARD_HEIGHT } from "@elements/core/hebrew-buttons/hebrew-buttons";
 
 @customElement("text-editor-controls")
@@ -19,7 +18,7 @@ export class _ extends LitElement {
                     display: grid;
                     row-gap: 22px;
                 }
-                hebrew-buttons {
+                ::slotted(hebrew-buttons) {
                     place-self: end;
                     margin-bottom: 18px;
                 }
@@ -97,7 +96,7 @@ export class _ extends LitElement {
                 <slot name="insert-button"></slot>
             </div>
             <div class="divider"></div>
-            <hebrew-buttons full .positionKeyboard="${this.positionHebrewKeyboard}"></hebrew-buttons>
+            <slot name="hebrew-buttons"></slot>
             <div class="controls">
                 <div class="row first">
                     <div class="button-collection">

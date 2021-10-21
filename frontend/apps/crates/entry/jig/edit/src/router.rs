@@ -1,3 +1,4 @@
+use components::overlay::container::OverlayContainer;
 use utils::routes::{JigRoute, Route};
 
 use crate::{edit::dom::EditPage, gallery::dom::GalleryDom};
@@ -27,6 +28,9 @@ impl Router {
     }
 
     pub fn render(&self) -> Dom {
-        html!("main", { .child_signal(Self::dom_signal()) } )
+        html!("main", {
+            .child_signal(Self::dom_signal())
+            .child(OverlayContainer::new().render(None))
+        })
     }
 }
