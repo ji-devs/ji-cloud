@@ -5,11 +5,11 @@ use actix_web::web::{self, ServiceConfig};
 
 pub fn configure(config: &mut ServiceConfig) {
     config
-        .route("/kids.{ext}*", web::get().to(spa::kids_template))
+        .route("/kids/{path:.*}", web::get().to(spa::kids_template))
         .route("/kids", web::get().to(spa::kids_template))
-        .route("/user.{ext}*", web::get().to(spa::user_template))
+        .route("/user/{path:.*}", web::get().to(spa::user_template))
         .route("/user", web::get().to(spa::user_template))
-        .route("/admin.{ext}*", web::get().to(spa::admin_template))
+        .route("/admin/{path:.*}", web::get().to(spa::admin_template))
         .route("/admin", web::get().to(spa::admin_template))
         .route(
             "/jig/{page_kind}/{jig_id}",
