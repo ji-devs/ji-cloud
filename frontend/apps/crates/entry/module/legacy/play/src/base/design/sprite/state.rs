@@ -4,8 +4,8 @@ use shared::domain::jig::module::body::legacy::design::{
     Animation
 };
 use std::{cell::RefCell, rc::Rc, sync::atomic::AtomicBool};
-use web_sys::{Blob, CanvasRenderingContext2d, HtmlCanvasElement, HtmlImageElement, ImageData, window};
-use crate::base::state::Base;
+use web_sys::{Blob, CanvasRenderingContext2d, HtmlCanvasElement, HtmlImageElement, ImageData, Worker, window};
+use crate::base::state::{Base, WorkerKind};
 use std::io::Cursor;
 
 pub enum Sprite {
@@ -52,7 +52,8 @@ pub struct AnimationPlayer {
     pub raw: RawSprite,
     pub size: Mutable<Option<(f64, f64)>>,
     pub hide: HideController,
-    pub anim: AnimationController
+    pub anim: AnimationController,
+    pub worker: Worker,
 }
 
 impl AnimationPlayer {
@@ -61,12 +62,15 @@ impl AnimationPlayer {
         let hide = HideController::new(&raw);
         let anim = AnimationController::new(&raw, animation);
 
+        let worker = base.get_worker(WorkerKind::GifConverter);
+
         Rc::new(Self{
             base,
             raw,
             size: Mutable::new(None),
             hide,
-            anim
+            anim,
+            worker
         })
     }
 }

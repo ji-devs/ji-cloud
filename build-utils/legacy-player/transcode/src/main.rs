@@ -137,6 +137,7 @@ async fn transcode_game(opts: &Opts) {
                                 let dest_file_path = dest_file_path.to_str().unwrap();
                                 log::info!("converting animation {} to {}...", media.file_stem(), dest_file_path);
 
+                                // ffmpeg -i 2_anim.gif -c vp9 -b:v 0 -crf 26 -pix_fmt yuva420p test001.webm
                                 Command::new("ffmpeg")
                                     .arg("-i")
                                     .arg(src_file_path)
@@ -146,33 +147,42 @@ async fn transcode_game(opts: &Opts) {
                                     .arg("0")
                                     .arg("-crf")
                                     .arg("26")
+                                    .arg("-pix_fmt")
+                                    .arg("-yuva420p")
                                     .arg(dest_file_path)
                                     .output()
                                     .expect("failed to execute process");
                             }
 
-                            let dest_file_path = dest_dir.join(&format!("{}.mp4", media.file_stem()));
+                            /// works for prores but huge file:
+                            /// ffmpeg -i 2_anim.gif -c prores -pix_fmt yuva444p10le -profile:v 4 -vf pad="width=ceil(iw/2)*2:height=ceil(ih/2)*2" test001.mov
+                            
+                            // unfortunately, yuva420p isn't supported here
+                            // let dest_file_path = dest_dir.join(&format!("{}.mp4", media.file_stem()));
 
-                            if !opts.skip_transcode_exists || !dest_file_path.exists() {
-                                let dest_file_path = dest_file_path.to_str().unwrap();
-                                log::info!("converting animation {} to {}...", media.file_stem(), dest_file_path);
-                                Command::new("ffmpeg")
-                                    .arg("-i")
-                                    .arg(src_file_path)
-                                    .arg("-c")
-                                    .arg("libx265")
-                                    .arg("-vtag")
-                                    .arg("hvc1")
-                                    .arg("-preset")
-                                    .arg("slow")
-                                    .arg("-b:v")
-                                    .arg("0")
-                                    .arg("-crf")
-                                    .arg("26")
-                                    .arg(dest_file_path)
-                                    .output()
-                                    .expect("failed to execute process");
-                            }
+                            // if !opts.skip_transcode_exists || !dest_file_path.exists() {
+                            //     let dest_file_path = dest_file_path.to_str().unwrap();
+                            //     log::info!("converting animation {} to {}...", media.file_stem(), dest_file_path);
+                            //      ffmpeg -i 2_anim.gif -c libx265 -b:v 0 -crf 26 -pix_fmt yuva420p test006.mp4
+                            //     Command::new("ffmpeg")
+                            //         .arg("-i")
+                            //         .arg(src_file_path)
+                            //         .arg("-c")
+                            //         .arg("libx265")
+                            //         .arg("-vtag")
+                            //         .arg("hvc1")
+                            //         .arg("-preset")
+                            //         .arg("slow")
+                            //         .arg("-b:v")
+                            //         .arg("0")
+                            //         .arg("-crf")
+                            //         .arg("26")
+                            //         .arg("-pix_fmt")
+                            //         .arg("-yuva420p")
+                            //         .arg(dest_file_path)
+                            //         .output()
+                            //         .expect("failed to execute process");
+                            // }
                         }
                     }
                 }

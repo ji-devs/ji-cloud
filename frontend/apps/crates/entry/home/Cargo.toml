@@ -48,7 +48,7 @@ wasm-bindgen-futures = "0.4.28"
 simple-html-template = { version = "0.2.4", features = ["wasm"] }
 htmlescape = "0.3.1"
 dominator = "0.5.21"
-futures-signals = "0.3.22"
+futures-signals = "0.3.23"
 dominator_helpers = "0.7.2"
 serde = { version = "1.0.130", features = ["derive"] }
 serde-wasm-bindgen = "0.3.1"
@@ -56,7 +56,7 @@ serde_json = "1.0.68"
 futures = "0.3.17"
 log = "0.4.14"
 cfg-if = "1.0.0"
-awsm_web = { version = "0.28.1", features = ["dom", "loaders"] }
+awsm_web = { version = "0.29.0", features = ["dom", "loaders"] }
 discard = "1.0.4"
 gloo-timers = { version = "0.2.1", features = ["futures"] }
 
