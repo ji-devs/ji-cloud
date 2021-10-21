@@ -48,11 +48,12 @@ async fn transcode_game(opts: &Opts) {
             let dest_path = dest_path.join("requests");
             std::fs::create_dir_all(&dest_path);
 
-            let file = File::create(&dest_path.join("jig.json")).unwrap();
+            let mut file = File::create(&dest_path.join("jig.json")).unwrap();
             serde_json::to_writer_pretty(file, &jig_req).unwrap();
 
+
             for (index, module_req) in module_reqs.iter().enumerate() {
-                let file = File::create(&dest_path.join(format!("module-{}.json", index))).unwrap();
+                let mut file = File::create(&dest_path.join(format!("module-{}.json", index))).unwrap();
                 serde_json::to_writer_pretty(file, &module_req).unwrap();
             }
         }
@@ -67,7 +68,7 @@ async fn transcode_game(opts: &Opts) {
                     _ => panic!("not a legacy module?!")
                 };
 
-                let file = File::create(&dest_path.join(format!("{}.json", id))).unwrap();
+                let mut file = File::create(&dest_path.join(format!("{}.json", id))).unwrap();
                 serde_json::to_writer_pretty(file, &slide).unwrap();
             }
         }
@@ -79,9 +80,13 @@ async fn transcode_game(opts: &Opts) {
 
         for media in medias.iter() {
 
+            let dest_dir = dest_path.join(&media.basepath);
+            std::fs::create_dir_all(&dest_dir);
+            let dest_path = dest_dir.join(&media.filename);
+
 
             if !opts.skip_download_exists || !dest_path.exists() {
-                let dest_path = dest_dir.join(&media.filename);
+                log::info!("downloading {} -> {}", media.url, dest_path.to_str().unwrap());
                 let data = reqwest::get(&media.url)
                     .await
                     .unwrap()
@@ -90,10 +95,6 @@ async fn transcode_game(opts: &Opts) {
                     .unwrap();
 
                 let mut cursor = std::io::Cursor::new(data);
-
-                let dest_dir = dest_path.join(&media.basepath);
-                std::fs::create_dir_all(&dest_dir);
-
 
                 let mut dest_file = std::fs::File::create(&dest_path).unwrap();
                 std::io::copy(&mut cursor, &mut dest_file).unwrap();

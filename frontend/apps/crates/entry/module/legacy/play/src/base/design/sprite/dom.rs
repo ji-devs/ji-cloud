@@ -1,4 +1,4 @@
-use crate::base::{design::sprite::{SpriteData, animation::Animation, player::SpritePlayer}, state::Base};
+use crate::base::state::Base;
 use dominator::{clone, html, with_node, Dom};
 use futures_signals::signal::{Mutable, Signal, SignalExt};
 
@@ -13,89 +13,104 @@ use utils::{
     resize::resize_info_signal,
 };
 use awsm_web::{canvas::{get_2d_context, CanvasToBlobFuture}, data::ArrayBufferExt};
-use super::state::{Sprite, SpritePhase};
+use super::{AnimationPlayer, ImagePlayer, state::{Sprite}};
 
 impl Sprite {
+    pub fn render(self: Self) -> Dom {
+        match self {
+            Self::Image(state) => state.render(),
+            Self::Animation(state) => state.render()
+        }
+    }
+}
+
+impl ImagePlayer {
     pub fn render(self: Rc<Self>) -> Dom {
-        let state = self.clone();
+        let state = self;
 
-        html!("empty-fragment", {
-            .future(clone!(state => async move {
+        let transform_matrix = Matrix4::new_direct(state.raw.transform_matrix.clone());
+        let transform_signal = resize_info_signal().map(move |resize_info| {
+            let mut m = transform_matrix.clone();
+            m.denormalize(&resize_info);
+            m.as_matrix_string()
+        });
 
-                let url = state.base.media_url(&state.raw.src);
+        html!("img" => web_sys:: HtmlImageElement, {
+            .attribute("src", &state.base.media_url(&state.raw.src))
+            .style("cursor", "pointer")
+            .style("display", "block")
+            .style("position", "absolute")
+            .style_signal("width", width_signal(state.size.signal_cloned()))
+            .style_signal("height", height_signal(state.size.signal_cloned()))
+            .style_signal("top", bounds::size_height_center_rem_signal(state.size.signal()))
+            .style_signal("left", bounds::size_width_center_rem_signal(state.size.signal()))
+            .style_signal("transform", transform_signal)
+            .with_node!(img => {
+                .event(clone!(state => move |_evt:events::Load| {
+                    let width = img.natural_width() as f64;
+                    let height = img.natural_height() as f64;
 
-                if state.raw.animation.is_some() {
+                    state.size.set(Some((width, height)));
 
-                    let animation = Animation::load_gif(&url).await;
-
-                    state.size.set(Some((animation.width, animation.height)));
-                    state.data.set(Some(SpriteData::Animation(Rc::new(animation))));
-
-                } else {
-                    let img = match awsm_web::loaders::image::load(url).await {
-                        Ok(img) => img,
-                        Err(_) => {
-                            panic!("could not load image!");
-                        }
-                    };
-
-                    state.size.set(Some((
-                        img.natural_width() as f64,
-                        img.natural_height() as f64,
-                    )));
-
-                    state.data.set(Some(
-                        SpriteData::Static(img)
-                    ));
-                }
-
+                }))
+            })
+            .event(clone!(state => move |_evt:events::Click| {
+                log::info!("clicked!")
             }))
-            .child_signal(state.data.signal_cloned().map(clone!(state => move |data| data.map(|data| {
-                let transform_matrix = Matrix4::new_direct(self.raw.transform_matrix.clone());
-                let transform_signal = resize_info_signal().map(move |resize_info| {
-                    let mut m = transform_matrix.clone();
-                    m.denormalize(&resize_info);
-                    m.as_matrix_string()
-                });
-
-                html!("canvas" => web_sys::HtmlCanvasElement, {
-                    .future(state.phase.signal_cloned().for_each(clone!(state, data => move |phase| {
-
-                        let ctx = state.ctx.borrow().as_ref().unwrap_ji().clone();
-
-                        *state.player.borrow_mut() = Some(SpritePlayer::new(ctx, data.clone(), phase.clone()));
-
-                        async {}
-                    })))
-                    .event(clone!(state => move |evt:events::Click| {
-                        log::info!("click")
-                    }))
-                    .style("cursor", "pointer")
-                    .style("display", "block")
-                    .style("position", "absolute")
-                    .style_signal("width", width_signal(state.size.signal_cloned()))
-                    .style_signal("height", height_signal(state.size.signal_cloned()))
-                    .style_signal("top", bounds::size_height_center_rem_signal(state.size.signal()))
-                    .style_signal("left", bounds::size_width_center_rem_signal(state.size.signal()))
-                    .style_signal("transform", transform_signal)
-
-                    .after_inserted(clone!(state => move |canvas| {
-                        let (natural_width, natural_height) = state.size.get_cloned().unwrap_ji();
-
-                        canvas.set_width(natural_width as u32);
-                        canvas.set_height(natural_height as u32);
-                        *state.ctx.borrow_mut() = Some(get_2d_context(&canvas, None).unwrap_ji());
-
-                        // todo - set based on settings
-                        state.phase.set_neq(SpritePhase::PlayStatic);
-                      
-                    }))
-                })
-            }))))
         })
     }
 }
 
+impl AnimationPlayer { 
+    pub fn render(self: Rc<Self>) -> Dom {
+        let state = self;
+
+        let transform_matrix = Matrix4::new_direct(state.raw.transform_matrix.clone());
+        let transform_signal = resize_info_signal().map(move |resize_info| {
+            let mut m = transform_matrix.clone();
+            m.denormalize(&resize_info);
+            m.as_matrix_string()
+        });
+
+
+        html!("video" => web_sys:: HtmlVideoElement, {
+            .children(&mut[
+                html!("source", {
+                    .attribute("src", &format!("{}.webm", &state.base.media_url(&state.raw.src)))
+                    .attribute("type", "video/webm; codecs=vp9")
+                }),
+                html!("source", {
+                    .attribute("src", &format!("{}.mp4", &state.base.media_url(&state.raw.src)))
+                    .attribute("type", "video/mp4; codecs=hvc1")
+                }),
+            ])
+            .property("autoplay", true)
+            .property("muted", true)
+            .property("loop", true)
+            .property("playsinline", true)
+            .style("cursor", "pointer")
+            .style("display", "block")
+            .style("position", "absolute")
+            .style_signal("width", width_signal(state.size.signal_cloned()))
+            .style_signal("height", height_signal(state.size.signal_cloned()))
+            .style_signal("top", bounds::size_height_center_rem_signal(state.size.signal()))
+            .style_signal("left", bounds::size_width_center_rem_signal(state.size.signal()))
+            .style_signal("transform", transform_signal)
+            .with_node!(video => {
+                .event(clone!(state => move |_evt:events::LoadedMetadata| {
+                    let width = video.video_width() as f64;
+                    let height = video.video_height() as f64;
+
+                    state.size.set(Some((width, height)));
+
+                }))
+            })
+            .event(clone!(state => move |_evt:events::Click| {
+                log::info!("clicked!")
+            }))
+        })
+    }
+}
 fn width_signal(size: impl Signal<Item = Option<(f64, f64)>>) -> impl Signal<Item = String> {
     size.map(|size| match size {
         None => "0".to_string(),

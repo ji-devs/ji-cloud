@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use shared::domain::jig::module::body::legacy::design::Animation;
 pub struct Media {
     pub url: String,

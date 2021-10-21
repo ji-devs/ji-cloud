@@ -192,10 +192,9 @@ fn convert_design(game_id: &str, slide_id: &str, base_url: &str, mut medias: &mu
                         if layer.kind == SrcLayerKind::Animation {
                             /// as of today, client needs to load both webm and x265 to have alpha video
                             /// so only stem name is set in the json
-                            let filename = Path::new(&filename).file_stem().unwrap().to_str().unwrap().to_string();
-                            SpriteSource::Animation(filename)
+                            Path::new(&filename).file_stem().unwrap().to_str().unwrap().to_string()
                         } else {
-                            SpriteSource::Image(filename)
+                            filename
                         }
 
                     },

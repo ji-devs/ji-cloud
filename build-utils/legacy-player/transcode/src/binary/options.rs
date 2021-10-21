@@ -5,7 +5,7 @@ use shared::config::RemoteTarget;
 #[derive(Debug, StructOpt)]
 #[structopt(name = "ji tap transcoder", about = "ji tap downloader/transcoder")]
 pub struct Opts {
-    #[structopt(long, default_value="https://d24o39yp3ttic8.cloudfront.net/106BBB0E-4966-4336-AB2D-7B210257646C/game.json")]
+    #[structopt(long, default_value="https://d24o39yp3ttic8.cloudfront.net/89422814-F05E-415D-82BD-99D19E98D58F/game.json")]
     pub game_json_url: String,
 
     #[structopt(long, default_value="D:\\Dropbox (Jewish Interactive)\\ji-cloud-media\\legacy\\examples", parse(from_os_str))]

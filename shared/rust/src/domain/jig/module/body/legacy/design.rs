@@ -32,16 +32,12 @@ pub struct Sprite {
     /// animation options
     pub animation: Option<Animation>,
     // associated audio
-    pub audio: Option<String>
+    pub audio: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub enum SpriteSource {
-    /// the full image filename
-    Image(String),
-    /// without extension, so client can load .webm, .mp4, etc.
-    Animation(String)
-}
+// in the case of full image, it's the filename
+/// for video, it's without the extension, so client can load .webm, .mp4, etc.
+pub type SpriteSource = String;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Text {
@@ -54,7 +50,7 @@ pub struct Text {
     /// toggle hidden state
     pub hide_toggle: Option<HideToggle>,
     // associated audio
-    pub audio: Option<String>
+    pub audio: Option<String>,
 }
 
 #[repr(u8)]
