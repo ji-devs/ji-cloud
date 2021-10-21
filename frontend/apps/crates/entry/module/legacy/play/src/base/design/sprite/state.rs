@@ -1,12 +1,20 @@
 use futures_signals::signal::Mutable;
+use gloo::events::EventListener;
 use shared::domain::jig::module::body::legacy::design::{
     Sprite as RawSprite,
     Animation
 };
+use std::sync::atomic::{AtomicUsize, Ordering};
 use std::{cell::RefCell, rc::Rc, sync::atomic::AtomicBool};
 use web_sys::{Blob, CanvasRenderingContext2d, HtmlCanvasElement, HtmlImageElement, ImageData, Worker, window};
 use crate::base::state::{Base, WorkerKind};
 use std::io::Cursor;
+use utils::prelude::*;
+use dominator::clone;
+use wasm_bindgen::prelude::*;
+use wasm_bindgen::JsCast;
+use serde::{Serialize, Deserialize};
+use super::animation::*;
 
 pub enum Sprite {
     Image(Rc<ImagePlayer>),
@@ -44,60 +52,5 @@ impl ImagePlayer {
             size: Mutable::new(None),
             hide
         })
-    }
-}
-
-pub struct AnimationPlayer {
-    pub base: Rc<Base>,
-    pub raw: RawSprite,
-    pub size: Mutable<Option<(f64, f64)>>,
-    pub hide: HideController,
-    pub anim: AnimationController,
-    pub worker: Worker,
-}
-
-impl AnimationPlayer {
-    pub fn new(base: Rc<Base>, raw: RawSprite, animation: Animation) -> Rc<Self> {
-
-        let hide = HideController::new(&raw);
-        let anim = AnimationController::new(&raw, animation);
-
-        let worker = base.get_worker(WorkerKind::GifConverter);
-
-        Rc::new(Self{
-            base,
-            raw,
-            size: Mutable::new(None),
-            hide,
-            anim,
-            worker
-        })
-    }
-}
-
-pub struct AnimationController {
-    pub playing: Mutable<bool>,
-    pub settings: Animation,
-}
-
-impl AnimationController {
-    pub fn new(raw: &RawSprite, settings: Animation) -> Self {
-        Self {
-            playing: Mutable::new(!settings.tap),
-            settings
-        }
-    }
-}
-pub struct HideController {
-    pub is_hidden: AtomicBool,
-    pub has_toggled_once: AtomicBool,
-}
-
-impl HideController {
-    pub fn new(raw: &RawSprite) -> Self {
-        Self {
-            is_hidden: AtomicBool::new(raw.hide),
-            has_toggled_once: AtomicBool::new(false),
-        }
     }
 }
