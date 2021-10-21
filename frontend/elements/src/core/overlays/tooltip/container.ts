@@ -6,10 +6,9 @@
 
 import { LitElement, svg, html, css, customElement, property } from "lit-element";
 import { nothing } from "lit-html";
-import { styleMap } from "lit-html/directives/style-map";
 import { Anchor, ContentAnchor, getAnchors } from "@elements/core/overlays/content";
 
-export type Color = "beige" | "red" | "green";
+export type Color = "blue" | "red" | "green";
 
 const TRIANGLE_WIDTH = 18;
 const TRIANGLE_HEIGHT = 10;
@@ -54,52 +53,35 @@ export class _ extends LitElement {
                     align-items: flex-end;
                 }
 
-                :host([color="red"]) > .main {
-                    background-color: var(--light-red-1);
-                }
+                :host([color=blue]) {
+                    --tooltip-bg-color: var(--light-orange-1);
+                    --tooltip-border-color: var(--light-orange-2);
 
 
-                /* beige */
-                :host([color="beige"]) > .main {
-                    border: solid 2px var(--light-orange-2);
-                    background-color: var(--light-orange-1);
+                    --tooltip-bg-color: var(--dark-blue-5);
+                    --tooltip-border-color: var(--light-blue-3);
                 }
-                :host([color="beige"]) .tri {
-                    fill: var(--light-orange-1);
+                :host([color=green]) {
+                    --tooltip-bg-color: var(--main-green);
+                    --tooltip-border-color: #4bb972;
                 }
-                :host([color="beige"]) .tri path {
-                    stroke: var(--light-orange-1);
-                }
-                :host([color="beige"]) .tri-repaint path {
-                    stroke: var(--light-orange-2);
+                :host([color=red]) {
+                    --tooltip-bg-color: var(--light-red-1);
+                    --tooltip-border-color: var(--light-red-1);
                 }
 
-                /* green */
-                :host([color="green"]) > .main {
-                    border: solid 2px #4bb972;
-                    background-color: var(--main-green);
+                .main {
+                    background-color: var(--tooltip-bg-color);
+                    border: solid 3px var(--tooltip-border-color);
                 }
-                :host([color="green"]) .tri {
-                    fill: var(--main-green);
+                .tri {
+                    fill: var(--tooltip-bg-color);
                 }
-                :host([color="green"]) .tri path {
-                    stroke: var(--main-green);
+                .tri path {
+                    stroke: var(--tooltip-bg-color);
                 }
-                :host([color="green"]) .tri-repaint path {
-                    stroke: #4bb972;
-                }
-                /* red */
-                :host([color="red"]) > .main {
-                    background-color: var(--light-red-1);
-                }
-                :host([color="red"]) .tri {
-                    fill: var(--light-red-1);
-                }
-                :host([color="red"]) .tri path {
-                    stroke: var(--light-red-1);
-                }
-                :host([color="red"]) .tri-repaint path {
-                    stroke: var(--light-red-1);
+                .tri-repaint path {
+                    stroke: var(--tooltip-border-color);
                 }
 
                 /* arrow offsets 
@@ -120,7 +102,7 @@ export class _ extends LitElement {
                 /* main */
                 .main {
                     border-radius: 25px;
-                    padding: 10px; 
+                    padding: 12px 24px; 
                 }
 
                 /* triangle */
@@ -169,7 +151,7 @@ export class _ extends LitElement {
     }
     
     @property({ reflect: true })
-    color: Color = "beige";
+    color: Color = "blue";
 
     @property()
     contentAnchor: ContentAnchor = "oppositeH";
