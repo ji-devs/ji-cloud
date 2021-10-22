@@ -30,11 +30,9 @@ pub struct WorkerList {
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 pub enum WorkerKind {
     GifConverter,
-    GifConverter2
 }
 
 static GIF_CONVERTER_SRC:&str = include_str!("design/sprite/gif-converter.js");
-static GIF_CONVERTER2_SRC:&str = include_str!("design/sprite/gif-converter-2.js");
 
 impl WorkerKind {
     pub fn make_worker(&self) -> Worker {
@@ -42,9 +40,6 @@ impl WorkerKind {
             Self::GifConverter => {
                 new_worker_from_js(GIF_CONVERTER_SRC, None).unwrap_ji()
             },
-            Self::GifConverter2 => {
-                new_worker_from_js(GIF_CONVERTER2_SRC, None).unwrap_ji()
-            }
         }
     } 
 }
