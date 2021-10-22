@@ -1,10 +1,10 @@
-const readers = new Map();
-const buffers = new Map();
+const readers = new Map()
 
 self.addEventListener("message", (msg) => {
     const payload = msg.data?.data;
     const kind = payload?.kind;
     const data = payload?.data;
+
 
     if(kind === "load") {
         const [id, url] = data;
@@ -16,7 +16,6 @@ self.addEventListener("message", (msg) => {
                 const reader = new GifReader(buffer);
 
                 readers.set(id, reader);
-                buffers.set(id, []);
 
                 const frameInfos = [];
 
@@ -26,34 +25,49 @@ self.addEventListener("message", (msg) => {
 
                 self.postMessage({data:{
                     kind: "init",
-                    data: [id, reader.width, reader.height, reader.numFrames(), frameInfos]
+                    data: [id, reader.width, reader.height, frameInfos]
                 }});
             });
     } else if(kind === "frame_req") {
-        const [id, frame_index] = data;
+        const {id, img_data, frame_index} = data;
 
         const reader = readers.get(id);
-        const id_buffers = buffers.get(id);
-        const info = reader.frameInfo(frame_index);
 
-        if(!id_buffers[frame_index]) {
-            const data_size = (info.width * info.height * 4);
+        //this is a slow operation, around 10-30ms
+        reader.decodeAndBlitFrameRGBA(frame_index, img_data.data);
 
-            //make room for id at the end
-            const buffer = new Uint8Array(data_size + 4);
+        self.postMessage({data:{
+            kind: "frame_resp",
+            data: {
+              id,
+              img_data
+            }
+        }});
+        //console.log(data);
+        // const [id, frame_index] = data;
 
-            //const start = performance.now();
-            reader.decodeAndBlitFrameRGBA(frame_index, buffer);
-            //console.log("decode", performance.now() - start);
+        // const reader = readers.get(id);
+        // const id_buffers = buffers.get(id);
+        // const info = reader.frameInfo(frame_index);
 
-            //append the id
-            const view = new DataView(buffer.buffer);
-            view.setUint32(data_size, id);
+        // if(!id_buffers[frame_index]) {
+        //     const data_size = (info.width * info.height * 4);
 
-            id_buffers[frame_index] = buffer;
-        }
+        //     //make room for id at the end
+        //     const buffer = new Uint8Array(data_size + 4);
 
-        self.postMessage(id_buffers[frame_index]);
+        //     //const start = performance.now();
+        //     reader.decodeAndBlitFrameRGBA(frame_index, buffer);
+        //     //console.log("decode", performance.now() - start);
+
+        //     //append the id
+        //     const view = new DataView(buffer.buffer);
+        //     view.setUint32(data_size, id);
+
+        //     id_buffers[frame_index] = buffer;
+        // }
+
+        // self.postMessage(id_buffers[frame_index]);
     }
 });
 // {"data":{"kind":"init","data":[10.2,45.6]}}

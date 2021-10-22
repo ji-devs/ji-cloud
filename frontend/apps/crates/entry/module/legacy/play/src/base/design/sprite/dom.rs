@@ -99,6 +99,8 @@ impl AnimationPlayer {
                         canvas.set_width(natural_width as u32);
                         canvas.set_height(natural_height as u32);
                         *state.ctx.borrow_mut() = Some(get_2d_context(&canvas, None).unwrap_ji());
+
+                        state.request_frame();
                     }))
                 })
             }))))
