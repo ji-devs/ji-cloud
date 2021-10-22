@@ -19,7 +19,7 @@ impl ImageTag {
             Self::BackgroundLayer2 => "Background Layer 2 (a.k.a. \"Overlay\")",
             Self::Ispy => "I Spy",
             Self::MultipleChoice => "Multiple Choice",
-            Self::DragAndDrop => "Drag and Drop",
+            Self::DragAndDrop => "Drag & Drop",
             Self::Video => "Video",
             Self::NavigationButton => "Navigation Button",
         }

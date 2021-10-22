@@ -109,10 +109,10 @@ pub enum ModuleKind {
     /// Memory Game
     Memory = 3,
 
-    /// Poster
+    /// Talking Poster
     Poster = 4,
 
-    /// Tapping Board
+    /// Listen & Learn
     TappingBoard = 5,
 
     /// Tracing
@@ -124,10 +124,10 @@ pub enum ModuleKind {
     /// Deprecated, next new module should use this slot
     //VisualQuiz = 8,
 
-    /// Card Quiz
+    /// Quiz Game
     CardQuiz = 9,
 
-    /// Drag and Drop
+    /// Drag & Drop
     DragDrop = 10,
 
     /// Legacy

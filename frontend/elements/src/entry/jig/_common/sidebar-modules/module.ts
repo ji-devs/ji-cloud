@@ -37,11 +37,15 @@ export class _ extends LitElement {
                 }
                 section {
                     display: flex;
-                    cursor: grab;
+                    /* cursor: grab; dragging is disabled for now */
+                    cursor: pointer;
                     box-sizing: border-box;
                     border: solid 1px transparent;
                     border-left: solid 8px transparent;
                     border-bottom: solid 2px transparent;
+                }
+                :host([collapsed]) section {
+                    cursor: pointer;
                 }
                 section.selected {
                     border-color: #e7f0fd;

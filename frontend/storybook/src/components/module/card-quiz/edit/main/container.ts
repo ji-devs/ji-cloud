@@ -5,7 +5,7 @@ import "@elements/module/card-quiz/_common/main/container";
 import {Size} from "@elements/module/_groups/cards/play/card/styles";
 import {Card, Args as CardArgs} from "~/components/module/_groups/cards/play/card";
 export default {
-    title: "Module / Card Quiz / Edit / Main" 
+    title: "Module / Quiz Game / Edit / Main" 
 }
 
 interface Args {

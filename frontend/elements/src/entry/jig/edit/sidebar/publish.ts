@@ -14,7 +14,7 @@ export class _ extends LitElement {
             css`
                 section {
                     display: flex;
-                    cursor: grab;
+                    cursor: pointer;
                     box-sizing: border-box;
                     border: solid 1px transparent;
                     border-left: solid 8px transparent;

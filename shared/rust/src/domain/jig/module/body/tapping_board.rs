@@ -81,7 +81,7 @@ impl TryFrom<Body> for ModuleData {
     fn try_from(body: Body) -> Result<Self, Self::Error> {
         match body {
             Body::TappingBoard(data) => Ok(data),
-            _ => Err("cannot convert body to tapping board!"),
+            _ => Err("cannot convert body to Listen & Learn!"),
         }
     }
 }

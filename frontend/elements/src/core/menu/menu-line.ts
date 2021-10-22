@@ -29,8 +29,8 @@ const STR_LABEL_LOOKUP: any = {
     //all stickers
     ["move-forward"]: "Move forward",
     ["move-backward"]: "Send backward",
-    ["flip-horizontal"]: "Flip horizontal",
-    ["flip-vertical"]: "Flip vertical",
+    ["flip-horizontal"]: "Flip right-left",
+    ["flip-vertical"]: "Flip up-down",
     //bg only
     ["change-background-color"]: "Change background color",
     ["change-background-image"]: "Change background image",

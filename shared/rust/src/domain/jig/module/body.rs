@@ -9,16 +9,16 @@ use std::{collections::HashSet, convert::TryFrom, fmt::Debug, hash::Hash};
 /// Memory Game Body.
 pub mod memory;
 
-/// Poster Body.
+/// Talking Poster Body.
 pub mod poster;
 
 /// Video Body.
 pub mod video;
 
-/// Tapping Board Body.
+/// Listen & Learn Body.
 pub mod tapping_board;
 
-/// Drag and Drop Body.
+/// Drag & Drop Body.
 pub mod drag_drop;
 
 /// Cover Body.
@@ -27,7 +27,7 @@ pub mod cover;
 /// Flashcards .
 pub mod flashcards;
 
-/// Card Quiz
+/// Quiz Game
 pub mod card_quiz;
 
 /// Matching
@@ -53,19 +53,19 @@ pub enum Body {
     /// Module is flashcards, and has a flashcard's body.
     Flashcards(flashcards::ModuleData),
 
-    /// Module is a card quiz, and has a card quiz's body.
+    /// Module is a quiz game, and has a quiz game's body.
     CardQuiz(card_quiz::ModuleData),
 
-    /// Module is a poster, and has a poster's body.
+    /// Module is a poster, and has a talking poster's body.
     Poster(poster::ModuleData),
 
     /// ??
     Video(video::ModuleData),
 
-    /// Module is a tapping board, and has a tapping board's body.
+    /// Module is a Listen & Learn, and has a Listen & Learn's body.
     TappingBoard(tapping_board::ModuleData),
 
-    /// Module is a drag and drop, and has a drag and drop's body.
+    /// Module is a drag & drop, and has a drag & drop's body.
     DragDrop(drag_drop::ModuleData),
 
     /// Module is a [`Cover`](super::ModuleKind::Cover).
@@ -206,21 +206,21 @@ pub trait BodyConvert {
     fn convert_to_flashcards(&self) -> Result<flashcards::ModuleData, &'static str> {
         Err("cannot convert to matching!")
     }
-    /// Card quiz
+    /// Quiz game
     fn convert_to_card_quiz(&self) -> Result<card_quiz::ModuleData, &'static str> {
-        Err("cannot convert to card quiz!")
+        Err("cannot convert to quiz game!")
     }
-    /// Poster
+    /// Talking Poster
     fn convert_to_poster(&self) -> Result<poster::ModuleData, &'static str> {
-        Err("cannot convert to poster!")
+        Err("cannot convert to talking poster!")
     }
-    /// Tapping board
+    /// Listen & Learn
     fn convert_to_tapping_board(&self) -> Result<tapping_board::ModuleData, &'static str> {
-        Err("cannot convert to tapping board!")
+        Err("cannot convert to Listen & Learn!")
     }
-    /// Drag and Drop
+    /// Drag & Drop
     fn convert_to_drag_drop(&self) -> Result<drag_drop::ModuleData, &'static str> {
-        Err("cannot convert to drag and drop!")
+        Err("cannot convert to drag & drop!")
     }
     /// Cover
     fn convert_to_cover(&self) -> Result<cover::ModuleData, &'static str> {

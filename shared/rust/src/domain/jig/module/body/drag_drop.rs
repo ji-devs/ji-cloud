@@ -81,7 +81,7 @@ impl TryFrom<Body> for ModuleData {
     fn try_from(body: Body) -> Result<Self, Self::Error> {
         match body {
             Body::DragDrop(data) => Ok(data),
-            _ => Err("cannot convert body to drag and drop!"),
+            _ => Err("cannot convert body to drag & drop!"),
         }
     }
 }
@@ -127,7 +127,7 @@ pub struct EditorState {
     pub steps_completed: HashSet<Step>,
 }
 
-/// drag and drop sticker w/ metadata
+/// drag & drop sticker w/ metadata
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct Item {
     /// the sticker
@@ -146,7 +146,7 @@ pub enum ItemKind {
     Interactive(Interactive),
 }
 
-/// drag and drop sticker w/ metadata
+/// drag & drop sticker w/ metadata
 #[derive(Clone, Serialize, Deserialize, Debug, Default)]
 pub struct Interactive {
     /// audio
@@ -156,7 +156,7 @@ pub struct Interactive {
     pub target_transform: Option<Transform>,
 }
 
-/// drag and drop trace w/ metadata
+/// drag & drop trace w/ metadata
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct TargetArea {
     /// the trace
