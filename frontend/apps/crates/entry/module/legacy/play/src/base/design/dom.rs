@@ -25,15 +25,23 @@ impl Base {
                     .attribute("src", &self.media_url(src))
                 })
             }))
-            .children(self.slide.design.stickers.iter().map(|sticker| {
-                match sticker {
-                    Sticker::Sprite(sprite) => Sprite::new(self.clone(), sprite.clone()).render(),
-                    Sticker::Text(_text) => {
-                        //TODO
-                        html!("empty-text")
+            .children(self.slide.design.stickers
+                .iter()
+                .enumerate()
+                .filter(|(index, sticker)| {
+                    //*index == 5 
+                    true
+                })
+                .map(|(index, sticker)| {
+                    match sticker {
+                        Sticker::Sprite(sprite) => Sprite::new(self.clone(), sprite.clone()).render(),
+                        Sticker::Text(_text) => {
+                            //TODO
+                            html!("empty-text")
+                        }
                     }
-                }
-            }))
+                })
+            )
         })
     }
 

@@ -8,6 +8,7 @@ use shared::domain::jig::module::body::legacy::design::{
 };
 use std::borrow::Borrow;
 use std::convert::TryInto;
+use std::ops::{Mul, Sub};
 use std::slice::SliceIndex;
 use std::sync::atomic::{AtomicU8, AtomicUsize, Ordering};
 use std::{cell::RefCell, rc::Rc, sync::atomic::AtomicBool};
@@ -33,6 +34,7 @@ pub struct AnimationPlayer {
     pub worker_listener: RefCell<Option<EventListener>>,
     pub ctx: RefCell<Option<CanvasRenderingContext2d>>,
     pub curr_frame_index: AtomicUsize,
+    pub blit_time: Cell<f64>,
     pub prev_frame_info: RefCell<Option<FrameInfo>>,
     pub prev_frame_data: RefCell<Option<ImageData>>,
     pub frame_infos: RefCell<Vec<FrameInfo>>,
@@ -105,6 +107,7 @@ impl AnimationPlayer {
             prev_frame_data: RefCell::new(None), 
             frame_infos: RefCell::new(Vec::new()),
             timer: RefCell::new(None),
+            blit_time: Cell::new(0.0)
         });
 
         *state.worker_listener.borrow_mut() = Some(EventListener::new(&state.worker, "message", clone!(state => move |event| {
@@ -162,13 +165,24 @@ impl AnimationPlayer {
         }
 
         let state = self;
-        let mut delay = state.frame_infos.borrow().get(frame_index).unwrap_ji().delay;
+        let delay = 
+            state.frame_infos.borrow().get(frame_index).unwrap_ji().delay
+                .mul(10.0)
+                .sub(Self::curr_time() - state.blit_time.get())
+                .max(0.0);
+
+
+        // log::info!("{}", delay);
+
+        //let start = web_sys::window().unwrap_ji().performance().unwrap_ji().now();
 
         *state.timer.borrow_mut() = Some(Timeout::new(delay as u32, clone!(state => move || {
             state.request_frame();
         })));
     }
     pub fn request_frame(self: Rc<Self>) {
+        self.blit_time.set(Self::curr_time());
+
 
         self.map_current_frame(|frame_index, frame_info| {
             let img_data = self.prep_frame();
@@ -191,13 +205,20 @@ impl AnimationPlayer {
 
     }
 
+    fn curr_time() -> f64 {
+       web_sys::window().unwrap_ji().performance().unwrap_ji().now()
+    }
+
     // based on: https://github.com/movableink/omggif/blob/example-web/example_web/index.html
     fn prep_frame(&self) -> ImageData {
+        //let start = web_sys::window().unwrap_ji().performance().unwrap_ji().now();
         let ctx = self.ctx.borrow();
         let ctx = ctx.as_ref().unwrap_ji();
 
         let (canvas_width, canvas_height) = self.size.get_cloned().unwrap_ji();
 
+        //TODO- it would be great if we could cut out the stashing!
+        //currently it's needed simply so we don't see a blank frame
         let stash = ctx.get_image_data(0.0, 0.0, canvas_width, canvas_height).unwrap_ji();
         self.clear_frame();
         // this is a fairly expensive operation, takes like 5-15ms
@@ -205,6 +226,7 @@ impl AnimationPlayer {
 
         ctx.put_image_data(&stash, 0.0, 0.0);
 
+        //log::info!("prep time: {}", web_sys::window().unwrap_ji().performance().unwrap_ji().now() - start);
         buffer
     }
 
@@ -264,6 +286,7 @@ impl AnimationPlayer {
         });
     }
     fn blit(&self, img_data: ImageData) {
+
         self.map_current_frame(|frame_index, frame_info| {
             //let start = web_sys::window().unwrap_ji().performance().unwrap_ji().now();
             let ctx = self.ctx.borrow();
