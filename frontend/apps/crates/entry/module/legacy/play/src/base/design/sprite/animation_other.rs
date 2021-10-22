@@ -35,7 +35,6 @@ pub struct AnimationPlayer {
     pub ctx: RefCell<Option<CanvasRenderingContext2d>>,
     pub curr_frame_index: AtomicUsize,
     pub blit_time: Cell<f64>,
-    pub frames: RefCell<Vec<ImageData>>,
     pub prev_frame_info: RefCell<Option<FrameInfo>>,
     pub prev_frame_data: RefCell<Option<ImageData>>,
     pub frame_infos: RefCell<Vec<FrameInfo>>,
@@ -44,15 +43,8 @@ pub struct AnimationPlayer {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct FrameInfo {
-    pub data_length: usize, 
-    pub data_offset: usize,
     pub disposal: u8, 
-    pub has_local_palette: bool, 
     pub height: u32,
-    pub interlaced: bool, 
-    pub palette_offset: usize,
-    pub palette_size: usize,
-    pub transparent_index: usize,
     pub width: u32,
     pub x: u32,
     pub y: u32,
@@ -87,7 +79,7 @@ impl AnimationPlayer {
         let hide = HideController::new(&raw);
         let anim = AnimationController::new(&raw, animation);
 
-        let worker = base.get_worker(WorkerKind::GifConverter);
+        let worker = base.get_worker(WorkerKind::GifConverter2);
 
             // log::info!("{:?}", serde_wasm_bindgen::to_value(&GifWorkerEvent{
             //     data: GifWorkerEventData::Init(10.2, 45.6)
@@ -107,7 +99,6 @@ impl AnimationPlayer {
             prev_frame_info: RefCell::new(None), 
             prev_frame_data: RefCell::new(None), 
             frame_infos: RefCell::new(Vec::new()),
-            frames: RefCell::new(Vec::new()),
             timer: RefCell::new(None),
             blit_time: Cell::new(0.0)
         });
@@ -121,13 +112,9 @@ impl AnimationPlayer {
                 if Reflect::get(&obj_data, &JsValue::from_str("kind")) == Ok(JsValue::from_str("frame_resp")) {
                     let data = Reflect::get(&obj_data, &JsValue::from_str("data")).unwrap_ji();
                     let id = Reflect::get(&data, &JsValue::from_str("id")).unwrap_ji().as_f64().unwrap_ji() as usize;
-                    let img_data:ImageData = Reflect::get(&data, &JsValue::from_str("img_data")).unwrap_ji().unchecked_into();
+                    //let img_data:ImageData = Reflect::get(&data, &JsValue::from_str("img_data")).unwrap_ji().unchecked_into();
                     if id == state.worker_id {
-                        state.blit(&img_data);
-
-                        let frame_index = state.curr_frame_index.load(Ordering::SeqCst);
-                        state.frames.borrow_mut().insert(frame_index,img_data);
-
+                        //state.blit(img_data);
                         state.clone().next_frame();
                     }
                 } else if let Ok(msg) = serde_wasm_bindgen::from_value::<GifWorkerEvent>(data) {
@@ -174,7 +161,7 @@ impl AnimationPlayer {
         let delay = 
             state.frame_infos.borrow().get(frame_index).unwrap_ji().delay
                 .mul(10.0)
-                .sub(Self::curr_time() - state.blit_time.get())
+                //.sub(Self::curr_time() - state.blit_time.get())
                 .max(0.0);
 
 
@@ -191,26 +178,21 @@ impl AnimationPlayer {
 
 
         self.map_current_frame(|frame_index, frame_info| {
-            if let Some(img_data) = self.frames.borrow().get(frame_index) {
-                self.blit(img_data);
-                self.clone().next_frame();
-            } else {
-                let img_data = self.prep_frame();
+            //let img_data = self.prep_frame();
 
-                // manually constructing due to binary buffer
-                let obj = Object::new();
-                let data = Object::new();
-                let payload = Object::new();
+            // manually constructing due to binary buffer
+            let obj = Object::new();
+            let data = Object::new();
+            let payload = Object::new();
 
-                Reflect::set(&payload, &JsValue::from_str("img_data"), &img_data);
-                Reflect::set(&payload, &JsValue::from_str("frame_index"), &JsValue::from_f64(frame_index as f64));
-                Reflect::set(&payload, &JsValue::from_str("id"), &JsValue::from_f64(self.worker_id as f64));
-                Reflect::set(&data, &JsValue::from_str("kind"), &JsValue::from_str("frame_req"));
-                Reflect::set(&data, &JsValue::from_str("data"), &payload);
-                Reflect::set(&obj, &JsValue::from_str("data"), &data);
-                
-                self.worker.post_message(&obj).unwrap_ji();
-            }
+            //Reflect::set(&payload, &JsValue::from_str("img_data"), &img_data);
+            Reflect::set(&payload, &JsValue::from_str("frame_index"), &JsValue::from_f64(frame_index as f64));
+            Reflect::set(&payload, &JsValue::from_str("id"), &JsValue::from_f64(self.worker_id as f64));
+            Reflect::set(&data, &JsValue::from_str("kind"), &JsValue::from_str("frame_req"));
+            Reflect::set(&data, &JsValue::from_str("data"), &payload);
+            Reflect::set(&obj, &JsValue::from_str("data"), &data);
+            
+            self.worker.post_message(&obj).unwrap_ji();
 
         });
 
@@ -230,12 +212,12 @@ impl AnimationPlayer {
 
         //TODO- it would be great if we could cut out the stashing!
         //currently it's needed simply so we don't see a blank frame
-        let stash = ctx.get_image_data(0.0, 0.0, canvas_width, canvas_height).unwrap_ji();
-        self.clear_frame();
+        //let stash = ctx.get_image_data(0.0, 0.0, canvas_width, canvas_height).unwrap_ji();
+        //self.clear_frame();
         // this is a fairly expensive operation, takes like 5-15ms
         let buffer = ctx.get_image_data(0.0, 0.0, canvas_width, canvas_height).unwrap_ji();
 
-        ctx.put_image_data(&stash, 0.0, 0.0);
+        //ctx.put_image_data(&stash, 0.0, 0.0);
 
         //log::info!("prep time: {}", web_sys::window().unwrap_ji().performance().unwrap_ji().now() - start);
         buffer
@@ -296,7 +278,7 @@ impl AnimationPlayer {
             //log::info!("blit time: {}", web_sys::window().unwrap_ji().performance().unwrap_ji().now() - start);
         });
     }
-    fn blit(&self, img_data: &ImageData) {
+    fn blit(&self, img_data: ImageData) {
 
         self.map_current_frame(|frame_index, frame_info| {
             //let start = web_sys::window().unwrap_ji().performance().unwrap_ji().now();
