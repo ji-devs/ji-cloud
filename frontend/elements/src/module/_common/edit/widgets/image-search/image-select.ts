@@ -14,15 +14,7 @@ export class _ extends LitElement {
     static get styles() {
         return [css`
             :host {
-                display: flex;
-                flex-direction: column;
-                row-gap: 18px;
-                column-gap: 24px;
-            }
-            @media (min-width: 1920px) {
-                :host {
-                    row-gap: 18px;
-                }
+                display: grid;
             }
             :host {
                 --image-height: 104px;
@@ -39,6 +31,20 @@ export class _ extends LitElement {
                 }
                 :host([imageMode=background]) {
                     --image-width: 207px;
+                }
+            }
+
+            .main {
+                grid-row: 1;
+                grid-column: 1;
+                display: flex;
+                flex-direction: column;
+                row-gap: 18px;
+                column-gap: 24px;
+            }
+            @media (min-width: 1920px) {
+                .main {
+                    row-gap: 18px;
                 }
             }
             .top-row {
@@ -145,6 +151,29 @@ export class _ extends LitElement {
                 transform: scale(1.02);
                 box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
             }
+
+            .loader-overlay {
+                display: none;
+                background-color: #0000006e;
+                grid-column: 1;
+                grid-row: 1;
+                place-content: center;
+            }
+            :host([loading]) .loader-overlay {
+                display: grid;
+            }
+            .loader {
+                border: 16px solid #f3f3f3;
+                border-top: 16px solid #3498db;
+                border-radius: 50%;
+                width: 120px;
+                height: 120px;
+                animation: loader 1s ease-in-out infinite;
+            }
+            @keyframes loader {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
         `];
     }
 
@@ -158,52 +187,60 @@ export class _ extends LitElement {
     recent: boolean = false;
 
     @property({type: Boolean, reflect: true})
+    loading: boolean = false;
+
+    @property({type: Boolean, reflect: true})
     private moreShown: boolean = false;
 
     render() {
         return html`
-            <div class="top-row">
-                <h2>${this.label || nothing}</h2>
-                <slot name="hide-overlay"></slot>
-            </div>
-            <div class="controls">
-                <div class="search-row">
-                    <slot name="search-input"></slot>
-                    <slot name="filters"></slot>
+            <div class="main">
+                <div class="top-row">
+                    <h2>${this.label || nothing}</h2>
+                    <slot name="hide-overlay"></slot>
                 </div>
-                <div class="bottom-row">
-                    <slot name="only-background-checkbox"></slot>
-                    <slot name="upload"></slot>
-                </div>
-            </div>
-            <section class="all-images">
-                ${
-                    this.recent ? (
-                        html`
-                            <div class="images-section recent">
-                                <h4>${STR_MY_RECENT}</h4>
-                                <button-rect
-                                    kind="text"
-                                    color="blue"
-                                    @click=${() => this.moreShown = !this.moreShown}
-                                >
-                                    ${ this.moreShown ? STR_SEE_LESS : STR_SEE_MORE }
-                                    <span class="icon">></span>
-                                </button-rect>
-                                <div class="image-wrapper">
-                                    <slot name="recent"></slot>
-                                </div>
-                            </div>
-                        `
-                    ) : nothing
-                }
-                <div class="images-section main">
-                    <h4>${STR_ALL_IMAGES}</h4>
-                    <div class="image-wrapper">
-                        <slot name="images"></slot>
+                <div class="controls">
+                    <div class="search-row">
+                        <slot name="search-input"></slot>
+                        <slot name="filters"></slot>
+                    </div>
+                    <div class="bottom-row">
+                        <slot name="only-background-checkbox"></slot>
+                        <slot name="upload"></slot>
                     </div>
                 </div>
-            </section>
+                <section class="all-images">
+                    ${
+                        this.recent ? (
+                            html`
+                                <div class="images-section recent">
+                                    <h4>${STR_MY_RECENT}</h4>
+                                    <button-rect
+                                        kind="text"
+                                        color="blue"
+                                        @click=${() => this.moreShown = !this.moreShown}
+                                    >
+                                        ${ this.moreShown ? STR_SEE_LESS : STR_SEE_MORE }
+                                        <span class="icon">></span>
+                                    </button-rect>
+                                    <div class="image-wrapper">
+                                        <slot name="recent"></slot>
+                                    </div>
+                                </div>
+                            `
+                        ) : nothing
+                    }
+                    <div class="images-section main">
+                        <h4>${STR_ALL_IMAGES}</h4>
+                        <div class="image-wrapper">
+                            <slot name="images"></slot>
+                        </div>
+                    </div>
+                </section>
+            </div>
+            <div class="loader-overlay">
+                <div class="loader"></div>
+            </div>
         `;
     }
 }

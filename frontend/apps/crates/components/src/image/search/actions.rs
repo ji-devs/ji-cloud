@@ -1,16 +1,21 @@
-use crate::image::search::state::{ImageSearchCheckboxKind, RECENT_COUNT};
+use crate::image::search::state::{ImageSearchCheckboxKind, SearchMode, RECENT_COUNT};
 use crate::image::tag::ImageTag;
 
 use super::super::upload::upload_image;
 use super::state::State;
 use dominator::clone;
 use futures::future::join;
+use futures_signals::signal_vec::MutableVec;
 use shared::api::endpoints::image;
+use shared::domain::image::ImageId;
 use shared::domain::image::{
     recent::{UserRecentImageListRequest, UserRecentImageUpsertRequest},
     user::UserImageCreateRequest,
 };
+use shared::domain::media::WebMediaUrlCreateRequest;
 use shared::domain::meta::ImageTagIndex;
+use shared::domain::search::WebImageSearchQuery;
+use shared::media::MediaKind;
 use shared::{
     api::{endpoints, ApiEndpoint},
     domain::{
@@ -21,7 +26,9 @@ use shared::{
     error::EmptyError,
     media::MediaLibrary,
 };
+use url::Url;
 use std::rc::Rc;
+use std::str::FromStr;
 use utils::prelude::*;
 use web_sys::File;
 
@@ -32,6 +39,33 @@ impl State {
         }
         add_recent(&self, &image);
     }
+}
+
+pub fn on_web_image_click(state: Rc<State>, url: &str) {
+    let url = Url::from_str(url).unwrap_ji();
+
+    state.loader.load(clone!(state => async move {
+        let req = WebMediaUrlCreateRequest {
+            url
+        };
+
+        match endpoints::media::Create::api_with_auth(Some(req)).await {
+            Err(_) => todo!(),
+            Ok(res) => {
+                if let MediaKind::Image(_) = res.kind {
+
+                    let image = Image {
+                        id: ImageId(res.id),
+                        lib: MediaLibrary::Web,
+                    };
+                    state.set_selected(image);
+
+                } else {
+                    unreachable!("Images only here");
+                }
+            },
+        }
+    }));
 }
 
 pub async fn get_styles() -> Vec<ImageStyle> {
@@ -46,7 +80,10 @@ pub async fn get_styles() -> Vec<ImageStyle> {
 
 pub fn search(state: Rc<State>) {
     state.loader.load(clone!(state => async move {
-        search_async(state).await;
+        match state.search_mode.get_cloned() {
+            SearchMode::Sticker(_) => search_async(Rc::clone(&state)).await,
+            SearchMode::Web(_) => search_async_web(Rc::clone(&state)).await,
+        };
     }));
 }
 
@@ -62,6 +99,47 @@ pub fn fetch_init_data(state: Rc<State>) {
             search.await;
         }
     }));
+}
+
+async fn search_async_web(state: Rc<State>) {
+    let kind = match &state.options.checkbox_kind {
+        Some(ImageSearchCheckboxKind::StickersFilter) if state.checkbox_checked.get() => Some(ImageKind::Sticker),
+        _ => None,
+    };
+
+    let mut tags = state.options.tags.clone().unwrap_or_default();
+    match &state.options.checkbox_kind {
+        Some(ImageSearchCheckboxKind::BackgroundLayer1Filter) | Some(ImageSearchCheckboxKind::BackgroundLayer2Filter) => {
+            let tag = match &state.options.checkbox_kind {
+                Some(ImageSearchCheckboxKind::BackgroundLayer1Filter) => ImageTag::BackgroundLayer1,
+                Some(ImageSearchCheckboxKind::BackgroundLayer2Filter) => ImageTag::BackgroundLayer2,
+                _ => unreachable!(),
+            };
+            if state.checkbox_checked.get() {
+                if !tags.contains(&tag) {
+                    tags.push(tag);
+                };
+            } else {
+                tags.retain(|t| t != &tag);
+            };
+        },
+        _ => {},
+    };
+
+    let req = WebImageSearchQuery {
+        q: state.query.lock_ref().clone(),
+    };
+
+    let res = endpoints::search::WebImageSearch::api_with_auth(Some(req)).await;
+
+    match res {
+        Ok(res) => {
+            state.search_mode.set(SearchMode::Web(Some(Rc::new(MutableVec::new_with_values(res.images)))));
+        },
+        Err(e) => {
+            log::error!("{:#?}", e);
+        }
+    }
 }
 
 async fn search_async(state: Rc<State>) {
@@ -124,22 +202,27 @@ async fn search_async(state: Rc<State>) {
         ..Default::default()
     };
 
-    log::info!("{:?}", search_query);
+    // log::info!("{:?}", search_query);
 
     let res = endpoints::image::Search::api_with_auth(Some(search_query)).await;
 
     match res {
         Ok(res) => {
-            state.image_list.lock_mut().replace_cloned(
-                res.images
-                    .iter()
-                    .map(|i| Image {
-                        id: i.metadata.id,
-                        lib: MediaLibrary::Global,
-                    })
-                    .collect(),
-            );
-        }
+            let images: Vec<Image> = res.images.iter().map(|i| {
+                Image {
+                    id: i.metadata.id,
+                    lib: MediaLibrary::Global,
+                }
+            }).collect();
+            state.search_mode.set(SearchMode::Sticker(Some(Rc::new(MutableVec::new_with_values(images)))));
+
+            // state.image_list.lock_mut().replace_cloned(res.images.iter().map(|i| {
+            //     Image {
+            //         id: i.metadata.id,
+            //         lib: MediaLibrary::Global,
+            //     }
+            // }).collect());
+        },
         Err(e) => {
             log::error!("{:#?}", e);
         }

@@ -1,13 +1,13 @@
-use crate::image::search::state::ImageSearchCheckboxKind;
+use crate::image::search::state::{ImageSearchCheckboxKind, SearchMode};
 
 use super::{
-    actions::{fetch_init_data, search, upload_file},
+    actions,
     state::State,
     types::*,
 };
 use dominator::{clone, html, Dom};
 use futures_signals::{signal::SignalExt, signal_vec::SignalVecExt};
-use shared::{domain::jig::module::body::Image, media::MediaLibrary};
+use shared::domain::{jig::module::body::Image, search::WebImageSearchItem};
 use std::rc::Rc;
 use utils::prelude::*;
 
@@ -32,10 +32,11 @@ pub fn render(state: Rc<State>, slot: Option<&str>) -> Dom {
 }
 
 pub fn render_loaded(state: Rc<State>) -> Dom {
-    fetch_init_data(Rc::clone(&state));
+    actions::fetch_init_data(Rc::clone(&state));
 
     html!("image-select", {
         .property("label", "Select background")
+        .property_signal("loading", state.loader.is_loading())
         .property_signal("recent", state.recent_list.signal_vec_cloned().len().map(|len| {
             len > 0
         }))
@@ -43,8 +44,51 @@ pub fn render_loaded(state: Rc<State>) -> Dom {
         .children_signal_vec(state.recent_list.signal_vec_cloned().map(clone!(state => move |image| {
             render_image(Rc::clone(&state), image, "recent")
         })))
-        .children_signal_vec(state.image_list.signal_vec_cloned().map(clone!(state => move |image| {
-            render_image(Rc::clone(&state), image, "images")
+        .children_signal_vec(state.search_mode.signal_cloned().map(|mmm| {
+            // MutableVec::new_with_values(vec![html!("br")]).signal_vec_cloned()
+
+
+
+            // match mmm {
+            //     MMM::Sticker(Some(images)) => {
+            //         images.signal_vec_cloned().map(clone!(state => move |image| {
+            //             render_image(Rc::clone(&state), image, "images")
+            //         }))
+            //         // todo!();
+            //     },
+            //     MMM::Web(Some(images)) => {
+            //         todo!()
+            //     },
+            //     _ => todo!(),
+            // }
+            vec![html!("br")]
+        }).to_signal_vec())
+        .child_signal(state.search_mode.signal_ref(clone!(state => move |search_mode| {
+            match search_mode {
+                SearchMode::Sticker(Some(images)) => {
+                    Some(html!("empty-fragment", {
+                        .property("slot", "images")
+                        .style("display", "contents")
+                        .children_signal_vec(
+                            images.signal_vec_cloned().map(clone!(state => move |image| {
+                                render_image(Rc::clone(&state), image, "")
+                            }))
+                        )
+                    }))
+                },
+                SearchMode::Web(Some(images)) => {
+                    Some(html!("empty-fragment", {
+                        .property("slot", "images")
+                        .style("display", "contents")
+                        .children_signal_vec(
+                            images.signal_vec_cloned().map(clone!(state => move |image| {
+                                render_web_image(Rc::clone(&state), image, "")
+                            }))
+                        )
+                    }))
+                },
+                _ => None,
+            }
         })))
         .apply_if(state.options.recent, |dom| {
             dom.child_signal(state.loader.is_loading().map(|is_loading| {
@@ -61,6 +105,7 @@ pub fn render_loaded(state: Rc<State>) -> Dom {
     })
 }
 
+
 fn render_image(state: Rc<State>, image: Image, slot: &str) -> Dom {
     html!("img-ji", {
         .property("slot", slot)
@@ -68,8 +113,7 @@ fn render_image(state: Rc<State>, image: Image, slot: &str) -> Dom {
         .property("lib", image.lib.to_str())
         .property("id", image.id.0.to_string())
         .event(clone!(state, image => move |_: events::Click| {
-            //TODO - this should change if the library has changed
-            state.set_selected(Image { id: image.id, lib: MediaLibrary::Global});
+            state.set_selected(image.clone());
         }))
         .event(clone!(image => move |evt: events::DragStart| {
             if let Some(data_transfer) = evt.data_transfer() {
@@ -83,6 +127,35 @@ fn render_image(state: Rc<State>, image: Image, slot: &str) -> Dom {
                 log::error!("no data transfer - use a real computer!!!");
             }
         }))
+    })
+}
+
+fn render_web_image(state: Rc<State>, image: WebImageSearchItem, slot: &str) -> Dom {
+    html!("img", {
+        .property("slot", slot)
+        .property("size", "thumb")
+        .property("src", &image.thumbnail_url)
+        .property("loading", "lazy")
+        .style("height", "100%")
+        .style("width", "100%")
+        .style("object-fit", "contain")
+        .style("object-position", "center")
+        .event(clone!(state, image => move |_: events::Click| {
+            actions::on_web_image_click(Rc::clone(&state), &image.url);
+        }))
+        // .event(clone!(image => move |evt: events::DragStart| {
+        // TODO:
+        //     if let Some(data_transfer) = evt.data_transfer() {
+        //         let data = ImageDataTransfer {
+        //             image: image.clone()
+        //         };
+        //         let json = serde_json::to_string(&data).unwrap_ji();
+        //         let _ = data_transfer.set_data(IMAGE_SEARCH_DATA_TRANSFER, &json);
+        //         data_transfer.set_drop_effect("all");
+        //     } else {
+        //         log::error!("no data transfer - use a real computer!!!");
+        //     }
+        // }))
     })
 }
 
@@ -102,7 +175,7 @@ fn render_controls(state: Rc<State>) -> Vec<Dom> {
             .property("checked", true)
             .event(clone!(state => move |evt: events::CustomToggle| {
                 state.checkbox_checked.set(evt.value());
-                search(state.clone());
+                actions::search(state.clone());
             }))
         }));
     }
@@ -114,7 +187,7 @@ fn render_controls(state: Rc<State>) -> Vec<Dom> {
             .event(clone!(state => move |e: events::CustomFile| {
                 let file = e.file();
                 state.loader.load(clone!(state => async move {
-                    upload_file(state.clone(), file).await;
+                    actions::upload_file(state.clone(), file).await;
                 }));
             }))
         }));
@@ -129,7 +202,7 @@ fn render_controls(state: Rc<State>) -> Vec<Dom> {
         .property("slot", "search-input")
         .event(clone!(state => move |e: events::CustomSearch| {
             state.query.set(e.query());
-            search(state.clone());
+            actions::search(state.clone());
         }))
     }));
 
@@ -146,7 +219,13 @@ fn render_filters(state: Rc<State>) -> Dom {
                     .property("type", "radio")
                     .property("name", "type")
                     .property("value", "web")
-                    .property("checked", true)
+                    .property_signal("checked", state.search_mode.signal_ref(|search_mode| {
+                        matches!(search_mode, &SearchMode::Sticker(_))
+                    }))
+                    .event(clone!(state => move |_: events::Change| {
+                        state.search_mode.set(SearchMode::Sticker(None));
+                        actions::search(Rc::clone(&state));
+                    }))
                 }))
                 .text("Stickers")
             }),
@@ -155,7 +234,14 @@ fn render_filters(state: Rc<State>) -> Dom {
                 .child(html!("input", {
                     .property("type", "radio")
                     .property("name", "type")
-                    .property("value", "stikers")
+                    .property("value", "stickers")
+                    .property_signal("checked", state.search_mode.signal_ref(|search_mode| {
+                        matches!(search_mode, &SearchMode::Web(_))
+                    }))
+                    .event(clone!(state => move |_: events::Change| {
+                        state.search_mode.set(SearchMode::Web(None));
+                        actions::search(Rc::clone(&state));
+                    }))
                 }))
                 .text("Web")
             }),
@@ -178,7 +264,7 @@ fn render_filters(state: Rc<State>) -> Dom {
                                     true => state.selected_styles.as_ref().borrow_mut().insert(style_id),
                                     false => state.selected_styles.as_ref().borrow_mut().remove(&style_id),
                                 };
-                                search(state.clone());
+                                actions::search(state.clone());
                             }))
                         })
 

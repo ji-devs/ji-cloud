@@ -18,7 +18,7 @@ pub struct WebImageSearchQuery {
 }
 
 /// A single image as returned from the web
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct WebImageSearchItem {
     /// A URL to the thumbnail of the image.
     pub thumbnail_url: String,

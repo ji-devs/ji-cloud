@@ -7,14 +7,15 @@ use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::Mutable;
 use futures_signals::signal_vec::MutableVec;
 use shared::domain::meta::ImageStyle;
-use shared::domain::user::UserProfile;
+use shared::domain::search::WebImageSearchItem;
 use shared::domain::{jig::module::body::Image, meta::ImageStyleId};
+use shared::domain::user::UserProfile;
 use std::{cell::RefCell, collections::HashSet, rc::Rc};
 
 pub const RECENT_COUNT: u16 = 16;
 
 pub struct State {
-    pub image_list: MutableVec<Image>,
+    pub search_mode: Mutable<SearchMode>,
     pub recent_list: MutableVec<Image>,
     pub search: Mutable<Option<String>>,
     pub options: ImageSearchOptions,
@@ -41,7 +42,6 @@ impl State {
         Self {
             options: image_search_options,
             search: Mutable::new(Some(String::new())),
-            image_list: MutableVec::new(),
             recent_list: MutableVec::new(),
             init_loader,
             loader: AsyncLoader::new(),
@@ -52,6 +52,7 @@ impl State {
             styles,
             callbacks,
             user: Rc::new(RefCell::new(None)),
+            search_mode: Mutable::new(SearchMode::Sticker(None))//TODO: change default to sticker
         }
     }
 }
@@ -82,4 +83,11 @@ pub enum ImageSearchCheckboxKind {
     BackgroundLayer1Filter, // adds TagId::BackgroundLayer1 to the image_tags filter
     BackgroundLayer2Filter, // adds TagId::BackgroundLayer2 to the image_tags filter
     StickersFilter,         // sets `kind` to Some(ImageKind::Sticker)
+}
+
+
+#[derive(Clone)]
+pub enum SearchMode {
+    Sticker(Option<Rc<MutableVec<Image>>>),
+    Web(Option<Rc<MutableVec<WebImageSearchItem>>>)
 }
