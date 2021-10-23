@@ -1,11 +1,29 @@
+/*
+    Rough summary of what's going on:
+
+    It takes roughly a full tick or more to decode a frame of GIF data
+    and another tick or so to create the pixel data
+
+    Once the pixel data exists, it can be cached and drawn quickly
+
+    Conceptually, we handle this decoding in a worker so it doesn't tie up the UI
+    but we can't actually do that since the pixel drawing part uses the Canvas API
+    (offscreeen canvas isn't universally supported)
+
+    So the complexity of the code here is about keeping the decoding part in a worker
+    while using the canvas in the main thread.
+
+    We (optionally) play the GIF while it is decoding, even though it may play slowly
+    until the first loop through and all the frames are cached
+
+    In the case where the GIF begins in a paused state, we still load
+*/
 use futures_signals::signal::Mutable;
 use gloo::events::EventListener;
+use gloo::render::AnimationFrame;
 use gloo_timers::callback::Timeout;
 use js_sys::{ArrayBuffer, DataView, Uint8Array};
-use shared::domain::jig::module::body::legacy::design::{
-    Sprite as RawSprite,
-    Animation
-};
+use shared::domain::jig::module::body::legacy::design::{Animation, HideToggle, Sprite as RawSprite};
 use std::borrow::Borrow;
 use std::convert::TryInto;
 use std::ops::{Mul, Sub};
@@ -27,8 +45,7 @@ pub struct AnimationPlayer {
     pub base: Rc<Base>,
     pub raw: RawSprite,
     pub size: Mutable<Option<(f64, f64)>>,
-    pub hide: HideController,
-    pub anim: AnimationController,
+    pub controller: Controller,
     pub worker_id: usize,
     pub worker: Worker,
     pub worker_listener: RefCell<Option<EventListener>>,
@@ -82,10 +99,10 @@ static WORKER_ID:AtomicUsize = AtomicUsize::new(0);
 impl AnimationPlayer {
     pub fn new(base: Rc<Base>, raw: RawSprite, animation: Animation) -> Rc<Self> {
 
+
         let worker_id = WORKER_ID.fetch_add(1, Ordering::SeqCst);
 
-        let hide = HideController::new(&raw);
-        let anim = AnimationController::new(&raw, animation);
+        let controller = Controller::new(&raw, animation);
 
         let worker = base.get_worker(WorkerKind::GifConverter);
 
@@ -97,8 +114,7 @@ impl AnimationPlayer {
             base,
             raw,
             size: Mutable::new(None),
-            hide,
-            anim,
+            controller,
             worker,
             worker_id,
             worker_listener: RefCell::new(None),
@@ -109,7 +125,7 @@ impl AnimationPlayer {
             frame_infos: RefCell::new(Vec::new()),
             frames: RefCell::new(Vec::new()),
             timer: RefCell::new(None),
-            blit_time: Cell::new(0.0)
+            blit_time: Cell::new(0.0),
         });
 
         *state.worker_listener.borrow_mut() = Some(EventListener::new(&state.worker, "message", clone!(state => move |event| {
@@ -299,51 +315,66 @@ impl AnimationPlayer {
     fn blit(&self, img_data: &ImageData) {
 
         self.map_current_frame(|frame_index, frame_info| {
-            //let start = web_sys::window().unwrap_ji().performance().unwrap_ji().now();
-            let ctx = self.ctx.borrow();
-            let ctx = ctx.as_ref().unwrap_ji();
 
-            let (canvas_width, canvas_height) = self.size.get_cloned().unwrap_ji();
+            if frame_index == 0 || self.controller.playing.load(Ordering::SeqCst) {
+                //let start = web_sys::window().unwrap_ji().performance().unwrap_ji().now();
+                let ctx = self.ctx.borrow();
+                let ctx = ctx.as_ref().unwrap_ji();
 
-            //ctx.clear_rect(0.0, 0.0, canvas_width, canvas_height);
-            ctx.put_image_data_with_dirty_x_and_dirty_y_and_dirty_width_and_dirty_height(
-                &img_data,
-                0.0,
-                0.0,
-                frame_info.x as f64, 
-                frame_info.y as f64,
-                frame_info.width as f64,
-                frame_info.height as f64
-            ).unwrap_ji();
+                let (canvas_width, canvas_height) = self.size.get_cloned().unwrap_ji();
 
-            //log::info!("blit time: {}", web_sys::window().unwrap_ji().performance().unwrap_ji().now() - start);
+                //ctx.clear_rect(0.0, 0.0, canvas_width, canvas_height);
+                ctx.put_image_data_with_dirty_x_and_dirty_y_and_dirty_width_and_dirty_height(
+                    &img_data,
+                    0.0,
+                    0.0,
+                    frame_info.x as f64, 
+                    frame_info.y as f64,
+                    frame_info.width as f64,
+                    frame_info.height as f64
+                ).unwrap_ji();
+
+                //log::info!("blit time: {}", web_sys::window().unwrap_ji().performance().unwrap_ji().now() - start);
+            }
         });
     }
 }
 
-pub struct AnimationController {
-    pub playing: Mutable<bool>,
-    pub settings: Animation,
+pub struct Controller {
+    pub hidden: Mutable<bool>,
+    pub has_toggled_once: AtomicBool,
+    pub playing: AtomicBool,
+    pub anim: Animation,
+    pub hide_toggle: Option<HideToggle>
 }
 
-impl AnimationController {
-    pub fn new(raw: &RawSprite, settings: Animation) -> Self {
+impl Controller {
+    pub fn new(raw: &RawSprite, anim: Animation) -> Self {
+
         Self {
-            playing: Mutable::new(!settings.tap),
-            settings
+            hidden: Mutable::new(raw.hide),
+            has_toggled_once: AtomicBool::new(false),
+            playing: AtomicBool::new(!anim.tap),
+            anim,
+            hide_toggle: raw.hide_toggle
         }
     }
-}
-pub struct HideController {
-    pub is_hidden: AtomicBool,
-    pub has_toggled_once: AtomicBool,
-}
 
-impl HideController {
-    pub fn new(raw: &RawSprite) -> Self {
-        Self {
-            is_hidden: AtomicBool::new(raw.hide),
-            has_toggled_once: AtomicBool::new(false),
+    pub fn handle_click(&self) {
+        let has_toggled_once = self.has_toggled_once.load(Ordering::SeqCst);
+
+        if let Some(hide_toggle) = self.hide_toggle {
+            if !has_toggled_once || hide_toggle == HideToggle::Always {
+                let val = self.hidden.get();
+                self.hidden.set(!val);
+            }
         }
+
+        if !has_toggled_once && self.anim.tap {
+            // TODO- reset frame index to 0...
+            self.playing.store(true, Ordering::SeqCst);
+        }
+
+        self.has_toggled_once.store(true, Ordering::SeqCst);
     }
 }

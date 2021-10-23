@@ -82,7 +82,7 @@ impl AnimationPlayer {
 
                 html!("canvas" => web_sys::HtmlCanvasElement, {
                     .event(clone!(state => move |evt:events::Click| {
-                        log::info!("click")
+                        state.controller.handle_click();
                     }))
                     .style("cursor", "pointer")
                     .style("display", "block")

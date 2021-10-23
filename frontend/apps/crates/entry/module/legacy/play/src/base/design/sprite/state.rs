@@ -14,7 +14,7 @@ use dominator::clone;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use serde::{Serialize, Deserialize};
-use super::animation::*;
+use super::animation::AnimationPlayer;
 
 pub enum Sprite {
     Image(Rc<ImagePlayer>),
@@ -38,19 +38,14 @@ pub struct ImagePlayer {
     pub base: Rc<Base>,
     pub raw: RawSprite,
     pub size: Mutable<Option<(f64, f64)>>,
-    pub hide: HideController
 }
 
 impl ImagePlayer {
     pub fn new(base: Rc<Base>, raw: RawSprite) -> Rc<Self> {
-
-        let hide = HideController::new(&raw);
-
         Rc::new(Self{
             base,
             raw,
             size: Mutable::new(None),
-            hide
         })
     }
 }
