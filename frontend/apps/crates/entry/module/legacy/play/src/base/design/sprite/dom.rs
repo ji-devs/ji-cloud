@@ -84,6 +84,13 @@ impl AnimationPlayer {
                     .event(clone!(state => move |evt:events::Click| {
                         state.controller.handle_click();
                     }))
+                    .style_signal("opacity", state.controller.hidden.signal().map(|hidden| {
+                        if hidden {
+                            "0"
+                        } else {
+                            "1"
+                        }
+                    }))
                     .style("cursor", "pointer")
                     .style("display", "block")
                     .style("position", "absolute")

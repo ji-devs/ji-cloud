@@ -50,7 +50,6 @@ pub struct AnimationPlayer {
     pub worker: Worker,
     pub worker_listener: RefCell<Option<EventListener>>,
     pub ctx: RefCell<Option<CanvasRenderingContext2d>>,
-    pub curr_frame_index: AtomicUsize,
     pub blit_time: Cell<f64>,
     pub frames: RefCell<Vec<ImageData>>,
     pub prev_frame_info: RefCell<Option<FrameInfo>>,
@@ -119,7 +118,6 @@ impl AnimationPlayer {
             worker_id,
             worker_listener: RefCell::new(None),
             ctx: RefCell::new(None),
-            curr_frame_index: AtomicUsize::new(0),
             prev_frame_info: RefCell::new(None), 
             prev_frame_data: RefCell::new(None), 
             frame_infos: RefCell::new(Vec::new()),
@@ -141,7 +139,7 @@ impl AnimationPlayer {
                     if id == state.worker_id {
                         state.blit(&img_data);
 
-                        let frame_index = state.curr_frame_index.load(Ordering::SeqCst);
+                        let frame_index = state.controller.curr_frame_index.load(Ordering::SeqCst);
                         state.frames.borrow_mut().insert(frame_index,img_data);
 
                         state.clone().next_frame();
@@ -176,14 +174,14 @@ impl AnimationPlayer {
         self.frame_infos.borrow().len()
     }
     pub fn map_current_frame<A>(&self, f: impl FnOnce(usize, &FrameInfo) -> A) -> A {
-        let frame_index = self.curr_frame_index.load(Ordering::SeqCst);
+        let frame_index = self.controller.curr_frame_index.load(Ordering::SeqCst);
         f(frame_index, self.frame_infos.borrow().get(frame_index).as_ref().unwrap_ji())
     }
 
     pub fn next_frame(self: Rc<Self>) {
-        let frame_index = self.curr_frame_index.fetch_add(1, Ordering::SeqCst);
+        let frame_index = self.controller.curr_frame_index.fetch_add(1, Ordering::SeqCst);
         if frame_index == self.num_frames() - 1 {
-            self.curr_frame_index.store(0, Ordering::SeqCst);
+            self.controller.curr_frame_index.store(0, Ordering::SeqCst);
         }
 
         let state = self;
@@ -343,6 +341,7 @@ impl AnimationPlayer {
 pub struct Controller {
     pub hidden: Mutable<bool>,
     pub has_toggled_once: AtomicBool,
+    pub curr_frame_index: AtomicUsize,
     pub playing: AtomicBool,
     pub anim: Animation,
     pub hide_toggle: Option<HideToggle>
@@ -355,6 +354,7 @@ impl Controller {
             hidden: Mutable::new(raw.hide),
             has_toggled_once: AtomicBool::new(false),
             playing: AtomicBool::new(!anim.tap),
+            curr_frame_index: AtomicUsize::new(0),
             anim,
             hide_toggle: raw.hide_toggle
         }
@@ -371,7 +371,10 @@ impl Controller {
         }
 
         if !has_toggled_once && self.anim.tap {
-            // TODO- reset frame index to 0...
+            //if the animation is still loading there will be a small visual glitch
+            //maybe force-show the first frame before just setting the index?
+            //worth it? 
+            self.curr_frame_index.store(0, Ordering::SeqCst);
             self.playing.store(true, Ordering::SeqCst);
         }
 
