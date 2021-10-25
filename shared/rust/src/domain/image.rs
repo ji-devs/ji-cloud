@@ -156,6 +156,7 @@ pub struct ImageUpdateRequest {
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
 pub struct ImageSearchQuery {
     /// The query string.
+    #[serde(default)]
     pub q: String,
 
     /// Optionally filter by `kind`
