@@ -307,7 +307,7 @@ impl AnimationPlayer {
             }
 
 
-            //log::info!("blit time: {}", web_sys::window().unwrap_ji().performance().unwrap_ji().now() - start);
+            //log::info!("clear time: {}", web_sys::window().unwrap_ji().performance().unwrap_ji().now() - start);
         });
     }
     fn blit(&self, img_data: &ImageData) {

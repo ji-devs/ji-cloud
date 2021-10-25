@@ -22,24 +22,6 @@ pub enum Sticker {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Sprite {
-    pub src: SpriteSource,
-    pub transform_matrix: [f64; 16],
-    /// start out hidden
-    pub hide: bool,
-    /// toggle hidden state
-    pub hide_toggle: Option<HideToggle>,
-    /// animation options
-    pub animation: Option<Animation>,
-    // associated audio
-    pub audio: Option<String>,
-}
-
-// in the case of full image, it's the filename
-/// for video, it's without the extension, so client can load .webm, .mp4, etc.
-pub type SpriteSource = String;
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Text {
     pub html: String,
     pub width: f64,
@@ -49,6 +31,27 @@ pub struct Text {
     pub hide: bool,
     /// toggle hidden state
     pub hide_toggle: Option<HideToggle>,
+    // associated audio
+    pub audio: Option<String>,
+}
+
+// in the case of full image, it's the filename
+/// for video, it's without the extension, so client can load .webm, .mp4, etc.
+pub type SpriteSource = String;
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Sprite {
+    pub src: SpriteSource,
+    pub transform_matrix: [f64; 16],
+    /// hide and hide_toggle are mapped from the top sections 
+    /// in "Houdini": HideOnTap, ShowOnTap, and ToggleOnTap
+    /// start out hidden
+    pub hide: bool,
+    /// toggle hidden state
+    pub hide_toggle: Option<HideToggle>,
+
+    /// animation options are mapped from the bottom animation section
+    pub animation: Option<Animation>,
     // associated audio
     pub audio: Option<String>,
 }
