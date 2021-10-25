@@ -2,12 +2,10 @@ use shared::domain::jig::{JigData, JigId, module::{ModuleId, body::{_groups::des
 use components::{audio::mixer::AudioMixer, module::_common::play::prelude::*};
 use utils::prelude::*;
 use web_sys::Worker;
-use std::{borrow::BorrowMut, cell::RefCell, collections::HashMap, rc::Rc, sync::atomic::{AtomicUsize, Ordering}};
+use std::{borrow::BorrowMut, cell::RefCell, collections::HashMap, hash::Hash, rc::Rc, sync::atomic::{AtomicUsize, Ordering}};
 use futures_signals::signal::Mutable;
-use awsm_web::{
-    loaders::fetch::fetch_url,
-    workers::new_worker_from_js,
-};
+use super::design::sprite::animation::WorkerKind;
+use awsm_web::loaders::fetch::fetch_url;
 
 pub struct Base {
     pub jig_id: JigId,
@@ -27,22 +25,6 @@ pub struct WorkerList {
     pub curr_index: AtomicUsize,
 }
 
-#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
-pub enum WorkerKind {
-    GifConverter,
-}
-
-static GIF_CONVERTER_SRC:&str = include_str!("design/sprite/gif-converter.js");
-
-impl WorkerKind {
-    pub fn make_worker(&self) -> Worker {
-        match self {
-            Self::GifConverter => {
-                new_worker_from_js(GIF_CONVERTER_SRC, None).unwrap_ji()
-            },
-        }
-    } 
-}
 
 impl WorkerList {
     pub fn next(&self) -> Option<&Worker> {

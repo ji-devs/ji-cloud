@@ -1,3 +1,4 @@
+
 use crate::base::state::Base;
 use dominator::{clone, html, with_node, Dom};
 use futures_signals::signal::{Mutable, Signal, SignalExt};
@@ -13,14 +14,17 @@ use utils::{
     resize::resize_info_signal,
 };
 use awsm_web::{canvas::{get_2d_context, CanvasToBlobFuture}, data::ArrayBufferExt};
-use super::{animation::AnimationPlayer, image::ImagePlayer, state::{Sprite}};
 
-// http://localhost:4104/module/legacy/play/debug?game_id=17736&slide_index=0&example=true
-impl Sprite {
-    pub fn render(self: Self) -> Dom {
-        match self {
-            Self::Image(state) => state.render(),
-            Self::Animation(state) => state.render()
-        }
-    }
+pub fn width_signal(size: impl Signal<Item = Option<(f64, f64)>>) -> impl Signal<Item = String> {
+    size.map(|size| match size {
+        None => "0".to_string(),
+        Some(size) => format!("{}rem", size.0),
+    })
+}
+
+pub fn height_signal(size: impl Signal<Item = Option<(f64, f64)>>) -> impl Signal<Item = String> {
+    size.map(|size| match size {
+        None => "0".to_string(),
+        Some(size) => format!("{}rem", size.1),
+    })
 }

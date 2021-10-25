@@ -31,7 +31,7 @@ use std::slice::SliceIndex;
 use std::sync::atomic::{AtomicU8, AtomicUsize, Ordering};
 use std::{cell::RefCell, rc::Rc, sync::atomic::AtomicBool};
 use web_sys::{Blob, CanvasRenderingContext2d, HtmlCanvasElement, HtmlImageElement, ImageData, Worker, window};
-use crate::base::state::{Base, WorkerKind};
+use crate::base::state::Base;
 use std::io::Cursor;
 use std::cell::{Cell, Ref};
 use utils::prelude::*;
@@ -40,6 +40,10 @@ use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use serde::{Serialize, Deserialize};
 use js_sys::{Object, Reflect};
+use awsm_web::{
+    loaders::fetch::fetch_url,
+    workers::new_worker_from_js,
+};
 
 pub struct AnimationPlayer {
     pub base: Rc<Base>,
@@ -56,6 +60,23 @@ pub struct AnimationPlayer {
     pub prev_frame_data: RefCell<Option<ImageData>>,
     pub frame_infos: RefCell<Vec<FrameInfo>>,
     pub timer: RefCell<Option<Timeout>>,
+}
+
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
+pub enum WorkerKind {
+    GifConverter,
+}
+
+static GIF_CONVERTER_SRC:&str = include_str!("gif-converter.js");
+
+impl WorkerKind {
+    pub fn make_worker(&self) -> Worker {
+        match self {
+            Self::GifConverter => {
+                new_worker_from_js(GIF_CONVERTER_SRC, None).unwrap_ji()
+            },
+        }
+    } 
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -182,6 +203,12 @@ impl AnimationPlayer {
         let frame_index = self.controller.curr_frame_index.fetch_add(1, Ordering::SeqCst);
         if frame_index == self.num_frames() - 1 {
             self.controller.curr_frame_index.store(0, Ordering::SeqCst);
+
+            if self.controller.playing.load(Ordering::SeqCst) {
+                if self.controller.anim.once {
+                    self.controller.playing.store(false, Ordering::SeqCst);
+                }
+            }
         }
 
         let state = self;
@@ -339,11 +366,22 @@ impl AnimationPlayer {
 }
 
 pub struct Controller {
-    pub hidden: Mutable<bool>,
-    pub has_toggled_once: AtomicBool,
-    pub curr_frame_index: AtomicUsize,
-    pub playing: AtomicBool,
+    // store the settings
     pub anim: Animation,
+    // directly set from raw.hide
+    pub hidden: Mutable<bool>,
+    // starts false (changed via ux)
+    pub has_toggled_once: AtomicBool,
+    // starts 0 (changed via internal updates)
+    pub curr_frame_index: AtomicUsize,
+    // starts as _not_ anim.tap... e.g. start
+    // playing right away if not waiting for a tap
+    // changes under these conditions:
+    // 1. set to false when animation ended and _once_ is true (i.e. no loop)
+    // 2. toggled on tap 
+
+    pub playing: AtomicBool,
+    // set from raw.hide_toggle
     pub hide_toggle: Option<HideToggle>
 }
 
@@ -370,12 +408,12 @@ impl Controller {
             }
         }
 
-        if !has_toggled_once && self.anim.tap {
+        if self.anim.tap {
             //if the animation is still loading there will be a small visual glitch
             //maybe force-show the first frame before just setting the index?
             //worth it? 
             self.curr_frame_index.store(0, Ordering::SeqCst);
-            self.playing.store(true, Ordering::SeqCst);
+            self.playing.store(!self.playing.load(Ordering::SeqCst), Ordering::SeqCst);
         }
 
         self.has_toggled_once.store(true, Ordering::SeqCst);
