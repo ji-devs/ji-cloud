@@ -3,6 +3,7 @@ use chrono::{DateTime, Duration, Utc};
 use http::StatusCode;
 use paseto::{PasetoBuilder, TimeBackend};
 use rand::Rng;
+use serde_json::json;
 use shared::domain::{session::AUTH_COOKIE_NAME, user::UserScope};
 use sqlx::PgPool;
 use uuid::Uuid;
@@ -34,6 +35,7 @@ bitflags::bitflags! {
         const VERIFY_EMAIL = 0b0000_0000_0000_0100;
         const CHANGE_PASSWORD = 0b0000_0000_0000_1000;
         const DELETE_ACCOUNT = 0b0000_0000_0001_0000;
+        const CHANGE_EMAIL = 0b0000_0000_0010_0000;
 
         const GENERAL = Self::GENERAL_API.bits | Self::DELETE_ACCOUNT.bits;
         const ONE_TIME = Self::CHANGE_PASSWORD.bits | Self::VERIFY_EMAIL.bits;
@@ -203,11 +205,12 @@ pub fn create_player_session_instance_token(
         .map_err(|err| anyhow::anyhow!("failed to create player session instance token: {}", err))
 }
 
-pub fn create_user_update_email_token(
+pub fn create_update_email_token(
     token_secret: &[u8; 32],
     valid_duration: Duration,
     user_email: &str,
     now: DateTime<Utc>,
+    session_instance_id: &Uuid,
 ) -> anyhow::Result<String> {
     PasetoBuilder::new()
         .set_expiration(&(now + valid_duration))
@@ -215,6 +218,8 @@ pub fn create_user_update_email_token(
         .set_issued_at(Some(now))
         .set_encryption_key(token_secret)
         .set_subject(&user_email.to_string())
+        .set_claim("id", json!(session_instance_id.to_string()))
+        // .set_subject(&session_instance_id.to_string())
         .build()
-        .map_err(|err| anyhow::anyhow!("failed to create update user email token: {}", err))
+        .map_err(|err| anyhow::anyhow!("failed to create update email token: {}", err))
 }

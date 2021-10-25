@@ -8,10 +8,9 @@ use http::StatusCode;
 use ji_cloud_api::http::Application;
 use serde_json::json;
 use shared::domain::{
-    image::ImageId,
     meta::{AffiliationId, AgeRangeId, SubjectId},
     session::{CreateSessionResponse, NewSessionResponse},
-    user::{CreateProfileRequest, PatchProfileRequest, UpdateUserEmailRequest},
+    user::{CreateProfileRequest, PatchProfileRequest},
 };
 use sqlx::PgPool;
 

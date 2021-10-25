@@ -241,6 +241,11 @@ pub struct EmailClientSettings {
     /// Is optional. If missing, password resetting will be disabled,
     /// all related routes will return "501 - Not Implemented" and a warning will be emitted.
     pub password_reset_template: Option<String>,
+
+    /// Email client template ID for resetting emails.
+    /// Is optional. If missing, email resetting will be disabled,
+    /// all related routes will return "501 - Not Implemented" and a warning will be emitted.
+    pub email_reset_template: Option<String>,
 }
 
 // TODO: unify google services clients' auth tokens and project_id requirements
@@ -561,6 +566,10 @@ impl SettingsManager {
             .get_varying_secret(keys::email::PASSWORD_RESET_TEMPLATE)
             .await?;
 
+        let email_reset_template = self
+            .get_varying_secret(keys::email::EMAIL_RESET_TEMPLATE)
+            .await?;
+
         let (api_key, sender_email) = match (api_key, sender_email) {
             (Some(api_key), Some(sender_email)) => (api_key, sender_email),
             _ => return Ok(None),
@@ -571,6 +580,7 @@ impl SettingsManager {
             sender_email,
             signup_verify_template,
             password_reset_template,
+            email_reset_template,
         }))
     }
 

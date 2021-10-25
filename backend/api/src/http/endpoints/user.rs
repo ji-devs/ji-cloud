@@ -9,31 +9,28 @@ use chrono::{Duration, Utc};
 use core::{config::IMAGE_BODY_SIZE_LIMIT, settings::RuntimeSettings};
 use rand::thread_rng;
 use sendgrid::v3::Email;
-use shared::domain::user::{UpdateUserEmailResponse, VerifyUpdateEmailRequest};
+use serde::{Deserialize, Serialize};
+use shared::domain::user::{ResetEmailResponse, VerifyResetEmailRequest};
 use shared::{
     api::endpoints::{
         user::{
             ChangePassword, Create, CreateColor, CreateFont, CreateProfile, Delete, DeleteColor,
-            DeleteFont, GetColors, GetFonts, PatchProfile, Profile, ResetPassword, UpdateColor,
-            UpdateEmail, UpdateFont, UserLookup, VerifyEmail, VerifyUpdateEmail,
+            DeleteFont, GetColors, GetFonts, PatchProfile, Profile, ResetEmail, ResetPassword,
+            UpdateColor, UpdateFont, UserLookup, VerifyEmail, VerifyResetEmail,
         },
         ApiEndpoint,
     },
     domain::{
         image::{ImageId, ImageKind},
         session::NewSessionResponse,
-        user::{
-            ChangePasswordRequest, CreateProfileRequest, UpdateUserEmailRequest, UserLookupQuery,
-            VerifyEmailRequest,
-        },
+        user::{ChangePasswordRequest, CreateProfileRequest, UserLookupQuery, VerifyEmailRequest},
     },
     media::MediaLibrary,
 };
 use sqlx::{postgres::PgDatabaseError, Acquire, PgConnection, PgPool};
 use uuid::Uuid;
-use serde::Deserialize;
 
-use crate::token::{create_user_update_email_token, validate_token};
+use crate::token::{create_update_email_token, validate_token};
 use crate::{
     db::{self, user::upsert_profile},
     domain::NoContentClearAuth,
@@ -102,6 +99,35 @@ async fn send_password_email(
     Ok(())
 }
 
+async fn send_reset_email(
+    txn: &mut PgConnection,
+    user_id: Uuid,
+    email_address: String,
+    mail: &mail::Client,
+    pages_url: &str,
+) -> Result<(), error::Service> {
+    let session = db::session::create(
+        &mut *txn,
+        user_id,
+        Some(&(Utc::now() + Duration::hours(1))),
+        SessionMask::CHANGE_EMAIL,
+        None,
+    )
+    .await?;
+
+    let template = mail
+        .email_reset_template()
+        .map_err(error::Service::DisabledService)?;
+
+    let email_link = format!("{}/user/verify-email-reset/{}", pages_url, session);
+
+    // email_link contains the session id
+    mail.send_email_reset(template, Email::new(email_address), email_link)
+        .await?;
+
+    Ok(())
+}
+
 async fn hash_password(pass: String) -> anyhow::Result<String> {
     let pass_hash = actix_web::web::block(move || {
         let password_hasher = Argon2::default();
@@ -140,6 +166,7 @@ async fn create_user(
     .fetch_one(&mut txn)
     .await?
     .exists;
+
     let exists_google = sqlx::query!(
         r#"select exists(select 1 from user_email where email = lower($1)) as "exists!""#,
         &req.email
@@ -461,23 +488,14 @@ where image_id = $1
     Ok(profile_image_id)
 }
 
-/*
-   Logged in user hits an endpoint which requires a new email address
-   Backend sends an email to this address with a link containing a token
-   Frontend extracts this token from the link and sends it to VerifyEmail or similar
-   Backend requires that this last endpoint (VerifyEmail or similar) is the same logged-in user as the one who
-    initiated the request. If not - it's an auth error
-   At this point, all is good, and email should be changed for the user
-*/
-
-/// Update user email.
-async fn update_user_email(
+/// reset user email
+async fn email_reset(
     settings: Data<RuntimeSettings>,
     mail: ServiceData<mail::Client>,
     db: Data<PgPool>,
     claims: TokenUser,
-    req: Json<UpdateUserEmailRequest>,
-) -> Result<Json<UpdateUserEmailResponse>, error::Register> {
+    req: Json<<ResetEmail as ApiEndpoint>::Req>,
+) -> Result<Json<<ResetEmail as ApiEndpoint>::Res>, error::Register> {
     // add authorized user to get user id
     let req = req.into_inner();
 
@@ -492,6 +510,7 @@ async fn update_user_email(
     .fetch_one(&mut txn)
     .await?
     .exists;
+
     let exists_google = sqlx::query!(
         r#"select exists(select 1 from user_email where email = lower($1)) as "exists!""#,
         &req.email
@@ -499,6 +518,7 @@ async fn update_user_email(
     .fetch_one(&mut txn)
     .await?
     .exists;
+
     match (exists_basic, exists_google) {
         (true, _) => {
             txn.rollback().await?;
@@ -512,24 +532,16 @@ async fn update_user_email(
     }
 
     // 1. generate a paseto token for this instance
-    let token: String = create_user_update_email_token(
+    let token: String = create_update_email_token(
         &settings.token_secret,
-        Duration::weeks(2),
+        Duration::hours(1),
         &req.email,
         Utc::now(),
+        &claims.0.user_id,
     )?;
 
-    // 1. Email is saved - move this to verify_update_email route
-    // sqlx::query!(
-    //     "update user_auth_basic set email = $2::text where user_id = $1",
-    //     claims.0.user_id,
-    //     &req.email,
-    // )
-    // .execute(&mut txn)
-    // .await?;
-
-    // 2. Send verification email with token
-    send_verification_email(
+    // 2. Send email reset email with token
+    send_reset_email(
         &mut txn,
         claims.0.user_id,
         req.email,
@@ -541,7 +553,7 @@ async fn update_user_email(
 
     txn.commit().await?;
 
-    Ok(Json(UpdateUserEmailResponse { token }))
+    Ok(Json(ResetEmailResponse { token }))
 }
 
 fn validate_patch_profile_req(
@@ -555,24 +567,37 @@ fn validate_patch_profile_req(
     }
 }
 
-#[derive(Deserialize)]
-struct EmailToken {
-    /// The instance this token is for.
-    pub user_email: String,
+#[derive(Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct SendEmailToken<'a> {
+    /// The new email instance this token is for.
+    pub user_email: &'a str,
+
+    /// The uuid instance this token is for.
+    pub user_id: Uuid,
 }
 
-/// Verify emails
-async fn verify_update_email(
+#[derive(Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct EmailToken {
+    /// The new email instance this token is for.
+    pub email: String,
+
+    /// The uuid instance this token is for.
+    pub user_id: Uuid,
+}
+
+/// Verify email reset email
+async fn verify_email_reset(
     settings: Data<RuntimeSettings>,
-    config: Data<RuntimeSettings>,
     mail: ServiceData<mail::Client>,
     db: Data<PgPool>,
-    req: Json<<VerifyUpdateEmail as ApiEndpoint>::Req>,
+    req: Json<<VerifyResetEmail as ApiEndpoint>::Req>,
 ) -> Result<HttpResponse, error::VerifyEmail> {
     let req = req.into_inner();
 
     match req {
-        VerifyUpdateEmailRequest::Resend { email } => {
+        VerifyResetEmailRequest::Resend { email } => {
             let mut txn = db.begin().await?;
 
             // todo: make this more future proof and exhaustive.
@@ -597,14 +622,14 @@ where
             };
 
             // make sure they can't use the old link anymore
-            db::session::clear_any(&mut txn, user.user_id, SessionMask::VERIFY_EMAIL).await?;
+            db::session::clear_any(&mut txn, user.user_id, SessionMask::CHANGE_EMAIL).await?;
 
-            send_verification_email(
+            send_reset_email(
                 &mut txn,
                 user.user_id,
                 email,
                 &mail,
-                &config.remote_target().pages_url(),
+                &settings.remote_target().pages_url(),
             )
             .await
             .map_err(|it| match it {
@@ -621,74 +646,71 @@ where
             Ok(HttpResponse::NoContent().into())
         }
 
-        VerifyUpdateEmailRequest::Verify { token, paseto_token } => {
+        VerifyResetEmailRequest::Verify {
+            paseto_token,
+            force_logout,
+        } => {
             let mut txn = db.begin().await?;
 
-            let paseto_token = validate_token(&paseto_token, None, &settings.token_secret)
-                .map_err(|_| error::VerifyEmail::Email)?;
+            log::warn!("Before validating token");
 
-            let instance_token: EmailToken = serde_json::from_value(paseto_token)?;
+            let token = validate_token(&paseto_token, None, &settings.token_secret)
+                .map_err(|_| error::VerifyEmail::Email(error::Email::Empty))?;
 
-            let email_from_token = instance_token.user_email;
+            log::warn!("Before instance");
 
-            // todo: make this more future proof and exhaustive.
+            // New Email
+            let (new_email, user_id) = (
+                token["sub"].to_string(),
+                Uuid::parse_str(&token["id"].to_string())?,
+            );
 
-            let user = sqlx::query!(
-                r#"
-insert into user_email (user_id, email)
-select session.user_id, user_auth_basic.email
-from session
-inner join user_auth_basic on user_auth_basic.user_id = session.user_id
-where
-    session.token = $1 and
-    session.expires_at > now() and
-    (session.scope_mask & $2) = $2
-returning user_id
-"#,
-                token,
-                SessionMask::VERIFY_EMAIL.bits(),
+            log::warn!("Before email check");
+
+            // Check if email exists
+            let email = sqlx::query!(
+                r#"select email::text as "email!" from user_email where user_id = $1 for share"#,
+                user_id
             )
-            .fetch_optional(&mut txn) // Result<Option<UserId>, Error>
-            .await
-            .map_err(|err| match err {
-                sqlx::Error::Database(err)
-                    if err.downcast_ref::<PgDatabaseError>().constraint()
-                        == Some("user_email_email_key") =>
-                {
-                    error::VerifyEmail::Email(error::Email::TakenBasic)
-                }
-                err => err.into(),
-            })?
-            .ok_or(error::VerifyEmail::ServiceSession(
-                error::ServiceSession::Unauthorized,
-            ))?;
-
-            // make sure they can't use the link, now that they're verified.
-            db::session::clear_any(&mut txn, user.user_id, SessionMask::VERIFY_EMAIL).await?;
-
-            let login_ttl = config
-                .login_token_valid_duration
-                .unwrap_or(Duration::weeks(2));
-
-            let valid_until = Utc::now() + Duration::hours(1);
-
-            let session = db::session::create(
-                &mut txn,
-                user.user_id,
-                Some(&valid_until),
-                SessionMask::PUT_PROFILE,
-                None,
-            )
+            .fetch_optional(&mut txn)
             .await?;
+
+            let email = match email {
+                Some(email) => email.email,
+                None => return Err(anyhow::anyhow!("Handle no confirmed email").into()),
+            };
+
+            log::warn!("Before before clearing session");
+
+            // make sure they can't use the link, now that they're email has changed.
+            db::session::clear_any(&mut txn, user_id, SessionMask::CHANGE_EMAIL).await?;
+
+            log::warn!("Before before user_auth_basic update");
+
+            sqlx::query!(
+                r#"
+        update user_auth_basic 
+        set email = $3::text
+        where user_id = $1 and email = $2::text
+        "#,
+                user_id,
+                &email,
+                new_email
+            )
+            .execute(&mut txn)
+            .await?;
+
+            log::warn!("Before before force logout");
+
+            if force_logout {
+                sqlx::query!("delete from session where user_id = $1", &user_id)
+                    .execute(&mut txn)
+                    .await?;
+            }
 
             txn.commit().await?;
 
-            let (csrf, cookie) =
-                create_auth_token(&config.token_secret, config.is_local(), login_ttl, &session)?;
-
-            Ok(HttpResponse::Created()
-                .cookie(cookie)
-                .json(NewSessionResponse { csrf }))
+            Ok(HttpResponse::NoContent().finish())
         }
     }
 }
@@ -853,58 +875,59 @@ values ($1, $2::text, $3)
 }
 
 pub fn configure(cfg: &mut ServiceConfig) {
-    cfg.route(
-        UpdateEmail::PATH,
-        UpdateEmail::METHOD.route().to(update_user_email),
-    )
-    .route(Profile::PATH, Profile::METHOD.route().to(get_profile))
-    .route(Create::PATH, Create::METHOD.route().to(create_user))
-    .route(
-        VerifyEmail::PATH,
-        VerifyEmail::METHOD.route().to(verify_email),
-    )
-    .route(
-        ResetPassword::PATH,
-        ResetPassword::METHOD.route().to(reset_password),
-    )
-    .route(
-        ChangePassword::PATH,
-        ChangePassword::METHOD.route().to(put_password),
-    )
-    .route(
-        CreateProfile::PATH,
-        CreateProfile::METHOD.route().to(create_profile),
-    )
-    .route(
-        PatchProfile::PATH,
-        PatchProfile::METHOD.route().to(patch_profile),
-    )
-    .route(UserLookup::PATH, UserLookup::METHOD.route().to(user_lookup))
-    .route(Delete::PATH, Delete::METHOD.route().to(delete))
-    .route(GetColors::PATH, GetColors::METHOD.route().to(color::get))
-    .route(
-        UpdateColor::PATH,
-        UpdateColor::METHOD.route().to(color::update),
-    )
-    .route(
-        CreateColor::PATH,
-        CreateColor::METHOD.route().to(color::create),
-    )
-    .route(
-        DeleteColor::PATH,
-        DeleteColor::METHOD.route().to(color::delete),
-    )
-    .route(GetFonts::PATH, GetFonts::METHOD.route().to(font::get))
-    .route(
-        UpdateFont::PATH,
-        UpdateFont::METHOD.route().to(font::update),
-    )
-    .route(
-        CreateFont::PATH,
-        CreateFont::METHOD.route().to(font::create),
-    )
-    .route(
-        DeleteFont::PATH,
-        DeleteFont::METHOD.route().to(font::delete),
-    );
+    cfg.route(ResetEmail::PATH, ResetEmail::METHOD.route().to(email_reset))
+        .route(
+            VerifyResetEmail::PATH,
+            VerifyResetEmail::METHOD.route().to(verify_email_reset),
+        )
+        .route(Profile::PATH, Profile::METHOD.route().to(get_profile))
+        .route(Create::PATH, Create::METHOD.route().to(create_user))
+        .route(
+            VerifyEmail::PATH,
+            VerifyEmail::METHOD.route().to(verify_email),
+        )
+        .route(
+            ResetPassword::PATH,
+            ResetPassword::METHOD.route().to(reset_password),
+        )
+        .route(
+            ChangePassword::PATH,
+            ChangePassword::METHOD.route().to(put_password),
+        )
+        .route(
+            CreateProfile::PATH,
+            CreateProfile::METHOD.route().to(create_profile),
+        )
+        .route(
+            PatchProfile::PATH,
+            PatchProfile::METHOD.route().to(patch_profile),
+        )
+        .route(UserLookup::PATH, UserLookup::METHOD.route().to(user_lookup))
+        .route(Delete::PATH, Delete::METHOD.route().to(delete))
+        .route(GetColors::PATH, GetColors::METHOD.route().to(color::get))
+        .route(
+            UpdateColor::PATH,
+            UpdateColor::METHOD.route().to(color::update),
+        )
+        .route(
+            CreateColor::PATH,
+            CreateColor::METHOD.route().to(color::create),
+        )
+        .route(
+            DeleteColor::PATH,
+            DeleteColor::METHOD.route().to(color::delete),
+        )
+        .route(GetFonts::PATH, GetFonts::METHOD.route().to(font::get))
+        .route(
+            UpdateFont::PATH,
+            UpdateFont::METHOD.route().to(font::update),
+        )
+        .route(
+            CreateFont::PATH,
+            CreateFont::METHOD.route().to(font::create),
+        )
+        .route(
+            DeleteFont::PATH,
+            DeleteFont::METHOD.route().to(font::delete),
+        );
 }

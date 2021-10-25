@@ -1786,6 +1786,20 @@
       "nullable": []
     }
   },
+  "4f2cdb8dafe9b214a430d4df9c96893fcd4a4d072fc41aee1d910505982f283d": {
+    "query": "\n        update user_auth_basic \n        set email = $3::text\n        where user_id = $1 and email = $2::text\n        ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "50ff48a8d492e560f61066b5217a70876d23552f79fcb6d43dbbcd5331da14ef": {
     "query": "delete from animation_metadata where id = $1 returning kind as \"kind: AnimationKind\"",
     "describe": {
@@ -3935,19 +3949,6 @@
       "parameters": {
         "Left": [
           "Int2"
-        ]
-      },
-      "nullable": []
-    }
-  },
-  "b9d2160d8e820168b233878b6496ddcb1ab039e68327a89913641962e931c5bc": {
-    "query": "update user_auth_basic set email = $2::text where user_id = $1",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Text"
         ]
       },
       "nullable": []

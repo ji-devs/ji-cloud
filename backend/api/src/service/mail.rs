@@ -13,6 +13,8 @@ pub struct Client {
     signup_verify_template: Option<String>,
 
     password_reset_template: Option<String>,
+
+    email_reset_template: Option<String>,
 }
 
 impl Client {
@@ -22,6 +24,7 @@ impl Client {
             sender_email: Email::new(settings.sender_email),
             signup_verify_template: settings.signup_verify_template,
             password_reset_template: settings.password_reset_template,
+            email_reset_template: settings.email_reset_template,
         }
     }
 
@@ -61,6 +64,24 @@ impl Client {
         Ok(())
     }
 
+    pub async fn send_email_reset(
+        &self,
+        template: EmailResetTemplate<'_>,
+        to: Email,
+        link: String,
+    ) -> anyhow::Result<()> {
+        let mut template_data = SGMap::new();
+        template_data.insert("url".to_string(), link);
+
+        let message = Message::new(self.sender_email.clone())
+            .set_template_id(&template.0)
+            .add_personalization(Personalization::new(to).add_dynamic_template_data(template_data));
+
+        self.client.send(&message).await?;
+
+        Ok(())
+    }
+
     pub fn signup_verify_template(&self) -> Result<SignupVerifyTemplate<'_>, error::ServiceKind> {
         // todo: make the error more specific?
         self.signup_verify_template
@@ -76,6 +97,14 @@ impl Client {
             .map(PasswordResetTemplate)
             .ok_or(error::ServiceKind::Mail)
     }
+
+    pub fn email_reset_template(&self) -> Result<EmailResetTemplate<'_>, error::ServiceKind> {
+        // todo: make the error more specific?
+        self.email_reset_template
+            .as_deref()
+            .map(EmailResetTemplate)
+            .ok_or(error::ServiceKind::Mail)
+    }
 }
 
 impl Service for Client {
@@ -89,3 +118,7 @@ pub struct SignupVerifyTemplate<'a>(&'a str);
 #[repr(transparent)]
 #[derive(Debug, Clone, Copy)]
 pub struct PasswordResetTemplate<'a>(&'a str);
+
+#[repr(transparent)]
+#[derive(Debug, Clone, Copy)]
+pub struct EmailResetTemplate<'a>(&'a str);

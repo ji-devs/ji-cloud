@@ -83,16 +83,14 @@ pub struct OtherUser {
 
 /// Update user email request
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
-pub struct UpdateUserEmailRequest {
+pub struct ResetEmailRequest {
     /// user's email
     pub email: String,
 }
 
-
-
 /// Update user email response (returns the paseto token for the user)
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
-pub struct UpdateUserEmailResponse {
+pub struct ResetEmailResponse {
     /// paseto token with user's email
     pub token: String,
 }
@@ -205,17 +203,20 @@ pub enum VerifyEmailRequest {
 
 /// Request for [`VerifyUpdateEmail`](crate::api::endpoints::user::VerifyEmail)
 #[derive(Debug, Serialize, Deserialize, Clone)]
-#[serde(rename_all = "camelCase")]
-pub enum VerifyUpdateEmailRequest {
+#[serde(untagged)]
+pub enum VerifyResetEmailRequest {
     /// Attempt to verify the email
+    #[serde(rename_all = "camelCase")]
     Verify {
-        /// The token to verify.
-        token: String,
         /// paseto token
         paseto_token: String,
+
+        /// Forcibly logout of all sessions.
+        force_logout: bool,
     },
 
     /// Resend a confirmation link if a verification is in progress
+    #[serde(rename_all = "camelCase")]
     Resend {
         /// The email to send a verification link to.
         email: String,

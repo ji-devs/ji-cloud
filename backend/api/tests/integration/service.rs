@@ -33,6 +33,7 @@ impl TestServicesSettings {
     const TEST_SENDER_EMAIL: &'static str = "TEST_SENDER_EMAIL";
     const TEST_SIGNUP_VERIFY_TEMPLATE: &'static str = "TEST_SIGNUP_VERIFY_TEMPLATE";
     const TEST_SIGNUP_PASSWORD_RESET_TEMPLATE: &'static str = "TEST_SIGNUP_PASSWORD_RESET_TEMPLATE";
+    const TEST_EMAIL_RESET_TEMPLATE: &'static str = "TEST_EMAIL_RESET_TEMPLATE";
 
     pub async fn new() -> anyhow::Result<Self> {
         let (token, project_id) = match req_env("TEST_SERVICE_ACCOUNT_JSON") {
@@ -156,6 +157,18 @@ impl TestServicesSettings {
             None => env_password_reset_template,
         };
 
+        let google_email_reset_template = self
+            .get_gcp_managed_secret(Self::TEST_EMAIL_RESET_TEMPLATE)
+            .await
+            .ok();
+
+        let env_email_reset_template = req_env("TEST_EMAIL_RESET_TEMPLATE").ok();
+
+        let email_reset_template = match google_email_reset_template {
+            Some(google_email_reset_template) => Some(google_email_reset_template),
+            None => env_email_reset_template,
+        };
+
         println!(
             "end keys {:?} {:?} {:?} {:?}",
             api_key, sender_email, signup_verify_template, password_reset_template
@@ -171,6 +184,7 @@ impl TestServicesSettings {
             sender_email,
             signup_verify_template,
             password_reset_template,
+            email_reset_template,
         };
 
         let client = mail::Client::new(settings);
