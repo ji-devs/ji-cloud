@@ -46,7 +46,7 @@ impl Default for PlayerSettings {
         Self {
             n_choices: 3,
             swap: false,
-            n_rounds: 1,
+            n_rounds: 3,
             time_limit: None,
             n_attempts: None,
         }
