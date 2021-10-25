@@ -200,5 +200,21 @@ pub fn create_player_session_instance_token(
         .set_encryption_key(token_secret)
         .set_subject(&session_instance_id.to_string())
         .build()
-        .map_err(|err| anyhow::anyhow!("failed to player session instance token: {}", err))
+        .map_err(|err| anyhow::anyhow!("failed to create player session instance token: {}", err))
+}
+
+pub fn create_user_update_email_token(
+    token_secret: &[u8; 32],
+    valid_duration: Duration,
+    user_email: &str,
+    now: DateTime<Utc>,
+) -> anyhow::Result<String> {
+    PasetoBuilder::new()
+        .set_expiration(&(now + valid_duration))
+        .set_not_before(&now)
+        .set_issued_at(Some(now))
+        .set_encryption_key(token_secret)
+        .set_subject(&user_email.to_string())
+        .build()
+        .map_err(|err| anyhow::anyhow!("failed to create update user email token: {}", err))
 }

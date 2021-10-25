@@ -6,7 +6,8 @@ use crate::{
         session::NewSessionResponse,
         user::{
             ChangePasswordRequest, CreateUserRequest, OtherUser, ResetPasswordRequest,
-            UpdateUserEmailRequest, UserLookupQuery, VerifyEmailRequest,
+            UpdateUserEmailRequest, UserLookupQuery, VerifyEmailRequest, VerifyUpdateEmailRequest,
+            UpdateUserEmailResponse,
         },
     },
     error::EmptyError,
@@ -81,6 +82,17 @@ impl ApiEndpoint for VerifyEmail {
     const METHOD: Method = Method::Post;
 }
 
+/// verifies the updated email for a user
+pub struct VerifyUpdateEmail;
+impl ApiEndpoint for VerifyUpdateEmail {
+    type Req = VerifyUpdateEmailRequest;
+    type Res = Option<NewSessionResponse>;
+    type Err = EmptyError;
+    const PATH: &'static str = "/v1/user/verify-user-email";
+    const METHOD: Method = Method::Post;
+}
+
+
 /// Update user email
 ///
 /// # Flow
@@ -92,7 +104,7 @@ impl ApiEndpoint for VerifyEmail {
 pub struct UpdateEmail;
 impl ApiEndpoint for UpdateEmail {
     type Req = UpdateUserEmailRequest;
-    type Res = ();
+    type Res = UpdateUserEmailResponse;
     type Err = EmptyError;
     const PATH: &'static str = "/v1/user/update-email";
     const METHOD: Method = Method::Patch;
