@@ -29,3 +29,4 @@ tokio-util = {version = "0.3.1", features = ["codec"]}
 csv = "1.1"
 image = "0.23.14"
 flate2 = "1.0.22"
+uuid = { version = "0.8", features = ["serde", "v1"] }

@@ -40,6 +40,7 @@ use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use serde::{Serialize, Deserialize};
 use js_sys::{Object, Reflect};
+use components::audio::mixer::{AUDIO_MIXER, AudioSource};
 use awsm_web::{
     loaders::fetch::fetch_url,
     workers::new_worker_from_js,
@@ -122,7 +123,7 @@ impl AnimationPlayer {
 
         let worker_id = WORKER_ID.fetch_add(1, Ordering::SeqCst);
 
-        let controller = Controller::new(&raw, animation);
+        let controller = Controller::new(base.clone(), &raw, animation);
 
         let worker = base.get_worker(WorkerKind::GifConverter);
 
@@ -185,7 +186,7 @@ impl AnimationPlayer {
         })));
 
         state.worker.post_message(&serde_wasm_bindgen::to_value(&GifWorkerEvent{
-            data: GifWorkerEventData::Load(worker_id, state.base.media_url(format!("{}.gif", state.raw.src)))
+            data: GifWorkerEventData::Load(worker_id, state.base.media_url(&state.raw.filename))
         }).unwrap_ji());
 
         state
@@ -366,6 +367,7 @@ impl AnimationPlayer {
 }
 
 pub struct Controller {
+    pub base: Rc<Base>,
     // store the settings
     pub anim: Animation,
     // directly set from raw.hide
@@ -382,19 +384,23 @@ pub struct Controller {
 
     pub playing: AtomicBool,
     // set from raw.hide_toggle
-    pub hide_toggle: Option<HideToggle>
+    pub hide_toggle: Option<HideToggle>,
+
+    pub audio_filename: Option<String>
 }
 
 impl Controller {
-    pub fn new(raw: &RawSprite, anim: Animation) -> Self {
+    pub fn new(base: Rc<Base>, raw: &RawSprite, anim: Animation) -> Self {
 
         Self {
+            base,
             hidden: Mutable::new(raw.hide),
             has_toggled_once: AtomicBool::new(false),
             playing: AtomicBool::new(!anim.tap),
             curr_frame_index: AtomicUsize::new(0),
             anim,
-            hide_toggle: raw.hide_toggle
+            hide_toggle: raw.hide_toggle,
+            audio_filename: raw.audio_filename.clone()
         }
     }
 
@@ -417,5 +423,15 @@ impl Controller {
         }
 
         self.has_toggled_once.store(true, Ordering::SeqCst);
+
+        match (self.playing.load(Ordering::SeqCst), self.audio_filename.as_ref()) {
+            (true, Some(audio_filename)) => {
+                AUDIO_MIXER.with(|mixer| {
+                    mixer.pause_all();
+                    mixer.play_oneshot(AudioSource::Url(self.base.media_url(&audio_filename)))
+                });
+            },
+            _ => {}
+        }
     }
 }

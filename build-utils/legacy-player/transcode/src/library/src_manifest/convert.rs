@@ -164,21 +164,14 @@ fn convert_design(game_id: &str, slide_id: &str, base_url: &str, mut medias: &mu
     for layer in layers {
 
         if let Some(filename) = layer.filename.as_ref() {
-            medias.push(make_media(&filename, {
-                if layer.kind == SrcLayerKind::Animation {
-                    Some(MediaTranscode::Animation)
-                } else {
-                    None
-                }
-            }));
+            medias.push(make_media(&filename, None));
         }
         if let Some(filename) = layer.audio.as_ref() {
             medias.push(make_media(&filename, Some(MediaTranscode::Audio)));
         }
 
         /// as of today, mp3 has full cross-browser support
-        /// but still leaving it up to the client to choose
-        let audio = layer.audio.as_ref().map(|audio| Path::new(&audio).file_stem().unwrap().to_str().unwrap().to_string());
+        let audio_filename = layer.audio.as_ref().map(|audio| format!("{}.mp3", Path::new(&audio).file_stem().unwrap().to_str().unwrap().to_string()));
 
         match layer.kind {
             SrcLayerKind::Background => {
@@ -186,18 +179,7 @@ fn convert_design(game_id: &str, slide_id: &str, base_url: &str, mut medias: &mu
             },
             SrcLayerKind::Image | SrcLayerKind::Animation => {
                 let sticker = Sprite { 
-                    src: {
-
-                        let filename = layer.filename.unwrap();
-                        if layer.kind == SrcLayerKind::Animation {
-                            /// as of today, client needs to load both webm and x265 to have alpha video
-                            /// so only stem name is set in the json
-                            Path::new(&filename).file_stem().unwrap().to_str().unwrap().to_string()
-                        } else {
-                            filename
-                        }
-
-                    },
+                    filename: layer.filename.unwrap(),
                     transform_matrix: convert_transform(layer.transform),
                     hide: match layer.show_kind {
                         SrcShowKind::ShowOnLoad => false, 
@@ -243,7 +225,7 @@ fn convert_design(game_id: &str, slide_id: &str, base_url: &str, mut medias: &mu
                         }
                     },
 
-                    audio,
+                    audio_filename,
 
 
                 };
@@ -274,7 +256,7 @@ fn convert_design(game_id: &str, slide_id: &str, base_url: &str, mut medias: &mu
                         ), 
                     },
 
-                    audio,
+                    audio_filename,
 
                 };
 

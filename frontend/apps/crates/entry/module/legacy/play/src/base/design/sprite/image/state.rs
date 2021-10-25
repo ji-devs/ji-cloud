@@ -11,6 +11,7 @@ use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use serde::{Serialize, Deserialize};
 use shared::domain::jig::module::body::legacy::design::{HideToggle, Sprite as RawSprite};
+use components::audio::mixer::{AUDIO_MIXER, AudioSource};
 
 pub struct ImagePlayer {
     pub base: Rc<Base>,
@@ -22,7 +23,7 @@ pub struct ImagePlayer {
 impl ImagePlayer {
     pub fn new(base: Rc<Base>, raw: RawSprite) -> Rc<Self> {
 
-        let controller = Controller::new(&raw);
+        let controller = Controller::new(base.clone(), &raw);
 
         Rc::new(Self{
             base,
@@ -34,21 +35,25 @@ impl ImagePlayer {
 }
 
 pub struct Controller {
+    pub base: Rc<Base>,
     // directly set from raw.hide
     pub hidden: Mutable<bool>,
     // starts false (changed via ux)
     pub has_toggled_once: AtomicBool,
     // set from raw.hide_toggle
-    pub hide_toggle: Option<HideToggle>
+    pub hide_toggle: Option<HideToggle>,
+    pub audio_filename: Option<String>
 }
 
 impl Controller {
-    pub fn new(raw: &RawSprite) -> Self {
+    pub fn new(base: Rc<Base>, raw: &RawSprite) -> Self {
 
         Self {
+            base,
             hidden: Mutable::new(raw.hide),
             has_toggled_once: AtomicBool::new(false),
-            hide_toggle: raw.hide_toggle
+            hide_toggle: raw.hide_toggle,
+            audio_filename: raw.audio_filename.clone()
         }
     }
 
@@ -63,5 +68,16 @@ impl Controller {
         }
 
         self.has_toggled_once.store(true, Ordering::SeqCst);
+
+
+        match (self.hidden.get(), self.audio_filename.as_ref()) {
+            (false, Some(audio_filename)) => {
+                AUDIO_MIXER.with(|mixer| {
+                    mixer.pause_all();
+                    mixer.play_oneshot(AudioSource::Url(self.base.media_url(&audio_filename)))
+                });
+            },
+            _ => {}
+        }
     }
 }

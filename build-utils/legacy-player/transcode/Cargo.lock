@@ -1930,6 +1930,7 @@ dependencies = [
  "tokio-util",
  "url",
  "utils",
+ "uuid",
 ]
 
 [[package]]

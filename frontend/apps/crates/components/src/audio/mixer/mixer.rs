@@ -8,7 +8,7 @@ use utils::{path, prelude::*};
 use std::borrow::Cow;
 use std::ops::Deref;
 
-pub use awsm_web::audio::{AudioClip, AudioClipOptions, AudioHandle, AudioSource, Id};
+pub use awsm_web::audio::{AudioClip, AudioClipOptions, AudioHandle, WeakAudioHandle, AudioSource, Id};
 
 thread_local! {
     pub static AUDIO_MIXER:AudioMixer = AudioMixer {
@@ -177,11 +177,11 @@ impl AudioMixer {
     /// Oneshots are AudioClips because they drop themselves
     /// They're intended solely to be kicked off and not being held anywhere
     /// However, if necessary, they can still be killed imperatively
-    pub fn play_oneshot<A: Into<AudioSource>>(&self, audio: A) -> AudioClip {
+    pub fn play_oneshot<A: Into<AudioSource>>(&self, audio: A) -> WeakAudioHandle {
         self.inner.play_oneshot(audio.into()).unwrap_ji()
     }
 
-    pub fn play_oneshot_on_ended<F, A>(&self, audio: A, on_ended: F) -> AudioClip
+    pub fn play_oneshot_on_ended<F, A>(&self, audio: A, on_ended: F) -> WeakAudioHandle 
     where
         F: FnMut() -> () + 'static,
         A: Into<AudioSource>,

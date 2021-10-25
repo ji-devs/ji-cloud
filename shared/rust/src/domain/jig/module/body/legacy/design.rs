@@ -1,4 +1,4 @@
-use std::time::Duration;
+use crate::domain::{audio::AudioId, image::ImageId};
 
 pub use super::*;
 use serde::{Deserialize, Serialize};
@@ -32,16 +32,13 @@ pub struct Text {
     /// toggle hidden state
     pub hide_toggle: Option<HideToggle>,
     // associated audio
-    pub audio: Option<String>,
+    pub audio_filename: Option<String>,
 }
 
-// in the case of full image, it's the filename
-/// for video, it's without the extension, so client can load .webm, .mp4, etc.
-pub type SpriteSource = String;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Sprite {
-    pub src: SpriteSource,
+    pub filename: String,
     pub transform_matrix: [f64; 16],
     /// hide and hide_toggle are mapped from the top sections 
     /// in "Houdini": HideOnTap, ShowOnTap, and ToggleOnTap
@@ -53,11 +50,11 @@ pub struct Sprite {
     /// animation options are mapped from the bottom animation section
     pub animation: Option<Animation>,
     // associated audio
-    pub audio: Option<String>,
+    pub audio_filename: Option<String>,
 }
 
-#[repr(u8)]
-#[derive(Serialize_repr, Deserialize_repr, PartialEq, Debug, Clone, Copy)]
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone, Copy)]
+#[serde(rename_all = "snake_case")]
 pub enum HideToggle {
     /// only let the toggle fire once
     Once,

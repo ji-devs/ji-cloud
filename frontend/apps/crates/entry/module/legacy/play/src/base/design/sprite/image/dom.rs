@@ -29,7 +29,7 @@ impl ImagePlayer {
         });
 
         html!("img" => web_sys:: HtmlImageElement, {
-            .attribute("src", &state.base.media_url(&state.raw.src))
+            .attribute("src", &state.base.media_url(&state.raw.filename))
             .event(clone!(state => move |evt:events::Click| {
                 state.controller.handle_click();
             }))
