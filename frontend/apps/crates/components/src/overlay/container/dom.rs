@@ -1,10 +1,9 @@
 use super::state::*;
 use std::rc::Rc;
-use dominator::{Dom, html, clone};
+use dominator::{Dom, html};
 use futures_signals::{
-    signal::{Signal, SignalExt, Mutable},
-    signal_vec::{SignalVecExt},
-    signal_map::{MutableBTreeMap, SignalMap, SignalMapExt}
+    signal::SignalExt,
+    signal_vec::SignalVecExt,
 };
 use utils::prelude::*;
 
