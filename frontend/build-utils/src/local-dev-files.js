@@ -15,7 +15,6 @@ const ALLOWED_APP_NAMES = [
 	"kids",
 	"jig/edit",
 	"jig/play",
-	"legacy/play",
 	"module/memory/edit",
 	"module/memory/play",
 	"module/flashcards/edit",
