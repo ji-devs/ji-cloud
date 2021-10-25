@@ -224,7 +224,7 @@ impl StepExt for Step {
             Self::Two => 2,
             Self::Three => 3,
             Self::Four => 4,
-            Self::Five => 4,
+            Self::Five => 5,
         }
     }
 
