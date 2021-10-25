@@ -2,7 +2,7 @@ import { MEDIA_UI } from "@utils/path";
 import { LitElement, html, css, customElement, property } from "lit-element";
 
 const STR_ACCOUNT = "Already have an account?";
-const STR_LOGIN = "Login";
+const STR_LOGIN = "Log in";
 
 @customElement("footer-register-login")
 export class _ extends LitElement {

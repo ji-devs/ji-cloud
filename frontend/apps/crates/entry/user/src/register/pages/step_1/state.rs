@@ -106,7 +106,7 @@ pub enum Over18Error {
 impl Over18Error {
     pub fn as_str(&self) -> &'static str {
         match self {
-            Self::Unchecked => "need to select!",
+            Self::Unchecked => "You must be at least 18 to register with Jigzi.",
         }
     }
 }

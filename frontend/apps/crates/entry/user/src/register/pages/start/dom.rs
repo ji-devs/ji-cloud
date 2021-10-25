@@ -10,6 +10,8 @@ use crate::{
 };
 use utils::events;
 
+const STR_GOOGLE_LABEL: &'static str = "Sign up with Google";
+
 pub struct StartPage {}
 
 impl StartPage {
@@ -59,6 +61,7 @@ impl StartPage {
                     }),
                     html!("button-google", {
                         .property("slot", "google")
+                        .property("label", STR_GOOGLE_LABEL)
                         .event(clone!(state => move |_evt:events::Click| {
                             actions::register_google(state.clone())
                         }))

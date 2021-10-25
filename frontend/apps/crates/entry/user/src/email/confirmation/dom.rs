@@ -1,7 +1,12 @@
 use super::state::*;
 use dominator::{clone, html, Dom};
+use futures_signals::signal::SignalExt;
 use std::rc::Rc;
 use utils::prelude::*;
+
+
+const STR_DIDNT_RECEIVE: &'static str = "Didn't receive our email? ";
+const STR_SEND_AGAIN: &'static str = "Send again";
 
 impl SendEmailConfirmationPage {
     pub fn render(state: Rc<SendEmailConfirmationPage>) -> Dom {
@@ -18,13 +23,33 @@ impl SendEmailConfirmationPage {
                 .text(crate::strings::STR_CHANGE_EMAIL)
             }))
             */
-            .child(html!("button-email-send", {
-                .property("slot", "send")
-                .property_signal("mode", state.mode_str())
-                .event(clone!(state => move |_:events::Click| {
-                    state.resend();
-                }))
-            }))
+            .child_signal(state.mode.signal().map(clone!(state => move |mode| {
+                match mode {
+                    Mode::Send => {
+                        Some(html!("p", {
+                            .property("slot", "send")
+                            .text(STR_DIDNT_RECEIVE)
+                            .child(html!("button-rect", {
+                                .property("color", "blue")
+                                .property("kind", "text")
+                                .text(STR_SEND_AGAIN)
+                                .event(clone!(state => move |_:events::Click| {
+                                    state.resend();
+                                }))
+                            }))
+                        }))
+                    },
+                    Mode::Sent => {
+                        Some(html!("button-email-send", {
+                            .property("slot", "send")
+                            .property_signal("mode", state.mode_str())
+                            .event(clone!(state => move |_:events::Click| {
+                                state.resend();
+                            }))
+                        }))
+                    },
+                }
+            })))
         })
     }
 }

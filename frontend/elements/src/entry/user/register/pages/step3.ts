@@ -6,11 +6,11 @@ import "@elements/core/titles/ji";
 import "@elements/entry/user/_common/base-page";
 
 const STR_TITLE = "Sign Up - Step 3";
-const STR_SUBTITLE = "We want to tailor the content that you find to your interests and needs.";
-const STR_SUBSUBTITLE = "You can select as many as you like now and edit it later it in your profile page";
-const STR_AGES_LABEL = "Which age group are you interested in?";
-const STR_AFFILIATIONS_LABEL = "Content from which streams of Judaism do you want to see?";
-const STR_SUBJECTS_LABEL = "Which subjects do you teach?";
+const STR_SUBTITLE = "We want to provide content that is tailored to your needs and interests.";
+const STR_SUBSUBTITLE = "Select as many as you like now. You can always edit this later under Teaching Settings in your profile page.";
+const STR_AGES_LABEL = "I'm interested in content for this age group:";
+const STR_AFFILIATIONS_LABEL = "I want to see content for these affiliations:";
+const STR_SUBJECTS_LABEL = "I'm interested in teaching these subjects:";
 
 @customElement("page-register-step3")
 export class _ extends LitElement {
@@ -44,7 +44,8 @@ export class _ extends LitElement {
         }
 
         .subtitle {
-          white-space: nowrap;
+          font-weight: 500;
+          color: var(--dark-gray-6);
         }
 
         .submit {
@@ -60,7 +61,8 @@ export class _ extends LitElement {
           <base-page>
                   <h1>${STR_TITLE}</h1>
 
-                  <title-ji class="subtitle" size="subMedium">${STR_SUBTITLE}<br/>${STR_SUBSUBTITLE}</title-ji>
+                  <h4 class="subtitle">${STR_SUBTITLE}<br/>${STR_SUBSUBTITLE}</h4>
+
                   <div class="grid">
                     <div class="ages card-grey">
                         <list-vertical label="${STR_AGES_LABEL}">

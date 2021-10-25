@@ -98,7 +98,6 @@ impl Step2Page {
                     .child(
                         html!("div", {
                             //whatever.. good enough for now
-                            .style("display", "flex")
                             .style("gap", ".5em")
                             .style("margin-left", ".5em")
                             .child(html!("a", {
@@ -116,6 +115,7 @@ impl Step2Page {
                                 .text(STR_TERMS_PRIVACY)
                                 .style("color", "var(--main-blue)")
                             }))
+                            .text(". *")
                         })
                     )
                 }),

@@ -6,6 +6,8 @@ use web_sys::HtmlInputElement;
 
 use utils::events;
 
+const STR_GOOGLE_LABEL: &'static str = "Log in with Google";
+
 pub struct LoginPage {}
 impl LoginPage {
     pub fn render() -> Dom {
@@ -55,6 +57,7 @@ impl LoginPage {
                     }),
                     html!("button-google", {
                         .property("slot", "google")
+                        .property("label", STR_GOOGLE_LABEL)
                         .event(clone!(state => move |_evt:events::Click| {
                             actions::signin_google(state.clone())
                         }))
