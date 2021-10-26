@@ -89,7 +89,7 @@ where
     let module_kind = RawData::kind().as_str();
 
     //TODO - load from localization endpoint
-    let STR_config_url =
+    let str_config_url =
         utils::path::config_cdn_url(format!("module/_header/{}.json", module_kind));
 
     #[derive(Deserialize, Default, Clone)]
@@ -133,7 +133,7 @@ where
 
     html!("module-header", {
         .future(clone!(header_config => async move {
-            let data:HeaderConfig = match fetch_url(&STR_config_url).await {
+            let data:HeaderConfig = match fetch_url(&str_config_url).await {
                 Ok(resp) => {
                     resp
                         .json_from_str()

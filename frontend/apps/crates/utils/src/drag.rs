@@ -232,7 +232,7 @@ impl Drag {
                 (None, next_pos)
             }
 
-            _ => (None, None),
+            // _ => (None, None),
         };
 
         if let Some(next_state) = next_state {

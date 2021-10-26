@@ -1,10 +1,7 @@
 use super::state::*;
 use std::rc::Rc;
 use dominator::{Dom, html};
-use futures_signals::{
-    signal::SignalExt,
-    signal_vec::SignalVecExt,
-};
+use futures_signals::signal_vec::SignalVecExt;
 use utils::prelude::*;
 
 impl OverlayContainer {

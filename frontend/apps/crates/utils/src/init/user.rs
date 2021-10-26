@@ -20,7 +20,7 @@ pub(crate) async fn init() {
         },
     };
 
-    USER.set(Mutable::new(user));
+    let _ = USER.set(Mutable::new(user));
 }
 
 pub fn set_user(user: Option<UserProfile>) {

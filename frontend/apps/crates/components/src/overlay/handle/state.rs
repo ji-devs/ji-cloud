@@ -11,7 +11,7 @@ impl OverlayHandle {
     /// not typically used, mostly for internal purposes
     /// but still public to support different potential use-cases
     pub fn new(f: impl Fn() -> Dom + 'static) -> Rc<Self> {
-        let key = OverlayContainer::insert(move |key| {
+        let key = OverlayContainer::insert(move |_key| {
             f
         });
 

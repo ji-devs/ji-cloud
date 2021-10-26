@@ -5,8 +5,7 @@
 */
 
 use serde::{de::DeserializeOwned, Serialize};
-use shared::api::{method::Method, result::HttpStatus};
-use wasm_bindgen::prelude::*;
+use shared::api::method::Method;
 
 use crate::{
     env::env_var,
@@ -26,14 +25,6 @@ use web_sys::File;
 
 pub use awsm_web::loaders::helpers::{spawn_handle, AbortController, FutureHandle};
 
-#[derive(Debug)]
-pub enum Error {
-    AuthForbidden,
-    AuthCompleteRegistration,
-    HttpStatusCodeOnly(u16),
-    HttpStatus(HttpStatus),
-    JsValue(JsValue),
-}
 
 pub const POST: &'static str = "POST";
 pub const GET: &'static str = "GET";
