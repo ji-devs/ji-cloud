@@ -80,9 +80,9 @@ dependencies = [
 
 [[package]]
 name = "awsm_web"
-version = "0.29.0"
+version = "0.30.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4038071b0326e8c3c3fae7f9e96449fba542e2455441f78b04d643774b2e6c71"
+checksum = "bd48a9fb3f3b64cca54fd604863365997f6c650cad1d162330cb9a18c27501df"
 dependencies = [
  "discard",
  "futures",
@@ -348,9 +348,9 @@ checksum = "212d0f5754cb6769937f4501cc0e67f4f4483c8d2c3e1e922ee9edbe4ab4c7c0"
 
 [[package]]
 name = "dominator"
-version = "0.5.21"
+version = "0.5.22"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "69c56006dbcd6f330a54310fda5ed9008157dd43c5928775ef43a0e5b6040057"
+checksum = "2ba42804f53bd02055c74ead9464b689a264e668ad4605bd77689b41a2b014f7"
 dependencies = [
  "discard",
  "futures-channel",
@@ -2012,7 +2012,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "async-trait",
- "awsm_web 0.29.0",
+ "awsm_web 0.30.0",
  "base64",
  "cfg-if 1.0.0",
  "chrono",
