@@ -1,7 +1,7 @@
 /*
     Rough summary of what's going on:
 
-    It takes roughly a full tick or more to decode a frame of GIF data
+    It takes around a full tick or more to decode a frame of GIF data
     and another tick or so to create the pixel data
 
     Once the pixel data exists, it can be cached and drawn quickly
@@ -10,13 +10,22 @@
     but we can't actually do that since the pixel drawing part uses the Canvas API
     (offscreeen canvas isn't universally supported)
 
-    So the complexity of the code here is about keeping the decoding part in a worker
+    So the first part of code complexity here is about keeping the decoding part in a worker
     while using the canvas in the main thread.
+    Note that we maintain separate canvases for the work vs. painting, so it would be easy
+    to move the entire processing off thread too
 
     We (optionally) play the GIF while it is decoding, even though it may play slowly
     until the first loop through and all the frames are cached
 
-    In the case where the GIF begins in a paused state, we still load
+    In the case where the GIF begins in a paused state, we still load the frames
+
+    The other part of the complexity is the rules regarding play vs. tap, looping or not
+    This was reverse-engineered by QA and comparing to the ji tap player
+
+    Ideally a new implementation of animation would be easier to reason about
+
+    That said, the data structure is changed so that it's one step closer to that simplicity
 */
 use futures_signals::signal::Mutable;
 use gloo::events::EventListener;
@@ -165,9 +174,8 @@ impl AnimationPlayer {
                     let id = Reflect::get(&data, &JsValue::from_str("id")).unwrap_ji().as_f64().unwrap_ji() as usize;
                     let img_data:ImageData = Reflect::get(&data, &JsValue::from_str("img_data")).unwrap_ji().unchecked_into();
                     if id == state.worker_id {
-                        state.blit(&img_data);
+                        state.clone().paint(&img_data, true);
                         state.frames.borrow_mut().push(img_data);
-                        state.clone().next_frame();
                     }
                 } else if let Ok(msg) = serde_wasm_bindgen::from_value::<GifWorkerEvent>(data) {
                     match msg.data {
@@ -203,42 +211,13 @@ impl AnimationPlayer {
         f(frame_index, self.frame_infos.borrow().get(frame_index).as_ref().unwrap_ji())
     }
 
-    pub fn next_frame(self: Rc<Self>) {
-        let frame_index = self.controller.curr_frame_index.fetch_add(1, Ordering::SeqCst);
-        if frame_index == self.num_frames() - 1 {
-            self.controller.curr_frame_index.store(0, Ordering::SeqCst);
-
-            if self.controller.playing.load(Ordering::SeqCst) {
-                if self.controller.anim.once {
-                    self.controller.playing.store(false, Ordering::SeqCst);
-                }
-            }
-        }
-
-        let state = self;
-        let delay = 
-            state.frame_infos.borrow().get(frame_index).unwrap_ji().delay
-                .mul(10.0)
-                .sub(Self::curr_time() - state.blit_time.get())
-                .max(0.0);
-
-
-        // log::info!("{}", delay);
-
-        //let start = web_sys::window().unwrap_ji().performance().unwrap_ji().now();
-
-        *state.timer.borrow_mut() = Some(Timeout::new(delay as u32, clone!(state => move || {
-            state.request_frame();
-        })));
-    }
     pub fn request_frame(self: Rc<Self>) {
         self.blit_time.set(Self::curr_time());
 
 
         self.map_current_frame(|frame_index, frame_info| {
             if let Some(img_data) = self.frames.borrow().get(frame_index) {
-                self.blit(img_data);
-                self.clone().next_frame();
+                self.clone().paint(img_data, false);
             } else {
                 let img_data = self.prep_cache_frame();
 
@@ -340,11 +319,11 @@ impl AnimationPlayer {
     fn cached_all_frames(&self) -> bool {
         self.frames.borrow().len() >= self.frame_infos.borrow().len()
     }
-    fn blit(&self, img_data: &ImageData) {
+    fn paint(self: Rc<Self>, img_data: &ImageData, write_cache: bool) {
 
         self.map_current_frame(|frame_index, frame_info| {
 
-            if !self.cached_all_frames() {
+            if write_cache {
                 //let start = web_sys::window().unwrap_ji().performance().unwrap_ji().now();
                 let ctx = self.work_ctx.borrow();
                 let ctx = ctx.as_ref().unwrap_ji();
@@ -369,7 +348,7 @@ impl AnimationPlayer {
             let ctx = self.paint_ctx.borrow();
             let ctx = ctx.as_ref().unwrap_ji();
 
-            if frame_index == 0 || self.controller.playing.load(Ordering::SeqCst) {
+            if (frame_index == 0 && write_cache) || self.controller.playing.load(Ordering::SeqCst) {
                 ctx.put_image_data_with_dirty_x_and_dirty_y_and_dirty_width_and_dirty_height(
                     &img_data,
                     0.0,
@@ -382,7 +361,42 @@ impl AnimationPlayer {
             }
             //log::info!("blit time: {}", web_sys::window().unwrap_ji().performance().unwrap_ji().now() - start);
         });
+
+        self.next_frame();
     }
+
+    fn next_frame(self: Rc<Self>) {
+        let frame_index = self.controller.curr_frame_index.fetch_add(1, Ordering::SeqCst);
+
+        if frame_index == self.num_frames() - 1 {
+            if self.controller.playing.load(Ordering::SeqCst) {
+                self.controller.has_finished_once.store(true, Ordering::SeqCst);
+
+                if self.controller.anim.once {
+                    self.controller.playing.store(false, Ordering::SeqCst);
+                }
+            }
+
+            self.controller.curr_frame_index.store(0, Ordering::SeqCst);
+        }
+
+        let state = self;
+        let delay = 
+            state.frame_infos.borrow().get(frame_index).unwrap_ji().delay
+                .mul(10.0)
+                .sub(Self::curr_time() - state.blit_time.get())
+                .max(0.0);
+
+
+        // log::info!("{}", delay);
+
+        //let start = web_sys::window().unwrap_ji().performance().unwrap_ji().now();
+
+        *state.timer.borrow_mut() = Some(Timeout::new(delay as u32, clone!(state => move || {
+            state.request_frame();
+        })));
+    }
+
 }
 
 pub struct Controller {
@@ -393,6 +407,8 @@ pub struct Controller {
     pub hidden: Mutable<bool>,
     // starts false (changed via ux)
     pub has_toggled_once: AtomicBool,
+    // starts false (changed via ux)
+    pub has_finished_once: AtomicBool,
     // starts 0 (changed via internal updates)
     pub curr_frame_index: AtomicUsize,
     // starts as _not_ anim.tap... e.g. start
@@ -415,6 +431,7 @@ impl Controller {
             base,
             hidden: Mutable::new(raw.hide),
             has_toggled_once: AtomicBool::new(false),
+            has_finished_once: AtomicBool::new(false),
             playing: AtomicBool::new(!raw.hide && !anim.tap),
             curr_frame_index: AtomicUsize::new(0),
             anim,
@@ -432,14 +449,34 @@ impl Controller {
                 self.hidden.set(!val);
             }
         }
+
         self.has_toggled_once.store(true, Ordering::SeqCst);
 
-        let playing = if self.hidden.get() { false } else { !self.playing.load(Ordering::SeqCst) };
+        let (playing_anim, playing_audio) = if self.hidden.get() { 
+            (false, false)
+        } else { 
+            let play_toggle = !self.playing.load(Ordering::SeqCst);
 
-        self.playing.store(playing, Ordering::SeqCst);
+            if self.anim.tap {
+                (play_toggle, play_toggle) 
+            } else if self.anim.once && self.has_finished_once.load(Ordering::SeqCst) {
+                (false, play_toggle)
+            } else {
+                (true, true)
+            }
+        };
 
-        if playing {
-            self.curr_frame_index.store(0, Ordering::SeqCst);
+        self.playing.store(playing_anim, Ordering::SeqCst);
+
+        if playing_anim {
+            // this is a small departure from TT, reset to the beginning in case 
+            // the sound was a bit timed to the animation
+            if self.anim.tap {
+                self.curr_frame_index.store(0, Ordering::SeqCst);
+            }
+        }
+
+        if playing_audio {
             if let Some(audio_filename) = self.audio_filename.as_ref() {
                 AUDIO_MIXER.with(|mixer| {
                     mixer.pause_all();

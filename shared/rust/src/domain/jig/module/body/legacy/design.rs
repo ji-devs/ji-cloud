@@ -17,23 +17,23 @@ pub struct Design {
 pub struct Sticker {
     pub filename: String,
     pub transform_matrix: [f64; 16],
-    /// hide and hide_toggle are mapped from the top sections 
+    /// hide and hide_toggle are mapped from the top sections
     /// in "Houdini": HideOnTap, ShowOnTap, and ToggleOnTap
     /// start out hidden
     pub hide: bool,
     /// toggle hidden state
-    #[serde(skip_serializing_if="Option::is_none")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub hide_toggle: Option<HideToggle>,
 
     /// animation options are mapped from the bottom animation section
-    #[serde(skip_serializing_if="Option::is_none")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub animation: Option<Animation>,
     // associated audio
-    #[serde(skip_serializing_if="Option::is_none")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub audio_filename: Option<String>,
 
     /// override the size
-    #[serde(skip_serializing_if="Option::is_none")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub override_size: Option<(f64, f64)>,
 }
 
