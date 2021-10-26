@@ -12,7 +12,7 @@ use shared::domain::{jig::module::body::Image, meta::ImageStyleId};
 use shared::domain::user::UserProfile;
 use std::{cell::RefCell, collections::HashSet, rc::Rc};
 
-pub const RECENT_COUNT: u16 = 16;
+pub const RECENT_COUNT: u16 = 12;
 
 pub struct State {
     pub search_mode: Mutable<SearchMode>,
@@ -52,7 +52,7 @@ impl State {
             styles,
             callbacks,
             user: Rc::new(RefCell::new(None)),
-            search_mode: Mutable::new(SearchMode::Sticker(None))//TODO: change default to sticker
+            search_mode: Mutable::new(SearchMode::Sticker(Rc::new(MutableVec::new())))
         }
     }
 }
@@ -88,6 +88,22 @@ pub enum ImageSearchCheckboxKind {
 
 #[derive(Clone)]
 pub enum SearchMode {
-    Sticker(Option<Rc<MutableVec<Image>>>),
-    Web(Option<Rc<MutableVec<WebImageSearchItem>>>)
+    Sticker(Rc<MutableVec<Image>>),
+    Web(Rc<MutableVec<WebImageSearchItem>>)
+}
+
+impl SearchMode {
+    pub fn is_sticker(&self) -> bool {
+        match self {
+            Self::Sticker(_) => true,
+            Self::Web(_) => false,
+        }
+    }
+
+    pub fn is_web(&self) -> bool {
+        match self {
+            Self::Sticker(_) => false,
+            Self::Web(_) => true,
+        }
+    }
 }

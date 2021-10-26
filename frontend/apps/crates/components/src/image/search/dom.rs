@@ -6,9 +6,9 @@ use super::{
     types::*,
 };
 use dominator::{clone, html, Dom};
-use futures_signals::{signal::SignalExt, signal_vec::SignalVecExt};
+use futures_signals::{signal::SignalExt, signal_vec::{MutableVec, SignalVec, SignalVecExt}};
 use shared::domain::{jig::module::body::Image, search::WebImageSearchItem};
-use std::rc::Rc;
+use std::{pin::Pin, rc::Rc};
 use utils::prelude::*;
 
 const STR_SHOW_ONLY_BACKGROUNDS: &'static str = "Show only background";
@@ -44,51 +44,8 @@ pub fn render_loaded(state: Rc<State>) -> Dom {
         .children_signal_vec(state.recent_list.signal_vec_cloned().map(clone!(state => move |image| {
             render_image(Rc::clone(&state), image, "recent")
         })))
-        .children_signal_vec(state.search_mode.signal_cloned().map(|mmm| {
-            // MutableVec::new_with_values(vec![html!("br")]).signal_vec_cloned()
-
-
-
-            // match mmm {
-            //     MMM::Sticker(Some(images)) => {
-            //         images.signal_vec_cloned().map(clone!(state => move |image| {
-            //             render_image(Rc::clone(&state), image, "images")
-            //         }))
-            //         // todo!();
-            //     },
-            //     MMM::Web(Some(images)) => {
-            //         todo!()
-            //     },
-            //     _ => todo!(),
-            // }
-            vec![html!("br")]
-        }).to_signal_vec())
-        .child_signal(state.search_mode.signal_ref(clone!(state => move |search_mode| {
-            match search_mode {
-                SearchMode::Sticker(Some(images)) => {
-                    Some(html!("empty-fragment", {
-                        .property("slot", "images")
-                        .style("display", "contents")
-                        .children_signal_vec(
-                            images.signal_vec_cloned().map(clone!(state => move |image| {
-                                render_image(Rc::clone(&state), image, "")
-                            }))
-                        )
-                    }))
-                },
-                SearchMode::Web(Some(images)) => {
-                    Some(html!("empty-fragment", {
-                        .property("slot", "images")
-                        .style("display", "contents")
-                        .children_signal_vec(
-                            images.signal_vec_cloned().map(clone!(state => move |image| {
-                                render_web_image(Rc::clone(&state), image, "")
-                            }))
-                        )
-                    }))
-                },
-                _ => None,
-            }
+        .children_signal_vec(state.search_mode.signal_cloned().switch_signal_vec(clone!(state => move |search_mode| {
+            images_signal_vec(Rc::clone(&state), &search_mode)
         })))
         .apply_if(state.options.recent, |dom| {
             dom.child_signal(state.loader.is_loading().map(|is_loading| {
@@ -102,7 +59,30 @@ pub fn render_loaded(state: Rc<State>) -> Dom {
                 }
             }))
         })
+        .event(clone!(state => move |_: events::ScrollEnd| {
+            log::info!("scroll end");
+        }))
     })
+}
+
+
+fn images_signal_vec(state: Rc<State>, search_mode: &SearchMode) -> Pin<Box<dyn SignalVec<Item = Dom>>> {
+    match search_mode {
+        SearchMode::Sticker(images) => {
+            let elements = images.signal_vec_cloned().map(clone!(state => move |image| {
+                render_image(Rc::clone(&state), image, "images")
+            }));
+
+            Box::pin(elements)
+        },
+        SearchMode::Web(images) => {
+            let elements = images.signal_vec_cloned().map(clone!(state => move |image| {
+                render_web_image(Rc::clone(&state), image, "images")
+            }));
+
+            Box::pin(elements)
+        },
+    }
 }
 
 
@@ -173,6 +153,9 @@ fn render_controls(state: Rc<State>) -> Vec<Dom> {
             })
             .property("slot", "only-background-checkbox")
             .property("checked", true)
+            .property_signal("disabled", state.search_mode.signal_ref(|search_mode| {
+                search_mode.is_web()
+            }))
             .event(clone!(state => move |evt: events::CustomToggle| {
                 state.checkbox_checked.set(evt.value());
                 actions::search(state.clone());
@@ -223,7 +206,7 @@ fn render_filters(state: Rc<State>) -> Dom {
                         matches!(search_mode, &SearchMode::Sticker(_))
                     }))
                     .event(clone!(state => move |_: events::Change| {
-                        state.search_mode.set(SearchMode::Sticker(None));
+                        state.search_mode.set(SearchMode::Sticker(Rc::new(MutableVec::new())));
                         actions::search(Rc::clone(&state));
                     }))
                 }))
@@ -239,7 +222,7 @@ fn render_filters(state: Rc<State>) -> Dom {
                         matches!(search_mode, &SearchMode::Web(_))
                     }))
                     .event(clone!(state => move |_: events::Change| {
-                        state.search_mode.set(SearchMode::Web(None));
+                        state.search_mode.set(SearchMode::Web(Rc::new(MutableVec::new())));
                         actions::search(Rc::clone(&state));
                     }))
                 }))

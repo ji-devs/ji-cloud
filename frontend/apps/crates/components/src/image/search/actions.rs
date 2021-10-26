@@ -134,7 +134,7 @@ async fn search_async_web(state: Rc<State>) {
 
     match res {
         Ok(res) => {
-            state.search_mode.set(SearchMode::Web(Some(Rc::new(MutableVec::new_with_values(res.images)))));
+            state.search_mode.set(SearchMode::Web(Rc::new(MutableVec::new_with_values(res.images))));
         },
         Err(e) => {
             log::error!("{:#?}", e);
@@ -214,7 +214,7 @@ async fn search_async(state: Rc<State>) {
                     lib: MediaLibrary::Global,
                 }
             }).collect();
-            state.search_mode.set(SearchMode::Sticker(Some(Rc::new(MutableVec::new_with_values(images)))));
+            state.search_mode.set(SearchMode::Sticker(Rc::new(MutableVec::new_with_values(images))));
 
             // state.image_list.lock_mut().replace_cloned(res.images.iter().map(|i| {
             //     Image {
@@ -233,7 +233,6 @@ async fn get_user(state: Rc<State>) {
     match endpoints::user::Profile::api_with_auth(None).await {
         Err(_) => todo!(),
         Ok(user) => {
-            log::info!("{:?}", user);
             *state.user.borrow_mut() = Some(user);
         }
     }
