@@ -35,6 +35,8 @@ temp_make_event!(CustomBlur, "custom-blur" => web_sys::Event);
 
 temp_make_event!(LoadedMetadata, "loadedmetadata" => web_sys::Event);
 
+temp_make_event!(ScrollEnd, "scroll-end" => web_sys::Event);
+
 make_custom_event_serde!("module-resize", ModuleResizeEvent, ResizeInfo);
 
 // Custom Bounds

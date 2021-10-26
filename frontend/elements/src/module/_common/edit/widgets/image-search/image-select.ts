@@ -1,4 +1,4 @@
-import { LitElement, html, css, customElement, property} from 'lit-element';
+import { LitElement, html, css, customElement, property, query } from 'lit-element';
 import { nothing } from "lit-html";
 
 export type imageMode = 'image' | 'background';
@@ -123,7 +123,7 @@ export class _ extends LitElement {
             :host([moreShown]) .images-section.recent button-rect .icon {
                 transform: rotate(-90deg);
             }
-            .image-wrapper {
+            .images-wrapper {
                 grid-column: 1 / -1;
                 display: grid;
                 grid-template-columns: repeat(auto-fit, var(--image-width));
@@ -158,6 +158,7 @@ export class _ extends LitElement {
                 grid-column: 1;
                 grid-row: 1;
                 place-content: center;
+                z-index: 1;
             }
             :host([loading]) .loader-overlay {
                 display: grid;
@@ -192,6 +193,39 @@ export class _ extends LitElement {
     @property({type: Boolean, reflect: true})
     private moreShown: boolean = false;
 
+    @query("#main-images-wrapper")
+    mainImagesWrapper!: HTMLElement;
+
+    @query("slot[name=images]")
+    imagesSlot!: HTMLSlotElement;
+
+    private observer!: IntersectionObserver;
+
+    firstUpdated() {
+        this.observer = new IntersectionObserver(this.onIntersection, {
+            threshold: 0,
+        });
+    }
+
+    private onIntersection = (entries: IntersectionObserverEntry[]) => {
+        const entry = entries[0];
+        if(entry.isIntersecting) {
+            this.observer.unobserve(entry.target);
+
+            this.dispatchEvent(new Event("scroll-end"));
+        }
+    }
+
+    private onNewImage = () => {
+        const images = this.imagesSlot.assignedElements();
+
+        if (images.length === 0) return;
+
+        const lastImage = images[images.length - 1];
+
+        this.observer.observe(lastImage);
+    }
+
     render() {
         return html`
             <div class="main">
@@ -223,7 +257,7 @@ export class _ extends LitElement {
                                         ${ this.moreShown ? STR_SEE_LESS : STR_SEE_MORE }
                                         <span class="icon">></span>
                                     </button-rect>
-                                    <div class="image-wrapper">
+                                    <div class="images-wrapper">
                                         <slot name="recent"></slot>
                                     </div>
                                 </div>
@@ -232,8 +266,8 @@ export class _ extends LitElement {
                     }
                     <div class="images-section main">
                         <h4>${STR_ALL_IMAGES}</h4>
-                        <div class="image-wrapper">
-                            <slot name="images"></slot>
+                        <div id="main-images-wrapper" class="images-wrapper">
+                            <slot name="images" @slotchange=${this.onNewImage}></slot>
                         </div>
                     </div>
                 </section>
