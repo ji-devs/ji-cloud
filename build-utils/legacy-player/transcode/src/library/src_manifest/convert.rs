@@ -111,6 +111,7 @@ impl SrcSlide {
 
         let slide_id =  self.file_path.trim_matches('/').to_string();
 
+
         let activities_len = self.activities.len();
         let layers_len = self.layers.len();
 
@@ -126,6 +127,33 @@ impl SrcSlide {
             if activities_len == 0 {
                 None
             } else {
+                let activity = &self.activities[0];
+
+
+                let make_media = |filename:&str, transcode:Option<MediaTranscode>| -> Media {
+                    Media { 
+                        url: format!("{}/{}/{}/{}", base_url, slide_id, activity.folder_path, filename), 
+                        basepath: format!("slides/{}", slide_id), 
+                        filename: filename.to_string(),
+                        transcode
+                    }
+                };
+
+                let audio_filename = if !activity.intro_audio.is_empty() {
+                    Some(format!("{}.mp3", Path::new(&activity.intro_audio).file_stem().unwrap().to_str().unwrap().to_string()))
+                } else {
+                    None
+                };
+
+                if let Some(filename) = audio_filename.as_ref() {
+                    medias.push(Media {
+                        url: format!("{}/{}", base_url, activity.intro_audio), 
+                        basepath: format!("slides/{}/activity", slide_id), 
+                        filename: filename.to_string(),
+                        transcode: Some(MediaTranscode::Audio)
+                    });
+                }
+
                 match self.activity_kind {
                     SrcActivityKind::Questions => {
                         let questions: Vec<Question> = 
@@ -138,6 +166,17 @@ impl SrcSlide {
 
                         Some(Activity::Questions(Questions {
                             questions
+                        }))
+                    },
+                    SrcActivityKind::SaySomething => {
+                        Some(Activity::SaySomething(SaySomething {
+                            audio_filename: audio_filename.unwrap(),
+                            advance_trigger: if activity.settings.advance.unwrap_or_default() {
+                                AdvanceTrigger::AudioEnd
+                            } else {
+                                AdvanceTrigger::Tap
+                            },
+                            advance_index: activity.settings.jump_index
                         }))
                     },
                     _ => None

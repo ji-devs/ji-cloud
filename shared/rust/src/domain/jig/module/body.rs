@@ -136,6 +136,11 @@ pub trait BodyExt<Mode: ModeExt, Step: StepExt>:
         false
     }
 
+    /// should wait for manual phase change to Init
+    fn has_preload() -> bool {
+        false
+    }
+
     /// get the kind from the type itself
     fn kind() -> super::ModuleKind;
 

@@ -28,6 +28,8 @@ impl ImagePlayer {
             m.as_matrix_string()
         });
 
+        let interactive = state.raw.hide_toggle.is_some() || state.controller.audio_filename.is_some();
+
         html!("img" => web_sys:: HtmlImageElement, {
             .attribute("src", &state.base.media_url(&state.raw.filename))
             .event(clone!(state => move |evt:events::Click| {
@@ -40,7 +42,8 @@ impl ImagePlayer {
                     "1"
                 }
             }))
-            .style("cursor", "pointer")
+            .style("cursor", if interactive {"pointer"} else {"initial"})
+            .style("pointer-events", if interactive {"initial"} else {"none"})
             .style("display", "block")
             .style("position", "absolute")
             .style_signal("width", width_signal(state.size.signal_cloned()))

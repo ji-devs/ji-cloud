@@ -28,6 +28,8 @@ impl AnimationPlayer {
     pub fn render(self: Rc<Self>) -> Dom {
         let state = self;
 
+        let interactive = state.raw.hide_toggle.is_some() || state.controller.audio_filename.is_some() || state.controller.anim.tap;
+
         html!("empty-fragment", {
             .child_signal(state.size.signal_cloned().map(clone!(state => move |size| size.map(|size| {
                 let transform_matrix = Matrix4::new_direct(state.raw.transform_matrix.clone());
@@ -48,7 +50,8 @@ impl AnimationPlayer {
                             "1"
                         }
                     }))
-                    .style("cursor", "pointer")
+                    .style("cursor", if interactive {"pointer"} else {"initial"})
+                    .style("pointer-events", if interactive {"initial"} else {"none"})
                     .style("display", "block")
                     .style("position", "absolute")
                     .style_signal("width", width_signal(state.size.signal_cloned()))

@@ -7,8 +7,10 @@ impl DomRenderable for Base {
     fn render(state: Rc<Base>) -> Dom {
         html!("empty-fragment", {
             .property("slot", "main")
+            .style("user-select", "none")
             .children(&mut [
-                state.render_design()
+                state.clone().render_design(),
+                state.clone().render_activity(),
             ])
         })
     }

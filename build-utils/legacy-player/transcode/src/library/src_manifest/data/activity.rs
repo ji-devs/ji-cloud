@@ -61,8 +61,11 @@ pub struct Activity {
 //and so there's no way to depend on ActivityKind being read/set
 #[derive(Deserialize, Debug)]
 pub struct ActivitySettings {
+
+    /// if set- advances automatically to next page
     pub advance: Option<bool>,
 
+    /// the index to jump to
     #[serde(rename="linkToPage")]
     pub jump_index: Option<usize>,
 

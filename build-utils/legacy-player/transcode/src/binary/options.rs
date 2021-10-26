@@ -8,10 +8,17 @@ pub struct Opts {
     // David test 002
     // #[structopt(long, default_value="https://d24o39yp3ttic8.cloudfront.net/5D00A147-73B7-43FF-A215-A38CB84CEBCD/game.json")]
     // pub game_json_url: String,
+    
     // Corinne Houdini states
-    #[structopt(long, default_value="https://d24o39yp3ttic8.cloudfront.net/42C980D6-9FCE-4552-A5F2-ECFC0EA8D129/game.json")]
+    // #[structopt(long, default_value="https://d24o39yp3ttic8.cloudfront.net/42C980D6-9FCE-4552-A5F2-ECFC0EA8D129/game.json")]
+    // pub game_json_url: String,
+
+    // say something options
+    // https://jitap.net/activities/gen8/play/say-something-options
+    #[structopt(long, default_value="https://d24o39yp3ttic8.cloudfront.net/86DCDC1D-64CB-4198-A866-257E213F0405/game.json")]
     pub game_json_url: String,
 
+    /////////////////////////////////////
     #[structopt(long, default_value="D:\\Dropbox (Jewish Interactive)\\ji-cloud-media\\legacy\\examples", parse(from_os_str))]
     pub dest_base_path: PathBuf,
 

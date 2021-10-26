@@ -281,6 +281,7 @@ pub enum InitSource {
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum ModulePlayPhase {
+    Preload,
     Init,
     Playing,
     Ending(Option<ModuleEnding>),
@@ -339,7 +340,7 @@ where
             jig,
             raw,
             source,
-            play_phase: Mutable::new(ModulePlayPhase::Init),
+            play_phase: Mutable::new(if RawData::has_preload() { ModulePlayPhase::Preload } else { ModulePlayPhase::Init }),
             phantom: PhantomData,
         }
     }

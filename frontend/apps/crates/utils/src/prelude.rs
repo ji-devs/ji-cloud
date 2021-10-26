@@ -7,5 +7,6 @@ pub use crate::{
     mixin::MixinStub,
     routes::*,
     themes::*,
+    iframe::*,
     unwrap::*,
 };

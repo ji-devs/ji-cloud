@@ -14,14 +14,24 @@ use super::sticker::Sticker;
 
 impl Base {
     pub fn render_design(self: Rc<Self>) -> Dom {
+        let state = self;
+
         html!("empty-fragment", {
-            .children(self.slide.design.bgs.iter().map(|src| {
+            .children(state.slide.design.bgs.iter().map(|src| {
                 html!("img", {
                     .class(&*styles::BG)
-                    .attribute("src", &self.media_url(src))
+                    .attribute("src", &state.media_url(src))
                 })
             }))
-            .children(self.slide.design.stickers
+            .child(html!("div", {
+                .class(&*styles::BG)
+                .event(clone!(state => move |evt:events::Click| {
+                    if let Some(cb) = state.bg_click_listener.borrow_mut().as_mut() {
+                        cb();
+                    }
+                }))
+            }))
+            .children(state.slide.design.stickers
                 .iter()
                 .enumerate()
                 .filter(|(index, sticker)| {
@@ -29,7 +39,7 @@ impl Base {
                     true
                 })
                 .map(|(index, sticker)| {
-                    Sticker::new(self.clone(), sticker.clone()).render()
+                    Sticker::new(state.clone(), sticker.clone()).render()
                 })
             )
         })

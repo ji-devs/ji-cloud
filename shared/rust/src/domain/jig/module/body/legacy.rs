@@ -38,6 +38,9 @@ impl BodyExt<(), ()> for ModuleData {
     fn is_legacy() -> bool {
         true
     }
+    fn has_preload() -> bool {
+        true
+    }
 
     fn kind() -> ModuleKind {
         ModuleKind::Legacy

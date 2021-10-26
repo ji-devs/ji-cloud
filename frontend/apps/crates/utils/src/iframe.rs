@@ -2,7 +2,7 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 
 use crate::unwrap::UnwrapJiExt;
-use shared::domain::jig::LiteModule;
+use shared::domain::jig::{LiteModule, module::ModuleId};
 
 pub const IFRAME_DATA_PARAM: &'static str = "iframe_data";
 
@@ -132,6 +132,8 @@ pub enum ModuleToJigPlayerMessage {
     Start(Option<u32>),
     Stop,
     Next,
+    JumpToIndex(usize),
+    JumpToId(ModuleId),
 }
 
 #[derive(Debug, Serialize, Deserialize)]

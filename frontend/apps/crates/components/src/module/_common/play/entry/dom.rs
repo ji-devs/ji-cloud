@@ -172,6 +172,11 @@ where
         .apply_if(!is_screenshot, |dom| {
             dom.child_signal(base.play_phase().signal().map(clone!(base => move |curr_play_phase| {
                 match curr_play_phase {
+                    ModulePlayPhase::Preload => {
+                        Some(html!("module-preload", {
+                        }))
+                    },
+
                     ModulePlayPhase::Init => {
                         Some(html!("module-play-button", {
                             .event(clone!(base => move |_evt:events::Click| {

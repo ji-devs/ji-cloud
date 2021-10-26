@@ -16,7 +16,9 @@ pub struct Base {
     pub game_id: String,
     pub slide_id: String,
     pub slide: Slide,
-    pub workers: RefCell<HashMap<WorkerKind, WorkerList>>
+    pub workers: RefCell<HashMap<WorkerKind, WorkerList>>,
+    pub bg_click_listener: RefCell<Option<Box<dyn FnMut()>>>,
+    pub start_listeners: RefCell<Vec<Box<dyn FnMut()>>>
 }
 
 #[derive(Default)]
@@ -63,7 +65,7 @@ impl Base {
             .await
             .unwrap_ji();
 
-        Rc::new(Self {
+        let _self = Rc::new(Self {
             jig_id,
             module_id,
             jig,
@@ -72,10 +74,31 @@ impl Base {
             game_id: raw.game_id,
             slide_id: raw.slide_id,
             slide,
-            workers: RefCell::new(HashMap::new())
-        })
+            workers: RefCell::new(HashMap::new()),
+            bg_click_listener: RefCell::new(None),
+            start_listeners: RefCell::new(Vec::new())
+        });
+
+        /// TODO- set after done preloading
+        _self.finished_preload();
+
+        _self
     }
 
+    pub fn finished_preload(&self) {
+        self.module_phase.set_neq(ModulePlayPhase::Init);
+    }
+    pub fn set_bg_listener(&self, f: impl FnMut() + 'static) {
+        *self.bg_click_listener.borrow_mut() = Some(Box::new(f));
+    }
+
+    pub fn insert_start_listener(&self, f: impl FnMut() + 'static) {
+        self.start_listeners.borrow_mut().push(Box::new(f));
+    }
+
+    pub fn activity_media_url<T: AsRef<str>>(&self, path:T) -> String {
+        utils::path::legacy_cdn_url(&format!("{}/media/slides/{}/activity/{}", self.game_id, self.slide_id, path.as_ref()))
+    }
     pub fn media_url<T: AsRef<str>>(&self, path:T) -> String {
         utils::path::legacy_cdn_url(&format!("{}/media/slides/{}/{}", self.game_id, self.slide_id, path.as_ref()))
     }
@@ -110,6 +133,12 @@ impl Base {
 }
 
 impl BaseExt for Base {
+    fn play(state: Rc<Self>) {
+        for f in state.start_listeners.borrow_mut().iter_mut() {
+            f();
+        }
+    }
+
     fn get_instructions(&self) -> Option<Instructions> {
         None
     }
