@@ -4,7 +4,7 @@ use dominator::{clone, html, with_node, Dom};
 use futures_signals::signal::{Mutable, Signal, SignalExt};
 
 use shared::domain::jig::module::body::legacy::design::{
-    Sprite as RawSprite
+    Sticker as RawSticker
 };
 use std::{borrow::Borrow, rc::Rc, cell::RefCell};
 use utils::{
@@ -50,11 +50,12 @@ impl ImagePlayer {
             .style_signal("transform", transform_signal)
             .with_node!(img => {
                 .event(clone!(state => move |_evt:events::Load| {
-                    let width = img.natural_width() as f64;
-                    let height = img.natural_height() as f64;
+                    if state.size.get_cloned().is_none() {
+                        let width = img.natural_width() as f64;
+                        let height = img.natural_height() as f64;
 
-                    state.size.set(Some((width, height)));
-
+                        state.size.set(Some((width, height)));
+                    }
                 }))
             })
             .event(clone!(state => move |_evt:events::Click| {

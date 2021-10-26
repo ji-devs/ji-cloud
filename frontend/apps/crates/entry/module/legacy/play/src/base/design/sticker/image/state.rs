@@ -10,26 +10,27 @@ use dominator::clone;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use serde::{Serialize, Deserialize};
-use shared::domain::jig::module::body::legacy::design::{HideToggle, Sprite as RawSprite};
+use shared::domain::jig::module::body::legacy::design::{HideToggle, Sticker as RawSticker};
 use components::audio::mixer::{AUDIO_MIXER, AudioSource};
 
 pub struct ImagePlayer {
     pub base: Rc<Base>,
-    pub raw: RawSprite,
+    pub raw: RawSticker,
     pub size: Mutable<Option<(f64, f64)>>,
     pub controller: Controller,
 }
 
 impl ImagePlayer {
-    pub fn new(base: Rc<Base>, raw: RawSprite) -> Rc<Self> {
+    pub fn new(base: Rc<Base>, raw: RawSticker) -> Rc<Self> {
 
+        let size = Mutable::new(raw.override_size);
         let controller = Controller::new(base.clone(), &raw);
 
         Rc::new(Self{
             base,
             raw,
-            size: Mutable::new(None),
-            controller
+            controller,
+            size
         })
     }
 }
@@ -46,7 +47,7 @@ pub struct Controller {
 }
 
 impl Controller {
-    pub fn new(base: Rc<Base>, raw: &RawSprite) -> Self {
+    pub fn new(base: Rc<Base>, raw: &RawSticker) -> Self {
 
         Self {
             base,

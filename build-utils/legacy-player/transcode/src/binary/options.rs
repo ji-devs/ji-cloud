@@ -5,6 +5,8 @@ use shared::config::RemoteTarget;
 #[derive(Debug, StructOpt)]
 #[structopt(name = "ji tap transcoder", about = "ji tap downloader/transcoder")]
 pub struct Opts {
+    // #[structopt(long, default_value="https://d24o39yp3ttic8.cloudfront.net/28717676-7AA4-4D3C-AC49-64A562D0B8F9/game.json")]
+    // pub game_json_url: String,
     #[structopt(long, default_value="https://d24o39yp3ttic8.cloudfront.net/89422814-F05E-415D-82BD-99D19E98D58F/game.json")]
     pub game_json_url: String,
 
@@ -44,6 +46,10 @@ pub struct Opts {
     /// skip files that already exist
     #[structopt(long, parse(try_from_str), default_value = "true")]
     pub skip_transcode_exists: bool,
+
+    /// don't panic if media is 404
+    #[structopt(long, parse(try_from_str), default_value = "true")]
+    pub allow_empty_media: bool,
 }
 
 impl Opts {

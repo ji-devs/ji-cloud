@@ -1,4 +1,4 @@
-use serde::{de, Deserializer,Deserialize};
+use serde::{Deserialize, Deserializer, de, serde_if_integer128};
 use serde_repr::*;
 use std::{
     path::{Path, PathBuf},
@@ -38,13 +38,22 @@ impl SrcManifest {
         serde_json::from_reader(file).unwrap()
     }
 
-    pub async fn load_url(url:&str) -> Self {
-        reqwest::get(url)
-            .await
-            .unwrap()
-            .json()
-            .await
-            .unwrap()
+    pub async fn load_url(url:&str) -> (Self, String) {
+
+        let text = 
+            reqwest::get(url)
+                .await
+                .unwrap()
+                .error_for_status()
+                .unwrap()
+                .text()
+                .await
+                .unwrap();
+
+        (
+            serde_json::from_str(&text).unwrap(),
+            text
+        )
     }
 
     pub fn jig_req(&self) -> JigCreateRequest {
@@ -177,8 +186,8 @@ fn convert_design(game_id: &str, slide_id: &str, base_url: &str, mut medias: &mu
             SrcLayerKind::Background => {
                 bgs.push(layer.filename.unwrap());
             },
-            SrcLayerKind::Image | SrcLayerKind::Animation => {
-                let sticker = Sprite { 
+            SrcLayerKind::Text | SrcLayerKind::Image | SrcLayerKind::Animation => {
+                let sticker = Sticker { 
                     filename: layer.filename.unwrap(),
                     transform_matrix: convert_transform(layer.transform),
                     hide: match layer.show_kind {
@@ -225,43 +234,19 @@ fn convert_design(game_id: &str, slide_id: &str, base_url: &str, mut medias: &mu
                         }
                     },
 
+                    override_size: {
+                        // not really needed unless it differs from the real file size
+                        // but whatever...
+                        Some((layer.width, layer.height))
+                    },
+
                     audio_filename,
 
 
                 };
 
-                stickers.push(Sticker::Sprite(sticker));
+                stickers.push(sticker);
             },
-            SrcLayerKind::Text => {
-                let sticker = Text {
-                    html: layer.html.unwrap(),
-                    width: layer.width,
-                    height: layer.height,
-                    transform_matrix: convert_transform(layer.transform),
-
-                    hide: match layer.show_kind {
-                        SrcShowKind::ShowOnLoad => false, 
-                        SrcShowKind::HideOnTap => false, 
-                        SrcShowKind::ShowOnTap => true, 
-                    },
-
-                    hide_toggle: match layer.show_kind {
-                        SrcShowKind::ShowOnLoad => None, 
-                        _ => Some(
-                            if layer.toggle_show {
-                                HideToggle::Always
-                            } else {
-                                HideToggle::Once
-                            }
-                        ), 
-                    },
-
-                    audio_filename,
-
-                };
-
-                stickers.push(Sticker::Text(sticker));
-            }
         }
     }
     Design {

@@ -30,7 +30,7 @@ async fn main() {
 }
 
 async fn transcode_game(opts: &Opts) {
-    let src_manifest = SrcManifest::load_url(&opts.game_json_url).await;
+    let (src_manifest, raw_game_json) = SrcManifest::load_url(&opts.game_json_url).await;
 
 
     let dest_dir = opts.dest_base_path.join(&src_manifest.game_id());
@@ -44,6 +44,12 @@ async fn transcode_game(opts: &Opts) {
         let dest_path = dest_dir.join(&opts.dest_json_dir);
         std::fs::create_dir_all(&dest_path);
 
+        {
+            let mut file = File::create(&dest_path.join("game.json")).unwrap();
+            let mut cursor = std::io::Cursor::new(raw_game_json);
+
+            std::io::copy(&mut cursor, &mut file).unwrap();
+        }
         {
             let dest_path = dest_path.join("requests");
             std::fs::create_dir_all(&dest_path);
@@ -87,17 +93,30 @@ async fn transcode_game(opts: &Opts) {
 
             if !opts.skip_download_exists || !dest_path.exists() {
                 log::info!("downloading {} -> {}", media.url, dest_path.to_str().unwrap());
-                let data = reqwest::get(&media.url)
+                match reqwest::get(&media.url)
                     .await
                     .unwrap()
-                    .bytes()
-                    .await
-                    .unwrap();
+                    .error_for_status() {
+                        Ok(resp) => {
+                            let data = resp
+                                .bytes()
+                                .await
+                                .unwrap();
 
-                let mut cursor = std::io::Cursor::new(data);
+                            let mut cursor = std::io::Cursor::new(data);
 
-                let mut dest_file = std::fs::File::create(&dest_path).unwrap();
-                std::io::copy(&mut cursor, &mut dest_file).unwrap();
+                            let mut dest_file = std::fs::File::create(&dest_path).unwrap();
+                            std::io::copy(&mut cursor, &mut dest_file).unwrap();
+                        },
+                        Err(err) => {
+                            if opts.allow_empty_media {
+                                log::warn!("couldn't download {}", media.url)
+                            } else {
+                                panic!("couldn't download {}", media.url)
+                            }
+                        }
+                    }
+
             }
         }
 
@@ -108,12 +127,17 @@ async fn transcode_game(opts: &Opts) {
             
                 let dest_dir = dest_path.join(&media.basepath);
                 let src_file_path = dest_dir.join(&media.filename);
-                let src_file_path = src_file_path.to_str().unwrap();
+                let src_file_path_str = src_file_path.to_str().unwrap();
+
+                if !src_file_path.exists() {
+                    log::warn!("transcode src missing: {}", src_file_path_str);
+                    continue;
+                }
 
                 if let Some(transcode) = media.transcode.as_ref() {
                     match transcode {
                         MediaTranscode::Audio => {
-
+ 
                             let dest_file_path = dest_dir.join(&format!("{}.mp3", media.file_stem()));
                             if !opts.skip_transcode_exists || !dest_file_path.exists() {
                                 let dest_file_path = dest_file_path.to_str().unwrap();
@@ -121,7 +145,7 @@ async fn transcode_game(opts: &Opts) {
 
                                 Command::new("ffmpeg")
                                     .arg("-i")
-                                    .arg(src_file_path)
+                                    .arg(src_file_path_str)
                                     .arg("-acodec")
                                     .arg("libmp3lame")
                                     .arg(dest_file_path)
@@ -142,7 +166,7 @@ async fn transcode_game(opts: &Opts) {
                         //         // ffmpeg -i 2_anim.gif -c vp9 -b:v 0 -crf 26 -pix_fmt yuva420p test001.webm
                         //         Command::new("ffmpeg")
                         //             .arg("-i")
-                        //             .arg(src_file_path)
+                        //             .arg(src_file_path_str)
                         //             .arg("-c")
                         //             .arg("vp9")
                         //             .arg("-b:v")
@@ -168,7 +192,7 @@ async fn transcode_game(opts: &Opts) {
                             //      ffmpeg -i 2_anim.gif -c libx265 -b:v 0 -crf 26 -pix_fmt yuva420p test006.mp4
                             //     Command::new("ffmpeg")
                             //         .arg("-i")
-                            //         .arg(src_file_path)
+                            //         .arg(src_file_path_str)
                             //         .arg("-c")
                             //         .arg("libx265")
                             //         .arg("-vtag")

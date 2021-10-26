@@ -23,7 +23,7 @@ use gloo::events::EventListener;
 use gloo::render::AnimationFrame;
 use gloo_timers::callback::Timeout;
 use js_sys::{ArrayBuffer, DataView, Uint8Array};
-use shared::domain::jig::module::body::legacy::design::{Animation, HideToggle, Sprite as RawSprite};
+use shared::domain::jig::module::body::legacy::design::{Animation, HideToggle, Sticker as RawSticker};
 use std::borrow::Borrow;
 use std::convert::TryInto;
 use std::ops::{Mul, Sub};
@@ -48,13 +48,15 @@ use awsm_web::{
 
 pub struct AnimationPlayer {
     pub base: Rc<Base>,
-    pub raw: RawSprite,
+    pub raw: RawSticker,
     pub size: Mutable<Option<(f64, f64)>>,
     pub controller: Controller,
     pub worker_id: usize,
     pub worker: Worker,
     pub worker_listener: RefCell<Option<EventListener>>,
-    pub ctx: RefCell<Option<CanvasRenderingContext2d>>,
+    pub paint_ctx: RefCell<Option<CanvasRenderingContext2d>>,
+    pub work_ctx: RefCell<Option<CanvasRenderingContext2d>>,
+    pub work_canvas: RefCell<Option<HtmlCanvasElement>>,
     pub blit_time: Cell<f64>,
     pub frames: RefCell<Vec<ImageData>>,
     pub prev_frame_info: RefCell<Option<FrameInfo>>,
@@ -118,7 +120,8 @@ enum GifWorkerEventData {
 static WORKER_ID:AtomicUsize = AtomicUsize::new(0);
 
 impl AnimationPlayer {
-    pub fn new(base: Rc<Base>, raw: RawSprite, animation: Animation) -> Rc<Self> {
+    pub fn new(base: Rc<Base>, raw: RawSticker, animation: Animation) -> Rc<Self> {
+
 
 
         let worker_id = WORKER_ID.fetch_add(1, Ordering::SeqCst);
@@ -134,12 +137,15 @@ impl AnimationPlayer {
         let state = Rc::new(Self{
             base,
             raw,
+            //wait until we have frame_info, even if using the override
             size: Mutable::new(None),
             controller,
             worker,
             worker_id,
             worker_listener: RefCell::new(None),
-            ctx: RefCell::new(None),
+            paint_ctx: RefCell::new(None),
+            work_ctx: RefCell::new(None),
+            work_canvas: RefCell::new(None),
             prev_frame_info: RefCell::new(None), 
             prev_frame_data: RefCell::new(None), 
             frame_infos: RefCell::new(Vec::new()),
@@ -160,10 +166,7 @@ impl AnimationPlayer {
                     let img_data:ImageData = Reflect::get(&data, &JsValue::from_str("img_data")).unwrap_ji().unchecked_into();
                     if id == state.worker_id {
                         state.blit(&img_data);
-
-                        let frame_index = state.controller.curr_frame_index.load(Ordering::SeqCst);
-                        state.frames.borrow_mut().insert(frame_index,img_data);
-
+                        state.frames.borrow_mut().push(img_data);
                         state.clone().next_frame();
                     }
                 } else if let Ok(msg) = serde_wasm_bindgen::from_value::<GifWorkerEvent>(data) {
@@ -174,8 +177,8 @@ impl AnimationPlayer {
 
                                 //this will cause the canvas to be created
                                 //which in turn will make the first frame request
+                                let size = state.raw.override_size.unwrap_or((width, height));
                                 state.size.set(Some((width, height)));
-
                             }
                         },
                         _ => {}
@@ -237,7 +240,7 @@ impl AnimationPlayer {
                 self.blit(img_data);
                 self.clone().next_frame();
             } else {
-                let img_data = self.prep_frame();
+                let img_data = self.prep_cache_frame();
 
                 // manually constructing due to binary buffer
                 let obj = Object::new();
@@ -263,30 +266,25 @@ impl AnimationPlayer {
     }
 
     // based on: https://github.com/movableink/omggif/blob/example-web/example_web/index.html
-    fn prep_frame(&self) -> ImageData {
+    fn prep_cache_frame(&self) -> ImageData {
         //let start = web_sys::window().unwrap_ji().performance().unwrap_ji().now();
-        let ctx = self.ctx.borrow();
+        let ctx = self.work_ctx.borrow();
         let ctx = ctx.as_ref().unwrap_ji();
 
         let (canvas_width, canvas_height) = self.size.get_cloned().unwrap_ji();
 
-        //TODO- it would be great if we could cut out the stashing!
-        //currently it's needed simply so we don't see a blank frame
-        let stash = ctx.get_image_data(0.0, 0.0, canvas_width, canvas_height).unwrap_ji();
-        self.clear_frame();
+        self.clear_cache_frame();
         // this is a fairly expensive operation, takes like 5-15ms
         let buffer = ctx.get_image_data(0.0, 0.0, canvas_width, canvas_height).unwrap_ji();
-
-        ctx.put_image_data(&stash, 0.0, 0.0);
 
         //log::info!("prep time: {}", web_sys::window().unwrap_ji().performance().unwrap_ji().now() - start);
         buffer
     }
 
-    fn clear_frame(&self) {
+    fn clear_cache_frame(&self) {
         self.map_current_frame(|frame_index, frame_info| {
             //let start = web_sys::window().unwrap_ji().performance().unwrap_ji().now();
-            let ctx = self.ctx.borrow();
+            let ctx = self.work_ctx.borrow();
             let ctx = ctx.as_ref().unwrap_ji();
 
             let (canvas_width, canvas_height) = self.size.get_cloned().unwrap_ji();
@@ -338,16 +336,23 @@ impl AnimationPlayer {
             //log::info!("clear time: {}", web_sys::window().unwrap_ji().performance().unwrap_ji().now() - start);
         });
     }
+
+    fn cached_all_frames(&self) -> bool {
+        self.frames.borrow().len() >= self.frame_infos.borrow().len()
+    }
     fn blit(&self, img_data: &ImageData) {
 
         self.map_current_frame(|frame_index, frame_info| {
 
-            if frame_index == 0 || self.controller.playing.load(Ordering::SeqCst) {
+            if !self.cached_all_frames() {
                 //let start = web_sys::window().unwrap_ji().performance().unwrap_ji().now();
-                let ctx = self.ctx.borrow();
+                let ctx = self.work_ctx.borrow();
                 let ctx = ctx.as_ref().unwrap_ji();
 
                 let (canvas_width, canvas_height) = self.size.get_cloned().unwrap_ji();
+                if frame_index == 0 {
+                    ctx.clear_rect(0.0, 0.0, canvas_width, canvas_height);
+                }
 
                 //ctx.clear_rect(0.0, 0.0, canvas_width, canvas_height);
                 ctx.put_image_data_with_dirty_x_and_dirty_y_and_dirty_width_and_dirty_height(
@@ -359,9 +364,23 @@ impl AnimationPlayer {
                     frame_info.width as f64,
                     frame_info.height as f64
                 ).unwrap_ji();
-
-                //log::info!("blit time: {}", web_sys::window().unwrap_ji().performance().unwrap_ji().now() - start);
             }
+
+            let ctx = self.paint_ctx.borrow();
+            let ctx = ctx.as_ref().unwrap_ji();
+
+            if frame_index == 0 || self.controller.playing.load(Ordering::SeqCst) {
+                ctx.put_image_data_with_dirty_x_and_dirty_y_and_dirty_width_and_dirty_height(
+                    &img_data,
+                    0.0,
+                    0.0,
+                    frame_info.x as f64, 
+                    frame_info.y as f64,
+                    frame_info.width as f64,
+                    frame_info.height as f64
+                ).unwrap_ji();
+            }
+            //log::info!("blit time: {}", web_sys::window().unwrap_ji().performance().unwrap_ji().now() - start);
         });
     }
 }
@@ -390,13 +409,13 @@ pub struct Controller {
 }
 
 impl Controller {
-    pub fn new(base: Rc<Base>, raw: &RawSprite, anim: Animation) -> Self {
+    pub fn new(base: Rc<Base>, raw: &RawSticker, anim: Animation) -> Self {
 
         Self {
             base,
             hidden: Mutable::new(raw.hide),
             has_toggled_once: AtomicBool::new(false),
-            playing: AtomicBool::new(!anim.tap),
+            playing: AtomicBool::new(!raw.hide && !anim.tap),
             curr_frame_index: AtomicUsize::new(0),
             anim,
             hide_toggle: raw.hide_toggle,
@@ -413,25 +432,21 @@ impl Controller {
                 self.hidden.set(!val);
             }
         }
-
-        if self.anim.tap {
-            //if the animation is still loading there will be a small visual glitch
-            //maybe force-show the first frame before just setting the index?
-            //worth it? 
-            self.curr_frame_index.store(0, Ordering::SeqCst);
-            self.playing.store(!self.playing.load(Ordering::SeqCst), Ordering::SeqCst);
-        }
-
         self.has_toggled_once.store(true, Ordering::SeqCst);
 
-        match (self.playing.load(Ordering::SeqCst), self.audio_filename.as_ref()) {
-            (true, Some(audio_filename)) => {
+        let playing = if self.hidden.get() { false } else { !self.playing.load(Ordering::SeqCst) };
+
+        self.playing.store(playing, Ordering::SeqCst);
+
+        if playing {
+            self.curr_frame_index.store(0, Ordering::SeqCst);
+            if let Some(audio_filename) = self.audio_filename.as_ref() {
                 AUDIO_MIXER.with(|mixer| {
                     mixer.pause_all();
                     mixer.play_oneshot(AudioSource::Url(self.base.media_url(&audio_filename)))
                 });
-            },
-            _ => {}
+            }
         }
+
     }
 }

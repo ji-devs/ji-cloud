@@ -29,7 +29,9 @@ pub struct PathPoint {
     #[serde(rename="type")]
     pub kind: PathElementKind,
 
+    #[serde(default)]
     pub x: f64,
+    #[serde(default)]
     pub y: f64,
 
     #[serde(default)]

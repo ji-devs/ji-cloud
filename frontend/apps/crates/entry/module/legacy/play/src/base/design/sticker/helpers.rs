@@ -2,10 +2,6 @@
 use crate::base::state::Base;
 use dominator::{clone, html, with_node, Dom};
 use futures_signals::signal::{Mutable, Signal, SignalExt};
-
-use shared::domain::jig::module::body::legacy::design::{
-    Sprite as RawSprite
-};
 use std::{borrow::Borrow, rc::Rc, cell::RefCell};
 use utils::{
     math::{bounds, mat4::Matrix4},

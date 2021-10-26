@@ -1,7 +1,7 @@
 use futures_signals::signal::Mutable;
 use gloo::events::EventListener;
 use shared::domain::jig::module::body::legacy::design::{
-    Sprite as RawSprite,
+    Sticker as RawSticker,
     Animation
 };
 use std::sync::atomic::{AtomicUsize, Ordering};
@@ -17,13 +17,13 @@ use serde::{Serialize, Deserialize};
 use super::animation::AnimationPlayer;
 use super::image::ImagePlayer;
 
-pub enum Sprite {
+pub enum Sticker {
     Image(Rc<ImagePlayer>),
     Animation(Rc<AnimationPlayer>),
 }
 
-impl Sprite {
-    pub fn new(base: Rc<Base>, raw: RawSprite) -> Self {
+impl Sticker {
+    pub fn new(base: Rc<Base>, raw: RawSticker) -> Self {
         match raw.animation.clone() {
             Some(animation) => {
                 Self::Animation(AnimationPlayer::new(base, raw, animation))

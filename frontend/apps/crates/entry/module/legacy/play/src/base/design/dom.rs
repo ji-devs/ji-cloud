@@ -2,10 +2,6 @@ use super::styles;
 use crate::base::state::Base;
 use dominator::{clone, html, with_node, Dom};
 use futures_signals::signal::{Mutable, Signal, SignalExt};
-
-use shared::domain::jig::module::body::legacy::design::{
-    Sticker
-};
 use std::rc::Rc;
 use utils::{
     math::{bounds, mat4::Matrix4},
@@ -14,7 +10,7 @@ use utils::{
     resize::resize_info_signal,
 };
 use awsm_web::canvas::{get_2d_context, CanvasToBlobFuture};
-use super::sprite::Sprite;
+use super::sticker::Sticker;
 
 impl Base {
     pub fn render_design(self: Rc<Self>) -> Dom {
@@ -33,13 +29,7 @@ impl Base {
                     true
                 })
                 .map(|(index, sticker)| {
-                    match sticker {
-                        Sticker::Sprite(sprite) => Sprite::new(self.clone(), sprite.clone()).render(),
-                        Sticker::Text(_text) => {
-                            //TODO
-                            html!("empty-text")
-                        }
-                    }
+                    Sticker::new(self.clone(), sticker.clone()).render()
                 })
             )
         })

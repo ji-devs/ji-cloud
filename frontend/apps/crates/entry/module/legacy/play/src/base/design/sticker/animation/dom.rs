@@ -1,10 +1,12 @@
 use crate::base::state::Base;
 use dominator::{clone, html, with_node, Dom};
 use futures_signals::signal::{Mutable, Signal, SignalExt};
-
+use wasm_bindgen::prelude::*;
+use wasm_bindgen::JsCast;
 use shared::domain::jig::module::body::legacy::design::{
-    Sprite as RawSprite
+    Sticker as RawSticker
 };
+use web_sys::HtmlCanvasElement;
 use std::{borrow::Borrow, rc::Rc, cell::RefCell};
 use utils::{
     math::{bounds, mat4::Matrix4},
@@ -60,7 +62,13 @@ impl AnimationPlayer {
 
                         canvas.set_width(natural_width as u32);
                         canvas.set_height(natural_height as u32);
-                        *state.ctx.borrow_mut() = Some(get_2d_context(&canvas, None).unwrap_ji());
+                        *state.paint_ctx.borrow_mut() = Some(get_2d_context(&canvas, None).unwrap_ji());
+
+                        let canvas:HtmlCanvasElement = web_sys::window().unwrap_ji().document().unwrap_ji().create_element("canvas").unwrap_ji().unchecked_into();
+                        canvas.set_width(natural_width as u32);
+                        canvas.set_height(natural_height as u32);
+                        *state.work_ctx.borrow_mut() = Some(get_2d_context(&canvas, None).unwrap_ji());
+                        *state.work_canvas.borrow_mut() = Some(canvas);
 
                         state.request_frame();
                     }))

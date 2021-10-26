@@ -4,7 +4,7 @@ use utils::prelude::*;
 use web_sys::Worker;
 use std::{borrow::BorrowMut, cell::RefCell, collections::HashMap, hash::Hash, rc::Rc, sync::atomic::{AtomicUsize, Ordering}};
 use futures_signals::signal::Mutable;
-use super::design::sprite::animation::WorkerKind;
+use super::design::sticker::animation::WorkerKind;
 use awsm_web::loaders::fetch::fetch_url;
 
 pub struct Base {

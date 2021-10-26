@@ -14,30 +14,7 @@ pub struct Design {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub enum Sticker {
-    /// sprites
-    Sprite(Sprite),
-    /// text
-    Text(Text),
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Text {
-    pub html: String,
-    pub width: f64,
-    pub height: f64,
-    pub transform_matrix: [f64; 16],
-    /// start out hidden
-    pub hide: bool,
-    /// toggle hidden state
-    pub hide_toggle: Option<HideToggle>,
-    // associated audio
-    pub audio_filename: Option<String>,
-}
-
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Sprite {
+pub struct Sticker {
     pub filename: String,
     pub transform_matrix: [f64; 16],
     /// hide and hide_toggle are mapped from the top sections 
@@ -45,12 +22,19 @@ pub struct Sprite {
     /// start out hidden
     pub hide: bool,
     /// toggle hidden state
+    #[serde(skip_serializing_if="Option::is_none")]
     pub hide_toggle: Option<HideToggle>,
 
     /// animation options are mapped from the bottom animation section
+    #[serde(skip_serializing_if="Option::is_none")]
     pub animation: Option<Animation>,
     // associated audio
+    #[serde(skip_serializing_if="Option::is_none")]
     pub audio_filename: Option<String>,
+
+    /// override the size
+    #[serde(skip_serializing_if="Option::is_none")]
+    pub override_size: Option<(f64, f64)>,
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone, Copy)]
