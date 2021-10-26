@@ -7,15 +7,12 @@ use dominator::clone;
 use futures::future::join;
 use futures_signals::signal_vec::MutableVec;
 use shared::api::endpoints::image;
-use shared::domain::image::ImageId;
 use shared::domain::image::{
     recent::{UserRecentImageListRequest, UserRecentImageUpsertRequest},
     user::UserImageCreateRequest,
 };
-use shared::domain::media::WebMediaUrlCreateRequest;
 use shared::domain::meta::ImageTagIndex;
 use shared::domain::search::WebImageSearchQuery;
-use shared::media::MediaKind;
 use shared::{
     api::{endpoints, ApiEndpoint},
     domain::{
@@ -27,6 +24,7 @@ use shared::{
     media::MediaLibrary,
 };
 use url::Url;
+use utils::web_image_resolver::ImageOrWeb;
 use std::rc::Rc;
 use std::str::FromStr;
 use utils::prelude::*;
@@ -42,29 +40,14 @@ impl State {
 }
 
 pub fn on_web_image_click(state: Rc<State>, url: &str) {
+    // TODO: why does the search request return strings but url is required here?
     let url = Url::from_str(url).unwrap_ji();
 
     state.loader.load(clone!(state => async move {
-        let req = WebMediaUrlCreateRequest {
-            url
-        };
 
-        match endpoints::media::Create::api_with_auth(Some(req)).await {
-            Err(_) => todo!(),
-            Ok(res) => {
-                if let MediaKind::Image(_) = res.kind {
+        let image = ImageOrWeb::web_to_image(url).await;
+        state.set_selected(image);
 
-                    let image = Image {
-                        id: ImageId(res.id),
-                        lib: MediaLibrary::Web,
-                    };
-                    state.set_selected(image);
-
-                } else {
-                    unreachable!("Images only here");
-                }
-            },
-        }
     }));
 }
 
