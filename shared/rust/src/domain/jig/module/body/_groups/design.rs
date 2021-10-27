@@ -160,7 +160,7 @@ pub enum TraceShape {
     /// explicit path commands
     /// corresponds to SVG spec: https://svgwg.org/svg2-draft/paths.html#TheDProperty
     /// the second parameter indicates whether it's absolute (true) or relative (false)
-    PathCommands(Vec<(PathCommand, bool)>)
+    PathCommands(Vec<(PathCommand, bool)>),
 }
 
 #[allow(missing_docs)]
@@ -186,5 +186,5 @@ pub enum PathCommand {
     /// https://svgwg.org/svg2-draft/paths.html#PathDataQuadraticBezierCommands
     SmoothQuadCurveTo(f64, f64),
     /// https://svgwg.org/svg2-draft/paths.html#PathDataEllipticalArcCommands
-    ArcTo(f64, f64, f64, f64, f64, f64, f64)
+    ArcTo(f64, f64, f64, f64, f64, f64, f64),
 }

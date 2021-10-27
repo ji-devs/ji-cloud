@@ -30,7 +30,7 @@ pub struct SaySomething {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Soundboard {
-    pub items: Vec<SoundboardItem>
+    pub items: Vec<SoundboardItem>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
