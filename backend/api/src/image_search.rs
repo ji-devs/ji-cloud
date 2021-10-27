@@ -4,8 +4,8 @@ use shared::domain::search::{WebImageSearchItem, WebImageSearchResponse};
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct Image {
-    thumbnail_url: String,
-    content_url: String,
+    thumbnail_url: url::Url,
+    content_url: url::Url,
     name: String,
 }
 
