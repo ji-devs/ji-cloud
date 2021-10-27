@@ -29,7 +29,9 @@ impl ShapeStyle {
             }
         }
 
-        if self.kind.is_some() && self.state.is_some() {
+        // TODO- kinda weird that the stroke is set above and here..
+        // might need rethinking to consolidate better
+        if self.mode != Some(ShapeStyleMode::Transparent) && self.kind.is_some() && self.state.is_some() {
             let state = self.state.unwrap_ji();
 
             classes.push(match self.kind.unwrap_ji() {
@@ -71,7 +73,7 @@ impl ShapeStyle {
     }
 }
 
-pub(super) static SVG_CLASS: Lazy<String> = Lazy::new(|| {
+pub static SVG_CLASS: Lazy<String> = Lazy::new(|| {
     class! {
         .style("position", "absolute")
         .style("top", "0")

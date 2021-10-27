@@ -29,7 +29,11 @@ impl ShapeStyleVar<PlaceholderShapeStyleSignal> {
 #[derive(Clone, Copy, Eq, PartialEq, Debug)]
 pub struct ShapeStyle {
     pub interactive: bool,
+    // if none or transparent then fill-opacity will be 0
     pub mode: Option<ShapeStyleMode>,
+
+    // both of these need to be set, and mode can't be transparent
+    // in order to see the stroke  
     pub kind: Option<TraceKind>,
     pub state: Option<ShapeStyleState>,
 }

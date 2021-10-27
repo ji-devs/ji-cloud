@@ -4,7 +4,7 @@ use utils::prelude::*;
 use web_sys::Worker;
 use std::{borrow::BorrowMut, cell::RefCell, collections::HashMap, hash::Hash, rc::Rc, sync::atomic::{AtomicUsize, Ordering}};
 use futures_signals::signal::Mutable;
-use super::design::sticker::animation::WorkerKind;
+use super::{actions::StageClick, design::sticker::animation::WorkerKind};
 use awsm_web::loaders::fetch::fetch_url;
 
 pub struct Base {
@@ -18,7 +18,8 @@ pub struct Base {
     pub slide: Slide,
     pub workers: RefCell<HashMap<WorkerKind, WorkerList>>,
     pub bg_click_listener: RefCell<Option<Box<dyn FnMut()>>>,
-    pub start_listeners: RefCell<Vec<Box<dyn FnMut()>>>
+    pub start_listeners: RefCell<Vec<Box<dyn FnMut()>>>,
+    pub stage_click_listeners: RefCell<Vec<Box<dyn FnMut(StageClick)>>>
 }
 
 #[derive(Default)]
@@ -76,7 +77,8 @@ impl Base {
             slide,
             workers: RefCell::new(HashMap::new()),
             bg_click_listener: RefCell::new(None),
-            start_listeners: RefCell::new(Vec::new())
+            start_listeners: RefCell::new(Vec::new()),
+            stage_click_listeners: RefCell::new(Vec::new())
         });
 
         /// TODO- set after done preloading
@@ -94,6 +96,10 @@ impl Base {
 
     pub fn insert_start_listener(&self, f: impl FnMut() + 'static) {
         self.start_listeners.borrow_mut().push(Box::new(f));
+    }
+
+    pub fn insert_stage_click_listener(&self, f: impl FnMut(StageClick) + 'static) {
+        self.stage_click_listeners.borrow_mut().push(Box::new(f));
     }
 
     pub fn activity_media_url<T: AsRef<str>>(&self, path:T) -> String {

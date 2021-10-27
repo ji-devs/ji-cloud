@@ -3,10 +3,7 @@ use futures_signals::signal::Mutable;
 use std::rc::Rc;
 
 use crate::transform::state::{TransformCallbacks, TransformState};
-use shared::domain::jig::module::body::{
-    Audio, Transform,
-    _groups::design::{Trace as RawTrace, TraceKind, TraceShape as RawTraceShape},
-};
+use shared::domain::jig::module::body::{Audio, Transform, _groups::design::{PathCommand, Trace as RawTrace, TraceKind, TraceShape as RawTraceShape}};
 
 use utils::{math::BoundsF64, prelude::*};
 
@@ -77,6 +74,7 @@ impl crate::traces::utils::TraceExt for DrawTrace {
         };
 
         match &*self.shape.lock_ref() {
+            TraceShape::PathCommands(commands) => calc_bounds(ShapeRef::PathCommands(&commands.lock_ref()), offset),
             TraceShape::Path(path) => calc_bounds(ShapeRef::Path(&path.lock_ref()), offset),
 
             TraceShape::Ellipse(radius_x, radius_y) => {
@@ -94,6 +92,8 @@ pub enum TraceShape {
     Ellipse(f64, f64),
     /// points - all rendered at once so no benefit to MutableVec
     Path(Mutable<Vec<(f64, f64)>>),
+    /// commands - all rendered at once so no benefit to MutableVec
+    PathCommands(Mutable<Vec<(PathCommand, bool)>>),
 }
 
 impl From<RawTraceShape> for TraceShape {
@@ -102,6 +102,7 @@ impl From<RawTraceShape> for TraceShape {
             RawTraceShape::Rect(width, height) => Self::Rect(width, height),
             RawTraceShape::Ellipse(radius_x, radius_y) => Self::Ellipse(radius_x, radius_y),
             RawTraceShape::Path(path) => Self::Path(Mutable::new(path)),
+            RawTraceShape::PathCommands(commands) => Self::PathCommands(Mutable::new(commands)),
         }
     }
 }
@@ -112,6 +113,7 @@ impl From<TraceShape> for RawTraceShape {
             TraceShape::Rect(width, height) => RawTraceShape::Rect(width, height),
             TraceShape::Ellipse(radius_x, radius_y) => RawTraceShape::Ellipse(radius_x, radius_y),
             TraceShape::Path(path) => RawTraceShape::Path(path.lock_ref().to_vec()),
+            TraceShape::PathCommands(commands) => RawTraceShape::PathCommands(commands.lock_ref().to_vec()),
         }
     }
 }

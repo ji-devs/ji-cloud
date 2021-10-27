@@ -2,7 +2,7 @@ use std::f64::consts::PI;
 use utils::{math::quat, prelude::*, resize::ResizeInfo};
 
 use super::utils::*;
-use shared::domain::jig::module::body::_groups::design::{Trace, TraceShape};
+use shared::domain::jig::module::body::_groups::design::{Trace, TraceShape, PathCommand};
 use web_sys::CanvasRenderingContext2d;
 
 pub fn draw_trace(ctx: &CanvasRenderingContext2d, resize_info: &ResizeInfo, trace: &Trace) {
@@ -36,12 +36,15 @@ pub fn draw_trace(ctx: &CanvasRenderingContext2d, resize_info: &ResizeInfo, trac
         match &trace.shape {
             TraceShape::Rect(width, height) => {
                 draw_rect(&ctx, &resize_info, *width, *height);
-            }
+            },
             TraceShape::Ellipse(radius_x, radius_y) => {
                 draw_ellipse(&ctx, &resize_info, *radius_x, *radius_y);
-            }
+            },
             TraceShape::Path(points) => {
                 draw_path(&ctx, &resize_info, &points);
+            },
+            TraceShape::PathCommands(commands) => {
+                draw_path_commands(&ctx, &resize_info, &commands);
             }
         }
         ctx.close_path();
@@ -50,6 +53,12 @@ pub fn draw_trace(ctx: &CanvasRenderingContext2d, resize_info: &ResizeInfo, trac
     }
 }
 
+pub fn draw_path_commands(ctx: &CanvasRenderingContext2d, resize_info: &ResizeInfo, commands: &[(PathCommand, bool)]) {
+    for (command, absolute) in commands {
+        let command = denormalize_command(command, resize_info);
+        unimplemented!("TODO!")
+    }
+}
 pub fn draw_path(ctx: &CanvasRenderingContext2d, resize_info: &ResizeInfo, points: &[(f64, f64)]) {
     ctx.move_to(0.0, 0.0);
 

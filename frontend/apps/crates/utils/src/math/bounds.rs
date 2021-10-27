@@ -240,6 +240,19 @@ impl BoundsF64 {
         (self.middle_horizontal(), self.middle_vertical())
     }
 
+    pub fn contains_point(&self, x: f64, y: f64) -> bool {
+
+        let contains_horiz = self.left() <= x && self.right() >= x;
+        let contains_vert = {
+            if self.invert_y {
+                self.top() <= y && self.bottom() >= y 
+            } else {
+                self.top() >= y && self.bottom() <= y 
+            }
+        };
+
+        contains_horiz && contains_vert
+    }
     pub fn contains(&self, other: Self) -> bool {
         if self.invert_y != other.invert_y {
             log::warn!("TODO - handle a case of different coordinate spaces!");
@@ -262,6 +275,7 @@ impl BoundsF64 {
         self.contains_corner(other) || other.contains_corner(*self)
     }
 
+    // contains any of the corners
     pub fn contains_corner(&self, other: Self) -> bool {
         if self.invert_y != other.invert_y {
             log::warn!("TODO - handle a case of different coordinate spaces!");

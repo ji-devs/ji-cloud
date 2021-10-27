@@ -40,7 +40,7 @@ where
 
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct Activity {
     #[serde(rename="filePathIntroRecording")]
     pub intro_audio: String,
@@ -59,7 +59,7 @@ pub struct Activity {
 //Deserializing in place doesn't work since the parent object
 //can be parsed in any order
 //and so there's no way to depend on ActivityKind being read/set
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct ActivitySettings {
 
     /// if set- advances automatically to next page

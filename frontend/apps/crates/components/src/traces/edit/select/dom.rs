@@ -130,9 +130,13 @@ where
             .map(move |t| (t, trace_size)),
     ));
     match trace.shape {
+        TraceShape::PathCommands(ref commands) => {
+            svg::render_path_commands(shape_style, &resize_info, transform_size, &commands, callbacks)
+        },
+
         TraceShape::Path(ref path) => {
             svg::render_path(shape_style, &resize_info, transform_size, &path, callbacks)
-        }
+        },
 
         TraceShape::Rect(width, height) => svg::render_rect(
             shape_style,
