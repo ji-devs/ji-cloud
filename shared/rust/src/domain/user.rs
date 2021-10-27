@@ -218,6 +218,9 @@ pub enum VerifyResetEmailRequest {
     /// Resend a confirmation link if a verification is in progress
     #[serde(rename_all = "camelCase")]
     Resend {
+        /// paseto token
+        paseto_token: String,
+
         /// The email to send a verification link to.
         email: String,
     },

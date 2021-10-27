@@ -105,7 +105,7 @@ impl ApiEndpoint for ResetEmail {
     type Req = ResetEmailRequest;
     type Res = ResetEmailResponse;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/user/reset-email";
+    const PATH: &'static str = "/v1/user/me/reset-email";
     const METHOD: Method = Method::Patch;
 }
 

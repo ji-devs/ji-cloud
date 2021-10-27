@@ -2013,6 +2013,20 @@
       "nullable": []
     }
   },
+  "5d82cd908ef70906813f2adebbf42094b5edaf3d3203d88b2cdd4c3e4d790563": {
+    "query": "\n        update user_email \n        set email = $3::text\n        where user_id = $1 and email = $2::text\n        ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "5e4bfa7c86f036663500b75df28a943c55cbc671a2dd296514568680f1b3733f": {
     "query": "\nselect id,\n       kind as \"kind: MediaKind\",\n       created_at,\n       updated_at,\n       array(select media_url from web_media_library_url where media_id = id) as \"urls!\"\nfrom web_media_library\nwhere id = (select media_id from web_media_library_url where media_url = $1)\n",
     "describe": {

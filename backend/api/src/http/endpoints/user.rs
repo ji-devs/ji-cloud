@@ -4,6 +4,7 @@ use actix_web::{
     web::{Bytes, Data, Json, Query, ServiceConfig},
     HttpResponse,
 };
+use anyhow::anyhow;
 use argon2::{password_hash::SaltString, Argon2, PasswordHasher};
 use chrono::{Duration, Utc};
 use core::{config::IMAGE_BODY_SIZE_LIMIT, settings::RuntimeSettings};
@@ -569,17 +570,7 @@ fn validate_patch_profile_req(
 
 #[derive(Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
-struct SendEmailToken<'a> {
-    /// The new email instance this token is for.
-    pub user_email: &'a str,
-
-    /// The uuid instance this token is for.
-    pub user_id: Uuid,
-}
-
-#[derive(Deserialize, Serialize)]
-#[serde(rename_all = "camelCase")]
-struct EmailToken {
+pub struct EmailToken {
     /// The new email instance this token is for.
     pub email: String,
 
@@ -597,36 +588,20 @@ async fn verify_email_reset(
     let req = req.into_inner();
 
     match req {
-        VerifyResetEmailRequest::Resend { email } => {
+        VerifyResetEmailRequest::Resend {
+            paseto_token,
+            email,
+        } => {
             let mut txn = db.begin().await?;
 
-            // todo: make this more future proof and exhaustive.
-
-            let user = sqlx::query!(
-                // this resends to the old email?
-                r#"
-select user_id
-from user_auth_basic
-where
-    email = $1::text and
-    not exists(select 1 from user_email where email = $1)
-"#,
-                email
-            )
-            .fetch_optional(&mut txn)
-            .await?;
-
-            let user = match user {
-                Some(user) => user,
-                None => return Ok(HttpResponse::NoContent().into()),
-            };
+            let token: EmailToken = validate_email_token(paseto_token, &settings.token_secret)?;
 
             // make sure they can't use the old link anymore
-            db::session::clear_any(&mut txn, user.user_id, SessionMask::CHANGE_EMAIL).await?;
+            db::session::clear_any(&mut txn, token.user_id, SessionMask::CHANGE_EMAIL).await?;
 
             send_reset_email(
                 &mut txn,
-                user.user_id,
+                token.user_id,
                 email,
                 &mail,
                 &settings.remote_target().pages_url(),
@@ -652,25 +627,12 @@ where
         } => {
             let mut txn = db.begin().await?;
 
-            log::warn!("Before validating token");
-
-            let token = validate_token(&paseto_token, None, &settings.token_secret)
-                .map_err(|_| error::VerifyEmail::Email(error::Email::Empty))?;
-
-            log::warn!("Before instance");
-
-            // New Email
-            let (new_email, user_id) = (
-                token["sub"].to_string(),
-                Uuid::parse_str(&token["id"].to_string())?,
-            );
-
-            log::warn!("Before email check");
+            let token: EmailToken = validate_email_token(paseto_token, &settings.token_secret)?;
 
             // Check if email exists
             let email = sqlx::query!(
                 r#"select email::text as "email!" from user_email where user_id = $1 for share"#,
-                user_id
+                token.user_id
             )
             .fetch_optional(&mut txn)
             .await?;
@@ -680,12 +642,8 @@ where
                 None => return Err(anyhow::anyhow!("Handle no confirmed email").into()),
             };
 
-            log::warn!("Before before clearing session");
-
             // make sure they can't use the link, now that they're email has changed.
-            db::session::clear_any(&mut txn, user_id, SessionMask::CHANGE_EMAIL).await?;
-
-            log::warn!("Before before user_auth_basic update");
+            db::session::clear_any(&mut txn, token.user_id, SessionMask::CHANGE_EMAIL).await?;
 
             sqlx::query!(
                 r#"
@@ -693,17 +651,28 @@ where
         set email = $3::text
         where user_id = $1 and email = $2::text
         "#,
-                user_id,
+                token.user_id,
                 &email,
-                new_email
+                token.email
             )
             .execute(&mut txn)
             .await?;
 
-            log::warn!("Before before force logout");
+            sqlx::query!(
+                r#"
+        update user_email 
+        set email = $3::text
+        where user_id = $1 and email = $2::text
+        "#,
+                token.user_id,
+                &email,
+                token.email
+            )
+            .execute(&mut txn)
+            .await?;
 
             if force_logout {
-                sqlx::query!("delete from session where user_id = $1", &user_id)
+                sqlx::query!("delete from session where user_id = $1", &token.user_id)
                     .execute(&mut txn)
                     .await?;
             }
@@ -713,6 +682,24 @@ where
             Ok(HttpResponse::NoContent().finish())
         }
     }
+}
+
+pub fn validate_email_token(
+    paseto_token: String,
+    token_key: &[u8; 32],
+) -> Result<EmailToken, error::VerifyEmail> {
+    let token = validate_token(&paseto_token, None, token_key)
+        .map_err(|_| error::VerifyEmail::Email(error::Email::Empty))?;
+
+    let (user_id, new_email) = (
+        serde_json::from_value::<Uuid>(token["id"].clone())?,
+        token["sub"].to_string(),
+    );
+
+    Ok(EmailToken {
+        email: new_email,
+        user_id,
+    })
 }
 
 /// Update your profile.
