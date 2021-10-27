@@ -166,6 +166,8 @@ pub fn on_iframe_message(state: Rc<State>, message: ModuleToJigPlayerMessage) {
         ModuleToJigPlayerMessage::Stop => {
             state.timer.set(None);
         }
+        ModuleToJigPlayerMessage::JumpToIndex(_) => todo!(),
+        ModuleToJigPlayerMessage::JumpToId(_) => todo!(),
     };
 }
 
