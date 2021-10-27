@@ -28,7 +28,7 @@ use components::{
             Anchor, ContentAnchor, MoveStrategy, State as TooltipState, TooltipData, TooltipError,
             TooltipTarget,
         },
-    }
+    },
 };
 use std::rc::Rc;
 

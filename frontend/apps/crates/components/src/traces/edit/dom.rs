@@ -13,7 +13,7 @@ impl TracesEdit {
                         Some(TracesEdit::render_selectable(state.clone()))
                     },
                     TracesEditPhase::Draw(draw) => {
-                        Some(TracesEdit::render_draw(state.clone(), draw.clone()))
+                        Some(TracesEdit::render_draw(state.clone(), draw))
                     }
                 }
             })))

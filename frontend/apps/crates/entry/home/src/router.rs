@@ -19,7 +19,7 @@ impl Router {
 
     fn dom_signal() -> impl Signal<Item = Option<Dom>> {
         dominator::routing::url().signal_ref(|url| {
-            let route = Route::from_url(&url);
+            let route = Route::from_url(url);
             match route {
                 Route::Home(route) => match route {
                     HomeRoute::Home => {

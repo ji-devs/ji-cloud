@@ -83,7 +83,7 @@ impl Tab {
 
                 Self::Image(Rc::new(state))
             }
-            MenuTabKind::Text => Self::Text(Rc::new(make_single_list(base.clone()))),
+            MenuTabKind::Text => Self::Text(Rc::new(make_single_list(base))),
 
             _ => unimplemented!("unsupported tab kind!"),
         }
@@ -116,7 +116,7 @@ fn make_single_list<RawData: RawDataExt, E: ExtraExt>(
         clone!(base => move |list| {
             base.replace_single_list(list);
         }),
-        |index| config::get_single_list_init_word(index),
+        config::get_single_list_init_word,
     );
 
     let options = SingleListOptions {
@@ -139,7 +139,7 @@ fn make_dual_list<RawData: RawDataExt, E: ExtraExt>(
         clone!(base => move |list| {
             base.replace_dual_list(list);
         }),
-        |row, index| config::get_dual_list_init_word(row, index),
+        config::get_dual_list_init_word,
         clone!(mode => move |side| {
             strings::STR_HEADER(side, mode).to_string()
         }),

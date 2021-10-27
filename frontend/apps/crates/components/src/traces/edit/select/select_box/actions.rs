@@ -12,7 +12,7 @@ impl SelectBox {
     pub fn reset_bounds(&self, resize_info: &ResizeInfo) {
         self.bounds.set(self.elem.borrow().as_ref().map(|elem| {
             let rect = elem.get_bounding_client_rect();
-            BoundsF64::new_from_dom_normalized(&rect, &resize_info)
+            BoundsF64::new_from_dom_normalized(&rect, resize_info)
         }));
     }
 

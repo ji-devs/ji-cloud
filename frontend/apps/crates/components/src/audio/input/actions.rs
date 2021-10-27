@@ -59,7 +59,7 @@ pub async fn file_change(state: Rc<AudioInput>, file: File) {
 
     let err = {
         match api_with_auth_abortable::<CreateResponse<AudioId>, EmptyError, ()>(
-            &endpoints::audio::user::Create::PATH,
+            endpoints::audio::user::Create::PATH,
             endpoints::audio::user::Create::METHOD,
             Some(&*state.aborter.borrow()),
             None,

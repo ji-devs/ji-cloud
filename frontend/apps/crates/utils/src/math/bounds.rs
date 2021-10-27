@@ -54,7 +54,7 @@ pub fn oobb_transform_px(
     size: Option<(f64, f64)>,
     resize_info: &ResizeInfo,
 ) -> OobbF64 {
-    let bounds = aabb_no_rotation_transform_px(coords_in_center, &transform, size, &resize_info);
+    let bounds = aabb_no_rotation_transform_px(coords_in_center, transform, size, resize_info);
 
     let invert_y = bounds.invert_y;
 
@@ -190,9 +190,9 @@ impl BoundsF64 {
     pub fn set_invert_y(&mut self, invert_y: bool) {
         if self.invert_y != invert_y {
             if invert_y {
-                self.y = self.y - self.height
+                self.y -= self.height
             } else {
-                self.y = self.y + self.height
+                self.y += self.height
             }
             self.invert_y = invert_y;
         }
@@ -241,13 +241,12 @@ impl BoundsF64 {
     }
 
     pub fn contains_point(&self, x: f64, y: f64) -> bool {
-
         let contains_horiz = self.left() <= x && self.right() >= x;
         let contains_vert = {
             if self.invert_y {
-                self.top() <= y && self.bottom() >= y 
+                self.top() <= y && self.bottom() >= y
             } else {
-                self.top() >= y && self.bottom() <= y 
+                self.top() >= y && self.bottom() <= y
             }
         };
 
@@ -320,14 +319,14 @@ impl BoundsF64 {
     }
     pub fn denormalize_signal(&self) -> impl Signal<Item = Self> {
         resize_info_signal().map({
-            let _self = self.clone();
+            let _self = *self;
 
             move |resize_info| _self.denormalize(&resize_info)
         })
     }
     pub fn denormalize_fixed_signal(&self) -> impl Signal<Item = Self> {
         resize_info_signal().map({
-            let _self = self.clone();
+            let _self = *self;
 
             move |resize_info| {
                 let mut bounds = _self.denormalize(&resize_info);

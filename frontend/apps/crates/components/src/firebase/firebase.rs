@@ -24,7 +24,7 @@ pub fn wait_for_upload_ready(
         Some(abort_controller) => waitForUploadReady(
             &media_id.to_string(),
             library.to_str(),
-            Some(&*abort_controller),
+            Some(*abort_controller),
         ),
         None => waitForUploadReady(&media_id.to_string(), library.to_str(), None),
     };

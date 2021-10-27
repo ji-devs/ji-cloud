@@ -4,7 +4,6 @@ use std::sync::atomic::Ordering;
 
 use crate::base::state::Phase;
 use components::module::_common::play::prelude::*;
-use futures_signals::signal::SignalExt;
 use rand::prelude::*;
 use std::convert::TryInto;
 use std::rc::Rc;

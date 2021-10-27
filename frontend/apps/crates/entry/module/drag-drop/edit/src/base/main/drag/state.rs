@@ -5,10 +5,7 @@ use std::rc::Rc;
 use utils::drag::Drag;
 
 use components::stickers::dom::TransformOverride;
-use futures_signals::{
-    signal::{Mutable, SignalExt},
-    signal_vec::SignalVecExt,
-};
+use futures_signals::signal::Mutable;
 
 pub struct MainDrag {
     pub base: Rc<Base>,

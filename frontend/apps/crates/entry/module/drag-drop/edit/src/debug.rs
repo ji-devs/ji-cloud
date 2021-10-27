@@ -1,5 +1,3 @@
-use futures_signals::{signal::SignalExt, signal_vec::SignalVecExt};
-
 use components::stickers::{sprite::ext::*, text::ext::*};
 use components::tabs::MenuTabKind;
 use once_cell::sync::OnceCell;
@@ -29,9 +27,9 @@ use utils::prelude::*;
 use uuid::Uuid;
 pub static SETTINGS: OnceCell<DebugSettings> = OnceCell::new();
 
-const IMAGE_UUID: &'static str = "f2e63cf2-ee11-11eb-9b68-4bf1f063ab1c";
+const IMAGE_UUID: &str = "f2e63cf2-ee11-11eb-9b68-4bf1f063ab1c";
 
-pub const DEBUG_TEXT: &'static str = "Debug Text";
+pub const DEBUG_TEXT: &str = "Debug Text";
 
 #[derive(Debug, Default)]
 pub struct DebugSettings {
@@ -105,7 +103,7 @@ impl DebugSettings {
                                         },
                                         InitSticker::Sprite => {
                                             let mut sprite = Sprite::new(Image {
-                                                id: ImageId(Uuid::parse_str(IMAGE_UUID).unwrap_ji()), 
+                                                id: ImageId(Uuid::parse_str(IMAGE_UUID).unwrap_ji()),
                                                 lib: MediaLibrary::Global
                                             });
 
@@ -119,10 +117,10 @@ impl DebugSettings {
 
                                 Item {
                                     sticker,
-                                    kind: item_kind.clone() 
+                                    kind: item_kind.clone()
                                 }
                             }).collect(),
-                            theme: ThemeChoice::Override(ThemeId::Chalkboard), 
+                            theme: ThemeChoice::Override(ThemeId::Chalkboard),
                             instructions: Instructions::default(),
                             backgrounds: Backgrounds {
                                 layer_1: None, //Some(Background::Color(hex_to_rgba8("#ff0000"))),

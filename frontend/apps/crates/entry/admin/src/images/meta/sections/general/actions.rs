@@ -16,15 +16,7 @@ pub fn toggle_style(state: Rc<State>, id: ImageStyleId, flag: bool) {
     crate::images::meta::actions::save(
         state.meta.clone(),
         ImageUpdateRequest {
-            styles: Some(
-                state
-                    .image
-                    .styles
-                    .lock_ref()
-                    .iter()
-                    .map(|x| x.clone())
-                    .collect(),
-            ),
+            styles: Some(state.image.styles.lock_ref().iter().copied().collect()),
             ..ImageUpdateRequest::default()
         },
     );
@@ -43,15 +35,7 @@ pub fn toggle_age_range(state: Rc<State>, id: AgeRangeId, flag: bool) {
     crate::images::meta::actions::save(
         state.meta.clone(),
         ImageUpdateRequest {
-            age_ranges: Some(
-                state
-                    .image
-                    .age_ranges
-                    .lock_ref()
-                    .iter()
-                    .map(|x| x.clone())
-                    .collect(),
-            ),
+            age_ranges: Some(state.image.age_ranges.lock_ref().iter().copied().collect()),
             ..ImageUpdateRequest::default()
         },
     );
@@ -76,7 +60,7 @@ pub fn toggle_affiliation(state: Rc<State>, id: AffiliationId, flag: bool) {
                     .affiliations
                     .lock_ref()
                     .iter()
-                    .map(|x| x.clone())
+                    .copied()
                     .collect(),
             ),
             ..ImageUpdateRequest::default()

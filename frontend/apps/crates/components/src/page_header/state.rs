@@ -4,8 +4,8 @@ use shared::domain::user::UserProfile;
 use strum_macros::EnumIter;
 use utils::routes::{HomeRoute, JigRoute, Route};
 
-const TARGET_SELF: &'static str = "_self";
-const TARGET_BLANK: &'static str = "_blank";
+const TARGET_SELF: &str = "_self";
+const TARGET_BLANK: &str = "_blank";
 
 pub struct State {
     pub logged_in: Mutable<LoggedInState>,

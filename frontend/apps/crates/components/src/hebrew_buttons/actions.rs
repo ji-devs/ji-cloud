@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use super::{Popup, HebrewButtons};
+use super::{HebrewButtons, Popup};
 
 impl HebrewButtons {
     pub(super) fn on_action_click(self: &Rc<Self>, popup: Popup) {

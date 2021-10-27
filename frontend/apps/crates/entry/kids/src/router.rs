@@ -15,7 +15,7 @@ impl Router {
 
     fn dom_signal() -> impl Signal<Item = Option<Dom>> {
         dominator::routing::url().signal_ref(|url| {
-            let route = Route::from_url(&url);
+            let route = Route::from_url(url);
             match route {
                 Route::Kids(route) => match route {
                     KidsRoute::StudentCode(code) => Some(student_code::dom::render(

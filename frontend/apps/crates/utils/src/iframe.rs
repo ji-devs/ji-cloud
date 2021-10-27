@@ -2,9 +2,9 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 
 use crate::unwrap::UnwrapJiExt;
-use shared::domain::jig::{LiteModule, module::ModuleId};
+use shared::domain::jig::{module::ModuleId, LiteModule};
 
-pub const IFRAME_DATA_PARAM: &'static str = "iframe_data";
+pub const IFRAME_DATA_PARAM: &str = "iframe_data";
 
 #[wasm_bindgen(
     inline_js = "export function is_in_iframe() { return window && window.parent && window.location !== window.parent.location; }"

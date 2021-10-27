@@ -30,11 +30,7 @@ where
                         .property("number", JsValue::from_f64(step.as_number() as f64))
                         .property("label", step.label())
                         .property_signal("active", state.step.signal().map(move |curr| {
-                            if curr == step {
-                                true
-                            } else {
-                                false
-                            }
+                            curr == step
                         }))
                         .property_signal("completed", state.steps_completed.signal_ref(move |steps_completed| {
                             steps_completed.contains(&step)

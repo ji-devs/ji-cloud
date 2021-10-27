@@ -9,11 +9,11 @@ use utils::unwrap::UnwrapJiExt;
 
 use super::super::state::State as PlayerState;
 
-const STR_REPORT_TYPE_OFFENSIVE: &'static str = "Offensive";
-const STR_REPORT_TYPE_COPYRIGHT: &'static str = "Copyright Infringement";
-const STR_REPORT_TYPE_SPAM: &'static str = "Spam";
-const STR_REPORT_TYPE_PRIVACY: &'static str = "Privacy";
-const STR_REPORT_TYPE_OTHER: &'static str = "Other";
+const STR_REPORT_TYPE_OFFENSIVE: &str = "Offensive";
+const STR_REPORT_TYPE_COPYRIGHT: &str = "Copyright Infringement";
+const STR_REPORT_TYPE_SPAM: &str = "Spam";
+const STR_REPORT_TYPE_PRIVACY: &str = "Privacy";
+const STR_REPORT_TYPE_OTHER: &str = "Other";
 
 pub struct State {
     pub sidebar_open: Mutable<bool>,

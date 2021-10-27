@@ -1,7 +1,7 @@
 use crate::base::game::state::*;
 use components::traces::{bubble::TraceBubble, utils::TraceExt};
 use dominator::clone;
-use futures_signals::signal::{Mutable, SignalExt};
+use futures_signals::signal::Mutable;
 use shared::domain::jig::module::body::_groups::design::Trace;
 use std::{ops::Deref, rc::Rc};
 
@@ -56,18 +56,16 @@ impl PlayTrace {
     pub fn select(&self, play_state: Rc<PlayState>) {
         if self.audio.is_none() && self.text.is_none() {
             self.phase.set(PlayPhase::IdleSelected);
-        } else {
-            if let Some(bounds) = self.inner.calc_bounds(true) {
-                let bubble = TraceBubble::new(
-                    bounds,
-                    self.audio.clone(),
-                    self.text.clone(),
-                    Some(clone!(play_state => move || {
-                        play_state.evaluate_end();
-                    })),
-                );
-                self.phase.set(PlayPhase::Playing(bubble));
-            }
+        } else if let Some(bounds) = self.inner.calc_bounds(true) {
+            let bubble = TraceBubble::new(
+                bounds,
+                self.audio.clone(),
+                self.text.clone(),
+                Some(clone!(play_state => move || {
+                    play_state.evaluate_end();
+                })),
+            );
+            self.phase.set(PlayPhase::Playing(bubble));
         }
     }
 

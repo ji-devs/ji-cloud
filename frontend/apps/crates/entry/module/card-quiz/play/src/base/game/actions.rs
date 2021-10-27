@@ -6,7 +6,7 @@ use components::module::_common::play::prelude::*;
 
 use crate::base::state::Phase;
 use dominator::clone;
-use futures_signals::signal::{Mutable, SignalExt};
+use futures_signals::signal::Mutable;
 use gloo_timers::future::TimeoutFuture;
 use rand::prelude::*;
 use std::convert::TryInto;

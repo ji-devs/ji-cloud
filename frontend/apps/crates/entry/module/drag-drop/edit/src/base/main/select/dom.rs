@@ -1,6 +1,5 @@
 use super::state::*;
 use crate::base::state::*;
-use components::module::_common::edit::prelude::*;
 use components::{
     audio::player_button::AudioPlayerButton,
     box_outline::{BoxOutline, BoxOutlineMixins, BoxOutlineStyle},
@@ -69,12 +68,12 @@ impl MainSelect {
 
         let raw_sticker = &item.raw_sticker();
 
-        let opts = StickerRawRenderOptions::new(&raw_sticker, Some(opts));
+        let opts = StickerRawRenderOptions::new(raw_sticker, Some(opts));
 
         let transform = raw_sticker.transform().clone();
         let transform_override = item.get_transform_override();
         html!("empty-fragment", {
-            .child(render_sticker_raw(&raw_sticker, theme_id, Some(opts)))
+            .child(render_sticker_raw(raw_sticker, theme_id, Some(opts)))
             .child(BoxOutline::render_mixins(
                     {
                         let box_outline = BoxOutline::new_transform_size(
@@ -138,13 +137,13 @@ impl MainSelect {
 
     pub fn render_static(state: Rc<Self>, theme_id: ThemeId, item: SelectItem) -> Dom {
         let mut opts = BaseRawRenderOptions::default();
-        opts.set_mixin(Self::mixin_click(state.clone(), item.index));
+        opts.set_mixin(Self::mixin_click(state, item.index));
 
         let raw_sticker = &item.raw_sticker();
 
-        let opts = StickerRawRenderOptions::new(&raw_sticker, Some(opts));
+        let opts = StickerRawRenderOptions::new(raw_sticker, Some(opts));
 
-        render_sticker_raw(&raw_sticker, theme_id, Some(opts))
+        render_sticker_raw(raw_sticker, theme_id, Some(opts))
     }
 
     pub fn mixin_click(

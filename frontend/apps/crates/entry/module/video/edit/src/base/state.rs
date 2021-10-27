@@ -151,7 +151,6 @@ impl Base {
         stickers.replace_all(
             base_content
                 .stickers
-                .clone()
                 .iter()
                 .map(|raw_sticker| Sticker::new(stickers.clone(), raw_sticker))
                 .collect::<Vec<Sticker>>(),
@@ -171,7 +170,7 @@ impl Base {
             text_editor,
             backgrounds,
             stickers,
-            play_settings: PlaySettings::new(content.play_settings.clone()),
+            play_settings: PlaySettings::new(content.play_settings),
             video: Mutable::new(None),
         });
 

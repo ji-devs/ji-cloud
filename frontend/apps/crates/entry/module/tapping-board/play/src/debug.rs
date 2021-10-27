@@ -1,5 +1,3 @@
-use futures_signals::{signal::SignalExt, signal_vec::SignalVecExt};
-
 use components::stickers::{sprite::ext::*, text::ext::*};
 use once_cell::sync::OnceCell;
 use shared::{
@@ -30,10 +28,10 @@ use uuid::Uuid;
 pub static SETTINGS: OnceCell<DebugSettings> = OnceCell::new();
 
 //const IMAGE_UUID:&'static str = "bf2fe548-7ffd-11eb-b3ab-579026da8b36";
-const IMAGE_UUID: &'static str = "9da11e0a-c17b-11eb-b863-570eea18a3bd";
-const AUDIO_UUID: &'static str = "734314da-0b07-11ec-95f0-2b4855fa3cb8";
+const IMAGE_UUID: &str = "9da11e0a-c17b-11eb-b863-570eea18a3bd";
+const AUDIO_UUID: &str = "734314da-0b07-11ec-95f0-2b4855fa3cb8";
 
-pub const DEBUG_TEXT:&'static str = "{\"version\":\"0.1.0\",\"content\":[{\"children\":[{\"text\":\"text from rust\",\"element\":\"P1\"}]}]}";
+pub const DEBUG_TEXT:&str = "{\"version\":\"0.1.0\",\"content\":[{\"children\":[{\"text\":\"text from rust\",\"element\":\"P1\"}]}]}";
 
 #[derive(Debug, Default)]
 pub struct DebugSettings {

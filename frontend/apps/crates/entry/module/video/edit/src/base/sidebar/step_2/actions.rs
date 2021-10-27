@@ -59,7 +59,7 @@ impl Base {
 
 pub fn set_error(elem: &HtmlElement, error: bool) {
     let _ = Reflect::set(
-        &elem,
+        elem,
         &JsValue::from_str("error"),
         &JsValue::from_bool(error),
     );

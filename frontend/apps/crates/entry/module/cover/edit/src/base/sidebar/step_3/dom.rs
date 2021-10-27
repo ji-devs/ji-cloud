@@ -8,7 +8,6 @@ use components::{
 use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
 use std::rc::Rc;
-use utils::prelude::*;
 
 pub fn render(state: Rc<Step3>) -> Dom {
     html!("menu-tabs", {
@@ -28,10 +27,10 @@ pub fn render(state: Rc<Step3>) -> Dom {
                             Some(render_text_editor(state.sidebar.base.text_editor.clone()))
                         },
                         Tab::Image(state) => {
-                            Some(render_image_search(state.clone(), None))
+                            Some(render_image_search(state, None))
                         },
                         Tab::Audio(state) => {
-                            Some(AudioInput::render(state.clone(), None))
+                            Some(AudioInput::render(state, None))
                         },
                     }
                 })))

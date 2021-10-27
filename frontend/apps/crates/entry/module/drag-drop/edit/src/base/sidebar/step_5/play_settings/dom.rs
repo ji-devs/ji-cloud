@@ -1,7 +1,6 @@
 use dominator::{clone, Dom};
 use futures_signals::signal::SignalExt;
 use std::rc::Rc;
-use utils::prelude::*;
 
 use super::state::PlaySettingsState;
 use shared::domain::jig::module::body::drag_drop::{Hint, Next};

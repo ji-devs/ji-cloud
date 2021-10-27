@@ -5,7 +5,7 @@ use crate::unwrap::UnwrapJiExt;
 use awsm_web::loaders::fetch::fetch_url;
 use shared::domain::jig::{module::ModuleId, JigId, ModuleKind};
 
-pub const SCREENSHOT_PARAM: &'static str = "screenshot";
+pub const SCREENSHOT_PARAM: &str = "screenshot";
 
 pub fn is_screenshot_url() -> bool {
     let url: String = dominator::routing::url().get_cloned();
@@ -14,13 +14,7 @@ pub fn is_screenshot_url() -> bool {
 
     match params.get(SCREENSHOT_PARAM) {
         None => false,
-        Some(value) => {
-            if value == "true" {
-                true
-            } else {
-                false
-            }
-        }
+        Some(value) => value == "true",
     }
 }
 

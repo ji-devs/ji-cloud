@@ -11,7 +11,7 @@ pub fn ui<T: AsRef<str>>(path: T) -> String {
     media_url(&format!("ui/{}", path.as_ref()))
 }
 
-pub fn legacy_cdn_url<T: AsRef<str>>(path:T) -> String {
+pub fn legacy_cdn_url<T: AsRef<str>>(path: T) -> String {
     if crate::routes::is_param_bool("example") {
         media_url(&format!("legacy/examples/{}", path.as_ref()))
     } else {

@@ -25,20 +25,13 @@ impl<RawData: RawDataExt, E: ExtraExt> MainPair<RawData, E> {
             index: index.clone(),
             left: MainCard::new(
                 base.clone(),
-                step.clone(),
+                step,
                 index.clone(),
                 Side::Left,
                 pair.0.clone(),
                 pair.1.clone(),
             ),
-            right: MainCard::new(
-                base.clone(),
-                step.clone(),
-                index.clone(),
-                Side::Right,
-                pair.1.clone(),
-                pair.0.clone(),
-            ),
+            right: MainCard::new(base, step, index, Side::Right, pair.1.clone(), pair.0),
         })
     }
 }

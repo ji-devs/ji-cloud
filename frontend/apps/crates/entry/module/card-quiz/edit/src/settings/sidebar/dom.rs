@@ -3,7 +3,6 @@ use std::rc::Rc;
 
 use super::state::*;
 use futures_signals::signal::{always, SignalExt};
-use utils::prelude::*;
 
 use components::module::_common::edit::settings::prelude::*;
 

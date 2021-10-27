@@ -24,17 +24,17 @@ use super::{actions, state::State};
 
 mod options_popup;
 
-const STR_EDIT: &'static str = " Edit";
-const STR_REMOVE_IMAGE: &'static str = "remove image";
+const STR_EDIT: &str = " Edit";
+const STR_REMOVE_IMAGE: &str = "remove image";
 
-const STR_AFFILIATION_HEADER: &'static str = "Affiliation";
-const STR_AFFILIATION_SUBHEADER: &'static str = "What type of content do you want to access?";
+const STR_AFFILIATION_HEADER: &str = "Affiliation";
+const STR_AFFILIATION_SUBHEADER: &str = "What type of content do you want to access?";
 
-const STR_SUBJECT_HEADER: &'static str = "Relevant Subjects";
-const STR_SUBJECT_SUBHEADER: &'static str = "Which subjects are you interested in?";
+const STR_SUBJECT_HEADER: &str = "Relevant Subjects";
+const STR_SUBJECT_SUBHEADER: &str = "Which subjects are you interested in?";
 
-const STR_AGE_HEADER: &'static str = "Relevant Age Group";
-const STR_AGE_SUBHEADER: &'static str = "Which age group are you interested in?";
+const STR_AGE_HEADER: &str = "Relevant Age Group";
+const STR_AGE_SUBHEADER: &str = "Which age group are you interested in?";
 
 pub struct ProfilePage {}
 

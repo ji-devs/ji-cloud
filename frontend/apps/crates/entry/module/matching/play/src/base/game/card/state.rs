@@ -1,14 +1,14 @@
 use crate::base::game::state::{CardPairId, Game};
 use components::module::_groups::cards::lookup::Side;
-use futures_signals::signal::{Mutable, SignalExt};
+use futures_signals::signal::Mutable;
 use shared::domain::jig::module::body::{
     ThemeId,
     _groups::cards::{Card, Mode},
 };
 use std::cell::RefCell;
 use std::rc::Rc;
+use utils::drag::Drag;
 use utils::math::BoundsF64;
-use utils::{drag::Drag, prelude::*};
 use web_sys::HtmlElement;
 
 pub type CardTop = CardChoice<TopPhase>;
@@ -55,8 +55,8 @@ pub struct CardDrag {
 
 impl CardChoice<TopPhase> {
     pub fn new(game: Rc<Game>, pair: CardPairId) -> Self {
-        let theme_id = game.base.theme_id.clone();
-        let mode = game.base.mode.clone();
+        let theme_id = game.base.theme_id;
+        let mode = game.base.mode;
         let swap = game.base.settings.swap;
 
         let CardPairId(card, other, pair_id) = pair;
@@ -103,8 +103,8 @@ impl CardChoice<TopPhase> {
 
 impl CardChoice<BottomPhase> {
     pub fn new(game: Rc<Game>, pair: CardPairId) -> Self {
-        let theme_id = game.base.theme_id.clone();
-        let mode = game.base.mode.clone();
+        let theme_id = game.base.theme_id;
+        let mode = game.base.mode;
         let swap = game.base.settings.swap;
 
         let CardPairId(card, other, pair_id) = pair;

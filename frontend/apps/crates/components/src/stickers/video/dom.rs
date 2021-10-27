@@ -43,7 +43,7 @@ impl Default for VideoRenderOptions {
         Self {
             base: BaseRenderOptions::default(),
             captions: read_only_bool.clone(),
-            muted: read_only_bool.clone(),
+            muted: read_only_bool,
             done_action: Mutable::new(None).read_only(),
             on_ended: None,
         }

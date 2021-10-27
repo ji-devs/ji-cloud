@@ -63,8 +63,10 @@ impl TraceExt for EditSelectTrace {
         };
 
         match &self.shape {
-            TraceShape::PathCommands(commands) => calc_bounds(ShapeRef::PathCommands(&commands), offset),
-            TraceShape::Path(path) => calc_bounds(ShapeRef::Path(&path), offset),
+            TraceShape::PathCommands(commands) => {
+                calc_bounds(ShapeRef::PathCommands(commands), offset)
+            }
+            TraceShape::Path(path) => calc_bounds(ShapeRef::Path(path), offset),
 
             TraceShape::Ellipse(radius_x, radius_y) => {
                 calc_bounds(ShapeRef::Ellipse(*radius_x, *radius_y), offset)

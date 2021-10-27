@@ -8,10 +8,6 @@ use std::rc::Rc;
 
 use futures_signals::signal::SignalExt;
 
-use rand::prelude::*;
-
-use utils::prelude::*;
-
 pub fn render(state: Rc<Game>) -> Dom {
     html!("matching-main", {
         .property("slot", "main")

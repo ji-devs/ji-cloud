@@ -1,6 +1,6 @@
 use dominator::{clone, html, Dom, EventOptions};
-use wasm_bindgen_futures::spawn_local;
 use std::rc::Rc;
+use wasm_bindgen_futures::spawn_local;
 
 use utils::prelude::*;
 use wasm_bindgen::prelude::*;
@@ -59,7 +59,7 @@ pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<MainCard<RawData, E>>)
                                         }
                                 };
 
-                                let mode = state.base.mode.clone();
+                                let mode = state.base.mode;
 
                                 sig.map(move |(len, theme_id)| {
                                     let font_size = lookup::get_card_font_size(len, theme_id, mode);
@@ -122,7 +122,7 @@ pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<MainCard<RawData, E>>)
                                         }))
                                         .event(clone!(state => move |evt:events::Drop| {
                                             if let Some(data_transfer) = evt.data_transfer() {
-                                                if let Some(data) = data_transfer.get_data(IMAGE_SEARCH_DATA_TRANSFER).ok() {
+                                                if let Ok(data) = data_transfer.get_data(IMAGE_SEARCH_DATA_TRANSFER) {
                                                     let data:ImageDataTransfer = serde_json::from_str(&data).unwrap_ji();
                                                     spawn_local(clone!(state => async move {
                                                         let image = data.to_image().await;

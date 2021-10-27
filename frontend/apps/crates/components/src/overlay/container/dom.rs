@@ -1,11 +1,11 @@
 use super::state::*;
-use std::rc::Rc;
-use dominator::{Dom, html};
+use dominator::{html, Dom};
 use futures_signals::signal_vec::SignalVecExt;
+use std::rc::Rc;
 use utils::prelude::*;
 
 impl OverlayContainer {
-    pub fn render(self: Rc<Self>, slot: Option<&str>) -> Dom { 
+    pub fn render(self: Rc<Self>, slot: Option<&str>) -> Dom {
         html!("overlay-container", {
             .apply_if(slot.is_some(), |dom| {
                 dom.property("slot", slot.unwrap_ji())
@@ -17,5 +17,5 @@ impl OverlayContainer {
                 )
             )
         })
-    } 
-} 
+    }
+}

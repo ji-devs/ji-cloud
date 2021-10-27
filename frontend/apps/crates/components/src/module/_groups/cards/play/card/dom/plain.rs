@@ -124,11 +124,11 @@ where
                 .property("scale", t.scale)
                 .property("hasTransform", true)
         })
-        .child(render_media(&card, mode, theme_id, None))
+        .child(render_media(card, mode, theme_id, None))
         .apply_if(back_card.is_some(), |dom| {
             dom
                 .property("doubleSided", true)
-                .child(render_media(&back_card.unwrap_ji(), mode, theme_id, Some("backSideContent")))
+                .child(render_media(back_card.unwrap_ji(), mode, theme_id, Some("backSideContent")))
         })
         .apply_if(mixin.is_some(), |dom| {
             (mixin.unwrap_ji()) (dom)

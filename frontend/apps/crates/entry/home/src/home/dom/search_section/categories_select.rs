@@ -9,8 +9,8 @@ use utils::{events, unwrap::UnwrapJiExt};
 
 use super::super::super::state::State;
 
-const STR_CATEGORIES_LABEL: &'static str = "Categories";
-const STR_CATEGORIES_PLACEHOLDER: &'static str = "Select one or more from the list";
+const STR_CATEGORIES_LABEL: &str = "Categories";
+const STR_CATEGORIES_PLACEHOLDER: &str = "Select one or more from the list";
 
 pub fn render(state: Rc<State>) -> Dom {
     html!("input-select", {
@@ -27,8 +27,8 @@ pub fn render(state: Rc<State>) -> Dom {
 
 fn render_categories(state: Rc<State>, categories: &Vec<Category>) -> Vec<Dom> {
     categories.iter().map(|category| {
-        if category.children.len() == 0 {
-            let category_id = category.id.clone();
+        if category.children.is_empty() {
+            let category_id = category.id;
             html!("input-select-option", {
                 .text(&category.name)
                 .property_signal("selected", state.search_selected.categories.signal_cloned().map(clone!(category_id => move |selected_categories| {

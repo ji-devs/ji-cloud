@@ -12,7 +12,7 @@ use shared::{
 use std::cell::RefCell;
 use std::rc::Rc;
 use strum::IntoEnumIterator;
-use utils::{prelude::*, routes::*};
+use utils::prelude::*;
 use web_sys::File;
 
 pub fn load_initial(
@@ -34,9 +34,9 @@ pub fn load_initial(
         let cat_req = GetCategoryRequest{ ids: Vec::new(), scope: Some( CategoryTreeScope::Decendants) } ;
         match (
             api_with_auth::<ImageResponse, EmptyError, ()>(&path, endpoints::image::Get::METHOD, None).await,
-            api_with_auth::<CategoryResponse, EmptyError, _>(&endpoints::category::Get::PATH, endpoints::category::Get::METHOD, Some(cat_req)).await,
-            api_no_auth::<MetadataResponse, (), ()>(&endpoints::meta::Get::PATH, endpoints::meta::Get::METHOD, None).await,
-            api_with_auth::<ImageTagListResponse, (), ()>(&endpoints::image::tag::List::PATH, endpoints::image::tag::List::METHOD, None).await
+            api_with_auth::<CategoryResponse, EmptyError, _>(endpoints::category::Get::PATH, endpoints::category::Get::METHOD, Some(cat_req)).await,
+            api_no_auth::<MetadataResponse, (), ()>(endpoints::meta::Get::PATH, endpoints::meta::Get::METHOD, None).await,
+            api_with_auth::<ImageTagListResponse, (), ()>(endpoints::image::tag::List::PATH, endpoints::image::tag::List::METHOD, None).await
         ) {
             (Ok(img_resp), Ok(cat_resp), Ok(meta_resp), Ok(tag_list_resp)) => {
 
@@ -61,7 +61,7 @@ pub fn load_initial(
                 for rust_tag in ImageTag::iter() {
                     let _ = tag_list_resp.image_tags.iter()
                         .find(|db_tag| db_tag.index.0 == rust_tag.as_index())
-                        .expect_ji(&format!("Image tag {} was in Rust but not Db!", rust_tag.STR_DISPLAY_NAME()));
+                        .expect_ji(&format!("Image tag {} was in Rust but not Db!", rust_tag.display_name()));
                 }
 
                 *ret.borrow_mut() = Some((image, categories, meta));
@@ -78,7 +78,7 @@ pub fn load_initial(
 
 pub fn save(state: Rc<State>, req: ImageUpdateRequest) {
     state.loader.load(clone!(state => async move {
-   
+
         let path = endpoints::image::UpdateMetadata::PATH.replace("{id}",&state.id.0.to_string());
         match api_with_auth_empty::<MetadataNotFound, _>(&path, endpoints::image::UpdateMetadata::METHOD, Some(req)).await {
             Ok(_) => {
@@ -98,7 +98,7 @@ pub fn on_file(state: Rc<State>, image: Rc<MutableImage>, file: File) {
                 //Trigger a re-render.
                 //To debug: this shouldn't be necessary, but it temp fixes!
                 //TimeoutFuture::new(5_000).await;
-                image.id.replace_with(|id| id.clone());
+                image.id.replace_with(|id| *id);
             },
             Err(err) => {
                 if err.is_abort() {

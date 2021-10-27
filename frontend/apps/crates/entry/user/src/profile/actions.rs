@@ -70,7 +70,7 @@ async fn upload_profile_image(file: File) -> Result<ImageId, Box<dyn std::error:
         .map_err(|_err| "Error creating image in db")?
         .id;
 
-    upload_image(image_id.clone(), MediaLibrary::User, &file, None)
+    upload_image(image_id, MediaLibrary::User, &file, None)
         .await
         .map_err(|_err| "Error uploading image")?;
 

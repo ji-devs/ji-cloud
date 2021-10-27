@@ -46,7 +46,7 @@ pub fn category_descendents_selected(
         }
     }
 
-    categories.signal_ref(move |lookup| check(&lookup, &cat))
+    categories.signal_ref(move |lookup| check(lookup, &cat))
 }
 
 pub fn render_report(
@@ -64,7 +64,7 @@ pub fn render_report(
                 .text(&cat.name)
             })
         ])
-        .property("hasChildren", if cat.children.len() > 0 { true } else { false })
+        .property("hasChildren", !cat.children.is_empty())
         .property("isChild", parent.is_some())
         .child(html!("div", {
             .property("slot", "children")

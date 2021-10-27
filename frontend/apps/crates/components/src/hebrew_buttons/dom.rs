@@ -1,17 +1,17 @@
 use std::rc::Rc;
 
-use dominator::{Dom, clone, html, with_node};
+use dominator::{clone, html, with_node, Dom};
 use futures_signals::signal::SignalExt;
 use utils::events;
 use web_sys::HtmlElement;
 
 use crate::overlay::handle::OverlayHandle;
 
-use super::{state::{HebrewButtons, Popup}};
+use super::state::{HebrewButtons, Popup};
 
-const SEFARIA_URL: &'static str = "https://www.sefaria.org/texts/Tanakh";
+const SEFARIA_URL: &str = "https://www.sefaria.org/texts/Tanakh";
 const SEFARIA_IFRAME_WIDTH: u32 = 700;
-const DICTA_URL: &'static str = "https://embed.dicta.org.il/";
+const DICTA_URL: &str = "https://embed.dicta.org.il/";
 const DICTA_IFRAME_WIDTH: u32 = 550;
 
 impl HebrewButtons {
@@ -26,12 +26,7 @@ impl HebrewButtons {
                     dom.property("slot", slot.unwrap())
                 })
                 .child_signal(state.active_popup.signal().map(clone!(state, elem => move|active_popup| {
-                    match active_popup {
-                        Some(popup) => {
-                            Some(state.render_popups(popup, elem.clone()))
-                        },
-                        None => None,
-                    }
+                    active_popup.map(|popup| state.render_popups(popup, elem.clone()))
                 })))
                 .children(&mut [
                     html!("hebrew-inputs-action", {
@@ -127,4 +122,3 @@ impl HebrewButtons {
         })
     }
 }
-

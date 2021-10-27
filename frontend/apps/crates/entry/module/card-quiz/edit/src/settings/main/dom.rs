@@ -9,15 +9,11 @@ use futures_signals::{
     signal_vec::{SignalVec, SignalVecExt},
 };
 
-use rand::prelude::*;
-
-use utils::prelude::*;
-
 pub fn render(state: Rc<MainSettings>) -> Dom {
     html!("card-quiz-main", {
         .property("slot", "main")
-        .child_signal(render_top_card(state.clone()).map(|dom| Some(dom)))
-        .children_signal_vec(render_choices(state.clone()))
+        .child_signal(render_top_card(state.clone()).map(Some))
+        .children_signal_vec(render_choices(state))
     })
 }
 
@@ -29,7 +25,7 @@ fn render_top_card(state: Rc<MainSettings>) -> impl Signal<Item = Dom> {
             => (*theme_id, card.clone(), *side)
     };
 
-    let mode = state.base.mode.clone();
+    let mode = state.base.mode;
 
     sig.map(move |(theme_id, card, side)| {
         let mut options = CardOptions::new(&card, theme_id, mode, side, Size::QuizTarget);
@@ -43,12 +39,12 @@ fn render_top_card(state: Rc<MainSettings>) -> impl Signal<Item = Dom> {
 fn render_choices(state: Rc<MainSettings>) -> impl SignalVec<Item = Dom> {
     state.choices_signal()
         .map_signal(clone!(state => move |choice| {
-            let mode = state.base.mode.clone();
+            let mode = state.base.mode;
             //theme_id won't have actually changed here, but w/e
             state.base.theme_id.signal_cloned()
                 .map(move |theme_id| {
                     let (card, side, _is_correct) = &choice;
-                    let mut options = CardOptions::new(&card, theme_id, mode, *side, Size::QuizOption);
+                    let mut options = CardOptions::new(card, theme_id, mode, *side, Size::QuizOption);
                     options.flipped = true;
                     options.slot = Some("options");
 

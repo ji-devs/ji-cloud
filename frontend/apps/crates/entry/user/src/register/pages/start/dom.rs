@@ -10,7 +10,7 @@ use crate::{
 };
 use utils::events;
 
-const STR_GOOGLE_LABEL: &'static str = "Sign up with Google";
+const STR_GOOGLE_LABEL: &str = "Sign up with Google";
 
 pub struct StartPage {}
 

@@ -8,7 +8,6 @@ use futures_signals::signal::SignalExt;
 use std::rc::Rc;
 use web_sys::HtmlElement;
 
-use rand::prelude::*;
 use shared::domain::jig::module::body::flashcards::DisplayMode;
 
 use utils::prelude::*;
@@ -21,8 +20,8 @@ pub fn render(state: Rc<Game>) -> Dom {
                 .map(clone!(state => move |current| {
                     let mut children:Vec<Dom> = Vec::new();
 
-                    let theme_id = state.base.theme_id.clone();
-                    let mode = state.base.mode.clone();
+                    let theme_id = state.base.theme_id;
+                    let mode = state.base.mode;
 
 
                     let Current { card, other, side } = current;

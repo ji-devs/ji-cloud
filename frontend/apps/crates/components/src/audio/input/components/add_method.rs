@@ -5,8 +5,8 @@ use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
 use utils::events;
 
-pub const STR_OPTION_RECORD: &'static str = "Record";
-pub const STR_OPTION_UPLOAD: &'static str = "Upload a file";
+pub const STR_OPTION_RECORD: &str = "Record";
+pub const STR_OPTION_UPLOAD: &str = "Upload a file";
 
 pub fn render(state: Rc<AudioInput>, add_method: AudioInputAddMethod) -> Dom {
     html!("label", {
@@ -29,7 +29,7 @@ pub fn render(state: Rc<AudioInput>, add_method: AudioInputAddMethod) -> Dom {
             }
         })
         .event(clone!(state => move |_: events::Change| {
-            state.add_method.set(add_method.clone());
+            state.add_method.set(add_method);
 
             // might not be ideal when there's no audio_id already
             state.set_audio(None);

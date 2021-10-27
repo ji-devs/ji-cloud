@@ -50,7 +50,7 @@ pub fn render_steps() -> Dom {
             render_button(1, "This", state.clone()),
             render_button(2, "Is", state.clone()),
             render_button(3, "A", state.clone()),
-            render_button(4, "Test", state.clone()),
+            render_button(4, "Test", state),
         ])
     })
 }
@@ -61,11 +61,7 @@ fn render_button(step: u32, label: &str, state: Rc<State>) -> Dom {
         .property("label", label)
         .property("slot", format!("btn-{}", step))
         .property_signal("active", state.current_step.signal().map(move |current_step| {
-            if current_step == step {
-                true
-            } else {
-                false
-            }
+            current_step == step
         }))
         .event(clone!(step, state => move |_evt: events::Click| {
             state.current_step.set(step);
@@ -145,7 +141,7 @@ pub fn render_text_editor_controls(state: Rc<text_editor::state::State>) -> Dom 
         .child(html!("dl", {
             .children(&mut [
                 html!("dt", {.text("Font")}),
-                html!("dd", {.text_signal(state.controls.signal_cloned().map(|controls| controls.font.to_string()))}),
+                html!("dd", {.text_signal(state.controls.signal_cloned().map(|controls| controls.font))}),
 
                 html!("dt", {.text("Element")}),
                 html!("dd", {.text_signal(state.controls.signal_cloned().map(|controls| controls.element.to_string()))}),

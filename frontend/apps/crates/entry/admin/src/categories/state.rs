@@ -31,10 +31,7 @@ pub struct Category {
 
 impl Category {
     pub fn has_children_signal(&self) -> impl Signal<Item = bool> {
-        self.children
-            .signal_vec_cloned()
-            .len()
-            .map(|len| if len > 0 { true } else { false })
+        self.children.signal_vec_cloned().len().map(|len| len > 0)
     }
 
     pub fn new(id: CategoryId, name: String) -> Self {

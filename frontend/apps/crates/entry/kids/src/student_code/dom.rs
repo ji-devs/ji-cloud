@@ -9,8 +9,8 @@ use crate::student_code::actions::submit_code;
 
 use super::state::State;
 
-const STR_TRY_AGAIN: &'static str = "Try again";
-const STR_HELP: &'static str = "Ask for help";
+const STR_TRY_AGAIN: &str = "Try again";
+const STR_HELP: &str = "Ask for help";
 
 pub fn render(state: Rc<State>, code: Option<String>) -> Dom {
     if let Some(code) = code {

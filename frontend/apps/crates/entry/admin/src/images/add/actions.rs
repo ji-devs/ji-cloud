@@ -27,7 +27,7 @@ pub fn on_change(state: Rc<State>, value: String) {
 
 pub fn on_file(state: Rc<State>, file: File) {
     state.loader.load(clone!(state => async move {
-        let meta_resp = api_no_auth::<MetadataResponse, (), ()>(&endpoints::meta::Get::PATH, endpoints::meta::Get::METHOD, None).await.expect_ji("couldn't get meta response!");
+        let meta_resp = api_no_auth::<MetadataResponse, (), ()>(endpoints::meta::Get::PATH, endpoints::meta::Get::METHOD, None).await.expect_ji("couldn't get meta response!");
 
         let affiliations = meta_resp.affiliations
             .iter()
@@ -49,13 +49,13 @@ pub fn on_file(state: Rc<State>, file: File) {
             age_ranges,
             affiliations,
             categories: Vec::new(),
-            kind: state.kind.borrow().clone()
+            kind: *state.kind.borrow()
         };
 
         match api_with_auth::<CreateResponse, MetadataNotFound, _>(endpoints::image::Create::PATH, endpoints::image::Create::METHOD, Some(req)).await {
             Ok(resp) => {
                 let CreateResponse { id} = resp;
-               
+
                 match upload_image(id, MediaLibrary::Global, &file, None).await {
                     Ok(_) => {
                         let route:String = Route::Admin(AdminRoute::ImageMeta(id, true)).into();

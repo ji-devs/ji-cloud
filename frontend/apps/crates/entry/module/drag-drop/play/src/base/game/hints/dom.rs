@@ -6,7 +6,6 @@ use components::{
     traces::show::{TracesShow, TracesShowMode},
 };
 use dominator::{clone, html, Dom};
-use futures_signals::{signal::SignalExt, signal_vec::SignalVecExt};
 use gloo_timers::future::TimeoutFuture;
 pub fn render(state: Rc<Hints>) -> Dom {
     html!("empty-fragment", {

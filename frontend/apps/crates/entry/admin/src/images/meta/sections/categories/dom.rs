@@ -36,7 +36,7 @@ impl CategoriesDom {
                     .event(clone!(state => move |evt:events::CustomToggle| {
                         let flag = evt.value();
                         for cat in state.categories.iter() {
-                            actions::toggle_expand_all(&cat, flag);
+                            actions::toggle_expand_all(cat, flag);
                         }
                     }))
                 })
@@ -50,7 +50,7 @@ pub fn render_select(
     cat: Rc<MutableCategory>,
     state: Rc<State>,
 ) -> Dom {
-    let has_children = if cat.children.len() > 0 { true } else { false };
+    let has_children = !cat.children.is_empty();
 
     let mut content: Vec<Dom> = vec![];
 
@@ -66,7 +66,7 @@ pub fn render_select(
                 .property("label", &cat.name)
                 .property_signal("checked", category_selected(state.image.categories.clone(), cat.clone()))
                 .event(clone!(cat, state => move |evt:events::CustomToggle| {
-                    actions::on_toggle(cat.id.clone(), state.clone(), evt.value());
+                    actions::on_toggle(cat.id, state.clone(), evt.value());
                 }))
             })
         );

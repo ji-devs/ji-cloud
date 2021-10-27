@@ -6,7 +6,6 @@ use crate::edit::sidebar::{
         actions::{self, MoveTarget},
         state::State as ModuleState,
     },
-    settings::state::ActiveSettingsPopup,
     state::State as SidebarState,
 };
 use dominator::{clone, html, Dom};
@@ -17,7 +16,7 @@ use utils::events;
 const STR_COPY: &'static str = "Copy to another Jig";
 const STR_PASTE: &'static str = "Paste from another JIG";
 const STR_DUPLICATE_AS: &'static str = "Duplicate content as:";
-const STR_EDIT_SETTINGS: &'static str = "Edit setting";
+// const STR_EDIT_SETTINGS: &'static str = "Edit setting";
 
 pub fn render(state: Rc<State>, items: Vec<Dom>) -> Dom {
     html!("menu-kebab", {
@@ -158,15 +157,15 @@ pub fn item_duplicate_as(
     })
 }
 
-pub fn item_edit_settings(state: Rc<State>, sidebar_state: Rc<SidebarState>) -> Dom {
-    html!("menu-line", {
-        .property("slot", "lines")
-        .property("customLabel", STR_EDIT_SETTINGS)
-        .property("icon", "edit")
-        .event(clone!(state => move |_:events::Click| {
-            state.close_menu();
-            // sidebar_state.settings_shown.set(true);
-            sidebar_state.settings.active_popup.set(Some(ActiveSettingsPopup::Main))
-        }))
-    })
-}
+// pub fn item_edit_settings(state: Rc<State>, sidebar_state: Rc<SidebarState>) -> Dom {
+//     html!("menu-line", {
+//         .property("slot", "lines")
+//         .property("customLabel", STR_EDIT_SETTINGS)
+//         .property("icon", "edit")
+//         .event(clone!(state => move |_:events::Click| {
+//             state.close_menu();
+//             // sidebar_state.settings_shown.set(true);
+//             sidebar_state.settings.active_popup.set(Some(ActiveSettingsPopup::Main))
+//         }))
+//     })
+// }

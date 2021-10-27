@@ -23,7 +23,7 @@ pub async fn update_module(
         .await
 }
 
-pub fn mouse_down(state: Rc<State>, x: i32, y: i32) {
+pub fn _mouse_down(state: Rc<State>, x: i32, y: i32) {
     state
         .sidebar
         .drag

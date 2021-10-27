@@ -18,7 +18,7 @@ impl Router {
     }
 
     fn signal() -> impl Signal<Item = Route> {
-        dominator::routing::url().signal_ref(|url| Route::from_url(&url))
+        dominator::routing::url().signal_ref(|url| Route::from_url(url))
     }
 
     fn dom_signal() -> impl Signal<Item = Option<Dom>> {

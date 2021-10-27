@@ -62,7 +62,7 @@ impl Drag {
     ) -> Self {
         let resize_info = get_resize_info();
 
-        let (elem_x, elem_y) = resize_info.get_element_pos_px(&elem);
+        let (elem_x, elem_y) = resize_info.get_element_pos_px(elem);
 
         let anchor_x = (mouse_x as f64) - elem_x;
         let anchor_y = (mouse_y as f64) - elem_y;
@@ -230,9 +230,7 @@ impl Drag {
                 let pos = self.pos.get();
                 let next_pos = Some(PointI32::new(pos.x - diff.x, pos.y - diff.y));
                 (None, next_pos)
-            }
-
-            // _ => (None, None),
+            } // _ => (None, None),
         };
 
         if let Some(next_state) = next_state {

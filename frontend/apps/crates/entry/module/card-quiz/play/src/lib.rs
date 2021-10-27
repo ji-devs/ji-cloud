@@ -11,7 +11,6 @@ mod config;
 mod debug;
 mod router;
 mod state;
-mod strings;
 
 use router::Router;
 use std::rc::Rc;
@@ -27,7 +26,7 @@ pub async fn main_js() {
     components::module::_groups::cards::play::config::init();
     let router = Rc::new(Router::new());
 
-    router::render(router.clone());
+    router::render(router);
 
     //std::mem::forget(Box::new(router));
 }

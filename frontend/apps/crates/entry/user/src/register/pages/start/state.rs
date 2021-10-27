@@ -35,25 +35,25 @@ impl State {
 
 #[derive(Debug, Clone)]
 pub enum EmailStatus {
-    ConfirmEmail,
+    // ConfirmEmail,
     EmptyEmail,
     InvalidEmail,
-    IdExists,
+    // IdExists,
     EmailExists,
-    UnknownFirebase,
-    Technical,
+    // UnknownFirebase,
+    // Technical,
 }
 
 impl EmailStatus {
     pub fn as_str(&self) -> &'static str {
         match self {
-            Self::ConfirmEmail => "confirm your email!",
+            // Self::ConfirmEmail => "confirm your email!",
             Self::EmptyEmail => "supply an email address!",
             Self::InvalidEmail => "invalid email address",
-            Self::IdExists => "id exists!",
+            // Self::IdExists => "id exists!",
             Self::EmailExists => "Email in use!",
-            Self::UnknownFirebase => "firebase error!",
-            Self::Technical => "technical error!",
+            // Self::UnknownFirebase => "firebase error!",
+            // Self::Technical => "technical error!",
         }
     }
 }

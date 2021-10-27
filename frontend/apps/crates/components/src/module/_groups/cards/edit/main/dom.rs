@@ -34,7 +34,7 @@ where
                                         (state.render_settings) (Rc::new((state.get_settings) (state.base.clone())))
                                     },
                                     _ => {
-                                        render_main_cards(state.base.clone(), step.clone())
+                                        render_main_cards(state.base.clone(), step)
                                     }
                                 })
                             })))
@@ -77,8 +77,8 @@ pub fn render_main_cards<RawData: RawDataExt, E: ExtraExt>(
                 .map(clone!(base => move |(index, pair)| {
                     let pair = MainPair::new(
                         base.clone(),
-                        step.clone(),
-                        index.clone(),
+                        step,
+                        index,
                         pair
                     );
                     render_pair(pair)

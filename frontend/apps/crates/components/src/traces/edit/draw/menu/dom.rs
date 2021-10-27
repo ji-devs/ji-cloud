@@ -1,8 +1,8 @@
+use crate::overlay::handle::OverlayHandle;
 use dominator::{clone, html, Dom};
+use futures_signals::signal::SignalExt;
 use std::rc::Rc;
 use utils::{prelude::*, resize::ResizeInfo};
-use crate::overlay::handle::OverlayHandle;
-use futures_signals::signal::SignalExt;
 
 use super::{super::state::*, state::*};
 /*
@@ -16,7 +16,6 @@ use super::{super::state::*, state::*};
 */
 
 pub fn render_draw_menu(state: Rc<Draw>, menu: Menu, resize_info: &ResizeInfo) -> Dom {
-
     let resize_info = resize_info.clone();
 
     html!("empty-fragment", {

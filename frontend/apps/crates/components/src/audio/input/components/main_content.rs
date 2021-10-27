@@ -11,9 +11,9 @@ use crate::audio::input::state::{AudioInput, AudioInputAddMethod, AudioInputMode
 
 pub fn render(state: Rc<AudioInput>, mode: AudioInputMode, add_method: AudioInputAddMethod) -> Dom {
     match mode {
-        AudioInputMode::Playing(audio) => player::dom::render(state.clone(), audio),
+        AudioInputMode::Playing(audio) => player::dom::render(state, audio),
         AudioInputMode::Stopped(_) => render_input_icon("success"),
-        AudioInputMode::Empty => render_start(state.clone(), add_method.clone()),
+        AudioInputMode::Empty => render_start(state, add_method),
         AudioInputMode::Recording => render_recording(),
         AudioInputMode::Uploading => render_uploading(),
     }

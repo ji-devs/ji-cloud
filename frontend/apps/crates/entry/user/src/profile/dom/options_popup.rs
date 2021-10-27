@@ -12,7 +12,7 @@ use crate::profile::{actions, state::ActivePopup};
 
 use super::super::state::{ProfilePageUser, State};
 
-const STR_DONE: &'static str = "Done";
+const STR_DONE: &str = "Done";
 
 pub struct PopupCallbacks<I, S> {
     pub get_options_list: Box<dyn Fn(&MetadataResponse) -> &Vec<S>>,
@@ -60,10 +60,10 @@ where
                     let options = (callbacks.get_options_list)(metadata);
 
                     options.iter().map(clone!(state, callbacks => move |age| {
-                        let age_id = (callbacks.get_id_from_struct)(&age).clone();
+                        let age_id = (callbacks.get_id_from_struct)(age).clone();
                         html!("input-checkbox", {
                             .property("slot", "options")
-                            .property("label", &*(callbacks.get_display_name)(&age))
+                            .property("label", &*(callbacks.get_display_name)(age))
                             .property_signal("checked", (callbacks.get_selected_list)(&state.user).signal_vec_cloned().to_signal_cloned().map(clone!(age_id => move |ages| {
                                 ages.contains(&age_id)
                             })))

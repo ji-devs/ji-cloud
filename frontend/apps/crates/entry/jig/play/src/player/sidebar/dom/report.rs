@@ -12,8 +12,8 @@ use super::super::{
     state::{ReportStatus, State},
 };
 
-const STR_REPORT: &'static str = "Report";
-const STR_REPORT_SENT: &'static str = "Your report has been sent.";
+const STR_REPORT: &str = "Report";
+const STR_REPORT_SENT: &str = "Your report has been sent.";
 
 pub fn render(state: Rc<State>) -> impl Signal<Item = Vec<Dom>> {
     state

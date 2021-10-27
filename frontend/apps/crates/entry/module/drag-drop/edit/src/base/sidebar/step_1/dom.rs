@@ -8,7 +8,6 @@ use components::{
 use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
 use std::rc::Rc;
-use utils::prelude::*;
 
 pub fn render_step_1(state: Rc<Step1>) -> Dom {
     html!("menu-tabs", {
@@ -27,16 +26,16 @@ pub fn render_step_1(state: Rc<Step1>) -> Dom {
                 .child_signal(state.tab.signal_cloned().map(clone!(state => move |tab| {
                     match tab {
                         Tab::BgImage(state) => {
-                            Some(render_image_search(state.clone(), None))
+                            Some(render_image_search(state, None))
                         },
                         Tab::BgColor(state) => {
-                            Some(render_color_picker(state.clone(), None))
+                            Some(render_color_picker(state, None))
                         },
                         Tab::BgOverlay(state) => {
-                            Some(render_image_search(state.clone(), None))
+                            Some(render_image_search(state, None))
                         },
                         Tab::StickerImage(state) => {
-                            Some(render_image_search(state.clone(), None))
+                            Some(render_image_search(state, None))
                         },
                         Tab::StickerText => {
                             Some(render_text_editor(state.sidebar.base.text_editor.clone()))

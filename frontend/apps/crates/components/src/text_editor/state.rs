@@ -30,7 +30,7 @@ pub struct State {
     pub callbacks: Callbacks,
 }
 
-pub const ELEMENT_DEFAULT_KEY: &'static str = "elementDefault";
+pub const ELEMENT_DEFAULT_KEY: &str = "elementDefault";
 
 impl State {
     pub fn new(
@@ -62,16 +62,16 @@ impl State {
     pub fn set_value(&self, value: Option<String>) {
         self.value.replace(value);
         if let Some(wysiwyg_ref) = &*self.wysiwyg_ref.lock_ref() {
-            self.update_wysiwyg_value(&wysiwyg_ref);
+            self.update_wysiwyg_value(wysiwyg_ref);
         }
     }
 
     pub fn select_all(&self) {
         if let Some(wysiwyg_ref) = &self.wysiwyg_ref.lock_ref().as_ref() {
             let select_all_method =
-                Reflect::get(&wysiwyg_ref, &JsValue::from_str("selectAll")).unwrap();
+                Reflect::get(wysiwyg_ref, &JsValue::from_str("selectAll")).unwrap();
             let select_all_method = select_all_method.dyn_ref::<js_sys::Function>().unwrap();
-            let _ = select_all_method.call0(&wysiwyg_ref);
+            let _ = select_all_method.call0(wysiwyg_ref);
         }
     }
 
@@ -79,16 +79,16 @@ impl State {
         match &*self.value.borrow() {
             Some(value) => {
                 let _ = Reflect::set(
-                    &wysiwyg_ref,
+                    wysiwyg_ref,
                     &JsValue::from_str("valueAsString"),
-                    &JsValue::from_str(&value),
+                    &JsValue::from_str(value),
                 );
             }
             None => {
                 let reset_value_method =
-                    Reflect::get(&wysiwyg_ref, &JsValue::from_str("clearValue")).unwrap();
+                    Reflect::get(wysiwyg_ref, &JsValue::from_str("clearValue")).unwrap();
                 let reset_value_method = reset_value_method.dyn_ref::<js_sys::Function>().unwrap();
-                let _ = reset_value_method.call0(&wysiwyg_ref);
+                let _ = reset_value_method.call0(wysiwyg_ref);
             }
         };
     }
@@ -149,11 +149,11 @@ impl State {
         if let Some(wysiwyg_ref) = &self.wysiwyg_ref.lock_ref().as_ref() {
             let (key, value) = control.to_js_key_value();
             let set_control_value_method =
-                Reflect::get(&wysiwyg_ref, &JsValue::from_str("setControlValue")).unwrap();
+                Reflect::get(wysiwyg_ref, &JsValue::from_str("setControlValue")).unwrap();
             let set_control_value_method = set_control_value_method
                 .dyn_ref::<js_sys::Function>()
                 .unwrap();
-            let _ = set_control_value_method.call2(&wysiwyg_ref, &key, &value);
+            let _ = set_control_value_method.call2(wysiwyg_ref, &key, &value);
         }
     }
 }

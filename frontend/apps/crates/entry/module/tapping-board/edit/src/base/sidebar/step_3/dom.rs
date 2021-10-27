@@ -5,7 +5,7 @@ use components::{
     audio::input::AudioInput,
     tabs::{MenuTab, MenuTabKind},
 };
-use dominator::{clone, html, Dom};
+use dominator::{clone, html, with_node, Dom};
 use futures_signals::signal::{Mutable, SignalExt};
 use utils::prelude::*;
 use web_sys::HtmlTextAreaElement;
@@ -93,24 +93,26 @@ fn render_tab_body(state: Rc<Step3>, tab: Tab) -> Dom {
             html!("div", {
                 .child(html!("input-wrapper", {
                     .property("label", crate::strings::step_3::STR_LABEL)
-                    .child(html!("textarea", {
-                        .property_signal("value", text_state.signal_cloned().map(|text| {
-                            text.unwrap_or_default()
-                        }))
-                        .property("placeholder", crate::strings::step_3::STR_PLACEHOLDER)
-                        .property("rows", 4)
-                        //Input is just local
-                        //Change pushes history and sets at a higher level
-                        .event(clone!(text_state => move |evt:events::Input| {
-                            let value = evt.value().unwrap_or_default();
-                            text_state.set(if value.is_empty() { None } else { Some(value) });
-                        }))
-                        .event(clone!(state => move |evt:events::Change| {
-                            let target = evt.dyn_target::<HtmlTextAreaElement>().unwrap();
-                            let value = target.value();
+                    .child(html!("textarea" => HtmlTextAreaElement, {
+                        .with_node!(elem => {
+                            .property_signal("value", text_state.signal_cloned().map(|text| {
+                                text.unwrap_or_default()
+                            }))
+                            .property("placeholder", crate::strings::step_3::STR_PLACEHOLDER)
+                            .property("rows", 4)
+                            //Input is just local
+                            //Change pushes history and sets at a higher level
+                            .event(clone!(text_state => move |_:events::Input| {
+                                let value = elem.value();
+                                text_state.set(if value.is_empty() { None } else { Some(value) });
+                            }))
+                            .event(clone!(state => move |evt:events::Change| {
+                                let target = evt.dyn_target::<HtmlTextAreaElement>().unwrap();
+                                let value = target.value();
 
-                            state.sidebar.base.traces.set_text(index, if value.is_empty() { None } else { Some(value) });
-                        }))
+                                state.sidebar.base.traces.set_text(index, if value.is_empty() { None } else { Some(value) });
+                            }))
+                        })
                     }))
                 }))
                 .child(html!("button", {
@@ -121,6 +123,6 @@ fn render_tab_body(state: Rc<Step3>, tab: Tab) -> Dom {
                 }))
             })
         }
-        Tab::Audio(audio_state) => AudioInput::render(audio_state.clone(), None),
+        Tab::Audio(audio_state) => AudioInput::render(audio_state, None),
     }
 }

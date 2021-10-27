@@ -87,7 +87,7 @@ impl State {
             .signal_ref(|tag_indices| {
                 tag_indices
                     .iter()
-                    .map(|tag_index| ImageTag::from(*tag_index).STR_DISPLAY_NAME().to_string())
+                    .map(|tag_index| ImageTag::from(*tag_index).display_name().to_string())
                     .collect::<Vec<String>>()
             })
             .to_signal_vec()

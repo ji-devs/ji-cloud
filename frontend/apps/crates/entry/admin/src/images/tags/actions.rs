@@ -40,9 +40,9 @@ impl ImageTags {
 
             for tag in ImageTag::iter() {
                 if let Some((index, curr)) = curr_list.iter().enumerate().find(|(_index, curr)| curr.index.0 == tag.as_index()) {
-                    if curr.display_name != tag.STR_DISPLAY_NAME() {
+                    if curr.display_name != tag.display_name() {
                         let req = ImageTagUpdateRequest {
-                            display_name: Some(tag.STR_DISPLAY_NAME().to_string()),
+                            display_name: Some(tag.display_name().to_string()),
                             index: None
                         };
                         let path = endpoints::image::tag::Update::PATH.replace("{index}", &tag.as_index().to_string());
@@ -50,12 +50,12 @@ impl ImageTags {
 
                         curr_list.set_cloned(index, Rc::new(ImageTagResponse {
                             index: curr.index,
-                            display_name: tag.STR_DISPLAY_NAME().to_string(),
+                            display_name: tag.display_name().to_string(),
                         }));
                     }
                 } else {
                     let req = ImageTagCreateRequest {
-                        display_name: tag.STR_DISPLAY_NAME().to_string()
+                        display_name: tag.display_name().to_string()
                     };
 
                     let path = endpoints::image::tag::Create::PATH.replace("{index}", &tag.as_index().to_string());
@@ -70,15 +70,14 @@ impl ImageTags {
 
             curr_list
                 .retain(|curr| {
-                    let flag = ImageTag::iter().find(|tag| tag.as_index() == curr.index.0).is_some();
-                    
+                    let flag = ImageTag::iter().any(|tag| tag.as_index() == curr.index.0);
+
                     if !flag {
                         to_remove.push(curr.index.0);
                     }
                     flag
                 });
 
-            
             for index in to_remove.iter() {
                 let path = endpoints::image::tag::Delete::PATH.replace("{index}", &index.to_string());
                 let _ = api_with_auth_empty::<EmptyError, _>(&path, endpoints::image::tag::Delete::METHOD, None::<()>).await.unwrap_ji();

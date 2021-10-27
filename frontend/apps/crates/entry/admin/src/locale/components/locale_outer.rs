@@ -14,7 +14,7 @@ use uuid::Uuid;
 use wasm_bindgen::UnwrapThrowExt;
 use web_sys::HtmlSelectElement;
 
-const STR_ADD_ENTRY: &'static str = "Add a text";
+const STR_ADD_ENTRY: &str = "Add a text";
 
 pub struct LocaleOuterDom {}
 
@@ -55,7 +55,7 @@ impl LocaleOuterDom {
                                     html!("option", {
                                         .property("text", e.name.to_string())
                                         .property("value", e.id.to_string())
-                                        .property("selected", selected.clone())
+                                        .property("selected", *selected)
                                     })
                                 })
                             )
@@ -115,15 +115,15 @@ impl LocaleOuterDom {
                             map_ref! {
                                 let in_section = state.section_options.signal_cloned().map(clone!(entry => move |section_options| {
                                     let section = entry.lock_ref().section.clone();
-                                    let section = section.unwrap_or(String::new());
+                                    let section = section.unwrap_or_default();
                                     *section_options.get(&section).unwrap()
                                 })),
                                 let in_item_kind = state.item_kind_filter.signal_cloned().map(clone!(entry => move |item_kind_filter| {
-                                    let item_kind_id = entry.lock_ref().item_kind_id.clone();
+                                    let item_kind_id = entry.lock_ref().item_kind_id;
                                     *item_kind_filter.get(&item_kind_id).unwrap()
                                 })),
                                 let in_status = state.status_options.signal_cloned().map(clone!(entry => move |status_options| {
-                                    let status = entry.lock_ref().status.clone();
+                                    let status = entry.lock_ref().status;
                                     *status_options.get(&status).unwrap()
                                 })) =>
                                 *in_section && *in_item_kind && *in_status
@@ -131,7 +131,7 @@ impl LocaleOuterDom {
 
                         }))
                         .map(clone!(state => move |entry| {
-                            EntryRow::render(entry.clone(), state.clone())
+                            EntryRow::render(entry, state.clone())
                         })))
                 })
             )

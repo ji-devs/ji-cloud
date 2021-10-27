@@ -108,7 +108,7 @@ impl<T: AsSticker> Stickers<T> {
 
     pub fn new(text_editor: Rc<TextEditorState>, callbacks: Callbacks<T>) -> Rc<Self> {
         Rc::new(Self {
-            text_editor: text_editor.clone(),
+            text_editor,
             list: MutableVec::new(),
             selected_index: Mutable::new(None),
             callbacks,
@@ -137,13 +137,13 @@ impl<T: AsSticker> Stickers<T> {
 
     pub fn get_as_text(&self, index: usize) -> Option<Rc<Text>> {
         self.get(index).and_then(|sticker| match sticker {
-            Sticker::Text(text) => Some(text.clone()),
+            Sticker::Text(text) => Some(text),
             _ => None,
         })
     }
     pub fn get_as_sprite(&self, index: usize) -> Option<Rc<Sprite>> {
         self.get(index).and_then(|sticker| match sticker {
-            Sticker::Sprite(sprite) => Some(sprite.clone()),
+            Sticker::Sprite(sprite) => Some(sprite),
             _ => None,
         })
     }

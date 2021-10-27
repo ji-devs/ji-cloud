@@ -10,12 +10,12 @@ use super::categories_select;
 
 use super::super::super::{actions::search, state::State};
 
-const STR_SEARCH: &'static str = "Search";
-const STR_ADVANCED: &'static str = "Advanced";
-const STR_GOAL_LABEL: &'static str = "Teaching Goal";
-const STR_GOAL_PLACEHOLDER: &'static str = "Select from the list";
-const STR_AFFILIATION_LABEL: &'static str = "Affiliation";
-const STR_AFFILIATION_PLACEHOLDER: &'static str = "Select one or more from the list";
+const STR_SEARCH: &str = "Search";
+const STR_ADVANCED: &str = "Advanced";
+const STR_GOAL_LABEL: &str = "Teaching Goal";
+const STR_GOAL_PLACEHOLDER: &str = "Select from the list";
+const STR_AFFILIATION_LABEL: &str = "Affiliation";
+const STR_AFFILIATION_PLACEHOLDER: &str = "Select one or more from the list";
 
 pub fn render(state: Rc<State>) -> Dom {
     html!("home-search-section-advanced", {
@@ -51,7 +51,7 @@ pub fn render(state: Rc<State>) -> Dom {
                                 let mut affiliations = state.search_selected.affiliations.lock_mut();
                                 match affiliations.contains(&affiliation.id) {
                                     true => affiliations.remove(&affiliation.id),
-                                    false => affiliations.insert(affiliation.id.clone()),
+                                    false => affiliations.insert(affiliation.id),
                                 };
                             }))
                         })
@@ -76,7 +76,7 @@ pub fn render(state: Rc<State>) -> Dom {
                                 let mut goals = state.search_selected.goals.lock_mut();
                                 match goals.contains(&goal.id) {
                                     true => goals.remove(&goal.id),
-                                    false => goals.insert(goal.id.clone()),
+                                    false => goals.insert(goal.id),
                                 };
                             }))
                         })
@@ -105,7 +105,7 @@ fn goal_value_signal(state: Rc<State>) -> impl Signal<Item = String> {
             let mut output = vec![];
             selected_goals.iter().for_each(|goal_id| {
                 // only search list if already populated
-                if available_goals.len() > 0 {
+                if !available_goals.is_empty() {
                     let goal = available_goals.iter().find(|goal| goal.id == *goal_id).unwrap_ji();
                     output.push(goal.display_name.clone());
                 }
@@ -123,7 +123,7 @@ fn affiliation_value_signal(state: Rc<State>) -> impl Signal<Item = String> {
             let mut output = vec![];
             selected_affiliations.iter().for_each(|affiliation_id| {
                 // only search list if already populated
-                if available_affiliations.len() > 0 {
+                if !available_affiliations.is_empty() {
                     let affiliation = available_affiliations.iter().find(|affiliation| affiliation.id == *affiliation_id).unwrap_ji();
                     output.push(affiliation.display_name.clone());
                 }

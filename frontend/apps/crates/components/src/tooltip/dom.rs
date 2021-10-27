@@ -27,7 +27,7 @@ where
                 } = &**data;
                 html!("overlay-tooltip-error", {
                     .apply(|dom| mixin(dom))
-                    .text(&body)
+                    .text(body)
 
                     .apply_if(state.container.is_some(), |dom| {
                         dom.property("container", state.container.as_ref().unwrap_ji().as_value())
@@ -95,7 +95,7 @@ where
                 } = &**data;
                 html!("overlay-tooltip-bubble", {
                     .apply(|dom| mixin(dom))
-                    .text(&body)
+                    .text(body)
                     .apply_if(state.container.is_some(), |dom| {
                         dom.property("container", state.container.as_ref().unwrap_ji().as_value())
                     })
@@ -123,7 +123,7 @@ where
                     } = &**data;
                     html!("overlay-tooltip-bubble", {
                         .apply(|dom| mixin(dom))
-                        .text(&body)
+                        .text(body)
                         .property_signal("target", bounds.denormalize_fixed_signal().map(|bounds| {
                             let rect:DomRect = bounds.into();
                             log::info!("{:?}", bounds);

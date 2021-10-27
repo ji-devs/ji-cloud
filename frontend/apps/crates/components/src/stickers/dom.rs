@@ -229,19 +229,19 @@ pub fn render_sticker<T: AsSticker>(
 ) -> Dom {
     match sticker.as_ref() {
         Sticker::Sprite(sprite) => render_sticker_sprite(
-            stickers.clone(),
+            stickers,
             index,
             sprite.clone(),
             opts.map(|opts| opts.into_sprite_unchecked()),
         ),
         Sticker::Text(text) => render_sticker_text(
-            stickers.clone(),
+            stickers,
             index,
             text.clone(),
             opts.map(|opts| opts.into_text_unchecked()),
         ),
         Sticker::Video(video) => render_sticker_video(
-            stickers.clone(),
+            stickers,
             index,
             video.clone(),
             opts.map(|opts| opts.into_video_unchecked()),
@@ -257,7 +257,7 @@ pub fn render_stickers_raw(stickers: &[RawSticker], theme_id: ThemeId) -> Dom {
 pub fn render_stickers_raw_vec(stickers: &[RawSticker], theme_id: ThemeId) -> Vec<Dom> {
     stickers
         .iter()
-        .map(|sticker| render_sticker_raw(&sticker, theme_id, None))
+        .map(|sticker| render_sticker_raw(sticker, theme_id, None))
         .collect::<Vec<Dom>>()
 }
 
@@ -299,7 +299,7 @@ where
                 }
             };
 
-            render_sticker_raw(&sticker, theme_id, Some(opts))
+            render_sticker_raw(sticker, theme_id, Some(opts))
         })
         .collect::<Vec<Dom>>()
 }

@@ -63,8 +63,8 @@ where
                 loader.load(clone!(init_from_raw, app => async move {
 
                     let (jig_id, module_id, jig) = (
-                        app.opts.jig_id.clone(),
-                        app.opts.module_id.clone(),
+                        app.opts.jig_id,
+                        app.opts.module_id,
                         app.jig.borrow().clone().unwrap_ji()
                     );
 

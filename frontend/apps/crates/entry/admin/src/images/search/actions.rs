@@ -17,7 +17,7 @@ pub fn search(state: Rc<State>, query: ImageSearchQuery) {
         route.push_state();
 
         //search
-        match api_with_auth::<ImageSearchResponse, EmptyError, _>(&endpoints::image::Search::PATH, endpoints::image::Search::METHOD, Some(query)).await {
+        match api_with_auth::<ImageSearchResponse, EmptyError, _>(endpoints::image::Search::PATH, endpoints::image::Search::METHOD, Some(query)).await {
             Ok(res) => {
                 state.response.set(Some(res))
             },

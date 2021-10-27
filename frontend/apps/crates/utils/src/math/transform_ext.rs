@@ -66,7 +66,7 @@ pub trait TransformExt: Clone {
     }
 
     fn map<A>(&self, f: impl FnOnce(&Self) -> A) -> A {
-        f(&self)
+        f(self)
     }
 }
 

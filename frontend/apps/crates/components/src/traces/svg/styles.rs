@@ -31,7 +31,10 @@ impl ShapeStyle {
 
         // TODO- kinda weird that the stroke is set above and here..
         // might need rethinking to consolidate better
-        if self.mode != Some(ShapeStyleMode::Transparent) && self.kind.is_some() && self.state.is_some() {
+        if self.mode != Some(ShapeStyleMode::Transparent)
+            && self.kind.is_some()
+            && self.state.is_some()
+        {
             let state = self.state.unwrap_ji();
 
             classes.push(match self.kind.unwrap_ji() {

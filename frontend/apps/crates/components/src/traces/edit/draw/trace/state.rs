@@ -3,7 +3,10 @@ use futures_signals::signal::Mutable;
 use std::rc::Rc;
 
 use crate::transform::state::{TransformCallbacks, TransformState};
-use shared::domain::jig::module::body::{Audio, Transform, _groups::design::{PathCommand, Trace as RawTrace, TraceKind, TraceShape as RawTraceShape}};
+use shared::domain::jig::module::body::{
+    Audio, Transform,
+    _groups::design::{PathCommand, Trace as RawTrace, TraceKind, TraceShape as RawTraceShape},
+};
 
 use utils::{math::BoundsF64, prelude::*};
 
@@ -74,7 +77,9 @@ impl crate::traces::utils::TraceExt for DrawTrace {
         };
 
         match &*self.shape.lock_ref() {
-            TraceShape::PathCommands(commands) => calc_bounds(ShapeRef::PathCommands(&commands.lock_ref()), offset),
+            TraceShape::PathCommands(commands) => {
+                calc_bounds(ShapeRef::PathCommands(&commands.lock_ref()), offset)
+            }
             TraceShape::Path(path) => calc_bounds(ShapeRef::Path(&path.lock_ref()), offset),
 
             TraceShape::Ellipse(radius_x, radius_y) => {
@@ -113,7 +118,9 @@ impl From<TraceShape> for RawTraceShape {
             TraceShape::Rect(width, height) => RawTraceShape::Rect(width, height),
             TraceShape::Ellipse(radius_x, radius_y) => RawTraceShape::Ellipse(radius_x, radius_y),
             TraceShape::Path(path) => RawTraceShape::Path(path.lock_ref().to_vec()),
-            TraceShape::PathCommands(commands) => RawTraceShape::PathCommands(commands.lock_ref().to_vec()),
+            TraceShape::PathCommands(commands) => {
+                RawTraceShape::PathCommands(commands.lock_ref().to_vec())
+            }
         }
     }
 }

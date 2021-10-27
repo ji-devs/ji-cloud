@@ -7,7 +7,7 @@ use std::rc::Rc;
 use utils::{colors::*, prelude::*};
 use wasm_bindgen_futures::spawn_local;
 
-static SYSTEM_COLORS: &'static [&str] = &[
+static SYSTEM_COLORS: &[&str] = &[
     "#00000000",
     "#ffffffff",
     "#fffcc7ff",
@@ -79,6 +79,6 @@ impl State {
     }
 
     fn get_theme_colors(theme_id: ThemeId) -> Vec<RGBA8> {
-        theme_id.get_colors().iter().map(|c| c.clone()).collect()
+        theme_id.get_colors().iter().copied().collect()
     }
 }

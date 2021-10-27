@@ -16,7 +16,7 @@ impl AudioInput {
             .apply_if(slot.is_some(), move |dom| {
                 dom.property("slot", slot.unwrap_ji())
             })
-            .property_signal("mode", state.mode.signal_cloned().map(|mode| get_element_mode(mode)))
+            .property_signal("mode", state.mode.signal_cloned().map(get_element_mode))
             .children(&mut [
                 add_method::render(state.clone(), AudioInputAddMethod::Record),
                 add_method::render(state.clone(), AudioInputAddMethod::Upload),

@@ -17,7 +17,7 @@ impl fmt::Debug for Templates {
 }
 impl Templates {
     pub fn new() -> Self {
-        let cache = TemplateCache::new(&vec![]);
+        let cache = TemplateCache::new(&[]);
 
         Self { cache }
     }

@@ -38,12 +38,12 @@ impl TracesEdit {
                 let size = state.trace.transform.size.signal_cloned(),
                 let display_trace = state.display_trace.signal()
                     => {
-                        (resize_info.clone(), size.clone(), display_trace.clone(), draw_points.clone(), shape.clone(), transform.clone())
+                        (resize_info.clone(), *size, *display_trace, draw_points.clone(), shape.clone(), transform.clone())
                     }
             }
         };
 
-        let mask_children = 
+        let mask_children =
             trace_signal().map(clone!(shadow_traces => move |(resize_info, size, display_trace, draw_points, shape, transform)| {
 
                 let mut elements:Vec<Dom> = Vec::new();
@@ -84,7 +84,7 @@ impl TracesEdit {
 
         let draw_kind = state.default_kind;
 
-        let draw_children = 
+        let draw_children =
             trace_signal().map(clone!(draw_kind, shadow_traces => move |(resize_info, size, display_trace, draw_points, shape, transform)| {
                 let mut elements = shadow_traces
                     .iter()
@@ -124,10 +124,10 @@ impl TracesEdit {
                         match shape {
 
                             TraceShape::PathCommands(commands) => {
-                                svg::render_path_commands_signal(shape_style, resize_info.clone(), transform_size, &commands)
+                                svg::render_path_commands_signal(shape_style, resize_info, transform_size, &commands)
                             },
                             TraceShape::Path(path) => {
-                                svg::render_path_signal(shape_style, resize_info.clone(), transform_size, &path)
+                                svg::render_path_signal(shape_style, resize_info, transform_size, &path)
                             },
 
                             TraceShape::Rect(width, height) => {
@@ -200,23 +200,24 @@ fn render_trace<S>(
 where
     S: Signal<Item = ShapeStyle> + 'static,
 {
-    let transform_size = Some(TransformSize::new_static(
-        &trace.transform,
-        trace.size.clone(),
-    ));
+    let transform_size = Some(TransformSize::new_static(&trace.transform, trace.size));
 
     match trace.shape {
-        RawTraceShape::PathCommands(ref commands) => {
-            svg::render_path_commands(shape_style, &resize_info, transform_size, &commands, callbacks)
-        },
+        RawTraceShape::PathCommands(ref commands) => svg::render_path_commands(
+            shape_style,
+            resize_info,
+            transform_size,
+            commands,
+            callbacks,
+        ),
 
         RawTraceShape::Path(ref path) => {
-            svg::render_path(shape_style, &resize_info, transform_size, &path, callbacks)
-        },
+            svg::render_path(shape_style, resize_info, transform_size, path, callbacks)
+        }
 
         RawTraceShape::Rect(width, height) => svg::render_rect(
             shape_style,
-            &resize_info,
+            resize_info,
             transform_size,
             width,
             height,
@@ -224,7 +225,7 @@ where
         ),
         RawTraceShape::Ellipse(radius_x, radius_y) => svg::render_ellipse(
             shape_style,
-            &resize_info,
+            resize_info,
             transform_size,
             radius_x,
             radius_y,

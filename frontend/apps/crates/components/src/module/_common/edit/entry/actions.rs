@@ -81,8 +81,8 @@ where
                 .load(clone!(_self, init_from_raw => async move {
 
                     let (jig_id, module_id, jig) = (
-                        _self.opts.jig_id.clone(),
-                        _self.opts.module_id.clone(),
+                        _self.opts.jig_id,
+                        _self.opts.module_id,
                         _self.jig.borrow().clone().unwrap_ji()
                     );
 
@@ -153,7 +153,7 @@ pub fn save<RawData, Mode, Step>(
         let path = Update::PATH.replace("{id}", &jig_id.0.to_string());
 
         let req = Some(ModuleUpdateRequest {
-            id: StableOrUniqueId::Unique(module_id.clone()),
+            id: StableOrUniqueId::Unique(module_id),
             is_complete: Some(raw_data.is_complete()),
             index: None,
             body: Some(body),

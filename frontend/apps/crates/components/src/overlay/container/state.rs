@@ -6,23 +6,19 @@
 // the dom flow, using something like a global mutable event system
 // but still using Dominator semantics to control it
 
-use std::{rc::Rc, sync::atomic::AtomicUsize};
-use futures_signals::signal_map::MutableBTreeMap;
 use dominator::Dom;
+use futures_signals::signal_map::MutableBTreeMap;
+use std::{rc::Rc, sync::atomic::AtomicUsize};
 
-pub(super) static KEY_COUNTER:AtomicUsize = AtomicUsize::new(0);
+pub(super) static KEY_COUNTER: AtomicUsize = AtomicUsize::new(0);
 thread_local! {
     pub(super) static OVERLAY_MAP:MutableBTreeMap<usize, Rc<dyn Fn() -> Dom>> = MutableBTreeMap::new();
 }
 
-pub struct OverlayContainer {
-}
+pub struct OverlayContainer {}
 
 impl OverlayContainer {
     pub fn new() -> Rc<Self> {
-        Rc::new(
-            Self{
-            }
-        )
-    } 
+        Rc::new(Self {})
+    }
 }

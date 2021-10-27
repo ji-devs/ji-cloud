@@ -8,8 +8,7 @@ use super::{
     game::dom::render as render_game,
     state::{Base, Phase},
 };
-use futures_signals::{signal::SignalExt, signal_vec::SignalVecExt};
-use utils::prelude::*;
+use futures_signals::signal::SignalExt;
 
 impl DomRenderable for Base {
     fn render(state: Rc<Base>) -> Dom {

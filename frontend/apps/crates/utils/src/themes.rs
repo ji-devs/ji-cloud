@@ -275,7 +275,7 @@ where
             // While there are entries remaining in the input, add them
             // into our vec.
             while let Some(value) = visitor.next_element::<String>()? {
-                let value = value.trim_start_matches("#");
+                let value = value.trim_start_matches('#');
                 let value = u32::from_str_radix(value, 16)
                     .map_err(|_| serde::de::Error::custom(format!("invalid color [{}]!", value)))?;
 

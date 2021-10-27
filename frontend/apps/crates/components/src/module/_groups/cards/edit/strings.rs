@@ -1,29 +1,29 @@
 use crate::lists::dual::dom::ColumnSide;
 use shared::domain::jig::module::body::_groups::cards::Mode;
 
-pub const STR_DONE: &'static str = "Done";
-pub const STR_CLEAR: &'static str = "Clear";
-pub const STR_CONTINUE: &'static str = "Continue";
+pub const STR_DONE: &str = "Done";
+pub const STR_CLEAR: &str = "Clear";
+pub const STR_CONTINUE: &str = "Continue";
 
-pub const STR_CREATE_NEW_LIST: &'static str = "Create new list";
+pub const STR_CREATE_NEW_LIST: &str = "Create new list";
 
-pub const STR_HEADER_ADD_PAIR: &'static str = "Add pair";
+pub const STR_HEADER_ADD_PAIR: &str = "Add pair";
 
 pub mod steps_nav {
-    pub const STR_CONTENT: &'static str = "Content";
-    pub const STR_DESIGN: &'static str = "Design";
-    pub const STR_SETTINGS: &'static str = "Settings";
-    pub const STR_PREVIEW: &'static str = "Preview";
+    pub const STR_CONTENT: &str = "Content";
+    pub const STR_DESIGN: &str = "Design";
+    pub const STR_SETTINGS: &str = "Settings";
+    pub const STR_PREVIEW: &str = "Preview";
 }
 
 pub mod error {
-    pub const STR_SINGLE_LIST_NUM_WORDS: &'static str =
+    pub const STR_SINGLE_LIST_NUM_WORDS: &str =
         "We recommend at least 2 pairs to create a memory game. Add more words to your list.";
 }
 pub mod confirm {
-    pub const STR_DELETE_PAIR_HEADER: &'static str = "Are you sure you want to delete the pair?";
-    pub const STR_DELETE_PAIR_CONFIRM: &'static str = "Delete pair";
-    pub const STR_DELETE_PAIR_CANCEL: &'static str = "Keep pair";
+    pub const STR_DELETE_PAIR_HEADER: &str = "Are you sure you want to delete the pair?";
+    pub const STR_DELETE_PAIR_CONFIRM: &str = "Delete pair";
+    pub const STR_DELETE_PAIR_CANCEL: &str = "Keep pair";
 }
 
 #[allow(non_snake_case)]

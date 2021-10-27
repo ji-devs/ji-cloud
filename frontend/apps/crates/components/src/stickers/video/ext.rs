@@ -19,10 +19,10 @@ impl VideoExt for Video {
     }
 }
 
-const REGULAR_URL_BASE: &'static str = "https://www.youtube.com/watch?v=";
-const SHARE_URL_BASE: &'static str = "https://youtu.be/";
-const EMBED_IFRAME_BASE: &'static str = "<iframe ";
-const EMBED_URL_BASE: &'static str = "https://www.youtube.com/embed/";
+const REGULAR_URL_BASE: &str = "https://www.youtube.com/watch?v=";
+const SHARE_URL_BASE: &str = "https://youtu.be/";
+const EMBED_IFRAME_BASE: &str = "<iframe ";
+const EMBED_URL_BASE: &str = "https://www.youtube.com/embed/";
 
 fn get_id_from_url(url: &str) -> Result<&str, ()> {
     let id;

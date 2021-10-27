@@ -2,7 +2,7 @@ use crate::state::*;
 use futures_signals::{
     map_ref,
     signal::{Signal, SignalExt},
-    signal_vec::{SignalVec, SignalVecExt},
+    signal_vec::SignalVec,
 };
 
 use components::module::_groups::cards::lookup::Side;
@@ -12,7 +12,6 @@ use rand::{
 };
 use shared::domain::jig::module::body::_groups::cards::Card;
 use std::rc::Rc;
-use utils::prelude::*;
 
 pub struct MainSettings {
     pub base: Rc<Base>,

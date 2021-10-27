@@ -11,7 +11,7 @@ use crate::{
             Anchor, ContentAnchor, MoveStrategy, State as TooltipState, TooltipData, TooltipError,
             TooltipTarget,
         },
-    }
+    },
 };
 use futures_signals::{
     map_ref,
@@ -76,7 +76,7 @@ pub fn render(state: Rc<State>) -> Dom {
                 }))
             }),
             render_column(state.clone(), ColumnSide::Left),
-            render_column(state.clone(), ColumnSide::Right),
+            render_column(state, ColumnSide::Right),
         ])
     })
 }

@@ -239,8 +239,8 @@ where
                         _self.opts.skip_save_for_debug,
                         _self.screenshot_loader.clone(),
                         _self.save_loader.clone(),
-                        _self.opts.jig_id.clone(),
-                        _self.opts.module_id.clone(),
+                        _self.opts.jig_id,
+                        _self.opts.module_id,
                     ),
                     Self::reset_from_history(_self.clone(), init_from_raw.clone())
                 ));
@@ -248,8 +248,8 @@ where
                 *_self.history.borrow_mut() = Some(history.clone());
 
                 let (jig_id, module_id) = (
-                    _self.opts.jig_id.clone(),
-                    _self.opts.module_id.clone(),
+                    _self.opts.jig_id,
+                    _self.opts.module_id,
                 );
 
                 if raw.requires_choose_mode() {

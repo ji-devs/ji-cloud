@@ -26,15 +26,7 @@ pub fn on_toggle(id: CategoryId, state: Rc<State>, flag: bool) {
     crate::images::meta::actions::save(
         state.meta.clone(),
         ImageUpdateRequest {
-            categories: Some(
-                state
-                    .image
-                    .categories
-                    .lock_ref()
-                    .iter()
-                    .map(|x| x.clone())
-                    .collect(),
-            ),
+            categories: Some(state.image.categories.lock_ref().iter().copied().collect()),
             ..ImageUpdateRequest::default()
         },
     );

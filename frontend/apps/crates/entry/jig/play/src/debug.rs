@@ -6,7 +6,7 @@ pub struct DebugSettings {
 }
 
 impl DebugSettings {
-    pub fn local() -> Self {
+    pub fn _local() -> Self {
         Self {
             empty_module_url: "http://localhost:4105/module/legacy/play/debug",
         }

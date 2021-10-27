@@ -111,15 +111,15 @@ impl ControlsChange {
             Self::Italic(italic) => JsValue::from_bool(*italic),
             Self::Underline(underline) => JsValue::from_bool(*underline),
             Self::Color(color) => match color {
-                Some(color) => JsValue::from_str(&color),
+                Some(color) => JsValue::from_str(color),
                 None => JsValue::UNDEFINED,
             },
             Self::HighlightColor(highlight_color) => match highlight_color {
-                Some(highlight_color) => JsValue::from_str(&highlight_color),
+                Some(highlight_color) => JsValue::from_str(highlight_color),
                 None => JsValue::UNDEFINED,
             },
             Self::BoxColor(highlight_color) => match highlight_color {
-                Some(box_color) => JsValue::from_str(&box_color),
+                Some(box_color) => JsValue::from_str(box_color),
                 None => JsValue::UNDEFINED,
             },
         };
@@ -156,6 +156,6 @@ where
             break;
         }
     }
-    let s = String::from(&s[start..end]);
-    s
+
+    String::from(&s[start..end])
 }

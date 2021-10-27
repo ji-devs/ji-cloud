@@ -1,4 +1,4 @@
-use dominator::{Dom, EventOptions, clone, html};
+use dominator::{clone, html, Dom, EventOptions};
 
 use super::super::menu::{dom as MenuDom, state::State as MenuState};
 use super::{actions, state::*};

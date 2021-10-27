@@ -25,10 +25,10 @@ use super::{
     state::{ActivePopup, State},
 };
 
-const STR_BACK: &'static str = "Back";
-const STR_COPIED: &'static str = "Copied to the clipboard";
-const STR_COPY_CODE: &'static str = "Copy Code";
-const JIGZI_BASE_URL: &'static str = "https://jigzi.org";
+const STR_BACK: &str = "Back";
+const STR_COPIED: &str = "Copied to the clipboard";
+const STR_COPY_CODE: &str = "Copy Code";
+const JIGZI_BASE_URL: &str = "https://jigzi.org";
 
 pub fn render(state: Rc<State>, anchor: Dom, slot: Option<&str>) -> Dom {
     html!("anchored-overlay", {

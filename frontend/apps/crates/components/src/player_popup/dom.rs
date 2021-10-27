@@ -29,7 +29,7 @@ impl PlayerPopup {
                         Some(html!("iframe", {
                             .property("slot", "iframe")
                             .property("src", {
-                                let url: String = Route::Jig(JigRoute::Play(state.jig_id.clone(), None, state.player_options.clone())).into();
+                                let url: String = Route::Jig(JigRoute::Play(state.jig_id, None, state.player_options.clone())).into();
                                 url
                             })
                         }))

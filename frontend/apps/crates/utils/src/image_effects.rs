@@ -17,7 +17,7 @@ pub struct ImageEffect {
 
 impl ImageEffect {
     pub async fn new(src: Image) -> Self {
-        let url = image_lib_url(src.lib.clone(), PngImageFile::Resized, src.id.clone());
+        let url = image_lib_url(src.lib, PngImageFile::Resized, src.id);
         let img = match awsm_web::loaders::image::load(url).await {
             Ok(img) => img,
             Err(_) => {

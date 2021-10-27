@@ -20,9 +20,7 @@ pub struct Step3 {
 
 impl Step3 {
     pub fn new(sidebar: Rc<Sidebar>) -> Rc<Self> {
-        let _self = Rc::new(Self { sidebar });
-
-        _self
+        Rc::new(Self { sidebar })
     }
 
     //The tab kind state is re-generated when selecting or deselecting a trace
@@ -105,7 +103,7 @@ impl Tab {
         }
     }
 
-    pub fn kind(&self) -> MenuTabKind {
+    pub fn _kind(&self) -> MenuTabKind {
         match self {
             Self::Text(_, _) => MenuTabKind::Text,
             Self::Audio(_) => MenuTabKind::Audio,

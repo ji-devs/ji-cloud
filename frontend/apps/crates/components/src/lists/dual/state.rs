@@ -67,14 +67,12 @@ impl State {
             .iter()
             .map(|mutable_string| mutable_string.get_cloned())
             .filter(|x| !x.is_empty())
-            .map(|x| x.to_string())
             .zip(
                 self.right
                     .lock_ref()
                     .iter()
                     .map(|mutable_string| mutable_string.get_cloned())
-                    .filter(|x| !x.is_empty())
-                    .map(|x| x.to_string()),
+                    .filter(|x| !x.is_empty()),
             )
             .collect();
 

@@ -1,19 +1,18 @@
 use crate::image::search::state::{ImageSearchCheckboxKind, NextPage, SearchMode};
 
-use super::{
-    actions,
-    state::State,
-    types::*,
-};
+use super::{actions, state::State, types::*};
 use dominator::{clone, html, Dom};
-use futures_signals::{signal::SignalExt, signal_vec::{MutableVec, SignalVec, SignalVecExt}};
+use futures_signals::{
+    signal::SignalExt,
+    signal_vec::{MutableVec, SignalVec, SignalVecExt},
+};
 use shared::domain::{jig::module::body::Image, search::WebImageSearchItem};
-use url::Url;
 use std::{pin::Pin, rc::Rc, str::FromStr};
+use url::Url;
 use utils::prelude::*;
 
-const STR_SHOW_ONLY_BACKGROUNDS: &'static str = "Show only background";
-const STR_DONT_INCLUDE_BACKGROUND: &'static str = "Do not include backgrounds";
+const STR_SHOW_ONLY_BACKGROUNDS: &str = "Show only background";
+const STR_DONT_INCLUDE_BACKGROUND: &str = "Do not include backgrounds";
 
 pub fn render(state: Rc<State>, slot: Option<&str>) -> Dom {
     html!("empty-fragment", {
@@ -78,26 +77,31 @@ pub fn render_loaded(state: Rc<State>) -> Dom {
     })
 }
 
-
-fn images_signal_vec(state: Rc<State>, search_mode: &SearchMode) -> Pin<Box<dyn SignalVec<Item = Dom>>> {
+fn images_signal_vec(
+    state: Rc<State>,
+    search_mode: &SearchMode,
+) -> Pin<Box<dyn SignalVec<Item = Dom>>> {
     match search_mode {
         SearchMode::Sticker(images) => {
-            let elements = images.signal_vec_cloned().map(clone!(state => move |image| {
-                render_image(Rc::clone(&state), image, "images")
-            }));
+            let elements = images
+                .signal_vec_cloned()
+                .map(clone!(state => move |image| {
+                    render_image(Rc::clone(&state), image, "images")
+                }));
 
             Box::pin(elements)
-        },
+        }
         SearchMode::Web(images) => {
-            let elements = images.signal_vec_cloned().map(clone!(state => move |image| {
-                render_web_image(Rc::clone(&state), image, "images")
-            }));
+            let elements = images
+                .signal_vec_cloned()
+                .map(clone!(state => move |image| {
+                    render_web_image(Rc::clone(&state), image, "images")
+                }));
 
             Box::pin(elements)
-        },
+        }
     }
 }
-
 
 fn render_image(state: Rc<State>, image: Image, slot: &str) -> Dom {
     html!("img-ji", {
@@ -147,7 +151,7 @@ fn render_web_image(state: Rc<State>, image: WebImageSearchItem, slot: &str) -> 
 }
 
 fn render_controls(state: Rc<State>) -> Vec<Dom> {
-    let options = &state.clone().options;
+    let options = &state.options;
     let mut vec = Vec::new();
 
     if let Some(checkbox_kind) = &options.checkbox_kind {
@@ -248,7 +252,7 @@ fn render_filters(state: Rc<State>) -> Dom {
                         .property("slot", "style-options")
                         .property("label", &style.display_name)
                         .apply(|dom| {
-                            let style_id = style.id.clone();
+                            let style_id = style.id;
                             dom.event(clone!(state => move |e: events::CustomToggle| {
                                 match e.value() {
                                     true => state.selected_styles.as_ref().borrow_mut().insert(style_id),

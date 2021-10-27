@@ -23,13 +23,13 @@ pub fn render(state: Rc<Step2>) -> Dom {
                 .child_signal(state.tab.signal_cloned().map(|tab| {
                     match tab {
                         Tab::Image(state) => {
-                            Some(render_image_search(state.clone(), None))
+                            Some(render_image_search(state, None))
                         },
                         Tab::Color(state) => {
-                            Some(render_color_picker(state.clone(), None))
+                            Some(render_color_picker(state, None))
                         },
                         Tab::Overlay(state) => {
-                            Some(render_image_search(state.clone(), None))
+                            Some(render_image_search(state, None))
                         },
                     }
                 }))

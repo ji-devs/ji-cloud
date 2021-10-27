@@ -11,7 +11,7 @@ use shared::domain::jig::module::body::{
     drag_drop::{Interactive, ItemKind},
 };
 use std::{cell::RefCell, rc::Rc};
-use utils::{drag::Drag, prelude::*};
+use utils::drag::Drag;
 
 use components::collision::stickers_traces::pixels::{StickerBoundsKind, StickerHitSource};
 use components::instructions::player::InstructionsPlayer;

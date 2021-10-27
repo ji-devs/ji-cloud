@@ -7,10 +7,7 @@ use components::{
     traces::show::{TracesShow, TracesShowMode},
 };
 use dominator::{apply_methods, clone, html, Dom};
-use futures_signals::{
-    signal::{Mutable, SignalExt},
-    signal_vec::SignalVecExt,
-};
+use futures_signals::signal::{Mutable, SignalExt};
 use std::rc::Rc;
 use utils::prelude::*;
 
@@ -31,7 +28,7 @@ pub fn render(state: Rc<PlayState>) -> Dom {
             })
         })))
         .child_signal(state.feedback_player.signal_cloned().map(|feedback| {
-            feedback.map(|feedback| InstructionsPlayer::render(feedback))
+            feedback.map(InstructionsPlayer::render)
         }))
         .child(TracesShow::render(TracesShow::new(
                 state.game.base.target_areas
@@ -47,7 +44,7 @@ pub fn render(state: Rc<PlayState>) -> Dom {
                 .map(|item| {
                     match item {
                         PlayItem::Static(sticker) => {
-                            render_sticker_raw(&sticker, theme_id, None)
+                            render_sticker_raw(sticker, theme_id, None)
                         },
                         PlayItem::Interactive(item) => {
                             let mut opts = BaseRawRenderOptions::default();

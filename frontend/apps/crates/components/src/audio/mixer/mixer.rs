@@ -8,7 +8,9 @@ use utils::{path, prelude::*};
 use std::borrow::Cow;
 use std::ops::Deref;
 
-pub use awsm_web::audio::{AudioClip, AudioClipOptions, AudioHandle, WeakAudioHandle, AudioSource, Id};
+pub use awsm_web::audio::{
+    AudioClip, AudioClipOptions, AudioHandle, AudioSource, Id, WeakAudioHandle,
+};
 
 thread_local! {
     pub static AUDIO_MIXER:AudioMixer = AudioMixer {
@@ -37,7 +39,7 @@ impl AudioSettings {
     }
 
     pub fn bg_source(&self) -> impl Into<AudioSource> {
-        let path: AudioPath = self.bg.clone().into();
+        let path: AudioPath = self.bg.into();
         path
     }
 }
@@ -181,9 +183,9 @@ impl AudioMixer {
         self.inner.play_oneshot(audio.into()).unwrap_ji()
     }
 
-    pub fn play_oneshot_on_ended<F, A>(&self, audio: A, on_ended: F) -> WeakAudioHandle 
+    pub fn play_oneshot_on_ended<F, A>(&self, audio: A, on_ended: F) -> WeakAudioHandle
     where
-        F: FnMut() -> () + 'static,
+        F: FnMut() + 'static,
         A: Into<AudioSource>,
     {
         self.inner
@@ -198,7 +200,7 @@ impl AudioMixer {
 
     pub fn play_on_ended<F, A>(&self, audio: A, is_loop: bool, on_ended: F) -> AudioHandle
     where
-        F: FnMut() -> () + 'static,
+        F: FnMut() + 'static,
         A: Into<AudioSource>,
     {
         self.inner
@@ -213,7 +215,7 @@ impl AudioMixer {
         options: AudioClipOptions<F>,
     ) -> AudioHandle
     where
-        F: FnMut() -> () + 'static,
+        F: FnMut() + 'static,
     {
         self.inner.add_source(audio.into(), options).unwrap_ji()
     }

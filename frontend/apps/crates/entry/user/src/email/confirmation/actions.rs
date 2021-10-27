@@ -15,7 +15,7 @@ impl SendEmailConfirmationPage {
             let query = VerifyEmailRequest::Resend { email };
 
             let resp: Result<(), EmptyError> = api_no_auth_empty(
-                &user::VerifyEmail::PATH,
+                user::VerifyEmail::PATH,
                 user::VerifyEmail::METHOD,
                 Some(query),
             )

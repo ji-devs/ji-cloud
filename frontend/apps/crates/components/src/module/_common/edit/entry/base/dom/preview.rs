@@ -85,7 +85,7 @@ where
                 match preview_mode {
                     PreviewMode::PostPreview(post_preview_state) => {
                         let data = state.history.get_current();
-                        Some(render_post_preview(post_preview_state.clone(), data))
+                        Some(render_post_preview(post_preview_state, data))
                     }
                     _ => None
                 }

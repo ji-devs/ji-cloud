@@ -34,7 +34,7 @@ impl MainSelect {
         Rc::new(Self { base, items })
     }
 
-    pub fn item_kinds(&self) -> impl SignalVec<Item = (usize, ItemKind)> {
+    pub fn _item_kinds(&self) -> impl SignalVec<Item = (usize, ItemKind)> {
         self.base
             .stickers
             .list

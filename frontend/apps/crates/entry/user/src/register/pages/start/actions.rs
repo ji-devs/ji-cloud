@@ -6,7 +6,7 @@ use shared::{
     error::EmptyError,
 };
 use std::rc::Rc;
-use utils::{prelude::*, routes::*};
+use utils::prelude::*;
 
 use crate::password::state::*;
 
@@ -39,14 +39,13 @@ pub fn register_email(state: Rc<State>) {
             password
         };
 
-        let (resp, status):(Result<(), EmptyError>, u16) = api_no_auth_empty_status(&user::Create::PATH, user::Create::METHOD, Some(query)).await;
+        let (resp, status):(Result<(), EmptyError>, u16) = api_no_auth_empty_status(user::Create::PATH, user::Create::METHOD, Some(query)).await;
 
-        
         match resp {
             Ok(_) => {
                 let route:String = Route::User(UserRoute::SendEmailConfirmation(email)).into();
                 dominator::routing::go_to_url(&route);
-            }, 
+            },
             Err(_err) => {
                 if status == 409 {
                     state.email_status.set(Some(EmailStatus::EmailExists));

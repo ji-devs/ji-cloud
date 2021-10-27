@@ -37,7 +37,7 @@ impl Draw {
     }
     pub fn move_draw(&self, x: i32, y: i32) {
         if let Some(drag) = &*self.drag.lock_ref() {
-            if let Some(_) = drag.update(x, y) {
+            if drag.update(x, y).is_some() {
                 let resize_info = get_resize_info();
                 let (norm_x, norm_y) = resize_info.get_pos_normalized(x as f64, y as f64);
                 self.draw_points.lock_mut().push((norm_x, norm_y));

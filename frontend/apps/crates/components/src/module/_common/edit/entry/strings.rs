@@ -1,1 +1,1 @@
-pub const STR_DONE: &'static str = "Done";
+pub const STR_DONE: &str = "Done";

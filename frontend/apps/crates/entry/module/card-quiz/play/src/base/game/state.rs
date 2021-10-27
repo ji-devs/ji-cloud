@@ -1,6 +1,6 @@
 use crate::base::state::Base;
 use components::module::_groups::cards::lookup::Side;
-use futures_signals::signal::{Mutable, SignalExt};
+use futures_signals::signal::Mutable;
 use rand::prelude::*;
 use shared::domain::jig::module::body::_groups::cards::Card;
 use shared::domain::jig::module::body::card_quiz::PlayerSettings;
@@ -88,11 +88,7 @@ impl Current {
         others.shuffle(rng);
 
         //take just what we need
-        let mut others: Vec<CardPairId> = others
-            .into_iter()
-            .take(amount - 1)
-            .map(|x| x.clone())
-            .collect();
+        let mut others: Vec<CardPairId> = others.into_iter().take(amount - 1).cloned().collect();
 
         //add in our target
         others.push(target.clone());

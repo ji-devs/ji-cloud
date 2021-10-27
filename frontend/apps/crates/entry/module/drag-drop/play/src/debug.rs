@@ -1,5 +1,3 @@
-use futures_signals::{signal::SignalExt, signal_vec::SignalVecExt};
-
 use components::stickers::{sprite::ext::*, text::ext::*};
 use once_cell::sync::OnceCell;
 use shared::{
@@ -40,11 +38,11 @@ cfg_if::cfg_if! {
 
 pub static SETTINGS: OnceCell<DebugSettings> = OnceCell::new();
 
-const IMAGE_UUID: &'static str = "f2e63cf2-ee11-11eb-9b68-4bf1f063ab1c";
+const IMAGE_UUID: &str = "f2e63cf2-ee11-11eb-9b68-4bf1f063ab1c";
 //const IMAGE_UUID:&'static str = "e84dd7fe-c92d-11eb-8c82-cfd1d3fd13ff";
-const AUDIO_UUID: &'static str = "734314da-0b07-11ec-95f0-2b4855fa3cb8";
+const AUDIO_UUID: &str = "734314da-0b07-11ec-95f0-2b4855fa3cb8";
 
-pub const DEBUG_TEXT: &'static str = "Hello World this is a long line of text";
+pub const DEBUG_TEXT: &str = "Hello World this is a long line of text";
 
 #[derive(Debug, Default)]
 pub struct DebugSettings {
@@ -149,7 +147,7 @@ impl DebugSettings {
                                         },
                                         InitSticker::Sprite => {
                                             let mut sprite = Sprite::new(Image {
-                                                id: ImageId(Uuid::parse_str(IMAGE_UUID).unwrap_ji()), 
+                                                id: ImageId(Uuid::parse_str(IMAGE_UUID).unwrap_ji()),
                                                 lib: MediaLibrary::Global
                                             });
 
@@ -164,10 +162,10 @@ impl DebugSettings {
 
                                 Item {
                                     sticker,
-                                    kind: item_kind.clone() 
+                                    kind: item_kind.clone()
                                 }
                             }).collect(),
-                            theme: ThemeChoice::Override(ThemeId::Chalkboard), 
+                            theme: ThemeChoice::Override(ThemeId::Chalkboard),
                             instructions: Instructions::default(),
                             //feedback: Instructions::default(),
                             feedback: Instructions {

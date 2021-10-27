@@ -3,7 +3,6 @@ use components::stickers::dom::{
     mixin_sticker_button, render_sticker_raw, BaseRawRenderOptions, StickerRawRenderOptions,
 };
 use dominator::{clone, html, Dom};
-use futures_signals::{signal::SignalExt, signal_vec::SignalVecExt};
 use std::rc::Rc;
 use utils::prelude::*;
 
@@ -13,7 +12,7 @@ impl MainDrag {
 
         html!("empty-fragment", {
             .children( {
-                state.clone().items
+                state.items
                     .iter()
                     .map(|item| {
 
@@ -40,14 +39,14 @@ impl MainDrag {
                                         }))
                                 }));
 
-                                let opts = StickerRawRenderOptions::new(&raw_sticker, Some(opts));
+                                let opts = StickerRawRenderOptions::new(raw_sticker, Some(opts));
                                 Some(opts)
                             } else {
                                 None
                             }
                         };
 
-                        render_sticker_raw(&raw_sticker, theme_id, opts)
+                        render_sticker_raw(raw_sticker, theme_id, opts)
                     })
                     .collect::<Vec<Dom>>()
             })

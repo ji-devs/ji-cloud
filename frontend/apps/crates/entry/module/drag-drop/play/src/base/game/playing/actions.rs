@@ -75,7 +75,7 @@ impl PlayState {
 
     pub fn evaluate(state: Rc<Self>, item: Rc<InteractiveItem>) {
         spawn_local(async move {
-            let mut move_back = false;
+            let mut move_back = true;
             let mut is_correct = false;
             if let Some(target_index) = item.target_index.borrow().as_ref() {
                 let target_index = *target_index;
@@ -92,10 +92,10 @@ impl PlayState {
                         .collect();
 
                     if let Some(index) = get_hit_index(hit_source, &traces).await {
-                        if DEBUGGING_EVALUATION_RESULT {
-                            if !DEBUGGING_EVALUATION_RESULT_ONLY_MATCH || index == target_index {
-                                debug_render_hit_trace(index, &traces);
-                            }
+                        if DEBUGGING_EVALUATION_RESULT
+                            && (!DEBUGGING_EVALUATION_RESULT_ONLY_MATCH || index == target_index)
+                        {
+                            debug_render_hit_trace(index, &traces);
                         }
                         if index == target_index {
                             log::info!("GOT A WINNER!");
@@ -105,8 +105,6 @@ impl PlayState {
                 }
 
                 move_back = !is_correct;
-            } else {
-                move_back = true;
             }
 
             if move_back {

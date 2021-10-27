@@ -117,7 +117,6 @@ impl Base {
         stickers.replace_all(
             base_content
                 .stickers
-                .clone()
                 .iter()
                 .map(|raw_sticker| Sticker::new(stickers.clone(), raw_sticker))
                 .collect::<Vec<Sticker>>(),

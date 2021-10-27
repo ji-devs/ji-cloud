@@ -7,13 +7,11 @@ impl PasswordState {
         let password = &self.value.borrow();
         if crate::debug::settings().skip_password_strength {
             self.strength.set(PasswordStrength::Strong);
+        } else if password.is_empty() {
+            self.strength.set(PasswordStrength::None);
         } else {
-            if password.is_empty() {
-                self.strength.set(PasswordStrength::None);
-            } else {
-                let estimate = zxcvbn(password, &[]).unwrap_ji();
-                self.strength.set(estimate.into());
-            }
+            let estimate = zxcvbn(password, &[]).unwrap_ji();
+            self.strength.set(estimate.into());
         }
     }
 }

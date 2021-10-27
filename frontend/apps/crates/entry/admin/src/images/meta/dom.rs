@@ -13,13 +13,13 @@ use utils::{events, routes::*};
 use wasm_bindgen::prelude::*;
 use web_sys::HtmlInputElement;
 
-const STR_REPLACE: &'static str = "Replace";
-const STR_DELETE: &'static str = "Delete";
-const STR_PREMIUM: &'static str = "Premium";
-const STR_IMAGENAME: &'static str = "Image name";
-const STR_DESCRIPTION: &'static str = "Image description";
-const STR_NEXT: &'static str = "Next";
-const STR_PUBLISH: &'static str = "Publish";
+const STR_REPLACE: &str = "Replace";
+const STR_DELETE: &str = "Delete";
+const STR_PREMIUM: &str = "Premium";
+const STR_IMAGENAME: &str = "Image name";
+const STR_DESCRIPTION: &str = "Image description";
+const STR_NEXT: &str = "Next";
+const STR_PUBLISH: &str = "Publish";
 
 pub struct ImageMetaPage {}
 

@@ -20,7 +20,7 @@ use futures_signals::{
 use shared::domain::jig::{
     module::{
         body::{
-            Audio, Instructions, StepExt, ThemeChoice, Transform,
+            Audio, Instructions, ThemeChoice, Transform,
             _groups::design::{Trace as RawTrace, TraceKind},
             drag_drop::{
                 Hint, Interactive as RawInteractive, Item as RawItem, ItemKind as RawItemKind,
@@ -283,7 +283,7 @@ impl Base {
             backgrounds,
             stickers,
             traces,
-            play_settings: Rc::new(PlaySettings::new(content.play_settings.clone())),
+            play_settings: Rc::new(PlaySettings::new(content.play_settings)),
             drag_item_selected_index: Mutable::new(None),
         });
 

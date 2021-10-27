@@ -13,7 +13,7 @@ use futures_signals::signal::Mutable;
 use shared::domain::jig::module::body::Background;
 use std::rc::Rc;
 
-const STR_SELECT_BACKGROUND_COLOR: &'static str = "Select background color";
+const STR_SELECT_BACKGROUND_COLOR: &str = "Select background color";
 
 pub struct Step2<RawData: RawDataExt, E: ExtraExt> {
     pub base: Rc<CardsBase<RawData, E>>,

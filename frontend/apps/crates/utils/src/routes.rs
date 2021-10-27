@@ -152,9 +152,9 @@ impl Route {
     }
 
     pub fn from_url(url: &str) -> Self {
-        let url = Url::new(&url).unwrap_ji();
+        let url = Url::new(url).unwrap_ji();
         let paths = url.pathname();
-        let paths = paths.split("/").into_iter().skip(1).collect::<Vec<_>>();
+        let paths = paths.split('/').into_iter().skip(1).collect::<Vec<_>>();
         let paths = paths.as_slice();
         let params_map = url.search_params();
 
@@ -448,13 +448,7 @@ impl From<&Route> for String {
 pub fn is_param_bool(param: &str) -> bool {
     match get_param(param) {
         None => false,
-        Some(value) => {
-            if value == "true" {
-                true
-            } else {
-                false
-            }
-        }
+        Some(value) => value == "true",
     }
 }
 pub fn get_param_index(param: &str) -> Option<usize> {

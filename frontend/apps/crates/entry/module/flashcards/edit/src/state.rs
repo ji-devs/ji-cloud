@@ -99,6 +99,6 @@ pub async fn init_from_raw(
         )),
         header: Rc::new(Header::new(base.clone())),
         footer: Rc::new(Footer::new(base.clone())),
-        overlay: Rc::new(Overlay::new(base.clone())),
+        overlay: Rc::new(Overlay::new(base)),
     }
 }

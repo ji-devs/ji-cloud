@@ -20,7 +20,7 @@ use super::state::{LoggedInState, State};
 
 pub fn fetch_profile(state: Rc<State>) {
     state.loader.load(clone!(state => async move {
-        let (result, status) = api_with_auth_status::<UserProfile, EmptyError, ()>(&Profile::PATH, Profile::METHOD, None).await;
+        let (result, status) = api_with_auth_status::<UserProfile, EmptyError, ()>(Profile::PATH, Profile::METHOD, None).await;
 
         match status  {
             401 | 403 => {
@@ -67,7 +67,7 @@ pub fn navigate_to_login() {
     );
     let redirect: String = js_sys::encode_uri_component(&redirect).into();
 
-    let route: String = Route::User(UserRoute::Login(redirect)).to_string().into();
+    let route: String = Route::User(UserRoute::Login(redirect)).to_string();
 
     let url = format!("{}{}", origin, route);
 

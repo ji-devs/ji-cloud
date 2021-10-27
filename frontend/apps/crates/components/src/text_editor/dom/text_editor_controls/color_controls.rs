@@ -112,14 +112,8 @@ pub fn render(state: Rc<State>) -> Dom {
 }
 
 fn hex_to_rgba8_optional(color: &Option<String>) -> Option<RGBA8> {
-    match color {
-        Some(color) => Some(hex_to_rgba8(&color)),
-        None => None,
-    }
+    color.as_ref().map(|color| hex_to_rgba8(color))
 }
 fn rgba8_to_hex_optional(color: &Option<RGBA8>) -> Option<String> {
-    match *color {
-        Some(color) => Some(rgba8_to_hex(&color)),
-        None => None,
-    }
+    (*color).map(|color| rgba8_to_hex(&color))
 }

@@ -1,5 +1,5 @@
 use crate::firebase::wait_for_upload_ready;
-use crate::image::search::state::{ImageSearchCheckboxKind, NextPage, RECENT_COUNT, SearchMode};
+use crate::image::search::state::{ImageSearchCheckboxKind, NextPage, SearchMode, RECENT_COUNT};
 use crate::image::tag::ImageTag;
 
 use super::super::upload::upload_image;
@@ -27,16 +27,14 @@ use shared::{
     error::EmptyError,
     media::MediaLibrary,
 };
-use url::Url;
 use std::rc::Rc;
 use std::str::FromStr;
+use url::Url;
 use utils::prelude::*;
 use web_sys::File;
 
 pub async fn web_to_image(url: Url) -> Result<Image, ()> {
-    let req = WebMediaUrlCreateRequest {
-        url
-    };
+    let req = WebMediaUrlCreateRequest { url };
 
     let res = endpoints::media::Create::api_with_auth(Some(req))
         .await
@@ -46,11 +44,7 @@ pub async fn web_to_image(url: Url) -> Result<Image, ()> {
         unreachable!("Only images here");
     }
 
-    wait_for_upload_ready(
-        &res.id, 
-        MediaLibrary::Web, 
-        None
-    ).await;
+    wait_for_upload_ready(&res.id, MediaLibrary::Web, None).await;
 
     Ok(Image {
         id: ImageId(res.id),
@@ -63,7 +57,7 @@ impl State {
         if let Some(on_select) = self.callbacks.on_select.as_ref() {
             on_select(image.clone());
         }
-        add_recent(&self, &image);
+        add_recent(self, &image);
     }
 }
 
@@ -81,7 +75,7 @@ pub fn on_web_image_click(state: Rc<State>, url: &str) {
 
 pub async fn get_styles() -> Vec<ImageStyle> {
     let res = api_with_auth::<MetadataResponse, (), ()>(
-        &endpoints::meta::Get::PATH,
+        endpoints::meta::Get::PATH,
         endpoints::meta::Get::METHOD,
         None,
     )
@@ -120,7 +114,8 @@ async fn search_async_web(state: Rc<State>) {
 
     let mut tags = state.options.tags.clone().unwrap_or_default();
     match &state.options.checkbox_kind {
-        Some(ImageSearchCheckboxKind::BackgroundLayer1Filter) | Some(ImageSearchCheckboxKind::BackgroundLayer2Filter) => {
+        Some(ImageSearchCheckboxKind::BackgroundLayer1Filter)
+        | Some(ImageSearchCheckboxKind::BackgroundLayer2Filter) => {
             let tag = match &state.options.checkbox_kind {
                 Some(ImageSearchCheckboxKind::BackgroundLayer1Filter) => ImageTag::BackgroundLayer1,
                 Some(ImageSearchCheckboxKind::BackgroundLayer2Filter) => ImageTag::BackgroundLayer2,
@@ -133,8 +128,8 @@ async fn search_async_web(state: Rc<State>) {
             } else {
                 tags.retain(|t| t != &tag);
             };
-        },
-        _ => {},
+        }
+        _ => {}
     };
 
     let req = WebImageSearchQuery {
@@ -145,8 +140,12 @@ async fn search_async_web(state: Rc<State>) {
 
     match res {
         Ok(res) => {
-            state.search_mode.set(SearchMode::Web(Rc::new(MutableVec::new_with_values(res.images))));
-        },
+            state
+                .search_mode
+                .set(SearchMode::Web(Rc::new(MutableVec::new_with_values(
+                    res.images,
+                ))));
+        }
         Err(e) => {
             log::error!("{:#?}", e);
         }
@@ -193,12 +192,7 @@ async fn search_async(state: Rc<State>, page: u32) {
     let search_query = ImageSearchQuery {
         q: state.query.lock_ref().clone(),
         page: Some(page),
-        styles: state
-            .selected_styles
-            .borrow()
-            .iter()
-            .map(|style_id| style_id.clone())
-            .collect(),
+        styles: state.selected_styles.borrow().iter().copied().collect(),
         affiliations,
         kind,
         tags: tags.iter().map(|x| ImageTagIndex(x.as_index())).collect(),
@@ -219,30 +213,36 @@ async fn search_async(state: Rc<State>, page: u32) {
 
     match res {
         Ok(res) => {
-            let images: Vec<Image> = res.images.iter().map(|i| {
-                Image {
+            let images: Vec<Image> = res
+                .images
+                .iter()
+                .map(|i| Image {
                     id: i.metadata.id,
                     lib: MediaLibrary::Global,
-                }
-            }).collect();
+                })
+                .collect();
 
             // if it's the first page replace otherwise append
             if page == 0 {
-                state.search_mode.set(SearchMode::Sticker(Rc::new(MutableVec::new_with_values(images))));
+                state
+                    .search_mode
+                    .set(SearchMode::Sticker(Rc::new(MutableVec::new_with_values(
+                        images,
+                    ))));
             } else {
                 // adding each item manually, wonder if there's a more efficient way
                 let search_mode = state.search_mode.lock_mut();
 
                 match &*search_mode {
-                    SearchMode::Web(_) => unreachable!("Should not get non 0 page for sticker when in web mode"),
+                    SearchMode::Web(_) => {
+                        unreachable!("Should not get non 0 page for sticker when in web mode")
+                    }
                     SearchMode::Sticker(images_on_page) => {
-
                         let mut images_on_page = images_on_page.lock_mut();
                         images.into_iter().for_each(|image| {
                             images_on_page.push_cloned(image);
                         });
-
-                    },
+                    }
                 }
             }
 
@@ -252,7 +252,7 @@ async fn search_async(state: Rc<State>, page: u32) {
             } else {
                 *state.next_page.borrow_mut() = NextPage::Page(next_page);
             }
-        },
+        }
         Err(e) => {
             log::error!("{:#?}", e);
         }
@@ -305,8 +305,8 @@ pub fn add_recent(state: &State, image: &Image) {
     }
 
     let req = UserRecentImageUpsertRequest {
-        id: image.id.clone(),
-        library: image.lib.clone(),
+        id: image.id,
+        library: image.lib,
     };
     state.loader.load(async {
         let _ = image::recent::Put::api_with_auth(Some(req)).await;

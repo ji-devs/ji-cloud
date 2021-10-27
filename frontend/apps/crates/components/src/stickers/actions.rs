@@ -46,7 +46,7 @@ impl<T: AsSticker> Stickers<T> {
     }
 
     fn move_dir(&self, index: usize, dir: Direction) {
-        let curr = index.clone();
+        let curr = index;
         let len = self.list.lock_ref().len();
         let target_index = match dir {
             Direction::Head => {

@@ -68,6 +68,6 @@ fn next_step(state: Rc<State>) {
         language: state.language.borrow().as_ref().unwrap_ji().clone(),
         persona: state.persona.borrow().as_ref().unwrap_ji().clone(),
         organization: state.organization.borrow().as_ref().unwrap_ji().clone(),
-        marketing: state.marketing.borrow().clone(),
+        marketing: *state.marketing.borrow(),
     }));
 }

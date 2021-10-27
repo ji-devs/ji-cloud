@@ -2,7 +2,7 @@ use crate::unwrap::UnwrapJiExt;
 use wasm_bindgen::prelude::*;
 use web_sys::{window, Storage};
 
-pub const CSRF_STORAGE_NAME: &'static str = "X-CSRF";
+pub const CSRF_STORAGE_NAME: &str = "X-CSRF";
 
 pub fn load_csrf_token() -> Option<String> {
     let res = get_local_storage()

@@ -33,7 +33,7 @@ pub struct ShapeStyle {
     pub mode: Option<ShapeStyleMode>,
 
     // both of these need to be set, and mode can't be transparent
-    // in order to see the stroke  
+    // in order to see the stroke
     pub kind: Option<TraceKind>,
     pub state: Option<ShapeStyleState>,
 }
@@ -95,7 +95,7 @@ where
         let (width, height) = resize_info.get_size_px(size.0, size.1);
         format!(
             "transform: {}; transform-origin: {}px {}px;width: {}px; height: {}px;",
-            transform.denormalize_matrix_string(&resize_info),
+            transform.denormalize_matrix_string(resize_info),
             width / 2.0,
             height / 2.0,
             width,

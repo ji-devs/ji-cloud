@@ -1,4 +1,4 @@
-use dominator::{Dom, clone, svg};
+use dominator::{clone, svg, Dom};
 use std::rc::Rc;
 use utils::{
     prelude::*,
@@ -13,7 +13,10 @@ use web_sys::SvgElement;
 
 use super::{super::utils::*, state::*, styles::*};
 
-use shared::domain::jig::module::body::{Transform, _groups::design::{PathCommand, Trace, TraceShape}};
+use shared::domain::jig::module::body::{
+    Transform,
+    _groups::design::{PathCommand, Trace, TraceShape},
+};
 use std::fmt::Write;
 
 pub fn render_single_trace<S>(
@@ -61,16 +64,20 @@ where
     S: Signal<Item = ShapeStyle> + 'static,
 {
     match shape {
-        TraceShape::PathCommands(ref commands) => {
-            render_path_commands(shape_style, &resize_info, transform_size, &commands, callbacks)
-        }
+        TraceShape::PathCommands(ref commands) => render_path_commands(
+            shape_style,
+            resize_info,
+            transform_size,
+            commands,
+            callbacks,
+        ),
         TraceShape::Path(ref path) => {
-            render_path(shape_style, &resize_info, transform_size, &path, callbacks)
+            render_path(shape_style, resize_info, transform_size, path, callbacks)
         }
 
         TraceShape::Rect(width, height) => render_rect(
             shape_style,
-            &resize_info,
+            resize_info,
             transform_size,
             *width,
             *height,
@@ -78,7 +85,7 @@ where
         ),
         TraceShape::Ellipse(radius_x, radius_y) => render_ellipse(
             shape_style,
-            &resize_info,
+            resize_info,
             transform_size,
             *radius_x,
             *radius_y,
@@ -99,15 +106,25 @@ where
     S: Signal<Item = ShapeStyle> + 'static,
 {
     match transform_size {
-        Some(transform_size) => {
-            render_single_shape(shape_style, resize_info, &trace.shape, Some(transform_size), callbacks)
-        }
+        Some(transform_size) => render_single_shape(
+            shape_style,
+            resize_info,
+            &trace.shape,
+            Some(transform_size),
+            callbacks,
+        ),
         None => {
             let transform_size = trace
                 .calc_size(resize_info)
                 .map(|size| TransformSize::new_static(&trace.transform, size));
 
-            render_single_shape(shape_style, resize_info, &trace.shape, transform_size, callbacks)
+            render_single_shape(
+                shape_style,
+                resize_info,
+                &trace.shape,
+                transform_size,
+                callbacks,
+            )
         }
     }
 }
@@ -262,7 +279,7 @@ where
 {
     let path_string = commands.signal_ref(clone!(resize_info => move |commands| {
         path_command_to_string(
-                commands 
+                commands
                     .iter()
                     .map(|(command, absolute)| {
                         (
@@ -293,14 +310,9 @@ where
     S: Signal<Item = ShapeStyle> + 'static,
 {
     let path_string = path_command_to_string(
-        commands 
+        commands
             .iter()
-            .map(|(command, absolute)| {
-                (
-                    denormalize_command(command, resize_info),
-                    *absolute
-                )
-            })
+            .map(|(command, absolute)| (denormalize_command(command, resize_info), *absolute)),
     );
 
     svg!("path" => SvgElement, {
@@ -398,25 +410,84 @@ where
     })
 }
 
-
 fn path_command_to_string(path: impl Iterator<Item = (PathCommand, bool)>) -> String {
     let mut output = String::new();
 
     for (index, (command, absolute)) in path.enumerate() {
         if index != 0 {
-            output.push_str(" ") 
+            output.push(' ')
         }
         let prefix = match &command {
-            PathCommand::MoveTo(_, _) => if absolute { "M" } else { "m" },
-            PathCommand::ClosePath => if absolute { "Z" } else { "z" },
-            PathCommand::LineTo(_, _) => if absolute { "L" } else { "l" },
-            PathCommand::HorizontalLineTo(_) => if absolute { "H" } else { "h" },
-            PathCommand::VerticalLineTo(_) => if absolute { "V" } else { "v" },
-            PathCommand::CurveTo(_, _, _, _, _, _) => if absolute { "C" } else { "c" },
-            PathCommand::SmoothCurveTo(_, _, _, _) => if absolute { "S" } else { "s" },
-            PathCommand::QuadCurveTo(_, _, _, _) => if absolute { "Q" } else { "q" },
-            PathCommand::SmoothQuadCurveTo(_, _) => if absolute { "T" } else { "t" },
-            PathCommand::ArcTo(_, _, _, _, _, _, _) => if absolute { "A" } else { "a" },
+            PathCommand::MoveTo(_, _) => {
+                if absolute {
+                    "M"
+                } else {
+                    "m"
+                }
+            }
+            PathCommand::ClosePath => {
+                if absolute {
+                    "Z"
+                } else {
+                    "z"
+                }
+            }
+            PathCommand::LineTo(_, _) => {
+                if absolute {
+                    "L"
+                } else {
+                    "l"
+                }
+            }
+            PathCommand::HorizontalLineTo(_) => {
+                if absolute {
+                    "H"
+                } else {
+                    "h"
+                }
+            }
+            PathCommand::VerticalLineTo(_) => {
+                if absolute {
+                    "V"
+                } else {
+                    "v"
+                }
+            }
+            PathCommand::CurveTo(_, _, _, _, _, _) => {
+                if absolute {
+                    "C"
+                } else {
+                    "c"
+                }
+            }
+            PathCommand::SmoothCurveTo(_, _, _, _) => {
+                if absolute {
+                    "S"
+                } else {
+                    "s"
+                }
+            }
+            PathCommand::QuadCurveTo(_, _, _, _) => {
+                if absolute {
+                    "Q"
+                } else {
+                    "q"
+                }
+            }
+            PathCommand::SmoothQuadCurveTo(_, _) => {
+                if absolute {
+                    "T"
+                } else {
+                    "t"
+                }
+            }
+            PathCommand::ArcTo(_, _, _, _, _, _, _) => {
+                if absolute {
+                    "A"
+                } else {
+                    "a"
+                }
+            }
         };
 
         output.push_str(prefix);
@@ -424,36 +495,38 @@ fn path_command_to_string(path: impl Iterator<Item = (PathCommand, bool)>) -> St
         match command {
             PathCommand::MoveTo(x, y) => {
                 write!(&mut output, "{} {}", x, y).unwrap_ji();
-            },
-            PathCommand::ClosePath => {
-            },
+            }
+            PathCommand::ClosePath => {}
             PathCommand::LineTo(x, y) => {
                 write!(&mut output, "{} {}", x, y).unwrap_ji();
-            },
+            }
             PathCommand::HorizontalLineTo(x) => {
                 write!(&mut output, "{}", x).unwrap_ji();
-            },
+            }
             PathCommand::VerticalLineTo(y) => {
                 write!(&mut output, "{}", y).unwrap_ji();
-            },
-            PathCommand::CurveTo(cp1x, cp1y,cp2x, cp2y, x, y) => {
-                write!(&mut output, "{} {} {} {} {} {}", cp1x, cp1y,cp2x, cp2y, x, y).unwrap_ji();
-            },
+            }
+            PathCommand::CurveTo(cp1x, cp1y, cp2x, cp2y, x, y) => {
+                write!(
+                    &mut output,
+                    "{} {} {} {} {} {}",
+                    cp1x, cp1y, cp2x, cp2y, x, y
+                )
+                .unwrap_ji();
+            }
             PathCommand::SmoothCurveTo(cp1x, cp1y, x, y) => {
-                write!(&mut output, "{} {} {} {}", cp1x, cp1y,x, y).unwrap_ji();
-            },
+                write!(&mut output, "{} {} {} {}", cp1x, cp1y, x, y).unwrap_ji();
+            }
             PathCommand::QuadCurveTo(cp1x, cp1y, x, y) => {
-                write!(&mut output, "{} {} {} {}", cp1x, cp1y,x, y).unwrap_ji();
-            },
+                write!(&mut output, "{} {} {} {}", cp1x, cp1y, x, y).unwrap_ji();
+            }
             PathCommand::SmoothQuadCurveTo(x, y) => {
                 write!(&mut output, "{} {}", x, y).unwrap_ji();
-            },
+            }
             PathCommand::ArcTo(a, b, c, d, e, f, g) => {
                 write!(&mut output, "{} {} {} {} {} {} {}", a, b, c, d, e, f, g).unwrap_ji();
-            },
+            }
         }
-
-
     }
 
     output

@@ -41,7 +41,7 @@ pub async fn redirect(service_kind: GetOAuthUrlServiceKind, url_kind: OAuthUrlKi
 }
 pub async fn finalize(req: CreateSessionOAuthRequest, url_kind: OAuthUrlKind) {
     if let Ok(resp) = api_no_auth_with_credentials::<CreateSessionResponse, EmptyError, _>(
-        &CreateOAuth::PATH,
+        CreateOAuth::PATH,
         CreateOAuth::METHOD,
         Some(req),
     )

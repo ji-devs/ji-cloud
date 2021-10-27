@@ -83,11 +83,11 @@ pub async fn get_hit_index<'a, V: AsRef<Trace>>(
 
         let color = if DEBUGGING_HIT {
             if index == 0 {
-                format!("red")
+                "red".to_string()
             } else if index == 1 {
-                format!("green")
+                "green".to_string()
             } else {
-                format!("yellow")
+                "yellow".to_string()
             }
         } else {
             format!("#{:02x}{:02x}{:02x}", r, g, b)
@@ -109,7 +109,7 @@ pub async fn get_hit_index<'a, V: AsRef<Trace>>(
     let sticker = &*sticker;
 
     let transform = &*transform_override.unwrap_or(Cow::Borrowed(sticker.transform()));
-    let oobb = bounds::oobb_transform_px(true, &transform, Some(size), &resize_info);
+    let oobb = bounds::oobb_transform_px(true, transform, Some(size), &resize_info);
     let aabb = oobb.to_aabb();
 
     ctx.save();
@@ -149,7 +149,7 @@ pub async fn get_hit_index<'a, V: AsRef<Trace>>(
         }
 
         if !DEBUGGING_HIT || DEBUGGING_HIT_CLIP {
-            let _ = ctx.set_global_composite_operation(&"destination-in");
+            let _ = ctx.set_global_composite_operation("destination-in");
         }
     } else {
         panic!("sticker.draw_to_canvas() doesn't exist yet!");
@@ -201,11 +201,7 @@ pub async fn get_hit_index<'a, V: AsRef<Trace>>(
             let better = {
                 if n_hits > 0 {
                     if let Some((_curr_index, curr_n_hits)) = acc {
-                        if n_hits > curr_n_hits {
-                            true
-                        } else {
-                            false
-                        }
+                        n_hits > curr_n_hits
                     } else {
                         true
                     }
@@ -276,7 +272,7 @@ pub fn debug_render_hit_trace<V: AsRef<Trace>>(index: usize, traces: &[V]) {
     let ctx = get_2d_context(&canvas, None).unwrap_ji();
 
     if let Some(trace) = traces.get(index) {
-        let color = format!("red");
+        let color = "red".to_string();
 
         crate::traces::canvas::draw_trace(&ctx, &resize_info, trace.as_ref());
         ctx.set_fill_style(&JsValue::from_str(&color));

@@ -30,7 +30,7 @@ impl Timer {
 
             let mut time = time.lock_mut();
             if *time > 0 {
-                *time = *time - 1;
+                *time -= 1;
             }
         });
 

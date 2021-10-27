@@ -25,14 +25,13 @@ use web_sys::File;
 
 pub use awsm_web::loaders::helpers::{spawn_handle, AbortController, FutureHandle};
 
-
-pub const POST: &'static str = "POST";
-pub const GET: &'static str = "GET";
+pub const POST: &str = "POST";
+pub const GET: &str = "GET";
 
 pub type IsAborted = bool;
 
-const DESERIALIZE_ERR: &'static str = "couldn't deserialize error in fetch";
-const DESERIALIZE_OK: &'static str = "couldn't deserialize ok in fetch";
+const DESERIALIZE_ERR: &str = "couldn't deserialize error in fetch";
+const DESERIALIZE_OK: &str = "couldn't deserialize ok in fetch";
 
 // extension trait to make calling the API very convenient
 #[async_trait(?Send)]
@@ -46,56 +45,56 @@ pub trait ApiEndpointExt {
 
     /**** WITH AUTH ****/
     async fn api_with_auth(data: Option<Self::Req>) -> Result<Self::Res, Self::Err> {
-        api_with_auth(&Self::EXT_PATH, Self::EXT_METHOD, data).await
+        api_with_auth(Self::EXT_PATH, Self::EXT_METHOD, data).await
     }
     async fn api_with_auth_status(data: Option<Self::Req>) -> (Result<Self::Res, Self::Err>, u16) {
-        api_with_auth_status(&Self::EXT_PATH, Self::EXT_METHOD, data).await
+        api_with_auth_status(Self::EXT_PATH, Self::EXT_METHOD, data).await
     }
     async fn api_with_auth_abortable(
         abort_controller: Option<&AbortController>,
         data: Option<Self::Req>,
     ) -> Result<Result<Self::Res, Self::Err>, IsAborted> {
-        api_with_auth_abortable(&Self::EXT_PATH, Self::EXT_METHOD, abort_controller, data).await
+        api_with_auth_abortable(Self::EXT_PATH, Self::EXT_METHOD, abort_controller, data).await
     }
     async fn api_with_auth_status_abortable(
         abort_controller: Option<&AbortController>,
         data: Option<Self::Req>,
     ) -> Result<(Result<Self::Res, Self::Err>, u16), IsAborted> {
-        api_with_auth_status_abortable(&Self::EXT_PATH, Self::EXT_METHOD, abort_controller, data)
+        api_with_auth_status_abortable(Self::EXT_PATH, Self::EXT_METHOD, abort_controller, data)
             .await
     }
     //TODO - get rid of this, use specialization
     async fn api_with_auth_empty(data: Option<Self::Req>) -> Result<(), Self::Err> {
-        api_with_auth_empty(&Self::EXT_PATH, Self::EXT_METHOD, data).await
+        api_with_auth_empty(Self::EXT_PATH, Self::EXT_METHOD, data).await
     }
     async fn api_with_auth_empty_status(data: Option<Self::Req>) -> (Result<(), Self::Err>, u16) {
-        api_with_auth_empty_status(&Self::EXT_PATH, Self::EXT_METHOD, data).await
+        api_with_auth_empty_status(Self::EXT_PATH, Self::EXT_METHOD, data).await
     }
 
     /**** NO AUTH ****/
     async fn api_no_auth(data: Option<Self::Req>) -> Result<Self::Res, Self::Err> {
-        api_no_auth(&Self::EXT_PATH, Self::EXT_METHOD, data).await
+        api_no_auth(Self::EXT_PATH, Self::EXT_METHOD, data).await
     }
     async fn api_no_auth_status(data: Option<Self::Req>) -> (Result<Self::Res, Self::Err>, u16) {
-        api_no_auth_status(&Self::EXT_PATH, Self::EXT_METHOD, data).await
+        api_no_auth_status(Self::EXT_PATH, Self::EXT_METHOD, data).await
     }
     //TODO - get rid of this, use specialization
     async fn api_no_auth_empty(data: Option<Self::Req>) -> Result<(), Self::Err> {
-        api_no_auth_empty(&Self::EXT_PATH, Self::EXT_METHOD, data).await
+        api_no_auth_empty(Self::EXT_PATH, Self::EXT_METHOD, data).await
     }
     async fn api_no_auth_empty_status(data: Option<Self::Req>) -> (Result<(), Self::Err>, u16) {
-        api_no_auth_empty_status(&Self::EXT_PATH, Self::EXT_METHOD, data).await
+        api_no_auth_empty_status(Self::EXT_PATH, Self::EXT_METHOD, data).await
     }
 
     /**** WITH BEARER TOKEN ****/
     async fn api_with_token(token: &str, data: Option<Self::Req>) -> Result<Self::Res, Self::Err> {
-        api_with_token(&Self::EXT_PATH, token, Self::EXT_METHOD, data).await
+        api_with_token(Self::EXT_PATH, token, Self::EXT_METHOD, data).await
     }
     async fn api_with_token_status(
         token: &str,
         data: Option<Self::Req>,
     ) -> (Result<Self::Res, Self::Err>, u16) {
-        api_with_token_status(&Self::EXT_PATH, token, Self::EXT_METHOD, data).await
+        api_with_token_status(Self::EXT_PATH, token, Self::EXT_METHOD, data).await
     }
     async fn api_with_token_status_abortable(
         token: &str,
@@ -103,7 +102,7 @@ pub trait ApiEndpointExt {
         data: Option<Self::Req>,
     ) -> Result<(Result<Self::Res, Self::Err>, u16), IsAborted> {
         api_with_token_status_abortable(
-            &Self::EXT_PATH,
+            Self::EXT_PATH,
             token,
             Self::EXT_METHOD,
             abort_controller,
@@ -113,25 +112,25 @@ pub trait ApiEndpointExt {
     }
     //TODO - get rid of this, use specialization
     async fn api_with_token_empty(token: &str, data: Option<Self::Req>) -> Result<(), Self::Err> {
-        api_with_token_empty(&Self::EXT_PATH, token, Self::EXT_METHOD, data).await
+        api_with_token_empty(Self::EXT_PATH, token, Self::EXT_METHOD, data).await
     }
     async fn api_with_token_empty_status(
         token: &str,
         data: Option<Self::Req>,
     ) -> (Result<(), Self::Err>, u16) {
-        api_with_token_empty_status(&Self::EXT_PATH, token, Self::EXT_METHOD, data).await
+        api_with_token_empty_status(Self::EXT_PATH, token, Self::EXT_METHOD, data).await
     }
 
     /**** WITH CREDENTIALS ****/
     //used in cases where we have the cookie but not the token
     //really just used for login and registration, to get the token via oauth flow
     async fn api_no_auth_with_credentials(data: Option<Self::Req>) -> Result<Self::Res, Self::Err> {
-        api_no_auth_with_credentials(&Self::EXT_PATH, Self::EXT_METHOD, data).await
+        api_no_auth_with_credentials(Self::EXT_PATH, Self::EXT_METHOD, data).await
     }
     async fn api_no_auth_with_credentials_status(
         data: Option<Self::Req>,
     ) -> (Result<Self::Res, Self::Err>, u16) {
-        api_no_auth_with_credentials_status(&Self::EXT_PATH, Self::EXT_METHOD, data).await
+        api_no_auth_with_credentials_status(Self::EXT_PATH, Self::EXT_METHOD, data).await
     }
 
     /**** WITH BASIC ****/
@@ -141,15 +140,14 @@ pub trait ApiEndpointExt {
         password: &str,
         data: Option<Self::Req>,
     ) -> Result<Self::Res, Self::Err> {
-        api_with_basic_token(&Self::EXT_PATH, user_id, password, Self::EXT_METHOD, data).await
+        api_with_basic_token(Self::EXT_PATH, user_id, password, Self::EXT_METHOD, data).await
     }
     async fn api_with_basic_token_status(
         user_id: &str,
         password: &str,
         data: Option<Self::Req>,
     ) -> (Result<Self::Res, Self::Err>, u16) {
-        api_with_basic_token_status(&Self::EXT_PATH, user_id, password, Self::EXT_METHOD, data)
-            .await
+        api_with_basic_token_status(Self::EXT_PATH, user_id, password, Self::EXT_METHOD, data).await
     }
 }
 
@@ -189,7 +187,7 @@ pub async fn upload_file_gcs_status(
     file: &File,
     abort_controller: Option<&AbortController>,
 ) -> (Result<(), awsm_web::errors::Error>, u16) {
-    match fetch_upload_file_abortable(&url, file, Method::Put.as_str(), abort_controller).await {
+    match fetch_upload_file_abortable(url, file, Method::Put.as_str(), abort_controller).await {
         Ok(res) => {
             let status = res.status();
 
@@ -225,7 +223,7 @@ pub async fn api_upload_file_status(
         file,
         method.as_str(),
         true,
-        &vec![(CSRF_HEADER_NAME, &csrf)],
+        &[(CSRF_HEADER_NAME, &csrf)],
     )
     .await
     .unwrap_ji();
@@ -315,7 +313,7 @@ where
             &url,
             method.as_str(),
             true,
-            &vec![(CSRF_HEADER_NAME, &csrf)],
+            &[(CSRF_HEADER_NAME, &csrf)],
             data,
         )
         .await
@@ -381,7 +379,7 @@ where
             &url,
             method.as_str(),
             true,
-            &vec![(CSRF_HEADER_NAME, &csrf)],
+            &[(CSRF_HEADER_NAME, &csrf)],
             data,
         )
         .await
@@ -548,7 +546,7 @@ where
         method.as_str(),
         true,
         abort_controller,
-        &vec![("Authorization", &bearer)],
+        &[("Authorization", &bearer)],
         data,
     )
     .await
@@ -612,7 +610,7 @@ where
         &url,
         method.as_str(),
         true,
-        &vec![("Authorization", &bearer)],
+        &[("Authorization", &bearer)],
         data,
     )
     .await
@@ -723,7 +721,7 @@ where
         &url,
         method.as_str(),
         true,
-        &vec![("Authorization", &basic)],
+        &[("Authorization", &basic)],
         data,
     )
     .await

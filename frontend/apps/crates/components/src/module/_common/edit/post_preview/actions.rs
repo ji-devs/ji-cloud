@@ -57,7 +57,7 @@ impl PostPreview {
                     let module_id = res.id;
 
                     let module = LiteModule {
-                        id: module_id.clone(),
+                        id: module_id,
                         kind: target_kind,
                     };
 

@@ -11,10 +11,10 @@ use super::state::State;
 use dominator_helpers::futures::AsyncLoader;
 use wasm_bindgen_futures::spawn_local;
 
-const STR_SYSTEM_COLORS_LABEL: &'static str = "General colors";
-const STR_THEME_COLORS_LABEL: &'static str = "Theme colors";
-const STR_USER_COLORS_LABEL: &'static str = "My colors";
-const STR_ADD_COLOR: &'static str = "Add color";
+const STR_SYSTEM_COLORS_LABEL: &str = "General colors";
+const STR_THEME_COLORS_LABEL: &str = "Theme colors";
+const STR_USER_COLORS_LABEL: &str = "My colors";
+const STR_ADD_COLOR: &str = "Add color";
 
 pub fn render(state: Rc<State>, slot: Option<&str>) -> Dom {
     let init_loader = AsyncLoader::new();
@@ -55,7 +55,7 @@ pub fn render_loaded(state: Rc<State>) -> Dom {
         .child(render_static_section(state.clone(), state.system_colors.as_ref(), STR_SYSTEM_COLORS_LABEL))
         .child(render_add_color(state.clone()))
         .child_signal(state.user_colors.signal_vec_cloned().to_signal_cloned().map(clone!(state => move |user_colors| {
-            if user_colors.len() > 0 {
+            if !user_colors.is_empty() {
                 // this re-renders every time the anything in the vec changes, there might be better ways of doing the same thing
                 Some(render_user_section(state.clone()))
             } else {
@@ -80,7 +80,7 @@ fn render_static_section(state: Rc<State>, color_options: &Vec<RGBA8>, label: &s
                     }
                 })))
                 .event(clone!(color, state => move |_:events::Click| {
-                    set_selected(Rc::clone(&state), Some(color.clone()));
+                    set_selected(Rc::clone(&state), Some(color));
                 }))
             })
         }))
@@ -103,7 +103,7 @@ fn render_user_section(state: Rc<State>) -> Dom {
                     false
                 })))
                 .event(clone!(color, state => move |_:events::Click| {
-                    set_selected(Rc::clone(&state), Some(color.clone()));
+                    set_selected(Rc::clone(&state), Some(color));
                 }))
                 .attribute("deletable", "")
                 .child(html!("button-icon", {

@@ -1,6 +1,6 @@
 use super::card::state::*;
 use crate::base::state::Base;
-use futures_signals::signal::{Mutable, SignalExt};
+use futures_signals::signal::Mutable;
 use rand::prelude::*;
 use shared::domain::jig::module::body::_groups::cards::Card;
 use std::cell::RefCell;
@@ -72,11 +72,7 @@ impl Current {
         others.shuffle(rng);
 
         //take just what we need
-        let mut others: Vec<CardPairId> = others
-            .into_iter()
-            .take(amount - 1)
-            .map(|x| x.clone())
-            .collect();
+        let mut others: Vec<CardPairId> = others.into_iter().take(amount - 1).cloned().collect();
 
         //add in our target
         others.push(target.clone());
@@ -85,9 +81,9 @@ impl Current {
         others.shuffle(rng);
 
         //add the target to the used buffer
-        used.push(target.clone());
+        used.push(target);
 
-        /// clone into top/bottom
+        // clone into top/bottom
         let mut top: Vec<Rc<CardTop>> = others
             .iter()
             .map(|choice| Rc::new(CardChoice::<TopPhase>::new(game.clone(), choice.clone())))

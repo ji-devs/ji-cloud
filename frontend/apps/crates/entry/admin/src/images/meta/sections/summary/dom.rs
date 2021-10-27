@@ -29,7 +29,7 @@ impl SummaryDom {
     ) -> Dom {
         let state = Rc::new(State::new(meta_state, image, metadata, categories));
 
-        let id = state.image.orig.id.clone();
+        let id = state.image.orig.id;
 
         let date_time_strings: Mutable<Option<DateTimeStrings>> = Mutable::new(None);
 

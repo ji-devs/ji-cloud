@@ -157,13 +157,13 @@ impl State {
     }
 
     pub async fn clone_entry(&self, entry: &DisplayableEntry) {
-        let entry = db_interface::clone_entry(&entry).await;
+        let entry = db_interface::clone_entry(entry).await;
         let mut vec = self.entries.lock_mut();
         vec.push_cloned(Rc::new(Mutable::new(entry)));
     }
 
     pub async fn save_entry(&self, entry: &DisplayableEntry) {
-        db_interface::save_entry(&entry).await;
+        db_interface::save_entry(entry).await;
     }
 
     pub async fn remove_entry(&self, entry_id: u32) {
@@ -304,15 +304,14 @@ impl From<Entry> for DisplayableEntry {
         DisplayableEntry {
             id: entry.id,
             section: entry.section.clone(),
-            item_kind_id: entry.item_kind_id.clone(),
+            item_kind_id: entry.item_kind_id,
             english: entry.english.clone().unwrap_or_default(),
             hebrew: entry.hebrew.clone().unwrap_or_default(),
             status: entry.status,
             zeplin_reference: {
-                let v = match entry.zeplin_reference {
-                    Some(url) => Some(Url::parse(&url).unwrap_throw()),
-                    None => None,
-                };
+                let v = entry
+                    .zeplin_reference
+                    .map(|url| Url::parse(&url).unwrap_throw());
                 Mutable::new(v)
             },
             comments: entry.comments.clone().unwrap_or_default(),
@@ -329,15 +328,16 @@ impl From<DisplayableEntry> for Entry {
         Entry {
             id: displayable_entry.id,
             section: displayable_entry.section.clone(),
-            item_kind_id: displayable_entry.item_kind_id.clone(),
+            item_kind_id: displayable_entry.item_kind_id,
             english: Some(displayable_entry.english.clone()),
             hebrew: Some(displayable_entry.hebrew.clone()),
             status: displayable_entry.status,
             zeplin_reference: {
-                match displayable_entry.zeplin_reference.lock_ref().as_ref() {
-                    Some(url) => Some(url.to_string()),
-                    None => None,
-                }
+                displayable_entry
+                    .zeplin_reference
+                    .lock_ref()
+                    .as_ref()
+                    .map(|url| url.to_string())
             },
             comments: Some(displayable_entry.comments.clone()),
             in_app: displayable_entry.in_app,
@@ -353,15 +353,16 @@ impl From<DisplayableEntry> for UpdateEntryRequest {
         UpdateEntryRequest {
             bundle_id: Some(entry.bundle_id),
             section: Some(entry.section.clone()),
-            item_kind_id: entry.item_kind_id.clone(),
+            item_kind_id: entry.item_kind_id,
             english: Some(entry.english.clone()),
             hebrew: Some(entry.hebrew.clone()),
             status: Some(entry.status),
             zeplin_reference: {
-                let v = match entry.zeplin_reference.lock_ref().as_ref() {
-                    Some(url) => Some(url.to_string()),
-                    None => None,
-                };
+                let v = entry
+                    .zeplin_reference
+                    .lock_ref()
+                    .as_ref()
+                    .map(|url| url.to_string());
                 Some(v)
             },
             comments: Some(Some(entry.comments.clone())),

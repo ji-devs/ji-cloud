@@ -12,14 +12,14 @@ use super::state::State;
 
 pub fn set_selected(state: Rc<State>, value: Option<RGBA8>) {
     if let Some(on_select) = state.on_select.as_ref() {
-        on_select(value.clone());
+        on_select(value);
     }
     state.value.set(value);
 }
 
 pub async fn get_user_colors() -> Result<Vec<RGBA8>, EmptyError> {
     let res = api_with_auth::<UserColorResponse, EmptyError, Option<()>>(
-        &endpoints::user::GetColors::PATH,
+        endpoints::user::GetColors::PATH,
         endpoints::user::GetColors::METHOD,
         None,
     )
@@ -32,13 +32,13 @@ pub async fn add_user_color(state: Rc<State>, color: RGBA8) -> Result<(), EmptyE
     let req = UserColorValueRequest { color };
 
     api_with_auth::<UserColorResponse, EmptyError, UserColorValueRequest>(
-        &endpoints::user::CreateColor::PATH,
+        endpoints::user::CreateColor::PATH,
         endpoints::user::CreateColor::METHOD,
         Some(req),
     )
     .await?;
 
-    state.user_colors.lock_mut().push_cloned(color.clone());
+    state.user_colors.lock_mut().push_cloned(color);
     set_selected(Rc::clone(&state), Some(color));
 
     Ok(())

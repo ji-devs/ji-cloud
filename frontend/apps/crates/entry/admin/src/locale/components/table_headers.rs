@@ -40,7 +40,7 @@ impl TableHeaderDom {
                                                         html!("option", {
                                                             .property("value", section_option)
                                                             .property("selected", *visible)
-                                                            .text(&section_option)
+                                                            .text(section_option)
                                                         })
                                                     }).collect()
                                                 })

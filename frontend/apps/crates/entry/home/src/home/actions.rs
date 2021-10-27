@@ -71,7 +71,7 @@ async fn fetch_metadata(state: Rc<State>) {
 
 async fn fetch_profile(state: Rc<State>) {
     let (result, status) =
-        api_with_auth_status::<UserProfile, EmptyError, ()>(&Profile::PATH, Profile::METHOD, None)
+        api_with_auth_status::<UserProfile, EmptyError, ()>(Profile::PATH, Profile::METHOD, None)
             .await;
     match status {
         403 | 401 => {

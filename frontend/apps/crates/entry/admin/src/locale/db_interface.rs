@@ -15,7 +15,7 @@ use wasm_bindgen::prelude::*;
 
 pub async fn get_bundles() -> Vec<Bundle> {
     api_with_auth::<ListBundleResponse, EmptyError, ()>(
-        &endpoints::locale::bundle::List::PATH,
+        endpoints::locale::bundle::List::PATH,
         endpoints::locale::bundle::List::METHOD,
         None,
     )
@@ -26,7 +26,7 @@ pub async fn get_bundles() -> Vec<Bundle> {
 
 pub async fn get_item_kind() -> Vec<ItemKind> {
     api_with_auth::<ListItemKindResponse, EmptyError, ()>(
-        &endpoints::locale::item_kind::List::PATH,
+        endpoints::locale::item_kind::List::PATH,
         endpoints::locale::item_kind::List::METHOD,
         None,
     )
@@ -41,7 +41,7 @@ pub async fn get_entries(bundles: Vec<Uuid>) -> Vec<DisplayableEntry> {
         group_by: ListEntryGroupBy::None,
     };
     let res = api_with_auth::<ListEntryResponse, EmptyError, ListEntryQuery>(
-        &endpoints::locale::entry::List::PATH,
+        endpoints::locale::entry::List::PATH,
         endpoints::locale::entry::List::METHOD,
         Some(query),
     )
@@ -69,10 +69,11 @@ pub async fn clone_entry(entry: &DisplayableEntry) -> DisplayableEntry {
         hebrew: Some(entry.hebrew.clone()),
         status: entry.status,
         zeplin_reference: {
-            match entry.zeplin_reference.lock_ref().as_ref() {
-                Some(url) => Some(url.as_str().to_string()),
-                None => None,
-            }
+            entry
+                .zeplin_reference
+                .lock_ref()
+                .as_ref()
+                .map(|url| url.as_str().to_string())
         },
         comments: Some(entry.comments.clone()),
         in_app: entry.in_app,
@@ -81,7 +82,7 @@ pub async fn clone_entry(entry: &DisplayableEntry) -> DisplayableEntry {
     };
 
     let res = api_with_auth::<CreateEntryResponse, EmptyError, CreateEntryRequest>(
-        &endpoints::locale::entry::Create::PATH,
+        endpoints::locale::entry::Create::PATH,
         endpoints::locale::entry::Create::METHOD,
         Some(body),
     )
@@ -109,7 +110,7 @@ pub async fn create_entry(bundle_id: Uuid) -> DisplayableEntry {
     };
 
     let res = api_with_auth::<CreateEntryResponse, EmptyError, CreateEntryRequest>(
-        &endpoints::locale::entry::Create::PATH,
+        endpoints::locale::entry::Create::PATH,
         endpoints::locale::entry::Create::METHOD,
         Some(body),
     )
@@ -148,7 +149,7 @@ pub async fn delete_entry(entry_id: u32) {
 
 fn new_entry_with_id(id: u32, bundle_id: Uuid) -> DisplayableEntry {
     DisplayableEntry {
-        id: id,
+        id,
         english: String::new(),
         hebrew: String::new(),
         section: None,

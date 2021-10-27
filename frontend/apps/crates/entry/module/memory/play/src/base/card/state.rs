@@ -44,7 +44,7 @@ impl CardState {
     }
 
     pub fn is_flipped(&self, base: &Base) -> impl Signal<Item = bool> {
-        let self_id = self.id.clone();
+        let self_id = self.id;
 
         base.flip_state
             .signal_ref(clone!(self_id => move |flip_state| {

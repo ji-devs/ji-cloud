@@ -6,7 +6,7 @@ use components::{
     traces::{edit::*, show::*},
 };
 use dominator::{clone, html, Dom};
-use futures_signals::{signal::SignalExt, signal_vec::SignalVecExt};
+use futures_signals::signal::SignalExt;
 use std::rc::Rc;
 
 impl DomRenderable for Main {
@@ -35,17 +35,17 @@ impl DomRenderable for Main {
             )
             .child_signal(
                 state.trace_phase_signal().map(clone!(state => move |trace_phase| {
-                    trace_phase.and_then(|trace_phase| {
+                    trace_phase.map(|trace_phase| {
                         match trace_phase {
                             TracePhase::Edit => {
-                                Some(TracesEdit::render(state.base.traces.clone()))
+                                TracesEdit::render(state.base.traces.clone())
                             },
                             TracePhase::Show => {
-                                Some(TracesShow::render(TracesShow::new(
+                                TracesShow::render(TracesShow::new(
                                     state.base.traces.to_raw(),
                                     TracesShowMode::Solid,
                                     TracesShow::on_select_noop()
-                                )))
+                                ))
                             },
                         }
                     })

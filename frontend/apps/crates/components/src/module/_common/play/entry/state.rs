@@ -143,14 +143,14 @@ where
                             _self.raw_loader.load(clone!(init_from_raw, _self => async move {
 
                                 let (jig_id, module_id, jig) = (
-                                    _self.opts.jig_id.clone(),
-                                    _self.opts.module_id.clone(),
+                                    _self.opts.jig_id,
+                                    _self.opts.module_id,
                                     _self.jig.borrow().as_ref().unwrap_ji().clone()
                                 );
                                 let base = init_from_raw(InitFromRawArgs::new(jig_id, module_id, jig, raw, InitSource::IframeData)).await;
 
                                 _self.phase.set(Rc::new(InitPhase::Ready(Ready {
-                                    base, 
+                                    base,
                                     jig_player: false,
                                 })));
                             }));
@@ -195,14 +195,14 @@ where
             if let Some((raw, init_source, jig_player)) = raw_source_player {
 
                 let (jig_id, module_id, jig) = (
-                    _self.opts.jig_id.clone(),
-                    _self.opts.module_id.clone(),
+                    _self.opts.jig_id,
+                    _self.opts.module_id,
                     _self.jig.borrow().as_ref().unwrap_ji().clone()
                 );
                 let base = init_from_raw(InitFromRawArgs::new(jig_id, module_id, jig, raw, init_source)).await;
 
                 _self.phase.set(Rc::new(InitPhase::Ready(Ready {
-                    base, 
+                    base,
                     jig_player,
                 })));
             }
@@ -324,7 +324,7 @@ where
     ) -> Self {
         let theme_id = match raw.get_theme() {
             Some(theme_choice) => match theme_choice {
-                ThemeChoice::Jig => jig.theme.clone(),
+                ThemeChoice::Jig => jig.theme,
                 ThemeChoice::Override(theme_id) => theme_id,
             },
             None => {
@@ -340,7 +340,11 @@ where
             jig,
             raw,
             source,
-            play_phase: Mutable::new(if RawData::has_preload() { ModulePlayPhase::Preload } else { ModulePlayPhase::Init }),
+            play_phase: Mutable::new(if RawData::has_preload() {
+                ModulePlayPhase::Preload
+            } else {
+                ModulePlayPhase::Init
+            }),
             phantom: PhantomData,
         }
     }

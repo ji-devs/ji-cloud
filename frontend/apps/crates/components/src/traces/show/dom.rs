@@ -97,7 +97,7 @@ impl TracesShow {
                         None::<fn(web_sys::SvgElement)>,
                         None::<fn(web_sys::SvgElement)>,
                     );
-                    render_trace(shape_style, &resize_info, &trace, callbacks)
+                    render_trace(shape_style, &resize_info, trace, callbacks)
                 }))
                 .collect()
             );
@@ -116,7 +116,7 @@ impl TracesShow {
                                             None::<fn(web_sys::SvgElement)>,
                                             None::<fn(web_sys::SvgElement)>,
                                         );
-                                        render_trace(shape_style, &resize_info, &trace, callbacks)
+                                        render_trace(shape_style, &resize_info, trace, callbacks)
                                     })
                                     .collect::<Vec<Dom>>()
                             }))
@@ -164,17 +164,21 @@ where
         .map(|size| TransformSize::new_static(&trace.transform, size));
 
     match trace.shape {
-        TraceShape::PathCommands(ref commands) => {
-            svg::render_path_commands(shape_style, &resize_info, transform_size, &commands, callbacks)
-        },
+        TraceShape::PathCommands(ref commands) => svg::render_path_commands(
+            shape_style,
+            resize_info,
+            transform_size,
+            commands,
+            callbacks,
+        ),
 
         TraceShape::Path(ref path) => {
-            svg::render_path(shape_style, &resize_info, transform_size, &path, callbacks)
-        },
+            svg::render_path(shape_style, resize_info, transform_size, path, callbacks)
+        }
 
         TraceShape::Rect(width, height) => svg::render_rect(
             shape_style,
-            &resize_info,
+            resize_info,
             transform_size,
             width,
             height,
@@ -182,7 +186,7 @@ where
         ),
         TraceShape::Ellipse(radius_x, radius_y) => svg::render_ellipse(
             shape_style,
-            &resize_info,
+            resize_info,
             transform_size,
             radius_x,
             radius_y,

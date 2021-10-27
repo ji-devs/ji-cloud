@@ -33,7 +33,7 @@ pub fn render(state: Rc<State>) -> Dom {
             (map_ref!{
                 let info_popup_active = state.info_popup_active.signal_cloned(),
                 let jig = state.player_state.jig.signal_cloned() => {
-                    (info_popup_active.clone(), jig.clone())
+                    (*info_popup_active, jig.clone())
                 }
             }).map(move|(info_popup_active, jig)| {
                 match (info_popup_active, jig) {

@@ -21,10 +21,10 @@ pub fn render(state: Rc<Step3>) -> Dom {
                 .child_signal(state.tab.signal_cloned().map(move |tab| {
                     match tab {
                         Tab::Settings(state) => {
-                            Some(super::play_settings::dom::render(state.clone()))
+                            Some(super::play_settings::dom::render(state))
                         },
                         Tab::Instructions(state) => {
-                            Some(render_instructions(state.clone()))
+                            Some(render_instructions(state))
                         },
                     }
                 }))

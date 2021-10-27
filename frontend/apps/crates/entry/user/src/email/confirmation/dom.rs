@@ -4,9 +4,8 @@ use futures_signals::signal::SignalExt;
 use std::rc::Rc;
 use utils::prelude::*;
 
-
-const STR_DIDNT_RECEIVE: &'static str = "Didn't receive our email? ";
-const STR_SEND_AGAIN: &'static str = "Send again";
+const STR_DIDNT_RECEIVE: &str = "Didn't receive our email? ";
+const STR_SEND_AGAIN: &str = "Send again";
 
 impl SendEmailConfirmationPage {
     pub fn render(state: Rc<SendEmailConfirmationPage>) -> Dom {

@@ -26,7 +26,7 @@ impl CategoriesPage {
                             .event(clone!(state => move |evt:events::CustomToggle| {
                                 let flag = evt.value();
                                 for cat in state.categories.lock_ref().iter() {
-                                    actions::toggle_expand_all(&cat, flag);
+                                    actions::toggle_expand_all(cat, flag);
                                 }
                             }))
                         }),

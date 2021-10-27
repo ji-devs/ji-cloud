@@ -18,7 +18,7 @@ where
                 .property_signal("visible", state.loader.is_loading())
             }))
             .property("module", state.module_kind.as_str())
-            .property("hasConvertable", RawData::convertable_list().iter().count() > 0)
+            .property("hasConvertable", !RawData::convertable_list().is_empty())
             .children(
                 RawData::convertable_list()
                     .iter()

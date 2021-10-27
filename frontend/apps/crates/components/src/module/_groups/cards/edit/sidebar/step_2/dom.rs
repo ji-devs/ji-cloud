@@ -25,13 +25,13 @@ pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<Step2<RawData, E>>) ->
                 .child_signal(state.tab.signal_cloned().map(|tab| {
                     match tab {
                         Tab::Theme(state) => {
-                            Some(render_theme_selector(state.clone(), None))
+                            Some(render_theme_selector(state, None))
                         },
                         Tab::Image(state) => {
-                            Some(render_image_search(state.clone(), None))
+                            Some(render_image_search(state, None))
                         },
                         Tab::Color(state) => {
-                            Some(render_color_picker(state.clone(), None))
+                            Some(render_color_picker(state, None))
                         },
                     }
                 }))

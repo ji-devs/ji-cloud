@@ -90,7 +90,7 @@ impl TracesEdit {
                     .signal_vec_cloned()
                     .enumerate()
                     .map(clone!(state, resize_info => move |(index, trace)| {
-                        EditSelectTrace::render_select_box(state.clone(), trace.clone(), index, &resize_info)
+                        EditSelectTrace::render_select_box(state.clone(), trace, index, &resize_info)
                     }))
             }));
 
@@ -120,7 +120,7 @@ fn render_trace<S>(
 where
     S: Signal<Item = ShapeStyle> + 'static,
 {
-    let trace_size = trace.size.clone();
+    let trace_size = trace.size;
 
     let transform_size = Some(TransformSize::Dynamic(
         trace
@@ -130,17 +130,21 @@ where
             .map(move |t| (t, trace_size)),
     ));
     match trace.shape {
-        TraceShape::PathCommands(ref commands) => {
-            svg::render_path_commands(shape_style, &resize_info, transform_size, &commands, callbacks)
-        },
+        TraceShape::PathCommands(ref commands) => svg::render_path_commands(
+            shape_style,
+            resize_info,
+            transform_size,
+            commands,
+            callbacks,
+        ),
 
         TraceShape::Path(ref path) => {
-            svg::render_path(shape_style, &resize_info, transform_size, &path, callbacks)
-        },
+            svg::render_path(shape_style, resize_info, transform_size, path, callbacks)
+        }
 
         TraceShape::Rect(width, height) => svg::render_rect(
             shape_style,
-            &resize_info,
+            resize_info,
             transform_size,
             width,
             height,
@@ -149,7 +153,7 @@ where
 
         TraceShape::Ellipse(radius_x, radius_y) => svg::render_ellipse(
             shape_style,
-            &resize_info,
+            resize_info,
             transform_size,
             radius_x,
             radius_y,

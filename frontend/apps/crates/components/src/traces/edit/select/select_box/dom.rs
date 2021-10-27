@@ -1,4 +1,4 @@
-use dominator::{Dom, DomBuilder, clone, html};
+use dominator::{clone, html, Dom, DomBuilder};
 use std::rc::Rc;
 use utils::{
     prelude::*,

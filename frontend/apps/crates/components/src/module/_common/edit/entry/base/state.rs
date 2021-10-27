@@ -196,10 +196,8 @@ where
         preview_step_reactor.load(step.signal().for_each(clone!(preview_mode => move |step| {
             if step.is_preview() {
                 preview_mode.set(Some(PreviewMode::Preview));
-            } else {
-                if preview_mode.lock_ref().is_some() {
-                    preview_mode.set(None);
-                }
+            } else if preview_mode.lock_ref().is_some() {
+                preview_mode.set(None);
             }
             async move {}
         })));

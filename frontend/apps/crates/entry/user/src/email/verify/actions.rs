@@ -13,7 +13,7 @@ impl VerifyEmailPage {
         };
 
         let resp: Result<Option<NewSessionResponse>, EmptyError> = api_no_auth_with_credentials(
-            &user::VerifyEmail::PATH,
+            user::VerifyEmail::PATH,
             user::VerifyEmail::METHOD,
             Some(query),
         )

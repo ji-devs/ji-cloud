@@ -1,6 +1,5 @@
 use shared::domain::jig::module::body::_groups::design::{
-    Trace as RawTrace, TraceShape as RawTraceShape,
-    PathCommand,
+    PathCommand, Trace as RawTrace, TraceShape as RawTraceShape,
 };
 use utils::{math::BoundsF64, prelude::*, resize::ResizeInfo};
 
@@ -29,12 +28,11 @@ impl TraceExt for RawTrace {
 
         match &self.shape {
             RawTraceShape::PathCommands(commands) => {
-                calc_bounds(ShapeRef::PathCommands(&commands), offset)
-            },
+                calc_bounds(ShapeRef::PathCommands(commands), offset)
+            }
             RawTraceShape::Path(path) => {
-                calc_bounds(ShapeRef::Path(&path), offset)
+                calc_bounds(ShapeRef::Path(path), offset)
             },
-
             RawTraceShape::Ellipse(radius_x, radius_y) => {
                 calc_bounds(ShapeRef::Ellipse(*radius_x, *radius_y), offset)
             }
@@ -56,9 +54,9 @@ pub enum ShapeRef<'a> {
 //TODO - document the use-cases for where offset is used
 pub fn calc_bounds<'a>(shape: ShapeRef<'a>, offset: Option<(f64, f64)>) -> Option<BoundsF64> {
     let mut bounds = match shape {
-        ShapeRef::PathCommands(commands) => {
+        ShapeRef::PathCommands(_commands) => {
             unimplemented!("TODO!");
-        },
+        }
 
         ShapeRef::Path(path) => {
             //Set to inverse of max values
@@ -133,44 +131,44 @@ pub fn denormalize_command(command: &PathCommand, resize_info: &ResizeInfo) -> P
     match command.clone() {
         PathCommand::MoveTo(x, y) => {
             let (x, y) = resize_info.get_pos_denormalized(x, y);
-            PathCommand::MoveTo(x,y)
-        },
-        PathCommand::ClosePath => {
-            PathCommand::ClosePath
-        },
+            PathCommand::MoveTo(x, y)
+        }
+        PathCommand::ClosePath => PathCommand::ClosePath,
         PathCommand::LineTo(x, y) => {
             let (x, y) = resize_info.get_pos_denormalized(x, y);
-            PathCommand::LineTo(x,y)
-        },
+            PathCommand::LineTo(x, y)
+        }
         PathCommand::HorizontalLineTo(x) => {
-            let (x, y) = resize_info.get_pos_denormalized(x, 0.0);
+            let (x, _y) = resize_info.get_pos_denormalized(x, 0.0);
             PathCommand::HorizontalLineTo(x)
-        },
+        }
         PathCommand::VerticalLineTo(y) => {
-            let (x, y) = resize_info.get_pos_denormalized(0.0, y);
+            let (_x, y) = resize_info.get_pos_denormalized(0.0, y);
             PathCommand::VerticalLineTo(y)
-        },
-        PathCommand::CurveTo(cp1x, cp1y,cp2x, cp2y, x, y) => {
+        }
+        PathCommand::CurveTo(cp1x, cp1y, cp2x, cp2y, x, y) => {
             let (cp1x, cp1y) = resize_info.get_pos_denormalized(cp1x, cp1y);
             let (cp2x, cp2y) = resize_info.get_pos_denormalized(cp2x, cp2y);
             let (x, y) = resize_info.get_pos_denormalized(x, y);
-            PathCommand::CurveTo(cp1x, cp1y,cp2x, cp2y, x, y)
-        },
+            PathCommand::CurveTo(cp1x, cp1y, cp2x, cp2y, x, y)
+        }
         PathCommand::SmoothCurveTo(cp1x, cp1y, x, y) => {
             let (cp1x, cp1y) = resize_info.get_pos_denormalized(cp1x, cp1y);
             let (x, y) = resize_info.get_pos_denormalized(x, y);
-            PathCommand::SmoothCurveTo(cp1x, cp1y,x, y)
-        },
+            PathCommand::SmoothCurveTo(cp1x, cp1y, x, y)
+        }
         PathCommand::QuadCurveTo(cp1x, cp1y, x, y) => {
             let (cp1x, cp1y) = resize_info.get_pos_denormalized(cp1x, cp1y);
             let (x, y) = resize_info.get_pos_denormalized(x, y);
-            PathCommand::QuadCurveTo(cp1x, cp1y,x, y)
-        },
+            PathCommand::QuadCurveTo(cp1x, cp1y, x, y)
+        }
         PathCommand::SmoothQuadCurveTo(x, y) => {
             let (x, y) = resize_info.get_pos_denormalized(x, y);
             PathCommand::SmoothQuadCurveTo(x, y)
-        },
-        _ => { unimplemented!("TODO: implement denormalize for this path command!")}
+        }
+        _ => {
+            unimplemented!("TODO: implement denormalize for this path command!")
+        }
     }
 }
 
@@ -196,4 +194,3 @@ pub fn denormalize_command(command: &PathCommand, resize_info: &ResizeInfo) -> P
 //     /// https://svgwg.org/svg2-draft/paths.html#PathDataEllipticalArcCommands
 //     ArcTo(f64, f64, f64, f64, f64, f64)
 // }
- 

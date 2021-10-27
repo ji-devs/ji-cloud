@@ -21,11 +21,7 @@ fn render_list(
             .map(clone!(selected => move |column: Column| html!("locale-select-columns-item", {
                 .text(&column.to_string())
                 .property_signal("active", selected.signal_cloned().map(clone!(column => move |e| {
-                    if e.is_some() && e.unwrap() == column {
-                        true
-                    } else {
-                        false
-                    }
+                    e.is_some() && e.unwrap() == column
                 })))
                 .event(clone!(selected, column => move |_: events::Click| {
                     if selected.lock_ref().is_none() || &selected.lock_ref().clone().unwrap() != &column {
@@ -53,11 +49,11 @@ fn render_move_button(
         .event(clone!(selected, list, other_list => move |_: events::Click| {
             let selected_ref = selected.lock_ref().clone();
             if selected_ref.is_some() {
-                let selected_ref = selected_ref.clone().unwrap();
+                let selected_ref = selected_ref.unwrap();
                 let mut list = list.lock_mut();
                 let pos = list.iter().position(|i| i == &selected_ref).unwrap();
                 list.remove(pos);
-                other_list.lock_mut().push_cloned(selected_ref.clone());
+                other_list.lock_mut().push_cloned(selected_ref);
                 selected.set(None);
             }
         }))
@@ -78,7 +74,7 @@ fn render_sort_button(
         .event(clone!(selected, list => move |_: events::Click| {
             let selected_ref = selected.lock_ref().clone();
             if selected_ref.is_some() {
-                let selected_ref = selected_ref.clone().unwrap();
+                let selected_ref = selected_ref.unwrap();
                 let mut list = list.lock_mut();
                 let pos = list.iter().position(|i| i == &selected_ref).unwrap();
 
@@ -103,7 +99,7 @@ pub fn render(state: Rc<State>) -> Dom {
             render_move_button(
                 "⇨",
                 state.hidden_columns.clone(),
-                hidden_selected.clone(),
+                hidden_selected,
                 state.visible_columns.clone()
             ),
             render_move_button(
@@ -125,7 +121,7 @@ pub fn render(state: Rc<State>) -> Dom {
             render_sort_button(
                 "⇩",
                 state.visible_columns.clone(),
-                visible_selected.clone(),
+                visible_selected,
                 |pos: usize, list_len| {
                     if pos >= list_len - 1 {
                         None

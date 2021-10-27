@@ -11,7 +11,7 @@ use crate::{
             Anchor, ContentAnchor, MoveStrategy, State as TooltipState, TooltipData, TooltipError,
             TooltipTarget,
         },
-    }
+    },
 };
 use futures_signals::{map_ref, signal::SignalExt, signal_vec::SignalVecExt};
 

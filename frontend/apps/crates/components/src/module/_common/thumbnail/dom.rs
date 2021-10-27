@@ -28,14 +28,14 @@ impl ModuleThumbnail {
     }
 
     pub fn render_live(state: Rc<Self>, slot: Option<&str>) -> Dom {
-        let module_id = Mutable::new(state.module.id.clone());
+        let module_id = Mutable::new(state.module.id);
 
         let listener = Rc::new(RefCell::new(Some(
             crate::firebase::listen_for_screenshot_updates(
                 &state.jig_id,
                 &state.module.id,
                 clone!(module_id, state => move || {
-                    module_id.set(state.module.id.clone());
+                    module_id.set(state.module.id);
                 }),
             ),
         )));

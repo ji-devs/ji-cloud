@@ -48,13 +48,13 @@ impl SearchSelected {
 
     pub fn set_from_profile(&self, profile: &UserProfile) {
         let mut affiliations = self.affiliations.lock_mut();
-        if profile.affiliations.len() > 0 {
+        if !profile.affiliations.is_empty() {
             affiliations.clear();
             affiliations.extend(profile.affiliations.clone());
         }
 
         let mut state_age_ranges = self.age_ranges.lock_mut();
-        if profile.age_ranges.len() > 0 && state_age_ranges.len() == 0 {
+        if !profile.age_ranges.is_empty() && state_age_ranges.len() == 0 {
             state_age_ranges.clear();
             state_age_ranges.extend(profile.age_ranges.clone());
         }
@@ -169,7 +169,7 @@ impl SearchOptions {
 
     fn get_categories_labels(categories: &Vec<Category>, lookup: &mut HashMap<CategoryId, String>) {
         for category in categories {
-            lookup.insert(category.id.clone(), category.name.clone());
+            lookup.insert(category.id, category.name.clone());
             Self::get_categories_labels(&category.children, lookup);
         }
     }

@@ -6,7 +6,6 @@ use shared::domain::jig::module::body::_groups::cards::CardPair;
 use crate::base::state::Base;
 
 use dominator::clone;
-use futures_signals::signal::SignalExt;
 use rand::prelude::*;
 use std::rc::Rc;
 use utils::prelude::*;

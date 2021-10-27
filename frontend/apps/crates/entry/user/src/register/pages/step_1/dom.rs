@@ -27,17 +27,17 @@ impl Step1Page {
                         .with_node!(elem => {
                             .property("placeholder", STR_FIRSTNAME_PLACEHOLDER)
                             .property("value", &*state.firstname.borrow())
-                            .event(clone!(state => move |_:events::Input| {
+                            .event(clone!(state, elem => move |_:events::Input| {
+                                state.clear_firstname_status();
+                                *state.firstname.borrow_mut() = elem.value();
+                            }))
+                            .property("placeholder", STR_FIRSTNAME_PLACEHOLDER)
+                            .property("value", &*state.firstname.borrow())
+                            .event(clone!(state, elem => move |_:events::Input| {
                                 state.clear_firstname_status();
                                 *state.firstname.borrow_mut() = elem.value();
                             }))
                         })
-                        .property("placeholder", STR_FIRSTNAME_PLACEHOLDER)
-                        .property("value", &*state.firstname.borrow())
-                        .event(clone!(state => move |evt:events::Input| {
-                            state.clear_firstname_status();
-                            *state.firstname.borrow_mut() = evt.value().unwrap_or_default();
-                        }))
                     }))
                 }),
                 html!("input-wrapper", {

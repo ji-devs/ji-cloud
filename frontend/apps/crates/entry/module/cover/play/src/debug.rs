@@ -1,5 +1,3 @@
-use futures_signals::{signal::SignalExt, signal_vec::SignalVecExt};
-
 use components::stickers::{sprite::ext::*, text::ext::*};
 use once_cell::sync::OnceCell;
 use shared::{
@@ -23,9 +21,9 @@ use utils::prelude::*;
 use uuid::Uuid;
 pub static SETTINGS: OnceCell<DebugSettings> = OnceCell::new();
 
-const IMAGE_UUID: &'static str = "e84dd7fe-c92d-11eb-8c82-cfd1d3fd13ff";
+const IMAGE_UUID: &str = "e84dd7fe-c92d-11eb-8c82-cfd1d3fd13ff";
 
-pub const DEBUG_TEXT: &'static str = "Hello World!";
+pub const DEBUG_TEXT: &str = "Hello World!";
 
 #[derive(Debug, Default)]
 pub struct DebugSettings {

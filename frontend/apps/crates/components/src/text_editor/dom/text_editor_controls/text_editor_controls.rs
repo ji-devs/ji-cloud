@@ -12,16 +12,16 @@ use super::super::super::state::State;
 use super::super::super::wysiwyg_types::{Align, ElementType, Font, Weight, BOLD_WEIGHT};
 use super::color_controls;
 
-const STR_WEIGHT_LABEL: &'static str = "Weight";
-const STR_FONT_LABEL: &'static str = "Font";
+const STR_WEIGHT_LABEL: &str = "Weight";
+const STR_FONT_LABEL: &str = "Font";
 
-const STR_WEIGHT_200: &'static str = "Light";
-const STR_WEIGHT_400: &'static str = "Regular";
-const STR_WEIGHT_700: &'static str = "Bold";
-const STR_WEIGHT_900: &'static str = "Bolder";
-const STR_WEIGHT_CUSTOM: &'static str = "Custom";
+const STR_WEIGHT_200: &str = "Light";
+const STR_WEIGHT_400: &str = "Regular";
+const STR_WEIGHT_700: &str = "Bold";
+const STR_WEIGHT_900: &str = "Bolder";
+const STR_WEIGHT_CUSTOM: &str = "Custom";
 
-const WEIGHT_OPTIONS: &'static [u16] = &[200, 400, 700, 900];
+const WEIGHT_OPTIONS: &[u16] = &[200, 400, 700, 900];
 
 fn readable_weight(weight: Weight) -> &'static str {
     match weight {
@@ -52,7 +52,7 @@ pub fn render(state: Rc<State>) -> Dom {
             html!("input-select", {
                 .property("slot", "font")
                 .property("label", STR_FONT_LABEL)
-                .property_signal("value", state.controls.signal_cloned().map(|controls| controls.font.to_string()))
+                .property_signal("value", state.controls.signal_cloned().map(|controls| controls.font))
                 // .style_signal("font-family", state.controls.signal_cloned().map(|controls| format!("'{}'", controls.font.to_string())))
                 .children_signal_vec(
                     state
@@ -126,7 +126,7 @@ pub fn render(state: Rc<State>) -> Dom {
                 .event(clone!(state => move |_: events::Click| {
                     let mut count: u8 = state.controls.lock_ref().indent_count;
                     if count > 0 {
-                        count = count - 1;
+                        count -= 1;
                     }
                     state.set_control_value(ControlsChange::IndentCount(count))
                 }))
@@ -150,11 +150,7 @@ fn render_element_option(state: Rc<State>, element: ElementType) -> Dom {
         .property("kind", element.to_string().to_lowercase())
         .property("slot", element.to_string().to_lowercase())
         .property_signal("active", state.controls.signal_cloned().map(clone!(element => move |controls| {
-            if controls.element == element {
-                true
-            } else {
-                false
-            }
+            controls.element == element
         })))
         .event(clone!(state, element => move |_: events::Click| {
             state.set_control_value(ControlsChange::Element(element.clone()));
@@ -175,11 +171,7 @@ fn render_align_option(state: Rc<State>, align: Align) -> Dom {
             Align::Right => "align-right",
         })
         .property_signal("active", state.controls.signal_cloned().map(clone!(align => move |controls| {
-            if controls.align == align {
-                true
-            } else {
-                false
-            }
+            controls.align == align
         })))
         .event(clone!(state, align => move |_: events::Click| {
             state.set_control_value(ControlsChange::Align(align.clone()))
@@ -191,11 +183,7 @@ fn render_weight_option(state: Rc<State>, weight: Weight) -> Dom {
     html!("input-select-option", {
         .style("font-weight", weight.to_string())
         .property_signal("selected", state.controls.signal_cloned().map(clone!(weight => move |controls| {
-            if controls.weight == weight {
-                true
-            } else {
-                false
-            }
+            controls.weight == weight
         })))
         .text(readable_weight(weight))
         .event(clone!(state, weight => move |evt: events::CustomSelectedChange| {
@@ -210,11 +198,7 @@ fn render_font_option(state: Rc<State>, font: &Font) -> Dom {
     html!("input-select-option", {
         .style("font-family", font_to_css(font))
         .property_signal("selected", state.controls.signal_cloned().map(clone!(font => move |controls| {
-            if controls.font == font {
-                true
-            } else {
-                false
-            }
+            controls.font == font
         })))
         .text(&font.to_string())
         .event(clone!(state, font => move |evt: events::CustomSelectedChange| {

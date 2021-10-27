@@ -29,10 +29,8 @@ impl CardDrag {
                 {
                     target.phase.set(BottomPhase::Show);
                 }
-            } else {
-                if current.top.iter().all(|choice| choice.is_landed()) {
-                    Game::next(self.game.clone());
-                }
+            } else if current.top.iter().all(|choice| choice.is_landed()) {
+                Game::next(self.game.clone());
             }
 
             current.drag.set(None);

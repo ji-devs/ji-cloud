@@ -1,7 +1,7 @@
-mod state;
-mod dom;
 mod actions;
+mod dom;
+mod state;
 
-pub use state::*;
-pub use dom::*;
 pub use actions::*;
+pub use dom::*;
+pub use state::*;

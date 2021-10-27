@@ -6,7 +6,7 @@ use shared::{
     error::EmptyError,
 };
 use std::rc::Rc;
-use utils::{prelude::*, routes::*, storage};
+use utils::{prelude::*, storage};
 
 pub fn signin_email(state: Rc<State>) {
     state.clear_email_status();
@@ -16,8 +16,8 @@ pub fn signin_email(state: Rc<State>) {
         let email:String = state.email.borrow().clone();
         let password:String = state.password.borrow().clone();
 
-        let (resp, _):(Result<CreateSessionResponse, EmptyError>, u16) = api_with_basic_token_status(&session::Create::PATH, &email, &password, session::Create::METHOD, None::<()>).await;
-       
+        let (resp, _):(Result<CreateSessionResponse, EmptyError>, u16) = api_with_basic_token_status(session::Create::PATH, &email, &password, session::Create::METHOD, None::<()>).await;
+
         match resp {
             Ok(resp) => {
                 match resp {
@@ -28,7 +28,7 @@ pub fn signin_email(state: Rc<State>) {
                         panic!("didn't expect register response here!");
                     }
                 }
-            }, 
+            },
             Err(_err) => {
                 state.status.set(Some(Status::BadCredentials));
             }
@@ -55,13 +55,12 @@ pub fn forgot_password(state: Rc<State>) {
             email
         };
 
-        let resp:Result<(), EmptyError> = api_no_auth_empty(&user::ResetPassword::PATH, user::ResetPassword::METHOD, Some(query)).await;
+        let resp:Result<(), EmptyError> = api_no_auth_empty(user::ResetPassword::PATH, user::ResetPassword::METHOD, Some(query)).await;
 
-        
         match resp {
             Ok(_) => {
                 state.status.set(Some(Status::PasswordResetSent));
-            }, 
+            },
             Err(_err) => {
                 log::error!("Got error!")
             }
@@ -88,7 +87,7 @@ pub fn status_redirect(status: Option<Status>) {
 //// PRIVATE HELPERS /////
 
 pub fn do_success(csrf: &str) {
-    storage::save_csrf_token(&csrf);
+    storage::save_csrf_token(csrf);
 
     let location = web_sys::window().unwrap_ji().location();
     let origin = location.origin().unwrap_ji();

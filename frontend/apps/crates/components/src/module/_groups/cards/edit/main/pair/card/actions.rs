@@ -31,7 +31,7 @@ impl<RawData: RawDataExt, E: ExtraExt> MainCard<RawData, E> {
                         if mode == Mode::Duplicate {
                             *other = RawCard::Text(text.clone());
                         }
-                        *card = RawCard::Text(text.clone());
+                        *card = RawCard::Text(text);
                     }),
                 );
             }

@@ -9,7 +9,7 @@ use super::state::State;
 pub(super) fn generate_student_code(state: Rc<State>) {
     state.loader.load(clone!(state => async move {
         let req = shared::domain::jig::player::JigPlayerSessionCreateRequest {
-            jig_id: state.jig_id.clone(),
+            jig_id: state.jig_id,
             settings: JigPlayerSettings::default(),
         };
 

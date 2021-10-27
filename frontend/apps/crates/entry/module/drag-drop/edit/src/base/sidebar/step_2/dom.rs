@@ -6,7 +6,6 @@ use components::{
 use dominator::{clone, html, Dom};
 use futures_signals::signal::{Signal, SignalExt};
 use std::rc::Rc;
-use utils::prelude::*;
 
 pub fn render_step_2(state: Rc<Step2>) -> Dom {
     html!("menu-tabs", {

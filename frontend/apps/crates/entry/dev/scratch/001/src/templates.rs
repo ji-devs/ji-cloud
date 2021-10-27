@@ -13,7 +13,7 @@ macro_rules! template_path {
     };
 }
 
-const HEADER: &'static str = "header";
+const HEADER: &str = "header";
 
 pub fn header() -> HtmlElement {
     TEMPLATES.with(|t| t.cache.render_elem_plain(HEADER))
@@ -30,8 +30,7 @@ impl fmt::Debug for Templates {
 }
 impl Templates {
     pub fn new() -> Self {
-        let cache =
-            TemplateCache::new(&vec![(HEADER, include_str!(template_path!("header.html")))]);
+        let cache = TemplateCache::new(&[(HEADER, include_str!(template_path!("header.html")))]);
 
         Self { cache }
     }

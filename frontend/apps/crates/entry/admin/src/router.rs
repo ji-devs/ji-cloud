@@ -47,7 +47,7 @@ impl Router {
     pub fn render(state: Rc<Self>) -> Dom {
         html!("div", {
             .future(clone!(state => async move {
-                let (result, status) = api_with_auth_status::<UserProfile, EmptyError, ()>(&Profile::PATH, Profile::METHOD, None).await;
+                let (result, status) = api_with_auth_status::<UserProfile, EmptyError, ()>(Profile::PATH, Profile::METHOD, None).await;
 
                 match status  {
                     401 | 403 => {
@@ -67,7 +67,7 @@ impl Router {
             }))
             .children_signal_vec(
                 map_ref!{
-                    let route = dominator::routing::url().signal_ref(|url| Route::from_url(&url)),
+                    let route = dominator::routing::url().signal_ref(|url| Route::from_url(url)),
                     let profile = state.profile.signal_cloned()
                         => move {
                             let mut children:Vec<Dom> = Vec::new();
@@ -96,7 +96,7 @@ impl Router {
                                                 AdminRoute::Locale => {
                                                     let app_state = Rc::new(LocaleLoaderState::new());
                                                     *state.app.borrow_mut() = Some(AppState::Locale(app_state.clone()));
-                                                    Some(state.with_child(route, LocalePage::render(app_state.clone())))
+                                                    Some(state.with_child(route, LocalePage::render(app_state)))
                                                 },
                                                 AdminRoute::ImageAdd => Some(state.with_child(route, ImageAddPage::render())),
                                                 AdminRoute::ImageMeta(id, is_new) => Some(state.with_child(route, ImageMetaPage::render(id, is_new))),

@@ -1,8 +1,8 @@
 use super::{actions, state::*};
-use dominator::{Dom, clone, html, with_node};
+use dominator::{clone, html, with_node, Dom};
 use futures_signals::signal::Mutable;
-use web_sys::HtmlInputElement;
 use std::rc::Rc;
+use web_sys::HtmlInputElement;
 
 use crate::{
     register::{

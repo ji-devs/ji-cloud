@@ -126,7 +126,7 @@ where
                         step_config.tabs.get(tab_index)
                     } );
 
-                tab_config.map(|x| x.clone()).unwrap_or_default()
+                tab_config.cloned().unwrap_or_default()
             }
         }
     });
@@ -155,12 +155,12 @@ where
         })
         .property_signal("tooltipTitle", {
             tab_config_sig().map(|t| {
-                t.title.clone()
+                t.title
             })
         })
         .property_signal("tooltipBody", {
             tab_config_sig().map(|t| {
-                t.body.clone()
+                t.body
             })
         })
         .child(ControllerDom::render(

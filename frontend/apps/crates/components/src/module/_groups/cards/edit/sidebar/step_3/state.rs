@@ -79,7 +79,7 @@ impl<SettingsState> Tab<SettingsState> {
         GetSettingsStateFn: Fn(Rc<CardsBase<RawData, E>>) -> SettingsState + Clone + 'static,
     {
         match kind {
-            MenuTabKind::PlaySettings => Self::Settings(Rc::new(get_settings(base.clone()))),
+            MenuTabKind::PlaySettings => Self::Settings(Rc::new(get_settings(base))),
             MenuTabKind::Instructions => {
                 let callbacks = InstructionsEditorCallbacks::new(
                     clone!(base => move |instructions, also_history| {

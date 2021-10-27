@@ -1,7 +1,7 @@
 use crate::base::state::Base;
 use std::rc::Rc;
 
-pub const DEFAULT_SELECT_AMOUNT: usize = 3;
+// pub const DEFAULT_SELECT_AMOUNT: usize = 3;
 
 pub struct State {
     pub base: Rc<Base>,

@@ -1,9 +1,9 @@
+use super::state::*;
+use crate::overlay::handle::OverlayHandle;
 use dominator::{clone, html, with_node, Dom};
 use futures_signals::signal::SignalExt;
 use std::rc::Rc;
 use utils::prelude::*;
-use crate::overlay::handle::OverlayHandle;
-use super::state::*;
 use utils::resize::resize_info_signal;
 use web_sys::HtmlElement;
 
@@ -71,7 +71,7 @@ pub fn render_transform(
                     let from = data.scale_from();
 
 
-                    let lock_aspect = !state.alt_pressed.borrow().clone();
+                    let lock_aspect = !*state.alt_pressed.borrow();
                     state.start_tracking_action(Action::Scale(from, lock_aspect), data.x as i32, data.y as i32);
                 }))
                 .global_event(clone!(state => move |evt:events::KeyDown| {

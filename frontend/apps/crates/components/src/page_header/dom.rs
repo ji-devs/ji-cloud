@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use dominator::{Dom, EventOptions, clone, html};
+use dominator::{clone, html, Dom, EventOptions};
 use futures_signals::signal::{Signal, SignalExt};
 use shared::domain::user::{UserProfile, UserScope};
 use strum::IntoEnumIterator;
@@ -13,13 +13,13 @@ use crate::page_header::state::{LoggedInState, PageLinks};
 
 use super::{actions, state::State};
 
-const DONATE_LINK: &'static str = "https://www.jewishinteractive.org/donate/";
+const DONATE_LINK: &str = "https://www.jewishinteractive.org/donate/";
 
-const STR_SIGN_UP: &'static str = "Sign up";
-const STR_LOGIN: &'static str = "Login";
-const STR_LOGOUT: &'static str = "Logout";
-const STR_ADMIN: &'static str = "Admin";
-const STR_DONATE: &'static str = "Donate";
+const STR_SIGN_UP: &str = "Sign up";
+const STR_LOGIN: &str = "Login";
+const STR_LOGOUT: &str = "Logout";
+const STR_ADMIN: &str = "Admin";
+const STR_DONATE: &str = "Donate";
 
 pub fn render(state: Rc<State>, slot: Option<&str>, active_page: Option<PageLinks>) -> Dom {
     actions::fetch_profile(Rc::clone(&state));

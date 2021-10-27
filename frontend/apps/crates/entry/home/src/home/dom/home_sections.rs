@@ -6,16 +6,16 @@ use super::super::{actions, state::Testimonial};
 
 use super::super::state::State;
 
-const STR_PLAY: &'static str = "Play Series";
-const STR_JIGS: &'static str = "JIGs";
+const STR_PLAY: &str = "Play Series";
+const STR_JIGS: &str = "JIGs";
 
-const STR_CONTENT_ACTION: &'static str = "See our library";
-const STR_CREATE_ACTION: &'static str = "Try it for free";
-const STR_CUSTOMIZE_ACTION: &'static str = "See our lesson outlines";
-const STR_COMMUNITY_ACTION: &'static str = "Get inspired";
-const STR_CLASSROOM_ACTION: &'static str = "Manage your class";
+const STR_CONTENT_ACTION: &str = "See our library";
+const STR_CREATE_ACTION: &str = "Try it for free";
+const STR_CUSTOMIZE_ACTION: &str = "See our lesson outlines";
+const STR_COMMUNITY_ACTION: &str = "Get inspired";
+const STR_CLASSROOM_ACTION: &str = "Manage your class";
 
-const STR_COMING_SOON: &'static str = "(coming soon!)";
+const STR_COMING_SOON: &str = "(coming soon!)";
 
 pub fn render(state: Rc<State>) -> Dom {
     html!("empty-fragment", {

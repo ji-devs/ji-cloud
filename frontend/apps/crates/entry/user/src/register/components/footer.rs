@@ -4,11 +4,11 @@ use dominator::{html, Dom};
 
 use utils::{events, routes::*};
 
-const STR_SUBMIT: &'static str = "Submit";
-const STR_EMAIL_LABEL: &'static str = "Email";
-const STR_EMAIL_PLACEHOLDER: &'static str = "Type or paste your email";
-const STR_PASSWORD_LABEL: &'static str = "Create Password";
-const STR_PASSWORD_PLACEHOLDER: &'static str = "********";
+const STR_SUBMIT: &str = "Submit";
+const STR_EMAIL_LABEL: &str = "Email";
+const STR_EMAIL_PLACEHOLDER: &str = "Type or paste your email";
+const STR_PASSWORD_LABEL: &str = "Create Password";
+const STR_PASSWORD_PLACEHOLDER: &str = "********";
 
 pub struct Footer {}
 

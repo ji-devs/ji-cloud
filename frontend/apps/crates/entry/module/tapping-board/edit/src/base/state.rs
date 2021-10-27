@@ -20,7 +20,7 @@ use futures_signals::{
 use shared::domain::jig::{
     module::{
         body::{
-            Instructions, StepExt, ThemeChoice,
+            Instructions, ThemeChoice,
             _groups::design::TraceKind,
             tapping_board::{
                 Hint, Mode, ModuleData as RawData, Next, PlaySettings as RawPlaySettings, Step,
@@ -69,7 +69,7 @@ impl PlaySettings {
         }
     }
 
-    pub fn to_raw(&self) -> RawPlaySettings {
+    pub fn _to_raw(&self) -> RawPlaySettings {
         RawPlaySettings {
             hint: self.hint.get_cloned(),
             next: self.next.get_cloned(),
@@ -168,7 +168,6 @@ impl Base {
             content
                 .base
                 .stickers
-                .clone()
                 .iter()
                 .map(|raw_sticker| Sticker::new(stickers.clone(), raw_sticker))
                 .collect::<Vec<Sticker>>(),
@@ -221,7 +220,7 @@ impl Base {
             stickers,
             traces,
             traces_meta,
-            play_settings: Rc::new(PlaySettings::new(content.play_settings.clone())),
+            play_settings: Rc::new(PlaySettings::new(content.play_settings)),
         });
 
         *_self_ref.borrow_mut() = Some(_self.clone());
@@ -229,7 +228,7 @@ impl Base {
         _self
     }
 
-    pub fn theme_id_str_signal(&self) -> impl Signal<Item = &'static str> {
+    pub fn _theme_id_str_signal(&self) -> impl Signal<Item = &'static str> {
         self.theme_id.signal().map(|id| id.as_str_id())
     }
 }

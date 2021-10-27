@@ -11,7 +11,7 @@ use utils::prelude::*;
 
 use web_sys::File;
 
-const STR_AUDIO_IS_TOO_LARGE: &'static str = "Audio is too large, limit is 30MB";
+const STR_AUDIO_IS_TOO_LARGE: &str = "Audio is too large, limit is 30MB";
 
 #[derive(Debug)]
 pub enum UploadError {
@@ -102,7 +102,7 @@ pub async fn upload_audio(
     };
 
     //upload to GCS
-    upload_file_gcs(&session_uri, &file, abort_controller)
+    upload_file_gcs(&session_uri, file, abort_controller)
         .await
         .map_err(|err| {
             if err.is_abort() {

@@ -28,7 +28,7 @@ pub fn render(state: Rc<MainSettings>) -> Dom {
 
 
                     let theme_id = state.base.theme_id.get_cloned();
-                    let mode = state.base.mode.clone();
+                    let mode = state.base.mode;
 
                     if display_mode == DisplayMode::Single {
 

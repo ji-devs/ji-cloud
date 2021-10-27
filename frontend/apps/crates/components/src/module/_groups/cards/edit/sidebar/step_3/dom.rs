@@ -32,10 +32,10 @@ where
                 .child_signal(state.tab.signal_cloned().map(clone!(render_settings => move |tab| {
                     match tab {
                         Tab::Settings(state) => {
-                            Some(render_settings(state.clone()))
+                            Some(render_settings(state))
                         },
                         Tab::Instructions(state) => {
-                            Some(render_instructions(state.clone()))
+                            Some(render_instructions(state))
                         },
                     }
                 })))

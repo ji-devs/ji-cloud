@@ -16,9 +16,7 @@ impl Game {
             Hint::None => Phase::Playing,
         });
 
-        let _self = Rc::new(Self { base, phase });
-
-        _self
+        Rc::new(Self { base, phase })
     }
 }
 

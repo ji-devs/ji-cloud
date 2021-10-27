@@ -24,7 +24,7 @@ impl GeneralDom {
                 html!("input-checkbox", {
                     .property("slot", "styles")
                     .property("label", &style.display_name)
-                    .property_signal("checked", state.style_selected(id.clone()))
+                    .property_signal("checked", state.style_selected(id))
                     .event(clone!(state, id => move |evt:events::CustomToggle| {
                         actions::toggle_style(state.clone(), id, evt.value());
                     }))
@@ -35,7 +35,7 @@ impl GeneralDom {
                 html!("input-checkbox", {
                     .property("slot", "age_ranges")
                     .property("label", &age_range.display_name)
-                    .property_signal("checked", state.age_range_selected(id.clone()))
+                    .property_signal("checked", state.age_range_selected(id))
                     .event(clone!(state, id => move |evt:events::CustomToggle| {
                         actions::toggle_age_range(state.clone(), id, evt.value());
                     }))
@@ -46,7 +46,7 @@ impl GeneralDom {
                 html!("input-checkbox", {
                     .property("slot", "affiliations")
                     .property("label", &affiliation.display_name)
-                    .property_signal("checked", state.affiliation_selected(id.clone()))
+                    .property_signal("checked", state.affiliation_selected(id))
                     .event(clone!(state, id => move |evt:events::CustomToggle| {
                         actions::toggle_affiliation(state.clone(), id, evt.value());
                     }))
@@ -55,7 +55,7 @@ impl GeneralDom {
             .children(ImageTag::iter().map(|tag| {
                 html!("input-checkbox", {
                     .property("slot", "tags")
-                    .property("label", tag.STR_DISPLAY_NAME())
+                    .property("label", tag.display_name())
                     .property_signal("checked", state.tag_selected(tag.as_index()))
                     .event(clone!(state, tag => move |evt:events::CustomToggle| {
                         actions::toggle_tag(state.clone(), tag.as_index(), evt.value());

@@ -29,7 +29,7 @@ pub fn render(state: Rc<Step2>) -> Dom {
                             Some(render_text_editor(state.sidebar.base.text_editor.clone()))
                         },
                         Tab::Image(state) => {
-                            Some(render_image_search(state.clone(), None))
+                            Some(render_image_search(state, None))
                         },
                     }
                 })))

@@ -7,8 +7,6 @@ use components::module::_groups::cards::play::card::dom::{
 use futures_signals::signal::SignalExt;
 use std::rc::Rc;
 
-use rand::prelude::*;
-
 use utils::prelude::*;
 
 impl Game {
@@ -21,8 +19,8 @@ impl Game {
                         let mut children:Vec<Dom> = Vec::new();
 
                         if let Some(current) = current {
-                            let theme_id = state.base.theme_id.clone();
-                            let mode = state.base.mode.clone();
+                            let theme_id = state.base.theme_id;
+                            let mode = state.base.mode;
 
                             let Current { target, others, side, phase } = &*current;
 
@@ -47,8 +45,8 @@ impl Game {
                                         //should be some animation
                                         .property_signal("flipped", phase.signal().map(clone!(pair_id => move |phase| {
                                             match phase {
-                                                CurrentPhase::Correct(id) => if id == pair_id { false } else {true},
-                                                CurrentPhase::Wrong(id) => if id == pair_id { false } else {true},
+                                                CurrentPhase::Correct(id) => id != pair_id,
+                                                CurrentPhase::Wrong(id) => id != pair_id,
                                                 _ => true,
                                             }
                                         })))

@@ -8,7 +8,7 @@ use shared::{
     api::endpoints::{self, ApiEndpoint},
     domain::{
         jig::{
-            module::{ModuleCreateRequest, ModuleId, ModuleResponse, ModuleGetQuery},
+            module::{ModuleCreateRequest, ModuleGetQuery, ModuleId, ModuleResponse},
             JigId, JigPlayerSettings, JigResponse, JigUpdateDraftDataRequest, LiteModule,
             ModuleKind,
         },

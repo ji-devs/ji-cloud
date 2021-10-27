@@ -118,12 +118,12 @@ impl<RawData: RawDataExt, E: ExtraExt> CardsBase<RawData, E> {
             .map(|pair| (pair.0.clone().into(), pair.1.clone().into()))
             .collect();
 
-        let mode = content.mode.into();
+        let mode = content.mode;
         let instructions = Mutable::new(content.instructions);
 
         let background = Mutable::new(content.background);
 
-        let _self = Rc::new(Self {
+        Rc::new(Self {
             jig_id,
             module_id,
             jig_theme_id,
@@ -139,9 +139,7 @@ impl<RawData: RawDataExt, E: ExtraExt> CardsBase<RawData, E> {
             extra,
             module_kind,
             debug: debug.unwrap_or_default(),
-        });
-
-        _self
+        })
     }
 
     pub fn clone_pairs_raw(&self) -> Vec<(raw::Card, raw::Card)> {

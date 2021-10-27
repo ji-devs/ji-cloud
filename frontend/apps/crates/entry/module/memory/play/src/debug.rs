@@ -25,7 +25,7 @@ use uuid::Uuid;
 pub static SETTINGS: OnceCell<DebugSettings> = OnceCell::new();
 
 //const IMAGE_UUID:&'static str = "bf2fe548-7ffd-11eb-b3ab-579026da8b36";
-const IMAGE_UUID: &'static str = "9da11e0a-c17b-11eb-b863-570eea18a3bd";
+const IMAGE_UUID: &str = "9da11e0a-c17b-11eb-b863-570eea18a3bd";
 
 #[derive(Debug, Default)]
 pub struct DebugSettings {

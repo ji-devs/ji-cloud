@@ -35,7 +35,7 @@ impl Draw {
 
         let _self = Self {
             trace: DrawTrace::new(
-                init_trace.clone(),
+                init_trace,
                 default_kind,
                 Rc::new(Box::new(clone!(menu => move || {
                     //this will trigger menu re-positioning

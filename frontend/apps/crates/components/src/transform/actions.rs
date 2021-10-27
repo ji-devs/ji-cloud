@@ -92,13 +92,7 @@ impl TransformState {
                             //and getting the angle between that and the same thing from last move
                             let _resize_info = get_resize_info();
                             let new_vec = self.center_to_point_vec(pos.x, pos.y);
-                            let old_vec = self
-                                .rot_stash
-                                .borrow()
-                                .as_ref()
-                                .unwrap_ji()
-                                .vec_to_point
-                                .clone();
+                            let old_vec = self.rot_stash.borrow().as_ref().unwrap_ji().vec_to_point;
                             let mut transform = self.transform.lock_mut();
 
                             let mut angle = math::vec2::angle(&old_vec, &new_vec);
@@ -161,24 +155,21 @@ impl TransformState {
                                             .borrow()
                                             .as_ref()
                                             .unwrap_ji()
-                                            .basis_vec_x
-                                            .clone();
+                                            .basis_vec_x;
                                         let basis_vec_y = self
                                             .scale_stash
                                             .borrow()
                                             .as_ref()
                                             .unwrap_ji()
-                                            .basis_vec_y
-                                            .clone();
+                                            .basis_vec_y;
                                         let perc_x = get_curr_perc(&basis_vec_x);
                                         let perc_y = get_curr_perc(&basis_vec_y);
                                         if perc_x >= MIN_SCALE_PERC && perc_y >= MIN_SCALE_PERC {
                                             transform.set_scale_2d(perc_x, perc_y);
                                         }
-                                    } else {
-                                        if scale_x >= MIN_SCALE_PERC && scale_y >= MIN_SCALE_PERC {
-                                            transform.set_scale_2d(scale_x, scale_y);
-                                        }
+                                    } else if scale_x >= MIN_SCALE_PERC && scale_y >= MIN_SCALE_PERC
+                                    {
+                                        transform.set_scale_2d(scale_x, scale_y);
                                     }
                                 }
                             }

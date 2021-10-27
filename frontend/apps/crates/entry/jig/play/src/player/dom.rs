@@ -50,10 +50,7 @@ pub fn render(state: Rc<State>) -> Dom {
             }
         }))
         .child_signal(state.jig.signal_ref(clone!(state => move |jig| {
-            match jig {
-                None => None,
-                Some(jig) => {
-                    Some(html!("jig-play-background-music", {
+            jig.as_ref().map(|jig| html!("jig-play-background-music", {
                         .property("slot", "background")
                         .property_signal("playing", state.bg_audio_playing.signal())
                         .apply(|dom| {
@@ -69,8 +66,6 @@ pub fn render(state: Rc<State>) -> Dom {
                             }
                         })
                     }))
-                },
-            }
         })))
         .children(&mut [
             html!("iframe" => HtmlIFrameElement, {
@@ -162,7 +157,7 @@ fn jig_and_active_module_signal(
     map_ref! {
         let jig = state.jig.signal_cloned(),
         let active_module = state.active_module.signal_cloned() => (
-            jig.clone(), active_module.clone()
+            jig.clone(), *active_module
         )
     }
 }

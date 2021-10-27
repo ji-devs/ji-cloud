@@ -70,10 +70,10 @@ impl TracesEdit {
             draw_kind: RefCell::new(draw_kind),
         });
 
-        if raw.len() > 0 {
+        if !raw.is_empty() {
             let resize_info = get_resize_info();
             _self.list.lock_mut().replace_cloned(
-                raw.into_iter()
+                raw.iter()
                     .map(|trace| Rc::new(EditSelectTrace::new(trace.clone(), &resize_info)))
                     .collect(),
             );
@@ -87,7 +87,7 @@ impl TracesEdit {
     }
 
     pub fn get(&self, index: usize) -> Option<Rc<EditSelectTrace>> {
-        self.list.lock_ref().get(index).map(|x| x.clone())
+        self.list.lock_ref().get(index).cloned()
     }
 
     pub fn get_audio(&self, index: usize) -> Option<Audio> {

@@ -59,11 +59,11 @@ pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<Step1<RawData, E>>) ->
                                             Some(if !is_empty {
                                                 render_non_empty(state.clone())
                                             } else {
-                                                render_single_list(single.clone())
+                                                render_single_list(single)
                                             })
                                         },
                                         Tab::Image(image) => {
-                                            Some(render_image_search(image.clone(), None))
+                                            Some(render_image_search(image, None))
                                         },
                                     }
                                 })))

@@ -117,7 +117,6 @@ impl Base {
         stickers.replace_all(
             base_content
                 .stickers
-                .clone()
                 .iter()
                 .map(|raw_sticker| Sticker::new(stickers.clone(), raw_sticker))
                 .collect::<Vec<Sticker>>(),
@@ -144,7 +143,7 @@ impl Base {
         _self
     }
 
-    pub fn theme_id_str_signal(&self) -> impl Signal<Item = &'static str> {
+    pub fn _theme_id_str_signal(&self) -> impl Signal<Item = &'static str> {
         self.theme_id.signal().map(|id| id.as_str_id())
     }
 }

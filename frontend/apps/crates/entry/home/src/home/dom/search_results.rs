@@ -48,7 +48,7 @@ fn render_result(state: Rc<State>, jig: &JigResponse) -> Dom {
         .children(&mut [
             ModuleThumbnail::render(
                 Rc::new(ModuleThumbnail {
-                    jig_id: jig.id.clone(),
+                    jig_id: jig.id,
                     module: jig.jig_data.modules[0].clone(),
                     is_jig_fallback: true,
                 }),

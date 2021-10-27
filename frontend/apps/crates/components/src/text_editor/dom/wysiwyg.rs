@@ -26,13 +26,13 @@ pub fn render(state: Rc<State>) -> Dom {
             let mut controls = state.controls.lock_mut();
             match value {
                 ControlsChange::Font(font) => controls.font = font_from_css(&font),
-                ControlsChange::Element(element) => controls.element = element.clone(),
+                ControlsChange::Element(element) => controls.element = element,
                 ControlsChange::Weight(weight) => controls.weight = weight,
-                ControlsChange::Align(align) => controls.align = align.clone(),
+                ControlsChange::Align(align) => controls.align = align,
                 ControlsChange::FontSize(font_size) => controls.font_size = font_size,
-                ControlsChange::Color(color) => controls.color = color.clone(),
-                ControlsChange::HighlightColor(highlight_color) => controls.highlight_color = highlight_color.clone(),
-                ControlsChange::BoxColor(box_color) => controls.box_color = box_color.clone(),
+                ControlsChange::Color(color) => controls.color = color,
+                ControlsChange::HighlightColor(highlight_color) => controls.highlight_color = highlight_color,
+                ControlsChange::BoxColor(box_color) => controls.box_color = box_color,
                 ControlsChange::IndentCount(indent_count) => controls.indent_count = indent_count,
                 ControlsChange::Italic(italic) => controls.italic = italic,
                 ControlsChange::Underline(underline) => controls.underline = underline,

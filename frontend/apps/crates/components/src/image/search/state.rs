@@ -8,8 +8,8 @@ use futures_signals::signal::Mutable;
 use futures_signals::signal_vec::MutableVec;
 use shared::domain::meta::ImageStyle;
 use shared::domain::search::WebImageSearchItem;
-use shared::domain::{jig::module::body::Image, meta::ImageStyleId};
 use shared::domain::user::UserProfile;
+use shared::domain::{jig::module::body::Image, meta::ImageStyleId};
 use std::{cell::RefCell, collections::HashSet, rc::Rc};
 
 pub const RECENT_COUNT: u16 = 12;
@@ -85,11 +85,10 @@ pub enum ImageSearchCheckboxKind {
     StickersFilter,         // sets `kind` to Some(ImageKind::Sticker)
 }
 
-
 #[derive(Clone)]
 pub enum SearchMode {
     Sticker(Rc<MutableVec<Image>>),
-    Web(Rc<MutableVec<WebImageSearchItem>>)
+    Web(Rc<MutableVec<WebImageSearchItem>>),
 }
 
 impl SearchMode {

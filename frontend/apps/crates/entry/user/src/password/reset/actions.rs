@@ -24,14 +24,13 @@ pub fn change_password(state: Rc<PasswordResetPage>) {
             force_logout: true
         };
 
-        let (resp, _status):(Result<(), EmptyError>, u16) = api_no_auth_empty_status(&user::ChangePassword::PATH, user::ChangePassword::METHOD, Some(query)).await;
+        let (resp, _status):(Result<(), EmptyError>, u16) = api_no_auth_empty_status(user::ChangePassword::PATH, user::ChangePassword::METHOD, Some(query)).await;
 
-        
         match resp {
             Ok(_) => {
                 let route:String = Route::User(UserRoute::Login(String::new())).into();
                 dominator::routing::go_to_url(&route);
-            }, 
+            },
             Err(_err) => {
                 state.password.status.set(Some(PasswordStatus::ResetError));
             }

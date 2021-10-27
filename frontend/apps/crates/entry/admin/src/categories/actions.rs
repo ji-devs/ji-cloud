@@ -24,10 +24,10 @@ pub fn toggle_expand_all(cat: &Rc<Category>, flag: bool) {
 pub fn load_categories(state: Rc<State>) {
     state.loader.load(clone!(state => async move {
         let req = GetCategoryRequest {
-            ids: Vec::new(), 
+            ids: Vec::new(),
             scope: Some(CategoryTreeScope::Decendants)
         };
-        
+
         match api_with_auth::<CategoryResponse, EmptyError, _>(endpoints::category::Get::PATH, endpoints::category::Get::METHOD, Some(req)).await {
             Ok(resp) => {
                 let categories:Vec<Rc<Category>> = resp.categories
@@ -153,7 +153,7 @@ pub fn move_category(content_state: Rc<ContentState>, dir: Direction) {
     });
 
     if let Some(target_index) = target_index {
-        let id = content_state.cat.id.clone();
+        let id = content_state.cat.id;
 
         let path = endpoints::category::Update::PATH.replace("{id}", &id.0.to_string());
 
@@ -184,7 +184,7 @@ pub fn delete_category(content_state: Rc<ContentState>) {
     content_state.close_menu();
 
     content_state.state.loader.load(clone!(content_state => async move {
-        let id = content_state.cat.id.clone();
+        let id = content_state.cat.id;
 
         let path = endpoints::category::Delete::PATH.replace(
             "{id}",
@@ -193,8 +193,8 @@ pub fn delete_category(content_state: Rc<ContentState>) {
 
         match api_with_auth_empty::<EmptyError, ()>(&path, endpoints::category::Delete::METHOD, None).await {
             Ok(_) => {
-                content_state 
-                    .with_siblings_mut(move |mut children| 
+                content_state
+                    .with_siblings_mut(move |mut children|
                         children.retain(|x| x.id != id)
                     );
             },

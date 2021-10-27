@@ -4,12 +4,8 @@ use std::rc::Rc;
 
 use super::{drag::*, select::*};
 use dominator::clone;
-use futures_signals::{
-    signal::{Signal, SignalExt},
-    signal_vec::SignalVecExt,
-};
+use futures_signals::signal::{Signal, SignalExt};
 use shared::domain::jig::module::body::drag_drop::Step;
-use utils::prelude::*;
 
 pub struct Main {
     pub base: Rc<Base>,

@@ -8,14 +8,14 @@ use crate::audio::input::{AudioInput, AudioInputCallbacks, AudioInputOptions};
 use futures_signals::signal::SignalExt;
 use shared::domain::jig::module::body::Audio;
 
-pub const STR_INSTRUCTIONS_LABEL: &'static str = "Written instructions";
-pub const STR_INSTRUCTIONS_PLACEHOLDER: &'static str = "Type instructions";
+pub const STR_INSTRUCTIONS_LABEL: &str = "Written instructions";
+pub const STR_INSTRUCTIONS_PLACEHOLDER: &str = "Type instructions";
 
 pub fn render(state: Rc<State>) -> Dom {
     html!("div", {
         .children(&mut [
             render_text(state.clone()),
-            render_audio(state.clone())
+            render_audio(state)
         ])
     })
 }
@@ -24,7 +24,7 @@ pub fn render_text(state: Rc<State>) -> Dom {
     fn change_text(state: &State, text: String, push_history: bool) {
         let mut lock = state.instructions.lock_mut();
 
-        if text == "" {
+        if text.is_empty() {
             lock.text = None;
         } else {
             lock.text = Some(text);

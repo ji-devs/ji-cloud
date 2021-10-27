@@ -35,11 +35,9 @@ impl Ending {
                 clone!(state, finished => async move {
                     if finished {
                         match state.kind {
-                            Some(kind) => {
-                                match kind {
-                                    _ => {
-                                        //if ending animation finished, automatically go next?
-                                    }
+                            Some(_kind) => {
+                                {
+                                    //if ending animation finished, automatically go next?
                                 }
                             },
                             None => {

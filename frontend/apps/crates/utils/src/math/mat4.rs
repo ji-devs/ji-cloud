@@ -428,7 +428,7 @@ impl AsRef<Matrix4> for Matrix4 {
 impl<T: AsRef<Matrix4>> Mul<T> for Matrix4 {
     type Output = Matrix4;
     fn mul(self, rhs: T) -> Self::Output {
-        let mut clone = self.clone();
+        let mut clone = self;
         clone *= rhs.as_ref();
         clone
     }

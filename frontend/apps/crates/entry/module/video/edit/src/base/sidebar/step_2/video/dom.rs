@@ -11,7 +11,7 @@ use crate::base::sidebar::step_2::actions;
 
 use super::super::state::Step2;
 
-const STR_DELETE: &'static str = "Delete";
+const STR_DELETE: &str = "Delete";
 
 pub fn render(state: Rc<Step2>) -> Dom {
     html!("video-third-party-input-card", {

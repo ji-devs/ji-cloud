@@ -9,8 +9,7 @@ use utils::{events::ModuleResizeEvent, iframe::*, prelude::*, resize::*};
 use super::{ending::*, loading::dom::render_loading, state::*};
 use crate::{
     audio::mixer::AUDIO_MIXER, instructions::player::InstructionsPlayer,
-    module::_common::play::prelude::*,
-    overlay::container::OverlayContainer,
+    module::_common::play::prelude::*, overlay::container::OverlayContainer,
 };
 use shared::domain::jig::module::body::{BodyExt, ModeExt, StepExt};
 
@@ -184,7 +183,7 @@ where
                             }))
                             .after_inserted(clone!(state, base => move |_elem| {
                                 if AUDIO_MIXER.with(|mixer| mixer.context_available()) || state.opts.skip_play {
-                                    start_playback(base.clone());
+                                    start_playback(base);
                                 }
                             }))
                         }))

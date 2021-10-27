@@ -1,5 +1,13 @@
 use strum_macros::EnumIter;
 
+const STR_BACKGROUND_LAYER_1: &str = "Background Layer 1";
+const STR_BACKGROUND_LAYER_2: &str = "Background Layer 2 (a.k.a. \"Overlay\")";
+const STR_ISPY: &str = "I Spy";
+const STR_MULTIPLE_CHOICE: &str = "Multiple Choice";
+const STR_DRAG_AND_DROP: &str = "Drag & Drop";
+const STR_VIDEO: &str = "Video";
+const STR_NAVIGATION_BUTTON: &str = "Navigation Button";
+
 #[repr(i16)]
 #[derive(EnumIter, Debug, PartialEq, Copy, Clone, Eq, Hash)]
 pub enum ImageTag {
@@ -13,15 +21,15 @@ pub enum ImageTag {
 }
 
 impl ImageTag {
-    pub const fn STR_DISPLAY_NAME(&self) -> &'static str {
+    pub const fn display_name(&self) -> &'static str {
         match self {
-            Self::BackgroundLayer1 => "Background Layer 1",
-            Self::BackgroundLayer2 => "Background Layer 2 (a.k.a. \"Overlay\")",
-            Self::Ispy => "I Spy",
-            Self::MultipleChoice => "Multiple Choice",
-            Self::DragAndDrop => "Drag & Drop",
-            Self::Video => "Video",
-            Self::NavigationButton => "Navigation Button",
+            Self::BackgroundLayer1 => STR_BACKGROUND_LAYER_1,
+            Self::BackgroundLayer2 => STR_BACKGROUND_LAYER_2,
+            Self::Ispy => STR_ISPY,
+            Self::MultipleChoice => STR_MULTIPLE_CHOICE,
+            Self::DragAndDrop => STR_DRAG_AND_DROP,
+            Self::Video => STR_VIDEO,
+            Self::NavigationButton => STR_NAVIGATION_BUTTON,
         }
     }
 

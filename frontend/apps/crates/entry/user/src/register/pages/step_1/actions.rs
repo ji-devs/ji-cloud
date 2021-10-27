@@ -63,7 +63,7 @@ async fn username_exists(name: String) -> bool {
     };
 
     let resp: Result<OtherUser, EmptyError> =
-        api_no_auth(&UserLookup::PATH, UserLookup::METHOD, Some(query)).await;
+        api_no_auth(UserLookup::PATH, UserLookup::METHOD, Some(query)).await;
 
     resp.is_ok()
 }

@@ -6,7 +6,7 @@ use web_sys::HtmlInputElement;
 
 use utils::events;
 
-const STR_GOOGLE_LABEL: &'static str = "Log in with Google";
+const STR_GOOGLE_LABEL: &str = "Log in with Google";
 
 pub struct LoginPage {}
 impl LoginPage {

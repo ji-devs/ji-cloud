@@ -2,7 +2,9 @@ use shared::{
     api::endpoints::{jig::module, ApiEndpoint},
     domain::{
         jig::{
-            module::{Module, ModuleBody, ModuleCreateRequest, ModuleId, ModuleResponse, ModuleGetQuery},
+            module::{
+                Module, ModuleBody, ModuleCreateRequest, ModuleGetQuery, ModuleId, ModuleResponse,
+            },
             JigId, LiteModule,
         },
         CreateResponse,
@@ -26,18 +28,16 @@ pub async fn clone_module(
 }
 
 async fn get_module(jig_id: &JigId, module_id: &ModuleId) -> Result<Module, EmptyError> {
-    let req = ModuleGetQuery { q: String::from("unique") };
+    let req = ModuleGetQuery {
+        q: String::from("unique"),
+    };
 
     let path = module::GetDraft::PATH
         .replace("{id}", &jig_id.0.to_string())
         .replace("{module_id}", &module_id.0.to_string());
 
     let res =
-        api_with_auth::<ModuleResponse, EmptyError, _>(
-            &path,
-            module::GetDraft::METHOD,
-            Some(req)
-        )
+        api_with_auth::<ModuleResponse, EmptyError, _>(&path, module::GetDraft::METHOD, Some(req))
             .await?;
     Ok(res.module)
 }

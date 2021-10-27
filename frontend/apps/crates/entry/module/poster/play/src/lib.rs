@@ -26,7 +26,7 @@ pub async fn main_js() {
 
     let router = Rc::new(Router::new());
 
-    router::render(router.clone());
+    router::render(router);
 
     //std::mem::forget(Box::new(router));
 }

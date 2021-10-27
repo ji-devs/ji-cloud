@@ -15,10 +15,10 @@ use super::super::{
 mod advanced_search;
 mod categories_select;
 
-const STR_ALL_LANGUAGES: &'static str = "All languages";
-const STR_ALL_AGES: &'static str = "All ages";
-const STR_SEARCH: &'static str = "Search";
-const STR_WHAT_ARE_YOU_LOOKING_FOR: &'static str = "What are you looking for?";
+const STR_ALL_LANGUAGES: &str = "All languages";
+const STR_ALL_AGES: &str = "All ages";
+const STR_SEARCH: &str = "Search";
+const STR_WHAT_ARE_YOU_LOOKING_FOR: &str = "What are you looking for?";
 
 pub fn render(state: Rc<State>, auto_search: bool) -> Dom {
     fetch_data(state.clone(), auto_search);
@@ -65,7 +65,7 @@ pub fn render(state: Rc<State>, auto_search: bool) -> Dom {
                                     let mut age_ranges = state.search_selected.age_ranges.lock_mut();
                                     match age_ranges.contains(&age_range.id) {
                                         true => age_ranges.remove(&age_range.id),
-                                        false => age_ranges.insert(age_range.id.clone()),
+                                        false => age_ranges.insert(age_range.id),
                                     };
                                 }))
                             })
@@ -117,7 +117,7 @@ pub fn render(state: Rc<State>, auto_search: bool) -> Dom {
                     }))
                 }),
             ])
-            .child(advanced_search::render(state.clone()))
+            .child(advanced_search::render(state))
         }))
     })
 }
@@ -129,12 +129,12 @@ fn age_value_signal(state: Rc<State>) -> impl Signal<Item = String> {
             let mut output = vec![];
             selected_ages.iter().for_each(|age_id| {
                 // only search list if already populated
-                if available_ages.len() > 0 {
+                if !available_ages.is_empty() {
                     let age = available_ages.iter().find(|age| age.id == *age_id).unwrap_ji();
                     output.push(age.display_name.clone());
                 }
             });
-            if output.len() > 0 {
+            if !output.is_empty() {
                 output.join(", ")
             } else {
                 STR_ALL_AGES.to_string()

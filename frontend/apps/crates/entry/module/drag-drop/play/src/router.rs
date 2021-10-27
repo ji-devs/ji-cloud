@@ -24,9 +24,9 @@ impl Router {
 }
 
 pub fn render(state: Rc<Router>) {
-    state.clone().loader.load(
+    state.loader.load(
         dominator::routing::url()
-            .signal_ref(|url| Route::from_url(&url))
+            .signal_ref(|url| Route::from_url(url))
             .for_each(clone!(state => move |route| {
                 match route {
                     Route::Module(route) => {

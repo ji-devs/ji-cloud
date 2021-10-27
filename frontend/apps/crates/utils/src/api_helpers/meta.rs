@@ -16,14 +16,13 @@ impl MetaOptions {
     pub async fn load() -> Result<Self, ()> {
         //Probably doesn't need auth - just regular fetch from awsm_web
         let resp: Result<MetadataResponse, ()> = api_no_auth::<_, _, ()>(
-            &endpoints::meta::Get::PATH,
+            endpoints::meta::Get::PATH,
             endpoints::meta::Get::METHOD,
             None,
         )
         .await;
         resp.map_err(|_err| {
             //log::error!("{:?}", err);
-            ()
         })
         .map(|res| Self {
             subjects: res
