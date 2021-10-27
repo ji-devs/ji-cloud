@@ -2,7 +2,7 @@ use futures_signals::signal::Mutable;
 use gloo::events::EventListener;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::{cell::RefCell, rc::Rc, sync::atomic::AtomicBool};
-use web_sys::{Blob, CanvasRenderingContext2d, HtmlCanvasElement, HtmlImageElement, ImageData, Worker, window};
+use web_sys::{Blob, CanvasRenderingContext2d, HtmlCanvasElement, HtmlImageElement, Element, ImageData, Worker, window};
 use crate::base::state::Base;
 use std::io::Cursor;
 use utils::prelude::*;
@@ -33,52 +33,35 @@ impl ImagePlayer {
             size
         })
     }
+
 }
 
 pub struct Controller {
     pub base: Rc<Base>,
+    pub elem: RefCell<Option<Element>>,
     // directly set from raw.hide
     pub hidden: Mutable<bool>,
     // starts false (changed via ux)
     pub has_toggled_once: AtomicBool,
     // set from raw.hide_toggle
     pub hide_toggle: Option<HideToggle>,
-    pub audio_filename: Option<String>
+    pub audio_filename: Option<String>,
+    pub interactive: bool,
 }
 
 impl Controller {
     pub fn new(base: Rc<Base>, raw: &RawSticker) -> Self {
 
+        let interactive = raw.hide_toggle.is_some() || raw.audio_filename.is_some();
+
         Self {
             base,
+            elem: RefCell::new(None),
             hidden: Mutable::new(raw.hide),
             has_toggled_once: AtomicBool::new(false),
             hide_toggle: raw.hide_toggle,
-            audio_filename: raw.audio_filename.clone()
-        }
-    }
-
-    pub fn handle_click(&self) {
-        let has_toggled_once = self.has_toggled_once.load(Ordering::SeqCst);
-
-        if let Some(hide_toggle) = self.hide_toggle {
-            if !has_toggled_once || hide_toggle == HideToggle::Always {
-                let val = self.hidden.get();
-                self.hidden.set(!val);
-            }
-        }
-
-        self.has_toggled_once.store(true, Ordering::SeqCst);
-
-
-        match (self.hidden.get(), self.audio_filename.as_ref()) {
-            (false, Some(audio_filename)) => {
-                AUDIO_MIXER.with(|mixer| {
-                    mixer.pause_all();
-                    mixer.play_oneshot(AudioSource::Url(self.base.media_url(&audio_filename)))
-                });
-            },
-            _ => {}
+            audio_filename: raw.audio_filename.clone(),
+            interactive
         }
     }
 }

@@ -1,5 +1,5 @@
 use crate::base::state::Base;
-use dominator::{clone, html, with_node, Dom};
+use dominator::{clone, html, with_node, Dom, EventOptions};
 use futures_signals::signal::{Mutable, Signal, SignalExt};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
@@ -28,8 +28,6 @@ impl AnimationPlayer {
     pub fn render(self: Rc<Self>) -> Dom {
         let state = self;
 
-        let interactive = state.raw.hide_toggle.is_some() || state.controller.audio_filename.is_some() || state.controller.anim.tap;
-
         html!("empty-fragment", {
             .child_signal(state.size.signal_cloned().map(clone!(state => move |size| size.map(|size| {
                 let transform_matrix = Matrix4::new_direct(state.raw.transform_matrix.clone());
@@ -40,9 +38,6 @@ impl AnimationPlayer {
                 });
 
                 html!("canvas" => web_sys::HtmlCanvasElement, {
-                    .event(clone!(state => move |evt:events::Click| {
-                        state.controller.handle_click();
-                    }))
                     .style_signal("opacity", state.controller.hidden.signal().map(|hidden| {
                         if hidden {
                             "0"
@@ -50,8 +45,7 @@ impl AnimationPlayer {
                             "1"
                         }
                     }))
-                    .style("cursor", if interactive {"pointer"} else {"initial"})
-                    .style("pointer-events", if interactive {"initial"} else {"none"})
+                    .style("cursor", if state.controller.interactive {"pointer"} else {"initial"})
                     .style("display", "block")
                     .style("position", "absolute")
                     .style_signal("width", width_signal(state.size.signal_cloned()))
@@ -60,18 +54,24 @@ impl AnimationPlayer {
                     .style_signal("left", bounds::size_width_center_rem_signal(state.size.signal()))
                     .style_signal("transform", transform_signal)
 
-                    .after_inserted(clone!(state, size => move |canvas| {
+                    .after_inserted(clone!(state, size => move |elem| {
                         let (natural_width, natural_height) = size; 
 
-                        canvas.set_width(natural_width as u32);
-                        canvas.set_height(natural_height as u32);
-                        *state.paint_ctx.borrow_mut() = Some(get_2d_context(&canvas, None).unwrap_ji());
+                        elem.set_width(natural_width as u32);
+                        elem.set_height(natural_height as u32);
+                        *state.paint_ctx.borrow_mut() = Some(get_2d_context(&elem, None).unwrap_ji());
+
 
                         let canvas:HtmlCanvasElement = web_sys::window().unwrap_ji().document().unwrap_ji().create_element("canvas").unwrap_ji().unchecked_into();
                         canvas.set_width(natural_width as u32);
                         canvas.set_height(natural_height as u32);
                         *state.work_ctx.borrow_mut() = Some(get_2d_context(&canvas, None).unwrap_ji());
                         *state.work_canvas.borrow_mut() = Some(canvas);
+
+                        *state.controller.elem.borrow_mut() = Some(elem.unchecked_into());
+                        state.base.insert_stage_click_listener(clone!(state => move |stage_click| {
+                            state.controller.handle_click(stage_click);
+                        }));
 
                         state.request_frame();
                     }))

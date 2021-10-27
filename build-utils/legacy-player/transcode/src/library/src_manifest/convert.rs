@@ -20,17 +20,28 @@ use super::{MediaTranscode, data::{
     ShowKind as SrcShowKind,
 }};
 
-use shared::domain::jig::{JigCreateRequest, JigData, JigPlayerSettings, module::{ModuleCreateRequest, ModuleBody, body::{
-        Transform,
-        legacy::{
-            ModuleData,
-            slide::*,
-            design::*,
-            activity::*
+use shared::domain::jig::{
+    JigCreateRequest, 
+    JigData, 
+    JigPlayerSettings, 
+    module::{
+        ModuleCreateRequest, 
+        ModuleBody, 
+        body::{
+            Transform,
+            _groups::design::{PathCommand, TraceKind, TraceShape},
+            legacy::{
+                ModuleData,
+                slide::*,
+                design::*,
+                activity::*
+            }
         }
-    }}};
+    }
+};
 
 use utils::{math::mat4::Matrix4, prelude::*};
+use crate::config::{REFERENCE_HEIGHT, REFERENCE_WIDTH};
 
 impl SrcManifest {
     pub fn load_file(path:PathBuf) -> Self {
@@ -127,7 +138,7 @@ impl SrcSlide {
             if activities_len == 0 {
                 None
             } else {
-                let activity = &self.activities[0];
+                let activity = self.activities[0].clone();
 
 
                 let make_media = |filename:&str, transcode:Option<MediaTranscode>| -> Media {
@@ -177,6 +188,18 @@ impl SrcSlide {
                                 AdvanceTrigger::Tap
                             },
                             advance_index: activity.settings.jump_index
+                        }))
+                    },
+                    SrcActivityKind::Soundboard => {
+                        Some(Activity::Soundboard(Soundboard{
+                            items: activity.shapes
+                                .into_iter()
+                                .map(|shape| {
+                                    SoundboardItem {
+                                        shape: shape.convert()
+                                    }
+                                }) 
+                                .collect()
                         }))
                     },
                     _ => None
@@ -300,8 +323,8 @@ fn convert_transform(orig: [f64;6]) -> [f64;16] {
     let scale_y = orig[3];
     let skew_x = orig[2];
     let skew_y = orig[1];
-    let translate_x = orig[4] / 1024.0;
-    let translate_y = orig[5] / 768.0;
+    let translate_x = orig[4] / REFERENCE_WIDTH;
+    let translate_y = orig[5] / REFERENCE_HEIGHT;
 
     let mut m = Matrix4::identity();
 
@@ -325,37 +348,39 @@ impl SrcActivity {
         }
         Question {
             audio,
-            path: self.shapes[0].convert_path()
+            shape: self.shapes[0].convert()
         }
     }
 }
 
 impl SrcShape {
-    pub fn convert_path(&self) -> Vec<PathPoint> {
-        self
-            .path
-            .iter()
-            .map(|point| point.clone().convert())
-            .collect()
+    pub fn convert(&self) -> TraceShape {
+        TraceShape::PathCommands(
+            self
+                .path
+                .iter()
+                .map(|point| (point.clone().convert(), true))
+                .collect()
+        )
     }
 }
 impl SrcPathPoint {
-    pub fn convert(self) -> PathPoint {
-        let kind = match self.kind {
-            SrcPathElementKind::MoveToPoint => PathElementKind::MoveToPoint,
-            SrcPathElementKind::AddLineToPoint => PathElementKind::AddLineToPoint,
-            SrcPathElementKind::AddQuadCurveToPoint => PathElementKind::AddQuadCurveToPoint,
-            SrcPathElementKind::AddCurveToPoint => PathElementKind::AddCurveToPoint,
-            SrcPathElementKind::CloseSubPath => PathElementKind::CloseSubPath,
-        };
+    pub fn convert(self) -> PathCommand {
+        let SrcPathPoint { mut x, mut y, mut cp1x, mut cp1y, mut cp2x, mut cp2y, kind} = self;
 
-        let SrcPathPoint { x, y, cp1x, cp1y, cp2x, cp2y, ..} = self;
+        x /= REFERENCE_WIDTH;
+        y /= REFERENCE_HEIGHT;
+        cp1x /= REFERENCE_WIDTH;
+        cp1y /= REFERENCE_HEIGHT;
+        cp2x /= REFERENCE_WIDTH;
+        cp2y /= REFERENCE_HEIGHT;
 
-        PathPoint {
-            kind,
-            x, y, 
-            cp1x, cp1y, 
-            cp2x, cp2y
+        match kind {
+            SrcPathElementKind::MoveToPoint => PathCommand::MoveTo(x, y),
+            SrcPathElementKind::AddLineToPoint => PathCommand::LineTo(x, y),
+            SrcPathElementKind::AddQuadCurveToPoint => PathCommand::QuadCurveTo(cp1x, cp1y, x, y),
+            SrcPathElementKind::AddCurveToPoint => PathCommand::CurveTo(cp1x, cp1y, cp2x, cp2y, x, y),
+            SrcPathElementKind::CloseSubPath => PathCommand::ClosePath,
         }
     }
 }

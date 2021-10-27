@@ -39,7 +39,7 @@ use std::ops::{Mul, Sub};
 use std::slice::SliceIndex;
 use std::sync::atomic::{AtomicU8, AtomicUsize, Ordering};
 use std::{cell::RefCell, rc::Rc, sync::atomic::AtomicBool};
-use web_sys::{Blob, CanvasRenderingContext2d, HtmlCanvasElement, HtmlImageElement, ImageData, Worker, window};
+use web_sys::{Blob, CanvasRenderingContext2d, HtmlCanvasElement, HtmlElement, HtmlImageElement, Element, ImageData, Worker, window};
 use crate::base::state::Base;
 use std::io::Cursor;
 use std::cell::{Cell, Ref};
@@ -401,6 +401,7 @@ impl AnimationPlayer {
 
 pub struct Controller {
     pub base: Rc<Base>,
+    pub elem: RefCell<Option<Element>>,
     // store the settings
     pub anim: Animation,
     // directly set from raw.hide
@@ -421,14 +422,19 @@ pub struct Controller {
     // set from raw.hide_toggle
     pub hide_toggle: Option<HideToggle>,
 
-    pub audio_filename: Option<String>
+    pub audio_filename: Option<String>,
+
+    pub interactive: bool
 }
 
 impl Controller {
     pub fn new(base: Rc<Base>, raw: &RawSticker, anim: Animation) -> Self {
 
+        let interactive = raw.hide_toggle.is_some() || raw.audio_filename.is_some() || anim.tap;
+
         Self {
             base,
+            elem: RefCell::new(None),
             hidden: Mutable::new(raw.hide),
             has_toggled_once: AtomicBool::new(false),
             has_finished_once: AtomicBool::new(false),
@@ -436,54 +442,8 @@ impl Controller {
             curr_frame_index: AtomicUsize::new(0),
             anim,
             hide_toggle: raw.hide_toggle,
-            audio_filename: raw.audio_filename.clone()
+            audio_filename: raw.audio_filename.clone(),
+            interactive
         }
-    }
-
-    pub fn handle_click(&self) {
-        let has_toggled_once = self.has_toggled_once.load(Ordering::SeqCst);
-
-        if let Some(hide_toggle) = self.hide_toggle {
-            if !has_toggled_once || hide_toggle == HideToggle::Always {
-                let val = self.hidden.get();
-                self.hidden.set(!val);
-            }
-        }
-
-        self.has_toggled_once.store(true, Ordering::SeqCst);
-
-        let (playing_anim, playing_audio) = if self.hidden.get() { 
-            (false, false)
-        } else { 
-            let play_toggle = !self.playing.load(Ordering::SeqCst);
-
-            if self.anim.tap {
-                (play_toggle, play_toggle) 
-            } else if self.anim.once && self.has_finished_once.load(Ordering::SeqCst) {
-                (false, play_toggle)
-            } else {
-                (true, true)
-            }
-        };
-
-        self.playing.store(playing_anim, Ordering::SeqCst);
-
-        if playing_anim {
-            // this is a small departure from TT, reset to the beginning in case 
-            // the sound was a bit timed to the animation
-            if self.anim.tap {
-                self.curr_frame_index.store(0, Ordering::SeqCst);
-            }
-        }
-
-        if playing_audio {
-            if let Some(audio_filename) = self.audio_filename.as_ref() {
-                AUDIO_MIXER.with(|mixer| {
-                    mixer.pause_all();
-                    mixer.play_oneshot(AudioSource::Url(self.base.media_url(&audio_filename)))
-                });
-            }
-        }
-
     }
 }

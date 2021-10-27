@@ -32,6 +32,7 @@ pub struct Backgrounds {
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
+#[serde(rename_all = "snake_case")]
 /// Stickers are things that can be rendered and transformed
 pub enum Sticker {
     /// Sprites
@@ -80,6 +81,7 @@ pub struct Sprite {
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
+#[serde(rename_all = "snake_case")]
 /// Sprite Effects
 pub enum SpriteEffect {
     /// Remove White
@@ -98,6 +100,7 @@ pub struct Video {
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
+#[serde(rename_all = "snake_case")]
 /// Host of video
 pub enum VideoHost {
     /// YouTube
@@ -127,6 +130,7 @@ pub struct Trace {
 }
 
 #[derive(Clone, Copy, Serialize, Deserialize, Debug, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
 /// Trace kind
 pub enum TraceKind {
     /// Wrong (red color)
@@ -144,6 +148,7 @@ impl AsRef<Trace> for Trace {
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
+#[serde(rename_all = "snake_case")]
 /// Trace shape
 pub enum TraceShape {
     /// width and height
@@ -152,4 +157,34 @@ pub enum TraceShape {
     Ellipse(f64, f64),
     /// points
     Path(Vec<(f64, f64)>),
+    /// explicit path commands
+    /// corresponds to SVG spec: https://svgwg.org/svg2-draft/paths.html#TheDProperty
+    /// the second parameter indicates whether it's absolute (true) or relative (false)
+    PathCommands(Vec<(PathCommand, bool)>)
+}
+
+#[allow(missing_docs)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+#[serde(rename_all = "snake_case")]
+pub enum PathCommand {
+    /// https://svgwg.org/svg2-draft/paths.html#PathDataMovetoCommands
+    MoveTo(f64, f64),
+    /// https://svgwg.org/svg2-draft/paths.html#PathDataLinetoCommands
+    ClosePath,
+    /// https://svgwg.org/svg2-draft/paths.html#PathDataLinetoCommands
+    LineTo(f64, f64),
+    /// https://svgwg.org/svg2-draft/paths.html#PathDataLinetoCommands
+    HorizontalLineTo(f64),
+    /// https://svgwg.org/svg2-draft/paths.html#PathDataLinetoCommands
+    VerticalLineTo(f64),
+    /// https://svgwg.org/svg2-draft/paths.html#PathDataCubicBezierCommands
+    CurveTo(f64, f64, f64, f64, f64, f64),
+    /// https://svgwg.org/svg2-draft/paths.html#PathDataCubicBezierCommands
+    SmoothCurveTo(f64, f64, f64, f64),
+    /// https://svgwg.org/svg2-draft/paths.html#PathDataQuadraticBezierCommands
+    QuadCurveTo(f64, f64, f64, f64),
+    /// https://svgwg.org/svg2-draft/paths.html#PathDataQuadraticBezierCommands
+    SmoothQuadCurveTo(f64, f64),
+    /// https://svgwg.org/svg2-draft/paths.html#PathDataEllipticalArcCommands
+    ArcTo(f64, f64, f64, f64, f64, f64, f64)
 }

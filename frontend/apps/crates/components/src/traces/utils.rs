@@ -1,5 +1,6 @@
 use shared::domain::jig::module::body::_groups::design::{
     Trace as RawTrace, TraceShape as RawTraceShape,
+    PathCommand,
 };
 use utils::{math::BoundsF64, prelude::*, resize::ResizeInfo};
 
@@ -27,7 +28,12 @@ impl TraceExt for RawTrace {
         };
 
         match &self.shape {
-            RawTraceShape::Path(path) => calc_bounds(ShapeRef::Path(&path), offset),
+            RawTraceShape::PathCommands(commands) => {
+                calc_bounds(ShapeRef::PathCommands(&commands), offset)
+            },
+            RawTraceShape::Path(path) => {
+                calc_bounds(ShapeRef::Path(&path), offset)
+            },
 
             RawTraceShape::Ellipse(radius_x, radius_y) => {
                 calc_bounds(ShapeRef::Ellipse(*radius_x, *radius_y), offset)
@@ -40,6 +46,7 @@ impl TraceExt for RawTrace {
 }
 pub enum ShapeRef<'a> {
     Path(&'a [(f64, f64)]),
+    PathCommands(&'a [(PathCommand, bool)]),
     Ellipse(f64, f64),
     Rect(f64, f64),
 }
@@ -49,6 +56,10 @@ pub enum ShapeRef<'a> {
 //TODO - document the use-cases for where offset is used
 pub fn calc_bounds<'a>(shape: ShapeRef<'a>, offset: Option<(f64, f64)>) -> Option<BoundsF64> {
     let mut bounds = match shape {
+        ShapeRef::PathCommands(commands) => {
+            unimplemented!("TODO!");
+        },
+
         ShapeRef::Path(path) => {
             //Set to inverse of max values
             let mut left: f64 = 1.0;
@@ -117,3 +128,72 @@ pub fn calc_bounds<'a>(shape: ShapeRef<'a>, offset: Option<(f64, f64)>) -> Optio
 
     bounds
 }
+
+pub fn denormalize_command(command: &PathCommand, resize_info: &ResizeInfo) -> PathCommand {
+    match command.clone() {
+        PathCommand::MoveTo(x, y) => {
+            let (x, y) = resize_info.get_pos_denormalized(x, y);
+            PathCommand::MoveTo(x,y)
+        },
+        PathCommand::ClosePath => {
+            PathCommand::ClosePath
+        },
+        PathCommand::LineTo(x, y) => {
+            let (x, y) = resize_info.get_pos_denormalized(x, y);
+            PathCommand::LineTo(x,y)
+        },
+        PathCommand::HorizontalLineTo(x) => {
+            let (x, y) = resize_info.get_pos_denormalized(x, 0.0);
+            PathCommand::HorizontalLineTo(x)
+        },
+        PathCommand::VerticalLineTo(y) => {
+            let (x, y) = resize_info.get_pos_denormalized(0.0, y);
+            PathCommand::VerticalLineTo(y)
+        },
+        PathCommand::CurveTo(cp1x, cp1y,cp2x, cp2y, x, y) => {
+            let (cp1x, cp1y) = resize_info.get_pos_denormalized(cp1x, cp1y);
+            let (cp2x, cp2y) = resize_info.get_pos_denormalized(cp2x, cp2y);
+            let (x, y) = resize_info.get_pos_denormalized(x, y);
+            PathCommand::CurveTo(cp1x, cp1y,cp2x, cp2y, x, y)
+        },
+        PathCommand::SmoothCurveTo(cp1x, cp1y, x, y) => {
+            let (cp1x, cp1y) = resize_info.get_pos_denormalized(cp1x, cp1y);
+            let (x, y) = resize_info.get_pos_denormalized(x, y);
+            PathCommand::SmoothCurveTo(cp1x, cp1y,x, y)
+        },
+        PathCommand::QuadCurveTo(cp1x, cp1y, x, y) => {
+            let (cp1x, cp1y) = resize_info.get_pos_denormalized(cp1x, cp1y);
+            let (x, y) = resize_info.get_pos_denormalized(x, y);
+            PathCommand::QuadCurveTo(cp1x, cp1y,x, y)
+        },
+        PathCommand::SmoothQuadCurveTo(x, y) => {
+            let (x, y) = resize_info.get_pos_denormalized(x, y);
+            PathCommand::SmoothQuadCurveTo(x, y)
+        },
+        _ => { unimplemented!("TODO: implement denormalize for this path command!")}
+    }
+}
+
+// pub enum PathCommand {
+//     /// https://svgwg.org/svg2-draft/paths.html#PathDataMovetoCommands
+//     MoveTo(f64, f64),
+//     /// https://svgwg.org/svg2-draft/paths.html#PathDataLinetoCommands
+//     ClosePath,
+//     /// https://svgwg.org/svg2-draft/paths.html#PathDataLinetoCommands
+//     LineTo(f64, f64),
+//     /// https://svgwg.org/svg2-draft/paths.html#PathDataLinetoCommands
+//     HorizontalLineTo(f64),
+//     /// https://svgwg.org/svg2-draft/paths.html#PathDataLinetoCommands
+//     VerticalLineTo(f64),
+//     /// https://svgwg.org/svg2-draft/paths.html#PathDataCubicBezierCommands
+//     CurveTo(f64, f64, f64, f64, f64, f64),
+//     /// https://svgwg.org/svg2-draft/paths.html#PathDataCubicBezierCommands
+//     SmoothTo(f64, f64, f64, f64),
+//     /// https://svgwg.org/svg2-draft/paths.html#PathDataQuadraticBezierCommands
+//     QuadCurveTo(f64, f64, f64, f64),
+//     /// https://svgwg.org/svg2-draft/paths.html#PathDataQuadraticBezierCommands
+//     SmoothQuadCurveTo(f64, f64),
+//     /// https://svgwg.org/svg2-draft/paths.html#PathDataEllipticalArcCommands
+//     ArcTo(f64, f64, f64, f64, f64, f64)
+// }
+ 

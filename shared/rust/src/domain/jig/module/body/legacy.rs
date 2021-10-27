@@ -3,8 +3,6 @@ pub mod activity;
 #[allow(missing_docs)]
 pub mod design;
 #[allow(missing_docs)]
-pub mod path;
-#[allow(missing_docs)]
 pub mod slide;
 
 use crate::domain::jig::module::{

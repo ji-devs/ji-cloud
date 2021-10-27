@@ -5,7 +5,7 @@ use std::fs::File;
 use std::fmt;
 use super::*;
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct Shape {
     pub path: Vec<PathPoint>,
 
@@ -53,7 +53,7 @@ pub enum PathElementKind {
     CloseSubPath
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct ShapeSettings {
     #[serde(rename="linkToPage")]
     pub jump_index: Option<usize>,

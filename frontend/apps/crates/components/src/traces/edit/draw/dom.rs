@@ -56,6 +56,9 @@ impl TracesEdit {
                         let transform_size = size.map(|size| TransformSize::new_static(&transform, size));
                         match shape {
 
+                            TraceShape::PathCommands(commands) => {
+                                svg::render_path_commands_signal(shape_style, resize_info.clone(), transform_size, &commands)
+                            },
                             TraceShape::Path(path) => {
                                 svg::render_path_signal(shape_style, resize_info.clone(), transform_size, &path)
                             },
@@ -120,6 +123,9 @@ impl TracesEdit {
                         let transform_size = size.map(|size| TransformSize::new_static(&transform, size));
                         match shape {
 
+                            TraceShape::PathCommands(commands) => {
+                                svg::render_path_commands_signal(shape_style, resize_info.clone(), transform_size, &commands)
+                            },
                             TraceShape::Path(path) => {
                                 svg::render_path_signal(shape_style, resize_info.clone(), transform_size, &path)
                             },
@@ -200,9 +206,13 @@ where
     ));
 
     match trace.shape {
+        RawTraceShape::PathCommands(ref commands) => {
+            svg::render_path_commands(shape_style, &resize_info, transform_size, &commands, callbacks)
+        },
+
         RawTraceShape::Path(ref path) => {
             svg::render_path(shape_style, &resize_info, transform_size, &path, callbacks)
-        }
+        },
 
         RawTraceShape::Rect(width, height) => svg::render_rect(
             shape_style,
