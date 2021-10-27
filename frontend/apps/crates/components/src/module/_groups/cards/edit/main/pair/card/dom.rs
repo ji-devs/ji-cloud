@@ -1,4 +1,5 @@
 use dominator::{clone, html, Dom, EventOptions};
+use wasm_bindgen_futures::spawn_local;
 use std::rc::Rc;
 
 use utils::prelude::*;
@@ -123,8 +124,11 @@ pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<MainCard<RawData, E>>)
                                             if let Some(data_transfer) = evt.data_transfer() {
                                                 if let Some(data) = data_transfer.get_data(IMAGE_SEARCH_DATA_TRANSFER).ok() {
                                                     let data:ImageDataTransfer = serde_json::from_str(&data).unwrap_ji();
-                                                    let index = state.index.get().unwrap_or_default();
-                                                    state.replace_card_image(index, state.side, data.image);
+                                                    spawn_local(clone!(state => async move {
+                                                        let image = data.to_image().await;
+                                                        let index = state.index.get().unwrap_or_default();
+                                                        state.replace_card_image(index, state.side, image);
+                                                    }));
                                                 }
                                             }
                                             state.editing_active.set_neq(false);

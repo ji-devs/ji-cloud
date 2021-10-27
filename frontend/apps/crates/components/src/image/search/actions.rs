@@ -1,3 +1,4 @@
+use crate::firebase::wait_for_upload_ready;
 use crate::image::search::state::{ImageSearchCheckboxKind, NextPage, RECENT_COUNT, SearchMode};
 use crate::image::tag::ImageTag;
 
@@ -7,12 +8,15 @@ use dominator::clone;
 use futures::future::join;
 use futures_signals::signal_vec::MutableVec;
 use shared::api::endpoints::image;
+use shared::domain::image::ImageId;
 use shared::domain::image::{
     recent::{UserRecentImageListRequest, UserRecentImageUpsertRequest},
     user::UserImageCreateRequest,
 };
+use shared::domain::media::WebMediaUrlCreateRequest;
 use shared::domain::meta::ImageTagIndex;
 use shared::domain::search::WebImageSearchQuery;
+use shared::media::MediaKind;
 use shared::{
     api::{endpoints, ApiEndpoint},
     domain::{
@@ -24,11 +28,35 @@ use shared::{
     media::MediaLibrary,
 };
 use url::Url;
-use utils::web_image_resolver::ImageOrWeb;
 use std::rc::Rc;
 use std::str::FromStr;
 use utils::prelude::*;
 use web_sys::File;
+
+pub async fn web_to_image(url: Url) -> Result<Image, ()> {
+    let req = WebMediaUrlCreateRequest {
+        url
+    };
+
+    let res = endpoints::media::Create::api_with_auth(Some(req))
+        .await
+        .map_err(|_| ())?;
+
+    if !matches!(res.kind, MediaKind::Image(_)) {
+        unreachable!("Only images here");
+    }
+
+    wait_for_upload_ready(
+        &res.id, 
+        MediaLibrary::Web, 
+        None
+    ).await;
+
+    Ok(Image {
+        id: ImageId(res.id),
+        lib: MediaLibrary::Web,
+    })
+}
 
 impl State {
     pub fn set_selected(&self, image: Image) {
@@ -45,7 +73,7 @@ pub fn on_web_image_click(state: Rc<State>, url: &str) {
 
     state.loader.load(clone!(state => async move {
 
-        let image = ImageOrWeb::web_to_image(url).await;
+        let image = web_to_image(url).await.expect_ji("Couldn't upload image");
         state.set_selected(image);
 
     }));
@@ -85,10 +113,10 @@ pub fn fetch_init_data(state: Rc<State>) {
 }
 
 async fn search_async_web(state: Rc<State>) {
-    let kind = match &state.options.checkbox_kind {
-        Some(ImageSearchCheckboxKind::StickersFilter) if state.checkbox_checked.get() => Some(ImageKind::Sticker),
-        _ => None,
-    };
+    // let kind = match &state.options.checkbox_kind {
+    //     Some(ImageSearchCheckboxKind::StickersFilter) if state.checkbox_checked.get() => Some(ImageKind::Sticker),
+    //     _ => None,
+    // };
 
     let mut tags = state.options.tags.clone().unwrap_or_default();
     match &state.options.checkbox_kind {

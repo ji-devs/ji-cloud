@@ -8,7 +8,8 @@ use super::{
 use dominator::{clone, html, Dom};
 use futures_signals::{signal::SignalExt, signal_vec::{MutableVec, SignalVec, SignalVecExt}};
 use shared::domain::{jig::module::body::Image, search::WebImageSearchItem};
-use std::{pin::Pin, rc::Rc};
+use url::Url;
+use std::{pin::Pin, rc::Rc, str::FromStr};
 use utils::prelude::*;
 
 const STR_SHOW_ONLY_BACKGROUNDS: &'static str = "Show only background";
@@ -60,12 +61,18 @@ pub fn render_loaded(state: Rc<State>) -> Dom {
             }))
         })
         .event(clone!(state => move |_: events::ScrollEnd| {
-            let next_page = *state.next_page.borrow();
-            if let NextPage::Page(page) = next_page {
-                log::info!("Loading page {}", page);
-                actions::search(Rc::clone(&state), Some(page));
-            } else {
-                log::info!("End, not loading more");
+            let search_mode = state.search_mode.lock_ref();
+            if let SearchMode::Sticker(_) = &*search_mode {
+
+                let next_page = *state.next_page.borrow();
+
+                if let NextPage::Page(page) = next_page {
+                    log::info!("Loading page {}", page);
+                    actions::search(Rc::clone(&state), Some(page));
+                } else {
+                    log::info!("End, not loading more");
+                };
+
             };
         }))
     })
@@ -103,9 +110,7 @@ fn render_image(state: Rc<State>, image: Image, slot: &str) -> Dom {
         }))
         .event(clone!(image => move |evt: events::DragStart| {
             if let Some(data_transfer) = evt.data_transfer() {
-                let data = ImageDataTransfer {
-                    image: image.clone()
-                };
+                let data = ImageDataTransfer::Image(image.clone());
                 let json = serde_json::to_string(&data).unwrap_ji();
                 let _ = data_transfer.set_data(IMAGE_SEARCH_DATA_TRANSFER, &json);
                 data_transfer.set_drop_effect("all");
@@ -122,26 +127,22 @@ fn render_web_image(state: Rc<State>, image: WebImageSearchItem, slot: &str) -> 
         .property("size", "thumb")
         .property("src", &image.thumbnail_url)
         .property("loading", "lazy")
-        .style("height", "100%")
-        .style("width", "100%")
-        .style("object-fit", "contain")
-        .style("object-position", "center")
         .event(clone!(state, image => move |_: events::Click| {
             actions::on_web_image_click(Rc::clone(&state), &image.url);
         }))
-        // .event(clone!(image => move |evt: events::DragStart| {
-        // TODO:
-        //     if let Some(data_transfer) = evt.data_transfer() {
-        //         let data = ImageDataTransfer {
-        //             image: image.clone()
-        //         };
-        //         let json = serde_json::to_string(&data).unwrap_ji();
-        //         let _ = data_transfer.set_data(IMAGE_SEARCH_DATA_TRANSFER, &json);
-        //         data_transfer.set_drop_effect("all");
-        //     } else {
-        //         log::error!("no data transfer - use a real computer!!!");
-        //     }
-        // }))
+        .event(clone!(image => move |evt: events::DragStart| {
+            if let Some(data_transfer) = evt.data_transfer() {
+                // issue #1768 will resolve this
+                let url = Url::from_str(&image.url).unwrap_ji();
+
+                let data = ImageDataTransfer::Web(url);
+                let json = serde_json::to_string(&data).unwrap_ji();
+                let _ = data_transfer.set_data(IMAGE_SEARCH_DATA_TRANSFER, &json);
+                data_transfer.set_drop_effect("all");
+            } else {
+                log::error!("no data transfer - use a real computer!!!");
+            }
+        }))
     })
 }
 

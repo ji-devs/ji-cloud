@@ -138,6 +138,12 @@ export class _ extends LitElement {
                     column-gap: 15px;
                 }
             }
+            ::slotted(img) {
+                height: 100%;
+                width: 100%;
+                object-fit: contain;
+                object-position: center;
+            }
             ::slotted([slot=images]),
             ::slotted([slot=recent]) {
                 display: grid;

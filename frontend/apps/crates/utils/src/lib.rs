@@ -30,6 +30,5 @@ pub mod screenshot;
 pub mod storage;
 pub mod themes;
 pub mod unwrap;
-pub mod web_image_resolver;
 
 pub(crate) mod strings;
