@@ -1,4 +1,4 @@
-use crate::image::search::state::{ImageSearchCheckboxKind, SearchMode, RECENT_COUNT};
+use crate::image::search::state::{ImageSearchCheckboxKind, NextPage, RECENT_COUNT, SearchMode};
 use crate::image::tag::ImageTag;
 
 use super::super::upload::upload_image;
@@ -61,10 +61,10 @@ pub async fn get_styles() -> Vec<ImageStyle> {
     res.unwrap_ji().image_styles
 }
 
-pub fn search(state: Rc<State>) {
+pub fn search(state: Rc<State>, page: Option<u32>) {
     state.loader.load(clone!(state => async move {
         match state.search_mode.get_cloned() {
-            SearchMode::Sticker(_) => search_async(Rc::clone(&state)).await,
+            SearchMode::Sticker(_) => search_async(Rc::clone(&state), page.unwrap_or_default()).await,
             SearchMode::Web(_) => search_async_web(Rc::clone(&state)).await,
         };
     }));
@@ -72,7 +72,7 @@ pub fn search(state: Rc<State>) {
 
 pub fn fetch_init_data(state: Rc<State>) {
     state.loader.load(clone!(state => async move {
-        let search = search_async(Rc::clone(&state));
+        let search = search_async(Rc::clone(&state), 0);
         if state.options.recent {
             join(
                 search,
@@ -125,7 +125,7 @@ async fn search_async_web(state: Rc<State>) {
     }
 }
 
-async fn search_async(state: Rc<State>) {
+async fn search_async(state: Rc<State>, page: u32) {
     if state.user.borrow().is_none() {
         get_user(Rc::clone(&state)).await;
     }
@@ -164,7 +164,7 @@ async fn search_async(state: Rc<State>) {
 
     let search_query = ImageSearchQuery {
         q: state.query.lock_ref().clone(),
-        page: state.page.lock_ref().clone(),
+        page: Some(page),
         styles: state
             .selected_styles
             .borrow()
@@ -197,14 +197,33 @@ async fn search_async(state: Rc<State>) {
                     lib: MediaLibrary::Global,
                 }
             }).collect();
-            state.search_mode.set(SearchMode::Sticker(Rc::new(MutableVec::new_with_values(images))));
 
-            // state.image_list.lock_mut().replace_cloned(res.images.iter().map(|i| {
-            //     Image {
-            //         id: i.metadata.id,
-            //         lib: MediaLibrary::Global,
-            //     }
-            // }).collect());
+            // if it's the first page replace otherwise append
+            if page == 0 {
+                state.search_mode.set(SearchMode::Sticker(Rc::new(MutableVec::new_with_values(images))));
+            } else {
+                // adding each item manually, wonder if there's a more efficient way
+                let search_mode = state.search_mode.lock_mut();
+
+                match &*search_mode {
+                    SearchMode::Web(_) => unreachable!("Should not get non 0 page for sticker when in web mode"),
+                    SearchMode::Sticker(images_on_page) => {
+
+                        let mut images_on_page = images_on_page.lock_mut();
+                        images.into_iter().for_each(|image| {
+                            images_on_page.push_cloned(image);
+                        });
+
+                    },
+                }
+            }
+
+            let next_page = page + 1;
+            if next_page >= res.pages {
+                *state.next_page.borrow_mut() = NextPage::End;
+            } else {
+                *state.next_page.borrow_mut() = NextPage::Page(next_page);
+            }
         },
         Err(e) => {
             log::error!("{:#?}", e);

@@ -23,11 +23,11 @@ pub struct State {
     pub loader: AsyncLoader,
     pub checkbox_checked: Mutable<bool>,
     pub query: Mutable<String>,
-    pub page: Mutable<Option<u32>>,
     pub styles: Rc<RefCell<Option<Vec<ImageStyle>>>>,
     pub selected_styles: Rc<RefCell<HashSet<ImageStyleId>>>,
     pub callbacks: Callbacks,
     pub user: Rc<RefCell<Option<UserProfile>>>,
+    pub next_page: RefCell<NextPage>,
 }
 
 impl State {
@@ -48,11 +48,11 @@ impl State {
             selected_styles: Rc::new(RefCell::new(selected_styles)),
             checkbox_checked: Mutable::new(true),
             query: Mutable::new(String::new()),
-            page: Mutable::new(None),
             styles,
             callbacks,
             user: Rc::new(RefCell::new(None)),
-            search_mode: Mutable::new(SearchMode::Sticker(Rc::new(MutableVec::new())))
+            search_mode: Mutable::new(SearchMode::Sticker(Rc::new(MutableVec::new()))),
+            next_page: RefCell::new(NextPage::default()),
         }
     }
 }
@@ -105,5 +105,17 @@ impl SearchMode {
             Self::Sticker(_) => false,
             Self::Web(_) => true,
         }
+    }
+}
+
+#[derive(Clone, Copy, Debug)]
+pub enum NextPage {
+    Page(u32),
+    End,
+}
+
+impl Default for NextPage {
+    fn default() -> Self {
+        Self::Page(0)
     }
 }

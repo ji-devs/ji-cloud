@@ -1,4 +1,4 @@
-use crate::image::search::state::{ImageSearchCheckboxKind, SearchMode};
+use crate::image::search::state::{ImageSearchCheckboxKind, NextPage, SearchMode};
 
 use super::{
     actions,
@@ -60,7 +60,13 @@ pub fn render_loaded(state: Rc<State>) -> Dom {
             }))
         })
         .event(clone!(state => move |_: events::ScrollEnd| {
-            log::info!("scroll end");
+            let next_page = *state.next_page.borrow();
+            if let NextPage::Page(page) = next_page {
+                log::info!("Loading page {}", page);
+                actions::search(Rc::clone(&state), Some(page));
+            } else {
+                log::info!("End, not loading more");
+            };
         }))
     })
 }
@@ -158,7 +164,7 @@ fn render_controls(state: Rc<State>) -> Vec<Dom> {
             }))
             .event(clone!(state => move |evt: events::CustomToggle| {
                 state.checkbox_checked.set(evt.value());
-                actions::search(state.clone());
+                actions::search(state.clone(), None);
             }))
         }));
     }
@@ -185,7 +191,7 @@ fn render_controls(state: Rc<State>) -> Vec<Dom> {
         .property("slot", "search-input")
         .event(clone!(state => move |e: events::CustomSearch| {
             state.query.set(e.query());
-            actions::search(state.clone());
+            actions::search(state.clone(), None);
         }))
     }));
 
@@ -207,7 +213,7 @@ fn render_filters(state: Rc<State>) -> Dom {
                     }))
                     .event(clone!(state => move |_: events::Change| {
                         state.search_mode.set(SearchMode::Sticker(Rc::new(MutableVec::new())));
-                        actions::search(Rc::clone(&state));
+                        actions::search(Rc::clone(&state), None);
                     }))
                 }))
                 .text("Stickers")
@@ -223,7 +229,7 @@ fn render_filters(state: Rc<State>) -> Dom {
                     }))
                     .event(clone!(state => move |_: events::Change| {
                         state.search_mode.set(SearchMode::Web(Rc::new(MutableVec::new())));
-                        actions::search(Rc::clone(&state));
+                        actions::search(Rc::clone(&state), None);
                     }))
                 }))
                 .text("Web")
@@ -247,7 +253,7 @@ fn render_filters(state: Rc<State>) -> Dom {
                                     true => state.selected_styles.as_ref().borrow_mut().insert(style_id),
                                     false => state.selected_styles.as_ref().borrow_mut().remove(&style_id),
                                 };
-                                actions::search(state.clone());
+                                actions::search(state.clone(), None);
                             }))
                         })
 
