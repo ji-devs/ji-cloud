@@ -61,7 +61,7 @@ pub fn submit(state: Rc<State>) {
         locale: "en".to_string(),
         timezone: chrono_tz::Tz::Asia__Jerusalem,
         opt_into_edu_resources: step_2.marketing,
-        organization: Some(step_2.organization),
+        organization: step_2.organization,
         persona: Some(step_2.persona),
         profile_image_url: step_1.oauth_profile.and_then(|p| p.profile_picture),
         subjects,

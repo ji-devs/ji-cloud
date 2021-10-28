@@ -3,6 +3,8 @@ use futures_signals::signal::Mutable;
 
 use shared::domain::session::OAuthUserProfile;
 
+use crate::debug::DebugRegisterStep;
+
 pub struct State {
     pub step: Mutable<Step>,
 }
@@ -72,7 +74,7 @@ pub struct Step2Data {
     pub location_json: Option<String>,
     pub language: String,
     pub persona: String,
-    pub organization: String,
+    pub organization: Option<String>,
     pub marketing: bool,
 }
 
@@ -83,7 +85,7 @@ impl Step2Data {
             location_json: None,
             language: "english".to_string(),
             persona: "Teacher".to_string(),
-            organization: "Home".to_string(),
+            organization: None,
             marketing: false,
         }
     }
