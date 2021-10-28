@@ -129,17 +129,14 @@ fn render_web_image(state: Rc<State>, image: WebImageSearchItem, slot: &str) -> 
     html!("img", {
         .property("slot", slot)
         .property("size", "thumb")
-        .property("src", &image.thumbnail_url)
+        .property("src", &image.thumbnail_url.to_string())
         .property("loading", "lazy")
         .event(clone!(state, image => move |_: events::Click| {
-            actions::on_web_image_click(Rc::clone(&state), &image.url);
+            actions::on_web_image_click(Rc::clone(&state), image.url.clone());
         }))
         .event(clone!(image => move |evt: events::DragStart| {
             if let Some(data_transfer) = evt.data_transfer() {
-                // issue #1768 will resolve this
-                let url = Url::from_str(&image.url).unwrap_ji();
-
-                let data = ImageDataTransfer::Web(url);
+                let data = ImageDataTransfer::Web(image.url.clone());
                 let json = serde_json::to_string(&data).unwrap_ji();
                 let _ = data_transfer.set_data(IMAGE_SEARCH_DATA_TRANSFER, &json);
                 data_transfer.set_drop_effect("all");

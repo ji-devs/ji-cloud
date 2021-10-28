@@ -61,10 +61,7 @@ impl State {
     }
 }
 
-pub fn on_web_image_click(state: Rc<State>, url: &str) {
-    // TODO: why does the search request return strings but url is required here?
-    let url = Url::from_str(url).unwrap_ji();
-
+pub fn on_web_image_click(state: Rc<State>, url: Url) {
     state.loader.load(clone!(state => async move {
 
         let image = web_to_image(url).await.expect_ji("Couldn't upload image");
