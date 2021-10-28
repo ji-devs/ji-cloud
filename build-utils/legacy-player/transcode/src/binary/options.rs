@@ -5,19 +5,20 @@ use shared::config::RemoteTarget;
 #[derive(Debug, StructOpt)]
 #[structopt(name = "ji tap transcoder", about = "ji tap downloader/transcoder")]
 pub struct Opts {
-    // Soundboard Options 
+    // Soundboard Options - 17765
     // https://jitap.net/activities/genr/play/soundboard-states 
     #[structopt(long, default_value="https://d24o39yp3ttic8.cloudfront.net/6A973171-C29A-4C99-A650-8033F996C6E7/game.json")]
     pub game_json_url: String,
-    // David test 002
+
+    // David test 002 - 17736
     // #[structopt(long, default_value="https://d24o39yp3ttic8.cloudfront.net/5D00A147-73B7-43FF-A215-A38CB84CEBCD/game.json")]
     // pub game_json_url: String,
     
-    // Corinne Houdini states
+    // Corinne Houdini states - 17762
     // #[structopt(long, default_value="https://d24o39yp3ttic8.cloudfront.net/42C980D6-9FCE-4552-A5F2-ECFC0EA8D129/game.json")]
     // pub game_json_url: String,
 
-    // say something options
+    // say something options - 17746
     // https://jitap.net/activities/gen8/play/say-something-options
     // #[structopt(long, default_value="https://d24o39yp3ttic8.cloudfront.net/86DCDC1D-64CB-4198-A866-257E213F0405/game.json")]
     // pub game_json_url: String,
