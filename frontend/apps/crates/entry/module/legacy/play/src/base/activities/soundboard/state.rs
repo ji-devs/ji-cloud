@@ -1,6 +1,6 @@
 use std::{cell::RefCell, rc::Rc};
 use awsm_web::audio::AudioHandle;
-use futures_signals::signal::Mutable;
+use futures_signals::signal::{Mutable, Signal, SignalExt};
 use shared::domain::jig::module::body::legacy::activity::{Soundboard as RawSoundboard, SoundboardItem as RawSoundboardItem};
 use dominator::clone;
 use crate::base::{
@@ -66,5 +66,16 @@ impl SoundboardItem {
             hotspot,
             revealed: Mutable::new(false)
         })
+    }
+
+    pub fn text_signal(&self) -> impl Signal<Item = Option<String>> {
+        let text = self.text.clone();
+        self.revealed.signal().map(clone!(text => move |revealed| {
+            if revealed {
+                text.clone()
+            } else {
+                None
+            }
+        }))
     }
 }

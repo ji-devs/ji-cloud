@@ -1,5 +1,5 @@
 use crate::traces::{svg::{self, ShapeStyle, ShapeStyleEditMode, ShapeStyleMode, ShapeStyleKind, ShapeStyleVar, SvgCallbacks, TransformSize}, utils::*};
-use dominator::{clone, html, Dom};
+use dominator::{clone, html, Dom, DomBuilder};
 use dominator_helpers::signals::EitherSignal;
 use futures_signals::{
     signal::{always, Signal, SignalExt},
@@ -96,6 +96,7 @@ impl TracesShow {
                         })),
                         None::<fn(web_sys::SvgElement)>,
                         None::<fn(web_sys::SvgElement)>,
+                        None::<fn(DomBuilder<web_sys::SvgElement>) -> DomBuilder<web_sys::SvgElement>>,
                     );
                     render_trace(shape_style, &resize_info, trace, callbacks)
                 }))
@@ -115,6 +116,7 @@ impl TracesShow {
                                             None::<fn()>,
                                             None::<fn(web_sys::SvgElement)>,
                                             None::<fn(web_sys::SvgElement)>,
+                                            None::<fn(DomBuilder<web_sys::SvgElement>) -> DomBuilder<web_sys::SvgElement>>,
                                         );
                                         render_trace(shape_style, &resize_info, trace, callbacks)
                                     })

@@ -1,4 +1,5 @@
 use std::rc::Rc;
+use dominator::DomBuilder;
 use utils::{prelude::*, resize::ResizeInfo};
 
 use futures_signals::signal::Signal;
@@ -152,17 +153,20 @@ pub struct SvgCallbacks {
     pub on_select: Option<Box<dyn Fn()>>,
     pub on_mount: Option<Box<dyn Fn(web_sys::SvgElement)>>,
     pub on_unmount: Option<Box<dyn Fn(web_sys::SvgElement)>>,
+    pub mixin: Option<Box<dyn Fn(DomBuilder<web_sys::SvgElement>) -> DomBuilder<web_sys::SvgElement>>>,
 }
 impl SvgCallbacks {
     pub fn new(
         on_select: Option<impl Fn() + 'static>,
         on_mount: Option<impl Fn(web_sys::SvgElement) + 'static>,
         on_unmount: Option<impl Fn(web_sys::SvgElement) + 'static>,
+        mixin: Option<impl Fn(DomBuilder<web_sys::SvgElement>) -> DomBuilder<web_sys::SvgElement> + 'static>,
     ) -> Rc<Self> {
         Rc::new(Self {
             on_select: on_select.map(|f| Box::new(f) as _),
             on_mount: on_mount.map(|f| Box::new(f) as _),
             on_unmount: on_unmount.map(|f| Box::new(f) as _),
+            mixin: mixin.map(|f| Box::new(f) as _),
         })
     }
 
@@ -171,6 +175,7 @@ impl SvgCallbacks {
             Some(on_select),
             None::<fn(web_sys::SvgElement)>,
             None::<fn(web_sys::SvgElement)>,
+            None::<fn(DomBuilder<web_sys::SvgElement>) -> DomBuilder<web_sys::SvgElement>>,
         )
     }
 
@@ -179,6 +184,7 @@ impl SvgCallbacks {
             None::<fn()>,
             None::<fn(web_sys::SvgElement)>,
             None::<fn(web_sys::SvgElement)>,
+            None::<fn(DomBuilder<web_sys::SvgElement>) -> DomBuilder<web_sys::SvgElement>>,
         )
     }
 }

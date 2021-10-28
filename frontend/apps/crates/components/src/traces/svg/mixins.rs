@@ -104,5 +104,8 @@ impl SvgCallbacks {
                 }
             }))
         })
+        .apply_if(callbacks.mixin.is_some(), |dom| {
+            dom.apply(callbacks.mixin.as_ref().unwrap_ji())
+        })
     }
 }

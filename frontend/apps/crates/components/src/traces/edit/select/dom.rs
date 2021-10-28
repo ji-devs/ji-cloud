@@ -1,4 +1,4 @@
-use dominator::{clone, html, Dom};
+use dominator::{clone, html, Dom, DomBuilder};
 use std::rc::Rc;
 use utils::resize::{resize_info_signal, ResizeInfo};
 
@@ -28,6 +28,7 @@ impl TracesEdit {
                             None::<fn()>,
                             None::<fn(web_sys::SvgElement)>,
                             None::<fn(web_sys::SvgElement)>,
+                            None::<fn(DomBuilder<web_sys::SvgElement>) -> DomBuilder<web_sys::SvgElement>>,
                         );
                         render_trace(shape_style, &resize_info, &trace, callbacks)
                     }))
@@ -78,6 +79,7 @@ impl TracesEdit {
                                 *trace.select_box.elem.borrow_mut() = None;
                                 trace.select_box.bounds.set(None);
                             })),
+                            None::<fn(DomBuilder<web_sys::SvgElement>) -> DomBuilder<web_sys::SvgElement>>,
                         );
                         render_trace(shape_style, &resize_info, &trace, callbacks)
                     }))

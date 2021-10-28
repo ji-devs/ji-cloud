@@ -31,6 +31,8 @@ impl SoundboardItem {
             log::info!("first time!");
         }
 
+        state.hotspot.tooltip_text.set(state.text.clone());
+
 
         if let Some(audio_filename) = state.audio_filename.as_ref() {
             AUDIO_MIXER.with(|mixer| {
