@@ -5,4 +5,4 @@ blank_issues_enabled: true
 contact_links:
   - name: Legacy Player (David)
     about: create a Legacy Player issue
-    url: https://github.com/ji-devs/ji-cloud/issues/new?assignees=dakom&milestone=Legacy+Player&projects=ji-devs/ji-cloud/3&labels=legacy&frontend%20-%20functionality
+    url: https://github.com/ji-devs/ji-cloud/issues/new?assignees=dakom&milestone=Legacy+Player&projects=ji-devs/ji-cloud/3&labels=legacy
