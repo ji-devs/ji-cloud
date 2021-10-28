@@ -2267,6 +2267,26 @@
       "nullable": []
     }
   },
+  "6d5e0402ef826c58b10d4fc66661311fb7f50e839d17ad0f9075ca92f67ab6e4": {
+    "query": "\nselect count(*) as \"count!: i64\"\nfrom jig_data\nwhere privacy_level = $1\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "count!: i64",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int2"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
   "6db1735f61450670c2ca115000a413f3b2eb9d4874eeec7e749f6243b2db5f7d": {
     "query": "select user_id from user_email where email = $1::text",
     "describe": {

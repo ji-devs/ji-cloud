@@ -755,6 +755,7 @@ limit 20 offset 20 * $1
 }
 
 /// `None` here means do not filter.
+// TODO: fix filtered count, used in browse()
 pub async fn filtered_count(
     db: &PgPool,
     privacy_level: Option<PrivacyLevel>,
@@ -771,6 +772,21 @@ where(privacy_level is not distinct from $1 or $1 is null)
 "#,
         privacy_level.map(|it| it as i16),
         author_id,
+    )
+    .fetch_one(db)
+    .await
+    .map(|it| it.count as u64)
+}
+
+pub async fn count(db: &PgPool, privacy_level: PrivacyLevel) -> sqlx::Result<u64> {
+    sqlx::query!(
+        //language=SQL
+        r#"
+select count(*) as "count!: i64"
+from jig_data
+where privacy_level = $1
+"#,
+        privacy_level as i16,
     )
     .fetch_one(db)
     .await
