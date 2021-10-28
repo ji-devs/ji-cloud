@@ -9,56 +9,105 @@ impl ShapeStyle {
         let mut classes = Vec::with_capacity(3);
 
         match self.mode {
-            None => classes.push(SHAPE_MODE_EMPTY_FILL_CLASS.as_str()),
-            Some(mode) => {
-                if mode == ShapeStyleMode::Mask {
-                    classes.push(SHAPE_MODE_MASK_CLASS.as_str());
-                } else {
-                    classes.push(SHAPE_MODE_EMPTY_FILL_CLASS.as_str());
-
-                    if mode == ShapeStyleMode::Solid {
-                        if let Some(kind) = self.kind {
-                            classes.push(match kind {
-                                TraceKind::Wrong => SHAPE_MODE_SOLID_KIND_WRONG_CLASS.as_str(),
-                                TraceKind::Correct => SHAPE_MODE_SOLID_KIND_CORRECT_CLASS.as_str(),
-                                TraceKind::Regular => SHAPE_MODE_SOLID_KIND_REGULAR_CLASS.as_str(),
-                            });
+            ShapeStyleMode::Mask => {
+                classes.push(SHAPE_MODE_MASK_CLASS.as_str());
+            },
+            ShapeStyleMode::Transparent => {
+                classes.push(SHAPE_MODE_EMPTY_FILL_CLASS.as_str());
+            },
+            ShapeStyleMode::Edit(mode)=> {
+                classes.push(SHAPE_MODE_EMPTY_FILL_CLASS.as_str());
+                match mode {
+                    ShapeStyleEditMode::Draw => {
+                        match self.kind {
+                            ShapeStyleKind::General => {
+                                classes.push(SHAPE_MODE_EDIT_DRAW_GENERAL_CLASS.as_str());
+                            },
+                            ShapeStyleKind::Correct => {
+                                classes.push(SHAPE_MODE_EDIT_DRAW_CORRECT_CLASS.as_str());
+                            },
+                            ShapeStyleKind::Incorrect => {
+                                classes.push(SHAPE_MODE_EDIT_DRAW_INCORRECT_CLASS.as_str());
+                            },
                         }
-                    }
+                    },
+                    ShapeStyleEditMode::Selected => {
+                        match self.kind {
+                            ShapeStyleKind::General => {
+                                classes.push(SHAPE_MODE_EDIT_SELECTED_GENERAL_CLASS.as_str());
+                            },
+                            ShapeStyleKind::Correct => {
+                                classes.push(SHAPE_MODE_EDIT_SELECTED_CORRECT_CLASS.as_str());
+                            },
+                            ShapeStyleKind::Incorrect => {
+                                classes.push(SHAPE_MODE_EDIT_SELECTED_INCORRECT_CLASS.as_str());
+                            },
+                        }
+                    },
+                    ShapeStyleEditMode::Deselected => {
+                        match self.kind {
+                            ShapeStyleKind::General => {
+                                classes.push(SHAPE_MODE_EDIT_DESELECTED_GENERAL_CLASS.as_str());
+                            },
+                            ShapeStyleKind::Correct => {
+                                classes.push(SHAPE_MODE_EDIT_DESELECTED_CORRECT_CLASS.as_str());
+                            },
+                            ShapeStyleKind::Incorrect => {
+                                classes.push(SHAPE_MODE_EDIT_DESELECTED_INCORRECT_CLASS.as_str());
+                            },
+                        }
+                    },
+                    ShapeStyleEditMode::WithoutCutout => {
+                        match self.kind {
+                            ShapeStyleKind::General => {
+                                classes.push(SHAPE_MODE_EDIT_WITHOUT_CUTOUT_GENERAL_CLASS.as_str());
+                            },
+                            ShapeStyleKind::Correct => {
+                                classes.push(SHAPE_MODE_EDIT_WITHOUT_CUTOUT_CORRECT_CLASS.as_str());
+                            },
+                            ShapeStyleKind::Incorrect => {
+                                classes.push(SHAPE_MODE_EDIT_WITHOUT_CUTOUT_INCORRECT_CLASS.as_str());
+                            },
+                        }
+                    },
                 }
-            }
+            },
+            ShapeStyleMode::Play(mode)=> {
+                classes.push(SHAPE_MODE_EMPTY_FILL_CLASS.as_str());
+                match mode {
+                    ShapeStylePlayMode::Selected => {
+                        match self.kind {
+                            ShapeStyleKind::General => {
+                                classes.push(SHAPE_MODE_PLAY_SELECTED_GENERAL_CLASS.as_str());
+                            },
+                            ShapeStyleKind::Correct => {
+                                classes.push(SHAPE_MODE_PLAY_SELECTED_CORRECT_CLASS.as_str());
+                            },
+                            ShapeStyleKind::Incorrect => {
+                                classes.push(SHAPE_MODE_PLAY_SELECTED_INCORRECT_CLASS.as_str());
+                            },
+                        }
+                    },
+                    ShapeStylePlayMode::Deselected => {
+                        match self.kind {
+                            ShapeStyleKind::General => {
+                                classes.push(SHAPE_MODE_PLAY_DESELECTED_GENERAL_CLASS.as_str());
+                            },
+                            ShapeStyleKind::Correct => {
+                                classes.push(SHAPE_MODE_PLAY_DESELECTED_CORRECT_CLASS.as_str());
+                            },
+                            ShapeStyleKind::Incorrect => {
+                                classes.push(SHAPE_MODE_PLAY_DESELECTED_INCORRECT_CLASS.as_str());
+                            },
+                        }
+                    },
+                    ShapeStylePlayMode::Hint => {
+                        classes.push(SHAPE_MODE_PLAY_HINT_CLASS.as_str());
+                    },
+                }
+            },
         }
 
-        // TODO- kinda weird that the stroke is set above and here..
-        // might need rethinking to consolidate better
-        if self.mode != Some(ShapeStyleMode::Transparent)
-            && self.kind.is_some()
-            && self.state.is_some()
-        {
-            let state = self.state.unwrap_ji();
-
-            classes.push(match self.kind.unwrap_ji() {
-                TraceKind::Wrong => match state {
-                    ShapeStyleState::Drawing => SHAPE_STATE_KIND_WRONG_DRAWING_CLASS.as_str(),
-                    ShapeStyleState::Selected => SHAPE_STATE_KIND_WRONG_SELECTED_CLASS.as_str(),
-                    ShapeStyleState::Deselected => SHAPE_STATE_KIND_WRONG_DESELECTED_CLASS.as_str(),
-                },
-                TraceKind::Correct => match state {
-                    ShapeStyleState::Drawing => SHAPE_STATE_KIND_CORRECT_DRAWING_CLASS.as_str(),
-                    ShapeStyleState::Selected => SHAPE_STATE_KIND_CORRECT_SELECTED_CLASS.as_str(),
-                    ShapeStyleState::Deselected => {
-                        SHAPE_STATE_KIND_CORRECT_DESELECTED_CLASS.as_str()
-                    }
-                },
-                TraceKind::Regular => match state {
-                    ShapeStyleState::Drawing => SHAPE_STATE_KIND_REGULAR_DRAWING_CLASS.as_str(),
-                    ShapeStyleState::Selected => SHAPE_STATE_KIND_REGULAR_SELECTED_CLASS.as_str(),
-                    ShapeStyleState::Deselected => {
-                        SHAPE_STATE_KIND_REGULAR_DESELECTED_CLASS.as_str()
-                    }
-                },
-            });
-        }
 
         if self.interactive {
             classes.push(SHAPE_INTERACTIVE_CLASS.as_str());
@@ -117,81 +166,147 @@ pub(super) static SHAPE_MODE_EMPTY_FILL_CLASS: Lazy<String> = Lazy::new(|| {
         .style("fill-opacity", "0")
     }
 });
-//Wrong mode
-pub(super) static SHAPE_STATE_KIND_WRONG_DRAWING_CLASS: Lazy<String> = Lazy::new(|| {
+
+
+//Edit Draw
+pub(super) static SHAPE_MODE_EDIT_DRAW_GENERAL_CLASS: Lazy<String> = Lazy::new(|| {
+    class! {
+        .style("stroke", "#005aff")
+        .style("stroke-width", "8")
+        .style("stroke-dasharray", "16,6")
+    }
+});
+
+pub(super) static SHAPE_MODE_EDIT_DRAW_CORRECT_CLASS: Lazy<String> = Lazy::new(|| {
+    class! {
+        .style("stroke", "#46ba6f")
+        .style("stroke-width", "8")
+        .style("stroke-dasharray", "16,6")
+    }
+});
+
+pub(super) static SHAPE_MODE_EDIT_DRAW_INCORRECT_CLASS: Lazy<String> = Lazy::new(|| {
     class! {
         .style("stroke", "#fd7c44")
         .style("stroke-width", "8")
         .style("stroke-dasharray", "16,6")
     }
 });
-pub(super) static SHAPE_STATE_KIND_WRONG_SELECTED_CLASS: Lazy<String> = Lazy::new(|| {
+
+//Edit Selected
+pub(super) static SHAPE_MODE_EDIT_SELECTED_GENERAL_CLASS: Lazy<String> = Lazy::new(|| {
     class! {
-        .style("stroke", "#fd7c44")
-        .style("stroke-width", "8")
-    }
-});
-pub(super) static SHAPE_STATE_KIND_WRONG_DESELECTED_CLASS: Lazy<String> = Lazy::new(|| {
-    class! {
-        .style("stroke", "#af6c27")
-        .style("stroke-width", "8")
-    }
-});
-pub(super) static SHAPE_MODE_SOLID_KIND_WRONG_CLASS: Lazy<String> = Lazy::new(|| {
-    class! {
-        .style("stroke", "#fea559")
+        .style("stroke", "#005aff")
         .style("stroke-width", "8")
     }
 });
 
-//Correct mode
-pub(super) static SHAPE_STATE_KIND_CORRECT_DRAWING_CLASS: Lazy<String> = Lazy::new(|| {
+pub(super) static SHAPE_MODE_EDIT_SELECTED_CORRECT_CLASS: Lazy<String> = Lazy::new(|| {
     class! {
         .style("stroke", "#46ba6f")
-        .style("stroke-width", "8")
-        .style("stroke-dasharray", "16,6")
+        .style("stroke-width", "9")
     }
 });
-pub(super) static SHAPE_STATE_KIND_CORRECT_SELECTED_CLASS: Lazy<String> = Lazy::new(|| {
+
+pub(super) static SHAPE_MODE_EDIT_SELECTED_INCORRECT_CLASS: Lazy<String> = Lazy::new(|| {
     class! {
-        .style("stroke", "#46ba6f")
+        .style("stroke", "#fd7c44")
+        .style("stroke-width", "5")
+    }
+});
+
+//Edit Deslected
+pub(super) static SHAPE_MODE_EDIT_DESELECTED_GENERAL_CLASS: Lazy<String> = Lazy::new(|| {
+    class! {
+        .style("stroke", "#2343A0")
         .style("stroke-width", "8")
     }
 });
-pub(super) static SHAPE_STATE_KIND_CORRECT_DESELECTED_CLASS: Lazy<String> = Lazy::new(|| {
+
+pub(super) static SHAPE_MODE_EDIT_DESELECTED_CORRECT_CLASS: Lazy<String> = Lazy::new(|| {
     class! {
         .style("stroke", "#518973")
+        .style("stroke-width", "9")
+    }
+});
+
+pub(super) static SHAPE_MODE_EDIT_DESELECTED_INCORRECT_CLASS: Lazy<String> = Lazy::new(|| {
+    class! {
+        .style("stroke", "#af6c27")
+        .style("stroke-width", "5")
+    }
+});
+
+
+//Edit Without Cutout 
+pub(super) static SHAPE_MODE_EDIT_WITHOUT_CUTOUT_GENERAL_CLASS: Lazy<String> = Lazy::new(|| {
+    class! {
+        .style("stroke", "#AFCBF4")
         .style("stroke-width", "8")
     }
 });
-pub(super) static SHAPE_MODE_SOLID_KIND_CORRECT_CLASS: Lazy<String> = Lazy::new(|| {
+
+pub(super) static SHAPE_MODE_EDIT_WITHOUT_CUTOUT_CORRECT_CLASS: Lazy<String> = Lazy::new(|| {
     class! {
         .style("stroke", "#9cddb2")
         .style("stroke-width", "8")
     }
 });
 
-//Regular mode
-pub(super) static SHAPE_STATE_KIND_REGULAR_DRAWING_CLASS: Lazy<String> = Lazy::new(|| {
+pub(super) static SHAPE_MODE_EDIT_WITHOUT_CUTOUT_INCORRECT_CLASS: Lazy<String> = Lazy::new(|| {
     class! {
-        .style("stroke", "#005aff")
-        .style("stroke-width", "8")
-        .style("stroke-dasharray", "16,6")
-    }
-});
-pub(super) static SHAPE_STATE_KIND_REGULAR_SELECTED_CLASS: Lazy<String> = Lazy::new(|| {
-    class! {
-        .style("stroke", "#005aff")
+        .style("stroke", "#fea559")
         .style("stroke-width", "8")
     }
 });
-pub(super) static SHAPE_STATE_KIND_REGULAR_DESELECTED_CLASS: Lazy<String> = Lazy::new(|| {
+
+
+//Play Selected
+pub(super) static SHAPE_MODE_PLAY_SELECTED_GENERAL_CLASS: Lazy<String> = Lazy::new(|| {
+    class! {
+        .style("stroke", "#005aff")
+        .style("stroke-width", "8")
+    }
+});
+
+pub(super) static SHAPE_MODE_PLAY_SELECTED_CORRECT_CLASS: Lazy<String> = Lazy::new(|| {
+    class! {
+        .style("stroke", "#46ba6f")
+        .style("stroke-width", "9")
+    }
+});
+
+pub(super) static SHAPE_MODE_PLAY_SELECTED_INCORRECT_CLASS: Lazy<String> = Lazy::new(|| {
+    class! {
+        .style("stroke", "#fd7c44")
+        .style("stroke-width", "5")
+    }
+});
+
+//Play Deslected
+pub(super) static SHAPE_MODE_PLAY_DESELECTED_GENERAL_CLASS: Lazy<String> = Lazy::new(|| {
     class! {
         .style("stroke", "#2343A0")
         .style("stroke-width", "8")
     }
 });
-pub(super) static SHAPE_MODE_SOLID_KIND_REGULAR_CLASS: Lazy<String> = Lazy::new(|| {
+
+pub(super) static SHAPE_MODE_PLAY_DESELECTED_CORRECT_CLASS: Lazy<String> = Lazy::new(|| {
+    class! {
+        .style("stroke", "#518973")
+        .style("stroke-width", "9")
+    }
+});
+
+pub(super) static SHAPE_MODE_PLAY_DESELECTED_INCORRECT_CLASS: Lazy<String> = Lazy::new(|| {
+    class! {
+        .style("stroke", "#af6c27")
+        .style("stroke-width", "5")
+    }
+});
+
+//Play Hint 
+pub(super) static SHAPE_MODE_PLAY_HINT_CLASS: Lazy<String> = Lazy::new(|| {
     class! {
         .style("stroke", "#AFCBF4")
         .style("stroke-width", "8")

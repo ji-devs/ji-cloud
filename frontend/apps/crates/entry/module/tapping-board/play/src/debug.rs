@@ -68,6 +68,7 @@ impl DebugSettings {
                         mode: Mode::Words,
                         play_settings: PlaySettings {
                             hint: Hint::None,
+                            //hint: Hint::Highlight,
                             //next: Next::SelectSome(1),
                             next: Next::SelectAll,
                         },

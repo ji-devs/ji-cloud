@@ -5,7 +5,7 @@ use utils::resize::{resize_info_signal, ResizeInfo};
 use super::trace::state::*;
 use crate::traces::{
     edit::state::*,
-    svg::{self, ShapeStyle, ShapeStyleState, ShapeStyleVar, SvgCallbacks, TransformSize},
+    svg::{self, ShapeStyle, ShapeStyleKind, ShapeStyleMode, ShapeStyleEditMode, ShapeStyleVar, SvgCallbacks, TransformSize},
 };
 use futures_signals::{
     map_ref,
@@ -39,7 +39,7 @@ impl TracesEdit {
                     .signal_vec_cloned()
                     .enumerate()
                     .map(clone!(resize_info, state => move |(index, trace)| {
-                        let trace_kind = trace.kind;
+                        let style_kind:ShapeStyleKind = trace.kind.into();
 
                         let shape_style_signal = map_ref!{
                             let selected_index = state.selected_index.signal_cloned(),
@@ -50,15 +50,14 @@ impl TracesEdit {
                         }.map(move |(selected_index, index)| {
                             ShapeStyle {
                                 interactive: true,
-                                mode: None,
-                                kind: Some(trace_kind),
-                                state: Some(
+                                mode: ShapeStyleMode::Edit(
                                     if index == selected_index {
-                                        ShapeStyleState::Selected
+                                        ShapeStyleEditMode::Selected
                                     } else {
-                                        ShapeStyleState::Deselected
+                                        ShapeStyleEditMode::Deselected
                                     }
-                                )
+                                ),
+                                kind: style_kind,
                             }
                         });
 

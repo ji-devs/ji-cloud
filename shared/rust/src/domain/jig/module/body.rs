@@ -252,6 +252,18 @@ pub trait ModeExt: Copy + Default + PartialEq + Eq + Hash {
     fn as_str_id(&self) -> &'static str;
     /// for headers, labels, etc.
     fn label(&self) -> &'static str;
+
+    /// Image tag filters for search  
+    /// The actual ImageTag enum variants are in components
+    fn image_tag_filters(&self) -> Option<Vec<i16>> {
+        None
+    }
+
+    /// Image tag priorities for search  
+    /// The actual ImageTag enum variants are in components
+    fn image_tag_priorities(&self) -> Option<Vec<i16>> {
+        None
+    }
 }
 
 /// impl ModeExt for empty modes

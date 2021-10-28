@@ -28,37 +28,81 @@ impl ShapeStyleVar<PlaceholderShapeStyleSignal> {
 
 #[derive(Clone, Copy, Eq, PartialEq, Debug)]
 pub struct ShapeStyle {
+    // whether or not it should show the cursor
     pub interactive: bool,
-    // if none or transparent then fill-opacity will be 0
-    pub mode: Option<ShapeStyleMode>,
-
-    // both of these need to be set, and mode can't be transparent
-    // in order to see the stroke
-    pub kind: Option<TraceKind>,
-    pub state: Option<ShapeStyleState>,
+    pub mode: ShapeStyleMode,
+    pub kind: ShapeStyleKind,
 }
 
 #[derive(Clone, Copy, Eq, PartialEq, Debug)]
 pub enum ShapeStyleMode {
     Mask,
     Transparent,
-    Solid,
+    Edit(ShapeStyleEditMode),
+    Play(ShapeStylePlayMode),
 }
 
 #[derive(Clone, Copy, Eq, PartialEq, Debug)]
-pub enum ShapeStyleState {
-    Drawing,
+pub enum ShapeStyleEditMode {
+    Draw,
     Selected,
     Deselected,
+    WithoutCutout,
+}
+
+#[derive(Clone, Copy, Eq, PartialEq, Debug)]
+pub enum ShapeStylePlayMode {
+    Selected,
+    Deselected,
+    Hint
+}
+
+#[derive(Clone, Copy, Eq, PartialEq, Debug)]
+pub enum ShapeStyleKind {
+    General,
+    Correct,
+    Incorrect,
+}
+
+impl From<TraceKind> for ShapeStyleKind {
+    fn from(trace_kind:TraceKind) -> ShapeStyleKind {
+        match trace_kind {
+            TraceKind::Wrong => Self::Incorrect,
+            TraceKind::Correct => Self::Correct,
+            TraceKind::Regular => Self::General,
+        }
+    }
 }
 
 impl ShapeStyle {
     pub fn new_mask() -> Self {
         Self {
             interactive: false,
-            mode: Some(ShapeStyleMode::Mask),
-            kind: None,
-            state: None,
+            mode: ShapeStyleMode::Mask,
+            kind: ShapeStyleKind::General,
+        }
+    }
+
+    pub fn new_transparent() -> Self {
+        Self {
+            interactive: true,
+            mode: ShapeStyleMode::Transparent,
+            kind: ShapeStyleKind::General,
+        }
+    }
+    pub fn new_edit(mode: ShapeStyleEditMode, kind: ShapeStyleKind) -> Self {
+        Self {
+            interactive: mode != ShapeStyleEditMode::Draw,
+            mode: ShapeStyleMode::Edit(mode),
+            kind: kind,
+        }
+    }
+
+    pub fn new_play(mode: ShapeStylePlayMode, kind: ShapeStyleKind) -> Self {
+        Self {
+            interactive: mode != ShapeStylePlayMode::Hint,
+            mode: ShapeStyleMode::Play(mode),
+            kind: kind,
         }
     }
 }
