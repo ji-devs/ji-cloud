@@ -30,7 +30,7 @@ async fn create_key(
 /// Search for images over the web.
 pub async fn search_web_images(
     runtime_settings: Data<RuntimeSettings>,
-    // _claims: TokenUser,
+    _claims: TokenUser,
     query: Query<<search::WebImageSearch as ApiEndpoint>::Req>,
 ) -> Result<Json<<search::WebImageSearch as ApiEndpoint>::Res>, error::Server> {
     let query = query.into_inner();

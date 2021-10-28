@@ -182,6 +182,7 @@ pub trait BodyExt<Mode: ModeExt, Step: StepExt>:
             ModuleKind::TappingBoard => Ok(Body::TappingBoard(self.convert_to_tapping_board()?)),
             ModuleKind::DragDrop => Ok(Body::DragDrop(self.convert_to_drag_drop()?)),
             ModuleKind::Cover => Ok(Body::Cover(self.convert_to_cover()?)),
+            ModuleKind::Legacy => Ok(Body::Legacy(self.convert_to_legacy()?)),
             _ => unimplemented!(
                 "cannot convert from {} to {}",
                 Self::kind().as_str(),
@@ -234,6 +235,10 @@ pub trait BodyConvert {
     /// Video
     fn convert_to_video(&self) -> Result<video::ModuleData, &'static str> {
         Err("cannot convert to video!")
+    }
+    /// Legacy
+    fn convert_to_legacy(&self) -> Result<legacy::ModuleData, &'static str> {
+        Err("cannot convert to legacy!")
     }
 }
 
