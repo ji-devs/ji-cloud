@@ -197,7 +197,7 @@ impl AnimationPlayer {
         })));
 
         state.worker.post_message(&serde_wasm_bindgen::to_value(&GifWorkerEvent{
-            data: GifWorkerEventData::Load(worker_id, state.base.media_url(&state.raw.filename))
+            data: GifWorkerEventData::Load(worker_id, state.base.design_media_url(&state.raw.filename))
         }).unwrap_ji());
 
         state

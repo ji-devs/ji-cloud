@@ -36,10 +36,7 @@ impl SoundboardItem {
         state.hotspot.render(
             &resize_info,
             clone!(state, parent => move || {
-                let was_revealed = state.revealed.replace(true);
-                if !was_revealed {
-                    log::info!("first time!");
-                }
+                state.clone().on_click(parent.clone());
             }),
             state.revealed.signal().map(|revealed| {
                 ShapeStyle {

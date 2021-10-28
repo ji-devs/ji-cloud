@@ -1,14 +1,14 @@
-use shared::domain::jig::module::body::_groups::design::{TraceShape};
+use shared::domain::jig::module::body::legacy::activity::Hotspot as RawHotspot;
 use std::rc::Rc;
 
 pub struct Hotspot {
-    pub shape: TraceShape 
+    pub raw: RawHotspot 
 }
 
 impl Hotspot {
-    pub fn new(shape: TraceShape) -> Rc<Self> {
+    pub fn new(raw: RawHotspot) -> Rc<Self> {
         Rc::new(Self {
-            shape 
+            raw 
         })
     }
 }

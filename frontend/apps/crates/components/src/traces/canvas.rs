@@ -60,7 +60,7 @@ pub fn draw_path_commands(
 ) {
     for (command, _absolute) in commands {
         let _command = denormalize_command(command, resize_info);
-        unimplemented!("TODO!")
+        unimplemented!("TODO - support path commands in canvas drawing!")
     }
 }
 pub fn draw_path(ctx: &CanvasRenderingContext2d, resize_info: &ResizeInfo, points: &[(f64, f64)]) {

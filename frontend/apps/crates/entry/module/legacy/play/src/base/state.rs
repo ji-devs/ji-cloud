@@ -105,7 +105,7 @@ impl Base {
     pub fn activity_media_url<T: AsRef<str>>(&self, path:T) -> String {
         utils::path::legacy_cdn_url(&format!("{}/media/slides/{}/activity/{}", self.game_id, self.slide_id, path.as_ref()))
     }
-    pub fn media_url<T: AsRef<str>>(&self, path:T) -> String {
+    pub fn design_media_url<T: AsRef<str>>(&self, path:T) -> String {
         utils::path::legacy_cdn_url(&format!("{}/media/slides/{}/{}", self.game_id, self.slide_id, path.as_ref()))
     }
 

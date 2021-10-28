@@ -7,7 +7,7 @@ use shared::config::RemoteTarget;
 pub struct Opts {
     // Soundboard Options 
     // https://jitap.net/activities/genr/play/soundboard-states 
-    #[structopt(long, default_value="https://d24o39yp3ttic8.cloudfront.net/351FB160-0592-4BF6-9BFE-47E9D40EDF39/game.json")]
+    #[structopt(long, default_value="https://d24o39yp3ttic8.cloudfront.net/6A973171-C29A-4C99-A650-8033F996C6E7/game.json")]
     pub game_json_url: String,
     // David test 002
     // #[structopt(long, default_value="https://d24o39yp3ttic8.cloudfront.net/5D00A147-73B7-43FF-A215-A38CB84CEBCD/game.json")]

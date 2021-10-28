@@ -141,47 +141,44 @@ impl SrcSlide {
                 let activity = self.activities[0].clone();
 
 
-                let make_media = |filename:&str, transcode:Option<MediaTranscode>| -> Media {
-                    Media { 
-                        url: format!("{}/{}/{}/{}", base_url, slide_id, activity.folder_path, filename), 
-                        basepath: format!("slides/{}", slide_id), 
-                        filename: filename.to_string(),
-                        transcode
+                let mut make_audio_media = |filename:&str| -> Option<String> {
+                    if filename.is_empty() {
+                        None
+                    } else {
+                        let filename_mp3 = format!("{}.mp3", Path::new(filename).file_stem().unwrap().to_str().unwrap().to_string());
+
+                        let media = Media {
+                            url: format!("{}/{}", base_url, filename), 
+                            basepath: format!("slides/{}/activity", slide_id), 
+                            filename: filename_mp3.to_string(),
+                            transcode: Some(MediaTranscode::Audio)
+                        };
+
+                        medias.push(media);
+
+                        Some(filename_mp3)
                     }
                 };
 
-                let audio_filename = if !activity.intro_audio.is_empty() {
-                    Some(format!("{}.mp3", Path::new(&activity.intro_audio).file_stem().unwrap().to_str().unwrap().to_string()))
-                } else {
-                    None
-                };
-
-                if let Some(filename) = audio_filename.as_ref() {
-                    medias.push(Media {
-                        url: format!("{}/{}", base_url, activity.intro_audio), 
-                        basepath: format!("slides/{}/activity", slide_id), 
-                        filename: filename.to_string(),
-                        transcode: Some(MediaTranscode::Audio)
-                    });
-                }
+                let audio_filename = make_audio_media(&activity.intro_audio);
 
                 match self.activity_kind {
-                    SrcActivityKind::Questions => {
-                        let questions: Vec<Question> = 
-                            self.activities
-                                .into_iter()
-                                .map(|activity| {
-                                    activity.convert_question() 
-                                })
-                                .collect();
+                    // SrcActivityKind::Questions => {
+                    //     let questions: Vec<Question> = 
+                    //         self.activities
+                    //             .into_iter()
+                    //             .map(|activity| {
+                    //                 activity.convert_question() 
+                    //             })
+                    //             .collect();
 
-                        Some(Activity::Questions(Questions {
-                            questions
-                        }))
-                    },
+                    //     Some(Activity::Questions(Questions {
+                    //         questions
+                    //     }))
+                    // },
                     SrcActivityKind::SaySomething => {
                         Some(Activity::SaySomething(SaySomething {
-                            audio_filename: audio_filename.unwrap(),
+                            audio_filename,
                             advance_trigger: if activity.settings.advance.unwrap_or_default() {
                                 AdvanceTrigger::AudioEnd
                             } else {
@@ -192,11 +189,15 @@ impl SrcSlide {
                     },
                     SrcActivityKind::Soundboard => {
                         Some(Activity::Soundboard(Soundboard{
+                            audio_filename,
                             items: activity.shapes
                                 .into_iter()
                                 .map(|shape| {
                                     SoundboardItem {
-                                        shape: shape.convert()
+                                        audio_filename: make_audio_media(&shape.audio),
+                                        text: map_text(&shape.settings.text),
+                                        jump_index: shape.settings.jump_index.clone(),
+                                        hotspot: shape.convert_to_hotspot()
                                     }
                                 }) 
                                 .collect()
@@ -216,6 +217,17 @@ impl SrcSlide {
         }
     }
 }
+
+fn map_text<T: AsRef<str>>(text: &Option<T>) -> Option<String> {
+    text.as_ref().and_then(|text| {
+        let text = text.as_ref();
+        if text.is_empty() {
+            None
+        } else {
+            Some(text.to_string())
+        }
+    })
+}
     // pub hide: bool,
     // pub hide_toggle: Option<HideToggle>,
     // pub animation: Option<Animation>
@@ -223,7 +235,7 @@ fn convert_design(game_id: &str, slide_id: &str, base_url: &str, mut medias: &mu
     let mut stickers: Vec<Sticker> = Vec::new();
     let mut bgs:Vec<String> = Vec::new();
   
-    let make_media = |filename:&str, transcode:Option<MediaTranscode>| -> Media {
+    let mut make_media = |filename:&str, transcode:Option<MediaTranscode>| -> Media {
         Media { 
             url: format!("{}/{}/layers/{}", base_url, slide_id, filename), 
             basepath: format!("slides/{}", slide_id), 
@@ -337,33 +349,31 @@ fn convert_transform(orig: [f64;6]) -> [f64;16] {
     m.values()
 }
 
-impl SrcActivity {
-    pub fn convert_question(self) -> Question {
-        let audio = format!("{}{}", self.folder_path, strip_path(&self.intro_audio));
-
-        let shapes_len = self.shapes.len();
-
-        if shapes_len != 1 {
-            panic!("question needs 1 shape! instead got {}", shapes_len);
-        }
-        Question {
-            audio,
-            shape: self.shapes[0].convert()
-        }
-    }
+fn transform_is_identity(orig: [f64;6]) -> bool {
+    orig == [1.0, 0.0, 0.0, 1.0, 0.0, 0.0]
 }
 
 impl SrcShape {
-    pub fn convert(&self) -> TraceShape {
-        TraceShape::PathCommands(
-            self
-                .path
-                .iter()
-                .map(|point| (point.clone().convert(), true))
-                .collect()
-        )
+    pub fn convert_to_hotspot(self) -> Hotspot {
+        Hotspot {
+            shape: TraceShape::PathCommands(
+                self
+                    .path
+                    .into_iter()
+                    .map(|point| (point.convert(), true))
+                    .collect()
+            ),
+            transform_matrix: self.settings.transform.and_then(|t| {
+                if !transform_is_identity(t) {
+                    Some(convert_transform(t))
+                } else {
+                    None
+                }
+            })
+        }
     }
 }
+
 impl SrcPathPoint {
     pub fn convert(self) -> PathCommand {
         let SrcPathPoint { mut x, mut y, mut cp1x, mut cp1y, mut cp2x, mut cp2y, kind} = self;

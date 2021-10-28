@@ -58,8 +58,8 @@ pub struct ShapeSettings {
     #[serde(rename="linkToPage")]
     pub jump_index: Option<usize>,
 
-    #[serde(rename="linkToPage")]
-    pub tootip_text: Option<String>,
+    #[serde(rename="toolTipText")]
+    pub text: Option<String>,
 
     #[serde(rename="originTransform")]
     pub transform: Option<Transform>,

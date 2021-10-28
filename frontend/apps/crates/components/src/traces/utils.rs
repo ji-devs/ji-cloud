@@ -55,7 +55,9 @@ pub enum ShapeRef<'a> {
 pub fn calc_bounds<'a>(shape: ShapeRef<'a>, offset: Option<(f64, f64)>) -> Option<BoundsF64> {
     let mut bounds = match shape {
         ShapeRef::PathCommands(_commands) => {
-            unimplemented!("TODO!");
+            //this will be tricky due to bezier curves etc. 
+            //might need to actually draw the entire path in memory calc the extants
+            unimplemented!("TODO - support calc_bounds for PathCommands!");
         }
 
         ShapeRef::Path(path) => {
@@ -166,8 +168,8 @@ pub fn denormalize_command(command: &PathCommand, resize_info: &ResizeInfo) -> P
             let (x, y) = resize_info.get_pos_denormalized(x, y);
             PathCommand::SmoothQuadCurveTo(x, y)
         }
-        _ => {
-            unimplemented!("TODO: implement denormalize for this path command!")
+        PathCommand::ArcTo(a,b,c,d,e,f,g) => {
+            unimplemented!("TODO: implement denormalize for ArcTo path command!")
         }
     }
 }

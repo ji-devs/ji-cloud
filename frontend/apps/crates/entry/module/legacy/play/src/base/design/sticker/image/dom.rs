@@ -31,7 +31,7 @@ impl ImagePlayer {
 
 
         html!("img" => web_sys:: HtmlImageElement, {
-            .attribute("src", &state.base.media_url(&state.raw.filename))
+            .attribute("src", &state.base.design_media_url(&state.raw.filename))
             .style_signal("opacity", state.controller.hidden.signal().map(|hidden| {
                 if hidden {
                     "0"

@@ -2,7 +2,7 @@ use crate::domain::{audio::AudioId, image::ImageId};
 
 pub use super::*;
 use serde::{Deserialize, Serialize};
-use serde_repr::*;
+use serde_with::skip_serializing_none;
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct Design {
@@ -13,6 +13,7 @@ pub struct Design {
     pub stickers: Vec<Sticker>,
 }
 
+#[skip_serializing_none]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Sticker {
     pub filename: String,
@@ -22,18 +23,14 @@ pub struct Sticker {
     /// start out hidden
     pub hide: bool,
     /// toggle hidden state
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub hide_toggle: Option<HideToggle>,
 
     /// animation options are mapped from the bottom animation section
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub animation: Option<Animation>,
     // associated audio
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub audio_filename: Option<String>,
 
     /// override the size
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub override_size: Option<(f64, f64)>,
 }
 

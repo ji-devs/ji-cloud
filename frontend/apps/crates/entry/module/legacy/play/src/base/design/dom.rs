@@ -20,7 +20,7 @@ impl Base {
             .children(state.slide.design.bgs.iter().map(|src| {
                 html!("img", {
                     .class(&*styles::BG)
-                    .attribute("src", &state.media_url(src))
+                    .attribute("src", &state.design_media_url(src))
                 })
             }))
             .child(html!("div", {

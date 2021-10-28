@@ -15,10 +15,15 @@ impl Hotspot {
     ) -> Dom {
         let shape_style = ShapeStyleVar::Dynamic(shape_style_signal);
 
+        // this depends on calc_bounds() being implemented for PathCommands
+        if self.raw.transform_matrix.is_some() {
+            log::error!("shape has a transform matrix, but no size")
+        }
+
         render_single_shape(
             shape_style, 
             &resize_info, 
-            &self.shape, 
+            &self.raw.shape, 
             TransformSize::none(), 
             SvgCallbacks::select(move || {
                 on_selected();

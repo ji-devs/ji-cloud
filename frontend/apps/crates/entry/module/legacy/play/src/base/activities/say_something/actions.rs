@@ -16,20 +16,22 @@ impl SaySomething {
 
         let state = self;
 
-        AUDIO_MIXER.with(|mixer| {
-            mixer.pause_all();
-            let handle = mixer.play_on_ended(
-                AudioSource::Url(state.base.activity_media_url(&state.raw.audio_filename)),
-                false,
-                clone!(state => move || {
-                    if state.raw.advance_trigger == AdvanceTrigger::AudioEnd {
-                        state.next();
-                    }
-                })
-            );
+        if let Some(audio_filename) = state.raw.audio_filename.as_ref() {
+            AUDIO_MIXER.with(|mixer| {
+                mixer.pause_all();
+                let handle = mixer.play_on_ended(
+                    AudioSource::Url(state.base.activity_media_url(&audio_filename)),
+                    false,
+                    clone!(state => move || {
+                        if state.raw.advance_trigger == AdvanceTrigger::AudioEnd {
+                            state.next();
+                        }
+                    })
+                );
 
-            *state.audio.borrow_mut() = Some(handle);
-        });
+                *state.audio.borrow_mut() = Some(handle);
+            });
+        }
     }
 
     pub fn next(&self) {

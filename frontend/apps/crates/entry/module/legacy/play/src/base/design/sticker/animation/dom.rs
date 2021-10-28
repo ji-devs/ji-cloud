@@ -92,11 +92,11 @@ impl AnimationPlayer {
         // html!("video" => web_sys:: HtmlVideoElement, {
         //     .children(&mut[
         //         html!("source", {
-        //             .attribute("src", &format!("{}.webm", &state.base.media_url(&state.raw.src)))
+        //             .attribute("src", &format!("{}.webm", &state.base.design_media_url(&state.raw.src)))
         //             .attribute("type", "video/webm; codecs=vp9")
         //         }),
         //         html!("source", {
-        //             .attribute("src", &format!("{}.mp4", &state.base.media_url(&state.raw.src)))
+        //             .attribute("src", &format!("{}.mp4", &state.base.design_media_url(&state.raw.src)))
         //             .attribute("type", "video/mp4; codecs=hvc1")
         //         }),
         //     ])

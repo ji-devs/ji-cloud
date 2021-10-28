@@ -47,15 +47,21 @@ impl Soundboard {
 
 pub struct SoundboardItem {
     pub base: Rc<Base>,
+    pub audio_filename: Option<String>,
+    pub text: Option<String>,
+    pub jump_index: Option<usize>,
     pub hotspot: Rc<Hotspot>,
     pub revealed: Mutable<bool>
 }
 
 impl SoundboardItem {
     pub fn new(base: Rc<Base>, raw: &RawSoundboardItem) -> Rc<Self> {
-        let hotspot = Hotspot::new(raw.shape.clone());
+        let hotspot = Hotspot::new(raw.hotspot.clone());
 
         Rc::new(Self{
+            audio_filename: raw.audio_filename.clone(),
+            text: raw.text.clone(),
+            jump_index: raw.jump_index,
             base,
             hotspot,
             revealed: Mutable::new(false)
