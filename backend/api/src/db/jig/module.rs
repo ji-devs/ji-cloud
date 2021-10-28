@@ -19,6 +19,7 @@ fn map_module_contents(body: &ModuleBody) -> anyhow::Result<(ModuleKind, serde_j
         ModuleBody::Poster(body) => serde_json::to_value(body)?,
         ModuleBody::TappingBoard(body) => serde_json::to_value(body)?,
         ModuleBody::Video(body) => serde_json::to_value(body)?,
+        ModuleBody::Legacy(body) => serde_json::to_value(body)?,
 
         _ => anyhow::bail!("Unimplemented body kind: {}", kind.as_str()),
     };
@@ -40,6 +41,7 @@ fn transform_response_kind(
         ModuleKind::Poster => Ok(ModuleBody::Poster(serde_json::from_value(contents)?)),
         ModuleKind::TappingBoard => Ok(ModuleBody::TappingBoard(serde_json::from_value(contents)?)),
         ModuleKind::Video => Ok(ModuleBody::Video(serde_json::from_value(contents)?)),
+        ModuleKind::Legacy => Ok(ModuleBody::Legacy(serde_json::from_value(contents)?)),
 
         _ => anyhow::bail!("Unimplemented response kind"),
     }
