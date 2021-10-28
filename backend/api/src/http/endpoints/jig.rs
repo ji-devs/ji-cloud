@@ -275,7 +275,7 @@ async fn search(
 }
 
 async fn count(db: Data<PgPool>) -> Result<Json<<jig::Count as ApiEndpoint>::Res>, error::Server> {
-    let total_count: u64 = db::jig::filtered_count(&*db, Some(PrivacyLevel::Public), None).await?;
+    let total_count: u64 = db::jig::count(&*db, PrivacyLevel::Public).await?;
 
     Ok(Json(JigCountResponse { total_count }))
 }
