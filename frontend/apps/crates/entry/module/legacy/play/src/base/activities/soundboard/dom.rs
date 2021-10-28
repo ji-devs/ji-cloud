@@ -9,7 +9,7 @@ use crate::base::{
     activities::_common::hotspot::*
 };
 
-use components::traces::svg::{ShapeStyle, ShapeStyleMode, ShapeStyleState};
+use components::traces::svg::{ShapeStyle, ShapeStyleMode, ShapeStyleKind, ShapeStylePlayMode};
 use shared::domain::jig::module::body::_groups::design::TraceKind;
 
 impl Soundboard {
@@ -41,9 +41,8 @@ impl SoundboardItem {
             state.revealed.signal().map(|revealed| {
                 ShapeStyle {
                     interactive: true,
-                    mode: if revealed { Some(ShapeStyleMode::Solid) } else { Some(ShapeStyleMode::Transparent) },
-                    kind: Some(TraceKind::Regular),
-                    state: Some(ShapeStyleState::Deselected),
+                    mode: if revealed { ShapeStyleMode::Play(ShapeStylePlayMode::Selected) } else { ShapeStyleMode::Transparent },
+                    kind: ShapeStyleKind::General,
                 }
             })
         )
