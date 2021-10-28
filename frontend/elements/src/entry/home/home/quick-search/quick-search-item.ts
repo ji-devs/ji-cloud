@@ -25,6 +25,10 @@ export class _ extends LitElement {
                 display: grid;
                 place-content: center;
             }
+            ::slotted(img-ui) {
+                height: 100%;
+                width: 100%;
+            }
             ::slotted([slot=title]) {
                 font-size: 18px;
                 font-weight: bold;
