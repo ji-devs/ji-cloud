@@ -35,6 +35,8 @@ pub struct SaySomething {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Soundboard {
     pub audio_filename: Option<String>,
+    pub bg_audio_filename: Option<String>,
+    pub highlight_color: Option<String>,
     pub items: Vec<SoundboardItem>,
 }
 

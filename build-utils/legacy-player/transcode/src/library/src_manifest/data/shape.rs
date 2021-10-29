@@ -72,4 +72,7 @@ pub struct ShapeSettings {
 
     #[serde(rename="isUsingSpeakingMode")]
     pub speaking_mode: Option<bool>,
+
+    #[serde(rename="highlightColor")]
+    pub highlight_color: Option<String>,
 }
