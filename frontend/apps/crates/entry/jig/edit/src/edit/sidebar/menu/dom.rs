@@ -8,7 +8,7 @@ use crate::edit::sidebar::{
     },
     state::State as SidebarState,
 };
-use dominator::{clone, html, Dom};
+use dominator::{Dom, EventOptions, clone, html};
 use shared::domain::jig::{module::ModuleId, LiteModule, ModuleKind};
 use std::rc::Rc;
 use utils::events;
@@ -24,6 +24,9 @@ pub fn render(state: Rc<State>, items: Vec<Dom>) -> Dom {
         .child(html!("jig-edit-sidebar-module-menu", {
             .children(items)
         }))
+        .event_with_options(&EventOptions::bubbles(), |e: events::Click| {
+            e.stop_propagation();
+        })
         .after_inserted(clone!(state => move |elem| {
             *state.menu_ref.borrow_mut() = Some(elem);
         }))

@@ -96,10 +96,6 @@ export class _ extends LitElement {
         this.dispatchEvent(new Event(event));
     }
 
-    private blockEvent(e: Event) {
-        e.stopPropagation();
-    }
-
     render() {
         const { visible } = this;
 
@@ -110,9 +106,8 @@ export class _ extends LitElement {
 
         const menuButtonIcon = visible ? "circle-kebab-blue" : "circle-kebab-grey";
 
-        // stop click events from getting to <jig-sidebar-module>
         return html`
-            <section @click=${this.blockEvent}>
+            <section>
                 <button-icon id="button" icon="${menuButtonIcon}" @click=${this.toggleVisible}></button-icon>
                 <div id="menu-container" class="${menuContainerClasses}" style="${this.getMenuContainerStyle()}">
                     <div class="menu">
