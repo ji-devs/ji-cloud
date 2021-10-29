@@ -216,8 +216,10 @@ fn render_done_popup(state: Rc<State>) -> impl Signal<Item = Option<Dom>> {
                                     html!("jig-play-replay", {
                                         .property("slot", "actions")
                                         .event(clone!(state => move |_: events::Click| {
-                                            state.active_module.set(0);
-                                            state.done.set(false);
+                                            actions::navigate_to_index(
+                                                Rc::clone(&state),
+                                                0
+                                            );
                                         }))
                                     })
                                 );

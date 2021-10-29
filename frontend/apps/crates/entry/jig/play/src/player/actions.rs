@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use super::{state::State, timer::Timer};
 use awsm_web::audio::AudioClipOptions;
-use components::audio::mixer::{AudioSourceExt, AUDIO_MIXER};
+use components::{audio::mixer::{AudioSourceExt, AUDIO_MIXER}, module::_common::prelude::ModuleId};
 use dominator::clone;
 use futures_signals::signal::SignalExt;
 use shared::{
@@ -50,11 +50,13 @@ pub fn toggle_background_audio(state: Rc<State>, background_audio: AudioBackgrou
 }
 
 pub fn navigate_forward(state: Rc<State>) {
-    let mut active_module = state.active_module.lock_mut();
+    let active_module = state.active_module.get();
     if let Some(jig) = &*state.jig.lock_ref() {
-        if *active_module < jig.jig_data.modules.len() - 1 {
-            *active_module += 1;
-            state.timer.set(None);
+        if active_module < jig.jig_data.modules.len() - 1 {
+            navigate_to_index(
+                Rc::clone(&state),
+                active_module + 1
+            );
         } else {
             state.done.set(true);
         }
@@ -62,10 +64,29 @@ pub fn navigate_forward(state: Rc<State>) {
 }
 
 pub fn navigate_back(state: Rc<State>) {
-    let mut active_module = state.active_module.lock_mut();
-    if *active_module != 0 {
-        *active_module -= 1;
-        state.timer.set(None);
+    let active_module = state.active_module.get();
+    if active_module != 0 {
+        navigate_to_index(state, active_module - 1);
+    }
+}
+
+pub fn navigate_to_index(state: Rc<State>, index: usize) {
+    state.active_module.set(index);
+    state.timer.set(None);
+}
+
+pub fn navigate_to_module(state: Rc<State>, module_id: &ModuleId) {
+    if let Some(jig) = &*state.jig.lock_ref() {
+        let index = jig
+            .jig_data
+            .modules
+            .iter()
+            .position(|module| &module.id == module_id);
+
+        if let Some(index) = index {
+            state.active_module.set(index);
+            state.timer.set(None);
+        };
     }
 }
 
@@ -166,8 +187,18 @@ pub fn on_iframe_message(state: Rc<State>, message: ModuleToJigPlayerMessage) {
         ModuleToJigPlayerMessage::Stop => {
             state.timer.set(None);
         }
-        ModuleToJigPlayerMessage::JumpToIndex(_) => todo!(),
-        ModuleToJigPlayerMessage::JumpToId(_) => todo!(),
+        ModuleToJigPlayerMessage::JumpToIndex(index) => {
+            navigate_to_index(
+                Rc::clone(&state),
+                index
+            );
+        },
+        ModuleToJigPlayerMessage::JumpToId(module_id) => {
+            navigate_to_module(
+                Rc::clone(&state),
+                &module_id
+            );
+        },
     };
 }
 
