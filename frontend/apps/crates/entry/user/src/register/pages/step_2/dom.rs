@@ -68,7 +68,6 @@ impl Step2Page {
                 html!("input-wrapper", {
                     .property("slot", "organization")
                     .property("label", STR_ORGANIZATION_LABEL)
-                    .property_signal("error", state.organization_error.signal())
                     .child(html!("input" => HtmlInputElement, {
                         .with_node!(elem => {
                             .event(clone!(state => move |_:events::Input| {

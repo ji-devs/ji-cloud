@@ -1,6 +1,7 @@
 import { LitElement, html, css, customElement, property } from 'lit-element';
 import "@elements/core/buttons/rectangle";
 import { homeStyles } from '../styles';
+import { mediaUi } from '@utils/path';
 
 @customElement('home-create')
 export class _ extends LitElement {
@@ -13,19 +14,18 @@ export class _ extends LitElement {
             .width-holder {
                 padding: 0;
                 display: grid;
-                grid-template-columns:  minmax(100px, 900px) auto;
+                grid-template-columns:  minmax(100px, 1000px) auto;
             }
             .video-wrapper {
-                background-color: #fee595;
+                display: grid;
             }
-            .video-wrapper img-ui {
-                object-fit: cover;
+            .video-wrapper video {
                 object-position: center center;
                 width: 100%;
                 height: 100%;
             }
             .content {
-                padding: 72px;
+                padding: 52px;
                 display: grid;
                 grid-template-rows: auto auto 1fr auto;
             }
@@ -74,7 +74,12 @@ export class _ extends LitElement {
         return html`
             <div class="width-holder">
                 <div class="video-wrapper">
-                    <img-ui path="entry/home/create/background.png"></img-ui>
+                    <video
+                        controls
+                        autoplay
+                        muted
+                        src=${mediaUi('entry/home/create/video.mp4')}
+                    ></video>
                 </div>
                 <div class="content">
                     <h3>${STR_SUBTITLE}</h3>

@@ -18,19 +18,13 @@ pub fn submit(state: Rc<State>) {
     };
     state.persona_error.set_neq(persona_error);
 
-    let organization_error = match &*state.organization.borrow() {
-        None => true,
-        Some(x) => x.is_empty(),
-    };
-    state.organization_error.set_neq(organization_error);
-
     let location_error = match &*state.location_json.borrow() {
         None => true,
         Some(x) => x.is_empty(),
     };
     state.location_error.set_neq(location_error);
 
-    if !terms_error && !language_error && !persona_error && !organization_error && !location_error {
+    if !terms_error && !language_error && !persona_error && !location_error {
         next_step(state);
     }
 }
@@ -67,7 +61,7 @@ fn next_step(state: Rc<State>) {
         location_json: state.location_json.borrow().clone(),
         language: state.language.borrow().as_ref().unwrap_ji().clone(),
         persona: state.persona.borrow().as_ref().unwrap_ji().clone(),
-        organization: state.organization.borrow().as_ref().unwrap_ji().clone(),
+        organization: state.organization.borrow().clone(),
         marketing: *state.marketing.borrow(),
     }));
 }
