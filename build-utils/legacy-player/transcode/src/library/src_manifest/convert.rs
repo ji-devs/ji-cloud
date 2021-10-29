@@ -3,7 +3,8 @@ use serde_repr::*;
 use std::{
     path::{Path, PathBuf},
     fs::File,
-    fmt
+    fmt,
+    future::Future
 };
 use super::{MediaTranscode, data::{
     SrcManifest,
@@ -39,7 +40,7 @@ use shared::domain::jig::{
         }
     }
 };
-
+use reqwest::Client; 
 use utils::{math::mat4::Matrix4, prelude::*};
 use crate::config::{REFERENCE_HEIGHT, REFERENCE_WIDTH};
 
@@ -49,10 +50,11 @@ impl SrcManifest {
         serde_json::from_reader(file).unwrap()
     }
 
-    pub async fn load_url(url:&str) -> (Self, String) {
+    pub async fn load_url(url:&str, client:&Client) -> (Self, String) {
 
         let text = 
-            reqwest::get(url)
+            client.get(url)
+                .send()
                 .await
                 .unwrap()
                 .error_for_status()
@@ -100,17 +102,18 @@ impl SrcManifest {
             .collect()
     }
 
-    pub fn into_slides(self) -> (Vec<Slide>, Vec<Media>) {
+    pub async fn into_slides(self, client: &Client) -> (Vec<Slide>, Vec<Media>) {
         let mut medias:Vec<Media> = Vec::new();
 
         let game_id = self.game_id();
         let base_url =  self.base_url.trim_matches('/').to_string();
 
-        let slides = self.structure
-            .slides
-            .into_iter()
-            .map(|slide| slide.convert(&game_id, &base_url, &mut medias))
-            .collect();
+        let mut slides:Vec<Slide> = Vec::new();
+        
+        for slide in self.structure.slides.into_iter() {
+            slides.push(slide.convert(&client, &game_id, &base_url, &mut medias).await);
+        }
+            
 
         (slides, medias)
     }
@@ -118,10 +121,50 @@ impl SrcManifest {
 
 
 impl SrcSlide {
-    pub fn convert(self, game_id: &str, base_url: &str, mut medias: &mut Vec<Media>) -> Slide {
+    async fn make_audio_media(&self, client: &Client, base_url: &str, filename: &str, allowed_empty: bool, mut medias: &mut Vec<Media>) -> Option<String> {
 
-        let slide_id =  self.file_path.trim_matches('/').to_string();
+        let slide_id = self.slide_id(); 
 
+        if filename.is_empty() {
+            None
+        } else {
+            let filename_mp3 = format!("{}.mp3", Path::new(filename).file_stem().unwrap().to_str().unwrap().to_string());
+
+            let url = format!("{}/{}", base_url, filename);
+
+            match client.head(&url)
+                .send()
+                .await
+                .unwrap()
+                .error_for_status() {
+                    Ok(_) => {
+
+                        let media = Media {
+                            url, 
+                            basepath: format!("slides/{}/activity", slide_id), 
+                            filename: filename_mp3.to_string(),
+                            transcode: Some(MediaTranscode::Audio)
+                        };
+
+                        medias.push(media);
+
+                        Some(filename_mp3)
+                    },
+                    Err(_) => {
+                        if allowed_empty {
+                            log::info!("skipping {} because file doesn't exist- but this is allowed here", url);
+                            None
+                        } else {
+                            panic!("{} is 404 and not allowed to be", url);
+                        }
+                    }
+                }
+        }
+    }
+    pub async fn convert(self, client: &Client, game_id: &str, base_url: &str, mut medias: &mut Vec<Media>) -> Slide {
+        let slide_id = self.slide_id(); 
+
+        log::info!("parsing slide: {}", slide_id);
 
         let activities_len = self.activities.len();
         let layers_len = self.layers.len();
@@ -141,26 +184,11 @@ impl SrcSlide {
                 let activity = self.activities[0].clone();
 
 
-                let mut make_audio_media = |filename:&str| -> Option<String> {
-                    if filename.is_empty() {
-                        None
-                    } else {
-                        let filename_mp3 = format!("{}.mp3", Path::new(filename).file_stem().unwrap().to_str().unwrap().to_string());
-
-                        let media = Media {
-                            url: format!("{}/{}", base_url, filename), 
-                            basepath: format!("slides/{}/activity", slide_id), 
-                            filename: filename_mp3.to_string(),
-                            transcode: Some(MediaTranscode::Audio)
-                        };
-
-                        medias.push(media);
-
-                        Some(filename_mp3)
-                    }
+                let audio_filename = self.make_audio_media(&client, base_url, &activity.intro_audio, false, &mut medias).await;
+                let bg_audio_filename = match activity.settings.bg_audio {
+                    None => None,
+                    Some(bg_audio) => self.make_audio_media(&client, base_url, &bg_audio, true, &mut medias).await
                 };
-
-                let audio_filename = make_audio_media(&activity.intro_audio);
 
                 match self.activity_kind {
                     // SrcActivityKind::Questions => {
@@ -188,19 +216,39 @@ impl SrcSlide {
                         }))
                     },
                     SrcActivityKind::Soundboard => {
+
+                        let mut items:Vec<SoundboardItem> = Vec::new();
+                        let mut highlight_color:Option<String> = None;
+
+                        for shape in activity.shapes.into_iter() {
+                            match (highlight_color.as_ref(), shape.settings.highlight_color.as_ref()) {
+                                (Some(c1), Some(c2)) => {
+                                    if c1 != c2.trim() {
+                                        panic!("soundboard highlight colors changed between shapes: {} vs. {}", c1, c2);
+                                    }
+                                },
+                                (None, Some(c)) => {
+                                    log::info!("highlight color: {}", c);
+
+                                    highlight_color = Some(c.trim().to_string());
+                                },
+                                _ => {}
+                            }
+
+
+                            items.push(SoundboardItem {
+                                audio_filename: self.make_audio_media(&client, base_url, &shape.audio, false, &mut medias).await,
+                                text: map_text(&shape.settings.text),
+                                jump_index: shape.settings.jump_index.clone(),
+                                hotspot: shape.convert_to_hotspot()
+                            });
+                        }
+
                         Some(Activity::Soundboard(Soundboard{
                             audio_filename,
-                            items: activity.shapes
-                                .into_iter()
-                                .map(|shape| {
-                                    SoundboardItem {
-                                        audio_filename: make_audio_media(&shape.audio),
-                                        text: map_text(&shape.settings.text),
-                                        jump_index: shape.settings.jump_index.clone(),
-                                        hotspot: shape.convert_to_hotspot()
-                                    }
-                                }) 
-                                .collect()
+                            bg_audio_filename,
+                            highlight_color,
+                            items
                         }))
                     },
                     _ => None

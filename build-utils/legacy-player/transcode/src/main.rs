@@ -17,6 +17,21 @@ use image::{Frame, ImageDecoder, AnimationDecoder};
 use flate2::Compression;
 use flate2::write::ZlibEncoder;
 use std::process::Command;
+use reqwest::Client; 
+
+// Soundboard Options - 17765
+// https://jitap.net/activities/genr/play/soundboard-states 
+// https://d24o39yp3ttic8.cloudfront.net/6A973171-C29A-4C99-A650-8033F996C6E7/game.json
+
+// David test 002 - 17736
+// https://d24o39yp3ttic8.cloudfront.net/5D00A147-73B7-43FF-A215-A38CB84CEBCD/game.json
+
+// Corinne Houdini states - 17762
+// https://d24o39yp3ttic8.cloudfront.net/42C980D6-9FCE-4552-A5F2-ECFC0EA8D129/game.json
+
+// say something options - 17746
+// https://jitap.net/activities/gen8/play/say-something-options
+// https://d24o39yp3ttic8.cloudfront.net/86DCDC1D-64CB-4198-A866-257E213F0405/game.json
 
 
 #[tokio::main]
@@ -26,19 +41,33 @@ async fn main() {
     init_logger(opts.verbose);
     opts.sanitize();
 
-    transcode_game(&opts).await;
+    let client = Client::new();
+
+    transcode_game(
+        &opts, 
+        client.clone(),
+        opts
+            .game_json_url
+            .as_ref()
+            .map(|x| x.as_str())
+            .unwrap_or("https://d24o39yp3ttic8.cloudfront.net/6A973171-C29A-4C99-A650-8033F996C6E7/game.json")
+    ).await;
 }
 
-async fn transcode_game(opts: &Opts) {
-    let (src_manifest, raw_game_json) = SrcManifest::load_url(&opts.game_json_url).await;
+async fn transcode_game(opts: &Opts, client:Client, game_json_url: &str) {
 
+    log::info!("loading game data from {}", game_json_url);
+
+    let (src_manifest, raw_game_json) = SrcManifest::load_url(game_json_url, &client).await;
+
+    log::info!("loaded manifest, game id: {}", src_manifest.game_id());
 
     let dest_dir = opts.dest_base_path.join(&src_manifest.game_id());
     std::fs::create_dir_all(&dest_dir);
 
     let jig_req = src_manifest.jig_req();
     let module_reqs = src_manifest.module_reqs();
-    let (slides, medias) = src_manifest.into_slides();
+    let (slides, medias) = src_manifest.into_slides(&client).await;
 
     if opts.write_json {
         let dest_path = dest_dir.join(&opts.dest_json_dir);
@@ -93,7 +122,8 @@ async fn transcode_game(opts: &Opts) {
 
             if !opts.skip_download_exists || !dest_path.exists() {
                 log::info!("downloading {} -> {}", media.url, dest_path.to_str().unwrap());
-                match reqwest::get(&media.url)
+                match client.get(&media.url)
+                    .send()
                     .await
                     .unwrap()
                     .error_for_status() {

@@ -82,6 +82,8 @@ pub struct ActivitySettings {
     #[serde(rename="kShowConfetti")]
     pub confetti: Option<bool>,
 
+    #[serde(rename="BGRecording")]
+    pub bg_audio: Option<String>,
 
     #[serde(rename="videoRange")]
     pub range: Option<VideoRange>,
