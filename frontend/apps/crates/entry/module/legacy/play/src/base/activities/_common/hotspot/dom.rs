@@ -40,6 +40,8 @@ impl Hotspot {
                         .with_node!(elem => {
                             .apply(OverlayHandle::lifecycle(clone!(tooltip_text => move || {
                                 html!("empty-fragment", {
+                                    // the element isn't actually ready to be tracked right away
+                                    // but we don't show the tooltip right away either, so all good
                                     .child_signal(tooltip_text.signal_ref(clone!(elem => move |text| {
                                         text.as_ref().map(|text| {
                                             html!("overlay-tooltip-bubble", {
@@ -49,24 +51,12 @@ impl Hotspot {
                                                 .property("contentAnchor", "oppositeV")
                                                 //.property("strategy", move_strategy.as_str())
                                             })
-                                            // html!("overlay-drag", {
-                                            //     .property("target", elem.clone())
-                                            //     .property("targetAnchor", "bm")
-                                            //     .property("contentAnchor", "tl")
-                                            //     .property("marginY", 24.0)
-                                            //     .child(html!("div", { 
-                                            //         .text(text)
-                                            //     }))
-                                            // })
                                         })
                                     })))
                                 })
                             })))
                         })
                     })
-                        // .after_inserted(|elem| {
-                        //     log::info!("{:?}", elem);
-                        // })
                 })
             )
         )

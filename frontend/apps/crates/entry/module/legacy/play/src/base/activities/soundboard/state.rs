@@ -11,6 +11,7 @@ pub struct Soundboard {
     pub base: Rc<Base>,
     pub raw: RawSoundboard,
     pub audio: RefCell<Option<AudioHandle>>,
+    pub bg_audio: RefCell<Option<AudioHandle>>,
     pub items: Vec<Rc<SoundboardItem>>
 }
 
@@ -27,6 +28,7 @@ impl Soundboard {
             base,
             raw,
             audio: RefCell::new(None),
+            bg_audio: RefCell::new(None),
             items
         });
 
@@ -51,7 +53,7 @@ pub struct SoundboardItem {
     pub text: Option<String>,
     pub jump_index: Option<usize>,
     pub hotspot: Rc<Hotspot>,
-    pub revealed: Mutable<bool>
+    pub revealed: Mutable<bool>,
 }
 
 impl SoundboardItem {
@@ -64,7 +66,7 @@ impl SoundboardItem {
             jump_index: raw.jump_index,
             base,
             hotspot,
-            revealed: Mutable::new(false)
+            revealed: Mutable::new(false),
         })
     }
 

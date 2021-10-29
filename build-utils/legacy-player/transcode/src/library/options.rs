@@ -49,6 +49,10 @@ pub struct Opts {
     /// don't panic if media is 404
     #[structopt(long, parse(try_from_str), default_value = "true")]
     pub allow_empty_media: bool,
+
+    /// if the jump index is corrupt, just remove it 
+    #[structopt(long, parse(try_from_str), default_value = "true")]
+    pub allow_bad_jump_index: bool,
 }
 
 impl Opts {

@@ -6,20 +6,24 @@ use std::{
     fmt,
     future::Future
 };
-use super::{MediaTranscode, data::{
-    SrcManifest,
-    Media,
-    Slide as SrcSlide,
-    ActivityKind as SrcActivityKind,
-    Activity as SrcActivity,
-    Shape as SrcShape,
-    PathPoint as SrcPathPoint,
-    PathElementKind as SrcPathElementKind,
-    Layer as SrcLayer,
-    LayerKind as SrcLayerKind,
-    LoopKind as SrcLoopKind,
-    ShowKind as SrcShowKind,
-}};
+use super::{
+    super::super::options::*,
+    MediaTranscode, 
+    data::{
+        SrcManifest,
+        Media,
+        Slide as SrcSlide,
+        ActivityKind as SrcActivityKind,
+        Activity as SrcActivity,
+        Shape as SrcShape,
+        PathPoint as SrcPathPoint,
+        PathElementKind as SrcPathElementKind,
+        Layer as SrcLayer,
+        LayerKind as SrcLayerKind,
+        LoopKind as SrcLoopKind,
+        ShowKind as SrcShowKind,
+    }
+};
 
 use shared::domain::jig::{
     JigCreateRequest, 
@@ -102,16 +106,18 @@ impl SrcManifest {
             .collect()
     }
 
-    pub async fn into_slides(self, client: &Client) -> (Vec<Slide>, Vec<Media>) {
+    pub async fn into_slides(self, client: &Client, opts: &Opts) -> (Vec<Slide>, Vec<Media>) {
         let mut medias:Vec<Media> = Vec::new();
 
         let game_id = self.game_id();
         let base_url =  self.base_url.trim_matches('/').to_string();
 
         let mut slides:Vec<Slide> = Vec::new();
-        
+       
+        let max_slides = self.structure.slides.len();
+
         for slide in self.structure.slides.into_iter() {
-            slides.push(slide.convert(&client, &game_id, &base_url, &mut medias).await);
+            slides.push(slide.convert(&opts, &client, &game_id, &base_url, &mut medias, max_slides).await);
         }
             
 
@@ -161,7 +167,7 @@ impl SrcSlide {
                 }
         }
     }
-    pub async fn convert(self, client: &Client, game_id: &str, base_url: &str, mut medias: &mut Vec<Media>) -> Slide {
+    pub async fn convert(self, opts: &Opts, client: &Client, game_id: &str, base_url: &str, mut medias: &mut Vec<Media>, max_slides: usize) -> Slide {
         let slide_id = self.slide_id(); 
 
         log::info!("parsing slide: {}", slide_id);
@@ -176,6 +182,19 @@ impl SrcSlide {
 
         let image_full = strip_path(&self.image_full).to_string();
         let image_thumb = strip_path(&self.image_thumb).to_string();
+
+        let validate_jump_index = |index: usize| -> Option<usize> {
+            if index >= max_slides {
+                if opts.allow_bad_jump_index {
+                    log::warn!("invalid jump index: {} (there are only {} slides!)", index, max_slides);
+                    None
+                } else {
+                    panic!("invalid jump index: {} (there are only {} slides!)", index, max_slides);
+                }
+            } else {
+                Some(index)
+            }
+        };
 
         let activity = {
             if activities_len == 0 {
@@ -212,7 +231,7 @@ impl SrcSlide {
                             } else {
                                 AdvanceTrigger::Tap
                             },
-                            advance_index: activity.settings.jump_index
+                            advance_index: activity.settings.jump_index.and_then(validate_jump_index)
                         }))
                     },
                     SrcActivityKind::Soundboard => {
@@ -239,7 +258,7 @@ impl SrcSlide {
                             items.push(SoundboardItem {
                                 audio_filename: self.make_audio_media(&client, base_url, &shape.audio, false, &mut medias).await,
                                 text: map_text(&shape.settings.text),
-                                jump_index: shape.settings.jump_index.clone(),
+                                jump_index: shape.settings.jump_index.and_then(validate_jump_index),
                                 hotspot: shape.convert_to_hotspot()
                             });
                         }

@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::{borrow::BorrowMut, rc::Rc};
 use super::state::{Soundboard, SoundboardItem};
 use components::audio::mixer::{AUDIO_MIXER, AudioSource};
 use shared::domain::jig::module::body::legacy::activity::AdvanceTrigger;
@@ -15,6 +15,13 @@ impl Soundboard {
                 mixer.pause_all();
 
                 mixer.play_oneshot(AudioSource::Url(state.base.activity_media_url(&audio_filename)))
+            });
+        }
+
+        if let Some(bg_audio_filename) = state.raw.bg_audio_filename.as_ref() {
+            AUDIO_MIXER.with(|mixer| {
+                let handle = mixer.play(AudioSource::Url(state.base.activity_media_url(&bg_audio_filename)), true);
+                *state.bg_audio.borrow_mut() = Some(handle);
             });
         }
     }

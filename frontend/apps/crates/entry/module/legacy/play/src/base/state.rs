@@ -59,6 +59,8 @@ impl Base {
 
         let url = utils::path::legacy_cdn_url(format!("{}/json/slides/{}.json", raw.game_id, raw.slide_id));
 
+        log::info!("loading {}", url);
+
         let slide:Slide = fetch_url(&url)
             .await
             .unwrap_ji()

@@ -1,16 +1,15 @@
 #![allow(warnings)]
 
-mod binary;
-pub use binary::*;
-
 use std::{future::Future, path::PathBuf};
 use dotenv::dotenv;
 use simplelog::*;
 use structopt::StructOpt;
 use std::fs::File;
 use std::io::Write;
-use options::*;
-use ::transcode::src_manifest::*;
+use ::transcode::{
+    src_manifest::*,
+    options::*,
+};
 use shared::domain::jig::module::ModuleBody;
 use image::gif::{GifDecoder, GifEncoder};
 use image::{Frame, ImageDecoder, AnimationDecoder};
@@ -67,7 +66,7 @@ async fn transcode_game(opts: &Opts, client:Client, game_json_url: &str) {
 
     let jig_req = src_manifest.jig_req();
     let module_reqs = src_manifest.module_reqs();
-    let (slides, medias) = src_manifest.into_slides(&client).await;
+    let (slides, medias) = src_manifest.into_slides(&client, &opts).await;
 
     if opts.write_json {
         let dest_path = dest_dir.join(&opts.dest_json_dir);
