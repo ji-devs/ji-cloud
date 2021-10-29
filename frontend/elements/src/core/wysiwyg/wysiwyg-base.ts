@@ -240,7 +240,7 @@ export class _ extends LitElement {
 
     private onBlur(e: FocusEvent) {
         this._blurSelection = this.backbone.editor.selection;
-        if(!this.closestPassShadow(e.relatedTarget as Node, "text-editor-controls")) {
+        if(!this.closestPassShadow(e.relatedTarget as Node, "text-editor-controls, hebrew-keyboard")) {
             this.dispatchEvent(new Event("custom-blur"));
         }
     }
