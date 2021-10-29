@@ -1,21 +1,19 @@
-import {
-    LitElement,
-    html,
-    css,
-    customElement,
-    property,
-    query,
-} from "lit-element";
-import { queryPierceShadow } from "@utils/dom";
+import { LitElement, html, css, customElement, property } from "lit-element";
 import "./container";
 import "./content";
-import {MoveStrategy, ZLayer, Anchor, ContentAnchor, TrackerProp} from "./content";
+import { MoveStrategy, ZLayer, Anchor, ContentAnchor, TrackerProp } from "./content";
 import "@elements/core/drag/container";
 
 @customElement("overlay-drag")
 export class _ extends LitElement {
     static get styles() {
-        return [css``];
+        return [css`
+            overlay-content {
+                /* since drag-container can be dragged away, make sure that the area is not covered */
+                height: 0;
+                width: 0;
+            }
+        `];
     }
 
     @property({ type: Boolean, reflect: true })

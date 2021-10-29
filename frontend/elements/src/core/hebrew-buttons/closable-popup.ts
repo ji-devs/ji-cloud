@@ -5,19 +5,28 @@ export class _ extends LitElement {
     static get styles() {
         return [
             css`
+                :host {
+                    display: grid;
+                }
                 button {
-                    position: absolute;
+                    grid-column: 1;
+                    grid-row: 1;
+                    justify-self: end;
                     background-color: var(--main-blue);
                     color: #ffffff;
                     height: 32px;
                     width: 32px;
                     font-size: 26px;
                     border-radius: 50%;
-                    transform: translate(-50%, -50%);
+                    transform: translate(50%, -50%);
                     left: 100%;
                     z-index: 1;
                     border: 0;
                     cursor: pointer;
+                }
+                ::slotted(*) {
+                    grid-column: 1;
+                    grid-row: 1;
                 }
             `,
         ];
