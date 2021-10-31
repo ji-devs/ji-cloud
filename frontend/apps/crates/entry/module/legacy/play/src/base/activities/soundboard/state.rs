@@ -9,7 +9,15 @@ use crate::base::{
 pub struct Soundboard {
     pub base: Rc<Base>,
     pub raw: RawSoundboard,
-    pub items: Vec<Rc<SoundboardItem>>
+    pub items: Vec<Rc<SoundboardItem>>,
+    pub phase: Mutable<Phase>
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum Phase {
+    Intro,
+    Hints,
+    Playing
 }
 
 impl Soundboard {
@@ -21,10 +29,12 @@ impl Soundboard {
             })
             .collect();
 
+
         let _self = Rc::new(Self{
             base,
             raw,
-            items
+            items,
+            phase: Mutable::new(Phase::Intro)
         });
 
         // TODO- soundboard listens on the foreground...

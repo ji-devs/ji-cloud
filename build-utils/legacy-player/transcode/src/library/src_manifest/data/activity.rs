@@ -69,9 +69,13 @@ pub struct ActivitySettings {
     #[serde(rename="linkToPage")]
     pub jump_index: Option<usize>,
 
-
-    #[serde(rename="soundFunModeV2")]
+    /// play one at a time is inverse of this?
+    #[serde(rename="soundFunMode")]
     pub fun_mode: Option<bool>,
+
+    /// play one at a time is inverse of this?
+    #[serde(rename="soundFunModeV2")]
+    pub fun_mode_v2: Option<bool>,
 
     #[serde(rename="soundHideHints")]
     pub hide_hints: Option<bool>,

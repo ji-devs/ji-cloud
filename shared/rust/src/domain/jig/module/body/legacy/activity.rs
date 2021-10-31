@@ -36,7 +36,11 @@ pub struct SaySomething {
 pub struct Soundboard {
     pub audio_filename: Option<String>,
     pub bg_audio_filename: Option<String>,
+    /// this isn't actually used for anything
     pub highlight_color: Option<String>,
+    /// this isn't actually used for anything
+    pub one_at_a_time: bool,
+    pub show_hints: bool,
     pub items: Vec<SoundboardItem>,
 }
 

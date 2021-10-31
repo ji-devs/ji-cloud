@@ -263,10 +263,36 @@ impl SrcSlide {
                             });
                         }
 
+                        let one_at_a_time = match (activity.settings.fun_mode, activity.settings.fun_mode_v2) {
+                            (Some(x1), Some(x2)) => {
+                                if x1 != x2 {
+                                    panic!("soundmode and v2 set, but different!");
+                                }
+
+                                !x1
+                            },
+                            (Some(x), None) => {
+                                !x
+                            },
+                            (None, Some(x)) => {
+                                !x
+                            },
+                            (None, None) => {
+                                false
+                            },
+                        };
+
+                        let show_hints = match activity.settings.hide_hints {
+                            None => false,
+                            Some(x) => !x
+                        };
+
                         Some(Activity::Soundboard(Soundboard{
                             audio_filename,
                             bg_audio_filename,
                             highlight_color,
+                            one_at_a_time,
+                            show_hints,
                             items
                         }))
                     },
