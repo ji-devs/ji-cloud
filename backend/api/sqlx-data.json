@@ -3235,12 +3235,12 @@
         ]
       },
       "nullable": [
+        false,
         true,
         true,
-        true,
-        true,
-        true,
-        true,
+        null,
+        false,
+        false,
         true
       ]
     }

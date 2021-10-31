@@ -32,14 +32,16 @@ pub struct Backgrounds {
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
-#[serde(rename_all = "snake_case")]
 /// Stickers are things that can be rendered and transformed
 pub enum Sticker {
     /// Sprites
+    #[serde(rename_all = "snake_case")]
     Sprite(Sprite),
     /// Text
+    #[serde(rename_all = "snake_case")]
     Text(Text),
     /// Video
+    #[serde(rename_all = "snake_case")]
     Video(Video),
 }
 
