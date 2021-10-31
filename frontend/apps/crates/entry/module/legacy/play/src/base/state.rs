@@ -2,7 +2,7 @@ use shared::domain::jig::{JigData, JigId, module::{ModuleId, body::{_groups::des
 use components::{audio::mixer::AudioMixer, module::_common::play::prelude::*};
 use utils::prelude::*;
 use web_sys::Worker;
-use std::{borrow::BorrowMut, cell::RefCell, collections::HashMap, hash::Hash, rc::Rc, sync::atomic::{AtomicUsize, Ordering}};
+use std::{borrow::BorrowMut, cell::RefCell, collections::HashMap, hash::Hash, rc::Rc, sync::atomic::{AtomicBool, AtomicUsize, Ordering}};
 use futures_signals::signal::Mutable;
 use super::{actions::StageClick, design::sticker::animation::WorkerKind, audio::AudioManager};
 use awsm_web::loaders::fetch::fetch_url;
@@ -20,7 +20,8 @@ pub struct Base {
     pub bg_click_listener: RefCell<Option<Box<dyn FnMut()>>>,
     pub start_listeners: RefCell<Vec<Box<dyn FnMut()>>>,
     pub stage_click_listeners: RefCell<Vec<Box<dyn FnMut(StageClick)>>>,
-    pub audio_manager: AudioManager
+    pub audio_manager: AudioManager,
+    pub stage_click_allowed: AtomicBool
 }
 
 #[derive(Default)]
@@ -82,7 +83,8 @@ impl Base {
             bg_click_listener: RefCell::new(None),
             start_listeners: RefCell::new(Vec::new()),
             stage_click_listeners: RefCell::new(Vec::new()),
-            audio_manager: AudioManager::new()
+            audio_manager: AudioManager::new(),
+            stage_click_allowed: AtomicBool::new(false)
         });
 
         /// TODO- set after done preloading

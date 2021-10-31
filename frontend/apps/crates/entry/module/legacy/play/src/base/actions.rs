@@ -1,5 +1,6 @@
 use super::state::Base;
 use utils::{prelude::*, resize::get_resize_info};
+use std::sync::atomic::Ordering;
 
 #[derive(Clone, Debug)]
 pub struct StageClick {
@@ -15,9 +16,15 @@ impl StageClick {
 }
 impl Base {
     pub fn on_click(&self, mouse_x: f64, mouse_y: f64) {
-        let stage_click = StageClick {mouse_x, mouse_y};
-        for f in self.stage_click_listeners.borrow_mut().iter_mut() {
-            f(stage_click.clone());
+        if self.stage_click_allowed.load(Ordering::SeqCst) {
+            let stage_click = StageClick {mouse_x, mouse_y};
+            for f in self.stage_click_listeners.borrow_mut().iter_mut() {
+                f(stage_click.clone());
+            }
         }
+    }
+
+    pub fn allow_stage_click(&self) {
+        self.stage_click_allowed.store(true, Ordering::SeqCst);
     }
 }

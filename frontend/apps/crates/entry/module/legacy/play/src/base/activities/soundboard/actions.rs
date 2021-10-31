@@ -23,14 +23,20 @@ impl Soundboard {
     }
 
     pub fn on_intro_finished(&self) {
+
         if let Some(bg_audio_filename) = self.raw.bg_audio_filename.as_ref() {
             self.base.audio_manager.play_bg(self.base.activity_media_url(&bg_audio_filename));
         }
 
-        self.phase.set_neq(if self.raw.show_hints { Phase::Hints } else { Phase::Playing });
+        if self.raw.show_hints { 
+            self.phase.set_neq(Phase::Hints);
+        } else {
+            self.on_hints_finished();
+        }
     }
 
-    pub fn on_hints_finished(self: Rc<Self>) {
+    pub fn on_hints_finished(&self) {
+        self.base.allow_stage_click();
         self.phase.set_neq(Phase::Playing);
     }
 }
