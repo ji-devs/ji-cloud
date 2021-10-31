@@ -1,5 +1,4 @@
 use std::{cell::RefCell, rc::Rc};
-use awsm_web::audio::AudioHandle;
 use futures_signals::signal::{Mutable, Signal, SignalExt};
 use shared::domain::jig::module::body::legacy::activity::{Soundboard as RawSoundboard, SoundboardItem as RawSoundboardItem};
 use dominator::clone;
@@ -10,8 +9,6 @@ use crate::base::{
 pub struct Soundboard {
     pub base: Rc<Base>,
     pub raw: RawSoundboard,
-    pub audio: RefCell<Option<AudioHandle>>,
-    pub bg_audio: RefCell<Option<AudioHandle>>,
     pub items: Vec<Rc<SoundboardItem>>
 }
 
@@ -27,8 +24,6 @@ impl Soundboard {
         let _self = Rc::new(Self{
             base,
             raw,
-            audio: RefCell::new(None),
-            bg_audio: RefCell::new(None),
             items
         });
 

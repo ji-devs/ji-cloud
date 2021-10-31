@@ -7,7 +7,6 @@ use dominator::clone;
 pub struct SaySomething {
     pub base: Rc<Base>,
     pub raw: RawSaySomething,
-    pub audio: RefCell<Option<AudioHandle>>
 }
 
 impl SaySomething {
@@ -15,7 +14,6 @@ impl SaySomething {
         let _self = Rc::new(Self{
             base,
             raw,
-            audio: RefCell::new(None)
         });
 
         _self.base.set_bg_listener(clone!(_self => move || {

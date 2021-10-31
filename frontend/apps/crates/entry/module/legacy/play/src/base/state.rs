@@ -4,7 +4,7 @@ use utils::prelude::*;
 use web_sys::Worker;
 use std::{borrow::BorrowMut, cell::RefCell, collections::HashMap, hash::Hash, rc::Rc, sync::atomic::{AtomicUsize, Ordering}};
 use futures_signals::signal::Mutable;
-use super::{actions::StageClick, design::sticker::animation::WorkerKind};
+use super::{actions::StageClick, design::sticker::animation::WorkerKind, audio::AudioManager};
 use awsm_web::loaders::fetch::fetch_url;
 
 pub struct Base {
@@ -19,7 +19,8 @@ pub struct Base {
     pub workers: RefCell<HashMap<WorkerKind, WorkerList>>,
     pub bg_click_listener: RefCell<Option<Box<dyn FnMut()>>>,
     pub start_listeners: RefCell<Vec<Box<dyn FnMut()>>>,
-    pub stage_click_listeners: RefCell<Vec<Box<dyn FnMut(StageClick)>>>
+    pub stage_click_listeners: RefCell<Vec<Box<dyn FnMut(StageClick)>>>,
+    pub audio_manager: AudioManager
 }
 
 #[derive(Default)]
@@ -80,7 +81,8 @@ impl Base {
             workers: RefCell::new(HashMap::new()),
             bg_click_listener: RefCell::new(None),
             start_listeners: RefCell::new(Vec::new()),
-            stage_click_listeners: RefCell::new(Vec::new())
+            stage_click_listeners: RefCell::new(Vec::new()),
+            audio_manager: AudioManager::new()
         });
 
         /// TODO- set after done preloading

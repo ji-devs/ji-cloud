@@ -2,7 +2,6 @@ use super::state::Controller;
 use std::{
     sync::atomic::{Ordering}
 };
-use components::audio::mixer::{AUDIO_MIXER, AudioSource};
 use gloo_timers::callback::Timeout;
 use utils::{
     prelude::*,
@@ -43,15 +42,8 @@ impl Controller {
 
         match (self.hidden.get(), self.audio_filename.as_ref()) {
             (false, Some(audio_filename)) => {
-                let url = self.base.design_media_url(&audio_filename);
                 //win the race condition with hotspots
-                Timeout::new(0, move || { 
-                    AUDIO_MIXER.with(|mixer| {
-                        mixer.pause_all();
-                        mixer.play_oneshot(AudioSource::Url(url))
-                    });
-                })
-                .forget();
+                self.base.audio_manager.play_clip_next_tick(self.base.design_media_url(&audio_filename));
             },
             _ => {}
         }

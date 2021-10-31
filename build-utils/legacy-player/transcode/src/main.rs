@@ -49,7 +49,7 @@ async fn main() {
             .game_json_url
             .as_ref()
             .map(|x| x.as_str())
-            .unwrap_or("https://d24o39yp3ttic8.cloudfront.net/6A973171-C29A-4C99-A650-8033F996C6E7/game.json")
+            .unwrap_or("https://d24o39yp3ttic8.cloudfront.net/9F5AD80D-7D86-4AB9-AB11-C942B162923E/game.json")
     ).await;
 }
 

@@ -1,6 +1,5 @@
 use std::{borrow::BorrowMut, rc::Rc};
 use super::state::{Soundboard, SoundboardItem};
-use components::audio::mixer::{AUDIO_MIXER, AudioSource};
 use shared::domain::jig::module::body::legacy::activity::AdvanceTrigger;
 use utils::prelude::*;
 use dominator::{Dom, html, clone};
@@ -11,18 +10,11 @@ impl Soundboard {
         let state = self;
 
         if let Some(audio_filename) = state.raw.audio_filename.as_ref() {
-            AUDIO_MIXER.with(|mixer| {
-                mixer.pause_all();
-
-                mixer.play_oneshot(AudioSource::Url(state.base.activity_media_url(&audio_filename)))
-            });
+            state.base.audio_manager.play_clip(state.base.activity_media_url(&audio_filename));
         }
 
         if let Some(bg_audio_filename) = state.raw.bg_audio_filename.as_ref() {
-            AUDIO_MIXER.with(|mixer| {
-                let handle = mixer.play(AudioSource::Url(state.base.activity_media_url(&bg_audio_filename)), true);
-                *state.bg_audio.borrow_mut() = Some(handle);
-            });
+            state.base.audio_manager.play_bg(state.base.activity_media_url(&bg_audio_filename));
         }
     }
 
@@ -42,14 +34,16 @@ impl SoundboardItem {
 
 
         if let Some(audio_filename) = state.audio_filename.as_ref() {
-            AUDIO_MIXER.with(|mixer| {
-                mixer.pause_all();
-                mixer.play_oneshot_on_ended(AudioSource::Url(state.base.activity_media_url(&audio_filename)), clone!(state => move || {
+            state.base.audio_manager.play_clip_on_ended(
+                state.base.activity_media_url(&audio_filename),
+                clone!(state => move || {
                     if let Some(index) = state.jump_index {
                         let _ = IframeAction::new(ModuleToJigPlayerMessage::JumpToIndex(index)).try_post_message_to_top();
+                    } else {
+                        //TODO- check if last clip
                     }
-                }))
-            });
+                })
+            );
         }
 
         

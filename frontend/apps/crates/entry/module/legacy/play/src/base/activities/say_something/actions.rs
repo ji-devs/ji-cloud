@@ -1,6 +1,5 @@
 use std::rc::Rc;
 use super::state::SaySomething;
-use components::audio::mixer::{AUDIO_MIXER, AudioSource};
 use shared::domain::jig::module::body::legacy::activity::AdvanceTrigger;
 use utils::prelude::*;
 use dominator::{Dom, html, clone};
@@ -17,20 +16,14 @@ impl SaySomething {
         let state = self;
 
         if let Some(audio_filename) = state.raw.audio_filename.as_ref() {
-            AUDIO_MIXER.with(|mixer| {
-                mixer.pause_all();
-                let handle = mixer.play_on_ended(
-                    AudioSource::Url(state.base.activity_media_url(&audio_filename)),
-                    false,
-                    clone!(state => move || {
-                        if state.raw.advance_trigger == AdvanceTrigger::AudioEnd {
-                            state.next();
-                        }
-                    })
-                );
-
-                *state.audio.borrow_mut() = Some(handle);
-            });
+            state.base.audio_manager.play_clip_on_ended(
+                state.base.activity_media_url(&audio_filename),
+                clone!(state => move || {
+                    if state.raw.advance_trigger == AdvanceTrigger::AudioEnd {
+                        state.next();
+                    }
+                })
+            );
         }
     }
 

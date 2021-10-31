@@ -49,7 +49,6 @@ use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use serde::{Serialize, Deserialize};
 use js_sys::{Object, Reflect};
-use components::audio::mixer::{AUDIO_MIXER, AudioSource};
 use awsm_web::{
     loaders::fetch::fetch_url,
     workers::new_worker_from_js,

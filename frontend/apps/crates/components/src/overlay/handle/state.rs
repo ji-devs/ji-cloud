@@ -34,7 +34,7 @@ impl OverlayHandle {
 
 impl Drop for OverlayHandle {
     fn drop(&mut self) {
-        log::info!("overlay {} dropped", self.key);
+        //log::info!("overlay {} dropped", self.key);
 
         OverlayContainer::remove(self.key);
     }

@@ -11,7 +11,6 @@ use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use serde::{Serialize, Deserialize};
 use shared::domain::jig::module::body::legacy::design::{HideToggle, Sticker as RawSticker};
-use components::audio::mixer::{AUDIO_MIXER, AudioSource};
 
 pub struct ImagePlayer {
     pub base: Rc<Base>,
