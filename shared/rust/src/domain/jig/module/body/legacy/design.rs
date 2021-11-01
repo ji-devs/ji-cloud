@@ -15,29 +15,7 @@ pub struct Design {
 
 #[skip_serializing_none]
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub enum Sticker {
-    /// sprites
-    Sprite(Sprite),
-    /// text
-    Text(Text),
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Text {
-    pub html: String,
-    pub width: f64,
-    pub height: f64,
-    pub transform_matrix: [f64; 16],
-    /// start out hidden
-    pub hide: bool,
-    /// toggle hidden state
-    pub hide_toggle: Option<HideToggle>,
-    // associated audio
-    pub audio_filename: Option<String>,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Sprite {
+pub struct Sticker {
     pub filename: String,
     pub transform_matrix: [f64; 16],
     /// hide and hide_toggle are mapped from the top sections
