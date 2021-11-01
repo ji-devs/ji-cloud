@@ -51,8 +51,9 @@ impl ProfilePage {
             .children(&mut [
                 html!("profile-image", {
                     .property("slot", "profile-image")
-                    .property_signal("imageId", state.user.profile_image_id.signal_ref(|profile_image_id| {
-                        match profile_image_id {
+                    .property_signal("imageId", state.user.profile_image.signal_ref(|profile_image| {
+                        log::info!("imageId: {:?}", profile_image);
+                        match profile_image {
                             Some(image_id) => JsValue::from_str(&image_id.0.to_string()),
                             None => JsValue::UNDEFINED,
                         }
@@ -60,8 +61,8 @@ impl ProfilePage {
                 }),
                 html!("profile-image", {
                     .property("slot", "editable-profile-image")
-                    .property_signal("imageId", state.user.profile_image_id.signal_ref(|profile_image_id| {
-                        match profile_image_id {
+                    .property_signal("imageId", state.user.profile_image.signal_ref(|profile_image| {
+                        match profile_image {
                             Some(image_id) => JsValue::from_str(&image_id.0.to_string()),
                             None => JsValue::UNDEFINED,
                         }
@@ -75,13 +76,13 @@ impl ProfilePage {
                     }))
                 }),
                 html!("button-rect", {
-                    .visible_signal(state.user.profile_image_id.signal_ref(|image| image.is_some()))
+                    .visible_signal(state.user.profile_image.signal_ref(|image| image.is_some()))
                     .property("kind", "text")
                     .property("color", "blue")
                     .property("slot", "profile-image-delete")
                     .text(STR_REMOVE_IMAGE)
                     .event(clone!(state => move |_: events::Click| {
-                        state.user.profile_image_id.set(None);
+                        state.user.profile_image.set(None);
                         actions::save_profile(Rc::clone(&state));
                     }))
                 }),

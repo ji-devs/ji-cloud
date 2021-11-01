@@ -84,7 +84,7 @@ pub fn set_profile_image(state: Rc<State>, file: File) {
                 log::error!("{}", err);
             },
             Ok(image_id) => {
-                state.user.profile_image_id.set(Some(image_id));
+                state.user.profile_image.set(Some(image_id));
                 save_profile(Rc::clone(&state));
             },
         }

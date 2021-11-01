@@ -8,6 +8,7 @@ use utils::{
     events,
     routes::{AdminRoute, Route, UserRoute},
 };
+use wasm_bindgen::JsValue;
 
 use crate::page_header::state::{LoggedInState, PageLinks};
 
@@ -96,25 +97,21 @@ fn render_logged_in(state: Rc<State>, user: &UserProfile) -> Vec<Dom> {
             }),
             html!("profile-image", {
                 .property("slot", "profile-image")
-                /* TODO - waiting on API fix
                 .property("imageId", {
-                    match &user.profile_image_id {
+                    match &user.profile_image {
                         Some(image_id) => JsValue::from_str(&image_id.0.to_string()),
                         None => JsValue::UNDEFINED,
                     }
                 })
-                */
             }),
             html!("profile-image", {
                 .property("slot", "overlay-profile-image")
-                /* TODO - waiting on API fix
                 .property("imageId", {
-                    match &user.profile_image_id {
+                    match &user.profile_image {
                         Some(image_id) => JsValue::from_str(&image_id.0.to_string()),
                         None => JsValue::UNDEFINED,
                     }
                 })
-                */
             }),
         ])
         .child_signal(admin_privileges(Rc::clone(&state)).map(|admin_privileges| {
