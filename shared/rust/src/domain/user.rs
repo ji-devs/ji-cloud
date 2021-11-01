@@ -220,9 +220,6 @@ pub enum VerifyResetEmailRequest {
     Resend {
         /// paseto token
         paseto_token: String,
-
-        /// The email to send a verification link to.
-        email: String,
     },
 }
 

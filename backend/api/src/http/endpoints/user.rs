@@ -4,7 +4,6 @@ use actix_web::{
     web::{Bytes, Data, Json, Query, ServiceConfig},
     HttpResponse,
 };
-use anyhow::anyhow;
 use argon2::{password_hash::SaltString, Argon2, PasswordHasher};
 use chrono::{Duration, Utc};
 use core::{config::IMAGE_BODY_SIZE_LIMIT, settings::RuntimeSettings};
@@ -588,10 +587,7 @@ async fn verify_email_reset(
     let req = req.into_inner();
 
     match req {
-        VerifyResetEmailRequest::Resend {
-            paseto_token,
-            email,
-        } => {
+        VerifyResetEmailRequest::Resend { paseto_token } => {
             let mut txn = db.begin().await?;
 
             let token: EmailToken = validate_email_token(paseto_token, &settings.token_secret)?;
@@ -602,7 +598,7 @@ async fn verify_email_reset(
             send_reset_email(
                 &mut txn,
                 token.user_id,
-                email,
+                token.email,
                 &mail,
                 &settings.remote_target().pages_url(),
             )
@@ -645,6 +641,7 @@ async fn verify_email_reset(
             // make sure they can't use the link, now that they're email has changed.
             db::session::clear_any(&mut txn, token.user_id, SessionMask::CHANGE_EMAIL).await?;
 
+            // update user_auth_basic table
             sqlx::query!(
                 r#"
         update user_auth_basic 
@@ -658,6 +655,7 @@ async fn verify_email_reset(
             .execute(&mut txn)
             .await?;
 
+            // update user_email table
             sqlx::query!(
                 r#"
         update user_email 
@@ -693,7 +691,7 @@ pub fn validate_email_token(
 
     let (user_id, new_email) = (
         serde_json::from_value::<Uuid>(token["id"].clone())?,
-        token["sub"].to_string(),
+        serde_json::from_value::<String>(token["sub"].clone())?,
     );
 
     Ok(EmailToken {
