@@ -84,7 +84,6 @@ export class _ extends LitElement {
 
     connectedCallback() {
         super.connectedCallback();
-        console.log("90", 90);
 
         window.addEventListener("mousedown", this.onGlobalMouseDown);
 
