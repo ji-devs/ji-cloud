@@ -63,6 +63,11 @@ pub mod email {
     /// Is optional. If missing, password resetting will be disabled,
     /// all related routes will return "501 - Not Implemented" and a warning will be emitted.
     pub const PASSWORD_RESET_TEMPLATE: &str = "EMAIL_PASSWORD_RESET_TEMPLATE";
+
+    /// Email client template ID for resetting emails.
+    /// Is optional. If missing, email resetting will be disabled,
+    /// all related routes will return "501 - Not Implemented" and a warning will be emitted.
+    pub const EMAIL_RESET_TEMPLATE: &str = "EMAIL_RESET_TEMPLATE";
 }
 
 #[cfg(feature = "db")]

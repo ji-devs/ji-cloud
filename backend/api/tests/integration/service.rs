@@ -33,21 +33,20 @@ impl TestServicesSettings {
     const TEST_SENDER_EMAIL: &'static str = "TEST_SENDER_EMAIL";
     const TEST_SIGNUP_VERIFY_TEMPLATE: &'static str = "TEST_SIGNUP_VERIFY_TEMPLATE";
     const TEST_SIGNUP_PASSWORD_RESET_TEMPLATE: &'static str = "TEST_SIGNUP_PASSWORD_RESET_TEMPLATE";
+    const TEST_EMAIL_RESET_TEMPLATE: &'static str = "TEST_EMAIL_RESET_TEMPLATE";
 
     pub async fn new() -> anyhow::Result<Self> {
         let (token, project_id) = match req_env("TEST_SERVICE_ACCOUNT_JSON") {
             Ok(key_json) => {
-                let credentials =
-                    match serde_json::from_str::<yup_oauth2::ServiceAccountKey>(&key_json) {
-                        Ok(v) => v,
-                        Err(e) => {
-                            return Err(anyhow::anyhow!(
-                                "Could not parse service account json key {:?}. Len: {:?}",
-                                e,
-                                &key_json.len()
-                            ));
-                        }
-                    };
+                let credentials = yup_oauth2::read_service_account_key(&key_json)
+                    .await
+                    .map_err(|e| {
+                        anyhow::anyhow!(
+                            "Could not parse service account json key {:?}. Len: {:?}",
+                            e,
+                            &key_json.len()
+                        )
+                    })?;
 
                 let project_id = credentials
                     .project_id
@@ -66,6 +65,9 @@ impl TestServicesSettings {
                 .await?;
 
                 let token = token.access_token.unwrap();
+
+                println!("token: {:?}", token);
+                println!("project id: {:?}", project_id);
 
                 (token, project_id)
             }
@@ -87,6 +89,7 @@ impl TestServicesSettings {
         Option<storage::Client>,
         Option<ji_cloud_api::algolia::Client>,
     ) {
+        println!("init_services");
         let services: std::collections::HashSet<&Service> = services.into_iter().collect();
 
         let mail = match services.contains(&Service::Email) {
@@ -105,25 +108,71 @@ impl TestServicesSettings {
     }
 
     pub async fn create_test_mail_client(&self) -> Option<mail::Client> {
-        let api_key = self
+        println!("create_test_mail_client");
+        let google_api_key = self
             .get_gcp_managed_secret(Self::TEST_SENDGRID_API_KEY)
             .await
             .ok();
 
-        let sender_email = self
+        let env_api_key = req_env("TEST_SENDGRID_API_KEY").ok();
+
+        let api_key = match google_api_key {
+            Some(google_api_key) => Some(google_api_key),
+            None => env_api_key,
+        };
+
+        let google_sender_email = self
             .get_gcp_managed_secret(Self::TEST_SENDER_EMAIL)
             .await
             .ok();
 
-        let signup_verify_template = self
+        let env_sender_email = req_env("TEST_SENDER_EMAIL").ok();
+
+        let sender_email = match google_sender_email {
+            Some(google_sender_email) => Some(google_sender_email),
+            None => env_sender_email,
+        };
+
+        let google_signup_verify_template = self
             .get_gcp_managed_secret(Self::TEST_SIGNUP_VERIFY_TEMPLATE)
             .await
             .ok();
 
-        let password_reset_template = self
+        let env_signup_verify_template = req_env("TEST_SIGNUP_VERIFY_TEMPLATE").ok();
+
+        let signup_verify_template = match google_signup_verify_template {
+            Some(google_signup_verify_template) => Some(google_signup_verify_template),
+            None => env_signup_verify_template,
+        };
+
+        let google_password_reset_template = self
             .get_gcp_managed_secret(Self::TEST_SIGNUP_PASSWORD_RESET_TEMPLATE)
             .await
             .ok();
+
+        let env_password_reset_template = req_env("TEST_PASSWORD_RESET_TEMPLATE").ok();
+
+        let password_reset_template = match google_password_reset_template {
+            Some(google_password_reset_template) => Some(google_password_reset_template),
+            None => env_password_reset_template,
+        };
+
+        let google_email_reset_template = self
+            .get_gcp_managed_secret(Self::TEST_EMAIL_RESET_TEMPLATE)
+            .await
+            .ok();
+
+        let env_email_reset_template = req_env("TEST_EMAIL_RESET_TEMPLATE").ok();
+
+        let email_reset_template = match google_email_reset_template {
+            Some(google_email_reset_template) => Some(google_email_reset_template),
+            None => env_email_reset_template,
+        };
+
+        println!(
+            "end keys {:?} {:?} {:?} {:?}",
+            api_key, sender_email, signup_verify_template, password_reset_template
+        );
 
         let (api_key, sender_email) = match (api_key, sender_email) {
             (Some(api_key), Some(sender_email)) => (api_key, sender_email),
@@ -135,6 +184,7 @@ impl TestServicesSettings {
             sender_email,
             signup_verify_template,
             password_reset_template,
+            email_reset_template,
         };
 
         let client = mail::Client::new(settings);

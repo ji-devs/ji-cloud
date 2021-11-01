@@ -1786,6 +1786,20 @@
       "nullable": []
     }
   },
+  "4f2cdb8dafe9b214a430d4df9c96893fcd4a4d072fc41aee1d910505982f283d": {
+    "query": "\n        update user_auth_basic \n        set email = $3::text\n        where user_id = $1 and email = $2::text\n        ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "50ff48a8d492e560f61066b5217a70876d23552f79fcb6d43dbbcd5331da14ef": {
     "query": "delete from animation_metadata where id = $1 returning kind as \"kind: AnimationKind\"",
     "describe": {
@@ -1994,6 +2008,20 @@
         "Left": [
           "Int2Array",
           "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "5d82cd908ef70906813f2adebbf42094b5edaf3d3203d88b2cdd4c3e4d790563": {
+    "query": "\n        update user_email \n        set email = $3::text\n        where user_id = $1 and email = $2::text\n        ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Text"
         ]
       },
       "nullable": []
@@ -3235,12 +3263,12 @@
         ]
       },
       "nullable": [
-        false,
         true,
         true,
-        null,
-        false,
-        false,
+        true,
+        true,
+        true,
+        true,
         true
       ]
     }

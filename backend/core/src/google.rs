@@ -136,6 +136,8 @@ pub(crate) async fn get_optional_secret(
         .await
         .with_context(|| anyhow!("request to get secret failed"))?;
 
+    println!("get optional secret status: {:?}", response.status());
+
     if response.status() == StatusCode::NOT_FOUND {
         return Ok(None);
     }
