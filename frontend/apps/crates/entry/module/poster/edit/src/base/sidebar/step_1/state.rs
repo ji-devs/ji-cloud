@@ -1,31 +1,103 @@
-use crate::base::sidebar::state::Sidebar;
+use crate::base::{sidebar::state::Sidebar, state::Base};
+use components::{
+    backgrounds::actions::Layer,
+    color_select::state::State as ColorPickerState,
+    image::search::{
+        callbacks::Callbacks as ImageSearchCallbacks,
+        state::{ImageSearchCheckboxKind, ImageSearchOptions, State as ImageSearchState},
+    },
+    tabs::MenuTabKind,
+};
+use dominator::clone;
+use futures_signals::signal::Mutable;
+use shared::domain::jig::module::body::Background;
 use std::rc::Rc;
 
-use components::theme_selector::state::{ThemeSelector, ThemeSelectorCallbacks};
-use dominator::clone;
+const STR_SELECT_BACKGROUND_COLOR: &str = "Select background color";
 
 pub struct Step1 {
     pub sidebar: Rc<Sidebar>,
-    pub theme_selector: Rc<ThemeSelector>,
+    pub tab: Mutable<Tab>,
 }
 
 impl Step1 {
     pub fn new(sidebar: Rc<Sidebar>) -> Rc<Self> {
-        let base = sidebar.base.clone();
+        let kind = match crate::debug::settings().bg_tab {
+            Some(kind) => kind,
+            None => MenuTabKind::Image,
+        };
 
-        let callbacks = ThemeSelectorCallbacks::new(clone!(base => move |theme_choice| {
-            base.set_theme(theme_choice);
-        }));
-        let theme_selector = Rc::new(ThemeSelector::new(
-            base.jig_id,
-            base.jig_theme_id.clone(),
-            base.theme_id.clone(),
-            callbacks,
-        ));
+        let tab = Mutable::new(Tab::new(sidebar.base.clone(), kind));
 
-        Rc::new(Self {
-            sidebar,
-            theme_selector,
-        })
+        Rc::new(Self { sidebar, tab })
+    }
+}
+
+#[derive(Clone)]
+pub enum Tab {
+    //Image(Rc<ImageSearchState>),
+    Image(Rc<ImageSearchState>),
+    Color(Rc<ColorPickerState>),
+    Overlay(Rc<ImageSearchState>),
+}
+
+impl Tab {
+    pub fn new(base: Rc<Base>, kind: MenuTabKind) -> Self {
+        match kind {
+            MenuTabKind::Image => {
+                let opts = ImageSearchOptions {
+                    checkbox_kind: Some(ImageSearchCheckboxKind::BackgroundLayer1Filter),
+                    ..ImageSearchOptions::default()
+                };
+
+                let callbacks = ImageSearchCallbacks::new(Some(clone!(base => move |image| {
+                    base.backgrounds.set_layer(Layer::One, Background::Image(image));
+                })));
+                let state = ImageSearchState::new(opts, callbacks);
+
+                Self::Image(Rc::new(state))
+            }
+            MenuTabKind::Color => {
+                let state = ColorPickerState::new(
+                    base.theme_id.clone(),
+                    None,
+                    Some(String::from(STR_SELECT_BACKGROUND_COLOR)),
+                    Some(clone!(base => move |color| {
+                        base.backgrounds.set_layer(Layer::One, Background::Color(color));
+                    })),
+                );
+                Self::Color(Rc::new(state))
+            }
+            MenuTabKind::Overlay => {
+                let opts = ImageSearchOptions {
+                    checkbox_kind: Some(ImageSearchCheckboxKind::BackgroundLayer2Filter),
+                    ..ImageSearchOptions::default()
+                };
+
+                let callbacks = ImageSearchCallbacks::new(Some(clone!(base => move |image| {
+                    base.backgrounds.set_layer(Layer::Two, Background::Image(image));
+                })));
+                let state = ImageSearchState::new(opts, callbacks);
+
+                Self::Overlay(Rc::new(state))
+            }
+
+            _ => unimplemented!("unsupported tab kind!"),
+        }
+    }
+
+    pub fn kind(&self) -> MenuTabKind {
+        match self {
+            Self::Image(_) => MenuTabKind::Image,
+            Self::Color(_) => MenuTabKind::Color,
+            Self::Overlay(_) => MenuTabKind::Overlay,
+        }
+    }
+    pub fn as_index(&self) -> usize {
+        match self {
+            Self::Image(_) => 0,
+            Self::Color(_) => 1,
+            Self::Overlay(_) => 2,
+        }
     }
 }

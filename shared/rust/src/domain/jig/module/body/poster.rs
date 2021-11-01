@@ -206,16 +206,15 @@ impl StepExt for Step {
     }
 
     fn label(&self) -> &'static str {
-        //TODO - localizaton
-        const STR_THEMES: &'static str = "Themes";
         const STR_BACKGROUND: &'static str = "Background";
         const STR_CONTENT: &'static str = "Content";
+        const STR_SETTINGS: &'static str = "Settings";
         const STR_PREVIEW: &'static str = "Preview";
 
         match self {
-            Self::One => STR_THEMES,
-            Self::Two => STR_BACKGROUND,
-            Self::Three => STR_CONTENT,
+            Self::One => STR_BACKGROUND,
+            Self::Two => STR_CONTENT,
+            Self::Three => STR_SETTINGS,
             Self::Four => STR_PREVIEW,
         }
     }

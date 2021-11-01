@@ -1,8 +1,8 @@
 use super::state::*;
 use components::{
-    color_select::dom::render as render_color_picker,
     image::search::dom::render as render_image_search,
     tabs::{MenuTab, MenuTabKind},
+    text_editor::dom::render_controls as render_text_editor,
 };
 use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
@@ -15,24 +15,20 @@ pub fn render(state: Rc<Step2>) -> Dom {
             async move {}
         })))
         .children(&mut [
+            render_tab(state.clone(), MenuTabKind::Text),
             render_tab(state.clone(), MenuTabKind::Image),
-            render_tab(state.clone(), MenuTabKind::Color),
-            render_tab(state.clone(), MenuTabKind::Overlay),
             html!("module-sidebar-body", {
                 .property("slot", "body")
-                .child_signal(state.tab.signal_cloned().map(|tab| {
+                .child_signal(state.tab.signal_cloned().map(clone!(state => move |tab| {
                     match tab {
+                        Tab::Text => {
+                            Some(render_text_editor(state.sidebar.base.text_editor.clone()))
+                        },
                         Tab::Image(state) => {
                             Some(render_image_search(state, None))
                         },
-                        Tab::Color(state) => {
-                            Some(render_color_picker(state, None))
-                        },
-                        Tab::Overlay(state) => {
-                            Some(render_image_search(state, None))
-                        },
                     }
-                }))
+                })))
             })
         ])
     })
