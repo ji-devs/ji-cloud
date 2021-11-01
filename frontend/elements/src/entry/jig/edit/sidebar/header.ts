@@ -76,11 +76,31 @@ export class _ extends LitElement {
                 nav, .settings-preview {
                     display: flex;
                     align-items: center;
-                    column-gap: 12px;
+                    column-gap: 16px;
+                    padding: 0;
+                    transition-property: column-gap, padding;
+                    transition-delay: var(--fading-phase-duration);
+                }
+                :host([collapsed]) .settings-preview {
+                    column-gap: 0px;
+                    padding: 0 12px;
+                }
+                ::slotted([slot=modules]) {
+                    font-size: 24px;
+                    color: var(--main-blue);
                 }
                 .input {
                     margin: 23px 0;
                     width: 100%;
+                }
+                ::slotted([slot=settings]) {
+                    font-size: 16px;
+                    height: 28px;
+                    width: 28px;
+                    background-color: var(--main-blue);
+                    border-radius: 50%;
+                    display: inline-grid;
+                    place-content: center;
                 }
             `,
         ];
@@ -112,10 +132,12 @@ export class _ extends LitElement {
                 </nav>
             </div>
             <div class="input open-only"><slot name="input"></slot></div>
-            <div class="settings-preview open-only">
+            <div class="settings-preview">
                 <slot name="settings"></slot>
-                <div class="divider"></div>
-                <slot name="preview"></slot>
+                <div class="divider open-only"></div>
+                <div class="open-only">
+                    <slot name="preview"></slot>
+                </div>
             </div>
         `;
     }

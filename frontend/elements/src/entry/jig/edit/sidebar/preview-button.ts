@@ -12,7 +12,6 @@ export class _ extends LitElement {
                     cursor: pointer;
                     border: 0;
                     display: flex;
-                    padding: 4px;
                     column-gap: 12px;
                     justify-content: space-between;
                     align-items: center;

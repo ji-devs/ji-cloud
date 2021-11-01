@@ -30,9 +30,10 @@ pub fn render(state: Rc<State>) -> Dom {
         .event(clone!(state => move |_: events::Close| {
             state.active_popup.set(None);
         }))
-        .child(html!("jig-edit-sidebar-action-button", {
+        .child(html!("fa-button", {
             .property("slot", "anchor")
-            .property("kind", "settings")
+            .property("icon", "fa-solid fa-gear")
+            .style("color", "#ffffff")
             .event(clone!(state => move |_: events::Click| {
                 let mut active_popup = state.active_popup.lock_mut();
 

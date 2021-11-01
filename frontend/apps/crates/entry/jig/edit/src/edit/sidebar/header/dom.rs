@@ -40,9 +40,9 @@ impl HeaderDom {
                     })
                 }),
                 settings::dom::render(Rc::clone(&sidebar_state.settings)),
-                html!("jig-edit-sidebar-action-button", {
+                html!("fa-button", {
                     .property("slot", "modules")
-                    .property("kind", "modules")
+                    .property("icon", "fa-light fa-grid")
                     .event(clone!(sidebar_state => move |_:events::Click| {
                         sidebar_state.jig_edit_state.route.set_neq(JigEditRoute::Landing);
                         let url:String = Route::Jig(JigRoute::Edit(sidebar_state.jig.id.clone(), JigEditRoute::Landing)).into();
