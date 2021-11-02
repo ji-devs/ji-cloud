@@ -10,8 +10,10 @@ use shared::domain::{jig::module::body::Image, search::WebImageSearchItem};
 use std::{pin::Pin, rc::Rc};
 use utils::prelude::*;
 
-const STR_SHOW_ONLY_BACKGROUNDS: &str = "Show only background";
-const STR_DONT_INCLUDE_BACKGROUND: &str = "Do not include backgrounds";
+const STR_SHOW_ONLY_BACKGROUNDS: &str = "Only background";
+const STR_DONT_INCLUDE_BACKGROUND: &str = "No backgrounds";
+const STR_WEB: &str = "Web";
+const STR_JIGZI: &str = "Jigzi";
 
 pub fn render(state: Rc<State>, slot: Option<&str>) -> Dom {
     html!("empty-fragment", {
@@ -150,25 +152,40 @@ fn render_controls(state: Rc<State>) -> Vec<Dom> {
     let options = &state.options;
     let mut vec = Vec::new();
 
-    if let Some(checkbox_kind) = &options.checkbox_kind {
-        vec.push(html!("input-checkbox", {
-            .property("label", {
-                match checkbox_kind {
-                    ImageSearchCheckboxKind::BackgroundLayer1Filter | ImageSearchCheckboxKind::BackgroundLayer2Filter => STR_SHOW_ONLY_BACKGROUNDS,
-                    ImageSearchCheckboxKind::StickersFilter => STR_DONT_INCLUDE_BACKGROUND,
-                }
-            })
-            .property("slot", "only-background-checkbox")
-            .property("checked", true)
-            .property_signal("disabled", state.search_mode.signal_ref(|search_mode| {
-                search_mode.is_web()
+    vec.push(html!("label", {
+        .property("slot", "source-options")
+        .child(html!("input", {
+            .property("type", "radio")
+            .property("name", "type")
+            .property("value", "web")
+            .style("margin", "0")
+            .property_signal("checked", state.search_mode.signal_ref(|search_mode| {
+                matches!(search_mode, &SearchMode::Sticker(_))
             }))
-            .event(clone!(state => move |evt: events::CustomToggle| {
-                state.checkbox_checked.set(evt.value());
-                actions::search(state.clone(), None);
+            .event(clone!(state => move |_: events::Change| {
+                state.search_mode.set(SearchMode::Sticker(Rc::new(MutableVec::new())));
+                actions::search(Rc::clone(&state), None);
             }))
-        }));
-    }
+        }))
+        .text(STR_JIGZI)
+    }));
+    vec.push(html!("label", {
+        .property("slot", "source-options")
+        .child(html!("input", {
+            .property("type", "radio")
+            .property("name", "type")
+            .property("value", "stickers")
+            .style("margin", "0")
+            .property_signal("checked", state.search_mode.signal_ref(|search_mode| {
+                matches!(search_mode, &SearchMode::Web(_))
+            }))
+            .event(clone!(state => move |_: events::Change| {
+                state.search_mode.set(SearchMode::Web(Rc::new(MutableVec::new())));
+                actions::search(Rc::clone(&state), None);
+            }))
+        }))
+        .text(STR_WEB)
+    }));
 
     if options.upload {
         vec.push(html!("image-search-upload", {
@@ -202,40 +219,30 @@ fn render_controls(state: Rc<State>) -> Vec<Dom> {
 fn render_filters(state: Rc<State>) -> Dom {
     html!("image-search-filters", {
         .property("slot", "filters")
-        .children(&mut [
-            html!("label", {
-                .property("slot", "source-options")
-                .child(html!("input", {
-                    .property("type", "radio")
-                    .property("name", "type")
-                    .property("value", "web")
-                    .property_signal("checked", state.search_mode.signal_ref(|search_mode| {
-                        matches!(search_mode, &SearchMode::Sticker(_))
+        .apply(|dom| {
+            if let Some(checkbox_kind) = &state.options.checkbox_kind {
+                dom.child(html!("input-checkbox", {
+                    .property("label", {
+                        match checkbox_kind {
+                            ImageSearchCheckboxKind::BackgroundLayer1Filter | ImageSearchCheckboxKind::BackgroundLayer2Filter => STR_SHOW_ONLY_BACKGROUNDS,
+                            ImageSearchCheckboxKind::StickersFilter => STR_DONT_INCLUDE_BACKGROUND,
+                        }
+                    })
+                    .property("slot", "background-checkbox")
+                    .property("checked", true)
+                    .property_signal("disabled", state.search_mode.signal_ref(|search_mode| {
+                        search_mode.is_web()
                     }))
-                    .event(clone!(state => move |_: events::Change| {
-                        state.search_mode.set(SearchMode::Sticker(Rc::new(MutableVec::new())));
-                        actions::search(Rc::clone(&state), None);
-                    }))
-                }))
-                .text("Stickers")
-            }),
-            html!("label", {
-                .property("slot", "source-options")
-                .child(html!("input", {
-                    .property("type", "radio")
-                    .property("name", "type")
-                    .property("value", "stickers")
-                    .property_signal("checked", state.search_mode.signal_ref(|search_mode| {
-                        matches!(search_mode, &SearchMode::Web(_))
-                    }))
-                    .event(clone!(state => move |_: events::Change| {
-                        state.search_mode.set(SearchMode::Web(Rc::new(MutableVec::new())));
-                        actions::search(Rc::clone(&state), None);
+                    .event(clone!(state => move |evt: events::CustomToggle| {
+                        state.checkbox_checked.set(evt.value());
+                        actions::search(state.clone(), None);
                     }))
                 }))
-                .text("Web")
-            }),
-        ])
+            } else { 
+                dom
+            }
+        })
+
         .children(
             state
                 .styles

@@ -7,6 +7,7 @@ const STR_MY_RECENT = "My recent";
 const STR_SEE_MORE = "See more";
 const STR_SEE_LESS = "See less";
 const STR_ALL_IMAGES = "All images";
+const STR_SEARCH_IN = "Search in";
 
 @customElement("image-select")
 export class _ extends LitElement {
@@ -81,6 +82,23 @@ export class _ extends LitElement {
             }
             .bottom-row ::slotted([slot=upload]) {
                 grid-column: 2;
+            }
+            .source-options {
+                display: flex;
+                column-gap: 20px;
+            }
+            h4 {
+                white-space: nowrap;
+                margin: 0;
+                font-size: 16px;
+                font-weight: 500;
+                color: var(--dark-gray-5);
+            }
+            ::slotted([slot=source-options]) {
+                cursor: pointer;
+                display: flex;
+                column-gap: 7px;
+                align-items: center;
             }
             .images-section {
                 padding: 20px 0;
@@ -245,7 +263,12 @@ export class _ extends LitElement {
                         <slot name="filters"></slot>
                     </div>
                     <div class="bottom-row">
-                        <slot name="only-background-checkbox"></slot>
+                        <div>
+                            <div class="source-options">
+                                <h4>${STR_SEARCH_IN}</h4>
+                                <slot name="source-options"></slot>
+                            </div>
+                        </div>
                         <slot name="upload"></slot>
                     </div>
                 </div>

@@ -2,7 +2,6 @@ import { LitElement, html, css, customElement, property } from 'lit-element';
 import '@elements/core/overlays/anchored-overlay';
 
 const STR_FILTER = "Filter";
-const STR_SEARCH_IN = "Search in";
 const STR_IMAGE_STYLE = "Image style";
 
 @customElement('image-search-filters')
@@ -38,10 +37,6 @@ export class _ extends LitElement {
             .overlay {
                 width: 235px;
             }
-            .source-options {
-                display: flex;
-                column-gap: 24px;
-            }
             section {
                 padding: 16px;
                 display: grid;
@@ -55,12 +50,6 @@ export class _ extends LitElement {
             }
             section:not(:last-child) {
                 border-bottom: solid 1px var(--light-gray-1);
-            }
-            h4 {
-                font-size: 16px;
-                font-weight: 500;
-                color: var(--main-blue);
-                margin: 0;
             }
         `];
     }
@@ -86,11 +75,8 @@ export class _ extends LitElement {
                     <img-ui class="caret" path="module/_common/edit/widgets/sidebar/image-select/open-filters-icon.svg"></img-ui>
                 </button>
                 <div slot="overlay" class="overlay">
-                    <section class="source-section">
-                        <h4>${STR_SEARCH_IN}</h4>
-                        <div class="source-options">
-                            <slot name="source-options"></slot>
-                        </div>
+                    <section class="background-checkbox">
+                        <slot name="background-checkbox"></slot>
                     </section>
                     <section class="style-section">
                         <h4>${STR_IMAGE_STYLE}</h4>
