@@ -153,16 +153,20 @@ where
                 h.title.clone()
             })
         })
-        .property_signal("tooltipTitle", {
-            tab_config_sig().map(|t| {
-                t.title
+        .child(html!("jigzi-help", {
+            .property("slot", "help")
+            .property("showId", "module-header")
+            .property_signal("title", {
+                tab_config_sig().map(|t| {
+                    t.title
+                })
             })
-        })
-        .property_signal("tooltipBody", {
-            tab_config_sig().map(|t| {
-                t.body
+            .property_signal("body", {
+                tab_config_sig().map(|t| {
+                    t.body
+                })
             })
-        })
+        }))
         .child(ControllerDom::render(
             state.history.clone(),
             clone!(state => move || {

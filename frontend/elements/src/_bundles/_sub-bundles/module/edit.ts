@@ -24,6 +24,7 @@ import "@elements/core/module-page/grid-resize";
 import "@elements/core/module-page/grid-plain";
 import "@elements/core/nav/steps-nav";
 import "@elements/core/nav/step-nav";
+import "@elements/core/help/jigzi-help";
 import "@elements/module/_common/edit/footer";
 import "@elements/module/_common/edit/footer-continue-button";
 import "@elements/module/_common/edit/header";
