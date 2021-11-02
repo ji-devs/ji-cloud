@@ -92,7 +92,7 @@ pub struct ResetEmailRequest {
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
 pub struct ResetEmailResponse {
     /// paseto token with user's email
-    pub token: String,
+    pub paseto_token: String,
 }
 
 /// A user's profile.
