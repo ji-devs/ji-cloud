@@ -94,7 +94,7 @@ export class _ extends LitElement {
             }
             .images-section.recent {
                 overflow: hidden;
-                max-height: 144px;
+                max-height: 142px;
             }
             @media (min-width: 1920px) {
                 .images-section h4 {
