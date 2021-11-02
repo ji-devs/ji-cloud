@@ -9,7 +9,7 @@ use components::{
     text_editor::{callbacks::Callbacks as TextEditorCallbacks, state::State as TextEditorState},
 };
 use dominator::clone;
-use futures_signals::signal::{self, Mutable, ReadOnlyMutable, Signal, SignalExt};
+use futures_signals::signal::{self, Mutable, ReadOnlyMutable, Signal};
 use shared::domain::jig::{
     module::{
         body::{
@@ -141,10 +141,6 @@ impl Base {
         *_self_ref.borrow_mut() = Some(_self.clone());
 
         _self
-    }
-
-    pub fn _theme_id_str_signal(&self) -> impl Signal<Item = &'static str> {
-        self.theme_id.signal().map(|id| id.as_str_id())
     }
 }
 

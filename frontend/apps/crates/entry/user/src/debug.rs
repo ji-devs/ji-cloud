@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use cfg_if::cfg_if;
 use once_cell::sync::OnceCell;
 use utils::prelude::*;

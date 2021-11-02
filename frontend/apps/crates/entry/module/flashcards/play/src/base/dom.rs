@@ -5,7 +5,6 @@ use dominator::{html, Dom};
 use std::rc::Rc;
 
 use super::{
-    ending::dom::render as render_ending,
     game::dom::render as render_game,
     state::{Base, Phase},
 };
@@ -20,7 +19,6 @@ impl DomRenderable for Base {
                 match phase {
                     Phase::Init => None,
                     Phase::Playing(game) => Some(render_game(game)),
-                    Phase::Ending(ending) => Some(render_ending(ending))
                 }
             }))
         })

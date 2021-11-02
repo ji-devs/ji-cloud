@@ -8,7 +8,7 @@ use components::{
 };
 use components::{module::_common::edit::prelude::*, stickers::video::state::Video};
 use dominator::clone;
-use futures_signals::signal::{self, Mutable, ReadOnlyMutable, Signal, SignalExt};
+use futures_signals::signal::{self, Mutable, ReadOnlyMutable, Signal};
 use futures_signals::signal_vec::{SignalVecExt, VecDiff};
 use shared::domain::jig::{
     module::{
@@ -59,15 +59,6 @@ impl PlaySettings {
             muted: Mutable::new(settings.muted),
             autoplay: Mutable::new(settings.autoplay),
             done_action: Mutable::new(settings.done_action),
-        }
-    }
-
-    pub fn to_raw(&self) -> RawPlaySettings {
-        RawPlaySettings {
-            captions: self.captions.get_cloned(),
-            muted: self.muted.get_cloned(),
-            autoplay: self.autoplay.get_cloned(),
-            done_action: self.done_action.get_cloned(),
         }
     }
 }
@@ -223,10 +214,6 @@ impl Base {
         ));
 
         _self
-    }
-
-    pub fn theme_id_str_signal(&self) -> impl Signal<Item = &'static str> {
-        self.theme_id.signal().map(|id| id.as_str_id())
     }
 }
 

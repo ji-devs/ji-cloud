@@ -7,8 +7,7 @@ use futures_signals::{
     signal_vec::{MutableVec, SignalVec, SignalVecExt},
 };
 use shared::domain::{jig::module::body::Image, search::WebImageSearchItem};
-use std::{pin::Pin, rc::Rc, str::FromStr};
-use url::Url;
+use std::{pin::Pin, rc::Rc};
 use utils::prelude::*;
 
 const STR_SHOW_ONLY_BACKGROUNDS: &str = "Show only background";

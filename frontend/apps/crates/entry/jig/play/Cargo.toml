@@ -49,7 +49,6 @@ web-sys = { version = "0.3.55", features = [
     'DomRect'
 ] }
 wasm-bindgen-futures = "0.4.28"
-simple-html-template = { version = "0.2.4", features = ["wasm"] }
 htmlescape = "0.3.1"
 dominator = "0.5.22"
 futures-signals = "0.3.23"

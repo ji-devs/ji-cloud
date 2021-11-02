@@ -83,7 +83,6 @@ impl State {
 
 #[derive(Debug, Clone)]
 pub enum NameError {
-    BadWord,
     Empty,
     Exists,
 }
@@ -91,7 +90,6 @@ pub enum NameError {
 impl NameError {
     pub fn as_str(&self) -> &'static str {
         match self {
-            Self::BadWord => "Bad word!",
             Self::Empty => "Can't be empty!",
             Self::Exists => "Already exists!",
         }

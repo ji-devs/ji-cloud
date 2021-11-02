@@ -6,10 +6,7 @@ use futures_signals::{
 };
 
 use components::module::_groups::cards::lookup::Side;
-use rand::{
-    distributions::{Distribution, Standard},
-    prelude::*,
-};
+use rand::prelude::*;
 use shared::domain::jig::module::body::_groups::cards::Card;
 use std::rc::Rc;
 
@@ -104,12 +101,5 @@ impl MainSettings {
             choices
         })
         .to_signal_vec()
-    }
-
-    pub fn get_random<T>(&self) -> T
-    where
-        Standard: Distribution<T>,
-    {
-        self.base.extra.settings.rng.borrow_mut().gen::<T>()
     }
 }

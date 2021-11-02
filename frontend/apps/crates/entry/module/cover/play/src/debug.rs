@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use components::stickers::{sprite::ext::*, text::ext::*};
 use once_cell::sync::OnceCell;
 use shared::{

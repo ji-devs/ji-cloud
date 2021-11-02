@@ -34,7 +34,6 @@ dominator = "0.5.22"
 discard = "1.0.4"
 futures-signals = "0.3.23"
 dominator_helpers = "0.7.2"
-simple-html-template = { version = "0.2.4", features = ["wasm"] }
 htmlescape = "0.3.1"
 unicode-segmentation = "1.8.0"
 

@@ -74,7 +74,7 @@ pub fn duplicate_module(state: Rc<State>, module_id: &ModuleId) {
     }));
 }
 
-pub fn player_settings_change_signal(state: Rc<State>) -> impl Signal<Item = JigPlayerSettings> {
+pub fn _player_settings_change_signal(state: Rc<State>) -> impl Signal<Item = JigPlayerSettings> {
     let sig = map_ref! {
         let direction = state.settings.direction.signal_cloned(),
         let display_score = state.settings.display_score.signal(),

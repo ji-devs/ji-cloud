@@ -168,7 +168,7 @@ pub fn denormalize_command(command: &PathCommand, resize_info: &ResizeInfo) -> P
             let (x, y) = resize_info.get_pos_denormalized(x, y);
             PathCommand::SmoothQuadCurveTo(x, y)
         }
-        PathCommand::ArcTo(a,b,c,d,e,f,g) => {
+        PathCommand::ArcTo(_a, _b, _c, _d, _e, _f, _g) => {
             unimplemented!("TODO: implement denormalize for ArcTo path command!")
         }
     }

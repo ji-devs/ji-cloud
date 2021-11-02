@@ -7,7 +7,6 @@
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 mod page;
-mod templates;
 
 use wasm_bindgen::prelude::*;
 

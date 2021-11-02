@@ -7,7 +7,6 @@
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 mod base;
-mod config;
 mod debug;
 mod router;
 mod state;

@@ -28,7 +28,6 @@ use shared::{
     media::MediaLibrary,
 };
 use std::rc::Rc;
-use std::str::FromStr;
 use url::Url;
 use utils::prelude::*;
 use web_sys::File;

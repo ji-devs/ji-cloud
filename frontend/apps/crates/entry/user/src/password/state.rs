@@ -71,25 +71,25 @@ impl From<Entropy> for PasswordStrength {
 
 #[derive(Debug, Clone)]
 pub enum PasswordStatus {
-    EmptyPw,
-    PwMismatch,
+    // EmptyPw,
+    // PwMismatch,
     PwWeak,
     PwShort,
     ResetError,
-    UnknownFirebase,
-    Technical,
+    // UnknownFirebase,
+    // Technical,
 }
 
 impl PasswordStatus {
     pub fn as_str(&self) -> &'static str {
         match self {
-            Self::EmptyPw => "supply a password!",
-            Self::PwMismatch => "passwords don't match!",
+            // Self::EmptyPw => "supply a password!",
+            // Self::PwMismatch => "passwords don't match!",
             Self::PwWeak => "weak password!",
             Self::PwShort => "Your password should be at least 6 characters.",
-            Self::UnknownFirebase => "firebase error!",
+            // Self::UnknownFirebase => "firebase error!",
             Self::ResetError => "unable to reset password!",
-            Self::Technical => "technical error!",
+            // Self::Technical => "technical error!",
         }
     }
 }

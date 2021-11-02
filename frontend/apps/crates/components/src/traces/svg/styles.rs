@@ -1,8 +1,6 @@
 use super::state::*;
 use dominator::class;
 use once_cell::sync::Lazy;
-use shared::domain::jig::module::body::_groups::design::TraceKind;
-use utils::prelude::*;
 
 impl ShapeStyle {
     pub fn classes(&self) -> Vec<&'static str> {

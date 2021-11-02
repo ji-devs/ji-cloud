@@ -7,7 +7,7 @@ use super::super::{actions, state::Testimonial};
 use super::super::state::State;
 
 const STR_PLAY: &str = "Play Series";
-const STR_JIGS: &str = "JIGs";
+// const STR_JIGS: &str = "JIGs";
 
 const STR_CONTENT_ACTION: &str = "See our library";
 const STR_CREATE_ACTION: &str = "Try it for free";

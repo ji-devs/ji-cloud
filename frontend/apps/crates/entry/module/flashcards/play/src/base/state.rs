@@ -16,7 +16,7 @@ use std::rc::Rc;
 use components::module::_common::play::prelude::*;
 use utils::prelude::*;
 
-use super::{ending::state::Ending, game::state::Game};
+use super::game::state::Game;
 
 pub struct Base {
     pub jig_id: JigId,
@@ -35,7 +35,6 @@ pub struct Base {
 pub enum Phase {
     Init,
     Playing(Rc<Game>),
-    Ending(Rc<Ending>),
 }
 
 impl Base {

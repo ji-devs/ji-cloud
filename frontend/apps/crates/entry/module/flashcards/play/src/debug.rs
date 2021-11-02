@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use components::module::_groups::cards::play::config;
 use once_cell::sync::OnceCell;
 use shared::{

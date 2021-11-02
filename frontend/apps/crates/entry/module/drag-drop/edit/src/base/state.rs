@@ -292,10 +292,6 @@ impl Base {
         _self
     }
 
-    pub fn _theme_id_str_signal(&self) -> impl Signal<Item = &'static str> {
-        self.theme_id.signal().map(|id| id.as_str_id())
-    }
-
     pub fn selected_item_signal(&self) -> impl Signal<Item = Option<(usize, Item)>> {
         map_ref! {
             let index = self.drag_item_selected_index.signal(),

@@ -3,7 +3,9 @@ use futures_signals::signal::Mutable;
 
 use shared::domain::session::OAuthUserProfile;
 
+cfg_if! { if #[cfg(all(feature = "local"))] {
 use crate::debug::DebugRegisterStep;
+}}
 
 pub struct State {
     pub step: Mutable<Step>,
@@ -57,6 +59,7 @@ pub struct Step1Data {
     pub oauth_profile: Option<OAuthUserProfile>,
 }
 
+cfg_if! { if #[cfg(all(feature = "local"))] {
 impl Step1Data {
     fn debug() -> Self {
         Self {
@@ -67,6 +70,7 @@ impl Step1Data {
         }
     }
 }
+}}
 
 #[derive(Clone, Debug)]
 pub struct Step2Data {
@@ -78,6 +82,7 @@ pub struct Step2Data {
     pub marketing: bool,
 }
 
+cfg_if! {if #[cfg(all(feature = "local"))] {
 impl Step2Data {
     pub fn debug() -> Self {
         Self {
@@ -90,3 +95,4 @@ impl Step2Data {
         }
     }
 }
+}}

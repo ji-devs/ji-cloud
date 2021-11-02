@@ -14,7 +14,7 @@ use components::{
 };
 use dominator::clone;
 use futures_signals::{
-    signal::{self, Mutable, ReadOnlyMutable, Signal, SignalExt},
+    signal::{self, Mutable, ReadOnlyMutable, Signal},
     signal_vec::MutableVec,
 };
 use shared::domain::jig::{
@@ -66,13 +66,6 @@ impl PlaySettings {
             hint: Mutable::new(settings.hint),
             next: Mutable::new(settings.next),
             next_value,
-        }
-    }
-
-    pub fn _to_raw(&self) -> RawPlaySettings {
-        RawPlaySettings {
-            hint: self.hint.get_cloned(),
-            next: self.next.get_cloned(),
         }
     }
 }
@@ -226,10 +219,6 @@ impl Base {
         *_self_ref.borrow_mut() = Some(_self.clone());
 
         _self
-    }
-
-    pub fn _theme_id_str_signal(&self) -> impl Signal<Item = &'static str> {
-        self.theme_id.signal().map(|id| id.as_str_id())
     }
 }
 

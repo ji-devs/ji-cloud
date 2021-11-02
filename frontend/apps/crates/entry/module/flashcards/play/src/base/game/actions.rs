@@ -26,7 +26,7 @@ impl Game {
         }
 
         self.reset_deck();
-        //self.base.phase.set(Phase::Ending(Rc::new(Ending::new(self.base.clone()))));
+        // self.base.phase.set(Phase::Ending(Rc::new(Ending::new(self.base.clone()))));
     }
 
     pub fn flip(state: Rc<Self>) {

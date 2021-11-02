@@ -32,7 +32,6 @@ serde_qs = "0.8.5"
 dominator = "0.5.22"
 futures-signals = "0.3.23"
 dominator_helpers = "0.7.2"
-simple-html-template = { version = "0.2.4", features = ["wasm"] }
 htmlescape = "0.3.1"
 gloo-timers = "0.2.1"
 console_error_panic_hook = "0.1.7"
