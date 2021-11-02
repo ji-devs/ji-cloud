@@ -17,6 +17,9 @@ static MODULE_KINDS: &[ModuleKind] = &[
     //ModuleKind::VisualQuiz,
 ];
 
+const STR_TOOLTIP_TITLE: &str = "Title";
+const STR_TOOLTIP_BODY: &str = "Body";
+
 pub struct SelectionDom {}
 
 impl SelectionDom {
@@ -31,6 +34,12 @@ impl SelectionDom {
                     })
                     .collect::<Vec<Dom>>()
             )
+            .child(html!("jigzi-help", {
+                .property("slot", "help")
+                .property("showId", "module-select")
+                .property("title", STR_TOOLTIP_TITLE)
+                .property("body", STR_TOOLTIP_BODY)
+            }))
         })
     }
 }
