@@ -37,6 +37,12 @@ pub fn render_loaded(state: Rc<State>) -> Dom {
 
     html!("image-select", {
         .property("label", "Select background")
+        .property("imageMode", {
+            match &state.options.checkbox_kind {
+                Some(ImageSearchCheckboxKind::StickersFilter) => "image",
+                _ => "background"
+            }
+        })
         .property_signal("loading", state.loader.is_loading())
         .property_signal("recent", state.recent_list.signal_vec_cloned().len().map(|len| {
             len > 0
