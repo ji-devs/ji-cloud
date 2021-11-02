@@ -532,7 +532,7 @@ async fn email_reset(
     }
 
     // 1. generate a paseto token for this instance
-    let token: String = create_update_email_token(
+    let paseto_token: String = create_update_email_token(
         &settings.token_secret,
         Duration::hours(1),
         &req.email,
@@ -553,7 +553,7 @@ async fn email_reset(
 
     txn.commit().await?;
 
-    Ok(Json(ResetEmailResponse { token }))
+    Ok(Json(ResetEmailResponse { paseto_token }))
 }
 
 fn validate_patch_profile_req(
@@ -592,6 +592,15 @@ async fn verify_email_reset(
 
             let token: EmailToken = validate_email_token(paseto_token, &settings.token_secret)?;
 
+            // 1. generate a paseto token for this instance
+            let paseto_token: String = create_update_email_token(
+                &settings.token_secret,
+                Duration::hours(1),
+                &token.email,
+                Utc::now(),
+                &token.user_id,
+            )?;
+
             // make sure they can't use the old link anymore
             db::session::clear_any(&mut txn, token.user_id, SessionMask::CHANGE_EMAIL).await?;
 
@@ -614,7 +623,7 @@ async fn verify_email_reset(
 
             txn.commit().await?;
 
-            Ok(HttpResponse::NoContent().into())
+            Ok(HttpResponse::Ok().json(ResetEmailResponse { paseto_token }))
         }
 
         VerifyResetEmailRequest::Verify {
