@@ -1,21 +1,27 @@
 import { LitElement, html, css, customElement, property } from 'lit-element';
 import {classMap} from "lit-html/directives/class-map";
-import {nothing} from "lit-html";
-
 
 @customElement('choose-mode-option')
 export class _ extends LitElement {
   static get styles() {
       return [css`
         section {
-          display: flex;
-          align-items: center;
-          flex-direction: column;
-          width: 389px;
-          height: 387px;
+          display: grid;
+          align-content: start;
+          justify-items: center;
           border-radius: 24px;
           background-color: #c8defd;
           cursor: pointer;
+          box-sizing: border-box;
+          /* padding: 50px 0px 20px 0; */
+          width: 340px;
+          height: 340px;
+        }
+        @media (min-width: 1920px) {
+          section {
+            width: 388px;
+            height: 388px;
+          }
         }
 
         :host([hover]) section {
@@ -24,20 +30,26 @@ export class _ extends LitElement {
 
 
         .label {
-            margin-top: 64px;
-            margin-bottom: 32px;
-          font-family: Poppins;
           font-size: 24px;
           font-weight: 300;
-          font-stretch: normal;
-          font-style: normal;
-          letter-spacing: normal;
           text-align: center;
           color: var(--dark-gray-6);
+          margin-top: 50px;
+          margin-bottom: 10px;
+        }
+        @media (min-width: 1920px) {
+          .label {
+            margin-top: 64px;
+            margin-bottom: 32px;
+          }
         }
 
         .hidden {
           display: none;
+        }
+
+        img-ui {
+          width: 340px;
         }
     `];
   }

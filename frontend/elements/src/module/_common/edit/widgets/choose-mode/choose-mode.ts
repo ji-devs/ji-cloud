@@ -15,17 +15,22 @@ export class _ extends LitElement {
     static get styles() {
         return [css`
             :host {
-                --item-width: 389px;
                 --nav-button-width: ${NAV_BUTTON_WIDTH}px;
                 --gap-width: 20px;
                 --visible-items: 1;
+                --item-width: 340px;
+            }
+            @media (min-width: 1920px) {
+                :host {
+                    --item-width: 388px;
+                }
             }
             @media only screen and (min-width: 1000px) {
                 :host {
                     --visible-items: 2;
                 }
             }
-            @media only screen and (min-width: 1400px) {
+            @media only screen and (min-width: 1280px) {
                 :host {
                     --visible-items: 3;
                 }
