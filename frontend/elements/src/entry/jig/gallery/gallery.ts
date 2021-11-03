@@ -24,6 +24,7 @@ export class _ extends LitElement {
             }
             .novel-row-1 {
                 z-index: 1;
+                pointer-events: none;
             }
             .novel-row-1 .width-holder {
                 padding-left: 698px;
