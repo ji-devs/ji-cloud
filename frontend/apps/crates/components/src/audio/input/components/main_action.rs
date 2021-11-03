@@ -13,6 +13,7 @@ pub fn render(state: Rc<AudioInput>, mode: AudioInputMode, add_method: AudioInpu
         html!("button-rect", {
             .property("slot", "main-action")
             .property("kind", "text")
+            .property("color", "blue")
             .text("Cancel")
             .event(clone!(state => move |_: events::Click| {
                 actions::cancel_upload(Rc::clone(&state));

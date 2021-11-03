@@ -82,6 +82,7 @@ fn render_non_empty<RawData: RawDataExt, E: ExtraExt>(state: Rc<Step1<RawData, E
             html!("button-rect", {
                 .property("slot", "clear")
                 .property("kind", "text")
+                .property("color", "blue")
                 .text(strings::STR_CREATE_NEW_LIST)
                 .event(clone!(state => move |_evt:events::Click| {
                     state.base.clear_all();

@@ -26,6 +26,7 @@ pub fn render(state: Rc<State>) -> Dom {
             html!("button-rect", {
                 .property("slot", "clear")
                 .property("kind", "text")
+                .property("color", "blue")
                 .text(super::strings::STR_CLEAR)
                 .event(clone!(state => move |_evt:events::Click| {
                     state.clear();
