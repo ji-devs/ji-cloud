@@ -83,7 +83,7 @@ export class _ extends LitElement {
                     width: 164px;
                     height: 123px;
                     border-radius: 62px;
-                    border: solid 2px #d8e7f9;
+                    border: solid 2px var(--light-blue-3);
                     background-color: var(--light-blue-2);
                     margin: 0 auto;
                     display: flex;
