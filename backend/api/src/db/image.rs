@@ -1,8 +1,6 @@
 use super::{recycle_metadata, recycle_tags};
-use crate::{
-    error::{Service, ServiceKind},
-    translate::translate_text,
-};
+use crate::translate::translate_text;
+use anyhow::Context;
 use chrono::{DateTime, Utc};
 use futures::stream::BoxStream;
 use shared::domain::{
@@ -89,7 +87,7 @@ pub async fn update(
     is_premium: Option<bool>,
     publish_at: Option<Option<DateTime<Utc>>>,
     token: String,
-) -> sqlx::Result<bool> {
+) -> anyhow::Result<bool> {
     if !sqlx::query!(
         r#"select exists(select 1 from image_metadata where id = $1) as "exists!""#,
         id.0
@@ -115,16 +113,15 @@ where id = $1 and $2 is distinct from publish_at"#,
     }
 
     if let Some(description) = description {
-        let translated_text = translate_text(description, "he", &token)
+        let translated_text = translate_text(description, "he", "en", &token)
             .await
-            .map_err(anyhow::Error::from);
-            .map_err()
+            .context("could not translate text")?;
 
         sqlx::query!(
             r#"
 update image_metadata
 set description = $2,
-    he_description = $3,
+    translated_description = $3,
     updated_at = now()
 where id = $1 and $2 is distinct from description"#,
             id.0,

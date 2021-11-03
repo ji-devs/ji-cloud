@@ -1,4 +1,3 @@
-use crate::error;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -6,6 +5,7 @@ use serde::{Deserialize, Serialize};
 struct TranslateTextRequest {
     q: Vec<String>,
     target: String,
+    source: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -29,8 +29,9 @@ struct Translation {
 pub async fn translate_text(
     query: &str,
     target: &str,
+    source: &str,
     access_token: &str,
-) -> Result<String, TranslateTextError> {
+) -> anyhow::Result<String> {
     let queries = vec![query.to_string()];
 
     //https://cloud.google.com/translate/docs/languages
@@ -45,6 +46,7 @@ pub async fn translate_text(
         .json(&TranslateTextRequest {
             q: queries,
             target: target.to_string(),
+            source: source.to_string(),
         })
         .send()
         .await?
@@ -66,21 +68,4 @@ pub async fn translate_text(
     let translate = res.translations[0].translated_text.clone();
 
     Ok(translate)
-}
-
-enum TranslateTextError {
-    TranslateResponseError(reqwest::Error),
-    Sqlx(sqlx::Error),
-}
-
-impl From<reqwest::Error> for TranslateTextError {
-    fn from(err: reqwest::Error) -> Self {
-        Self::TranslateResponseError(err)
-    }
-}
-
-impl<T> From<T> for TranslateTextError {
-    fn into(self) -> T {
-        Self::Sqlx()
-    }
 }
