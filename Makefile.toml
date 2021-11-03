@@ -190,11 +190,11 @@ run_task = [{name = [
 
 [tasks.deploy-sandbox-fastly-purge-frontend]
 script_runner = "@shell"
-script = ["gcloud functions deploy purgeFrontendSandbox --project ji-cloud-developer-sandbox --trigger-resource ji-cloud-sandbox-frontend-origin-eu-001 --region europe-west1 --source backend/fastly-purge --runtime nodejs10 --trigger-event google.storage.object.finalize"]
+script = ["gcloud functions deploy purgeFrontendSandbox --project ji-cloud-developer-sandbox --trigger-resource ji-cloud-sandbox-frontend-origin-eu-001 --region europe-west1 --source backend/fastly-purge --runtime nodejs14 --trigger-event google.storage.object.finalize"]
 
 [tasks.deploy-sandbox-fastly-purge-uploads]
 script_runner = "@shell"
-script = ["gcloud functions deploy purgeUploadsSandbox --project ji-cloud-developer-sandbox --trigger-resource ji-cloud-sandbox-uploads-origin-eu-001 --region europe-west1 --source backend/fastly-purge --runtime nodejs10 --trigger-event google.storage.object.finalize"]
+script = ["gcloud functions deploy purgeUploadsSandbox --project ji-cloud-developer-sandbox --trigger-resource ji-cloud-sandbox-uploads-origin-eu-001 --region europe-west1 --source backend/fastly-purge --runtime nodejs14 --trigger-event google.storage.object.finalize"]
 
 
 
