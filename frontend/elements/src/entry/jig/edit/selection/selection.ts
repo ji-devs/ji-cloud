@@ -15,7 +15,8 @@ export class _ extends LitElement {
                     display: block;
                     height: 100vh;
                     overflow-y: auto;
-                    padding: 48px 56px 343px 56px;
+                    padding: 48px 56px;
+                    box-sizing: border-box;
                 }
                 .header {
                     display: flex;

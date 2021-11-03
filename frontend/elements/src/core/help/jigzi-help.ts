@@ -76,6 +76,7 @@ export class _ extends LitElement {
                         body=${this.body}
                         showId=${this.showId}
                         closeable
+                        strategy="track"
                     ></overlay-tooltip-info>
                 ` : nothing}
             </overlay-container>
