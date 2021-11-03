@@ -8,6 +8,7 @@ export class _ extends LitElement {
             :host {
                 display: grid;
                 row-gap: 32px;
+                padding-bottom: 32px;
             }
             h2 {
                 margin: 0;
@@ -20,6 +21,7 @@ export class _ extends LitElement {
             }
             hr {
                 width: 100%;
+                margin: 0;
                 background: var(--light-gray-4);
             }
         `];
