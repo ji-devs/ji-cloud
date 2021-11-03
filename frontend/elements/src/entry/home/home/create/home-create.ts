@@ -18,16 +18,17 @@ export class _ extends LitElement {
             }
             .video-wrapper {
                 display: grid;
+                align-items: center;
             }
             .video-wrapper video {
                 object-position: center center;
                 width: 100%;
-                height: 100%;
             }
             .content {
                 padding: 52px;
                 display: grid;
                 grid-template-rows: auto auto 1fr auto;
+                justify-items: start;
             }
             h3 {
                 font-size: 32px;
