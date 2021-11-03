@@ -9,8 +9,8 @@ pub struct Menu {
     pub trace: DrawTrace,
 }
 
-//in normalized units
-const MENU_MARGIN: f64 = 0.01;
+// //in normalized units
+// const MENU_MARGIN: f64 = 0.01;
 
 //in real-world units
 const MENU_WIDTH: f64 = 217.0;

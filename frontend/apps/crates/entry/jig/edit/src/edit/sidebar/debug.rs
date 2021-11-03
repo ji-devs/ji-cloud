@@ -1,3 +1,6 @@
+#![allow(unused_imports)]
+#![allow(dead_code)]
+
 use shared::domain::jig::{
     module::ModuleId, AudioEffects, DraftOrLive, JigData, JigId, JigPlayerSettings, JigResponse,
     LiteModule, ModuleKind, PrivacyLevel,
