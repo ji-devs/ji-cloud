@@ -16,7 +16,7 @@ export class _ extends LitElement {
                 backdrop-filter: blur(30px);
                 box-shadow: 0 3px 16px 0 rgba(0, 0, 0, 0.2);
                 background-color: var(--white);
-                padding: 14px 6px 16px 14px;
+                padding: 14px;
             }
             .menu-container.visible {
                 display: block;
