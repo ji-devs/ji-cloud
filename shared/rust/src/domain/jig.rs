@@ -407,6 +407,9 @@ pub struct JigResponse {
     /// The author's name, as "{given_name} {family_name}".
     pub author_name: Option<String>,
 
+    /// True if Jig cover is set
+    pub initial_cover_set: bool,
+
     /// The data of the requested JIG.
     pub jig_data: JigData,
 }
