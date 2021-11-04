@@ -156,7 +156,6 @@ async fn delete(
     Ok(HttpResponse::NoContent().finish())
 }
 
-/// Delete a jig.
 async fn cover(
     db: Data<PgPool>,
     claims: TokenUser,
