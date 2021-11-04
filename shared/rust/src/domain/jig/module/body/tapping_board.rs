@@ -229,8 +229,7 @@ impl StepExt for Step {
     }
 
     fn label(&self) -> &'static str {
-        //TODO - localizaton
-        const STR_BACKGROUND: &'static str = "Background";
+        const STR_BACKGROUND: &'static str = "Design";
         const STR_CONTENT: &'static str = "Content";
         const STR_INTERACTION: &'static str = "Interaction";
         const STR_SETTINGS: &'static str = "Settings";
