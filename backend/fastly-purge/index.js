@@ -1,9 +1,12 @@
-const configPath = process.env["CONFIG_PATH"] ? process.env["CONFIG_PATH"] : "./config";
+const URL_MEDIA = "https://media.jicloud.org";
+const URL_FRONTEND_RELEASE = "https://frontend.jicloud.org";
+const URL_FRONTEND_SANDBOX = "https://frontend.sandbox.jicloud.org";
+const URL_UPLOADS_RELEASE = "https://uploads.jicloud.org";
+const URL_UPLOADS_SANDBOX = "https://uploads.sandbox.jicloud.org";
 
 const fetch = require('node-fetch');
 const {Storage} = require('@google-cloud/storage');
 const storage = new Storage();
-const CONFIG = require(configPath);
 
 const hasExtension = ext => target => {
   const idx = target.lastIndexOf('.');
@@ -86,10 +89,9 @@ const makePurger = FASTLY_PUBLIC_BASEURL => async (obj, context) => {
     }
 };
 
-exports.purgeMedia = makePurger(CONFIG.URL_MEDIA);
+exports.purgeMedia = makePurger(URL_MEDIA);
 
-exports.purgeFrontendRelease = makePurger(CONFIG.URL_FRONTEND_RELEASE);
-exports.purgeFrontendSandbox = makePurger(CONFIG.URL_FRONTEND_SANDBOX);
-exports.purgeUploadsRelease = makePurger(CONFIG.URL_UPLOADS_RELEASE);
-exports.purgeUploadsSandbox = makePurger(CONFIG.URL_UPLOADS_SANDBOX);
-
+exports.purgeFrontendRelease = makePurger(URL_FRONTEND_RELEASE);
+exports.purgeFrontendSandbox = makePurger(URL_FRONTEND_SANDBOX);
+exports.purgeUploadsRelease = makePurger(URL_UPLOADS_RELEASE);
+exports.purgeUploadsSandbox = makePurger(URL_UPLOADS_SANDBOX);
