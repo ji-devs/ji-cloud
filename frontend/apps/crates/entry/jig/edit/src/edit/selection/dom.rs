@@ -17,7 +17,7 @@ static MODULE_KINDS: &[ModuleKind] = &[
     //ModuleKind::VisualQuiz,
 ];
 
-const STR_TOOLTIP_TITLE: &str = "Pull up those sleeves! Let's build your JIG!";
+const STR_TOOLTIP_TITLE: &str = "Let's build your JIG!";
 const STR_TOOLTIP_BODY: &str = "Select an activity and drag it to the body of your JIG. You can change the order at any time.";
 
 pub struct SelectionDom {}
