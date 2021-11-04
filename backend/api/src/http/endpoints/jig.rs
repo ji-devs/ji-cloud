@@ -156,6 +156,21 @@ async fn delete(
     Ok(HttpResponse::NoContent().finish())
 }
 
+/// Delete a jig.
+async fn cover(
+    db: Data<PgPool>,
+    claims: TokenUser,
+    path: web::Path<JigId>,
+) -> Result<HttpResponse, error::Delete> {
+    let id = path.into_inner();
+
+    db::jig::authz(&*db, claims.0.user_id, Some(id)).await?;
+
+    db::jig::cover_set(&*db, id).await?;
+
+    Ok(HttpResponse::NoContent().finish())
+}
+
 async fn browse(
     db: Data<PgPool>,
     claims: TokenUser,
@@ -303,6 +318,7 @@ pub fn configure(cfg: &mut ServiceConfig) {
             jig::UpdateDraftData::METHOD.route().to(update_draft),
         )
         .route(jig::Delete::PATH, jig::Delete::METHOD.route().to(delete))
+        .route(jig::Cover::PATH, jig::Cover::METHOD.route().to(cover))
         .route(
             jig::player::Create::PATH,
             jig::player::Create::METHOD.route().to(player::create),

@@ -168,6 +168,19 @@ impl ApiEndpoint for Delete {
     const METHOD: Method = Method::Delete;
 }
 
+/// Indicates if a jig has a cover
+///
+/// # Authorization
+/// * One of `Admin`, `AdminJig`, or `ManageSelfJig` for owned JIGs
+pub struct Cover;
+impl ApiEndpoint for Cover {
+    type Req = ();
+    type Res = ();
+    type Err = EmptyError;
+    const PATH: &'static str = "/v1/jig/{id}/cover";
+    const METHOD: Method = Method::Patch;
+}
+
 /// Count of all public JIGs. See [`PrivacyLevel`](crate::domain::jig::PrivacyLevel).
 ///
 /// # Authorization
