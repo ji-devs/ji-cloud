@@ -41,8 +41,8 @@ impl<RawData: RawDataExt, E: ExtraExt> Step2<RawData, E> {
 #[derive(Clone)]
 pub enum Tab {
     Theme(Rc<ThemeSelector>),
-    Image(Rc<ImageSearchState>),
-    Color(Rc<ColorPickerState>),
+    BackgroundImage(Rc<ImageSearchState>),
+    FillColor(Rc<ColorPickerState>),
 }
 
 impl Tab {
@@ -63,7 +63,7 @@ impl Tab {
                 );
                 Self::Theme(Rc::new(state))
             }
-            MenuTabKind::Image => {
+            MenuTabKind::BackgroundImage => {
                 let opts = ImageSearchOptions {
                     checkbox_kind: Some(ImageSearchCheckboxKind::BackgroundLayer1Filter),
                     ..ImageSearchOptions::default()
@@ -74,10 +74,10 @@ impl Tab {
                 })));
                 let state = ImageSearchState::new(opts, callbacks);
 
-                Self::Image(Rc::new(state))
+                Self::BackgroundImage(Rc::new(state))
             }
 
-            MenuTabKind::Color => {
+            MenuTabKind::FillColor => {
                 let state = ColorPickerState::new(
                     base.theme_id.clone(),
                     None,
@@ -86,7 +86,7 @@ impl Tab {
                         base.set_bg(Background::Color(color));
                     })),
                 );
-                Self::Color(Rc::new(state))
+                Self::FillColor(Rc::new(state))
             }
 
             _ => unimplemented!("unsupported tab kind!"),
@@ -96,15 +96,15 @@ impl Tab {
     pub fn kind(&self) -> MenuTabKind {
         match self {
             Self::Theme(_) => MenuTabKind::Theme,
-            Self::Image(_) => MenuTabKind::Image,
-            Self::Color(_) => MenuTabKind::Color,
+            Self::BackgroundImage(_) => MenuTabKind::BackgroundImage,
+            Self::FillColor(_) => MenuTabKind::FillColor,
         }
     }
     pub fn as_index(&self) -> usize {
         match self {
             Self::Theme(_) => 0,
-            Self::Image(_) => 1,
-            Self::Color(_) => 2,
+            Self::BackgroundImage(_) => 1,
+            Self::FillColor(_) => 2,
         }
     }
 }

@@ -6,15 +6,12 @@ import "@elements/core/images/ui";
 export type TabKind = ""
   | "answer"
   | "audio"
-  | "audio-file"
-  | "audio-record"
-  | "background-color"
   | "background-image"
-  | "background-image-full"
-  | "color"
+  | "fill-color"
   | "feedback"
   | "image"
   | "instructions"
+  | "label"
   | "overlay"
   | "play-settings"
   | "question"
@@ -22,14 +19,14 @@ export type TabKind = ""
   | "text"
   | "theme"
   | "tooltip"
-  | "add-text"
   | "video"
 
 const STR_ICON_OVERRIDE: Partial<{
     [key in TabKind]: TabKind;
 }> = {
-  "add-text": "tooltip",
-  "background-image-full": "background-image"
+  // "add-text": "tooltip",
+  // "background-image-full": "background-image"
+  // "background-color": "color"
 };
 
 const STR_LABEL_LOOKUP: {
@@ -37,24 +34,20 @@ const STR_LABEL_LOOKUP: {
 } = {
   "": "",
   "answer": "Answer",
-  "audio": "Add sound",
-  "audio-file": "", //not in Zeplin
-  "audio-record": "", //Not in Zeplin
-  "background-color": "Color",
+  "audio": "Audio",
   "background-image": "Background",
-  "background-image-full": "Background image",
-  "color": "Color",
-  "feedback": "Final feedback",
+  "fill-color": "Fill Color",
+  "feedback": "Feedback",
   "image": "Image",
   "instructions": "Instructions",
+  "label": "Label",
   "overlay": "Overlay",
-  "play-settings": "Play settings",
+  "play-settings": "Play Settings",
   "question": "Question",
   "select": "Select",
   "text": "Text",
   "theme": "Theme",
   "tooltip": "Tooltip", //Not in zeplin
-  "add-text": "Add text box",
   "video": "Video", //Not in Zeplin
 };
 

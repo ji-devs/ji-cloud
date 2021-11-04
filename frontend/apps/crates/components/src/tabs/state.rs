@@ -34,15 +34,12 @@ impl MenuTab {
 pub enum MenuTabKind {
     Answer,
     Audio,
-    AudioFile,
-    AudioRecord,
-    BackgroundColor,
     BackgroundImage,
-    BackgroundImageFull,
-    Color,
+    FillColor,
     Feedback,
     Image,
     Instructions,
+    Label,
     Overlay,
     PlaySettings,
     Question,
@@ -50,7 +47,6 @@ pub enum MenuTabKind {
     Text,
     Theme,
     Tooltip,
-    AddText,
     Video,
 }
 
@@ -59,15 +55,12 @@ impl MenuTabKind {
         match self {
             Self::Answer => "answer",
             Self::Audio => "audio",
-            Self::AudioFile => "audio-file",
-            Self::AudioRecord => "audio-record",
-            Self::BackgroundColor => "background-color",
             Self::BackgroundImage => "background-image",
-            Self::BackgroundImageFull => "background-image-full",
-            Self::Color => "color",
+            Self::FillColor => "fill-color",
             Self::Feedback => "feedback",
             Self::Image => "image",
             Self::Instructions => "instructions",
+            Self::Label => "label",
             Self::Overlay => "overlay",
             Self::PlaySettings => "play-settings",
             Self::Question => "question",
@@ -75,7 +68,6 @@ impl MenuTabKind {
             Self::Text => "text",
             Self::Theme => "theme",
             Self::Tooltip => "tooltip",
-            Self::AddText => "add-text",
             Self::Video => "video",
         }
     }

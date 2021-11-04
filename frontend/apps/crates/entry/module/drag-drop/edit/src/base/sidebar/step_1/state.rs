@@ -26,7 +26,7 @@ impl Step1 {
     pub fn new(sidebar: Rc<Sidebar>) -> Rc<Self> {
         let kind = match crate::debug::settings().step_1_tab {
             Some(kind) => kind,
-            None => MenuTabKind::BackgroundImageFull,
+            None => MenuTabKind::BackgroundImage,
         };
 
         let tab = Mutable::new(Tab::new(sidebar.base.clone(), kind));
@@ -37,8 +37,8 @@ impl Step1 {
 
 #[derive(Clone)]
 pub enum Tab {
-    BgImage(Rc<ImageSearchState>),
-    BgColor(Rc<ColorPickerState>),
+    BackgroundImage(Rc<ImageSearchState>),
+    FillColor(Rc<ColorPickerState>),
     BgOverlay(Rc<ImageSearchState>),
     StickerImage(Rc<ImageSearchState>),
     StickerText,
@@ -47,7 +47,7 @@ pub enum Tab {
 impl Tab {
     pub fn new(base: Rc<Base>, kind: MenuTabKind) -> Self {
         match kind {
-            MenuTabKind::BackgroundImageFull => {
+            MenuTabKind::BackgroundImage => {
                 let opts = ImageSearchOptions {
                     checkbox_kind: Some(ImageSearchCheckboxKind::BackgroundLayer1Filter),
                     ..ImageSearchOptions::default()
@@ -58,9 +58,9 @@ impl Tab {
                 })));
                 let state = ImageSearchState::new(opts, callbacks);
 
-                Self::BgImage(Rc::new(state))
+                Self::BackgroundImage(Rc::new(state))
             }
-            MenuTabKind::BackgroundColor => {
+            MenuTabKind::FillColor => {
                 let state = ColorPickerState::new(
                     base.theme_id.clone(),
                     None,
@@ -69,7 +69,7 @@ impl Tab {
                         base.backgrounds.set_layer(Layer::One, Background::Color(color));
                     })),
                 );
-                Self::BgColor(Rc::new(state))
+                Self::FillColor(Rc::new(state))
             }
             MenuTabKind::Overlay => {
                 let opts = ImageSearchOptions {
@@ -107,8 +107,8 @@ impl Tab {
 
     pub fn kind(&self) -> MenuTabKind {
         match self {
-            Self::BgImage(_) => MenuTabKind::BackgroundImageFull,
-            Self::BgColor(_) => MenuTabKind::BackgroundColor,
+            Self::BackgroundImage(_) => MenuTabKind::BackgroundImage,
+            Self::FillColor(_) => MenuTabKind::FillColor,
             Self::BgOverlay(_) => MenuTabKind::Overlay,
             Self::StickerImage(_) => MenuTabKind::Image,
             Self::StickerText => MenuTabKind::Text,
@@ -117,8 +117,8 @@ impl Tab {
 
     pub fn as_index(&self) -> usize {
         match self {
-            Self::BgImage(_) => 0,
-            Self::BgColor(_) => 1,
+            Self::BackgroundImage(_) => 0,
+            Self::FillColor(_) => 1,
             Self::BgOverlay(_) => 2,
             Self::StickerImage(_) => 3,
             Self::StickerText => 4,

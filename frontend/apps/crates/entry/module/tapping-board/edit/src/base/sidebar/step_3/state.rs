@@ -71,16 +71,16 @@ impl Step3 {
 
 #[derive(Clone)]
 pub enum Tab {
-    Text(usize, Mutable<Option<String>>),
+    Label(usize, Mutable<Option<String>>),
     Audio(Rc<AudioInput>),
 }
 
 impl Tab {
     pub fn new(base: Rc<Base>, kind: MenuTabKind, index: usize) -> Self {
         match kind {
-            MenuTabKind::Text => {
+            MenuTabKind::Label => {
                 let text = base.traces.get_text(index);
-                Self::Text(index, Mutable::new(text))
+                Self::Label(index, Mutable::new(text))
             }
             MenuTabKind::Audio => {
                 let opts = AudioInputOptions::new(Some(base.traces.audio_signal(index)));
@@ -105,7 +105,7 @@ impl Tab {
 
     pub fn _kind(&self) -> MenuTabKind {
         match self {
-            Self::Text(_, _) => MenuTabKind::Text,
+            Self::Label(_, _) => MenuTabKind::Label,
             Self::Audio(_) => MenuTabKind::Audio,
         }
     }
@@ -113,7 +113,7 @@ impl Tab {
     pub fn as_index(&self) -> usize {
         match self {
             Self::Audio(_) => 0,
-            Self::Text(_, _) => 1,
+            Self::Label(_, _) => 1,
         }
     }
 }

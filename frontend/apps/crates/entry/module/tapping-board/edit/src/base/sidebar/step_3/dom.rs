@@ -40,7 +40,7 @@ pub fn render(state: Rc<Step3>) -> Dom {
                             .children(&mut [
                                 //pass down our mutable so that we can switch tabs
                                 render_tab(state.clone(), MenuTabKind::Audio, selected_tab.clone()),
-                                render_tab(state.clone(), MenuTabKind::Text, selected_tab.clone()),
+                                render_tab(state.clone(), MenuTabKind::Label, selected_tab.clone()),
                                 html!("module-sidebar-body", {
                                     .property("slot", "body")
                                     .child_signal(
@@ -89,7 +89,7 @@ fn render_tab(
 
 fn render_tab_body(state: Rc<Step3>, tab: Tab) -> Dom {
     match tab {
-        Tab::Text(index, text_state) => {
+        Tab::Label(index, text_state) => {
             html!("div", {
                 .child(html!("input-wrapper", {
                     .property("label", crate::strings::step_3::STR_LABEL)

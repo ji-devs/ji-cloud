@@ -24,7 +24,7 @@ impl Step1 {
     pub fn new(sidebar: Rc<Sidebar>) -> Rc<Self> {
         let kind = match crate::debug::settings().bg_tab {
             Some(kind) => kind,
-            None => MenuTabKind::Image,
+            None => MenuTabKind::BackgroundImage,
         };
 
         let tab = Mutable::new(Tab::new(sidebar.base.clone(), kind));
@@ -35,16 +35,15 @@ impl Step1 {
 
 #[derive(Clone)]
 pub enum Tab {
-    //Image(Rc<ImageSearchState>),
-    Image(Rc<ImageSearchState>),
-    Color(Rc<ColorPickerState>),
+    BackgroundImage(Rc<ImageSearchState>),
+    FillColor(Rc<ColorPickerState>),
     Overlay(Rc<ImageSearchState>),
 }
 
 impl Tab {
     pub fn new(base: Rc<Base>, kind: MenuTabKind) -> Self {
         match kind {
-            MenuTabKind::Image => {
+            MenuTabKind::BackgroundImage => {
                 let opts = ImageSearchOptions {
                     checkbox_kind: Some(ImageSearchCheckboxKind::BackgroundLayer1Filter),
                     ..ImageSearchOptions::default()
@@ -55,9 +54,9 @@ impl Tab {
                 })));
                 let state = ImageSearchState::new(opts, callbacks);
 
-                Self::Image(Rc::new(state))
+                Self::BackgroundImage(Rc::new(state))
             }
-            MenuTabKind::Color => {
+            MenuTabKind::FillColor => {
                 let state = ColorPickerState::new(
                     base.theme_id.clone(),
                     None,
@@ -66,7 +65,7 @@ impl Tab {
                         base.backgrounds.set_layer(Layer::One, Background::Color(color));
                     })),
                 );
-                Self::Color(Rc::new(state))
+                Self::FillColor(Rc::new(state))
             }
             MenuTabKind::Overlay => {
                 let opts = ImageSearchOptions {
@@ -88,15 +87,15 @@ impl Tab {
 
     pub fn kind(&self) -> MenuTabKind {
         match self {
-            Self::Image(_) => MenuTabKind::Image,
-            Self::Color(_) => MenuTabKind::Color,
+            Self::BackgroundImage(_) => MenuTabKind::BackgroundImage,
+            Self::FillColor(_) => MenuTabKind::FillColor,
             Self::Overlay(_) => MenuTabKind::Overlay,
         }
     }
     pub fn as_index(&self) -> usize {
         match self {
-            Self::Image(_) => 0,
-            Self::Color(_) => 1,
+            Self::BackgroundImage(_) => 0,
+            Self::FillColor(_) => 1,
             Self::Overlay(_) => 2,
         }
     }

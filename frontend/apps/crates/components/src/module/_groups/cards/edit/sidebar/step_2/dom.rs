@@ -18,8 +18,8 @@ pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<Step2<RawData, E>>) ->
         })))
         .children(&mut [
             render_tab(state.clone(), MenuTabKind::Theme),
-            render_tab(state.clone(), MenuTabKind::Image),
-            render_tab(state.clone(), MenuTabKind::Color),
+            render_tab(state.clone(), MenuTabKind::BackgroundImage),
+            render_tab(state.clone(), MenuTabKind::FillColor),
             html!("module-sidebar-body", {
                 .property("slot", "body")
                 .child_signal(state.tab.signal_cloned().map(|tab| {
@@ -27,10 +27,10 @@ pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<Step2<RawData, E>>) ->
                         Tab::Theme(state) => {
                             Some(render_theme_selector(state, None))
                         },
-                        Tab::Image(state) => {
+                        Tab::BackgroundImage(state) => {
                             Some(render_image_search(state, None))
                         },
-                        Tab::Color(state) => {
+                        Tab::FillColor(state) => {
                             Some(render_color_picker(state, None))
                         },
                     }

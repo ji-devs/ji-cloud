@@ -119,7 +119,7 @@ impl DebugSettings {
             step: Some(Step::Three),
             skip_save: true,
             skip_load_jig: true,
-            bg_tab: Some(MenuTabKind::Image),
+            bg_tab: Some(MenuTabKind::BackgroundImage),
             content_tab: Some(MenuTabKind::Text),
             interaction_tab: Some(MenuTabKind::Audio),
             settings_tab: Some(MenuTabKind::PlaySettings),

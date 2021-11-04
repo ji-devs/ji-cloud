@@ -15,8 +15,8 @@ pub fn render(state: Rc<Step2>) -> Dom {
             async move {}
         })))
         .children(&mut [
-            render_tab(state.clone(), MenuTabKind::Image),
-            render_tab(state.clone(), MenuTabKind::Color),
+            render_tab(state.clone(), MenuTabKind::BackgroundImage),
+            render_tab(state.clone(), MenuTabKind::FillColor),
             render_tab(state.clone(), MenuTabKind::Overlay),
             html!("module-sidebar-body", {
                 .property("slot", "body")
@@ -25,7 +25,7 @@ pub fn render(state: Rc<Step2>) -> Dom {
                         Tab::Image(state) => {
                             Some(render_image_search(state, None))
                         },
-                        Tab::Color(state) => {
+                        Tab::FillColor(state) => {
                             Some(render_color_picker(state, None))
                         },
                         Tab::Overlay(state) => {

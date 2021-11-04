@@ -16,8 +16,8 @@ pub fn render_step_1(state: Rc<Step1>) -> Dom {
             async move {}
         })))
         .children(&mut [
-            render_tab(state.clone(), MenuTabKind::BackgroundImageFull),
-            render_tab(state.clone(), MenuTabKind::BackgroundColor),
+            render_tab(state.clone(), MenuTabKind::BackgroundImage),
+            render_tab(state.clone(), MenuTabKind::FillColor),
             render_tab(state.clone(), MenuTabKind::Overlay),
             render_tab(state.clone(), MenuTabKind::Image),
             render_tab(state.clone(), MenuTabKind::Text),
@@ -25,10 +25,10 @@ pub fn render_step_1(state: Rc<Step1>) -> Dom {
                 .property("slot", "body")
                 .child_signal(state.tab.signal_cloned().map(clone!(state => move |tab| {
                     match tab {
-                        Tab::BgImage(state) => {
+                        Tab::BackgroundImage(state) => {
                             Some(render_image_search(state, None))
                         },
-                        Tab::BgColor(state) => {
+                        Tab::FillColor(state) => {
                             Some(render_color_picker(state, None))
                         },
                         Tab::BgOverlay(state) => {

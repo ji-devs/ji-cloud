@@ -38,14 +38,14 @@ impl Step2 {
 pub enum Tab {
     //Image(Rc<ImageSearchState>),
     Image(Rc<ImageSearchState>),
-    Color(Rc<ColorPickerState>),
+    FillColor(Rc<ColorPickerState>),
     Overlay(Rc<ImageSearchState>),
 }
 
 impl Tab {
     pub fn new(base: Rc<Base>, kind: MenuTabKind) -> Self {
         match kind {
-            MenuTabKind::Image => {
+            MenuTabKind::BackgroundImage => {
                 let opts = ImageSearchOptions {
                     checkbox_kind: Some(ImageSearchCheckboxKind::BackgroundLayer1Filter),
                     ..ImageSearchOptions::default()
@@ -58,7 +58,7 @@ impl Tab {
 
                 Self::Image(Rc::new(state))
             }
-            MenuTabKind::Color => {
+            MenuTabKind::FillColor => {
                 let state = ColorPickerState::new(
                     base.theme_id.clone(),
                     None,
@@ -67,7 +67,7 @@ impl Tab {
                         base.backgrounds.set_layer(Layer::One, Background::Color(color));
                     })),
                 );
-                Self::Color(Rc::new(state))
+                Self::FillColor(Rc::new(state))
             }
             MenuTabKind::Overlay => {
                 let opts = ImageSearchOptions {
@@ -90,7 +90,7 @@ impl Tab {
     pub fn kind(&self) -> MenuTabKind {
         match self {
             Self::Image(_) => MenuTabKind::Image,
-            Self::Color(_) => MenuTabKind::Color,
+            Self::FillColor(_) => MenuTabKind::FillColor,
             Self::Overlay(_) => MenuTabKind::Overlay,
         }
     }
@@ -98,7 +98,7 @@ impl Tab {
     pub fn as_index(&self) -> usize {
         match self {
             Self::Image(_) => 0,
-            Self::Color(_) => 1,
+            Self::FillColor(_) => 1,
             Self::Overlay(_) => 2,
         }
     }
