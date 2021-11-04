@@ -213,7 +213,7 @@ with cte as (
                when $2 = 0 then jig.draft_id
                when $2 = 1 then jig.live_id
                end as "draft_or_live_id",
-           initial_cover_set,
+           first_cover_assigned,  
            published_at
     from jig
     where id = $1
@@ -225,7 +225,7 @@ select cte.jig_id                                          as "jig_id: JigId",
        (select given_name || ' '::text || family_name
         from user_profile
         where user_profile.user_id = author_id)            as "author_name",
-       initial_cover_set,
+       first_cover_assigned,
        published_at,
        updated_at,
        privacy_level                                       as "privacy_level!: PrivacyLevel",
@@ -274,7 +274,7 @@ from jig_data
             creator_id: row.creator_id,
             author_id: row.author_id,
             author_name: row.author_name,
-            initial_cover_set: row.initial_cover_set,
+            first_cover_assigned: row.first_cover_assigned,
             jig_data: JigData {
                 draft_or_live,
                 display_name: row.display_name,
@@ -327,7 +327,7 @@ select jig.id                                       as "id!: JigId",
        (select given_name || ' '::text || family_name
         from user_profile
         where user_profile.user_id = author_id) as "author_name",
-       initial_cover_set                        as "initial_cover_set!",
+       first_cover_assigned                        as "first_cover_assigned!",
        live_id                                  as "live_id!",
        draft_id                                 as "draft_id!",
        published_at
@@ -402,7 +402,7 @@ order by t.ord
             creator_id: jig_row.creator_id,
             author_id: jig_row.author_id,
             author_name: jig_row.author_name,
-            initial_cover_set: jig_row.initial_cover_set,
+            first_cover_assigned: jig_row.first_cover_assigned,
             jig_data: JigData {
                 draft_or_live,
                 display_name: jig_data_row.display_name,
@@ -666,7 +666,7 @@ pub async fn cover_set(db: &PgPool, jig_id: JigId) -> sqlx::Result<()> {
         //language=SQL
         r#"
 update jig
-set initial_cover_set = true
+set first_cover_assigned = true
 where id = $1
 "#,
         jig_id.0
@@ -691,7 +691,7 @@ select jig.id                                              as "jig_id: JigId",
        (select given_name || ' '::text || family_name
         from user_profile
         where user_profile.user_id = author_id)            as "author_name",
-       initial_cover_set                                   as "initial_cover_set!",
+       first_cover_assigned                                   as "first_cover_assigned!",
        published_at,
        display_name                                        as "display_name!",
        updated_at,
@@ -742,7 +742,7 @@ limit 20 offset 20 * $1
             creator_id: row.creator_id,
             author_id: row.author_id,
             author_name: row.author_name,
-            initial_cover_set: row.initial_cover_set,
+            first_cover_assigned: row.first_cover_assigned,
             jig_data: JigData {
                 draft_or_live: DraftOrLive::Draft,
                 display_name: row.display_name,

@@ -9,7 +9,7 @@ expression: body
   "creatorId": "1f241e1b-b537-493f-a230-075cb16315be",
   "authorId": "1f241e1b-b537-493f-a230-075cb16315be",
   "authorName": "Bobby Tables",
-  "initialCoverSet": false,
+  "firstCoverAssigned": false,
   "jigData": {
     "draftOrLive": "Draft",
     "displayName": "draft name",
