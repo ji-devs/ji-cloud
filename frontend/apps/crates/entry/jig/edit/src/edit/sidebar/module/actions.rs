@@ -1,15 +1,53 @@
-// use shared::{api::endpoints::{ApiEndpoint, self}, domain::{CreateResponse, jig::{self::*, module::body::cover::ModuleData}, jig::module::*}, error::{EmptyError, MetadataNotFound}};
 use super::state::State;
 use crate::edit::sidebar::dragging::state::State as DragState;
 use dominator::clone;
-use shared::{
-    api::endpoints::{self, ApiEndpoint},
-    domain::{jig::module::*, jig::*, CreateResponse},
-    error::EmptyError,
-};
+use shared::{api::endpoints::{self, ApiEndpoint}, domain::{jig::module::*, jig::*, CreateResponse}, error::EmptyError};
+use wasm_bindgen_futures::spawn_local;
 use std::convert::TryInto;
 use std::rc::Rc;
 use utils::prelude::*;
+
+pub fn on_module_kind_drop(state: Rc<State>, module_kind: ModuleKind) {
+    if state.index == 0 {
+        if module_kind == ModuleKind::Cover {
+            fist_cover_dragged(Rc::clone(&state));
+        } else {
+            todo!("invalid module type");
+        }
+    } else {
+        if state.module.is_none() {
+            assign_kind(state.clone(), module_kind);
+        }
+    }
+}
+
+pub fn fist_cover_dragged(state: Rc<State>) {
+    spawn_local(clone!(state => async move {
+        let path = endpoints::jig::Cover::PATH.replace("{id}", &state.sidebar.jig.id.0.to_string());
+
+        let res = api_with_auth_empty::<EmptyError, ()>(
+            &path,
+            endpoints::jig::Cover::METHOD,
+            None
+        ).await;
+        match res {
+            Err(_) => todo!(),
+            Ok(_) => {
+                let cover_id = match &*state.module {
+                    None => unreachable!(),
+                    Some(module) => {
+                        module.id
+                    },
+                };
+        
+                state.sidebar.first_cover_assigned.set(true);
+                state.sidebar.collapsed.set(true);
+                state.sidebar.jig_edit_state.route.set(JigEditRoute::Module(cover_id.clone()));
+                Route::push_state(Route::Jig(JigRoute::Edit(state.sidebar.jig.id, JigEditRoute::Module(cover_id))));
+            },
+        }
+    }));
+}
 
 pub async fn update_module(
     jig_id: &JigId,
@@ -126,7 +164,6 @@ pub fn assign_kind(state: Rc<State>, kind: ModuleKind) {
 pub enum MoveTarget {
     Up,
     Down,
-    Any(usize),
 }
 pub fn move_index(state: Rc<State>, move_target: MoveTarget) {
     state.sidebar.loader.load(clone!(state => async move {
@@ -139,7 +176,6 @@ pub fn move_index(state: Rc<State>, move_target: MoveTarget) {
                     MoveTarget::Down if state.index < state.total_len-1 => {
                         Some(state.index+1)
                     },
-                    MoveTarget::Any(target) => Some(target),
                     _ => None
                 }
             } {

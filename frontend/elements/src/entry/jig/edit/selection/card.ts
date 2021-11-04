@@ -54,7 +54,11 @@ export class _ extends LitElement {
                     color: var(--dark-gray-6);
                     background-color: var(--light-blue-2);
                 }
-                section:hover .bottom {
+                :host([module=cover]) .bottom {
+                    background-color: var(--light-orange-1);
+                }
+                /* ":host([module])" is to increase the specificity because of previous selector */
+                :host([module]) section:hover .bottom {
                     color: white;
                     background-color: var(--dark-blue-5);
                 }
@@ -98,7 +102,7 @@ export class _ extends LitElement {
         this.hover = false;
     }
 
-    @property()
+    @property({ reflect: true })
     module: ModuleKind = "memory";
 
     @property({ type: Boolean })

@@ -1,6 +1,6 @@
 use crate::edit::sidebar::state::State as SidebarState;
 use dominator::clone;
-use futures_signals::signal::{Mutable, Signal, SignalExt};
+use futures_signals::{map_ref, signal::{Mutable, Signal, SignalExt}};
 use shared::domain::jig::LiteModule;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -41,17 +41,25 @@ impl State {
         }
     }
     pub fn window_state_signal(state: Rc<State>) -> impl Signal<Item = &'static str> {
-        state.sidebar.jig_edit_state.route.signal_cloned().map(clone!(state => move |route| {
-            match &*state.module {
-                None => return "empty",
-                Some(this_module) => {
-                    match route {
-                        JigEditRoute::Module(module_id) if module_id == this_module.id => return "active",
-                        _ => return "thumbnail",
+        clone!(state => map_ref! {
+            let route = state.sidebar.jig_edit_state.route.signal_cloned(),
+            let cover_dragged = state.sidebar.first_cover_assigned.signal() => move {
+                match &*state.module {
+                    None => return "empty",
+                    Some(this_module) => {
+                        // if first and cover isn't wasn't dragged yet
+                        if state.index == 0 && !cover_dragged {
+                            return "empty";
+                        }
+
+                        match route {
+                            JigEditRoute::Module(module_id) if module_id == &this_module.id => return "active",
+                            _ => return "thumbnail",
+                        }
                     }
-                }
-            };
-        }))
+                };
+            }
+        })
     }
 
     pub fn drag_overlap_signal(_self: Rc<Self>) -> impl Signal<Item = bool> {

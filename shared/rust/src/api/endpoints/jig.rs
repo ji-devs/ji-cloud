@@ -168,7 +168,7 @@ impl ApiEndpoint for Delete {
     const METHOD: Method = Method::Delete;
 }
 
-/// Indicates if a jig has a cover
+/// Indicates that a jig has a cover
 ///
 /// # Authorization
 /// * One of `Admin`, `AdminJig`, or `ManageSelfJig` for owned JIGs

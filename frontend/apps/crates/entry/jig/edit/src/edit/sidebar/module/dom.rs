@@ -81,24 +81,26 @@ impl ModuleDom {
                     .property("slot", "window")
                     .property_signal("state", State::window_state_signal(Rc::clone(&state)))
                     .property("activeModuleKind", state.kind_str())
+                    .property("coverOnly", state.index == 0)
                     .event_with_options(
                         &EventOptions::preventable(),
-                        clone!(state => move |evt:events::DragOver| {
+                        |evt:events::DragOver| {
                             if let Some(data_transfer) = evt.data_transfer() {
                                 if data_transfer.types().index_of(&JsValue::from_str("module_kind"), 0) != -1 {
-                                    if state.module.is_none() {
-                                        evt.prevent_default();
-                                    }
+                                    evt.prevent_default();
                                 }
                             }
-                        })
+                        }
                     )
                     .event_with_options(&EventOptions::preventable(), clone!(state => move |evt:events::Drop| {
                         evt.prevent_default(); // needed so that Firefox doesn't open the image
                         if let Some(data_transfer) = evt.data_transfer() {
                             if let Some(module_kind) = data_transfer.get_data("module_kind").ok() {
                                 let kind:ModuleKind = ModuleKind::from_str(&module_kind).unwrap_ji();
-                                actions::assign_kind(state.clone(), kind);
+                                actions::on_module_kind_drop(
+                                    Rc::clone(&state),
+                                    kind
+                                );
                             }
                         }
                     }))

@@ -200,6 +200,8 @@ pub struct JigData {
     pub display_name: String,
 
     /// The JIG's remaining modules.
+    ///
+    /// NOTE: the first module will always exist and will always be of type cover
     pub modules: Vec<LiteModule>,
 
     /// This jig's age ranges.
@@ -408,6 +410,9 @@ pub struct JigResponse {
     pub author_name: Option<String>,
 
     /// True if Jig cover is set
+    /// 
+    /// NOTE: the cover is always technically there, this is just to indicate if the user has dragged the cover,
+    /// needed just for the UI
     pub first_cover_assigned: bool,
 
     /// The data of the requested JIG.

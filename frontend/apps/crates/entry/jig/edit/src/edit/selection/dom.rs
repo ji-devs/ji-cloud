@@ -4,7 +4,7 @@ use super::module::dom::ModuleDom;
 use shared::domain::jig::ModuleKind;
 
 static MODULE_KINDS: &[ModuleKind] = &[
-    //ModuleKind::Cover,
+    ModuleKind::Cover,
     ModuleKind::Flashcards,
     ModuleKind::Matching,
     ModuleKind::Memory,

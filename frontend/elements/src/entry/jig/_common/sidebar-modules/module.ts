@@ -225,7 +225,7 @@ export class _ extends LitElement {
                     </div>
                     <div class="middle open-only">
                         <div class="decorations">
-                            ${renderDecoration(module, index)}
+                            ${renderDecoration(index)}
                         </div>
                         <div class="window">
                             <slot name="window"></slot>
@@ -248,16 +248,10 @@ export class _ extends LitElement {
     }
 }
 
-function renderDecoration(module: ModuleKind | "", index: number) {
+function renderDecoration(index: number) {
     const getImage = (path:string, classes:string) => html`<img-ui class="${classes}" path="entry/jig/jiggling/${path}" />`;
 
-    const renderBottomDecoration = () => {
-        return html`
-            ${getImage("feet-spring.svg", "feet-spring")}
-            ${getImage("yellow/feet-rollers.svg", "feet-rollers")}
-        `
-    }
-    if(module === "cover") {
+    if(index === 0) {
         return html`
             ${getImage("arm-left.svg", "arm-left")}
             ${getImage("arm-right.svg", "arm-right")}

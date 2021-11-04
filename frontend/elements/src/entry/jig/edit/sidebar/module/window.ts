@@ -1,10 +1,9 @@
 import { LitElement, html, css, customElement, property, query } from "lit-element";
 import { nothing } from "lit-html";
-import { ModuleKind, moduleKinds } from "@elements/module/_common/types";
+import { ModuleKind } from "@elements/module/_common/types";
 import "@elements/core/images/ui";
 
 
-// export type ModuleState = "empty" | "draft" | "active" | "complete" | "published";
 export type ModuleState = "empty" | "active" | "thumbnail";
 const STR_EMPTY = "Drag\nactivity\nhere"
 
@@ -23,24 +22,23 @@ export class _ extends LitElement {
                 }
                 :host([state=empty]) .wrapper {
                     background-color: var(--light-blue-5);
+                    color: #ffffff;
                 }
                 :host([state=empty]) .wrapper.drag-over {
                     background-color: var(--dark-blue-1);
+                    color: transparent;
                 }
-                /* :host([state=draft]) .wrapper {
-                    background-color: var(--light-blue-2);
-                    border: solid 2px #d8e7f9;
-                } */
+                :host([state=empty][coverOnly]) .wrapper:not(.drag-over) {
+                    color: var(--dark-gray-3);
+                    border: solid 3px var(--light-orange-2);
+                    background-color: var(--light-orange-1);
+                }
                 :host([state=active]) .wrapper {
                     background-color: var(--light-blue-5);
                 }
                 :host([state=active]) img-ui {
                     height: 100px;
                 }
-                /* :host([state=complete]) {
-                    background-color: #d5f0de;
-                    border: solid 2px #c5e9d2;
-                } */
                 slot[name=thumbnail] {
                     display: none;
                 }
@@ -52,20 +50,11 @@ export class _ extends LitElement {
                 }
 
                 .drag-here-text {
-                    color: white;
                     white-space: pre-wrap;
                     font-size: 14px;
                     font-weight: bold;
-                    font-stretch: normal;
-                    font-style: normal;
-                    line-height: 1.29;
-                    letter-spacing: normal;
                     text-align: center;
-                    color: var(--white);
                     margin: 0;
-                }
-                .drag-over .drag-here-text {
-                    color: transparent;
                 }
             `,
         ];
@@ -76,6 +65,9 @@ export class _ extends LitElement {
 
     @property()
     activeModuleKind: ModuleKind = "cover";
+
+    @property({ type: Boolean, reflect: true })
+    coverOnly: boolean = false;
 
     @property()
     publishedThumbnail: string = "";

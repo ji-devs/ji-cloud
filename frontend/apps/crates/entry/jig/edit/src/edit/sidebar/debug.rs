@@ -16,6 +16,7 @@ pub fn get_jig() -> JigResponse {
         author_id: None,
         author_name: None,
         published_at: None,
+        first_cover_assigned: true,
         jig_data: JigData {
             draft_or_live: DraftOrLive::Draft,
             display_name: "hello world".to_string(),
