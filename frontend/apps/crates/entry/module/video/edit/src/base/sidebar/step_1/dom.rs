@@ -15,14 +15,14 @@ pub fn render(state: Rc<Step1>) -> Dom {
             async move {}
         })))
         .children(&mut [
-            render_tab(state.clone(), MenuTabKind::Image),
+            render_tab(state.clone(), MenuTabKind::BackgroundImage),
             render_tab(state.clone(), MenuTabKind::FillColor),
             render_tab(state.clone(), MenuTabKind::Overlay),
             html!("module-sidebar-body", {
                 .property("slot", "body")
                 .child_signal(state.tab.signal_cloned().map(|tab| {
                     match tab {
-                        Tab::Image(state) => {
+                        Tab::BackgroundImage(state) => {
                             Some(render_image_search(state, None))
                         },
                         Tab::FillColor(state) => {
