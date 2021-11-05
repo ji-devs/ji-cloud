@@ -12,7 +12,8 @@ name = "transcode"
 [dependencies]
 shared = { path = "../../../shared/rust" }
 utils = { path = "../../../frontend/apps/crates/utils" }
-scan_fmt = "0.2.5"
+components = { path = "../../../frontend/apps/crates/components" }
+scan_fmt = "0.2.6"
 structopt = "^0.3"
 simplelog = "^0.8"
 cfg-if = "^0.1"
