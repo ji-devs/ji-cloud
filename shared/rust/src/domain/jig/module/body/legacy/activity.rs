@@ -1,4 +1,4 @@
-use crate::domain::jig::module::body::_groups::design::TraceShape;
+use crate::domain::jig::module::body::_groups::design::{TraceShape, YoutubeUrl};
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 
@@ -8,6 +8,7 @@ pub enum Activity {
     Questions(Questions),
     SaySomething(SaySomething),
     Soundboard(Soundboard),
+    Video(Video),
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -53,7 +54,21 @@ pub struct SoundboardItem {
     pub hotspot: Hotspot,
 }
 
-// used in multiple activities
+#[skip_serializing_none]
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Video {
+    pub transform_matrix: Option<[f64; 16]>,
+    pub src: VideoSource,
+    pub range: Option<(f64, f64)>,
+}
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "snake_case")]
+pub enum VideoSource {
+    Youtube(YoutubeUrl),
+    Direct(String),
+}
+
+////////// used in multiple activities
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 #[serde(rename_all = "snake_case")]
 pub enum AdvanceTrigger {

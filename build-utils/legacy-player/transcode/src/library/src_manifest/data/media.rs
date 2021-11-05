@@ -6,7 +6,7 @@ pub struct Media {
     pub url: String,
     pub basepath: String,
     pub filename: String,
-    pub transcode: Option<MediaTranscode>,
+    pub transcode: Option<(MediaTranscode, String)>,
 }
 
 impl Media {
@@ -20,5 +20,6 @@ impl Media {
 }
 
 pub enum MediaTranscode {
-    Audio
+    Audio,
+    Video
 }

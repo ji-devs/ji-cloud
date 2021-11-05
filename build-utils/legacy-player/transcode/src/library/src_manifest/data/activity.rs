@@ -90,18 +90,19 @@ pub struct ActivitySettings {
     pub bg_audio: Option<String>,
 
     #[serde(rename="videoRange")]
-    pub range: Option<VideoRange>,
+    pub video_range: Option<VideoRange>,
 
     #[serde(rename="videoTitle")]
-    pub title: Option<String>,
+    pub video_title: Option<String>,
     
     #[serde(rename="videoURL")]
-    pub url: Option<String>,
+    pub video_url: Option<String>,
+
+    #[serde(rename="videoThumbURL")]
+    pub video_thumb_url: Option<String>, 
 
     pub transform: Option<Transform>,
 
-    #[serde(rename="videoThumbURL")]
-    pub img_thumb: Option<String>, 
 
 
     #[serde(rename="showShapeV2")]

@@ -32,6 +32,12 @@ use reqwest::Client;
 // https://jitap.net/activities/gen8/play/say-something-options
 // https://d24o39yp3ttic8.cloudfront.net/86DCDC1D-64CB-4198-A866-257E213F0405/game.json
 
+// play testing video - 17771 
+// https://jitap.net/activities/genx/play/ 
+// https://d24o39yp3ttic8.cloudfront.net/94FB3C73-FE29-46A8-933D-75D261DD4B8F/game.json
+
+// url
+// http://localhost:4104/module/legacy/play/debug?game_id=ID&slide_index=0&example=true
 
 #[tokio::main]
 async fn main() {
@@ -49,7 +55,8 @@ async fn main() {
             .game_json_url
             .as_ref()
             .map(|x| x.as_str())
-            .unwrap_or("https://d24o39yp3ttic8.cloudfront.net/9F5AD80D-7D86-4AB9-AB11-C942B162923E/game.json")
+            //.unwrap_or("https://d24o39yp3ttic8.cloudfront.net/6A973171-C29A-4C99-A650-8033F996C6E7/game.json")
+            .unwrap_or("https://d24o39yp3ttic8.cloudfront.net/94FB3C73-FE29-46A8-933D-75D261DD4B8F/game.json")
     ).await;
 }
 
@@ -163,11 +170,11 @@ async fn transcode_game(opts: &Opts, client:Client, game_json_url: &str) {
                     continue;
                 }
 
-                if let Some(transcode) = media.transcode.as_ref() {
+                if let Some((transcode, filename_dest)) = media.transcode.as_ref() {
                     match transcode {
                         MediaTranscode::Audio => {
  
-                            let dest_file_path = dest_dir.join(&format!("{}.mp3", media.file_stem()));
+                            let dest_file_path = dest_dir.join(filename_dest);
                             if !opts.skip_transcode_exists || !dest_file_path.exists() {
                                 let dest_file_path = dest_file_path.to_str().unwrap();
                                 log::info!("converting audio {} to {}...", media.file_stem(), dest_file_path);
@@ -182,6 +189,33 @@ async fn transcode_game(opts: &Opts, client:Client, game_json_url: &str) {
                                     .expect("failed to execute process");
                             }
                         },
+                        MediaTranscode::Video => {
+ 
+                            let dest_file_path = dest_dir.join(filename_dest);
+                            if !opts.skip_transcode_exists || !dest_file_path.exists() {
+                                let dest_file_path = dest_file_path.to_str().unwrap();
+                                log::info!("converting video {} to {}...", media.file_stem(), dest_file_path);
+
+                                Command::new("ffmpeg")
+                                    .arg("-i")
+                                    .arg(src_file_path_str)
+                                    .arg("-vcodec")
+                                    .arg("libx264")
+                                    .arg("-acodec")
+                                    .arg("aac")
+                                    .arg("-pix_fmt")
+                                    .arg("yuv420p")
+                                    .arg("-crf")
+                                    .arg("20")
+                                    .arg("-maxrate")
+                                    .arg("1M")
+                                    .arg(dest_file_path)
+                                    .output()
+                                    .expect("failed to execute process");
+                            }
+                        },
+
+                        // ffmpeg -an -i input.mov -vcodec libx264 -pix_fmt yuv420p -profile:v baseline -level 3 output.mp4
 
                         // no longer transcoding animation
                         // MediaTranscode::Animation => {

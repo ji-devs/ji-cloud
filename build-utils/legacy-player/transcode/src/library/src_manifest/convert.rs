@@ -4,8 +4,12 @@ use std::{
     path::{Path, PathBuf},
     fs::File,
     fmt,
-    future::Future
+    future::Future,
+    convert::TryFrom,
 };
+
+use components::stickers::video::ext::{YoutubeUrlExt};
+use scan_fmt::scan_fmt;
 use super::{
     super::super::options::*,
     MediaTranscode, 
@@ -34,7 +38,7 @@ use shared::domain::jig::{
         ModuleBody, 
         body::{
             Transform,
-            _groups::design::{PathCommand, TraceKind, TraceShape},
+            _groups::design::{PathCommand, TraceKind, TraceShape, YoutubeUrl},
             legacy::{
                 ModuleData,
                 slide::*,
@@ -134,9 +138,11 @@ impl SrcSlide {
         if filename.is_empty() {
             None
         } else {
-            let filename_mp3 = format!("{}.mp3", Path::new(filename).file_stem().unwrap().to_str().unwrap().to_string());
 
             let url = format!("{}/{}", base_url, filename);
+
+            let filename = Path::new(&filename).file_name().unwrap().to_str().unwrap().to_string();
+            let filename_dest = format!("{}.mp3", Path::new(&filename).file_stem().unwrap().to_str().unwrap().to_string());
 
             match client.head(&url)
                 .send()
@@ -148,13 +154,13 @@ impl SrcSlide {
                         let media = Media {
                             url, 
                             basepath: format!("slides/{}/activity", slide_id), 
-                            filename: filename_mp3.to_string(),
-                            transcode: Some(MediaTranscode::Audio)
+                            filename,
+                            transcode: Some((MediaTranscode::Audio, filename_dest.clone()))
                         };
 
                         medias.push(media);
 
-                        Some(filename_mp3)
+                        Some(filename_dest)
                     },
                     Err(_) => {
                         if allowed_empty {
@@ -163,6 +169,45 @@ impl SrcSlide {
                         } else {
                             panic!("{} is 404 and not allowed to be", url);
                         }
+                    }
+                }
+        }
+    }
+
+
+    async fn make_video_media(&self, client: &Client, base_url: &str, filename: &str, allowed_empty: bool, mut medias: &mut Vec<Media>) -> Option<String> {
+
+        let slide_id = self.slide_id(); 
+
+        if filename.is_empty() {
+            None
+        } else {
+            let filename = Path::new(&filename).file_name().unwrap().to_str().unwrap().to_string();
+            let filename_dest = format!("{}.mp4", Path::new(&filename).file_stem().unwrap().to_str().unwrap().to_string());
+
+            let url = format!("{}/video/{}", base_url, filename);
+
+            match client.head(&url)
+                .send()
+                .await
+                .unwrap()
+                .error_for_status() {
+                    Ok(_) => {
+
+                        let media = Media {
+                            url, 
+                            basepath: format!("slides/{}/activity", slide_id), 
+                            filename,
+                            transcode: Some((MediaTranscode::Video, filename_dest.clone()))
+                        };
+
+                        medias.push(media);
+
+                        Some(filename_dest)
+                    },
+
+                    Err(_) => {
+                        panic!("{} is 404 and not allowed to be", url);
                     }
                 }
         }
@@ -296,6 +341,40 @@ impl SrcSlide {
                             items
                         }))
                     },
+                    SrcActivityKind::Video => {
+                        match activity.settings.video_url {
+                            None => None,
+                            Some(video_url) => {
+                                let transform_matrix = activity.settings.transform.map(convert_transform);
+                                let video_url = video_url.replace("http://", "https://");
+
+                                let src = match <YoutubeUrl as YoutubeUrlExt>::try_from(video_url.clone()) {
+                                    Ok(yt) => {
+                                        log::info!("yt: {}", yt.get_id());
+                                        VideoSource::Youtube(yt)
+                                    },
+                                    Err(_) => {
+                                        let video_url = video_url.replace("local://", "");
+
+                                        let filename = self.make_video_media(&client, base_url, &video_url, false, &mut medias).await.unwrap();
+
+                                        log::info!("not yt: {}", filename);
+                                        VideoSource::Direct(filename)
+                                    }
+                                };
+
+                                let range = activity.settings.video_range.and_then(|range_str| {
+                                    scan_fmt!(&range_str, "{{{}, {}}}", f64, f64).ok()
+                                });
+                                
+                                Some(Activity::Video(Video {
+                                    transform_matrix,
+                                    src,
+                                    range
+                                }))
+                            }
+                        } 
+                    },
                     _ => None
                 }
             }
@@ -328,26 +407,32 @@ fn convert_design(game_id: &str, slide_id: &str, base_url: &str, mut medias: &mu
     let mut stickers: Vec<Sticker> = Vec::new();
     let mut bgs:Vec<String> = Vec::new();
   
-    let mut make_media = |filename:&str, transcode:Option<MediaTranscode>| -> Media {
-        Media { 
-            url: format!("{}/{}/layers/{}", base_url, slide_id, filename), 
-            basepath: format!("slides/{}", slide_id), 
-            filename: filename.to_string(),
-            transcode
-        }
-    };
-
     for layer in layers {
 
         if let Some(filename) = layer.filename.as_ref() {
-            medias.push(make_media(&filename, None));
-        }
-        if let Some(filename) = layer.audio.as_ref() {
-            medias.push(make_media(&filename, Some(MediaTranscode::Audio)));
+            medias.push(
+                Media { 
+                    url: format!("{}/{}/layers/{}", base_url, slide_id, filename), 
+                    basepath: format!("slides/{}", slide_id), 
+                    filename: filename.to_string(),
+                    transcode: None
+                }
+            );
         }
 
-        /// as of today, mp3 has full cross-browser support
-        let audio_filename = layer.audio.as_ref().map(|audio| format!("{}.mp3", Path::new(&audio).file_stem().unwrap().to_str().unwrap().to_string()));
+        let audio_filename = layer.audio.as_ref().map(|audio| {
+                let filename_dest = format!("{}.mp3", Path::new(&audio).file_stem().unwrap().to_str().unwrap().to_string());
+
+                medias.push(Media { 
+                    url: format!("{}/{}/layers/{}", base_url, slide_id, audio), 
+                    basepath: format!("slides/{}", slide_id), 
+                    filename: audio.to_string(),
+                    transcode: Some((MediaTranscode::Audio, filename_dest.clone()))
+                });
+
+                filename_dest
+        });
+
 
         match layer.kind {
             SrcLayerKind::Background => {
