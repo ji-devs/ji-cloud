@@ -25,7 +25,7 @@ impl Step2 {
     pub fn new(sidebar: Rc<Sidebar>) -> Rc<Self> {
         let kind = match crate::debug::settings().bg_tab {
             Some(kind) => kind,
-            None => MenuTabKind::Image,
+            None => MenuTabKind::BackgroundImage,
         };
 
         let tab = Mutable::new(Tab::new(sidebar.base.clone(), kind));
@@ -36,8 +36,7 @@ impl Step2 {
 
 #[derive(Clone)]
 pub enum Tab {
-    //Image(Rc<ImageSearchState>),
-    Image(Rc<ImageSearchState>),
+    BackgroundImage(Rc<ImageSearchState>),
     FillColor(Rc<ColorPickerState>),
     Overlay(Rc<ImageSearchState>),
 }
@@ -56,7 +55,7 @@ impl Tab {
                 })));
                 let state = ImageSearchState::new(opts, callbacks);
 
-                Self::Image(Rc::new(state))
+                Self::BackgroundImage(Rc::new(state))
             }
             MenuTabKind::FillColor => {
                 let state = ColorPickerState::new(
@@ -83,13 +82,13 @@ impl Tab {
                 Self::Overlay(Rc::new(state))
             }
 
-            _ => unimplemented!("unsupported tab kind!"),
+            fdsa => unimplemented!("unsupported tab kind! {:?}", fdsa),
         }
     }
 
     pub fn kind(&self) -> MenuTabKind {
         match self {
-            Self::Image(_) => MenuTabKind::Image,
+            Self::BackgroundImage(_) => MenuTabKind::BackgroundImage,
             Self::FillColor(_) => MenuTabKind::FillColor,
             Self::Overlay(_) => MenuTabKind::Overlay,
         }
@@ -97,7 +96,7 @@ impl Tab {
 
     pub fn as_index(&self) -> usize {
         match self {
-            Self::Image(_) => 0,
+            Self::BackgroundImage(_) => 0,
             Self::FillColor(_) => 1,
             Self::Overlay(_) => 2,
         }

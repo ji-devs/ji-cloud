@@ -22,7 +22,7 @@ pub fn render(state: Rc<Step2>) -> Dom {
                 .property("slot", "body")
                 .child_signal(state.tab.signal_cloned().map(|tab| {
                     match tab {
-                        Tab::Image(state) => {
+                        Tab::BackgroundImage(state) => {
                             Some(render_image_search(state, None))
                         },
                         Tab::FillColor(state) => {
