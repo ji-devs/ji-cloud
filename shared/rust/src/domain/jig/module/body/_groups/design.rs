@@ -32,16 +32,16 @@ pub struct Backgrounds {
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
-/// Stickers are things that can be rendered and transformed
+/// Stickers are things that can be rendered and transforme
 pub enum Sticker {
     /// Sprites
-    #[serde(rename_all = "snake_case")]
+    #[serde(alias = "sprite")]
     Sprite(Sprite),
     /// Text
-    #[serde(rename_all = "snake_case")]
+    #[serde(alias = "text")]
     Text(Text),
     /// Video
-    #[serde(rename_all = "snake_case")]
+    #[serde(alias = "video")]
     Video(Video),
 }
 
@@ -132,7 +132,6 @@ pub struct Trace {
 }
 
 #[derive(Clone, Copy, Serialize, Deserialize, Debug, PartialEq, Eq)]
-#[serde(rename_all = "snake_case")]
 /// Trace kind
 pub enum TraceKind {
     /// Wrong (red color)
@@ -150,7 +149,6 @@ impl AsRef<Trace> for Trace {
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
-#[serde(rename_all = "snake_case")]
 /// Trace shape
 pub enum TraceShape {
     /// width and height
