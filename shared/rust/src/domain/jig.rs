@@ -410,7 +410,7 @@ pub struct JigResponse {
     pub author_name: Option<String>,
 
     /// True if Jig cover is set
-    /// 
+    ///
     /// NOTE: the cover is always technically there, this is just to indicate if the user has dragged the cover,
     /// needed just for the UI
     pub first_cover_assigned: bool,
