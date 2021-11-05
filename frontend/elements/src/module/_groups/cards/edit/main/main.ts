@@ -11,16 +11,17 @@ export class _ extends LitElement {
                     overflow-x: hidden;
                 }
                 section {
-                    display: flex;
-                    flex-wrap: wrap;
-                    justify-content: start;
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, 353px);
+                    justify-content: center;
+                    width: 100%;
                     margin: 24px;
                     gap: 24px;
                 }
                 @media (min-width: 1920px) {
                     section {
-                        margin: 32px;
-                        gap: 32px;
+                        margin: 30px;
+                        gap: 30px;
                     }
                 }
             `,

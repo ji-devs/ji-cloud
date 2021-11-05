@@ -39,11 +39,11 @@ export class _ extends LitElement {
                 font-weight: 500;
             }
             .results {
-                display: flex;
-                flex-wrap: wrap;
+                /* display: flex;
+                flex-wrap: wrap; */
 
-                /* display: grid;
-                grid-template-columns: repeat(auto-fill, 354px); */
+                display: grid;
+                grid-template-columns: repeat(auto-fill, 354px);
 
                 justify-content: space-between;
                 row-gap: 80px;
