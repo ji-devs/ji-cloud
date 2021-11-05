@@ -50,13 +50,9 @@ export class _ extends LitElement {
               height: var(--card-size);
           }
 
-          ::slotted(img-ui) {
-              width: 56px;
-              height: 56px;
-          }
-
-          ::slotted(img-ji) {
+          ::slotted(*) {
               --img-size: calc(var(--card-size) - ((var(--border-size) * 2) + var(--img-padding)));
+              padding: calc(var(--img-padding) / 2);
               width: var(--img-size); 
               height: var(--img-size); 
               object-fit: contain;
@@ -75,9 +71,7 @@ export class _ extends LitElement {
           }
 
           .front, .back {
-              justify-content: center;
-              align-items: center;
-              display: flex;
+              display: grid;
               position: absolute;
               -webkit-backface-visibility: hidden; /* Safari */
                   backface-visibility: hidden;
@@ -91,6 +85,10 @@ export class _ extends LitElement {
           }
             .back > img-ui {
                 object-fit: cover;
+            }
+            ::slotted(*) {
+                display: grid;
+                place-content: center;
             }
     `];
   }
