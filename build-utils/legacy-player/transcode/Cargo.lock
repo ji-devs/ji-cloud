@@ -1682,17 +1682,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "simple-html-template"
-version = "0.2.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "619f4412d7c5f180fc1526a9e26da6658879923f427c2fafcd36a8f9cf7516ec"
-dependencies = [
- "cfg-if 0.1.10",
- "wasm-bindgen",
- "web-sys",
-]
-
-[[package]]
 name = "simplelog"
 version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2114,7 +2103,6 @@ dependencies = [
  "serde_qs",
  "serde_repr",
  "shared",
- "simple-html-template",
  "strum",
  "strum_macros",
  "thiserror",
