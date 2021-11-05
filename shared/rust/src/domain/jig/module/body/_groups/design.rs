@@ -102,10 +102,10 @@ pub struct Video {
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
-#[serde(rename_all = "snake_case")]
 /// Host of video
 pub enum VideoHost {
     /// YouTube
+    #[serde(alias = "youtube")]
     Youtube(YoutubeUrl),
 }
 
