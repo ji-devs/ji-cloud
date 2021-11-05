@@ -809,7 +809,7 @@ pub async fn count(db: &PgPool, privacy_level: PrivacyLevel) -> sqlx::Result<u64
 select count(*) as "count!: i64"
 from jig_data
 inner join jig on jig.live_id = jig_data.id
-where privacy_level = $1 
+where privacy_level = $1 and published_at is not null
 "#,
         privacy_level as i16,
     )

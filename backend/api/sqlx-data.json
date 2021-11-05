@@ -1865,6 +1865,26 @@
       "nullable": []
     }
   },
+  "56263a7b5fb586f235a32392781152540d13713df3c932a73ff21c57ddfcf827": {
+    "query": "\nselect count(*) as \"count!: i64\"\nfrom jig_data\ninner join jig on jig.live_id = jig_data.id\nwhere privacy_level = $1 and published_at is not null\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "count!: i64",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int2"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
   "56567f2d09b683dfb6209093ff0ded597cda78b614466626b84956d955eb69c6": {
     "query": "\n        update jig_play_count\n        set play_count = play_count + 1\n        where jig_id = $1\n        ",
     "describe": {
@@ -4538,26 +4558,6 @@
       "nullable": []
     }
   },
-  "cdb9e3cb8c738d50f4e5037fe8df4b688878f794a7e0dadd8e547278bc17ae85": {
-    "query": "\nselect count(*) as \"count!: i64\"\nfrom jig_data\ninner join jig on jig.live_id = jig_data.id\nwhere privacy_level = $1 \n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "count!: i64",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int2"
-        ]
-      },
-      "nullable": [
-        null
-      ]
-    }
-  },
   "d201d9e5aec8be8b9ecf9a698f834a73a0fabc887886d198e12d387b8e9d78f5": {
     "query": "\nselect kind as \"kind: ImageKind\"\nfrom image_metadata\ninner join image_upload on image_metadata.id = image_upload.image_id\nwhere (id = $1 and uploaded_at is not null and processed_at >= uploaded_at is not true)\nfor no key update of image_upload\nfor share of image_metadata\nskip locked\n        ",
     "describe": {
@@ -4683,13 +4683,13 @@
         ]
       },
       "nullable": [
+        false,
         true,
         true,
-        true,
-        true,
-        true,
-        true,
-        true,
+        null,
+        false,
+        false,
+        false,
         true
       ]
     }
