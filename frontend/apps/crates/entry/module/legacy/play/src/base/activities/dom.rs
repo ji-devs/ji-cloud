@@ -6,6 +6,7 @@ use super::{
     say_something::SaySomething,
     soundboard::Soundboard,
     video::Video,
+    ask_questions::AskQuestions,
 };
 
 impl Base {
@@ -20,6 +21,9 @@ impl Base {
                 },
                 Activity::Video(activity) => {
                     Video::new(self.clone(), activity).render()
+                },
+                Activity::AskQuestions(activity) => {
+                    AskQuestions::new(self.clone(), activity).render()
                 },
                 _ => html!("empty-fragment"),
             },

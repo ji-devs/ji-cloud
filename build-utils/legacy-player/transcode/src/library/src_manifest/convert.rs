@@ -245,137 +245,160 @@ impl SrcSlide {
             if activities_len == 0 {
                 None
             } else {
-                let activity = self.activities[0].clone();
+                if self.activity_kind == SrcActivityKind::Questions {
+                    let mut items:Vec<QuestionItem> = Vec::with_capacity(activities_len);
 
+                    for activity in self.activities.clone().into_iter() {
 
-                let audio_filename = self.make_audio_media(&client, base_url, &activity.intro_audio, false, &mut medias).await;
-                let bg_audio_filename = match activity.settings.bg_audio {
-                    None => None,
-                    Some(bg_audio) => self.make_audio_media(&client, base_url, &bg_audio, true, &mut medias).await
-                };
-
-                match self.activity_kind {
-                    // SrcActivityKind::Questions => {
-                    //     let questions: Vec<Question> = 
-                    //         self.activities
-                    //             .into_iter()
-                    //             .map(|activity| {
-                    //                 activity.convert_question() 
-                    //             })
-                    //             .collect();
-
-                    //     Some(Activity::Questions(Questions {
-                    //         questions
-                    //     }))
-                    // },
-                    SrcActivityKind::SaySomething => {
-                        Some(Activity::SaySomething(SaySomething {
-                            audio_filename,
-                            advance_trigger: if activity.settings.advance.unwrap_or_default() {
-                                AdvanceTrigger::AudioEnd
-                            } else {
-                                AdvanceTrigger::Tap
-                            },
-                            advance_index: activity.settings.jump_index.and_then(validate_jump_index)
-                        }))
-                    },
-                    SrcActivityKind::Soundboard => {
-
-                        let mut items:Vec<SoundboardItem> = Vec::new();
-                        let mut highlight_color:Option<String> = None;
-
-                        for shape in activity.shapes.into_iter() {
-                            match (highlight_color.as_ref(), shape.settings.highlight_color.as_ref()) {
-                                (Some(c1), Some(c2)) => {
-                                    if c1 != c2.trim() {
-                                        panic!("soundboard highlight colors changed between shapes: {} vs. {}", c1, c2);
-                                    }
-                                },
-                                (None, Some(c)) => {
-                                    log::info!("highlight color: {}", c);
-
-                                    highlight_color = Some(c.trim().to_string());
-                                },
-                                _ => {}
-                            }
-
-
-                            items.push(SoundboardItem {
-                                audio_filename: self.make_audio_media(&client, base_url, &shape.audio, false, &mut medias).await,
-                                text: map_text(&shape.settings.text),
-                                jump_index: shape.settings.jump_index.and_then(validate_jump_index),
-                                hotspot: shape.convert_to_hotspot()
-                            });
+                        if activity.settings.bg_audio.is_some() {
+                            panic!("Ask a question shouldn't have bg audio set..");
                         }
 
-                        let one_at_a_time = match (activity.settings.fun_mode, activity.settings.fun_mode_v2) {
-                            (Some(x1), Some(x2)) => {
-                                if x1 != x2 {
-                                    panic!("soundmode and v2 set, but different!");
+                        if activity.shapes.len() > 1 {
+                            panic!("Ask a question can't have more than one shape...");
+                        } else if activity.shapes.is_empty() {
+                            log::warn!("ask a question with no questions?? skipping...");
+                        } else {
+                            let question_filename = self.make_audio_media(&client, base_url, &activity.intro_audio, false, &mut medias).await;
+                            let shape = activity.shapes[0].clone();
+                            let answer_filename = self.make_audio_media(&client, base_url, &shape.audio, false, &mut medias).await;
+                            let wrong_filename = self.make_audio_media(&client, base_url, &shape.audio_2, false, &mut medias).await;
+                            let hotspot = shape.convert_to_hotspot();
+
+                            items.push(QuestionItem{
+                                question_filename,
+                                answer_filename,
+                                wrong_filename,
+                                hotspot
+                            });
+                        }
+                    }
+
+                    Some(Activity::AskQuestions(AskQuestions {
+                        items
+                    }))
+                } else {
+                    let activity = self.activities[0].clone();
+
+                    let audio_filename = self.make_audio_media(&client, base_url, &activity.intro_audio, false, &mut medias).await;
+                    let bg_audio_filename = match activity.settings.bg_audio {
+                        None => None,
+                        Some(bg_audio) => self.make_audio_media(&client, base_url, &bg_audio, true, &mut medias).await
+                    };
+
+                    match self.activity_kind {
+                        SrcActivityKind::SaySomething => {
+                            Some(Activity::SaySomething(SaySomething {
+                                audio_filename,
+                                advance_trigger: if activity.settings.advance.unwrap_or_default() {
+                                    AdvanceTrigger::AudioEnd
+                                } else {
+                                    AdvanceTrigger::Tap
+                                },
+                                advance_index: activity.settings.jump_index.and_then(validate_jump_index)
+                            }))
+                        },
+                        SrcActivityKind::Soundboard => {
+
+                            let mut items:Vec<SoundboardItem> = Vec::new();
+                            let mut highlight_color:Option<String> = None;
+
+                            for shape in activity.shapes.into_iter() {
+                                match (highlight_color.as_ref(), shape.settings.highlight_color.as_ref()) {
+                                    (Some(c1), Some(c2)) => {
+                                        if c1 != c2.trim() {
+                                            panic!("soundboard highlight colors changed between shapes: {} vs. {}", c1, c2);
+                                        }
+                                    },
+                                    (None, Some(c)) => {
+                                        log::info!("highlight color: {}", c);
+
+                                        highlight_color = Some(c.trim().to_string());
+                                    },
+                                    _ => {}
                                 }
 
-                                !x1
-                            },
-                            (Some(x), None) => {
-                                !x
-                            },
-                            (None, Some(x)) => {
-                                !x
-                            },
-                            (None, None) => {
-                                false
-                            },
-                        };
 
-                        let show_hints = match activity.settings.hide_hints {
-                            None => false,
-                            Some(x) => !x
-                        };
-
-                        Some(Activity::Soundboard(Soundboard{
-                            audio_filename,
-                            bg_audio_filename,
-                            highlight_color,
-                            one_at_a_time,
-                            show_hints,
-                            items
-                        }))
-                    },
-                    SrcActivityKind::Video => {
-                        match activity.settings.video_url {
-                            None => None,
-                            Some(video_url) => {
-                                let transform_matrix = activity.settings.transform.map(convert_transform);
-                                let video_url = video_url.replace("http://", "https://");
-
-                                let src = match <YoutubeUrl as YoutubeUrlExt>::try_from(video_url.clone()) {
-                                    Ok(yt) => {
-                                        log::info!("yt: {}", yt.get_id());
-                                        VideoSource::Youtube(yt)
-                                    },
-                                    Err(_) => {
-                                        let video_url = video_url.replace("local://", "");
-
-                                        let filename = self.make_video_media(&client, base_url, &video_url, false, &mut medias).await.unwrap();
-
-                                        log::info!("not yt: {}", filename);
-                                        VideoSource::Direct(filename)
-                                    }
-                                };
-
-                                let range = activity.settings.video_range.and_then(|range_str| {
-                                    scan_fmt!(&range_str, "{{{}, {}}}", f64, f64).ok()
+                                items.push(SoundboardItem {
+                                    audio_filename: self.make_audio_media(&client, base_url, &shape.audio, false, &mut medias).await,
+                                    text: map_text(&shape.settings.text),
+                                    jump_index: shape.settings.jump_index.and_then(validate_jump_index),
+                                    hotspot: shape.convert_to_hotspot()
                                 });
-                                
-                                Some(Activity::Video(Video {
-                                    transform_matrix,
-                                    src,
-                                    range
-                                }))
                             }
-                        } 
-                    },
-                    _ => None
+
+                            let one_at_a_time = match (activity.settings.fun_mode, activity.settings.fun_mode_v2) {
+                                (Some(x1), Some(x2)) => {
+                                    if x1 != x2 {
+                                        panic!("soundmode and v2 set, but different!");
+                                    }
+
+                                    !x1
+                                },
+                                (Some(x), None) => {
+                                    !x
+                                },
+                                (None, Some(x)) => {
+                                    !x
+                                },
+                                (None, None) => {
+                                    false
+                                },
+                            };
+
+                            let show_hints = match activity.settings.hide_hints {
+                                None => false,
+                                Some(x) => !x
+                            };
+
+                            Some(Activity::Soundboard(Soundboard{
+                                audio_filename,
+                                bg_audio_filename,
+                                highlight_color,
+                                one_at_a_time,
+                                show_hints,
+                                items
+                            }))
+                        },
+                        SrcActivityKind::Video => {
+                            match activity.settings.video_url {
+                                None => None,
+                                Some(video_url) => {
+                                    let transform_matrix = activity.settings.transform.map(convert_transform);
+                                    let video_url = video_url.replace("http://", "https://");
+
+                                    let src = match <YoutubeUrl as YoutubeUrlExt>::try_from(video_url.clone()) {
+                                        Ok(yt) => {
+                                            log::info!("yt: {}", yt.get_id());
+                                            VideoSource::Youtube(yt)
+                                        },
+                                        Err(_) => {
+                                            let video_url = video_url.replace("local://", "");
+
+                                            let filename = self.make_video_media(&client, base_url, &video_url, false, &mut medias).await.unwrap();
+
+                                            log::info!("not yt: {}", filename);
+                                            VideoSource::Direct(filename)
+                                        }
+                                    };
+
+                                    let range = activity.settings.video_range.and_then(|range_str| {
+                                        //yes, really
+                                        scan_fmt!(&range_str, "{{{}, {}}}", f64, f64).ok()
+                                    });
+                                    
+                                    Some(Activity::Video(Video {
+                                        transform_matrix,
+                                        src,
+                                        range
+                                    }))
+                                }
+                            } 
+                        },
+                        _ => {
+                            unimplemented!("unsupported activity!");
+                        }
+                    }
                 }
             }
         };
@@ -400,9 +423,7 @@ fn map_text<T: AsRef<str>>(text: &Option<T>) -> Option<String> {
         }
     })
 }
-    // pub hide: bool,
-    // pub hide_toggle: Option<HideToggle>,
-    // pub animation: Option<Animation>
+
 fn convert_design(game_id: &str, slide_id: &str, base_url: &str, mut medias: &mut Vec<Media>, layers: Vec<SrcLayer>) -> Design {
     let mut stickers: Vec<Sticker> = Vec::new();
     let mut bgs:Vec<String> = Vec::new();
@@ -579,25 +600,3 @@ fn strip_path(orig:&str) -> &str {
         Some((_, end)) => end 
     }
 }
-/*
-#[derive(Serialize, Deserialize, Debug)]
-pub struct Slide {
-    pub base_path: String,
-
-    pub image_full: String,
-
-    pub image_thumb: String,
-
-    pub activity: Option<Activity>
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub enum Activity {
-    Questions(Questions)
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct Questions {
-
-}
-*/

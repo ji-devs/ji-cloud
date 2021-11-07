@@ -1,11 +1,12 @@
 use awsm_web::audio::AudioMixer as AwsmAudioMixer;
 use shared::domain::jig::module::body::Audio;
-use shared::domain::jig::{self, JigData};
+use shared::domain::jig::{self, AudioFeedbackPositive, AudioFeedbackNegative, JigData};
 use std::cell::RefCell;
 use std::rc::Rc;
 use utils::{path, prelude::*};
+use rand::prelude::*;
 
-use std::borrow::Cow;
+use std::borrow::{BorrowMut, Cow};
 use std::ops::Deref;
 
 pub use awsm_web::audio::{
@@ -16,6 +17,7 @@ thread_local! {
     pub static AUDIO_MIXER:AudioMixer = AudioMixer {
         inner: Rc::new(AwsmAudioMixer::new(None)),
         settings: Rc::new(RefCell::new(AudioSettings::default())),
+        rng: RefCell::new(thread_rng()),
     }
 }
 
@@ -24,18 +26,18 @@ thread_local! {
 pub struct AudioMixer {
     inner: Rc<AwsmAudioMixer>,
     settings: Rc<RefCell<AudioSettings>>,
+    rng: RefCell<ThreadRng>,
 }
 
 pub struct AudioSettings {
     pub bg: jig::AudioBackground,
+    pub positive: Vec<AudioFeedbackPositive>,
+    pub negative: Vec<AudioFeedbackNegative>,
 }
 
 impl AudioSettings {
-    pub fn new_from_jig(_jig: &JigData) -> Self {
-        Self {
+    pub fn reset_from_jig(&mut self, _jig: &JigData) {
             //TODO...
-            ..Self::default()
-        }
     }
 
     pub fn bg_source(&self) -> impl Into<AudioSource> {
@@ -48,6 +50,8 @@ impl Default for AudioSettings {
     fn default() -> Self {
         Self {
             bg: jig::AudioBackground::FunForKids,
+            positive: AudioFeedbackPositive::variants(),
+            negative: AudioFeedbackNegative::variants()
         }
     }
 }
@@ -79,14 +83,18 @@ impl AudioPath<'_> {
     pub fn new_cdn(cdn_path: String) -> Self {
         Self::Cdn(Cow::Owned(cdn_path))
     }
+
+    pub fn url(&self) -> String {
+        match self {
+            Self::Lib(audio) => path::audio_lib_url(audio.lib, audio.id),
+            Self::Cdn(cdn_path) => path::audio_cdn_url(cdn_path),
+        }
+    }
 }
 
 impl<'a> From<AudioPath<'a>> for AudioSource {
     fn from(audio_path: AudioPath) -> Self {
-        match audio_path {
-            AudioPath::Lib(audio) => AudioSource::Url(path::audio_lib_url(audio.lib, audio.id)),
-            AudioPath::Cdn(cdn_path) => AudioSource::Url(path::audio_cdn_url(cdn_path)),
-        }
+        AudioSource::Url(audio_path.url())
     }
 }
 
@@ -173,9 +181,17 @@ impl From<jig::AudioFeedbackNegative> for AudioPath<'_> {
 
 impl AudioMixer {
     pub fn set_from_jig(&self, jig: &JigData) {
-        *self.settings.borrow_mut() = AudioSettings::new_from_jig(jig);
+        //not sure why this doesn't compile...
+        //self.settings.borrow_mut().reset_from_jig(jig);
     }
 
+    pub fn get_random_positive(&self) -> AudioFeedbackPositive {
+        self.settings.borrow().positive.iter().choose(&mut *self.rng.borrow_mut()).unwrap_ji().clone()
+    }
+
+    pub fn get_random_negative(&self) -> AudioFeedbackNegative {
+        self.settings.borrow().negative.iter().choose(&mut *self.rng.borrow_mut()).unwrap_ji().clone()
+    }
     /// Oneshots are AudioClips because they drop themselves
     /// They're intended solely to be kicked off and not being held anywhere
     /// However, if necessary, they can still be killed imperatively

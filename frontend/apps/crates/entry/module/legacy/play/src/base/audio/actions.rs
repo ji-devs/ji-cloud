@@ -11,6 +11,10 @@ impl AudioManager {
         }));
     }
 
+    pub fn stop_clip(&self) {
+        *self.clip.borrow_mut() = None; 
+    }
+
     pub fn play_clip_on_ended(&self, url:String, f: impl Fn() + 'static) {
         *self.clip.borrow_mut() = Some(AUDIO_MIXER.with(|mixer| {
             mixer.play_on_ended(AudioSource::Url(url), false, f)

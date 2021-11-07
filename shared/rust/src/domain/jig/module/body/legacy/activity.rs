@@ -5,21 +5,23 @@ use serde_with::skip_serializing_none;
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum Activity {
-    Questions(Questions),
+    AskQuestions(AskQuestions),
     SaySomething(SaySomething),
     Soundboard(Soundboard),
     Video(Video),
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Questions {
-    pub questions: Vec<Question>,
+pub struct AskQuestions {
+    pub items: Vec<QuestionItem>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Question {
-    pub audio: String,
-    pub shape: TraceShape,
+pub struct QuestionItem {
+    pub question_filename: Option<String>,
+    pub answer_filename: Option<String>,
+    pub wrong_filename: Option<String>,
+    pub hotspot: Hotspot,
 }
 
 #[skip_serializing_none]
