@@ -284,7 +284,6 @@ from jig
          inner join jig_data on live_id = jig_data.id
 where last_synced_at is null
    or (updated_at is not null and last_synced_at < updated_at)
-   or (privacy_level != 2) -- 2 is private
 limit 100 for no key update skip locked;
      "#
         )
@@ -325,6 +324,7 @@ limit 100 for no key update skip locked;
         .await?;
 
         if requests.is_empty() {
+            log::warn!("Request is empty");
             return Ok(true);
         }
 
