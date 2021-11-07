@@ -5,6 +5,7 @@ use shared::domain::jig::module::body::legacy::activity::Activity;
 use super::{
     say_something::SaySomething,
     soundboard::Soundboard,
+    video::Video,
 };
 
 impl Base {
@@ -16,6 +17,9 @@ impl Base {
                 },
                 Activity::Soundboard(activity) => {
                     Soundboard::new(self.clone(), activity).render()
+                },
+                Activity::Video(activity) => {
+                    Video::new(self.clone(), activity).render()
                 },
                 _ => html!("empty-fragment"),
             },

@@ -47,6 +47,15 @@ export class _ extends LitElement {
     @property({ type: Boolean })
     muted: boolean = false;
 
+    @property({ type: Boolean })
+    hideControls: boolean = false;
+
+    @property({ type: Number })
+    start?: number;
+
+    @property({ type: Number })
+    end?: number;
+
     private player?: YT.Player;
 
     public get playerState(): StateName {
@@ -118,6 +127,9 @@ export class _ extends LitElement {
                 showinfo: 0,
                 modestbranding: 1,
                 cc_load_policy: this.captions ? 1 : 0,
+                controls: this.hideControls ? 0 : 1,
+                start: this.start,
+                end: this.end,
             },
             events: {
                 onStateChange: (e: YT.OnStateChangeEvent) => {
@@ -130,6 +142,8 @@ export class _ extends LitElement {
                     if(this.muted) {
                         this.player?.mute();
                     }
+
+                    this.dispatchEvent(new Event("ready"));
                 },
             }
         });

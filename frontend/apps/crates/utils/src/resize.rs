@@ -110,6 +110,12 @@ impl ResizeInfo {
         (width * full_width, height * full_height)
     }
 
+    /// gets the full size as px
+    pub fn get_full_size_px(&self) -> (f64, f64) {
+        let (full_width, full_height) = self.full_size();
+        self.get_size_px(full_width, full_height)
+    }
+
     /// "rem" really means consistent,
     /// i.e. relative to our reference artboard size
     /// but we typically express that as css rem units so...
