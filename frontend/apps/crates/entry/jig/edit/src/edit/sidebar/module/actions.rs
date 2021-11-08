@@ -17,6 +17,15 @@ pub fn on_module_kind_drop(state: Rc<State>, module_kind: ModuleKind) {
     } else {
         if state.module.is_none() {
             assign_kind(state.clone(), module_kind);
+
+            // if this is the empty module at the end
+            if state.sidebar.jig.jig_data.modules.len() == state.index {
+                state
+                    .sidebar
+                    .modules
+                    .lock_mut()
+                    .push_cloned(Rc::new(None));
+            }
         }
     }
 }

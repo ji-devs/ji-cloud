@@ -35,10 +35,7 @@ impl State {
             .map(|module| Rc::new(Some(module.clone().into())))
             .collect();
 
-        // if no module besides cover add empty
-        if modules.len() <= 1 {
-            modules.push(Rc::new(None));
-        };
+        modules.push(Rc::new(None));
 
         Self {
             jig_edit_state,
