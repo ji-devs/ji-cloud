@@ -73,6 +73,7 @@ impl ModuleDom {
                             },
                             None =>  {
                                 state.sidebar.jig_edit_state.route.set_neq(JigEditRoute::Landing);
+                                state.sidebar.collapsed.set_neq(false);
                             },
                         };
                     })
