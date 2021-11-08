@@ -132,13 +132,17 @@ pub struct Trace {
 }
 
 #[derive(Clone, Copy, Serialize, Deserialize, Debug, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
 /// Trace kind
 pub enum TraceKind {
     /// Wrong (red color)
+    // #[serde(alias = "wrong")]
     Wrong,
     /// Correct (green color)
+    // #[serde(alias = "correct")]
     Correct,
     /// Regular (blue color)
+    // #[serde(alias = "regular")]
     Regular,
 }
 
@@ -149,6 +153,7 @@ impl AsRef<Trace> for Trace {
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
+#[serde(rename_all = "camelCase")]
 /// Trace shape
 pub enum TraceShape {
     /// width and height
@@ -165,7 +170,7 @@ pub enum TraceShape {
 
 #[allow(missing_docs)]
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "camelCase")]
 pub enum PathCommand {
     /// https://svgwg.org/svg2-draft/paths.html#PathDataMovetoCommands
     MoveTo(f64, f64),
