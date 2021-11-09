@@ -78,10 +78,10 @@ impl ImageMetaPage {
                                             "publish" => {
                                                 actions::publish(state.clone())
                                             },
-                                            _ => {
-                                                let section:Section = route.into();
-                                                state.section.set_neq(section);
+                                            "add" => {
+                                                Route::push_state(Route::Admin(AdminRoute::ImageAdd));
                                             }
+                                            _ => { }
                                         }
                                     }))
                                     .property("slot", "header")
