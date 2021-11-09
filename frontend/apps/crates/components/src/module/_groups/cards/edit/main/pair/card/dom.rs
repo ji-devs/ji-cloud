@@ -135,6 +135,10 @@ pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<MainCard<RawData, E>>)
                                 },
                                 Some(image) => {
                                     html!("img-ji", {
+                                        // would like to get rid if the styles here
+                                        .style("height", "148px")
+                                        .style("width", "148px")
+                                        .style("object-fit", "contain")
                                         .property("size", "full")
                                         .property("id", image.id.0.to_string())
                                         .property("lib", image.lib.to_str())
