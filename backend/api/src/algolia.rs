@@ -1,5 +1,9 @@
 use algolia::{
-    filter::{AndFilter, AndFilterable, CommonFilter, FacetFilter, ScoredFacetFilter, TagFilter},
+    filter::{
+        AndFilter, AndFilterable, CommonFilter, CommonFilterKind, FacetFilter, OrFilter,
+        ScoredFacetFilter, TagFilter,
+    },
+    model::attribute::FacetAttribute,
     request::{BatchWriteRequests, SearchQuery, VirtualKeyRestrictions},
     response::SearchResponse,
     ApiKey, AppId, Client as Inner,
@@ -9,6 +13,7 @@ use chrono::Utc;
 use core::settings::AlgoliaSettings;
 use futures::TryStreamExt;
 use serde::Serialize;
+use std::fmt::Display;
 
 use shared::{
     domain::{
@@ -505,6 +510,17 @@ impl SearchKeyStore {
             })
     }
 }
+
+// #[derive(Default)]
+// pub struct CloseOrFilter<T: CommonFilterKind> {
+//     pub close_filters: OrFilter<T>,
+// }
+
+// impl<T: CommonFilterKind> Display for CloseOrFilter<T> {
+//     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+//         write!(f, r#"({})"#, self.close_filters)
+//     }
+// }
 
 /// OR UUIDs then append them to AND filter for a named facet
 fn filters_for_ids_or<T: Into<Uuid> + Copy>(
