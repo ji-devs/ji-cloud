@@ -1,4 +1,4 @@
-use crate::image::search::state::{ImageSearchCheckboxKind, NextPage, SearchMode};
+use crate::image::search::state::{ImageSearchKind, NextPage, SearchMode};
 
 use super::{actions, state::State, types::*};
 use dominator::{clone, html, Dom};
@@ -6,7 +6,7 @@ use futures_signals::{
     signal::SignalExt,
     signal_vec::{MutableVec, SignalVec, SignalVecExt},
 };
-use shared::domain::{jig::module::body::Image, search::WebImageSearchItem};
+use shared::domain::{jig::module::body::{Image, ModeExt}, search::WebImageSearchItem};
 use std::{pin::Pin, rc::Rc};
 use utils::prelude::*;
 
@@ -36,10 +36,10 @@ pub fn render_loaded(state: Rc<State>) -> Dom {
     actions::fetch_init_data(Rc::clone(&state));
 
     html!("image-select", {
-        .property("label", "Select background")
+        .property("label", state.options.kind.label())
         .property("imageMode", {
-            match &state.options.checkbox_kind {
-                Some(ImageSearchCheckboxKind::StickersFilter) => "image",
+            match &state.options.kind {
+                ImageSearchKind::Sticker => "image",
                 _ => "background"
             }
         })
@@ -226,12 +226,12 @@ fn render_filters(state: Rc<State>) -> Dom {
     html!("image-search-filters", {
         .property("slot", "filters")
         .apply(|dom| {
-            if let Some(checkbox_kind) = &state.options.checkbox_kind {
+            if let kind = &state.options.kind {
                 dom.child(html!("input-checkbox", {
                     .property("label", {
-                        match checkbox_kind {
-                            ImageSearchCheckboxKind::BackgroundLayer1Filter | ImageSearchCheckboxKind::BackgroundLayer2Filter => STR_SHOW_ONLY_BACKGROUNDS,
-                            ImageSearchCheckboxKind::StickersFilter => STR_DONT_INCLUDE_BACKGROUND,
+                        match kind {
+                            ImageSearchKind::Background | ImageSearchKind::Overlay => STR_SHOW_ONLY_BACKGROUNDS,
+                            ImageSearchKind::Sticker => STR_DONT_INCLUDE_BACKGROUND,
                         }
                     })
                     .property("slot", "background-checkbox")

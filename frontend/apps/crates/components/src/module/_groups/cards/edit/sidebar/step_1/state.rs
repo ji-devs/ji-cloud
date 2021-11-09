@@ -1,7 +1,7 @@
 use crate::{
     image::search::{
         callbacks::Callbacks as ImageSearchCallbacks,
-        state::{ImageSearchCheckboxKind, ImageSearchOptions, State as ImageSearchState},
+        state::{ImageSearchKind, ImageSearchOptions, State as ImageSearchState},
     },
     lists::{
         dual::{
@@ -74,7 +74,7 @@ impl Tab {
         match kind {
             MenuTabKind::Image => {
                 let opts = ImageSearchOptions {
-                    checkbox_kind: Some(ImageSearchCheckboxKind::StickersFilter),
+                    kind: ImageSearchKind::Sticker,
                     ..ImageSearchOptions::default()
                 };
 

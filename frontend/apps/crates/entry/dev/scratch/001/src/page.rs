@@ -14,7 +14,7 @@ use components::{
     image::search::{
         self as image_search,
         callbacks::Callbacks as ImageSearchCallbacks,
-        state::{ImageSearchCheckboxKind, ImageSearchOptions},
+        state::{ImageSearchKind, ImageSearchOptions},
     },
     text_editor,
 };
@@ -71,7 +71,7 @@ fn render_button(step: u32, label: &str, state: Rc<State>) -> Dom {
 
 pub fn render_image_search() -> Dom {
     let opts = ImageSearchOptions {
-        checkbox_kind: Some(ImageSearchCheckboxKind::BackgroundLayer1Filter),
+        kind: ImageSearchKind::Background,
         ..ImageSearchOptions::default()
     };
     let callbacks = ImageSearchCallbacks::new(Some(|image| {

@@ -1,5 +1,5 @@
 use crate::firebase::wait_for_upload_ready;
-use crate::image::search::state::{ImageSearchCheckboxKind, NextPage, SearchMode, RECENT_COUNT};
+use crate::image::search::state::{ImageSearchKind, NextPage, SearchMode, RECENT_COUNT};
 use crate::image::tag::ImageTag;
 
 use super::super::upload::upload_image;
@@ -104,17 +104,16 @@ pub fn fetch_init_data(state: Rc<State>) {
 
 async fn search_async_web(state: Rc<State>) {
     // let kind = match &state.options.checkbox_kind {
-    //     Some(ImageSearchCheckboxKind::StickersFilter) if state.checkbox_checked.get() => Some(ImageKind::Sticker),
+    //     Some(ImageSearchKind::StickersFilter) if state.checkbox_checked.get() => Some(ImageKind::Sticker),
     //     _ => None,
     // };
 
     let mut tags = state.options.tags.clone().unwrap_or_default();
-    match &state.options.checkbox_kind {
-        Some(ImageSearchCheckboxKind::BackgroundLayer1Filter)
-        | Some(ImageSearchCheckboxKind::BackgroundLayer2Filter) => {
-            let tag = match &state.options.checkbox_kind {
-                Some(ImageSearchCheckboxKind::BackgroundLayer1Filter) => ImageTag::BackgroundLayer1,
-                Some(ImageSearchCheckboxKind::BackgroundLayer2Filter) => ImageTag::BackgroundLayer2,
+    match &state.options.kind {
+        ImageSearchKind::Background | ImageSearchKind::Overlay => {
+            let tag = match &state.options.kind {
+                ImageSearchKind::Background => ImageTag::BackgroundLayer1,
+                ImageSearchKind::Overlay => ImageTag::BackgroundLayer2,
                 _ => unreachable!(),
             };
             if state.checkbox_checked.get() {
@@ -158,20 +157,19 @@ async fn search_async(state: Rc<State>, page: u32) {
         None => unreachable!("User should exist"),
     };
 
-    let kind = match &state.options.checkbox_kind {
-        Some(ImageSearchCheckboxKind::StickersFilter) if state.checkbox_checked.get() => {
+    let kind = match &state.options.kind {
+        ImageSearchKind::Sticker if state.checkbox_checked.get() => {
             Some(ImageKind::Sticker)
         }
         _ => None,
     };
 
     let mut tags = state.options.tags.clone().unwrap_or_default();
-    match &state.options.checkbox_kind {
-        Some(ImageSearchCheckboxKind::BackgroundLayer1Filter)
-        | Some(ImageSearchCheckboxKind::BackgroundLayer2Filter) => {
-            let tag = match &state.options.checkbox_kind {
-                Some(ImageSearchCheckboxKind::BackgroundLayer1Filter) => ImageTag::BackgroundLayer1,
-                Some(ImageSearchCheckboxKind::BackgroundLayer2Filter) => ImageTag::BackgroundLayer2,
+    match &state.options.kind {
+        ImageSearchKind::Background | ImageSearchKind::Overlay => {
+            let tag = match &state.options.kind {
+                ImageSearchKind::Background => ImageTag::BackgroundLayer1,
+                ImageSearchKind::Overlay => ImageTag::BackgroundLayer2,
                 _ => unreachable!(),
             };
             if state.checkbox_checked.get() {

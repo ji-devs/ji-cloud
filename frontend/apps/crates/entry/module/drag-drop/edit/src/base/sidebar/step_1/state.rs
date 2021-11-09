@@ -5,7 +5,7 @@ use components::{
     color_select::state::State as ColorPickerState,
     image::search::{
         callbacks::Callbacks as ImageSearchCallbacks,
-        state::{ImageSearchCheckboxKind, ImageSearchOptions, State as ImageSearchState},
+        state::{ImageSearchKind, ImageSearchOptions, State as ImageSearchState},
     },
     stickers::state::Stickers,
     tabs::MenuTabKind,
@@ -49,7 +49,7 @@ impl Tab {
         match kind {
             MenuTabKind::BackgroundImage => {
                 let opts = ImageSearchOptions {
-                    checkbox_kind: Some(ImageSearchCheckboxKind::BackgroundLayer1Filter),
+                    kind: ImageSearchKind::Background,
                     ..ImageSearchOptions::default()
                 };
 
@@ -73,7 +73,7 @@ impl Tab {
             }
             MenuTabKind::Overlay => {
                 let opts = ImageSearchOptions {
-                    checkbox_kind: Some(ImageSearchCheckboxKind::BackgroundLayer2Filter),
+                    kind: ImageSearchKind::Overlay,
                     ..ImageSearchOptions::default()
                 };
 
@@ -87,7 +87,7 @@ impl Tab {
 
             MenuTabKind::Image => {
                 let opts = ImageSearchOptions {
-                    checkbox_kind: Some(ImageSearchCheckboxKind::StickersFilter),
+                    kind: ImageSearchKind::Sticker,
                     ..ImageSearchOptions::default()
                 };
 

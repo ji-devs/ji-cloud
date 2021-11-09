@@ -13,6 +13,9 @@ use shared::domain::{jig::module::body::Image, meta::ImageStyleId};
 use std::{cell::RefCell, collections::HashSet, rc::Rc};
 
 pub const RECENT_COUNT: u16 = 12;
+const STR_SELECT_IMAGE: &str = "Select image";
+const STR_SELECT_BACKGROUND: &str = "Select background";
+const STR_SELECT_OVERLAY: &str = "Select overlay";
 
 pub struct State {
     pub search_mode: Mutable<SearchMode>,
@@ -58,7 +61,7 @@ impl State {
 }
 
 pub struct ImageSearchOptions {
-    pub checkbox_kind: Option<ImageSearchCheckboxKind>,
+    pub kind: ImageSearchKind,
     pub upload: bool,
     pub filters: bool,
     pub recent: bool,
@@ -69,7 +72,7 @@ pub struct ImageSearchOptions {
 impl Default for ImageSearchOptions {
     fn default() -> Self {
         Self {
-            checkbox_kind: None,
+            kind: ImageSearchKind::Sticker,
             upload: true,
             filters: true,
             recent: true,
@@ -79,10 +82,22 @@ impl Default for ImageSearchOptions {
     }
 }
 
-pub enum ImageSearchCheckboxKind {
-    BackgroundLayer1Filter, // adds TagId::BackgroundLayer1 to the image_tags filter
-    BackgroundLayer2Filter, // adds TagId::BackgroundLayer2 to the image_tags filter
-    StickersFilter,         // sets `kind` to Some(ImageKind::Sticker)
+// sticker is handled with ImageKind instead of ImageTag since we want all images to default to sticker
+// but don't wanna add all manually so we accepted this compromise
+pub enum ImageSearchKind {
+    Background, // adds ImageTag::BackgroundLayer1 to the image_tags filter
+    Overlay,    // adds ImageTag::BackgroundLayer2 to the image_tags filter
+    Sticker,    // sets `kind` to Some(ImageKind::Sticker)
+}
+
+impl ImageSearchKind {
+    pub fn label(&self) -> &str {
+        match self {
+            Self::Background => STR_SELECT_BACKGROUND,
+            Self::Overlay => STR_SELECT_OVERLAY,
+            Self::Sticker => STR_SELECT_IMAGE,
+        }
+    }
 }
 
 #[derive(Clone)]

@@ -2,7 +2,7 @@ use crate::{
     color_select::state::State as ColorPickerState,
     image::search::{
         callbacks::Callbacks as ImageSearchCallbacks,
-        state::{ImageSearchCheckboxKind, ImageSearchOptions, State as ImageSearchState},
+        state::{ImageSearchKind, ImageSearchOptions, State as ImageSearchState},
     },
     module::_groups::cards::edit::state::*,
     tabs::MenuTabKind,
@@ -65,7 +65,7 @@ impl Tab {
             }
             MenuTabKind::BackgroundImage => {
                 let opts = ImageSearchOptions {
-                    checkbox_kind: Some(ImageSearchCheckboxKind::BackgroundLayer1Filter),
+                    kind: ImageSearchKind::Background,
                     ..ImageSearchOptions::default()
                 };
 

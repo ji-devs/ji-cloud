@@ -2,7 +2,7 @@ use crate::base::state::Base;
 use components::{
     image::search::{
         callbacks::Callbacks as ImageSearchCallbacks,
-        state::{ImageSearchCheckboxKind, ImageSearchOptions, State as ImageSearchState},
+        state::{ImageSearchKind, ImageSearchOptions, State as ImageSearchState},
     },
     stickers::state::Stickers,
     tabs::MenuTabKind,
@@ -43,7 +43,7 @@ impl Tab {
             MenuTabKind::Text => Self::Text,
             MenuTabKind::Image => {
                 let opts = ImageSearchOptions {
-                    checkbox_kind: Some(ImageSearchCheckboxKind::StickersFilter),
+                    kind: ImageSearchKind::Sticker,
                     ..ImageSearchOptions::default()
                 };
 
