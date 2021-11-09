@@ -1,11 +1,14 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 import { nothing } from "lit-html";
-import { ModuleKind, STR_MODULE_PREVIEW_TOOLTIP_BODY } from "@elements/module/_common/types";
+import { ModuleKind, STR_MODULE_DISPLAY_NAME } from "@elements/module/_common/types";
 
 const STR_TITLE = "Preview Mode";
 
+const STR_HERE_IS_THE_PREVIEW_1 = "Here’s your ";
+const STR_HERE_IS_THE_PREVIEW_2 = " page for you to preview.";
+const STR_HERE_IS_THE_PREVIEW_3 = "Want to change something? Just go back and edit!";
+
 const STR_TOOLTIP_CONTINUE = "Click to continue";
-const STR_TOOLTIP_GETTING_STARTED = "Time to play!";
 
 @customElement("module-preview-header")
 export class _ extends LitElement {
@@ -51,12 +54,22 @@ export class _ extends LitElement {
                     grid-column: 2;
                     z-index: 1;
                 }
-                .title {
+                .text {
                     grid-column: 1 / -1;
                     grid-row: 1;
                     text-align: center;
+                    display: grid;
+                    place-content: center;
+                }
+                .text h1 {
+                    margin: 0;
                     font-size: 28px;
                     color: var(--dark-blue-4);
+                }
+                .text p {
+                    margin: 0;
+                    font-size: 14px;
+                    color: var(--grey-4);
                 }
             `,
         ];
@@ -84,10 +97,18 @@ export class _ extends LitElement {
                 <div class="nav">
                     <slot name="nav"></slot>
                 </div>
-                <div class="title">${STR_TITLE}</div>
+                <div class="text">
+                    <h1>${STR_TITLE}</h1>
+                    <p>
+                        ${STR_HERE_IS_THE_PREVIEW_1}
+                        ${STR_MODULE_DISPLAY_NAME[this.moduleKind]}
+                        ${STR_HERE_IS_THE_PREVIEW_2}
+                        <br>
+                        ${STR_HERE_IS_THE_PREVIEW_3}
+                    </p>
+                </div>
                 <div class="btn"><slot name="btn"></slot></div>
             </section>
-            ${sectionRef ? renderIntroTooltip(moduleKind, sectionRef) : nothing}
             ${sectionRef && continueTooltip
                 ? renderContinueTooltip(sectionRef)
                 : nothing}
@@ -95,30 +116,6 @@ export class _ extends LitElement {
     }
 }
 
-function renderIntroTooltip(moduleKind: ModuleKind, targetRef: HTMLElement) {
-    const body = STR_MODULE_PREVIEW_TOOLTIP_BODY[moduleKind];
-    if (!body) {
-        return nothing;
-    }
-
-    const showId = `preview-header-intro-${moduleKind}`;
-
-    return html`
-        <overlay-container>
-            <overlay-tooltip-info
-                id="tooltip"
-                .target=${targetRef}
-                targetAnchor="bl"
-                contentAnchor="tl"
-                title="${STR_TOOLTIP_GETTING_STARTED}"
-                body="${body}"
-                showId="${showId}"
-                closeable
-            >
-            </overlay-tooltip-info>
-        </overlay-container>
-    `;
-}
 function renderContinueTooltip(targetRef: HTMLElement) {
     return html`
         <overlay-container>

@@ -50,16 +50,3 @@ export const STR_MODULE_CHOOSE_HEADER:{[key in ModuleKind]:string} = {
     "tracing": "Create a Tracing Activity",
     "video": "Create a Video Activity",
 };
-
-export const STR_MODULE_PREVIEW_TOOLTIP_BODY:{[key in ModuleKind]:string} = {
-    "cover": "Here’s your cover page for you to preview. Want to change something? Just go back and edit!",
-    "flashcards": "Here are your flashcards for you to preview. Want to change something? Just go back and edit!",
-    "matching": "Here’s your matching game for you to preview. Want to change something? Just go back and edit!",
-    "memory": "Here’s your memory game for you to preview. Want to change something? Just go back and edit!",
-    "card-quiz": "Here’s your quiz for you to preview. Want to change something? Just go back and edit!",
-    "tapping-board": "Here’s your Listen & Learn activity for you to preview. Want to change something? Just go back and edit!",
-    "poster": "Here’s your talking poster for you to preview. Want to change something? Just go back and edit!",
-    "tracing": "Here’s your tracing activity for you to preview. Want to change something? Just go back and edit!",
-    "drag-drop": "Here’s your drag & drop activity for you to preview. Want to change something? Just go back and edit!",
-    "video": "Here’s your video for you to preview. Want to change something? Just go back and edit!",
-};
