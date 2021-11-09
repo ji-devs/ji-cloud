@@ -1,9 +1,5 @@
 use algolia::{
-    filter::{
-        AndFilter, AndFilterable, CommonFilter, CommonFilterKind, FacetFilter, OrFilter,
-        ScoredFacetFilter, TagFilter,
-    },
-    model::attribute::FacetAttribute,
+    filter::{AndFilter, AndFilterable, CommonFilter, FacetFilter, ScoredFacetFilter, TagFilter},
     request::{BatchWriteRequests, SearchQuery, VirtualKeyRestrictions},
     response::SearchResponse,
     ApiKey, AppId, Client as Inner,
@@ -13,7 +9,6 @@ use chrono::Utc;
 use core::settings::AlgoliaSettings;
 use futures::TryStreamExt;
 use serde::Serialize;
-use std::fmt::Display;
 
 use shared::{
     domain::{
@@ -511,17 +506,6 @@ impl SearchKeyStore {
     }
 }
 
-// #[derive(Default)]
-// pub struct CloseOrFilter<T: CommonFilterKind> {
-//     pub close_filters: OrFilter<T>,
-// }
-
-// impl<T: CommonFilterKind> Display for CloseOrFilter<T> {
-//     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-//         write!(f, r#"({})"#, self.close_filters)
-//     }
-// }
-
 /// OR UUIDs then append them to AND filter for a named facet
 fn filters_for_ids_or<T: Into<Uuid> + Copy>(
     filters: &mut Vec<Box<dyn AndFilterable>>,
@@ -530,12 +514,8 @@ fn filters_for_ids_or<T: Into<Uuid> + Copy>(
 ) {
     let mut or_filters = algolia::filter::OrFilter::<FacetFilter> { filters: vec![] };
 
-    log::error!("before iteration");
-
     for id in ids.iter().copied() {
         let id: Uuid = id.into();
-
-        log::error!("{}", id.to_string());
 
         // Push onto OR filter
         or_filters.filters.push(CommonFilter {
@@ -547,7 +527,7 @@ fn filters_for_ids_or<T: Into<Uuid> + Copy>(
         })
     }
 
-    log::error!("{}", or_filters.to_string());
+    // (A or B) and (C or D)
 
     if !(or_filters.filters.is_empty()) {
         // append all OR filters to AND filter
@@ -822,8 +802,6 @@ impl Client {
         filters_for_ids_or(&mut and_filters.filters, "categories", categories);
         filters_for_ids_or(&mut and_filters.filters, "goals", goals);
 
-        log::error!("after filtering arrays {}", and_filters);
-
         let results: SearchResponse = self
             .inner
             .search(
@@ -851,8 +829,6 @@ impl Client {
             .map(|hit| hit.object_id.parse())
             .collect::<Result<Vec<_>, _>>()?;
 
-        log::error!("before end");
-
         Ok(Some((results, pages, total_hits)))
     }
 
@@ -874,3 +850,55 @@ impl Client {
         Ok(())
     }
 }
+
+// #[cfg(test)]
+// mod tests {
+//     use std::str::FromStr;
+
+//     use crate::algolia::{filters_for_ids_or, AffiliationId, GoalId};
+//     use algolia::filter::{CommonFilter, TagFilter};
+//     use shared::domain::jig::{JigSearchQuery, PrivacyLevel};
+//     use uuid::Uuid;
+
+//     #[test]
+//     fn separator() {
+//         let mut jig_search = JigSearchQuery {
+//             ..Default::default()
+//         };
+
+//         let mut and_filters = algolia::filter::AndFilter { filters: vec![] };
+
+//         jig_search.affiliations.push(AffiliationId(
+//             Uuid::from_str("037cb6ae-29af-11eb-b921-070d98d7c0c3").unwrap(),
+//         ));
+
+//         jig_search.affiliations.push(AffiliationId(
+//             Uuid::from_str("037cacea-29af-11eb-b921-27857150c361").unwrap(),
+//         ));
+
+//         jig_search.goals.push(GoalId(
+//             Uuid::from_str("037cacea-29af-11eb-b921-27857150c341").unwrap(),
+//         ));
+
+//         let privacy_level: Option<PrivacyLevel> = Some(PrivacyLevel::Public);
+
+//         if let Some(privacy_level) = privacy_level {
+//             and_filters.filters.push(Box::new(CommonFilter {
+//                 filter: TagFilter(privacy_level.as_str().to_owned()),
+//                 invert: false,
+//             }))
+//         }
+
+//         let affiliations: &[AffiliationId] = &jig_search.affiliations;
+//         let goals: &[GoalId] = &jig_search.goals;
+
+//         filters_for_ids_or(&mut and_filters.filters, "affiliations", affiliations);
+//         filters_for_ids_or(&mut and_filters.filters, "goals", goals);
+
+//         println!("{}", &and_filters);
+
+//         assert!(1 == 1);
+//     }
+
+//     fn and_separator() {}
+// }
