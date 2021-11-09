@@ -4683,13 +4683,13 @@
         ]
       },
       "nullable": [
-        false,
         true,
         true,
-        null,
-        false,
-        false,
-        false,
+        true,
+        true,
+        true,
+        true,
+        true,
         true
       ]
     }

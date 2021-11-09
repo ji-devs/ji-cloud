@@ -506,39 +506,62 @@ impl SearchKeyStore {
     }
 }
 
-/// Appends UUIDs to AND filter for a named facet
-fn filters_for_ids<T: Into<Uuid> + Copy>(
+/// OR UUIDs then append them to AND filter for a named facet
+fn filters_for_ids_or<T: Into<Uuid> + Copy>(
     filters: &mut Vec<Box<dyn AndFilterable>>,
     facet_name: &str,
     ids: &[T],
 ) {
+    let mut or_filters = algolia::filter::OrFilter::<FacetFilter> { filters: vec![] };
+
+    log::error!("before iteration");
+
     for id in ids.iter().copied() {
         let id: Uuid = id.into();
-        filters.push(Box::new(CommonFilter {
+
+        log::error!("{}", id.to_string());
+
+        // Push onto OR filter
+        or_filters.filters.push(CommonFilter {
             filter: FacetFilter {
                 facet_name: facet_name.to_owned(),
                 value: id.to_string(),
             },
             invert: false,
-        }))
+        })
+    }
+
+    log::error!("{}", or_filters.to_string());
+
+    if !(or_filters.filters.is_empty()) {
+        // append all OR filters to AND filter
+        filters.push(Box::new(or_filters));
     }
 }
 
-/// Appends int-based IDs to AND filter for a named facet
-fn filters_for_ints<T: Into<i64> + Copy>(
+/// OR ints then append them to AND filter for a named facet
+fn filters_for_ints_or<T: Into<i64> + Copy>(
     filters: &mut Vec<Box<dyn AndFilterable>>,
     facet_name: &str,
     ints: &[T],
 ) {
+    let mut or_filters = algolia::filter::OrFilter::<FacetFilter> { filters: vec![] };
+
     for v in ints {
         let v: i64 = (*v).into();
-        filters.push(Box::new(CommonFilter {
+        // Push onto OR filter
+        or_filters.filters.push(CommonFilter {
             filter: FacetFilter {
                 facet_name: facet_name.to_owned(),
                 value: v.to_string(),
             },
             invert: false,
-        }))
+        })
+    }
+
+    if !(or_filters.filters.is_empty()) {
+        // append all OR filters to AND filter
+        filters.push(Box::new(or_filters));
     }
 }
 
@@ -661,11 +684,11 @@ impl Client {
             }))
         }
 
-        filters_for_ids(&mut filters.filters, "styles", styles);
-        filters_for_ids(&mut filters.filters, "age_ranges", age_ranges);
-        filters_for_ids(&mut filters.filters, "affiliations", affiliations);
-        filters_for_ids(&mut filters.filters, "categories", categories);
-        filters_for_ints(&mut filters.filters, "image_tags", tags);
+        filters_for_ids_or(&mut filters.filters, "styles", styles);
+        filters_for_ids_or(&mut filters.filters, "age_ranges", age_ranges);
+        filters_for_ids_or(&mut filters.filters, "affiliations", affiliations);
+        filters_for_ids_or(&mut filters.filters, "categories", categories);
+        filters_for_ints_or(&mut filters.filters, "image_tags", tags);
 
         let optional_filters = scored_int_filtering(
             "image_tags",
@@ -734,15 +757,15 @@ impl Client {
         author: Option<Uuid>,
         author_name: Option<String>,
     ) -> anyhow::Result<Option<(Vec<Uuid>, u32, u64)>> {
-        let mut filters = algolia::filter::AndFilter { filters: vec![] };
+        let mut and_filters = algolia::filter::AndFilter { filters: vec![] };
 
         if let Some(author) = author {
-            filters.filters.push(Box::new(CommonFilter {
+            and_filters.filters.push(Box::new(CommonFilter {
                 filter: TagFilter(HAS_AUTHOR_TAG.to_owned()),
                 invert: false,
             }));
 
-            filters.filters.push(Box::new(CommonFilter {
+            and_filters.filters.push(Box::new(CommonFilter {
                 filter: FacetFilter {
                     facet_name: "author".to_owned(),
                     value: author.to_string(),
@@ -752,7 +775,7 @@ impl Client {
         }
 
         if let Some(author_name) = author_name {
-            filters.filters.push(Box::new(CommonFilter {
+            and_filters.filters.push(Box::new(CommonFilter {
                 filter: FacetFilter {
                     facet_name: "author_name".to_owned(),
                     value: author_name,
@@ -762,14 +785,14 @@ impl Client {
         }
 
         if let Some(privacy_level) = privacy_level {
-            filters.filters.push(Box::new(CommonFilter {
+            and_filters.filters.push(Box::new(CommonFilter {
                 filter: TagFilter(privacy_level.as_str().to_owned()),
                 invert: false,
             }))
         }
 
         if let Some(language) = language {
-            filters.filters.push(Box::new(CommonFilter {
+            and_filters.filters.push(Box::new(CommonFilter {
                 filter: FacetFilter {
                     facet_name: "language".to_owned(),
                     value: language,
@@ -778,10 +801,12 @@ impl Client {
             }))
         }
 
-        filters_for_ids(&mut filters.filters, "age_ranges", age_ranges);
-        filters_for_ids(&mut filters.filters, "affiliations", affiliations);
-        filters_for_ids(&mut filters.filters, "categories", categories);
-        filters_for_ids(&mut filters.filters, "goals", goals);
+        filters_for_ids_or(&mut and_filters.filters, "age_ranges", age_ranges);
+        filters_for_ids_or(&mut and_filters.filters, "affiliations", affiliations);
+        filters_for_ids_or(&mut and_filters.filters, "categories", categories);
+        filters_for_ids_or(&mut and_filters.filters, "goals", goals);
+
+        log::error!("after filtering arrays {}", and_filters);
 
         let results: SearchResponse = self
             .inner
@@ -791,13 +816,15 @@ impl Client {
                     query: Some(query),
                     page,
                     get_ranking_info: true,
-                    filters: Some(filters),
+                    filters: Some(and_filters),
                     optional_filters: None,
                     hits_per_page: None,
                     sum_or_filters_scores: false,
                 },
             )
             .await?;
+
+        log::error!("search results {:?}", results);
 
         let pages = results.page_count.try_into()?;
         let total_hits = results.hit_count as u64;
@@ -807,6 +834,8 @@ impl Client {
             .into_iter()
             .map(|hit| hit.object_id.parse())
             .collect::<Result<Vec<_>, _>>()?;
+
+        log::error!("before end");
 
         Ok(Some((results, pages, total_hits)))
     }
