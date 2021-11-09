@@ -20,14 +20,5 @@ where
 {
     html!("div", {
         .property("slot", "main")
-        .child(html!("button", {
-            .text("START")
-            .event(clone!(state => move |_evt:events::Click| {
-                if let Some(on_init_ready) = state.on_init_ready.borrow().as_ref() {
-
-                    (on_init_ready) ();
-                }
-            }))
-        }))
     })
 }
