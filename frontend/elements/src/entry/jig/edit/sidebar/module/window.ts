@@ -5,7 +5,8 @@ import "@elements/core/images/ui";
 
 
 export type ModuleState = "empty" | "active" | "thumbnail";
-const STR_EMPTY = "Drag\nactivity\nhere"
+const STR_EMPTY = "Drag\nactivity\nhere";
+const STR_EMPTY_COVER = "Drag\ncover\nhere";
 
 @customElement("jig-edit-sidebar-module-window")
 export class _ extends LitElement {
@@ -87,7 +88,10 @@ export class _ extends LitElement {
             <div class="wrapper" @dragover="${this.dragOver}" @dragleave="${this.dragLeave}">
                 ${
                     this.state === "empty" ? html`
-                        <p class="drag-here-text">${STR_EMPTY}</p>
+                        <p class="drag-here-text">${
+                            this.coverOnly ? STR_EMPTY_COVER
+                                : STR_EMPTY
+                        }</p>
                     ` : this.state === "active" ? html`
                         <img-ui path="entry/jig/modules/large/${this.activeModuleKind}-hover.svg"></img-ui>
                     ` : this.state === "thumbnail" ? html`
