@@ -190,14 +190,17 @@ fn render_page(state: Rc<State>) -> Dom {
                             actions::save_jig(state.clone());
                         }))
                     }))
-                    .child_signal(state.submission_tried.signal().map(clone!(elem => move |submission_tried| {
-                        if submission_tried {
+                    .child_signal(state.show_missing_info_popup.signal().map(clone!(state, elem => move |show_popup| {
+                        if show_popup {
+                            let on_close = clone!(state => move|| {
+                                state.show_missing_info_popup.set(false);
+                            });
                             let data = TooltipData::Error(Rc::new(TooltipError {
                                 target_anchor: Anchor::Top,
                                 content_anchor: ContentAnchor::Bottom,
                                 body: String::from(STR_MISSING_INFO_TOOLTIP),
                                 max_width: None,
-                                callbacks: TooltipErrorCallbacks::new(Some(||{}))
+                                callbacks: TooltipErrorCallbacks::new(Some(on_close))
                             }));
 
                             let target = TooltipTarget::Element(elem.clone(), MoveStrategy::Track);

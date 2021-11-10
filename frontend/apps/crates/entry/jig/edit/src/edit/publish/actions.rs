@@ -147,6 +147,7 @@ async fn save_and_publish(state: Rc<State>) -> Result<(), ()> {
 pub fn save_jig(state: Rc<State>) {
     if form_invalid(Rc::clone(&state)) {
         state.submission_tried.set(true);
+        state.show_missing_info_popup.set(true);
         return;
     };
 
