@@ -1,7 +1,7 @@
 {
     "init": {
         "single_list_words": [
-            "שמש", 
+            "שֶׁמֶשׁ", 
             "Sun", 
             "יָרֵחַ", 
             "Moon", 
@@ -9,7 +9,7 @@
             "Star"
         ],
 		"dual_list_words": [
-            ["שמש", "Sun"], 
+            ["שֶׁמֶשׁ", "Sun"], 
             ["יָרֵחַ", "Moon"], 
             ["כּוֹכָב", "Star"]
         ]
