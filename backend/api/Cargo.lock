@@ -285,7 +285,7 @@ dependencies = [
 [[package]]
 name = "algolia"
 version = "0.1.0"
-source = "git+https://github.com/RickyLB/algolia-rs?branch=main#0ed6b4bef172fcde51b8d0a62a3b6da4981040a0"
+source = "git+https://github.com/RickyLB/algolia-rs?branch=main#542e069f6926b7f53852e51aae6c23a6764e142c"
 dependencies = [
  "base64 0.13.0",
  "chrono",
