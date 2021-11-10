@@ -196,6 +196,7 @@ pub async fn initialize_server_and_get_db(
         0,
         None,
         None,
+        None,
         PASETO_KEY.clone(),
         None,
     );

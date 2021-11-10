@@ -1,3 +1,4 @@
+use reqwest::{self};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -30,19 +31,15 @@ pub async fn translate_text(
     query: &str,
     target: &str,
     source: &str,
-    access_token: &str,
-) -> anyhow::Result<String> {
+    api_key: &str,
+) -> anyhow::Result<Option<String>> {
     let queries = vec![query.to_string()];
 
     //https://cloud.google.com/translate/docs/languages
     //https://cloud.google.com/translate/docs/reference/rest/v2/translate
     let res = reqwest::Client::new()
         .post("https://translation.googleapis.com/language/translate/v2")
-        .header(
-            reqwest::header::AUTHORIZATION,
-            format!("Bearer {}", access_token.to_owned()),
-        )
-        .header("Content-Type: application/json; charset={}", "utf-8")
+        .query(&[("key", &api_key.to_owned())])
         .json(&TranslateTextRequest {
             q: queries,
             target: target.to_string(),
@@ -67,5 +64,5 @@ pub async fn translate_text(
 
     let translate = res.translations[0].translated_text.clone();
 
-    Ok(translate)
+    Ok(Some(translate))
 }

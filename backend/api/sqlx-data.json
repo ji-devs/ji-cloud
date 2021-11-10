@@ -1008,21 +1008,6 @@
       ]
     }
   },
-  "2fc15a774a3c774d8fbe0e1c9479a021c7491224421b3d51a739126b2f38a252": {
-    "query": "\nupdate image_metadata\nset name        = coalesce($2, name),\n    description = coalesce($3, description),\n    is_premium  = coalesce($4, is_premium),\n    updated_at  = now()\nwhere id = $1\n  and (($2::text is not null and $2 is distinct from name) or\n       ($3::text is not null and $3 is distinct from description) or\n       ($4::boolean is not null and $4 is distinct from is_premium))",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Text",
-          "Text",
-          "Bool"
-        ]
-      },
-      "nullable": []
-    }
-  },
   "30e211c77af70b7a52d9ffde24d7a442e3565e2135840cb8d2646bb7fa048509": {
     "query": "\nselect id,\n       kind as \"kind: MediaKind\",\n       created_at,\n       updated_at,\n       array(select media_url from web_media_library_url where media_id = $1) as \"urls!\"\nfrom web_media_library\nwhere id = $1",
     "describe": {
@@ -2593,6 +2578,20 @@
       ]
     }
   },
+  "7c52442554186edb177fcd9dca9083748cd77443e1a0923be7de29cf0c811fdd": {
+    "query": "\nupdate image_metadata\nset name        = coalesce($2, name),\n    is_premium  = coalesce($3, is_premium),\n    updated_at  = now()\nwhere id = $1\n  and (($2::text is not null and $2 is distinct from name) or\n       ($3::boolean is not null and $3 is distinct from is_premium))",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Bool"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "7de388b21267e45c30f82ed5f18a433423d535b7e22a752bcd95c82fc050190e": {
     "query": "select count(*) - 1 as \"max_index!\" from jig_data_module where jig_data_id = $1",
     "describe": {
@@ -3356,6 +3355,20 @@
         "Left": [
           "Uuid",
           "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "992b728db1ae8e5d3c248c107417b2de49b6d43f341f092d4a39e2238dd8bb47": {
+    "query": "\nupdate image_metadata\nset description = $2,\n    translated_description = (case when ($3::text is not null) then $3::text else (translated_description) end),\n    updated_at = now()\nwhere id = $1 and $2 is distinct from description",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Text"
         ]
       },
       "nullable": []

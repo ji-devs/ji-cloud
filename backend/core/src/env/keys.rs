@@ -146,3 +146,8 @@ pub const GOOGLE_OAUTH_CLIENT: &str = "GOOGLE_OAUTH_CLIENT";
 /// Is optional. If missing, all google-oauth related services will be disabled,
 /// all related routes will return "501 - Not Implemented" and a warning will be emitted.
 pub const GOOGLE_OAUTH_SECRET: &str = "GOOGLE_OAUTH_SECRET";
+
+/// Secret for the Google Translate APIs.
+/// Is optional. If missing, all Google Api related services will be disabled,
+/// all related routes will return "501 - Not Implemented" and a warning will be emitted.
+pub const GOOGLE_API_KEY: &str = "GOOGLE_API_KEY";
