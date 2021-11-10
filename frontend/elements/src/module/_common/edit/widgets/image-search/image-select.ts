@@ -114,8 +114,8 @@ export class _ extends LitElement {
                 max-height: 142px;
             }
             @media (min-width: 1920px) {
-                .images-section h4 {
-                    max-height: 170px;
+                .images-section.recent {
+                    max-height: 156px;
                 }
             }
             :host([moreShown]) .images-section.recent {
@@ -168,6 +168,7 @@ export class _ extends LitElement {
                 cursor: pointer;
                 border-radius: 4px;
                 transition: transform .2s, box-shadow .2s;
+                grid-auto-rows: minmax(0, min-content);
             }
             ::slotted([slot=images]:hover),
             ::slotted([slot=recent]:hover) {
