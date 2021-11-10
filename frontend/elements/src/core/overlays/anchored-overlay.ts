@@ -17,7 +17,7 @@ export class AnchoredOverlay extends LitElement {
                 }
                 .overlay {
                     position: fixed;
-                    z-index: 1;
+                    z-index: 2;
                     overflow: auto;
                     box-sizing: border-box;
                 }

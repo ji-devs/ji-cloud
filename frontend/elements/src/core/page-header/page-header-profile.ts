@@ -32,7 +32,7 @@ export class _ extends LitElement {
                 position: absolute;
                 transform: translate(-50%, 50%) rotate(45deg);
                 bottom: 0;
-                z-index: 2;
+                z-index: 3;
                 left: 50%;
                 box-shadow: rgb(0 0 0 / 7%) -3px -3px 3px 0px;
                 border-top-left-radius: 8px;
