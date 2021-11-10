@@ -132,17 +132,16 @@ pub struct Trace {
 }
 
 #[derive(Clone, Copy, Serialize, Deserialize, Debug, PartialEq, Eq)]
-#[serde(rename_all = "camelCase")]
 /// Trace kind
 pub enum TraceKind {
     /// Wrong (red color)
-    // #[serde(alias = "wrong")]
+    #[serde(alias = "wrong")]
     Wrong,
     /// Correct (green color)
-    // #[serde(alias = "correct")]
+    #[serde(alias = "correct")]
     Correct,
     /// Regular (blue color)
-    // #[serde(alias = "regular")]
+    #[serde(alias = "regular")]
     Regular,
 }
 
