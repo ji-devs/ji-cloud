@@ -117,6 +117,7 @@ pub fn render(state: Rc<State>) -> Dom {
                 ])
             }),
             html!("home-whats-new", {
+                .visible(false)
                 .property("pageCount", state.whats_new.len() as u32)
                 .children(state.whats_new.iter().map(|item| {
                     html!("home-new-item", {
