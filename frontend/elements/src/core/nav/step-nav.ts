@@ -1,15 +1,70 @@
 import { LitElement, html, css, customElement, property } from 'lit-element';
-import { ifDefined } from 'lit-html/directives/if-defined';
 
 
 @customElement('step-nav')
 export class _ extends LitElement {
-
     static get styles() {
         return [css`
             :host {
                 display: contents;
             }
+
+            :host {
+                --color: var(--dark-gray-3);
+                --border-color: #e9eff8;
+            }
+            :host([completed]),
+            :host([active]) {
+                --color: var(--light-blue-6);
+                --border-color: var(--light-blue-6);
+            }
+            section {
+                cursor: pointer;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+
+                width: 50px;
+                color: var(--color);
+            }
+            .circle {
+                border-radius: 9999px;
+                height: 48px;
+                width: 48px;
+                border-style: solid;
+                border-width: 1px;
+                border-color: var(--light-gray-1);
+                background-color: white;
+                justify-content: center;
+                align-items: center;
+                display: flex;
+                text-align: center;
+                border-color: var(--border-color);
+            }
+            :host([active]) .circle {
+                background-color: var(--color);
+                color: #fff;
+                font-weight: bold;
+            }
+            :host([active]) .label {
+                font-weight: bold;
+            }
+
+            p.label {
+                font-weight: 500;
+                letter-spacing: 0.14px;
+                text-align: center;
+                color: var(--color);
+                margin: 6px 0;
+                font-size: 12px;
+            }
+            @media (min-width: 1920px) {
+                p.label {
+                    margin: 12px 0;
+                    font-size: 14px;
+                }
+            }
+
             :host(:last-child) .line {
                 display: none;
             }
@@ -26,9 +81,6 @@ export class _ extends LitElement {
                 /* 50px matches the width of the circle-button */
                 width: calc(100% + 50px);
             }
-            :host([completed]) .line::after {
-                background-color: var(--dark-green-1);
-            }
         `];
     }
 
@@ -41,21 +93,17 @@ export class _ extends LitElement {
     @property({type: Boolean, reflect: true})
     completed: boolean = false;
 
-    @property({type: Boolean})
+    @property({type: Boolean, reflect: true})
     active: boolean = false;
 
     render() {
         return html`
-            <button-circle
-                label="${this.label}"
-                color="${ifDefined(
-                    this.active ?  "blue"
-                        : this.completed ? "green"
-                        : undefined
-                )}"
-            >
-                ${this.number}
-            </button-circle>
+            <section>
+                <div class="circle">
+                    ${this.number}
+                </div>
+                <p class="label">${this.label}</p>
+            </section>
             <div class="line"></div>
         `;
     }

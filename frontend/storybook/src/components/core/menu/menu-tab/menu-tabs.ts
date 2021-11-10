@@ -1,7 +1,6 @@
 import "@elements/core/menu/menu-tabs/menu-tabs";
 import "@elements/core/menu/menu-tabs/menu-tab";
 import "@elements/core/menu/menu-tabs/menu-tab-with-title";
-import "@elements/core/buttons/circle";
 import { argsToAttrs } from "@utils/attributes";
 export default {
     title: "Core / Menu / Menu Tab"

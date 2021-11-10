@@ -1,6 +1,5 @@
 import "@elements/core/menu/menu-tabs/menu-tab";
 import "@elements/core/menu/menu-tabs/menu-tab-title";
-import "@elements/core/buttons/circle";
 import { argsToAttrs } from "@utils/attributes";
 
 export default {
