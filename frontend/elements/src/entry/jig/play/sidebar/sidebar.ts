@@ -67,6 +67,9 @@ export class _ extends LitElement {
                     row-gap: 14px;
                     grid-template-columns: 1fr auto
                 }
+                .logo {
+                    place-self: start;
+                }
                 ::slotted([slot=close]) {
                     align-self: start;
                     height: 32px;
@@ -132,7 +135,9 @@ export class _ extends LitElement {
             <slot name="opener"></slot>
             <main>
                 <div class="heading">
-                    <img-ui path="entry/jig/logo-jigzi.svg"></img-ui>
+                    <a class="logo" href="/">
+                        <img-ui path="entry/jig/logo-jigzi.svg"></img-ui>
+                    </a>
                     <slot name="close"></slot>
                     <h2>${this.jigName}</h2>
                 </div>
