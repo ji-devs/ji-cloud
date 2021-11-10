@@ -7,7 +7,6 @@ const STR_MY_RECENT = "My recent";
 const STR_SEE_MORE = "See more";
 const STR_SEE_LESS = "See less";
 const STR_ALL_IMAGES = "All images";
-const STR_SEARCH_IN = "Search in";
 
 @customElement("image-select")
 export class _ extends LitElement {
@@ -60,7 +59,7 @@ export class _ extends LitElement {
             }
             .controls {
                 display: grid;
-                row-gap: 6px;
+                row-gap: 16px;
             }
             .search-row {
                 display: grid;
@@ -97,7 +96,7 @@ export class _ extends LitElement {
             ::slotted([slot=source-options]) {
                 cursor: pointer;
                 display: flex;
-                column-gap: 7px;
+                column-gap: 6px;
                 align-items: center;
             }
             .images-section {
@@ -265,7 +264,6 @@ export class _ extends LitElement {
                     <div class="bottom-row">
                         <div>
                             <div class="source-options">
-                                <h4>${STR_SEARCH_IN}</h4>
                                 <slot name="source-options"></slot>
                             </div>
                         </div>

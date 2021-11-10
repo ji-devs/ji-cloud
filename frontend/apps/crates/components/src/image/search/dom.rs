@@ -6,7 +6,7 @@ use futures_signals::{
     signal::SignalExt,
     signal_vec::{MutableVec, SignalVec, SignalVecExt},
 };
-use shared::domain::{jig::module::body::{Image, ModeExt}, search::WebImageSearchItem};
+use shared::domain::{jig::module::body::Image, search::WebImageSearchItem};
 use std::{pin::Pin, rc::Rc};
 use utils::prelude::*;
 
@@ -14,6 +14,7 @@ const STR_SHOW_ONLY_BACKGROUNDS: &str = "Only background";
 const STR_DONT_INCLUDE_BACKGROUND: &str = "No backgrounds";
 const STR_WEB: &str = "Web";
 const STR_JIGZI: &str = "Jigzi";
+const STR_SEARCH: &str = "Search";
 
 pub fn render(state: Rc<State>, slot: Option<&str>) -> Dom {
     html!("empty-fragment", {
@@ -211,7 +212,13 @@ fn render_controls(state: Rc<State>) -> Vec<Dom> {
     }
 
     vec.push(html!("input-search", {
-        .property("placeholder", "Search")
+        .property_signal("placeholder", state.search_mode.signal_ref(|search_mode| {
+            let s = match search_mode {
+                SearchMode::Sticker(_) => STR_JIGZI,
+                SearchMode::Web(_) => STR_WEB,
+            };
+            format!("{} {}", STR_SEARCH, s)
+        }))
         .property("slot", "search-input")
         .event(clone!(state => move |e: events::CustomSearch| {
             state.query.set(e.query());
@@ -226,27 +233,23 @@ fn render_filters(state: Rc<State>) -> Dom {
     html!("image-search-filters", {
         .property("slot", "filters")
         .apply(|dom| {
-            if let kind = &state.options.kind {
-                dom.child(html!("input-checkbox", {
-                    .property("label", {
-                        match kind {
-                            ImageSearchKind::Background | ImageSearchKind::Overlay => STR_SHOW_ONLY_BACKGROUNDS,
-                            ImageSearchKind::Sticker => STR_DONT_INCLUDE_BACKGROUND,
-                        }
-                    })
-                    .property("slot", "background-checkbox")
-                    .property("checked", true)
-                    .property_signal("disabled", state.search_mode.signal_ref(|search_mode| {
-                        search_mode.is_web()
-                    }))
-                    .event(clone!(state => move |evt: events::CustomToggle| {
-                        state.checkbox_checked.set(evt.value());
-                        actions::search(state.clone(), None);
-                    }))
+            dom.child(html!("input-checkbox", {
+                .property("label", {
+                    match &state.options.kind {
+                        ImageSearchKind::Background | ImageSearchKind::Overlay => STR_SHOW_ONLY_BACKGROUNDS,
+                        ImageSearchKind::Sticker => STR_DONT_INCLUDE_BACKGROUND,
+                    }
+                })
+                .property("slot", "background-checkbox")
+                .property("checked", true)
+                .property_signal("disabled", state.search_mode.signal_ref(|search_mode| {
+                    search_mode.is_web()
                 }))
-            } else { 
-                dom
-            }
+                .event(clone!(state => move |evt: events::CustomToggle| {
+                    state.checkbox_checked.set(evt.value());
+                    actions::search(state.clone(), None);
+                }))
+            }))
         })
 
         .children(

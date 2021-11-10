@@ -51,6 +51,12 @@ export class _ extends LitElement {
             section:not(:last-child) {
                 border-bottom: solid 1px var(--light-gray-1);
             }
+            h4 {
+                font-size: 16px;
+                font-weight: 500;
+                color: var(--main-blue);
+                margin: 0;
+            }
         `];
     }
 
