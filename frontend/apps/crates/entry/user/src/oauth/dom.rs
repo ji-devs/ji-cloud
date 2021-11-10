@@ -26,13 +26,6 @@ impl OauthPage {
                 is_loading.set_neq(false);
 
             }))
-            .text_signal(is_loading.signal().map(|loading| {
-                if loading {
-                    "loading"
-                } else {
-                    "done!"
-                }
-            }))
         })
     }
 }
