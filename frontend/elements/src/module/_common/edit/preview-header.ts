@@ -1,12 +1,10 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 import { nothing } from "lit-html";
-import { ModuleKind, STR_MODULE_DISPLAY_NAME } from "@elements/module/_common/types";
+import { ModuleKind } from "@elements/module/_common/types";
 
 const STR_TITLE = "Preview Mode";
 
-const STR_HERE_IS_THE_PREVIEW_1 = "Here’s your ";
-const STR_HERE_IS_THE_PREVIEW_2 = " page for you to preview.";
-const STR_HERE_IS_THE_PREVIEW_3 = "Want to change something? Just go back and edit!";
+const STR_AUTOSAVED = "Your work is auto-saved. To make changes, click back to any step.";
 
 const STR_TOOLTIP_CONTINUE = "Click to continue";
 
@@ -99,13 +97,7 @@ export class _ extends LitElement {
                 </div>
                 <div class="text">
                     <h1>${STR_TITLE}</h1>
-                    <p>
-                        ${STR_HERE_IS_THE_PREVIEW_1}
-                        ${STR_MODULE_DISPLAY_NAME[this.moduleKind]}
-                        ${STR_HERE_IS_THE_PREVIEW_2}
-                        <br>
-                        ${STR_HERE_IS_THE_PREVIEW_3}
-                    </p>
+                    <p>${STR_AUTOSAVED}</p>
                 </div>
                 <div class="btn"><slot name="btn"></slot></div>
             </section>
