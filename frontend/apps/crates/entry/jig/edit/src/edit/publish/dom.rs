@@ -4,7 +4,7 @@ use futures_signals::{
     signal::{Mutable, SignalExt},
 };
 use shared::domain::jig::PrivacyLevel;
-use utils::events;
+use utils::{events, routes::{JigEditRoute, JigRoute, Route}};
 use web_sys::{HtmlElement, HtmlInputElement, HtmlTextAreaElement};
 
 use super::super::state::State as JigEditState;
@@ -33,6 +33,7 @@ use components::{
 use std::rc::Rc;
 
 const STR_PUBLISH_JIG: &'static str = "Publish JIG";
+const STR_PUBLISH_LATER: &'static str = "I will publish later";
 const STR_PUBLIC_LABEL: &'static str = "My JIG is public";
 const STR_NAME_LABEL: &'static str = "JIG’s name";
 const STR_NAME_PLACEHOLDER: &'static str = "Type your JIG’s name here";
@@ -180,12 +181,27 @@ fn render_page(state: Rc<State>) -> Dom {
             CategoriesSelectRender(state.clone()),
             CategoriesPillsRender(state.clone()),
 
+            html!("button-rect", {
+                .property("slot", "publish-later")
+                .property("color", "blue")
+                .property("kind", "text")
+                .text(STR_PUBLISH_LATER)
+                .event(clone!(state => move |_: events::Click| {
+                    state.jig_edit_state.route.set_neq(JigEditRoute::Landing);
+                    let url:String = Route::Jig(JigRoute::Edit(state.jig.id.clone(), JigEditRoute::Landing)).into();
+                    dominator::routing::go_to_url(&url);
+                }))
+            }),
+
             html!("div" => HtmlElement, {
                 .property("slot", "publish")
                 .with_node!(elem => {
                     .child(html!("button-rect", {
-                        .property("iconAfter", "rocket")
                         .text(STR_PUBLISH_JIG)
+                        .child(html!("fa-icon", {
+                            .property("icon", "fa-light fa-rocket-launch")
+                            .style("color", "var(--main-yellow)")
+                        }))
                         .event(clone!(state => move |_: events::Click| {
                             actions::save_jig(state.clone());
                         }))

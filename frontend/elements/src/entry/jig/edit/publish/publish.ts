@@ -136,6 +136,8 @@ export class _ extends LitElement {
             }
             .publish {
                 display: grid;
+                grid-auto-flow: column;
+                column-gap: 32px;
                 place-content: center;
             }
       `];
@@ -183,6 +185,7 @@ export class _ extends LitElement {
                             </div>
                         </div>
                         <div class="publish">
+                            <slot name="publish-later"></slot>
                             <slot name="publish"></slot>
                         </div>
                     </div>
