@@ -135,7 +135,7 @@ export class _ extends LitElement {
             <slot name="opener"></slot>
             <main>
                 <div class="heading">
-                    <a class="logo" href="/">
+                    <a class="logo" href="/" target="_top">
                         <img-ui path="entry/jig/logo-jigzi.svg"></img-ui>
                     </a>
                     <slot name="close"></slot>
