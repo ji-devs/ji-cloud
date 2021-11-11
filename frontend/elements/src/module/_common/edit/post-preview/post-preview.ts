@@ -22,7 +22,9 @@ export class _ extends LitElement {
                 grid-template-rows: 440px 360px;
                 box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
                 border-radius: 32px;
-                overflow: hidden;
+                overflow: auto;
+                margin: 20px 0;
+                max-height: calc(100vh - 40px);
             }
             .top-section {
                 background-color: #fff;
