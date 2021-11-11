@@ -152,43 +152,55 @@ impl AsRef<Trace> for Trace {
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
-#[serde(rename_all = "camelCase")]
 /// Trace shape
 pub enum TraceShape {
     /// width and height
+    #[serde(alias = "rect")]
     Rect(f64, f64),
     /// radius
+    #[serde(alias = "ellipse")]
     Ellipse(f64, f64),
     /// points
+    #[serde(alias = "path")]
     Path(Vec<(f64, f64)>),
     /// explicit path commands
     /// corresponds to SVG spec: https://svgwg.org/svg2-draft/paths.html#TheDProperty
     /// the second parameter indicates whether it's absolute (true) or relative (false)
+    #[serde(alias = "pathCommands")]
     PathCommands(Vec<(PathCommand, bool)>),
 }
 
 #[allow(missing_docs)]
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
-#[serde(rename_all = "camelCase")]
 pub enum PathCommand {
     /// https://svgwg.org/svg2-draft/paths.html#PathDataMovetoCommands
+    #[serde(alias = "moveTo")]
     MoveTo(f64, f64),
     /// https://svgwg.org/svg2-draft/paths.html#PathDataLinetoCommands
+    #[serde(alias = "closePath")]
     ClosePath,
     /// https://svgwg.org/svg2-draft/paths.html#PathDataLinetoCommands
+    #[serde(alias = "lineTo")]
     LineTo(f64, f64),
     /// https://svgwg.org/svg2-draft/paths.html#PathDataLinetoCommands
+    #[serde(alias = "horizontalLineTo")]
     HorizontalLineTo(f64),
     /// https://svgwg.org/svg2-draft/paths.html#PathDataLinetoCommands
+    #[serde(alias = "verticalLineTo")]
     VerticalLineTo(f64),
     /// https://svgwg.org/svg2-draft/paths.html#PathDataCubicBezierCommands
+    #[serde(alias = "curveTo")]
     CurveTo(f64, f64, f64, f64, f64, f64),
     /// https://svgwg.org/svg2-draft/paths.html#PathDataCubicBezierCommands
+    #[serde(alias = "smoothCurveTo")]
     SmoothCurveTo(f64, f64, f64, f64),
     /// https://svgwg.org/svg2-draft/paths.html#PathDataQuadraticBezierCommands
+    #[serde(alias = "quadCurveTo")]
     QuadCurveTo(f64, f64, f64, f64),
     /// https://svgwg.org/svg2-draft/paths.html#PathDataQuadraticBezierCommands
+    #[serde(alias = "smoothQuadCurveTo")]
     SmoothQuadCurveTo(f64, f64),
     /// https://svgwg.org/svg2-draft/paths.html#PathDataEllipticalArcCommands
+    #[serde(alias = "arcTo")]
     ArcTo(f64, f64, f64, f64, f64, f64, f64),
 }
