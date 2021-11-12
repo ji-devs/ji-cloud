@@ -1,12 +1,12 @@
 use awsm_web::audio::AudioMixer as AwsmAudioMixer;
+use rand::prelude::*;
 use shared::domain::jig::module::body::Audio;
-use shared::domain::jig::{self, AudioFeedbackPositive, AudioFeedbackNegative, JigData};
+use shared::domain::jig::{self, AudioFeedbackNegative, AudioFeedbackPositive, JigData};
 use std::cell::RefCell;
 use std::rc::Rc;
 use utils::{path, prelude::*};
-use rand::prelude::*;
 
-use std::borrow::{BorrowMut, Cow};
+use std::borrow::Cow;
 use std::ops::Deref;
 
 pub use awsm_web::audio::{
@@ -37,7 +37,7 @@ pub struct AudioSettings {
 
 impl AudioSettings {
     pub fn reset_from_jig(&mut self, _jig: &JigData) {
-            //TODO...
+        //TODO...
     }
 
     pub fn bg_source(&self) -> impl Into<AudioSource> {
@@ -51,7 +51,7 @@ impl Default for AudioSettings {
         Self {
             bg: jig::AudioBackground::FunForKids,
             positive: AudioFeedbackPositive::variants(),
-            negative: AudioFeedbackNegative::variants()
+            negative: AudioFeedbackNegative::variants(),
         }
     }
 }
@@ -180,17 +180,29 @@ impl From<jig::AudioFeedbackNegative> for AudioPath<'_> {
 }
 
 impl AudioMixer {
-    pub fn set_from_jig(&self, jig: &JigData) {
+    pub fn set_from_jig(&self, _jig: &JigData) {
         //not sure why this doesn't compile...
         //self.settings.borrow_mut().reset_from_jig(jig);
     }
 
     pub fn get_random_positive(&self) -> AudioFeedbackPositive {
-        self.settings.borrow().positive.iter().choose(&mut *self.rng.borrow_mut()).unwrap_ji().clone()
+        *self
+            .settings
+            .borrow()
+            .positive
+            .iter()
+            .choose(&mut *self.rng.borrow_mut())
+            .unwrap_ji()
     }
 
     pub fn get_random_negative(&self) -> AudioFeedbackNegative {
-        self.settings.borrow().negative.iter().choose(&mut *self.rng.borrow_mut()).unwrap_ji().clone()
+        *self
+            .settings
+            .borrow()
+            .negative
+            .iter()
+            .choose(&mut *self.rng.borrow_mut())
+            .unwrap_ji()
     }
     /// Oneshots are AudioClips because they drop themselves
     /// They're intended solely to be kicked off and not being held anywhere

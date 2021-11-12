@@ -18,6 +18,7 @@ pub fn is_screenshot_url() -> bool {
     }
 }
 
+#[allow(dead_code)]
 #[derive(Deserialize)]
 struct ScreenshotResponse {
     jpg: String,

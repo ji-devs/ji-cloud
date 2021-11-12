@@ -1,7 +1,5 @@
 use super::state::*;
-use components::{
-    audio::input::AudioInput,
-};
+use components::audio::input::AudioInput;
 use dominator::{html, Dom};
 use std::rc::Rc;
 

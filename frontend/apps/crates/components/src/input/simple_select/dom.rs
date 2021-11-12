@@ -6,7 +6,9 @@ use utils::prelude::*;
 use wasm_bindgen::prelude::*;
 use web_sys::HtmlElement;
 
-impl<T: ToString + Clone + 'static, P: ToString + 'static, L: ToString + 'static> SimpleSelect<T, P, L> {
+impl<T: ToString + Clone + 'static, P: ToString + 'static, L: ToString + 'static>
+    SimpleSelect<T, P, L>
+{
     pub fn render(state: Rc<Self>, slot: Option<&str>) -> Dom {
         Self::_render_mixin(
             state,

@@ -1,6 +1,9 @@
 use crate::edit::sidebar::state::State as SidebarState;
 use dominator::clone;
-use futures_signals::{map_ref, signal::{Mutable, Signal, SignalExt}};
+use futures_signals::{
+    map_ref,
+    signal::{Mutable, Signal, SignalExt},
+};
 use shared::domain::jig::LiteModule;
 use std::cell::RefCell;
 use std::rc::Rc;

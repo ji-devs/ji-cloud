@@ -1,11 +1,15 @@
 use super::state::State;
 use crate::edit::sidebar::dragging::state::State as DragState;
 use dominator::clone;
-use shared::{api::endpoints::{self, ApiEndpoint}, domain::{jig::module::*, jig::*, CreateResponse}, error::EmptyError};
-use wasm_bindgen_futures::spawn_local;
+use shared::{
+    api::endpoints::{self, ApiEndpoint},
+    domain::{jig::module::*, jig::*, CreateResponse},
+    error::EmptyError,
+};
 use std::convert::TryInto;
 use std::rc::Rc;
 use utils::prelude::*;
+use wasm_bindgen_futures::spawn_local;
 
 pub fn on_module_kind_drop(state: Rc<State>, module_kind: ModuleKind) {
     if state.index == 0 {
@@ -20,11 +24,7 @@ pub fn on_module_kind_drop(state: Rc<State>, module_kind: ModuleKind) {
 
             // if this is the empty module at the end
             if state.sidebar.jig.jig_data.modules.len() == state.index {
-                state
-                    .sidebar
-                    .modules
-                    .lock_mut()
-                    .push_cloned(Rc::new(None));
+                state.sidebar.modules.lock_mut().push_cloned(Rc::new(None));
             }
         }
     }
@@ -48,7 +48,7 @@ pub fn fist_cover_dragged(state: Rc<State>) {
                         module.id
                     },
                 };
-        
+
                 state.sidebar.first_cover_assigned.set(true);
                 state.sidebar.collapsed.set(true);
                 state.sidebar.jig_edit_state.route.set(JigEditRoute::Module(cover_id.clone()));

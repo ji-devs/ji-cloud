@@ -1,11 +1,10 @@
 use super::super::{base::state::*, state::*};
-use dominator::{clone, html, Dom};
+use dominator::{html, Dom};
 use shared::domain::jig::module::body::{BodyExt, ModeExt, StepExt};
 use std::rc::Rc;
-use utils::prelude::*;
 
 pub fn render<Mode, Step, RawData, Base, Main, Sidebar, Header, Footer, Overlay>(
-    state: Rc<GenericState<Mode, Step, RawData, Base, Main, Sidebar, Header, Footer, Overlay>>,
+    _state: Rc<GenericState<Mode, Step, RawData, Base, Main, Sidebar, Header, Footer, Overlay>>,
 ) -> Dom
 where
     Base: BaseExt<Step> + 'static,

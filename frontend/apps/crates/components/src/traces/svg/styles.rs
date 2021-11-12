@@ -9,103 +9,90 @@ impl ShapeStyle {
         match self.mode {
             ShapeStyleMode::Mask => {
                 classes.push(SHAPE_MODE_MASK_CLASS.as_str());
-            },
+            }
             ShapeStyleMode::Transparent => {
                 classes.push(SHAPE_MODE_EMPTY_FILL_CLASS.as_str());
-            },
-            ShapeStyleMode::Edit(mode)=> {
+            }
+            ShapeStyleMode::Edit(mode) => {
                 classes.push(SHAPE_MODE_EMPTY_FILL_CLASS.as_str());
                 match mode {
-                    ShapeStyleEditMode::Draw => {
-                        match self.kind {
-                            ShapeStyleKind::General => {
-                                classes.push(SHAPE_MODE_EDIT_DRAW_GENERAL_CLASS.as_str());
-                            },
-                            ShapeStyleKind::Correct => {
-                                classes.push(SHAPE_MODE_EDIT_DRAW_CORRECT_CLASS.as_str());
-                            },
-                            ShapeStyleKind::Incorrect => {
-                                classes.push(SHAPE_MODE_EDIT_DRAW_INCORRECT_CLASS.as_str());
-                            },
+                    ShapeStyleEditMode::Draw => match self.kind {
+                        ShapeStyleKind::General => {
+                            classes.push(SHAPE_MODE_EDIT_DRAW_GENERAL_CLASS.as_str());
+                        }
+                        ShapeStyleKind::Correct => {
+                            classes.push(SHAPE_MODE_EDIT_DRAW_CORRECT_CLASS.as_str());
+                        }
+                        ShapeStyleKind::Incorrect => {
+                            classes.push(SHAPE_MODE_EDIT_DRAW_INCORRECT_CLASS.as_str());
                         }
                     },
-                    ShapeStyleEditMode::Selected => {
-                        match self.kind {
-                            ShapeStyleKind::General => {
-                                classes.push(SHAPE_MODE_EDIT_SELECTED_GENERAL_CLASS.as_str());
-                            },
-                            ShapeStyleKind::Correct => {
-                                classes.push(SHAPE_MODE_EDIT_SELECTED_CORRECT_CLASS.as_str());
-                            },
-                            ShapeStyleKind::Incorrect => {
-                                classes.push(SHAPE_MODE_EDIT_SELECTED_INCORRECT_CLASS.as_str());
-                            },
+                    ShapeStyleEditMode::Selected => match self.kind {
+                        ShapeStyleKind::General => {
+                            classes.push(SHAPE_MODE_EDIT_SELECTED_GENERAL_CLASS.as_str());
+                        }
+                        ShapeStyleKind::Correct => {
+                            classes.push(SHAPE_MODE_EDIT_SELECTED_CORRECT_CLASS.as_str());
+                        }
+                        ShapeStyleKind::Incorrect => {
+                            classes.push(SHAPE_MODE_EDIT_SELECTED_INCORRECT_CLASS.as_str());
                         }
                     },
-                    ShapeStyleEditMode::Deselected => {
-                        match self.kind {
-                            ShapeStyleKind::General => {
-                                classes.push(SHAPE_MODE_EDIT_DESELECTED_GENERAL_CLASS.as_str());
-                            },
-                            ShapeStyleKind::Correct => {
-                                classes.push(SHAPE_MODE_EDIT_DESELECTED_CORRECT_CLASS.as_str());
-                            },
-                            ShapeStyleKind::Incorrect => {
-                                classes.push(SHAPE_MODE_EDIT_DESELECTED_INCORRECT_CLASS.as_str());
-                            },
+                    ShapeStyleEditMode::Deselected => match self.kind {
+                        ShapeStyleKind::General => {
+                            classes.push(SHAPE_MODE_EDIT_DESELECTED_GENERAL_CLASS.as_str());
+                        }
+                        ShapeStyleKind::Correct => {
+                            classes.push(SHAPE_MODE_EDIT_DESELECTED_CORRECT_CLASS.as_str());
+                        }
+                        ShapeStyleKind::Incorrect => {
+                            classes.push(SHAPE_MODE_EDIT_DESELECTED_INCORRECT_CLASS.as_str());
                         }
                     },
-                    ShapeStyleEditMode::WithoutCutout => {
-                        match self.kind {
-                            ShapeStyleKind::General => {
-                                classes.push(SHAPE_MODE_EDIT_WITHOUT_CUTOUT_GENERAL_CLASS.as_str());
-                            },
-                            ShapeStyleKind::Correct => {
-                                classes.push(SHAPE_MODE_EDIT_WITHOUT_CUTOUT_CORRECT_CLASS.as_str());
-                            },
-                            ShapeStyleKind::Incorrect => {
-                                classes.push(SHAPE_MODE_EDIT_WITHOUT_CUTOUT_INCORRECT_CLASS.as_str());
-                            },
+                    ShapeStyleEditMode::WithoutCutout => match self.kind {
+                        ShapeStyleKind::General => {
+                            classes.push(SHAPE_MODE_EDIT_WITHOUT_CUTOUT_GENERAL_CLASS.as_str());
+                        }
+                        ShapeStyleKind::Correct => {
+                            classes.push(SHAPE_MODE_EDIT_WITHOUT_CUTOUT_CORRECT_CLASS.as_str());
+                        }
+                        ShapeStyleKind::Incorrect => {
+                            classes.push(SHAPE_MODE_EDIT_WITHOUT_CUTOUT_INCORRECT_CLASS.as_str());
                         }
                     },
                 }
-            },
-            ShapeStyleMode::Play(mode)=> {
+            }
+            ShapeStyleMode::Play(mode) => {
                 classes.push(SHAPE_MODE_EMPTY_FILL_CLASS.as_str());
                 match mode {
-                    ShapeStylePlayMode::Selected => {
-                        match self.kind {
-                            ShapeStyleKind::General => {
-                                classes.push(SHAPE_MODE_PLAY_SELECTED_GENERAL_CLASS.as_str());
-                            },
-                            ShapeStyleKind::Correct => {
-                                classes.push(SHAPE_MODE_PLAY_SELECTED_CORRECT_CLASS.as_str());
-                            },
-                            ShapeStyleKind::Incorrect => {
-                                classes.push(SHAPE_MODE_PLAY_SELECTED_INCORRECT_CLASS.as_str());
-                            },
+                    ShapeStylePlayMode::Selected => match self.kind {
+                        ShapeStyleKind::General => {
+                            classes.push(SHAPE_MODE_PLAY_SELECTED_GENERAL_CLASS.as_str());
+                        }
+                        ShapeStyleKind::Correct => {
+                            classes.push(SHAPE_MODE_PLAY_SELECTED_CORRECT_CLASS.as_str());
+                        }
+                        ShapeStyleKind::Incorrect => {
+                            classes.push(SHAPE_MODE_PLAY_SELECTED_INCORRECT_CLASS.as_str());
                         }
                     },
-                    ShapeStylePlayMode::Deselected => {
-                        match self.kind {
-                            ShapeStyleKind::General => {
-                                classes.push(SHAPE_MODE_PLAY_DESELECTED_GENERAL_CLASS.as_str());
-                            },
-                            ShapeStyleKind::Correct => {
-                                classes.push(SHAPE_MODE_PLAY_DESELECTED_CORRECT_CLASS.as_str());
-                            },
-                            ShapeStyleKind::Incorrect => {
-                                classes.push(SHAPE_MODE_PLAY_DESELECTED_INCORRECT_CLASS.as_str());
-                            },
+                    ShapeStylePlayMode::Deselected => match self.kind {
+                        ShapeStyleKind::General => {
+                            classes.push(SHAPE_MODE_PLAY_DESELECTED_GENERAL_CLASS.as_str());
+                        }
+                        ShapeStyleKind::Correct => {
+                            classes.push(SHAPE_MODE_PLAY_DESELECTED_CORRECT_CLASS.as_str());
+                        }
+                        ShapeStyleKind::Incorrect => {
+                            classes.push(SHAPE_MODE_PLAY_DESELECTED_INCORRECT_CLASS.as_str());
                         }
                     },
                     ShapeStylePlayMode::Hint => {
                         classes.push(SHAPE_MODE_PLAY_HINT_CLASS.as_str());
-                    },
+                    }
                 }
-            },
+            }
         }
-
 
         if self.interactive {
             classes.push(SHAPE_INTERACTIVE_CLASS.as_str());
@@ -164,7 +151,6 @@ pub(super) static SHAPE_MODE_EMPTY_FILL_CLASS: Lazy<String> = Lazy::new(|| {
         .style("fill-opacity", "0")
     }
 });
-
 
 //Edit Draw
 pub(super) static SHAPE_MODE_EDIT_DRAW_GENERAL_CLASS: Lazy<String> = Lazy::new(|| {
@@ -235,8 +221,7 @@ pub(super) static SHAPE_MODE_EDIT_DESELECTED_INCORRECT_CLASS: Lazy<String> = Laz
     }
 });
 
-
-//Edit Without Cutout 
+//Edit Without Cutout
 pub(super) static SHAPE_MODE_EDIT_WITHOUT_CUTOUT_GENERAL_CLASS: Lazy<String> = Lazy::new(|| {
     class! {
         .style("stroke", "#AFCBF4")
@@ -257,7 +242,6 @@ pub(super) static SHAPE_MODE_EDIT_WITHOUT_CUTOUT_INCORRECT_CLASS: Lazy<String> =
         .style("stroke-width", "8")
     }
 });
-
 
 //Play Selected
 pub(super) static SHAPE_MODE_PLAY_SELECTED_GENERAL_CLASS: Lazy<String> = Lazy::new(|| {
@@ -303,7 +287,7 @@ pub(super) static SHAPE_MODE_PLAY_DESELECTED_INCORRECT_CLASS: Lazy<String> = Laz
     }
 });
 
-//Play Hint 
+//Play Hint
 pub(super) static SHAPE_MODE_PLAY_HINT_CLASS: Lazy<String> = Lazy::new(|| {
     class! {
         .style("stroke", "#AFCBF4")

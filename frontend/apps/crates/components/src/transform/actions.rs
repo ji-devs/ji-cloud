@@ -97,7 +97,7 @@ impl TransformState {
 
                             let mut angle = math::vec2::angle(&old_vec, &new_vec);
 
-                            if angle != f64::NAN {
+                            if !angle.is_nan() {
                                 if math::vec2::cross_value(&old_vec, &new_vec) < 0.0 {
                                     angle = -angle;
                                 }

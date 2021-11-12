@@ -1,5 +1,5 @@
-use std::rc::Rc;
 use dominator::DomBuilder;
+use std::rc::Rc;
 use utils::{prelude::*, resize::ResizeInfo};
 
 use futures_signals::signal::Signal;
@@ -55,7 +55,7 @@ pub enum ShapeStyleEditMode {
 pub enum ShapeStylePlayMode {
     Selected,
     Deselected,
-    Hint
+    Hint,
 }
 
 #[derive(Clone, Copy, Eq, PartialEq, Debug)]
@@ -66,7 +66,7 @@ pub enum ShapeStyleKind {
 }
 
 impl From<TraceKind> for ShapeStyleKind {
-    fn from(trace_kind:TraceKind) -> ShapeStyleKind {
+    fn from(trace_kind: TraceKind) -> ShapeStyleKind {
         match trace_kind {
             TraceKind::Wrong => Self::Incorrect,
             TraceKind::Correct => Self::Correct,
@@ -95,7 +95,7 @@ impl ShapeStyle {
         Self {
             interactive: mode != ShapeStyleEditMode::Draw,
             mode: ShapeStyleMode::Edit(mode),
-            kind: kind,
+            kind,
         }
     }
 
@@ -103,7 +103,7 @@ impl ShapeStyle {
         Self {
             interactive: mode != ShapeStylePlayMode::Hint,
             mode: ShapeStyleMode::Play(mode),
-            kind: kind,
+            kind,
         }
     }
 }
@@ -153,14 +153,17 @@ pub struct SvgCallbacks {
     pub on_select: Option<Box<dyn Fn()>>,
     pub on_mount: Option<Box<dyn Fn(web_sys::SvgElement)>>,
     pub on_unmount: Option<Box<dyn Fn(web_sys::SvgElement)>>,
-    pub mixin: Option<Box<dyn Fn(DomBuilder<web_sys::SvgElement>) -> DomBuilder<web_sys::SvgElement>>>,
+    pub mixin:
+        Option<Box<dyn Fn(DomBuilder<web_sys::SvgElement>) -> DomBuilder<web_sys::SvgElement>>>,
 }
 impl SvgCallbacks {
     pub fn new(
         on_select: Option<impl Fn() + 'static>,
         on_mount: Option<impl Fn(web_sys::SvgElement) + 'static>,
         on_unmount: Option<impl Fn(web_sys::SvgElement) + 'static>,
-        mixin: Option<impl Fn(DomBuilder<web_sys::SvgElement>) -> DomBuilder<web_sys::SvgElement> + 'static>,
+        mixin: Option<
+            impl Fn(DomBuilder<web_sys::SvgElement>) -> DomBuilder<web_sys::SvgElement> + 'static,
+        >,
     ) -> Rc<Self> {
         Rc::new(Self {
             on_select: on_select.map(|f| Box::new(f) as _),

@@ -1,5 +1,5 @@
 use dominator::{clone, html, Dom};
-use futures_signals::signal::{Mutable, SignalExt};
+use futures_signals::signal::Mutable;
 
 use utils::routes::*;
 

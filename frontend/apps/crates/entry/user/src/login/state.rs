@@ -56,7 +56,6 @@ impl State {
 pub enum Status {
     BadCredentials,
     PasswordResetSent,
-    ConfirmEmail(String),
 }
 
 impl Status {
@@ -64,14 +63,12 @@ impl Status {
         match self {
             Self::PasswordResetSent => Some("Check your email at this address!"),
             Self::BadCredentials => Some("Invalid email or password"),
-            Self::ConfirmEmail(_) => Some("Need to confirm your email!"),
         }
     }
     pub fn password_error(&self) -> Option<&'static str> {
         match self {
             Self::PasswordResetSent => Some("Password reset link sent!"),
             Self::BadCredentials => Some("Invalid email or password"),
-            _ => None,
         }
     }
 }

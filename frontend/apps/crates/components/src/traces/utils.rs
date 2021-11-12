@@ -30,9 +30,7 @@ impl TraceExt for RawTrace {
             RawTraceShape::PathCommands(commands) => {
                 calc_bounds(ShapeRef::PathCommands(commands), offset)
             }
-            RawTraceShape::Path(path) => {
-                calc_bounds(ShapeRef::Path(path), offset)
-            },
+            RawTraceShape::Path(path) => calc_bounds(ShapeRef::Path(path), offset),
             RawTraceShape::Ellipse(radius_x, radius_y) => {
                 calc_bounds(ShapeRef::Ellipse(*radius_x, *radius_y), offset)
             }
@@ -55,7 +53,7 @@ pub enum ShapeRef<'a> {
 pub fn calc_bounds<'a>(shape: ShapeRef<'a>, offset: Option<(f64, f64)>) -> Option<BoundsF64> {
     let mut bounds = match shape {
         ShapeRef::PathCommands(_commands) => {
-            //this will be tricky due to bezier curves etc. 
+            //this will be tricky due to bezier curves etc.
             //might need to actually draw the entire path in memory calc the extants
             unimplemented!("TODO - support calc_bounds for PathCommands!");
         }

@@ -2,7 +2,10 @@ use super::{menu::dom::render_draw_menu, state::*, trace::state::*};
 use crate::{
     traces::{
         edit::{select::trace::state::*, state::*},
-        svg::{self, ShapeStyle, ShapeStyleKind, ShapeStyleMode, ShapeStyleEditMode, ShapeStyleVar, SvgCallbacks, TransformSize},
+        svg::{
+            self, ShapeStyle, ShapeStyleEditMode, ShapeStyleKind, ShapeStyleMode, ShapeStyleVar,
+            SvgCallbacks, TransformSize,
+        },
     },
     transform::state::ResizeLevel,
 };
@@ -82,7 +85,7 @@ impl TracesEdit {
             }))
             .to_signal_vec();
 
-        let draw_kind:ShapeStyleKind = state.default_kind.into();
+        let draw_kind: ShapeStyleKind = state.default_kind.into();
 
         let draw_children =
             trace_signal().map(clone!(draw_kind, shadow_traces => move |(resize_info, size, display_trace, draw_points, shape, transform)| {

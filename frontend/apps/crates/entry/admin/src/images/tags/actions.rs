@@ -48,8 +48,9 @@ impl ImageTags {
                         let path = endpoints::image::tag::Update::PATH.replace("{index}", &tag.as_index().to_string());
                         let _ = api_with_auth_empty::<EmptyError, _>(&path, endpoints::image::tag::Update::METHOD, Some(req)).await.unwrap_ji();
 
+                        let curr_index = curr.index;
                         curr_list.set_cloned(index, Rc::new(ImageTagResponse {
-                            index: curr.index,
+                            index: curr_index,
                             display_name: tag.display_name().to_string(),
                         }));
                     }

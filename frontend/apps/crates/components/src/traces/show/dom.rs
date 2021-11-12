@@ -1,4 +1,10 @@
-use crate::traces::{svg::{self, ShapeStyle, ShapeStyleEditMode, ShapeStyleMode, ShapeStyleKind, ShapeStyleVar, SvgCallbacks, TransformSize}, utils::*};
+use crate::traces::{
+    svg::{
+        self, ShapeStyle, ShapeStyleEditMode, ShapeStyleKind, ShapeStyleMode, ShapeStyleVar,
+        SvgCallbacks, TransformSize,
+    },
+    utils::*,
+};
 use dominator::{clone, html, Dom, DomBuilder};
 use dominator_helpers::signals::EitherSignal;
 use futures_signals::{

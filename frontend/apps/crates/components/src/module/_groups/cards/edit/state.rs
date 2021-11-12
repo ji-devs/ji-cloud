@@ -154,7 +154,7 @@ impl<RawData: RawDataExt, E: ExtraExt> CardsBase<RawData, E> {
         self.pairs
             .signal_vec_cloned()
             .len()
-            .map(|len| len <= 0)
+            .map(|len| len == 0)
             .dedupe()
     }
 

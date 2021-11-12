@@ -2,7 +2,10 @@ use std::rc::Rc;
 
 use super::{state::State, timer::Timer};
 use awsm_web::audio::AudioClipOptions;
-use components::{audio::mixer::{AudioSourceExt, AUDIO_MIXER}, module::_common::prelude::ModuleId};
+use components::{
+    audio::mixer::{AudioSourceExt, AUDIO_MIXER},
+    module::_common::prelude::ModuleId,
+};
 use dominator::clone;
 use futures_signals::signal::SignalExt;
 use shared::{
@@ -53,10 +56,7 @@ pub fn navigate_forward(state: Rc<State>) {
     let active_module = state.active_module.get();
     if let Some(jig) = &*state.jig.lock_ref() {
         if active_module < jig.jig_data.modules.len() - 1 {
-            navigate_to_index(
-                Rc::clone(&state),
-                active_module + 1
-            );
+            navigate_to_index(Rc::clone(&state), active_module + 1);
         } else {
             state.done.set(true);
         }
@@ -188,17 +188,11 @@ pub fn on_iframe_message(state: Rc<State>, message: ModuleToJigPlayerMessage) {
             state.timer.set(None);
         }
         ModuleToJigPlayerMessage::JumpToIndex(index) => {
-            navigate_to_index(
-                Rc::clone(&state),
-                index
-            );
-        },
+            navigate_to_index(Rc::clone(&state), index);
+        }
         ModuleToJigPlayerMessage::JumpToId(module_id) => {
-            navigate_to_module(
-                Rc::clone(&state),
-                &module_id
-            );
-        },
+            navigate_to_module(Rc::clone(&state), &module_id);
+        }
     };
 }
 

@@ -73,17 +73,6 @@ pub fn go_register(_state: Rc<State>) {
     dominator::routing::go_to_url(&route);
 }
 
-pub fn status_redirect(status: Option<Status>) {
-    if let Some(status) = status {
-        match status {
-            Status::ConfirmEmail(email) => {
-                let route: String = Route::User(UserRoute::SendEmailConfirmation(email)).into();
-                dominator::routing::go_to_url(&route);
-            }
-            _ => {}
-        }
-    }
-}
 //// PRIVATE HELPERS /////
 
 pub fn do_success(csrf: &str) {

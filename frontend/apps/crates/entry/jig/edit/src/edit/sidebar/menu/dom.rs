@@ -8,7 +8,7 @@ use crate::edit::sidebar::{
     },
     state::State as SidebarState,
 };
-use dominator::{Dom, EventOptions, clone, html};
+use dominator::{clone, html, Dom, EventOptions};
 use shared::domain::jig::{module::ModuleId, LiteModule, ModuleKind};
 use std::rc::Rc;
 use utils::events;

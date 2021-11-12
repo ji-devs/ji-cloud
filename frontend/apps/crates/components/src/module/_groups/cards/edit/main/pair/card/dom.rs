@@ -13,10 +13,7 @@ use crate::{
         lookup,
     },
 };
-use futures_signals::{
-    map_ref,
-    signal::SignalExt,
-};
+use futures_signals::{map_ref, signal::SignalExt};
 use js_sys::Reflect;
 use shared::domain::jig::module::body::{
     ModeExt,

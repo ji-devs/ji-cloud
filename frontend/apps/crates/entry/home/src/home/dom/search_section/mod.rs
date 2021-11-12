@@ -1,4 +1,4 @@
-use dominator::{Dom, EventOptions, clone, html, with_node};
+use dominator::{clone, html, with_node, Dom, EventOptions};
 use futures_signals::{
     map_ref,
     signal::{Signal, SignalExt},
@@ -35,7 +35,7 @@ pub fn render(state: Rc<State>, auto_search: bool) -> Dom {
         .child(html!("home-search-section-help", {
             .property("slot", "help")
         }))
-        .child(html!("form", { 
+        .child(html!("form", {
             .property("slot", "search-bar")
             .event_with_options(&EventOptions::preventable(), clone!(state => move |e: events::Submit| {
                 e.prevent_default();

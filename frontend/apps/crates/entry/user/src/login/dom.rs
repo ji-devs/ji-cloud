@@ -18,10 +18,6 @@ impl LoginPage {
                 .property_signal("visible", state.loader.is_loading())
             }))
             .child(html!("page-login-landing", {
-                .future(state.status.signal_cloned().for_each(|status| {
-                    actions::status_redirect(status);
-                    async {}
-                }))
                 .children(vec![
                     html!("input-wrapper", {
                         .property("slot", "email")

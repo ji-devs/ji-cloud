@@ -158,9 +158,7 @@ async fn search_async(state: Rc<State>, page: u32) {
     };
 
     let kind = match &state.options.kind {
-        ImageSearchKind::Sticker if state.checkbox_checked.get() => {
-            Some(ImageKind::Sticker)
-        }
+        ImageSearchKind::Sticker if state.checkbox_checked.get() => Some(ImageKind::Sticker),
         _ => None,
     };
 

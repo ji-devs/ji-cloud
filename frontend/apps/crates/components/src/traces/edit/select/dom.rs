@@ -5,7 +5,10 @@ use utils::resize::{resize_info_signal, ResizeInfo};
 use super::trace::state::*;
 use crate::traces::{
     edit::state::*,
-    svg::{self, ShapeStyle, ShapeStyleKind, ShapeStyleMode, ShapeStyleEditMode, ShapeStyleVar, SvgCallbacks, TransformSize},
+    svg::{
+        self, ShapeStyle, ShapeStyleEditMode, ShapeStyleKind, ShapeStyleMode, ShapeStyleVar,
+        SvgCallbacks, TransformSize,
+    },
 };
 use futures_signals::{
     map_ref,

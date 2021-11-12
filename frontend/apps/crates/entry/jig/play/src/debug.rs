@@ -5,7 +5,7 @@ pub struct DebugSettings {
     pub empty_module_url: &'static str,
 }
 
-#[cfg(feature = "local")] 
+#[cfg(feature = "local")]
 impl DebugSettings {
     pub fn local() -> Self {
         Self {

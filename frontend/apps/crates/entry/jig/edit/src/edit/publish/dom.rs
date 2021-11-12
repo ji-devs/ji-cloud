@@ -4,7 +4,10 @@ use futures_signals::{
     signal::{Mutable, SignalExt},
 };
 use shared::domain::jig::PrivacyLevel;
-use utils::{events, routes::{JigEditRoute, JigRoute, Route}};
+use utils::{
+    events,
+    routes::{JigEditRoute, JigRoute, Route},
+};
 use web_sys::{HtmlElement, HtmlInputElement, HtmlTextAreaElement};
 
 use super::super::state::State as JigEditState;
