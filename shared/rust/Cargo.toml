@@ -28,7 +28,7 @@ url = { version = "2.2.2", features = ["serde"] }
 uuid = { version = "0.8.2", features = ["serde"] }
 
 # wasm
-wasm-bindgen = { version = "0.2.78", features = ["nightly"], optional = true }
+wasm-bindgen = { version = "0.2.78", optional = true }
 js-sys = { version = "0.3.55", optional = true }
 
 # backend

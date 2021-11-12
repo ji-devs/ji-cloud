@@ -19,7 +19,7 @@ shared = {path = "../../../../../../shared/rust", features = ["wasm"]}
 wasm-logger = { version = "0.2.0", optional = true }
 wee_alloc = { version = "0.4.5", optional = true }
 console_error_panic_hook = { version = "0.1.7", optional = true }
-wasm-bindgen = { version = "0.2.78", features = ["nightly"] }
+wasm-bindgen = { version = "0.2.78" }
 js-sys = "0.3.55"
 web-sys = { version = "0.3.55", features = [
     'Url',
