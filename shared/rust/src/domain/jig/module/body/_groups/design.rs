@@ -174,33 +174,23 @@ pub enum TraceShape {
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub enum PathCommand {
     /// https://svgwg.org/svg2-draft/paths.html#PathDataMovetoCommands
-    #[serde(alias = "moveTo")]
     MoveTo(f64, f64),
     /// https://svgwg.org/svg2-draft/paths.html#PathDataLinetoCommands
-    #[serde(alias = "closePath")]
     ClosePath,
     /// https://svgwg.org/svg2-draft/paths.html#PathDataLinetoCommands
-    #[serde(alias = "lineTo")]
     LineTo(f64, f64),
     /// https://svgwg.org/svg2-draft/paths.html#PathDataLinetoCommands
-    #[serde(alias = "horizontalLineTo")]
     HorizontalLineTo(f64),
     /// https://svgwg.org/svg2-draft/paths.html#PathDataLinetoCommands
-    #[serde(alias = "verticalLineTo")]
     VerticalLineTo(f64),
     /// https://svgwg.org/svg2-draft/paths.html#PathDataCubicBezierCommands
-    #[serde(alias = "curveTo")]
     CurveTo(f64, f64, f64, f64, f64, f64),
     /// https://svgwg.org/svg2-draft/paths.html#PathDataCubicBezierCommands
-    #[serde(alias = "smoothCurveTo")]
     SmoothCurveTo(f64, f64, f64, f64),
     /// https://svgwg.org/svg2-draft/paths.html#PathDataQuadraticBezierCommands
-    #[serde(alias = "quadCurveTo")]
     QuadCurveTo(f64, f64, f64, f64),
     /// https://svgwg.org/svg2-draft/paths.html#PathDataQuadraticBezierCommands
-    #[serde(alias = "smoothQuadCurveTo")]
     SmoothQuadCurveTo(f64, f64),
     /// https://svgwg.org/svg2-draft/paths.html#PathDataEllipticalArcCommands
-    #[serde(alias = "arcTo")]
     ArcTo(f64, f64, f64, f64, f64, f64, f64),
 }
