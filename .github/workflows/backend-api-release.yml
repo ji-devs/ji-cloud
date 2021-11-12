@@ -46,6 +46,11 @@ jobs:
         with:
           path: ${{github.workspace}}/cargo-make
 
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
 
       - name: build and deploy api
         run: cargo make release-api

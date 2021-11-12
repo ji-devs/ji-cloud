@@ -1,9 +1,6 @@
 use shared::config::RemoteTarget;
 
-use core::{
-    env::req_env,
-    settings::{EmailClientSettings, GoogleCloudStorageSettings},
-};
+use core::{env::req_env, settings::EmailClientSettings};
 use ji_cloud_api::service::{mail, s3, storage};
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
