@@ -44,6 +44,13 @@ jobs:
         with:
           path: ${{github.workspace}}/cargo-make
 
+      - name: install latest Rust version for build script
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+
       - name: build and deploy 
         run: cargo make sandbox-fastly-purge
         

@@ -4,8 +4,7 @@ use crate::{
 };
 use http::StatusCode;
 use shared::domain::jig::player::{
-    instance::PlayerSessionInstanceResponse, JigPlayerSession, JigPlayerSessionCreateResponse,
-    JigPlayerSessionListResponse,
+    instance::PlayerSessionInstanceResponse, JigPlayerSession, JigPlayerSessionListResponse,
 };
 
 #[actix_rt::test]

@@ -1,9 +1,7 @@
 use std::{collections::HashSet, sync::Mutex};
 
 use chrono::{Duration, Utc};
-use core::settings::{
-    EmailClientSettings, GoogleCloudStorageSettings, JwkAudiences, RuntimeSettings,
-};
+use core::settings::{JwkAudiences, RuntimeSettings};
 use ji_cloud_api::http::Application;
 use rand::Rng;
 use shared::config::RemoteTarget;
