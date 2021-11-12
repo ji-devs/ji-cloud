@@ -1,13 +1,13 @@
-import resolve from '@rollup/plugin-node-resolve';
-import { terser } from 'rollup-plugin-terser';
-import filesize from 'rollup-plugin-filesize';
-import alias from '@rollup/plugin-alias';
-import injectProcessEnv from 'rollup-plugin-inject-process-env';
+import resolve from "@rollup/plugin-node-resolve";
+import { terser } from "rollup-plugin-terser";
+import filesize from "rollup-plugin-filesize";
+import alias from "@rollup/plugin-alias";
+import injectProcessEnv from "rollup-plugin-inject-process-env";
 import typescript from "rollup-plugin-typescript2";
 import commonjs from "@rollup/plugin-commonjs";
-import json from '@rollup/plugin-json';
+import json from "@rollup/plugin-json";
 
-const path = require('path');
+const path = require("path");
 
 const filesizeConfig = {
     showGzippedSize: true,
@@ -15,15 +15,13 @@ const filesizeConfig = {
     showMinifiedSize: false,
 };
 
-
 const projectRootDir = path.resolve(__dirname);
-
 
 //target should be local, sandbox, or release
 
 export function createConfig(target) {
     const { APP_NAME } = process.env;
-    const bundleName = (APP_NAME == null) ? "kitchen-sink" : APP_NAME;
+    const bundleName = APP_NAME == null ? "kitchen-sink" : APP_NAME;
 
     const input = `./src/_bundles/${bundleName}/imports.ts`;
     const file = `./dist/${bundleName}/custom-elements.js`;
@@ -49,14 +47,14 @@ export function createConfig(target) {
 
         typescript({
             tsconfigOverride: {
-                include: [input]
-            }
+                include: [input],
+            },
         }),
 
         filesize(filesizeConfig),
 
-        injectProcessEnv({ 
-			NODE_ENV: target === "local" ? 'development' : 'production',
+        injectProcessEnv({
+            NODE_ENV: target === "local" ? "development" : "production",
             DEPLOY_TARGET: target,
         }),
     ];
@@ -65,8 +63,8 @@ export function createConfig(target) {
         plugins.push(
             terser({
                 output: {
-                    comments: false
-                }
+                    comments: false,
+                },
             })
         );
     }
@@ -76,7 +74,7 @@ export function createConfig(target) {
         output: [
             {
                 file,
-                format: 'es',
+                format: "es",
                 sourcemap: true,
             },
         ],
@@ -88,5 +86,5 @@ export function createConfig(target) {
         //external: ['lit-html', 'lit-element'],
 
         plugins,
-    }
-};
+    };
+}

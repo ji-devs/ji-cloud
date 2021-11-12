@@ -1,26 +1,26 @@
-import {ThemeId, ThemeControl} from "~/components/module/_common/theme";
+import { ThemeId, ThemeControl } from "~/components/module/_common/theme";
 import "@elements/mock/text-example";
 import "@elements/core/module-page/grid-resize";
-import {Variant} from "@elements/mock/text-example";
+import { Variant } from "@elements/mock/text-example";
 
 export default {
-    title: "Module / _common"
-}
+    title: "Module / _common",
+};
 
 interface Args {
-    theme: ThemeId,
-    text: string,
+    theme: ThemeId;
+    text: string;
 }
 
-const DEFAULT_ARGS:Args = {
+const DEFAULT_ARGS: Args = {
     theme: "blank",
     text: "hello שָׁלוֹם",
-}
+};
 
-export const TextExample = (props?:Partial<Args>) => {
-    props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
+export const TextExample = (props?: Partial<Args>) => {
+    props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
 
-    const {theme, text} = props;
+    const { theme, text } = props;
 
     return `
 
@@ -36,24 +36,27 @@ export const TextExample = (props?:Partial<Args>) => {
         </div>
       </module-page-grid-resize>
     `;
-}
+};
 
-const Foo = () => {
-}
+const Foo = () => {};
 
-function makeLine(variant: Variant, theme: ThemeId, text:string) {
-	return `
+function makeLine(variant: Variant, theme: ThemeId, text: string) {
+    return `
 		<b>${variant.toUpperCase()}</b>:
 		<br/>
-		<mock-text-example variant="${variant}" theme="${theme as string}" text="${text}"></mock-text-example>
+		<mock-text-example variant="${variant}" theme="${
+        theme as string
+    }" text="${text}"></mock-text-example>
 	`;
 }
 
 //like render_theme_bg in Rust
-function renderThemeBg(theme:ThemeId) {
-	return `<img-ui style="position: absolute; top: 0; left: 0; display: block; width: 100%; height: 100%" path="theme/${theme as string}/bg.jpg"></img-ui>`
+function renderThemeBg(theme: ThemeId) {
+    return `<img-ui style="position: absolute; top: 0; left: 0; display: block; width: 100%; height: 100%" path="theme/${
+        theme as string
+    }/bg.jpg"></img-ui>`;
 }
 TextExample.args = DEFAULT_ARGS;
 TextExample.argTypes = {
-    theme: ThemeControl
-}
+    theme: ThemeControl,
+};

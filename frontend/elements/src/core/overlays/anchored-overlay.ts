@@ -1,10 +1,28 @@
-import { scrollbarStyles } from '@elements/_styles/scrollbar';
-import { LitElement, html, css, customElement, property, query, PropertyValues } from 'lit-element';
-import { nothing } from 'lit-html';
-import { classMap } from 'lit-html/directives/class-map';
+import { scrollbarStyles } from "@elements/_styles/scrollbar";
+import {
+    LitElement,
+    html,
+    css,
+    customElement,
+    property,
+    query,
+    PropertyValues,
+} from "lit-element";
+import { nothing } from "lit-html";
+import { classMap } from "lit-html/directives/class-map";
 
-export type PositionX = "left-out" | "right-out" | "left-in" | "right-in" | "center";
-export type PositionY = "top-out" | "bottom-out" | "top-in" | "bottom-in" | "center";
+export type PositionX =
+    | "left-out"
+    | "right-out"
+    | "left-in"
+    | "right-in"
+    | "center";
+export type PositionY =
+    | "top-out"
+    | "bottom-out"
+    | "top-in"
+    | "bottom-in"
+    | "center";
 
 @customElement("anchored-overlay")
 export class AnchoredOverlay extends LitElement {
@@ -26,7 +44,7 @@ export class AnchoredOverlay extends LitElement {
                     box-shadow: rgb(0 0 0 / 25%) 0px 3px 16px 0px;
                     background-color: #ffffff;
                 }
-            `
+            `,
         ];
     }
 
@@ -39,13 +57,13 @@ export class AnchoredOverlay extends LitElement {
         window.removeEventListener("mousedown", this.onGlobalMouseDown);
     }
     onGlobalMouseDown = (evt: MouseEvent) => {
-        if(this.open && !evt.composedPath().includes(this)) {
+        if (this.open && !evt.composedPath().includes(this)) {
             if (this.autoClose) {
                 this.open = false;
             }
-            this.dispatchEvent(new Event("close"))
+            this.dispatchEvent(new Event("close"));
         }
-    }
+    };
 
     @query(".overlay")
     overlay!: HTMLElement;
@@ -75,14 +93,13 @@ export class AnchoredOverlay extends LitElement {
     styled: boolean = false;
 
     updated(propertyValues: PropertyValues) {
-        if(propertyValues.has("open"))
-            this.onOpenChange();
+        if (propertyValues.has("open")) this.onOpenChange();
     }
 
     private onOpenChange() {
-        if(this.open) {
+        if (this.open) {
             this.positionOverlay();
-            if(this.scrollClose)
+            if (this.scrollClose)
                 document.addEventListener("scroll", this.onScroll);
         } else {
             document.removeEventListener("scroll", this.onScroll);
@@ -91,8 +108,8 @@ export class AnchoredOverlay extends LitElement {
 
     private onScroll = () => {
         this.open = false;
-        this.dispatchEvent(new Event("close"))
-    }
+        this.dispatchEvent(new Event("close"));
+    };
 
     private positionOverlay() {
         const thisBounds = this.getBoundingClientRect();
@@ -113,7 +130,7 @@ export class AnchoredOverlay extends LitElement {
                 top = thisBounds.bottom - overlayBounds.height;
                 break;
             case "center":
-                const center = (thisBounds.height / 2) - (overlayBounds.height / 2);
+                const center = thisBounds.height / 2 - overlayBounds.height / 2;
                 top = thisBounds.top + center;
                 break;
         }
@@ -134,38 +151,39 @@ export class AnchoredOverlay extends LitElement {
                 left = thisBounds.right - overlayBounds.width;
                 break;
             case "center":
-                const center = (thisBounds.width / 2) - (overlayBounds.width / 2);
+                const center = thisBounds.width / 2 - overlayBounds.width / 2;
                 left = thisBounds.left + center;
                 break;
         }
         this.overlay.style.setProperty("left", `${left}px`);
 
-        let maxHeight = window.innerHeight - top;
+        const maxHeight = window.innerHeight - top;
         this.overlay.style.setProperty("max-height", `${maxHeight}px`);
 
-        let maxWidth = window.innerWidth - top;
+        const maxWidth = window.innerWidth - top;
         this.overlay.style.setProperty("max-width", `${maxWidth}px`);
     }
 
     render() {
         const overlayClasses = classMap({
-            "overlay": true,
-            "scrollbar": this.styled
+            overlay: true,
+            scrollbar: this.styled,
         });
 
         return html`
             <div part="anchor" class="anchor">
                 <slot name="anchor"></slot>
             </div>
-            ${ this.open ? html`
-                <div part="overlay" class=${overlayClasses}>
-                    <slot name="overlay"></slot>
-                </div>
-            ` : nothing }
+            ${this.open
+                ? html`
+                      <div part="overlay" class=${overlayClasses}>
+                          <slot name="overlay"></slot>
+                      </div>
+                  `
+                : nothing}
         `;
     }
 }
-
 
 // positioning algo: ??
 // if enough in preferred side: put there

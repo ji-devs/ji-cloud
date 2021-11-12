@@ -1,19 +1,19 @@
 [
     {
-      "origin": ["*"],
-      "responseHeader": [
-        "Origin", 
-        "Accept", 
-        "X-Requested-With", 
-        "Authorization", 
-        "Content-Type", 
-        "Content-Length", 
-        "Accept-Encoding", 
-        "X-CSRF-Token", 
-        "Access-Control-Allow-Origin",
-        "Access-Control-Allow-Credentials"
-      ],
-      "method": ["GET", "HEAD", "OPTIONS"],
-      "maxAgeSeconds": 3600
+        "origin": ["*"],
+        "responseHeader": [
+            "Origin",
+            "Accept",
+            "X-Requested-With",
+            "Authorization",
+            "Content-Type",
+            "Content-Length",
+            "Accept-Encoding",
+            "X-CSRF-Token",
+            "Access-Control-Allow-Origin",
+            "Access-Control-Allow-Credentials"
+        ],
+        "method": ["GET", "HEAD", "OPTIONS"],
+        "maxAgeSeconds": 3600
     }
 ]

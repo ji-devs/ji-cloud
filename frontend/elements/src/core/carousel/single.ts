@@ -1,29 +1,38 @@
-import { LitElement, html, css, customElement, property, query } from 'lit-element';
+import {
+    LitElement,
+    html,
+    css,
+    customElement,
+    property,
+    query,
+} from "lit-element";
 
-@customElement('carousel-single')
+@customElement("carousel-single")
 export class CarouselSingle extends LitElement {
     static get styles() {
-        return [css`
-            :host {
-                display: block;
-            }
-            .carousel {
-                display: grid;
-                align-items: center;
-                grid-auto-flow: column;
-                overflow-x: auto;
-                grid-auto-columns: 100%;
-                scroll-snap-type: x mandatory;
-                scrollbar-width: none; /* Firefox */
-            }
-            .carousel::-webkit-scrollbar {
-                display: none; /* Chromium and Safari */
-            }
-            .carousel ::slotted(*) {
-                scroll-snap-align: center;
-                scroll-snap-stop: always;
-            };
-        `];
+        return [
+            css`
+                :host {
+                    display: block;
+                }
+                .carousel {
+                    display: grid;
+                    align-items: center;
+                    grid-auto-flow: column;
+                    overflow-x: auto;
+                    grid-auto-columns: 100%;
+                    scroll-snap-type: x mandatory;
+                    scrollbar-width: none; /* Firefox */
+                }
+                .carousel::-webkit-scrollbar {
+                    display: none; /* Chromium and Safari */
+                }
+                .carousel ::slotted(*) {
+                    scroll-snap-align: center;
+                    scroll-snap-stop: always;
+                }
+            `,
+        ];
     }
 
     @query(".carousel")
@@ -37,7 +46,7 @@ export class CarouselSingle extends LitElement {
         this.goToPage(this.activePage + 1);
     }
 
-    private getActivePage() : number {
+    private getActivePage(): number {
         return Math.round(this.carousel.scrollLeft / this.clientWidth);
     }
 
@@ -46,15 +55,17 @@ export class CarouselSingle extends LitElement {
 
     private onScroll() {
         this.activePage = this.getActivePage();
-        this.dispatchEvent(new CustomEvent("active-page-change", {
-            detail: {activePage: this.activePage}
-        }));
+        this.dispatchEvent(
+            new CustomEvent("active-page-change", {
+                detail: { activePage: this.activePage },
+            })
+        );
     }
 
     public goToPage(page: number) {
         this.carousel.scroll({
             left: page * this.clientWidth,
-            behavior: 'smooth',
+            behavior: "smooth",
         });
     }
 

@@ -3,19 +3,19 @@ import "@elements/module/_common/edit/widgets/image-search/image-search-style-op
 import { argsToAttrs } from "@utils/attributes";
 
 export default {
-    title: "Module / _COMMON /  edit /Widgets / Sidebar / Image Search"
-}
+    title: "Module / _COMMON /  edit /Widgets / Sidebar / Image Search",
+};
 
 interface Args {
-    open: boolean,
+    open: boolean;
 }
 
-const DEFAULT_ARGS:Args = {
+const DEFAULT_ARGS: Args = {
     open: true,
-}
+};
 
-export const ImageSearchFilters = (props?:Partial<Args>) => {
-    props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
+export const ImageSearchFilters = (props?: Partial<Args>) => {
+    props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
 
     return `
         <image-search-filters
@@ -37,6 +37,6 @@ export const ImageSearchFilters = (props?:Partial<Args>) => {
             <image-search-style-option slot="style-options" label="Transparent"></image-search-style-option>
         </image-search-filters>
     `;
-}
+};
 
 ImageSearchFilters.args = DEFAULT_ARGS;

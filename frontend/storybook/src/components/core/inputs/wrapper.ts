@@ -3,15 +3,15 @@ import "@elements/core/inputs/wrapper";
 import { arrayCount, mapToString } from "@utils/array";
 
 export default {
-    title: "Core / Inputs / Wrappers"
-}
+    title: "Core / Inputs / Wrappers",
+};
 
 interface Args {
-    label: string,
-    value: string,
-    placeholder: string,
-    hint: string,
-    error: boolean,
+    label: string;
+    value: string;
+    placeholder: string;
+    hint: string;
+    error: boolean;
 }
 
 const DEFAULT_ARGS: Args = {
@@ -20,7 +20,7 @@ const DEFAULT_ARGS: Args = {
     placeholder: "Placeholder",
     hint: "",
     error: false,
-}
+};
 
 export const Wrapper = (props?: Partial<Args>) => {
     props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
@@ -34,6 +34,6 @@ export const Wrapper = (props?: Partial<Args>) => {
             <textarea ${argsToAttrs(props)}></textarea>
         </input-wrapper>
     `;
-}
+};
 
 Wrapper.args = DEFAULT_ARGS;

@@ -1,5 +1,5 @@
-import { LitElement, html, css, customElement, property } from 'lit-element';
-import { ifDefined } from 'lit-html/directives/if-defined';
+import { LitElement, html, css, customElement, property } from "lit-element";
+import { ifDefined } from "lit-html/directives/if-defined";
 
 export type Color = "red" | "blue" | "green" | "darkGray";
 export type Size = "small" | "medium" | "large";
@@ -43,45 +43,46 @@ export class _ extends LitElement {
                     pointer-events: none;
                 }
 
-                :host([color=darkGray]) {
+                :host([color="darkGray"]) {
                     /* Just taken from the first time it was needed... */
                     color: #4a4a4a;
                 }
-                :host([color=lightGray]) {
+                :host([color="lightGray"]) {
                     --color: var(--light-gray-4);
                 }
-                :host([color=red]) {
+                :host([color="red"]) {
                     --color: #fd6b71;
                 }
-                :host([color=red]:hover) {
+                :host([color="red"]:hover) {
                     --color: #ed6065;
                 }
-                :host([color=blue]) {
+                :host([color="blue"]) {
                     --color: #5590fc;
                 }
 
-                :host([color=blue]:hover), :host([hoverColor=blue]:hover) {
+                :host([color="blue"]:hover),
+                :host([hoverColor="blue"]:hover) {
                     --color: #387af4;
                 }
-                :host([color=green]) {
+                :host([color="green"]) {
                     --color: #71cf92;
                 }
-                :host([color=green]:hover) {
+                :host([color="green"]:hover) {
                     --color: #46ba6f;
                 }
 
-                :host([color=orange]) {
+                :host([color="orange"]) {
                     --color: #fc7551;
                 }
-                :host([kind=filled]) {
+                :host([kind="filled"]) {
                     background-color: var(--color);
                     color: #ffffff;
                 }
-                :host([kind=outline]) {
+                :host([kind="outline"]) {
                     color: var(--color);
                     border: solid 1px var(--color);
                 }
-                :host([kind=text]) {
+                :host([kind="text"]) {
                     color: var(--color);
                 }
 
@@ -93,35 +94,36 @@ export class _ extends LitElement {
                     font-style: italic;
                 }
 
-                :host([size=small]:not([kind=text])) .inner {
+                :host([size="small"]:not([kind="text"])) .inner {
                     padding: 8px 22px;
                 }
-                :host([size=medium]:not([kind=text])) .inner {
+                :host([size="medium"]:not([kind="text"])) .inner {
                     padding: 12px 24px;
                 }
-                :host([size=large]:not([kind=text])) .inner {
+                :host([size="large"]:not([kind="text"])) .inner {
                     padding: 16px 40px;
                 }
 
-                :host([disabled][kind=filled]) {
+                :host([disabled][kind="filled"]) {
                     background-color: var(--light-gray-4);
                     color: #ffffff;
                 }
-                :host([disabled][kind=outline]) {
+                :host([disabled][kind="outline"]) {
                     color: var(--light-gray-4);
                     border: solid 1px var(--light-gray-4);
                 }
-                :host([disabled][kind=text]) {
+                :host([disabled][kind="text"]) {
                     color: var(--light-gray-4);
                 }
 
-                button, a {
+                button,
+                a {
                     all: unset;
                     color: inherit;
                     display: flex;
                     column-gap: 6px;
                 }
-            `
+            `,
         ];
     }
 
@@ -160,26 +162,38 @@ export class _ extends LitElement {
         this.addEventListener("click", this.onClick, true);
     }
     private onClick(e: MouseEvent) {
-        if(this.disabled)
-            e.stopPropagation();
+        if (this.disabled) e.stopPropagation();
     }
 
     private renderButton() {
         return html`
-            <button part="button" class="inner" type="${this.submit ? 'submit' : 'button' }" ?disabled="${this.disabled}">
+            <button
+                part="button"
+                class="inner"
+                type="${this.submit ? "submit" : "button"}"
+                ?disabled="${this.disabled}"
+            >
                 <slot></slot>
             </button>
         `;
     }
     private renderLink() {
         return html`
-            <a part="a" class="inner" href=${this.href!} @click=${this.onClick} target=${ifDefined(this.target as any)}>
+            <a
+                part="a"
+                class="inner"
+                href=${this.href!}
+                @click=${this.onClick}
+                target=${ifDefined(this.target as any)}
+            >
                 <slot></slot>
             </a>
         `;
     }
 
     render() {
-        return this.href === undefined ? this.renderButton() : this.renderLink();
+        return this.href === undefined
+            ? this.renderButton()
+            : this.renderLink();
     }
 }

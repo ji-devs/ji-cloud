@@ -1,22 +1,21 @@
-import {argsToAttrs} from "@utils/attributes";
+import { argsToAttrs } from "@utils/attributes";
 import "@elements/entry/kids/student-code/jigzi";
 import { Mode } from "@elements/entry/home/student-code/jigzi";
 
 export default {
-    title: "Entry / Kids / Student Code"
-}
+    title: "Entry / Kids / Student Code",
+};
 
 interface Args {
-    mode: Mode,
+    mode: Mode;
 }
 
-const DEFAULT_ARGS:Args = {
+const DEFAULT_ARGS: Args = {
     mode: "default",
-}
+};
 
-export const Jigzi = (props?:Args) => {
-
-    props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
+export const Jigzi = (props?: Args) => {
+    props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
 
     return `
         <kids-student-code-jigzi slot="jigzi" ${argsToAttrs(props)}>
@@ -24,14 +23,14 @@ export const Jigzi = (props?:Args) => {
             <button slot="try-again" onclick="console.log('try again')">Try again</button>
         </kids-student-code-jigzi>
     `;
-}
+};
 
 Jigzi.args = DEFAULT_ARGS;
 Jigzi.argTypes = {
     mode: {
         control: {
-            type: 'inline-radio',
-            options: ["default", "try-again", "help"]
-        }
-    }
-}
+            type: "inline-radio",
+            options: ["default", "try-again", "help"],
+        },
+    },
+};

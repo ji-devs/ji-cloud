@@ -1,4 +1,4 @@
-import { LitElement, html, css, customElement, property } from 'lit-element';
+import { LitElement, html, css, customElement, property } from "lit-element";
 
 export type Color = "grey" | "red" | "blue" | "green"; // grey and disabled have the same color
 export type Size = "small" | "medium" | "large" | "x-large";
@@ -9,25 +9,25 @@ export class _ extends LitElement {
     static get styles() {
         return [
             css`
-                :host([color=grey]) {
+                :host([color="grey"]) {
                     --color: var(--light-gray-4);
                 }
-                :host([color=red]) {
+                :host([color="red"]) {
                     --color: #fd6b71;
                 }
-                :host([color=red]:hover) {
+                :host([color="red"]:hover) {
                     --color: #ed6065;
                 }
-                :host([color=blue]) {
+                :host([color="blue"]) {
                     --color: #5590fc;
                 }
-                :host([color=blue]:hover) {
+                :host([color="blue"]:hover) {
                     --color: #387af4;
                 }
-                :host([color=green]) {
+                :host([color="green"]) {
                     --color: #71cf92;
                 }
-                :host([color=green]:hover) {
+                :host([color="green"]:hover) {
                     --color: #46ba6f;
                 }
                 button {
@@ -40,15 +40,15 @@ export class _ extends LitElement {
                     background-color: transparent;
                     box-sizing: border-box;
                 }
-                :host([kind=rect]) button {
+                :host([kind="rect"]) button {
                     background-color: var(--color);
                     color: #ffffff;
                 }
-                :host([kind=outline]) button {
+                :host([kind="outline"]) button {
                     color: var(--color);
                     border: solid 1px var(--color);
                 }
-                :host([kind=text]) button {
+                :host([kind="text"]) button {
                     color: var(--color);
                 }
                 :host([bold]) button {
@@ -57,13 +57,13 @@ export class _ extends LitElement {
                 :host([italic]) button {
                     font-style: italic;
                 }
-                :host([size=small]) button {
+                :host([size="small"]) button {
                     padding: 8px 22px;
                 }
-                :host([size=medium]) button {
+                :host([size="medium"]) button {
                     padding: 12px 24px;
                 }
-                :host([size=large]) button {
+                :host([size="large"]) button {
                     padding: 16px 40px;
                 }
                 /* :host([size=x-large]) button {
@@ -73,7 +73,7 @@ export class _ extends LitElement {
                 :host button:disabled {
                     background-color: #a9b1b5;
                 }
-            `
+            `,
         ];
     }
 
@@ -100,7 +100,10 @@ export class _ extends LitElement {
 
     render() {
         return html`
-            <button type="${this.submit ? 'submit' : 'button' }" ?disabled="${this.disabled}">
+            <button
+                type="${this.submit ? "submit" : "button"}"
+                ?disabled="${this.disabled}"
+            >
                 <slot></slot>
             </button>
         `;

@@ -1,19 +1,16 @@
-import {argsToAttrs} from "@utils/attributes";
+import { argsToAttrs } from "@utils/attributes";
 import "@elements/entry/jig/play/landing";
 
 export default {
-    title: "Entry / Jig / Play"
-}
+    title: "Entry / Jig / Play",
+};
 
-interface Args {
-}
+interface Args {}
 
-const DEFAULT_ARGS:Args = {
-}
+const DEFAULT_ARGS: Args = {};
 
-
-export const Landing = (props?:Partial<Args>) => {
-    props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
+export const Landing = (props?: Partial<Args>) => {
+    props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
 
     return `
         <jig-play-landing ${argsToAttrs(props)}>
@@ -32,13 +29,13 @@ export const Landing = (props?:Partial<Args>) => {
             <jig-play-move-button slot="forward" kind="forward"></jig-play-move-button>
         </jig-play-landing>
     `;
-}
+};
 Landing.args = DEFAULT_ARGS;
 Landing.argTypes = {
     WW__WW: {
         control: {
-            type: 'inline-radio',
+            type: "inline-radio",
             options: [],
-        }
+        },
     },
-}
+};

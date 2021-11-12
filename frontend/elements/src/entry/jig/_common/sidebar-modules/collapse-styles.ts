@@ -2,11 +2,12 @@ import { css } from "lit-element";
 
 export const collapseStyles = css`
     :host {
-        --fading-phase-duration: .2s;
-        --collapsing-phase-duration: .3s;
+        --fading-phase-duration: 0.2s;
+        --collapsing-phase-duration: 0.3s;
     }
     @keyframes hide {
-        from { }
+        from {
+        }
         to {
             height: 0;
             width: 0;
@@ -19,7 +20,8 @@ export const collapseStyles = css`
             width: 0;
             overflow: hidden;
         }
-        to { }
+        to {
+        }
     }
     .open-only {
         transition-property: opacity;

@@ -32,7 +32,7 @@ export class _ extends LitElement {
                     height: 200px;
                     resize: none;
                 }
-                ::slotted([slot=copy]) {
+                ::slotted([slot="copy"]) {
                     place-self: end;
                 }
             `,

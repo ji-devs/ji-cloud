@@ -5,8 +5,10 @@ import "@elements/entry/user/_common/base-page";
 
 const STR_TITLE = "Woohoo! We just sent you an email.";
 const STR_SUBTITLE1 = "You're one step closer to the Jigzi family!";
-const STR_SUBTITLE2 = "Please check your inbox and click the verification button.";
-const STR_SUBTITLE3 = "If you don't see it within minutes, check your filters and spam folders.";
+const STR_SUBTITLE2 =
+    "Please check your inbox and click the verification button.";
+const STR_SUBTITLE3 =
+    "If you don't see it within minutes, check your filters and spam folders.";
 
 @customElement("page-email-send")
 export class _ extends LitElement {

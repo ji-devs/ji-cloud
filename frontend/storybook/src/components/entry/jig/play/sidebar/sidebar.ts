@@ -1,23 +1,22 @@
-import {argsToAttrs} from "@utils/attributes";
+import { argsToAttrs } from "@utils/attributes";
 import "@elements/entry/jig/play/sidebar/sidebar";
 
 export default {
-    title: "Entry / Jig / Play / Sidebar"
-}
+    title: "Entry / Jig / Play / Sidebar",
+};
 
 interface Args {
-    jigName: string,
-    open: boolean,
+    jigName: string;
+    open: boolean;
 }
 
-const DEFAULT_ARGS:Args = {
+const DEFAULT_ARGS: Args = {
     jigName: "Hebrew Letters - Tet",
     open: false,
-}
+};
 
-
-export const Sidebar = (props?:Partial<Args>) => {
-    props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
+export const Sidebar = (props?: Partial<Args>) => {
+    props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
 
     return `
         <jig-play-sidebar ${argsToAttrs(props)}>
@@ -40,5 +39,5 @@ export const Sidebar = (props?:Partial<Args>) => {
             </jig-sidebar-module>
         </jig-play-sidebar>
     `;
-}
+};
 Sidebar.args = DEFAULT_ARGS;

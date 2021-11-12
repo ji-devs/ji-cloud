@@ -3,7 +3,6 @@ import "@elements/core/images/ui";
 import "@elements/core/buttons/icon";
 import { collapseStyles } from "../../_common/sidebar-modules/collapse-styles";
 
-
 @customElement("jig-edit-sidebar")
 export class _ extends LitElement {
     static get styles() {
@@ -29,7 +28,8 @@ export class _ extends LitElement {
                 :host([isModulePage]) .page-overlay {
                     display: none;
                 }
-                :host([collapsed]) .page-overlay, :host([isModulePage]) .page-overlay {
+                :host([collapsed]) .page-overlay,
+                :host([isModulePage]) .page-overlay {
                     background-color: #ffffff00;
                     pointer-events: none;
                 }
@@ -97,10 +97,10 @@ export class _ extends LitElement {
         ];
     }
 
-    @property({type: Boolean, reflect: true})
+    @property({ type: Boolean, reflect: true })
     collapsed: boolean = false;
 
-    @property({type: Boolean, reflect: true})
+    @property({ type: Boolean, reflect: true })
     isModulePage: boolean = false;
 
     render() {
@@ -111,7 +111,9 @@ export class _ extends LitElement {
                     <slot name="header"></slot>
                 </header>
                 <div class="side-head collapsing-phase">
-                    <img-ui path="entry/jig/jiggling/yellow/face-small.png"></img-ui>
+                    <img-ui
+                        path="entry/jig/jiggling/yellow/face-small.png"
+                    ></img-ui>
                 </div>
                 <section class="collapsing-phase">
                     <div class="cover-module collapsing-phase">

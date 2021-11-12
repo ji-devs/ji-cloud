@@ -1,8 +1,14 @@
-import { LitElement, html, css, customElement, property, query } from "lit-element";
+import {
+    LitElement,
+    html,
+    css,
+    customElement,
+    property,
+    query,
+} from "lit-element";
 import { nothing } from "lit-html";
 import { ModuleKind } from "@elements/module/_common/types";
 import "@elements/core/images/ui";
-
 
 export type ModuleState = "empty" | "active" | "thumbnail";
 const STR_EMPTY = "Drag\nactivity\nhere";
@@ -21,32 +27,32 @@ export class _ extends LitElement {
                     border-radius: 16px;
                     box-sizing: border-box;
                 }
-                :host([state=empty]) .wrapper {
+                :host([state="empty"]) .wrapper {
                     background-color: var(--light-blue-5);
                     color: #ffffff;
                 }
-                :host([state=empty]) .wrapper.drag-over {
+                :host([state="empty"]) .wrapper.drag-over {
                     background-color: var(--dark-blue-1);
                     color: transparent;
                 }
-                :host([state=empty][coverOnly]) .wrapper:not(.drag-over) {
+                :host([state="empty"][coverOnly]) .wrapper:not(.drag-over) {
                     color: var(--dark-gray-3);
                     border: solid 3px var(--light-orange-2);
                     background-color: var(--light-orange-1);
                 }
-                :host([state=active]) .wrapper {
+                :host([state="active"]) .wrapper {
                     background-color: var(--light-blue-5);
                 }
-                :host([state=active]) img-ui {
+                :host([state="active"]) img-ui {
                     height: 100px;
                 }
-                slot[name=thumbnail] {
+                slot[name="thumbnail"] {
                     display: none;
                 }
-                :host([state=thumbnail]) slot[name=thumbnail] {
+                :host([state="thumbnail"]) slot[name="thumbnail"] {
                     display: revert;
                 }
-                ::slotted([slot=thumbnail]) {
+                ::slotted([slot="thumbnail"]) {
                     border-radius: 16px;
                 }
 
@@ -61,7 +67,7 @@ export class _ extends LitElement {
         ];
     }
 
-    @property({reflect: true})
+    @property({ reflect: true })
     state: ModuleState = "active";
 
     @property()
@@ -85,19 +91,27 @@ export class _ extends LitElement {
 
     render() {
         return html`
-            <div class="wrapper" @dragover="${this.dragOver}" @dragleave="${this.dragLeave}">
-                ${
-                    this.state === "empty" ? html`
-                        <p class="drag-here-text">${
-                            this.coverOnly ? STR_EMPTY_COVER
-                                : STR_EMPTY
-                        }</p>
-                    ` : this.state === "active" ? html`
-                        <img-ui path="entry/jig/modules/large/${this.activeModuleKind}-hover.svg"></img-ui>
-                    ` : this.state === "thumbnail" ? html`
-                        <slot name="thumbnail"></slot>
-                    `: nothing
-                }
+            <div
+                class="wrapper"
+                @dragover="${this.dragOver}"
+                @dragleave="${this.dragLeave}"
+            >
+                ${this.state === "empty"
+                    ? html`
+                          <p class="drag-here-text">
+                              ${this.coverOnly ? STR_EMPTY_COVER : STR_EMPTY}
+                          </p>
+                      `
+                    : this.state === "active"
+                    ? html`
+                          <img-ui
+                              path="entry/jig/modules/large/${this
+                                  .activeModuleKind}-hover.svg"
+                          ></img-ui>
+                      `
+                    : this.state === "thumbnail"
+                    ? html` <slot name="thumbnail"></slot> `
+                    : nothing}
             </div>
         `;
     }

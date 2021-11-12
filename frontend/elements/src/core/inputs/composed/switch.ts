@@ -30,7 +30,7 @@ export class _ extends LitElement {
                     width: 20px;
                     border-radius: 50%;
                     background-color: var(--light-gray-4);
-                    transition: transform .3s, background-color .3s;
+                    transition: transform 0.3s, background-color 0.3s;
                 }
                 input:checked + label .circle {
                     transform: translateX(20px);
@@ -56,7 +56,12 @@ export class _ extends LitElement {
 
     render() {
         return html`
-            <input id="input" type="checkbox" ?checked="${this.enabled}" @change="${this.toggle}">
+            <input
+                id="input"
+                type="checkbox"
+                ?checked="${this.enabled}"
+                @change="${this.toggle}"
+            />
             <label for="input">
                 <span class="track"></span>
                 <span class="circle"></span>

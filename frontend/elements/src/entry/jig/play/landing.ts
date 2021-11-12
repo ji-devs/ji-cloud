@@ -23,7 +23,7 @@ export class _ extends LitElement {
                     height: 100%;
                     width: 100%;
                 }
-                ::slotted([slot=iframe]),
+                ::slotted([slot="iframe"]),
                 .controls,
                 .paused-backdrop,
                 .play-pause-button-layer,
@@ -34,10 +34,11 @@ export class _ extends LitElement {
                     width: 100%;
                     border: 0;
                 }
-                ::slotted([slot=iframe]) {
+                ::slotted([slot="iframe"]) {
                     z-index: 1;
                 }
-                .controls, .play-pause-button-layer {
+                .controls,
+                .play-pause-button-layer {
                     display: grid;
                     grid-template-columns: 0px 1fr auto;
                     grid-template-rows: 1fr 100px;
@@ -82,10 +83,11 @@ export class _ extends LitElement {
                     align-items: center;
                     padding-right: 32px;
                 }
-                .bottom-right ::slotted([slot=background]) {
+                .bottom-right ::slotted([slot="background"]) {
                     margin-right: 102px;
                 }
-                :host([paused]) .paused-backdrop, ::slotted(dialog-overlay) {
+                :host([paused]) .paused-backdrop,
+                ::slotted(dialog-overlay) {
                     background-color: #00000080;
                 }
                 :host([paused]) .paused-backdrop {
@@ -95,13 +97,13 @@ export class _ extends LitElement {
                     z-index: 4;
                     pointer-events: none;
                 }
-                .play-pause-button-layer ::slotted([slot=play-pause-button]) {
+                .play-pause-button-layer ::slotted([slot="play-pause-button"]) {
                     pointer-events: all;
                 }
                 :host([paused]) .play-pause-button-layer {
                     pointer-events: all;
                 }
-                ::slotted(dialog-overlay){
+                ::slotted(dialog-overlay) {
                     z-index: 5;
                 }
             `,
@@ -124,8 +126,12 @@ export class _ extends LitElement {
                     </div>
                     <div class="bottom-bar">
                         <span class="back"><slot name="back"></slot></span>
-                        <span class="progress"><slot name="progress"></slot></span>
-                        <span class="forward"><slot name="forward"></slot></span>
+                        <span class="progress"
+                            ><slot name="progress"></slot
+                        ></span>
+                        <span class="forward"
+                            ><slot name="forward"></slot
+                        ></span>
                     </div>
                     <div class="bottom-right">
                         <slot name="background"></slot>

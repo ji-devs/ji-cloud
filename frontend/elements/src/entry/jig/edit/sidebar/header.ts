@@ -4,7 +4,6 @@ import "@elements/core/images/ui";
 import "@elements/core/buttons/icon";
 import { collapseStyles } from "../../_common/sidebar-modules/collapse-styles";
 
-
 @customElement("jig-edit-sidebar-header")
 export class _ extends LitElement {
     static get styles() {
@@ -42,11 +41,11 @@ export class _ extends LitElement {
                     margin-right: 0px;
                     transition-property: margin-right;
                 }
-                :host([collapsed]) ::slotted([slot=close]) {
+                :host([collapsed]) ::slotted([slot="close"]) {
                     transform: rotate(-180deg);
                 }
-                ::slotted([slot=close]) {
-                    transition: transform .3s;
+                ::slotted([slot="close"]) {
+                    transition: transform 0.3s;
                 }
                 .logo-nav-wrapper {
                     margin-top: 16px;
@@ -73,7 +72,8 @@ export class _ extends LitElement {
                     height: 12px;
                     width: 1px;
                 }
-                nav, .settings-preview {
+                nav,
+                .settings-preview {
                     display: flex;
                     align-items: center;
                     column-gap: 16px;
@@ -85,7 +85,7 @@ export class _ extends LitElement {
                     column-gap: 0px;
                     padding: 0 12px;
                 }
-                ::slotted([slot=modules]) {
+                ::slotted([slot="modules"]) {
                     font-size: 24px;
                     color: var(--main-blue);
                 }
@@ -93,7 +93,7 @@ export class _ extends LitElement {
                     margin: 23px 0;
                     width: 100%;
                 }
-                ::slotted([slot=settings]) {
+                ::slotted([slot="settings"]) {
                     font-size: 16px;
                     height: 28px;
                     width: 28px;
@@ -106,10 +106,10 @@ export class _ extends LitElement {
         ];
     }
 
-    @property({type: Boolean, reflect: true})
+    @property({ type: Boolean, reflect: true })
     collapsed: boolean = false;
 
-    @property({type: Boolean, reflect: true})
+    @property({ type: Boolean, reflect: true })
     isModulePage: boolean = false;
 
     render() {
@@ -121,14 +121,19 @@ export class _ extends LitElement {
             </div>
             <div class="logo-nav-wrapper">
                 <a href="/">
-                    <img-ui class="logo collapsing-phase" path="entry/jig/logo-jigzi.svg"></img-ui>
+                    <img-ui
+                        class="logo collapsing-phase"
+                        path="entry/jig/logo-jigzi.svg"
+                    ></img-ui>
                 </a>
                 <nav class="open-only">
                     <slot name="gallery"></slot>
-                    ${ this.isModulePage ? nothing : (html`
-                        <div class="divider"></div>
-                        <slot name="modules"></slot>
-                    `) }
+                    ${this.isModulePage
+                        ? nothing
+                        : html`
+                              <div class="divider"></div>
+                              <slot name="modules"></slot>
+                          `}
                 </nav>
             </div>
             <div class="input open-only"><slot name="input"></slot></div>

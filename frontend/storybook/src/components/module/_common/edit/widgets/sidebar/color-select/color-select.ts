@@ -7,16 +7,16 @@ import "@elements/core/buttons/icon";
 import { argsToAttrs } from "@utils/attributes";
 
 export default {
-    title: "Module / _COMMON /  edit /Widgets / Sidebar / Color Select"
-}
+    title: "Module / _COMMON /  edit /Widgets / Sidebar / Color Select",
+};
 
 interface Args {
-    label: string,
+    label: string;
 }
 
 const DEFAULT_ARGS: Args = {
     label: "Select color for the background",
-}
+};
 
 const generalColorList = [
     "#00000000",
@@ -45,20 +45,9 @@ const generalColorList = [
     "#1a1a1aff",
 ];
 
-const themeColorList = [
-    "#dce9f5",
-    "#e6e6e6",
-    "#808080",
-    "#1a1a1a",
-];
+const themeColorList = ["#dce9f5", "#e6e6e6", "#808080", "#1a1a1a"];
 
-const userColorList = [
-    "#dce9f5",
-    "#e6e6e6",
-    "#808080",
-    "#1a1a1a",
-];
-
+const userColorList = ["#dce9f5", "#e6e6e6", "#808080", "#1a1a1a"];
 
 export const colorSelect = (props?: Partial<Args>) => {
     props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
@@ -66,21 +55,24 @@ export const colorSelect = (props?: Partial<Args>) => {
     return `
         <color-select ${argsToAttrs(props)}>
             <color-select-section slot="sections" label="General colors">
-                ${generalColorList.map(color => (
-                    `<color-select-item slot="items" color="${color}"></color-select-item>`
-                ))}
+                ${generalColorList.map(
+                    (color) =>
+                        `<color-select-item slot="items" color="${color}"></color-select-item>`
+                )}
             </color-select-section>
             <color-select-section slot="sections" label="Theme colors">
-                ${themeColorList.map(color => (
-                    `<color-select-item slot="items" color="${color}"></color-select-item>`
-                ))}
+                ${themeColorList.map(
+                    (color) =>
+                        `<color-select-item slot="items" color="${color}"></color-select-item>`
+                )}
             </color-select-section>
             <color-select-section slot="sections" label="My colors">
-                ${userColorList.map(color => (
-                    `<color-select-item slot="items" color="${color}" deletable>
+                ${userColorList.map(
+                    (color) =>
+                        `<color-select-item slot="items" color="${color}" deletable>
                         <button-icon slot="delete-button" icon="circle-x-blue"></button-icon>
                     </color-select-item>`
-                ))}
+                )}
             </color-select-section>
 
             <input-color slot="add-color">
@@ -88,6 +80,6 @@ export const colorSelect = (props?: Partial<Args>) => {
             </input-color>
         </color-select>
     `;
-}
+};
 
 colorSelect.args = DEFAULT_ARGS;

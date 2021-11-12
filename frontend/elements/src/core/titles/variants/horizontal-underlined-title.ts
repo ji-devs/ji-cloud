@@ -1,39 +1,37 @@
-import { MEDIA_UI } from '@utils/path';
-import { LitElement, html, css, customElement, property } from 'lit-element';
-@customElement('horizontal-underlined-title')
+import { MEDIA_UI } from "@utils/path";
+import { LitElement, html, css, customElement, property } from "lit-element";
+@customElement("horizontal-underlined-title")
 export class _ extends LitElement {
-  static get styles() {
-    return [css`
-    .wrapper{
-        border-bottom: solid 1px #e5e7ef;
-        width:100%;
-        position:relative;
-        display:flex;
-        justify-content:space-between
-        
+    static get styles() {
+        return [
+            css`
+                .wrapper {
+                    border-bottom: solid 1px #e5e7ef;
+                    width: 100%;
+                    position: relative;
+                    display: flex;
+                    justify-content: space-between;
+                }
+                h1 {
+                    font-size: 24px;
+                    font-weight: 300;
+                    margin-top: 0;
+                }
+            `,
+        ];
     }
-        h1{
-        font-size: 24px;
-        font-weight: 300;
-        margin-top:0;
-        
+
+    @property()
+    title: string = "";
+
+    render() {
+        const { title } = this;
+
+        return html`
+            <div class="wrapper">
+                <h1>${title}</h1>
+                <slot></slot>
+            </div>
+        `;
     }
-   
-    `];
-  }
-
-  @property()
-  title:string = ""; 
-
-  render() {
-
-    const {title} = this;
-
-    return html`
-    <div class="wrapper">
-       <h1>${title}</h1>
-       <slot></slot>
-    </div>
-  `;
-  }
 }

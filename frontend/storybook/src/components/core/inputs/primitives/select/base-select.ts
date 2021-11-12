@@ -3,16 +3,16 @@ import "@elements/core/inputs/primitives/select/base-select";
 import { arrayCount, mapToString } from "@utils/array";
 
 export default {
-    title: "Core / Inputs / Primitives / Select"
-}
+    title: "Core / Inputs / Primitives / Select",
+};
 
 interface Args {
-    multiple: boolean,
+    multiple: boolean;
 }
 
 const DEFAULT_ARGS: Args = {
     multiple: false,
-}
+};
 
 export const BaseSelect = (props?: Partial<Args>) => {
     props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
@@ -71,6 +71,6 @@ export const BaseSelect = (props?: Partial<Args>) => {
             </base-select>
         </div>
     `;
-}
+};
 
 BaseSelect.args = DEFAULT_ARGS;

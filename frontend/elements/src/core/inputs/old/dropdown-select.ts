@@ -44,7 +44,8 @@ export class _ extends LitElement {
                 :host([open]) .label {
                     color: var(--dark-blue-3);
                 }
-                .input .value, .input .placeholder {
+                .input .value,
+                .input .placeholder {
                     grid-column: 1;
                     overflow: hidden;
                     text-overflow: ellipsis;
@@ -60,7 +61,7 @@ export class _ extends LitElement {
                     grid-column: 2;
                     grid-row: 1 / span 2;
                     width: 24px;
-                    transition: transform .3s;
+                    transition: transform 0.3s;
                     display: flex;
                 }
                 :host([open]) .icon {
@@ -92,7 +93,7 @@ export class _ extends LitElement {
     @property()
     placeholder: string = "";
 
-    @property({type: Boolean, reflect: true})
+    @property({ type: Boolean, reflect: true })
     error: boolean = false;
 
     @property({ type: Boolean, reflect: true })
@@ -110,19 +111,30 @@ export class _ extends LitElement {
         return html`
             <anchored-overlay
                 ?open="${this.open}"
-                @close="${() => this.open = false}"
+                @close="${() => (this.open = false)}"
                 ?autoClose="${false}"
                 positionY="bottom-out"
                 positionX="left-in"
             >
-                <div slot="anchor" class="input" @click=${() => this.toggleOpen()}>
-                    ${ this.label ? html`<span class="label">${this.label}</span>` : nothing }
-                    ${ this.value ? (
-                        html`<span class="value" title="${this.value}">${this.value}</span>`
-                    ) : (
-                        html`<span class="placeholder">${this.placeholder}</span>`
-                    )}
-                    <img-ui class="icon" path="core/_common/chevron-down-blue.svg"></img-ui>
+                <div
+                    slot="anchor"
+                    class="input"
+                    @click=${() => this.toggleOpen()}
+                >
+                    ${this.label
+                        ? html`<span class="label">${this.label}</span>`
+                        : nothing}
+                    ${this.value
+                        ? html`<span class="value" title="${this.value}"
+                              >${this.value}</span
+                          >`
+                        : html`<span class="placeholder"
+                              >${this.placeholder}</span
+                          >`}
+                    <img-ui
+                        class="icon"
+                        path="core/_common/chevron-down-blue.svg"
+                    ></img-ui>
                 </div>
                 <slot slot="overlay"></slot>
             </anchored-overlay>

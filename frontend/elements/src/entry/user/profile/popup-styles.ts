@@ -10,7 +10,7 @@ export default css`
         max-width: 700px;
         background-color: #ffffff;
     }
-    ::slotted([slot=close]) {
+    ::slotted([slot="close"]) {
         height: 32px;
         width: 32px;
         position: absolute;

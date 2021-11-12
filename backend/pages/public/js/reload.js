@@ -10,17 +10,17 @@ const INTERVAL = 500;
 let _epoch;
 
 function ping() {
-    fetch("/epoch")
-        .then(data => data.text())
-        .then(epoch => {
-            if(_epoch != null && _epoch != epoch) {
-                console.log("reloading...");
-                window.location.reload();
-            } else {
-                _epoch = epoch;
-                setTimeout(ping, INTERVAL);
-            }
-        });
+  fetch("/epoch")
+    .then((data) => data.text())
+    .then((epoch) => {
+      if (_epoch != null && _epoch != epoch) {
+        console.log("reloading...");
+        window.location.reload();
+      } else {
+        _epoch = epoch;
+        setTimeout(ping, INTERVAL);
+      }
+    });
 }
 
 ping();

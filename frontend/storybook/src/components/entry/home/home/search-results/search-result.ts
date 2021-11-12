@@ -1,27 +1,27 @@
-import {argsToAttrs} from "@utils/attributes";
+import { argsToAttrs } from "@utils/attributes";
 import "@elements/entry/home/home/search-results/search-result";
 import "@elements/entry/home/home/search-results/search-result-details";
 import "@elements/entry/home/home/search-results/search-result-category";
 import { Details } from "./search-result-details";
 
 export default {
-    title: "Entry / Home / Home / Search results"
-}
+    title: "Entry / Home / Home / Search results",
+};
 
 interface Args {
-    new: boolean,
-    leaningPathJigCount?: number,
-    title: string,
-    playedCount: number,
-    likedCount: number,
-    ages: string,
-    language: string,
-    byJiTeam: boolean,
-    author: string,
-    description: string,
+    new: boolean;
+    leaningPathJigCount?: number;
+    title: string;
+    playedCount: number;
+    likedCount: number;
+    ages: string;
+    language: string;
+    byJiTeam: boolean;
+    author: string;
+    description: string;
 }
 
-const DEFAULT_ARGS:Args = {
+const DEFAULT_ARGS: Args = {
     new: false,
     leaningPathJigCount: undefined,
     title: "The Big Gematria challenge",
@@ -31,11 +31,12 @@ const DEFAULT_ARGS:Args = {
     language: "english",
     byJiTeam: false,
     author: "Corinne",
-    description: "This game is about… using … Lorem Ipsum is simply dummy text of the printing and typesetting industry",
-}
+    description:
+        "This game is about… using … Lorem Ipsum is simply dummy text of the printing and typesetting industry",
+};
 
-export const SearchResult = (props?:Args) => {
-    props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
+export const SearchResult = (props?: Args) => {
+    props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
 
     return `
         <home-search-result ${argsToAttrs(props)} slot="results">
@@ -49,6 +50,6 @@ export const SearchResult = (props?:Args) => {
             <button-rect slot="play-button" color="bluewhite">Play</button-rect>
         </home-search-result>
     `;
-}
+};
 
 SearchResult.args = DEFAULT_ARGS;

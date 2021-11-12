@@ -6,28 +6,29 @@ import "@elements/entry/admin/locale/locale-actions-wrapper";
 import "@elements/entry/admin/locale/locale-hover-link";
 import "@elements/entry/admin/locale/locale-sort-button";
 import "@elements/core/buttons/rectangle";
-import {argsToAttrs} from "@utils/attributes";
-
+import { argsToAttrs } from "@utils/attributes";
 
 export default {
-  title: 'Entry/Admin/Locale/pages',
-}
+    title: "Entry/Admin/Locale/pages",
+};
 
 interface Args {
-    saving: boolean,
-    sortOrder: 'asc' | 'desc',
+    saving: boolean;
+    sortOrder: "asc" | "desc";
 }
 
 const DEFAULT_ARGS: Args = {
     saving: false,
-    sortOrder: 'asc',
-}
+    sortOrder: "asc",
+};
 
 export const Landing = (props?: Partial<Args>) => {
-    props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
+    props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
 
     return `
-<locale-page ${argsToAttrs(props)} sortorder="asc" columns='[["ID", true], ["Section", true], ["Item Kind", true], ["English", true], ["Hebrew", false], ["Status", true], ["Zeplin reference", true], ["Comments", true], ["App", true], ["Element", true], ["Mock", true], ["Actions", true]]'>
+<locale-page ${argsToAttrs(
+        props
+    )} sortorder="asc" columns='[["ID", true], ["Section", true], ["Item Kind", true], ["English", true], ["Hebrew", false], ["Status", true], ["Zeplin reference", true], ["Comments", true], ["App", true], ["Element", true], ["Mock", true], ["Actions", true]]'>
     <select slot="bundles" multiple="">
         <option value="Publish">Publish</option>
         <option value="Poster">Poster</option>
@@ -277,7 +278,7 @@ export const Landing = (props?: Partial<Args>) => {
         </locale-cell>
     </locale-row>
 </locale-page>
-    `
-}
+    `;
+};
 
 Landing.args = DEFAULT_ARGS;

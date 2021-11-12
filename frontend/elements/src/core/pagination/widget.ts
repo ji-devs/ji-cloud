@@ -1,120 +1,123 @@
-import { LitElement, html, css, customElement, property } from 'lit-element';
-import {classMap} from "lit-html/directives/class-map";
+import { LitElement, html, css, customElement, property } from "lit-element";
+import { classMap } from "lit-html/directives/class-map";
 import "@elements/core/titles/variants/horizontal-underlined-title";
 
-    const STR_BACK = "Back";
-    const STR_PAGE = "Page";
-    const STR_OF = "of";
-    const STR_NEXT ="Next";
+const STR_BACK = "Back";
+const STR_PAGE = "Page";
+const STR_OF = "of";
+const STR_NEXT = "Next";
 
-@customElement('pagination-widget')
+@customElement("pagination-widget")
 export class _ extends LitElement {
     static get styles() {
-        return [css`
-            :host {
-                display: flex;
-                color: #4a4a4a;
-            }
-            .icon-btn {
-                display: flex;
-                align-items: center;
-                opacity: 30%;
-                cursor: default;
-            }
+        return [
+            css`
+                :host {
+                    display: flex;
+                    color: #4a4a4a;
+                }
+                .icon-btn {
+                    display: flex;
+                    align-items: center;
+                    opacity: 30%;
+                    cursor: default;
+                }
 
-            .icon-btn.active {
-                cursor: pointer;
-                opacity: 100%;
-            }
+                .icon-btn.active {
+                    cursor: pointer;
+                    opacity: 100%;
+                }
 
-            .icon-btn.prev > img-ui {
-                margin-right: 10px;
-            }
-            .icon-btn.next > img-ui {
-                margin-left: 10px;
-            }
-            
-            .total:before { content: "\\00a0 "; }
+                .icon-btn.prev > img-ui {
+                    margin-right: 10px;
+                }
+                .icon-btn.next > img-ui {
+                    margin-left: 10px;
+                }
 
-            input {
-                width: 24px;
-                height: 24px;
-                border: solid 1px #c4dbfe;
-                background-color: #e6f0ff;
-                color: #5590fc;
-                margin:0 8px;
-                outline: none;
+                .total:before {
+                    content: "\\00a0 ";
+                }
 
-            }
+                input {
+                    width: 24px;
+                    height: 24px;
+                    border: solid 1px #c4dbfe;
+                    background-color: #e6f0ff;
+                    color: #5590fc;
+                    margin: 0 8px;
+                    outline: none;
+                }
 
-            .middle {
-                margin: 0 55px;
-            }
-        `]
+                .middle {
+                    margin: 0 55px;
+                }
+            `,
+        ];
     }
 
     onPrev() {
-        this.dispatchChange(this.page-1);
+        this.dispatchChange(this.page - 1);
     }
     onNext() {
-        this.dispatchChange(this.page+1);
+        this.dispatchChange(this.page + 1);
     }
 
-    onChange(evt:any) {
+    onChange(evt: any) {
         this.updateSize();
         this.dispatchChange(evt.target.value);
     }
 
-    updateSize() {
-    }
+    updateSize() {}
 
-    dispatchChange(target:number) {
-        const {total, page} = this;
+    dispatchChange(target: number) {
+        const { total, page } = this;
 
-        if(target >= 1 && target <= total) {
+        if (target >= 1 && target <= total) {
             this.page = target;
-            this.dispatchEvent(new CustomEvent("custom-change", {
-                detail: { value: target.toString() },
-            }))
-        } 
+            this.dispatchEvent(
+                new CustomEvent("custom-change", {
+                    detail: { value: target.toString() },
+                })
+            );
+        }
     }
 
-    inputRef:any;
-    firstUpdated(_changed:any) {
+    inputRef: any;
+    firstUpdated(_changed: any) {
         this.inputRef = this.shadowRoot?.getElementById("input");
         this.requestUpdate();
     }
     getSize() {
-        if(!this.inputRef) {
+        if (!this.inputRef) {
             return 24;
         } else {
             //this isn't perfect, adds too much margin, but w/e
-            return (this.inputRef.value.length * 16) + 8;
+            return this.inputRef.value.length * 16 + 8;
         }
     }
 
-    @property({type: Number})
-    total:number = 0;
+    @property({ type: Number })
+    total: number = 0;
 
-    @property({type: Number})
-    page:number = 0;
+    @property({ type: Number })
+    page: number = 0;
 
     render() {
-        const {page, total} = this;
+        const { page, total } = this;
 
         console.log(page, page > 1);
 
         const prevClasses = classMap({
             ["icon-btn"]: true,
             prev: true,
-            active: page > 1
-        })
+            active: page > 1,
+        });
         const nextClasses = classMap({
             ["icon-btn"]: true,
             next: true,
-            active: page < total
-        })
-
+            active: page < total,
+        });
 
         return html`
             <div class="${prevClasses}" @click=${this.onPrev}>
@@ -123,7 +126,8 @@ export class _ extends LitElement {
             </div>
             <div class="middle">
                 ${STR_PAGE}
-                <input id="input" @change=${this.onChange} @input=${() => this.requestUpdate()} value="${page}" type="number" style="width: ${this.getSize()}px" ></input>
+                <input id="input" @change=${this.onChange} @input=${() =>
+            this.requestUpdate()} value="${page}" type="number" style="width: ${this.getSize()}px" ></input>
                 ${STR_OF}<span class="total">${total}</span>
 
                 
@@ -132,7 +136,7 @@ export class _ extends LitElement {
               <div>${STR_NEXT}</div>
               <img-ui path="core/_common/chevron-right-grey.svg" alt="" class="left-arrow"></img-ui>
           </div>
-        `
+        `;
     }
 }
 

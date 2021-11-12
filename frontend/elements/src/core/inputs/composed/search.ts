@@ -1,4 +1,11 @@
-import { LitElement, html, css, customElement, property, query } from "lit-element";
+import {
+    LitElement,
+    html,
+    css,
+    customElement,
+    property,
+    query,
+} from "lit-element";
 
 @customElement("input-search")
 export class _ extends LitElement {

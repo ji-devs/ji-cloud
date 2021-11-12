@@ -5,8 +5,8 @@ import "@elements/core/inputs/composed/select/option-group";
 import { arrayCount, mapToString } from "@utils/array";
 
 export default {
-    title: "Core / Inputs / Composed"
-}
+    title: "Core / Inputs / Composed",
+};
 
 interface Args {
     label: string;
@@ -24,7 +24,7 @@ const DEFAULT_ARGS: Args = {
     error: false,
     hint: "",
     multiple: false,
-}
+};
 
 export const Select = (props?: Partial<Args>) => {
     props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
@@ -56,6 +56,6 @@ export const Select = (props?: Partial<Args>) => {
             </input-select>
         </div>
     `;
-}
+};
 
 Select.args = DEFAULT_ARGS;

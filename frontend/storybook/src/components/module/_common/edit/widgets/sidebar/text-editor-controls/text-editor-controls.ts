@@ -1,21 +1,20 @@
-import {argsToAttrs} from "@utils/attributes";
+import { argsToAttrs } from "@utils/attributes";
 import "@elements/module/_common/edit/widgets/text-editor-controls/text-editor-controls";
 
 export default {
-    title: "Module / _COMMON / edit / Widgets / Sidebar / Text Editor Controls"
-}
-
+    title: "Module / _COMMON / edit / Widgets / Sidebar / Text Editor Controls",
+};
 
 interface Args {
-    controlsDisabled: boolean,
+    controlsDisabled: boolean;
 }
 
-const DEFAULT_ARGS:Args = {
+const DEFAULT_ARGS: Args = {
     controlsDisabled: false,
-}
+};
 
-export const TextEditorControls = (props?:Partial<Args>) => {
-    props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
+export const TextEditorControls = (props?: Partial<Args>) => {
+    props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
 
     return `
         <text-editor-controls ${argsToAttrs(props)} style="width: 492px">
@@ -43,6 +42,6 @@ export const TextEditorControls = (props?:Partial<Args>) => {
             <text-editor-controls-button slot="outdent" kind="outdent"></text-editor-controls-button>
         </text-editor-controls>
     `;
-}
+};
 
 TextEditorControls.args = DEFAULT_ARGS;

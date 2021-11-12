@@ -1,14 +1,15 @@
-import { html, css } from 'lit-element';
+import { html, css } from "lit-element";
 
 const STR_DELETE = "Erase";
-export const deleteStyles = css`
-`;
+export const deleteStyles = css``;
 
 export function renderDelete(onClick: () => void) {
     return html`
         <button @click="${onClick}">
             <span class="tooltip">${STR_DELETE}</span>
-            <img-ui path="module/_common/edit/widgets/hebrew-keyboard/delete.svg"></img-ui>
+            <img-ui
+                path="module/_common/edit/widgets/hebrew-keyboard/delete.svg"
+            ></img-ui>
         </button>
     `;
 }
@@ -20,7 +21,9 @@ export const enderStyles = css`
     }
     .enter {
         position: absolute;
-        clip-path: path('M 7 0 L 41 0 C 48 0 48 0 48 7 L 48 65 C 48 72 48 72 41 72 L 13 72 C 6 72 6 72 6 65 T 6 36 C 6 32 6 32 3 32 L 4 32 C 0 32 0 32 0 28 L 0 7 C 0 0 0 0 7 0');
+        clip-path: path(
+            "M 7 0 L 41 0 C 48 0 48 0 48 7 L 48 65 C 48 72 48 72 41 72 L 13 72 C 6 72 6 72 6 65 T 6 36 C 6 32 6 32 3 32 L 4 32 C 0 32 0 32 0 28 L 0 7 C 0 0 0 0 7 0"
+        );
         background-color: var(--light-blue-5);
         border: 0;
         z-index: 3;
@@ -42,8 +45,10 @@ export const enderStyles = css`
 export function renderEnder(onClick: (char: string) => void) {
     return html`
         <div class="enter-wrapper">
-            <button @click="${() => onClick('\n')}" class="enter">
-                <img-ui path="module/_common/edit/widgets/hebrew-keyboard/enter.svg"></img-ui>
+            <button @click="${() => onClick("\n")}" class="enter">
+                <img-ui
+                    path="module/_common/edit/widgets/hebrew-keyboard/enter.svg"
+                ></img-ui>
             </button>
             <span class="tooltip">${STR_ENTER}</span>
         </div>
@@ -51,12 +56,11 @@ export function renderEnder(onClick: (char: string) => void) {
 }
 
 const STR_SPACE = "Space";
-export const spaceStyles = css`
-`;
+export const spaceStyles = css``;
 
 export function renderSpace(onClick: (char: string) => void) {
     return html`
-        <button @click="${() => onClick(' ')}">
+        <button @click="${() => onClick(" ")}">
             <span class="tooltip">${STR_SPACE}</span>
             רווח
         </button>

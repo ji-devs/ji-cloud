@@ -1,18 +1,16 @@
-import {argsToAttrs} from "@utils/attributes";
+import { argsToAttrs } from "@utils/attributes";
 import "@elements/entry/home/home/search-section/search-section-advanced";
 
 export default {
-    title: "Entry / Home / Home / Search section"
-}
+    title: "Entry / Home / Home / Search section",
+};
 
-interface Args {
-}
+interface Args {}
 
-const DEFAULT_ARGS:Args = {
-}
+const DEFAULT_ARGS: Args = {};
 
-export const AdvancedSearch = (props?:Args) => {
-    props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
+export const AdvancedSearch = (props?: Args) => {
+    props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
 
     return `
         <home-search-section-advanced slot="advanced">
@@ -23,6 +21,6 @@ export const AdvancedSearch = (props?:Args) => {
             <button-rect slot="search-button" color="blue">Search</button-rect>
         </home-search-section-advanced>
     `;
-}
+};
 
 AdvancedSearch.args = DEFAULT_ARGS;

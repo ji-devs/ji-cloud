@@ -1,29 +1,28 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
-import { mediaUi} from "@utils/path";
-import {sameOrigin} from "@utils/image";
+import { mediaUi } from "@utils/path";
+import { sameOrigin } from "@utils/image";
 
 @customElement("img-ui")
 export class _ extends LitElement {
     static get styles() {
         return [
             css`
-            img {
-                display: inherit;
-                width: inherit;
-                height: inherit;
-                object-fit: inherit;
-                object-position: inherit;
-            }
-
+                img {
+                    display: inherit;
+                    width: inherit;
+                    height: inherit;
+                    object-fit: inherit;
+                    object-position: inherit;
+                }
             `,
         ];
     }
 
-      @property()
-      path: string = "";
+    @property()
+    path: string = "";
 
-      @property({type: Boolean})
-      draggable: boolean = true; 
+    @property({ type: Boolean })
+    draggable: boolean = true;
 
     onLoad(evt: Event) {
         const img = evt.currentTarget as HTMLImageElement;
@@ -39,16 +38,15 @@ export class _ extends LitElement {
         );
     }
 
-
     render() {
-    const { path, draggable } = this;
+        const { path, draggable } = this;
 
-    const src = mediaUi(path);
+        const src = mediaUi(path);
 
         if (sameOrigin(src)) {
             return html`<img .draggable=${draggable} .src="${src}" @load="${this.onLoad}" ></img>`;
         } else {
             return html`<img .draggable=${draggable} .src="${src}" crossorigin="anonymous" @load="${this.onLoad}" ></img>`;
-            }
+        }
     }
 }

@@ -4,7 +4,8 @@ import { ModuleKind } from "@elements/module/_common/types";
 
 const STR_TITLE = "Preview Mode";
 
-const STR_AUTOSAVED = "Your work is auto-saved. To make changes, click back to any step.";
+const STR_AUTOSAVED =
+    "Your work is auto-saved. To make changes, click back to any step.";
 
 const STR_TOOLTIP_CONTINUE = "Click to continue";
 

@@ -5,9 +5,8 @@ export default {
     title: "Core / Hebrew buttons",
 };
 
-
 interface Args {
-    full: boolean,
+    full: boolean;
 }
 
 const DEFAULT_ARGS: Args = {

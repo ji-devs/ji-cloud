@@ -4,19 +4,19 @@ import "@elements/entry/jig/edit/post-publish/post-publish-action";
 import { argsToAttrs } from "@utils/attributes";
 
 export default {
-    title: "Entry / Jig / Edit / Post publish"
-}
+    title: "Entry / Jig / Edit / Post publish",
+};
 
 interface Args {
     module: ModuleKind;
 }
 
-const DEFAULT_ARGS:Args = {
+const DEFAULT_ARGS: Args = {
     module: "memory",
-}
+};
 
-export const PostPublish = (props?:Partial<Args>) => {
-    props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
+export const PostPublish = (props?: Partial<Args>) => {
+    props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
 
     return `
         <post-publish ${argsToAttrs(props)}>
@@ -25,6 +25,6 @@ export const PostPublish = (props?:Partial<Args>) => {
             <post-publish-action slot="actions" kind="play-jig"></post-publish-action>
         </post-publish>
     `;
-}
+};
 
 PostPublish.args = DEFAULT_ARGS;

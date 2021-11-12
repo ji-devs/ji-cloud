@@ -1,19 +1,16 @@
-import {argsToAttrs} from "@utils/attributes";
+import { argsToAttrs } from "@utils/attributes";
 import "@elements/core/share-jig/main";
 
 export default {
-    title: "Core / Share jig"
-}
+    title: "Core / Share jig",
+};
 
-interface Args {
-}
+interface Args {}
 
-const DEFAULT_ARGS:Args = {
-}
+const DEFAULT_ARGS: Args = {};
 
-
-export const Main = (props?:Partial<Args>) => {
-    props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
+export const Main = (props?: Partial<Args>) => {
+    props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
 
     return `
         <share-jig-main ${argsToAttrs(props)}>
@@ -23,5 +20,5 @@ export const Main = (props?:Partial<Args>) => {
             <share-jig-option kind="copy"></share-jig-option>
         </share-jig-main>
     `;
-}
+};
 Main.args = DEFAULT_ARGS;

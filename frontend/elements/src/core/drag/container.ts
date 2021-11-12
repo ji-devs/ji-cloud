@@ -8,66 +8,65 @@
 //amount of pixels moved after which we disable the child pointer events
 const DISABLE_CHILD_POINTER_THRESHHOLD = 3;
 
-import { LitElement, html, css, customElement, property } from 'lit-element';
-import {nothing} from 'lit-html';
+import { LitElement, html, css, customElement, property } from "lit-element";
+import { nothing } from "lit-html";
 
-@customElement('drag-container')
+@customElement("drag-container")
 export class _ extends LitElement {
-  static get styles() {
-    return [css`
-      :host {
-        cursor: pointer;
+    static get styles() {
+        return [
+            css`
+                :host {
+                    cursor: pointer;
 
-        /* make sure host doesn't cover up anything on the page */
-        height: 0;
-      }
+                    /* make sure host doesn't cover up anything on the page */
+                    height: 0;
+                }
 
-          ::slotted(*) {
-            user-drag: none; 
-            user-select: none;
-            -moz-user-select: none;
-            -webkit-user-drag: none;
-            -webkit-user-select: none;
-            -ms-user-select: none;
-          }
+                ::slotted(*) {
+                    user-drag: none;
+                    user-select: none;
+                    -moz-user-select: none;
+                    -webkit-user-drag: none;
+                    -webkit-user-select: none;
+                    -ms-user-select: none;
+                }
 
-              :host([disableChildPointer]) ::slotted(*) {
-                pointer-events: none;
-              }
+                :host([disableChildPointer]) ::slotted(*) {
+                    pointer-events: none;
+                }
+            `,
+        ];
+    }
 
-      `];
+    @property({ type: Boolean, reflect: true })
+    disableChildPointer: boolean = false;
 
-  }
+    @property({ type: Number })
+    x: number = 0;
 
-  @property({type: Boolean, reflect: true})
-  disableChildPointer:boolean = false;
+    @property({ type: Number })
+    y: number = 0;
 
-  @property({type: Number})
-  x:number = 0;
+    lastMouseX: number = 0;
+    lastMouseY: number = 0;
 
-  @property({type: Number})
-  y:number = 0;
+    accumDiffX: number = 0;
+    accumDiffY: number = 0;
 
-
-  lastMouseX:number = 0;
-  lastMouseY:number = 0;
-
-  accumDiffX:number = 0;
-  accumDiffY:number = 0;
-
-  onThisMouseDown = (evt: MouseEvent) => {
-      this.accumDiffX = 0;
-      this.accumDiffY = 0;
+    onThisMouseDown = (evt: MouseEvent) => {
+        this.accumDiffX = 0;
+        this.accumDiffY = 0;
         this.disableChildPointer = false;
 
-      this.lastMouseX = evt.clientX;
-      this.lastMouseY = evt.clientY;
+        this.lastMouseX = evt.clientX;
+        this.lastMouseY = evt.clientY;
 
-      window.addEventListener("mousemove", this.onGlobalMouseMove);
-      window.addEventListener("mouseup", this.onGlobalMouseUp);
-  }
+        window.addEventListener("mousemove", this.onGlobalMouseMove);
+        window.addEventListener("mouseup", this.onGlobalMouseUp);
+    };
 
-  onGlobalMouseMove = (evt: MouseEvent) => {
+    onGlobalMouseMove = (evt: MouseEvent) => {
         const diffX = evt.clientX - this.lastMouseX;
         const diffY = evt.clientY - this.lastMouseY;
 
@@ -80,53 +79,62 @@ export class _ extends LitElement {
         this.accumDiffX += Math.abs(diffX);
         this.accumDiffY += Math.abs(diffX);
 
-        if(this.accumDiffX > DISABLE_CHILD_POINTER_THRESHHOLD || this.accumDiffY >= DISABLE_CHILD_POINTER_THRESHHOLD) {
+        if (
+            this.accumDiffX > DISABLE_CHILD_POINTER_THRESHHOLD ||
+            this.accumDiffY >= DISABLE_CHILD_POINTER_THRESHHOLD
+        ) {
             this.disableChildPointer = true;
         }
-  }
+    };
 
-  onGlobalMouseDown = (evt: MouseEvent) => {
-      const self = this.shadowRoot?.getElementById("section") as any;
+    onGlobalMouseDown = (evt: MouseEvent) => {
+        const self = this.shadowRoot?.getElementById("section") as any;
 
-      if(!evt.composedPath().includes(self)) {
-          this.dispatchEvent(new Event("close"));
-      }
-  }
+        if (!evt.composedPath().includes(self)) {
+            this.dispatchEvent(new Event("close"));
+        }
+    };
 
-  onGlobalMouseUp = (_evt: MouseEvent) => {
-    this.removeGlobalMoveListener();
-    this.removeGlobalUpListener();
-    this.disableChildPointer = false;
-  }
+    onGlobalMouseUp = (_evt: MouseEvent) => {
+        this.removeGlobalMoveListener();
+        this.removeGlobalUpListener();
+        this.disableChildPointer = false;
+    };
 
-  removeGlobalDownListener() {
-     window.removeEventListener("mousedown", this.onGlobalMouseDown);
-  }
+    removeGlobalDownListener() {
+        window.removeEventListener("mousedown", this.onGlobalMouseDown);
+    }
 
-  removeGlobalMoveListener() {
-     window.removeEventListener("mousemove", this.onGlobalMouseMove);
-  }
-  removeGlobalUpListener() {
-     window.removeEventListener("mouseup", this.onGlobalMouseUp);
-  }
+    removeGlobalMoveListener() {
+        window.removeEventListener("mousemove", this.onGlobalMouseMove);
+    }
+    removeGlobalUpListener() {
+        window.removeEventListener("mouseup", this.onGlobalMouseUp);
+    }
 
-  //lifecycle
-  firstUpdated() {
-      window.addEventListener("mousedown", this.onGlobalMouseDown);
-  }
+    //lifecycle
+    firstUpdated() {
+        window.addEventListener("mousedown", this.onGlobalMouseDown);
+    }
 
-  disconnectedCallback() {
-    super.disconnectedCallback();
-    this.removeGlobalDownListener(); 
-    this.removeGlobalMoveListener();
-    this.removeGlobalUpListener();
-  }
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        this.removeGlobalDownListener();
+        this.removeGlobalMoveListener();
+        this.removeGlobalUpListener();
+    }
 
-  render() {
-      const {x, y} = this;
+    render() {
+        const { x, y } = this;
 
-      const style = `transform: translate(${x}px, ${y}px);`
+        const style = `transform: translate(${x}px, ${y}px);`;
 
-    return html`<section id="section" style="${style}" @mousedown=${this.onThisMouseDown}><slot></slot></section>`;
-  }
+        return html`<section
+            id="section"
+            style="${style}"
+            @mousedown=${this.onThisMouseDown}
+        >
+            <slot></slot>
+        </section>`;
+    }
 }

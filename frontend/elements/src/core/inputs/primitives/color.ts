@@ -1,4 +1,11 @@
-import { LitElement, html, css, customElement, property, query } from "lit-element";
+import {
+    LitElement,
+    html,
+    css,
+    customElement,
+    property,
+    query,
+} from "lit-element";
 
 @customElement("input-color")
 export class _ extends LitElement {
@@ -19,7 +26,7 @@ export class _ extends LitElement {
                     grid-row: 1;
                     /* not using display none intentionally */
                     visibility: hidden;
-                    height: .1px;
+                    height: 0.1px;
                     padding: 0;
                     margin: 0;
                 }
@@ -39,17 +46,23 @@ export class _ extends LitElement {
     }
 
     private onChange(evt: InputEvent) {
-        const {value} = (evt.target as any);
+        const { value } = evt.target as any;
         this.value = value;
 
-        this.dispatchEvent(new CustomEvent("custom-change", {
-            detail: { value },
-        }))
+        this.dispatchEvent(
+            new CustomEvent("custom-change", {
+                detail: { value },
+            })
+        );
     }
 
     render() {
         return html`
-            <input type="color" .value="${this.value}" @change="${this.onChange}">
+            <input
+                type="color"
+                .value="${this.value}"
+                @change="${this.onChange}"
+            />
             <slot @click="${() => this.open()}" slot="trigger"></slot>
         `;
     }

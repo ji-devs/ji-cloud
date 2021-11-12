@@ -1,35 +1,35 @@
-import {argsToAttrs} from "@utils/attributes";
+import { argsToAttrs } from "@utils/attributes";
 import "@elements/core/tags/icon";
-import {IconKind} from "@elements/core/tags/icon";
+import { IconKind } from "@elements/core/tags/icon";
 
 export default {
-    title: "Core / Tags"
-}
+    title: "Core / Tags",
+};
 
 interface Args {
-    kind: IconKind,
-    label: string
+    kind: IconKind;
+    label: string;
 }
 
-const DEFAULT_ARGS:Args = {
+const DEFAULT_ARGS: Args = {
     kind: "age",
-    label: "hello"
-}
+    label: "hello",
+};
 
-export const Icon = (props?:Partial<Args>) => {
-    props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
-    const {} = props
+export const Icon = (props?: Partial<Args>) => {
+    props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
+    const {} = props;
 
     return `<tag-icon ${argsToAttrs(props)}></tag-icon>`;
-}
+};
 
 Icon.args = DEFAULT_ARGS;
 
 Icon.argTypes = {
     kind: {
         control: {
-            type: 'inline-radio',
-            options: ["age", "lang"]
-        }
-    }
-}
+            type: "inline-radio",
+            options: ["age", "lang"],
+        },
+    },
+};

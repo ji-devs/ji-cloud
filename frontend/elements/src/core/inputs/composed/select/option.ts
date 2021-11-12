@@ -2,7 +2,6 @@ import { LitElement, html, css, customElement, property } from "lit-element";
 import { nothing } from "lit-html";
 import "../../primitives/select/base-option";
 
-
 @customElement("input-select-option")
 export class _ extends LitElement {
     static get styles() {
@@ -14,11 +13,12 @@ export class _ extends LitElement {
                     column-gap: 10px;
                     padding: 4px 10px;
                 }
-                base-option:hover, base-option[active] {
+                base-option:hover,
+                base-option[active] {
                     background-color: var(--light-blue-2);
                 }
                 .check-mark {
-                    color: var(--main-blue)
+                    color: var(--main-blue);
                 }
             `,
         ];
@@ -35,11 +35,14 @@ export class _ extends LitElement {
 
     render() {
         return html`
-            <base-option ?selected=${this.selected} @custom-selected="${this.onSelectedChange}">
+            <base-option
+                ?selected=${this.selected}
+                @custom-selected="${this.onSelectedChange}"
+            >
                 <slot></slot>
-                ${this.selected ? html`
-                    <span class="check-mark">✔</span>
-                ` : nothing}
+                ${this.selected
+                    ? html` <span class="check-mark">✔</span> `
+                    : nothing}
             </base-option>
         `;
     }

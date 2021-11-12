@@ -8,9 +8,9 @@ export type ContainerMode = "multi-color" | "none";
 
 @customElement("dropdown-tree")
 export class DropdownTree extends LitElement {
-  static get styles() {
-    return [
-      css`
+    static get styles() {
+        return [
+            css`
       .container-multi-color {
           border-color:#e6f0ff;
           border-style:solid;
@@ -73,87 +73,96 @@ export class DropdownTree extends LitElement {
         align-items: center;
       }
     `,
-    ];
-  }
+        ];
+    }
 
-  onExpandAllToggle(evt:CustomEvent) {
-    const {value} = evt.detail;
-    this.dispatchEvent(new Event(value ? "expand-all" : "collapse-all"));
-  }
+    onExpandAllToggle(evt: CustomEvent) {
+        const { value } = evt.detail;
+        this.dispatchEvent(new Event(value ? "expand-all" : "collapse-all"));
+    }
 
-  toggleExpand() {
-    this.expanded = !this.expanded;
-  }
-  @property({type: Boolean})
-  expanded: boolean = false; 
+    toggleExpand() {
+        this.expanded = !this.expanded;
+    }
+    @property({ type: Boolean })
+    expanded: boolean = false;
 
-  @property({type: Boolean})
-  hasChildren: boolean = false; 
+    @property({ type: Boolean })
+    hasChildren: boolean = false;
 
-  @property({type: Boolean})
-  isChild : boolean = false; 
+    @property({ type: Boolean })
+    isChild: boolean = false;
 
-  @property()
-  containerMode: ContainerMode = "multi-color";
+    @property()
+    containerMode: ContainerMode = "multi-color";
 
-  render() {
-    const { expanded, containerMode, isChild} = this;
+    render() {
+        const { expanded, containerMode, isChild } = this;
 
-    const containerClasses = containerMode === "multi-color" ? multiColorClasses(this)
-      : "";
+        const containerClasses =
+            containerMode === "multi-color" ? multiColorClasses(this) : "";
 
-    const hasMarker = isChild; 
+        const hasMarker = isChild;
 
-    const contentClasses = classMap({
-      ["content-line"]: true,
-      ["marker-offset-down"]: hasMarker,
-    });
+        const contentClasses = classMap({
+            ["content-line"]: true,
+            ["marker-offset-down"]: hasMarker,
+        });
 
-    const childrenClasses = classMap({
-      ["children-visible"]: expanded,
-      ["children-hidden"]: !expanded,
-      ["indent-left-root"]: !isChild,
-      ["indent-left-child"]: isChild,
-    });
+        const childrenClasses = classMap({
+            ["children-visible"]: expanded,
+            ["children-hidden"]: !expanded,
+            ["indent-left-root"]: !isChild,
+            ["indent-left-child"]: isChild,
+        });
 
-    return html`
-        <div class="${containerClasses}">
-          <div class="content-line">
-              ${hasMarker ? html`<div class="marker"></div>` : nothing}
-              <div class="${contentClasses}"> 
-                ${renderArrow(this)}
-                <slot name="content"></slot>
-              </div>
-          </div>
-          <div class="${childrenClasses}">
-            <slot name="children"></slot>
-          </div>
-        </div>
-    `
-  }
+        return html`
+            <div class="${containerClasses}">
+                <div class="content-line">
+                    ${hasMarker ? html`<div class="marker"></div>` : nothing}
+                    <div class="${contentClasses}">
+                        ${renderArrow(this)}
+                        <slot name="content"></slot>
+                    </div>
+                </div>
+                <div class="${childrenClasses}">
+                    <slot name="children"></slot>
+                </div>
+            </div>
+        `;
+    }
 }
 
 function renderArrow(self: DropdownTree) {
-  const {expanded, hasChildren} = self;
+    const { expanded, hasChildren } = self;
 
+    if (!hasChildren) {
+        return nothing;
+    }
 
-  if(!hasChildren) {
-    return nothing;
-  }
-
-  return expanded ? html`<img-ui @click="${self.toggleExpand}" class="arrow" path="core/inputs/chevron-circle-down-green.svg" alt=""></img-ui>`
-    : html`<div class="arrow arrowContainer" @click="${self.toggleExpand}"><img-ui path="core/_common/chevron-right-grey.svg" alt=""></img-ui></div>`
+    return expanded
+        ? html`<img-ui
+              @click="${self.toggleExpand}"
+              class="arrow"
+              path="core/inputs/chevron-circle-down-green.svg"
+              alt=""
+          ></img-ui>`
+        : html`<div class="arrow arrowContainer" @click="${self.toggleExpand}">
+              <img-ui
+                  path="core/_common/chevron-right-grey.svg"
+                  alt=""
+              ></img-ui>
+          </div>`;
 }
 
 function multiColorClasses(self: DropdownTree) {
-  const {expanded, isChild} = self;
- 
-  if(isChild) return "";
+    const { expanded, isChild } = self;
 
-  return classMap({
-    ["container-multi-color"]: true,
-    expanded,
-    closed: !expanded,
-  });
+    if (isChild) return "";
 
+    return classMap({
+        ["container-multi-color"]: true,
+        expanded,
+        closed: !expanded,
+    });
 }

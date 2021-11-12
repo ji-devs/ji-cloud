@@ -1,33 +1,86 @@
-export const letters = ["alef", "vet", "bet", "gimel", "dalet", "hay", "vav", "vav-holam", "vav-shuruk", "zayin", "chet", "tet", "yud", "chaf", "kaf", "chaf-sofit", "lamed", "mem", "mem-sofit", "nun", "nun-sofit", "samech", "ayin", "fay", "pay", "fay-sofit", "tsadi", "tsadi-sofit", "kuf", "resh", "shin-sin", "shin", "sin", "tav"] as const;
+export const letters = [
+    "alef",
+    "vet",
+    "bet",
+    "gimel",
+    "dalet",
+    "hay",
+    "vav",
+    "vav-holam",
+    "vav-shuruk",
+    "zayin",
+    "chet",
+    "tet",
+    "yud",
+    "chaf",
+    "kaf",
+    "chaf-sofit",
+    "lamed",
+    "mem",
+    "mem-sofit",
+    "nun",
+    "nun-sofit",
+    "samech",
+    "ayin",
+    "fay",
+    "pay",
+    "fay-sofit",
+    "tsadi",
+    "tsadi-sofit",
+    "kuf",
+    "resh",
+    "shin-sin",
+    "shin",
+    "sin",
+    "tav",
+] as const;
 export type Letter = typeof letters[number];
 
-export const niqquds = ["dagesh", "patach", "kamatz", "kamatz-katan", "‎sheva", "chirik", "tsere", "segol", "hataf-patach", "hataf-kamatz", "hataf-segol", "cholam-chaser", "kubutz"] as const;
+export const niqquds = [
+    "dagesh",
+    "patach",
+    "kamatz",
+    "kamatz-katan",
+    "‎sheva",
+    "chirik",
+    "tsere",
+    "segol",
+    "hataf-patach",
+    "hataf-kamatz",
+    "hataf-segol",
+    "cholam-chaser",
+    "kubutz",
+] as const;
 export type Niqqud = typeof niqquds[number];
 
-export const punctuations = ['dot', 'comma', 'geresh'] as const;
+export const punctuations = ["dot", "comma", "geresh"] as const;
 export type Punctuation = typeof punctuations[number];
 
-export const cantillations = ['atnah', 'zakef-katan', 'oleh', 'meteg-and-siluk'] as const;
+export const cantillations = [
+    "atnah",
+    "zakef-katan",
+    "oleh",
+    "meteg-and-siluk",
+] as const;
 export type Cantillation = typeof cantillations[number];
 
-
 export interface NiqqudInfo {
-    name: string,
-    char: string,
+    name: string;
+    char: string;
 }
 
 export const NIQQUD_INFO: {
-    [key in Niqqud]: NiqqudInfo
+    [key in Niqqud]: NiqqudInfo;
 } = {
-    "dagesh": {
+    dagesh: {
         name: "Dagesh",
         char: "ּ",
     },
-    "patach": {
+    patach: {
         name: "Patach",
         char: "ַ",
     },
-    "kamatz": {
+    kamatz: {
         name: "Kamatz",
         char: "ָ",
     },
@@ -39,15 +92,15 @@ export const NIQQUD_INFO: {
         name: "‎sheva",
         char: "ְ",
     },
-    "chirik": {
+    chirik: {
         name: "Chirik",
         char: "ִ",
     },
-    "tsere": {
+    tsere: {
         name: "Tsere",
         char: "ֵ",
     },
-    "segol": {
+    segol: {
         name: "Segol",
         char: "ֶ",
     },
@@ -64,208 +117,205 @@ export const NIQQUD_INFO: {
         char: "ֱ",
     },
     "cholam-chaser": {
-        name: "Cholam chaser", 
+        name: "Cholam chaser",
         char: "ֹ",
     },
-    "kubutz": {
+    kubutz: {
         name: "Kubutz",
         char: "ֻ",
     },
 };
 
-
 export interface LetterInfo {
-    name: string,
-    char: string,
+    name: string;
+    char: string;
 }
 
 export const LETTER_INFO: {
-    [key in Letter]: LetterInfo
+    [key in Letter]: LetterInfo;
 } = {
-    "alef": {
+    alef: {
         name: "Alef",
-        char: 'א',
+        char: "א",
     },
-    "vet": {
+    vet: {
         name: "Vet",
-        char: 'ב',
+        char: "ב",
     },
-    "bet": {
+    bet: {
         name: "Bet",
-        char: 'בּ',
+        char: "בּ",
     },
-    "gimel": {
+    gimel: {
         name: "Gimel",
-        char: 'ג',
+        char: "ג",
     },
-    "dalet": {
+    dalet: {
         name: "Dalet",
-        char: 'ד',
+        char: "ד",
     },
-    "hay": {
+    hay: {
         name: "Hay",
-        char: 'ה',
+        char: "ה",
     },
-    "vav": {
+    vav: {
         name: "Vav",
-        char: 'ו',
+        char: "ו",
     },
     "vav-holam": {
         name: "Cholom",
-        char: 'וֹ',
+        char: "וֹ",
     },
     "vav-shuruk": {
         name: "Shuruk",
-        char: 'וּ',
+        char: "וּ",
     },
-    "zayin": {
+    zayin: {
         name: "Zayin",
-        char: 'ז',
+        char: "ז",
     },
-    "chet": {
+    chet: {
         name: "Chet",
-        char: 'ח',
+        char: "ח",
     },
-    "tet": {
+    tet: {
         name: "Tet",
-        char: 'ט',
+        char: "ט",
     },
-    "yud": {
+    yud: {
         name: "Yud",
-        char: 'י',
+        char: "י",
     },
-    "chaf": {
+    chaf: {
         name: "Chaf",
-        char: 'כ',
+        char: "כ",
     },
-    "kaf": {
+    kaf: {
         name: "Kaf",
-        char: 'כּ',
+        char: "כּ",
     },
     "chaf-sofit": {
         name: "Khaf Sofit",
-        char: 'ך',
+        char: "ך",
     },
-    "lamed": {
+    lamed: {
         name: "Lamed",
-        char: 'ל',
+        char: "ל",
     },
-    "mem": {
+    mem: {
         name: "Mem",
-        char: 'מ',
+        char: "מ",
     },
     "mem-sofit": {
         name: "Mem Sofit",
-        char: 'ם',
+        char: "ם",
     },
-    "nun": {
+    nun: {
         name: "Nun",
-        char: 'נ',
+        char: "נ",
     },
     "nun-sofit": {
         name: "Nun Sofit",
-        char: 'ן',
+        char: "ן",
     },
-    "samech": {
+    samech: {
         name: "Samech",
-        char: 'ס',
+        char: "ס",
     },
-    "ayin": {
+    ayin: {
         name: "Ayin",
-        char: 'ע',
+        char: "ע",
     },
-    "fay": {
+    fay: {
         name: "Fay",
-        char: 'פ',
+        char: "פ",
     },
-    "pay": {
+    pay: {
         name: "Pay",
-        char: 'פּ',
+        char: "פּ",
     },
     "fay-sofit": {
         name: "Fay Sofit",
-        char: 'ף',
+        char: "ף",
     },
-    "tsadi": {
+    tsadi: {
         name: "Tsadi",
-        char: 'צ',
+        char: "צ",
     },
     "tsadi-sofit": {
         name: "Tsadi Sofit",
-        char: 'ץ',
+        char: "ץ",
     },
-    "kuf": {
+    kuf: {
         name: "Kuf",
-        char: 'ק',
+        char: "ק",
     },
-    "resh": {
+    resh: {
         name: "Resh",
-        char: 'ר',
+        char: "ר",
     },
     "shin-sin": {
         name: "Shin",
-        char: 'ש',
+        char: "ש",
     },
-    "shin": {
+    shin: {
         name: "Shin",
-        char: 'שׁ',
+        char: "שׁ",
     },
-    "sin": {
+    sin: {
         name: "Sin",
-        char: 'שׂ',
+        char: "שׂ",
     },
-    "tav": {
+    tav: {
         name: "Tav",
-        char: 'ת',
+        char: "ת",
     },
 };
 
-
 export interface PunctuationInfo {
-    name: string,
-    char: string,
+    name: string;
+    char: string;
 }
 
 export const PUNCTUATION_INFO: {
-    [key in Punctuation]: PunctuationInfo
+    [key in Punctuation]: PunctuationInfo;
 } = {
-    "dot": {
+    dot: {
         name: "Dot",
-        char: '.',
+        char: ".",
     },
-    "comma": {
+    comma: {
         name: "Comma",
-        char: ',',
+        char: ",",
     },
-    "geresh": {
+    geresh: {
         name: "Beth",
-        char: '`',
+        char: "`",
     },
 };
 
-
 export interface CantillationInfo {
-    name: string,
-    char: string,
+    name: string;
+    char: string;
 }
 
 export const CANTILLATION_INFO: {
-    [key in Cantillation]: CantillationInfo
+    [key in Cantillation]: CantillationInfo;
 } = {
-    "atnah": {
+    atnah: {
         name: "Atnah",
-        char: "֑"
+        char: "֑",
     },
     "zakef-katan": {
         name: "Zakef katan",
-        char: "֔"
+        char: "֔",
     },
-    "oleh": {
+    oleh: {
         name: "Oleh",
-        char: "֫"
+        char: "֫",
     },
     "meteg-and-siluk": {
         name: "Meteg & siluk",
-        char: "ֽ"
+        char: "ֽ",
     },
 };

@@ -19,16 +19,16 @@ export class _ extends LitElement {
                     background-color: var(--dark-blue-2);
                     animation: line 500ms ease-in-out infinite alternate;
                 }
-                .bar:nth-child(5n+1) {
+                .bar:nth-child(5n + 1) {
                     animation-delay: 100ms;
                 }
-                .bar:nth-child(5n+2) {
+                .bar:nth-child(5n + 2) {
                     animation-delay: 200ms;
                 }
-                .bar:nth-child(5n+3) {
+                .bar:nth-child(5n + 3) {
                     animation-delay: 300ms;
                 }
-                .bar:nth-child(5n+4) {
+                .bar:nth-child(5n + 4) {
                     animation-delay: 400ms;
                 }
                 @keyframes line {
@@ -36,7 +36,7 @@ export class _ extends LitElement {
                         transform: scaleY(1);
                     }
                     to {
-                        transform: scaleY(.5);
+                        transform: scaleY(0.5);
                     }
                 }
             `,

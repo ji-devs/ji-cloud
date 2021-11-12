@@ -1,32 +1,44 @@
-import { LitElement, html, css, customElement, property, unsafeCSS } from 'lit-element';
+import {
+    LitElement,
+    html,
+    css,
+    customElement,
+    property,
+    unsafeCSS,
+} from "lit-element";
 import "@elements/core/buttons/rectangle";
 import "./home-why-ji-item";
-import { mediaUi } from '@utils/path';
-import { homeStyles } from '../styles';
+import { mediaUi } from "@utils/path";
+import { homeStyles } from "../styles";
 
-@customElement('home-why-ji')
+@customElement("home-why-ji")
 export class _ extends LitElement {
     static get styles() {
-        return [homeStyles, css`
-            :host {
-                display: block;
-                background-image: url("${unsafeCSS(mediaUi("entry/home/why-ji/background.png"))}");
-                background-size: cover;
-                padding: 72px 0;
-            }
-            h2 {
-                font-size: 64px;
-                font-weight: 900;
-                color: var(--dark-blue-4);
-                text-align: center;
-                margin: 0;
-            }
-            .items-wrapper {
-                display: flex;
-                column-gap: 50px;
-                justify-content: space-between;
-            }
-        `];
+        return [
+            homeStyles,
+            css`
+                :host {
+                    display: block;
+                    background-image: url("${unsafeCSS(
+                        mediaUi("entry/home/why-ji/background.png")
+                    )}");
+                    background-size: cover;
+                    padding: 72px 0;
+                }
+                h2 {
+                    font-size: 64px;
+                    font-weight: 900;
+                    color: var(--dark-blue-4);
+                    text-align: center;
+                    margin: 0;
+                }
+                .items-wrapper {
+                    display: flex;
+                    column-gap: 50px;
+                    justify-content: space-between;
+                }
+            `,
+        ];
     }
 
     render() {

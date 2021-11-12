@@ -1,19 +1,21 @@
-import { LitElement, html, css, customElement, property } from 'lit-element';
+import { LitElement, html, css, customElement, property } from "lit-element";
 
-@customElement('social-networks')
+@customElement("social-networks")
 export class _ extends LitElement {
     static get styles() {
-        return [css`
-            img-ui {
-                width: 32px;
-                height: 32px;
-                margin-right:24px;
-                display:block;
-            }
-            .wrapper {
-                display:flex;
-            }
-        `]
+        return [
+            css`
+                img-ui {
+                    width: 32px;
+                    height: 32px;
+                    margin-right: 24px;
+                    display: block;
+                }
+                .wrapper {
+                    display: flex;
+                }
+            `,
+        ];
     }
 
     @property()
@@ -26,7 +28,8 @@ export class _ extends LitElement {
     path_linkedin: string = "";
 
     render() {
-        const { path_facebook, path_instagram, path_youtube, path_linkedin } = this;
+        const { path_facebook, path_instagram, path_youtube, path_linkedin } =
+            this;
 
         return html`
             <div class="wrapper">

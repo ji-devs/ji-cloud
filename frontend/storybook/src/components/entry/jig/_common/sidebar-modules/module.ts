@@ -1,38 +1,38 @@
-import {argsToAttrs} from "@utils/attributes";
+import { argsToAttrs } from "@utils/attributes";
 import "@elements/entry/jig/_common/sidebar-modules/module";
 import "@elements/entry/jig/edit/sidebar/module/window";
 import "@elements/entry/jig/edit/sidebar/module/menu";
 import "@elements/core/buttons/icon";
 import "@elements/core/menu/kebab";
 import "@elements/core/menu/menu-line";
-import {ModuleKind, moduleKinds} from "@elements/module/_common/types";
+import { ModuleKind, moduleKinds } from "@elements/module/_common/types";
 
 const STR_CUSTOM_COPY = "Copy to another Jig";
 
 export default {
-    title: "Entry / Jig / Sidebar modules"
-}
+    title: "Entry / Jig / Sidebar modules",
+};
 
 interface Args {
-    state: "draft" | "complete",
-    thumbnail: string,
-    selected: boolean,
-    module: ModuleKind | "none",
-    rawIndex: number,
-    menuOpen: boolean,
-    showAdvancedMenu: boolean,
-    makeDemoRoomAtTop: boolean,
-    showAdd: boolean,
-    dragging: boolean,
-    collapsed: boolean,
-    dragX: number,
-    dragY: number,
+    state: "draft" | "complete";
+    thumbnail: string;
+    selected: boolean;
+    module: ModuleKind | "none";
+    rawIndex: number;
+    menuOpen: boolean;
+    showAdvancedMenu: boolean;
+    makeDemoRoomAtTop: boolean;
+    showAdd: boolean;
+    dragging: boolean;
+    collapsed: boolean;
+    dragX: number;
+    dragY: number;
 }
 
-const DEFAULT_ARGS:Args = {
+const DEFAULT_ARGS: Args = {
     state: "draft",
     module: "cover",
-    thumbnail : "",
+    thumbnail: "",
     selected: true,
     rawIndex: 0,
     menuOpen: false,
@@ -43,25 +43,37 @@ const DEFAULT_ARGS:Args = {
     collapsed: false,
     dragX: 0,
     dragY: 0,
-}
+};
 
 type InternalExtra = {
-    slot?: string,
-}
+    slot?: string;
+};
 
-export const Module = (props?:Partial<Args> & InternalExtra) => {
-    props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
-    
-    const {state, slot, dragX, dragY, showAdd, thumbnail, showAdvancedMenu, rawIndex, makeDemoRoomAtTop, menuOpen, ...rest} = props;
-    const moduleProps:any = rest;
+export const Module = (props?: Partial<Args> & InternalExtra) => {
+    props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
+
+    const {
+        state,
+        slot,
+        dragX,
+        dragY,
+        showAdd,
+        thumbnail,
+        showAdvancedMenu,
+        rawIndex,
+        makeDemoRoomAtTop,
+        menuOpen,
+        ...rest
+    } = props;
+    const moduleProps: any = rest;
 
     const windowProps = {
-        state: moduleProps.module === "none" ? "empty" : state, 
-        thumbnail
+        state: moduleProps.module === "none" ? "empty" : state,
+        thumbnail,
     };
 
     moduleProps.index = rawIndex;
-    if(moduleProps.module === "none") {
+    if (moduleProps.module === "none") {
         moduleProps.module = "";
     }
 
@@ -70,16 +82,23 @@ export const Module = (props?:Partial<Args> & InternalExtra) => {
         : "";
 
     return `
-        <div style="${makeDemoRoomAtTop && `position: absolute; top: 200px;`}" ${slot && `slot="${slot}"`}>
+        <div style="${
+            makeDemoRoomAtTop && `position: absolute; top: 200px;`
+        }" ${slot && `slot="${slot}"`}>
             <jig-sidebar-module style="${style}" ${argsToAttrs(moduleProps)}>
-                <jig-edit-sidebar-module-window ${argsToAttrs(windowProps)} slot="window"></jig-edit-sidebar-module-window>
+                <jig-edit-sidebar-module-window ${argsToAttrs(
+                    windowProps
+                )} slot="window"></jig-edit-sidebar-module-window>
                 ${renderMenu(menuOpen, showAdvancedMenu)} 
-                ${showAdd && `<button-icon icon="gears" slot="add"></button-icon>`}
+                ${
+                    showAdd &&
+                    `<button-icon icon="gears" slot="add"></button-icon>`
+                }
             </jig-sidebar-module>
         </div>`;
-}
+};
 
-function renderMenu(visible: boolean, showAdvanced:boolean) {
+function renderMenu(visible: boolean, showAdvanced: boolean) {
     return `
         <menu-kebab ${visible && "visible"} slot="menu">
             <jig-edit-sidebar-module-menu ${showAdvanced && "advanced"}>
@@ -100,14 +119,14 @@ Module.args = DEFAULT_ARGS;
 Module.argTypes = {
     module: {
         control: {
-            type: 'inline-radio',
-            options: ["none"].concat(moduleKinds)
-        }
+            type: "inline-radio",
+            options: ["none"].concat(moduleKinds),
+        },
     },
     state: {
         control: {
-            type: 'inline-radio',
-            options: ["draft", "complete"] 
-        }
-    }
-}
+            type: "inline-radio",
+            options: ["draft", "complete"],
+        },
+    },
+};

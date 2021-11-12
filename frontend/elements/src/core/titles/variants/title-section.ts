@@ -1,81 +1,67 @@
-import { MEDIA_UI } from '@utils/path';
-import { LitElement, html, css, customElement, property } from 'lit-element';
-@customElement('title-section')
+import { MEDIA_UI } from "@utils/path";
+import { LitElement, html, css, customElement, property } from "lit-element";
+@customElement("title-section")
 export class _ extends LitElement {
-  static get styles() {
-    return [css`
-  h1{
-    font-size: 64px;
-    font-weight: 900;
-  
+    static get styles() {
+        return [
+            css`
+                h1 {
+                    font-size: 64px;
+                    font-weight: 900;
+                }
+                .purple {
+                    color: #5662a3;
+                }
 
-  }
-  .purple{
-    color: #5662a3;
-  }
-  
-  .lightblue{
-color:#6ca1fc;
+                .lightblue {
+                    color: #6ca1fc;
+                }
 
-  }
+                .pink {
+                    color: #fd7076;
+                }
 
-  .pink{
-    
-color:#fd7076;
-  }
+                .darkblue {
+                    color: #5662a3;
+                }
 
-  .darkblue{
-color:#5662a3;
+                .white {
+                    color: #ffffff;
+                }
 
-  }
+                .yellow {
+                    color: #fed657;
+                }
 
-  .white{
-    color:#ffffff;
-  }
+                .small {
+                    font-size: 32px;
+                    font-weight: 900;
+                }
 
-  .yellow{
-    color:#fed657;
-  }
-  
-  
-.small{
-  font-size: 32px;
-  font-weight: 900;
+                .medium {
+                    font-size: 48px;
+                    font-weight: 900;
+                }
+                .large {
+                    font-size: 64px;
+                    font-weight: 900;
+                }
+            `,
+        ];
+    }
 
-}
+    @property()
+    title: string = "";
 
-  .medium{
-    font-size: 48px;
-    font-weight: 900;
-  }
-  .large{
-    font-size: 64px;
-    font-weight: 900;
-  }
+    @property()
+    titlecolor: string = "";
 
+    @property()
+    size: string = "";
 
+    render() {
+        const { title, titlecolor, size } = this;
 
- 
-    `];
-  }
-
-
-  @property()
-  title:string = ""; 
-
-  @property()
-  titlecolor:string = "";
-
-  @property()
-  size:string = "";
-  
- 
-
-  render() {
-    const {title,titlecolor,size} = this;
-
-    return html`
-        <h1 class="${titlecolor} ${size}"  >${title}</h1> 
-  `;
-  }
+        return html` <h1 class="${titlecolor} ${size}">${title}</h1> `;
+    }
 }

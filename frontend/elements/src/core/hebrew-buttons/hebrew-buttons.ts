@@ -13,7 +13,7 @@ export class _ extends LitElement {
                     grid-gap: 12px;
                     align-items: center;
                 }
-                :host(:not([full]):not(:hover)) ::slotted([slot=full-only]) {
+                :host(:not([full]):not(:hover)) ::slotted([slot="full-only"]) {
                     display: none;
                 }
                 ::slotted(.divider) {

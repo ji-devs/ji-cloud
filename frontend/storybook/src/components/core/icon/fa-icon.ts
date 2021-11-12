@@ -5,9 +5,8 @@ export default {
     title: "Core / Icon",
 };
 
-
 interface Args {
-    icon: string,
+    icon: string;
 }
 
 const DEFAULT_ARGS: Args = {

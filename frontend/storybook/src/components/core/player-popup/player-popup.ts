@@ -1,18 +1,16 @@
-import {argsToAttrs} from "@utils/attributes";
+import { argsToAttrs } from "@utils/attributes";
 import "@elements/core/player-popup/player-popup";
 
 export default {
-    title: "Core / Player popup"
-}
+    title: "Core / Player popup",
+};
 
-interface Args {
-}
+interface Args {}
 
-const DEFAULT_ARGS:Args = {
-}
+const DEFAULT_ARGS: Args = {};
 
-export const PlayerPopup = (props?:Args) => {
-    props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
+export const PlayerPopup = (props?: Args) => {
+    props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
 
     return `
         <player-popup ${argsToAttrs(props)}>
@@ -20,6 +18,6 @@ export const PlayerPopup = (props?:Args) => {
             <button slot="close">×</button>
         </player-popup>
     `;
-}
+};
 
 PlayerPopup.args = DEFAULT_ARGS;

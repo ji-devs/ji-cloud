@@ -1,9 +1,15 @@
-import { LitElement, html, css, customElement, property, query } from "lit-element";
+import {
+    LitElement,
+    html,
+    css,
+    customElement,
+    property,
+    query,
+} from "lit-element";
 import "@elements/core/inputs/primitives/select/base-select";
 import "@elements/core/inputs/wrapper";
 import "@elements/core/images/ui";
 import { BaseSelect } from "@elements/core/inputs/primitives/select/base-select";
-
 
 @customElement("input-select")
 export class _ extends LitElement {
@@ -40,7 +46,7 @@ export class _ extends LitElement {
                     color: var(--light-gray-4);
                 }
                 .icon {
-                    transition: transform .3s;
+                    transition: transform 0.3s;
                 }
                 :host([open]) .icon {
                     transform: rotate(180deg);
@@ -78,7 +84,7 @@ export class _ extends LitElement {
     }
 
     createRenderRoot() {
-        return this.attachShadow({ mode: 'open', delegatesFocus: true });
+        return this.attachShadow({ mode: "open", delegatesFocus: true });
     }
 
     render() {
@@ -102,13 +108,17 @@ export class _ extends LitElement {
                     ?focus-within=${this.open}
                 >
                     <div class="label-placeholder">
-                        ${ this.value ? (
-                            html`<span class="value">${this.value}</span>`
-                        ) : (
-                            html`<span class="placeholder">${this.placeholder}</span>`
-                        )}
+                        ${this.value
+                            ? html`<span class="value">${this.value}</span>`
+                            : html`<span class="placeholder"
+                                  >${this.placeholder}</span
+                              >`}
                     </div>
-                    <img-ui slot="icon" class="icon" path="core/_common/chevron-down-blue.svg"></img-ui>
+                    <img-ui
+                        slot="icon"
+                        class="icon"
+                        path="core/_common/chevron-down-blue.svg"
+                    ></img-ui>
                 </input-wrapper>
                 <slot></slot>
             </base-select>

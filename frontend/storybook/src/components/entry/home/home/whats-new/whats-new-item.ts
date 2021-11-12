@@ -1,13 +1,12 @@
 import "@elements/entry/home/home/whats-new/home-new-item";
 
-
-
 export default {
     title: "Entry / Home / Home / What's new",
-}
+};
 
 const STR_SUBTITLE = "HOP TV - New Hebrew Series";
-const STR_PARAGRAPH = "Learning Hebrew with HOP Channel, Learning Hebrew with HOP Channel, Learning Hebrew with HOP Channel, Learning Hebrew with HOP Channel Learning Hebrew with HOP ";
+const STR_PARAGRAPH =
+    "Learning Hebrew with HOP Channel, Learning Hebrew with HOP Channel, Learning Hebrew with HOP Channel, Learning Hebrew with HOP Channel Learning Hebrew with HOP ";
 const STR_PLAY = "Play Series";
 
 export const WhatsNewItem = () => {
@@ -18,5 +17,5 @@ export const WhatsNewItem = () => {
             <p slot="lines">${STR_PARAGRAPH}</p>
             <button-rect slot="button" size="large" color="red" bold>${STR_PLAY}</button-rect>
         </home-new-item>
-    `
-}
+    `;
+};

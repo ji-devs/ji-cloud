@@ -1,7 +1,24 @@
-import { LitElement, html, css, customElement, property, query } from 'lit-element';
+import {
+    LitElement,
+    html,
+    css,
+    customElement,
+    property,
+    query,
+} from "lit-element";
 
-export type PositionX = "left-out" | "right-out" | "left-in" | "right-in" | "center";
-export type PositionY = "top-out" | "bottom-out" | "top-in" | "bottom-in" | "center";
+export type PositionX =
+    | "left-out"
+    | "right-out"
+    | "left-in"
+    | "right-in"
+    | "center";
+export type PositionY =
+    | "top-out"
+    | "bottom-out"
+    | "top-in"
+    | "bottom-in"
+    | "center";
 
 @customElement("anchored-overlay-absolute")
 export class AnchoredOverlayAbsolute extends LitElement {
@@ -21,44 +38,44 @@ export class AnchoredOverlayAbsolute extends LitElement {
                 :host([open]) .overlay {
                     display: block;
                 }
-                :host([positionY=top-out]) .overlay {
+                :host([positionY="top-out"]) .overlay {
                     bottom: 100%;
                 }
-                :host([positionY=top-in]) .overlay {
+                :host([positionY="top-in"]) .overlay {
                     top: 0;
                 }
-                :host([positionY=bottom-out]) .overlay {
+                :host([positionY="bottom-out"]) .overlay {
                     top: 100%;
                 }
-                :host([positionY=bottom-in]) .overlay {
+                :host([positionY="bottom-in"]) .overlay {
                     bottom: 0;
                 }
-                :host([positionY=center]) .overlay {
+                :host([positionY="center"]) .overlay {
                     /* from https://stackoverflow.com/a/25776315/5253155 */
                     top: 50%;
                     transform: translateY(-50%);
                 }
-                :host([positionX=right-out]) .overlay {
+                :host([positionX="right-out"]) .overlay {
                     left: 100%;
                 }
-                :host([positionX=right-in]) .overlay {
+                :host([positionX="right-in"]) .overlay {
                     right: 0;
                 }
-                :host([positionX=left-out]) .overlay {
+                :host([positionX="left-out"]) .overlay {
                     right: 100%;
                 }
-                :host([positionX=left-in]) .overlay {
+                :host([positionX="left-in"]) .overlay {
                     left: 0;
                 }
-                :host([positionX=center]) .overlay {
+                :host([positionX="center"]) .overlay {
                     left: 50%;
                     transform: translateX(-50%);
                 }
-                :host([positionY=center][positionX=center]) .overlay {
+                :host([positionY="center"][positionX="center"]) .overlay {
                     /* when both are center but only one transform can be applied */
                     transform: translate(-50%, -50%);
                 }
-            `
+            `,
         ];
     }
 
@@ -71,13 +88,13 @@ export class AnchoredOverlayAbsolute extends LitElement {
         window.removeEventListener("mousedown", this.onGlobalMouseDown);
     }
     onGlobalMouseDown = (evt: MouseEvent) => {
-        if(this.open && !evt.composedPath().includes(this)) {
+        if (this.open && !evt.composedPath().includes(this)) {
             if (this.autoClose) {
                 this.open = false;
             }
-            this.dispatchEvent(new Event("close"))
+            this.dispatchEvent(new Event("close"));
         }
-    }
+    };
 
     @query(".overlay")
     overlay!: HTMLElement;

@@ -7,7 +7,8 @@ export class _ extends LitElement {
     static get styles() {
         return [
             css`
-                img-ui, img-ji {
+                img-ui,
+                img-ji {
                     height: inherit;
                     width: inherit;
                 }
@@ -20,17 +21,19 @@ export class _ extends LitElement {
 
     render() {
         return html`
-            ${
-                this.imageId === undefined ? (
-                    html`
-                        <img-ui path="user/profile-image-placeholder.webp"></img-ui>
-                    `
-                ) : (
-                    html`
-                        <img-ji lib="user" size="thumb" id="${this.imageId}"></img-ji>
-                    `
-                )
-            }
+            ${this.imageId === undefined
+                ? html`
+                      <img-ui
+                          path="user/profile-image-placeholder.webp"
+                      ></img-ui>
+                  `
+                : html`
+                      <img-ji
+                          lib="user"
+                          size="thumb"
+                          id="${this.imageId}"
+                      ></img-ji>
+                  `}
         `;
     }
 }

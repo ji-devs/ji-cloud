@@ -4,10 +4,7 @@ import "../wrapper";
 @customElement("input-password")
 export class _ extends LitElement {
     static get styles() {
-        return [
-            css`
-            `,
-        ];
+        return [css``];
     }
 
     @property()
@@ -29,34 +26,37 @@ export class _ extends LitElement {
     visible: boolean = false;
 
     @property()
-    autocomplete:string = "current-password"; 
+    autocomplete: string = "current-password";
 
     toggleVisible() {
         this.visible = !this.visible;
     }
 
-    onInput(evt:InputEvent) {
-        const {value} = (evt.target as any);
+    onInput(evt: InputEvent) {
+        const { value } = evt.target as any;
         this.value = value;
 
-        this.dispatchEvent(new CustomEvent("custom-input", {
-            detail: { value },
-        }))
+        this.dispatchEvent(
+            new CustomEvent("custom-input", {
+                detail: { value },
+            })
+        );
     }
-    onChange(evt:InputEvent) {
-        const {value} = (evt.target as any);
+    onChange(evt: InputEvent) {
+        const { value } = evt.target as any;
         this.value = value;
 
-        this.dispatchEvent(new CustomEvent("custom-change", {
-            detail: { value },
-        }))
+        this.dispatchEvent(
+            new CustomEvent("custom-change", {
+                detail: { value },
+            })
+        );
     }
 
     render() {
         const path = `core/inputs/eye-${this.visible ? "open" : "closed"}.svg`;
 
         const inputType = this.visible ? "text" : "password";
-
 
         return html`
             <input-wrapper
@@ -71,10 +71,13 @@ export class _ extends LitElement {
                     autocomplete="${this.autocomplete}"
                     @input="${this.onInput}"
                     @change="${this.onChange}"
-                >
-                <img-ui @click="${this.toggleVisible}" slot="icon" path="${path}"></img-ui>
+                />
+                <img-ui
+                    @click="${this.toggleVisible}"
+                    slot="icon"
+                    path="${path}"
+                ></img-ui>
             </input-wrapper>
-
         `;
     }
 }

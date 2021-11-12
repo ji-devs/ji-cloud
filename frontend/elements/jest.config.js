@@ -4,6 +4,5 @@
  */
 
 module.exports = {
-
-  rootDir: "./.ts-output"
+    rootDir: "./.ts-output",
 };

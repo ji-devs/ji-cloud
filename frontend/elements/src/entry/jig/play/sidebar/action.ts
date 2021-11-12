@@ -34,7 +34,12 @@ export class _ extends LitElement {
     render() {
         return html`
             <button>
-                <img-ui path="entry/jig/play/sidebar/action-${this.kind}${this.active ? "-active" : ""}.svg"></img-ui>
+                <img-ui
+                    path="entry/jig/play/sidebar/action-${this.kind}${this
+                        .active
+                        ? "-active"
+                        : ""}.svg"
+                ></img-ui>
             </button>
         `;
     }

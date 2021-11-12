@@ -1,25 +1,25 @@
-import {argsToAttrs} from "@utils/attributes";
+import { argsToAttrs } from "@utils/attributes";
 import "@elements/core/inputs/old/location";
 import "@elements/core/inputs/primitives/location";
 
 export default {
-    title: "Core / Inputs / Primitives"
-}
+    title: "Core / Inputs / Primitives",
+};
 
 interface Args {
-    value: string,
-    placeholder: string,
+    value: string;
+    placeholder: string;
 }
 
-const DEFAULT_ARGS:Args = {
+const DEFAULT_ARGS: Args = {
     value: "",
     placeholder: "",
-}
+};
 
-export const Location = (props?:Partial<Args>) => {
-    props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
+export const Location = (props?: Partial<Args>) => {
+    props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
 
-    return `<input-location ${argsToAttrs(props)} ></input-location>`
-}
+    return `<input-location ${argsToAttrs(props)} ></input-location>`;
+};
 
 Location.args = DEFAULT_ARGS;

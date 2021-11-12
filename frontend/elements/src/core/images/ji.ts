@@ -1,7 +1,7 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 import { imageLib, MediaLibOptions, MediaSizeOptions } from "@utils/path";
-import {sameOrigin} from "@utils/image";
-import {nothing} from "lit-html";
+import { sameOrigin } from "@utils/image";
+import { nothing } from "lit-html";
 
 @customElement("img-ji")
 export class _ extends LitElement {
@@ -73,12 +73,25 @@ export class _ extends LitElement {
         }
 
         if (fallbackVisible) {
-            return html`<slot name="fallback"><div>[MISSING IMAGE]</div></slot>`;
+            return html`<slot name="fallback"
+                ><div>[MISSING IMAGE]</div></slot
+            >`;
         } else {
             if (sameOrigin(src)) {
-                return html`<img .draggable=${draggable} .src="${src}" @error=${this.onError} @load="${this.onLoad}" />`;
+                return html`<img
+                    .draggable=${draggable}
+                    .src="${src}"
+                    @error=${this.onError}
+                    @load="${this.onLoad}"
+                />`;
             } else {
-                return html`<img .draggable=${draggable} .src="${src}" crossorigin="anonymous" @error=${this.onError} @load="${this.onLoad}" />`;
+                return html`<img
+                    .draggable=${draggable}
+                    .src="${src}"
+                    crossorigin="anonymous"
+                    @error=${this.onError}
+                    @load="${this.onLoad}"
+                />`;
             }
         }
     }

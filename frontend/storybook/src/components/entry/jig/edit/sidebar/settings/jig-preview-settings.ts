@@ -1,18 +1,16 @@
-import {argsToAttrs} from "@utils/attributes";
+import { argsToAttrs } from "@utils/attributes";
 import "@elements/entry/jig/edit/sidebar/settings/jig-preview-settings";
 
 export default {
-    title: "Entry / Jig / Edit / Sidebar / Settings"
-}
+    title: "Entry / Jig / Edit / Sidebar / Settings",
+};
 
-interface Args {
-}
+interface Args {}
 
-const DEFAULT_ARGS:Args = {
-}
+const DEFAULT_ARGS: Args = {};
 
-export const JigPreviewSettings = (props?:Partial<Args>) => {
-    props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
+export const JigPreviewSettings = (props?: Partial<Args>) => {
+    props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
 
     return `
         <jig-preview-settings ${argsToAttrs(props)} slot="preview">
@@ -31,5 +29,5 @@ export const JigPreviewSettings = (props?:Partial<Args>) => {
             </label>
         </jig-preview-settings>
     `;
-}
+};
 JigPreviewSettings.args = DEFAULT_ARGS;

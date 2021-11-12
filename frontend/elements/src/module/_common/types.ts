@@ -1,5 +1,5 @@
 export type ModuleKind =
-    "cover"
+    | "cover"
     | "flashcards"
     | "matching"
     | "memory"
@@ -10,7 +10,7 @@ export type ModuleKind =
     | "card-quiz"
     | "drag-drop";
 
-export const moduleKinds:Array<ModuleKind> = [ 
+export const moduleKinds: Array<ModuleKind> = [
     "cover",
     "flashcards",
     "matching",
@@ -25,28 +25,28 @@ export const moduleKinds:Array<ModuleKind> = [
 
 //TODO - move these to JSON
 
-export const STR_MODULE_DISPLAY_NAME:{[key in ModuleKind]:string} = {
-        "cover": "Cover",
-        "flashcards": "Flashcards",
-        "matching": "Matching",
-        "memory": "Memory Game",
-        "poster": "Talking Poster",
-        "tapping-board": "Listen & Learn",
-        "tracing": "Tracing",
-        "video": "Video Player",
-        "card-quiz": "Quiz Game",
-        "drag-drop": "Drag & Drop",
+export const STR_MODULE_DISPLAY_NAME: { [key in ModuleKind]: string } = {
+    cover: "Cover",
+    flashcards: "Flashcards",
+    matching: "Matching",
+    memory: "Memory Game",
+    poster: "Talking Poster",
+    "tapping-board": "Listen & Learn",
+    tracing: "Tracing",
+    video: "Video Player",
+    "card-quiz": "Quiz Game",
+    "drag-drop": "Drag & Drop",
 };
 
-export const STR_MODULE_CHOOSE_HEADER:{[key in ModuleKind]:string} = {
-    "cover": "", //not used
-    "flashcards": "Create a Set of Flashcards",
-    "matching": "Create a Matching Game",
-    "memory": "Create a Memory Game",
+export const STR_MODULE_CHOOSE_HEADER: { [key in ModuleKind]: string } = {
+    cover: "", //not used
+    flashcards: "Create a Set of Flashcards",
+    matching: "Create a Matching Game",
+    memory: "Create a Memory Game",
     "card-quiz": "Create a Quiz Game",
     "tapping-board": "Create a Listen & Learn Activity",
-    "poster": "Create a Talking Poster",
+    poster: "Create a Talking Poster",
     "drag-drop": "Create a Drag & Drop Activity",
-    "tracing": "Create a Tracing Activity",
-    "video": "Create a Video Activity",
+    tracing: "Create a Tracing Activity",
+    video: "Create a Video Activity",
 };

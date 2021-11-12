@@ -1,19 +1,17 @@
-import {argsToAttrs} from "@utils/attributes";
+import { argsToAttrs } from "@utils/attributes";
 import "@elements/module/_common/edit/widgets/trace/edit-reshape-menu";
 import "@elements/module/_common/edit/widgets/trace/edit-reshape-menu-btn";
 import "@elements/core/buttons/icon";
 export default {
-    title: "Module / _COMMON /  edit /Widgets / Trace"
-}
+    title: "Module / _COMMON /  edit /Widgets / Trace",
+};
 
-interface Args {
-}
+interface Args {}
 
-const DEFAULT_ARGS:Args = {
-}
+const DEFAULT_ARGS: Args = {};
 
-export const Menu = (props?:Partial<Args>) => {
-    props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
+export const Menu = (props?: Partial<Args>) => {
+    props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
 
     return `
     <trace-edit-reshape-menu style="position: absolute; top: 100px; left: 100px">
@@ -24,6 +22,6 @@ export const Menu = (props?:Partial<Args>) => {
         <trace-edit-reshape-menu-btn kind="confirm"></trace-edit-reshape-menu-btn>
     </trace-edit-reshape-menu>
     `;
-}
+};
 
 Menu.args = DEFAULT_ARGS;

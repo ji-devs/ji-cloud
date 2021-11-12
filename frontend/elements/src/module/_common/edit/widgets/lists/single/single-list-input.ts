@@ -70,7 +70,12 @@ export class _ extends LitElement {
 
         return html`
             <!-- <div class="row"> -->
-                <input type="text" @input="${this.onInput}" @change="${this.onChange}" .value="${live(value)}">
+            <input
+                type="text"
+                @input="${this.onInput}"
+                @change="${this.onChange}"
+                .value="${live(value)}"
+            />
             <!-- </div> -->
         `;
     }

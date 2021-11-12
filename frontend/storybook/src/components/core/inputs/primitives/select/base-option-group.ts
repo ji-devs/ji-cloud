@@ -3,16 +3,16 @@ import "@elements/core/inputs/primitives/select/base-option-group";
 import { arrayCount, mapToString } from "@utils/array";
 
 export default {
-    title: "Core / Inputs / Primitives / Select"
-}
+    title: "Core / Inputs / Primitives / Select",
+};
 
 interface Args {
-    open: boolean,
+    open: boolean;
 }
 
 const DEFAULT_ARGS: Args = {
     open: true,
-}
+};
 
 export const BaseOptionGroup = (props?: Partial<Args>) => {
     props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
@@ -29,6 +29,6 @@ export const BaseOptionGroup = (props?: Partial<Args>) => {
             </base-option-group>
         </div>
     `;
-}
+};
 
 BaseOptionGroup.args = DEFAULT_ARGS;

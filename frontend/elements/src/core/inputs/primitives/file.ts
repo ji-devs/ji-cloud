@@ -1,6 +1,5 @@
 import { LitElement, html, css, customElement, query } from "lit-element";
 
-
 @customElement("input-file")
 export class _ extends LitElement {
     static get styles() {
@@ -27,14 +26,14 @@ export class _ extends LitElement {
     input!: HTMLInputElement;
 
     private onChange(e: any) {
-        if(e.target.files[0]) {
+        if (e.target.files[0]) {
             this.newFile(e.target.files[0]);
         }
     }
 
     private onDrop(e: DragEvent) {
         e.preventDefault();
-        if(e.dataTransfer?.files[0]) {
+        if (e.dataTransfer?.files[0]) {
             this.newFile(e.dataTransfer.files[0]);
         }
     }
@@ -44,16 +43,18 @@ export class _ extends LitElement {
     }
 
     private newFile(file: File) {
-        this.dispatchEvent(new CustomEvent("custom-file", {
-            detail: file,
-        }))
+        this.dispatchEvent(
+            new CustomEvent("custom-file", {
+                detail: file,
+            })
+        );
     }
 
     render() {
         return html`
             <label @drop="${this.onDrop}" @dragover="${this.onDragOver}">
                 <slot></slot>
-                <input type="file" @change="${this.onChange}">
+                <input type="file" @change="${this.onChange}" />
             </label>
         `;
     }

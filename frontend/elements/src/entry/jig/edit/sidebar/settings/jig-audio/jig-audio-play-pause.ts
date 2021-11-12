@@ -14,7 +14,8 @@ export class _ extends LitElement {
                 img-ui {
                     display: none;
                 }
-                :host([mode=play]) .play, :host([mode=pause]) .pause {
+                :host([mode="play"]) .play,
+                :host([mode="pause"]) .pause {
                     display: inline-block;
                 }
             `,

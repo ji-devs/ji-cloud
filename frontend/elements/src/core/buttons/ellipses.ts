@@ -1,10 +1,10 @@
-import { LitElement, html, css, customElement, property } from 'lit-element';
+import { LitElement, html, css, customElement, property } from "lit-element";
 
-@customElement('button-ellipses')
+@customElement("button-ellipses")
 export class _ extends LitElement {
-
-  static get styles() {
-    return [css`
+    static get styles() {
+        return [
+            css`
         :host {
             display: grid;
             grid-template-columns: 6px 6px 6px;
@@ -26,17 +26,16 @@ export class _ extends LitElement {
        
      
        
-    `];
-  }
+    `,
+        ];
+    }
 
-
-  render() {
-   
- 
-    return html`
-       <div class="circle" style="grid-area: l"></div>
-       <div class="circle" style="grid-area: m"></div>
-       <div class="circle" style="grid-area: r"></div>
-  `;
-  }
+    render() {
+        return html`
+            <div class="circle" style="grid-area: l"></div>
+            <div class="circle" style="grid-area: m"></div>
+            <div class="circle" style="grid-area: r"></div>
+              
+        `;
+    }
 }

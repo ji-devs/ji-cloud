@@ -1,7 +1,6 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 import "@elements/core/inputs/primitives/select/base-option-group";
 
-
 @customElement("input-select-option-group")
 export class _ extends LitElement {
     static get styles() {
@@ -26,7 +25,7 @@ export class _ extends LitElement {
                     padding: 8px 0;
                 }
                 .arrow {
-                    color: var(--main-blue)
+                    color: var(--main-blue);
                 }
             `,
         ];
@@ -38,7 +37,6 @@ export class _ extends LitElement {
     render() {
         return html`
             <base-option-group>
-
                 <div class="anchor" slot="anchor">
                     <slot name="label">
                         <span>${this.label}</span>
@@ -47,7 +45,6 @@ export class _ extends LitElement {
                 </div>
 
                 <slot></slot>
-
             </base-option-group>
         `;
     }

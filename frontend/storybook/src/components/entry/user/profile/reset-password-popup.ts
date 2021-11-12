@@ -1,20 +1,18 @@
-import {argsToAttrs} from "@utils/attributes";
+import { argsToAttrs } from "@utils/attributes";
 import "@elements/entry/user/profile/reset-password-popup";
 import "@elements/core/buttons/rectangle";
 import "@elements/core/buttons/empty";
 
 export default {
-    title: 'Entry / User / Profile',
-}
+    title: "Entry / User / Profile",
+};
 
-interface Args {
-}
+interface Args {}
 
-const DEFAULT_ARGS:Args = {
-}
+const DEFAULT_ARGS: Args = {};
 
-export const OptionsPopup = (props?:Partial<Args>) => {
-    props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
+export const OptionsPopup = (props?: Partial<Args>) => {
+    props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
 
     return `
         <user-profile-reset-password-popup ${argsToAttrs(props)}>
@@ -26,7 +24,7 @@ export const OptionsPopup = (props?:Partial<Args>) => {
             <button-rect type="text" slot="cancel">Cancel</button-rect>
             <button-rect slot="save" color="blue">Save</button-rect>
         </user-profile-reset-password-popup>
-    `
-}
+    `;
+};
 
 OptionsPopup.args = DEFAULT_ARGS;

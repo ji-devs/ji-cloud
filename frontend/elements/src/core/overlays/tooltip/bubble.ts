@@ -1,12 +1,18 @@
-import { LitElement, html, css, customElement, property } from 'lit-element';
-import {nothing} from "lit-html";
-import { styleMap } from 'lit-html/directives/style-map';
+import { LitElement, html, css, customElement, property } from "lit-element";
+import { nothing } from "lit-html";
+import { styleMap } from "lit-html/directives/style-map";
 import "@elements/core/overlays/container";
 import "@elements/core/overlays/content";
-import {TrackerProp, ZLayer, Anchor, ContentAnchor, MoveStrategy} from "@elements/core/overlays/content";
+import {
+    TrackerProp,
+    ZLayer,
+    Anchor,
+    ContentAnchor,
+    MoveStrategy,
+} from "@elements/core/overlays/content";
 import "@elements/core/buttons/icon";
 import "./container";
-import {Color} from "./container";
+import { Color } from "./container";
 
 @customElement("overlay-tooltip-bubble")
 export class _ extends LitElement {
@@ -32,7 +38,6 @@ export class _ extends LitElement {
         ];
     }
 
-
     connectedCallback() {
         super.connectedCallback();
         window.addEventListener("mousedown", this.onGlobalMouseDown);
@@ -43,91 +48,103 @@ export class _ extends LitElement {
     }
 
     onConfirm = () => {
-        this.dispatchEvent(new Event("accept"))
-    }
+        this.dispatchEvent(new Event("accept"));
+    };
     onCancel = () => {
-        this.dispatchEvent(new Event("close"))
-    }
+        this.dispatchEvent(new Event("close"));
+    };
     onGlobalMouseDown = (evt: MouseEvent) => {
-        if(!evt.composedPath().includes(this.shadowRoot?.getElementById("tooltip") as any)) {
+        if (
+            !evt
+                .composedPath()
+                .includes(this.shadowRoot?.getElementById("tooltip") as any)
+        ) {
             this.onCancel();
         }
-    }
+    };
 
-    @property({type: Number})
-    minWidth:number = 200;
+    @property({ type: Number })
+    minWidth: number = 200;
 
-    @property({type: Number})
-    maxWidth:number = 1000;
-
+    @property({ type: Number })
+    maxWidth: number = 1000;
 
     //internal
     @property()
-    currContentAnchor:ContentAnchor = "oppositeH";
+    currContentAnchor: ContentAnchor = "oppositeH";
 
     @property()
-    currTargetAnchor:Anchor = "tr";
+    currTargetAnchor: Anchor = "tr";
 
     //pass through
     @property()
-    container:TrackerProp | undefined = window;
+    container: TrackerProp | undefined = window;
 
     @property()
-    target:TrackerProp | undefined;
+    target: TrackerProp | undefined;
 
     @property()
-    strategy:MoveStrategy = "";
+    strategy: MoveStrategy = "";
 
-    @property({reflect: true})
-    zLayer:ZLayer | undefined = "tooltip";
-
-    @property()
-    contentAnchor:ContentAnchor = "oppositeH";
+    @property({ reflect: true })
+    zLayer: ZLayer | undefined = "tooltip";
 
     @property()
-    color:Color = "green";
+    contentAnchor: ContentAnchor = "oppositeH";
 
     @property()
-    targetAnchor:Anchor = "tr";
+    color: Color = "green";
 
-    @property({type: Number})
-    marginX:number = 0;
+    @property()
+    targetAnchor: Anchor = "tr";
 
-    @property({type: Number})
-    marginY:number = 0;
+    @property({ type: Number })
+    marginX: number = 0;
 
-    
-    @property({type: Number})
-    arrowNudge:number = 0;
+    @property({ type: Number })
+    marginY: number = 0;
+
+    @property({ type: Number })
+    arrowNudge: number = 0;
 
     render() {
-        const {container, target, strategy, zLayer,marginX, minWidth,marginY, contentAnchor, targetAnchor, maxWidth, arrowNudge} = this;
+        const {
+            container,
+            target,
+            strategy,
+            zLayer,
+            marginX,
+            minWidth,
+            marginY,
+            contentAnchor,
+            targetAnchor,
+            maxWidth,
+            arrowNudge,
+        } = this;
 
-        let bodyStyles:any = {
-        };
+        const bodyStyles: any = {};
 
-        if(minWidth !== -1) {
+        if (minWidth !== -1) {
             bodyStyles.minWidth = `${minWidth}rem`;
         }
-        if(maxWidth !== -1) {
+        if (maxWidth !== -1) {
             bodyStyles.maxWidth = `${maxWidth}rem`;
         }
         return html`
-
             <overlay-content
-             .container=${container}
-             .target=${target}
-             .strategy=${strategy}
-             .zLayer=${zLayer}
-             .contentAnchor=${contentAnchor}
-             .targetAnchor=${targetAnchor}
-             .marginX=${marginX}
-             .marginY=${marginY}
-             @anchor-changed=${(evt:CustomEvent) => {
-                const {contentAnchor, targetAnchor} = evt.detail;
-                 this.currContentAnchor = contentAnchor;
-                 this.currTargetAnchor = targetAnchor;
-             }}
+                .container=${container}
+                .target=${target}
+                .strategy=${strategy}
+                .zLayer=${zLayer}
+                .contentAnchor=${contentAnchor}
+                .targetAnchor=${targetAnchor}
+                .marginX=${marginX}
+                .marginY=${marginY}
+                @anchor-changed=${(evt: CustomEvent) => {
+                    const { contentAnchor, targetAnchor } = evt.detail;
+                    this.currContentAnchor = contentAnchor;
+                    this.currTargetAnchor = targetAnchor;
+                }}
             >
                 <tooltip-container
                     id="tooltip"
@@ -136,10 +153,13 @@ export class _ extends LitElement {
                     .targetAnchor=${this.currTargetAnchor}
                     .arrowNudge=${arrowNudge}
                 >
-                    <article><div class="body" style="${styleMap(bodyStyles)}"><slot></slot></div></article>
+                    <article>
+                        <div class="body" style="${styleMap(bodyStyles)}">
+                            <slot></slot>
+                        </div>
+                    </article>
                 </tooltip-container>
             </overlay-content>
-
         `;
     }
 }

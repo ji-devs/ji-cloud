@@ -1,6 +1,5 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 
-
 @customElement("text-editor-controls-input-number")
 export class _ extends LitElement {
     static get styles() {
@@ -76,7 +75,7 @@ export class _ extends LitElement {
         ];
     }
 
-    @property({type: Number})
+    @property({ type: Number })
     value: number = 1;
 
     private min: number = 0;
@@ -84,9 +83,11 @@ export class _ extends LitElement {
     private max: number = 300;
 
     private changed() {
-        this.dispatchEvent(new CustomEvent("custom-change", {
-            detail: { value: this.value.toString() }, // custom change expect a string
-        }))
+        this.dispatchEvent(
+            new CustomEvent("custom-change", {
+                detail: { value: this.value.toString() }, // custom change expect a string
+            })
+        );
     }
 
     private increment() {
@@ -106,10 +107,10 @@ export class _ extends LitElement {
     private onSelectChange = (e: any) => {
         this.value = parseInt(e.target.value);
         this.changed();
-    }
+    };
 
-    private getSelectOptions(): number [] {
-        let arr =  Array.from(Array(17).keys());
+    private getSelectOptions(): number[] {
+        const arr = Array.from(Array(17).keys());
         arr.shift();
         return arr;
     }
@@ -117,14 +118,11 @@ export class _ extends LitElement {
     render() {
         return html`
             <button @click="${this.decrement}">-</button>
-            <label for="select">${ this.value.toString() }</label>
+            <label for="select">${this.value.toString()}</label>
             <select id="select" @input=${this.onSelectChange}>
-                ${
-                    this.getSelectOptions()
-                        .map((num: number) => html`
-                            <option>${num * 10}</option>
-                        `)
-                }
+                ${this.getSelectOptions().map(
+                    (num: number) => html` <option>${num * 10}</option> `
+                )}
             </select>
             <button @click="${this.increment}">+</button>
         `;

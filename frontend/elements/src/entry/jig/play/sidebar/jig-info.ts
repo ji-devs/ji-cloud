@@ -97,7 +97,7 @@ export class _ extends LitElement {
                     justify-content: start;
                     column-gap: 16px;
                 }
-                .report-section ::slotted([slot=report-sent]) {
+                .report-section ::slotted([slot="report-sent"]) {
                     color: var(--dark-green-1);
                     font-size: 14px;
                 }
@@ -108,10 +108,10 @@ export class _ extends LitElement {
     @property()
     name: string = "";
 
-    @property({type: Number})
+    @property({ type: Number })
     playedCount?: number;
 
-    @property({type: Number})
+    @property({ type: Number })
     likedCount?: number;
 
     @property()
@@ -120,7 +120,7 @@ export class _ extends LitElement {
     @property()
     language: string = "";
 
-    @property({type: Boolean})
+    @property({ type: Boolean })
     byJiTeam: boolean = false;
 
     @property()
@@ -141,24 +141,36 @@ export class _ extends LitElement {
                     <section class="main-info-section">
                         <div class="first-line">
                             <div class="author">
-                                ${this.byJiTeam ? html`
-                                    <img-ui path="entry/home/search-results/ji-logo-blue.svg"></img-ui>
-                                    <span class="by-ji-team">${STR_JI_TEAM} - </span>
-                                ` : nothing}
+                                ${this.byJiTeam
+                                    ? html`
+                                          <img-ui
+                                              path="entry/home/search-results/ji-logo-blue.svg"
+                                          ></img-ui>
+                                          <span class="by-ji-team"
+                                              >${STR_JI_TEAM} -
+                                          </span>
+                                      `
+                                    : nothing}
                                 ${this.author}
                             </div>
                             <span class="published-at">
-                                <img-ui path="entry/home/search-results/time.svg"></img-ui>
+                                <img-ui
+                                    path="entry/home/search-results/time.svg"
+                                ></img-ui>
                                 ${this.publishedAt}
                             </span>
                         </div>
                         <div class="second-line">
                             <span>
-                                <img-ui path="entry/jig/play/sidebar/age.svg"></img-ui>
+                                <img-ui
+                                    path="entry/jig/play/sidebar/age.svg"
+                                ></img-ui>
                                 ${this.ages}
                             </span>
                             <span>
-                                <img-ui path="entry/jig/play/sidebar/language.svg"></img-ui>
+                                <img-ui
+                                    path="entry/jig/play/sidebar/language.svg"
+                                ></img-ui>
                                 ${this.language}
                             </span>
                             <span>

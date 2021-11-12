@@ -8,5 +8,4 @@ export const homeStyles = css`
     }
 `;
 
-
 //touched for CI under pressure, delete me

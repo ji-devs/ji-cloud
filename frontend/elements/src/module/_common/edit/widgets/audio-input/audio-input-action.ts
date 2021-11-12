@@ -1,16 +1,22 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 
-export type Kind = 'record' | 'confirm' | 'preview' | 'play' | 'stop' | 'add-sound';
+export type Kind =
+    | "record"
+    | "confirm"
+    | "preview"
+    | "play"
+    | "stop"
+    | "add-sound";
 
 const STR_LABEL_LOOKUP: {
-    [key in Kind]: string
+    [key in Kind]: string;
 } = {
-    ['record']: 'Record',
-    ['confirm']: 'Confirm',
-    ['preview']: 'Preview',
-    ['play']: 'Play',
-    ['stop']: 'Stop',
-    ['add-sound']: 'Add sound',
+    ["record"]: "Record",
+    ["confirm"]: "Confirm",
+    ["preview"]: "Preview",
+    ["play"]: "Play",
+    ["stop"]: "Stop",
+    ["add-sound"]: "Add sound",
 };
 
 @customElement("audio-input-action")
@@ -52,20 +58,24 @@ export class _ extends LitElement {
         ];
     }
 
-    @property({type: String, reflect: true})
-    kind: Kind = 'record';
+    @property({ type: String, reflect: true })
+    kind: Kind = "record";
 
-    @property({type: Boolean, reflect: true})
+    @property({ type: Boolean, reflect: true })
     disabled: boolean = false;
 
     render() {
-        const label =  STR_LABEL_LOOKUP[this.kind];
-        const iconUrl = `action-${this.kind}${this.disabled ? '-disabled' : ''}`;
+        const label = STR_LABEL_LOOKUP[this.kind];
+        const iconUrl = `action-${this.kind}${
+            this.disabled ? "-disabled" : ""
+        }`;
 
         return html`
             <button ?disabled="${this.disabled}">
-                ${ label }
-                <img-ui path="module/_common/edit/widgets/sidebar/audio-input/${iconUrl}.svg"></img-ui>
+                ${label}
+                <img-ui
+                    path="module/_common/edit/widgets/sidebar/audio-input/${iconUrl}.svg"
+                ></img-ui>
             </button>
         `;
     }

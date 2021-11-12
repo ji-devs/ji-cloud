@@ -1,67 +1,73 @@
-import { LitElement, html, css, customElement, property} from 'lit-element';
-import {nothing} from "lit-html";
-import {BgBlue} from "@elements/_styles/bg";
-import { startResizer, setResizeOnStyle, setResizeOnDocumentRoot } from "@utils/resize";
-import {STAGE_PLAYER, STAGE_LEGACY} from "@utils/config";
-import { loadAllFonts, loadFonts } from '@elements/_themes/themes';
-import { classMap } from 'lit-html/directives/class-map';
+import { LitElement, html, css, customElement, property } from "lit-element";
+import { nothing } from "lit-html";
+import { BgBlue } from "@elements/_styles/bg";
+import {
+    startResizer,
+    setResizeOnStyle,
+    setResizeOnDocumentRoot,
+} from "@utils/resize";
+import { STAGE_PLAYER, STAGE_LEGACY } from "@utils/config";
+import { loadAllFonts, loadFonts } from "@elements/_themes/themes";
+import { classMap } from "lit-html/directives/class-map";
 
-@customElement('module-page-iframe')
+@customElement("module-page-iframe")
 export class _ extends BgBlue {
     private cancelResize: (() => any) | null = null;
 
     static get styles() {
-        return [...super.styles, css`
-        :host {
-            width: 100vw;
-            height: 100vh;
-            display: block;
-            padding: 0;
-            margin: 0;
-        }
-        
-        #overlay {
-            position: fixed;
-            top: 0;
-            left: 0; 
-            display: block;
-            z-index: 1000;
-        }
+        return [
+            ...super.styles,
+            css`
+                :host {
+                    width: 100vw;
+                    height: 100vh;
+                    display: block;
+                    padding: 0;
+                    margin: 0;
+                }
 
+                #overlay {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    display: block;
+                    z-index: 1000;
+                }
 
-        #outer {
-            width: 100%;
-            height: 100%;
-        }
+                #outer {
+                    width: 100%;
+                    height: 100%;
+                }
 
-        #container {
-            position: absolute;
-            top: var(--y);
-            left: var(--x);
-            width: var(--width);
-            height: var(--height);
-            background-color: white;
-        }
+                #container {
+                    position: absolute;
+                    top: var(--y);
+                    left: var(--x);
+                    width: var(--width);
+                    height: var(--height);
+                    background-color: white;
+                }
 
-        #content {
-            position: absolute;
-            top: var(--content-y);
-            left: var(--content-x);
-            width: var(--content-width);
-            height: var(--content-height);
-            overflow: hidden;
-        }
-        main {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-        }
-        .hidden {
-            display: none;
-        }
-    `];
+                #content {
+                    position: absolute;
+                    top: var(--content-y);
+                    left: var(--content-x);
+                    width: var(--content-width);
+                    height: var(--content-height);
+                    overflow: hidden;
+                }
+                main {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                }
+                .hidden {
+                    display: none;
+                }
+            `,
+        ];
     }
 
     @property({ type: Boolean })
@@ -70,11 +76,11 @@ export class _ extends BgBlue {
     @property({ type: Boolean })
     legacy: boolean = false;
 
-  @property({type: Boolean})
-  fontsLoaded:boolean = false;
+    @property({ type: Boolean })
+    fontsLoaded: boolean = false;
 
-  @property()
-  fontFamilies:Array<string> | undefined;
+    @property()
+    fontFamilies: Array<string> | undefined;
 
     firstUpdated() {
         const shadowRoot = this.shadowRoot as ShadowRoot;
@@ -82,16 +88,20 @@ export class _ extends BgBlue {
         const [_, cancelResize] = startResizer(
             {
                 stage: this.legacy ? STAGE_LEGACY : STAGE_PLAYER,
-            }, (info) => {
+            },
+            (info) => {
                 setResizeOnDocumentRoot(info);
-                this.dispatchEvent(new CustomEvent('module-resize', {
-                    detail: info
-                }));
-            });
+                this.dispatchEvent(
+                    new CustomEvent("module-resize", {
+                        detail: info,
+                    })
+                );
+            }
+        );
 
         this.cancelResize = cancelResize;
 
-        if(this.fontFamilies) {
+        if (this.fontFamilies) {
             loadFonts(this.fontFamilies).then(() => {
                 this.fontsLoaded = true;
             });
@@ -116,7 +126,7 @@ export class _ extends BgBlue {
 
         const scrollStyle = scrollable ? `overflow-auto` : `overflow-hidden`;
 
-        const classes = classMap({hidden: !this.fontsLoaded});
+        const classes = classMap({ hidden: !this.fontsLoaded });
 
         return html`
             <main class=${classes}>
@@ -128,7 +138,9 @@ export class _ extends BgBlue {
                     </div>
                 </div>
             </main>
-            <div id="overlay" class=${classes}><slot name="overlay"></slot></div>
-    `;
+            <div id="overlay" class=${classes}>
+                <slot name="overlay"></slot>
+            </div>
+        `;
     }
 }

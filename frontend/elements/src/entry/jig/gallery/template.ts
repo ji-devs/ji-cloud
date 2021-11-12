@@ -1,8 +1,8 @@
-import { LitElement, html, css, customElement, property } from 'lit-element';
-import '@elements/core/images/ui';
-import { styles } from './styles';
+import { LitElement, html, css, customElement, property } from "lit-element";
+import "@elements/core/images/ui";
+import { styles } from "./styles";
 
-export type Kind = 'vocabulary' | 'parsha';
+export type Kind = "vocabulary" | "parsha";
 
 interface KindInfo {
     label: string;
@@ -10,19 +10,19 @@ interface KindInfo {
 }
 
 const STR_INFO_LOOKUP: {
-    [key in Kind]: KindInfo
+    [key in Kind]: KindInfo;
 } = {
-    ['vocabulary']: {
-        label: 'Teach New Vocabulary',
-        ages: '5-8',
+    ["vocabulary"]: {
+        label: "Teach New Vocabulary",
+        ages: "5-8",
     },
-    ['parsha']: {
-        label: 'Teach New Parsha',
-        ages: '3-5',
+    ["parsha"]: {
+        label: "Teach New Parsha",
+        ages: "3-5",
     },
 };
 
-@customElement('jig-gallery-template')
+@customElement("jig-gallery-template")
 export class _ extends LitElement {
     static get styles() {
         return [
@@ -40,7 +40,8 @@ export class _ extends LitElement {
                     box-sizing: border-box;
                     grid-template-rows: auto min-content;
                 }
-                :host(:hover), :host(:focus) {
+                :host(:hover),
+                :host(:focus) {
                     background-color: var(--light-blue-2);
                 }
                 .top-section {
@@ -63,7 +64,7 @@ export class _ extends LitElement {
                     justify-self: stretch;
                     justify-content: center;
                 }
-            `
+            `,
         ];
     }
 
@@ -75,7 +76,9 @@ export class _ extends LitElement {
 
         return html`
             <div class="top-section">
-                <img-ui path="entry/jig/gallery/template-${this.kind}.svg"></img-ui>
+                <img-ui
+                    path="entry/jig/gallery/template-${this.kind}.svg"
+                ></img-ui>
                 <span class="label">${info.label}</span>
             </div>
             <span class="ages">

@@ -1,15 +1,15 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 import "@elements/core/popups/popup-body";
 
-export type Direction = "ltr" | "rtl"; 
+export type Direction = "ltr" | "rtl";
 
 const STR_JIG_DIRECTION = "JIG direction:";
 
 const STR_DIRECTION_LABEL: {
-    [key in Direction]: string
+    [key in Direction]: string;
 } = {
-    ['ltr']: "Left to right",
-    ['rtl']: "Right to left",
+    ["ltr"]: "Left to right",
+    ["rtl"]: "Right to left",
 };
 
 @customElement("jig-preview-settings-direction")
@@ -17,7 +17,8 @@ export class _ extends LitElement {
     static get styles() {
         return [
             css`
-                .main, label {
+                .main,
+                label {
                     cursor: pointer;
                     display: flex;
                     column-gap: 8px;
@@ -31,13 +32,14 @@ export class _ extends LitElement {
                     border-radius: 8px;
                     overflow: hidden;
                 }
-                .right-pointer, .left-pointer{
+                .right-pointer,
+                .left-pointer {
                     color: var(--main-blue);
                     display: inline-grid;
                     place-content: center;
                 }
-                :host([direction=ltr]) .right-pointer,
-                :host([direction=rtl]) .left-pointer {
+                :host([direction="ltr"]) .right-pointer,
+                :host([direction="rtl"]) .left-pointer {
                     background-color: var(--main-blue);
                     color: white;
                 }
@@ -52,16 +54,16 @@ export class _ extends LitElement {
     direction: Direction = "ltr";
 
     private toggleDirection() {
-        if(this.direction === "ltr")
-            this.direction = "rtl";
-        else
-            this.direction = "ltr";
+        if (this.direction === "ltr") this.direction = "rtl";
+        else this.direction = "ltr";
 
-        this.dispatchEvent(new CustomEvent("custom-direction", {
-            detail: {
-                direction: this.direction
-            }
-        }))
+        this.dispatchEvent(
+            new CustomEvent("custom-direction", {
+                detail: {
+                    direction: this.direction,
+                },
+            })
+        );
     }
 
     render() {

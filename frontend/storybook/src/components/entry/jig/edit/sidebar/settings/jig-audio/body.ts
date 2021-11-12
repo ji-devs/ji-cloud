@@ -1,22 +1,22 @@
-import {argsToAttrs} from "@utils/attributes";
+import { argsToAttrs } from "@utils/attributes";
 import "@elements/entry/jig/edit/sidebar/settings/jig-audio/jig-audio-body";
-import {Kind} from "@elements/entry/jig/edit/sidebar/settings/jig-audio/jig-audio-body";
+import { Kind } from "@elements/entry/jig/edit/sidebar/settings/jig-audio/jig-audio-body";
 import { arrayCount, mapToString } from "@utils/array";
 
 export default {
-    title: "Entry / Jig / Edit / Sidebar/ Settings/ Jig Audio"
-}
+    title: "Entry / Jig / Edit / Sidebar/ Settings/ Jig Audio",
+};
 
 interface Args {
-    kind: Kind,
+    kind: Kind;
 }
 
-const DEFAULT_ARGS:Args = {
-    kind: "feedback"
-}
+const DEFAULT_ARGS: Args = {
+    kind: "feedback",
+};
 
-export const Body = (props?:Partial<Args>) => {
-    props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
+export const Body = (props?: Partial<Args>) => {
+    props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
 
     return `
         <jig-audio-body ${argsToAttrs(props)}>
@@ -35,18 +35,16 @@ export const Body = (props?:Partial<Args>) => {
             ${mapToString(arrayCount(7), line)}
         </jig-audio-body>
     `;
-}
+};
 Body.args = DEFAULT_ARGS;
 Body.argTypes = {
     kind: {
         control: {
-            type: 'inline-radio',
+            type: "inline-radio",
             options: ["background", "feedback"],
-        }
+        },
     },
-}
-
-
+};
 
 function line() {
     return `

@@ -26,7 +26,8 @@ export const actionStyles = css`
         width: 48px;
         padding: 10px;
     }
-    .action:hover, .action:active {
+    .action:hover,
+    .action:active {
         background-color: var(--dark-blue-5);
     }
     .action img-ui {

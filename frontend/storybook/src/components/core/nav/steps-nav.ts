@@ -3,17 +3,15 @@ import "@elements/core/nav/step-nav";
 import { argsToAttrs } from "@utils/attributes";
 
 export default {
-    title: "Core / Nav"
-}
+    title: "Core / Nav",
+};
 
-interface Args {
-}
+interface Args {}
 
-const DEFAULT_ARGS:Args = {
-}
+const DEFAULT_ARGS: Args = {};
 
-export const StepsNav = (props?:Partial<Args>) => {
-    props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
+export const StepsNav = (props?: Partial<Args>) => {
+    props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
 
     return `
         <steps-nav ${argsToAttrs(props)}>
@@ -23,6 +21,6 @@ export const StepsNav = (props?:Partial<Args>) => {
             <step-nav number="4" label="Preview"></step-nav>
         </steps-nav>
     `;
-}
+};
 
 StepsNav.args = DEFAULT_ARGS;

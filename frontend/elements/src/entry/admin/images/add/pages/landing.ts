@@ -1,4 +1,4 @@
-import { LitElement, html, css, customElement, property } from 'lit-element';
+import { LitElement, html, css, customElement, property } from "lit-element";
 import "@elements/core/titles/ji";
 import "@elements/core/titles/variants/underlined-title";
 import "@elements/core/inputs/composed/search";
@@ -9,56 +9,57 @@ export type ImageKind = "sticker" | "canvas";
 const STR_TITLE = "Add Images";
 const STR_SELECT = "Select an image kind:";
 const STR_OPTION_STICKER = "Sticker";
-const STR_OPTION_CANVAS= "Canvas";
+const STR_OPTION_CANVAS = "Canvas";
 
-@customElement('image-add-page')
+@customElement("image-add-page")
 export class _ extends LitElement {
     static get styles() {
-        return [css`
+        return [
+            css`
+                aside {
+                    display: flex;
+                    justify-content: space-between;
+                    border-bottom: solid 1px #e5e7ef;
+                    padding-bottom: 29px;
+                    margin-bottom: 29px;
+                }
+                aside .title {
+                    font-size: 24px;
+                    font-weight: 300;
+                    font-stretch: normal;
+                    font-style: normal;
+                    line-height: 1.25;
+                    letter-spacing: -0.24px;
+                    text-align: left;
+                    color: #000000;
+                    margin-right: 10px;
+                }
 
-            aside {
-                display: flex;
-                justify-content: space-between;
-                border-bottom: solid 1px #e5e7ef;
-                padding-bottom: 29px;
-                margin-bottom: 29px;
-            }
-            aside .title {
-                font-size: 24px;
-                font-weight: 300;
-                font-stretch: normal;
-                font-style: normal;
-                line-height: 1.25;
-                letter-spacing: -0.24px;
-                text-align: left;
-                color: #000000;
-                margin-right: 10px;
-            }
+                aside .right {
+                    display: flex;
+                    align-items: center;
+                    gap: 24px;
+                }
 
-            aside .right {
-                display: flex;
-                align-items: center;
-                gap: 24px;
-            }
-
-            :host {
-                display: block;
-                margin-top: 29px;
-                padding-left: 40px;
-                padding-right: 40px;
-            }
-        .button {
-            margin-top: 32px;
-        }
-    `];
+                :host {
+                    display: block;
+                    margin-top: 29px;
+                    padding-left: 40px;
+                    padding-right: 40px;
+                }
+                .button {
+                    margin-top: 32px;
+                }
+            `,
+        ];
     }
 
-    onRadioChange(evt:any) {
+    onRadioChange(evt: any) {
         this.imageKind = evt.target.value;
 
         this.dispatchEvent(
             new CustomEvent("custom-change", {
-                detail: { value: this.imageKind},
+                detail: { value: this.imageKind },
             })
         );
     }
@@ -67,13 +68,11 @@ export class _ extends LitElement {
     imageKind: ImageKind = "sticker";
 
     @property()
-    query:string = "";
+    query: string = "";
     render() {
-        
-        const {query, imageKind} = this;
+        const { query, imageKind } = this;
 
         return html`
-
             <aside>
                 <div class="title">${STR_TITLE}</div>
                 <div class="right">
@@ -89,13 +88,25 @@ export class _ extends LitElement {
 
                     <div>
                         <label>
-                            <input @change=${this.onRadioChange} type="radio" name="img_kind" value="sticker" .checked=${imageKind === "sticker"} />
+                            <input
+                                @change=${this.onRadioChange}
+                                type="radio"
+                                name="img_kind"
+                                value="sticker"
+                                .checked=${imageKind === "sticker"}
+                            />
                             ${STR_OPTION_STICKER}
                         </label>
                     </div>
                     <div>
                         <label>
-                            <input @change=${this.onRadioChange} type="radio" name="img_kind" value="canvas" .checked=${imageKind === "canvas"} />
+                            <input
+                                @change=${this.onRadioChange}
+                                type="radio"
+                                name="img_kind"
+                                value="canvas"
+                                .checked=${imageKind === "canvas"}
+                            />
                             ${STR_OPTION_CANVAS}
                         </label>
                     </div>

@@ -4,7 +4,10 @@ import { nothing } from "lit-html";
 import "@elements/core/images/ui";
 import "@elements/core/buttons/icon";
 import "@elements/core/buttons/rectangle";
-import { ModuleKind, STR_MODULE_DISPLAY_NAME} from "@elements/module/_common/types";
+import {
+    ModuleKind,
+    STR_MODULE_DISPLAY_NAME,
+} from "@elements/module/_common/types";
 import { collapseStyles } from "./collapse-styles";
 
 @customElement("jig-sidebar-module")
@@ -17,11 +20,14 @@ export class _ extends LitElement {
                     transform: rotate(-5deg);
                 }
 
-                .dragging .menu, .dragging .decorations, .add-container.dragging {
+                .dragging .menu,
+                .dragging .decorations,
+                .add-container.dragging {
                     display: none;
                 }
 
-                .drag-overlay, section {
+                .drag-overlay,
+                section {
                     width: 416px;
                     height: 168px;
                     transition-property: height, width;
@@ -102,7 +108,8 @@ export class _ extends LitElement {
                     line-height: 1.5;
                     color: #4a4a4a;
                     transition-property: font-size, opacity;
-                    transition-duration: var(--collapsing-phase-duration), var(--fading-phase-duration);
+                    transition-duration: var(--collapsing-phase-duration),
+                        var(--fading-phase-duration);
                     transition-delay: 0s, var(--collapsing-phase-duration);
                     transition-timing-function: linear;
                 }
@@ -120,7 +127,7 @@ export class _ extends LitElement {
                     width: 218px;
                     overflow: hidden;
                 }
-                .window ::slotted([slot=window]) {
+                .window ::slotted([slot="window"]) {
                     height: 123px;
                     border-radius: 16px;
                 }
@@ -132,16 +139,24 @@ export class _ extends LitElement {
 
                 .add-container {
                     position: relative;
-                    top: 0px; 
-                    left: 0px; 
+                    top: 0px;
+                    left: 0px;
                     z-index: 1;
                 }
                 .add {
                     position: absolute;
-                    top: -15px; 
-                    left: calc(416px - (30px + 17px)); 
+                    top: -15px;
+                    left: calc(416px - (30px + 17px));
                 }
-                .arm-left, .arm-right, .neck, .head, .torso-columns, .torso-gears, .torso-spring, .feet-spring, .feet-rollers {
+                .arm-left,
+                .arm-right,
+                .neck,
+                .head,
+                .torso-columns,
+                .torso-gears,
+                .torso-spring,
+                .feet-spring,
+                .feet-rollers {
                     position: absolute;
                     top: 0;
                     left: 0;
@@ -154,73 +169,75 @@ export class _ extends LitElement {
                     transform: translate(190px, -110px);
                 }
                 .neck {
-                    transform: translate(92px, -60px); 
+                    transform: translate(92px, -60px);
                 }
                 .head {
-                    transform: translate(40px, -200px); 
+                    transform: translate(40px, -200px);
                 }
                 .torso-columns {
-                    transform: translate(61px, 110px); 
+                    transform: translate(61px, 110px);
                 }
                 .torso-gears {
-                    transform: translate(60px, 120px); 
+                    transform: translate(60px, 120px);
                 }
                 .torso-spring {
-                    transform: translate(86px, 110px); 
+                    transform: translate(86px, 110px);
                 }
                 .feet-spring {
-                    transform: translate(92px, 90px); 
+                    transform: translate(92px, 90px);
                 }
-                .feet-rollers{
-                    transform: translate(49px, 150px); 
+                .feet-rollers {
+                    transform: translate(49px, 150px);
                 }
             `,
         ];
     }
 
-    @property({type: Boolean})
+    @property({ type: Boolean })
     selected: boolean = false;
 
     // Should be the raw index in the JIG's module list
     // Will be bumped by 1 for display purposes
-    @property({type: Number})
+    @property({ type: Number })
     index: number = 0;
 
     @property()
     module: ModuleKind | "" = "";
 
-    @property({type: Boolean})
+    @property({ type: Boolean })
     dragging: boolean = false;
 
-    @property({type: Boolean, reflect: true})
+    @property({ type: Boolean, reflect: true })
     collapsed: boolean = false;
 
     render() {
-        const {selected, index, dragging, module} = this;
+        const { selected, index, dragging, module } = this;
 
-        const sectionClasses = classMap({selected, dragging});
-        const addContainerClasses = classMap({["add-container"]: true, dragging});
+        const sectionClasses = classMap({ selected, dragging });
+        const addContainerClasses = classMap({
+            ["add-container"]: true,
+            dragging,
+        });
 
-        const title = (index+1).toString().padStart(2, '0');
+        const title = (index + 1).toString().padStart(2, "0");
 
-        const subtitle = module === "" ? "" 
-            : STR_MODULE_DISPLAY_NAME[module];
+        const subtitle = module === "" ? "" : STR_MODULE_DISPLAY_NAME[module];
 
-        const iconPath = module === "" ? "" 
-            : `entry/jig/modules/small/${module}.svg`;
+        const iconPath =
+            module === "" ? "" : `entry/jig/modules/small/${module}.svg`;
 
         return html`
             <section class="${sectionClasses}">
                 <div class="grid-container">
                     <div class="left">
                         <div class="title">${title}</div>
-                        ${subtitle === "" ? nothing
-                            : html`<div class="subtitle">${subtitle}</div>`
-                        }
+                        ${subtitle === ""
+                            ? nothing
+                            : html`<div class="subtitle">${subtitle}</div>`}
                         <div class="icon">
-                            ${iconPath === "" ? nothing
-                                : html`<img-ui path="${iconPath}"></img-ui>`
-                            }
+                            ${iconPath === ""
+                                ? nothing
+                                : html`<img-ui path="${iconPath}"></img-ui>`}
                         </div>
                     </div>
                     <div class="middle open-only">
@@ -236,7 +253,9 @@ export class _ extends LitElement {
                             <slot name="menu"></slot>
                         </div>
                     </div>
-                    ${dragging ? html`<div class="drag-overlay"></div>` : nothing}
+                    ${dragging
+                        ? html`<div class="drag-overlay"></div>`
+                        : nothing}
                 </div>
             </section>
             <div class="${addContainerClasses} open-only">
@@ -249,22 +268,27 @@ export class _ extends LitElement {
 }
 
 function renderDecoration(index: number) {
-    const getImage = (path:string, classes:string) => html`<img-ui class="${classes}" path="entry/jig/jiggling/${path}" />`;
+    const getImage = (path: string, classes: string) =>
+        html`<img-ui class="${classes}" path="entry/jig/jiggling/${path}" />`;
 
-    if(index === 0) {
+    if (index === 0) {
         return html`
             ${getImage("arm-left.svg", "arm-left")}
             ${getImage("arm-right.svg", "arm-right")}
             ${getImage("neck-spring.svg", "neck")}
             ${getImage("yellow/face.png", "head")}
             ${getImage("torso-columns.svg", "torso-columns")}
-        `
+        `;
     } else {
-        switch(index % 3) {
-            case 0: return getImage("torso-columns.svg", "torso-columns");
-            case 1: return getImage("torso-spring.svg", "torso-spring");
-            case 2: return getImage("torso-gears.svg", "torso-gears");
-            default: return nothing;
+        switch (index % 3) {
+            case 0:
+                return getImage("torso-columns.svg", "torso-columns");
+            case 1:
+                return getImage("torso-spring.svg", "torso-spring");
+            case 2:
+                return getImage("torso-gears.svg", "torso-gears");
+            default:
+                return nothing;
         }
     }
 }

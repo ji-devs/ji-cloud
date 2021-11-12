@@ -8,19 +8,19 @@ import { arrayCount, mapToString } from "@utils/array";
 import { argsToAttrs } from "@utils/attributes";
 
 export default {
-    title: "Entry / Jig / Gallery"
-}
+    title: "Entry / Jig / Gallery",
+};
 
 interface Args {
     recentCount: number;
 }
 
-const DEFAULT_ARGS:Args = {
+const DEFAULT_ARGS: Args = {
     recentCount: 12,
-}
+};
 
-export const Gallery = (props?:Partial<Args>) => {
-    props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
+export const Gallery = (props?: Partial<Args>) => {
+    props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
 
     return `
         <jig-gallery ${argsToAttrs(props)}>
@@ -37,10 +37,9 @@ export const Gallery = (props?:Partial<Args>) => {
             ${mapToString(arrayCount(props.recentCount), recent)}
         </jig-gallery>
     `;
-}
+};
 
 Gallery.args = DEFAULT_ARGS;
-
 
 function recent() {
     return `

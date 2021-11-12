@@ -105,30 +105,30 @@ export class _ extends LitElement {
                     left: 0;
                     pointer-events: none;
                 }
-                .feet-spring, .feet-rollers {
+                .feet-spring,
+                .feet-rollers {
                     position: absolute;
                     top: 0;
                     left: 0;
                 }
                 .feet-spring {
-                    transform: translate(92px, 90px); 
+                    transform: translate(92px, 90px);
                 }
-                .feet-rollers{
-                    transform: translate(49px, 150px); 
+                .feet-rollers {
+                    transform: translate(49px, 150px);
                 }
             `,
         ];
     }
 
-    @property({type: Boolean, reflect: true})
+    @property({ type: Boolean, reflect: true })
     selected: boolean = false;
 
-    @property({type: Boolean, reflect: true})
+    @property({ type: Boolean, reflect: true })
     published: boolean = false;
 
-    @property({type: Boolean, reflect: true})
+    @property({ type: Boolean, reflect: true })
     collapsed: boolean = true;
-
 
     render() {
         return html`
@@ -137,16 +137,29 @@ export class _ extends LitElement {
                     <div class="left">
                         <div class="side-title">${STR_END}</div>
                         <div class="icon">
-                            <img-ui path="entry/jig/modules/small/publish.svg"></img-ui>
+                            <img-ui
+                                path="entry/jig/modules/small/publish.svg"
+                            ></img-ui>
                         </div>
                     </div>
                     <div class="middle open-only">
                         <div class="decorations">
-                            <img-ui class="feet-spring" path="entry/jig/jiggling/feet-spring.svg"></img-ui>
-                            <img-ui class="feet-rollers" path="entry/jig/jiggling/yellow/feet-rollers.svg"></img-ui>
+                            <img-ui
+                                class="feet-spring"
+                                path="entry/jig/jiggling/feet-spring.svg"
+                            ></img-ui>
+                            <img-ui
+                                class="feet-rollers"
+                                path="entry/jig/jiggling/yellow/feet-rollers.svg"
+                            ></img-ui>
                         </div>
                         <div class="window">
-                            <img-ui path="entry/jig/modules/small/publish-${this.published ? "green" : "blue"}-bg.svg"></img-ui>
+                            <img-ui
+                                path="entry/jig/modules/small/publish-${this
+                                    .published
+                                    ? "green"
+                                    : "blue"}-bg.svg"
+                            ></img-ui>
                             <span class="window-title">${STR_PUBLISH}</span>
                         </div>
                     </div>

@@ -7,9 +7,8 @@ export const STYLE_OPTIONS = [
     "Frame",
     "Icon/Emoji/Button",
     "Word/Label",
-    "Layout"
-    
-]
+    "Layout",
+];
 
 export const AGE_OPTIONS = [
     "All ages",
@@ -18,7 +17,7 @@ export const AGE_OPTIONS = [
     "Middle school",
     "High school",
     "University",
-]
+];
 
 export const AFFILIATION_OPTIONS = [
     "Show me everything",
@@ -28,7 +27,7 @@ export const AFFILIATION_OPTIONS = [
     "Orthodox content",
     "Charedi content",
     "Israeli Secular content",
-]
+];
 
 export const SUBJECT_OPTIONS = [
     "Hebrew Language",
@@ -37,7 +36,7 @@ export const SUBJECT_OPTIONS = [
     "Israel",
     "Jewish Life",
     "Prayer",
-]
+];
 
 export const SCHOOL_OPTIONS = [
     "AlEtz Chaiml",
@@ -45,4 +44,4 @@ export const SCHOOL_OPTIONS = [
     "Lauder",
     "Naima JPS",
     "Rimon",
-]
+];

@@ -1,12 +1,18 @@
-import { LitElement, html, css, customElement, property } from 'lit-element';
-import {nothing} from "lit-html";
-import { styleMap } from 'lit-html/directives/style-map';
+import { LitElement, html, css, customElement, property } from "lit-element";
+import { nothing } from "lit-html";
+import { styleMap } from "lit-html/directives/style-map";
 import "@elements/core/overlays/container";
 import "@elements/core/overlays/content";
-import {TrackerProp, ZLayer, Anchor, ContentAnchor, MoveStrategy} from "@elements/core/overlays/content";
+import {
+    TrackerProp,
+    ZLayer,
+    Anchor,
+    ContentAnchor,
+    MoveStrategy,
+} from "@elements/core/overlays/content";
 import "@elements/core/buttons/icon";
 import "./container";
-import {Color} from "./container";
+import { Color } from "./container";
 
 @customElement("overlay-tooltip-confirm")
 export class _ extends LitElement {
@@ -16,40 +22,39 @@ export class _ extends LitElement {
                 :host {
                     display: inline-block;
                 }
-            .body {
-                font-size: 16px;
-                color: var(--dark-gray-6);
-            }
+                .body {
+                    font-size: 16px;
+                    color: var(--dark-gray-6);
+                }
 
-            .buttons {
-                display: flex;
-                margin-top: 37px;
-                gap: 31px;
-                align-items: center;
-            }
+                .buttons {
+                    display: flex;
+                    margin-top: 37px;
+                    gap: 31px;
+                    align-items: center;
+                }
 
-            .buttons > * {
-                cursor: pointer;
-            }
+                .buttons > * {
+                    cursor: pointer;
+                }
 
-            .confirm {
-                color: var(--red-alert);
-            }
+                .confirm {
+                    color: var(--red-alert);
+                }
 
-            .cancel {
-                border: solid 1px #2a68d2;
-                color: var(--dark-blue-2);
-                border-radius: 16px;
-                padding: 5px 15px;
-            }
-            article {
-                display: flex;
-                gap: 16px;
-            }
-            `
+                .cancel {
+                    border: solid 1px #2a68d2;
+                    color: var(--dark-blue-2);
+                    border-radius: 16px;
+                    padding: 5px 15px;
+                }
+                article {
+                    display: flex;
+                    gap: 16px;
+                }
+            `,
         ];
     }
-
 
     connectedCallback() {
         super.connectedCallback();
@@ -61,92 +66,108 @@ export class _ extends LitElement {
     }
 
     onConfirm = () => {
-        this.dispatchEvent(new Event("accept"))
-    }
+        this.dispatchEvent(new Event("accept"));
+    };
     onCancel = () => {
-        this.dispatchEvent(new Event("close"))
-    }
+        this.dispatchEvent(new Event("close"));
+    };
     onGlobalMouseDown = (evt: MouseEvent) => {
-        if(!evt.composedPath().includes(this.shadowRoot?.getElementById("tooltip") as any)) {
+        if (
+            !evt
+                .composedPath()
+                .includes(this.shadowRoot?.getElementById("tooltip") as any)
+        ) {
             this.onCancel();
         }
-    }
+    };
 
-    @property({type: Number})
-    maxWidth:number = -1;
-
-    @property()
-    header:string = "";
+    @property({ type: Number })
+    maxWidth: number = -1;
 
     @property()
-    confirmLabel:string = "";
+    header: string = "";
 
     @property()
-    cancelLabel:string = "";
+    confirmLabel: string = "";
+
+    @property()
+    cancelLabel: string = "";
 
     //internal
     @property()
-    currContentAnchor:ContentAnchor = "oppositeH";
+    currContentAnchor: ContentAnchor = "oppositeH";
 
     @property()
-    currTargetAnchor:Anchor = "tr";
+    currTargetAnchor: Anchor = "tr";
 
     //pass through
     @property()
-    container:TrackerProp | undefined = window;
+    container: TrackerProp | undefined = window;
 
     @property()
-    target:TrackerProp | undefined;
+    target: TrackerProp | undefined;
 
     @property()
-    strategy:MoveStrategy = "";
+    strategy: MoveStrategy = "";
 
-    @property({reflect: true})
-    zLayer:ZLayer | undefined = "tooltip";
-
-    @property()
-    contentAnchor:ContentAnchor = "oppositeH";
+    @property({ reflect: true })
+    zLayer: ZLayer | undefined = "tooltip";
 
     @property()
-    targetAnchor:Anchor = "tr";
-
-    @property({type: Number})
-    marginX:number = 0;
-
-    @property({type: Number})
-    marginY:number = 0;
+    contentAnchor: ContentAnchor = "oppositeH";
 
     @property()
-    color:Color = "red";
-    
-    @property({type: Number})
-    arrowNudge:number = 0;
+    targetAnchor: Anchor = "tr";
+
+    @property({ type: Number })
+    marginX: number = 0;
+
+    @property({ type: Number })
+    marginY: number = 0;
+
+    @property()
+    color: Color = "red";
+
+    @property({ type: Number })
+    arrowNudge: number = 0;
 
     render() {
-        const {container, target, strategy, zLayer,marginX, marginY, contentAnchor, targetAnchor, header, confirmLabel, cancelLabel, maxWidth, arrowNudge} = this;
+        const {
+            container,
+            target,
+            strategy,
+            zLayer,
+            marginX,
+            marginY,
+            contentAnchor,
+            targetAnchor,
+            header,
+            confirmLabel,
+            cancelLabel,
+            maxWidth,
+            arrowNudge,
+        } = this;
 
-        let bodyStyles:any = {
-        };
+        const bodyStyles: any = {};
 
-        if(maxWidth !== -1) {
+        if (maxWidth !== -1) {
             bodyStyles.maxWidth = `${maxWidth}px`;
         }
         return html`
-
             <overlay-content
-             .container=${container}
-             .target=${target}
-             .strategy=${strategy}
-             .zLayer=${zLayer}
-             .contentAnchor=${contentAnchor}
-             .targetAnchor=${targetAnchor}
-             .marginX=${marginX}
-             .marginY=${marginY}
-             @anchor-changed=${(evt:CustomEvent) => {
-                const {contentAnchor, targetAnchor} = evt.detail;
-                 this.currContentAnchor = contentAnchor;
-                 this.currTargetAnchor = targetAnchor;
-             }}
+                .container=${container}
+                .target=${target}
+                .strategy=${strategy}
+                .zLayer=${zLayer}
+                .contentAnchor=${contentAnchor}
+                .targetAnchor=${targetAnchor}
+                .marginX=${marginX}
+                .marginY=${marginY}
+                @anchor-changed=${(evt: CustomEvent) => {
+                    const { contentAnchor, targetAnchor } = evt.detail;
+                    this.currContentAnchor = contentAnchor;
+                    this.currTargetAnchor = targetAnchor;
+                }}
             >
                 <tooltip-container
                     id="tooltip"
@@ -160,14 +181,17 @@ export class _ extends LitElement {
                         <div class="body" style="${styleMap(bodyStyles)}">
                             <div class="header">${header}</div>
                             <div class="buttons">
-                                <div class="confirm" @click=${this.onConfirm} >${confirmLabel}</div>
-                                <div class="cancel" @click=${this.onCancel} >${cancelLabel}</div>
+                                <div class="confirm" @click=${this.onConfirm}>
+                                    ${confirmLabel}
+                                </div>
+                                <div class="cancel" @click=${this.onCancel}>
+                                    ${cancelLabel}
+                                </div>
                             </div>
                         </div>
                     </article>
                 </tooltip-container>
             </overlay-content>
-
         `;
     }
 }

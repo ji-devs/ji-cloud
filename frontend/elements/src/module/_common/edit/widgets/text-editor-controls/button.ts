@@ -1,7 +1,22 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 import "@elements/core/images/ui";
 
-export type Kind = 'h1' | 'h2' | 'p1' | 'p2' | 'bold' | 'italic' | 'underline' | 'align-left' | 'align-center' | 'align-right' | 'color' | 'highlight-color' | 'box-color' | 'indent' | 'outdent';
+export type Kind =
+    | "h1"
+    | "h2"
+    | "p1"
+    | "p2"
+    | "bold"
+    | "italic"
+    | "underline"
+    | "align-left"
+    | "align-center"
+    | "align-right"
+    | "color"
+    | "highlight-color"
+    | "box-color"
+    | "indent"
+    | "outdent";
 
 @customElement("text-editor-controls-button")
 export class _ extends LitElement {
@@ -15,7 +30,7 @@ export class _ extends LitElement {
                     width: 36px;
                     line-height: 36px;
                     text-align: center;
-                    font-family: 'Poppins', sans-serif;
+                    font-family: "Poppins", sans-serif;
                     color: var(--dark-gray-6);
                     display: flex;
                     font-weight: 500;
@@ -43,13 +58,15 @@ export class _ extends LitElement {
     }
 
     @property()
-    kind: Kind = 'h1';
+    kind: Kind = "h1";
 
-    @property({type: Boolean, reflect: true})
+    @property({ type: Boolean, reflect: true })
     active = false;
 
     render() {
-        const path = `module/_common/edit/widgets/sidebar/text-editor-controls/${ this.kind.toLowerCase() }${ this.active ? '-active' : '' }.svg`;
+        const path = `module/_common/edit/widgets/sidebar/text-editor-controls/${this.kind.toLowerCase()}${
+            this.active ? "-active" : ""
+        }.svg`;
         return html`
             <button>
                 <img-ui path="${path}"></img-ui>

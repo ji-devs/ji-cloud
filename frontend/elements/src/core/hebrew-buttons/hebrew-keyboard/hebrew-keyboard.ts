@@ -1,13 +1,24 @@
-import { LitElement, html, css, customElement, property, TemplateResult, query } from 'lit-element';
-import { render as renderNiqqud, styles as buttonStyles } from './niqqud';
-import { render as renderLetter, styles as letterStyles } from './letter';
-import { render as renderPunctuation, styles as punctuationStyles } from './punctuation';
-import { letters, niqquds, punctuations } from './data';
-import { enderStyles, renderDelete, renderEnder, renderSpace } from './buttons';
-import { cantillationsStyles, renderCantillations } from './cantillations';
-import { AnchoredOverlayAbsolute } from '@elements/core/overlays/anchored-overlay-absolute';
+import {
+    LitElement,
+    html,
+    css,
+    customElement,
+    property,
+    TemplateResult,
+    query,
+} from "lit-element";
+import { render as renderNiqqud, styles as buttonStyles } from "./niqqud";
+import { render as renderLetter, styles as letterStyles } from "./letter";
+import {
+    render as renderPunctuation,
+    styles as punctuationStyles,
+} from "./punctuation";
+import { letters, niqquds, punctuations } from "./data";
+import { enderStyles, renderDelete, renderEnder, renderSpace } from "./buttons";
+import { cantillationsStyles, renderCantillations } from "./cantillations";
+import { AnchoredOverlayAbsolute } from "@elements/core/overlays/anchored-overlay-absolute";
 
-@customElement('hebrew-keyboard')
+@customElement("hebrew-keyboard")
 export class _ extends LitElement {
     static get styles() {
         return [
@@ -48,7 +59,8 @@ export class _ extends LitElement {
                 .row:nth-child(5) {
                     grid-template-columns: 112px 260px repeat(3, 36px);
                 }
-                .tet, .fay {
+                .tet,
+                .fay {
                     /* make room for enter button */
                     grid-column: 2;
                 }
@@ -87,10 +99,10 @@ export class _ extends LitElement {
                     grid-row: 1;
                     grid-column: 1;
                 }
-                anchored-overlay-absolute button[slot=anchor] {
+                anchored-overlay-absolute button[slot="anchor"] {
                     width: 100%;
                 }
-                anchored-overlay-absolute[open] button[slot=anchor] {
+                anchored-overlay-absolute[open] button[slot="anchor"] {
                     background-color: var(--light-blue-3);
                 }
                 .tooltip {
@@ -116,7 +128,7 @@ export class _ extends LitElement {
                     display: block;
                 }
                 .tooltip::after {
-                    content: '';
+                    content: "";
                     display: inline-block;
                     height: 10px;
                     width: 10px;
@@ -129,7 +141,7 @@ export class _ extends LitElement {
                     top: calc(100% - 5px);
                     transform: translateX(-50%) rotate(45deg);
                 }
-                anchored-overlay-absolute [slot=overlay] {
+                anchored-overlay-absolute [slot="overlay"] {
                     background-color: #ffffff;
                     padding: 8px;
                     box-sizing: border-box;
@@ -138,28 +150,38 @@ export class _ extends LitElement {
                     display: flex;
                     column-gap: 8px;
                 }
-                anchored-overlay-absolute [slot=overlay] button {
+                anchored-overlay-absolute [slot="overlay"] button {
                     width: 32px;
                 }
-            `
+            `,
         ];
     }
 
     private onClick = (char: string) => {
         const input = this.deepActiveElementOrWysiwyg() as any;
-        if("setRangeText" in input) {
-            input.setRangeText(char, input.selectionStart, input.selectionEnd, "end");
-        } else if("setTextAtSelection" in input) {
+        if ("setRangeText" in input) {
+            input.setRangeText(
+                char,
+                input.selectionStart,
+                input.selectionEnd,
+                "end"
+            );
+        } else if ("setTextAtSelection" in input) {
             // for wysiwyg
             input.setTextAtSelection(char);
         }
         input.dispatchEvent(new Event("input"));
         input.dispatchEvent(new Event("change"));
-    }
+    };
 
     private deepActiveElementOrWysiwyg() {
         let a = document.activeElement;
-        while (a && !a.matches("wysiwyg-base") && a.shadowRoot && a.shadowRoot.activeElement) {
+        while (
+            a &&
+            !a.matches("wysiwyg-base") &&
+            a.shadowRoot &&
+            a.shadowRoot.activeElement
+        ) {
             a = a.shadowRoot.activeElement;
         }
         return a;
@@ -167,113 +189,120 @@ export class _ extends LitElement {
 
     private onDelete = () => {
         const input = this.deepActiveElementOrWysiwyg() as any;
-        if("setRangeText" in input) {
-            if(input.selectionStart === input.selectionEnd) {
+        if ("setRangeText" in input) {
+            if (input.selectionStart === input.selectionEnd) {
                 const start = input.selectionStart;
                 if (start === 0) return;
-                input.value = input.value.slice(0, start - 1) + input.value.slice(start);
+                input.value =
+                    input.value.slice(0, start - 1) + input.value.slice(start);
                 input.setSelectionRange(start - 1, start - 1);
             } else {
-                input.setRangeText('', input.selectionStart, input.selectionEnd, "end");
+                input.setRangeText(
+                    "",
+                    input.selectionStart,
+                    input.selectionEnd,
+                    "end"
+                );
             }
-        } else if("triggerBackspace" in input) {
+        } else if ("triggerBackspace" in input) {
             // for wysiwyg
             input.triggerBackspace();
         }
         input.dispatchEvent(new Event("input"));
         input.dispatchEvent(new Event("change"));
-    }
+    };
 
     @query("anchored-overlay-absolute#cantillations")
     private cantillationsOverlay!: AnchoredOverlayAbsolute;
 
     private toggleCantillationsOpen = () => {
         this.cantillationsOverlay.open = !this.cantillationsOverlay.open;
-    }
+    };
 
     renderRow1(): TemplateResult[] {
         let elements = [];
         elements.push(renderDelete(this.onDelete));
-        elements = elements.concat(letters.slice(0, 11).map(letter => {
-            return renderLetter(letter, this.onClick);
-        }));
+        elements = elements.concat(
+            letters.slice(0, 11).map((letter) => {
+                return renderLetter(letter, this.onClick);
+            })
+        );
         return elements;
     }
 
     renderRow2(): TemplateResult[] {
         let elements = [];
         elements.push(renderEnder(this.onClick));
-        elements = elements.concat(letters.slice(11, 23).map(letter => {
-            return renderLetter(letter, this.onClick);
-        }));
+        elements = elements.concat(
+            letters.slice(11, 23).map((letter) => {
+                return renderLetter(letter, this.onClick);
+            })
+        );
         return elements;
     }
 
     renderRow3(): TemplateResult[] {
         let elements: any[] = [];
         elements.push(html`<span></span>`);
-        elements = elements.concat(letters.slice(23).map(letter => {
-            return renderLetter(letter, this.onClick);
-        }));
+        elements = elements.concat(
+            letters.slice(23).map((letter) => {
+                return renderLetter(letter, this.onClick);
+            })
+        );
         return elements;
     }
 
     renderRow4(): TemplateResult[] {
-        return niqquds.map(niqqud => {
+        return niqquds.map((niqqud) => {
             return renderNiqqud(niqqud, this.onClick);
         });
     }
 
     renderRow5(): TemplateResult[] {
         let elements: any[] = [];
-        elements.push(renderCantillations(this.onClick, this.toggleCantillationsOpen));
+        elements.push(
+            renderCantillations(this.onClick, this.toggleCantillationsOpen)
+        );
         elements.push(renderSpace(this.onClick));
-        elements = elements.concat(punctuations.map(punctuation => {
-            return renderPunctuation(punctuation, this.onClick);
-        }));
+        elements = elements.concat(
+            punctuations.map((punctuation) => {
+                return renderPunctuation(punctuation, this.onClick);
+            })
+        );
         return elements;
     }
-
 
     connectedCallback() {
         super.connectedCallback();
         this.tabIndex = 0;
-        this.addEventListener("focusin", this.onFocus)
+        this.addEventListener("focusin", this.onFocus);
     }
     disconnectedCallback() {
         super.disconnectedCallback();
-        this.removeEventListener("focusin", this.onFocus)
+        this.removeEventListener("focusin", this.onFocus);
     }
     private onFocus(e: FocusEvent) {
         let relatedTarget = e.relatedTarget as HTMLElement | null;
 
         while (relatedTarget) {
             relatedTarget.focus();
-            if(relatedTarget.matches(":focus")) {
+            if (relatedTarget.matches(":focus")) {
                 break;
             } else {
-                relatedTarget = relatedTarget.shadowRoot?.querySelector("input, textarea, [contentediable]") as HTMLElement | null;
+                relatedTarget = relatedTarget.shadowRoot?.querySelector(
+                    "input, textarea, [contentediable]"
+                ) as HTMLElement | null;
             }
         }
     }
 
     render() {
         return html`
-            <div class="row">
-                ${this.renderRow1()}
-            </div>
-            <div class="row">
-                ${this.renderRow2()}
-            </div>
-            <div class="row">
-                ${this.renderRow3()}
-            </div>
-            <div class="row">
-                ${this.renderRow4()}
-            </div>
-            <div class="row">
-                ${this.renderRow5()}
-            </div>
+            <div class="row">${this.renderRow1()}</div>
+            <div class="row">${this.renderRow2()}</div>
+            <div class="row">${this.renderRow3()}</div>
+            <div class="row">${this.renderRow4()}</div>
+            <div class="row">${this.renderRow5()}</div>
         `;
     }
 }

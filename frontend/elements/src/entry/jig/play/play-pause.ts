@@ -6,11 +6,7 @@ export type Mode = "play" | "pause";
 @customElement("jig-play-play-pause")
 export class _ extends LitElement {
     static get styles() {
-        return [
-            actionStyles,
-            css`
-            `,
-        ];
+        return [actionStyles, css``];
     }
 
     @property()

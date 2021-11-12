@@ -1,14 +1,21 @@
-import { LitElement, html, css, customElement, property, internalProperty } from 'lit-element';
-import { nothing } from 'lit-html';
-import '@elements/core/images/ui';
-import '@elements/core/menu/kebab';
-import '@elements/core/menu/menu-line';
-import { styles } from './styles';
-import { classMap } from 'lit-html/directives/class-map';
+import {
+    LitElement,
+    html,
+    css,
+    customElement,
+    property,
+    internalProperty,
+} from "lit-element";
+import { nothing } from "lit-html";
+import "@elements/core/images/ui";
+import "@elements/core/menu/kebab";
+import "@elements/core/menu/menu-line";
+import { styles } from "./styles";
+import { classMap } from "lit-html/directives/class-map";
 
 const STR_DRAFT = "Draft";
 
-@customElement('jig-gallery-recent')
+@customElement("jig-gallery-recent")
 export class _ extends LitElement {
     static get styles() {
         return [
@@ -47,7 +54,7 @@ export class _ extends LitElement {
                     grid-template-rows: 16px auto 1fr;
                     grid-template-columns: 1fr auto 16px;
                 }
-                .top-section ::slotted([slot=thumbnail]) {
+                .top-section ::slotted([slot="thumbnail"]) {
                     grid-column: 1 / -1;
                     grid-row: 1 / -1;
                     border-radius: 16px 16px 0 0;
@@ -57,7 +64,8 @@ export class _ extends LitElement {
                     grid-column: 2;
                     grid-row: 2;
                 }
-                :host(:hover) .menu, .menu.menu-open {
+                :host(:hover) .menu,
+                .menu.menu-open {
                     display: block;
                 }
                 .bottom-section {
@@ -76,14 +84,14 @@ export class _ extends LitElement {
                     font-weight: 500;
                     text-align: right;
                 }
-            `
+            `,
         ];
     }
 
     @property()
     label: string = "";
 
-    @property({type: Boolean, reflect: true})
+    @property({ type: Boolean, reflect: true })
     draft = false;
 
     @property()
@@ -101,19 +109,23 @@ export class _ extends LitElement {
     render() {
         return html`
             <a href="${this.href}">
-                ${ this.draft ? (
-                    html`<div class="draft">
-                        <img-ui path="entry/jig/gallery/draft-icon.svg"></img-ui>
-                        <span>${STR_DRAFT}</span>
-                    </div>`
-                ) : nothing }
+                ${this.draft
+                    ? html`<div class="draft">
+                          <img-ui
+                              path="entry/jig/gallery/draft-icon.svg"
+                          ></img-ui>
+                          <span>${STR_DRAFT}</span>
+                      </div>`
+                    : nothing}
                 <div class="card">
                     <div class="top-section">
                         <slot name="thumbnail"></slot>
                         <menu-kebab
-                            class="menu ${classMap({"menu-open": this.menuOpen})}"
-                            @open="${() => this.menuOpen = true}"
-                            @close="${() => this.menuOpen = false}"
+                            class="menu ${classMap({
+                                "menu-open": this.menuOpen,
+                            })}"
+                            @open="${() => (this.menuOpen = true)}"
+                            @close="${() => (this.menuOpen = false)}"
                             @click="${(e: Event) => e.preventDefault()}"
                         >
                             <slot name="menu-content"></slot>
@@ -122,7 +134,11 @@ export class _ extends LitElement {
                     <div class="bottom-section">
                         <span class="label main-text">${this.label}</span>
                         <span class="ages">
-                            <img-ui path="entry/jig/gallery/age-icon${this.draft ? "-draft" : ""}.svg"></img-ui>
+                            <img-ui
+                                path="entry/jig/gallery/age-icon${this.draft
+                                    ? "-draft"
+                                    : ""}.svg"
+                            ></img-ui>
                             ${this.ages}
                         </span>
                         <span class="last-edited">${this.publishedAt}</span>

@@ -1,81 +1,95 @@
-import { LitElement, svg, html, css, customElement, property } from 'lit-element';
-import {classMap} from "lit-html/directives/class-map";
-import {nothing} from "lit-html";
+import {
+    LitElement,
+    svg,
+    html,
+    css,
+    customElement,
+    property,
+} from "lit-element";
+import { classMap } from "lit-html/directives/class-map";
+import { nothing } from "lit-html";
 
 type Kind = "free" | "rect" | "ellipse" | "confirm";
-@customElement('trace-edit-reshape-menu-btn')
+@customElement("trace-edit-reshape-menu-btn")
 export class _ extends LitElement {
-  static get styles() {
-      return [css`
-          :host {
-              display: flex;
-              flex-direction: column;
-              justify-content: center;
-              height: 100%;
-              cursor: pointer;
-          }
-          .confirm-btn {
-              display: flex;
-              flex-direction: column;
-              justify-content: center;
-              align-items: center;
-              background-color: #387AF4;
-              height: 100%;
-              border-top-right-radius: 8px;
-              border-bottom-right-radius: 8px;
-                width: 51px; 
-          }
+    static get styles() {
+        return [
+            css`
+                :host {
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    height: 100%;
+                    cursor: pointer;
+                }
+                .confirm-btn {
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    align-items: center;
+                    background-color: #387af4;
+                    height: 100%;
+                    border-top-right-radius: 8px;
+                    border-bottom-right-radius: 8px;
+                    width: 51px;
+                }
 
-          :host([bothSidesRounded]) .confirm-btn {
-            border-radius: 8px;
-          }
-          
-          svg {
-              fill: #bcbcbc;
-          }
-          svg:hover {
-              fill: #387AF4;
-          }
-    `]
-  }
+                :host([bothSidesRounded]) .confirm-btn {
+                    border-radius: 8px;
+                }
 
-  @property({type: Boolean, reflect: true})
-  bothSidesRounded:boolean = false;
+                svg {
+                    fill: #bcbcbc;
+                }
+                svg:hover {
+                    fill: #387af4;
+                }
+            `,
+        ];
+    }
 
-  @property()
-  kind:Kind = "free";
+    @property({ type: Boolean, reflect: true })
+    bothSidesRounded: boolean = false;
 
-  render() {
-      const {kind} = this;
+    @property()
+    kind: Kind = "free";
 
-      return kind === "confirm" 
-          ?  html`<div class="confirm-btn">
-                    <img-ui path="module/_common/edit/widgets/main/trace/confirm-check.svg"></img-ui> 
-                    </div>
-              `
-                  :  generateSvg(kind);
-  }
+    render() {
+        const { kind } = this;
+
+        return kind === "confirm"
+            ? html`<div class="confirm-btn">
+                  <img-ui
+                      path="module/_common/edit/widgets/main/trace/confirm-check.svg"
+                  ></img-ui>
+              </div> `
+            : generateSvg(kind);
+    }
 }
 
-function generateSvg(kind:Kind) {
-    switch(kind) {
-        case "free":  return svg`
+function generateSvg(kind: Kind) {
+    switch (kind) {
+        case "free":
+            return svg`
 
         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32.002" viewBox="0 0 32 32.002">
           <path data-name="Path 148033" d="M-17.337,0h.021a5.931,5.931,0,0,1,4.738,2.036h0l0,0h0l.018.021h0l0,0h0l0,0h0l0,0h0l0,0h0l0,0h0l0,0h0v0h0l0,0h0l0,0h0v0l0,0h0l0,0h0v0l0,0,.012.013h0l0,0h0l0,0h0l0,0h0c.109.133.214.271.314.412l-1.641,1.146A3.928,3.928,0,0,0-17.337,2Zm6.4,5.266c.123.432.223.871.3,1.311h0v0h0l0,.019h0v0h0l0,.013h0v0h0l0,.013h0l0,0h0a.072.072,0,0,0,0,.019h0l0,.018v0l0,.018h0v0h0l0,.013v.006h0l0,.013h0l0,0h0v.006l0,.012h0v.006l0,.012h0v0l0,0v0h0l0,.014h0l0,0h0l0,.014h0v0h0l0,.013h0l0,0h0v0h0l0,.013h0l0,0v0l0,.012h0v0l0,0,0,.012h0v.006l0,.013h0v0l0,0v0h0l0,.013v.006h0l0,.012v.006h0v0l0,0v.011l0,0v.009l0,0v.008l0,0h0V7.03h0l0,0v.008l0,0v.008l0,0v.007h0l0,.006v.012h0v.006h0V7.1h0V7.1h0v.006h0v.005h0v.006l0,.011v0l0,0v.007h0l0,0h0v.007l0,0h0l0,.012h0v.006h0l0,.012h0V7.2h0l0,.006h0l0,.012h0v.005h0v.005h0v.006h0v.005l0,0v.013l0,0v.007h0l0,.006h0v0h0a.055.055,0,0,1,0,.018h0l0,.005h0l0,.012h0v.006h0a.062.062,0,0,1,0,.019h0a19.736,19.736,0,0,1,.162,2.034h0V9.44h0a.183.183,0,0,1,0,.033h0v.005h0v.01h0v.016h0v0h0l0,0v.018h0v.006h0v.005h0v.019h0v.016h0v0h0v0h0l0,.013h0v.021h0v.013h0v.008h0v.03h0v0h0c.01.555,0,1.073-.023,1.529l-2-.093a17.275,17.275,0,0,0-.493-5.307Zm-1.865,8.069,1.84.783c-.109.259-.238.562-.381.9h0l-.006.015c-.517,1.226-1.213,2.911-1.888,4.636l-1.864-.729C-14.215,16.669-13.284,14.453-12.807,13.335ZM-16.185,21.8l1.883.677c-.076.21-.149.415-.219.618h0l0,.01h0c-.281.805-.578,1.685-.939,2.567h0l-.006.018h0a.473.473,0,0,0-.02.047h0l-.007.016v0l-.006.016,0,0,0,.008v0l0,.005,0,0,0,.007v0l0,.005,0,0,0,.006,0,0,0,.006,0,.005,0,0,0,0,0,.006v.005l0,0,0,0,0,.006,0,0,0,0,0,0,0,.006,0,0,0,.005,0,.006,0,0,0,.005,0,0,0,.006,0,0,0,0,0,0,0,.006,0,0,0,0v0l0,.006,0,0,0,.007,0,0,0,0,0,0,0,.007,0,0,0,.005v0l0,.008,0,0,0,.007h0l0,.008,0,0,0,.008h0l0,.008h0l0,.008h0l0,.008h0l0,.008,0,0,0,.008h0l0,.009,0,0,0,.008h0l0,.008,0,0,0,.008h0l0,.007,0,0,0,.008,0,0,0,.008h0l0,.009h0a.085.085,0,0,1-.008.017h0l0,.008h0l0,.008h0l0,.009h0l0,.009h0l0,.008h0a.071.071,0,0,0-.008.018h0a.134.134,0,0,0-.007.018h0l0,.008h0l0,.009h0l0,.008h0a.071.071,0,0,1-.008.018h0l-.008.018h0A14.924,14.924,0,0,1-16.609,28l-1.711-1.035a22.562,22.562,0,0,0,1.809-4.242l.1-.28C-16.341,22.239-16.265,22.022-16.185,21.8Zm-3.622,6.964,1.285,1.533a7.051,7.051,0,0,1-2.973,1.479h0l-.016,0h0l-.037.009h0l-.022.005h0l-.015,0h0l-.02,0h0l-.013,0h0l0,0h0l-.016,0h0l-.016,0h0l-.016,0h0l-.016,0H-21.7l-.016,0h0l-.016,0h-.006l-.015,0h-.024l-.013,0H-21.8l-.01,0h-.008l-.013,0h-.024l-.015,0h-.008l-.014,0h-1.861c-.121,0-.244-.006-.369-.013l.1-2c.158.008.319.012.471.012A5.585,5.585,0,0,0-19.806,28.764Zm-12.154-.881a26.9,26.9,0,0,0,5.309,1.691l-.435,1.951A28.684,28.684,0,0,1-32.793,29.7Zm-5.661-5.13a11.777,11.777,0,0,0,3.389,3.835L-35.4,28.216a12.768,12.768,0,0,1-1.7-1.448h0c-.029-.031-.061-.061-.09-.092h0l-.027-.029h0l0,0h0l-.02-.019h0l0,0h0l0,0,0,0,0,0h0l-.024-.024h0l0,0h0a.17.17,0,0,0-.019-.019h0l0,0h0l0,0h0l-.014-.014h0l-.006,0h0l0,0h0l0,0h0l-.006-.005h0l-.018-.019h0l0,0h0l0,0h0l-.013-.015h0l0-.005h0l0,0h0l0,0h0l0,0h0l-.014-.014h0l0,0h0l0,0h0l0,0h0l-.014-.014h0l0,0h0l0,0h0l0,0h0l0,0h0l-.007-.009,0,0,0,0h0l0,0h0l0,0h0l0,0h0l-.008-.009,0,0,0,0,0,0v0l0,0,0,0,0,0,0,0,0,0,0,0h0l0,0,0,0,0,0h0l0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0v0l-.006-.005,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0-.005,0,0,0,0,0,0,0,0,0,0v0l0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0-.006h0l0,0v0l0,0v0l0,0,0,0,0,0,0,0,0,0,0,0,0,0h0l0-.006,0,0,0,0,0,0,0,0v0l0,0h0l0,0h0a.066.066,0,0,0-.014-.015v0l0,0h0l0,0h0l0,0v0l0,0h0l-.013-.017h0l0,0h0l0,0h0l-.023-.025h0l0,0h0a16.175,16.175,0,0,1-1.6-2.285Zm-2.652-7.7a21.238,21.238,0,0,0,1.434,5.26l-1.848.768A23.651,23.651,0,0,1-42,16.8h0l0,0h0l0-.011h0v0l0,0v0h0l0-.01v0l0,0h0v0l0,0v-.007l0,0h0l0-.011h0v0l0-.014h0v0l0,0v0l0-.005h0v0h0v0l0,0v-.006l0,0v0h0v-.005l0,0h0v0h0l0,0h0l0-.01h0c-.113-.569-.181-1.026-.22-1.331Zm-1.441-8.7,1.951.433a29.09,29.09,0,0,0-.584,5.559l-2-.034a34.822,34.822,0,0,1,.25-3.7h0l.006-.041h0a.071.071,0,0,1,0-.02h0V8.543h0l0-.005h0l0-.025h0l0,0V8.5h0l0-.019h0V8.47h0V8.465h0l0-.02h0v-.01h0l0-.019V8.408h0l0,0v0a.155.155,0,0,1,0-.029h0V8.366h0V8.361h0l0-.014h0l0,0V8.335h0l0-.019h0V8.3l0,0V8.293h0l0-.013V8.274l0,0V8.263l0-.006h0V8.246l0,0V8.231l0,0v-.01l0-.005h0V8.2h0a.055.055,0,0,1,0-.018h0V8.171h0V8.165h0l0,0h0V8.147l0,0V8.14h0V8.133l0-.005h0V8.121l0-.006h0V8.109h0l0-.005h0V8.1h0l0-.024h0V8.066h0l0-.006h0l0-.019h0l0-.005v0c0-.024.006-.049.01-.073h0l0-.024h0l0-.006h0C-41.926,7.4-41.831,6.876-41.715,6.355ZM-36.289.1l.19,1.991c-.207.02-.42.044-.635.072-.33.044-1.34.176-2.246,2.167L-40.8,3.5a8.668,8.668,0,0,1,.648-1.183h0l0,0h0l0,0h0l.016-.023h0l0,0h0l.015-.023h0l0,0h0l0,0h0l0,0h0a.065.065,0,0,0,.01-.015h0l0,0h0l0,0h0l0,0h0l0-.011h0l0,0h0l0,0h0l0,0h0l0,0h0l0,0h0v0l0,0,0,0h0l0,0h0v0l0,0,0,0,0,0v0h0l0,0,0,0,0,0V2.155l0,0,0,0,0,0h0l0,0,0,0v0l0,0,0,0,0,0,0,0h0l0,0v0l0,0,0,0v0l0,0,0,0,0,0,0,0v0L-40,2.1h0V2.1l0,0h0l0,0h0l0,0h0l.008-.012h0l0,0h0l0,0h0l0,0h0l.012-.017h0l0,0h0l0,0h0l.012-.016h0l0,0h0l0,0h0l0,0h0l0,0h0l.01-.012h0l0,0h0l0,0h0A4.63,4.63,0,0,1-38.037.463h0L-38,.448h0l.021-.009h0l.006,0h0a.169.169,0,0,1,.027-.011h0l.028-.01h0l.005,0h0L-37.884.4h0l0,0h0l.023-.008h0l.006,0h0l.027-.01h0l.006,0h0L-37.8.372h0l.006,0h.009l.018-.007h.006l0,0h0l.019-.006h0l0,0h.006l0,0h0l.019-.006h0l.006,0h0l.02-.006h.015l.014,0h.014l.019,0h.006l0,0h.006l.014,0h.019l.016,0h.006l0,0h0l.016,0h.02l.015,0h.02l.009,0h.02l.016,0h.019l.01,0h.021l.014,0h.022l.009,0h.02l.01,0h.025l.01,0h.056l.012,0h.207c.127-.017.252-.032.373-.046h.012l.018,0h.1Zm3,0c.6.057,1.158.144,1.724.24h.039a31.654,31.654,0,0,0,4.181.537l-.094,2A30.387,30.387,0,0,1-31.407,2.4c-.711-.123-1.382-.24-2.078-.307Zm13.627,0,.215,1.988c-.225.024-.461.059-.7.1a47.558,47.558,0,0,1-5.331.691l-.133-2c.193-.013,1.574-.029,1.427-.052l.509-.113-1.258.113A39.573,39.573,0,0,0-20.045.147C-19.916.129-19.789.113-19.664.1Z" transform="translate(42.348)" />
         </svg>
         `;
 
-        case "ellipse": return svg`<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+        case "ellipse":
+            return svg`<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
           <g id="Shape_Circle" transform="translate(0)">
             <path id="Path_148031" data-name="Path 148031" d="M58.381,32a16.121,16.121,0,0,1-4.075-.522l.508-1.935a14.262,14.262,0,0,0,5.565.316l.282,1.98A16.455,16.455,0,0,1,58.381,32Zm5.387-.926-.673-1.884a13.932,13.932,0,0,0,4.769-2.875l1.354,1.473A15.91,15.91,0,0,1,63.768,31.074Zm-12.46-.713a15.986,15.986,0,0,1-5.04-3.883l1.514-1.31a13.99,13.99,0,0,0,4.411,3.4Zm20.041-4.955-1.62-1.178a13.829,13.829,0,0,0,2.316-5.056L74,19.623A15.822,15.822,0,0,1,71.349,25.406ZM44.423,23.869a15.783,15.783,0,0,1-1.967-6.046l1.991-.226a13.831,13.831,0,0,0,1.719,5.287ZM74.4,16.456l-2-.055c0-.133.006-.267.006-.4a13.914,13.914,0,0,0-.952-5.081l1.867-.725A15.9,15.9,0,0,1,74.41,16C74.41,16.152,74.408,16.3,74.4,16.456Zm-30-1.656-2-.169a15.822,15.822,0,0,1,1.792-6.1l1.771.936A13.827,13.827,0,0,0,44.407,14.8ZM70.181,8.431A14.006,14.006,0,0,0,66.3,4.441l1.132-1.65a16.008,16.008,0,0,1,4.437,4.557ZM47.523,7.138l-1.55-1.267A15.992,15.992,0,0,1,50.9,1.847l.937,1.767A14.029,14.029,0,0,0,47.523,7.138ZM63.841,3.1A13.955,13.955,0,0,0,58.381,2h-.005a14.037,14.037,0,0,0-3.948.563L53.865.644A16.059,16.059,0,0,1,58.376,0h.005a15.948,15.948,0,0,1,6.24,1.258Z" transform="translate(-42.41)" />
           </g>
         </svg>`;
 
-        case "rect": return svg`<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+        case "rect":
+            return svg`<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
   <path id="Path_148032" data-name="Path 148032" d="M28,32H22V30h6Zm-9,0H13V30h6Zm-9,0H4V30h6Zm22-1H30V25h2ZM2,31H0V25H2Zm30-9H30V16h2ZM2,22H0V16H2Zm30-9H30V7h2ZM2,13H0V7H2ZM32,4H30V2H28V0h4ZM2,4H0V0H7V2H2ZM25,2H19V0h6ZM16,2H10V0h6Z" />
 </svg>`;
 
-        default: return nothing;
+        default:
+            return nothing;
     }
 }

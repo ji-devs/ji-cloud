@@ -1,22 +1,22 @@
-import {argsToAttrs} from "@utils/attributes";
+import { argsToAttrs } from "@utils/attributes";
 import "@elements/entry/jig/play/sidebar/jig-info";
 
 export default {
-    title: "Entry / Jig / Play / Sidebar"
-}
+    title: "Entry / Jig / Play / Sidebar",
+};
 
 interface Args {
-    name: string,
-    playedCount: number,
-    likedCount: number,
-    ages: string,
-    language: string,
-    byJiTeam: boolean,
-    author: string,
-    description: string,
+    name: string;
+    playedCount: number;
+    likedCount: number;
+    ages: string;
+    language: string;
+    byJiTeam: boolean;
+    author: string;
+    description: string;
 }
 
-const DEFAULT_ARGS:Args = {
+const DEFAULT_ARGS: Args = {
     name: "The Big Gematria challenge",
     playedCount: 10,
     likedCount: 20,
@@ -24,11 +24,12 @@ const DEFAULT_ARGS:Args = {
     language: "english",
     byJiTeam: false,
     author: "Corinne",
-    description: "This game is about… using … Lorem Ipsum is simply dummy text of the printing and typesetting industry",
-}
+    description:
+        "This game is about… using … Lorem Ipsum is simply dummy text of the printing and typesetting industry",
+};
 
-export const JigInfo = (props?:Partial<Args>) => {
-    props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
+export const JigInfo = (props?: Partial<Args>) => {
+    props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
 
     return `
         <jig-play-sidebar-jig-info ${argsToAttrs(props)}>
@@ -45,5 +46,5 @@ export const JigInfo = (props?:Partial<Args>) => {
             <button-rect slot="report" color="blue">Report</button-rect>
         </jig-play-sidebar-jig-info>
     `;
-}
+};
 JigInfo.args = DEFAULT_ARGS;

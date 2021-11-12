@@ -1,20 +1,19 @@
-import { LitElement, html, css, customElement } from 'lit-element';
+import { LitElement, html, css, customElement } from "lit-element";
 
-@customElement('steps-nav')
+@customElement("steps-nav")
 export class _ extends LitElement {
-
     static get styles() {
-        return [css`
-            :host {
-                display: flex;
-                justify-content: space-between;
-            }
-        `];
+        return [
+            css`
+                :host {
+                    display: flex;
+                    justify-content: space-between;
+                }
+            `,
+        ];
     }
 
     render() {
-        return html`
-            <slot></slot>
-        `;
+        return html` <slot></slot> `;
     }
 }

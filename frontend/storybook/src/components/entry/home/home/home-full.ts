@@ -1,4 +1,4 @@
-import {argsToAttrs} from "@utils/attributes";
+import { argsToAttrs } from "@utils/attributes";
 import "@elements/entry/home/home/home-full";
 import { SearchSection } from "~/components/entry/home/home/search-section/search-section";
 import { QuickSearch } from "~/components/entry/home/home/quick-search/quick-search";
@@ -11,47 +11,44 @@ import { PageHeader } from "~/components/core/page-header/page-header";
 import { SearchResults } from "~/components/entry/home/home/search-results/search-results";
 
 export default {
-    title: "Entry / Home / Home"
-}
+    title: "Entry / Home / Home",
+};
 
 interface Args {
-    page: string,
+    page: string;
 }
 
-const DEFAULT_ARGS:Args = {
+const DEFAULT_ARGS: Args = {
     page: "home",
-}
+};
 
-export const HomePageFull = (props?:Args) => {
-
-    props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
-    const {} = props
+export const HomePageFull = (props?: Args) => {
+    props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
+    const {} = props;
 
     return `<home-full ${argsToAttrs(props)}>
         ${PageHeader()}
-        ${SearchSection({mode: props.page as any})}
-        ${ 
-            props.page === "home" ? (
-                QuickSearch() +
-                Create() +
-                WhyJi() +
-                WhatsNew() +
-                Testimonials()
-            ) : (
-                SearchResults()
-            )
+        ${SearchSection({ mode: props.page as any })}
+        ${
+            props.page === "home"
+                ? QuickSearch() +
+                  Create() +
+                  WhyJi() +
+                  WhatsNew() +
+                  Testimonials()
+                : SearchResults()
         }
         ${PageFooter()}
     
     </home-full>`;
-}
+};
 
 HomePageFull.args = DEFAULT_ARGS;
 HomePageFull.argTypes = {
     page: {
         control: {
-            type: 'inline-radio',
-            options: ["home", "results"]
-        }
-    }
-}
+            type: "inline-radio",
+            options: ["home", "results"],
+        },
+    },
+};

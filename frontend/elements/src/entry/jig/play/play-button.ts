@@ -1,4 +1,11 @@
-import { LitElement, html, css, customElement, property, internalProperty } from "lit-element";
+import {
+    LitElement,
+    html,
+    css,
+    customElement,
+    property,
+    internalProperty,
+} from "lit-element";
 
 @customElement("jig-play-play-button")
 export class _ extends LitElement {
@@ -38,7 +45,11 @@ export class _ extends LitElement {
                 @mouseenter="${this.onMouseEnter}"
                 @mouseleave="${this.onMouseLeave}"
             >
-                <img-ui path="entry/jig/play/play${this.active ? "-active" : ""}.svg"></img-ui>
+                <img-ui
+                    path="entry/jig/play/play${this.active
+                        ? "-active"
+                        : ""}.svg"
+                ></img-ui>
             </button>
         `;
     }

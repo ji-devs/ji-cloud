@@ -1,4 +1,4 @@
-import { LitElement, html, css, customElement, property } from 'lit-element';
+import { LitElement, html, css, customElement, property } from "lit-element";
 import "@elements/core/titles/ji";
 import "@elements/core/inputs/composed/search";
 import { nothing } from "lit-html";
@@ -14,92 +14,104 @@ const STR_DATE_TIME = "Date and time (automatic)";
 //FUTURE: const STR_USED = "To be used only for";
 
 const STR_CATEGORIES_REPORT = "Categories summary";
-@customElement('image-meta-section-summary')
+@customElement("image-meta-section-summary")
 export class _ extends LitElement {
-  static get styles() {
-    return [css`
-   
-          :host {
-              display: grid;
+    static get styles() {
+        return [
+            css`
+                :host {
+                    display: grid;
 
-              grid-template-columns: 704px 1fr;
-              gap: 10px;
-          }
-          .label-info {
-          }
-          .summary-line {
-              display: flex;
-              justify-content: space-between;
-          }
-          header {
-              font-size: 16px;
-              font-weight: 500;
-              font-stretch: normal;
-              font-style: normal;
-              line-height: 1.25;
-              letter-spacing: -0.16px;
-              text-align: left;
-              color: #5590fc;
-              margin-bottom: 10px;
-          }
+                    grid-template-columns: 704px 1fr;
+                    gap: 10px;
+                }
+                .label-info {
+                }
+                .summary-line {
+                    display: flex;
+                    justify-content: space-between;
+                }
+                header {
+                    font-size: 16px;
+                    font-weight: 500;
+                    font-stretch: normal;
+                    font-style: normal;
+                    line-height: 1.25;
+                    letter-spacing: -0.16px;
+                    text-align: left;
+                    color: #5590fc;
+                    margin-bottom: 10px;
+                }
 
-          .summary {
-              margin-bottom: 20px;
-          }
-    `];
-  }
+                .summary {
+                    margin-bottom: 20px;
+                }
+            `,
+        ];
+    }
 
-  render() {
-
-    return html`
-        <div class="label-info">
-            <div class="summary-line">
-                <header>${STR_GENERAL_SUMMARY}</header>
-                <slot name="edit-general"></slot>
-            </div>
+    render() {
+        return html`
+            <div class="label-info">
+                <div class="summary-line">
+                    <header>${STR_GENERAL_SUMMARY}</header>
+                    <slot name="edit-general"></slot>
+                </div>
                 <card-blue>
-                    <title-ji color="blue" class="summary-title">${STR_IMAGENAME}</title-ji>
+                    <title-ji color="blue" class="summary-title"
+                        >${STR_IMAGENAME}</title-ji
+                    >
                     <div class="summary">
                         <slot name="imagename"></slot>
                     </div>
-                    <title-ji color="blue" class="summary-title">${STR_DESCRIPTIONTITLE}</title-ji>
+                    <title-ji color="blue" class="summary-title"
+                        >${STR_DESCRIPTIONTITLE}</title-ji
+                    >
                     <div class="summary">
                         <slot name="description"></slot>
                     </div>
-                    <title-ji color="blue" class="summary-title">${STR_STYLETITLE}</title-ji>
+                    <title-ji color="blue" class="summary-title"
+                        >${STR_STYLETITLE}</title-ji
+                    >
                     <div class="summary">
                         <slot name="style"></slot>
                     </div>
-                    <title-ji color="blue" class="summary-title">${STR_AGE}</title-ji>
+                    <title-ji color="blue" class="summary-title"
+                        >${STR_AGE}</title-ji
+                    >
                     <div class="summary">
                         <slot name="age"></slot>
                     </div>
-                    <title-ji color="blue" class="summary-title">${STR_STREAM}</title-ji>
+                    <title-ji color="blue" class="summary-title"
+                        >${STR_STREAM}</title-ji
+                    >
                     <div class="summary">
                         <slot name="stream"></slot>
                     </div>
-                    <title-ji color="blue" class="summary-title">${STR_TAGS}</title-ji>
+                    <title-ji color="blue" class="summary-title"
+                        >${STR_TAGS}</title-ji
+                    >
                     <div class="summary">
                         <slot name="tags"></slot>
                     </div>
-                    <title-ji color="blue" class="summary-title">${STR_DATE_TIME}</title-ji>
+                    <title-ji color="blue" class="summary-title"
+                        >${STR_DATE_TIME}</title-ji
+                    >
                     <div class="summary">
                         <slot name="date-time"></slot>
                     </div>
                 </card-blue>
-        </div>
-
-        <div>
-            <div class="summary-line">
-                <header>${STR_CATEGORIES_REPORT}</header>
-                <slot name="edit-categories"></slot>
             </div>
-            <card-blue>
-                <slot name="category-report"></slot>
-            </card-blue>
-        </div>
-  `;
-  }
+
+            <div>
+                <div class="summary-line">
+                    <header>${STR_CATEGORIES_REPORT}</header>
+                    <slot name="edit-categories"></slot>
+                </div>
+                <card-blue>
+                    <slot name="category-report"></slot>
+                </card-blue>
+            </div>
+        `;
+    }
 }
-
-

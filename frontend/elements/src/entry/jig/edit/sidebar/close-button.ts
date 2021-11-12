@@ -36,7 +36,10 @@ export class _ extends LitElement {
         return html`
             <button>
                 <img-ui path="entry/jig/collapse.svg"></img-ui>
-                <img-ui path="entry/jig/collapse-blue-bg.svg" class="hover"></img-ui>
+                <img-ui
+                    path="entry/jig/collapse-blue-bg.svg"
+                    class="hover"
+                ></img-ui>
             </button>
         `;
     }

@@ -1,4 +1,4 @@
-import { LitElement, html, css, customElement, property } from 'lit-element';
+import { LitElement, html, css, customElement, property } from "lit-element";
 import "@elements/core/images/ui";
 import "@elements/core/progress-bar/progress-bar";
 
@@ -30,22 +30,28 @@ export class _ extends LitElement {
                     height: 12px;
                     width: 12px;
                 }
-                ::slotted([slot=cancel]) {
+                ::slotted([slot="cancel"]) {
                     height: 100%;
                     width: 100%;
                 }
-            `
+            `,
         ];
     }
 
-    @property({type: Number})
+    @property({ type: Number })
     progress: number = 1;
 
     render() {
         return html`
-            <img-ui class="icon-uploading" path="core/uploading/uploading-icon.svg"></img-ui>
+            <img-ui
+                class="icon-uploading"
+                path="core/uploading/uploading-icon.svg"
+            ></img-ui>
             <span class="text-uploading">${STR_UPLOADING}</span>
-            <progress-bar color="green" progress="${this.progress}"></progress-bar>
+            <progress-bar
+                color="green"
+                progress="${this.progress}"
+            ></progress-bar>
             <div class="cancel">
                 <slot name="cancel"></slot>
             </div>

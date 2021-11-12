@@ -16,100 +16,113 @@ export type CLICK_MODE = "single" | "double";
 
 @customElement("input-text-content")
 export class _ extends LitElement {
-  static get styles() {
-      return [css`
-          input, span {
-              font-family: Poppins;
-              font-size: 16px;
-              display: none;
-          }
+    static get styles() {
+        return [
+            css`
+                input,
+                span {
+                    font-family: Poppins;
+                    font-size: 16px;
+                    display: none;
+                }
 
-          span {
-                white-space: pre;
-          }
-          input {
-              outline: 0;
-              border: none;
-              padding: 0;
-          }
+                span {
+                    white-space: pre;
+                }
+                input {
+                    outline: 0;
+                    border: none;
+                    padding: 0;
+                }
 
-          input.visible {
-              display: inline-block;
-          }
+                input.visible {
+                    display: inline-block;
+                }
 
-          span#measure, span.visible {
-              display: inline;
-          }
+                span#measure,
+                span.visible {
+                    display: inline;
+                }
 
-          span#measure {
-              position: absolute;
-              left: -10000px;
-              bottom: 10000px;
-          }
-
-      `];
-  }
-
-  @property()
-  value: string = "";
-
-  @property({ type: Boolean })
-  editing: boolean = false;
-
-  @property()
-  clickMode: CLICK_MODE = "double";
-
-  onKey(evt: KeyboardEvent) {
-    let { key } = evt;
-    key = key.toLowerCase();
-    if (key === "escape") {
-        const input = this.shadowRoot?.getElementById("input") as HTMLInputElement;
-        input.value = this.value;
-        this.editing = false;
-        this.dispatchEvent(new Event("reset"));
-    } else if(key === "enter") {
-        this.dispatchChange();
+                span#measure {
+                    position: absolute;
+                    left: -10000px;
+                    bottom: 10000px;
+                }
+            `,
+        ];
     }
-  }
 
-  onInput() {
-      const input = this.shadowRoot?.getElementById("input") as HTMLInputElement;
+    @property()
+    value: string = "";
+
+    @property({ type: Boolean })
+    editing: boolean = false;
+
+    @property()
+    clickMode: CLICK_MODE = "double";
+
+    onKey(evt: KeyboardEvent) {
+        let { key } = evt;
+        key = key.toLowerCase();
+        if (key === "escape") {
+            const input = this.shadowRoot?.getElementById(
+                "input"
+            ) as HTMLInputElement;
+            input.value = this.value;
+            this.editing = false;
+            this.dispatchEvent(new Event("reset"));
+        } else if (key === "enter") {
+            this.dispatchChange();
+        }
+    }
+
+    onInput() {
+        const input = this.shadowRoot?.getElementById(
+            "input"
+        ) as HTMLInputElement;
         this.dispatchEvent(
             new CustomEvent("custom-input", {
-                detail: { value: input.value},
+                detail: { value: input.value },
             })
         );
-      this.resizeInput();
-  }
-
-  resizeInput = () => {
-      const input = this.shadowRoot?.getElementById("input") as HTMLInputElement;
-      const measure = this.shadowRoot?.getElementById("measure") as HTMLInputElement;
-
-      measure.textContent = input.value;
-      const rect = measure.getBoundingClientRect();
-
-      input.style.width = `${rect.width}px`;
-  }
-
-  onGlobalMouseDown = (evt: MouseEvent) => {
-    if(!evt.composedPath().includes(this as any)) {
-        console.log("dispatching?");
-        this.dispatchChange();
+        this.resizeInput();
     }
-  }
 
-  firstUpdated(_changed:any) {
-    this.resizeInput();
-  }
-  updated(changed:any) {
-        if(typeof changed.get("editing") === "boolean") {
-            const {editing} = this;
-            this.removeGlobalListener(); 
-            if(editing) {
+    resizeInput = () => {
+        const input = this.shadowRoot?.getElementById(
+            "input"
+        ) as HTMLInputElement;
+        const measure = this.shadowRoot?.getElementById(
+            "measure"
+        ) as HTMLInputElement;
+
+        measure.textContent = input.value;
+        const rect = measure.getBoundingClientRect();
+
+        input.style.width = `${rect.width}px`;
+    };
+
+    onGlobalMouseDown = (evt: MouseEvent) => {
+        if (!evt.composedPath().includes(this as any)) {
+            console.log("dispatching?");
+            this.dispatchChange();
+        }
+    };
+
+    firstUpdated(_changed: any) {
+        this.resizeInput();
+    }
+    updated(changed: any) {
+        if (typeof changed.get("editing") === "boolean") {
+            const { editing } = this;
+            this.removeGlobalListener();
+            if (editing) {
                 window.addEventListener("mousedown", this.onGlobalMouseDown);
-                const input = this.shadowRoot?.getElementById("input") as HTMLInputElement;
-                if(input) {
+                const input = this.shadowRoot?.getElementById(
+                    "input"
+                ) as HTMLInputElement;
+                if (input) {
                     input.focus();
                     input.value = this.value;
                     input.setSelectionRange(-1, -1);
@@ -117,58 +130,62 @@ export class _ extends LitElement {
                 }
             }
         }
-  }
+    }
 
-  disconnectedCallback() {
-    super.disconnectedCallback();
-    this.removeGlobalListener(); 
-  }
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        this.removeGlobalListener();
+    }
 
-  removeGlobalListener() {
-     window.removeEventListener("mousedown", this.onGlobalMouseDown);
-  }
+    removeGlobalListener() {
+        window.removeEventListener("mousedown", this.onGlobalMouseDown);
+    }
 
-  getValue = () => {
-      const input = this.shadowRoot?.getElementById("input") as HTMLInputElement;
-      if(input == null) {
-          console.warn("input should never be null!");
-          return undefined;
-      } else {
-          const {value} = input;
-          return value;
-      }
-
-      
-  }
-  dispatchChange = () => {
-      const value = this.getValue();
+    getValue = () => {
+        const input = this.shadowRoot?.getElementById(
+            "input"
+        ) as HTMLInputElement;
+        if (input == null) {
+            console.warn("input should never be null!");
+            return undefined;
+        } else {
+            const { value } = input;
+            return value;
+        }
+    };
+    dispatchChange = () => {
+        const value = this.getValue();
         this.dispatchEvent(
             new CustomEvent("custom-change", {
-                detail: { value},
+                detail: { value },
             })
         );
 
-      this.editing = false;
-  }
+        this.editing = false;
+    };
 
-  render() {
-    const { value, editing, clickMode} = this;
+    render() {
+        const { value, editing, clickMode } = this;
 
-    return html`
-        <input class="${classMap({visible: editing})}" id="input" type="text" @input="${this.onInput}" @keyup="${this.onKey}" .value="${value}"></input>
-        <span class="${classMap({visible: !editing})}"
+        return html`
+        <input class="${classMap({
+            visible: editing,
+        })}" id="input" type="text" @input="${this.onInput}" @keyup="${
+            this.onKey
+        }" .value="${value}"></input>
+        <span class="${classMap({ visible: !editing })}"
               @dblclick=${() => {
-                if(clickMode === "double") {
-                    this.editing = true
-                }
+                  if (clickMode === "double") {
+                      this.editing = true;
+                  }
               }}
               @click=${() => {
-                if(clickMode === "single") {
-                    this.editing = true
-                }
+                  if (clickMode === "single") {
+                      this.editing = true;
+                  }
               }}
               >${value}</span>
         <span id="measure">${value}</span>
         `;
-  }
+    }
 }

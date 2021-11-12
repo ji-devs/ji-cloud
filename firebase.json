@@ -3,11 +3,7 @@
     {
       "target": "ji-cloud-sandbox-storybook",
       "public": "frontend/storybook/dist/storybook-build",
-      "ignore": [
-        "firebase.json",
-        "**/.*",
-        "**/node_modules/**"
-      ],
+      "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
       "rewrites": [
         {
           "source": "**",
@@ -18,11 +14,7 @@
     {
       "target": "ji-cloud-sandbox-docs",
       "public": "temp-docs",
-      "ignore": [
-        "firebase.json",
-        "**/.*",
-        "**/node_modules/**"
-      ],
+      "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
       "rewrites": [
         {
           "source": "book/**",
@@ -37,11 +29,7 @@
     {
       "target": "ji-cloud-storybook",
       "public": "frontend/storybook/dist/storybook-build",
-      "ignore": [
-        "firebase.json",
-        "**/.*",
-        "**/node_modules/**"
-      ],
+      "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
       "rewrites": [
         {
           "source": "**",
@@ -52,11 +40,7 @@
     {
       "target": "ji-cloud-docs",
       "public": "temp-docs",
-      "ignore": [
-        "firebase.json",
-        "**/.*",
-        "**/node_modules/**"
-      ],
+      "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
       "rewrites": [
         {
           "source": "book/**",

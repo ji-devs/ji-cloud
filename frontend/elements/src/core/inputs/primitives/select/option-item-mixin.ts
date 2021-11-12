@@ -7,8 +7,7 @@ type Constructor = new (...args: any[]) => {};
 // type GConstructor<T = {}> = new (...args: any[]) => T;
 // type Spritable = GConstructor<LitElement>;
 
-
-export  function OptionItemMixin<TBase extends Constructor>(Base: TBase) {
+export function OptionItemMixin<TBase extends Constructor>(Base: TBase) {
     class OptionItem extends Base {
         container: any | null;
 
@@ -17,7 +16,7 @@ export  function OptionItemMixin<TBase extends Constructor>(Base: TBase) {
 
         setActive() {
             // first have the container clear all actives and then set active to true
-            if(this.container) {
+            if (this.container) {
                 this.container.optionActivated(1);
             }
 
@@ -25,7 +24,7 @@ export  function OptionItemMixin<TBase extends Constructor>(Base: TBase) {
         }
 
         setInactive() {
-            if(this.container) {
+            if (this.container) {
                 this.container.optionDeactivate();
             }
             this.active = false;
@@ -33,9 +32,12 @@ export  function OptionItemMixin<TBase extends Constructor>(Base: TBase) {
 
         firstUpdated() {
             // @ts-ignore
-            this.container = closestPierceSlot(this.assignedSlot || this.parentNode, "base-select, base-option-group") as any | null;
+            this.container = closestPierceSlot(
+                this.assignedSlot || this.parentNode,
+                "base-select, base-option-group"
+            ) as any | null;
 
-            if(this.container) {
+            if (this.container) {
                 this.container.registerOption(this);
             }
         }
@@ -43,10 +45,10 @@ export  function OptionItemMixin<TBase extends Constructor>(Base: TBase) {
         disconnectedCallback() {
             // @ts-ignore
             super.disconnectedCallback();
-            if(this.container) {
+            if (this.container) {
                 this.container.unregisterOption(this);
             }
         }
-    };
+    }
     return OptionItem;
 }

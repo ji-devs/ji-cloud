@@ -1,24 +1,27 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 import { imageLib, MediaLibOptions, MediaSizeOptions } from "@utils/path";
-import {sameOrigin} from "@utils/image";
-import {nothing} from "lit-html";
+import { sameOrigin } from "@utils/image";
+import { nothing } from "lit-html";
 import { ModuleKind } from "@elements/module/_common/types";
 
 @customElement("img-module-screenshot")
 export class _ extends LitElement {
     static get styles() {
-        return [css`
-            :host {
-                border: solid var(--light-blue-3) 1px;
-                box-sizing: border-box;
-                overflow: hidden;
-                display: inline-block;
-            }
-            img-ui, img-ji {
-                height: 100%;
-                width: 100%;
-            }
-        `]
+        return [
+            css`
+                :host {
+                    border: solid var(--light-blue-3) 1px;
+                    box-sizing: border-box;
+                    overflow: hidden;
+                    display: inline-block;
+                }
+                img-ui,
+                img-ji {
+                    height: 100%;
+                    width: 100%;
+                }
+            `,
+        ];
     }
 
     @property()
@@ -34,20 +37,25 @@ export class _ extends LitElement {
     @property()
     moduleKind: ModuleKind | "" = "";
 
-    @property({type: Boolean})
-    cacheBust:boolean = false;
+    @property({ type: Boolean })
+    cacheBust: boolean = false;
 
     render() {
+        const { jigId, moduleId, moduleKind, size, cacheBust } = this;
 
-	    const {jigId, moduleId, moduleKind, size, cacheBust} = this;
-
-        const fallbackPath = moduleKind == ""
-            ? `jig/thumb-placeholder.svg` 
-            : `module/_common/thumb-placeholder.svg`;
-	    return html`
-	    	<img-ji lib="screenshot" id="${jigId}/${moduleId}" size="${size}" .cacheBust=${cacheBust ? Date.now() : false}>
-  			    <img-ui path="${fallbackPath}" slot="fallback"></img-ui>
-		    </img-ji>
-	    `;
+        const fallbackPath =
+            moduleKind == ""
+                ? `jig/thumb-placeholder.svg`
+                : `module/_common/thumb-placeholder.svg`;
+        return html`
+            <img-ji
+                lib="screenshot"
+                id="${jigId}/${moduleId}"
+                size="${size}"
+                .cacheBust=${cacheBust ? Date.now() : false}
+            >
+                <img-ui path="${fallbackPath}" slot="fallback"></img-ui>
+            </img-ji>
+        `;
     }
 }

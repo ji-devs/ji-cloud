@@ -44,7 +44,7 @@ export class _ extends LitElement {
                     border: 0;
                     color: white;
                 }
-                ::slotted([slot=checkbox]) {
+                ::slotted([slot="checkbox"]) {
                     border: solid 1px #c7d3db;
                     height: 16px;
                     width: 16px;
@@ -94,16 +94,16 @@ export class _ extends LitElement {
             <div class="start">
                 <slot name="checkbox"></slot>
                 <div class="name">
-                    ${ this.label }
+                    ${this.label}
                     <span class="new">${STR_NEW}</span>
                 </div>
             </div>
             <div class="end">
-                ${
-                    this.playing ? html`
-                        <jig-audio-playing-indicator></jig-audio-playing-indicator>
-                    ` : nothing
-                }
+                ${this.playing
+                    ? html`
+                          <jig-audio-playing-indicator></jig-audio-playing-indicator>
+                      `
+                    : nothing}
                 <div class="play-pause">
                     <slot name="play-pause"></slot>
                 </div>

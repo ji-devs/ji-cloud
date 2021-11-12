@@ -1,4 +1,11 @@
-import { LitElement, html, css, customElement, property, query } from "lit-element";
+import {
+    LitElement,
+    html,
+    css,
+    customElement,
+    property,
+    query,
+} from "lit-element";
 import { nothing } from "lit-html";
 
 @customElement("input-wrapper")
@@ -38,7 +45,8 @@ export class _ extends LitElement {
                     background-color: var(--background-color);
                     grid-row: 2;
                 }
-                .inner-wrapper:focus-within, :host([focus-within]) .inner-wrapper {
+                .inner-wrapper:focus-within,
+                :host([focus-within]) .inner-wrapper {
                     border-color: var(--dark-blue-3);
                     border-width: 2px;
                     /* removing one pixel to account for thicker border */
@@ -54,10 +62,11 @@ export class _ extends LitElement {
                     color: var(--main-blue);
                     font-weight: 500;
                 }
-                .label:focus-within, :host([focus-within]) .label {
+                .label:focus-within,
+                :host([focus-within]) .label {
                     color: var(--dark-blue-3);
                 }
-                ::slotted([slot=icon]) {
+                ::slotted([slot="icon"]) {
                     grid-column: 2;
                     grid-row: 1 / span 2;
                     width: 24px;
@@ -128,7 +137,9 @@ export class _ extends LitElement {
             <slot name="hebrew-inputs"></slot>
             <div class="outer-wrapper">
                 <label class="inner-wrapper" @click="${this.focus}">
-                    ${ this.label ? html`<span class="label">${this.label}</span>` : nothing }
+                    ${this.label
+                        ? html`<span class="label">${this.label}</span>`
+                        : nothing}
                     <slot id="main-slot"></slot>
                     <slot name="icon"></slot>
                 </label>

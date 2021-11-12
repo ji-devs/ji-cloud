@@ -3,19 +3,14 @@ import "@elements/entry/home/home/search-section/search-section-select";
 import { AdvancedSearch } from "./search-result-advanced";
 
 export default {
-    title: 'Entry / Home / Home / Search section',
-}
+    title: "Entry / Home / Home / Search section",
+};
 
-interface SearchArgs {
+interface SearchArgs {}
 
-}
-
-const DEFAULT_ARGS: SearchArgs = {
-
-}
+const DEFAULT_ARGS: SearchArgs = {};
 
 export const SearchBar = (props?: SearchArgs) => {
-
     return `
         <home-search-bar slot="search-bar">
 
@@ -28,7 +23,7 @@ export const SearchBar = (props?: SearchArgs) => {
             <button-rect slot="button" bold color="red">Search</button-rect>
             ${AdvancedSearch()}
         </home-search-bar>
-    `
-}
+    `;
+};
 
 SearchBar.args = DEFAULT_ARGS;

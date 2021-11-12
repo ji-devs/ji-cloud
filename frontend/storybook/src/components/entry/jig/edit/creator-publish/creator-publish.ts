@@ -11,19 +11,19 @@ import "@elements/core/pills/pill-close";
 import { argsToAttrs } from "@utils/attributes";
 
 export default {
-    title: "Entry / Jig / Edit / Publish"
-}
+    title: "Entry / Jig / Edit / Publish",
+};
 
 interface Args {
     recentCount: number;
 }
 
-const DEFAULT_ARGS:Args = {
+const DEFAULT_ARGS: Args = {
     recentCount: 12,
-}
+};
 
-export const Publish = (props?:Partial<Args>) => {
-    props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
+export const Publish = (props?: Partial<Args>) => {
+    props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
 
     return `
         <div style="padding:30px;background-color:#d7eafa;">
@@ -127,6 +127,6 @@ export const Publish = (props?:Partial<Args>) => {
             </jig-edit-publish>
         </div>
     `;
-}
+};
 
 Publish.args = DEFAULT_ARGS;

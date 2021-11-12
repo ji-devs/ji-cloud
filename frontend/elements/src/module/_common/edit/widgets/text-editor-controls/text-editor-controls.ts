@@ -23,7 +23,7 @@ export class _ extends LitElement {
                     margin-bottom: 18px;
                 }
                 :host([controlsDisabled]) .controls {
-                    filter: opacity(.5);
+                    filter: opacity(0.5);
                     pointer-events: none;
                 }
                 .button-collection {
@@ -65,7 +65,7 @@ export class _ extends LitElement {
                         grid-template-columns: 1fr 1fr;
                     }
                 }
-                ::slotted(anchored-overlay[slot=colors]) {
+                ::slotted(anchored-overlay[slot="colors"]) {
                     display: block;
                 }
                 .button-collection.color {
@@ -87,7 +87,7 @@ export class _ extends LitElement {
         return {
             y: rect.top - KEYBOARD_HEIGHT,
             x: 0,
-        }
+        };
     }
 
     render() {

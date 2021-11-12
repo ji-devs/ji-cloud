@@ -3,15 +3,15 @@ import "@elements/core/inputs/old/select";
 import { arrayCount, mapToString } from "@utils/array";
 
 export default {
-    title: "Core / Inputs / Old"
-}
+    title: "Core / Inputs / Old",
+};
 
 interface Args {
-    label: string,
-    value: string,
-    placeholder: string,
-    hint: string,
-    error: boolean,
+    label: string;
+    value: string;
+    placeholder: string;
+    hint: string;
+    error: boolean;
 }
 
 const DEFAULT_ARGS: Args = {
@@ -20,18 +20,18 @@ const DEFAULT_ARGS: Args = {
     placeholder: "Placeholder",
     hint: "",
     error: false,
-}
+};
 
 export const Select = (props?: Partial<Args>) => {
     props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
 
     return `
         <input-select ${argsToAttrs(props)}>
-            ${mapToString(arrayCount(10), i => {
+            ${mapToString(arrayCount(10), (i) => {
                 return `<li-check>item ${i}</li-check>`;
             })}
         </input-select>
     `;
-}
+};
 
 Select.args = DEFAULT_ARGS;

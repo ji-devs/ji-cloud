@@ -4,8 +4,8 @@ import "@elements/core/inputs/primitives/color";
 import { argsToAttrs } from "@utils/attributes";
 
 export default {
-    title: "Module / _COMMON /  edit /Widgets / Sidebar / Color Select"
-}
+    title: "Module / _COMMON /  edit /Widgets / Sidebar / Color Select",
+};
 
 interface Args {
     label: string;
@@ -13,7 +13,7 @@ interface Args {
 
 const DEFAULT_ARGS: Args = {
     label: "General colors",
-}
+};
 
 const colorList = [
     "transparent",
@@ -40,19 +40,19 @@ const colorList = [
     "#1a1a1a",
     "#fff",
     "#fff",
-]
-
+];
 
 export const colorSelectSection = (props?: Partial<Args>) => {
     props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
 
     return `
         <color-select-section  ${argsToAttrs(props)}>
-            ${colorList.map(color => (
-                `<color-select-item slot="items" color="${color}"></color-select-item>`
-            ))}
+            ${colorList.map(
+                (color) =>
+                    `<color-select-item slot="items" color="${color}"></color-select-item>`
+            )}
         </color-select-section>
     `;
-}
+};
 
 colorSelectSection.args = DEFAULT_ARGS;

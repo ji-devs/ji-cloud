@@ -1,5 +1,5 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
-import {IconKind, IconSize} from "./icon";
+import { IconKind, IconSize } from "./icon";
 import "./icon";
 
 export type LabelColor = "blue";
@@ -40,17 +40,17 @@ export class _ extends LitElement {
     @property()
     size: IconSize | undefined;
 
-    @property({type: Boolean, reflect: true})
-    hover:boolean = false; 
+    @property({ type: Boolean, reflect: true })
+    hover: boolean = false;
 
-    @property({type: Boolean, reflect: true})
-    active:boolean = false; 
+    @property({ type: Boolean, reflect: true })
+    active: boolean = false;
 
     @property()
-    label: string = ""; 
+    label: string = "";
 
-    @property({reflect: true})
-    labelColor: LabelColor = "blue"; 
+    @property({ reflect: true })
+    labelColor: LabelColor = "blue";
 
     connectedCallback() {
         super.connectedCallback();
@@ -73,10 +73,16 @@ export class _ extends LitElement {
     }
 
     render() {
-        const {icon, active, hover, label, size} = this;
+        const { icon, active, hover, label, size } = this;
 
         return html`
-            <button-icon .icon=${icon} .active=${active} .hover=${hover} .size=${size} disableHover></button-icon>
+            <button-icon
+                .icon=${icon}
+                .active=${active}
+                .hover=${hover}
+                .size=${size}
+                disableHover
+            ></button-icon>
             <div class="label">${label}</div>
         `;
     }

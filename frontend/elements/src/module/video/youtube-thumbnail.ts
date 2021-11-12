@@ -1,4 +1,11 @@
-import { LitElement, html, css, customElement, property, query } from "lit-element";
+import {
+    LitElement,
+    html,
+    css,
+    customElement,
+    property,
+    query,
+} from "lit-element";
 import "@elements/core/images/ui";
 
 @customElement("video-youtube-thumbnail")
@@ -24,7 +31,9 @@ export class _ extends LitElement {
 
     render() {
         return html`
-            <img src="https://i.ytimg.com/vi_webp/${this.videoId}/mqdefault.webp">
+            <img
+                src="https://i.ytimg.com/vi_webp/${this.videoId}/mqdefault.webp"
+            />
         `;
     }
 }

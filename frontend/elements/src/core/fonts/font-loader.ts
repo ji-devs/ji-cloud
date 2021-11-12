@@ -4,18 +4,13 @@ import { nothing } from "lit-html";
 
 @customElement("font-loader")
 export class _ extends LitElement {
-  static get styles() {
-    return [
-      css`
-      `,
-    ];
-  }
+    static get styles() {
+        return [css``];
+    }
 
-  firstUpdated() {
-  }
+    firstUpdated() {}
 
-  render() {
-
-      return nothing;
-  }
+    render() {
+        return nothing;
+    }
 }

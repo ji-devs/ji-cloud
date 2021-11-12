@@ -21,7 +21,7 @@ export class _ extends LitElement {
                     height: 32px;
                     margin-bottom: 46px;
                 }
-                ::slotted([slot=delete]) {
+                ::slotted([slot="delete"]) {
                     justify-self: start;
                 }
             `,

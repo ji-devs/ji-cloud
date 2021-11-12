@@ -1,5 +1,12 @@
-import { LitElement, html, css, customElement, property, query } from 'lit-element';
-import { queryPierceShadow} from '@utils/dom';
+import {
+    LitElement,
+    html,
+    css,
+    customElement,
+    property,
+    query,
+} from "lit-element";
+import { queryPierceShadow } from "@utils/dom";
 @customElement("overlay-container")
 export class _ extends LitElement {
     static get styles() {
@@ -12,23 +19,23 @@ export class _ extends LitElement {
                     left: 0;
                     z-index: 1;
                 }
-            `
+            `,
         ];
     }
 
     /// this allows rendering overlay-container anywhere in the tree
     /// and it will propogate to the top (either into #overlay if that exists, or body)
     /// breaks with frameworks though...
-    @property({type: Boolean})
-    reparent:boolean = false;
+    @property({ type: Boolean })
+    reparent: boolean = false;
 
     firstUpdated() {
-        if(!this.reparent) {
+        if (!this.reparent) {
             return;
         }
 
         let parentElement = queryPierceShadow(document, "#overlay");
-        if(!parentElement) {
+        if (!parentElement) {
             console.warn("couldn't find #overlay! using document.body");
             parentElement = document.body;
         }
@@ -37,8 +44,6 @@ export class _ extends LitElement {
     }
 
     render() {
-        return html`
-                <slot></slot>
-        `;
+        return html` <slot></slot> `;
     }
 }

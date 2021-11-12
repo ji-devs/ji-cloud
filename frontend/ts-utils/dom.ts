@@ -1,44 +1,50 @@
-export function withSlot(slot:string, html:string):string {
-    const getInsertPos = ():any => {
-        for(let i = 1; i < html.length; i++) {
-            if(!isNaN(html[i] as any)) {
+export function withSlot(slot: string, html: string): string {
+    const getInsertPos = (): any => {
+        for (let i = 1; i < html.length; i++) {
+            if (!isNaN(html[i] as any)) {
                 return i;
             }
         }
-    }
-    const splitPos = getInsertPos(); 
+    };
+    const splitPos = getInsertPos();
     const part_1 = html.substr(0, splitPos);
     const part_2 = html.substr(splitPos);
     return `${part_1} slot="${slot}" ${part_2}`;
 }
 
 /// From top down
-export function queryPierceShadowChildren(nodes: NodeList, selector: string) : HTMLElement | null {
+export function queryPierceShadowChildren(
+    nodes: NodeList,
+    selector: string
+): HTMLElement | null {
     //NodeList isn't Array, and Array.find() returns undefined instead of null
     //so regular ol' for loop it is...
-    for(let i = 0; i < nodes.length; i++) {
+    for (let i = 0; i < nodes.length; i++) {
         const result = queryPierceShadow(nodes[i], selector);
-        if(result != null) {
+        if (result != null) {
             return result;
         }
     }
     return null;
 }
-export function queryPierceShadow(node: Node | null, selector: string) : HTMLElement | null {
+export function queryPierceShadow(
+    node: Node | null,
+    selector: string
+): HTMLElement | null {
     if (!node) {
         return null;
     }
     if (node instanceof ShadowRoot) {
         return queryPierceShadow(node.host, selector);
     }
-    
+
     if (node instanceof HTMLElement) {
         let result = node.shadowRoot?.querySelector(selector);
-        if(result instanceof HTMLElement) {
+        if (result instanceof HTMLElement) {
             return result;
         }
         result = node.querySelector(selector);
-        if(result instanceof HTMLElement) {
+        if (result instanceof HTMLElement) {
             return result;
         }
 
@@ -50,7 +56,10 @@ export function queryPierceShadow(node: Node | null, selector: string) : HTMLEle
 // difference between closestPierceShadow and closestPierceSlot:
 // closestPierceShadow starts in a shadow and crawls out, while closestPierceSlot starts outside of the shadow on crawls in
 // TODO - clarify that note... closestPierceShot is still crawling up through parents...
-export function closestPierceShadow(node: Node | null, selector: string) : HTMLElement | null {
+export function closestPierceShadow(
+    node: Node | null,
+    selector: string
+): HTMLElement | null {
     if (!node) {
         return null;
     }
@@ -67,24 +76,29 @@ export function closestPierceShadow(node: Node | null, selector: string) : HTMLE
     return closestPierceShadow(node.parentNode, selector);
 }
 
-export function closestPierceSlot(node: Node | null, selector: string) : Node | null {
+export function closestPierceSlot(
+    node: Node | null,
+    selector: string
+): Node | null {
     if (!node) {
         return null;
     } else {
-        if (node instanceof ShadowRoot){
+        if (node instanceof ShadowRoot) {
             return closestPierceSlot(node.host, selector);
         }
         if (node instanceof HTMLElement) {
             if (node.matches(selector)) {
                 return node;
             } else {
-                return closestPierceSlot(node.assignedSlot || node.parentNode, selector);
+                return closestPierceSlot(
+                    node.assignedSlot || node.parentNode,
+                    selector
+                );
             }
         }
         return node.parentNode; // not sure if this is reachable
     }
 }
-
 
 // https://stackoverflow.com/a/56105394/784519
 /*

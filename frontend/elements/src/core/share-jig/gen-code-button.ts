@@ -1,4 +1,12 @@
-import { LitElement, html, css, customElement, property, internalProperty, PropertyValues } from "lit-element";
+import {
+    LitElement,
+    html,
+    css,
+    customElement,
+    property,
+    internalProperty,
+    PropertyValues,
+} from "lit-element";
 import "@elements/core/popups/popup-body";
 import "@elements/core/buttons/rectangle";
 
@@ -54,9 +62,7 @@ export class _ extends LitElement {
         return html`
             <button>
                 ${STR_CLICK_TO_CREATE}
-                <span class="icon">
-                    • • • •
-                </span>
+                <span class="icon"> • • • • </span>
             </button>
         `;
     }

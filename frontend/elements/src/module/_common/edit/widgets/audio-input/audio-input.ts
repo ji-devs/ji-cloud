@@ -1,6 +1,6 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 
-export type mode = 'default' | 'active' | 'success' | 'done';
+export type mode = "default" | "active" | "success" | "done";
 
 @customElement("audio-input")
 export class _ extends LitElement {
@@ -28,27 +28,27 @@ export class _ extends LitElement {
                     display: grid;
                     place-items: center;
                 }
-                :host([mode=default]) .main-content {
+                :host([mode="default"]) .main-content {
                     border-color: var(--light-blue-4);
                     border-style: solid;
                 }
-                :host([mode=active]) .main-content {
+                :host([mode="active"]) .main-content {
                     border-color: var(--dark-blue-1);
                     border-style: dashed;
                 }
-                :host([mode=success]) .main-content {
+                :host([mode="success"]) .main-content {
                     border-color: var(--green-4);
                     background-color: var(--green-2);
                     border-style: solid;
                 }
-                :host([mode=done]) .main-content {
+                :host([mode="done"]) .main-content {
                     border-color: var(--green-4);
                     border-style: solid;
                 }
-                ::slotted(progress-bar[slot=main-content]) {
+                ::slotted(progress-bar[slot="main-content"]) {
                     width: 272px;
                 }
-                ::slotted(input-file[slot=main-content]) {
+                ::slotted(input-file[slot="main-content"]) {
                     height: 100%;
                     width: 100%;
                 }
@@ -60,15 +60,15 @@ export class _ extends LitElement {
                     grid-column: 1;
                     grid-row: 1;
                 }
-                ::slotted([slot=main-action]) {
+                ::slotted([slot="main-action"]) {
                     justify-self: center;
                 }
             `,
         ];
     }
 
-    @property({type: String, reflect: true})
-    mode: mode = 'default';
+    @property({ type: String, reflect: true })
+    mode: mode = "default";
 
     render() {
         return html`

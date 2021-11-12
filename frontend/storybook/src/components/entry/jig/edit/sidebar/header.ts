@@ -1,25 +1,24 @@
-
-import {argsToAttrs} from "@utils/attributes";
+import { argsToAttrs } from "@utils/attributes";
 import "@elements/entry/jig/edit/sidebar/sidebar";
 import "@elements/entry/jig/edit/sidebar/header";
 
 const STR_MY_JIGS = "My JIGs";
 export default {
-    title: "Entry / Jig / Edit / Sidebar"
-}
+    title: "Entry / Jig / Edit / Sidebar",
+};
 
 interface Args {
-    collapsed: boolean,
-    isModulePage: boolean,
+    collapsed: boolean;
+    isModulePage: boolean;
 }
 
-const DEFAULT_ARGS:Args = {
+const DEFAULT_ARGS: Args = {
     collapsed: false,
     isModulePage: false,
-}
+};
 
-export const Header = (props?:Partial<Args>) => {
-    props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
+export const Header = (props?: Partial<Args>) => {
+    props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
 
     return `
         <jig-edit-sidebar-header slot="header" ${argsToAttrs(props)}>
@@ -34,5 +33,5 @@ export const Header = (props?:Partial<Args>) => {
             <jig-edit-sidebar-preview-button slot="preview"></jig-edit-sidebar-preview-button>
         </jig-edit-sidebar-header>
     `;
-}
+};
 Header.args = DEFAULT_ARGS;

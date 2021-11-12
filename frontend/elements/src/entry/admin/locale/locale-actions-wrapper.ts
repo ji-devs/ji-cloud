@@ -2,18 +2,19 @@ import { LitElement, html, css, customElement } from "lit-element";
 
 @customElement("locale-actions-wrapper")
 export class _ extends LitElement {
-
     static get styles() {
-        return [css`
-            :host {
-                display: flex;
-                column-gap: 4px;
-                padding: 4px;
-            }
-            span {
-                content: '|';
-            }
-        `]
+        return [
+            css`
+                :host {
+                    display: flex;
+                    column-gap: 4px;
+                    padding: 4px;
+                }
+                span {
+                    content: "|";
+                }
+            `,
+        ];
     }
 
     render() {

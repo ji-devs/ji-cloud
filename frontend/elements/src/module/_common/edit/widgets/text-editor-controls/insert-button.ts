@@ -31,11 +31,13 @@ export class _ extends LitElement {
         ];
     }
 
-    @property({type: Boolean, reflect: true})
+    @property({ type: Boolean, reflect: true })
     disabled = false;
 
     render() {
-        const path = `module/_common/edit/widgets/sidebar/text-editor-controls/insert-text-${this.disabled ? 'blue' : 'white'}.svg`;
+        const path = `module/_common/edit/widgets/sidebar/text-editor-controls/insert-text-${
+            this.disabled ? "blue" : "white"
+        }.svg`;
         return html`
             <button ?disabled=${this.disabled}>
                 ${STR_INSERT_TEXTBOX}

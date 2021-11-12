@@ -72,7 +72,8 @@ export class _ extends LitElement {
                     white-space: nowrap;
                 }
 
-                :host([active]), .hover {
+                :host([active]),
+                .hover {
                     color: #5590fc;
                 }
 
@@ -126,9 +127,13 @@ export class _ extends LitElement {
                 @mouseleave="${this.onLeave}"
             >
                 <div class="img">
-                    ${icon === "" ? nothing : html`
-                        <img-ui path="core/menus/${filename}.svg"></img-ui>
-                    `}
+                    ${icon === ""
+                        ? nothing
+                        : html`
+                              <img-ui
+                                  path="core/menus/${filename}.svg"
+                              ></img-ui>
+                          `}
                 </div>
                 <div class="label ${labelClasses}">${label}</div>
             </section>

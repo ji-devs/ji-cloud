@@ -1,48 +1,51 @@
-import { LitElement, html, css, customElement, property} from 'lit-element';
-import {loadAllFonts, ThemeId} from "@elements/_themes/themes";
+import { LitElement, html, css, customElement, property } from "lit-element";
+import { loadAllFonts, ThemeId } from "@elements/_themes/themes";
 
 export type Variant = "h1" | "h2" | "p1" | "p2";
 
-@customElement('mock-text-example')
+@customElement("mock-text-example")
 export class _ extends LitElement {
-  static get styles() {
-      return [css`
-      `];
-  }
+    static get styles() {
+        return [css``];
+    }
 
-  @property()
-  variant:Variant = "h1";
+    @property()
+    variant: Variant = "h1";
 
-  @property()
-  theme:ThemeId = "blank";
+    @property()
+    theme: ThemeId = "blank";
 
-  @property()
-  text:string = ""
+    @property()
+    text: string = "";
 
-	@property({type: Boolean})
-	fontsLoaded:boolean = false;
-	
-	connectedCallback() {
-		super.connectedCallback();
+    @property({ type: Boolean })
+    fontsLoaded: boolean = false;
 
-		loadAllFonts().then(() => {
-			this.fontsLoaded = true;
-		});
-	}
- 
- 
-  render() {
-	const {fontsLoaded, text, theme, variant} = this;
+    connectedCallback() {
+        super.connectedCallback();
 
-	if(fontsLoaded) {
-		let style = `font-family: var(--theme-${theme as string}-${variant}-font-family);`;
-		style += ` font-size: var(--theme-${theme as string}-${variant}-font-size);`;
-		style += ` color: var(--theme-${theme as string}-${variant}-color);`;
+        loadAllFonts().then(() => {
+            this.fontsLoaded = true;
+        });
+    }
 
+    render() {
+        const { fontsLoaded, text, theme, variant } = this;
 
-		return html`<div style="${style}">${text}</div>`
-	} else {
-		return html`<div>Loading fonts...</div>`;
-	}
-  }
+        if (fontsLoaded) {
+            let style = `font-family: var(--theme-${
+                theme as string
+            }-${variant}-font-family);`;
+            style += ` font-size: var(--theme-${
+                theme as string
+            }-${variant}-font-size);`;
+            style += ` color: var(--theme-${
+                theme as string
+            }-${variant}-color);`;
+
+            return html`<div style="${style}">${text}</div>`;
+        } else {
+            return html`<div>Loading fonts...</div>`;
+        }
+    }
 }

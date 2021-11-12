@@ -1,25 +1,22 @@
-import {argsToAttrs} from "@utils/attributes";
+import { argsToAttrs } from "@utils/attributes";
 import "@elements/module/_common/edit/footer";
 export default {
-    title: "Module / _common / edit"
-}
+    title: "Module / _common / edit",
+};
 
 const STR_CONTINUE = "Continue";
 
-interface Args {
-}
+interface Args {}
 
-const DEFAULT_ARGS:Args = {
-}
+const DEFAULT_ARGS: Args = {};
 
-export const Footer = (props?:Partial<Args>) => {
-    props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
-
+export const Footer = (props?: Partial<Args>) => {
+    props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
 
     return `<module-footer slot="footer">
 
         <button-rect disabled size="small" iconAfter="arrow" slot="btn">${STR_CONTINUE}</button-rect>
-    </module-footer>`
-}
+    </module-footer>`;
+};
 
 Footer.args = DEFAULT_ARGS;

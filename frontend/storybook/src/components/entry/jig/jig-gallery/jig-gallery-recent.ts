@@ -2,8 +2,8 @@ import "@elements/entry/jig/gallery/recent";
 import { argsToAttrs } from "@utils/attributes";
 
 export default {
-    title: "Entry / Jig / Gallery"
-}
+    title: "Entry / Jig / Gallery",
+};
 
 interface Args {
     draft: boolean;
@@ -11,20 +11,20 @@ interface Args {
     img: string;
     ages: string;
     publishedAt: string;
-    href: string
+    href: string;
 }
 
-const DEFAULT_ARGS:Args = {
+const DEFAULT_ARGS: Args = {
     draft: false,
     label: "Teach New Vocabulary",
     img: "mock/resized/jig-gallery.jpg",
     ages: "5-8",
     publishedAt: "3 W ago",
     href: "https://google.com",
-}
+};
 
-export const Recent = (props?:Partial<Args>) => {
-    props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
+export const Recent = (props?: Partial<Args>) => {
+    props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
 
     return `
         <div style="padding: 30px;">
@@ -33,7 +33,6 @@ export const Recent = (props?:Partial<Args>) => {
             </jig-gallery-recent>
         </div>
     `;
-}
+};
 
 Recent.args = DEFAULT_ARGS;
-

@@ -1,7 +1,7 @@
-import { LitElement, html, css, customElement, property } from 'lit-element';
-import { classMap } from 'lit-html/directives/class-map';
-import { nothing} from 'lit-html';
-import {BaseButton} from "@elements/_styles/buttons";
+import { LitElement, html, css, customElement, property } from "lit-element";
+import { classMap } from "lit-html/directives/class-map";
+import { nothing } from "lit-html";
+import { BaseButton } from "@elements/_styles/buttons";
 import "@elements/core/buttons/icon";
 import "@elements/core/buttons/rectangle";
 
@@ -102,70 +102,88 @@ export class _ extends BaseButton {
                   color: var(--dark-red-2);
                   cursor: pointer;
                 }
-                `];
+                `,
+        ];
     }
 
-    onAnyClick(evt:MouseEvent) {
-
-      const path = evt.composedPath();
-      if(!path.includes(this.shadowRoot?.getElementById("section") as any)) {
-          this.onCancel();
-      }
+    onAnyClick(evt: MouseEvent) {
+        const path = evt.composedPath();
+        if (!path.includes(this.shadowRoot?.getElementById("section") as any)) {
+            this.onCancel();
+        }
     }
 
     onCancel() {
-        this.dispatchEvent(new CustomEvent("custom-toggle", {
-          detail: { value: false},
-        }))
+        this.dispatchEvent(
+            new CustomEvent("custom-toggle", {
+                detail: { value: false },
+            })
+        );
     }
 
     onConfirm() {
-        this.dispatchEvent(new CustomEvent("custom-toggle", {
-          detail: { value: true},
-        }))
+        this.dispatchEvent(
+            new CustomEvent("custom-toggle", {
+                detail: { value: true },
+            })
+        );
     }
 
     @property()
     mode: Mode = "deleteModule";
 
-    @property({type: Boolean})
+    @property({ type: Boolean })
     visible: boolean = false;
 
     render() {
+        const { visible, mode } = this;
 
-
-        const {visible, mode} = this;
-
-        if(!visible) {
+        if (!visible) {
             return nothing;
         }
 
         const title = STR_TITLE_WARNING;
-        const body = mode === "deleteModule" ? STR_BODY_DELETE_MODULE
-            : STR_BODY_DELETE_IMAGE;
-        const confirm_str = mode === "deleteModule" ? STR_CONFIRM_DELETE_MODULE
-            : STR_CONFIRM_DELETE_IMAGE;
-        const cancel_str = mode === "deleteModule" ? STR_CANCEL_DELETE_MODULE
-            : STR_CANCEL_DELETE_IMAGE;
-        const confirm = html`<div class="confirm-warning">${confirm_str}</div>`
-        const cancel = html`<button-rect color="blue">${cancel_str}</button-rect>`
+        const body =
+            mode === "deleteModule"
+                ? STR_BODY_DELETE_MODULE
+                : STR_BODY_DELETE_IMAGE;
+        const confirm_str =
+            mode === "deleteModule"
+                ? STR_CONFIRM_DELETE_MODULE
+                : STR_CONFIRM_DELETE_IMAGE;
+        const cancel_str =
+            mode === "deleteModule"
+                ? STR_CANCEL_DELETE_MODULE
+                : STR_CANCEL_DELETE_IMAGE;
+        const confirm = html`<div class="confirm-warning">${confirm_str}</div>`;
+        const cancel = html`<button-rect color="blue"
+            >${cancel_str}</button-rect
+        >`;
 
         const titleClasses = classMap({
             title: true,
-            warning: mode === "deleteModule" || mode === "deleteImage"
+            warning: mode === "deleteModule" || mode === "deleteImage",
         });
 
         return html`
             <article @click=${this.onAnyClick}>
                 <section id="section">
-                    <button-icon class="close" icon="x" @click=${this.onCancel}></button-icon>
+                    <button-icon
+                        class="close"
+                        icon="x"
+                        @click=${this.onCancel}
+                    ></button-icon>
                     <div class="contents">
                         <div class="${titleClasses}">${title}</div>
                         <div class="divider"></div>
                         <div class="body">${body}</div>
                         <div class="options">
-                            <div @click=${this.onConfirm} class="confirm">${confirm}</div>
-                            <div @click=${this.onCancel} class="cancel">${cancel}</div>
+                            <div @click=${this.onConfirm} class="confirm">
+                                ${confirm}
+                            </div>
+                            <div @click=${this.onCancel} class="cancel">
+                                ${cancel}
+                            </div>
                         </div>
                     </div>
                 </section>
@@ -173,4 +191,3 @@ export class _ extends BaseButton {
         `;
     }
 }
-

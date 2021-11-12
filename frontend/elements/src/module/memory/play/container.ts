@@ -1,19 +1,24 @@
-import { LitElement, html, css, customElement, property, unsafeCSS } from "lit-element";
+import {
+    LitElement,
+    html,
+    css,
+    customElement,
+    property,
+    unsafeCSS,
+} from "lit-element";
 import { mediaUi } from "@utils/path";
-import {ThemeId} from "@elements/_themes/themes";
-
+import { ThemeId } from "@elements/_themes/themes";
 
 @customElement("memory-container")
 export class _ extends LitElement {
     static get styles() {
         return [
             css`
-
-            :host {
-                position: absolute;
-                top: 0;
-                left: 0;
-            }
+                :host {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                }
                 .bg {
                     position: absolute;
                     top: 0;
@@ -23,8 +28,8 @@ export class _ extends LitElement {
                 }
                 .fg {
                     display: grid;
-                    grid-template-columns: 1fr calc(1432rem * (1920/1719));
-                    column-gap: calc(56rem * (1920/1719));
+                    grid-template-columns: 1fr calc(1432rem * (1920 / 1719));
+                    column-gap: calc(56rem * (1920 / 1719));
                     width: 100%;
                     height: 100%;
                     background-size: cover;
@@ -46,6 +51,6 @@ export class _ extends LitElement {
                     <slot name="main"></slot>
                 </div>
             </div>
-        `
+        `;
     }
 }

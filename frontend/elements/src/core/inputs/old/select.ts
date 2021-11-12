@@ -11,7 +11,7 @@ export class _ extends BaseSelect {
             ...super.styles,
             css`
                 .icon {
-                    transition: transform .3s;
+                    transition: transform 0.3s;
                 }
                 :host([open]) .icon {
                     transform: rotate(180deg);
@@ -55,9 +55,12 @@ export class _ extends BaseSelect {
                 @click="${this.focus}"
             >
                 ${super.render()}
-                <img-ui slot="icon" class="icon" path="core/_common/chevron-down-blue.svg"></img-ui>
+                <img-ui
+                    slot="icon"
+                    class="icon"
+                    path="core/_common/chevron-down-blue.svg"
+                ></img-ui>
             </input-wrapper>
-
         `;
     }
 }

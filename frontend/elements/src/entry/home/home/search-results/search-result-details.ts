@@ -1,31 +1,40 @@
-import { LitElement, html, css, customElement, property, internalProperty } from 'lit-element';
+import {
+    LitElement,
+    html,
+    css,
+    customElement,
+    property,
+    internalProperty,
+} from "lit-element";
 
-@customElement('home-search-result-details')
+@customElement("home-search-result-details")
 export class _ extends LitElement {
     static get styles() {
-        return [css`
-            :host {
-                --closed-height: 38px;
-                display: grid;
-                grid-template-columns: 1fr min-content;
-                height: var(--closed-height);
-                overflow: hidden;
-            }
-            :host([open]) {
-                height: unset;
-            }
-            .collapse-icon::after {
-                content: '>';
-                cursor: pointer;
-                display: inline-block;
-                transform: rotate(90deg);
-                transition: transform .3s;
-                line-height: 38px;
-            }
-            :host([open]) .collapse-icon::after {
-                transform: rotate(-90deg);
-            }
-        `];
+        return [
+            css`
+                :host {
+                    --closed-height: 38px;
+                    display: grid;
+                    grid-template-columns: 1fr min-content;
+                    height: var(--closed-height);
+                    overflow: hidden;
+                }
+                :host([open]) {
+                    height: unset;
+                }
+                .collapse-icon::after {
+                    content: ">";
+                    cursor: pointer;
+                    display: inline-block;
+                    transform: rotate(90deg);
+                    transition: transform 0.3s;
+                    line-height: 38px;
+                }
+                :host([open]) .collapse-icon::after {
+                    transform: rotate(-90deg);
+                }
+            `,
+        ];
     }
 
     @property({ type: Boolean, reflect: true })
@@ -36,7 +45,7 @@ export class _ extends LitElement {
         if (!this.open) {
             this.dispatchEvent(new Event("closed"));
         }
-    }
+    };
 
     render() {
         return html`
@@ -47,9 +56,6 @@ export class _ extends LitElement {
         `;
     }
 }
-
-
-
 
 // import { LitElement, html, css, customElement, property } from 'lit-element';
 

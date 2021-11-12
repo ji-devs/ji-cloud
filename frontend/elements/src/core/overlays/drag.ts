@@ -1,19 +1,27 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 import "./container";
 import "./content";
-import { MoveStrategy, ZLayer, Anchor, ContentAnchor, TrackerProp } from "./content";
+import {
+    MoveStrategy,
+    ZLayer,
+    Anchor,
+    ContentAnchor,
+    TrackerProp,
+} from "./content";
 import "@elements/core/drag/container";
 
 @customElement("overlay-drag")
 export class _ extends LitElement {
     static get styles() {
-        return [css`
-            overlay-content {
-                /* since drag-container can be dragged away, make sure that the area is not covered */
-                height: 0;
-                width: 0;
-            }
-        `];
+        return [
+            css`
+                overlay-content {
+                    /* since drag-container can be dragged away, make sure that the area is not covered */
+                    height: 0;
+                    width: 0;
+                }
+            `,
+        ];
     }
 
     @property({ type: Boolean, reflect: true })
@@ -21,32 +29,40 @@ export class _ extends LitElement {
 
     //pass through
     @property()
-    container:TrackerProp | undefined = "mainOrWindow";
+    container: TrackerProp | undefined = "mainOrWindow";
 
     @property()
-    target:TrackerProp | undefined;
+    target: TrackerProp | undefined;
 
     @property()
-    strategy:MoveStrategy = "none";
+    strategy: MoveStrategy = "none";
 
-    @property({reflect: true})
-    zLayer:ZLayer | undefined = "drag";
-
-    @property()
-    contentAnchor:ContentAnchor = "oppositeH";
+    @property({ reflect: true })
+    zLayer: ZLayer | undefined = "drag";
 
     @property()
-    targetAnchor:Anchor = "tr";
+    contentAnchor: ContentAnchor = "oppositeH";
 
-    @property({type: Number})
-    marginX:number = 0;
+    @property()
+    targetAnchor: Anchor = "tr";
 
-    @property({type: Number})
-    marginY:number = 0;
+    @property({ type: Number })
+    marginX: number = 0;
+
+    @property({ type: Number })
+    marginY: number = 0;
 
     render() {
-
-        const {container, target, strategy, zLayer,marginX, marginY, contentAnchor, targetAnchor, } = this;
+        const {
+            container,
+            target,
+            strategy,
+            zLayer,
+            marginX,
+            marginY,
+            contentAnchor,
+            targetAnchor,
+        } = this;
         // return html`<slot></slot>`
         return html`
             <overlay-content

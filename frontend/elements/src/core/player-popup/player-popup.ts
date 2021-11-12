@@ -1,4 +1,4 @@
-import { LitElement, html, css, customElement } from 'lit-element';
+import { LitElement, html, css, customElement } from "lit-element";
 
 const CSS_RULE_WEBKIT = `
     :root::-webkit-scrollbar {
@@ -32,13 +32,13 @@ export class _ extends LitElement {
                     grid-row: 1;
                     grid-column: 1;
                 }
-                ::slotted([slot=iframe]) {
+                ::slotted([slot="iframe"]) {
                     height: 100%;
                     width: 100%;
                     background-color: #ffffff;
                     border: 0;
                 }
-                ::slotted([slot=close]) {
+                ::slotted([slot="close"]) {
                     justify-self: end;
                     align-self: start;
                     margin: 16px;
@@ -51,10 +51,10 @@ export class _ extends LitElement {
                     cursor: pointer;
                     font-size: 32px;
                     line-height: 1em;
-                    font-family: 'OpenSans-light';
+                    font-family: "OpenSans-light";
                     z-index: 1;
                 }
-            `
+            `,
         ];
     }
 

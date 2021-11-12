@@ -3,7 +3,10 @@ import { OptionItem } from "./options-interfaces";
 import { OptionItemMixin } from "./option-item-mixin";
 
 @customElement("base-option")
-export class BaseOption extends OptionItemMixin(LitElement) implements OptionItem {
+export class BaseOption
+    extends OptionItemMixin(LitElement)
+    implements OptionItem
+{
     static get styles() {
         return [
             css`
@@ -21,16 +24,15 @@ export class BaseOption extends OptionItemMixin(LitElement) implements OptionIte
 
     public toggleSelected() {
         // deselection only allowed when in multiple mode
-        if(!this.selected || this.container?.multiple) {
-            if(this.container) {
-                if(!this.selected) {
+        if (!this.selected || this.container?.multiple) {
+            if (this.container) {
+                if (!this.selected) {
                     this.container.optionSelected();
                     this.selected = true;
                 } else {
                     this.container.optionDeselected();
                     this.selected = false;
                 }
-                
             }
             this.dispatchSelectedChange();
         }
@@ -43,12 +45,14 @@ export class BaseOption extends OptionItemMixin(LitElement) implements OptionIte
     }
 
     private dispatchSelectedChange() {
-        this.dispatchEvent(new CustomEvent("custom-selected", {
-            bubbles: true, // should be here?
-            detail: {
-                selected: this.selected
-            }
-        }));
+        this.dispatchEvent(
+            new CustomEvent("custom-selected", {
+                bubbles: true, // should be here?
+                detail: {
+                    selected: this.selected,
+                },
+            })
+        );
     }
 
     connectedCallback() {
@@ -64,8 +68,6 @@ export class BaseOption extends OptionItemMixin(LitElement) implements OptionIte
     }
 
     render() {
-        return html`
-            <slot></slot>
-        `;
+        return html` <slot></slot> `;
     }
 }

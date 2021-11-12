@@ -1,25 +1,21 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 
-
 @customElement("vertical-full")
 export class _ extends LitElement {
-  static get styles() {
-    return [
-      css`
-        div {
-          width: 100%;
-          height: 1px;
-          
-        }
-      
-      `,
-    ];
-  }
+    static get styles() {
+        return [
+            css`
+                div {
+                    width: 100%;
+                    height: 1px;
+                }
+            `,
+        ];
+    }
 
+    render() {
+        const {} = this;
 
-  render() {
-    const {} = this;
-
-    return html` <div ></div> `;
-  }
+        return html` <div></div> `;
+    }
 }

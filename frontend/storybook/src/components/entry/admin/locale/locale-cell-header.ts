@@ -1,23 +1,22 @@
 import "@elements/entry/admin/locale/locale-cell-header";
-import {argsToAttrs} from "@utils/attributes";
-
+import { argsToAttrs } from "@utils/attributes";
 
 export default {
-  title: 'Entry/Admin/Locale',
-}
+    title: "Entry/Admin/Locale",
+};
 
 interface Args {
-    label: string,
-    adminOnly: boolean,
+    label: string;
+    adminOnly: boolean;
 }
 
 const DEFAULT_ARGS: Args = {
     label: "Label",
     adminOnly: false,
-}
+};
 
 export const LocaleCellHeader = (props?: Partial<Args>) => {
-    props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
+    props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
 
     return `
         <locale-cell-header ${argsToAttrs(props)}>
@@ -29,7 +28,7 @@ export const LocaleCellHeader = (props?: Partial<Args>) => {
             </select>
             <locale-sort-button slot="actions"></locale-sort-button>
         </locale-cell-header>
-    `
-}
+    `;
+};
 
 LocaleCellHeader.args = DEFAULT_ARGS;

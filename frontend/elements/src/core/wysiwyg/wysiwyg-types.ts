@@ -29,16 +29,16 @@ export enum Align {
 }
 
 export interface ControllerState {
-    font: Font,
-    element: ElementType,
-    weight: Weight,
-    align: Align,
-    fontSize: FontSize,
-    color?: Color,
-    highlightColor?: Color,
-    boxColor?: Color,
-    italic: boolean,
-    underline: boolean,
+    font: Font;
+    element: ElementType;
+    weight: Weight;
+    align: Align;
+    fontSize: FontSize;
+    color?: Color;
+    highlightColor?: Color;
+    boxColor?: Color;
+    italic: boolean;
+    underline: boolean;
     indentCount: IndentCount;
 }
 
@@ -56,17 +56,14 @@ export const defaultState: ControllerState = {
     italic: false,
     underline: false,
     indentCount: 0,
-}
+};
 
-export type KeyLevel = 'leaf' | 'element' | 'root';
+export type KeyLevel = "leaf" | "element" | "root";
 
 export function getKeyLevel<K extends keyof ControllerState>(key: K): KeyLevel {
-    if(key === "align" || key === "indentCount")
-        return 'element';
-    if(key === "boxColor")
-        return 'root';
-    else
-        return 'leaf';
+    if (key === "align" || key === "indentCount") return "element";
+    if (key === "boxColor") return "root";
+    else return "leaf";
 }
 
 export type ControlName = keyof ControllerState;

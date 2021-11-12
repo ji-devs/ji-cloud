@@ -1,13 +1,13 @@
 import rust from "@wasm-tool/rollup-plugin-rust";
 import nodeResolve from "@rollup/plugin-node-resolve";
-import injectProcessEnv from 'rollup-plugin-inject-process-env';
-import {getEnv} from "./rollup.common.js";
+import injectProcessEnv from "rollup-plugin-inject-process-env";
+import { getEnv } from "./rollup.common.js";
 
-const {URL_FRONTEND_RELEASE} = require("../config/constants");
+const { URL_FRONTEND_RELEASE } = require("../config/constants");
 
-let {APP_NAME} = process.env;
+let { APP_NAME } = process.env;
 
-if(!APP_NAME) {
+if (!APP_NAME) {
     console.error("INVALID APP_NAME!");
     process.exit(1);
 }
@@ -24,10 +24,10 @@ export default {
     plugins: [
         rust({
             serverPath: `${URL_FRONTEND_RELEASE}/${APP_NAME}/js/`,
-			cargoArgs: ["--features", "release"],
+            cargoArgs: ["--features", "release"],
             debug: false,
         }),
-		nodeResolve(),
+        nodeResolve(),
         injectProcessEnv(getEnv()),
     ],
 };

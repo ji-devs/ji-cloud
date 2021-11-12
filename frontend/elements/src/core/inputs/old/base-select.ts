@@ -13,7 +13,8 @@ export class BaseSelect extends LitElement {
                 .input {
                     display: grid;
                 }
-                .input .value, .input .placeholder {
+                .input .value,
+                .input .placeholder {
                     grid-column: 1;
                     overflow: hidden;
                     text-overflow: ellipsis;
@@ -54,19 +55,25 @@ export class BaseSelect extends LitElement {
         return html`
             <anchored-overlay
                 ?open="${this.open}"
-                @close="${() => this.open = false}"
+                @close="${() => (this.open = false)}"
                 ?autoClose="${false}"
                 positionY="bottom-out"
                 positionX="left-in"
                 tabindex="0"
                 part="anchored-overlay"
             >
-                <div slot="anchor" class="input" @click=${() => this.toggleOpen()}>
-                    ${ this.value ? (
-                        html`<span class="value" title="${this.value}">${this.value}</span>`
-                    ) : (
-                        html`<span class="placeholder">${this.placeholder}</span>`
-                    )}
+                <div
+                    slot="anchor"
+                    class="input"
+                    @click=${() => this.toggleOpen()}
+                >
+                    ${this.value
+                        ? html`<span class="value" title="${this.value}"
+                              >${this.value}</span
+                          >`
+                        : html`<span class="placeholder"
+                              >${this.placeholder}</span
+                          >`}
                 </div>
                 <slot slot="overlay"></slot>
             </anchored-overlay>

@@ -1,4 +1,4 @@
-import { LitElement, html, css, customElement, property } from 'lit-element';
+import { LitElement, html, css, customElement, property } from "lit-element";
 import "@elements/core/images/ui";
 import "@elements/core/progress-bar/progress-bar";
 
@@ -15,22 +15,22 @@ export class _ extends LitElement {
                 }
                 nav {
                     display: flex;
-                    justify-content: space-between
+                    justify-content: space-between;
                 }
-                ::slotted([slot=back]) {
+                ::slotted([slot="back"]) {
                     /* only add margin in back exists */
                     margin-bottom: 16px;
                 }
-                ::slotted([slot=close]) {
+                ::slotted([slot="close"]) {
                     font-size: 24px;
                     color: var(--dark-gray-5);
                     font-weight: 300;
                 }
-                ::slotted(button-icon[slot=close]) {
+                ::slotted(button-icon[slot="close"]) {
                     width: 12px;
                     height: 12px;
                 }
-                ::slotted([slot=heading]) {
+                ::slotted([slot="heading"]) {
                     color: #fd7076;
                     font-size: 24px;
                     font-weight: 600;
@@ -38,7 +38,7 @@ export class _ extends LitElement {
                     padding-bottom: 16px;
                     border-bottom: solid 1px #d5e4ff;
                 }
-            `
+            `,
         ];
     }
 

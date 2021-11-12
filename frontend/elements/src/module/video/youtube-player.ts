@@ -1,7 +1,21 @@
-import { LitElement, html, css, customElement, property, query, PropertyValues } from "lit-element";
+import {
+    LitElement,
+    html,
+    css,
+    customElement,
+    property,
+    query,
+    PropertyValues,
+} from "lit-element";
 import "@elements/core/images/ui";
 
-export type StateName = "unstarted" | "ended" | "playing" | "paused" | "buffering" | "cued";
+export type StateName =
+    | "unstarted"
+    | "ended"
+    | "playing"
+    | "paused"
+    | "buffering"
+    | "cued";
 
 declare global {
     interface Window {
@@ -63,53 +77,51 @@ export class _ extends LitElement {
     }
 
     firstUpdated() {
-        if(!window.youTubeEvents) {
-            window.youTubeEvents = new YouTubeEvents;
+        if (!window.youTubeEvents) {
+            window.youTubeEvents = new YouTubeEvents();
         }
 
-        if(window.youTubeEvents.apiReady) {
+        if (window.youTubeEvents.apiReady) {
             this.init();
         } else {
-            window.youTubeEvents.addEventListener("api-ready", this.init, {once: true});
+            window.youTubeEvents.addEventListener("api-ready", this.init, {
+                once: true,
+            });
         }
 
         this.setupOnEnded();
     }
 
     updated(changedProperties: PropertyValues) {
-        if (changedProperties.has('muted')) {
+        if (changedProperties.has("muted")) {
             this.mutedChanged();
         }
-        if (changedProperties.has('loop')) {
+        if (changedProperties.has("loop")) {
             this.loopChanged();
         }
-        if (changedProperties.has('autoplay')) {
+        if (changedProperties.has("autoplay")) {
             this.autoplayChanged();
         }
-        if (changedProperties.has('captions')) {
+        if (changedProperties.has("captions")) {
             console.log("TODO: captions change");
         }
     }
 
     private setupOnEnded() {
         this.addEventListener("youtube-ended", () => {
-            if(this.loop)
-                this.play();
+            if (this.loop) this.play();
         });
     }
 
     private mutedChanged() {
-        if(this.muted)
-            this.player?.mute();
-        else
-            this.player?.unMute();
+        if (this.muted) this.player?.mute();
+        else this.player?.unMute();
     }
     private loopChanged() {
         this.player?.setLoop(this.loop);
     }
     private autoplayChanged() {
-        if(this.autoplay)
-            this.player?.playVideo();
+        if (this.autoplay) this.player?.playVideo();
         // TODO: what if the video is not loaded yet? Have to deal with this one
     }
 
@@ -135,34 +147,33 @@ export class _ extends LitElement {
                 onStateChange: (e: YT.OnStateChangeEvent) => {
                     const stateName = this.stateName(e.data);
 
-                    const eventName = 'youtube-' + stateName.toLowerCase();
+                    const eventName = "youtube-" + stateName.toLowerCase();
                     this.dispatchEvent(new Event(eventName));
                 },
                 onReady: () => {
-                    if(this.muted) {
+                    if (this.muted) {
                         this.player?.mute();
                     }
 
                     this.dispatchEvent(new Event("ready"));
                 },
-            }
+            },
         });
-    }
+    };
 
     private stateName(num: number): StateName {
         const state = YT.PlayerState;
-        return Object.keys(state).find(key => (state as any)[key] === num)?.toLowerCase() as StateName;
+        return Object.keys(state)
+            .find((key) => (state as any)[key] === num)
+            ?.toLowerCase() as StateName;
     }
 
     render() {
-        return html`
-            <div id="container"></div>
-        `;
+        return html` <div id="container"></div> `;
     }
 }
 
 class YouTubeEvents extends EventTarget {
-
     private _apiReady: boolean = false;
     get apiReady(): boolean {
         return this._apiReady;
@@ -176,10 +187,10 @@ class YouTubeEvents extends EventTarget {
     }
 
     private createScript() {
-        var tag = document.createElement('script');
+        const tag = document.createElement("script");
 
         tag.src = "https://www.youtube.com/iframe_api";
-        var firstScriptTag = document.getElementsByTagName('script')[0];
+        const firstScriptTag = document.getElementsByTagName("script")[0];
         firstScriptTag.parentNode!.insertBefore(tag, firstScriptTag);
     }
 
@@ -187,6 +198,6 @@ class YouTubeEvents extends EventTarget {
         window.onYouTubeIframeAPIReady = () => {
             this._apiReady = true;
             this.dispatchEvent(new Event("api-ready"));
-        }
+        };
     }
 }

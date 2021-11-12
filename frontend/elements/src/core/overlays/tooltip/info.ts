@@ -1,6 +1,12 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 import { nothing } from "lit-html";
-import { TrackerProp, ZLayer, Anchor, ContentAnchor, MoveStrategy } from "@elements/core/overlays/content";
+import {
+    TrackerProp,
+    ZLayer,
+    Anchor,
+    ContentAnchor,
+    MoveStrategy,
+} from "@elements/core/overlays/content";
 import "@elements/core/buttons/icon";
 import "./container";
 import { Color } from "./container";
@@ -258,8 +264,6 @@ function renderShowId(showId: string, onClose: () => any) {
         onClose();
     };
     return html`
-        <div @click=${onClick} class="noshow">
-            ${STR_NO_SHOW_AGAIN}
-        </div>
+        <div @click=${onClick} class="noshow">${STR_NO_SHOW_AGAIN}</div>
     `;
 }

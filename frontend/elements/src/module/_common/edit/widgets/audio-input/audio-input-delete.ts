@@ -1,6 +1,6 @@
 import { LitElement, html, css, customElement } from "lit-element";
 
-const STR_DELETE = 'Delete';
+const STR_DELETE = "Delete";
 
 @customElement("audio-input-delete")
 export class _ extends LitElement {
@@ -24,8 +24,10 @@ export class _ extends LitElement {
         return html`
             <button-rect kind="text" color="blue">
                 <div class="content">
-                    <img-ui path="module/_common/edit/widgets/sidebar/audio-input/delete.svg"></img-ui>
-                    ${ STR_DELETE }
+                    <img-ui
+                        path="module/_common/edit/widgets/sidebar/audio-input/delete.svg"
+                    ></img-ui>
+                    ${STR_DELETE}
                 </div>
             </button-rect>
         `;

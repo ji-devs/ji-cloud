@@ -1,5 +1,12 @@
 import { mediaUi } from "@utils/path";
-import { LitElement, html, css, customElement, property, unsafeCSS } from "lit-element";
+import {
+    LitElement,
+    html,
+    css,
+    customElement,
+    property,
+    unsafeCSS,
+} from "lit-element";
 
 @customElement("jig-play-sidebar")
 export class _ extends LitElement {
@@ -11,13 +18,13 @@ export class _ extends LitElement {
                     grid-template-columns: 416px auto;
                     justify-content: start;
                     transform: translateX(-424px);
-                    transition: transform .3s;
+                    transition: transform 0.3s;
                     height: 100%;
                 }
                 :host([open]) {
                     transform: translateX(0px);
                 }
-                ::slotted([slot=opener]) {
+                ::slotted([slot="opener"]) {
                     background-color: transparent;
                     border: 0;
                     padding: 0;
@@ -28,19 +35,21 @@ export class _ extends LitElement {
                     width: 120px;
                     cursor: pointer;
                     margin-left: -40px;
-                    transition: transform .2s, opacity .2s;
+                    transition: transform 0.2s, opacity 0.2s;
                     transform-origin: left top;
                     border-radius: 50%;
-                    background-image: url(${unsafeCSS(mediaUi("entry/jig/play/sidebar/opener.svg"))});
+                    background-image: url(${unsafeCSS(
+                        mediaUi("entry/jig/play/sidebar/opener.svg")
+                    )});
                     background-position: center;
                     background-color: transparent;
                     box-shadow: 0 3px 6px 0 rgb(0 0 0 / 16%);
                 }
-                :host([open]) ::slotted([slot=opener]) {
+                :host([open]) ::slotted([slot="opener"]) {
                     opacity: 0;
                     pointer-events: none;
                 }
-                ::slotted([slot=opener]:hover) {
+                ::slotted([slot="opener"]:hover) {
                     transform: rotate(-20deg);
                 }
                 main {
@@ -65,12 +74,12 @@ export class _ extends LitElement {
                     padding: 20px 24px;
                     display: grid;
                     row-gap: 14px;
-                    grid-template-columns: 1fr auto
+                    grid-template-columns: 1fr auto;
                 }
                 .logo {
                     place-self: start;
                 }
-                ::slotted([slot=close]) {
+                ::slotted([slot="close"]) {
                     align-self: start;
                     height: 32px;
                     width: 32px;
@@ -96,11 +105,11 @@ export class _ extends LitElement {
                 }
                 ::slotted(*)::part(overlay) {
                     z-index: 2;
-                    background-color: green
+                    background-color: green;
                 }
                 ::slotted(::part(overlay)) {
                     z-index: 2;
-                    background-color: red
+                    background-color: red;
                 }
                 .modules {
                     grid-column: 1;

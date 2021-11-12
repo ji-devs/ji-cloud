@@ -15,7 +15,7 @@ export class _ extends LitElement {
                     grid-row: 1;
                 }
                 :host(:not([playing]))::after {
-                    content: '';
+                    content: "";
                     grid-column: 1;
                     grid-row: 1;
                     margin: 0 auto;

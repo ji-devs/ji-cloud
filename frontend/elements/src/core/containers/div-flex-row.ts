@@ -3,24 +3,23 @@ import { LitElement, html, css, customElement, property } from "lit-element";
 
 @customElement("div-flex-row")
 export class _ extends LitElement {
-  static get styles() {
-    return [
-      css`
-        div {
-          display: flex;
-        
-        }
-      `,
-    ];
-  }
+    static get styles() {
+        return [
+            css`
+                div {
+                    display: flex;
+                }
+            `,
+        ];
+    }
 
-  render() {
-    const {} = this;
+    render() {
+        const {} = this;
 
-    return html`
-      <div>
-        <slot></slot>
-      </div>
-    `;
-  }
+        return html`
+            <div>
+                <slot></slot>
+            </div>
+        `;
+    }
 }

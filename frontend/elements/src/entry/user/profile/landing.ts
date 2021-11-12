@@ -1,4 +1,12 @@
-import { LitElement, html, css, customElement, property, queryAll, query } from "lit-element";
+import {
+    LitElement,
+    html,
+    css,
+    customElement,
+    property,
+    queryAll,
+    query,
+} from "lit-element";
 
 const STR_BASIC_INFO = "Basic info";
 const STR_PROFILE_IMAGE = "Profile image";
@@ -29,7 +37,7 @@ export class _ extends LitElement {
                     grid-template-columns: 400px 1fr;
                     height: 100vh;
                 }
-                ::slotted([slot=page-header]) {
+                ::slotted([slot="page-header"]) {
                     grid-column: 1 / -1;
                 }
                 aside {
@@ -60,7 +68,7 @@ export class _ extends LitElement {
                     display: grid;
                     row-gap: 24px;
                     padding: 32px 0;
-                    text-align: left
+                    text-align: left;
                 }
                 nav a {
                     color: var(--main-blue);
@@ -144,14 +152,14 @@ export class _ extends LitElement {
                     row-gap: 16px;
                     width: 156px;
                 }
-                ::slotted([slot=editable-profile-image]) {
+                ::slotted([slot="editable-profile-image"]) {
                     grid-row: 1;
                     grid-column: 1;
                     overflow: hidden;
                     border-radius: 50%;
                     height: 156px;
                 }
-                ::slotted([slot=profile-image-edit]) {
+                ::slotted([slot="profile-image-edit"]) {
                     grid-row: 1;
                     grid-column: 1;
                     place-self: end;
@@ -190,17 +198,17 @@ export class _ extends LitElement {
         e.preventDefault();
         const id = (e.target as HTMLAnchorElement).getAttribute("href")!;
         this.shadowRoot!.querySelector(id)!.scrollIntoView({
-            behavior: 'smooth'
+            behavior: "smooth",
         });
-    }
+    };
 
     firstUpdated() {
         this.sections = this.shadowRoot!.querySelectorAll("section");
 
         const links = this.shadowRoot!.querySelectorAll("a[href^='#']");
-        let map = new Map;
+        const map = new Map();
         for (const a of links) {
-            let key = a.getAttribute("href")!.substring(1);
+            const key = a.getAttribute("href")!.substring(1);
             map.set(key, a);
         }
         this.links = map;
@@ -211,7 +219,7 @@ export class _ extends LitElement {
     recalculateActive = () => {
         let active = this.sections[0];
         for (const section of this.sections) {
-            if(this.main.scrollTop >= section.offsetTop) {
+            if (this.main.scrollTop >= section.offsetTop) {
                 active = section;
             } else {
                 break;
@@ -219,12 +227,10 @@ export class _ extends LitElement {
         }
 
         for (const [id, link] of this.links.entries()) {
-            if (id === active.id)
-                link.classList.add("active");
-            else
-                link.classList.remove("active");
+            if (id === active.id) link.classList.add("active");
+            else link.classList.remove("active");
         }
-    }
+    };
 
     render() {
         return html`
@@ -236,9 +242,17 @@ export class _ extends LitElement {
                 <div class="name">${this.name}</div>
                 <div class="email-address">${this.email}</div>
                 <nav>
-                    <a @click="${this.scrollToSection}" href="#basic-info">${STR_BASIC_INFO}</a>
-                    <a @click="${this.scrollToSection}" href="#location">${STR_LOCATION}</a>
-                    <a @click="${this.scrollToSection}" href="#teaching-settings">${STR_TEACHING_SETTINGS}</a>
+                    <a @click="${this.scrollToSection}" href="#basic-info"
+                        >${STR_BASIC_INFO}</a
+                    >
+                    <a @click="${this.scrollToSection}" href="#location"
+                        >${STR_LOCATION}</a
+                    >
+                    <a
+                        @click="${this.scrollToSection}"
+                        href="#teaching-settings"
+                        >${STR_TEACHING_SETTINGS}</a
+                    >
                 </nav>
             </aside>
             <main @scroll="${this.recalculateActive}">

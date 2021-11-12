@@ -3,13 +3,12 @@ import { LitElement, html, css, customElement, property } from "lit-element";
 export type Kind = "students" | "embed" | "copy";
 
 const STR_LABEL_LOOKUP: {
-    [key in Kind]: string
+    [key in Kind]: string;
 } = {
-    ['students']: "Share with students",
-    ['embed']: "Embed this JIG",
-    ['copy']: "Copy URL",
+    ["students"]: "Share with students",
+    ["embed"]: "Embed this JIG",
+    ["copy"]: "Copy URL",
 };
-
 
 @customElement("share-jig-option")
 export class _ extends LitElement {

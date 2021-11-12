@@ -1,14 +1,14 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
-import { nothing} from 'lit-html';
+import { nothing } from "lit-html";
 
 export type Color = "green" | "blue" | "white";
 export type IconKind = "ji" | "";
 
 @customElement("card-banner")
 export class _ extends LitElement {
-  static get styles() {
-    return [
-      css`
+    static get styles() {
+        return [
+            css`
         .wrapper{
             width: 354px;
             height: 40px;
@@ -41,38 +41,33 @@ export class _ extends LitElement {
             font-weight:500
         }
     `,
-    ];
-  }
+        ];
+    }
 
- 
-  @property()
-  label: string = "";
+    @property()
+    label: string = "";
 
-  @property()
-  team: IconKind = "ji";
+    @property()
+    team: IconKind = "ji";
 
-  @property()
-  color: Color = "blue";
+    @property()
+    color: Color = "blue";
 
-  @property()
-  kind: IconKind = "ji";
+    @property()
+    kind: IconKind = "ji";
 
+    render() {
+        const { label, color, kind } = this;
+        const iconPath = kind === "ji" ? "JI_Badge.svg" : nothing;
+        const teamtitle = kind === "ji" ? "Ji Team -  " : nothing;
 
-  render() {
-    const {label, color, kind } = this;
-    const iconPath = kind === "ji" ? "JI_Badge.svg"
-        : nothing;
-    const teamtitle = kind === "ji" ? "Ji Team -  "
-        : nothing;
-
-
-    return html`
-      <div class="wrapper ${color}">
-        <img-ui path="${iconPath}"></img-ui>
-        <p class="team">${teamtitle}</p>
-        <p>${label}</p>
-      </div>
-        
-    `;
-  }
+        return html`
+            <div class="wrapper ${color}">
+                <img-ui path="${iconPath}"></img-ui>
+                <p class="team">${teamtitle}</p>
+                <p>${label}</p>
+            </div>
+              
+        `;
+    }
 }

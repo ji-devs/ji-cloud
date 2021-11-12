@@ -1,40 +1,39 @@
-import {argsToAttrs} from "@utils/attributes";
+import { argsToAttrs } from "@utils/attributes";
 import "@elements/entry/admin/images/search/image-cell";
 import { Mode } from "@elements/entry/admin/images/search/image-cell";
-import {Ji as MockJiImage} from "~/components/core/images/ji";
+import { Ji as MockJiImage } from "~/components/core/images/ji";
 
 export default {
-    title: "Entry/Admin/Images/Search "
-}
+    title: "Entry/Admin/Images/Search ",
+};
 
 interface Args {
-    name:string,
-    mode: Mode,
-    active:boolean,
+    name: string;
+    mode: Mode;
+    active: boolean;
 }
 
-const DEFAULT_ARGS:Args = {
+const DEFAULT_ARGS: Args = {
     name: "A chair",
-    mode:"published",
-    active:false,
-}
+    mode: "published",
+    active: false,
+};
 
-export const ImageCell = (props?:Partial<Args> & {slot?: string}) => {
-
-    props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
+export const ImageCell = (props?: Partial<Args> & { slot?: string }) => {
+    props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
 
     return `
     <search-image-cell ${argsToAttrs(props)}>
-      ${MockJiImage({size: "thumb", slot: "image"})}
+      ${MockJiImage({ size: "thumb", slot: "image" })}
     </search-image-cell >`;
-}
+};
 
 ImageCell.args = DEFAULT_ARGS;
 ImageCell.argTypes = {
-  mode  : {
+    mode: {
         control: {
-            type: 'inline-radio',
-            options: ["published", "saved"]
-        }
-    }
-}
+            type: "inline-radio",
+            options: ["published", "saved"],
+        },
+    },
+};

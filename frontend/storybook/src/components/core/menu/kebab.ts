@@ -1,26 +1,24 @@
-import {argsToAttrs} from "@utils/attributes";
+import { argsToAttrs } from "@utils/attributes";
 import "@elements/core/menu/kebab";
 
-
 export default {
-    title: "Core / Menu"
-}
+    title: "Core / Menu",
+};
 
 interface Args {
-    visible:boolean,
-    width: number,
+    visible: boolean;
+    width: number;
 }
 
-const DEFAULT_ARGS:Args = {
+const DEFAULT_ARGS: Args = {
     width: 300,
     visible: true,
-}
+};
 
-export const Kebab = (props?:Args) => {
+export const Kebab = (props?: Args) => {
+    props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
 
-    props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
-
-    const {width, ...menuProps} = props;
+    const { width, ...menuProps } = props;
     return `
     <div style="position: absolute; top: 100px; left: 100px;">
     <menu-kebab ${argsToAttrs(menuProps)}>
@@ -32,6 +30,6 @@ export const Kebab = (props?:Args) => {
         </menu-kebab>
         </div>
         `;
-}
+};
 
 Kebab.args = DEFAULT_ARGS;

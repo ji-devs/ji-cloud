@@ -1,9 +1,9 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 @customElement("search-image")
 export class _ extends LitElement {
-  static get styles() {
-    return [
-      css`
+    static get styles() {
+        return [
+            css`
         .image-wrapper{
             height:200px;
             width:354px;
@@ -16,19 +16,19 @@ export class _ extends LitElement {
         }
     
       }`,
-    ];
-  }
+        ];
+    }
 
-  @property()
-  image: string = "";
+    @property()
+    image: string = "";
 
-  render() {
-    const { image } = this;
+    render() {
+        const { image } = this;
 
-    return html`
-      <div class="image-wrapper">
-        <img-ui path="${image}"></img-ui>
-      </div>
-    `;
-  }
+        return html`
+            <div class="image-wrapper">
+                <img-ui path="${image}"></img-ui>
+            </div>
+        `;
+    }
 }

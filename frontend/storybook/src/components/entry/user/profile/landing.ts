@@ -1,23 +1,23 @@
-import {argsToAttrs} from "@utils/attributes";
+import { argsToAttrs } from "@utils/attributes";
 import "@elements/entry/user/profile/landing";
 import "@elements/core/inputs/composed/select/select";
 
 export default {
-    title: 'Entry / User / Profile',
-}
+    title: "Entry / User / Profile",
+};
 
 interface Args {
-    name: string,
-    email: string,
+    name: string;
+    email: string;
 }
 
-const DEFAULT_ARGS:Args = {
+const DEFAULT_ARGS: Args = {
     name: "Corinne Ossendryver",
     email: "corinne@jewishinteractive.net",
-}
+};
 
-export const Profile = (props?:Partial<Args>) => {
-    props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
+export const Profile = (props?: Partial<Args>) => {
+    props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
 
     return `
         <user-profile ${argsToAttrs(props)}>
@@ -60,7 +60,7 @@ export const Profile = (props?:Partial<Args>) => {
             <pill-close slot="affiliations" label="Charedi content"></pill-close>
             <button-rect kind="outline" color="blue" size="small" slot="affiliations-edit">Edit</button-rect>
         </user-profile>
-    `
-}
+    `;
+};
 
 Profile.args = DEFAULT_ARGS;

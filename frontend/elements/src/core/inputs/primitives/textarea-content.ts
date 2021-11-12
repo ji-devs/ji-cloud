@@ -28,7 +28,8 @@ export class _ extends LitElement {
                     top: 0;
                     left: 0;
                 }
-                textarea, span {
+                textarea,
+                span {
                     font-family: var(--font-family, Poppins);
                     /*font-size: var(--font-size, 16px);*/
                     color: var(--color, black);
@@ -51,7 +52,9 @@ export class _ extends LitElement {
                     min-height: 1em;
                 }
 
-                textarea.visible, span.measure, span.visible {
+                textarea.visible,
+                span.measure,
+                span.visible {
                     display: inline-block;
                 }
 
@@ -97,7 +100,9 @@ export class _ extends LitElement {
         let { key } = evt;
         key = key.toLowerCase();
         if (key === "escape") {
-            const input = this.shadowRoot?.getElementById("input") as HTMLInputElement;
+            const input = this.shadowRoot?.getElementById(
+                "input"
+            ) as HTMLInputElement;
             input.value = this.value;
             this.toggleEditing(false);
             this.dispatchEvent(new Event("reset"));
@@ -111,7 +116,9 @@ export class _ extends LitElement {
     lastMeasuredHeight: number = 0;
     onInput() {
         const { constrainWidth, constrainHeight } = this;
-        const input = this.shadowRoot?.getElementById("input") as HTMLInputElement;
+        const input = this.shadowRoot?.getElementById(
+            "input"
+        ) as HTMLInputElement;
         this.resizeInput();
         if (constrainWidth && constrainHeight) {
             while (
@@ -132,8 +139,12 @@ export class _ extends LitElement {
     }
 
     resizeInput = () => {
-        const input = this.shadowRoot?.getElementById("input") as HTMLInputElement;
-        const measure = this.shadowRoot?.getElementById("measure") as HTMLInputElement;
+        const input = this.shadowRoot?.getElementById(
+            "input"
+        ) as HTMLInputElement;
+        const measure = this.shadowRoot?.getElementById(
+            "measure"
+        ) as HTMLInputElement;
 
         measure.textContent = input.value as string;
 
@@ -142,7 +153,9 @@ export class _ extends LitElement {
 
         let { width, height } = rect;
         if (lastChar === "\n" || lastChar === "\r") {
-            const measureLine = this.shadowRoot?.getElementById("measure-line") as HTMLInputElement;
+            const measureLine = this.shadowRoot?.getElementById(
+                "measure-line"
+            ) as HTMLInputElement;
             const lineRect = measureLine.getBoundingClientRect();
             height += lineRect.height;
         }
@@ -169,7 +182,9 @@ export class _ extends LitElement {
             this.removeGlobalListener();
             if (editing) {
                 window.addEventListener("mousedown", this.onGlobalMouseDown);
-                const input = this.shadowRoot?.getElementById("input") as HTMLInputElement;
+                const input = this.shadowRoot?.getElementById(
+                    "input"
+                ) as HTMLInputElement;
                 if (input) {
                     input.focus();
                     input.value = this.value;
@@ -190,7 +205,9 @@ export class _ extends LitElement {
     }
 
     dispatchChange = () => {
-        const input = this.shadowRoot?.getElementById("input") as HTMLInputElement;
+        const input = this.shadowRoot?.getElementById(
+            "input"
+        ) as HTMLInputElement;
         const value = input.value;
         this.dispatchEvent(
             new CustomEvent("custom-change", {
@@ -202,7 +219,14 @@ export class _ extends LitElement {
     };
 
     render() {
-        const { value, editing, clickMode, constrainWidth, constrainHeight, disableFixedClickArea } = this;
+        const {
+            value,
+            editing,
+            clickMode,
+            constrainWidth,
+            constrainHeight,
+            disableFixedClickArea,
+        } = this;
 
         const style = styleMap({
             fontSize: this.fontSize,
@@ -218,26 +242,24 @@ export class _ extends LitElement {
         });
 
         return html`
-            ${
-                disableFixedClickArea
-                    ? nothing
-                    : html`
-                        <div
-                            class="hiddenClickArea"
-                            style=${hiddenClickAreaStyle}
-                            @dblclick=${() => {
-                                if (clickMode === "double") {
-                                    this.toggleEditing(true);
-                                }
-                            }}
-                            @click=${() => {
-                                if (clickMode === "single") {
-                                    this.toggleEditing(true);
-                                }
-                            }}
-                        ></div>
-                    `
-            }
+            ${disableFixedClickArea
+                ? nothing
+                : html`
+                      <div
+                          class="hiddenClickArea"
+                          style=${hiddenClickAreaStyle}
+                          @dblclick=${() => {
+                              if (clickMode === "double") {
+                                  this.toggleEditing(true);
+                              }
+                          }}
+                          @click=${() => {
+                              if (clickMode === "single") {
+                                  this.toggleEditing(true);
+                              }
+                          }}
+                      ></div>
+                  `}
             <textarea
                 style=${style}
                 class="${classMap({
@@ -264,7 +286,8 @@ export class _ extends LitElement {
                         this.toggleEditing(true);
                     }
                 }}
-            >${value}</span>
+                >${value}</span
+            >
             <span style=${style} id="measure" class="measure">${value}</span>
             <span style=${style} id="measure-line" class="measure">&nbsp;</span>
         `;

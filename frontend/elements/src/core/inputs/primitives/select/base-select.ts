@@ -1,13 +1,22 @@
-import { LitElement, html, css, customElement, property, query } from "lit-element";
+import {
+    LitElement,
+    html,
+    css,
+    customElement,
+    property,
+    query,
+} from "lit-element";
 import { BaseOption } from "./base-option";
 import { BaseOptionGroup } from "./base-option-group";
 import { OptionsContainer } from "./options-interfaces";
 import { OptionsCollectionMixin } from "./options-collection-mixin";
 import "@elements/core/overlays/anchored-overlay";
 
-
 @customElement("base-select")
-export class BaseSelect extends OptionsCollectionMixin(LitElement) implements OptionsContainer {
+export class BaseSelect
+    extends OptionsCollectionMixin(LitElement)
+    implements OptionsContainer
+{
     static get styles() {
         return [
             css`
@@ -58,7 +67,7 @@ export class BaseSelect extends OptionsCollectionMixin(LitElement) implements Op
     optionSelected(option: BaseOption): void {
         this.dispatchEvent(new Event("option-selected"));
 
-        if(!this.multiple) {
+        if (!this.multiple) {
             this.close();
 
             this.deselectAll(option);
@@ -70,7 +79,7 @@ export class BaseSelect extends OptionsCollectionMixin(LitElement) implements Op
     }
 
     toggleSelected() {
-        if(this.activeWithin === undefined) {
+        if (this.activeWithin === undefined) {
             // and when closed
             this.toggleOpen();
         } else {
@@ -99,7 +108,7 @@ export class BaseSelect extends OptionsCollectionMixin(LitElement) implements Op
     }
 
     private toggleOpen() {
-        if(this.open) {
+        if (this.open) {
             this.close();
         } else {
             this.openUp();
@@ -107,20 +116,25 @@ export class BaseSelect extends OptionsCollectionMixin(LitElement) implements Op
     }
 
     private triggerOpenChangeEvent() {
-        this.dispatchEvent(new CustomEvent("custom-open-change", {
-            bubbles: true, // should be here?
-            detail: {
-                open: this.open
-            }
-        }));
+        this.dispatchEvent(
+            new CustomEvent("custom-open-change", {
+                bubbles: true, // should be here?
+                detail: {
+                    open: this.open,
+                },
+            })
+        );
     }
 
     private clearAllActive(container: Array<BaseOptionGroup | BaseOption>) {
         for (const option of container) {
-            if(option.active) {
+            if (option.active) {
                 option.setInactive();
                 return; // since only one can be active at a time, we can return after finding one active
-            } else if (option instanceof BaseOptionGroup && option.activeWithin !== undefined) {
+            } else if (
+                option instanceof BaseOptionGroup &&
+                option.activeWithin !== undefined
+            ) {
                 this.clearAllActive(option.options as any[]);
             }
         }
@@ -128,8 +142,19 @@ export class BaseSelect extends OptionsCollectionMixin(LitElement) implements Op
 
     render() {
         return html`
-            <anchored-overlay ?open="${this.open}" .autoClose="${false}" @close="${this.close}" positionX="left-in" part="anchored-overlay" exportparts="overlay: anchored-overlay_overlay">
-                <slot slot="anchor" name="anchor" @click="${this.toggleOpen}"></slot>
+            <anchored-overlay
+                ?open="${this.open}"
+                .autoClose="${false}"
+                @close="${this.close}"
+                positionX="left-in"
+                part="anchored-overlay"
+                exportparts="overlay: anchored-overlay_overlay"
+            >
+                <slot
+                    slot="anchor"
+                    name="anchor"
+                    @click="${this.toggleOpen}"
+                ></slot>
                 <slot slot="overlay"></slot>
             </anchored-overlay>
         `;

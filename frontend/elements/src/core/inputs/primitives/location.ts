@@ -19,7 +19,7 @@ export class _ extends LitElement {
     placeholder: string = "";
 
     set locationAsString(v: string) {
-        if(v) {
+        if (v) {
             this.value = JSON.parse(v)?.input;
         } else {
             this.value = "";
@@ -28,22 +28,24 @@ export class _ extends LitElement {
 
     private autoComplete: any;
 
-    onLocation(data: {input: string, place: any} | null) {
-        
+    onLocation(data: { input: string; place: any } | null) {
         this.dispatchEvent(
             new CustomEvent("google-location", {
-                detail: data == null
-                    ? {}
-                    : {
-                        ...data,
-                        rawJson: JSON.stringify(data),
-                    }
+                detail:
+                    data == null
+                        ? {}
+                        : {
+                              ...data,
+                              rawJson: JSON.stringify(data),
+                          },
             })
         );
     }
 
     firstUpdated() {
-        const input = this.shadowRoot?.getElementById("input") as HTMLInputElement;
+        const input = this.shadowRoot?.getElementById(
+            "input"
+        ) as HTMLInputElement;
         this.autoComplete = bindGoogleMaps(input, this.onLocation.bind(this));
     }
 
@@ -64,7 +66,10 @@ export class _ extends LitElement {
     }
 }
 
-function bindGoogleMaps(elem: HTMLInputElement, onLocation: (data:{input: string, place: any} | null) => any) {
+function bindGoogleMaps(
+    elem: HTMLInputElement,
+    onLocation: (data: { input: string; place: any } | null) => any
+) {
     // Create the autocomplete object, restricting the search predictions to
     // geographical location types.
     const autoComplete = new google.maps.places.Autocomplete(elem, {
@@ -79,9 +84,9 @@ function bindGoogleMaps(elem: HTMLInputElement, onLocation: (data:{input: string
         const place = autoComplete.getPlace();
         const value = elem.value;
         onLocation(
-                place == null || value == null || value == ""
-                            ? null 
-                            : { input: value, place },
+            place == null || value == null || value == ""
+                ? null
+                : { input: value, place }
         );
     });
 

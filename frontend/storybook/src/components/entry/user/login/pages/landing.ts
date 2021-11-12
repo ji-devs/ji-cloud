@@ -1,27 +1,25 @@
-import {argsToAttrs} from "@utils/attributes";
+import { argsToAttrs } from "@utils/attributes";
 import "@elements/entry/user/login/pages/landing";
 import "@elements/core/buttons/rectangle";
 import "@elements/entry/user/_common/buttons/google";
 
 export default {
-  title: 'Entry / User / Login / Pages',
-}
+    title: "Entry / User / Login / Pages",
+};
 
 const STR_REGISTER = "Don't have an account yet?";
 const STR_PASSWORD = "Password";
-const STR_FORGOTTEN ="Forgot your Password?";
+const STR_FORGOTTEN = "Forgot your Password?";
 const STR_USERLABEL = "Email";
 const STR_SUBMIT = "Submit";
 const STR_PASSWORDPLACEHOLDER = "Type your password";
 const STR_USERNAMEPLACEHOLDER = "Type your username";
-interface Args {
-}
+interface Args {}
 
-const DEFAULT_ARGS:Args = {
-}
+const DEFAULT_ARGS: Args = {};
 
-export const Landing = (props?:Partial<Args>) => {
-    props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
+export const Landing = (props?: Partial<Args>) => {
+    props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
 
     const {} = props;
 
@@ -41,7 +39,7 @@ export const Landing = (props?:Partial<Args>) => {
             <button-rect kind="text" color="blue" slot="register" weight="normal">${STR_REGISTER}</button-rect>
         </page-login-landing>
     
-    `
-}
+    `;
+};
 
 Landing.args = DEFAULT_ARGS;

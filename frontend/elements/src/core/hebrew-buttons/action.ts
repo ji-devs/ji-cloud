@@ -41,9 +41,18 @@ export class _ extends LitElement {
     render() {
         return html`
             <button type="button">
-                <img-ui class="img-default" path="core/hebrew-buttons/${this.kind}.svg"></img-ui>
-                <img-ui class="img-hover" path="core/hebrew-buttons/${this.kind}-hover.svg"></img-ui>
-                <img-ui class="img-active" path="core/hebrew-buttons/${this.kind}-active.svg"></img-ui>
+                <img-ui
+                    class="img-default"
+                    path="core/hebrew-buttons/${this.kind}.svg"
+                ></img-ui>
+                <img-ui
+                    class="img-hover"
+                    path="core/hebrew-buttons/${this.kind}-hover.svg"
+                ></img-ui>
+                <img-ui
+                    class="img-active"
+                    path="core/hebrew-buttons/${this.kind}-active.svg"
+                ></img-ui>
             </button>
         `;
     }

@@ -1,23 +1,23 @@
-import {argsToAttrs} from "@utils/attributes";
+import { argsToAttrs } from "@utils/attributes";
 import "@elements/core/buttons/main";
 import { Color, Size, Kind } from "@elements/core/buttons/main";
 
 export default {
-  title: 'Core / Buttons',
-}
+    title: "Core / Buttons",
+};
 interface Args {
-    size: Size,
-    color: Color,
-    kind: Kind,
-    bold: boolean,
-    italic: boolean,
-    submit: boolean,
-    disabled: boolean,
+    size: Size;
+    color: Color;
+    kind: Kind;
+    bold: boolean;
+    italic: boolean;
+    submit: boolean;
+    disabled: boolean;
 
-    contents: string,
+    contents: string;
 }
 
-const DEFAULT_ARGS:Args = {
+const DEFAULT_ARGS: Args = {
     size: "medium",
     color: "red",
     kind: "rect",
@@ -27,33 +27,33 @@ const DEFAULT_ARGS:Args = {
     disabled: false,
 
     contents: "Submit",
-}
+};
 
-export const Main = (props?:Partial<Args>) => {
-    props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
+export const Main = (props?: Partial<Args>) => {
+    props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
 
     return `<button-main ${argsToAttrs(props)}>${props.contents}</button-main>`;
-}
+};
 
 Main.args = DEFAULT_ARGS;
 
 Main.argTypes = {
     size: {
         control: {
-            type: 'inline-radio',
-            options: ["small", "medium", "large", "x-large"]
-        }
+            type: "inline-radio",
+            options: ["small", "medium", "large", "x-large"],
+        },
     },
     color: {
         control: {
-            type: 'inline-radio',
-            options: ["grey", "red", "blue", "green"]
-        }
+            type: "inline-radio",
+            options: ["grey", "red", "blue", "green"],
+        },
     },
     kind: {
         control: {
-            type: 'inline-radio',
-            options: ["rect", "text", "outline"]
-        }
+            type: "inline-radio",
+            options: ["rect", "text", "outline"],
+        },
     },
-}
+};

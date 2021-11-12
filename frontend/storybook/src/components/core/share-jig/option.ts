@@ -1,33 +1,32 @@
-import {argsToAttrs} from "@utils/attributes";
+import { argsToAttrs } from "@utils/attributes";
 import "@elements/core/share-jig/option";
 import { Kind } from "@elements/core/share-jig/option";
 
 export default {
-    title: "Core / Share jig"
-}
+    title: "Core / Share jig",
+};
 
 interface Args {
-    kind: Kind,
+    kind: Kind;
 }
 
-const DEFAULT_ARGS:Args = {
+const DEFAULT_ARGS: Args = {
     kind: "students",
-}
+};
 
-
-export const Option = (props?:Partial<Args>) => {
-    props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
+export const Option = (props?: Partial<Args>) => {
+    props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
 
     return `
         <share-jig-option ${argsToAttrs(props)}></share-jig-option>
     `;
-}
+};
 Option.args = DEFAULT_ARGS;
 Option.argTypes = {
     kind: {
         control: {
-            type: 'inline-radio',
+            type: "inline-radio",
             options: ["students", "embed", "copy"],
-        }
+        },
     },
-}
+};

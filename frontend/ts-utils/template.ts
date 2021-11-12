@@ -11,23 +11,23 @@ export function renderTemplateFragment(template, data?: any) {
 }
 
 export function renderDivText(text) {
-	return renderTemplate(`<div>${text}</div>`, {text});
+    return renderTemplate(`<div>${text}</div>`, { text });
 }
 
 //Very simple replacement of `${pattern}`
 //Probably not safe, but only used for storybook / internal dev anyway
 export function renderTemplateString(template, data) {
-    if(data == null) {
-            return template;
+    if (data == null) {
+        return template;
     } else {
-            return interpolate(template, data);
+        return interpolate(template, data);
     }
 }
 
 //See: https://stackoverflow.com/a/47358102
 const regex = /\${[^{]+}/g;
 
-export function interpolate(template, variables, fallback?:any) {
+export function interpolate(template, variables, fallback?: any) {
     return template.replace(regex, (match) => {
         const path = match.slice(2, -1).trim();
         return getObjPath(path, variables, fallback);
@@ -35,6 +35,6 @@ export function interpolate(template, variables, fallback?:any) {
 }
 
 //get the specified property or nested property of an object
-function getObjPath(path, obj, fallback = '') {
-    return path.split('.').reduce((res, key) => res[key] || fallback, obj);
+function getObjPath(path, obj, fallback = "") {
+    return path.split(".").reduce((res, key) => res[key] || fallback, obj);
 }

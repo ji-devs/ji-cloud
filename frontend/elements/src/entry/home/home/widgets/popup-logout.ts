@@ -1,34 +1,36 @@
-import { LitElement, html, css, customElement, property } from 'lit-element';
+import { LitElement, html, css, customElement, property } from "lit-element";
 
-@customElement('popup-logout')
+@customElement("popup-logout")
 export class _ extends LitElement {
     static get styles() {
-        return [css`
-            .inside-wrapper {
-                display: flex;
-            }
+        return [
+            css`
+                .inside-wrapper {
+                    display: flex;
+                }
 
-            main {
-                //  background-image: url("Strip_Background_Jigglings@2x.jpg");
-                width: 576px;
-                height: 352px;
-            }
+                main {
+                    //  background-image: url("Strip_Background_Jigglings@2x.jpg");
+                    width: 576px;
+                    height: 352px;
+                }
 
-            ::slotted([slot=title]) {
-                margin-top: 89px;
-                margin-left: 40px;
-            }
+                ::slotted([slot="title"]) {
+                    margin-top: 89px;
+                    margin-left: 40px;
+                }
 
-            img-ui {
-                width: 193px;
-                height: 118px;
-            }
+                img-ui {
+                    width: 193px;
+                    height: 118px;
+                }
 
-            ::slotted([slot=button]) {
-                display: block;
-                margin-left: 410px;
-            }
-        `];
+                ::slotted([slot="button"]) {
+                    display: block;
+                    margin-left: 410px;
+                }
+            `,
+        ];
     }
 
     render() {

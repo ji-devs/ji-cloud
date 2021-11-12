@@ -1,12 +1,12 @@
-import { LitElement, html, css, customElement, property } from 'lit-element';
+import { LitElement, html, css, customElement, property } from "lit-element";
 
-export type IconKind = "age" | "lang" | "time" | "file" | "jiwhite" ;
+export type IconKind = "age" | "lang" | "time" | "file" | "jiwhite";
 
-@customElement('tag-icon')
+@customElement("tag-icon")
 export class _ extends LitElement {
-
-  static get styles() {
-    return [css`
+    static get styles() {
+        return [
+            css`
     p{
         font-size: 14px;
         font-weight: 500;
@@ -30,8 +30,9 @@ export class _ extends LitElement {
     .white {
         color:#ffffff;
     }
-    `];
-  }
+    `,
+        ];
+    }
 
     @property()
     kind: IconKind = "age";
@@ -39,28 +40,41 @@ export class _ extends LitElement {
     @property()
     label: string = "";
 
-  render() {
-    const {kind, label} = this;
-   
-    const iconPath = kind === "age" ? "Icn_Age.svg"
-        : kind === "lang" ? "globe.svg"
-        : kind === "time" ? "Icn_clock.svg"
-        : kind === "file" ? "icn-file.svg"
-        : kind === "jiwhite" ? "JI_Logo_White.svg"
-        : "nothing";
+    render() {
+        const { kind, label } = this;
 
-    const colorClass = kind === "age" ? "darkgrey"
-        : kind === "lang" ? "darkgrey"
-        : kind === "time" ? "lightblue"
-        : kind === "file" ? "lightblue"
-        : kind === "jiwhite" ? "white"
-        : "nothing";
+        const iconPath =
+            kind === "age"
+                ? "Icn_Age.svg"
+                : kind === "lang"
+                ? "globe.svg"
+                : kind === "time"
+                ? "Icn_clock.svg"
+                : kind === "file"
+                ? "icn-file.svg"
+                : kind === "jiwhite"
+                ? "JI_Logo_White.svg"
+                : "nothing";
 
-    return html`
-<div class="wrapper">
-        <img-ui path="${iconPath}"></img-ui>
-        <p class="${colorClass}">${label}</p>
-</div>
-  `;
-  }
+        const colorClass =
+            kind === "age"
+                ? "darkgrey"
+                : kind === "lang"
+                ? "darkgrey"
+                : kind === "time"
+                ? "lightblue"
+                : kind === "file"
+                ? "lightblue"
+                : kind === "jiwhite"
+                ? "white"
+                : "nothing";
+
+        return html`
+            <div class="wrapper">
+                <img-ui path="${iconPath}"></img-ui>
+                <p class="${colorClass}">${label}</p>
+            </div>
+              
+        `;
+    }
 }

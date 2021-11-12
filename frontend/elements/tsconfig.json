@@ -1,31 +1,31 @@
 {
-  "compilerOptions": {
-    "baseUrl": "./",
-    "outDir": "./.ts-output",
-    "paths": {
-        "@utils/*": ["../ts-utils/*"],
-        "@config/*": ["../config/*"],
-        "@elements/*": ["./src/*"],
-        "@bundles/*": ["./src/_bundles/*"],
-        "tslib": ["./node_modules/tslib/tslib.d.ts"]
+    "compilerOptions": {
+        "baseUrl": "./",
+        "outDir": "./.ts-output",
+        "paths": {
+            "@utils/*": ["../ts-utils/*"],
+            "@config/*": ["../config/*"],
+            "@elements/*": ["./src/*"],
+            "@bundles/*": ["./src/_bundles/*"],
+            "tslib": ["./node_modules/tslib/tslib.d.ts"]
+        },
+        "target": "es2017",
+        "module": "es2015",
+        "lib": ["es2019", "dom", "dom.iterable"],
+        "declaration": true,
+        "declarationMap": true,
+        "sourceMap": true,
+        "strict": true,
+        "noUnusedLocals": false,
+        "noUnusedParameters": true,
+        "noImplicitReturns": true,
+        "noFallthroughCasesInSwitch": true,
+        "moduleResolution": "node",
+        "allowSyntheticDefaultImports": true,
+        "experimentalDecorators": true,
+        "forceConsistentCasingInFileNames": true,
+        "resolveJsonModule": true
     },
-    "target": "es2017",
-    "module": "es2015",
-    "lib": ["es2019", "dom", "dom.iterable"],
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "strict": true,
-    "noUnusedLocals": false,
-    "noUnusedParameters": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "moduleResolution": "node",
-    "allowSyntheticDefaultImports": true,
-    "experimentalDecorators": true,
-    "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
-  },
-  "include": ["src/**/*.ts"],
-  "exclude": []
+    "include": ["src/**/*.ts"],
+    "exclude": []
 }

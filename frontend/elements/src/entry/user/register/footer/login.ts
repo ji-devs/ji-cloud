@@ -6,25 +6,27 @@ const STR_LOGIN = "Log in";
 
 @customElement("footer-register-login")
 export class _ extends LitElement {
-  static get styles() {
-    return [
-      css`
-        main {
-          display: flex;
-          align-items: center;
-          margin-top: 16px;
-        }
-      `,
-    ];
-  }
+    static get styles() {
+        return [
+            css`
+                main {
+                    display: flex;
+                    align-items: center;
+                    margin-top: 16px;
+                }
+            `,
+        ];
+    }
 
-  render() {
-    return html`
-        <main>
-            <title-ji color="black" weight="normal">${STR_ACCOUNT}</title-ji>
-            &nbsp;
-            <button-rect kind="text" color="blue">${STR_LOGIN}</button-rect>
-        </main>
-    `;
-  }
+    render() {
+        return html`
+            <main>
+                <title-ji color="black" weight="normal"
+                    >${STR_ACCOUNT}</title-ji
+                >
+                &nbsp;
+                <button-rect kind="text" color="blue">${STR_LOGIN}</button-rect>
+            </main>
+        `;
+    }
 }

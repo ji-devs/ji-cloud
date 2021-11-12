@@ -1,13 +1,13 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 import "@elements/core/popups/popup-body";
 
-export type Kind = "background" | "feedback"; 
+export type Kind = "background" | "feedback";
 
 const STR_HEADER: {
-    [key in Kind]: string
+    [key in Kind]: string;
 } = {
-    ['background']: "Add Background Music",
-    ['feedback']: "Feedback Effects",
+    ["background"]: "Add Background Music",
+    ["feedback"]: "Feedback Effects",
 };
 
 @customElement("jig-audio-body")
@@ -32,7 +32,7 @@ export class _ extends LitElement {
                     display: flex;
                     column-gap: 24px;
                 }
-                :host([kind=background]) .correct-mistake {
+                :host([kind="background"]) .correct-mistake {
                     display: none;
                 }
                 .lines {
@@ -45,8 +45,8 @@ export class _ extends LitElement {
         ];
     }
 
-    @property({reflect: true})
-    kind: Kind = 'background';
+    @property({ reflect: true })
+    kind: Kind = "background";
 
     render() {
         return html`

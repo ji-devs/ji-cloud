@@ -1,19 +1,17 @@
-import {argsToAttrs, argToAttr} from "@utils/attributes";
+import { argsToAttrs, argToAttr } from "@utils/attributes";
 import "@elements/core/lists/li-check-collection";
 import "@elements/core/lists/li-check";
 
 export default {
-    title: "Core / Lists"
-}
+    title: "Core / Lists",
+};
 
-interface Args {
-}
+interface Args {}
 
-const DEFAULT_ARGS:Args = {
-}
+const DEFAULT_ARGS: Args = {};
 
-export const LiCheckCollection = (props?:Partial<Args>) => {
-    props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
+export const LiCheckCollection = (props?: Partial<Args>) => {
+    props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
 
     return `
         <li-check-collection label="hello0">
@@ -23,20 +21,18 @@ export const LiCheckCollection = (props?:Partial<Args>) => {
             <li-check>Hello4</li-check>
         </li-check-collection>
     `;
-}
+};
 
 LiCheckCollection.args = DEFAULT_ARGS;
 
-
-
 interface Args2 {
-    open: boolean,
+    open: boolean;
 }
-const DEFAULT_ARGS2:Args2 = {
+const DEFAULT_ARGS2: Args2 = {
     open: false,
-}
-export const LiCheckCollectionInSelect = (props?:Partial<Args>) => {
-    props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
+};
+export const LiCheckCollectionInSelect = (props?: Partial<Args>) => {
+    props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
 
     // @ts-ignore
     props.nested = true;
@@ -65,6 +61,6 @@ export const LiCheckCollectionInSelect = (props?:Partial<Args>) => {
             </input-select>
         </div>
     `;
-}
+};
 
 LiCheckCollectionInSelect.args = DEFAULT_ARGS2;

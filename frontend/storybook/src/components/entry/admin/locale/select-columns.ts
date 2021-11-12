@@ -1,21 +1,18 @@
 import "@elements/core/buttons/rectangle";
 import "@elements/entry/admin/locale/locale-select-columns";
 import "@elements/entry/admin/locale/locale-select-columns-item";
-import {argsToAttrs} from "@utils/attributes";
-
+import { argsToAttrs } from "@utils/attributes";
 
 export default {
-  title: 'Entry/Admin/Locale',
-}
+    title: "Entry/Admin/Locale",
+};
 
-interface Args {
-}
+interface Args {}
 
-const DEFAULT_ARGS: Args = {
-}
+const DEFAULT_ARGS: Args = {};
 
 export const LocaleSelectColumns = (props?: Partial<Args>) => {
-    props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
+    props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
 
     return `
     <dialog open>
@@ -38,9 +35,7 @@ export const LocaleSelectColumns = (props?: Partial<Args>) => {
 
         </locale-select-columns>
     </dialog>
-    `
-}
+    `;
+};
 
 LocaleSelectColumns.args = DEFAULT_ARGS;
-
-

@@ -1,18 +1,16 @@
-import {argsToAttrs} from "@utils/attributes";
+import { argsToAttrs } from "@utils/attributes";
 import "@elements/core/popups/popup-body";
 
 export default {
-    title: "Core / Popup"
-}
+    title: "Core / Popup",
+};
 
-interface Args {
-}
+interface Args {}
 
-const DEFAULT_ARGS:Args = {
-}
+const DEFAULT_ARGS: Args = {};
 
-export const Confirm = (props?:Args) => {
-    props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
+export const Confirm = (props?: Args) => {
+    props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
 
     return `
         <popup-body ${argsToAttrs(props)}>
@@ -24,6 +22,6 @@ export const Confirm = (props?:Args) => {
             </div>
         </popup-body">
     `;
-}
+};
 
 Confirm.args = DEFAULT_ARGS;

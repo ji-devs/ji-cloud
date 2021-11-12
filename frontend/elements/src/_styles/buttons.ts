@@ -1,5 +1,3 @@
-import {BaseText} from "./text";
+import { BaseText } from "./text";
 
-export class BaseButton extends BaseText {
-  
-}
+export class BaseButton extends BaseText {}

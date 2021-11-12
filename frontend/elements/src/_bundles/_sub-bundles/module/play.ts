@@ -10,4 +10,3 @@ import "@elements/module/_common/play/play-button";
 import "@elements/module/_common/play/preload";
 
 import "@elements/core/images/composed/module-screenshot";
-

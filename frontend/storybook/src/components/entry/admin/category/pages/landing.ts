@@ -5,30 +5,29 @@ import "@elements/core/titles/ji";
 import "@elements/core/inputs/composed//dropdown-tree";
 import "@elements/core/cards/blue";
 import "@elements/core/buttons/expand";
-import {mockCategoryHierarchy, TreeNode} from "~/mock/hierarchy";
-import {argsToAttrs} from "@utils/attributes";
-import {mapToString} from "@utils/array";
+import { mockCategoryHierarchy, TreeNode } from "~/mock/hierarchy";
+import { argsToAttrs } from "@utils/attributes";
+import { mapToString } from "@utils/array";
 import { Rectangle } from "~/components/core/buttons/rectangle";
-import {DropdownTree} from "~/components/core/inputs/composed/dropdown-tree"
+import { DropdownTree } from "~/components/core/inputs/composed/dropdown-tree";
 
 export default {
-  title: 'Entry/Admin/Category/Pages',
-}
+    title: "Entry/Admin/Category/Pages",
+};
 
-const STR_PUBLISH = "Publish"
+const STR_PUBLISH = "Publish";
 
 export const Landing = () => {
-  
-  return `
+    return `
     <category-page>
     
       <div slot="middle">
-        ${DropdownTree({mock: "categories"})}
+        ${DropdownTree({ mock: "categories" })}
       </div>
       <button-expand slot="expand"></button-expand>
       <category-button-add slot="add"></category-button-add>
 
     </category-label>
     
-    `
-}
+    `;
+};

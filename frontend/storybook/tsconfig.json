@@ -8,12 +8,8 @@
             "~/*": ["./src/*"]
         },
 
-        "lib": [
-            "es2017", 
-            "dom", 
-            "dom.iterable"
-        ],
+        "lib": ["es2017", "dom", "dom.iterable"],
 
-        "resolveJsonModule": true,
-    },
+        "resolveJsonModule": true
+    }
 }

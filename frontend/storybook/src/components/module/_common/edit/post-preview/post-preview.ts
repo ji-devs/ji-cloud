@@ -4,19 +4,19 @@ import "@elements/module/_common/edit/post-preview/post-preview-action";
 import { argsToAttrs } from "@utils/attributes";
 
 export default {
-    title: "Module / _COMMON /  edit /Post Preview"
-}
+    title: "Module / _COMMON /  edit /Post Preview",
+};
 
 interface Args {
     module: ModuleKind;
 }
 
-const DEFAULT_ARGS:Args = {
+const DEFAULT_ARGS: Args = {
     module: "memory",
-}
+};
 
-export const PostPreview = (props?:Partial<Args>) => {
-    props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
+export const PostPreview = (props?: Partial<Args>) => {
+    props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
 
     return `
         <post-preview ${argsToAttrs(props)}>
@@ -27,14 +27,14 @@ export const PostPreview = (props?:Partial<Args>) => {
             <post-preview-action slot="action-continue" kind="continue"></post-preview-action>
         </post-preview>
     `;
-}
+};
 
 PostPreview.args = DEFAULT_ARGS;
 PostPreview.argTypes = {
     module: {
         control: {
-            type: 'inline-radio',
+            type: "inline-radio",
             options: ["matching", "memory", "card-quiz", "flashcards"],
-        }
-    }
-}
+        },
+    },
+};

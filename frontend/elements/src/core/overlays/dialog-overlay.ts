@@ -1,4 +1,11 @@
-import { LitElement, html, css, customElement, property, query } from 'lit-element';
+import {
+    LitElement,
+    html,
+    css,
+    customElement,
+    property,
+    query,
+} from "lit-element";
 
 @customElement("dialog-overlay")
 export class DialogOverlay extends LitElement {
@@ -18,7 +25,7 @@ export class DialogOverlay extends LitElement {
                 :host([open]) {
                     display: grid;
                 }
-            `
+            `,
         ];
     }
 
@@ -31,13 +38,13 @@ export class DialogOverlay extends LitElement {
         window.removeEventListener("mousedown", this.onGlobalMouseDown);
     }
     onGlobalMouseDown = (evt: MouseEvent) => {
-        if(this.open && !evt.composedPath().includes(this.overlay)) {
+        if (this.open && !evt.composedPath().includes(this.overlay)) {
             if (this.autoClose) {
                 this.open = false;
             }
-            this.dispatchEvent(new Event("close"))
+            this.dispatchEvent(new Event("close"));
         }
-    }
+    };
 
     @property({ type: Boolean })
     autoClose: boolean = true;

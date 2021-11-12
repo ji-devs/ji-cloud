@@ -69,11 +69,11 @@ export class _ extends LitElement {
         ];
     }
 
-    @property({type: Boolean, reflect: true})
-    lineHidden: boolean = false; 
+    @property({ type: Boolean, reflect: true })
+    lineHidden: boolean = false;
 
-    @property({type: Boolean, reflect: true})
-    lineThick: boolean = false; 
+    @property({ type: Boolean, reflect: true })
+    lineThick: boolean = false;
 
     @property({ type: Boolean, reflect: true })
     "top-right-hover-only": boolean = false;

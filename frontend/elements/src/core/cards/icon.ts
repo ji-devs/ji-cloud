@@ -5,9 +5,9 @@ export type IconKind = "group";
 
 @customElement("card-icon")
 export class _ extends LitElement {
-  static get styles() {
-    return [
-      css`
+    static get styles() {
+        return [
+            css`
         main{
             width: 122px;
             display:flex;
@@ -27,26 +27,26 @@ export class _ extends LitElement {
             border-radius:0 0 12px 12px;
         }
     `,
-    ];
-  }
+        ];
+    }
 
-  @property()
-  label: string = "";
+    @property()
+    label: string = "";
 
-  @property()
-  icon: IconKind = "group";
+    @property()
+    icon: IconKind = "group";
 
-  render() {
-    const { label, icon } = this;
+    render() {
+        const { label, icon } = this;
 
-    const src = "core/cards/icon-group.svg"; 
+        const src = "core/cards/icon-group.svg";
 
-    return html`
-      <main>
-        <img src="${MEDIA_UI}/${src}" />
-        <div class="banner">${label}</div>
-      </main>
-        
-    `;
-  }
+        return html`
+            <main>
+                <img src="${MEDIA_UI}/${src}" />
+                <div class="banner">${label}</div>
+            </main>
+              
+        `;
+    }
 }

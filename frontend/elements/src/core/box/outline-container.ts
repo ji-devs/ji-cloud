@@ -17,14 +17,13 @@ export class _ extends LitElement {
         return [
             css`
                 :host {
-                  --border-size: 1px;
+                    --border-size: 1px;
                 }
 
                 :host([thick]) {
-                  --border-size: 5px;
+                    --border-size: 5px;
                 }
 
-                
                 section {
                     box-sizing: border-box;
                     cursor: pointer;
@@ -35,7 +34,7 @@ export class _ extends LitElement {
                 }
 
                 :host([borderInside]) > section {
-                  left: 0;
+                    left: 0;
                 }
 
                 :host([color="blue"]) > section {
@@ -43,24 +42,24 @@ export class _ extends LitElement {
                 }
 
                 :host([hover]) .close {
-                  display: block;
+                    display: block;
                 }
 
                 .close {
-                  display: none;
-                  position: absolute;
-                  top: calc((12px + var(--border-size)) * -1); 
-                  right: calc((12px + var(--border-size)) * -1); 
-                  width: 24px;
-                  height: 24px;
+                    display: none;
+                    position: absolute;
+                    top: calc((12px + var(--border-size)) * -1);
+                    right: calc((12px + var(--border-size)) * -1);
+                    width: 24px;
+                    height: 24px;
                 }
 
                 .audio {
-                  top: calc((32px + var(--border-size) + 4px) * -1);
-                  left: calc(var(--border-size) * -1);
-                  position: absolute;
-                  width: 32px;
-                  height: 32px;
+                    top: calc((32px + var(--border-size) + 4px) * -1);
+                    left: calc(var(--border-size) * -1);
+                    position: absolute;
+                    width: 32px;
+                    height: 32px;
                 }
             `,
         ];
@@ -69,57 +68,60 @@ export class _ extends LitElement {
     @property({ reflect: true })
     color: Color = "blue";
 
-    @property({type: Boolean, reflect: true})
-    thick:boolean = false;
+    @property({ type: Boolean, reflect: true })
+    thick: boolean = false;
 
-    @property({type: Boolean, reflect: true})
-    uncloseable:boolean = false;
+    @property({ type: Boolean, reflect: true })
+    uncloseable: boolean = false;
 
-    @property({type: Boolean, reflect: true})
-    "borderInside":boolean = false;
+    @property({ type: Boolean, reflect: true })
+    "borderInside": boolean = false;
 
-    @property({type: Boolean, reflect: true})
-    hover:boolean = false;
+    @property({ type: Boolean, reflect: true })
+    hover: boolean = false;
 
     connectedCallback() {
-      super.connectedCallback();
-      this.addEventListener("mouseenter", this.onMouseEnter);
-      this.addEventListener("mouseleave", this.onMouseLeave);
+        super.connectedCallback();
+        this.addEventListener("mouseenter", this.onMouseEnter);
+        this.addEventListener("mouseleave", this.onMouseLeave);
     }
 
     disconnectedCallback() {
-      super.disconnectedCallback();
-      this.removeEventListener("mouseenter", this.onMouseEnter);
-      this.removeEventListener("mouseleave", this.onMouseLeave);
+        super.disconnectedCallback();
+        this.removeEventListener("mouseenter", this.onMouseEnter);
+        this.removeEventListener("mouseleave", this.onMouseLeave);
     }
 
     onMouseEnter() {
-      this.hover = true;
+        this.hover = true;
     }
 
     onMouseLeave() {
-      this.hover = false;
+        this.hover = false;
     }
 
     onClose() {
-      this.dispatchEvent(new Event("close"));
+        this.dispatchEvent(new Event("close"));
     }
 
     render() {
-      const {uncloseable} = this;
+        const { uncloseable } = this;
 
         return html`
             <section>
                 <slot></slot>
                 <div class="audio">
-                  <slot name="audio">
-                    <!--<button-icon icon="audio"></button-icon>-->
-                  </slot>
-                </div> 
-                ${uncloseable 
-                  ? nothing
-                  : html`<button-icon class="close" icon="circle-x-blue" @click=${this.onClose}></button-icon>`
-                }
+                    <slot name="audio">
+                        <!--<button-icon icon="audio"></button-icon>-->
+                    </slot>
+                </div>
+                ${uncloseable
+                    ? nothing
+                    : html`<button-icon
+                          class="close"
+                          icon="circle-x-blue"
+                          @click=${this.onClose}
+                      ></button-icon>`}
             </section>
         `;
     }

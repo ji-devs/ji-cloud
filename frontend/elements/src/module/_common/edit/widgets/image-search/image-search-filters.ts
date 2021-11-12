@@ -1,66 +1,67 @@
-import { LitElement, html, css, customElement, property } from 'lit-element';
-import '@elements/core/overlays/anchored-overlay';
+import { LitElement, html, css, customElement, property } from "lit-element";
+import "@elements/core/overlays/anchored-overlay";
 
 const STR_FILTER = "Filter";
 const STR_IMAGE_STYLE = "Image style";
 
-@customElement('image-search-filters')
+@customElement("image-search-filters")
 export class _ extends LitElement {
-
     static get styles() {
-        return [css`
-            button {
-                font-family: Poppins;
-                font-weight: 500;
-                font-stretch: normal;
-                font-style: normal;
-                border: 0;
-                padding: 0;
-                background-color: transparent;
-                cursor: pointer;
-                display: flex;
-                align-items: center;
-                column-gap: 8px;
-                font-size: 14px;
-            }
-            @media (min-width: 1920px) {
+        return [
+            css`
                 button {
-                    font-size: 16px;
+                    font-family: Poppins;
+                    font-weight: 500;
+                    font-stretch: normal;
+                    font-style: normal;
+                    border: 0;
+                    padding: 0;
+                    background-color: transparent;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    column-gap: 8px;
+                    font-size: 14px;
                 }
-            }
-            .caret {
-                transition: transform .2s;
-            }
-            :host([open]) .caret {
-                transform: rotate(180deg);
-            }
-            .overlay {
-                width: 235px;
-            }
-            section {
-                padding: 16px;
-                display: grid;
-                row-gap: 10px;
-            }
-            .style-section {
-                padding: 16px 2px;
-            }
-            .style-section h4 {
-                padding: 0 14px;
-            }
-            section:not(:last-child) {
-                border-bottom: solid 1px var(--light-gray-1);
-            }
-            h4 {
-                font-size: 16px;
-                font-weight: 500;
-                color: var(--main-blue);
-                margin: 0;
-            }
-        `];
+                @media (min-width: 1920px) {
+                    button {
+                        font-size: 16px;
+                    }
+                }
+                .caret {
+                    transition: transform 0.2s;
+                }
+                :host([open]) .caret {
+                    transform: rotate(180deg);
+                }
+                .overlay {
+                    width: 235px;
+                }
+                section {
+                    padding: 16px;
+                    display: grid;
+                    row-gap: 10px;
+                }
+                .style-section {
+                    padding: 16px 2px;
+                }
+                .style-section h4 {
+                    padding: 0 14px;
+                }
+                section:not(:last-child) {
+                    border-bottom: solid 1px var(--light-gray-1);
+                }
+                h4 {
+                    font-size: 16px;
+                    font-weight: 500;
+                    color: var(--main-blue);
+                    margin: 0;
+                }
+            `,
+        ];
     }
 
-    @property({type: Boolean, reflect: true})
+    @property({ type: Boolean, reflect: true })
     open: boolean = false;
 
     private openClick() {
@@ -72,13 +73,16 @@ export class _ extends LitElement {
             <anchored-overlay
                 .open=${this.open}
                 .autoClose=${false}
-                @close=${() => this.open = false}
+                @close=${() => (this.open = false)}
                 .styled=${true}
                 positionX="right-in"
             >
                 <button slot="anchor" @click="${this.openClick}">
                     ${STR_FILTER}
-                    <img-ui class="caret" path="module/_common/edit/widgets/sidebar/image-select/open-filters-icon.svg"></img-ui>
+                    <img-ui
+                        class="caret"
+                        path="module/_common/edit/widgets/sidebar/image-select/open-filters-icon.svg"
+                    ></img-ui>
                 </button>
                 <div slot="overlay" class="overlay">
                     <section class="background-checkbox">

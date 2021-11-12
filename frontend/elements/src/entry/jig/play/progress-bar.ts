@@ -17,7 +17,7 @@ export class _ extends LitElement {
                     background-color: var(--main-yellow);
                     border-radius: 10px;
                     height: 12px;
-                    transition: width .3s;
+                    transition: width 0.3s;
                 }
             `,
         ];

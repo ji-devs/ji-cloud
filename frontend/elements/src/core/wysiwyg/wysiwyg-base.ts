@@ -1,12 +1,37 @@
-import { LitElement, html, customElement, query, property, PropertyValues, css, internalProperty } from 'lit-element';
-import React, { useMemo } from 'react';
-import ReactDOM from 'react-dom';
-import { BaseSelection, Descendant, Point, Transforms } from 'slate';
-import { ControllerState, controlNameList, defaultState, ElementType, getKeyLevel, WysiwygValue } from './wysiwyg-types';
-import { EditorElement, EditorText, EditorBackbone } from './slate-wysiwyg-react/EditorBackbone';
-import { EditorComponent } from './slate-wysiwyg-react/EditorComponent';
-import { baseStyles, getRootStyles } from './styles';
-import { ThemeId, THEMES, TextEditor as TextEditorTheme, TextEditorVariant} from '@elements/_themes/themes';
+import {
+    LitElement,
+    html,
+    customElement,
+    query,
+    property,
+    PropertyValues,
+    css,
+    internalProperty,
+} from "lit-element";
+import React, { useMemo } from "react";
+import ReactDOM from "react-dom";
+import { BaseSelection, Descendant, Point, Transforms } from "slate";
+import {
+    ControllerState,
+    controlNameList,
+    defaultState,
+    ElementType,
+    getKeyLevel,
+    WysiwygValue,
+} from "./wysiwyg-types";
+import {
+    EditorElement,
+    EditorText,
+    EditorBackbone,
+} from "./slate-wysiwyg-react/EditorBackbone";
+import { EditorComponent } from "./slate-wysiwyg-react/EditorComponent";
+import { baseStyles, getRootStyles } from "./styles";
+import {
+    ThemeId,
+    THEMES,
+    TextEditor as TextEditorTheme,
+    TextEditorVariant,
+} from "@elements/_themes/themes";
 import { getThemeVars } from "./wysiwyg-theme";
 
 @customElement("wysiwyg-base")
@@ -32,20 +57,20 @@ export class _ extends LitElement {
 
     private componentRef?: EditorComponent;
 
-    private backbone = new EditorBackbone;
+    private backbone = new EditorBackbone();
 
     private controllerState: ControllerState = this.getDefaultState();
 
     private _blurSelection?: BaseSelection;
 
     private createValue(text: string = ""): WysiwygValue {
-        let textNode: EditorText = {
-            text
+        const textNode: EditorText = {
+            text,
         };
 
-        if(this.elementDefault) textNode.element = this.elementDefault;
+        if (this.elementDefault) textNode.element = this.elementDefault;
 
-        let v: WysiwygValue = {
+        const v: WysiwygValue = {
             version: "0.1.0",
             content: [
                 {
@@ -74,14 +99,14 @@ export class _ extends LitElement {
     }
 
     updated(changedProperties: PropertyValues) {
-        if (changedProperties.has('theme')) {
+        if (changedProperties.has("theme")) {
             this.onThemeChange();
         }
     }
 
     createRenderRoot() {
         // hebrew keyboard only works when delegatesFocus is true
-        return this.attachShadow({ mode: 'open', delegatesFocus: true });
+        return this.attachShadow({ mode: "open", delegatesFocus: true });
     }
 
     render() {
@@ -94,7 +119,7 @@ export class _ extends LitElement {
 
     public setTextAtSelection(text: string) {
         const currentSelection = this.backbone.editor.selection;
-        if(currentSelection) {
+        if (currentSelection) {
             Transforms.insertText(this.backbone.editor, text, {
                 at: currentSelection,
             });
@@ -104,15 +129,18 @@ export class _ extends LitElement {
     // if text is selected delete it otherwise delete the last character just like backspace
     public triggerBackspace() {
         const currentSelection = this.backbone.editor.selection;
-        if(currentSelection) {
+        if (currentSelection) {
             // check if text is actually selected or it's just a cursor
-            const isTextSelection = !Point.equals(currentSelection.anchor, currentSelection.focus);
-            if(isTextSelection) {
+            const isTextSelection = !Point.equals(
+                currentSelection.anchor,
+                currentSelection.focus
+            );
+            if (isTextSelection) {
                 Transforms.delete(this.backbone.editor, {
                     at: currentSelection,
                 });
             } else {
-                this.backbone.editor.deleteBackward('character');
+                this.backbone.editor.deleteBackward("character");
             }
         }
     }
@@ -120,19 +148,25 @@ export class _ extends LitElement {
     public selectAll() {
         const selection = window.getSelection()!;
         const range = document.createRange();
-        range.selectNodeContents(this.shadowRoot!.querySelector("[contenteditable=true]")!);
+        range.selectNodeContents(
+            this.shadowRoot!.querySelector("[contenteditable=true]")!
+        );
         selection.removeAllRanges();
         selection.addRange(range);
     }
 
-    public setControlValue<K extends keyof ControllerState>(key: K, value: ControllerState[K]) {
+    public setControlValue<K extends keyof ControllerState>(
+        key: K,
+        value: ControllerState[K]
+    ) {
         this.reFocus();
 
         const defaultValue = this.getDefault(key);
-        let finalValue = key !== "element" && value === defaultValue ? undefined : value;
+        const finalValue =
+            key !== "element" && value === defaultValue ? undefined : value;
 
-        if(getKeyLevel(key) === "root") {
-            let wysiwygValue: any = {...this.value};
+        if (getKeyLevel(key) === "root") {
+            const wysiwygValue: any = { ...this.value };
             wysiwygValue[key] = value;
             this.value = wysiwygValue;
 
@@ -142,10 +176,10 @@ export class _ extends LitElement {
             this.backbone.setValue(key, finalValue);
         }
 
-        if(key === "element") {
+        if (key === "element") {
             // setting element resets all other values
             for (const key of controlNameList) {
-                if(key === "element") continue;
+                if (key === "element") continue;
                 this.backbone.setValue(key as any, undefined);
             }
         }
@@ -162,17 +196,27 @@ export class _ extends LitElement {
         });
     }
 
-
     private getDefaultState(): ControllerState {
-        const entries = controlNameList.map(key => [key, this.getDefault(key)]);
+        const entries = controlNameList.map((key) => [
+            key,
+            this.getDefault(key),
+        ]);
         return Object.fromEntries(entries);
     }
 
-    private getDefault<K extends keyof ControllerState>(key: K): ControllerState[K] {
-        const elementType = this.controllerState?.element || this.elementDefault || defaultState.element;
-        const elementName:keyof TextEditorTheme = elementType.toLowerCase() as any;
+    private getDefault<K extends keyof ControllerState>(
+        key: K
+    ): ControllerState[K] {
+        const elementType =
+            this.controllerState?.element ||
+            this.elementDefault ||
+            defaultState.element;
+        const elementName: keyof TextEditorTheme =
+            elementType.toLowerCase() as any;
         const themeInfo = THEMES[this.theme];
-        const themeVariant = themeInfo.textEditor[elementName] as TextEditorVariant;
+        const themeVariant = themeInfo.textEditor[
+            elementName
+        ] as TextEditorVariant;
 
         switch (key) {
             case "color":
@@ -186,21 +230,28 @@ export class _ extends LitElement {
         }
     }
 
-    private triggerControlsChangeEvent<K extends keyof ControllerState>(key: K, value: ControllerState[K]) {
+    private triggerControlsChangeEvent<K extends keyof ControllerState>(
+        key: K,
+        value: ControllerState[K]
+    ) {
         if (value === undefined) value = null as any; // serde can't handle undefined only null
-        this.dispatchEvent(new CustomEvent("wysiwyg-controls-change", {
-            detail: {
-                [key]: value
-            }
-        }));
+        this.dispatchEvent(
+            new CustomEvent("wysiwyg-controls-change", {
+                detail: {
+                    [key]: value,
+                },
+            })
+        );
     }
 
     private triggerValueChangeEvent() {
-        this.dispatchEvent(new CustomEvent("custom-change", {
-            detail: {
-                value: this.valueAsString
-            }
-        }));
+        this.dispatchEvent(
+            new CustomEvent("custom-change", {
+                detail: {
+                    value: this.valueAsString,
+                },
+            })
+        );
     }
 
     private onSlateChange(value: Descendant[]) {
@@ -210,10 +261,10 @@ export class _ extends LitElement {
 
     private checkForValueChangeChange(newContent: EditorElement[]) {
         const valueAsString = this.valueAsString;
-        let newValue = JSON.parse(JSON.stringify(this.value)) as WysiwygValue;
+        const newValue = JSON.parse(JSON.stringify(this.value)) as WysiwygValue;
         newValue.content = newContent;
         const newValueAsString = JSON.stringify(newValue);
-        if(valueAsString !== newValueAsString) {
+        if (valueAsString !== newValueAsString) {
             this.value = newValue;
             this.triggerValueChangeEvent();
         }
@@ -226,12 +277,15 @@ export class _ extends LitElement {
 
         for (const key of controlNameList) {
             const keyLevel = getKeyLevel(key);
-            let node: any = keyLevel === 'element' ? element
-                : keyLevel === "leaf" ? leaf
-                : root;
+            const node: any =
+                keyLevel === "element"
+                    ? element
+                    : keyLevel === "leaf"
+                    ? leaf
+                    : root;
 
             const controlValue = node?.[key] || this.getDefault(key);
-            if(this.controllerState[key] != controlValue) {
+            if (this.controllerState[key] != controlValue) {
                 (this.controllerState as any)[key] = controlValue;
                 this.triggerControlsChangeEvent(key, controlValue);
             }
@@ -240,14 +294,23 @@ export class _ extends LitElement {
 
     private onBlur(e: FocusEvent) {
         this._blurSelection = this.backbone.editor.selection;
-        if(!this.closestPassShadow(e.relatedTarget as Node, "text-editor-controls, hebrew-keyboard")) {
+        if (
+            !this.closestPassShadow(
+                e.relatedTarget as Node,
+                "text-editor-controls, hebrew-keyboard"
+            )
+        ) {
             this.dispatchEvent(new Event("custom-blur"));
         }
     }
 
     private reFocus() {
-        if(this._blurSelection) {
-            (this.shadowRoot!.querySelector("[contenteditable=true]") as HTMLElement).focus();
+        if (this._blurSelection) {
+            (
+                this.shadowRoot!.querySelector(
+                    "[contenteditable=true]"
+                ) as HTMLElement
+            ).focus();
 
             Transforms.select(this.backbone.editor, this._blurSelection);
         }
@@ -255,20 +318,20 @@ export class _ extends LitElement {
 
     private reactRender() {
         this.componentRef = ReactDOM.render(
-            React.createElement(
-                EditorComponent,
-                {
-                    backbone: this.backbone,
-                    value: this.value.content,
-                    onChange: (e) => this.onSlateChange(e),
-                    onBlur: (e: any) => this.onBlur(e),
-                }
-            ),
-            this.editorRoot,
+            React.createElement(EditorComponent, {
+                backbone: this.backbone,
+                value: this.value.content,
+                onChange: (e) => this.onSlateChange(e),
+                onBlur: (e: any) => this.onBlur(e),
+            }),
+            this.editorRoot
         );
     }
 
-    private closestPassShadow(node: Node | null, selector: string) : HTMLElement | null {
+    private closestPassShadow(
+        node: Node | null,
+        selector: string
+    ): HTMLElement | null {
         if (!node) {
             return null;
         }

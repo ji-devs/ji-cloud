@@ -1,19 +1,16 @@
-import {argsToAttrs} from "@utils/attributes";
+import { argsToAttrs } from "@utils/attributes";
 import "@elements/entry/kids/student-code/student-code";
 
 export default {
-    title: "Entry / Kids / Student Code"
-}
+    title: "Entry / Kids / Student Code",
+};
 
-interface Args {
-}
+interface Args {}
 
-const DEFAULT_ARGS:Args = {
-}
+const DEFAULT_ARGS: Args = {};
 
-export const StudentCode = (props?:Args) => {
-
-    props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
+export const StudentCode = (props?: Args) => {
+    props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
 
     return `
         <kids-student-code ${argsToAttrs(props)}>
@@ -21,6 +18,6 @@ export const StudentCode = (props?:Args) => {
             <kids-student-code-jigzi slot="jigzi" mode="default"></kids-student-code-jigzi>
         </kids-student-code>
     `;
-}
+};
 
 StudentCode.args = DEFAULT_ARGS;

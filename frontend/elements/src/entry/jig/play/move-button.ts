@@ -9,14 +9,14 @@ export class _ extends LitElement {
         return [
             actionStyles,
             css`
-                :host([kind=back]) img-ui {
+                :host([kind="back"]) img-ui {
                     transform: rotate(180deg);
                 }
             `,
         ];
     }
 
-    @property({reflect: true})
+    @property({ reflect: true })
     kind: Kind = "back";
 
     render() {

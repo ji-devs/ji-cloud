@@ -1,4 +1,4 @@
-import { css} from 'lit-element';
+import { css } from "lit-element";
 
 export const scrollbarStyles = css`
     .scrollbar {
@@ -6,7 +6,7 @@ export const scrollbarStyles = css`
         scrollbar-color: #d3d4dd transparent;
     }
     .scrollbar::-webkit-scrollbar-track {
-        background-color: transparent
+        background-color: transparent;
     }
     .scrollbar::-webkit-scrollbar {
         width: 6px;

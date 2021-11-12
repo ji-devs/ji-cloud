@@ -4,9 +4,7 @@ import { property } from "lit-element";
 import { BaseOption } from "./base-option";
 import { BaseOptionGroup } from "./base-option-group";
 
-
 type Constructor = new (...args: any[]) => {};
-
 
 export function OptionsCollectionMixin<TBase extends Constructor>(Base: TBase) {
     class OptionsCollection extends Base {
@@ -20,7 +18,7 @@ export function OptionsCollectionMixin<TBase extends Constructor>(Base: TBase) {
                 toAttribute: (num: number) => {
                     // empty string sets the attribute and null removes it
                     return num ? "" : null;
-                }
+                },
             },
         })
         activeWithin?: number;
@@ -30,15 +28,13 @@ export function OptionsCollectionMixin<TBase extends Constructor>(Base: TBase) {
         registerOption(option: any) {
             this.options.push(option); // TODO:, how will I know the index??
         }
-        unregisterOption(_option: any): void {
-
-        }
+        unregisterOption(_option: any): void {}
 
         up() {
             const options = this.options;
 
             for (let i = 1; i < options.length; i++) {
-                if(options[i].active) {
+                if (options[i].active) {
                     options[i].setInactive();
                     options[i - 1].setActive();
                     return;
@@ -50,7 +46,7 @@ export function OptionsCollectionMixin<TBase extends Constructor>(Base: TBase) {
             }
 
             // if last item isn't selected
-            if(options.length && !options[0].active) {
+            if (options.length && !options[0].active) {
                 options[options.length - 1].active = true;
             }
         }
@@ -59,7 +55,7 @@ export function OptionsCollectionMixin<TBase extends Constructor>(Base: TBase) {
             const options = this.options;
 
             for (let i = 0; i < options.length - 1; i++) {
-                if(options[i].active) {
+                if (options[i].active) {
                     options[i].setInactive();
                     options[i + 1].setActive();
                     return;
@@ -71,35 +67,36 @@ export function OptionsCollectionMixin<TBase extends Constructor>(Base: TBase) {
             }
 
             // if first item isn't selected
-            if(options.length && !options[options.length - 1].active) {
+            if (options.length && !options[options.length - 1].active) {
                 options[0].active = true;
             }
         }
 
         toggleSelected() {
             for (const option of this.options) {
-                if(option instanceof BaseOption && option.active) {
+                if (option instanceof BaseOption && option.active) {
                     option.toggleSelected();
                     return;
                 } else if (option instanceof BaseOptionGroup) {
-                    if(option.active)
-                        option.open = !option.open;
-                    else if(option.activeWithin)
-                        option.toggleSelected();
+                    if (option.active) option.open = !option.open;
+                    else if (option.activeWithin) option.toggleSelected();
                 }
             }
         }
 
         deselectAll(except: BaseOption) {
             for (const option of this.options) {
-                if(option instanceof BaseOption && option.selected && option !== except) {
+                if (
+                    option instanceof BaseOption &&
+                    option.selected &&
+                    option !== except
+                ) {
                     option._deselectingAll();
                 } else if (option instanceof BaseOptionGroup) {
-                    if(option.selectedWithin)
-                        option.deselectAll(except);
+                    if (option.selectedWithin) option.deselectAll(except);
                 }
             }
         }
-    };
+    }
     return OptionsCollection;
 }

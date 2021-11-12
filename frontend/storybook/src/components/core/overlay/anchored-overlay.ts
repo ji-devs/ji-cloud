@@ -3,13 +3,13 @@ import "@elements/core/overlays/anchored-overlay";
 import { arrayCount, mapToString } from "@utils/array";
 
 export default {
-    title: "Core / Overlays"
-}
+    title: "Core / Overlays",
+};
 
 interface Args {
-    open: boolean,
-    positionY: string,
-    positionX: string,
+    open: boolean;
+    positionY: string;
+    positionX: string;
     autoClose: boolean;
     scrollClose: boolean;
 }
@@ -20,7 +20,7 @@ const DEFAULT_ARGS: Args = {
     positionX: "center",
     autoClose: true,
     scrollClose: true,
-}
+};
 
 export const AnchoredOverlay = (props?: Partial<Args>) => {
     props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
@@ -37,20 +37,20 @@ export const AnchoredOverlay = (props?: Partial<Args>) => {
         </div>
         <progress></progress>
     `;
-}
+};
 
 AnchoredOverlay.args = DEFAULT_ARGS;
 AnchoredOverlay.argTypes = {
     positionY: {
         control: {
-            type: 'inline-radio',
-            options: ['center', 'top-out', 'top-in', 'bottom-out', 'bottom-in'],
-        }
+            type: "inline-radio",
+            options: ["center", "top-out", "top-in", "bottom-out", "bottom-in"],
+        },
     },
     positionX: {
         control: {
-            type: 'inline-radio',
-            options: ['center', 'left-out', 'left-in', 'right-out', 'right-in'],
-        }
+            type: "inline-radio",
+            options: ["center", "left-out", "left-in", "right-out", "right-in"],
+        },
     },
-}
+};

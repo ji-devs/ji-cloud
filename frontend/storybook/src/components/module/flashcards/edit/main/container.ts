@@ -1,25 +1,28 @@
-import {argsToAttrs} from "@utils/attributes";
-import {mapToString, arrayCount} from "@utils/array";
+import { argsToAttrs } from "@utils/attributes";
+import { mapToString, arrayCount } from "@utils/array";
 import "@elements/core/module-page/grid-resize";
 import "@elements/module/flashcards/_common/main/container";
 import "~/components/module/_groups/cards/edit/main/card-pair/card";
-import {Mode} from "@elements/module/flashcards/edit/sidebar/option";
-import {Card, Args as CardArgs} from "~/components/module/_groups/cards/play/card";
+import { Mode } from "@elements/module/flashcards/edit/sidebar/option";
+import {
+    Card,
+    Args as CardArgs,
+} from "~/components/module/_groups/cards/play/card";
 export default {
-    title: "Module / Flashcards / Edit / Main" 
-}
+    title: "Module / Flashcards / Edit / Main",
+};
 
 interface Args {
-    mode: Mode,
+    mode: Mode;
 }
 
-const DEFAULT_ARGS:Args = {
+const DEFAULT_ARGS: Args = {
     mode: "single",
-}
+};
 
-export const Container = (props?:Partial<Args> & {content?: string}) => {
-    props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
-    const {mode} = props;
+export const Container = (props?: Partial<Args> & { content?: string }) => {
+    props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
+    const { mode } = props;
     return `
 
       <module-page-grid-resize>
@@ -28,58 +31,58 @@ export const Container = (props?:Partial<Args> & {content?: string}) => {
 	</flashcards-main>
       </module-page-grid-resize>
       `;
-}
+};
 
 interface CardOptions {
-	flipped: boolean,
-	flippable: boolean,
-	doubleSided: boolean,
+    flipped: boolean;
+    flippable: boolean;
+    doubleSided: boolean;
 }
-function renderCard({flipped, flippable, doubleSided}) {
-	const cardArgs:Partial<CardArgs> = {
-		contentMode: "image",
-		theme: "happy-brush",
-		size: "flashcards",
-		flipped,
-		flipOnHover: flippable,
-	};
+function renderCard({ flipped, flippable, doubleSided }) {
+    const cardArgs: Partial<CardArgs> = {
+        contentMode: "image",
+        theme: "happy-brush",
+        size: "flashcards",
+        flipped,
+        flipOnHover: flippable,
+    };
 
-	if(doubleSided) {
-		cardArgs.backSideContent = "text";
-	}
+    if (doubleSided) {
+        cardArgs.backSideContent = "text";
+    }
 
-	return Card(cardArgs);
+    return Card(cardArgs);
 }
 function renderSingle() {
-	return `
+    return `
 		${renderCard({
-			flipped: true,
-			flippable: true,
-			doubleSided: true
-		})}
-	`
+            flipped: true,
+            flippable: true,
+            doubleSided: true,
+        })}
+	`;
 }
 function renderPair() {
-	return `
+    return `
 		${renderCard({
-			flipped: true,
-			flippable: false,
-			doubleSided: false
-		})}
+            flipped: true,
+            flippable: false,
+            doubleSided: false,
+        })}
 		${renderCard({
-			flipped: false,
-			flippable: true,
-			doubleSided: false
-		})}
-	`
+            flipped: false,
+            flippable: true,
+            doubleSided: false,
+        })}
+	`;
 }
-Container.args= DEFAULT_ARGS;
+Container.args = DEFAULT_ARGS;
 
 Container.argTypes = {
-  mode: {
-    control: {
-      type: 'inline-radio',
-      options: ["single", "pair"]
-    }
-  },
-}
+    mode: {
+        control: {
+            type: "inline-radio",
+            options: ["single", "pair"],
+        },
+    },
+};

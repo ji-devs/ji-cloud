@@ -1,4 +1,12 @@
-import { LitElement, html, css, customElement, property, internalProperty, PropertyValues } from "lit-element";
+import {
+    LitElement,
+    html,
+    css,
+    customElement,
+    property,
+    internalProperty,
+    PropertyValues,
+} from "lit-element";
 import "@elements/core/popups/popup-body";
 import "@elements/core/buttons/rectangle";
 import { nothing } from "lit-html";
@@ -15,8 +23,9 @@ const STR_STUDENTS_CODE_VALID_UNTIL = "until";
 
 const SECS_IN_WEEK = 60 * 60 * 24 * 7;
 
-const formatter = new Intl.DateTimeFormat('en-US', {
-    month: 'short', day: '2-digit'
+const formatter = new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "2-digit",
 });
 
 @customElement("share-jig-students")
@@ -76,7 +85,7 @@ export class _ extends LitElement {
                     color: #4a4a4a;
                     font-size: 14px;
                 }
-                .field-code ::slotted([slot=copy-code]) {
+                .field-code ::slotted([slot="copy-code"]) {
                     grid-column: 2;
                 }
             `,
@@ -99,14 +108,14 @@ export class _ extends LitElement {
     exprDateLabel?: string;
 
     updated(changedProperties: PropertyValues) {
-        if (changedProperties.has('secondsToExpire')) {
+        if (changedProperties.has("secondsToExpire")) {
             this.exprUpdated();
         }
     }
 
     private exprUpdated() {
-        if(this.secondsToExpire) {
-            let date = new Date();
+        if (this.secondsToExpire) {
+            const date = new Date();
             date.setSeconds(date.getSeconds() + this.secondsToExpire);
             this.exprDateLabel = formatter.format(date);
 
@@ -118,9 +127,11 @@ export class _ extends LitElement {
 
     render() {
         return html`
-            <popup-body class=${classMap({
-                "no-code": this.code === ""
-            })}>
+            <popup-body
+                class=${classMap({
+                    "no-code": this.code === "",
+                })}
+            >
                 <slot slot="back" name="back"></slot>
                 <slot slot="close" name="close"></slot>
                 <h3 slot="heading">${STR_STUDENTS_HEADER}</h3>
@@ -129,7 +140,7 @@ export class _ extends LitElement {
                     <div class="field-url">
                         <label>
                             ${STR_STUDENTS_URL_LABEL}
-                            <input readonly value="${this.url}">
+                            <input readonly value="${this.url}" />
                         </label>
                         <div class="under">
                             <button-rect
@@ -137,7 +148,8 @@ export class _ extends LitElement {
                                 kind="text"
                                 color="blue"
                                 ?disabled=${this.code === ""}
-                            >${STR_STUDENTS_URL_LINK}</button-rect>
+                                >${STR_STUDENTS_URL_LINK}</button-rect
+                            >
                             <span class="divider"></span>
                             <slot name="copy-url"></slot>
                         </div>
@@ -145,23 +157,23 @@ export class _ extends LitElement {
                     <div class="field-code">
                         <label>
                             ${STR_STUDENTS_CODE_LABEL}
-                            <input readonly value="${this.code}">
+                            <input readonly value="${this.code}" />
                         </label>
                         <div class="under">
                             <span class="valid-until">
-                                ${ this.exprWeeks ? html`
-                                    ${STR_STUDENTS_CODE_VALID_FOR}
-                                    ${
-                                        this.exprWeeks === 1 ? html`
-                                            ${STR_WEEK_SINGULAR}
-                                        ` : html`
-                                            ${this.exprWeeks}
-                                            ${STR_WEEK_PLURAL}
-                                        `
-                                    }
-                                    ${STR_STUDENTS_CODE_VALID_UNTIL}
-                                    ${this.exprDateLabel}
-                                ` : nothing }
+                                ${this.exprWeeks
+                                    ? html`
+                                          ${STR_STUDENTS_CODE_VALID_FOR}
+                                          ${this.exprWeeks === 1
+                                              ? html` ${STR_WEEK_SINGULAR} `
+                                              : html`
+                                                    ${this.exprWeeks}
+                                                    ${STR_WEEK_PLURAL}
+                                                `}
+                                          ${STR_STUDENTS_CODE_VALID_UNTIL}
+                                          ${this.exprDateLabel}
+                                      `
+                                    : nothing}
                             </span>
                             <slot name="copy-code"></slot>
                         </div>

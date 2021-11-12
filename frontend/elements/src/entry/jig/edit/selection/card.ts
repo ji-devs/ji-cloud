@@ -1,5 +1,8 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
-import { ModuleKind, STR_MODULE_DISPLAY_NAME } from "@elements/module/_common/types";
+import {
+    ModuleKind,
+    STR_MODULE_DISPLAY_NAME,
+} from "@elements/module/_common/types";
 import "@elements/core/images/ui";
 
 const SHAKE_TIME = 1000;
@@ -54,7 +57,7 @@ export class _ extends LitElement {
                     color: var(--dark-gray-6);
                     background-color: var(--light-blue-2);
                 }
-                :host([module=cover]) .bottom {
+                :host([module="cover"]) .bottom {
                     background-color: var(--light-orange-1);
                 }
                 /* ":host([module])" is to increase the specificity because of previous selector */
@@ -82,7 +85,7 @@ export class _ extends LitElement {
                     place-content: center;
                     background-color: red;
                     border-radius: 16px;
-                    background-color: rgba(32, 64, 163, .9);
+                    background-color: rgba(32, 64, 163, 0.9);
                 }
                 .overlay p {
                     margin: 0;
@@ -128,7 +131,11 @@ export class _ extends LitElement {
 
         const iconPath = `entry/jig/modules/large/${module}${iconSuffix}.svg`;
         return html`
-            <section @mouseenter="${this.onEnter}" @mouseleave="${this.onLeave}" @click=${this.showOverlay}>
+            <section
+                @mouseenter="${this.onEnter}"
+                @mouseleave="${this.onLeave}"
+                @click=${this.showOverlay}
+            >
                 <div class="top">
                     <img-ui path="${iconPath}"></img-ui>
                 </div>
