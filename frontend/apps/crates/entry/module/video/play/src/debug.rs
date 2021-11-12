@@ -90,7 +90,7 @@ impl DebugSettings {
                                     })),
                                     InitSticker::Video => {
                                         let youtube_url =
-                                            YoutubeUrl::try_from("LUQksiZ2TVw".to_string())
+                                            YoutubeUrl::try_parse("LUQksiZ2TVw".to_string())
                                                 .unwrap_ji();
                                         let host = VideoHost::Youtube(youtube_url);
                                         Sticker::Video(Video::new(host))

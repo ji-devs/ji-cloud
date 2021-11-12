@@ -66,13 +66,13 @@ fn is_id(id: &str) -> bool {
 }
 
 pub trait YoutubeUrlExt {
-    fn try_from(text: String) -> Result<YoutubeUrl, ()>;
+    fn try_parse(text: String) -> Result<YoutubeUrl, ()>;
     fn get_id(&self) -> &str;
     fn has_id(url: &str) -> bool;
 }
 
 impl YoutubeUrlExt for YoutubeUrl {
-    fn try_from(text: String) -> Result<Self, ()> {
+    fn try_parse(text: String) -> Result<Self, ()> {
         match get_id_from_url(&text) {
             Ok(_) => Ok(Self(text)),
             Err(_) => Err(()),
@@ -109,7 +109,7 @@ mod tests {
         ];
 
         for url in valid_url_vec {
-            let id = YoutubeUrl::try_from(url.to_string());
+            let id = YoutubeUrl::try_parse(url.to_string());
 
             assert!(id.is_ok());
         }

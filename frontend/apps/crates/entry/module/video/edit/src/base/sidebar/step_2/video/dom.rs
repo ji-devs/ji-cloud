@@ -34,7 +34,7 @@ pub fn render(state: Rc<Step2>) -> Dom {
                     }))
                     .with_node!(input => {
                         .event(clone!(state => move |_: events::Input| {
-                            match YoutubeUrl::try_from(input.value()) {
+                            match YoutubeUrl::try_parse(input.value()) {
                                 Err(_) => {
                                     actions::set_error(&wrapper, true);
                                 }

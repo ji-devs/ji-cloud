@@ -367,7 +367,7 @@ impl SrcSlide {
                                     let transform_matrix = activity.settings.transform.map(convert_transform);
                                     let video_url = video_url.replace("http://", "https://");
 
-                                    let src = match <YoutubeUrl as YoutubeUrlExt>::try_from(video_url.clone()) {
+                                    let src = match <YoutubeUrl as YoutubeUrlExt>::try_parse(video_url.clone()) {
                                         Ok(yt) => {
                                             log::info!("yt: {}", yt.get_id());
                                             VideoSource::Youtube(yt)
