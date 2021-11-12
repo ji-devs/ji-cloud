@@ -1,15 +1,9 @@
 use super::styles;
 use crate::base::state::Base;
-use dominator::{clone, html, with_node, Dom};
-use futures_signals::signal::{Mutable, Signal, SignalExt};
+use dominator::{clone, html, Dom};
 use std::rc::Rc;
-use utils::{
-    math::{bounds, mat4::Matrix4},
-    path,
-    prelude::*,
-    resize::resize_info_signal,
-};
-use awsm_web::canvas::{get_2d_context, CanvasToBlobFuture};
+use utils::prelude::*;
+
 use super::sticker::Sticker;
 
 impl Base {
@@ -25,7 +19,7 @@ impl Base {
             }))
             .child(html!("div", {
                 .class(&*styles::BG)
-                .event(clone!(state => move |evt:events::Click| {
+                .event(clone!(state => move |_evt:events::Click| {
                     if let Some(cb) = state.bg_click_listener.borrow_mut().as_mut() {
                         cb();
                     }
@@ -34,15 +28,14 @@ impl Base {
             .children(state.slide.design.stickers
                 .iter()
                 .enumerate()
-                .filter(|(index, sticker)| {
-                    //*index == 5 
+                .filter(|(_index, _sticker)| {
+                    //*index == 5
                     true
                 })
-                .map(|(index, sticker)| {
+                .map(|(_index, sticker)| {
                     Sticker::new(state.clone(), sticker.clone()).render()
                 })
             )
         })
     }
-
 }

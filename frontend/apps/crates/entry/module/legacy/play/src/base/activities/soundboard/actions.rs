@@ -1,12 +1,11 @@
-use std::{borrow::BorrowMut, rc::Rc};
 use super::state::*;
-use shared::domain::jig::module::body::legacy::activity::AdvanceTrigger;
+use std::rc::Rc;
+
+use dominator::clone;
 use utils::prelude::*;
-use dominator::{Dom, html, clone};
 
 impl Soundboard {
     pub fn on_start(self: Rc<Self>) {
-
         let state = self;
 
         if let Some(audio_filename) = state.raw.audio_filename.as_ref() {
@@ -14,21 +13,21 @@ impl Soundboard {
                 state.base.activity_media_url(&audio_filename),
                 clone!(state => move || {
                     state.on_intro_finished();
-                })
+                }),
             );
         } else {
             state.on_intro_finished();
         }
-
     }
 
     pub fn on_intro_finished(&self) {
-
         if let Some(bg_audio_filename) = self.raw.bg_audio_filename.as_ref() {
-            self.base.audio_manager.play_bg(self.base.activity_media_url(&bg_audio_filename));
+            self.base
+                .audio_manager
+                .play_bg(self.base.activity_media_url(&bg_audio_filename));
         }
 
-        if self.raw.show_hints { 
+        if self.raw.show_hints {
             self.phase.set_neq(Phase::Hints);
         } else {
             self.on_hints_finished();
@@ -41,7 +40,6 @@ impl Soundboard {
     }
 }
 
-
 impl SoundboardItem {
     pub fn on_click(self: Rc<Self>, parent: Rc<Soundboard>) {
         let state = self;
@@ -52,7 +50,6 @@ impl SoundboardItem {
         }
 
         state.hotspot.tooltip_text.set(state.text.clone());
-
 
         if let Some(audio_filename) = state.audio_filename.as_ref() {
             state.base.audio_manager.play_clip_on_ended(
@@ -72,7 +69,5 @@ impl SoundboardItem {
                 })
             );
         }
-
-        
     }
 }

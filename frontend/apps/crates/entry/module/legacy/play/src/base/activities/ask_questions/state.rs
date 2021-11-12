@@ -1,13 +1,12 @@
-use std::{cell::RefCell, rc::Rc, sync::atomic::{AtomicU8, Ordering}};
-use futures_signals::signal::{Mutable, Signal, SignalExt};
-use gloo_timers::callback::Timeout;
-use shared::domain::jig::module::body::legacy::activity::{AskQuestions as RawAskQuestions, QuestionItem as RawQuestionItem};
+use crate::base::{activities::_common::hotspot::*, state::Base};
 use dominator::clone;
-use utils::unwrap::UnwrapJiExt;
-use crate::base::{
-    state::Base,
-    activities::_common::hotspot::*
+use futures_signals::signal::Mutable;
+use gloo_timers::callback::Timeout;
+use shared::domain::jig::module::body::legacy::activity::{
+    AskQuestions as RawAskQuestions, QuestionItem as RawQuestionItem,
 };
+use std::{cell::RefCell, rc::Rc, sync::atomic::AtomicU8};
+use utils::unwrap::UnwrapJiExt;
 pub struct AskQuestions {
     pub base: Rc<Base>,
     pub raw: RawAskQuestions,
@@ -15,23 +14,23 @@ pub struct AskQuestions {
     pub item_bank: RefCell<Vec<RawQuestionItem>>,
     pub item: Mutable<Rc<QuestionItem>>,
     pub phase: Mutable<Phase>,
-    pub wrong_count: AtomicU8
+    pub wrong_count: AtomicU8,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Phase {
     Play,
     Hint,
-    WaitingNext 
+    WaitingNext,
 }
 
 impl AskQuestions {
     pub fn new(base: Rc<Base>, raw: RawAskQuestions) -> Rc<Self> {
-        let mut item_bank:Vec<RawQuestionItem> = raw.items.iter().cloned().rev().collect();
+        let mut item_bank: Vec<RawQuestionItem> = raw.items.iter().cloned().rev().collect();
         let item = item_bank.pop().unwrap_ji();
         let item = Mutable::new(QuestionItem::new(base.clone(), item));
 
-        let _self = Rc::new(Self{
+        let _self = Rc::new(Self {
             base,
             raw,
             item,
@@ -55,21 +54,21 @@ pub struct QuestionItem {
     pub wrong_filename: Option<String>,
     pub hotspot: Rc<Hotspot>,
     pub revealed: Mutable<bool>,
-    pub re_ask_timer: RefCell<Option<Timeout>>
+    pub re_ask_timer: RefCell<Option<Timeout>>,
 }
 
 impl QuestionItem {
     pub fn new(base: Rc<Base>, raw: RawQuestionItem) -> Rc<Self> {
         let hotspot = Hotspot::new(raw.hotspot);
 
-        Rc::new(Self{
+        Rc::new(Self {
             question_filename: raw.question_filename,
             answer_filename: raw.answer_filename,
             wrong_filename: raw.wrong_filename,
             base,
             hotspot,
             revealed: Mutable::new(false),
-            re_ask_timer: RefCell::new(None)
+            re_ask_timer: RefCell::new(None),
         })
     }
 }

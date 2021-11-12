@@ -1,8 +1,8 @@
-mod dom;
-mod state;
 pub mod animation;
-pub mod image;
+mod dom;
 pub mod helpers;
+pub mod image;
+mod state;
 
 pub use dom::*;
 pub use state::*;

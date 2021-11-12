@@ -4,14 +4,14 @@ use std::rc::Rc;
 
 pub struct Hotspot {
     pub raw: RawHotspot,
-    pub tooltip_text: Mutable<Option<String>>
+    pub tooltip_text: Mutable<Option<String>>,
 }
 
 impl Hotspot {
     pub fn new(raw: RawHotspot) -> Rc<Self> {
         Rc::new(Self {
             raw,
-            tooltip_text: Mutable::new(None)
+            tooltip_text: Mutable::new(None),
         })
     }
 }

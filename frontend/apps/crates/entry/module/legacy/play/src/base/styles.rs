@@ -11,7 +11,6 @@ pub static FULL_STAGE: Lazy<String> = Lazy::new(|| {
     }
 });
 
-
 pub static SVG_FILL_TRANSPARENT_CLICK_CLASS: Lazy<String> = Lazy::new(|| {
     class! {
         .style("fill", "black")

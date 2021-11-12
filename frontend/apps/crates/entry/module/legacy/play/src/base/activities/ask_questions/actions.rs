@@ -1,10 +1,10 @@
-use std::{borrow::BorrowMut, rc::Rc, sync::atomic::Ordering};
 use super::state::*;
-use components::audio::mixer::{AUDIO_MIXER, AudioSourceExt, AudioPath, AudioSource};
+use components::audio::mixer::{AudioPath, AUDIO_MIXER};
 use gloo_timers::callback::Timeout;
-use shared::domain::jig::module::body::legacy::activity::AdvanceTrigger;
+use std::{rc::Rc, sync::atomic::Ordering};
+
+use dominator::clone;
 use utils::prelude::*;
-use dominator::{Dom, html, clone};
 
 impl AskQuestions {
     pub fn on_start(self: Rc<Self>) {
@@ -14,21 +14,19 @@ impl AskQuestions {
     pub fn on_bg_click(self: Rc<Self>) {
         if self.phase.get() != Phase::WaitingNext {
             let item = self.item.get_cloned();
-            item.on_wrong_click(self.clone());
+            item.on_wrong_click(self);
         }
     }
 
     pub fn next_question(self: Rc<Self>) {
-
         self.wrong_count.store(0, Ordering::SeqCst);
 
         match self.item_bank.borrow_mut().pop() {
             None => {
                 log::info!("all finished!");
                 let _ = IframeAction::new(ModuleToJigPlayerMessage::Next).try_post_message_to_top();
-            },
+            }
             Some(item) => {
-
                 let item = QuestionItem::new(self.base.clone(), item);
                 item.clone().start_asking();
                 self.item.set(item);
@@ -39,7 +37,6 @@ impl AskQuestions {
     }
 }
 
-
 impl QuestionItem {
     pub fn on_correct_click(self: Rc<Self>, parent: Rc<AskQuestions>) {
         let state = self;
@@ -48,21 +45,16 @@ impl QuestionItem {
 
         let url = match state.answer_filename.as_ref() {
             Some(x) => state.base.activity_media_url(x),
-            None => {
-                AudioPath::from(AUDIO_MIXER.with(|mixer| mixer.get_random_positive()))
-                    .url()
-            }
+            None => AudioPath::from(AUDIO_MIXER.with(|mixer| mixer.get_random_positive())).url(),
         };
-
 
         state.stop_asking();
         state.base.audio_manager.play_clip_on_ended(
-            url, 
+            url,
             clone!(parent => move || {
                 parent.clone().next_question();
-            })
+            }),
         );
-
     }
 
     pub fn on_wrong_click(self: Rc<Self>, parent: Rc<AskQuestions>) {
@@ -70,10 +62,7 @@ impl QuestionItem {
 
         let url = match state.wrong_filename.as_ref() {
             Some(x) => state.base.activity_media_url(x),
-            None => {
-                AudioPath::from(AUDIO_MIXER.with(|mixer| mixer.get_random_negative()))
-                    .url()
-            }
+            None => AudioPath::from(AUDIO_MIXER.with(|mixer| mixer.get_random_negative())).url(),
         };
 
         state.stop_asking();
@@ -81,15 +70,13 @@ impl QuestionItem {
             url,
             clone!(state => move || {
                 *state.re_ask_timer.borrow_mut() = Some(Timeout::new(crate::config::ASK_QUESTION_WAIT_RE_ASK, clone!(state => move || {
-                    state.clone().start_asking();
+                    state.start_asking();
                 })))
             })
         );
 
-
         let count = parent.wrong_count.fetch_add(1, Ordering::SeqCst);
         if count >= crate::config::WRONG_TRIES_UNTIL_HINT {
-
             parent.phase.set_neq(Phase::Hint);
             parent.wrong_count.store(0, Ordering::SeqCst);
         }
@@ -108,9 +95,9 @@ impl QuestionItem {
             state.base.audio_manager.play_clip_on_ended(
                 state.base.activity_media_url(&audio_filename),
                 clone!(state => move || {
-                    *state.re_ask_timer.borrow_mut() = Some(Timeout::new(crate::config::ASK_QUESTION_WAIT_RE_ASK, clone!(state => move || {
+                    *state.re_ask_timer.borrow_mut() = Some(Timeout::new(crate::config::ASK_QUESTION_WAIT_RE_ASK, move || {
                         //state.clone().start_asking();
-                    })))
+                    }))
                 })
             );
         }

@@ -1,16 +1,14 @@
-use std::{cell::RefCell, rc::Rc};
 use crate::base::state::Base;
-use awsm_web::audio::AudioHandle;
-use futures_signals::{map_ref, signal::{Signal, SignalExt, Mutable}};
-use shared::domain::jig::module::body::legacy::activity::{Video as RawVideo, VideoSource};
+use std::{cell::RefCell, rc::Rc};
+
 use dominator::clone;
-use web_sys::{HtmlElement, HtmlVideoElement};
-use utils::{
-    math::{bounds, mat4::Matrix4},
-    path,
-    prelude::*,
-    resize::resize_info_signal,
+use futures_signals::{
+    map_ref,
+    signal::{Mutable, Signal, SignalExt},
 };
+use shared::domain::jig::module::body::legacy::activity::Video as RawVideo;
+use utils::{math::mat4::Matrix4, resize::resize_info_signal};
+use web_sys::{HtmlElement, HtmlVideoElement};
 
 pub struct Video {
     pub base: Rc<Base>,
@@ -29,7 +27,7 @@ pub struct StartGates {
 
 impl Video {
     pub fn new(base: Rc<Base>, raw: RawVideo) -> Rc<Self> {
-        let _self = Rc::new(Self{
+        let _self = Rc::new(Self {
             base,
             raw,
             video_size: Mutable::new(None),
@@ -54,11 +52,7 @@ impl Video {
             let start_gates = self.start_gates.signal(),
             let has_size = self.has_size_signal()
             => {
-                if start_gates.module && start_gates.video && *has_size {
-                    true
-                } else {
-                    false
-                }
+                start_gates.module && start_gates.video && *has_size
             }
         }
     }
@@ -66,7 +60,7 @@ impl Video {
     pub fn transform_signal(&self) -> impl Signal<Item = String> {
         let transform_matrix = match self.raw.transform_matrix {
             None => Matrix4::identity(),
-            Some(m) => Matrix4::new_direct(m)
+            Some(m) => Matrix4::new_direct(m),
         };
 
         resize_info_signal().map(move |resize_info| {
@@ -104,52 +98,51 @@ impl Video {
         }
     }
     pub fn width_signal(&self) -> impl Signal<Item = String> {
-        self.video_resize_signal().map(|video_size| match video_size {
-            None => "0px".to_string(),
-            Some((width, _)) => format!("{}px", width)
-        })
+        self.video_resize_signal()
+            .map(|video_size| match video_size {
+                None => "0px".to_string(),
+                Some((width, _)) => format!("{}px", width),
+            })
     }
 
     pub fn height_signal(&self) -> impl Signal<Item = String> {
-        self.video_resize_signal().map(|video_size| match video_size {
-            None => "0px".to_string(),
-            Some((_, height)) => format!("{}px", height)
-        })
+        self.video_resize_signal()
+            .map(|video_size| match video_size {
+                None => "0px".to_string(),
+                Some((_, height)) => format!("{}px", height),
+            })
     }
 
     pub fn top_signal(&self) -> impl Signal<Item = String> {
-        self.video_offset_signal().map(|video_offset| match video_offset {
-            None => "0px".to_string(),
-            Some((_, top)) => format!("{}px", top)
-        })
+        self.video_offset_signal()
+            .map(|video_offset| match video_offset {
+                None => "0px".to_string(),
+                Some((_, top)) => format!("{}px", top),
+            })
     }
     pub fn left_signal(&self) -> impl Signal<Item = String> {
-        self.video_offset_signal().map(|video_offset| match video_offset {
-            None => "0px".to_string(),
-            Some((left, _)) => format!("{}px", left)
-        })
+        self.video_offset_signal()
+            .map(|video_offset| match video_offset {
+                None => "0px".to_string(),
+                Some((left, _)) => format!("{}px", left),
+            })
     }
 
     pub fn set_yt_api(&self, elem: HtmlElement) {
-        *self.yt_api.borrow_mut() = Some(YoutubeApi {
-            elem
-        });
+        *self.yt_api.borrow_mut() = Some(YoutubeApi { elem });
     }
 
     pub fn set_direct_api(&self, elem: HtmlVideoElement) {
-        *self.direct_api.borrow_mut() = Some(DirectApi {
-            elem
-        });
+        *self.direct_api.borrow_mut() = Some(DirectApi { elem });
     }
 }
 
 pub struct YoutubeApi {
-    pub elem: HtmlElement
+    pub elem: HtmlElement,
 }
 
 impl YoutubeApi {
     pub fn get_video_size(&self) -> (f64, f64) {
-
         // TODO- get from API
         let is_wide: bool = true;
 
@@ -162,9 +155,8 @@ impl YoutubeApi {
 }
 
 pub struct DirectApi {
-    pub elem: HtmlVideoElement
+    pub elem: HtmlVideoElement,
 }
-
 
 impl DirectApi {
     pub fn get_video_size(&self) -> (f64, f64) {

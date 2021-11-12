@@ -1,8 +1,8 @@
-use std::{cell::RefCell, rc::Rc};
 use crate::base::state::Base;
-use awsm_web::audio::AudioHandle;
-use shared::domain::jig::module::body::legacy::activity::{SaySomething as RawSaySomething};
+use std::rc::Rc;
+
 use dominator::clone;
+use shared::domain::jig::module::body::legacy::activity::SaySomething as RawSaySomething;
 
 pub struct SaySomething {
     pub base: Rc<Base>,
@@ -11,10 +11,7 @@ pub struct SaySomething {
 
 impl SaySomething {
     pub fn new(base: Rc<Base>, raw: RawSaySomething) -> Rc<Self> {
-        let _self = Rc::new(Self{
-            base,
-            raw,
-        });
+        let _self = Rc::new(Self { base, raw });
 
         _self.base.set_bg_listener(clone!(_self => move || {
             _self.clone().on_bg_click();

@@ -1,25 +1,19 @@
-use std::rc::Rc;
 use super::state::*;
-use dominator::{Dom, html, svg, clone, EventOptions};
-use gloo_timers::future::TimeoutFuture;
-use utils::{math::BoundsF64, prelude::*, resize::{ResizeInfo, resize_info_signal}};
-use futures_signals::{
-    signal_vec::{self, SignalVecExt},
-    signal::{self, Signal, SignalExt},
-    map_ref
-};
-use crate::base::{
-    styles::{FULL_STAGE, SVG_FILL_TRANSPARENT_CLICK_CLASS},
-    activities::_common::hotspot::*
-};
+use crate::base::styles::{FULL_STAGE, SVG_FILL_TRANSPARENT_CLICK_CLASS};
 use crate::config::HINT_TIME_MS;
-
-use components::traces::{
-    svg::{self, ShapeStyle, ShapeStyleMode, ShapeStyleKind, ShapeStylePlayMode},
-    bubble::TraceBubble
+use dominator::{clone, svg, Dom};
+use futures_signals::{
+    map_ref,
+    signal::{self, SignalExt},
+};
+use gloo_timers::future::TimeoutFuture;
+use std::rc::Rc;
+use utils::{
+    prelude::*,
+    resize::{resize_info_signal, ResizeInfo},
 };
 
-use shared::domain::jig::module::body::_groups::design::TraceKind;
+use components::traces::svg::{ShapeStyle, ShapeStyleKind, ShapeStyleMode, ShapeStylePlayMode};
 
 impl AskQuestions {
     pub fn render(self: Rc<Self>) -> Dom {
@@ -43,7 +37,7 @@ impl AskQuestions {
                     format!("{}px", info.height)
                 }))
                 .class(&*SVG_FILL_TRANSPARENT_CLICK_CLASS)
-                .event(clone!(state => move |evt:events::Click| {
+                .event(clone!(state => move |_evt:events::Click| {
                     state.clone().on_bg_click();
                 }))
             }))
@@ -55,11 +49,11 @@ impl AskQuestions {
                     => move {
                         Some(match phase {
                             Phase::Play => {
-                                item.clone().render_svg_playing(state.clone(), &resize_info)
+                                item.clone().render_svg_playing(state.clone(), resize_info)
                             },
 
                             Phase::Hint | Phase::WaitingNext => {
-                                item.clone().render_svg_hint(state.clone(), &resize_info)
+                                item.clone().render_svg_hint(state.clone(), resize_info)
                             }
                         })
                     }
@@ -70,36 +64,43 @@ impl AskQuestions {
 }
 
 impl QuestionItem {
-    pub fn render_svg_hint(self: Rc<Self>, parent: Rc<AskQuestions>, resize_info: &ResizeInfo) -> Dom {
+    pub fn render_svg_hint(
+        self: Rc<Self>,
+        _parent: Rc<AskQuestions>,
+        resize_info: &ResizeInfo,
+    ) -> Dom {
         let state = self;
         state.hotspot.render(
-            &resize_info,
-            || {
-            },
-            signal::always(
-                ShapeStyle {
-                    interactive: false,
-                    mode: ShapeStyleMode::Play(ShapeStylePlayMode::Hint),
-                    kind: ShapeStyleKind::General,
-                }
-            )
+            resize_info,
+            || {},
+            signal::always(ShapeStyle {
+                interactive: false,
+                mode: ShapeStyleMode::Play(ShapeStylePlayMode::Hint),
+                kind: ShapeStyleKind::General,
+            }),
         )
     }
 
-    pub fn render_svg_playing(self: Rc<Self>, parent: Rc<AskQuestions>, resize_info: &ResizeInfo) -> Dom {
+    pub fn render_svg_playing(
+        self: Rc<Self>,
+        parent: Rc<AskQuestions>,
+        resize_info: &ResizeInfo,
+    ) -> Dom {
         let state = self;
         state.hotspot.render(
-            &resize_info,
+            resize_info,
             clone!(state, parent => move || {
                 state.clone().on_correct_click(parent.clone());
             }),
-            state.revealed.signal().map(|revealed| {
-                ShapeStyle {
-                    interactive: true,
-                    mode: if revealed { ShapeStyleMode::Play(ShapeStylePlayMode::Selected) } else { ShapeStyleMode::Transparent },
-                    kind: ShapeStyleKind::General,
-                }
-            })
+            state.revealed.signal().map(|revealed| ShapeStyle {
+                interactive: true,
+                mode: if revealed {
+                    ShapeStyleMode::Play(ShapeStylePlayMode::Selected)
+                } else {
+                    ShapeStyleMode::Transparent
+                },
+                kind: ShapeStyleKind::General,
+            }),
         )
     }
 }

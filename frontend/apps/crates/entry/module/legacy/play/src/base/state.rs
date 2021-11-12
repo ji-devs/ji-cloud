@@ -1,11 +1,25 @@
-use shared::domain::jig::{JigData, JigId, module::{ModuleId, body::{_groups::design::{Backgrounds, Sticker}, ThemeChoice, Instructions, legacy::{slide::Slide, ModuleData as RawData}}}};
-use components::{audio::mixer::AudioMixer, module::_common::play::prelude::*};
+use super::{actions::StageClick, audio::AudioManager, design::sticker::animation::WorkerKind};
+use awsm_web::loaders::fetch::fetch_url;
+use components::module::_common::play::prelude::*;
+use futures_signals::signal::Mutable;
+use shared::domain::jig::{
+    module::{
+        body::{
+            legacy::{slide::Slide, ModuleData as RawData},
+            Instructions,
+        },
+        ModuleId,
+    },
+    JigData, JigId,
+};
+use std::{
+    cell::RefCell,
+    collections::HashMap,
+    rc::Rc,
+    sync::atomic::{AtomicBool, AtomicUsize, Ordering},
+};
 use utils::prelude::*;
 use web_sys::Worker;
-use std::{borrow::BorrowMut, cell::RefCell, collections::HashMap, hash::Hash, rc::Rc, sync::atomic::{AtomicBool, AtomicUsize, Ordering}};
-use futures_signals::signal::Mutable;
-use super::{actions::StageClick, design::sticker::animation::WorkerKind, audio::AudioManager};
-use awsm_web::loaders::fetch::fetch_url;
 
 pub struct Base {
     pub jig_id: JigId,
@@ -21,7 +35,7 @@ pub struct Base {
     pub start_listeners: RefCell<Vec<Box<dyn FnMut()>>>,
     pub stage_click_listeners: RefCell<Vec<Box<dyn FnMut(StageClick)>>>,
     pub audio_manager: AudioManager,
-    pub stage_click_allowed: AtomicBool
+    pub stage_click_allowed: AtomicBool,
 }
 
 #[derive(Default)]
@@ -29,7 +43,6 @@ pub struct WorkerList {
     pub list: Vec<Worker>,
     pub curr_index: AtomicUsize,
 }
-
 
 impl WorkerList {
     pub fn next(&self) -> Option<&Worker> {
@@ -59,11 +72,14 @@ impl Base {
             ..
         } = init_args;
 
-        let url = utils::path::legacy_cdn_url(format!("{}/json/slides/{}.json", raw.game_id, raw.slide_id));
+        let url = utils::path::legacy_cdn_url(format!(
+            "{}/json/slides/{}.json",
+            raw.game_id, raw.slide_id
+        ));
 
         log::info!("loading {}", url);
 
-        let slide:Slide = fetch_url(&url)
+        let slide: Slide = fetch_url(&url)
             .await
             .unwrap_ji()
             .json_from_str()
@@ -84,10 +100,10 @@ impl Base {
             start_listeners: RefCell::new(Vec::new()),
             stage_click_listeners: RefCell::new(Vec::new()),
             audio_manager: AudioManager::new(),
-            stage_click_allowed: AtomicBool::new(false)
+            stage_click_allowed: AtomicBool::new(false),
         });
 
-        /// TODO- set after done preloading
+        // TODO- set after done preloading
         _self.finished_preload();
 
         _self
@@ -108,11 +124,21 @@ impl Base {
         self.stage_click_listeners.borrow_mut().push(Box::new(f));
     }
 
-    pub fn activity_media_url<T: AsRef<str>>(&self, path:T) -> String {
-        utils::path::legacy_cdn_url(&format!("{}/media/slides/{}/activity/{}", self.game_id, self.slide_id, path.as_ref()))
+    pub fn activity_media_url<T: AsRef<str>>(&self, path: T) -> String {
+        utils::path::legacy_cdn_url(&format!(
+            "{}/media/slides/{}/activity/{}",
+            self.game_id,
+            self.slide_id,
+            path.as_ref()
+        ))
     }
-    pub fn design_media_url<T: AsRef<str>>(&self, path:T) -> String {
-        utils::path::legacy_cdn_url(&format!("{}/media/slides/{}/{}", self.game_id, self.slide_id, path.as_ref()))
+    pub fn design_media_url<T: AsRef<str>>(&self, path: T) -> String {
+        utils::path::legacy_cdn_url(&format!(
+            "{}/media/slides/{}/{}",
+            self.game_id,
+            self.slide_id,
+            path.as_ref()
+        ))
     }
 
     pub fn workers_len(&self) -> usize {
@@ -135,9 +161,9 @@ impl Base {
         // try to limit it to max_workers, but if we have none for this src
         // create it anyway
         if total_len <= crate::config::MAX_WORKERS || workers.list.is_empty() {
-            let worker = kind.make_worker(); 
+            let worker = kind.make_worker();
             workers.list.push(worker.clone());
-            worker 
+            worker
         } else {
             workers.next().unwrap_ji().clone()
         }

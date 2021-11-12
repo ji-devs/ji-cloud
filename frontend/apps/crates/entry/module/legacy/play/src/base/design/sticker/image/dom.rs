@@ -1,34 +1,27 @@
-
-use crate::base::state::Base;
 use dominator::{clone, html, with_node, Dom};
-use futures_signals::signal::{Mutable, Signal, SignalExt};
+use futures_signals::signal::SignalExt;
 
-use shared::domain::jig::module::body::legacy::design::{
-    Sticker as RawSticker
-};
-use std::{borrow::Borrow, rc::Rc, cell::RefCell};
+use std::rc::Rc;
 use utils::{
     math::{bounds, mat4::Matrix4},
-    path,
     prelude::*,
     resize::resize_info_signal,
 };
 use wasm_bindgen::JsCast;
-use awsm_web::{canvas::{get_2d_context, CanvasToBlobFuture}, data::ArrayBufferExt};
-use super::state::*;
+
 use super::super::helpers::*;
+use super::state::*;
 
 impl ImagePlayer {
     pub fn render(self: Rc<Self>) -> Dom {
         let state = self;
 
-        let transform_matrix = Matrix4::new_direct(state.raw.transform_matrix.clone());
+        let transform_matrix = Matrix4::new_direct(state.raw.transform_matrix);
         let transform_signal = resize_info_signal().map(move |resize_info| {
             let mut m = transform_matrix.clone();
             m.denormalize(&resize_info);
             m.as_matrix_string()
         });
-
 
         html!("img" => web_sys:: HtmlImageElement, {
             .attribute("src", &state.base.design_media_url(&state.raw.filename))
@@ -62,9 +55,9 @@ impl ImagePlayer {
                     }
                 }))
             })
-            .event(clone!(state => move |_evt:events::Click| {
+            .event(move |_:events::Click| {
                 log::info!("clicked!")
-            }))
+            })
         })
     }
 }

@@ -1,8 +1,8 @@
-use std::rc::Rc;
 use super::state::SaySomething;
+use dominator::clone;
 use shared::domain::jig::module::body::legacy::activity::AdvanceTrigger;
+use std::rc::Rc;
 use utils::prelude::*;
-use dominator::{Dom, html, clone};
 
 impl SaySomething {
     pub fn on_bg_click(self: Rc<Self>) {
@@ -12,7 +12,6 @@ impl SaySomething {
     }
 
     pub fn on_start(self: Rc<Self>) {
-
         let state = self;
 
         state.base.allow_stage_click();
@@ -24,22 +23,21 @@ impl SaySomething {
                     if state.raw.advance_trigger == AdvanceTrigger::AudioEnd {
                         state.next();
                     }
-                })
+                }),
             );
         }
     }
 
     pub fn next(&self) {
-
         let msg = match self.raw.advance_index {
             Some(index) => {
                 log::info!("going to index {}!", index);
                 IframeAction::new(ModuleToJigPlayerMessage::JumpToIndex(index))
-            },
+            }
             None => {
                 log::info!("going next!");
                 IframeAction::new(ModuleToJigPlayerMessage::Next)
-            },
+            }
         };
 
         if let Err(_) = msg.try_post_message_to_top() {

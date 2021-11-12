@@ -1,17 +1,15 @@
-use std::rc::Rc;
 use super::state::Video;
-use utils::prelude::*;
-use dominator::{Dom, html, clone, with_node};
 use crate::base::styles;
-use shared::domain::jig::module::body::{
-    _groups::design::YoutubeUrl,
-    legacy::activity::VideoSource,
-};
 use components::stickers::video::ext::*;
-use wasm_bindgen::prelude::*;
-use wasm_bindgen::JsCast;
+use dominator::{clone, html, with_node, Dom};
+use shared::domain::jig::module::body::{
+    _groups::design::YoutubeUrl, legacy::activity::VideoSource,
+};
+use std::rc::Rc;
+use utils::prelude::*;
+
 use web_sys::{HtmlElement, HtmlVideoElement};
-use js_sys::Reflect;
+
 use futures_signals::signal::SignalExt;
 
 impl Video {
@@ -71,8 +69,8 @@ impl Video {
                 state.on_ended();
             }))
             .with_node!(elem => {
-                .event(clone!(state => move |evt: events::TimeUpdate| {
-                    if let Some(end) = state.raw.range.map(|(start, end)| end) {
+                .event(clone!(state => move |_evt: events::TimeUpdate| {
+                    if let Some(end) = state.raw.range.map(|(_start, end)| end) {
                         let current_time = elem.current_time();
                         log::info!("{} vs. {}", current_time, end);
 
@@ -82,8 +80,8 @@ impl Video {
                     }
                 }))
             })
-            .with_node!(elem => {
-                .future(clone!(elem, state => async move {
+            .with_node!(_elem => {
+                .future(clone!(state => async move {
                     state.first_play_signal().for_each(|first_play| {
                         if first_play {
                             state.direct_api.borrow().as_ref().unwrap_ji().play();
@@ -96,7 +94,6 @@ impl Video {
                 state.set_direct_api(elem);
             }))
         })
-
     }
 
     pub fn render_youtube(self: Rc<Self>, yt: &YoutubeUrl) -> Dom {
@@ -125,7 +122,7 @@ impl Video {
             })
             .property("captions", false)
             .property("muted", false)
-            .property("loop", false) 
+            .property("loop", false)
             // always false since we imperatively play when the context is ready
             .property("autoplay", false)
             .event(clone!(state => move |_: events::Ready| {
@@ -139,8 +136,8 @@ impl Video {
                 ));
 
             }))
-            .with_node!(elem => {
-                .future(clone!(elem, state => async move {
+            .with_node!(_elem => {
+                .future(clone!(state => async move {
                     state.first_play_signal().for_each(|first_play| {
                         if first_play {
                             state.yt_api.borrow().as_ref().unwrap_ji().play();
@@ -159,4 +156,3 @@ impl Video {
         })
     }
 }
-

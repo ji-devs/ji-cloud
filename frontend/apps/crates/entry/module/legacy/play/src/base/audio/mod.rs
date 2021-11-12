@@ -1,5 +1,5 @@
-mod state;
 mod actions;
- 
-pub use state::*;
+mod state;
+
 pub use actions::*;
+pub use state::*;

@@ -1,21 +1,21 @@
-use dominator::{html, Dom, clone, svg, DomBuilder, with_node, apply_methods};
-use utils::{prelude::*, resize::{ResizeInfo, resize_info_signal}};
+use dominator::{apply_methods, clone, html, with_node, Dom, DomBuilder};
+use utils::resize::ResizeInfo;
 use web_sys::SvgElement;
-use std::rc::Rc;
-use futures_signals::signal::{Signal, SignalExt};
+
 use components::{
     overlay::handle::OverlayHandle,
-    traces::svg::{ShapeStyle, ShapeStyleMode, ShapeStyleKind, ShapeStyleVar, SvgCallbacks, TransformSize, render_single_shape}
+    traces::svg::{render_single_shape, ShapeStyle, ShapeStyleVar, SvgCallbacks, TransformSize},
 };
-use shared::domain::jig::module::body::_groups::design::TraceKind;
+use futures_signals::signal::Signal;
+
 use super::state::*;
 
 impl Hotspot {
     pub fn render(
-        &self, 
-        resize_info: &ResizeInfo, 
+        &self,
+        resize_info: &ResizeInfo,
         on_selected: impl Fn() + 'static,
-        shape_style_signal: impl Signal<Item = ShapeStyle> + 'static
+        shape_style_signal: impl Signal<Item = ShapeStyle> + 'static,
     ) -> Dom {
         let shape_style = ShapeStyleVar::Dynamic(shape_style_signal);
 
@@ -27,15 +27,15 @@ impl Hotspot {
         let tooltip_text = self.tooltip_text.clone();
 
         render_single_shape(
-            shape_style, 
-            &resize_info, 
-            &self.raw.shape, 
-            TransformSize::none(), 
+            shape_style,
+            resize_info,
+            &self.raw.shape,
+            TransformSize::none(),
             SvgCallbacks::new(
                 Some(on_selected),
                 None::<fn(web_sys::SvgElement)>,
                 None::<fn(web_sys::SvgElement)>,
-                Some(move |dom:DomBuilder<SvgElement>| {
+                Some(move |dom: DomBuilder<SvgElement>| {
                     apply_methods!(dom, {
                         .with_node!(elem => {
                             .apply(OverlayHandle::lifecycle(clone!(tooltip_text => move || {
@@ -57,8 +57,8 @@ impl Hotspot {
                             })))
                         })
                     })
-                })
-            )
+                }),
+            ),
         )
     }
 }

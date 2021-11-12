@@ -1,8 +1,8 @@
-use std::rc::Rc;
 use super::state::SaySomething;
-use utils::prelude::*;
-use dominator::{Dom, html, clone};
+use std::rc::Rc;
+
 use crate::base::styles;
+use dominator::{html, Dom};
 
 impl SaySomething {
     pub fn render(self: Rc<Self>) -> Dom {

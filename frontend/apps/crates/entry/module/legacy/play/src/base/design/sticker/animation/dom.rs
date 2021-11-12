@@ -1,36 +1,31 @@
-use crate::base::state::Base;
-use dominator::{clone, html, with_node, Dom, EventOptions};
-use futures_signals::signal::{Mutable, Signal, SignalExt};
-use wasm_bindgen::prelude::*;
+use dominator::{clone, html, Dom};
+use futures_signals::signal::SignalExt;
+
 use wasm_bindgen::JsCast;
-use shared::domain::jig::module::body::legacy::design::{
-    Sticker as RawSticker
-};
-use web_sys::HtmlCanvasElement;
-use std::{borrow::Borrow, rc::Rc, cell::RefCell};
+
+use super::super::helpers::*;
+use super::state::*;
+use awsm_web::canvas::get_2d_context;
+use std::rc::Rc;
 use utils::{
     math::{bounds, mat4::Matrix4},
-    path,
     prelude::*,
     resize::resize_info_signal,
 };
-use awsm_web::{canvas::{get_2d_context, CanvasToBlobFuture}, data::ArrayBufferExt};
-use super::state::*;
-use super::super::helpers::*;
+use web_sys::HtmlCanvasElement;
 
-
-impl Drop for AnimationPlayer { 
+impl Drop for AnimationPlayer {
     fn drop(&mut self) {
         log::info!("player dropped ");
     }
 }
-impl AnimationPlayer { 
+impl AnimationPlayer {
     pub fn render(self: Rc<Self>) -> Dom {
         let state = self;
 
         html!("empty-fragment", {
             .child_signal(state.size.signal_cloned().map(clone!(state => move |size| size.map(|size| {
-                let transform_matrix = Matrix4::new_direct(state.raw.transform_matrix.clone());
+                let transform_matrix = Matrix4::new_direct(state.raw.transform_matrix);
                 let transform_signal = resize_info_signal().map(move |resize_info| {
                     let mut m = transform_matrix.clone();
                     m.denormalize(&resize_info);
@@ -55,7 +50,7 @@ impl AnimationPlayer {
                     .style_signal("transform", transform_signal)
 
                     .after_inserted(clone!(state, size => move |elem| {
-                        let (natural_width, natural_height) = size; 
+                        let (natural_width, natural_height) = size;
 
                         elem.set_width(natural_width as u32);
                         elem.set_height(natural_height as u32);
@@ -87,7 +82,6 @@ impl AnimationPlayer {
         //     m.denormalize(&resize_info);
         //     m.as_matrix_string()
         // });
-
 
         // html!("video" => web_sys:: HtmlVideoElement, {
         //     .children(&mut[

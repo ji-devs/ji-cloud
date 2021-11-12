@@ -1,8 +1,8 @@
 use super::state::*;
-use components::module::_common::play::prelude::DomRenderable;
-use dominator::{html, Dom, clone};
-use std::rc::Rc;
 use super::styles;
+use components::module::_common::play::prelude::DomRenderable;
+use dominator::{clone, html, Dom};
+use std::rc::Rc;
 use utils::prelude::*;
 
 impl DomRenderable for Base {
