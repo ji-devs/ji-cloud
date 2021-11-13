@@ -18,28 +18,6 @@ use flate2::write::ZlibEncoder;
 use std::process::Command;
 use reqwest::Client; 
 
-// David Houdini- 17736
-// https://d24o39yp3ttic8.cloudfront.net/5D00A147-73B7-43FF-A215-A38CB84CEBCD/game.json
-
-// Corinne Houdini - 17762
-// https://d24o39yp3ttic8.cloudfront.net/42C980D6-9FCE-4552-A5F2-ECFC0EA8D129/game.json
-
-// Soundboard - 17765
-// https://jitap.net/activities/genr/play/soundboard-states 
-// https://d24o39yp3ttic8.cloudfront.net/6A973171-C29A-4C99-A650-8033F996C6E7/game.json
-
-// say something - 17746
-// https://jitap.net/activities/gen8/play/say-something-options
-// https://d24o39yp3ttic8.cloudfront.net/86DCDC1D-64CB-4198-A866-257E213F0405/game.json
-
-// video - 17771 
-// https://jitap.net/activities/genx/play/ 
-// https://d24o39yp3ttic8.cloudfront.net/94FB3C73-FE29-46A8-933D-75D261DD4B8F/game.json
-
-// ask a question - 17792
-// https://jitap.net/activities/geoi/play/testing-ask-a-question-legacy-player
-// https://d24o39yp3ttic8.cloudfront.net/236F4AC1-9B06-49EA-B580-4AE806B0A337/game.json
-
 // url
 // http://localhost:4104/module/legacy/play/debug?game_id=ID&slide_index=0&example=true
 
@@ -52,15 +30,41 @@ async fn main() {
 
     let client = Client::new();
 
-    transcode_game(
-        &opts, 
-        client.clone(),
-        opts
-            .game_json_url
-            .as_ref()
-            .map(|x| x.as_str())
-            .unwrap_or("https://d24o39yp3ttic8.cloudfront.net/236F4AC1-9B06-49EA-B580-4AE806B0A337/game.json")
-    ).await;
+    let json_urls = match opts.game_json_url.as_ref() {
+        Some(url) => {
+            vec![url.as_str()]
+        },
+        None => {
+            vec![
+                    // David Houdini- 17736
+                    "https://d24o39yp3ttic8.cloudfront.net/5D00A147-73B7-43FF-A215-A38CB84CEBCD/game.json",
+
+                    // Corinne Houdini - 17762
+                    "https://d24o39yp3ttic8.cloudfront.net/42C980D6-9FCE-4552-A5F2-ECFC0EA8D129/game.json",
+
+                    // Soundboard - 17765
+                    // https://jitap.net/activities/genr/play/soundboard-states 
+                    "https://d24o39yp3ttic8.cloudfront.net/6A973171-C29A-4C99-A650-8033F996C6E7/game.json",
+
+                    // say something - 17746
+                    // https://jitap.net/activities/gen8/play/say-something-options
+                    "https://d24o39yp3ttic8.cloudfront.net/86DCDC1D-64CB-4198-A866-257E213F0405/game.json",
+
+                    // video - 17771 
+                    // https://jitap.net/activities/genx/play/ 
+                    "https://d24o39yp3ttic8.cloudfront.net/94FB3C73-FE29-46A8-933D-75D261DD4B8F/game.json",
+
+                    // ask a question - 17792
+                    // https://jitap.net/activities/geoi/play/testing-ask-a-question-legacy-player
+                    "https://d24o39yp3ttic8.cloudfront.net/236F4AC1-9B06-49EA-B580-4AE806B0A337/game.json",
+            ]
+        }
+    };
+    
+    for url in json_urls {
+        transcode_game(&opts, client.clone(), url).await;
+    }
+
 }
 
 async fn transcode_game(opts: &Opts, client:Client, game_json_url: &str) {

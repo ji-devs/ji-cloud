@@ -15,7 +15,7 @@ pub fn legacy_cdn_url<T: AsRef<str>>(path: T) -> String {
     if crate::routes::is_param_bool("example") {
         media_url(&format!("legacy/examples/{}", path.as_ref()))
     } else {
-        media_url(&format!("legacy/{}", path.as_ref()))
+        legacy_url(&format!("games/{}", path.as_ref()))
     }
 }
 
@@ -50,6 +50,14 @@ pub fn media_url(path: &str) -> String {
     format!(
         "{}/{}",
         SETTINGS.get().unwrap_ji().remote_target.media_url(),
+        path
+    )
+}
+
+pub fn legacy_url(path: &str) -> String {
+    format!(
+        "{}/{}",
+        SETTINGS.get().unwrap_ji().remote_target.legacy_url(),
         path
     )
 }

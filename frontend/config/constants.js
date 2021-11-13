@@ -32,11 +32,13 @@ module.exports = {
 	BUCKET_UPLOADS_RELEASE: "ji-cloud-uploads-origin-eu-001",
 	BUCKET_UPLOADS_SANDBOX: "ji-cloud-sandbox-uploads-origin-eu-001",
 	BUCKET_MEDIA: "ji-cloud-media-origin-eu-001",
+	BUCKET_LEGACY: "ji-cloud-legacy-eu-001",
 
 //is actually on sandbox (since it's for devs)
 	URL_DOCS: "https://docs.jicloud.org",
 //is actually on release (since it's for public)
 	URL_MEDIA: "https://media.jicloud.org",
+	URL_LEGACY: "https://legacy.jicloud.org",
 	URL_FRONTEND_RELEASE: "https://frontend.jicloud.org",
 	URL_FRONTEND_SANDBOX: "https://frontend.sandbox.jicloud.org",
 	URL_STORYBOOK_RELEASE: "https://storybook.jicloud.org",

@@ -12,6 +12,7 @@ const getBucket = () => {
         case "--uploads-release": return config.BUCKET_UPLOADS_RELEASE;
         case "--uploads-sandbox": return config.BUCKET_UPLOADS_SANDBOX;
         case "--media": return config.BUCKET_MEDIA;
+        case "--legacy": return config.BUCKET_LEGACY;
     }
 
     return null;
@@ -27,6 +28,8 @@ const getConfig = bucket => {
             return "storage-uploads-cors.json";
         case "--media": 
             return "storage-media-cors.json";
+        case "--legacy": 
+            return "storage-legacy-cors.json";
     }
 
     return null;

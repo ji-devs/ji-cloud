@@ -4,14 +4,15 @@
   "scripts": {
     "local-media-server": "node ./src/local-media-server.js",
     "local-dev-files": "node ./src/local-dev-files.js",
-    "cors": "npm-run-all -p _cors:frontend _cors:uploads _cors:media",
+    "cors": "npm-run-all -p _cors:frontend _cors:uploads _cors:media _cors:legacy",
     "_cors:frontend": "npm run _cors:frontend-release && npm run _cors:frontend-sandbox",
     "_cors:frontend-release": "node ./src/cors.js --frontend-release --set",
     "_cors:frontend-sandbox": "node ./src/cors.js --frontend-sandbox --set",
     "_cors:uploads": "npm run _cors:uploads-release && npm run _cors:uploads-sandbox",
     "_cors:uploads-release": "node ./src/cors.js --uploads-release --set",
     "_cors:uploads-sandbox": "node ./src/cors.js --uploads-sandbox --set",
-    "_cors:media": "node ./src/cors.js --media --set"
+    "_cors:media": "node ./src/cors.js --media --set",
+    "_cors:legacy": "node ./src/cors.js --legacy --set"
   },
   "dependencies": {
     "cors": "^2.8.5",
