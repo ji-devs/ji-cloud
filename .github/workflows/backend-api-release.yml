@@ -46,7 +46,8 @@ jobs:
         with:
           path: ${{github.workspace}}/cargo-make
 
-      - uses: actions-rs/toolchain@v1
+      - name: install latest Rust version for build script
+        uses: actions-rs/toolchain@v1
         with:
           profile: minimal
           toolchain: stable
