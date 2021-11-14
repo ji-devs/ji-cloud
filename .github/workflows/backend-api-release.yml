@@ -15,6 +15,13 @@ jobs:
       - name: checkout repo
         uses: actions/checkout@v1
 
+      - name: install latest Rust version
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+
       - name: Extract label 
         shell: bash
         run: echo "##[set-output name=label;]$(echo \"[${GITHUB_REF#refs/heads/} - backend/api]\")"
@@ -45,13 +52,6 @@ jobs:
         uses: dakom/actions-path@master
         with:
           path: ${{github.workspace}}/cargo-make
-
-      - name: install latest Rust version for build script
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
 
       - name: build and deploy api
         run: cargo make release-api
