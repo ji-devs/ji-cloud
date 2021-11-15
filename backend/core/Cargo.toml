@@ -3,7 +3,7 @@ authors = [
   "David Komer <david.komer@gmail.com>",
   "Chloe Ross <chloe@launchbadge.com>",
 ]
-edition = "2021"
+edition = "2018"
 name = "core"
 publish = false
 version = "0.1.0"

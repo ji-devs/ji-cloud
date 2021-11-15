@@ -14,13 +14,6 @@ jobs:
     steps:
       - name: checkout repo
         uses: actions/checkout@v1
-         
-      - name: install latest Rust version
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
 
       - name: Extract label 
         shell: bash

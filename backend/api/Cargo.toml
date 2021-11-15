@@ -4,7 +4,7 @@ authors = [
   "Chloe Ross <orangesnowfox@gmail.com>", # chloe@launchbadge.com 
 ]
 default-run = "ji-cloud-api"
-edition = "2021"
+edition = "2018"
 name = "ji-cloud-api"
 version = "0.1.0"
 
