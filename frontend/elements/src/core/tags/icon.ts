@@ -7,30 +7,29 @@ export class _ extends LitElement {
     static get styles() {
         return [
             css`
-    p{
-        font-size: 14px;
-        font-weight: 500;
-        color:#798b96;
-        margin-left:8px;
-        margin-top:0;
-        margin-bottom:0;
-  
-    }
-    .wrapper{
-        display:flex;
-        align-items:center;
-        height:20px;
-    }
-    .darkgrey {
-        color:#798b96;
-    }
-    .lightblue{
-        color:#afcbf4;
-    }
-    .white {
-        color:#ffffff;
-    }
-    `,
+                p {
+                    font-size: 14px;
+                    font-weight: 500;
+                    color:#798b96;
+                    margin-left:8px;
+                    margin-top:0;
+                    margin-bottom:0;
+                }
+                .wrapper {
+                    display:flex;
+                    align-items:center;
+                    height:20px;
+                }
+                .darkgrey {
+                    color:#798b96;
+                }
+                .lightblue {
+                    color:#afcbf4;
+                }
+                .white {
+                    color:#ffffff;
+                }
+            `,
         ];
     }
 

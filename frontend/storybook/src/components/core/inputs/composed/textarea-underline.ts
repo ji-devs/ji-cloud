@@ -23,7 +23,6 @@ const DEFAULT_ARGS: Args = {
 
 export const TextAreaUnderline = (props?: Partial<Args>) => {
     props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
-    const {} = props;
 
     const { width, ...textProps } = props;
 

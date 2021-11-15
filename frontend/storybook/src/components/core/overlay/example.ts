@@ -49,7 +49,6 @@ const DEFAULT_ARGS: Args = {
 
 export const Example = (props?: Args) => {
     props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
-    const {} = props;
 
     return `
         ${GridResize({ main: makeMain(props) })}

@@ -9,29 +9,29 @@ export class ReportTree extends LitElement {
     static get styles() {
         return [
             css`
-      .indent-left-root {
-          margin-left: 4px;
-      }
-      .indent-left-child {
-        margin-left: 30px;
-      }
+                .indent-left-root {
+                    margin-left: 4px;
+                }
+                .indent-left-child {
+                    margin-left: 30px;
+                }
 
-      .marker-offset-down {
-        margin-top: 10px;
-      }
+                .marker-offset-down {
+                    margin-top: 10px;
+                }
 
-      .marker {
-        border:solid 1px #c4dbff;
-        border-right:none; 
-        border-top:none;
-        width:26px;
-        height:24px;
-      }
+                .marker {
+                    border:solid 1px #c4dbff;
+                    border-right:none; 
+                    border-top:none;
+                    width:26px;
+                    height:24px;
+                }
 
-      .content-line {
-        display: flex;
-      }
-    `,
+                .content-line {
+                    display: flex;
+                }
+            `,
         ];
     }
 

@@ -21,8 +21,6 @@ const DEFAULT_ARGS: Args = {};
 export const Landing = (props?: Partial<Args>) => {
     props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
 
-    const {} = props;
-
     return `
         <page-login-landing>
 

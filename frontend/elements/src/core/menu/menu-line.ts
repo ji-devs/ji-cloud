@@ -105,7 +105,8 @@ export class _ extends LitElement {
     active: boolean = false;
 
     render() {
-        let { icon, customLabel, hover, active } = this;
+        const { icon, customLabel, active } = this;
+        let { hover } = this;
 
         if (icon === "delete") {
             hover = false;

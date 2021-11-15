@@ -16,7 +16,6 @@ const DEFAULT_ARGS: Args = {
 
 export const Widget = (props?: Args) => {
     props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
-    const {} = props;
 
     return `<pagination-widget ${argsToAttrs(props)}></pagination-widget>`;
 };

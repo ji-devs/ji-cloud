@@ -16,7 +16,6 @@ const DEFAULT_ARGS: Args = {
 
 export const DialogOverlay = (props?: Args) => {
     props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
-    const {} = props;
 
     return `
         <dialog-overlay ${argsToAttrs(props)} style="background:#00000030;">

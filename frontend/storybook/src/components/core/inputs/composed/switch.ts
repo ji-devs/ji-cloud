@@ -17,7 +17,6 @@ const DEFAULT_ARGS: Args = {
 
 export const Switch = (props?: Partial<Args>) => {
     props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
-    const {} = props;
 
     return `<input-switch ${argsToAttrs(props)}></input-switch>`;
 };

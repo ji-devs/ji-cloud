@@ -269,7 +269,7 @@ export class _ extends LitElement {
 
 function renderDecoration(index: number) {
     const getImage = (path: string, classes: string) =>
-        html`<img-ui class="${classes}" path="entry/jig/jiggling/${path}" />`;
+        html`<img-ui class="${classes}" path="entry/jig/jiggling/${path}"></img-ui>`;
 
     if (index === 0) {
         return html`

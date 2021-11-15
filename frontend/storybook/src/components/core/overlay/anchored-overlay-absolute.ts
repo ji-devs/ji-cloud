@@ -20,7 +20,6 @@ const DEFAULT_ARGS: Args = {
 
 export const AnchoredOverlayAbsolute = (props?: Args) => {
     props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
-    const {} = props;
 
     return `
         <div style="margin: 50px">

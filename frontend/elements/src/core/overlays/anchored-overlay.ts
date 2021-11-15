@@ -117,22 +117,27 @@ export class AnchoredOverlay extends LitElement {
 
         let top: number;
         switch (this.positionY) {
-            case "top-out":
+            case "top-out": {
                 top = thisBounds.top - overlayBounds.height;
                 break;
-            case "bottom-out":
+            }
+            case "bottom-out": {
                 top = thisBounds.bottom;
                 break;
-            case "top-in":
+            }
+            case "top-in": {
                 top = thisBounds.top;
                 break;
-            case "bottom-in":
+            }
+            case "bottom-in": {
                 top = thisBounds.bottom - overlayBounds.height;
                 break;
-            case "center":
+            }
+            case "center": {
                 const center = thisBounds.height / 2 - overlayBounds.height / 2;
                 top = thisBounds.top + center;
                 break;
+            }
         }
         this.overlay.style.setProperty("top", `${top}px`);
 

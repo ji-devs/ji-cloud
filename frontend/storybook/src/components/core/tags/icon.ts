@@ -18,7 +18,6 @@ const DEFAULT_ARGS: Args = {
 
 export const Icon = (props?: Partial<Args>) => {
     props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
-    const {} = props;
 
     return `<tag-icon ${argsToAttrs(props)}></tag-icon>`;
 };
