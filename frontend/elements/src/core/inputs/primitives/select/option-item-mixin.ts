@@ -31,8 +31,8 @@ export function OptionItemMixin<TBase extends Constructor>(Base: TBase) {
         }
 
         firstUpdated() {
-            // @ts-ignore
             this.container = closestPierceSlot(
+                // @ts-ignore
                 this.assignedSlot || this.parentNode,
                 "base-select, base-option-group"
             ) as any | null;
