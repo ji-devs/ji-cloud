@@ -2,7 +2,7 @@
 name = "ji-cloud-pages"
 version = "0.1.0"
 authors = ["dakom <david.komer@gmail.com>", "Chloe Ross <chloe@launchbadge.com>"]
-edition = "2021"
+edition = "2018"
 publish = false
 
 [dependencies]
