@@ -31,12 +31,12 @@ async fn create_key(
 pub async fn search_web_images(
     runtime_settings: Data<RuntimeSettings>,
     _claims: TokenUser,
-    query: Query<<search::WebImageSearch as ApiEndpoint>::Req>,
+    query: Option<Query<<search::WebImageSearch as ApiEndpoint>::Req>>,
 ) -> Result<Json<<search::WebImageSearch as ApiEndpoint>::Res>, error::Server> {
-    let query = query.into_inner();
+    let query = query.map_or_else(Default::default, Query::into_inner);
 
     let res = match &runtime_settings.bing_search_key {
-        Some(key) => crate::image_search::get_images(&query.q, key).await?,
+        Some(key) => crate::image_search::get_images(&query.q, query.image_type, key).await?,
         None => WebImageSearchResponse { images: Vec::new() },
     };
 

@@ -18,12 +18,21 @@ struct ImagesResponse {
     value: Vec<Image>,
 }
 
-pub async fn get_images(query: &str, key: &str) -> anyhow::Result<WebImageSearchResponse> {
+pub async fn get_images(
+    query: &str,
+    image_type: Option<String>,
+    key: &str,
+) -> anyhow::Result<WebImageSearchResponse> {
+    let image_type = if let Some(image_type) = image_type {
+        image_type
+    } else {
+        Default::default()
+    };
     // https://docs.microsoft.com/en-us/bing/search-apis/bing-image-search/reference/endpoints
     // https://docs.microsoft.com/en-us/bing/search-apis/bing-image-search/reference/query-parameters
     let res = reqwest::Client::new()
         .get("https://api.bing.microsoft.com/v7.0/images/search")
-        .query(&[("q", query)])
+        .query(&[("q", query), ("imageType", &image_type)])
         .query(&[("safeSearch", "strict")])
         .header("Ocp-Apim-Subscription-Key", key)
         .send()
