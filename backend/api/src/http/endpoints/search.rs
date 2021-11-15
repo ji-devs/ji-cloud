@@ -35,8 +35,6 @@ pub async fn search_web_images(
 ) -> Result<Json<<search::WebImageSearch as ApiEndpoint>::Res>, error::Server> {
     let query = query.into_inner();
 
-    // todo: handle empty queries (they're invalid in bing)
-
     let res = match &runtime_settings.bing_search_key {
         Some(key) => crate::image_search::get_images(&query.q, key).await?,
         None => WebImageSearchResponse { images: Vec::new() },

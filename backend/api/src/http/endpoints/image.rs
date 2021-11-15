@@ -3,6 +3,7 @@ use actix_web::{
     HttpResponse,
 };
 use chrono::{DateTime, Utc};
+use core::settings::RuntimeSettings;
 use futures::TryStreamExt;
 use shared::{
     api::{endpoints, ApiEndpoint},
@@ -204,12 +205,14 @@ async fn browse(
 async fn update(
     db: Data<PgPool>,
     _claims: TokenUserWithScope<ScopeManageImage>,
+    runtime_settings: Data<RuntimeSettings>,
     req: Option<Json<<endpoints::image::UpdateMetadata as ApiEndpoint>::Req>>,
     id: Path<ImageId>,
 ) -> Result<HttpResponse, error::UpdateWithMetadata> {
     let req = req.map_or_else(ImageUpdateRequest::default, Json::into_inner);
     let id = id.into_inner();
     let mut txn = db.begin().await?;
+    let api_key = &runtime_settings.google_api_key;
 
     let exists = db::image::update(
         &mut txn,
@@ -218,6 +221,7 @@ async fn update(
         req.description.as_deref(),
         req.is_premium,
         req.publish_at.map(|it| it.map(DateTime::<Utc>::from)),
+        api_key,
     )
     .await?;
 

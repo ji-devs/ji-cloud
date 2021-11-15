@@ -1,4 +1,6 @@
 use super::{recycle_metadata, recycle_tags};
+use crate::translate::translate_text;
+use anyhow::Context;
 use chrono::{DateTime, Utc};
 use futures::stream::BoxStream;
 use shared::domain::{
@@ -84,7 +86,8 @@ pub async fn update(
     description: Option<&str>,
     is_premium: Option<bool>,
     publish_at: Option<Option<DateTime<Utc>>>,
-) -> sqlx::Result<bool> {
+    api_key: &Option<String>,
+) -> anyhow::Result<bool> {
     if !sqlx::query!(
         r#"select exists(select 1 from image_metadata where id = $1) as "exists!""#,
         id.0
@@ -109,21 +112,41 @@ where id = $1 and $2 is distinct from publish_at"#,
         .await?;
     }
 
+    if let Some(description) = description {
+        let translate_text = match &api_key {
+            Some(key) => translate_text(description, "he", "en", key)
+                .await
+                .context("could not translate text")?,
+            None => None,
+        };
+
+        sqlx::query!(
+            r#"
+update image_metadata
+set description = $2,
+    translated_description = (case when ($3::text is not null) then $3::text else (translated_description) end),
+    updated_at = now()
+where id = $1 and $2 is distinct from description"#,
+            id.0,
+            description,
+            translate_text
+        )
+        .execute(&mut *conn)
+        .await?;
+    }
+
     sqlx::query!(
         //language=SQL
         r#"
 update image_metadata
 set name        = coalesce($2, name),
-    description = coalesce($3, description),
-    is_premium  = coalesce($4, is_premium),
+    is_premium  = coalesce($3, is_premium),
     updated_at  = now()
 where id = $1
   and (($2::text is not null and $2 is distinct from name) or
-       ($3::text is not null and $3 is distinct from description) or
-       ($4::boolean is not null and $4 is distinct from is_premium))"#,
+       ($3::boolean is not null and $3 is distinct from is_premium))"#,
         id.0,
         name,
-        description,
         is_premium,
     )
     .execute(conn)

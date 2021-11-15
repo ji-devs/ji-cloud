@@ -129,7 +129,7 @@ async fn delete(
     db: Data<PgPool>,
     auth: TokenUser,
     path: web::Path<JigId>,
-    req: Json<<module::Update as ApiEndpoint>::Req>,
+    req: Json<<module::Delete as ApiEndpoint>::Req>,
 ) -> Result<HttpResponse, error::Delete> {
     let parent_id = path.into_inner();
 

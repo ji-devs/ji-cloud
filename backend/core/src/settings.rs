@@ -92,6 +92,10 @@ pub struct RuntimeSettings {
     /// if missing / disabled, related routes will return `501 - Not Implemented`
     pub google_oauth: Option<GoogleOAuth>,
 
+    /// Settings for google OAuth
+    /// if missing / disabled, related routes will return `501 - Not Implemented`
+    pub google_api_key: Option<String>,
+
     /// Secret for signing/encrypting tokens.
     pub token_secret: Box<[u8; 32]>,
 
@@ -109,6 +113,7 @@ impl RuntimeSettings {
         pages_port: u16,
         media_watch_port: u16,
         bing_search_key: Option<String>,
+        google_api_key: Option<String>,
         google_oauth: Option<GoogleOAuth>,
         token_secret: Box<[u8; 32]>,
         login_token_valid_duration: Option<chrono::Duration>,
@@ -123,6 +128,7 @@ impl RuntimeSettings {
             remote_target,
             bing_search_key,
             google_oauth,
+            google_api_key,
             token_secret,
             login_token_valid_duration,
         }
@@ -131,6 +137,7 @@ impl RuntimeSettings {
     pub(crate) fn with_env(
         remote_target: RemoteTarget,
         bing_search_key: Option<String>,
+        google_api_key: Option<String>,
         google_oauth: Option<GoogleOAuth>,
         token_secret: Box<[u8; 32]>,
         login_token_valid_duration: Option<chrono::Duration>,
@@ -155,6 +162,7 @@ impl RuntimeSettings {
             remote_target,
             bing_search_key,
             google_oauth,
+            google_api_key,
             token_secret,
             login_token_valid_duration,
         })
@@ -475,6 +483,13 @@ impl SettingsManager {
             .map(|it| it.filter(|it| !it.is_empty()))
     }
 
+    /// Load the key required for initializing sentry (for pages)
+    pub async fn google_api_key(&self) -> anyhow::Result<Option<String>> {
+        self.get_optional_secret(keys::GOOGLE_API_KEY)
+            .await
+            .map(|it| it.filter(|it| !it.is_empty()))
+    }
+
     /// Load the settings for connecting to the db.
     #[cfg(feature = "db")]
     pub async fn db_connect_options(&self, sql_proxy: bool) -> anyhow::Result<PgConnectOptions> {
@@ -718,6 +733,8 @@ impl SettingsManager {
 
         let bing_search_key = self.get_optional_secret(keys::BING_SEARCH_KEY).await?;
 
+        let google_api_key = self.get_optional_secret(keys::GOOGLE_API_KEY).await?;
+
         let login_token_valid_duration = match self.remote_target {
             RemoteTarget::Local => self
                 .get_optional_secret(keys::LOGIN_TOKEN_VALID_DURATION)
@@ -737,6 +754,7 @@ impl SettingsManager {
         RuntimeSettings::with_env(
             self.remote_target,
             bing_search_key,
+            google_api_key,
             google_oauth,
             token_secret,
             login_token_valid_duration,
