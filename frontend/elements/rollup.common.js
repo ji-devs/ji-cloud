@@ -59,7 +59,7 @@ export function createConfig(target) {
         }),
     ];
 
-    if (target === "production") {
+    if (target !== "local") {
         plugins.push(
             terser({
                 output: {
