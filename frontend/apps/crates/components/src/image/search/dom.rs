@@ -159,57 +159,64 @@ fn render_controls(state: Rc<State>) -> Vec<Dom> {
     let options = &state.options;
     let mut vec = Vec::new();
 
-    vec.push(html!("label", {
-        .property("slot", "source-options")
-        .child(html!("input", {
-            .property("type", "radio")
-            .property("name", "type")
-            .property("value", "web")
-            .style("margin", "0")
-            .property_signal("checked", state.search_mode.signal_ref(|search_mode| {
-                matches!(search_mode, &SearchMode::Sticker(_))
-            }))
-            .event(clone!(state => move |_: events::Change| {
-                state.search_mode.set(SearchMode::Sticker(Rc::new(MutableVec::new())));
-                actions::search(Rc::clone(&state), None);
-            }))
-        }))
-        .text(STR_JIGZI)
-    }));
-    vec.push(html!("label", {
-        .property("slot", "source-options")
-        .child(html!("input", {
-            .property("type", "radio")
-            .property("name", "type")
-            .property("value", "stickers")
-            .style("margin", "0")
-            .property_signal("checked", state.search_mode.signal_ref(|search_mode| {
-                matches!(search_mode, &SearchMode::Web(_))
-            }))
-            .event(clone!(state => move |_: events::Change| {
-                state.search_mode.set(SearchMode::Web(Rc::new(MutableVec::new())));
-                actions::search(Rc::clone(&state), None);
-            }))
-        }))
-        .text(STR_WEB)
-    }));
-
-    if options.upload {
-        vec.push(html!("image-search-upload", {
-            .property("slot", "upload")
-            .property("label", "Upload")
-            .event(clone!(state => move |e: events::CustomFile| {
-                let file = e.file();
-                state.loader.load(clone!(state => async move {
-                    actions::upload_file(state.clone(), file).await;
+    match state.options.kind {
+        ImageSearchKind::Overlay => {
+            // overlay can only search in jigzi and doesn't have filters or upload
+        },
+        ImageSearchKind::Background | ImageSearchKind::Sticker => {
+            vec.push(html!("label", {
+                .property("slot", "source-options")
+                .child(html!("input", {
+                    .property("type", "radio")
+                    .property("name", "type")
+                    .property("value", "web")
+                    .style("margin", "0")
+                    .property_signal("checked", state.search_mode.signal_ref(|search_mode| {
+                        matches!(search_mode, &SearchMode::Sticker(_))
+                    }))
+                    .event(clone!(state => move |_: events::Change| {
+                        state.search_mode.set(SearchMode::Sticker(Rc::new(MutableVec::new())));
+                        actions::search(Rc::clone(&state), None);
+                    }))
+                }))
+                .text(STR_JIGZI)
+            }));
+            vec.push(html!("label", {
+                .property("slot", "source-options")
+                .child(html!("input", {
+                    .property("type", "radio")
+                    .property("name", "type")
+                    .property("value", "stickers")
+                    .style("margin", "0")
+                    .property_signal("checked", state.search_mode.signal_ref(|search_mode| {
+                        matches!(search_mode, &SearchMode::Web(_))
+                    }))
+                    .event(clone!(state => move |_: events::Change| {
+                        state.search_mode.set(SearchMode::Web(Rc::new(MutableVec::new())));
+                        actions::search(Rc::clone(&state), None);
+                    }))
+                }))
+                .text(STR_WEB)
+            }));
+        
+            if options.upload {
+                vec.push(html!("image-search-upload", {
+                    .property("slot", "upload")
+                    .property("label", "Upload")
+                    .event(clone!(state => move |e: events::CustomFile| {
+                        let file = e.file();
+                        state.loader.load(clone!(state => async move {
+                            actions::upload_file(state.clone(), file).await;
+                        }));
+                    }))
                 }));
-            }))
-        }));
-    }
+            }
 
-    if options.filters {
-        vec.push(render_filters(state.clone()));
-    }
+            if options.filters {
+                vec.push(render_filters(state.clone()));
+            }
+        },
+    };
 
     vec.push(html!("input-search", {
         .property_signal("placeholder", state.search_mode.signal_ref(|search_mode| {
