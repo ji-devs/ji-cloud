@@ -89,6 +89,7 @@ export class _ extends LitElement {
         this.wrapper.classList.remove("drag-over");
     }
 
+    // prettier-ignore
     render() {
         return html`
             <div
@@ -98,20 +99,20 @@ export class _ extends LitElement {
             >
                 ${this.state === "empty"
                     ? html`
-                          <p class="drag-here-text">
-                              ${this.coverOnly ? STR_EMPTY_COVER : STR_EMPTY}
-                          </p>
+                          <!-- keep in one line -->
+                          <p class="drag-here-text">${this.coverOnly ? STR_EMPTY_COVER : STR_EMPTY}</p>
+                    `
+                    : this.state === "active" ? html`
+                        <img-ui
+                            path="entry/jig/modules/large/${this
+                                .activeModuleKind}-hover.svg"
+                        ></img-ui>
                       `
-                    : this.state === "active"
-                    ? html`
-                          <img-ui
-                              path="entry/jig/modules/large/${this
-                                  .activeModuleKind}-hover.svg"
-                          ></img-ui>
-                      `
-                    : this.state === "thumbnail"
-                    ? html` <slot name="thumbnail"></slot> `
-                    : nothing}
+                    : this.state === "thumbnail" ? html`
+                        <slot name="thumbnail"></slot>
+                    `
+                    : nothing
+                }
             </div>
         `;
     }
