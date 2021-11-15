@@ -116,6 +116,12 @@ pub fn on_iframe_message(state: Rc<State>, message: ModuleToJigEditorMessage) {
         }
         ModuleToJigEditorMessage::Next => {
             state.collapsed.set(false);
+            state
+                .jig_edit_state
+                .route
+                .set_neq(JigEditRoute::Landing);
+            let jig_id = state.jig.id;
+            Route::push_state(Route::Jig(JigRoute::Edit(jig_id, JigEditRoute::Landing)));
         }
     }
 }
