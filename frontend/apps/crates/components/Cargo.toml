@@ -19,7 +19,7 @@ strum = "0.22.0"
 strum_macros = "0.22.0"
 const_format = { version = "0.2.22", features = ["const_generics"] }
 log = "0.4.14"
-serde_json = "1.0.68"
+serde_json = "1.0.70"
 cfg-if = "1.0.0"
 beach_map = "0.2.1"
 wasm-bindgen = { version = "0.2.78", features = ["serde-serialize"] }
@@ -65,10 +65,10 @@ web-sys = { version = "0.3.55", features = [
     'HtmlSelectElement',
     'Performance',
 ] }
-awsm_web = { version = "0.30.0", features = ["loaders", "serde_iso", "dom", "image", "audio", "canvas"] }
-anyhow = "1.0.44"
+awsm_web = { version = "0.31.0", features = ["loaders", "serde_iso", "dom", "image", "audio", "canvas"] }
+anyhow = "1.0.45"
 gloo-timers = "0.2.1"
-rgb = "0.8.27"
+rgb = "0.8.29"
 regex = "1.5.4"
 
 [features]
