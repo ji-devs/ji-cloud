@@ -1,12 +1,4 @@
-import {
-    LitElement,
-    html,
-    css,
-    customElement,
-    property,
-    internalProperty,
-} from "lit-element";
-import { classMap } from "lit-html/directives/class-map";
+import { LitElement, html, css, customElement } from "lit-element";
 
 @customElement("module-preload")
 export class _ extends LitElement {

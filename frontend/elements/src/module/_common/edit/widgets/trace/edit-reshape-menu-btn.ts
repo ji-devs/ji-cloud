@@ -1,12 +1,4 @@
-import {
-    LitElement,
-    svg,
-    html,
-    css,
-    customElement,
-    property,
-} from "lit-element";
-import { classMap } from "lit-html/directives/class-map";
+import { LitElement, svg, html, css, customElement, property } from "lit-element";
 import { nothing } from "lit-html";
 
 type Kind = "free" | "rect" | "ellipse" | "confirm";

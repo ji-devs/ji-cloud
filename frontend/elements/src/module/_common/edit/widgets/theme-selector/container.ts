@@ -1,4 +1,4 @@
-import { LitElement, html, css, customElement, property } from "lit-element";
+import { LitElement, html, css, customElement } from "lit-element";
 
 const STR_HEADER = "Select theme";
 

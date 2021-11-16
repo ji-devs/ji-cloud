@@ -1,13 +1,10 @@
 import {
     LitElement,
     html,
-    svg,
     css,
     customElement,
     property,
 } from "lit-element";
-import { nothing } from "lit-html";
-import { classMap } from "lit-html/directives/class-map";
 import "@elements/core/images/ui";
 
 export type Kind =

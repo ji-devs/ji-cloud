@@ -1,6 +1,4 @@
-import { LitElement, html, css, customElement, property } from "lit-element";
-import { classMap } from "lit-html/directives/class-map";
-import { nothing } from "lit-html";
+import { LitElement, html, css, customElement } from "lit-element";
 
 @customElement("module-sidebar-body")
 export class _ extends LitElement {

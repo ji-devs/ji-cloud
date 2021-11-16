@@ -6,7 +6,6 @@ import {
     customElement,
     property,
 } from "lit-element";
-import { classMap } from "lit-html/directives/class-map";
 import { nothing } from "lit-html";
 
 export type ResizeLevel = "full" | "keep-aspect-ratio" | "none";
