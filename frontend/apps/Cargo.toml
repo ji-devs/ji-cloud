@@ -35,3 +35,5 @@ members = [
 
 [profile.release]
 lto = true
+opt-level = 'z'
+wasm-opt = ['-Oz']
