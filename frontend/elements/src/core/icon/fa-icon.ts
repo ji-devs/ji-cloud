@@ -1,15 +1,5 @@
-import {
-    LitElement,
-    html,
-    customElement,
-    property,
-    css,
-    PropertyValues,
-    internalProperty,
-} from "lit-element";
-
-// using pro-solid here but could technically use any other lib, just need the unicode char which is the same across libs (except brands)
-import * as faIcons from "@fortawesome/pro-solid-svg-icons";
+import { LitElement, html, customElement, property, css, PropertyValues, state } from "lit-element";
+import faIcons from "./icons.json";
 
 const ROOT = "https://ka-p.fontawesome.com/releases/v6.0.0-beta1";
 const END = "?token=da13958c29";
@@ -28,7 +18,7 @@ function addMainCss() {
 addMainCss();
 
 @customElement("fa-icon")
-class _ extends LitElement {
+export class _ extends LitElement {
     static get styles() {
         return [
             css`
@@ -72,26 +62,14 @@ class _ extends LitElement {
     }
 
     private onIconChange() {
-        const snakeCase = this.icon.split(" ")?.[1];
-
-        if (!snakeCase) {
-            this.iconPascal = "";
-        } else {
-            const words = snakeCase.split("-");
-            for (let i = 1; i < words.length; i++) {
-                words[i] =
-                    words[i].slice(0, 1).toUpperCase() +
-                    words[i].slice(1, words[i].length);
-            }
-            this.iconPascal = words.join("");
-        }
+        this.iconName = this.icon.split(" ")?.[1];
     }
 
     @property({ reflect: true })
     icon = "";
 
-    @internalProperty()
-    private iconPascal = "";
+    @state()
+    private iconName = "";
 
     updated(propertyValues: PropertyValues) {
         if (propertyValues.has("icon")) {
@@ -100,31 +78,31 @@ class _ extends LitElement {
     }
 
     private getCode(icon: string) {
-        return (faIcons as any)[icon]?.icon[3];
+        return (faIcons as any)[icon];
     }
 
     render() {
-        const code = this.getCode(this.iconPascal);
+        const code = this.getCode(this.iconName);
 
         return html`
             ${this.icon.startsWith("fa-duotone")
                 ? html`
-                      <style>
-                          i::before {
-                              content: "\\${code}\\fe01";
-                          }
-                          i::after {
-                              content: "\\${code}\\fe02";
-                          }
-                      </style>
+                    <style>
+                        i::before {
+                            content: "\\${code}\\fe01";
+                        }
+                        i::after {
+                            content: "\\${code}\\fe02";
+                        }
+                    </style>
                   `
                 : html`
-                      <style>
-                          i::before {
-                              content: "\\${code}";
-                          }
-                      </style>
-                  `}
+                    <style>
+                        i::before {
+                            content: "\\${code}";
+                        }
+                    </style>
+                `}
 
             <i class="${this.icon}"></i>
         `;
