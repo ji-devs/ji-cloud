@@ -11,10 +11,16 @@ pub struct CreateSearchKeyResponse {
 }
 
 /// Search for images via the given query string.
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, Default)]
 pub struct WebImageSearchQuery {
     /// The query string.
+    #[serde(default)]
     pub q: String,
+
+    /// Image type string
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub image_type: Option<String>,
 }
 
 /// A single image as returned from the web
