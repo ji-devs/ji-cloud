@@ -115,7 +115,6 @@ pub fn on_iframe_message(state: Rc<State>, message: ModuleToJigEditorMessage) {
             populate_added_module(Rc::clone(&state), module);
         }
         ModuleToJigEditorMessage::Next => {
-            state.collapsed.set(false);
             state
                 .jig_edit_state
                 .route

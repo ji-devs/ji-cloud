@@ -1,5 +1,6 @@
 use dominator::{clone, html, Dom};
 use dominator_helpers::events::Message;
+use futures::future::ready;
 
 use super::{
     super::state::State as JigEditState,
@@ -68,9 +69,17 @@ impl SidebarDom {
                 };
             }))
             .child(html!("jig-edit-sidebar", {
+                .future(clone!(state => async move {
+                    state.jig_edit_state.route.signal_cloned().for_each(clone!(state => move |route| {
+                        if route == JigEditRoute::Landing {
+                            state.collapsed.set(false);
+                        }
+                        ready(())
+                    })).await
+                }))
                 .property_signal("collapsed", state.collapsed.signal())
                 .property_signal("isModulePage", state.jig_edit_state.route.signal_cloned().map(|route| {
-                    matches!(route, JigEditRoute::Landing)
+                    route == JigEditRoute::Landing
                 }))
                 .property_signal("loading", state.loader.is_loading())
                 .child(HeaderDom::render(state.clone()))
