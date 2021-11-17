@@ -36,14 +36,14 @@ async fn main() -> anyhow::Result<()> {
         jwk_verifier,
         mail_client,
         media_upload_cleaner,
-        _guard,
+        // _guard,
     ) = {
         log::trace!("initializing settings and processes");
         let remote_target = settings::read_remote_target()?;
 
         let settings: SettingsManager = SettingsManager::new(remote_target).await?;
 
-        let guard = core::sentry::init(settings.sentry_api_key().await?.as_deref(), remote_target)?;
+        // let guard = core::sentry::init(settings.sentry_api_key().await?.as_deref(), remote_target)?;
 
         let runtime_settings = settings.runtime_settings().await?;
 
@@ -109,7 +109,7 @@ async fn main() -> anyhow::Result<()> {
             jwk_verifier,
             mail_client,
             media_upload_cleaner,
-            guard,
+            // guard,
         )
     };
 

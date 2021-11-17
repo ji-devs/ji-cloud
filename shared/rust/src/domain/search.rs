@@ -18,9 +18,40 @@ pub struct WebImageSearchQuery {
     pub q: String,
 
     /// Image type string
-    #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub image_type: Option<String>,
+    pub image_type: Option<ImageType>,
+}
+
+/// Represents different types of images
+#[derive(Serialize, Deserialize, Copy, Clone, Debug)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[repr(i16)]
+pub enum ImageType {
+    /// Animated Gif Images
+    Clipart = 0,
+    /// Clip art images
+    AnimatedGif = 1,
+    /// Photographs (excluding line drawings, animated gifs, and clip art)
+    Photo = 2,
+    /// Line drawings
+    Line = 3,
+    /// Images with transparent backgrounds
+    Transparent = 4,
+}
+
+/// Image types used in query string
+impl ImageType {
+    ///
+    #[must_use]
+    pub fn to_str(self) -> &'static str {
+        match self {
+            Self::Clipart => "Clipart",
+            Self::AnimatedGif => "AnimatedGif",
+            Self::Photo => "Photo",
+            Self::Line => "Line",
+            Self::Transparent => "Transparent",
+        }
+    }
 }
 
 /// A single image as returned from the web
