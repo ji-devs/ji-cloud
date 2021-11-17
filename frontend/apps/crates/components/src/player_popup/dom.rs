@@ -2,10 +2,7 @@ use std::rc::Rc;
 
 use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
-use utils::{
-    events,
-    routes::{JigRoute, Route},
-};
+use utils::{events, prelude::SETTINGS, routes::{JigRoute, Route}};
 
 use super::state::PlayerPopup;
 
@@ -30,6 +27,11 @@ impl PlayerPopup {
                             .property("slot", "iframe")
                             .property("src", {
                                 let url: String = Route::Jig(JigRoute::Play(state.jig_id, None, state.player_options.clone())).into();
+                                let url = unsafe {
+                                    SETTINGS.get_unchecked()
+                                        .remote_target
+                                        .spa_iframe(&url)
+                                };
                                 url
                             })
                         }))
