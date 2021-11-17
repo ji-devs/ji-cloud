@@ -137,7 +137,8 @@ impl RemoteTarget {
     pub fn legacy_url(&self) -> String {
         match self {
             Self::Local => {
-                env_var("LOCAL_LEGACY_URL").unwrap_or("http://localhost:4106".to_string())
+                //env_var("LOCAL_LEGACY_URL").unwrap_or("http://localhost:4106".to_string())
+                "https://legacy.jicloud.org".to_string()
             }
             Self::Sandbox | Self::Release => "https://legacy.jicloud.org".to_string(),
         }

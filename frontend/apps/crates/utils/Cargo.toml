@@ -63,7 +63,7 @@ web-sys = { version = "0.3.55", features = [
     'BlobPropertyBag',
     'Worker',
 ] }
-awsm_web = { version = "0.31.0", features = ["loaders", "image", "serde_iso", "canvas"] }
+awsm_web = { version = "0.32.0", features = ["loaders", "image", "serde_iso", "canvas"] }
 anyhow = "1.0.45"
 rgb = "0.8.29"
 lazy_static = "1.4.0"
