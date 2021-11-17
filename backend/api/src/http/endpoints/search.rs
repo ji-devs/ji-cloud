@@ -28,12 +28,14 @@ async fn create_key(
 }
 
 /// Search for images over the web.
+/// # Errors
+/// 400: request not in proper format, or invalid image type
 pub async fn search_web_images(
     runtime_settings: Data<RuntimeSettings>,
     _claims: TokenUser,
-    query: Option<Query<<search::WebImageSearch as ApiEndpoint>::Req>>,
+    query: Query<<search::WebImageSearch as ApiEndpoint>::Req>,
 ) -> Result<Json<<search::WebImageSearch as ApiEndpoint>::Res>, error::Server> {
-    let query = query.map_or_else(Default::default, Query::into_inner);
+    let query = query.into_inner();
 
     let res = match &runtime_settings.bing_search_key {
         Some(key) => crate::image_search::get_images(&query.q, query.image_type, key).await?,

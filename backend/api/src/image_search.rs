@@ -1,5 +1,8 @@
+use anyhow;
 use serde::Deserialize;
-use shared::domain::search::{WebImageSearchItem, WebImageSearchResponse};
+use shared::domain::search::{ImageType, WebImageSearchItem, WebImageSearchResponse};
+
+const QUERY_TYPE: &str = "imageType";
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -20,19 +23,31 @@ struct ImagesResponse {
 
 pub async fn get_images(
     query: &str,
-    image_type: Option<String>,
+    image_type: Option<ImageType>,
     key: &str,
 ) -> anyhow::Result<WebImageSearchResponse> {
-    let image_type = if let Some(image_type) = image_type {
-        image_type
+    // returns tuple if there is a valid user input,
+    // otherwise empty query for image type field
+    let image_type: (&str, &str) = if let Some(image) = image_type {
+        let im_type = match image {
+            ImageType::Clipart => ImageType::Clipart.to_str(),
+            ImageType::AnimatedGif => ImageType::AnimatedGif.to_str(),
+            ImageType::Photo => ImageType::Photo.to_str(),
+            ImageType::Line => ImageType::Line.to_str(),
+            ImageType::Transparent => ImageType::Transparent.to_str(),
+        };
+
+        (QUERY_TYPE, im_type)
     } else {
-        Default::default()
+        ("", "")
     };
+
     // https://docs.microsoft.com/en-us/bing/search-apis/bing-image-search/reference/endpoints
     // https://docs.microsoft.com/en-us/bing/search-apis/bing-image-search/reference/query-parameters
     let res = reqwest::Client::new()
         .get("https://api.bing.microsoft.com/v7.0/images/search")
-        .query(&[("q", query), ("imageType", &image_type)])
+        .query(&[("q", query)])
+        .query(&[image_type])
         .query(&[("safeSearch", "strict")])
         .header("Ocp-Apim-Subscription-Key", key)
         .send()
