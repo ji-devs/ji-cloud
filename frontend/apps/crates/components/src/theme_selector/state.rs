@@ -21,6 +21,7 @@ pub struct ThemeSelector {
     pub(super) theme_id: ReadOnlyMutable<ThemeId>,
     pub(super) callbacks: ThemeSelectorCallbacks,
     pub(super) jig_id_saver: AsyncLoader,
+    pub(super) apply_to_jig_popup_active: Mutable<bool>,
 }
 
 impl ThemeSelector {
@@ -36,6 +37,7 @@ impl ThemeSelector {
             theme_id,
             callbacks,
             jig_id_saver: AsyncLoader::new(),
+            apply_to_jig_popup_active: Mutable::new(false),
         }
     }
 

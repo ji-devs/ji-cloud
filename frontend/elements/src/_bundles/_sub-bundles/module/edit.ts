@@ -51,8 +51,6 @@ import "@elements/module/_common/edit/widgets/color-select/color-select-section"
 import "@elements/module/_common/edit/widgets/color-select/color-select-item";
 import "@elements/core/inputs/primitives/color";
 
-import "@elements/module/_common/edit/widgets/theme-selector/container";
-import "@elements/module/_common/edit/widgets/theme-selector/jig";
 
 import "@elements/_bundles/_sub-bundles/components/image_search/imports";
 import "@elements/_bundles/_sub-bundles/components/audio_input/imports";

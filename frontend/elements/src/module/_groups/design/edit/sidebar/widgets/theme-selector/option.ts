@@ -147,9 +147,9 @@ export class _ extends LitElement {
                         path="${themeIconPath(theme, true)}"
                     ></img-ui>
                     <div class="label">${THEMES[theme].label.en}</div>
-                    ${state === "selected" && this.hasMenu
+                    <!-- ${state === "selected" && this.hasMenu
                         ? renderMenu()
-                        : nothing}
+                        : nothing} -->
                 </div>
             </section>
         `;
