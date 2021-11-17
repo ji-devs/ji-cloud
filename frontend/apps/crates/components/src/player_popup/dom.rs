@@ -24,6 +24,7 @@ impl PlayerPopup {
                     false => None,
                     true => {
                         Some(html!("iframe", {
+                            .style("border", "0")
                             .property("slot", "iframe")
                             .property("src", {
                                 let url: String = Route::Jig(JigRoute::Play(state.jig_id, None, state.player_options.clone())).into();

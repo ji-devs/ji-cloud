@@ -25,18 +25,30 @@ export class _ extends LitElement {
                     left: 0;
                     z-index: 9999;
                     display: grid;
+                    place-content: center;
                     height: 100vh;
                     width: 100vw;
+                    background-color: #ececec;
                 }
                 ::slotted(*) {
                     grid-row: 1;
                     grid-column: 1;
                 }
-                ::slotted([slot="iframe"]) {
+                .iframe-wrapper {
+                    grid-row: 1;
+                    grid-column: 1;
                     height: 100%;
                     width: 100%;
+                    max-height: 100vh;
+                    max-width: 100vw;
                     background-color: #ffffff;
                     border: 0;
+                    aspect-ratio: 16 / 9;
+                    box-shadow: 0 3px 16px 0 rgba(0, 0, 0, 0.16);
+                }
+                .iframe-wrapper ::slotted(iframe) {
+                    height: 100%;
+                    width: 100%;
                 }
                 ::slotted([slot="close"]) {
                     justify-self: end;
@@ -74,7 +86,9 @@ export class _ extends LitElement {
 
     render() {
         return html`
-            <slot name="iframe"></slot>
+            <div class="iframe-wrapper">
+                <slot name="iframe"></slot>
+            </div>
             <slot name="close"></slot>
         `;
     }
