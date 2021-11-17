@@ -82,6 +82,7 @@ audio_input = []
 audio_player_button = []
 backgrounds = []
 color_select = []
+dialog = []
 image = []
 image_search = []
 image_upload = []
@@ -117,6 +118,7 @@ all= [
     "audio_player_button", 
     "backgrounds", 
     "color_select", 
+    "dialog", 
     "image", 
     "image_search", 
     "image_upload", 
