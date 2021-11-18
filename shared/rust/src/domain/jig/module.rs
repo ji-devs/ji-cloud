@@ -176,13 +176,6 @@ impl FromStr for ModuleKind {
     }
 }
 
-/// Request for fetching a module.
-#[derive(Clone, Serialize, Deserialize, Debug)]
-pub struct ModuleGetQuery {
-    /// The type of the ID.
-    pub q: String,
-}
-
 /// Minimal information about a module.
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct LiteModule {

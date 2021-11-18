@@ -1,12 +1,12 @@
 use actix_web::{
-    web::{self, Data, Json, Path, Query, ServiceConfig},
+    web::{self, Data, Json, Path, ServiceConfig},
     HttpResponse,
 };
 use shared::{
     api::{endpoints::jig::module, ApiEndpoint},
     domain::{
         jig::{
-            module::{ModuleId, ModuleResponse, StableModuleId, StableOrUniqueId},
+            module::{ModuleId, ModuleResponse, StableOrUniqueId},
             JigId,
         },
         CreateResponse,
@@ -40,22 +40,10 @@ async fn create(
 async fn get_live(
     db: Data<PgPool>,
     path: web::Path<(JigId, String)>,
-    query: Query<<module::GetLive as ApiEndpoint>::Req>,
 ) -> Result<Json<<module::GetLive as ApiEndpoint>::Res>, error::NotFound> {
     let path = path.into_inner();
-    let query = query.into_inner();
 
-    let q: &str = &query.q;
-
-    let module_id = match q {
-        "stable" => StableOrUniqueId::Stable(StableModuleId(uuid::Uuid::parse_str(&path.1)?)),
-
-        "unique" => StableOrUniqueId::Unique(ModuleId(uuid::Uuid::parse_str(&path.1)?)),
-
-        _ => {
-            return Err(error::NotFound::ResourceNotFound);
-        }
-    };
+    let module_id = StableOrUniqueId::Unique(ModuleId(uuid::Uuid::parse_str(&path.1)?));
 
     let module = db::jig::module::get_live(&db, path.0, module_id)
         .await?
@@ -70,22 +58,10 @@ async fn get_live(
 async fn get_draft(
     db: Data<PgPool>,
     path: web::Path<(JigId, String)>,
-    query: Query<<module::GetLive as ApiEndpoint>::Req>,
 ) -> Result<Json<<module::GetDraft as ApiEndpoint>::Res>, error::NotFound> {
     let path = path.into_inner();
-    let query = query.into_inner();
 
-    let q: &str = &query.q;
-
-    let module_id = match q {
-        "stable" => StableOrUniqueId::Stable(StableModuleId(uuid::Uuid::parse_str(&path.1)?)),
-
-        "unique" => StableOrUniqueId::Unique(ModuleId(uuid::Uuid::parse_str(&path.1)?)),
-
-        _ => {
-            return Err(error::NotFound::ResourceNotFound);
-        }
-    };
+    let module_id = StableOrUniqueId::Unique(ModuleId(uuid::Uuid::parse_str(&path.1)?));
 
     let module = db::jig::module::get_draft(&db, path.0, module_id)
         .await?
