@@ -11,7 +11,7 @@ use utils::languages::{Language, JIG_LANGUAGES};
 use super::super::state::State as JigEditState;
 use super::publish_jig::PublishJig;
 
-pub struct State {
+pub struct Publish {
     pub loader: AsyncLoader,
     pub categories: Mutable<Vec<Category>>,
     // categories has label lookup since it's both more complex to lookup and used more then others (pills)
@@ -27,7 +27,7 @@ pub struct State {
     pub show_public_popup: Mutable<bool>,
 }
 
-impl State {
+impl Publish {
     pub fn new(
         jig: PublishJig,
         categories: Vec<Category>,

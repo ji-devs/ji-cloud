@@ -7,37 +7,40 @@ use shared::domain::meta::Goal;
 use std::rc::Rc;
 use utils::{events, unwrap::UnwrapJiExt};
 
-use super::super::state::State;
+use super::super::state::Publish;
 
 const STR_TEACHING_GOAL_LABEL: &'static str = "Teaching Goal";
 const STR_TEACHING_GOAL_PLACEHOLDER: &'static str = "Select from the list";
 
-pub fn render(state: Rc<State>) -> Dom {
-    html!("input-select", {
-        .property("slot", "goal")
-        .property("label", STR_TEACHING_GOAL_LABEL)
-        .property("placeholder", STR_TEACHING_GOAL_PLACEHOLDER)
-        .property("multiple", true)
-        .property_signal("value", goal_value_signal(state.clone()))
-        .property_signal("error", {
-            (map_ref! {
-                let submission_tried = state.submission_tried.signal(),
-                let value = state.jig.goals.signal_cloned()
-                    => (*submission_tried, value.clone())
-            })
-                .map(|(submission_tried, value)| {
-                    submission_tried && value.is_empty()
+impl Publish {
+    pub fn render_goals(self: Rc<Self>) -> Dom {
+        let state = Rc::clone(&self);
+        html!("input-select", {
+            .property("slot", "goal")
+            .property("label", STR_TEACHING_GOAL_LABEL)
+            .property("placeholder", STR_TEACHING_GOAL_PLACEHOLDER)
+            .property("multiple", true)
+            .property_signal("value", goal_value_signal(state.clone()))
+            .property_signal("error", {
+                (map_ref! {
+                    let submission_tried = state.submission_tried.signal(),
+                    let value = state.jig.goals.signal_cloned()
+                        => (*submission_tried, value.clone())
                 })
+                    .map(|(submission_tried, value)| {
+                        submission_tried && value.is_empty()
+                    })
+            })
+            .children_signal_vec(state.goals.signal_cloned().map(clone!(state => move |goals| {
+                goals.iter().map(|goal| {
+                    render_goal(&goal, state.clone())
+                }).collect()
+            })).to_signal_vec())
         })
-        .children_signal_vec(state.goals.signal_cloned().map(clone!(state => move |goals| {
-            goals.iter().map(|goal| {
-                render_goal(&goal, state.clone())
-            }).collect()
-        })).to_signal_vec())
-    })
+    }
 }
 
-fn render_goal(goal: &Goal, state: Rc<State>) -> Dom {
+fn render_goal(goal: &Goal, state: Rc<Publish>) -> Dom {
     let goal_id = goal.id.clone();
     html!("input-select-option", {
         .text(&goal.display_name)
@@ -55,7 +58,7 @@ fn render_goal(goal: &Goal, state: Rc<State>) -> Dom {
     })
 }
 
-fn goal_value_signal(state: Rc<State>) -> impl Signal<Item = String> {
+fn goal_value_signal(state: Rc<Publish>) -> impl Signal<Item = String> {
     map_ref! {
         let selected_goals = state.jig.goals.signal_cloned(),
         let available_goals = state.goals.signal_cloned() => {

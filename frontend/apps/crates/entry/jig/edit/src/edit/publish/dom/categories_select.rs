@@ -7,35 +7,38 @@ use shared::domain::category::Category;
 use std::rc::Rc;
 use utils::{events, unwrap::UnwrapJiExt};
 
-use super::super::state::State;
+use super::super::state::Publish;
 
 const STR_CATEGORIES_LABEL: &'static str = "Categories";
 const STR_CATEGORIES_PLACEHOLDER: &'static str = "Select one or more";
 
-pub fn render(state: Rc<State>) -> Dom {
-    html!("input-select", {
-        .property("slot", "catagories-select")
-        .property("label", STR_CATEGORIES_LABEL)
-        .property("placeholder", STR_CATEGORIES_PLACEHOLDER)
-        .property("multiple", true)
-        .property_signal("value", category_value_signal(state.clone()))
-        .property_signal("error", {
-            (map_ref! {
-                let submission_tried = state.submission_tried.signal(),
-                let value = state.jig.categories.signal_cloned()
-                    => (*submission_tried, value.clone())
-            })
-                .map(|(submission_tried, value)| {
-                    submission_tried && value.is_empty()
+impl Publish {
+    pub fn render_categories_select(self: Rc<Self>) -> Dom {
+        let state = Rc::clone(&self);
+        html!("input-select", {
+            .property("slot", "catagories-select")
+            .property("label", STR_CATEGORIES_LABEL)
+            .property("placeholder", STR_CATEGORIES_PLACEHOLDER)
+            .property("multiple", true)
+            .property_signal("value", category_value_signal(state.clone()))
+            .property_signal("error", {
+                (map_ref! {
+                    let submission_tried = state.submission_tried.signal(),
+                    let value = state.jig.categories.signal_cloned()
+                        => (*submission_tried, value.clone())
                 })
+                    .map(|(submission_tried, value)| {
+                        submission_tried && value.is_empty()
+                    })
+            })
+            .children_signal_vec(state.categories.signal_cloned().map(clone!(state => move |categories| {
+                render_categories(state.clone(), &categories)
+            })).to_signal_vec())
         })
-        .children_signal_vec(state.categories.signal_cloned().map(clone!(state => move |categories| {
-            render_categories(state.clone(), &categories)
-        })).to_signal_vec())
-    })
+    }
 }
 
-fn render_categories(state: Rc<State>, categories: &Vec<Category>) -> Vec<Dom> {
+fn render_categories(state: Rc<Publish>, categories: &Vec<Category>) -> Vec<Dom> {
     categories.iter().map(|category| {
         if category.children.len() == 0 {
             let category_id = category.id.clone();
@@ -65,7 +68,7 @@ fn render_categories(state: Rc<State>, categories: &Vec<Category>) -> Vec<Dom> {
     }).collect()
 }
 
-fn category_value_signal(state: Rc<State>) -> impl Signal<Item = String> {
+fn category_value_signal(state: Rc<Publish>) -> impl Signal<Item = String> {
     map_ref! {
         let selected_categories = state.jig.categories.signal_cloned(),
         let category_label_lookup = state.category_label_lookup.signal_cloned() => {

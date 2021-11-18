@@ -1,9 +1,12 @@
 use std::rc::Rc;
 
-use super::state::State;
 use super::{
-    iframe::dom::IframeDom, post_publish::dom::render as render_post_publish,
-    publish::dom::render as render_publish, selection::dom::SelectionDom, sidebar::dom::SidebarDom,
+    super::edit::publish::Publish,
+    state::State,
+    iframe::dom::IframeDom,
+    post_publish::dom::render as render_post_publish,
+    selection::dom::SelectionDom,
+    sidebar::dom::SidebarDom,
 };
 use components::player_popup::{PlayerPopup, PreviewPopupCallbacks};
 use dominator::{clone, html, Dom};
@@ -48,7 +51,7 @@ impl EditPage {
                             Some(IframeDom::render(jig_id.clone(), module_id.clone()))
                         },
                         JigEditRoute::Publish => {
-                            Some(render_publish(Rc::clone(&state)))
+                            Some(Publish::render(Rc::clone(&state)))
                         }
                         JigEditRoute::PostPublish => {
                             Some(render_post_publish(jig_id.clone(), Rc::clone(&state)))

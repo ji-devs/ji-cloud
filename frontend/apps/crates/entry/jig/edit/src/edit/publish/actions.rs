@@ -17,9 +17,9 @@ use utils::{
 };
 
 use super::super::state::State as JigEditState;
-use super::{publish_jig::PublishJig, state::State};
+use super::{publish_jig::PublishJig, state::Publish};
 
-impl State {
+impl Publish {
     pub async fn load_new(jig_edit_state: Rc<JigEditState>) -> Self {
         let jig = load_jig(jig_edit_state.jig_id);
         let categories = load_categories();
@@ -58,6 +58,65 @@ impl State {
                 .route
                 .set(JigEditRoute::Module(cover_module_id));
         };
+    }
+
+    fn form_invalid(self: Rc<Self>) -> bool {
+        self.jig.display_name.lock_ref().is_empty()
+            || self.jig.description.lock_ref().is_empty()
+            || self.jig.language.lock_ref().is_empty()
+            || self.jig.age_ranges.lock_ref().is_empty()
+            || self.jig.goals.lock_ref().is_empty()
+            || self.jig.categories.lock_ref().is_empty()
+    }
+
+    async fn save_and_publish(self: Rc<Self>) -> Result<(), ()> {
+        let state = Rc::clone(&self);
+        let path = jig::UpdateDraftData::PATH.replace("{id}", &state.jig.id.0.to_string());
+        let req = state.jig.to_jig_update_request();
+        api_with_auth_empty::<MetadataNotFound, JigUpdateDraftDataRequest>(
+            &path,
+            jig::UpdateDraftData::METHOD,
+            Some(req),
+        )
+        .await
+        .map_err(|_| ())?;
+
+        let path = jig::Publish::PATH.replace("{id}", &state.jig.id.0.to_string());
+        api_with_auth_empty::<EmptyError, ()>(&path, jig::Publish::METHOD, None)
+            .await
+            .map_err(|_| ())?;
+
+        Ok(())
+    }
+
+    pub fn save_jig(self: Rc<Self>) {
+        let state = Rc::clone(&self);
+        if Rc::clone(&state).form_invalid() {
+            state.submission_tried.set(true);
+            state.show_missing_info_popup.set(true);
+            return;
+        };
+
+        state.loader.load(clone!(state => async move {
+            match Rc::clone(&state).save_and_publish().await {
+                Ok(_) => {
+                    state.submission_tried.set(false);
+
+                    state.jig_edit_state.route.set_neq(JigEditRoute::PostPublish);
+
+                    let url: String = Route::Jig(JigRoute::Edit(state.jig.id, JigEditRoute::PostPublish)).into();
+                    log::info!("{}", url);
+
+                    /* this will cause a full refresh - but preserves history
+                    * see the .future in EditPage too
+                    dominator::routing::go_to_url(&url);
+                    */
+                },
+                Err(_) => {
+                    let _ = web_sys::window().unwrap().alert_with_message("Error!");
+                }
+            }
+        }));
     }
 }
 
@@ -114,63 +173,6 @@ async fn load_categories() -> Result<Vec<Category>, EmptyError> {
         Ok(resp) => Ok(resp.categories),
         Err(e) => Err(e),
     }
-}
-
-fn form_invalid(state: Rc<State>) -> bool {
-    state.jig.display_name.lock_ref().is_empty()
-        || state.jig.description.lock_ref().is_empty()
-        || state.jig.language.lock_ref().is_empty()
-        || state.jig.age_ranges.lock_ref().is_empty()
-        || state.jig.goals.lock_ref().is_empty()
-        || state.jig.categories.lock_ref().is_empty()
-}
-
-async fn save_and_publish(state: Rc<State>) -> Result<(), ()> {
-    let path = jig::UpdateDraftData::PATH.replace("{id}", &state.jig.id.0.to_string());
-    let req = state.jig.to_jig_update_request();
-    api_with_auth_empty::<MetadataNotFound, JigUpdateDraftDataRequest>(
-        &path,
-        jig::UpdateDraftData::METHOD,
-        Some(req),
-    )
-    .await
-    .map_err(|_| ())?;
-
-    let path = jig::Publish::PATH.replace("{id}", &state.jig.id.0.to_string());
-    api_with_auth_empty::<EmptyError, ()>(&path, jig::Publish::METHOD, None)
-        .await
-        .map_err(|_| ())?;
-
-    Ok(())
-}
-
-pub fn save_jig(state: Rc<State>) {
-    if form_invalid(Rc::clone(&state)) {
-        state.submission_tried.set(true);
-        state.show_missing_info_popup.set(true);
-        return;
-    };
-
-    state.loader.load(clone!(state => async move {
-        match save_and_publish(Rc::clone(&state)).await {
-            Ok(_) => {
-                state.submission_tried.set(false);
-
-                state.jig_edit_state.route.set_neq(JigEditRoute::PostPublish);
-
-                let url: String = Route::Jig(JigRoute::Edit(state.jig.id, JigEditRoute::PostPublish)).into();
-                log::info!("{}", url);
-
-                /* this will cause a full refresh - but preserves history
-                 * see the .future in EditPage too
-                dominator::routing::go_to_url(&url);
-                 */
-            },
-            Err(_) => {
-                let _ = web_sys::window().unwrap().alert_with_message("Error!");
-            }
-        }
-    }));
 }
 
 pub async fn load_metadata() -> Result<MetadataResponse, EmptyError> {

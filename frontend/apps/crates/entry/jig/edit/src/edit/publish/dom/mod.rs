@@ -11,16 +11,7 @@ use utils::{
 use web_sys::{HtmlElement, HtmlInputElement, HtmlTextAreaElement};
 
 use super::super::state::State as JigEditState;
-use super::{
-    actions,
-    components::{
-        additional_resources::render as AdditionalResourcesRender, age::render as AgeRender,
-        categories_pills::render as CategoriesPillsRender,
-        categories_select::render as CategoriesSelectRender, goal::render as GoalRender,
-        language::render as LanguageRender,
-    },
-    state::*,
-};
+use super::state::Publish;
 use components::{
     hebrew_buttons::HebrewButtons,
     module::_common::thumbnail::ModuleThumbnail,
@@ -35,6 +26,13 @@ use components::{
 };
 use std::rc::Rc;
 
+pub mod age;
+pub mod category_pills;
+pub mod categories_select;
+pub mod goal;
+pub mod language;
+pub mod additional_resources;
+
 const STR_PUBLISH_JIG: &'static str = "Publish JIG";
 const STR_PUBLISH_LATER: &'static str = "I will publish later";
 const STR_PUBLIC_LABEL: &'static str = "My JIG is public";
@@ -47,25 +45,27 @@ const STR_PUBLIC_POPUP_TITLE: &'static str = "Sharing is Caring!";
 const STR_PUBLIC_POPUP_BODY: &'static str = "Are you sure you want to keep this JIG private? Please consider sharing your JIG with the Jigzi community.";
 const STR_MISSING_INFO_TOOLTIP: &'static str = "Please fill in the missing information.";
 
-pub fn render(jig_edit_state: Rc<JigEditState>) -> Dom {
-    let state: Mutable<Option<Rc<State>>> = Mutable::new(None);
+impl Publish {
+    pub fn render(jig_edit_state: Rc<JigEditState>) -> Dom {
+        let state: Mutable<Option<Rc<Publish>>> = Mutable::new(None);
 
-    html!("empty-fragment", {
-        .future(clone!(state => async move {
-            let _state = State::load_new(jig_edit_state).await;
-            state.set(Some(Rc::new(_state)));
-        }))
-        .property("slot", "main")
-        .child_signal(state.signal_cloned().map(|state| {
-            state.map(|state| render_page(state.clone()))
-        }))
-        .child(html!("window-loader-block", {
-            .property_signal("visible", state.signal_ref(|state| state.is_none()))
-        }))
-    })
+        html!("empty-fragment", {
+            .future(clone!(state => async move {
+                let _state = Publish::load_new(jig_edit_state).await;
+                state.set(Some(Rc::new(_state)));
+            }))
+            .property("slot", "main")
+            .child_signal(state.signal_cloned().map(|state| {
+                state.map(|state| render_page(state.clone()))
+            }))
+            .child(html!("window-loader-block", {
+                .property_signal("visible", state.signal_ref(|state| state.is_none()))
+            }))
+        })
+    }
 }
 
-fn render_page(state: Rc<State>) -> Dom {
+fn render_page(state: Rc<Publish>) -> Dom {
     html!("jig-edit-publish", {
         .children(&mut [
             ModuleThumbnail::render_live(
@@ -178,11 +178,11 @@ fn render_page(state: Rc<State>) -> Dom {
                 }))
             }),
 
-            AgeRender(state.clone()),
-            LanguageRender(state.clone()),
-            GoalRender(state.clone()),
-            CategoriesSelectRender(state.clone()),
-            CategoriesPillsRender(state.clone()),
+            Publish::render_ages(state.clone()),
+            Publish::render_languages(state.clone()),
+            Publish::render_goals(state.clone()),
+            Publish::render_categories_select(state.clone()),
+            Publish::render_category_pills(state.clone()),
 
             html!("button-rect", {
                 .property("slot", "publish-later")
@@ -206,7 +206,7 @@ fn render_page(state: Rc<State>) -> Dom {
                             .style("color", "var(--main-yellow)")
                         }))
                         .event(clone!(state => move |_: events::Click| {
-                            actions::save_jig(state.clone());
+                            Rc::clone(&state).save_jig();
                         }))
                     }))
                     .child_signal(state.show_missing_info_popup.signal().map(clone!(state, elem => move |show_popup| {
@@ -232,6 +232,6 @@ fn render_page(state: Rc<State>) -> Dom {
                 })
             }),
         ])
-        .children(AdditionalResourcesRender(state.clone()))
+        .children(Publish::render_additional_resources(state.clone()))
     })
 }
