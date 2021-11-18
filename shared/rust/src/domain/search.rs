@@ -12,6 +12,7 @@ pub struct CreateSearchKeyResponse {
 
 /// Search for images via the given query string.
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
+#[serde(rename_all = "camelCase")]
 pub struct WebImageSearchQuery {
     /// The query string.
     #[serde(default)]
@@ -24,8 +25,7 @@ pub struct WebImageSearchQuery {
 
 /// Represents different types of images
 #[derive(Serialize, Deserialize, Copy, Clone, Debug)]
-#[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[repr(i16)]
+#[serde(rename_all = "camelCase")]
 pub enum ImageType {
     /// Animated Gif Images
     Clipart = 0,
