@@ -1,8 +1,7 @@
 use http::StatusCode;
 
 use shared::domain::jig::module::{
-    body::memory, ModuleBody, ModuleCreateRequest, ModuleId, ModuleUpdateRequest, StableModuleId,
-    StableOrUniqueId,
+    body::memory, ModuleBody, ModuleCreateRequest, ModuleId, ModuleUpdateRequest, StableOrUniqueId,
 };
 
 use crate::{
@@ -20,27 +19,9 @@ async fn get_live() -> anyhow::Result<()> {
 
     let resp = client
         .get(&format!(
-            "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008/live/module/0cc03a02-7c83-11eb-9f77-f77f9ad65e9a",
+            "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008/live/module/a6b24970-1dd7-11ec-8426-57136b411853",
             port
         ))
-        .query(&[("q", "stable")])
-        .login()
-        .send()
-        .await?
-        .error_for_status()?;
-
-    assert_eq!(resp.status(), StatusCode::OK);
-
-    let body: serde_json::Value = resp.json().await?;
-
-    insta::assert_json_snapshot!(body, {".**.updated_at" => "[timestamp]"});
-
-    let resp = client
-        .get(&format!(
-            "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008/live/module/0cc03a02-7c83-11eb-9f77-f77f9ad65e9a",
-            port
-        ))
-        .query(&[("q", "stable")])
         .login()
         .send()
         .await?
@@ -146,24 +127,6 @@ async fn update_empty() -> anyhow::Result<()> {
             "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008/draft/module/a6b24a42-1dd7-11ec-8426-a7165f9281a2",
             port
         ))
-        .query(&[("q", "unique")])
-        .login()
-        .send()
-        .await?
-        .error_for_status()?;
-
-    assert_eq!(resp.status(), StatusCode::OK);
-
-    let body: serde_json::Value = resp.json().await?;
-
-    insta::assert_json_snapshot!(body, {".**.updated_at" => "[timestamp]"});
-
-    let resp = client
-        .get(&format!(
-            "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008/draft/module/0cc03a02-7c83-11eb-9f77-f77f9ad65e9a",
-            port
-        ))
-        .query(&[("q", "stable")])
         .login()
         .send()
         .await?
@@ -188,6 +151,8 @@ async fn update_contents() -> anyhow::Result<()> {
 
     let client = reqwest::Client::new();
 
+    println!("Before module");
+
     let resp = client
         .patch(&format!(
             "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008/draft/module",
@@ -195,8 +160,8 @@ async fn update_contents() -> anyhow::Result<()> {
         ))
         .login()
         .json(&ModuleUpdateRequest {
-            id: StableOrUniqueId::Stable(StableModuleId(uuid::Uuid::parse_str(
-                "0cc03a02-7c83-11eb-9f77-f77f9ad65e9a",
+            id: StableOrUniqueId::Unique(ModuleId(uuid::Uuid::parse_str(
+                "a6b24970-1dd7-11ec-8426-57136b411853",
             )?)),
             body: Some(ModuleBody::MemoryGame(memory::ModuleData {
                 content: Some(memory::Content {
@@ -214,10 +179,9 @@ async fn update_contents() -> anyhow::Result<()> {
 
     let resp = client
         .get(&format!(
-            "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008/draft/module/0cc03a02-7c83-11eb-9f77-f77f9ad65e9a",
+            "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008/draft/module/a6b24970-1dd7-11ec-8426-57136b411853",
             port
         ))
-        .query(&[("q", "stable")])
         .login()
         .send()
         .await?
@@ -234,7 +198,6 @@ async fn update_contents() -> anyhow::Result<()> {
             "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008/draft/module/a6b24a42-1dd7-11ec-8426-a7165f9281a2",
             port
         ))
-        .query(&[("q", "unique")])
         .login()
         .send()
         .await?
