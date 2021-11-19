@@ -193,3 +193,29 @@ impl ApiEndpoint for Count {
     const PATH: &'static str = "/v1/jig/count";
     const METHOD: Method = Method::Get;
 }
+
+/// Like a JIG
+///
+/// # Authorization
+/// * Admin, BasicAuth
+pub struct Like;
+impl ApiEndpoint for Like {
+    type Req = ();
+    type Res = ();
+    type Err = EmptyError;
+    const PATH: &'static str = "/v1/jig/{id}/like";
+    const METHOD: Method = Method::Put;
+}
+
+/// Play a JIG
+///
+/// # Authorization
+/// * Admin, BasicAuth
+pub struct Play;
+impl ApiEndpoint for Play {
+    type Req = ();
+    type Res = ();
+    type Err = EmptyError;
+    const PATH: &'static str = "/v1/jig/{id}/play";
+    const METHOD: Method = Method::Put;
+}

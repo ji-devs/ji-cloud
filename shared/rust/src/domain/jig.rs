@@ -409,6 +409,12 @@ pub struct JigResponse {
     /// The author's name, as "{given_name} {family_name}".
     pub author_name: Option<String>,
 
+    /// Number of likes on Jig
+    pub likes: i64,
+
+    /// Number of plays on Jig
+    pub plays: i64,
+
     /// True if Jig cover is set
     ///
     /// NOTE: the cover is always technically there, this is just to indicate if the user has dragged the cover,
