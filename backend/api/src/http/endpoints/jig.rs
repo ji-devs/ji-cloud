@@ -294,9 +294,30 @@ async fn count(db: Data<PgPool>) -> Result<Json<<jig::Count as ApiEndpoint>::Res
     Ok(Json(JigCountResponse { total_count }))
 }
 
+/// Add a like to a jig
+async fn like(
+    db: Data<PgPool>,
+    claims: TokenUser,
+    path: web::Path<JigId>,
+) -> Result<HttpResponse, error::Server> {
+    db::jig::jig_like(&*db, claims.0.user_id, path.into_inner()).await?;
+
+    Ok(HttpResponse::NoContent().finish())
+}
+
+/// Add a play to a jig
+async fn play(
+    db: Data<PgPool>,
+    _claims: TokenUser,
+    path: web::Path<JigId>,
+) -> Result<HttpResponse, error::NotFound> {
+    db::jig::jig_play(&*db, path.into_inner()).await?;
+
+    Ok(HttpResponse::NoContent().finish())
+}
+
 pub fn configure(cfg: &mut ServiceConfig) {
-    cfg.route(jig::Count::PATH, jig::Count::METHOD.route().to(count))
-        .route(jig::Create::PATH, jig::Create::METHOD.route().to(create))
+    cfg.route(jig::Create::PATH, jig::Create::METHOD.route().to(create))
         .route(
             jig::GetLive::PATH,
             jig::GetLive::METHOD.route().to(get_live),
@@ -347,5 +368,8 @@ pub fn configure(cfg: &mut ServiceConfig) {
             jig::player::PlayCount::METHOD
                 .route()
                 .to(player::get_play_count),
-        );
+        )
+        .route(jig::Count::PATH, jig::Count::METHOD.route().to(count))
+        .route(jig::Play::PATH, jig::Play::METHOD.route().to(play))
+        .route(jig::Like::PATH, jig::Like::METHOD.route().to(like));
 }

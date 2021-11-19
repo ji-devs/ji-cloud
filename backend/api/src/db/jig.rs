@@ -209,6 +209,8 @@ with cte as (
     select id      as "jig_id",
            creator_id,
            author_id,
+           liked_count,
+           play_count,
            case
                when $2 = 0 then jig.draft_id
                when $2 = 1 then jig.live_id
@@ -216,6 +218,7 @@ with cte as (
            first_cover_assigned,  
            published_at
     from jig
+    left join jig_play_count on jig_play_count.jig_id = jig.id
     where id = $1
 )
 select cte.jig_id                                          as "jig_id: JigId",
@@ -237,6 +240,8 @@ select cte.jig_id                                          as "jig_id: JigId",
        drag_assist,
        theme                                               as "theme: ThemeId",
        audio_background                                    as "audio_background: AudioBackground",
+       liked_count,
+       play_count,
        array(select row (unnest(audio_feedback_positive))) as "audio_feedback_positive!: Vec<(AudioFeedbackPositive,)>",
        array(select row (unnest(audio_feedback_negative))) as "audio_feedback_negative!: Vec<(AudioFeedbackNegative,)>",
        array(
@@ -275,6 +280,8 @@ from jig_data
             author_id: row.author_id,
             author_name: row.author_name,
             first_cover_assigned: row.first_cover_assigned,
+            likes: row.liked_count,
+            plays: row.play_count,
             jig_data: JigData {
                 draft_or_live,
                 display_name: row.display_name,
@@ -330,8 +337,13 @@ select jig.id                                       as "id!: JigId",
        first_cover_assigned                        as "first_cover_assigned!",
        live_id                                  as "live_id!",
        draft_id                                 as "draft_id!",
-       published_at
-
+       published_at,
+       liked_count                            as "liked_count!",
+       (
+           select play_count 
+           from jig_play_count 
+           where jig_play_count.jig_id = jig.id
+        )  as "play_count!"
 from jig 
          inner join unnest($1::uuid[])
     with ordinality t(id, ord) using (id)
@@ -402,6 +414,8 @@ order by t.ord
             creator_id: jig_row.creator_id,
             author_id: jig_row.author_id,
             author_name: jig_row.author_name,
+            likes: jig_row.liked_count,
+            plays: jig_row.play_count,
             first_cover_assigned: jig_row.first_cover_assigned,
             jig_data: JigData {
                 draft_or_live,
@@ -693,6 +707,12 @@ select jig.id                                              as "jig_id: JigId",
         where user_profile.user_id = author_id)            as "author_name",
        first_cover_assigned                                   as "first_cover_assigned!",
        published_at,
+       liked_count,
+       (
+            select play_count 
+            from jig_play_count 
+            where jig_play_count.jig_id = jig.id
+       )  as "play_count!",
        display_name                                        as "display_name!",
        updated_at,
        language                                            as "language!",
@@ -743,6 +763,8 @@ limit 20 offset 20 * $1
             author_id: row.author_id,
             author_name: row.author_name,
             first_cover_assigned: row.first_cover_assigned,
+            plays: row.play_count,
+            likes: row.liked_count,
             jig_data: JigData {
                 draft_or_live: DraftOrLive::Draft,
                 display_name: row.display_name,
@@ -1020,6 +1042,88 @@ where jig_id = $1;
     .play_count;
 
     Ok(play_count)
+}
+
+pub async fn jig_play(db: &PgPool, id: JigId) -> anyhow::Result<()> {
+    let mut txn = db.begin().await?;
+
+    let jig = sqlx::query!(
+        // language=SQL
+        r#"
+select published_at  as "published_at?"
+from jig
+where id = $1
+    "#,
+        id.0
+    )
+    .fetch_one(&mut txn)
+    .await?;
+
+    //check if jig has been published and playable
+    if jig.published_at == None {
+        return Err(anyhow::anyhow!("Jig has not been published"));
+    };
+
+    //update Jig play count
+    sqlx::query!(
+        // language=SQL
+        r#"
+update jig_play_count
+set play_count = play_count + 1
+where jig_id = $1;
+            "#,
+        id.0,
+    )
+    .execute(db)
+    .await?;
+
+    txn.commit().await?;
+
+    Ok(())
+}
+
+pub async fn jig_like(db: &PgPool, user_id: Uuid, id: JigId) -> anyhow::Result<()> {
+    let mut txn = db.begin().await?;
+
+    let jig = sqlx::query!(
+        r#"
+select author_id,
+       published_at  as "published_at?"
+from jig
+where id = $1
+    "#,
+        id.0
+    )
+    .fetch_one(&mut txn)
+    .await?;
+
+    //check if Jig is published and likeable
+    if jig.published_at == None {
+        return Err(anyhow::anyhow!("Jig has not been published"));
+    };
+
+    // check if current user is the author
+    if jig.author_id == Some(user_id) {
+        return Err(anyhow::anyhow!("Cannot like your own jig"));
+    };
+
+    // checks if user has already liked the jig
+    sqlx::query!(
+        // language=SQL
+        r#"
+insert into jig_like(jig_id, user_id)
+values ($1, $2)
+            "#,
+        id.0,
+        user_id
+    )
+    .execute(&mut txn)
+    .await
+    .map_err(|_| anyhow::anyhow!("Cannot like a jig more than once"))?;
+
+    txn.commit().await?;
+
+    Ok(())
 }
 
 /////////
