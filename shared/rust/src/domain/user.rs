@@ -55,7 +55,7 @@ impl TryFrom<i16> for UserScope {
             7 => Ok(Self::ManageEntry),
             8 => Ok(Self::ManageSelfJig),
             9 => Ok(Self::ManageAudio),
-            _ => anyhow::bail!("Scope {} is invalid"),
+            _ => anyhow::bail!("Scope {} is invalid", i),
         }
     }
 }
