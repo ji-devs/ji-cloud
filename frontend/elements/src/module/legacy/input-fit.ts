@@ -7,7 +7,8 @@ export class _ extends LitElement {
     static get styles() {
         return [
             css`
-                :host {
+                input {
+                    text-align: center;
                 }
             `,
         ];
@@ -48,15 +49,15 @@ export class _ extends LitElement {
 
         let curr = 12;
         const max = 128;
+        const margin = 3;
 
         do {
             input.style.fontSize = `${curr++}px`;
         } while(!isOverflowing() && curr < max);
 
-        input.style.fontSize = `${curr - 1}px`;
-
         console.log(curr);
-        
+
+        input.style.fontSize = `${curr - margin}px`;
     }
 
     @property({type: Number})
