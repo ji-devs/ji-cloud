@@ -42,6 +42,7 @@ web-sys = { version = "0.3.55", features = [
     'HtmlImageElement',
     'HtmlSelectElement',
     'HtmlVideoElement',
+    'HtmlSpanElement',
     'KeyboardEvent',
     'MouseEvent',
     'FileList',

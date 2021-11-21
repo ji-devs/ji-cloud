@@ -10,6 +10,7 @@ use shared::domain::jig::module::body::Transform;
 
 use crate::{prelude::*, resize::resize_info_signal};
 
+
 pub fn size_width_center_rem_signal(
     size_signal: impl Signal<Item = Option<(f64, f64)>>,
 ) -> impl Signal<Item = String> {

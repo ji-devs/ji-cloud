@@ -59,6 +59,8 @@ pub struct Activity {
 //Deserializing in place doesn't work since the parent object
 //can be parsed in any order
 //and so there's no way to depend on ActivityKind being read/set
+//these are renamed to _try_ and make some comprehensive sense
+//though tbh that's kinda futile (see github discussion: https://github.com/ji-devs/ji-cloud/discussions/1787)
 #[derive(Deserialize, Debug, Clone)]
 pub struct ActivitySettings {
 
@@ -103,17 +105,19 @@ pub struct ActivitySettings {
 
     pub transform: Option<Transform>,
 
-
+    #[serde(rename="showShape")]
+    pub show_shape: Option<bool>,
 
     #[serde(rename="showShapeV2")]
-    pub show_shape: Option<bool>,
+    pub show_shape_v2: Option<bool>,
 
     #[serde(rename="DisableHints")]
     pub hints_disabled: Option<bool>,
 
+    #[serde(rename="ShapePuzzleTheme")]
+    pub theme: Option<u8>,
     #[serde(rename="ShapePuzzleThemeV2")]
-    pub theme: Option<bool>,
-
+    pub theme_v2: Option<u8>,
 
     #[serde(rename="soundShowToolTip")]
     pub tooltip: Option<bool>,

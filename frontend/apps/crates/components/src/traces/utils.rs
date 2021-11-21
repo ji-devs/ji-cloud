@@ -26,7 +26,22 @@ impl TraceExt for RawTrace {
             None
         };
 
-        match &self.shape {
+        self.shape.calc_bounds(offset)
+    }
+}
+
+pub trait TraceShapeExt {
+    fn calc_bounds(&self, offset: Option<(f64, f64)>) -> Option<BoundsF64>;
+
+    fn calc_size(&self, resize_info: &ResizeInfo) -> Option<(f64, f64)> {
+        self.calc_bounds(None)
+            .map(|bounds| resize_info.get_size_full(bounds.width, bounds.height))
+    }
+}
+
+impl TraceShapeExt for RawTraceShape {
+    fn calc_bounds(&self, offset: Option<(f64, f64)>) -> Option<BoundsF64> {
+        match self {
             RawTraceShape::PathCommands(commands) => {
                 calc_bounds(ShapeRef::PathCommands(commands), offset)
             }
@@ -40,6 +55,7 @@ impl TraceExt for RawTrace {
         }
     }
 }
+
 pub enum ShapeRef<'a> {
     Path(&'a [(f64, f64)]),
     PathCommands(&'a [(PathCommand, bool)]),
@@ -52,10 +68,81 @@ pub enum ShapeRef<'a> {
 //TODO - document the use-cases for where offset is used
 pub fn calc_bounds<'a>(shape: ShapeRef<'a>, offset: Option<(f64, f64)>) -> Option<BoundsF64> {
     let mut bounds = match shape {
-        ShapeRef::PathCommands(_commands) => {
-            //this will be tricky due to bezier curves etc.
-            //might need to actually draw the entire path in memory calc the extants
-            unimplemented!("TODO - support calc_bounds for PathCommands!");
+        ShapeRef::PathCommands(commands) => {
+
+            //Set to inverse of max values
+            let mut left: f64 = 1.0;
+            let mut right: f64 = 0.0;
+            let mut top: f64 = 1.0;
+            let mut bottom: f64 = 0.0;
+            let mut rel_first = None;
+            for (command, rel) in commands.iter() {
+                if rel_first.is_some() {
+                    if rel_first != Some(rel) {
+                        panic!("cannot calc bounds in shape when relative changes");
+                    }
+                } else {
+                    rel_first = Some(rel);
+                }
+
+
+                let (x, y) = match command {
+
+                    PathCommand::LineTo(x, y) => (Some(x), Some(y)),
+                    PathCommand::HorizontalLineTo(x) => (Some(x), None),
+                    PathCommand::VerticalLineTo(y) => (None, Some(y)),
+
+
+                    //not using the point
+                    PathCommand::ClosePath => (None, None),
+
+                    // TODO: need to calculate all the extends manually.. or use dom or something
+                    // for now, just use the x,y
+                    PathCommand::MoveTo(x,y) => (Some(x), Some(y)),
+                    PathCommand::CurveTo(_, _, _, _, x, y) => (Some(x), Some(y)),
+                    PathCommand::SmoothCurveTo(_, _, x, y) => (Some(x), Some(y)),
+                    PathCommand::QuadCurveTo(_, _, x, y) => (Some(x), Some(y)),
+                    PathCommand::SmoothQuadCurveTo(x, y) => (Some(x), Some(y)),
+                    PathCommand::ArcTo(_, _, _, _, _, x, y) => (Some(x), Some(y)),
+                };
+
+                if let Some(x) = x {
+                    let x = *x;
+                    if x < left {
+                        left = x;
+                    }
+
+                    if x > right {
+                        right = x;
+                    }
+                }
+                
+                if let Some(y) = y {
+                    let y = *y;
+                    if y < top {
+                        top = y;
+                    }
+
+                    if y > bottom {
+                        bottom = y;
+                    }
+                }
+            }
+
+            let width = right - left;
+            let height = bottom - top;
+
+            if width > 0.0 && height > 0.0 {
+                Some(BoundsF64 {
+                    x: left,
+                    y: top,
+                    width,
+                    height,
+                    invert_y: true,
+                })
+            } else {
+                None
+            }
         }
 
         ShapeRef::Path(path) => {

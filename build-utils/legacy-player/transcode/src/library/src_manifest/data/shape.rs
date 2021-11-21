@@ -61,6 +61,9 @@ pub struct ShapeSettings {
     #[serde(rename="toolTipText")]
     pub text: Option<String>,
 
+    #[serde(rename="textInputLanguage")]
+    pub text_input_language: Option<String>,
+
     #[serde(rename="originTransform")]
     pub transform: Option<Transform>,
 

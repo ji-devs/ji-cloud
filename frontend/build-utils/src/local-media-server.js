@@ -30,9 +30,38 @@ const express = require("express");
 const cors = require("cors");
 const serveIndex = require("serve-index");
 
+startCdnLegacy();
 startCdnMedia();
 startCdnElements();
 
+function startCdnLegacy() {
+
+    if (!process.env.LOCAL_CDN_LEGACY_PORT 
+        || process.env.LOCAL_ELEMENTS_LEGACY_PORT === ""
+        || !process.env.LOCAL_CDN_LEGACY_DIR
+        || process.env.LOCAL_CDN_LEGACY_DIR === ""
+    ) {
+        return;
+    }
+
+    const port = parseInt(process.env.LOCAL_CDN_LEGACY_PORT);
+    const localPath = path.resolve(process.env.LOCAL_CDN_LEGACY_DIR);
+
+    const app = express();
+
+    app.options("*", cors());
+    app.use(cors());
+    app.use(
+        express.static(localPath, { cacheControl: false }),
+        serveIndex(localPath, { icons: true })
+    );
+
+    app.listen(port, () =>
+        console.log(
+            `Local CDN for Legacy Started on port ${port}, serving ${localPath}!`
+        )
+    );
+}
 function startCdnMedia() {
     const port = parseInt(process.env.LOCAL_CDN_MEDIA_PORT);
     const localPath = path.resolve(process.env.LOCAL_CDN_MEDIA_DIR);

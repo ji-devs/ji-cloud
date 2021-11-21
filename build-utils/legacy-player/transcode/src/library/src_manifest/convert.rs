@@ -225,8 +225,31 @@ impl SrcSlide {
             panic!("{} is more than one activity and not ask a question?!", self.activities.len());
         }
 
-        let image_full = strip_path(&self.image_full).to_string();
-        let image_thumb = strip_path(&self.image_thumb).to_string();
+        let image_full = {
+            let filename = strip_path(&self.image_full).to_string();
+            medias.push(
+                Media { 
+                    url: format!("{}/{}/{}", base_url, slide_id, filename), 
+                    basepath: format!("slides/{}", slide_id), 
+                    filename: filename.clone(),
+                    transcode: None
+                }
+            );
+            filename
+        };
+        let image_thumb = {
+            let filename = strip_path(&self.image_thumb).to_string();
+            medias.push(
+                Media { 
+                    url: format!("{}/{}/{}", base_url, slide_id, filename), 
+                    basepath: format!("slides/{}", slide_id), 
+                    filename: filename.clone(),
+                    transcode: None
+                }
+            );
+            filename
+        };
+
 
         let validate_jump_index = |index: usize| -> Option<usize> {
             if index >= max_slides {
@@ -395,8 +418,81 @@ impl SrcSlide {
                                 }
                             } 
                         },
+                        SrcActivityKind::Puzzle => {
+                            let mut items:Vec<PuzzleItem> = Vec::new();
+
+                            for shape in activity.shapes.into_iter() {
+                                items.push(PuzzleItem {
+                                    audio_filename: self.make_audio_media(&client, base_url, &shape.audio, false, &mut medias).await,
+                                    hotspot: shape.convert_to_hotspot()
+                                });
+                            }
+
+                            fn map_theme(x:&Option<u8>) -> PuzzleTheme {
+                                match x {
+                                    None => PuzzleTheme::Regular,
+                                    Some(x) => {
+                                        if *x == 0 {
+                                            PuzzleTheme::Extrude
+                                        } else {
+                                            PuzzleTheme::Regular
+                                        }
+                                    }
+                                }
+                            };
+
+                            let theme = if map_theme(&activity.settings.theme) == PuzzleTheme::Extrude || map_theme(&activity.settings.theme_v2) == PuzzleTheme::Extrude {
+                                PuzzleTheme::Extrude
+                            } else {
+                                PuzzleTheme::Regular
+                            };
+
+
+                            Some(Activity::Puzzle(Puzzle {
+                                audio_filename,
+                                jump_index: activity.settings.jump_index.and_then(validate_jump_index),
+                                full_cutout_img: image_full,
+                                //show_hints: activity.settings.tooltip.unwrap_or(false),
+                                show_hints: !activity.settings.hints_disabled.unwrap_or(true),
+                                fly_back_to_origin: !activity.settings.fun_mode.unwrap_or(false),
+                                show_preview: activity.settings.show_shape.unwrap_or(false) || activity.settings.show_shape_v2.unwrap_or(false),
+                                theme,
+                                items
+                            }))
+
+                        },
+                        SrcActivityKind::TalkType => {
+
+                            let mut items:Vec<TalkTypeItem> = Vec::new();
+
+                            for shape in activity.shapes.into_iter() {
+                                items.push(TalkTypeItem {
+                                    audio_filename: self.make_audio_media(&client, base_url, &shape.audio, false, &mut medias).await,
+                                    texts: match shape.settings.text_answers.as_ref() {
+                                        None => None,
+                                        Some(answers) => {
+                                            Some(answers.iter().map(|x| x.trim().to_string()).collect())
+                                        }
+                                    },
+                                    input_language: shape.settings.text_input_language.clone(),
+                                    answer_kind: if shape.settings.speaking_mode.unwrap_or(false) {
+                                        TalkTypeAnswerKind::Audio
+                                    } else {
+                                        TalkTypeAnswerKind::Text
+                                    },
+                                    hotspot: shape.convert_to_hotspot()
+                                });
+                            }
+                            Some(Activity::TalkType(TalkType {
+                                audio_filename,
+                                jump_index: activity.settings.jump_index.and_then(validate_jump_index),
+                                show_hints: activity.settings.tooltip.unwrap_or(false),
+                                items
+                            }))
+                        },
+
                         _ => {
-                            unimplemented!("unsupported activity!");
+                            unimplemented!("unsupported activity!")
                         }
                     }
                 }

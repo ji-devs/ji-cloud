@@ -1,5 +1,5 @@
 use super::{
-    ask_questions::AskQuestions, say_something::SaySomething, soundboard::Soundboard, video::Video,
+    ask_questions::AskQuestions, say_something::SaySomething, soundboard::Soundboard, video::Video, talk_type::TalkType, puzzle::Puzzle,
 };
 use crate::base::state::Base;
 use dominator::{html, Dom};
@@ -15,9 +15,9 @@ impl Base {
                 }
                 Activity::Soundboard(activity) => Soundboard::new(self.clone(), activity).render(),
                 Activity::Video(activity) => Video::new(self.clone(), activity).render(),
-                Activity::AskQuestions(activity) => {
-                    AskQuestions::new(self.clone(), activity).render()
-                }
+                Activity::AskQuestions(activity) => AskQuestions::new(self.clone(), activity).render(),
+                Activity::TalkType(activity) => TalkType::new(self.clone(), activity).render(),
+                Activity::Puzzle(activity) => Puzzle::new(self.clone(), activity).render(),
                 // _ => html!("empty-fragment"),
             },
             None => html!("empty-fragment"),

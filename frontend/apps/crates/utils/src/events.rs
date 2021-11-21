@@ -26,6 +26,8 @@ temp_make_event!(Updated, "updated" => web_sys::Event);
 
 temp_make_event!(Accept, "accept" => web_sys::Event);
 
+temp_make_event!(Enter, "enter" => web_sys::Event);
+
 temp_make_event!(Next, "next" => web_sys::Event);
 temp_make_event!(Prev, "prev" => web_sys::Event);
 

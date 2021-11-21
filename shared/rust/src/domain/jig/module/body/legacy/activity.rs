@@ -9,6 +9,8 @@ pub enum Activity {
     SaySomething(SaySomething),
     Soundboard(Soundboard),
     Video(Video),
+    Puzzle(Puzzle),
+    TalkType(TalkType),
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -68,6 +70,59 @@ pub struct Video {
 pub enum VideoSource {
     Youtube(YoutubeUrl),
     Direct(String),
+}
+
+#[skip_serializing_none]
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Puzzle {
+    pub audio_filename: Option<String>,
+    pub jump_index: Option<usize>,
+    pub full_cutout_img: String,
+    pub fly_back_to_origin: bool,
+    pub show_preview: bool,
+    // doesn't seem to have any effect...
+    pub show_hints: bool,
+    // what does this do?
+    pub theme: PuzzleTheme,
+    pub items: Vec<PuzzleItem>,
+}
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+pub enum PuzzleTheme {
+    Regular,
+    Extrude,
+}
+
+#[skip_serializing_none]
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct PuzzleItem {
+    pub audio_filename: Option<String>,
+    pub hotspot: Hotspot,
+}
+
+#[skip_serializing_none]
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct TalkType {
+    pub audio_filename: Option<String>,
+    pub jump_index: Option<usize>,
+    pub show_hints: bool,
+    pub items: Vec<TalkTypeItem>,
+}
+
+#[skip_serializing_none]
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct TalkTypeItem {
+    pub texts: Option<Vec<String>>,
+    pub audio_filename: Option<String>,
+    pub answer_kind: TalkTypeAnswerKind,
+    pub input_language: Option<String>,
+    pub hotspot: Hotspot,
+}
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "snake_case")]
+pub enum TalkTypeAnswerKind {
+    Text,
+    Audio,
 }
 
 ////////// used in multiple activities
