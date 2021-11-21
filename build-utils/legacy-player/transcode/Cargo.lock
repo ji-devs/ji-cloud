@@ -34,9 +34,9 @@ dependencies = [
 
 [[package]]
 name = "anyhow"
-version = "1.0.44"
+version = "1.0.47"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "61604a8f862e1d5c3229fdd78f8b02c68dcf73a4c4b05fd636d12240aaa242c1"
+checksum = "38d9ff5d688f1c13395289f67db01d4826b46dd694e7580accdc3e8430f2d98e"
 
 [[package]]
 name = "async-trait"
@@ -80,9 +80,9 @@ dependencies = [
 
 [[package]]
 name = "awsm_web"
-version = "0.30.0"
+version = "0.32.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bd48a9fb3f3b64cca54fd604863365997f6c650cad1d162330cb9a18c27501df"
+checksum = "744a2e70351b17c4d59215db8cc42e21627fb60242da5f87937311cb49164463"
 dependencies = [
  "beach_map",
  "discard",
@@ -242,7 +242,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "async-trait",
- "awsm_web 0.30.0",
+ "awsm_web 0.32.0",
  "beach_map",
  "cfg-if 1.0.0",
  "chrono",
@@ -1542,9 +1542,9 @@ dependencies = [
 
 [[package]]
 name = "rgb"
-version = "0.8.27"
+version = "0.8.29"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8fddb3b23626145d1776addfc307e1a1851f60ef6ca64f376bcb889697144cf0"
+checksum = "a27fa03bb1e3e2941f52d4a555a395a72bf79b0a85fbbaab79447050c97d978c"
 dependencies = [
  "bytemuck",
  "serde",
@@ -1650,9 +1650,9 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.68"
+version = "1.0.71"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0f690853975602e1bfe1ccbf50504d67174e3bcf340f23b5ea9992e0587a52d8"
+checksum = "063bf466a64011ac24040a49009724ee60a57da1b437617ceb32e53ad61bfb19"
 dependencies = [
  "itoa",
  "ryu",
@@ -2140,7 +2140,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "async-trait",
- "awsm_web 0.30.0",
+ "awsm_web 0.32.0",
  "base64",
  "cfg-if 1.0.0",
  "chrono",
