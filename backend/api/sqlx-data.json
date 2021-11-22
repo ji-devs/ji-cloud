@@ -2754,6 +2754,19 @@
       ]
     }
   },
+  "79bce8bafae973dfdb2932091ebeeed4f007ecf2849cc8c859d45a1fea68a251": {
+    "query": "\ndelete from jig_like\nwhere jig_id = $1 and user_id = $2\n    ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "7a3746ec8866c890e58cd4e3cd5a876235b1b9b116d9f5fbb7aab1187000c86f": {
     "query": "insert into web_media_upload (media_id, uploaded_at) values ($1, now())",
     "describe": {

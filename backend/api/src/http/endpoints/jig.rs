@@ -305,6 +305,17 @@ async fn like(
     Ok(HttpResponse::NoContent().finish())
 }
 
+/// Unlike to a jig
+async fn unlike(
+    db: Data<PgPool>,
+    claims: TokenUser,
+    path: web::Path<JigId>,
+) -> Result<HttpResponse, error::Server> {
+    db::jig::jig_unlike(&*db, claims.0.user_id, path.into_inner()).await?;
+
+    Ok(HttpResponse::NoContent().finish())
+}
+
 /// Add a play to a jig
 async fn play(
     db: Data<PgPool>,
@@ -371,5 +382,6 @@ pub fn configure(cfg: &mut ServiceConfig) {
         )
         .route(jig::Count::PATH, jig::Count::METHOD.route().to(count))
         .route(jig::Play::PATH, jig::Play::METHOD.route().to(play))
-        .route(jig::Like::PATH, jig::Like::METHOD.route().to(like));
+        .route(jig::Like::PATH, jig::Like::METHOD.route().to(like))
+        .route(jig::Unlike::PATH, jig::Unlike::METHOD.route().to(unlike));
 }
