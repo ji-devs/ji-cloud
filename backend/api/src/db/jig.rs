@@ -1126,6 +1126,22 @@ values ($1, $2)
     Ok(())
 }
 
+pub async fn jig_unlike(db: &PgPool, user_id: Uuid, id: JigId) -> anyhow::Result<()> {
+    sqlx::query!(
+        r#"
+delete from jig_like
+where jig_id = $1 and user_id = $2
+    "#,
+        id.0,
+        user_id
+    )
+    .execute(db)
+    .await
+    .map_err(|_| anyhow::anyhow!("Must like jig prior to unlike"))?;
+
+    Ok(())
+}
+
 /////////
 // Auth based on user scope or jig ownership
 

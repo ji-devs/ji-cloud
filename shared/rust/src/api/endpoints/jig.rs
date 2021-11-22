@@ -207,6 +207,19 @@ impl ApiEndpoint for Like {
     const METHOD: Method = Method::Put;
 }
 
+/// Unlike a JIG
+///
+/// # Authorization
+/// * Admin, BasicAuth
+pub struct Unlike;
+impl ApiEndpoint for Unlike {
+    type Req = ();
+    type Res = ();
+    type Err = EmptyError;
+    const PATH: &'static str = "/v1/jig/{id}/unlike";
+    const METHOD: Method = Method::Delete;
+}
+
 /// Play a JIG
 ///
 /// # Authorization

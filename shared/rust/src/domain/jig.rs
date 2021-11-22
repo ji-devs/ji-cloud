@@ -412,7 +412,7 @@ pub struct JigResponse {
     /// Number of likes on Jig
     pub likes: i64,
 
-    /// Number of plays on Jig
+    /// Number of plays Jig
     pub plays: i64,
 
     /// True if Jig cover is set
