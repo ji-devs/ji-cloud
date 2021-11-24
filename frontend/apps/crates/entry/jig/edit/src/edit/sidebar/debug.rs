@@ -53,5 +53,7 @@ pub fn get_jig() -> JigResponse {
             default_player_settings: JigPlayerSettings::default(),
             privacy_level: PrivacyLevel::default(),
         },
+        likes: 0,
+        plays: 0,
     }
 }

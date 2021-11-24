@@ -75,17 +75,37 @@ pub fn render(state: Rc<State>, tab: FeedbackTab) -> Dom {
                     let audio_handles: Vec<Mutable<Option<AudioHandle>>> = AudioFeedbackPositive::variants().iter().map(|_| Mutable::new(None)).collect();
                     let audio_handles = Rc::new(audio_handles);
 
-                    dom.children(AudioFeedbackPositive::variants().iter().enumerate().map(clone!(state => move|(index, option)| {
+                    dom.children(AudioFeedbackPositive::variants().iter().enumerate().map(clone!(state, audio_handles => move|(index, option)| {
                         line(Rc::clone(&state), state.feedback_positive.clone(), option, audio_handles.clone(), index)
                     })).collect::<Vec<Dom>>())
+                    .after_removed(clone!(audio_handles => move |_| {
+                        for audio_handle in audio_handles.iter() {
+                            match audio_handle.get_cloned() {
+                                None => {},
+                                Some(audio_handle) => {
+                                    audio_handle.pause();
+                                },
+                            }
+                        }
+                    }))
                 },
                 FeedbackTab::Negative => {
                     let audio_handles: Vec<Mutable<Option<AudioHandle>>> = AudioFeedbackNegative::variants().iter().map(|_| Mutable::new(None)).collect();
                     let audio_handles = Rc::new(audio_handles);
 
-                    dom.children(AudioFeedbackNegative::variants().iter().enumerate().map(clone!(state => move|(index, option)| {
+                    dom.children(AudioFeedbackNegative::variants().iter().enumerate().map(clone!(state, audio_handles => move|(index, option)| {
                         line(Rc::clone(&state), state.feedback_negative.clone(), option, audio_handles.clone(), index)
                     })).collect::<Vec<Dom>>())
+                    .after_removed(clone!(audio_handles => move |_| {
+                        for audio_handle in audio_handles.iter() {
+                            match audio_handle.get_cloned() {
+                                None => {},
+                                Some(audio_handle) => {
+                                    audio_handle.pause();
+                                },
+                            }
+                        }
+                    }))
                 },
             }
         })
