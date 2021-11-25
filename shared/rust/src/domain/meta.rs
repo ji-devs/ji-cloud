@@ -34,6 +34,12 @@ pub struct AgeRangeId(pub Uuid);
 #[cfg_attr(feature = "backend", sqlx(transparent))]
 pub struct AffiliationId(pub Uuid);
 
+/// Wrapper type around [`Uuid`], represents [`AdditionalResource::id`].
+#[derive(Hash, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[cfg_attr(feature = "backend", sqlx(transparent))]
+pub struct AdditionalResourceId(pub Uuid);
+
 /// Wrapper type around [`Uuid`], represents [`Subject::id`].
 #[derive(Hash, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
@@ -50,6 +56,7 @@ into_uuid!(
     ImageStyleId,
     AnimationStyleId,
     AffiliationId,
+    AdditionalResourceId,
     AgeRangeId,
     SubjectId,
     GoalId
@@ -130,6 +137,22 @@ pub struct Affiliation {
     pub updated_at: Option<DateTime<Utc>>,
 }
 
+/// Represents an additional resource.
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct AdditionalResource {
+    /// The id of the additional resource.
+    pub id: AdditionalResourceId,
+
+    /// The additional resource name.
+    pub display_name: String,
+
+    /// When the age range was created.
+    pub created_at: DateTime<Utc>,
+
+    /// When the age range was last updated.
+    pub updated_at: Option<DateTime<Utc>>,
+}
+
 /// Represents a subject.
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Subject {
@@ -196,6 +219,9 @@ pub struct MetadataResponse {
     /// All affiliations the server has.
     pub affiliations: Vec<Affiliation>,
 
+    /// All additional resources the server has.
+    pub additional_resources: Vec<AdditionalResource>,
+
     /// All subjects the server has.
     pub subjects: Vec<Subject>,
 
@@ -211,6 +237,9 @@ pub struct MetadataResponse {
 pub enum MetaKind {
     /// [`Affiliation`]
     Affiliation,
+
+    /// [`AdditionalResource`]
+    AdditionalResource,
 
     /// [`ImageStyle`]
     ImageStyle,

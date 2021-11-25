@@ -36,7 +36,9 @@ async fn create(
 
     let req = req.into_inner();
 
-    let id = db::jig::additional_resource::create(&*db, parent_id, req.url).await?;
+    let id =
+        db::jig::additional_resource::create(&*db, parent_id, req.display_name, req.resource_value)
+            .await?;
 
     Ok((Json(CreateResponse { id }), http::StatusCode::CREATED))
 }

@@ -1,14 +1,10 @@
 use shared::domain::jig::{AdditionalResourceId, DraftOrLive, JigId};
 use sqlx::PgPool;
 
-pub async fn create(
-    pool: &PgPool,
-    jig_id: JigId,
-    url: String,
-) -> anyhow::Result<AdditionalResourceId> {
+pub async fn create(pool: &PgPool, jig_id: JigId) -> anyhow::Result<AdditionalResourceId> {
     sqlx::query!(
         r#"
-insert into jig_data_additional_resource (jig_data_id, url)
+insert into jig_data_additional_resource (jig_data_id, resource)
 values ((select draft_id from jig where id = $1), $2)
 returning id as "id!: AdditionalResourceId"
         "#,
