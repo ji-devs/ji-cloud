@@ -48,9 +48,19 @@ pub fn render(state: Rc<State>) -> Dom {
             //     .property("slot", "search")
             // }),
         ])
-        .children(AudioBackground::variants().iter().enumerate().map(clone!(state => move|(index, option)| {
+        .children(AudioBackground::variants().iter().enumerate().map(clone!(state, audio_handles => move|(index, option)| {
             line(Rc::clone(&state), option, Rc::clone(&audio_handles), index)
         })).collect::<Vec<Dom>>())
+        .after_removed(clone!(audio_handles => move |_| {
+            for audio_handle in audio_handles.iter() {
+                match audio_handle.get_cloned() {
+                    None => {},
+                    Some(audio_handle) => {
+                        audio_handle.pause();
+                    },
+                }
+            }
+        }))
     })
 }
 
