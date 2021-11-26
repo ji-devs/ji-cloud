@@ -2,7 +2,11 @@ use crate::base::state::Base;
 use utils::{prelude::*, math::BoundsF64};
 use components::traces::utils::TraceShapeExt;
 use std::rc::Rc;
+use std::cell::RefCell;
+use std::fmt;
 use futures_signals::signal::{Mutable, SignalExt};
+use unicode_segmentation::UnicodeSegmentation;
+use rand::prelude::*;
 
 use dominator::clone;
 use shared::domain::jig::module::body::legacy::activity::{
@@ -13,17 +17,20 @@ use shared::domain::jig::module::body::legacy::activity::{
 pub struct TalkType {
     pub base: Rc<Base>,
     pub raw: RawTalkType,
-    pub items: Vec<Rc<TalkTypeItem>>
+    pub items: Vec<Rc<TalkTypeItem>>,
+    pub rng: RefCell<ThreadRng>,
 }
 
 impl TalkType {
     pub fn new(base: Rc<Base>, raw: RawTalkType) -> Rc<Self> {
-        let items = raw.items.iter().map(|raw_item| TalkTypeItem::new(raw_item.clone())).collect();
+        let mut rng = thread_rng();
+        let items = raw.items.iter().map(|raw_item| TalkTypeItem::new(raw_item.clone(), &mut rng)).collect();
 
         let _self = Rc::new(Self { 
             base, 
             raw,
-            items
+            items,
+            rng: RefCell::new(rng),
         });
 
         _self.base.insert_start_listener(clone!(_self => move || {
@@ -37,17 +44,72 @@ impl TalkType {
 pub struct TalkTypeItem {
     pub raw: RawTalkTypeItem,
     pub bounds: BoundsF64,
-    pub value: Mutable<String>
+    pub value: Mutable<String>,
+    pub hint_letters: RefCell<HintLetters>,
+}
+
+pub struct HintLetters {
+    pub letters: Vec<HintLetter>,
+    pub indices: Vec<usize>
+}
+
+pub struct HintLetter {
+    pub letter: String,
+    pub revealed: bool,
 }
 
 impl TalkTypeItem {
-    pub fn new(raw: RawTalkTypeItem) -> Rc<Self> {
+    pub fn new(raw: RawTalkTypeItem, rng: &mut ThreadRng) -> Rc<Self> {
         let mut bounds = raw.hotspot.shape.calc_bounds(None).expect_ji("could not calc bounds");
 
+        let hint_letters = match raw.texts.as_ref() {
+            Some(text) => {
+                let letters:Vec<HintLetter> = text[0]
+                    .graphemes(true)
+                    .into_iter()
+                    .map(|letter| {
+                        HintLetter {
+                            letter: letter.to_string(),
+                            revealed: false
+                        }
+                    })
+                    .collect();
+
+                let mut indices:Vec<usize> = (0..letters.len()).collect();
+                indices.shuffle(rng);
+
+                RefCell::new(HintLetters {
+                    letters,
+                    indices
+                })
+            },
+            None => {
+                RefCell::new(HintLetters {
+                    letters: Vec::new(),
+                    indices: Vec::new()
+                })
+            }
+        };
         Rc::new(Self {
             raw,
             bounds,
-            value: Mutable::new("".to_string())
+            value: Mutable::new("".to_string()),
+            hint_letters
         })
+    }
+}
+
+impl fmt::Display for HintLetters {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        for s in self.letters.iter() {
+            if s.revealed {
+                write!(f, "{}", s.letter)?;
+            } else {
+                write!(f, "_")?;
+            }
+
+        }
+        Ok(())
+        //write!(f, "({}, {})", self.x, self.y)
     }
 }

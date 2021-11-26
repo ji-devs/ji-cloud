@@ -19,7 +19,7 @@ use std::process::Command;
 use reqwest::Client; 
 
 // url
-// http://localhost:4104/module/legacy/play/debug?game_id=ID&slide_index=0&example=true
+// http://localhost:4104/module/legacy/play/debug?slide_index=0&game_id=ID
 
 #[tokio::main]
 async fn main() {

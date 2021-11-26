@@ -55,8 +55,6 @@ export class _ extends LitElement {
             input.style.fontSize = `${curr++}px`;
         } while(!isOverflowing() && curr < max);
 
-        console.log(curr);
-
         input.style.fontSize = `${curr - margin}px`;
     }
 
