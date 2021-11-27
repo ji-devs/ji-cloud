@@ -7,8 +7,20 @@ export class _ extends LitElement {
     static get styles() {
         return [
             css`
+                :host {
+                    position: absolute;
+                }
                 input {
                     text-align: center;
+                }
+
+                :host([color="green"]) input {
+                    background-color: green;
+                    color: white;
+                }
+                :host([color="red"]) input {
+                    background-color: red;
+                    color: white;
                 }
             `,
         ];
@@ -72,6 +84,9 @@ export class _ extends LitElement {
 
     @property()
     value:string = "";
+
+    @property({reflect: true})
+    color:string = "";
 
     render() {
         

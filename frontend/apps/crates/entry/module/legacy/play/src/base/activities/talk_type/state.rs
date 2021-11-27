@@ -7,6 +7,7 @@ use std::fmt;
 use futures_signals::signal::{Mutable, SignalExt};
 use unicode_segmentation::UnicodeSegmentation;
 use rand::prelude::*;
+use gloo_timers::callback::Timeout;
 
 use dominator::clone;
 use shared::domain::jig::module::body::legacy::activity::{
@@ -24,7 +25,7 @@ pub struct TalkType {
 impl TalkType {
     pub fn new(base: Rc<Base>, raw: RawTalkType) -> Rc<Self> {
         let mut rng = thread_rng();
-        let items = raw.items.iter().map(|raw_item| TalkTypeItem::new(raw_item.clone(), &mut rng)).collect();
+        let items = raw.items.iter().map(|raw_item| TalkTypeItem::new(base.clone(), raw_item.clone(), &mut rng)).collect();
 
         let _self = Rc::new(Self { 
             base, 
@@ -42,10 +43,19 @@ impl TalkType {
 }
 
 pub struct TalkTypeItem {
+    pub base: Rc<Base>,
     pub raw: RawTalkTypeItem,
     pub bounds: BoundsF64,
     pub value: Mutable<String>,
     pub hint_letters: RefCell<HintLetters>,
+    pub phase: Mutable<TalkTypeItemPhase>,
+}
+
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
+pub enum TalkTypeItemPhase {
+    Input,
+    Wrong,
+    Correct 
 }
 
 pub struct HintLetters {
@@ -59,7 +69,7 @@ pub struct HintLetter {
 }
 
 impl TalkTypeItem {
-    pub fn new(raw: RawTalkTypeItem, rng: &mut ThreadRng) -> Rc<Self> {
+    pub fn new(base: Rc<Base>, raw: RawTalkTypeItem, rng: &mut ThreadRng) -> Rc<Self> {
         let mut bounds = raw.hotspot.shape.calc_bounds(None).expect_ji("could not calc bounds");
 
         let hint_letters = match raw.texts.as_ref() {
@@ -91,10 +101,12 @@ impl TalkTypeItem {
             }
         };
         Rc::new(Self {
+            base,
             raw,
             bounds,
             value: Mutable::new("".to_string()),
-            hint_letters
+            hint_letters,
+            phase: Mutable::new(TalkTypeItemPhase::Input),
         })
     }
 }
