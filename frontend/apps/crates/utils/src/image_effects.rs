@@ -1,13 +1,13 @@
 use crate::{path::image_lib_url, prelude::*};
 use awsm_web::canvas::{get_2d_context, CanvasToBlobFuture};
-use web_sys::{window, Blob, CanvasRenderingContext2d, HtmlCanvasElement, ImageData};
+use web_sys::{window, Blob, CanvasRenderingContext2d, HtmlImageElement, HtmlCanvasElement, ImageData};
 
 use wasm_bindgen::JsCast;
 
 use shared::{domain::jig::module::body::Image, media::PngImageFile};
 
 pub struct ImageEffect {
-    pub src: Image,
+    pub image_element: HtmlImageElement,
     pub image_data_vec: Vec<u8>,
     pub width: usize,
     pub height: usize,
@@ -16,9 +16,12 @@ pub struct ImageEffect {
 }
 
 impl ImageEffect {
-    pub async fn new(src: Image) -> Self {
-        let url = image_lib_url(src.lib, PngImageFile::Resized, src.id);
-        let img = match awsm_web::loaders::image::load(url).await {
+    pub async fn new(src: Image, canvas: Option<HtmlCanvasElement>) -> Self {
+        Self::new_url(&image_lib_url(src.lib, PngImageFile::Resized, src.id), canvas).await
+    }
+
+    pub async fn new_url(url: &str, canvas: Option<HtmlCanvasElement>) -> Self {
+        let img = match awsm_web::loaders::image::load(url.to_string()).await {
             Ok(img) => img,
             Err(_) => {
                 gloo_timers::future::TimeoutFuture::new(900_000_000).await;
@@ -28,13 +31,15 @@ impl ImageEffect {
 
         let width = img.natural_width() as usize;
         let height = img.natural_height() as usize;
-        let canvas: HtmlCanvasElement = window()
-            .unwrap_ji()
-            .document()
-            .unwrap_ji()
-            .create_element("canvas")
-            .unwrap_ji()
-            .unchecked_into();
+        let canvas: HtmlCanvasElement = canvas.unwrap_or_else(|| {
+            window()
+                .unwrap_ji()
+                .document()
+                .unwrap_ji()
+                .create_element("canvas")
+                .unwrap_ji()
+                .unchecked_into()
+        });
 
         canvas.set_width(width as u32);
         canvas.set_height(height as u32);
@@ -51,7 +56,7 @@ impl ImageEffect {
             .to_vec();
 
         Self {
-            src,
+            image_element: img,
             image_data_vec,
             width,
             height,

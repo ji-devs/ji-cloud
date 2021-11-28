@@ -11,10 +11,10 @@ impl DomRenderable for Base {
             .class(&*styles::FULL_STAGE)
             .property("slot", "main")
             .style("user-select", "none")
-            .children(&mut [
-                state.clone().render_design(),
-                state.clone().render_activity(),
-            ])
+            .apply_if(state.should_render_design(), |dom| {
+                dom.child(state.clone().render_design())
+            })
+            .child(state.clone().render_activity())
             .event(clone!(state => move |evt:events::Click| {
                 state.on_click(evt.mouse_x() as f64, evt.mouse_y() as f64);
             }))

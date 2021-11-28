@@ -24,7 +24,7 @@ impl Sprite {
 }
 
 pub async fn load_and_render(image: Image, effects: &[SpriteEffect]) -> (String, f64, f64) {
-    let mut effect = ImageEffect::new(image).await;
+    let mut effect = ImageEffect::new(image, None).await;
 
     for kind in effects.iter() {
         match kind {

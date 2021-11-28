@@ -1,8 +1,8 @@
 use std::f64::consts::PI;
 use utils::{math::quat, prelude::*, resize::ResizeInfo};
-
 use super::utils::*;
 use shared::domain::jig::module::body::_groups::design::{PathCommand, Trace, TraceShape};
+use super::svg::helpers::path_command_to_string;
 use web_sys::CanvasRenderingContext2d;
 
 pub fn draw_trace(ctx: &CanvasRenderingContext2d, resize_info: &ResizeInfo, trace: &Trace) {
@@ -53,16 +53,49 @@ pub fn draw_trace(ctx: &CanvasRenderingContext2d, resize_info: &ResizeInfo, trac
     }
 }
 
+pub fn draw_single_shape(ctx: &CanvasRenderingContext2d, resize_info: &ResizeInfo, shape: &TraceShape) {
+    match shape {
+        TraceShape::PathCommands(ref commands) => draw_path_commands(
+            ctx,
+            resize_info,
+            commands,
+        ),
+        TraceShape::Path(ref path) => {
+            draw_path(ctx, resize_info, path)
+        }
+
+        TraceShape::Rect(width, height) => draw_rect(
+            ctx,
+            resize_info,
+            *width,
+            *height,
+        ),
+        TraceShape::Ellipse(radius_x, radius_y) => draw_ellipse(
+            ctx,
+            resize_info,
+            *radius_x,
+            *radius_y,
+        ),
+    }
+}
+
+
 pub fn draw_path_commands(
-    _ctx: &CanvasRenderingContext2d,
+    ctx: &CanvasRenderingContext2d,
     resize_info: &ResizeInfo,
     commands: &[(PathCommand, bool)],
 ) {
-    for (command, _absolute) in commands {
-        let _command = denormalize_command(command, resize_info);
-        unimplemented!("TODO - support path commands in canvas drawing!")
-    }
+
+    let path_string = path_command_to_string(
+        commands
+            .iter()
+            .map(|(command, absolute)| (denormalize_command(command, resize_info), *absolute)),
+    );
+
+    let path_2d = web_sys::Path2d::new_with_path_string(&path_string).unwrap_ji();
+    ctx.fill_with_path_2d(&path_2d);
 }
+
 pub fn draw_path(ctx: &CanvasRenderingContext2d, resize_info: &ResizeInfo, points: &[(f64, f64)]) {
     ctx.move_to(0.0, 0.0);
 

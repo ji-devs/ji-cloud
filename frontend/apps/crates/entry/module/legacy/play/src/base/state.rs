@@ -20,6 +20,7 @@ use std::{
 };
 use utils::prelude::*;
 use web_sys::Worker;
+use shared::domain::jig::module::body::legacy::activity::Activity;
 
 pub struct Base {
     pub jig_id: JigId,
@@ -166,6 +167,18 @@ impl Base {
             worker
         } else {
             workers.next().unwrap_ji().clone()
+        }
+    }
+
+    pub fn should_render_design(&self) -> bool {
+        match self.slide.activity.as_ref() {
+            None => true,
+            Some(activity) => {
+                match activity {
+                    Activity::Puzzle(_) => false,
+                    _ => true
+                }
+            }
         }
     }
 }
