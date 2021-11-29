@@ -1,17 +1,14 @@
 // 2d matrix math taken from glmatrix: http://glmatrix.net/docs/mat2d.js.html
 
-//Broken...
+//Broken... could theoretically work but different targets
+//expect a different order sometimes (e.g. 6 elem isn't as standard)
 // pub fn from_mat4(mat:&[f64;16]) -> [f64;6] {
-//     let out:[f64;6] = [
-//         mat[0],
-//         mat[1],
-//         mat[4],
-//         mat[5],
-//         mat[8],
-//         mat[9],
-//     ];
-
-//     out
+    // let translate_x = mat[12];
+    // let translate_y = mat[13];
+    // let scale_x = mat[0];
+    // let scale_y = mat[5];
+    // let skew_x = mat[4].atan();
+    // let skew_y = mat[1].atan();
 // }
 
 pub fn translate_mut(transform: &mut [f64; 6], x: f64, y: f64) {
