@@ -82,10 +82,10 @@ export class _ extends LitElement {
     @query(".wrapper")
     wrapper!: HTMLElement;
 
-    dragOver() {
+    addDragClass() {
         this.wrapper.classList.add("drag-over");
     }
-    dragLeave() {
+    removeDragClass() {
         this.wrapper.classList.remove("drag-over");
     }
 
@@ -94,8 +94,9 @@ export class _ extends LitElement {
         return html`
             <div
                 class="wrapper"
-                @dragover="${this.dragOver}"
-                @dragleave="${this.dragLeave}"
+                @dragover="${this.addDragClass}"
+                @dragleave="${this.removeDragClass}"
+                @drop="${this.removeDragClass}"
             >
                 ${this.state === "empty"
                     ? html`

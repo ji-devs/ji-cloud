@@ -16,7 +16,7 @@ pub fn on_module_kind_drop(state: Rc<State>, module_kind: ModuleKind) {
         if module_kind == ModuleKind::Cover {
             fist_cover_dragged(Rc::clone(&state));
         } else {
-            todo!("invalid module type");
+            state.tried_module_at_cover.set(true);
         }
     } else {
         if state.module.is_none() {

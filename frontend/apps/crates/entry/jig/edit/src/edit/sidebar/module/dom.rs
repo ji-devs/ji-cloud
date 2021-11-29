@@ -1,4 +1,6 @@
-use dominator::{clone, html, Dom, EventOptions};
+use components::overlay::handle::OverlayHandle;
+use dominator::{Dom, EventOptions, clone, html, with_node};
+use web_sys::HtmlElement;
 
 use super::super::menu::{dom as MenuDom, state::State as MenuState};
 use super::{actions, state::*};
@@ -77,49 +79,72 @@ impl ModuleDom {
                         };
                     })
                 )
-                .child(html!("jig-edit-sidebar-module-window", {
-                    .property("slot", "window")
-                    .property_signal("state", State::window_state_signal(Rc::clone(&state)))
-                    .property("activeModuleKind", state.kind_str())
-                    .property("coverOnly", state.index == 0)
-                    .event_with_options(
-                        &EventOptions::preventable(),
-                        |evt:events::DragOver| {
-                            if let Some(data_transfer) = evt.data_transfer() {
-                                if data_transfer.types().index_of(&JsValue::from_str("module_kind"), 0) != -1 {
-                                    evt.prevent_default();
+                .child(html!("jig-edit-sidebar-module-window" => HtmlElement, {
+                    .with_node!(elem => {
+                        .property("slot", "window")
+                        .property_signal("state", State::window_state_signal(Rc::clone(&state)))
+                        .property("activeModuleKind", state.kind_str())
+                        .property("coverOnly", state.index == 0)
+                        .event_with_options(
+                            &EventOptions::preventable(),
+                            |evt:events::DragOver| {
+                                if let Some(data_transfer) = evt.data_transfer() {
+                                    if data_transfer.types().index_of(&JsValue::from_str("module_kind"), 0) != -1 {
+                                        evt.prevent_default();
+                                    }
                                 }
                             }
-                        }
-                    )
-                    .event_with_options(&EventOptions::preventable(), clone!(state => move |evt:events::Drop| {
-                        evt.prevent_default(); // needed so that Firefox doesn't open the image
-                        if let Some(data_transfer) = evt.data_transfer() {
-                            if let Some(module_kind) = data_transfer.get_data("module_kind").ok() {
-                                let kind:ModuleKind = ModuleKind::from_str(&module_kind).unwrap_ji();
-                                actions::on_module_kind_drop(
-                                    Rc::clone(&state),
-                                    kind
-                                );
+                        )
+                        .event_with_options(&EventOptions::preventable(), clone!(state => move |evt:events::Drop| {
+                            evt.prevent_default(); // needed so that Firefox doesn't open the image
+                            if let Some(data_transfer) = evt.data_transfer() {
+                                if let Some(module_kind) = data_transfer.get_data("module_kind").ok() {
+                                    let kind:ModuleKind = ModuleKind::from_str(&module_kind).unwrap_ji();
+                                    actions::on_module_kind_drop(
+                                        Rc::clone(&state),
+                                        kind
+                                    );
+                                }
                             }
-                        }
-                    }))
-                    .child_signal(state.sidebar.jig_edit_state.route.signal_ref(clone!(state, module => move |route| {
-                        match (&*module, route) {
-                            (Some(module), JigEditRoute::Module(module_id)) if module_id == &module.id => None,
-                            (Some(module), _) => {
-                                Some(ModuleThumbnail::render_live(
+                        }))
+                        .child_signal(state.sidebar.jig_edit_state.route.signal_ref(clone!(state, module => move |route| {
+                            match (&*module, route) {
+                                (Some(module), JigEditRoute::Module(module_id)) if module_id == &module.id => None,
+                                (Some(module), _) => {
+                                    Some(ModuleThumbnail::render_live(
                                         Rc::new(ModuleThumbnail {
                                             jig_id: state.sidebar.jig.id.clone(),
                                             module: module.clone(),
                                             is_jig_fallback: false,
                                         }),
                                         Some("thumbnail")
-                                ))
-                            },
-                            _ => None,
-                        }
-                    })))
+                                    ))
+                                },
+                                _ => None,
+                            }
+                        })))
+                        .apply(OverlayHandle::lifecycle(clone!(state => move || {
+                            html!("empty-fragment", {
+                                .child_signal(state.tried_module_at_cover.signal().map(clone!(state, elem => move |tried_module_at_cover| {
+                                    match tried_module_at_cover {
+                                        false => None,
+                                        true => {
+                                            Some(html!("overlay-tooltip-error", {
+                                                .text("You can only drag here the cover activity.")
+                                                .property("target", elem.clone())
+                                                .property("targetAnchor", "mr")
+                                                .property("contentAnchor", "oppositeH")
+                                                .style("width", "650px")
+                                                .event(clone!(state => move |_:events::Close| {
+                                                    state.tried_module_at_cover.set(false);
+                                                }))
+                                            }))
+                                        },
+                                    }
+                                })))
+                            })
+                        })))
+                    })
                 }))
                 .after_inserted(clone!(state => move |dom| {
                     *state.elem.borrow_mut() = Some(dom);

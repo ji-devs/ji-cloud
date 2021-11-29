@@ -13,6 +13,7 @@ use web_sys::HtmlElement;
 
 pub struct State {
     pub module: Rc<Option<LiteModule>>,
+    pub tried_module_at_cover: Mutable<bool>,
     pub sidebar: Rc<SidebarState>,
     pub drag: Mutable<Option<Drag>>,
     pub index: usize,
@@ -32,6 +33,7 @@ impl State {
             sidebar,
             index,
             total_len,
+            tried_module_at_cover: Mutable::new(false),
             drag: Mutable::new(None),
             elem: RefCell::new(None),
         }
