@@ -2,6 +2,8 @@ use shared::domain::jig::module::body::_groups::design::{
     PathCommand, Trace as RawTrace, TraceShape as RawTraceShape,
 };
 use utils::{math::BoundsF64, prelude::*, resize::ResizeInfo};
+use web_sys::Path2d;
+use super::svg::helpers::{path_command_to_string, path_to_string};
 
 pub trait TraceExt {
     fn to_raw(&self) -> RawTrace;
@@ -37,6 +39,8 @@ pub trait TraceShapeExt {
         self.calc_bounds(None)
             .map(|bounds| resize_info.get_size_full(bounds.width, bounds.height))
     }
+
+    fn as_path2d(&self, resize_info: &ResizeInfo) -> Path2d;
 }
 
 impl TraceShapeExt for RawTraceShape {
@@ -51,6 +55,48 @@ impl TraceShapeExt for RawTraceShape {
             }
             RawTraceShape::Rect(width, height) => {
                 calc_bounds(ShapeRef::Rect(*width, *height), offset)
+            }
+        }
+    }
+
+
+    fn as_path2d(&self, resize_info: &ResizeInfo) -> Path2d {
+
+        match self {
+            RawTraceShape::PathCommands(commands) => {
+
+                let path_string = path_command_to_string(
+                    commands
+                        .iter()
+                        .map(|(command, absolute)| (denormalize_command(command, resize_info), *absolute)),
+                );
+
+                Path2d::new_with_path_string(&path_string).unwrap_ji()
+            }
+
+            RawTraceShape::Path(path) => {
+                let path_string = path_to_string(
+                    path 
+                        .iter()
+                        .map(|(x, y)| resize_info.get_pos_denormalized(*x, *y)),
+                );
+
+                Path2d::new_with_path_string(&path_string).unwrap_ji()
+            } 
+            RawTraceShape::Ellipse(radius_x, radius_y) => {
+                let (radius_x, radius_y) = resize_info.get_pos_denormalized(*radius_x, *radius_y);
+                let mut path = Path2d::new().unwrap_ji();
+                path.ellipse(radius_x, radius_y, radius_x, radius_y, 0.0, 0.0, 2.0 * std::f64::consts::PI);
+
+                path
+            }
+            RawTraceShape::Rect(width, height) => {
+                let (width, height) = resize_info.get_pos_denormalized(*width, *height);
+
+                let mut path = Path2d::new().unwrap_ji();
+                path.rect(0.0, 0.0, width, height);
+
+                path
             }
         }
     }

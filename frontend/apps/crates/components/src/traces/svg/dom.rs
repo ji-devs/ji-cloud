@@ -244,17 +244,13 @@ where
     S: Signal<Item = ShapeStyle> + 'static,
 {
     let path_string = points.signal_ref(clone!(resize_info => move |points| {
-        if points.len() < 2 {
-            String::from("M 0 0")
-        } else {
-            path_to_string(
-                points
-                    .iter()
-                    .map(|(x, y)| {
-                        resize_info.get_pos_denormalized(*x, *y)
-                    })
-            )
-        }
+        path_to_string(
+            points
+                .iter()
+                .map(|(x, y)| {
+                    resize_info.get_pos_denormalized(*x, *y)
+                })
+        )
     }));
 
     svg!("path", {
@@ -335,17 +331,12 @@ where
     T: Signal<Item = (Transform, (f64, f64))> + 'static,
     S: Signal<Item = ShapeStyle> + 'static,
 {
-    let path_string = {
-        if points.len() < 2 {
-            String::from("M 0 0")
-        } else {
-            path_to_string(
-                points
-                    .iter()
-                    .map(|(x, y)| resize_info.get_pos_denormalized(*x, *y)),
-            )
-        }
-    };
+
+    let path_string = path_to_string(
+        points
+            .iter()
+            .map(|(x, y)| resize_info.get_pos_denormalized(*x, *y)),
+    );
 
     svg!("path" => SvgElement, {
         .apply(|dom| shape_style.apply(dom))

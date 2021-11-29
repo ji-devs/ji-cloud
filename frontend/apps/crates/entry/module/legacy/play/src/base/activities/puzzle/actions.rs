@@ -1,8 +1,9 @@
 use super::state::*;
 use dominator::clone;
 use std::rc::Rc;
-use utils::{prelude::*, resize::ResizeInfo};
-use components::traces::canvas::draw_single_shape;
+use utils::{prelude::*, resize::ResizeInfo, math::{mat_2d, mat4}};
+use components::traces::{canvas::{draw_single_shape, apply_transform_mat4, clip_single_shape}, utils::TraceShapeExt};
+use web_sys::CanvasRenderingContext2d;
 use wasm_bindgen::prelude::*;
 
 impl Puzzle {
@@ -37,16 +38,31 @@ impl PuzzleGame {
         dest_canvas.set_width(resize_info.width as u32);
         dest_canvas.set_height(resize_info.height as u32);
 
+        //draw complete background
         dest_ctx.draw_image_with_html_image_element_and_dw_and_dh(&self.effects.image_element, 0.0, 0.0, resize_info.width, resize_info.height).unwrap_ji();
+
         //draw the cutouts
         dest_ctx.set_fill_style(&JsValue::from_str("black"));
         for item in self.items.iter() {
             draw_single_shape(dest_ctx, resize_info, &item.raw.hotspot.shape, );
         }
 
-        //TODO draw the items
-        //need to somehow take the source image... maybe composite with masking?
+        //draw the items
         for item in self.items.iter() {
+            dest_ctx.save();
+
+            if let Some(transform) = item.raw.hotspot.transform_matrix.clone() {
+                let mut mat = mat4::Matrix4::new_direct(transform);
+                mat.denormalize(&resize_info);
+                apply_transform_mat4(&dest_ctx, &mat);
+            }
+
+
+            clip_single_shape(&dest_ctx, resize_info, &item.raw.hotspot.shape);
+
+            dest_ctx.draw_image_with_html_image_element_and_dw_and_dh(&self.effects.image_element, 0.0, 0.0, resize_info.width, resize_info.height).unwrap_ji();
+
+            dest_ctx.restore();
         }
     }
 }

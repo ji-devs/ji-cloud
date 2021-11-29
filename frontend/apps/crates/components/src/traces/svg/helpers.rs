@@ -125,12 +125,18 @@ pub fn path_command_to_string(path: impl Iterator<Item = (PathCommand, bool)>) -
 }
 
 pub fn path_to_string(path: impl Iterator<Item = (f64, f64)>) -> String {
+    let mut count = 0;
     let mut output = String::from("M");
     for (_index, (x, y)) in path.enumerate() {
         write!(&mut output, " {} {}", x, y).unwrap_ji();
+        count += 1;
     }
 
     output.push_str(" Z");
 
-    output
+    if count < 2 {
+        String::from("M 0 0")
+    } else {
+        output
+    }
 }
