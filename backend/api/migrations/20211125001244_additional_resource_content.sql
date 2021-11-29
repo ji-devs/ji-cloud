@@ -10,9 +10,7 @@ create table additional_resource
 alter table jig_data_additional_resource 
     add column resource_id        uuid             references "additional_resource"(id) not null unique,
     add column resource_content   jsonb            not null default '{}'::jsonb,
-    drop column "url",
-    drop column "id";
-
+    drop column "url";
 
 
 

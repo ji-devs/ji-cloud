@@ -22,10 +22,7 @@ pub struct AdditionalResource {
     pub display_name: String,
 
     /// Kind of additional resource
-    pub resource_value: ResourceValue,
-
-    /// Type of additional  resource
-    pub resource_type: ResourceType,
+    pub resource_value: ResourceContent,
 }
 
 /// Request to create a new `AdditionalResource`.
@@ -34,14 +31,11 @@ pub struct AdditionalResource {
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct AdditionalResourceCreateRequest {
-    /// resource display name
-    pub display_name: String,
-
-    /// Value of additional  resource
-    pub resource_value: ResourceValue,
+    /// Value of additional resource
+    pub resource_content: ResourceContent,
 
     /// Type of additional resource
-    pub resource_type: ResourceType,
+    pub resource_id: Uuid,
 }
 
 /// Request to update an `AdditionalResource`.
@@ -59,7 +53,7 @@ pub struct AdditionalResourceUpdateRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     #[serde(flatten)]
-    pub resource_value: Option<ResourceValue>,
+    pub resource_value: Option<ResourceContent>,
 
     /// Type of additional  resource
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -75,10 +69,8 @@ pub struct AdditionalResourceResponse {
     pub display_name: String,
 
     /// Value of additional resource
-    pub resource_value: ResourceValue,
-
-    /// Type of additional  resource
-    pub resource_kind: ResourceType,
+    #[serde(flatten)]
+    pub resource_content: ResourceContent,
 }
 
 /// Type of additional resource
@@ -115,7 +107,7 @@ pub enum ResourceType {
 /// Value of additional resource
 #[derive(Deserialize, Serialize, Debug)]
 #[serde(rename_all = "camelCase")]
-pub enum ResourceValue {
+pub enum ResourceContent {
     /// Additional resource kind: image
     Image(ImageId),
     /// Additional resource kind: audioFile
