@@ -7,8 +7,8 @@ use shared::domain::{
             ModuleId, StableModuleId,
         },
         AudioBackground, AudioEffects, AudioFeedbackNegative, AudioFeedbackPositive, DraftOrLive,
-        JigData, JigId, JigPlayerSettings, JigResponse, LiteModule, ModuleKind, PrivacyLevel,
-        TextDirection,
+        JigData, JigFocus, JigId, JigPlayerSettings, JigResponse, LiteModule, ModuleKind,
+        PrivacyLevel, TextDirection,
     },
     meta::{AdditionalResourceId, AffiliationId, AgeRangeId, GoalId},
     user::UserScope,
@@ -231,6 +231,7 @@ select cte.jig_id                                          as "jig_id: JigId",
        published_at,
        updated_at,
        privacy_level                                       as "privacy_level!: PrivacyLevel",
+       jig_focus                                           as "jig_focus!: JigFocus",
        language,
        description,
        direction                                           as "direction: TextDirection",
@@ -310,6 +311,7 @@ from jig_data
                     feedback_negative: row.audio_feedback_negative.into_iter().map(|(it, )| it).collect(),
                 },
                 privacy_level: row.privacy_level,
+                jig_focus: row.jig_focus,
 
             },
         });
@@ -394,7 +396,8 @@ select id,
        array(select row (jig_data_additional_resource.id)
              from jig_data_additional_resource
              where jig_data_id = jig_data.id)     as "additional_resources!: Vec<(AdditionalResourceId,)>",
-       privacy_level                                       as "privacy_level!: PrivacyLevel"
+       privacy_level                                       as "privacy_level!: PrivacyLevel",
+       jig_focus                                           as "jig_focus!: JigFocus"
 from jig_data
          inner join unnest($1::uuid[])
     with ordinality t(id, ord) using (id)
@@ -469,6 +472,7 @@ order by t.ord
                         .collect(),
                 },
                 privacy_level: jig_data_row.privacy_level,
+                jig_focus: jig_data_row.jig_focus,
             },
         })
         .collect();
@@ -494,6 +498,7 @@ pub async fn update_draft(
     audio_background: Option<&Option<AudioBackground>>,
     audio_effects: Option<&AudioEffects>,
     privacy_level: Option<PrivacyLevel>,
+    jig_focus: Option<JigFocus>,
 ) -> Result<(), error::UpdateWithMetadata> {
     let mut txn = pool.begin().await?;
 
@@ -587,6 +592,22 @@ where id = $1
     "#,
             draft_id,
             privacy_level as i16,
+        )
+        .execute(&mut txn)
+        .await?;
+    }
+
+    if let Some(jig_focus) = jig_focus {
+        sqlx::query!(
+            //language=SQL
+            r#"
+update jig_data
+set jig_focus = coalesce($2, jig_focus)
+where id = $1
+  and $2 is distinct from jig_focus
+    "#,
+            draft_id,
+            jig_focus as i16,
         )
         .execute(&mut txn)
         .await?;
@@ -706,6 +727,7 @@ pub async fn browse(
         r#"
 select jig.id                                              as "jig_id: JigId",
        privacy_level                                       as "privacy_level: PrivacyLevel",
+       jig_focus                                           as "jig_focus!: JigFocus",
        creator_id,
        author_id,
        (select given_name || ' '::text || family_name
@@ -800,6 +822,7 @@ limit 20 offset 20 * $1
                     feedback_negative: row.audio_feedback_negative.into_iter().map(|(it, )| it).collect(),
                 },
                 privacy_level: row.privacy_level,
+                jig_focus: row.jig_focus
             },
         })
         .try_collect()
@@ -870,7 +893,7 @@ pub async fn clone_data(
         r#"
 insert into jig_data
 (display_name, created_at, updated_at, language, last_synced_at, description, theme, audio_background,
- audio_feedback_negative, audio_feedback_positive, direction, display_score, drag_assist, track_assessments, privacy_level)
+ audio_feedback_negative, audio_feedback_positive, direction, display_score, drag_assist, track_assessments, privacy_level, jig_focus)
 select display_name,
        created_at,
        updated_at,
@@ -885,7 +908,8 @@ select display_name,
        display_score,
        drag_assist,
        track_assessments,
-       privacy_level
+       privacy_level,
+       jig_focus
 from jig_data
 where id = $1
 returning id

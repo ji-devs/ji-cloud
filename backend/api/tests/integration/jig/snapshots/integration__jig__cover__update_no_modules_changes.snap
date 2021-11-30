@@ -52,6 +52,7 @@ expression: body
       "feedbackPositive": "[audio]",
       "feedbackNegative": "[audio]"
     },
-    "privacyLevel": "unlisted"
+    "privacyLevel": "unlisted",
+    "jigFocus": "modules"
   }
 }

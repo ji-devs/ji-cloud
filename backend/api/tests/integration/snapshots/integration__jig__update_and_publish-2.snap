@@ -39,6 +39,7 @@ expression: body
       "feedbackPositive": [],
       "feedbackNegative": []
     },
-    "privacyLevel": "unlisted"
+    "privacyLevel": "unlisted",
+    "jigFocus": "modules"
   }
 }
