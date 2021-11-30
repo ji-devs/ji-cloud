@@ -1,6 +1,6 @@
 //! Types for additional resources for JIGs.
 
-use crate::domain::{audio::AudioId, image::ImageId};
+use crate::domain::{audio::AudioId, image::ImageId, meta::ResourceTypeId};
 use serde::{Deserialize, Serialize};
 use std::convert::TryFrom;
 use uuid::Uuid;
@@ -22,7 +22,7 @@ pub struct AdditionalResource {
     pub display_name: String,
 
     /// Type of additional resource
-    pub resource_type_id: Uuid,
+    pub resource_type_id: ResourceTypeId,
 
     /// Type of additional resource
     pub resource_content: ResourceContent,
@@ -38,7 +38,7 @@ pub struct AdditionalResourceCreateRequest {
     pub display_name: String,
 
     /// Type of additional resource
-    pub resource_type_id: Uuid,
+    pub resource_type_id: ResourceTypeId,
 
     /// Value of additional resource
     #[serde(flatten)]
@@ -59,28 +59,13 @@ pub struct AdditionalResourceUpdateRequest {
     /// Type of additional  resource
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
-    pub resource_type_id: Option<Uuid>,
+    pub resource_type_id: Option<ResourceTypeId>,
 
     /// Kind of additional resource
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     #[serde(flatten)]
     pub resource_content: Option<ResourceContent>,
-}
-
-/// Response for successfully requesting an additional resource.
-#[derive(Serialize, Deserialize, Debug)]
-#[serde(rename_all = "camelCase")]
-pub struct AdditionalResourceResponse {
-    /// resource display name
-    pub display_name: String,
-
-    /// resource id for resource type
-    pub resource_type_id: Uuid,
-
-    /// Value of additional resource
-    #[serde(flatten)]
-    pub resource_content: ResourceContent,
 }
 
 /// Type of additional resource

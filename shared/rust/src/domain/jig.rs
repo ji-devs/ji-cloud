@@ -16,9 +16,9 @@ use uuid::Uuid;
 
 use super::{
     category::CategoryId,
-    meta::{AdditionalResourceId, AffiliationId, AgeRangeId, GoalId},
+    meta::{AffiliationId, AgeRangeId, GoalId},
 };
-use crate::domain::jig::module::body::ThemeId;
+use crate::domain::jig::{additional_resource::AdditionalResourceId, module::body::ThemeId};
 
 /// Wrapper type around [`Uuid`], represents the ID of a JIG.
 #[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
