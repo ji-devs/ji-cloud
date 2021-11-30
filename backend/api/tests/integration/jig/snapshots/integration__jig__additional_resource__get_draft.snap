@@ -4,5 +4,7 @@ expression: body
 
 ---
 {
-  "url": "url://test.url.testst/s/s"
+  "displayName": "link test",
+  "resourceTypeId": "a91aca34-519e-11ec-ab46-175eaaf1ff23",
+  "link": "url://url.url.url/url/s"
 }

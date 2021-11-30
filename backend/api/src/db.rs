@@ -13,7 +13,8 @@ use core::config::DB_POOL_CONNECTIONS;
 use shared::domain::{
     category::CategoryId,
     meta::{
-        AffiliationId, AgeRangeId, AnimationStyleId, GoalId, ImageStyleId, ImageTagIndex, SubjectId,
+        AdditionalResourceId, AffiliationId, AgeRangeId, AnimationStyleId, GoalId, ImageStyleId,
+        ImageTagIndex, SubjectId,
     },
 };
 use sqlx::{
@@ -57,6 +58,10 @@ trait Metadata: Into<Uuid> + Copy {
 
 impl Metadata for AffiliationId {
     const TABLE: &'static str = "affiliation";
+}
+
+impl Metadata for AdditionalResourceId {
+    const TABLE: &'static str = "additional_resource";
 }
 
 impl Metadata for ImageStyleId {

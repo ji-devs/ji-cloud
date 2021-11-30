@@ -1,6 +1,7 @@
 use shared::domain::meta::{
-    Affiliation, AffiliationId, AgeRange, AgeRangeId, AnimationStyle, AnimationStyleId, Goal,
-    GoalId, ImageStyle, ImageStyleId, ImageTag, ImageTagIndex, MetaKind, Subject, SubjectId,
+    AdditionalResource, AdditionalResourceId, Affiliation, AffiliationId, AgeRange, AgeRangeId,
+    AnimationStyle, AnimationStyleId, Goal, GoalId, ImageStyle, ImageStyleId, ImageTag,
+    ImageTagIndex, MetaKind, Subject, SubjectId,
 };
 use shared::media::MediaGroupKind;
 use sqlx::{postgres::PgDatabaseError, PgPool};
@@ -88,6 +89,18 @@ order by index
     .await
 }
 
+pub async fn get_additional_resources(db: &PgPool) -> sqlx::Result<Vec<AdditionalResource>> {
+    sqlx::query_as!(
+        AdditionalResource,
+        r#"
+select id as "id: AdditionalResourceId", display_name, created_at, updated_at from "resource_type"
+order by index
+"#
+    )
+    .fetch_all(db)
+    .await
+}
+
 pub async fn get_image_tags(db: &PgPool) -> sqlx::Result<Vec<ImageTag>> {
     sqlx::query_as!(
         ImageTag,
@@ -146,6 +159,7 @@ pub fn handle_metadata_err(err: sqlx::Error) -> MetaWrapperError {
         Some("image_age_range_age_range_id_fkey") => MetaKind::AgeRange,
         Some("image_style_style_id_fkey") => MetaKind::ImageStyle,
         Some("image_category_category_id_fkey") => MetaKind::Category,
+        Some("additional_resource_resource_id_fkey") => MetaKind::AdditionalResource,
         Some("jig_goal_goal_id_fkey") => MetaKind::Goal,
         Some("image_tag_join_tag_index_fkey") => {
             let index = db_err.detail().and_then(extract_index);

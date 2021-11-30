@@ -27,3 +27,8 @@ values ('1f241e1b-b537-493f-a230-075cb16315be', 'test',
 insert into "user_scope" (user_id, scope)
 values ('1f241e1b-b537-493f-a230-075cb16315be', 1);
 --
+
+-- additional resource test
+insert into "user_image_library" (id)
+values('a974ce0e-ef6e-11eb-ad5a-bf4be1413928')
+

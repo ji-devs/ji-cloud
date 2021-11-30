@@ -18,6 +18,11 @@ values ('5eac0740-f224-11ea-9b22-cf2ee94195fe', 'Subject A', 0, '2020-09-08T15:4
        ('5eac07b8-f224-11ea-9b22-db3bdfab8258', 'Subject B', 1, '2020-09-08T15:41:55.203383-07'),
        ('5eac081c-f224-11ea-9b22-cbb8b4f00518', 'Subject C', 2, '2020-09-08T15:41:55.203383-07');
 
+insert into resource_type (id, display_name, index, created_at)
+values ('a91aca34-519e-11ec-ab46-175eaaf1ff23', 'Coloring', 0, '2020-09-08T15:41:55.203383-07'),
+       ('a9219e7c-519e-11ec-ab46-63ad4c3d4eeb', 'Worksheet', 1, '2020-09-08T15:41:55.203383-07'),
+       ('a939f454-519e-11ec-ab46-2fa68cd3a8c7', 'LessonPlan', 2, '2020-09-08T15:41:55.203383-07');
+
 insert into "goal" (id, display_name, index, created_at)
 values ('533898ea-3367-11eb-a473-8f2df3b13671', 'Lesson Component', 0, '2020-11-30 23:54:39.198381+00'),
        ('533899b2-3367-11eb-a473-ef2577a4de84', 'Full Lesson', 1, '2020-11-30 23:54:39.198381+00'),
