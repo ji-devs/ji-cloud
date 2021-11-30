@@ -1,10 +1,7 @@
 #![allow(unused_imports)]
 #![allow(dead_code)]
 
-use shared::domain::jig::{
-    module::ModuleId, AudioEffects, DraftOrLive, JigData, JigId, JigPlayerSettings, JigResponse,
-    LiteModule, ModuleKind, PrivacyLevel,
-};
+use shared::domain::jig::{AudioEffects, DraftOrLive, JigData, JigFocus, JigId, JigPlayerSettings, JigResponse, LiteModule, ModuleKind, PrivacyLevel, module::ModuleId};
 use utils::themes::ThemeId;
 use uuid::Uuid;
 
@@ -52,6 +49,7 @@ pub fn get_jig() -> JigResponse {
             audio_effects: AudioEffects::default(),
             default_player_settings: JigPlayerSettings::default(),
             privacy_level: PrivacyLevel::default(),
+            jig_focus: JigFocus::Modules,
         },
         likes: 0,
         plays: 0,
