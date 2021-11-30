@@ -2,7 +2,6 @@ use futures::TryStreamExt;
 use shared::domain::{
     category::CategoryId,
     jig::{
-        additional_resource::AdditionalResourceId,
         module::{
             body::{cover, ThemeId},
             ModuleId, StableModuleId,
@@ -11,7 +10,7 @@ use shared::domain::{
         JigData, JigId, JigPlayerSettings, JigResponse, LiteModule, ModuleKind, PrivacyLevel,
         TextDirection,
     },
-    meta::{AffiliationId, AgeRangeId, GoalId},
+    meta::{AdditionalResourceId, AffiliationId, AgeRangeId, GoalId},
     user::UserScope,
 };
 use sqlx::{PgConnection, PgPool};
@@ -262,7 +261,7 @@ select cte.jig_id                                          as "jig_id: JigId",
        array(select row (age_range_id)
              from jig_data_age_range
              where jig_data_id = cte.draft_or_live_id)     as "age_ranges!: Vec<(AgeRangeId,)>",
-       array(select row (jig_data_additional_resource.id)
+       array(select row (resource_type_id)
              from jig_data_additional_resource
              where jig_data_id = cte.draft_or_live_id)     as "additional_resources!: Vec<(AdditionalResourceId,)>"
 from jig_data
@@ -487,6 +486,7 @@ pub async fn update_draft(
     categories: Option<&[CategoryId]>,
     age_ranges: Option<&[AgeRangeId]>,
     affiliations: Option<&[AffiliationId]>,
+    additional_resources: Option<&[AdditionalResourceId]>,
     language: Option<&str>,
     description: Option<&str>,
     default_player_settings: Option<&JigPlayerSettings>,
@@ -634,6 +634,12 @@ where id = $1
             .map_err(super::meta::handle_metadata_err)?;
     }
 
+    if let Some(additional_resources) = additional_resources {
+        super::recycle_metadata(&mut txn, "jig_data", draft_id, additional_resources)
+            .await
+            .map_err(super::meta::handle_metadata_err)?;
+    }
+
     if let Some(age_ranges) = age_ranges {
         super::recycle_metadata(&mut txn, "jig_data", draft_id, age_ranges)
             .await
@@ -743,7 +749,7 @@ select jig.id                                              as "jig_id: JigId",
        array(select row (age_range_id)
              from jig_data_age_range
              where jig_data_id = jig_data.id)              as "age_ranges!: Vec<(AgeRangeId,)>",
-       array(select row (jig_data_additional_resource.id)
+       array(select row (resource_type_id)
              from jig_data_additional_resource
              where jig_data_id = jig_data.id)              as "additional_resources!: Vec<(AdditionalResourceId,)>"
 from jig_data
@@ -908,8 +914,8 @@ where jig_data_id = $1
     sqlx::query!(
         //language=SQL
         r#"
-insert into jig_data_additional_resource(jig_data_id, url)
-select $2, url
+insert into jig_data_additional_resource(jig_data_id, resource_type_id)
+select $2, resource_type_id
 from jig_data_additional_resource
 where jig_data_id = $1
         "#,

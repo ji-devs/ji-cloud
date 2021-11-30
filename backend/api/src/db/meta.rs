@@ -1,4 +1,3 @@
-use shared::domain::jig::additional_resource::AdditionalResource;
 use shared::domain::meta::{
     AdditionalResource, AdditionalResourceId, Affiliation, AffiliationId, AgeRange, AgeRangeId,
     AnimationStyle, AnimationStyleId, Goal, GoalId, ImageStyle, ImageStyleId, ImageTag,
@@ -92,9 +91,9 @@ order by index
 
 pub async fn get_additional_resources(db: &PgPool) -> sqlx::Result<Vec<AdditionalResource>> {
     sqlx::query_as!(
-        Goal,
+        AdditionalResource,
         r#"
-select id as "id: AdditionalResourceId", display_name, created_at, updated_at from "additional_resource"
+select id as "id: AdditionalResourceId", display_name, created_at, updated_at from "resource_type"
 order by index
 "#
     )

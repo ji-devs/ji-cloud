@@ -21,8 +21,11 @@ pub struct AdditionalResource {
     /// Name for additional resource
     pub display_name: String,
 
-    /// Kind of additional resource
-    pub resource_value: ResourceContent,
+    /// Type of additional resource
+    pub resource_type_id: Uuid,
+
+    /// Type of additional resource
+    pub resource_content: ResourceContent,
 }
 
 /// Request to create a new `AdditionalResource`.
@@ -31,11 +34,15 @@ pub struct AdditionalResource {
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct AdditionalResourceCreateRequest {
-    /// Value of additional resource
-    pub resource_content: ResourceContent,
+    /// Display name for additional resource
+    pub display_name: String,
 
     /// Type of additional resource
-    pub resource_id: Uuid,
+    pub resource_type_id: Uuid,
+
+    /// Value of additional resource
+    #[serde(flatten)]
+    pub resource_content: ResourceContent,
 }
 
 /// Request to update an `AdditionalResource`.
@@ -49,16 +56,16 @@ pub struct AdditionalResourceUpdateRequest {
     #[serde(default)]
     pub display_name: Option<String>,
 
+    /// Type of additional  resource
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
+    pub resource_type_id: Option<Uuid>,
+
     /// Kind of additional resource
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     #[serde(flatten)]
-    pub resource_value: Option<ResourceContent>,
-
-    /// Type of additional  resource
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(default)]
-    pub resource_type: Option<ResourceType>,
+    pub resource_content: Option<ResourceContent>,
 }
 
 /// Response for successfully requesting an additional resource.
@@ -67,6 +74,9 @@ pub struct AdditionalResourceUpdateRequest {
 pub struct AdditionalResourceResponse {
     /// resource display name
     pub display_name: String,
+
+    /// resource id for resource type
+    pub resource_type_id: Uuid,
 
     /// Value of additional resource
     #[serde(flatten)]
@@ -109,12 +119,11 @@ pub enum ResourceType {
 #[serde(rename_all = "camelCase")]
 pub enum ResourceContent {
     /// Additional resource kind: image
-    Image(ImageId),
+    ImageId(ImageId),
     /// Additional resource kind: audioFile
-    Audio(AudioId),
+    AudioId(AudioId),
     /// Additional resource kind: link
-    Link(String),
-    // Pdf(PdfId) = 3,
+    Link(url::Url),
 }
 
 impl TryFrom<i16> for ResourceType {

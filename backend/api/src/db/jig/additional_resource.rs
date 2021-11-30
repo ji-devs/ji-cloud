@@ -1,9 +1,15 @@
 use serde::{Deserialize, Serialize};
-use serde_json::json;
-use shared::domain::jig::{
-    additional_resource::ResourceContent, AdditionalResourceId, DraftOrLive, JigId,
+use serde_json::{json, value::Value};
+use shared::domain::{
+    audio::AudioId,
+    image::ImageId,
+    jig::{
+        additional_resource::{AdditionalResourceId, ResourceContent},
+        DraftOrLive, JigId,
+    },
 };
 use sqlx::PgPool;
+use url::Url;
 use uuid::Uuid;
 
 #[derive(Deserialize, Serialize, Debug)]
@@ -11,43 +17,29 @@ use uuid::Uuid;
 #[cfg_attr(feature = "backend", sqlx(transparent))]
 #[serde(rename_all = "camelCase")]
 pub struct ResourceObject {
-    #[serde(alias = "kind")]
-    r_kind: &'static str,
-
-    #[serde(flatten)]
-    r_content: serde_json::Value,
+    content: serde_json::Value,
 }
 
 pub async fn create(
     pool: &PgPool,
     jig_id: JigId,
-    resource_id: Uuid,
+    display_name: String,
+    resource_type_id: Uuid,
     resource_content: ResourceContent,
 ) -> anyhow::Result<AdditionalResourceId> {
-    let resource: ResourceObject = match resource_content {
-        ResourceContent::Image(data) => ResourceObject {
-            r_kind: "Image",
-            r_content: serde_json::to_value(data)?,
-        },
-        ResourceContent::Audio(data) => ResourceObject {
-            r_kind: "Audio",
-            r_content: serde_json::to_value(data)?,
-        },
-        ResourceContent::Link(data) => ResourceObject {
-            r_kind: "Link",
-            r_content: serde_json::to_value(data)?,
-        },
-    };
+    // Checks if Audio and Image IDs exists
+    let resource: serde_json::Value = check_content(pool, resource_content).await?;
 
     sqlx::query!(
         r#"
-insert into jig_data_additional_resource (jig_data_id, resource_id, resource_content)
-values ((select draft_id from jig where id = $1), $2, $3)
+insert into jig_data_additional_resource (jig_data_id, resource_type_id, resource_content, display_name)
+values ((select draft_id from jig where id = $1), $2, $3, $4)
 returning id as "id!: AdditionalResourceId"
         "#,
         jig_id.0,
-        resource_id,
-        json!(resource),
+        resource_type_id,
+        resource,
+        display_name
     )
     .fetch_one(pool)
     .await
@@ -60,7 +52,7 @@ pub async fn get(
     jig_id: JigId,
     draft_or_live: DraftOrLive,
     id: AdditionalResourceId,
-) -> anyhow::Result<(String, ResourceContent)> {
+) -> anyhow::Result<(String, Uuid, ResourceContent)> {
     let mut txn = pool.begin().await?;
 
     let (draft_id, live_id) = super::get_draft_and_live_ids(&mut txn, jig_id)
@@ -74,10 +66,10 @@ pub async fn get(
 
     let res = sqlx::query!(
         r#"
-select display_name     as "display_name!",
+select display_name         as "display_name!",
+       resource_type_id     as "resource_type_id!",
        resource_content    as "resource_content!"
 from jig_data_additional_resource "jdar"
-left join additional_resource "ar" on ar.id = jdar.resource_id
 where jig_data_id = $1
   and jdar.id = $2
         "#,
@@ -91,7 +83,7 @@ where jig_data_id = $1
 
     txn.rollback().await?;
 
-    Ok((res.display_name, content))
+    Ok((res.display_name, res.resource_type_id, content))
 }
 
 pub async fn update(
@@ -99,7 +91,8 @@ pub async fn update(
     jig_id: JigId,
     draft_or_live: DraftOrLive,
     id: AdditionalResourceId,
-    resource_id: Option<Uuid>,
+    display_name: Option<String>,
+    resource_type_id: Option<Uuid>,
     resource_content: Option<ResourceContent>,
 ) -> anyhow::Result<()> {
     let mut txn = pool.begin().await?;
@@ -113,33 +106,31 @@ pub async fn update(
         DraftOrLive::Live => live_id,
     };
 
-    if let Some(resource_id) = resource_id {
+    if let Some(display_name) = display_name {
         sqlx::query!(
             //language=SQL
             r#"
 update jig_data_additional_resource
-set resource_id= $3
-where jig_data_id = $1 and id = $2
+set display_name = coalesce($2, display_name)
+where id = $1 and $2 is distinct from display_name
             "#,
-            jig_data_id,
             id.0,
-            resource_id
+            display_name
         )
         .execute(&mut txn)
         .await?;
     }
 
-    if let Some(resource_id) = resource_id {
+    if let Some(resource_type_id) = resource_type_id {
         sqlx::query!(
             //language=SQL
             r#"
 update jig_data_additional_resource
-set resource_id = $3
-where jig_data_id = $1 and id = $2
+set resource_type_id = coalesce($2, resource_type_id)
+where id = $1 and $2 is distinct from resource_type_id
             "#,
-            jig_data_id,
             id.0,
-            resource_id
+            resource_type_id
         )
         .execute(&mut txn)
         .await?;
@@ -192,4 +183,38 @@ where jig_data_id = $1
     txn.commit().await?;
 
     Ok(())
+}
+
+pub async fn check_content(db: &PgPool, content: ResourceContent) -> anyhow::Result<Value> {
+    let resource: serde_json::Value = match content {
+        ResourceContent::ImageId(data) => {
+            sqlx::query!(
+                r#"select id as "id: ImageId" from user_image_library where id = $1"#,
+                data.0
+            )
+            .fetch_one(db)
+            .await
+            .map_err(|_| anyhow::anyhow!("Image Id does not exist"))?;
+
+            json!(ResourceContent::ImageId(data))
+        }
+        ResourceContent::AudioId(data) => {
+            sqlx::query!(
+                r#"select id as "id: AudioId" from user_audio_library where id = $1"#,
+                data.0
+            )
+            .fetch_one(db)
+            .await
+            .map_err(|_| anyhow::anyhow!("Audio Id does not exist"))?;
+
+            json!(ResourceContent::AudioId(data))
+        }
+        ResourceContent::Link(data) => {
+            let data = Url::parse(data.as_str())?;
+
+            json!(ResourceContent::Link(data))
+        }
+    };
+
+    Ok(resource)
 }

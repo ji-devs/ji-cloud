@@ -60,6 +60,26 @@ expression: body
       "updated_at": null
     }
   ],
+  "additional_resources": [
+    {
+      "id": "a91aca34-519e-11ec-ab46-175eaaf1ff23",
+      "display_name": "Coloring",
+      "created_at": "2020-09-08T22:41:55.203383Z",
+      "updated_at": null
+    },
+    {
+      "id": "a9219e7c-519e-11ec-ab46-63ad4c3d4eeb",
+      "display_name": "Worksheet",
+      "created_at": "2020-09-08T22:41:55.203383Z",
+      "updated_at": null
+    },
+    {
+      "id": "a939f454-519e-11ec-ab46-2fa68cd3a8c7",
+      "display_name": "LessonPlan",
+      "created_at": "2020-09-08T22:41:55.203383Z",
+      "updated_at": null
+    }
+  ],
   "subjects": [
     {
       "id": "5eac0740-f224-11ea-9b22-cf2ee94195fe",

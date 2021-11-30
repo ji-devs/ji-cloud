@@ -38,13 +38,13 @@ values ('a6b248f8-1dd7-11ec-8426-975953035335', '0cbfdd82-7c83-11eb-9f77-d7d8626
         'd4cad4c8-1dd5-11ec-8426-a37eda7ce03f', 2, 3, false, '{}', '2021-03-04 00:46:26.134651+00');
 
 
-insert into jig_data_additional_resource (jig_data_id, id, url)
-values ('d4cad43c-1dd5-11ec-8426-83d4a42e3ac9', '286b828c-1dd9-11ec-8426-571b03b2d3df',
-        'url://url.url.url/url'), -- live
-       ('d4cad43c-1dd5-11ec-8426-83d4a42e3ac9', '286b82fa-1dd9-11ec-8426-2b6953011bae', 'url://test.url.testst/s/s'),
+insert into jig_data_additional_resource (jig_data_id, id, display_name, resource_type_id, resource_content)
+values ('d4cad43c-1dd5-11ec-8426-83d4a42e3ac9', '286b828c-1dd9-11ec-8426-571b03b2d3df', 'link test', 'a91aca34-519e-11ec-ab46-175eaaf1ff23',
+        '{ "link": "url://url.url.url/urlese" }'), -- live
+       ('d4cad43c-1dd5-11ec-8426-83d4a42e3ac9', '286b82fa-1dd9-11ec-8426-2b6953011bae', 'link test', 'a91aca34-519e-11ec-ab46-175eaaf1ff23', '{ "link": "url://url.url.url/url" }'),
        ('d4cad4c8-1dd5-11ec-8426-a37eda7ce03f', '286b834a-1dd9-11ec-8426-6f641a50e23f',
-        'url://url.url.url/url'), -- draft
-       ('d4cad4c8-1dd5-11ec-8426-a37eda7ce03f', '286b8390-1dd9-11ec-8426-fbeb80c504d9', 'url://test.url.testst/s/s');
+        'link test', 'a91aca34-519e-11ec-ab46-175eaaf1ff23', '{ "link": "url://url.url.url/urls/s" }'), -- draft
+       ('d4cad4c8-1dd5-11ec-8426-a37eda7ce03f', '286b8390-1dd9-11ec-8426-fbeb80c504d9', 'link test', 'a91aca34-519e-11ec-ab46-175eaaf1ff23', '{ "link": "url://url.url.url/url/s" }');
 
 insert into jig_player_session (index, jig_id, created_at, expires_at, direction, display_score, track_assessments,
                                 drag_assist)

@@ -11,6 +11,7 @@ use crate::{db, error};
 /// Get a list of all available metadata of all kinds (sans categories)
 async fn get(db: Data<PgPool>) -> Result<Json<<Get as ApiEndpoint>::Res>, error::Server> {
     let affiliations = db::meta::get_affiliations(&db).await?;
+    let additional_resources = db::meta::get_additional_resources(&db).await?;
     let age_ranges = db::meta::get_age_ranges(&db).await?;
     let subjects = db::meta::get_subjects(&db).await?;
     let goals = db::meta::get_goals(&db).await?;
@@ -20,6 +21,7 @@ async fn get(db: Data<PgPool>) -> Result<Json<<Get as ApiEndpoint>::Res>, error:
 
     Ok(Json(MetadataResponse {
         affiliations,
+        additional_resources,
         age_ranges,
         subjects,
         goals,

@@ -1,7 +1,6 @@
 //! Types for JIGs.
 
 pub mod additional_resource;
-pub use additional_resource::AdditionalResourceId;
 
 pub mod module;
 // avoid breaking Changes
@@ -17,7 +16,7 @@ use uuid::Uuid;
 
 use super::{
     category::CategoryId,
-    meta::{AffiliationId, AgeRangeId, GoalId},
+    meta::{AdditionalResourceId, AffiliationId, AgeRangeId, GoalId},
 };
 use crate::domain::jig::module::body::ThemeId;
 
@@ -573,6 +572,15 @@ pub struct JigSearchQuery {
     #[serde(deserialize_with = "super::from_csv")]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub affiliations: Vec<AffiliationId>,
+
+    /// Optionally filter by `additional resources`
+    ///
+    /// Note: Currently does nothing
+    #[serde(default)]
+    #[serde(serialize_with = "super::csv_encode_uuids")]
+    #[serde(deserialize_with = "super::from_csv")]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub additional_resources: Vec<AdditionalResourceId>,
 
     /// Optionally filter by `categories`
     #[serde(default)]

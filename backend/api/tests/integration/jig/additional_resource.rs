@@ -3,11 +3,16 @@ use crate::{
     helpers::{initialize_server, LoginExt},
 };
 use http::StatusCode;
-use shared::domain::jig::additional_resource::AdditionalResourceCreateRequest;
+use shared::domain::{
+    image::ImageId,
+    jig::additional_resource::{AdditionalResourceCreateRequest, ResourceContent},
+};
+use std::str::FromStr;
+use uuid::Uuid;
 
 #[actix_rt::test]
 async fn create() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Jig], &[]).await;
+    let app = initialize_server(&[Fixture::MetaKinds, Fixture::User, Fixture::Jig], &[]).await;
 
     let port: u16 = app.port();
 
@@ -20,7 +25,9 @@ async fn create() -> anyhow::Result<()> {
         ))
         .login()
         .json(&AdditionalResourceCreateRequest {
-            url: "http://test.tset.test/tes".to_string(),
+            display_name: "testing".to_string(),
+            resource_type_id: Uuid::from_str("a939f454-519e-11ec-ab46-2fa68cd3a8c7").unwrap(),
+            resource_content: ResourceContent::ImageId(ImageId(Uuid::from_str("a974ce0e-ef6e-11eb-ad5a-bf4be1413928").unwrap()))
         })
         .send()
         .await?
@@ -39,7 +46,7 @@ async fn create() -> anyhow::Result<()> {
 
 #[actix_rt::test]
 async fn get_draft() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Jig], &[]).await;
+    let app = initialize_server(&[Fixture::MetaKinds, Fixture::User, Fixture::Jig], &[]).await;
 
     let port: u16 = app.port();
 
@@ -68,7 +75,7 @@ async fn get_draft() -> anyhow::Result<()> {
 
 #[actix_rt::test]
 async fn get_live() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Jig], &[]).await;
+    let app = initialize_server(&[Fixture::MetaKinds, Fixture::User, Fixture::Jig], &[]).await;
 
     let port: u16 = app.port();
 
@@ -97,7 +104,7 @@ async fn get_live() -> anyhow::Result<()> {
 
 #[actix_rt::test]
 async fn delete() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Jig], &[]).await;
+    let app = initialize_server(&[Fixture::MetaKinds, Fixture::User, Fixture::Jig], &[]).await;
 
     let port: u16 = app.port();
 
@@ -105,7 +112,7 @@ async fn delete() -> anyhow::Result<()> {
 
     let resp = client
         .delete(&format!(
-            "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008/draft/additional-resource/286b828c-1dd9-11ec-8426-571b03b2d3df",
+            "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008/draft/additional-resource/286b8390-1dd9-11ec-8426-fbeb80c504d9",
             port
         ))
         .login()
@@ -114,17 +121,6 @@ async fn delete() -> anyhow::Result<()> {
         .error_for_status()?;
 
     assert_eq!(resp.status(), StatusCode::NO_CONTENT);
-
-    let resp = client
-        .get(&format!(
-            "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008/draft/additional-resource/286b828c-1dd9-11ec-8426-571b03b2d3df",
-            port
-        ))
-        .login()
-        .send()
-        .await?;
-
-    assert_eq!(resp.status(), StatusCode::NOT_FOUND);
 
     app.stop(false).await;
 
