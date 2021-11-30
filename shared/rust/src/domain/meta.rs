@@ -38,7 +38,7 @@ pub struct AffiliationId(pub Uuid);
 #[derive(Hash, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
-pub struct AdditionalResourceId(pub Uuid);
+pub struct ResourceTypeId(pub Uuid);
 
 /// Wrapper type around [`Uuid`], represents [`Subject::id`].
 #[derive(Hash, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
@@ -56,7 +56,7 @@ into_uuid!(
     ImageStyleId,
     AnimationStyleId,
     AffiliationId,
-    AdditionalResourceId,
+    ResourceTypeId,
     AgeRangeId,
     SubjectId,
     GoalId
@@ -139,9 +139,9 @@ pub struct Affiliation {
 
 /// Represents an additional resource.
 #[derive(Clone, Serialize, Deserialize, Debug)]
-pub struct AdditionalResource {
+pub struct ResourceType {
     /// The id of the additional resource.
-    pub id: AdditionalResourceId,
+    pub id: ResourceTypeId,
 
     /// The additional resource name.
     pub display_name: String,
@@ -220,7 +220,7 @@ pub struct MetadataResponse {
     pub affiliations: Vec<Affiliation>,
 
     /// All additional resources the server has.
-    pub additional_resources: Vec<AdditionalResource>,
+    pub resource_types: Vec<ResourceType>,
 
     /// All subjects the server has.
     pub subjects: Vec<Subject>,
@@ -238,8 +238,8 @@ pub enum MetaKind {
     /// [`Affiliation`]
     Affiliation,
 
-    /// [`AdditionalResource`]
-    AdditionalResource,
+    /// [`ResourceType`]
+    ResourceType,
 
     /// [`ImageStyle`]
     ImageStyle,

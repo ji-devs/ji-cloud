@@ -2,7 +2,7 @@ use crate::{
     api::Method,
     domain::{
         jig::additional_resource::{
-            AdditionalResourceCreateRequest, AdditionalResourceId, AdditionalResourceResponse,
+            AdditionalResource, AdditionalResourceCreateRequest, AdditionalResourceId,
             AdditionalResourceUpdateRequest,
         },
         CreateResponse,
@@ -24,7 +24,7 @@ use super::ApiEndpoint;
 pub struct GetDraft;
 impl ApiEndpoint for GetDraft {
     type Req = ();
-    type Res = AdditionalResourceResponse;
+    type Res = AdditionalResource;
     type Err = EmptyError;
     const PATH: &'static str = "/v1/jig/{id}/draft/additional-resource/{additional_resource_id}";
     const METHOD: Method = Method::Get;
@@ -42,7 +42,7 @@ impl ApiEndpoint for GetDraft {
 pub struct GetLive;
 impl ApiEndpoint for GetLive {
     type Req = ();
-    type Res = AdditionalResourceResponse;
+    type Res = AdditionalResource;
     type Err = EmptyError;
     const PATH: &'static str = "/v1/jig/{id}/live/additional-resource/{additional_resource_id}";
     const METHOD: Method = Method::Get;
