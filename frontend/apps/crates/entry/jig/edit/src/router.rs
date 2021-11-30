@@ -21,7 +21,10 @@ impl Router {
         Self::signal().map(|route| match route {
             Route::Jig(route) => match route {
                 JigRoute::Gallery => Some(
-                    JigGallery::new().render()
+                    JigGallery::new(JigFocus::Modules).render()
+                ),
+                JigRoute::ResourceGallery => Some(
+                    JigGallery::new(JigFocus::Resources).render()
                 ),
                 JigRoute::Edit(jig_id, route) => Some(EditPage::render(jig_id, route)),
                 _ => None,

@@ -36,17 +36,20 @@ impl JigGallery {
             .child(page_header::dom::render(Rc::new(page_header::state::State::new()), None, Some(PageLinks::Create)))
             .child(
                 html!("jig-gallery", {
+                    .property("jigFocus", state.focus.as_str())
                     .child(html!("jig-gallery-create", {
                         .property("slot", "create-jig")
                         .event(clone!(state => move |_: events::Click| {
                             state.create_jig();
                         }))
                     }))
-                    .children(TEMPLATE_KINDS.iter().map(|kind| {
-                        html!("jig-gallery-template", {
-                            .property("slot", "jig-templates")
-                            .property("kind", *kind)
-                        })
+                    .apply_if(state.focus.is_modules(), clone!(state => move |dom| {
+                        dom.children(TEMPLATE_KINDS.iter().map(|kind| {
+                            html!("jig-gallery-template", {
+                                .property("slot", "jig-templates")
+                                .property("kind", *kind)
+                            })
+                        }))
                     }))
                     .child(html!("input-search", {
                         .property("slot", "search-input")

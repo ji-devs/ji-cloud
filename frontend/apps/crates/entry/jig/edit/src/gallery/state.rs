@@ -22,6 +22,7 @@ pub enum VisibleJigs {
 }
 
 pub struct JigGallery {
+    pub focus: JigFocus,
     pub loader: AsyncLoader,
     pub jigs: MutableVec<JigResponse>,
     pub visible_jigs: Rc<Mutable<VisibleJigs>>,
@@ -29,8 +30,9 @@ pub struct JigGallery {
 }
 
 impl JigGallery {
-    pub fn new() -> Rc<Self> {
+    pub fn new(focus: JigFocus) -> Rc<Self> {
         Rc::new(Self {
+            focus,
             loader: AsyncLoader::new(),
             jigs: MutableVec::new(),
             visible_jigs: Rc::new(Mutable::new(VisibleJigs::All)),

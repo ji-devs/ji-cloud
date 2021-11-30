@@ -269,6 +269,16 @@ impl JigFocus {
             Self::Resources => "resources",
         }
     }
+
+    /// check if is modules
+    pub fn is_modules(&self) -> bool {
+        self == &Self::Modules
+    }
+
+    /// check if is resources
+    pub fn is_resources(&self) -> bool {
+        self == &Self::Resources
+    }
 }
 
 impl Default for JigFocus {

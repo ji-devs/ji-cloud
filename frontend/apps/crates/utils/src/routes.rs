@@ -92,6 +92,7 @@ impl AdminRoute {
 #[derive(Debug, Clone)]
 pub enum JigRoute {
     Gallery,
+    ResourceGallery,
     Edit(JigId, JigEditRoute),
     Play(JigId, Option<ModuleId>, JigPlayerOptions),
 }
@@ -245,6 +246,7 @@ impl Route {
             }
             ["admin"] => Self::Admin(AdminRoute::Landing),
             ["jig", "edit", "gallery"] => Self::Jig(JigRoute::Gallery),
+            ["jig", "edit", "resource-gallery"] => Self::Jig(JigRoute::ResourceGallery),
             ["jig", "edit", jig_id, "publish"] => Self::Jig(JigRoute::Edit(
                 JigId(Uuid::from_str(jig_id).unwrap_ji()),
                 JigEditRoute::Publish,
@@ -399,6 +401,7 @@ impl From<&Route> for String {
             },
             Route::Jig(route) => match route {
                 JigRoute::Gallery => "/jig/edit/gallery".to_string(),
+                JigRoute::ResourceGallery => "/jig/edit/resource-gallery".to_string(),
                 JigRoute::Edit(jig_id, route) => match route {
                     JigEditRoute::Landing => format!("/jig/edit/{}", jig_id.0.to_string()),
                     JigEditRoute::Module(module_id) => format!(
