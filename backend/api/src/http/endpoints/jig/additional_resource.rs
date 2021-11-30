@@ -6,7 +6,7 @@ use shared::{
     api::{endpoints::jig::additional_resource, ApiEndpoint},
     domain::{
         jig::{
-            additional_resource::{AdditionalResourceId, AdditionalResourceResponse},
+            additional_resource::{AdditionalResource, AdditionalResourceId},
             DraftOrLive, JigId,
         },
         CreateResponse,
@@ -91,7 +91,8 @@ async fn get_draft(
     )
     .await?;
 
-    Ok(Json(AdditionalResourceResponse {
+    Ok(Json(AdditionalResource {
+        id: additional_resource_id,
         display_name,
         resource_type_id,
         resource_content,
@@ -114,7 +115,8 @@ async fn get_live(
     )
     .await?;
 
-    Ok(Json(AdditionalResourceResponse {
+    Ok(Json(AdditionalResource {
+        id: additional_resource_id,
         display_name,
         resource_type_id,
         resource_content,

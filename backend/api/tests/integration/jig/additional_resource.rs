@@ -6,6 +6,7 @@ use http::StatusCode;
 use shared::domain::{
     image::ImageId,
     jig::additional_resource::{AdditionalResourceCreateRequest, ResourceContent},
+    meta::ResourceTypeId,
 };
 use std::str::FromStr;
 use uuid::Uuid;
@@ -26,7 +27,7 @@ async fn create() -> anyhow::Result<()> {
         .login()
         .json(&AdditionalResourceCreateRequest {
             display_name: "testing".to_string(),
-            resource_type_id: Uuid::from_str("a939f454-519e-11ec-ab46-2fa68cd3a8c7").unwrap(),
+            resource_type_id: ResourceTypeId(Uuid::from_str("a939f454-519e-11ec-ab46-2fa68cd3a8c7").unwrap()),
             resource_content: ResourceContent::ImageId(ImageId(Uuid::from_str("a974ce0e-ef6e-11eb-ad5a-bf4be1413928").unwrap()))
         })
         .send()

@@ -10,7 +10,7 @@ use shared::domain::{
         JigData, JigFocus, JigId, JigPlayerSettings, JigResponse, LiteModule, ModuleKind,
         PrivacyLevel, TextDirection,
     },
-    meta::{AdditionalResourceId, AffiliationId, AgeRangeId, GoalId},
+    meta::{AffiliationId, AgeRangeId, GoalId, ResourceTypeId},
     user::UserScope,
 };
 use sqlx::{PgConnection, PgPool};
@@ -264,7 +264,7 @@ select cte.jig_id                                          as "jig_id: JigId",
              where jig_data_id = cte.draft_or_live_id)     as "age_ranges!: Vec<(AgeRangeId,)>",
        array(select row (resource_type_id)
              from jig_data_additional_resource
-             where jig_data_id = cte.draft_or_live_id)     as "additional_resources!: Vec<(AdditionalResourceId,)>"
+             where jig_data_id = cte.draft_or_live_id)     as "additional_resources!: Vec<(ResourceTypeId,)>"
 from jig_data
          inner join cte on cte.draft_or_live_id = jig_data.id
 "#,
@@ -395,7 +395,7 @@ select id,
              where jig_data_id = jig_data.id)     as "age_ranges!: Vec<(AgeRangeId,)>",
        array(select row (jig_data_additional_resource.id)
              from jig_data_additional_resource
-             where jig_data_id = jig_data.id)     as "additional_resources!: Vec<(AdditionalResourceId,)>",
+             where jig_data_id = jig_data.id)     as "additional_resources!: Vec<(ResourceTypeId,)>",
        privacy_level                                       as "privacy_level!: PrivacyLevel",
        jig_focus                                           as "jig_focus!: JigFocus"
 from jig_data
@@ -490,7 +490,7 @@ pub async fn update_draft(
     categories: Option<&[CategoryId]>,
     age_ranges: Option<&[AgeRangeId]>,
     affiliations: Option<&[AffiliationId]>,
-    additional_resources: Option<&[AdditionalResourceId]>,
+    additional_resources: Option<&[ResourceTypeId]>,
     language: Option<&str>,
     description: Option<&str>,
     default_player_settings: Option<&JigPlayerSettings>,
@@ -773,7 +773,7 @@ select jig.id                                              as "jig_id: JigId",
              where jig_data_id = jig_data.id)              as "age_ranges!: Vec<(AgeRangeId,)>",
        array(select row (resource_type_id)
              from jig_data_additional_resource
-             where jig_data_id = jig_data.id)              as "additional_resources!: Vec<(AdditionalResourceId,)>"
+             where jig_data_id = jig_data.id)              as "additional_resources!: Vec<(ResourceTypeId,)>"
 from jig_data
          inner join jig on jig_data.id = jig.draft_id
 where (author_id is not distinct from $2 or $2 is null)

@@ -15,9 +15,7 @@ use shared::{
         category::CategoryId,
         image::{ImageId, ImageKind},
         jig::{JigId, PrivacyLevel},
-        meta::{
-            AdditionalResourceId, AffiliationId, AgeRangeId, GoalId, ImageStyleId, ImageTagIndex,
-        },
+        meta::{AffiliationId, AgeRangeId, GoalId, ImageStyleId, ImageTagIndex, ResourceTypeId},
     },
     media::MediaGroupKind,
 };
@@ -764,7 +762,7 @@ impl Client {
         language: Option<String>,
         age_ranges: &[AgeRangeId],
         affiliations: &[AffiliationId],
-        additional_resources: &[AdditionalResourceId],
+        additional_resources: &[ResourceTypeId],
         categories: &[CategoryId],
         goals: &[GoalId],
         author: Option<Uuid>,

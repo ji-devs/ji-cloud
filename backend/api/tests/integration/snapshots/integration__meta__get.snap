@@ -60,7 +60,7 @@ expression: body
       "updated_at": null
     }
   ],
-  "additional_resources": [
+  "resource_types": [
     {
       "id": "a91aca34-519e-11ec-ab46-175eaaf1ff23",
       "display_name": "Coloring",

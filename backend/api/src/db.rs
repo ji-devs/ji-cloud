@@ -13,8 +13,8 @@ use core::config::DB_POOL_CONNECTIONS;
 use shared::domain::{
     category::CategoryId,
     meta::{
-        AdditionalResourceId, AffiliationId, AgeRangeId, AnimationStyleId, GoalId, ImageStyleId,
-        ImageTagIndex, SubjectId,
+        AffiliationId, AgeRangeId, AnimationStyleId, GoalId, ImageStyleId, ImageTagIndex,
+        ResourceTypeId, SubjectId,
     },
 };
 use sqlx::{
@@ -60,8 +60,8 @@ impl Metadata for AffiliationId {
     const TABLE: &'static str = "affiliation";
 }
 
-impl Metadata for AdditionalResourceId {
-    const TABLE: &'static str = "additional_resource";
+impl Metadata for ResourceTypeId {
+    const TABLE: &'static str = "resource_type";
 }
 
 impl Metadata for ImageStyleId {
