@@ -11,8 +11,6 @@ use utils::ages::AgeRangeVecExt;
 use utils::jig::published_at_string;
 use utils::prelude::*;
 
-pub struct GalleryDom {}
-
 const STR_DELETE: &'static str = "Delete";
 const STR_DUPLICATE: &'static str = "Duplicate";
 const STR_SEARCH: &'static str = "Search";
@@ -20,7 +18,7 @@ const STR_SHOW_JIG_ALL: &'static str = "Show all my JIGs";
 const STR_SHOW_JIG_PUBLISHED: &'static str = "Show published JIGs";
 const STR_SHOW_JIG_DRAFT: &'static str = "Show drafts";
 
-impl GalleryDom {
+impl JigGallery {
     fn visible_jigs_option_string(visible_jigs: &VisibleJigs) -> &'static str {
         match visible_jigs {
             VisibleJigs::All => STR_SHOW_JIG_ALL,
@@ -29,10 +27,10 @@ impl GalleryDom {
         }
     }
 
-    pub fn render() -> Dom {
-        let state = Rc::new(State::new());
+    pub fn render(self: Rc<Self>) -> Dom {
+        let state = self;
 
-        actions::load_data(state.clone());
+        state.load_data();
 
         html!("empty-fragment", {
             .child(page_header::dom::render(Rc::new(page_header::state::State::new()), None, Some(PageLinks::Create)))
@@ -41,7 +39,7 @@ impl GalleryDom {
                     .child(html!("jig-gallery-create", {
                         .property("slot", "create-jig")
                         .event(clone!(state => move |_: events::Click| {
-                            actions::create_jig(state.clone());
+                            state.create_jig();
                         }))
                     }))
                     .children(TEMPLATE_KINDS.iter().map(|kind| {
@@ -56,9 +54,9 @@ impl GalleryDom {
                         .event(clone!(state => move |evt: events::CustomSearch| {
                             let value = evt.query();
                             if !value.is_empty() {
-                                actions::search_jigs(state.clone(), value);
+                                state.search_jigs(value);
                             } else {
-                                actions::load_jigs_regular(state.clone());
+                                state.load_jigs_regular();
                             }
                         }))
                     }))
@@ -79,7 +77,7 @@ impl GalleryDom {
                                 .event(clone!(state, option => move |evt: events::CustomSelectedChange| {
                                     if evt.selected() {
                                         state.visible_jigs.set(option.clone());
-                                        actions::load_jigs_regular(state.clone());
+                                        state.load_jigs_regular();
                                     }
                                 }))
                             })
@@ -123,7 +121,7 @@ impl GalleryDom {
                                     .property("icon", "duplicate")
                                     .text(STR_DUPLICATE)
                                     .event(clone!(state, jig => move |_: events::Click| {
-                                        actions::copy_jig(state.clone(), &jig.id);
+                                        state.copy_jig(&jig.id);
                                     }))
                                 }),
                                 html!("menu-line", {
@@ -131,7 +129,7 @@ impl GalleryDom {
                                     .property("icon", "delete")
                                     .text(STR_DELETE)
                                     .event(clone!(state, jig => move |_: events::Click| {
-                                        actions::delete_jig(state.clone(), jig.id);
+                                        state.delete_jig(jig.id);
                                     }))
                                 }),
                             ])
