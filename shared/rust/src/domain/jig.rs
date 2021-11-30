@@ -16,7 +16,7 @@ use uuid::Uuid;
 
 use super::{
     category::CategoryId,
-    meta::{AffiliationId, AgeRangeId, GoalId},
+    meta::{AffiliationId, AgeRangeId, GoalId, ResourceTypeId},
 };
 use crate::domain::jig::{additional_resource::AdditionalResourceId, module::body::ThemeId};
 
@@ -617,7 +617,7 @@ pub struct JigSearchQuery {
     #[serde(serialize_with = "super::csv_encode_uuids")]
     #[serde(deserialize_with = "super::from_csv")]
     #[serde(skip_serializing_if = "Vec::is_empty")]
-    pub additional_resources: Vec<AdditionalResourceId>,
+    pub additional_resources: Vec<ResourceTypeId>,
 
     /// Optionally filter by `categories`
     #[serde(default)]
