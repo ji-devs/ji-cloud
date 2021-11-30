@@ -133,6 +133,7 @@ async fn update_draft(
         req.audio_background.as_ref(),
         req.audio_effects.as_ref(),
         req.privacy_level,
+        req.jig_focus,
     )
     .await?;
 

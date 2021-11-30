@@ -243,6 +243,38 @@ pub struct JigData {
 
     /// The privacy level on the JIG.
     pub privacy_level: PrivacyLevel,
+
+    /// Primary material for jig
+    pub jig_focus: JigFocus,
+}
+
+/// Access level for the jig.
+#[derive(Serialize, Deserialize, Copy, Clone, Eq, PartialEq, Debug)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[serde(rename_all = "camelCase")]
+#[repr(i16)]
+pub enum JigFocus {
+    /// Jig focuses on modules
+    Modules = 0,
+
+    /// Jig focuses on Resources
+    Resources = 1,
+}
+
+impl JigFocus {
+    /// Represents the privacy level as a `str`. Relevant for Algolia tag filtering.
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Self::Modules => "modules",
+            Self::Resources => "resources",
+        }
+    }
+}
+
+impl Default for JigFocus {
+    fn default() -> Self {
+        Self::Modules
+    }
 }
 
 /// Audio for background music
@@ -500,6 +532,11 @@ pub struct JigUpdateDraftDataRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub privacy_level: Option<PrivacyLevel>,
+
+    /// Privacy level for the jig.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
+    pub jig_focus: Option<JigFocus>,
 }
 
 /// Query for [`Browse`](crate::api::endpoints::jig::Browse).
