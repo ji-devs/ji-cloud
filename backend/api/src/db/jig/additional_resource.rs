@@ -7,11 +7,10 @@ use shared::domain::{
         additional_resource::{AdditionalResourceId, ResourceContent},
         DraftOrLive, JigId,
     },
+    meta::ResourceTypeId,
 };
 use sqlx::PgPool;
 use url::Url;
-use uuid::Uuid;
-
 #[derive(Deserialize, Serialize, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
@@ -24,7 +23,7 @@ pub async fn create(
     pool: &PgPool,
     jig_id: JigId,
     display_name: String,
-    resource_type_id: Uuid,
+    resource_type_id: ResourceTypeId,
     resource_content: ResourceContent,
 ) -> anyhow::Result<AdditionalResourceId> {
     // Checks if Audio and Image IDs exists
@@ -37,7 +36,7 @@ values ((select draft_id from jig where id = $1), $2, $3, $4)
 returning id as "id!: AdditionalResourceId"
         "#,
         jig_id.0,
-        resource_type_id,
+        resource_type_id.0,
         resource,
         display_name
     )
@@ -52,7 +51,7 @@ pub async fn get(
     jig_id: JigId,
     draft_or_live: DraftOrLive,
     id: AdditionalResourceId,
-) -> anyhow::Result<(String, Uuid, ResourceContent)> {
+) -> anyhow::Result<(String, ResourceTypeId, ResourceContent)> {
     let mut txn = pool.begin().await?;
 
     let (draft_id, live_id) = super::get_draft_and_live_ids(&mut txn, jig_id)
@@ -67,7 +66,7 @@ pub async fn get(
     let res = sqlx::query!(
         r#"
 select display_name         as "display_name!",
-       resource_type_id     as "resource_type_id!",
+       resource_type_id     as "resource_type_id!: ResourceTypeId",
        resource_content    as "resource_content!"
 from jig_data_additional_resource "jdar"
 where jig_data_id = $1
@@ -92,7 +91,7 @@ pub async fn update(
     draft_or_live: DraftOrLive,
     id: AdditionalResourceId,
     display_name: Option<String>,
-    resource_type_id: Option<Uuid>,
+    resource_type_id: Option<ResourceTypeId>,
     resource_content: Option<ResourceContent>,
 ) -> anyhow::Result<()> {
     let mut txn = pool.begin().await?;
@@ -130,7 +129,7 @@ set resource_type_id = coalesce($2, resource_type_id)
 where id = $1 and $2 is distinct from resource_type_id
             "#,
             id.0,
-            resource_type_id
+            resource_type_id.0
         )
         .execute(&mut txn)
         .await?;

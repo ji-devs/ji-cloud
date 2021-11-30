@@ -4,7 +4,10 @@ expression: body
 
 ---
 {
+  "id": "286b8390-1dd9-11ec-8426-fbeb80c504d9",
   "displayName": "link test",
   "resourceTypeId": "a91aca34-519e-11ec-ab46-175eaaf1ff23",
-  "link": "url://url.url.url/url/s"
+  "resourceContent": {
+    "link": "url://url.url.url/url/s"
+  }
 }

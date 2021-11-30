@@ -18,7 +18,7 @@ use super::{
     category::CategoryId,
     meta::{AffiliationId, AgeRangeId, GoalId, ResourceTypeId},
 };
-use crate::domain::jig::{additional_resource::AdditionalResourceId, module::body::ThemeId};
+use crate::domain::jig::module::body::ThemeId;
 
 /// Wrapper type around [`Uuid`], represents the ID of a JIG.
 #[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
@@ -221,7 +221,7 @@ pub struct JigData {
     pub categories: Vec<CategoryId>,
 
     /// Additional resources of this JIG.
-    pub additional_resources: Vec<AdditionalResourceId>,
+    pub additional_resources: Vec<ResourceTypeId>,
 
     /// Description of the jig.
     pub description: String,
@@ -500,7 +500,7 @@ pub struct JigUpdateDraftDataRequest {
     /// Additional resources of this JIG.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
-    pub additional_resources: Option<Vec<AdditionalResourceId>>,
+    pub additional_resources: Option<Vec<ResourceTypeId>>,
 
     /// Description of the jig.
     #[serde(skip_serializing_if = "Option::is_none")]
