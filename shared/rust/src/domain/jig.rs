@@ -543,7 +543,7 @@ pub struct JigUpdateDraftDataRequest {
     #[serde(default)]
     pub privacy_level: Option<PrivacyLevel>,
 
-    /// Privacy level for the jig.
+    /// Optionally jig_focus by resource or modules.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub jig_focus: Option<JigFocus>,
@@ -567,6 +567,11 @@ pub struct JigBrowseQuery {
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub page: Option<u32>,
+
+    /// Optionally jig_focus by resource or modules.
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub jig_focus: Option<JigFocus>,
 }
 
 /// Response for [`Browse`](crate::api::endpoints::jig::Browse).
@@ -657,6 +662,11 @@ pub struct JigSearchQuery {
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub author_name: Option<String>,
+
+    /// Optionally jig_focus by resource or modules
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub jig_focus: Option<JigFocus>,
 }
 
 /// Response for successful search.

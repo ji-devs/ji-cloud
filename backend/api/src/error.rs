@@ -35,6 +35,7 @@ pub type BasicError = ApiError<EmptyError>;
 pub enum Auth {
     InternalServerError(anyhow::Error),
     Forbidden,
+    BadRequest,
 }
 
 impl<T: Into<anyhow::Error>> From<T> for Auth {
@@ -48,6 +49,10 @@ impl Into<actix_web::Error> for Auth {
         match self {
             Self::Forbidden => BasicError::new(http::StatusCode::FORBIDDEN).into(),
             Self::InternalServerError(e) => ise(e),
+            Self::BadRequest => {
+                BasicError::with_message(http::StatusCode::BAD_REQUEST, "Invalid Input".to_owned())
+                    .into()
+            }
         }
     }
 }
@@ -68,6 +73,7 @@ pub enum Delete {
     Forbidden,
     ResourceNotFound,
     InternalServerError(anyhow::Error),
+    BadRequest,
 }
 
 impl<T: Into<anyhow::Error>> From<T> for Delete {
@@ -81,6 +87,7 @@ impl From<Auth> for Delete {
         match e {
             Auth::InternalServerError(e) => Self::InternalServerError(e),
             Auth::Forbidden => Self::Forbidden,
+            Auth::BadRequest => Self::BadRequest,
         }
     }
 }
@@ -92,6 +99,7 @@ impl Into<actix_web::Error> for Delete {
             Self::Forbidden => BasicError::new(http::StatusCode::FORBIDDEN).into(),
             Self::ResourceNotFound => BasicError::new(http::StatusCode::NOT_FOUND).into(),
             Self::InternalServerError(e) => ise(e),
+            Self::BadRequest => BasicError::new(http::StatusCode::BAD_REQUEST).into(),
         }
     }
 }
@@ -226,6 +234,7 @@ pub enum NotFound {
     ResourceNotFound,
     Forbidden,
     InternalServerError(anyhow::Error),
+    BadRequest,
 }
 
 impl From<Auth> for NotFound {
@@ -233,6 +242,7 @@ impl From<Auth> for NotFound {
         match e {
             Auth::InternalServerError(e) => Self::InternalServerError(e),
             Auth::Forbidden => Self::Forbidden,
+            Auth::BadRequest => Self::BadRequest,
         }
     }
 }
@@ -253,6 +263,7 @@ impl Into<actix_web::Error> for NotFound {
             .into(),
             Self::Forbidden => BasicError::new(http::StatusCode::FORBIDDEN).into(),
             Self::InternalServerError(e) => ise(e),
+            Self::BadRequest => BasicError::new(http::StatusCode::BAD_REQUEST).into(),
         }
     }
 }
@@ -356,6 +367,7 @@ pub enum CreateWithMetadata {
     InternalServerError(anyhow::Error),
     Forbidden,
     MissingMetadata(MetadataNotFound),
+    BadRequest,
 }
 
 impl From<Auth> for CreateWithMetadata {
@@ -363,6 +375,7 @@ impl From<Auth> for CreateWithMetadata {
         match e {
             Auth::InternalServerError(e) => Self::InternalServerError(e),
             Auth::Forbidden => Self::Forbidden,
+            Auth::BadRequest => Self::BadRequest,
         }
     }
 }
@@ -384,6 +397,7 @@ impl Into<actix_web::Error> for CreateWithMetadata {
             .into(),
             Self::Forbidden => BasicError::new(http::StatusCode::FORBIDDEN).into(),
             Self::InternalServerError(e) => ise(e),
+            Self::BadRequest => BasicError::new(http::StatusCode::BAD_REQUEST).into(),
         }
     }
 }
@@ -393,6 +407,7 @@ pub enum UpdateWithMetadata {
     InternalServerError(anyhow::Error),
     MissingMetadata(MetadataNotFound),
     Forbidden,
+    BadRequest,
 }
 
 impl From<Auth> for UpdateWithMetadata {
@@ -400,6 +415,7 @@ impl From<Auth> for UpdateWithMetadata {
         match e {
             Auth::InternalServerError(e) => Self::InternalServerError(e),
             Auth::Forbidden => Self::Forbidden,
+            Auth::BadRequest => Self::BadRequest,
         }
     }
 }
@@ -429,6 +445,8 @@ impl Into<actix_web::Error> for UpdateWithMetadata {
             Self::Forbidden => BasicError::new(http::StatusCode::FORBIDDEN).into(),
 
             Self::InternalServerError(e) => ise(e),
+
+            Self::BadRequest => BasicError::new(http::StatusCode::BAD_REQUEST).into(),
         }
     }
 }
@@ -554,6 +572,7 @@ pub enum JigCloneDraft {
     Conflict,
     Forbidden,
     InternalServerError(anyhow::Error),
+    BadRequest,
 }
 
 impl<T: Into<anyhow::Error>> From<T> for JigCloneDraft {
@@ -567,6 +586,7 @@ impl From<Auth> for JigCloneDraft {
         match e {
             Auth::InternalServerError(e) => Self::InternalServerError(e),
             Auth::Forbidden => Self::Forbidden,
+            Auth::BadRequest => Self::BadRequest,
         }
     }
 }
@@ -595,6 +615,8 @@ impl Into<actix_web::Error> for JigCloneDraft {
             Self::Forbidden => BasicError::new(http::StatusCode::FORBIDDEN).into(),
 
             Self::InternalServerError(e) => ise(e),
+
+            Self::BadRequest => BasicError::new(http::StatusCode::BAD_REQUEST).into(),
         }
     }
 }
@@ -633,6 +655,7 @@ pub enum JigCode {
     Conflict,
     AllCodesUsed,
     Forbidden,
+    BadRequest,
 }
 
 impl<T: Into<anyhow::Error>> From<T> for JigCode {
@@ -669,6 +692,8 @@ impl Into<actix_web::Error> for JigCode {
                 "User does not have permissions for this jig".to_owned(),
             )
             .into(),
+
+            Self::BadRequest => BasicError::new(http::StatusCode::BAD_REQUEST).into(),
         }
     }
 }
@@ -678,6 +703,7 @@ impl From<Auth> for JigCode {
         match err {
             Auth::InternalServerError(e) => Self::InternalServerError(e),
             Auth::Forbidden => Self::Forbidden,
+            Auth::BadRequest => Self::BadRequest,
         }
     }
 }
