@@ -2,7 +2,6 @@
 
 use crate::domain::{audio::AudioId, image::ImageId, meta::ResourceTypeId};
 use serde::{Deserialize, Serialize};
-use std::convert::TryFrom;
 use uuid::Uuid;
 
 /// Wrapper type around [`Uuid`](Uuid), represents the ID of an additional resource.
@@ -68,37 +67,6 @@ pub struct AdditionalResourceUpdateRequest {
     pub resource_content: Option<ResourceContent>,
 }
 
-/// Type of additional resource
-#[derive(Deserialize, Serialize, PartialEq, Eq, Debug, Clone, Copy)]
-#[non_exhaustive]
-#[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[repr(i16)]
-#[serde(rename_all = "camelCase")]
-pub enum ResourceType {
-    /// Additional resource type: activity
-    Activity = 0,
-    /// Additional resource type: coloring
-    Coloring = 1,
-    /// Additional resource type: curriculum
-    Curriculum = 2,
-    /// Additional resource type: craft
-    Craft = 3,
-    /// Additional resource type: ebook
-    EBook = 4,
-    /// Additional resource type: flashcards
-    Flashcards = 5,
-    /// Additional resource type: lessonPlan
-    LessonPlan = 6,
-    /// Additional resource type: podcast
-    Podcast = 7,
-    /// Additional resource type: websiteLink
-    WebsiteLink = 8,
-    /// Additional resource type: worksheet
-    Worksheet = 9,
-    /// Additional resource type: video
-    Video = 10,
-}
-
 /// Value of additional resource
 #[derive(Deserialize, Serialize, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -109,27 +77,6 @@ pub enum ResourceContent {
     AudioId(AudioId),
     /// Additional resource kind: link
     Link(url::Url),
-}
-
-impl TryFrom<i16> for ResourceType {
-    type Error = anyhow::Error;
-
-    fn try_from(i: i16) -> Result<Self, Self::Error> {
-        match i {
-            0 => Ok(Self::Activity),
-            1 => Ok(Self::Coloring),
-            2 => Ok(Self::Curriculum),
-            3 => Ok(Self::Craft),
-            4 => Ok(Self::EBook),
-            5 => Ok(Self::Flashcards),
-            6 => Ok(Self::LessonPlan),
-            7 => Ok(Self::Podcast),
-            8 => Ok(Self::WebsiteLink),
-            9 => Ok(Self::Worksheet),
-            10 => Ok(Self::Video),
-            _ => anyhow::bail!("Resource kind {} is invalid", i),
-        }
-    }
 }
 
 into_uuid![AdditionalResourceId];

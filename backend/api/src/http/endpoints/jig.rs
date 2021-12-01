@@ -186,9 +186,16 @@ async fn browse(
 
     db::jig::authz_list(&*db, claims.0.user_id, author_id).await?;
 
-    let jigs = db::jig::browse(db.as_ref(), author_id, query.page.unwrap_or(0) as i32).await?;
+    let jigs = db::jig::browse(
+        db.as_ref(),
+        author_id,
+        query.jig_focus,
+        query.page.unwrap_or(0) as i32,
+    )
+    .await?;
 
-    let total_count = db::jig::filtered_count(db.as_ref(), None, author_id).await?;
+    let total_count =
+        db::jig::filtered_count(db.as_ref(), None, author_id, query.jig_focus).await?;
 
     let pages = (total_count / 20 + (total_count % 20 != 0) as u64) as u32;
 
@@ -278,6 +285,7 @@ async fn search(
             &query.goals,
             query.author,
             query.author_name,
+            query.jig_focus,
         )
         .await?
         .ok_or_else(|| error::Service::DisabledService(ServiceKind::Algolia))?;
