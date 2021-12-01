@@ -40,6 +40,31 @@ impl Puzzle {
                     } 
                 })
             })))
+
+            .event(clone!(state => move |evt:events::MouseDown| {
+                match state.init_phase.get_cloned() {
+                    InitPhase::Playing(game) => {
+                        game.start_drag(evt.x(), evt.y());
+                    },
+                    _ => {}
+                }
+            }))
+            .global_event(clone!(state => move |evt:events::MouseMove| {
+                match state.init_phase.get_cloned() {
+                    InitPhase::Playing(game) => {
+                        game.try_move_drag(evt.x(), evt.y());
+                    },
+                    _ => {}
+                }
+            }))
+            .global_event(clone!(state => move |evt:events::MouseUp| {
+                match state.init_phase.get_cloned() {
+                    InitPhase::Playing(game) => {
+                        game.try_end_drag(evt.x(), evt.y());
+                    },
+                    _ => {}
+                }
+            }))
         })
     }
 }

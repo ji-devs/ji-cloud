@@ -1,6 +1,6 @@
 use crate::base::state::Base;
-use std::rc::Rc;
-use std::cell::RefCell;
+use std::{rc::Rc, sync::atomic::AtomicUsize};
+use std::cell::{RefCell, Cell};
 use dominator::clone;
 use shared::domain::jig::module::body::legacy::activity::{Puzzle as RawPuzzle, PuzzleItem as RawPuzzleItem};
 use web_sys::HtmlCanvasElement;
@@ -8,9 +8,10 @@ use futures_signals::{
     map_ref,
     signal::{Mutable, Signal, SignalExt}
 };
-use utils::{prelude::*, image_effects::ImageEffect, resize::{resize_info_signal, ResizeInfo}};
+use utils::{prelude::*,drag::Drag, image_effects::ImageEffect, resize::{resize_info_signal, ResizeInfo}, math::mat4::Matrix4};
 use awsm_web::canvas::get_2d_context;
 use web_sys::CanvasRenderingContext2d;
+use wasm_bindgen::JsCast;
 
 pub struct Puzzle {
     pub base: Rc<Base>,
@@ -24,11 +25,18 @@ pub struct PuzzleGame {
     pub effects: ImageEffect,
     pub cutouts_canvas: HtmlCanvasElement,
     pub cutouts_ctx: CanvasRenderingContext2d,
-    pub items: Vec<Rc<PuzzleItem>> 
+    pub click_canvas: HtmlCanvasElement,
+    pub click_ctx: CanvasRenderingContext2d,
+    pub items: Vec<Rc<PuzzleItem>>,
+    pub drag_index: Cell<Option<usize>> 
 }
 
 pub struct PuzzleItem {
-    pub raw: RawPuzzleItem
+    pub raw: RawPuzzleItem,
+    pub completed: Cell<bool>,
+    pub orig_transform_matrix: Matrix4, 
+    pub curr_transform_matrix: RefCell<Matrix4>,
+    pub drag: RefCell<Option<Rc<Drag>>>,
 }
 
 #[derive(Clone)]
@@ -42,7 +50,7 @@ impl Puzzle {
         let _self = Rc::new(Self { 
             base,
             raw,
-            init_phase: Mutable::new(InitPhase::Loading)
+            init_phase: Mutable::new(InitPhase::Loading),
         });
 
         _self.base.insert_start_listener(clone!(_self => move || {
@@ -69,6 +77,17 @@ impl PuzzleGame {
 
         let cutouts_ctx = get_2d_context(&cutouts_canvas, None).unwrap_ji();
 
+
+        let click_canvas: HtmlCanvasElement = web_sys::window()
+            .unwrap_ji()
+            .document()
+            .unwrap_ji()
+            .create_element("canvas")
+            .unwrap_ji()
+            .unchecked_into();
+
+        let click_ctx = get_2d_context(&click_canvas, None).unwrap_ji();
+
         let items = parent.raw.items
             .iter()
             .map(|raw| {
@@ -82,7 +101,10 @@ impl PuzzleGame {
             effects,
             cutouts_canvas,
             cutouts_ctx,
-            items
+            click_canvas,
+            click_ctx,
+            items,
+            drag_index: Cell::new(None)
         });
 
         _self
@@ -92,8 +114,17 @@ impl PuzzleGame {
 
 impl PuzzleItem{
     pub fn new(effects: &ImageEffect, raw: RawPuzzleItem) -> Rc<Self> {
+        let orig_transform_matrix = match raw.hotspot.transform_matrix {
+            None => Matrix4::identity(),
+            Some(values) => Matrix4::new_direct(values)
+        };
+
         Rc::new(Self {
-            raw
+            raw,
+            completed: Cell::new(false),
+            orig_transform_matrix: orig_transform_matrix.clone(),
+            curr_transform_matrix: RefCell::new(orig_transform_matrix),
+            drag: RefCell::new(None),
         })
     }
 }
