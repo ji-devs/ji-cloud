@@ -39,8 +39,8 @@ struct BatchJig<'a> {
     age_range_names: &'a [String],
     affiliations: &'a [Uuid],
     affiliation_names: &'a [String],
-    additional_resources: &'a [Uuid],
-    additional_resource_names: &'a [String],
+    resource_types: &'a [Uuid],
+    resource_type_names: &'a [String],
     goals: &'a [Uuid],
     goal_names: &'a [String],
     categories: &'a [Uuid],
@@ -262,11 +262,11 @@ select jig.id,
               where jig_data_affiliation.jig_data_id = jig_data.id))                                                as "affiliation_names!",
         array((select resource_type_id
                 from jig_data_additional_resource
-                where jig_data_id = jig_data.id))                                                                     as "additional_resources!",
+                where jig_data_id = jig_data.id))                                                                     as "resource_types!",
         array((select resource_type.display_name
               from resource_type
                         inner join jig_data_additional_resource on resource_type.id = jig_data_additional_resource.resource_type_id
-             where jig_data_additional_resource.jig_data_id = jig_data.id))                                         as "additional_resource_names!",
+             where jig_data_additional_resource.jig_data_id = jig_data.id))                                         as "resource_type_names!",
        array((select age_range_id
               from jig_data_age_range
               where jig_data_id = jig_data.id))                                                                     as "age_ranges!",
@@ -320,8 +320,8 @@ limit 100 for no key update skip locked;
                 age_range_names: &row.age_range_names,
                 affiliations: &row.affiliations,
                 affiliation_names: &row.affiliation_names,
-                additional_resources: &row.additional_resources,
-                additional_resource_names: &row.additional_resource_names,
+                resource_types: &row.resource_types,
+                resource_type_names: &row.resource_type_names,
                 categories: &row.categories,
                 category_names: &row.category_names,
                 author: row.author,
@@ -766,7 +766,7 @@ impl Client {
         language: Option<String>,
         age_ranges: &[AgeRangeId],
         affiliations: &[AffiliationId],
-        additional_resources: &[ResourceTypeId],
+        resource_types: &[ResourceTypeId],
         categories: &[CategoryId],
         goals: &[GoalId],
         author: Option<Uuid>,
@@ -826,11 +826,7 @@ impl Client {
 
         filters_for_ids_or(&mut and_filters.filters, "age_ranges", age_ranges);
         filters_for_ids_or(&mut and_filters.filters, "affiliations", affiliations);
-        filters_for_ids_or(
-            &mut and_filters.filters,
-            "additional_resources",
-            additional_resources,
-        );
+        filters_for_ids_or(&mut and_filters.filters, "resource_types", resource_types);
         filters_for_ids_or(&mut and_filters.filters, "categories", categories);
         filters_for_ids_or(&mut and_filters.filters, "goals", goals);
 
