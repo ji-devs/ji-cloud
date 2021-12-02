@@ -721,6 +721,7 @@ where id = $1
 pub async fn browse(
     pool: &sqlx::Pool<sqlx::Postgres>,
     author_id: Option<Uuid>,
+    jig_focus: Option<JigFocus>,
     page: i32,
 ) -> sqlx::Result<Vec<JigResponse>> {
     sqlx::query!( //language=SQL
@@ -733,7 +734,7 @@ select jig.id                                              as "jig_id: JigId",
        (select given_name || ' '::text || family_name
         from user_profile
         where user_profile.user_id = author_id)            as "author_name",
-       first_cover_assigned                                   as "first_cover_assigned!",
+       first_cover_assigned                                as "first_cover_assigned!",
        published_at,
        liked_count,
        (
@@ -776,12 +777,14 @@ select jig.id                                              as "jig_id: JigId",
              where jig_data_id = jig_data.id)              as "additional_resources!: Vec<(ResourceTypeId,)>"
 from jig_data
          inner join jig on jig_data.id = jig.draft_id
-where (author_id is not distinct from $2 or $2 is null)
+where (author_id = coalesce($2, author_id)) 
+and (jig_focus = coalesce($3, jig_focus))
 order by coalesce(updated_at, created_at) desc
 limit 20 offset 20 * $1
 "#,
         page,
         author_id,
+        jig_focus.map(|it| it as i16),
     )
         .fetch(pool)
         .map_ok(|row| JigResponse {
@@ -835,6 +838,7 @@ pub async fn filtered_count(
     db: &PgPool,
     privacy_level: Option<PrivacyLevel>,
     author_id: Option<Uuid>,
+    jig_focus: Option<JigFocus>,
 ) -> sqlx::Result<u64> {
     sqlx::query!(
         //language=SQL
@@ -842,11 +846,13 @@ pub async fn filtered_count(
 select count(*) as "count!: i64"
 from jig
 left join jig_data on jig.id = jig_data.id
-where(privacy_level is not distinct from $1 or $1 is null)
-    and (author_id is not distinct from $2 or $2 is null)
+where (privacy_level = coalesce($1, privacy_level))
+    and (author_id = coalesce($2, author_id))
+    and (jig_focus = coalesce($3, jig_focus))
 "#,
         privacy_level.map(|it| it as i16),
         author_id,
+        jig_focus.map(|it| it as i16)
     )
     .fetch_one(db)
     .await
@@ -860,7 +866,8 @@ pub async fn count(db: &PgPool, privacy_level: PrivacyLevel) -> sqlx::Result<u64
 select count(*) as "count!: i64"
 from jig_data
 inner join jig on jig.live_id = jig_data.id
-where privacy_level = $1 and published_at is not null
+where (privacy_level = coalesce($1, privacy_level))
+and (jig_focus = coalesce($1, jig_focus))
 "#,
         privacy_level as i16,
     )

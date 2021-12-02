@@ -35,6 +35,7 @@ pub type BasicError = ApiError<EmptyError>;
 pub enum Auth {
     InternalServerError(anyhow::Error),
     Forbidden,
+    ResourceNotFound(String),
 }
 
 impl<T: Into<anyhow::Error>> From<T> for Auth {
@@ -48,6 +49,9 @@ impl Into<actix_web::Error> for Auth {
         match self {
             Self::Forbidden => BasicError::new(http::StatusCode::FORBIDDEN).into(),
             Self::InternalServerError(e) => ise(e),
+            Self::ResourceNotFound(message) => {
+                BasicError::with_message(http::StatusCode::NOT_FOUND, message).into()
+            }
         }
     }
 }
@@ -81,6 +85,7 @@ impl From<Auth> for Delete {
         match e {
             Auth::InternalServerError(e) => Self::InternalServerError(e),
             Auth::Forbidden => Self::Forbidden,
+            Auth::ResourceNotFound(_) => Self::ResourceNotFound,
         }
     }
 }
@@ -233,6 +238,7 @@ impl From<Auth> for NotFound {
         match e {
             Auth::InternalServerError(e) => Self::InternalServerError(e),
             Auth::Forbidden => Self::Forbidden,
+            Auth::ResourceNotFound(_) => Self::ResourceNotFound,
         }
     }
 }
@@ -356,6 +362,7 @@ pub enum CreateWithMetadata {
     InternalServerError(anyhow::Error),
     Forbidden,
     MissingMetadata(MetadataNotFound),
+    ResourceNotFound,
 }
 
 impl From<Auth> for CreateWithMetadata {
@@ -363,6 +370,7 @@ impl From<Auth> for CreateWithMetadata {
         match e {
             Auth::InternalServerError(e) => Self::InternalServerError(e),
             Auth::Forbidden => Self::Forbidden,
+            Auth::ResourceNotFound(_) => Self::ResourceNotFound,
         }
     }
 }
@@ -384,6 +392,7 @@ impl Into<actix_web::Error> for CreateWithMetadata {
             .into(),
             Self::Forbidden => BasicError::new(http::StatusCode::FORBIDDEN).into(),
             Self::InternalServerError(e) => ise(e),
+            Self::ResourceNotFound => BasicError::new(http::StatusCode::BAD_REQUEST).into(),
         }
     }
 }
@@ -400,6 +409,7 @@ impl From<Auth> for UpdateWithMetadata {
         match e {
             Auth::InternalServerError(e) => Self::InternalServerError(e),
             Auth::Forbidden => Self::Forbidden,
+            Auth::ResourceNotFound(_) => Self::ResourceNotFound,
         }
     }
 }
@@ -567,6 +577,7 @@ impl From<Auth> for JigCloneDraft {
         match e {
             Auth::InternalServerError(e) => Self::InternalServerError(e),
             Auth::Forbidden => Self::Forbidden,
+            Auth::ResourceNotFound(_) => Self::ResourceNotFound,
         }
     }
 }
@@ -678,6 +689,7 @@ impl From<Auth> for JigCode {
         match err {
             Auth::InternalServerError(e) => Self::InternalServerError(e),
             Auth::Forbidden => Self::Forbidden,
+            Auth::ResourceNotFound(_) => Self::ResourceNotFound,
         }
     }
 }
