@@ -2,7 +2,7 @@
 
 cargo install:
   * systemfd
-  * watchexec
+  * watchexec-cli
   * cargo-make
   * cargo-watch
 
