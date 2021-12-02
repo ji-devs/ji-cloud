@@ -88,7 +88,7 @@ impl TracesEdit {
     }
 
     pub fn select_index(&self, index: usize) {
-        self.selected_index.set(Some(index));
+        self.selected_index.set_neq(Some(index));
     }
 
     pub fn deselect(&self) {

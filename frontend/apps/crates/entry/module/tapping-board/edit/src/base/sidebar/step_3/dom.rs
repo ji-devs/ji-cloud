@@ -12,6 +12,7 @@ use web_sys::HtmlTextAreaElement;
 
 pub fn render(state: Rc<Step3>) -> Dom {
     html!("empty-fragment", {
+        .style("display", "contents")
         .child_signal(
             //we need both an ability to change tabs, and to know if we should show tabs
             //so get a Mutable<Option<MenuTabKind>>

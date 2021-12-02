@@ -16,6 +16,8 @@ impl AudioInput {
     //Internal only - when the audio is changed via recording/uploading
     //Will call the callbacks
     pub(super) fn set_audio(&self, audio: Option<Audio>) {
+        let previous_mode = self.mode.get_cloned();
+
         //Change the mutable for affecting all DOM rendering stuff
         //with _eventual consistency_
         self.mode.set_neq(match audio.clone() {
@@ -31,8 +33,15 @@ impl AudioInput {
                 }
             }
             None => {
-                if let Some(on_delete) = &self.callbacks.on_delete {
-                    (on_delete)();
+                match previous_mode {
+                    AudioInputMode::Empty | AudioInputMode::Recording | AudioInputMode::Uploading => {
+                        // don't trigger on_delete since there wasn't any value here in the first place
+                    },
+                    AudioInputMode::Playing(_) | AudioInputMode::Stopped(_) => {
+                        if let Some(on_delete) = &self.callbacks.on_delete {
+                            (on_delete)();
+                        }
+                    },
                 }
             }
         }
