@@ -2,7 +2,7 @@
 
 ## Requirements
 
-- NodeJS v15
+- NodeJS v15 or greater
     - [NodeJS](https://nodejs.org/en/)
     - Or with [nvm](https://github.com/nvm-sh/nvm/blob/master/README.md#installing-and-updating)
         - `nvm install v15 && nvm alias default v15`
