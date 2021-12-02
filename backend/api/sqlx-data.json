@@ -4127,16 +4127,16 @@
         ]
       },
       "nullable": [
+        false,
         true,
         true,
+        null,
+        false,
+        false,
+        false,
         true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true
+        false,
+        null
       ]
     }
   },
@@ -4683,6 +4683,27 @@
         ]
       },
       "nullable": []
+    }
+  },
+  "c991e500948ede0aba8f2a8bd11f43aa266ae6c986cf0fa9ce1c48f64d4dde5c": {
+    "query": "\nselect exists(select 1 from jig_data_additional_resource \"jdar\" where jig_data_id = $1\n    and jdar.id = $2) as \"exists!\"\n    ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "exists!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        null
+      ]
     }
   },
   "cd49cef54182b43dd7943bcd51fd3c535f4a8ec0dae95cbc8ceb39f7f757fe02": {
