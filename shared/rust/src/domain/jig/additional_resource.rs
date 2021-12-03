@@ -10,7 +10,7 @@ use uuid::Uuid;
 #[cfg_attr(feature = "backend", sqlx(transparent))]
 pub struct AdditionalResourceId(pub Uuid);
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 /// Over-the-wire representation of a JIG additional resource.
 pub struct AdditionalResource {
@@ -68,7 +68,7 @@ pub struct AdditionalResourceUpdateRequest {
 }
 
 /// Value of additional resource
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub enum ResourceContent {
     /// Additional resource kind: image

@@ -1,12 +1,4 @@
-import {
-    LitElement,
-    html,
-    css,
-    customElement,
-    property,
-    unsafeCSS,
-    internalProperty,
-} from "lit-element";
+import { LitElement, html, css, customElement } from "lit-element";
 import "@elements/core/images/ui";
 
 const STR_HEADER_FIRST = "Settings and JIG info.";
@@ -58,7 +50,8 @@ export class _ extends LitElement {
                 }
                 .main {
                     display: grid;
-                    grid-template-columns: repeat(4, minmax(auto, 1fr));
+                    grid-auto-columns: minmax(auto, 1fr);
+                    grid-auto-flow: column;
                     column-gap: 48px;
                     justify-content: center;
                     align-items: start;
@@ -129,19 +122,8 @@ export class _ extends LitElement {
                     row-gap: 12px;
                 }
                 .additional-resources {
-                    border-radius: 12px;
-                    background-color: var(--light-blue-1);
-                    padding: 16px;
-                }
-                .additional-resources h4 {
-                    font-weight: 500;
-                    margin: 0;
-                    color: var(--main-blue);
-                }
-                .additional-resources-items {
-                    padding: 24px 0;
                     display: grid;
-                    grid-gap: 56px;
+                    row-gap: 16px;
                 }
                 .publish {
                     display: grid;
@@ -187,10 +169,7 @@ export class _ extends LitElement {
                                 </div>
                             </div>
                             <div class="column-4 additional-resources">
-                                <h4>Additional resources (Coming soon!)</h4>
-                                <div class="additional-resources-items">
-                                    <slot name="additional-resources"></slot>
-                                </div>
+                                <slot name="additional-resources"></slot>
                             </div>
                         </div>
                         <div class="publish">

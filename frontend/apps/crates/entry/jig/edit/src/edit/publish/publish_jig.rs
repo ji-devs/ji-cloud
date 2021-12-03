@@ -1,8 +1,11 @@
 use std::collections::HashSet;
 use std::iter::FromIterator;
+use std::rc::Rc;
 
 use futures_signals::signal::Mutable;
+use futures_signals::signal_vec::MutableVec;
 use shared::domain::jig::PrivacyLevel;
+use shared::domain::jig::additional_resource::AdditionalResourceId;
 use shared::domain::meta::AffiliationId;
 use shared::domain::{
     category::CategoryId,
@@ -22,7 +25,7 @@ pub struct PublishJig {
     pub language: Mutable<String>,
     pub categories: Mutable<HashSet<CategoryId>>,
     pub affiliations: Mutable<HashSet<AffiliationId>>,
-    // pub additional_resources: Mutable<HashSet<AdditionalResourceId>>,
+    pub additional_resources: Rc<MutableVec<AdditionalResourceId>>,
     pub privacy_level: Mutable<PrivacyLevel>,
 }
 
@@ -38,6 +41,7 @@ impl From<JigResponse> for PublishJig {
             language: Mutable::new(jig.jig_data.language),
             categories: Mutable::new(HashSet::from_iter(jig.jig_data.categories)),
             affiliations: Mutable::new(HashSet::from_iter(jig.jig_data.affiliations)),
+            additional_resources: Rc::new(MutableVec::new_with_values(jig.jig_data.additional_resources)),
             privacy_level: Mutable::new(jig.jig_data.privacy_level),
         }
     }
@@ -55,11 +59,13 @@ impl PublishJig {
             language: Mutable::new(jig.jig_data.language),
             categories: Mutable::new(HashSet::from_iter(jig.jig_data.categories)),
             affiliations: Mutable::new(HashSet::from_iter(jig.jig_data.affiliations)),
+            additional_resources: Rc::new(MutableVec::new_with_values(jig.jig_data.additional_resources)),
             privacy_level: Mutable::new(jig.jig_data.privacy_level),
         }
     }
 
     pub fn to_jig_update_request(&self) -> JigUpdateDraftDataRequest {
+        // don't include additional_resources here since they're handled in seperatly
         JigUpdateDraftDataRequest {
             display_name: Some(self.display_name.get_cloned()),
             description: Some(self.description.get_cloned()),

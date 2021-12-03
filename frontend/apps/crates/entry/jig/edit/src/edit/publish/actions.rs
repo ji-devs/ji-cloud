@@ -46,6 +46,7 @@ impl Publish {
             meta.goals,
             meta.age_ranges,
             meta.affiliations,
+            meta.resource_types,
             jig_edit_state,
         )
     }

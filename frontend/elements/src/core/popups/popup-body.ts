@@ -9,6 +9,7 @@ export class _ extends LitElement {
             css`
                 :host {
                     display: grid;
+                    background-color: #fff;
                 }
                 header {
                     padding: 16px;

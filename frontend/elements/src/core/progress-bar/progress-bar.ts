@@ -8,7 +8,8 @@ export class _ extends LitElement {
         return [
             css`
                 :host {
-                    height: 24px;
+                    --height: 24px;
+                    height: var(--height);
                 }
                 :host([color="blue"]) {
                     --color: var(--main-blue);
@@ -22,11 +23,11 @@ export class _ extends LitElement {
                     display: grid;
                     background-color: var(--background-color);
                     height: 100%;
-                    border-radius: 12px;
-                    grid-template-columns: 24px repeat(99, 1fr);
+                    border-radius: calc(var(--height) / 2);
+                    grid-template-columns: var(--height) repeat(99, 1fr);
                 }
                 .inner {
-                    border-radius: 12px;
+                    border-radius: calc(var(--height) / 2);
                     background-color: var(--color);
                 }
             `,

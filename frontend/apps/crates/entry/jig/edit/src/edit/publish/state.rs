@@ -2,10 +2,7 @@ use std::{collections::HashMap, rc::Rc};
 
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::Mutable;
-use shared::domain::{
-    category::{Category, CategoryId},
-    meta::{Affiliation, AgeRange, Goal},
-};
+use shared::domain::{category::{Category, CategoryId}, meta::{Affiliation, AgeRange, Goal, ResourceType}};
 use utils::languages::{Language, JIG_LANGUAGES};
 
 use super::super::state::State as JigEditState;
@@ -16,6 +13,7 @@ pub struct Publish {
     pub categories: Mutable<Vec<Category>>,
     // categories has label lookup since it's both more complex to lookup and used more then others (pills)
     pub category_label_lookup: Mutable<HashMap<CategoryId, String>>,
+    pub resource_types: Mutable<Vec<ResourceType>>,
     pub goals: Mutable<Vec<Goal>>,
     pub ages: Mutable<Vec<AgeRange>>,
     pub affiliations: Mutable<Vec<Affiliation>>,
@@ -35,6 +33,7 @@ impl Publish {
         goals: Vec<Goal>,
         ages: Vec<AgeRange>,
         affiliations: Vec<Affiliation>,
+        resource_types: Vec<ResourceType>,
         jig_edit_state: Rc<JigEditState>,
     ) -> Self {
         Self {
@@ -45,6 +44,7 @@ impl Publish {
             goals: Mutable::new(goals),
             ages: Mutable::new(ages),
             affiliations: Mutable::new(affiliations),
+            resource_types: Mutable::new(resource_types),
             submission_tried: Mutable::new(false),
             show_missing_info_popup: Mutable::new(false),
             languages: JIG_LANGUAGES.clone(),

@@ -9,7 +9,8 @@ use web_sys::HtmlElement;
 impl<T: ToString + Clone + 'static, P: ToString + 'static, L: ToString + 'static>
     SimpleSelect<T, P, L>
 {
-    pub fn render(state: Rc<Self>, slot: Option<&str>) -> Dom {
+    pub fn render(self: Rc<Self>, slot: Option<&str>) -> Dom {
+        let state = Rc::clone(&self);
         Self::_render_mixin(
             state,
             slot,

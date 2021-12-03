@@ -1,6 +1,6 @@
 import "@elements/entry/jig/edit/publish/publish";
-import "@elements/entry/jig/edit/publish/add-resource";
-import "@elements/entry/jig/edit/publish/add-resource-method";
+// import "@elements/entry/jig/edit/publish/add-resource";
+// import "@elements/entry/jig/edit/publish/add-resource-method";
 import "@elements/core/inputs/composed/switch";
 import "@elements/core/inputs/old/text";
 import "@elements/core/inputs/old/textarea";

@@ -65,7 +65,8 @@ impl<T: Default> ApiError<T> {
 impl<T> ApiError<T> {}
 
 /// An `extra` error type that represents "no extension"
-#[derive(Serialize, Deserialize, Debug, Default)]
+#[derive(Serialize, Deserialize, Debug, Default, thiserror::Error)]
+#[error("EmptyError")]
 pub struct EmptyError {}
 
 /// Metadata associated with this operation could not be found.

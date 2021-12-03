@@ -9,6 +9,9 @@ export class _ extends LitElement {
                     all: unset;
                     cursor: pointer;
                 }
+                :host([disabled]) {
+                    pointer-events: none;
+                }
             `,
         ];
     }
@@ -16,9 +19,12 @@ export class _ extends LitElement {
     @property()
     icon: string = "";
 
+    @property({ type: Boolean, reflect: true })
+    disabled: boolean = false;
+
     render() {
         return html`
-            <button>
+            <button ?disabled="${this.disabled}">
                 <fa-icon icon=${this.icon}></fa-icon>
             </button>
         `;

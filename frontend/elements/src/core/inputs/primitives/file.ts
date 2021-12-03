@@ -1,4 +1,4 @@
-import { LitElement, html, css, customElement, query } from "lit-element";
+import { LitElement, html, css, customElement, query, property } from "lit-element";
 
 @customElement("input-file")
 export class _ extends LitElement {
@@ -21,6 +21,9 @@ export class _ extends LitElement {
             `,
         ];
     }
+
+    @property()
+    accept: string = "";
 
     @query("input")
     input!: HTMLInputElement;
@@ -54,7 +57,7 @@ export class _ extends LitElement {
         return html`
             <label @drop="${this.onDrop}" @dragover="${this.onDragOver}">
                 <slot></slot>
-                <input type="file" @change="${this.onChange}" />
+                <input type="file" @change="${this.onChange}" accept=${this.accept} />
             </label>
         `;
     }

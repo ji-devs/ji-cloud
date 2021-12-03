@@ -1,14 +1,14 @@
 use dominator::{clone, html, with_node, Dom};
-use futures_signals::{
-    map_ref,
-    signal::{Mutable, SignalExt},
-};
+use futures_signals::{map_ref, signal::{Mutable, SignalExt}, signal_vec::SignalVecExt};
 use shared::domain::jig::PrivacyLevel;
 use utils::{
     events,
     routes::{JigEditRoute, JigRoute, Route},
 };
 use web_sys::{HtmlElement, HtmlInputElement, HtmlTextAreaElement};
+
+use super::additional_resource::AdditionalResourceComponent;
+use super::add_additional_resource::AddAdditionalResource;
 
 use super::super::state::State as JigEditState;
 use super::state::Publish;
@@ -31,7 +31,6 @@ pub mod category_pills;
 pub mod categories_select;
 pub mod goal;
 pub mod language;
-pub mod additional_resources;
 
 const STR_PUBLISH_JIG: &'static str = "Publish JIG";
 const STR_PUBLISH_LATER: &'static str = "I will publish later";
@@ -232,6 +231,12 @@ fn render_page(state: Rc<Publish>) -> Dom {
                 })
             }),
         ])
-        .children(Publish::render_additional_resources(state.clone()))
+        .children_signal_vec(state.jig.additional_resources.signal_vec_cloned().map(clone!(state => move |additional_resource_id| {
+            AdditionalResourceComponent::new(
+                additional_resource_id,
+                Rc::clone(&state)
+            ).render()
+        })))
+        .child(AddAdditionalResource::new(Rc::clone(&state)).render())
     })
 }

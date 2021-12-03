@@ -1,26 +1,22 @@
-/// TODO - use macros to keep it DRY, handle image uploading in the same basic functions
+/// TODO - use macros to keep it DRY, handle audio uploading in the same basic functions
 use crate::firebase;
 use awsm_web::loaders::helpers::AbortController;
 use shared::{
     api::{endpoints, ApiEndpoint},
-    domain::audio::{user::*, *},
+    domain::image::{user::*, *},
     error::*,
     media::MediaLibrary,
 };
-use thiserror::Error;
 use utils::prelude::*;
 
 use web_sys::File;
 
-const STR_AUDIO_IS_TOO_LARGE: &str = "Audio is too large, limit is 30MB";
+const STR_IMAGE_TOO_LARGE: &str = "Image is too large, limit is 30MB";
 
-#[derive(Debug, Error)]
+#[derive(Debug)]
 pub enum UploadError {
-    #[error("Aborted")]
     Aborted,
-    #[error("TooLarge")]
     TooLarge,
-    #[error("awsm_web error")]
     Other(awsm_web::errors::Error),
 }
 
@@ -55,25 +51,62 @@ impl UploadError {
  * Doesn't go back and delete previous steps
  */
 
-pub async fn upload_audio(
-    id: AudioId,
+pub async fn upload_image(
+    id: ImageId,
     lib: MediaLibrary,
     file: &File,
     abort_controller: Option<&AbortController>,
 ) -> Result<(), UploadError> {
     let session_uri = {
         match lib {
-            MediaLibrary::User => {
-                let req = UserAudioUploadRequest {
+            MediaLibrary::Global => {
+                let req = ImageUploadRequest {
                     file_size: file.size() as usize,
                 };
 
-                let path = endpoints::audio::user::Upload::PATH.replace("{id}", &id.0.to_string());
+                let path = endpoints::image::Upload::PATH.replace("{id}", &id.0.to_string());
+
+                let resp = api_with_auth_status_abortable::<ImageUploadResponse, EmptyError, _>(
+                    &path,
+                    endpoints::image::Upload::METHOD,
+                    abort_controller,
+                    Some(req),
+                )
+                .await
+                .map_err(|aborted| {
+                    if aborted {
+                        UploadError::Aborted
+                    } else {
+                        UploadError::Other(awsm_web::errors::Error::Empty)
+                    }
+                })
+                .and_then(|(resp, status)| {
+                    if status == 413 {
+                        let _ = web_sys::window()
+                            .unwrap_ji()
+                            .alert_with_message(STR_IMAGE_TOO_LARGE);
+                        Err(UploadError::TooLarge)
+                    } else {
+                        side_effect_status_code(status);
+                        resp.map_err(|_| UploadError::Other(awsm_web::errors::Error::Empty))
+                    }
+                })?;
+
+                let ImageUploadResponse { session_uri } = resp;
+                session_uri
+            }
+
+            MediaLibrary::User => {
+                let req = UserImageUploadRequest {
+                    file_size: file.size() as usize,
+                };
+
+                let path = endpoints::image::user::Upload::PATH.replace("{id}", &id.0.to_string());
 
                 let resp =
-                    api_with_auth_status_abortable::<UserAudioUploadResponse, EmptyError, _>(
+                    api_with_auth_status_abortable::<UserImageUploadResponse, EmptyError, _>(
                         &path,
-                        endpoints::audio::user::Upload::METHOD,
+                        endpoints::image::user::Upload::METHOD,
                         abort_controller,
                         Some(req),
                     )
@@ -89,7 +122,7 @@ pub async fn upload_audio(
                         if status == 413 {
                             let _ = web_sys::window()
                                 .unwrap_ji()
-                                .alert_with_message(STR_AUDIO_IS_TOO_LARGE);
+                                .alert_with_message(STR_IMAGE_TOO_LARGE);
                             Err(UploadError::TooLarge)
                         } else {
                             side_effect_status_code(status);
@@ -97,11 +130,11 @@ pub async fn upload_audio(
                         }
                     })?;
 
-                let UserAudioUploadResponse { session_uri } = resp;
+                let UserImageUploadResponse { session_uri } = resp;
                 session_uri
             }
 
-            _ => panic!("Cannot upload images other than to user library!"),
+            _ => panic!("Cannot upload images other than to global or user library!"),
         }
     };
 

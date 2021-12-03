@@ -1,5 +1,6 @@
 /// TODO - use macros to keep it DRY, handle audio uploading in the same basic functions
 use crate::firebase;
+use thiserror::Error;
 use awsm_web::loaders::helpers::AbortController;
 use shared::{
     api::{endpoints, ApiEndpoint},
@@ -13,10 +14,13 @@ use web_sys::File;
 
 const STR_IMAGE_TOO_LARGE: &str = "Image is too large, limit is 30MB";
 
-#[derive(Debug)]
+#[derive(Debug, Error)]
 pub enum UploadError {
+    #[error("Aborted")]
     Aborted,
+    #[error("TooLarge")]
     TooLarge,
+    #[error("awsm_web error")]
     Other(awsm_web::errors::Error),
 }
 

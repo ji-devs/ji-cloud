@@ -40,6 +40,8 @@ pub mod overlay;
 pub mod page_footer;
 #[cfg(feature = "page_header")]
 pub mod page_header;
+#[cfg(feature = "pdf")]
+pub mod pdf;
 #[cfg(feature = "player_popup")]
 pub mod player_popup;
 #[cfg(feature = "share_jig")]
