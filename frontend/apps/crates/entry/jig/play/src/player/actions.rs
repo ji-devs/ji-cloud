@@ -73,6 +73,7 @@ pub fn navigate_back(state: Rc<State>) {
 pub fn navigate_to_index(state: Rc<State>, index: usize) {
     state.active_module.set(index);
     state.timer.set(None);
+    state.done.set(false);
 }
 
 pub fn navigate_to_module(state: Rc<State>, module_id: &ModuleId) {
@@ -84,9 +85,8 @@ pub fn navigate_to_module(state: Rc<State>, module_id: &ModuleId) {
             .position(|module| &module.id == module_id);
 
         if let Some(index) = index {
-            state.active_module.set(index);
-            state.timer.set(None);
-        };
+            navigate_to_index(Rc::clone(&state), index);
+        }
     }
 }
 
