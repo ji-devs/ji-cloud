@@ -5,6 +5,8 @@ use futures_signals::{signal::Mutable, signal_vec::MutableVec};
 use search_state::{SearchOptions, SearchSelected};
 use shared::domain::jig::{JigId, JigResponse, JigSearchQuery};
 
+use components::page_header::state::PageLinks;
+
 mod search_state;
 
 pub struct State {
@@ -138,6 +140,15 @@ impl State {
 pub enum HomePageMode {
     Home,
     Search(String, Rc<MutableVec<JigResponse>>),
+}
+
+impl From<&HomePageMode> for PageLinks {
+    fn from(mode: &HomePageMode) -> PageLinks {
+        match mode {
+            &HomePageMode::Home => PageLinks::Home,
+            &HomePageMode::Search(..) => PageLinks::Content,
+        }
+    }
 }
 
 #[derive(Clone)]
