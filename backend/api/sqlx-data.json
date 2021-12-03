@@ -460,6 +460,19 @@
       "nullable": []
     }
   },
+  "11be0aa19af23c8c3ee5c0b166fa7f4127ffe6dc9d2f62b01a11e7385e5b5202": {
+    "query": "\ninsert into jig_data_additional_resource(jig_data_id, resource_type_id, display_name, resource_content)\nselect $2, resource_type_id, display_name, resource_content\nfrom jig_data_additional_resource\nwhere jig_data_id = $1\n        ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "124802b593631b117b5b2e1d2eb43712d579be04d5b218f7c19f382f3fe5dcca": {
     "query": "\ninsert into locale_entry (bundle_id, section, item_kind_id, english, hebrew, status, zeplin_reference, comments, in_app, in_element, in_mock)\nvalues ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)\nreturning id\n",
     "describe": {
@@ -551,19 +564,6 @@
       "columns": [],
       "parameters": {
         "Left": [
-          "Uuid"
-        ]
-      },
-      "nullable": []
-    }
-  },
-  "1584664f521c7e814d8d2978cbe636116383b1c69f90cdc4571426639232a0ec": {
-    "query": "\ninsert into jig_data_additional_resource(jig_data_id, resource_type_id)\nselect $2, resource_type_id\nfrom jig_data_additional_resource\nwhere jig_data_id = $1\n        ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
           "Uuid"
         ]
       },
@@ -3988,16 +3988,16 @@
         ]
       },
       "nullable": [
+        false,
         true,
         true,
+        null,
+        false,
+        false,
+        false,
         true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true
+        false,
+        null
       ]
     }
   },

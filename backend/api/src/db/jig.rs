@@ -939,8 +939,8 @@ where jig_data_id = $1
     sqlx::query!(
         //language=SQL
         r#"
-insert into jig_data_additional_resource(jig_data_id, resource_type_id)
-select $2, resource_type_id
+insert into jig_data_additional_resource(jig_data_id, resource_type_id, display_name, resource_content)
+select $2, resource_type_id, display_name, resource_content
 from jig_data_additional_resource
 where jig_data_id = $1
         "#,

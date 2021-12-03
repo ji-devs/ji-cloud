@@ -1,0 +1,3 @@
+alter table jig_data_additional_resource drop constraint jig_data_additional_resource_resource_type_id_resource_cont_key;
+alter table jig_data_additional_resource add unique(jig_data_id, resource_content, resource_type_id);
+
