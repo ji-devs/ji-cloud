@@ -9,7 +9,7 @@ pub struct Opts {
     pub game_json_url: Option<String>,
 
     /////////////////////////////////////
-    #[structopt(long, default_value="/home/dakom/Documents/JI/games", parse(from_os_str))]
+    #[structopt(long, default_value="C:\\Users\\david\\Documents\\JI\\legacy-cdn\\games", parse(from_os_str))]
     pub dest_base_path: PathBuf,
 
     #[structopt(long, default_value="json", parse(from_os_str))]

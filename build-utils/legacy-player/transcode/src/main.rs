@@ -60,7 +60,7 @@ async fn main() {
 
                     // puzzle - 17822
                     // https://jitap.net/activities/gepc/play/test-puzzles-for-legacy-player
-                    // "https://d24o39yp3ttic8.cloudfront.net/23DA1A28-88D7-4059-8DD1-167E18C0D5B7/game.json",
+                    "https://d24o39yp3ttic8.cloudfront.net/23DA1A28-88D7-4059-8DD1-167E18C0D5B7/game.json",
 
                     // talk or type - 17820
                     // https://jitap.net/activities/gepa/play/test-talk-or-type-for-legacy-player

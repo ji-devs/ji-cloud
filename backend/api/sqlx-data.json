@@ -460,6 +460,19 @@
       "nullable": []
     }
   },
+  "11be0aa19af23c8c3ee5c0b166fa7f4127ffe6dc9d2f62b01a11e7385e5b5202": {
+    "query": "\ninsert into jig_data_additional_resource(jig_data_id, resource_type_id, display_name, resource_content)\nselect $2, resource_type_id, display_name, resource_content\nfrom jig_data_additional_resource\nwhere jig_data_id = $1\n        ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "124802b593631b117b5b2e1d2eb43712d579be04d5b218f7c19f382f3fe5dcca": {
     "query": "\ninsert into locale_entry (bundle_id, section, item_kind_id, english, hebrew, status, zeplin_reference, comments, in_app, in_element, in_mock)\nvalues ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)\nreturning id\n",
     "describe": {
@@ -551,19 +564,6 @@
       "columns": [],
       "parameters": {
         "Left": [
-          "Uuid"
-        ]
-      },
-      "nullable": []
-    }
-  },
-  "1584664f521c7e814d8d2978cbe636116383b1c69f90cdc4571426639232a0ec": {
-    "query": "\ninsert into jig_data_additional_resource(jig_data_id, resource_type_id)\nselect $2, resource_type_id\nfrom jig_data_additional_resource\nwhere jig_data_id = $1\n        ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
           "Uuid"
         ]
       },
@@ -998,146 +998,6 @@
         false,
         true,
         null
-      ]
-    }
-  },
-  "31e4118b980613bcf54fdc79cefb2963ddf90d1300184a4791b55a0f45741af4": {
-    "query": "\nselect id,\n       display_name                                                                  as \"display_name!\",\n       updated_at,\n       language                                                                      as \"language!\",\n       description                                                                   as \"description!\",\n       direction                                                                     as \"direction!: TextDirection\",\n       display_score                                                                 as \"display_score!\",\n       track_assessments                                                             as \"track_assessments!\",\n       drag_assist                                                                   as \"drag_assist!\",\n       theme                                                                         as \"theme!: ThemeId\",\n       audio_background                                                              as \"audio_background!: Option<AudioBackground>\",\n       array(select row (unnest(audio_feedback_positive)))                           as \"audio_feedback_positive!: Vec<(AudioFeedbackPositive,)>\",\n       array(select row (unnest(audio_feedback_negative)))                           as \"audio_feedback_negative!: Vec<(AudioFeedbackNegative,)>\",\n       array(\n               select row (jig_data_module.id, kind)\n               from jig_data_module\n               where jig_data_id = jig_data.id\n               order by \"index\"\n           )                                               as \"modules!: Vec<(ModuleId, ModuleKind)>\",\n       array(select row (goal_id)\n             from jig_data_goal\n             where jig_data_id = jig_data.id)     as \"goals!: Vec<(GoalId,)>\",\n       array(select row (category_id)\n             from jig_data_category\n             where jig_data_id = jig_data.id)     as \"categories!: Vec<(CategoryId,)>\",\n       array(select row (affiliation_id)\n             from jig_data_affiliation\n             where jig_data_id = jig_data.id)     as \"affiliations!: Vec<(AffiliationId,)>\",\n       array(select row (age_range_id)\n             from jig_data_age_range\n             where jig_data_id = jig_data.id)     as \"age_ranges!: Vec<(AgeRangeId,)>\",\n       array(select row (jig_data_additional_resource.id)\n             from jig_data_additional_resource\n             where jig_data_id = jig_data.id)     as \"additional_resources!: Vec<(ResourceTypeId,)>\",\n       privacy_level                                       as \"privacy_level!: PrivacyLevel\",\n       jig_focus                                           as \"jig_focus!: JigFocus\"\nfrom jig_data\n         inner join unnest($1::uuid[])\n    with ordinality t(id, ord) using (id)\norder by t.ord\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "display_name!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "updated_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 3,
-          "name": "language!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 4,
-          "name": "description!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 5,
-          "name": "direction!: TextDirection",
-          "type_info": "Int2"
-        },
-        {
-          "ordinal": 6,
-          "name": "display_score!",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 7,
-          "name": "track_assessments!",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 8,
-          "name": "drag_assist!",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 9,
-          "name": "theme!: ThemeId",
-          "type_info": "Int2"
-        },
-        {
-          "ordinal": 10,
-          "name": "audio_background!: Option<AudioBackground>",
-          "type_info": "Int2"
-        },
-        {
-          "ordinal": 11,
-          "name": "audio_feedback_positive!: Vec<(AudioFeedbackPositive,)>",
-          "type_info": "RecordArray"
-        },
-        {
-          "ordinal": 12,
-          "name": "audio_feedback_negative!: Vec<(AudioFeedbackNegative,)>",
-          "type_info": "RecordArray"
-        },
-        {
-          "ordinal": 13,
-          "name": "modules!: Vec<(ModuleId, ModuleKind)>",
-          "type_info": "RecordArray"
-        },
-        {
-          "ordinal": 14,
-          "name": "goals!: Vec<(GoalId,)>",
-          "type_info": "RecordArray"
-        },
-        {
-          "ordinal": 15,
-          "name": "categories!: Vec<(CategoryId,)>",
-          "type_info": "RecordArray"
-        },
-        {
-          "ordinal": 16,
-          "name": "affiliations!: Vec<(AffiliationId,)>",
-          "type_info": "RecordArray"
-        },
-        {
-          "ordinal": 17,
-          "name": "age_ranges!: Vec<(AgeRangeId,)>",
-          "type_info": "RecordArray"
-        },
-        {
-          "ordinal": 18,
-          "name": "additional_resources!: Vec<(ResourceTypeId,)>",
-          "type_info": "RecordArray"
-        },
-        {
-          "ordinal": 19,
-          "name": "privacy_level!: PrivacyLevel",
-          "type_info": "Int2"
-        },
-        {
-          "ordinal": 20,
-          "name": "jig_focus!: JigFocus",
-          "type_info": "Int2"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "UuidArray"
-        ]
-      },
-      "nullable": [
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true
       ]
     }
   },
@@ -1613,189 +1473,6 @@
         ]
       },
       "nullable": [
-        null
-      ]
-    }
-  },
-  "4cdd1fe65c4f59d0e416031777722738502b51ea0b2380c3a665df305163b0ac": {
-    "query": "\nwith cte as (\n    select id      as \"jig_id\",\n           creator_id,\n           author_id,\n           liked_count,\n           play_count,\n           case\n               when $2 = 0 then jig.draft_id\n               when $2 = 1 then jig.live_id\n               end as \"draft_or_live_id\",\n           first_cover_assigned,  \n           published_at\n    from jig\n    left join jig_play_count on jig_play_count.jig_id = jig.id\n    where id = $1\n)\nselect cte.jig_id                                          as \"jig_id: JigId\",\n       display_name,\n       creator_id,\n       author_id,\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = author_id)            as \"author_name\",\n       first_cover_assigned,\n       published_at,\n       updated_at,\n       privacy_level                                       as \"privacy_level!: PrivacyLevel\",\n       jig_focus                                           as \"jig_focus!: JigFocus\",\n       language,\n       description,\n       direction                                           as \"direction: TextDirection\",\n       display_score,\n       track_assessments,\n       drag_assist,\n       theme                                               as \"theme: ThemeId\",\n       audio_background                                    as \"audio_background: AudioBackground\",\n       liked_count,\n       play_count,\n       array(select row (unnest(audio_feedback_positive))) as \"audio_feedback_positive!: Vec<(AudioFeedbackPositive,)>\",\n       array(select row (unnest(audio_feedback_negative))) as \"audio_feedback_negative!: Vec<(AudioFeedbackNegative,)>\",\n       array(\n               select row (jig_data_module.id, kind)\n               from jig_data_module\n               where jig_data_id = cte.draft_or_live_id\n               order by \"index\"\n           )                                               as \"modules!: Vec<(ModuleId, ModuleKind)>\",\n       array(select row (goal_id)\n             from jig_data_goal\n             where jig_data_id = cte.draft_or_live_id)     as \"goals!: Vec<(GoalId,)>\",\n       array(select row (category_id)\n             from jig_data_category\n             where jig_data_id = cte.draft_or_live_id)     as \"categories!: Vec<(CategoryId,)>\",\n       array(select row (affiliation_id)\n             from jig_data_affiliation\n             where jig_data_id = cte.draft_or_live_id)     as \"affiliations!: Vec<(AffiliationId,)>\",\n       array(select row (age_range_id)\n             from jig_data_age_range\n             where jig_data_id = cte.draft_or_live_id)     as \"age_ranges!: Vec<(AgeRangeId,)>\",\n       array(select row (resource_type_id)\n             from jig_data_additional_resource\n             where jig_data_id = cte.draft_or_live_id)     as \"additional_resources!: Vec<(ResourceTypeId,)>\"\nfrom jig_data\n         inner join cte on cte.draft_or_live_id = jig_data.id\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "jig_id: JigId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "display_name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "creator_id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 3,
-          "name": "author_id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 4,
-          "name": "author_name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 5,
-          "name": "first_cover_assigned",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 6,
-          "name": "published_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 7,
-          "name": "updated_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 8,
-          "name": "privacy_level!: PrivacyLevel",
-          "type_info": "Int2"
-        },
-        {
-          "ordinal": 9,
-          "name": "jig_focus!: JigFocus",
-          "type_info": "Int2"
-        },
-        {
-          "ordinal": 10,
-          "name": "language",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 11,
-          "name": "description",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 12,
-          "name": "direction: TextDirection",
-          "type_info": "Int2"
-        },
-        {
-          "ordinal": 13,
-          "name": "display_score",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 14,
-          "name": "track_assessments",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 15,
-          "name": "drag_assist",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 16,
-          "name": "theme: ThemeId",
-          "type_info": "Int2"
-        },
-        {
-          "ordinal": 17,
-          "name": "audio_background: AudioBackground",
-          "type_info": "Int2"
-        },
-        {
-          "ordinal": 18,
-          "name": "liked_count",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 19,
-          "name": "play_count",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 20,
-          "name": "audio_feedback_positive!: Vec<(AudioFeedbackPositive,)>",
-          "type_info": "RecordArray"
-        },
-        {
-          "ordinal": 21,
-          "name": "audio_feedback_negative!: Vec<(AudioFeedbackNegative,)>",
-          "type_info": "RecordArray"
-        },
-        {
-          "ordinal": 22,
-          "name": "modules!: Vec<(ModuleId, ModuleKind)>",
-          "type_info": "RecordArray"
-        },
-        {
-          "ordinal": 23,
-          "name": "goals!: Vec<(GoalId,)>",
-          "type_info": "RecordArray"
-        },
-        {
-          "ordinal": 24,
-          "name": "categories!: Vec<(CategoryId,)>",
-          "type_info": "RecordArray"
-        },
-        {
-          "ordinal": 25,
-          "name": "affiliations!: Vec<(AffiliationId,)>",
-          "type_info": "RecordArray"
-        },
-        {
-          "ordinal": 26,
-          "name": "age_ranges!: Vec<(AgeRangeId,)>",
-          "type_info": "RecordArray"
-        },
-        {
-          "ordinal": 27,
-          "name": "additional_resources!: Vec<(ResourceTypeId,)>",
-          "type_info": "RecordArray"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int4"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        true,
-        true,
-        null,
-        false,
-        true,
-        true,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        true,
-        false,
-        false,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
         null
       ]
     }
@@ -2281,6 +1958,120 @@
         false,
         false,
         true
+      ]
+    }
+  },
+  "641bef7bd796d76c9b8218380505967acf48a21deca799020dcdab97254d2dcc": {
+    "query": "\nselect jig.id,\n       display_name                                                                                                 as \"name\",\n       language                                                                                                     as \"language!\",\n       array((select affiliation_id\n              from jig_data_affiliation\n              where jig_data_id = jig_data.id))                                                                     as \"affiliations!\",\n       array((select affiliation.display_name\n              from affiliation\n                       inner join jig_data_affiliation on affiliation.id = jig_data_affiliation.affiliation_id\n              where jig_data_affiliation.jig_data_id = jig_data.id))                                                as \"affiliation_names!\",\n        array((select resource_type_id\n                from jig_data_additional_resource\n                where jig_data_id = jig_data.id))                                                                     as \"resource_types!\",\n        array((select resource_type.display_name\n              from resource_type\n                        inner join jig_data_additional_resource on resource_type.id = jig_data_additional_resource.resource_type_id\n             where jig_data_additional_resource.jig_data_id = jig_data.id))                                         as \"resource_type_names!\",\n       array((select age_range_id\n              from jig_data_age_range\n              where jig_data_id = jig_data.id))                                                                     as \"age_ranges!\",\n       array((select age_range.display_name\n              from age_range\n                       inner join jig_data_age_range on age_range.id = jig_data_age_range.age_range_id\n              where jig_data_age_range.jig_data_id = jig_data.id))                                                  as \"age_range_names!\",\n       array((select goal_id from jig_data_goal where jig_data_id = jig_data.id))                                   as \"goals!\",\n       array((select goal.display_name\n              from goal\n                       inner join jig_data_goal on goal.id = jig_data_goal.goal_id\n              where jig_data_goal.jig_data_id = jig_data.id))                                                       as \"goal_names!\",\n       array((select category_id\n              from jig_data_category\n              where jig_data_id = jig_data.id))                                                                     as \"categories!\",\n       array((select name\n              from category\n                       inner join jig_data_category on category.id = jig_data_category.category_id\n              where jig_data_category.jig_data_id = jig_data.id))                                                   as \"category_names!\",\n       privacy_level                                                                                                as \"privacy_level!: PrivacyLevel\",\n       jig_focus                                                                                                    as \"jig_focus!: JigFocus\",\n       author_id                                                                                                    as \"author\",\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = jig.author_id)                                                                 as \"author_name\"\n\nfrom jig\n         inner join jig_data on live_id = jig_data.id\nwhere last_synced_at is null\n   or (updated_at is not null and last_synced_at < updated_at)\nlimit 100 for no key update skip locked;\n     ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "language!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "affiliations!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 4,
+          "name": "affiliation_names!",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 5,
+          "name": "resource_types!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 6,
+          "name": "resource_type_names!",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 7,
+          "name": "age_ranges!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 8,
+          "name": "age_range_names!",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 9,
+          "name": "goals!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 10,
+          "name": "goal_names!",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 11,
+          "name": "categories!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 12,
+          "name": "category_names!",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 13,
+          "name": "privacy_level!: PrivacyLevel",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 14,
+          "name": "jig_focus!: JigFocus",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 15,
+          "name": "author",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 16,
+          "name": "author_name",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        false,
+        false,
+        true,
+        null
       ]
     }
   },
@@ -3041,120 +2832,6 @@
       },
       "nullable": [
         false
-      ]
-    }
-  },
-  "8825471aa808994e771ccbc31a09a28bf44a20fe33bb133cca174ed86f2dc9e1": {
-    "query": "\nselect jig.id,\n       display_name                                                                                                 as \"name\",\n       language                                                                                                     as \"language!\",\n       array((select affiliation_id\n              from jig_data_affiliation\n              where jig_data_id = jig_data.id))                                                                     as \"affiliations!\",\n       array((select affiliation.display_name\n              from affiliation\n                       inner join jig_data_affiliation on affiliation.id = jig_data_affiliation.affiliation_id\n              where jig_data_affiliation.jig_data_id = jig_data.id))                                                as \"affiliation_names!\",\n        array((select resource_type_id\n                from jig_data_additional_resource\n                where jig_data_id = jig_data.id))                                                                     as \"additional_resources!\",\n        array((select resource_type.display_name\n              from resource_type\n                        inner join jig_data_additional_resource on resource_type.id = jig_data_additional_resource.resource_type_id\n             where jig_data_additional_resource.jig_data_id = jig_data.id))                                         as \"additional_resource_names!\",\n       array((select age_range_id\n              from jig_data_age_range\n              where jig_data_id = jig_data.id))                                                                     as \"age_ranges!\",\n       array((select age_range.display_name\n              from age_range\n                       inner join jig_data_age_range on age_range.id = jig_data_age_range.age_range_id\n              where jig_data_age_range.jig_data_id = jig_data.id))                                                  as \"age_range_names!\",\n       array((select goal_id from jig_data_goal where jig_data_id = jig_data.id))                                   as \"goals!\",\n       array((select goal.display_name\n              from goal\n                       inner join jig_data_goal on goal.id = jig_data_goal.goal_id\n              where jig_data_goal.jig_data_id = jig_data.id))                                                       as \"goal_names!\",\n       array((select category_id\n              from jig_data_category\n              where jig_data_id = jig_data.id))                                                                     as \"categories!\",\n       array((select name\n              from category\n                       inner join jig_data_category on category.id = jig_data_category.category_id\n              where jig_data_category.jig_data_id = jig_data.id))                                                   as \"category_names!\",\n       privacy_level                                                                                                as \"privacy_level!: PrivacyLevel\",\n       jig_focus                                                                                                    as \"jig_focus!: JigFocus\",\n       author_id                                                                                                    as \"author\",\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = jig.author_id)                                                                 as \"author_name\"\n\nfrom jig\n         inner join jig_data on live_id = jig_data.id\nwhere last_synced_at is null\n   or (updated_at is not null and last_synced_at < updated_at)\nlimit 100 for no key update skip locked;\n     ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "language!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 3,
-          "name": "affiliations!",
-          "type_info": "UuidArray"
-        },
-        {
-          "ordinal": 4,
-          "name": "affiliation_names!",
-          "type_info": "TextArray"
-        },
-        {
-          "ordinal": 5,
-          "name": "additional_resources!",
-          "type_info": "UuidArray"
-        },
-        {
-          "ordinal": 6,
-          "name": "additional_resource_names!",
-          "type_info": "TextArray"
-        },
-        {
-          "ordinal": 7,
-          "name": "age_ranges!",
-          "type_info": "UuidArray"
-        },
-        {
-          "ordinal": 8,
-          "name": "age_range_names!",
-          "type_info": "TextArray"
-        },
-        {
-          "ordinal": 9,
-          "name": "goals!",
-          "type_info": "UuidArray"
-        },
-        {
-          "ordinal": 10,
-          "name": "goal_names!",
-          "type_info": "TextArray"
-        },
-        {
-          "ordinal": 11,
-          "name": "categories!",
-          "type_info": "UuidArray"
-        },
-        {
-          "ordinal": 12,
-          "name": "category_names!",
-          "type_info": "TextArray"
-        },
-        {
-          "ordinal": 13,
-          "name": "privacy_level!: PrivacyLevel",
-          "type_info": "Int2"
-        },
-        {
-          "ordinal": 14,
-          "name": "jig_focus!: JigFocus",
-          "type_info": "Int2"
-        },
-        {
-          "ordinal": 15,
-          "name": "author",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 16,
-          "name": "author_name",
-          "type_info": "Text"
-        }
-      ],
-      "parameters": {
-        "Left": []
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        false,
-        false,
-        true,
-        null
       ]
     }
   },
@@ -3941,6 +3618,190 @@
       "nullable": []
     }
   },
+  "ab7453139cf36d5e54b43871e4b94410b788d1e20f3dc71ea71027292d137376": {
+    "query": "\nselect jig.id                                              as \"jig_id: JigId\",\n       privacy_level                                       as \"privacy_level: PrivacyLevel\",\n       jig_focus                                           as \"jig_focus!: JigFocus\",\n       creator_id,\n       author_id,\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = author_id)            as \"author_name\",\n       first_cover_assigned                                as \"first_cover_assigned!\",\n       published_at,\n       liked_count,\n       (\n            select play_count \n            from jig_play_count \n            where jig_play_count.jig_id = jig.id\n       )  as \"play_count!\",\n       display_name                                        as \"display_name!\",\n       updated_at,\n       language                                            as \"language!\",\n       description                                         as \"description!\",\n       direction                                           as \"direction!: TextDirection\",\n       display_score                                       as \"display_score!\",\n       track_assessments                                   as \"track_assessments!\",\n       drag_assist                                         as \"drag_assist!\",\n       theme                                               as \"theme!: ThemeId\",\n       audio_background                                    as \"audio_background!: Option<AudioBackground>\",\n       array(select row (unnest(audio_feedback_positive))) as \"audio_feedback_positive!: Vec<(AudioFeedbackPositive,)>\",\n       array(select row (unnest(audio_feedback_negative))) as \"audio_feedback_negative!: Vec<(AudioFeedbackNegative,)>\",\n       array(\n               select row (jig_data_module.id, kind)\n               from jig_data_module\n               where jig_data_id = jig_data.id\n               order by \"index\"\n           )                                               as \"modules!: Vec<(ModuleId, ModuleKind)>\",\n       array(select row (goal_id)\n             from jig_data_goal\n             where jig_data_id = jig_data.id)              as \"goals!: Vec<(GoalId,)>\",\n       array(select row (category_id)\n             from jig_data_category\n             where jig_data_id = jig_data.id)              as \"categories!: Vec<(CategoryId,)>\",\n       array(select row (affiliation_id)\n             from jig_data_affiliation\n             where jig_data_id = jig_data.id)              as \"affiliations!: Vec<(AffiliationId,)>\",\n       array(select row (age_range_id)\n             from jig_data_age_range\n             where jig_data_id = jig_data.id)              as \"age_ranges!: Vec<(AgeRangeId,)>\",\n       array(select row (id)\n             from jig_data_additional_resource\n             where jig_data_id = jig_data.id)              as \"additional_resources!: Vec<(AdditionalResourceId,)>\"\nfrom jig_data\n         inner join jig on jig_data.id = jig.draft_id\nwhere (author_id = coalesce($2, author_id)) \nand (jig_focus = coalesce($3, jig_focus))\norder by coalesce(updated_at, created_at) desc\nlimit 20 offset 20 * $1\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "jig_id: JigId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "privacy_level: PrivacyLevel",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 2,
+          "name": "jig_focus!: JigFocus",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 3,
+          "name": "creator_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 4,
+          "name": "author_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 5,
+          "name": "author_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 6,
+          "name": "first_cover_assigned!",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 7,
+          "name": "published_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 8,
+          "name": "liked_count",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 9,
+          "name": "play_count!",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 10,
+          "name": "display_name!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 11,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 12,
+          "name": "language!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 13,
+          "name": "description!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 14,
+          "name": "direction!: TextDirection",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 15,
+          "name": "display_score!",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 16,
+          "name": "track_assessments!",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 17,
+          "name": "drag_assist!",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 18,
+          "name": "theme!: ThemeId",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 19,
+          "name": "audio_background!: Option<AudioBackground>",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 20,
+          "name": "audio_feedback_positive!: Vec<(AudioFeedbackPositive,)>",
+          "type_info": "RecordArray"
+        },
+        {
+          "ordinal": 21,
+          "name": "audio_feedback_negative!: Vec<(AudioFeedbackNegative,)>",
+          "type_info": "RecordArray"
+        },
+        {
+          "ordinal": 22,
+          "name": "modules!: Vec<(ModuleId, ModuleKind)>",
+          "type_info": "RecordArray"
+        },
+        {
+          "ordinal": 23,
+          "name": "goals!: Vec<(GoalId,)>",
+          "type_info": "RecordArray"
+        },
+        {
+          "ordinal": 24,
+          "name": "categories!: Vec<(CategoryId,)>",
+          "type_info": "RecordArray"
+        },
+        {
+          "ordinal": 25,
+          "name": "affiliations!: Vec<(AffiliationId,)>",
+          "type_info": "RecordArray"
+        },
+        {
+          "ordinal": 26,
+          "name": "age_ranges!: Vec<(AgeRangeId,)>",
+          "type_info": "RecordArray"
+        },
+        {
+          "ordinal": 27,
+          "name": "additional_resources!: Vec<(AdditionalResourceId,)>",
+          "type_info": "RecordArray"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Uuid",
+          "Int2"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        true,
+        true,
+        null,
+        false,
+        true,
+        false,
+        null,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    }
+  },
   "aec729ae876f9816b6a64f6527c6e8497140391a8bebb7a00fc5418cb07682a8": {
     "query": "\ndelete from image_tag where index = $1\n            ",
     "describe": {
@@ -4706,6 +4567,146 @@
       ]
     }
   },
+  "cb894234bf2656d906bc6c1f0a1d549235691c16bd09f89d2903d86461804175": {
+    "query": "\nselect id,\n       display_name                                                                  as \"display_name!\",\n       updated_at,\n       language                                                                      as \"language!\",\n       description                                                                   as \"description!\",\n       direction                                                                     as \"direction!: TextDirection\",\n       display_score                                                                 as \"display_score!\",\n       track_assessments                                                             as \"track_assessments!\",\n       drag_assist                                                                   as \"drag_assist!\",\n       theme                                                                         as \"theme!: ThemeId\",\n       audio_background                                                              as \"audio_background!: Option<AudioBackground>\",\n       array(select row (unnest(audio_feedback_positive)))                           as \"audio_feedback_positive!: Vec<(AudioFeedbackPositive,)>\",\n       array(select row (unnest(audio_feedback_negative)))                           as \"audio_feedback_negative!: Vec<(AudioFeedbackNegative,)>\",\n       array(\n               select row (jig_data_module.id, kind)\n               from jig_data_module\n               where jig_data_id = jig_data.id\n               order by \"index\"\n           )                                               as \"modules!: Vec<(ModuleId, ModuleKind)>\",\n       array(select row (goal_id)\n             from jig_data_goal\n             where jig_data_id = jig_data.id)     as \"goals!: Vec<(GoalId,)>\",\n       array(select row (category_id)\n             from jig_data_category\n             where jig_data_id = jig_data.id)     as \"categories!: Vec<(CategoryId,)>\",\n       array(select row (affiliation_id)\n             from jig_data_affiliation\n             where jig_data_id = jig_data.id)     as \"affiliations!: Vec<(AffiliationId,)>\",\n       array(select row (age_range_id)\n             from jig_data_age_range\n             where jig_data_id = jig_data.id)     as \"age_ranges!: Vec<(AgeRangeId,)>\",\n       array(select row (jig_data_additional_resource.id)\n             from jig_data_additional_resource\n             where jig_data_id = jig_data.id)     as \"additional_resources!: Vec<(AdditionalResourceId,)>\",\n       privacy_level                                       as \"privacy_level!: PrivacyLevel\",\n       jig_focus                                           as \"jig_focus!: JigFocus\"\nfrom jig_data\n         inner join unnest($1::uuid[])\n    with ordinality t(id, ord) using (id)\norder by t.ord\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "display_name!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 3,
+          "name": "language!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "description!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 5,
+          "name": "direction!: TextDirection",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 6,
+          "name": "display_score!",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 7,
+          "name": "track_assessments!",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 8,
+          "name": "drag_assist!",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 9,
+          "name": "theme!: ThemeId",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 10,
+          "name": "audio_background!: Option<AudioBackground>",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 11,
+          "name": "audio_feedback_positive!: Vec<(AudioFeedbackPositive,)>",
+          "type_info": "RecordArray"
+        },
+        {
+          "ordinal": 12,
+          "name": "audio_feedback_negative!: Vec<(AudioFeedbackNegative,)>",
+          "type_info": "RecordArray"
+        },
+        {
+          "ordinal": 13,
+          "name": "modules!: Vec<(ModuleId, ModuleKind)>",
+          "type_info": "RecordArray"
+        },
+        {
+          "ordinal": 14,
+          "name": "goals!: Vec<(GoalId,)>",
+          "type_info": "RecordArray"
+        },
+        {
+          "ordinal": 15,
+          "name": "categories!: Vec<(CategoryId,)>",
+          "type_info": "RecordArray"
+        },
+        {
+          "ordinal": 16,
+          "name": "affiliations!: Vec<(AffiliationId,)>",
+          "type_info": "RecordArray"
+        },
+        {
+          "ordinal": 17,
+          "name": "age_ranges!: Vec<(AgeRangeId,)>",
+          "type_info": "RecordArray"
+        },
+        {
+          "ordinal": 18,
+          "name": "additional_resources!: Vec<(AdditionalResourceId,)>",
+          "type_info": "RecordArray"
+        },
+        {
+          "ordinal": 19,
+          "name": "privacy_level!: PrivacyLevel",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 20,
+          "name": "jig_focus!: JigFocus",
+          "type_info": "Int2"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "UuidArray"
+        ]
+      },
+      "nullable": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
+    }
+  },
   "cd49cef54182b43dd7943bcd51fd3c535f4a8ec0dae95cbc8ceb39f7f757fe02": {
     "query": "delete from locale_entry where id = $1",
     "describe": {
@@ -4802,190 +4803,6 @@
         ]
       },
       "nullable": [
-        null
-      ]
-    }
-  },
-  "db50812d65c95386aecb9975b9a115a1d643f1fbe6568ffbc874f52f0e13ae06": {
-    "query": "\nselect jig.id                                              as \"jig_id: JigId\",\n       privacy_level                                       as \"privacy_level: PrivacyLevel\",\n       jig_focus                                           as \"jig_focus!: JigFocus\",\n       creator_id,\n       author_id,\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = author_id)            as \"author_name\",\n       first_cover_assigned                                as \"first_cover_assigned!\",\n       published_at,\n       liked_count,\n       (\n            select play_count \n            from jig_play_count \n            where jig_play_count.jig_id = jig.id\n       )  as \"play_count!\",\n       display_name                                        as \"display_name!\",\n       updated_at,\n       language                                            as \"language!\",\n       description                                         as \"description!\",\n       direction                                           as \"direction!: TextDirection\",\n       display_score                                       as \"display_score!\",\n       track_assessments                                   as \"track_assessments!\",\n       drag_assist                                         as \"drag_assist!\",\n       theme                                               as \"theme!: ThemeId\",\n       audio_background                                    as \"audio_background!: Option<AudioBackground>\",\n       array(select row (unnest(audio_feedback_positive))) as \"audio_feedback_positive!: Vec<(AudioFeedbackPositive,)>\",\n       array(select row (unnest(audio_feedback_negative))) as \"audio_feedback_negative!: Vec<(AudioFeedbackNegative,)>\",\n       array(\n               select row (jig_data_module.id, kind)\n               from jig_data_module\n               where jig_data_id = jig_data.id\n               order by \"index\"\n           )                                               as \"modules!: Vec<(ModuleId, ModuleKind)>\",\n       array(select row (goal_id)\n             from jig_data_goal\n             where jig_data_id = jig_data.id)              as \"goals!: Vec<(GoalId,)>\",\n       array(select row (category_id)\n             from jig_data_category\n             where jig_data_id = jig_data.id)              as \"categories!: Vec<(CategoryId,)>\",\n       array(select row (affiliation_id)\n             from jig_data_affiliation\n             where jig_data_id = jig_data.id)              as \"affiliations!: Vec<(AffiliationId,)>\",\n       array(select row (age_range_id)\n             from jig_data_age_range\n             where jig_data_id = jig_data.id)              as \"age_ranges!: Vec<(AgeRangeId,)>\",\n       array(select row (resource_type_id)\n             from jig_data_additional_resource\n             where jig_data_id = jig_data.id)              as \"additional_resources!: Vec<(ResourceTypeId,)>\"\nfrom jig_data\n         inner join jig on jig_data.id = jig.draft_id\nwhere (author_id = coalesce($2, author_id)) \nand (jig_focus = coalesce($3, jig_focus))\norder by coalesce(updated_at, created_at) desc\nlimit 20 offset 20 * $1\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "jig_id: JigId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "privacy_level: PrivacyLevel",
-          "type_info": "Int2"
-        },
-        {
-          "ordinal": 2,
-          "name": "jig_focus!: JigFocus",
-          "type_info": "Int2"
-        },
-        {
-          "ordinal": 3,
-          "name": "creator_id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 4,
-          "name": "author_id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 5,
-          "name": "author_name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 6,
-          "name": "first_cover_assigned!",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 7,
-          "name": "published_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 8,
-          "name": "liked_count",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 9,
-          "name": "play_count!",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 10,
-          "name": "display_name!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 11,
-          "name": "updated_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 12,
-          "name": "language!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 13,
-          "name": "description!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 14,
-          "name": "direction!: TextDirection",
-          "type_info": "Int2"
-        },
-        {
-          "ordinal": 15,
-          "name": "display_score!",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 16,
-          "name": "track_assessments!",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 17,
-          "name": "drag_assist!",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 18,
-          "name": "theme!: ThemeId",
-          "type_info": "Int2"
-        },
-        {
-          "ordinal": 19,
-          "name": "audio_background!: Option<AudioBackground>",
-          "type_info": "Int2"
-        },
-        {
-          "ordinal": 20,
-          "name": "audio_feedback_positive!: Vec<(AudioFeedbackPositive,)>",
-          "type_info": "RecordArray"
-        },
-        {
-          "ordinal": 21,
-          "name": "audio_feedback_negative!: Vec<(AudioFeedbackNegative,)>",
-          "type_info": "RecordArray"
-        },
-        {
-          "ordinal": 22,
-          "name": "modules!: Vec<(ModuleId, ModuleKind)>",
-          "type_info": "RecordArray"
-        },
-        {
-          "ordinal": 23,
-          "name": "goals!: Vec<(GoalId,)>",
-          "type_info": "RecordArray"
-        },
-        {
-          "ordinal": 24,
-          "name": "categories!: Vec<(CategoryId,)>",
-          "type_info": "RecordArray"
-        },
-        {
-          "ordinal": 25,
-          "name": "affiliations!: Vec<(AffiliationId,)>",
-          "type_info": "RecordArray"
-        },
-        {
-          "ordinal": 26,
-          "name": "age_ranges!: Vec<(AgeRangeId,)>",
-          "type_info": "RecordArray"
-        },
-        {
-          "ordinal": 27,
-          "name": "additional_resources!: Vec<(ResourceTypeId,)>",
-          "type_info": "RecordArray"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int4",
-          "Uuid",
-          "Int2"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        true,
-        true,
-        null,
-        false,
-        true,
-        false,
-        null,
-        false,
-        true,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        true,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
         null
       ]
     }
@@ -5139,6 +4956,189 @@
       },
       "nullable": [
         true
+      ]
+    }
+  },
+  "e7710fa6deb977f9ee72f7f1da4c210bba15b0bacfafe5a1248eac404091ff9a": {
+    "query": "\nwith cte as (\n    select id      as \"jig_id\",\n           creator_id,\n           author_id,\n           liked_count,\n           play_count,\n           case\n               when $2 = 0 then jig.draft_id\n               when $2 = 1 then jig.live_id\n               end as \"draft_or_live_id\",\n           first_cover_assigned,  \n           published_at\n    from jig\n    left join jig_play_count on jig_play_count.jig_id = jig.id\n    where id = $1\n)\nselect cte.jig_id                                          as \"jig_id: JigId\",\n       display_name,\n       creator_id,\n       author_id,\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = author_id)            as \"author_name\",\n       first_cover_assigned,\n       published_at,\n       updated_at,\n       privacy_level                                       as \"privacy_level!: PrivacyLevel\",\n       jig_focus                                           as \"jig_focus!: JigFocus\",\n       language,\n       description,\n       direction                                           as \"direction: TextDirection\",\n       display_score,\n       track_assessments,\n       drag_assist,\n       theme                                               as \"theme: ThemeId\",\n       audio_background                                    as \"audio_background: AudioBackground\",\n       liked_count,\n       play_count,\n       array(select row (unnest(audio_feedback_positive))) as \"audio_feedback_positive!: Vec<(AudioFeedbackPositive,)>\",\n       array(select row (unnest(audio_feedback_negative))) as \"audio_feedback_negative!: Vec<(AudioFeedbackNegative,)>\",\n       array(\n               select row (jig_data_module.id, kind)\n               from jig_data_module\n               where jig_data_id = cte.draft_or_live_id\n               order by \"index\"\n           )                                               as \"modules!: Vec<(ModuleId, ModuleKind)>\",\n       array(select row (goal_id)\n             from jig_data_goal\n             where jig_data_id = cte.draft_or_live_id)     as \"goals!: Vec<(GoalId,)>\",\n       array(select row (category_id)\n             from jig_data_category\n             where jig_data_id = cte.draft_or_live_id)     as \"categories!: Vec<(CategoryId,)>\",\n       array(select row (affiliation_id)\n             from jig_data_affiliation\n             where jig_data_id = cte.draft_or_live_id)     as \"affiliations!: Vec<(AffiliationId,)>\",\n       array(select row (age_range_id)\n             from jig_data_age_range\n             where jig_data_id = cte.draft_or_live_id)     as \"age_ranges!: Vec<(AgeRangeId,)>\",\n       array(select row (id)\n             from jig_data_additional_resource\n             where jig_data_id = cte.draft_or_live_id)     as \"additional_resources!: Vec<(AdditionalResourceId,)>\"\nfrom jig_data\n         inner join cte on cte.draft_or_live_id = jig_data.id\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "jig_id: JigId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "display_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "creator_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 3,
+          "name": "author_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 4,
+          "name": "author_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 5,
+          "name": "first_cover_assigned",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 6,
+          "name": "published_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 7,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 8,
+          "name": "privacy_level!: PrivacyLevel",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 9,
+          "name": "jig_focus!: JigFocus",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 10,
+          "name": "language",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 11,
+          "name": "description",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 12,
+          "name": "direction: TextDirection",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 13,
+          "name": "display_score",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 14,
+          "name": "track_assessments",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 15,
+          "name": "drag_assist",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 16,
+          "name": "theme: ThemeId",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 17,
+          "name": "audio_background: AudioBackground",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 18,
+          "name": "liked_count",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 19,
+          "name": "play_count",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 20,
+          "name": "audio_feedback_positive!: Vec<(AudioFeedbackPositive,)>",
+          "type_info": "RecordArray"
+        },
+        {
+          "ordinal": 21,
+          "name": "audio_feedback_negative!: Vec<(AudioFeedbackNegative,)>",
+          "type_info": "RecordArray"
+        },
+        {
+          "ordinal": 22,
+          "name": "modules!: Vec<(ModuleId, ModuleKind)>",
+          "type_info": "RecordArray"
+        },
+        {
+          "ordinal": 23,
+          "name": "goals!: Vec<(GoalId,)>",
+          "type_info": "RecordArray"
+        },
+        {
+          "ordinal": 24,
+          "name": "categories!: Vec<(CategoryId,)>",
+          "type_info": "RecordArray"
+        },
+        {
+          "ordinal": 25,
+          "name": "affiliations!: Vec<(AffiliationId,)>",
+          "type_info": "RecordArray"
+        },
+        {
+          "ordinal": 26,
+          "name": "age_ranges!: Vec<(AgeRangeId,)>",
+          "type_info": "RecordArray"
+        },
+        {
+          "ordinal": 27,
+          "name": "additional_resources!: Vec<(AdditionalResourceId,)>",
+          "type_info": "RecordArray"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int4"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        true,
+        true,
+        null,
+        false,
+        true,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
       ]
     }
   },

@@ -37,7 +37,7 @@ startCdnElements();
 function startCdnLegacy() {
 
     if (!process.env.LOCAL_CDN_LEGACY_PORT 
-        || process.env.LOCAL_ELEMENTS_LEGACY_PORT === ""
+        || process.env.LOCAL_CDN_LEGACY_PORT === ""
         || !process.env.LOCAL_CDN_LEGACY_DIR
         || process.env.LOCAL_CDN_LEGACY_DIR === ""
     ) {

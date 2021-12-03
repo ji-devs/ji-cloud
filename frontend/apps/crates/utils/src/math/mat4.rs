@@ -170,6 +170,17 @@ impl Matrix4 {
         values[13] = translation[1];
         values[14] = translation[2];
     }
+    pub fn add_translation(&mut self, translation: &[f64]) {
+        let values = &mut self.0;
+        values[12] = values[12] + translation[0];
+        values[13] = values[13] + translation[1];
+        values[14] = values[14] + translation[2];
+    }
+
+    pub fn get_translation(&self) -> [f64;3] {
+        let values = &self.0;
+        [values[12], values[13], values[14]]
+    }
 
     //rotation
     pub fn new_from_rotation(rotation: &[f64]) -> Self {

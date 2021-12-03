@@ -16,6 +16,7 @@ use uuid::Uuid;
 
 use super::{
     category::CategoryId,
+    jig::additional_resource::AdditionalResourceId,
     meta::{AffiliationId, AgeRangeId, GoalId, ResourceTypeId},
 };
 use crate::domain::jig::module::body::ThemeId;
@@ -221,7 +222,7 @@ pub struct JigData {
     pub categories: Vec<CategoryId>,
 
     /// Additional resources of this JIG.
-    pub additional_resources: Vec<ResourceTypeId>,
+    pub additional_resources: Vec<AdditionalResourceId>,
 
     /// Description of the jig.
     pub description: String,
@@ -507,11 +508,6 @@ pub struct JigUpdateDraftDataRequest {
     #[serde(default)]
     pub author_id: Option<Uuid>,
 
-    /// Additional resources of this JIG.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(default)]
-    pub additional_resources: Option<Vec<ResourceTypeId>>,
-
     /// Description of the jig.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
@@ -626,13 +622,11 @@ pub struct JigSearchQuery {
     pub affiliations: Vec<AffiliationId>,
 
     /// Optionally filter by `additional resources`
-    ///
-    /// Note: Currently does nothing
     #[serde(default)]
     #[serde(serialize_with = "super::csv_encode_uuids")]
     #[serde(deserialize_with = "super::from_csv")]
     #[serde(skip_serializing_if = "Vec::is_empty")]
-    pub additional_resources: Vec<ResourceTypeId>,
+    pub resource_types: Vec<ResourceTypeId>,
 
     /// Optionally filter by `categories`
     #[serde(default)]
