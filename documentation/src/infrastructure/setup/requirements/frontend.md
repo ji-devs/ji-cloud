@@ -13,8 +13,6 @@
     - `cargo install cargo-make`
 - [cargo-watch](https://github.com/watchexec/cargo-watch)
     - `cargo install cargo-watch`
-- [watchexec-cli](https://github.com/watchexec/watchexec)
-    - `cargo install watchexec-cli`
 
 ## Setup
 
