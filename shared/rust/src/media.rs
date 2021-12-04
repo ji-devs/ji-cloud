@@ -17,6 +17,9 @@ pub enum MediaGroupKind {
 
     /// Media is an animation
     Animation,
+
+    /// Media is a pdf
+    Pdf,
 }
 
 impl MediaGroupKind {
@@ -27,6 +30,7 @@ impl MediaGroupKind {
             Self::Audio => "audio",
             Self::Image => "image",
             Self::Animation => "animation",
+            Self::Pdf => "pdf",
         }
     }
 }
@@ -95,7 +99,9 @@ pub enum MediaKind {
 
     /// Media is audio
     Audio(AudioKind),
-    // Audio()
+
+    ///media is a Pdf
+    Pdf,
 }
 
 /// Kinds of media files
@@ -111,6 +117,9 @@ pub enum FileKind {
     // Spritesheet(Image,JSON),
     /// File for Mp3 audio
     AudioMp3,
+
+    /// File for pdf documents
+    DocumentPdf,
 }
 
 impl FileKind {
@@ -121,6 +130,7 @@ impl FileKind {
             Self::AnimationGif => "image/gif",
             Self::ImagePng(_) => "image/png",
             Self::AudioMp3 => "audio/mp3",
+            Self::DocumentPdf => "document/pdf",
         }
     }
 
@@ -132,6 +142,7 @@ impl FileKind {
             Self::ImagePng(PngImageFile::Thumbnail) => "thumbnail.png",
             Self::ImagePng(PngImageFile::Resized) => "resized.png",
             Self::AudioMp3 => "audio.mp3",
+            Self::DocumentPdf => "document.pdf",
         }
     }
 }
@@ -146,6 +157,7 @@ impl std::str::FromStr for FileKind {
             "thumbnail.png" => Ok(Self::ImagePng(PngImageFile::Thumbnail)),
             "resized.png" => Ok(Self::ImagePng(PngImageFile::Resized)),
             "audio.mp3" => Ok(Self::AudioMp3),
+            "document.pdf" => Ok(Self::DocumentPdf),
             _ => Err(anyhow::anyhow!("media type not recognized")),
         }
     }
