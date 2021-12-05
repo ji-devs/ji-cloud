@@ -1,6 +1,31 @@
+/*
+    Click detection is pixel-perfect even with advanced shapes
+    The way we do it is, instead of creating a polygon around it,
+    we render each shape to an offscreen canvas, where the color
+    is derived directly from the shape's index.
+
+    For example, shape 0's R value is 0, shape 1's R value is 1
+    and this goes on, filling RGB sequentially
+
+    Then, when the screen is clicked, we read the pixel at that position
+    and reverse the process to get the shape index
+
+    It _might_ be possible to use alpha, but it's unclear whether this 
+    skews the internal data with blending, canvas composite mode, etc.
+
+    So we only support up to 16,777,216 shapes... should be more than enough ;)
+
+    See pixels in stickers_traces or Drag and Drop player for a similar technique,
+    but there it is being used for shape-to-shape collision detection
+*/
+
 use super::state::*;
-use dominator::clone;
+use dominator::{clone, animation::Percentage};
 use std::rc::Rc;
+use futures_signals::{
+    map_ref,
+    signal::{Mutable, Signal, SignalExt}
+};
 use utils::{prelude::*, drag::Drag, resize::{ResizeInfo, get_resize_info}, math::{mat_2d, mat4::{self, Matrix4}, vec2}};
 use components::traces::{canvas::{draw_single_shape, apply_transform_mat4, clip_single_shape}, utils::TraceShapeExt};
 use web_sys::CanvasRenderingContext2d;
@@ -11,6 +36,9 @@ impl Puzzle {
     pub fn on_start(self: Rc<Self>) {
         let state = self;
 
+        if state.raw.show_preview {
+            log::info!("showing preview...");
+        }
         if let Some(audio_filename) = state.raw.audio_filename.as_ref() {
             state.base.audio_manager.play_clip(state.base.activity_media_url(&audio_filename));
         }
@@ -18,13 +46,6 @@ impl Puzzle {
         state.base.allow_stage_click();
     }
 
-    pub fn create_pieces(&self) {
-
-    }
-
-    pub fn render_cutouts(&self) {
-
-    }
 }
 
 impl PuzzleGame {
@@ -63,10 +84,6 @@ impl PuzzleGame {
             ctx.draw_image_with_html_image_element_and_dw_and_dh(&self.effects.image_element, 0.0, 0.0, resize_info.width, resize_info.height).unwrap_ji();
 
             ctx.restore();
-        }
-
-        if self.drag_index.get().is_none() {
-            self.draw_click_detection(resize_info)
         }
     }
 
@@ -120,6 +137,8 @@ impl PuzzleGame {
     pub fn start_drag(&self, x: i32, y: i32) {
 
         let resize_info = get_resize_info();
+        self.draw_click_detection(&resize_info);
+
         let canvas_x = (x as f64) - resize_info.x;
         let canvas_y = (y as f64) - resize_info.y;
 
@@ -196,6 +215,10 @@ impl PuzzleItem {
     pub fn start_drag(&self, x: i32, y: i32) {
         if !self.completed.get() {
             *self.drag.borrow_mut() = Some(Rc::new(Drag::new(x, y, 0.0, 0.0, true)));
+
+            if let Some(audio_filename) = self.raw.audio_filename.as_ref() {
+                self.base.audio_manager.play_clip(self.base.activity_media_url(audio_filename));
+            }
         }
     }
 
@@ -229,11 +252,49 @@ impl PuzzleItem {
             *self.curr_transform_matrix.borrow_mut() = Matrix4::identity(); 
 
             self.completed.set(true);
+            self.base.audio_manager.play_positive_clip();
         } else {
             if fly_back_to_origin {
                 *self.curr_transform_matrix.borrow_mut() = self.orig_transform_matrix.clone();
             }
+            self.base.audio_manager.play_negative_clip();
         }
     }
 }
 
+
+impl PuzzlePreview {
+    pub fn start_animation(self: Rc<Self>, parent: Rc<Puzzle>) {
+        let state = self;
+
+        state.loader.load(
+            state.animation.signal().for_each(clone!(state, parent => move |t| {
+
+                state.draw_animation(t);
+
+                if t == Percentage::END {
+                    parent.init_phase.set(InitPhase::Playing(state.game.clone()));
+                }
+
+                async {}
+            }))
+        );
+
+        state.animation.animate_to(Percentage::END);
+    }
+
+    pub fn draw_animation(&self, perc:Percentage) {
+
+        let t = perc.into_f64();
+        for item in self.game.items.iter() {
+            let mut v = item.orig_transform_matrix.get_translation();
+            v[0] *= t;
+            v[1] *= t;
+
+            let m = &mut *item.curr_transform_matrix.borrow_mut();
+            m.translate(&v);
+        }
+
+        self.game.draw(&get_resize_info());
+    }
+}
