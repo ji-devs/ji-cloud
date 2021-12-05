@@ -1,6 +1,6 @@
-use serde::{Deserialize, Deserializer, de, serde_if_integer128};
-use serde_repr::*;
-use std::{
+pub use serde::{Deserialize, Deserializer, de, serde_if_integer128};
+pub use serde_repr::*;
+pub use std::{
     path::{Path, PathBuf},
     fs::File,
     fmt,
@@ -8,12 +8,14 @@ use std::{
     convert::TryFrom,
 };
 
-use components::stickers::video::ext::{YoutubeUrlExt};
-use scan_fmt::scan_fmt;
-use super::{
-    super::super::options::*,
-    MediaTranscode, 
-    data::{
+pub use components::stickers::video::ext::{YoutubeUrlExt};
+pub use scan_fmt::scan_fmt;
+pub use super::options::*;
+
+pub use transcode::{ 
+    config::{REFERENCE_HEIGHT, REFERENCE_WIDTH},
+    src_manifest::{
+        MediaTranscode, 
         SrcManifest,
         Media,
         Slide as SrcSlide,
@@ -29,7 +31,7 @@ use super::{
     }
 };
 
-use shared::domain::jig::{
+pub use shared::domain::jig::{
     JigCreateRequest, 
     JigData, 
     JigPlayerSettings, 
@@ -48,92 +50,57 @@ use shared::domain::jig::{
         }
     }
 };
-use reqwest::Client; 
-use utils::{math::mat4::Matrix4, prelude::*};
-use crate::config::{REFERENCE_HEIGHT, REFERENCE_WIDTH};
+pub use reqwest::Client; 
+pub use utils::{math::mat4::Matrix4, prelude::*};
 
-impl SrcManifest {
-    pub fn load_file(path:PathBuf) -> Self {
-        let file = File::open(path).unwrap();
-        serde_json::from_reader(file).unwrap()
-    }
-
-    pub async fn load_url(url:&str, client:&Client) -> (Self, String) {
-
-        let text = 
-            client.get(url)
-                .send()
-                .await
-                .unwrap()
-                .error_for_status()
-                .unwrap()
-                .text()
-                .await
-                .unwrap();
-
-        (
-            serde_json::from_str(&text).unwrap(),
-            text
-        )
-    }
-
-    pub fn jig_req(&self) -> JigCreateRequest {
-        //let background_audio = if src.music_file == "" { None } else { Some(src.music_file) };
-        
-        // TODO- populate
-        JigCreateRequest { 
-            display_name: "".to_string(), 
-            goals: Vec::new(), 
-            age_ranges: Vec::new(), 
-            affiliations: Vec::new(), 
-            language: None, 
-            categories: Vec::new(), 
-            description: "".to_string(), 
-            default_player_settings: JigPlayerSettings::default()
-        }
-    }
-
-    pub fn module_reqs(&self) -> Vec<ModuleCreateRequest> {
-        self.structure
-            .slides
-            .iter()
-            .map(|slide| {
-                ModuleCreateRequest {
-                    body: ModuleBody::Legacy(
-                        ModuleData {
-                            game_id: self.game_id(),
-                            slide_id: slide.slide_id()
-                        },
-                    )
-                }
-            })
-            .collect()
-    }
-
-    pub async fn into_slides(self, client: &Client, opts: &Opts) -> (Vec<Slide>, Vec<Media>) {
-        let mut medias:Vec<Media> = Vec::new();
-
-        let game_id = self.game_id();
-        let base_url =  self.base_url.trim_matches('/').to_string();
-
-        let mut slides:Vec<Slide> = Vec::new();
-       
-        let max_slides = self.structure.slides.len();
-
-        for slide in self.structure.slides.into_iter() {
-            slides.push(slide.convert(&opts, &client, &game_id, &base_url, &mut medias, max_slides).await);
-        }
-            
-
-        (slides, medias)
-    }
+pub fn load_file(path:PathBuf) -> SrcManifest {
+    let file = File::open(path).unwrap();
+    serde_json::from_reader(file).unwrap()
 }
 
+pub async fn load_url(url:&str, client:&Client) -> (SrcManifest, String) {
 
-impl SrcSlide {
-    async fn make_audio_media(&self, client: &Client, base_url: &str, filename: &str, allowed_empty: bool, mut medias: &mut Vec<Media>) -> Option<String> {
+    let text = 
+        client.get(url)
+            .send()
+            .await
+            .unwrap()
+            .error_for_status()
+            .unwrap()
+            .text()
+            .await
+            .unwrap();
 
-        let slide_id = self.slide_id(); 
+    (
+        serde_json::from_str(&text).unwrap(),
+        text
+    )
+}
+
+pub async fn into_slides(manifest: SrcManifest, client: &Client, opts: &Opts) -> (Vec<Slide>, Vec<Media>) {
+    let mut medias:Vec<Media> = Vec::new();
+
+    let game_id = manifest.game_id();
+    let base_url =  manifest.base_url.trim_matches('/').to_string();
+
+    let mut slides:Vec<Slide> = Vec::new();
+    
+    let max_slides = manifest.structure.slides.len();
+
+    for slide in manifest.structure.slides.into_iter() {
+        slides.push(slide::convert(slide, &opts, &client, &game_id, &base_url, &mut medias, max_slides).await);
+    }
+        
+
+    (slides, medias)
+}
+
+mod slide {
+    use super::*;
+
+    async fn make_audio_media(slide: &SrcSlide, client: &Client, base_url: &str, filename: &str, allowed_empty: bool, mut medias: &mut Vec<Media>) -> Option<String> {
+
+        let slide_id = slide.slide_id(); 
 
         if filename.is_empty() {
             None
@@ -175,9 +142,9 @@ impl SrcSlide {
     }
 
 
-    async fn make_video_media(&self, client: &Client, base_url: &str, filename: &str, allowed_empty: bool, mut medias: &mut Vec<Media>) -> Option<String> {
+    async fn make_video_media(slide: &SrcSlide, client: &Client, base_url: &str, filename: &str, allowed_empty: bool, mut medias: &mut Vec<Media>) -> Option<String> {
 
-        let slide_id = self.slide_id(); 
+        let slide_id = slide.slide_id(); 
 
         if filename.is_empty() {
             None
@@ -212,21 +179,21 @@ impl SrcSlide {
                 }
         }
     }
-    pub async fn convert(self, opts: &Opts, client: &Client, game_id: &str, base_url: &str, mut medias: &mut Vec<Media>, max_slides: usize) -> Slide {
-        let slide_id = self.slide_id(); 
+    pub async fn convert(slide: SrcSlide, opts: &Opts, client: &Client, game_id: &str, base_url: &str, mut medias: &mut Vec<Media>, max_slides: usize) -> Slide {
+        let slide_id = slide.slide_id(); 
 
         log::info!("parsing slide: {}", slide_id);
 
-        let activities_len = self.activities.len();
-        let layers_len = self.layers.len();
+        let activities_len = slide.activities.len();
+        let layers_len = slide.layers.len();
 
-        if activities_len > 1 && self.activity_kind != SrcActivityKind::Questions {
-            log::error!("{:#?}", self.activities);
-            panic!("{} is more than one activity and not ask a question?!", self.activities.len());
+        if activities_len > 1 && slide.activity_kind != SrcActivityKind::Questions {
+            log::error!("{:#?}", slide.activities);
+            panic!("{} is more than one activity and not ask a question?!", slide.activities.len());
         }
 
         let image_full = {
-            let filename = strip_path(&self.image_full).to_string();
+            let filename = strip_path(&slide.image_full).to_string();
             medias.push(
                 Media { 
                     url: format!("{}/{}/{}", base_url, slide_id, filename), 
@@ -238,7 +205,7 @@ impl SrcSlide {
             filename
         };
         let image_thumb = {
-            let filename = strip_path(&self.image_thumb).to_string();
+            let filename = strip_path(&slide.image_thumb).to_string();
             medias.push(
                 Media { 
                     url: format!("{}/{}/{}", base_url, slide_id, filename), 
@@ -268,10 +235,10 @@ impl SrcSlide {
             if activities_len == 0 {
                 None
             } else {
-                if self.activity_kind == SrcActivityKind::Questions {
+                if slide.activity_kind == SrcActivityKind::Questions {
                     let mut items:Vec<QuestionItem> = Vec::with_capacity(activities_len);
 
-                    for activity in self.activities.clone().into_iter() {
+                    for activity in slide.activities.clone().into_iter() {
 
                         if activity.settings.bg_audio.is_some() {
                             panic!("Ask a question shouldn't have bg audio set..");
@@ -282,11 +249,11 @@ impl SrcSlide {
                         } else if activity.shapes.is_empty() {
                             log::warn!("ask a question with no questions?? skipping...");
                         } else {
-                            let question_filename = self.make_audio_media(&client, base_url, &activity.intro_audio, false, &mut medias).await;
+                            let question_filename = slide::make_audio_media(&slide, &client, base_url, &activity.intro_audio, false, &mut medias).await;
                             let shape = activity.shapes[0].clone();
-                            let answer_filename = self.make_audio_media(&client, base_url, &shape.audio, false, &mut medias).await;
-                            let wrong_filename = self.make_audio_media(&client, base_url, &shape.audio_2, false, &mut medias).await;
-                            let hotspot = shape.convert_to_hotspot();
+                            let answer_filename = slide::make_audio_media(&slide, &client, base_url, &shape.audio, false, &mut medias).await;
+                            let wrong_filename = slide::make_audio_media(&slide, &client, base_url, &shape.audio_2, false, &mut medias).await;
+                            let hotspot = shape::convert_to_hotspot(shape);
 
                             items.push(QuestionItem{
                                 question_filename,
@@ -301,15 +268,15 @@ impl SrcSlide {
                         items
                     }))
                 } else {
-                    let activity = self.activities[0].clone();
+                    let activity = slide.activities[0].clone();
 
-                    let audio_filename = self.make_audio_media(&client, base_url, &activity.intro_audio, false, &mut medias).await;
+                    let audio_filename = slide::make_audio_media(&slide, &client, base_url, &activity.intro_audio, false, &mut medias).await;
                     let bg_audio_filename = match activity.settings.bg_audio {
                         None => None,
-                        Some(bg_audio) => self.make_audio_media(&client, base_url, &bg_audio, true, &mut medias).await
+                        Some(bg_audio) => slide::make_audio_media(&slide, &client, base_url, &bg_audio, true, &mut medias).await
                     };
 
-                    match self.activity_kind {
+                    match slide.activity_kind {
                         SrcActivityKind::SaySomething => {
                             Some(Activity::SaySomething(SaySomething {
                                 audio_filename,
@@ -343,10 +310,10 @@ impl SrcSlide {
 
 
                                 items.push(SoundboardItem {
-                                    audio_filename: self.make_audio_media(&client, base_url, &shape.audio, false, &mut medias).await,
+                                    audio_filename: slide::make_audio_media(&slide, &client, base_url, &shape.audio, false, &mut medias).await,
                                     text: map_text(&shape.settings.text),
                                     jump_index: shape.settings.jump_index.and_then(validate_jump_index),
-                                    hotspot: shape.convert_to_hotspot()
+                                    hotspot: shape::convert_to_hotspot(shape)
                                 });
                             }
 
@@ -398,7 +365,7 @@ impl SrcSlide {
                                         Err(_) => {
                                             let video_url = video_url.replace("local://", "");
 
-                                            let filename = self.make_video_media(&client, base_url, &video_url, false, &mut medias).await.unwrap();
+                                            let filename = slide::make_video_media(&slide, &client, base_url, &video_url, false, &mut medias).await.unwrap();
 
                                             log::info!("not yt: {}", filename);
                                             VideoSource::Direct(filename)
@@ -423,8 +390,8 @@ impl SrcSlide {
 
                             for shape in activity.shapes.into_iter() {
                                 items.push(PuzzleItem {
-                                    audio_filename: self.make_audio_media(&client, base_url, &shape.audio, false, &mut medias).await,
-                                    hotspot: shape.convert_to_hotspot()
+                                    audio_filename: slide::make_audio_media(&slide, &client, base_url, &shape.audio, false, &mut medias).await,
+                                    hotspot: shape::convert_to_hotspot(shape)
                                 });
                             }
 
@@ -467,7 +434,7 @@ impl SrcSlide {
 
                             for shape in activity.shapes.into_iter() {
                                 items.push(TalkTypeItem {
-                                    audio_filename: self.make_audio_media(&client, base_url, &shape.audio, false, &mut medias).await,
+                                    audio_filename: slide::make_audio_media(&slide, &client, base_url, &shape.audio, false, &mut medias).await,
                                     texts: match shape.settings.text_answers.as_ref() {
                                         None => None,
                                         Some(answers) => {
@@ -480,7 +447,7 @@ impl SrcSlide {
                                     } else {
                                         TalkTypeAnswerKind::Text
                                     },
-                                    hotspot: shape.convert_to_hotspot()
+                                    hotspot: shape::convert_to_hotspot(shape)
                                 });
                             }
                             Some(Activity::TalkType(TalkType {
@@ -500,7 +467,7 @@ impl SrcSlide {
         };
 
 
-        let design = convert_design(&game_id, &slide_id, &base_url, &mut medias, self.layers);
+        let design = convert_design(&game_id, &slide_id, &base_url, &mut medias, slide.layers);
 
         Slide {
             activity,
@@ -648,17 +615,20 @@ fn transform_is_identity(orig: [f64;6]) -> bool {
     orig == [1.0, 0.0, 0.0, 1.0, 0.0, 0.0]
 }
 
-impl SrcShape {
-    pub fn convert_to_hotspot(self) -> Hotspot {
+mod shape {
+
+    use super::*;
+
+    pub fn convert_to_hotspot(shape: SrcShape) -> Hotspot {
         Hotspot {
             shape: TraceShape::PathCommands(
-                self
+               shape 
                     .path
                     .into_iter()
-                    .map(|point| (point.convert(), true))
+                    .map(|point| (convert_point(point), true))
                     .collect()
             ),
-            transform_matrix: self.settings.transform.and_then(|t| {
+            transform_matrix: shape.settings.transform.and_then(|t| {
                 if !transform_is_identity(t) {
                     Some(convert_transform(t))
                 } else {
@@ -667,11 +637,9 @@ impl SrcShape {
             })
         }
     }
-}
 
-impl SrcPathPoint {
-    pub fn convert(self) -> PathCommand {
-        let SrcPathPoint { mut x, mut y, mut cp1x, mut cp1y, mut cp2x, mut cp2y, kind} = self;
+    pub fn convert_point(point: SrcPathPoint) -> PathCommand {
+        let SrcPathPoint { mut x, mut y, mut cp1x, mut cp1y, mut cp2x, mut cp2y, kind} = point;
 
         x /= REFERENCE_WIDTH;
         y /= REFERENCE_HEIGHT;

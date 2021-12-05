@@ -5,7 +5,12 @@ authors = ["David Komer <david.komer@gmail.com>"]
 edition = "2018"
 
 [[bin]]
-name = "transcode"
+name = "parse"
+path = "src/parse/main.rs"
+
+[[bin]]
+name = "upload"
+path = "src/upload/main.rs"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

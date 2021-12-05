@@ -92,4 +92,11 @@ pub struct AlbumStore {
 pub struct Album {
     #[serde(rename="pk")]
     pub key: PrimaryKey,
+    pub fields: AlbumFields,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct AlbumFields {
+    pub name: Option<String>,
+    pub description: Option<String>,
 }

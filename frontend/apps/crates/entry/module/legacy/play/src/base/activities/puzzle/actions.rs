@@ -49,11 +49,6 @@ impl Puzzle {
 }
 
 impl PuzzleGame {
-    pub fn on_start(self: Rc<Self>) {
-        let state = self;
-
-        state.base.allow_stage_click();
-    }
 
     pub fn draw(&self, resize_info: &ResizeInfo) {
         let canvas = &self.cutouts_canvas;

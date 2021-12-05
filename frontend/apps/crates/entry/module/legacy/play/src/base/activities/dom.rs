@@ -20,7 +20,10 @@ impl Base {
                 Activity::Puzzle(activity) => Puzzle::new(self.clone(), activity).render(),
                 // _ => html!("empty-fragment"),
             },
-            None => html!("empty-fragment"),
+            None => {
+                self.allow_stage_click();
+                html!("empty-fragment")
+            },
         }
     }
 }
