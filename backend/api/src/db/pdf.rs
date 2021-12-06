@@ -2,15 +2,18 @@ pub mod user {
     use futures::stream::BoxStream;
     use shared::domain::pdf::{user::UserPdf, PdfId};
     use sqlx::PgPool;
+    use uuid::Uuid;
 
-    pub async fn create(db: &PgPool) -> sqlx::Result<PdfId> {
+    pub async fn create(db: &PgPool, user_id: Uuid) -> sqlx::Result<PdfId> {
         let mut txn = db.begin().await?;
 
         let id: PdfId = sqlx::query!(
             r#"
-insert into user_pdf_library default values
+insert into user_pdf_library(user_id)
+values($1)
 returning id as "id: PdfId"
-"#,
+        "#,
+            user_id
         )
         .fetch_one(db)
         .await?

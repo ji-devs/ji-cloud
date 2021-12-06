@@ -41,9 +41,9 @@ pub mod user {
     /// Create a pdf file in the user's pdf library.
     pub(super) async fn create(
         db: Data<PgPool>,
-        _claims: TokenUser,
+        claims: TokenUser,
     ) -> Result<HttpResponse, error::NotFound> {
-        let id = db::pdf::user::create(db.as_ref()).await?;
+        let id = db::pdf::user::create(db.as_ref(), claims.0.user_id).await?;
         Ok(HttpResponse::Created().json(CreateResponse { id }))
     }
 
