@@ -33,6 +33,7 @@ impl AddAdditionalResource {
                 match is_loading {
                     true => Some(
                         html!("progress-bar", {
+                            .property("progress", "infinite")
                         })
                     ),
                     false => Some(
