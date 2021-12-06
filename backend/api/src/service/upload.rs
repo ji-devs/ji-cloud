@@ -416,6 +416,75 @@ skip locked
     Ok(true)
 }
 
+pub async fn process_user_pdf(
+    db: &PgPool,
+    s3: &service::s3::Client,
+    id: Uuid,
+) -> anyhow::Result<bool> {
+    let mut txn = db.begin().await?;
+
+    let exists = sqlx::query!(
+        //language=SQL
+        r#"
+select exists(select 1
+from user_pdf_library
+inner join user_pdf_upload on user_pdf_library.id = user_pdf_upload.pdf_id
+where (id = $1 and uploaded_at is not null and processed_at >= uploaded_at is not true)
+for no key update of user_pdf_upload
+for share of user_pdf_library
+skip locked
+) as "exists!"
+        "#,
+        id
+    )
+    .fetch_one(&mut txn)
+    .await?
+    .exists;
+
+    if !exists {
+        txn.rollback().await?;
+        return Ok(false);
+    }
+
+    let file = s3
+        .download_media_for_processing(MediaLibrary::User, id, FileKind::DocumentPdf)
+        .await?;
+
+    // todo: use the duration
+    // let _duration = {
+    //     let bytes = bytes.clone();
+    //     tokio::task::spawn_blocking(move || {
+    //         mp3_metadata::read_from_slice(&bytes).map_err(|_it| error::Upload::InvalidMedia)
+    //     })
+    //         .await
+    //         .unwrap()?
+    // };
+
+    let file = match file {
+        Some(it) => it,
+        None => {
+            sqlx::query!("update user_pdf_upload set processed_at = now(), processing_result = false where pdf_id = $1", id)
+                .execute(&mut txn)
+                .await?;
+
+            log::warn!("Pdf wasn't uploaded properly before processing?");
+            txn.commit().await?;
+            return Ok(true);
+        }
+    };
+
+    // todo: processing
+
+    s3.upload_media(file, MediaLibrary::User, id, FileKind::AudioMp3)
+        .await?;
+
+    sqlx::query!("update user_pdf_upload set processed_at = now(), processing_result = true where pdf_id = $1", id).execute(&mut txn).await?;
+
+    txn.commit().await?;
+
+    Ok(true)
+}
+
 pub async fn finalize_upload(
     access_token: &str,
     notifications: &service::notifications::Client,
