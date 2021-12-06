@@ -28,7 +28,7 @@ impl AdditionalResourceComponent {
         }));
 
         html!("jig-edit-publish-resource", {
-            .property("slot", "additional-resources")
+            .property("slot", "resources")
             .property_signal("label", state.additional_resource.signal_ref(|additional_resource| {
                 match additional_resource {
                     Some(additional_resource) => additional_resource.display_name.to_owned(),

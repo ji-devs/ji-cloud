@@ -28,7 +28,7 @@ impl AddAdditionalResource {
         let state = Rc::clone(&self);
         html!("empty-fragment", {
             .style("display", "contents")
-            .property("slot", "additional-resources")
+            .property("slot", "resources")
             .child_signal(state.loader.is_loading().map(clone!(state => move|is_loading| {
                 match is_loading {
                     true => Some(
