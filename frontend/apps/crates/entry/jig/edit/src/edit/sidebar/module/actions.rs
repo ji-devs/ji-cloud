@@ -114,6 +114,10 @@ pub fn delete(state: Rc<State>) {
                 },
                 Err(_) => {}
             }
+        } else {
+            // The module is DragDrop, it is not persisted so it can be removed from the list with
+            // no extra work required.
+            state.sidebar.modules.lock_mut().remove(index);
         }
     }));
 }
@@ -144,7 +148,17 @@ pub fn assign_kind(state: Rc<State>, kind: ModuleKind) {
                     id,
                     kind,
                 }));
-                state.sidebar.modules.lock_mut().set_cloned(index, module);
+
+                {
+                    // Instead of replacing the module at the index, we remove the old module and
+                    // add the new one. This is slightly less efficient because it fires signals
+                    // for the entire list of modules, however, it is necessary so that the modules
+                    // before and after this one can have their views updated.
+                    let mut modules = state.sidebar.modules.lock_mut();
+                    modules.remove(index);
+                    modules.insert_cloned(index, module);
+                }
+
                 let req = ModuleUpdateRequest {
                     id: StableOrUniqueId::Unique(id.clone()),
                     index: Some(index.try_into().unwrap_ji()),

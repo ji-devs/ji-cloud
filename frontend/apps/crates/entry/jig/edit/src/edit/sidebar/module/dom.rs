@@ -43,10 +43,10 @@ impl ModuleDom {
                     if overlap {
                         state.sidebar.drag_target_index.set(Some(state.index));
                     }
-                        //Doing this here instead of immediately on mousemove
-                        //gives us a nice separation of concerns
-                        //e.g. to throttle
-                        //actions::update_index(state.clone(), pos.x, pos.y);
+                    // Doing this here instead of immediately on mousemove
+                    // gives us a nice separation of concerns
+                    // e.g. to throttle
+                    // actions::update_index(state.clone(), pos.x, pos.y);
                     async {}
                 })))
                 .style("display", {
@@ -154,44 +154,56 @@ impl ModuleDom {
                     *state.elem.borrow_mut() = None;
                 }))
                 .apply(clone!(state, sidebar_state, module => move |dom| {
-                    let menu_state = Rc::new(MenuState::new());
-                    let menu_items = match index {
-                        0 => {
-                            vec![
-                                MenuDom::item_edit(menu_state.clone(), state.clone()),
-                                // TODO:
-                                // MenuDom::item_copy(menu_state.clone()),
-                                MenuDom::item_paste(menu_state.clone(), sidebar_state.clone()),
-                            ]
-                        },
-                        _ => {
-                            let mut v = vec![];
-                            if let Some(module) = &*module {
-                                v.push(MenuDom::item_edit(menu_state.clone(), state.clone()));
-                                v.push(MenuDom::item_move_up(menu_state.clone(), state.clone()));
-                                v.push(MenuDom::item_move_down(menu_state.clone(), state.clone()));
-                                v.push(MenuDom::item_duplicate(menu_state.clone(), sidebar_state.clone(), module.id));
+                    // If the module is anything other than a DragDrop, otherwise if it is not the
+                    // last module in the list.
+                    if (&*module).is_some() || (index <= total_len - 2 && (&*module).is_none()) {
+                        let menu_state = Rc::new(MenuState::new());
+                        let menu_items = match index {
+                            0 => {
+                                vec![
+                                    MenuDom::item_edit(menu_state.clone(), state.clone()),
+                                    // TODO:
+                                    // MenuDom::item_copy(menu_state.clone()),
+                                    MenuDom::item_paste(menu_state.clone(), sidebar_state.clone()),
+                                ]
+                            },
+                            _ => {
+                                let mut v = vec![];
+                                if let Some(module) = &*module {
+                                    v.push(MenuDom::item_edit(menu_state.clone(), state.clone()));
+                                    v.push(MenuDom::item_move_up(menu_state.clone(), state.clone()));
+                                    v.push(MenuDom::item_move_down(menu_state.clone(), state.clone()));
+                                    v.push(MenuDom::item_duplicate(menu_state.clone(), sidebar_state.clone(), module.id));
+                                }
+                                v.push(MenuDom::item_delete(menu_state.clone(), state.clone()));
+                                if let Some(module) = &*module {
+                                    v.push(MenuDom::item_copy(menu_state.clone(), sidebar_state.clone(), module.id));
+                                    v.push(MenuDom::item_duplicate_as(menu_state.clone(), sidebar_state.clone(), module));
+                                }
+                                v
                             }
-                            v.push(MenuDom::item_delete(menu_state.clone(), state.clone()));
-                            if let Some(module) = &*module {
-                                v.push(MenuDom::item_copy(menu_state.clone(), sidebar_state.clone(), module.id));
-                                v.push(MenuDom::item_duplicate_as(menu_state.clone(), sidebar_state.clone(), module));
-                            }
-                            v
-                        }
-                    };
+                        };
 
-                    dom.child(MenuDom::render(
-                        menu_state.clone(),
-                        menu_items
-                    ))
+                        dom.child(MenuDom::render(
+                            menu_state.clone(),
+                            menu_items
+                        ))
+                    } else {
+                        dom
+                    }
                 }))
-                .child(html!("button-icon", {
-                    .property("icon", "gears")
-                    .property("slot", "add")
-                    .event(clone!(state => move |_evt:events::Click| {
-                        actions::add_empty_module_after(state.clone())
-                    }))
+                .apply(clone!(state => move |dom| {
+                    if state.can_add() {
+                        dom.child(html!("button-icon", {
+                            .property("icon", "gears")
+                            .property("slot", "add")
+                            .event(clone!(state => move |_evt:events::Click| {
+                                actions::add_empty_module_after(state.clone())
+                            }))
+                        }))
+                    } else {
+                        dom
+                    }
                 }))
             }))
         })
