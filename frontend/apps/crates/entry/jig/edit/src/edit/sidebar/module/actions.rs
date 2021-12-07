@@ -115,7 +115,7 @@ pub fn delete(state: Rc<State>) {
                 Err(_) => {}
             }
         } else {
-            // The module is DragDrop, it is not persisted so it can be removed from the list with
+            // The module is placeholder, it is not persisted so it can be removed from the list with
             // no extra work required.
             state.sidebar.modules.lock_mut().remove(index);
         }
