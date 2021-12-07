@@ -47,12 +47,12 @@ impl State {
     }
 
     pub fn can_add(&self) -> bool {
-        // If this module is anything other than DragDrop, the add button could be displayed.
+        // If this module is anything other than a placeholder, the add button could be displayed.
         let current_module_should_add = if let Some(_) = &*self.module { true } else { false };
         let next_module_should_show_add = {
             match self.sidebar.modules.lock_ref().to_vec().get(self.index + 1) {
                 Some(module) => {
-                    // If the next module is anything other than DragDrop, then this module can
+                    // If the next module is anything other than a placeholder, then this module can
                     // potentially display the the add button.
                     if let Some(_) = &**module { true } else { false }
                 }

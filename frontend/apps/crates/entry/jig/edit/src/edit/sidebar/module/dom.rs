@@ -154,7 +154,7 @@ impl ModuleDom {
                     *state.elem.borrow_mut() = None;
                 }))
                 .apply(clone!(state, sidebar_state, module => move |dom| {
-                    // If the module is anything other than a DragDrop, otherwise if it is not the
+                    // If the module is anything other than a placeholder, otherwise if it is not the
                     // last module in the list.
                     if (&*module).is_some() || (index <= total_len - 2 && (&*module).is_none()) {
                         let menu_state = Rc::new(MenuState::new());
