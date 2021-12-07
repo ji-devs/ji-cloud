@@ -24,6 +24,9 @@ pub mod drag_drop;
 /// Cover Body.
 pub mod cover;
 
+/// Resource Cover Body.
+pub mod resource_cover;
+
 /// Flashcards .
 pub mod flashcards;
 
@@ -59,7 +62,7 @@ pub enum Body {
     /// Module is a poster, and has a talking poster's body.
     Poster(poster::ModuleData),
 
-    /// ??
+    /// Module is a Video, and has a video body.
     Video(video::ModuleData),
 
     /// Module is a Listen & Learn, and has a Listen & Learn's body.
@@ -72,6 +75,9 @@ pub enum Body {
     ///
     /// DEPRECATED INFO: This exists as an empty enum because cover *needs* to exist, but it also isn't decided yet.
     Cover(cover::ModuleData),
+
+    /// Module is a Resource Cover.
+    ResourceCover(resource_cover::ModuleData),
 
     /// Module is a legacy, and has a legacy's body.
     Legacy(legacy::ModuleData),
@@ -109,6 +115,7 @@ impl Body {
             Self::TappingBoard(data) => data.convert_to_body(kind),
             Self::DragDrop(data) => data.convert_to_body(kind),
             Self::Cover(data) => data.convert_to_body(kind),
+            Self::ResourceCover(data) => data.convert_to_body(kind),
             Self::Legacy(data) => data.convert_to_body(kind),
         }
     }
@@ -289,6 +296,7 @@ impl Body {
     pub fn kind(&self) -> super::ModuleKind {
         match self {
             Self::Cover(_) => super::ModuleKind::Cover,
+            Self::ResourceCover(_) => super::ModuleKind::ResourceCover,
             Self::MemoryGame(_) => super::ModuleKind::Memory,
             Self::Flashcards(_) => super::ModuleKind::Flashcards,
             Self::CardQuiz(_) => super::ModuleKind::CardQuiz,

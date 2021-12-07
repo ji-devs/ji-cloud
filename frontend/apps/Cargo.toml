@@ -23,6 +23,8 @@ members = [
     "crates/entry/module/poster/play",
 	"crates/entry/module/cover/edit",
     "crates/entry/module/cover/play",
+	"crates/entry/module/resource-cover/edit",
+    "crates/entry/module/resource-cover/play",
     "crates/entry/module/video/edit",
     "crates/entry/module/video/play",
     "crates/entry/module/tapping-board/edit",
