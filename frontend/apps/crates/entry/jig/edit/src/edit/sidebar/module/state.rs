@@ -4,7 +4,7 @@ use futures_signals::{
     map_ref,
     signal::{Mutable, Signal, SignalExt},
 };
-use shared::domain::jig::LiteModule;
+use shared::domain::jig::{LiteModule, ModuleKind};
 use std::cell::RefCell;
 use std::rc::Rc;
 use utils::drag::Drag;
@@ -45,6 +45,26 @@ impl State {
             Some(module) => module.kind.as_str(),
         }
     }
+
+    pub fn can_add(&self) -> bool {
+        // If this module is anything other than DragDrop, the add button could be displayed.
+        let current_module_should_add = if let Some(_) = &*self.module { true } else { false };
+        let next_module_should_show_add = {
+            match self.sidebar.modules.lock_ref().to_vec().get(self.index + 1) {
+                Some(module) => {
+                    // If the next module is anything other than DragDrop, then this module can
+                    // potentially display the the add button.
+                    if let Some(_) = &**module { true } else { false }
+                }
+                // If there is no next module, then this module can potentially display the add
+                // button.
+                None => true
+            }
+        };
+
+        current_module_should_add && next_module_should_show_add
+    }
+
     pub fn window_state_signal(state: Rc<State>) -> impl Signal<Item = &'static str> {
         clone!(state => map_ref! {
             let route = state.sidebar.jig_edit_state.route.signal_cloned(),
