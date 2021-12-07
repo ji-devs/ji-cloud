@@ -86,7 +86,7 @@ impl Router {
                                             Some(user) => !route.allowed_user_scope(&user.scopes)
                                         };
 
-                                        if locked {
+                                        if !locked {
                                             Some(state.with_child(route, html!("h1", {
                                                 .text("Not Authorized")
                                             })))
@@ -102,6 +102,7 @@ impl Router {
                                                 AdminRoute::ImageMeta(id, is_new) => Some(state.with_child(route, ImageMetaPage::render(id, is_new))),
                                                 AdminRoute::ImageSearch(query) => Some(state.with_child(route, ImageSearchPage::render(query))),
                                                 AdminRoute::ImageTags => Some(state.with_child(route, ImageTags::render(ImageTags::new()))),
+                                                AdminRoute::Jigs => Some(state.with_child(route, html!("div", {.text("Jig Label UI goes here")}))),
                                                 _ => Some(state.with_child(route, html!("empty-fragment"))),
                                             }
                                         }
