@@ -802,7 +802,10 @@ impl Client {
 
         if let Some(jig_focus) = jig_focus {
             and_filters.filters.push(Box::new(CommonFilter {
-                filter: TagFilter(jig_focus.as_str().to_owned()),
+                filter: FacetFilter {
+                    facet_name: "jig_focus".to_owned(),
+                    value: jig_focus.as_str().to_owned(),
+                },
                 invert: false,
             }))
         }
