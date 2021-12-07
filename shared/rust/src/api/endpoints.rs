@@ -57,3 +57,6 @@ pub mod session;
 
 /// Locale endpoints
 pub mod locale;
+
+/// Pdf endpoints
+pub mod pdf;

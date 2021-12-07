@@ -570,6 +570,26 @@
       "nullable": []
     }
   },
+  "14f012bfa5f6e21f23b17bc3d4a56b40dcffe39be966cd8b6af3aba87631968a": {
+    "query": "select exists(select 1 from user_pdf_upload where pdf_id = $1 for no key update) as \"exists!\"",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "exists!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
   "160b640822791b21c7d5d057e0d388bfdf669e70b2a2eeb99056919681a607ee": {
     "query": "\nselect id as \"id: ResourceTypeId\", display_name, created_at, updated_at from \"resource_type\"\norder by index\n",
     "describe": {
@@ -705,6 +725,18 @@
         "Left": [
           "Int2",
           "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "1c72ff4451fa5342ae8ae20bb4169b62efa25b9b44c80ce26bf9a9619336dd60": {
+    "query": "delete from user_pdf_library where id = $1",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
         ]
       },
       "nullable": []
@@ -933,6 +965,26 @@
         null,
         null,
         null
+      ]
+    }
+  },
+  "2c9269da9de0d178512713b7fc2789ad3472cc1dcea22eecd5fb941415d37bc4": {
+    "query": "\ninsert into user_pdf_library(user_id)\nvalues($1)\nreturning id as \"id: PdfId\"\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: PdfId",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false
       ]
     }
   },
@@ -1489,6 +1541,26 @@
       "nullable": []
     }
   },
+  "4d327320e1810b7c419009172dc1137243a3d1d67ec65c614afb0101e374c4fc": {
+    "query": "select id as \"id: PdfId\" from user_pdf_library where id = $1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: PdfId",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
   "4f2cdb8dafe9b214a430d4df9c96893fcd4a4d072fc41aee1d910505982f283d": {
     "query": "\n        update user_auth_basic \n        set email = $3::text\n        where user_id = $1 and email = $2::text\n        ",
     "describe": {
@@ -1602,6 +1674,18 @@
   },
   "5842389dd9a03ba291f04a518e3eccc249eb3664c1ecd12b294de7a81d132a59": {
     "query": "delete from user_audio_library where id = $1",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "584c1a6c3683272dc4cb0785bdb9ee07ca772df2c04a8ce0cbe406a3d1487016": {
+    "query": "update user_pdf_upload set processed_at = now(), processing_result = false where pdf_id = $1",
     "describe": {
       "columns": [],
       "parameters": {
@@ -2640,6 +2724,18 @@
       "nullable": []
     }
   },
+  "82fb52aa41cccc3af1b68d0266aa291db61b2b33adf95590022f86ac1a56f7fa": {
+    "query": "update user_pdf_upload set uploaded_at = now(), processing_result = null where pdf_id = $1",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "8313a67bf42c71861a5f4935f1cd53fda46e3da275e46cdaa266a785595b8cd1": {
     "query": "select id as \"id: AudioId\" from user_audio_library where id = $1",
     "describe": {
@@ -3324,6 +3420,26 @@
       ]
     }
   },
+  "9d077a763e28dfcec303320f15227adb9d5786148dbfafe30b79c5b5e8ecc8d8": {
+    "query": "\nselect exists(select 1\nfrom user_pdf_library\ninner join user_pdf_upload on user_pdf_library.id = user_pdf_upload.pdf_id\nwhere (id = $1 and uploaded_at is not null and processed_at >= uploaded_at is not true)\nfor no key update of user_pdf_upload\nfor share of user_pdf_library\nskip locked\n) as \"exists!\"\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "exists!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
   "9d166e1174a30bbd4c9c87544cf9c8403e5fb1dfc00fb312db75c795436f9ea3": {
     "query": "select exists(select 1 from user_audio_upload where audio_id = $1 for no key update) as \"exists!\"",
     "describe": {
@@ -3897,6 +4013,24 @@
         ]
       },
       "nullable": []
+    }
+  },
+  "b5949f227788bc5e36a22b50498a85a8be8cefd31395f4892b2e0932ba05dfaa": {
+    "query": "select id as \"id: PdfId\" from user_pdf_library order by created_at desc",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: PdfId",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false
+      ]
     }
   },
   "b6429faf2c5e6dc1936e74a8991b6bf41f439b60cd206ba7d8d2df46cdc828f1": {
@@ -4719,6 +4853,18 @@
       "nullable": []
     }
   },
+  "ceee83d2943409d2f3a3e5a70b7ae3d423d39cf2b15af44565c6f4100abcfc31": {
+    "query": "insert into user_pdf_upload (pdf_id) values($1)",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "d201d9e5aec8be8b9ecf9a698f834a73a0fabc887886d198e12d387b8e9d78f5": {
     "query": "\nselect kind as \"kind: ImageKind\"\nfrom image_metadata\ninner join image_upload on image_metadata.id = image_upload.image_id\nwhere (id = $1 and uploaded_at is not null and processed_at >= uploaded_at is not true)\nfor no key update of image_upload\nfor share of image_metadata\nskip locked\n        ",
     "describe": {
@@ -4929,6 +5075,18 @@
   },
   "e476295de7bbf205eb11c2a4046c46c9352f30eb4c32bad44714b9053841fd58": {
     "query": "delete from \"user\" where id = $1",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "e57b7c587be57d904c82ee82ea48df2b8e02a38dd1a4c1c7fee015385d66d155": {
+    "query": "update user_pdf_upload set processed_at = now(), processing_result = true where pdf_id = $1",
     "describe": {
       "columns": [],
       "parameters": {

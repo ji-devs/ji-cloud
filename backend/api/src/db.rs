@@ -6,6 +6,7 @@ pub(crate) mod jig;
 pub(crate) mod locale;
 pub(crate) mod media;
 pub(crate) mod meta;
+pub(crate) mod pdf;
 pub(crate) mod session;
 pub(crate) mod user;
 
@@ -39,6 +40,7 @@ pub const UPLOADS_DB_SCHEMA: &[(&str, &str, &str)] = &[
         "global_animation_upload",
         "animation_id",
     ),
+    ("user_pdf_library", "user_pdf_upload", "pdf_id"),
 ];
 
 pub async fn get_pool(connect_options: PgConnectOptions) -> anyhow::Result<PgPool> {

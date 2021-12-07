@@ -59,7 +59,7 @@ into_uuid!(
     ResourceTypeId,
     AgeRangeId,
     SubjectId,
-    GoalId
+    GoalId,
 );
 
 /// Wrapper type around [`i16`](std::i16), represents the index of an image tag.
@@ -102,6 +102,22 @@ pub struct AnimationStyle {
     pub created_at: DateTime<Utc>,
 
     /// When the animation style was last updated.
+    pub updated_at: Option<DateTime<Utc>>,
+}
+
+/// Represents an image style.
+#[derive(Serialize, Deserialize, Debug)]
+pub struct PdfStyle {
+    /// The id of the image style.
+    pub id: ImageStyleId,
+
+    /// The image style's name.
+    pub display_name: String,
+
+    /// When the image style was created.
+    pub created_at: DateTime<Utc>,
+
+    /// When the image style was last updated.
     pub updated_at: Option<DateTime<Utc>>,
 }
 

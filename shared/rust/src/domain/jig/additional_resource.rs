@@ -1,6 +1,6 @@
 //! Types for additional resources for JIGs.
 
-use crate::domain::{audio::AudioId, image::ImageId, meta::ResourceTypeId};
+use crate::domain::{audio::AudioId, image::ImageId, meta::ResourceTypeId, pdf::PdfId};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -77,6 +77,8 @@ pub enum ResourceContent {
     AudioId(AudioId),
     /// Additional resource kind: link
     Link(url::Url),
+    /// Additional resource kind: pdf
+    PdfId(PdfId),
 }
 
 into_uuid![AdditionalResourceId];

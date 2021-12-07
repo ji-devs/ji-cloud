@@ -300,6 +300,7 @@ pub async fn signal_status_and_process_media(
         },
         FileKind::AnimationGif => upload::process_animation(db, s3, *id).await,
         FileKind::AudioMp3 => upload::process_user_audio(db, s3, *id).await,
+        FileKind::DocumentPdf => upload::process_user_pdf(db, s3, *id).await,
 
         _ => return Err(error::EventArc::InvalidEventResource),
     };
