@@ -167,7 +167,7 @@ impl ModuleDom {
                 .after_removed(clone!(state => move |_dom| {
                     *state.elem.borrow_mut() = None;
                 }))
-                .child(MenuDom::render(state.clone()))
+                .child(MenuDom::render(&state))
                 .apply(Self::render_add_button(&state))
             }))
         })

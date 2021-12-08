@@ -21,13 +21,13 @@ const STR_DUPLICATE_AS: &'static str = "Duplicate content as:";
 pub struct MenuDom;
 
 impl MenuDom {
-    pub fn render(module_state: Rc<ModuleState>) -> Dom {
+    pub fn render(module_state: &Rc<ModuleState>) -> Dom {
         let state = Rc::new(State::new());
 
         html!("menu-kebab", {
             .property("slot", "menu")
             .child(html!("jig-edit-sidebar-module-menu", {
-                .children(Self::children(&state, &module_state))
+                .children(Self::children(&state, module_state))
             }))
             .event_with_options(&EventOptions::bubbles(), |e: events::Click| {
                 e.stop_propagation();
