@@ -56,7 +56,9 @@ struct BatchJig<'a> {
 struct BatchImage<'a> {
     name: &'a str,
     description: &'a str,
-    translated_description: &'a str,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    translated_description: Option<String>,
     styles: &'a [Uuid],
     style_names: &'a [String],
     age_ranges: &'a [Uuid],
@@ -394,7 +396,7 @@ select id,
        name,
        kind                                                                                     as "kind!: ImageKind",
        description,
-       translated_description                                                                   as "translated_description!",
+       translated_description                                                                   as "translated_description",
        array((select affiliation_id from image_affiliation where image_id = image_metadata.id)) as "affiliations!",
        array((select affiliation.display_name
               from affiliation
@@ -450,7 +452,7 @@ limit 100 for no key update skip locked;
                 media_subkind: &row.kind.to_str(),
                 name: &row.name,
                 description: &row.description,
-                translated_description: &row.translated_description,
+                translated_description: row.translated_description,
                 styles: &row.styles,
                 style_names: &row.style_names,
                 age_ranges: &row.age_ranges,
