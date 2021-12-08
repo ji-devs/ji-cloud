@@ -2045,6 +2045,120 @@
       ]
     }
   },
+  "641bef7bd796d76c9b8218380505967acf48a21deca799020dcdab97254d2dcc": {
+    "query": "\nselect jig.id,\n       display_name                                                                                                 as \"name\",\n       language                                                                                                     as \"language!\",\n       array((select affiliation_id\n              from jig_data_affiliation\n              where jig_data_id = jig_data.id))                                                                     as \"affiliations!\",\n       array((select affiliation.display_name\n              from affiliation\n                       inner join jig_data_affiliation on affiliation.id = jig_data_affiliation.affiliation_id\n              where jig_data_affiliation.jig_data_id = jig_data.id))                                                as \"affiliation_names!\",\n        array((select resource_type_id\n                from jig_data_additional_resource\n                where jig_data_id = jig_data.id))                                                                     as \"resource_types!\",\n        array((select resource_type.display_name\n              from resource_type\n                        inner join jig_data_additional_resource on resource_type.id = jig_data_additional_resource.resource_type_id\n             where jig_data_additional_resource.jig_data_id = jig_data.id))                                         as \"resource_type_names!\",\n       array((select age_range_id\n              from jig_data_age_range\n              where jig_data_id = jig_data.id))                                                                     as \"age_ranges!\",\n       array((select age_range.display_name\n              from age_range\n                       inner join jig_data_age_range on age_range.id = jig_data_age_range.age_range_id\n              where jig_data_age_range.jig_data_id = jig_data.id))                                                  as \"age_range_names!\",\n       array((select goal_id from jig_data_goal where jig_data_id = jig_data.id))                                   as \"goals!\",\n       array((select goal.display_name\n              from goal\n                       inner join jig_data_goal on goal.id = jig_data_goal.goal_id\n              where jig_data_goal.jig_data_id = jig_data.id))                                                       as \"goal_names!\",\n       array((select category_id\n              from jig_data_category\n              where jig_data_id = jig_data.id))                                                                     as \"categories!\",\n       array((select name\n              from category\n                       inner join jig_data_category on category.id = jig_data_category.category_id\n              where jig_data_category.jig_data_id = jig_data.id))                                                   as \"category_names!\",\n       privacy_level                                                                                                as \"privacy_level!: PrivacyLevel\",\n       jig_focus                                                                                                    as \"jig_focus!: JigFocus\",\n       author_id                                                                                                    as \"author\",\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = jig.author_id)                                                                 as \"author_name\"\n\nfrom jig\n         inner join jig_data on live_id = jig_data.id\nwhere last_synced_at is null\n   or (updated_at is not null and last_synced_at < updated_at)\nlimit 100 for no key update skip locked;\n     ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "language!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "affiliations!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 4,
+          "name": "affiliation_names!",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 5,
+          "name": "resource_types!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 6,
+          "name": "resource_type_names!",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 7,
+          "name": "age_ranges!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 8,
+          "name": "age_range_names!",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 9,
+          "name": "goals!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 10,
+          "name": "goal_names!",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 11,
+          "name": "categories!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 12,
+          "name": "category_names!",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 13,
+          "name": "privacy_level!: PrivacyLevel",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 14,
+          "name": "jig_focus!: JigFocus",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 15,
+          "name": "author",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 16,
+          "name": "author_name",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        false,
+        false,
+        true,
+        null
+      ]
+    }
+  },
   "64cfdb8662f781313ee5765279e6d4b9a03cc12c3873a00386e94a1eda9e472b": {
     "query": "\nwith delete as (\n        delete from user_font\n    where user_id = $1 and index = $2\n)\nselect 1 as discard\nfrom user_font\nwhere user_id = $1 and index > $2\nfor update\n        ",
     "describe": {
@@ -2433,120 +2547,6 @@
       "nullable": [
         false,
         false
-      ]
-    }
-  },
-  "779d93f68913e736df589c1690a1311fac7b19a1810de4f298dc1b1b06588325": {
-    "query": "\nselect jig.id,\n       display_name                                                                                                 as \"name\",\n       language                                                                                                     as \"language!\",\n       array((select affiliation_id\n              from jig_data_affiliation\n              where jig_data_id = jig_data.id))                                                                     as \"affiliations!\",\n       array((select affiliation.display_name\n              from affiliation\n                       inner join jig_data_affiliation on affiliation.id = jig_data_affiliation.affiliation_id\n              where jig_data_affiliation.jig_data_id = jig_data.id))                                                as \"affiliation_names!\",\n        array((select resource_type_id\n                from jig_data_additional_resource\n                where jig_data_id = jig_data.id))                                                                     as \"resource_types!\",\n        array((select resource_type.display_name\n              from resource_type\n                        inner join jig_data_additional_resource on resource_type.id = jig_data_additional_resource.resource_type_id\n             where jig_data_additional_resource.jig_data_id = jig_data.id))                                         as \"resource_type_names!\",\n       array((select age_range_id\n              from jig_data_age_range\n              where jig_data_id = jig_data.id))                                                                     as \"age_ranges!\",\n       array((select age_range.display_name\n              from age_range\n                       inner join jig_data_age_range on age_range.id = jig_data_age_range.age_range_id\n              where jig_data_age_range.jig_data_id = jig_data.id))                                                  as \"age_range_names!\",\n       array((select goal_id from jig_data_goal where jig_data_id = jig_data.id))                                   as \"goals!\",\n       array((select goal.display_name\n              from goal\n                       inner join jig_data_goal on goal.id = jig_data_goal.goal_id\n              where jig_data_goal.jig_data_id = jig_data.id))                                                       as \"goal_names!\",\n       array((select category_id\n              from jig_data_category\n              where jig_data_id = jig_data.id))                                                                     as \"categories!\",\n       array((select name\n              from category\n                       inner join jig_data_category on category.id = jig_data_category.category_id\n              where jig_data_category.jig_data_id = jig_data.id))                                                   as \"category_names!\",\n       privacy_level                                                                                                as \"privacy_level!: PrivacyLevel\",\n       jig_focus                                                                                                    as \"jig_focus!: JigFocus\",\n       author_id                                                                                                    as \"author\",\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = jig.author_id)                                                                 as \"author_name\"\n\nfrom jig\n         inner join jig_data on live_id = jig_data.id\nwhere last_synced_at is null\n   or (updated_at is not null and last_synced_at <= updated_at)\nlimit 100 for no key update skip locked;\n     ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "language!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 3,
-          "name": "affiliations!",
-          "type_info": "UuidArray"
-        },
-        {
-          "ordinal": 4,
-          "name": "affiliation_names!",
-          "type_info": "TextArray"
-        },
-        {
-          "ordinal": 5,
-          "name": "resource_types!",
-          "type_info": "UuidArray"
-        },
-        {
-          "ordinal": 6,
-          "name": "resource_type_names!",
-          "type_info": "TextArray"
-        },
-        {
-          "ordinal": 7,
-          "name": "age_ranges!",
-          "type_info": "UuidArray"
-        },
-        {
-          "ordinal": 8,
-          "name": "age_range_names!",
-          "type_info": "TextArray"
-        },
-        {
-          "ordinal": 9,
-          "name": "goals!",
-          "type_info": "UuidArray"
-        },
-        {
-          "ordinal": 10,
-          "name": "goal_names!",
-          "type_info": "TextArray"
-        },
-        {
-          "ordinal": 11,
-          "name": "categories!",
-          "type_info": "UuidArray"
-        },
-        {
-          "ordinal": 12,
-          "name": "category_names!",
-          "type_info": "TextArray"
-        },
-        {
-          "ordinal": 13,
-          "name": "privacy_level!: PrivacyLevel",
-          "type_info": "Int2"
-        },
-        {
-          "ordinal": 14,
-          "name": "jig_focus!: JigFocus",
-          "type_info": "Int2"
-        },
-        {
-          "ordinal": 15,
-          "name": "author",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 16,
-          "name": "author_name",
-          "type_info": "Text"
-        }
-      ],
-      "parameters": {
-        "Left": []
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        false,
-        false,
-        true,
-        null
       ]
     }
   },
@@ -4122,16 +4122,16 @@
         ]
       },
       "nullable": [
+        false,
         true,
         true,
+        null,
+        false,
+        false,
+        false,
         true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true
+        false,
+        null
       ]
     }
   },
