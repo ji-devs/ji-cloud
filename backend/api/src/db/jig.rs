@@ -1,3 +1,5 @@
+use crate::translate::translate_text;
+use anyhow::Context;
 use futures::TryStreamExt;
 use shared::domain::{
     category::CategoryId,
@@ -243,6 +245,9 @@ select cte.jig_id                                          as "jig_id: JigId",
        audio_background                                    as "audio_background: AudioBackground",
        liked_count,
        play_count,
+       locked,
+       other_keywords,
+       translated_keywords,
        array(select row (unnest(audio_feedback_positive))) as "audio_feedback_positive!: Vec<(AudioFeedbackPositive,)>",
        array(select row (unnest(audio_feedback_negative))) as "audio_feedback_negative!: Vec<(AudioFeedbackNegative,)>",
        array(
@@ -313,7 +318,9 @@ from jig_data
                 },
                 privacy_level: row.privacy_level,
                 jig_focus: row.jig_focus,
-
+                locked: row.locked,
+                other_keywords: row.other_keywords,
+                translated_keywords: row.translated_keywords
             },
         });
 
@@ -398,7 +405,10 @@ select id,
              from jig_data_additional_resource
              where jig_data_id = jig_data.id)     as "additional_resources!: Vec<(AdditionalResourceId,)>",
        privacy_level                                       as "privacy_level!: PrivacyLevel",
-       jig_focus                                           as "jig_focus!: JigFocus"
+       jig_focus                                           as "jig_focus!: JigFocus",
+       locked                                              as "locked!",
+       other_keywords                                      as "other_keywords!", 
+       translated_keywords                                 as "translated_keywords!"
 from jig_data
          inner join unnest($1::uuid[])
     with ordinality t(id, ord) using (id)
@@ -474,6 +484,9 @@ order by t.ord
                 },
                 privacy_level: jig_data_row.privacy_level,
                 jig_focus: jig_data_row.jig_focus,
+                locked: jig_data_row.locked,
+                other_keywords: jig_data_row.other_keywords,
+                translated_keywords: jig_data_row.translated_keywords,
             },
         })
         .collect();
@@ -499,6 +512,8 @@ pub async fn update_draft(
     audio_effects: Option<&AudioEffects>,
     privacy_level: Option<PrivacyLevel>,
     jig_focus: Option<JigFocus>,
+    other_keywords: Option<String>,
+    api_key: &Option<String>,
 ) -> Result<(), error::UpdateWithMetadata> {
     let mut txn = pool.begin().await?;
 
@@ -610,6 +625,29 @@ where id = $1
             jig_focus as i16,
         )
         .execute(&mut txn)
+        .await?;
+    }
+
+    if let Some(other_keywords) = other_keywords {
+        let translate_text = match &api_key {
+            Some(key) => translate_text(&other_keywords, "he", "en", key)
+                .await
+                .context("could not translate text")?,
+            None => None,
+        };
+
+        sqlx::query!(
+            r#"
+update jig_data
+set other_keywords = $2,
+    translated_keywords = (case when ($3::text is not null) then $3::text else (translated_keywords) end),
+    updated_at = now()
+where id = $1 and $2 is distinct from other_keywords"#,
+            draft_id,
+            other_keywords,
+            translate_text
+        )
+        .execute(&mut *txn)
         .await?;
     }
 
@@ -745,6 +783,9 @@ select jig.id                                              as "jig_id: JigId",
        track_assessments                                   as "track_assessments!",
        drag_assist                                         as "drag_assist!",
        theme                                               as "theme!: ThemeId",
+       locked                                              as "locked!",
+       other_keywords                                      as "other_keywords!",
+       translated_keywords                                 as "translated_keywords!",
        audio_background                                    as "audio_background!: Option<AudioBackground>",
        array(select row (unnest(audio_feedback_positive))) as "audio_feedback_positive!: Vec<(AudioFeedbackPositive,)>",
        array(select row (unnest(audio_feedback_negative))) as "audio_feedback_negative!: Vec<(AudioFeedbackNegative,)>",
@@ -819,7 +860,10 @@ limit 20 offset 20 * $1
                     feedback_negative: row.audio_feedback_negative.into_iter().map(|(it, )| it).collect(),
                 },
                 privacy_level: row.privacy_level,
-                jig_focus: row.jig_focus
+                jig_focus: row.jig_focus,
+                locked: row.locked,
+                other_keywords: row.other_keywords,
+                translated_keywords: row.translated_keywords
             },
         })
         .try_collect()
@@ -839,7 +883,7 @@ pub async fn filtered_count(
         r#"
 select count(*) as "count!: i64"
 from jig
-left join jig_data on jig.id = jig_data.id
+left join jig_data on jig.live_id = jig_data.id
 where (privacy_level = coalesce($1, privacy_level))
     and (author_id = coalesce($2, author_id))
     and (jig_focus = coalesce($3, jig_focus))
@@ -894,7 +938,7 @@ pub async fn clone_data(
         r#"
 insert into jig_data
 (display_name, created_at, updated_at, language, last_synced_at, description, theme, audio_background,
- audio_feedback_negative, audio_feedback_positive, direction, display_score, drag_assist, track_assessments, privacy_level, jig_focus)
+ audio_feedback_negative, audio_feedback_positive, direction, display_score, drag_assist, track_assessments, privacy_level, jig_focus, other_keywords, translated_keywords)
 select display_name,
        created_at,
        updated_at,
@@ -910,7 +954,9 @@ select display_name,
        drag_assist,
        track_assessments,
        privacy_level,
-       jig_focus
+       jig_focus,
+       other_keywords,
+       translated_keywords
 from jig_data
 where id = $1
 returning id

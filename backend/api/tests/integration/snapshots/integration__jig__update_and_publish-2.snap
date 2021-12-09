@@ -40,6 +40,9 @@ expression: body
       "feedbackNegative": []
     },
     "privacyLevel": "unlisted",
-    "jigFocus": "modules"
+    "jigFocus": "modules",
+    "locked": false,
+    "otherKeywords": "",
+    "translatedKeywords": ""
   }
 }

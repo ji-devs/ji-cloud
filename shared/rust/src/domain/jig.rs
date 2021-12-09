@@ -247,6 +247,15 @@ pub struct JigData {
 
     /// Primary material for jig
     pub jig_focus: JigFocus,
+
+    /// Lock this jig
+    pub locked: bool,
+
+    /// Other keywords used to searched for jigs
+    pub other_keywords: String,
+
+    /// translated keywords used to searched for jigs
+    pub translated_keywords: String,
 }
 
 /// Access level for the jig.
@@ -543,6 +552,11 @@ pub struct JigUpdateDraftDataRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub jig_focus: Option<JigFocus>,
+
+    /// Additional keywords for searches
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
+    pub other_keywords: Option<String>,
 }
 
 /// Query for [`Browse`](crate::api::endpoints::jig::Browse).
@@ -661,6 +675,16 @@ pub struct JigSearchQuery {
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub jig_focus: Option<JigFocus>,
+
+    /// Optionally search for jigs using keywords
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub other_keywords: Option<String>,
+
+    /// Optionally search for jigs using translated keyword
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub translated_keywords: Option<String>,
 }
 
 /// Response for successful search.

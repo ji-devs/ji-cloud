@@ -53,6 +53,9 @@ expression: body
       "feedbackNegative": "[audio]"
     },
     "privacyLevel": "public",
-    "jigFocus": "modules"
+    "jigFocus": "modules",
+    "locked": false,
+    "otherKeywords": "",
+    "translatedKeywords": ""
   }
 }

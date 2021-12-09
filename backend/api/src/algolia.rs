@@ -50,6 +50,9 @@ struct BatchJig<'a> {
     #[serde(rename = "_tags")]
     tags: Vec<&'static str>,
     jig_focus: &'a str,
+    locked: &'a bool,
+    other_keywords: &'a str,
+    translated_keywords: &'a str,
 }
 
 #[derive(Serialize)]
@@ -291,10 +294,12 @@ select jig.id,
        privacy_level                                                                                                as "privacy_level!: PrivacyLevel",
        jig_focus                                                                                                    as "jig_focus!: JigFocus",
        author_id                                                                                                    as "author",
+       locked                                                                                                       as "locked!",  
+       other_keywords                                                                                               as "other_keywords!",
+       translated_keywords                                                                                          as "translated_keywords!",
        (select given_name || ' '::text || family_name
         from user_profile
         where user_profile.user_id = jig.author_id)                                                                 as "author_name"
-
 from jig
          inner join jig_data on live_id = jig_data.id
 where last_synced_at is null
@@ -329,7 +334,10 @@ limit 100 for no key update skip locked;
                 author: row.author,
                 author_name: row.author_name,
                 jig_focus: &row.jig_focus.as_str(),
-                tags
+                tags,
+                locked: &row.locked,
+                other_keywords: &row.other_keywords,
+                translated_keywords: &row.translated_keywords,
             })
             .expect("failed to serialize BatchJig to json")
             {
@@ -774,6 +782,8 @@ impl Client {
         author: Option<Uuid>,
         author_name: Option<String>,
         jig_focus: Option<JigFocus>,
+        other_keywords: Option<String>,
+        translated_keywords: Option<String>,
     ) -> anyhow::Result<Option<(Vec<Uuid>, u32, u64)>> {
         let mut and_filters = algolia::filter::AndFilter { filters: vec![] };
 
@@ -824,6 +834,25 @@ impl Client {
                 filter: FacetFilter {
                     facet_name: "language".to_owned(),
                     value: language,
+                },
+                invert: false,
+            }))
+        }
+
+        if let Some(other_keywords) = other_keywords {
+            and_filters.filters.push(Box::new(CommonFilter {
+                filter: FacetFilter {
+                    facet_name: "other_keywords".to_owned(),
+                    value: other_keywords,
+                },
+                invert: false,
+            }))
+        }
+        if let Some(translated_keywords) = translated_keywords {
+            and_filters.filters.push(Box::new(CommonFilter {
+                filter: FacetFilter {
+                    facet_name: "translated_keywords".to_owned(),
+                    value: translated_keywords,
                 },
                 invert: false,
             }))

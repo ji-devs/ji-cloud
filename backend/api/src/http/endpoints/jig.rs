@@ -2,6 +2,7 @@ use actix_web::{
     web::{self, Data, Json, Path, Query, ServiceConfig},
     HttpResponse,
 };
+use core::settings::RuntimeSettings;
 use shared::{
     api::{endpoints::jig, ApiEndpoint},
     domain::{
@@ -107,11 +108,13 @@ async fn get_draft(
 /// Update a JIG's draft data.
 async fn update_draft(
     db: Data<PgPool>,
+    settings: Data<RuntimeSettings>,
     claims: TokenUser,
     req: Option<Json<<jig::UpdateDraftData as ApiEndpoint>::Req>>,
     path: web::Path<JigId>,
 ) -> Result<HttpResponse, error::UpdateWithMetadata> {
     let id = path.into_inner();
+    let api_key = &settings.google_api_key;
 
     db::jig::authz(&*db, claims.0.user_id, Some(id)).await?;
 
@@ -133,6 +136,8 @@ async fn update_draft(
         req.audio_effects.as_ref(),
         req.privacy_level,
         req.jig_focus,
+        req.other_keywords,
+        api_key,
     )
     .await?;
 
@@ -285,6 +290,8 @@ async fn search(
             query.author,
             query.author_name,
             query.jig_focus,
+            query.other_keywords,
+            query.translated_keywords,
         )
         .await?
         .ok_or_else(|| error::Service::DisabledService(ServiceKind::Algolia))?;
