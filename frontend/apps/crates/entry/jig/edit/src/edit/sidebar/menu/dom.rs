@@ -18,6 +18,13 @@ const STR_PASTE: &'static str = "Paste from another JIG";
 const STR_DUPLICATE_AS: &'static str = "Duplicate content as:";
 // const STR_EDIT_SETTINGS: &'static str = "Edit setting";
 
+const CARD_KINDS: [ModuleKind; 4] = [
+    ModuleKind::Memory,
+    ModuleKind::Flashcards,
+    ModuleKind::Matching,
+    ModuleKind::CardQuiz,
+];
+
 pub fn render(module_state: &Rc<ModuleState>) -> Dom {
     let state = Rc::new(State::new());
 
@@ -158,22 +165,14 @@ fn item_duplicate_as(
     sidebar_state: &Rc<SidebarState>,
     module: &LiteModule,
 ) -> Dom {
-    let card_kinds = vec![
-        ModuleKind::Memory,
-        ModuleKind::Flashcards,
-        ModuleKind::Matching,
-        ModuleKind::CardQuiz,
-    ];
-
-    let is_card = card_kinds.contains(&module.kind);
-
-    let card_kinds = card_kinds.into_iter().filter(|kind| &module.kind != kind);
-
-    let module_id = module.id;
+    let is_card = CARD_KINDS.contains(&module.kind);
 
     html!("empty-fragment", {
         .property("slot", "advanced")
         .apply_if(is_card, |dom| {
+            let card_kinds = CARD_KINDS.into_iter().filter(|kind| &module.kind != kind);
+            let module_id = module.id;
+
             dom.child(html!("menu-line", {
                 .property("customLabel", STR_DUPLICATE_AS)
                 .property("icon", "reuse")
