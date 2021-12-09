@@ -126,12 +126,14 @@ pub fn on_iframe_message(state: Rc<State>, message: ModuleToJigEditorMessage) {
 }
 
 fn populate_added_module(state: Rc<State>, module: LiteModule) {
-    let module_len = state.modules.lock_ref().len();
+    // Assumes that the final module in the list is always the placeholder module.
+    let insert_at_idx = state.modules.lock_ref().len() - 1;
 
     state
         .modules
         .lock_mut()
-        .insert_cloned(module_len - 1, Rc::new(Some(module.clone())));
+        .insert_cloned(insert_at_idx, Rc::new(Some(module.clone())));
+
     state
         .jig_edit_state
         .route
