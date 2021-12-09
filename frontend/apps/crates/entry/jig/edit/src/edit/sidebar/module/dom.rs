@@ -167,7 +167,12 @@ impl ModuleDom {
                 .after_removed(clone!(state => move |_dom| {
                     *state.elem.borrow_mut() = None;
                 }))
-                .child(MenuDom::render(&state))
+                // Add the menu only if the current module is not a placeholder or if it is, it is
+                // not the _last_ placeholder.
+                .apply_if(
+                    module.is_some() || (index <= total_len - 2 && module.is_none()),
+                    |dom| dom.child(MenuDom::render(&state))
+                )
                 .apply(Self::render_add_button(&state))
             }))
         })
