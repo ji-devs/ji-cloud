@@ -22,10 +22,6 @@ pub fn on_module_kind_drop(state: Rc<State>, module_kind: ModuleKind) {
         if state.module.is_none() {
             assign_kind(state.clone(), module_kind);
 
-            // if this is the empty module at the end
-            if state.sidebar.jig.jig_data.modules.len() == state.index {
-                state.sidebar.modules.lock_mut().push_cloned(Rc::new(None));
-            }
         }
     }
 }
@@ -157,6 +153,23 @@ pub fn assign_kind(state: Rc<State>, kind: ModuleKind) {
                     let mut modules = state.sidebar.modules.lock_mut();
                     modules.remove(index);
                     modules.insert_cloned(index, module);
+
+                    // Only add a new placeholder module once the above request has completed and
+                    // the new module has been added to the list of modules.
+                    let placeholder_exists = {
+                        match modules.last() {
+                            // If the list of modules is not empty and the last module is None, then it is
+                            // a placeholder module.
+                            Some(module) => module.is_none(),
+                            // When the list is empty or the last module is not a placeholder module.
+                            _ => false,
+                        }
+                    };
+
+                    // if this is the empty module at the end
+                    if !placeholder_exists {
+                        modules.push_cloned(Rc::new(None));
+                    }
                 }
 
                 let req = ModuleUpdateRequest {
