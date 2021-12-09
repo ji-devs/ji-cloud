@@ -18,107 +18,144 @@ const STR_PASTE: &'static str = "Paste from another JIG";
 const STR_DUPLICATE_AS: &'static str = "Duplicate content as:";
 // const STR_EDIT_SETTINGS: &'static str = "Edit setting";
 
-pub fn render(state: Rc<State>, items: Vec<Dom>) -> Dom {
+pub fn render(module_state: &Rc<ModuleState>) -> Dom {
+    let state = Rc::new(State::new());
+
     html!("menu-kebab", {
         .property("slot", "menu")
         .child(html!("jig-edit-sidebar-module-menu", {
-            .children(items)
+            .children(menu_items(&state, module_state))
         }))
         .event_with_options(&EventOptions::bubbles(), |e: events::Click| {
             e.stop_propagation();
         })
-        .after_inserted(clone!(state => move |elem| {
+        .after_inserted(move |elem| {
             *state.menu_ref.borrow_mut() = Some(elem);
-        }))
+        })
     })
 }
 
-pub fn item_edit(state: Rc<State>, module: Rc<ModuleState>) -> Dom {
+fn menu_items(state: &Rc<State>, module_state: &Rc<ModuleState>) -> Vec<Dom> {
+    match module_state.index {
+        0 => {
+            vec![
+                item_edit(state, module_state),
+                // TODO:
+                // item_copy(state.clone()),
+                item_paste(state, &module_state.sidebar),
+            ]
+        },
+        _ => {
+            let mut v = vec![];
+            if let Some(module) = &*module_state.module {
+                v.push(item_edit(state, module_state));
+                if module_state.index > 1 {
+                    // We only want to be able to move up if there's somewhere
+                    // to move to. Index 0 is occupied by the Cover module, so
+                    // anything at 1 cannot go higher.
+                    v.push(item_move_up(state, module_state));
+                }
+                if module_state.is_last_module() {
+                    v.push(item_move_down(state, module_state));
+                }
+                v.push(item_duplicate(state, &module_state.sidebar, module.id));
+            }
+            v.push(item_delete(state, module_state));
+            if let Some(module) = &*module_state.module {
+                v.push(item_copy(state, &module_state.sidebar, module.id));
+                v.push(item_duplicate_as(state, &module_state.sidebar, module));
+            }
+            v
+        }
+    }
+}
+
+fn item_edit(state: &Rc<State>, module: &Rc<ModuleState>) -> Dom {
     html!("menu-line", {
         .property("slot", "lines")
         .property("icon", "edit")
-        .event(clone!(state => move |_:events::Click| {
-            actions::edit(module.clone());
+        .event(clone!(state, module => move |_:events::Click| {
             state.close_menu();
+            actions::edit(module.clone());
         }))
     })
 }
 
-pub fn item_move_up(state: Rc<State>, module: Rc<ModuleState>) -> Dom {
+fn item_move_up(state: &Rc<State>, module: &Rc<ModuleState>) -> Dom {
     html!("menu-line", {
         .property("slot", "lines")
         .property("icon", "move-up")
-        .event(clone!(state => move |_:events::Click| {
-            actions::move_index(module.clone(), MoveTarget::Up);
+        .event(clone!(state, module => move |_:events::Click| {
             state.close_menu();
+            actions::move_index(module.clone(), MoveTarget::Up);
         }))
     })
 }
 
-pub fn item_move_down(state: Rc<State>, module: Rc<ModuleState>) -> Dom {
+fn item_move_down(state: &Rc<State>, module: &Rc<ModuleState>) -> Dom {
     html!("menu-line", {
         .property("slot", "lines")
         .property("icon", "move-down")
-        .event(clone!(state => move |_:events::Click| {
-            actions::move_index(module.clone(), MoveTarget::Down);
+        .event(clone!(state, module => move |_:events::Click| {
             state.close_menu();
+            actions::move_index(module.clone(), MoveTarget::Down);
         }))
     })
 }
 
-pub fn item_duplicate(
-    state: Rc<State>,
-    sidebar_state: Rc<SidebarState>,
+fn item_duplicate(
+    state: &Rc<State>,
+    sidebar_state: &Rc<SidebarState>,
     module_id: ModuleId,
 ) -> Dom {
     html!("menu-line", {
         .property("slot", "lines")
         .property("icon", "duplicate")
-        .event(clone!(state, module_id => move |_:events::Click| {
+        .event(clone!(state, sidebar_state => move |_:events::Click| {
             state.close_menu();
             duplicate_module(sidebar_state.clone(), &module_id);
         }))
     })
 }
 
-pub fn item_delete(state: Rc<State>, module: Rc<ModuleState>) -> Dom {
+fn item_delete(state: &Rc<State>, module: &Rc<ModuleState>) -> Dom {
     html!("menu-line", {
         .property("slot", "lines")
         .property("icon", "delete")
-        .event(clone!(state => move |_:events::Click| {
-            actions::delete(module.clone());
+        .event(clone!(state, module => move |_:events::Click| {
             state.close_menu();
+            actions::delete(module.clone());
         }))
     })
 }
 
-pub fn item_copy(state: Rc<State>, sidebar_state: Rc<SidebarState>, module_id: ModuleId) -> Dom {
+fn item_copy(state: &Rc<State>, sidebar_state: &Rc<SidebarState>, module_id: ModuleId) -> Dom {
     html!("menu-line", {
         .property("slot", "advanced")
         .property("customLabel", STR_COPY)
         .property("icon", "copy")
-        .event(clone!(state => move |_:events::Click| {
+        .event(clone!(state, sidebar_state => move |_:events::Click| {
             state.close_menu();
             copy_module(sidebar_state.clone(), &module_id);
         }))
     })
 }
 
-pub fn item_paste(state: Rc<State>, sidebar_state: Rc<SidebarState>) -> Dom {
+fn item_paste(state: &Rc<State>, sidebar_state: &Rc<SidebarState>) -> Dom {
     html!("menu-line", {
         .property("slot", "advanced")
         .property("customLabel", STR_PASTE)
         .property("icon", "copy")
-        .event(clone!(state => move |_:events::Click| {
+        .event(clone!(state, sidebar_state => move |_:events::Click| {
             state.close_menu();
             paste_module(sidebar_state.clone());
         }))
     })
 }
 
-pub fn item_duplicate_as(
-    state: Rc<State>,
-    sidebar_state: Rc<SidebarState>,
+fn item_duplicate_as(
+    state: &Rc<State>,
+    sidebar_state: &Rc<SidebarState>,
     module: &LiteModule,
 ) -> Dom {
     let card_kinds = vec![
@@ -160,7 +197,7 @@ pub fn item_duplicate_as(
     })
 }
 
-// pub fn item_edit_settings(state: Rc<State>, sidebar_state: Rc<SidebarState>) -> Dom {
+// fn item_edit_settings(state: Rc<State>, sidebar_state: Rc<SidebarState>) -> Dom {
 //     html!("menu-line", {
 //         .property("slot", "lines")
 //         .property("customLabel", STR_EDIT_SETTINGS)
@@ -172,3 +209,4 @@ pub fn item_duplicate_as(
 //         }))
 //     })
 // }
+
