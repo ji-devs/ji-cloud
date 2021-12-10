@@ -55,7 +55,10 @@ expression: body
           "feedbackNegative": "[audio]"
         },
         "privacyLevel": "unlisted",
-        "jigFocus": "modules"
+        "jigFocus": "modules",
+        "locked": false,
+        "otherKeywords": "",
+        "translatedKeywords": ""
       }
     },
     {
@@ -92,10 +95,13 @@ expression: body
           "feedbackNegative": "[audio]"
         },
         "privacyLevel": "unlisted",
-        "jigFocus": "modules"
+        "jigFocus": "modules",
+        "locked": false,
+        "otherKeywords": "",
+        "translatedKeywords": ""
       }
     }
   ],
-  "pages": 0,
-  "totalJigCount": 0
+  "pages": 1,
+  "totalJigCount": 2
 }
