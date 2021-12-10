@@ -59,6 +59,11 @@ expression: body
         "locked": false,
         "otherKeywords": "",
         "translatedKeywords": ""
+      },
+      "adminData": {
+        "rating": null,
+        "blocked": false,
+        "curated": false
       }
     },
     {
@@ -99,6 +104,11 @@ expression: body
         "locked": false,
         "otherKeywords": "",
         "translatedKeywords": ""
+      },
+      "adminData": {
+        "rating": null,
+        "blocked": false,
+        "curated": false
       }
     }
   ],

@@ -10,8 +10,8 @@ use shared::domain::{
             ModuleId, StableModuleId,
         },
         AudioBackground, AudioEffects, AudioFeedbackNegative, AudioFeedbackPositive, DraftOrLive,
-        JigData, JigFocus, JigId, JigPlayerSettings, JigResponse, LiteModule, ModuleKind,
-        PrivacyLevel, TextDirection,
+        JigAdminData, JigAdminUpdateData, JigData, JigFocus, JigId, JigPlayerSettings, JigRating,
+        JigResponse, LiteModule, ModuleKind, PrivacyLevel, TextDirection,
     },
     meta::{AffiliationId, AgeRangeId, GoalId},
     user::UserScope,
@@ -218,9 +218,13 @@ with cte as (
                when $2 = 1 then jig.live_id
                end as "draft_or_live_id",
            first_cover_assigned,  
-           published_at
+           published_at,
+           rating,
+           blocked,
+           curated
     from jig
     left join jig_play_count on jig_play_count.jig_id = jig.id
+    left join jig_admin_data "admin" on admin.jig_id = jig.id
     where id = $1
 )
 select cte.jig_id                                          as "jig_id: JigId",
@@ -248,6 +252,9 @@ select cte.jig_id                                          as "jig_id: JigId",
        locked,
        other_keywords,
        translated_keywords,
+       rating                                               as "rating?: JigRating",
+       blocked                                              as "blocked",                         
+       curated,
        array(select row (unnest(audio_feedback_positive))) as "audio_feedback_positive!: Vec<(AudioFeedbackPositive,)>",
        array(select row (unnest(audio_feedback_negative))) as "audio_feedback_negative!: Vec<(AudioFeedbackNegative,)>",
        array(
@@ -320,7 +327,12 @@ from jig_data
                 jig_focus: row.jig_focus,
                 locked: row.locked,
                 other_keywords: row.other_keywords,
-                translated_keywords: row.translated_keywords
+                translated_keywords: row.translated_keywords,
+            },
+            admin_data: JigAdminData {
+                rating: row.rating,
+                blocked: row.blocked,
+                curated: row.curated,
             },
         });
 
@@ -347,15 +359,20 @@ select jig.id                                       as "id!: JigId",
        live_id                                  as "live_id!",
        draft_id                                 as "draft_id!",
        published_at,
-       liked_count                            as "liked_count!",
+       liked_count                              as "liked_count!",
        (
            select play_count 
            from jig_play_count 
            where jig_play_count.jig_id = jig.id
-        )  as "play_count!"
+       )                                        as "play_count!",
+       rating                                   as "rating?: JigRating",
+       blocked                                  as "blocked!",             
+       curated                                  as "curated!"
 from jig 
+
          inner join unnest($1::uuid[])
     with ordinality t(id, ord) using (id)
+    inner join jig_admin_data "admin" on admin.jig_id = jig.id
 order by t.ord
     "#,
         ids,
@@ -404,11 +421,11 @@ select id,
        array(select row (jig_data_additional_resource.id)
              from jig_data_additional_resource
              where jig_data_id = jig_data.id)     as "additional_resources!: Vec<(AdditionalResourceId,)>",
-       privacy_level                                       as "privacy_level!: PrivacyLevel",
-       jig_focus                                           as "jig_focus!: JigFocus",
-       locked                                              as "locked!",
-       other_keywords                                      as "other_keywords!", 
-       translated_keywords                                 as "translated_keywords!"
+       privacy_level                              as "privacy_level!: PrivacyLevel",
+       jig_focus                                  as "jig_focus!: JigFocus",
+       locked                                     as "locked!",
+       other_keywords                             as "other_keywords!", 
+       translated_keywords                        as "translated_keywords!"
 from jig_data
          inner join unnest($1::uuid[])
     with ordinality t(id, ord) using (id)
@@ -488,6 +505,11 @@ order by t.ord
                 other_keywords: jig_data_row.other_keywords,
                 translated_keywords: jig_data_row.translated_keywords,
             },
+            admin_data: JigAdminData {
+                rating: jig_row.rating,
+                blocked: jig_row.blocked,
+                curated: jig_row.curated,
+            },
         })
         .collect();
 
@@ -498,7 +520,9 @@ order by t.ord
 
 pub async fn update_draft(
     pool: &PgPool,
+    api_key: &Option<String>,
     id: JigId,
+    user_id: Uuid,
     display_name: Option<&str>,
     goals: Option<&[GoalId]>,
     categories: Option<&[CategoryId]>,
@@ -513,7 +537,7 @@ pub async fn update_draft(
     privacy_level: Option<PrivacyLevel>,
     jig_focus: Option<JigFocus>,
     other_keywords: Option<String>,
-    api_key: &Option<String>,
+    admin_data: Option<JigAdminUpdateData>,
 ) -> Result<(), error::UpdateWithMetadata> {
     let mut txn = pool.begin().await?;
 
@@ -651,6 +675,26 @@ where id = $1 and $2 is distinct from other_keywords"#,
         .await?;
     }
 
+    if let Some(admin) = admin_data {
+        check_admin(&mut *txn, user_id).await?;
+
+        sqlx::query!(
+            r#"
+update jig_admin_data
+set rating = coalesce($2, rating),
+    blocked = coalesce($3, blocked),
+    curated = coalesce($4, curated)
+where jig_id = $1
+"#,
+            id.0,
+            admin.rating.map(|it| it as i16),
+            admin.blocked,
+            admin.curated
+        )
+        .execute(&mut *txn)
+        .await?;
+    }
+
     // update trivial, not null fields
     sqlx::query!(
         //language=SQL
@@ -700,6 +744,25 @@ where id = $1
     }
 
     txn.commit().await?;
+
+    Ok(())
+}
+
+pub async fn check_admin(
+    pool: &mut sqlx::PgConnection,
+    user_id: Uuid,
+) -> Result<(), error::UpdateWithMetadata> {
+    sqlx::query!(
+        r#"
+select exists(select 1 from user_scope where user_id = $1 and scope = $2) as "authed!"
+"#,
+        user_id,
+        UserScope::Admin as i16,
+    )
+    .fetch_optional(pool)
+    .await?
+    .ok_or(error::UpdateWithMetadata::Forbidden)?
+    .authed;
 
     Ok(())
 }
@@ -756,6 +819,8 @@ pub async fn browse(
     jig_focus: Option<JigFocus>,
     page: i32,
 ) -> sqlx::Result<Vec<JigResponse>> {
+    println!("inside");
+
     sqlx::query!( //language=SQL
         r#"
 select jig.id                                              as "jig_id: JigId",
@@ -773,7 +838,7 @@ select jig.id                                              as "jig_id: JigId",
             select play_count 
             from jig_play_count 
             where jig_play_count.jig_id = jig.id
-       )  as "play_count!",
+       )                                                   as "play_count!",
        display_name                                        as "display_name!",
        updated_at,
        language                                            as "language!",
@@ -786,6 +851,9 @@ select jig.id                                              as "jig_id: JigId",
        locked                                              as "locked!",
        other_keywords                                      as "other_keywords!",
        translated_keywords                                 as "translated_keywords!",
+       rating                                              as "rating!: Option<JigRating>",
+       blocked                                             as "blocked!",
+       curated                                             as "curated!",
        audio_background                                    as "audio_background!: Option<AudioBackground>",
        array(select row (unnest(audio_feedback_positive))) as "audio_feedback_positive!: Vec<(AudioFeedbackPositive,)>",
        array(select row (unnest(audio_feedback_negative))) as "audio_feedback_negative!: Vec<(AudioFeedbackNegative,)>",
@@ -812,6 +880,7 @@ select jig.id                                              as "jig_id: JigId",
              where jig_data_id = jig_data.id)              as "additional_resources!: Vec<(AdditionalResourceId,)>"
 from jig_data
          inner join jig on jig_data.id = jig.draft_id
+         inner join jig_admin_data "admin" on admin.jig_id = jig.id 
 where (author_id = $2 or $2 is null) 
 and (jig_focus = $3 or $3 is null)
 order by coalesce(updated_at, created_at) desc
@@ -863,7 +932,13 @@ limit 20 offset 20 * $1
                 jig_focus: row.jig_focus,
                 locked: row.locked,
                 other_keywords: row.other_keywords,
-                translated_keywords: row.translated_keywords
+                translated_keywords: row.translated_keywords,
+
+            },
+            admin_data: JigAdminData {
+                rating: row.rating,
+                blocked: row.blocked,
+                curated: row.curated,
             },
         })
         .try_collect()
