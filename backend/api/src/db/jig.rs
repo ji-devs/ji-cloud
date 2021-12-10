@@ -812,8 +812,8 @@ select jig.id                                              as "jig_id: JigId",
              where jig_data_id = jig_data.id)              as "additional_resources!: Vec<(AdditionalResourceId,)>"
 from jig_data
          inner join jig on jig_data.id = jig.draft_id
-where (author_id = coalesce($2, author_id)) 
-and (jig_focus = coalesce($3, jig_focus))
+where (author_id = $2 or $2 is null) 
+and (jig_focus = $3 or $3 is null)
 order by coalesce(updated_at, created_at) desc
 limit 20 offset 20 * $1
 "#,
@@ -870,7 +870,7 @@ limit 20 offset 20 * $1
         .await
 }
 
-/// `None` here means do not filter.
+// `None` here means do not filter.
 // TODO: fix filtered count, used in browse()
 pub async fn filtered_count(
     db: &PgPool,
@@ -883,10 +883,10 @@ pub async fn filtered_count(
         r#"
 select count(*) as "count!: i64"
 from jig
-left join jig_data on jig.live_id = jig_data.id
-where (privacy_level = coalesce($1, privacy_level))
-    and (author_id = coalesce($2, author_id))
-    and (jig_focus = coalesce($3, jig_focus))
+left join jig_data on jig.draft_id = jig_data.id
+where (privacy_level = $1 or $1 is null)
+    and (author_id = $2 or $2 is null)
+    and (jig_focus = $3 or $3 is null)
 "#,
         privacy_level.map(|it| it as i16),
         author_id,
