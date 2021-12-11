@@ -193,7 +193,10 @@ where
                         audio_effects: AudioEffects::default(),
                         default_player_settings: JigPlayerSettings::default(),
                         privacy_level: PrivacyLevel::default(),
-                        jig_focus: JigFocus::Modules
+                        jig_focus: JigFocus::Modules,
+                        locked: true,
+                        other_keywords: String::from(""),
+                        translated_keywords: String::from("")
                     });
                 }
 
