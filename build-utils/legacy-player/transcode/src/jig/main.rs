@@ -218,12 +218,12 @@ async fn publish_jig(ctx:&Context, jig_id: &JigId) {
 fn init_logger(verbose:bool) {
     if verbose {
         CombinedLogger::init(vec![
-            TermLogger::new(LevelFilter::Info, Config::default(), TerminalMode::Mixed),
+            TermLogger::new(LevelFilter::Info, Config::default(), TerminalMode::Mixed, ColorChoice::Auto),
         ])
         .unwrap();
     } else {
         CombinedLogger::init(vec![
-            TermLogger::new(LevelFilter::Warn, Config::default(), TerminalMode::Mixed),
+            TermLogger::new(LevelFilter::Warn, Config::default(), TerminalMode::Mixed, ColorChoice::Auto),
         ])
         .unwrap();
     }

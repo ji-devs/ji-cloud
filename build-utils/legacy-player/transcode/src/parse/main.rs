@@ -1,14 +1,16 @@
 #![allow(warnings)]
 
 use std::{future::Future, path::PathBuf};
+use std::sync::Arc;
 use dotenv::dotenv;
 use simplelog::*;
 use structopt::StructOpt;
-use std::fs::File;
-use std::io::Write;
+use std::fs::{self, File};
+use std::io::{BufReader, Write};
 use ::transcode::{
     src_manifest::*,
 };
+use serde::Deserialize;
 use shared::domain::jig::module::ModuleBody;
 use image::gif::{GifDecoder, GifEncoder};
 use image::{Frame, ImageDecoder, AnimationDecoder};
@@ -16,7 +18,11 @@ use flate2::Compression;
 use flate2::write::ZlibEncoder;
 use std::process::Command;
 use reqwest::Client; 
+use futures::stream::{FuturesUnordered, StreamExt};
+use tokio::time::{Duration};
 
+mod context;
+use context::*;
 mod options;
 use options::*;
 mod convert;
@@ -31,69 +37,137 @@ async fn main() {
     init_logger(opts.verbose);
     opts.sanitize();
 
-    let client = Client::new();
+    let ctx = Arc::new(Context::new(opts));
 
-    let json_urls = match opts.game_json_url.as_ref() {
-        Some(url) => {
-            vec![url.as_str()]
-        },
-        None => {
-            vec![
-                    // // David Test 002 (houdini) - 17736
-                    // https://jitap.net/activities/gemy/play/david-test-002
-                    // "https://d24o39yp3ttic8.cloudfront.net/5D00A147-73B7-43FF-A215-A38CB84CEBCD/game.json",
 
-                    // // // Corinne Houdini - 17762
-                    // https://jitap.net/activities/geno/play/houdini-states
-                    // "https://d24o39yp3ttic8.cloudfront.net/42C980D6-9FCE-4552-A5F2-ECFC0EA8D129/game.json",
+    let batch_size = *&ctx.opts.batch_size;
+    let mut jobs = get_futures(ctx.clone()).await;
 
-                    // // // Soundboard - 17765
-                    // // // https://jitap.net/activities/genr/play/soundboard-states 
-                    // "https://d24o39yp3ttic8.cloudfront.net/6A973171-C29A-4C99-A650-8033F996C6E7/game.json",
-
-                    // // // say something - 17746
-                    // // // https://jitap.net/activities/gen8/play/say-something-options
-                    // "https://d24o39yp3ttic8.cloudfront.net/86DCDC1D-64CB-4198-A866-257E213F0405/game.json",
-
-                    // // // video - 17771 
-                    // // // https://jitap.net/activities/genx/play/ 
-                    // "https://d24o39yp3ttic8.cloudfront.net/94FB3C73-FE29-46A8-933D-75D261DD4B8F/game.json",
-
-                    // // // ask a question - 17792
-                    // // // https://jitap.net/activities/geoi/play/testing-ask-a-question-legacy-player
-                    // "https://d24o39yp3ttic8.cloudfront.net/236F4AC1-9B06-49EA-B580-4AE806B0A337/game.json",
-
-                    // // puzzle - 17822
-                    // // https://jitap.net/activities/gepc/play/test-puzzles-for-legacy-player
-                    // "https://d24o39yp3ttic8.cloudfront.net/23DA1A28-88D7-4059-8DD1-167E18C0D5B7/game.json",
-
-                    // // talk or type - 17820
-                    // // https://jitap.net/activities/gepa/play/test-talk-or-type-for-legacy-player
-                    // "https://d24o39yp3ttic8.cloudfront.net/A789925B-6130-47BA-9DBB-BE4B5D7CCCDC/game.json"
-            ]
+    if batch_size == 0 {
+        for job in jobs {
+            job.await;
         }
-    };
-    
-    for url in json_urls {
-        transcode_game(&opts, client.clone(), url).await;
+    } else {
+        let mut futures = FuturesUnordered::new();
+
+
+        while let Some(next_job) = jobs.pop() {
+            while futures.len() >= batch_size {
+                futures.next().await;
+            }
+            futures.push(next_job);
+        }
+        while let Some(_) = futures.next().await {}
     }
 
+    log::info!("done!");
 }
 
-async fn transcode_game(opts: &Opts, client:Client, game_json_url: &str) {
+async fn get_futures(ctx:Arc<Context>) -> Vec<impl Future> {
+    let urls = game_json_urls(&ctx.opts).await;
+    log::info!("parsing {} urls", urls.len());
+    urls
+        .into_iter()
+        .map(|url| {
+            transcode_game(ctx.clone(), url)
+        })
+        .collect()
+}
+async fn game_json_urls(opts:&Opts) -> Vec<String> {
+
+    #[derive(Deserialize)]
+    struct Data {
+        album: Album,
+    }
+    #[derive(Deserialize)]
+    struct Album {
+        fields: AlbumFields,
+    }
+    #[derive(Deserialize)]
+    struct AlbumFields {
+        structure: String,
+    }
+
+    match opts.game_json_url.as_ref() {
+        Some(url) => {
+            vec![url.to_string()]
+        },
+        None => {
+            if opts.game_json_from_albums {
+                let paths = fs::read_dir(&opts.game_json_albums_dir).unwrap();
+                let mut urls = Vec::new();
+
+                for path in paths {
+                    let file = File::open(path.unwrap().path()).unwrap();
+                    let reader = BufReader::new(file);
+                    let data:Data = serde_json::from_reader(reader).unwrap();
+
+                    //log::info!("{}", data.album.fields.structure);
+                    urls.push(data.album.fields.structure);
+                }
+                urls
+            } else {
+                let list:&[&str] = &[
+                        // // David Test 002 (houdini) - 17736
+                        // https://jitap.net/activities/gemy/play/david-test-002
+                        // "https://d24o39yp3ttic8.cloudfront.net/5D00A147-73B7-43FF-A215-A38CB84CEBCD/game.json",
+
+                        // // // Corinne Houdini - 17762
+                        // https://jitap.net/activities/geno/play/houdini-states
+                        // "https://d24o39yp3ttic8.cloudfront.net/42C980D6-9FCE-4552-A5F2-ECFC0EA8D129/game.json",
+
+                        // // // Soundboard - 17765
+                        // // // https://jitap.net/activities/genr/play/soundboard-states 
+                        // "https://d24o39yp3ttic8.cloudfront.net/6A973171-C29A-4C99-A650-8033F996C6E7/game.json",
+
+                        // // // say something - 17746
+                        // // // https://jitap.net/activities/gen8/play/say-something-options
+                        // "https://d24o39yp3ttic8.cloudfront.net/86DCDC1D-64CB-4198-A866-257E213F0405/game.json",
+
+                        // // // video - 17771 
+                        // // // https://jitap.net/activities/genx/play/ 
+                        // "https://d24o39yp3ttic8.cloudfront.net/94FB3C73-FE29-46A8-933D-75D261DD4B8F/game.json",
+
+                        // // // ask a question - 17792
+                        // // // https://jitap.net/activities/geoi/play/testing-ask-a-question-legacy-player
+                        // "https://d24o39yp3ttic8.cloudfront.net/236F4AC1-9B06-49EA-B580-4AE806B0A337/game.json",
+
+                        // // puzzle - 17822
+                        // // https://jitap.net/activities/gepc/play/test-puzzles-for-legacy-player
+                        // "https://d24o39yp3ttic8.cloudfront.net/23DA1A28-88D7-4059-8DD1-167E18C0D5B7/game.json",
+
+                        // // talk or type - 17820
+                        // // https://jitap.net/activities/gepa/play/test-talk-or-type-for-legacy-player
+                        // "https://d24o39yp3ttic8.cloudfront.net/A789925B-6130-47BA-9DBB-BE4B5D7CCCDC/game.json"
+                ];
+                
+                list.iter().map(|x| String::from(*x)).collect()
+            }
+        }
+    }
+    
+}
+
+async fn transcode_game(ctx: Arc<Context>, game_json_url: String) {
+    let opts = &ctx.opts;
+    let client = &ctx.client;
 
     log::info!("loading game data from {}", game_json_url);
 
-    let (src_manifest, raw_game_json) = convert::load_url(game_json_url, &client).await;
+    let (src_manifest, raw_game_json) = convert::load_url(&ctx, &game_json_url).await;
 
     let slide_ids:Vec<String> = src_manifest.structure.slides.iter().map(|slide| slide.slide_id()).collect();
 
-    log::info!("loaded manifest, game id: {}", src_manifest.game_id());
+    log::info!("loaded manifest, game id: {} ({})", src_manifest.game_id(), game_json_url);
 
     let dest_dir = opts.dest_base_path.join(&src_manifest.game_id());
+    if opts.skip_dir_exists && dest_dir.join(&opts.dest_json_dir).join("game.json").exists() {
+        log::info!("skipping {} because dir already exists", &src_manifest.game_id());
+        return;
+    }
     std::fs::create_dir_all(&dest_dir);
 
-    let (slides, medias) = convert::into_slides(src_manifest, &client, &opts).await;
+    let (slides, medias) = convert::into_slides(&ctx, src_manifest, &game_json_url).await;
 
     if opts.write_json {
         let dest_path = dest_dir.join(&opts.dest_json_dir);
@@ -287,12 +361,12 @@ async fn transcode_game(opts: &Opts, client:Client, game_json_url: &str) {
 fn init_logger(verbose:bool) {
     if verbose {
         CombinedLogger::init(vec![
-            TermLogger::new(LevelFilter::Info, Config::default(), TerminalMode::Mixed),
+            TermLogger::new(LevelFilter::Info, Config::default(), TerminalMode::Mixed, ColorChoice::Auto),
         ])
         .unwrap();
     } else {
         CombinedLogger::init(vec![
-            TermLogger::new(LevelFilter::Warn, Config::default(), TerminalMode::Mixed),
+            TermLogger::new(LevelFilter::Warn, Config::default(), TerminalMode::Mixed, ColorChoice::Auto),
         ])
         .unwrap();
     }

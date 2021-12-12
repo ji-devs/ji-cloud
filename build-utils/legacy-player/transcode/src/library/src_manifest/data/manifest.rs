@@ -55,16 +55,16 @@ pub struct ManifestSettings {
 #[derive(Deserialize, Debug)]
 pub struct QuizSettings {
     #[serde(rename="activityTimeLimit")]
-    pub activity_time_limit: u32,
+    pub activity_time_limit: Option<f64>,
 
     #[serde(rename="globalLivesLimit")]
-    pub global_lives_limit: u32,
+    pub global_lives_limit: Option<f64>,
 
     #[serde(rename="globalTimeLimit")]
-    pub global_time_limit: u32,
+    pub global_time_limit: Option<f64>,
 
     #[serde(rename="quizModeEnabled")]
-    pub enabled: bool,
+    pub enabled: Option<bool>,
 }
 
 pub type PrimaryKey = usize;

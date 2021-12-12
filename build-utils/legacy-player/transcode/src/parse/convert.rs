@@ -6,10 +6,13 @@ pub use std::{
     fmt,
     future::Future,
     convert::TryFrom,
+    io::prelude::*
 };
 
 pub use components::stickers::video::ext::{YoutubeUrlExt};
 pub use scan_fmt::scan_fmt;
+use crate::context::Context;
+
 pub use super::options::*;
 
 pub use transcode::{ 
@@ -58,18 +61,19 @@ pub fn load_file(path:PathBuf) -> SrcManifest {
     serde_json::from_reader(file).unwrap()
 }
 
-pub async fn load_url(url:&str, client:&Client) -> (SrcManifest, String) {
+pub async fn load_url(ctx: &Context, url:&str) -> (SrcManifest, String) {
 
-    let text = 
-        client.get(url)
-            .send()
-            .await
-            .unwrap()
-            .error_for_status()
-            .unwrap()
-            .text()
-            .await
-            .unwrap();
+    let text = ctx 
+        .client
+        .get(url)
+        .send()
+        .await
+        .unwrap()
+        .error_for_status()
+        .unwrap()
+        .text()
+        .await
+        .unwrap();
 
     (
         serde_json::from_str(&text).unwrap(),
@@ -77,7 +81,7 @@ pub async fn load_url(url:&str, client:&Client) -> (SrcManifest, String) {
     )
 }
 
-pub async fn into_slides(manifest: SrcManifest, client: &Client, opts: &Opts) -> (Vec<Slide>, Vec<Media>) {
+pub async fn into_slides(ctx: &Context, manifest: SrcManifest, game_url: &str) -> (Vec<Slide>, Vec<Media>) {
     let mut medias:Vec<Media> = Vec::new();
 
     let game_id = manifest.game_id();
@@ -88,7 +92,7 @@ pub async fn into_slides(manifest: SrcManifest, client: &Client, opts: &Opts) ->
     let max_slides = manifest.structure.slides.len();
 
     for slide in manifest.structure.slides.into_iter() {
-        slides.push(slide::convert(slide, &opts, &client, &game_id, &base_url, &mut medias, max_slides).await);
+        slides.push(slide::convert(&ctx, slide, &game_url, &game_id, &base_url, &mut medias, max_slides).await);
     }
         
 
@@ -98,7 +102,7 @@ pub async fn into_slides(manifest: SrcManifest, client: &Client, opts: &Opts) ->
 mod slide {
     use super::*;
 
-    async fn make_audio_media(slide: &SrcSlide, client: &Client, base_url: &str, filename: &str, allowed_empty: bool, mut medias: &mut Vec<Media>) -> Option<String> {
+    async fn make_audio_media(ctx: &Context, game_url: &str, slide: &SrcSlide, base_url: &str, filename: &str, allowed_empty: bool, mut medias: &mut Vec<Media>) -> Option<String> {
 
         let slide_id = slide.slide_id(); 
 
@@ -111,7 +115,9 @@ mod slide {
             let filename = Path::new(&filename).file_name().unwrap().to_str().unwrap().to_string();
             let filename_dest = format!("{}.mp3", Path::new(&filename).file_stem().unwrap().to_str().unwrap().to_string());
 
-            match client.head(&url)
+            match ctx
+                .client
+                .head(&url)
                 .send()
                 .await
                 .unwrap()
@@ -131,10 +137,16 @@ mod slide {
                     },
                     Err(_) => {
                         if allowed_empty {
-                            log::info!("skipping {} because file doesn't exist- but this is allowed here", url);
+                            writeln!(&ctx.warnings_log, "skipping url {}, filename {}... is 404 and but is allowed to be (slide id: {}, game_url: {})", url, filename, slide_id, game_url).unwrap();
+                            log::warn!("skipping url {}, filename {}... is 404 and but is allowed to be (slide id: {}, game_url: {})", url, filename, slide_id, game_url);
                             None
                         } else {
-                            panic!("{} is 404 and not allowed to be", url);
+                            writeln!(&ctx.errors_log, "url {}, filename {} is 404 and not allowed to be (slide id: {}, game_url: {})", url, filename, slide_id, game_url).unwrap();
+                            if ctx.opts.panic_on_404_error {
+                                panic!("url {}, filename {} is 404 and not allowed to be (slide id: {}, game_url: {})", url, filename, slide_id, game_url);
+                            } else {
+                                None
+                            }
                         }
                     }
                 }
@@ -142,7 +154,7 @@ mod slide {
     }
 
 
-    async fn make_video_media(slide: &SrcSlide, client: &Client, base_url: &str, filename: &str, allowed_empty: bool, mut medias: &mut Vec<Media>) -> Option<String> {
+    async fn make_video_media(ctx: &Context, game_url: &str, slide: &SrcSlide, base_url: &str, filename: &str, allowed_empty: bool, mut medias: &mut Vec<Media>) -> Option<String> {
 
         let slide_id = slide.slide_id(); 
 
@@ -154,7 +166,9 @@ mod slide {
 
             let url = format!("{}/video/{}", base_url, filename);
 
-            match client.head(&url)
+            match ctx
+                .client
+                .head(&url)
                 .send()
                 .await
                 .unwrap()
@@ -174,12 +188,19 @@ mod slide {
                     },
 
                     Err(_) => {
-                        panic!("{} is 404 and not allowed to be", url);
+                        writeln!(&ctx.errors_log, "url {}, filename {} is 404 and not allowed to be (slide id: {}, game_url: {})", url, filename, slide_id, game_url).unwrap();
+                        if ctx.opts.panic_on_404_error {
+                            panic!("url {}, filename {} is 404 and not allowed to be (slide id: {}, game_url: {})", url, filename, slide_id, game_url);
+                        } else {
+                            None
+                        }
                     }
                 }
         }
     }
-    pub async fn convert(slide: SrcSlide, opts: &Opts, client: &Client, game_id: &str, base_url: &str, mut medias: &mut Vec<Media>, max_slides: usize) -> Slide {
+    pub async fn convert(ctx: &Context, slide: SrcSlide, game_url: &str, game_id: &str, base_url: &str, mut medias: &mut Vec<Media>, max_slides: usize) -> Slide {
+        let client = &ctx.client;
+        let opts = &ctx.opts;
         let slide_id = slide.slide_id(); 
 
         log::info!("parsing slide: {}", slide_id);
@@ -222,8 +243,10 @@ mod slide {
             if index >= max_slides {
                 if opts.allow_bad_jump_index {
                     log::warn!("invalid jump index: {} (there are only {} slides!)", index, max_slides);
+                    writeln!(&ctx.warnings_log, "invalid jump index: {} (there are only {} slides!) in game_id: {}, game_url: {}", index, max_slides, game_id, game_url).unwrap();
                     None
                 } else {
+                    writeln!(&ctx.errors_log, "invalid jump index: {} (there are only {} slides!) in game_id: {}, game_url: {}", index, max_slides, game_id, game_url).unwrap();
                     panic!("invalid jump index: {} (there are only {} slides!)", index, max_slides);
                 }
             } else {
@@ -249,10 +272,10 @@ mod slide {
                         } else if activity.shapes.is_empty() {
                             log::warn!("ask a question with no questions?? skipping...");
                         } else {
-                            let question_filename = slide::make_audio_media(&slide, &client, base_url, &activity.intro_audio, false, &mut medias).await;
+                            let question_filename = slide::make_audio_media(&ctx, &game_url, &slide, base_url, &activity.intro_audio, false, &mut medias).await;
                             let shape = activity.shapes[0].clone();
-                            let answer_filename = slide::make_audio_media(&slide, &client, base_url, &shape.audio, false, &mut medias).await;
-                            let wrong_filename = slide::make_audio_media(&slide, &client, base_url, &shape.audio_2, false, &mut medias).await;
+                            let answer_filename = slide::make_audio_media(&ctx, &game_url, &slide, base_url, &shape.audio, false, &mut medias).await;
+                            let wrong_filename = slide::make_audio_media(&ctx, &game_url, &slide, base_url, &shape.audio_2, false, &mut medias).await;
                             let hotspot = shape::convert_to_hotspot(shape);
 
                             items.push(QuestionItem{
@@ -270,10 +293,10 @@ mod slide {
                 } else {
                     let activity = slide.activities[0].clone();
 
-                    let audio_filename = slide::make_audio_media(&slide, &client, base_url, &activity.intro_audio, false, &mut medias).await;
+                    let audio_filename = slide::make_audio_media(&ctx, &game_url, &slide, base_url, &activity.intro_audio, false, &mut medias).await;
                     let bg_audio_filename = match activity.settings.bg_audio {
                         None => None,
-                        Some(bg_audio) => slide::make_audio_media(&slide, &client, base_url, &bg_audio, true, &mut medias).await
+                        Some(bg_audio) => slide::make_audio_media(&ctx, &game_url, &slide, base_url, &bg_audio, true, &mut medias).await
                     };
 
                     match slide.activity_kind {
@@ -310,7 +333,7 @@ mod slide {
 
 
                                 items.push(SoundboardItem {
-                                    audio_filename: slide::make_audio_media(&slide, &client, base_url, &shape.audio, false, &mut medias).await,
+                                    audio_filename: slide::make_audio_media(&ctx, &game_url, &slide, base_url, &shape.audio, false, &mut medias).await,
                                     text: map_text(&shape.settings.text),
                                     jump_index: shape.settings.jump_index.and_then(validate_jump_index),
                                     hotspot: shape::convert_to_hotspot(shape)
@@ -365,7 +388,7 @@ mod slide {
                                         Err(_) => {
                                             let video_url = video_url.replace("local://", "");
 
-                                            let filename = slide::make_video_media(&slide, &client, base_url, &video_url, false, &mut medias).await.unwrap();
+                                            let filename = slide::make_video_media(&ctx, &game_url, &slide, base_url, &video_url, false, &mut medias).await.unwrap();
 
                                             log::info!("not yt: {}", filename);
                                             VideoSource::Direct(filename)
@@ -390,7 +413,7 @@ mod slide {
 
                             for shape in activity.shapes.into_iter() {
                                 items.push(PuzzleItem {
-                                    audio_filename: slide::make_audio_media(&slide, &client, base_url, &shape.audio, false, &mut medias).await,
+                                    audio_filename: slide::make_audio_media(&ctx, &game_url, &slide, base_url, &shape.audio, false, &mut medias).await,
                                     hotspot: shape::convert_to_hotspot(shape)
                                 });
                             }
@@ -408,7 +431,7 @@ mod slide {
                                 }
                             };
 
-                            let theme = if map_theme(&activity.settings.theme) == PuzzleTheme::Extrude || map_theme(&activity.settings.theme_v2) == PuzzleTheme::Extrude {
+                            let theme = if map_theme(&activity.settings.theme) == PuzzleTheme::Extrude || activity.settings.theme_v2.unwrap_or_default() == true {
                                 PuzzleTheme::Extrude
                             } else {
                                 PuzzleTheme::Regular
@@ -434,7 +457,7 @@ mod slide {
 
                             for shape in activity.shapes.into_iter() {
                                 items.push(TalkTypeItem {
-                                    audio_filename: slide::make_audio_media(&slide, &client, base_url, &shape.audio, false, &mut medias).await,
+                                    audio_filename: slide::make_audio_media(&ctx, &game_url, &slide, base_url, &shape.audio, false, &mut medias).await,
                                     texts: match shape.settings.text_answers.as_ref() {
                                         None => None,
                                         Some(answers) => {
@@ -467,7 +490,7 @@ mod slide {
         };
 
 
-        let design = convert_design(&game_id, &slide_id, &base_url, &mut medias, slide.layers);
+        let design = convert_design(&game_url, &game_id, &slide_id, &base_url, &mut medias, slide.layers);
 
         Slide {
             activity,
@@ -487,24 +510,31 @@ fn map_text<T: AsRef<str>>(text: &Option<T>) -> Option<String> {
     })
 }
 
-fn convert_design(game_id: &str, slide_id: &str, base_url: &str, mut medias: &mut Vec<Media>, layers: Vec<SrcLayer>) -> Design {
+fn convert_design(game_url: &str, game_id: &str, slide_id: &str, base_url: &str, mut medias: &mut Vec<Media>, layers: Vec<SrcLayer>) -> Design {
     let mut stickers: Vec<Sticker> = Vec::new();
     let mut bgs:Vec<String> = Vec::new();
   
     for layer in layers {
 
         if let Some(filename) = layer.filename.as_ref() {
-            medias.push(
-                Media { 
-                    url: format!("{}/{}/layers/{}", base_url, slide_id, filename), 
-                    basepath: format!("slides/{}", slide_id), 
-                    filename: filename.to_string(),
-                    transcode: None
-                }
-            );
+            if !filename.is_empty() {
+                medias.push(
+                    Media { 
+                        url: format!("{}/{}/layers/{}", base_url, slide_id, filename), 
+                        basepath: format!("slides/{}", slide_id), 
+                        filename: filename.to_string(),
+                        transcode: None
+                    }
+                );
+            }
         }
 
-        let audio_filename = layer.audio.as_ref().map(|audio| {
+        let audio_filename = layer.audio.as_ref().and_then(|audio| {
+            if audio.is_empty() {
+                None
+            } else {
+                log::info!("{:?}", audio);
+
                 let filename_dest = format!("{}.mp3", Path::new(&audio).file_stem().unwrap().to_str().unwrap().to_string());
 
                 medias.push(Media { 
@@ -514,7 +544,8 @@ fn convert_design(game_id: &str, slide_id: &str, base_url: &str, mut medias: &mu
                     transcode: Some((MediaTranscode::Audio, filename_dest.clone()))
                 });
 
-                filename_dest
+                Some(filename_dest)
+            }
         });
 
 
@@ -523,65 +554,69 @@ fn convert_design(game_id: &str, slide_id: &str, base_url: &str, mut medias: &mu
                 bgs.push(layer.filename.unwrap());
             },
             SrcLayerKind::Text | SrcLayerKind::Image | SrcLayerKind::Animation => {
-                let sticker = Sticker { 
-                    filename: layer.filename.unwrap(),
-                    transform_matrix: convert_transform(layer.transform),
-                    hide: match layer.show_kind {
-                        SrcShowKind::ShowOnLoad => false, 
-                        SrcShowKind::HideOnTap => false, 
-                        SrcShowKind::ShowOnTap => true, 
-                    },
+                if let Some(filename) = layer.filename.as_ref() {
+                    let sticker = Sticker { 
+                        filename: filename.to_string(),
+                        transform_matrix: convert_transform(layer.transform),
+                        hide: match layer.show_kind {
+                            SrcShowKind::ShowOnLoad => false, 
+                            SrcShowKind::HideOnTap => false, 
+                            SrcShowKind::ShowOnTap => true, 
+                        },
 
-                    hide_toggle: match layer.show_kind {
-                        SrcShowKind::ShowOnLoad => None, 
-                        _ => Some(
-                            if layer.toggle_show {
-                                HideToggle::Always
-                            } else {
-                                HideToggle::Once
-                            }
-                        ), 
-                    },
-
-                    animation: {
-                        if layer.kind == SrcLayerKind::Animation {
-                            Some(
-                                match layer.loop_kind {
-                                    SrcLoopKind::PlayOnLoadLoop => Animation {
-                                        once: false,
-                                        tap: false 
-                                    },
-                                    SrcLoopKind::PlayOnLoadOnce => Animation {
-                                        once: true,
-                                        tap: false 
-                                    },
-                                    SrcLoopKind::PlayOnTapLoop => Animation {
-                                        once: false,
-                                        tap: true 
-                                    },
-                                    SrcLoopKind::PlayOnTapOnce => Animation {
-                                        once: true,
-                                        tap: true 
-                                    },
+                        hide_toggle: match layer.show_kind {
+                            SrcShowKind::ShowOnLoad => None, 
+                            _ => Some(
+                                if layer.toggle_show {
+                                    HideToggle::Always
+                                } else {
+                                    HideToggle::Once
                                 }
-                            )
-                        } else {
-                            None
-                        }
-                    },
+                            ), 
+                        },
 
-                    override_size: {
-                        // not really needed unless it differs from the real file size
-                        // but whatever...
-                        Some((layer.width, layer.height))
-                    },
+                        animation: {
+                            if layer.kind == SrcLayerKind::Animation {
+                                Some(
+                                    match layer.loop_kind {
+                                        SrcLoopKind::PlayOnLoadLoop => Animation {
+                                            once: false,
+                                            tap: false 
+                                        },
+                                        SrcLoopKind::PlayOnLoadOnce => Animation {
+                                            once: true,
+                                            tap: false 
+                                        },
+                                        SrcLoopKind::PlayOnTapLoop => Animation {
+                                            once: false,
+                                            tap: true 
+                                        },
+                                        SrcLoopKind::PlayOnTapOnce => Animation {
+                                            once: true,
+                                            tap: true 
+                                        },
+                                    }
+                                )
+                            } else {
+                                None
+                            }
+                        },
 
-                    audio_filename,
+                        override_size: {
+                            // not really needed unless it differs from the real file size
+                            // but whatever...
+                            Some((layer.width, layer.height))
+                        },
+
+                        audio_filename,
 
 
-                };
+                    };
 
-                stickers.push(sticker);
+                    stickers.push(sticker);
+                } else {
+                    log::warn!("expected filename for layer kind {:?}, game_id: {}, slide_id: {}, game_url: {}", &layer.kind, &game_id, &slide_id, &game_url);
+                }
             },
         }
     }

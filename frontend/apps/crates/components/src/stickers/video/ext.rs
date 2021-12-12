@@ -23,6 +23,7 @@ const REGULAR_URL_BASE: &str = "https://www.youtube.com/watch?v=";
 const SHARE_URL_BASE: &str = "https://youtu.be/";
 const EMBED_IFRAME_BASE: &str = "<iframe ";
 const EMBED_URL_BASE: &str = "https://www.youtube.com/embed/";
+const LEGACY_WATCH_STRING_BASE: &str = "watch?v=";
 
 fn get_id_from_url(url: &str) -> Result<&str, ()> {
     let id;
@@ -34,6 +35,8 @@ fn get_id_from_url(url: &str) -> Result<&str, ()> {
         id = extract_id_share(url);
     } else if url.starts_with(EMBED_IFRAME_BASE) || url.starts_with(EMBED_URL_BASE) {
         id = extract_id_iframe(url);
+    } else if url.find(LEGACY_WATCH_STRING_BASE).is_some() {
+        id = extract_legacy_watch(url);
     } else {
         return Err(());
     };
@@ -43,6 +46,12 @@ fn get_id_from_url(url: &str) -> Result<&str, ()> {
     } else {
         Err(())
     }
+}
+
+fn extract_legacy_watch(url: &str) -> &str {
+    let start_bytes = url.find(LEGACY_WATCH_STRING_BASE).unwrap_or(0) + LEGACY_WATCH_STRING_BASE.len();
+    let end_bytes = url.find("&").unwrap_or(url.len());
+    &url[start_bytes..end_bytes]
 }
 
 fn extract_id_regular(url: &str) -> &str {

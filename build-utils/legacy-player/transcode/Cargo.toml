@@ -9,8 +9,12 @@ name = "parse"
 path = "src/parse/main.rs"
 
 [[bin]]
-name = "upload"
-path = "src/upload/main.rs"
+name = "jig"
+path = "src/upload/jig.rs"
+
+[[bin]]
+name = "download_albums"
+path = "src/download_albums/main.rs"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -19,21 +23,21 @@ shared = { path = "../../../shared/rust" }
 utils = { path = "../../../frontend/apps/crates/utils" }
 components = { path = "../../../frontend/apps/crates/components" }
 scan_fmt = "0.2.6"
-structopt = "^0.3"
-simplelog = "^0.8"
-cfg-if = "^0.1"
-dotenv = "^0.15"
-log = "^0.4"
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0.46"
-serde_repr = "0.1.6"
-url = "2.1.1"
-reqwest = { version = "0.10.8", features = ["json", "stream"] }
-futures = "0.3.5"
-tokio = { version = "0.2", features = ["full"] }
-tokio-util = {version = "0.3.1", features = ["codec"]}
-csv = "1.1"
+structopt = "0.3.25"
+simplelog = "0.11.1"
+cfg-if = "1.0.0"
+dotenv = "0.15.0"
+log = "0.4.14"
+serde = { version = "1.0.131", features = ["derive"] }
+serde_json = { version = "1.0.72", features = ["raw_value"] }
+serde_repr = "0.1.7"
+url = "2.2.2"
+reqwest = { version = "0.11.7", features = ["json", "stream"] }
+futures = "0.3.18"
+tokio = { version = "1.14.0", features = ["full"] }
+tokio-util = { version = "0.6.9", features = ["codec"] }
+csv = "1.1.6"
 image = "0.23.14"
 flate2 = "1.0.22"
-uuid = { version = "0.8", features = ["serde", "v1"] }
+uuid = { version = "0.8.2", features = ["serde", "v1"] }
 serde_with  = { version = "1.11.0", features = ["json", "macros"] }
