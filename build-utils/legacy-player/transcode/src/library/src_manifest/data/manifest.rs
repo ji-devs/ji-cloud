@@ -31,7 +31,7 @@ impl SrcManifest {
 #[derive(Deserialize, Debug)]
 pub struct ManifestStructure {
     #[serde(rename="musicFile")]
-    pub music_file: String,
+    pub music_file: Option<String>,
 
     #[serde(rename="pk")]
     pub key: PrimaryKey,

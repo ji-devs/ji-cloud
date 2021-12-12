@@ -61,7 +61,7 @@ pub fn load_file(path:PathBuf) -> SrcManifest {
     serde_json::from_reader(file).unwrap()
 }
 
-pub async fn load_url(ctx: &Context, url:&str) -> (SrcManifest, String) {
+pub async fn load_url(ctx: &Context, url:&str) -> Option<(SrcManifest, String)> {
 
     let text = ctx 
         .client
@@ -74,11 +74,21 @@ pub async fn load_url(ctx: &Context, url:&str) -> (SrcManifest, String) {
         .text()
         .await
         .unwrap();
+    
+    let manifest = serde_json::from_str::<SrcManifest>(&text);
 
-    (
-        serde_json::from_str(&text).unwrap(),
-        text
-    )
+    match manifest {
+        Ok(manifest) => Some((manifest, text)),
+        Err(err) => {
+            writeln!(&ctx.errors_log, "unable to parse manifest for {}, error: {:?}", url, err).unwrap();
+            if !ctx.opts.keep_going_if_manifest_parse_error {
+                panic!("unable to parse manifest for {}, error: {:?}", url, err);
+            } else {
+                None
+            }
+        }
+    }
+
 }
 
 pub async fn into_slides(ctx: &Context, manifest: SrcManifest, game_url: &str) -> (Vec<Slide>, Vec<Media>) {
@@ -386,12 +396,18 @@ mod slide {
                                             VideoSource::Youtube(yt)
                                         },
                                         Err(_) => {
-                                            let video_url = video_url.replace("local://", "");
+                                            let filename = video_url.replace("local://", "");
 
-                                            let filename = slide::make_video_media(&ctx, &game_url, &slide, base_url, &video_url, false, &mut medias).await.unwrap();
+                                            match slide::make_video_media(&ctx, &game_url, &slide, base_url, &filename, false, &mut medias).await {
+                                                None => {
+                                                    panic!("unable to get url from {}", video_url);
+                                                },
+                                                Some(filename) => {
+                                                    log::info!("not yt: {}", filename);
+                                                    VideoSource::Direct(filename)
+                                                }
+                                            }
 
-                                            log::info!("not yt: {}", filename);
-                                            VideoSource::Direct(filename)
                                         }
                                     };
 

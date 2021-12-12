@@ -48,8 +48,10 @@ async fn main() {
             job.await;
         }
     } else {
-        let mut futures = FuturesUnordered::new();
+        //See: https://users.rust-lang.org/t/awaiting-futuresunordered/49295/5
+        //Idea is we try to have a saturated queue of futures
 
+        let mut futures = FuturesUnordered::new();
 
         while let Some(next_job) = jobs.pop() {
             while futures.len() >= batch_size {
@@ -110,35 +112,35 @@ async fn game_json_urls(opts:&Opts) -> Vec<String> {
                 let list:&[&str] = &[
                         // // David Test 002 (houdini) - 17736
                         // https://jitap.net/activities/gemy/play/david-test-002
-                        // "https://d24o39yp3ttic8.cloudfront.net/5D00A147-73B7-43FF-A215-A38CB84CEBCD/game.json",
+                        "https://d24o39yp3ttic8.cloudfront.net/5D00A147-73B7-43FF-A215-A38CB84CEBCD/game.json",
 
                         // // // Corinne Houdini - 17762
                         // https://jitap.net/activities/geno/play/houdini-states
-                        // "https://d24o39yp3ttic8.cloudfront.net/42C980D6-9FCE-4552-A5F2-ECFC0EA8D129/game.json",
+                        "https://d24o39yp3ttic8.cloudfront.net/42C980D6-9FCE-4552-A5F2-ECFC0EA8D129/game.json",
 
                         // // // Soundboard - 17765
                         // // // https://jitap.net/activities/genr/play/soundboard-states 
-                        // "https://d24o39yp3ttic8.cloudfront.net/6A973171-C29A-4C99-A650-8033F996C6E7/game.json",
+                        "https://d24o39yp3ttic8.cloudfront.net/6A973171-C29A-4C99-A650-8033F996C6E7/game.json",
 
                         // // // say something - 17746
                         // // // https://jitap.net/activities/gen8/play/say-something-options
-                        // "https://d24o39yp3ttic8.cloudfront.net/86DCDC1D-64CB-4198-A866-257E213F0405/game.json",
+                        "https://d24o39yp3ttic8.cloudfront.net/86DCDC1D-64CB-4198-A866-257E213F0405/game.json",
 
                         // // // video - 17771 
                         // // // https://jitap.net/activities/genx/play/ 
-                        // "https://d24o39yp3ttic8.cloudfront.net/94FB3C73-FE29-46A8-933D-75D261DD4B8F/game.json",
+                        "https://d24o39yp3ttic8.cloudfront.net/94FB3C73-FE29-46A8-933D-75D261DD4B8F/game.json",
 
                         // // // ask a question - 17792
                         // // // https://jitap.net/activities/geoi/play/testing-ask-a-question-legacy-player
-                        // "https://d24o39yp3ttic8.cloudfront.net/236F4AC1-9B06-49EA-B580-4AE806B0A337/game.json",
+                        "https://d24o39yp3ttic8.cloudfront.net/236F4AC1-9B06-49EA-B580-4AE806B0A337/game.json",
 
                         // // puzzle - 17822
                         // // https://jitap.net/activities/gepc/play/test-puzzles-for-legacy-player
-                        // "https://d24o39yp3ttic8.cloudfront.net/23DA1A28-88D7-4059-8DD1-167E18C0D5B7/game.json",
+                        "https://d24o39yp3ttic8.cloudfront.net/23DA1A28-88D7-4059-8DD1-167E18C0D5B7/game.json",
 
                         // // talk or type - 17820
                         // // https://jitap.net/activities/gepa/play/test-talk-or-type-for-legacy-player
-                        // "https://d24o39yp3ttic8.cloudfront.net/A789925B-6130-47BA-9DBB-BE4B5D7CCCDC/game.json"
+                        "https://d24o39yp3ttic8.cloudfront.net/A789925B-6130-47BA-9DBB-BE4B5D7CCCDC/game.json"
                 ];
                 
                 list.iter().map(|x| String::from(*x)).collect()
@@ -154,7 +156,13 @@ async fn transcode_game(ctx: Arc<Context>, game_json_url: String) {
 
     log::info!("loading game data from {}", game_json_url);
 
-    let (src_manifest, raw_game_json) = convert::load_url(&ctx, &game_json_url).await;
+    let loaded = convert::load_url(&ctx, &game_json_url).await;
+
+    if loaded.is_none() {
+        return;
+    }
+
+    let (src_manifest, raw_game_json) = loaded.unwrap();
 
     let slide_ids:Vec<String> = src_manifest.structure.slides.iter().map(|slide| slide.slide_id()).collect();
 
@@ -186,8 +194,11 @@ async fn transcode_game(ctx: Arc<Context>, game_json_url: String) {
 
             for (index, slide) in slides.into_iter().enumerate() {
                 let id = &slide_ids[index];
-                let mut file = File::create(&dest_path.join(format!("{}.json", id))).unwrap();
-                serde_json::to_writer_pretty(file, &slide).unwrap();
+                if let Ok(mut file) = File::create(&dest_path.join(format!("{}.json", id))) {
+                    serde_json::to_writer_pretty(file, &slide).unwrap();
+                } else {
+                    panic!("unable to create file at {} (game json: {})", dest_path.join(format!("{}.json", id)).display().to_string(), game_json_url);
+                }
             }
         }
     }

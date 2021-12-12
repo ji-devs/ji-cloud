@@ -4,6 +4,7 @@ use shared::domain::jig::module::body::{
     _groups::design::{Video, VideoHost, YoutubeUrl},
 };
 use utils::prelude::*;
+use url::Url;
 
 pub trait VideoExt {
     fn new(value: VideoHost) -> Self;
@@ -19,6 +20,7 @@ impl VideoExt for Video {
     }
 }
 
+const ANY_YOUTUBE_DOMAIN: &str = "www.youtube.com";
 const REGULAR_URL_BASE: &str = "https://www.youtube.com/watch?v=";
 const SHARE_URL_BASE: &str = "https://youtu.be/";
 const EMBED_IFRAME_BASE: &str = "<iframe ";
@@ -37,6 +39,23 @@ fn get_id_from_url(url: &str) -> Result<&str, ()> {
         id = extract_id_iframe(url);
     } else if url.find(LEGACY_WATCH_STRING_BASE).is_some() {
         id = extract_legacy_watch(url);
+    } else if url.find(ANY_YOUTUBE_DOMAIN).is_some() {
+        match Url::parse(url) {
+            Ok(real_url) => {
+                match real_url.query_pairs().find(|pair| pair.0 == "v") {
+                    Some(_) => {
+                        id = extract_any_v(url);
+                    },
+                    None => {
+                        return Err(())
+                    }
+                }
+
+            },
+            _ => {
+                return Err(())
+            }
+        }
     } else {
         return Err(());
     };
@@ -48,9 +67,17 @@ fn get_id_from_url(url: &str) -> Result<&str, ()> {
     }
 }
 
+// https://play.rust-lang.org/?version=stable&mode=debug&edition=2021&gist=814bb22fa870f8132b2995c6e99a5221
+fn extract_any_v(url: &str) -> &str {
+    let start_bytes = url.find("v=").unwrap_or(0) + 2;
+    let rest = &url[start_bytes..];
+    let end_bytes = start_bytes + rest.find("&").unwrap_or(rest.len());
+    &url[start_bytes..end_bytes]
+}
 fn extract_legacy_watch(url: &str) -> &str {
     let start_bytes = url.find(LEGACY_WATCH_STRING_BASE).unwrap_or(0) + LEGACY_WATCH_STRING_BASE.len();
-    let end_bytes = url.find("&").unwrap_or(url.len());
+    let rest = &url[start_bytes..];
+    let end_bytes = start_bytes + rest.find("&").unwrap_or(rest.len());
     &url[start_bytes..end_bytes]
 }
 
