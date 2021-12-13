@@ -10,6 +10,7 @@ use crate::player::sidebar::actions::load_ages;
 use super::state::State;
 
 pub(super) mod info;
+pub(super) mod like;
 pub(super) mod report;
 pub(super) mod share;
 
@@ -45,10 +46,15 @@ pub fn render(state: Rc<State>) -> Dom {
                 state.sidebar_open.set(false);
             }))
         }))
-        .child(html!("jig-play-sidebar-action", {
-            .property("slot", "actions")
-            .property("kind", "like")
-        }))
+        .child_signal(state.player_state.jig.signal_ref(clone!(state => move |jig| {
+            // only show like if jig is published
+            match jig {
+                Some(jig) if jig.published_at.is_some() => {
+                    Some(like::render(Rc::clone(&state), &jig))
+                },
+                _ => None,
+            }
+        })))
         .child_signal(state.player_state.jig.signal_ref(clone!(state => move |jig| {
             // only show share options if jig is published
             match jig {
