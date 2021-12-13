@@ -1,0 +1,118 @@
+use components::module::_common::thumbnail::ModuleThumbnail;
+use dominator::{clone, html, Dom};
+use futures_signals::{
+    signal::SignalExt,
+    signal_vec::{MutableVec, SignalVecExt},
+};
+use shared::domain::jig::{JigResponse, JigFocus};
+use std::rc::Rc;
+use utils::{ages::AgeRangeVecExt, events, jig::published_at_string};
+
+use super::state::SearchResultsSection;
+
+const STR_LOAD_MORE: &str = "See more";
+
+impl SearchResultsSection {
+    pub fn render(self: &Rc<Self>) -> Dom {
+        let state = self;
+
+        html!("home-search-results-section", {
+            .property("slot", "sections")
+            .property("kind", match state.focus {
+                JigFocus::Modules => "jigs",
+                JigFocus::Resources => "resources",
+            })
+            .property_signal("resultsCount", state.total.signal())
+            .children_signal_vec(state.list.signal_vec_cloned().map(clone!(state => move |jig| {
+                state.render_result(&jig)
+            })))
+            .child_signal(state.all_loaded_signal().map(clone!(state => move |all_loaded| {
+                match all_loaded {
+                    true => None,
+                    false => {
+                        Some(html!("button-rect", {
+                            .property("slot", "load-more")
+                            .property("color", "blue")
+                            .property("type", "filled")
+                            .property_signal("disabled", state.loader.is_loading())
+                            .text(STR_LOAD_MORE)
+                            .event(clone!(state => move |_: events::Click| {
+                                state.loader.load(clone!(state => async move {
+                                    let req = state.search_selected.to_search_request();
+                                    state.load_items(req).await;
+                                }));
+                            }))
+                        }))
+                    },
+                }
+            })))
+        })
+    }
+
+    fn render_result(self: &Rc<Self>, jig: &JigResponse) -> Dom {
+        let state = self;
+        let jig_ages = jig.jig_data.age_ranges.clone();
+
+        html!("home-search-result", {
+            .property("slot", "results")
+            .property("title", &jig.jig_data.display_name)
+            .property("playedCount", "???")
+            .property("likedCount", "???")
+            .property("author", &jig.author_name.clone().unwrap_or_default())
+            .property("publishedAt", {
+                match jig.published_at {
+                    Some(publish_at) => published_at_string(publish_at, false),
+                    None => String::new(),
+                }
+            })
+            .property("language", &jig.jig_data.language)
+            .property_signal("ages", state.search_options.age_ranges.signal_cloned().map(move |age_ranges| {
+                age_ranges.range_string(&jig_ages)
+            }))
+            .property("description", jig.jig_data.description.clone())
+            .children(&mut [
+                ModuleThumbnail::render(
+                    Rc::new(ModuleThumbnail {
+                        jig_id: jig.id,
+                        module: jig.jig_data.modules[0].clone(),
+                        is_jig_fallback: true,
+                    }),
+                    Some("image")
+                ),
+
+                html!("home-search-result-details", {
+                    .property("slot", "categories")
+                    .children(jig.jig_data.categories.iter().map(|category_id| {
+                        html!("home-search-result-category", {
+                            .property_signal("label", {
+                                state.search_options.category_label_lookup.signal_cloned().map(clone!(category_id => move |category_label_lookup| {
+                                    match category_label_lookup.get(&category_id) {
+                                        Some(label) => label.to_owned(),
+                                        None => String::new(),
+                                    }
+                                }))
+                            })
+                        })
+                    }))
+                }),
+                html!("button-rect", {
+                    .property("slot", "play-button")
+                    .property("color", "blue")
+                    .property("bold", true)
+                    .text("Play")
+                    .event({
+                        let jig_id = jig.id;
+                        clone!(state => move |_: events::Click| {
+                            state.play_jig.set(Some(jig_id));
+                        })
+                    })
+                }),
+            ])
+        })
+    }
+    // new
+    // leaningPathJigCount
+    // playedCount
+    // likedCount
+    // byJiTeam
+}

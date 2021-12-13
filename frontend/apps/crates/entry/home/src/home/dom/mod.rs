@@ -10,10 +10,11 @@ use components::{
     player_popup::{PlayerPopup, PreviewPopupCallbacks},
 };
 
+use crate::home::search_results::SearchResults;
+
 use super::state::{HomePageMode, State};
 
 mod home_sections;
-mod search_results;
 mod search_section;
 
 pub fn render(state: Rc<State>, auto_search: bool) -> Dom {
@@ -27,7 +28,9 @@ pub fn render(state: Rc<State>, auto_search: bool) -> Dom {
                 .child_signal(state.mode.signal_cloned().map(clone!(state => move |mode| {
                     match mode {
                         HomePageMode::Home => Some(home_sections::render(state.clone())),
-                        HomePageMode::Search(query, results) => Some(search_results::render(state.clone(), query, results)),
+                        HomePageMode::Search(search_results) => {
+                            Some(search_results.render())
+                        },
                     }
                 })))
             }),
