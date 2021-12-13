@@ -10,7 +10,7 @@ path = "src/parse/main.rs"
 
 [[bin]]
 name = "jig"
-path = "src/upload/jig.rs"
+path = "src/jig/main.rs"
 
 [[bin]]
 name = "download_albums"

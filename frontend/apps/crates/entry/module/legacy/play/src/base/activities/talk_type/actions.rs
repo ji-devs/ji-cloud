@@ -28,6 +28,7 @@ impl TalkType {
 
             let msg = match state.raw.jump_index {
                 Some(index) => {
+                    let index = index + 1; // bump for cover
                     log::info!("going to index {}!", index);
                     IframeAction::new(ModuleToJigPlayerMessage::JumpToIndex(index))
                 }

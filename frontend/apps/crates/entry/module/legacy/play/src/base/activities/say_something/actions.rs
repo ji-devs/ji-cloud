@@ -31,6 +31,7 @@ impl SaySomething {
     pub fn next(&self) {
         let msg = match self.raw.advance_index {
             Some(index) => {
+                let index = index + 1; // bump for cover
                 log::info!("going to index {}!", index);
                 IframeAction::new(ModuleToJigPlayerMessage::JumpToIndex(index))
             }
