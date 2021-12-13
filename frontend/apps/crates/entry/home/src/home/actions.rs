@@ -3,14 +3,14 @@ use crate::home::search_results::SearchResults;
 use super::state::{HomePageMode};
 use dominator::clone;
 use futures::join;
-use futures_signals::signal_vec::MutableVec;
+
 use shared::{
     api::{
         endpoints::{jig, user::Profile},
         ApiEndpoint,
     },
     domain::{
-        jig::{JigCountResponse, JigFocus, JigSearchQuery, JigSearchResponse},
+        jig::{JigCountResponse},
         user::UserProfile
     },
     error::EmptyError

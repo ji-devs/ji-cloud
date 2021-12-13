@@ -1,14 +1,14 @@
 use super::state::*;
-use super::actions::*;
+
 use std::rc::Rc;
 use utils::{prelude::*, resize::{ResizeInfo, resize_info_signal}};
 use crate::base::styles;
 use crate::config::HINT_TIME_MS;
-use futures_signals::signal::{Mutable, SignalExt};
+use futures_signals::signal::{SignalExt};
 use dominator::{html, Dom, clone, with_node};
-use dominator_helpers::signals::{DefaultSignal, DomRectSignal};
-use awsm_web::dom::*;
-use wasm_bindgen::JsCast;
+
+
+
 use components::overlay::handle::OverlayHandle;
 use gloo_timers::future::TimeoutFuture;
 
@@ -66,20 +66,20 @@ impl TalkTypeItem {
                     _ => ""
                 }
             })) 
-            .event(clone!(state => move |evt:events::Focus| {
+            .event(clone!(state => move |_evt:events::Focus| {
                 state.play_audio();
             }))
             .event(clone!(state => move |evt:events::CustomInput| {
                 state.phase.set_neq(TalkTypeItemPhase::Input);
                 state.value.set_neq(evt.value())
             }))
-            .event(clone!(state, parent => move |evt:events::Enter| {
+            .event(clone!(state, parent => move |_evt:events::Enter| {
                 state.clone().evaluate(parent.clone())
             }))
-            .with_node!(elem => {
+            .with_node!(_elem => {
                 .apply_if(parent.raw.show_hints, OverlayHandle::lifecycle(clone!(state => move || {
                     html!("empty-fragment", {
-                        .child_signal(state.phase.signal().map(clone!(elem, state => move |phase| {
+                        .child_signal(state.phase.signal().map(clone!(state => move |phase| {
                             match phase {
                                 TalkTypeItemPhase::Wrong => {
                                     Some(html!("overlay-tooltip-bubble", {

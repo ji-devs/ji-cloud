@@ -37,14 +37,14 @@ use shared::domain::jig::module::body::legacy::design::{
 };
 
 use crate::base::state::Base;
-use std::ops::{Mul, Sub};
+
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::{cell::RefCell, rc::Rc, sync::atomic::AtomicBool};
 use web_sys::{CanvasRenderingContext2d, Element, HtmlCanvasElement, ImageData, Worker};
 
 use awsm_web::workers::new_worker_from_js;
 use dominator::clone;
-use js_sys::{Object, Reflect};
+use js_sys::{Reflect};
 use serde::{Deserialize, Serialize};
 use std::cell::Cell;
 use utils::prelude::*;
@@ -159,9 +159,9 @@ impl AnimationPlayer {
             raf: RefCell::new(None),
         });
 
-        *state.raf.borrow_mut() = Some(Raf::new(clone!(state => move |tick| {
+        *state.raf.borrow_mut() = Some(Raf::new(|_tick| {
 
-        })));
+        }));
 
         *state.worker_listener.borrow_mut() = Some(EventListener::new(
             &state.worker,

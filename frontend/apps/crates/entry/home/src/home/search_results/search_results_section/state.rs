@@ -1,13 +1,13 @@
-use std::rc::{Rc, Weak};
+use std::rc::{Rc};
 
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::{signal::{Mutable, Signal}, signal_vec::{MutableVec, SignalVecExt}, map_ref};
 use shared::domain::jig::{JigResponse, JigSearchResponse, JigFocus, JigId};
-use utils::unwrap::UnwrapJiExt;
+
 
 use crate::home::state::SearchSelected;
 
-use super::super::state::SearchResults;
+
 use super::super::super::state::SearchOptions;
 
 pub struct SearchResultsSection {

@@ -1,8 +1,8 @@
 use std::rc::{Rc, Weak};
 
-use dominator_helpers::futures::AsyncLoader;
-use futures_signals::{signal::{Mutable, Signal}, signal_vec::{MutableVec, SignalVecExt}, map_ref};
-use shared::domain::jig::{JigResponse, JigSearchResponse, JigFocus, JigId};
+
+use futures_signals::{signal::{Signal}, map_ref};
+use shared::domain::jig::{JigFocus};
 use utils::unwrap::UnwrapJiExt;
 
 use super::{super::state::State as HomeState, search_results_section::SearchResultsSection};

@@ -1,17 +1,17 @@
 use std::rc::Rc;
 
-use dominator::clone;
+
 use shared::api::ApiEndpoint;
 use shared::domain::CreateResponse;
 use shared::domain::jig::additional_resource::{AdditionalResourceId, ResourceContent};
 use shared::domain::meta::ResourceTypeId;
 use shared::error::EmptyError;
 use shared::{api::endpoints, domain::jig::additional_resource::AdditionalResourceCreateRequest};
-use url::Url;
-use utils::prelude::{ApiEndpointExt, api_with_auth};
-use utils::unwrap::UnwrapJiExt;
-use wasm_bindgen_futures::spawn_local;
-use web_sys::File;
+
+use utils::prelude::{api_with_auth};
+
+
+
 
 use super::state::AddAdditionalResource;
 

@@ -1,11 +1,11 @@
-use std::{borrow::{Borrow, BorrowMut}, rc::Rc, str::FromStr};
+use std::{rc::Rc};
 
-use components::input::simple_select::SimpleSelect;
-use dominator::{Dom, clone, html, with_node};
-use futures_signals::{map_ref, signal::{Signal, SignalExt, not}};
-use url::Url;
+
+use dominator::{Dom, clone, html};
+use futures_signals::{map_ref, signal::{Signal, not}};
+
 use utils::events;
-use web_sys::{HtmlElement, HtmlTextAreaElement};
+
 
 use crate::edit::publish::add_additional_resource::ActivePopup;
 

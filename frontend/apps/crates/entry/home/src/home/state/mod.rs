@@ -1,8 +1,8 @@
 use std::{iter, rc::Rc};
 
 use dominator_helpers::futures::AsyncLoader;
-use futures_signals::{signal::Mutable, signal_vec::MutableVec};
-use shared::domain::jig::{JigId, JigResponse, JigSearchQuery};
+use futures_signals::{signal::Mutable};
+use shared::domain::jig::{JigId, JigSearchQuery};
 
 use components::page_header::state::PageLinks;
 

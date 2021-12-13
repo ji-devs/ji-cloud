@@ -10,7 +10,7 @@ use components::{
     player_popup::{PlayerPopup, PreviewPopupCallbacks},
 };
 
-use crate::home::search_results::SearchResults;
+
 
 use super::state::{HomePageMode, State};
 

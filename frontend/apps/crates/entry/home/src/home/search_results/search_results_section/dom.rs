@@ -2,7 +2,7 @@ use components::module::_common::thumbnail::ModuleThumbnail;
 use dominator::{clone, html, Dom};
 use futures_signals::{
     signal::SignalExt,
-    signal_vec::{MutableVec, SignalVecExt},
+    signal_vec::{SignalVecExt},
 };
 use shared::domain::jig::{JigResponse, JigFocus};
 use std::rc::Rc;
