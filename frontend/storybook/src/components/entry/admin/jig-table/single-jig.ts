@@ -1,4 +1,3 @@
-import { html } from "lit-element";
 import { JigData } from "./types";
 
 import "@elements/entry/admin/jig_label_ui/single-jig";
@@ -17,7 +16,9 @@ export default {
   component: "single-jig",
 };
 
-const Template = ({ jig }) => html`
+export const SingleJig = ({jig}) => {
+  console.log({jig})
+  return `
   <single-jig>
     <span slot="jig-name">${jig.jig_name}</span>
     <span slot="author">${jig.author}</span>
@@ -26,9 +27,8 @@ const Template = ({ jig }) => html`
     <span slot="language">${jig.language}</span>
     <span slot="curators">${jig.curators}</span>
   </single-jig>
-`;
-
-export const Primary = Template.bind({});
-Primary.args = {
-  jig,
+`
 };
+SingleJig.args = {
+  jig
+}
