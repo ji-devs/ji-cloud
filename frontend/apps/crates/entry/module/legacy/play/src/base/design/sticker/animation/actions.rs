@@ -75,6 +75,8 @@ impl Controller {
             }
         }
 
+        log::info!("has audio: {}", self.audio_filename.is_some());
+
         if playing_audio {
             if let Some(audio_filename) = self.audio_filename.as_ref() {
                 //win the race condition with hotspots

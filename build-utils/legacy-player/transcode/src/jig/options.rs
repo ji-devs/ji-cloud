@@ -17,6 +17,11 @@ pub struct Opts {
     #[structopt(long, default_value="json", parse(from_os_str))]
     pub src_json_dir: PathBuf,
 
+    #[structopt(long, default_value="C:\\Users\\david\\Downloads\\info.txt", parse(from_os_str))]
+    pub info_log: PathBuf,
+
+    #[structopt(long, parse(try_from_str), default_value = "false")]
+    pub clear_log_files: bool,
 
     /// batch size to help throttle connections 
     #[structopt(long, parse(try_from_str), default_value = "100")]
