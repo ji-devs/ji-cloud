@@ -44,7 +44,7 @@ impl State {
             done: Mutable::new(false),
             player_options,
             bg_audio_handle: Rc::new(RefCell::new(None)),
-            bg_audio_playing: Mutable::new(false),
+            bg_audio_playing: Mutable::new(true),
         }
     }
 }
