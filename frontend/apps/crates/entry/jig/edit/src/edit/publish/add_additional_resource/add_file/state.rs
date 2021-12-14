@@ -1,8 +1,8 @@
-use std::{cell::RefCell, rc::Rc};
+use std::{rc::Rc};
 
 use futures_signals::signal::Mutable;
 use shared::domain::meta::ResourceType;
-use url::Url;
+
 use web_sys::File;
 
 use super::super::state::AddAdditionalResource as AddAdditionalResourceState;

@@ -1,13 +1,12 @@
 use super::state::*;
 use std::rc::Rc;
-use futures_signals::signal::{Mutable, Signal, SignalExt};
+use futures_signals::signal::{SignalExt};
 use gloo_timers::future::TimeoutFuture;
 use crate::base::styles;
-use dominator::{html, Dom, clone, with_node, animation::Percentage};
+use dominator::{html, Dom, clone, with_node};
 use utils::{
     prelude::*,
-    image_effects::ImageEffect,
-    resize::resize_info_signal
+    image_effects::ImageEffect
 };
 
 impl Puzzle {
@@ -39,8 +38,8 @@ impl Puzzle {
                     })
                 })))
             })
-            .future(state.game_signal().for_each(clone!(state => move |(init_phase, resize_info)| {
-                clone!(state => async move {
+            .future(state.game_signal().for_each(move |(init_phase, resize_info)| {
+                async move {
                     match init_phase {
                         InitPhase::Playing(game) => {
                             game.draw(&resize_info);
@@ -50,8 +49,8 @@ impl Puzzle {
                         },
                         _ => {}
                     } 
-                })
-            })))
+                }
+            }))
             .event(clone!(state => move |evt:events::MouseDown| {
                 match state.init_phase.get_cloned() {
                     InitPhase::Playing(game) => {

@@ -1,8 +1,8 @@
 use super::state::*;
-use dominator::clone;
+
 use std::rc::Rc;
 use utils::prelude::*;
-use wasm_bindgen::prelude::*;
+
 
 impl TalkType {
 
@@ -14,8 +14,7 @@ impl TalkType {
         if let Some(audio_filename) = state.raw.audio_filename.as_ref() {
             state.base.audio_manager.play_clip_on_ended(
                 state.base.activity_media_url(&audio_filename),
-                clone!(state => move || {
-                }),
+                || {},
             );
         }
     }
@@ -28,6 +27,7 @@ impl TalkType {
 
             let msg = match state.raw.jump_index {
                 Some(index) => {
+                    let index = index + 1; // bump for cover
                     log::info!("going to index {}!", index);
                     IframeAction::new(ModuleToJigPlayerMessage::JumpToIndex(index))
                 }

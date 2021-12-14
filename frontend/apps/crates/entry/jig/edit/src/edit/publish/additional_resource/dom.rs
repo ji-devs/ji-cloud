@@ -1,23 +1,12 @@
 use std::rc::Rc;
 
-use components::{
-    tooltip::{
-        callbacks::TooltipErrorCallbacks,
-        dom::render as TooltipDom,
-        state::{Anchor, ContentAnchor, MoveStrategy, TooltipData, TooltipError, TooltipTarget, State as TooltipState},
-    },
-    input::simple_select::SimpleSelect
-};
-use dominator::{Dom, clone, html, with_node};
+
+use dominator::{Dom, clone, html};
 use futures_signals::{map_ref, signal::Signal};
-use utils::{events, unwrap::UnwrapJiExt};
-use web_sys::HtmlElement;
+use utils::{events};
+
 
 use super::state::AdditionalResourceComponent;
-
-const STR_UPLOAD_FILE: &str = "Upload file";
-const STR_ADD_LINK: &str = "Add link";
-const STR_SELECT_REQUIRED: &str = "Please select type\nbefore moving on";
 
 impl AdditionalResourceComponent {
     pub fn render(self: Rc<Self>) -> Dom {

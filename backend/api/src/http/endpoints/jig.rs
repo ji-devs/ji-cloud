@@ -122,7 +122,9 @@ async fn update_draft(
 
     db::jig::update_draft(
         &*db,
+        api_key,
         id,
+        claims.0.user_id,
         req.display_name.as_deref(),
         req.goals.as_deref(),
         req.categories.as_deref(),
@@ -137,7 +139,7 @@ async fn update_draft(
         req.privacy_level,
         req.jig_focus,
         req.other_keywords,
-        api_key,
+        req.admin_data,
     )
     .await?;
 
@@ -189,6 +191,8 @@ async fn browse(
     });
 
     db::jig::authz_list(&*db, claims.0.user_id, author_id).await?;
+
+    println!("before browse");
 
     let jigs = db::jig::browse(
         db.as_ref(),

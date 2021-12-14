@@ -23,9 +23,3 @@ impl AdditionalResourceComponent {
         })
     }
 }
-
-#[derive(Clone, Copy, Debug)]
-pub(super) enum ResourceMode {
-    File,
-    Link,
-}

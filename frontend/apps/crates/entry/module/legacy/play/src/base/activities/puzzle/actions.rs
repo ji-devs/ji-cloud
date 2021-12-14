@@ -23,12 +23,11 @@ use super::state::*;
 use dominator::{clone, animation::Percentage};
 use std::rc::Rc;
 use futures_signals::{
-    map_ref,
-    signal::{Mutable, Signal, SignalExt}
+    signal::{SignalExt}
 };
-use utils::{prelude::*, drag::Drag, resize::{ResizeInfo, get_resize_info}, math::{mat_2d, mat4::{self, Matrix4}, vec2}};
-use components::traces::{canvas::{draw_single_shape, apply_transform_mat4, clip_single_shape}, utils::TraceShapeExt};
-use web_sys::CanvasRenderingContext2d;
+use utils::{prelude::*, drag::Drag, resize::{ResizeInfo, get_resize_info}, math::{mat4::{Matrix4}, vec2}};
+use components::traces::{canvas::{draw_single_shape, apply_transform_mat4, clip_single_shape}};
+
 use wasm_bindgen::prelude::*;
 use crate::config::PUZZLE_DISTANCE_THRESHHOLD;
 
@@ -192,7 +191,9 @@ impl PuzzleGame {
             log::info!("all finished!!");
             let msg = match self.raw.jump_index {
                 Some(index) => {
+                    let index = index + 1; // bump for cover
                     log::info!("going to index {}!", index);
+                    
                     IframeAction::new(ModuleToJigPlayerMessage::JumpToIndex(index))
                 }
                 None => {
@@ -243,7 +244,7 @@ impl PuzzleItem {
         let curr_t = self.curr_transform_matrix.borrow().get_translation();
         let dist = vec2::distance(&curr_t, &[0.0, 0.0]);
 
-        if(dist <= PUZZLE_DISTANCE_THRESHHOLD) {
+        if dist <= PUZZLE_DISTANCE_THRESHHOLD {
             *self.curr_transform_matrix.borrow_mut() = Matrix4::identity(); 
 
             self.completed.set(true);

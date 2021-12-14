@@ -85,15 +85,15 @@ impl TraceShapeExt for RawTraceShape {
             } 
             RawTraceShape::Ellipse(radius_x, radius_y) => {
                 let (radius_x, radius_y) = resize_info.get_pos_denormalized(*radius_x, *radius_y);
-                let mut path = Path2d::new().unwrap_ji();
-                path.ellipse(radius_x, radius_y, radius_x, radius_y, 0.0, 0.0, 2.0 * std::f64::consts::PI);
+                let path = Path2d::new().unwrap_ji();
+                let _ = path.ellipse(radius_x, radius_y, radius_x, radius_y, 0.0, 0.0, 2.0 * std::f64::consts::PI);
 
                 path
             }
             RawTraceShape::Rect(width, height) => {
                 let (width, height) = resize_info.get_pos_denormalized(*width, *height);
 
-                let mut path = Path2d::new().unwrap_ji();
+                let path = Path2d::new().unwrap_ji();
                 path.rect(0.0, 0.0, width, height);
 
                 path

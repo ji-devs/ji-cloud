@@ -63,6 +63,26 @@ pub fn load_file(path:PathBuf) -> SrcManifest {
 
 pub async fn load_url(ctx: &Context, url:&str) -> Option<(SrcManifest, String)> {
 
+    #[derive(Deserialize, Debug)]
+    pub struct MinimalSrcManifest {
+        pub album_store: MinimalAlbumStore
+    }
+    #[derive(Deserialize, Debug)]
+    pub struct MinimalAlbumStore {
+        pub album: MinimalAlbum,
+    }
+    #[derive(Deserialize, Debug)]
+    pub struct MinimalAlbum {
+        #[serde(rename="pk")]
+        pub key: usize,
+    }
+
+    impl MinimalSrcManifest {
+        pub fn game_id(&self) -> String {
+            format!("{}", self.album_store.album.key)
+        }
+    }
+
     let text = ctx 
         .client
         .get(url)
@@ -80,9 +100,14 @@ pub async fn load_url(ctx: &Context, url:&str) -> Option<(SrcManifest, String)> 
     match manifest {
         Ok(manifest) => Some((manifest, text)),
         Err(err) => {
-            writeln!(&ctx.errors_log, "unable to parse manifest for {}, error: {:?}", url, err).unwrap();
+            let game_id = match serde_json::from_str::<MinimalSrcManifest>(&text) {
+                Ok(m) => m.game_id(),
+                Err(_) => "unknown".to_string()
+            };
+
+            writeln!(&ctx.errors_log, "{} unable to parse manifest at {}, error: {:?}", game_id, url, err).unwrap();
             if !ctx.opts.keep_going_if_manifest_parse_error {
-                panic!("unable to parse manifest for {}, error: {:?}", url, err);
+                panic!("{} unable to parse manifest at {}, error: {:?}", game_id, url, err);
             } else {
                 None
             }
@@ -112,7 +137,7 @@ pub async fn into_slides(ctx: &Context, manifest: SrcManifest, game_url: &str) -
 mod slide {
     use super::*;
 
-    async fn make_audio_media(ctx: &Context, game_url: &str, slide: &SrcSlide, base_url: &str, filename: &str, allowed_empty: bool, mut medias: &mut Vec<Media>) -> Option<String> {
+    async fn make_audio_media(ctx: &Context, game_id: &str, game_url: &str, slide: &SrcSlide, base_url: &str, filename: &str, allowed_empty: bool, mut medias: &mut Vec<Media>) -> Option<String> {
 
         let slide_id = slide.slide_id(); 
 
@@ -147,13 +172,13 @@ mod slide {
                     },
                     Err(_) => {
                         if allowed_empty {
-                            writeln!(&ctx.warnings_log, "skipping url {}, filename {}... is 404 and but is allowed to be (slide id: {}, game_url: {})", url, filename, slide_id, game_url).unwrap();
-                            log::warn!("skipping url {}, filename {}... is 404 and but is allowed to be (slide id: {}, game_url: {})", url, filename, slide_id, game_url);
+                            writeln!(&ctx.warnings_log, "{} skipping url {}, filename {}... is 404 and but is allowed to be (slide id: {}, game_url: {})", game_id, url, filename, slide_id, game_url).unwrap();
+                            log::warn!("{} skipping url {}, filename {}... is 404 and but is allowed to be (slide id: {}, game_url: {})", game_id, url, filename, slide_id, game_url);
                             None
                         } else {
-                            writeln!(&ctx.errors_log, "url {}, filename {} is 404 and not allowed to be (slide id: {}, game_url: {})", url, filename, slide_id, game_url).unwrap();
+                            writeln!(&ctx.errors_log, "{} url {}, filename {} is 404 and not allowed to be (slide id: {}, game_url: {})", game_id, url, filename, slide_id, game_url).unwrap();
                             if ctx.opts.panic_on_404_error {
-                                panic!("url {}, filename {} is 404 and not allowed to be (slide id: {}, game_url: {})", url, filename, slide_id, game_url);
+                                panic!("{} url {}, filename {} is 404 and not allowed to be (slide id: {}, game_url: {})", game_id, url, filename, slide_id, game_url);
                             } else {
                                 None
                             }
@@ -164,7 +189,7 @@ mod slide {
     }
 
 
-    async fn make_video_media(ctx: &Context, game_url: &str, slide: &SrcSlide, base_url: &str, filename: &str, allowed_empty: bool, mut medias: &mut Vec<Media>) -> Option<String> {
+    async fn make_video_media(ctx: &Context, game_id: &str, game_url: &str, slide: &SrcSlide, base_url: &str, filename: &str, allowed_empty: bool, mut medias: &mut Vec<Media>) -> Option<String> {
 
         let slide_id = slide.slide_id(); 
 
@@ -198,9 +223,9 @@ mod slide {
                     },
 
                     Err(_) => {
-                        writeln!(&ctx.errors_log, "url {}, filename {} is 404 and not allowed to be (slide id: {}, game_url: {})", url, filename, slide_id, game_url).unwrap();
+                        writeln!(&ctx.errors_log, "{} url {}, filename {} is 404 and not allowed to be (slide id: {}, game_url: {})", game_id, url, filename, slide_id, game_url).unwrap();
                         if ctx.opts.panic_on_404_error {
-                            panic!("url {}, filename {} is 404 and not allowed to be (slide id: {}, game_url: {})", url, filename, slide_id, game_url);
+                            panic!("{} url {}, filename {} is 404 and not allowed to be (slide id: {}, game_url: {})", game_id, url, filename, slide_id, game_url);
                         } else {
                             None
                         }
@@ -253,11 +278,11 @@ mod slide {
             if index >= max_slides {
                 if opts.allow_bad_jump_index {
                     log::warn!("invalid jump index: {} (there are only {} slides!)", index, max_slides);
-                    writeln!(&ctx.warnings_log, "invalid jump index: {} (there are only {} slides!) in game_id: {}, game_url: {}", index, max_slides, game_id, game_url).unwrap();
+                    writeln!(&ctx.warnings_log, "{} invalid jump index: {} (there are only {} slides!), game_url: {}", game_id, index, max_slides,  game_url).unwrap();
                     None
                 } else {
-                    writeln!(&ctx.errors_log, "invalid jump index: {} (there are only {} slides!) in game_id: {}, game_url: {}", index, max_slides, game_id, game_url).unwrap();
-                    panic!("invalid jump index: {} (there are only {} slides!)", index, max_slides);
+                    writeln!(&ctx.errors_log, "{} invalid jump index: {} (there are only {} slides!), game_url: {}", game_id, index, max_slides, game_url).unwrap();
+                    panic!("{} invalid jump index: {} (there are only {} slides!), game_url: {}", game_id, index, max_slides, game_url);
                 }
             } else {
                 Some(index)
@@ -282,10 +307,10 @@ mod slide {
                         } else if activity.shapes.is_empty() {
                             log::warn!("ask a question with no questions?? skipping...");
                         } else {
-                            let question_filename = slide::make_audio_media(&ctx, &game_url, &slide, base_url, &activity.intro_audio, false, &mut medias).await;
+                            let question_filename = slide::make_audio_media(&ctx, &game_id, &game_url, &slide, base_url, &activity.intro_audio, false, &mut medias).await;
                             let shape = activity.shapes[0].clone();
-                            let answer_filename = slide::make_audio_media(&ctx, &game_url, &slide, base_url, &shape.audio, false, &mut medias).await;
-                            let wrong_filename = slide::make_audio_media(&ctx, &game_url, &slide, base_url, &shape.audio_2, false, &mut medias).await;
+                            let answer_filename = slide::make_audio_media(&ctx, &game_id, &game_url, &slide, base_url, &shape.audio, false, &mut medias).await;
+                            let wrong_filename = slide::make_audio_media(&ctx, &game_id, &game_url, &slide, base_url, &shape.audio_2, false, &mut medias).await;
                             let hotspot = shape::convert_to_hotspot(shape);
 
                             items.push(QuestionItem{
@@ -303,10 +328,10 @@ mod slide {
                 } else {
                     let activity = slide.activities[0].clone();
 
-                    let audio_filename = slide::make_audio_media(&ctx, &game_url, &slide, base_url, &activity.intro_audio, false, &mut medias).await;
+                    let audio_filename = slide::make_audio_media(&ctx, &game_id, &game_url, &slide, base_url, &activity.intro_audio, false, &mut medias).await;
                     let bg_audio_filename = match activity.settings.bg_audio {
                         None => None,
-                        Some(bg_audio) => slide::make_audio_media(&ctx, &game_url, &slide, base_url, &bg_audio, true, &mut medias).await
+                        Some(bg_audio) => slide::make_audio_media(&ctx, &game_id, &game_url, &slide, base_url, &bg_audio, true, &mut medias).await
                     };
 
                     match slide.activity_kind {
@@ -343,7 +368,7 @@ mod slide {
 
 
                                 items.push(SoundboardItem {
-                                    audio_filename: slide::make_audio_media(&ctx, &game_url, &slide, base_url, &shape.audio, false, &mut medias).await,
+                                    audio_filename: slide::make_audio_media(&ctx, &game_id, &game_url, &slide, base_url, &shape.audio, false, &mut medias).await,
                                     text: map_text(&shape.settings.text),
                                     jump_index: shape.settings.jump_index.and_then(validate_jump_index),
                                     hotspot: shape::convert_to_hotspot(shape)
@@ -398,7 +423,7 @@ mod slide {
                                         Err(_) => {
                                             let filename = video_url.replace("local://", "");
 
-                                            match slide::make_video_media(&ctx, &game_url, &slide, base_url, &filename, false, &mut medias).await {
+                                            match slide::make_video_media(&ctx,&game_id, &game_url, &slide, base_url, &filename, false, &mut medias).await {
                                                 None => {
                                                     panic!("unable to get url from {}", video_url);
                                                 },
@@ -429,7 +454,7 @@ mod slide {
 
                             for shape in activity.shapes.into_iter() {
                                 items.push(PuzzleItem {
-                                    audio_filename: slide::make_audio_media(&ctx, &game_url, &slide, base_url, &shape.audio, false, &mut medias).await,
+                                    audio_filename: slide::make_audio_media(&ctx, &game_id, &game_url, &slide, base_url, &shape.audio, false, &mut medias).await,
                                     hotspot: shape::convert_to_hotspot(shape)
                                 });
                             }
@@ -473,7 +498,7 @@ mod slide {
 
                             for shape in activity.shapes.into_iter() {
                                 items.push(TalkTypeItem {
-                                    audio_filename: slide::make_audio_media(&ctx, &game_url, &slide, base_url, &shape.audio, false, &mut medias).await,
+                                    audio_filename: slide::make_audio_media(&ctx, &game_id, &game_url, &slide, base_url, &shape.audio, false, &mut medias).await,
                                     texts: match shape.settings.text_answers.as_ref() {
                                         None => None,
                                         Some(answers) => {

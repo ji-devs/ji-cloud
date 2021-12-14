@@ -15,7 +15,7 @@ use shared::{
         MetadataNotFound
     }
 };
-use std::{default, rc::Rc};
+use std::{rc::Rc};
 use utils::prelude::*;
 
 impl JigGallery {

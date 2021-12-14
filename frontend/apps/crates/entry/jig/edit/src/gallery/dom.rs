@@ -1,4 +1,4 @@
-use super::{actions, state::*};
+use super::{state::*};
 use components::module::_common::thumbnail::ModuleThumbnail;
 use components::page_header::state::PageLinks;
 use components::{page_footer, page_header};
@@ -43,14 +43,14 @@ impl JigGallery {
                             state.create_jig();
                         }))
                     }))
-                    .apply_if(state.focus.is_modules(), clone!(state => move |dom| {
+                    .apply_if(state.focus.is_modules(), move |dom| {
                         dom.children(TEMPLATE_KINDS.iter().map(|kind| {
                             html!("jig-gallery-template", {
                                 .property("slot", "jig-templates")
                                 .property("kind", *kind)
                             })
                         }))
-                    }))
+                    })
                     .child(html!("input-search", {
                         .property("slot", "search-input")
                         .property("placeholder", STR_SEARCH)

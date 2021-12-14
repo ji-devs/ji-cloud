@@ -1,12 +1,12 @@
 use crate::base::state::Base;
-use std::{rc::Rc, sync::atomic::AtomicUsize};
+use std::{rc::Rc};
 use std::cell::{RefCell, Cell};
-use dominator::{clone, animation::{MutableAnimation, Percentage}};
+use dominator::{clone, animation::{MutableAnimation}};
 use shared::domain::jig::module::body::legacy::activity::{Puzzle as RawPuzzle, PuzzleItem as RawPuzzleItem};
 use web_sys::HtmlCanvasElement;
 use futures_signals::{
     map_ref,
-    signal::{Mutable, Signal, SignalExt}
+    signal::{Mutable, Signal}
 };
 use utils::{prelude::*,drag::Drag, image_effects::ImageEffect, resize::{resize_info_signal, ResizeInfo}, math::mat4::Matrix4};
 use awsm_web::canvas::get_2d_context;
@@ -138,7 +138,7 @@ impl PuzzleGame {
 
 
 impl PuzzleItem{
-    pub fn new(base: Rc<Base>, effects: &ImageEffect, raw: RawPuzzleItem) -> Rc<Self> {
+    pub fn new(base: Rc<Base>, _effects: &ImageEffect, raw: RawPuzzleItem) -> Rc<Self> {
         let orig_transform_matrix = match raw.hotspot.transform_matrix {
             None => Matrix4::identity(),
             Some(values) => Matrix4::new_direct(values)

@@ -297,6 +297,57 @@ impl Default for JigFocus {
     }
 }
 
+/// These fields can be edited by admin and can be viewed by everyone
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct JigAdminData {
+    /// Rating for jig, weighted for jig search
+    #[serde(default)]
+    pub rating: Option<JigRating>,
+
+    /// if true does not appear in search
+    pub blocked: bool,
+
+    /// Indicates jig has been curated by admin
+    pub curated: bool,
+}
+
+/// These fields can be edited by admin and can be viewed by everyone
+#[derive(Serialize, Deserialize, Debug, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct JigAdminUpdateData {
+    /// Rating for jig, weighted for jig search
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
+    pub rating: Option<JigRating>,
+
+    /// if true does not appear in search
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
+    pub blocked: Option<bool>,
+
+    /// Indicates jig has been curated by admin
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
+    pub curated: Option<bool>,
+}
+
+/// Admin rating for Jig
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, Eq, PartialEq)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[serde(rename_all = "camelCase")]
+#[repr(i16)]
+pub enum JigRating {
+    #[allow(missing_docs)]
+    One = 1,
+    #[allow(missing_docs)]
+    Two = 2,
+    #[allow(missing_docs)]
+    Three = 3,
+    #[allow(missing_docs)]
+    NoRating = 17,
+}
+
 /// Audio for background music
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, Eq, PartialEq)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
@@ -474,6 +525,9 @@ pub struct JigResponse {
 
     /// The data of the requested JIG.
     pub jig_data: JigData,
+
+    /// Admin data for Jig
+    pub admin_data: JigAdminData,
 }
 
 /// Request for updating a JIG's draft data.
@@ -557,6 +611,11 @@ pub struct JigUpdateDraftDataRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub other_keywords: Option<String>,
+
+    /// Rating by admin for Jig
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
+    pub admin_data: Option<JigAdminUpdateData>,
 }
 
 /// Query for [`Browse`](crate::api::endpoints::jig::Browse).

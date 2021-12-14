@@ -1,25 +1,25 @@
-use futures_signals::signal::Mutable;
-use gloo::events::EventListener;
-use awsm_web::tick::Raf;
+
+
+
 use gloo_timers::callback::Timeout;
 
 use shared::domain::jig::module::body::legacy::design::{
-    Animation, HideToggle, Sticker as RawSticker,
+    HideToggle,
 };
 
-use crate::base::state::Base;
+
 use std::ops::{Mul, Sub};
-use std::sync::atomic::{AtomicUsize, Ordering};
-use std::{cell::RefCell, rc::Rc, sync::atomic::AtomicBool};
-use web_sys::{CanvasRenderingContext2d, Element, HtmlCanvasElement, ImageData, Worker};
+use std::sync::atomic::{Ordering};
+use std::{rc::Rc};
+use web_sys::{ImageData};
 
 use dominator::clone;
 use js_sys::{Object, Reflect};
-use serde::{Deserialize, Serialize};
-use std::cell::Cell;
+
+
 use utils::prelude::*;
 use wasm_bindgen::prelude::*;
-use wasm_bindgen::JsCast;
+
 use super::state::*;
 use crate::base::actions::StageClick;
 use utils::math::bounds::BoundsF64;
@@ -135,7 +135,7 @@ impl AnimationPlayer {
             ctx.clear_rect(0.0, 0.0, ctx.canvas().unwrap().width().into(), ctx.canvas().unwrap().height().into());
         } else {
             if let Some(img_data) = self.last_paint_data.borrow().as_ref() {
-                self.map_current_frame(|frame_index, frame_info| {
+                self.map_current_frame(|_frame_index, frame_info| {
                     ctx.put_image_data_with_dirty_x_and_dirty_y_and_dirty_width_and_dirty_height(
                         img_data,
                         0.0,

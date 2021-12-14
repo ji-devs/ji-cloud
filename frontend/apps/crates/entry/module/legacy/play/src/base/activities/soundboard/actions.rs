@@ -55,16 +55,24 @@ impl SoundboardItem {
             state.base.audio_manager.play_clip_on_ended(
                 state.base.activity_media_url(&audio_filename),
                 clone!(state => move || {
-                    if let Some(index) = state.jump_index {
-                        log::info!("jumpin to {}", index);
-                        let _ = IframeAction::new(ModuleToJigPlayerMessage::JumpToIndex(index)).try_post_message_to_top();
+                    let msg = if let Some(index) = state.jump_index {
+                        let index = index + 1; // bump for cover
+                        log::info!("going to index {}!", index);
+
+                        Some(IframeAction::new(ModuleToJigPlayerMessage::JumpToIndex(index)))
                     } else {
                         let all_revealed = parent.items.iter().all(|item| item.revealed.get());
 
                         if all_revealed {
                             log::info!("finished all, going next");
-                            let _ = IframeAction::new(ModuleToJigPlayerMessage::Next).try_post_message_to_top();
+                            Some(IframeAction::new(ModuleToJigPlayerMessage::Next))
+                        } else {
+                            None
                         }
+                    };
+
+                    if let Some(msg) = msg {
+                        let _ = msg.try_post_message_to_top();
                     }
                 })
             );
