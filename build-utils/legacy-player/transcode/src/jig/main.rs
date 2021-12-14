@@ -151,6 +151,7 @@ async fn parse(ctx: Arc<Context>, game_id: String) {
 
     if let Some(image_id) = image_id {
         if !ctx.opts.dry_run {
+            log::info!("setting cover");
             assign_cover_image(ctx, &jig_id, image_id).await;
         }
     }
