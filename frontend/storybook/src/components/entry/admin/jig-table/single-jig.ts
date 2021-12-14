@@ -17,7 +17,6 @@ export default {
 };
 
 export const SingleJig = ({jig}) => {
-  console.log({jig})
   return `
   <single-jig>
     <span slot="jig-name">${jig.jig_name}</span>

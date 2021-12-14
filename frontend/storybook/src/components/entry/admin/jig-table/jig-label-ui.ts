@@ -1,4 +1,3 @@
-import { html } from "lit-element";
 import { JigData } from "./types";
 import { jigs } from "./story-data";
 
@@ -10,11 +9,11 @@ export default {
   component: "jig-label-ui",
 }
 
-const Template = ({ jigs }) =>
-  html`
+export const JigTable = ({ jigs }) => {
+  return `
     <jig-label-ui>
       ${jigs.map(
-        (jig: JigData) => html`
+        (jig: JigData) => `
           <single-jig>
             <span slot="jig-name">${jig.jig_name}</span>
             <span slot="author">${jig.author}</span>
@@ -24,11 +23,9 @@ const Template = ({ jigs }) =>
             <span slot="curators">${jig.curators}</span>
           </single-jig>
         `
-      )}
+      ).join('')}
     </jig-label-ui>
-  `;
-
-export const Primary = Template.bind({});
-Primary.args = {
+  `};
+JigTable.args = {
   jigs,
 };
