@@ -29,7 +29,6 @@ impl LoginPage {
                         .child(html!("input" => HtmlInputElement, {
                             .with_node!(elem => {
                                 .property("type", "email")
-                                .property("placeholder", crate::strings::STR_EMAIL_PLACEHOLDER)
                                 .attribute("autocomplete", "email")
                                 .event(clone!(state => move |_:events::Input| {
                                     state.clear_email_status();
