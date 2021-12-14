@@ -57,5 +57,10 @@ expression: body
     "locked": false,
     "otherKeywords": "",
     "translatedKeywords": ""
+  },
+  "adminData": {
+    "rating": null,
+    "blocked": false,
+    "curated": false
   }
 }

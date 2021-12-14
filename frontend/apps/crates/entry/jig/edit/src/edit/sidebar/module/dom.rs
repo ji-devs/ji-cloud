@@ -2,7 +2,7 @@ use components::overlay::handle::OverlayHandle;
 use dominator::{Dom, EventOptions, clone, html, with_node, DomBuilder};
 use web_sys::{HtmlElement, Node};
 
-use super::super::menu::{dom as MenuDom, state::State as MenuState};
+use super::super::menu::{dom as MenuDom};
 use super::{actions, state::*};
 use crate::edit::sidebar::state::State as SidebarState;
 use components::module::_common::thumbnail::ModuleThumbnail;

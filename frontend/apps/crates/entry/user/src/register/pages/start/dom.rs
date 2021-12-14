@@ -36,7 +36,6 @@ impl StartPage {
                             .with_node!(elem => {
                                 .property("type", "email")
                                 .attribute("autocomplete", "email")
-                                .property("placeholder", strings::STR_EMAIL_PLACEHOLDER)
                                 .event(clone!(state => move |_:events::Input| {
                                     state.clear_email_status();
                                     *state.email.borrow_mut() = elem.value();

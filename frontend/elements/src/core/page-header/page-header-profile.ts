@@ -9,7 +9,6 @@ import {
 import "@elements/core/overlays/anchored-overlay";
 
 const STR_SHALOM = "Shalom";
-const STR_MY_PROFILE = "My profile";
 
 @customElement("page-header-profile")
 export class _ extends LitElement {
@@ -103,7 +102,14 @@ export class _ extends LitElement {
                     font-weight: 500;
                     color: var(--dark-gray-6);
                 }
-                .overlay .profile-link a {
+                .overlay .user-links {
+                    display: grid;
+                    grid-template-columns: 18px 1fr;
+                    column-gap: 10px;
+                    row-gap: 14px;
+                }
+                .overlay .user-links ::slotted(a) {
+                    display: contents;
                     color: var(--main-blue);
                     font-size: 16px;
                     font-weight: 500;
@@ -162,12 +168,8 @@ export class _ extends LitElement {
                         <span class="email">${this.email}</span>
                     </div>
                     <div class="divider"></div>
-                    <div class="profile-link">
-                        <!-- <slot name="profile-link"></slot> -->
-                        <a href="/user/profile">
-                            <!-- TODO: add proper icon -->
-                            ⚙ ${STR_MY_PROFILE}
-                        </a>
+                    <div class="user-links">
+                        <slot name="user-links"></slot>
                     </div>
                     <div class="divider"></div>
                     <div class="logout">

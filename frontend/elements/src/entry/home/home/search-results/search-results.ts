@@ -1,7 +1,9 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
+import { nothing } from "lit-html";
 
 const STR_WE_FOUND = "We found";
-const STR_RESULTS_FOR = "results for";
+const STR_RESULTS = "results";
+const STR_FOR = "for";
 
 @customElement("home-search-results")
 export class _ extends LitElement {
@@ -39,8 +41,13 @@ export class _ extends LitElement {
                 <h1>
                     ${STR_WE_FOUND}
                     <span class="results-count">${this.resultsCount}</span>
-                    ${STR_RESULTS_FOR}
-                    <span class="query">${this.query}</span>
+                    ${STR_RESULTS}
+                    ${
+                        this.query.trim() !== "" ? html`
+                            ${STR_FOR}
+                            <span class="query">${this.query}</span>
+                        ` : nothing
+                    }
                 </h1>
                 <slot name="sections"></slot>
             </div>

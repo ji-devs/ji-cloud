@@ -1,8 +1,8 @@
-use std::{borrow::{Borrow, BorrowMut}, rc::Rc, str::FromStr};
+use std::{rc::Rc, str::FromStr};
 
-use components::input::simple_select::SimpleSelect;
+
 use dominator::{Dom, clone, html, with_node};
-use futures_signals::{map_ref, signal::{Signal, SignalExt, not}};
+use futures_signals::{map_ref, signal::{Signal, not}};
 use url::Url;
 use utils::events;
 use web_sys::HtmlTextAreaElement;
@@ -48,9 +48,9 @@ impl AddLink {
                             let url = Url::from_str(&val);
 
                             if val.is_empty() || url.is_ok() {
-                                elem.remove_attribute("error");
+                                let _ = elem.remove_attribute("error");
                             } else {
-                                elem.set_attribute("error", "");
+                                let _ = elem.set_attribute("error", "");
                             }
 
                             match url {

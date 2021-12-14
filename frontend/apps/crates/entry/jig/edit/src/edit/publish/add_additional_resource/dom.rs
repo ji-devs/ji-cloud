@@ -1,27 +1,20 @@
-use std::{rc::Rc, str::FromStr};
+use std::{rc::Rc};
 
 use components::{
-    input::simple_select::SimpleSelect,
-    overlay::handle::OverlayHandle,
-    tooltip::{
-        callbacks::TooltipErrorCallbacks,
-        dom::render as TooltipDom,
-        state::{Anchor, ContentAnchor, MoveStrategy, TooltipData, TooltipError, TooltipTarget, State as TooltipState},
-    }
+    overlay::handle::OverlayHandle
 };
 use dominator::{Dom, clone, html, with_node};
 use futures_signals::signal::SignalExt;
-use url::Url;
+
 use utils::events;
 use web_sys::HtmlElement;
 
-use crate::edit::{iframe::actions, publish::add_additional_resource::{add_file::state::AddFile, add_link::state::AddLink}};
+use crate::edit::{publish::add_additional_resource::{add_file::state::AddFile, add_link::state::AddLink}};
 
 use super::state::{AddAdditionalResource, ActivePopup};
 
 const STR_UPLOAD_FILE: &str = "Upload file";
 const STR_ADD_LINK: &str = "Add link";
-const STR_SELECT_REQUIRED: &str = "Please select type\nbefore moving on";
 
 impl AddAdditionalResource {
     pub fn render(self: Rc<Self>) -> Dom {
@@ -38,7 +31,7 @@ impl AddAdditionalResource {
                     ),
                     false => Some(
                         html!("jig-edit-publish-resource-button-add", {
-                            .event(clone!(state => move |event: events::Click| {
+                            .event(clone!(state => move |_event: events::Click| {
                                 let mut active_popup = state.active_popup.lock_mut();
                                 match &*active_popup {
                                     Some(_) => *active_popup = None,

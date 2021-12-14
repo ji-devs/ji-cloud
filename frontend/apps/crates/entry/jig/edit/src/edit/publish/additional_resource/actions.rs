@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use dominator::clone;
 use shared::{api::{ApiEndpoint, endpoints}, domain::jig::additional_resource::AdditionalResource, error::EmptyError};
-use utils::{prelude::{ApiEndpointExt, api_with_auth, api_with_auth_empty}, unwrap::UnwrapJiExt};
+use utils::{prelude::{api_with_auth, api_with_auth_empty}, unwrap::UnwrapJiExt};
 
 use super::state::AdditionalResourceComponent;
 
@@ -10,8 +10,8 @@ impl AdditionalResourceComponent {
     pub fn load_resource(self: &Rc<Self>) {
         let state = Rc::clone(&self);
         state.loader.load(clone!(state => async move {
-            let jig_id = state.publish_state.jig.id.0.to_string();
-            let resource_id = state.id.0.to_string();
+            let _jig_id = state.publish_state.jig.id.0.to_string();
+            let _resource_id = state.id.0.to_string();
 
             let path = endpoints::jig::additional_resource::GetDraft::PATH
                 .replace("{id}", &state.publish_state.jig.id.0.to_string())
@@ -37,8 +37,8 @@ impl AdditionalResourceComponent {
     pub fn delete(self: &Rc<Self>) {
         let state = Rc::clone(&self);
         state.loader.load(clone!(state => async move {
-            let jig_id = state.publish_state.jig.id.0.to_string();
-            let resource_id = state.id.0.to_string();
+            let _jig_id = state.publish_state.jig.id.0.to_string();
+            let _resource_id = state.id.0.to_string();
 
             let path = endpoints::jig::additional_resource::Delete::PATH
                 .replace("{id}", &state.publish_state.jig.id.0.to_string())
