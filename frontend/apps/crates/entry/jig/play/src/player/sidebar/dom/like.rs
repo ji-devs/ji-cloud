@@ -20,7 +20,11 @@ pub fn render(state: Rc<State>, jig: &JigResponse) -> Dom {
         .property("kind", "like")
         // TODO Render active or not active
         .event(clone!(state, jig => move |_: events::Click| {
-            state.loader.load(async move {
+            // TODO Return early to disable this feature until we are able to fetch whether the
+            // current user liked the jig or not.
+            return;
+
+            state.loader.load(async {
                 let path = jig::Like::PATH.replace("{id}", &jig.id.0.to_string());
                 let response = api_with_auth_empty::<EmptyError, ()>(
                     &path,
