@@ -1,9 +1,9 @@
 #![allow(warnings)]
 
-use std::{future::Future, path::PathBuf};
+use std::{future::Future, path::PathBuf, vec};
 use components::module::_common::prelude::Image;
 use dotenv::dotenv;
-use shared::{domain::{image::user::UserImageUploadResponse, jig::module::{body::Background, ModuleUpdateRequest}}, media::MediaLibrary};
+use shared::{domain::{image::user::UserImageUploadResponse, jig::{module::{body::Background, ModuleUpdateRequest}, PrivacyLevel}, meta::{GoalId, AgeRangeId, AffiliationId}}, media::MediaLibrary, config::RemoteTarget};
 use tokio_util::codec::{BytesCodec, FramedRead};
 use reqwest::Body;
 use simplelog::*;
@@ -33,12 +33,14 @@ pub use shared::{
                 UserImageUploadRequest,
             },
         },
+        category::CategoryId,
         jig::{
             JigId,
             JigCreateRequest, 
             JigData, 
             JigPlayerSettings, 
             JigResponse,
+            JigUpdateDraftDataRequest,
             module::{
                 ModuleCreateRequest, 
                 ModuleBody, 
@@ -149,16 +151,21 @@ async fn parse(ctx: Arc<Context>, game_id: String) {
     log::info!("got jig id: {}", jig_id.0.to_string());
     assign_modules(ctx, game_id, &jig_id, &manifest).await;
 
-    if let Some(image_id) = image_id {
-        if !ctx.opts.dry_run {
+    if !ctx.opts.dry_run {
+        if let Some(image_id) = image_id {
             log::info!("setting cover");
             assign_cover_image(ctx, &jig_id, image_id).await;
         }
+
+        publish_jig(ctx, &jig_id).await;
+
+        let hash = manifest.album_store.album.fields.hash.unwrap_or_else(|| "[unknown]".to_string());
+
+        
+        writeln!(&ctx.info_log, "{} {} {}", jig_id.0.to_string(), game_id, hash).unwrap();
     }
 
-    if ctx.opts.publish {
-        publish_jig(ctx, &jig_id).await;
-    }
+
 }
 
 async fn upload_cover_image(ctx:&Context, game_id: &str, slide: &transcode::src_manifest::Slide) -> ImageId {
@@ -407,33 +414,29 @@ async fn make_jig(ctx:&Context, manifest: &SrcManifest) -> JigId {
         }
     };
 
-    // TODO- populate
     let req = JigCreateRequest { 
         display_name: manifest.album_store.album.fields.name.clone().unwrap_or_default(),
         goals: Vec::new(), 
-        age_ranges: Vec::new(), 
-        affiliations: Vec::new(), 
-        language: None, 
+        age_ranges: Vec::new(),        
+        affiliations: Vec::new(),
+        language: None,
         categories: Vec::new(), 
         description: format!("{} {}", 
             manifest.album_store.album.fields.description.clone().unwrap_or_default(),
             author_byline
         ),
-        default_player_settings: JigPlayerSettings::default()
+        default_player_settings: JigPlayerSettings::default(),
     };
-
     let path = endpoints::jig::Create::PATH;
     let url = format!("{}{}", ctx.opts.get_remote_target().api_url(), path);
 
-    log::info!("calling {}", url);
-
-    if(ctx.opts.dry_run) {
+    let jig_id = if(ctx.opts.dry_run) {
         //log::info!("{:#?}", req);
 
         JigId(Uuid::nil())
     } else {
 
-        let resp = ctx.client
+        let res = ctx.client
             .post(&url)
             .header("Authorization", &format!("Bearer {}", ctx.token))
             .json(&req)
@@ -443,16 +446,46 @@ async fn make_jig(ctx:&Context, manifest: &SrcManifest) -> JigId {
             .error_for_status()
             .unwrap();
 
-        if !resp.status().is_success() {
-            panic!("error!"); 
+        if !res.status().is_success() {
+            log::error!("error code: {}, details: {:?}", res.status().as_str(), res);
+            panic!("unable to create jig!"); 
         }
 
 
-        let body: serde_json::Value = resp.json().await.unwrap();
+        let body: serde_json::Value = res.json().await.unwrap();
         let body:CreateResponse<JigId> = serde_json::from_value(body).unwrap();
 
         body.id
+    };
+
+    // update jig settings
+
+    let path = endpoints::jig::UpdateDraftData::PATH.replace("{id}", &jig_id.0.to_string());
+    let url = format!("{}{}", ctx.opts.get_remote_target().api_url(), path);
+
+    let req = JigUpdateDraftDataRequest {
+        privacy_level: Some(PrivacyLevel::Public),
+        ..Default::default()
+    };
+
+    if !ctx.opts.dry_run {
+        let res = ctx.client
+            .patch(&url)
+            .header("Authorization", &format!("Bearer {}", ctx.token))
+            .json(&req)
+            .send()
+            .await
+            .unwrap();
+
+
+        if !res.status().is_success() {
+            log::error!("error code: {}, details: {:?}", res.status().as_str(), res);
+            panic!("unable to update jig!"); 
+        }
     }
+
+    jig_id
+
 }
 
 async fn assign_modules(ctx:&Context, game_id: &str, jig_id: &JigId, manifest: &SrcManifest) {
@@ -479,7 +512,7 @@ async fn assign_modules(ctx:&Context, game_id: &str, jig_id: &JigId, manifest: &
                 ModuleId(Uuid::nil())
             } else {
 
-                let resp = ctx.client
+                let res = ctx.client
                     .post(&url)
                     .header("Authorization", &format!("Bearer {}", ctx.token))
                     .json(&req)
@@ -489,11 +522,12 @@ async fn assign_modules(ctx:&Context, game_id: &str, jig_id: &JigId, manifest: &
                     .error_for_status()
                     .unwrap();
 
-                if !resp.status().is_success() {
-                    panic!("error!"); 
+                if !res.status().is_success() {
+                    log::error!("error code: {}, details: {:?}", res.status().as_str(), res);
+                    panic!("unable to assign module!"); 
                 }
 
-                let body: serde_json::Value = resp.json().await.unwrap();
+                let body: serde_json::Value = res.json().await.unwrap();
                 let body:CreateResponse<ModuleId> = serde_json::from_value(body).unwrap();
 
                 body.id
@@ -507,21 +541,16 @@ async fn publish_jig(ctx:&Context, jig_id: &JigId) {
     let path = endpoints::jig::Publish::PATH.replace("{id}", &jig_id.0.to_string());
     let url = format!("{}{}", ctx.opts.get_remote_target().api_url(), path);
 
-    log::info!("calling {}", url);
+    let res = ctx.client
+        .put(&url)
+        .header("Authorization", &format!("Bearer {}", ctx.token))
+        .send()
+        .await
+        .unwrap();
 
-    if !ctx.opts.dry_run {
-        let resp = ctx.client
-            .post(&url)
-            .header("Authorization", &format!("Bearer {}", ctx.token))
-            .send()
-            .await
-            .unwrap()
-            .error_for_status()
-            .unwrap();
-
-        if !resp.status().is_success() {
-            panic!("error!"); 
-        }
+    if !res.status().is_success() {
+        log::error!("error code: {}, details: {:?}", res.status().as_str(), res);
+        panic!("unable to publish jig!"); 
     }
 }
 

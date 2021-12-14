@@ -100,6 +100,7 @@ pub struct AlbumFields {
     pub name: Option<String>,
     pub description: Option<String>,
     pub author: Option<AlbumAuthor>,
+    pub hash: Option<String>,
 }
 
 

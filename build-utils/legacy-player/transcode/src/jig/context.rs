@@ -1,3 +1,4 @@
+use std::fs::{OpenOptions, File};
 use super::options::Opts;
 use dotenv::dotenv;
 use simplelog::*;
@@ -8,14 +9,11 @@ pub struct Context {
     pub token:String,
     pub opts: Opts,
     pub client: Client,
+    pub info_log: File,
 }
 
 impl Context {
     pub fn new(mut opts: Opts) -> Self {
-        opts.game_id = Some("17820".to_string());
-
-        log::info!("dry run: {}", opts.dry_run);
-
         let token = {
             if !opts.token.is_empty() {
                 log::info!("TOKEN: {}", opts.token);
@@ -26,10 +24,22 @@ impl Context {
             }
         };
 
+        let mut info_log = {
+            let mut file = OpenOptions::new();
+            let mut file = file.write(true).create(true);
+
+            if opts.clear_log_files {
+                file.truncate(true)
+            } else {
+                file.append(true)
+            }.open(&opts.info_log).unwrap()
+        };
+
         Self {
             token,
             opts,
-            client: Client::new()
+            client: Client::new(),
+            info_log
         }
     }
 }

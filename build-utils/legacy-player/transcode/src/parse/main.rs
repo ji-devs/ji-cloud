@@ -116,31 +116,31 @@ async fn game_json_urls(opts:&Opts) -> Vec<String> {
 
                         // // // Corinne Houdini - 17762
                         // https://jitap.net/activities/geno/play/houdini-states
-                        "https://d24o39yp3ttic8.cloudfront.net/42C980D6-9FCE-4552-A5F2-ECFC0EA8D129/game.json",
+                        "https://d24o39yp3ttic8.cloudfront.net/58C85551-79A5-4E36-9794-3D3D8D3E0D31/game.json",
 
-                        // // // Soundboard - 17765
+                        // // // Soundboard states - 17765
                         // // // https://jitap.net/activities/genr/play/soundboard-states 
-                        "https://d24o39yp3ttic8.cloudfront.net/6A973171-C29A-4C99-A650-8033F996C6E7/game.json",
+                        "https://d24o39yp3ttic8.cloudfront.net/9F5AD80D-7D86-4AB9-AB11-C942B162923E/game.json",
 
-                        // // // say something - 17746
+                        // // // say something options - 17746
                         // // // https://jitap.net/activities/gen8/play/say-something-options
                         "https://d24o39yp3ttic8.cloudfront.net/86DCDC1D-64CB-4198-A866-257E213F0405/game.json",
 
-                        // // // video - 17771 
+                        // // // video for legacy - 17771 
                         // // // https://jitap.net/activities/genx/play/ 
-                        "https://d24o39yp3ttic8.cloudfront.net/94FB3C73-FE29-46A8-933D-75D261DD4B8F/game.json",
+                        "https://d24o39yp3ttic8.cloudfront.net/64498594-B340-4B5C-87E0-615C6ACC7676/game.json",
 
-                        // // // ask a question - 17792
+                        // // // ask a question legacy player - 17792
                         // // // https://jitap.net/activities/geoi/play/testing-ask-a-question-legacy-player
                         "https://d24o39yp3ttic8.cloudfront.net/236F4AC1-9B06-49EA-B580-4AE806B0A337/game.json",
 
                         // // puzzle - 17822
                         // // https://jitap.net/activities/gepc/play/test-puzzles-for-legacy-player
-                        "https://d24o39yp3ttic8.cloudfront.net/23DA1A28-88D7-4059-8DD1-167E18C0D5B7/game.json",
+                        "https://d24o39yp3ttic8.cloudfront.net/D9BB6E6A-03FE-4B39-A3CD-289059E118E9/game.json",
 
                         // // talk or type - 17820
                         // // https://jitap.net/activities/gepa/play/test-talk-or-type-for-legacy-player
-                        "https://d24o39yp3ttic8.cloudfront.net/A789925B-6130-47BA-9DBB-BE4B5D7CCCDC/game.json"
+                        "https://d24o39yp3ttic8.cloudfront.net/2B7A33C0-BA81-4661-9202-4C0463AEC606/game.json"
                 ];
                 
                 list.iter().map(|x| String::from(*x)).collect()
