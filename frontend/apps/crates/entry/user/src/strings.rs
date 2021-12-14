@@ -4,16 +4,15 @@ pub const STR_AUTH_OAUTH_LOGIN_FAIL: &str = "Create an account first :)";
 pub const STR_CHANGE_EMAIL: &str = "Change email account";
 pub const STR_SUBMIT: &str = "Submit";
 pub const STR_CONTINUE: &str = "Continue";
-pub const STR_EMAIL_LABEL: &str = "Email*";
-pub const STR_EMAIL_PLACEHOLDER: &str = "Type or paste your email";
-pub const STR_PASSWORD_CREATE_LABEL: &str = "Create password*";
+pub const STR_EMAIL_LABEL: &str = "Email *";
+pub const STR_PASSWORD_CREATE_LABEL: &str = "Create password *";
 pub const STR_PASSWORD_PLACEHOLDER: &str = "********";
 
 pub const STR_NOT_AUTHORIZED: &str = "Not authorized!";
 pub const STR_USER_EXISTS: &str = "User already exists!";
 pub const STR_EMPTY_USERNAME: &str = "Empty username!";
 
-pub const STR_PASSWORD_LABEL: &str = "Password*";
+pub const STR_PASSWORD_LABEL: &str = "Password *";
 pub const STR_PASSWORD_FORGOTTEN: &str = "Forgot your password?";
 
 pub mod profile {
