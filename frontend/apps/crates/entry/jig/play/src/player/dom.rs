@@ -17,8 +17,6 @@ use web_sys::{HtmlElement, HtmlIFrameElement};
 
 use super::state::State;
 
-const STR_JIG_NO_BACKGROUND_AUDIO: &str = "This JIG has no background audio";
-
 pub fn render(state: Rc<State>) -> Dom {
     actions::load_jig(state.clone());
 
@@ -52,24 +50,25 @@ pub fn render(state: Rc<State>) -> Dom {
             }
         }))
         .child_signal(state.jig.signal_ref(clone!(state => move |jig| {
-            jig.as_ref().map(|jig| html!("jig-play-background-music", {
-                .property("slot", "background")
-                .property_signal("playing", state.bg_audio_playing.signal())
-                .apply(|dom| {
-                    match jig.jig_data.audio_background {
-                        Some(audio_background) => {
-                            dom.event(clone!(state, audio_background => move|_: events::Click| {
-                                actions::toggle_background_audio(Rc::clone(&state), audio_background);
-                            }))
-                        },
-                        None => {
-                            dom
-                                .property("disabled", true)
-                                .property("title", STR_JIG_NO_BACKGROUND_AUDIO)
-                        }
-                    }
-                })
-            }))
+            match &jig {
+                // Only render the background music element on a jig if the jig has background
+                // music configured.
+                Some(jig) if jig.jig_data.audio_background.is_some() => {
+                    Some(html!("jig-play-background-music", {
+                        .property("slot", "background")
+                        .property_signal("playing", state.bg_audio_playing.signal())
+                        .event(clone!(state, jig => move|_: events::Click| {
+                            actions::toggle_background_audio(
+                                Rc::clone(&state),
+                                // `unwrap` is safe here because we are checking that it is Some in
+                                // the match branch above.
+                                jig.jig_data.audio_background.unwrap()
+                            );
+                        }))
+                    }))
+                },
+                _ => None
+            }
         })))
         .children(&mut [
             html!("iframe" => HtmlIFrameElement, {
