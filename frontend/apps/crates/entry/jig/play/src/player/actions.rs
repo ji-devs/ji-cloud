@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use super::{state::State, timer::Timer};
-use awsm_web::audio::AudioClipOptions;
+use awsm_web::audio::{AudioClipOptions, AudioHandle};
 use components::{
     audio::mixer::{AudioSourceExt, AUDIO_MIXER},
     module::_common::prelude::ModuleId,
@@ -21,35 +21,29 @@ use utils::{
 };
 use wasm_bindgen_futures::spawn_local;
 
-pub fn toggle_background_audio(state: Rc<State>, background_audio: AudioBackground) {
-    let mut bg_audio_handle = state.bg_audio_handle.borrow_mut();
+pub fn toggle_background_audio(state: Rc<State>) {
+    let bg_audio_handle = state.bg_audio_handle.borrow();
 
     match &*bg_audio_handle {
         Some(bg_audio_handle) => {
             if state.bg_audio_playing.get() {
-                bg_audio_handle.pause();
-                state.bg_audio_playing.set(false);
+                pause_background_audio(&state, bg_audio_handle);
             } else {
-                bg_audio_handle.play();
-                state.bg_audio_playing.set(true);
+                play_background_audio(&state, bg_audio_handle);
             };
         }
-        None => {
-            let handle = AUDIO_MIXER.with(|mixer| {
-                mixer.add_source(
-                    background_audio.as_source(),
-                    AudioClipOptions {
-                        auto_play: true,
-                        is_loop: true,
-                        on_ended: None::<fn()>,
-                    },
-                )
-            });
-
-            *bg_audio_handle = Some(handle);
-            state.bg_audio_playing.set(true);
-        }
+        None => {}
     };
+}
+
+pub fn play_background_audio(state: &State, audio_handle: &AudioHandle) {
+    audio_handle.play();
+    state.bg_audio_playing.set(true);
+}
+
+pub fn pause_background_audio(state: &State, audio_handle: &AudioHandle) {
+    audio_handle.pause();
+    state.bg_audio_playing.set(false);
 }
 
 pub fn navigate_forward(state: Rc<State>) {
@@ -92,7 +86,6 @@ pub fn navigate_to_module(state: Rc<State>, module_id: &ModuleId) {
 
 pub fn load_jig(state: Rc<State>) {
     state.loader.load(clone!(state => async move {
-
         let resp = match state.player_options.draft {
             false => {
                 let path = jig::GetLive::PATH.replace("{id}", &state.jig_id.0.to_string());
@@ -112,6 +105,23 @@ pub fn load_jig(state: Rc<State>) {
             Err(_) => {},
         }
     }));
+}
+
+fn init_audio(state: &State, background_audio: AudioBackground) {
+    let handle = AUDIO_MIXER.with(|mixer| {
+        mixer.add_source(
+            background_audio.as_source(),
+            AudioClipOptions {
+                auto_play: true,
+                is_loop: true,
+                on_ended: None::<fn()>,
+            },
+        )
+    });
+
+    let mut bg_audio_handle = state.bg_audio_handle.borrow_mut();
+    *bg_audio_handle = Some(handle);
+    state.bg_audio_playing.set(true);
 }
 
 pub fn start_timer(state: Rc<State>, time: u32) {
@@ -177,6 +187,20 @@ pub fn on_iframe_message(state: Rc<State>, message: ModuleToJigPlayerMessage) {
             *points += amount;
         }
         ModuleToJigPlayerMessage::Start(time) => {
+            // Initialize the audio once the jig is started
+            if let Some(jig) = state.jig.get_cloned() {
+                if let Some(audio_background) = jig.jig_data.audio_background {
+                    init_audio(&state, audio_background);
+                }
+            }
+
+            // If the background audio is set to play, then start the audio
+            if state.bg_audio_playing.get() {
+                if let Some(bg_audio_handle) = &*state.bg_audio_handle.borrow() {
+                    play_background_audio(&state, bg_audio_handle);
+                }
+            }
+
             if let Some(time) = time {
                 start_timer(Rc::clone(&state), time);
             }
