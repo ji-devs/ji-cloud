@@ -538,6 +538,8 @@ async fn assign_modules(ctx:&Context, game_id: &str, jig_id: &JigId, manifest: &
 
 async fn publish_jig(ctx:&Context, jig_id: &JigId) {
 
+    log::info!("publishing {}...", jig_id.0.to_string());
+
     let path = endpoints::jig::Publish::PATH.replace("{id}", &jig_id.0.to_string());
     let url = format!("{}{}", ctx.opts.get_remote_target().api_url(), path);
 
