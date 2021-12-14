@@ -13,7 +13,7 @@ const jig: JigData = {
 };
 
 export default {
-  title: "Single Jig",
+  title: "Entry/Admin/Single Jig",
   component: "single-jig",
 };
 

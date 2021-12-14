@@ -6,7 +6,7 @@ import "@elements/entry/admin/jig_label_ui/jig-label-ui";
 import "@elements/entry/admin/jig_label_ui/single-jig";
 
 export default {
-  title: "Jig Label UI",
+  title: "Entry/Admin/Jig Table UI",
   component: "jig-label-ui",
 }
 
