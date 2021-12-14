@@ -1,4 +1,3 @@
-import { Meta, Story } from "@storybook/web-components";
 import { html } from "lit-element";
 import { JigData } from "./types";
 import { jigs } from "./story-data";
@@ -9,9 +8,9 @@ import "@elements/entry/admin/jig_label_ui/single-jig";
 export default {
   title: "Jig Label UI",
   component: "jig-label-ui",
-} as Meta;
+}
 
-const Template: Story = ({ jigs }) =>
+const Template = ({ jigs }) =>
   html`
     <jig-label-ui>
       ${jigs.map(
