@@ -99,4 +99,12 @@ pub struct Album {
 pub struct AlbumFields {
     pub name: Option<String>,
     pub description: Option<String>,
+    pub author: Option<AlbumAuthor>,
+}
+
+
+#[derive(Deserialize, Debug)]
+pub struct AlbumAuthor {
+    pub first_name: Option<String>,
+    pub last_name: Option<String>,
 }

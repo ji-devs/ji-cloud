@@ -6,15 +6,21 @@ use shared::config::RemoteTarget;
 #[structopt(name = "ji tap transcoder", about = "ji tap downloader/transcoder")]
 pub struct Opts {
     /////////////////////////////////////
+    /// 
+    /// single game id
+    #[structopt(long)]
+    pub game_id: Option<String>,
+
     #[structopt(long, default_value="C:\\Users\\david\\Documents\\JI\\legacy-cdn\\games", parse(from_os_str))]
     pub src_base_path: PathBuf,
 
     #[structopt(long, default_value="json", parse(from_os_str))]
     pub src_json_dir: PathBuf,
 
-    /// single game id
-    #[structopt(long)]
-    pub game_id: Option<String>,
+
+    /// batch size to help throttle connections 
+    #[structopt(long, parse(try_from_str), default_value = "100")]
+    pub batch_size: usize,
 
     /// debug mode 
     #[structopt(long, parse(try_from_str), default_value = "false")]

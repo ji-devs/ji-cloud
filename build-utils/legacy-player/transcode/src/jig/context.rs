@@ -11,7 +11,9 @@ pub struct Context {
 }
 
 impl Context {
-    pub fn new(opts: Opts) -> Self {
+    pub fn new(mut opts: Opts) -> Self {
+        opts.game_id = Some("17820".to_string());
+
         log::info!("dry run: {}", opts.dry_run);
 
         let token = {
