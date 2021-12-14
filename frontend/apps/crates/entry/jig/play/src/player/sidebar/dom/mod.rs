@@ -49,7 +49,7 @@ pub fn render(state: Rc<State>) -> Dom {
         .child_signal(state.player_state.jig.signal_ref(clone!(state => move |jig| {
             // only show like if jig is published
             match jig {
-                Some(jig) if jig.published_at.is_some() => {
+                Some(jig) if jig.jig_data.draft_or_live.is_live() => {
                     Some(like::render(Rc::clone(&state), &jig))
                 },
                 _ => None,
@@ -58,7 +58,7 @@ pub fn render(state: Rc<State>) -> Dom {
         .child_signal(state.player_state.jig.signal_ref(clone!(state => move |jig| {
             // only show share options if jig is published
             match jig {
-                Some(jig) if jig.published_at.is_some() => {
+                Some(jig) if jig.jig_data.draft_or_live.is_live() => {
                     Some(share::render(Rc::clone(&state)))
                 },
                 _ => None,

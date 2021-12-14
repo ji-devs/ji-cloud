@@ -171,6 +171,34 @@ pub enum DraftOrLive {
     Live = 1,
 }
 
+impl DraftOrLive {
+    /// Returns `true` for a [`Self::Live`] value.
+    ///
+    /// ```
+    /// let x = DraftOrLive::Live;
+    /// assert_eq!(x.is_live(), true);
+    ///
+    /// let x = DraftOrLive::Draft;
+    /// assert_eq!(x.is_live(), false);
+    /// ```
+    pub fn is_live(&self) -> bool {
+        matches!(*self, DraftOrLive::Live)
+    }
+
+    /// Returns `true` for a [`Draft`] value.
+    ///
+    /// ```
+    /// let x = DraftOrLive::Live;
+    /// assert_eq!(x.is_draft(), false);
+    ///
+    /// let x = DraftOrLive::Draft;
+    /// assert_eq!(x.is_draft(), true);
+    /// ```
+    pub fn is_draft(&self) -> bool {
+        !self.is_live()
+    }
+}
+
 impl From<DraftOrLive> for bool {
     fn from(draft_or_live: DraftOrLive) -> Self {
         match draft_or_live {
