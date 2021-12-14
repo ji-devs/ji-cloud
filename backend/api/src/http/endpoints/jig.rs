@@ -219,7 +219,7 @@ pub(super) async fn publish_draft_to_live(
     db: Data<PgPool>,
     claims: TokenUser,
     jig_id: Path<JigId>,
-) -> Result<Json<<jig::Publish as ApiEndpoint>::Res>, error::JigCloneDraft> {
+) -> Result<HttpResponse, error::JigCloneDraft> {
     let jig_id = jig_id.into_inner();
 
     db::jig::authz(&*db, claims.0.user_id, Some(jig_id)).await?;
@@ -256,7 +256,7 @@ delete from jig_data where id = $1
 
     txn.commit().await?;
 
-    Ok(Json(()))
+    Ok(HttpResponse::NoContent().finish())
 }
 
 /// Clone a jig
