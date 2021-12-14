@@ -44,7 +44,7 @@ pub fn render(state: Rc<MainSettings>) -> Dom {
 
                         children.push(render_card(options));
 
-                        let mut options = CardOptions::new(card, theme_id, mode, side, Size::Flashcards);
+                        let mut options = CardOptions::new(other, theme_id, mode, side, Size::Flashcards);
                         options.flip_on_hover = true;
 
                         children.push(render_card(options));
