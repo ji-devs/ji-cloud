@@ -25,13 +25,6 @@ impl Step1Page {
                     .property_signal("hint", state.firstname_error())
                     .child(html!("input" => HtmlInputElement, {
                         .with_node!(elem => {
-                            .property("placeholder", STR_FIRSTNAME_PLACEHOLDER)
-                            .property("value", &*state.firstname.borrow())
-                            .event(clone!(state, elem => move |_:events::Input| {
-                                state.clear_firstname_status();
-                                *state.firstname.borrow_mut() = elem.value();
-                            }))
-                            .property("placeholder", STR_FIRSTNAME_PLACEHOLDER)
                             .property("value", &*state.firstname.borrow())
                             .event(clone!(state, elem => move |_:events::Input| {
                                 state.clear_firstname_status();
@@ -49,7 +42,6 @@ impl Step1Page {
                     .property_signal("hint", state.lastname_error())
                     .child(html!("input" => HtmlInputElement, {
                         .with_node!(elem => {
-                            .property("placeholder", STR_LASTNAME_PLACEHOLDER)
                             .property("value", &*state.lastname.borrow())
                             .event(clone!(state => move |_:events::Input| {
                                 state.clear_lastname_status();

@@ -33,9 +33,7 @@ pub mod register {
 
     pub mod step_1 {
         pub const STR_FIRSTNAME_LABEL: &str = "First name *";
-        pub const STR_FIRSTNAME_PLACEHOLDER: &str = "Type your first name";
         pub const STR_LASTNAME_LABEL: &str = "Last name *";
-        pub const STR_LASTNAME_PLACEHOLDER: &str = "Type your last name";
         pub const STR_USERNAME_LABEL: &str = "Create a username *";
         pub const STR_USERNAME_PLACEHOLDER: &str = "This will be public to all Jigzi members";
         pub const STR_18: &str = "I am over 18 *";
