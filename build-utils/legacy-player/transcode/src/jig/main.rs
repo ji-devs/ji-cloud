@@ -546,6 +546,7 @@ async fn publish_jig(ctx:&Context, jig_id: &JigId) {
     let res = ctx.client
         .put(&url)
         .header("Authorization", &format!("Bearer {}", ctx.token))
+        .header("content-length", 0)
         .send()
         .await
         .unwrap();
