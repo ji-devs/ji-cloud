@@ -1,6 +1,8 @@
 import { html } from "lit-element";
 import { JigData } from "./types";
 
+import "@elements/entry/admin/jig_label_ui/single-jig";
+
 const jig: JigData = {
   jig_name: "Hebrew Letters",
   author: "Michael Wikes",
@@ -9,8 +11,6 @@ const jig: JigData = {
   language: "English (American)",
   curators: "Anat (13.7.21)",
 };
-
-import "../single-jig";
 
 export default {
   title: "Single Jig",
