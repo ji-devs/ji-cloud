@@ -10,12 +10,12 @@ use dominator::clone;
 use futures_signals::signal::SignalExt;
 use shared::{
     api::{endpoints::jig, ApiEndpoint},
-    domain::jig::{AudioBackground, JigResponse},
+    domain::jig::{AudioBackground, JigResponse, JigLikedResponse},
     error::EmptyError,
 };
 use utils::{
     iframe::{IframeAction, JigToModulePlayerMessage, ModuleToJigPlayerMessage},
-    prelude::{api_no_auth, SETTINGS},
+    prelude::{api_no_auth, SETTINGS, api_with_auth},
     routes::{HomeRoute, Route},
     unwrap::UnwrapJiExt,
 };
@@ -86,21 +86,42 @@ pub fn navigate_to_module(state: Rc<State>, module_id: &ModuleId) {
 
 pub fn load_jig(state: Rc<State>) {
     state.loader.load(clone!(state => async move {
-        let resp = match state.player_options.draft {
+        let (jig, jig_liked) = match state.player_options.draft {
             false => {
-                let path = jig::GetLive::PATH.replace("{id}", &state.jig_id.0.to_string());
-                api_no_auth::<JigResponse, EmptyError, ()>(&path, jig::GetLive::METHOD, None).await
+                let jig = {
+                    let path = jig::GetLive::PATH.replace("{id}", &state.jig_id.0.to_string());
+                    api_no_auth::<JigResponse, EmptyError, ()>(&path, jig::GetLive::METHOD, None).await
+                };
+
+                // Fetch whether the current user has liked this JIG.
+                // TODO Only do this if there is a logged-in user.
+                let jig_liked = {
+                    let path = jig::Liked::PATH.replace("{id}", &state.jig_id.0.to_string());
+                    let res = api_with_auth::<JigLikedResponse, EmptyError, ()>(&path, jig::Liked::METHOD, None).await;
+
+                    match res {
+                        Ok(JigLikedResponse(jig_liked)) => jig_liked,
+                        Err(_) => false,
+                    }
+                };
+
+                (jig, jig_liked)
             },
             true => {
-                let path = jig::GetDraft::PATH.replace("{id}", &state.jig_id.0.to_string());
-                api_no_auth::<JigResponse, EmptyError, ()>(&path, jig::GetDraft::METHOD, None).await
+                let jig = {
+                    let path = jig::GetDraft::PATH.replace("{id}", &state.jig_id.0.to_string());
+                    api_no_auth::<JigResponse, EmptyError, ()>(&path, jig::GetDraft::METHOD, None).await
+                };
+
+                (jig, false)
             },
         };
 
-        match resp {
-            Ok(resp) => {
+        match jig {
+            Ok(jig) => {
                 // state.active_module.set(Some(resp.jig.modules[0].clone()));
-                state.jig.set(Some(resp));
+                state.jig.set(Some(jig));
+                state.jig_liked.set(Some(jig_liked));
             },
             Err(_) => {},
         }

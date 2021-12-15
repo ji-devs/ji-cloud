@@ -12,6 +12,8 @@ use super::timer::Timer;
 pub struct State {
     pub jig_id: JigId,
     pub jig: Mutable<Option<JigResponse>>,
+    /// Loaded after [`State`] is initialized necessitating an Option
+    pub jig_liked: Mutable<Option<bool>>,
     pub loader: AsyncLoader,
     pub active_module: Mutable<usize>,
     pub module_id: Mutable<Option<ModuleId>>, // needed?
@@ -34,6 +36,7 @@ impl State {
         Self {
             jig_id,
             jig: Mutable::new(None),
+            jig_liked: Mutable::new(None),
             loader: AsyncLoader::new(),
             active_module: Mutable::new(0),
             module_id: Mutable::new(None),
