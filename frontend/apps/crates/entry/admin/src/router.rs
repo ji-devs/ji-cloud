@@ -87,7 +87,7 @@ impl Router {
                                             Some(user) => !route.allowed_user_scope(&user.scopes)
                                         };
 
-                                        if locked {
+                                        if !locked {
                                             Some(state.with_child(route, html!("h1", {
                                                 .text("Not Authorized")
                                             })))
