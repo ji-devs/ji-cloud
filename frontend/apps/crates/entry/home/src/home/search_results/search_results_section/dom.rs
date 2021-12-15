@@ -59,13 +59,17 @@ impl SearchResultsSection {
             .property("playedCount", "???")
             .property("likedCount", "???")
             .property("author", &jig.author_name.clone().unwrap_or_default())
+            .property("language", &jig.jig_data.language)
+            .property("kind", match state.focus {
+                JigFocus::Modules => "jig",
+                JigFocus::Resources => "resource",
+            })
             .property("publishedAt", {
                 match jig.published_at {
                     Some(publish_at) => published_at_string(publish_at, false),
                     None => String::new(),
                 }
             })
-            .property("language", &jig.jig_data.language)
             .property_signal("ages", state.search_options.age_ranges.signal_cloned().map(move |age_ranges| {
                 age_ranges.range_string(&jig_ages)
             }))

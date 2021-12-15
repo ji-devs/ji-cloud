@@ -8,12 +8,12 @@ export class _ extends LitElement {
                 :host {
                     display: inline-block;
                     box-sizing: border-box;
-                    border: solid 1px var(--light-blue-4);
+                    border: solid 1px #ffffff;
                     padding: 3px 12px;
                     font-size: 14px;
                     border-radius: 20px;
                     margin: 0 8px 8px 0;
-                    color: var(--light-blue-4);
+                    color: #ffffff;
                 }
             `,
         ];

@@ -22,9 +22,12 @@ export class _ extends LitElement {
                 :host {
                     display: grid;
                     row-gap: 48px;
-                    padding: 0 50px;
+                    padding: 5px 50px;
                     max-width: 1800px;
                     margin: 0 auto;
+                }
+                :host([kind=resources]) {
+                    background-color: var(--green-2);
                 }
                 .top-line {
                     display: flex;
@@ -64,6 +67,9 @@ export class _ extends LitElement {
                 .load-more {
                     display: grid;
                     place-content: center;
+                }
+                .load-more ::slotted(*) {
+                    margin-bottom: 40px;
                 }
             `,
         ];
