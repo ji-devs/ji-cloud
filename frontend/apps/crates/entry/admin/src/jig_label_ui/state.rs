@@ -1,5 +1,5 @@
 use std::rc::Rc;
-use futures_signals::signal::Mutable;
+use futures_signals::signal_vec::MutableVec;
 
 pub struct JigData {
   pub jig_name: String,
@@ -11,13 +11,13 @@ pub struct JigData {
 }
 
 pub struct JigUI {
-  jigs: Mutable<Vec<JigData>>,
+  jigs: MutableVec<JigData>,
 }
 
 impl JigUI {
   pub fn new() -> Rc<Self> {
     Rc::new(Self {
-      jigs: Mutable::new(vec![]),
+      jigs: MutableVec::new(),
     })
   }
 }
