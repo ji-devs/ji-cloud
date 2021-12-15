@@ -1,3 +1,4 @@
+use std::rc::Rc;
 use dominator::{html, Dom};
 use super::state::*;
 
@@ -8,7 +9,7 @@ impl JigUI {
             .text(text)
         })
     }
-    pub fn render() -> Dom {
+    pub fn render(state: Rc<Self>) -> Dom {
         let jigs = vec![
             JigData {
                 jig_name: String::from("Hebrew Letters"),
