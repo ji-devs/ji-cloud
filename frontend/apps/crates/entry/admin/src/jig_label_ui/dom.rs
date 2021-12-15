@@ -1,15 +1,5 @@
 use dominator::{html, Dom};
-
-pub struct JigData {
-    pub jig_name: String,
-    pub author: String,
-    pub author_badge: String,
-    pub date: String,
-    pub language: String,
-    pub curators: Vec<String>,
-}
-
-pub struct JigUI {}
+use super::state::*;
 
 impl JigUI {
     fn render_jig_span(slot: &str, text: &str) -> Dom {

@@ -23,7 +23,7 @@ use crate::{
     },
     locale::{dom::LocalePage, state::LoaderState as LocaleLoaderState},
     sidebar::Sidebar,
-    jig_label_ui::dom::JigUI,
+    jig_label_ui::state::JigUI,
 };
 use std::cell::RefCell;
 pub struct Router {
