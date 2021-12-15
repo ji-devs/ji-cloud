@@ -103,7 +103,7 @@ impl Router {
                                                 AdminRoute::ImageMeta(id, is_new) => Some(state.with_child(route, ImageMetaPage::render(id, is_new))),
                                                 AdminRoute::ImageSearch(query) => Some(state.with_child(route, ImageSearchPage::render(query))),
                                                 AdminRoute::ImageTags => Some(state.with_child(route, ImageTags::render(ImageTags::new()))),
-                                                AdminRoute::Jigs => Some(state.with_child(route, JigUI::render())),
+                                                AdminRoute::Jigs => Some(state.with_child(route, JigUI::render(JigUI::new()))),
                                                 _ => Some(state.with_child(route, html!("empty-fragment"))),
                                             }
                                         }
