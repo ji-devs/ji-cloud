@@ -16,6 +16,7 @@ use std::convert::TryInto;
 use uuid::Uuid;
 use ::transcode::{
     src_manifest::*,
+    jig_log::JigInfoLogLine
 };
 use futures::stream::{FuturesUnordered, StreamExt};
 pub use shared::{
@@ -130,8 +131,12 @@ async fn get_futures(ctx:Arc<Context>) -> Vec<impl Future> {
     }
 }
 async fn parse(ctx: Arc<Context>, game_id: String) {
-    let game_id = &game_id;
     let ctx = &ctx;
+
+    if let Some(line) = ctx.skip_lines.iter().find(|line| &line.game_id == &game_id) {
+        log::info!("skipping {}, first hit is jig_id: {}, game_hash: {}", game_id, line.jig_id, line.game_hash);
+        return;
+    }
 
     let manifest:SrcManifest = {
         let path = ctx.opts.src_base_path.join(&format!("{}/json/game.json", game_id));
@@ -142,14 +147,14 @@ async fn parse(ctx: Arc<Context>, game_id: String) {
     log::info!("{}: {} slides", game_id, manifest.structure.slides.len());
 
     let image_id = if manifest.structure.slides.len() > 0 {
-        Some(upload_cover_image(ctx, game_id, &manifest.structure.slides[0]).await)
+        Some(upload_cover_image(ctx, &game_id, &manifest.structure.slides[0]).await)
     } else {
         None
     };
     
     let jig_id = make_jig(ctx, &manifest).await;
     log::info!("got jig id: {}", jig_id.0.to_string());
-    assign_modules(ctx, game_id, &jig_id, &manifest).await;
+    assign_modules(ctx, &game_id, &jig_id, &manifest).await;
 
     if !ctx.opts.dry_run {
         if let Some(image_id) = image_id {
@@ -159,10 +164,14 @@ async fn parse(ctx: Arc<Context>, game_id: String) {
 
         publish_jig(ctx, &jig_id).await;
 
-        let hash = manifest.album_store.album.fields.hash.unwrap_or_else(|| "[unknown]".to_string());
+        let game_hash = manifest.album_store.album.fields.hash.unwrap_or_else(|| "[unknown]".to_string());
 
-        
-        writeln!(&ctx.info_log, "{} {} {}", jig_id.0.to_string(), game_id, hash).unwrap();
+       
+        JigInfoLogLine {
+            jig_id: jig_id.0.to_string(),
+            game_id,
+            game_hash
+        }.write_line(&ctx.info_log);
     }
 
 

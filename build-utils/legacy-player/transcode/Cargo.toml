@@ -9,8 +9,12 @@ name = "parse"
 path = "src/parse/main.rs"
 
 [[bin]]
-name = "jig"
-path = "src/jig/main.rs"
+name = "create_jig"
+path = "src/create_jig/main.rs"
+
+[[bin]]
+name = "update_jig"
+path = "src/update_jig/main.rs"
 
 [[bin]]
 name = "download_albums"

@@ -11,17 +11,9 @@ pub struct Opts {
     #[structopt(long)]
     pub game_id: Option<String>,
 
-    #[structopt(long, default_value="C:\\Users\\david\\Documents\\JI\\legacy-cdn\\games", parse(from_os_str))]
-    pub src_base_path: PathBuf,
-
-    #[structopt(long, default_value="json", parse(from_os_str))]
-    pub src_json_dir: PathBuf,
-
+    //skip jigs appearing in this info file
     #[structopt(long, default_value="C:\\Users\\david\\Downloads\\info.txt", parse(from_os_str))]
-    pub info_log: PathBuf,
-
-    #[structopt(long, parse(try_from_str), default_value = "false")]
-    pub clear_log_files: bool,
+    pub info_file: PathBuf,
 
     /// batch size to help throttle connections 
     #[structopt(long, parse(try_from_str), default_value = "100")]
@@ -44,15 +36,12 @@ pub struct Opts {
 
     #[structopt(long, default_value = "")]
     pub token: String,
-
-    #[structopt(long, parse(try_from_str), default_value = "false")]
-    pub publish: bool,
 }
 
 impl Opts {
     pub fn sanitize(&mut self) {
 
-        log::warn!("setting manual game id");
+        //log::warn!("setting manual game id");
         //self.game_id = Some("17822".to_string());
         //self.game_id = Some("17736".to_string());
         if self.debug {
