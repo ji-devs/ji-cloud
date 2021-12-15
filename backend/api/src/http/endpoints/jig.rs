@@ -8,7 +8,7 @@ use shared::{
     domain::{
         jig::{
             DraftOrLive, JigBrowseResponse, JigCountResponse, JigCreateRequest, JigId,
-            JigSearchResponse, PrivacyLevel, UserOrMe, JigLikedResponse,
+            JigLikedResponse, JigSearchResponse, PrivacyLevel, UserOrMe,
         },
         CreateResponse,
     },
