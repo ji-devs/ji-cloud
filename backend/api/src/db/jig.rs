@@ -255,7 +255,7 @@ select cte.jig_id                                          as "jig_id: JigId",
        other_keywords,
        translated_keywords,
        rating                                               as "rating?: JigRating",
-       blocked                                              as "blocked",                         
+       blocked                                              as "blocked",
        curated,
        array(select row (unnest(audio_feedback_positive))) as "audio_feedback_positive!: Vec<(AudioFeedbackPositive,)>",
        array(select row (unnest(audio_feedback_negative))) as "audio_feedback_negative!: Vec<(AudioFeedbackNegative,)>",
@@ -371,14 +371,14 @@ select jig.id                                       as "id!: JigId",
        published_at,
        liked_count                              as "liked_count!",
        (
-           select play_count 
-           from jig_play_count 
+           select play_count
+           from jig_play_count
            where jig_play_count.jig_id = jig.id
        )                                        as "play_count!",
        rating                                   as "rating?: JigRating",
-       blocked                                  as "blocked!",             
+       blocked                                  as "blocked!",
        curated                                  as "curated!"
-from jig 
+from jig
 
          inner join unnest($1::uuid[])
     with ordinality t(id, ord) using (id)
@@ -437,8 +437,8 @@ select id,
        privacy_level                              as "privacy_level!: PrivacyLevel",
        jig_focus                                  as "jig_focus!: JigFocus",
        locked                                     as "locked!",
-       other_keywords                             as "other_keywords!", 
-       translated_keywords                        as "translated_keywords!"                  
+       other_keywords                             as "other_keywords!",
+       translated_keywords                        as "translated_keywords!"
 from jig_data
          inner join unnest($1::uuid[])
     with ordinality t(id, ord) using (id)
@@ -624,10 +624,10 @@ set direction = $2,
     display_score = $3,
     track_assessments = $4,
     drag_assist = $5
-where id = $1 and 
-    (($2 is distinct from direction) or 
+where id = $1 and
+    (($2 is distinct from direction) or
      ($3 is distinct from display_score) or
-     ($4 is distinct from track_assessments) or 
+     ($4 is distinct from track_assessments) or
      ($5 is distinct from drag_assist))
             "#,
             draft_id,
@@ -855,8 +855,8 @@ select jig.id                                              as "jig_id: JigId",
        published_at,
        liked_count,
        (
-            select play_count 
-            from jig_play_count 
+            select play_count
+            from jig_play_count
             where jig_play_count.jig_id = jig.id
        )                                                   as "play_count!",
        display_name                                        as "display_name!",
@@ -903,8 +903,8 @@ select jig.id                                              as "jig_id: JigId",
 
 from jig_data
          inner join jig on jig_data.id = jig.draft_id
-         inner join jig_admin_data "admin" on admin.jig_id = jig.id 
-where (author_id = $2 or $2 is null) 
+         inner join jig_admin_data "admin" on admin.jig_id = jig.id
+where (author_id = $2 or $2 is null)
 and (jig_focus = $3 or $3 is null)
 order by coalesce(updated_at, created_at) desc
 limit 20 offset 20 * $1
@@ -1212,7 +1212,7 @@ pub async fn get_play_count(db: &PgPool, id: JigId) -> Result<i64, error::NotFou
     let play_count = sqlx::query!(
         // language=SQL
         r#"
-select play_count from jig_play_count 
+select play_count from jig_play_count
 where jig_id = $1;
             "#,
         id.0,
@@ -1321,6 +1321,27 @@ where jig_id = $1 and user_id = $2
     .map_err(|_| anyhow::anyhow!("Must like jig prior to unlike"))?;
 
     Ok(())
+}
+
+pub async fn jig_is_liked(db: &PgPool, user_id: Uuid, id: JigId) -> sqlx::Result<bool> {
+    let exists = sqlx::query!(
+        r#"
+select exists (
+    select 1
+    from jig_like
+    where
+        jig_id = $1
+        and user_id = $2
+) as "exists!"
+    "#,
+        id.0,
+        user_id
+    )
+    .fetch_one(db)
+    .await?
+    .exists;
+
+    Ok(exists)
 }
 
 /////////

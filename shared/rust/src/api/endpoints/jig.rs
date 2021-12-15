@@ -3,7 +3,7 @@ use crate::{
     domain::{
         jig::{
             JigBrowseQuery, JigBrowseResponse, JigCountResponse, JigCreateRequest, JigId,
-            JigResponse, JigSearchQuery, JigSearchResponse, JigUpdateDraftDataRequest,
+            JigResponse, JigSearchQuery, JigSearchResponse, JigUpdateDraftDataRequest, JigLikedResponse,
         },
         CreateResponse,
     },
@@ -216,8 +216,21 @@ impl ApiEndpoint for Unlike {
     type Req = ();
     type Res = ();
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/jig/{id}/unlike";
+    const PATH: &'static str = "/v1/jig/{id}/like";
     const METHOD: Method = Method::Delete;
+}
+
+/// Is a JIG liked by a user
+///
+/// # Authorization
+/// * Admin, BasicAuth
+pub struct Liked;
+impl ApiEndpoint for Liked {
+    type Req = ();
+    type Res = JigLikedResponse;
+    type Err = EmptyError;
+    const PATH: &'static str = "/v1/jig/{id}/like";
+    const METHOD: Method = Method::Get;
 }
 
 /// Play a JIG
