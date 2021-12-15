@@ -316,10 +316,14 @@ export class _ extends LitElement {
                                 <h4>${STR_DESCRIPTION}</h4>
                                 <p class="description">${this.description}</p>
                             </home-search-result-details>
-                            <home-search-result-details>
-                                <h4>${STR_ADDITIONAL_RESOURCES}</h4>
-                                <slot name="additional-resources"></slot>
-                            </home-search-result-details>
+                            ${
+                                this.kind === "jig" ? html`
+                                    <home-search-result-details>
+                                        <h4>${STR_ADDITIONAL_RESOURCES}</h4>
+                                        <slot name="additional-resources"></slot>
+                                    </home-search-result-details>
+                                ` : nothing
+                            }
                             <div class="author-section">
                                 <span class="left-side">
                                     ${this.byJiTeam
