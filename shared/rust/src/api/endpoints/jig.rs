@@ -3,7 +3,8 @@ use crate::{
     domain::{
         jig::{
             JigBrowseQuery, JigBrowseResponse, JigCountResponse, JigCreateRequest, JigId,
-            JigResponse, JigSearchQuery, JigSearchResponse, JigUpdateDraftDataRequest, JigLikedResponse,
+            JigLikedResponse, JigResponse, JigSearchQuery, JigSearchResponse,
+            JigUpdateDraftDataRequest,
         },
         CreateResponse,
     },
