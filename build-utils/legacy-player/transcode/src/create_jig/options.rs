@@ -11,19 +11,19 @@ pub struct Opts {
     #[structopt(long)]
     pub game_id: Option<String>,
 
-    #[structopt(long, default_value="C:\\Users\\david\\Documents\\JI\\legacy-cdn\\games", parse(from_os_str))]
+    #[structopt(long, default_value="/home/david/archive/legacy-cdn/games", parse(from_os_str))]
     pub src_base_path: PathBuf,
 
     #[structopt(long, default_value="json", parse(from_os_str))]
     pub src_json_dir: PathBuf,
 
     //skip jigs appearing in this info file
-    #[structopt(long, default_value="C:\\Users\\david\\Downloads\\skip_info.txt", parse(from_os_str))]
+    #[structopt(long, default_value="/home/david/archive/skip_info.txt", parse(from_os_str))]
     pub skip_info_log_file: PathBuf,
     #[structopt(long, parse(try_from_str), default_value = "true")]
     pub skip_info_log: bool,
     
-    #[structopt(long, default_value="C:\\Users\\david\\Downloads\\info.txt", parse(from_os_str))]
+    #[structopt(long, default_value="/home/david/archive/info.txt", parse(from_os_str))]
     pub info_log: PathBuf,
 
     #[structopt(long, parse(try_from_str), default_value = "false")]

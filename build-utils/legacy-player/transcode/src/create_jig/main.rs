@@ -83,7 +83,7 @@ async fn main() {
     init_logger(opts.verbose);
     opts.sanitize();
 
-    let ctx = Arc::new(Context::new(opts));
+    let ctx = Arc::new(Context::new(opts).await);
 
 
 
@@ -426,8 +426,8 @@ async fn make_jig(ctx:&Context, manifest: &SrcManifest) -> JigId {
     let req = JigCreateRequest { 
         display_name: manifest.album_store.album.fields.name.clone().unwrap_or_default(),
         goals: Vec::new(), 
-        age_ranges: Vec::new(),        
-        affiliations: Vec::new(),
+        age_ranges: ctx.age_ranges.clone(), 
+        affiliations: ctx.affiliations.clone(), 
         language: None,
         categories: Vec::new(), 
         description: format!("{} {}", 

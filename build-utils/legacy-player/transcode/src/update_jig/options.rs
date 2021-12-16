@@ -12,7 +12,7 @@ pub struct Opts {
     pub game_id: Option<String>,
 
     //skip jigs appearing in this info file
-    #[structopt(long, default_value="C:\\Users\\david\\Downloads\\info.txt", parse(from_os_str))]
+    #[structopt(long, default_value="/home/david/archive/info.txt", parse(from_os_str))]
     pub info_file: PathBuf,
 
     /// batch size to help throttle connections 

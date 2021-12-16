@@ -11,9 +11,9 @@ pub struct Opts {
     /// otherwise, uses hardcoded local vec
     #[structopt(long, parse(try_from_str), default_value = "false")]
     pub game_json_from_albums: bool,
-    #[structopt(long, default_value="C:\\Users\\david\\Downloads\\warnings.txt", parse(from_os_str))]
+    #[structopt(long, default_value="/home/david/archive/warnings.txt", parse(from_os_str))]
     pub warnings_log: PathBuf,
-    #[structopt(long, default_value="C:\\Users\\david\\Downloads\\errors.txt", parse(from_os_str))]
+    #[structopt(long, default_value="/home/david/archive/errors.txt", parse(from_os_str))]
     pub errors_log: PathBuf,
     /// debug mode 
     #[structopt(long, parse(try_from_str), default_value = "false")]
@@ -36,11 +36,11 @@ pub struct Opts {
     #[structopt(long)]
     pub game_json_url: Option<String>,
 
-    #[structopt(long, default_value="C:\\Users\\david\\Documents\\JI\\legacy-cdn\\albums", parse(from_os_str))]
+    #[structopt(long, default_value="/home/david/archive/legacy-cdn/albums", parse(from_os_str))]
     pub game_json_albums_dir: PathBuf,
 
     /////////////////////////////////////
-    #[structopt(long, default_value="C:\\Users\\david\\Documents\\JI\\legacy-cdn\\games", parse(from_os_str))]
+    #[structopt(long, default_value="/home/david/archive/legacy-cdn/games", parse(from_os_str))]
     pub dest_base_path: PathBuf,
 
     #[structopt(long, default_value="json", parse(from_os_str))]

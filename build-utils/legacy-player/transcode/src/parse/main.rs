@@ -110,6 +110,14 @@ async fn game_json_urls(opts:&Opts) -> Vec<String> {
                 urls
             } else {
                 let list:&[&str] = &[
+                        // 
+                        // Let's learn about tet - 7556
+                        // (pro only)
+                        "https://d24o39yp3ttic8.cloudfront.net/223FCB2E-F1D9-42B1-80E9-BEF44FD513B6/game.json",
+
+                        // animals - 16248
+                        "https://d24o39yp3ttic8.cloudfront.net/6E5E7733-D22E-4315-AD26-CB06B6B6CB53/game.json",
+
                         // // David Test 002 (houdini) - 17736
                         // https://jitap.net/activities/gemy/play/david-test-002
                         "https://d24o39yp3ttic8.cloudfront.net/5D00A147-73B7-43FF-A215-A38CB84CEBCD/game.json",

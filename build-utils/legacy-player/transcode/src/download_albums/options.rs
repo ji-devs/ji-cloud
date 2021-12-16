@@ -6,7 +6,7 @@ use shared::config::RemoteTarget;
 #[structopt(name = "ji tap transcoder", about = "ji tap downloader/transcoder")]
 pub struct Opts {
     /////////////////////////////////////
-    #[structopt(long, default_value="C:\\Users\\david\\Documents\\JI\\legacy-cdn\\albums", parse(from_os_str))]
+    #[structopt(long, default_value="/home/david/archive/legacy-cdn/albums", parse(from_os_str))]
     pub dest_dir: PathBuf,
 
     #[structopt(long, parse(try_from_str), default_value = "100")]
