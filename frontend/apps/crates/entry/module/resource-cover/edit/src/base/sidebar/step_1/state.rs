@@ -1,9 +1,14 @@
 use super::super::state::Sidebar;
 use crate::base::state::Base;
-use components::{backgrounds::actions::Layer, color_select::state::State as ColorPickerState, image::search::{
+use components::{
+    backgrounds::actions::Layer,
+    color_select::state::State as ColorPickerState,
+    image::search::{
         callbacks::Callbacks as ImageSearchCallbacks,
         state::{ImageSearchKind, ImageSearchOptions, State as ImageSearchState},
-    }, stickers::state::Stickers, tabs::MenuTabKind};
+    },
+    tabs::MenuTabKind
+};
 use dominator::clone;
 use futures_signals::signal::Mutable;
 use shared::domain::jig::module::body::Background;
@@ -34,8 +39,6 @@ pub enum Tab {
     BackgroundImage(Rc<ImageSearchState>),
     FillColor(Rc<ColorPickerState>),
     Overlay(Rc<ImageSearchState>),
-    Image(Rc<ImageSearchState>),
-    Text, // uses top-level state since it must be toggled from main too
 }
 
 impl Tab {
@@ -78,21 +81,6 @@ impl Tab {
 
                 Self::Overlay(Rc::new(state))
             }
-            MenuTabKind::Image => {
-                let opts = ImageSearchOptions {
-                    kind: ImageSearchKind::Sticker,
-                    ..ImageSearchOptions::default()
-                };
-
-                let callbacks = ImageSearchCallbacks::new(Some(clone!(base => move |image| {
-                    log::info!("{:?}", image);
-                    Stickers::add_sprite(base.stickers.clone(), image);
-                })));
-                let state = ImageSearchState::new(opts, callbacks);
-
-                Self::Image(Rc::new(state))
-            }
-            MenuTabKind::Text => Self::Text,
             kind => unimplemented!("unsupported tab kind! {:?}", kind),
         }
     }
@@ -102,8 +90,6 @@ impl Tab {
             Self::BackgroundImage(_) => MenuTabKind::BackgroundImage,
             Self::FillColor(_) => MenuTabKind::FillColor,
             Self::Overlay(_) => MenuTabKind::Overlay,
-            Self::Image(_) => MenuTabKind::Image,
-            Self::Text => MenuTabKind::Text,
         }
     }
 
@@ -112,8 +98,6 @@ impl Tab {
             Self::BackgroundImage(_) => 0,
             Self::FillColor(_) => 1,
             Self::Overlay(_) => 2,
-            Self::Image(_) => 3,
-            Self::Text => 4,
         }
     }
 }
