@@ -49,13 +49,12 @@ pub mod register {
         pub const STR_TERMS_TERMS: &str = "terms & conditions";
         pub const STR_TERMS_LABEL_TWO: &str = " and ";
         pub const STR_TERMS_PRIVACY: &str = "privacy policy";
-        pub const STR_LANGUAGE_LABEL: &str = "Language of communication *";
         pub const STR_MARKETING_LABEL: &str = "I would like to receive educational resources.";
         pub const STR_PROTECTING_PRIVACY:&str = "Jewish Interactive (Ji) is committed to protecting and respecting your privacy. We will only use your personal information to administer your account and to provide the products and services you requested from us.";
 
+        pub const STR_LANGUAGE_LABEL: &str = "Language of communication *";
         pub const STR_LANGUAGE_PLACEHOLDER: &str = "Select from the list";
-        pub const STR_LANGUAGE_OPTIONS: &[&str] =
-            &["English", "Hebrew", "Spanish", "French", "Russian"];
+
         pub const STR_PERSONA_OPTIONS: &[&str] = &[
             "Teacher",
             "Parent",

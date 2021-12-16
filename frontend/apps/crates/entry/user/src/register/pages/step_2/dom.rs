@@ -11,9 +11,11 @@ use crate::{
     },
     strings::register::step_2::*,
 };
-use utils::events;
+use utils::{events, languages};
 
-use components::input::simple_select::SimpleSelect;
+use super::Language;
+
+use components::input::simple_select::{SimpleSelect, Item};
 
 pub struct Step2Page {}
 
@@ -38,9 +40,9 @@ impl Step2Page {
                         Some(STR_LANGUAGE_LABEL),
                         Some(STR_LANGUAGE_PLACEHOLDER),
                         None,
-                        STR_LANGUAGE_OPTIONS.to_vec(),
+                        languages::EMAIL_LANGUAGES.iter().map(|l| Language::from(l.clone())).collect(),
                         clone!(state => move |value| {
-                            *state.language.borrow_mut() = value.map(|x| x.to_string());
+                            *state.language.borrow_mut() = value.map(|lang| lang.value().to_string());
                             state.evaluate_language_error();
                         })
                     ),
