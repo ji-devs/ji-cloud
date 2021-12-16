@@ -78,10 +78,10 @@ impl Context {
         let mut skip_lines = Vec::new();
 
         if opts.skip_info_log {
-            if let Some(mut file) = OpenOptions::new()
+            if let Ok(mut file) = OpenOptions::new()
                 .read(true)
                 .open(&opts.skip_info_log_file)
-                .unwrap() {
+                {
 
                     for line in std::io::BufReader::new(file).lines() {
                         skip_lines.push(JigInfoLogLine::read_line(&line.unwrap()));
