@@ -1,6 +1,7 @@
 use std::rc::Rc;
 use futures_signals::signal_vec::MutableVec;
 
+#[derive(Debug)]
 #[derive(std::clone::Clone)]
 pub struct JigData {
   pub jig_name: String,
