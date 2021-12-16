@@ -4,8 +4,11 @@ use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::{Signal, SignalExt};
 use futures_signals::signal_vec::SignalVecExt;
 use shared::{
-    api::{endpoints::user::Profile, ApiEndpoint},
-    domain::{jig::JigResponse, user::UserProfile},
+    api::{
+        endpoints::{jig, user::Profile},
+        ApiEndpoint,
+    },
+    domain::jig::{JigSearchQuery, JigSearchResponse},
     error::EmptyError,
 };
 use std::rc::Rc;
@@ -21,40 +24,18 @@ impl JigUI {
     pub fn render(state: Rc<Self>) -> Dom {
         let init_loader = AsyncLoader::new();
         init_loader.load(clone!(state => async move {
-            let (result, status) = api_with_auth_status::<UserProfile, EmptyError, ()>("https://api.sandbox.jigzi.org/v1/jig", "GET", None).await;
-
-            // match api_no_auth::<JigSearchResponse, EmptyError, JigSearchQuery>(
-            //     jig::Search::PATH,
-            //     jig::Search::METHOD,
-            //     Some(req),
-            // )
-            // .await
-            // {
-            //     Err(_) => {}
-            //     Ok(res) => {
-            //         state.mode.set(HomePageMode::Search(
-            //             query,
-            //             Rc::new(MutableVec::new_with_values(res.jigs)),
-            //         ));
-            //     }
-            // };
-            
-            match status  {
-                401 | 403 => {
-                    state.jigs.set(Some(None));
-                }
-                _ => {
-                    match result {
-                        Err(_) => {
-                            log::info!("error fetching jigs");
-                        },
-                        Ok(jigs) => {
-                            state.jigs.set(Some(Some(jigs)));
-                        }
-                    }
+            match api_no_auth::<JigSearchResponse, EmptyError, JigSearchQuery>(
+                jig::Search::PATH,
+                jig::Search::METHOD,
+                None
+            )
+            .await
+            {
+                Err(_) => {}
+                Ok(res) => {
+                    state.jigs.lock_mut().replace_cloned(res.jigs);
                 }
             };
-            state.jigs.lock_mut().replace_cloned(jigs);
         }));
 
         // let jigs = vec![
