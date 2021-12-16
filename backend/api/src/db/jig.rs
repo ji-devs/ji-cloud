@@ -1,19 +1,21 @@
 use crate::translate::translate_text;
 use anyhow::Context;
 use futures::TryStreamExt;
+use serde_json::{json, value::Value};
 use shared::domain::{
     category::CategoryId,
     jig::{
-        additional_resource::AdditionalResourceId,
+        additional_resource::{AdditionalResourceId, ResourceContent},
         module::{
             body::{cover, ThemeId},
             ModuleId, StableModuleId,
         },
         AudioBackground, AudioEffects, AudioFeedbackNegative, AudioFeedbackPositive, DraftOrLive,
-        JigAdminData, JigAdminUpdateData, JigData, JigFocus, JigId, JigPlayerSettings, JigRating,
-        JigResponse, LiteModule, ModuleKind, PrivacyLevel, TextDirection,
+        JigAdditionalResource, JigAdminData, JigAdminUpdateData, JigData, JigFocus, JigId,
+        JigPlayerSettings, JigRating, JigResponse, LiteModule, ModuleKind, PrivacyLevel,
+        TextDirection,
     },
-    meta::{AffiliationId, AgeRangeId, GoalId},
+    meta::{AffiliationId, AgeRangeId, GoalId, ResourceTypeId},
     user::UserScope,
 };
 use sqlx::{PgConnection, PgPool};
@@ -217,7 +219,7 @@ with cte as (
                when $2 = 0 then jig.draft_id
                when $2 = 1 then jig.live_id
                end as "draft_or_live_id",
-           first_cover_assigned,  
+           first_cover_assigned,
            published_at,
            rating,
            blocked,
@@ -275,9 +277,11 @@ select cte.jig_id                                          as "jig_id: JigId",
        array(select row (age_range_id)
              from jig_data_age_range
              where jig_data_id = cte.draft_or_live_id)     as "age_ranges!: Vec<(AgeRangeId,)>",
-       array(select row (id)
-             from jig_data_additional_resource
-             where jig_data_id = cte.draft_or_live_id)     as "additional_resources!: Vec<(AdditionalResourceId,)>"
+       array(
+             select row (jdar.id, jdar.display_name, resource_type_id, resource_content)
+             from jig_data_additional_resource "jdar"
+             where jdar.jig_data_id = cte.draft_or_live_id
+       )                                                    as "additional_resource!: Vec<(Uuid, String, Uuid, Value)>"
 from jig_data
          inner join cte on cte.draft_or_live_id = jig_data.id
 "#,
@@ -317,7 +321,13 @@ from jig_data
                 theme: row.theme,
                 age_ranges: row.age_ranges.into_iter().map(|(it, )| it).collect(),
                 affiliations: row.affiliations.into_iter().map(|(it, )| it).collect(),
-                additional_resources: row.additional_resources.into_iter().map(|(it, )| it).collect(),
+                additional_resources: row.additional_resource.into_iter().map(|(id, display_name, resource_type_id, resource_content)| {
+                    JigAdditionalResource {
+                        id,
+                        display_name,
+                        resource_type_id,
+                        resource_content,
+                    }}).collect(),
                 audio_background: row.audio_background,
                 audio_effects: AudioEffects {
                     feedback_positive: row.audio_feedback_positive.into_iter().map(|(it, )| it).collect(),
@@ -355,7 +365,7 @@ select jig.id                                       as "id!: JigId",
        (select given_name || ' '::text || family_name
         from user_profile
         where user_profile.user_id = author_id) as "author_name",
-       first_cover_assigned                        as "first_cover_assigned!",
+       first_cover_assigned                     as "first_cover_assigned!",
        live_id                                  as "live_id!",
        draft_id                                 as "draft_id!",
        published_at,
@@ -385,8 +395,9 @@ order by t.ord
         DraftOrLive::Live => jig.iter().map(|it| it.live_id).collect(),
     };
 
-    let jig_data = sqlx::query!( //language=SQL
-r#"
+    let jig_data = sqlx::query!(
+        //language=SQL
+        r#"
 select id,
        display_name                                                                  as "display_name!",
        updated_at,
@@ -418,14 +429,16 @@ select id,
        array(select row (age_range_id)
              from jig_data_age_range
              where jig_data_id = jig_data.id)     as "age_ranges!: Vec<(AgeRangeId,)>",
-       array(select row (jig_data_additional_resource.id)
-             from jig_data_additional_resource
-             where jig_data_id = jig_data.id)     as "additional_resources!: Vec<(AdditionalResourceId,)>",
+      array(
+                select row (jdar.id, jdar.display_name, resource_type_id, resource_content)
+                from jig_data_additional_resource "jdar"
+                where jdar.jig_data_id = jig_data.id
+            )                                     as "additional_resource!: Vec<(Uuid, String, Uuid, Value)>",
        privacy_level                              as "privacy_level!: PrivacyLevel",
        jig_focus                                  as "jig_focus!: JigFocus",
        locked                                     as "locked!",
        other_keywords                             as "other_keywords!", 
-       translated_keywords                        as "translated_keywords!"
+       translated_keywords                        as "translated_keywords!"                  
 from jig_data
          inner join unnest($1::uuid[])
     with ordinality t(id, ord) using (id)
@@ -482,9 +495,16 @@ order by t.ord
                     .map(|(it,)| it)
                     .collect(),
                 additional_resources: jig_data_row
-                    .additional_resources
+                    .additional_resource
                     .into_iter()
-                    .map(|(it,)| it)
+                    .map(|(id, display_name, resource_type_id, resource_content)| {
+                        JigAdditionalResource {
+                            id,
+                            display_name,
+                            resource_type_id,
+                            resource_content,
+                        }
+                    })
                     .collect(),
                 audio_background: jig_data_row.audio_background,
                 audio_effects: AudioEffects {
@@ -875,9 +895,12 @@ select jig.id                                              as "jig_id: JigId",
        array(select row (age_range_id)
              from jig_data_age_range
              where jig_data_id = jig_data.id)              as "age_ranges!: Vec<(AgeRangeId,)>",
-       array(select row (id)
-             from jig_data_additional_resource
-             where jig_data_id = jig_data.id)              as "additional_resources!: Vec<(AdditionalResourceId,)>"
+       array(
+                select row (jdar.id, jdar.display_name, resource_type_id, resource_content)
+                from jig_data_additional_resource "jdar"
+                where jdar.jig_data_id = jig_data.id
+            )                                               as "additional_resource!: Vec<(Uuid, String, Uuid, Value)>"
+
 from jig_data
          inner join jig on jig_data.id = jig.draft_id
          inner join jig_admin_data "admin" on admin.jig_id = jig.id 
@@ -922,7 +945,13 @@ limit 20 offset 20 * $1
                 theme: row.theme,
                 age_ranges: row.age_ranges.into_iter().map(|(it, )| it).collect(),
                 affiliations: row.affiliations.into_iter().map(|(it, )| it).collect(),
-                additional_resources: row.additional_resources.into_iter().map(|(it, )| it).collect(),
+                additional_resources: row.additional_resource.into_iter().map(|(id, display_name, resource_type_id, resource_content)| {
+                    JigAdditionalResource {
+                        id,
+                        display_name,
+                        resource_type_id,
+                        resource_content,
+                    }}).collect(),
                 audio_background: row.audio_background,
                 audio_effects: AudioEffects {
                     feedback_positive: row.audio_feedback_positive.into_iter().map(|(it, )| it).collect(),
