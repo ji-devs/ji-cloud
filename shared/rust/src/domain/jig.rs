@@ -1,6 +1,7 @@
 //! Types for JIGs.
 
 pub mod additional_resource;
+pub use additional_resource::AdditionalResourceId;
 
 pub mod module;
 // avoid breaking Changes
@@ -16,7 +17,6 @@ use uuid::Uuid;
 
 use super::{
     category::CategoryId,
-    jig::additional_resource::AdditionalResourceId,
     meta::{AffiliationId, AgeRangeId, GoalId, ResourceTypeId},
 };
 use crate::domain::jig::module::body::ThemeId;
@@ -222,7 +222,7 @@ pub struct JigData {
     pub categories: Vec<CategoryId>,
 
     /// Additional resources of this JIG.
-    pub additional_resources: Vec<AdditionalResourceId>,
+    pub additional_resources: Vec<JigAdditionalResource>,
 
     /// Description of the jig.
     pub description: String,
@@ -330,6 +330,24 @@ pub struct JigAdminUpdateData {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub curated: Option<bool>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+/// Over-the-wire representation of a JIG additional resource.
+pub struct JigAdditionalResource {
+    /// The additional resources's ID.
+    pub id: Uuid,
+
+    /// Name for additional resource
+    pub display_name: String,
+
+    /// Type of additional resource
+    pub resource_type_id: Uuid,
+
+    /// resource content of additional resource
+    #[serde(flatten)]
+    pub resource_content: serde_json::Value,
 }
 
 /// Admin rating for Jig

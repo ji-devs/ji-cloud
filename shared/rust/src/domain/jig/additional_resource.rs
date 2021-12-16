@@ -23,7 +23,7 @@ pub struct AdditionalResource {
     /// Type of additional resource
     pub resource_type_id: ResourceTypeId,
 
-    /// Type of additional resource
+    /// Content of additional resource
     pub resource_content: ResourceContent,
 }
 
@@ -80,5 +80,32 @@ pub enum ResourceContent {
     /// Additional resource kind: pdf
     PdfId(PdfId),
 }
+
+// /// Represents the various kinds of data a module can represent.
+// #[repr(i16)]
+// #[cfg_attr(feature = "backend", derive(sqlx::Type))]
+// #[derive(Serialize, Deserialize, Debug, Copy, Clone, PartialEq, Eq)]
+// pub enum ResourceKind {
+//     /// This is a sort of special module, every jig has one and it can't be deleted TODO: is that so?
+//     Image = 0,
+
+//     Audio = 1,
+
+//     Link = 2,
+
+//     Pdf = 3
+// }
+
+// impl ResourceContent {
+//     /// Gets this body's related [`ModuleKind`](super::ModuleKind)
+//     pub fn kind(&self) -> super::ResourceKind {
+//         match self {
+//             ResourceContent::ImageId(_) => super::ResourceKind::,
+//             ResourceContent::AudioId(_) => super::ResourceKind::,
+//             ResourceContent::Link(_) => super::ResourceKind::,
+//             ResourceContent::PdfId(_) => super::ResourceKind::,
+//         }
+//     }
+// }
 
 into_uuid![AdditionalResourceId];
