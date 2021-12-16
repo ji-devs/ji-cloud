@@ -112,6 +112,8 @@ pub enum Step {
     One,
     /// Step 2
     Two,
+    /// Step 3
+    Three,
 }
 
 impl Default for Step {
@@ -124,7 +126,8 @@ impl StepExt for Step {
     fn next(&self) -> Option<Self> {
         match self {
             Self::One => Some(Self::Two),
-            Self::Two => None,
+            Self::Two => Some(Self::Three),
+            Self::Three => None,
         }
     }
 
@@ -132,23 +135,26 @@ impl StepExt for Step {
         match self {
             Self::One => 1,
             Self::Two => 2,
+            Self::Three => 3,
         }
     }
 
     fn label(&self) -> &'static str {
+        const STR_DESIGN: &'static str = "Design";
         const STR_CONTENT: &'static str = "Content";
         const STR_PREVIEW: &'static str = "Preview";
 
         match self {
-            Self::One => STR_CONTENT,
-            Self::Two => STR_PREVIEW,
+            Self::One => STR_DESIGN,
+            Self::Two => STR_CONTENT,
+            Self::Three => STR_PREVIEW,
         }
     }
 
     fn get_list() -> Vec<Self> {
-        vec![Self::One, Self::Two]
+        vec![Self::One, Self::Two, Self::Three]
     }
     fn get_preview() -> Self {
-        Self::Two
+        Self::Three
     }
 }
