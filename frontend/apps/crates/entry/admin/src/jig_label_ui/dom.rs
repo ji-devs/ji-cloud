@@ -15,10 +15,10 @@ use std::rc::Rc;
 use utils::{prelude::*, routes::AdminRoute::Jigs};
 
 impl JigUI {
-    fn render_jig_span(slot: &str, text: &str) -> Dom {
+    fn render_jig_span(slot: &str, text: String) -> Dom {
         html!("span", {
             .attribute("slot", slot)
-            .text(text)
+            .text(&text)
         })
     }
     pub fn render(state: Rc<Self>) -> Dom {
@@ -40,18 +40,18 @@ impl JigUI {
             .children_signal_vec(state.jigs.signal_vec_cloned().map(clone!(state => move |jig: JigResponse| {
                 html!("single-jig", {
                     .children(&mut [
-                        Self::render_jig_span("jig-name", &jig.jig_data.display_name),
-                        Self::render_jig_span("author", match &jig.author_name {
+                        Self::render_jig_span("jig-name", jig.jig_data.display_name),
+                        Self::render_jig_span("author", match jig.author_name {
                             Some(name) => name,
-                            None => ""
+                            None => "".to_string()
                         }),
-                        Self::render_jig_span("author-badge", "AUTHOR BADGE"),
-                        Self::render_jig_span("date", match &jig.published_at {
-                            Some(published_at) => "", // &published_at.date().naive_utc().format("%Y-%m-%d").to_string(),
-                            None => ""
+                        Self::render_jig_span("author-badge", "AUTHOR BADGE".to_string()),
+                        Self::render_jig_span("date", match jig.published_at {
+                            Some(published_at) => published_at.format("%b %e, %Y").to_string(),
+                            None => "".to_string()
                         }),
-                        Self::render_jig_span("language", &jig.jig_data.language),
-                        Self::render_jig_span("curators", "CURATORS"),
+                        Self::render_jig_span("language", jig.jig_data.language),
+                        Self::render_jig_span("curators", "CURATORS".to_string()),
                     ])
                 })
             })))
