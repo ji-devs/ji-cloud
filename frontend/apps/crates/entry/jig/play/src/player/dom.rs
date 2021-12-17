@@ -57,13 +57,8 @@ pub fn render(state: Rc<State>) -> Dom {
                     Some(html!("jig-play-background-music", {
                         .property("slot", "background")
                         .property_signal("playing", state.bg_audio_playing.signal())
-                        .event(clone!(state, jig => move|_: events::Click| {
-                            actions::toggle_background_audio(
-                                Rc::clone(&state),
-                                // `unwrap` is safe here because we are checking that it is Some in
-                                // the match branch above.
-                                jig.jig_data.audio_background.unwrap()
-                            );
+                        .event(clone!(state => move|_: events::Click| {
+                            actions::toggle_background_audio(Rc::clone(&state));
                         }))
                     }))
                 },
