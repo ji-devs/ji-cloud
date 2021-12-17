@@ -187,37 +187,41 @@ pub fn on_iframe_message(state: Rc<State>, message: ModuleToJigPlayerMessage) {
             *points += amount;
         }
         ModuleToJigPlayerMessage::Start(time) => {
-            // Initialize the audio once the jig is started
-            if let Some(jig) = state.jig.get_cloned() {
-                if let Some(audio_background) = jig.jig_data.audio_background {
-                    init_audio(&state, audio_background);
-                }
-            }
-
-            // If the background audio is set to play, then start the audio
-            if state.bg_audio_playing.get() {
-                if let Some(bg_audio_handle) = &*state.bg_audio_handle.borrow() {
-                    play_background_audio(&state, bg_audio_handle);
-                }
-            }
-
-            if let Some(time) = time {
-                start_timer(Rc::clone(&state), time);
-            }
+            start_player(state, time);
         }
         ModuleToJigPlayerMessage::Next => {
-            navigate_forward(Rc::clone(&state));
+            navigate_forward(state);
         }
         ModuleToJigPlayerMessage::Stop => {
             state.timer.set(None);
         }
         ModuleToJigPlayerMessage::JumpToIndex(index) => {
-            navigate_to_index(Rc::clone(&state), index);
+            navigate_to_index(state, index);
         }
         ModuleToJigPlayerMessage::JumpToId(module_id) => {
-            navigate_to_module(Rc::clone(&state), &module_id);
+            navigate_to_module(state, &module_id);
         }
     };
+}
+
+fn start_player(state: Rc<State>, time: Option<u32>) {
+    // Initialize the audio once the jig is started
+    if let Some(jig) = state.jig.get_cloned() {
+        if let Some(audio_background) = jig.jig_data.audio_background {
+            init_audio(&state, audio_background);
+        }
+    }
+
+    // If the background audio is set to play, then start the audio
+    if state.bg_audio_playing.get() {
+        if let Some(bg_audio_handle) = &*state.bg_audio_handle.borrow() {
+            play_background_audio(&state, bg_audio_handle);
+        }
+    }
+
+    if let Some(time) = time {
+        start_timer(Rc::clone(&state), time);
+    }
 }
 
 pub fn reload_iframe(state: Rc<State>) {
