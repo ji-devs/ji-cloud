@@ -24,7 +24,7 @@ export type Color = "blue" | "red" | "green";
 const TRIANGLE_WIDTH = 18;
 const TRIANGLE_HEIGHT = 10;
 const OUTLINE_SIZE = 3;
-const BASE_ARROW_NUDGE = 20;
+const BASE_ARROW_NUDGE = 24;
 
 type ArrowAnchor = Anchor | "ttr" | "ttl" | "bbr" | "bbl";
 
