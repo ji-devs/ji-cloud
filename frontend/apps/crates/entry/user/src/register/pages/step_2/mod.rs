@@ -1,15 +1,15 @@
-use components::input::simple_select::Item;
+use components::input::simple_select::SimpleSelectItem;
 
 pub(super) mod actions;
 pub mod dom;
 pub(super) mod state;
 
-/// Wrapper for [`utils::languages::Language`] so that we can implement SimpleSelect's [`Item`]
-/// trait.
+/// Wrapper for [`utils::languages::Language`] so that we can implement SimpleSelect's
+/// [`SimpleSelectItem`] trait.
 #[derive(Clone)]
 pub struct Language(utils::languages::Language);
 
-impl Item for Language {
+impl SimpleSelectItem for Language {
     fn value(&self) -> &str {
         self.0.0
     }

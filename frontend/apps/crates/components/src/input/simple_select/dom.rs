@@ -1,4 +1,4 @@
-use super::{state::*, Item};
+use super::{state::*, SimpleSelectItem};
 use dominator::{clone, html, Dom, DomBuilder};
 use futures_signals::signal::SignalExt;
 use std::rc::Rc;
@@ -6,7 +6,7 @@ use utils::{prelude::*, languages::Language};
 use wasm_bindgen::prelude::*;
 use web_sys::HtmlElement;
 
-impl<T: Item + 'static, P: ToString + 'static, L: ToString + 'static>
+impl<T: SimpleSelectItem + 'static, P: ToString + 'static, L: ToString + 'static>
     SimpleSelect<T, P, L>
 {
     pub fn render(self: Rc<Self>, slot: Option<&str>) -> Dom {

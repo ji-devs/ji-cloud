@@ -4,12 +4,12 @@ mod state;
 pub use dom::*;
 pub use state::*;
 
-pub trait Item: Clone {
+pub trait SimpleSelectItem: Clone {
     fn value(&self) -> &str;
     fn label(&self) -> &str;
 }
 
-impl Item for &str {
+impl SimpleSelectItem for &str {
     fn value(&self) -> &str {
         self
     }

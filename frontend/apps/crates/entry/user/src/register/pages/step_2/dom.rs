@@ -15,7 +15,7 @@ use utils::{events, languages};
 
 use super::Language;
 
-use components::input::simple_select::{SimpleSelect, Item};
+use components::input::simple_select::{SimpleSelect, SimpleSelectItem};
 
 pub struct Step2Page {}
 
