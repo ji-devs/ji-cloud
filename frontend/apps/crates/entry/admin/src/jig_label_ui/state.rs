@@ -1,19 +1,9 @@
 use std::rc::Rc;
 use futures_signals::signal_vec::MutableVec;
-
-#[derive(Debug)]
-#[derive(std::clone::Clone)]
-pub struct JigData {
-  pub jig_name: String,
-  pub author: String,
-  pub author_badge: String,
-  pub date: String,
-  pub language: String,
-  pub curators: Vec<String>,
-}
+use shared::domain::jig::JigResponse;
 
 pub struct JigUI {
-  pub jigs: MutableVec<JigData>,
+  pub jigs: MutableVec<JigResponse>,
 }
 
 impl JigUI {

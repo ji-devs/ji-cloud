@@ -8,7 +8,7 @@ use shared::{
         endpoints::{jig, user::Profile},
         ApiEndpoint,
     },
-    domain::jig::{JigSearchQuery, JigSearchResponse},
+    domain::jig::{JigResponse, JigSearchQuery, JigSearchResponse},
     error::EmptyError,
 };
 use std::rc::Rc;
@@ -32,8 +32,8 @@ impl JigUI {
             .await
             {
                 Err(_) => {}
-                Ok(res) => {
-                    state.jigs.lock_mut().replace_cloned(res.jigs);
+                Ok(jigSearchResponse) => {
+                    state.jigs.lock_mut().replace_cloned(jigSearchResponse.jigs);
                 }
             };
         }));
@@ -101,15 +101,21 @@ impl JigUI {
             //         ])
             //     })
             // }))
-            .children_signal_vec(state.jigs.signal_vec_cloned().map(clone!(state => move |jig| {
+            .children_signal_vec(state.jigs.signal_vec_cloned().map(clone!(state => move |jig: JigResponse| {
                 html!("single-jig", {
                     .children(&mut [
-                        Self::render_jig_span("jig-name", &jig.jig_name),
-                        Self::render_jig_span("author", &jig.author),
-                        Self::render_jig_span("author-badge", &jig.author_badge),
-                        Self::render_jig_span("date", &jig.date),
-                        Self::render_jig_span("language", &jig.language),
-                        Self::render_jig_span("curators", &jig.curators.join(", ")),
+                        Self::render_jig_span("jig-name", &jig.jig_data.display_name),
+                        Self::render_jig_span("author", match &jig.author_name {
+                            Some(name) => name,
+                            None => ""
+                        }),
+                        Self::render_jig_span("author-badge", "AUTHOR BADGE"),
+                        Self::render_jig_span("date", match &jig.published_at {
+                            Some(published_at) => "", // &published_at.date().naive_utc().format("%Y-%m-%d").to_string(),
+                            None => ""
+                        }),
+                        Self::render_jig_span("language", &jig.jig_data.language),
+                        Self::render_jig_span("curators", "CURATORS"),
                     ])
                 })
             })))
