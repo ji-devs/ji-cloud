@@ -89,6 +89,7 @@ image = []
 image_search = []
 image_upload = []
 instructions = []
+jigzi_help = []
 module = []
 module_edit = []
 module_play = []
@@ -126,6 +127,7 @@ all= [
     "image_search", 
     "image_upload", 
     "instructions", 
+    "jigzi_help", 
     "module", 
     "module_edit", 
     "module_play", 
