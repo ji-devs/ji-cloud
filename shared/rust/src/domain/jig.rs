@@ -796,6 +796,9 @@ pub struct JigCountResponse {
 
 /// Response for whether a user has liked a JIG.
 #[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct JigLikedResponse(pub bool);
+pub struct JigLikedResponse {
+    /// Whether the authenticated user has liked the current JIG
+    pub is_liked: bool,
+}
 
 into_uuid![JigId];

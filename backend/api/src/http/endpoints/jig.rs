@@ -334,7 +334,7 @@ async fn liked(
 ) -> Result<Json<<jig::Liked as ApiEndpoint>::Res>, error::Server> {
     let is_liked = db::jig::jig_is_liked(&*db, claims.0.user_id, path.into_inner()).await?;
 
-    Ok(Json(JigLikedResponse(is_liked)))
+    Ok(Json(JigLikedResponse { is_liked }))
 }
 
 /// Unlike to a jig
