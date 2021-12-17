@@ -8,7 +8,7 @@ use shared::{
     domain::{
         jig::{
             DraftOrLive, JigBrowseResponse, JigCountResponse, JigCreateRequest, JigId,
-            JigSearchResponse, PrivacyLevel, UserOrMe,
+            JigLikedResponse, JigSearchResponse, PrivacyLevel, UserOrMe,
         },
         CreateResponse,
     },
@@ -326,6 +326,17 @@ async fn like(
     Ok(HttpResponse::NoContent().finish())
 }
 
+/// Whether a user has liked a JIG
+async fn liked(
+    db: Data<PgPool>,
+    claims: TokenUser,
+    path: web::Path<JigId>,
+) -> Result<Json<<jig::Liked as ApiEndpoint>::Res>, error::Server> {
+    let is_liked = db::jig::jig_is_liked(&*db, claims.0.user_id, path.into_inner()).await?;
+
+    Ok(Json(JigLikedResponse { is_liked }))
+}
+
 /// Unlike to a jig
 async fn unlike(
     db: Data<PgPool>,
@@ -404,5 +415,6 @@ pub fn configure(cfg: &mut ServiceConfig) {
         .route(jig::Count::PATH, jig::Count::METHOD.route().to(count))
         .route(jig::Play::PATH, jig::Play::METHOD.route().to(play))
         .route(jig::Like::PATH, jig::Like::METHOD.route().to(like))
+        .route(jig::Liked::PATH, jig::Liked::METHOD.route().to(liked))
         .route(jig::Unlike::PATH, jig::Unlike::METHOD.route().to(unlike));
 }
