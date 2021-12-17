@@ -1,21 +1,20 @@
 use crate::translate::translate_text;
 use anyhow::Context;
 use futures::TryStreamExt;
-use serde_json::{json, value::Value};
+use serde_json::value::Value;
 use shared::domain::{
     category::CategoryId,
     jig::{
-        additional_resource::{AdditionalResourceId, ResourceContent},
+        additional_resource::{AdditionalResource, AdditionalResourceId as AddId, ResourceContent},
         module::{
             body::{cover, ThemeId},
             ModuleId, StableModuleId,
         },
         AudioBackground, AudioEffects, AudioFeedbackNegative, AudioFeedbackPositive, DraftOrLive,
-        JigAdditionalResource, JigAdminData, JigAdminUpdateData, JigData, JigFocus, JigId,
-        JigPlayerSettings, JigRating, JigResponse, LiteModule, ModuleKind, PrivacyLevel,
-        TextDirection,
+        JigAdminData, JigAdminUpdateData, JigData, JigFocus, JigId, JigPlayerSettings, JigRating,
+        JigResponse, LiteModule, ModuleKind, PrivacyLevel, TextDirection,
     },
-    meta::{AffiliationId, AgeRangeId, GoalId, ResourceTypeId},
+    meta::{AffiliationId, AgeRangeId, GoalId, ResourceTypeId as TypeId},
     user::UserScope,
 };
 use sqlx::{PgConnection, PgPool};
@@ -281,7 +280,7 @@ select cte.jig_id                                          as "jig_id: JigId",
              select row (jdar.id, jdar.display_name, resource_type_id, resource_content)
              from jig_data_additional_resource "jdar"
              where jdar.jig_data_id = cte.draft_or_live_id
-       )                                                    as "additional_resource!: Vec<(Uuid, String, Uuid, Value)>"
+       )                                                    as "additional_resource!: Vec<(AddId, String, TypeId, Value)>"
 from jig_data
          inner join cte on cte.draft_or_live_id = jig_data.id
 "#,
@@ -322,11 +321,11 @@ from jig_data
                 age_ranges: row.age_ranges.into_iter().map(|(it, )| it).collect(),
                 affiliations: row.affiliations.into_iter().map(|(it, )| it).collect(),
                 additional_resources: row.additional_resource.into_iter().map(|(id, display_name, resource_type_id, resource_content)| {
-                    JigAdditionalResource {
+                    AdditionalResource {
                         id,
                         display_name,
                         resource_type_id,
-                        resource_content,
+                        resource_content: serde_json::from_value::<ResourceContent>(resource_content).unwrap(),
                     }}).collect(),
                 audio_background: row.audio_background,
                 audio_effects: AudioEffects {
@@ -429,11 +428,11 @@ select id,
        array(select row (age_range_id)
              from jig_data_age_range
              where jig_data_id = jig_data.id)     as "age_ranges!: Vec<(AgeRangeId,)>",
-      array(
+       array(
                 select row (jdar.id, jdar.display_name, resource_type_id, resource_content)
                 from jig_data_additional_resource "jdar"
                 where jdar.jig_data_id = jig_data.id
-            )                                     as "additional_resource!: Vec<(Uuid, String, Uuid, Value)>",
+            )                                               as "additional_resource!: Vec<(AddId, String, TypeId, Value)>",
        privacy_level                              as "privacy_level!: PrivacyLevel",
        jig_focus                                  as "jig_focus!: JigFocus",
        locked                                     as "locked!",
@@ -498,11 +497,14 @@ order by t.ord
                     .additional_resource
                     .into_iter()
                     .map(|(id, display_name, resource_type_id, resource_content)| {
-                        JigAdditionalResource {
+                        AdditionalResource {
                             id,
                             display_name,
                             resource_type_id,
-                            resource_content,
+                            resource_content: serde_json::from_value::<ResourceContent>(
+                                resource_content,
+                            )
+                            .unwrap(),
                         }
                     })
                     .collect(),
@@ -899,8 +901,7 @@ select jig.id                                              as "jig_id: JigId",
                 select row (jdar.id, jdar.display_name, resource_type_id, resource_content)
                 from jig_data_additional_resource "jdar"
                 where jdar.jig_data_id = jig_data.id
-            )                                               as "additional_resource!: Vec<(Uuid, String, Uuid, Value)>"
-
+            )                                               as "additional_resource!: Vec<(AddId, String, TypeId, Value)>"
 from jig_data
          inner join jig on jig_data.id = jig.draft_id
          inner join jig_admin_data "admin" on admin.jig_id = jig.id
@@ -946,11 +947,11 @@ limit 20 offset 20 * $1
                 age_ranges: row.age_ranges.into_iter().map(|(it, )| it).collect(),
                 affiliations: row.affiliations.into_iter().map(|(it, )| it).collect(),
                 additional_resources: row.additional_resource.into_iter().map(|(id, display_name, resource_type_id, resource_content)| {
-                    JigAdditionalResource {
+                    AdditionalResource {
                         id,
                         display_name,
                         resource_type_id,
-                        resource_content,
+                        resource_content: serde_json::from_value::<ResourceContent>(resource_content).unwrap(),
                     }}).collect(),
                 audio_background: row.audio_background,
                 audio_effects: AudioEffects {
