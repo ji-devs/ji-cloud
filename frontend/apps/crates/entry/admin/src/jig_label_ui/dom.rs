@@ -22,8 +22,7 @@ impl JigUI {
         })
     }
     pub fn render(state: Rc<Self>) -> Dom {
-        let init_loader = AsyncLoader::new();
-        init_loader.load(clone!(state => async move {
+        state.loader.load(clone!(state => async move {
             match api_no_auth::<JigSearchResponse, EmptyError, JigSearchQuery>(
                 jig::Search::PATH,
                 jig::Search::METHOD,
@@ -31,23 +30,12 @@ impl JigUI {
             )
             .await
             {
-                Err(_) => {}
-                Ok(jigSearchResponse) => {
-                    state.jigs.lock_mut().replace_cloned(jigSearchResponse.jigs);
+                Err(_) => todo!(),
+                Ok(resp) => {
+                    state.jigs.lock_mut().replace_cloned(resp.jigs);
                 }
             };
         }));
-
-        // let jigs = vec![
-        //     JigData {
-        //         jig_name: String::from("Hebrew Letters"),
-        //         author: String::from("Michael Wikes"),
-        //         author_badge: String::from("JI Team"),
-        //         date: String::from("Aug. 5, 2020"),
-        //         language: String::from("English (American)"),
-        //         curators: vec![String::from("Anat (13.7.21)")],
-        //     },
-        // ];
         html!("jig-label-ui", {
             .children_signal_vec(state.jigs.signal_vec_cloned().map(clone!(state => move |jig: JigResponse| {
                 html!("single-jig", {

@@ -189,6 +189,14 @@ impl From<bool> for DraftOrLive {
     }
 }
 
+/// Struct containing an additional resource Id.
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct AdditionalResourceIdStruct {
+    /// Id field containing AdditionalResourceID.
+    pub id: AdditionalResourceId,
+}
+
 /// The over-the-wire representation of a JIG's data. This can either be the live copy or the draft copy.
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -222,7 +230,7 @@ pub struct JigData {
     pub categories: Vec<CategoryId>,
 
     /// Additional resources of this JIG.
-    pub additional_resources: Vec<AdditionalResourceId>,
+    pub additional_resources: Vec<AdditionalResourceIdStruct>,
 
     /// Description of the jig.
     pub description: String,
