@@ -69,10 +69,8 @@ pub fn submit(state: Rc<State>) {
         affiliations,
         location: step_2
             .location_json
-            .map(|raw| serde_json::to_value(JsonRaw { raw }).unwrap_throw()),
+            .map(|raw| serde_json::to_value(raw).unwrap_throw()),
     };
-
-    log::info!("{:?}", req);
 
     state.register_loader.load(async {
         let (resp, status) = endpoints::user::CreateProfile::api_with_auth_status(Some(req)).await;

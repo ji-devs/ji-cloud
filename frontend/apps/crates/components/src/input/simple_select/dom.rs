@@ -1,12 +1,12 @@
-use super::state::*;
+use super::{state::*, SimpleSelectItem};
 use dominator::{clone, html, Dom, DomBuilder};
 use futures_signals::signal::SignalExt;
 use std::rc::Rc;
-use utils::prelude::*;
+use utils::{prelude::*, languages::Language};
 use wasm_bindgen::prelude::*;
 use web_sys::HtmlElement;
 
-impl<T: ToString + Clone + 'static, P: ToString + 'static, L: ToString + 'static>
+impl<T: SimpleSelectItem + 'static, P: ToString + 'static, L: ToString + 'static>
     SimpleSelect<T, P, L>
 {
     pub fn render(self: Rc<Self>, slot: Option<&str>) -> Dom {
@@ -35,7 +35,9 @@ impl<T: ToString + Clone + 'static, P: ToString + 'static, L: ToString + 'static
             .property_signal("value", state.value.signal_cloned().map(|value| {
                 match value {
                     None => JsValue::NULL,
-                    Some(value) => JsValue::from_str(&value.to_string())
+                    // Use the label here because the input-select element uses the value as the
+                    // display value for rendering the selected item in the placeholder field.
+                    Some(value) => JsValue::from_str(&value.label())
                 }
             }))
             .apply_if(state.label.is_some(), |dom| {
@@ -46,12 +48,12 @@ impl<T: ToString + Clone + 'static, P: ToString + 'static, L: ToString + 'static
             })
             .children(state.values.iter().map(clone!(state => move |value| {
                 html!("input-select-option", {
-                    .text(&value.to_string())
+                    .text(&value.label())
                     .event(clone!(state, value => move |evt:events::CustomSelectedChange| {
                         if evt.selected() {
                             state.value.set(Some(value.clone()));
                             if let Some(on_change) = state.on_change.as_ref() {
-                                (on_change) (Some(&value.to_string()));
+                                (on_change) (Some(value.clone()));
                             }
                         }
                     }))
