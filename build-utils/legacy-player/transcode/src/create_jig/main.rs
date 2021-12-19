@@ -115,14 +115,24 @@ async fn main() {
 async fn get_futures(ctx:Arc<Context>) -> Vec<impl Future> {
     match ctx.opts.game_id.clone() {
         None => {
-            let paths = fs::read_dir(&ctx.opts.src_base_path).unwrap();
-            paths
-                .into_iter()
-                .map(|path| {
-                    let path = path.unwrap().path();
-                    let game_id = path.file_stem().unwrap().to_str().unwrap().to_string();
-                    parse(ctx.clone(), game_id)
-                })
+
+            let res = reqwest::Client::new()
+                .get(&ctx.opts.game_ids_list_url)
+                .send()
+                .await
+                .unwrap();
+
+            if !res.status().is_success() {
+                log::error!("error code: {}, details: {:?}", res.status().as_str(), res);
+                panic!("Failed to get jig data");
+            }
+
+            res
+                .text()
+                .await
+                .unwrap()
+                .lines()
+                .map(|line| parse(ctx.clone(), line.to_string()))
                 .collect()
         },
         Some(game_id) => {
@@ -133,16 +143,25 @@ async fn get_futures(ctx:Arc<Context>) -> Vec<impl Future> {
 async fn parse(ctx: Arc<Context>, game_id: String) {
     let ctx = &ctx;
 
-    if let Some(line) = ctx.skip_lines.iter().find(|line| &line.game_id == &game_id) {
-        log::info!("skipping {}, first hit is jig_id: {}, game_hash: {}", game_id, line.jig_id, line.game_hash);
+    if let Some(game_id) = ctx.skip_game_ids.iter().find(|skip_game_id| game_id == **skip_game_id) {
+        log::info!("skipping {}", game_id);
         return;
     }
 
-    let manifest:SrcManifest = {
-        let path = ctx.opts.src_base_path.join(&format!("{}/json/game.json", game_id));
-        let file = File::open(path).unwrap();
-        serde_json::from_reader(file).unwrap()
-    };
+    let url = format!("https://storage.googleapis.com/ji-cloud-legacy-eu-001/games/{}/json/game.json", game_id);
+
+    let res = reqwest::Client::new()
+        .get(&url)
+        .send()
+        .await
+        .unwrap();
+
+    if !res.status().is_success() {
+        log::error!("error code: {}, details: {:?}", res.status().as_str(), res);
+        panic!("Failed to get game json for {}", game_id);
+    }
+
+    let manifest:SrcManifest = serde_json::from_str(&res.text().await.unwrap()).unwrap();
 
     log::info!("{}: {} slides", game_id, manifest.structure.slides.len());
 
@@ -180,9 +199,16 @@ async fn parse(ctx: Arc<Context>, game_id: String) {
 async fn upload_cover_image(ctx:&Context, game_id: &str, slide: &transcode::src_manifest::Slide) -> ImageId {
     //get file info
 
-    let path = ctx.opts.src_base_path.join(&format!("{}/media/slides/{}", game_id, slide.image_full));
-    let file = tokio::fs::File::open(path).await.unwrap();
-    let file_size = file.metadata().await.unwrap().len();
+    let url = format!("https://storage.googleapis.com/ji-cloud-legacy-eu-001/games/{}/media/slides/{}", game_id, slide.image_full);
+
+    let res = reqwest::Client::new()
+        .get(&url)
+        .send()
+        .await
+        .unwrap();
+
+    let data = res.bytes().await.unwrap();
+    let file_size = data.len();
 
     let content_type = {
         if slide.image_full.contains(".png") {
@@ -266,8 +292,7 @@ async fn upload_cover_image(ctx:&Context, game_id: &str, slide: &transcode::src_
 
     //upload it
 
-    let stream = FramedRead::new(file, BytesCodec::new());
-    let body = Body::wrap_stream(stream);
+    let body:Body = data.into(); 
 
     if ctx.opts.dry_run {
         image_id

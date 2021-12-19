@@ -1,6 +1,5 @@
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
-use once_cell::sync::Lazy;
 use std::cell::Cell;
 use crate::unwrap::UnwrapJiExt;
 use shared::domain::jig::{module::ModuleId, LiteModule};

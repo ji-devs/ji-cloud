@@ -1,4 +1,4 @@
-use std::fs::{OpenOptions, File};
+use std::{fs::{OpenOptions, File}, hash::Hash};
 use super::options::Opts;
 use dotenv::dotenv;
 use simplelog::*;
@@ -13,13 +13,14 @@ use shared::{
     error::*,
     media::MediaLibrary,
 };
+use std::collections::HashSet;
 
 pub struct Context {
     pub token:String,
     pub opts: Opts,
     pub client: Client,
     pub info_log: File,
-    pub skip_lines: Vec<JigInfoLogLine>,
+    pub skip_game_ids: Vec<String>,
     pub affiliations: Vec<AffiliationId>,
     pub age_ranges: Vec<AgeRangeId>,
 }
@@ -75,7 +76,7 @@ impl Context {
             }.open(&opts.info_log).unwrap()
         };
 
-        let mut skip_lines = Vec::new();
+        let mut skip_game_ids = HashSet::new();
 
         if opts.skip_info_log {
             if let Ok(mut file) = OpenOptions::new()
@@ -84,17 +85,39 @@ impl Context {
                 {
 
                     for line in std::io::BufReader::new(file).lines() {
-                        skip_lines.push(JigInfoLogLine::read_line(&line.unwrap()));
+                        let line = JigInfoLogLine::read_line(&line.unwrap());
+                        log::info!("skipping {} due to skip_info", line.game_id);
+                        skip_game_ids.insert(line.game_id);
                     }
             }
         } 
+        if opts.skip_errors_log {
+
+            let res = reqwest::Client::new()
+                .get(&opts.skip_errors_log_url)
+                .send()
+                .await
+                .unwrap();
+
+            if !res.status().is_success() {
+                log::error!("error code: {}, details: {:?}", res.status().as_str(), res);
+                panic!("Failed to get errors log for skipping");
+            }
+
+
+            for line in res.text().await.unwrap().lines() {
+                let game_id = scan_fmt!(&line, "{} ", String).unwrap();
+                log::info!("skipping {} due to error", game_id);
+                skip_game_ids.insert(game_id);
+            }
+        }
 
         Self {
             token,
             opts,
             client: Client::new(),
             info_log,
-            skip_lines,
+            skip_game_ids: skip_game_ids.into_iter().collect(),
             affiliations,
             age_ranges
         }

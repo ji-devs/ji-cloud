@@ -11,17 +11,21 @@ pub struct Opts {
     #[structopt(long)]
     pub game_id: Option<String>,
 
-    #[structopt(long, default_value="/home/david/archive/legacy-cdn/games", parse(from_os_str))]
-    pub src_base_path: PathBuf,
+    // if game_id isn't supplied, loads from this url (easily generated via `ls -A1 > list.txt`)
+    #[structopt(long, default_value="https://storage.googleapis.com/ji-cloud-legacy-eu-001/full-list.txt")]
+    pub game_ids_list_url: String,
 
-    #[structopt(long, default_value="json", parse(from_os_str))]
-    pub src_json_dir: PathBuf,
+    #[structopt(long, parse(try_from_str), default_value = "true")]
+    pub skip_errors_log: bool,
+    // if skip_errors_log, loads the errors log and skips the game ids
+    #[structopt(long, default_value="https://storage.googleapis.com/ji-cloud-legacy-eu-001/logs-albums-first-2800/errors.txt")]
+    pub skip_errors_log_url: String,
 
+    #[structopt(long, parse(try_from_str), default_value = "false")]
+    pub skip_info_log: bool,
     //skip jigs appearing in this info file
     #[structopt(long, default_value="/home/david/archive/skip_info.txt", parse(from_os_str))]
     pub skip_info_log_file: PathBuf,
-    #[structopt(long, parse(try_from_str), default_value = "true")]
-    pub skip_info_log: bool,
     
     #[structopt(long, default_value="/home/david/archive/info.txt", parse(from_os_str))]
     pub info_log: PathBuf,
@@ -59,7 +63,7 @@ impl Opts {
     pub fn sanitize(&mut self) {
 
         log::warn!("setting manual game id");
-        //self.game_id = Some("17822".to_string());
+        self.game_id = Some("17822".to_string());
         //self.game_id = Some("17736".to_string());
         if self.debug {
             log::warn!("sanitization: forcing dry_run since debug is true");
