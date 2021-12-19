@@ -5,7 +5,7 @@ use std::rc::Rc;
 use futures_signals::signal::Mutable;
 use futures_signals::signal_vec::MutableVec;
 use shared::domain::jig::{JigFocus, PrivacyLevel};
-use shared::domain::jig::additional_resource::AdditionalResourceId;
+use shared::domain::jig::additional_resource::AdditionalResource;
 use shared::domain::meta::AffiliationId;
 use shared::domain::{
     category::CategoryId,
@@ -25,7 +25,7 @@ pub struct PublishJig {
     pub language: Mutable<String>,
     pub categories: Mutable<HashSet<CategoryId>>,
     pub affiliations: Mutable<HashSet<AffiliationId>>,
-    pub additional_resources: Rc<MutableVec<AdditionalResourceId>>,
+    pub additional_resources: Rc<MutableVec<AdditionalResource>>,
     pub privacy_level: Mutable<PrivacyLevel>,
     pub jig_focus: JigFocus,
 }

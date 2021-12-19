@@ -234,9 +234,9 @@ fn render_page(state: Rc<Publish>) -> Dom {
         ])
         .apply_if(state.jig.jig_focus.is_modules(), |dom|{
             dom
-                .children_signal_vec(state.jig.additional_resources.signal_vec_cloned().map(clone!(state => move |additional_resource_id| {
+                .children_signal_vec(state.jig.additional_resources.signal_vec_cloned().map(clone!(state => move |additional_resource| {
                     AdditionalResourceComponent::new(
-                        additional_resource_id,
+                        additional_resource,
                         Rc::clone(&state)
                     ).render()
                 })))
@@ -247,7 +247,7 @@ fn render_page(state: Rc<Publish>) -> Dom {
                 if len == 0 {
                     Some(AddAdditionalResource::new(Rc::clone(&state)).render())
                 } else {
-                    let resource = state.jig.additional_resources.lock_ref()[0];
+                    let resource = state.jig.additional_resources.lock_ref()[0].clone();
                     Some(
                         AdditionalResourceComponent::new(
                             resource,
