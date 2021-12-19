@@ -27,7 +27,7 @@ use futures_signals::{
 };
 use utils::{prelude::*, drag::Drag, resize::{ResizeInfo, get_resize_info}, math::{mat4::{Matrix4}, vec2}};
 use components::traces::{canvas::{draw_single_shape, apply_transform_mat4, clip_single_shape}};
-
+use crate::base::actions::NavigationTarget;
 use wasm_bindgen::prelude::*;
 use crate::config::PUZZLE_DISTANCE_THRESHHOLD;
 
@@ -189,20 +189,18 @@ impl PuzzleGame {
     pub fn evaluate_all(&self) {
         if self.items.iter().all(|item| item.completed.get()) {
             log::info!("all finished!!");
-            let msg = match self.raw.jump_index {
+            match self.raw.jump_index {
                 Some(index) => {
                     let index = index + 1; // bump for cover
                     log::info!("going to index {}!", index);
-                    
-                    IframeAction::new(ModuleToJigPlayerMessage::JumpToIndex(index))
+                    self.base.navigate(NavigationTarget::Index(index));
                 }
                 None => {
                     log::info!("going next!");
-                    IframeAction::new(ModuleToJigPlayerMessage::Next)
+                    self.base.navigate(NavigationTarget::Next);
                 }
             };
 
-            let _ = msg.try_post_message_to_player();
         }
     }
 }

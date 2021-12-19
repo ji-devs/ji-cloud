@@ -39,6 +39,7 @@ pub struct Base {
     pub audio_manager: AudioManager,
     pub stage_click_allowed: AtomicBool,
     pub has_started: AtomicBool,
+    pub has_navigated: AtomicBool,
 }
 
 #[derive(Default)]
@@ -105,6 +106,7 @@ impl Base {
             audio_manager: AudioManager::new(),
             stage_click_allowed: AtomicBool::new(false),
             has_started: AtomicBool::new(false),
+            has_navigated: AtomicBool::new(false),
         });
 
         // TODO- set after done preloading

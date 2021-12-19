@@ -2,6 +2,7 @@ use super::state::*;
 use components::audio::mixer::{AudioPath, AUDIO_MIXER};
 use gloo_timers::callback::Timeout;
 use std::{rc::Rc, sync::atomic::Ordering};
+use crate::base::actions::NavigationTarget;
 
 use dominator::clone;
 use utils::prelude::*;
@@ -24,7 +25,7 @@ impl AskQuestions {
         match self.item_bank.borrow_mut().pop() {
             None => {
                 log::info!("all finished!");
-                let _ = IframeAction::new(ModuleToJigPlayerMessage::Next).try_post_message_to_player();
+                self.base.navigate(NavigationTarget::Next);
             }
             Some(item) => {
                 let item = QuestionItem::new(self.base.clone(), item);

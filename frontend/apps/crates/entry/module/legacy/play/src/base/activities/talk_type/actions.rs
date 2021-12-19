@@ -1,5 +1,5 @@
 use super::state::*;
-
+use crate::base::actions::NavigationTarget;
 use std::rc::Rc;
 use utils::prelude::*;
 
@@ -25,19 +25,19 @@ impl TalkType {
         if state.items.iter().all(|item| item.phase.get() == TalkTypeItemPhase::Correct) {
             log::info!("all finished!");
 
-            let msg = match state.raw.jump_index {
+            match state.raw.jump_index {
                 Some(index) => {
                     let index = index + 1; // bump for cover
                     log::info!("going to index {}!", index);
-                    IframeAction::new(ModuleToJigPlayerMessage::JumpToIndex(index))
+
+                    state.base.navigate(NavigationTarget::Index(index));
                 }
                 None => {
                     log::info!("going next!");
-                    IframeAction::new(ModuleToJigPlayerMessage::Next)
+                    state.base.navigate(NavigationTarget::Next);
                 }
-            };
+            }
 
-            let _ = msg.try_post_message_to_player();
         }
     }
 }

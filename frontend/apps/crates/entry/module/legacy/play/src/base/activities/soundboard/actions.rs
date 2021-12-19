@@ -1,6 +1,7 @@
 use super::state::*;
 use std::rc::Rc;
 
+use crate::base::actions::NavigationTarget;
 use dominator::clone;
 use utils::prelude::*;
 
@@ -55,25 +56,19 @@ impl SoundboardItem {
             state.base.audio_manager.play_clip_on_ended(
                 state.base.activity_media_url(&audio_filename),
                 clone!(state => move || {
-                    let msg = if let Some(index) = state.jump_index {
+                    if let Some(index) = state.jump_index {
                         let index = index + 1; // bump for cover
                         log::info!("going to index {}!", index);
 
-                        Some(IframeAction::new(ModuleToJigPlayerMessage::JumpToIndex(index)))
+                        state.base.navigate(NavigationTarget::Index(index));
                     } else {
                         let all_revealed = parent.items.iter().all(|item| item.revealed.get());
 
                         if all_revealed {
                             log::info!("finished all, going next");
-                            Some(IframeAction::new(ModuleToJigPlayerMessage::Next))
-                        } else {
-                            None
+                            state.base.navigate(NavigationTarget::Next);
                         }
                     };
-
-                    if let Some(msg) = msg {
-                        let _ = msg.try_post_message_to_player();
-                    }
                 })
             );
         }
