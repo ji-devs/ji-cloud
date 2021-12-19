@@ -63,7 +63,7 @@ impl Opts {
     pub fn sanitize(&mut self) {
 
         log::warn!("setting manual game id");
-        self.game_id = Some("17822".to_string());
+        //self.game_id = Some("17822".to_string());
         //self.game_id = Some("17736".to_string());
         if self.debug {
             log::warn!("sanitization: forcing dry_run since debug is true");
