@@ -24,7 +24,7 @@ impl AskQuestions {
         match self.item_bank.borrow_mut().pop() {
             None => {
                 log::info!("all finished!");
-                let _ = IframeAction::new(ModuleToJigPlayerMessage::Next).try_post_message_to_top();
+                let _ = IframeAction::new(ModuleToJigPlayerMessage::Next).try_post_message_to_player();
             }
             Some(item) => {
                 let item = QuestionItem::new(self.base.clone(), item);

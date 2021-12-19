@@ -72,7 +72,7 @@ impl SoundboardItem {
                     };
 
                     if let Some(msg) = msg {
-                        let _ = msg.try_post_message_to_top();
+                        let _ = msg.try_post_message_to_player();
                     }
                 })
             );

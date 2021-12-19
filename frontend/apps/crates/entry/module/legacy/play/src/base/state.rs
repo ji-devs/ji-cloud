@@ -20,6 +20,7 @@ use std::{
 };
 use utils::prelude::*;
 use web_sys::Worker;
+use wasm_bindgen::prelude::*;
 use shared::domain::jig::module::body::legacy::activity::Activity;
 
 pub struct Base {

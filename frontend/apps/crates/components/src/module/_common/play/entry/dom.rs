@@ -103,6 +103,8 @@ where
         .after_inserted(|_elem| {
             //On mount - send an empty IframeInit message to let the *parent* know we're ready
             //parent here is probably the editor window (i.e. we've been told to wait for raw data)
+            //note that by default try_post_message_to_editor() is by default IframeTarget::Top
+            //TODO: determine if this can be changed to try_post_message_to_editor()
             IframeInit::empty()
                 .try_post_message_to_parent()
                 .unwrap_ji();
@@ -160,10 +162,9 @@ where
                     }
                 })
                 .after_inserted(|_elem| {
-                    //On mount - send an empty IframeInit message to let the *top* know we're ready
-                    //top here should be the jig player
+                    //On mount - send an empty IframeInit message to let the player know we're ready 
                     IframeInit::empty()
-                        .try_post_message_to_top()
+                        .try_post_message_to_player()
                         .unwrap_ji();
                 })
         })
@@ -201,7 +202,7 @@ where
                             }
 
                             //let the player know we're starting
-                            msg.try_post_message_to_top().unwrap_ji();
+                            msg.try_post_message_to_player().unwrap_ji();
                         }
                         None
                     },

@@ -37,7 +37,7 @@ impl TalkType {
                 }
             };
 
-            let _ = msg.try_post_message_to_top();
+            let _ = msg.try_post_message_to_player();
         }
     }
 }

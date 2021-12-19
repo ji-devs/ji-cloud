@@ -41,7 +41,7 @@ impl SaySomething {
             }
         };
 
-        if let Err(_) = msg.try_post_message_to_top() {
+        if let Err(_) = msg.try_post_message_to_player() {
             log::info!("Couldn't post message to top... debugging?");
         }
     }

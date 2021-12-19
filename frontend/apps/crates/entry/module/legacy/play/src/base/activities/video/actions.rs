@@ -25,7 +25,7 @@ impl Video {
         }
 
         log::info!("video finished, going next");
-        let _ = IframeAction::new(ModuleToJigPlayerMessage::Next).try_post_message_to_top();
+        let _ = IframeAction::new(ModuleToJigPlayerMessage::Next).try_post_message_to_player();
     }
 }
 
