@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use super::{state::State, timer::Timer};
+use super::{state::{can_load_liked_status, State}, timer::Timer};
 use awsm_web::audio::{AudioClipOptions, AudioHandle};
 use components::{
     audio::mixer::{AudioSourceExt, AUDIO_MIXER},
@@ -94,14 +94,16 @@ pub fn load_jig(state: Rc<State>) {
                 };
 
                 // Fetch whether the current user has liked this JIG.
-                // TODO Only do this if there is a logged-in user.
                 let jig_liked = {
-                    let path = jig::Liked::PATH.replace("{id}", &state.jig_id.0.to_string());
-                    let res = api_with_auth::<JigLikedResponse, EmptyError, ()>(&path, jig::Liked::METHOD, None).await;
-
-                    match res {
-                        Ok(JigLikedResponse(jig_liked)) => jig_liked,
-                        Err(_) => false,
+                    match &jig {
+                        // Only fetch liked status if the jig request didn't error and
+                        Ok(jig) if can_load_liked_status(&jig) => {
+                            let path = jig::Liked::PATH.replace("{id}", &state.jig_id.0.to_string());
+                            api_with_auth::<JigLikedResponse, EmptyError, ()>(&path, jig::Liked::METHOD, None)
+                                .await
+                                .map_or(false, |r| r.is_liked)
+                        },
+                        _ => false
                     }
                 };
 

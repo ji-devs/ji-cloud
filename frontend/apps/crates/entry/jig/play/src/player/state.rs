@@ -3,7 +3,7 @@ use std::{cell::RefCell, rc::Rc};
 use awsm_web::{audio::AudioHandle, loaders::helpers::AsyncLoader};
 use futures_signals::signal::Mutable;
 use serde::{Deserialize, Serialize};
-use shared::domain::jig::{module::ModuleId, JigId, JigPlayerSettings, JigResponse};
+use shared::domain::{jig::{module::ModuleId, JigId, JigPlayerSettings, JigResponse}, user::UserProfile};
 use utils::jig::JigPlayerOptions;
 use web_sys::HtmlIFrameElement;
 
@@ -56,4 +56,20 @@ impl State {
 pub struct PlayerOptions {
     settings: JigPlayerSettings,
     is_student: bool,
+}
+
+/// Returns whether the liked status should be loaded for a JIG
+///
+/// Returns true only if there is a logged-in user who is **not** the author of the JIG, and the
+/// JIG is published.
+pub fn can_load_liked_status(jig: &JigResponse) -> bool {
+    match utils::init::user::get_user() {
+        Some(user) if jig.jig_data.draft_or_live.is_live() => {
+            match jig.author_id {
+                Some(author_id) => author_id != user.id,
+                None => true
+            }
+        },
+        _ => false, // No logged-in user
+    }
 }

@@ -8,6 +8,7 @@ use utils::events;
 use crate::player::sidebar::actions::load_ages;
 
 use super::state::State;
+use super::super::state::can_load_liked_status;
 
 pub(super) mod info;
 pub(super) mod like;
@@ -47,10 +48,13 @@ pub fn render(state: Rc<State>) -> Dom {
             }))
         }))
         .child_signal(state.player_state.jig.signal_ref(clone!(state => move |jig| {
-            // only show like if jig is published
             match jig {
-                Some(jig) if jig.jig_data.draft_or_live.is_live() => {
-                    Some(like::render(Rc::clone(&state), &jig))
+                Some(jig) => {
+                    if can_load_liked_status(jig) {
+                        Some(like::render(Rc::clone(&state), jig))
+                    } else {
+                        None
+                    }
                 },
                 _ => None,
             }

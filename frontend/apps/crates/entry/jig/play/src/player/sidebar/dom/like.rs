@@ -25,6 +25,11 @@ pub fn render(state: Rc<State>, jig: &JigResponse) -> Dom {
             // whether the user liked this jig may not have resolved yet.
             if let Some(jig_liked) = state.player_state.jig_liked.get() {
                 state.loader.load(clone!(state => async move {
+                    // Immediately update the liked status so that it renders the correct icon to
+                    // the user. If the like/unlike request fails, we reset it to its original
+                    // state.
+                    state.player_state.jig_liked.set(Some(!jig_liked));
+
                     let response = if jig_liked {
                         // Unlike the JIG
                         let path = jig::Unlike::PATH.replace("{id}", &jig.id.0.to_string());
@@ -45,8 +50,8 @@ pub fn render(state: Rc<State>, jig: &JigResponse) -> Dom {
                         .await
                     };
 
-                    if response.is_ok() {
-                        state.player_state.jig_liked.set(Some(!jig_liked));
+                    if response.is_err() {
+                        state.player_state.jig_liked.set(Some(jig_liked));
                     }
                 }));
             }
