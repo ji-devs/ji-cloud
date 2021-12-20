@@ -96,7 +96,8 @@ pub fn load_jig(state: Rc<State>) {
                 // Fetch whether the current user has liked this JIG.
                 let jig_liked = {
                     match &jig {
-                        // Only fetch liked status if the jig request didn't error and
+                        // Only fetch liked status if the jig request didn't error, the user is
+                        // logged in and the user is not the author of the JIG.
                         Ok(jig) if can_load_liked_status(&jig) => {
                             let path = jig::Liked::PATH.replace("{id}", &state.jig_id.0.to_string());
                             api_with_auth::<JigLikedResponse, EmptyError, ()>(&path, jig::Liked::METHOD, None)
