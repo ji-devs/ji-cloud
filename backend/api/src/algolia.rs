@@ -35,6 +35,7 @@ const HAS_AUTHOR_TAG: &'static str = "hasAuthor";
 struct BatchJig<'a> {
     name: &'a str,
     language: &'a str,
+    description: &'a str,
     age_ranges: &'a [Uuid],
     age_range_names: &'a [String],
     affiliations: &'a [Uuid],
@@ -258,6 +259,7 @@ select algolia_index_version as "algolia_index_version!" from "settings"
 select jig.id,
        display_name                                                                                                 as "name",
        language                                                                                                     as "language!",
+       description                                                                                                  as "description!",
        array((select affiliation_id
               from jig_data_affiliation
               where jig_data_id = jig_data.id))                                                                     as "affiliations!",
@@ -321,6 +323,7 @@ limit 100 for no key update skip locked;
             body: match serde_json::to_value(&BatchJig {
                 name: &row.name,
                 language: &row.language,
+                description: &row.description,
                 goals: &row.goals,
                 goal_names: &row.goal_names,
                 age_ranges: &row.age_ranges,
