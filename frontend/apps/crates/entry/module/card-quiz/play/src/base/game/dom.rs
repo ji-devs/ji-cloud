@@ -45,7 +45,7 @@ impl Game {
                                         //should be some animation
                                         .property_signal("flipped", phase.signal().map(clone!(pair_id => move |phase| {
                                             match phase {
-                                                CurrentPhase::Correct(id) => id != pair_id,
+                                                CurrentPhase::Correct(id) => id == pair_id,
                                                 CurrentPhase::Wrong(id) => id != pair_id,
                                                 _ => true,
                                             }
