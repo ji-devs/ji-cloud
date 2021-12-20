@@ -27,6 +27,9 @@ export class _ extends LitElement {
                     border-radius: 16px;
                     box-sizing: border-box;
                 }
+                :host([state="empty"]) {
+                    cursor: auto;
+                }
                 :host([state="empty"]) .wrapper {
                     background-color: var(--light-blue-5);
                     color: #ffffff;
