@@ -22,9 +22,34 @@ pub struct SrcManifest {
     pub album_store: AlbumStore
 }
 
+
 impl SrcManifest {
     pub fn game_id(&self) -> String {
         format!("{}", self.album_store.album.key)
+    }
+
+    pub fn lang_str(&self) -> &'static str {
+
+        let tt_lang:u32 = self.album_store.album.fields.language.unwrap_or_default();
+
+        match tt_lang { 
+            16 => "da",
+            8 => "nl",
+            1 | 14 | 13 | 10 | 12 => "en",
+            9 => "fr",
+            11 => "de",
+            2 => "he",
+            18 => "hu",
+            19 => "it",
+            7 => "pt",
+            6 => "ru",
+            5 => "es",
+            17 => "sv",
+            _ => {
+                log::warn!("no lang set, picking en");
+                "en"
+            }
+        }
     }
 }
 

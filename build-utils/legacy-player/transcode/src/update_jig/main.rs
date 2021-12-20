@@ -130,53 +130,31 @@ async fn update(ctx: Arc<Context>, info_line: JigInfoLogLine) {
 }
 
 async fn set_language(ctx: &Context, info_line: &JigInfoLogLine, manifest: &SrcManifest) {
-    let tt_lang:u32 = manifest.album_store.album.fields.language.unwrap_or_default();
+    let lang = manifest.lang_str();
+    let path = endpoints::jig::UpdateDraftData::PATH.replace("{id}", &info_line.jig_id);
+    let url = format!("{}{}", ctx.opts.get_remote_target().api_url(), path);
 
-    let lang = match tt_lang { 
-        16 => "da",
-        8 => "nl",
-        1 | 14 | 13 | 10 | 12 => "en",
-        9 => "fr",
-        11 => "de",
-        2 => "he",
-        18 => "hu",
-        19 => "it",
-        7 => "pt",
-        6 => "ru",
-        5 => "es",
-        17 => "sv",
-        _ => ""
+    let req = JigUpdateDraftDataRequest {
+        language: Some(lang.to_string()),
+        ..Default::default()
     };
 
-    if lang.is_empty() {
-        panic!("unknown language [{}]!", manifest.album_store.album.fields.language.unwrap_or_default());
-    } else {
+    if !ctx.opts.dry_run {
+        let res = ctx.client
+            .patch(&url)
+            .header("Authorization", &format!("Bearer {}", ctx.token))
+            .json(&req)
+            .send()
+            .await
+            .unwrap();
 
-        let path = endpoints::jig::UpdateDraftData::PATH.replace("{id}", &info_line.jig_id);
-        let url = format!("{}{}", ctx.opts.get_remote_target().api_url(), path);
-
-        let req = JigUpdateDraftDataRequest {
-            language: Some(lang.to_string()),
-            ..Default::default()
-        };
-
-        if !ctx.opts.dry_run {
-            let res = ctx.client
-                .patch(&url)
-                .header("Authorization", &format!("Bearer {}", ctx.token))
-                .json(&req)
-                .send()
-                .await
-                .unwrap();
-
-            if !res.status().is_success() {
-                log::error!("error code: {}, details: {:?}", res.status().as_str(), res);
-                panic!("unable to update jig!"); 
-            }
+        if !res.status().is_success() {
+            log::error!("error code: {}, details: {:?}", res.status().as_str(), res);
+            panic!("unable to update jig!"); 
         }
-
-        log::info!("setting language to [{}]", lang);
     }
+
+    log::info!("setting language to [{}]", lang);
 }
 
 async fn get_manifest(ctx: &Context, info_line: &JigInfoLogLine) -> SrcManifest {
