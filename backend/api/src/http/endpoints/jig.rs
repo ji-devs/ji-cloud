@@ -68,6 +68,7 @@ async fn create(
         &language,
         &req.description,
         &req.default_player_settings,
+        &req.jig_focus,
     )
     .await
     .map_err(|e| match e {
@@ -137,7 +138,6 @@ async fn update_draft(
         req.audio_background.as_ref(),
         req.audio_effects.as_ref(),
         req.privacy_level,
-        req.jig_focus,
         req.other_keywords,
         req.admin_data,
     )

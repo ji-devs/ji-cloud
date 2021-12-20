@@ -158,6 +158,10 @@ pub struct JigCreateRequest {
     /// Default player settings for this jig.
     #[serde(default)]
     pub default_player_settings: JigPlayerSettings,
+
+    /// Primary material for jig
+    #[serde(default)]
+    pub jig_focus: JigFocus,
 }
 
 /// Whether the data is draft or live.
@@ -272,9 +276,6 @@ pub struct JigData {
 
     /// The privacy level on the JIG.
     pub privacy_level: PrivacyLevel,
-
-    /// Primary material for jig
-    pub jig_focus: JigFocus,
 
     /// Lock this jig
     pub locked: bool,
@@ -544,6 +545,9 @@ pub struct JigResponse {
 
     /// Number of plays Jig
     pub plays: i64,
+
+    /// Number of plays Jig
+    pub jig_focus: JigFocus,
 
     /// True if Jig cover is set
     ///
