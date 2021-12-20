@@ -12,11 +12,11 @@ pub struct Opts {
     pub game_id: Option<String>,
 
     //skip jigs appearing in this info file
-    #[structopt(long, default_value="/home/david/archive/info.txt", parse(from_os_str))]
-    pub info_file: PathBuf,
+    #[structopt(long, default_value="https://storage.googleapis.com/ji-cloud-legacy-eu-001/logs-albums-first-2800/info-release.txt")]
+    pub info_file_url: String,
 
     /// batch size to help throttle connections 
-    #[structopt(long, parse(try_from_str), default_value = "100")]
+    #[structopt(long, parse(try_from_str), default_value = "0")]
     pub batch_size: usize,
 
     /// debug mode 
@@ -31,7 +31,7 @@ pub struct Opts {
     pub dry_run: bool,
  
     // local, sandbox, or release 
-    #[structopt(long, default_value = "sandbox")]
+    #[structopt(long, default_value = "release")]
     pub remote_target: String,
 
     #[structopt(long, default_value = "")]
