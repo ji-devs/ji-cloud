@@ -8,6 +8,7 @@ use shared::domain::{
         DraftOrLive, JigId,
     },
     meta::ResourceTypeId,
+    pdf::PdfId,
 };
 use sqlx::PgPool;
 use url::Url;
@@ -231,6 +232,17 @@ pub async fn check_content(db: &PgPool, content: ResourceContent) -> anyhow::Res
             let data = Url::parse(data.as_str())?;
 
             json!(ResourceContent::Link(data))
+        }
+        ResourceContent::PdfId(data) => {
+            sqlx::query!(
+                r#"select id as "id: PdfId" from user_pdf_library where id = $1"#,
+                data.0
+            )
+            .fetch_one(db)
+            .await
+            .map_err(|_| anyhow::anyhow!("Pdf Id does not exist"))?;
+
+            json!(ResourceContent::PdfId(data))
         }
     };
 

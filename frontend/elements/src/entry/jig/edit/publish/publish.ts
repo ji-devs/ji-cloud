@@ -1,9 +1,12 @@
-import { LitElement, html, css, customElement } from "lit-element";
+import { LitElement, html, css, customElement, property } from "lit-element";
 import "@elements/core/images/ui";
+import { nothing } from "lit-html";
 
 const STR_HEADER_FIRST = "Settings and JIG info.";
 const STR_HEADER_SECOND = "Last step before publishing";
 const STR_THUMBNAIL = "Thumbnail";
+
+export type JigFocus = "modules" | "resources";
 
 @customElement("jig-edit-publish")
 export class _ extends LitElement {
@@ -47,6 +50,9 @@ export class _ extends LitElement {
                     font-weight: 500;
                     color: #4a4a4a;
                     margin: 0;
+                }
+                :host([jigFocus=resources]) h3 {
+                    display: none;
                 }
                 .main {
                     display: grid;
@@ -135,6 +141,9 @@ export class _ extends LitElement {
         ];
     }
 
+    @property({ reflect: true })
+    jigFocus: JigFocus = "modules";
+
     render() {
         return html`
             <div class="main-wrapper">
@@ -143,6 +152,11 @@ export class _ extends LitElement {
                         <div class="header">
                             <h1>${STR_HEADER_FIRST}</h1>
                             <h3>${STR_HEADER_SECOND}</h3>
+                            ${
+                                this.jigFocus === "resources" ? html`
+                                    <slot name="resources"></slot>
+                                ` : nothing
+                            }
                         </div>
                         <div class="main">
                             <div class="column-1">
@@ -168,9 +182,13 @@ export class _ extends LitElement {
                                     <slot name="category-labels"></slot>
                                 </div>
                             </div>
-                            <div class="column-4 additional-resources">
-                                <slot name="additional-resources"></slot>
-                            </div>
+                            ${
+                                this.jigFocus === "modules" ? html`
+                                    <div class="column-4 additional-resources">
+                                        <slot name="resources"></slot>
+                                    </div>
+                                ` : nothing
+                            }
                         </div>
                         <div class="publish">
                             <slot name="publish-later"></slot>

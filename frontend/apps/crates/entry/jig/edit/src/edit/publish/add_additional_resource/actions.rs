@@ -1,17 +1,14 @@
 use std::rc::Rc;
 
-use dominator::clone;
 use shared::api::ApiEndpoint;
 use shared::domain::CreateResponse;
+use shared::domain::jig::AdditionalResource;
 use shared::domain::jig::additional_resource::{AdditionalResourceId, ResourceContent};
 use shared::domain::meta::ResourceTypeId;
 use shared::error::EmptyError;
 use shared::{api::endpoints, domain::jig::additional_resource::AdditionalResourceCreateRequest};
-use url::Url;
-use utils::prelude::{ApiEndpointExt, api_with_auth};
-use utils::unwrap::UnwrapJiExt;
-use wasm_bindgen_futures::spawn_local;
-use web_sys::File;
+
+use utils::prelude::{api_with_auth};
 
 use super::state::AddAdditionalResource;
 
@@ -25,9 +22,9 @@ impl AddAdditionalResource {
         let state = Rc::clone(&self);
 
         let req = AdditionalResourceCreateRequest {
-            display_name,
-            resource_type_id,
-            resource_content,
+            display_name: display_name.clone(),
+            resource_type_id: resource_type_id.clone(),
+            resource_content: resource_content.clone(),
         };
 
         let path = endpoints::jig::additional_resource::Create::PATH.replace("{id}", &self.publish_state.jig.id.0.to_string());
@@ -39,7 +36,13 @@ impl AddAdditionalResource {
 
         match res {
             Ok(res) => {
-                state.publish_state.jig.additional_resources.lock_mut().push(res.id);
+                let resource = AdditionalResource {
+                    id: res.id,
+                    display_name,
+                    resource_type_id,
+                    resource_content,
+                };
+                state.publish_state.jig.additional_resources.lock_mut().push_cloned(resource);
             },
             Err(_e) => todo!(),
         };

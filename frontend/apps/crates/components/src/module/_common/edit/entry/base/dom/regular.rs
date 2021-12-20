@@ -8,7 +8,7 @@ use futures_signals::{
 use serde::Deserialize;
 use std::rc::Rc;
 
-use crate::module::_common::edit::header::controller::dom::ControllerDom;
+use crate::{jigzi_help::JigziHelp, module::_common::edit::header::controller::dom::ControllerDom};
 
 use shared::domain::jig::module::body::{BodyExt, ModeExt, StepExt};
 use utils::prelude::*;
@@ -153,19 +153,15 @@ where
                 h.title.clone()
             })
         })
-        .child(html!("jigzi-help", {
-            .property("slot", "help")
-            .property("showId", "module-header")
-            .property_signal("title", {
-                tab_config_sig().map(|t| {
-                    t.title
-                })
-            })
-            .property_signal("body", {
-                tab_config_sig().map(|t| {
-                    t.body
-                })
-            })
+        .child_signal(tab_config_sig().map(|tab| {
+            Some(
+                JigziHelp::new(
+                    tab.title,
+                    tab.body,
+                    "module-header"
+                )
+                .render(Some("help"))
+            )
         }))
         .child(ControllerDom::render(
             state.history.clone(),

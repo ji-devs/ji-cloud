@@ -80,9 +80,9 @@ pub struct Puzzle {
     pub full_cutout_img: String,
     pub fly_back_to_origin: bool,
     pub show_preview: bool,
-    // doesn't seem to have any effect...
+    // doesn't seem to have any effect anywhere...
     pub show_hints: bool,
-    // what does this do?
+    // on ipad it's 3d bevel, but on web app nothing, so nothing..
     pub theme: PuzzleTheme,
     pub items: Vec<PuzzleItem>,
 }

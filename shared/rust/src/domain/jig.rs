@@ -1,6 +1,7 @@
 //! Types for JIGs.
 
 pub mod additional_resource;
+pub use additional_resource::{AdditionalResource, AdditionalResourceId};
 
 pub mod module;
 // avoid breaking Changes
@@ -16,7 +17,6 @@ use uuid::Uuid;
 
 use super::{
     category::CategoryId,
-    jig::additional_resource::AdditionalResourceId,
     meta::{AffiliationId, AgeRangeId, GoalId, ResourceTypeId},
 };
 use crate::domain::jig::module::body::ThemeId;
@@ -171,6 +171,34 @@ pub enum DraftOrLive {
     Live = 1,
 }
 
+impl DraftOrLive {
+    /// Returns `true` for a [`Self::Live`] value.
+    ///
+    /// ```
+    /// let x = DraftOrLive::Live;
+    /// assert_eq!(x.is_live(), true);
+    ///
+    /// let x = DraftOrLive::Draft;
+    /// assert_eq!(x.is_live(), false);
+    /// ```
+    pub fn is_live(&self) -> bool {
+        matches!(*self, DraftOrLive::Live)
+    }
+
+    /// Returns `true` for a [`Draft`] value.
+    ///
+    /// ```
+    /// let x = DraftOrLive::Live;
+    /// assert_eq!(x.is_draft(), false);
+    ///
+    /// let x = DraftOrLive::Draft;
+    /// assert_eq!(x.is_draft(), true);
+    /// ```
+    pub fn is_draft(&self) -> bool {
+        !self.is_live()
+    }
+}
+
 impl From<DraftOrLive> for bool {
     fn from(draft_or_live: DraftOrLive) -> Self {
         match draft_or_live {
@@ -255,6 +283,15 @@ pub struct JigData {
 
     /// Primary material for jig
     pub jig_focus: JigFocus,
+
+    /// Lock this jig
+    pub locked: bool,
+
+    /// Other keywords used to searched for jigs
+    pub other_keywords: String,
+
+    /// translated keywords used to searched for jigs
+    pub translated_keywords: String,
 }
 
 /// Access level for the jig.
@@ -294,6 +331,57 @@ impl Default for JigFocus {
     fn default() -> Self {
         Self::Modules
     }
+}
+
+/// These fields can be edited by admin and can be viewed by everyone
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct JigAdminData {
+    /// Rating for jig, weighted for jig search
+    #[serde(default)]
+    pub rating: Option<JigRating>,
+
+    /// if true does not appear in search
+    pub blocked: bool,
+
+    /// Indicates jig has been curated by admin
+    pub curated: bool,
+}
+
+/// These fields can be edited by admin and can be viewed by everyone
+#[derive(Serialize, Deserialize, Debug, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct JigAdminUpdateData {
+    /// Rating for jig, weighted for jig search
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
+    pub rating: Option<JigRating>,
+
+    /// if true does not appear in search
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
+    pub blocked: Option<bool>,
+
+    /// Indicates jig has been curated by admin
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
+    pub curated: Option<bool>,
+}
+
+/// Admin rating for Jig
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, Eq, PartialEq)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[serde(rename_all = "camelCase")]
+#[repr(i16)]
+pub enum JigRating {
+    #[allow(missing_docs)]
+    One = 1,
+    #[allow(missing_docs)]
+    Two = 2,
+    #[allow(missing_docs)]
+    Three = 3,
+    #[allow(missing_docs)]
+    NoRating = 17,
 }
 
 /// Audio for background music
@@ -473,6 +561,9 @@ pub struct JigResponse {
 
     /// The data of the requested JIG.
     pub jig_data: JigData,
+
+    /// Admin data for Jig
+    pub admin_data: JigAdminData,
 }
 
 /// Request for updating a JIG's draft data.
@@ -551,6 +642,16 @@ pub struct JigUpdateDraftDataRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub jig_focus: Option<JigFocus>,
+
+    /// Additional keywords for searches
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
+    pub other_keywords: Option<String>,
+
+    /// Rating by admin for Jig
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
+    pub admin_data: Option<JigAdminUpdateData>,
 }
 
 /// Query for [`Browse`](crate::api::endpoints::jig::Browse).
@@ -669,6 +770,16 @@ pub struct JigSearchQuery {
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub jig_focus: Option<JigFocus>,
+
+    /// Optionally search for jigs using keywords
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub other_keywords: Option<String>,
+
+    /// Optionally search for jigs using translated keyword
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub translated_keywords: Option<String>,
 }
 
 /// Response for successful search.
@@ -699,6 +810,13 @@ pub struct JigIdResponse {
 pub struct JigCountResponse {
     /// Total number of public and published jigs.
     pub total_count: u64,
+}
+
+/// Response for whether a user has liked a JIG.
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct JigLikedResponse {
+    /// Whether the authenticated user has liked the current JIG
+    pub is_liked: bool,
 }
 
 into_uuid![JigId];

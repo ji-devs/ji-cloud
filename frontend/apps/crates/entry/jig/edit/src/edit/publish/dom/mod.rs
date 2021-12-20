@@ -32,17 +32,17 @@ pub mod categories_select;
 pub mod goal;
 pub mod language;
 
-const STR_PUBLISH_JIG: &'static str = "Publish JIG";
-const STR_PUBLISH_LATER: &'static str = "I will publish later";
-const STR_PUBLIC_LABEL: &'static str = "My JIG is public";
-const STR_NAME_LABEL: &'static str = "JIG’s name";
-const STR_NAME_PLACEHOLDER: &'static str = "Type your JIG’s name here";
-const STR_DESCRIPTION_LABEL: &'static str = "Description";
-const STR_DESCRIPTION_PLACEHOLDER: &'static str =
+const STR_PUBLISH_JIG: &str = "Publish JIG";
+const STR_PUBLISH_LATER: &str = "I will publish later";
+const STR_PUBLIC_LABEL: &str = "My JIG is public";
+const STR_NAME_LABEL: &str = "JIG’s name";
+const STR_NAME_PLACEHOLDER: &str = "Type your JIG’s name here";
+const STR_DESCRIPTION_LABEL: &str = "Description";
+const STR_DESCRIPTION_PLACEHOLDER: &str =
     "This JIG is about… (include words that will help others find this JIG easily)";
-const STR_PUBLIC_POPUP_TITLE: &'static str = "Sharing is Caring!";
-const STR_PUBLIC_POPUP_BODY: &'static str = "Are you sure you want to keep this JIG private? Please consider sharing your JIG with the Jigzi community.";
-const STR_MISSING_INFO_TOOLTIP: &'static str = "Please fill in the missing information.";
+const STR_PUBLIC_POPUP_TITLE: &str = "Sharing is Caring!";
+const STR_PUBLIC_POPUP_BODY: &str = "Are you sure you want to keep this JIG private? Please consider sharing your JIG with the Jigzi community.";
+const STR_MISSING_INFO_TOOLTIP: &str = "Please fill in the missing information.";
 
 impl Publish {
     pub fn render(jig_edit_state: Rc<JigEditState>) -> Dom {
@@ -66,6 +66,7 @@ impl Publish {
 
 fn render_page(state: Rc<Publish>) -> Dom {
     html!("jig-edit-publish", {
+        .property("jigFocus", state.jig.jig_focus.as_str())
         .children(&mut [
             ModuleThumbnail::render_live(
                 Rc::new(ModuleThumbnail {
@@ -231,12 +232,30 @@ fn render_page(state: Rc<Publish>) -> Dom {
                 })
             }),
         ])
-        .children_signal_vec(state.jig.additional_resources.signal_vec_cloned().map(clone!(state => move |additional_resource_id| {
-            AdditionalResourceComponent::new(
-                additional_resource_id,
-                Rc::clone(&state)
-            ).render()
-        })))
-        .child(AddAdditionalResource::new(Rc::clone(&state)).render())
+        .apply_if(state.jig.jig_focus.is_modules(), |dom|{
+            dom
+                .children_signal_vec(state.jig.additional_resources.signal_vec_cloned().map(clone!(state => move |additional_resource| {
+                    AdditionalResourceComponent::new(
+                        additional_resource,
+                        Rc::clone(&state)
+                    ).render()
+                })))
+                .child(AddAdditionalResource::new(Rc::clone(&state)).render())
+        })
+        .apply_if(state.jig.jig_focus.is_resources(), |dom|{
+            dom.child_signal(state.jig.additional_resources.signal_vec_cloned().len().map(clone!(state => move|len| {
+                if len == 0 {
+                    Some(AddAdditionalResource::new(Rc::clone(&state)).render())
+                } else {
+                    let resource = state.jig.additional_resources.lock_ref()[0].clone();
+                    Some(
+                        AdditionalResourceComponent::new(
+                            resource,
+                            Rc::clone(&state)
+                        ).render()
+                    )
+                }
+            })))
+        })
     })
 }

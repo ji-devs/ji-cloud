@@ -20,6 +20,7 @@ use std::{
 };
 use utils::prelude::*;
 use web_sys::Worker;
+use wasm_bindgen::prelude::*;
 use shared::domain::jig::module::body::legacy::activity::Activity;
 
 pub struct Base {
@@ -37,6 +38,8 @@ pub struct Base {
     pub stage_click_listeners: RefCell<Vec<Box<dyn FnMut(StageClick)>>>,
     pub audio_manager: AudioManager,
     pub stage_click_allowed: AtomicBool,
+    pub has_started: AtomicBool,
+    pub has_navigated: AtomicBool,
 }
 
 #[derive(Default)]
@@ -102,6 +105,8 @@ impl Base {
             stage_click_listeners: RefCell::new(Vec::new()),
             audio_manager: AudioManager::new(),
             stage_click_allowed: AtomicBool::new(false),
+            has_started: AtomicBool::new(false),
+            has_navigated: AtomicBool::new(false),
         });
 
         // TODO- set after done preloading
@@ -185,6 +190,7 @@ impl Base {
 
 impl BaseExt for Base {
     fn play(state: Rc<Self>) {
+        state.has_started.store(true, Ordering::SeqCst);
         for f in state.start_listeners.borrow_mut().iter_mut() {
             f();
         }

@@ -1,12 +1,12 @@
 use super::state::*;
 use std::rc::Rc;
-use futures_signals::signal::{Mutable, Signal, SignalExt};
+use futures_signals::signal::{SignalExt};
+use gloo_timers::future::TimeoutFuture;
 use crate::base::styles;
 use dominator::{html, Dom, clone, with_node};
 use utils::{
     prelude::*,
-    image_effects::ImageEffect,
-    resize::resize_info_signal
+    image_effects::ImageEffect
 };
 
 impl Puzzle {
@@ -23,24 +23,34 @@ impl Puzzle {
                                 let url = state.base.design_media_url(&state.raw.full_cutout_img);
                                 let effects = ImageEffect::new_url(&url, None).await;
 
-                                state.init_phase.set(InitPhase::Playing(PuzzleGame::new(&state, canvas, effects)));
+                                if state.raw.show_preview {
+                                    state.init_phase.set(InitPhase::Preview(PuzzlePreview::new(&state, canvas, effects)));
+                                } else {
+                                    state.init_phase.set(InitPhase::Playing(PuzzleGame::new(&state, canvas, effects)));
+                                }
                             },
+                            InitPhase::Preview(preview) => {
+                                TimeoutFuture::new(crate::config::PUZZLE_PREVIEW_DELAY).await;
+                                preview.start_animation(state);
+                            }
                             _ => {}
                         }
                     })
                 })))
             })
-            .future(state.game_signal().for_each(clone!(state => move |(init_phase, resize_info)| {
-                clone!(state => async move {
+            .future(state.game_signal().for_each(move |(init_phase, resize_info)| {
+                async move {
                     match init_phase {
                         InitPhase::Playing(game) => {
                             game.draw(&resize_info);
                         },
+                        InitPhase::Preview(preview) => {
+                            preview.game.draw(&resize_info);
+                        },
                         _ => {}
                     } 
-                })
-            })))
-
+                }
+            }))
             .event(clone!(state => move |evt:events::MouseDown| {
                 match state.init_phase.get_cloned() {
                     InitPhase::Playing(game) => {

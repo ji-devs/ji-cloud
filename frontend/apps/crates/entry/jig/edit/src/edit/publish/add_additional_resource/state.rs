@@ -22,12 +22,6 @@ impl AddAdditionalResource {
 }
 
 #[derive(Clone, Copy, Debug)]
-pub(super) enum ResourceMode {
-    File,
-    Link,
-}
-
-#[derive(Clone, Copy, Debug)]
 pub(super) enum ActivePopup {
     Main,
     File,

@@ -1,17 +1,19 @@
-use super::state::HomePageMode;
+use crate::home::search_results::SearchResults;
+
+use super::state::{HomePageMode};
 use dominator::clone;
 use futures::join;
-use futures_signals::signal_vec::MutableVec;
+
 use shared::{
     api::{
         endpoints::{jig, user::Profile},
         ApiEndpoint,
     },
     domain::{
-        jig::{JigCountResponse, JigSearchQuery, JigSearchResponse},
-        user::UserProfile,
+        jig::{JigCountResponse},
+        user::UserProfile
     },
-    error::EmptyError,
+    error::EmptyError
 };
 use std::rc::Rc;
 use utils::prelude::*;
@@ -88,26 +90,16 @@ async fn fetch_profile(state: Rc<State>) {
 }
 
 async fn search_async(state: Rc<State>) {
-    let req = state.search_selected.to_search_request();
+    let search_state = SearchResults::new(&state);
+    state.mode.set(HomePageMode::Search(Rc::clone(&search_state)));
 
+    let req = state.search_selected.to_search_request();
     Route::Home(HomeRoute::Search(Some(req.clone()))).push_state();
 
-    let query = req.q.to_owned();
-    match api_no_auth::<JigSearchResponse, EmptyError, JigSearchQuery>(
-        jig::Search::PATH,
-        jig::Search::METHOD,
-        Some(req),
-    )
-    .await
-    {
-        Err(_) => {}
-        Ok(res) => {
-            state.mode.set(HomePageMode::Search(
-                query,
-                Rc::new(MutableVec::new_with_values(res.jigs)),
-            ));
-        }
-    };
+    join!(
+        search_state.jigs.load_items(req.clone()),
+        search_state.resources.load_items(req),
+    );
 }
 
 pub fn search(state: Rc<State>) {

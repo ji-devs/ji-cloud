@@ -40,6 +40,7 @@ pub mod jig;
 pub mod locale;
 pub mod media;
 pub mod meta;
+pub mod pdf;
 pub mod search;
 mod ser;
 pub mod session;

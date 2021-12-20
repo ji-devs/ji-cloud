@@ -31,7 +31,7 @@ impl SrcManifest {
 #[derive(Deserialize, Debug)]
 pub struct ManifestStructure {
     #[serde(rename="musicFile")]
-    pub music_file: String,
+    pub music_file: Option<String>,
 
     #[serde(rename="pk")]
     pub key: PrimaryKey,
@@ -55,16 +55,16 @@ pub struct ManifestSettings {
 #[derive(Deserialize, Debug)]
 pub struct QuizSettings {
     #[serde(rename="activityTimeLimit")]
-    pub activity_time_limit: u32,
+    pub activity_time_limit: Option<f64>,
 
     #[serde(rename="globalLivesLimit")]
-    pub global_lives_limit: u32,
+    pub global_lives_limit: Option<f64>,
 
     #[serde(rename="globalTimeLimit")]
-    pub global_time_limit: u32,
+    pub global_time_limit: Option<f64>,
 
     #[serde(rename="quizModeEnabled")]
-    pub enabled: bool,
+    pub enabled: Option<bool>,
 }
 
 pub type PrimaryKey = usize;
@@ -92,4 +92,20 @@ pub struct AlbumStore {
 pub struct Album {
     #[serde(rename="pk")]
     pub key: PrimaryKey,
+    pub fields: AlbumFields,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct AlbumFields {
+    pub name: Option<String>,
+    pub description: Option<String>,
+    pub author: Option<AlbumAuthor>,
+    pub hash: Option<String>,
+}
+
+
+#[derive(Deserialize, Debug)]
+pub struct AlbumAuthor {
+    pub first_name: Option<String>,
+    pub last_name: Option<String>,
 }

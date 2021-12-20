@@ -1,20 +1,22 @@
 use std::{iter, rc::Rc};
 
 use dominator_helpers::futures::AsyncLoader;
-use futures_signals::{signal::Mutable, signal_vec::MutableVec};
-use search_state::{SearchOptions, SearchSelected};
-use shared::domain::jig::{JigId, JigResponse, JigSearchQuery};
+use futures_signals::{signal::Mutable};
+use shared::domain::jig::{JigId, JigSearchQuery};
 
 use components::page_header::state::PageLinks;
 
+use super::search_results::SearchResults;
+
 mod search_state;
+pub use search_state::*;
 
 pub struct State {
     pub loader: AsyncLoader,
     pub mode: Mutable<HomePageMode>,
     pub is_logged_in: Mutable<bool>,
-    pub search_options: SearchOptions,
-    pub search_selected: SearchSelected,
+    pub search_options: Rc<SearchOptions>,
+    pub search_selected: Rc<SearchSelected>,
     pub quick_searches: Vec<QuickSearch>,
     pub whats_new: Vec<WhatsNewItem>,
     pub parents_testimonials: Vec<Testimonial>,
@@ -36,11 +38,11 @@ impl State {
     }
     fn new_with_search_selected(search_selected: SearchSelected) -> Self {
         Self {
-            search_selected,
+            search_selected: Rc::new(search_selected),
             loader: AsyncLoader::new(),
             mode: Mutable::new(HomePageMode::Home),
             is_logged_in: Mutable::new(false),
-            search_options: SearchOptions::new(),
+            search_options: Rc::new(SearchOptions::new()),
             quick_searches: Self::get_quick_searches(),
             whats_new: Self::get_whats_new(),
             parents_testimonials: Self::get_parents_testimonials(),
@@ -139,7 +141,7 @@ impl State {
 #[derive(Clone)]
 pub enum HomePageMode {
     Home,
-    Search(String, Rc<MutableVec<JigResponse>>),
+    Search(Rc<SearchResults>),
 }
 
 impl From<&HomePageMode> for PageLinks {

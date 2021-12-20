@@ -22,7 +22,7 @@ impl PostPreview {
     pub fn next(&self) {
         let msg = IframeAction::new(ModuleToJigEditorMessage::Next);
 
-        if let Err(_) = msg.try_post_message_to_top() {
+        if let Err(_) = msg.try_post_message_to_editor() {
             log::info!("Couldn't post message to top... redirect!");
 
             let route: String =
@@ -62,7 +62,8 @@ impl PostPreview {
                     };
 
                     let msg = IframeAction::new(ModuleToJigEditorMessage::AppendModule(module));
-                    if let Err(_) = msg.try_post_message_to_top() {
+
+                    if let Err(_) = msg.try_post_message_to_editor() {
                         log::info!("Couldn't post message to parent... redirect!");
                         let route: String =
                             Route::Jig(JigRoute::Edit(jig_id, JigEditRoute::Module(module_id)))

@@ -15,7 +15,7 @@ use shared::{
         MetadataNotFound
     }
 };
-use std::{default, rc::Rc};
+use std::{rc::Rc};
 use utils::prelude::*;
 
 impl JigGallery {
@@ -37,16 +37,17 @@ impl JigGallery {
             VisibleJigs::Draft => Some(false),
         };
 
-        let req = Some(JigBrowseQuery {
+        let req = JigBrowseQuery {
             is_published,
             author_id: Some(UserOrMe::Me),
+            jig_focus: Some(state.focus),
             ..Default::default()
-        });
+        };
 
         match api_with_auth::<JigBrowseResponse, EmptyError, _>(
             &endpoints::jig::Browse::PATH,
             endpoints::jig::Browse::METHOD,
-            req
+            Some(req)
         )
             .await
         {

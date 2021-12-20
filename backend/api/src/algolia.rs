@@ -50,13 +50,18 @@ struct BatchJig<'a> {
     #[serde(rename = "_tags")]
     tags: Vec<&'static str>,
     jig_focus: &'a str,
+    locked: &'a bool,
+    other_keywords: &'a str,
+    translated_keywords: &'a str,
 }
 
 #[derive(Serialize)]
 struct BatchImage<'a> {
     name: &'a str,
     description: &'a str,
-    translated_description: &'a str,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    translated_description: Option<String>,
     styles: &'a [Uuid],
     style_names: &'a [String],
     age_ranges: &'a [Uuid],
@@ -289,10 +294,12 @@ select jig.id,
        privacy_level                                                                                                as "privacy_level!: PrivacyLevel",
        jig_focus                                                                                                    as "jig_focus!: JigFocus",
        author_id                                                                                                    as "author",
+       locked                                                                                                       as "locked!",  
+       other_keywords                                                                                               as "other_keywords!",
+       translated_keywords                                                                                          as "translated_keywords!",
        (select given_name || ' '::text || family_name
         from user_profile
         where user_profile.user_id = jig.author_id)                                                                 as "author_name"
-
 from jig
          inner join jig_data on live_id = jig_data.id
 where last_synced_at is null
@@ -327,7 +334,10 @@ limit 100 for no key update skip locked;
                 author: row.author,
                 author_name: row.author_name,
                 jig_focus: &row.jig_focus.as_str(),
-                tags
+                tags,
+                locked: &row.locked,
+                other_keywords: &row.other_keywords,
+                translated_keywords: &row.translated_keywords,
             })
             .expect("failed to serialize BatchJig to json")
             {
@@ -394,7 +404,7 @@ select id,
        name,
        kind                                                                                     as "kind!: ImageKind",
        description,
-       translated_description                                                                   as "translated_description!",
+       translated_description                                                                   as "translated_description",
        array((select affiliation_id from image_affiliation where image_id = image_metadata.id)) as "affiliations!",
        array((select affiliation.display_name
               from affiliation
@@ -450,7 +460,7 @@ limit 100 for no key update skip locked;
                 media_subkind: &row.kind.to_str(),
                 name: &row.name,
                 description: &row.description,
-                translated_description: &row.translated_description,
+                translated_description: row.translated_description,
                 styles: &row.styles,
                 style_names: &row.style_names,
                 age_ranges: &row.age_ranges,
@@ -772,6 +782,8 @@ impl Client {
         author: Option<Uuid>,
         author_name: Option<String>,
         jig_focus: Option<JigFocus>,
+        other_keywords: Option<String>,
+        translated_keywords: Option<String>,
     ) -> anyhow::Result<Option<(Vec<Uuid>, u32, u64)>> {
         let mut and_filters = algolia::filter::AndFilter { filters: vec![] };
 
@@ -802,7 +814,10 @@ impl Client {
 
         if let Some(jig_focus) = jig_focus {
             and_filters.filters.push(Box::new(CommonFilter {
-                filter: TagFilter(jig_focus.as_str().to_owned()),
+                filter: FacetFilter {
+                    facet_name: "jig_focus".to_owned(),
+                    value: jig_focus.as_str().to_owned(),
+                },
                 invert: false,
             }))
         }
@@ -819,6 +834,25 @@ impl Client {
                 filter: FacetFilter {
                     facet_name: "language".to_owned(),
                     value: language,
+                },
+                invert: false,
+            }))
+        }
+
+        if let Some(other_keywords) = other_keywords {
+            and_filters.filters.push(Box::new(CommonFilter {
+                filter: FacetFilter {
+                    facet_name: "other_keywords".to_owned(),
+                    value: other_keywords,
+                },
+                invert: false,
+            }))
+        }
+        if let Some(translated_keywords) = translated_keywords {
+            and_filters.filters.push(Box::new(CommonFilter {
+                filter: FacetFilter {
+                    facet_name: "translated_keywords".to_owned(),
+                    value: translated_keywords,
                 },
                 invert: false,
             }))

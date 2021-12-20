@@ -4,8 +4,8 @@ use std::rc::Rc;
 
 use futures_signals::signal::Mutable;
 use futures_signals::signal_vec::MutableVec;
-use shared::domain::jig::PrivacyLevel;
-use shared::domain::jig::additional_resource::AdditionalResourceId;
+use shared::domain::jig::{JigFocus, PrivacyLevel};
+use shared::domain::jig::additional_resource::AdditionalResource;
 use shared::domain::meta::AffiliationId;
 use shared::domain::{
     category::CategoryId,
@@ -25,8 +25,9 @@ pub struct PublishJig {
     pub language: Mutable<String>,
     pub categories: Mutable<HashSet<CategoryId>>,
     pub affiliations: Mutable<HashSet<AffiliationId>>,
-    pub additional_resources: Rc<MutableVec<AdditionalResourceId>>,
+    pub additional_resources: Rc<MutableVec<AdditionalResource>>,
     pub privacy_level: Mutable<PrivacyLevel>,
+    pub jig_focus: JigFocus,
 }
 
 impl From<JigResponse> for PublishJig {
@@ -43,6 +44,7 @@ impl From<JigResponse> for PublishJig {
             affiliations: Mutable::new(HashSet::from_iter(jig.jig_data.affiliations)),
             additional_resources: Rc::new(MutableVec::new_with_values(jig.jig_data.additional_resources)),
             privacy_level: Mutable::new(jig.jig_data.privacy_level),
+            jig_focus: jig.jig_data.jig_focus,
         }
     }
 }
@@ -61,6 +63,7 @@ impl PublishJig {
             affiliations: Mutable::new(HashSet::from_iter(jig.jig_data.affiliations)),
             additional_resources: Rc::new(MutableVec::new_with_values(jig.jig_data.additional_resources)),
             privacy_level: Mutable::new(jig.jig_data.privacy_level),
+            jig_focus: jig.jig_data.jig_focus,
         }
     }
 

@@ -97,7 +97,7 @@ impl StableOrUniqueId {
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[derive(Serialize, Deserialize, Debug, Copy, Clone, PartialEq, Eq)]
 pub enum ModuleKind {
-    /// This is a sort of special module, every jig has one and it can't be deleted
+    /// This is a sort of special module, every jig has one and it can't be deleted TODO: is that so?
     Cover = 0,
 
     /// Flashcards
@@ -132,6 +132,9 @@ pub enum ModuleKind {
 
     /// Legacy
     Legacy = 11,
+
+    /// ResourceCover
+    ResourceCover = 12,
 }
 
 impl ModuleKind {
@@ -140,6 +143,7 @@ impl ModuleKind {
     pub const fn as_str(self) -> &'static str {
         match self {
             Self::Cover => "cover",
+            Self::ResourceCover => "resource-cover",
             Self::Flashcards => "flashcards",
             Self::Matching => "matching",
             Self::Memory => "memory",
@@ -159,6 +163,7 @@ impl FromStr for ModuleKind {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let res = match s {
             "cover" => Self::Cover,
+            "resource-cover" => Self::ResourceCover,
             "flashcards" => Self::Flashcards,
             "matching" => Self::Matching,
             "memory" => Self::Memory,

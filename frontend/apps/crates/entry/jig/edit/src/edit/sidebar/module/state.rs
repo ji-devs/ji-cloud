@@ -45,6 +45,11 @@ impl State {
             Some(module) => module.kind.as_str(),
         }
     }
+
+    pub fn is_last_module(&self) -> bool {
+        self.index < self.total_len - 2 && (&*self.module).is_some()
+    }
+
     pub fn window_state_signal(state: Rc<State>) -> impl Signal<Item = &'static str> {
         clone!(state => map_ref! {
             let route = state.sidebar.jig_edit_state.route.signal_cloned(),

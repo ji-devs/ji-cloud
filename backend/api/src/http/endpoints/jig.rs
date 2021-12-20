@@ -2,12 +2,13 @@ use actix_web::{
     web::{self, Data, Json, Path, Query, ServiceConfig},
     HttpResponse,
 };
+use core::settings::RuntimeSettings;
 use shared::{
     api::{endpoints::jig, ApiEndpoint},
     domain::{
         jig::{
             DraftOrLive, JigBrowseResponse, JigCountResponse, JigCreateRequest, JigId,
-            JigSearchResponse, PrivacyLevel, UserOrMe,
+            JigLikedResponse, JigSearchResponse, PrivacyLevel, UserOrMe,
         },
         CreateResponse,
     },
@@ -107,11 +108,13 @@ async fn get_draft(
 /// Update a JIG's draft data.
 async fn update_draft(
     db: Data<PgPool>,
+    settings: Data<RuntimeSettings>,
     claims: TokenUser,
     req: Option<Json<<jig::UpdateDraftData as ApiEndpoint>::Req>>,
     path: web::Path<JigId>,
 ) -> Result<HttpResponse, error::UpdateWithMetadata> {
     let id = path.into_inner();
+    let api_key = &settings.google_api_key;
 
     db::jig::authz(&*db, claims.0.user_id, Some(id)).await?;
 
@@ -119,7 +122,9 @@ async fn update_draft(
 
     db::jig::update_draft(
         &*db,
+        api_key,
         id,
+        claims.0.user_id,
         req.display_name.as_deref(),
         req.goals.as_deref(),
         req.categories.as_deref(),
@@ -133,6 +138,8 @@ async fn update_draft(
         req.audio_effects.as_ref(),
         req.privacy_level,
         req.jig_focus,
+        req.other_keywords,
+        req.admin_data,
     )
     .await?;
 
@@ -185,6 +192,8 @@ async fn browse(
 
     db::jig::authz_list(&*db, claims.0.user_id, author_id).await?;
 
+    println!("before browse");
+
     let jigs = db::jig::browse(
         db.as_ref(),
         author_id,
@@ -210,7 +219,7 @@ pub(super) async fn publish_draft_to_live(
     db: Data<PgPool>,
     claims: TokenUser,
     jig_id: Path<JigId>,
-) -> Result<Json<<jig::Publish as ApiEndpoint>::Res>, error::JigCloneDraft> {
+) -> Result<HttpResponse, error::JigCloneDraft> {
     let jig_id = jig_id.into_inner();
 
     db::jig::authz(&*db, claims.0.user_id, Some(jig_id)).await?;
@@ -247,7 +256,7 @@ delete from jig_data where id = $1
 
     txn.commit().await?;
 
-    Ok(Json(()))
+    Ok(HttpResponse::NoContent().finish())
 }
 
 /// Clone a jig
@@ -285,6 +294,8 @@ async fn search(
             query.author,
             query.author_name,
             query.jig_focus,
+            query.other_keywords,
+            query.translated_keywords,
         )
         .await?
         .ok_or_else(|| error::Service::DisabledService(ServiceKind::Algolia))?;
@@ -313,6 +324,17 @@ async fn like(
     db::jig::jig_like(&*db, claims.0.user_id, path.into_inner()).await?;
 
     Ok(HttpResponse::NoContent().finish())
+}
+
+/// Whether a user has liked a JIG
+async fn liked(
+    db: Data<PgPool>,
+    claims: TokenUser,
+    path: web::Path<JigId>,
+) -> Result<Json<<jig::Liked as ApiEndpoint>::Res>, error::Server> {
+    let is_liked = db::jig::jig_is_liked(&*db, claims.0.user_id, path.into_inner()).await?;
+
+    Ok(Json(JigLikedResponse { is_liked }))
 }
 
 /// Unlike to a jig
@@ -393,5 +415,6 @@ pub fn configure(cfg: &mut ServiceConfig) {
         .route(jig::Count::PATH, jig::Count::METHOD.route().to(count))
         .route(jig::Play::PATH, jig::Play::METHOD.route().to(play))
         .route(jig::Like::PATH, jig::Like::METHOD.route().to(like))
+        .route(jig::Liked::PATH, jig::Liked::METHOD.route().to(liked))
         .route(jig::Unlike::PATH, jig::Unlike::METHOD.route().to(unlike));
 }

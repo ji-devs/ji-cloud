@@ -42,6 +42,14 @@ expression: body
       "feedbackNegative": "[audio]"
     },
     "privacyLevel": "unlisted",
-    "jigFocus": "modules"
+    "jigFocus": "modules",
+    "locked": false,
+    "otherKeywords": "",
+    "translatedKeywords": ""
+  },
+  "adminData": {
+    "rating": null,
+    "blocked": false,
+    "curated": false
   }
 }

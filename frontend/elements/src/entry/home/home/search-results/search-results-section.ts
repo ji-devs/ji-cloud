@@ -1,8 +1,18 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 
-export type Kind = "jigs" | "learning-paths";
+export type Kind = "jigs" | "resources" | "learning-paths";
 
 const STR_JIGS = "JIGs";
+const STR_RESOURCES = "Resource Library";
+const STR_LEARNING_PATH = "Learning Paths";
+
+const IMAGE_LOOKUP: {
+    [key in Kind]: string;
+} = {
+    ["jigs"]: "jig-section.png",
+    ["resources"]: "resources.webp",
+    ["learning-paths"]: "learning-paths.svg",
+};
 
 @customElement("home-search-results-section")
 export class _ extends LitElement {
@@ -12,9 +22,12 @@ export class _ extends LitElement {
                 :host {
                     display: grid;
                     row-gap: 48px;
-                    padding: 0 50px;
+                    padding: 5px 50px;
                     max-width: 1800px;
                     margin: 0 auto;
+                }
+                :host([kind=resources]) {
+                    background-color: var(--green-2);
                 }
                 .top-line {
                     display: flex;
@@ -28,6 +41,7 @@ export class _ extends LitElement {
                 .left-side img-ui {
                     position: absolute;
                     right: 100%;
+                    height: 55px;
                 }
                 h2 {
                     margin: 0;
@@ -41,7 +55,7 @@ export class _ extends LitElement {
                 }
                 .results {
                     /* display: flex;
-                flex-wrap: wrap; */
+                    flex-wrap: wrap; */
 
                     display: grid;
                     grid-template-columns: repeat(auto-fill, 354px);
@@ -53,6 +67,9 @@ export class _ extends LitElement {
                 .load-more {
                     display: grid;
                     place-content: center;
+                }
+                .load-more ::slotted(*) {
+                    margin-bottom: 40px;
                 }
             `,
         ];
@@ -69,14 +86,17 @@ export class _ extends LitElement {
             <div class="top-line">
                 <div class="left-side">
                     <img-ui
-                        path="entry/home/search-results/${this.kind === "jigs"
-                            ? "jig-section.png"
-                            : "learning-paths.svg"}"
+                        path="entry/home/search-results/${IMAGE_LOOKUP[this.kind]}"
                     ></img-ui>
                     <h2>
-                        ${STR_JIGS}
-                        <span class="results-count"
-                            >(${this.resultsCount})</span
+                        ${
+                            this.kind === "jigs" ? STR_JIGS
+                                : this.kind === "resources" ? STR_RESOURCES
+                                : STR_LEARNING_PATH
+                        }
+                        <span class="results-count">
+                            (${this.resultsCount})
+                        </span
                         >
                     </h2>
                 </div>

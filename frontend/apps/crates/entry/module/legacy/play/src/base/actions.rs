@@ -1,11 +1,16 @@
 use super::state::Base;
 use std::sync::atomic::Ordering;
-use utils::resize::get_resize_info;
+use utils::{prelude::*, resize::get_resize_info};
 
 #[derive(Clone, Debug)]
 pub struct StageClick {
     pub mouse_x: f64,
     pub mouse_y: f64,
+}
+
+pub enum NavigationTarget {
+    Next,
+    Index(usize)
 }
 
 impl StageClick {
@@ -25,5 +30,23 @@ impl Base {
 
     pub fn allow_stage_click(&self) {
         self.stage_click_allowed.store(true, Ordering::SeqCst);
+    }
+
+    pub fn navigate(&self, target: NavigationTarget) {
+        let msg = match target {
+            NavigationTarget::Next => {
+                IframeAction::new(ModuleToJigPlayerMessage::Next)
+            },
+
+            NavigationTarget::Index(index) => {
+                IframeAction::new(ModuleToJigPlayerMessage::JumpToIndex(index))
+            },
+        };
+
+        // only allow navigating once
+        if !self.has_navigated.load(Ordering::SeqCst) {
+            self.has_navigated.store(true, Ordering::SeqCst);
+            let _ = msg.try_post_message_to_player();
+        }
     }
 }

@@ -117,7 +117,7 @@ pub struct ActivitySettings {
     #[serde(rename="ShapePuzzleTheme")]
     pub theme: Option<u8>,
     #[serde(rename="ShapePuzzleThemeV2")]
-    pub theme_v2: Option<u8>,
+    pub theme_v2: Option<bool>,
 
     #[serde(rename="soundShowToolTip")]
     pub tooltip: Option<bool>,

@@ -3,6 +3,7 @@ use dominator::clone;
 use shared::domain::jig::module::body::legacy::activity::AdvanceTrigger;
 use std::rc::Rc;
 use utils::prelude::*;
+use crate::base::actions::NavigationTarget;
 
 impl SaySomething {
     pub fn on_bg_click(self: Rc<Self>) {
@@ -29,19 +30,17 @@ impl SaySomething {
     }
 
     pub fn next(&self) {
-        let msg = match self.raw.advance_index {
+        match self.raw.advance_index {
             Some(index) => {
+                let index = index + 1; // bump for cover
                 log::info!("going to index {}!", index);
-                IframeAction::new(ModuleToJigPlayerMessage::JumpToIndex(index))
+
+                self.base.navigate(NavigationTarget::Index(index));
             }
             None => {
                 log::info!("going next!");
-                IframeAction::new(ModuleToJigPlayerMessage::Next)
+                self.base.navigate(NavigationTarget::Next);
             }
         };
-
-        if let Err(_) = msg.try_post_message_to_top() {
-            log::info!("Couldn't post message to top... debugging?");
-        }
     }
 }

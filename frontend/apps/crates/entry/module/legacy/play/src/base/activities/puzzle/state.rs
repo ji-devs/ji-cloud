@@ -1,22 +1,29 @@
 use crate::base::state::Base;
-use std::{rc::Rc, sync::atomic::AtomicUsize};
+use std::{rc::Rc};
 use std::cell::{RefCell, Cell};
-use dominator::clone;
+use dominator::{clone, animation::{MutableAnimation}};
 use shared::domain::jig::module::body::legacy::activity::{Puzzle as RawPuzzle, PuzzleItem as RawPuzzleItem};
 use web_sys::HtmlCanvasElement;
 use futures_signals::{
     map_ref,
-    signal::{Mutable, Signal, SignalExt}
+    signal::{Mutable, Signal}
 };
 use utils::{prelude::*,drag::Drag, image_effects::ImageEffect, resize::{resize_info_signal, ResizeInfo}, math::mat4::Matrix4};
 use awsm_web::canvas::get_2d_context;
 use web_sys::CanvasRenderingContext2d;
 use wasm_bindgen::JsCast;
+use dominator_helpers::futures::AsyncLoader;
 
 pub struct Puzzle {
     pub base: Rc<Base>,
     pub raw: RawPuzzle,
     pub init_phase: Mutable<InitPhase>,
+}
+
+pub struct PuzzlePreview {
+    pub game: Rc<PuzzleGame>,
+    pub animation: MutableAnimation,
+    pub loader: AsyncLoader,
 }
 
 pub struct PuzzleGame {
@@ -32,6 +39,7 @@ pub struct PuzzleGame {
 }
 
 pub struct PuzzleItem {
+    pub base: Rc<Base>,
     pub raw: RawPuzzleItem,
     pub completed: Cell<bool>,
     pub orig_transform_matrix: Matrix4, 
@@ -42,6 +50,7 @@ pub struct PuzzleItem {
 #[derive(Clone)]
 pub enum InitPhase {
     Loading,
+    Preview(Rc<PuzzlePreview>),
     Playing(Rc<PuzzleGame>)
 }
 
@@ -71,6 +80,22 @@ impl Puzzle {
     }
 }
 
+impl PuzzlePreview {
+    pub fn new(parent: &Puzzle, cutouts_canvas: HtmlCanvasElement, effects: ImageEffect) -> Rc<Self> {
+        let game = PuzzleGame::new(parent, cutouts_canvas, effects);
+        for item in game.items.iter() {
+            *item.curr_transform_matrix.borrow_mut() = Matrix4::identity();
+        }
+
+        Rc::new(Self {
+            game,
+            animation: MutableAnimation::new(crate::config::PUZZLE_PREVIEW_DURATION),
+            loader: AsyncLoader::new()
+        })
+
+    }
+}
+
 impl PuzzleGame {
     pub fn new(parent: &Puzzle, cutouts_canvas: HtmlCanvasElement, effects: ImageEffect) -> Rc<Self> {
 
@@ -91,7 +116,7 @@ impl PuzzleGame {
         let items = parent.raw.items
             .iter()
             .map(|raw| {
-                PuzzleItem::new(&effects, raw.clone())
+                PuzzleItem::new(parent.base.clone(), &effects, raw.clone())
             })
             .collect();
 
@@ -113,13 +138,14 @@ impl PuzzleGame {
 
 
 impl PuzzleItem{
-    pub fn new(effects: &ImageEffect, raw: RawPuzzleItem) -> Rc<Self> {
+    pub fn new(base: Rc<Base>, _effects: &ImageEffect, raw: RawPuzzleItem) -> Rc<Self> {
         let orig_transform_matrix = match raw.hotspot.transform_matrix {
             None => Matrix4::identity(),
             Some(values) => Matrix4::new_direct(values)
         };
 
         Rc::new(Self {
+            base,
             raw,
             completed: Cell::new(false),
             orig_transform_matrix: orig_transform_matrix.clone(),

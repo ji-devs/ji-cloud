@@ -723,6 +723,76 @@ dependencies = [
 ]
 
 [[package]]
+name = "app-resource-cover-edit"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "awsm_web 0.32.0",
+ "cfg-if 1.0.0",
+ "components",
+ "console_error_panic_hook",
+ "discard",
+ "dominator",
+ "dominator_helpers",
+ "futures",
+ "futures-signals",
+ "gloo",
+ "gloo-timers",
+ "itertools",
+ "js-sys",
+ "log",
+ "once_cell",
+ "serde",
+ "serde-wasm-bindgen",
+ "serde_json",
+ "shared",
+ "unicode-segmentation",
+ "url",
+ "utils",
+ "uuid",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "wasm-logger",
+ "web-sys",
+ "wee_alloc",
+]
+
+[[package]]
+name = "app-resource-cover-play"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "awsm_web 0.32.0",
+ "cfg-if 1.0.0",
+ "components",
+ "console_error_panic_hook",
+ "discard",
+ "dominator",
+ "dominator_helpers",
+ "futures",
+ "futures-signals",
+ "gloo",
+ "gloo-timers",
+ "itertools",
+ "js-sys",
+ "log",
+ "once_cell",
+ "serde",
+ "serde-wasm-bindgen",
+ "serde_json",
+ "shared",
+ "unicode-segmentation",
+ "url",
+ "utils",
+ "uuid",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "wasm-logger",
+ "web-sys",
+ "wee_alloc",
+]
+
+[[package]]
 name = "app-tapping-board-edit"
 version = "0.1.0"
 dependencies = [

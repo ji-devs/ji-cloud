@@ -107,6 +107,9 @@ where
                         default_player_settings: JigPlayerSettings::default(),
                         privacy_level: PrivacyLevel::default(),
                         jig_focus: JigFocus::Modules,
+                        locked: true,
+                        other_keywords: String::from(""),
+                        translated_keywords: String::from("")
                     })
                 } else {
 

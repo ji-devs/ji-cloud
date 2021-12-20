@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
-use super::{state::State, timer::Timer};
-use awsm_web::audio::AudioClipOptions;
+use super::{state::{can_load_liked_status, State}, timer::Timer};
+use awsm_web::audio::{AudioClipOptions, AudioHandle};
 use components::{
     audio::mixer::{AudioSourceExt, AUDIO_MIXER},
     module::_common::prelude::ModuleId,
@@ -10,46 +10,40 @@ use dominator::clone;
 use futures_signals::signal::SignalExt;
 use shared::{
     api::{endpoints::jig, ApiEndpoint},
-    domain::jig::{AudioBackground, JigResponse},
+    domain::jig::{AudioBackground, JigResponse, JigLikedResponse},
     error::EmptyError,
 };
 use utils::{
     iframe::{IframeAction, JigToModulePlayerMessage, ModuleToJigPlayerMessage},
-    prelude::{api_no_auth, SETTINGS},
+    prelude::{api_no_auth, SETTINGS, api_with_auth},
     routes::{HomeRoute, Route},
     unwrap::UnwrapJiExt,
 };
 use wasm_bindgen_futures::spawn_local;
 
-pub fn toggle_background_audio(state: Rc<State>, background_audio: AudioBackground) {
-    let mut bg_audio_handle = state.bg_audio_handle.borrow_mut();
+pub fn toggle_background_audio(state: Rc<State>) {
+    let bg_audio_handle = state.bg_audio_handle.borrow();
 
     match &*bg_audio_handle {
         Some(bg_audio_handle) => {
             if state.bg_audio_playing.get() {
-                bg_audio_handle.pause();
-                state.bg_audio_playing.set(false);
+                pause_background_audio(&state, bg_audio_handle);
             } else {
-                bg_audio_handle.play();
-                state.bg_audio_playing.set(true);
+                play_background_audio(&state, bg_audio_handle);
             };
         }
-        None => {
-            let handle = AUDIO_MIXER.with(|mixer| {
-                mixer.add_source(
-                    background_audio.as_source(),
-                    AudioClipOptions {
-                        auto_play: true,
-                        is_loop: true,
-                        on_ended: None::<fn()>,
-                    },
-                )
-            });
-
-            *bg_audio_handle = Some(handle);
-            state.bg_audio_playing.set(true);
-        }
+        None => {}
     };
+}
+
+pub fn play_background_audio(state: &State, audio_handle: &AudioHandle) {
+    audio_handle.play();
+    state.bg_audio_playing.set(true);
+}
+
+pub fn pause_background_audio(state: &State, audio_handle: &AudioHandle) {
+    audio_handle.pause();
+    state.bg_audio_playing.set(false);
 }
 
 pub fn navigate_forward(state: Rc<State>) {
@@ -92,26 +86,66 @@ pub fn navigate_to_module(state: Rc<State>, module_id: &ModuleId) {
 
 pub fn load_jig(state: Rc<State>) {
     state.loader.load(clone!(state => async move {
-
-        let resp = match state.player_options.draft {
+        let (jig, jig_liked) = match state.player_options.draft {
             false => {
-                let path = jig::GetLive::PATH.replace("{id}", &state.jig_id.0.to_string());
-                api_no_auth::<JigResponse, EmptyError, ()>(&path, jig::GetLive::METHOD, None).await
+                let jig = {
+                    let path = jig::GetLive::PATH.replace("{id}", &state.jig_id.0.to_string());
+                    api_no_auth::<JigResponse, EmptyError, ()>(&path, jig::GetLive::METHOD, None).await
+                };
+
+                // Fetch whether the current user has liked this JIG.
+                let jig_liked = {
+                    match &jig {
+                        // Only fetch liked status if the jig request didn't error, the user is
+                        // logged in and the user is not the author of the JIG.
+                        Ok(jig) if can_load_liked_status(&jig) => {
+                            let path = jig::Liked::PATH.replace("{id}", &state.jig_id.0.to_string());
+                            api_with_auth::<JigLikedResponse, EmptyError, ()>(&path, jig::Liked::METHOD, None)
+                                .await
+                                .map_or(false, |r| r.is_liked)
+                        },
+                        _ => false
+                    }
+                };
+
+                (jig, jig_liked)
             },
             true => {
-                let path = jig::GetDraft::PATH.replace("{id}", &state.jig_id.0.to_string());
-                api_no_auth::<JigResponse, EmptyError, ()>(&path, jig::GetDraft::METHOD, None).await
+                let jig = {
+                    let path = jig::GetDraft::PATH.replace("{id}", &state.jig_id.0.to_string());
+                    api_no_auth::<JigResponse, EmptyError, ()>(&path, jig::GetDraft::METHOD, None).await
+                };
+
+                (jig, false)
             },
         };
 
-        match resp {
-            Ok(resp) => {
+        match jig {
+            Ok(jig) => {
                 // state.active_module.set(Some(resp.jig.modules[0].clone()));
-                state.jig.set(Some(resp));
+                state.jig.set(Some(jig));
+                state.jig_liked.set(Some(jig_liked));
             },
             Err(_) => {},
         }
     }));
+}
+
+fn init_audio(state: &State, background_audio: AudioBackground) {
+    let handle = AUDIO_MIXER.with(|mixer| {
+        mixer.add_source(
+            background_audio.as_source(),
+            AudioClipOptions {
+                auto_play: true,
+                is_loop: true,
+                on_ended: None::<fn()>,
+            },
+        )
+    });
+
+    let mut bg_audio_handle = state.bg_audio_handle.borrow_mut();
+    *bg_audio_handle = Some(handle);
+    state.bg_audio_playing.set(true);
 }
 
 pub fn start_timer(state: Rc<State>, time: u32) {
@@ -177,23 +211,41 @@ pub fn on_iframe_message(state: Rc<State>, message: ModuleToJigPlayerMessage) {
             *points += amount;
         }
         ModuleToJigPlayerMessage::Start(time) => {
-            if let Some(time) = time {
-                start_timer(Rc::clone(&state), time);
-            }
+            start_player(state, time);
         }
         ModuleToJigPlayerMessage::Next => {
-            navigate_forward(Rc::clone(&state));
+            navigate_forward(state);
         }
         ModuleToJigPlayerMessage::Stop => {
             state.timer.set(None);
         }
         ModuleToJigPlayerMessage::JumpToIndex(index) => {
-            navigate_to_index(Rc::clone(&state), index);
+            navigate_to_index(state, index);
         }
         ModuleToJigPlayerMessage::JumpToId(module_id) => {
-            navigate_to_module(Rc::clone(&state), &module_id);
+            navigate_to_module(state, &module_id);
         }
     };
+}
+
+fn start_player(state: Rc<State>, time: Option<u32>) {
+    // Initialize the audio once the jig is started
+    if let Some(jig) = state.jig.get_cloned() {
+        if let Some(audio_background) = jig.jig_data.audio_background {
+            init_audio(&state, audio_background);
+        }
+    }
+
+    // If the background audio is set to play, then start the audio
+    if state.bg_audio_playing.get() {
+        if let Some(bg_audio_handle) = &*state.bg_audio_handle.borrow() {
+            play_background_audio(&state, bg_audio_handle);
+        }
+    }
+
+    if let Some(time) = time {
+        start_timer(Rc::clone(&state), time);
+    }
 }
 
 pub fn reload_iframe(state: Rc<State>) {

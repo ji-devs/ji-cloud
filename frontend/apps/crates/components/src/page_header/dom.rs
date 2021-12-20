@@ -22,6 +22,10 @@ const STR_LOGOUT: &str = "Logout";
 const STR_ADMIN: &str = "Admin";
 const STR_DONATE: &str = "Donate";
 
+const STR_MY_PROFILE: &str = "My profile";
+const STR_MY_JIGS: &str = "My JIGs";
+const STR_MY_RESOURCES: &str = "My resources";
+
 pub fn render(state: Rc<State>, slot: Option<&str>, active_page: Option<PageLinks>) -> Dom {
     actions::fetch_profile(Rc::clone(&state));
 
@@ -70,11 +74,11 @@ pub fn render(state: Rc<State>, slot: Option<&str>, active_page: Option<PageLink
     })
 }
 
-fn admin_privileges(state: Rc<State>) -> impl Signal<Item = bool> {
+fn has_privileges(state: Rc<State>, scope: UserScope) -> impl Signal<Item = bool> {
     state
         .logged_in
-        .signal_ref(|logged_in_state| match logged_in_state {
-            LoggedInState::LoggedIn(profile) if profile.scopes.contains(&UserScope::Admin) => true,
+        .signal_ref(move |logged_in_state| match logged_in_state {
+            LoggedInState::LoggedIn(profile) if profile.scopes.contains(&scope) => true,
             _ => false,
         })
 }
@@ -114,7 +118,38 @@ fn render_logged_in(state: Rc<State>, user: &UserProfile) -> Vec<Dom> {
                 })
             }),
         ])
-        .child_signal(admin_privileges(Rc::clone(&state)).map(|admin_privileges| {
+        .child(html!("a", {
+            .property("slot", "user-links")
+            .property("href", "/jig/edit/gallery")
+            .child(html!("img-ui", {
+                .property("path", "core/page-header/jig-icon.svg")
+            }))
+            .text(STR_MY_JIGS)
+        }))
+        .child_signal(has_privileges(Rc::clone(&state), UserScope::Admin).map(|admin_privileges| {
+            match admin_privileges {
+                false => None,
+                true => {
+                    Some(html!("a", {
+                        .property("slot", "user-links")
+                        .property("href", "/jig/edit/resource-gallery")
+                        .child(html!("fa-icon", {
+                            .property("icon", "fa-light fa-lightbulb-on")
+                        }))
+                        .text(STR_MY_RESOURCES)
+                    }))
+                }
+            }
+        }))
+        .child(html!("a", {
+            .property("slot", "user-links")
+            .property("href", "/user/profile")
+            .child(html!("fa-icon", {
+                .property("icon", "fa-light fa-gear")
+            }))
+            .text(STR_MY_PROFILE)
+        }))
+        .child_signal(has_privileges(Rc::clone(&state), UserScope::Admin).map(|admin_privileges| {
             match admin_privileges {
                 false => None,
                 true => {
