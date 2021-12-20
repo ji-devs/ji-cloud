@@ -37,6 +37,7 @@ pub async fn create(
     language: &str,
     description: &str,
     default_player_settings: &JigPlayerSettings,
+    jig_focus: &JigFocus,
 ) -> Result<JigId, CreateJigError> {
     let mut txn = pool.begin().await?;
 
@@ -117,10 +118,11 @@ values ($1, $2, $3, $4, $5)
 
     let jig = sqlx::query!(
         //language=SQL
-        r#"insert into jig (creator_id, author_id, live_id, draft_id) values ($1, $1, $2, $3) returning id"#,
+        r#"insert into jig (creator_id, author_id, live_id, draft_id, jig_focus) values ($1, $1, $2, $3, $4) returning id"#,
         creator_id,
         live_id,
         draft_id,
+        (*jig_focus) as i16,
     )
     .fetch_one(&mut txn)
     .await?;
@@ -222,7 +224,8 @@ with cte as (
            published_at,
            rating,
            blocked,
-           curated
+           curated,
+           jig_focus
     from jig
     left join jig_play_count on jig_play_count.jig_id = jig.id
     left join jig_admin_data "admin" on admin.jig_id = jig.id
@@ -298,6 +301,7 @@ from jig_data
             first_cover_assigned: row.first_cover_assigned,
             likes: row.liked_count,
             plays: row.play_count,
+            jig_focus: row.jig_focus,
             jig_data: JigData {
                 draft_or_live,
                 display_name: row.display_name,
@@ -333,7 +337,6 @@ from jig_data
                     feedback_negative: row.audio_feedback_negative.into_iter().map(|(it, )| it).collect(),
                 },
                 privacy_level: row.privacy_level,
-                jig_focus: row.jig_focus,
                 locked: row.locked,
                 other_keywords: row.other_keywords,
                 translated_keywords: row.translated_keywords,
@@ -376,7 +379,8 @@ select jig.id                                       as "id!: JigId",
        )                                        as "play_count!",
        rating                                   as "rating?: JigRating",
        blocked                                  as "blocked!",
-       curated                                  as "curated!"
+       curated                                  as "curated!",
+       jig_focus                                as "jig_focus!: JigFocus"
 from jig
 
          inner join unnest($1::uuid[])
@@ -434,7 +438,6 @@ select id,
                 where jdar.jig_data_id = jig_data.id
             )                                               as "additional_resource!: Vec<(AddId, String, TypeId, Value)>",
        privacy_level                              as "privacy_level!: PrivacyLevel",
-       jig_focus                                  as "jig_focus!: JigFocus",
        locked                                     as "locked!",
        other_keywords                             as "other_keywords!",
        translated_keywords                        as "translated_keywords!"
@@ -459,6 +462,7 @@ order by t.ord
             likes: jig_row.liked_count,
             plays: jig_row.play_count,
             first_cover_assigned: jig_row.first_cover_assigned,
+            jig_focus: jig_row.jig_focus,
             jig_data: JigData {
                 draft_or_live,
                 display_name: jig_data_row.display_name,
@@ -522,7 +526,6 @@ order by t.ord
                         .collect(),
                 },
                 privacy_level: jig_data_row.privacy_level,
-                jig_focus: jig_data_row.jig_focus,
                 locked: jig_data_row.locked,
                 other_keywords: jig_data_row.other_keywords,
                 translated_keywords: jig_data_row.translated_keywords,
@@ -557,7 +560,6 @@ pub async fn update_draft(
     audio_background: Option<&Option<AudioBackground>>,
     audio_effects: Option<&AudioEffects>,
     privacy_level: Option<PrivacyLevel>,
-    jig_focus: Option<JigFocus>,
     other_keywords: Option<String>,
     admin_data: Option<JigAdminUpdateData>,
 ) -> Result<(), error::UpdateWithMetadata> {
@@ -653,22 +655,6 @@ where id = $1
     "#,
             draft_id,
             privacy_level as i16,
-        )
-        .execute(&mut txn)
-        .await?;
-    }
-
-    if let Some(jig_focus) = jig_focus {
-        sqlx::query!(
-            //language=SQL
-            r#"
-update jig_data
-set jig_focus = coalesce($2, jig_focus)
-where id = $1
-  and $2 is distinct from jig_focus
-    "#,
-            draft_id,
-            jig_focus as i16,
         )
         .execute(&mut txn)
         .await?;
@@ -922,6 +908,7 @@ limit 20 offset 20 * $1
             author_id: row.author_id,
             author_name: row.author_name,
             first_cover_assigned: row.first_cover_assigned,
+            jig_focus: row.jig_focus,
             plays: row.play_count,
             likes: row.liked_count,
             jig_data: JigData {
@@ -959,7 +946,6 @@ limit 20 offset 20 * $1
                     feedback_negative: row.audio_feedback_negative.into_iter().map(|(it, )| it).collect(),
                 },
                 privacy_level: row.privacy_level,
-                jig_focus: row.jig_focus,
                 locked: row.locked,
                 other_keywords: row.other_keywords,
                 translated_keywords: row.translated_keywords,
@@ -1043,7 +1029,7 @@ pub async fn clone_data(
         r#"
 insert into jig_data
 (display_name, created_at, updated_at, language, last_synced_at, description, theme, audio_background,
- audio_feedback_negative, audio_feedback_positive, direction, display_score, drag_assist, track_assessments, privacy_level, jig_focus, other_keywords, translated_keywords)
+ audio_feedback_negative, audio_feedback_positive, direction, display_score, drag_assist, track_assessments, privacy_level, other_keywords, translated_keywords)
 select display_name,
        created_at,
        updated_at,
@@ -1059,7 +1045,6 @@ select display_name,
        drag_assist,
        track_assessments,
        privacy_level,
-       jig_focus,
        other_keywords,
        translated_keywords
 from jig_data
@@ -1179,8 +1164,8 @@ pub async fn clone_jig(
     let new_jig = sqlx::query!(
         //language=SQL
         r#"
-insert into jig (creator_id, author_id, parents, live_id, draft_id, published_at)
-select creator_id, $2, array_append(parents, $1), $3, $4, published_at
+insert into jig (creator_id, author_id, parents, live_id, draft_id, published_at, jig_focus)
+select creator_id, $2, array_append(parents, $1), $3, $4, published_at, jig_focus
 from jig
 where id = $1
 returning id as "id!: JigId"
