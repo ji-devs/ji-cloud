@@ -35,7 +35,7 @@ export class _ extends LitElement {
                 }
 
                 section {
-                    transition: transform 0.8s;
+                    transition: transform 0.8s, opacity 0.8s;
                     transform-style: preserve-3d;
                     transform: rotateY(180deg);
                 }
@@ -84,6 +84,10 @@ export class _ extends LitElement {
                     transform: rotateY(0deg);
                 }
 
+                :host([faded]) > section {
+                    opacity: 0.5;
+                }
+
                 :host * {
                     pointer-events: none;
                 }
@@ -94,6 +98,10 @@ export class _ extends LitElement {
     // whether or not showing front vs. back
     @property({ type: Boolean, reflect: true })
     flipped: boolean = false;
+
+    // Whether or not the card is faded out
+    @property({ type: Boolean, reflect: true })
+    faded: boolean = false;
 
     // required for styling
     @property()

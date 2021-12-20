@@ -49,12 +49,8 @@ pub fn render(state: Rc<State>) -> Dom {
         }))
         .child_signal(state.player_state.jig.signal_ref(clone!(state => move |jig| {
             match jig {
-                Some(jig) => {
-                    if can_load_liked_status(jig) {
-                        Some(like::render(Rc::clone(&state), jig))
-                    } else {
-                        None
-                    }
+                Some(jig) if can_load_liked_status(jig) => {
+                    Some(like::render(Rc::clone(&state), jig))
                 },
                 _ => None,
             }
