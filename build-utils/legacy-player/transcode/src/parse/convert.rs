@@ -112,6 +112,8 @@ pub async fn load_url(ctx: &Context, url:&str) -> Option<(SrcManifest, String)> 
             }
         }
     };
+
+    let text = text.replace("\"path\": {}", "\"path\": []");
    
     let manifest = if ctx.opts.data_url {
         serde_json::from_str::<SrcManifestData>(&text)
