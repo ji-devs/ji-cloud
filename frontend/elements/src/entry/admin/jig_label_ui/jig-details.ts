@@ -1,4 +1,6 @@
 import { LitElement, html, customElement, property } from "lit-element";
+import "@elements/core/inputs/composed/select/select";
+import "@elements/core/inputs/composed/select/option";
 
 @customElement("jig-details")
 export class JigLabelUI extends LitElement {
@@ -19,14 +21,12 @@ export class JigLabelUI extends LitElement {
         <label for="author">Author name</label>
         <input id="author" type="text" value=${this.authorName}>
       </div>
-      <div>
-        <label for="language">Instruction Language</label>
-        <input id="language" type="text" value=${this.language}>
-      </div>
-      <div>
-        <label for="age">Suitable for age</label>
-        <input id="age" type="text" value=${this.suitableForAge}>
-      </div>
+      <input-select label="Instruction Language">
+        <input-select-option>English</input-select-option>
+      </input-select>
+      <input-select label="Suitable for age">
+        <input-select-option>All ages</input-select-option>
+      </input-select>
       <div>
         <label for="affiliation">Affiliation</label>
         <input id="affiliation" type="text" value=${this.name}>
@@ -39,6 +39,7 @@ export class JigLabelUI extends LitElement {
         <label for="keywords">Additional keywords</label>
         <textarea id="keywords" rows="6" value=${this.keywords}></textarea>
       </div>
+      <slot></slot>
     `
   }
 }
