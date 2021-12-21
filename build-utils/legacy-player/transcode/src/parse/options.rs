@@ -6,6 +6,9 @@ use shared::config::RemoteTarget;
 #[structopt(name = "ji tap transcoder", about = "ji tap downloader/transcoder")]
 pub struct Opts {
 
+    //if hitting the structure url that wraps manifest in data
+    #[structopt(long, parse(try_from_str), default_value = "true")]
+    pub data_url: bool,
     /// if this is set, will use game json from albums folder
     /// if game_json_url isn't set 
     /// otherwise, uses hardcoded local vec

@@ -13,6 +13,11 @@ use super::{
 };
 
 #[derive(Deserialize, Debug)]
+pub struct SrcManifestData {
+    pub data: SrcManifest,
+}
+
+#[derive(Deserialize, Debug)]
 pub struct SrcManifest {
     /// Base url of the amazon bucket
     pub base_url: String,

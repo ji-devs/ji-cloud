@@ -105,9 +105,11 @@ async fn game_json_urls(opts:&Opts) -> Vec<String> {
                     let reader = BufReader::new(file);
                     let data:Data = serde_json::from_reader(reader).unwrap();
 
-                    //log::info!("{}", data.album.fields.structure);
-                    urls.push(format!("https://jitap.net/store/api/album/{}/structure/", data.album.pk));
-                    //urls.push(data.album.fields.structure);
+                    if opts.data_url {
+                        urls.push(format!("https://jitap.net/store/api/album/{}/structure/", data.album.pk));
+                    } else {
+                        urls.push(data.album.fields.structure);
+                    }
                 }
                 urls
             } else {

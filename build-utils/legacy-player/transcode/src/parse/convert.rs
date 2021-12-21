@@ -20,6 +20,7 @@ pub use transcode::{
     src_manifest::{
         MediaTranscode, 
         SrcManifest,
+        SrcManifestData,
         Media,
         Slide as SrcSlide,
         ActivityKind as SrcActivityKind,
@@ -64,6 +65,10 @@ pub fn load_file(path:PathBuf) -> SrcManifest {
 pub async fn load_url(ctx: &Context, url:&str) -> Option<(SrcManifest, String)> {
 
     #[derive(Deserialize, Debug)]
+    pub struct MinimalSrcManifestData {
+        pub data: MinimalSrcManifest
+    }
+    #[derive(Deserialize, Debug)]
     pub struct MinimalSrcManifest {
         pub album_store: MinimalAlbumStore
     }
@@ -107,13 +112,25 @@ pub async fn load_url(ctx: &Context, url:&str) -> Option<(SrcManifest, String)> 
             }
         }
     };
-    
-    let manifest = serde_json::from_str::<SrcManifest>(&text);
+   
+    let manifest = if ctx.opts.data_url {
+        serde_json::from_str::<SrcManifestData>(&text)
+            .map(|resp| resp.data)
+    } else {
+        serde_json::from_str::<SrcManifest>(&text)
+    };
 
     match manifest {
         Ok(manifest) => Some((manifest, text)),
         Err(err) => {
-            let game_id = match serde_json::from_str::<MinimalSrcManifest>(&text) {
+            let minimal = if ctx.opts.data_url {
+                serde_json::from_str::<MinimalSrcManifestData>(&text)
+                    .map(|resp| resp.data)
+            } else {
+                serde_json::from_str::<MinimalSrcManifest>(&text)
+            };
+            
+            let game_id = match minimal {
                 Ok(m) => m.game_id(),
                 Err(_) => "unknown".to_string()
             };
