@@ -10,7 +10,7 @@ export const JigDetails = () => {
   return `
     <jig-details>
       <input-wrapper id="first-input" label="JIG's name">
-      <input type="text" value="">
+        <input type="text" value="">
       </input-wrapper>
       <input-wrapper label="Author name">
         <input type="text" value="">
