@@ -77,7 +77,7 @@ struct AlbumList<'a> {
 }
 
 pub async fn load_page(ctx: &Context, page_num: u32) -> Option<Vec<(u64, String)>> {
-    let url = format!("https://jitap.net/community/api/albums/recent/?page_num={}&per_page={}", page_num, ctx.opts.per_page);
+    let url = format!("https://jitap.net/community/api/albums/recent/?page_num={}&per_page={}&language=0&category=0&ageGroup=0 ", page_num, ctx.opts.per_page);
 
     let text = ctx
         .client
