@@ -2,6 +2,7 @@ import { LitElement, html, css, customElement, property } from "lit-element";
 import "@elements/core/inputs/composed/select/select";
 import "@elements/core/inputs/composed/select/option";
 import "@elements/core/inputs/wrapper";
+import "@elements/core/buttons/rectangle";
 
 @customElement("jig-details")
 export class JigLabelUI extends LitElement {
@@ -9,14 +10,24 @@ export class JigLabelUI extends LitElement {
   #container {
     padding: 44px;
   }
+  #heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  #general-summary {
+    height: 100%;
+    color: var(--dark-gray-5);
+  }
+  #heading-buttons {
+    display: flex;
+    gap: 0 32px;
+  }
   #input-container {
-    margin-top: 8px;
+    margin-top: 12px;
     padding: 31px 24px;
     border-radius: 12px;
     border: solid 2px #e6f0ff;
-  }
-  #general-summary {
-    color: var(--dark-gray-5);
   }
   input-wrapper, input-select {
     margin-top: 24px;
@@ -36,8 +47,15 @@ export class JigLabelUI extends LitElement {
   render() {
     return html`
     <div id="container">
-      <div id="general-summary">General Summary</div>
-      <!-- Cancel and Save Changes Button -->
+      <div id="heading">
+        <div>
+          <div id="general-summary">General Summary</div>
+        </div>
+        <div id="heading-buttons">
+          <button-rect kind="text" color="blue">Cancel</button-rect>
+          <button-rect kind="outline" color="blue">Save Changes</button-rect>
+        </div>
+      </div>
       <div id="input-container">
         <input-wrapper label="JIG's name">
           <input type="text" value=${this.name}>
