@@ -24,6 +24,7 @@ import "@elements/entry/admin/locale/locale-select-columns";
 import "@elements/entry/admin/locale/locale-select-columns-item";
 import "@elements/entry/admin/jig_label_ui/jig-label-ui";
 import "@elements/entry/admin/jig_label_ui/single-jig";
+import "@elements/entry/admin/jig_label_ui/jig-details";
 import "@elements/_bundles/_sub-bundles/all";
 import "@elements/core/titles/variants/underlined-title";
 import "@elements/core/titles/ji";
