@@ -6,9 +6,9 @@ import "@elements/core/inputs/wrapper";
 @customElement("jig-details")
 export class JigLabelUI extends LitElement {
   static styles = css`
-    #container {
-      padding: 10px;
-    }
+  #container {
+    padding: 10px;
+  }
   `;
   
   @property({type: String}) name: string = ""
@@ -21,14 +21,12 @@ export class JigLabelUI extends LitElement {
   render() {
     return html`
     <div id="container">
-      <div>
-        <label for="name">JIG's name</label>
-        <input id="name" type="text" value=${this.name}>
-      </div>
-      <div>
-        <label for="author">Author name</label>
-        <input id="author" type="text" value=${this.authorName}>
-      </div>
+      <input-wrapper label="JIG's name">
+        <input type="text" value=${this.name}>
+      </input-wrapper>
+      <input-wrapper label="Author name">
+        <input type="text" value=${this.authorName}>
+      </input-wrapper>
       <input-select label="Instruction Language">
         <input-select-option>English</input-select-option>
         <input-select-option>Spanish</input-select-option>
