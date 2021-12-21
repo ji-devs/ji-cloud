@@ -341,18 +341,18 @@ mod slide {
                             log::warn!("ask a question with no questions?? skipping...");
                         } else {
                             let question_filename = match activity.intro_audio.as_ref() {
-                                Some(audio) => slide::make_audio_media(&ctx, &game_id, &game_url, &slide, base_url, &audio, false, &mut medias).await,
+                                Some(audio) => slide::make_audio_media(&ctx, &game_id, &game_url, &slide, base_url, &audio, true, &mut medias).await,
                                 None => None
                             };
 
                             let shape = activity.shapes[0].clone();
                             let answer_filename = match shape.audio.as_ref() {
-                                Some(audio) => slide::make_audio_media(&ctx, &game_id, &game_url, &slide, base_url, &audio, false, &mut medias).await,
+                                Some(audio) => slide::make_audio_media(&ctx, &game_id, &game_url, &slide, base_url, &audio, true, &mut medias).await,
                                 None => None
                             };
 
                             let wrong_filename = match shape.audio_2.as_ref() {
-                                Some(audio) => slide::make_audio_media(&ctx, &game_id, &game_url, &slide, base_url, &audio, false, &mut medias).await,
+                                Some(audio) => slide::make_audio_media(&ctx, &game_id, &game_url, &slide, base_url, &audio, true, &mut medias).await,
                                 None => None
                             };
 
