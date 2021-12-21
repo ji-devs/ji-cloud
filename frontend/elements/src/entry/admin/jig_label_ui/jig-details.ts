@@ -1,4 +1,4 @@
-import { LitElement, html, css, customElement, property } from "lit-element";
+import { LitElement, html, css, customElement } from "lit-element";
 import "@elements/core/inputs/composed/select/select";
 import "@elements/core/inputs/composed/select/option";
 import "@elements/core/inputs/wrapper";
