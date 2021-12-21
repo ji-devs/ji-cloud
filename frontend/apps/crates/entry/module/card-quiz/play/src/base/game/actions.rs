@@ -84,8 +84,11 @@ impl Game {
                     TimeoutFuture::new(crate::config::SUCCESS_TIME).await;
                     Self::next(state);
                 } else {
-                    phase.set(CurrentPhase::Wrong(pair_id));
-                    TimeoutFuture::new(crate::config::WRONG_TIME).await;
+                    // We should be able to safely assume that current is Some(_), but
+                    // double-check here anyway because assumptions are bad.
+                    if let Some(current) = &*state.current.lock_ref() {
+                        current.incorrect_choices.borrow_mut().push(pair_id);
+                    }
                     phase.set(CurrentPhase::Waiting);
                 }
 
