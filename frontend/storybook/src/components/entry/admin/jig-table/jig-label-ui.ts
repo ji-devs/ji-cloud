@@ -9,7 +9,7 @@ export default {
   component: "jig-label-ui",
 }
 
-export const JigTable = ({ jigs }) => {
+export const JigTableUI = ({ jigs }) => {
   return `
     <jig-label-ui>
       ${jigs.map(
@@ -26,6 +26,6 @@ export const JigTable = ({ jigs }) => {
       ).join('')}
     </jig-label-ui>
   `};
-JigTable.args = {
+JigTableUI.args = {
   jigs,
 };
