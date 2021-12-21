@@ -68,11 +68,11 @@ pub fn get_jig() -> JigResponse {
             audio_effects: AudioEffects::default(),
             default_player_settings: JigPlayerSettings::default(),
             privacy_level: PrivacyLevel::default(),
-            jig_focus: JigFocus::Modules,
             locked: true,
             other_keywords: String::from(""),
             translated_keywords: String::from(""),
         },
+        jig_focus: JigFocus::Modules,
         likes: 0,
         plays: 0,
     }
