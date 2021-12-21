@@ -237,7 +237,7 @@ impl ApiEndpoint for Liked {
 /// Play a JIG
 ///
 /// # Authorization
-/// * Admin, BasicAuth
+/// * None
 pub struct Play;
 impl ApiEndpoint for Play {
     type Req = ();
