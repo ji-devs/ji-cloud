@@ -349,10 +349,7 @@ async fn unlike(
 }
 
 /// Add a play to a jig
-async fn play(
-    db: Data<PgPool>,
-    path: web::Path<JigId>,
-) -> Result<HttpResponse, error::NotFound> {
+async fn play(db: Data<PgPool>, path: web::Path<JigId>) -> Result<HttpResponse, error::NotFound> {
     db::jig::jig_play(&*db, path.into_inner()).await?;
 
     Ok(HttpResponse::NoContent().finish())
