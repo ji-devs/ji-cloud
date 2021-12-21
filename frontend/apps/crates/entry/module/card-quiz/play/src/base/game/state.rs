@@ -27,10 +27,10 @@ pub struct CardId {
     pub pair_id: usize,
 }
 
-#[derive(Clone)]
 pub struct Current {
     pub target: CardId,
     pub others: Vec<CardId>,
+    pub incorrect_choices: RefCell<Vec<usize>>,
     pub side: Side,
     pub phase: Mutable<CurrentPhase>,
 }
@@ -125,6 +125,7 @@ impl Current {
         Rc::new(Self {
             target,
             others,
+            incorrect_choices: RefCell::new(Vec::new()),
             side,
             phase: Mutable::new(CurrentPhase::Waiting),
         })
