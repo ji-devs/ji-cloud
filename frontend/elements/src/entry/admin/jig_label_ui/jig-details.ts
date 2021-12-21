@@ -19,7 +19,7 @@ export class JigLabelUI extends LitElement {
     height: 100%;
     color: var(--dark-gray-5);
   }
-  #heading-buttons {
+  ::slotted([slot="buttons"]) {
     display: flex;
     gap: 0 32px;
   }
@@ -29,14 +29,10 @@ export class JigLabelUI extends LitElement {
     border-radius: 12px;
     border: solid 2px #e6f0ff;
   }
-  ::slotted(input-wrapper) {
-    margin-top: 24px;
-  }
-  ::slotted(input-select) {
-    margin-top: 24px;
-  }
-  ::slotted(#first-input) {
-    margin-top: 0;
+  ::slotted([slot="inputs"]) {
+    display: flex;
+    flex-direction: column;
+    gap: 24px 0;
   }
   `;
   
@@ -48,12 +44,11 @@ export class JigLabelUI extends LitElement {
           <div id="general-summary">General Summary</div>
         </div>
         <div id="heading-buttons">
-          <button-rect kind="text" color="blue">Cancel</button-rect>
-          <button-rect kind="outline" color="blue">Save Changes</button-rect>
+          <slot name="buttons"></slot>
         </div>
       </div>
       <div id="input-container">
-        <slot></slot>
+        <slot name="inputs"></slot>
       </div>
     </div>
     `
