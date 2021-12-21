@@ -9,7 +9,7 @@ pub struct Opts {
     /// if this is set, will use game json from albums folder
     /// if game_json_url isn't set 
     /// otherwise, uses hardcoded local vec
-    #[structopt(long, parse(try_from_str), default_value = "false")]
+    #[structopt(long, parse(try_from_str), default_value = "true")]
     pub game_json_from_albums: bool,
     #[structopt(long, default_value="/home/david/archive/warnings.txt", parse(from_os_str))]
     pub warnings_log: PathBuf,
