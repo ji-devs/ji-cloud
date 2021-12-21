@@ -44,7 +44,7 @@ impl From<JigResponse> for PublishJig {
             affiliations: Mutable::new(HashSet::from_iter(jig.jig_data.affiliations)),
             additional_resources: Rc::new(MutableVec::new_with_values(jig.jig_data.additional_resources)),
             privacy_level: Mutable::new(jig.jig_data.privacy_level),
-            jig_focus: jig.jig_data.jig_focus,
+            jig_focus: jig.jig_focus,
         }
     }
 }
@@ -63,7 +63,7 @@ impl PublishJig {
             affiliations: Mutable::new(HashSet::from_iter(jig.jig_data.affiliations)),
             additional_resources: Rc::new(MutableVec::new_with_values(jig.jig_data.additional_resources)),
             privacy_level: Mutable::new(jig.jig_data.privacy_level),
-            jig_focus: jig.jig_data.jig_focus,
+            jig_focus: jig.jig_focus,
         }
     }
 
