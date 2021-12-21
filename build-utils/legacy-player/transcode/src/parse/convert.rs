@@ -273,8 +273,9 @@ mod slide {
             );
             filename
         };
-        let image_thumb = {
-            let filename = strip_path(&slide.image_thumb).to_string();
+
+        if let Some(image_thumb) = slide.image_thumb.as_ref() {
+            let filename = strip_path(&image_thumb).to_string();
             medias.push(
                 Media { 
                     url: format!("{}/{}/{}", base_url, slide_id, filename), 
@@ -283,8 +284,7 @@ mod slide {
                     transcode: None
                 }
             );
-            filename
-        };
+        }
 
 
         let validate_jump_index = |index: usize| -> Option<usize> {
@@ -310,8 +310,9 @@ mod slide {
                     let mut items:Vec<QuestionItem> = Vec::with_capacity(activities_len);
 
                     for activity in slide.activities.clone().into_iter() {
+                        let activity_settings = activity.settings.clone().unwrap_or_default();
 
-                        if activity.settings.bg_audio.is_some() {
+                        if activity_settings.bg_audio.is_some() {
                             panic!("Ask a question shouldn't have bg audio set..");
                         }
 
@@ -320,10 +321,22 @@ mod slide {
                         } else if activity.shapes.is_empty() {
                             log::warn!("ask a question with no questions?? skipping...");
                         } else {
-                            let question_filename = slide::make_audio_media(&ctx, &game_id, &game_url, &slide, base_url, &activity.intro_audio, false, &mut medias).await;
+                            let question_filename = match activity.intro_audio.as_ref() {
+                                Some(audio) => slide::make_audio_media(&ctx, &game_id, &game_url, &slide, base_url, &audio, false, &mut medias).await,
+                                None => None
+                            };
+
                             let shape = activity.shapes[0].clone();
-                            let answer_filename = slide::make_audio_media(&ctx, &game_id, &game_url, &slide, base_url, &shape.audio, false, &mut medias).await;
-                            let wrong_filename = slide::make_audio_media(&ctx, &game_id, &game_url, &slide, base_url, &shape.audio_2, false, &mut medias).await;
+                            let answer_filename = match shape.audio.as_ref() {
+                                Some(audio) => slide::make_audio_media(&ctx, &game_id, &game_url, &slide, base_url, &audio, false, &mut medias).await,
+                                None => None
+                            };
+
+                            let wrong_filename = match shape.audio_2.as_ref() {
+                                Some(audio) => slide::make_audio_media(&ctx, &game_id, &game_url, &slide, base_url, &audio, false, &mut medias).await,
+                                None => None
+                            };
+
                             let hotspot = shape::convert_to_hotspot(shape);
 
                             items.push(QuestionItem{
@@ -340,9 +353,14 @@ mod slide {
                     }))
                 } else {
                     let activity = slide.activities[0].clone();
+                    let activity_settings = activity.settings.clone().unwrap_or_default();
 
-                    let audio_filename = slide::make_audio_media(&ctx, &game_id, &game_url, &slide, base_url, &activity.intro_audio, false, &mut medias).await;
-                    let bg_audio_filename = match activity.settings.bg_audio {
+                    let audio_filename = match activity.intro_audio.as_ref() {
+                        Some(audio) => slide::make_audio_media(&ctx, &game_id, &game_url, &slide, base_url, &audio, false, &mut medias).await,
+                        None => None
+                    };
+
+                    let bg_audio_filename = match activity_settings.bg_audio {
                         None => None,
                         Some(bg_audio) => slide::make_audio_media(&ctx, &game_id, &game_url, &slide, base_url, &bg_audio, true, &mut medias).await
                     };
@@ -351,12 +369,12 @@ mod slide {
                         SrcActivityKind::SaySomething => {
                             Some(Activity::SaySomething(SaySomething {
                                 audio_filename,
-                                advance_trigger: if activity.settings.advance.unwrap_or_default() {
+                                advance_trigger: if activity_settings.advance.unwrap_or_default() {
                                     AdvanceTrigger::AudioEnd
                                 } else {
                                     AdvanceTrigger::Tap
                                 },
-                                advance_index: activity.settings.jump_index.and_then(validate_jump_index)
+                                advance_index: activity_settings.jump_index.and_then(validate_jump_index)
                             }))
                         },
                         SrcActivityKind::Soundboard => {
@@ -365,7 +383,9 @@ mod slide {
                             let mut highlight_color:Option<String> = None;
 
                             for shape in activity.shapes.into_iter() {
-                                match (highlight_color.as_ref(), shape.settings.highlight_color.as_ref()) {
+                                let shape_settings = shape.settings.clone().unwrap_or_default();
+
+                                match (highlight_color.as_ref(), shape_settings.highlight_color.as_ref()) {
                                     (Some(c1), Some(c2)) => {
                                         if c1 != c2.trim() {
                                             panic!("soundboard highlight colors changed between shapes: {} vs. {}", c1, c2);
@@ -381,14 +401,17 @@ mod slide {
 
 
                                 items.push(SoundboardItem {
-                                    audio_filename: slide::make_audio_media(&ctx, &game_id, &game_url, &slide, base_url, &shape.audio, false, &mut medias).await,
-                                    text: map_text(&shape.settings.text),
-                                    jump_index: shape.settings.jump_index.and_then(validate_jump_index),
+                                    audio_filename: match shape.audio.as_ref() {
+                                        Some(audio) => slide::make_audio_media(&ctx, &game_id, &game_url, &slide, base_url, &audio, false, &mut medias).await,
+                                        None => None
+                                    },
+                                    text: map_text(&shape_settings.text),
+                                    jump_index: shape_settings.jump_index.and_then(validate_jump_index),
                                     hotspot: shape::convert_to_hotspot(shape)
                                 });
                             }
 
-                            let one_at_a_time = match (activity.settings.fun_mode, activity.settings.fun_mode_v2) {
+                            let one_at_a_time = match (activity_settings.fun_mode, activity_settings.fun_mode_v2) {
                                 (Some(x1), Some(x2)) => {
                                     if x1 != x2 {
                                         panic!("soundmode and v2 set, but different!");
@@ -407,7 +430,7 @@ mod slide {
                                 },
                             };
 
-                            let show_hints = match activity.settings.hide_hints {
+                            let show_hints = match activity_settings.hide_hints {
                                 None => false,
                                 Some(x) => !x
                             };
@@ -422,10 +445,10 @@ mod slide {
                             }))
                         },
                         SrcActivityKind::Video => {
-                            match activity.settings.video_url {
+                            match activity_settings.video_url {
                                 None => None,
                                 Some(video_url) => {
-                                    let transform_matrix = activity.settings.transform.map(convert_transform);
+                                    let transform_matrix = activity_settings.transform.map(convert_transform);
                                     let video_url = video_url.replace("http://", "https://");
 
                                     let src = match <YoutubeUrl as YoutubeUrlExt>::try_parse(video_url.clone()) {
@@ -449,7 +472,7 @@ mod slide {
                                         }
                                     };
 
-                                    let range = activity.settings.video_range.and_then(|range_str| {
+                                    let range = activity_settings.video_range.and_then(|range_str| {
                                         //yes, really
                                         scan_fmt!(&range_str, "{{{}, {}}}", f64, f64).ok()
                                     });
@@ -467,7 +490,10 @@ mod slide {
 
                             for shape in activity.shapes.into_iter() {
                                 items.push(PuzzleItem {
-                                    audio_filename: slide::make_audio_media(&ctx, &game_id, &game_url, &slide, base_url, &shape.audio, false, &mut medias).await,
+                                    audio_filename: match shape.audio.as_ref() {
+                                        Some(audio) => slide::make_audio_media(&ctx, &game_id, &game_url, &slide, base_url, &audio, false, &mut medias).await,
+                                        None => None
+                                    },
                                     hotspot: shape::convert_to_hotspot(shape)
                                 });
                             }
@@ -485,7 +511,7 @@ mod slide {
                                 }
                             };
 
-                            let theme = if map_theme(&activity.settings.theme) == PuzzleTheme::Extrude || activity.settings.theme_v2.unwrap_or_default() == true {
+                            let theme = if map_theme(&activity_settings.theme) == PuzzleTheme::Extrude || activity_settings.theme_v2.unwrap_or_default() == true {
                                 PuzzleTheme::Extrude
                             } else {
                                 PuzzleTheme::Regular
@@ -494,12 +520,12 @@ mod slide {
 
                             Some(Activity::Puzzle(Puzzle {
                                 audio_filename,
-                                jump_index: activity.settings.jump_index.and_then(validate_jump_index),
+                                jump_index: activity_settings.jump_index.and_then(validate_jump_index),
                                 full_cutout_img: image_full,
                                 //show_hints: activity.settings.tooltip.unwrap_or(false),
-                                show_hints: !activity.settings.hints_disabled.unwrap_or(true),
-                                fly_back_to_origin: !activity.settings.fun_mode.unwrap_or(false),
-                                show_preview: activity.settings.show_shape.unwrap_or(false) || activity.settings.show_shape_v2.unwrap_or(false),
+                                show_hints: !activity_settings.hints_disabled.unwrap_or(true),
+                                fly_back_to_origin: !activity_settings.fun_mode.unwrap_or(false),
+                                show_preview: activity_settings.show_shape.unwrap_or(false) || activity_settings.show_shape_v2.unwrap_or(false),
                                 theme,
                                 items
                             }))
@@ -510,16 +536,21 @@ mod slide {
                             let mut items:Vec<TalkTypeItem> = Vec::new();
 
                             for shape in activity.shapes.into_iter() {
+                                let shape_settings = shape.settings.clone().unwrap_or_default();
+
                                 items.push(TalkTypeItem {
-                                    audio_filename: slide::make_audio_media(&ctx, &game_id, &game_url, &slide, base_url, &shape.audio, false, &mut medias).await,
-                                    texts: match shape.settings.text_answers.as_ref() {
+                                    audio_filename: match shape.audio.as_ref() {
+                                        Some(audio) => slide::make_audio_media(&ctx, &game_id, &game_url, &slide, base_url, audio, false, &mut medias).await,
+                                        None => None
+                                    },
+                                    texts: match shape_settings.text_answers.as_ref() {
                                         None => None,
                                         Some(answers) => {
                                             Some(answers.iter().map(|x| x.trim().to_string()).collect())
                                         }
                                     },
-                                    input_language: shape.settings.text_input_language.clone(),
-                                    answer_kind: if shape.settings.speaking_mode.unwrap_or(false) {
+                                    input_language: shape_settings.text_input_language.clone(),
+                                    answer_kind: if shape_settings.speaking_mode.unwrap_or(false) {
                                         TalkTypeAnswerKind::Audio
                                     } else {
                                         TalkTypeAnswerKind::Text
@@ -529,8 +560,8 @@ mod slide {
                             }
                             Some(Activity::TalkType(TalkType {
                                 audio_filename,
-                                jump_index: activity.settings.jump_index.and_then(validate_jump_index),
-                                show_hints: activity.settings.tooltip.unwrap_or(false),
+                                jump_index: activity_settings.jump_index.and_then(validate_jump_index),
+                                show_hints: activity_settings.tooltip.unwrap_or(false),
                                 items
                             }))
                         },
@@ -612,16 +643,16 @@ fn convert_design(game_url: &str, game_id: &str, slide_id: &str, base_url: &str,
                     let sticker = Sticker { 
                         filename: filename.to_string(),
                         transform_matrix: convert_transform(layer.transform),
-                        hide: match layer.show_kind {
+                        hide: match layer.show_kind.unwrap_or_default() {
                             SrcShowKind::ShowOnLoad => false, 
                             SrcShowKind::HideOnTap => false, 
                             SrcShowKind::ShowOnTap => true, 
                         },
 
-                        hide_toggle: match layer.show_kind {
+                        hide_toggle: match layer.show_kind.unwrap_or_default() {
                             SrcShowKind::ShowOnLoad => None, 
                             _ => Some(
-                                if layer.toggle_show {
+                                if layer.toggle_show.unwrap_or_default() {
                                     HideToggle::Always
                                 } else {
                                     HideToggle::Once
@@ -632,7 +663,7 @@ fn convert_design(game_url: &str, game_id: &str, slide_id: &str, base_url: &str,
                         animation: {
                             if layer.kind == SrcLayerKind::Animation {
                                 Some(
-                                    match layer.loop_kind {
+                                    match layer.loop_kind.unwrap_or_default() {
                                         SrcLoopKind::PlayOnLoadLoop => Animation {
                                             once: false,
                                             tap: false 
@@ -717,7 +748,7 @@ mod shape {
                     .map(|point| (convert_point(point), true))
                     .collect()
             ),
-            transform_matrix: shape.settings.transform.and_then(|t| {
+            transform_matrix: shape.settings.unwrap_or_default().transform.and_then(|t| {
                 if !transform_is_identity(t) {
                     Some(convert_transform(t))
                 } else {

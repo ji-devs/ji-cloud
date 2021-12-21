@@ -61,17 +61,17 @@ pub struct ManifestStructure {
     #[serde(rename="pk")]
     pub key: PrimaryKey,
 
-    pub settings: ManifestSettings,
+    pub settings: Option<ManifestSettings>,
 
     #[serde(rename="shuffleType")]
-    pub shuffle_type: ShuffleType,
+    pub shuffle_type: Option<ShuffleType>,
 
     pub version: usize,
 
     pub slides: Vec<Slide>,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Default)]
 pub struct ManifestSettings {
     #[serde(rename="quizParameters")]
     pub quiz: Option<QuizSettings>,

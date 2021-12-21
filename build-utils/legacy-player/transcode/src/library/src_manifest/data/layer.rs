@@ -12,16 +12,16 @@ pub struct Layer {
     pub transform: Transform,
 
     #[serde(rename="InteractiveLoopType")]
-    pub loop_kind: LoopKind,
+    pub loop_kind: Option<LoopKind>,
 
     #[serde(rename="InteractiveShowType")]
-    pub show_kind: ShowKind,
+    pub show_kind: Option<ShowKind>,
 
     #[serde(rename="interactiveLayerSound")]
     pub audio: Option<String>,
 
     #[serde(rename="interactiveToggleShow")]
-    pub toggle_show: bool,
+    pub toggle_show: Option<bool>,
 
     #[serde(rename="type", deserialize_with = "layer_kind_deser")]
     pub kind: LayerKind,
@@ -42,12 +42,24 @@ pub enum LoopKind {
     PlayOnLoadOnce,
 }
 
+impl Default for LoopKind {
+    fn default() -> Self {
+        Self::PlayOnLoadLoop
+    }
+}
+
 #[repr(u8)]
 #[derive(Deserialize_repr, PartialEq, Debug, Clone, Copy)]
 pub enum ShowKind {
     ShowOnLoad,
     HideOnTap,
     ShowOnTap,
+}
+
+impl Default for ShowKind {
+    fn default() -> Self {
+        Self::ShowOnLoad
+    }
 }
 
 #[repr(u8)]

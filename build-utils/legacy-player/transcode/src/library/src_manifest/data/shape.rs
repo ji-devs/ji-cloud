@@ -10,15 +10,15 @@ pub struct Shape {
     pub path: Vec<PathPoint>,
 
     #[serde(rename="filePathRecording1")]
-    pub audio: String,
+    pub audio: Option<String>,
 
     #[serde(rename="filePathRecording2")]
-    pub audio_2: String,
+    pub audio_2: Option<String>,
 
     #[serde(rename="filePathThumb")]
-    pub image_thumb: String,
+    pub image_thumb: Option<String>,
 
-    pub settings: ShapeSettings,
+    pub settings: Option<ShapeSettings>,
 
     #[serde(rename="pk")]
     pub key: PrimaryKey
@@ -53,7 +53,7 @@ pub enum PathElementKind {
     CloseSubPath
 }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, Default)]
 pub struct ShapeSettings {
     #[serde(rename="linkToPage")]
     pub jump_index: Option<usize>,
