@@ -1,8 +1,4 @@
 import { LitElement, html, css, customElement } from "lit-element";
-import "@elements/core/inputs/composed/select/select";
-import "@elements/core/inputs/composed/select/option";
-import "@elements/core/inputs/wrapper";
-import "@elements/core/buttons/rectangle";
 
 @customElement("jig-details")
 export class JigLabelUI extends LitElement {
