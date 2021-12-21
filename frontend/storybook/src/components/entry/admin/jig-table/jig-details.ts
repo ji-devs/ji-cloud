@@ -8,12 +8,7 @@ export default {
 
 export const JigDetails = () => {
   return `
-    <jig-details>
-      <input-select label="Input Select">
-        <input-select-option>Option 1</input-select-option>
-      </input-select>
-      <p>Test</p>
-    </jig-details>
+    <jig-details></jig-details>
   `
 };
 JigDetails.args = {}
