@@ -1,18 +1,26 @@
-import { LitElement, html, customElement, property } from "lit-element";
+import { LitElement, html, css, customElement, property } from "lit-element";
 import "@elements/core/inputs/composed/select/select";
 import "@elements/core/inputs/composed/select/option";
+import "@elements/core/inputs/wrapper";
 
 @customElement("jig-details")
 export class JigLabelUI extends LitElement {
-  @property({type: String}) name!: string;
-  @property({type: String}) authorName!: string;
-  @property({type: String}) language!: string;
-  @property({type: String}) suitableForAge!: string;
-  @property({type: String}) description!: string;
-  @property({type: String}) keywords!: string;
+  static styles = css`
+    #container {
+      padding: 10px;
+    }
+  `;
+  
+  @property({type: String}) name: string = ""
+  @property({type: String}) authorName: string = ""
+  @property({type: String}) language: string = ""
+  @property({type: String}) suitableForAge: string = ""
+  @property({type: String}) description: string = ""
+  @property({type: String}) keywords: string = ""
   
   render() {
     return html`
+    <div id="container">
       <div>
         <label for="name">JIG's name</label>
         <input id="name" type="text" value=${this.name}>
@@ -23,23 +31,28 @@ export class JigLabelUI extends LitElement {
       </div>
       <input-select label="Instruction Language">
         <input-select-option>English</input-select-option>
+        <input-select-option>Spanish</input-select-option>
+        <input-select-option>Hebrew</input-select-option>
+        <input-select-option>French</input-select-option>
+        <input-select-option>Italian</input-select-option>
       </input-select>
       <input-select label="Suitable for age">
         <input-select-option>All ages</input-select-option>
+        <input-select-option>No ages</input-select-option>
       </input-select>
-      <div>
-        <label for="affiliation">Affiliation</label>
-        <input id="affiliation" type="text" value=${this.name}>
-      </div>
-      <div>
-        <label for="description">JIG teacher's description</label>
+      <input-select label="Affiliation">
+        <input-select-option>Affiliation 1</input-select-option>
+        <input-select-option>Affiliation 2</input-select-option>
+        <input-select-option>Affiliation 3</input-select-option>
+      </input-select>
+      <input-wrapper label="JIG teacher's description">
         <textarea id="description" rows="6" value=${this.description}></textarea>
-      </div>
-      <div>
-        <label for="keywords">Additional keywords</label>
-        <textarea id="keywords" rows="6" value=${this.keywords}></textarea>
-      </div>
+      </input-wrapper>
+      <input-wrapper label="Additional keywords">
+        <textarea rows="6" value=${this.keywords}></textarea>
+      </input-wrapper>
       <slot></slot>
+    </div>
     `
   }
 }
