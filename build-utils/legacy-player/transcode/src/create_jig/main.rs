@@ -460,6 +460,7 @@ async fn make_jig(ctx:&Context, manifest: &SrcManifest) -> JigId {
             author_byline
         ),
         default_player_settings: JigPlayerSettings::default(),
+        ..JigCreateRequest::default()
     };
     let path = endpoints::jig::Create::PATH;
     let url = format!("{}{}", ctx.opts.get_remote_target().api_url(), path);

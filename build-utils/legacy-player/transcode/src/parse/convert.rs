@@ -83,17 +83,30 @@ pub async fn load_url(ctx: &Context, url:&str) -> Option<(SrcManifest, String)> 
         }
     }
 
-    let text = ctx 
-        .client
-        .get(url)
-        .send()
-        .await
-        .unwrap()
-        .error_for_status()
-        .unwrap()
-        .text()
-        .await
-        .unwrap();
+    let text = match ctx.client.get(url).send().await {
+        Err(err) => Err(err),
+        Ok(resp) => {
+            match resp.error_for_status() {
+                Err(err) => Err(err),
+                Ok(resp) => {
+                    resp.text().await
+                }
+            }
+        }
+    };
+    
+    let text = match text {
+        Ok(text) => text,
+        Err(err) => {
+
+            writeln!(&ctx.errors_log, "unknown unable to load manifest at {}, error: {:?}", url, err).unwrap();
+            if !ctx.opts.keep_going_if_manifest_parse_error {
+                panic!("unknown unable to load manifest at {}, error: {:?}", url, err);
+            } else {
+                return None
+            }
+        }
+    };
     
     let manifest = serde_json::from_str::<SrcManifest>(&text);
 
