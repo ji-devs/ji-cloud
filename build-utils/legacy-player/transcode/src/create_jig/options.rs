@@ -49,7 +49,7 @@ pub struct Opts {
     pub dry_run: bool,
  
     // local, sandbox, or release 
-    #[structopt(long, default_value = "sandbox")]
+    #[structopt(long, default_value = "release")]
     pub remote_target: String,
 
     #[structopt(long, default_value = "")]
