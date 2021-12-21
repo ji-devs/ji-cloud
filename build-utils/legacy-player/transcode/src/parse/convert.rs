@@ -671,7 +671,10 @@ fn convert_design(game_url: &str, game_id: &str, slide_id: &str, base_url: &str,
                 if let Some(filename) = layer.filename.as_ref() {
                     let sticker = Sticker { 
                         filename: filename.to_string(),
-                        transform_matrix: convert_transform(layer.transform),
+                        transform_matrix: match layer.transform {
+                            Some(transform) => convert_transform(transform),
+                            None => convert_transform([1.0, 0.0, 0.0, 1.0, 0.0, 0.0])
+                        },
                         hide: match layer.show_kind.unwrap_or_default() {
                             SrcShowKind::ShowOnLoad => false, 
                             SrcShowKind::HideOnTap => false, 
@@ -719,7 +722,10 @@ fn convert_design(game_url: &str, game_id: &str, slide_id: &str, base_url: &str,
                         override_size: {
                             // not really needed unless it differs from the real file size
                             // but whatever...
-                            Some((layer.width, layer.height))
+                            match (layer.width, layer.height) {
+                                (Some(width), Some(height)) => Some((width, height)),
+                                _ => None
+                            }
                         },
 
                         audio_filename,

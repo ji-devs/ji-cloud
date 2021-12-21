@@ -7,9 +7,9 @@ use super::*;
 
 #[derive(Deserialize, Debug)]
 pub struct Layer {
-    pub width: f64,
-    pub height: f64,
-    pub transform: Transform,
+    pub width: Option<f64>,
+    pub height: Option<f64>,
+    pub transform: Option<Transform>,
 
     #[serde(rename="InteractiveLoopType")]
     pub loop_kind: Option<LoopKind>,
