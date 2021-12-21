@@ -5,7 +5,7 @@ pub use std::{
     fs::File,
     fmt,
     future::Future,
-    convert::TryFrom,
+    convert::{TryFrom,TryInto},
     io::prelude::*
 };
 
@@ -316,8 +316,8 @@ mod slide {
         }
 
 
-        let validate_jump_index = |index: usize| -> Option<usize> {
-            if index >= max_slides {
+        let validate_jump_index = |index: i32| -> Option<usize> {
+            if index >= (max_slides as i32) || index < 0 {
                 if opts.allow_bad_jump_index {
                     log::warn!("invalid jump index: {} (there are only {} slides!)", index, max_slides);
                     writeln!(&ctx.warnings_log, "{} invalid jump index: {} (there are only {} slides!), game_url: {}", game_id, index, max_slides,  game_url).unwrap();
@@ -327,7 +327,7 @@ mod slide {
                     panic!("{} invalid jump index: {} (there are only {} slides!), game_url: {}", game_id, index, max_slides, game_url);
                 }
             } else {
-                Some(index)
+                index.try_into().ok()
             }
         };
 
