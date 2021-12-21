@@ -316,8 +316,8 @@ mod slide {
         }
 
 
-        let validate_jump_index = |index: i32| -> Option<usize> {
-            if index >= (max_slides as i32) || index < 0 {
+        let validate_jump_index = |index: i128| -> Option<usize> {
+            if index >= (max_slides as i128) || index < 0 {
                 if opts.allow_bad_jump_index {
                     log::warn!("invalid jump index: {} (there are only {} slides!)", index, max_slides);
                     writeln!(&ctx.warnings_log, "{} invalid jump index: {} (there are only {} slides!), game_url: {}", game_id, index, max_slides,  game_url).unwrap();

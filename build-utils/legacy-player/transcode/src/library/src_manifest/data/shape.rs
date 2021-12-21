@@ -56,7 +56,7 @@ pub enum PathElementKind {
 #[derive(Deserialize, Debug, Clone, Default)]
 pub struct ShapeSettings {
     #[serde(rename="linkToPage")]
-    pub jump_index: Option<i32>,
+    pub jump_index: Option<i128>,
 
     #[serde(rename="toolTipText")]
     pub text: Option<String>,

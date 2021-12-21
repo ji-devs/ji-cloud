@@ -69,7 +69,7 @@ pub struct ActivitySettings {
 
     /// the index to jump to
     #[serde(rename="linkToPage")]
-    pub jump_index: Option<i32>,
+    pub jump_index: Option<i128>,
 
     /// play one at a time is inverse of this?
     #[serde(rename="soundFunMode")]
