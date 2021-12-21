@@ -122,8 +122,8 @@ pub async fn load_url(ctx: &Context, url:&str) -> Option<(SrcManifest, String)> 
         serde_json::from_str::<SrcManifest>(&text)
     };
 
-    match manifest {
-        Ok(manifest) => Some((manifest, text)),
+    let game_id = match manifest.as_ref() {
+        Ok(manifest) => manifest.game_id(),
         Err(err) => {
             let minimal = if ctx.opts.data_url {
                 serde_json::from_str::<MinimalSrcManifestData>(&text)
@@ -132,11 +132,20 @@ pub async fn load_url(ctx: &Context, url:&str) -> Option<(SrcManifest, String)> 
                 serde_json::from_str::<MinimalSrcManifest>(&text)
             };
             
-            let game_id = match minimal {
+            match minimal {
                 Ok(m) => m.game_id(),
                 Err(_) => "unknown".to_string()
-            };
+            }
+        }
+    };
 
+    if text.contains("\"path\": []") {
+        writeln!(&ctx.warnings_log, "{} has empty path", game_id).unwrap();
+    }
+
+    match manifest {
+        Ok(manifest) => Some((manifest, text)),
+        Err(err) => {
             writeln!(&ctx.errors_log, "{} unable to parse manifest at {}, error: {:?}", game_id, url, err).unwrap();
             if !ctx.opts.keep_going_if_manifest_parse_error {
                 panic!("{} unable to parse manifest at {}, error: {:?}", game_id, url, err);
@@ -203,6 +212,7 @@ mod slide {
                         Some(filename_dest)
                     },
                     Err(_) => {
+                        // there were just so many missing, we are *always* allowing empty... but still leaving the param for debugging purposes
                         if allowed_empty {
                             writeln!(&ctx.warnings_log, "{} skipping url {}, filename {}... is 404 and but is allowed to be (slide id: {}, game_url: {})", game_id, url, filename, slide_id, game_url).unwrap();
                             log::warn!("{} skipping url {}, filename {}... is 404 and but is allowed to be (slide id: {}, game_url: {})", game_id, url, filename, slide_id, game_url);
@@ -375,7 +385,7 @@ mod slide {
                     let activity_settings = activity.settings.clone().unwrap_or_default();
 
                     let audio_filename = match activity.intro_audio.as_ref() {
-                        Some(audio) => slide::make_audio_media(&ctx, &game_id, &game_url, &slide, base_url, &audio, false, &mut medias).await,
+                        Some(audio) => slide::make_audio_media(&ctx, &game_id, &game_url, &slide, base_url, &audio, true, &mut medias).await,
                         None => None
                     };
 
@@ -421,7 +431,7 @@ mod slide {
 
                                 items.push(SoundboardItem {
                                     audio_filename: match shape.audio.as_ref() {
-                                        Some(audio) => slide::make_audio_media(&ctx, &game_id, &game_url, &slide, base_url, &audio, false, &mut medias).await,
+                                        Some(audio) => slide::make_audio_media(&ctx, &game_id, &game_url, &slide, base_url, &audio, true, &mut medias).await,
                                         None => None
                                     },
                                     text: map_text(&shape_settings.text),
@@ -510,7 +520,7 @@ mod slide {
                             for shape in activity.shapes.into_iter() {
                                 items.push(PuzzleItem {
                                     audio_filename: match shape.audio.as_ref() {
-                                        Some(audio) => slide::make_audio_media(&ctx, &game_id, &game_url, &slide, base_url, &audio, false, &mut medias).await,
+                                        Some(audio) => slide::make_audio_media(&ctx, &game_id, &game_url, &slide, base_url, &audio, true, &mut medias).await,
                                         None => None
                                     },
                                     hotspot: shape::convert_to_hotspot(shape)
@@ -559,7 +569,7 @@ mod slide {
 
                                 items.push(TalkTypeItem {
                                     audio_filename: match shape.audio.as_ref() {
-                                        Some(audio) => slide::make_audio_media(&ctx, &game_id, &game_url, &slide, base_url, audio, false, &mut medias).await,
+                                        Some(audio) => slide::make_audio_media(&ctx, &game_id, &game_url, &slide, base_url, audio, true, &mut medias).await,
                                         None => None
                                     },
                                     texts: match shape_settings.text_answers.as_ref() {
