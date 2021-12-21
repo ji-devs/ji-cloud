@@ -4,7 +4,9 @@ import { LitElement, html, css, customElement } from "lit-element";
 export class JigLabelUI extends LitElement {
   static styles = css`
   #container {
+    width: 100%;
     padding: 44px;
+    background-color: white;
   }
   #heading {
     display: flex;
