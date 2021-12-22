@@ -5,4 +5,5 @@ export interface JigData {
   date: string;
   language: string;
   curators: string;
+  age_ranges: string;
 }

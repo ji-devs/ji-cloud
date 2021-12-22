@@ -10,6 +10,7 @@ export class JigLabelUI extends LitElement {
         font-family: sans-serif;
         background: #f3f8fe;
         border: solid 1px #c4d9f7;
+        overflow: auto;
       }
       .headers {
         display: flex;
@@ -17,6 +18,7 @@ export class JigLabelUI extends LitElement {
         font-weight: 700;
         color: #2565d5;
       }
+      
     `,
   ];
 
@@ -28,6 +30,7 @@ export class JigLabelUI extends LitElement {
     "Date",
     "Instruction Language",
     "Curators",
+    "Age Ranges"
   ];
 
   render() {
