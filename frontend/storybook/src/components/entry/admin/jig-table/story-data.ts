@@ -8,7 +8,8 @@ export const jigs: JigData[] = [
     date: "Aug. 5, 2020",
     language: "English (American)",
     curators: "Anat (13.7.21)",
-    age_ranges: "All Ages"
+    age_ranges: "All Ages",
+    affiliations: "Affiliation"
   },
   {
     jig_name: "Hebrew Numbers & Balloons",
@@ -17,42 +18,7 @@ export const jigs: JigData[] = [
     date: "Aug. 5, 2020",
     language: "English (American)",
     curators: "Anat (13.7.21)",
-    age_ranges: "All Ages"
-  },
-  {
-    jig_name: "Hebrew Letters",
-    author: "Michael Wikes",
-    author_badge: "JI Team",
-    date: "Aug. 5, 2020",
-    language: "English (American)",
-    curators: "Anat (13.7.21)",
-    age_ranges: "All Ages"
-  },
-  {
-    jig_name: "Hebrew Letters",
-    author: "Michael Wikes",
-    author_badge: "JI Team",
-    date: "Aug. 5, 2020",
-    language: "English (American)",
-    curators: "Anat (13.7.21)",
-    age_ranges: "All Ages"
-  },
-  {
-    jig_name: "Hebrew Letters",
-    author: "Michael Wikes",
-    author_badge: "JI Team",
-    date: "Aug. 5, 2020",
-    language: "English (American)",
-    curators: "Anat (13.7.21)",
-    age_ranges: "All Ages"
-  },
-  {
-    jig_name: "Hebrew Letters",
-    author: "Michael Wikes",
-    author_badge: "JI Team",
-    date: "Aug. 5, 2020",
-    language: "English (American)",
-    curators: "Anat (13.7.21)",
-    age_ranges: "All Ages"
+    age_ranges: "All Ages",
+    affiliations: "Affiliation"
   },
 ];

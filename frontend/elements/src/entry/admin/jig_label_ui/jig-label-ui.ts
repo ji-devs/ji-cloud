@@ -30,7 +30,8 @@ export class JigLabelUI extends LitElement {
     "Date",
     "Instruction Language",
     "Curators",
-    "Age Ranges"
+    "Age Ranges",
+    "Affiliation"
   ];
 
   render() {
