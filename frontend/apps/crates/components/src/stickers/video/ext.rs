@@ -20,7 +20,7 @@ impl VideoExt for Video {
     }
 }
 
-const ANY_YOUTUBE_DOMAIN: &str = "www.youtube.com";
+const ANY_YOUTUBE_DOMAIN: &str = "youtube.com";
 const REGULAR_URL_BASE: &str = "https://www.youtube.com/watch?v=";
 const SHARE_URL_BASE: &str = "https://youtu.be/";
 const EMBED_IFRAME_BASE: &str = "<iframe ";
@@ -142,6 +142,7 @@ mod tests {
             r#"<iframe src="https://www.youtube.com/embed/UQosz5VNsjY"></iframe>"#,
             "https://www.youtube.com/embed/UQosz5VNsjY",
             "UQosz5VNsjY",
+            "https://www.youtube.com/watch?app=desktop&feature=youtu.be&v=7BvLp4VdW1A"
         ];
 
         for url in valid_url_vec {
