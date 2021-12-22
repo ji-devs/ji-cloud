@@ -5,12 +5,10 @@ use dotenv::dotenv;
 use simplelog::*;
 use structopt::StructOpt;
 use reqwest::Client;
-use reqwest_middleware::{ClientBuilder, ClientWithMiddleware};
-use reqwest_retry::{RetryTransientMiddleware, policies::ExponentialBackoff};
 
 pub struct Context {
     pub opts: Opts,
-    pub client: ClientWithMiddleware, 
+    pub client: Client, 
     pub warnings_log: File,
     pub errors_log: File,
 }
@@ -40,14 +38,9 @@ impl Context {
             }.open(&opts.errors_log).unwrap()
         };
 
-        let retry_policy = ExponentialBackoff::builder().build_with_max_retries(10);
-        let client = ClientBuilder::new(reqwest::Client::new())
-            // Retry failed requests.
-            .with(RetryTransientMiddleware::new_with_policy(retry_policy))
-            .build();
         Self {
             opts,
-            client,
+            client: Client::new(),
             warnings_log,
             errors_log,
         }
