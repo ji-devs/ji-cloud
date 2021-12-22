@@ -223,22 +223,6 @@
       "nullable": []
     }
   },
-  "09f913ab4fc2f7d7411a182f52210a70ad2bff8bbc27c67449cc9a5b983794c8": {
-    "query": "\ninsert into jig_data_module (stable_id, jig_data_id, \"index\", kind, contents)\nvalues ($1, $2, $3, $4, $5)\n",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid",
-          "Int2",
-          "Int2",
-          "Jsonb"
-        ]
-      },
-      "nullable": []
-    }
-  },
   "0a1f9e5fee4b10a173b8723976cecfb920f90a4828d723abb14f6e0215cf880b": {
     "query": "select exists(select 1 from locale_entry where id = $1 for update) as \"exists!\"",
     "describe": {
@@ -313,29 +297,6 @@
         false,
         false,
         false,
-        false
-      ]
-    }
-  },
-  "0ca2ee29314d9dd79d7eab236d935ac40f4699104a8e32d4fedda568c67d9ab5": {
-    "query": "\ninsert into jig_data_module (jig_data_id, \"index\", kind, contents)\nvalues ($1, $2, $3, $4)\nreturning stable_id as \"stable_id: StableModuleId\"\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "stable_id: StableModuleId",
-          "type_info": "Uuid"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int2",
-          "Int2",
-          "Jsonb"
-        ]
-      },
-      "nullable": [
         false
       ]
     }
