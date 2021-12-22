@@ -10,9 +10,10 @@ use shared::domain::{
             body::{cover, ThemeId},
             ModuleId, StableModuleId,
         },
-        AudioBackground, AudioEffects, AudioFeedbackNegative, AudioFeedbackPositive, DraftOrLive,
-        JigAdminData, JigAdminUpdateData, JigData, JigFocus, JigId, JigPlayerSettings, JigRating,
-        JigResponse, LiteModule, ModuleKind, PrivacyLevel, TextDirection,
+        AudioBackground, AudioEffects, AudioFeedbackNegative, AudioFeedbackPositive,
+        DeleteUserJigs, DraftOrLive, JigAdminData, JigAdminUpdateData, JigData, JigFocus, JigId,
+        JigPlayerSettings, JigRating, JigResponse, LiteModule, ModuleKind, PrivacyLevel,
+        TextDirection,
     },
     meta::{AffiliationId, AgeRangeId, GoalId, ResourceTypeId as TypeId},
     user::UserScope,
@@ -805,6 +806,31 @@ where id is not distinct from $3
     Ok(())
 }
 
+pub async fn delete_all_jigs(
+    pool: &PgPool,
+    user_id: Uuid,
+) -> Result<Vec<DeleteUserJigs>, error::Delete> {
+    let mut txn = pool.begin().await?;
+
+    let jig_ids: Vec<DeleteUserJigs> = get_user_jig_ids(&mut txn, user_id).await?;
+
+    sqlx::query!(
+        //language=SQL
+        r#"
+delete
+from jig
+where creator_id is not distinct from $1
+"#,
+        user_id
+    )
+    .execute(&mut txn)
+    .await?;
+
+    txn.commit().await?;
+
+    Ok(jig_ids)
+}
+
 pub async fn cover_set(db: &PgPool, jig_id: JigId) -> sqlx::Result<()> {
     sqlx::query!(
         //language=SQL
@@ -1017,6 +1043,22 @@ select draft_id, live_id from jig where id = $1
     .await
     .ok()?
     .map(|it| (it.draft_id, it.live_id))
+}
+
+pub async fn get_user_jig_ids(
+    txn: &mut PgConnection,
+    user_id: Uuid,
+) -> sqlx::Result<Vec<DeleteUserJigs>> {
+    sqlx::query_as!(
+        //language=SQL
+        DeleteUserJigs,
+        r#"
+select id as "jig_id!: JigId" from jig where creator_id = $1
+"#,
+        user_id
+    )
+    .fetch_all(&mut *txn)
+    .await
 }
 
 /// Clones a copy of the jig data and modules, preserving the module's stable IDs

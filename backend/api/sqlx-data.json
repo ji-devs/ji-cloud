@@ -4083,6 +4083,18 @@
       ]
     }
   },
+  "b1a15c616e8f86aa4d7bd37701eb692298a9b55afafa797e6ded14ba650f2bb3": {
+    "query": "\ndelete\nfrom jig\nwhere creator_id is not distinct from $1\n",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "b211b1f87835114b657632739dc3502a1de67cb2c971b0e53c4283b9086eaa9c": {
     "query": "\nupdate jig_data_module\nset index = index - 1\nwhere jig_data_id = $1\n  and index > $2\n",
     "describe": {
@@ -4678,6 +4690,26 @@
           "ordinal": 0,
           "name": "kind: MediaKind",
           "type_info": "Int2"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
+  "c8b56c12795686a4ecf068a13f44acab1b3382515c4b21024d95cb867e76fed1": {
+    "query": "\nselect id as \"jig_id!: JigId\" from jig where creator_id = $1\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "jig_id!: JigId",
+          "type_info": "Uuid"
         }
       ],
       "parameters": {
