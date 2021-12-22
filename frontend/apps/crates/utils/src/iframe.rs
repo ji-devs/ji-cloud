@@ -13,7 +13,7 @@ pub enum IframeTarget {
 }
 
 thread_local! {
-    pub(super) static PLAYER_TARGET:Cell<IframeTarget> = Cell::new(IframeTarget::Top);
+    pub(super) static PLAYER_TARGET:Cell<IframeTarget> = Cell::new(IframeTarget::Parent);
     pub(super) static EDITOR_TARGET:Cell<IframeTarget> = Cell::new(IframeTarget::Top);
 }
 

@@ -112,7 +112,10 @@ impl JigGallery {
     pub fn create_jig(self: &Rc<Self>) {
         let state = Rc::clone(&self);
         state.loader.load(clone!(state => async move {
-            let req = Some(JigCreateRequest::default());
+            let req = Some(JigCreateRequest {
+                jig_focus: state.focus,
+                ..Default::default()
+            });
 
             match api_with_auth::<CreateResponse<JigId>, MetadataNotFound, _>(
                 &endpoints::jig::Create::PATH,
@@ -122,31 +125,12 @@ impl JigGallery {
             .await
             {
                 Ok(resp) => {
-                    if state.focus.is_resources() {
-                        Self::set_focus_resource(&resp.id).await;
-                    }
                     let url: String = Route::Jig(JigRoute::Edit(resp.id, JigEditRoute::Landing)).into();
                     dominator::routing::go_to_url(&url);
                 }
                 Err(_) => todo!("")
             }
         }));
-    }
-
-    async fn set_focus_resource(jig_id: &JigId) {
-        let path = endpoints::jig::UpdateDraftData::PATH.replace("{id}", &jig_id.0.to_string());
-        let req = JigUpdateDraftDataRequest {
-            jig_focus: Some(JigFocus::Resources),
-            ..Default::default()
-        };
-        match api_with_auth_empty::<EmptyError, JigUpdateDraftDataRequest>(
-            &path,
-            endpoints::jig::UpdateDraftData::METHOD,
-            Some(req)
-        ).await {
-            Ok(_) => {},
-            Err(_) => todo!(),
-        };
     }
 
     pub fn copy_jig(self: &Rc<Self>, jig_id: &JigId) {

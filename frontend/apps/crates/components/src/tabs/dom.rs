@@ -9,6 +9,7 @@ impl MenuTab {
         html!("menu-tab-with-title", {
             .apply_if(slot.is_some(), |dom| dom.property("slot", slot.unwrap_ji()))
             .property("kind", state.kind.as_str())
+            .property("disabled", !state.enabled)
             .apply_if(state.sizeable, |dom| {
                 dom.property_signal("small", (state.active_signal) ().map(|active| !active))
             })

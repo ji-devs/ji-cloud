@@ -15,7 +15,7 @@ use shared::{
 };
 use utils::{
     iframe::{IframeAction, JigToModulePlayerMessage, ModuleToJigPlayerMessage},
-    prelude::{api_no_auth, SETTINGS, api_with_auth},
+    prelude::{api_no_auth, api_no_auth_empty, api_with_auth, SETTINGS},
     routes::{HomeRoute, Route},
     unwrap::UnwrapJiExt,
 };
@@ -128,6 +128,14 @@ pub fn load_jig(state: Rc<State>) {
             },
             Err(_) => {},
         }
+
+        // We don't need to handle an Ok Result; We can ignore Err, nothing is dependent on the
+        // success of this call. The failure should be noted in the server logs.
+        let _ = api_no_auth_empty::<EmptyError, ()>(
+            &jig::Play::PATH.replace("{id}", &state.jig_id.0.to_string()),
+            jig::Play::METHOD,
+            None,
+        ).await;
     }));
 }
 

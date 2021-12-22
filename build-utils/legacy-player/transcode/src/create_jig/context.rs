@@ -79,18 +79,26 @@ impl Context {
         let mut skip_game_ids = HashSet::new();
 
         if opts.skip_info_log {
-            if let Ok(mut file) = OpenOptions::new()
-                .read(true)
-                .open(&opts.skip_info_log_file)
-                {
 
-                    for line in std::io::BufReader::new(file).lines() {
-                        let line = JigInfoLogLine::read_line(&line.unwrap());
-                        log::info!("skipping {} due to skip_info", line.game_id);
-                        skip_game_ids.insert(line.game_id);
-                    }
+            let res = reqwest::Client::new()
+                .get(&opts.skip_info_log_url)
+                .send()
+                .await
+                .unwrap();
+
+            if !res.status().is_success() {
+                log::error!("error code: {}, details: {:?}", res.status().as_str(), res);
+                panic!("Failed to get info log for skipping");
+            }
+
+
+            for line in res.text().await.unwrap().lines() {
+                let line = JigInfoLogLine::read_line(&line);
+                log::info!("skipping {} due to skip_info", line.game_id);
+                skip_game_ids.insert(line.game_id);
             }
         } 
+
         if opts.skip_errors_log {
 
             let res = reqwest::Client::new()

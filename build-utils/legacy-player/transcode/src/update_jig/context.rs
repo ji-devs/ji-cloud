@@ -17,7 +17,7 @@ pub struct Context {
 }
 
 impl Context {
-    pub fn new(mut opts: Opts) -> Self {
+    pub async fn new(mut opts: Opts) -> Self {
         let token = {
             if !opts.token.is_empty() {
                 log::info!("TOKEN: {}", opts.token);
@@ -28,16 +28,24 @@ impl Context {
             }
         };
 
-        let mut file = OpenOptions::new()
-            .read(true)
-            .open(&opts.info_file)
+        let res = reqwest::Client::new()
+            .get(&opts.info_file_url)
+            .send()
+            .await
             .unwrap();
 
-        let mut info_lines:Vec<JigInfoLogLine> = std::io::BufReader::new(file)
+        if !res.status().is_success() {
+            log::error!("error code: {}, details: {:?}", res.status().as_str(), res);
+            panic!("Failed to get info file");
+        }
+
+        let mut info_lines:Vec<JigInfoLogLine> = res
+            .text()
+            .await
+            .unwrap()
             .lines()
-            .into_iter()
             .map(|line| {
-                JigInfoLogLine::read_line(&line.unwrap())
+                JigInfoLogLine::read_line(&line)
             })
             .collect();
 

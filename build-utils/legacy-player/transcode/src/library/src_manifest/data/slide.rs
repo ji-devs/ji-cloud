@@ -14,7 +14,7 @@ pub struct Slide {
     pub image_full: String,
 
     #[serde(rename="filePathImageThumb")]
-    pub image_thumb: String,
+    pub image_thumb: Option<String>,
 
     #[serde(rename="pk")]
     pub key: PrimaryKey,

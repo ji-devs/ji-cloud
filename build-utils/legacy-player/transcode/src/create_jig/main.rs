@@ -453,13 +453,14 @@ async fn make_jig(ctx:&Context, manifest: &SrcManifest) -> JigId {
         goals: Vec::new(), 
         age_ranges: ctx.age_ranges.clone(), 
         affiliations: ctx.affiliations.clone(), 
-        language: None,
+        language: Some(manifest.lang_str().to_string()),
         categories: Vec::new(), 
         description: format!("{} {}", 
             manifest.album_store.album.fields.description.clone().unwrap_or_default(),
             author_byline
         ),
         default_player_settings: JigPlayerSettings::default(),
+        ..JigCreateRequest::default()
     };
     let path = endpoints::jig::Create::PATH;
     let url = format!("{}{}", ctx.opts.get_remote_target().api_url(), path);

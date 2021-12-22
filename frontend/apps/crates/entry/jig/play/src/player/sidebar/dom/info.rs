@@ -55,8 +55,8 @@ fn render_jig_info(state: Rc<State>, jig: &JigResponse) -> Dom {
     html!("jig-play-sidebar-jig-info", {
         .property("slot", "overlay")
         .property("name", &jig.jig_data.display_name)
-        .property("playedCount", "?")
-        .property("likedCount", "?")
+        .property("playedCount", jig.plays as usize)
+        .property("likedCount", jig.likes as usize)
         .property("language", &jig.jig_data.language)
         // .property("author", jig.author_id)
         .property("publishedAt", {
