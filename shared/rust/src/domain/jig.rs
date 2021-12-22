@@ -689,6 +689,12 @@ pub struct JigBrowseResponse {
     pub total_jig_count: u64,
 }
 
+/// All id's associated with a jig to delete
+pub struct DeleteUserJigs {
+    /// Jig ID to delete.
+    pub jig_id: JigId,
+}
+
 /// Search for jigs via the given query string.
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
 #[serde(rename_all = "camelCase")]
