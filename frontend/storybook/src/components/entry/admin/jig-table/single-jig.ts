@@ -1,15 +1,8 @@
-import { JigData } from "./types";
+import {jigs} from './story-data';
 
 import "@elements/entry/admin/jig_label_ui/single-jig";
 
-const jig: JigData = {
-  jig_name: "Hebrew Letters",
-  author: "Michael Wikes",
-  author_badge: "JI Team",
-  date: "Aug. 5, 2020",
-  language: "English (American)",
-  curators: "Anat (13.7.21)",
-};
+const jig = jigs[0];
 
 export default {
   title: "Entry/Admin/Single Jig",
@@ -25,6 +18,8 @@ export const SingleJig = ({jig}) => {
     <span slot="date">${jig.date}</span>
     <span slot="language">${jig.language}</span>
     <span slot="curators">${jig.curators}</span>
+    <span slot="age-ranges">${jig.age_ranges}</span>
+    <span slot="affiliations">${jig.affiliations}</span>
   </single-jig>
 `
 };
