@@ -158,6 +158,10 @@ pub struct JigCreateRequest {
     /// Default player settings for this jig.
     #[serde(default)]
     pub default_player_settings: JigPlayerSettings,
+
+    /// Primary material for jig
+    #[serde(default)]
+    pub jig_focus: JigFocus,
 }
 
 /// Whether the data is draft or live.
@@ -217,14 +221,6 @@ impl From<bool> for DraftOrLive {
     }
 }
 
-/// Struct containing an additional resource Id.
-#[derive(Serialize, Deserialize, Clone, Debug)]
-#[serde(rename_all = "camelCase")]
-pub struct AdditionalResourceIdStruct {
-    /// Id field containing AdditionalResourceID.
-    pub id: AdditionalResourceId,
-}
-
 /// The over-the-wire representation of a JIG's data. This can either be the live copy or the draft copy.
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -258,7 +254,7 @@ pub struct JigData {
     pub categories: Vec<CategoryId>,
 
     /// Additional resources of this JIG.
-    pub additional_resources: Vec<AdditionalResourceIdStruct>,
+    pub additional_resources: Vec<AdditionalResource>,
 
     /// Description of the jig.
     pub description: String,
@@ -280,9 +276,6 @@ pub struct JigData {
 
     /// The privacy level on the JIG.
     pub privacy_level: PrivacyLevel,
-
-    /// Primary material for jig
-    pub jig_focus: JigFocus,
 
     /// Lock this jig
     pub locked: bool,
@@ -552,6 +545,9 @@ pub struct JigResponse {
 
     /// Number of plays Jig
     pub plays: i64,
+
+    /// Number of plays Jig
+    pub jig_focus: JigFocus,
 
     /// True if Jig cover is set
     ///
