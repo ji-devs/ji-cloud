@@ -21,6 +21,7 @@ export const JigTableUI = ({ jigs }) => {
             <span slot="date">${jig.date}</span>
             <span slot="language">${jig.language}</span>
             <span slot="curators">${jig.curators}</span>
+            <span slot="age-ranges">${jig.age_ranges}</span>
           </single-jig>
         `
       ).join('')}
