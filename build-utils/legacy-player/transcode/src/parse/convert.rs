@@ -89,12 +89,12 @@ pub async fn load_url(ctx: &Context, url:&str) -> Option<(SrcManifest, String)> 
     }
 
     let text = match ctx.client.get(url).send().await {
-        Err(err) => Err(err),
+        Err(_) => Err(()),
         Ok(resp) => {
             match resp.error_for_status() {
-                Err(err) => Err(err),
+                Err(_) => Err(()),
                 Ok(resp) => {
-                    resp.text().await
+                    resp.text().await.map_err(|_| ())
                 }
             }
         }
@@ -102,11 +102,11 @@ pub async fn load_url(ctx: &Context, url:&str) -> Option<(SrcManifest, String)> 
     
     let text = match text {
         Ok(text) => text,
-        Err(err) => {
+        Err(_) => {
 
-            writeln!(&ctx.errors_log, "unknown unable to load manifest at {}, error: {:?}", url, err).unwrap();
+            writeln!(&ctx.errors_log, "unknown unable to load manifest raw text at {}", url).unwrap();
             if !ctx.opts.keep_going_if_manifest_parse_error {
-                panic!("unknown unable to load manifest at {}, error: {:?}", url, err);
+                panic!("unknown unable to load manifest raw text at {}", url);
             } else {
                 return None
             }
