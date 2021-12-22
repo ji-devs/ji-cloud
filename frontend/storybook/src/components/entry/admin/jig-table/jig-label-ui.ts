@@ -23,7 +23,7 @@ export const JigTableUI = ({ jigs }) => {
             <span slot="curators">${jig.curators}</span>
             <span slot="age-ranges">${jig.age_ranges}</span>
             <span slot="affiliations">${jig.affiliations}</span>
-            <jig-details>
+            <jig-details slot="jig-details">
               <div slot="buttons">
                 <button-rect kind="text" color="blue">Cancel</button-rect>
                 <button-rect kind="outline" color="blue">Save Changes</button-rect>
