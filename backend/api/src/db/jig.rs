@@ -42,12 +42,6 @@ pub async fn create(
 ) -> Result<JigId, CreateJigError> {
     let mut txn = pool.begin().await?;
 
-    let default_modules = [(
-        ModuleKind::Cover,
-        serde_json::to_value(cover::ModuleData::default())
-            .expect("default cover module failed to serialize while creating jig"),
-    )];
-
     let draft_id = create_jig_data(
         &mut txn,
         display_name,
@@ -61,27 +55,6 @@ pub async fn create(
     )
     .await?;
 
-    let mut module_stable_ids = Vec::new();
-
-    for (idx, (kind, contents)) in default_modules.iter().enumerate() {
-        let module = sqlx::query!(
-            //language=SQL
-            r#"
-insert into jig_data_module (jig_data_id, "index", kind, contents)
-values ($1, $2, $3, $4)
-returning stable_id as "stable_id: StableModuleId"
-"#,
-            draft_id,
-            idx as i16,
-            (*kind) as i16,
-            contents
-        )
-        .fetch_one(&mut txn)
-        .await?;
-
-        module_stable_ids.push(module.stable_id);
-    }
-
     let live_id = create_jig_data(
         &mut txn,
         display_name,
@@ -94,28 +67,6 @@ returning stable_id as "stable_id: StableModuleId"
         default_player_settings,
     )
     .await?;
-
-    for (idx, (kind, contents, stable_id)) in default_modules
-        .iter()
-        .zip(module_stable_ids.iter())
-        .map(|it| (&it.0 .0, &it.0 .1, it.1))
-        .enumerate()
-    {
-        sqlx::query!(
-            //language=SQL
-            r#"
-insert into jig_data_module (stable_id, jig_data_id, "index", kind, contents)
-values ($1, $2, $3, $4, $5)
-"#,
-            (*stable_id).0,
-            live_id,
-            idx as i16,
-            (*kind) as i16,
-            contents
-        )
-        .fetch_all(&mut txn)
-        .await?;
-    }
 
     let jig = sqlx::query!(
         //language=SQL
