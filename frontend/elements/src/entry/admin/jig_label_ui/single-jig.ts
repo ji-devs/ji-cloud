@@ -40,6 +40,7 @@ export class SingleJig extends LitElement {
       <div class="flex"><slot name="language"></slot></div>
       <div class="flex"><slot name="curators"></slot></div>
       <div class="flex"><slot name="age-ranges"></slot></div>
+      <div class="flex"><slot name="affiliations"></slot></div>
     </div>
     <div id="overlay-container">
       <dialog-overlay @close=${this.closeOverlay} autoClose ?open=${this.open}>
