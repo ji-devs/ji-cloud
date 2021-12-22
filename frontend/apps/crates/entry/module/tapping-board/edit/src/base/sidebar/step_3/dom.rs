@@ -74,6 +74,7 @@ fn render_tab(
         MenuTab::new(
             tab_kind,
             false,
+            true,
             clone!(selected_tab => move || selected_tab.signal_ref(clone!(tab_kind => move |curr| {
                 match curr {
                     Some(curr) => *curr == tab_kind,
