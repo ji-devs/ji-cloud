@@ -11,13 +11,13 @@ const STR_APPLY_TO_JIG: &str = "Apply to JIG";
 const STR_APPLY_TO_MODULE: &str = "Apply to cover only";
 
 pub fn render_design(state: Rc<ThemeSelector>, slot: Option<&str>) -> Dom {
-    render("theme-selector-design-option", state, slot)
+    render("theme-selector-design-option", state, true, slot)
 }
 pub fn render_cards(state: Rc<ThemeSelector>, slot: Option<&str>) -> Dom {
-    render("theme-selector-cards-option", state, slot)
+    render("theme-selector-cards-option", state, false, slot)
 }
 
-fn render(element_name: &str, state: Rc<ThemeSelector>, slot: Option<&str>) -> Dom {
+fn render(element_name: &str, state: Rc<ThemeSelector>, can_apply_to_jig: bool, slot: Option<&str>) -> Dom {
     html!("theme-selector", {
         .apply_if(slot.is_some(), |dom| {
             dom.property("slot", slot.unwrap_ji())
@@ -38,7 +38,9 @@ fn render(element_name: &str, state: Rc<ThemeSelector>, slot: Option<&str>) -> D
                         if state.jig_theme_id.get() == theme_id {
                             ThemeChoice::Jig
                         } else {
-                            state.apply_to_jig_popup_active.set(true);
+                            if can_apply_to_jig {
+                                state.apply_to_jig_popup_active.set(true);
+                            }
                             ThemeChoice::Override(theme_id)
                         }
                     };
