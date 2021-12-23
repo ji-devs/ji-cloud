@@ -1,18 +1,15 @@
 use crate::home::search_results::SearchResults;
 
-use super::state::{HomePageMode};
+use super::state::HomePageMode;
 use dominator::clone;
 use futures::join;
 
 use shared::{
     api::{
-        endpoints::{jig, user::Profile},
+        endpoints::jig,
         ApiEndpoint,
     },
-    domain::{
-        jig::{JigCountResponse},
-        user::UserProfile
-    },
+    domain::jig::JigCountResponse,
     error::EmptyError
 };
 use std::rc::Rc;
@@ -72,21 +69,13 @@ async fn fetch_metadata(state: Rc<State>) {
 }
 
 async fn fetch_profile(state: Rc<State>) {
-    let (result, status) =
-        api_with_auth_status::<UserProfile, EmptyError, ()>(Profile::PATH, Profile::METHOD, None)
-            .await;
-    match status {
-        403 | 401 => {
-            //not logged in
-        }
-        _ => match result {
-            Err(_) => {}
-            Ok(profile) => {
-                state.is_logged_in.set(true);
-                state.search_selected.set_from_profile(&profile);
-            }
+    match get_user() {
+        Some(profile) => {
+            state.is_logged_in.set(true);
+            state.search_selected.set_from_profile(profile);
         },
-    };
+        None => {},
+    }
 }
 
 async fn search_async(state: Rc<State>) {

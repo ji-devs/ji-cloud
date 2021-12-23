@@ -23,7 +23,7 @@ impl State {
 
 #[derive(Clone, Debug)]
 pub enum LoggedInState {
-    LoggedIn(UserProfile),
+    LoggedIn(&'static UserProfile),
     LoggedOut,
     Loading,
 }
