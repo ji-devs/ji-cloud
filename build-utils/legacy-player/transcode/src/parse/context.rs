@@ -5,16 +5,37 @@ use dotenv::dotenv;
 use simplelog::*;
 use structopt::StructOpt;
 use reqwest::Client;
+use std::io::{self, BufRead};
 
 pub struct Context {
     pub opts: Opts,
     pub client: Client, 
     pub warnings_log: File,
     pub errors_log: File,
+    pub finished_log: File,
+    pub skip_finished_list: Vec<String>
 }
 
 impl Context {
     pub fn new(opts: Opts) -> Self {
+
+        let skip_finished_list: Vec<String> = {
+            match File::open(&opts.finished_log) {
+                Ok(file) => {
+                    io::BufReader::new(file)
+                        .lines()
+                        .map(|line| line.unwrap())
+                        .collect()
+                },
+                Err(_) => Vec::new()
+            }
+        };
+
+        let mut finished_log = OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open(&opts.finished_log)
+            .unwrap();
 
         let mut warnings_log = {
             let mut file = OpenOptions::new();
@@ -43,6 +64,8 @@ impl Context {
             client: Client::new(),
             warnings_log,
             errors_log,
+            finished_log,
+            skip_finished_list
         }
     }
 }

@@ -71,7 +71,12 @@ async fn get_futures(ctx:Arc<Context>) -> Vec<impl Future> {
     urls
         .into_iter()
         .map(|url| {
-            transcode_game(ctx.clone(), url)
+            let ctx = ctx.clone();
+            async move {
+                if let Some(game_id) = transcode_game(ctx.clone(), url).await {
+                    writeln!(&ctx.finished_log, "{}", game_id).unwrap();
+                }
+            }
         })
         .collect()
 }
@@ -162,7 +167,7 @@ async fn game_json_urls(opts:&Opts) -> Vec<String> {
     
 }
 
-async fn transcode_game(ctx: Arc<Context>, game_json_url: String) {
+async fn transcode_game(ctx: Arc<Context>, game_json_url: String) -> Option<String> {
     let opts = &ctx.opts;
     let client = &ctx.client;
 
@@ -171,20 +176,28 @@ async fn transcode_game(ctx: Arc<Context>, game_json_url: String) {
     let loaded = convert::load_url(&ctx, &game_json_url).await;
 
     if loaded.is_none() {
-        return;
+        return None;
     }
 
     let (src_manifest, raw_game_json) = loaded.unwrap();
 
+    let game_id = src_manifest.game_id();
+
     let slide_ids:Vec<String> = src_manifest.structure.slides.iter().map(|slide| slide.slide_id()).collect();
 
-    log::info!("loaded manifest, game id: {} ({})", src_manifest.game_id(), game_json_url);
-
-    let dest_dir = opts.dest_base_path.join(&src_manifest.game_id());
-    if opts.skip_dir_exists && dest_dir.join(&opts.dest_json_dir).join("game.json").exists() {
-        log::info!("skipping {} because dir already exists", &src_manifest.game_id());
-        return;
+    if ctx.skip_finished_list.contains(&game_id) {
+        log::info!("skipping {} because it's in the skip list", &game_id);
+        return Some(game_id);
     }
+    let dest_dir = opts.dest_base_path.join(&game_id);
+    if opts.skip_dir_exists && dest_dir.join(&opts.dest_json_dir).join("game.json").exists() {
+        log::info!("skipping {} because dir already exists", &game_id);
+        return Some(game_id);
+    }
+
+    log::info!("loaded manifest, game id: {} ({})", game_id, game_json_url);
+
+
     std::fs::create_dir_all(&dest_dir);
 
     let (slides, medias) = convert::into_slides(&ctx, src_manifest, &game_json_url).await;
@@ -379,6 +392,7 @@ async fn transcode_game(ctx: Arc<Context>, game_json_url: String) {
         }
     }
 
+    Some(game_id)
 }
 
 fn init_logger(verbose:bool) {
