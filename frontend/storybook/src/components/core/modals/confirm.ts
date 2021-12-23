@@ -16,19 +16,8 @@ const DEFAULT_ARGS: Args = {
 export const Confirm = (props?: Partial<Args>) => {
     props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
 
-
-    const cancel = () => {
-        console.log('foo')
-    }
-
-    const confirm = () => {
-        console.log('confirm')
-    }
-
     return `
-        <div @cancel="${cancel}" @confirm="${confirm}">
-            <modal-confirm ${argsToAttrs(props)}></modal-confirm>
-        </div>
+        <modal-confirm ${argsToAttrs(props)}></modal-confirm>
     `;
 };
 
