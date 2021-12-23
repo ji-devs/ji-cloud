@@ -72,7 +72,7 @@ fn render_page(state: Rc<Publish>) -> Dom {
                 Rc::new(ModuleThumbnail {
                     jig_id: state.jig.id.clone(),
                     //Cover module (first module) is guaranteed to exist
-                    module: state.jig.modules.lock_ref()[0].clone(),
+                    module: state.jig.modules.lock_ref().first().cloned(),
                     is_jig_fallback: true,
                 }),
                 Some("img")

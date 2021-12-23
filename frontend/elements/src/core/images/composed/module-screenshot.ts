@@ -1,7 +1,5 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
-import { imageLib, MediaLibOptions, MediaSizeOptions } from "@utils/path";
-import { sameOrigin } from "@utils/image";
-import { nothing } from "lit-html";
+import { MediaSizeOptions } from "@utils/path";
 import { ModuleKind } from "@elements/module/_common/types";
 
 @customElement("img-module-screenshot")
@@ -29,7 +27,7 @@ export class _ extends LitElement {
 
     //use with cacheBust true to force reloading when id changes to the same thing
     @property({ hasChanged: () => true })
-    moduleId: string = "";
+    moduleId?: string = "";
 
     @property()
     size: MediaSizeOptions = "thumb";
@@ -48,14 +46,26 @@ export class _ extends LitElement {
                 ? `jig/thumb-placeholder.svg`
                 : `module/_common/thumb-placeholder.svg`;
         return html`
-            <img-ji
-                lib="screenshot"
-                id="${jigId}/${moduleId}"
-                size="${size}"
-                .cacheBust=${cacheBust ? Date.now() : false}
-            >
-                <img-ui path="${fallbackPath}" slot="fallback"></img-ui>
-            </img-ji>
+            ${this.moduleId ? (
+                html`
+                    <img-ji
+                        lib="screenshot"
+                        id="${jigId}/${moduleId}"
+                        size="${size}"
+                        .cacheBust=${cacheBust ? Date.now() : false}
+                    >
+                        ${this.fallbackImage(fallbackPath)}
+                    </img-ji>
+                `
+            ) : (
+                this.fallbackImage(fallbackPath)
+            ) }
+        `;
+    }
+
+    private fallbackImage(path: string) {
+        return html`
+            <img-ui path="${path}" slot="fallback"></img-ui>
         `;
     }
 }

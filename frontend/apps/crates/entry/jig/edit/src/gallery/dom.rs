@@ -113,7 +113,7 @@ impl JigGallery {
                             .child(ModuleThumbnail::render(
                                 Rc::new(ModuleThumbnail {
                                     jig_id: jig.id.clone(),
-                                    module: jig.jig_data.modules[0].clone(),
+                                    module: jig.jig_data.modules.first().cloned(),
                                     is_jig_fallback: true,
                                 }),
                                 Some("thumbnail")
