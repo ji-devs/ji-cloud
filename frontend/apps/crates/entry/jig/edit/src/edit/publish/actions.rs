@@ -54,11 +54,19 @@ impl Publish {
     pub fn navigate_to_cover(&self) {
         let cover_module_id = self.jig.modules.lock_ref().first().map(|m| m.id.clone());
 
-        if let Some(cover_module_id) = cover_module_id {
-            self.jig_edit_state
-                .route
-                .set(JigEditRoute::Module(cover_module_id));
+        // navigate to cover if exists otherwise navigate to landing
+        let route = match cover_module_id {
+            Some(cover_module_id) => {
+                JigEditRoute::Module(cover_module_id)
+            },
+            None => {
+                JigEditRoute::Landing
+            },
         };
+
+        self.jig_edit_state
+            .route
+            .set(route);
     }
 
     fn form_invalid(self: Rc<Self>) -> bool {
