@@ -13,7 +13,7 @@ export class _ extends BaseButton {
     static get styles() {
         return [
             css`
-                article {
+                .overlay {
                     position: fixed;
                     top: 0;
                     left: 0;
@@ -22,10 +22,22 @@ export class _ extends BaseButton {
                     align-items: center;
                     width: 100vw;
                     height: 100vh;
+                    opacity: 0.8;
                     background-color: var(--light-blue-3);
                     z-index: 6;
                 }
-                section {
+                .container {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    width: 100vw;
+                    height: 100vh;
+                    z-index: 7;
+                }
+                .section {
                     width: 419px;
                     min-height: 276px;
                     border-radius: 16px;
@@ -33,7 +45,7 @@ export class _ extends BaseButton {
                     backdrop-filter: blur(30px);
                     box-shadow: 0 3px 16px 0 rgba(0, 0, 0, 0.16);
                     background-color: var(--white);
-
+                    opacity: 1;
                     display: flex;
                     flex-direction: column;
                 }
@@ -197,8 +209,10 @@ export class _ extends BaseButton {
 
     render() {
         return html`
-            <article @click=${this.onAnyClick}>
-                <section id="section">
+            <div class="overlay">
+            </div>
+            <div class="container" @click=${this.onAnyClick}>
+                <div class="section">
                     <button-icon
                         size="small"
                         class="close"
@@ -211,8 +225,8 @@ export class _ extends BaseButton {
                         ${this.renderContent()}
                         ${this.renderActions()}
                     </div>
-                </section>
-            </article>
+                </div>
+            </div>
         `;
     }
 }
