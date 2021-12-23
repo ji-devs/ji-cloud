@@ -12,6 +12,10 @@ use std::rc::Rc;
 use std::str::FromStr;
 use utils::prelude::*;
 use wasm_bindgen::prelude::*;
+
+const STR_DELETE_TITLE: &'static str = "Warning";
+const STR_DELETE_CONTENT: &'static str = "Are you sure you want to delete this activity?";
+
 pub struct ModuleDom {}
 
 impl ModuleDom {
@@ -33,6 +37,22 @@ impl ModuleDom {
 
         html!("empty-fragment", {
             .property("slot", if index == 0 { "cover-module" } else { "modules" })
+            .child_signal(state.confirm_delete.signal().map(clone!(state => move |confirm_delete| {
+                if confirm_delete {
+                    Some(html!("modal-confirm", {
+                        .property("dangerous", true)
+                        .property("title", STR_DELETE_TITLE)
+                        .property("content", STR_DELETE_CONTENT)
+                        .event(clone!(state => move |_evt: events::CustomCancel| state.confirm_delete.set_neq(false)))
+                        .event(clone!(state => move |_evt: events::CustomConfirm| {
+                            state.confirm_delete.set_neq(false);
+                            actions::delete(state.clone());
+                        }))
+                    }))
+                } else {
+                    None
+                }
+            })))
             .child(html!("jig-edit-sidebar-filler", {
                 .style("display", {
                     if is_filler { "block" } else {"none"}

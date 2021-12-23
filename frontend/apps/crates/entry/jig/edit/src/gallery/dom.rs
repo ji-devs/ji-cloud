@@ -18,6 +18,9 @@ const STR_SHOW_JIG_ALL: &'static str = "Show all my JIGs";
 const STR_SHOW_JIG_PUBLISHED: &'static str = "Show published JIGs";
 const STR_SHOW_JIG_DRAFT: &'static str = "Show drafts";
 
+const STR_DELETE_TITLE: &'static str = "Warning";
+const STR_DELETE_CONTENT: &'static str = "Are you sure you want to delete this JIG?";
+
 impl JigGallery {
     fn visible_jigs_option_string(visible_jigs: &VisibleJigs) -> &'static str {
         match visible_jigs {
@@ -34,6 +37,20 @@ impl JigGallery {
 
         html!("empty-fragment", {
             .child(page_header::dom::render(Rc::new(page_header::state::State::new()), None, Some(PageLinks::Create)))
+            .child_signal(state.confirm_delete.signal().map(clone!(state => move |confirm_delete| {
+                confirm_delete.map(|jig_id| {
+                    html!("modal-confirm", {
+                        .property("dangerous", true)
+                        .property("title", STR_DELETE_TITLE)
+                        .property("content", STR_DELETE_CONTENT)
+                        .event(clone!(state => move |_evt: events::CustomCancel| state.confirm_delete.set_neq(None)))
+                        .event(clone!(state => move |_evt: events::CustomConfirm| {
+                            state.confirm_delete.set_neq(None);
+                            state.delete_jig(jig_id);
+                        }))
+                    })
+                })
+            })))
             .child(
                 html!("jig-gallery", {
                     .property("jigFocus", state.focus.as_str())
@@ -138,7 +155,7 @@ impl JigGallery {
                                     .property("icon", "delete")
                                     .text(STR_DELETE)
                                     .event(clone!(state, jig => move |_: events::Click| {
-                                        state.delete_jig(jig.id);
+                                        state.confirm_delete.set_neq(Some(jig.id));
                                     }))
                                 }),
                             ])
