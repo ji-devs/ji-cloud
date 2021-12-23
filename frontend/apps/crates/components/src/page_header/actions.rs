@@ -13,10 +13,8 @@ use super::state::{LoggedInState, State};
 
 pub fn fetch_profile(state: Rc<State>) {
     match get_user() {
-        Some(profile) => {
-            state.logged_in.set(LoggedInState::LoggedIn(profile));
-        },
-        None => {},
+        Some(profile) => state.logged_in.set(LoggedInState::LoggedIn(profile)),
+        None => state.logged_in.set(LoggedInState::LoggedOut)
     }
 }
 
