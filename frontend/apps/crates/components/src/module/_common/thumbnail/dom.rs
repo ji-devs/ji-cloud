@@ -44,11 +44,11 @@ impl ModuleThumbnail {
 
         let listener = Rc::new(RefCell::new(
             match &state.module {
-                Some(module) => Some(
+                Some(_) => Some(
                     crate::firebase::listen_for_screenshot_updates(
                         &state.jig_id,
                         &state.module.clone().unwrap_ji().id,
-                        clone!(mutable, state => move || {
+                        clone!(mutable => move || {
                             log::info!("fdsa");
                             mutable.set(());
                         }),

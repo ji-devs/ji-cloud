@@ -2,7 +2,6 @@ use super::state::SaySomething;
 use dominator::clone;
 use shared::domain::jig::module::body::legacy::activity::AdvanceTrigger;
 use std::rc::Rc;
-use utils::prelude::*;
 use crate::base::actions::NavigationTarget;
 
 impl SaySomething {
