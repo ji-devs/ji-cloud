@@ -1,52 +1,22 @@
-use crate::{fetch::*, unwrap::*};
-use dominator::clone;
-use futures_signals::signal::{Mutable, Signal, SignalExt};
+use crate::fetch::*;
 use once_cell::sync::OnceCell;
 use shared::{api::endpoints::user::Profile, domain::user::UserProfile};
 
-static USER: OnceCell<Mutable<Option<UserProfile>>> = OnceCell::new();
+static USER: OnceCell<UserProfile> = OnceCell::new();
 
 pub(crate) async fn init() {
     let (result, status) = Profile::api_with_auth_status(None).await;
 
-    let user = match status {
-        401 | 403 => None,
-        _ => match result {
-            Err(_) => {
-                log::info!("error fetching profile");
-                None
-            }
-            Ok(user) => Some(user),
+    match result {
+        Ok(user) if status != 401 || status != 403 => {
+            // `USER` is private and the only way to initialize it is through `init` - `set()`
+            // should never fail at this point.
+            let _ = USER.set(user);
         },
-    };
-
-    let _ = USER.set(Mutable::new(user));
+        _ => {},
+    }
 }
 
-pub fn set_user(user: Option<UserProfile>) {
-    USER.get().unwrap_ji().set(user);
-}
-
-pub fn user_signal() -> impl Signal<Item = Option<UserProfile>> {
-    USER.get().unwrap_ji().signal_cloned()
-}
-
-pub fn user_map_signal_ref<A>(
-    f: impl FnOnce(&UserProfile) -> A + Clone + 'static,
-) -> impl Signal<Item = Option<A>> {
+pub fn get_user() -> Option<&'static UserProfile> {
     USER.get()
-        .unwrap_ji()
-        .signal_ref(clone!(f => move |user| user.as_ref().map(f.clone())))
-}
-
-pub fn user_logged_in_signal() -> impl Signal<Item = bool> {
-    user_map_signal_ref(|_| ()).map(|x| x.is_some())
-}
-
-pub fn get_user() -> Option<UserProfile> {
-    USER.get().unwrap_ji().get_cloned()
-}
-
-pub fn map_user<A>(f: impl FnOnce(&UserProfile) -> A + 'static) -> Option<A> {
-    USER.get().unwrap_ji().lock_ref().as_ref().map(f)
 }
