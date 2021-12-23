@@ -20,6 +20,7 @@ export class _ extends LitElement {
                     padding-left: 18px;
                     height: 48px;
                     box-sizing: border-box;
+                    border: solid 1px #ffffff;
                 }
                 .bar:focus-within {
                     border-color: var(--dark-blue-3);
@@ -43,6 +44,7 @@ export class _ extends LitElement {
                 }
                 ::slotted([slot="button"]) {
                     /* cover .bar border */
+                    margin: -1px -2px 0 0;
                     height: 48px;
                     font-size: 24px;
                 }
