@@ -15,7 +15,7 @@ impl SearchResults {
             .property_signal("resultsCount", state.total_results_count_signal())
             .property("query", &state.query)
             .child(state.jigs.render())
-            // .child(state.resources.render()) // TODO:
+            .child(state.resources.render())
         })
     }
 }
