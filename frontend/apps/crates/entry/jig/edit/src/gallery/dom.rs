@@ -20,6 +20,8 @@ const STR_SHOW_JIG_DRAFT: &'static str = "Show drafts";
 
 const STR_DELETE_TITLE: &'static str = "Warning";
 const STR_DELETE_CONTENT: &'static str = "Are you sure you want to delete this JIG?";
+const STR_DELETE_CONFIRM: &'static str = "Delete JIG";
+const STR_DELETE_CANCEL: &'static str = "Don't delete";
 
 impl JigGallery {
     fn visible_jigs_option_string(visible_jigs: &VisibleJigs) -> &'static str {
@@ -43,6 +45,8 @@ impl JigGallery {
                         .property("dangerous", true)
                         .property("title", STR_DELETE_TITLE)
                         .property("content", STR_DELETE_CONTENT)
+                        .property("cancel_text", STR_DELETE_CANCEL)
+                        .property("confirm_text", STR_DELETE_CONFIRM)
                         .event(clone!(state => move |_evt: events::CustomCancel| state.confirm_delete.set_neq(None)))
                         .event(clone!(state => move |_evt: events::CustomConfirm| {
                             state.confirm_delete.set_neq(None);

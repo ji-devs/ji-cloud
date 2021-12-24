@@ -15,6 +15,8 @@ use wasm_bindgen::prelude::*;
 
 const STR_DELETE_TITLE: &'static str = "Warning";
 const STR_DELETE_CONTENT: &'static str = "Are you sure you want to delete this activity?";
+const STR_DELETE_CONFIRM: &'static str = "Delete activity";
+const STR_DELETE_CANCEL: &'static str = "Don't delete";
 
 pub struct ModuleDom {}
 
@@ -43,6 +45,8 @@ impl ModuleDom {
                         .property("dangerous", true)
                         .property("title", STR_DELETE_TITLE)
                         .property("content", STR_DELETE_CONTENT)
+                        .property("cancel_text", STR_DELETE_CANCEL)
+                        .property("confirm_text", STR_DELETE_CONFIRM)
                         .event(clone!(state => move |_evt: events::CustomCancel| state.confirm_delete.set_neq(false)))
                         .event(clone!(state => move |_evt: events::CustomConfirm| {
                             state.confirm_delete.set_neq(false);

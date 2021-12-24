@@ -13,6 +13,10 @@ export class _ extends BaseButton {
     static get styles() {
         return [
             css`
+                :host {
+                    --overlay-z-index: 300;
+                }
+
                 .overlay {
                     position: fixed;
                     top: 0;
@@ -24,20 +28,15 @@ export class _ extends BaseButton {
                     height: 100vh;
                     opacity: 0.8;
                     background-color: var(--light-blue-3);
-                    z-index: 6;
-                }
-                .container {
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    width: 100vw;
-                    height: 100vh;
-                    z-index: 7;
+                    z-index: var(--overlay-z-index);
                 }
                 .section {
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    z-index: var(--overlay-z-index);
+
                     width: 419px;
                     min-height: 276px;
                     border-radius: 16px;
@@ -209,22 +208,19 @@ export class _ extends BaseButton {
 
     render() {
         return html`
-            <div class="overlay">
-            </div>
-            <div class="container" @click=${this.onAnyClick}>
-                <div class="section">
-                    <button-icon
-                        size="small"
-                        class="close"
-                        icon="x"
-                        @click=${this.onCancel}
-                    ></button-icon>
-                    <div class="contents">
-                        ${this.renderTitle()}
-                        <div class="divider"></div>
-                        ${this.renderContent()}
-                        ${this.renderActions()}
-                    </div>
+            <div class="overlay" @click=${this.onAnyClick}></div>
+            <div class="section">
+                <button-icon
+                    size="x-small"
+                    class="close"
+                    icon="x"
+                    @click=${this.onCancel}
+                ></button-icon>
+                <div class="contents">
+                    ${this.renderTitle()}
+                    <div class="divider"></div>
+                    ${this.renderContent()}
+                    ${this.renderActions()}
                 </div>
             </div>
         `;

@@ -7,7 +7,7 @@ export default {
 
 const DEFAULT_ARGS: Args = {
     title: "Warning",
-    body: "Are you sure you want to delete this thing?",
+    content: "Are you sure you want to delete this thing?",
     cancel_text: "Cancel",
     confirm_text: "Confirm",
     dangerous: true,
