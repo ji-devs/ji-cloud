@@ -29,9 +29,9 @@ jobs:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
       - name: install node
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v2
         with:
-          node-version: '15'
+          node-version: '16'
 
       - name: install build utils deps
         run: npm install
