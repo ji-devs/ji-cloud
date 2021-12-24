@@ -22,7 +22,6 @@ export class _ extends LitElement {
                     height: 100%;
                     display: grid;
                     grid-template-rows: auto 1fr auto;
-                    z-index: 1;
                 }
                 ::slotted(hebrew-buttons) {
                     grid-row: 1;
