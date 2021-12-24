@@ -1,4 +1,4 @@
-#![allow(dead_code)] // this should be remove eventually
+#![allow(dead_code)] // this should be removed eventually
 
 pub const STR_AUTH_OAUTH_LOGIN_FAIL: &str = "Create an account first :)";
 pub const STR_CHANGE_EMAIL: &str = "Change email account";
