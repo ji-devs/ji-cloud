@@ -241,30 +241,33 @@ async fn transcode_game(ctx: Arc<Context>, game_json_url: String) -> Option<Stri
 
             if !opts.skip_download_exists || !dest_path.exists() {
                 log::info!("downloading {} -> {}", media.url, dest_path.to_str().unwrap());
-                match client.get(&media.url)
-                    .send()
-                    .await
-                    .unwrap()
-                    .error_for_status() {
-                        Ok(resp) => {
-                            let data = resp
-                                .bytes()
-                                .await
-                                .unwrap();
+                match client.get(&media.url).send().await {
+                    Ok(resp) => {
+                        match resp.error_for_status() {
+                            Ok(resp) => {
+                                let data = resp
+                                    .bytes()
+                                    .await
+                                    .unwrap();
 
-                            let mut cursor = std::io::Cursor::new(data);
+                                let mut cursor = std::io::Cursor::new(data);
 
-                            let mut dest_file = std::fs::File::create(&dest_path).unwrap();
-                            std::io::copy(&mut cursor, &mut dest_file).unwrap();
-                        },
-                        Err(err) => {
-                            if opts.allow_empty_media {
-                                log::warn!("couldn't download {}", media.url)
-                            } else {
-                                panic!("couldn't download {}", media.url)
+                                let mut dest_file = std::fs::File::create(&dest_path).unwrap();
+                                std::io::copy(&mut cursor, &mut dest_file).unwrap();
+                            },
+                            Err(err) => {
+                                if opts.allow_empty_media {
+                                    log::warn!("couldn't download {}", media.url)
+                                } else {
+                                    panic!("couldn't download {}", media.url)
+                                }
                             }
                         }
+                    },
+                    Err(err) => {
+                        panic!("unable to download: {}", media.url);
                     }
+                }
 
             }
         }

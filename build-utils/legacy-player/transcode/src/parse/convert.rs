@@ -487,21 +487,26 @@ mod slide {
                                     let src = match <YoutubeUrl as YoutubeUrlExt>::try_parse(video_url.clone()) {
                                         Ok(yt) => {
                                             log::info!("yt: {}", yt.get_id());
-                                            VideoSource::Youtube(yt)
+                                            Some(VideoSource::Youtube(yt))
                                         },
                                         Err(_) => {
                                             let filename = video_url.replace("local://", "");
 
-                                            match slide::make_video_media(&ctx,&game_id, &game_url, &slide, base_url, &filename, false, &mut medias).await {
-                                                None => {
-                                                    panic!("{} unable to get url from {}", video_url, game_id);
-                                                },
-                                                Some(filename) => {
-                                                    log::info!("not yt: {}", filename);
-                                                    VideoSource::Direct(filename)
+                                            if filename.trim().is_empty() {
+                                                writeln!(&ctx.errors_log, "{} empty video", game_id).unwrap();
+                                                log::warn!("{} empty video", game_id);
+                                                None
+                                            } else {
+                                                match slide::make_video_media(&ctx,&game_id, &game_url, &slide, base_url, &filename, false, &mut medias).await {
+                                                    None => {
+                                                        panic!("{} unable to get url from {}", game_id, video_url);
+                                                    },
+                                                    Some(filename) => {
+                                                        log::info!("not yt: {}", filename);
+                                                        Some(VideoSource::Direct(filename))
+                                                    }
                                                 }
                                             }
-
                                         }
                                     };
 
@@ -509,12 +514,14 @@ mod slide {
                                         //yes, really
                                         scan_fmt!(&range_str, "{{{}, {}}}", f64, f64).ok()
                                     });
-                                    
-                                    Some(Activity::Video(Video {
-                                        transform_matrix,
-                                        src,
-                                        range
-                                    }))
+
+                                    src.map(move |src| {
+                                        Activity::Video(Video {
+                                            transform_matrix,
+                                            src,
+                                            range
+                                        })
+                                    })
                                 }
                             } 
                         },
