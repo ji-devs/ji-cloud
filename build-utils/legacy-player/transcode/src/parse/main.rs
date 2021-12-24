@@ -187,12 +187,12 @@ async fn transcode_game(ctx: Arc<Context>, game_json_url: String) -> Option<Stri
 
     if ctx.skip_finished_list.contains(&game_id) {
         log::info!("skipping {} because it's in the skip list", &game_id);
-        return Some(game_id);
+        return None;
     }
     let dest_dir = opts.dest_base_path.join(&game_id);
     if opts.skip_dir_exists && dest_dir.join(&opts.dest_json_dir).join("game.json").exists() {
         log::info!("skipping {} because dir already exists", &game_id);
-        return Some(game_id);
+        return None; 
     }
 
     log::info!("loaded manifest, game id: {} ({})", game_id, game_json_url);
