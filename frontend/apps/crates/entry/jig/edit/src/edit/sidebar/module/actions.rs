@@ -9,49 +9,14 @@ use shared::{
 use std::convert::TryInto;
 use std::rc::Rc;
 use utils::prelude::*;
-use wasm_bindgen_futures::spawn_local;
 
 pub fn on_module_kind_drop(state: Rc<State>, module_kind: ModuleKind) {
-    if state.index == 0 {
-        if module_kind == ModuleKind::Cover {
-            fist_cover_dragged(Rc::clone(&state));
-        } else {
-            state.tried_module_at_cover.set(true);
-        }
-    } else {
-        if state.module.is_none() {
-            assign_kind(state.clone(), module_kind);
-
-        }
+    if state.index == 0 && module_kind != ModuleKind::Cover {
+        return;
     }
-}
-
-pub fn fist_cover_dragged(state: Rc<State>) {
-    spawn_local(clone!(state => async move {
-        let path = endpoints::jig::Cover::PATH.replace("{id}", &state.sidebar.jig.id.0.to_string());
-
-        let res = api_with_auth_empty::<EmptyError, ()>(
-            &path,
-            endpoints::jig::Cover::METHOD,
-            None
-        ).await;
-        match res {
-            Err(_) => todo!(),
-            Ok(_) => {
-                let cover_id = match &*state.module {
-                    None => unreachable!(),
-                    Some(module) => {
-                        module.id
-                    },
-                };
-
-                state.sidebar.first_cover_assigned.set(true);
-                state.sidebar.collapsed.set(true);
-                state.sidebar.jig_edit_state.route.set(JigEditRoute::Module(cover_id.clone()));
-                Route::push_state(Route::Jig(JigRoute::Edit(state.sidebar.jig.id, JigEditRoute::Module(cover_id))));
-            },
-        }
-    }));
+    if state.module.is_none() {
+        assign_kind(state.clone(), module_kind);
+    }
 }
 
 pub async fn update_module(

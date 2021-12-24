@@ -78,7 +78,7 @@ impl SearchResultsSection {
                 ModuleThumbnail::render(
                     Rc::new(ModuleThumbnail {
                         jig_id: jig.id,
-                        module: jig.jig_data.modules[0].clone(),
+                        module: jig.jig_data.modules.first().cloned(),
                         is_jig_fallback: true,
                     }),
                     Some("image")

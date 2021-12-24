@@ -75,24 +75,30 @@ pub fn render(state: Rc<State>) -> Dom {
                             crate::debug::settings().empty_module_url.to_string()
                         },
                         Some(jig) => {
-                            let active_module = &jig.jig_data.modules[active_module_index];
+                            let active_module = &jig.jig_data.modules.get(active_module_index);
 
-                            let mut route: String = Route::Module(ModuleRoute::Play(
-                                active_module.kind,
-                                state.jig_id,
-                                active_module.id
-                            )).into();
-
-                            if state.player_options.draft {
-                                route = format!("{}?draft=true", route);
+                            match active_module {
+                                // module doesn't exist, can happen with jigs that don't have a cover
+                                None => String::new(),
+                                Some(active_module) => {
+                                    let mut route: String = Route::Module(ModuleRoute::Play(
+                                        active_module.kind,
+                                        state.jig_id,
+                                        active_module.id
+                                    )).into();
+        
+                                    if state.player_options.draft {
+                                        route = format!("{}?draft=true", route);
+                                    }
+        
+                                    let url = unsafe {
+                                        SETTINGS.get_unchecked()
+                                            .remote_target
+                                            .spa_iframe(&route)
+                                    };
+                                    url
+                                },
                             }
-
-                            let url = unsafe {
-                                SETTINGS.get_unchecked()
-                                    .remote_target
-                                    .spa_iframe(&route)
-                            };
-                            url
                         },
                     }
                 })))

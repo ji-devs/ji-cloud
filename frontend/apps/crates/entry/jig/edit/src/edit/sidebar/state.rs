@@ -4,7 +4,7 @@ use futures_signals::{
     signal::{Mutable, Signal, SignalExt},
     signal_vec::MutableVec,
 };
-use shared::domain::jig::{JigResponse, LiteModule};
+use shared::domain::jig::{JigResponse, LiteModule, ModuleKind};
 use std::rc::Rc;
 use utils::math::PointI32;
 
@@ -35,6 +35,22 @@ impl State {
             .map(|module| Rc::new(Some(module.clone().into())))
             .collect();
 
+        match modules.get(0) {
+            // if there's no first module
+            None => {
+                modules.push(Rc::new(None));
+            },
+            // if first in not on kind cover
+            Some(module) => {
+                if let Some(module) = &**module {
+                    if module.kind != ModuleKind::Cover {
+                        modules.push(Rc::new(None));
+                    }
+                };
+            },
+        };
+
+        // add empty module at end
         modules.push(Rc::new(None));
 
         Self {

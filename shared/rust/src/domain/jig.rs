@@ -553,6 +553,7 @@ pub struct JigResponse {
     ///
     /// NOTE: the cover is always technically there, this is just to indicate if the user has dragged the cover,
     /// needed just for the UI
+    #[deprecated]
     pub first_cover_assigned: bool,
 
     /// The data of the requested JIG.

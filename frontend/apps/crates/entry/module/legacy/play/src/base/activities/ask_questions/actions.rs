@@ -5,7 +5,6 @@ use std::{rc::Rc, sync::atomic::Ordering};
 use crate::base::actions::NavigationTarget;
 
 use dominator::clone;
-use utils::prelude::*;
 
 impl AskQuestions {
     pub fn on_start(self: Rc<Self>) {
