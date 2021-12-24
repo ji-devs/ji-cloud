@@ -1,9 +1,12 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
-use shared::domain::jig::{
-    AudioBackground, AudioFeedbackNegative, AudioFeedbackPositive, JigPlayerSettings, TextDirection,
+use shared::{
+    domain::jig::{AudioBackground, AudioFeedbackNegative, AudioFeedbackPositive, JigPlayerSettings, TextDirection, additional_resource::ResourceContent},
+    media::{MediaLibrary, PngImageFile}
 };
+
+use crate::path::{audio_lib_url, image_lib_url};
 
 pub trait JigAudioExt {
     fn display_name(&self) -> &'static str;
@@ -171,6 +174,28 @@ impl From<JigPlayerSettings> for JigPlayerOptions {
             drag_assist: settings.drag_assist,
             is_student: false,
             draft: false,
+        }
+    }
+}
+
+
+pub trait ResourceContentExt {
+    fn get_link(&self) -> String;
+}
+
+impl ResourceContentExt for ResourceContent {
+    fn get_link(&self) -> String {
+        match self {
+            ResourceContent::ImageId(image_id) => {
+                image_lib_url(MediaLibrary::User, PngImageFile::Original, image_id.clone())
+            },
+            ResourceContent::AudioId(audio_id) => {
+                audio_lib_url(MediaLibrary::User, audio_id.clone())
+            },
+            ResourceContent::Link(url) => {
+                url.to_string()
+            },
+            ResourceContent::PdfId(_) => todo!(),
         }
     }
 }
