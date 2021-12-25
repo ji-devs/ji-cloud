@@ -1,4 +1,5 @@
 use super::state::*;
+use components::module::_common::prelude::ModuleId;
 use dominator::clone;
 use futures::join;
 use shared::{
@@ -6,7 +7,11 @@ use shared::{
         self, ApiEndpoint
     },
     domain::{
-        jig::*,
+        jig::{
+            module::{
+                ModuleCreateRequest, ModuleBody
+            }, JigBrowseQuery, UserOrMe, JigBrowseResponse, JigSearchResponse, JigSearchQuery, JigCreateRequest, JigId, ModuleKind, JigResponse
+        },
         meta::MetadataResponse,
         CreateResponse
     },
@@ -112,10 +117,7 @@ impl JigGallery {
     pub fn create_jig(self: &Rc<Self>) {
         let state = Rc::clone(&self);
         state.loader.load(clone!(state => async move {
-            let req = Some(JigCreateRequest {
-                jig_focus: state.focus,
-                ..Default::default()
-            });
+            let req = Some(JigCreateRequest::default());
 
             match api_with_auth::<CreateResponse<JigId>, MetadataNotFound, _>(
                 &endpoints::jig::Create::PATH,
@@ -125,12 +127,32 @@ impl JigGallery {
             .await
             {
                 Ok(resp) => {
+                    if state.focus.is_resources() {
+                        Self::add_resource_cover(&resp.id).await;
+                    }
                     let url: String = Route::Jig(JigRoute::Edit(resp.id, JigEditRoute::Landing)).into();
                     dominator::routing::go_to_url(&url);
                 }
                 Err(_) => todo!("")
             }
         }));
+    }
+
+    async fn add_resource_cover(jig_id: &JigId) {
+        let req = ModuleCreateRequest {
+            body: ModuleBody::new(ModuleKind::ResourceCover),
+        };
+
+        let path = endpoints::jig::module::Create::PATH.replace("{id}", &jig_id.0.to_string());
+
+        match api_with_auth::<CreateResponse<ModuleId>, EmptyError, _>(&path, endpoints::jig::module::Create::METHOD, Some(req)).await {
+            Ok(_) => {
+                
+            },
+            Err(_) => {
+                todo!()
+            },
+        }
     }
 
     pub fn copy_jig(self: &Rc<Self>, jig_id: &JigId) {

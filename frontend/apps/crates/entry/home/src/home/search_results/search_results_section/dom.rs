@@ -6,7 +6,7 @@ use futures_signals::{
 };
 use shared::domain::jig::{JigResponse, JigFocus};
 use std::rc::Rc;
-use utils::{ages::AgeRangeVecExt, events, jig::published_at_string};
+use utils::{ages::AgeRangeVecExt, events, jig::{published_at_string, ResourceContentExt}};
 
 use super::state::SearchResultsSection;
 
@@ -99,19 +99,48 @@ impl SearchResultsSection {
                         })
                     }))
                 }),
-                html!("button-rect", {
-                    .property("slot", "play-button")
-                    .property("color", "blue")
-                    .property("bold", true)
-                    .text("Play")
-                    .event({
-                        let jig_id = jig.id;
-                        clone!(state => move |_: events::Click| {
-                            state.play_jig.set(Some(jig_id));
-                        })
-                    })
-                }),
             ])
+            .apply(|dom| {
+                match jig.jig_focus {
+                    JigFocus::Modules => {
+                        dom.child(html!("button-rect", {
+                            .property("slot", "play-button")
+                            .property("color", "blue")
+                            .property("bold", true)
+                            .text("Play")
+                            .event({
+                                let jig_id = jig.id;
+                                clone!(state => move |_: events::Click| {
+                                    state.play_jig.set(Some(jig_id));
+                                })
+                            })
+                        }))
+                    },
+                    JigFocus::Resources => {
+                        dom.child({
+                            match jig.jig_data.additional_resources.get(0) {
+                                Some(resource) => {
+                                    html!("button-rect", {
+                                        .property("slot", "play-button")
+                                        .property("color", "green")
+                                        .property("bold", true)
+                                        .property("href", resource.resource_content.get_link())
+                                        .property("target", "_new")
+                                        .text("View")
+                                    })
+                                },
+                                None => {
+                                    // should not be possible, resource focused jigs need to have exactly one additional resource
+                                    html!("span", {
+                                        .text("Error 😞")
+                                        .property("slot", "play-button")
+                                    })
+                                },
+                            }
+                        })
+                    },
+                }
+            })
         })
     }
     // new

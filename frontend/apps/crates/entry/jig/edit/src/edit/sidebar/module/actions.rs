@@ -31,7 +31,7 @@ pub async fn update_module(
         .await
 }
 
-#[allow(dead_code)] // this should be remove eventually
+#[allow(dead_code)] // this should be removed eventually
 pub fn mouse_down(state: Rc<State>, x: i32, y: i32) {
     state
         .sidebar
