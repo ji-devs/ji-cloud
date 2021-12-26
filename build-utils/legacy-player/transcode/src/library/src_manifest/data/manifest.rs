@@ -116,6 +116,8 @@ pub struct AlbumStore {
 
     #[serde(rename="pk")]
     pub key: PrimaryKey,
+
+    pub public: Option<bool>
 }
 
 #[derive(Deserialize, Debug)]

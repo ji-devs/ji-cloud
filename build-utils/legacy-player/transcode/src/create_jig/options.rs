@@ -5,29 +5,36 @@ use shared::config::RemoteTarget;
 #[derive(Debug, StructOpt)]
 #[structopt(name = "ji tap transcoder", about = "ji tap downloader/transcoder")]
 pub struct Opts {
+    #[structopt(long, parse(try_from_str), default_value = "true")]
+    pub delete_all_jigs_first: bool,
+
+    #[structopt(long, parse(try_from_str), default_value = "true")]
+    pub skip_cover_page: bool,
     /////////////////////////////////////
     /// 
     /// single game id
     #[structopt(long)]
     pub game_id: Option<String>,
 
-    // if game_id isn't supplied, loads from this url (easily generated via `ls -A1 > list.txt`)
-    #[structopt(long, default_value="https://storage.googleapis.com/ji-cloud-legacy-eu-001/full-list.txt")]
+    // if game_id isn't supplied, loads from this url
+    #[structopt(long, default_value="https://storage.googleapis.com/ji-cloud-legacy-eu-001/17000-report/finished.txt")]
     pub game_ids_list_url: String,
 
-    #[structopt(long, parse(try_from_str), default_value = "true")]
+    // this is no longer necessary since we have the proper finished.txt
+    #[structopt(long, parse(try_from_str), default_value = "false")]
     pub skip_errors_log: bool,
     // if skip_errors_log, loads the errors log and skips the game ids
-    #[structopt(long, default_value="https://storage.googleapis.com/ji-cloud-legacy-eu-001/logs-albums-first-2800/errors.txt")]
+    #[structopt(long, default_value="")]
     pub skip_errors_log_url: String,
 
     #[structopt(long, parse(try_from_str), default_value = "false")]
     pub skip_info_log: bool,
     // if skip_info_log, loads the info log and skips the game ids
-    #[structopt(long, default_value="https://storage.googleapis.com/ji-cloud-legacy-eu-001/logs-albums-first-2800/info-release.txt")]
+    #[structopt(long, default_value="")]
     pub skip_info_log_url: String,
     
-    #[structopt(long, default_value="/home/david/archive/info.txt", parse(from_os_str))]
+    //#[structopt(long, default_value="/home/david/archive/create-info.txt", parse(from_os_str))]
+    #[structopt(long, default_value="/Users/dakom/Documents/JI/create-info.txt", parse(from_os_str))]
     pub info_log: PathBuf,
 
     #[structopt(long, parse(try_from_str), default_value = "false")]
