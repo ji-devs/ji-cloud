@@ -2,20 +2,24 @@ import { LitElement, html, css, customElement, property } from "lit-element";
 import "@elements/core/images/ui";
 // import {ModuleKind, STR_MODULE_DISPLAY_NAME} from "@elements/module/_common/types";
 
-export type Kind = "share" | "new-jig" | "play-jig";
+export type Kind = "share" | "new-jig" | "play-jig" | "new-resource" | "view-resources";
 
 const STR_LABEL_LOOKUP: { [key in Kind]: string } = {
-    share: "Share the JIG",
+    "share": "Share the JIG",
     "new-jig": "Create a new JIG",
     "play-jig": "Play the JIG",
+    "new-resource": "Add another",
+    "view-resources": "View my resources"
 };
 
 const ext: {
     [key in Kind]: string;
 } = {
-    share: "svg",
+    "share": "svg",
     "new-jig": "png",
     "play-jig": "svg",
+    "new-resource": "svg",
+    "view-resources": "svg",
 };
 
 @customElement("post-publish-action")
