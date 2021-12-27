@@ -12,7 +12,7 @@ pub use player::{JigPlayerSettings, TextDirection};
 
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use std::{collections::HashSet, fmt, str::FromStr, convert::TryFrom};
+use std::{collections::HashSet, convert::TryFrom, fmt, str::FromStr};
 use uuid::Uuid;
 
 use super::{
@@ -334,7 +334,6 @@ impl TryFrom<&str> for JigFocus {
         }
     }
 }
-
 
 impl Default for JigFocus {
     fn default() -> Self {
