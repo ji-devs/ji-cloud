@@ -191,7 +191,11 @@ fn render_page(state: Rc<Publish>) -> Dom {
                 .text(STR_PUBLISH_LATER)
                 .event(clone!(state => move |_: events::Click| {
                     state.jig_edit_state.route.set_neq(JigEditRoute::Landing);
-                    let url:String = Route::Jig(JigRoute::Edit(state.jig.id.clone(), JigEditRoute::Landing)).into();
+                    let url:String = Route::Jig(JigRoute::Edit(
+                        state.jig.id.clone(),
+                        state.jig.jig_focus,
+                        JigEditRoute::Landing
+                    )).into();
                     dominator::routing::go_to_url(&url);
                 }))
             }),

@@ -3,7 +3,7 @@ use std::rc::Rc;
 use shared::{
     api::{endpoints::jig, ApiEndpoint},
     domain::{
-        jig::{JigCreateRequest, JigId},
+        jig::{JigCreateRequest, JigId, JigFocus},
         CreateResponse,
     },
     error::EmptyError,
@@ -27,7 +27,11 @@ pub fn create_jig(state: Rc<State>) {
         .await
         {
             Ok(resp) => {
-                let url: String = Route::Jig(JigRoute::Edit(resp.id, JigEditRoute::Landing)).into();
+                let url: String = Route::Jig(JigRoute::Edit(
+                    resp.id,
+                    JigFocus::Modules, // TODO: might change with resources
+                    JigEditRoute::Landing
+                )).into();
                 dominator::routing::go_to_url(&url);
             }
             Err(_) => {}

@@ -39,6 +39,13 @@ impl Publish {
             set_default_values(&mut jig.jig_data, &meta);
         }
 
+        // ensure the correct jig focus is set
+        assert_eq!(
+            jig_edit_state.jig_focus,
+            jig.jig_focus,
+            "Jig focus doesn't match the route"
+        );
+
         Self::new(
             PublishJig::new(jig),
             categories,
@@ -113,7 +120,11 @@ impl Publish {
 
                     state.jig_edit_state.route.set_neq(JigEditRoute::PostPublish);
 
-                    let url: String = Route::Jig(JigRoute::Edit(state.jig.id, JigEditRoute::PostPublish)).into();
+                    let url: String = Route::Jig(JigRoute::Edit(
+                        state.jig.id,
+                        state.jig.jig_focus,
+                        JigEditRoute::PostPublish
+                    )).into();
                     log::info!("{}", url);
 
                     /* this will cause a full refresh - but preserves history

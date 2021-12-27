@@ -8,9 +8,16 @@ use shared::{
     },
     domain::{
         jig::{
-            module::{
-                ModuleCreateRequest, ModuleBody
-            }, JigBrowseQuery, UserOrMe, JigBrowseResponse, JigSearchResponse, JigSearchQuery, JigCreateRequest, JigId, ModuleKind, JigResponse
+            module::{ModuleCreateRequest, ModuleBody},
+            JigBrowseQuery,
+            UserOrMe,
+            JigBrowseResponse,
+            JigSearchResponse,
+            JigSearchQuery,
+            JigCreateRequest,
+            JigId,
+            ModuleKind,
+            JigResponse,
         },
         meta::MetadataResponse,
         CreateResponse
@@ -130,7 +137,11 @@ impl JigGallery {
                     if state.focus.is_resources() {
                         Self::add_resource_cover(&resp.id).await;
                     }
-                    let url: String = Route::Jig(JigRoute::Edit(resp.id, JigEditRoute::Landing)).into();
+                    let url: String = Route::Jig(JigRoute::Edit(
+                        resp.id,
+                        state.focus,
+                        JigEditRoute::Landing
+                    )).into();
                     dominator::routing::go_to_url(&url);
                 }
                 Err(_) => todo!("")

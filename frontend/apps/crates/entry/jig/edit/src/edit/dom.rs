@@ -11,14 +11,14 @@ use super::{
 use components::player_popup::{PlayerPopup, PreviewPopupCallbacks};
 use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
-use shared::domain::jig::JigId;
+use shared::domain::jig::{JigId, JigFocus};
 use utils::prelude::*;
 
 pub struct EditPage {}
 
 impl EditPage {
-    pub fn render(jig_id: JigId, route: JigEditRoute) -> Dom {
-        let state = Rc::new(State::new(jig_id, route));
+    pub fn render(jig_id: JigId, jig_focus: JigFocus, route: JigEditRoute) -> Dom {
+        let state = Rc::new(State::new(jig_id, jig_focus, route));
 
         html!("empty-fragment", {
             .child(html!("jig-edit-page", {
@@ -41,11 +41,19 @@ impl EditPage {
                     async {}
                 })))
                 */
-                .child(SidebarDom::render(jig_id.clone(), state.clone()))
+                .apply(|dom| {
+                    match jig_focus {
+                        JigFocus::Modules => dom.child(SidebarDom::render(jig_id.clone(), state.clone())),
+                        JigFocus::Resources => dom,
+                    }
+                })
                 .child_signal(state.route.signal_cloned().map(clone!(state, jig_id => move |route| {
-                    match route {
+                        match route {
                         JigEditRoute::Landing => {
-                            Some(SelectionDom::render())
+                            match jig_focus {
+                                JigFocus::Modules => Some(SelectionDom::render()),
+                                JigFocus::Resources => Some(Publish::render(Rc::clone(&state))),
+                            }
                         },
                         JigEditRoute::Module(module_id) => {
                             Some(IframeDom::render(jig_id.clone(), module_id.clone()))

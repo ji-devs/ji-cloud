@@ -12,7 +12,7 @@ pub use player::{JigPlayerSettings, TextDirection};
 
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use std::{collections::HashSet, fmt, str::FromStr};
+use std::{collections::HashSet, fmt, str::FromStr, convert::TryFrom};
 use uuid::Uuid;
 
 use super::{
@@ -319,6 +319,19 @@ impl JigFocus {
         self == &Self::Resources
     }
 }
+
+impl TryFrom<&str> for JigFocus {
+    type Error = anyhow::Error;
+
+    fn try_from(s: &str) -> Result<Self, Self::Error> {
+        match s {
+            "modules" => Ok(Self::Modules),
+            "resources" => Ok(Self::Resources),
+            s => Err(anyhow::format_err!("\"{}\" is not a valid JigFocus variant", s))
+        }
+    }
+}
+
 
 impl Default for JigFocus {
     fn default() -> Self {

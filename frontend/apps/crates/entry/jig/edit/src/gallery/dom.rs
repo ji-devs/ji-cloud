@@ -95,8 +95,14 @@ impl JigGallery {
                         let jig_ages = jig.jig_data.age_ranges.clone();
                         html!("jig-gallery-recent", {
                             .property("slot", "recent-items")
-                            .property("href", jig.id.0.to_string())
                             .property("label", jig.jig_data.display_name.clone())
+                            .property("href", {
+                                String::from(Route::Jig(JigRoute::Edit(
+                                    jig.id,
+                                    jig.jig_focus,
+                                    JigEditRoute::Landing
+                                )))
+                            })
                             .property_signal("ages", state.age_ranges.signal_cloned().map(move|age_ranges| {
                                 age_ranges.range_string(&jig_ages)
                             }))
