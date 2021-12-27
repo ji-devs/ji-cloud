@@ -1,12 +1,11 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 import "@elements/core/images/ui";
 import { nothing } from "lit-html";
+import { JigFocus } from "@elements/module/_common/types";
 
 const STR_HEADER_FIRST = "Settings and JIG info.";
 const STR_HEADER_SECOND = "Last step before publishing";
 const STR_THUMBNAIL = "Thumbnail";
-
-export type JigFocus = "modules" | "resources";
 
 @customElement("jig-edit-publish")
 export class _ extends LitElement {
