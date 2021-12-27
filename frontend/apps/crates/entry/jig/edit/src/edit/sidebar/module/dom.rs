@@ -69,26 +69,14 @@ impl ModuleDom {
                 .event_with_options(
                     &EventOptions::bubbles(),
                     clone!(state => move |_evt:events::Click| {
-                        let can_edit = match &*state.module {
-                            Some(_) => {
-                                if state.index == 0 {
-                                    // If the cover is clicked, but the cover module hasn't yet
-                                    // been dragged onto it, then it should navigate to the landing
-                                    // screen.
-                                    state.sidebar.first_cover_assigned.get()
-                                } else {
-                                    true
-                                }
-                            },
-                            None => false,
-                        };
 
-                        if can_edit {
-                            actions::edit(state.clone())
-                        } else {
-                            // Anything that cannot be edited should navigate the user to the
-                            // landing screen.
-                            state.sidebar.jig_edit_state.route.set_neq(JigEditRoute::Landing);
+                        match &*state.module {
+                            Some(_) => {
+                                actions::edit(state.clone())
+                            },
+                            None => {
+                                state.sidebar.jig_edit_state.route.set_neq(JigEditRoute::Landing);
+                            },
                         }
 
                     })

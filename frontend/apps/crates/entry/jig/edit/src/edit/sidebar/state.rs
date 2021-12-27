@@ -18,7 +18,6 @@ pub struct State {
     pub name: Mutable<String>,
     pub publish_at: Mutable<Option<DateTime<Utc>>>,
     pub modules: MutableVec<Rc<Option<LiteModule>>>,
-    pub first_cover_assigned: Mutable<bool>,
     pub collapsed: Mutable<bool>,
     pub settings: Rc<SettingsState>,
     pub drag: Mutable<Option<Rc<DragState>>>,
@@ -63,7 +62,6 @@ impl State {
             drag: Mutable::new(None),
             drag_target_index: Mutable::new(None),
             loader: AsyncLoader::new(),
-            first_cover_assigned: Mutable::new(jig.first_cover_assigned),
             jig,
         }
     }
