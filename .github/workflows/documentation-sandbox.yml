@@ -49,7 +49,7 @@ jobs:
       run: cp -R shared/rust/target/doc ./temp-docs/crate
 
     - name: deploy to firebase
-      uses: w9jds/firebase-action@v1.0.1
+      uses: w9jds/firebase-action@v2.0.0
       with:
         args: deploy --project ji-cloud-developer-sandbox --only hosting:ji-cloud-sandbox-docs
       env:

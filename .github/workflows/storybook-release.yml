@@ -63,7 +63,7 @@ jobs:
           FONTAWESOME_NPM_AUTH_TOKEN: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
 
       - name: deploy to firebase
-        uses: w9jds/firebase-action@v1.0.1
+        uses: w9jds/firebase-action@v2.0.0
         with:
           args: deploy --project ji-cloud --only hosting:ji-cloud-storybook
         env:
