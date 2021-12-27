@@ -327,7 +327,10 @@ impl TryFrom<&str> for JigFocus {
         match s {
             "modules" => Ok(Self::Modules),
             "resources" => Ok(Self::Resources),
-            s => Err(anyhow::format_err!("\"{}\" is not a valid JigFocus variant", s))
+            s => Err(anyhow::format_err!(
+                "\"{}\" is not a valid JigFocus variant",
+                s
+            )),
         }
     }
 }
