@@ -124,12 +124,15 @@ impl JigGallery {
     pub fn create_jig(self: &Rc<Self>) {
         let state = Rc::clone(&self);
         state.loader.load(clone!(state => async move {
-            let req = Some(JigCreateRequest::default());
+            let req = JigCreateRequest {
+                jig_focus: state.focus,
+                ..Default::default()
+            };
 
             match api_with_auth::<CreateResponse<JigId>, MetadataNotFound, _>(
                 &endpoints::jig::Create::PATH,
                 endpoints::jig::Create::METHOD,
-                req,
+                Some(req),
             )
             .await
             {
