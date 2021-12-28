@@ -30,6 +30,7 @@ impl Step2Page {
                     .property("label", STR_LOCATION_LABEL)
                     .property_signal("error", state.location_error.signal())
                     .child(html!("input-location", {
+                        .property("placeholder", STR_LOCATION_PLACEHOLDER)
                         .event(clone!(state => move |evt:events::GoogleLocation| {
                             *state.location_json.borrow_mut() = evt.raw_json();
                         }))

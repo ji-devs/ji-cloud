@@ -43,6 +43,7 @@ pub mod register {
     pub mod step_2 {
         pub const STR_SUBMIT: &str = "Submit";
         pub const STR_LOCATION_LABEL: &str = "Location *";
+        pub const STR_LOCATION_PLACEHOLDER: &str = "City, State";
         pub const STR_PERSONA_LABEL: &str = "I am signing up as a... *";
         pub const STR_ORGANIZATION_LABEL: &str = "School/Organization";
         pub const STR_TERMS_LABEL_ONE: &str = "I have read and accept the ";

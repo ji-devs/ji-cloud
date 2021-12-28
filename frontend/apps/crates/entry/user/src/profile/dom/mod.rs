@@ -17,7 +17,7 @@ use web_sys::{HtmlElement, HtmlInputElement};
 
 use crate::{
     profile::{change_password, dom::options_popup::PopupCallbacks, state::ActivePopup},
-    strings::register::step_2::STR_PERSONA_OPTIONS,
+    strings::register::step_2::{STR_PERSONA_OPTIONS, STR_LOCATION_PLACEHOLDER},
 };
 
 use super::{actions, state::State};
@@ -180,6 +180,7 @@ impl ProfilePage {
                 html!("input-wrapper", {
                     .property("slot", "location")
                     .child(html!("input-location", {
+                        .property("placeholder", STR_LOCATION_PLACEHOLDER)
                         .property_signal("locationAsString", state.user.location.signal_cloned().map(|location| {
                             location.unwrap_or_default()
                                 .as_str()
