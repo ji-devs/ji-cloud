@@ -18,6 +18,10 @@ export class _ extends LitElement {
                     height: 100vh;
                     width: 100vw;
                 }
+                :host([isLegacy]) {
+                    /* only needed for legacy since legacy doesn't cover the whole height of the page */
+                    background-color: #e6f0ff;
+                }
                 main {
                     display: grid;
                     height: 100%;
@@ -36,6 +40,9 @@ export class _ extends LitElement {
                 }
                 ::slotted([slot="iframe"]) {
                     z-index: 1;
+                }
+                :host([isLegacy]) ::slotted([slot="iframe"]){
+                    height: calc(100% - 100px);
                 }
                 .controls,
                 .play-pause-button-layer {
@@ -112,6 +119,9 @@ export class _ extends LitElement {
 
     @property({ type: Boolean, reflect: true })
     paused: boolean = false;
+
+    @property({ type: Boolean, reflect: true })
+    isLegacy = false;
 
     render() {
         return html`

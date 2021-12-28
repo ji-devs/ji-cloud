@@ -4,7 +4,7 @@ use dominator_helpers::{events::Message, signals::DefaultSignal};
 use futures_signals::map_ref;
 use futures_signals::signal::{Signal, SignalExt};
 use js_sys::Reflect;
-use shared::domain::jig::JigResponse;
+use shared::domain::jig::{JigResponse, ModuleKind};
 use std::rc::Rc;
 use utils::{
     iframe::{IframeAction, ModuleToJigPlayerMessage},
@@ -22,6 +22,16 @@ pub fn render(state: Rc<State>) -> Dom {
 
     html!("jig-play-landing", {
         .property_signal("paused", state.paused.signal())
+        .property_signal("isLegacy", state.jig.signal_ref(|jig| {
+            if let Some(jig) = jig {
+                if let Some(first_module) = jig.jig_data.modules.get(0) {
+                    if first_module.kind == ModuleKind::Legacy {
+                        return true;
+                    }
+                }
+            };
+            false
+        }))
         .global_event(clone!(state => move |evt:Message| {
             match evt.try_serde_data::<IframeAction<ModuleToJigPlayerMessage>>() {
                 Err(_) => {},
