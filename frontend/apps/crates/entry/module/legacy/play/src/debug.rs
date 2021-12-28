@@ -66,14 +66,14 @@ pub async fn init(jig_id: JigId, _module_id: ModuleId) {
 
                 let url = utils::path::legacy_cdn_url(format!("{}/json/game.json", game_id));
 
-                let game: DebugGameManifest = fetch_url(&url)
+                let game: DebugGameData = fetch_url(&url)
                     .await
                     .unwrap_ji()
                     .json_from_str()
                     .await
                     .unwrap_ji();
 
-                let slide_id = game.structure.slides[slide_index].slide_id();
+                let slide_id = game.data.structure.slides[slide_index].slide_id();
                 
                 RawData { game_id, slide_id }
             }
@@ -90,6 +90,10 @@ pub fn settings() -> &'static DebugSettings {
     unsafe { SETTINGS.get_unchecked() }
 }
 
+#[derive(Deserialize, Debug)]
+pub struct DebugGameData {
+    pub data: DebugGameManifest,
+}
 #[derive(Deserialize, Debug)]
 pub struct DebugGameManifest {
     pub structure: DebugGameManifestStructure,
