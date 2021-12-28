@@ -6,7 +6,7 @@ use shared::{
     media::{MediaLibrary, PngImageFile}
 };
 
-use crate::path::{audio_lib_url, image_lib_url};
+use crate::path::{audio_lib_url, image_lib_url, pdf_lib_url};
 
 pub trait JigAudioExt {
     fn display_name(&self) -> &'static str;
@@ -192,10 +192,12 @@ impl ResourceContentExt for ResourceContent {
             ResourceContent::AudioId(audio_id) => {
                 audio_lib_url(MediaLibrary::User, audio_id.clone())
             },
+            ResourceContent::PdfId(pdf_id) => {
+                pdf_lib_url(MediaLibrary::User, pdf_id.clone())
+            },
             ResourceContent::Link(url) => {
                 url.to_string()
             },
-            ResourceContent::PdfId(_) => todo!(),
         }
     }
 }

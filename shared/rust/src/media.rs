@@ -130,7 +130,7 @@ impl FileKind {
             Self::AnimationGif => "image/gif",
             Self::ImagePng(_) => "image/png",
             Self::AudioMp3 => "audio/mp3",
-            Self::DocumentPdf => "document/pdf",
+            Self::DocumentPdf => "application/pdf",
         }
     }
 

@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
-use components::{audio, image};
-use shared::{api::endpoints, domain::{audio::AudioId, image::{ImageId, ImageKind, user::UserImageCreateRequest}, jig::additional_resource::ResourceContent}, media::MediaLibrary};
+use components::{audio, image, pdf};
+use shared::{api::endpoints, domain::{audio::AudioId, image::{ImageId, ImageKind, user::UserImageCreateRequest}, jig::additional_resource::ResourceContent, pdf::PdfId}, media::MediaLibrary};
 use utils::{prelude::ApiEndpointExt, unwrap::UnwrapJiExt};
 use web_sys::{Blob, File};
 
@@ -44,8 +44,8 @@ pub async fn upload_file(file: &File) -> Result<ResourceContent, anyhow::Error> 
 
     let value = if mime_type == MIME_PDF {
 
-        // upload_pdf(file).await?;
-        todo!()
+        let pdf_id = upload_pdf(file).await?;
+        ResourceContent::PdfId(pdf_id)
 
     } else if mime_type.starts_with(MIME_START_IMAGE) {
 
@@ -73,7 +73,7 @@ async fn upload_image(file: &File) -> Result<ImageId, anyhow::Error> {
 
     let image_id = endpoints::image::user::Create::api_with_auth(Some(req))
         .await
-        .map_err(|_err| anyhow::Error::msg("Error creating image in db"))?
+        .map_err(|_| anyhow::Error::msg("Error creating image in db"))?
         .id;
 
     image::upload::upload_image(
@@ -91,7 +91,7 @@ async fn upload_image(file: &File) -> Result<ImageId, anyhow::Error> {
 async fn upload_audio(file: &File) -> Result<AudioId, anyhow::Error> {
     let audio_id = endpoints::audio::user::Create::api_with_auth(None)
         .await
-        .map_err(|_err| anyhow::Error::msg("Error creating audio in db"))?
+        .map_err(|_| anyhow::Error::msg("Error creating audio in db"))?
         .id;
 
     audio::upload::upload_audio(
@@ -106,17 +106,20 @@ async fn upload_audio(file: &File) -> Result<AudioId, anyhow::Error> {
     Ok(audio_id)
 }
 
-// async fn upload_pdf(file: &File) -> Result<PdfId, anyhow::Error> {
-//     let audio_id = endpoints::audio::user::Create::api_with_auth(None)
-//         .await
-//         .map_err(|_err| anyhow::Error::msg("Error creating audio in db"))?
-//         .id;
-//     pdf::upload::upload_audio(
-//         PdfId(Uuid::parse_str("0").unwrap()),
-//         MediaLibrary::User,
-//         file,
-//         None
-//     )
-//         .await
-//         .map_err(|e| anyhow::Error::msg(e.to_string()))
-// }
+async fn upload_pdf(file: &File) -> Result<PdfId, anyhow::Error> {
+    let pdf_id = endpoints::pdf::user::Create::api_with_auth(None)
+        .await
+        .map_err(|_| anyhow::Error::msg("Error creating pdf in db"))?
+        .id;
+
+    pdf::upload::upload_pdf(
+        pdf_id,
+        MediaLibrary::User,
+        file,
+        None
+    )
+        .await
+        .map_err(|e| anyhow::Error::msg(e.to_string()))?;
+
+    Ok(pdf_id)
+}
