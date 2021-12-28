@@ -6,10 +6,7 @@ use shared::domain::{
     category::CategoryId,
     jig::{
         additional_resource::{AdditionalResource, AdditionalResourceId as AddId, ResourceContent},
-        module::{
-            body::{cover, ThemeId},
-            ModuleId, StableModuleId,
-        },
+        module::{body::ThemeId, ModuleId},
         AudioBackground, AudioEffects, AudioFeedbackNegative, AudioFeedbackPositive,
         DeleteUserJigs, DraftOrLive, JigAdminData, JigAdminUpdateData, JigData, JigFocus, JigId,
         JigPlayerSettings, JigRating, JigResponse, LiteModule, ModuleKind, PrivacyLevel,

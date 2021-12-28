@@ -28,18 +28,18 @@ returning id as "id: PdfId"
         Ok(id)
     }
 
-    pub async fn delete(db: &PgPool, image: PdfId) -> sqlx::Result<()> {
-        sqlx::query!("delete from user_pdf_library where id = $1", image.0)
+    pub async fn delete(db: &PgPool, pdf: PdfId) -> sqlx::Result<()> {
+        sqlx::query!("delete from user_pdf_library where id = $1", pdf.0)
             .execute(db)
             .await
             .map(drop)
     }
 
-    pub async fn get(db: &PgPool, image: PdfId) -> sqlx::Result<Option<UserPdf>> {
+    pub async fn get(db: &PgPool, pdf: PdfId) -> sqlx::Result<Option<UserPdf>> {
         sqlx::query_as!(
             UserPdf,
             r#"select id as "id: PdfId" from user_pdf_library where id = $1"#,
-            image.0
+            pdf.0
         )
         .fetch_optional(db)
         .await
