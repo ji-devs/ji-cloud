@@ -61,7 +61,6 @@ impl ModuleDom {
                         _ => false,
                     }
                 })))
-                .property("lastBottomDecoration", index == total_len-1)
                 // TODO:
                 // .event(|_evt:events::MouseDown| {
                 //     actions::mouse_down(state.clone(), evt.x(), evt.y());

@@ -81,7 +81,7 @@ pub fn render(state: Rc<State>) -> Dom {
                             html!("jig-sidebar-module", {
                                 .property("module", module.kind.as_str())
                                 .property("index", i as u32)
-                                .property("lastBottomDecoration", i == module_count - 1)
+                                .property("isLastModule", i == module_count - 1)
                                 .property("selected", true)
                                 .property_signal("selected", state.player_state.active_module.signal().map(move |active_module_index| {
                                     i == active_module_index
