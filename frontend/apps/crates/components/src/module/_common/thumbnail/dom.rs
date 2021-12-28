@@ -49,7 +49,6 @@ impl ModuleThumbnail {
                         &state.jig_id,
                         &state.module.clone().unwrap_ji().id,
                         clone!(mutable => move || {
-                            log::info!("fdsa");
                             mutable.set(());
                         }),
                     ),
