@@ -208,7 +208,7 @@ export class _ extends LitElement {
     index: number = 0;
 
     @property({ type: Boolean })
-    lastBottomDecoration: boolean = false;
+    isLastModule: boolean = false;
 
     @property()
     module: ModuleKind | "" = "";
@@ -231,7 +231,7 @@ export class _ extends LitElement {
                 ${getImage("yellow/face.png", "head")}
                 ${getImage("torso-columns.svg", "torso-columns")}
             `;
-        } else if (this.lastBottomDecoration) {
+        } else if (this.isLastModule) {
             return html`
                 ${getImage("feet-spring.svg", "feet-spring")}
                 ${getImage("yellow/feet-rollers.svg", "feet-rollers")}
