@@ -18,6 +18,7 @@ pub struct State {
     pub index: usize,
     pub total_len: usize,
     pub elem: RefCell<Option<HtmlElement>>,
+    pub confirm_delete: Mutable<bool>,
 }
 
 impl State {
@@ -35,6 +36,7 @@ impl State {
             tried_module_at_cover: Mutable::new(false),
             drag: Mutable::new(None),
             elem: RefCell::new(None),
+            confirm_delete: Mutable::new(false),
         }
     }
 

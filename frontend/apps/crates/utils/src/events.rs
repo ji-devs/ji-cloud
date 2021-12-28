@@ -213,3 +213,23 @@ impl CustomSelectedChange {
         self.data().selected
     }
 }
+
+// Custom Confirm
+#[derive(Deserialize, Debug)]
+pub struct CustomConfirmData;
+
+make_custom_event_serde!(
+    "custom-confirm",
+    CustomConfirm,
+    CustomConfirmData
+);
+
+// Custom Cancel
+#[derive(Deserialize, Debug)]
+pub struct CustomCancelData;
+
+make_custom_event_serde!(
+    "custom-cancel",
+    CustomCancel,
+    CustomCancelData
+);

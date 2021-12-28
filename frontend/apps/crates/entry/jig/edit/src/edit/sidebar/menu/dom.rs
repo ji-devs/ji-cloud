@@ -130,8 +130,8 @@ fn item_delete(state: &Rc<State>, module: &Rc<ModuleState>) -> Dom {
         .property("slot", "lines")
         .property("icon", "delete")
         .event(clone!(state, module => move |_:events::Click| {
+            module.confirm_delete.set_neq(true);
             state.close_menu();
-            actions::delete(module.clone());
         }))
     })
 }
