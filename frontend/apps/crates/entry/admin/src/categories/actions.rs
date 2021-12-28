@@ -99,7 +99,8 @@ fn add_category(state: Rc<State>, parent: Option<Rc<Category>>) {
 
         match api_with_auth::<NewCategoryResponse, EmptyError, _>(endpoints::category::Create::PATH, endpoints::category::Create::METHOD, Some(req)).await {
             Ok(resp) => {
-                let cat = Rc::new(Category::new(resp.id, name));
+                // Categories created here should be in the editing state already.
+                let cat = Rc::new(Category::new(resp.id, name, true));
 
                 match parent {
                     Some(parent) => {

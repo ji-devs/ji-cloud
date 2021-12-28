@@ -110,12 +110,10 @@ impl ContentLineDom {
     pub fn render(content_state: Rc<ContentState>) -> Vec<Dom> {
         let mut children: Vec<Dom> = vec![html!("input-text-content", {
             .property("slot", "content")
+            .property_signal("editing", content_state.cat.editing.signal_cloned())
             .property_signal("value", content_state.cat.name.signal_cloned())
             .event(clone!(content_state => move |evt:events::CustomChange| {
                 actions::rename_category(&content_state.cat, content_state.state.clone(), evt.value());
-            }))
-            .after_inserted(clone!(content_state => move |elem| {
-                *content_state.input_ref.borrow_mut() = Some(elem);
             }))
         })];
 
@@ -144,7 +142,7 @@ impl MenuDom {
                     .property("kind", "text")
                     .property("color", "darkGray")
                     .property("hoverColor", "blue")
-                    .text("add")
+                    .text("Add")
                     .event(clone!(content_state => move |_evt:events::Click| {
                         actions::add_category_child(content_state.clone());
                     }))
@@ -153,16 +151,7 @@ impl MenuDom {
                     .property("kind", "text")
                     .property("color", "darkGray")
                     .property("hoverColor", "blue")
-                    .text("delete")
-                    .event(clone!(content_state => move |_evt:events::Click| {
-                        actions::delete_category(content_state.clone());
-                    }))
-                }),
-                html!("button-rect", {
-                    .property("kind", "text")
-                    .property("color", "darkGray")
-                    .property("hoverColor", "blue")
-                    .text("move up")
+                    .text("Move up")
                     .event(clone!(content_state => move |_evt:events::Click| {
                         actions::move_category(content_state.clone(), actions::Direction::Up);
                     }))
@@ -171,7 +160,7 @@ impl MenuDom {
                     .property("kind", "text")
                     .property("color", "darkGray")
                     .property("hoverColor", "blue")
-                    .text("move down")
+                    .text("Move down")
                     .event(clone!(content_state => move |_evt:events::Click| {
                         actions::move_category(content_state.clone(), actions::Direction::Down);
                     }))
@@ -180,19 +169,20 @@ impl MenuDom {
                     .property("kind", "text")
                     .property("color", "darkGray")
                     .property("hoverColor", "blue")
-                    .text("rename")
+                    .text("Rename")
                     .event(clone!(content_state => move |_evt:events::Click| {
-                        //These are only DOM changes
-                        if let Some(input_ref) = content_state.input_ref.borrow().as_ref() {
-                            let _= js_sys::Reflect::set(
-                                input_ref,
-                                &JsValue::from_str("editing"),
-                                &JsValue::from_bool(true)
-                            );
-                        }
-
+                        content_state.cat.editing.set(true);
                         content_state.close_menu();
 
+                    }))
+                }),
+                html!("button-rect", {
+                    .property("kind", "text")
+                    .property("color", "red")
+                    .property("hoverColor", "red")
+                    .text("Delete")
+                    .event(clone!(content_state => move |_evt:events::Click| {
+                        actions::delete_category(content_state.clone());
                     }))
                 }),
             ])
