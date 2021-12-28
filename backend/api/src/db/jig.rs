@@ -804,8 +804,6 @@ pub async fn browse(
     jig_focus: Option<JigFocus>,
     page: i32,
 ) -> sqlx::Result<Vec<JigResponse>> {
-    println!("inside");
-
     sqlx::query!( //language=SQL
         r#"
 select jig.id                                              as "jig_id: JigId",
