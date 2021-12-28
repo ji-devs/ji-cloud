@@ -14,7 +14,6 @@ expression: body
       "likes": 0,
       "plays": 0,
       "jigFocus": "modules",
-      "firstCoverAssigned": false,
       "jigData": {
         "draftOrLive": "Draft",
         "displayName": "name",
@@ -85,7 +84,6 @@ expression: body
       "likes": 0,
       "plays": 0,
       "jigFocus": "modules",
-      "firstCoverAssigned": false,
       "jigData": {
         "draftOrLive": "Draft",
         "displayName": "draft name",

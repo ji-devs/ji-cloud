@@ -172,7 +172,6 @@ with cte as (
                when $2 = 0 then jig.draft_id
                when $2 = 1 then jig.live_id
                end as "draft_or_live_id",
-           first_cover_assigned,
            published_at,
            rating,
            blocked,
@@ -190,7 +189,6 @@ select cte.jig_id                                          as "jig_id: JigId",
        (select given_name || ' '::text || family_name
         from user_profile
         where user_profile.user_id = author_id)            as "author_name",
-       first_cover_assigned,
        published_at,
        updated_at,
        privacy_level                                       as "privacy_level!: PrivacyLevel",
@@ -250,7 +248,6 @@ from jig_data
             creator_id: row.creator_id,
             author_id: row.author_id,
             author_name: row.author_name,
-            first_cover_assigned: row.first_cover_assigned,
             likes: row.liked_count,
             plays: row.play_count,
             jig_focus: row.jig_focus,
@@ -319,7 +316,6 @@ select jig.id                                       as "id!: JigId",
        (select given_name || ' '::text || family_name
         from user_profile
         where user_profile.user_id = author_id) as "author_name",
-       first_cover_assigned                     as "first_cover_assigned!",
        live_id                                  as "live_id!",
        draft_id                                 as "draft_id!",
        published_at,
@@ -413,7 +409,6 @@ order by t.ord
             author_name: jig_row.author_name,
             likes: jig_row.liked_count,
             plays: jig_row.play_count,
-            first_cover_assigned: jig_row.first_cover_assigned,
             jig_focus: jig_row.jig_focus,
             jig_data: JigData {
                 draft_or_live,
@@ -782,22 +777,6 @@ where creator_id is not distinct from $1
     Ok(jig_ids)
 }
 
-pub async fn cover_set(db: &PgPool, jig_id: JigId) -> sqlx::Result<()> {
-    sqlx::query!(
-        //language=SQL
-        r#"
-update jig
-set first_cover_assigned = true
-where id = $1
-"#,
-        jig_id.0
-    )
-    .execute(db)
-    .await?;
-
-    Ok(())
-}
-
 pub async fn browse(
     pool: &sqlx::Pool<sqlx::Postgres>,
     author_id: Option<Uuid>,
@@ -814,7 +793,6 @@ select jig.id                                              as "jig_id: JigId",
        (select given_name || ' '::text || family_name
         from user_profile
         where user_profile.user_id = author_id)            as "author_name",
-       first_cover_assigned                                as "first_cover_assigned!",
        published_at,
        liked_count,
        (
@@ -882,7 +860,6 @@ limit 20 offset 20 * $1
             creator_id: row.creator_id,
             author_id: row.author_id,
             author_name: row.author_name,
-            first_cover_assigned: row.first_cover_assigned,
             jig_focus: row.jig_focus,
             plays: row.play_count,
             likes: row.liked_count,

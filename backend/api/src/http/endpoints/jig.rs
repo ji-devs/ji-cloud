@@ -190,20 +190,6 @@ async fn delete_all(
     Ok(HttpResponse::NoContent().finish())
 }
 
-async fn cover(
-    db: Data<PgPool>,
-    claims: TokenUser,
-    path: web::Path<JigId>,
-) -> Result<HttpResponse, error::Delete> {
-    let id = path.into_inner();
-
-    db::jig::authz(&*db, claims.0.user_id, Some(id)).await?;
-
-    db::jig::cover_set(&*db, id).await?;
-
-    Ok(HttpResponse::NoContent().finish())
-}
-
 async fn browse(
     db: Data<PgPool>,
     claims: TokenUser,
@@ -407,7 +393,6 @@ pub fn configure(cfg: &mut ServiceConfig) {
             jig::DeleteAll::PATH,
             jig::DeleteAll::METHOD.route().to(delete_all),
         )
-        .route(jig::Cover::PATH, jig::Cover::METHOD.route().to(cover))
         .route(
             jig::player::Create::PATH,
             jig::player::Create::METHOD.route().to(player::create),

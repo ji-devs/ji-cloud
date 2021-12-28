@@ -564,13 +564,6 @@ pub struct JigResponse {
     /// Number of plays Jig
     pub jig_focus: JigFocus,
 
-    /// True if Jig cover is set
-    ///
-    /// NOTE: the cover is always technically there, this is just to indicate if the user has dragged the cover,
-    /// needed just for the UI
-    #[deprecated]
-    pub first_cover_assigned: bool,
-
     /// The data of the requested JIG.
     pub jig_data: JigData,
 
