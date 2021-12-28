@@ -35,6 +35,8 @@ pub const IMAGE_BODY_SIZE_LIMIT: usize = 1024 * 1024 * 30;
 pub const ANIMATION_BODY_SIZE_LIMIT: usize = 1024 * 1024 * 40;
 /// Audio file size limit. 30 MB
 pub const AUDIO_BODY_SIZE_LIMIT: usize = 1024 * 1024 * 30;
+/// PDF file size limit. 10 MB
+pub const PDF_BODY_SIZE_LIMIT: usize = 1024 * 1024 * 10;
 /// JSON body size limit for both requests and responses. 16 KB
 pub const JSON_BODY_LIMIT: u64 = 1024 * 16;
 /// Allowed CORS origins

@@ -11,6 +11,7 @@ use crate::{error, extractor::RequestOrigin};
 use core::{
     config::{
         ANIMATION_BODY_SIZE_LIMIT, AUDIO_BODY_SIZE_LIMIT, CORS_ORIGINS, IMAGE_BODY_SIZE_LIMIT,
+        PDF_BODY_SIZE_LIMIT,
     },
     settings::GoogleCloudStorageSettings,
 };
@@ -147,6 +148,7 @@ impl Client {
             FileKind::AnimationGif => Some(ANIMATION_BODY_SIZE_LIMIT),
             FileKind::ImagePng(PngImageFile::Original) => Some(IMAGE_BODY_SIZE_LIMIT),
             FileKind::AudioMp3 => Some(AUDIO_BODY_SIZE_LIMIT),
+            FileKind::DocumentPdf => Some(PDF_BODY_SIZE_LIMIT),
             _ => unimplemented!("File type size limit undefined!"),
         }
     }
