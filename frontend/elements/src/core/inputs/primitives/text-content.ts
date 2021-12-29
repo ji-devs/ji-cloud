@@ -112,22 +112,27 @@ export class _ extends LitElement {
 
     firstUpdated(_changed: any) {
         this.resizeInput();
+        this.handleEditing();
     }
     updated(changed: any) {
         if (typeof changed.get("editing") === "boolean") {
-            const { editing } = this;
-            this.removeGlobalListener();
-            if (editing) {
-                window.addEventListener("mousedown", this.onGlobalMouseDown);
-                const input = this.shadowRoot?.getElementById(
-                    "input"
-                ) as HTMLInputElement;
-                if (input) {
-                    input.focus();
-                    input.value = this.value;
-                    input.setSelectionRange(-1, -1);
-                    this.resizeInput();
-                }
+            this.handleEditing();
+        }
+    }
+
+    handleEditing() {
+        const { editing } = this;
+        this.removeGlobalListener();
+        if (editing) {
+            window.addEventListener("mousedown", this.onGlobalMouseDown);
+            const input = this.shadowRoot?.getElementById(
+                "input"
+            ) as HTMLInputElement;
+            if (input) {
+                input.focus();
+                input.value = this.value;
+                input.setSelectionRange(0, -1);
+                this.resizeInput();
             }
         }
     }
