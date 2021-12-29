@@ -37,7 +37,7 @@ impl State {
             .location()
             .origin()
             .unwrap_ji();
-        format!(r#"<iframe src="{}{}"></iframe>"#, origin, url)
+        format!(r#"<iframe src="{}{}" width="800" height="450"></iframe>"#, origin, url)
     }
 }
 
