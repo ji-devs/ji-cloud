@@ -37,9 +37,6 @@ serde_json = { version = "1.0.72", features = ["raw_value"] }
 serde_repr = "0.1.7"
 url = "2.2.2"
 reqwest = { version = "0.11.7", features = ["json", "stream"] }
-reqwest-middleware = "0.1.1"
-reqwest-retry = "0.1.1"
-reqwest-tracing = "0.2.0"
 futures = "0.3.18"
 tokio = { version = "1.14.0", features = ["full"] }
 tokio-util = { version = "0.6.9", features = ["codec"] }

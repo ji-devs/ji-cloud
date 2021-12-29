@@ -85,7 +85,13 @@ async fn main() {
 
     let ctx = Arc::new(Context::new(opts).await);
 
+    if ctx.opts.delete_all_jigs_first {
+        delete_all_jigs_first(&ctx).await;
+        log::info!("deleted all jigs!");
+    }
 
+    log::warn!("exiting early for now, once all jigs are deleted pick it up again!")
+    std::process::exit(0);
 
     let batch_size = *&ctx.opts.batch_size;
     let mut jobs = get_futures(ctx.clone()).await;
@@ -112,11 +118,36 @@ async fn main() {
     log::info!("done!");
 }
 
+async fn delete_all_jigs_first(ctx:&Context) {
+
+    let url = format!("{}{}", 
+        ctx.opts.get_remote_target().api_url(), 
+        endpoints::jig::DeleteAll::PATH
+    );
+
+    log::info!("url: {}", url);
+
+    let res = ctx
+        .client 
+        .delete(&url)
+        .header("AUTHORIZATION", &format!("Bearer {}", &ctx.token))
+        .header("content-length", 0)
+        .send()
+        .await
+        .unwrap();
+
+    if !res.status().is_success() {
+        log::error!("error code: {}, details: {:?}", res.status().as_str(), res);
+        panic!("Failed to delete all jigs");
+    }
+}
+
 async fn get_futures(ctx:Arc<Context>) -> Vec<impl Future> {
     match ctx.opts.game_id.clone() {
         None => {
 
-            let res = reqwest::Client::new()
+            let res = ctx 
+                .client
                 .get(&ctx.opts.game_ids_list_url)
                 .send()
                 .await
@@ -150,7 +181,8 @@ async fn parse(ctx: Arc<Context>, game_id: String) {
 
     let url = format!("https://storage.googleapis.com/ji-cloud-legacy-eu-001/games/{}/json/game.json", game_id);
 
-    let res = reqwest::Client::new()
+    let res = ctx 
+        .client
         .get(&url)
         .send()
         .await
@@ -165,7 +197,7 @@ async fn parse(ctx: Arc<Context>, game_id: String) {
 
     log::info!("{}: {} slides", game_id, manifest.structure.slides.len());
 
-    let image_id = if manifest.structure.slides.len() > 0 {
+    let image_id = if !ctx.opts.skip_cover_page && manifest.structure.slides.len() > 0 {
         Some(upload_cover_image(ctx, &game_id, &manifest.structure.slides[0]).await)
     } else {
         None
@@ -201,7 +233,8 @@ async fn upload_cover_image(ctx:&Context, game_id: &str, slide: &transcode::src_
 
     let url = format!("https://storage.googleapis.com/ji-cloud-legacy-eu-001/games/{}/media/slides/{}", game_id, slide.image_full);
 
-    let res = reqwest::Client::new()
+    let res = ctx 
+        .client
         .get(&url)
         .send()
         .await
@@ -239,7 +272,8 @@ async fn upload_cover_image(ctx:&Context, game_id: &str, slide: &transcode::src_
         ImageId(Uuid::nil())
     } else {
 
-        let res = reqwest::Client::new()
+        let res = ctx 
+            .client
             .post(url)
             .header("AUTHORIZATION", &format!("Bearer {}", &ctx.token))
             .json(&req_data)
@@ -273,7 +307,8 @@ async fn upload_cover_image(ctx:&Context, game_id: &str, slide: &transcode::src_
         "https://example.com".to_string()
     } else {
 
-        let res = reqwest::Client::new()
+        let res = ctx 
+            .client
             .put(url)
             .header("AUTHORIZATION", &format!("Bearer {}", &ctx.token))
             .json(&req_data)
@@ -297,7 +332,8 @@ async fn upload_cover_image(ctx:&Context, game_id: &str, slide: &transcode::src_
     if ctx.opts.dry_run {
         image_id
     } else {
-        let res = reqwest::Client::new()
+        let res = ctx 
+            .client
             .put(&session_uri)
             .header("Content-Type", content_type)
             .header("Content-Length", file_size) 
@@ -326,7 +362,8 @@ async fn assign_cover_image(ctx:&Context, jig_id: &JigId, image_id: ImageId) {
     );
 
 
-    let res = reqwest::Client::new()
+    let res = ctx 
+        .client
         .get(url)
         .header("AUTHORIZATION", &format!("Bearer {}", &ctx.token))
         .send()
@@ -351,7 +388,8 @@ async fn assign_cover_image(ctx:&Context, jig_id: &JigId, image_id: ImageId) {
     );
 
 
-    let res = reqwest::Client::new()
+    let res = ctx 
+        .client
         .get(url)
         .header("AUTHORIZATION", &format!("Bearer {}", &ctx.token))
         .send()
@@ -397,7 +435,8 @@ async fn assign_cover_image(ctx:&Context, jig_id: &JigId, image_id: ImageId) {
         endpoints::jig::module::Update::PATH.replace("{id}", &jig_id.0.to_string())
     );
 
-    let res = reqwest::Client::new()
+    let res = ctx
+        .client 
         .patch(url)
         .header("AUTHORIZATION", &format!("Bearer {}", &ctx.token))
         .json(&req_data)
@@ -417,7 +456,8 @@ async fn assign_cover_image(ctx:&Context, jig_id: &JigId, image_id: ImageId) {
         endpoints::jig::Cover::PATH.replace("{id}", &jig_id.0.to_string())
     );
 
-    let res = reqwest::Client::new()
+    let res = ctx 
+        .client
         .patch(url)
         .header("AUTHORIZATION", &format!("Bearer {}", &ctx.token))
         .send()
@@ -499,7 +539,11 @@ async fn make_jig(ctx:&Context, manifest: &SrcManifest) -> JigId {
     let url = format!("{}{}", ctx.opts.get_remote_target().api_url(), path);
 
     let req = JigUpdateDraftDataRequest {
-        privacy_level: Some(PrivacyLevel::Public),
+        privacy_level: if manifest.album_store.public.unwrap_or(true) {
+            Some(PrivacyLevel::Public)
+        } else {
+            Some(PrivacyLevel::Private)
+        },
         ..Default::default()
     };
 

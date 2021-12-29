@@ -70,12 +70,19 @@ async fn get_futures(ctx:Arc<Context>) -> Vec<impl Future> {
     log::info!("parsing {} urls", urls.len());
     urls
         .into_iter()
-        .map(|url| {
-            transcode_game(ctx.clone(), url)
+        .map(|(url, id)| {
+            let ctx = ctx.clone();
+            async move {
+                if let Some(game_id) = transcode_game(ctx.clone(), url, id).await {
+                    writeln!(&ctx.finished_log, "{}", game_id).unwrap();
+                }
+            }
         })
         .collect()
 }
-async fn game_json_urls(opts:&Opts) -> Vec<String> {
+
+//url, game_id
+async fn game_json_urls(opts:&Opts) -> Vec<(String, String)> {
 
     #[derive(Deserialize)]
     struct Data {
@@ -93,7 +100,7 @@ async fn game_json_urls(opts:&Opts) -> Vec<String> {
 
     match opts.game_json_url.as_ref() {
         Some(url) => {
-            vec![url.to_string()]
+            vec![(url.to_string(), "".to_string())]
         },
         None => {
             if opts.game_json_from_albums {
@@ -105,86 +112,101 @@ async fn game_json_urls(opts:&Opts) -> Vec<String> {
                     let reader = BufReader::new(file);
                     let data:Data = serde_json::from_reader(reader).unwrap();
 
+                    let game_id = format!("{}", data.album.pk);
+
                     if opts.data_url {
-                        urls.push(format!("https://jitap.net/store/api/album/{}/structure/", data.album.pk));
+                        urls.push((format!("https://jitap.net/store/api/album/{}/structure/", data.album.pk), game_id));
                     } else {
-                        urls.push(data.album.fields.structure);
+                        urls.push((data.album.fields.structure, game_id));
                     }
                 }
                 urls
             } else {
-                let list:&[&str] = &[
+                let list:&[(&str, &str)] = &[
                         // 
                         // Let's learn about tet - 7556
                         // (pro only)
-                        "https://d24o39yp3ttic8.cloudfront.net/223FCB2E-F1D9-42B1-80E9-BEF44FD513B6/game.json",
+                        ("https://d24o39yp3ttic8.cloudfront.net/223FCB2E-F1D9-42B1-80E9-BEF44FD513B6/game.json", "7556"),
 
                         // animals - 16248
-                        "https://d24o39yp3ttic8.cloudfront.net/6E5E7733-D22E-4315-AD26-CB06B6B6CB53/game.json",
+                        ("https://d24o39yp3ttic8.cloudfront.net/6E5E7733-D22E-4315-AD26-CB06B6B6CB53/game.json", "16248"),
 
                         // // David Test 002 (houdini) - 17736
                         // https://jitap.net/activities/gemy/play/david-test-002
-                        "https://d24o39yp3ttic8.cloudfront.net/5D00A147-73B7-43FF-A215-A38CB84CEBCD/game.json",
+                        ("https://d24o39yp3ttic8.cloudfront.net/5D00A147-73B7-43FF-A215-A38CB84CEBCD/game.json", "17736"),
 
                         // // // Corinne Houdini - 17762
                         // https://jitap.net/activities/geno/play/houdini-states
-                        "https://d24o39yp3ttic8.cloudfront.net/58C85551-79A5-4E36-9794-3D3D8D3E0D31/game.json",
+                        ("https://d24o39yp3ttic8.cloudfront.net/58C85551-79A5-4E36-9794-3D3D8D3E0D31/game.json", "17762"),
 
                         // // // Soundboard states - 17765
                         // // // https://jitap.net/activities/genr/play/soundboard-states 
-                        "https://d24o39yp3ttic8.cloudfront.net/9F5AD80D-7D86-4AB9-AB11-C942B162923E/game.json",
+                        ("https://d24o39yp3ttic8.cloudfront.net/9F5AD80D-7D86-4AB9-AB11-C942B162923E/game.json", "17765"),
 
                         // // // say something options - 17746
                         // // // https://jitap.net/activities/gen8/play/say-something-options
-                        "https://d24o39yp3ttic8.cloudfront.net/86DCDC1D-64CB-4198-A866-257E213F0405/game.json",
+                        ("https://d24o39yp3ttic8.cloudfront.net/86DCDC1D-64CB-4198-A866-257E213F0405/game.json", "17746"),
 
                         // // // video for legacy - 17771 
                         // // // https://jitap.net/activities/genx/play/ 
-                        "https://d24o39yp3ttic8.cloudfront.net/64498594-B340-4B5C-87E0-615C6ACC7676/game.json",
+                        ("https://d24o39yp3ttic8.cloudfront.net/64498594-B340-4B5C-87E0-615C6ACC7676/game.json", "17771"),
 
                         // // // ask a question legacy player - 17792
                         // // // https://jitap.net/activities/geoi/play/testing-ask-a-question-legacy-player
-                        "https://d24o39yp3ttic8.cloudfront.net/236F4AC1-9B06-49EA-B580-4AE806B0A337/game.json",
+                        ("https://d24o39yp3ttic8.cloudfront.net/236F4AC1-9B06-49EA-B580-4AE806B0A337/game.json", "17792"),
 
                         // // puzzle - 17822
                         // // https://jitap.net/activities/gepc/play/test-puzzles-for-legacy-player
-                        "https://d24o39yp3ttic8.cloudfront.net/D9BB6E6A-03FE-4B39-A3CD-289059E118E9/game.json",
+                        ("https://d24o39yp3ttic8.cloudfront.net/D9BB6E6A-03FE-4B39-A3CD-289059E118E9/game.json", "17822"),
 
                         // // talk or type - 17820
                         // // https://jitap.net/activities/gepa/play/test-talk-or-type-for-legacy-player
-                        "https://d24o39yp3ttic8.cloudfront.net/2B7A33C0-BA81-4661-9202-4C0463AEC606/game.json"
+                        ("https://d24o39yp3ttic8.cloudfront.net/2B7A33C0-BA81-4661-9202-4C0463AEC606/game.json", "17820"),
                 ];
                 
-                list.iter().map(|x| String::from(*x)).collect()
+                list.iter().map(|(a, b)| (String::from(*a), String::from(*b))).collect()
             }
         }
     }
     
 }
 
-async fn transcode_game(ctx: Arc<Context>, game_json_url: String) {
+async fn transcode_game(ctx: Arc<Context>, game_json_url: String, target_game_id: String) -> Option<String> {
     let opts = &ctx.opts;
     let client = &ctx.client;
+
+    if !target_game_id.is_empty() && ctx.skip_finished_list.contains(&target_game_id) {
+        log::info!("skipping {} because it's in the skip list", &target_game_id);
+        return None;
+    }
 
     log::info!("loading game data from {}", game_json_url);
 
     let loaded = convert::load_url(&ctx, &game_json_url).await;
 
     if loaded.is_none() {
-        return;
+        return None;
     }
 
     let (src_manifest, raw_game_json) = loaded.unwrap();
 
+    let game_id = src_manifest.game_id();
+    if !target_game_id.is_empty() && game_id != target_game_id {
+        panic!("game id {} != target_game_id {}", game_id, target_game_id);
+    }
+
+    let dest_dir = opts.dest_base_path.join(&game_id);
+    if opts.skip_dir_exists && dest_dir.join(&opts.dest_json_dir).join("game.json").exists() {
+        log::info!("skipping {} because dir already exists", &game_id);
+        return None; 
+    }
+
     let slide_ids:Vec<String> = src_manifest.structure.slides.iter().map(|slide| slide.slide_id()).collect();
 
-    log::info!("loaded manifest, game id: {} ({})", src_manifest.game_id(), game_json_url);
 
-    let dest_dir = opts.dest_base_path.join(&src_manifest.game_id());
-    if opts.skip_dir_exists && dest_dir.join(&opts.dest_json_dir).join("game.json").exists() {
-        log::info!("skipping {} because dir already exists", &src_manifest.game_id());
-        return;
-    }
+    log::info!("loaded manifest, game id: {} ({})", game_id, game_json_url);
+
+
     std::fs::create_dir_all(&dest_dir);
 
     let (slides, medias) = convert::into_slides(&ctx, src_manifest, &game_json_url).await;
@@ -228,30 +250,33 @@ async fn transcode_game(ctx: Arc<Context>, game_json_url: String) {
 
             if !opts.skip_download_exists || !dest_path.exists() {
                 log::info!("downloading {} -> {}", media.url, dest_path.to_str().unwrap());
-                match client.get(&media.url)
-                    .send()
-                    .await
-                    .unwrap()
-                    .error_for_status() {
-                        Ok(resp) => {
-                            let data = resp
-                                .bytes()
-                                .await
-                                .unwrap();
+                match client.get(&media.url).send().await {
+                    Ok(resp) => {
+                        match resp.error_for_status() {
+                            Ok(resp) => {
+                                let data = resp
+                                    .bytes()
+                                    .await
+                                    .unwrap();
 
-                            let mut cursor = std::io::Cursor::new(data);
+                                let mut cursor = std::io::Cursor::new(data);
 
-                            let mut dest_file = std::fs::File::create(&dest_path).unwrap();
-                            std::io::copy(&mut cursor, &mut dest_file).unwrap();
-                        },
-                        Err(err) => {
-                            if opts.allow_empty_media {
-                                log::warn!("couldn't download {}", media.url)
-                            } else {
-                                panic!("couldn't download {}", media.url)
+                                let mut dest_file = std::fs::File::create(&dest_path).unwrap();
+                                std::io::copy(&mut cursor, &mut dest_file).unwrap();
+                            },
+                            Err(err) => {
+                                if opts.allow_empty_media {
+                                    log::warn!("couldn't download {}", media.url)
+                                } else {
+                                    panic!("couldn't download {}", media.url)
+                                }
                             }
                         }
+                    },
+                    Err(err) => {
+                        panic!("unable to download: {}", media.url);
                     }
+                }
 
             }
         }
@@ -379,6 +404,7 @@ async fn transcode_game(ctx: Arc<Context>, game_json_url: String) {
         }
     }
 
+    Some(game_id)
 }
 
 fn init_logger(verbose:bool) {

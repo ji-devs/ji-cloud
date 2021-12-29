@@ -6,13 +6,11 @@ use shared::domain::{
     category::CategoryId,
     jig::{
         additional_resource::{AdditionalResource, AdditionalResourceId as AddId, ResourceContent},
-        module::{
-            body::{cover, ThemeId},
-            ModuleId, StableModuleId,
-        },
-        AudioBackground, AudioEffects, AudioFeedbackNegative, AudioFeedbackPositive, DraftOrLive,
-        JigAdminData, JigAdminUpdateData, JigData, JigFocus, JigId, JigPlayerSettings, JigRating,
-        JigResponse, LiteModule, ModuleKind, PrivacyLevel, TextDirection,
+        module::{body::ThemeId, ModuleId},
+        AudioBackground, AudioEffects, AudioFeedbackNegative, AudioFeedbackPositive,
+        DeleteUserJigs, DraftOrLive, JigAdminData, JigAdminUpdateData, JigData, JigFocus, JigId,
+        JigPlayerSettings, JigRating, JigResponse, LiteModule, ModuleKind, PrivacyLevel,
+        TextDirection,
     },
     meta::{AffiliationId, AgeRangeId, GoalId, ResourceTypeId as TypeId},
     user::UserScope,
@@ -41,12 +39,6 @@ pub async fn create(
 ) -> Result<JigId, CreateJigError> {
     let mut txn = pool.begin().await?;
 
-    let default_modules = [(
-        ModuleKind::Cover,
-        serde_json::to_value(cover::ModuleData::default())
-            .expect("default cover module failed to serialize while creating jig"),
-    )];
-
     let draft_id = create_jig_data(
         &mut txn,
         display_name,
@@ -60,27 +52,6 @@ pub async fn create(
     )
     .await?;
 
-    let mut module_stable_ids = Vec::new();
-
-    for (idx, (kind, contents)) in default_modules.iter().enumerate() {
-        let module = sqlx::query!(
-            //language=SQL
-            r#"
-insert into jig_data_module (jig_data_id, "index", kind, contents)
-values ($1, $2, $3, $4)
-returning stable_id as "stable_id: StableModuleId"
-"#,
-            draft_id,
-            idx as i16,
-            (*kind) as i16,
-            contents
-        )
-        .fetch_one(&mut txn)
-        .await?;
-
-        module_stable_ids.push(module.stable_id);
-    }
-
     let live_id = create_jig_data(
         &mut txn,
         display_name,
@@ -93,28 +64,6 @@ returning stable_id as "stable_id: StableModuleId"
         default_player_settings,
     )
     .await?;
-
-    for (idx, (kind, contents, stable_id)) in default_modules
-        .iter()
-        .zip(module_stable_ids.iter())
-        .map(|it| (&it.0 .0, &it.0 .1, it.1))
-        .enumerate()
-    {
-        sqlx::query!(
-            //language=SQL
-            r#"
-insert into jig_data_module (stable_id, jig_data_id, "index", kind, contents)
-values ($1, $2, $3, $4, $5)
-"#,
-            (*stable_id).0,
-            live_id,
-            idx as i16,
-            (*kind) as i16,
-            contents
-        )
-        .fetch_all(&mut txn)
-        .await?;
-    }
 
     let jig = sqlx::query!(
         //language=SQL
@@ -220,7 +169,6 @@ with cte as (
                when $2 = 0 then jig.draft_id
                when $2 = 1 then jig.live_id
                end as "draft_or_live_id",
-           first_cover_assigned,
            published_at,
            rating,
            blocked,
@@ -238,7 +186,6 @@ select cte.jig_id                                          as "jig_id: JigId",
        (select given_name || ' '::text || family_name
         from user_profile
         where user_profile.user_id = author_id)            as "author_name",
-       first_cover_assigned,
        published_at,
        updated_at,
        privacy_level                                       as "privacy_level!: PrivacyLevel",
@@ -298,7 +245,6 @@ from jig_data
             creator_id: row.creator_id,
             author_id: row.author_id,
             author_name: row.author_name,
-            first_cover_assigned: row.first_cover_assigned,
             likes: row.liked_count,
             plays: row.play_count,
             jig_focus: row.jig_focus,
@@ -367,7 +313,6 @@ select jig.id                                       as "id!: JigId",
        (select given_name || ' '::text || family_name
         from user_profile
         where user_profile.user_id = author_id) as "author_name",
-       first_cover_assigned                     as "first_cover_assigned!",
        live_id                                  as "live_id!",
        draft_id                                 as "draft_id!",
        published_at,
@@ -461,7 +406,6 @@ order by t.ord
             author_name: jig_row.author_name,
             likes: jig_row.liked_count,
             plays: jig_row.play_count,
-            first_cover_assigned: jig_row.first_cover_assigned,
             jig_focus: jig_row.jig_focus,
             jig_data: JigData {
                 draft_or_live,
@@ -805,20 +749,29 @@ where id is not distinct from $3
     Ok(())
 }
 
-pub async fn cover_set(db: &PgPool, jig_id: JigId) -> sqlx::Result<()> {
+pub async fn delete_all_jigs(
+    pool: &PgPool,
+    user_id: Uuid,
+) -> Result<Vec<DeleteUserJigs>, error::Delete> {
+    let mut txn = pool.begin().await?;
+
+    let jig_ids: Vec<DeleteUserJigs> = get_user_jig_ids(&mut txn, user_id).await?;
+
     sqlx::query!(
         //language=SQL
         r#"
-update jig
-set first_cover_assigned = true
-where id = $1
+delete
+from jig
+where creator_id is not distinct from $1
 "#,
-        jig_id.0
+        user_id
     )
-    .execute(db)
+    .execute(&mut txn)
     .await?;
 
-    Ok(())
+    txn.commit().await?;
+
+    Ok(jig_ids)
 }
 
 pub async fn browse(
@@ -827,8 +780,6 @@ pub async fn browse(
     jig_focus: Option<JigFocus>,
     page: i32,
 ) -> sqlx::Result<Vec<JigResponse>> {
-    println!("inside");
-
     sqlx::query!( //language=SQL
         r#"
 select jig.id                                              as "jig_id: JigId",
@@ -839,7 +790,6 @@ select jig.id                                              as "jig_id: JigId",
        (select given_name || ' '::text || family_name
         from user_profile
         where user_profile.user_id = author_id)            as "author_name",
-       first_cover_assigned                                as "first_cover_assigned!",
        published_at,
        liked_count,
        (
@@ -907,7 +857,6 @@ limit 20 offset 20 * $1
             creator_id: row.creator_id,
             author_id: row.author_id,
             author_name: row.author_name,
-            first_cover_assigned: row.first_cover_assigned,
             jig_focus: row.jig_focus,
             plays: row.play_count,
             likes: row.liked_count,
@@ -1017,6 +966,22 @@ select draft_id, live_id from jig where id = $1
     .await
     .ok()?
     .map(|it| (it.draft_id, it.live_id))
+}
+
+pub async fn get_user_jig_ids(
+    txn: &mut PgConnection,
+    user_id: Uuid,
+) -> sqlx::Result<Vec<DeleteUserJigs>> {
+    sqlx::query_as!(
+        //language=SQL
+        DeleteUserJigs,
+        r#"
+select id as "jig_id!: JigId" from jig where creator_id = $1
+"#,
+        user_id
+    )
+    .fetch_all(&mut *txn)
+    .await
 }
 
 /// Clones a copy of the jig data and modules, preserving the module's stable IDs

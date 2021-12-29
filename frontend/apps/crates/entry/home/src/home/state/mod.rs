@@ -1,11 +1,12 @@
 use std::{iter, rc::Rc};
 
 use dominator_helpers::futures::AsyncLoader;
-use futures_signals::{signal::Mutable};
+use futures_signals::signal::Mutable;
 use shared::domain::jig::{JigId, JigSearchQuery};
 
 use components::page_header::state::PageLinks;
 
+use strum_macros::Display;
 use super::search_results::SearchResults;
 
 mod search_state;
@@ -138,9 +139,11 @@ impl State {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Display)]
 pub enum HomePageMode {
+    #[strum(serialize = "home")]
     Home,
+    #[strum(serialize = "results")]
     Search(Rc<SearchResults>),
 }
 

@@ -169,6 +169,19 @@ impl ApiEndpoint for Delete {
     const METHOD: Method = Method::Delete;
 }
 
+/// Delete all jigs associated with current user.
+///
+/// # Authorization
+/// * One of `Admin`, `AdminJig`, or `ManageSelfJig` for owned JIGs
+pub struct DeleteAll;
+impl ApiEndpoint for DeleteAll {
+    type Req = ();
+    type Res = ();
+    type Err = EmptyError;
+    const PATH: &'static str = "/v1/jig";
+    const METHOD: Method = Method::Delete;
+}
+
 /// Indicates that a jig has a cover
 ///
 /// # Authorization

@@ -8,6 +8,7 @@ export class _ extends LitElement {
                 :host {
                     position: relative;
                     display: flex;
+                    font-size: 20px;
                 }
                 .bar {
                     border-radius: 36px;
@@ -17,9 +18,9 @@ export class _ extends LitElement {
                     grid-template-columns: 1fr 200px 200px auto;
                     align-items: center;
                     padding-left: 18px;
-                    border: solid 1px #ffffff;
                     height: 48px;
                     box-sizing: border-box;
+                    border: solid 1px #ffffff;
                 }
                 .bar:focus-within {
                     border-color: var(--dark-blue-3);
@@ -45,7 +46,9 @@ export class _ extends LitElement {
                     /* cover .bar border */
                     margin: -1px -2px 0 0;
                     height: 48px;
+                    font-size: 24px;
                 }
+
                 .advanced {
                     position: absolute;
                     /* add 32px for margin */

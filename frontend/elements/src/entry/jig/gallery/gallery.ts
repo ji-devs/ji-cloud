@@ -11,6 +11,7 @@ import "@elements/core/images/ui";
 import { mediaUi } from "@utils/path";
 import { classMap } from "lit-html/directives/class-map";
 import { nothing } from "lit-html";
+import { JigFocus } from "@elements/module/_common/types";
 
 const STR_CREATE_JIG = "Create a New JIG";
 const STR_TEMPLATE_PARAGRAPH =
@@ -18,8 +19,6 @@ const STR_TEMPLATE_PARAGRAPH =
 const STR_RECENT = "My Recent JIGs";
 const STR_SEE_ALL_TEMPLATES = "See all templates";
 const STR_SEE_LESS_TEMPLATES = "See less templates";
-
-export type JigFocus = "modules" | "resources";
 
 @customElement("jig-gallery")
 export class _ extends LitElement {

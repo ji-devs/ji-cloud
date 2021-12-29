@@ -12,7 +12,7 @@ pub use player::{JigPlayerSettings, TextDirection};
 
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use std::{collections::HashSet, fmt, str::FromStr};
+use std::{collections::HashSet, convert::TryFrom, fmt, str::FromStr};
 use uuid::Uuid;
 
 use super::{
@@ -320,6 +320,21 @@ impl JigFocus {
     }
 }
 
+impl TryFrom<&str> for JigFocus {
+    type Error = anyhow::Error;
+
+    fn try_from(s: &str) -> Result<Self, Self::Error> {
+        match s {
+            "modules" => Ok(Self::Modules),
+            "resources" => Ok(Self::Resources),
+            s => Err(anyhow::format_err!(
+                "\"{}\" is not a valid JigFocus variant",
+                s
+            )),
+        }
+    }
+}
+
 impl Default for JigFocus {
     fn default() -> Self {
         Self::Modules
@@ -549,12 +564,6 @@ pub struct JigResponse {
     /// Number of plays Jig
     pub jig_focus: JigFocus,
 
-    /// True if Jig cover is set
-    ///
-    /// NOTE: the cover is always technically there, this is just to indicate if the user has dragged the cover,
-    /// needed just for the UI
-    pub first_cover_assigned: bool,
-
     /// The data of the requested JIG.
     pub jig_data: JigData,
 
@@ -687,6 +696,12 @@ pub struct JigBrowseResponse {
 
     /// The total number of jigs found
     pub total_jig_count: u64,
+}
+
+/// All id's associated with a jig to delete
+pub struct DeleteUserJigs {
+    /// Jig ID to delete.
+    pub jig_id: JigId,
 }
 
 /// Search for jigs via the given query string.

@@ -3,7 +3,6 @@ use std::rc::Rc;
 
 use crate::base::actions::NavigationTarget;
 use dominator::clone;
-use utils::prelude::*;
 
 impl Soundboard {
     pub fn on_start(self: Rc<Self>) {

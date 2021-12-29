@@ -12,16 +12,10 @@ expression: body
   "likes": 0,
   "plays": 0,
   "jigFocus": "modules",
-  "firstCoverAssigned": false,
   "jigData": {
     "draftOrLive": "Live",
     "displayName": "",
-    "modules": [
-      {
-        "id": "[id]",
-        "kind": "Cover"
-      }
-    ],
+    "modules": [],
     "ageRanges": [],
     "affiliations": [],
     "goals": [],

@@ -5,18 +5,37 @@ use dotenv::dotenv;
 use simplelog::*;
 use structopt::StructOpt;
 use reqwest::Client;
-use reqwest_middleware::{ClientBuilder, ClientWithMiddleware};
-use reqwest_retry::{RetryTransientMiddleware, policies::ExponentialBackoff};
+use std::io::{self, BufRead};
 
 pub struct Context {
     pub opts: Opts,
-    pub client: ClientWithMiddleware, 
+    pub client: Client, 
     pub warnings_log: File,
     pub errors_log: File,
+    pub finished_log: File,
+    pub skip_finished_list: Vec<String>
 }
 
 impl Context {
     pub fn new(opts: Opts) -> Self {
+
+        let skip_finished_list: Vec<String> = {
+            match File::open(&opts.finished_log) {
+                Ok(file) => {
+                    io::BufReader::new(file)
+                        .lines()
+                        .map(|line| line.unwrap())
+                        .collect()
+                },
+                Err(_) => Vec::new()
+            }
+        };
+
+        let mut finished_log = OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open(&opts.finished_log)
+            .unwrap();
 
         let mut warnings_log = {
             let mut file = OpenOptions::new();
@@ -40,16 +59,13 @@ impl Context {
             }.open(&opts.errors_log).unwrap()
         };
 
-        let retry_policy = ExponentialBackoff::builder().build_with_max_retries(10);
-        let client = ClientBuilder::new(reqwest::Client::new())
-            // Retry failed requests.
-            .with(RetryTransientMiddleware::new_with_policy(retry_policy))
-            .build();
         Self {
             opts,
-            client,
+            client: Client::new(),
             warnings_log,
             errors_log,
+            finished_log,
+            skip_finished_list
         }
     }
 }

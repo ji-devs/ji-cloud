@@ -1,7 +1,6 @@
 use super::state::*;
 use crate::base::actions::NavigationTarget;
 use std::rc::Rc;
-use utils::prelude::*;
 
 
 impl TalkType {

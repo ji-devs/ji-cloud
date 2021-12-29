@@ -73,12 +73,15 @@ pub fn render(state: Rc<State>) -> Dom {
             match jig {
                 None => None,
                 Some(jig) => {
+                    let module_count = jig.jig_data.modules.len();
+
                     Some(html!("empty-fragment", {
                         .property("slot", "modules")
                         .children(jig.jig_data.modules.iter().enumerate().map(|(i, module)| {
                             html!("jig-sidebar-module", {
                                 .property("module", module.kind.as_str())
                                 .property("index", i as u32)
+                                .property("isLastModule", i == module_count - 1)
                                 .property("selected", true)
                                 .property_signal("selected", state.player_state.active_module.signal().map(move |active_module_index| {
                                     i == active_module_index
@@ -89,7 +92,7 @@ pub fn render(state: Rc<State>) -> Dom {
                                 .child(ModuleThumbnail::render_live(
                                     Rc::new(ModuleThumbnail {
                                         jig_id: state.player_state.jig_id,
-                                        module: module.clone(),
+                                        module: Some(module.clone()),
                                         is_jig_fallback: false,
                                     }),
                                     Some("window")

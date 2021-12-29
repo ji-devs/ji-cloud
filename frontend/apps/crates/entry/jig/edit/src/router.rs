@@ -26,7 +26,9 @@ impl Router {
                 JigRoute::ResourceGallery => Some(
                     JigGallery::new(JigFocus::Resources).render()
                 ),
-                JigRoute::Edit(jig_id, route) => Some(EditPage::render(jig_id, route)),
+                JigRoute::Edit(jig_id, jig_focus, route) => Some(
+                    EditPage::render(jig_id, jig_focus, route)
+                ),
                 _ => None,
             },
             _ => None,

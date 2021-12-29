@@ -72,7 +72,7 @@ fn render_page(state: Rc<Publish>) -> Dom {
                 Rc::new(ModuleThumbnail {
                     jig_id: state.jig.id.clone(),
                     //Cover module (first module) is guaranteed to exist
-                    module: state.jig.modules.lock_ref()[0].clone(),
+                    module: state.jig.modules.lock_ref().first().cloned(),
                     is_jig_fallback: true,
                 }),
                 Some("img")
@@ -191,7 +191,11 @@ fn render_page(state: Rc<Publish>) -> Dom {
                 .text(STR_PUBLISH_LATER)
                 .event(clone!(state => move |_: events::Click| {
                     state.jig_edit_state.route.set_neq(JigEditRoute::Landing);
-                    let url:String = Route::Jig(JigRoute::Edit(state.jig.id.clone(), JigEditRoute::Landing)).into();
+                    let url:String = Route::Jig(JigRoute::Edit(
+                        state.jig.id.clone(),
+                        state.jig.jig_focus,
+                        JigEditRoute::Landing
+                    )).into();
                     dominator::routing::go_to_url(&url);
                 }))
             }),

@@ -64,6 +64,8 @@ jsonwebtoken = "7.2.0"
 chrono = { version = "0.4.19", features = ["serde"] }
 chrono-tz = { version = "0.6.0", features = ["serde"] }
 zxcvbn = "2.1.2"
+strum = "0.23.0"
+strum_macros = "0.23.1"
 
 [features]
 default = ["wee_alloc"]

@@ -1,26 +1,23 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 import { classMap } from "lit-html/directives/class-map";
-import { nothing } from "lit-html";
 import { BaseButton } from "@elements/_styles/buttons";
 import "@elements/core/buttons/icon";
 import "@elements/core/buttons/rectangle";
 
-export type Mode = "deleteModule" | "deleteImage";
-
+const STR_DEFAULT_CANCEL_TEXT = "Cancel";
+const STR_DEFAULT_CONFIRM_TEXT = "Confirm";
 const STR_TITLE_WARNING = "Warning";
-const STR_BODY_DELETE_MODULE = "Are you sure you want to delete this activity?";
-const STR_CONFIRM_DELETE_MODULE = "Delete activity";
-const STR_CANCEL_DELETE_MODULE = "Don't delete";
 
-const STR_BODY_DELETE_IMAGE = "Are you sure you want to delete this image?";
-const STR_CONFIRM_DELETE_IMAGE = "Delete image";
-const STR_CANCEL_DELETE_IMAGE = "Don't delete";
 @customElement("modal-confirm")
 export class _ extends BaseButton {
     static get styles() {
         return [
             css`
-                article {
+                :host {
+                    --overlay-z-index: 300;
+                }
+
+                .overlay {
                     position: fixed;
                     top: 0;
                     left: 0;
@@ -31,29 +28,37 @@ export class _ extends BaseButton {
                     height: 100vh;
                     opacity: 0.8;
                     background-color: var(--light-blue-3);
+                    z-index: var(--overlay-z-index);
                 }
-                section {
+                .section {
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    z-index: var(--overlay-z-index);
+
                     width: 419px;
-                    height: 276px;
+                    min-height: 276px;
                     border-radius: 16px;
                     -webkit-backdrop-filter: blur(30px);
                     backdrop-filter: blur(30px);
                     box-shadow: 0 3px 16px 0 rgba(0, 0, 0, 0.16);
                     background-color: var(--white);
-
+                    opacity: 1;
                     display: flex;
                     flex-direction: column;
                 }
 
-
                 .close {
                     align-self: flex-end;
+                    margin: .5em .5em 0 0;
                 }
 
                 .contents {
                     display: flex;
                     flex-direction: column;
                     padding: 0 32px; 32px; 32px;
+                    flex: 1;
                 }
                 .warning {
                     color: var(--dark-red-2);
@@ -75,7 +80,7 @@ export class _ extends BaseButton {
                     letter-spacing: -0.32px;
                     text-align: left;
                 }
-                .body {
+                .content {
                   font-size: 16px;
                   font-weight: normal;
                   font-stretch: normal;
@@ -84,23 +89,13 @@ export class _ extends BaseButton {
                   letter-spacing: normal;
                   text-align: left;
                   color: var(--dark-gray-6);
+                  flex: 1;
                 }
                 .options {
-                    margin-top: 40px;
+                    margin: 2em 0 1em 0;
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
-                }
-                .confirm-warning {
-                  font-size: 16px;
-                  font-weight: 500;
-                  font-stretch: normal;
-                  font-style: normal;
-                  line-height: 1.5;
-                  letter-spacing: normal;
-                  text-align: center;
-                  color: var(--dark-red-2);
-                  cursor: pointer;
                 }
                 `,
         ];
@@ -108,6 +103,7 @@ export class _ extends BaseButton {
 
     onAnyClick(evt: MouseEvent) {
         const path = evt.composedPath();
+        // Makes sure that only clicking the overlay will trigger a cancel event.
         if (!path.includes(this.shadowRoot?.getElementById("section") as any)) {
             this.onCancel();
         }
@@ -115,79 +111,118 @@ export class _ extends BaseButton {
 
     onCancel() {
         this.dispatchEvent(
-            new CustomEvent("custom-toggle", {
-                detail: { value: false },
-            })
+            new CustomEvent("custom-cancel", {})
         );
     }
 
     onConfirm() {
         this.dispatchEvent(
-            new CustomEvent("custom-toggle", {
-                detail: { value: true },
-            })
+            new CustomEvent("custom-confirm", {})
         );
     }
 
-    @property()
-    mode: Mode = "deleteModule";
+    @property({ type: String })
+    title!: string;
+
+    @property({ type: String })
+    content!: string;
+
+    @property({ type: String })
+    cancel_text: string = STR_DEFAULT_CANCEL_TEXT;
+
+    @property({ type: String })
+    confirm_text: string = STR_DEFAULT_CONFIRM_TEXT;
 
     @property({ type: Boolean })
-    visible: boolean = false;
+    dangerous: boolean = false;
 
-    render() {
-        const { visible, mode } = this;
+    buttonProps(isPrimary: Boolean) {
+        let color = "blue";
+        let kind = "filled";
 
-        if (!visible) {
-            return nothing;
+        if (!isPrimary && this.dangerous) {
+            color = "red";
+            kind = "text";
+        } else if (!isPrimary && !this.dangerous) {
+            kind = "text";
         }
 
-        const title = STR_TITLE_WARNING;
-        const body =
-            mode === "deleteModule"
-                ? STR_BODY_DELETE_MODULE
-                : STR_BODY_DELETE_IMAGE;
-        const confirm_str =
-            mode === "deleteModule"
-                ? STR_CONFIRM_DELETE_MODULE
-                : STR_CONFIRM_DELETE_IMAGE;
-        const cancel_str =
-            mode === "deleteModule"
-                ? STR_CANCEL_DELETE_MODULE
-                : STR_CANCEL_DELETE_IMAGE;
-        const confirm = html`<div class="confirm-warning">${confirm_str}</div>`;
-        const cancel = html`<button-rect color="blue"
-            >${cancel_str}</button-rect
-        >`;
+        return [color, kind];
+    }
 
-        const titleClasses = classMap({
-            title: true,
-            warning: mode === "deleteModule" || mode === "deleteImage",
-        });
+    renderConfirm(isPrimary: Boolean) {
+        const [color, kind] = this.buttonProps(isPrimary);
 
         return html`
-            <article @click=${this.onAnyClick}>
-                <section id="section">
-                    <button-icon
-                        class="close"
-                        icon="x"
-                        @click=${this.onCancel}
-                    ></button-icon>
-                    <div class="contents">
-                        <div class="${titleClasses}">${title}</div>
-                        <div class="divider"></div>
-                        <div class="body">${body}</div>
-                        <div class="options">
-                            <div @click=${this.onConfirm} class="confirm">
-                                ${confirm}
-                            </div>
-                            <div @click=${this.onCancel} class="cancel">
-                                ${cancel}
-                            </div>
-                        </div>
-                    </div>
-                </section>
-            </article>
+            <div @click=${this.onConfirm}>
+                <button-rect color=${color} kind=${kind}>${this.confirm_text}</button-rect>
+            </div>
+        `;
+    }
+
+    renderCancel(isPrimary: Boolean) {
+        const [color, kind] = this.buttonProps(isPrimary);
+
+        return html`
+            <div @click=${this.onCancel}>
+                <button-rect color=${color} kind=${kind}>${this.cancel_text}</button-rect>
+            </div>
+        `;
+    }
+
+    renderActions() {
+        if (this.dangerous) {
+            return html`
+                <div class="options">
+                    ${this.renderConfirm(false)}
+                    ${this.renderCancel(true)}
+                </div>
+            `;
+        } else {
+            return html`
+                <div class="options">
+                    ${this.renderCancel(false)}
+                    ${this.renderConfirm(true)}
+                </div>
+            `;
+        }
+    }
+
+    renderTitle() {
+        const titleClasses = classMap({
+            title: true,
+            warning: this.dangerous,
+        });
+
+
+        return html`
+            <div class="${titleClasses}">${this.title}</div>
+        `;
+    }
+
+    renderContent() {
+        return html`
+            <div class="content">${this.content}</div>
+        `;
+    }
+
+    render() {
+        return html`
+            <div class="overlay" @click=${this.onAnyClick}></div>
+            <div class="section">
+                <button-icon
+                    size="x-small"
+                    class="close"
+                    icon="x"
+                    @click=${this.onCancel}
+                ></button-icon>
+                <div class="contents">
+                    ${this.renderTitle()}
+                    <div class="divider"></div>
+                    ${this.renderContent()}
+                    ${this.renderActions()}
+                </div>
+            </div>
         `;
     }
 }

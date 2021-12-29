@@ -4,7 +4,7 @@ use futures_signals::{
     signal::{Mutable, Signal, SignalExt},
     signal_vec::MutableVec,
 };
-use shared::domain::jig::{JigResponse, LiteModule};
+use shared::domain::jig::{JigResponse, LiteModule, ModuleKind};
 use std::rc::Rc;
 use utils::math::PointI32;
 
@@ -18,7 +18,6 @@ pub struct State {
     pub name: Mutable<String>,
     pub publish_at: Mutable<Option<DateTime<Utc>>>,
     pub modules: MutableVec<Rc<Option<LiteModule>>>,
-    pub first_cover_assigned: Mutable<bool>,
     pub collapsed: Mutable<bool>,
     pub settings: Rc<SettingsState>,
     pub drag: Mutable<Option<Rc<DragState>>>,
@@ -35,6 +34,22 @@ impl State {
             .map(|module| Rc::new(Some(module.clone().into())))
             .collect();
 
+        match modules.get(0) {
+            // if there's no first module
+            None => {
+                modules.push(Rc::new(None));
+            },
+            // if first in not on kind cover
+            Some(module) => {
+                if let Some(module) = &**module {
+                    if module.kind != ModuleKind::Cover {
+                        modules.push(Rc::new(None));
+                    }
+                };
+            },
+        };
+
+        // add empty module at end
         modules.push(Rc::new(None));
 
         Self {
@@ -47,7 +62,6 @@ impl State {
             drag: Mutable::new(None),
             drag_target_index: Mutable::new(None),
             loader: AsyncLoader::new(),
-            first_cover_assigned: Mutable::new(jig.first_cover_assigned),
             jig,
         }
     }

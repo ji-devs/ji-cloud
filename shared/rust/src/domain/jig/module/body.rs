@@ -73,7 +73,7 @@ pub enum Body {
 
     /// Module is a [`Cover`](super::ModuleKind::Cover).
     ///
-    /// DEPRECATED INFO: This exists as an empty enum because cover *needs* to exist, but it also isn't decided yet.
+    /// Cover for Module type
     Cover(cover::ModuleData),
 
     /// Module is a Resource Cover.
@@ -88,6 +88,9 @@ impl Body {
     pub fn new(kind: super::ModuleKind) -> Self {
         match kind {
             super::ModuleKind::Cover => Self::Cover(cover::ModuleData::default()),
+            super::ModuleKind::ResourceCover => {
+                Self::ResourceCover(resource_cover::ModuleData::default())
+            }
             super::ModuleKind::Memory => Self::MemoryGame(memory::ModuleData::default()),
             super::ModuleKind::CardQuiz => Self::CardQuiz(card_quiz::ModuleData::default()),
             super::ModuleKind::Flashcards => Self::Flashcards(flashcards::ModuleData::default()),
@@ -189,6 +192,7 @@ pub trait BodyExt<Mode: ModeExt, Step: StepExt>:
             ModuleKind::TappingBoard => Ok(Body::TappingBoard(self.convert_to_tapping_board()?)),
             ModuleKind::DragDrop => Ok(Body::DragDrop(self.convert_to_drag_drop()?)),
             ModuleKind::Cover => Ok(Body::Cover(self.convert_to_cover()?)),
+            ModuleKind::ResourceCover => Ok(Body::ResourceCover(self.convert_to_resource_cover()?)),
             ModuleKind::Legacy => Ok(Body::Legacy(self.convert_to_legacy()?)),
             _ => unimplemented!(
                 "cannot convert from {} to {}",
@@ -238,6 +242,10 @@ pub trait BodyConvert {
     /// Cover
     fn convert_to_cover(&self) -> Result<cover::ModuleData, &'static str> {
         Err("cannot convert to cover!")
+    }
+    /// Resource Cover
+    fn convert_to_resource_cover(&self) -> Result<resource_cover::ModuleData, &'static str> {
+        Err("cannot convert to resource cover!")
     }
     /// Video
     fn convert_to_video(&self) -> Result<video::ModuleData, &'static str> {

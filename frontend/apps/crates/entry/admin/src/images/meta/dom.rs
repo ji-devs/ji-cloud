@@ -21,6 +21,9 @@ const STR_DESCRIPTION: &str = "Image description";
 const STR_NEXT: &str = "Next";
 const STR_PUBLISH: &str = "Publish";
 
+const STR_DELETE_TITLE: &'static str = "Warning";
+const STR_DELETE_CONTENT: &'static str = "Are you sure you want to delete this image?";
+
 pub struct ImageMetaPage {}
 
 impl ImageMetaPage {
@@ -188,18 +191,24 @@ impl ImageMetaPage {
                                         }
                                     })))
                                 }),
-                                html!("modal-confirm", {
-                                    .property("mode", "deleteImage")
-                                    .property_signal("visible", state.delete_modal.signal())
-                                    .property("slot", "modal")
-                                    .event(clone!(state => move |evt:events::CustomToggle| {
-                                        state.delete_modal.set_neq(false);
-                                        if evt.value() {
-                                            actions::delete(state.clone());
-                                        }
-                                    }))
-                                })
                             ])
+                            .child_signal(state.delete_modal.signal().map(clone!(state => move |delete_modal| {
+                                if delete_modal {
+                                    Some(html!("modal-confirm", {
+                                        .property("slot", "modal")
+                                        .property("dangerous", true)
+                                        .property("title", STR_DELETE_TITLE)
+                                        .property("content", STR_DELETE_CONTENT)
+                                        .event(clone!(state => move |_evt: events::CustomCancel| state.delete_modal.set_neq(false)))
+                                        .event(clone!(state => move |_evt: events::CustomConfirm| {
+                                            state.delete_modal.set_neq(false);
+                                            actions::delete(state.clone());
+                                        }))
+                                    }))
+                                } else {
+                                    None
+                                }
+                            })))
                         }))
                     } else {
                         None

@@ -7,8 +7,8 @@ use shared::{
     api::{endpoints::jig, ApiEndpoint},
     domain::{
         jig::{
-            DraftOrLive, JigBrowseResponse, JigCountResponse, JigCreateRequest, JigId,
-            JigLikedResponse, JigSearchResponse, PrivacyLevel, UserOrMe,
+            DeleteUserJigs, DraftOrLive, JigBrowseResponse, JigCountResponse, JigCreateRequest,
+            JigId, JigLikedResponse, JigSearchResponse, PrivacyLevel, UserOrMe,
         },
         CreateResponse,
     },
@@ -164,17 +164,29 @@ async fn delete(
     Ok(HttpResponse::NoContent().finish())
 }
 
-async fn cover(
+/// Delete all jigs associated with user.
+async fn delete_all(
     db: Data<PgPool>,
     claims: TokenUser,
-    path: web::Path<JigId>,
+    algolia: ServiceData<crate::algolia::Client>,
 ) -> Result<HttpResponse, error::Delete> {
-    let id = path.into_inner();
+    db::jig::authz(&*db, claims.0.user_id, None).await?;
 
-    db::jig::authz(&*db, claims.0.user_id, Some(id)).await?;
+    let id: Vec<DeleteUserJigs> = db::jig::delete_all_jigs(&*db, claims.0.user_id).await?;
 
-    db::jig::cover_set(&*db, id).await?;
+    let mut ids = id.into_iter();
 
+    loop {
+        match ids.next() {
+            Some(id) => match id {
+                jig_id => algolia.delete_jig(jig_id.jig_id).await,
+            },
+            None => {
+                log::warn!("Done with delete");
+                break;
+            }
+        }
+    }
     Ok(HttpResponse::NoContent().finish())
 }
 
@@ -377,10 +389,9 @@ pub fn configure(cfg: &mut ServiceConfig) {
             jig::UpdateDraftData::METHOD.route().to(update_draft),
         )
         .route(jig::Delete::PATH, jig::Delete::METHOD.route().to(delete))
-        .route(jig::Cover::PATH, jig::Cover::METHOD.route().to(cover))
         .route(
-            jig::player::Create::PATH,
-            jig::player::Create::METHOD.route().to(player::create),
+            jig::DeleteAll::PATH,
+            jig::DeleteAll::METHOD.route().to(delete_all),
         )
         .route(
             jig::player::Create::PATH,

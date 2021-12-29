@@ -45,7 +45,11 @@ impl HeaderDom {
                     .property("icon", "fa-light fa-grid")
                     .event(clone!(sidebar_state => move |_:events::Click| {
                         sidebar_state.jig_edit_state.route.set_neq(JigEditRoute::Landing);
-                        let url:String = Route::Jig(JigRoute::Edit(sidebar_state.jig.id.clone(), JigEditRoute::Landing)).into();
+                        let url:String = Route::Jig(JigRoute::Edit(
+                            sidebar_state.jig.id.clone(),
+                            sidebar_state.jig.jig_focus,
+                            JigEditRoute::Landing
+                        )).into();
                         dominator::routing::go_to_url(&url);
                     }))
                 }),

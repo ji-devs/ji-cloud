@@ -43,6 +43,12 @@ export class _ extends LitElement {
                     box-shadow: 0 3px 16px 0 rgba(0, 0, 0, 0.25);
                     background-color: #ffffff;
                 }
+                ::slotted([slot="menu-content"]) {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: flex-start;
+                }
+
             `,
         ];
     }

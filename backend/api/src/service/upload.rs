@@ -475,7 +475,7 @@ skip locked
 
     // todo: processing
 
-    s3.upload_media(file, MediaLibrary::User, id, FileKind::AudioMp3)
+    s3.upload_media(file, MediaLibrary::User, id, FileKind::DocumentPdf)
         .await?;
 
     sqlx::query!("update user_pdf_upload set processed_at = now(), processing_result = true where pdf_id = $1", id).execute(&mut txn).await?;

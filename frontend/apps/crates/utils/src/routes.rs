@@ -2,7 +2,7 @@ use crate::jig::JigPlayerOptions;
 use serde::{Deserialize, Serialize};
 use shared::domain::{
     image::{ImageId, ImageSearchQuery},
-    jig::{module::ModuleId, JigId, JigSearchQuery, ModuleKind},
+    jig::{module::ModuleId, JigId, JigSearchQuery, ModuleKind, JigFocus},
     session::OAuthUserProfile,
     user::UserScope,
 };
@@ -14,6 +14,8 @@ use web_sys::Url;
 use super::unwrap::*;
 
 pub type StringId = String;
+
+const JIG_FOCUS_KEY: &str = "jig_focus";
 
 #[derive(Debug, Clone)]
 pub enum Route {
@@ -93,7 +95,8 @@ impl AdminRoute {
 pub enum JigRoute {
     Gallery,
     ResourceGallery,
-    Edit(JigId, JigEditRoute),
+    // might make sense to move JigFocus one level up and get rid of ResourceGallery
+    Edit(JigId, JigFocus, JigEditRoute),
     Play(JigId, Option<ModuleId>, JigPlayerOptions),
 }
 
@@ -247,26 +250,56 @@ impl Route {
             ["admin"] => Self::Admin(AdminRoute::Landing),
             ["jig", "edit", "gallery"] => Self::Jig(JigRoute::Gallery),
             ["jig", "edit", "resource-gallery"] => Self::Jig(JigRoute::ResourceGallery),
-            ["jig", "edit", jig_id, "publish"] => Self::Jig(JigRoute::Edit(
-                JigId(Uuid::from_str(jig_id).unwrap_ji()),
-                JigEditRoute::Publish,
-            )),
-            ["jig", "edit", jig_id, "post-publish"] => Self::Jig(JigRoute::Edit(
-                JigId(Uuid::from_str(jig_id).unwrap_ji()),
-                JigEditRoute::PostPublish,
-            )),
-            ["jig", "edit", "debug"] => Self::Jig(JigRoute::Edit(
-                JigId(Uuid::from_u128(0)),
-                JigEditRoute::Landing,
-            )),
-            ["jig", "edit", jig_id] => Self::Jig(JigRoute::Edit(
-                JigId(Uuid::from_str(jig_id).unwrap_ji()),
-                JigEditRoute::Landing,
-            )),
-            ["jig", "edit", jig_id, module_id] => Self::Jig(JigRoute::Edit(
-                JigId(Uuid::from_str(jig_id).unwrap_ji()),
-                JigEditRoute::Module(ModuleId(Uuid::from_str(module_id).unwrap_ji())),
-            )),
+            ["jig", "edit", jig_id, "publish"] => {
+                let focus = params_map.get(JIG_FOCUS_KEY).unwrap_or_default();
+                let focus = JigFocus::try_from(focus.as_str()).unwrap_or_default();
+
+                Self::Jig(JigRoute::Edit(
+                    JigId(Uuid::from_str(jig_id).unwrap_ji()),
+                    focus,
+                    JigEditRoute::Publish,
+                ))
+            },
+            ["jig", "edit", jig_id, "post-publish"] => {
+                let focus = params_map.get(JIG_FOCUS_KEY).unwrap_or_default();
+                let focus = JigFocus::try_from(focus.as_str()).unwrap_or_default();
+
+                Self::Jig(JigRoute::Edit(
+                    JigId(Uuid::from_str(jig_id).unwrap_ji()),
+                    focus,
+                    JigEditRoute::PostPublish,
+                ))
+            },
+            ["jig", "edit", "debug"] => {
+                let focus = params_map.get(JIG_FOCUS_KEY).unwrap_or_default();
+                let focus = JigFocus::try_from(focus.as_str()).unwrap_or_default();
+
+                Self::Jig(JigRoute::Edit(
+                    JigId(Uuid::from_u128(0)),
+                    focus,
+                    JigEditRoute::Landing,
+                ))
+            },
+            ["jig", "edit", jig_id] => {
+                let focus = params_map.get(JIG_FOCUS_KEY).unwrap_or_default();
+                let focus = JigFocus::try_from(focus.as_str()).unwrap_or_default();
+
+                Self::Jig(JigRoute::Edit(
+                    JigId(Uuid::from_str(jig_id).unwrap_ji()),
+                    focus,
+                    JigEditRoute::Landing,
+                ))
+            },
+            ["jig", "edit", jig_id, module_id] => {
+                let focus = params_map.get(JIG_FOCUS_KEY).unwrap_or_default();
+                let focus = JigFocus::try_from(focus.as_str()).unwrap_or_default();
+
+                Self::Jig(JigRoute::Edit(
+                    JigId(Uuid::from_str(jig_id).unwrap_ji()),
+                    focus,
+                    JigEditRoute::Module(ModuleId(Uuid::from_str(module_id).unwrap_ji())),
+                ))
+            },
             ["jig", "play", "debug"] => {
                 let search: JigPlayerOptions = serde_qs::from_str(&params_string).unwrap_ji();
 
@@ -402,16 +435,24 @@ impl From<&Route> for String {
             Route::Jig(route) => match route {
                 JigRoute::Gallery => "/jig/edit/gallery".to_string(),
                 JigRoute::ResourceGallery => "/jig/edit/resource-gallery".to_string(),
-                JigRoute::Edit(jig_id, route) => match route {
-                    JigEditRoute::Landing => format!("/jig/edit/{}", jig_id.0.to_string()),
-                    JigEditRoute::Module(module_id) => format!(
-                        "/jig/edit/{}/{}",
-                        jig_id.0.to_string(),
-                        module_id.0.to_string()
-                    ),
-                    JigEditRoute::Publish => format!("/jig/edit/{}/publish", jig_id.0.to_string()),
-                    JigEditRoute::PostPublish => {
-                        format!("/jig/edit/{}/post-publish", jig_id.0.to_string())
+                JigRoute::Edit(jig_id, jig_focus, route) => {
+                    let focus_str = match jig_focus {
+                        JigFocus::Modules => String::new(),
+                        JigFocus::Resources => format!("?{}={}", JIG_FOCUS_KEY, JigFocus::Resources.as_str()),
+                    };
+                    match route {
+                        JigEditRoute::Landing => {
+                            format!("/jig/edit/{}{}", jig_id.0.to_string(), focus_str)
+                        },
+                        JigEditRoute::Module(module_id) => {
+                            format!("/jig/edit/{}/{}{}", jig_id.0.to_string(), module_id.0.to_string(), focus_str)
+                        },
+                        JigEditRoute::Publish => {
+                            format!("/jig/edit/{}/publish{}", jig_id.0.to_string(), focus_str)
+                        },
+                        JigEditRoute::PostPublish => {
+                            format!("/jig/edit/{}/post-publish{}", jig_id.0.to_string(), focus_str)
+                        }
                     }
                 },
                 JigRoute::Play(jig_id, module_id, player_settings) => {

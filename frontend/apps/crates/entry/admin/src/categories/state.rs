@@ -11,12 +11,14 @@ use web_sys::HtmlElement;
 
 pub struct State {
     pub categories: MutableVec<Rc<Category>>,
+    pub deleting: Mutable<Option<Rc<ContentState>>>,
     pub loader: AsyncLoader,
 }
 impl State {
     pub fn new() -> Self {
         Self {
             categories: MutableVec::new(),
+            deleting: Mutable::new(None),
             loader: AsyncLoader::new(),
         }
     }
@@ -27,6 +29,7 @@ pub struct Category {
     pub name: Mutable<String>,
     pub children: MutableVec<Rc<Category>>,
     pub expanded: Mutable<bool>,
+    pub editing: Mutable<bool>,
 }
 
 impl Category {
@@ -34,14 +37,19 @@ impl Category {
         self.children.signal_vec_cloned().len().map(|len| len > 0)
     }
 
-    pub fn new(id: CategoryId, name: String) -> Self {
-        Self::_new(id, name, None)
+    pub fn new(id: CategoryId, name: String, editing: bool) -> Self {
+        Self::new_internal(id, name, None, editing)
     }
     pub fn new_with_children(id: CategoryId, name: String, children: Vec<Rc<Self>>) -> Self {
-        Self::_new(id, name, Some(children))
+        Self::new_internal(id, name, Some(children), false)
     }
 
-    fn _new(id: CategoryId, name: String, children: Option<Vec<Rc<Self>>>) -> Self {
+    fn new_internal(
+        id: CategoryId,
+        name: String,
+        children: Option<Vec<Rc<Self>>>,
+        editing: bool
+    ) -> Self {
         Self {
             id,
             name: Mutable::new(name),
@@ -50,6 +58,7 @@ impl Category {
                 None => MutableVec::new(),
             },
             expanded: Mutable::new(debug::INIT_EXPANDED),
+            editing: Mutable::new(editing),
         }
     }
 }
@@ -71,8 +80,7 @@ pub struct ContentState {
     pub parent: Option<Rc<Category>>,
     pub cat: Rc<Category>,
     pub state: Rc<State>,
-    //These are only needed for imperatively toggling via menu
-    pub input_ref: RefCell<Option<HtmlElement>>,
+    //This is only needed for imperatively toggling via menu
     pub menu_ref: RefCell<Option<HtmlElement>>,
 }
 impl ContentState {
@@ -81,7 +89,6 @@ impl ContentState {
             parent,
             cat,
             state,
-            input_ref: RefCell::new(None),
             menu_ref: RefCell::new(None),
         }
     }

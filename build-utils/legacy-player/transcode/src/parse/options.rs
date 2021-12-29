@@ -6,7 +6,7 @@ use shared::config::RemoteTarget;
 #[structopt(name = "ji tap transcoder", about = "ji tap downloader/transcoder")]
 pub struct Opts {
 
-    //if hitting the structure url that wraps manifest in data
+    //if use the data_url via API instead of structure url in album 
     #[structopt(long, parse(try_from_str), default_value = "true")]
     pub data_url: bool,
     /// if this is set, will use game json from albums folder
@@ -18,6 +18,8 @@ pub struct Opts {
     pub warnings_log: PathBuf,
     #[structopt(long, default_value="/home/david/archive/errors.txt", parse(from_os_str))]
     pub errors_log: PathBuf,
+    #[structopt(long, default_value="/home/david/archive/finished.txt", parse(from_os_str))]
+    pub finished_log: PathBuf,
     /// debug mode 
     #[structopt(long, parse(try_from_str), default_value = "false")]
     pub debug: bool,
@@ -28,7 +30,7 @@ pub struct Opts {
     #[structopt(long, parse(try_from_str), default_value = "false")]
     pub clear_log_files: bool,
 
-    /// skip target directories that already exist
+    /// skip target directories that already exist (if using finished.txt, probably unneccessary)
     #[structopt(long, parse(try_from_str), default_value = "false")]
     pub skip_dir_exists: bool,
 

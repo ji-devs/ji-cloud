@@ -68,7 +68,7 @@ impl PublishJig {
     }
 
     pub fn to_jig_update_request(&self) -> JigUpdateDraftDataRequest {
-        // don't include additional_resources here since they're handled in seperatly
+        // don't include additional_resources here since they're handled in separately
         JigUpdateDraftDataRequest {
             display_name: Some(self.display_name.get_cloned()),
             description: Some(self.description.get_cloned()),

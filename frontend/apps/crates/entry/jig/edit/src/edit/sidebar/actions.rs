@@ -9,7 +9,11 @@ use shared::{
     domain::{
         jig::{
             module::{ModuleCreateRequest, ModuleId, ModuleResponse},
-            JigId, JigPlayerSettings, JigResponse, JigUpdateDraftDataRequest, LiteModule,
+            JigId,
+            JigPlayerSettings,
+            JigResponse,
+            JigUpdateDraftDataRequest,
+            LiteModule,
             ModuleKind,
         },
         CreateResponse,
@@ -31,6 +35,7 @@ pub async fn load_jig(jig_id: JigId, jig_cell: Rc<RefCell<Option<JigResponse>>>)
     .await
     {
         Ok(resp) => {
+            assert!(resp.jig_focus.is_modules(), "only module focused jigs should be here");
             *jig_cell.borrow_mut() = Some(resp);
         }
         Err(_) => {}
@@ -42,7 +47,11 @@ pub fn navigate_to_publish(state: Rc<State>) {
     state.collapsed.set(true);
 
     let jig_id = state.jig.id;
-    Route::push_state(Route::Jig(JigRoute::Edit(jig_id, JigEditRoute::Publish)));
+    Route::push_state(Route::Jig(JigRoute::Edit(
+        jig_id,
+        state.jig.jig_focus,
+        JigEditRoute::Publish
+    )));
 }
 
 pub async fn update_jig(jig_id: &JigId, req: JigUpdateDraftDataRequest) -> Result<(), EmptyError> {
@@ -120,7 +129,11 @@ pub fn on_iframe_message(state: Rc<State>, message: ModuleToJigEditorMessage) {
                 .route
                 .set_neq(JigEditRoute::Landing);
             let jig_id = state.jig.id;
-            Route::push_state(Route::Jig(JigRoute::Edit(jig_id, JigEditRoute::Landing)));
+            Route::push_state(Route::Jig(JigRoute::Edit(
+                jig_id,
+                state.jig.jig_focus,
+                JigEditRoute::Landing
+            )));
         }
     }
 }

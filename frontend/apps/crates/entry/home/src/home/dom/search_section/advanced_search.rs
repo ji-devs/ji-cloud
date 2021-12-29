@@ -10,8 +10,7 @@ use super::categories_select;
 
 use super::super::super::{actions::search, state::State};
 
-const STR_SEARCH: &str = "Search";
-const STR_ADVANCED: &str = "Advanced";
+const STR_SEARCH: &str = "Advanced Search";
 const STR_GOAL_LABEL: &str = "Teaching Goal";
 const STR_GOAL_PLACEHOLDER: &str = "Select from the list";
 const STR_AFFILIATION_LABEL: &str = "Affiliation";
@@ -22,12 +21,11 @@ pub fn render(state: Rc<State>) -> Dom {
         .property("slot", "advanced")
         .children(&mut [
             html!("button-rect", {
+                .attribute("style", "height: 48px")
                 .property("slot", "opener")
                 .property("kind", "text")
                 .property("color", "white")
                 .property("bold", true)
-                .text(STR_ADVANCED)
-                .child(html!("br"))
                 .text(STR_SEARCH)
             }),
 

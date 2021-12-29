@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::{signal::Mutable, signal_vec::MutableVec};
-use shared::domain::{jig::{JigFocus, JigResponse}, meta::AgeRange};
+use shared::domain::{jig::{JigFocus, JigResponse, JigId}, meta::AgeRange};
 use strum_macros::{Display, EnumIter, EnumString};
 
 pub const TEMPLATE_KINDS: &[&str] = &[
@@ -27,6 +27,7 @@ pub struct JigGallery {
     pub jigs: MutableVec<JigResponse>,
     pub visible_jigs: Rc<Mutable<VisibleJigs>>,
     pub age_ranges: Mutable<Vec<AgeRange>>,
+    pub confirm_delete: Mutable<Option<JigId>>,
 }
 
 impl JigGallery {
@@ -37,6 +38,7 @@ impl JigGallery {
             jigs: MutableVec::new(),
             visible_jigs: Rc::new(Mutable::new(VisibleJigs::All)),
             age_ranges: Mutable::new(vec![]),
+            confirm_delete: Mutable::new(None),
         })
     }
 }

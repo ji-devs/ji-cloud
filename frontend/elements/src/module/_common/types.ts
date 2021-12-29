@@ -54,3 +54,5 @@ export const STR_MODULE_CHOOSE_HEADER: { [key in ModuleKind]: string } = {
     tracing: "Create a Tracing Activity",
     video: "Create a Video Activity",
 };
+
+export type JigFocus = "modules" | "resources";

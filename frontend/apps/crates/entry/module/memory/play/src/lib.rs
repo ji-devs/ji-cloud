@@ -11,7 +11,6 @@ mod config;
 mod debug;
 mod router;
 mod state;
-mod strings;
 
 use router::Router;
 use std::rc::Rc;

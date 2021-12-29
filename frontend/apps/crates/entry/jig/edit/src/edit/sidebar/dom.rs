@@ -49,11 +49,7 @@ impl SidebarDom {
                     None
                 } else {
                     let jig = jig.borrow_mut().take().unwrap_ji();
-                    if jig.jig_focus.is_modules() {
-                        Some(Self::render_loaded(jig, Rc::clone(&jig_edit_state)))
-                    } else {
-                        None
-                    }
+                    Some(Self::render_loaded(jig, Rc::clone(&jig_edit_state)))
                 }
             })))
         })

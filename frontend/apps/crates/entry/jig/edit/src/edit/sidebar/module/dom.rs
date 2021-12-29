@@ -12,6 +12,12 @@ use std::rc::Rc;
 use std::str::FromStr;
 use utils::prelude::*;
 use wasm_bindgen::prelude::*;
+
+const STR_DELETE_TITLE: &'static str = "Warning";
+const STR_DELETE_CONTENT: &'static str = "Are you sure you want to delete this activity?";
+const STR_DELETE_CONFIRM: &'static str = "Delete activity";
+const STR_DELETE_CANCEL: &'static str = "Don't delete";
+
 pub struct ModuleDom {}
 
 impl ModuleDom {
@@ -33,6 +39,24 @@ impl ModuleDom {
 
         html!("empty-fragment", {
             .property("slot", if index == 0 { "cover-module" } else { "modules" })
+            .child_signal(state.confirm_delete.signal().map(clone!(state => move |confirm_delete| {
+                if confirm_delete {
+                    Some(html!("modal-confirm", {
+                        .property("dangerous", true)
+                        .property("title", STR_DELETE_TITLE)
+                        .property("content", STR_DELETE_CONTENT)
+                        .property("cancel_text", STR_DELETE_CANCEL)
+                        .property("confirm_text", STR_DELETE_CONFIRM)
+                        .event(clone!(state => move |_evt: events::CustomCancel| state.confirm_delete.set_neq(false)))
+                        .event(clone!(state => move |_evt: events::CustomConfirm| {
+                            state.confirm_delete.set_neq(false);
+                            actions::delete(state.clone());
+                        }))
+                    }))
+                } else {
+                    None
+                }
+            })))
             .child(html!("jig-edit-sidebar-filler", {
                 .style("display", {
                     if is_filler { "block" } else {"none"}
@@ -61,7 +85,6 @@ impl ModuleDom {
                         _ => false,
                     }
                 })))
-                .property("lastBottomDecoration", index == total_len-1)
                 // TODO:
                 // .event(|_evt:events::MouseDown| {
                 //     actions::mouse_down(state.clone(), evt.x(), evt.y());
@@ -69,26 +92,14 @@ impl ModuleDom {
                 .event_with_options(
                     &EventOptions::bubbles(),
                     clone!(state => move |_evt:events::Click| {
-                        let can_edit = match &*state.module {
-                            Some(_) => {
-                                if state.index == 0 {
-                                    // If the cover is clicked, but the cover module hasn't yet
-                                    // been dragged onto it, then it should navigate to the landing
-                                    // screen.
-                                    state.sidebar.first_cover_assigned.get()
-                                } else {
-                                    true
-                                }
-                            },
-                            None => false,
-                        };
 
-                        if can_edit {
-                            actions::edit(state.clone())
-                        } else {
-                            // Anything that cannot be edited should navigate the user to the
-                            // landing screen.
-                            state.sidebar.jig_edit_state.route.set_neq(JigEditRoute::Landing);
+                        match &*state.module {
+                            Some(_) => {
+                                actions::edit(state.clone())
+                            },
+                            None => {
+                                state.sidebar.jig_edit_state.route.set_neq(JigEditRoute::Landing);
+                            },
                         }
 
                     })
@@ -128,7 +139,7 @@ impl ModuleDom {
                                     Some(ModuleThumbnail::render_live(
                                         Rc::new(ModuleThumbnail {
                                             jig_id: state.sidebar.jig.id.clone(),
-                                            module: module.clone(),
+                                            module: Some(module.clone()),
                                             is_jig_fallback: false,
                                         }),
                                         Some("thumbnail")
