@@ -1,18 +1,9 @@
 use super::state::*;
 use dominator::{clone, html, Dom};
-use dominator_helpers::futures::AsyncLoader;
-use futures_signals::signal::{Signal, SignalExt};
-use futures_signals::signal_vec::SignalVecExt;
-use shared::{
-    api::{
-        endpoints::{jig, user::Profile},
-        ApiEndpoint,
-    },
-    domain::jig::{JigResponse, JigSearchQuery, JigSearchResponse},
-    error::EmptyError,
-};
+use futures_signals::{signal_vec::SignalVecExt, signal::Signal};
+use shared::domain::{jig::JigResponse, meta::{AgeRangeId, AffiliationId}};
 use std::rc::Rc;
-use utils::{prelude::*, routes::AdminRoute::Jigs};
+use utils::languages::Language;
 
 impl JigUI {
     fn render_jig_span(slot: &str, text: String) -> Dom {
@@ -126,20 +117,8 @@ impl JigUI {
         })
     }
     pub fn render(state: Rc<Self>) -> Dom {
-        state.loader.load(clone!(state => async move {
-            match api_no_auth::<JigSearchResponse, EmptyError, JigSearchQuery>(
-                jig::Search::PATH,
-                jig::Search::METHOD,
-                None
-            )
-            .await
-            {
-                Err(_) => todo!(),
-                Ok(resp) => {
-                    state.jigs.lock_mut().replace_cloned(resp.jigs);
-                }
-            };
-        }));
+        state.load_data();
+
         html!("jig-label-ui", {
             .children_signal_vec(state.jigs.signal_vec_cloned().map(clone!(state => move |jig: JigResponse| {
                 html!("single-jig", {
@@ -154,14 +133,54 @@ impl JigUI {
                             Some(published_at) => published_at.format("%b %e, %Y").to_string(),
                             None => "".to_string()
                         }),
-                        Self::render_jig_span("language", jig.jig_data.language),
+                        Self::render_jig_span("language", {
+                            Language::code_to_display_name(&jig.jig_data.language).to_string()
+                        }),
                         Self::render_jig_span("curators", "CURATORS".to_string()),
-                        Self::render_jig_span("age-ranges", "AGE RANGES".to_string()),
-                        Self::render_jig_span("affiliations", "AFFILIATIONS".to_string()),
+                        html!("span", {
+                            .property("slot", "age-ranges")
+                            .style("display", "flex")
+                            .style("flex-wrap", "wrap")
+                            .style("column-gap", "16px")
+                            .children(jig.jig_data.age_ranges.into_iter().map(|age_id| {
+                                html!("span", {
+                                    .text_signal(state.age_label(age_id))
+                                })
+                            }))
+                        }),
+                        html!("span", {
+                            .property("slot", "affiliations")
+                            .style("display", "flex")
+                            .style("flex-wrap", "wrap")
+                            .style("column-gap", "16px")
+                            .children(jig.jig_data.affiliations.into_iter().map(|affiliation_id| {
+                                html!("span", {
+                                    .text_signal(state.affiliation_label(affiliation_id))
+                                })
+                            }))
+                        }),
                         Self::render_jig_details(),
                     ])
                 })
             })))
+        })
+    }
+
+    fn age_label(self: &Rc<Self>, age_id: AgeRangeId) -> impl Signal<Item = String> {
+        self.ages.signal_ref(move |ages| {
+            match ages.get(&age_id) {
+                Some(age) => age.display_name.clone(),
+                None => "-".to_string(),
+            }
+        })
+    }
+
+    fn affiliation_label(self: &Rc<Self>, affiliation_id: AffiliationId) -> impl Signal<Item = String> {
+        self.affiliations.signal_ref(move |affiliations| {
+            match affiliations.get(&affiliation_id) {
+                Some(affiliation) => affiliation.display_name.clone(),
+                None => "-".to_string(),
+            }
         })
     }
 }

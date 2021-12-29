@@ -24,6 +24,10 @@ export class SingleJig extends LitElement {
             ::slotted([name="jig-name"]) a {
                 color: red;
             }
+
+            dialog-overlay {
+                background-color: #00000080;
+            }
         `,
     ];
 
