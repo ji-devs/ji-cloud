@@ -472,6 +472,19 @@
       "nullable": []
     }
   },
+  "11623dd925dc935401e7c2ef73941a1a46d253df579b98af410e69d1e578850d": {
+    "query": "\nupdate jig_curation_data\nset display_name = $2\nwhere jig_id = $1 and $2 is distinct from display_name\n            ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Bool"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "11be0aa19af23c8c3ee5c0b166fa7f4127ffe6dc9d2f62b01a11e7385e5b5202": {
     "query": "\ninsert into jig_data_additional_resource(jig_data_id, resource_type_id, display_name, resource_content)\nselect $2, resource_type_id, display_name, resource_content\nfrom jig_data_additional_resource\nwhere jig_data_id = $1\n        ",
     "describe": {
@@ -568,6 +581,19 @@
       "nullable": [
         null
       ]
+    }
+  },
+  "140ff97c5bd0b551e1c2b0026a53c713117faf011a3f7f9e6f7e420cc481204a": {
+    "query": "\n        update jig_curation_data\n        set additional_resources = $2\n        where jig_id = $1 and $2 is distinct from additional_resources\n                    ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Bool"
+        ]
+      },
+      "nullable": []
     }
   },
   "145cde06bc00df1855bd4307423b6f6f7f36a4560ed6e354a127f166d0d21011": {
@@ -678,6 +704,19 @@
         false,
         false
       ]
+    }
+  },
+  "17c068f0940d505201e9323c0d5d93d2565806c21b75c86f167f18f17caf652f": {
+    "query": "\nupdate jig_curation_data\nset categories = $2\nwhere jig_id = $1 and $2 is distinct from categories\n            ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Bool"
+        ]
+      },
+      "nullable": []
     }
   },
   "183f33f737958dc08f3e695c93f6520336204b206468b789ddc86726c3f1ff47": {
@@ -1805,6 +1844,19 @@
       "nullable": []
     }
   },
+  "5db8993ee5d00df44d48007636297504ce52b6f236c785cc04e4e39df9f4a3ce": {
+    "query": "\n    update jig_curation_data\n    set age_ranges = $2\n    where jig_id = $1 and $2 is distinct from age_ranges\n                ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Bool"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "5e4bfa7c86f036663500b75df28a943c55cbc671a2dd296514568680f1b3733f": {
     "query": "\nselect id,\n       kind as \"kind: MediaKind\",\n       created_at,\n       updated_at,\n       array(select media_url from web_media_library_url where media_id = id) as \"urls!\"\nfrom web_media_library\nwhere id = (select media_id from web_media_library_url where media_url = $1)\n",
     "describe": {
@@ -1873,6 +1925,19 @@
         false,
         false
       ]
+    }
+  },
+  "5ff5fa2a87043688acf1a71be7f3a293bd4cad618ed473b7ef536a116dabf50c": {
+    "query": "\n    update jig_curation_data\n    set description = $2\n    where jig_id = $1 and $2 is distinct from description\n                ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Bool"
+        ]
+      },
+      "nullable": []
     }
   },
   "6022c1b3fa61fd8de70432380a299ffad5bb5cbf9cd6ccea335c0a8973d258e7": {
@@ -2614,6 +2679,19 @@
       "nullable": [
         false
       ]
+    }
+  },
+  "7ae63cb702c40e9ca6ff187714217834737f1e8f1ee4a866a9fee21bacebeb74": {
+    "query": "\nupdate jig_curation_data\nset goals = $2\nwhere jig_id = $1 and $2 is distinct from goals\n            ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Bool"
+        ]
+      },
+      "nullable": []
     }
   },
   "7c52442554186edb177fcd9dca9083748cd77443e1a0923be7de29cf0c811fdd": {
@@ -3676,6 +3754,18 @@
       "nullable": [
         false
       ]
+    }
+  },
+  "a7597f668f530133865fe74a396da14ff51dcb53fc0537df95964ae98649ce1d": {
+    "query": "\n        update jig_curation_data\n        set updated_at = now()\n        where jig_id = $1\n    ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": []
     }
   },
   "a85530d1d83a7f3cd3786da68f5b489fbddbf411d735cf114817e4417768520b": {
@@ -4925,6 +5015,99 @@
       ]
     }
   },
+  "da9f9a428e7ad449406f935bee2eb4f9e7bc6f7faf31b9eab2463be2142ac6a6": {
+    "query": "\nselect jig_id                               as \"jig_id!: JigId\",\n       display_name,\n       language,\n       goals,\n       categories,\n       description,\n       age_ranges,\n       affiliations,\n       additional_resources,\n       curation_status                          as \"curation_status: JigCurationStatus\",\n       array(\n            select row (jcc.id, jcc.jig_id, comment, created_at, author_id)\n            from jig_curation_comment  \"jcc\"\n            where jcd.jig_id = jcc.jig_id\n        )                                                    as \"comments!: Vec<(CommentId, JigId, String, DateTime<Utc>, Uuid)>\"\nfrom jig_curation_data \"jcd\"\nwhere jig_id = $1\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "jig_id!: JigId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "display_name",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 2,
+          "name": "language",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 3,
+          "name": "goals",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 4,
+          "name": "categories",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 5,
+          "name": "description",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 6,
+          "name": "age_ranges",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 7,
+          "name": "affiliations",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 8,
+          "name": "additional_resources",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 9,
+          "name": "curation_status: JigCurationStatus",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 10,
+          "name": "comments!: Vec<(CommentId, JigId, String, DateTime<Utc>, Uuid)>",
+          "type_info": "RecordArray"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        null
+      ]
+    }
+  },
+  "dc462c844af0d21cfc19babd04a01f7937c0b7d085ebedff4dfeb2733de028f5": {
+    "query": "\n            update jig_curation_data\n            set curation_status = $2\n            where jig_id = $1 and $2 is distinct from curation_status\n             ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "dce1ba23b612bd8fa029a70a2e43b93f5158cbf0f24377b079e70d5d6c29a97c": {
     "query": "\nupdate user_profile\nset organization = $2\nwhere user_id = $1 and organization is distinct from $2",
     "describe": {
@@ -5421,6 +5604,19 @@
       "nullable": []
     }
   },
+  "ec58db6f7417f0821c8a35acb1da226c7206c7614b4b5f9ab890693e0b9d9e41": {
+    "query": "\n    update jig_curation_data\n    set affiliations = $2\n    where jig_id = $1 and $2 is distinct from affiliations\n                ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Bool"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "edf5cb94b8714ed9995df1c7266d8837390d35250f6c20f3d65b73974e50da4b": {
     "query": "\nwith recursive cte(parent_id) as (\nselect parent_id from category where id = $1\nunion all\nselect c.parent_id from category c inner join cte on cte.parent_id = c.id\n) select exists(select 1 from cte where parent_id = $2) as \"would_cycle!\"\n    ",
     "describe": {
@@ -5440,6 +5636,19 @@
       "nullable": [
         null
       ]
+    }
+  },
+  "f4463110f5544135bbcbb441792aad08a4e34be4dbf2994b9525b6ae031e3b5f": {
+    "query": "\nupdate jig_curation_data\nset language = $2\nwhere jig_id = $1 and $2 is distinct from language\n            ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Bool"
+        ]
+      },
+      "nullable": []
     }
   },
   "f4d6632fc60abf4351be966b89b2490a3c3aef6f9f59d9ab4ea2eecc68d8cb72": {

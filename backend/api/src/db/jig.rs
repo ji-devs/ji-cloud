@@ -21,6 +21,7 @@ use uuid::Uuid;
 use crate::error;
 
 pub(crate) mod additional_resource;
+pub(crate) mod curation;
 pub(crate) mod module;
 pub(crate) mod player;
 

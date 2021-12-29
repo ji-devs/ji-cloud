@@ -231,6 +231,7 @@ pub fn build(
             .configure(endpoints::jig::configure)
             .configure(endpoints::jig::module::configure)
             .configure(endpoints::jig::additional_resource::configure)
+            .configure(endpoints::jig::curation::configure)
             .configure(endpoints::admin::configure)
             .configure(endpoints::animation::configure)
             .configure(endpoints::search::configure)
