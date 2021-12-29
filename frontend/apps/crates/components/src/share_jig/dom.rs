@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use dominator::{clone, html, with_node, Dom};
+use dominator::{clone, html, with_node, Dom, EventOptions};
 use futures_signals::signal::{Signal, SignalExt};
 use shared::config::JIG_PLAYER_SESSION_VALID_DURATION_SECS;
 use utils::{
@@ -255,11 +255,13 @@ fn render_share_embed(state: Rc<State>) -> Dom {
                         }
                     }))
                 })
-                .event(|_evt: events::Click| {
-                    // stop close event from propagating to the anchored-overlay
-                    // TODO: this needs to be enabled once dominator allows it
-                    // evt.stop_propagation();
-                })
+                .event_with_options(
+                    &EventOptions::bubbles(),
+                    |evt: events::Click| {
+                        // stop close event from propagating to the anchored-overlay
+                        evt.stop_propagation();
+                    }
+                )
             })
         ])
     })
