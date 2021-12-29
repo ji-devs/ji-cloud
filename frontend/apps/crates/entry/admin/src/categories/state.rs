@@ -11,12 +11,14 @@ use web_sys::HtmlElement;
 
 pub struct State {
     pub categories: MutableVec<Rc<Category>>,
+    pub deleting: Mutable<Option<Rc<ContentState>>>,
     pub loader: AsyncLoader,
 }
 impl State {
     pub fn new() -> Self {
         Self {
             categories: MutableVec::new(),
+            deleting: Mutable::new(None),
             loader: AsyncLoader::new(),
         }
     }

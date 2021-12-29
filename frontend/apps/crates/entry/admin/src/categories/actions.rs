@@ -182,8 +182,6 @@ pub fn move_category(content_state: Rc<ContentState>, dir: Direction) {
 }
 
 pub fn delete_category(content_state: Rc<ContentState>) {
-    content_state.close_menu();
-
     content_state.state.loader.load(clone!(content_state => async move {
         let id = content_state.cat.id;
 
