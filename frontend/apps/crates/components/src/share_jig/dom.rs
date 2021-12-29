@@ -106,9 +106,9 @@ fn render_share_main(state: Rc<State>) -> Dom {
             }),
             html!("share-jig-option", {
                 .property("kind", "copy")
-                .event(|_: events::Click| {
-                    clipboard::write_text("???");
-                })
+                .event(clone!(state => move|_: events::Click| {
+                    clipboard::write_text(&state.jig_link());
+                }))
             }),
         ])
     })

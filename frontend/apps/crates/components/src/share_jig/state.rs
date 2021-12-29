@@ -26,18 +26,24 @@ impl State {
     }
 
     pub fn embed_code(&self) -> String {
+        let link = self.jig_link();
+        format!(r#"<iframe src="{}" width="800" height="450"></iframe>"#, link)
+    }
+
+    pub fn jig_link(&self) -> String {
         let url = Route::Jig(JigRoute::Play(
             self.jig_id,
             None,
             JigPlayerOptions::default(),
         ))
-        .to_string();
+            .to_string();
         let origin = web_sys::window()
             .unwrap_ji()
             .location()
             .origin()
             .unwrap_ji();
-        format!(r#"<iframe src="{}{}" width="800" height="450"></iframe>"#, origin, url)
+
+        format!("{}{}", origin, url)
     }
 }
 
