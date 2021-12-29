@@ -1,12 +1,16 @@
 use dominator::{clone, html, Dom};
-use futures_signals::signal::Mutable;
+use futures_signals::signal::{Mutable, SignalExt};
 use futures_signals::signal_vec::SignalVecExt;
 use std::rc::Rc;
 
 use super::{actions, state::*};
 
 use utils::events;
-use wasm_bindgen::prelude::*;
+
+const STR_DELETE_TITLE: &'static str = "Warning";
+const STR_DELETE_CONTENT: &'static str = "Deleting the category \"{category}\" will also remove it from any images or JIGs associated with it. Are you sure you want to delete this category?";
+const STR_DELETE_CONFIRM: &'static str = "Delete category";
+const STR_DELETE_CANCEL: &'static str = "Don't delete";
 
 pub struct CategoriesPage {}
 
@@ -17,6 +21,24 @@ impl CategoriesPage {
         actions::load_categories(state.clone());
 
         html!("empty-fragment", {
+            .child_signal(state.deleting.signal_cloned().map(clone!(state => move |deleting| {
+                if let Some(content_state) = deleting {
+                    Some(html!("modal-confirm", {
+                        .property("dangerous", true)
+                        .property("title", STR_DELETE_TITLE)
+                        .property("content", STR_DELETE_CONTENT.replace("{category}", &content_state.cat.name.get_cloned()))
+                        .property("cancel_text", STR_DELETE_CANCEL)
+                        .property("confirm_text", STR_DELETE_CONFIRM)
+                        .event(clone!(state => move |_evt: events::CustomCancel| state.deleting.set(None)))
+                        .event(clone!(state => move |_evt: events::CustomConfirm| {
+                            state.deleting.set(None);
+                            actions::delete_category(content_state.clone());
+                        }))
+                    }))
+                } else {
+                    None
+                }
+            })))
             .child(
                 html!("category-page", {
                     .children(&mut [
@@ -112,7 +134,7 @@ impl ContentLineDom {
             .property("slot", "content")
             .property_signal("editing", content_state.cat.editing.signal_cloned())
             .property_signal("value", content_state.cat.name.signal_cloned())
-            .event(clone!(content_state => move |evt:events::CustomChange| {
+            .event(clone!(content_state => move |evt: events::CustomChange| {
                 actions::rename_category(&content_state.cat, content_state.state.clone(), evt.value());
             }))
         })];
@@ -121,7 +143,7 @@ impl ContentLineDom {
             children.push(html!("button-expand", {
                 .property("slot", "content")
                 .property("expanded", false)
-                .event(clone!(content_state => move |evt:events::CustomToggle| {
+                .event(clone!(content_state => move |evt: events::CustomToggle| {
                     actions::toggle_expand_all(&content_state.cat, evt.value());
                 }))
             }));
@@ -143,7 +165,7 @@ impl MenuDom {
                     .property("color", "darkGray")
                     .property("hoverColor", "blue")
                     .text("Add")
-                    .event(clone!(content_state => move |_evt:events::Click| {
+                    .event(clone!(content_state => move |_evt: events::Click| {
                         actions::add_category_child(content_state.clone());
                     }))
                 }),
@@ -152,7 +174,7 @@ impl MenuDom {
                     .property("color", "darkGray")
                     .property("hoverColor", "blue")
                     .text("Move up")
-                    .event(clone!(content_state => move |_evt:events::Click| {
+                    .event(clone!(content_state => move |_evt: events::Click| {
                         actions::move_category(content_state.clone(), actions::Direction::Up);
                     }))
                 }),
@@ -161,7 +183,7 @@ impl MenuDom {
                     .property("color", "darkGray")
                     .property("hoverColor", "blue")
                     .text("Move down")
-                    .event(clone!(content_state => move |_evt:events::Click| {
+                    .event(clone!(content_state => move |_evt: events::Click| {
                         actions::move_category(content_state.clone(), actions::Direction::Down);
                     }))
                 }),
@@ -170,7 +192,7 @@ impl MenuDom {
                     .property("color", "darkGray")
                     .property("hoverColor", "blue")
                     .text("Rename")
-                    .event(clone!(content_state => move |_evt:events::Click| {
+                    .event(clone!(content_state => move |_evt: events::Click| {
                         content_state.cat.editing.set(true);
                         content_state.close_menu();
 
@@ -181,8 +203,9 @@ impl MenuDom {
                     .property("color", "red")
                     .property("hoverColor", "red")
                     .text("Delete")
-                    .event(clone!(content_state => move |_evt:events::Click| {
-                        actions::delete_category(content_state.clone());
+                    .event(clone!(content_state => move |_evt: events::Click| {
+                        content_state.close_menu();
+                        content_state.state.deleting.set(Some(content_state.clone()));
                     }))
                 }),
             ])
