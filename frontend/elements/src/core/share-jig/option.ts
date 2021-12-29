@@ -48,7 +48,7 @@ export class _ extends LitElement {
             <slot slot="close" name="close"></slot>
             <img-ui path="core/share-jig/${this.kind}.svg"></img-ui>
             <span class="label">${STR_LABEL_LOOKUP[this.kind]}</span>
-            <span class="help">?</span>
+            <!-- <span class="help">?</span> -->
         `;
     }
 }
