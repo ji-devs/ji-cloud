@@ -56,8 +56,8 @@ impl SearchResultsSection {
         html!("home-search-result", {
             .property("slot", "results")
             .property("title", &jig.jig_data.display_name)
-            .property("playedCount", "???")
-            .property("likedCount", "???")
+            .property("playedCount", jig.likes)
+            .property("likedCount", jig.plays)
             .property("author", &jig.author_name.clone().unwrap_or_default())
             .property("language", &jig.jig_data.language)
             .property("kind", match state.focus {
@@ -145,7 +145,5 @@ impl SearchResultsSection {
     }
     // new
     // leaningPathJigCount
-    // playedCount
-    // likedCount
     // byJiTeam
 }
