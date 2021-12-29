@@ -100,6 +100,18 @@ impl SearchResultsSection {
                     }))
                 }),
             ])
+            .children(jig.jig_data.additional_resources.iter().map(|resource| {
+                html!("a", {
+                    .property("slot", "additional-resources")
+                    .property("target", "_BLANK")
+                    .property("href", resource.resource_content.get_link())
+                    .child(html!("fa-icon", {
+                        .property("icon", "fa-light fa-file")
+                    }))
+                    .text(" ")
+                    .text(&resource.display_name)
+                })
+            }))
             .apply(|dom| {
                 match jig.jig_focus {
                     JigFocus::Modules => {
