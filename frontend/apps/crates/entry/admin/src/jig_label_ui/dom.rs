@@ -52,6 +52,69 @@ impl JigUI {
                         }),
                         Self::render_jig_span("language", jig.jig_data.language),
                         Self::render_jig_span("curators", "CURATORS".to_string()),
+                        Self::render_jig_span("age-ranges", "AGE RANGES".to_string()),
+                        Self::render_jig_span("affiliations", "AFFILIATIONS".to_string()),
+                        html!("jig-details", {
+                            .attribute("slot", "jig-details")
+                            .children(&mut [
+                                html!("div", {
+                                    .attribute("slot", "buttons")
+                                    .children(&mut [
+                                        html!("button-rect", {
+                                            .attribute("kind", "text")
+                                            .attribute("color", "blue")
+                                            .text("JIG's name")
+                                        }),
+                                        html!("button-rect", {
+                                            .attribute("kind", "outline")
+                                            .attribute("color", "blue")
+                                            .text("Save Changes")
+                                        }),
+                                    ])
+                                }),
+                                html!("div", {
+                                    .attribute("slot", "inputs")
+                                    .children(&mut [
+                                        html!("input-wrapper", {
+                                            .attribute("label", "JIG's name")
+                                            .children(&mut [
+                                                html!("input", {
+                                                    .attribute("value", "")
+                                                }),
+                                            ])
+                                        }),
+                                        html!("input-wrapper", {
+                                            .attribute("label", "Author name")
+                                            .children(&mut [
+                                                html!("input", {
+                                                    .attribute("value", "")
+                                                }),
+                                            ])
+                                        }),
+                                        html!("input-select", {
+                                            .attribute("label", "Instruction Language")
+                                            .children(&mut [
+                                                html!("input-select-option", {
+                                                    .text("English")
+                                                }),
+                                                html!("input-select-option", {
+                                                    .text("Spanish")
+                                                }),
+                                                html!("input-select-option", {
+                                                    .text("Hebrew")
+                                                }),
+                                                html!("input-select-option", {
+                                                    .text("French")
+                                                }),
+                                                html!("input-select-option", {
+                                                    .text("Italian")
+                                                }),
+                                            ])
+                                        })
+                                    ])
+                                })
+                            ])
+                        })
                     ])
                 })
             })))
