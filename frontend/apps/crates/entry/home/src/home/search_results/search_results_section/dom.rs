@@ -137,7 +137,7 @@ impl SearchResultsSection {
                                         .property("color", "green")
                                         .property("bold", true)
                                         .property("href", resource.resource_content.get_link())
-                                        .property("target", "_new")
+                                        .property("target", "_BLANK")
                                         .text("View")
                                     })
                                 },
