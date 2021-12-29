@@ -101,7 +101,7 @@ where
     struct HeaderConfigStep {
         tabs: Vec<HeaderConfigTab>,
     }
-    #[derive(Deserialize, Default, Clone)]
+    #[derive(Debug, Deserialize, Default, Clone)]
     struct HeaderConfigTab {
         title: String,
         body: String,
@@ -154,14 +154,20 @@ where
             })
         })
         .child_signal(tab_config_sig().map(|tab| {
-            Some(
-                JigziHelp::new(
-                    tab.title,
-                    tab.body,
-                    "module-header"
+            let HeaderConfigTab {title, body} = tab;
+
+            if !title.is_empty() && !body.is_empty() {
+                Some(
+                    JigziHelp::new(
+                        title,
+                        body,
+                        "module-header"
+                    )
+                    .render(Some("help"))
                 )
-                .render(Some("help"))
-            )
+            } else {
+                None
+            }
         }))
         .child(ControllerDom::render(
             state.history.clone(),
