@@ -33,8 +33,8 @@ export class _ extends LitElement {
                     pointer-events: none;
                 }
                 .width-holder {
-                    display: flex;
-                    flex-direction: row;
+                    display: grid;
+                    grid-template-columns: auto;
                     justify-content: center;
                     align-items: center;
                 }
