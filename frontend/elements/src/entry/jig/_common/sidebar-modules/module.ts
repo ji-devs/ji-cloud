@@ -256,7 +256,7 @@ export class _ extends LitElement {
         const iconPath = `entry/jig/modules/small/${module}.svg`;
         const plusModuleIconPath = `entry/jig/modules/small/${"poster"}.svg`;
         
-        if (!this.collapsed) {
+        if (this.collapsed) {
             return html`
                 <div class="icon">
                     ${ module === ""
