@@ -1,4 +1,4 @@
-use std::{fs::{OpenOptions, File}, hash::Hash};
+use std::{fs::{OpenOptions, File}, hash::Hash, sync::atomic::AtomicUsize};
 use super::options::Opts;
 use dotenv::dotenv;
 use simplelog::*;
@@ -23,6 +23,7 @@ pub struct Context {
     pub skip_game_ids: Vec<String>,
     pub affiliations: Vec<AffiliationId>,
     pub age_ranges: Vec<AgeRangeId>,
+    pub completed_count: AtomicUsize
 }
 
 impl Context {
@@ -127,7 +128,8 @@ impl Context {
             info_log,
             skip_game_ids: skip_game_ids.into_iter().collect(),
             affiliations,
-            age_ranges
+            age_ranges,
+            completed_count: AtomicUsize::new(0)
         }
     }
 }

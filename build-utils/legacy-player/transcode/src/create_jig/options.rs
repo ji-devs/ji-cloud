@@ -33,15 +33,16 @@ pub struct Opts {
     #[structopt(long, default_value="")]
     pub skip_info_log_url: String,
     
-    //#[structopt(long, default_value="/home/david/archive/create-info.txt", parse(from_os_str))]
-    #[structopt(long, default_value="/Users/dakom/Documents/JI/create-info.txt", parse(from_os_str))]
+    #[structopt(long, default_value="/home/david/archive/create-info.txt", parse(from_os_str))]
+    //#[structopt(long, default_value="/Users/dakom/Documents/JI/create-info.txt", parse(from_os_str))]
     pub info_log: PathBuf,
 
     #[structopt(long, parse(try_from_str), default_value = "false")]
     pub clear_log_files: bool,
 
-    /// batch size to help throttle connections 
-    #[structopt(long, parse(try_from_str), default_value = "100")]
+    /// batch size to help throttle connections
+    /// note - setting to 100 and running for the full set breaks things :/
+    #[structopt(long, parse(try_from_str), default_value = "0")]
     pub batch_size: usize,
 
     /// debug mode 

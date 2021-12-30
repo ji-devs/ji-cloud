@@ -11,7 +11,7 @@ use structopt::StructOpt;
 use std::fs;
 use std::fs::File;
 use std::io::Write;
-use std::sync::Arc;
+use std::sync::{Arc, atomic::Ordering};
 use std::convert::TryInto;
 use uuid::Uuid;
 use ::transcode::{
@@ -90,8 +90,8 @@ async fn main() {
         log::info!("deleted all jigs!");
     }
 
-    log::warn!("exiting early for now, once all jigs are deleted pick it up again!")
-    std::process::exit(0);
+    // log::warn!("exiting early for now, once all jigs are deleted pick it up again!");
+    // std::process::exit(0);
 
     let batch_size = *&ctx.opts.batch_size;
     let mut jobs = get_futures(ctx.clone()).await;
@@ -115,7 +115,7 @@ async fn main() {
         while let Some(_) = futures.next().await {}
     }
 
-    log::info!("done!");
+    log::info!("completed {}", ctx.completed_count.load(Ordering::SeqCst));
 }
 
 async fn delete_all_jigs_first(ctx:&Context) {
@@ -176,56 +176,56 @@ async fn parse(ctx: Arc<Context>, game_id: String) {
 
     if let Some(game_id) = ctx.skip_game_ids.iter().find(|skip_game_id| game_id == **skip_game_id) {
         log::info!("skipping {}", game_id);
-        return;
-    }
-
-    let url = format!("https://storage.googleapis.com/ji-cloud-legacy-eu-001/games/{}/json/game.json", game_id);
-
-    let res = ctx 
-        .client
-        .get(&url)
-        .send()
-        .await
-        .unwrap();
-
-    if !res.status().is_success() {
-        log::error!("error code: {}, details: {:?}", res.status().as_str(), res);
-        panic!("Failed to get game json for {}", game_id);
-    }
-
-    let manifest:SrcManifest = serde_json::from_str(&res.text().await.unwrap()).unwrap();
-
-    log::info!("{}: {} slides", game_id, manifest.structure.slides.len());
-
-    let image_id = if !ctx.opts.skip_cover_page && manifest.structure.slides.len() > 0 {
-        Some(upload_cover_image(ctx, &game_id, &manifest.structure.slides[0]).await)
     } else {
-        None
-    };
-    
-    let jig_id = make_jig(ctx, &manifest).await;
-    log::info!("got jig id: {}", jig_id.0.to_string());
-    assign_modules(ctx, &game_id, &jig_id, &manifest).await;
+        let url = format!("https://storage.googleapis.com/ji-cloud-legacy-eu-001/games/{}/json/game.json", game_id);
 
-    if !ctx.opts.dry_run {
-        if let Some(image_id) = image_id {
-            log::info!("setting cover");
-            assign_cover_image(ctx, &jig_id, image_id).await;
+        let res = ctx 
+            .client
+            .get(&url)
+            .send()
+            .await
+            .unwrap();
+
+        if !res.status().is_success() {
+            log::error!("error code: {}, details: {:?}", res.status().as_str(), res);
+            panic!("Failed to get game json for {}", game_id);
         }
 
-        publish_jig(ctx, &jig_id).await;
+        let data:SrcManifestData = serde_json::from_str(&res.text().await.unwrap()).unwrap();
+        let manifest = data.data; 
 
-        let game_hash = manifest.album_store.album.fields.hash.unwrap_or_else(|| "[unknown]".to_string());
+        log::info!("{}: {} slides", game_id, manifest.structure.slides.len());
 
-       
-        JigInfoLogLine {
-            jig_id: jig_id.0.to_string(),
-            game_id,
-            game_hash
-        }.write_line(&ctx.info_log);
+        let image_id = if !ctx.opts.skip_cover_page && manifest.structure.slides.len() > 0 {
+            Some(upload_cover_image(ctx, &game_id, &manifest.structure.slides[0]).await)
+        } else {
+            None
+        };
+        
+        let jig_id = make_jig(ctx, &manifest).await;
+        log::info!("got jig id: {}", jig_id.0.to_string());
+        assign_modules(ctx, &game_id, &jig_id, &manifest).await;
+
+        if !ctx.opts.dry_run {
+            if let Some(image_id) = image_id {
+                log::info!("setting cover");
+                assign_cover_image(ctx, &jig_id, image_id).await;
+            }
+
+            publish_jig(ctx, &jig_id).await;
+
+            let game_hash = manifest.album_store.album.fields.hash.unwrap_or_else(|| "[unknown]".to_string());
+
+        
+            JigInfoLogLine {
+                jig_id: jig_id.0.to_string(),
+                game_id,
+                game_hash
+            }.write_line(&ctx.info_log);
+        }
     }
 
-
+    ctx.completed_count.fetch_add(1, Ordering::SeqCst);
 }
 
 async fn upload_cover_image(ctx:&Context, game_id: &str, slide: &transcode::src_manifest::Slide) -> ImageId {
