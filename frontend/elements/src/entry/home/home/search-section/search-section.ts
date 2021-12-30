@@ -18,9 +18,14 @@ export class _ extends LitElement {
             homeStyles,
             css`
                 :host {
+                    --padding: 88px;
+
                     display: block;
                     background-color: var(--light-blue-6);
-                    padding: 88px 0;
+                    padding: var(--padding) 0;
+                }
+                :host([mode="results"]) {
+                    padding: calc(var(--padding) / 2) 0;
                 }
                 :host([mode="results"]) .home-only,
                 :host([mode="home"]) .results-only {
@@ -28,10 +33,13 @@ export class _ extends LitElement {
                     pointer-events: none;
                 }
                 .width-holder {
-                    display: grid;
-                    grid-template-columns: 1fr auto;
-                    justify-content: space-between;
+                    display: flex;
+                    flex-direction: row;
+                    justify-content: center;
                     align-items: center;
+                }
+                :host([mode="results"]) .width-holder {
+                    justify-content: space-between;
                 }
                 .center-1 {
                     grid-column: 1 / -1;
@@ -130,11 +138,9 @@ export class _ extends LitElement {
 
         // TODO: Enable once ready
         return html`
-            <!--
             <div class="help results-only">
                 <slot name="help"></slot>
             </div>
-            -->
         `;
     }
 

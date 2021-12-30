@@ -19,6 +19,7 @@ export class _ extends LitElement {
                     display: inline-grid;
                     grid-template-columns: auto auto;
                     align-items: flex-start;
+                    cursor: pointer;
                 }
                 .tooltip {
                     background-color: var(--orange-1);
