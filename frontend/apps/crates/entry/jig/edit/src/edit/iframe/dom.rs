@@ -16,6 +16,7 @@ impl IframeDom {
 
         html!("iframe" => web_sys::HtmlIFrameElement, {
             .property("allow", "autoplay; fullscreen")
+            .property("frameBorder", "0")
             .property("slot", "main")
             .future(clone!(jig_id, module_id, module_kind, is_loading => async move {
                 actions::load_module_kind(jig_id, module_id, module_kind).await;
