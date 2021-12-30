@@ -48,7 +48,7 @@ impl EditPage {
                     }
                 })
                 .child_signal(state.route.signal_cloned().map(clone!(state, jig_id => move |route| {
-                        match route {
+                    match route {
                         JigEditRoute::Landing => {
                             match jig_focus {
                                 JigFocus::Modules => Some(SelectionDom::render()),

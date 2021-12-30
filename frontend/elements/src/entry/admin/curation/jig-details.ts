@@ -42,6 +42,7 @@ export class _ extends LitElement {
                 <div id="heading">
                     <div>
                         <div id="general-summary">General Summary</div>
+                        <slot name="back"></slot>
                     </div>
                     <div id="heading-buttons">
                         <slot name="buttons"></slot>

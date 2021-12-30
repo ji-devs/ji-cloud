@@ -3,9 +3,9 @@ use std::rc::Rc;
 use dominator::clone;
 use futures::join;
 use shared::{domain::jig::JigBrowseQuery, api::endpoints};
-use utils::prelude::ApiEndpointExt;
+use utils::{prelude::ApiEndpointExt, routes::{AdminCurationRoute, Route, AdminRoute}};
 
-use super::state::Curation;
+use super::Curation;
 
 impl Curation {
     pub fn load_data(self: &Rc<Self>) {
@@ -54,5 +54,10 @@ impl Curation {
                 );
             }
         };
+    }
+
+    pub fn navigate_to(self: &Rc<Self>, route: AdminCurationRoute) {
+        self.route.set(route.clone());
+        Route::Admin(AdminRoute::Curation(route)).push_state();
     }
 }

@@ -29,7 +29,7 @@ impl Sidebar {
                     SidebarItem::new(AdminRoute::ImageAdd, profile, &curr_route),
                     SidebarItem::new(AdminRoute::ImageSearch(None), profile, &curr_route),
                     SidebarItem::new(AdminRoute::ImageTags, profile, &curr_route),
-                    SidebarItem::new(AdminRoute::Curation, profile, &curr_route),
+                    SidebarItem::new(AdminRoute::Curation(AdminCurationRoute::Table), profile, &curr_route),
                     SidebarItem::new(AdminRoute::Categories, profile, &curr_route),
                     SidebarItem::new(AdminRoute::Locale, profile, &curr_route),
                 ],
@@ -58,7 +58,7 @@ impl SidebarItem {
             AdminRoute::ImageTags => "image-tags",
             AdminRoute::ImageMeta(_, _) => "image-search",
             AdminRoute::ImageSearch(_) => "image-search",
-            AdminRoute::Curation => "curation",
+            AdminRoute::Curation(_) => "curation",
             AdminRoute::Landing => "",
         };
 

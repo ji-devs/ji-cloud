@@ -31,23 +31,11 @@ export class _ extends LitElement {
         `,
     ];
 
-    @property({ type: Boolean })
-    open = false;
-
-    openOverlay(event: Event) {
-        event.preventDefault();
-        this.open = true;
-    }
-
-    closeOverlay() {
-        this.open = false;
-    }
-
     render() {
         return html`
             <div class="jig">
                 <div class="flex">
-                    <a @click=${this.openOverlay}>
+                    <a>
                         <slot name="jig-name"></slot>
                     </a>
                 </div>
@@ -72,11 +60,6 @@ export class _ extends LitElement {
                 <div class="flex">
                     <slot name="affiliations"></slot>
                 </div>
-            </div>
-            <div id="overlay-container">
-                <dialog-overlay @close=${this.closeOverlay} autoClose ?open=${this.open}>
-                    <slot name="jig-details"></slot>
-                </dialog-overlay>
             </div>
         `;
     }
