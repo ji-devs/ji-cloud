@@ -251,27 +251,21 @@ export class _ extends LitElement {
     }
 
     renderModuleImg() {
-        const {module} = this;
-        
-        const iconPath = `entry/jig/modules/small/${module}.svg`;
-        const plusModuleIconPath = `entry/jig/modules/small/${"poster"}.svg`;
-        
-        if (this.collapsed) {
-            return html`
-                <div class="icon">
-                    ${ module === ""
-                        ? html`<img-ui path="${plusModuleIconPath}"></img-ui>`
-                        : html`<img-ui path="${iconPath}"></img-ui>`}
-                </div>
-            `;
+        const { module } = this;
+
+        const getIconPath = (module: string) => `entry/jig/modules/small/${
+            module === "" ? "poster" : module
+        }.svg`;
+
+        if (!this.collapsed && module === "") {
+            return nothing;
         }
+
         return html`
             <div class="icon">
-                ${ module === ""
-                    ? nothing
-                    : html`<img-ui path="${iconPath}"></img-ui>`}
+                ${html`<img-ui path="${getIconPath(module)}"></img-ui>`}
             </div>
-        `
+        `;
     }
     
     render() {
