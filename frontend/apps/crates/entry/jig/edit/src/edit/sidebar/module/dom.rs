@@ -155,7 +155,7 @@ impl ModuleDom {
                                         false => None,
                                         true => {
                                             Some(html!("overlay-tooltip-error", {
-                                                .text("You can only drag here the cover activity.")
+                                                .text("Only the cover can be dragged here.")
                                                 .property("target", elem.clone())
                                                 .property("targetAnchor", "mr")
                                                 .property("contentAnchor", "oppositeH")
