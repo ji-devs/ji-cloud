@@ -6,7 +6,7 @@ use futures_signals::{
     signal::{Signal, SignalExt},
 };
 use shared::domain::jig::JigResponse;
-use utils::{ages::AgeRangeVecExt, events, jig::published_at_string};
+use utils::{ages::AgeRangeVecExt, events, jig::{published_at_string, ResourceContentExt}};
 
 use super::{super::state::State, report};
 
@@ -81,7 +81,20 @@ fn render_jig_info(state: Rc<State>, jig: &JigResponse) -> Dom {
                 .property("slot", "categories")
                 .property("label", &category_id.0.to_string())
             })
-        }).collect::<Vec<Dom>>())
+        }))
+
+        .children(jig.jig_data.additional_resources.iter().map(|resource| {
+            html!("a", {
+                .property("slot", "additional-resources")
+                .property("target", "_BLANK")
+                .property("href", resource.resource_content.get_link())
+                .child(html!("fa-icon", {
+                    .property("icon", "fa-light fa-file")
+                }))
+                .text(" ")
+                .text(&resource.display_name)
+            })
+        }))
         .child(html!("button-rect", {
             .property("slot", "courses")
             .property("kind", "text")

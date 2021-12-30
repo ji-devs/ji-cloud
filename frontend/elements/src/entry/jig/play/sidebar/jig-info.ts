@@ -82,6 +82,20 @@ export class _ extends LitElement {
                     flex-wrap: wrap;
                     grid-gap: 10px;
                 }
+                .additional-resources-items {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 16px;
+                    padding: 10px 0;
+                }
+                ::slotted(a[slot=additional-resources]) {
+                    color: var(--main-blue);
+                    font-weight: 500;
+                    text-decoration: none;
+                    font-size: 14px;
+                    display: flex;
+                    column-gap: 6px;
+                }
                 .courses-section h5 {
                     margin: 0;
                     font-size: 14px;
@@ -189,10 +203,8 @@ export class _ extends LitElement {
                     </section>
                     <section class="additional-resources-section">
                         <h4>${STR_ADDITIONAL_RESOURCES}</h4>
-                        <div class="resources-section">
-                            <!-- TODO: enable when ready -->
-                            <!-- <slot name="resources-section"></slot> -->
-                            Coming soon!
+                        <div class="additional-resources-items">
+                            <slot name="additional-resources"></slot>
                         </div>
                     </section>
                     <section class="courses-section">

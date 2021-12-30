@@ -56,8 +56,8 @@ impl SearchResultsSection {
         html!("home-search-result", {
             .property("slot", "results")
             .property("title", &jig.jig_data.display_name)
-            .property("playedCount", "???")
-            .property("likedCount", "???")
+            .property("playedCount", jig.likes)
+            .property("likedCount", jig.plays)
             .property("author", &jig.author_name.clone().unwrap_or_default())
             .property("language", &jig.jig_data.language)
             .property("kind", match state.focus {
@@ -100,6 +100,18 @@ impl SearchResultsSection {
                     }))
                 }),
             ])
+            .children(jig.jig_data.additional_resources.iter().map(|resource| {
+                html!("a", {
+                    .property("slot", "additional-resources")
+                    .property("target", "_BLANK")
+                    .property("href", resource.resource_content.get_link())
+                    .child(html!("fa-icon", {
+                        .property("icon", "fa-light fa-file")
+                    }))
+                    .text(" ")
+                    .text(&resource.display_name)
+                })
+            }))
             .apply(|dom| {
                 match jig.jig_focus {
                     JigFocus::Modules => {
@@ -125,7 +137,7 @@ impl SearchResultsSection {
                                         .property("color", "green")
                                         .property("bold", true)
                                         .property("href", resource.resource_content.get_link())
-                                        .property("target", "_new")
+                                        .property("target", "_BLANK")
                                         .text("View")
                                     })
                                 },
@@ -145,7 +157,5 @@ impl SearchResultsSection {
     }
     // new
     // leaningPathJigCount
-    // playedCount
-    // likedCount
     // byJiTeam
 }
