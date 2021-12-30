@@ -250,6 +250,30 @@ export class _ extends LitElement {
         }
     }
 
+    renderModuleImg() {
+        const {module} = this;
+        
+        const iconPath = `entry/jig/modules/small/${module}.svg`;
+        const plusModuleIconPath = `entry/jig/modules/small/${"poster"}.svg`;
+        
+        if (!this.collapsed) {
+            return html`
+                <div class="icon">
+                    ${ module === ""
+                        ? html`<img-ui path="${plusModuleIconPath}"></img-ui>`
+                        : html`<img-ui path="${iconPath}"></img-ui>`}
+                </div>
+            `;
+        }
+        return html`
+            <div class="icon">
+                ${ module === ""
+                    ? nothing
+                    : html`<img-ui path="${iconPath}"></img-ui>`}
+            </div>
+        `
+    }
+    
     render() {
         const { selected, index, dragging, module } = this;
 
@@ -263,9 +287,6 @@ export class _ extends LitElement {
 
         const subtitle = module === "" ? "" : STR_MODULE_DISPLAY_NAME[module];
 
-        const iconPath = `entry/jig/modules/small/${module}.svg`;
-        const plusModuleIconPath = `entry/jig/modules/small/${"poster"}.svg`;
-
         return html`
             <section class="${sectionClasses}">
                 <div class="grid-container">
@@ -274,11 +295,7 @@ export class _ extends LitElement {
                         ${subtitle === ""
                             ? nothing
                             : html`<div class="subtitle">${subtitle}</div>`}
-                        <div class="icon">
-                            ${module === ""
-                                ? html`<img-ui path="${plusModuleIconPath}"></img-ui>`
-                                : html`<img-ui path="${iconPath}"></img-ui>`}
-                        </div>
+                        ${this.renderModuleImg()}
                     </div>
                     <div class="middle open-only">
                         <div class="decorations">
