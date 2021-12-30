@@ -1,8 +1,8 @@
-use dominator::{clone, html, Dom};
+use dominator::{class, clone, html, Dom};
 use shared::domain::jig::{module::ModuleId, module::ModuleKind, JigId};
 use utils::prelude::*;
 
-use super::actions;
+use super::{actions, styles::IFRAME_CLASS};
 use futures_signals::signal::{Mutable, SignalExt};
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -15,8 +15,8 @@ impl IframeDom {
         let module_kind: Rc<RefCell<Option<ModuleKind>>> = Rc::new(RefCell::new(None));
 
         html!("iframe" => web_sys::HtmlIFrameElement, {
+            .class(&*IFRAME_CLASS)
             .property("allow", "autoplay; fullscreen")
-            .property("frameBorder", "0")
             .property("slot", "main")
             .future(clone!(jig_id, module_id, module_kind, is_loading => async move {
                 actions::load_module_kind(jig_id, module_id, module_kind).await;
