@@ -46,31 +46,6 @@ self.addEventListener("message", (msg) => {
                 },
             },
         });
-        //console.log(data);
-        // const [id, frame_index] = data;
-
-        // const reader = readers.get(id);
-        // const id_buffers = buffers.get(id);
-        // const info = reader.frameInfo(frame_index);
-
-        // if(!id_buffers[frame_index]) {
-        //     const data_size = (info.width * info.height * 4);
-
-        //     //make room for id at the end
-        //     const buffer = new Uint8Array(data_size + 4);
-
-        //     //const start = performance.now();
-        //     reader.decodeAndBlitFrameRGBA(frame_index, buffer);
-        //     //console.log("decode", performance.now() - start);
-
-        //     //append the id
-        //     const view = new DataView(buffer.buffer);
-        //     view.setUint32(data_size, id);
-
-        //     id_buffers[frame_index] = buffer;
-        // }
-
-        // self.postMessage(id_buffers[frame_index]);
     }
 });
 // {"data":{"kind":"init","data":[10.2,45.6]}}

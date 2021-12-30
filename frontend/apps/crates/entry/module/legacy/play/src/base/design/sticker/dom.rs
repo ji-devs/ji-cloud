@@ -7,6 +7,7 @@ impl Sticker {
     pub fn render(self) -> Dom {
         match self {
             Self::Image(state) => {
+                log::info!("image");
                 state.render()
             },
             Self::Animation(state) => {

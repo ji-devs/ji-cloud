@@ -58,6 +58,7 @@ impl AnimationPlayer {
                     .after_inserted(clone!(state, size => move |elem| {
                         let (natural_width, natural_height) = size;
 
+
                         elem.set_width(natural_width as u32);
                         elem.set_height(natural_height as u32);
                         let paint_ctx = get_2d_context(&elem, None).unwrap_ji();

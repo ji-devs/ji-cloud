@@ -97,7 +97,7 @@ pub struct FrameInfo {
     pub interlaced: bool,
     pub palette_offset: usize,
     pub palette_size: usize,
-    pub transparent_index: usize,
+    pub transparent_index: Option<usize>,
     pub width: u32,
     pub x: u32,
     pub y: u32,
@@ -170,6 +170,7 @@ impl AnimationPlayer {
                 let event = event.dyn_ref::<web_sys::MessageEvent>().unwrap_throw();
                 let data = event.data();
 
+
                 if let Ok(obj_data) = Reflect::get(&data, &JsValue::from_str("data")) {
                     // ImageData payloads are slow to serde, so manually deserialize
                     if Reflect::get(&obj_data, &JsValue::from_str("kind")) == Ok(JsValue::from_str("frame_resp")) {
@@ -195,8 +196,8 @@ impl AnimationPlayer {
                             _ => {}
                         }
 
-                    }
-                }
+                    } 
+                } 
             }),
         ));
 
