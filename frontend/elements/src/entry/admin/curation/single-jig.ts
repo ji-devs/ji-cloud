@@ -1,10 +1,10 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 import jigFlex from './jig-flex-css';
 import "@elements/core/overlays/dialog-overlay";
-import "@elements/entry/admin/jig_label_ui/jig-details";
+import "@elements/entry/admin/curation/jig-details";
 
-@customElement("single-jig")
-export class SingleJig extends LitElement {
+@customElement("admin-curation-single-jig")
+export class _ extends LitElement {
     static styles = [
         jigFlex,
         css`

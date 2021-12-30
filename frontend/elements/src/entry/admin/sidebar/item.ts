@@ -1,12 +1,11 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
-import { classMap } from "lit-html/directives/class-map";
 import { nothing } from "lit-html";
 
 export type ID =
     | "locale"
     | "image-add"
     | "image-search"
-    | "jigs"
+    | "curation"
     | "category"
     | "image-tags";
 
@@ -14,9 +13,9 @@ const STR_LABEL_LOOKUP: { [key in ID]: string } = {
     "image-add": "Add image",
     "image-tags": "Image tags",
     "image-search": "Edit images",
-    jigs: "Label JIGs",
-    category: "Edit categories",
-    locale: "Localization",
+    "curation": "Curation",
+    "category": "Edit categories",
+    "locale": "Localization",
 };
 
 @customElement("admin-sidebar-item")

@@ -1,20 +1,20 @@
 import { JigData } from "./types";
 import { jigs } from "./story-data";
 
-import "@elements/entry/admin/jig_label_ui/jig-label-ui";
-import "@elements/entry/admin/jig_label_ui/single-jig";
+import "@elements/entry/admin/curation/curation";
+import "@elements/entry/admin/curation/single-jig";
 
 export default {
   title: "Entry/Admin/Jig Table UI",
-  component: "jig-label-ui",
+  component: "curation",
 }
 
 export const JigTableUI = ({ jigs }) => {
   return `
-    <jig-label-ui>
+    <admin-curation>
       ${jigs.map(
         (jig: JigData) => `
-          <single-jig>
+          <admin-curation-single-jig>
             <span slot="jig-name">${jig.jig_name}</span>
             <span slot="author">${jig.author}</span>
             <span slot="author-badge">${jig.author_badge}</span>
@@ -23,7 +23,7 @@ export const JigTableUI = ({ jigs }) => {
             <span slot="curators">${jig.curators}</span>
             <span slot="age-ranges">${jig.age_ranges}</span>
             <span slot="affiliations">${jig.affiliations}</span>
-            <jig-details slot="jig-details">
+            <admin-curation-jig-details slot="jig-details">
               <div slot="buttons">
                 <button-rect kind="text" color="blue">Cancel</button-rect>
                 <button-rect kind="outline" color="blue">Save Changes</button-rect>
@@ -58,11 +58,11 @@ export const JigTableUI = ({ jigs }) => {
                   <textarea rows="6" value=""></textarea>
                 </input-wrapper>
               </div>
-            </jig-details>
-          </single-jig>
+            </admin-curation-jig-details>
+          </admin-curation-single-jig>
         `
       ).join('')}
-    </jig-label-ui>
+    </admin-curation>
   `};
 JigTableUI.args = {
   jigs,

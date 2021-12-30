@@ -11,7 +11,7 @@ mod locale;
 mod router;
 mod sidebar;
 mod strings;
-mod jig_label_ui;
+mod curation;
 
 use router::Router;
 use wasm_bindgen::prelude::*;

@@ -1,6 +1,6 @@
 import {jigs} from './story-data';
 
-import "@elements/entry/admin/jig_label_ui/single-jig";
+import "@elements/entry/admin/curation/single-jig";
 
 const jig = jigs[0];
 
@@ -11,7 +11,7 @@ export default {
 
 export const SingleJig = ({jig}) => {
   return `
-  <single-jig>
+  <admin-curation-single-jig>
     <span slot="jig-name">${jig.jig_name}</span>
     <span slot="author">${jig.author}</span>
     <span slot="author-badge">${jig.author_badge}</span>
@@ -20,7 +20,7 @@ export const SingleJig = ({jig}) => {
     <span slot="curators">${jig.curators}</span>
     <span slot="age-ranges">${jig.age_ranges}</span>
     <span slot="affiliations">${jig.affiliations}</span>
-    <jig-details slot="jig-details">
+    <admin-curation-jig-details slot="jig-details">
       <div slot="buttons">
         <button-rect kind="text" color="blue">Cancel</button-rect>
         <button-rect kind="outline" color="blue">Save Changes</button-rect>
@@ -55,8 +55,8 @@ export const SingleJig = ({jig}) => {
           <textarea rows="6" value=""></textarea>
         </input-wrapper>
       </div>
-    </jig-details>
-  </single-jig>
+    </admin-curation-jig-details>
+  </admin-curation-single-jig>
 `
 };
 SingleJig.args = {

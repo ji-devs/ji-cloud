@@ -1,7 +1,7 @@
 import { LitElement, html, css, customElement } from "lit-element";
 
-@customElement("jig-details")
-export class JigLabelUI extends LitElement {
+@customElement("admin-curation-jig-details")
+export class _ extends LitElement {
     static styles = [
         css`
             #container {

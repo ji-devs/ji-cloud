@@ -5,9 +5,9 @@ use futures::join;
 use shared::{domain::jig::JigBrowseQuery, api::endpoints};
 use utils::prelude::ApiEndpointExt;
 
-use super::state::JigUI;
+use super::state::Curation;
 
-impl JigUI {
+impl Curation {
     pub fn load_data(self: &Rc<Self>) {
         let state = Rc::clone(self);
         state.loader.load(clone!(state => async move {

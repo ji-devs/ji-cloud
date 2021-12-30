@@ -5,7 +5,7 @@ use shared::domain::{jig::JigResponse, meta::{AgeRangeId, AffiliationId}};
 use std::rc::Rc;
 use utils::languages::Language;
 
-impl JigUI {
+impl Curation {
     fn render_jig_span(slot: &str, text: String) -> Dom {
         html!("span", {
             .attribute("slot", slot)
@@ -13,7 +13,7 @@ impl JigUI {
         })
     }
     fn render_jig_details() -> Dom {
-        html!("jig-details", {
+        html!("admin-curation-jig-details", {
             .attribute("slot", "jig-details")
             .children(&mut [
                 html!("div", {
@@ -119,9 +119,9 @@ impl JigUI {
     pub fn render(state: Rc<Self>) -> Dom {
         state.load_data();
 
-        html!("jig-label-ui", {
+        html!("admin-curation", {
             .children_signal_vec(state.jigs.signal_vec_cloned().map(clone!(state => move |jig: JigResponse| {
-                html!("single-jig", {
+                html!("admin-curation-single-jig", {
                     .children(&mut [
                         Self::render_jig_span("jig-name", jig.jig_data.display_name),
                         Self::render_jig_span("author", match jig.author_name {

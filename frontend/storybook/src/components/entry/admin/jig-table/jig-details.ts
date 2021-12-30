@@ -1,4 +1,4 @@
-import "@elements/entry/admin/jig_label_ui/jig-details";
+import "@elements/entry/admin/curation/jig-details";
 
 export default {
   title: "Entry/Admin/Jig Details",
@@ -7,7 +7,7 @@ export default {
 
 export const JigDetails = () => {
   return `
-    <jig-details>
+    <admin-curation-jig-details>
       <div slot="buttons">
         <button-rect kind="text" color="blue">Cancel</button-rect>
         <button-rect kind="outline" color="blue">Save Changes</button-rect>
@@ -42,7 +42,7 @@ export const JigDetails = () => {
           <textarea rows="6" value=""></textarea>
         </input-wrapper>
       </div>
-    </jig-details>
+    </admin-curation-jig-details>
   `
 };
 JigDetails.args = {}

@@ -1,8 +1,8 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 import jigFlex from "./jig-flex-css";
 
-@customElement("jig-label-ui")
-export class JigLabelUI extends LitElement {
+@customElement("admin-curation")
+export class _ extends LitElement {
     static styles = [
         jigFlex,
         css`

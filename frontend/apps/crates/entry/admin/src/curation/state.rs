@@ -3,7 +3,7 @@ use futures_signals::{signal_vec::MutableVec, signal::Mutable};
 use shared::domain::{jig::JigResponse, meta::{MetadataResponse, AgeRange, Goal, AgeRangeId, GoalId, AffiliationId, Affiliation}};
 use std::{rc::Rc, collections::HashMap};
 
-pub struct JigUI {
+pub struct Curation {
     pub jigs: MutableVec<JigResponse>,
     pub loader: AsyncLoader,
     pub meta: Mutable<Option<MetadataResponse>>,
@@ -12,7 +12,7 @@ pub struct JigUI {
     pub affiliations: Mutable<HashMap<AffiliationId, Affiliation>>,
 }
 
-impl JigUI {
+impl Curation {
     pub fn new() -> Rc<Self> {
         Rc::new(Self {
             jigs: MutableVec::new(),

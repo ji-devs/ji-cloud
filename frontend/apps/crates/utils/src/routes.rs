@@ -66,7 +66,7 @@ pub enum AdminRoute {
     Landing,
     Categories,
     Locale,
-    Jigs,
+    Curation,
     ImageSearch(Option<ImageSearchQuery>),
     ImageAdd,
     ImageTags,
@@ -83,7 +83,7 @@ impl AdminRoute {
             Self::Landing => true,
             Self::Categories => scopes.contains(&UserScope::ManageCategory),
             Self::Locale => false,
-            Self::Jigs => scopes.contains(&UserScope::AdminJig),
+            Self::Curation => scopes.contains(&UserScope::AdminJig),
             Self::ImageSearch(_) | Self::ImageAdd | Self::ImageTags | Self::ImageMeta(_, _) => {
                 scopes.contains(&UserScope::ManageImage)
             }
@@ -230,7 +230,7 @@ impl Route {
             }
             ["user", "register-complete"] => Self::User(UserRoute::RegisterComplete),
             ["user", "no-auth"] => Self::User(UserRoute::NoAuth),
-            ["admin", "jigs"] => Self::Admin(AdminRoute::Jigs),
+            ["admin", "curation"] => Self::Admin(AdminRoute::Curation),
             ["admin", "locale"] => Self::Admin(AdminRoute::Locale),
             ["admin", "categories"] => Self::Admin(AdminRoute::Categories),
             ["admin", "image-search"] => {
@@ -416,7 +416,7 @@ impl From<&Route> for String {
             },
             Route::Admin(route) => match route {
                 AdminRoute::Landing => "/admin".to_string(),
-                AdminRoute::Jigs => "/admin/jigs".to_string(),
+                AdminRoute::Curation => "/admin/curation".to_string(),
                 AdminRoute::Locale => "/admin/locale".to_string(),
                 AdminRoute::Categories => "/admin/categories".to_string(),
                 AdminRoute::ImageSearch(search) => match search {
