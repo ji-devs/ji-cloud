@@ -95,6 +95,10 @@ export class _ extends LitElement {
     @property({ type: Boolean, reflect: true })
     flipped: boolean = false;
 
+    // whether or not showing front vs. back
+    @property({ type: Boolean })
+    eventOnFlipped: boolean = false;
+
     // required for styling
     @property()
     theme: ThemeId = "blank";
@@ -126,6 +130,14 @@ export class _ extends LitElement {
     // style mode - see helpers definition
     @property()
     styleKind: StyleKind = "theme";
+
+    updated(changedProperties: Map<string, unknown>) {
+        if (changedProperties.get('flipped') && this.eventOnFlipped) {
+            this.dispatchEvent(
+                new CustomEvent("custom-card-flipped", {})
+            );
+        }
+    }
 
     connectedCallback() {
         super.connectedCallback();
