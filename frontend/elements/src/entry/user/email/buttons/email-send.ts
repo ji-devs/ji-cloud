@@ -1,7 +1,7 @@
 import { LitElement, html, css, customElement } from "lit-element";
 import "@elements/core/images/ui";
 
-const STR_SENT = "We have just sent you another email";
+const STR_SENT = "I didn’t receive an email. Please send again.";
 
 @customElement("button-email-send")
 export class _ extends LitElement {

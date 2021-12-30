@@ -5,8 +5,6 @@ import "@elements/entry/user/_common/base-page";
 
 const STR_TITLE = "We just sent you an email";
 const STR_SUBTITLE1 = "Please open the email and click on the Verification button. If you cannot see the email in your inbox, check your promotion or spam folders.";
-const STR_SUBTITLE2 =
-    "I didn’t receive an email. Please send again. (button)";
 
 @customElement("page-email-send")
 export class _ extends LitElement {
@@ -50,8 +48,6 @@ export class _ extends LitElement {
                 <div class="title">${STR_TITLE}</div>
                 <div class="subtitle">
                     ${STR_SUBTITLE1}
-                    <br />
-                    ${STR_SUBTITLE2}
                 </div>
                 <slot name="send"></slot>
                 <slot name="submit"></slot>
