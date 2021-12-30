@@ -174,6 +174,19 @@ export class _ extends LitElement {
                 :host([kind=resource]) ::slotted(home-search-result-details) {
                     border-bottom: solid 1px #3f9c6f;
                 }
+                .hover .additional-resources-items {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 16px;
+                    padding: 10px 0;
+                }
+                .hover ::slotted(a[slot=additional-resources]) {
+                    color: #ffffff;
+                    text-decoration: none;
+                    font-size: 14px;
+                    display: flex;
+                    column-gap: 6px;
+                }
                 .hover h3 {
                     font-size: 16px;
                     font-weight: 600;
@@ -320,7 +333,9 @@ export class _ extends LitElement {
                                 this.kind === "jig" ? html`
                                     <home-search-result-details>
                                         <h4>${STR_ADDITIONAL_RESOURCES}</h4>
-                                        <slot name="additional-resources"></slot>
+                                        <div class="additional-resources-items">
+                                            <slot name="additional-resources"></slot>
+                                        </div>
                                     </home-search-result-details>
                                 ` : nothing
                             }

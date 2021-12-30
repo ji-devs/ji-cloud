@@ -95,9 +95,16 @@ impl JigGallery {
                 VisibleJigs::Draft => Some(false),
             };
 
+            let user_id = get_user()
+                .as_ref()
+                .map(|user| user.id.clone())
+                .expect_ji("Only logged in users are allowed here");
+
             let req = Some(JigSearchQuery {
                 q,
                 is_published,
+                author: Some(user_id),
+                jig_focus: Some(state.focus),
                 ..Default::default()
             });
 
