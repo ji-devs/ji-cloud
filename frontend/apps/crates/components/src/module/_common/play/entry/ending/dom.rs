@@ -12,8 +12,8 @@ impl Ending {
         log::info!("MODULE ENDED");
         let msg = IframeAction::new(ModuleToJigPlayerMessage::Stop);
 
-        if let Err(_) = msg.try_post_message_to_top() {
-            log::info!("Couldn't post message to top!");
+        if let Err(_) = msg.try_post_message_to_player() {
+            log::info!("Couldn't post message to player!");
         }
 
         if let Some(kind) = state.kind {
@@ -22,8 +22,8 @@ impl Ending {
                     log::info!("ending is next, transitioning...");
                     let msg = IframeAction::new(ModuleToJigPlayerMessage::Next);
 
-                    if let Err(_) = msg.try_post_message_to_top() {
-                        log::info!("Couldn't post message to top... redirect!");
+                    if let Err(_) = msg.try_post_message_to_player() {
+                        log::info!("Couldn't post message to player... redirect!");
                     }
                 }
                 _ => {}

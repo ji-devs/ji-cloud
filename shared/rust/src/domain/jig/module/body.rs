@@ -24,6 +24,9 @@ pub mod drag_drop;
 /// Cover Body.
 pub mod cover;
 
+/// Resource Cover Body.
+pub mod resource_cover;
+
 /// Flashcards .
 pub mod flashcards;
 
@@ -59,7 +62,7 @@ pub enum Body {
     /// Module is a poster, and has a talking poster's body.
     Poster(poster::ModuleData),
 
-    /// ??
+    /// Module is a Video, and has a video body.
     Video(video::ModuleData),
 
     /// Module is a Listen & Learn, and has a Listen & Learn's body.
@@ -70,8 +73,11 @@ pub enum Body {
 
     /// Module is a [`Cover`](super::ModuleKind::Cover).
     ///
-    /// DEPRECATED INFO: This exists as an empty enum because cover *needs* to exist, but it also isn't decided yet.
+    /// Cover for Module type
     Cover(cover::ModuleData),
+
+    /// Module is a Resource Cover.
+    ResourceCover(resource_cover::ModuleData),
 
     /// Module is a legacy, and has a legacy's body.
     Legacy(legacy::ModuleData),
@@ -82,6 +88,9 @@ impl Body {
     pub fn new(kind: super::ModuleKind) -> Self {
         match kind {
             super::ModuleKind::Cover => Self::Cover(cover::ModuleData::default()),
+            super::ModuleKind::ResourceCover => {
+                Self::ResourceCover(resource_cover::ModuleData::default())
+            }
             super::ModuleKind::Memory => Self::MemoryGame(memory::ModuleData::default()),
             super::ModuleKind::CardQuiz => Self::CardQuiz(card_quiz::ModuleData::default()),
             super::ModuleKind::Flashcards => Self::Flashcards(flashcards::ModuleData::default()),
@@ -109,6 +118,7 @@ impl Body {
             Self::TappingBoard(data) => data.convert_to_body(kind),
             Self::DragDrop(data) => data.convert_to_body(kind),
             Self::Cover(data) => data.convert_to_body(kind),
+            Self::ResourceCover(data) => data.convert_to_body(kind),
             Self::Legacy(data) => data.convert_to_body(kind),
         }
     }
@@ -182,6 +192,7 @@ pub trait BodyExt<Mode: ModeExt, Step: StepExt>:
             ModuleKind::TappingBoard => Ok(Body::TappingBoard(self.convert_to_tapping_board()?)),
             ModuleKind::DragDrop => Ok(Body::DragDrop(self.convert_to_drag_drop()?)),
             ModuleKind::Cover => Ok(Body::Cover(self.convert_to_cover()?)),
+            ModuleKind::ResourceCover => Ok(Body::ResourceCover(self.convert_to_resource_cover()?)),
             ModuleKind::Legacy => Ok(Body::Legacy(self.convert_to_legacy()?)),
             _ => unimplemented!(
                 "cannot convert from {} to {}",
@@ -231,6 +242,10 @@ pub trait BodyConvert {
     /// Cover
     fn convert_to_cover(&self) -> Result<cover::ModuleData, &'static str> {
         Err("cannot convert to cover!")
+    }
+    /// Resource Cover
+    fn convert_to_resource_cover(&self) -> Result<resource_cover::ModuleData, &'static str> {
+        Err("cannot convert to resource cover!")
     }
     /// Video
     fn convert_to_video(&self) -> Result<video::ModuleData, &'static str> {
@@ -289,6 +304,7 @@ impl Body {
     pub fn kind(&self) -> super::ModuleKind {
         match self {
             Self::Cover(_) => super::ModuleKind::Cover,
+            Self::ResourceCover(_) => super::ModuleKind::ResourceCover,
             Self::MemoryGame(_) => super::ModuleKind::Memory,
             Self::Flashcards(_) => super::ModuleKind::Flashcards,
             Self::CardQuiz(_) => super::ModuleKind::CardQuiz,

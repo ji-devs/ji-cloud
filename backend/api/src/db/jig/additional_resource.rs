@@ -8,9 +8,13 @@ use shared::domain::{
         DraftOrLive, JigId,
     },
     meta::ResourceTypeId,
+    pdf::PdfId,
 };
 use sqlx::PgPool;
 use url::Url;
+
+use crate::error;
+
 #[derive(Deserialize, Serialize, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
@@ -51,17 +55,33 @@ pub async fn get(
     jig_id: JigId,
     draft_or_live: DraftOrLive,
     id: AdditionalResourceId,
-) -> anyhow::Result<(String, ResourceTypeId, ResourceContent)> {
+) -> anyhow::Result<(String, ResourceTypeId, ResourceContent), error::NotFound> {
     let mut txn = pool.begin().await?;
 
     let (draft_id, live_id) = super::get_draft_and_live_ids(&mut txn, jig_id)
         .await
-        .ok_or(anyhow::anyhow!("failed to get jig_data IDs"))?;
+        .ok_or(error::NotFound::ResourceNotFound)?;
 
     let jig_data_id = match draft_or_live {
         DraftOrLive::Draft => draft_id,
         DraftOrLive::Live => live_id,
     };
+
+    if !sqlx::query!(
+        //language=SQL
+        r#"
+select exists(select 1 from jig_data_additional_resource "jdar" where jig_data_id = $1
+    and jdar.id = $2) as "exists!"
+    "#,
+        jig_data_id,
+        id.0,
+    )
+    .fetch_one(&mut txn)
+    .await?
+    .exists
+    {
+        return Err(error::NotFound::ResourceNotFound);
+    }
 
     let res = sqlx::query!(
         r#"
@@ -93,7 +113,7 @@ pub async fn update(
     display_name: Option<String>,
     resource_type_id: Option<ResourceTypeId>,
     resource_content: Option<ResourceContent>,
-) -> anyhow::Result<()> {
+) -> anyhow::Result<(), error::Auth> {
     let mut txn = pool.begin().await?;
 
     let (draft_id, live_id) = super::get_draft_and_live_ids(&mut txn, jig_id)
@@ -212,6 +232,17 @@ pub async fn check_content(db: &PgPool, content: ResourceContent) -> anyhow::Res
             let data = Url::parse(data.as_str())?;
 
             json!(ResourceContent::Link(data))
+        }
+        ResourceContent::PdfId(data) => {
+            sqlx::query!(
+                r#"select id as "id: PdfId" from user_pdf_library where id = $1"#,
+                data.0
+            )
+            .fetch_one(db)
+            .await
+            .map_err(|_| anyhow::anyhow!("Pdf Id does not exist"))?;
+
+            json!(ResourceContent::PdfId(data))
         }
     };
 

@@ -29,9 +29,9 @@ jobs:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
       - name: install node
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v2
         with:
-          node-version: '15'
+          node-version: '16'
 
       - name: install build utils deps
         run: npm install
@@ -63,7 +63,7 @@ jobs:
           FONTAWESOME_NPM_AUTH_TOKEN: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
 
       - name: deploy to firebase
-        uses: w9jds/firebase-action@v1.0.1
+        uses: w9jds/firebase-action@v2.0.0
         with:
           args: deploy --project ji-cloud-developer-sandbox --only hosting:ji-cloud-sandbox-storybook
         env:

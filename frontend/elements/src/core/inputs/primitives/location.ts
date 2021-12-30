@@ -8,6 +8,9 @@ export class _ extends LitElement {
                 input {
                     all: inherit;
                 }
+                input::placeholder {
+                    color: var(--light-gray-4);
+                }
             `,
         ];
     }

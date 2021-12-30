@@ -3,7 +3,7 @@ import { nothing } from "lit-html";
 import { classMap } from "lit-html/directives/class-map";
 import "@elements/core/images/ui";
 
-export type IconSize = "small" | "medium";
+export type IconSize = "x-small" | "small" | "medium";
 
 export type IconKind =
     | "circle-x-blue"
@@ -38,6 +38,10 @@ export class _ extends LitElement {
                     cursor: pointer;
                     width: var(--button-width, 32px);
                     height: var(--button-height, 32px);
+                }
+                :host([size="x-small"]) {
+                    width: 16px;
+                    height: 16px;
                 }
                 :host([size="small"]) {
                     width: 24px;

@@ -1,16 +1,18 @@
+use crate::translate::translate_text;
+use anyhow::Context;
 use futures::TryStreamExt;
+use serde_json::value::Value;
 use shared::domain::{
     category::CategoryId,
     jig::{
-        module::{
-            body::{cover, ThemeId},
-            ModuleId, StableModuleId,
-        },
-        AudioBackground, AudioEffects, AudioFeedbackNegative, AudioFeedbackPositive, DraftOrLive,
-        JigData, JigFocus, JigId, JigPlayerSettings, JigResponse, LiteModule, ModuleKind,
-        PrivacyLevel, TextDirection,
+        additional_resource::{AdditionalResource, AdditionalResourceId as AddId, ResourceContent},
+        module::{body::ThemeId, ModuleId},
+        AudioBackground, AudioEffects, AudioFeedbackNegative, AudioFeedbackPositive,
+        DeleteUserJigs, DraftOrLive, JigAdminData, JigAdminUpdateData, JigData, JigFocus, JigId,
+        JigPlayerSettings, JigRating, JigResponse, LiteModule, ModuleKind, PrivacyLevel,
+        TextDirection,
     },
-    meta::{AffiliationId, AgeRangeId, GoalId, ResourceTypeId},
+    meta::{AffiliationId, AgeRangeId, GoalId, ResourceTypeId as TypeId},
     user::UserScope,
 };
 use sqlx::{PgConnection, PgPool};
@@ -33,14 +35,9 @@ pub async fn create(
     language: &str,
     description: &str,
     default_player_settings: &JigPlayerSettings,
+    jig_focus: &JigFocus,
 ) -> Result<JigId, CreateJigError> {
     let mut txn = pool.begin().await?;
-
-    let default_modules = [(
-        ModuleKind::Cover,
-        serde_json::to_value(cover::ModuleData::default())
-            .expect("default cover module failed to serialize while creating jig"),
-    )];
 
     let draft_id = create_jig_data(
         &mut txn,
@@ -55,27 +52,6 @@ pub async fn create(
     )
     .await?;
 
-    let mut module_stable_ids = Vec::new();
-
-    for (idx, (kind, contents)) in default_modules.iter().enumerate() {
-        let module = sqlx::query!(
-            //language=SQL
-            r#"
-insert into jig_data_module (jig_data_id, "index", kind, contents)
-values ($1, $2, $3, $4)
-returning stable_id as "stable_id: StableModuleId"
-"#,
-            draft_id,
-            idx as i16,
-            (*kind) as i16,
-            contents
-        )
-        .fetch_one(&mut txn)
-        .await?;
-
-        module_stable_ids.push(module.stable_id);
-    }
-
     let live_id = create_jig_data(
         &mut txn,
         display_name,
@@ -89,34 +65,13 @@ returning stable_id as "stable_id: StableModuleId"
     )
     .await?;
 
-    for (idx, (kind, contents, stable_id)) in default_modules
-        .iter()
-        .zip(module_stable_ids.iter())
-        .map(|it| (&it.0 .0, &it.0 .1, it.1))
-        .enumerate()
-    {
-        sqlx::query!(
-            //language=SQL
-            r#"
-insert into jig_data_module (stable_id, jig_data_id, "index", kind, contents)
-values ($1, $2, $3, $4, $5)
-"#,
-            (*stable_id).0,
-            live_id,
-            idx as i16,
-            (*kind) as i16,
-            contents
-        )
-        .fetch_all(&mut txn)
-        .await?;
-    }
-
     let jig = sqlx::query!(
         //language=SQL
-        r#"insert into jig (creator_id, author_id, live_id, draft_id) values ($1, $1, $2, $3) returning id"#,
+        r#"insert into jig (creator_id, author_id, live_id, draft_id, jig_focus) values ($1, $1, $2, $3, $4) returning id"#,
         creator_id,
         live_id,
         draft_id,
+        (*jig_focus) as i16,
     )
     .fetch_one(&mut txn)
     .await?;
@@ -214,10 +169,14 @@ with cte as (
                when $2 = 0 then jig.draft_id
                when $2 = 1 then jig.live_id
                end as "draft_or_live_id",
-           first_cover_assigned,  
-           published_at
+           published_at,
+           rating,
+           blocked,
+           curated,
+           jig_focus
     from jig
     left join jig_play_count on jig_play_count.jig_id = jig.id
+    left join jig_admin_data "admin" on admin.jig_id = jig.id
     where id = $1
 )
 select cte.jig_id                                          as "jig_id: JigId",
@@ -227,7 +186,6 @@ select cte.jig_id                                          as "jig_id: JigId",
        (select given_name || ' '::text || family_name
         from user_profile
         where user_profile.user_id = author_id)            as "author_name",
-       first_cover_assigned,
        published_at,
        updated_at,
        privacy_level                                       as "privacy_level!: PrivacyLevel",
@@ -242,6 +200,12 @@ select cte.jig_id                                          as "jig_id: JigId",
        audio_background                                    as "audio_background: AudioBackground",
        liked_count,
        play_count,
+       locked,
+       other_keywords,
+       translated_keywords,
+       rating                                               as "rating?: JigRating",
+       blocked                                              as "blocked",
+       curated,
        array(select row (unnest(audio_feedback_positive))) as "audio_feedback_positive!: Vec<(AudioFeedbackPositive,)>",
        array(select row (unnest(audio_feedback_negative))) as "audio_feedback_negative!: Vec<(AudioFeedbackNegative,)>",
        array(
@@ -262,9 +226,11 @@ select cte.jig_id                                          as "jig_id: JigId",
        array(select row (age_range_id)
              from jig_data_age_range
              where jig_data_id = cte.draft_or_live_id)     as "age_ranges!: Vec<(AgeRangeId,)>",
-       array(select row (resource_type_id)
-             from jig_data_additional_resource
-             where jig_data_id = cte.draft_or_live_id)     as "additional_resources!: Vec<(ResourceTypeId,)>"
+       array(
+             select row (jdar.id, jdar.display_name, resource_type_id, resource_content)
+             from jig_data_additional_resource "jdar"
+             where jdar.jig_data_id = cte.draft_or_live_id
+       )                                                    as "additional_resource!: Vec<(AddId, String, TypeId, Value)>"
 from jig_data
          inner join cte on cte.draft_or_live_id = jig_data.id
 "#,
@@ -279,9 +245,9 @@ from jig_data
             creator_id: row.creator_id,
             author_id: row.author_id,
             author_name: row.author_name,
-            first_cover_assigned: row.first_cover_assigned,
             likes: row.liked_count,
             plays: row.play_count,
+            jig_focus: row.jig_focus,
             jig_data: JigData {
                 draft_or_live,
                 display_name: row.display_name,
@@ -304,15 +270,27 @@ from jig_data
                 theme: row.theme,
                 age_ranges: row.age_ranges.into_iter().map(|(it, )| it).collect(),
                 affiliations: row.affiliations.into_iter().map(|(it, )| it).collect(),
-                additional_resources: row.additional_resources.into_iter().map(|(it, )| it).collect(),
+                additional_resources: row.additional_resource.into_iter().map(|(id, display_name, resource_type_id, resource_content)| {
+                    AdditionalResource {
+                        id,
+                        display_name,
+                        resource_type_id,
+                        resource_content: serde_json::from_value::<ResourceContent>(resource_content).unwrap(),
+                    }}).collect(),
                 audio_background: row.audio_background,
                 audio_effects: AudioEffects {
                     feedback_positive: row.audio_feedback_positive.into_iter().map(|(it, )| it).collect(),
                     feedback_negative: row.audio_feedback_negative.into_iter().map(|(it, )| it).collect(),
                 },
                 privacy_level: row.privacy_level,
-                jig_focus: row.jig_focus,
-
+                locked: row.locked,
+                other_keywords: row.other_keywords,
+                translated_keywords: row.translated_keywords,
+            },
+            admin_data: JigAdminData {
+                rating: row.rating,
+                blocked: row.blocked,
+                curated: row.curated,
             },
         });
 
@@ -335,19 +313,24 @@ select jig.id                                       as "id!: JigId",
        (select given_name || ' '::text || family_name
         from user_profile
         where user_profile.user_id = author_id) as "author_name",
-       first_cover_assigned                        as "first_cover_assigned!",
        live_id                                  as "live_id!",
        draft_id                                 as "draft_id!",
        published_at,
-       liked_count                            as "liked_count!",
+       liked_count                              as "liked_count!",
        (
-           select play_count 
-           from jig_play_count 
+           select play_count
+           from jig_play_count
            where jig_play_count.jig_id = jig.id
-        )  as "play_count!"
-from jig 
+       )                                        as "play_count!",
+       rating                                   as "rating?: JigRating",
+       blocked                                  as "blocked!",
+       curated                                  as "curated!",
+       jig_focus                                as "jig_focus!: JigFocus"
+from jig
+
          inner join unnest($1::uuid[])
     with ordinality t(id, ord) using (id)
+    inner join jig_admin_data "admin" on admin.jig_id = jig.id
 order by t.ord
     "#,
         ids,
@@ -360,8 +343,9 @@ order by t.ord
         DraftOrLive::Live => jig.iter().map(|it| it.live_id).collect(),
     };
 
-    let jig_data = sqlx::query!( //language=SQL
-r#"
+    let jig_data = sqlx::query!(
+        //language=SQL
+        r#"
 select id,
        display_name                                                                  as "display_name!",
        updated_at,
@@ -393,11 +377,15 @@ select id,
        array(select row (age_range_id)
              from jig_data_age_range
              where jig_data_id = jig_data.id)     as "age_ranges!: Vec<(AgeRangeId,)>",
-       array(select row (jig_data_additional_resource.id)
-             from jig_data_additional_resource
-             where jig_data_id = jig_data.id)     as "additional_resources!: Vec<(ResourceTypeId,)>",
-       privacy_level                                       as "privacy_level!: PrivacyLevel",
-       jig_focus                                           as "jig_focus!: JigFocus"
+       array(
+                select row (jdar.id, jdar.display_name, resource_type_id, resource_content)
+                from jig_data_additional_resource "jdar"
+                where jdar.jig_data_id = jig_data.id
+            )                                               as "additional_resource!: Vec<(AddId, String, TypeId, Value)>",
+       privacy_level                              as "privacy_level!: PrivacyLevel",
+       locked                                     as "locked!",
+       other_keywords                             as "other_keywords!",
+       translated_keywords                        as "translated_keywords!"
 from jig_data
          inner join unnest($1::uuid[])
     with ordinality t(id, ord) using (id)
@@ -418,7 +406,7 @@ order by t.ord
             author_name: jig_row.author_name,
             likes: jig_row.liked_count,
             plays: jig_row.play_count,
-            first_cover_assigned: jig_row.first_cover_assigned,
+            jig_focus: jig_row.jig_focus,
             jig_data: JigData {
                 draft_or_live,
                 display_name: jig_data_row.display_name,
@@ -454,9 +442,19 @@ order by t.ord
                     .map(|(it,)| it)
                     .collect(),
                 additional_resources: jig_data_row
-                    .additional_resources
+                    .additional_resource
                     .into_iter()
-                    .map(|(it,)| it)
+                    .map(|(id, display_name, resource_type_id, resource_content)| {
+                        AdditionalResource {
+                            id,
+                            display_name,
+                            resource_type_id,
+                            resource_content: serde_json::from_value::<ResourceContent>(
+                                resource_content,
+                            )
+                            .unwrap(),
+                        }
+                    })
                     .collect(),
                 audio_background: jig_data_row.audio_background,
                 audio_effects: AudioEffects {
@@ -472,7 +470,14 @@ order by t.ord
                         .collect(),
                 },
                 privacy_level: jig_data_row.privacy_level,
-                jig_focus: jig_data_row.jig_focus,
+                locked: jig_data_row.locked,
+                other_keywords: jig_data_row.other_keywords,
+                translated_keywords: jig_data_row.translated_keywords,
+            },
+            admin_data: JigAdminData {
+                rating: jig_row.rating,
+                blocked: jig_row.blocked,
+                curated: jig_row.curated,
             },
         })
         .collect();
@@ -484,13 +489,14 @@ order by t.ord
 
 pub async fn update_draft(
     pool: &PgPool,
+    api_key: &Option<String>,
     id: JigId,
+    user_id: Uuid,
     display_name: Option<&str>,
     goals: Option<&[GoalId]>,
     categories: Option<&[CategoryId]>,
     age_ranges: Option<&[AgeRangeId]>,
     affiliations: Option<&[AffiliationId]>,
-    additional_resources: Option<&[ResourceTypeId]>,
     language: Option<&str>,
     description: Option<&str>,
     default_player_settings: Option<&JigPlayerSettings>,
@@ -498,7 +504,8 @@ pub async fn update_draft(
     audio_background: Option<&Option<AudioBackground>>,
     audio_effects: Option<&AudioEffects>,
     privacy_level: Option<PrivacyLevel>,
-    jig_focus: Option<JigFocus>,
+    other_keywords: Option<String>,
+    admin_data: Option<JigAdminUpdateData>,
 ) -> Result<(), error::UpdateWithMetadata> {
     let mut txn = pool.begin().await?;
 
@@ -565,10 +572,10 @@ set direction = $2,
     display_score = $3,
     track_assessments = $4,
     drag_assist = $5
-where id = $1 and 
-    (($2 is distinct from direction) or 
+where id = $1 and
+    (($2 is distinct from direction) or
      ($3 is distinct from display_score) or
-     ($4 is distinct from track_assessments) or 
+     ($4 is distinct from track_assessments) or
      ($5 is distinct from drag_assist))
             "#,
             draft_id,
@@ -597,19 +604,46 @@ where id = $1
         .await?;
     }
 
-    if let Some(jig_focus) = jig_focus {
+    if let Some(other_keywords) = other_keywords {
+        let translate_text = match &api_key {
+            Some(key) => translate_text(&other_keywords, "he", "en", key)
+                .await
+                .context("could not translate text")?,
+            None => None,
+        };
+
         sqlx::query!(
-            //language=SQL
             r#"
 update jig_data
-set jig_focus = coalesce($2, jig_focus)
-where id = $1
-  and $2 is distinct from jig_focus
-    "#,
+set other_keywords = $2,
+    translated_keywords = (case when ($3::text is not null) then $3::text else (translated_keywords) end),
+    updated_at = now()
+where id = $1 and $2 is distinct from other_keywords"#,
             draft_id,
-            jig_focus as i16,
+            other_keywords,
+            translate_text
         )
-        .execute(&mut txn)
+        .execute(&mut *txn)
+        .await?;
+    }
+
+    if let Some(admin) = admin_data {
+        check_admin(&mut *txn, user_id).await?;
+
+        sqlx::query!(
+            r#"
+update jig_admin_data
+set rating = coalesce($2, rating),
+    blocked = coalesce($3, blocked),
+    curated = coalesce($4, curated)
+where jig_id = $1
+"#,
+            id.0,
+            admin.rating.map(|it| it as i16),
+            admin.blocked,
+            admin.curated
+        )
+        .execute(&mut *txn)
         .await?;
     }
 
@@ -655,12 +689,6 @@ where id = $1
             .map_err(super::meta::handle_metadata_err)?;
     }
 
-    if let Some(additional_resources) = additional_resources {
-        super::recycle_metadata(&mut txn, "jig_data", draft_id, additional_resources)
-            .await
-            .map_err(super::meta::handle_metadata_err)?;
-    }
-
     if let Some(age_ranges) = age_ranges {
         super::recycle_metadata(&mut txn, "jig_data", draft_id, age_ranges)
             .await
@@ -668,6 +696,25 @@ where id = $1
     }
 
     txn.commit().await?;
+
+    Ok(())
+}
+
+pub async fn check_admin(
+    pool: &mut sqlx::PgConnection,
+    user_id: Uuid,
+) -> Result<(), error::UpdateWithMetadata> {
+    sqlx::query!(
+        r#"
+select exists(select 1 from user_scope where user_id = $1 and scope = $2) as "authed!"
+"#,
+        user_id,
+        UserScope::Admin as i16,
+    )
+    .fetch_optional(pool)
+    .await?
+    .ok_or(error::UpdateWithMetadata::Forbidden)?
+    .authed;
 
     Ok(())
 }
@@ -702,25 +749,35 @@ where id is not distinct from $3
     Ok(())
 }
 
-pub async fn cover_set(db: &PgPool, jig_id: JigId) -> sqlx::Result<()> {
+pub async fn delete_all_jigs(
+    pool: &PgPool,
+    user_id: Uuid,
+) -> Result<Vec<DeleteUserJigs>, error::Delete> {
+    let mut txn = pool.begin().await?;
+
+    let jig_ids: Vec<DeleteUserJigs> = get_user_jig_ids(&mut txn, user_id).await?;
+
     sqlx::query!(
         //language=SQL
         r#"
-update jig
-set first_cover_assigned = true
-where id = $1
+delete
+from jig
+where creator_id is not distinct from $1
 "#,
-        jig_id.0
+        user_id
     )
-    .execute(db)
+    .execute(&mut txn)
     .await?;
 
-    Ok(())
+    txn.commit().await?;
+
+    Ok(jig_ids)
 }
 
 pub async fn browse(
     pool: &sqlx::Pool<sqlx::Postgres>,
     author_id: Option<Uuid>,
+    jig_focus: Option<JigFocus>,
     page: i32,
 ) -> sqlx::Result<Vec<JigResponse>> {
     sqlx::query!( //language=SQL
@@ -733,14 +790,13 @@ select jig.id                                              as "jig_id: JigId",
        (select given_name || ' '::text || family_name
         from user_profile
         where user_profile.user_id = author_id)            as "author_name",
-       first_cover_assigned                                   as "first_cover_assigned!",
        published_at,
        liked_count,
        (
-            select play_count 
-            from jig_play_count 
+            select play_count
+            from jig_play_count
             where jig_play_count.jig_id = jig.id
-       )  as "play_count!",
+       )                                                   as "play_count!",
        display_name                                        as "display_name!",
        updated_at,
        language                                            as "language!",
@@ -750,6 +806,12 @@ select jig.id                                              as "jig_id: JigId",
        track_assessments                                   as "track_assessments!",
        drag_assist                                         as "drag_assist!",
        theme                                               as "theme!: ThemeId",
+       locked                                              as "locked!",
+       other_keywords                                      as "other_keywords!",
+       translated_keywords                                 as "translated_keywords!",
+       rating                                              as "rating!: Option<JigRating>",
+       blocked                                             as "blocked!",
+       curated                                             as "curated!",
        audio_background                                    as "audio_background!: Option<AudioBackground>",
        array(select row (unnest(audio_feedback_positive))) as "audio_feedback_positive!: Vec<(AudioFeedbackPositive,)>",
        array(select row (unnest(audio_feedback_negative))) as "audio_feedback_negative!: Vec<(AudioFeedbackNegative,)>",
@@ -771,17 +833,22 @@ select jig.id                                              as "jig_id: JigId",
        array(select row (age_range_id)
              from jig_data_age_range
              where jig_data_id = jig_data.id)              as "age_ranges!: Vec<(AgeRangeId,)>",
-       array(select row (resource_type_id)
-             from jig_data_additional_resource
-             where jig_data_id = jig_data.id)              as "additional_resources!: Vec<(ResourceTypeId,)>"
+       array(
+                select row (jdar.id, jdar.display_name, resource_type_id, resource_content)
+                from jig_data_additional_resource "jdar"
+                where jdar.jig_data_id = jig_data.id
+            )                                               as "additional_resource!: Vec<(AddId, String, TypeId, Value)>"
 from jig_data
          inner join jig on jig_data.id = jig.draft_id
-where (author_id is not distinct from $2 or $2 is null)
+         inner join jig_admin_data "admin" on admin.jig_id = jig.id
+where (author_id = $2 or $2 is null)
+and (jig_focus = $3 or $3 is null)
 order by coalesce(updated_at, created_at) desc
 limit 20 offset 20 * $1
 "#,
         page,
         author_id,
+        jig_focus.map(|it| it as i16),
     )
         .fetch(pool)
         .map_ok(|row| JigResponse {
@@ -790,7 +857,7 @@ limit 20 offset 20 * $1
             creator_id: row.creator_id,
             author_id: row.author_id,
             author_name: row.author_name,
-            first_cover_assigned: row.first_cover_assigned,
+            jig_focus: row.jig_focus,
             plays: row.play_count,
             likes: row.liked_count,
             jig_data: JigData {
@@ -815,38 +882,55 @@ limit 20 offset 20 * $1
                 theme: row.theme,
                 age_ranges: row.age_ranges.into_iter().map(|(it, )| it).collect(),
                 affiliations: row.affiliations.into_iter().map(|(it, )| it).collect(),
-                additional_resources: row.additional_resources.into_iter().map(|(it, )| it).collect(),
+                additional_resources: row.additional_resource.into_iter().map(|(id, display_name, resource_type_id, resource_content)| {
+                    AdditionalResource {
+                        id,
+                        display_name,
+                        resource_type_id,
+                        resource_content: serde_json::from_value::<ResourceContent>(resource_content).unwrap(),
+                    }}).collect(),
                 audio_background: row.audio_background,
                 audio_effects: AudioEffects {
                     feedback_positive: row.audio_feedback_positive.into_iter().map(|(it, )| it).collect(),
                     feedback_negative: row.audio_feedback_negative.into_iter().map(|(it, )| it).collect(),
                 },
                 privacy_level: row.privacy_level,
-                jig_focus: row.jig_focus
+                locked: row.locked,
+                other_keywords: row.other_keywords,
+                translated_keywords: row.translated_keywords,
+
+            },
+            admin_data: JigAdminData {
+                rating: row.rating,
+                blocked: row.blocked,
+                curated: row.curated,
             },
         })
         .try_collect()
         .await
 }
 
-/// `None` here means do not filter.
+// `None` here means do not filter.
 // TODO: fix filtered count, used in browse()
 pub async fn filtered_count(
     db: &PgPool,
     privacy_level: Option<PrivacyLevel>,
     author_id: Option<Uuid>,
+    jig_focus: Option<JigFocus>,
 ) -> sqlx::Result<u64> {
     sqlx::query!(
         //language=SQL
         r#"
 select count(*) as "count!: i64"
 from jig
-left join jig_data on jig.id = jig_data.id
-where(privacy_level is not distinct from $1 or $1 is null)
-    and (author_id is not distinct from $2 or $2 is null)
+left join jig_data on jig.draft_id = jig_data.id
+where (privacy_level = $1 or $1 is null)
+    and (author_id = $2 or $2 is null)
+    and (jig_focus = $3 or $3 is null)
 "#,
         privacy_level.map(|it| it as i16),
         author_id,
+        jig_focus.map(|it| it as i16)
     )
     .fetch_one(db)
     .await
@@ -860,7 +944,8 @@ pub async fn count(db: &PgPool, privacy_level: PrivacyLevel) -> sqlx::Result<u64
 select count(*) as "count!: i64"
 from jig_data
 inner join jig on jig.live_id = jig_data.id
-where privacy_level = $1 and published_at is not null
+where (privacy_level = coalesce($1, privacy_level))
+and (jig_focus = coalesce($1, jig_focus))
 "#,
         privacy_level as i16,
     )
@@ -883,6 +968,22 @@ select draft_id, live_id from jig where id = $1
     .map(|it| (it.draft_id, it.live_id))
 }
 
+pub async fn get_user_jig_ids(
+    txn: &mut PgConnection,
+    user_id: Uuid,
+) -> sqlx::Result<Vec<DeleteUserJigs>> {
+    sqlx::query_as!(
+        //language=SQL
+        DeleteUserJigs,
+        r#"
+select id as "jig_id!: JigId" from jig where creator_id = $1
+"#,
+        user_id
+    )
+    .fetch_all(&mut *txn)
+    .await
+}
+
 /// Clones a copy of the jig data and modules, preserving the module's stable IDs
 pub async fn clone_data(
     txn: &mut PgConnection,
@@ -893,7 +994,7 @@ pub async fn clone_data(
         r#"
 insert into jig_data
 (display_name, created_at, updated_at, language, last_synced_at, description, theme, audio_background,
- audio_feedback_negative, audio_feedback_positive, direction, display_score, drag_assist, track_assessments, privacy_level, jig_focus)
+ audio_feedback_negative, audio_feedback_positive, direction, display_score, drag_assist, track_assessments, privacy_level, other_keywords, translated_keywords)
 select display_name,
        created_at,
        updated_at,
@@ -909,7 +1010,8 @@ select display_name,
        drag_assist,
        track_assessments,
        privacy_level,
-       jig_focus
+       other_keywords,
+       translated_keywords
 from jig_data
 where id = $1
 returning id
@@ -938,8 +1040,8 @@ where jig_data_id = $1
     sqlx::query!(
         //language=SQL
         r#"
-insert into jig_data_additional_resource(jig_data_id, resource_type_id)
-select $2, resource_type_id
+insert into jig_data_additional_resource(jig_data_id, resource_type_id, display_name, resource_content)
+select $2, resource_type_id, display_name, resource_content
 from jig_data_additional_resource
 where jig_data_id = $1
         "#,
@@ -1027,8 +1129,8 @@ pub async fn clone_jig(
     let new_jig = sqlx::query!(
         //language=SQL
         r#"
-insert into jig (creator_id, author_id, parents, live_id, draft_id, published_at)
-select creator_id, $2, array_append(parents, $1), $3, $4, published_at
+insert into jig (creator_id, author_id, parents, live_id, draft_id, published_at, jig_focus)
+select creator_id, $2, array_append(parents, $1), $3, $4, published_at, jig_focus
 from jig
 where id = $1
 returning id as "id!: JigId"
@@ -1061,7 +1163,7 @@ pub async fn get_play_count(db: &PgPool, id: JigId) -> Result<i64, error::NotFou
     let play_count = sqlx::query!(
         // language=SQL
         r#"
-select play_count from jig_play_count 
+select play_count from jig_play_count
 where jig_id = $1;
             "#,
         id.0,
@@ -1170,6 +1272,27 @@ where jig_id = $1 and user_id = $2
     .map_err(|_| anyhow::anyhow!("Must like jig prior to unlike"))?;
 
     Ok(())
+}
+
+pub async fn jig_is_liked(db: &PgPool, user_id: Uuid, id: JigId) -> sqlx::Result<bool> {
+    let exists = sqlx::query!(
+        r#"
+select exists (
+    select 1
+    from jig_like
+    where
+        jig_id = $1
+        and user_id = $2
+) as "exists!"
+    "#,
+        id.0,
+        user_id
+    )
+    .fetch_one(db)
+    .await?
+    .exists;
+
+    Ok(exists)
 }
 
 /////////

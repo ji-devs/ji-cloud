@@ -12,6 +12,7 @@ fn map_module_contents(body: &ModuleBody) -> anyhow::Result<(ModuleKind, serde_j
     let body = match body {
         ModuleBody::CardQuiz(body) => serde_json::to_value(body)?,
         ModuleBody::Cover(body) => serde_json::to_value(body)?,
+        ModuleBody::ResourceCover(body) => serde_json::to_value(body)?,
         ModuleBody::DragDrop(body) => serde_json::to_value(body)?,
         ModuleBody::Flashcards(body) => serde_json::to_value(body)?,
         ModuleBody::Matching(body) => serde_json::to_value(body)?,
@@ -34,6 +35,9 @@ fn transform_response_kind(
     match kind {
         ModuleKind::CardQuiz => Ok(ModuleBody::CardQuiz(serde_json::from_value(contents)?)),
         ModuleKind::Cover => Ok(ModuleBody::Cover(serde_json::from_value(contents)?)),
+        ModuleKind::ResourceCover => {
+            Ok(ModuleBody::ResourceCover(serde_json::from_value(contents)?))
+        }
         ModuleKind::DragDrop => Ok(ModuleBody::DragDrop(serde_json::from_value(contents)?)),
         ModuleKind::Flashcards => Ok(ModuleBody::Flashcards(serde_json::from_value(contents)?)),
         ModuleKind::Matching => Ok(ModuleBody::Matching(serde_json::from_value(contents)?)),

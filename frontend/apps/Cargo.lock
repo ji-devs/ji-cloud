@@ -13,9 +13,9 @@ dependencies = [
 
 [[package]]
 name = "anyhow"
-version = "1.0.45"
+version = "1.0.48"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ee10e43ae4a853c0a3591d4e2ada1719e553be18199d9da9d4a83f5927c2f5c7"
+checksum = "62e1f47f7dc0422027a4e370dd4548d4d66b26782e513e98dca1e689e058a80e"
 
 [[package]]
 name = "app-admin"
@@ -41,8 +41,8 @@ dependencies = [
  "serde_derive",
  "serde_json",
  "shared",
- "strum",
- "strum_macros",
+ "strum 0.22.0",
+ "strum_macros 0.22.0",
  "url",
  "utils",
  "uuid",
@@ -361,6 +361,8 @@ dependencies = [
  "serde-wasm-bindgen",
  "serde_json",
  "shared",
+ "strum 0.23.0",
+ "strum_macros 0.23.1",
  "utils",
  "uuid",
  "wasm-bindgen",
@@ -375,6 +377,7 @@ dependencies = [
 name = "app-jig-edit"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "awsm_web 0.32.0",
  "cfg-if 1.0.0",
  "chrono",
@@ -394,8 +397,8 @@ dependencies = [
  "serde-wasm-bindgen",
  "serde_json",
  "shared",
- "strum",
- "strum_macros",
+ "strum 0.22.0",
+ "strum_macros 0.22.0",
  "url",
  "utils",
  "uuid",
@@ -688,6 +691,76 @@ dependencies = [
 
 [[package]]
 name = "app-poster-play"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "awsm_web 0.32.0",
+ "cfg-if 1.0.0",
+ "components",
+ "console_error_panic_hook",
+ "discard",
+ "dominator",
+ "dominator_helpers",
+ "futures",
+ "futures-signals",
+ "gloo",
+ "gloo-timers",
+ "itertools",
+ "js-sys",
+ "log",
+ "once_cell",
+ "serde",
+ "serde-wasm-bindgen",
+ "serde_json",
+ "shared",
+ "unicode-segmentation",
+ "url",
+ "utils",
+ "uuid",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "wasm-logger",
+ "web-sys",
+ "wee_alloc",
+]
+
+[[package]]
+name = "app-resource-cover-edit"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "awsm_web 0.32.0",
+ "cfg-if 1.0.0",
+ "components",
+ "console_error_panic_hook",
+ "discard",
+ "dominator",
+ "dominator_helpers",
+ "futures",
+ "futures-signals",
+ "gloo",
+ "gloo-timers",
+ "itertools",
+ "js-sys",
+ "log",
+ "once_cell",
+ "serde",
+ "serde-wasm-bindgen",
+ "serde_json",
+ "shared",
+ "unicode-segmentation",
+ "url",
+ "utils",
+ "uuid",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "wasm-logger",
+ "web-sys",
+ "wee_alloc",
+]
+
+[[package]]
+name = "app-resource-cover-play"
 version = "0.1.0"
 dependencies = [
  "async-trait",
@@ -1096,8 +1169,9 @@ dependencies = [
  "serde_qs",
  "serde_repr",
  "shared",
- "strum",
- "strum_macros",
+ "strum 0.22.0",
+ "strum_macros 0.22.0",
+ "thiserror",
  "unicode-segmentation",
  "url",
  "utils",
@@ -1655,8 +1729,8 @@ dependencies = [
  "serde-wasm-bindgen",
  "serde_json",
  "shared",
- "strum",
- "strum_macros",
+ "strum 0.22.0",
+ "strum_macros 0.22.0",
  "url",
  "utils",
  "uuid",
@@ -2145,6 +2219,7 @@ dependencies = [
  "serde_json",
  "serde_repr",
  "serde_with",
+ "thiserror",
  "url",
  "uuid",
  "wasm-bindgen",
@@ -2192,6 +2267,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f7ac893c7d471c8a21f31cfe213ec4f6d9afeed25537c772e08ef3f005f8729e"
 
 [[package]]
+name = "strum"
+version = "0.23.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cae14b91c7d11c9a851d3fbc80a963198998c2a64eec840477fa92d8ce9b70bb"
+
+[[package]]
 name = "strum_macros"
 version = "0.22.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2200,6 +2281,19 @@ dependencies = [
  "heck",
  "proc-macro2",
  "quote",
+ "syn",
+]
+
+[[package]]
+name = "strum_macros"
+version = "0.23.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5bb0dc7ee9c15cea6199cde9a127fa16a4c5819af85395457ad72d68edc85a38"
+dependencies = [
+ "heck",
+ "proc-macro2",
+ "quote",
+ "rustversion",
  "syn",
 ]
 
@@ -2347,8 +2441,8 @@ dependencies = [
  "serde_qs",
  "serde_repr",
  "shared",
- "strum",
- "strum_macros",
+ "strum 0.22.0",
+ "strum_macros 0.22.0",
  "thiserror",
  "url",
  "uuid",

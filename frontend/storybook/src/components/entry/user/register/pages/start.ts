@@ -12,7 +12,6 @@ export default {
 
 const STR_SUBMIT = "Submit";
 const STR_EMAIL_LABEL = "Email";
-const STR_EMAIL_PLACEHOLDER = "Type or paste your email";
 const STR_PASSWORD_LABEL = "Create Password";
 const STR_PASSWORD_PLACEHOLDER = "********";
 const STR_CONTINUE = "Continue";
@@ -34,10 +33,10 @@ export const Start = (props?: Partial<Args>) => {
         <page-register-start passwordStrength="${passwordStrength}">
             <button-google slot="google"></button-google>
             <input-wrapper slot="email" label="${STR_EMAIL_LABEL}">
-                <input placeholder="${STR_EMAIL_PLACEHOLDER}">
+                <input>
             </input-wrapper>
             <input-password slot="password" label="${STR_PASSWORD_LABEL}" placeholder="${STR_PASSWORD_PLACEHOLDER}"></input-password>
-            <button-rect slot="submit" color="red" size="medium" IconAfter="arrow">${STR_CONTINUE}</button-rect> 
+            <button-rect slot="submit" color="red" size="medium" IconAfter="arrow">${STR_CONTINUE}</button-rect>
             <footer-register-login slot="footer"></footer-register-login>
         </page-register-start>
     `;

@@ -99,7 +99,8 @@ fn add_category(state: Rc<State>, parent: Option<Rc<Category>>) {
 
         match api_with_auth::<NewCategoryResponse, EmptyError, _>(endpoints::category::Create::PATH, endpoints::category::Create::METHOD, Some(req)).await {
             Ok(resp) => {
-                let cat = Rc::new(Category::new(resp.id, name));
+                // Categories created here should be in the editing state already.
+                let cat = Rc::new(Category::new(resp.id, name, true));
 
                 match parent {
                     Some(parent) => {
@@ -181,8 +182,6 @@ pub fn move_category(content_state: Rc<ContentState>, dir: Direction) {
 }
 
 pub fn delete_category(content_state: Rc<ContentState>) {
-    content_state.close_menu();
-
     content_state.state.loader.load(clone!(content_state => async move {
         let id = content_state.cat.id;
 

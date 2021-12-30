@@ -1,17 +1,16 @@
+use crate::home::search_results::SearchResults;
+
 use super::state::HomePageMode;
 use dominator::clone;
 use futures::join;
-use futures_signals::signal_vec::MutableVec;
+
 use shared::{
     api::{
-        endpoints::{jig, user::Profile},
+        endpoints::jig,
         ApiEndpoint,
     },
-    domain::{
-        jig::{JigCountResponse, JigSearchQuery, JigSearchResponse},
-        user::UserProfile,
-    },
-    error::EmptyError,
+    domain::jig::JigCountResponse,
+    error::EmptyError
 };
 use std::rc::Rc;
 use utils::prelude::*;
@@ -70,44 +69,26 @@ async fn fetch_metadata(state: Rc<State>) {
 }
 
 async fn fetch_profile(state: Rc<State>) {
-    let (result, status) =
-        api_with_auth_status::<UserProfile, EmptyError, ()>(Profile::PATH, Profile::METHOD, None)
-            .await;
-    match status {
-        403 | 401 => {
-            //not logged in
-        }
-        _ => match result {
-            Err(_) => {}
-            Ok(profile) => {
-                state.is_logged_in.set(true);
-                state.search_selected.set_from_profile(&profile);
-            }
+    match get_user() {
+        Some(profile) => {
+            state.is_logged_in.set(true);
+            state.search_selected.set_from_profile(profile);
         },
-    };
+        None => {},
+    }
 }
 
 async fn search_async(state: Rc<State>) {
-    let req = state.search_selected.to_search_request();
+    let search_state = SearchResults::new(&state);
+    state.mode.set(HomePageMode::Search(Rc::clone(&search_state)));
 
+    let req = state.search_selected.to_search_request();
     Route::Home(HomeRoute::Search(Some(req.clone()))).push_state();
 
-    let query = req.q.to_owned();
-    match api_no_auth::<JigSearchResponse, EmptyError, JigSearchQuery>(
-        jig::Search::PATH,
-        jig::Search::METHOD,
-        Some(req),
-    )
-    .await
-    {
-        Err(_) => {}
-        Ok(res) => {
-            state.mode.set(HomePageMode::Search(
-                query,
-                Rc::new(MutableVec::new_with_values(res.jigs)),
-            ));
-        }
-    };
+    join!(
+        search_state.jigs.load_items(req.clone()),
+        search_state.resources.load_items(req),
+    );
 }
 
 pub fn search(state: Rc<State>) {

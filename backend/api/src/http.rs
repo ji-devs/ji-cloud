@@ -238,6 +238,7 @@ pub fn build(
             .configure(endpoints::session::configure)
             .configure(endpoints::locale::configure)
             .configure(endpoints::scheduler::configure)
+            .configure(endpoints::pdf::configure)
             .route("/", method(http::Method::GET).to(no_content_response))
     });
 

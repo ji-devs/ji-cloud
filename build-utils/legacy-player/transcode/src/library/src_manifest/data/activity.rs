@@ -43,7 +43,7 @@ where
 #[derive(Deserialize, Debug, Clone)]
 pub struct Activity {
     #[serde(rename="filePathIntroRecording")]
-    pub intro_audio: String,
+    pub intro_audio: Option<String>,
 
     #[serde(rename="pk")]
     pub key: PrimaryKey,
@@ -51,7 +51,7 @@ pub struct Activity {
     #[serde(rename="folderPath")]
     pub folder_path: String,
 
-    pub settings: ActivitySettings,
+    pub settings: Option<ActivitySettings>,
 
     pub shapes: Vec<Shape>
 }
@@ -61,7 +61,7 @@ pub struct Activity {
 //and so there's no way to depend on ActivityKind being read/set
 //these are renamed to _try_ and make some comprehensive sense
 //though tbh that's kinda futile (see github discussion: https://github.com/ji-devs/ji-cloud/discussions/1787)
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, Default)]
 pub struct ActivitySettings {
 
     /// if set- advances automatically to next page
@@ -69,7 +69,7 @@ pub struct ActivitySettings {
 
     /// the index to jump to
     #[serde(rename="linkToPage")]
-    pub jump_index: Option<usize>,
+    pub jump_index: Option<i128>,
 
     /// play one at a time is inverse of this?
     #[serde(rename="soundFunMode")]
@@ -117,7 +117,7 @@ pub struct ActivitySettings {
     #[serde(rename="ShapePuzzleTheme")]
     pub theme: Option<u8>,
     #[serde(rename="ShapePuzzleThemeV2")]
-    pub theme_v2: Option<u8>,
+    pub theme_v2: Option<bool>,
 
     #[serde(rename="soundShowToolTip")]
     pub tooltip: Option<bool>,

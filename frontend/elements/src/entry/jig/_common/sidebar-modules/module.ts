@@ -189,6 +189,12 @@ export class _ extends LitElement {
                 .feet-rollers {
                     transform: translate(49px, 150px);
                 }
+                .feet-spring {
+                    transform: translate(92px, 90px);
+                }
+                .feet-rollers {
+                    transform: translate(49px, 150px);
+                }
             `,
         ];
     }
@@ -201,6 +207,9 @@ export class _ extends LitElement {
     @property({ type: Number })
     index: number = 0;
 
+    @property({ type: Boolean })
+    isLastModule: boolean = false;
+
     @property()
     module: ModuleKind | "" = "";
 
@@ -209,6 +218,37 @@ export class _ extends LitElement {
 
     @property({ type: Boolean, reflect: true })
     collapsed: boolean = false;
+
+    renderDecoration() {
+        const getImage = (path: string, classes: string) =>
+            html`<img-ui class="${classes}" path="entry/jig/jiggling/${path}"></img-ui>`;
+
+        if (this.index === 0) {
+            return html`
+                ${getImage("arm-left.svg", "arm-left")}
+                ${getImage("arm-right.svg", "arm-right")}
+                ${getImage("neck-spring.svg", "neck")}
+                ${getImage("yellow/face.png", "head")}
+                ${getImage("torso-columns.svg", "torso-columns")}
+            `;
+        } else if (this.isLastModule) {
+            return html`
+                ${getImage("feet-spring.svg", "feet-spring")}
+                ${getImage("yellow/feet-rollers.svg", "feet-rollers")}
+            `;
+        } else {
+            switch (this.index % 3) {
+                case 0:
+                    return getImage("torso-columns.svg", "torso-columns");
+                case 1:
+                    return getImage("torso-spring.svg", "torso-spring");
+                case 2:
+                    return getImage("torso-gears.svg", "torso-gears");
+                default:
+                    return nothing;
+            }
+        }
+    }
 
     render() {
         const { selected, index, dragging, module } = this;
@@ -242,7 +282,7 @@ export class _ extends LitElement {
                     </div>
                     <div class="middle open-only">
                         <div class="decorations">
-                            ${renderDecoration(index)}
+                            ${this.renderDecoration()}
                         </div>
                         <div class="window">
                             <slot name="window"></slot>
@@ -264,31 +304,5 @@ export class _ extends LitElement {
                 </div>
             </div>
         `;
-    }
-}
-
-function renderDecoration(index: number) {
-    const getImage = (path: string, classes: string) =>
-        html`<img-ui class="${classes}" path="entry/jig/jiggling/${path}"></img-ui>`;
-
-    if (index === 0) {
-        return html`
-            ${getImage("arm-left.svg", "arm-left")}
-            ${getImage("arm-right.svg", "arm-right")}
-            ${getImage("neck-spring.svg", "neck")}
-            ${getImage("yellow/face.png", "head")}
-            ${getImage("torso-columns.svg", "torso-columns")}
-        `;
-    } else {
-        switch (index % 3) {
-            case 0:
-                return getImage("torso-columns.svg", "torso-columns");
-            case 1:
-                return getImage("torso-spring.svg", "torso-spring");
-            case 2:
-                return getImage("torso-gears.svg", "torso-gears");
-            default:
-                return nothing;
-        }
     }
 }

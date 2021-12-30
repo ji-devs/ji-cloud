@@ -1,14 +1,12 @@
 use std::rc::Rc;
 
 use dominator::clone;
-use gloo_timers::future::TimeoutFuture;
 use shared::{
     api::{endpoints::meta, ApiEndpoint},
     domain::meta::MetadataResponse,
     error::EmptyError,
 };
 use utils::prelude::api_no_auth;
-use wasm_bindgen_futures::spawn_local;
 
 use crate::player::sidebar::state::ReportStatus;
 
@@ -21,14 +19,15 @@ pub fn send_report(state: Rc<State>) {
         // TODO: actually send report
         state.report_status.set(ReportStatus::Sent);
 
-        spawn_local(clone!(state => async move {
-            TimeoutFuture::new(5_000).await;
-            let mut report_status = state.report_status.lock_mut();
-            // only update if status hasn't changed
-            if *report_status == ReportStatus::Sent {
-                *report_status = ReportStatus::Default;
-            }
-        }));
+        // TODO: enable once we actually send the reports
+        // spawn_local(clone!(state => async move {
+        //     TimeoutFuture::new(5_000).await;
+        //     let mut report_status = state.report_status.lock_mut();
+        //     // only update if status hasn't changed
+        //     if *report_status == ReportStatus::Sent {
+        //         *report_status = ReportStatus::Default;
+        //     }
+        // }));
     }));
 }
 

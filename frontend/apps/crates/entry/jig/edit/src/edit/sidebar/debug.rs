@@ -1,7 +1,21 @@
 #![allow(unused_imports)]
 #![allow(dead_code)]
 
-use shared::domain::jig::{AudioEffects, DraftOrLive, JigData, JigFocus, JigId, JigPlayerSettings, JigResponse, LiteModule, ModuleKind, PrivacyLevel, module::ModuleId};
+use shared::domain::jig::{
+    AudioEffects,
+    DraftOrLive,
+    JigAdminData,
+    JigData,
+    JigFocus,
+    JigId,
+    JigPlayerSettings,
+    JigRating,
+    JigResponse,
+    LiteModule,
+    ModuleKind,
+    PrivacyLevel,
+    module::ModuleId
+};
 use utils::themes::ThemeId;
 use uuid::Uuid;
 
@@ -9,11 +23,15 @@ pub fn get_jig() -> JigResponse {
     let module_id = ModuleId(Uuid::from_u128(0));
     JigResponse {
         id: JigId(Uuid::from_u128(0)),
+        admin_data: JigAdminData {
+            rating: Some(JigRating::NoRating),
+            blocked: false,
+            curated: true,
+        },
         creator_id: None,
         author_id: None,
         author_name: None,
         published_at: None,
-        first_cover_assigned: true,
         jig_data: JigData {
             draft_or_live: DraftOrLive::Draft,
             display_name: "hello world".to_string(),
@@ -49,8 +67,11 @@ pub fn get_jig() -> JigResponse {
             audio_effects: AudioEffects::default(),
             default_player_settings: JigPlayerSettings::default(),
             privacy_level: PrivacyLevel::default(),
-            jig_focus: JigFocus::Modules,
+            locked: true,
+            other_keywords: String::from(""),
+            translated_keywords: String::from(""),
         },
+        jig_focus: JigFocus::Modules,
         likes: 0,
         plays: 0,
     }

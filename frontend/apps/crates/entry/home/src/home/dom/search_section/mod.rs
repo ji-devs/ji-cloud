@@ -24,13 +24,7 @@ pub fn render(state: Rc<State>, auto_search: bool) -> Dom {
     fetch_data(state.clone(), auto_search);
 
     html!("home-search-section", {
-        // TODO: Enable once ready
-        // .property_signal("mode", state.mode.signal_cloned().map(|mode| {
-        //     match mode {
-        //         HomePageMode::Home => "home",
-        //         HomePageMode::Search(_, _) => "results",
-        //     }
-        // }))
+        .property_signal("mode", state.mode.signal_cloned().map(|mode| mode.to_string()))
         .property_signal("resultsCount", state.total_jigs_count.signal().map(|x| x as f64))
         .child(html!("home-search-section-help", {
             .property("slot", "help")

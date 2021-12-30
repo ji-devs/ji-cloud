@@ -7,7 +7,7 @@ export default {
 };
 
 interface Args {
-    progress: number;
+    progress: number | "infinite";
     color: ProgressColor;
 }
 
@@ -19,7 +19,11 @@ const DEFAULT_ARGS: Args = {
 export const ProgressBar = (props?: Partial<Args>) => {
     props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
 
-    return `<progress-bar ${argsToAttrs(props)}></progress-bar>`;
+    return `
+        <div style="height: 10px">
+            <progress-bar ${argsToAttrs(props)}></progress-bar>
+        </div>
+    `;
 };
 
 ProgressBar.args = DEFAULT_ARGS;

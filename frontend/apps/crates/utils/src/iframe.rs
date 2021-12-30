@@ -1,10 +1,37 @@
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
-
+use std::cell::Cell;
 use crate::unwrap::UnwrapJiExt;
 use shared::domain::jig::{module::ModuleId, LiteModule};
 
 pub const IFRAME_DATA_PARAM: &str = "iframe_data";
+
+#[derive(Clone, Debug, Copy, Eq, PartialEq)]
+pub enum IframeTarget {
+    Top,
+    Parent
+}
+
+thread_local! {
+    pub(super) static PLAYER_TARGET:Cell<IframeTarget> = Cell::new(IframeTarget::Parent);
+    pub(super) static EDITOR_TARGET:Cell<IframeTarget> = Cell::new(IframeTarget::Top);
+}
+
+pub fn get_player_target() -> IframeTarget {
+    PLAYER_TARGET.with(|p| p.get())
+}
+pub fn get_editor_target() -> IframeTarget {
+    EDITOR_TARGET.with(|p| p.get())
+}
+
+// call this to change the target for msg.try_post_message_player()
+// by default it is Top
+pub fn set_player_target(target: IframeTarget) {
+    PLAYER_TARGET.with(move |p| p.set(target))
+}
+pub fn set_editor_target(target: IframeTarget) {
+    EDITOR_TARGET.with(move |p| p.set(target))
+}
 
 #[wasm_bindgen(
     inline_js = "export function is_in_iframe() { return window && window.parent && window.location !== window.parent.location; }"
@@ -31,6 +58,26 @@ pub trait IframeMessageExt {
         let parent = window.parent()?.unwrap_ji();
 
         parent.post_message(&self.into(), "*")
+    }
+
+    fn try_post_message_to_player<'a>(&'a self) -> Result<(), JsValue>
+    where
+        &'a Self: Into<JsValue>,
+    {
+        match get_player_target() {
+            IframeTarget::Top => self.try_post_message_to_top(),
+            IframeTarget::Parent => self.try_post_message_to_parent(),
+        }
+    }
+
+    fn try_post_message_to_editor<'a>(&'a self) -> Result<(), JsValue>
+    where
+        &'a Self: Into<JsValue>,
+    {
+        match get_editor_target() {
+            IframeTarget::Top => self.try_post_message_to_top(),
+            IframeTarget::Parent => self.try_post_message_to_parent(),
+        }
     }
 }
 

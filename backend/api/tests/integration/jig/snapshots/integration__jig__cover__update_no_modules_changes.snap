@@ -11,7 +11,7 @@ expression: body
   "authorName": "Bobby Tables",
   "likes": 0,
   "plays": 0,
-  "firstCoverAssigned": false,
+  "jigFocus": "modules",
   "jigData": {
     "draftOrLive": "Draft",
     "displayName": "test",
@@ -35,8 +35,18 @@ expression: body
     "language": "en",
     "categories": [],
     "additionalResources": [
-      "a91aca34-519e-11ec-ab46-175eaaf1ff23",
-      "a91aca34-519e-11ec-ab46-175eaaf1ff23"
+      {
+        "id": "286b834a-1dd9-11ec-8426-6f641a50e23f",
+        "displayName": "link test",
+        "resourceTypeId": "a91aca34-519e-11ec-ab46-175eaaf1ff23",
+        "link": "url://url.url.url/urls/s"
+      },
+      {
+        "id": "286b8390-1dd9-11ec-8426-fbeb80c504d9",
+        "displayName": "link test",
+        "resourceTypeId": "a91aca34-519e-11ec-ab46-175eaaf1ff23",
+        "link": "url://url.url.url/url/s"
+      }
     ],
     "description": "test description",
     "lastEdited": "[timestamp]",
@@ -53,6 +63,13 @@ expression: body
       "feedbackNegative": "[audio]"
     },
     "privacyLevel": "unlisted",
-    "jigFocus": "modules"
+    "locked": false,
+    "otherKeywords": "",
+    "translatedKeywords": ""
+  },
+  "adminData": {
+    "rating": null,
+    "blocked": false,
+    "curated": false
   }
 }

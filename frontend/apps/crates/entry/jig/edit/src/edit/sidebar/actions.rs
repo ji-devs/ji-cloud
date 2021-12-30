@@ -9,7 +9,11 @@ use shared::{
     domain::{
         jig::{
             module::{ModuleCreateRequest, ModuleId, ModuleResponse},
-            JigId, JigPlayerSettings, JigResponse, JigUpdateDraftDataRequest, LiteModule,
+            JigId,
+            JigPlayerSettings,
+            JigResponse,
+            JigUpdateDraftDataRequest,
+            LiteModule,
             ModuleKind,
         },
         CreateResponse,
@@ -31,6 +35,7 @@ pub async fn load_jig(jig_id: JigId, jig_cell: Rc<RefCell<Option<JigResponse>>>)
     .await
     {
         Ok(resp) => {
+            assert!(resp.jig_focus.is_modules(), "only module focused jigs should be here");
             *jig_cell.borrow_mut() = Some(resp);
         }
         Err(_) => {}
@@ -42,7 +47,11 @@ pub fn navigate_to_publish(state: Rc<State>) {
     state.collapsed.set(true);
 
     let jig_id = state.jig.id;
-    Route::push_state(Route::Jig(JigRoute::Edit(jig_id, JigEditRoute::Publish)));
+    Route::push_state(Route::Jig(JigRoute::Edit(
+        jig_id,
+        state.jig.jig_focus,
+        JigEditRoute::Publish
+    )));
 }
 
 pub async fn update_jig(jig_id: &JigId, req: JigUpdateDraftDataRequest) -> Result<(), EmptyError> {
@@ -70,7 +79,7 @@ pub fn update_display_name(state: Rc<State>, value: String) {
 pub fn duplicate_module(state: Rc<State>, module_id: &ModuleId) {
     state.loader.load(clone!(state, module_id => async move {
         let module = super::module_cloner::clone_module(&state.jig.id, &module_id, &state.jig.id).await.unwrap_ji();
-        state.modules.lock_mut().push_cloned(Rc::new(Some(module)));
+        populate_added_module(state.clone(), module);
     }));
 }
 
@@ -120,16 +129,24 @@ pub fn on_iframe_message(state: Rc<State>, message: ModuleToJigEditorMessage) {
                 .route
                 .set_neq(JigEditRoute::Landing);
             let jig_id = state.jig.id;
-            Route::push_state(Route::Jig(JigRoute::Edit(jig_id, JigEditRoute::Landing)));
+            Route::push_state(Route::Jig(JigRoute::Edit(
+                jig_id,
+                state.jig.jig_focus,
+                JigEditRoute::Landing
+            )));
         }
     }
 }
 
 fn populate_added_module(state: Rc<State>, module: LiteModule) {
+    // Assumes that the final module in the list is always the placeholder module.
+    let insert_at_idx = state.modules.lock_ref().len() - 1;
+
     state
         .modules
         .lock_mut()
-        .push_cloned(Rc::new(Some(module.clone())));
+        .insert_cloned(insert_at_idx, Rc::new(Some(module.clone())));
+
     state
         .jig_edit_state
         .route

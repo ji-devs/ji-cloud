@@ -1,3 +1,31 @@
+/*
+    The collision detection here is pixel-perfect even with advanced shapes
+    The way we do it is, instead of creating a polygon for geometric tests,
+    we render each shape to an offscreen canvas, where the color
+    is derived directly from the shape's index.
+
+    For example, shape 0's R value is 0, shape 1's R value is 1
+    and this goes on, filling RGB sequentially
+
+    Then, when we want to know which shape is at a coordinate, 
+    we read the pixel and reverse the process to get the shape index
+
+    This can be used for anything, but so far here we then check how much
+    of the target's bounding box overlaps here.
+
+    The reason for not doing the same process on the target to be pixel-perfect
+    in both directions, is that the use case was for the "drag and drop"
+    module where the target is an HtmlImageElement with various levels of transparency.
+    
+    There might be an opportunity to support that, but it could get very tricky and/or slow.
+
+    Note: it _might_ be possible to use alpha, but it's unclear whether this 
+    skews the internal data with blending, canvas composite mode, etc.
+
+    So we only support up to 16,777,216 shapes... should be more than enough ;)
+
+    See Puzzle in Legacy Player for an isolated example of the same technique, but for click only
+*/
 use awsm_web::{canvas::get_2d_context, dom::StyleExt};
 use shared::domain::jig::module::body::{
     Transform,

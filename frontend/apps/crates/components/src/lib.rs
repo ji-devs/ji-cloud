@@ -30,6 +30,8 @@ pub mod firebase;
 pub mod hebrew_buttons;
 #[cfg(feature = "instructions")]
 pub mod instructions;
+#[cfg(feature = "jigzi_help")]
+pub mod jigzi_help;
 #[cfg(feature = "lists")]
 pub mod lists;
 #[cfg(feature = "module")]
@@ -40,6 +42,8 @@ pub mod overlay;
 pub mod page_footer;
 #[cfg(feature = "page_header")]
 pub mod page_header;
+#[cfg(feature = "pdf")]
+pub mod pdf;
 #[cfg(feature = "player_popup")]
 pub mod player_popup;
 #[cfg(feature = "share_jig")]

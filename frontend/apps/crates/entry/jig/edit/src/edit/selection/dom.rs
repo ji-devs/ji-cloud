@@ -1,3 +1,4 @@
+use components::jigzi_help::JigziHelp;
 use dominator::{html, Dom};
 
 use super::module::dom::ModuleDom;
@@ -35,12 +36,14 @@ impl SelectionDom {
                     })
                     .collect::<Vec<Dom>>()
             )
-            .child(html!("jigzi-help", {
-                .property("slot", "help")
-                .property("showId", "module-select")
-                .property("title", STR_TOOLTIP_TITLE)
-                .property("body", STR_TOOLTIP_BODY)
-            }))
+            .child(
+                JigziHelp::new(
+                    STR_TOOLTIP_TITLE.to_string(),
+                    STR_TOOLTIP_BODY.to_string(),
+                    "module-select"
+                )
+                .render(Some("help"))
+            )
         })
     }
 }

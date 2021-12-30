@@ -18,17 +18,26 @@ use crate::{
 };
 use dominator::clone;
 use futures_signals::signal::Mutable;
+use once_cell::sync::OnceCell;
 use shared::domain::jig::module::body::{Image, _groups::cards::Mode};
 use std::rc::Rc;
 
 pub struct Step1<RawData: RawDataExt, E: ExtraExt> {
     pub base: Rc<CardsBase<RawData, E>>,
-    pub widget: Rc<Widget>,
+    pub widget: OnceCell<Widget>,
     pub tab_index: Mutable<Option<usize>>,
 }
 
 impl<RawData: RawDataExt, E: ExtraExt> Step1<RawData, E> {
     pub fn new(base: Rc<CardsBase<RawData, E>>, tab_index: Mutable<Option<usize>>) -> Rc<Self> {
+        let state = Rc::new(Self {
+            base: base.clone(),
+            widget: OnceCell::default(),
+            tab_index,
+        });
+
+        // Widgets require a reference to the top-level state so that they can have access to any
+        // fields they might require in callbacks.
         let widget = match base.mode {
             Mode::WordsAndImages => {
                 let kind = match base.debug.step1_tab {
@@ -36,20 +45,21 @@ impl<RawData: RawDataExt, E: ExtraExt> Step1<RawData, E> {
                     None => MenuTabKind::Text,
                 };
 
-                let tab = Mutable::new(Tab::new(base.clone(), kind));
+                let tab = Mutable::new(Tab::new(state.clone(), kind));
                 Widget::Tabs(tab)
             }
             Mode::Duplicate | Mode::Lettering => {
-                Widget::Single(Rc::new(make_single_list(base.clone())))
+                Widget::Single(Rc::new(make_single_list(state.clone())))
             }
-            _ => Widget::Dual(Rc::new(make_dual_list(base.clone()))),
+            _ => Widget::Dual(Rc::new(make_dual_list(state.clone()))),
         };
 
-        Rc::new(Self {
-            base,
-            widget: Rc::new(widget),
-            tab_index,
-        })
+        // `set()` will return an Err if the cell already has a value. However, because we are
+        // using this purely to lazily set a widget immediately after initializing the state, the
+        // error here will never occur.
+        let _ = state.widget.set(widget);
+
+        state
     }
 }
 
@@ -68,7 +78,7 @@ pub enum Tab {
 
 impl Tab {
     pub fn new<RawData: RawDataExt, E: ExtraExt>(
-        base: Rc<CardsBase<RawData, E>>,
+        state: Rc<Step1<RawData, E>>,
         kind: MenuTabKind,
     ) -> Self {
         match kind {
@@ -83,7 +93,7 @@ impl Tab {
 
                 Self::Image(Rc::new(state))
             }
-            MenuTabKind::Text => Self::Text(Rc::new(make_single_list(base))),
+            MenuTabKind::Text => Self::Text(Rc::new(make_single_list(state))),
 
             _ => unimplemented!("unsupported tab kind!"),
         }
@@ -104,17 +114,25 @@ impl Tab {
 }
 
 fn make_single_list<RawData: RawDataExt, E: ExtraExt>(
-    base: Rc<CardsBase<RawData, E>>,
+    state: Rc<Step1<RawData, E>>,
 ) -> SingleListState {
-    let _mode = base.mode;
+    let _mode = state.base.mode;
 
     let callbacks = SingleListCallbacks::new(
         |text| super::actions::limit_text(config::SINGLE_LIST_CHAR_LIMIT, text),
-        clone!(base => move |tooltip| {
-            base.tooltips.list_error.set(tooltip);
+        clone!(state => move |tooltip| {
+            state.base.tooltips.list_error.set(tooltip);
         }),
-        clone!(base => move |list| {
-            base.replace_single_list(list);
+        clone!(state => move |list| {
+            state.base.replace_single_list(list);
+
+            // If the current mode is words and images, and the current widget is a Tab, then at
+            // this point the user can be navigated directly to the Image tab.
+            if matches!(state.base.mode, Mode::WordsAndImages) {
+                if let Widget::Tabs(tab) = state.widget.get().unwrap() {
+                    tab.set(Tab::new(state.clone(), MenuTabKind::Image));
+                }
+            }
         }),
         config::get_single_list_init_word,
     );
@@ -127,17 +145,17 @@ fn make_single_list<RawData: RawDataExt, E: ExtraExt>(
     SingleListState::new(options, callbacks)
 }
 fn make_dual_list<RawData: RawDataExt, E: ExtraExt>(
-    base: Rc<CardsBase<RawData, E>>,
+    state: Rc<Step1<RawData, E>>,
 ) -> DualListState {
-    let mode = base.mode;
+    let mode = state.base.mode;
 
     let callbacks = DualListCallbacks::new(
         |text| super::actions::limit_text(config::DUAL_LIST_CHAR_LIMIT, text),
-        clone!(base => move |tooltip| {
-            base.tooltips.list_error.set(tooltip);
+        clone!(state => move |tooltip| {
+            state.base.tooltips.list_error.set(tooltip);
         }),
-        clone!(base => move |list| {
-            base.replace_dual_list(list);
+        clone!(state => move |list| {
+            state.base.replace_dual_list(list);
         }),
         config::get_dual_list_init_word,
         clone!(mode => move |side| {
@@ -148,7 +166,7 @@ fn make_dual_list<RawData: RawDataExt, E: ExtraExt>(
     let options = DualListOptions {
         max_rows: config::MAX_LIST_WORDS,
         cell_rows: {
-            match base.mode {
+            match state.base.mode {
                 Mode::Riddles => 2,
                 _ => 1,
             }

@@ -4,7 +4,7 @@ use dominator_helpers::{events::Message, signals::DefaultSignal};
 use futures_signals::map_ref;
 use futures_signals::signal::{Signal, SignalExt};
 use js_sys::Reflect;
-use shared::domain::jig::JigResponse;
+use shared::domain::jig::{JigResponse, ModuleKind};
 use std::rc::Rc;
 use utils::{
     iframe::{IframeAction, ModuleToJigPlayerMessage},
@@ -22,6 +22,16 @@ pub fn render(state: Rc<State>) -> Dom {
 
     html!("jig-play-landing", {
         .property_signal("paused", state.paused.signal())
+        .property_signal("isLegacy", state.jig.signal_ref(|jig| {
+            if let Some(jig) = jig {
+                if let Some(first_module) = jig.jig_data.modules.get(0) {
+                    if first_module.kind == ModuleKind::Legacy {
+                        return true;
+                    }
+                }
+            };
+            false
+        }))
         .global_event(clone!(state => move |evt:Message| {
             match evt.try_serde_data::<IframeAction<ModuleToJigPlayerMessage>>() {
                 Err(_) => {},
@@ -50,22 +60,20 @@ pub fn render(state: Rc<State>) -> Dom {
             }
         }))
         .child_signal(state.jig.signal_ref(clone!(state => move |jig| {
-            jig.as_ref().map(|jig| html!("jig-play-background-music", {
+            match &jig {
+                // Only render the background music element on a jig if the jig has background
+                // music configured.
+                Some(jig) if jig.jig_data.audio_background.is_some() => {
+                    Some(html!("jig-play-background-music", {
                         .property("slot", "background")
                         .property_signal("playing", state.bg_audio_playing.signal())
-                        .apply(|dom| {
-                            match jig.jig_data.audio_background {
-                                Some(audio_background) => {
-                                    dom.event(clone!(state, audio_background => move|_: events::Click| {
-                                        actions::toggle_background_audio(Rc::clone(&state), audio_background);
-                                    }))
-                                },
-                                None => {
-                                    dom.property("disabled", true)
-                                }
-                            }
-                        })
+                        .event(clone!(state => move|_: events::Click| {
+                            actions::toggle_background_audio(Rc::clone(&state));
+                        }))
                     }))
+                },
+                _ => None
+            }
         })))
         .children(&mut [
             html!("iframe" => HtmlIFrameElement, {
@@ -77,24 +85,30 @@ pub fn render(state: Rc<State>) -> Dom {
                             crate::debug::settings().empty_module_url.to_string()
                         },
                         Some(jig) => {
-                            let active_module = &jig.jig_data.modules[active_module_index];
+                            let active_module = &jig.jig_data.modules.get(active_module_index);
 
-                            let mut route: String = Route::Module(ModuleRoute::Play(
-                                active_module.kind,
-                                state.jig_id,
-                                active_module.id
-                            )).into();
-
-                            if state.player_options.draft {
-                                route = format!("{}?draft=true", route);
+                            match active_module {
+                                // module doesn't exist, can happen with jigs that don't have a cover
+                                None => String::new(),
+                                Some(active_module) => {
+                                    let mut route: String = Route::Module(ModuleRoute::Play(
+                                        active_module.kind,
+                                        state.jig_id,
+                                        active_module.id
+                                    )).into();
+        
+                                    if state.player_options.draft {
+                                        route = format!("{}?draft=true", route);
+                                    }
+        
+                                    let url = unsafe {
+                                        SETTINGS.get_unchecked()
+                                            .remote_target
+                                            .spa_iframe(&route)
+                                    };
+                                    url
+                                },
                             }
-
-                            let url = unsafe {
-                                SETTINGS.get_unchecked()
-                                    .remote_target
-                                    .spa_iframe(&route)
-                            };
-                            url
                         },
                     }
                 })))

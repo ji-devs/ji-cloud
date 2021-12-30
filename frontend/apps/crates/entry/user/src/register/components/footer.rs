@@ -1,4 +1,4 @@
-#![allow(dead_code)] // this should be remove eventually
+#![allow(dead_code)] // this should be removed eventually
 
 use dominator::{html, Dom};
 

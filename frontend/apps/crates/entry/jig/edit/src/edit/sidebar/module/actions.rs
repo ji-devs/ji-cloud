@@ -9,53 +9,14 @@ use shared::{
 use std::convert::TryInto;
 use std::rc::Rc;
 use utils::prelude::*;
-use wasm_bindgen_futures::spawn_local;
 
 pub fn on_module_kind_drop(state: Rc<State>, module_kind: ModuleKind) {
-    if state.index == 0 {
-        if module_kind == ModuleKind::Cover {
-            fist_cover_dragged(Rc::clone(&state));
-        } else {
-            state.tried_module_at_cover.set(true);
-        }
-    } else {
-        if state.module.is_none() {
-            assign_kind(state.clone(), module_kind);
-
-            // if this is the empty module at the end
-            if state.sidebar.jig.jig_data.modules.len() == state.index {
-                state.sidebar.modules.lock_mut().push_cloned(Rc::new(None));
-            }
-        }
+    if state.index == 0 && module_kind != ModuleKind::Cover {
+        return;
     }
-}
-
-pub fn fist_cover_dragged(state: Rc<State>) {
-    spawn_local(clone!(state => async move {
-        let path = endpoints::jig::Cover::PATH.replace("{id}", &state.sidebar.jig.id.0.to_string());
-
-        let res = api_with_auth_empty::<EmptyError, ()>(
-            &path,
-            endpoints::jig::Cover::METHOD,
-            None
-        ).await;
-        match res {
-            Err(_) => todo!(),
-            Ok(_) => {
-                let cover_id = match &*state.module {
-                    None => unreachable!(),
-                    Some(module) => {
-                        module.id
-                    },
-                };
-
-                state.sidebar.first_cover_assigned.set(true);
-                state.sidebar.collapsed.set(true);
-                state.sidebar.jig_edit_state.route.set(JigEditRoute::Module(cover_id.clone()));
-                Route::push_state(Route::Jig(JigRoute::Edit(state.sidebar.jig.id, JigEditRoute::Module(cover_id))));
-            },
-        }
-    }));
+    if state.module.is_none() {
+        assign_kind(state.clone(), module_kind);
+    }
 }
 
 pub async fn update_module(
@@ -70,7 +31,7 @@ pub async fn update_module(
         .await
 }
 
-#[allow(dead_code)] // this should be remove eventually
+#[allow(dead_code)] // this should be removed eventually
 pub fn mouse_down(state: Rc<State>, x: i32, y: i32) {
     state
         .sidebar
@@ -91,6 +52,7 @@ pub fn edit(state: Rc<State>) {
         let jig_id = state.sidebar.jig.id;
         Route::push_state(Route::Jig(JigRoute::Edit(
             jig_id,
+            state.sidebar.jig.jig_focus,
             JigEditRoute::Module(module_id),
         )));
     }
@@ -114,6 +76,10 @@ pub fn delete(state: Rc<State>) {
                 },
                 Err(_) => {}
             }
+        } else {
+            // The module is placeholder, it is not persisted so it can be removed from the list with
+            // no extra work required.
+            state.sidebar.modules.lock_mut().remove(index);
         }
     }));
 }
@@ -144,7 +110,34 @@ pub fn assign_kind(state: Rc<State>, kind: ModuleKind) {
                     id,
                     kind,
                 }));
-                state.sidebar.modules.lock_mut().set_cloned(index, module);
+
+                {
+                    // Instead of replacing the module at the index, we remove the old module and
+                    // add the new one. This is slightly less efficient because it fires signals
+                    // for the entire list of modules, however, it is necessary so that the modules
+                    // before and after this one can have their views updated.
+                    let mut modules = state.sidebar.modules.lock_mut();
+                    modules.remove(index);
+                    modules.insert_cloned(index, module);
+
+                    // Only add a new placeholder module once the above request has completed and
+                    // the new module has been added to the list of modules.
+                    let placeholder_exists = {
+                        match modules.last() {
+                            // If the list of modules is not empty and the last module is None, then it is
+                            // a placeholder module.
+                            Some(module) => module.is_none(),
+                            // When the list is empty or the last module is not a placeholder module.
+                            _ => false,
+                        }
+                    };
+
+                    // if this is the empty module at the end
+                    if !placeholder_exists {
+                        modules.push_cloned(Rc::new(None));
+                    }
+                }
+
                 let req = ModuleUpdateRequest {
                     id: StableOrUniqueId::Unique(id.clone()),
                     index: Some(index.try_into().unwrap_ji()),
@@ -156,7 +149,11 @@ pub fn assign_kind(state: Rc<State>, kind: ModuleKind) {
                     Ok(_) => {
                         state.sidebar.collapsed.set(true);
                         state.sidebar.jig_edit_state.route.set(JigEditRoute::Module(id.clone()));
-                        Route::push_state(Route::Jig(JigRoute::Edit(state.sidebar.jig.id, JigEditRoute::Module(id))));
+                        Route::push_state(Route::Jig(JigRoute::Edit(
+                            state.sidebar.jig.id,
+                            state.sidebar.jig.jig_focus,
+                            JigEditRoute::Module(id)
+                        )));
                     },
                     Err(e) => {
                         log::error!("Error: {:?}", e);

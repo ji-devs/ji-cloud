@@ -37,6 +37,7 @@ dominator_helpers = "0.7.2"
 htmlescape = "0.3.1"
 unicode-segmentation = "1.8.0"
 rand = "0.8.4"
+thiserror = "1.0.30"
 
 web-sys = { version = "0.3.55", features = [
     'Url',
@@ -88,6 +89,7 @@ image = []
 image_search = []
 image_upload = []
 instructions = []
+jigzi_help = []
 module = []
 module_edit = []
 module_play = []
@@ -105,6 +107,7 @@ firebase = []
 hebrew_buttons = []
 page_header = []
 page_footer = []
+pdf = []
 share_jig = []
 player_popup = []
 box_outline = []
@@ -124,6 +127,7 @@ all= [
     "image_search", 
     "image_upload", 
     "instructions", 
+    "jigzi_help", 
     "module", 
     "module_edit", 
     "module_play", 
@@ -141,6 +145,7 @@ all= [
     "hebrew_buttons",
     "page_header",
     "page_footer",
+    "pdf",
     "share_jig",
     "player_popup",
     "box_outline",

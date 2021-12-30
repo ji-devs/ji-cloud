@@ -18,7 +18,7 @@ const STR_LABEL: Partial<Record<Kind, string>> = {
 };
 
 const STR_LABEL_SUFFIX: Partial<Record<Kind, string>> = {
-    attempts: "attempts",
+    attempts: "tries",
     "time-limit": "minutes",
     "continue-some": "items",
     rounds: "rounds",

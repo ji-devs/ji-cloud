@@ -1,4 +1,5 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
+import { nothing } from "lit-html";
 
 export type ProgressColor = "blue" | "green";
 
@@ -8,7 +9,10 @@ export class _ extends LitElement {
         return [
             css`
                 :host {
-                    height: 24px;
+                    --height: 24px;
+                    --border-radius: calc(var(--height) / 2);
+                    display: block;
+                    height: var(--height);
                 }
                 :host([color="blue"]) {
                     --color: var(--main-blue);
@@ -18,36 +22,53 @@ export class _ extends LitElement {
                     --color: #7fd29c;
                     --background-color: #d0ebda;
                 }
-                .outer {
-                    display: grid;
-                    background-color: var(--background-color);
+                .wrapper {
                     height: 100%;
-                    border-radius: 12px;
-                    grid-template-columns: 24px repeat(99, 1fr);
+                    border-radius: var(--border-radius);
+                    background-color: var(--background-color);
+                    overflow: hidden;
                 }
-                .inner {
-                    border-radius: 12px;
+                .bar {
+                    height: 100%;
                     background-color: var(--color);
+                }
+                :host([progress=infinite]) .bar {
+                    width: 25%;
+                    animation-name: slide;
+                    animation-duration: 1s;
+                    animation-iteration-count: infinite;
+                    animation-timing-function: linear;
+                }
+
+                @keyframes slide {
+                    from {
+                        transform: translateX(-100%);
+                    }
+                    to {
+                        transform: translateX(500%);
+                    }
                 }
             `,
         ];
     }
 
-    @property({ type: Number })
-    progress: number = 100;
+    @property({ type: Number, reflect: true })
+    progress: number | "infinite" = 100;
 
     @property({ reflect: true })
     color: ProgressColor = "blue";
 
     render() {
         return html`
-            <style>
-                .inner {
-                    grid-column: 1 / span ${this.progress + 1};
-                }
-            </style>
-            <div class="outer">
-                <div class="inner"></div>
+            ${this.progress !== "infinite" ? html`
+                <style>
+                    .bar {
+                        width: ${this.progress}%;
+                    }
+                </style>
+            ` : nothing}
+            <div class="wrapper">
+                <div class="bar"></div>
             </div>
         `;
     }

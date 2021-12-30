@@ -61,3 +61,6 @@ config/rust/Cargo.lock
 venv
 __pycache__
 
+# Local config
+.editorconfig
+.nvmrc

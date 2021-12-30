@@ -1,6 +1,7 @@
 //! Types for JIGs.
 
 pub mod additional_resource;
+pub use additional_resource::{AdditionalResource, AdditionalResourceId};
 
 pub mod module;
 // avoid breaking Changes
@@ -11,7 +12,7 @@ pub use player::{JigPlayerSettings, TextDirection};
 
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use std::{collections::HashSet, fmt, str::FromStr};
+use std::{collections::HashSet, convert::TryFrom, fmt, str::FromStr};
 use uuid::Uuid;
 
 use super::{
@@ -157,6 +158,10 @@ pub struct JigCreateRequest {
     /// Default player settings for this jig.
     #[serde(default)]
     pub default_player_settings: JigPlayerSettings,
+
+    /// Primary material for jig
+    #[serde(default)]
+    pub jig_focus: JigFocus,
 }
 
 /// Whether the data is draft or live.
@@ -168,6 +173,34 @@ pub enum DraftOrLive {
     Draft = 0,
     /// Represents a live copy
     Live = 1,
+}
+
+impl DraftOrLive {
+    /// Returns `true` for a [`Self::Live`] value.
+    ///
+    /// ```
+    /// let x = DraftOrLive::Live;
+    /// assert_eq!(x.is_live(), true);
+    ///
+    /// let x = DraftOrLive::Draft;
+    /// assert_eq!(x.is_live(), false);
+    /// ```
+    pub fn is_live(&self) -> bool {
+        matches!(*self, DraftOrLive::Live)
+    }
+
+    /// Returns `true` for a [`Draft`] value.
+    ///
+    /// ```
+    /// let x = DraftOrLive::Live;
+    /// assert_eq!(x.is_draft(), false);
+    ///
+    /// let x = DraftOrLive::Draft;
+    /// assert_eq!(x.is_draft(), true);
+    /// ```
+    pub fn is_draft(&self) -> bool {
+        !self.is_live()
+    }
 }
 
 impl From<DraftOrLive> for bool {
@@ -221,7 +254,7 @@ pub struct JigData {
     pub categories: Vec<CategoryId>,
 
     /// Additional resources of this JIG.
-    pub additional_resources: Vec<ResourceTypeId>,
+    pub additional_resources: Vec<AdditionalResource>,
 
     /// Description of the jig.
     pub description: String,
@@ -244,8 +277,14 @@ pub struct JigData {
     /// The privacy level on the JIG.
     pub privacy_level: PrivacyLevel,
 
-    /// Primary material for jig
-    pub jig_focus: JigFocus,
+    /// Lock this jig
+    pub locked: bool,
+
+    /// Other keywords used to searched for jigs
+    pub other_keywords: String,
+
+    /// translated keywords used to searched for jigs
+    pub translated_keywords: String,
 }
 
 /// Access level for the jig.
@@ -281,10 +320,76 @@ impl JigFocus {
     }
 }
 
+impl TryFrom<&str> for JigFocus {
+    type Error = anyhow::Error;
+
+    fn try_from(s: &str) -> Result<Self, Self::Error> {
+        match s {
+            "modules" => Ok(Self::Modules),
+            "resources" => Ok(Self::Resources),
+            s => Err(anyhow::format_err!(
+                "\"{}\" is not a valid JigFocus variant",
+                s
+            )),
+        }
+    }
+}
+
 impl Default for JigFocus {
     fn default() -> Self {
         Self::Modules
     }
+}
+
+/// These fields can be edited by admin and can be viewed by everyone
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct JigAdminData {
+    /// Rating for jig, weighted for jig search
+    #[serde(default)]
+    pub rating: Option<JigRating>,
+
+    /// if true does not appear in search
+    pub blocked: bool,
+
+    /// Indicates jig has been curated by admin
+    pub curated: bool,
+}
+
+/// These fields can be edited by admin and can be viewed by everyone
+#[derive(Serialize, Deserialize, Debug, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct JigAdminUpdateData {
+    /// Rating for jig, weighted for jig search
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
+    pub rating: Option<JigRating>,
+
+    /// if true does not appear in search
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
+    pub blocked: Option<bool>,
+
+    /// Indicates jig has been curated by admin
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
+    pub curated: Option<bool>,
+}
+
+/// Admin rating for Jig
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, Eq, PartialEq)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[serde(rename_all = "camelCase")]
+#[repr(i16)]
+pub enum JigRating {
+    #[allow(missing_docs)]
+    One = 1,
+    #[allow(missing_docs)]
+    Two = 2,
+    #[allow(missing_docs)]
+    Three = 3,
+    #[allow(missing_docs)]
+    NoRating = 17,
 }
 
 /// Audio for background music
@@ -456,14 +561,14 @@ pub struct JigResponse {
     /// Number of plays Jig
     pub plays: i64,
 
-    /// True if Jig cover is set
-    ///
-    /// NOTE: the cover is always technically there, this is just to indicate if the user has dragged the cover,
-    /// needed just for the UI
-    pub first_cover_assigned: bool,
+    /// Number of plays Jig
+    pub jig_focus: JigFocus,
 
     /// The data of the requested JIG.
     pub jig_data: JigData,
+
+    /// Admin data for Jig
+    pub admin_data: JigAdminData,
 }
 
 /// Request for updating a JIG's draft data.
@@ -507,11 +612,6 @@ pub struct JigUpdateDraftDataRequest {
     #[serde(default)]
     pub author_id: Option<Uuid>,
 
-    /// Additional resources of this JIG.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(default)]
-    pub additional_resources: Option<Vec<ResourceTypeId>>,
-
     /// Description of the jig.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
@@ -543,10 +643,20 @@ pub struct JigUpdateDraftDataRequest {
     #[serde(default)]
     pub privacy_level: Option<PrivacyLevel>,
 
-    /// Privacy level for the jig.
+    /// Optionally jig_focus by resource or modules.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub jig_focus: Option<JigFocus>,
+
+    /// Additional keywords for searches
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
+    pub other_keywords: Option<String>,
+
+    /// Rating by admin for Jig
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
+    pub admin_data: Option<JigAdminUpdateData>,
 }
 
 /// Query for [`Browse`](crate::api::endpoints::jig::Browse).
@@ -567,6 +677,11 @@ pub struct JigBrowseQuery {
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub page: Option<u32>,
+
+    /// Optionally jig_focus by resource or modules.
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub jig_focus: Option<JigFocus>,
 }
 
 /// Response for [`Browse`](crate::api::endpoints::jig::Browse).
@@ -581,6 +696,12 @@ pub struct JigBrowseResponse {
 
     /// The total number of jigs found
     pub total_jig_count: u64,
+}
+
+/// All id's associated with a jig to delete
+pub struct DeleteUserJigs {
+    /// Jig ID to delete.
+    pub jig_id: JigId,
 }
 
 /// Search for jigs via the given query string.
@@ -621,13 +742,11 @@ pub struct JigSearchQuery {
     pub affiliations: Vec<AffiliationId>,
 
     /// Optionally filter by `additional resources`
-    ///
-    /// Note: Currently does nothing
     #[serde(default)]
     #[serde(serialize_with = "super::csv_encode_uuids")]
     #[serde(deserialize_with = "super::from_csv")]
     #[serde(skip_serializing_if = "Vec::is_empty")]
-    pub additional_resources: Vec<ResourceTypeId>,
+    pub resource_types: Vec<ResourceTypeId>,
 
     /// Optionally filter by `categories`
     #[serde(default)]
@@ -657,6 +776,21 @@ pub struct JigSearchQuery {
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub author_name: Option<String>,
+
+    /// Optionally jig_focus by resource or modules
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub jig_focus: Option<JigFocus>,
+
+    /// Optionally search for jigs using keywords
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub other_keywords: Option<String>,
+
+    /// Optionally search for jigs using translated keyword
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub translated_keywords: Option<String>,
 }
 
 /// Response for successful search.
@@ -687,6 +821,13 @@ pub struct JigIdResponse {
 pub struct JigCountResponse {
     /// Total number of public and published jigs.
     pub total_count: u64,
+}
+
+/// Response for whether a user has liked a JIG.
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct JigLikedResponse {
+    /// Whether the authenticated user has liked the current JIG
+    pub is_liked: bool,
 }
 
 into_uuid![JigId];

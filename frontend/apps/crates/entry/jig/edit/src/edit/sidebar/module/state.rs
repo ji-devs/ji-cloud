@@ -1,7 +1,6 @@
 use crate::edit::sidebar::state::State as SidebarState;
 use dominator::clone;
 use futures_signals::{
-    map_ref,
     signal::{Mutable, Signal, SignalExt},
 };
 use shared::domain::jig::LiteModule;
@@ -19,6 +18,7 @@ pub struct State {
     pub index: usize,
     pub total_len: usize,
     pub elem: RefCell<Option<HtmlElement>>,
+    pub confirm_delete: Mutable<bool>,
 }
 
 impl State {
@@ -36,6 +36,7 @@ impl State {
             tried_module_at_cover: Mutable::new(false),
             drag: Mutable::new(None),
             elem: RefCell::new(None),
+            confirm_delete: Mutable::new(false),
         }
     }
 
@@ -45,26 +46,23 @@ impl State {
             Some(module) => module.kind.as_str(),
         }
     }
-    pub fn window_state_signal(state: Rc<State>) -> impl Signal<Item = &'static str> {
-        clone!(state => map_ref! {
-            let route = state.sidebar.jig_edit_state.route.signal_cloned(),
-            let cover_dragged = state.sidebar.first_cover_assigned.signal() => move {
-                match &*state.module {
-                    None => return "empty",
-                    Some(this_module) => {
-                        // if first and cover isn't wasn't dragged yet
-                        if state.index == 0 && !cover_dragged {
-                            return "empty";
-                        }
 
-                        match route {
-                            JigEditRoute::Module(module_id) if module_id == &this_module.id => return "active",
-                            _ => return "thumbnail",
-                        }
+    pub fn is_last_module(&self) -> bool {
+        self.index < self.total_len - 2 && (&*self.module).is_some()
+    }
+
+    pub fn window_state_signal(state: Rc<State>) -> impl Signal<Item = &'static str> {
+        state.sidebar.jig_edit_state.route.signal_ref(clone!(state => move |route| {
+            match &*state.module {
+                None => return "empty",
+                Some(this_module) => {
+                    match route {
+                        JigEditRoute::Module(active_module_id) if active_module_id == &this_module.id => return "active",
+                        _ => return "thumbnail",
                     }
-                };
-            }
-        })
+                }
+            };
+        }))
     }
 
     pub fn drag_overlap_signal(_self: Rc<Self>) -> impl Signal<Item = bool> {

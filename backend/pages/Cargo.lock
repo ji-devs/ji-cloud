@@ -2329,6 +2329,7 @@ dependencies = [
  "serde_repr",
  "serde_with",
  "sqlx",
+ "thiserror",
  "url",
  "uuid",
 ]

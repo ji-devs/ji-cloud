@@ -23,6 +23,8 @@ impl ImagePlayer {
             m.as_matrix_string()
         });
 
+        log::info!("Loading {}!", state.raw.filename);
+
         html!("img" => web_sys:: HtmlImageElement, {
             .attribute("src", &state.base.design_media_url(&state.raw.filename))
             .style_signal("opacity", state.controller.hidden.signal().map(|hidden| {
@@ -43,20 +45,20 @@ impl ImagePlayer {
             .with_node!(elem => {
                 .event(clone!(state => move |_evt:events::Load| {
                     if state.size.get_cloned().is_none() {
+
                         let width = elem.natural_width() as f64;
                         let height = elem.natural_height() as f64;
 
                         state.size.set(Some((width, height)));
 
-                        *state.controller.elem.borrow_mut() = Some(elem.clone().unchecked_into());
-                        state.base.insert_stage_click_listener(clone!(state => move |stage_click| {
-                            state.controller.handle_click(stage_click);
-                        }));
+
                     }
+
+                    *state.controller.elem.borrow_mut() = Some(elem.clone().unchecked_into());
+                    state.base.insert_stage_click_listener(clone!(state => move |stage_click| {
+                        state.controller.handle_click(stage_click);
+                    }));
                 }))
-            })
-            .event(move |_:events::Click| {
-                log::info!("clicked!")
             })
         })
     }

@@ -1,8 +1,8 @@
 use components::overlay::handle::OverlayHandle;
-use dominator::{Dom, EventOptions, clone, html, with_node};
-use web_sys::HtmlElement;
+use dominator::{Dom, EventOptions, clone, html, with_node, DomBuilder};
+use web_sys::{HtmlElement, Node};
 
-use super::super::menu::{dom as MenuDom, state::State as MenuState};
+use super::super::menu::{dom as MenuDom};
 use super::{actions, state::*};
 use crate::edit::sidebar::state::State as SidebarState;
 use components::module::_common::thumbnail::ModuleThumbnail;
@@ -12,6 +12,12 @@ use std::rc::Rc;
 use std::str::FromStr;
 use utils::prelude::*;
 use wasm_bindgen::prelude::*;
+
+const STR_DELETE_TITLE: &'static str = "Warning";
+const STR_DELETE_CONTENT: &'static str = "Are you sure you want to delete this activity?";
+const STR_DELETE_CONFIRM: &'static str = "Delete activity";
+const STR_DELETE_CANCEL: &'static str = "Don't delete";
+
 pub struct ModuleDom {}
 
 impl ModuleDom {
@@ -33,6 +39,24 @@ impl ModuleDom {
 
         html!("empty-fragment", {
             .property("slot", if index == 0 { "cover-module" } else { "modules" })
+            .child_signal(state.confirm_delete.signal().map(clone!(state => move |confirm_delete| {
+                if confirm_delete {
+                    Some(html!("modal-confirm", {
+                        .property("dangerous", true)
+                        .property("title", STR_DELETE_TITLE)
+                        .property("content", STR_DELETE_CONTENT)
+                        .property("cancel_text", STR_DELETE_CANCEL)
+                        .property("confirm_text", STR_DELETE_CONFIRM)
+                        .event(clone!(state => move |_evt: events::CustomCancel| state.confirm_delete.set_neq(false)))
+                        .event(clone!(state => move |_evt: events::CustomConfirm| {
+                            state.confirm_delete.set_neq(false);
+                            actions::delete(state.clone());
+                        }))
+                    }))
+                } else {
+                    None
+                }
+            })))
             .child(html!("jig-edit-sidebar-filler", {
                 .style("display", {
                     if is_filler { "block" } else {"none"}
@@ -43,10 +67,10 @@ impl ModuleDom {
                     if overlap {
                         state.sidebar.drag_target_index.set(Some(state.index));
                     }
-                        //Doing this here instead of immediately on mousemove
-                        //gives us a nice separation of concerns
-                        //e.g. to throttle
-                        //actions::update_index(state.clone(), pos.x, pos.y);
+                    // Doing this here instead of immediately on mousemove
+                    // gives us a nice separation of concerns
+                    // e.g. to throttle
+                    // actions::update_index(state.clone(), pos.x, pos.y);
                     async {}
                 })))
                 .style("display", {
@@ -61,22 +85,23 @@ impl ModuleDom {
                         _ => false,
                     }
                 })))
-                .property("lastBottomDecoration", index == total_len-1)
-                .event(|_evt:events::MouseDown| {
-                    // TODO:
-                    // actions::mouse_down(state.clone(), evt.x(), evt.y());
-                })
+                // TODO:
+                // .event(|_evt:events::MouseDown| {
+                //     actions::mouse_down(state.clone(), evt.x(), evt.y());
+                // })
                 .event_with_options(
                     &EventOptions::bubbles(),
                     clone!(state => move |_evt:events::Click| {
+
                         match &*state.module {
                             Some(_) => {
                                 actions::edit(state.clone())
                             },
-                            None =>  {
+                            None => {
                                 state.sidebar.jig_edit_state.route.set_neq(JigEditRoute::Landing);
                             },
-                        };
+                        }
+
                     })
                 )
                 .child(html!("jig-edit-sidebar-module-window" => HtmlElement, {
@@ -114,7 +139,7 @@ impl ModuleDom {
                                     Some(ModuleThumbnail::render_live(
                                         Rc::new(ModuleThumbnail {
                                             jig_id: state.sidebar.jig.id.clone(),
-                                            module: module.clone(),
+                                            module: Some(module.clone()),
                                             is_jig_fallback: false,
                                         }),
                                         Some("thumbnail")
@@ -153,47 +178,48 @@ impl ModuleDom {
                 .after_removed(clone!(state => move |_dom| {
                     *state.elem.borrow_mut() = None;
                 }))
-                .apply(clone!(state, sidebar_state, module => move |dom| {
-                    let menu_state = Rc::new(MenuState::new());
-                    let menu_items = match index {
-                        0 => {
-                            vec![
-                                MenuDom::item_edit(menu_state.clone(), state.clone()),
-                                // TODO:
-                                // MenuDom::item_copy(menu_state.clone()),
-                                MenuDom::item_paste(menu_state.clone(), sidebar_state.clone()),
-                            ]
-                        },
-                        _ => {
-                            let mut v = vec![];
-                            if let Some(module) = &*module {
-                                v.push(MenuDom::item_edit(menu_state.clone(), state.clone()));
-                                v.push(MenuDom::item_move_up(menu_state.clone(), state.clone()));
-                                v.push(MenuDom::item_move_down(menu_state.clone(), state.clone()));
-                                v.push(MenuDom::item_duplicate(menu_state.clone(), sidebar_state.clone(), module.id));
-                            }
-                            v.push(MenuDom::item_delete(menu_state.clone(), state.clone()));
-                            if let Some(module) = &*module {
-                                v.push(MenuDom::item_copy(menu_state.clone(), sidebar_state.clone(), module.id));
-                                v.push(MenuDom::item_duplicate_as(menu_state.clone(), sidebar_state.clone(), module));
-                            }
-                            v
-                        }
-                    };
+                // Add the menu only if the current module is not a placeholder or if it is, it is
+                // not the _last_ placeholder.
+                .apply_if(
+                    module.is_some() || (index <= total_len - 2 && module.is_none()),
+                    |dom| dom.child(MenuDom::render(&state))
+                )
+                .apply(Self::render_add_button(&state))
+            }))
+        })
+    }
 
-                    dom.child(MenuDom::render(
-                        menu_state.clone(),
-                        menu_items
-                    ))
-                }))
-                .child(html!("button-icon", {
+    pub fn render_add_button<A>(state: &Rc<State>) -> impl FnOnce(DomBuilder<A>) -> DomBuilder<A> + '_
+    where
+        A: AsRef<Node>,
+    {
+        move |dom: DomBuilder<A>| {
+            // If this module is anything other than a placeholder, the add button could be displayed.
+            let current_module_should_add = state.module.is_some();
+            let next_module_should_show_add = {
+                match state.sidebar.modules.lock_ref().to_vec().get(state.index + 1) {
+                    // If the next module is anything other than a placeholder, then this module can
+                    // potentially display the the add button.
+                    Some(module) => module.is_some(),
+                    // If there is no next module, then this module can potentially display the add
+                    // button.
+                    None => true,
+                }
+            };
+
+            let should_add = current_module_should_add && next_module_should_show_add;
+
+            if should_add {
+                dom.child(html!("button-icon", {
                     .property("icon", "gears")
                     .property("slot", "add")
                     .event(clone!(state => move |_evt:events::Click| {
                         actions::add_empty_module_after(state.clone())
                     }))
                 }))
-            }))
-        })
+            } else {
+                dom
+            }
+        }
     }
 }

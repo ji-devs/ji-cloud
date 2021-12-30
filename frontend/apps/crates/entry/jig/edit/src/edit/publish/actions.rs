@@ -39,6 +39,13 @@ impl Publish {
             set_default_values(&mut jig.jig_data, &meta);
         }
 
+        // ensure the correct jig focus is set
+        assert_eq!(
+            jig_edit_state.jig_focus,
+            jig.jig_focus,
+            "Jig focus doesn't match the route"
+        );
+
         Self::new(
             PublishJig::new(jig),
             categories,
@@ -46,6 +53,7 @@ impl Publish {
             meta.goals,
             meta.age_ranges,
             meta.affiliations,
+            meta.resource_types,
             jig_edit_state,
         )
     }
@@ -53,11 +61,19 @@ impl Publish {
     pub fn navigate_to_cover(&self) {
         let cover_module_id = self.jig.modules.lock_ref().first().map(|m| m.id.clone());
 
-        if let Some(cover_module_id) = cover_module_id {
-            self.jig_edit_state
-                .route
-                .set(JigEditRoute::Module(cover_module_id));
+        // navigate to cover if exists otherwise navigate to landing
+        let route = match cover_module_id {
+            Some(cover_module_id) => {
+                JigEditRoute::Module(cover_module_id)
+            },
+            None => {
+                JigEditRoute::Landing
+            },
         };
+
+        self.jig_edit_state
+            .route
+            .set(route);
     }
 
     fn form_invalid(self: Rc<Self>) -> bool {
@@ -104,7 +120,11 @@ impl Publish {
 
                     state.jig_edit_state.route.set_neq(JigEditRoute::PostPublish);
 
-                    let url: String = Route::Jig(JigRoute::Edit(state.jig.id, JigEditRoute::PostPublish)).into();
+                    let url: String = Route::Jig(JigRoute::Edit(
+                        state.jig.id,
+                        state.jig.jig_focus,
+                        JigEditRoute::PostPublish
+                    )).into();
                     log::info!("{}", url);
 
                     /* this will cause a full refresh - but preserves history

@@ -82,7 +82,7 @@ impl Tab {
                 Self::Overlay(Rc::new(state))
             }
 
-            fdsa => unimplemented!("unsupported tab kind! {:?}", fdsa),
+            kind => unimplemented!("unsupported tab kind! {:?}", kind),
         }
     }
 

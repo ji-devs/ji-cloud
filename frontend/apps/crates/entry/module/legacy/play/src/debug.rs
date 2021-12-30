@@ -34,6 +34,7 @@ use utils::{colors::*, prelude::*};
 use uuid::Uuid;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
+use serde::{Deserialize};
 
 pub static SETTINGS: OnceCell<DebugSettings> = OnceCell::new();
 
@@ -58,27 +59,22 @@ impl DebugSettings {
 
 pub async fn init(jig_id: JigId, _module_id: ModuleId) {
     if jig_id == JigId(Uuid::from_u128(0)) {
-        // http://localhost:4104/module/legacy/play/debug?game_id=web-stress-test&slide_index=0&example=true
+        //is debug, so just load game.json to get slide id
         let data = match utils::routes::get_param("game_id") {
             Some(game_id) => {
                 let slide_index = utils::routes::get_param_index("slide_index").unwrap_or_default();
-                let url = utils::path::legacy_cdn_url(format!(
-                    "{}/json/requests/module-{}.json",
-                    game_id, slide_index
-                ));
 
-                let module_req: ModuleCreateRequest = fetch_url(&url)
+                let url = utils::path::legacy_cdn_url(format!("{}/json/game.json", game_id));
+
+                let game: DebugGameData = fetch_url(&url)
                     .await
                     .unwrap_ji()
                     .json_from_str()
                     .await
                     .unwrap_ji();
 
-                let slide_id = match module_req.body {
-                    ModuleBody::Legacy(legacy) => legacy.slide_id,
-                    _ => panic!("not a legacy module?!"),
-                };
-
+                let slide_id = game.data.structure.slides[slide_index].slide_id();
+                
                 RawData { game_id, slide_id }
             }
             None => RawData::default(),
@@ -92,4 +88,30 @@ pub async fn init(jig_id: JigId, _module_id: ModuleId) {
 
 pub fn settings() -> &'static DebugSettings {
     unsafe { SETTINGS.get_unchecked() }
+}
+
+#[derive(Deserialize, Debug)]
+pub struct DebugGameData {
+    pub data: DebugGameManifest,
+}
+#[derive(Deserialize, Debug)]
+pub struct DebugGameManifest {
+    pub structure: DebugGameManifestStructure,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct DebugGameManifestStructure {
+    pub slides: Vec<DebugGameSlide>,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct DebugGameSlide {
+    #[serde(rename="filePath")]
+    pub file_path: String,
+}
+
+impl DebugGameSlide {
+    pub fn slide_id(&self) -> String {
+        self.file_path.trim_matches('/').to_string()
+    }
 }

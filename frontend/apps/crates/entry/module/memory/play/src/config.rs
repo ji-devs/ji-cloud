@@ -1,8 +1,8 @@
-#![allow(dead_code)] // this should be remove eventually
+#![allow(dead_code)] // this should be removed eventually
 
 use shared::domain::jig::module::body::_groups::cards::Mode;
 
-#[allow(unused_macros)] // this should be remove eventually
+#[allow(unused_macros)] // this should be removed eventually
 macro_rules! config_path {
     ($e:tt) => {
         concat!("../../../../../../../config/", $e)

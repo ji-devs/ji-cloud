@@ -1,16 +1,9 @@
 use std::rc::Rc;
 
 use dominator::clone;
-use shared::{
-    api::{
-        endpoints::{self, user::Profile},
-        ApiEndpoint,
-    },
-    domain::user::UserProfile,
-    error::EmptyError,
-};
+use shared::api::endpoints;
 use utils::{
-    prelude::{api_with_auth_status, ApiEndpointExt},
+    prelude::{ApiEndpointExt, get_user},
     routes::{Route, UserRoute},
     storage::delete_csrf_token,
     unwrap::UnwrapJiExt,
@@ -19,25 +12,11 @@ use utils::{
 use super::state::{LoggedInState, State};
 
 pub fn fetch_profile(state: Rc<State>) {
-    state.loader.load(clone!(state => async move {
-        let (result, status) = api_with_auth_status::<UserProfile, EmptyError, ()>(Profile::PATH, Profile::METHOD, None).await;
-
-        match status  {
-            401 | 403 => {
-                state.logged_in.set(LoggedInState::LoggedOut)
-            }
-            _ => {
-                match result {
-                    Err(_) => {
-                        log::info!("error fetching profile");
-                    },
-                    Ok(profile) => {
-                        state.logged_in.set(LoggedInState::LoggedIn(profile))
-                    }
-                }
-            }
-        };
-    }));
+    match get_user() {
+        // Some(profile) => state.logged_in.set(LoggedInState::LoggedIn(&profile)),
+        Some(profile) => state.logged_in.set(LoggedInState::LoggedIn(profile)),
+        None => state.logged_in.set(LoggedInState::LoggedOut)
+    }
 }
 
 pub fn logout(state: Rc<State>) {

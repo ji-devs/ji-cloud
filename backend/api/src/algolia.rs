@@ -14,7 +14,7 @@ use shared::{
     domain::{
         category::CategoryId,
         image::{ImageId, ImageKind},
-        jig::{JigId, PrivacyLevel},
+        jig::{JigFocus, JigId, PrivacyLevel},
         meta::{AffiliationId, AgeRangeId, GoalId, ImageStyleId, ImageTagIndex, ResourceTypeId},
     },
     media::MediaGroupKind,
@@ -35,12 +35,13 @@ const HAS_AUTHOR_TAG: &'static str = "hasAuthor";
 struct BatchJig<'a> {
     name: &'a str,
     language: &'a str,
+    description: &'a str,
     age_ranges: &'a [Uuid],
     age_range_names: &'a [String],
     affiliations: &'a [Uuid],
     affiliation_names: &'a [String],
-    additional_resources: &'a [Uuid],
-    additional_resource_names: &'a [String],
+    resource_types: &'a [Uuid],
+    resource_type_names: &'a [String],
     goals: &'a [Uuid],
     goal_names: &'a [String],
     categories: &'a [Uuid],
@@ -49,13 +50,19 @@ struct BatchJig<'a> {
     author_name: Option<String>,
     #[serde(rename = "_tags")]
     tags: Vec<&'static str>,
+    jig_focus: &'a str,
+    locked: &'a bool,
+    other_keywords: &'a str,
+    translated_keywords: &'a str,
 }
 
 #[derive(Serialize)]
 struct BatchImage<'a> {
     name: &'a str,
     description: &'a str,
-    translated_description: &'a str,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    translated_description: Option<String>,
     styles: &'a [Uuid],
     style_names: &'a [String],
     age_ranges: &'a [Uuid],
@@ -252,6 +259,7 @@ select algolia_index_version as "algolia_index_version!" from "settings"
 select jig.id,
        display_name                                                                                                 as "name",
        language                                                                                                     as "language!",
+       description                                                                                                  as "description!",
        array((select affiliation_id
               from jig_data_affiliation
               where jig_data_id = jig_data.id))                                                                     as "affiliations!",
@@ -261,11 +269,11 @@ select jig.id,
               where jig_data_affiliation.jig_data_id = jig_data.id))                                                as "affiliation_names!",
         array((select resource_type_id
                 from jig_data_additional_resource
-                where jig_data_id = jig_data.id))                                                                     as "additional_resources!",
+                where jig_data_id = jig_data.id))                                                                     as "resource_types!",
         array((select resource_type.display_name
               from resource_type
                         inner join jig_data_additional_resource on resource_type.id = jig_data_additional_resource.resource_type_id
-             where jig_data_additional_resource.jig_data_id = jig_data.id))                                         as "additional_resource_names!",
+             where jig_data_additional_resource.jig_data_id = jig_data.id))                                         as "resource_type_names!",
        array((select age_range_id
               from jig_data_age_range
               where jig_data_id = jig_data.id))                                                                     as "age_ranges!",
@@ -286,7 +294,11 @@ select jig.id,
                        inner join jig_data_category on category.id = jig_data_category.category_id
               where jig_data_category.jig_data_id = jig_data.id))                                                   as "category_names!",
        privacy_level                                                                                                as "privacy_level!: PrivacyLevel",
+       jig_focus                                                                                                    as "jig_focus!: JigFocus",
        author_id                                                                                                    as "author",
+       locked                                                                                                       as "locked!",  
+       other_keywords                                                                                               as "other_keywords!",
+       translated_keywords                                                                                          as "translated_keywords!",
        (select given_name || ' '::text || family_name
         from user_profile
         where user_profile.user_id = jig.author_id)                                                                 as "author_name"
@@ -311,19 +323,24 @@ limit 100 for no key update skip locked;
             body: match serde_json::to_value(&BatchJig {
                 name: &row.name,
                 language: &row.language,
+                description: &row.description,
                 goals: &row.goals,
                 goal_names: &row.goal_names,
                 age_ranges: &row.age_ranges,
                 age_range_names: &row.age_range_names,
                 affiliations: &row.affiliations,
                 affiliation_names: &row.affiliation_names,
-                additional_resources: &row.additional_resources,
-                additional_resource_names: &row.additional_resource_names,
+                resource_types: &row.resource_types,
+                resource_type_names: &row.resource_type_names,
                 categories: &row.categories,
                 category_names: &row.category_names,
                 author: row.author,
                 author_name: row.author_name,
-                tags
+                jig_focus: &row.jig_focus.as_str(),
+                tags,
+                locked: &row.locked,
+                other_keywords: &row.other_keywords,
+                translated_keywords: &row.translated_keywords,
             })
             .expect("failed to serialize BatchJig to json")
             {
@@ -390,7 +407,7 @@ select id,
        name,
        kind                                                                                     as "kind!: ImageKind",
        description,
-       translated_description                                                                   as "translated_description!",
+       translated_description                                                                   as "translated_description",
        array((select affiliation_id from image_affiliation where image_id = image_metadata.id)) as "affiliations!",
        array((select affiliation.display_name
               from affiliation
@@ -446,7 +463,7 @@ limit 100 for no key update skip locked;
                 media_subkind: &row.kind.to_str(),
                 name: &row.name,
                 description: &row.description,
-                translated_description: &row.translated_description,
+                translated_description: row.translated_description,
                 styles: &row.styles,
                 style_names: &row.style_names,
                 age_ranges: &row.age_ranges,
@@ -762,11 +779,14 @@ impl Client {
         language: Option<String>,
         age_ranges: &[AgeRangeId],
         affiliations: &[AffiliationId],
-        additional_resources: &[ResourceTypeId],
+        resource_types: &[ResourceTypeId],
         categories: &[CategoryId],
         goals: &[GoalId],
         author: Option<Uuid>,
         author_name: Option<String>,
+        jig_focus: Option<JigFocus>,
+        other_keywords: Option<String>,
+        translated_keywords: Option<String>,
     ) -> anyhow::Result<Option<(Vec<Uuid>, u32, u64)>> {
         let mut and_filters = algolia::filter::AndFilter { filters: vec![] };
 
@@ -795,6 +815,16 @@ impl Client {
             }))
         }
 
+        if let Some(jig_focus) = jig_focus {
+            and_filters.filters.push(Box::new(CommonFilter {
+                filter: FacetFilter {
+                    facet_name: "jig_focus".to_owned(),
+                    value: jig_focus.as_str().to_owned(),
+                },
+                invert: false,
+            }))
+        }
+
         if let Some(privacy_level) = privacy_level {
             and_filters.filters.push(Box::new(CommonFilter {
                 filter: TagFilter(privacy_level.as_str().to_owned()),
@@ -812,13 +842,28 @@ impl Client {
             }))
         }
 
+        if let Some(other_keywords) = other_keywords {
+            and_filters.filters.push(Box::new(CommonFilter {
+                filter: FacetFilter {
+                    facet_name: "other_keywords".to_owned(),
+                    value: other_keywords,
+                },
+                invert: false,
+            }))
+        }
+        if let Some(translated_keywords) = translated_keywords {
+            and_filters.filters.push(Box::new(CommonFilter {
+                filter: FacetFilter {
+                    facet_name: "translated_keywords".to_owned(),
+                    value: translated_keywords,
+                },
+                invert: false,
+            }))
+        }
+
         filters_for_ids_or(&mut and_filters.filters, "age_ranges", age_ranges);
         filters_for_ids_or(&mut and_filters.filters, "affiliations", affiliations);
-        filters_for_ids_or(
-            &mut and_filters.filters,
-            "additional_resources",
-            additional_resources,
-        );
+        filters_for_ids_or(&mut and_filters.filters, "resource_types", resource_types);
         filters_for_ids_or(&mut and_filters.filters, "categories", categories);
         filters_for_ids_or(&mut and_filters.filters, "goals", goals);
 
@@ -837,8 +882,6 @@ impl Client {
                 },
             )
             .await?;
-
-        log::error!("search results {:?}", results);
 
         let pages = results.page_count.try_into()?;
         let total_hits = results.hit_count as u64;

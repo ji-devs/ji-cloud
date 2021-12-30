@@ -76,7 +76,8 @@ pub fn clip_single_shape(ctx: &CanvasRenderingContext2d, resize_info: &ResizeInf
     ctx.clip_with_path_2d(&path);
 }
 
-pub fn draw_single_shape(ctx: &CanvasRenderingContext2d, resize_info: &ResizeInfo, shape: &TraceShape) {
+//returns whether it already filled - an unfortunate necessity for PathCommands
+pub fn draw_single_shape(ctx: &CanvasRenderingContext2d, resize_info: &ResizeInfo, shape: &TraceShape) -> bool {
     match shape {
         TraceShape::PathCommands(ref commands) => draw_path_commands(
             ctx,
@@ -100,6 +101,11 @@ pub fn draw_single_shape(ctx: &CanvasRenderingContext2d, resize_info: &ResizeInf
             *radius_y,
         ),
     }
+
+    match shape {
+        TraceShape::PathCommands(_) => true,
+        _ => false
+    }
 }
 
 
@@ -108,7 +114,7 @@ pub fn draw_path_commands(
     resize_info: &ResizeInfo,
     commands: &[(PathCommand, bool)],
 ) {
-    log::warn!("canvas draw for path commands inherently fills!!!");
+    //log::warn!("canvas draw for path commands inherently fills!!!");
 
     let path_string = path_command_to_string(
         commands

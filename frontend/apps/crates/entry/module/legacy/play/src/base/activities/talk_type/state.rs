@@ -4,10 +4,10 @@ use components::traces::utils::TraceShapeExt;
 use std::rc::Rc;
 use std::cell::RefCell;
 use std::fmt;
-use futures_signals::signal::{Mutable, SignalExt};
+use futures_signals::signal::Mutable;
 use unicode_segmentation::UnicodeSegmentation;
 use rand::prelude::*;
-use gloo_timers::callback::Timeout;
+
 
 use dominator::clone;
 use shared::domain::jig::module::body::legacy::activity::{
@@ -70,7 +70,7 @@ pub struct HintLetter {
 
 impl TalkTypeItem {
     pub fn new(base: Rc<Base>, raw: RawTalkTypeItem, rng: &mut ThreadRng) -> Rc<Self> {
-        let mut bounds = raw.hotspot.shape.calc_bounds(None).expect_ji("could not calc bounds");
+        let bounds = raw.hotspot.shape.calc_bounds(None).expect_ji("could not calc bounds");
 
         let hint_letters = match raw.texts.as_ref() {
             Some(text) => {

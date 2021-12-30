@@ -7,16 +7,20 @@ use shared::{
     error::*,
     media::MediaLibrary,
 };
+use thiserror::Error;
 use utils::prelude::*;
 
 use web_sys::File;
 
 const STR_AUDIO_IS_TOO_LARGE: &str = "Audio is too large, limit is 30MB";
 
-#[derive(Debug)]
+#[derive(Debug, Error)]
 pub enum UploadError {
+    #[error("Aborted")]
     Aborted,
+    #[error("TooLarge")]
     TooLarge,
+    #[error("awsm_web error")]
     Other(awsm_web::errors::Error),
 }
 

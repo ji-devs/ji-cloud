@@ -1,13 +1,7 @@
-import {
-    LitElement,
-    html,
-    css,
-    customElement,
-    property,
-    unsafeCSS,
-    internalProperty,
-} from "lit-element";
+import { LitElement, html, css, customElement, property } from "lit-element";
 import "@elements/core/images/ui";
+import { nothing } from "lit-html";
+import { JigFocus } from "@elements/module/_common/types";
 
 const STR_HEADER_FIRST = "Settings and JIG info.";
 const STR_HEADER_SECOND = "Last step before publishing";
@@ -56,9 +50,13 @@ export class _ extends LitElement {
                     color: #4a4a4a;
                     margin: 0;
                 }
+                :host([jigFocus=resources]) h3 {
+                    display: none;
+                }
                 .main {
                     display: grid;
-                    grid-template-columns: repeat(4, minmax(auto, 1fr));
+                    grid-auto-columns: minmax(auto, 1fr);
+                    grid-auto-flow: column;
                     column-gap: 48px;
                     justify-content: center;
                     align-items: start;
@@ -129,19 +127,8 @@ export class _ extends LitElement {
                     row-gap: 12px;
                 }
                 .additional-resources {
-                    border-radius: 12px;
-                    background-color: var(--light-blue-1);
-                    padding: 16px;
-                }
-                .additional-resources h4 {
-                    font-weight: 500;
-                    margin: 0;
-                    color: var(--main-blue);
-                }
-                .additional-resources-items {
-                    padding: 24px 0;
                     display: grid;
-                    grid-gap: 56px;
+                    row-gap: 16px;
                 }
                 .publish {
                     display: grid;
@@ -153,6 +140,9 @@ export class _ extends LitElement {
         ];
     }
 
+    @property({ reflect: true })
+    jigFocus: JigFocus = "modules";
+
     render() {
         return html`
             <div class="main-wrapper">
@@ -161,6 +151,11 @@ export class _ extends LitElement {
                         <div class="header">
                             <h1>${STR_HEADER_FIRST}</h1>
                             <h3>${STR_HEADER_SECOND}</h3>
+                            ${
+                                this.jigFocus === "resources" ? html`
+                                    <slot name="resources"></slot>
+                                ` : nothing
+                            }
                         </div>
                         <div class="main">
                             <div class="column-1">
@@ -186,12 +181,13 @@ export class _ extends LitElement {
                                     <slot name="category-labels"></slot>
                                 </div>
                             </div>
-                            <div class="column-4 additional-resources">
-                                <h4>Additional resources (Coming soon!)</h4>
-                                <div class="additional-resources-items">
-                                    <slot name="additional-resources"></slot>
-                                </div>
-                            </div>
+                            ${
+                                this.jigFocus === "modules" ? html`
+                                    <div class="column-4 additional-resources">
+                                        <slot name="resources"></slot>
+                                    </div>
+                                ` : nothing
+                            }
                         </div>
                         <div class="publish">
                             <slot name="publish-later"></slot>

@@ -10,11 +10,11 @@
         "build:sandbox": "cross-env RUSTUP_TOOLCHAIN=nightly rollup --config rollup.sandbox.js"
     },
     "dependencies": {
-        "@rollup/plugin-node-resolve": "^13.0.2",
-        "@wasm-tool/rollup-plugin-rust": "1.0.5",
+        "@rollup/plugin-node-resolve": "^13.1.1",
+        "@wasm-tool/rollup-plugin-rust": "1.0.7",
         "cross-env": "^7.0.3",
-        "firebase": "^9.0.0-beta.6",
-        "rollup": "^2.53.2",
+        "firebase": "^9.6.1",
+        "rollup": "^2.61.1",
         "vmsg": "^0.4.0"
     },
     "devDependencies": {

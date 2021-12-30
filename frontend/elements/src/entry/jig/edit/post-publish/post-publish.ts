@@ -1,9 +1,6 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 import "@elements/core/images/ui";
-import {
-    ModuleKind,
-    STR_MODULE_DISPLAY_NAME,
-} from "@elements/module/_common/types";
+import { JigFocus } from "@elements/module/_common/types";
 
 const STR_ACTION_HEADER = "What do you want to do next?";
 const STR_HEADER = "Your JIG is live!";
@@ -69,6 +66,9 @@ export class _ extends LitElement {
             `,
         ];
     }
+
+    @property()
+    jigFocus: JigFocus = "modules";
 
     render() {
         return html`

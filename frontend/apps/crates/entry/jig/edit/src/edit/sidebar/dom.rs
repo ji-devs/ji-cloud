@@ -48,7 +48,8 @@ impl SidebarDom {
                 if loading {
                     None
                 } else {
-                    Some(Self::render_loaded(jig.borrow_mut().take().unwrap_ji(), Rc::clone(&jig_edit_state)))
+                    let jig = jig.borrow_mut().take().unwrap_ji();
+                    Some(Self::render_loaded(jig, Rc::clone(&jig_edit_state)))
                 }
             })))
         })

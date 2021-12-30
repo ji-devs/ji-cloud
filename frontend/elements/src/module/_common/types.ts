@@ -1,5 +1,6 @@
 export type ModuleKind =
     | "cover"
+    | "resource-cover"
     | "flashcards"
     | "matching"
     | "memory"
@@ -12,6 +13,7 @@ export type ModuleKind =
 
 export const moduleKinds: Array<ModuleKind> = [
     "cover",
+    "resource-cover",
     "flashcards",
     "matching",
     "memory",
@@ -27,6 +29,7 @@ export const moduleKinds: Array<ModuleKind> = [
 
 export const STR_MODULE_DISPLAY_NAME: { [key in ModuleKind]: string } = {
     cover: "Cover",
+    "resource-cover": "Cover",
     flashcards: "Flashcards",
     matching: "Matching",
     memory: "Memory Game",
@@ -40,6 +43,7 @@ export const STR_MODULE_DISPLAY_NAME: { [key in ModuleKind]: string } = {
 
 export const STR_MODULE_CHOOSE_HEADER: { [key in ModuleKind]: string } = {
     cover: "", //not used
+    "resource-cover": "",
     flashcards: "Create a Set of Flashcards",
     matching: "Create a Matching Game",
     memory: "Create a Memory Game",
@@ -50,3 +54,5 @@ export const STR_MODULE_CHOOSE_HEADER: { [key in ModuleKind]: string } = {
     tracing: "Create a Tracing Activity",
     video: "Create a Video Activity",
 };
+
+export type JigFocus = "modules" | "resources";

@@ -22,7 +22,7 @@ impl Game {
                             let theme_id = state.base.theme_id;
                             let mode = state.base.mode;
 
-                            let Current { target, others, side, phase } = &*current;
+                            let Current { target, others, side, phase, .. } = &*current;
 
                             let mut options = CardOptions::new(&target.card, theme_id, mode, *side, Size::QuizTarget);
 
@@ -43,12 +43,23 @@ impl Game {
                                 children.push(render_card_mixin(options, |dom| {
                                     dom
                                         //should be some animation
-                                        .property_signal("flipped", phase.signal().map(clone!(pair_id => move |phase| {
-                                            match phase {
-                                                CurrentPhase::Correct(id) => id != pair_id,
-                                                CurrentPhase::Wrong(id) => id != pair_id,
-                                                _ => true,
+                                        .property_signal("flipped", phase.signal().map(clone!(state, pair_id => move |phase| {
+                                            let is_incorrect_choice = state.current.lock_ref().as_ref().unwrap().incorrect_choices
+                                                .borrow()
+                                                .iter()
+                                                .find(|id| *id == &pair_id)
+                                                .is_some();
+
+                                            if is_incorrect_choice {
+                                                false
+                                            } else {
+                                                match phase {
+                                                    CurrentPhase::Correct(id) => id == pair_id,
+                                                    CurrentPhase::Wrong(id) => id != pair_id,
+                                                    CurrentPhase::Waiting => true,
+                                                }
                                             }
+
                                         })))
                                         .event(clone!(state, pair_id, phase => move |_evt:events::Click| {
                                             Self::evaluate(state.clone(), pair_id, phase.clone());

@@ -1,11 +1,4 @@
-import {
-    LitElement,
-    html,
-    css,
-    customElement,
-    property,
-    unsafeCSS,
-} from "lit-element";
+import { LitElement, html, css, customElement, property } from "lit-element";
 import { nothing } from "lit-html";
 
 const STR_PLAYED = "Played";
@@ -14,6 +7,8 @@ const STR_JI_TEAM = "Ji Team";
 const STR_DESCRIPTION = "Description";
 const STR_ADDITIONAL_RESOURCES = "Additional resources";
 const STR_SEE_ALL = "See more JIGs by this author";
+
+type Kind = "jig" | "resource";
 
 @customElement("home-search-result")
 export class _ extends LitElement {
@@ -53,6 +48,7 @@ export class _ extends LitElement {
                     grid-template-rows: 200px auto 1fr 34px 40px;
                     height: 100%;
                     row-gap: 8px;
+                    background-color: #ffffff;
                 }
                 .main ::slotted([slot="image"]) {
                     border-radius: 20px 20px 0 0;
@@ -94,11 +90,16 @@ export class _ extends LitElement {
                 .main .author-section {
                     font-weight: 500;
                     line-height: 40px;
-                    color: var(--main-blue);
-                    border-top: solid 1px var(--light-blue-2);
                     display: flex;
                     align-items: center;
                     justify-content: center;
+                }
+                :host([kind=jig]) .main .author-section {
+                    color: var(--main-blue);
+                    border-top: solid 1px var(--light-blue-2);
+                }
+                :host([kind=resource]) .main .author-section {
+                    background-color: #b4eacb;
                 }
                 :host([byJiTeam]) .main .author-section {
                     background-color: var(--light-blue-2);
@@ -111,12 +112,17 @@ export class _ extends LitElement {
                 .hover {
                     grid-column: 1;
                     grid-row: 1;
-                    background-color: var(--dark-blue-2);
                     height: 100%;
                     color: #ffffff;
                     display: grid;
                     grid-template-rows: 1fr auto;
                     transform: rotateY(180deg);
+                }
+                :host([kind=jig]) .hover {
+                    background-color: var(--dark-blue-2);
+                }
+                :host([kind=resource]) .hover {
+                    background-color: #00844c;
                 }
                 .hover .scrollable-content {
                     padding: 16px 24px;
@@ -124,7 +130,12 @@ export class _ extends LitElement {
                     margin-right: 12px;
                     overflow: auto;
                     scrollbar-width: thin;
+                }
+                :host([kind=jig]) .hover {
                     scrollbar-color: var(--light-blue-5) transparent;
+                }
+                :host([kind=resource]) .hover {
+                    scrollbar-color: #3f9c6f transparent;
                 }
                 .hover .scrollable-content::-webkit-scrollbar-track {
                     background-color: transparent;
@@ -135,19 +146,33 @@ export class _ extends LitElement {
                 }
                 .hover .scrollable-content::-webkit-scrollbar-thumb {
                     border-radius: 4px;
+                }
+                :host([kind=jig]) .scrollable-content::-webkit-scrollbar-thumb {
                     background-color: var(--light-blue-5);
+                }
+                :host([kind=resource]) .scrollable-content::-webkit-scrollbar-thumb {
+                    background-color: #3f9c6f;
                 }
                 .hover .title {
                     margin: 0;
                     font-size: 16px;
                     font-weight: 600;
                 }
-                .hover home-search-result-details:not(:last-child) {
+                :host([kind=jig]) .hover home-search-result-details:not(:last-child) {
                     border-bottom: solid 1px #3c7df0;
                 }
+                :host([kind=resource]) .hover home-search-result-details:not(:last-child) {
+                    border-bottom: solid 1px #3f9c6f;
+                }
+
                 ::slotted(home-search-result-details) {
-                    border-bottom: solid 1px #3c7df0;
                     --closed-height: 36px;
+                }
+                :host([kind=jig]) ::slotted(home-search-result-details) {
+                    border-bottom: solid 1px #3c7df0;
+                }
+                :host([kind=resource]) ::slotted(home-search-result-details) {
+                    border-bottom: solid 1px #3f9c6f;
                 }
                 .hover h3 {
                     font-size: 16px;
@@ -194,6 +219,9 @@ export class _ extends LitElement {
             `,
         ];
     }
+
+    @property({ reflect: true })
+    kind: Kind = "jig";
 
     @property({ type: Boolean })
     new: boolean = false;
@@ -288,10 +316,14 @@ export class _ extends LitElement {
                                 <h4>${STR_DESCRIPTION}</h4>
                                 <p class="description">${this.description}</p>
                             </home-search-result-details>
-                            <home-search-result-details>
-                                <h4>${STR_ADDITIONAL_RESOURCES}</h4>
-                                <slot name="additional-resources"></slot>
-                            </home-search-result-details>
+                            ${
+                                this.kind === "jig" ? html`
+                                    <home-search-result-details>
+                                        <h4>${STR_ADDITIONAL_RESOURCES}</h4>
+                                        <slot name="additional-resources"></slot>
+                                    </home-search-result-details>
+                                ` : nothing
+                            }
                             <div class="author-section">
                                 <span class="left-side">
                                     ${this.byJiTeam

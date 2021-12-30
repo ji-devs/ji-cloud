@@ -26,6 +26,7 @@ serde_repr = "0.1.7"
 serde_with  = { version = "1.11.0", features = ["json", "macros"] }
 url = { version = "2.2.2", features = ["serde"] }
 uuid = { version = "0.8.2", features = ["serde"] }
+thiserror = "1.0.30"
 
 # wasm
 wasm-bindgen = { version = "0.2.78", optional = true }

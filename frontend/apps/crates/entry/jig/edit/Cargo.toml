@@ -68,6 +68,7 @@ strum = "0.22.0"
 strum_macros = "0.22.0"
 chrono = "0.4.19"
 components = {path = "../../../components"}
+anyhow = "1.0.48"
 
 [features]
 default = ["wee_alloc"]

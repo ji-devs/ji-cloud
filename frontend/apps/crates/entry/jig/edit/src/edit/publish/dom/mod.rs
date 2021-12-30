@@ -1,14 +1,14 @@
 use dominator::{clone, html, with_node, Dom};
-use futures_signals::{
-    map_ref,
-    signal::{Mutable, SignalExt},
-};
+use futures_signals::{map_ref, signal::{Mutable, SignalExt}, signal_vec::SignalVecExt};
 use shared::domain::jig::PrivacyLevel;
 use utils::{
     events,
     routes::{JigEditRoute, JigRoute, Route},
 };
 use web_sys::{HtmlElement, HtmlInputElement, HtmlTextAreaElement};
+
+use super::additional_resource::AdditionalResourceComponent;
+use super::add_additional_resource::AddAdditionalResource;
 
 use super::super::state::State as JigEditState;
 use super::state::Publish;
@@ -31,19 +31,18 @@ pub mod category_pills;
 pub mod categories_select;
 pub mod goal;
 pub mod language;
-pub mod additional_resources;
 
-const STR_PUBLISH_JIG: &'static str = "Publish JIG";
-const STR_PUBLISH_LATER: &'static str = "I will publish later";
-const STR_PUBLIC_LABEL: &'static str = "My JIG is public";
-const STR_NAME_LABEL: &'static str = "JIG’s name";
-const STR_NAME_PLACEHOLDER: &'static str = "Type your JIG’s name here";
-const STR_DESCRIPTION_LABEL: &'static str = "Description";
-const STR_DESCRIPTION_PLACEHOLDER: &'static str =
+const STR_PUBLISH_JIG: &str = "Publish JIG";
+const STR_PUBLISH_LATER: &str = "I will publish later";
+const STR_PUBLIC_LABEL: &str = "My JIG is public";
+const STR_NAME_LABEL: &str = "JIG’s name";
+const STR_NAME_PLACEHOLDER: &str = "Type your JIG’s name here";
+const STR_DESCRIPTION_LABEL: &str = "Description";
+const STR_DESCRIPTION_PLACEHOLDER: &str =
     "This JIG is about… (include words that will help others find this JIG easily)";
-const STR_PUBLIC_POPUP_TITLE: &'static str = "Sharing is Caring!";
-const STR_PUBLIC_POPUP_BODY: &'static str = "Are you sure you want to keep this JIG private? Please consider sharing your JIG with the Jigzi community.";
-const STR_MISSING_INFO_TOOLTIP: &'static str = "Please fill in the missing information.";
+const STR_PUBLIC_POPUP_TITLE: &str = "Sharing is Caring!";
+const STR_PUBLIC_POPUP_BODY: &str = "Are you sure you want to keep this JIG private? Please consider sharing your JIG with the Jigzi community.";
+const STR_MISSING_INFO_TOOLTIP: &str = "Please fill in the missing information.";
 
 impl Publish {
     pub fn render(jig_edit_state: Rc<JigEditState>) -> Dom {
@@ -67,12 +66,13 @@ impl Publish {
 
 fn render_page(state: Rc<Publish>) -> Dom {
     html!("jig-edit-publish", {
+        .property("jigFocus", state.jig.jig_focus.as_str())
         .children(&mut [
             ModuleThumbnail::render_live(
                 Rc::new(ModuleThumbnail {
                     jig_id: state.jig.id.clone(),
                     //Cover module (first module) is guaranteed to exist
-                    module: state.jig.modules.lock_ref()[0].clone(),
+                    module: state.jig.modules.lock_ref().first().cloned(),
                     is_jig_fallback: true,
                 }),
                 Some("img")
@@ -191,7 +191,11 @@ fn render_page(state: Rc<Publish>) -> Dom {
                 .text(STR_PUBLISH_LATER)
                 .event(clone!(state => move |_: events::Click| {
                     state.jig_edit_state.route.set_neq(JigEditRoute::Landing);
-                    let url:String = Route::Jig(JigRoute::Edit(state.jig.id.clone(), JigEditRoute::Landing)).into();
+                    let url:String = Route::Jig(JigRoute::Edit(
+                        state.jig.id.clone(),
+                        state.jig.jig_focus,
+                        JigEditRoute::Landing
+                    )).into();
                     dominator::routing::go_to_url(&url);
                 }))
             }),
@@ -232,6 +236,30 @@ fn render_page(state: Rc<Publish>) -> Dom {
                 })
             }),
         ])
-        .children(Publish::render_additional_resources(state.clone()))
+        .apply_if(state.jig.jig_focus.is_modules(), |dom|{
+            dom
+                .children_signal_vec(state.jig.additional_resources.signal_vec_cloned().map(clone!(state => move |additional_resource| {
+                    AdditionalResourceComponent::new(
+                        additional_resource,
+                        Rc::clone(&state)
+                    ).render()
+                })))
+                .child(AddAdditionalResource::new(Rc::clone(&state)).render())
+        })
+        .apply_if(state.jig.jig_focus.is_resources(), |dom|{
+            dom.child_signal(state.jig.additional_resources.signal_vec_cloned().len().map(clone!(state => move|len| {
+                if len == 0 {
+                    Some(AddAdditionalResource::new(Rc::clone(&state)).render())
+                } else {
+                    let resource = state.jig.additional_resources.lock_ref()[0].clone();
+                    Some(
+                        AdditionalResourceComponent::new(
+                            resource,
+                            Rc::clone(&state)
+                        ).render()
+                    )
+                }
+            })))
+        })
     })
 }

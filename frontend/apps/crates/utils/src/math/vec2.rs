@@ -17,6 +17,20 @@ pub fn angle(v1: &[f64], v2: &[f64]) -> f64 {
         cosine.acos()
     }
 }
+
+pub fn distance(v1: &[f64], v2: &[f64]) -> f64 {
+    let x = v2[0] - v1[0];
+    let y = v2[1] - v1[1];
+    x.hypot(y)
+}
+
+pub fn sqr_distance(v1: &[f64], v2: &[f64]) -> f64 {
+    let x = v2[0] - v1[0];
+    let y = v2[1] - v1[1];
+
+    (x * x) + (y * y)
+}
+
 pub fn add(v1: &[f64], v2: &[f64]) -> [f64; 2] {
     [v1[0] + v2[0], v1[1] + v2[1]]
 }

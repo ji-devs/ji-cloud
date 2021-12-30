@@ -14,7 +14,7 @@ pub struct Slide {
     pub image_full: String,
 
     #[serde(rename="filePathImageThumb")]
-    pub image_thumb: String,
+    pub image_thumb: Option<String>,
 
     #[serde(rename="pk")]
     pub key: PrimaryKey,
@@ -29,6 +29,9 @@ pub struct Slide {
 
 impl Slide {
     pub fn slide_id(&self) -> String {
-        self.file_path.trim_matches('/').to_string()
+        self.file_path
+            .trim_matches('/')
+            .replace("/", "-")
+            .to_string()
     }
 }
