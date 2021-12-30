@@ -263,8 +263,8 @@ export class _ extends LitElement {
 
         const subtitle = module === "" ? "" : STR_MODULE_DISPLAY_NAME[module];
 
-        const iconPath =
-            module === "" ? "" : `entry/jig/modules/small/${module}.svg`;
+        const iconPath = `entry/jig/modules/small/${module}.svg`;
+        const plusModuleIconPath = `entry/jig/modules/small/${"poster"}.svg`;
 
         return html`
             <section class="${sectionClasses}">
@@ -275,8 +275,8 @@ export class _ extends LitElement {
                             ? nothing
                             : html`<div class="subtitle">${subtitle}</div>`}
                         <div class="icon">
-                            ${iconPath === ""
-                                ? nothing
+                            ${module === ""
+                                ? html`<img-ui path="${plusModuleIconPath}"></img-ui>`
                                 : html`<img-ui path="${iconPath}"></img-ui>`}
                         </div>
                     </div>
