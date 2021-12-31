@@ -1,4 +1,5 @@
 use crate::base::state::Base;
+use awsm_web::audio::AudioHandle;
 use components::module::_groups::cards::lookup::Side;
 use futures_signals::signal::Mutable;
 use rand::prelude::*;
@@ -16,6 +17,7 @@ pub struct Game {
     pub used: RefCell<Vec<CardPairId>>,
     pub current: Mutable<Option<Rc<Current>>>,
     pub rounds_played: AtomicUsize,
+    pub audio: RefCell<Option<AudioHandle>>,
 }
 
 #[derive(Clone, Debug)]
@@ -50,6 +52,7 @@ impl Game {
             rng: RefCell::new(thread_rng()),
             current: Mutable::new(None),
             rounds_played: AtomicUsize::new(0),
+            audio: RefCell::new(None),
         });
 
         Self::reset_deck(_self.clone());

@@ -7,7 +7,7 @@ use shared::domain::jig::{
         },
         ModuleId,
     },
-    JigId,
+    JigId, JigData,
 };
 
 use futures_signals::signal::Mutable;
@@ -20,6 +20,7 @@ use super::game::state::Game;
 
 pub struct Base {
     pub jig_id: JigId,
+    pub jig: JigData,
     pub module_id: ModuleId,
     pub mode: Mode,
     pub theme_id: ThemeId,
@@ -42,6 +43,7 @@ impl Base {
     pub async fn new(init_args: InitFromRawArgs<RawData, Mode, Step>) -> Rc<Self> {
         let InitFromRawArgs {
             jig_id,
+            jig,
             module_id,
             raw,
             theme_id,
@@ -52,6 +54,7 @@ impl Base {
 
         let _self = Rc::new(Self {
             jig_id,
+            jig,
             module_id,
             mode: content.base.mode,
             theme_id,
