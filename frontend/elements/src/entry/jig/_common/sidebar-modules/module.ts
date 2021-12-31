@@ -251,19 +251,14 @@ export class _ extends LitElement {
     }
 
     renderModuleImg() {
-        const { module } = this;
+        const { collapsed, module } = this;
+        
+        if (!collapsed && module === "") return nothing;
 
-        const getIconPath = (module: string) => `entry/jig/modules/small/${
-            module === "" ? "poster" : module
-        }.svg`;
-
-        if (!this.collapsed && module === "") {
-            return nothing;
-        }
-
+        const iconPath = `entry/jig/modules/small/${module || "poster"}.svg`;
         return html`
             <div class="icon">
-                ${html`<img-ui path="${getIconPath(module)}"></img-ui>`}
+                ${html`<img-ui path="${iconPath}"></img-ui>`}
             </div>
         `;
     }
