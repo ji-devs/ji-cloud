@@ -36,8 +36,27 @@ pub struct AudioSettings {
 }
 
 impl AudioSettings {
-    pub fn reset_from_jig(&mut self, _jig: &JigData) {
-        //TODO...
+    pub fn reset_from_jig(&mut self, jig: &JigData) {
+        // If there is no positive or negative effects configured on the jig, reset the clips to
+        // the list returned by `variants()`. Alternatively we could just **not** reset at all, but
+        // there could potentially be a case where the the audio was reset for a jig with audio effects
+        // and then calling reset_from_jig again would not reset to the defaults.
+
+        self.positive = {
+            if !jig.audio_effects.feedback_positive.is_empty() {
+                jig.audio_effects.feedback_positive.clone().into_iter().collect()
+            } else {
+                AudioFeedbackPositive::variants()
+            }
+        };
+
+        self.negative = {
+            if !jig.audio_effects.feedback_negative.is_empty() {
+                jig.audio_effects.feedback_negative.clone().into_iter().collect()
+            } else {
+                AudioFeedbackNegative::variants()
+            }
+        };
     }
 
     pub fn bg_source(&self) -> impl Into<AudioSource> {
@@ -132,6 +151,7 @@ impl From<&jig::AudioFeedbackPositive> for AudioPath<'_> {
         (*p).into()
     }
 }
+
 impl From<jig::AudioFeedbackPositive> for AudioPath<'_> {
     fn from(p: jig::AudioFeedbackPositive) -> Self {
         Self::Cdn(Cow::Borrowed(match p {
@@ -180,30 +200,25 @@ impl From<jig::AudioFeedbackNegative> for AudioPath<'_> {
 }
 
 impl AudioMixer {
-    pub fn set_from_jig(&self, _jig: &JigData) {
-        //not sure why this doesn't compile...
-        //self.settings.borrow_mut().reset_from_jig(jig);
+    pub fn set_from_jig(&self, jig: &JigData) {
+        let mut settings = (*self.settings).borrow_mut();
+        settings.reset_from_jig(jig);
     }
 
     pub fn get_random_positive(&self) -> AudioFeedbackPositive {
-        *self
-            .settings
-            .borrow()
-            .positive
-            .iter()
-            .choose(&mut *self.rng.borrow_mut())
-            .unwrap_ji()
+        let settings = self.settings.borrow();
+        let effects = settings.positive.iter();
+        let chosen_effect = effects.choose(&mut *self.rng.borrow_mut());
+        *chosen_effect.unwrap_ji()
     }
 
     pub fn get_random_negative(&self) -> AudioFeedbackNegative {
-        *self
-            .settings
-            .borrow()
-            .negative
-            .iter()
-            .choose(&mut *self.rng.borrow_mut())
-            .unwrap_ji()
+        let settings = self.settings.borrow();
+        let effects = settings.negative.iter();
+        let chosen_effect = effects.choose(&mut *self.rng.borrow_mut());
+        *chosen_effect.unwrap_ji()
     }
+
     /// Oneshots are AudioClips because they drop themselves
     /// They're intended solely to be kicked off and not being held anywhere
     /// However, if necessary, they can still be killed imperatively

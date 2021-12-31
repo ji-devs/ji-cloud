@@ -43,21 +43,12 @@ impl Game {
                                 children.push(render_card_mixin(options, |dom| {
                                     dom
                                         //should be some animation
-                                        .property_signal("eventOnFlipped", phase.signal().map(clone!(state => move |_| {
-                                            state.current.lock_ref().as_ref().unwrap().incorrect_choices
-                                                .borrow()
-                                                .iter()
-                                                .find(|id| *id == &pair_id)
-                                                .is_some()
-                                        })))
+                                        .property_signal(
+                                            "eventOnFlipped",
+                                            phase.signal().map(clone!(state => move |_| is_incorrect_choice(&state, &pair_id)))
+                                        )
                                         .property_signal("flipped", phase.signal().map(clone!(state, pair_id => move |phase| {
-                                            let is_incorrect_choice = state.current.lock_ref().as_ref().unwrap().incorrect_choices
-                                                .borrow()
-                                                .iter()
-                                                .find(|id| *id == &pair_id)
-                                                .is_some();
-
-                                            if is_incorrect_choice {
+                                            if is_incorrect_choice(&state, &pair_id) {
                                                 false
                                             } else {
                                                 match phase {
@@ -80,4 +71,12 @@ impl Game {
             )
         })
     }
+}
+
+fn is_incorrect_choice(state: &Rc<Game>, pair_id: &usize) -> bool {
+    state.current.lock_ref().as_ref().unwrap().incorrect_choices
+        .borrow()
+        .iter()
+        .find(|id| *id == pair_id)
+        .is_some()
 }
