@@ -39,7 +39,6 @@ pub struct Current {
 pub enum CurrentPhase {
     Waiting,
     Correct(usize),
-    Wrong(usize),
 }
 
 impl Game {

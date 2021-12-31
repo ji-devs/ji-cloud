@@ -62,7 +62,6 @@ impl Game {
                                             } else {
                                                 match phase {
                                                     CurrentPhase::Correct(id) => id == pair_id,
-                                                    CurrentPhase::Wrong(id) => id != pair_id,
                                                     CurrentPhase::Waiting => true,
                                                 }
                                             }
