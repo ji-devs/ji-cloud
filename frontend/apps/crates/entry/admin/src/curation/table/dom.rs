@@ -70,7 +70,8 @@ impl CurationTable {
 
     fn age_label(self: &Rc<Self>, age_id: AgeRangeId) -> impl Signal<Item = String> {
         self.curation_state.ages.signal_ref(move |ages| {
-            match ages.get(&age_id) {
+            let age = ages.iter().find(|age| age.id == age_id);
+            match age {
                 Some(age) => age.display_name.clone(),
                 None => "-".to_string(),
             }
@@ -79,7 +80,8 @@ impl CurationTable {
 
     fn affiliation_label(self: &Rc<Self>, affiliation_id: AffiliationId) -> impl Signal<Item = String> {
         self.curation_state.affiliations.signal_ref(move |affiliations| {
-            match affiliations.get(&affiliation_id) {
+            let affiliation = affiliations.iter().find(|affiliation| affiliation.id == affiliation_id);
+            match affiliation {
                 Some(affiliation) => affiliation.display_name.clone(),
                 None => "-".to_string(),
             }

@@ -1,6 +1,7 @@
 use std::rc::Rc;
 
 use dominator::{Dom, html, clone};
+use futures_signals::signal::{SignalExt, from_future};
 use utils::routes::AdminCurationRoute;
 
 use crate::curation::{table::state::CurationTable, jig::state::CurationJig};
@@ -22,10 +23,17 @@ impl Curation {
                         ).render()
                     },
                     AdminCurationRoute::Jig(jig_id) => {
-                        CurationJig::new(
-                            Rc::clone(&state),
-                            jig_id.clone()
-                        ).render()
+                        html!("empty-fragment", {
+                            .child_signal(from_future(state.clone().get_jig(jig_id.clone())).map(clone!(state => move|jig| {
+                                jig.map(|jig| {
+                                    CurationJig::new(
+                                        Rc::clone(&state),
+                                        jig.id.clone(),
+                                        jig
+                                    ).render()
+                                })
+                            })))
+                        })
                     },
                 })
             })))

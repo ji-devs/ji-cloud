@@ -5,7 +5,7 @@ export class _ extends LitElement {
     static styles = [
         css`
             #container {
-                width: 100%;
+                max-width: 800px;
                 padding: 44px;
                 background-color: white;
             }
@@ -52,6 +52,7 @@ export class _ extends LitElement {
                     <slot name="inputs"></slot>
                 </div>
             </div>
+            <slot name="loader"></slot>
         `;
     }
 }
