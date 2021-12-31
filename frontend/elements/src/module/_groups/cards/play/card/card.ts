@@ -95,6 +95,14 @@ export class _ extends LitElement {
     @property({ type: Boolean, reflect: true })
     flipped: boolean = false;
 
+    // whether to dispatch an event when a card is flipped
+    // Note: This is an interim **workaround**. The code that interfaces with this
+    // element uses references with non-static lifetimes which makes it tricky to
+    // run logic inside card-flipped event handler because of the 'static
+    // requirement.
+    @property({ type: Boolean })
+    eventOnFlipped: boolean = false;
+
     // required for styling
     @property()
     theme: ThemeId = "blank";
@@ -126,6 +134,14 @@ export class _ extends LitElement {
     // style mode - see helpers definition
     @property()
     styleKind: StyleKind = "theme";
+
+    updated(changedProperties: Map<string, unknown>) {
+        if (changedProperties.get('flipped') && this.eventOnFlipped) {
+            this.dispatchEvent(
+                new CustomEvent("custom-card-flipped", {})
+            );
+        }
+    }
 
     connectedCallback() {
         super.connectedCallback();

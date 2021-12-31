@@ -1,10 +1,13 @@
-use crate::module::_groups::cards::lookup::Side;
+use std::cell::RefCell;
+
+use crate::{module::_groups::cards::lookup::Side, audio::mixer::{AUDIO_MIXER, AudioPath}};
+use awsm_web::audio::AudioHandle;
 use dominator::{html, Dom, DomBuilder};
 use shared::domain::jig::module::body::{
     ModeExt,
     _groups::cards::{Card, Mode},
 };
-use utils::prelude::*;
+use utils::{events, prelude::*};
 use web_sys::HtmlElement;
 
 use super::common::*;
@@ -25,6 +28,7 @@ pub struct CardOptions<'a> {
     //use the opposite
     pub side: Side,
     pub slot: Option<&'a str>,
+    pub audio: RefCell<Option<AudioHandle>>,
 }
 
 /*
@@ -50,6 +54,7 @@ impl<'a> CardOptions<'a> {
             simple_transform: None,
             slot: None,
             style_kind: StyleKind::Theme,
+            audio: RefCell::new(None),
         }
     }
 }
@@ -86,6 +91,7 @@ where
         side,
         slot,
         style_kind,
+        audio,
     } = options;
 
     html!("play-card", {
@@ -132,6 +138,11 @@ where
         })
         .apply_if(mixin.is_some(), |dom| {
             (mixin.unwrap_ji()) (dom)
+        })
+        .event(move |_evt: events::CustomCardFlipped| {
+            *audio.borrow_mut() = Some(AUDIO_MIXER.with(|mixer| {
+                mixer.play(AudioPath::new_cdn("module/cards/flip_card_3.mp3".to_string()), false)
+            }));
         })
     })
 }
