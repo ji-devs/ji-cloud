@@ -95,7 +95,11 @@ export class _ extends LitElement {
     @property({ type: Boolean, reflect: true })
     flipped: boolean = false;
 
-    // whether or not showing front vs. back
+    // whether to dispatch an event when a card is flipped
+    // Note: This is an interim **workaround**. The code that interfaces with this
+    // element uses references with non-static lifetimes which makes it tricky to
+    // run logic inside card-flipped event handler because of the 'static
+    // requirement.
     @property({ type: Boolean })
     eventOnFlipped: boolean = false;
 
