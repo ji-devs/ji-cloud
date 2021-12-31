@@ -50,5 +50,5 @@ impl ApiEndpoint for GetComment {
     type Res = JigCurationCommentResponse;
     type Err = EmptyError;
     const PATH: &'static str = "/v1/jig/{id}/curation/comment/{comment_id}";
-    const METHOD: Method = Method::Patch;
+    const METHOD: Method = Method::Get;
 }

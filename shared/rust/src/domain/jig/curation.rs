@@ -192,7 +192,7 @@ pub struct JigCurationCommentResponse {
     pub value: String,
 
     /// When comment was submitted
-    pub created_at: DateTime<Utc>,
+    pub created_at: Option<DateTime<Utc>>,
 
     /// ID of commenter
     pub author_id: Uuid,
