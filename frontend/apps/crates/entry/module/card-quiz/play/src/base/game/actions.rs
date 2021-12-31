@@ -83,7 +83,6 @@ impl Game {
                     phase.set(CurrentPhase::Correct(pair_id));
 
                     *state.audio.borrow_mut() = Some(AUDIO_MIXER.with(|mixer| {
-                        mixer.set_from_jig(&state.base.jig);
                         let path: AudioPath<'_> = mixer.get_random_positive().into();
                         mixer.play(path, false)
                     }));
