@@ -949,6 +949,86 @@
       ]
     }
   },
+  "23b28306fbf4257a34bab234b9d35ac4857b3cc1d97624c13f9ffe926059655f": {
+    "query": "\nselect jig_id                               as \"jig_id!: JigId\",\n       display_name,\n       language,\n       goals,\n       categories,\n       description,\n       age_ranges,\n       affiliations,\n       additional_resources,\n       curation_status                          as \"curation_status: JigCurationStatus\",\n       array(\n            select row (jcc.id, jcc.jig_id, comment, created_at, author_id)\n            from jig_curation_comment  \"jcc\"\n            where jcd.jig_id = jcc.jig_id\n            order by created_at desc\n        )                                                    as \"comments!: Vec<(CommentId, JigId, String, DateTime<Utc>, Uuid)>\"\nfrom jig_curation_data \"jcd\"\nwhere jig_id = $1\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "jig_id!: JigId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "display_name",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 2,
+          "name": "language",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 3,
+          "name": "goals",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 4,
+          "name": "categories",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 5,
+          "name": "description",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 6,
+          "name": "age_ranges",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 7,
+          "name": "affiliations",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 8,
+          "name": "additional_resources",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 9,
+          "name": "curation_status: JigCurationStatus",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 10,
+          "name": "comments!: Vec<(CommentId, JigId, String, DateTime<Utc>, Uuid)>",
+          "type_info": "RecordArray"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        null
+      ]
+    }
+  },
   "29a0f9148a4fa42c0e68388554eca61b27aae6fd7ce9dda131ad6571523833ad": {
     "query": "select\n  id as \"id!\",\n  case\n    kind -- PngCanvasImage\n    when 0 then 3 -- PngStickerImage\n    when 1 then 0\n  end :: int2 \"kind!: MediaKind\",\n  created_at as \"created_at!\",\n  updated_at,\n  uploaded_at,\n  0 :: int2 as \"library!: MediaLibrary\" -- global\nfrom\n  image_metadata\n  left join image_upload on image_id = id\nunion all\nselect\n  id as \"id!\",\n  case\n    kind -- GifAnimation\n    when 0 then 1 -- SpritesheetAnimation\n    when 1 then 2\n  end :: int2 \"kind!: MediaKind\",\n  created_at as \"created_at!\",\n  updated_at,\n  uploaded_at,\n  0 :: int2 as \"library!: MediaLibrary\" -- global\nfrom\n  animation_metadata\n  left join global_animation_upload on animation_id = id\nunion all\nselect\n  id as \"id!\",\n  -- PngStickerImage\n  0 :: int2 as \"kind!: MediaKind\",\n  created_at as \"created_at!\",\n  updated_at,\n  uploaded_at,\n  1 :: int2 as \"library!: MediaLibrary\" -- user\nfrom\n  user_image_library\n  left join user_image_upload on image_id = id\nunion all\nselect\n  id as \"id!\",\n  -- Mp3Audio\n  4 :: int2 as \"kind!: MediaKind\",\n  created_at as \"created_at!\",\n  updated_at,\n  uploaded_at,\n  1 :: int2 as \"library!: MediaLibrary\" -- user\nfrom\n  user_audio_library\n  left join user_audio_upload on audio_id = id\nunion all\nselect\n  id as \"id!\",\n  kind as \"kind!: MediaKind\",\n  created_at as \"created_at!\",\n  updated_at,\n  uploaded_at,\n  2 :: int2 as \"library!: MediaLibrary\" -- web\nfrom web_media_upload wmu\ninner join web_media_library wml on wml.kind = kind\nwhere wmu.media_id = media_id ",
     "describe": {
@@ -1477,6 +1557,57 @@
         ]
       },
       "nullable": []
+    }
+  },
+  "497d102ecb4180c0d121a24d6005b7bf078dd8c59dc68949b82c62bbb41951c0": {
+    "query": "\nselect id                                   as \"id!: CommentId\",\n       jig_id                               as \"jig_id!: JigId\",                      \n       comment,\n       created_at,\n       author_id                            as \"author_id!: Uuid\",\n       (\n            select given_name || ' '::text || family_name\n            from user_profile\n            where user_profile.user_id = author_id\n        )                                       as \"author_name!\"\nfrom jig_curation_comment\nwhere id = $1 and jig_id = $2\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id!: CommentId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "jig_id!: JigId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 2,
+          "name": "comment",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 4,
+          "name": "author_id!: Uuid",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 5,
+          "name": "author_name!",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        null
+      ]
     }
   },
   "49e49fd07ac30a6dde52fa0090ae8a616a808e045e474fedac23568b6d876fdb": {
@@ -3947,6 +4078,28 @@
       "nullable": []
     }
   },
+  "b4338c9f23e8fad86b9bc505f8d366e02ca2c59cb4ac11255ef3d84e68daf79c": {
+    "query": "\ninsert into jig_curation_comment (jig_id, comment, author_id)\nvalues ($1, $2, $3)\nreturning id as \"id!: CommentId\"\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id!: CommentId",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
   "b4f3858831e1685ac7bf663ebddc340a804437258fce9803fd079c084b38e470": {
     "query": "update global_animation_upload set processed_at = now(), processing_result = true where animation_id = $1",
     "describe": {
@@ -5011,86 +5164,6 @@
         ]
       },
       "nullable": [
-        null
-      ]
-    }
-  },
-  "da9f9a428e7ad449406f935bee2eb4f9e7bc6f7faf31b9eab2463be2142ac6a6": {
-    "query": "\nselect jig_id                               as \"jig_id!: JigId\",\n       display_name,\n       language,\n       goals,\n       categories,\n       description,\n       age_ranges,\n       affiliations,\n       additional_resources,\n       curation_status                          as \"curation_status: JigCurationStatus\",\n       array(\n            select row (jcc.id, jcc.jig_id, comment, created_at, author_id)\n            from jig_curation_comment  \"jcc\"\n            where jcd.jig_id = jcc.jig_id\n        )                                                    as \"comments!: Vec<(CommentId, JigId, String, DateTime<Utc>, Uuid)>\"\nfrom jig_curation_data \"jcd\"\nwhere jig_id = $1\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "jig_id!: JigId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "display_name",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 2,
-          "name": "language",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 3,
-          "name": "goals",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 4,
-          "name": "categories",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 5,
-          "name": "description",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 6,
-          "name": "age_ranges",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 7,
-          "name": "affiliations",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 8,
-          "name": "additional_resources",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 9,
-          "name": "curation_status: JigCurationStatus",
-          "type_info": "Int2"
-        },
-        {
-          "ordinal": 10,
-          "name": "comments!: Vec<(CommentId, JigId, String, DateTime<Utc>, Uuid)>",
-          "type_info": "RecordArray"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
         null
       ]
     }

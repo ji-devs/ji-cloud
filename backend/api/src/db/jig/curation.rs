@@ -1,7 +1,8 @@
 use chrono::{DateTime, Utc};
 use shared::domain::jig::{
     curation::{
-        CommentId, JigCurationComment, JigCurationData, JigCurationFieldsDone, JigCurationStatus,
+        CommentId, JigCurationComment, JigCurationCommentResponse, JigCurationData,
+        JigCurationFieldsDone, JigCurationStatus,
     },
     JigId,
 };
@@ -195,6 +196,7 @@ select jig_id                               as "jig_id!: JigId",
             select row (jcc.id, jcc.jig_id, comment, created_at, author_id)
             from jig_curation_comment  "jcc"
             where jcd.jig_id = jcc.jig_id
+            order by created_at desc
         )                                                    as "comments!: Vec<(CommentId, JigId, String, DateTime<Utc>, Uuid)>"
 from jig_curation_data "jcd"
 where jig_id = $1
@@ -227,4 +229,65 @@ where jig_id = $1
     });
 
     Ok(curation)
+}
+
+pub async fn create_comment(
+    pool: &PgPool,
+    jig_id: JigId,
+    value: String,
+    author_id: Uuid,
+) -> anyhow::Result<CommentId> {
+    // Checks if Audio and Image IDs exists
+    sqlx::query!(
+        r#"
+insert into jig_curation_comment (jig_id, comment, author_id)
+values ($1, $2, $3)
+returning id as "id!: CommentId"
+        "#,
+        jig_id.0,
+        value,
+        author_id
+    )
+    .fetch_one(pool)
+    .await
+    .map(|it| it.id)
+    .map_err(Into::into)
+}
+
+pub async fn get_comment(
+    pool: &PgPool,
+    jig_id: JigId,
+    comment_id: CommentId,
+) -> anyhow::Result<Option<JigCurationCommentResponse>> {
+    let comment = sqlx::query!(
+        //language=SQL
+        r#"
+select id                                   as "id!: CommentId",
+       jig_id                               as "jig_id!: JigId",                      
+       comment,
+       created_at,
+       author_id                            as "author_id!: Uuid",
+       (
+            select given_name || ' '::text || family_name
+            from user_profile
+            where user_profile.user_id = author_id
+        )                                       as "author_name!"
+from jig_curation_comment
+where id = $1 and jig_id = $2
+"#,
+        comment_id.0,
+        jig_id.0
+    )
+    .fetch_optional(pool)
+    .await?
+    .map(|row| JigCurationCommentResponse {
+        id: row.id,
+        jig_id: row.jig_id,
+        value: row.comment,
+        created_at: Some(row.created_at),
+        author_id: row.author_id,
+        author_name: row.author_name,
+    });
+
+    Ok(comment)
 }
