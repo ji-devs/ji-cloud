@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use awsm_web::loaders::helpers::AsyncLoader;
+use dominator_helpers::futures::AsyncLoader;
 use futures_signals::{signal_vec::MutableVec, signal::Mutable};
 use shared::domain::{jig::JigResponse, meta::{Goal, AgeRange, Affiliation}};
 use utils::routes::AdminCurationRoute;
@@ -12,6 +12,8 @@ pub struct Curation {
     pub loader: AsyncLoader,
     pub ages: Mutable<Vec<AgeRange>>,
     pub affiliations: Mutable<Vec<Affiliation>>,
+    pub active_page: Mutable<u32>,
+    pub total_pages: Mutable<Option<u32>>,
 }
 
 impl Curation {
@@ -23,6 +25,8 @@ impl Curation {
             goals: Mutable::new(Vec::new()),
             ages: Mutable::new(Vec::new()),
             affiliations: Mutable::new(Vec::new()),
+            active_page: Mutable::new(0),
+            total_pages: Mutable::new(None),
         })
     }
 }

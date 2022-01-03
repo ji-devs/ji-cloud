@@ -15,6 +15,10 @@ impl Curation {
         state.load_data();
 
         html!("empty-fragment", {
+            .child(html!("window-loader-block", {
+                .property("slot", "loader")
+                .property_signal("visible", state.loader.is_loading())
+            }))
             .child_signal(self.route.signal_ref(clone!(state => move|route| {
                 Some(match route {
                     AdminCurationRoute::Table => {

@@ -20,6 +20,7 @@ impl Curation {
 
     async fn load_jigs(self: &Rc<Self>) {
         let req = JigBrowseQuery {
+            page: Some(self.active_page.get()),
             ..Default::default()
         };
 
@@ -27,6 +28,7 @@ impl Curation {
             Err(_) => todo!(),
             Ok(resp) => {
                 self.jigs.lock_mut().replace_cloned(resp.jigs);
+                self.set_total_page(resp.pages);
             }
         };
     }
@@ -35,28 +37,24 @@ impl Curation {
         match endpoints::meta::Get::api_with_auth(None).await {
             Err(_) => todo!(),
             Ok(meta) => {
-                // self.ages.set(
-                //     meta.age_ranges.into_iter().map(|age| {
-                //         (age.id.clone(), age)
-                //     }).collect()
-                // );
-
-                // self.goals.set(
-                //     meta.goals.into_iter().map(|goal| {
-                //         (goal.id.clone(), goal)
-                //     }).collect()
-                // );
-
-                // self.affiliations.set(
-                //     meta.affiliations.into_iter().map(|affiliation| {
-                //         (affiliation.id.clone(), affiliation)
-                //     }).collect()
-                // );
-
                 self.ages.set(meta.age_ranges);
                 self.goals.set(meta.goals);
                 self.affiliations.set(meta.affiliations);
             }
+        };
+    }
+
+    pub fn go_to_page(self: &Rc<Self>, page: u32) {
+        let state = self;
+        state.loader.load(clone!(state => async move {
+            state.active_page.set(page);
+            state.load_jigs().await;
+        }));
+    }
+
+    fn set_total_page(&self, pages: u32) {
+        if self.total_pages.get() == None {
+            self.total_pages.set(Some(pages));
         };
     }
 

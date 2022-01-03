@@ -1,7 +1,8 @@
 use super::state::*;
-use dominator::{clone, html, Dom};
-use futures_signals::{signal_vec::SignalVecExt, signal::Signal};
+use dominator::{clone, html, Dom, with_node};
+use futures_signals::{signal_vec::SignalVecExt, signal::{Signal, SignalExt}, map_ref};
 use shared::domain::{jig::JigResponse, meta::{AgeRangeId, AffiliationId}};
+use web_sys::HtmlSelectElement;
 use std::rc::Rc;
 use utils::{languages::Language, events, routes::AdminCurationRoute};
 
@@ -65,6 +66,62 @@ impl CurationTable {
                     ])
                 })
             })))
+            .child(html!("button", {
+                .property("slot", "pagination")
+                .property("title", "Previous")
+                .property_signal("disabled", state.curation_state.active_page.signal().map(|active_page| {
+                    active_page == 0
+                }))
+                .text("<")
+                .event(clone!(state => move |_: events::Click| {
+                    let active_page = state.curation_state.active_page.get();
+                    state.curation_state.go_to_page(active_page - 1);
+                }))
+            }))
+            .child_signal(state.curation_state.total_pages.signal().map(clone!(state => move |total_pages| {
+                total_pages.map(|total_pages| {
+                    html!("select" => HtmlSelectElement, {
+                        .with_node!(elem => {
+                            .property("slot", "pagination")
+                            .property_signal("value", state.curation_state.active_page.signal().map(|active_page| {
+                                active_page + 1
+                            }))
+                            .event(clone!(state => move |_: events::Change| {
+                                let page = elem.value().parse::<u32>();
+                                if let Ok(page) = page {
+                                    state.curation_state.go_to_page(page - 1);
+                                };
+                            }))
+                            .children((0..total_pages).map(|page| {
+                                html!("option", {
+                                    .text(&(page + 1).to_string())
+                                })
+                            }))
+                        })
+                    })
+                })
+            })))
+            .child(html!("button", {
+                .property("slot", "pagination")
+                .property("title", "Next")
+                .property_signal("disabled", map_ref! {
+                    let total_pages = state.curation_state.total_pages.signal(),
+                    let active_page = state.curation_state.active_page.signal() => {
+                        match total_pages {
+                            None => true,
+                            Some(total_pages) => {
+                                // active_page is 0 indexed in the code side, so need to add 1 for display
+                                *active_page == total_pages - 1
+                            }
+                        }
+                    }
+                })
+                .text(">")
+                .event(clone!(state => move |_: events::Click| {
+                    let active_page = state.curation_state.active_page.get();
+                    state.curation_state.go_to_page(active_page + 1);
+                }))
+            }))
         })
     }
 

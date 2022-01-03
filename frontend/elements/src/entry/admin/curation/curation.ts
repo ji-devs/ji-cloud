@@ -43,6 +43,7 @@ export class _ extends LitElement {
                 )}
                 </div>
                 <slot></slot>
+                <slot name="pagination"></slot>
             </div>
         `;
     }
