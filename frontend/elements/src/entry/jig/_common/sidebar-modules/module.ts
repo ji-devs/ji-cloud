@@ -255,7 +255,7 @@ export class _ extends LitElement {
         
         if (!collapsed && module === "") return nothing;
 
-        const iconPath = `entry/jig/modules/small/${module || "poster"}.svg`;
+        const iconPath = `entry/jig/modules/small/${module || "empty"}.svg`;
         return html`
             <div class="icon">
                 ${html`<img-ui path="${iconPath}"></img-ui>`}
