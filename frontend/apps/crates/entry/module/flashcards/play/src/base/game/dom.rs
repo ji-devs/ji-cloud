@@ -31,7 +31,6 @@ pub fn render(state: Rc<Game>) -> Dom {
                         let mut options = CardOptions::new(&card, theme_id, mode, side, Size::Flashcards);
                         options.back_card = Some(&other);
 
-
                         children.push(render_card_mixin(options, flip_controller(state.clone(), true)));
 
                     } else {
@@ -64,18 +63,19 @@ fn flip_controller(
     initial: bool,
 ) -> impl FnOnce(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement> {
     move |dom| {
-        dom.property_signal(
-            "flipped",
-            state.gate.signal().map(move |gate| {
-                if gate == Gate::Waiting || gate == Gate::FinishingFlip {
-                    initial
-                } else {
-                    !initial
-                }
-            }),
-        )
-        .event(clone!(state => move |_evt:events::Click| {
-            Game::flip(state.clone());
-        }))
+        let is_initial = move |gate| {
+            if gate == Gate::Waiting || gate == Gate::FinishingFlip {
+                initial
+            } else {
+                !initial
+            }
+        };
+
+        dom
+            .property_signal("eventOnFlipped", state.gate.signal().map(is_initial))
+            .property_signal("flipped", state.gate.signal().map(is_initial))
+            .event(clone!(state => move |_evt:events::Click| {
+                Game::flip(state.clone());
+            }))
     }
 }

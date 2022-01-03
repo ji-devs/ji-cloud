@@ -17,7 +17,10 @@ impl CardDrag {
                     found_match = true;
                     choice.phase.set(TopPhase::Landed);
                 } else {
-                    //specific wrong answer
+                    // Only play the negative effect if they've dropped the card over a target. If
+                    // they drop the card over nothing, it could be for something like releasing
+                    // the card to select a new card.
+                    play_random_negative();
                 }
             } else {
                 //empty area
@@ -29,10 +32,6 @@ impl CardDrag {
                     .iter()
                     .find(|choice| choice.pair_id == self.pair_id)
                 {
-                    // Only play the negative effect if they've dropped the card over a target. If
-                    // they drop the card over nothing, it could be for something like releasing
-                    // the card to select a new card.
-                    play_random_negative();
                     target.phase.set(BottomPhase::Show);
                 }
             } else if current.top.iter().all(|choice| choice.is_landed()) {
