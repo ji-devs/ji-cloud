@@ -16,7 +16,6 @@ pub struct SearchResultsSection {
     pub list: Rc<MutableVec<JigResponse>>,
     pub total: Mutable<u64>,
     pub next_page: Mutable<u32>,
-    pub total_pages: Mutable<u32>,
     pub search_options: Rc<SearchOptions>,
     pub search_selected: Rc<SearchSelected>,
     pub play_jig: Mutable<Option<JigId>>,
@@ -35,7 +34,6 @@ impl SearchResultsSection {
             list: Rc::new(MutableVec::new()),
             total: Mutable::new(0),
             next_page: Mutable::new(0),
-            total_pages: Mutable::new(0),
             search_options,
             search_selected,
             play_jig,
@@ -49,8 +47,6 @@ impl SearchResultsSection {
         });
 
         self.total.set(res.total_jig_count);
-
-        self.total_pages.set(res.pages);
 
         let mut last_page_loaded = self.next_page.lock_mut();
         *last_page_loaded += 1;
