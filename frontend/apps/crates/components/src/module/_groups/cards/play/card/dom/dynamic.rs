@@ -1,29 +1,23 @@
 use super::common::*;
-use crate::module::_groups::cards::lookup::Side;
+use crate::{module::_groups::cards::lookup::Side, audio::mixer::{AUDIO_MIXER, AudioPath}};
 use dominator::{html, Dom, DomBuilder};
 use futures_signals::signal::{Always, Signal, SignalExt};
 use shared::domain::jig::module::body::{
     ModeExt,
     _groups::cards::{Card, Mode},
 };
-use utils::prelude::*;
+use utils::{events, prelude::*};
 use web_sys::HtmlElement;
 
 //For the use case when things are driven by Signals
-pub struct DynamicCardOptions<'a, F, T, H, S, SOut>
+pub struct DynamicCardOptions<'a, S, SOut>
 where
-    F: Signal<Item = bool> + 'static,
-    T: Signal<Item = bool> + 'static,
-    H: Signal<Item = bool> + 'static,
     S: Fn() -> SOut + 'static,
     SOut: Signal<Item = Option<SimpleTransform>> + 'static,
 {
     pub card: &'a Card,
     pub back_card: Option<&'a Card>,
     pub flip_on_hover: bool,
-    pub flipped: F,
-    pub transparent: T,
-    pub hidden: H,
     pub get_simple_transform: Option<S>,
     pub theme_id: ThemeId,
     pub size: Size,
@@ -39,11 +33,8 @@ where
 //others can simply use always()
 pub type NoTransform = fn() -> Always<Option<SimpleTransform>>;
 
-impl<'a, F, T, H, S, SOut> DynamicCardOptions<'a, F, T, H, S, SOut>
+impl<'a, S, SOut> DynamicCardOptions<'a, S, SOut>
 where
-    F: Signal<Item = bool> + 'static,
-    T: Signal<Item = bool> + 'static,
-    H: Signal<Item = bool> + 'static,
     S: Fn() -> SOut + 'static,
     SOut: Signal<Item = Option<SimpleTransform>> + 'static,
 {
@@ -53,9 +44,6 @@ where
         mode: Mode,
         side: Side,
         size: Size,
-        flipped: F,
-        transparent: T,
-        hidden: H,
         get_simple_transform: Option<S>,
     ) -> Self {
         Self {
@@ -64,9 +52,6 @@ where
             mode,
             side,
             size,
-            flipped,
-            transparent,
-            hidden,
             get_simple_transform,
             //mimic default derive
             back_card: None,
@@ -77,11 +62,8 @@ where
     }
 }
 
-pub fn render_dynamic_card<F, T, H, S, SOut>(options: DynamicCardOptions<F, T, H, S, SOut>) -> Dom
+pub fn render_dynamic_card<S, SOut>(options: DynamicCardOptions<S, SOut>) -> Dom
 where
-    F: Signal<Item = bool> + 'static,
-    T: Signal<Item = bool> + 'static,
-    H: Signal<Item = bool> + 'static,
     S: Fn() -> SOut + 'static,
     SOut: Signal<Item = Option<SimpleTransform>> + 'static,
 {
@@ -91,14 +73,11 @@ where
     )
 }
 
-pub fn render_dynamic_card_mixin<F, T, H, S, SOut, M>(
-    options: DynamicCardOptions<F, T, H, S, SOut>,
+pub fn render_dynamic_card_mixin<S, SOut, M>(
+    options: DynamicCardOptions<S, SOut>,
     mixin: M,
 ) -> Dom
 where
-    F: Signal<Item = bool> + 'static,
-    T: Signal<Item = bool> + 'static,
-    H: Signal<Item = bool> + 'static,
     S: Fn() -> SOut + 'static,
     SOut: Signal<Item = Option<SimpleTransform>> + 'static,
     M: FnOnce(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>,
@@ -106,14 +85,11 @@ where
     _render_dynamic_card(options, Some(mixin))
 }
 
-fn _render_dynamic_card<F, T, H, S, SOut, M>(
-    options: DynamicCardOptions<F, T, H, S, SOut>,
+fn _render_dynamic_card<S, SOut, M>(
+    options: DynamicCardOptions<S, SOut>,
     mixin: Option<M>,
 ) -> Dom
 where
-    F: Signal<Item = bool> + 'static,
-    T: Signal<Item = bool> + 'static,
-    H: Signal<Item = bool> + 'static,
     S: Fn() -> SOut + 'static,
     SOut: Signal<Item = Option<SimpleTransform>> + 'static,
     M: FnOnce(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>,
@@ -122,9 +98,6 @@ where
         card,
         back_card,
         flip_on_hover,
-        flipped,
-        transparent,
-        hidden,
         get_simple_transform,
         theme_id,
         mode,
@@ -142,24 +115,9 @@ where
         .property("styleKind", style_kind.as_str_id())
         .property("size", size.as_str_id())
         .property("flipOnHover", flip_on_hover)
-        .property_signal("flipped", flipped)
         .property("theme", theme_id.as_str_id())
         .property("mode", mode.as_str_id())
         .property("side", side.as_str_id())
-        .style_signal("visibility", transparent.map(|transparent| {
-            if transparent {
-                "hidden"
-            } else {
-                "visible"
-            }
-        }))
-        .style_signal("display", hidden.map(|hidden| {
-            if hidden {
-                "none"
-            } else {
-                "block"
-            }
-        }))
         .apply_if(get_simple_transform.is_some(), move |dom| {
             let get_simple_transform = get_simple_transform.unwrap_ji();
 
@@ -180,6 +138,11 @@ where
         })
         .apply_if(mixin.is_some(), |dom| {
             (mixin.unwrap_ji()) (dom)
+        })
+        .event(move |_evt: events::CustomCardFlipped| {
+            AUDIO_MIXER.with(|mixer| {
+                mixer.play_oneshot(AudioPath::new_cdn(super::FLIPPED_AUDIO_EFFECT.to_string()))
+            });
         })
     })
 }

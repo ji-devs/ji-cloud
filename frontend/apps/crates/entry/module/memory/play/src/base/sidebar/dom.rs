@@ -1,6 +1,6 @@
 use crate::base::{card::state::*, state::*};
 use dominator::{clone, html, Dom};
-use futures_signals::signal::{always, SignalExt};
+use futures_signals::signal::SignalExt;
 use std::rc::Rc;
 
 use components::module::_groups::cards::play::card::dom::{
@@ -31,9 +31,6 @@ fn render_sidebar_card(state: Rc<Base>, card_state: Rc<CardState>) -> Dom {
     let side = card_state.side;
     let size = Size::Memory;
 
-    let flipped_signal = always(true);
-    let transparent_signal = always(false);
-    let hidden_signal = card_state.is_found().map(|found| !found);
     let get_simple_transform = clone!(card_state => move || {
         card_state.animation_state_signal()
             .map(|animation_state| {
@@ -53,14 +50,16 @@ fn render_sidebar_card(state: Rc<Base>, card_state: Rc<CardState>) -> Dom {
         mode,
         side,
         size,
-        flipped_signal,
-        transparent_signal,
-        hidden_signal,
         Some(get_simple_transform),
     );
 
+    // let transparent_signal = always(false);
+    // let hidden_signal = card_state.is_found().map(|found| !found);
     render_dynamic_card_mixin(options, |dom| {
-        dom.future(card_state.found_index.signal().for_each(
+        dom
+            .style_signal("display", card_state.is_found().map(|found| if !found { "none" } else { "block" }))
+            .property("flipped", true)
+            .future(card_state.found_index.signal().for_each(
             clone!(state, card_state => move |found_index| {
                 if let Some(found_index) = found_index {
                     super::actions::start_animation(&state, card_state.clone(), found_index);

@@ -271,3 +271,19 @@ impl Deref for AudioMixer {
         &self.inner
     }
 }
+
+/// Utility function to play a random positive audio effect.
+pub fn play_random_positive() {
+    AUDIO_MIXER.with(|mixer| {
+        let path: AudioPath<'_> = mixer.get_random_positive().into();
+        mixer.play_oneshot(path)
+    });
+}
+
+/// Utility function to play a random negative audio effect.
+pub fn play_random_negative() {
+    AUDIO_MIXER.with(|mixer| {
+        let path: AudioPath<'_> = mixer.get_random_negative().into();
+        mixer.play_oneshot(path)
+    });
+}

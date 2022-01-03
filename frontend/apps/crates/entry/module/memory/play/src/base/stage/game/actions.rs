@@ -1,5 +1,6 @@
 use crate::base::state::*;
 
+use components::audio::mixer::{play_random_positive, play_random_negative};
 use gloo_timers::future::TimeoutFuture;
 use std::rc::Rc;
 use wasm_bindgen_futures::spawn_local;
@@ -36,7 +37,9 @@ pub fn evaluate(state: Rc<Base>, id_1: usize, id_2: usize) {
             if let Some(card) = state.cards.iter().find(|c| c.id == id_2) {
                 card.found_index.set(Some(found_pairs_index));
             }
+            play_random_positive();
         } else {
+            play_random_negative();
             TimeoutFuture::new(2_000).await;
         }
         state.flip_state.set(FlipState::None);

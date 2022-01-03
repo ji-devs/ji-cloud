@@ -1,6 +1,6 @@
 use crate::base::{card::state::*, state::*};
 use dominator::{clone, html, Dom};
-use futures_signals::signal::always;
+use futures_signals::signal::SignalExt;
 use std::rc::Rc;
 use utils::prelude::*;
 
@@ -32,9 +32,6 @@ fn render_main_card(state: Rc<Base>, card_state: Rc<CardState>) -> Dom {
     let side = card_state.side;
     let size = Size::Memory;
 
-    let flipped_signal = card_state.is_flipped(&state);
-    let transparent_signal = card_state.is_found();
-    let hidden_signal = always(false);
     let get_simple_transform = None::<NoTransform>;
 
     let options = DynamicCardOptions::new(
@@ -43,21 +40,22 @@ fn render_main_card(state: Rc<Base>, card_state: Rc<CardState>) -> Dom {
         mode,
         side,
         size,
-        flipped_signal,
-        transparent_signal,
-        hidden_signal,
         get_simple_transform,
     );
 
     render_dynamic_card_mixin(options, |dom| {
-        dom.event(clone!(state, card_id => move |_evt:events::Click| {
-            if let Some((id_1, id_2)) = super::actions::card_click(state.clone(), card_id) {
-                super::actions::evaluate(state.clone(), id_1, id_2);
-            }
-        }))
-        .after_inserted(clone!(card_state => move |elem| {
-            *card_state.main_elem.borrow_mut() = Some(elem);
-        }))
+        dom
+            .style_signal("visibility", card_state.is_found().map(|found| if found { "hidden" } else { "visible" }))
+            .property_signal("eventOnFlipped", state.flip_state.signal_ref(|flip_state| matches!(flip_state, FlipState::One(_))))
+            .property_signal("flipped", card_state.is_flipped(&state))
+            .event(clone!(state, card_id => move |_evt:events::Click| {
+                if let Some((id_1, id_2)) = super::actions::card_click(state.clone(), card_id) {
+                    super::actions::evaluate(state.clone(), id_1, id_2);
+                }
+            }))
+            .after_inserted(clone!(card_state => move |elem| {
+                *card_state.main_elem.borrow_mut() = Some(elem);
+            }))
     })
 }
 

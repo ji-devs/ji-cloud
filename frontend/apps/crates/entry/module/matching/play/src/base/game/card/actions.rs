@@ -1,5 +1,6 @@
 use super::{super::state::*, state::*};
 use std::rc::Rc;
+use components::audio::mixer::{play_random_positive, play_random_negative};
 use utils::math::BoundsF64;
 use web_sys::HtmlElement;
 
@@ -12,6 +13,7 @@ impl CardDrag {
 
             if let Some(choice) = choice {
                 if choice.pair_id == self.pair_id {
+                    play_random_positive();
                     found_match = true;
                     choice.phase.set(TopPhase::Landed);
                 } else {
@@ -27,6 +29,10 @@ impl CardDrag {
                     .iter()
                     .find(|choice| choice.pair_id == self.pair_id)
                 {
+                    // Only play the negative effect if they've dropped the card over a target. If
+                    // they drop the card over nothing, it could be for something like releasing
+                    // the card to select a new card.
+                    play_random_negative();
                     target.phase.set(BottomPhase::Show);
                 }
             } else if current.top.iter().all(|choice| choice.is_landed()) {
