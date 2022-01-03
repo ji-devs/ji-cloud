@@ -23,6 +23,7 @@ use crate::{
 };
 
 pub mod additional_resource;
+pub mod curation;
 pub mod module;
 mod player;
 

@@ -22,6 +22,9 @@ pub mod additional_resource;
 /// Endpoints for jig player sessions.
 pub mod player;
 
+/// Endpoints for jig curation.
+pub mod curation;
+
 /// Create a JIG and it's draft and live data copies.
 ///
 /// * New jigs are all set to `PrivacyLevel::Unlisted` by default
