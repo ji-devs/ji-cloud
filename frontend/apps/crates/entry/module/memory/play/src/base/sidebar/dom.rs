@@ -1,11 +1,9 @@
 use crate::base::{card::state::*, state::*};
 use dominator::{clone, html, Dom};
-use futures_signals::signal::{always, SignalExt};
+use futures_signals::signal::SignalExt;
 use std::rc::Rc;
 
-use components::module::_groups::cards::play::card::dom::{
-    render_dynamic_card_mixin, DynamicCardOptions, SimpleTransform, Size,
-};
+use components::module::_groups::cards::play::card::dom::{Size, CardOptions, render_card_mixin};
 
 pub fn render(state: Rc<Base>) -> Dom {
     html!("play-sidebar", {
@@ -31,42 +29,43 @@ fn render_sidebar_card(state: Rc<Base>, card_state: Rc<CardState>) -> Dom {
     let side = card_state.side;
     let size = Size::Memory;
 
-    let flipped_signal = always(true);
-    let transparent_signal = always(false);
-    let hidden_signal = card_state.is_found().map(|found| !found);
-    let get_simple_transform = clone!(card_state => move || {
-        card_state.animation_state_signal()
-            .map(|animation_state| {
-                animation_state.map(|animation_state| {
-                    SimpleTransform {
-                        x: animation_state.x,
-                        y: animation_state.y,
-                        scale: animation_state.scale,
-                    }
-                })
-            })
-    });
-
-    let options = DynamicCardOptions::new(
+    let options = CardOptions::new(
         card,
         theme_id,
         mode,
         side,
         size,
-        flipped_signal,
-        transparent_signal,
-        hidden_signal,
-        Some(get_simple_transform),
     );
 
-    render_dynamic_card_mixin(options, |dom| {
-        dom.future(card_state.found_index.signal().for_each(
-            clone!(state, card_state => move |found_index| {
-                if let Some(found_index) = found_index {
-                    super::actions::start_animation(&state, card_state.clone(), found_index);
-                }
-                async {}
-            }),
-        ))
+    render_card_mixin(options, |dom| {
+        dom
+            .style_signal("display", card_state.is_found().map(|found| if !found { "none" } else { "block" }))
+            .property("flipped", true)
+            .apply(clone!(card_state => move |dom| {
+                dom
+                    .style_signal("transform", {
+                        card_state.animation_state_signal()
+                            .map(|animation_state| {
+                                match animation_state {
+                                    Some(animation_state) => format!(
+                                        "scale({}) translate({}rem, {}rem)",
+                                        animation_state.scale,
+                                        animation_state.x,
+                                        animation_state.y
+                                    ),
+                                    None => "none".into(),
+                                }
+                            })
+                    })
+                    .property("hasTransform", true)
+            }))
+            .future(card_state.found_index.signal().for_each(
+                clone!(state, card_state => move |found_index| {
+                    if let Some(found_index) = found_index {
+                        super::actions::start_animation(&state, card_state.clone(), found_index);
+                    }
+                    async {}
+                }),
+            ))
     })
 }
