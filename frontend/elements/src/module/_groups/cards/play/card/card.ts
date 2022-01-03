@@ -136,7 +136,7 @@ export class _ extends LitElement {
     styleKind: StyleKind = "theme";
 
     updated(changedProperties: Map<string, unknown>) {
-        if (changedProperties.get('flipped') && this.eventOnFlipped) {
+        if (changedProperties.get('flipped') !== undefined && this.eventOnFlipped) {
             this.dispatchEvent(
                 new CustomEvent("custom-card-flipped", {})
             );
