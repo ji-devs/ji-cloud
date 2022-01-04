@@ -30,6 +30,7 @@ export class _ extends LitElement {
                     font-size: 16px;
                     padding: 0;
                     margin-left: 8px;
+                    background-color: transparent;
                 }
                 input:focus {
                     outline: none;
