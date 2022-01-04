@@ -4596,7 +4596,7 @@
         {
           "ordinal": 14,
           "name": "persona",
-          "type_info": "Text"
+          "type_info": "TextArray"
         },
         {
           "ordinal": 15,
@@ -5271,7 +5271,7 @@
       "parameters": {
         "Left": [
           "Uuid",
-          "Text"
+          "TextArray"
         ]
       },
       "nullable": []
@@ -5851,7 +5851,7 @@
           "Text",
           "Bool",
           "Text",
-          "Text",
+          "TextArray",
           "Jsonb"
         ]
       },
