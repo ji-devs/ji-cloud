@@ -110,19 +110,23 @@ pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<MainCard<RawData, E>>)
                         .event(clone!(state => move |_evt:events::DragLeave| {
                             state.editing_active.set_neq(false);
                         }))
-                        .event(clone!(state => move |evt:events::Drop| {
-                            if let Some(data_transfer) = evt.data_transfer() {
-                                if let Ok(data) = data_transfer.get_data(IMAGE_SEARCH_DATA_TRANSFER) {
-                                    let data:ImageDataTransfer = serde_json::from_str(&data).unwrap_ji();
-                                    spawn_local(clone!(state => async move {
-                                        let image = data.to_image().await;
-                                        let index = state.index.get().unwrap_or_default();
-                                        state.replace_card_image(index, state.side, image);
-                                    }));
+                        .event_with_options(
+                            &EventOptions::preventable(),
+                            clone!(state => move |evt:events::Drop| {
+                                evt.prevent_default();
+                                if let Some(data_transfer) = evt.data_transfer() {
+                                    if let Ok(data) = data_transfer.get_data(IMAGE_SEARCH_DATA_TRANSFER) {
+                                        let data:ImageDataTransfer = serde_json::from_str(&data).unwrap_ji();
+                                        spawn_local(clone!(state => async move {
+                                            let image = data.to_image().await;
+                                            let index = state.index.get().unwrap_or_default();
+                                            state.replace_card_image(index, state.side, image);
+                                        }));
+                                    }
                                 }
-                            }
-                            state.editing_active.set_neq(false);
-                        }))
+                                state.editing_active.set_neq(false);
+                            })
+                        )
                         .child_signal(image.signal_cloned().map(|image| {
                             Some(match image {
                                 None => {
