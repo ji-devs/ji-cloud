@@ -6,6 +6,7 @@ use futures_signals::{
     signal::{Mutable, SignalExt},
 };
 use serde::Deserialize;
+use wasm_bindgen::JsValue;
 use std::rc::Rc;
 
 use crate::{jigzi_help::JigziHelp, module::_common::edit::header::controller::dom::ControllerDom};
@@ -153,6 +154,7 @@ where
                 h.title.clone()
             })
         })
+        .property("subtitle", state.mode.map_or(JsValue::UNDEFINED, |m| JsValue::from_str(m.label())))
         .child_signal(tab_config_sig().map(|tab| {
             let HeaderConfigTab {title, body} = tab;
 

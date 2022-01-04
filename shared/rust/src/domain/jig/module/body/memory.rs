@@ -51,6 +51,10 @@ impl BodyExt<Mode, Step> for ModuleData {
         }
     }
 
+    fn mode(&self) -> Option<Mode> {
+        self.content.as_ref().map(|c| c.base.mode.clone())
+    }
+
     fn requires_choose_mode(&self) -> bool {
         self.content.is_none()
     }

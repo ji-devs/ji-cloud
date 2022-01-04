@@ -47,6 +47,10 @@ impl BodyExt<(), ()> for ModuleData {
         unimplemented!("can't create new legacy modules!")
     }
 
+    fn mode(&self) -> Option<()> {
+        None
+    }
+
     fn requires_choose_mode(&self) -> bool {
         false
     }

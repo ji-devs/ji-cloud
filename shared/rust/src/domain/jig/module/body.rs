@@ -36,7 +36,7 @@ pub mod card_quiz;
 /// Matching
 pub mod matching;
 
-/// Legacy  
+/// Legacy
 pub mod legacy;
 
 /// Groups that share types
@@ -158,6 +158,9 @@ pub trait BodyExt<Mode: ModeExt, Step: StepExt>:
     /// will usually populate an inner .content
     fn new_mode(mode: Mode) -> Self;
 
+    /// Fetch the mode for this module
+    fn mode(&self) -> Option<Mode>;
+
     /// requires an additional step of choosing the mode
     fn requires_choose_mode(&self) -> bool;
 
@@ -268,13 +271,13 @@ pub trait ModeExt: Copy + Default + PartialEq + Eq + Hash {
     /// for headers, labels, etc.
     fn label(&self) -> &'static str;
 
-    /// Image tag filters for search  
+    /// Image tag filters for search
     /// The actual ImageTag enum variants are in components
     fn image_tag_filters(&self) -> Option<Vec<i16>> {
         None
     }
 
-    /// Image tag priorities for search  
+    /// Image tag priorities for search
     /// The actual ImageTag enum variants are in components
     fn image_tag_priorities(&self) -> Option<Vec<i16>> {
         None
