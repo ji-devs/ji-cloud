@@ -4016,6 +4016,24 @@
       "nullable": []
     }
   },
+  "b093762d4b40e825b57962cb833a8144a57270a3029f0cd6362d956b701e0651": {
+    "query": "select token from \"session\" order by created_at limit 1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "token",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
   "b1a15c616e8f86aa4d7bd37701eb692298a9b55afafa797e6ded14ba650f2bb3": {
     "query": "\ndelete\nfrom jig\nwhere creator_id is not distinct from $1\n",
     "describe": {
