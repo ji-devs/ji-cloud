@@ -2,7 +2,7 @@ use dominator::{clone, html, Dom};
 
 use super::state::*;
 use components::module::_groups::cards::play::card::dom::{
-    render_card, render_card_mixin, CardOptions, Size,
+    render_card, render_card_mixin, CardOptions, Size, Effect,
 };
 use futures_signals::signal::SignalExt;
 use std::rc::Rc;
@@ -42,10 +42,18 @@ impl Game {
 
                                 children.push(render_card_mixin(options, |dom| {
                                     dom
-                                        //should be some animation
                                         .property_signal(
                                             "eventOnFlipped",
                                             phase.signal().map(clone!(state => move |_| is_incorrect_choice(&state, &pair_id)))
+                                        )
+                                        .property_signal(
+                                            "effect",
+                                            phase.signal().map(move |phase| {
+                                                match phase {
+                                                    CurrentPhase::Correct(id) if id == pair_id => Effect::Positive,
+                                                    _ => Effect::None,
+                                                }
+                                            })
                                         )
                                         .property_signal("flipped", phase.signal().map(clone!(state, pair_id => move |phase| {
                                             if is_incorrect_choice(&state, &pair_id) {
@@ -53,7 +61,7 @@ impl Game {
                                             } else {
                                                 match phase {
                                                     CurrentPhase::Correct(id) => id == pair_id,
-                                                    CurrentPhase::Waiting => true,
+                                                    _ => true,
                                                 }
                                             }
 

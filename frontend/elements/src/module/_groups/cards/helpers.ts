@@ -13,6 +13,8 @@ export const cardBackFullPath = (theme: ThemeId): string => {
 //i.e. "none" will still use theme settings for font, but otherwise plain white card
 export type StyleKind = "theme" | "none" | "dragging";
 
+export type Effect = "positive" | "negative" | null;
+
 export type Side = "left" | "right";
 
 export type Mode =
