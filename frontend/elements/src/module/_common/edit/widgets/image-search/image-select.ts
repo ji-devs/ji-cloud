@@ -175,7 +175,7 @@ export class _ extends LitElement {
                     cursor: pointer;
                     border-radius: 4px;
                     transition: transform 0.2s, box-shadow 0.2s;
-                    grid-auto-rows: minmax(0, min-content);
+                    grid-auto-rows: minmax(0, max-content);
                 }
                 ::slotted([slot="images"]:hover),
                 ::slotted([slot="recent"]:hover) {
