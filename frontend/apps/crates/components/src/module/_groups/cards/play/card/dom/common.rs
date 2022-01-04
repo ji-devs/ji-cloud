@@ -1,5 +1,6 @@
 use dominator::{html, Dom};
 use utils::prelude::*;
+use wasm_bindgen::JsValue;
 
 use crate::module::_groups::cards::lookup::{self};
 use shared::domain::jig::module::body::_groups::cards::{Card, Mode};
@@ -22,6 +23,22 @@ impl Size {
             Self::QuizOption => "quiz-option",
             Self::QuizTarget => "quiz-target",
             Self::Matching => "matching",
+        }
+    }
+}
+
+pub enum Effect {
+    Positive,
+    Negative,
+    None,
+}
+
+impl From<Effect> for JsValue {
+    fn from(effect: Effect) -> JsValue {
+        match effect {
+            Effect::Positive => JsValue::from_str("positive"),
+            Effect::Negative => JsValue::from_str("negative"),
+            Effect::None => JsValue::NULL,
         }
     }
 }

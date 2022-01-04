@@ -7,6 +7,7 @@ import {
     cardBackFullPath,
     Mode,
     Side,
+    Effect,
     StyleKind,
     getContentStyle,
 } from "@elements/module/_groups/cards/helpers";
@@ -18,6 +19,7 @@ export class _ extends LitElement {
         return [
             ...cardStyles,
             css`
+
                 :host([hasTransform]) {
                     position: absolute;
                     top: 0;
@@ -38,6 +40,16 @@ export class _ extends LitElement {
                     transition: transform 0.8s;
                     transform-style: preserve-3d;
                     transform: rotateY(180deg);
+                }
+
+                @keyframes positive {
+                    50% {
+                        transform: scale(1.2);
+                    }
+                }
+
+                :host([effect="positive"]) section {
+                    animation: positive 0.35s ease-in-out;
                 }
 
                 .front,
@@ -134,6 +146,9 @@ export class _ extends LitElement {
     // style mode - see helpers definition
     @property()
     styleKind: StyleKind = "theme";
+
+    @property({ reflect: true })
+    effect?: Effect = null;
 
     updated(changedProperties: Map<string, unknown>) {
         if (changedProperties.get('flipped') !== undefined && this.eventOnFlipped) {
