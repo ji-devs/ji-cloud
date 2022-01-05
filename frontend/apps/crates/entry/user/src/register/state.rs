@@ -77,7 +77,7 @@ pub struct Step2Data {
     pub step_1: Step1Data,
     pub location_json: Option<String>,
     pub language: String,
-    pub persona: String,
+    pub persona: Vec<String>,
     pub organization: Option<String>,
     pub marketing: bool,
 }
@@ -89,7 +89,7 @@ impl Step2Data {
             step_1: Step1Data::debug(),
             location_json: None,
             language: "english".to_string(),
-            persona: "Teacher".to_string(),
+            persona: vec!["Teacher".to_string()],
             organization: None,
             marketing: false,
         }

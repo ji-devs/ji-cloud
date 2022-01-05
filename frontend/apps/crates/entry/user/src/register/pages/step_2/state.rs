@@ -9,7 +9,7 @@ pub struct State {
     pub location_error: Mutable<bool>,
     pub language: RefCell<Option<String>>,
     pub language_error: Mutable<bool>,
-    pub persona: RefCell<Option<String>>,
+    pub persona: RefCell<Option<Vec<String>>>,
     pub persona_error: Mutable<bool>,
     pub organization: RefCell<Option<String>>,
     pub organization_error: Mutable<bool>,

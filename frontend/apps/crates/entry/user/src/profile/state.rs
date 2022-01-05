@@ -49,7 +49,7 @@ pub struct ProfilePageUser {
     pub subjects: MutableVec<SubjectId>,
     pub age_ranges: MutableVec<AgeRangeId>,
     pub affiliations: MutableVec<AffiliationId>,
-    pub persona: Mutable<Option<String>>,
+    pub persona: Mutable<Option<Vec<String>>>,
 }
 
 impl ProfilePageUser {

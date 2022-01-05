@@ -166,12 +166,17 @@ impl ProfilePage {
                 }),
                 html!("input-select", {
                     .property("slot", "persona")
-                    .property_signal("value", state.user.persona.signal_cloned().map(|persona| persona.unwrap_or_default()))
+                    .property_signal("value", state.user.persona.signal_cloned().map(|persona| {
+                        // Temporary hacked-in fix so that the frontend still works for single
+                        // personas.
+                        // TODO This needs to support multiple personas
+                        persona.map_or("".to_string(), |persona| persona.first().map_or("".to_string(), |p| p.clone()))
+                    }))
                     .children(STR_PERSONA_OPTIONS.iter().map(|persona| {
                         html!("input-select-option", {
                             .text(persona)
                             .event(clone!(state => move |_: events::CustomSelectedChange| {
-                                state.user.persona.set(Some(persona.to_string()));
+                                state.user.persona.set(Some(vec![persona.to_string()]));
                                 actions::save_profile(Rc::clone(&state));
                             }))
                         })
