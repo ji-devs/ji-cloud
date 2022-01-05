@@ -49,7 +49,7 @@ pub struct ProfilePageUser {
     pub subjects: MutableVec<SubjectId>,
     pub age_ranges: MutableVec<AgeRangeId>,
     pub affiliations: MutableVec<AffiliationId>,
-    pub persona: Mutable<Option<Vec<String>>>,
+    pub persona: Mutable<Vec<String>>,
 }
 
 impl ProfilePageUser {
@@ -68,7 +68,7 @@ impl ProfilePageUser {
             subjects: MutableVec::new(),
             age_ranges: MutableVec::new(),
             affiliations: MutableVec::new(),
-            persona: Mutable::new(None),
+            persona: Mutable::new(vec![]),
         }
     }
 

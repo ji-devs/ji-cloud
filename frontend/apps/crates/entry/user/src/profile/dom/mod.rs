@@ -170,13 +170,13 @@ impl ProfilePage {
                         // Temporary hacked-in fix so that the frontend still works for single
                         // personas.
                         // TODO This needs to support multiple personas
-                        persona.map_or("".to_string(), |persona| persona.first().map_or("".to_string(), |p| p.clone()))
+                        persona.first().map_or("".to_string(), |p| p.clone())
                     }))
                     .children(STR_PERSONA_OPTIONS.iter().map(|persona| {
                         html!("input-select-option", {
                             .text(persona)
                             .event(clone!(state => move |_: events::CustomSelectedChange| {
-                                state.user.persona.set(Some(vec![persona.to_string()]));
+                                state.user.persona.set(vec![persona.to_string()]);
                                 actions::save_profile(Rc::clone(&state));
                             }))
                         })
