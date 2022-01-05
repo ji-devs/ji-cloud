@@ -59,7 +59,7 @@ impl Step2Page {
                         None,
                         STR_PERSONA_OPTIONS.to_vec(),
                         clone!(state => move |value| {
-                            *state.persona.borrow_mut() = value.map(|x| x.to_string());
+                            *state.persona.borrow_mut() = value.map(|x| vec![x.to_string()]);
                             state.evaluate_persona_error();
                         })
                     ),
