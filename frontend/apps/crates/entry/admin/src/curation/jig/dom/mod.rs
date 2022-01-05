@@ -8,7 +8,6 @@ mod affiliation;
 mod age;
 // mod categories_select;
 // mod category_pills;
-mod goal;
 mod language;
 
 impl CurationJig {
@@ -89,7 +88,6 @@ impl CurationJig {
                         }),
                         state.render_languages(),
                         state.render_ages(),
-                        state.render_goals(),
                         state.render_affiliations(),
                         html!("input-wrapper", {
                             .property("label", "JIG teacher's description")
