@@ -3,7 +3,8 @@ import "@elements/core/images/ui";
 import { nothing } from "lit-html";
 import { JigFocus } from "@elements/module/_common/types";
 
-const STR_HEADER_FIRST = "Settings and JIG info.";
+const STR_HEADER_FIRST_1 = "Settings and";
+const STR_HEADER_FIRST_2 = " info.";
 const STR_HEADER_SECOND = "Last step before publishing";
 const STR_THUMBNAIL = "Thumbnail";
 
@@ -149,7 +150,11 @@ export class _ extends LitElement {
                 <main>
                     <div class="width-holder">
                         <div class="header">
-                            <h1>${STR_HEADER_FIRST}</h1>
+                            <h1>
+                                ${STR_HEADER_FIRST_1}
+                                ${this.jigFocus === "modules" ? "JIG" : "resource"}
+                                ${STR_HEADER_FIRST_2}
+                            </h1>
                             <h3>${STR_HEADER_SECOND}</h3>
                             ${
                                 this.jigFocus === "resources" ? html`

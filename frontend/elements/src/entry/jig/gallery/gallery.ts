@@ -5,7 +5,7 @@ import {
     customElement,
     property,
     unsafeCSS,
-    internalProperty,
+    state,
 } from "lit-element";
 import "@elements/core/images/ui";
 import { mediaUi } from "@utils/path";
@@ -13,10 +13,14 @@ import { classMap } from "lit-html/directives/class-map";
 import { nothing } from "lit-html";
 import { JigFocus } from "@elements/module/_common/types";
 
-const STR_CREATE_JIG = "Create a New JIG";
-const STR_TEMPLATE_PARAGRAPH =
-    "We have created lesson plans you can use for teaching. Create Jig from one of these templates to easily address all your student’s learning needs!";
-const STR_RECENT = "My Recent JIGs";
+const STR_JIG = "JIG";
+const STR_RESOURCE = "Resource";
+
+const STR_CREATE_JIG = "Create a New ";
+const STR_TEMPLATE_PARAGRAPH_1 = "We have created lesson plans you can use for teaching. Create ";
+const STR_TEMPLATE_PARAGRAPH_2 = " from one of these templates to easily address all your student’s learning needs!";
+const STR_RECENT_1 = "My Recent ";
+const STR_RECENT_2 = "s";
 const STR_SEE_ALL_TEMPLATES = "See all templates";
 const STR_SEE_LESS_TEMPLATES = "See less templates";
 
@@ -179,8 +183,16 @@ export class _ extends LitElement {
     @property()
     jigFocus: JigFocus = "modules";
 
-    @internalProperty()
+    @state()
     private allTemplatesVisible = false;
+
+    private focusString() {
+        if (this.jigFocus === "resources") {
+            return STR_RESOURCE;
+        } else {
+            return STR_JIG;
+        }
+    }
 
     render() {
         return html`
@@ -195,9 +207,13 @@ export class _ extends LitElement {
             <section class="top-section">
                 <div class="width-holder">
                     <div class="text-side">
-                        <h1 class="create-jig-header">${STR_CREATE_JIG}</h1>
+                        <h1 class="create-jig-header">
+                            ${STR_CREATE_JIG + this.focusString()}
+                        </h1>
                         <p class="template-paragraph">
-                            ${STR_TEMPLATE_PARAGRAPH}
+                            ${STR_TEMPLATE_PARAGRAPH_1}
+                            ${this.focusString()}
+                            ${STR_TEMPLATE_PARAGRAPH_2}
                         </p>
                     </div>
                     <div
@@ -252,7 +268,11 @@ export class _ extends LitElement {
             <section class="bottom-section">
                 <div class="width-holder">
                     <div class="recent-top-line">
-                        <h2 class="recent-header">${STR_RECENT}</h2>
+                        <h2 class="recent-header">
+                            ${STR_RECENT_1}
+                            ${this.focusString()}
+                            ${STR_RECENT_2}
+                        </h2>
                         <slot class="filters" name="filters"></slot>
                         <slot class="search-input" name="search-input"></slot>
                     </div>

@@ -13,6 +13,9 @@ use shared::domain::{
     meta::{AgeRangeId, GoalId},
 };
 
+const STR_JIG: &str = "JIG";
+const STR_RESOURCE: &str = "Resource";
+
 #[derive(Clone)]
 pub struct PublishJig {
     pub id: JigId,
@@ -79,6 +82,14 @@ impl PublishJig {
             affiliations: Some(self.affiliations.get_cloned().into_iter().collect()),
             privacy_level: Some(self.privacy_level.get()),
             ..Default::default()
+        }
+    }
+
+    /// a displayable string for jig_focus
+    pub fn focus_display(&self) -> &'static str {
+        match self.jig_focus {
+            JigFocus::Modules => STR_JIG,
+            JigFocus::Resources => STR_RESOURCE,
         }
     }
 }

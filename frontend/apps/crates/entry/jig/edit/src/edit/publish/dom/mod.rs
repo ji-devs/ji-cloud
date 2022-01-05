@@ -32,16 +32,21 @@ pub mod categories_select;
 pub mod goal;
 pub mod language;
 
-const STR_PUBLISH_JIG: &str = "Publish JIG";
+const STR_PUBLISH: &str = "Publish ";
 const STR_PUBLISH_LATER: &str = "I will publish later";
-const STR_PUBLIC_LABEL: &str = "My JIG is public";
-const STR_NAME_LABEL: &str = "JIG’s name";
-const STR_NAME_PLACEHOLDER: &str = "Type your JIG’s name here";
+const STR_PUBLIC_LABEL_1: &str = "My ";
+const STR_PUBLIC_LABEL_2: &str = " is public";
+const STR_NAME_LABEL: &str = "’s name";
+const STR_NAME_PLACEHOLDER_1: &str = "Type your ";
+const STR_NAME_PLACEHOLDER_2: &str = "’s name here";
 const STR_DESCRIPTION_LABEL: &str = "Description";
-const STR_DESCRIPTION_PLACEHOLDER: &str =
-    "This JIG is about… (include words that will help others find this JIG easily)";
+const STR_DESCRIPTION_PLACEHOLDER_1: &str = "This ";
+const STR_DESCRIPTION_PLACEHOLDER_2: &str = " is about… (include words that will help others find this ";
+const STR_DESCRIPTION_PLACEHOLDER_3: &str = " easily)";
 const STR_PUBLIC_POPUP_TITLE: &str = "Sharing is Caring!";
-const STR_PUBLIC_POPUP_BODY: &str = "Are you sure you want to keep this JIG private? Please consider sharing your JIG with the Jigzi community.";
+const STR_PUBLIC_POPUP_BODY_1: &str = "Are you sure you want to keep this ";
+const STR_PUBLIC_POPUP_BODY_2: &str = " private? Please consider sharing your ";
+const STR_PUBLIC_POPUP_BODY_3: &str = " with the Jigzi community.";
 const STR_MISSING_INFO_TOOLTIP: &str = "Please fill in the missing information.";
 
 impl Publish {
@@ -87,7 +92,9 @@ fn render_page(state: Rc<Publish>) -> Dom {
             html!("label", {
                 .with_node!(elem => {
                     .property("slot", "public")
-                    .text(STR_PUBLIC_LABEL)
+                    .text(STR_PUBLIC_LABEL_1)
+                    .text(state.jig.focus_display())
+                    .text(STR_PUBLIC_LABEL_2)
                     .child(html!("input-switch", {
                         .property_signal("enabled", state.jig.privacy_level.signal().map(|privacy_level| {
                             privacy_level == PrivacyLevel::Public
@@ -110,7 +117,14 @@ fn render_page(state: Rc<Publish>) -> Dom {
                                 Some(html!("tooltip-info", {
 
                                     .property("title", STR_PUBLIC_POPUP_TITLE)
-                                    .property("body", STR_PUBLIC_POPUP_BODY)
+                                    .property("body", format!(
+                                        "{}{}{}{}{}",
+                                        STR_PUBLIC_POPUP_BODY_1,
+                                        state.jig.focus_display(),
+                                        STR_PUBLIC_POPUP_BODY_2,
+                                        state.jig.focus_display(),
+                                        STR_PUBLIC_POPUP_BODY_3
+                                    ))
                                     .property("closeable", true)
                                     .property("target", elem.clone())
                                     .property("placement", "bottom")
@@ -125,7 +139,7 @@ fn render_page(state: Rc<Publish>) -> Dom {
             }),
             html!("input-wrapper", {
                 .property("slot", "name")
-                .property("label", STR_NAME_LABEL)
+                .property("label", format!("{}{}",  state.jig.focus_display(), STR_NAME_LABEL))
                 .property_signal("error", {
                     (map_ref! {
                         let submission_tried = state.submission_tried.signal(),
@@ -141,7 +155,7 @@ fn render_page(state: Rc<Publish>) -> Dom {
                 })
                 .child(html!("input" => HtmlInputElement, {
                     .with_node!(elem => {
-                        .property("placeholder", STR_NAME_PLACEHOLDER)
+                        .property("placeholder", format!("{}{}{}", STR_NAME_PLACEHOLDER_1, state.jig.focus_display(), STR_NAME_PLACEHOLDER_2))
                         .property_signal("value", state.jig.display_name.signal_cloned())
                         .event(clone!(state => move |_evt: events::Input| {
                             let value = elem.value();
@@ -168,7 +182,14 @@ fn render_page(state: Rc<Publish>) -> Dom {
                 })
                 .child(html!("textarea" => HtmlTextAreaElement, {
                     .with_node!(elem => {
-                        .property("placeholder", STR_DESCRIPTION_PLACEHOLDER)
+                        .property("placeholder", format!(
+                            "{}{}{}{}{}",
+                            STR_DESCRIPTION_PLACEHOLDER_1,
+                            state.jig.focus_display(),
+                            STR_DESCRIPTION_PLACEHOLDER_2,
+                            state.jig.focus_display(),
+                            STR_DESCRIPTION_PLACEHOLDER_3,
+                        ))
                         .text_signal(state.jig.description.signal_cloned())
                         .event(clone!(state => move |_: events::Input| {
                             let value = elem.value();
@@ -204,7 +225,8 @@ fn render_page(state: Rc<Publish>) -> Dom {
                 .property("slot", "publish")
                 .with_node!(elem => {
                     .child(html!("button-rect", {
-                        .text(STR_PUBLISH_JIG)
+                        .text(STR_PUBLISH)
+                        .text(state.jig.focus_display())
                         .child(html!("fa-icon", {
                             .property("icon", "fa-light fa-rocket-launch")
                             .style("color", "var(--main-yellow)")
