@@ -245,7 +245,7 @@ set persona = $2
 where user_id = $1 and persona is distinct from $2
         "#,
             user_id,
-            persona.as_deref()
+            &persona
         )
         .execute(&mut txn)
         .await?;

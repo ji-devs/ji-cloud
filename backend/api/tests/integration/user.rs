@@ -131,7 +131,7 @@ async fn patch_profile() -> anyhow::Result<()> {
             timezone: None,
             opt_into_edu_resources: Some(false),
             organization: Some(None),
-            persona: Some(Some(vec!["persona".to_owned()])),
+            persona: Some(vec!["persona".to_owned()]),
             subjects: None,
             age_ranges: None,
             affiliations: Some(Vec::<AffiliationId>::new()),

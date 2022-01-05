@@ -352,9 +352,8 @@ pub struct PatchProfileRequest {
     ///
     /// Field is updated if `Some(_)` with the inner contents.
     #[serde(default)]
-    #[serde(deserialize_with = "super::deserialize_optional_field")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub persona: Option<Option<Vec<String>>>,
+    pub persona: Option<Vec<String>>,
 
     /// The user's taught subjects.
     ///
