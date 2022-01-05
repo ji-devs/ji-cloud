@@ -155,8 +155,8 @@ pub struct UserProfile {
 
     /// The persona of the user
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub persona: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub persona: Vec<String>,
 
     /// The user's taught subjects.
     #[serde(default)]
@@ -270,8 +270,8 @@ pub struct CreateProfileRequest {
 
     /// The persona of the user
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub persona: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub persona: Vec<String>,
 
     /// The user's taught subjects.
     #[serde(default)]
