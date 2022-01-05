@@ -77,7 +77,7 @@ impl CurationTable {
                 let jig_id = jig.id.clone();
                 html!("admin-curation-table-line", {
                     .children(&mut [
-                        html!("span", {
+                        html!("a", {
                             .text(&jig.jig_data.display_name)
                             .event(clone!(state => move |_: events::Click| {
                                 let route = AdminCurationRoute::Jig(jig_id);

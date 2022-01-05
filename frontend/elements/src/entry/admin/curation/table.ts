@@ -34,10 +34,10 @@ export class _ extends LitElement {
                 display: grid;
                 grid-template-columns: repeat(8, 1fr);
                 font-family: sans-serif;
-                background: #f3f8fe;
                 border: solid 1px #c4d9f7;
             }
             .header-cell {
+                background-color: #f3f8fe;
                 border: solid 1px #eaebef;
                 padding: 5px;
                 color: #2565d5;
