@@ -296,6 +296,8 @@ fn render_time_indicator(state: Rc<State>) -> impl Signal<Item = Option<Dom>> {
             None => None,
             Some(timer) => {
                 Some(html!("jig-play-timer-indicator" => HtmlElement, {
+                    .style("position", "relative")
+                    .style("right", "40px")
                     .property("slot", "indicators")
                     .property_signal("value", timer.time.signal())
                     .with_node!(elem => {
