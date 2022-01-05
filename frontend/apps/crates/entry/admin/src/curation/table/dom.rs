@@ -10,58 +10,13 @@ impl CurationTable {
     pub fn render(self: Rc<Self>) -> Dom {
         let state = self;
         html!("admin-curation-table", {
-            .children_signal_vec(state.curation_state.jigs.signal_vec_cloned().map(clone!(state => move |jig: JigResponse| {
-                let jig_id = jig.id.clone();
-                html!("admin-curation-table-line", {
-                    .children(&mut [
-                        html!("span", {
-                            .text(&jig.jig_data.display_name)
-                            .event(clone!(state => move |_: events::Click| {
-                                let route = AdminCurationRoute::Jig(jig_id);
-                                state.curation_state.navigate_to(route);
-                            }))
-                        }),
-                        html!("span", {
-                            .text(&jig.author_name.unwrap_or_default())
-                        }),
-                        html!("span", {
-                            .text("AUTHOR BADGE")
-                        }),
-                        html!("span", {
-                            .text(&match jig.published_at {
-                                Some(published_at) => published_at.format("%b %e, %Y").to_string(),
-                                None => "".to_string()
-                            })
-                        }),
-                        html!("span", {
-                            .text(Language::code_to_display_name(&jig.jig_data.language))
-                        }),
-                        html!("span", {
-                            .text("CURATORS")
-                        }),
-                        html!("span", {
-                            .style("display", "flex")
-                            .style("flex-wrap", "wrap")
-                            .style("column-gap", "16px")
-                            .children(jig.jig_data.age_ranges.into_iter().map(|age_id| {
-                                html!("span", {
-                                    .text_signal(state.age_label(age_id))
-                                })
-                            }))
-                        }),
-                        html!("span", {
-                            .style("display", "flex")
-                            .style("flex-wrap", "wrap")
-                            .style("column-gap", "16px")
-                            .children(jig.jig_data.affiliations.into_iter().map(|affiliation_id| {
-                                html!("span", {
-                                    .text_signal(state.affiliation_label(affiliation_id))
-                                })
-                            }))
-                        }),
-                    ])
-                })
-            })))
+            .child(html!("input-search", {
+                .property("slot", "search")
+                .property("placeholder", "Search...")
+                .event(clone!(state => move |e: events::CustomSearch| {
+                    state.search_jigs(e.query());
+                }))
+            }))
             .child(html!("button", {
                 .property("slot", "pagination")
                 .property("title", "Previous")
@@ -118,6 +73,58 @@ impl CurationTable {
                     state.curation_state.go_to_page(active_page + 1);
                 }))
             }))
+            .children_signal_vec(state.curation_state.jigs.signal_vec_cloned().map(clone!(state => move |jig: JigResponse| {
+                let jig_id = jig.id.clone();
+                html!("admin-curation-table-line", {
+                    .children(&mut [
+                        html!("span", {
+                            .text(&jig.jig_data.display_name)
+                            .event(clone!(state => move |_: events::Click| {
+                                let route = AdminCurationRoute::Jig(jig_id);
+                                state.curation_state.navigate_to(route);
+                            }))
+                        }),
+                        html!("span", {
+                            .text(&jig.author_name.unwrap_or_default())
+                        }),
+                        html!("span", {
+                            .text("AUTHOR BADGE")
+                        }),
+                        html!("span", {
+                            .text(&match jig.published_at {
+                                Some(published_at) => published_at.format("%b %e, %Y").to_string(),
+                                None => "".to_string()
+                            })
+                        }),
+                        html!("span", {
+                            .text(Language::code_to_display_name(&jig.jig_data.language))
+                        }),
+                        html!("span", {
+                            .text("CURATORS")
+                        }),
+                        html!("span", {
+                            .style("display", "flex")
+                            .style("flex-wrap", "wrap")
+                            .style("column-gap", "16px")
+                            .children(jig.jig_data.age_ranges.into_iter().map(|age_id| {
+                                html!("span", {
+                                    .text_signal(state.age_label(age_id))
+                                })
+                            }))
+                        }),
+                        html!("span", {
+                            .style("display", "flex")
+                            .style("flex-wrap", "wrap")
+                            .style("column-gap", "16px")
+                            .children(jig.jig_data.affiliations.into_iter().map(|affiliation_id| {
+                                html!("span", {
+                                    .text_signal(state.affiliation_label(affiliation_id))
+                                })
+                            }))
+                        }),
+                    ])
+                })
+            })))
         })
     }
 

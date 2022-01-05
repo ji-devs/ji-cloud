@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::{rc::Rc, cell::RefCell};
 
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::{signal_vec::MutableVec, signal::Mutable};
@@ -8,6 +8,7 @@ use utils::routes::AdminCurationRoute;
 pub struct Curation {
     pub route: Mutable<AdminCurationRoute>,
     pub jigs: MutableVec<JigResponse>,
+    pub fetch_mode: RefCell<FetchMode>,
     pub goals: Mutable<Vec<Goal>>,
     pub loader: AsyncLoader,
     pub ages: Mutable<Vec<AgeRange>>,
@@ -21,6 +22,7 @@ impl Curation {
         Rc::new(Self {
             route: Mutable::new(route),
             jigs: MutableVec::new(),
+            fetch_mode: RefCell::new(FetchMode::Browse),
             loader: AsyncLoader::new(),
             goals: Mutable::new(Vec::new()),
             ages: Mutable::new(Vec::new()),
@@ -29,4 +31,10 @@ impl Curation {
             total_pages: Mutable::new(None),
         })
     }
+}
+
+#[derive(Clone, Debug)]
+pub enum FetchMode {
+    Browse,
+    Search(String)
 }
