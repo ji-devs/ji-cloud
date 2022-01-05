@@ -67,7 +67,6 @@ impl CurationJig {
                             .children(&mut [
                                 html!("input" => HtmlInputElement, {
                                     .with_node!(elem => {
-                                        .property("value", "")
                                         .property_signal("value", state.jig.display_name.signal_cloned())
                                         .event(clone!(state => move |_evt: events::Input| {
                                             let value = elem.value();
@@ -81,7 +80,7 @@ impl CurationJig {
                             .property("label", "Author name")
                             .children(&mut [
                                 html!("input", {
-                                    .property("readonly", true)
+                                    .property("readOnly", true)
                                     .property("value", &state.jig.author_name)
                                 }),
                             ])
