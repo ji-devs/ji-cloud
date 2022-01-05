@@ -297,7 +297,11 @@ fn render_time_indicator(state: Rc<State>) -> impl Signal<Item = Option<Dom>> {
             Some(timer) => {
                 Some(html!("jig-play-timer-indicator" => HtmlElement, {
                     .property("slot", "indicators")
-                    .property_signal("value", timer.time.signal())
+                    .property_signal("value", timer.time.signal().map(|time| {
+                        let minutes = (time as f32 / 60.0).floor();
+                        let seconds = time % 60;
+                        format!("{}:{:0>2}", minutes, seconds)
+                    }))
                     .with_node!(elem => {
                         .future(ten_sec_signal(Rc::clone(&state)).for_each(move |less_than_10_sec| {
                             if less_than_10_sec {
