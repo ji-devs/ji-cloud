@@ -2,7 +2,7 @@
 
 In each of these there are various options for output files, testing config, etc.
 
-Generally run `cargo run +nightly --bin [binary name]
+Generally run `cargo run +nightly --bin [binary name]`
 
 ## 1. On GCE or some machine
 1a. download_albums: this downloads the _metadata_ for each album from tiny tap. In other words, gives us the list of available jigs
