@@ -9,7 +9,7 @@ const STR_JIGS_TITLE = "JIGs";
 const STR_JIGS_HEBREW = "Hebrew";
 const STR_JIGS_JEWISH_HOLIDAYS = "Jewish holidays";
 const STR_JIGS_TORAH = "Torah";
-const STR_JIGS_J_STREAM = "J-STEAM";
+const STR_JIGS_J_STREAM = "J-Stem";
 const STR_JIGS_ISRAEL = "Israel";
 const STR_JIGS_SONGS = "Songs";
 
@@ -59,6 +59,8 @@ const STR_PRIVACY = "Privacy Policy";
 const STR_TERMS = "Terms & Conditions";
 const STR_CHILD_PROTECTION = "Child Protection Policy";
 
+const STR_DEDICATION_TEXT = "Dedicated in memory of Yochanan Hillel ben Mordechai";
+
 const COMING_SOON_ALERT = "javascript:alert('Coming soon')";
 
 function searchLink(q: string): string {
@@ -77,7 +79,7 @@ export class _ extends LitElement {
                     color: #ffffff;
                     font-size: 14px;
                     font-weight: 500;
-                    padding: 100px 0;
+                    padding: 100px 0 30px 0;
                 }
                 .width-holder {
                     display: grid;
@@ -160,6 +162,29 @@ export class _ extends LitElement {
                 }
                 .bottom-section .kid-safe img {
                     width: 156px;
+                }
+                .horizontal-slider {
+                    width: 87%;
+                    margin: 40px auto 28px auto;
+                    height: 0;
+                    opacity: 0.35;
+                    border: solid 1px var(--white);
+                }
+                .dedication-text {
+                    font-family: Poppins;
+                    font-size: 16px;
+                    font-weight: 500;
+                    font-stretch: normal;
+                    font-style: normal;
+                    line-height: 1.56;
+                    letter-spacing: normal;
+                    text-align: left;
+                    color: var(--light-blue-3);
+                }
+                .dedication-text-container {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
                 }
             `,
         ];
@@ -466,6 +491,8 @@ export class _ extends LitElement {
                     >
                 </section>
             </div>
+            <div class="horizontal-slider"></div>
+            <div class="dedication-text-container"><span class="dedication-text">${STR_DEDICATION_TEXT}</span></div>
         `;
     }
 }
