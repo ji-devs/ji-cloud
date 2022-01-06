@@ -72,10 +72,11 @@ impl EditPage {
                     let close = clone!(state => move || {
                         state.play_jig.set(None);
                     });
-                    PlayerPopup::render(
-                        Rc::new(PlayerPopup::new(jig_id, settings.into(), PreviewPopupCallbacks::new(close))),
-                        None
-                    )
+                    PlayerPopup::new(
+                        jig_id,
+                        settings.into(),
+                        PreviewPopupCallbacks::new(close)
+                    ).render(None)
                 })
             })))
         })

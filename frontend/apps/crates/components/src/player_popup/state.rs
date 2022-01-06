@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use futures_signals::signal::Mutable;
 use shared::domain::jig::JigId;
 use utils::jig::JigPlayerOptions;
@@ -16,12 +18,12 @@ impl PlayerPopup {
         jig_id: JigId,
         player_options: JigPlayerOptions,
         callbacks: PreviewPopupCallbacks,
-    ) -> Self {
-        Self {
+    ) -> Rc<Self> {
+        Rc::new(Self {
             jig_id,
             player_options,
             open: Mutable::new(true),
             callbacks,
-        }
+        })
     }
 }

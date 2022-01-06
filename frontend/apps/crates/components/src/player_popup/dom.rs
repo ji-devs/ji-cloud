@@ -7,7 +7,8 @@ use utils::{events, prelude::SETTINGS, routes::{JigRoute, Route}};
 use super::state::PlayerPopup;
 
 impl PlayerPopup {
-    pub fn render(state: Rc<Self>, slot: Option<&str>) -> Dom {
+    pub fn render(self: Rc<Self>, slot: Option<&str>) -> Dom {
+        let state = self;
         html!("player-popup", {
             .apply_if(slot.is_some(), |dom| {
                 dom.property("slot", slot.unwrap())
