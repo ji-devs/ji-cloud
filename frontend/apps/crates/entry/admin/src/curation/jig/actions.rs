@@ -37,6 +37,5 @@ impl CurationJig {
             state.save_draft().await;
             state.publish().await;
         }))
-
     }
 }

@@ -106,6 +106,11 @@ impl CurationTable {
                         html!("span", {
                             .text(&jig.author_name.unwrap_or_default())
                         }),
+                        html!("star-rating", {
+                            .property("rating", jig.admin_data.rating.map(|rating| {
+                                rating as u8
+                            }))
+                        }),
                         // html!("span", {
                         //     .text("AUTHOR BADGE")
                         // }),

@@ -49,6 +49,7 @@ export class _ extends LitElement {
         "Preview",
         "Jig Name",
         "Author",
+        "Rating",
         // "Author's Badge",
         "Date",
         "Language",

@@ -45,3 +45,4 @@ import "@elements/core/images/ui";
 import "@elements/core/images/composed/module-screenshot";
 import "@elements/core/modals/confirm";
 import "@elements/core/player-popup/player-popup";
+import "@elements/core/rating";

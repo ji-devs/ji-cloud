@@ -394,6 +394,20 @@ pub enum JigRating {
     NoRating = 17,
 }
 
+impl TryFrom<u8> for JigRating {
+    type Error = ();
+
+    fn try_from(num: u8) -> Result<Self, Self::Error> {
+        match num {
+            1 => Ok(Self::One),
+            2 => Ok(Self::Two),
+            3 => Ok(Self::Three),
+            17 => Ok(Self::NoRating),
+            _ => Err(()),
+        }
+    }
+}
+
 /// Audio for background music
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, Eq, PartialEq)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]

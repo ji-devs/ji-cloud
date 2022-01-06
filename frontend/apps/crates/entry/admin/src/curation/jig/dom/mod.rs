@@ -2,7 +2,8 @@ use super::state::CurationJig;
 use components::{player_popup::{PlayerPopup, PreviewPopupCallbacks}, module::_common::thumbnail::ModuleThumbnail};
 use dominator::{html, Dom, clone, with_node};
 use futures_signals::signal::SignalExt;
-use utils::{events, routes::AdminCurationRoute, jig::JigPlayerOptions};
+use shared::domain::jig::JigRating;
+use utils::{events, routes::AdminCurationRoute, jig::JigPlayerOptions, unwrap::UnwrapJiExt};
 use web_sys::{HtmlInputElement, HtmlTextAreaElement};
 use std::rc::Rc;
 
@@ -30,6 +31,21 @@ impl CurationJig {
                     .event(clone!(state => move |_: events::Click| {
                         let route = AdminCurationRoute::Table;
                         state.curation_state.navigate_to(route);
+                    }))
+                }),
+                html!("star-rating", {
+                    .property("slot", "back")
+                    .property_signal("rating", state.jig.rating.signal_cloned().map(|rating| {
+                        rating.map(|rating| {
+                            rating as u8
+                        })
+                    }))
+                    .event(clone!(state => move |e: events::CustomRatingChange| {
+                        let rating = e.rating();
+                        let rating = rating.map(|rating| {
+                            JigRating::try_from(rating).unwrap_ji()
+                        });
+                        state.jig.rating.set(rating);
                     }))
                 }),
                 html!("div", {
