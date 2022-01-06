@@ -208,21 +208,6 @@
       "nullable": []
     }
   },
-  "09e722529d2a3e91d6e8dc33dac3ad8caa93006e5aafb1b0ea478410e3efb899": {
-    "query": "\nupdate jig_admin_data\nset rating = coalesce($2, rating),\n    blocked = coalesce($3, blocked),\n    curated = coalesce($4, curated)\nwhere jig_id = $1\n",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int2",
-          "Bool",
-          "Bool"
-        ]
-      },
-      "nullable": []
-    }
-  },
   "0a1f9e5fee4b10a173b8723976cecfb920f90a4828d723abb14f6e0215cf880b": {
     "query": "select exists(select 1 from locale_entry where id = $1 for update) as \"exists!\"",
     "describe": {
@@ -2244,25 +2229,17 @@
       ]
     }
   },
-  "668625f47ad262dd929fbf9a85a5d319af1f0bb4297b2fad9ad7ab19d77ccf69": {
-    "query": "\nselect exists(select 1 from user_scope where user_id = $1 and scope = $2) as \"authed!\"\n",
+  "674424a88094e0ceb29cc4c2c4548cc97162b931eff9316fcdb78ede5cf7d7da": {
+    "query": "\nupdate jig_admin_data\nset blocked = coalesce($2, blocked)\nwhere jig_id = $1 and $2 is distinct from blocked\n            ",
     "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "authed!",
-          "type_info": "Bool"
-        }
-      ],
+      "columns": [],
       "parameters": {
         "Left": [
           "Uuid",
-          "Int2"
+          "Bool"
         ]
       },
-      "nullable": [
-        null
-      ]
+      "nullable": []
     }
   },
   "68a6cedcf31dbac17f23ec2cf4cdead5973b0bf72e32708d64e680ecc2997f6b": {
@@ -4543,6 +4520,19 @@
       ]
     }
   },
+  "bfd314e70437482954c5dfb3a40ab08990a0bea43779d810e9dd903e87e10c81": {
+    "query": "\nupdate jig_admin_data\nset curated = coalesce($2, curated)\nwhere jig_id = $1 and $2 is distinct from curated\n            ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Bool"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "c0503b4756010f70f84bfc842758cc356568bcb7324b0c0a8454f49511300942": {
     "query": "insert into user_scope (user_id, scope) values ($1, $2)",
     "describe": {
@@ -4708,6 +4698,19 @@
       "nullable": [
         null
       ]
+    }
+  },
+  "ca807853c119226252820e8cd0f9476d114f3e5e98ffed0dcd059d05063760a4": {
+    "query": "\nupdate jig_admin_data\nset rating = coalesce($2, rating)\nwhere jig_id = $1 and $2 is distinct from rating\n            ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2"
+        ]
+      },
+      "nullable": []
     }
   },
   "cb1eb42e7bcc8143deb3eec658b4a6d23278f99ce5bf5062886d0b18c1b2b1d3": {

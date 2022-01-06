@@ -8,9 +8,8 @@ use shared::domain::{
         additional_resource::{AdditionalResource, AdditionalResourceId as AddId, ResourceContent},
         module::{body::ThemeId, ModuleId},
         AudioBackground, AudioEffects, AudioFeedbackNegative, AudioFeedbackPositive,
-        DeleteUserJigs, DraftOrLive, JigAdminData, JigAdminUpdateData, JigData, JigFocus, JigId,
-        JigPlayerSettings, JigRating, JigResponse, LiteModule, ModuleKind, PrivacyLevel,
-        TextDirection,
+        DeleteUserJigs, DraftOrLive, JigAdminData, JigData, JigFocus, JigId, JigPlayerSettings,
+        JigRating, JigResponse, LiteModule, ModuleKind, PrivacyLevel, TextDirection,
     },
     meta::{AffiliationId, AgeRangeId, GoalId, ResourceTypeId as TypeId},
     user::UserScope,
@@ -492,7 +491,6 @@ pub async fn update_draft(
     pool: &PgPool,
     api_key: &Option<String>,
     id: JigId,
-    user_id: Uuid,
     display_name: Option<&str>,
     goals: Option<&[GoalId]>,
     categories: Option<&[CategoryId]>,
@@ -506,7 +504,6 @@ pub async fn update_draft(
     audio_effects: Option<&AudioEffects>,
     privacy_level: Option<PrivacyLevel>,
     other_keywords: Option<String>,
-    admin_data: Option<JigAdminUpdateData>,
 ) -> Result<(), error::UpdateWithMetadata> {
     let mut txn = pool.begin().await?;
 
@@ -628,26 +625,6 @@ where id = $1 and $2 is distinct from other_keywords"#,
         .await?;
     }
 
-    if let Some(admin) = admin_data {
-        check_admin(&mut *txn, user_id).await?;
-
-        sqlx::query!(
-            r#"
-update jig_admin_data
-set rating = coalesce($2, rating),
-    blocked = coalesce($3, blocked),
-    curated = coalesce($4, curated)
-where jig_id = $1
-"#,
-            id.0,
-            admin.rating.map(|it| it as i16),
-            admin.blocked,
-            admin.curated
-        )
-        .execute(&mut *txn)
-        .await?;
-    }
-
     // update trivial, not null fields
     sqlx::query!(
         //language=SQL
@@ -697,25 +674,6 @@ where id = $1
     }
 
     txn.commit().await?;
-
-    Ok(())
-}
-
-pub async fn check_admin(
-    pool: &mut sqlx::PgConnection,
-    user_id: Uuid,
-) -> Result<(), error::UpdateWithMetadata> {
-    sqlx::query!(
-        r#"
-select exists(select 1 from user_scope where user_id = $1 and scope = $2) as "authed!"
-"#,
-        user_id,
-        UserScope::Admin as i16,
-    )
-    .fetch_optional(pool)
-    .await?
-    .ok_or(error::UpdateWithMetadata::Forbidden)?
-    .authed;
 
     Ok(())
 }
@@ -1209,6 +1167,65 @@ where jig_id = $1;
     )
     .execute(db)
     .await?;
+
+    txn.commit().await?;
+
+    Ok(())
+}
+
+pub async fn update_admin_data(
+    pool: &PgPool,
+    jig_id: JigId,
+    rating: Option<JigRating>,
+    blocked: Option<bool>,
+    curated: Option<bool>,
+) -> Result<(), error::NotFound> {
+    let mut txn = pool.begin().await?;
+
+    if let Some(rating) = rating {
+        sqlx::query!(
+            //language=SQL
+            r#"
+update jig_admin_data
+set rating = coalesce($2, rating)
+where jig_id = $1 and $2 is distinct from rating
+            "#,
+            jig_id.0,
+            rating as i16
+        )
+        .execute(&mut txn)
+        .await?;
+    }
+
+    if let Some(blocked) = blocked {
+        sqlx::query!(
+            //language=SQL
+            r#"
+update jig_admin_data
+set blocked = coalesce($2, blocked)
+where jig_id = $1 and $2 is distinct from blocked
+            "#,
+            jig_id.0,
+            blocked
+        )
+        .execute(&mut txn)
+        .await?;
+    }
+
+    if let Some(curated) = curated {
+        sqlx::query!(
+            //language=SQL
+            r#"
+update jig_admin_data
+set curated = coalesce($2, curated)
+where jig_id = $1 and $2 is distinct from curated
+            "#,
+            jig_id.0,
+            curated
+        )
+        .execute(&mut txn)
+        .await?;
+    }
 
     txn.commit().await?;
 
