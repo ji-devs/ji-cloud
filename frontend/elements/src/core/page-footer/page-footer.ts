@@ -51,7 +51,7 @@ const STR_SERVICES_PRIME = "Ji Prime";
 const STR_SERVICES_TAP = "Ji Tap";
 const STR_SERVICES_STUDIO = "Ji Studio";
 const STR_SERVICES_COLLECTION = "The Ji Collection";
-const STR_SERVICES_J_STREAM = "J-STEAM";
+const STR_SERVICES_J_STREAM = "J-Stem";
 const STR_SERVICES_BLOG = "Ji Blog";
 const STR_SERVICES_JOBS = "Jobs";
 
