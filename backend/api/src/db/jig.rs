@@ -23,6 +23,7 @@ pub(crate) mod additional_resource;
 pub(crate) mod curation;
 pub(crate) mod module;
 pub(crate) mod player;
+pub(crate) mod report;
 
 pub async fn create(
     pool: &PgPool,

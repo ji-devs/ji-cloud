@@ -4,6 +4,7 @@ use shared::domain::jig::{
         CommentId, JigCurationComment, JigCurationCommentResponse, JigCurationData,
         JigCurationFieldsDone, JigCurationStatus,
     },
+    report::{JigReportType as RType, ReportId},
     JigId,
 };
 use sqlx::PgPool;
@@ -197,7 +198,13 @@ select jig_id                               as "jig_id!: JigId",
             from jig_curation_comment  "jcc"
             where jcd.jig_id = jcc.jig_id
             order by created_at desc
-        )                                                    as "comments!: Vec<(CommentId, JigId, String, DateTime<Utc>, Uuid)>"
+        )                                                    as "comments!: Vec<(CommentId, JigId, String, DateTime<Utc>, Uuid)>",
+        array(
+            select row (jr.id, jr.jig_id, report_type, reporter_id, created_at)
+            from jig_report "jr"
+            where jcd.jig_id = jr.jig_id
+            order by created_at desc
+        )                                                    as "reports!: Vec<(ReportId, JigId, RType, Uuid, DateTime<Utc>)>"
 from jig_curation_data "jcd"
 where jig_id = $1
 "#,
@@ -226,6 +233,14 @@ where jig_id = $1
                 created_at,
                 author_id
             }}).collect(),
+            reports: row.reports.into_iter().map(|(id, jig_id, report_type, created_at, author_id)| {
+                JigReport {
+                    id,
+                    jig_id,
+                    value: comment,
+                    created_at,
+                    author_id
+                }}).collect(),
     });
 
     Ok(curation)

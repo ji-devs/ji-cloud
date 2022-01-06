@@ -5,7 +5,7 @@ create table jig_report (
 
     report_type    int2              not null,
 
-    reporter       uuid              references "user"(id),
+    reporter_id    uuid              references "user"(id),
 
-    created_at     timestamptz   default now() not null;       
+    created_at     timestamptz       default now()      not null
 );
