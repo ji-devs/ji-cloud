@@ -4,7 +4,7 @@ use crate::{
         jig::{
             JigBrowseQuery, JigBrowseResponse, JigCountResponse, JigCreateRequest, JigId,
             JigLikedResponse, JigResponse, JigSearchQuery, JigSearchResponse,
-            JigUpdateDraftDataRequest,
+            JigUpdateAdminDataRequest, JigUpdateDraftDataRequest,
         },
         CreateResponse,
     },
@@ -261,4 +261,24 @@ impl ApiEndpoint for Play {
     type Err = EmptyError;
     const PATH: &'static str = "/v1/jig/{id}/play";
     const METHOD: Method = Method::Put;
+}
+
+/// Update an admin data for a JIG.
+///
+/// # Authorization
+///
+/// * Standard + [`UserScope::ManageJig`](crate::domain::user::UserScope)
+///
+/// # Errors
+///
+/// * [`Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.
+/// * [`Forbidden`](http::StatusCode::FORBIDDEN) if the user does not have sufficient permission to perform the action.
+/// * [`BadRequest`](http::StatusCode::BAD_REQUEST) if the request is missing/invalid.
+pub struct JigAdminDataUpdate;
+impl ApiEndpoint for JigAdminDataUpdate {
+    type Req = JigUpdateAdminDataRequest;
+    type Res = ();
+    type Err = EmptyError;
+    const PATH: &'static str = "/v1/jig/{id}/admin";
+    const METHOD: Method = Method::Patch;
 }

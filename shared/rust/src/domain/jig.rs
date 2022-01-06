@@ -359,6 +359,26 @@ pub struct JigAdminData {
 }
 
 /// These fields can be edited by admin and can be viewed by everyone
+#[derive(Serialize, Deserialize, Clone, Debug, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct JigUpdateAdminDataRequest {
+    /// Rating for jig, weighted for jig search
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
+    pub rating: Option<JigRating>,
+
+    /// if true does not appear in search
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
+    pub blocked: Option<bool>,
+
+    /// Indicates jig has been curated by admin
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
+    pub curated: Option<bool>,
+}
+
+/// These fields can be edited by admin and can be viewed by everyone
 #[derive(Serialize, Deserialize, Debug, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct JigAdminUpdateData {
@@ -668,11 +688,6 @@ pub struct JigUpdateDraftDataRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub other_keywords: Option<String>,
-
-    /// Rating by admin for Jig
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(default)]
-    pub admin_data: Option<JigAdminUpdateData>,
 }
 
 /// Query for [`Browse`](crate::api::endpoints::jig::Browse).
