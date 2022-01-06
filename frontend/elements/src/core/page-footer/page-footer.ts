@@ -9,7 +9,7 @@ const STR_JIGS_TITLE = "JIGs";
 const STR_JIGS_HEBREW = "Hebrew";
 const STR_JIGS_JEWISH_HOLIDAYS = "Jewish holidays";
 const STR_JIGS_TORAH = "Torah";
-const STR_JIGS_J_STREAM = "J-Stem";
+const STR_JIGS_J_STEM = "J-Stem";
 const STR_JIGS_ISRAEL = "Israel";
 const STR_JIGS_SONGS = "Songs";
 
@@ -222,8 +222,8 @@ export class _ extends LitElement {
                                     >
                                 </li>
                                 <li>
-                                    <a href="${searchLink(STR_JIGS_J_STREAM)}"
-                                        >${STR_JIGS_J_STREAM}</a
+                                    <a href="${searchLink(STR_JIGS_J_STEM)}"
+                                        >${STR_JIGS_J_STEM}</a
                                     >
                                 </li>
                                 <li>
