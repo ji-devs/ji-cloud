@@ -2,8 +2,8 @@ use std::fmt::{Display, Formatter, Result};
 
 use super::play::card::dom::Size;
 
-const FONT_SIZE_RANGE: (f32, f32) = (100f32, 40f32);
-const TEXT_LENGTH_RANGE: (usize, usize) = (1, 12);
+const FONT_SIZE_RANGE: (f32, f32) = (200f32, 60f32);
+const TEXT_LENGTH_RANGE: (usize, usize) = (1, 10);
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum Side {
@@ -49,7 +49,7 @@ pub fn get_card_font_size(length: usize, size: Option<&Size>, unit_type: UnitTyp
             let size_scale = match size {
                 Size::Flashcards => 1f32,
                 Size::QuizTarget => 0.80f32,
-                Size::Matching | Size::QuizOption => 0.75f32,
+                Size::Matching | Size::QuizOption => 0.5f32,
                 Size::Memory => 0.5f32,
             };
 
