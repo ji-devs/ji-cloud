@@ -32,7 +32,6 @@ export class _ extends LitElement {
             }
             .table {
                 display: grid;
-                grid-template-columns: repeat(8, 1fr);
                 font-family: sans-serif;
                 border: solid 1px #c4d9f7;
             }
@@ -47,18 +46,24 @@ export class _ extends LitElement {
 
     @property({ attribute: false })
     headers: string[] = [
+        "Preview",
         "Jig Name",
         "Author",
-        "Author's Badge",
+        // "Author's Badge",
         "Date",
-        "Instruction Language",
-        "Curators",
+        "Language",
+        // "Curators",
         "Age Ranges",
         "Affiliation"
     ];
 
     render() {
         return html`
+            <style>
+                .table {
+                    grid-template-columns: repeat(${this.headers.length}, 1fr);
+                }
+            </style>
             <div class="controls">
                 <slot name="search"></slot>
                 <div class="pagination">

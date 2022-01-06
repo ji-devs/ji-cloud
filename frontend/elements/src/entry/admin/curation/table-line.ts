@@ -7,10 +7,10 @@ export class _ extends LitElement {
             :host {
                 display: contents;
             }
-            /* :host(:nth-child(even)) ::slotted(*) {
+            :host(:nth-child(even)) ::slotted(*) {
                 background-color: #f2f2f2;
-            } */
-            :host(:hover) ::slotted(*) {
+            }
+            :host(:hover) ::slotted(*), :host(:hover) .preview {
                 background-color: rgb(233 233 233);
             }
             ::slotted(*) {

@@ -1,6 +1,8 @@
 use super::state::CurationJig;
+use components::{player_popup::{PlayerPopup, PreviewPopupCallbacks}, module::_common::thumbnail::ModuleThumbnail};
 use dominator::{html, Dom, clone, with_node};
-use utils::{events, routes::AdminCurationRoute};
+use futures_signals::signal::SignalExt;
+use utils::{events, routes::AdminCurationRoute, jig::JigPlayerOptions};
 use web_sys::{HtmlInputElement, HtmlTextAreaElement};
 use std::rc::Rc;
 
@@ -117,8 +119,38 @@ impl CurationJig {
                             ])
                         }),
                     ])
-                })
+                }),
             ])
+            .child(ModuleThumbnail::render(
+                Rc::new(ModuleThumbnail {
+                    jig_id: state.jig_id,
+                    module: state.jig.modules.lock_ref().get(0).cloned(),
+                    is_jig_fallback: true,
+                }),
+                Some("player")
+            ))
+            .child(html!("fa-button", {
+                .property("slot", "player")
+                .property("icon", "fa-duotone fa-circle-play")
+                .event(clone!(state => move |_: events::Click| {
+                    state.player_open.set(true);
+                }))
+            }))
+            .child_signal(state.player_open.signal().map(clone!(state => move |player_open| {
+                match player_open {
+                    false => None,
+                    true => {
+                        let on_close = clone!(state => move|| {
+                            state.player_open.set(false);
+                        });
+                        Some(PlayerPopup::new(
+                            state.jig_id,
+                            JigPlayerOptions::default(),
+                            PreviewPopupCallbacks::new(Box::new(on_close)),
+                        ).render(Some("player")))
+                    }
+                }
+            })))
         })
     }
 }

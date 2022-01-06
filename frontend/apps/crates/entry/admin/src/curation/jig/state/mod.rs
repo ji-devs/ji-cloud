@@ -1,4 +1,5 @@
 use dominator_helpers::futures::AsyncLoader;
+use futures_signals::signal::Mutable;
 use shared::domain::jig::{JigId, JigResponse};
 use std::rc::Rc;
 
@@ -13,6 +14,7 @@ pub struct CurationJig {
     pub jig: EditableJig,
     pub loader: AsyncLoader,
     pub curation_state: Rc<Curation>,
+    pub player_open: Mutable<bool>,
 }
 
 impl CurationJig {
@@ -26,6 +28,7 @@ impl CurationJig {
             jig: jig.into(),
             loader: AsyncLoader::new(),
             curation_state,
+            player_open: Mutable::new(false),
         })
     }
 }
