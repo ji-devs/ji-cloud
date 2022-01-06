@@ -2,7 +2,7 @@ use dominator::{html, Dom};
 use utils::prelude::*;
 use wasm_bindgen::JsValue;
 
-use crate::module::_groups::cards::lookup::{self};
+use crate::module::_groups::cards::lookup::{self, UnitType};
 use shared::domain::jig::module::body::_groups::cards::{Card, Mode};
 
 //must match @elements/module/_groups/cards/play/card/styles.ts
@@ -64,7 +64,7 @@ pub struct SimpleTransform {
     pub scale: f64,
 }
 
-pub(super) fn render_media(card: &Card, mode: Mode, theme_id: ThemeId, slot: Option<&str>) -> Dom {
+pub(super) fn render_media(card: &Card, size: &Size, mode: Mode, slot: Option<&str>) -> Dom {
     match &card {
         Card::Text(s) => {
             html!("card-text", {
@@ -73,8 +73,7 @@ pub(super) fn render_media(card: &Card, mode: Mode, theme_id: ThemeId, slot: Opt
                 })
                 .property("value", s)
                 .property("fontSize", {
-                    let font_size = lookup::get_card_font_size(s.len(), theme_id, mode);
-                    format!("{}rem", font_size)
+                    lookup::get_card_font_size(s.len(), Some(size), UnitType::Rem)
                 })
             })
         }
