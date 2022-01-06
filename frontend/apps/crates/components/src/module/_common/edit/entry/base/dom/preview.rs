@@ -124,6 +124,7 @@ where
         .property("slot", "main")
         .style("width", "100%")
         .style("height", "100%")
+        .style("border", "none")
         .property("src", url.clone())
         .with_node!(elem => {
             .global_event(clone!(state, url => move |evt:Message| {
