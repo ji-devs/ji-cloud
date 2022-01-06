@@ -46,17 +46,9 @@ impl CurationJig {
                         html!("button-rect", {
                             .property("kind", "filled")
                             .property("color", "blue")
-                            .text("Save draft")
+                            .text("Save and republish")
                             .event(clone!(state => move |_: events::Click| {
-                                state.save_draft();
-                            }))
-                        }),
-                        html!("button-rect", {
-                            .property("kind", "outline")
-                            .property("color", "blue")
-                            .text("Publish")
-                            .event(clone!(state => move |_: events::Click| {
-                                state.publish();
+                                state.save_and_publish();
                             }))
                         }),
                     ])
