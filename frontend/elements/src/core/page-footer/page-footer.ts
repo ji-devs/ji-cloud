@@ -9,7 +9,7 @@ const STR_JIGS_TITLE = "JIGs";
 const STR_JIGS_HEBREW = "Hebrew";
 const STR_JIGS_JEWISH_HOLIDAYS = "Jewish holidays";
 const STR_JIGS_TORAH = "Torah";
-const STR_JIGS_J_STEM = "J-Stem";
+const STR_JIGS_J_STEM = "J-STEM";
 const STR_JIGS_ISRAEL = "Israel";
 const STR_JIGS_SONGS = "Songs";
 
@@ -51,7 +51,7 @@ const STR_SERVICES_PRIME = "Ji Prime";
 const STR_SERVICES_TAP = "Ji Tap";
 const STR_SERVICES_STUDIO = "Ji Studio";
 const STR_SERVICES_COLLECTION = "The Ji Collection";
-const STR_SERVICES_J_STREAM = "J-Stem";
+const STR_SERVICES_J_STEM = "J-STEM";
 const STR_SERVICES_BLOG = "Ji Blog";
 const STR_SERVICES_JOBS = "Jobs";
 
@@ -438,7 +438,7 @@ export class _ extends LitElement {
                                     <a
                                         href="https://www.jewishinteractive.org/ji-products-services/jstem/"
                                         target="_blank"
-                                        >${STR_SERVICES_J_STREAM}</a
+                                        >${STR_SERVICES_J_STEM}</a
                                     >
                                 </li>
                                 <li>
