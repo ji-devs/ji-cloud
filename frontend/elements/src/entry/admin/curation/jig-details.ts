@@ -82,6 +82,7 @@ export class _ extends LitElement {
                     <slot name="player"></slot>
                 </div>
                 <slot name="rating"></slot>
+                <slot name="block"></slot>
             </div>
             <slot name="loader"></slot>
         `;

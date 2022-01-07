@@ -159,6 +159,31 @@ impl CurationJig {
                     }
                 }
             })))
+            .child(html!("fa-button", {
+                .property("slot", "block")
+                .style_signal("color", state.jig.blocked.signal().map(|blocked| {
+                    match blocked {
+                        true => "red",
+                        false => "green",
+                    }
+                }))
+                .property_signal("icon", state.jig.blocked.signal().map(|blocked| {
+                    match blocked {
+                        true => "fa-solid fa-eye-slash",
+                        false => "fa-solid fa-eye",
+                    }
+                }))
+                .property_signal("title", state.jig.blocked.signal().map(|blocked| {
+                    match blocked {
+                        true => "Blocked",
+                        false => "Visible",
+                    }
+                }))
+                .event(clone!(state => move |_: events::Click| {
+                    let mut blocked = state.jig.blocked.lock_mut();
+                    *blocked = !*blocked;
+                }))
+            }))
         })
     }
 }

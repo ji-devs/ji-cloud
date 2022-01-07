@@ -31,6 +31,7 @@ pub struct EditableJig {
     pub additional_resources: Rc<MutableVec<AdditionalResource>>,
     pub privacy_level: Mutable<PrivacyLevel>,
     pub rating: Mutable<Option<JigRating>>,
+    pub blocked: Mutable<bool>,
     pub jig_focus: JigFocus,
     pub author_name: String,
 }
@@ -51,6 +52,7 @@ impl From<JigResponse> for EditableJig {
             additional_resources: Rc::new(MutableVec::new_with_values(jig.jig_data.additional_resources)),
             privacy_level: Mutable::new(jig.jig_data.privacy_level),
             rating: Mutable::new(jig.admin_data.rating),
+            blocked: Mutable::new(jig.admin_data.blocked),
             jig_focus: jig.jig_focus,
             author_name: jig.author_name.unwrap_or_default(),
         }
@@ -77,6 +79,7 @@ impl EditableJig {
     pub fn to_update_admin_data_request(&self) -> JigUpdateAdminDataRequest {
         JigUpdateAdminDataRequest {
             rating: self.rating.get_cloned(),
+            blocked: Some(self.blocked.get()),
             ..Default::default()
         }
     }
