@@ -10,7 +10,7 @@ use crate::{
     image::search::types::*,
     module::_groups::cards::{
         edit::{config, state::*},
-        lookup::{self, UnitType},
+        lookup,
     },
 };
 use futures_signals::signal::SignalExt;
@@ -46,7 +46,7 @@ pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<MainCard<RawData, E>>)
                     html!("input-textarea-content", {
                         .property_signal("value", data.signal_cloned())
                         .property_signal("fontSize", data.signal_cloned().map(|value| {
-                            lookup::get_card_font_size(value.len(), None, UnitType::Px)
+                            lookup::get_card_font_size(&value, None)
                         }))
                         .property("clickMode", "none")
                         .property("constrainWidth", config::CARD_TEXT_LIMIT_WIDTH)
