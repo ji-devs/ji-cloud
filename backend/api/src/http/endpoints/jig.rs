@@ -203,8 +203,6 @@ async fn browse(
 
     db::jig::authz_list(&*db, claims.0.user_id, author_id).await?;
 
-    println!("before browse");
-
     let jigs = db::jig::browse(
         db.as_ref(),
         author_id,
@@ -313,10 +311,12 @@ async fn search(
 
     let jigs: Vec<_> = db::jig::get_by_ids(db.as_ref(), &ids, DraftOrLive::Live).await?;
 
+    let jig_num = jigs.len() as u64;
+
     Ok(Json(JigSearchResponse {
         jigs,
         pages,
-        total_jig_count: total_hits,
+        total_jig_count: total_hits - (total_hits - jig_num),
     }))
 }
 
