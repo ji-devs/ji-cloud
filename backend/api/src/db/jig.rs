@@ -331,6 +331,7 @@ from jig
          inner join unnest($1::uuid[])
     with ordinality t(id, ord) using (id)
     inner join jig_admin_data "admin" on admin.jig_id = jig.id
+where blocked is not true
 order by t.ord
     "#,
         ids,
