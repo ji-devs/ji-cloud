@@ -27,6 +27,10 @@ pub struct Content {
 pub struct PlayerSettings {
     /// display mode
     pub display_mode: DisplayMode,
+
+    /// swap the display to be primary left vs. right
+    #[serde(default)]
+    pub swap: bool,
 }
 
 /// Display Mode

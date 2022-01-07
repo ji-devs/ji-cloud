@@ -12,7 +12,16 @@ pub fn render(state: Rc<SidebarSettings>) -> Dom {
             LineKind::CardView,
             vec![
                 Some(make_button(state.clone(), DisplayMode::Single)),
-                Some(make_button(state, DisplayMode::Double)),
+                Some(make_button(state.clone(), DisplayMode::Double)),
+                Some(SettingsButton::new_click(
+                    SettingsButtonKind::Swap,
+                    clone!(state => move || {
+                        state.base.extra.settings.swap.signal()
+                    }),
+                    clone!(state => move || {
+                        state.toggle_swap();
+                    }),
+                )),
             ],
         )],
     }))

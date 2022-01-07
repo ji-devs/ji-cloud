@@ -3,7 +3,7 @@ use utils::prelude::*;
 use wasm_bindgen::JsValue;
 
 use crate::module::_groups::cards::lookup;
-use shared::domain::jig::module::body::_groups::cards::{Card, Mode};
+use shared::domain::jig::module::body::_groups::cards::Card;
 
 //must match @elements/module/_groups/cards/play/card/styles.ts
 //export type Size = "memory" | "flashcards" | "quiz-option" | "quiz-target" | "matching";

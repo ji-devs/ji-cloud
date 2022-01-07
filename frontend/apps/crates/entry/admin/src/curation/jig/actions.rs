@@ -1,7 +1,11 @@
 use std::rc::Rc;
 
 use dominator::clone;
-use shared::{domain::jig::{JigUpdateDraftDataRequest, JigUpdateAdminDataRequest}, error::EmptyError, api::{endpoints::{self, jig::JigAdminDataUpdate}, ApiEndpoint}};
+use shared::{
+    domain::jig::{JigUpdateDraftDataRequest, JigUpdateAdminDataRequest},
+    error::EmptyError,
+    api::{endpoints, ApiEndpoint}
+};
 use utils::prelude::api_with_auth_empty;
 
 use super::state::CurationJig;
