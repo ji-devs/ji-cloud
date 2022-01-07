@@ -34,8 +34,8 @@ pub fn get_card_font_size(value: &str, size: Option<&Size>) -> String {
             let size_scale = match size {
                 Size::Flashcards => 1f32,
                 Size::QuizTarget => 0.80f32,
-                Size::Matching | Size::QuizOption => 0.5f32,
-                Size::Memory => 0.5f32,
+                Size::Matching | Size::QuizOption => 0.45f32,
+                Size::Memory => 0.3f32,
             };
 
             let value_len = value.graphemes(true).count();
