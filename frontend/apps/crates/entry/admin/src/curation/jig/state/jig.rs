@@ -4,12 +4,14 @@ use std::rc::Rc;
 
 use futures_signals::signal::Mutable;
 use futures_signals::signal_vec::MutableVec;
-use shared::domain::jig::{JigFocus, PrivacyLevel, JigRating, JigAdminUpdateData};
-use shared::domain::jig::additional_resource::AdditionalResource;
-use shared::domain::meta::AffiliationId;
 use shared::domain::{
+    meta::AffiliationId,
     category::CategoryId,
-    jig::{JigId, JigResponse, JigUpdateDraftDataRequest, LiteModule},
+    jig::{
+        additional_resource::AdditionalResource,
+        JigFocus, PrivacyLevel, JigRating, JigId, JigResponse, JigUpdateDraftDataRequest,
+        JigUpdateAdminDataRequest, LiteModule
+    },
     meta::{AgeRangeId, GoalId},
 };
 
@@ -68,10 +70,13 @@ impl EditableJig {
             categories: Some(self.categories.get_cloned().into_iter().collect()),
             affiliations: Some(self.affiliations.get_cloned().into_iter().collect()),
             privacy_level: Some(self.privacy_level.get()),
-            admin_data: Some(JigAdminUpdateData {
-                rating: self.rating.get_cloned(),
-                ..Default::default()
-            }),
+            ..Default::default()
+        }
+    }
+
+    pub fn to_update_admin_data_request(&self) -> JigUpdateAdminDataRequest {
+        JigUpdateAdminDataRequest {
+            rating: self.rating.get_cloned(),
             ..Default::default()
         }
     }
