@@ -53,6 +53,19 @@ pub fn render(state: Rc<State>, auto_search: bool) -> Dom {
                         .property("slot", "age")
                         .property("multiple", true)
                         .property_signal("value", age_value_signal(state.clone()))
+                        .child(html!("input-select-option", {
+                            .text(STR_ALL_AGES)
+                            .property_signal("selected", state.search_selected.age_ranges.signal_cloned().map(|age_ranges| {
+                                age_ranges.is_empty()
+                            }))
+                            .event(clone!(state => move |_: events::CustomSelectedChange| {
+                                state
+                                    .search_selected
+                                    .age_ranges
+                                    .lock_mut()
+                                    .clear();
+                            }))
+                        }))
                         .children_signal_vec(state.search_options.age_ranges.signal_cloned().map(clone!(state => move|age_ranges| {
                             age_ranges.iter().map(|age_range| {
                                 html!("input-select-option", {
