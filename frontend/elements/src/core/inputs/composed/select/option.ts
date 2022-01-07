@@ -8,8 +8,9 @@ export class _ extends LitElement {
         return [
             css`
                 base-option {
-                    display: flex;
-                    justify-content: space-between;
+                    display: grid;
+                    grid-template-columns: auto 1fr;
+                    align-items: center;
                     column-gap: 10px;
                     padding: 4px 10px;
                 }
@@ -17,8 +18,20 @@ export class _ extends LitElement {
                 base-option[active] {
                     background-color: var(--light-blue-2);
                 }
-                .check-mark {
-                    color: var(--main-blue);
+                .checkbox {
+                    display: inline-grid;
+                    height: 16px;
+                    width: 16px;
+                    border-radius: 3px;
+                    border: solid 1px #c7d3db;
+                    box-sizing: border-box;
+                }
+                :host([selected]) .checkbox {
+                    background-color: var(--main-blue);
+                    color: white;
+                    place-content: center;
+                    font-size: 12px;
+                    border: none;
                 }
             `,
         ];
@@ -39,10 +52,17 @@ export class _ extends LitElement {
                 ?selected=${this.selected}
                 @custom-selected="${this.onSelectedChange}"
             >
+                <span class="checkbox">
+                    ${
+                        this.selected
+                            ? html`<fa-icon icon="fa-solid fa-check"></fa-icon>`
+                        : nothing
+                    }
+                </span>
                 <slot></slot>
-                ${this.selected
+                <!-- ${this.selected
                     ? html` <span class="check-mark">✔</span> `
-                    : nothing}
+                    : nothing} -->
             </base-option>
         `;
     }
