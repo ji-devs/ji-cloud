@@ -648,6 +648,7 @@ impl Into<actix_web::Error> for MediaProcessing {
 pub enum ReportError {
     InternalServerError(anyhow::Error),
     ResourceNotFound,
+    SendEmailFail,
 }
 
 impl<T: Into<anyhow::Error>> From<T> for ReportError {
@@ -664,6 +665,11 @@ impl Into<actix_web::Error> for ReportError {
             Self::ResourceNotFound => BasicError::with_message(
                 http::StatusCode::NOT_FOUND,
                 "Resource Not Found".to_owned(),
+            )
+            .into(),
+            Self::SendEmailFail => BasicError::with_message(
+                http::StatusCode::INTERNAL_SERVER_ERROR,
+                "Failed to report to email".to_owned(),
             )
             .into(),
         }

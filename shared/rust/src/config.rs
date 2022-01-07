@@ -146,10 +146,7 @@ impl RemoteTarget {
 
     pub fn pages_url(&self) -> String {
         match self {
-            Self::Local => {
-                env_var("LOCAL_PAGES_URL").unwrap_or("http://localhost:4104".to_string())
-            }
-            Self::Sandbox => "https://sandbox.jigzi.org".to_string(),
+            Self::Local | Self::Sandbox => "https://sandbox.jigzi.org".to_string(),
             Self::Release => "https://jigzi.org".to_string(),
         }
     }
@@ -216,6 +213,13 @@ impl RemoteTarget {
             Self::Local
             | Self::Sandbox => "https://maps.googleapis.com/maps/api/js?key=AIzaSyCtU4taX_GG36bXfZr98HSwZTBNYo9HS1I&libraries=places",
             Self::Release => "https://maps.googleapis.com/maps/api/js?key=AIzaSyCU1HygSZgK4L3qPdRmrV-dTnS1GBBiqyE&libraries=places"
+        }
+    }
+
+    pub fn jigzi_info_email(&self) -> &'static str {
+        match self {
+            Self::Local | Self::Sandbox => "JiTestLB@gmail.com",
+            Self::Release => "info@jigzi.org",
         }
     }
 

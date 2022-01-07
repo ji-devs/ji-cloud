@@ -11,8 +11,9 @@ use super::JigId;
 #[cfg_attr(feature = "backend", sqlx(transparent))]
 pub struct ReportId(pub Uuid);
 
-/// Request for reporting a jig
+/// Jig report details
 #[derive(Serialize, Deserialize, Clone, Debug)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[serde(rename_all = "camelCase")]
 pub struct JigReport {
     /// Id of report
@@ -48,6 +49,26 @@ pub struct CreateJigReport {
     pub report_type: JigReportType,
 }
 
+/// Request for reporting a jig
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct JigReportEmail {
+    /// Display name of the jig.
+    pub display_name: String,
+
+    /// Report type of the report.
+    pub report_type: JigReportType,
+
+    /// Optional name for reporter
+    pub reporter_name: Option<String>,
+
+    /// Optional email of reporter
+    pub reporter_email: Option<String>,
+
+    /// Creator name of jig
+    pub creator_name: String,
+}
+
 /// Type of report
 #[derive(Serialize, Deserialize, Copy, Clone, Eq, PartialEq, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
@@ -63,7 +84,23 @@ pub enum JigReportType {
     #[allow(missing_docs)]
     Privacy = 3,
     #[allow(missing_docs)]
-    Other = 4,
+    JiTapGameNotPlaying = 4,
+    #[allow(missing_docs)]
+    Other = 5,
+}
+
+impl JigReportType {
+    #[allow(missing_docs)]
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            JigReportType::Offensive => "Offensive",
+            JigReportType::CopyrightInfringement => "Copyright Infringement",
+            JigReportType::Spam => "Spam",
+            JigReportType::Privacy => "Privacy",
+            JigReportType::JiTapGameNotPlaying => "Ji Tap Game Not Playing",
+            JigReportType::Other => "Other",
+        }
+    }
 }
 
 into_uuid![ReportId];

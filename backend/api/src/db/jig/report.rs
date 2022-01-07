@@ -1,21 +1,20 @@
 use crate::error;
-use crate::extractor::TokenUser;
 use shared::domain::jig::{
-    report::{JigReport, JigReportType, ReportId},
+    report::{JigReport, JigReportEmail, JigReportType, ReportId},
     JigId,
 };
-use sqlx::PgPool;
+use sqlx::{PgConnection, PgPool};
 use uuid::Uuid;
 
 pub async fn create_report(
     pool: &PgPool,
     jig_id: JigId,
     report_type: JigReportType,
-    claims: Option<TokenUser>,
+    user_id: Option<Uuid>,
 ) -> Result<ReportId, error::ReportError> {
     check_jig(pool, jig_id).await?;
 
-    if let Some(reporter_id) = claims {
+    if let Some(user_id) = user_id {
         sqlx::query!(
             r#"
     insert into jig_report(jig_id, report_type, reporter_id)
@@ -24,7 +23,7 @@ pub async fn create_report(
             "#,
             jig_id.0,
             report_type as i16,
-            reporter_id.0.user_id
+            user_id
         )
         .fetch_one(pool)
         .await
@@ -86,6 +85,52 @@ where id = $1 and jig_id = $2
         reporter_name: row.name,
         reporter_email: row.email,
         created_at: row.created_at,
+    });
+
+    Ok(report)
+}
+
+pub async fn get_report_email(
+    conn: &mut PgConnection,
+    jig_id: JigId,
+    report_id: ReportId,
+) -> Result<Option<JigReportEmail>, error::ReportError> {
+    let report = sqlx::query!(
+        //language=SQL
+        r#"
+select display_name                               as "display_name!",    
+       report_type                                as "report_type!: JigReportType",                  
+       (
+            select given_name || ' '::text || family_name
+            from user_profile
+            where user_profile.user_id = reporter_id
+        )                                       as "name?",
+        (
+            select email::text
+            from user_email
+            where user_email.user_id = reporter_id
+        )                                       as "email?",
+        (
+            select given_name || ' '::text || family_name
+            from user_profile
+            where user_profile.user_id = creator_id
+        )                                       as "creator_name!"
+from jig_report
+    left join jig on jig.id = jig_report.jig_id
+    left join jig_data on jig_data.id = jig.live_id
+where jig_report.id = $1 and jig_report.jig_id = $2
+"#,
+        report_id.0,
+        jig_id.0
+    )
+    .fetch_optional(&mut *conn)
+    .await?
+    .map(|row| JigReportEmail {
+        display_name: row.display_name,
+        report_type: row.report_type,
+        reporter_name: row.name,
+        reporter_email: row.email,
+        creator_name: row.creator_name,
     });
 
     Ok(report)
