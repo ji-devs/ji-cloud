@@ -11,6 +11,7 @@ import "@elements/module/_groups/cards/edit/sidebar/widgets/theme-selector/optio
 /* components */
 
 // theme selector
+import "@elements/module/_common/edit/widgets/theme-selector/container";
 
 // lists
 import "@elements/module/_common/edit/widgets/lists/single/single-list";
