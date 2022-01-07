@@ -1,6 +1,7 @@
 use std::rc::Rc;
 
 use dominator::clone;
+use futures::join;
 use shared::{
     domain::jig::{JigUpdateDraftDataRequest, JigUpdateAdminDataRequest},
     error::EmptyError,
@@ -52,8 +53,10 @@ impl CurationJig {
     pub fn save_and_publish(self: &Rc<Self>) {
         let state = self;
         state.loader.load(clone!(state => async move {
-            state.save_draft().await;
-            state.save_admin_data().await;
+            join!(
+                state.save_draft(),
+                state.save_admin_data(),
+            );
             state.publish().await;
         }))
     }
