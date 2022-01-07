@@ -12,6 +12,8 @@ export class _ extends LitElement {
                     /*font-size: var(--font-size, 40rem);*/
                     color: var(--color, black);
                     text-align: center;
+                    display: inline-block;
+                    margin: 1em;
 
                     white-space: pre-wrap;
                 }
