@@ -14,10 +14,15 @@ export class _ extends LitElement {
                     display: grid;
                 }
                 .img-wrapper {
-                    height: 88px;
                     display: grid;
                     justify-content: center;
                     align-items: end;
+                    height: 68px;
+                }
+                @media (min-width: 1920px) {
+                    .img-wrapper {
+                        height: 88px;
+                    }
                 }
                 .overlay {
                     position: absolute;
