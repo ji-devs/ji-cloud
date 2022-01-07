@@ -34,7 +34,7 @@ impl CurationJig {
                     }))
                 }),
                 html!("star-rating", {
-                    .property("slot", "back")
+                    .property("slot", "rating")
                     .property_signal("rating", state.jig.rating.signal_cloned().map(|rating| {
                         rating.map(|rating| {
                             rating as u8

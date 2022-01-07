@@ -27,15 +27,21 @@ export class _ extends LitElement {
                 gap: 0 32px;
             }
             .input-container {
-                margin-top: 12px;
                 padding: 31px 24px;
                 border-radius: 12px;
                 border: solid 2px #e6f0ff;
+                max-height: calc(100vh - 300px);
+                overflow: auto;
             }
             ::slotted([slot="inputs"]) {
-                display: flex;
-                flex-direction: column;
+                display: grid;
+                grid-template-rows: repeat(5, auto) 200px 200px;
                 gap: 24px 0;
+            }
+            .right-side {
+                display: grid;
+                row-gap: 20px;
+                align-self: start;
             }
             .player {
                 display: grid;
@@ -71,8 +77,11 @@ export class _ extends LitElement {
             <div class="input-container">
                 <slot name="inputs"></slot>
             </div>
-            <div class="player">
-                <slot name="player"></slot>
+            <div class="right-side">
+                <div class="player">
+                    <slot name="player"></slot>
+                </div>
+                <slot name="rating"></slot>
             </div>
             <slot name="loader"></slot>
         `;
