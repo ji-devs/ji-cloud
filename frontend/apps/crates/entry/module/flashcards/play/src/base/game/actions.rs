@@ -18,7 +18,7 @@ impl Game {
 
         //borrow-checker fails with if/else here
         {
-            if let Some(next) = get_current(&mut self.deck.borrow_mut(), &mut self.rng.borrow_mut())
+            if let Some(next) = get_current(&self.base, &mut self.deck.borrow_mut())
             {
                 self.current.set(next);
                 return;
@@ -47,7 +47,7 @@ impl Game {
 
         let mut deck = get_fresh_deck(&self.base, &mut rng);
 
-        let current = get_current(&mut deck, &mut rng).unwrap_ji();
+        let current = get_current(&self.base, &mut deck).unwrap_ji();
 
         *self.deck.borrow_mut() = deck;
         self.current.set(current);
@@ -62,9 +62,9 @@ pub(super) fn get_fresh_deck(base: &Base, rng: &mut ThreadRng) -> Vec<CardPair> 
     deck
 }
 
-pub(super) fn get_current(deck: &mut Vec<CardPair>, rng: &mut ThreadRng) -> Option<Current> {
+pub(super) fn get_current(base: &Base, deck: &mut Vec<CardPair>) -> Option<Current> {
     deck.pop().map(|pair| {
-        if rng.gen::<bool>() {
+        if base.settings.swap {
             Current {
                 card: pair.0,
                 other: pair.1,

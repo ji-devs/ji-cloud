@@ -1,9 +1,5 @@
 use crate::state::*;
 use futures_signals::signal::Mutable;
-use rand::{
-    distributions::{Distribution, Standard},
-    prelude::*,
-};
 use shared::domain::jig::module::body::{_groups::cards::Card, flashcards::DisplayMode};
 use std::rc::Rc;
 use utils::prelude::*;
@@ -33,12 +29,5 @@ impl MainSettings {
             right,
             display_mode,
         }
-    }
-
-    pub fn get_random<T>(&self) -> T
-    where
-        Standard: Distribution<T>,
-    {
-        self.base.extra.settings.rng.borrow_mut().gen::<T>()
     }
 }
