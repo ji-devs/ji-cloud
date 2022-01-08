@@ -327,11 +327,10 @@ select jig.id                                       as "id!: JigId",
        curated                                  as "curated!",
        jig_focus                                as "jig_focus!: JigFocus"
 from jig
-
          inner join unnest($1::uuid[])
     with ordinality t(id, ord) using (id)
     inner join jig_admin_data "admin" on admin.jig_id = jig.id
-where blocked is not true
+where blocked = false
 order by t.ord
     "#,
         ids,
