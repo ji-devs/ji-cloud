@@ -364,7 +364,6 @@ pub struct JigAdminData {
 pub struct JigUpdateAdminDataRequest {
     /// Rating for jig, weighted for jig search
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(default)]
     pub rating: Option<JigRating>,
 
     /// if true does not appear in search
@@ -383,9 +382,7 @@ pub struct JigUpdateAdminDataRequest {
 #[serde(rename_all = "camelCase")]
 pub struct JigAdminUpdateData {
     /// Rating for jig, weighted for jig search
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(default)]
-    pub rating: Option<JigRating>,
+    pub rating: Option<Option<JigRating>>,
 
     /// if true does not appear in search
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -410,8 +407,6 @@ pub enum JigRating {
     Two = 2,
     #[allow(missing_docs)]
     Three = 3,
-    #[allow(missing_docs)]
-    NoRating = 17,
 }
 
 impl TryFrom<u8> for JigRating {
@@ -422,7 +417,6 @@ impl TryFrom<u8> for JigRating {
             1 => Ok(Self::One),
             2 => Ok(Self::Two),
             3 => Ok(Self::Three),
-            17 => Ok(Self::NoRating),
             _ => Err(()),
         }
     }
