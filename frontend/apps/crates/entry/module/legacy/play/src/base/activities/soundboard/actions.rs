@@ -8,6 +8,8 @@ impl Soundboard {
     pub fn on_start(self: Rc<Self>) {
         let state = self;
 
+        state.base.allow_stage_click();
+
         if let Some(audio_filename) = state.raw.audio_filename.as_ref() {
             state.base.audio_manager.play_clip_on_ended(
                 state.base.activity_media_url(&audio_filename),
@@ -43,6 +45,8 @@ impl Soundboard {
 impl SoundboardItem {
     pub fn on_click(self: Rc<Self>, parent: Rc<Soundboard>) {
         let state = self;
+
+        parent.phase.set_neq(Phase::Playing);
 
         let was_revealed = state.revealed.replace(true);
         if !was_revealed {

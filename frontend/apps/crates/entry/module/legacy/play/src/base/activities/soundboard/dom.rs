@@ -21,9 +21,9 @@ impl Soundboard {
             .child_signal(
                 state.phase.signal().map(clone!(state => move |phase| {
                     match phase {
-                        Phase::Intro => {
-                            None
-                        },
+                        // Phase::Intro => {
+                        //     None
+                        // },
 
                         Phase::Hints => {
                             Some(svg!("svg", {
@@ -44,7 +44,7 @@ impl Soundboard {
                             }))
                         },
 
-                        Phase::Playing => {
+                        Phase::Intro | Phase::Playing => {
                             Some(svg!("svg", {
                                 .class(&*FULL_STAGE)
                                 .children_signal_vec(

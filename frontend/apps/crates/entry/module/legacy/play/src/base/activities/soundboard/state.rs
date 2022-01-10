@@ -34,13 +34,6 @@ impl Soundboard {
             phase: Mutable::new(Phase::Intro),
         });
 
-        // TODO- soundboard listens on the foreground...
-        // but still need to detect sticker triggers...
-        // or maybe no foreground, just global window click?
-        // _self.base.set_bg_listener(clone!(_self => move || {
-        //     _self.clone().on_bg_click();
-        // }));
-
         _self.base.insert_start_listener(clone!(_self => move || {
             _self.clone().on_start();
         }));
