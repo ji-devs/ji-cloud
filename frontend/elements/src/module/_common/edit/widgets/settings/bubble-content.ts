@@ -55,20 +55,13 @@ export class _ extends LitElement {
     value?: any;
 
     renderLabelSuffix() {
-        const suffix_config = STR_LABEL_SUFFIX[this.kind];
+        const suffix = STR_LABEL_SUFFIX[this.kind];
 
-        if (!suffix_config) {
+        if (!suffix) {
             return nothing;
         }
 
-        let suffix = null;
-        if (this.value > 1) {
-            suffix = suffix_config[1];
-        } else {
-            suffix = suffix_config[0];
-        }
-
-        return html`<span>${suffix}</span>`;
+        return html`<span>${this.value > 1 ? suffix[1] : suffix[0]}</span>`;
     }
 
     render() {
