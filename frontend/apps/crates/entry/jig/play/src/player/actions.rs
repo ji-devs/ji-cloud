@@ -53,6 +53,20 @@ pub fn navigate_forward(state: Rc<State>) {
             navigate_to_index(Rc::clone(&state), active_module + 1);
         } else {
             state.done.set(true);
+
+            // Fire off a request to increment the play count only once a JIG has been played to
+            // the end.
+            if !state.player_options.draft {
+                state.loader.load(clone!(state => async move {
+                    // We don't need to handle an Ok Result; We can ignore Err, nothing is dependent on the
+                    // success of this call. The failure should be noted in the server logs.
+                    let _ = api_no_auth_empty::<EmptyError, ()>(
+                        &jig::Play::PATH.replace("{id}", &state.jig_id.0.to_string()),
+                        jig::Play::METHOD,
+                        None,
+                    ).await;
+                }))
+            }
         }
     }
 }
@@ -128,14 +142,6 @@ pub fn load_jig(state: Rc<State>) {
             },
             Err(_) => {},
         }
-
-        // We don't need to handle an Ok Result; We can ignore Err, nothing is dependent on the
-        // success of this call. The failure should be noted in the server logs.
-        let _ = api_no_auth_empty::<EmptyError, ()>(
-            &jig::Play::PATH.replace("{id}", &state.jig_id.0.to_string()),
-            jig::Play::METHOD,
-            None,
-        ).await;
     }));
 }
 
