@@ -1,5 +1,5 @@
 use crate::register::state::{Step, Step1Data};
-use futures_signals::signal::{Mutable, Signal, SignalExt};
+use futures_signals::{signal::{Mutable, Signal, SignalExt}, signal_vec::MutableVec};
 use std::cell::RefCell;
 
 pub struct State {
@@ -9,7 +9,7 @@ pub struct State {
     pub location_error: Mutable<bool>,
     pub language: RefCell<Option<String>>,
     pub language_error: Mutable<bool>,
-    pub persona: RefCell<Option<Vec<String>>>,
+    pub persona: MutableVec<String>,
     pub persona_error: Mutable<bool>,
     pub organization: RefCell<Option<String>>,
     pub organization_error: Mutable<bool>,
@@ -27,7 +27,7 @@ impl State {
             location_error: Mutable::new(false),
             language: RefCell::new(None),
             language_error: Mutable::new(false),
-            persona: RefCell::new(None),
+            persona: MutableVec::new(),
             persona_error: Mutable::new(false),
             organization: RefCell::new(None),
             organization_error: Mutable::new(false),
