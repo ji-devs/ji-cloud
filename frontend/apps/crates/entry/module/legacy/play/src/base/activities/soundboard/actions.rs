@@ -56,7 +56,6 @@ impl SoundboardItem {
                 state.base.activity_media_url(&audio_filename),
                 clone!(state => move || {
                     if let Some(index) = state.jump_index {
-                        let index = index + 1; // bump for cover
                         log::info!("going to index {}!", index);
 
                         state.base.navigate(NavigationTarget::Index(index));
