@@ -8,7 +8,7 @@ use utils::{events, languages::Language};
 
 use super::super::state::Publish;
 
-const STR_LANGUAGE_LABEL: &'static str = "Language of instructions";
+const STR_LANGUAGE_LABEL: &'static str = "Language of instruction";
 const STR_LANGUAGE_PLACEHOLDER: &'static str = "Select language";
 
 impl Publish {

@@ -3,10 +3,8 @@ import "@elements/core/images/ui";
 import { nothing } from "lit-html";
 import { JigFocus } from "@elements/module/_common/types";
 
-const STR_HEADER_FIRST_1 = "Settings and";
-const STR_HEADER_FIRST_2 = " info.";
-const STR_HEADER_SECOND = "Last step before publishing";
-const STR_THUMBNAIL = "Thumbnail";
+const STR_HEADER_FIRST = "Publish your";
+const STR_HEADER_SECOND = "This information helps users find your JIG";
 
 @customElement("jig-edit-publish")
 export class _ extends LitElement {
@@ -151,9 +149,8 @@ export class _ extends LitElement {
                     <div class="width-holder">
                         <div class="header">
                             <h1>
-                                ${STR_HEADER_FIRST_1}
-                                ${this.jigFocus === "modules" ? "JIG" : "resource"}
-                                ${STR_HEADER_FIRST_2}
+                                ${STR_HEADER_FIRST}
+                                ${this.jigFocus === "modules" ? "JIG" : "resource"}!
                             </h1>
                             <h3>${STR_HEADER_SECOND}</h3>
                             ${
@@ -165,7 +162,6 @@ export class _ extends LitElement {
                         <div class="main">
                             <div class="column-1">
                                 <div class="img-wrapper">
-                                    <h4>${STR_THUMBNAIL}</h4>
                                     <slot name="edit-cover"></slot>
                                     <slot name="img"></slot>
                                 </div>

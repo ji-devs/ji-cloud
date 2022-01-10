@@ -73,7 +73,7 @@ impl CurationJig {
                     .property("slot", "inputs")
                     .children(&mut [
                         html!("input-wrapper", {
-                            .property("label", "JIG's name")
+                            .property("label", "JIG name")
                             .children(&mut [
                                 html!("input" => HtmlInputElement, {
                                     .with_node!(elem => {

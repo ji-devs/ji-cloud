@@ -12,7 +12,7 @@ use super::super::super::{actions::search, state::State};
 
 const STR_SEARCH: &str = "Advanced Search";
 const STR_GOAL_LABEL: &str = "Teaching Goal";
-const STR_GOAL_PLACEHOLDER: &str = "Select from the list";
+const STR_GOAL_PLACEHOLDER: &str = "";
 const STR_AFFILIATION_LABEL: &str = "Affiliation";
 const STR_AFFILIATION_PLACEHOLDER: &str = "Select one or more from the list";
 

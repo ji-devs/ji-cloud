@@ -32,16 +32,15 @@ pub mod categories_select;
 pub mod language;
 
 const STR_PUBLISH: &str = "Publish ";
-const STR_PUBLISH_LATER: &str = "I will publish later";
+const STR_PUBLISH_LATER: &str = "Publish later";
 const STR_PUBLIC_LABEL_1: &str = "My ";
 const STR_PUBLIC_LABEL_2: &str = " is public";
 const STR_NAME_LABEL: &str = "’s name";
 const STR_NAME_PLACEHOLDER_1: &str = "Type your ";
 const STR_NAME_PLACEHOLDER_2: &str = "’s name here";
 const STR_DESCRIPTION_LABEL: &str = "Description";
-const STR_DESCRIPTION_PLACEHOLDER_1: &str = "This ";
-const STR_DESCRIPTION_PLACEHOLDER_2: &str = " is about… (include words that will help others find this ";
-const STR_DESCRIPTION_PLACEHOLDER_3: &str = " easily)";
+const STR_DESCRIPTION_PLACEHOLDER_1: &str = "What's this ";
+const STR_DESCRIPTION_PLACEHOLDER_2: &str = " about?";
 const STR_PUBLIC_POPUP_TITLE: &str = "Sharing is Caring!";
 const STR_PUBLIC_POPUP_BODY_1: &str = "Are you sure you want to keep this ";
 const STR_PUBLIC_POPUP_BODY_2: &str = " private? Please consider sharing your ";
@@ -182,12 +181,10 @@ fn render_page(state: Rc<Publish>) -> Dom {
                 .child(html!("textarea" => HtmlTextAreaElement, {
                     .with_node!(elem => {
                         .property("placeholder", format!(
-                            "{}{}{}{}{}",
+                            "{}{}{}",
                             STR_DESCRIPTION_PLACEHOLDER_1,
                             state.jig.focus_display(),
-                            STR_DESCRIPTION_PLACEHOLDER_2,
-                            state.jig.focus_display(),
-                            STR_DESCRIPTION_PLACEHOLDER_3,
+                            STR_DESCRIPTION_PLACEHOLDER_2
                         ))
                         .text_signal(state.jig.description.signal_cloned())
                         .event(clone!(state => move |_: events::Input| {
