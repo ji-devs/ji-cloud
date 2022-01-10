@@ -78,11 +78,11 @@ impl Publish {
 
     fn form_invalid(self: Rc<Self>) -> bool {
         self.jig.display_name.lock_ref().is_empty()
-            || self.jig.description.lock_ref().is_empty()
-            || self.jig.language.lock_ref().is_empty()
-            || self.jig.age_ranges.lock_ref().is_empty()
-            || self.jig.goals.lock_ref().is_empty()
-            || self.jig.categories.lock_ref().is_empty()
+            // || self.jig.description.lock_ref().is_empty()
+            // || self.jig.language.lock_ref().is_empty()
+            // || self.jig.age_ranges.lock_ref().is_empty()
+            // || self.jig.goals.lock_ref().is_empty()
+            // || self.jig.categories.lock_ref().is_empty()
     }
 
     async fn save_and_publish(self: Rc<Self>) -> Result<(), ()> {
