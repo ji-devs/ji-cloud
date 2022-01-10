@@ -1,6 +1,9 @@
 use super::{actions, state::*};
 use dominator::{clone, html, with_node, Dom};
-use futures_signals::signal::Mutable;
+use futures_signals::{
+    signal::{Mutable, SignalExt},
+    signal_vec::SignalVecExt,
+};
 use std::rc::Rc;
 use web_sys::HtmlInputElement;
 
@@ -52,22 +55,46 @@ impl Step2Page {
                         dom.property_signal("error", state.language_error.signal())
                     })
                 ),
-                SimpleSelect::render_mixin(
-                    SimpleSelect::new(
-                        Some(STR_PERSONA_LABEL),
-                        Some(STR_PERSONA_PLACEHOLDER),
-                        None,
-                        STR_PERSONA_OPTIONS.to_vec(),
-                        clone!(state => move |value| {
-                            *state.persona.borrow_mut() = value.map(|x| vec![x.to_string()]);
-                            state.evaluate_persona_error();
+                html!("input-select", {
+                    .property("slot", "persona")
+                    .property("label", STR_PERSONA_LABEL)
+                    .property("placeholder", STR_PERSONA_PLACEHOLDER)
+                    .property("multiple", true)
+                    .property_signal("value", state.persona.signal_vec_cloned().to_signal_cloned().map(|persona| {
+                        persona.join(", ")
+                    }))
+                    .children(STR_PERSONA_OPTIONS.iter().map(|persona| {
+                        html!("input-select-option", {
+                            .text(persona)
+                            .property_signal(
+                                "selected",
+                                state.persona.signal_vec_cloned().to_signal_cloned().map(move |p| {
+                                    p.iter().find(|p| p == persona).is_some()
+                                })
+                            )
+                            .event(clone!(state => move |evt: events::CustomSelectedChange| {
+                                let pos = state.persona.lock_ref().iter().position(|p| p == persona);
+
+                                if evt.selected() {
+                                    if pos.is_none() {
+                                        // Only add the selection if it doesn't exist yet and the
+                                        // event is selected.
+                                        state.persona.lock_mut().push_cloned(persona.to_string());
+                                    }
+                                } else {
+                                    if let Some(pos) = pos {
+                                        // Only remove the selection if it does exist and the event
+                                        // is not selected.
+                                        state.persona.lock_mut().remove(pos);
+                                    }
+                                }
+
+                                state.evaluate_persona_error();
+                            }))
                         })
-                    ),
-                    Some("persona"),
-                    clone!(state => move |dom| {
-                        dom.property_signal("error", state.persona_error.signal())
-                    })
-                ),
+                    }))
+                    .property_signal("error", state.persona_error.signal())
+                }),
                 html!("input-wrapper", {
                     .property("slot", "organization")
                     .property("label", STR_ORGANIZATION_LABEL)

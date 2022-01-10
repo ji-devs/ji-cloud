@@ -12,10 +12,7 @@ pub fn submit(state: Rc<State>) {
     let language_error = state.language_error.get();
     let _persona_error = state.persona_error.get();
 
-    let persona_error = match &*state.persona.borrow() {
-        None => true,
-        Some(x) => x.is_empty(),
-    };
+    let persona_error = state.persona.lock_ref().is_empty();
     state.persona_error.set_neq(persona_error);
 
     let location_error = match &*state.location_json.borrow() {
@@ -47,11 +44,7 @@ impl State {
     }
 
     pub fn evaluate_persona_error(&self) {
-        let error = match &*self.persona.borrow() {
-            None => true,
-            Some(x) => x.is_empty(),
-        };
-        self.persona_error.set_neq(error);
+        self.persona_error.set_neq(self.persona.lock_ref().is_empty());
     }
 }
 
@@ -60,7 +53,7 @@ fn next_step(state: Rc<State>) {
         step_1: state.step_1.clone(),
         location_json: state.location_json.borrow().clone(),
         language: state.language.borrow().as_ref().unwrap_ji().clone(),
-        persona: state.persona.borrow().as_ref().unwrap_ji().clone(),
+        persona: state.persona.lock_ref().to_vec(),
         organization: state.organization.borrow().clone(),
         marketing: *state.marketing.borrow(),
     }));

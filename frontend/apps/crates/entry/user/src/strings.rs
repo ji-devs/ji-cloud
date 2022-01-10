@@ -65,6 +65,7 @@ pub mod register {
             "Administrator",
             "Shaliach",
             "Tutor",
+            "Content manager",
         ];
         pub const STR_PERSONA_PLACEHOLDER: &str = "Select from the list";
         pub const STR_ONE_MORE_STEP: &str = "One more step";

@@ -166,17 +166,36 @@ impl ProfilePage {
                 }),
                 html!("input-select", {
                     .property("slot", "persona")
-                    .property_signal("value", state.user.persona.signal_cloned().map(|persona| {
-                        // Temporary hacked-in fix so that the frontend still works for single
-                        // personas.
-                        // TODO This needs to support multiple personas
-                        persona.first().map_or("".to_string(), |p| p.clone())
+                    .property("multiple", true)
+                    .property_signal("value", state.user.persona.signal_vec_cloned().to_signal_cloned().map(|persona| {
+                        persona.join(", ")
                     }))
                     .children(STR_PERSONA_OPTIONS.iter().map(|persona| {
                         html!("input-select-option", {
                             .text(persona)
-                            .event(clone!(state => move |_: events::CustomSelectedChange| {
-                                state.user.persona.set(vec![persona.to_string()]);
+                            .property_signal(
+                                "selected",
+                                state.user.persona.signal_vec_cloned().to_signal_cloned().map(move |p| {
+                                    p.iter().find(|p| p == persona).is_some()
+                                })
+                            )
+                            .event(clone!(state => move |evt: events::CustomSelectedChange| {
+                                let pos = state.user.persona.lock_ref().iter().position(|p| p == persona);
+
+                                if evt.selected() {
+                                    if pos.is_none() {
+                                        // Only add the selection if it doesn't exist yet and the
+                                        // event is selected.
+                                        state.user.persona.lock_mut().push_cloned(persona.to_string());
+                                    }
+                                } else {
+                                    if let Some(pos) = pos {
+                                        // Only remove the selection if it does exist and the event
+                                        // is not selected.
+                                        state.user.persona.lock_mut().remove(pos);
+                                    }
+                                }
+
                                 actions::save_profile(Rc::clone(&state));
                             }))
                         })
