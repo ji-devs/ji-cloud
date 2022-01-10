@@ -43,7 +43,7 @@ impl State {
             Some(module) => {
                 if let Some(module) = &**module {
                     if module.kind != ModuleKind::Cover {
-                        modules.push(Rc::new(None));
+                        modules.insert(0, Rc::new(None));
                     }
                 };
             },
