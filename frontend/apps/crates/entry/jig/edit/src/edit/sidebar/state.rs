@@ -35,11 +35,13 @@ impl State {
             .collect();
 
         match modules.get(0) {
-            // if there's no first module
+            // If there are no modules, add a default placeholder which will be used for setting
+            // a cover on the JIG.
             None => {
                 modules.push(Rc::new(None));
             },
-            // if first in not on kind cover
+            // If the first module is not a cover module, insert a placeholder module before that
+            // so that a cover can still be set on the JIG.
             Some(module) => {
                 if let Some(module) = &**module {
                     if module.kind != ModuleKind::Cover {
