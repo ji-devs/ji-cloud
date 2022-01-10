@@ -12,6 +12,7 @@ use super::super::{
     state::State,
 };
 
+#[allow(dead_code)] // TODO: remove once advanced search is enabled again
 mod advanced_search;
 mod categories_select;
 
@@ -129,7 +130,8 @@ pub fn render(state: Rc<State>, auto_search: bool) -> Dom {
                         }))
                     }),
                 ])
-                .child(advanced_search::render(state))
+                // TODO: only disabled for MVP
+                // .child(advanced_search::render(state))
             }))
         }))
     })
