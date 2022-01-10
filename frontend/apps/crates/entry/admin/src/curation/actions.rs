@@ -23,7 +23,6 @@ impl Curation {
             Err(_) => todo!(),
             Ok(meta) => {
                 self.ages.set(meta.age_ranges);
-                self.goals.set(meta.goals);
                 self.affiliations.set(meta.affiliations);
             }
         };

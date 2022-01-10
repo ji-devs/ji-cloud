@@ -2,7 +2,7 @@ use std::{collections::HashMap, rc::Rc};
 
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::Mutable;
-use shared::domain::{category::{Category, CategoryId}, meta::{Affiliation, AgeRange, Goal, ResourceType}};
+use shared::domain::{category::{Category, CategoryId}, meta::{Affiliation, AgeRange, ResourceType}};
 use utils::languages::{Language, JIG_LANGUAGES};
 
 use super::super::state::State as JigEditState;
@@ -14,7 +14,6 @@ pub struct Publish {
     // categories has label lookup since it's both more complex to lookup and used more then others (pills)
     pub category_label_lookup: Mutable<HashMap<CategoryId, String>>,
     pub resource_types: Mutable<Vec<ResourceType>>,
-    pub goals: Mutable<Vec<Goal>>,
     pub ages: Mutable<Vec<AgeRange>>,
     pub affiliations: Mutable<Vec<Affiliation>>,
     pub jig: PublishJig,
@@ -30,7 +29,6 @@ impl Publish {
         jig: PublishJig,
         categories: Vec<Category>,
         category_label_lookup: HashMap<CategoryId, String>,
-        goals: Vec<Goal>,
         ages: Vec<AgeRange>,
         affiliations: Vec<Affiliation>,
         resource_types: Vec<ResourceType>,
@@ -41,7 +39,6 @@ impl Publish {
             jig,
             categories: Mutable::new(categories),
             category_label_lookup: Mutable::new(category_label_lookup),
-            goals: Mutable::new(goals),
             ages: Mutable::new(ages),
             affiliations: Mutable::new(affiliations),
             resource_types: Mutable::new(resource_types),

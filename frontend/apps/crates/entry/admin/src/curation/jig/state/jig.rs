@@ -12,7 +12,7 @@ use shared::domain::{
         JigFocus, PrivacyLevel, JigRating, JigId, JigResponse, JigUpdateDraftDataRequest,
         JigUpdateAdminDataRequest, LiteModule
     },
-    meta::{AgeRangeId, GoalId},
+    meta::AgeRangeId,
 };
 
 #[derive(Clone)]
@@ -24,7 +24,6 @@ pub struct EditableJig {
     pub description: Mutable<String>,
     pub other_keywords: Mutable<String>,
     pub age_ranges: Mutable<HashSet<AgeRangeId>>,
-    pub goals: Mutable<HashSet<GoalId>>,
     pub language: Mutable<String>,
     pub categories: Mutable<HashSet<CategoryId>>,
     pub affiliations: Mutable<HashSet<AffiliationId>>,
@@ -45,7 +44,6 @@ impl From<JigResponse> for EditableJig {
             description: Mutable::new(jig.jig_data.description.clone()),
             other_keywords: Mutable::new(jig.jig_data.other_keywords.clone()),
             age_ranges: Mutable::new(HashSet::from_iter(jig.jig_data.age_ranges)),
-            goals: Mutable::new(HashSet::from_iter(jig.jig_data.goals)),
             language: Mutable::new(jig.jig_data.language),
             categories: Mutable::new(HashSet::from_iter(jig.jig_data.categories)),
             affiliations: Mutable::new(HashSet::from_iter(jig.jig_data.affiliations)),
@@ -67,7 +65,6 @@ impl EditableJig {
             description: Some(self.description.get_cloned()),
             other_keywords: Some(self.other_keywords.get_cloned()),
             age_ranges: Some(self.age_ranges.get_cloned().into_iter().collect()),
-            goals: Some(self.goals.get_cloned().into_iter().collect()),
             language: Some(self.language.get_cloned()),
             categories: Some(self.categories.get_cloned().into_iter().collect()),
             affiliations: Some(self.affiliations.get_cloned().into_iter().collect()),

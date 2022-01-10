@@ -50,7 +50,6 @@ impl Publish {
             PublishJig::new(jig),
             categories,
             category_label_lookup,
-            meta.goals,
             meta.age_ranges,
             meta.affiliations,
             meta.resource_types,
@@ -81,7 +80,6 @@ impl Publish {
             // || self.jig.description.lock_ref().is_empty()
             // || self.jig.language.lock_ref().is_empty()
             // || self.jig.age_ranges.lock_ref().is_empty()
-            // || self.jig.goals.lock_ref().is_empty()
             // || self.jig.categories.lock_ref().is_empty()
     }
 

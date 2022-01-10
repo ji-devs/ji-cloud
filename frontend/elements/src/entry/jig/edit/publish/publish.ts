@@ -180,7 +180,6 @@ export class _ extends LitElement {
                             <div class="column-3">
                                 <slot name="language"></slot>
                                 <slot name="age"></slot>
-                                <slot name="goal"></slot>
                                 <div class="catagories">
                                     <slot name="catagories-select"></slot>
                                     <slot name="category-labels"></slot>

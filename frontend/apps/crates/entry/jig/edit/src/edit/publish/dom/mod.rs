@@ -29,7 +29,6 @@ use std::rc::Rc;
 pub mod age;
 pub mod category_pills;
 pub mod categories_select;
-pub mod goal;
 pub mod language;
 
 const STR_PUBLISH: &str = "Publish ";
@@ -201,7 +200,6 @@ fn render_page(state: Rc<Publish>) -> Dom {
 
             Publish::render_ages(state.clone()),
             Publish::render_languages(state.clone()),
-            Publish::render_goals(state.clone()),
             Publish::render_categories_select(state.clone()),
             Publish::render_category_pills(state.clone()),
 
