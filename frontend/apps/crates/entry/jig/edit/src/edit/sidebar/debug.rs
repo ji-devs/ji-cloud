@@ -24,7 +24,7 @@ pub fn get_jig() -> JigResponse {
     JigResponse {
         id: JigId(Uuid::from_u128(0)),
         admin_data: JigAdminData {
-            rating: Some(JigRating::NoRating),
+            rating: None,
             blocked: false,
             curated: true,
         },
