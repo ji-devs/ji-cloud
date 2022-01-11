@@ -1,5 +1,5 @@
 [package]
-name = "update_jigs"
+name = "batch_user_jigs"
 version = "0.1.0"
 authors = ["David Komer <david.komer@gmail.com>"]
 edition = "2018"

@@ -105,6 +105,34 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "904dfeac50f3cdaba28fc6f57fdcddb75f49ed61346676a78c4ffe55877802fd"
 
 [[package]]
+name = "batch_user_jigs"
+version = "0.1.0"
+dependencies = [
+ "cfg-if 1.0.0",
+ "components",
+ "csv",
+ "dotenv",
+ "flate2",
+ "futures",
+ "image",
+ "log",
+ "reqwest",
+ "scan_fmt",
+ "serde",
+ "serde_json",
+ "serde_repr",
+ "serde_with",
+ "shared",
+ "simplelog",
+ "structopt",
+ "tokio",
+ "tokio-util",
+ "url",
+ "utils",
+ "uuid",
+]
+
+[[package]]
 name = "beach_map"
 version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1990,34 +2018,6 @@ name = "unicode-xid"
 version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8ccb82d61f80a663efe1f787a51b16b5a51e3314d6ac365b08639f52387b33f3"
-
-[[package]]
-name = "update_jigs"
-version = "0.1.0"
-dependencies = [
- "cfg-if 1.0.0",
- "components",
- "csv",
- "dotenv",
- "flate2",
- "futures",
- "image",
- "log",
- "reqwest",
- "scan_fmt",
- "serde",
- "serde_json",
- "serde_repr",
- "serde_with",
- "shared",
- "simplelog",
- "structopt",
- "tokio",
- "tokio-util",
- "url",
- "utils",
- "uuid",
-]
 
 [[package]]
 name = "url"
