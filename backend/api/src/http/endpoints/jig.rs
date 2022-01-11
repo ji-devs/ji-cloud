@@ -207,12 +207,19 @@ async fn browse(
         db.as_ref(),
         author_id,
         query.jig_focus,
+        query.draft_or_live,
         query.page.unwrap_or(0) as i32,
     )
     .await?;
 
-    let total_count =
-        db::jig::filtered_count(db.as_ref(), None, author_id, query.jig_focus).await?;
+    let total_count = db::jig::filtered_count(
+        db.as_ref(),
+        None,
+        author_id,
+        query.jig_focus,
+        query.draft_or_live,
+    )
+    .await?;
 
     let pages = (total_count / 20 + (total_count % 20 != 0) as u64) as u32;
 

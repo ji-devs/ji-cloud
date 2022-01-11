@@ -169,6 +169,7 @@ pub struct JigCreateRequest {
 /// Whether the data is draft or live.
 #[derive(Serialize, Deserialize, Clone, Copy, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[serde(rename_all = "camelCase")]
 #[repr(i16)]
 pub enum DraftOrLive {
     /// Represents a draft copy
@@ -707,6 +708,11 @@ pub struct JigBrowseQuery {
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub jig_focus: Option<JigFocus>,
+
+    /// Optionally browse by draft or live.
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub draft_or_live: Option<DraftOrLive>,
 }
 
 /// Response for [`Browse`](crate::api::endpoints::jig::Browse).
