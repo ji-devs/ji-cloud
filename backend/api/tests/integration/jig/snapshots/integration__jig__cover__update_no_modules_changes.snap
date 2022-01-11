@@ -13,7 +13,7 @@ expression: body
   "plays": 0,
   "jigFocus": "modules",
   "jigData": {
-    "draftOrLive": "Draft",
+    "draftOrLive": "draft",
     "displayName": "test",
     "modules": [
       {
