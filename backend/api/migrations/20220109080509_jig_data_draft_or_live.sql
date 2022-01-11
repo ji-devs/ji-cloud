@@ -10,6 +10,3 @@ update jig_data
 set draft_or_live = 1
 from jig
 where jig.live_id = jig_data.id;
-
-delete from jig_data
-where draft_or_live is NULL;
