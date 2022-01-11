@@ -169,7 +169,6 @@ pub struct JigCreateRequest {
 /// Whether the data is draft or live.
 #[derive(Serialize, Deserialize, Clone, Copy, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[serde(rename_all = "camelCase")]
 #[repr(i16)]
 pub enum DraftOrLive {
     /// Represents a draft copy
