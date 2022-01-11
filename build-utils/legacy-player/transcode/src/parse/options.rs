@@ -24,6 +24,10 @@ pub struct Opts {
     #[structopt(long, parse(try_from_str), default_value = "false")]
     pub debug: bool,
 
+    /// download media 
+    #[structopt(long, parse(try_from_str), default_value = "true")]
+    pub download_media: bool,
+
     #[structopt(long, parse(try_from_str), default_value = "true")]
     pub keep_going_if_manifest_parse_error: bool,
 
@@ -59,9 +63,6 @@ pub struct Opts {
     #[structopt(short, long, parse(try_from_str), default_value = "true")]
     pub verbose: bool,
     
-    /// download media 
-    #[structopt(long, parse(try_from_str), default_value = "false")]
-    pub download_media: bool,
 
     /// write json
     #[structopt(long, parse(try_from_str), default_value = "true")]
