@@ -1,2 +1,0 @@
-pub const REFERENCE_WIDTH:f64 = 1024.0;
-pub const REFERENCE_HEIGHT:f64 = 768.0;
