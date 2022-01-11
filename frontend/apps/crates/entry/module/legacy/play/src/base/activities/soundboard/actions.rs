@@ -8,6 +8,8 @@ impl Soundboard {
     pub fn on_start(self: Rc<Self>) {
         let state = self;
 
+        state.base.allow_stage_click();
+
         if let Some(audio_filename) = state.raw.audio_filename.as_ref() {
             state.base.audio_manager.play_clip_on_ended(
                 state.base.activity_media_url(&audio_filename),
@@ -44,6 +46,8 @@ impl SoundboardItem {
     pub fn on_click(self: Rc<Self>, parent: Rc<Soundboard>) {
         let state = self;
 
+        parent.phase.set_neq(Phase::Playing);
+
         let was_revealed = state.revealed.replace(true);
         if !was_revealed {
             log::info!("first time!");
@@ -56,7 +60,6 @@ impl SoundboardItem {
                 state.base.activity_media_url(&audio_filename),
                 clone!(state => move || {
                     if let Some(index) = state.jump_index {
-                        let index = index + 1; // bump for cover
                         log::info!("going to index {}!", index);
 
                         state.base.navigate(NavigationTarget::Index(index));

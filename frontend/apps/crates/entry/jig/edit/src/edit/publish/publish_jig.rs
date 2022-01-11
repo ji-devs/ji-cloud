@@ -10,8 +10,11 @@ use shared::domain::meta::AffiliationId;
 use shared::domain::{
     category::CategoryId,
     jig::{JigId, JigResponse, JigUpdateDraftDataRequest, LiteModule},
-    meta::{AgeRangeId, GoalId},
+    meta::AgeRangeId,
 };
+
+const STR_JIG: &str = "JIG";
+const STR_RESOURCE: &str = "Resource";
 
 #[derive(Clone)]
 pub struct PublishJig {
@@ -21,7 +24,6 @@ pub struct PublishJig {
     pub display_name: Mutable<String>,
     pub description: Mutable<String>,
     pub age_ranges: Mutable<HashSet<AgeRangeId>>,
-    pub goals: Mutable<HashSet<GoalId>>,
     pub language: Mutable<String>,
     pub categories: Mutable<HashSet<CategoryId>>,
     pub affiliations: Mutable<HashSet<AffiliationId>>,
@@ -38,7 +40,6 @@ impl From<JigResponse> for PublishJig {
             display_name: Mutable::new(jig.jig_data.display_name),
             description: Mutable::new(jig.jig_data.description.clone()),
             age_ranges: Mutable::new(HashSet::from_iter(jig.jig_data.age_ranges)),
-            goals: Mutable::new(HashSet::from_iter(jig.jig_data.goals)),
             language: Mutable::new(jig.jig_data.language),
             categories: Mutable::new(HashSet::from_iter(jig.jig_data.categories)),
             affiliations: Mutable::new(HashSet::from_iter(jig.jig_data.affiliations)),
@@ -57,7 +58,6 @@ impl PublishJig {
             modules: Mutable::new(jig.jig_data.modules),
             description: Mutable::new(jig.jig_data.description),
             age_ranges: Mutable::new(HashSet::from_iter(jig.jig_data.age_ranges)),
-            goals: Mutable::new(HashSet::from_iter(jig.jig_data.goals)),
             language: Mutable::new(jig.jig_data.language),
             categories: Mutable::new(HashSet::from_iter(jig.jig_data.categories)),
             affiliations: Mutable::new(HashSet::from_iter(jig.jig_data.affiliations)),
@@ -73,12 +73,19 @@ impl PublishJig {
             display_name: Some(self.display_name.get_cloned()),
             description: Some(self.description.get_cloned()),
             age_ranges: Some(self.age_ranges.get_cloned().into_iter().collect()),
-            goals: Some(self.goals.get_cloned().into_iter().collect()),
             language: Some(self.language.get_cloned()),
             categories: Some(self.categories.get_cloned().into_iter().collect()),
             affiliations: Some(self.affiliations.get_cloned().into_iter().collect()),
             privacy_level: Some(self.privacy_level.get()),
             ..Default::default()
+        }
+    }
+
+    /// a displayable string for jig_focus
+    pub fn focus_display(&self) -> &'static str {
+        match self.jig_focus {
+            JigFocus::Modules => STR_JIG,
+            JigFocus::Resources => STR_RESOURCE,
         }
     }
 }

@@ -12,7 +12,7 @@ use super::super::super::{actions::search, state::State};
 
 const STR_SEARCH: &str = "Advanced Search";
 const STR_GOAL_LABEL: &str = "Teaching Goal";
-const STR_GOAL_PLACEHOLDER: &str = "Select from the list";
+const STR_GOAL_PLACEHOLDER: &str = "";
 const STR_AFFILIATION_LABEL: &str = "Affiliation";
 const STR_AFFILIATION_PLACEHOLDER: &str = "Select one or more from the list";
 
@@ -57,31 +57,6 @@ pub fn render(state: Rc<State>) -> Dom {
                 })).to_signal_vec())
             }),
 
-            html!("input-select", {
-                .property("slot", "goal")
-                .property("label", STR_GOAL_LABEL)
-                .property("placeholder", STR_GOAL_PLACEHOLDER)
-                .property("multiple", true)
-                .property_signal("value", goal_value_signal(state.clone()))
-                .children_signal_vec(state.search_options.goals.signal_cloned().map(clone!(state => move|goals| {
-                    goals.iter().map(|goal| {
-                        html!("input-select-option", {
-                            .text(&goal.display_name)
-                            .property_signal("selected", state.search_selected.goals.signal_cloned().map(clone!(goal => move |goals| {
-                                goals.contains(&goal.id)
-                            })))
-                            .event(clone!(state, goal => move |_: events::CustomSelectedChange| {
-                                let mut goals = state.search_selected.goals.lock_mut();
-                                match goals.contains(&goal.id) {
-                                    true => goals.remove(&goal.id),
-                                    false => goals.insert(goal.id),
-                                };
-                            }))
-                        })
-                    }).collect()
-                })).to_signal_vec())
-            }),
-
             categories_select::render(state.clone()),
 
             html!("button-rect", {
@@ -94,24 +69,6 @@ pub fn render(state: Rc<State>) -> Dom {
             })
         ])
     })
-}
-
-fn goal_value_signal(state: Rc<State>) -> impl Signal<Item = String> {
-    map_ref! {
-        let selected_goals = state.search_selected.goals.signal_cloned(),
-        let available_goals = state.search_options.goals.signal_cloned() => {
-            let mut output = vec![];
-            selected_goals.iter().for_each(|goal_id| {
-                // only search list if already populated
-                if !available_goals.is_empty() {
-                    let goal = available_goals.iter().find(|goal| goal.id == *goal_id).unwrap_ji();
-                    output.push(goal.display_name.clone());
-                }
-            });
-            output.join(", ")
-        }
-
-    }
 }
 
 fn affiliation_value_signal(state: Rc<State>) -> impl Signal<Item = String> {

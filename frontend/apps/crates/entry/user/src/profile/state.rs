@@ -49,7 +49,7 @@ pub struct ProfilePageUser {
     pub subjects: MutableVec<SubjectId>,
     pub age_ranges: MutableVec<AgeRangeId>,
     pub affiliations: MutableVec<AffiliationId>,
-    pub persona: Mutable<Option<String>>,
+    pub persona: MutableVec<String>,
 }
 
 impl ProfilePageUser {
@@ -68,7 +68,7 @@ impl ProfilePageUser {
             subjects: MutableVec::new(),
             age_ranges: MutableVec::new(),
             affiliations: MutableVec::new(),
-            persona: Mutable::new(None),
+            persona: MutableVec::new(),
         }
     }
 
@@ -86,7 +86,7 @@ impl ProfilePageUser {
         self.subjects.lock_mut().replace(user.subjects);
         self.age_ranges.lock_mut().replace(user.age_ranges);
         self.affiliations.lock_mut().replace(user.affiliations);
-        self.persona.set(user.persona);
+        self.persona.lock_mut().replace_cloned(user.persona);
     }
 
     pub fn to_update(&self) -> PatchProfileRequest {
@@ -102,7 +102,7 @@ impl ProfilePageUser {
             age_ranges: Some(self.age_ranges.lock_ref().to_vec()),
             affiliations: Some(self.affiliations.lock_ref().to_vec()),
             location: Some(self.location.get_cloned()),
-            persona: Some(self.persona.get_cloned()),
+            persona: Some(self.persona.lock_ref().to_vec()),
             ..Default::default()
         }
     }

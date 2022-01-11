@@ -40,6 +40,7 @@ where
                     .property("slot", "bubble")
                     .child(html!("module-settings-bubble-content", {
                         .property("kind", state.kind.as_str_id())
+                        .property_signal("value", state.value.as_ref().unwrap_ji().string_signal())
                         .apply_if(input_kind.is_some(), |dom| {
                             dom.child(
                                 match input_kind.unwrap_ji() {

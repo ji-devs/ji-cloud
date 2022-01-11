@@ -13,7 +13,7 @@ use crate::{
         lookup,
     },
 };
-use futures_signals::{map_ref, signal::SignalExt};
+use futures_signals::signal::SignalExt;
 use js_sys::Reflect;
 use shared::domain::jig::module::body::{
     ModeExt,
@@ -45,22 +45,9 @@ pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<MainCard<RawData, E>>)
                 Card::Text(data) => {
                     html!("input-textarea-content", {
                         .property_signal("value", data.signal_cloned())
-                        .property_signal("fontSize", {
-                            let sig = map_ref!{
-                                let value = data.signal_cloned(),
-                                let theme_id = state.base.theme_id.signal()
-                                    => {
-                                        (value.len(), *theme_id)
-                                    }
-                            };
-
-                            let mode = state.base.mode;
-
-                            sig.map(move |(len, theme_id)| {
-                                let font_size = lookup::get_card_font_size(len, theme_id, mode);
-                                format!("{}px", font_size)
-                            })
-                        })
+                        .property_signal("fontSize", data.signal_cloned().map(|value| {
+                            lookup::get_card_font_size(&value, None)
+                        }))
                         .property("clickMode", "none")
                         .property("constrainWidth", config::CARD_TEXT_LIMIT_WIDTH)
                         .property("constrainHeight", config::CARD_TEXT_LIMIT_HEIGHT)

@@ -155,8 +155,8 @@ pub struct UserProfile {
 
     /// The persona of the user
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub persona: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub persona: Vec<String>,
 
     /// The user's taught subjects.
     #[serde(default)]
@@ -270,8 +270,8 @@ pub struct CreateProfileRequest {
 
     /// The persona of the user
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub persona: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub persona: Vec<String>,
 
     /// The user's taught subjects.
     #[serde(default)]
@@ -352,9 +352,8 @@ pub struct PatchProfileRequest {
     ///
     /// Field is updated if `Some(_)` with the inner contents.
     #[serde(default)]
-    #[serde(deserialize_with = "super::deserialize_optional_field")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub persona: Option<Option<Vec<String>>>,
+    pub persona: Option<Vec<String>>,
 
     /// The user's taught subjects.
     ///

@@ -40,6 +40,10 @@ impl BodyExt<(), Step> for ModuleData {
         }
     }
 
+    fn mode(&self) -> Option<()> {
+        None
+    }
+
     fn requires_choose_mode(&self) -> bool {
         false
     }

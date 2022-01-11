@@ -21,12 +21,27 @@ export class _ extends LitElement {
                     text-align: left;
                     color: var(--dark-blue-4);
                 }
+                :host([subtitle]) .title {
+                    margin-top: 30px;
+                }
+                .subtitle {
+                    margin: 10px 0 10px 0;
+                    font-family: Poppins;
+                    font-size: 24px;
+                    font-weight: 500;
+                    letter-spacing: normal;
+                    text-align: left;
+                    color: var(--dark-blue-4);
+                }
             `,
         ];
     }
 
-    @property()
+    @property({ type: String })
     headerTitle: string = "";
+
+    @property({ type: String, reflect: true })
+    subtitle?: string;
 
     render() {
         return html`
@@ -36,6 +51,9 @@ export class _ extends LitElement {
                     <slot name="help"></slot>
                 </div>
                 <div class="title">${this.headerTitle}</div>
+                ${this.subtitle && html`
+                    <div class="subtitle">${this.subtitle}</div>
+                `}
                 <slot></slot>
             </section>
         `;

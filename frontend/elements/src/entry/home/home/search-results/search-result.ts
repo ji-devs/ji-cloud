@@ -1,8 +1,8 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 import { nothing } from "lit-html";
 
-const STR_PLAYED = "Played";
-const STR_LIKED = "Liked";
+const STR_PLAYED = "Plays";
+const STR_LIKED = "Likes";
 const STR_JI_TEAM = "Ji Team";
 const STR_DESCRIPTION = "Description";
 const STR_ADDITIONAL_RESOURCES = "Additional resources";

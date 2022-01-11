@@ -9,7 +9,7 @@ use utils::{events, unwrap::UnwrapJiExt};
 
 use super::super::state::Publish;
 
-const STR_CATEGORIES_LABEL: &'static str = "Categories";
+const STR_CATEGORIES_LABEL: &'static str = "Keywords";
 const STR_CATEGORIES_PLACEHOLDER: &'static str = "Select one or more";
 
 impl Publish {

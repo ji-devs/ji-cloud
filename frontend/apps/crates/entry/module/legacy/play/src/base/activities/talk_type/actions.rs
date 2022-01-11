@@ -26,7 +26,6 @@ impl TalkType {
 
             match state.raw.jump_index {
                 Some(index) => {
-                    let index = index + 1; // bump for cover
                     log::info!("going to index {}!", index);
 
                     state.base.navigate(NavigationTarget::Index(index));

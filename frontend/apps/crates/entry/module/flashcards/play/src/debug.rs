@@ -49,6 +49,7 @@ impl DebugSettings {
                         player_settings: PlayerSettings {
                             display_mode:
                                 shared::domain::jig::module::body::flashcards::DisplayMode::Double,
+                            swap: false,
                         },
                         base: BaseContent {
                             mode,

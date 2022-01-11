@@ -41,11 +41,18 @@ export class _ extends LitElement {
                     display: grid;
                     grid-template-columns: auto auto;
                     column-gap: 6px;
-                    margin: 0 26px;
                     align-items: center;
                     justify-content: space-between;
                     cursor: pointer;
                     font-weight: 500;
+                    font-size: 14px;
+                    margin: 0 12px;
+                }
+                @media (min-width: 1920px) {
+                    .center {
+                        font-size: 16px;
+                        margin: 0 26px;
+                    }
                 }
                 :host([active]) .center {
                     border-color: #fd7076;

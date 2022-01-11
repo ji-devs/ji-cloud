@@ -44,7 +44,7 @@ select user_id as "id",
     user_profile.created_at,
     user_profile.updated_at,
     organization,
-    persona,
+    persona as "persona!: Vec<String>",
     location,
     array(select scope from user_scope where user_scope.user_id = "user".id) as "scopes!: Vec<i16>",
     array(select subject_id from user_subject where user_subject.user_id = "user".id) as "subjects!: Vec<Uuid>",
@@ -116,8 +116,8 @@ pub async fn upsert_profile(
         //language=SQL
         r#"
 insert into user_profile
-    (user_id, username, over_18, given_name, family_name, profile_image_id, language, locale, timezone, opt_into_edu_resources, organization, persona, location) 
-values 
+    (user_id, username, over_18, given_name, family_name, profile_image_id, language, locale, timezone, opt_into_edu_resources, organization, persona, location)
+values
     ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
 on conflict (user_id) do update
 set
@@ -144,7 +144,7 @@ set
         req.timezone.name(),
         req.opt_into_edu_resources,
         req.organization.as_deref(),
-        req.persona.as_deref(),
+        &req.persona,
         req.location.as_ref(),
     )
     .execute(&mut *txn)
@@ -245,7 +245,7 @@ set persona = $2
 where user_id = $1 and persona is distinct from $2
         "#,
             user_id,
-            persona.as_deref()
+            &persona
         )
         .execute(&mut txn)
         .await?;
@@ -525,7 +525,7 @@ select exists(
 
     sqlx::query!(
         r#"
-update user_font 
+update user_font
     set name = $3
     where user_id = $1
     and index = $2

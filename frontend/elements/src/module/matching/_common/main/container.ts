@@ -21,7 +21,7 @@ export class _ extends LitElement {
 
                 .top {
                     margin-top: 38rem;
-                    gap: 164rem;
+                    gap: 64rem;
                 }
                 .bottom {
                     margin-bottom: 38rem;

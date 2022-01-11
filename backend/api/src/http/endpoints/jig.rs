@@ -18,7 +18,7 @@ use sqlx::PgPool;
 use crate::{
     db::{self, jig::CreateJigError},
     error::{self, ServiceKind},
-    extractor::TokenUser,
+    extractor::{ScopeAdmin, TokenUser, TokenUserWithScope},
     service::ServiceData,
 };
 
@@ -126,7 +126,6 @@ async fn update_draft(
         &*db,
         api_key,
         id,
-        claims.0.user_id,
         req.display_name.as_deref(),
         req.goals.as_deref(),
         req.categories.as_deref(),
@@ -140,7 +139,6 @@ async fn update_draft(
         req.audio_effects.as_ref(),
         req.privacy_level,
         req.other_keywords,
-        req.admin_data,
     )
     .await?;
 
@@ -205,18 +203,23 @@ async fn browse(
 
     db::jig::authz_list(&*db, claims.0.user_id, author_id).await?;
 
-    println!("before browse");
-
     let jigs = db::jig::browse(
         db.as_ref(),
         author_id,
         query.jig_focus,
+        query.draft_or_live,
         query.page.unwrap_or(0) as i32,
     )
     .await?;
 
-    let total_count =
-        db::jig::filtered_count(db.as_ref(), None, author_id, query.jig_focus).await?;
+    let total_count = db::jig::filtered_count(
+        db.as_ref(),
+        None,
+        author_id,
+        query.jig_focus,
+        query.draft_or_live,
+    )
+    .await?;
 
     let pages = (total_count / 20 + (total_count % 20 != 0) as u64) as u32;
 
@@ -322,6 +325,24 @@ async fn search(
     }))
 }
 
+/// Update a JIG's admin data.
+async fn update_admin_data(
+    db: Data<PgPool>,
+    _auth: TokenUserWithScope<ScopeAdmin>,
+    req: Option<Json<<jig::JigAdminDataUpdate as ApiEndpoint>::Req>>,
+    path: web::Path<JigId>,
+) -> Result<HttpResponse, error::NotFound> {
+    let id = path.into_inner();
+
+    let req = req.map_or_else(Default::default, Json::into_inner);
+
+    db::jig::update_admin_data(&*db, id, req.rating, req.blocked, req.curated)
+        .await
+        .map_err(|_| error::NotFound::ResourceNotFound)?;
+
+    Ok(HttpResponse::NoContent().finish())
+}
+
 async fn count(db: Data<PgPool>) -> Result<Json<<jig::Count as ApiEndpoint>::Res>, error::Server> {
     let total_count: u64 = db::jig::count(&*db, PrivacyLevel::Public).await?;
 
@@ -395,6 +416,12 @@ pub fn configure(cfg: &mut ServiceConfig) {
             jig::DeleteAll::METHOD.route().to(delete_all),
         )
         .route(
+            jig::JigAdminDataUpdate::PATH,
+            jig::JigAdminDataUpdate::METHOD
+                .route()
+                .to(update_admin_data),
+        )
+        .route(
             jig::player::Create::PATH,
             jig::player::Create::METHOD.route().to(player::create),
         )
@@ -413,6 +440,12 @@ pub fn configure(cfg: &mut ServiceConfig) {
             jig::player::instance::Complete::METHOD
                 .route()
                 .to(player::instance::complete_session_instance),
+        )
+        .route(
+            jig::player::PlayCount::PATH,
+            jig::player::PlayCount::METHOD
+                .route()
+                .to(player::get_play_count),
         )
         .route(
             jig::player::PlayCount::PATH,

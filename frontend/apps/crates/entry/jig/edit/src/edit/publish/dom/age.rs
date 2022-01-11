@@ -9,7 +9,7 @@ use utils::{events, unwrap::UnwrapJiExt};
 
 use super::super::state::Publish;
 
-const STR_AGE_LABEL: &'static str = "Age";
+const STR_AGE_LABEL: &'static str = "Age Range";
 const STR_AGE_PLACEHOLDER: &'static str = "Select one or more";
 
 impl Publish {

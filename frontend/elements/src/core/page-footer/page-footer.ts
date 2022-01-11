@@ -9,7 +9,7 @@ const STR_JIGS_TITLE = "JIGs";
 const STR_JIGS_HEBREW = "Hebrew";
 const STR_JIGS_JEWISH_HOLIDAYS = "Jewish holidays";
 const STR_JIGS_TORAH = "Torah";
-const STR_JIGS_J_STREAM = "J-STEAM";
+const STR_JIGS_J_STEM = "J-STEM";
 const STR_JIGS_ISRAEL = "Israel";
 const STR_JIGS_SONGS = "Songs";
 
@@ -51,13 +51,15 @@ const STR_SERVICES_PRIME = "Ji Prime";
 const STR_SERVICES_TAP = "Ji Tap";
 const STR_SERVICES_STUDIO = "Ji Studio";
 const STR_SERVICES_COLLECTION = "The Ji Collection";
-const STR_SERVICES_J_STREAM = "J-STEAM";
+const STR_SERVICES_J_STEM = "J-STEM";
 const STR_SERVICES_BLOG = "Ji Blog";
 const STR_SERVICES_JOBS = "Jobs";
 
 const STR_PRIVACY = "Privacy Policy";
 const STR_TERMS = "Terms & Conditions";
 const STR_CHILD_PROTECTION = "Child Protection Policy";
+
+const STR_DEDICATION_TEXT = "Dedicated in memory of Yochanan Hillel ben Mordechai";
 
 const COMING_SOON_ALERT = "javascript:alert('Coming soon')";
 
@@ -77,7 +79,7 @@ export class _ extends LitElement {
                     color: #ffffff;
                     font-size: 14px;
                     font-weight: 500;
-                    padding: 100px 0;
+                    padding: 100px 0 30px 0;
                 }
                 .width-holder {
                     display: grid;
@@ -161,6 +163,29 @@ export class _ extends LitElement {
                 .bottom-section .kid-safe img {
                     width: 156px;
                 }
+                .horizontal-slider {
+                    width: 87%;
+                    margin: 40px auto 28px auto;
+                    height: 0;
+                    opacity: 0.35;
+                    border: solid 1px var(--white);
+                }
+                .dedication-text {
+                    font-family: Poppins;
+                    font-size: 16px;
+                    font-weight: 500;
+                    font-stretch: normal;
+                    font-style: normal;
+                    line-height: 1.56;
+                    letter-spacing: normal;
+                    text-align: left;
+                    color: var(--light-blue-3);
+                }
+                .dedication-text-container {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                }
             `,
         ];
     }
@@ -197,8 +222,8 @@ export class _ extends LitElement {
                                     >
                                 </li>
                                 <li>
-                                    <a href="${searchLink(STR_JIGS_J_STREAM)}"
-                                        >${STR_JIGS_J_STREAM}</a
+                                    <a href="${searchLink(STR_JIGS_J_STEM)}"
+                                        >${STR_JIGS_J_STEM}</a
                                     >
                                 </li>
                                 <li>
@@ -413,7 +438,7 @@ export class _ extends LitElement {
                                     <a
                                         href="https://www.jewishinteractive.org/ji-products-services/jstem/"
                                         target="_blank"
-                                        >${STR_SERVICES_J_STREAM}</a
+                                        >${STR_SERVICES_J_STEM}</a
                                     >
                                 </li>
                                 <li>
@@ -466,6 +491,8 @@ export class _ extends LitElement {
                     >
                 </section>
             </div>
+            <div class="horizontal-slider"></div>
+            <div class="dedication-text-container"><span class="dedication-text">${STR_DEDICATION_TEXT}</span></div>
         `;
     }
 }

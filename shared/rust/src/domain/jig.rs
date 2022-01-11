@@ -169,6 +169,7 @@ pub struct JigCreateRequest {
 /// Whether the data is draft or live.
 #[derive(Serialize, Deserialize, Clone, Copy, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[serde(rename_all = "camelCase")]
 #[repr(i16)]
 pub enum DraftOrLive {
     /// Represents a draft copy
@@ -359,13 +360,30 @@ pub struct JigAdminData {
 }
 
 /// These fields can be edited by admin and can be viewed by everyone
+#[derive(Serialize, Deserialize, Clone, Debug, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct JigUpdateAdminDataRequest {
+    /// Rating for jig, weighted for jig search
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub rating: Option<JigRating>,
+
+    /// if true does not appear in search
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
+    pub blocked: Option<bool>,
+
+    /// Indicates jig has been curated by admin
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
+    pub curated: Option<bool>,
+}
+
+/// These fields can be edited by admin and can be viewed by everyone
 #[derive(Serialize, Deserialize, Debug, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct JigAdminUpdateData {
     /// Rating for jig, weighted for jig search
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(default)]
-    pub rating: Option<JigRating>,
+    pub rating: Option<Option<JigRating>>,
 
     /// if true does not appear in search
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -390,8 +408,19 @@ pub enum JigRating {
     Two = 2,
     #[allow(missing_docs)]
     Three = 3,
-    #[allow(missing_docs)]
-    NoRating = 17,
+}
+
+impl TryFrom<u8> for JigRating {
+    type Error = ();
+
+    fn try_from(num: u8) -> Result<Self, Self::Error> {
+        match num {
+            1 => Ok(Self::One),
+            2 => Ok(Self::Two),
+            3 => Ok(Self::Three),
+            _ => Err(()),
+        }
+    }
 }
 
 /// Audio for background music
@@ -654,11 +683,6 @@ pub struct JigUpdateDraftDataRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub other_keywords: Option<String>,
-
-    /// Rating by admin for Jig
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(default)]
-    pub admin_data: Option<JigAdminUpdateData>,
 }
 
 /// Query for [`Browse`](crate::api::endpoints::jig::Browse).
@@ -684,6 +708,11 @@ pub struct JigBrowseQuery {
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub jig_focus: Option<JigFocus>,
+
+    /// Optionally browse by draft or live.
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub draft_or_live: Option<DraftOrLive>,
 }
 
 /// Response for [`Browse`](crate::api::endpoints::jig::Browse).

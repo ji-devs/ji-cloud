@@ -138,6 +138,7 @@ where
     pub steps_completed: Mutable<HashSet<Step>>,
     pub history: Rc<HistoryStateImpl<RawData>>,
     pub preview_mode: Mutable<Option<PreviewMode>>,
+    pub mode: Option<Mode>,
     phantom: PhantomData<Mode>,
 }
 
@@ -177,6 +178,7 @@ where
         let theme_choice = init_args.theme_choice.clone();
         let steps_completed = init_args.steps_completed.clone();
         let jig = init_args.jig.clone();
+        let mode = init_args.raw.mode();
 
         // get a BaseInit
         let init = init_from_raw(init_args).await;
@@ -215,6 +217,7 @@ where
             steps_completed,
             history: app.history.borrow().as_ref().unwrap_ji().clone(),
             preview_mode,
+            mode,
             phantom: PhantomData,
         }
     }

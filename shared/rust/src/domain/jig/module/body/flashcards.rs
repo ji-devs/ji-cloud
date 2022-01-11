@@ -27,6 +27,10 @@ pub struct Content {
 pub struct PlayerSettings {
     /// display mode
     pub display_mode: DisplayMode,
+
+    /// swap the display to be primary left vs. right
+    #[serde(default)]
+    pub swap: bool,
 }
 
 /// Display Mode
@@ -81,6 +85,10 @@ impl BodyExt<Mode, Step> for ModuleData {
                 ..Content::default()
             }),
         }
+    }
+
+    fn mode(&self) -> Option<Mode> {
+        self.content.as_ref().map(|c| c.base.mode.clone())
     }
 
     fn requires_choose_mode(&self) -> bool {

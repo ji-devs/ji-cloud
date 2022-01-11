@@ -1,6 +1,9 @@
 use super::state::CurationJig;
+use components::{player_popup::{PlayerPopup, PreviewPopupCallbacks}, module::_common::thumbnail::ModuleThumbnail};
 use dominator::{html, Dom, clone, with_node};
-use utils::{events, routes::AdminCurationRoute};
+use futures_signals::signal::SignalExt;
+use shared::domain::jig::JigRating;
+use utils::{events, routes::AdminCurationRoute, jig::JigPlayerOptions, unwrap::UnwrapJiExt};
 use web_sys::{HtmlInputElement, HtmlTextAreaElement};
 use std::rc::Rc;
 
@@ -8,7 +11,6 @@ mod affiliation;
 mod age;
 // mod categories_select;
 // mod category_pills;
-mod goal;
 mod language;
 
 impl CurationJig {
@@ -31,6 +33,21 @@ impl CurationJig {
                         state.curation_state.navigate_to(route);
                     }))
                 }),
+                html!("star-rating", {
+                    .property("slot", "rating")
+                    .property_signal("rating", state.jig.rating.signal_cloned().map(|rating| {
+                        rating.map(|rating| {
+                            rating as u8
+                        })
+                    }))
+                    .event(clone!(state => move |e: events::CustomRatingChange| {
+                        let rating = e.rating();
+                        let rating = rating.map(|rating| {
+                            JigRating::try_from(rating).unwrap_ji()
+                        });
+                        state.jig.rating.set(rating);
+                    }))
+                }),
                 html!("div", {
                     .property("slot", "buttons")
                     .children(&mut [
@@ -45,17 +62,9 @@ impl CurationJig {
                         html!("button-rect", {
                             .property("kind", "filled")
                             .property("color", "blue")
-                            .text("Save draft")
+                            .text("Save and republish")
                             .event(clone!(state => move |_: events::Click| {
-                                state.save_draft();
-                            }))
-                        }),
-                        html!("button-rect", {
-                            .property("kind", "outline")
-                            .property("color", "blue")
-                            .text("Publish")
-                            .event(clone!(state => move |_: events::Click| {
-                                state.publish();
+                                state.save_and_publish();
                             }))
                         }),
                     ])
@@ -64,11 +73,10 @@ impl CurationJig {
                     .property("slot", "inputs")
                     .children(&mut [
                         html!("input-wrapper", {
-                            .property("label", "JIG's name")
+                            .property("label", "JIG name")
                             .children(&mut [
                                 html!("input" => HtmlInputElement, {
                                     .with_node!(elem => {
-                                        .property("value", "")
                                         .property_signal("value", state.jig.display_name.signal_cloned())
                                         .event(clone!(state => move |_evt: events::Input| {
                                             let value = elem.value();
@@ -82,14 +90,13 @@ impl CurationJig {
                             .property("label", "Author name")
                             .children(&mut [
                                 html!("input", {
-                                    .property("readonly", true)
+                                    .property("readOnly", true)
                                     .property("value", &state.jig.author_name)
                                 }),
                             ])
                         }),
                         state.render_languages(),
                         state.render_ages(),
-                        state.render_goals(),
                         state.render_affiliations(),
                         html!("input-wrapper", {
                             .property("label", "JIG teacher's description")
@@ -120,8 +127,63 @@ impl CurationJig {
                             ])
                         }),
                     ])
-                })
+                }),
             ])
+            .child(ModuleThumbnail::render(
+                Rc::new(ModuleThumbnail {
+                    jig_id: state.jig_id,
+                    module: state.jig.modules.lock_ref().get(0).cloned(),
+                    is_jig_fallback: true,
+                }),
+                Some("player")
+            ))
+            .child(html!("fa-button", {
+                .property("slot", "player")
+                .property("icon", "fa-duotone fa-circle-play")
+                .event(clone!(state => move |_: events::Click| {
+                    state.player_open.set(true);
+                }))
+            }))
+            .child_signal(state.player_open.signal().map(clone!(state => move |player_open| {
+                match player_open {
+                    false => None,
+                    true => {
+                        let on_close = clone!(state => move|| {
+                            state.player_open.set(false);
+                        });
+                        Some(PlayerPopup::new(
+                            state.jig_id,
+                            JigPlayerOptions::default(),
+                            PreviewPopupCallbacks::new(Box::new(on_close)),
+                        ).render(Some("player")))
+                    }
+                }
+            })))
+            .child(html!("fa-button", {
+                .property("slot", "block")
+                .style_signal("color", state.jig.blocked.signal().map(|blocked| {
+                    match blocked {
+                        true => "red",
+                        false => "green",
+                    }
+                }))
+                .property_signal("icon", state.jig.blocked.signal().map(|blocked| {
+                    match blocked {
+                        true => "fa-solid fa-eye-slash",
+                        false => "fa-solid fa-eye",
+                    }
+                }))
+                .property_signal("title", state.jig.blocked.signal().map(|blocked| {
+                    match blocked {
+                        true => "Blocked",
+                        false => "Visible",
+                    }
+                }))
+                .event(clone!(state => move |_: events::Click| {
+                    let mut blocked = state.jig.blocked.lock_mut();
+                    *blocked = !*blocked;
+                }))
+            }))
         })
     }
 }

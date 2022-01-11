@@ -12,4 +12,16 @@ impl SidebarSettings {
             }
         })
     }
+
+    pub fn toggle_swap(&self) {
+        let swap = !self.base.extra.settings.swap.get();
+
+        self.base.extra.settings.swap.set_neq(swap);
+
+        self.base.history.push_modify(|raw| {
+            if let Some(content) = &mut raw.content {
+                content.player_settings.swap = swap;
+            }
+        })
+    }
 }

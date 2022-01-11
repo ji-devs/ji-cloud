@@ -37,7 +37,7 @@ impl Game {
 
         let mut deck = get_fresh_deck(&base, &mut rng);
 
-        let current = get_current(&mut deck, &mut rng).unwrap_ji();
+        let current = get_current(&base, &mut deck).unwrap_ji();
 
         Self {
             base,

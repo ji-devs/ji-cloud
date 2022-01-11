@@ -84,7 +84,6 @@ export class _ extends LitElement {
                     <div class="selects">
                         <slot name="categories"></slot>
                         <slot name="affiliation"></slot>
-                        <slot name="goal"></slot>
                     </div>
                     <div class="search-button-wrapper">
                         <slot name="search-button"></slot>

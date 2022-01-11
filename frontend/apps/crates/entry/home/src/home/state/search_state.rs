@@ -14,7 +14,7 @@ use shared::{
     domain::{
         category::{Category, CategoryId, CategoryResponse, CategoryTreeScope, GetCategoryRequest},
         jig::JigSearchQuery,
-        meta::{Affiliation, AffiliationId, AgeRange, AgeRangeId, Goal, GoalId, MetadataResponse},
+        meta::{Affiliation, AffiliationId, AgeRange, AgeRangeId, MetadataResponse},
         user::UserProfile,
     },
     error::EmptyError,
@@ -26,7 +26,6 @@ use utils::{
 
 #[derive(Debug)]
 pub struct SearchSelected {
-    pub goals: Mutable<HashSet<GoalId>>,
     pub affiliations: Mutable<HashSet<AffiliationId>>,
     pub categories: Mutable<HashSet<CategoryId>>,
     pub age_ranges: Mutable<HashSet<AgeRangeId>>,
@@ -37,7 +36,6 @@ pub struct SearchSelected {
 impl SearchSelected {
     pub fn new() -> Self {
         Self {
-            goals: Mutable::new(HashSet::new()),
             affiliations: Mutable::new(HashSet::new()),
             categories: Mutable::new(HashSet::new()),
             age_ranges: Mutable::new(HashSet::new()),
@@ -62,7 +60,6 @@ impl SearchSelected {
 
     pub fn from_search_request(search: JigSearchQuery) -> Self {
         Self {
-            goals: Mutable::new(HashSet::from_iter(search.goals)),
             affiliations: Mutable::new(HashSet::from_iter(search.affiliations)),
             categories: Mutable::new(HashSet::from_iter(search.categories)),
             age_ranges: Mutable::new(HashSet::from_iter(search.age_ranges)),
@@ -83,7 +80,6 @@ impl SearchSelected {
                 .into_iter()
                 .collect(),
             categories: self.categories.lock_ref().to_owned().into_iter().collect(),
-            goals: self.goals.lock_ref().to_owned().into_iter().collect(),
             page: Some(0),
             language: self.language.get_cloned(),
             ..Default::default()
@@ -93,7 +89,6 @@ impl SearchSelected {
 
 pub struct SearchOptions {
     pub age_ranges: Mutable<Vec<AgeRange>>,
-    pub goals: Mutable<Vec<Goal>>,
     pub affiliations: Mutable<Vec<Affiliation>>,
     pub categories: Mutable<Vec<Category>>,
     pub category_label_lookup: Mutable<HashMap<CategoryId, String>>,
@@ -104,7 +99,6 @@ impl SearchOptions {
     pub fn new() -> Self {
         Self {
             age_ranges: Mutable::new(vec![]),
-            goals: Mutable::new(vec![]),
             affiliations: Mutable::new(vec![]),
             categories: Mutable::new(vec![]),
             category_label_lookup: Mutable::new(HashMap::new()),
@@ -132,9 +126,6 @@ impl SearchOptions {
                 }
                 if self.age_ranges.lock_ref().is_empty() {
                     self.age_ranges.set(res.age_ranges);
-                }
-                if self.goals.lock_ref().is_empty() {
-                    self.goals.set(res.goals);
                 }
                 Ok(())
             }

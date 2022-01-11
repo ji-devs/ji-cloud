@@ -3,9 +3,8 @@ import "@elements/core/images/ui";
 import { nothing } from "lit-html";
 import { JigFocus } from "@elements/module/_common/types";
 
-const STR_HEADER_FIRST = "Settings and JIG info.";
-const STR_HEADER_SECOND = "Last step before publishing";
-const STR_THUMBNAIL = "Thumbnail";
+const STR_HEADER_FIRST = "Publish your";
+const STR_HEADER_SECOND = "This information helps users find your JIG";
 
 @customElement("jig-edit-publish")
 export class _ extends LitElement {
@@ -149,7 +148,10 @@ export class _ extends LitElement {
                 <main>
                     <div class="width-holder">
                         <div class="header">
-                            <h1>${STR_HEADER_FIRST}</h1>
+                            <h1>
+                                ${STR_HEADER_FIRST}
+                                ${this.jigFocus === "modules" ? "JIG" : "resource"}!
+                            </h1>
                             <h3>${STR_HEADER_SECOND}</h3>
                             ${
                                 this.jigFocus === "resources" ? html`
@@ -160,7 +162,6 @@ export class _ extends LitElement {
                         <div class="main">
                             <div class="column-1">
                                 <div class="img-wrapper">
-                                    <h4>${STR_THUMBNAIL}</h4>
                                     <slot name="edit-cover"></slot>
                                     <slot name="img"></slot>
                                 </div>
@@ -175,7 +176,6 @@ export class _ extends LitElement {
                             <div class="column-3">
                                 <slot name="language"></slot>
                                 <slot name="age"></slot>
-                                <slot name="goal"></slot>
                                 <div class="catagories">
                                     <slot name="catagories-select"></slot>
                                     <slot name="category-labels"></slot>

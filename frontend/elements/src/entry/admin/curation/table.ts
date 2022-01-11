@@ -4,17 +4,10 @@ import { LitElement, html, css, customElement, property } from "lit-element";
 export class _ extends LitElement {
     static styles = [
         css`
-            .table {
-                display: grid;
-                grid-template-columns: repeat(8, 1fr);
-                font-family: sans-serif;
-                background: #f3f8fe;
-                border: solid 1px #c4d9f7;
-            }
-            .header-cell {
-                border: solid 1px #eaebef;
-                padding: 5px;
-                color: #2565d5;
+            .controls {
+                display: flex;
+                justify-content: space-between;
+                padding: 10px;
             }
             .pagination {
                 display: grid;
@@ -37,23 +30,47 @@ export class _ extends LitElement {
             ::slotted(select[slot=pagination]) {
                 font-size: 20px;
             }
+            .table {
+                display: grid;
+                font-family: sans-serif;
+                border: solid 1px #c4d9f7;
+            }
+            .header-cell {
+                background-color: #f3f8fe;
+                border: solid 1px #eaebef;
+                padding: 5px;
+                color: #2565d5;
+            }
         `,
     ];
 
     @property({ attribute: false })
     headers: string[] = [
+        "Preview",
         "Jig Name",
         "Author",
-        "Author's Badge",
+        "Rating",
+        // "Author's Badge",
         "Date",
-        "Instruction Language",
-        "Curators",
+        "Language",
+        // "Curators",
         "Age Ranges",
         "Affiliation"
     ];
 
     render() {
         return html`
+            <style>
+                .table {
+                    grid-template-columns: repeat(${this.headers.length}, 1fr);
+                }
+            </style>
+            <div class="controls">
+                <slot name="search"></slot>
+                <div class="pagination">
+                    <slot name="pagination"></slot>
+                </div>
+            </div>
             <div class="table">
                 <admin-curation-table-line>
                     ${this.headers.map(
@@ -61,9 +78,6 @@ export class _ extends LitElement {
                     )}
                 </admin-curation-table-line>
                 <slot></slot>
-            </div>
-            <div class="pagination">
-                <slot name="pagination"></slot>
             </div>
         `;
     }

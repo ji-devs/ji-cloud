@@ -6,17 +6,36 @@ export class _ extends LitElement {
         return [
             css`
                 :host {
-                    height: 88px;
                     display: grid;
                     grid-template-columns: repeat(5, auto);
                     justify-content: space-between;
                     align-items: center;
-                    padding: 0 40px;
+                    padding: 0 20px;
+                    height: 68px;
+                }
+                @media (min-width: 1920px) {
+                    :host {
+                        padding: 0 40px;
+                        height: 88px;
+                    }
+                }
+                .logo {
+                    width: 85px;
+                }
+                @media (min-width: 1920px) {
+                    .logo {
+                        width: 115px;
+                    }
                 }
                 nav {
                     display: flex;
-                    column-gap: 8px;
                     height: 100%;
+                    column-gap: 4px;
+                }
+                @media (min-width: 1920px) {
+                    nav {
+                        column-gap: 8px;
+                    }
                 }
                 .donate {
                     display: grid;
