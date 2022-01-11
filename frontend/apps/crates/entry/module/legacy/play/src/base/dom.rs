@@ -11,6 +11,10 @@ impl DomRenderable for Base {
             .class(&*styles::FULL_STAGE)
             .property("slot", "main")
             .style("user-select", "none")
+            .child(html!("img", {
+                .class(&*styles::FULL_STAGE)
+                .attribute("src", &state.design_media_url(&state.slide.image_full))
+            }))
             .apply_if(state.should_render_design(), |dom| {
                 dom.child(state.clone().render_design())
             })

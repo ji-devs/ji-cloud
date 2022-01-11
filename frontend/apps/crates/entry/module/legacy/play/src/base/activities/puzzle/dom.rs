@@ -20,7 +20,7 @@ impl Puzzle {
                     clone!(state, canvas => async move {
                         match init_phase {
                             InitPhase::Loading => {
-                                let url = state.base.design_media_url(&state.raw.full_cutout_img);
+                                let url = state.base.design_media_url(&state.base.slide.image_full);
                                 let effects = ImageEffect::new_url(&url, None).await;
 
                                 if state.raw.show_preview {
