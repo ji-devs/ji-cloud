@@ -49,7 +49,9 @@ pub async fn get_pool(connect_options: PgConnectOptions) -> anyhow::Result<PgPoo
         .connect_with(connect_options)
         .await?;
 
+    log::info!("Running migrations, if there are any");
     sqlx::migrate!("./migrations").run(&pool).await?;
+    log::info!("Migrations complete");
 
     Ok(pool)
 }
