@@ -77,7 +77,6 @@ pub enum VideoSource {
 pub struct Puzzle {
     pub audio_filename: Option<String>,
     pub jump_index: Option<usize>,
-    pub full_cutout_img: String,
     pub fly_back_to_origin: bool,
     pub show_preview: bool,
     // doesn't seem to have any effect anywhere...

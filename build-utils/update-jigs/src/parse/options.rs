@@ -60,7 +60,7 @@ pub struct Opts {
     pub verbose: bool,
     
     /// download media 
-    #[structopt(long, parse(try_from_str), default_value = "false")]
+    #[structopt(long, parse(try_from_str), default_value = "true")]
     pub download_media: bool,
 
     /// write json
