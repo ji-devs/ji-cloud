@@ -6,7 +6,7 @@ use futures_signals::{
     signal::{Mutable, SignalExt},
 };
 
-use dominator::{clone, html, DomHandle};
+use dominator::{clone, html};
 
 use utils::{events::ModuleResizeEvent, resize::*};
 
