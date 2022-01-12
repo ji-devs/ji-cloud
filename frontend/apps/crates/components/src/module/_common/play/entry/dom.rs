@@ -1,5 +1,6 @@
 use std::rc::Rc;
 
+use discard::Discard;
 use futures_signals::signal::{Mutable, SignalExt};
 
 use dominator::{clone, events, html, Dom};
@@ -70,12 +71,21 @@ pub fn render_page_body<RawData, Mode, Step, Base>(
                 })
             }));
 
-    state.page_body_switcher.load(sig.for_each(|dom| {
-        let body = dominator::body();
-        body.set_inner_html("");
-        dominator::append_dom(&body, dom);
+    state.page_body_switcher.load(sig.for_each(clone!(state => move |dom| {
+        {
+            // Discard the previous body and set the current handle to None.
+            // This forces dominator to release all references held by this handle.
+            let current_handle = state.dom_body_handle.replace(None);
+            if let Some(current_handle) = current_handle {
+                current_handle.discard();
+            }
+        }
+
+        // Append the new body and set the handle.
+        let handle = dominator::append_dom(&dominator::body(), dom);
+        state.dom_body_handle.set(Some(handle));
         async move {}
-    }));
+    })));
 }
 
 //This is just a placeholder to get messages
@@ -162,7 +172,7 @@ where
                     }
                 })
                 .after_inserted(|_elem| {
-                    //On mount - send an empty IframeInit message to let the player know we're ready 
+                    //On mount - send an empty IframeInit message to let the player know we're ready
                     IframeInit::empty()
                         .try_post_message_to_player()
                         .unwrap_ji();

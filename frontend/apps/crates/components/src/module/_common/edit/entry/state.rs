@@ -1,4 +1,4 @@
-use dominator::clone;
+use dominator::{clone, DomHandle};
 use futures_signals::signal::{Mutable, Signal, SignalExt};
 
 use std::cell::RefCell;
@@ -52,6 +52,7 @@ where
     pub(super) history: RefCell<Option<Rc<HistoryStateImpl<RawData>>>>,
     pub(super) raw_loaded: Mutable<bool>,
     pub(super) page_body_switcher: AsyncLoader,
+    pub(super) dom_body_handle: Mutable<Option<DomHandle>>,
     pub(super) reset_from_history_loader: AsyncLoader,
     pub(super) on_init_ready: RefCell<Option<Box<dyn Fn()>>>,
 }
@@ -144,6 +145,7 @@ where
             screenshot_loader: Rc::new(AsyncLoader::new()),
             save_loader: Rc::new(AsyncLoader::new()),
             page_body_switcher: AsyncLoader::new(),
+            dom_body_handle: Mutable::new(None),
             reset_from_history_loader: AsyncLoader::new(),
             on_init_ready: RefCell::new(None),
         });
