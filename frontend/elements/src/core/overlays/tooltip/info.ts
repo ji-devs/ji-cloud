@@ -78,6 +78,8 @@ export class _ extends LitElement {
                     margin: 8px 0 36px 0;
                 }
                 .noshow {
+                    background: transparent;
+                    border: none;
                     font-size: 13px;
                     font-weight: 500;
                     color: var(--light-blue-4);
@@ -196,7 +198,7 @@ export class _ extends LitElement {
             this.onClose();
         };
         return html`
-            <div @click=${onClick} class="noshow">${STR_NO_SHOW_AGAIN}</div>
+            <button @click=${onClick} class="noshow">${STR_NO_SHOW_AGAIN}</button>
         `;
     }
 
