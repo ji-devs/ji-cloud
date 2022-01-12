@@ -130,8 +130,6 @@ pub enum Mode {
     Talk,
     /// Read mode
     Read,
-    /// Draw mode
-    Draw,
     /// Scene mode
     Scene,
     /// Photo album mode
@@ -157,7 +155,6 @@ impl ModeExt for Mode {
             Self::Images,
             Self::Talk,
             Self::Read,
-            Self::Draw,
             Self::Scene,
             Self::PhotoAlbum,
             Self::Comic,
@@ -172,7 +169,6 @@ impl ModeExt for Mode {
             Self::Images => "images",
             Self::Talk => "talk",
             Self::Read => "read",
-            Self::Draw => "draw",
             Self::Scene => "scene",
             Self::PhotoAlbum => "photo-album",
             Self::Comic => "comic",
@@ -186,7 +182,6 @@ impl ModeExt for Mode {
         const STR_IMAGES_LABEL: &'static str = "Images";
         const STR_TALK_LABEL: &'static str = "Talking Pictures";
         const STR_READ_LABEL: &'static str = "Read Along";
-        const STR_DRAW_LABEL: &'static str = "Interactive drawing";
         const STR_SCENE_LABEL: &'static str = "Scene";
         const STR_PHOTO_ALBUM_LABEL: &'static str = "Photo Album";
         const STR_COMIC_LABEL: &'static str = "Comics";
@@ -198,7 +193,6 @@ impl ModeExt for Mode {
             Self::Images => STR_IMAGES_LABEL,
             Self::Talk => STR_TALK_LABEL,
             Self::Read => STR_READ_LABEL,
-            Self::Draw => STR_DRAW_LABEL,
             Self::Scene => STR_SCENE_LABEL,
             Self::PhotoAlbum => STR_PHOTO_ALBUM_LABEL,
             Self::Comic => STR_COMIC_LABEL,
