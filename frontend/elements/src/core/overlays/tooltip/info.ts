@@ -78,6 +78,8 @@ export class _ extends LitElement {
                     margin: 8px 0 36px 0;
                 }
                 .noshow {
+                    background: transparent;
+                    border: none;
                     font-size: 13px;
                     font-weight: 500;
                     color: var(--light-blue-4);
@@ -92,16 +94,8 @@ export class _ extends LitElement {
         super.connectedCallback();
 
         window.addEventListener("mousedown", this.onGlobalMouseDown);
-
-        const { showId } = this;
-
-        if (showId !== "" && showId !== "debug") {
-            if (localStorage.getItem("tooltip-" + showId) === "hidden") {
-                //hiding due to storage
-                this.onClose();
-            }
-        }
     }
+
     disconnectedCallback() {
         super.disconnectedCallback();
         window.removeEventListener("mousedown", this.onGlobalMouseDown);
@@ -134,8 +128,8 @@ export class _ extends LitElement {
     @property()
     body: string = "";
 
-    @property()
-    showId: string | "debug" = "";
+    @property({ type: Boolean })
+    showPermanentlyClose: boolean = false;
 
     @property({ type: Boolean })
     closeable: boolean = false;
@@ -181,6 +175,33 @@ export class _ extends LitElement {
     @property({ type: Number })
     arrowNudge: number = 0;
 
+
+    renderClose() {
+        if (!this.closeable) {
+            return nothing;
+        }
+
+        return html`
+            <button class="close-button" @click=${this.onClose}>
+                <fa-icon icon="fa-light fa-xmark"></fa-icon>
+            </button>
+        `;
+    }
+
+    renderPermanentlyClose() {
+        if (!this.showPermanentlyClose) {
+            return nothing;
+        }
+
+        const onClick = () => {
+            this.dispatchEvent(new Event("permanently-close"));
+            this.onClose();
+        };
+        return html`
+            <button @click=${onClick} class="noshow">${STR_NO_SHOW_AGAIN}</button>
+        `;
+    }
+
     render() {
         const {
             container,
@@ -192,10 +213,8 @@ export class _ extends LitElement {
             marginY,
             contentAnchor,
             targetAnchor,
-            closeable,
             title,
             body,
-            showId,
             arrowNudge,
         } = this;
 
@@ -227,16 +246,14 @@ export class _ extends LitElement {
                     .arrowNudge=${arrowNudge}
                 >
                     <section class="content">
-                        ${closeable ? renderClose(this.onClose) : nothing}
+                        ${this.renderClose()}
                         ${title !== ""
                             ? html`<div class="title">${title}</div>`
                             : nothing}
                         ${body !== ""
                             ? html`<section class="body">${body}</section>`
                             : nothing}
-                        ${showId !== ""
-                            ? renderShowId(showId, this.onClose)
-                            : nothing}
+                        ${this.renderPermanentlyClose()}
                     </section>
                 </tooltip-container>
             </overlay-content>
@@ -244,26 +261,3 @@ export class _ extends LitElement {
     }
 }
 
-function renderClose(onClose: () => any) {
-    return html`
-        <button class="close-button" @click=${onClose}>
-            <fa-icon icon="fa-light fa-xmark"></fa-icon>
-        </button>
-    `;
-}
-
-function renderShowId(showId: string, onClose: () => any) {
-    const onClick = () => {
-        if (showId === "debug") {
-            //skipping showId action because it's debug
-        } else {
-            //setting ${showId}
-            localStorage.setItem("tooltip-" + showId, "hidden");
-        }
-
-        onClose();
-    };
-    return html`
-        <div @click=${onClick} class="noshow">${STR_NO_SHOW_AGAIN}</div>
-    `;
-}
