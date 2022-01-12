@@ -72,6 +72,8 @@ export class _ extends LitElement {
                     align-content: start;
                     padding-right: 32px;
                     padding-top: 24px;
+                    position: relative;
+                    top: 50px;
                 }
                 .bottom-bar {
                     grid-row: 2;
