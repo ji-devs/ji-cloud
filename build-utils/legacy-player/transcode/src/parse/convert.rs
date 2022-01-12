@@ -563,7 +563,6 @@ mod slide {
                             Some(Activity::Puzzle(Puzzle {
                                 audio_filename,
                                 jump_index: activity_settings.jump_index.and_then(validate_jump_index),
-                                full_cutout_img: image_full,
                                 //show_hints: activity.settings.tooltip.unwrap_or(false),
                                 show_hints: !activity_settings.hints_disabled.unwrap_or(true),
                                 fly_back_to_origin: !activity_settings.fun_mode.unwrap_or(false),
@@ -622,6 +621,7 @@ mod slide {
         let design = convert_design(&game_url, &game_id, &slide_id, &base_url, &mut medias, slide.layers);
 
         Slide {
+            image_full,
             activity,
             design,
         }

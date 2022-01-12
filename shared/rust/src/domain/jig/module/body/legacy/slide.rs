@@ -6,6 +6,9 @@ use serde_with::skip_serializing_none;
 #[skip_serializing_none]
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]
 pub struct Slide {
+    /// Full Image
+    pub image_full: String,
+
     /// Design layer  
     pub design: design::Design,
 
