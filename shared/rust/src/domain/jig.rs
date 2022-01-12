@@ -801,10 +801,10 @@ pub struct JigSearchQuery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub is_published: Option<bool>,
 
-    /// Optionally filter by the author
+    /// Optionally filter by author's id
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub author: Option<Uuid>,
+    pub author_id: Option<UserOrMe>,
 
     /// Optionally filter by the author's name
     #[serde(default)]

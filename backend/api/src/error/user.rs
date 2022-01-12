@@ -128,6 +128,7 @@ pub enum VerifyEmail {
     InternalServerError(anyhow::Error),
     Email(Email),
     ServiceSession(ServiceSession),
+    Forbidden,
 }
 
 impl<T: Into<anyhow::Error>> From<T> for VerifyEmail {
@@ -153,6 +154,11 @@ impl Into<actix_web::Error> for VerifyEmail {
                 .into(),
             },
             Self::ServiceSession(e) => e.into(),
+            Self::Forbidden => BasicError::with_message(
+                StatusCode::FORBIDDEN,
+                "Current user does not have access".to_owned(),
+            )
+            .into(),
         }
     }
 }

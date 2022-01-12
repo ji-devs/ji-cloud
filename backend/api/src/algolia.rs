@@ -14,7 +14,7 @@ use shared::{
     domain::{
         category::CategoryId,
         image::{ImageId, ImageKind},
-        jig::{JigFocus, JigId, PrivacyLevel},
+        jig::{JigFocus, JigId, PrivacyLevel, UserOrMe},
         meta::{AffiliationId, AgeRangeId, GoalId, ImageStyleId, ImageTagIndex, ResourceTypeId},
     },
     media::MediaGroupKind,
@@ -46,7 +46,7 @@ struct BatchJig<'a> {
     goal_names: &'a [String],
     categories: &'a [Uuid],
     category_names: &'a [String],
-    author: Option<Uuid>,
+    author_id: Option<Uuid>,
     author_name: Option<String>,
     #[serde(rename = "_tags")]
     tags: Vec<&'static str>,
@@ -295,7 +295,7 @@ select jig.id,
               where jig_data_category.jig_data_id = jig_data.id))                                                   as "category_names!",
        privacy_level                                                                                                as "privacy_level!: PrivacyLevel",
        jig_focus                                                                                                    as "jig_focus!: JigFocus",
-       author_id                                                                                                    as "author",
+       author_id                                                                                                    as "author_id",
        locked                                                                                                       as "locked!",  
        other_keywords                                                                                               as "other_keywords!",
        translated_keywords                                                                                          as "translated_keywords!",
@@ -315,7 +315,7 @@ limit 100 for no key update skip locked;
 
             tags.push(row.privacy_level.as_str());
 
-            if row.author.is_some() {
+            if row.author_id.is_some() {
                 tags.push(HAS_AUTHOR_TAG);
             }
 
@@ -334,7 +334,7 @@ limit 100 for no key update skip locked;
                 resource_type_names: &row.resource_type_names,
                 categories: &row.categories,
                 category_names: &row.category_names,
-                author: row.author,
+                author_id: row.author_id,
                 author_name: row.author_name,
                 jig_focus: &row.jig_focus.as_str(),
                 tags,
@@ -782,7 +782,7 @@ impl Client {
         resource_types: &[ResourceTypeId],
         categories: &[CategoryId],
         goals: &[GoalId],
-        author: Option<Uuid>,
+        author_id: Option<Uuid>,
         author_name: Option<String>,
         jig_focus: Option<JigFocus>,
         other_keywords: Option<String>,
@@ -790,7 +790,7 @@ impl Client {
     ) -> anyhow::Result<Option<(Vec<Uuid>, u32, u64)>> {
         let mut and_filters = algolia::filter::AndFilter { filters: vec![] };
 
-        if let Some(author) = author {
+        if let Some(author_id) = author_id {
             and_filters.filters.push(Box::new(CommonFilter {
                 filter: TagFilter(HAS_AUTHOR_TAG.to_owned()),
                 invert: false,
@@ -799,7 +799,7 @@ impl Client {
             and_filters.filters.push(Box::new(CommonFilter {
                 filter: FacetFilter {
                     facet_name: "author".to_owned(),
-                    value: author.to_string(),
+                    value: author_id.to_string(),
                 },
                 invert: false,
             }))
