@@ -17,5 +17,5 @@ pub async fn main_js() {
 
     utils::init::init().await;
 
-    dominator::append_dom(&dominator::body(), page::Page::render());
+    dominator::append_dom(&dominator::get_id("root"), page::Page::render());
 }

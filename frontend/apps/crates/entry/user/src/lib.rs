@@ -27,5 +27,5 @@ pub async fn main_js() {
     utils::init::init().await;
 
     let router = router::Router::new();
-    dominator::append_dom(&dominator::body(), router.render());
+    dominator::append_dom(&dominator::get_id("root"), router.render());
 }

@@ -119,7 +119,7 @@ pub fn render_page_body<Mode, Step, RawData, Base, Main, Sidebar, Header, Footer
         }
 
         // Append the new body and set the handle.
-        let handle = dominator::append_dom(&dominator::body(), dom);
+        let handle = dominator::append_dom(&dominator::get_id("root"), dom);
         state.dom_body_handle.set(Some(handle));
         async move {}
     })));

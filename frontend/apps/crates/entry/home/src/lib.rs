@@ -23,7 +23,7 @@ pub async fn main_js() {
 
     let router = Rc::new(Router::new());
 
-    dominator::append_dom(&dominator::body(), Router::render());
+    dominator::append_dom(&dominator::get_id("root"), Router::render());
 
     std::mem::forget(Box::new(router));
 }
