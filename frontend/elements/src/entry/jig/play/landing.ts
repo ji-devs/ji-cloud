@@ -8,10 +8,9 @@ export class _ extends LitElement {
                 /*
                     z-index layers:
                     1) iframe
-                    2) controls
-                    3) pause overlay
-                    4) play pause button
-                    5) dialog
+                    2) pause overlay
+                    3) controls
+                    4) dialog
                 */
                 :host {
                     display: block;
@@ -30,7 +29,6 @@ export class _ extends LitElement {
                 ::slotted([slot="iframe"]),
                 .controls,
                 .paused-backdrop,
-                .play-pause-button-layer,
                 ::slotted(dialog-overlay) {
                     grid-column: 1;
                     grid-row: 1;
@@ -52,15 +50,14 @@ export class _ extends LitElement {
                     place-content: center;
                     background-color: #ffffff;
                 }
-                .controls,
-                .play-pause-button-layer {
+                .controls {
                     display: grid;
                     grid-template-columns: 0px 1fr auto;
                     grid-template-rows: 1fr 100px;
                     box-sizing: border-box;
                 }
                 .controls {
-                    z-index: 2;
+                    z-index: 3;
                     pointer-events: none;
                 }
                 .controls ::slotted(*) {
@@ -69,7 +66,7 @@ export class _ extends LitElement {
                 .sidebar {
                     grid-column: 1;
                     grid-row: 1 / -1;
-                    z-index: 2;
+                    z-index: 3;
                 }
                 .indicators {
                     grid-column: 3;
@@ -100,25 +97,14 @@ export class _ extends LitElement {
                 .bottom-right ::slotted([slot="background"]) {
                     margin-right: 102px;
                 }
-                :host([paused]) .paused-backdrop,
                 ::slotted(dialog-overlay) {
                     background-color: #00000080;
                 }
                 :host([paused]) .paused-backdrop {
-                    z-index: 3;
-                }
-                .play-pause-button-layer {
-                    z-index: 4;
-                    pointer-events: none;
-                }
-                .play-pause-button-layer ::slotted([slot="play-pause-button"]) {
-                    pointer-events: all;
-                }
-                :host([paused]) .play-pause-button-layer {
-                    pointer-events: all;
+                    z-index: 2;
                 }
                 ::slotted(dialog-overlay) {
-                    z-index: 5;
+                    z-index: 4;
                 }
             `,
         ];
@@ -135,6 +121,7 @@ export class _ extends LitElement {
             <main>
                 <slot name="message"></slot>
                 <slot name="iframe"></slot>
+                <div class="paused-backdrop"></div>
                 <div class="controls">
                     <div class="sidebar">
                         <slot name="sidebar"></slot>
@@ -153,11 +140,6 @@ export class _ extends LitElement {
                     </div>
                     <div class="bottom-right">
                         <slot name="background"></slot>
-                    </div>
-                </div>
-                <div class="paused-backdrop"></div>
-                <div class="play-pause-button-layer">
-                    <div class="bottom-right">
                         <slot name="play-pause-button"></slot>
                     </div>
                 </div>
