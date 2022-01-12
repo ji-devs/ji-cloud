@@ -15,7 +15,7 @@ import {
     STR_MODULE_CHOOSE_HEADER,
 } from "@elements/module/_common/types";
 
-const STR_SUBTITLE = "What do you want to do?";
+const STR_SUBTITLE = "Best ways to use this activity:";
 
 type ScrollPosition = "left" | "right" | null;
 
