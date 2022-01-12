@@ -1,5 +1,5 @@
 use crate::audio::mixer::AUDIO_MIXER;
-use dominator::{clone, Dom};
+use dominator::{clone, Dom, DomHandle};
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::Mutable;
 use shared::domain::jig::module::body::Instructions;
@@ -34,6 +34,7 @@ where
     pub(super) opts: StateOpts<RawData>,
     pub(super) raw_loader: AsyncLoader,
     pub(super) page_body_switcher: AsyncLoader,
+    pub(super) dom_body_handle: Mutable<Option<DomHandle>>,
     phantom: PhantomData<(Mode, Step)>,
 }
 
@@ -83,6 +84,7 @@ where
             phase: Mutable::new(Rc::new(InitPhase::Loading(loading_kind))),
             raw_loader: AsyncLoader::new(),
             page_body_switcher: AsyncLoader::new(),
+            dom_body_handle: Mutable::new(None),
             phantom: PhantomData,
         });
 

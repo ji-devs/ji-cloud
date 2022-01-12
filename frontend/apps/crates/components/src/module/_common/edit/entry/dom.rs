@@ -1,11 +1,12 @@
 use std::rc::Rc;
 
+use discard::Discard;
 use futures_signals::{
     map_ref,
     signal::{Mutable, SignalExt},
 };
 
-use dominator::{clone, html};
+use dominator::{clone, html, DomHandle};
 
 use utils::{events::ModuleResizeEvent, resize::*};
 
@@ -107,10 +108,19 @@ pub fn render_page_body<Mode, Step, RawData, Base, Main, Sidebar, Header, Footer
         })
     }));
 
-    state.page_body_switcher.load(sig.for_each(|dom| {
-        let body = dominator::body();
-        body.set_inner_html("");
-        dominator::append_dom(&body, dom);
+    state.page_body_switcher.load(sig.for_each(clone!(state => move |dom| {
+        {
+            // Discard the previous body and set the current handle to None.
+            // This forces dominator to release all references held by this handle.
+            let current_handle = state.dom_body_handle.replace(None);
+            if let Some(current_handle) = current_handle {
+                current_handle.discard();
+            }
+        }
+
+        // Append the new body and set the handle.
+        let handle = dominator::append_dom(&dominator::body(), dom);
+        state.dom_body_handle.set(Some(handle));
         async move {}
-    }));
+    })));
 }
