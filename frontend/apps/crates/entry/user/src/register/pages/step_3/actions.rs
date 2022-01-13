@@ -10,7 +10,6 @@ use shared::{
 use std::rc::Rc;
 use utils::{api_helpers::meta::MetaOptions, prelude::*, storage};
 use uuid::Uuid;
-use wasm_bindgen::prelude::*;
 
 impl State {
     pub fn pre_select(&self, meta: &MetaOptions) {
@@ -32,21 +31,21 @@ pub fn submit(state: Rc<State>) {
         .age_ranges
         .borrow()
         .iter()
-        .map(|id| AgeRangeId(Uuid::parse_str(id).unwrap_throw()))
+        .map(|id| AgeRangeId(Uuid::parse_str(id).unwrap_ji()))
         .collect();
 
     let affiliations: Vec<AffiliationId> = state
         .affiliations
         .borrow()
         .iter()
-        .map(|id| AffiliationId(Uuid::parse_str(id).unwrap_throw()))
+        .map(|id| AffiliationId(Uuid::parse_str(id).unwrap_ji()))
         .collect();
 
     let subjects: Vec<SubjectId> = state
         .subjects
         .borrow()
         .iter()
-        .map(|id| SubjectId(Uuid::parse_str(id).unwrap_throw()))
+        .map(|id| SubjectId(Uuid::parse_str(id).unwrap_ji()))
         .collect();
 
     let step_2 = state.step_2.clone();
@@ -69,7 +68,7 @@ pub fn submit(state: Rc<State>) {
         affiliations,
         location: step_2
             .location_json
-            .map(|raw| serde_json::to_value(raw).unwrap_throw()),
+            .map(|raw| serde_json::to_value(raw).unwrap_ji()),
     };
 
     state.register_loader.load(async {
@@ -90,7 +89,7 @@ pub fn submit(state: Rc<State>) {
                 };
 
                 if let Some(msg) = msg {
-                    let _ = web_sys::window().unwrap_throw().alert_with_message(msg);
+                    let _ = web_sys::window().unwrap_ji().alert_with_message(msg);
                 } else {
                     log::error!("unexpected technical error!");
                     panic!("{:?}", err);

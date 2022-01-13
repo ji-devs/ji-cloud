@@ -167,7 +167,7 @@ impl AnimationPlayer {
             &state.worker,
             "message",
             clone!(state => move |event| {
-                let event = event.dyn_ref::<web_sys::MessageEvent>().unwrap_throw();
+                let event = event.dyn_ref::<web_sys::MessageEvent>().unwrap_ji();
                 let data = event.data();
 
 

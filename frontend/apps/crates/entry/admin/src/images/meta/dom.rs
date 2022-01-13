@@ -9,8 +9,7 @@ use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
 use shared::domain::image::{ImageId, ImageSearchQuery};
 use std::rc::Rc;
-use utils::{events, routes::*};
-use wasm_bindgen::prelude::*;
+use utils::{events, routes::*, unwrap::UnwrapJiExt};
 use web_sys::HtmlInputElement;
 
 const STR_REPLACE: &str = "Replace";
@@ -39,7 +38,7 @@ impl ImageMetaPage {
             .child_signal(
                 state.loaded.signal().map(clone!(state, initial_data => move |loaded| {
                     if loaded {
-                        let (image, categories, metadata) = initial_data.borrow_mut().take().unwrap_throw();
+                        let (image, categories, metadata) = initial_data.borrow_mut().take().unwrap_ji();
 
                         Some(html!("image-meta-container", {
                             .event(|evt:events::CustomRoute| {

@@ -8,10 +8,10 @@ use futures_signals::map_ref;
 use futures_signals::signal::SignalExt;
 use futures_signals::signal_vec::SignalVecExt;
 use shared::domain::locale::ItemKind;
+use utils::unwrap::UnwrapJiExt;
 use std::rc::Rc;
 use utils::events;
 use uuid::Uuid;
-use wasm_bindgen::UnwrapThrowExt;
 use web_sys::HtmlSelectElement;
 
 const STR_ADD_ENTRY: &str = "Add a text";
@@ -24,7 +24,7 @@ impl LocaleOuterDom {
             Some(id) => map
                 .iter()
                 .find(|item_kind| item_kind.id == id)
-                .unwrap_throw()
+                .unwrap_ji()
                 .name
                 .clone(),
             None => String::new(),

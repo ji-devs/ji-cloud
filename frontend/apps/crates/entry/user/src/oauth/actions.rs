@@ -6,7 +6,7 @@ use shared::{
 use utils::{
     fetch::{api_no_auth, api_no_auth_with_credentials},
     routes::*,
-    storage,
+    storage, unwrap::UnwrapJiExt,
 };
 use wasm_bindgen::prelude::*;
 
@@ -17,14 +17,14 @@ extern "C" {
 
 pub async fn redirect(service_kind: GetOAuthUrlServiceKind, url_kind: OAuthUrlKind) {
     let service_kind_str = serde_wasm_bindgen::to_value(&service_kind)
-        .unwrap_throw()
+        .unwrap_ji()
         .as_string()
-        .unwrap_throw();
+        .unwrap_ji();
 
     let url_kind_str = serde_wasm_bindgen::to_value(&url_kind)
-        .unwrap_throw()
+        .unwrap_ji()
         .as_string()
-        .unwrap_throw();
+        .unwrap_ji();
 
     let path = GetOAuthUrl::PATH
         .replace("{service}", &service_kind_str)
@@ -33,7 +33,7 @@ pub async fn redirect(service_kind: GetOAuthUrlServiceKind, url_kind: OAuthUrlKi
         api_no_auth::<GetOAuthUrlResponse, EmptyError, ()>(&path, GetOAuthUrl::METHOD, None).await
     {
         let _ = web_sys::window()
-            .unwrap_throw()
+            .unwrap_ji()
             .location()
             .set_href(&resp.url);
         //unsafe { crate::oauth::actions::oauth_open_window(&resp.url, "oauth"); }
@@ -66,7 +66,7 @@ pub async fn finalize(req: CreateSessionOAuthRequest, url_kind: OAuthUrlKind) {
                     }
                     OAuthUrlKind::Login => {
                         let _ = web_sys::window()
-                            .unwrap_throw()
+                            .unwrap_ji()
                             .alert_with_message(crate::strings::STR_AUTH_OAUTH_LOGIN_FAIL);
                         let route: String = Route::User(UserRoute::Register).into();
                         dominator::routing::go_to_url(&route);

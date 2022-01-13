@@ -4,11 +4,12 @@ use crate::locale::state::{Column, SortKind, State};
 use dominator::{clone, html, with_node, Dom};
 use futures_signals::{signal::SignalExt, signal_vec::SignalVecExt};
 use shared::domain::locale::ItemKind;
+use utils::unwrap::UnwrapJiExt;
 use std::collections::BTreeMap;
 use std::rc::Rc;
 use utils::events;
 use uuid::Uuid;
-use wasm_bindgen::{JsCast, UnwrapThrowExt};
+use wasm_bindgen::JsCast;
 use web_sys::{HtmlOptionElement, HtmlSelectElement};
 
 pub struct TableHeaderDom {}
@@ -74,7 +75,7 @@ impl TableHeaderDom {
                                             .style("width", "100px")
                                             .child(html!("option", {
                                                 .property("value", "")
-                                                .property("selected", *state.item_kind_filter.lock_ref().get(&None).unwrap_throw())
+                                                .property("selected", *state.item_kind_filter.lock_ref().get(&None).unwrap_ji())
                                             }))
                                             .children(state
                                                 .item_kind_options
@@ -82,7 +83,7 @@ impl TableHeaderDom {
                                                 .map(|item_kind: &ItemKind| {
                                                     html!("option", {
                                                         .property("value", &item_kind.id.to_string())
-                                                        .property("selected", *state.item_kind_filter.lock_ref().get(&Some(item_kind.id)).unwrap_throw())
+                                                        .property("selected", *state.item_kind_filter.lock_ref().get(&Some(item_kind.id)).unwrap_ji())
                                                         .text(&item_kind.name)
                                                     })
                                                 })

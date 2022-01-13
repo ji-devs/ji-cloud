@@ -18,7 +18,7 @@ impl Renderer {
 
         let entity = {
             world.borrow::<SceneGraphStoragesMut>()
-                .unwrap_throw()
+                .unwrap_ji()
                 .spawn_child_identity(parent)
         };
 

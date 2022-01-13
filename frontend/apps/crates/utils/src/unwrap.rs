@@ -2,7 +2,7 @@ use cfg_if::cfg_if;
 use wasm_bindgen::prelude::*;
 
 /*
- * debug switching between unwrap_throw() and unwrap()
+ * debug switching between unwrap_ji() and unwrap()
  * just use unwrap_ji() and expect_ji() everywhere
  * potentially can add more instrumentaton for debugging here
  * TODO - get right line numbers!

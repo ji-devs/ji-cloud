@@ -1,6 +1,7 @@
 use dominator::{clone, html, Dom};
 use futures_signals::signal::{Mutable, SignalExt};
 use futures_signals::signal_vec::SignalVec;
+use utils::unwrap::UnwrapJiExt;
 
 use super::{actions, state::*};
 use std::rc::Rc;
@@ -10,7 +11,6 @@ use crate::{
     strings::register::step_3::*,
 };
 use utils::{api_helpers::meta::MetaOptions, events};
-use wasm_bindgen::prelude::*;
 
 pub struct Step3Page {}
 
@@ -22,7 +22,7 @@ impl Step3Page {
 
         html!("page-register-step3", {
             .future(clone!(state, meta_options => async move {
-                let meta = MetaOptions::load().await.unwrap_throw();
+                let meta = MetaOptions::load().await.unwrap_ji();
                 state.pre_select(&meta);
 
                 meta_options.set(Some(meta));

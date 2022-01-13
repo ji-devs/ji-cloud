@@ -6,6 +6,7 @@ use futures_signals::signal::Mutable;
 use futures_signals::signal_vec::MutableVec;
 use serde_derive::{Deserialize, Serialize};
 use shared::domain::locale::{Bundle, Entry, EntryStatus, ItemKind, UpdateEntryRequest};
+use utils::unwrap::UnwrapJiExt;
 use std::clone::Clone;
 use std::cmp::Ord;
 use std::collections::BTreeMap;
@@ -15,7 +16,7 @@ use std::str::FromStr;
 use strum_macros::Display;
 use url::Url;
 use uuid::Uuid;
-use wasm_bindgen::{JsCast, UnwrapThrowExt};
+use wasm_bindgen::JsCast;
 use web_sys::{HtmlDialogElement, HtmlOptionElement, HtmlOptionsCollection};
 
 pub struct LoaderState {
@@ -148,7 +149,7 @@ impl State {
             .lock_ref()
             .iter()
             .find(|(_, selected)| **selected)
-            .unwrap_throw()
+            .unwrap_ji()
             .0
             .id;
         let entry = db_interface::create_entry(bundle_id).await;
@@ -233,13 +234,13 @@ impl State {
                 .unwrap()
                 .dyn_into::<HtmlOptionElement>()
                 .unwrap();
-            let uuid = Uuid::parse_str(&option.value()).unwrap_throw();
+            let uuid = Uuid::parse_str(&option.value()).unwrap_ji();
             let selected = option.selected();
             let mut bundles = self.bundles.lock_mut();
             let bundle = bundles
                 .iter()
                 .find(|(bundle, _)| bundle.id == uuid)
-                .unwrap_throw()
+                .unwrap_ji()
                 .0
                 .clone();
             bundles.insert(bundle, selected);
@@ -311,7 +312,7 @@ impl From<Entry> for DisplayableEntry {
             zeplin_reference: {
                 let v = entry
                     .zeplin_reference
-                    .map(|url| Url::parse(&url).unwrap_throw());
+                    .map(|url| Url::parse(&url).unwrap_ji());
                 Mutable::new(v)
             },
             comments: entry.comments.clone().unwrap_or_default(),

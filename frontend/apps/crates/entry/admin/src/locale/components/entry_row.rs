@@ -4,11 +4,11 @@ use dominator::{clone, events, html, with_node, Dom};
 use futures_signals::signal::Mutable;
 use futures_signals::signal_vec::SignalVecExt;
 use shared::domain::locale::EntryStatus;
+use utils::unwrap::UnwrapJiExt;
 use std::clone::Clone;
 use std::rc::Rc;
 use url::Url;
 use uuid::Uuid;
-use wasm_bindgen::prelude::*;
 use web_sys::{HtmlInputElement, HtmlSelectElement, HtmlTextAreaElement};
 
 #[derive(Clone)]
@@ -43,7 +43,7 @@ impl EntryRow {
                                         .property("value", entry_ref.id)
                                         .attribute("readonly", "")
                                         .event(clone!(state, entry => move |_: events::Input| {
-                                            let value: u32 = elem.value().parse().unwrap_throw();
+                                            let value: u32 = elem.value().parse().unwrap_ji();
                                             let mut entry = entry.lock_mut();
                                             entry.id = value;
                                             Self::save_entry(state.clone(), entry.clone());
@@ -149,7 +149,7 @@ impl EntryRow {
                                         .event(clone!(state, entry => move |_event: events::Change| {
                                             let value: String = elem.value();
                                             let mut entry = entry.lock_mut();
-                                            entry.status = EntryStatus::from_str(&value); //.unwrap_throw();
+                                            entry.status = EntryStatus::from_str(&value); //.unwrap_ji();
                                             Self::save_entry(state.clone(), entry.clone());
                                         }))
                                     })
@@ -214,7 +214,7 @@ impl EntryRow {
                                     .attribute("type", "checkbox")
                                     .property("checked", entry_ref.in_app)
                                     .event(clone!(state, entry => move |event: events::Change| {
-                                        let value: bool = event.checked().unwrap_throw();
+                                        let value: bool = event.checked().unwrap_ji();
                                         let mut entry = entry.lock_mut();
                                         entry.in_app = value;
                                         Self::save_entry(state.clone(), entry.clone());
@@ -228,7 +228,7 @@ impl EntryRow {
                                     .attribute("type", "checkbox")
                                     .property("checked", entry_ref.in_element)
                                     .event(clone!(state, entry => move |event: events::Change| {
-                                        let value: bool = event.checked().unwrap_throw();
+                                        let value: bool = event.checked().unwrap_ji();
                                         let mut entry = entry.lock_mut();
                                         entry.in_element = value;
                                         Self::save_entry(state.clone(), entry.clone());
@@ -242,7 +242,7 @@ impl EntryRow {
                                     .attribute("type", "checkbox")
                                     .property("checked", entry_ref.in_mock)
                                     .event(clone!(state, entry => move |event: events::Change| {
-                                        let value: bool = event.checked().unwrap_throw();
+                                        let value: bool = event.checked().unwrap_ji();
                                         let mut entry = entry.lock_mut();
                                         entry.in_mock = value;
                                         Self::save_entry(state.clone(), entry.clone());
@@ -286,7 +286,7 @@ impl EntryRow {
                                     .with_node!(elem => {
                                         .event(clone!(state, entry => move |_: events::Input| {
                                             let value: String = elem.value();
-                                            let value = Uuid::parse_str(&value).unwrap_throw();
+                                            let value = Uuid::parse_str(&value).unwrap_ji();
                                             let mut entry = entry.lock_mut();
                                             entry.bundle_id = value;
                                             Self::save_entry(state.clone(), entry.clone());
