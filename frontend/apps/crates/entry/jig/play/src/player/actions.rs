@@ -1,6 +1,9 @@
 use std::rc::Rc;
 
-use super::{state::{can_load_liked_status, State}, timer::Timer};
+use super::{
+    state::{can_load_liked_status, State},
+    timer::Timer,
+};
 use awsm_web::audio::{AudioClipOptions, AudioHandle};
 use components::{
     audio::mixer::{AudioSourceExt, AUDIO_MIXER},
@@ -10,7 +13,7 @@ use dominator::clone;
 use futures_signals::signal::SignalExt;
 use shared::{
     api::{endpoints::jig, ApiEndpoint},
-    domain::jig::{AudioBackground, JigResponse, JigLikedResponse},
+    domain::jig::{AudioBackground, JigLikedResponse, JigResponse},
     error::EmptyError,
 };
 use utils::{
@@ -20,6 +23,8 @@ use utils::{
     unwrap::UnwrapJiExt,
 };
 use wasm_bindgen_futures::spawn_local;
+
+const TRACK_MODULE_COUNT: usize = 3;
 
 pub fn toggle_background_audio(state: Rc<State>) {
     let bg_audio_handle = state.bg_audio_handle.borrow();
@@ -48,25 +53,44 @@ pub fn pause_background_audio(state: &State, audio_handle: &AudioHandle) {
 
 pub fn navigate_forward(state: Rc<State>) {
     let active_module = state.active_module.get();
-    if let Some(jig) = &*state.jig.lock_ref() {
-        if active_module < jig.jig_data.modules.len() - 1 {
+
+    let module_count = (&*state.jig.lock_ref())
+        .as_ref()
+        .map(|jig| jig.jig_data.modules.len());
+
+    if let Some(module_count) = module_count {
+        let is_done = active_module == module_count - 1;
+        // Track that the JIG has been played if
+        // - The JIG is not a draft;
+        // - The play hasn't been tracked yet;
+        // - Either TRACK_MODULE_COUNT count of modules have been played or the JIG is done.
+        let should_track = !state.player_options.draft
+            && !*state.play_tracked.borrow()
+            && (*state.played_modules.borrow() + 1 == TRACK_MODULE_COUNT || is_done);
+
+        if should_track {
+            state.loader.load(clone!(state => async move {
+                // We don't need to handle an Ok Result; We can ignore Err, nothing is dependent on the
+                // success of this call. The failure should be noted in the server logs.
+                let _ = api_no_auth_empty::<EmptyError, ()>(
+                    &jig::Play::PATH.replace("{id}", &state.jig_id.0.to_string()),
+                    jig::Play::METHOD,
+                    None,
+                ).await;
+
+                // Set the flag to indicate that the play has been tracked for this JIG.
+                *state.play_tracked.borrow_mut() = true;
+            }))
+        }
+
+        if !is_done {
+            // Only increment the played count when navigating to the _next_ module.
+            let mut played_modules = state.played_modules.borrow_mut();
+            *played_modules += 1;
+
             navigate_to_index(Rc::clone(&state), active_module + 1);
         } else {
             state.done.set(true);
-
-            // Fire off a request to increment the play count only once a JIG has been played to
-            // the end.
-            if !state.player_options.draft {
-                state.loader.load(clone!(state => async move {
-                    // We don't need to handle an Ok Result; We can ignore Err, nothing is dependent on the
-                    // success of this call. The failure should be noted in the server logs.
-                    let _ = api_no_auth_empty::<EmptyError, ()>(
-                        &jig::Play::PATH.replace("{id}", &state.jig_id.0.to_string()),
-                        jig::Play::METHOD,
-                        None,
-                    ).await;
-                }))
-            }
         }
     }
 }
