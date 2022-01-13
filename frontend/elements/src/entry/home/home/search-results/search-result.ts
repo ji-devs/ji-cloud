@@ -269,6 +269,33 @@ export class _ extends LitElement {
     @property()
     description: string = "";
 
+    renderCount(label: string, count: number) {
+        // See related comment in renderCountDivider.
+        if (BigInt(count) === BigInt(0)) {
+            return nothing;
+        }
+
+        return html`
+            <div>
+                ${label}
+                <span class="count">${count}</span>
+            </div>
+        `;
+    }
+
+    renderCountDivider() {
+        // There is no guarantee that the value passed into this element is
+        // a BigInt, but it _can_ be. Convert the count values so that we're
+        // always comparing BigInts.
+        // Note: BigInt literals (example 1n) are not available pre-es2020, so
+        // we have to use the BigInt() constructor.
+        if (BigInt(this.playedCount) === BigInt(0) || BigInt(this.likedCount) === BigInt(0)) {
+            return nothing;
+        }
+
+        return html`<div class="played-liked-divider"></div>`;
+    }
+
     render() {
         return html`
             <div class="wrapper">
@@ -276,15 +303,9 @@ export class _ extends LitElement {
                     <slot name="image"></slot>
                     <h3 class="title">${this.title}</h3>
                     <div class="played-liked">
-                        <div>
-                            ${STR_PLAYED}
-                            <span class="count">${this.playedCount}</span>
-                        </div>
-                        <div class="played-liked-divider"></div>
-                        <div>
-                            ${STR_LIKED}
-                            <span class="count">${this.likedCount}</span>
-                        </div>
+                        ${this.renderCount(STR_PLAYED, this.playedCount)}
+                        ${this.renderCountDivider()}
+                        ${this.renderCount(STR_LIKED, this.likedCount)}
                     </div>
                     <div class="ages-language">
                         <div class="age">
