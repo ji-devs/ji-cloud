@@ -208,18 +208,18 @@ export class _ extends LitElement {
                 }
                 .hover .description {
                     font-size: 14px;
+                    font-weight: 300;
                 }
                 .hover h4,
                 .hover .author-section {
                     font-size: 14px;
                     font-weight: 500;
-                    line-height: 38px;
-                    margin: 0;
                 }
                 .hover .author-section {
                     display: flex;
                     justify-content: space-between;
                     flex-wrap: wrap;
+                    margin: 6px 0;
                 }
                 .hover .author-section .left-side {
                     display: flex;
@@ -271,6 +271,9 @@ export class _ extends LitElement {
 
     @property()
     description: string = "";
+
+    @property({ type: Boolean })
+    showAdditionalResources: boolean = true;
 
     renderCount(label: string, count: number) {
         // See related comment in renderCountDivider.
@@ -354,7 +357,7 @@ export class _ extends LitElement {
                                 <p class="description">${this.description}</p>
                             </home-search-result-details>
                             ${
-                                this.kind === "jig" ? html`
+                                this.showAdditionalResources ? html`
                                     <home-search-result-details>
                                         <h4>${STR_ADDITIONAL_RESOURCES}</h4>
                                         <div class="additional-resources-items">
@@ -377,12 +380,12 @@ export class _ extends LitElement {
                                         : nothing}
                                     ${this.author}
                                 </span>
-                                <a>
+                                <!-- <a>
                                     ${STR_SEE_ALL}
                                     <fa-icon
                                         icon="fa-light fa-chevron-right"
                                     ></fa-icon>
-                                </a>
+                                </a> -->
                             </div>
                         </div>
                     </div>
