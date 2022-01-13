@@ -16,6 +16,9 @@ pub struct State {
     pub jig_liked: Mutable<Option<bool>>,
     pub loader: AsyncLoader,
     pub active_module: Mutable<usize>,
+    /// Count of modules which have been played
+    pub played_modules: RefCell<usize>,
+    pub play_tracked: RefCell<bool>,
     pub module_id: Mutable<Option<ModuleId>>, // needed?
     pub timer: Mutable<Option<Timer>>,
     pub points: Mutable<u32>,
@@ -39,6 +42,8 @@ impl State {
             jig_liked: Mutable::new(None),
             loader: AsyncLoader::new(),
             active_module: Mutable::new(0),
+            played_modules: RefCell::new(0),
+            play_tracked: RefCell::new(false),
             module_id: Mutable::new(None),
             timer: Mutable::new(None),
             points: Mutable::new(0),
