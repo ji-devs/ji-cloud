@@ -45,9 +45,8 @@ export class _ extends LitElement {
                     grid-column: 1;
                     grid-row: 1;
                     display: grid;
-                    grid-template-rows: 200px auto 1fr 34px 40px;
+                    grid-template-rows: 200px auto auto 34px 40px;
                     height: 100%;
-                    row-gap: 8px;
                     background-color: #ffffff;
                 }
                 .main ::slotted([slot="image"]) {
@@ -60,6 +59,10 @@ export class _ extends LitElement {
                     text-align: center;
                     margin: 0;
                     margin-top: 8px;
+                    display: -webkit-box;
+                    -webkit-line-clamp: 2;
+                    -webkit-box-orient: vertical;  
+                    overflow: hidden;
                 }
                 .main .played-liked {
                     align-self: flex-start;
