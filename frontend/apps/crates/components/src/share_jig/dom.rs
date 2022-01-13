@@ -33,7 +33,7 @@ const JIGZI_BASE_URL: &str = "https://jigzi.org";
 pub fn render(state: Rc<State>, anchor: Dom, slot: Option<&str>) -> Dom {
     html!("anchored-overlay", {
         .apply_if(slot.is_some(), |dom| {
-            dom.property("slot", slot.unwrap())
+            dom.property("slot", slot.unwrap_ji())
         })
         .property("positionY", "bottom-out")
         .property("positionX", "left-in")

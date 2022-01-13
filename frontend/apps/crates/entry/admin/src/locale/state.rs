@@ -173,7 +173,7 @@ impl State {
         let index = vec
             .iter()
             .position(|i| i.lock_ref().id == entry_id)
-            .unwrap();
+            .unwrap_ji();
         vec.remove(index);
     }
 
@@ -198,9 +198,9 @@ impl State {
         for i in 0..options.length() {
             let option: HtmlOptionElement = options
                 .get_with_index(i)
-                .unwrap()
+                .unwrap_ji()
                 .dyn_into::<HtmlOptionElement>()
-                .unwrap();
+                .unwrap_ji();
 
             let parsed =
                 T::from_str(&option.value()).unwrap_or_else(|_| panic!("Invalid option in select"));
@@ -216,9 +216,9 @@ impl State {
         for i in 0..options.length() {
             let option: HtmlOptionElement = options
                 .get_with_index(i)
-                .unwrap()
+                .unwrap_ji()
                 .dyn_into::<HtmlOptionElement>()
-                .unwrap();
+                .unwrap_ji();
 
             let parsed = T::from_str(&option.value());
 
@@ -231,9 +231,9 @@ impl State {
         for i in 0..options.length() {
             let option: HtmlOptionElement = options
                 .get_with_index(i)
-                .unwrap()
+                .unwrap_ji()
                 .dyn_into::<HtmlOptionElement>()
-                .unwrap();
+                .unwrap_ji();
             let uuid = Uuid::parse_str(&option.value()).unwrap_ji();
             let selected = option.selected();
             let mut bundles = self.bundles.lock_mut();

@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use utils::unwrap::UnwrapJiExt;
 use wasm_bindgen::prelude::*;
 use web_sys::File;
 
@@ -38,7 +39,7 @@ impl AudioRecorder {
         let config = RecorderConfig {
             wasm_url: "https://unpkg.com/vmsg@0.3.0/vmsg.wasm".to_string(),
         };
-        let config = serde_wasm_bindgen::to_value(&config).unwrap();
+        let config = serde_wasm_bindgen::to_value(&config).unwrap_ji();
         Self {
             vmsg: Recorder::new(&config),
         }

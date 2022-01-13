@@ -1,6 +1,7 @@
 use super::state::*;
 use std::rc::Rc;
 use crate::base::actions::NavigationTarget;
+use utils::unwrap::UnwrapJiExt;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 
@@ -31,9 +32,9 @@ impl Video {
 
 impl YoutubeApi {
     pub fn play(&self) {
-        let play_method = Reflect::get(&self.elem, &JsValue::from_str("play")).unwrap();
+        let play_method = Reflect::get(&self.elem, &JsValue::from_str("play")).unwrap_ji();
 
-        let play_method = play_method.dyn_ref::<js_sys::Function>().unwrap();
+        let play_method = play_method.dyn_ref::<js_sys::Function>().unwrap_ji();
         let _ = play_method.call0(&self.elem);
     }
 

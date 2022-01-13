@@ -82,7 +82,7 @@ impl Game {
 }
 
 fn is_incorrect_choice(state: &Rc<Game>, pair_id: &usize) -> bool {
-    state.current.lock_ref().as_ref().unwrap().incorrect_choices
+    state.current.lock_ref().as_ref().unwrap_ji().incorrect_choices
         .borrow()
         .iter()
         .find(|id| *id == pair_id)

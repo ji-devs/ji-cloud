@@ -6,7 +6,7 @@ use shared::domain::user::{UserProfile, UserScope};
 use strum::IntoEnumIterator;
 use utils::{
     events,
-    routes::{AdminRoute, Route, UserRoute},
+    routes::{AdminRoute, Route, UserRoute}, unwrap::UnwrapJiExt,
 };
 use wasm_bindgen::JsValue;
 
@@ -31,7 +31,7 @@ pub fn render(state: Rc<State>, slot: Option<&str>, active_page: Option<PageLink
 
     html!("page-header", {
         .apply_if(slot.is_some(), |dom| {
-            dom.property("slot", slot.unwrap())
+            dom.property("slot", slot.unwrap_ji())
         })
         .children(PageLinks::iter().map(|page_link| {
             html!("page-header-link", {

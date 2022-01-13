@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
-use utils::{events, prelude::SETTINGS, routes::{JigRoute, Route}};
+use utils::{events, prelude::SETTINGS, routes::{JigRoute, Route}, unwrap::UnwrapJiExt};
 
 use super::state::PlayerPopup;
 
@@ -11,7 +11,7 @@ impl PlayerPopup {
         let state = self;
         html!("player-popup", {
             .apply_if(slot.is_some(), |dom| {
-                dom.property("slot", slot.unwrap())
+                dom.property("slot", slot.unwrap_ji())
             })
             .child(html!("button", {
                 .property("slot", "close")

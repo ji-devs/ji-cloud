@@ -17,7 +17,7 @@ pub struct EntryRow {}
 impl EntryRow {
     fn url_option_string(url: &Option<Url>) -> String {
         if url.is_some() {
-            url.clone().unwrap().to_string()
+            url.clone().unwrap_ji().to_string()
         } else {
             String::new()
         }
@@ -57,7 +57,7 @@ impl EntryRow {
                                 .child(html!("input" => HtmlInputElement, {
                                     .with_node!(elem => {
                                         .apply_if(entry_ref.section.is_some(), |dom| {
-                                            dom.property("value", &entry_ref.section.clone().unwrap())
+                                            dom.property("value", &entry_ref.section.clone().unwrap_ji())
                                         })
                                         .attribute("list", "sections")
                                         .event(clone!(state, entry => move |_: events::Input| {
@@ -104,7 +104,7 @@ impl EntryRow {
                                                     html!("option", {
                                                         .property("text", &item_kind.name)
                                                         .property("value", &item_kind.id.to_string())
-                                                        .property("selected", entry_ref.item_kind_id.is_some() && &entry_ref.item_kind_id.unwrap() == &item_kind.id)
+                                                        .property("selected", entry_ref.item_kind_id.is_some() && &entry_ref.item_kind_id.unwrap_ji() == &item_kind.id)
                                                     })
                                                 })
                                         )
@@ -175,7 +175,7 @@ impl EntryRow {
                                         .with_node!(elem => {
                                             .property("type", "url")
                                             .apply_if(entry_ref.zeplin_reference.lock_ref().is_some(), |dom| {
-                                                dom.property("value", &entry_ref.zeplin_reference.lock_ref().clone().unwrap().to_string())
+                                                dom.property("value", &entry_ref.zeplin_reference.lock_ref().clone().unwrap_ji().to_string())
                                             })
                                             .event(clone!(state, entry => move |_: events::Input| {
                                                 let value: String = elem.value();

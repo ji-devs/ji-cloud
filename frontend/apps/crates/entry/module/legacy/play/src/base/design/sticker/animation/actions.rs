@@ -134,7 +134,7 @@ impl AnimationPlayer {
         let ctx = ctx.as_ref().unwrap_ji();
 
         if hidden {
-            ctx.clear_rect(0.0, 0.0, ctx.canvas().unwrap().width().into(), ctx.canvas().unwrap().height().into());
+            ctx.clear_rect(0.0, 0.0, ctx.canvas().unwrap_ji().width().into(), ctx.canvas().unwrap_ji().height().into());
         } else {
             if let Some(img_data) = self.last_paint_data.borrow().as_ref() {
                 self.map_current_frame(|_frame_index, frame_info| {

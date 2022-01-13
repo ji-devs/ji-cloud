@@ -131,7 +131,7 @@ impl Publish {
                     */
                 },
                 Err(_) => {
-                    let _ = web_sys::window().unwrap().alert_with_message("Error!");
+                    let _ = web_sys::window().unwrap_ji().alert_with_message("Error!");
                 }
             }
         }));

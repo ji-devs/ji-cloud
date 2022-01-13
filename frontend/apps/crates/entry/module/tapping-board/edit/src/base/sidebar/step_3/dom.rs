@@ -109,7 +109,7 @@ fn render_tab_body(state: Rc<Step3>, tab: Tab) -> Dom {
                                 text_state.set(if value.is_empty() { None } else { Some(value) });
                             }))
                             .event(clone!(state => move |evt:events::Change| {
-                                let target = evt.dyn_target::<HtmlTextAreaElement>().unwrap();
+                                let target = evt.dyn_target::<HtmlTextAreaElement>().unwrap_ji();
                                 let value = target.value();
 
                                 state.sidebar.base.traces.set_text(index, if value.is_empty() { None } else { Some(value) });
