@@ -10,7 +10,8 @@ export class IndicatorBase extends LitElement {
                     display: inline-grid;
                     justify-content: center;
                     align-content: space-evenly;
-                    border-radius: 16px;
+                    border-top-left-radius: 50%;
+                    border-bottom-left-radius: 50%;
                     box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.16);
                     border: solid 2px var(--light-blue-4);
                     background-color: var(--light-blue-2);

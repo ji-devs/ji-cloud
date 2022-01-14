@@ -70,7 +70,6 @@ export class _ extends LitElement {
                     grid-gap: 16px;
                     justify-items: end;
                     align-content: start;
-                    padding-right: 32px;
                     padding-top: 74px;
                 }
                 .bottom-bar {
