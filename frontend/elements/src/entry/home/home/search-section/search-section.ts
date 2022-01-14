@@ -4,8 +4,8 @@ import { homeStyles } from "../styles";
 
 export type Mode = "home" | "results";
 
-const STR_LEARNING = "Learning Through";
-const STR_CREATION = "Creation";
+const STR_LEARNING = "Joyful Jewish";
+const STR_CREATION = "Learning";
 const STR_MAKE_LEARNING = "Make learning awesome with";
 const STR_JIGS = "JIGs";
 
