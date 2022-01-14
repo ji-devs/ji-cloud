@@ -17,9 +17,7 @@ const STR_JIG = "JIG";
 const STR_RESOURCE = "Resource";
 
 const STR_CREATE_JIG = "Create a New ";
-// Create a new JIG (Jewish Interactive Game). Choose the activities designed to fit your teaching goals and you'll have a complete interactive lesson in just a snap!
-const STR_TEMPLATE_PARAGRAPH_1 = "We have created lesson plans you can use for teaching. Create ";
-const STR_TEMPLATE_PARAGRAPH_2 = " from one of these templates to easily address all your student’s learning needs!";
+const STR_TEMPLATE_PARAGRAPH = "Create a new JIG (Jewish Interactive Game). Choose the activities designed to fit your teaching goals and you'll have a complete interactive lesson in just a snap!";
 const STR_RECENT_1 = "My Recent";
 const STR_RECENT_2 = "s";
 const STR_SEE_ALL_TEMPLATES = "See all templates";
@@ -212,9 +210,7 @@ export class _ extends LitElement {
                             ${STR_CREATE_JIG + this.focusString()}
                         </h1>
                         <p class="template-paragraph">
-                            ${STR_TEMPLATE_PARAGRAPH_1}
-                            ${this.focusString()}
-                            ${STR_TEMPLATE_PARAGRAPH_2}
+                            ${STR_TEMPLATE_PARAGRAPH}
                         </p>
                     </div>
                     <div
