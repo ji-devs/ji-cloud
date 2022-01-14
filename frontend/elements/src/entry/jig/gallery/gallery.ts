@@ -17,9 +17,10 @@ const STR_JIG = "JIG";
 const STR_RESOURCE = "Resource";
 
 const STR_CREATE_JIG = "Create a New ";
+// Create a new JIG (Jewish Interactive Game). Choose the activities designed to fit your teaching goals and you'll have a complete interactive lesson in just a snap!
 const STR_TEMPLATE_PARAGRAPH_1 = "We have created lesson plans you can use for teaching. Create ";
 const STR_TEMPLATE_PARAGRAPH_2 = " from one of these templates to easily address all your student’s learning needs!";
-const STR_RECENT_1 = "My Recent ";
+const STR_RECENT_1 = "My Recent";
 const STR_RECENT_2 = "s";
 const STR_SEE_ALL_TEMPLATES = "See all templates";
 const STR_SEE_LESS_TEMPLATES = "See less templates";
@@ -270,8 +271,7 @@ export class _ extends LitElement {
                     <div class="recent-top-line">
                         <h2 class="recent-header">
                             ${STR_RECENT_1}
-                            ${this.focusString()}
-                            ${STR_RECENT_2}
+                            ${`${this.focusString()}${STR_RECENT_2}`}
                         </h2>
                         <slot class="filters" name="filters"></slot>
                         <slot class="search-input" name="search-input"></slot>
