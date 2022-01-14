@@ -1,5 +1,5 @@
-use dominator::{events, html, Dom};
-use futures_signals::signal::Mutable;
+use dominator::{events, html, clone, Dom};
+use futures_signals::signal::{Mutable, SignalExt};
 use std::rc::Rc;
 
 const STR_JEWISH_INTERACTIVE_URL: &str = "https://www.jewishinteractive.org/jigzi-home";
@@ -15,11 +15,20 @@ impl Iframe {
         })
     }
     pub fn render(self: Rc<Self>) -> Dom {
+        let state = self.clone();
         html!("iframe", {
             .style("width", "100%")
-            .event(|_: events::Load| {
+            .style_signal("height", state.height.signal_cloned()
+                .map(|height| {
+                    let adjusted_height = height.to_string() + "px";
+                    log::info!("Height: {}", adjusted_height);
+                    adjusted_height
+                })
+            )
+            .event(clone!(state => move |_: events::Load| {
                 log::info!("loaded");
-            })
+                state.height.set(1200);
+            }))
             .property("src", STR_JEWISH_INTERACTIVE_URL)
         })
     }
