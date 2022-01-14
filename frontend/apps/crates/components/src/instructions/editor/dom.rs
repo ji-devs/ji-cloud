@@ -44,7 +44,7 @@ pub fn render_text(state: Rc<State>) -> Dom {
                     change_text(&state, elem.value(), false);
                 }))
                 .event(clone!(state => move |evt:events::Change| {
-                    let target = evt.dyn_target::<HtmlTextAreaElement>().unwrap();
+                    let target = evt.dyn_target::<HtmlTextAreaElement>().unwrap_ji();
                     change_text(&state, target.value(), true);
                 }))
             })

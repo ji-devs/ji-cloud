@@ -87,7 +87,7 @@ impl State {
                 //This must exist since it's added before the module
                 //is added to drag_targets
                 let elem = module.elem.borrow();
-                let elem = elem.as_ref().unwrap_throw();
+                let elem = elem.as_ref().unwrap_ji();
                 let rect = elem.get_bounding_client_rect();
                 (*index, rect)
             })

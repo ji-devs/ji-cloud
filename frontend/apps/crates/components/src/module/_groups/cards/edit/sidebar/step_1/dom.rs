@@ -16,7 +16,7 @@ pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<Step1<RawData, E>>) ->
     html!("empty-fragment", {
         .style("display", "contents")
         .child_signal(state.base.is_empty_signal().map(clone!(state => move |is_empty| {
-            Some(match state.widget.get().unwrap() {
+            Some(match state.widget.get().unwrap_ji() {
                 Widget::Single(single) => {
 
                     html!("module-sidebar-body", {

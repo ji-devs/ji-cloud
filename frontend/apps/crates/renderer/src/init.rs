@@ -46,15 +46,15 @@ impl Renderer {
         let gl = get_webgl_context_2(&canvas, Some(&WebGlContextOptions {
             alpha: false,
             ..WebGlContextOptions::default()
-        })).unwrap_throw();
+        })).unwrap_ji();
 
-        let mut gl = WebGl2Renderer::new(gl).unwrap_throw();
+        let mut gl = WebGl2Renderer::new(gl).unwrap_ji();
         
         // Static Geometry
-        let static_geometry = StaticGeometry::new(&mut gl).unwrap_throw();
+        let static_geometry = StaticGeometry::new(&mut gl).unwrap_ji();
 
         // Add it to the world
-        world.add_unique_non_send_sync(gl).unwrap_throw();
+        world.add_unique_non_send_sync(gl).unwrap_ji();
 
 
         // Resizing

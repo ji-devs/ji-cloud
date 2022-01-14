@@ -25,11 +25,11 @@ pub async fn main_js() {
     //init dom stuff
 
     let router = router::Router::new();
-    dominator::append_dom(&dominator::body(), router.render());
+    dominator::append_dom(&dominator::get_id("root"), router.render());
     /*
 
     let page = page::Page::new();
 
-    dominator::append_dom(&dominator::body(), page.render());
+    dominator::append_dom(&dominator::get_id("root"), page.render());
     */
 }

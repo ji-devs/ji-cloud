@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use dominator::{clone, html, with_node, Dom};
 use futures_signals::signal::SignalExt;
-use utils::events;
+use utils::{events, unwrap::UnwrapJiExt};
 use web_sys::HtmlElement;
 
 use crate::overlay::handle::OverlayHandle;
@@ -23,7 +23,7 @@ impl HebrewButtons {
                     state.full || active_popup.is_some()
                 })))
                 .apply_if(slot.is_some(), |dom| {
-                    dom.property("slot", slot.unwrap())
+                    dom.property("slot", slot.unwrap_ji())
                 })
                 .child_signal(state.active_popup.signal().map(clone!(state, elem => move|active_popup| {
                     active_popup.map(|popup| state.render_popups(popup, elem.clone()))

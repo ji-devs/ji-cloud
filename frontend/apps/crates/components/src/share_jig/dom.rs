@@ -1,13 +1,14 @@
 use std::rc::Rc;
 
 use dominator::{clone, html, with_node, Dom, EventOptions};
-use futures_signals::signal::{Signal, SignalExt};
+use futures_signals::signal::SignalExt;
 use shared::config::JIG_PLAYER_SESSION_VALID_DURATION_SECS;
 use utils::{
     clipboard, events,
     routes::{KidsRoute, Route},
     unwrap::UnwrapJiExt,
 };
+use web_sys::HtmlElement;
 
 use crate::{
     animation::fade::{Fade, FadeKind},
@@ -18,6 +19,7 @@ use crate::{
             TooltipTarget,
         },
     },
+    overlay::handle::OverlayHandle,
 };
 
 use super::{
@@ -31,63 +33,61 @@ const STR_COPY_CODE: &str = "Copy Code";
 const JIGZI_BASE_URL: &str = "https://jigzi.org";
 
 pub fn render(state: Rc<State>, anchor: Dom, slot: Option<&str>) -> Dom {
-    html!("anchored-overlay", {
-        .apply_if(slot.is_some(), |dom| {
-            dom.property("slot", slot.unwrap())
-        })
-        .property("positionY", "bottom-out")
-        .property("positionX", "left-in")
-        .property("styled", true)
-        .property("slot", "actions")
-        .property_signal("open", share_open_signal(Rc::clone(&state)))
-        .event(clone!(state => move |_: events::Close| {
-            state.active_popup.set(None);
-        }))
-        .child(html!("empty-fragment", {
-            .property("slot", "anchor")
-            .event(clone!(state => move |_: events::Click| {
-                let new_value = match &*state.active_popup.lock_ref() {
-                    Some(_) => None,
-                    _ => Some(ActivePopup::ShareMain),
-                };
-                state.active_popup.set(new_value);
+    html!("empty-fragment" => HtmlElement, {
+        .with_node!(elem => {
+            .apply_if(slot.is_some(), |dom| {
+                dom.property("slot", slot.unwrap_ji())
+            })
+            .event(clone!(state => move |_: events::Close| {
+                state.active_popup.set(None);
             }))
-            .child(anchor)
-        }))
-        .child_signal(state.active_popup.signal_cloned().map(clone!(state => move|active_popup| {
-            match active_popup {
-                Some(ActivePopup::ShareMain) => {
-                    Some(render_share_main(Rc::clone(&state)))
-                },
-                Some(ActivePopup::ShareStudents) => {
-                    Some(render_share_students(Rc::clone(&state)))
-                },
-                Some(ActivePopup::ShareEmbed) => {
-                    Some(render_share_embed(Rc::clone(&state)))
-                },
-                _ => None,
-            }
-        })))
-    })
-}
-
-fn share_open_signal(state: Rc<State>) -> impl Signal<Item = bool> {
-    state
-        .active_popup
-        .signal_cloned()
-        .map(|active_popup| match active_popup {
-            Some(_) => true,
-            _ => false,
+            .child(html!("empty-fragment", {
+                .property("slot", "anchor")
+                .event(clone!(state => move |_: events::Click| {
+                    let new_value = match &*state.active_popup.lock_ref() {
+                        Some(_) => None,
+                        _ => Some(ActivePopup::ShareMain),
+                    };
+                    state.active_popup.set(new_value);
+                }))
+                .child(anchor)
+            }))
+            .apply(OverlayHandle::lifecycle(
+                move || {
+                    html!("overlay-content", {
+                        .property("target", &elem)
+                        .property("contentAnchor", "oppositeH")
+                        .property("targetAnchor", "tr")
+                        .child(html!("empty-fragment", {
+                            .child_signal(state.active_popup.signal_cloned().map(clone!(state => move|active_popup| {
+                                match active_popup {
+                                    Some(ActivePopup::ShareMain) => {
+                                        Some(render_share_main(Rc::clone(&state)))
+                                    },
+                                    Some(ActivePopup::ShareStudents) => {
+                                        Some(render_share_students(Rc::clone(&state)))
+                                    },
+                                    Some(ActivePopup::ShareEmbed) => {
+                                        Some(render_share_embed(Rc::clone(&state)))
+                                    },
+                                    _ => None,
+                                }
+                            })))
+                        }))
+                    })
+                }
+            ))
         })
+    })
 }
 
 fn render_share_main(state: Rc<State>) -> Dom {
     html!("share-jig-main", {
         .property("slot", "overlay")
         .children(&mut [
-            html!("button-empty", {
+            html!("fa-button", {
                 .property("slot", "close")
-                .text("×")
+                .property("icon", "fa-light fa-xmark")
                 .event(clone!(state => move |_: events::Click| {
                     state.active_popup.set(None);
                 }))

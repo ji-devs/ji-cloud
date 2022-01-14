@@ -97,7 +97,7 @@ fn render_user_section(state: Rc<State>) -> Dom {
                 .property("color", rgba8_to_hex(&color))
                 .property_signal("selected", state.value.signal_cloned().map(clone!(color => move |selected_color| {
                     if selected_color.is_some() {
-                        let selected_color = selected_color.unwrap();
+                        let selected_color = selected_color.unwrap_ji();
                         return selected_color == color;
                     };
                     false

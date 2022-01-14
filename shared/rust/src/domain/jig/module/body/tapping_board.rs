@@ -130,12 +130,16 @@ pub enum Mode {
     Talk,
     /// Read mode
     Read,
-    /// Draw mode
-    Draw,
     /// Scene mode
     Scene,
     /// Photo album mode
     PhotoAlbum,
+    /// Comic mode
+    Comic,
+    /// Timeline mode
+    Timeline,
+    /// Family Tree mode
+    FamilyTree,
 }
 
 impl Default for Mode {
@@ -151,9 +155,11 @@ impl ModeExt for Mode {
             Self::Images,
             Self::Talk,
             Self::Read,
-            Self::Draw,
             Self::Scene,
             Self::PhotoAlbum,
+            Self::Comic,
+            Self::Timeline,
+            Self::FamilyTree,
         ]
     }
 
@@ -163,29 +169,35 @@ impl ModeExt for Mode {
             Self::Images => "images",
             Self::Talk => "talk",
             Self::Read => "read",
-            Self::Draw => "draw",
             Self::Scene => "scene",
             Self::PhotoAlbum => "photo-album",
+            Self::Comic => "comic",
+            Self::Timeline => "timeline",
+            Self::FamilyTree => "family-tree",
         }
     }
 
     fn label(&self) -> &'static str {
-        const STR_WORDS_LABEL: &'static str = "Tap words & hear";
-        const STR_IMAGES_LABEL: &'static str = "Tap images & hear";
-        const STR_TALK_LABEL: &'static str = "Tap & talk";
-        const STR_READ_LABEL: &'static str = "Tap & read";
-        const STR_DRAW_LABEL: &'static str = "Interactive drawing";
-        const STR_SCENE_LABEL: &'static str = "Interactive scene";
-        const STR_PHOTO_ALBUM_LABEL: &'static str = "Interactive photo album";
+        const STR_WORDS_LABEL: &'static str = "Words";
+        const STR_IMAGES_LABEL: &'static str = "Images";
+        const STR_TALK_LABEL: &'static str = "Talking Pictures";
+        const STR_READ_LABEL: &'static str = "Read Along";
+        const STR_SCENE_LABEL: &'static str = "Scene";
+        const STR_PHOTO_ALBUM_LABEL: &'static str = "Photo Album";
+        const STR_COMIC_LABEL: &'static str = "Comics";
+        const STR_TIMELINE_LABEL: &'static str = "Timeline";
+        const STR_FAMILY_TREE_LABEL: &'static str = "Family Tree";
 
         match self {
             Self::Words => STR_WORDS_LABEL,
             Self::Images => STR_IMAGES_LABEL,
             Self::Talk => STR_TALK_LABEL,
             Self::Read => STR_READ_LABEL,
-            Self::Draw => STR_DRAW_LABEL,
             Self::Scene => STR_SCENE_LABEL,
             Self::PhotoAlbum => STR_PHOTO_ALBUM_LABEL,
+            Self::Comic => STR_COMIC_LABEL,
+            Self::Timeline => STR_TIMELINE_LABEL,
+            Self::FamilyTree => STR_FAMILY_TREE_LABEL,
         }
     }
 }

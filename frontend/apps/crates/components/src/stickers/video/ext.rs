@@ -98,7 +98,7 @@ fn extract_id_iframe(code: &str) -> &str {
 }
 
 fn is_id(id: &str) -> bool {
-    let regex = Regex::new(r"^[\w|_|\-]{11}$").unwrap();
+    let regex = Regex::new(r"^[\w|_|\-]{11}$").unwrap_ji();
     regex.is_match(id)
 }
 

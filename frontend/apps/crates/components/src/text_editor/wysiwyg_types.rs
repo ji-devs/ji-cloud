@@ -1,6 +1,7 @@
 // this file needs to be in sync with frontend\elements\src\core\wysiwyg\wysiwyg-types.ts
 
 use serde::{Deserialize, Serialize};
+use utils::unwrap::UnwrapJiExt;
 use wasm_bindgen::JsValue;
 
 use dominator_helpers::make_custom_event_serde;
@@ -138,7 +139,7 @@ impl WysiwygControlsChange {
     pub fn value(&self) -> ControlsChange {
         log::info!("{:#?}", self.detail());
 
-        self.detail().into_serde().unwrap()
+        self.detail().into_serde().unwrap_ji()
     }
 }
 
@@ -146,7 +147,7 @@ pub fn enum_variant_to_string<T: ?Sized>(v: &T) -> String
 where
     T: Serialize,
 {
-    let s = serde_json::to_string(&v).unwrap();
+    let s = serde_json::to_string(&v).unwrap_ji();
     let chars = s.chars();
     let start = 2;
     let mut end = 3;

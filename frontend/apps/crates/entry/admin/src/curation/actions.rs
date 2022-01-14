@@ -29,7 +29,9 @@ impl Curation {
     }
 
     pub async fn load_jigs(self: &Rc<Self>) {
-        let res = match &*self.fetch_mode.borrow() {
+        // clone right away to free the lock
+        let fetch_mode = self.fetch_mode.borrow().clone();
+        let res = match fetch_mode {
             FetchMode::Browse => {
                 self.load_jigs_browse().await
             },

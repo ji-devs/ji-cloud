@@ -28,17 +28,32 @@ export class _ extends LitElement {
                     display: inline-block;
                     transform: rotate(90deg);
                     transition: transform 0.3s;
-                    line-height: 38px;
                 }
                 :host([open]) .collapse-icon::after {
                     transform: rotate(-90deg);
+                }
+
+                .content {
+                    padding: 10px 0;
+                    display: grid;
+                    row-gap: 7px;
+                }
+
+                ::slotted(h4), ::slotted(p) {
+                    margin: 0;
+                }
+
+                ::slotted(div) {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 7px;
                 }
             `,
         ];
     }
 
     @property({ type: Boolean, reflect: true })
-    open: boolean = false;
+    open: boolean = true;
 
     private toggleOpen = () => {
         this.open = !this.open;
@@ -52,7 +67,7 @@ export class _ extends LitElement {
             <div class="content">
                 <slot></slot>
             </div>
-            <span class="collapse-icon" @click="${this.toggleOpen}"></span>
+            <!-- <span class="collapse-icon" @click="${this.toggleOpen}"></span> -->
         `;
     }
 }

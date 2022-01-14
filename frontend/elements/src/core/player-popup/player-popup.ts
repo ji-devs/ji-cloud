@@ -25,8 +25,6 @@ export class _ extends LitElement {
                     left: 0;
                     z-index: 9999;
                     display: grid;
-                    grid-template-columns: 100%;
-                    grid-template-rows: 100%;
                     place-content: center;
                     height: 100vh;
                     width: 100vw;
@@ -51,6 +49,7 @@ export class _ extends LitElement {
                 .iframe-wrapper ::slotted(iframe) {
                     height: 100%;
                     width: 100%;
+                    aspect-ratio: 16 / 9;
                 }
                 ::slotted([slot="close"]) {
                     justify-self: end;

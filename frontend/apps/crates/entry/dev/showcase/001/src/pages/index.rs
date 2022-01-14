@@ -33,7 +33,7 @@ impl Page {
             .style("text-decoration", "underline")
         });
 
-        dominator::append_dom(&dominator::body(), render_dom());
+        dominator::append_dom(&dominator::get_id("root"), render_dom());
         _self
     }
 }

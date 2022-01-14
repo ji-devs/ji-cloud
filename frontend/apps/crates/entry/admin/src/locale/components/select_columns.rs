@@ -6,6 +6,7 @@ use futures_signals::{
     signal::Mutable,
     signal_vec::{MutableSignalVec, MutableVec},
 };
+use utils::unwrap::UnwrapJiExt;
 use std::rc::Rc;
 use utils::events;
 
@@ -21,10 +22,10 @@ fn render_list(
             .map(clone!(selected => move |column: Column| html!("locale-select-columns-item", {
                 .text(&column.to_string())
                 .property_signal("active", selected.signal_cloned().map(clone!(column => move |e| {
-                    e.is_some() && e.unwrap() == column
+                    e.is_some() && e.unwrap_ji() == column
                 })))
                 .event(clone!(selected, column => move |_: events::Click| {
-                    if selected.lock_ref().is_none() || &selected.lock_ref().clone().unwrap() != &column {
+                    if selected.lock_ref().is_none() || &selected.lock_ref().clone().unwrap_ji() != &column {
                         selected.set(Some(column.clone()));
                     } else {
                         selected.set(None);
@@ -49,9 +50,9 @@ fn render_move_button(
         .event(clone!(selected, list, other_list => move |_: events::Click| {
             let selected_ref = selected.lock_ref().clone();
             if selected_ref.is_some() {
-                let selected_ref = selected_ref.unwrap();
+                let selected_ref = selected_ref.unwrap_ji();
                 let mut list = list.lock_mut();
-                let pos = list.iter().position(|i| i == &selected_ref).unwrap();
+                let pos = list.iter().position(|i| i == &selected_ref).unwrap_ji();
                 list.remove(pos);
                 other_list.lock_mut().push_cloned(selected_ref);
                 selected.set(None);
@@ -74,14 +75,14 @@ fn render_sort_button(
         .event(clone!(selected, list => move |_: events::Click| {
             let selected_ref = selected.lock_ref().clone();
             if selected_ref.is_some() {
-                let selected_ref = selected_ref.unwrap();
+                let selected_ref = selected_ref.unwrap_ji();
                 let mut list = list.lock_mut();
-                let pos = list.iter().position(|i| i == &selected_ref).unwrap();
+                let pos = list.iter().position(|i| i == &selected_ref).unwrap_ji();
 
                 let new_pos = on_click(pos, list.len());
                 if new_pos.is_some() {
                     let v = list.remove(pos);
-                    list.insert_cloned(new_pos.unwrap(), v);
+                    list.insert_cloned(new_pos.unwrap_ji(), v);
                 }
             }
         }))

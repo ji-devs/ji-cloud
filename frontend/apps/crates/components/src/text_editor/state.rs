@@ -7,7 +7,7 @@ use futures_signals::signal::{Mutable, ReadOnlyMutable, SignalExt};
 use js_sys::Reflect;
 use utils::{
     fonts::font_families_iter,
-    themes::{ThemeId, ThemeIdExt},
+    themes::{ThemeId, ThemeIdExt}, unwrap::UnwrapJiExt,
 };
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
@@ -69,8 +69,8 @@ impl State {
     pub fn select_all(&self) {
         if let Some(wysiwyg_ref) = &self.wysiwyg_ref.lock_ref().as_ref() {
             let select_all_method =
-                Reflect::get(wysiwyg_ref, &JsValue::from_str("selectAll")).unwrap();
-            let select_all_method = select_all_method.dyn_ref::<js_sys::Function>().unwrap();
+                Reflect::get(wysiwyg_ref, &JsValue::from_str("selectAll")).unwrap_ji();
+            let select_all_method = select_all_method.dyn_ref::<js_sys::Function>().unwrap_ji();
             let _ = select_all_method.call0(wysiwyg_ref);
         }
     }
@@ -86,8 +86,8 @@ impl State {
             }
             None => {
                 let reset_value_method =
-                    Reflect::get(wysiwyg_ref, &JsValue::from_str("clearValue")).unwrap();
-                let reset_value_method = reset_value_method.dyn_ref::<js_sys::Function>().unwrap();
+                    Reflect::get(wysiwyg_ref, &JsValue::from_str("clearValue")).unwrap_ji();
+                let reset_value_method = reset_value_method.dyn_ref::<js_sys::Function>().unwrap_ji();
                 let _ = reset_value_method.call0(wysiwyg_ref);
             }
         };
@@ -149,10 +149,10 @@ impl State {
         if let Some(wysiwyg_ref) = &self.wysiwyg_ref.lock_ref().as_ref() {
             let (key, value) = control.to_js_key_value();
             let set_control_value_method =
-                Reflect::get(wysiwyg_ref, &JsValue::from_str("setControlValue")).unwrap();
+                Reflect::get(wysiwyg_ref, &JsValue::from_str("setControlValue")).unwrap_ji();
             let set_control_value_method = set_control_value_method
                 .dyn_ref::<js_sys::Function>()
-                .unwrap();
+                .unwrap_ji();
             let _ = set_control_value_method.call2(wysiwyg_ref, &key, &value);
         }
     }

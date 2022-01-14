@@ -8,7 +8,9 @@ export class _ extends LitElement {
     static get styles() {
         return [
             css`
-                :host {
+                popup-body {
+                    border-radius: 16px;
+                    box-shadow: rgb(0 0 0 / 25%) 0px 3px 16px 0px;
                     background-color: #ffffff;
                 }
                 .body {

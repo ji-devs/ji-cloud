@@ -74,32 +74,38 @@ impl SearchResultsSection {
                 age_ranges.range_string(&jig_ages)
             }))
             .property("description", jig.jig_data.description.clone())
-            .children(&mut [
-                ModuleThumbnail::render(
-                    Rc::new(ModuleThumbnail {
-                        jig_id: jig.id,
-                        module: jig.jig_data.modules.first().cloned(),
-                        is_jig_fallback: true,
-                    }),
-                    Some("image")
-                ),
-
-                html!("home-search-result-details", {
-                    .property("slot", "categories")
-                    .children(jig.jig_data.categories.iter().map(|category_id| {
-                        html!("home-search-result-category", {
-                            .property_signal("label", {
-                                state.search_options.category_label_lookup.signal_cloned().map(clone!(category_id => move |category_label_lookup| {
-                                    match category_label_lookup.get(&category_id) {
-                                        Some(label) => label.to_owned(),
-                                        None => String::new(),
-                                    }
-                                }))
-                            })
-                        })
-                    }))
+            .child(ModuleThumbnail::render(
+                Rc::new(ModuleThumbnail {
+                    jig_id: jig.id,
+                    module: jig.jig_data.modules.first().cloned(),
+                    is_jig_fallback: true,
                 }),
-            ])
+                Some("image")
+            ))
+            .apply_if(!jig.jig_data.categories.is_empty(), clone!(state => move |dom| {
+                dom.child(html!("home-search-result-details", {
+                    .property("slot", "categories")
+                    .child(html!("div", {
+                        .children(jig.jig_data.categories.iter().map(|category_id| {
+                            html!("home-search-result-category", {
+                                .property_signal("label", {
+                                    state.search_options.category_label_lookup.signal_cloned().map(clone!(category_id => move |category_label_lookup| {
+                                        match category_label_lookup.get(&category_id) {
+                                            Some(label) => label.to_owned(),
+                                            None => String::new(),
+                                        }
+                                    }))
+                                })
+                            })
+                        }))
+                    }))
+                }))
+            }))
+            .property("showAdditionalResources", {
+                !jig.jig_data.additional_resources.is_empty()
+                &&
+                jig.jig_focus.is_modules()
+            })
             .children(jig.jig_data.additional_resources.iter().map(|resource| {
                 html!("a", {
                     .property("slot", "additional-resources")

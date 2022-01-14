@@ -4,7 +4,7 @@ use futures_signals::{signal::SignalExt, signal_vec::SignalVecExt};
 use shared::domain::image::ImageSearchQuery;
 use std::cell::RefCell;
 use std::rc::Rc;
-use utils::{events, routes::*};
+use utils::{events, routes::*, unwrap::UnwrapJiExt};
 use wasm_bindgen::prelude::*;
 use web_sys::HtmlElement;
 
@@ -89,7 +89,7 @@ impl PaginationDom {
             .property_signal("total", state.total_page_signal())
             .property("slot", slot)
             .event(clone!(state => move |evt:events::CustomChange| {
-                let page:u32 = evt.value().parse().unwrap();
+                let page:u32 = evt.value().parse().unwrap_ji();
                 let mut query = state.query.lock_mut();
                 query.page = Some(page - 1);
             }))
@@ -104,7 +104,7 @@ struct FilterDom {
 impl FilterDom {
     pub fn close_menu(&self) {
         let _ = js_sys::Reflect::set(
-            self.elem_ref.borrow().as_ref().unwrap(),
+            self.elem_ref.borrow().as_ref().unwrap_ji(),
             &JsValue::from_str("open"),
             &JsValue::from_bool(false),
         );

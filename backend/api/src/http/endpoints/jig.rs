@@ -246,7 +246,7 @@ pub(super) async fn publish_draft_to_live(
         .await
         .ok_or(error::JigCloneDraft::ResourceNotFound)?;
 
-    let new_live_id = db::jig::clone_data(&mut txn, &draft_id).await?;
+    let new_live_id = db::jig::clone_data(&mut txn, &draft_id, DraftOrLive::Live).await?;
 
     sqlx::query!(
         //language=SQL

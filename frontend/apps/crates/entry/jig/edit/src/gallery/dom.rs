@@ -73,6 +73,7 @@ impl JigGallery {
                         }))
                     })
                     .child(html!("input-search", {
+                        .style("grid-column", "3") // TODO: remove once draft filter is enabled
                         .property("slot", "search-input")
                         .property("placeholder", STR_SEARCH)
                         .event(clone!(state => move |evt: events::CustomSearch| {
@@ -85,6 +86,7 @@ impl JigGallery {
                         }))
                     }))
                     .child(html!("input-select", {
+                        .visible(false)
                         .property("slot", "filters")
                         .property_signal("value", state.visible_jigs.signal_cloned().map(|visible_jigs| Self::visible_jigs_option_string(&visible_jigs)))
                         .children(VisibleJigs::iter().map(|option| {
@@ -130,7 +132,8 @@ impl JigGallery {
                             .apply(|dom| {
                                 match jig.published_at {
                                     None => {
-                                        dom.property("draft", true)
+                                        // dom.property("draft", true)
+                                        dom
                                     },
                                     Some(published_at) => {
                                         dom.property("publishedAt", published_at_string(published_at, true))

@@ -16,7 +16,7 @@ impl App {
         state.renderer.render();
 
         state.image_loader.load(clone!(state => async move {
-            let texture_id = state.renderer.load_texture(utils::path::ui("mock/thumbnail/sticker.jpg")).await.unwrap_throw();
+            let texture_id = state.renderer.load_texture(utils::path::ui("mock/thumbnail/sticker.jpg")).await.unwrap_ji();
             state.renderer.add_sprite(texture_id, None);
 
             state.renderer.render();

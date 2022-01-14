@@ -45,9 +45,8 @@ export class _ extends LitElement {
                     grid-column: 1;
                     grid-row: 1;
                     display: grid;
-                    grid-template-rows: 200px auto 1fr 34px 40px;
+                    grid-template-rows: 200px auto auto 34px 40px;
                     height: 100%;
-                    row-gap: 8px;
                     background-color: #ffffff;
                 }
                 .main ::slotted([slot="image"]) {
@@ -60,6 +59,10 @@ export class _ extends LitElement {
                     text-align: center;
                     margin: 0;
                     margin-top: 8px;
+                    display: -webkit-box;
+                    -webkit-line-clamp: 2;
+                    -webkit-box-orient: vertical;  
+                    overflow: hidden;
                 }
                 .main .played-liked {
                     align-self: flex-start;
@@ -205,18 +208,18 @@ export class _ extends LitElement {
                 }
                 .hover .description {
                     font-size: 14px;
+                    font-weight: 300;
                 }
                 .hover h4,
                 .hover .author-section {
                     font-size: 14px;
                     font-weight: 500;
-                    line-height: 38px;
-                    margin: 0;
                 }
                 .hover .author-section {
                     display: flex;
                     justify-content: space-between;
                     flex-wrap: wrap;
+                    margin: 6px 0;
                 }
                 .hover .author-section .left-side {
                     display: flex;
@@ -269,6 +272,36 @@ export class _ extends LitElement {
     @property()
     description: string = "";
 
+    @property({ type: Boolean })
+    showAdditionalResources: boolean = true;
+
+    renderCount(label: string, count: number) {
+        // See related comment in renderCountDivider.
+        if (BigInt(count) === BigInt(0)) {
+            return nothing;
+        }
+
+        return html`
+            <div>
+                ${label}
+                <span class="count">${count}</span>
+            </div>
+        `;
+    }
+
+    renderCountDivider() {
+        // There is no guarantee that the value passed into this element is
+        // a BigInt, but it _can_ be. Convert the count values so that we're
+        // always comparing BigInts.
+        // Note: BigInt literals (example 1n) are not available pre-es2020, so
+        // we have to use the BigInt() constructor.
+        if (BigInt(this.playedCount) === BigInt(0) || BigInt(this.likedCount) === BigInt(0)) {
+            return nothing;
+        }
+
+        return html`<div class="played-liked-divider"></div>`;
+    }
+
     render() {
         return html`
             <div class="wrapper">
@@ -276,15 +309,9 @@ export class _ extends LitElement {
                     <slot name="image"></slot>
                     <h3 class="title">${this.title}</h3>
                     <div class="played-liked">
-                        <div>
-                            ${STR_PLAYED}
-                            <span class="count">${this.playedCount}</span>
-                        </div>
-                        <div class="played-liked-divider"></div>
-                        <div>
-                            ${STR_LIKED}
-                            <span class="count">${this.likedCount}</span>
-                        </div>
+                        ${this.renderCount(STR_PLAYED, this.playedCount)}
+                        ${this.renderCountDivider()}
+                        ${this.renderCount(STR_LIKED, this.likedCount)}
                     </div>
                     <div class="ages-language">
                         <div class="age">
@@ -330,7 +357,7 @@ export class _ extends LitElement {
                                 <p class="description">${this.description}</p>
                             </home-search-result-details>
                             ${
-                                this.kind === "jig" ? html`
+                                this.showAdditionalResources ? html`
                                     <home-search-result-details>
                                         <h4>${STR_ADDITIONAL_RESOURCES}</h4>
                                         <div class="additional-resources-items">
@@ -353,12 +380,12 @@ export class _ extends LitElement {
                                         : nothing}
                                     ${this.author}
                                 </span>
-                                <a>
+                                <!-- <a>
                                     ${STR_SEE_ALL}
                                     <fa-icon
                                         icon="fa-light fa-chevron-right"
                                     ></fa-icon>
-                                </a>
+                                </a> -->
                             </div>
                         </div>
                     </div>

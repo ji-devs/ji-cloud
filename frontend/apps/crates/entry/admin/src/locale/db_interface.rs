@@ -9,9 +9,8 @@ use shared::{
     },
     error::EmptyError,
 };
-use utils::fetch::{api_with_auth, api_with_auth_empty};
+use utils::{fetch::{api_with_auth, api_with_auth_empty}, unwrap::UnwrapJiExt};
 use uuid::Uuid;
-use wasm_bindgen::prelude::*;
 
 pub async fn get_bundles() -> Vec<Bundle> {
     api_with_auth::<ListBundleResponse, EmptyError, ()>(
@@ -20,7 +19,7 @@ pub async fn get_bundles() -> Vec<Bundle> {
         None,
     )
     .await
-    .unwrap_throw()
+    .unwrap_ji()
     .bundles
 }
 
@@ -31,7 +30,7 @@ pub async fn get_item_kind() -> Vec<ItemKind> {
         None,
     )
     .await
-    .unwrap_throw()
+    .unwrap_ji()
     .item_kinds
 }
 
@@ -46,7 +45,7 @@ pub async fn get_entries(bundles: Vec<Uuid>) -> Vec<DisplayableEntry> {
         Some(query),
     )
     .await
-    .unwrap_throw();
+    .unwrap_ji();
 
     match res {
         ListEntryResponse::Bundles(_f) => panic!("Not what I need!"),
@@ -87,7 +86,7 @@ pub async fn clone_entry(entry: &DisplayableEntry) -> DisplayableEntry {
         Some(body),
     )
     .await
-    .unwrap_throw();
+    .unwrap_ji();
 
     let mut new_entry = entry.clone();
     new_entry.id = res.id;
@@ -115,7 +114,7 @@ pub async fn create_entry(bundle_id: Uuid) -> DisplayableEntry {
         Some(body),
     )
     .await
-    .unwrap_throw();
+    .unwrap_ji();
 
     new_entry_with_id(res.id, bundle_id)
 }

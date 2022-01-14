@@ -20,6 +20,7 @@ use dominator::clone;
 use futures_signals::signal::Mutable;
 use once_cell::sync::OnceCell;
 use shared::domain::jig::module::body::{Image, _groups::cards::Mode};
+use utils::unwrap::UnwrapJiExt;
 use std::rc::Rc;
 
 pub struct Step1<RawData: RawDataExt, E: ExtraExt> {
@@ -129,7 +130,7 @@ fn make_single_list<RawData: RawDataExt, E: ExtraExt>(
             // If the current mode is words and images, and the current widget is a Tab, then at
             // this point the user can be navigated directly to the Image tab.
             if matches!(state.base.mode, Mode::WordsAndImages) {
-                if let Widget::Tabs(tab) = state.widget.get().unwrap() {
+                if let Widget::Tabs(tab) = state.widget.get().unwrap_ji() {
                     tab.set(Tab::new(state.clone(), MenuTabKind::Image));
                 }
             }

@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use dominator::{clone, html, Dom, with_node};
-use futures_signals::signal::SignalExt;
+use futures_signals::{signal::SignalExt, map_ref};
 use js_sys::Reflect;
 use utils::events;
 use wasm_bindgen::JsValue;
@@ -18,6 +18,14 @@ impl JigziHelp {
         let state = self;
         state.show_info_tooltip_delayed();
 
+        let show_tooltip_signal = map_ref! {
+            let show_info_tooltip = state.show_info_tooltip.signal_cloned(),
+            let permanently_closed = state.permanently_closed.signal_cloned()
+                => {
+                    *show_info_tooltip && !*permanently_closed
+                }
+        };
+
         html!("jigzi-help", {
             .apply(move |dom| {
                 match slot {
@@ -26,9 +34,10 @@ impl JigziHelp {
                 }
             })
             .event(clone!(state => move |_: events::Click| {
+                state.permanently_closed.set(false);
                 state.show_info_tooltip.set(true);
             }))
-            .child_signal(state.show_info_tooltip.signal().map(clone!(state => move|show_tooltip| {
+            .child_signal(show_tooltip_signal.map(clone!(state => move|show_tooltip| {
                 match show_tooltip {
                     false => None,
                     true => Some(
@@ -39,13 +48,19 @@ impl JigziHelp {
                                         html!("overlay-tooltip-info", {
                                             .property("marginX", MARGIN_X)
                                             .property("target", &elem)
-                                            .attribute("targetanchor", "br")
-                                            .attribute("contentanchor", "oppositeV")
+                                            .attribute("targetAnchor", "br")
+                                            .attribute("contentAnchor", "oppositeV")
                                             .property("title", &state.title)
                                             .property("body", &state.body)
-                                            .property("showid", &state.show_id)
+                                            .property("showPermanentlyClose", !&state.show_id.is_empty())
                                             .property("closeable", true)
                                             .property("strategy", "track")
+                                            .event(clone!(state => move |_evt: events::Close| {
+                                                state.show_info_tooltip.set(false);
+                                            }))
+                                            .event(clone!(state => move |_evt: events::PermanentlyClose| {
+                                                state.permanently_close();
+                                            }))
                                             .after_inserted(move |elem| {
                                                 let _ = Reflect::set(
                                                     &elem,

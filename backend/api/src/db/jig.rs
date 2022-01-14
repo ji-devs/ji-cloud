@@ -392,6 +392,7 @@ select id,
 from jig_data
          inner join unnest($1::uuid[])
     with ordinality t(id, ord) using (id)
+where draft_or_live is not null
 order by t.ord
 "#,
         &jig_data_ids
@@ -546,6 +547,7 @@ where blocked = false
         [&draft_ids[..], &live_ids[..]].concat()
     };
 
+    //TODO: purge junk jig data from with draft_or_live is NULL
     let jig_data = sqlx::query!(
         //language=SQL
         r#"
@@ -593,6 +595,7 @@ select id,
 from jig_data
          inner join unnest($1::uuid[])
     with ordinality t(id, ord) using (id)
+where draft_or_live is not null
 order by coalesce(updated_at, created_at) desc
 limit 20 offset 20 * $2
 "#,
@@ -1020,6 +1023,7 @@ select id as "jig_id!: JigId" from jig where creator_id = $1
 pub async fn clone_data(
     txn: &mut PgConnection,
     from_data_id: &Uuid,
+    draft_or_live: DraftOrLive,
 ) -> Result<Uuid, error::JigCloneDraft> {
     let new_id = sqlx::query!(
         //language=SQL
@@ -1053,6 +1057,11 @@ returning id
     .fetch_one(&mut *txn)
     .await?
     .id;
+
+    match draft_or_live {
+        DraftOrLive::Draft => update_draft_or_live(txn, new_id, draft_or_live).await?,
+        DraftOrLive::Live => update_draft_or_live(txn, new_id, draft_or_live).await?,
+    }
 
     // copy metadata
     sqlx::query!(
@@ -1155,8 +1164,8 @@ pub async fn clone_jig(
         .await
         .ok_or(error::JigCloneDraft::ResourceNotFound)?;
 
-    let new_draft_id = clone_data(&mut txn, &draft_id).await?;
-    let new_live_id = clone_data(&mut txn, &live_id).await?;
+    let new_draft_id = clone_data(&mut txn, &draft_id, DraftOrLive::Draft).await?;
+    let new_live_id = clone_data(&mut txn, &live_id, DraftOrLive::Live).await?;
 
     let new_jig = sqlx::query!(
         //language=SQL
@@ -1465,6 +1474,27 @@ select exists (
     if !authed {
         return Err(error::Auth::Forbidden);
     }
+
+    Ok(())
+}
+
+async fn update_draft_or_live(
+    conn: &mut PgConnection,
+    jig_data_id: Uuid,
+    draft_or_live: DraftOrLive,
+) -> sqlx::Result<()> {
+    sqlx::query!(
+        //language=SQL
+        r#"
+update jig_data
+set draft_or_live = $2
+where id = $1
+            "#,
+        jig_data_id,
+        draft_or_live as i16
+    )
+    .execute(&mut *conn)
+    .await?;
 
     Ok(())
 }

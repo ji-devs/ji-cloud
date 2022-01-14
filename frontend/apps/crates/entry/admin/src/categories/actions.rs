@@ -9,7 +9,7 @@ use shared::{
     error::EmptyError,
 };
 use std::rc::Rc;
-use utils::fetch::{api_with_auth, api_with_auth_empty};
+use utils::{fetch::{api_with_auth, api_with_auth_empty}, unwrap::UnwrapJiExt};
 
 use dominator::clone;
 use wasm_bindgen::prelude::*;
@@ -76,7 +76,7 @@ impl ContentState {
             children
                 .iter()
                 .position(|x| x.id == self.cat.id)
-                .unwrap_throw()
+                .unwrap_ji()
         })
     }
 }

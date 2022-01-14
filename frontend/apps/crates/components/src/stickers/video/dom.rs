@@ -74,9 +74,9 @@ fn render_youtube_video(
                             &elem,
                             &JsValue::from_str("play")
                         )
-                            .unwrap();
+                            .unwrap_ji();
 
-                        let play_method = play_method.dyn_ref::<js_sys::Function>().unwrap();
+                        let play_method = play_method.dyn_ref::<js_sys::Function>().unwrap_ji();
                         let _ = play_method.call0(&elem);
                     }
                     async {}
@@ -110,7 +110,7 @@ fn render_youtube_video(
 
                 TimeoutFuture::new(300).await;
 
-                let target = evt.dyn_target::<HtmlElement>().unwrap();
+                let target = evt.dyn_target::<HtmlElement>().unwrap_ji();
                 let player_state = Reflect::get(
                     &target,
                     &JsValue::from_str("playerState")

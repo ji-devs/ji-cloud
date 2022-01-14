@@ -8,10 +8,10 @@ use futures_signals::map_ref;
 use futures_signals::signal::SignalExt;
 use futures_signals::signal_vec::SignalVecExt;
 use shared::domain::locale::ItemKind;
+use utils::unwrap::UnwrapJiExt;
 use std::rc::Rc;
 use utils::events;
 use uuid::Uuid;
-use wasm_bindgen::UnwrapThrowExt;
 use web_sys::HtmlSelectElement;
 
 const STR_ADD_ENTRY: &str = "Add a text";
@@ -24,7 +24,7 @@ impl LocaleOuterDom {
             Some(id) => map
                 .iter()
                 .find(|item_kind| item_kind.id == id)
-                .unwrap_throw()
+                .unwrap_ji()
                 .name
                 .clone(),
             None => String::new(),
@@ -116,15 +116,15 @@ impl LocaleOuterDom {
                                 let in_section = state.section_options.signal_cloned().map(clone!(entry => move |section_options| {
                                     let section = entry.lock_ref().section.clone();
                                     let section = section.unwrap_or_default();
-                                    *section_options.get(&section).unwrap()
+                                    *section_options.get(&section).unwrap_ji()
                                 })),
                                 let in_item_kind = state.item_kind_filter.signal_cloned().map(clone!(entry => move |item_kind_filter| {
                                     let item_kind_id = entry.lock_ref().item_kind_id;
-                                    *item_kind_filter.get(&item_kind_id).unwrap()
+                                    *item_kind_filter.get(&item_kind_id).unwrap_ji()
                                 })),
                                 let in_status = state.status_options.signal_cloned().map(clone!(entry => move |status_options| {
                                     let status = entry.lock_ref().status;
-                                    *status_options.get(&status).unwrap()
+                                    *status_options.get(&status).unwrap_ji()
                                 })) =>
                                 *in_section && *in_item_kind && *in_status
                             }

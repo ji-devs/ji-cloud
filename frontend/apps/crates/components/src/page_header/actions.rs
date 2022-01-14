@@ -29,7 +29,7 @@ pub fn logout(state: Rc<State>) {
                 state.logged_in.set(LoggedInState::LoggedOut);
             },
             _ => {
-                let _ = web_sys::window().unwrap().alert_with_message("Error logging out!");
+                let _ = web_sys::window().unwrap_ji().alert_with_message("Error logging out!");
             },
         }
     }));

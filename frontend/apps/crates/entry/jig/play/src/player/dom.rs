@@ -309,7 +309,7 @@ fn render_time_indicator(state: Rc<State>) -> impl Signal<Item = Option<Dom>> {
                                     &elem,
                                     &JsValue::from_str("buzz")
                                 )
-                                    .unwrap();
+                                    .unwrap_ji();
                                 log::info!("{:?}", buzz_method);
                                 let buzz_method = buzz_method.dyn_ref::<js_sys::Function>().unwrap_ji();
                                 let _ = buzz_method.call0(&elem);

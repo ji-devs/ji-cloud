@@ -64,7 +64,7 @@ impl ModuleRenderer<State> for PageRenderer {
                 ]
                 .into_iter()
                 .filter(|x| x.is_some())
-                .map(|x| x.unwrap_throw())
+                .map(|x| x.unwrap_ji())
                 .collect()
             }))
             .to_signal_vec()

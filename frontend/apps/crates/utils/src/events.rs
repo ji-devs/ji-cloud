@@ -14,6 +14,7 @@ temp_make_event!(Ready, "ready" => web_sys::Event);
 
 temp_make_event!(Open, "open" => web_sys::Event);
 temp_make_event!(Close, "close" => web_sys::Event);
+temp_make_event!(PermanentlyClose, "permanently-close" => web_sys::Event);
 
 temp_make_event!(Submit, "submit" => web_sys::Event);
 
