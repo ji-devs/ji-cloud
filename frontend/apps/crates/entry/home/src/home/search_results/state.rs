@@ -1,14 +1,15 @@
 use std::rc::{Rc, Weak};
 
 
-use futures_signals::{signal::{Signal}, map_ref};
-use shared::domain::jig::{JigFocus};
+use futures_signals::{signal::{Signal, Mutable}, map_ref};
+use shared::domain::jig::JigFocus;
 use utils::unwrap::UnwrapJiExt;
 
 use super::{super::state::State as HomeState, search_results_section::SearchResultsSection};
 
 #[derive(Clone)]
 pub struct SearchResults {
+    pub loading: Mutable<bool>,
     pub query: String,
     pub jigs: Rc<SearchResultsSection>,
     pub resources: Rc<SearchResultsSection>,
@@ -16,10 +17,11 @@ pub struct SearchResults {
 }
 
 impl SearchResults {
-    pub fn new(home_state: &Rc<HomeState>) -> Rc<Self> {
+    pub fn new(home_state: &Rc<HomeState>, loading: bool) -> Rc<Self> {
         let query = home_state.search_selected.query.get_cloned();
 
         Rc::new(Self {
+            loading: Mutable::new(loading),
             query,
             jigs: SearchResultsSection::new(
                 JigFocus::Modules,
@@ -45,8 +47,8 @@ impl SearchResults {
     pub fn total_results_count_signal(self: &Rc<Self>) -> impl Signal<Item = u64> {
         map_ref! {
             let resources = self.resources.total.signal(),
-            let jig = self.jigs.total.signal() => move {
-                resources + jig
+            let jigs = self.jigs.total.signal() => move {
+                resources + jigs
             }
         }
     }

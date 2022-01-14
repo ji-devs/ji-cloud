@@ -79,7 +79,7 @@ async fn fetch_profile(state: Rc<State>) {
 }
 
 async fn search_async(state: Rc<State>) {
-    let search_state = SearchResults::new(&state);
+    let search_state = SearchResults::new(&state, true);
     state.mode.set(HomePageMode::Search(Rc::clone(&search_state)));
 
     let req = state.search_selected.to_search_request();
@@ -89,6 +89,8 @@ async fn search_async(state: Rc<State>) {
         search_state.jigs.load_items(req.clone()),
         search_state.resources.load_items(req),
     );
+
+    search_state.loading.set(false);
 }
 
 pub fn search(state: Rc<State>) {
