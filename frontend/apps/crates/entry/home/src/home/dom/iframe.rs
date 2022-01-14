@@ -13,13 +13,14 @@ pub struct Iframe {
 impl Iframe {
     pub fn new() -> Rc<Self> {
         Rc::new(Self {
-            height: Mutable::new(400),
+            height: Mutable::new(3000),
         })
     }
     pub fn render(self: Rc<Self>) -> Dom {
         let state = self.clone();
         html!("iframe" => HtmlIFrameElement, {
             .style("width", "100%")
+            .style("border", "none")
             .style_signal("height", state.height.signal_cloned()
                 .map(|height| {
                     let adjusted_height = height.to_string() + "px";
@@ -46,9 +47,9 @@ pub fn get_height(iframe: &HtmlIFrameElement) -> Result<usize, JsValue> {
     let height: usize = match iframe.content_window() {
         Some(window) => {
             log::info!("{:#?}", window.name());
-            1200
+            3000
         },
-        None => 1200
+        None => 3000
     };
     
     Ok(height)
