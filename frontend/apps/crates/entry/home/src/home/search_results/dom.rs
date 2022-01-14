@@ -32,7 +32,8 @@ impl SearchResults {
 
         html!("home-search-results", {
             .property_signal("loading", state.loading.signal())
-            .property_signal("resultsCount", state.total_results_count_signal())
+            .property_signal("jigCount", state.jigs.total.signal())
+            .property_signal("resourceCount", state.resources.total.signal())
             .property("query", &state.query)
             .child_signal(search_results_signal(state.jigs.clone()))
             .child_signal(search_results_signal(state.resources.clone()))
