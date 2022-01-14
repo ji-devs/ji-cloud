@@ -26,7 +26,6 @@ impl Iframe {
                 })
             )
             .event(clone!(state => move |_: events::Load| {
-                log::info!("loaded");
                 state.height.set(1200);
             }))
             .property("src", STR_JEWISH_INTERACTIVE_URL)
