@@ -193,7 +193,7 @@ where
                                 start_playback(base.clone());
                             }))
                             .after_inserted(clone!(state, base => move |_elem| {
-                                if AUDIO_MIXER.with(|mixer| mixer.context_available()) || state.opts.skip_play {
+                                if state.opts.skip_play {
                                     start_playback(base);
                                 }
                             }))
