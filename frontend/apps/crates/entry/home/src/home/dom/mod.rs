@@ -29,7 +29,7 @@ pub fn render(state: Rc<State>, auto_search: bool) -> Dom {
             html!("empty-fragment", {
                 .child_signal(state.mode.signal_cloned().map(clone!(state => move |mode| {
                     match mode {
-                        HomePageMode::Home => Some(Iframe::render()), // Some(home_sections::render(state.clone())),
+                        HomePageMode::Home => Some(Iframe::render(Iframe::new())), // Some(home_sections::render(state.clone())),
                         HomePageMode::Search(search_results) => {
                             Some(search_results.render())
                         },
