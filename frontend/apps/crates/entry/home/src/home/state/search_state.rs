@@ -14,7 +14,7 @@ use shared::{
     domain::{
         category::{Category, CategoryId, CategoryResponse, CategoryTreeScope, GetCategoryRequest},
         jig::JigSearchQuery,
-        meta::{Affiliation, AffiliationId, AgeRange, AgeRangeId, MetadataResponse},
+        meta::{Affiliation, AffiliationId, AgeRange, AgeRangeId, MetadataResponse, ResourceType},
         user::UserProfile,
     },
     error::EmptyError,
@@ -90,6 +90,7 @@ impl SearchSelected {
 pub struct SearchOptions {
     pub age_ranges: Mutable<Vec<AgeRange>>,
     pub affiliations: Mutable<Vec<Affiliation>>,
+    pub resource_types: Mutable<Vec<ResourceType>>,
     pub categories: Mutable<Vec<Category>>,
     pub category_label_lookup: Mutable<HashMap<CategoryId, String>>,
     pub languages: Rc<Vec<Language>>,
@@ -100,6 +101,7 @@ impl SearchOptions {
         Self {
             age_ranges: Mutable::new(vec![]),
             affiliations: Mutable::new(vec![]),
+            resource_types: Mutable::new(vec![]),
             categories: Mutable::new(vec![]),
             category_label_lookup: Mutable::new(HashMap::new()),
             languages: Rc::new(JIG_LANGUAGES.clone()),
@@ -126,6 +128,9 @@ impl SearchOptions {
                 }
                 if self.age_ranges.lock_ref().is_empty() {
                     self.age_ranges.set(res.age_ranges);
+                }
+                if self.resource_types.lock_ref().is_empty() {
+                    self.resource_types.set(res.resource_types);
                 }
                 Ok(())
             }

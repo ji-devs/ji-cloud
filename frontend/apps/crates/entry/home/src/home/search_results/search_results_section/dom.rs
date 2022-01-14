@@ -1,10 +1,10 @@
 use components::module::_common::thumbnail::ModuleThumbnail;
 use dominator::{clone, html, Dom};
 use futures_signals::{
-    signal::SignalExt,
+    signal::{SignalExt, Signal},
     signal_vec::{SignalVecExt},
 };
-use shared::domain::jig::{JigResponse, JigFocus};
+use shared::domain::{jig::{JigResponse, JigFocus}, meta::ResourceTypeId};
 use std::rc::Rc;
 use utils::{ages::AgeRangeVecExt, events, jig::{published_at_string, ResourceContentExt}};
 
@@ -110,12 +110,13 @@ impl SearchResultsSection {
                 html!("a", {
                     .property("slot", "additional-resources")
                     .property("target", "_BLANK")
+                    .property("title", &resource.display_name)
                     .property("href", resource.resource_content.get_link())
                     .child(html!("fa-icon", {
                         .property("icon", "fa-light fa-file")
                     }))
                     .text(" ")
-                    .text(&resource.display_name)
+                    .text_signal(state.resource_type_name(resource.resource_type_id.clone()))
                 })
             }))
             .apply(|dom| {
@@ -164,4 +165,17 @@ impl SearchResultsSection {
     // new
     // leaningPathJigCount
     // byJiTeam
+
+    fn resource_type_name(self: &Rc<Self>, id: ResourceTypeId) -> impl Signal<Item = String> {
+        self.search_options.resource_types.signal_ref(move|resource_types| {
+            let resource_type = resource_types.iter().find(move |resource_type| {
+                resource_type.id == id
+            });
+            
+            match resource_type {
+                Some(resource_type) => resource_type.display_name.clone(),
+                None => String::new()
+            }
+        })
+    }
 }
