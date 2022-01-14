@@ -1,4 +1,5 @@
 use crate::player::{dom::render as player_render, state::State as PlayerState};
+use components::overlay::container::OverlayContainer;
 use dominator::{html, Dom};
 use futures_signals::signal::{Signal, SignalExt};
 use std::rc::Rc;
@@ -28,6 +29,9 @@ impl Router {
     }
 
     pub fn render(&self) -> Dom {
-        html!("main", { .child_signal(Self::dom_signal()) } )
+        html!("main", {
+            .child_signal(Self::dom_signal())
+            .child(OverlayContainer::new().render(None))
+        } )
     }
 }

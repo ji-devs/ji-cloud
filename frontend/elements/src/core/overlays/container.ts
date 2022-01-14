@@ -1,11 +1,5 @@
-import {
-    LitElement,
-    html,
-    css,
-    customElement,
-    property,
-    query,
-} from "lit-element";
+import { LitElement, html, css, customElement, property } from "lit-element";
+
 import { queryPierceShadow } from "@utils/dom";
 @customElement("overlay-container")
 export class _ extends LitElement {
@@ -17,7 +11,7 @@ export class _ extends LitElement {
                     position: fixed;
                     top: 0;
                     left: 0;
-                    z-index: 1;
+                    z-index: 2;
                 }
             `,
         ];
