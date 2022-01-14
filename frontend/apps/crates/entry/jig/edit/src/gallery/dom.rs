@@ -64,14 +64,14 @@ impl JigGallery {
                             state.create_jig();
                         }))
                     }))
-                    .apply_if(state.focus.is_modules(), move |dom| {
-                        dom.children(TEMPLATE_KINDS.iter().map(|kind| {
-                            html!("jig-gallery-template", {
-                                .property("slot", "jig-templates")
-                                .property("kind", *kind)
-                            })
-                        }))
-                    })
+                    // .apply_if(state.focus.is_modules(), move |dom| {
+                    //     dom.children(TEMPLATE_KINDS.iter().map(|kind| {
+                    //         html!("jig-gallery-template", {
+                    //             .property("slot", "jig-templates")
+                    //             .property("kind", *kind)
+                    //         })
+                    //     }))
+                    // })
                     .child(html!("input-search", {
                         .style("grid-column", "3") // TODO: remove once draft filter is enabled
                         .property("slot", "search-input")
