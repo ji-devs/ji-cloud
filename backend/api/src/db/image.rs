@@ -1,8 +1,9 @@
 use super::{recycle_metadata, recycle_tags};
-use crate::translate::translate_text;
+use crate::translate::multi_translation;
 use anyhow::Context;
 use chrono::{DateTime, Utc};
 use futures::stream::BoxStream;
+use serde_json::json;
 use shared::domain::{
     category::CategoryId,
     image::{ImageId, ImageKind, ImageMetadata},
@@ -114,7 +115,7 @@ where id = $1 and $2 is distinct from publish_at"#,
 
     if let Some(description) = description {
         let translate_text = match &api_key {
-            Some(key) => translate_text(description, "he", "en", key)
+            Some(key) => multi_translation(description, key)
                 .await
                 .context("could not translate text")?,
             None => None,
@@ -124,12 +125,12 @@ where id = $1 and $2 is distinct from publish_at"#,
             r#"
 update image_metadata
 set description = $2,
-    translated_description = (case when ($3::text is not null) then $3::text else (translated_description) end),
+    translated_description = (case when ($3::jsonb is not null) then $3::jsonb else (translated_description) end),
     updated_at = now()
 where id = $1 and $2 is distinct from description"#,
             id.0,
             description,
-            translate_text
+            json!(translate_text)
         )
         .execute(&mut *conn)
         .await?;

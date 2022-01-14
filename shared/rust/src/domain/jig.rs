@@ -17,6 +17,7 @@ pub use player::{JigPlayerSettings, TextDirection};
 
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use serde_json::value::Value;
 use std::{collections::HashSet, convert::TryFrom, fmt, str::FromStr};
 use uuid::Uuid;
 
@@ -291,6 +292,11 @@ pub struct JigData {
 
     /// translated keywords used to searched for jigs
     pub translated_keywords: String,
+
+    /// translated descriptions
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub translated_description: Option<Value>,
 }
 
 /// Access level for the jig.

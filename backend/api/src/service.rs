@@ -8,8 +8,10 @@ use tokio::sync::RwLock;
 use crate::algolia;
 use crate::error;
 use crate::error::ServiceKind;
+use crate::translate;
 use core::google::GoogleAccessTokenResponse;
 
+use self::translate::GoogleTranslate;
 use self::upload::cleaner::UploadCleaner;
 
 pub mod event_arc;
@@ -58,7 +60,11 @@ impl Service for algolia::Manager {
 }
 
 impl Service for UploadCleaner {
-    const DISABLED_ERROR: error::ServiceKind = error::ServiceKind::UploadCleaner;
+    const DISABLED_ERROR: ServiceKind = error::ServiceKind::UploadCleaner;
+}
+
+impl Service for GoogleTranslate {
+    const DISABLED_ERROR: ServiceKind = error::ServiceKind::GoogleTranslate;
 }
 #[derive(Debug)]
 pub struct ServiceData<T: ?Sized>(Arc<T>);

@@ -1,4 +1,4 @@
-use crate::translate::translate_text;
+use crate::translate::{multi_translation, translate_text};
 use anyhow::Context;
 use serde_json::value::Value;
 use shared::domain::{
@@ -26,6 +26,7 @@ pub(crate) mod report;
 
 pub async fn create(
     pool: &PgPool,
+    api_key: &Option<String>,
     display_name: &str,
     goals: &[GoalId],
     categories: &[CategoryId],
@@ -39,6 +40,18 @@ pub async fn create(
 ) -> Result<JigId, CreateJigError> {
     let mut txn = pool.begin().await?;
 
+    let translated_description: Option<Value> = if !description.is_empty() {
+        let translate_text = match &api_key {
+            Some(key) => multi_translation(description, key)
+                .await
+                .context("could not translate text")?,
+            None => None,
+        };
+        translate_text
+    } else {
+        None
+    };
+
     let draft_id = create_jig_data(
         &mut txn,
         display_name,
@@ -50,6 +63,7 @@ pub async fn create(
         description,
         default_player_settings,
         DraftOrLive::Draft,
+        &translated_description,
     )
     .await?;
 
@@ -64,6 +78,7 @@ pub async fn create(
         description,
         default_player_settings,
         DraftOrLive::Live,
+        &translated_description,
     )
     .await?;
 
@@ -108,13 +123,16 @@ pub async fn create_jig_data(
     description: &str,
     default_player_settings: &JigPlayerSettings,
     draft_or_live: DraftOrLive,
+    translated_description: &Option<Value>,
 ) -> Result<Uuid, CreateJigError> {
+    log::warn!("description: {}", description);
+
     let jig_data = sqlx::query!(
         // language=SQL
         r#"
 insert into jig_data
-   (display_name, language, description, direction, display_score, track_assessments, drag_assist, draft_or_live)
-values ($1, $2, $3, $4, $5, $6, $7, $8)
+   (display_name, language, description, direction, display_score, track_assessments, drag_assist, draft_or_live, translated_description)
+values ($1, $2, $3, $4, $5, $6, $7, $8, $9::jsonb)
 returning id
 "#,
         display_name,
@@ -125,6 +143,7 @@ returning id
         default_player_settings.track_assessments,
         default_player_settings.drag_assist,
         draft_or_live as i16,
+        json!(translated_description)
     )
     .fetch_one(&mut *txn)
     .await?;
@@ -142,11 +161,18 @@ returning id
 pub enum CreateJigError {
     Sqlx(sqlx::Error),
     DefaultModules(serde_json::Error),
+    InternalServerError(anyhow::Error),
 }
 
 impl From<sqlx::Error> for CreateJigError {
     fn from(e: sqlx::Error) -> Self {
         Self::Sqlx(e)
+    }
+}
+
+impl From<anyhow::Error> for CreateJigError {
+    fn from(e: anyhow::Error) -> Self {
+        Self::InternalServerError(e)
     }
 }
 
@@ -196,6 +222,7 @@ select cte.jig_id                                          as "jig_id: JigId",
        jig_focus                                           as "jig_focus!: JigFocus",
        language,
        description,
+       translated_description                              as "translated_description?: Value",
        direction                                           as "direction: TextDirection",
        display_score,
        track_assessments,
@@ -290,6 +317,7 @@ from jig_data
                 locked: row.locked,
                 other_keywords: row.other_keywords,
                 translated_keywords: row.translated_keywords,
+                translated_description: row.translated_description,
             },
             admin_data: JigAdminData {
                 rating: row.rating,
@@ -354,6 +382,7 @@ select id,
        updated_at,
        language                                                                      as "language!",
        description                                                                   as "description!",
+       translated_description                                                        as "translated_description?: Value",
        direction                                                                     as "direction!: TextDirection",
        display_score                                                                 as "display_score!",
        track_assessments                                                             as "track_assessments!",
@@ -480,6 +509,7 @@ where draft_or_live is not null
                 locked: jig_data_row.locked,
                 other_keywords: jig_data_row.other_keywords,
                 translated_keywords: jig_data_row.translated_keywords,
+                translated_description: jig_data_row.translated_description,
             },
             admin_data: JigAdminData {
                 rating: jig_row.rating,
@@ -567,6 +597,7 @@ select  jig.id                                              as "jig_id: JigId",
        updated_at,
        language                                                                      as "language!",
        description                                                                   as "description!",
+       translated_description                                                        as "translated_description?: Value",
        direction                                                                     as "direction!: TextDirection",
        display_score                                                                 as "display_score!",
        track_assessments                                                             as "track_assessments!",
@@ -699,6 +730,7 @@ limit 20
                 locked: jig_data_row.locked,
                 other_keywords: jig_data_row.other_keywords,
                 translated_keywords: jig_data_row.translated_keywords,
+                translated_description: jig_data_row.translated_description,
             },
             admin_data: JigAdminData {
                 rating: jig_data_row.rating,
@@ -828,6 +860,29 @@ where id = $1
         .await?;
     }
 
+    if let Some(description) = description {
+        let translate_text = match &api_key {
+            Some(key) => multi_translation(description, key)
+                .await
+                .context("could not translate text")?,
+            None => None,
+        };
+
+        sqlx::query!(
+            r#"
+update jig_data
+set description = $2,
+    translated_description = (case when ($3::jsonb is not null) then $3::jsonb else (translated_description) end),
+    updated_at = now()
+where id = $1 and $2 is distinct from description"#,
+            draft_id,
+            description,
+            json!(translate_text)
+        )
+        .execute(&mut txn)
+        .await?;
+    }
+
     if let Some(other_keywords) = other_keywords {
         let translate_text = match &api_key {
             Some(key) => translate_text(&other_keywords, "he", "en", key)
@@ -858,18 +913,15 @@ where id = $1 and $2 is distinct from other_keywords"#,
 update jig_data
 set display_name     = coalesce($2, display_name),
     language         = coalesce($3, language),
-    description      = coalesce($4, description),
-    theme            = coalesce($5, theme)
+    theme            = coalesce($4, theme)
 where id = $1
   and (($2::text is not null and $2 is distinct from display_name) or
        ($3::text is not null and $3 is distinct from language) or
-       ($4::text is not null and $4 is distinct from description) or
-       ($5::smallint is not null and $5 is distinct from theme))
+       ($4::smallint is not null and $4 is distinct from theme))
 "#,
         draft_id,
         display_name,
         language,
-        description,
         theme.map(|it| *it as i16),
     )
     .execute(&mut txn)
@@ -1049,7 +1101,7 @@ pub async fn clone_data(
         r#"
 insert into jig_data
 (display_name, created_at, updated_at, language, last_synced_at, description, theme, audio_background,
- audio_feedback_negative, audio_feedback_positive, direction, display_score, drag_assist, track_assessments, privacy_level, other_keywords, translated_keywords)
+ audio_feedback_negative, audio_feedback_positive, direction, display_score, drag_assist, track_assessments, privacy_level, other_keywords, translated_keywords, translated_description)
 select display_name,
        created_at,
        updated_at,
@@ -1066,7 +1118,8 @@ select display_name,
        track_assessments,
        privacy_level,
        other_keywords,
-       translated_keywords
+       translated_keywords,
+       translated_description
 from jig_data
 where id = $1
 returning id
@@ -1077,10 +1130,7 @@ returning id
     .await?
     .id;
 
-    match draft_or_live {
-        DraftOrLive::Draft => update_draft_or_live(txn, new_id, draft_or_live).await?,
-        DraftOrLive::Live => update_draft_or_live(txn, new_id, draft_or_live).await?,
-    }
+    update_draft_or_live(txn, new_id, draft_or_live).await?;
 
     // copy metadata
     sqlx::query!(

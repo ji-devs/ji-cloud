@@ -16,7 +16,7 @@ use std::thread;
 use anyhow::Context;
 use core::settings::{self, SettingsManager};
 
-use ji_cloud_api::{algolia, db, http, jwk, logger, service};
+use ji_cloud_api::{algolia, db, http, jwk, logger, service, translate};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -36,14 +36,15 @@ async fn main() -> anyhow::Result<()> {
         jwk_verifier,
         mail_client,
         media_upload_cleaner,
-        _guard,
+        google_translate,
+        // _guard,
     ) = {
         log::trace!("initializing settings and processes");
         let remote_target = settings::read_remote_target()?;
 
         let settings: SettingsManager = SettingsManager::new(remote_target).await?;
 
-        let guard = core::sentry::init(settings.sentry_api_key().await?.as_deref(), remote_target)?;
+        // let guard = core::sentry::init(settings.sentry_api_key().await?.as_deref(), remote_target)?;
 
         let runtime_settings = settings.runtime_settings().await?;
 
@@ -87,6 +88,8 @@ async fn main() -> anyhow::Result<()> {
         let media_upload_cleaner =
             service::upload::cleaner::UploadCleaner::new(db_pool.clone(), db::UPLOADS_DB_SCHEMA)?;
 
+        let google_translate = translate::GoogleTranslate::new(db_pool.clone(), &runtime_settings)?;
+
         let jwk_verifier =
             jwk::create_verifier(settings.jwk_audience_settings(&runtime_settings).await?);
 
@@ -109,7 +112,8 @@ async fn main() -> anyhow::Result<()> {
             jwk_verifier,
             mail_client,
             media_upload_cleaner,
-            guard,
+            google_translate,
+            // guard,
         )
     };
 
@@ -126,6 +130,7 @@ async fn main() -> anyhow::Result<()> {
             mail_client,
             algolia_manager,
             media_upload_cleaner,
+            google_translate,
         )
     });
 

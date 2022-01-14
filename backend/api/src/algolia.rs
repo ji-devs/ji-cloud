@@ -9,6 +9,7 @@ use chrono::{DateTime, Utc};
 use core::settings::AlgoliaSettings;
 use futures::TryStreamExt;
 use serde::Serialize;
+use serde_json::value::Value;
 
 use shared::{
     domain::{
@@ -58,6 +59,9 @@ struct BatchJig<'a> {
     likes: &'a i64,
     plays: &'a i64,
     published_at: Option<DateTime<Utc>>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    translated_description: Option<Value>,
 }
 
 #[derive(Serialize)]
@@ -66,7 +70,7 @@ struct BatchImage<'a> {
     description: &'a str,
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
-    translated_description: Option<String>,
+    translated_description: Option<Value>,
     styles: &'a [Uuid],
     style_names: &'a [String],
     age_ranges: &'a [Uuid],
@@ -264,6 +268,7 @@ select jig.id,
        display_name                                                                                                 as "name",
        language                                                                                                     as "language!",
        description                                                                                                  as "description!",
+       translated_description                                                                                       as "translated_description?: Value",
        array((select affiliation_id
               from jig_data_affiliation
               where jig_data_id = jig_data.id))                                                                     as "affiliations!",
@@ -358,6 +363,7 @@ limit 100 for no key update skip locked;
                 likes: &row.likes,
                 plays: &row.plays,
                 published_at: row.published_at
+                translated_description: row.translated_description,
             })
             .expect("failed to serialize BatchJig to json")
             {
@@ -424,7 +430,7 @@ select id,
        name,
        kind                                                                                     as "kind!: ImageKind",
        description,
-       translated_description                                                                   as "translated_description",
+       translated_description                                                                   as "translated_description?: Value",
        array((select affiliation_id from image_affiliation where image_id = image_metadata.id)) as "affiliations!",
        array((select affiliation.display_name
               from affiliation
