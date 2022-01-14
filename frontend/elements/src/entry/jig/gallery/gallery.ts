@@ -224,7 +224,7 @@ export class _ extends LitElement {
                                 <slot name="jig-templates"></slot>
                             </div>
                         </div>
-                        ${
+                        <!-- ${
                             this.jigFocus === "resources" ? nothing : html`
                                 <div class="see-all-templates-button">
                                     <button-rect
@@ -246,7 +246,7 @@ export class _ extends LitElement {
                                     </button-rect>
                                 </div>
                             `
-                        }
+                        } -->
                     </div>
                 </div>
             </section>
