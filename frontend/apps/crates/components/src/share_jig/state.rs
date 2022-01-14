@@ -12,6 +12,7 @@ pub struct State {
     pub loader: AsyncLoader,
     pub jig_id: JigId,
     pub copied_embed: Mutable<bool>,
+    pub link_copied: Mutable<bool>,
 }
 
 impl State {
@@ -22,6 +23,7 @@ impl State {
             loader: AsyncLoader::new(),
             active_popup: Mutable::new(None),
             copied_embed: Mutable::new(false),
+            link_copied: Mutable::new(false),
         }
     }
 

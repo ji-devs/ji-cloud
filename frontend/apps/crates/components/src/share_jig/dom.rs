@@ -9,6 +9,7 @@ use utils::{
     unwrap::UnwrapJiExt,
 };
 use web_sys::HtmlElement;
+use gloo_timers::callback::Timeout;
 
 use crate::{
     animation::fade::{Fade, FadeKind},
@@ -31,6 +32,10 @@ const STR_BACK: &str = "Back";
 const STR_COPIED: &str = "Copied to the clipboard";
 const STR_COPY_CODE: &str = "Copy Code";
 const JIGZI_BASE_URL: &str = "https://jigzi.org";
+const STR_STUDENTS_LABEL: &str = "Share with students";
+const STR_EMBED_LABEL: &str = "Embed this JIG";
+const STR_COPY_LABEL: &str = "Copy JIG link";
+const STR_COPIED_LABEL: &str = "JIG link copied";
 
 pub fn render(state: Rc<State>, anchor: Dom, slot: Option<&str>) -> Dom {
     html!("empty-fragment" => HtmlElement, {
@@ -94,20 +99,33 @@ fn render_share_main(state: Rc<State>) -> Dom {
             }),
             html!("share-jig-option", {
                 .property("kind", "students")
+                .text(STR_STUDENTS_LABEL)
                 .event(clone!(state => move |_: events::Click| {
                     state.active_popup.set(Some(ActivePopup::ShareStudents));
                 }))
             }),
             html!("share-jig-option", {
                 .property("kind", "embed")
+                .text(STR_EMBED_LABEL)
                 .event(clone!(state => move |_: events::Click| {
                     state.active_popup.set(Some(ActivePopup::ShareEmbed));
                 }))
             }),
             html!("share-jig-option", {
                 .property("kind", "copy")
+                .text_signal(state.link_copied.signal().map(|copied| {
+                    match copied {
+                        false => STR_COPY_LABEL,
+                        true => STR_COPIED_LABEL,
+                    }
+                }))
                 .event(clone!(state => move|_: events::Click| {
                     clipboard::write_text(&state.jig_link());
+                    state.link_copied.set(true);
+                    let timeout = Timeout::new(3_000, clone!(state => move || {
+                        state.link_copied.set(false);
+                    }));
+                    timeout.forget();
                 }))
             }),
         ])
