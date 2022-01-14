@@ -5,9 +5,9 @@ import "@elements/core/images/ui";
 export type Kind = "share" | "new-jig" | "play-jig" | "new-resource" | "view-resources";
 
 const STR_LABEL_LOOKUP: { [key in Kind]: string } = {
-    "share": "Share the JIG",
+    "share": "Share JIG",
     "new-jig": "Create a new JIG",
-    "play-jig": "Play the JIG",
+    "play-jig": "Play JIG",
     "new-resource": "Add another",
     "view-resources": "View my resources"
 };

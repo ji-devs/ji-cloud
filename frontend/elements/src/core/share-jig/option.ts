@@ -2,14 +2,6 @@ import { LitElement, html, css, customElement, property } from "lit-element";
 
 export type Kind = "students" | "embed" | "copy";
 
-const STR_LABEL_LOOKUP: {
-    [key in Kind]: string;
-} = {
-    ["students"]: "Share with students",
-    ["embed"]: "Embed this JIG",
-    ["copy"]: "Copy URL",
-};
-
 @customElement("share-jig-option")
 export class _ extends LitElement {
     static get styles() {
@@ -47,7 +39,7 @@ export class _ extends LitElement {
             <slot slot="back" name="back"></slot>
             <slot slot="close" name="close"></slot>
             <img-ui path="core/share-jig/${this.kind}.svg"></img-ui>
-            <span class="label">${STR_LABEL_LOOKUP[this.kind]}</span>
+            <span class="label"><slot></slot></span>
             <!-- <span class="help">?</span> -->
         `;
     }
