@@ -1,6 +1,8 @@
-use dominator::{events, html, clone, Dom};
+use dominator::{clone, events, html, with_node, Dom};
 use futures_signals::signal::{Mutable, SignalExt};
 use std::rc::Rc;
+use wasm_bindgen::prelude::*;
+use web_sys::HtmlIFrameElement;
 
 const STR_JEWISH_INTERACTIVE_URL: &str = "https://www.jewishinteractive.org/jigzi-home";
 
@@ -16,7 +18,7 @@ impl Iframe {
     }
     pub fn render(self: Rc<Self>) -> Dom {
         let state = self.clone();
-        html!("iframe", {
+        html!("iframe" => HtmlIFrameElement, {
             .style("width", "100%")
             .style_signal("height", state.height.signal_cloned()
                 .map(|height| {
@@ -25,10 +27,29 @@ impl Iframe {
                     adjusted_height
                 })
             )
-            .event(clone!(state => move |_: events::Load| {
-                state.height.set(1200);
-            }))
+            .with_node!(elem => {
+                .event(clone!(state => move |_: events::Load| {
+                    match get_height(&elem) {
+                        Ok(height) => state.height.set(height),
+                        Err(_) => (),
+                    }
+
+                }))
+            })
             .property("src", STR_JEWISH_INTERACTIVE_URL)
         })
     }
+}
+
+#[wasm_bindgen]
+pub fn get_height(iframe: &HtmlIFrameElement) -> Result<usize, JsValue> {
+    let height: usize = match iframe.content_window() {
+        Some(window) => {
+            log::info!("{:#?}", window.name());
+            1200
+        },
+        None => 1200
+    };
+    
+    Ok(height)
 }
