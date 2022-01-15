@@ -1,5 +1,6 @@
 use crate::translate::translate_text;
 use anyhow::Context;
+use serde::{Deserialize, Serialize};
 use serde_json::value::Value;
 use shared::domain::{
     category::CategoryId,
@@ -491,45 +492,252 @@ order by t.ord
     Ok(v)
 }
 
+// pub async fn browse(
+//     db: &sqlx::Pool<sqlx::Postgres>,
+//     author_id: Option<Uuid>,
+//     jig_focus: Option<JigFocus>,
+//     draft_or_live: Option<DraftOrLive>,
+//     page: i32,
+// ) -> sqlx::Result<Vec<JigResponse>> {
+//     let mut txn = db.begin().await?;
+
+//     let jig = sqlx::query!(
+//         //language=SQL
+//         r#"
+// select live_id                                  as "live_id!",
+//        draft_id                                 as "draft_id!"
+// from jig
+//     inner join jig_data on jig_data.id = jig.draft_id or jig_data.id = jig.live_id
+//     inner join jig_admin_data "admin" on admin.jig_id = jig.id
+// where blocked = false
+//     and (author_id = $1 or $1 is null)
+//     and (jig_focus = $2 or $2 is null)
+//     "#,
+//         author_id,
+//         jig_focus.map(|it| it as i16),
+//     )
+//     .fetch_all(&mut txn)
+//     .await?;
+
+//     let jig_data_ids: Vec<Uuid> = if let Some(draft_or_live) = draft_or_live {
+//         let choose = match draft_or_live {
+//             DraftOrLive::Draft => jig.iter().map(|it| it.draft_id).collect(),
+//             DraftOrLive::Live => jig.iter().map(|it| it.live_id).collect(),
+//         };
+//         choose
+//     } else {
+//         let draft_ids: Vec<Uuid> = jig.iter().map(|it| it.draft_id).collect();
+//         let live_ids: Vec<Uuid> = jig.iter().map(|it| it.live_id).collect();
+
+//         [&draft_ids[..], &live_ids[..]].concat()
+//     };
+
+//     //TODO: purge junk jig data from with draft_or_live is NULL
+//     let jig_data = sqlx::query!(
+//         //language=SQL
+//         r#"
+// with cte as (
+//     select * from unnest($1::uuid[]) with ordinality t(id, ord) order by ord desc
+// )
+// select  jig.id                                              as "jig_id: JigId",
+//         privacy_level                                       as "privacy_level: PrivacyLevel",
+//         jig_focus                                           as "jig_focus!: JigFocus",
+//         creator_id,
+//         author_id,
+//         (select given_name || ' '::text || family_name
+//          from user_profile
+//          where user_profile.user_id = author_id)            as "author_name",
+//         published_at,
+//         liked_count,
+//         (
+//              select play_count
+//              from jig_play_count
+//              where jig_play_count.jig_id = jig.id
+//         )                                                   as "play_count!",
+//        display_name                                                                  as "display_name!",
+//        updated_at,
+//        language                                                                      as "language!",
+//        description                                                                   as "description!",
+//        direction                                                                     as "direction!: TextDirection",
+//        display_score                                                                 as "display_score!",
+//        track_assessments                                                             as "track_assessments!",
+//        drag_assist                                                                   as "drag_assist!",
+//        theme                                                                         as "theme!: ThemeId",
+//        audio_background                                                              as "audio_background!: Option<AudioBackground>",
+//        draft_or_live                                                                 as "draft_or_live!: DraftOrLive",
+//        array(select row (unnest(audio_feedback_positive)))                           as "audio_feedback_positive!: Vec<(AudioFeedbackPositive,)>",
+//        array(select row (unnest(audio_feedback_negative)))                           as "audio_feedback_negative!: Vec<(AudioFeedbackNegative,)>",
+//        array(
+//                select row (jig_data_module.id, kind)
+//                from jig_data_module
+//                where jig_data_id = jig_data.id
+//                order by "index"
+//            )                                               as "modules!: Vec<(ModuleId, ModuleKind)>",
+//        array(select row (goal_id)
+//              from jig_data_goal
+//              where jig_data_id = jig_data.id)     as "goals!: Vec<(GoalId,)>",
+//        array(select row (category_id)
+//              from jig_data_category
+//              where jig_data_id = jig_data.id)     as "categories!: Vec<(CategoryId,)>",
+//        array(select row (affiliation_id)
+//              from jig_data_affiliation
+//              where jig_data_id = jig_data.id)     as "affiliations!: Vec<(AffiliationId,)>",
+//        array(select row (age_range_id)
+//              from jig_data_age_range
+//              where jig_data_id = jig_data.id)     as "age_ranges!: Vec<(AgeRangeId,)>",
+//        array(
+//                 select row (jdar.id, jdar.display_name, resource_type_id, resource_content)
+//                 from jig_data_additional_resource "jdar"
+//                 where jdar.jig_data_id = jig_data.id
+//             )                                               as "additional_resource!: Vec<(AddId, String, TypeId, Value)>",
+//        locked                                     as "locked!",
+//        other_keywords                             as "other_keywords!",
+//        translated_keywords                        as "translated_keywords!",
+//        rating                                     as "rating!: Option<JigRating>",
+//        blocked                                    as "blocked!",
+//        curated                                    as "curated!",
+//        cte.ord                                    as "order_id"
+// from jig_data
+//     inner join cte on cte.id = jig_data.id
+//     inner join jig on jig_data.id = jig.draft_id or jig_data.id = jig.live_id
+//     inner join jig_admin_data "admin" on admin.jig_id = jig.id
+// where cte.ord >= 20 * $2
+// order by ord desc
+// limit 20
+// "#,
+//         &jig_data_ids,
+//         page
+//     )
+//         .fetch_all(&mut txn).await?;
+
+//     log::warn!("Jiggy {:?}", jig_data);
+
+//     let v = jig_data
+//         .into_iter()
+//         .map(|jig_data_row| JigResponse {
+//             id: jig_data_row.jig_id,
+//             published_at: jig_data_row.published_at,
+//             creator_id: jig_data_row.creator_id,
+//             author_id: jig_data_row.author_id,
+//             author_name: jig_data_row.author_name,
+//             likes: jig_data_row.liked_count,
+//             plays: jig_data_row.play_count,
+//             jig_focus: jig_data_row.jig_focus,
+//             jig_data: JigData {
+//                 draft_or_live: jig_data_row.draft_or_live,
+//                 display_name: jig_data_row.display_name,
+//                 language: jig_data_row.language,
+//                 modules: jig_data_row
+//                     .modules
+//                     .into_iter()
+//                     .map(|(id, kind)| LiteModule { id, kind })
+//                     .collect(),
+//                 goals: jig_data_row.goals.into_iter().map(|(it,)| it).collect(),
+//                 categories: jig_data_row
+//                     .categories
+//                     .into_iter()
+//                     .map(|(it,)| it)
+//                     .collect(),
+//                 last_edited: jig_data_row.updated_at,
+//                 description: jig_data_row.description,
+//                 default_player_settings: JigPlayerSettings {
+//                     direction: jig_data_row.direction,
+//                     display_score: jig_data_row.display_score,
+//                     track_assessments: jig_data_row.track_assessments,
+//                     drag_assist: jig_data_row.drag_assist,
+//                 },
+//                 theme: jig_data_row.theme,
+//                 age_ranges: jig_data_row
+//                     .age_ranges
+//                     .into_iter()
+//                     .map(|(it,)| it)
+//                     .collect(),
+//                 affiliations: jig_data_row
+//                     .affiliations
+//                     .into_iter()
+//                     .map(|(it,)| it)
+//                     .collect(),
+//                 additional_resources: jig_data_row
+//                     .additional_resource
+//                     .into_iter()
+//                     .map(|(id, display_name, resource_type_id, resource_content)| {
+//                         AdditionalResource {
+//                             id,
+//                             display_name,
+//                             resource_type_id,
+//                             resource_content: serde_json::from_value::<ResourceContent>(
+//                                 resource_content,
+//                             )
+//                             .unwrap(),
+//                         }
+//                     })
+//                     .collect(),
+//                 audio_background: jig_data_row.audio_background,
+//                 audio_effects: AudioEffects {
+//                     feedback_positive: jig_data_row
+//                         .audio_feedback_positive
+//                         .into_iter()
+//                         .map(|(it,)| it)
+//                         .collect(),
+//                     feedback_negative: jig_data_row
+//                         .audio_feedback_negative
+//                         .into_iter()
+//                         .map(|(it,)| it)
+//                         .collect(),
+//                 },
+//                 privacy_level: jig_data_row.privacy_level,
+//                 locked: jig_data_row.locked,
+//                 other_keywords: jig_data_row.other_keywords,
+//                 translated_keywords: jig_data_row.translated_keywords,
+//             },
+//             admin_data: JigAdminData {
+//                 rating: jig_data_row.rating,
+//                 blocked: jig_data_row.blocked,
+//                 curated: jig_data_row.curated,
+//             },
+//         })
+//         .collect();
+
+//     txn.rollback().await?;
+
+//     Ok(v)
+// }
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct Testing {
+    /// Jig ID to delete.
+    pub id: Option<Uuid>,
+    pub ord: Option<i64>,
+}
+
 pub async fn browse(
     db: &sqlx::Pool<sqlx::Postgres>,
     author_id: Option<Uuid>,
     jig_focus: Option<JigFocus>,
     draft_or_live: Option<DraftOrLive>,
     page: i32,
-) -> sqlx::Result<Vec<JigResponse>> {
+) -> sqlx::Result<(Vec<JigResponse>, u64)> {
     let mut txn = db.begin().await?;
 
     let jig = sqlx::query!(
         //language=SQL
         r#"
-select jig.id                                       as "id!: JigId",
-       creator_id,
-       author_id                                as "author_id",
-       (select given_name || ' '::text || family_name
-        from user_profile
-        where user_profile.user_id = author_id) as "author_name",
-       live_id                                  as "live_id!",
-       draft_id                                 as "draft_id!",
-       published_at,
-       liked_count                              as "liked_count!",
-       (
-           select play_count
-           from jig_play_count
-           where jig_play_count.jig_id = jig.id
-       )                                        as "play_count!",
-       rating                                   as "rating?: JigRating",
-       blocked                                  as "blocked!",
-       curated                                  as "curated!",
-       jig_focus                                as "jig_focus!: JigFocus"
-from jig
-    inner join jig_admin_data "admin" on admin.jig_id = jig.id
-where blocked = false
-    and (author_id = $1 or $1 is null)
-    and (jig_focus = $2 or $2 is null)
-    "#,
+    select live_id                                  as "live_id!",
+           draft_id                                 as "draft_id!"
+    from jig
+        left join jig_admin_data "admin" on admin.jig_id = jig.id
+        left join jig_data "jig_dt" on jig_dt.id = jig.draft_id
+        left join jig_data "jig_tt" on jig_tt.id = jig.live_id
+    where blocked = false
+        and (jig_dt.draft_or_live is not null and jig_tt.draft_or_live is not null)
+        and ((jig_dt.draft_or_live = $3 or $3 is null) 
+              or (jig_tt.draft_or_live = $3 or $3 is null))
+        and (author_id = $1 or $1 is null)
+        and (jig_focus = $2 or $2 is null)
+        "#,
         author_id,
         jig_focus.map(|it| it as i16),
+        draft_or_live.map(|it| it as i16)
     )
     .fetch_all(&mut txn)
     .await?;
@@ -547,11 +755,30 @@ where blocked = false
         [&draft_ids[..], &live_ids[..]].concat()
     };
 
+    let count = jig_data_ids.len() as u64;
+
     //TODO: purge junk jig data from with draft_or_live is NULL
     let jig_data = sqlx::query!(
         //language=SQL
         r#"
-select id,
+with cte as (
+    select * from unnest($1::uuid[]) with ordinality t(id, ord) order by ord desc
+)
+select  jig.id                                              as "jig_id: JigId",
+        privacy_level                                       as "privacy_level: PrivacyLevel",
+        jig_focus                                           as "jig_focus!: JigFocus",
+        creator_id,
+        author_id,
+        (select given_name || ' '::text || family_name
+         from user_profile
+         where user_profile.user_id = author_id)            as "author_name",
+        published_at,
+        liked_count,
+        (
+             select play_count
+             from jig_play_count
+             where jig_play_count.jig_id = jig.id
+        )                                                   as "play_count!",
        display_name                                                                  as "display_name!",
        updated_at,
        language                                                                      as "language!",
@@ -588,34 +815,36 @@ select id,
                 from jig_data_additional_resource "jdar"
                 where jdar.jig_data_id = jig_data.id
             )                                               as "additional_resource!: Vec<(AddId, String, TypeId, Value)>",
-       privacy_level                              as "privacy_level!: PrivacyLevel",
        locked                                     as "locked!",
        other_keywords                             as "other_keywords!",
-       translated_keywords                        as "translated_keywords!"
+       translated_keywords                        as "translated_keywords!",
+       rating                                     as "rating!: Option<JigRating>",
+       blocked                                    as "blocked!",
+       curated                                    as "curated!"
 from jig_data
-         inner join unnest($1::uuid[])
-    with ordinality t(id, ord) using (id)
-where draft_or_live is not null
-order by coalesce(updated_at, created_at) desc
-limit 20 offset 20 * $2
+    inner join cte on cte.id = jig_data.id
+    inner join jig on jig_data.id = jig.draft_id or jig_data.id = jig.live_id
+    inner join jig_admin_data "admin" on admin.jig_id = jig.id
+where cte.ord >= (20 * $2)
+order by ord asc
+limit 20 
 "#,
         &jig_data_ids,
         page
     )
         .fetch_all(&mut txn).await?;
 
-    let v = jig
+    let v = jig_data
         .into_iter()
-        .zip(jig_data.into_iter())
-        .map(|(jig_row, jig_data_row)| JigResponse {
-            id: jig_row.id,
-            published_at: jig_row.published_at,
-            creator_id: jig_row.creator_id,
-            author_id: jig_row.author_id,
-            author_name: jig_row.author_name,
-            likes: jig_row.liked_count,
-            plays: jig_row.play_count,
-            jig_focus: jig_row.jig_focus,
+        .map(|jig_data_row| JigResponse {
+            id: jig_data_row.jig_id,
+            published_at: jig_data_row.published_at,
+            creator_id: jig_data_row.creator_id,
+            author_id: jig_data_row.author_id,
+            author_name: jig_data_row.author_name,
+            likes: jig_data_row.liked_count,
+            plays: jig_data_row.play_count,
+            jig_focus: jig_data_row.jig_focus,
             jig_data: JigData {
                 draft_or_live: jig_data_row.draft_or_live,
                 display_name: jig_data_row.display_name,
@@ -684,16 +913,16 @@ limit 20 offset 20 * $2
                 translated_keywords: jig_data_row.translated_keywords,
             },
             admin_data: JigAdminData {
-                rating: jig_row.rating,
-                blocked: jig_row.blocked,
-                curated: jig_row.curated,
+                rating: jig_data_row.rating,
+                blocked: jig_data_row.blocked,
+                curated: jig_data_row.curated,
             },
         })
         .collect();
 
     txn.rollback().await?;
 
-    Ok(v)
+    Ok((v, count))
 }
 
 pub async fn update_draft(
@@ -943,7 +1172,6 @@ where creator_id is not distinct from $1
 }
 
 // `None` here means do not filter.
-// TODO: fix filtered count, used in browse()
 pub async fn filtered_count(
     db: &PgPool,
     privacy_level: Option<PrivacyLevel>,
@@ -956,11 +1184,14 @@ pub async fn filtered_count(
         r#"
 select count(*) as "count!: i64"
 from jig
-inner join jig_data on jig.draft_id = jig_data.id or jig.live_id = jig_data.id
-where (privacy_level = $1 or $1 is null)
+left join jig_admin_data "admin" on admin.jig_id = jig.id
+left join jig_data "jig_dt" on jig_dt.id = jig.draft_id
+left join jig_data "jig_tt" on jig_tt.id = jig.live_id
+where (jig_dt.privacy_level = $1 or $1 is null)
     and (author_id = $2 or $2 is null)
     and (jig_focus = $3 or $3 is null)
-    and (draft_or_live = $4 or $4 is null)
+    and ((jig_dt.draft_or_live = $4 or $4 is null) 
+    or (jig_tt.draft_or_live = $4 or $4 is null))
 "#,
         privacy_level.map(|it| it as i16),
         author_id,
