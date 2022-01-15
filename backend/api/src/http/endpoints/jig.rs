@@ -3,6 +3,7 @@ use actix_web::{
     HttpResponse,
 };
 use core::settings::RuntimeSettings;
+use sha2::digest::consts::U6;
 use shared::{
     api::{endpoints::jig, ApiEndpoint},
     domain::{
@@ -203,7 +204,7 @@ async fn browse(
 
     db::jig::authz_list(&*db, claims.0.user_id, author_id).await?;
 
-    let jigs = db::jig::browse(
+    let (jigs, count) = db::jig::browse(
         db.as_ref(),
         author_id,
         query.jig_focus,
@@ -221,7 +222,7 @@ async fn browse(
     )
     .await?;
 
-    let pages = (total_count / 20 + (total_count % 20 != 0) as u64) as u32;
+    let pages = (count / 20 + (count % 20 != 0) as u64) as u32;
 
     Ok(Json(JigBrowseResponse {
         jigs,
