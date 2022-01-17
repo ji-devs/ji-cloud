@@ -15,7 +15,14 @@ impl Base {
                 }
                 Activity::Soundboard(activity) => Soundboard::new(self.clone(), activity).render(),
                 Activity::Video(activity) => Video::new(self.clone(), activity).render(),
-                Activity::AskQuestions(activity) => AskQuestions::new(self.clone(), activity).render(),
+                Activity::AskQuestions(activity) => {
+                    if activity.items.len() > 0 {
+                        AskQuestions::new(self.clone(), activity).render()
+                    } else {
+                        self.allow_stage_click();
+                        html!("empty-fragment")
+                    }
+                },
                 Activity::TalkType(activity) => TalkType::new(self.clone(), activity).render(),
                 Activity::Puzzle(activity) => Puzzle::new(self.clone(), activity).render(),
                 // _ => html!("empty-fragment"),
