@@ -183,16 +183,16 @@ fn render_page(state: Rc<Publish>) -> Dom {
             html!("input-wrapper", {
                 .property("slot", "description")
                 .property("label", STR_DESCRIPTION_LABEL)
-                .property_signal("error", {
-                    (map_ref! {
-                        let submission_tried = state.submission_tried.signal(),
-                        let value = state.jig.description.signal_cloned()
-                            => (*submission_tried, value.clone())
-                    })
-                        .map(|(submission_tried, value)| {
-                            submission_tried && value.is_empty()
-                        })
-                })
+                // .property_signal("error", {
+                //     (map_ref! {
+                //         let submission_tried = state.submission_tried.signal(),
+                //         let value = state.jig.description.signal_cloned()
+                //             => (*submission_tried, value.clone())
+                //     })
+                //         .map(|(submission_tried, value)| {
+                //             submission_tried && value.is_empty()
+                //         })
+                // })
                 .child({
                     HebrewButtons::short().render(Some("hebrew-inputs"))
                 })
