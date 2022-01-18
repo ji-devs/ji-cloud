@@ -20,15 +20,18 @@ expression: body
         "modules": [
           {
             "id": "a6b24a06-1dd7-11ec-8426-635a3a7ea572",
-            "kind": "Cover"
+            "kind": "Cover",
+            "is_complete": false
           },
           {
             "id": "a6b24a42-1dd7-11ec-8426-a7165f9281a2",
-            "kind": "Flashcards"
+            "kind": "Flashcards",
+            "is_complete": false
           },
           {
             "id": "a6b24a88-1dd7-11ec-8426-57525d09b22c",
-            "kind": "Memory"
+            "kind": "Memory",
+            "is_complete": false
           }
         ],
         "ageRanges": [],
@@ -120,6 +123,56 @@ expression: body
       }
     },
     {
+      "id": "19becb2b-bff7-4c1b-bb2c-16f2e098d3d3",
+      "publishedAt": null,
+      "creatorId": "1f241e1b-b537-493f-a230-075cb16315be",
+      "authorId": "1f241e1b-b537-493f-a230-075cb16315be",
+      "authorName": "Bobby Tables",
+      "likes": 0,
+      "plays": 0,
+      "jigFocus": "modules",
+      "jigData": {
+        "draftOrLive": "draft",
+        "displayName": "name",
+        "modules": [
+          {
+            "id": "56841805-d762-478b-8f07-e263917058b9",
+            "kind": "Cover",
+            "is_complete": true
+          }
+        ],
+        "ageRanges": [],
+        "affiliations": [],
+        "goals": [],
+        "language": "en",
+        "categories": [],
+        "additionalResources": [],
+        "description": "test description",
+        "lastEdited": "[last_edited]",
+        "defaultPlayerSettings": {
+          "direction": "ltr",
+          "displayScore": true,
+          "trackAssessments": true,
+          "dragAssist": true
+        },
+        "theme": "Blank",
+        "audioBackground": null,
+        "audioEffects": {
+          "feedbackPositive": "[audio]",
+          "feedbackNegative": "[audio]"
+        },
+        "privacyLevel": "unlisted",
+        "locked": false,
+        "otherKeywords": "",
+        "translatedKeywords": ""
+      },
+      "adminData": {
+        "rating": null,
+        "blocked": false,
+        "curated": false
+      }
+    },
+    {
       "id": "0cc084bc-7c83-11eb-9f77-e3218dffb008",
       "publishedAt": null,
       "creatorId": "1f241e1b-b537-493f-a230-075cb16315be",
@@ -134,15 +187,18 @@ expression: body
         "modules": [
           {
             "id": "a6b248f8-1dd7-11ec-8426-975953035335",
-            "kind": "Cover"
+            "kind": "Cover",
+            "is_complete": false
           },
           {
             "id": "a6b24970-1dd7-11ec-8426-57136b411853",
-            "kind": "Flashcards"
+            "kind": "Flashcards",
+            "is_complete": false
           },
           {
             "id": "a6b249c0-1dd7-11ec-8426-f77e58fd17c6",
-            "kind": "Memory"
+            "kind": "Memory",
+            "is_complete": false
           }
         ],
         "ageRanges": [],
@@ -232,8 +288,58 @@ expression: body
         "blocked": false,
         "curated": false
       }
+    },
+    {
+      "id": "19becb2b-bff7-4c1b-bb2c-16f2e098d3d3",
+      "publishedAt": null,
+      "creatorId": "1f241e1b-b537-493f-a230-075cb16315be",
+      "authorId": "1f241e1b-b537-493f-a230-075cb16315be",
+      "authorName": "Bobby Tables",
+      "likes": 0,
+      "plays": 0,
+      "jigFocus": "modules",
+      "jigData": {
+        "draftOrLive": "live",
+        "displayName": "name",
+        "modules": [
+          {
+            "id": "865eeae6-f081-49bb-87bb-827296a8a82b",
+            "kind": "Cover",
+            "is_complete": true
+          }
+        ],
+        "ageRanges": [],
+        "affiliations": [],
+        "goals": [],
+        "language": "en",
+        "categories": [],
+        "additionalResources": [],
+        "description": "test description",
+        "lastEdited": "[last_edited]",
+        "defaultPlayerSettings": {
+          "direction": "ltr",
+          "displayScore": true,
+          "trackAssessments": true,
+          "dragAssist": true
+        },
+        "theme": "Blank",
+        "audioBackground": null,
+        "audioEffects": {
+          "feedbackPositive": "[audio]",
+          "feedbackNegative": "[audio]"
+        },
+        "privacyLevel": "public",
+        "locked": false,
+        "otherKeywords": "",
+        "translatedKeywords": ""
+      },
+      "adminData": {
+        "rating": null,
+        "blocked": false,
+        "curated": false
+      }
     }
   ],
   "pages": 1,
-  "totalJigCount": 2
+  "totalJigCount": 3
 }
