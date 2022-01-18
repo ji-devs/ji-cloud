@@ -68,8 +68,26 @@ impl Publish {
 }
 
 fn render_page(state: Rc<Publish>) -> Dom {
+    let (has_modules, invalid_module) = {
+        let modules = state.jig.modules.lock_ref();
+
+        let has_modules = !modules.is_empty();
+
+        let invalid_module = modules.iter().find(|module| !module.is_complete);
+        (has_modules, invalid_module.map(|module| module.clone()))
+    };
+
     html!("jig-edit-publish", {
         .property("jigFocus", state.jig.jig_focus.as_str())
+        .apply_if(state.jig.jig_focus.is_resources(), |dom| {
+            // TODO set content for no activities and content for incomplete activities.
+            if !has_modules {
+                // TODO
+            } else if let Some(_invalid_module) = invalid_module {
+                // TODO
+            }
+            dom
+        })
         .children(&mut [
             ModuleThumbnail::render_live(
                 Rc::new(ModuleThumbnail {

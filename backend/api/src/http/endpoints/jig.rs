@@ -3,13 +3,12 @@ use actix_web::{
     HttpResponse,
 };
 use core::settings::RuntimeSettings;
-use sha2::digest::consts::U6;
 use shared::{
     api::{endpoints::jig, ApiEndpoint},
     domain::{
         jig::{
             DeleteUserJigs, DraftOrLive, JigBrowseResponse, JigCountResponse, JigCreateRequest,
-            JigId, JigLikedResponse, JigSearchResponse, PrivacyLevel, UserOrMe,
+            JigId, JigLikedResponse, JigSearchResponse, LiteModule, PrivacyLevel, UserOrMe,
         },
         CreateResponse,
     },
@@ -246,6 +245,25 @@ pub(super) async fn publish_draft_to_live(
     let (draft_id, live_id) = db::jig::get_draft_and_live_ids(&mut *txn, jig_id)
         .await
         .ok_or(error::JigCloneDraft::ResourceNotFound)?;
+
+    let draft = db::jig::get_one(&db, jig_id, DraftOrLive::Draft)
+        .await?
+        .ok_or(error::JigCloneDraft::ResourceNotFound)?; // Not strictly necessary, we already know the JIG exists.
+
+    let modules = draft.jig_data.modules;
+    // Check that modules have been configured on the JIG
+    let has_modules = !modules.is_empty();
+    // Check whether the draft's modules all have content
+    let modules_valid = modules
+        .into_iter()
+        .filter(|module| !module.is_complete)
+        .collect::<Vec<LiteModule>>()
+        .is_empty();
+
+    // If no modules or modules without content, prevent publishing.
+    if !modules_valid || !has_modules {
+        return Err(error::JigCloneDraft::IncompleteModules);
+    }
 
     let new_live_id = db::jig::clone_data(&mut txn, &draft_id, DraftOrLive::Live).await?;
 

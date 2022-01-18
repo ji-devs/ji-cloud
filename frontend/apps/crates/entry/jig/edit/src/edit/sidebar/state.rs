@@ -1,4 +1,5 @@
 use super::{dragging::state::State as DragState, settings::state::State as SettingsState};
+use components::module::_common::prelude::ModuleId;
 use dominator_helpers::{futures::AsyncLoader, signals::OptionSignal};
 use futures_signals::{
     signal::{Mutable, Signal, SignalExt},
@@ -12,12 +13,55 @@ use chrono::{DateTime, Utc};
 
 use super::super::state::State as JigEditState;
 
+/// A wrapper struct for LiteModule so that the fields can be used as signals. State::modules is a
+/// MutableVec, but replacing the entire LiteModule whenever is_complete changes means that the
+/// entire item in the sidebar will be rerendered.
+///
+/// Should be constructed from a LiteModule.
+pub struct Module {
+    inner: Rc<LiteModule>,
+
+    /// Whether this module is completed.
+    pub is_complete: Mutable<bool>,
+}
+
+impl Module {
+    pub fn id(&self) -> &ModuleId {
+        &self.inner.id
+    }
+
+    pub fn kind(&self) -> &ModuleKind {
+        &self.inner.kind
+    }
+}
+
+impl From<LiteModule> for Module {
+    fn from(module: LiteModule) -> Self {
+        let is_complete = Mutable::new(module.is_complete);
+
+        Self {
+            inner: Rc::new(module),
+            is_complete,
+        }
+    }
+}
+
+impl From<&Module> for LiteModule {
+    fn from(module: &Module) -> LiteModule {
+        LiteModule {
+            id: module.inner.id,
+            kind: module.inner.kind,
+            is_complete: module.is_complete.get(),
+        }
+    }
+}
+
 pub struct State {
     pub jig: JigResponse,
     pub jig_edit_state: Rc<JigEditState>,
     pub name: Mutable<String>,
     pub publish_at: Mutable<Option<DateTime<Utc>>>,
-    pub modules: MutableVec<Rc<Option<LiteModule>>>,
+    pub modules: MutableVec<Rc<Option<Module>>>,
     pub collapsed: Mutable<bool>,
     pub settings: Rc<SettingsState>,
     pub drag: Mutable<Option<Rc<DragState>>>,
@@ -27,7 +71,7 @@ pub struct State {
 
 impl State {
     pub fn new(jig: JigResponse, jig_edit_state: Rc<JigEditState>) -> Self {
-        let mut modules: Vec<Rc<Option<LiteModule>>> = jig
+        let mut modules: Vec<Rc<Option<Module>>> = jig
             .jig_data
             .modules
             .iter()
@@ -44,7 +88,7 @@ impl State {
             // so that a cover can still be set on the JIG.
             Some(module) => {
                 if let Some(module) = &**module {
-                    if module.kind != ModuleKind::Cover {
+                    if *module.kind() != ModuleKind::Cover {
                         modules.insert(0, Rc::new(None));
                     }
                 };

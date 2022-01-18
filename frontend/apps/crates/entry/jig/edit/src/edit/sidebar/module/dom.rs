@@ -4,10 +4,10 @@ use web_sys::{HtmlElement, Node};
 
 use super::super::menu::{dom as MenuDom};
 use super::{actions, state::*};
-use crate::edit::sidebar::state::State as SidebarState;
+use crate::edit::sidebar::state::{State as SidebarState, Module};
 use components::module::_common::thumbnail::ModuleThumbnail;
-use futures_signals::signal::SignalExt;
-use shared::domain::jig::{LiteModule, ModuleKind};
+use futures_signals::signal::{SignalExt, Mutable};
+use shared::domain::jig::ModuleKind;
 use std::rc::Rc;
 use std::str::FromStr;
 use utils::prelude::*;
@@ -26,7 +26,7 @@ impl ModuleDom {
         index: usize,
         drag_target_index: Option<usize>,
         total_len: usize,
-        module: Rc<Option<LiteModule>>,
+        module: Rc<Option<Module>>,
     ) -> Dom {
         let state = Rc::new(State::new(
             sidebar_state.clone(),
@@ -36,6 +36,11 @@ impl ModuleDom {
         ));
 
         let is_filler = Some(index) == drag_target_index;
+
+        let is_incomplete_signal = match &*module {
+            Some(module) => module.is_complete.signal_cloned(),
+            None => Mutable::new(true).signal_cloned(),
+        }.map(|is_complete| !is_complete);
 
         html!("empty-fragment", {
             .property("slot", if index == 0 { "cover-module" } else { "modules" })
@@ -81,10 +86,11 @@ impl ModuleDom {
                 .property_signal("collapsed", state.sidebar.collapsed.signal())
                 .property_signal("selected", state.sidebar.jig_edit_state.route.signal_ref(clone!(module => move |route| {
                     match (&*module, route) {
-                        (Some(module), JigEditRoute::Module(module_id)) if module_id == &module.id => true,
+                        (Some(module), JigEditRoute::Module(module_id)) if module_id == module.id() => true,
                         _ => false,
                     }
                 })))
+                .property_signal("incomplete", is_incomplete_signal)
                 // TODO:
                 // .event(|_evt:events::MouseDown| {
                 //     actions::mouse_down(state.clone(), evt.x(), evt.y());
@@ -134,12 +140,12 @@ impl ModuleDom {
                         }))
                         .child_signal(state.sidebar.jig_edit_state.route.signal_ref(clone!(state, module => move |route| {
                             match (&*module, route) {
-                                (Some(module), JigEditRoute::Module(module_id)) if module_id == &module.id => None,
+                                (Some(module), JigEditRoute::Module(module_id)) if module_id == module.id() => None,
                                 (Some(module), _) => {
                                     Some(ModuleThumbnail::render_live(
                                         Rc::new(ModuleThumbnail {
                                             jig_id: state.sidebar.jig.id.clone(),
-                                            module: Some(module.clone()),
+                                            module: Some(module.into()),
                                             is_jig_fallback: false,
                                         }),
                                         Some("thumbnail")

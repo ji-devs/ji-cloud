@@ -109,10 +109,10 @@ pub fn get_player_settings(state: Rc<State>) -> JigPlayerOptions {
     let drag_assist = state.settings.drag_assist.get();
 
     JigPlayerOptions {
-        direction: direction,
-        display_score: display_score,
-        track_assessments: track_assessments,
-        drag_assist: drag_assist,
+        direction,
+        display_score,
+        track_assessments,
+        drag_assist,
         is_student: false,
         draft: true,
     }
@@ -122,6 +122,23 @@ pub fn on_iframe_message(state: Rc<State>, message: ModuleToJigEditorMessage) {
     match message {
         ModuleToJigEditorMessage::AppendModule(module) => {
             populate_added_module(Rc::clone(&state), module);
+        }
+        ModuleToJigEditorMessage::Completed(module_id) => {
+            let modules = state.modules.lock_ref();
+            let module = modules.into_iter().find(|module| {
+                // Oh my.
+                match &***module {
+                    Some(module) => *module.id() == module_id,
+                    None => false
+                }
+            });
+
+
+            if let Some(module) = module {
+                if let Some(module) = &**module {
+                    module.is_complete.set_neq(true);
+                }
+            }
         }
         ModuleToJigEditorMessage::Next => {
             state
@@ -142,20 +159,22 @@ fn populate_added_module(state: Rc<State>, module: LiteModule) {
     // Assumes that the final module in the list is always the placeholder module.
     let insert_at_idx = state.modules.lock_ref().len() - 1;
 
+    let module_id = module.id;
+
     state
         .modules
         .lock_mut()
-        .insert_cloned(insert_at_idx, Rc::new(Some(module.clone())));
+        .insert_cloned(insert_at_idx, Rc::new(Some(module.into())));
 
     state
         .jig_edit_state
         .route
-        .set_neq(JigEditRoute::Module(module.id));
+        .set_neq(JigEditRoute::Module(module_id));
 }
 
 pub fn use_module_as(state: Rc<State>, target_kind: ModuleKind, source_module_id: ModuleId) {
     state.loader.load(clone!(state => async move {
-        let target_module_id: Result<ModuleId, EmptyError> = async {
+        let target_module_id: Result<(ModuleId, bool), EmptyError> = async {
             let path = endpoints::jig::module::GetDraft::PATH
                 .replace("{id}", &state.jig.id.0.to_string())
                 .replace("{module_id}", &source_module_id.0.to_string());
@@ -180,17 +199,18 @@ pub fn use_module_as(state: Rc<State>, target_kind: ModuleKind, source_module_id
             )
             .await?;
 
-            Ok(res.id)
+            Ok((res.id, source_module.is_complete))
         }.await;
 
         match target_module_id {
             Err(_) => {
                 log::error!("request to create module failed!");
             },
-            Ok(target_module_id) => {
+            Ok((target_module_id, is_complete)) => {
                 let lite_module = LiteModule {
                     id: target_module_id,
                     kind: target_kind,
+                    is_complete,
                 };
                 populate_added_module(Rc::clone(&state), lite_module);
             },

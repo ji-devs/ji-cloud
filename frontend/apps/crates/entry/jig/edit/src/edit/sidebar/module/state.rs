@@ -1,9 +1,6 @@
-use crate::edit::sidebar::state::State as SidebarState;
+use crate::edit::sidebar::state::{State as SidebarState, Module};
 use dominator::clone;
-use futures_signals::{
-    signal::{Mutable, Signal, SignalExt},
-};
-use shared::domain::jig::LiteModule;
+use futures_signals::signal::{Mutable, Signal, SignalExt};
 use std::cell::RefCell;
 use std::rc::Rc;
 use utils::drag::Drag;
@@ -11,7 +8,7 @@ use utils::routes::JigEditRoute;
 use web_sys::HtmlElement;
 
 pub struct State {
-    pub module: Rc<Option<LiteModule>>,
+    pub module: Rc<Option<Module>>,
     pub tried_module_at_cover: Mutable<bool>,
     pub sidebar: Rc<SidebarState>,
     pub drag: Mutable<Option<Drag>>,
@@ -26,7 +23,7 @@ impl State {
         sidebar: Rc<SidebarState>,
         index: usize,
         total_len: usize,
-        module: Rc<Option<LiteModule>>,
+        module: Rc<Option<Module>>,
     ) -> Self {
         Self {
             module,
@@ -43,7 +40,7 @@ impl State {
     pub fn kind_str(&self) -> &'static str {
         match &*self.module {
             None => "",
-            Some(module) => module.kind.as_str(),
+            Some(module) => module.kind().as_str(),
         }
     }
 
@@ -57,7 +54,7 @@ impl State {
                 None => return "empty",
                 Some(this_module) => {
                     match route {
-                        JigEditRoute::Module(active_module_id) if active_module_id == &this_module.id => return "active",
+                        JigEditRoute::Module(active_module_id) if active_module_id == this_module.id() => return "active",
                         _ => return "thumbnail",
                     }
                 }

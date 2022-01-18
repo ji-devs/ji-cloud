@@ -24,6 +24,7 @@ pub async fn clone_module(
     Ok(LiteModule {
         id: id,
         kind: module.body.kind(),
+        is_complete: module.is_complete,
     })
 }
 
