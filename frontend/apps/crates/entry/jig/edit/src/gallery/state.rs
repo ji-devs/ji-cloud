@@ -5,6 +5,7 @@ use futures_signals::{signal::Mutable, signal_vec::MutableVec};
 use shared::domain::{jig::{JigFocus, JigResponse, JigId}, meta::AgeRange};
 use strum_macros::{Display, EnumIter, EnumString};
 
+#[allow(dead_code)] // TODO: delete once used
 pub const TEMPLATE_KINDS: &[&str] = &[
     "vocabulary",
     "parsha",
