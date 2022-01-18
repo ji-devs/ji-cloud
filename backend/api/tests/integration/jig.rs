@@ -490,3 +490,49 @@ async fn update_and_publish() -> anyhow::Result<()> {
 
     Ok(())
 }
+
+#[actix_rt::test]
+async fn update_and_publish_incomplete_modules() -> anyhow::Result<()> {
+    let app = initialize_server(
+        &[
+            Fixture::MetaKinds,
+            Fixture::User,
+            Fixture::Jig,
+            Fixture::CategoryOrdering,
+        ],
+        &[],
+    )
+    .await;
+
+    let port = app.port();
+
+    let client = reqwest::Client::new();
+
+    // Test no modules on JIG returns HTTP 400
+    let resp = client
+        .put(&format!(
+            "http://0.0.0.0:{}/v1/jig/3a71522a-cd77-11eb-8dc1-af3e35f7c743/draft/publish",
+            port
+        ))
+        .login()
+        .send()
+        .await?;
+
+    assert_eq!(resp.status(), StatusCode::BAD_REQUEST);
+
+    // Test no modules on JIG returns HTTP 400
+    let resp = client
+        .put(&format!(
+            "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008/draft/publish",
+            port
+        ))
+        .login()
+        .send()
+        .await?;
+
+    assert_eq!(resp.status(), StatusCode::BAD_REQUEST);
+
+    app.stop(false).await;
+
+    Ok(())
+}
