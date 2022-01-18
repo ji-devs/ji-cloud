@@ -29,14 +29,13 @@ export class _ extends LitElement {
                     text-align: center;
                     font-weight: normal;
                 }
-                h1 a,
-                h1 .query {
+                h1 a {
                     color: #fd7076;
                     font-weight: bold;
                 }
 
                 h1 a {
-                    text-decoration: underline;
+                    text-decoration: none;
                 }
             `,
         ];
