@@ -37,6 +37,12 @@ export class _ extends LitElement {
                 h1 a {
                     text-decoration: none;
                 }
+
+                .algolia {
+                    display: grid;
+                    justify-content: center;
+                    margin-top: 50px;
+                }
             `,
         ];
     }
@@ -133,6 +139,11 @@ export class _ extends LitElement {
             }
             <div class="main">
                 <slot name="sections"></slot>
+            </div>
+            <div class="algolia">
+                <a href="https://www.algolia.com/" target="_blank">
+                    <img-ui path="search-by-algolia.png"></img-ui>
+                </a>
             </div>
         `;
     }

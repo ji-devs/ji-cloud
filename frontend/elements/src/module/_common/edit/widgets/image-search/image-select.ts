@@ -182,6 +182,11 @@ export class _ extends LitElement {
                     transform: scale(1.02);
                     box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
                 }
+                .algolia {
+                    display: grid;
+                    justify-content: center;
+                    grid-column: 1 / -1;
+                }
 
                 .loader-overlay {
                     display: none;
@@ -312,6 +317,11 @@ export class _ extends LitElement {
                                 name="images"
                                 @slotchange=${this.onNewImage}
                             ></slot>
+                        </div>
+                        <div class="algolia">
+                            <a href="https://www.algolia.com/" target="_blank">
+                                <img-ui path="search-by-algolia.png"></img-ui>
+                            </a>
                         </div>
                     </div>
                 </section>
