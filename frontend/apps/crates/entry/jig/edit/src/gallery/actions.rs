@@ -18,6 +18,7 @@ use shared::{
             JigId,
             ModuleKind,
             JigResponse,
+            DraftOrLive,
         },
         meta::MetadataResponse,
         CreateResponse
@@ -53,6 +54,7 @@ impl JigGallery {
             is_published,
             author_id: Some(UserOrMe::Me),
             jig_focus: Some(state.focus),
+            draft_or_live: Some(DraftOrLive::Draft),
             ..Default::default()
         };
 

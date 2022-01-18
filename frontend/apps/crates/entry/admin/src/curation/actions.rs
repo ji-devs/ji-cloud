@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use dominator::clone;
 use futures::join;
-use shared::{domain::jig::{JigBrowseQuery, JigId, JigResponse, JigSearchQuery, JigFocus}, api::{endpoints, ApiEndpoint}, error::EmptyError};
+use shared::{domain::jig::{JigBrowseQuery, JigId, JigResponse, JigSearchQuery, JigFocus, DraftOrLive}, api::{endpoints, ApiEndpoint}, error::EmptyError};
 use utils::{prelude::{ApiEndpointExt, api_with_auth}, routes::{AdminCurationRoute, Route, AdminRoute}};
 
 use super::{Curation, FetchMode};
@@ -50,6 +50,7 @@ impl Curation {
         let req = JigBrowseQuery {
             page: Some(self.active_page.get()),
             jig_focus: Some(JigFocus::Modules),
+            draft_or_live: Some(DraftOrLive::Live),
             ..Default::default()
         };
 
