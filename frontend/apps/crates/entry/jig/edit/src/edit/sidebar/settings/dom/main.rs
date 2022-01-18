@@ -1,8 +1,6 @@
 use std::rc::Rc;
 
 use dominator::{clone, html, Dom};
-use futures_signals::signal::SignalExt;
-use shared::domain::jig::TextDirection;
 use utils::events;
 
 use crate::edit::sidebar::settings::{
@@ -51,18 +49,18 @@ pub fn render(state: Rc<State>) -> Dom {
             html!("jig-preview-settings", {
                 .property("slot", "preview")
                 .children(&mut [
-                    html!("jig-preview-settings-direction", {
-                        .property_signal("direction", state.direction.signal().map(|dir| {
-                            match dir {
-                                TextDirection::LeftToRight => "ltr",
-                                TextDirection::RightToLeft => "rtl",
-                            }
-                        }))
-                        .event(clone!(state => move|evt :events::CustomDirection| {
-                            state.direction.set(evt.direction());
-                            update_jig_settings(Rc::clone(&state));
-                        }))
-                    }),
+                    // html!("jig-preview-settings-direction", {
+                    //     .property_signal("direction", state.direction.signal().map(|dir| {
+                    //         match dir {
+                    //             TextDirection::LeftToRight => "ltr",
+                    //             TextDirection::RightToLeft => "rtl",
+                    //         }
+                    //     }))
+                    //     .event(clone!(state => move|evt :events::CustomDirection| {
+                    //         state.direction.set(evt.direction());
+                    //         update_jig_settings(Rc::clone(&state));
+                    //     }))
+                    // }),
                     html!("label", {
                         .child(html!("input-switch", {
                             .property_signal("enabled", state.display_score.signal())
