@@ -39,10 +39,8 @@ pub fn paste_module(state: Rc<State>) {
         None => log::warn!("No module to paste"),
         Some((jig_id, module_id)) => {
             state.loader.load(clone!(state => async move {
-
                 let module = super::module_cloner::clone_module(&jig_id, &module_id, &state.jig.id).await.unwrap_ji();
-                state.modules.lock_mut().push_cloned(Rc::new(Some(module)));
-
+                state.modules.lock_mut().push_cloned(Rc::new(Some(module.into())));
             }));
         }
     }

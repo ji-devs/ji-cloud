@@ -18,15 +18,18 @@ expression: body
     "modules": [
       {
         "id": "a6b24a06-1dd7-11ec-8426-635a3a7ea572",
-        "kind": "Cover"
+        "kind": "Cover",
+        "is_complete": false
       },
       {
         "id": "a6b24a42-1dd7-11ec-8426-a7165f9281a2",
-        "kind": "Flashcards"
+        "kind": "Flashcards",
+        "is_complete": false
       },
       {
         "id": "a6b24a88-1dd7-11ec-8426-57525d09b22c",
-        "kind": "Memory"
+        "kind": "Memory",
+        "is_complete": false
       }
     ],
     "ageRanges": [],

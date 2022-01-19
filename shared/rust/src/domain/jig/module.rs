@@ -189,6 +189,10 @@ pub struct LiteModule {
 
     /// Which kind of module this is.
     pub kind: ModuleKind,
+
+    /// Whether this module is completed.
+    #[serde(default)]
+    pub is_complete: bool,
 }
 
 /// Over the wire representation of a module.

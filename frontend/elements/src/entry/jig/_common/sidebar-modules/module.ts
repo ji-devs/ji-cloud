@@ -53,11 +53,21 @@ export class _ extends LitElement {
                 :host([collapsed]) section {
                     cursor: pointer;
                 }
-                section.selected {
+
+                :host([selected]) section {
                     border-color: #e7f0fd;
                     background-color: #f8f9fd;
                     border-left-color: var(--main-blue);
                 }
+
+                :host([incomplete]) section {
+                    border-left-color: var(--light-red-1);
+                }
+
+                :host([incomplete][selected]) section {
+                    border-left-color: var(--light-red-4);
+                }
+
                 :host([collapsed]) section {
                     height: 136px;
                     width: 72px;
@@ -199,8 +209,11 @@ export class _ extends LitElement {
         ];
     }
 
-    @property({ type: Boolean })
+    @property({ type: Boolean, reflect: true })
     selected: boolean = false;
+
+    @property({ type: Boolean, reflect: true })
+    incomplete: boolean = false;
 
     // Should be the raw index in the JIG's module list
     // Will be bumped by 1 for display purposes
@@ -252,7 +265,7 @@ export class _ extends LitElement {
 
     renderModuleImg() {
         const { collapsed, module } = this;
-        
+
         if (!collapsed && module === "") return nothing;
 
         const iconPath = `entry/jig/modules/small/${module || "empty"}.svg`;
@@ -262,11 +275,11 @@ export class _ extends LitElement {
             </div>
         `;
     }
-    
-    render() {
-        const { selected, index, dragging, module } = this;
 
-        const sectionClasses = classMap({ selected, dragging });
+    render() {
+        const { index, dragging, module } = this;
+
+        const sectionClasses = classMap({ dragging });
         const addContainerClasses = classMap({
             ["add-container"]: true,
             dragging,

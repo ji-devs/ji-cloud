@@ -4,7 +4,7 @@ expression: body
 
 ---
 {
-  "id": "3a71522a-cd77-11eb-8dc1-af3e35f7c743",
+  "id": "[id]",
   "publishedAt": "[published_at]",
   "creatorId": "1f241e1b-b537-493f-a230-075cb16315be",
   "authorId": "1f241e1b-b537-493f-a230-075cb16315be",
@@ -14,8 +14,14 @@ expression: body
   "jigFocus": "modules",
   "jigData": {
     "draftOrLive": "live",
-    "displayName": "draft name",
-    "modules": [],
+    "displayName": "name",
+    "modules": [
+      {
+        "id": "[id]",
+        "kind": "Cover",
+        "is_complete": false
+      }
+    ],
     "ageRanges": [],
     "affiliations": [],
     "goals": [],
@@ -28,13 +34,13 @@ expression: body
     "description": "asdasdasd",
     "lastEdited": "[last_edited]",
     "defaultPlayerSettings": {
-      "direction": "rtl",
-      "displayScore": false,
-      "trackAssessments": false,
-      "dragAssist": false
+      "direction": "ltr",
+      "displayScore": true,
+      "trackAssessments": true,
+      "dragAssist": true
     },
-    "theme": "Jigzi",
-    "audioBackground": "funForKids",
+    "theme": "Blank",
+    "audioBackground": null,
     "audioEffects": {
       "feedbackPositive": "[audio]",
       "feedbackNegative": "[audio]"

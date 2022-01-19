@@ -213,11 +213,11 @@ select cte.jig_id                                          as "jig_id: JigId",
        array(select row (unnest(audio_feedback_positive))) as "audio_feedback_positive!: Vec<(AudioFeedbackPositive,)>",
        array(select row (unnest(audio_feedback_negative))) as "audio_feedback_negative!: Vec<(AudioFeedbackNegative,)>",
        array(
-               select row (jig_data_module.id, kind)
+               select row (jig_data_module.id, kind, is_complete)
                from jig_data_module
                where jig_data_id = cte.draft_or_live_id
                order by "index"
-           )                                               as "modules!: Vec<(ModuleId, ModuleKind)>",
+           )                                               as "modules!: Vec<(ModuleId, ModuleKind, bool)>",
        array(select row (goal_id)
              from jig_data_goal
              where jig_data_id = cte.draft_or_live_id)     as "goals!: Vec<(GoalId,)>",
@@ -259,7 +259,7 @@ from jig_data
                 modules: row
                     .modules
                     .into_iter()
-                    .map(|(id, kind)| LiteModule { id, kind })
+                    .map(|(id, kind, is_complete)| LiteModule { id, kind, is_complete })
                     .collect(),
                 goals: row.goals.into_iter().map(|(it, )| it).collect(),
                 categories: row.categories.into_iter().map(|(it, )| it).collect(),
@@ -364,11 +364,11 @@ select id,
        array(select row (unnest(audio_feedback_positive)))                           as "audio_feedback_positive!: Vec<(AudioFeedbackPositive,)>",
        array(select row (unnest(audio_feedback_negative)))                           as "audio_feedback_negative!: Vec<(AudioFeedbackNegative,)>",
        array(
-               select row (jig_data_module.id, kind)
+               select row (jig_data_module.id, kind, is_complete)
                from jig_data_module
                where jig_data_id = jig_data.id
                order by "index"
-           )                                               as "modules!: Vec<(ModuleId, ModuleKind)>",
+           )                                               as "modules!: Vec<(ModuleId, ModuleKind, bool)>",
        array(select row (goal_id)
              from jig_data_goal
              where jig_data_id = jig_data.id)     as "goals!: Vec<(GoalId,)>",
@@ -419,7 +419,11 @@ order by t.ord
                 modules: jig_data_row
                     .modules
                     .into_iter()
-                    .map(|(id, kind)| LiteModule { id, kind })
+                    .map(|(id, kind, is_complete)| LiteModule {
+                        id,
+                        kind,
+                        is_complete,
+                    })
                     .collect(),
                 goals: jig_data_row.goals.into_iter().map(|(it,)| it).collect(),
                 categories: jig_data_row
@@ -730,7 +734,7 @@ pub async fn browse(
         left join jig_data "jig_tt" on jig_tt.id = jig.live_id
     where blocked = false
         and (jig_dt.draft_or_live is not null and jig_tt.draft_or_live is not null)
-        and ((jig_dt.draft_or_live = $3 or $3 is null) 
+        and ((jig_dt.draft_or_live = $3 or $3 is null)
               or (jig_tt.draft_or_live = $3 or $3 is null))
         and (author_id = $1 or $1 is null)
         and (jig_focus = $2 or $2 is null)
@@ -789,15 +793,15 @@ select  jig.id                                              as "jig_id: JigId",
        drag_assist                                                                   as "drag_assist!",
        theme                                                                         as "theme!: ThemeId",
        audio_background                                                              as "audio_background!: Option<AudioBackground>",
-       draft_or_live                                                                 as "draft_or_live!: DraftOrLive",  
+       draft_or_live                                                                 as "draft_or_live!: DraftOrLive",
        array(select row (unnest(audio_feedback_positive)))                           as "audio_feedback_positive!: Vec<(AudioFeedbackPositive,)>",
        array(select row (unnest(audio_feedback_negative)))                           as "audio_feedback_negative!: Vec<(AudioFeedbackNegative,)>",
        array(
-               select row (jig_data_module.id, kind)
+               select row (jig_data_module.id, kind, is_complete)
                from jig_data_module
                where jig_data_id = jig_data.id
                order by "index"
-           )                                               as "modules!: Vec<(ModuleId, ModuleKind)>",
+           )                                               as "modules!: Vec<(ModuleId, ModuleKind, bool)>",
        array(select row (goal_id)
              from jig_data_goal
              where jig_data_id = jig_data.id)     as "goals!: Vec<(GoalId,)>",
@@ -827,7 +831,7 @@ from jig_data
     inner join jig_admin_data "admin" on admin.jig_id = jig.id
 where cte.ord >= (20 * $2)
 order by ord asc
-limit 20 
+limit 20
 "#,
         &jig_data_ids,
         page
@@ -852,7 +856,11 @@ limit 20
                 modules: jig_data_row
                     .modules
                     .into_iter()
-                    .map(|(id, kind)| LiteModule { id, kind })
+                    .map(|(id, kind, is_complete)| LiteModule {
+                        id,
+                        kind,
+                        is_complete,
+                    })
                     .collect(),
                 goals: jig_data_row.goals.into_iter().map(|(it,)| it).collect(),
                 categories: jig_data_row
@@ -1190,7 +1198,7 @@ left join jig_data "jig_tt" on jig_tt.id = jig.live_id
 where (jig_dt.privacy_level = $1 or $1 is null)
     and (author_id = $2 or $2 is null)
     and (jig_focus = $3 or $3 is null)
-    and ((jig_dt.draft_or_live = $4 or $4 is null) 
+    and ((jig_dt.draft_or_live = $4 or $4 is null)
     or (jig_tt.draft_or_live = $4 or $4 is null))
 "#,
         privacy_level.map(|it| it as i16),

@@ -64,6 +64,7 @@ impl PostPreview {
                     let module = LiteModule {
                         id: module_id,
                         kind: target_kind,
+                        is_complete: raw_data.is_complete(),
                     };
 
                     let msg = IframeAction::new(ModuleToJigEditorMessage::AppendModule(module));

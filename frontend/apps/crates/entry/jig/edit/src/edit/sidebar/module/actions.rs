@@ -41,19 +41,19 @@ pub fn mouse_down(state: Rc<State>, x: i32, y: i32) {
 
 pub fn edit(state: Rc<State>) {
     if let Some(module) = &*state.module {
-        let module_id = module.id;
+        let module_id = module.id();
         state
             .sidebar
             .jig_edit_state
             .route
-            .set_neq(JigEditRoute::Module(module_id));
+            .set_neq(JigEditRoute::Module(*module_id));
         state.sidebar.collapsed.set(true);
 
         let jig_id = state.sidebar.jig.id;
         Route::push_state(Route::Jig(JigRoute::Edit(
             jig_id,
             state.sidebar.jig.jig_focus,
-            JigEditRoute::Module(module_id),
+            JigEditRoute::Module(*module_id),
         )));
     }
 }
@@ -67,7 +67,7 @@ pub fn delete(state: Rc<State>) {
                 .replace("{id}", &state.sidebar.jig.id.0.to_string());
 
             let req = ModuleDeleteRequest {
-                id: StableOrUniqueId::Unique(module.id)
+                id: StableOrUniqueId::Unique(*module.id())
             };
 
             match api_with_auth_empty::<EmptyError, _>(&path, endpoints::jig::module::Delete::METHOD, Some(req)).await {
@@ -106,10 +106,12 @@ pub fn assign_kind(state: Rc<State>, kind: ModuleKind) {
             Ok(resp) => {
                 let id = resp.id;
                 let index = state.index;
+
                 let module = Rc::new(Some(LiteModule {
                     id,
                     kind,
-                }));
+                    is_complete: false,
+                }.into()));
 
                 {
                     // Instead of replacing the module at the index, we remove the old module and
@@ -171,6 +173,7 @@ pub enum MoveTarget {
     Up,
     Down,
 }
+
 pub fn move_index(state: Rc<State>, move_target: MoveTarget) {
     state.sidebar.loader.load(clone!(state => async move {
         if let Some(module) = &*state.module {
@@ -187,13 +190,13 @@ pub fn move_index(state: Rc<State>, move_target: MoveTarget) {
             } {
                 state.sidebar.modules.lock_mut().move_from_to(state.index, target);
                 let req = ModuleUpdateRequest {
-                    id: StableOrUniqueId::Unique(module.id.clone()),
+                    id: StableOrUniqueId::Unique(*module.id()),
                     index: Some(target.try_into().unwrap_ji()),
                     body: None,
                     is_complete: None,
                 };
 
-                match update_module(&state.sidebar.jig.id, &module.id, req).await {
+                match update_module(&state.sidebar.jig.id, module.id(), req).await {
                     Ok(_) => {
                     },
                     Err(_) => {},

@@ -40,18 +40,22 @@ pub fn get_jig() -> JigResponse {
                 LiteModule {
                     id: module_id,
                     kind: ModuleKind::Cover,
+                    is_complete: true,
                 },
                 LiteModule {
                     id: module_id,
                     kind: ModuleKind::Memory,
+                    is_complete: true,
                 },
                 LiteModule {
                     id: module_id,
                     kind: ModuleKind::Memory,
+                    is_complete: true,
                 },
                 LiteModule {
                     id: module_id,
                     kind: ModuleKind::TappingBoard,
+                    is_complete: true,
                 },
             ],
             age_ranges: Vec::new(),

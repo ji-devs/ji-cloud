@@ -6,10 +6,10 @@ use crate::edit::sidebar::{
         actions::{self, MoveTarget},
         state::State as ModuleState,
     },
-    state::State as SidebarState,
+    state::{State as SidebarState, Module},
 };
 use dominator::{clone, html, Dom, EventOptions};
-use shared::domain::jig::{module::ModuleId, LiteModule, ModuleKind};
+use shared::domain::jig::{module::ModuleId, ModuleKind};
 use std::rc::Rc;
 use utils::events;
 
@@ -65,11 +65,11 @@ fn menu_items(state: &Rc<State>, module_state: &Rc<ModuleState>) -> Vec<Dom> {
                 if module_state.is_last_module() {
                     v.push(item_move_down(state, module_state));
                 }
-                v.push(item_duplicate(state, &module_state.sidebar, module.id));
+                v.push(item_duplicate(state, &module_state.sidebar, *module.id()));
             }
             v.push(item_delete(state, module_state));
             if let Some(module) = &*module_state.module {
-                v.push(item_copy(state, &module_state.sidebar, module.id));
+                v.push(item_copy(state, &module_state.sidebar, *module.id()));
                 v.push(item_duplicate_as(state, &module_state.sidebar, module));
             }
             v
@@ -163,15 +163,15 @@ fn item_paste(state: &Rc<State>, sidebar_state: &Rc<SidebarState>) -> Dom {
 fn item_duplicate_as(
     state: &Rc<State>,
     sidebar_state: &Rc<SidebarState>,
-    module: &LiteModule,
+    module: &Module,
 ) -> Dom {
-    let is_card = CARD_KINDS.contains(&module.kind);
+    let is_card = CARD_KINDS.contains(&module.kind());
 
     html!("empty-fragment", {
         .property("slot", "advanced")
         .apply_if(is_card, |dom| {
-            let card_kinds = CARD_KINDS.into_iter().filter(|kind| &module.kind != kind);
-            let module_id = module.id;
+            let card_kinds = CARD_KINDS.into_iter().filter(|kind| module.kind() != kind);
+            let module_id = module.id();
 
             dom.child(html!("menu-line", {
                 .property("customLabel", STR_DUPLICATE_AS)

@@ -561,6 +561,7 @@ impl Into<actix_web::Error> for UserRecentImage {
 pub enum JigCloneDraft {
     ResourceNotFound,
     UnprocessableEntity,
+    IncompleteModules,
     Conflict,
     Forbidden,
     InternalServerError(anyhow::Error),
@@ -594,6 +595,12 @@ impl Into<actix_web::Error> for JigCloneDraft {
             Self::UnprocessableEntity => BasicError::with_message(
                 http::StatusCode::UNPROCESSABLE_ENTITY,
                 "Called method not allowed on this jig".to_owned(),
+            )
+            .into(),
+
+            Self::IncompleteModules => BasicError::with_message(
+                http::StatusCode::BAD_REQUEST,
+                "No activities exist or activities with missing content".to_owned(),
             )
             .into(),
 
