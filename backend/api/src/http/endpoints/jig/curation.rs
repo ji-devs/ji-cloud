@@ -62,7 +62,7 @@ async fn get_curation(
     Ok(Json(curation))
 }
 
-/// Create a new additional resource.
+/// Create a comment for jig curation.
 async fn create_comment(
     db: Data<PgPool>,
     auth: TokenUserWithScope<ScopeAdmin>,
@@ -87,7 +87,7 @@ async fn create_comment(
     Ok((Json(CreateResponse { id }), http::StatusCode::CREATED))
 }
 
-/// Get curation details for a Jig
+/// Get comment details for a jig curation
 async fn get_comment(
     db: Data<PgPool>,
     _auth: TokenUserWithScope<ScopeAdmin>,

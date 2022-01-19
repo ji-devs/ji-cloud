@@ -26,6 +26,7 @@ pub mod additional_resource;
 pub mod curation;
 pub mod module;
 mod player;
+pub mod report;
 
 /// Create a jig.
 async fn create(

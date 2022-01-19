@@ -3,7 +3,7 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use super::JigId;
+use super::{report::JigReport, JigId};
 
 /// Wrapper type around [`Uuid`](Uuid), represents the ID of a curation comment.
 #[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
@@ -26,6 +26,9 @@ pub struct JigCurationData {
 
     /// Comments from curator (not updatable)
     pub comments: Vec<JigCurationComment>,
+
+    /// Reports for Jig from users (not updatable)
+    pub reports: Vec<JigReport>,
 }
 
 /// Curation fields that have been completed

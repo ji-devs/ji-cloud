@@ -25,6 +25,9 @@ pub mod player;
 /// Endpoints for jig curation.
 pub mod curation;
 
+/// Endpoints for jig reports.
+pub mod report;
+
 /// Create a JIG and it's draft and live data copies.
 ///
 /// * New jigs are all set to `PrivacyLevel::Unlisted` by default

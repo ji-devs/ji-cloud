@@ -645,6 +645,37 @@ impl Into<actix_web::Error> for MediaProcessing {
     }
 }
 
+pub enum ReportError {
+    InternalServerError(anyhow::Error),
+    ResourceNotFound,
+    SendEmailFail,
+}
+
+impl<T: Into<anyhow::Error>> From<T> for ReportError {
+    fn from(e: T) -> Self {
+        Self::InternalServerError(e.into())
+    }
+}
+
+impl Into<actix_web::Error> for ReportError {
+    fn into(self) -> actix_web::Error {
+        match self {
+            Self::InternalServerError(e) => ise(e),
+
+            Self::ResourceNotFound => BasicError::with_message(
+                http::StatusCode::NOT_FOUND,
+                "Resource Not Found".to_owned(),
+            )
+            .into(),
+            Self::SendEmailFail => BasicError::with_message(
+                http::StatusCode::INTERNAL_SERVER_ERROR,
+                "Failed to report to email".to_owned(),
+            )
+            .into(),
+        }
+    }
+}
+
 pub enum JigCode {
     InternalServerError(anyhow::Error),
     ResourceNotFound,

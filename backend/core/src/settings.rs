@@ -240,6 +240,11 @@ pub struct EmailClientSettings {
     /// all related routes will return "501 - Not Implemented" and a warning will be emitted.
     pub sender_email: String,
 
+    /// Email client jigzi email address.
+    /// Is optional. If missing, all mailing services will be disabled,
+    /// all related routes will return "501 - Not Implemented" and a warning will be emitted.
+    // pub jigzi_info_email: String,
+
     /// Email client template ID for verifying emails at signup.
     /// Is optional. If missing, email verification (at signup) will be disabled,
     /// all related routes will return "501 - Not Implemented" and a warning will be emitted.
@@ -572,6 +577,10 @@ impl SettingsManager {
         let api_key = self.get_varying_secret(keys::email::API_KEY).await?;
 
         let sender_email = self.get_varying_secret(keys::email::SENDER_EMAIL).await?;
+
+        // let jigzi_info_email = self
+        //     .get_varying_secret(keys::email::JIGZI_INFO_EMAIL)
+        //     .await?;
 
         let signup_verify_template = self
             .get_varying_secret(keys::email::SIGNUP_VERIFY_TEMPLATE)

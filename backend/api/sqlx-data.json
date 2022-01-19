@@ -325,6 +325,63 @@
       ]
     }
   },
+  "0e9cec4ea69218f08784c12a17bcd8b15c22486f0e76051fea80fd21b12af760": {
+    "query": "\nselect id                                   as \"id!: ReportId\",\n       jig_id                               as \"jig_id!: JigId\",    \n       report_type                          as \"report_type!: JigReportType\",                  \n       created_at,\n       reporter_id                          as \"reporter_id?: Uuid\",\n       (\n            select given_name || ' '::text || family_name\n            from user_profile\n            where user_profile.user_id = reporter_id\n        )                                       as \"name?\",\n        (\n            select email::text\n            from user_email\n            where user_email.user_id = reporter_id\n        )                                       as \"email?\"\nfrom jig_report\nwhere id = $1 and jig_id = $2\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id!: ReportId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "jig_id!: JigId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 2,
+          "name": "report_type!: JigReportType",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 3,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 4,
+          "name": "reporter_id?: Uuid",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 5,
+          "name": "name?",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 6,
+          "name": "email?",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        true,
+        null,
+        null
+      ]
+    }
+  },
   "0eaa3162be77943a44df9ba08acf627d0f82b1b11b5486710ccfc445691b8a5f": {
     "query": "\nselect\n    id as \"id: u32\",\n    bundle_id,\n    section,\n    item_kind_id,\n    english,\n    hebrew,\n    status as \"status: EntryStatus\",\n    zeplin_reference,\n    comments,\n    in_app, \n    in_element, \n    in_mock\nfrom locale_entry\nwhere id = $1\n",
     "describe": {
@@ -789,6 +846,51 @@
       ]
     }
   },
+  "1c34eda829dd92980a83bf0ff3b38800febb950fd3b6e5f3e3694938b7bc19e3": {
+    "query": "\nselect display_name                               as \"display_name!\",    \n       report_type                                as \"report_type!: JigReportType\",                  \n       (\n            select given_name || ' '::text || family_name\n            from user_profile\n            where user_profile.user_id = reporter_id\n        )                                       as \"name?\",\n        (\n            select email::text\n            from user_email\n            where user_email.user_id = reporter_id\n        )                                       as \"email?\",\n        (\n            select given_name || ' '::text || family_name\n            from user_profile\n            where user_profile.user_id = creator_id\n        )                                       as \"creator_name!\"\nfrom jig_report\n    left join jig on jig.id = jig_report.jig_id\n    left join jig_data on jig_data.id = jig.live_id\nwhere jig_report.id = $1 and jig_report.jig_id = $2\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "display_name!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 1,
+          "name": "report_type!: JigReportType",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 2,
+          "name": "name?",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "email?",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "creator_name!",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        null,
+        null,
+        null
+      ]
+    }
+  },
   "1c72ff4451fa5342ae8ae20bb4169b62efa25b9b44c80ce26bf9a9619336dd60": {
     "query": "delete from user_pdf_library where id = $1",
     "describe": {
@@ -957,86 +1059,6 @@
       ]
     }
   },
-  "23b28306fbf4257a34bab234b9d35ac4857b3cc1d97624c13f9ffe926059655f": {
-    "query": "\nselect jig_id                               as \"jig_id!: JigId\",\n       display_name,\n       language,\n       goals,\n       categories,\n       description,\n       age_ranges,\n       affiliations,\n       additional_resources,\n       curation_status                          as \"curation_status: JigCurationStatus\",\n       array(\n            select row (jcc.id, jcc.jig_id, comment, created_at, author_id)\n            from jig_curation_comment  \"jcc\"\n            where jcd.jig_id = jcc.jig_id\n            order by created_at desc\n        )                                                    as \"comments!: Vec<(CommentId, JigId, String, DateTime<Utc>, Uuid)>\"\nfrom jig_curation_data \"jcd\"\nwhere jig_id = $1\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "jig_id!: JigId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "display_name",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 2,
-          "name": "language",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 3,
-          "name": "goals",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 4,
-          "name": "categories",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 5,
-          "name": "description",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 6,
-          "name": "age_ranges",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 7,
-          "name": "affiliations",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 8,
-          "name": "additional_resources",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 9,
-          "name": "curation_status: JigCurationStatus",
-          "type_info": "Int2"
-        },
-        {
-          "ordinal": 10,
-          "name": "comments!: Vec<(CommentId, JigId, String, DateTime<Utc>, Uuid)>",
-          "type_info": "RecordArray"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        null
-      ]
-    }
-  },
   "29a0f9148a4fa42c0e68388554eca61b27aae6fd7ce9dda131ad6571523833ad": {
     "query": "select\n  id as \"id!\",\n  case\n    kind -- PngCanvasImage\n    when 0 then 3 -- PngStickerImage\n    when 1 then 0\n  end :: int2 \"kind!: MediaKind\",\n  created_at as \"created_at!\",\n  updated_at,\n  uploaded_at,\n  0 :: int2 as \"library!: MediaLibrary\" -- global\nfrom\n  image_metadata\n  left join image_upload on image_id = id\nunion all\nselect\n  id as \"id!\",\n  case\n    kind -- GifAnimation\n    when 0 then 1 -- SpritesheetAnimation\n    when 1 then 2\n  end :: int2 \"kind!: MediaKind\",\n  created_at as \"created_at!\",\n  updated_at,\n  uploaded_at,\n  0 :: int2 as \"library!: MediaLibrary\" -- global\nfrom\n  animation_metadata\n  left join global_animation_upload on animation_id = id\nunion all\nselect\n  id as \"id!\",\n  -- PngStickerImage\n  0 :: int2 as \"kind!: MediaKind\",\n  created_at as \"created_at!\",\n  updated_at,\n  uploaded_at,\n  1 :: int2 as \"library!: MediaLibrary\" -- user\nfrom\n  user_image_library\n  left join user_image_upload on image_id = id\nunion all\nselect\n  id as \"id!\",\n  -- Mp3Audio\n  4 :: int2 as \"kind!: MediaKind\",\n  created_at as \"created_at!\",\n  updated_at,\n  uploaded_at,\n  1 :: int2 as \"library!: MediaLibrary\" -- user\nfrom\n  user_audio_library\n  left join user_audio_upload on audio_id = id\nunion all\nselect\n  id as \"id!\",\n  kind as \"kind!: MediaKind\",\n  created_at as \"created_at!\",\n  updated_at,\n  uploaded_at,\n  2 :: int2 as \"library!: MediaLibrary\" -- web\nfrom web_media_upload wmu\ninner join web_media_library wml on wml.kind = kind\nwhere wmu.media_id = media_id ",
     "describe": {
@@ -1151,6 +1173,92 @@
       },
       "nullable": [
         true
+      ]
+    }
+  },
+  "2fb018594a7a300fdb29db0a0e418938ce95df6cfd26ed7b42e245618c379701": {
+    "query": "\nselect jig_id                               as \"jig_id!: JigId\",\n       display_name,\n       language,\n       goals,\n       categories,\n       description,\n       age_ranges,\n       affiliations,\n       additional_resources,\n       curation_status                          as \"curation_status!: JigCurationStatus\",\n       array(\n            select row (jcc.id, jcc.jig_id, comment, created_at, author_id)\n            from jig_curation_comment  \"jcc\"\n            where jcd.jig_id = jcc.jig_id\n            order by created_at desc\n       )                                                    as \"comments!: Vec<(CommentId, JigId, String, DateTime<Utc>, Uuid)>\",\n       array(\n           select row (jr.id, jr.jig_id, report_type, reporter_id,        \n                        (\n                        select given_name || ' '::text || family_name\n                        from user_profile\n                        where user_profile.user_id = reporter_id\n                        ),\n                        (\n                            select email::text\n                            from user_email\n                            where user_email.user_id = reporter_id\n                        ),\n                        created_at                                                                         \n            )\n           from jig_report \"jr\"\n           where jcd.jig_id = jr.jig_id\n           order by created_at desc\n       )                                                    as \"reports!: Vec<(JigReport)>\"\nfrom jig_curation_data \"jcd\"\nwhere jig_id = $1\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "jig_id!: JigId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "display_name",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 2,
+          "name": "language",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 3,
+          "name": "goals",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 4,
+          "name": "categories",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 5,
+          "name": "description",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 6,
+          "name": "age_ranges",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 7,
+          "name": "affiliations",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 8,
+          "name": "additional_resources",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 9,
+          "name": "curation_status!: JigCurationStatus",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 10,
+          "name": "comments!: Vec<(CommentId, JigId, String, DateTime<Utc>, Uuid)>",
+          "type_info": "RecordArray"
+        },
+        {
+          "ordinal": 11,
+          "name": "reports!: Vec<(JigReport)>",
+          "type_info": "RecordArray"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        null,
+        null
       ]
     }
   },
@@ -2510,6 +2618,27 @@
         ]
       },
       "nullable": []
+    }
+  },
+  "684289dd550908cfb5adac9278ac9beb606e7d0ac91d8aa8a95d81100f357c3c": {
+    "query": "\n    insert into jig_report(jig_id, report_type)\n    values ($1, $2)\n    returning id as \"id!: ReportId\"\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id!: ReportId",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2"
+        ]
+      },
+      "nullable": [
+        false
+      ]
     }
   },
   "68a6cedcf31dbac17f23ec2cf4cdead5973b0bf72e32708d64e680ecc2997f6b": {
@@ -4767,6 +4896,26 @@
       "nullable": []
     }
   },
+  "cbf72977b86cfd79cc5b3577cad8ce2b11394b783608e0f7d947e271bc1d2663": {
+    "query": "\nselect exists (\n    select 1 from jig where id = $1\n) as \"authed!\"\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "authed!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
   "cc6f40a5d7ef52b723de9ee087074cea897580421431f57682f29e2653bbf705": {
     "query": "\nselect jig.id                                       as \"id!: JigId\",\n       creator_id,\n       author_id                                as \"author_id\",\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = author_id) as \"author_name\",\n       live_id                                  as \"live_id!\",\n       draft_id                                 as \"draft_id!\",\n       published_at,\n       liked_count                              as \"liked_count!\",\n       (\n           select play_count\n           from jig_play_count\n           where jig_play_count.jig_id = jig.id\n       )                                        as \"play_count!\",\n       rating                                   as \"rating?: JigRating\",\n       blocked                                  as \"blocked!\",\n       curated                                  as \"curated!\",\n       jig_focus                                as \"jig_focus!: JigFocus\"\nfrom jig\n         inner join unnest($1::uuid[])\n    with ordinality t(id, ord) using (id)\n    inner join jig_admin_data \"admin\" on admin.jig_id = jig.id\nwhere blocked = false\norder by t.ord\n    ",
     "describe": {
@@ -5333,6 +5482,28 @@
       },
       "nullable": [
         null
+      ]
+    }
+  },
+  "d935de8ff747d8408644105a61f99219aee129fd49e240cd3843d8374b02ea29": {
+    "query": "\n    insert into jig_report(jig_id, report_type, reporter_id)\n    values ($1, $2, $3)\n    returning id as \"id!: ReportId\"\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id!: ReportId",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2",
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false
       ]
     }
   },

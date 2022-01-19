@@ -4,6 +4,7 @@ use shared::domain::jig::{
         CommentId, JigCurationComment, JigCurationCommentResponse, JigCurationData,
         JigCurationFieldsDone, JigCurationStatus,
     },
+    report::JigReport,
     JigId,
 };
 use sqlx::PgPool;
@@ -191,13 +192,31 @@ select jig_id                               as "jig_id!: JigId",
        age_ranges,
        affiliations,
        additional_resources,
-       curation_status                          as "curation_status: JigCurationStatus",
+       curation_status                          as "curation_status!: JigCurationStatus",
        array(
             select row (jcc.id, jcc.jig_id, comment, created_at, author_id)
             from jig_curation_comment  "jcc"
             where jcd.jig_id = jcc.jig_id
             order by created_at desc
-        )                                                    as "comments!: Vec<(CommentId, JigId, String, DateTime<Utc>, Uuid)>"
+       )                                                    as "comments!: Vec<(CommentId, JigId, String, DateTime<Utc>, Uuid)>",
+       array(
+           select row (jr.id, jr.jig_id, report_type, reporter_id,        
+                        (
+                        select given_name || ' '::text || family_name
+                        from user_profile
+                        where user_profile.user_id = reporter_id
+                        ),
+                        (
+                            select email::text
+                            from user_email
+                            where user_email.user_id = reporter_id
+                        ),
+                        created_at                                                                         
+            )
+           from jig_report "jr"
+           where jcd.jig_id = jr.jig_id
+           order by created_at desc
+       )                                                    as "reports!: Vec<(JigReport)>"
 from jig_curation_data "jcd"
 where jig_id = $1
 "#,
@@ -226,6 +245,7 @@ where jig_id = $1
                 created_at,
                 author_id
             }}).collect(),
+        reports: row.reports.into_iter().map(|it| it).collect(),
     });
 
     Ok(curation)

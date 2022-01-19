@@ -5,6 +5,9 @@ pub use additional_resource::{AdditionalResource, AdditionalResourceId};
 
 pub mod curation;
 
+pub mod report;
+pub use report::{JigReport, ReportId};
+
 pub mod module;
 // avoid breaking Changes
 pub use module::{LiteModule, Module, ModuleKind};

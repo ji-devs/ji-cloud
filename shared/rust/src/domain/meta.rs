@@ -52,6 +52,12 @@ pub struct SubjectId(pub Uuid);
 #[cfg_attr(feature = "backend", sqlx(transparent))]
 pub struct GoalId(pub Uuid);
 
+/// Wrapper type around [`Uuid`], represents [`Report::id`].
+#[derive(Hash, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[cfg_attr(feature = "backend", sqlx(transparent))]
+pub struct ReportId(pub Uuid);
+
 into_uuid!(
     ImageStyleId,
     AnimationStyleId,
@@ -60,6 +66,7 @@ into_uuid!(
     AgeRangeId,
     SubjectId,
     GoalId,
+    ReportId
 );
 
 /// Wrapper type around [`i16`](std::i16), represents the index of an image tag.

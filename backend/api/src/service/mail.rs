@@ -1,5 +1,6 @@
 use core::settings::EmailClientSettings;
-use sendgrid::v3::{Email, Message, Personalization, SGMap, Sender};
+use sendgrid::v3::{Content, Email, Message, Personalization, SGMap, Sender};
+use shared::domain::jig::report::JigReportEmail;
 
 use crate::error;
 
@@ -76,6 +77,47 @@ impl Client {
         let message = Message::new(self.sender_email.clone())
             .set_template_id(&template.0)
             .add_personalization(Personalization::new(to).add_dynamic_template_data(template_data));
+
+        self.client.send(&message).await?;
+
+        Ok(())
+    }
+
+    pub async fn send_report_email(
+        &self,
+        to: Email,
+        report: JigReportEmail,
+        link: String,
+    ) -> anyhow::Result<()> {
+        let subject = format!("URGENT: JIG Report '{}'", report.report_type.as_str());
+
+        let (reporter_email, reporter_name): (String, String) =
+            if let (Some(email), Some(name)) = (report.reporter_email, report.reporter_name) {
+                (email, name)
+            } else {
+                ("Unknown".to_string(), "Unknown".to_string())
+            };
+
+        let value = format!(
+            r#"{} with email {} has reported "{}" for the following reason: "{}".
+            
+            URL: {}
+            Created by: {} 
+               "#,
+            reporter_name,
+            reporter_email,
+            report.display_name,
+            report.report_type.as_str(),
+            link,
+            report.creator_name,
+        );
+
+        let content = Content::new();
+
+        let message = Message::new(self.sender_email.clone())
+            .add_personalization(Personalization::new(to))
+            .set_subject(&subject)
+            .add_content(content.set_content_type("text/plain").set_value(value));
 
         self.client.send(&message).await?;
 
