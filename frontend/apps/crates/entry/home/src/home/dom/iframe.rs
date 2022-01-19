@@ -1,14 +1,10 @@
-use dominator::{clone, events, html, with_node, Dom};
+use dominator::{clone, html, Dom};
 use dominator_helpers::events::Message;
 use futures_signals::signal::{Mutable, SignalExt};
 use std::rc::Rc;
-use wasm_bindgen::prelude::*;
-use wasm_bindgen::{JsValue, JsCast};
 use web_sys::HtmlIFrameElement;
-use js_sys::Function;
 
 const STR_JEWISH_INTERACTIVE_URL: &str = "https://www.jewishinteractive.org/jigzi-home";
-const STR_TARGET_DOMAIN: &str = "https://www.jewishinteractive.org/";
 
 pub struct Iframe {
     height: Mutable<usize>,
