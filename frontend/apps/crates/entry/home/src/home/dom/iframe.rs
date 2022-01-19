@@ -33,7 +33,7 @@ impl Iframe {
             )
             .global_event(clone!(state => move |event: Message| {
                 if let Ok(height) = event.try_serde_data::<String>() {
-                    state.height.set(height.parse::<usize>().unwrap_or(3000));
+                    state.height.set(height.parse::<usize>().unwrap());
                 }
             }))
             .property("src", STR_JEWISH_INTERACTIVE_URL)
