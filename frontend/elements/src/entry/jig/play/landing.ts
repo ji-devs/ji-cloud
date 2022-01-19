@@ -125,6 +125,7 @@ export class _ extends LitElement {
     render() {
         return html`
             <main>
+                <slot name="message"></slot>
                 <slot name="iframe"></slot>
                 <div class="controls">
                     <div class="sidebar">

@@ -17,6 +17,8 @@ use web_sys::{HtmlElement, HtmlIFrameElement};
 
 use super::state::State;
 
+const STR_INVALID_MODULE_MESSAGE: &str = "This part of your JIG needs attention. Add content or delete.";
+
 pub fn render(state: Rc<State>) -> Dom {
     actions::load_jig(state.clone());
 
@@ -75,47 +77,64 @@ pub fn render(state: Rc<State>) -> Dom {
                 _ => None
             }
         })))
-        .children(&mut [
-            html!("iframe" => HtmlIFrameElement, {
-                .property("allow", "autoplay; fullscreen")
-                .property("slot", "iframe")
-                .property_signal("src", jig_and_active_module_signal(Rc::clone(&state)).map(clone!(state => move|(jig, active_module_index)| {
-                    match jig {
-                        None => {
-                            crate::debug::settings().empty_module_url.to_string()
-                        },
-                        Some(jig) => {
-                            let active_module = &jig.jig_data.modules.get(active_module_index);
-
-                            match active_module {
-                                // module doesn't exist, can happen with jigs that don't have a cover
-                                None => String::new(),
-                                Some(active_module) => {
-                                    let mut route: String = Route::Module(ModuleRoute::Play(
-                                        active_module.kind,
-                                        state.jig_id,
-                                        active_module.id
-                                    )).into();
-        
-                                    if state.player_options.draft {
-                                        route = format!("{}?draft=true", route);
-                                    }
-        
-                                    let url = unsafe {
-                                        SETTINGS.get_unchecked()
-                                            .remote_target
-                                            .spa_iframe(&route)
-                                    };
-                                    url
-                                },
-                            }
-                        },
-                    }
-                })))
-                .after_inserted(clone!(state => move|element| {
-                    *state.iframe.borrow_mut() = Some(element);
+        .child_signal(active_module_valid_signal(Rc::clone(&state)).map(|valid| {
+            if !valid {
+                Some(html!("page-message", {
+                    .property("slot", "message")
+                    .property("text", STR_INVALID_MODULE_MESSAGE)
+                    .property("image", "module/_groups/cards/edit/main/no-preview.svg")
                 }))
-            }),
+            } else {
+                None
+            }
+        }))
+        .child_signal(active_module_valid_signal(Rc::clone(&state)).map(clone!(state => move |valid| {
+            if valid {
+                Some(html!("iframe" => HtmlIFrameElement, {
+                    .property("allow", "autoplay; fullscreen")
+                    .property("slot", "iframe")
+                    .property_signal("src", jig_and_active_module_signal(Rc::clone(&state)).map(clone!(state => move|(jig, active_module_index)| {
+                        match jig {
+                            None => {
+                                crate::debug::settings().empty_module_url.to_string()
+                            },
+                            Some(jig) => {
+                                let active_module = &jig.jig_data.modules.get(active_module_index);
+
+                                match active_module {
+                                    // module doesn't exist, can happen with jigs that don't have a cover
+                                    None => String::new(),
+                                    Some(active_module) => {
+                                        let mut route: String = Route::Module(ModuleRoute::Play(
+                                            active_module.kind,
+                                            state.jig_id,
+                                            active_module.id
+                                        )).into();
+
+                                        if state.player_options.draft {
+                                            route = format!("{}?draft=true", route);
+                                        }
+
+                                        let url = unsafe {
+                                            SETTINGS.get_unchecked()
+                                                .remote_target
+                                                .spa_iframe(&route)
+                                        };
+                                        url
+                                    },
+                                }
+                            },
+                        }
+                    })))
+                    .after_inserted(clone!(state => move|element| {
+                        *state.iframe.borrow_mut() = Some(element);
+                    }))
+                }))
+            } else {
+                None
+            }
+        })))
+        .children(&mut [
             html!("jig-play-play-button", {
                 .property("slot", "play-button")
             }),
@@ -162,6 +181,22 @@ pub fn render(state: Rc<State>) -> Dom {
         .child_signal(render_time_indicator(Rc::clone(&state)))
         .child_signal(render_done_popup(Rc::clone(&state)))
         .child_signal(render_time_up_popup(Rc::clone(&state)))
+    })
+}
+
+/// Emits `true` if the module doesn't exist in the list of modules or if the jig is `None`.
+/// Otherwise emits the value of the module's `is_complete` field.
+fn active_module_valid_signal(state: Rc<State>) -> impl Signal<Item = bool> {
+    jig_and_active_module_signal(state).map(|(jig, active_module_index)| {
+        match jig {
+            Some(jig) => match &jig.jig_data.modules.get(active_module_index) {
+                Some(active_module) => {
+                    active_module.is_complete
+                },
+                None => true, // Active module isn't in the list
+            },
+            None => true, // Jig isn't set
+        }
     })
 }
 
