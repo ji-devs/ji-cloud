@@ -4,7 +4,8 @@ use futures_signals::signal::{Mutable, SignalExt};
 use std::rc::Rc;
 use web_sys::HtmlIFrameElement;
 
-const STR_JEWISH_INTERACTIVE_URL: &str = "https://www.jewishinteractive.org/jigzi-home";
+const STR_IFRAME_URL: &str = "https://www.jewishinteractive.org/jigzi-home";
+const INT_IFRAME_PADDING: usize = 30;
 
 pub struct Iframe {
     height: Mutable<usize>,
@@ -29,10 +30,10 @@ impl Iframe {
             )
             .global_event(clone!(state => move |event: Message| {
                 if let Ok(height) = event.try_serde_data::<String>() {
-                    state.height.set(height.parse::<usize>().unwrap());
+                    state.height.set(height.parse::<usize>().unwrap() + INT_IFRAME_PADDING);
                 }
             }))
-            .property("src", STR_JEWISH_INTERACTIVE_URL)
+            .property("src", STR_IFRAME_URL)
         })
     }
 }
