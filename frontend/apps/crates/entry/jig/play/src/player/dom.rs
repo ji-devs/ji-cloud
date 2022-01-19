@@ -81,8 +81,6 @@ pub fn render(state: Rc<State>) -> Dom {
             if !valid {
                 Some(html!("main-empty", {
                     .property("slot", "message")
-                    .property("text", STR_INVALID_MODULE_MESSAGE)
-                    .property("image", "module/_groups/cards/edit/main/no-preview.svg")
                 }))
             } else {
                 None
