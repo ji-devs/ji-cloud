@@ -1,4 +1,5 @@
 use dominator::{clone, events, html, with_node, Dom};
+use dominator_helpers::events::Message;
 use futures_signals::signal::{Mutable, SignalExt};
 use std::rc::Rc;
 use wasm_bindgen::prelude::*;
@@ -27,38 +28,16 @@ impl Iframe {
             .style_signal("height", state.height.signal_cloned()
                 .map(|height| {
                     let adjusted_height = height.to_string() + "px";
-                    log::info!("Height: {}", adjusted_height);
                     adjusted_height
                 })
             )
-            .with_node!(elem => {
-                .event(clone!(state => move |_: events::Load| {
-                    match get_height(&elem) {
-                        Ok(height) => state.height.set(height),
-                        Err(_) => (),
-                    }
-
-                }))
-            })
+            .global_event(clone!(state => move |event: Message| {
+                if let Ok(height) = event.try_serde_data::<String>() {
+                    log::info!("Height: {}", height);
+                    state.height.set(height.parse::<usize>().unwrap());
+                }
+            }))
             .property("src", STR_JEWISH_INTERACTIVE_URL)
         })
     }
-}
-
-#[wasm_bindgen]
-pub fn get_height(iframe: &HtmlIFrameElement) -> Result<usize, JsValue> {
-    let height: usize = match iframe.content_window() {
-        Some(content_window) => {
-            match content_window.post_message(&JsValue::from_str("scrollHeight"), STR_TARGET_DOMAIN) {
-                Ok(_) => log::info!("post_message worked"),
-                Err(error) => log::info!("post_message failed\n{:?}", error),
-            };
-            3000
-        },
-        None => 3000
-    };
-    
-    Ok(height)
-
-    // iframe.post_message("", "");
 }
