@@ -66,7 +66,9 @@ export function createConfig(target) {
                 },
             })
         );
-        plugins.push(minifyHTML());
+
+        // https://github.com/asyncLiz/minify-html-literals/issues/30
+        // plugins.push(minifyHTML());
     }
 
     return {
