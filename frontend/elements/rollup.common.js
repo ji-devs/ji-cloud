@@ -6,6 +6,7 @@ import injectProcessEnv from "rollup-plugin-inject-process-env";
 import typescript from "rollup-plugin-typescript2";
 import commonjs from "@rollup/plugin-commonjs";
 import json from "@rollup/plugin-json";
+import minifyHTML from 'rollup-plugin-minify-html-literals';
 
 const path = require("path");
 
@@ -43,8 +44,6 @@ export function createConfig(target) {
 
         commonjs(),
 
-        //minifyHTML(),
-
         typescript({
             tsconfigOverride: {
                 include: [input],
@@ -67,6 +66,7 @@ export function createConfig(target) {
                 },
             })
         );
+        plugins.push(minifyHTML());
     }
 
     return {
