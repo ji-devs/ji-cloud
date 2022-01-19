@@ -33,7 +33,6 @@ impl Iframe {
             )
             .global_event(clone!(state => move |event: Message| {
                 if let Ok(height) = event.try_serde_data::<String>() {
-                    log::info!("Height: {}", height);
                     state.height.set(height.parse::<usize>().unwrap());
                 }
             }))
