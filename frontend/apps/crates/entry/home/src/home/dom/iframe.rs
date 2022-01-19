@@ -25,7 +25,7 @@ impl Iframe {
         html!("iframe" => HtmlIFrameElement, {
             .style("width", "100%")
             .style("border", "none")
-            .style_signal("height", state.height.signal_cloned()
+            .style_signal("height", state.height.signal()
                 .map(|height| {
                     let adjusted_height = height.to_string() + "px";
                     adjusted_height
