@@ -240,6 +240,7 @@ fn render_page(state: Rc<Publish>) -> Dom {
                     .child(html!("button-rect", {
                         .text(STR_PUBLISH)
                         .text(state.jig.focus_display())
+                        .property("disabled", state.jig.modules.lock_ref().iter().find(|m| !m.is_complete).is_some())
                         .child(html!("fa-icon", {
                             .property("icon", "fa-light fa-rocket-launch")
                             .style("color", "var(--main-yellow)")
