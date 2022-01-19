@@ -18,6 +18,7 @@ export class _ extends LitElement {
                 }
                 img-ui {
                     margin-bottom: 24px;
+                    transform: translateX(32px);
                 }
                 .label {
                     font-size: 18px;
@@ -25,14 +26,13 @@ export class _ extends LitElement {
                     line-height: 1.22;
                     text-align: center;
                     color: var(--dark-gray-6);
-                    margin-left: -16px;
                 }
 
                 section {
                     display: flex;
                     flex-direction: column;
-                    justify-content: flex-start;
-                    align-items: flex-start;
+                    justify-content: center;
+                    align-items: center;
                 }
 
                 .clear {
@@ -50,7 +50,7 @@ export class _ extends LitElement {
         return html`
             <section>
                 <img-ui
-                    path="module/_groups/cards/edit/sidebar/jiggling-card-pointer.svg"
+                    path="module/_groups/cards/edit/sidebar/edit-words.svg"
                 ></img-ui>
                 <div class="label">${STR_LABEL}</div>
             </section>

@@ -79,7 +79,7 @@ pub fn render(state: Rc<State>) -> Dom {
         })))
         .child_signal(active_module_valid_signal(Rc::clone(&state)).map(|valid| {
             if !valid {
-                Some(html!("page-message", {
+                Some(html!("main-empty", {
                     .property("slot", "message")
                     .property("text", STR_INVALID_MODULE_MESSAGE)
                     .property("image", "module/_groups/cards/edit/main/no-preview.svg")
