@@ -17,8 +17,6 @@ use web_sys::{HtmlElement, HtmlIFrameElement};
 
 use super::state::State;
 
-const STR_INVALID_MODULE_MESSAGE: &str = "This part of your JIG needs attention. Add content or delete.";
-
 pub fn render(state: Rc<State>) -> Dom {
     actions::load_jig(state.clone());
 
@@ -188,8 +186,8 @@ fn active_module_valid_signal(state: Rc<State>) -> impl Signal<Item = bool> {
     jig_and_active_module_signal(state).map(|(jig, active_module_index)| {
         match jig {
             Some(jig) => match &jig.jig_data.modules.get(active_module_index) {
-                Some(active_module) => {
-                    active_module.is_complete
+                Some(module) => {
+                    module.is_complete || matches!(module.kind, ModuleKind::Legacy)
                 },
                 None => true, // Active module isn't in the list
             },
