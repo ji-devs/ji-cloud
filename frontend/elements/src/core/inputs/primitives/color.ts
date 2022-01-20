@@ -13,9 +13,8 @@ export class _ extends LitElement {
         return [
             css`
                 :host {
-                    display: inline-flex;
-                    flex-direction: column;
                     display: inline-grid;
+                    justify-content: start;
                 }
                 ::slotted(*) {
                     grid-column: 1;

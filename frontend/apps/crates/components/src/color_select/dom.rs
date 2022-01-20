@@ -20,8 +20,8 @@ pub fn render(state: Rc<State>, slot: Option<&str>) -> Dom {
 
     html!("color-select", {
         .future(clone!(state => async move {
-        let user_colors = get_user_colors().await.unwrap_ji();
-        state.user_colors.lock_mut().replace_cloned(user_colors);
+            let user_colors = get_user_colors().await.unwrap_ji();
+            state.user_colors.lock_mut().replace_cloned(user_colors);
         }))
         .apply_if(slot.is_some(), move |dom| {
             dom.property("slot", slot.unwrap_ji())
@@ -108,11 +108,8 @@ fn render_add_color(state: Rc<State>) -> Dom {
     html!("input-color", {
         .property("slot", "add-color")
         .child(html!("button-rect", {
-            .property("kind", "text")
+            .property("kind", "filled")
             .property("color", "blue")
-            .child(html!("fa-icon", {
-                .property("icon", "fa-solid fa-circle-plus")
-            }))
             .text(STR_ADD_COLOR)
         }))
         .event(clone!(state => move |e: events::CustomChange| {
