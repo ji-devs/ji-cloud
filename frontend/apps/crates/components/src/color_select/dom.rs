@@ -8,7 +8,6 @@ use utils::{colors::*, prelude::*};
 
 use super::actions::{add_user_color, delete_user_color, set_selected};
 use super::state::State;
-use dominator_helpers::futures::AsyncLoader;
 use wasm_bindgen_futures::spawn_local;
 
 const STR_SYSTEM_COLORS_LABEL: &str = "General colors";
@@ -17,32 +16,16 @@ const STR_USER_COLORS_LABEL: &str = "My colors";
 const STR_ADD_COLOR: &str = "Add color";
 
 pub fn render(state: Rc<State>, slot: Option<&str>) -> Dom {
-    let init_loader = AsyncLoader::new();
-    init_loader.load(clone!(state => async move {
-        let user_colors = get_user_colors().await.unwrap_ji();
-        state.user_colors.lock_mut().replace_cloned(user_colors);
-    }));
-
     State::handle_theme(Rc::clone(&state));
 
-    html!("empty-fragment", {
+    html!("color-select", {
+        .future(clone!(state => async move {
+        let user_colors = get_user_colors().await.unwrap_ji();
+        state.user_colors.lock_mut().replace_cloned(user_colors);
+        }))
         .apply_if(slot.is_some(), move |dom| {
             dom.property("slot", slot.unwrap_ji())
         })
-        .child_signal(init_loader.is_loading().map(clone!(state => move |loading| {
-            if loading {
-                Some(html!("window-loader-block", {
-                    .property("visible", true)
-                }))
-            } else {
-                Some(render_loaded(state.clone()))
-            }
-        })))
-    })
-}
-
-pub fn render_loaded(state: Rc<State>) -> Dom {
-    html!("color-select", {
         .apply_if(state.label.is_some(), clone!(state => move |dom| {
             dom.property("label", state.label.clone().unwrap_ji())
         }))
