@@ -162,6 +162,19 @@
       ]
     }
   },
+  "07a08e527260ed80e9a98a2f24bf76fb43524033f639b527bfa99b26839a76d1": {
+    "query": "\ninsert into jig_data_module (stable_id, \"index\", jig_data_id, kind, is_complete, contents)\nselect stable_id, \"index\", $2 as \"jig_id\", kind, is_complete, contents\nfrom jig_data_module\nwhere jig_data_id = $1\n        ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "07c23d4be4038602fadd286c040a438b0366a8308e634d0ef4f5325c7b07b225": {
     "query": "\n            update image_tag set index = $2 where index = $1\n            ",
     "describe": {
@@ -4738,19 +4751,6 @@
           "Uuid",
           "Int2",
           "Int2"
-        ]
-      },
-      "nullable": []
-    }
-  },
-  "c7e30f7036ed5deee0d6c4f600faaa19c41db8b6184735b3d1766277e58d12aa": {
-    "query": "\ninsert into jig_data_module (stable_id, \"index\", jig_data_id, kind, contents)\nselect stable_id, \"index\", $2 as \"jig_id\", kind, contents\nfrom jig_data_module\nwhere jig_data_id = $1\n        ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid"
         ]
       },
       "nullable": []
