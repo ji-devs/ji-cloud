@@ -28,3 +28,4 @@ import "@elements/entry/jig/play/sidebar/jig-info";
 import "@elements/entry/jig/play/sidebar/report";
 import "@elements/entry/jig/play/sidebar/sidebar";
 import "@elements/core/images/composed/module-screenshot";
+import "@elements/module/_groups/cards/_common/main-empty";

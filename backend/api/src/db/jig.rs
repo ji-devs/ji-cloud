@@ -1307,8 +1307,8 @@ returning id
     sqlx::query!(
         //language=SQL
         r#"
-insert into jig_data_module (stable_id, "index", jig_data_id, kind, contents)
-select stable_id, "index", $2 as "jig_id", kind, contents
+insert into jig_data_module (stable_id, "index", jig_data_id, kind, is_complete, contents)
+select stable_id, "index", $2 as "jig_id", kind, is_complete, contents
 from jig_data_module
 where jig_data_id = $1
         "#,

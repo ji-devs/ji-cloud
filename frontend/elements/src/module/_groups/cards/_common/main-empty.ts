@@ -21,6 +21,17 @@ export class _ extends LitElement {
                     flex-direction: column;
                     align-items: center;
                 }
+
+                img-ui {
+                    transform: translateX(-14px);
+                }
+
+                .label {
+                    background-color: var(--light-blue-3);
+                    border-radius: 10px;
+                    padding: 6px 16px;
+                    margin: 16px;
+                }
             `,
         ];
     }
@@ -29,10 +40,11 @@ export class _ extends LitElement {
         return html`
             <section class="empty">
                 <img-ui
-                    path="module/_groups/cards/edit/main/empty.svg"
+                    path="module/_groups/cards/edit/main/no-preview.svg"
                 ></img-ui>
                 <div class="label">${STR_EMPTY}</div>
             </section>
         `;
     }
 }
+

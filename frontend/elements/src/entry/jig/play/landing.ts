@@ -44,6 +44,14 @@ export class _ extends LitElement {
                 :host([isLegacy]) ::slotted([slot="iframe"]){
                     height: calc(100% - 100px);
                 }
+                ::slotted([slot="message"]) {
+                    position: fixed;
+                    height: 100vh;
+                    width: 100vw;
+                    display: grid;
+                    place-content: center;
+                    background-color: #ffffff;
+                }
                 .controls,
                 .play-pause-button-layer {
                     display: grid;
@@ -125,6 +133,7 @@ export class _ extends LitElement {
     render() {
         return html`
             <main>
+                <slot name="message"></slot>
                 <slot name="iframe"></slot>
                 <div class="controls">
                     <div class="sidebar">

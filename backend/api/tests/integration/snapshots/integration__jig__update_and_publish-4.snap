@@ -19,7 +19,7 @@ expression: body
       {
         "id": "[id]",
         "kind": "Cover",
-        "is_complete": false
+        "is_complete": true
       }
     ],
     "ageRanges": [],

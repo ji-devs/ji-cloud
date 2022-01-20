@@ -1,6 +1,6 @@
 import { argsToAttrs } from "@utils/attributes";
 import "@elements/module/_groups/cards/edit/main/main";
-import "@elements/module/_groups/cards/edit/main/main-empty";
+import "@elements/module/_groups/cards/_common/main-empty";
 import { mapToString, arrayIndex } from "@utils/array";
 import { Pair } from "./card-pair/pair";
 import { Args as CardArgs } from "./card-pair/card";
