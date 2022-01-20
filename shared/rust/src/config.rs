@@ -11,6 +11,12 @@ pub const JIG_PLAYER_SESSION_VALID_DURATION_SECS: u32 = 60 * 60 * 24 * 14;
 /// means 0-9999 are possible. If this is changed then the DB's check constraint must also be updated.
 pub const JIG_PLAYER_SESSION_CODE_MAX: i16 = 9999;
 
+/// Minimum amount of words which should be added to a list for a game.
+pub const MIN_LIST_WORDS: usize = 2;
+
+/// Maximum amount of words which should be added to a list for a game.
+pub const MAX_LIST_WORDS: usize = 14;
+
 #[derive(Debug, PartialEq, Eq, Copy, Clone)]
 pub enum RemoteTarget {
     Local,

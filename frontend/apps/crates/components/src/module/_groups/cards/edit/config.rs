@@ -4,8 +4,6 @@ use serde::Deserialize;
 use shared::domain::jig::module::body::_groups::cards::Mode;
 use utils::prelude::*;
 
-pub const MAX_LIST_WORDS: usize = 14;
-
 pub static DUAL_LIST_CHAR_LIMIT: usize = 30;
 pub static SINGLE_LIST_CHAR_LIMIT: usize = 30;
 pub static CARD_TEXT_LIMIT_WIDTH: f64 = 150.0;

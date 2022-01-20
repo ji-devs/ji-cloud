@@ -123,7 +123,7 @@ pub fn on_iframe_message(state: Rc<State>, message: ModuleToJigEditorMessage) {
         ModuleToJigEditorMessage::AppendModule(module) => {
             populate_added_module(Rc::clone(&state), module);
         }
-        ModuleToJigEditorMessage::Completed(module_id) => {
+        ModuleToJigEditorMessage::Complete(module_id, is_complete) => {
             let modules = state.modules.lock_ref();
             let module = modules.into_iter().find(|module| {
                 // Oh my.
@@ -133,10 +133,9 @@ pub fn on_iframe_message(state: Rc<State>, message: ModuleToJigEditorMessage) {
                 }
             });
 
-
             if let Some(module) = module {
                 if let Some(module) = &**module {
-                    module.is_complete.set_neq(true);
+                    module.is_complete.set_neq(is_complete);
                 }
             }
         }
