@@ -44,11 +44,15 @@ export class _ extends LitElement {
                     background-color: var(--light-orange-1);
                 }
                 :host([state="active"]) .wrapper {
-                    background-color: var(--light-blue-5);
+                    border: solid var(--light-blue-5) 3px;
+                }
+                :host([incomplete]) .wrapper {
+                    border: solid var(--light-red-4) 3px;
                 }
                 :host([state="active"]) img-ui {
                     height: 100px;
                 }
+
                 slot[name="thumbnail"] {
                     display: none;
                 }
@@ -57,6 +61,9 @@ export class _ extends LitElement {
                 }
                 ::slotted([slot="thumbnail"]) {
                     border-radius: 16px;
+                }
+                :host([incomplete]) ::slotted([slot="thumbnail"]) {
+                    border: none;
                 }
 
                 .drag-here-text {
@@ -81,6 +88,9 @@ export class _ extends LitElement {
 
     @property()
     publishedThumbnail: string = "";
+
+    @property({ type: Boolean, reflect: true })
+    incomplete: boolean = false;
 
     @query(".wrapper")
     wrapper!: HTMLElement;

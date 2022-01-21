@@ -17,6 +17,9 @@ pub fn on_module_kind_drop(state: Rc<State>, module_kind: ModuleKind) {
     if state.module.is_none() {
         assign_kind(state.clone(), module_kind);
     }
+
+    // Remove module highlights whenever a new module is added to the list.
+    state.sidebar.highlight_modules.set_neq(None);
 }
 
 pub async fn update_module(

@@ -1,8 +1,9 @@
 use components::overlay::handle::OverlayHandle;
 use dominator::{Dom, EventOptions, clone, html, with_node, DomBuilder};
+use futures_signals::map_ref;
 use web_sys::{HtmlElement, Node};
 
-use super::super::menu::{dom as MenuDom};
+use super::super::menu::dom as MenuDom;
 use super::{actions, state::*};
 use crate::edit::sidebar::state::{State as SidebarState, Module};
 use components::module::_common::thumbnail::ModuleThumbnail;
@@ -37,10 +38,18 @@ impl ModuleDom {
 
         let is_filler = Some(index) == drag_target_index;
 
-        let is_incomplete_signal = match &*module {
-            Some(module) => module.is_complete.signal_cloned(),
-            None => Mutable::new(true).signal_cloned(),
-        }.map(|is_complete| !is_complete);
+        let is_incomplete_signal = map_ref! {
+            let is_complete = (*module).as_ref()
+                // Placeholder modules should be marked as complete so that we don't incorrectly
+                // highlight them.
+                .map_or_else(|| Mutable::new(true), |module| module.is_complete.clone())
+                .signal_cloned(),
+            let highlight_modules = sidebar_state.highlight_modules.signal_cloned()
+                => {
+                    log::info!("is_complete {:?}, highlight {:?}", is_complete, highlight_modules);
+                    !is_complete && highlight_modules.is_some()
+                }
+        };
 
         html!("empty-fragment", {
             .property("slot", if index == 0 { "cover-module" } else { "modules" })
@@ -90,7 +99,6 @@ impl ModuleDom {
                         _ => false,
                     }
                 })))
-                .property_signal("incomplete", is_incomplete_signal)
                 // TODO:
                 // .event(|_evt:events::MouseDown| {
                 //     actions::mouse_down(state.clone(), evt.x(), evt.y());
@@ -114,6 +122,7 @@ impl ModuleDom {
                     .with_node!(elem => {
                         .property("slot", "window")
                         .property_signal("state", State::window_state_signal(Rc::clone(&state)))
+                        .property_signal("incomplete", is_incomplete_signal)
                         .property("activeModuleKind", state.kind_str())
                         .property("coverOnly", state.index == 0)
                         .event_with_options(
@@ -152,6 +161,34 @@ impl ModuleDom {
                                     ))
                                 },
                                 _ => None,
+                            }
+                        })))
+                        .child_signal(state.sidebar.highlight_modules.signal_cloned().map(clone!(state, elem => move |highlight| {
+                            match highlight {
+                                Some(idx) => {
+                                    if idx == state.index {
+                                        Some(html!("empty-fragment", {
+                                            .apply(OverlayHandle::lifecycle(clone!(state, elem => move || {
+                                                html!("overlay-tooltip-error", {
+                                                    .text("This part of your JIG needs attention. Add content or delete.")
+                                                    .property("target", elem.clone())
+                                                    .property("targetAnchor", "tr")
+                                                    .property("contentAnchor", "oppositeH")
+                                                    .property("marginX", 75i32)
+                                                    .property("closeable", true)
+                                                    .property("strategy", "track")
+                                                    .style("width", "350px")
+                                                    /* .event(clone!(state => move |_:events::Close| {
+                                                        state.tried_module_at_cover.set(false);
+                                                    })) */
+                                                })
+                                            })))
+                                        }))
+                                    } else {
+                                        None
+                                    }
+                                },
+                                None => None,
                             }
                         })))
                         .apply(OverlayHandle::lifecycle(clone!(state => move || {

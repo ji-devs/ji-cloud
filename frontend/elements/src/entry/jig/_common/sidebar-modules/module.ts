@@ -60,14 +60,6 @@ export class _ extends LitElement {
                     border-left-color: var(--main-blue);
                 }
 
-                :host([incomplete]) section {
-                    border-left-color: var(--light-red-1);
-                }
-
-                :host([incomplete][selected]) section {
-                    border-left-color: var(--light-red-4);
-                }
-
                 :host([collapsed]) section {
                     height: 136px;
                     width: 72px;
@@ -211,9 +203,6 @@ export class _ extends LitElement {
 
     @property({ type: Boolean, reflect: true })
     selected: boolean = false;
-
-    @property({ type: Boolean, reflect: true })
-    incomplete: boolean = false;
 
     // Should be the raw index in the JIG's module list
     // Will be bumped by 1 for display purposes

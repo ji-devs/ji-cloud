@@ -94,7 +94,11 @@ impl SidebarDom {
                         matches!(route, JigEditRoute::Publish)
                     }))
                     .event(clone!(state => move |_ :events::Click| {
-                        actions::navigate_to_publish(state.clone());
+                        if state.can_publish() {
+                            actions::navigate_to_publish(state.clone());
+                        } else {
+                            actions::set_highlight_modules(&state, true);
+                        }
                     }))
                     .child(html!("menu-kebab", {
                         .property("slot", "menu")
