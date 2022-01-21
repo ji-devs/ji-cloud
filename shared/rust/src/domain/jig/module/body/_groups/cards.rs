@@ -3,10 +3,8 @@
  * But the editor steps are identical except for 3
  */
 use crate::{
-    domain::jig::module::body::{
-        Background, Image, Instructions, ModeExt, StepExt, ThemeChoice,
-    },
     config,
+    domain::jig::module::body::{Background, Image, Instructions, ModeExt, StepExt, ThemeChoice},
 };
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
@@ -131,26 +129,30 @@ impl Mode {
         match self {
             // Text/Image pairs
             Self::WordsAndImages => {
-                pairs.iter().find(|pair| {
-                    // Neither card should be empty; the first card should be a Text variant and
-                    // the 2nd card should be an Image variant.
-                    pair.0.is_empty()
-                        || pair.1.is_empty()
-                        || !matches!(pair.0, Card::Text(_))
-                        || !matches!(pair.1, Card::Image(_))
-                })
-                .is_none()
-            },
+                pairs
+                    .iter()
+                    .find(|pair| {
+                        // Neither card should be empty; the first card should be a Text variant and
+                        // the 2nd card should be an Image variant.
+                        pair.0.is_empty()
+                            || pair.1.is_empty()
+                            || !matches!(pair.0, Card::Text(_))
+                            || !matches!(pair.1, Card::Image(_))
+                    })
+                    .is_none()
+            }
             // Text/Text pairs
             _ => {
-                pairs.iter().find(|pair| {
-                    // Neither card should be empty, and both cards must be Image variants.
-                    pair.0.is_empty()
-                        || pair.1.is_empty()
-                        || !matches!(pair.0, Card::Text(_))
-                        || !matches!(pair.1, Card::Text(_))
-                })
-                .is_none()
+                pairs
+                    .iter()
+                    .find(|pair| {
+                        // Neither card should be empty, and both cards must be Image variants.
+                        pair.0.is_empty()
+                            || pair.1.is_empty()
+                            || !matches!(pair.0, Card::Text(_))
+                            || !matches!(pair.1, Card::Text(_))
+                    })
+                    .is_none()
             }
         }
     }

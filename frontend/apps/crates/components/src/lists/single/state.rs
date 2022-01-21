@@ -3,7 +3,7 @@ use std::rc::Rc;
 
 use super::callbacks::Callbacks;
 use futures_signals::{
-    signal::{Mutable, Signal},
+    signal::{Mutable, Signal, SignalExt},
     signal_vec::{MutableVec, SignalVecExt},
 };
 use web_sys::HtmlElement;
@@ -51,37 +51,33 @@ impl State {
         }
     }
 
-    /// TODO - can derive_list and is_valid_signal be consolidated?
-    pub fn derive_list(&self) -> Result<Vec<String>, Error> {
-        let lock = self.list.lock_ref();
-
-        let list: Vec<String> = lock
+    pub fn derive_list(&self) -> Option<Vec<String>> {
+        let list: Vec<String> = self.list.lock_ref()
             .iter()
-            .map(|mutable_string| mutable_string.get_cloned())
-            .filter(|x| !x.is_empty())
+            .map(|value| value.get_cloned())
+            .filter(|value| !value.trim().is_empty())
             .collect();
 
         if list.len() < self.opts.min_valid {
-            Err(Error::NumWords)
+            None
         } else {
-            Ok(list)
+            Some(list)
         }
     }
 
-    pub fn is_valid_signal(&self) -> impl Signal<Item = Result<(), Error>> {
+    pub fn is_valid_signal(&self) -> impl Signal<Item = bool> {
         let min_valid = self.opts.min_valid;
 
         self.list
             .signal_vec_cloned()
             .map_signal(|inner| inner.signal_cloned())
             .to_signal_map(move |values| {
-                let valid_len = values.iter().filter(|x| !x.is_empty()).count();
+                let len = values
+                    .iter()
+                    .filter(|value| !value.trim().is_empty())
+                    .count();
 
-                if valid_len < min_valid {
-                    Err(Error::NumWords)
-                } else {
-                    Ok(())
-                }
+                len >= min_valid
             })
     }
 
