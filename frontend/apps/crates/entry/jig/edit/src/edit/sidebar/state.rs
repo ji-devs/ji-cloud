@@ -5,7 +5,7 @@ use futures_signals::{
     signal::{Mutable, Signal, SignalExt},
     signal_vec::MutableVec,
 };
-use shared::domain::jig::{JigResponse, LiteModule, ModuleKind, module::body::BodyExt};
+use shared::domain::jig::{JigResponse, LiteModule, ModuleKind};
 use std::rc::Rc;
 use utils::math::PointI32;
 
