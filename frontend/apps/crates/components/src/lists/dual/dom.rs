@@ -33,25 +33,17 @@ pub fn render(state: Rc<State>) -> Dom {
                 }))
             }),
             html!("button-rect", {
-                .property_signal("color", state.is_valid_signal().map(|ready| {
-                    if ready.is_err() {
-                        "lightGray"
-                    } else {
-                        "red"
-                    }
-                }))
-                //.property_signal("disabled", state.is_valid_signal().map(|ready| ready.is_err()))
+                .property_signal("disabled", state.is_valid_signal().map(|valid| !valid))
                 .property("size", "small")
                 .property("iconAfter", "done")
                 .property("slot", "done-btn")
                 .text(super::strings::STR_DONE)
                 .event(clone!(state => move |_evt:events::Click| {
                     match state.derive_list() {
-                        Ok(list) => {
+                        Some(list) => {
                             (state.callbacks.replace_list) (list);
                         },
-                        Err(_err) => {
-
+                        None => {
                             (state.callbacks.set_tooltip_error) (Some(
                                     Rc::new(TooltipState::new(
                                         TooltipTarget::Element(

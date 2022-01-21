@@ -2,8 +2,9 @@
  * The card modules not only share some base content
  * But the editor steps are identical except for 3
  */
-use crate::domain::jig::module::body::{
-    Background, Image, Instructions, ModeExt, StepExt, ThemeChoice,
+use crate::{
+    config,
+    domain::jig::module::body::{Background, Image, Instructions, ModeExt, StepExt, ThemeChoice},
 };
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
@@ -38,6 +39,14 @@ impl BaseContent {
             ..Self::default()
         }
     }
+
+    /// Convenience method to determine whether pairs have been configured correctly
+    pub fn is_valid(&self) -> bool {
+        let pair_len = self.pairs.len();
+        pair_len >= config::MIN_LIST_WORDS
+            && pair_len <= config::MAX_LIST_WORDS
+            && self.mode.pairs_valid(&self.pairs)
+    }
 }
 
 /// Editor state
@@ -64,6 +73,17 @@ pub enum Card {
     // todo(@dakom): document this
     #[allow(missing_docs)]
     Image(Option<Image>),
+}
+
+impl Card {
+    /// Whether the variants value is empty
+    pub fn is_empty(&self) -> bool {
+        match self {
+            Self::Text(value) if value.trim().len() == 0 => true,
+            Self::Image(None) => true,
+            _ => false,
+        }
+    }
 }
 
 /// What mode the module runs in.
@@ -101,6 +121,41 @@ pub enum Mode {
 
     /// Translate from one language to another.
     Translate = 7,
+}
+
+impl Mode {
+    /// Returns whether a list of card pairs are valid for the game mode
+    pub fn pairs_valid(&self, pairs: &Vec<CardPair>) -> bool {
+        match self {
+            // Text/Image pairs
+            Self::WordsAndImages => {
+                pairs
+                    .iter()
+                    .find(|pair| {
+                        // Neither card should be empty; the first card should be a Text variant and
+                        // the 2nd card should be an Image variant.
+                        pair.0.is_empty()
+                            || pair.1.is_empty()
+                            || !matches!(pair.0, Card::Text(_))
+                            || !matches!(pair.1, Card::Image(_))
+                    })
+                    .is_none()
+            }
+            // Text/Text pairs
+            _ => {
+                pairs
+                    .iter()
+                    .find(|pair| {
+                        // Neither card should be empty, and both cards must be Image variants.
+                        pair.0.is_empty()
+                            || pair.1.is_empty()
+                            || !matches!(pair.0, Card::Text(_))
+                            || !matches!(pair.1, Card::Text(_))
+                    })
+                    .is_none()
+            }
+        }
+    }
 }
 
 impl Default for Mode {

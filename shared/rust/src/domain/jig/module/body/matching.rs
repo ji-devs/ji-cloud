@@ -62,7 +62,9 @@ impl BodyExt<Mode, Step> for ModuleData {
             .collect()
     }
     fn is_complete(&self) -> bool {
-        self.content.is_some()
+        self.content
+            .as_ref()
+            .map_or(false, |content| content.base.is_valid())
     }
 
     fn kind() -> ModuleKind {

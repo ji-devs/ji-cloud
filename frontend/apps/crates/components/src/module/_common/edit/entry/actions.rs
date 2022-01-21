@@ -162,11 +162,8 @@ pub fn save<RawData, Mode, Step>(
         });
         let _ = api_with_auth_empty::<EmptyError, _>(&path, Update::METHOD, req).await; //.expect_ji("error saving module!");
 
-        if is_complete {
-            // Let the sidebar know that this module has been marked as completed so that it can
-            // update any relevant states.
-            let _ = IframeAction::new(ModuleToJigEditorMessage::Completed(module_id)).try_post_message_to_editor();
-        }
+        // Update the sidebar with this modules completion status
+        let _ = IframeAction::new(ModuleToJigEditorMessage::Complete(module_id, is_complete)).try_post_message_to_editor();
 
         screenshot_loader.load(async move {
             call_screenshot_service(jig_id, module_id, RawData::kind()).await;

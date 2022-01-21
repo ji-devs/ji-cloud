@@ -187,6 +187,6 @@ pub enum ModuleToJigPlayerMessage {
 pub enum ModuleToJigEditorMessage {
     AppendModule(LiteModule),
     Next,
-    /// Whenever a module is marked as complete, i.e. has the minimum required content.
-    Completed(ModuleId),
+    /// Whenever a modules completion status changes, i.e. meets the minimum required content.
+    Complete(ModuleId, bool),
 }

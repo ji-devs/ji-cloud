@@ -19,7 +19,10 @@ use crate::{
 use dominator::clone;
 use futures_signals::signal::Mutable;
 use once_cell::sync::OnceCell;
-use shared::domain::jig::module::body::{Image, _groups::cards::Mode};
+use shared::{
+    domain::jig::module::body::{Image, _groups::cards::Mode},
+    config as shared_config,
+};
 use utils::unwrap::UnwrapJiExt;
 use std::rc::Rc;
 
@@ -139,8 +142,8 @@ fn make_single_list<RawData: RawDataExt, E: ExtraExt>(
     );
 
     let options = SingleListOptions {
-        max_rows: config::MAX_LIST_WORDS,
-        min_valid: 2,
+        max_rows: shared_config::MAX_LIST_WORDS,
+        min_valid: shared_config::MIN_LIST_WORDS,
     };
 
     SingleListState::new(options, callbacks)
@@ -165,14 +168,14 @@ fn make_dual_list<RawData: RawDataExt, E: ExtraExt>(
     );
 
     let options = DualListOptions {
-        max_rows: config::MAX_LIST_WORDS,
+        max_rows: shared_config::MAX_LIST_WORDS,
         cell_rows: {
             match state.base.mode {
                 Mode::Riddles => 2,
                 _ => 1,
             }
         },
-        min_valid: 2,
+        min_valid: shared_config::MIN_LIST_WORDS,
     };
 
     DualListState::new(options, callbacks)
