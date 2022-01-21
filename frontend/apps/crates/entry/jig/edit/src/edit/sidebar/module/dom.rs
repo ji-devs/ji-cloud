@@ -1,7 +1,7 @@
 use components::overlay::handle::OverlayHandle;
 use dominator::{Dom, EventOptions, clone, html, with_node, DomBuilder};
 use futures_signals::map_ref;
-use web_sys::{HtmlElement, Node};
+use web_sys::{HtmlElement, Node, ScrollIntoViewOptions, ScrollBehavior};
 
 use super::super::menu::dom as MenuDom;
 use super::{actions, state::*};
@@ -167,6 +167,9 @@ impl ModuleDom {
                             match highlight {
                                 Some(idx) => {
                                     if idx == state.index {
+                                        // Make sure that the module window is visible to the
+                                        // teacher.
+                                        elem.scroll_into_view_with_scroll_into_view_options(ScrollIntoViewOptions::new().behavior(ScrollBehavior::Smooth));
                                         Some(html!("empty-fragment", {
                                             .apply(OverlayHandle::lifecycle(clone!(state, elem => move || {
                                                 html!("overlay-tooltip-error", {
@@ -178,9 +181,9 @@ impl ModuleDom {
                                                     .property("closeable", true)
                                                     .property("strategy", "track")
                                                     .style("width", "350px")
-                                                    /* .event(clone!(state => move |_:events::Close| {
-                                                        state.tried_module_at_cover.set(false);
-                                                    })) */
+                                                    .event(clone!(state => move |_:events::Close| {
+                                                        state.sidebar.highlight_modules.set_neq(None);
+                                                    }))
                                                 })
                                             })))
                                         }))

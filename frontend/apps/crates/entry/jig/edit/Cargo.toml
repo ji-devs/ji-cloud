@@ -27,7 +27,7 @@ web-sys = { version = "0.3.55", features = [
     'Response',
     'RequestMode',
     'Headers',
-    'Document', 
+    'Document',
     'DocumentFragment',
     'HtmlTemplateElement',
     'Window',
@@ -45,7 +45,9 @@ web-sys = { version = "0.3.55", features = [
     'MouseEvent',
     'FileList',
     'File',
-    'DomRect'
+    'DomRect',
+    'ScrollIntoViewOptions',
+    'ScrollBehavior'
 ] }
 wasm-bindgen-futures = "0.4.28"
 htmlescape = "0.3.1"
