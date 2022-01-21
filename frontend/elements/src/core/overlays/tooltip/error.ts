@@ -39,7 +39,7 @@ export class _ extends LitElement {
                 article {
                     display: flex;
                     gap: 16px;
-                    align-items: center;
+                    align-items: flex-start;
                 }
             `,
         ];

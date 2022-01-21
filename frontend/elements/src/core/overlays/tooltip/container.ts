@@ -94,7 +94,7 @@ export class _ extends LitElement {
                     stroke: var(--tooltip-border-color);
                 }
 
-                /* arrow offsets 
+                /* arrow offsets
                 :host([arrowAnchor="tr"]) > .main {
                     margin-right: ${TRIANGLE_HEIGHT}px;
                 }

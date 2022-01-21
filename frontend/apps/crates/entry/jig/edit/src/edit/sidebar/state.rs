@@ -5,7 +5,7 @@ use futures_signals::{
     signal::{Mutable, Signal, SignalExt},
     signal_vec::MutableVec,
 };
-use shared::domain::jig::{JigResponse, LiteModule, ModuleKind};
+use shared::domain::jig::{JigResponse, LiteModule, ModuleKind, module::body::BodyExt};
 use std::rc::Rc;
 use utils::math::PointI32;
 
@@ -66,6 +66,10 @@ pub struct State {
     pub settings: Rc<SettingsState>,
     pub drag: Mutable<Option<Rc<DragState>>>,
     pub drag_target_index: Mutable<Option<usize>>,
+    /// Whether to highlight incomplete modules. This is useful so that we can _only_ highlight
+    /// modules once the teacher performs a specific action, such as clicking "Publish".
+    /// Holds the index of the first module in the list which is incomplete
+    pub highlight_modules: Mutable<Option<usize>>,
     pub loader: AsyncLoader,
 }
 
@@ -98,17 +102,24 @@ impl State {
         // add empty module at end
         modules.push(Rc::new(None));
 
+        // Initialize these here so that we can move `jig` into the initialization of Self and
+        // still keep the ordering of the fields.
+        let jig_display_name = jig.jig_data.display_name.clone();
+        let jig_published_at = jig.published_at.clone();
+        let settings_state = SettingsState::new(&jig);
+
         Self {
+            jig,
             jig_edit_state,
-            name: Mutable::new(jig.jig_data.display_name.clone()),
-            publish_at: Mutable::new(jig.published_at.clone()),
+            name: Mutable::new(jig_display_name),
+            publish_at: Mutable::new(jig_published_at),
             modules: MutableVec::new_with_values(modules),
             collapsed: Mutable::new(false),
-            settings: Rc::new(SettingsState::new(&jig)),
+            settings: Rc::new(settings_state),
             drag: Mutable::new(None),
             drag_target_index: Mutable::new(None),
+            highlight_modules: Mutable::new(None), // By default we don't want modules highlighted yet.
             loader: AsyncLoader::new(),
-            jig,
         }
     }
 
@@ -120,6 +131,18 @@ impl State {
             .map(|drag| OptionSignal::new(drag.map(|drag| drag.inner.pos_signal())))
             .flatten()
             .map(|x| x.and_then(|x| x))
+    }
+
+    /// Returns whether this JIG is publishable
+    pub fn can_publish(&self) -> bool {
+        self.modules.lock_ref().into_iter().find(|module| {
+            match &***module {
+                // Find the first module which isn't complete
+                Some(module) => !module.is_complete.get_cloned(),
+                None => false,
+            }
+        })
+        .is_none()
     }
 
     /*

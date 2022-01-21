@@ -54,6 +54,20 @@ pub fn navigate_to_publish(state: Rc<State>) {
     )));
 }
 
+pub fn set_highlight_modules(state: &Rc<State>, highlight: bool) {
+    if highlight {
+        let idx = state.modules.lock_ref().iter()
+            .position(|module| match &**module {
+                    Some(module) => !module.is_complete.get_cloned(),
+                    None => false,
+                }
+            );
+        state.highlight_modules.set_neq(idx);
+    } else {
+        state.highlight_modules.set_neq(None);
+    }
+}
+
 pub async fn update_jig(jig_id: &JigId, req: JigUpdateDraftDataRequest) -> Result<(), EmptyError> {
     let path = endpoints::jig::UpdateDraftData::PATH.replace("{id}", &jig_id.0.to_string());
     api_with_auth_empty::<EmptyError, _>(&path, endpoints::jig::UpdateDraftData::METHOD, Some(req))
