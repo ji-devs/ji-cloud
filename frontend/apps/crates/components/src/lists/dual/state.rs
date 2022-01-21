@@ -132,8 +132,6 @@ impl State {
             .find(|(left, right)| (left.is_empty() || right.is_empty()) && !(left.is_empty() && right.is_empty()))
             .is_none();
 
-        log::info!("FOO contents_valid {}", contents_valid);
-
         if contents_valid {
             let list: Vec<(&str, &str)> = create_iter(left, right)
                 // At this point we know that the only rows with empty data are the prefilled rows,
@@ -143,7 +141,6 @@ impl State {
             // If the final list's length is less than the minimum or somehow there are more rows, the list
             // is invalid.
             let list_len = list.len();
-            log::info!("FOO list_len {}", list_len);
             if list_len >= self.opts.min_valid && list_len <= self.opts.max_rows {
                 Some(list)
             } else {
