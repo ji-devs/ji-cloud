@@ -158,6 +158,7 @@ impl Into<actix_web::Error> for ServiceKind {
 pub enum Service {
     InternalServerError(anyhow::Error),
     DisabledService(ServiceKind),
+    Forbidden,
 }
 
 impl<T: Into<anyhow::Error>> From<T> for Service {
@@ -171,6 +172,7 @@ impl Into<actix_web::Error> for Service {
         match self {
             Self::InternalServerError(e) => ise(e),
             Self::DisabledService(s) => s.into(),
+            Self::Forbidden => BasicError::new(http::StatusCode::FORBIDDEN).into(),
         }
     }
 }

@@ -14,6 +14,7 @@ use shared::{
     },
 };
 use sqlx::PgPool;
+use uuid::Uuid;
 
 use crate::{
     db::{self, jig::CreateJigError},
@@ -311,10 +312,35 @@ async fn clone(
 /// Search for jigs.
 async fn search(
     db: Data<PgPool>,
+    claims: Option<TokenUser>,
     algolia: ServiceData<crate::algolia::Client>,
     query: Option<Query<<jig::Search as ApiEndpoint>::Req>>,
 ) -> Result<Json<<jig::Search as ApiEndpoint>::Res>, error::Service> {
     let query = query.map_or_else(Default::default, Query::into_inner);
+
+    let author_id: Option<Uuid> = if let Some(user) = claims {
+        let author_id = query.author_id.map(|it| match it {
+            UserOrMe::Me => user.0.user_id,
+            UserOrMe::User(id) => id,
+        });
+
+        db::jig::authz_list(&*db, user.0.user_id, author_id)
+            .await
+            .map_err(|_| error::Service::Forbidden)?;
+
+        author_id
+    } else {
+        let author_id = query.author_id.map(|it| match it {
+            UserOrMe::Me => None,
+            UserOrMe::User(id) => Some(id),
+        });
+
+        if let Some(id) = author_id {
+            id
+        } else {
+            None
+        }
+    };
 
     let (ids, pages, total_hits) = algolia
         .search_jig(
@@ -327,7 +353,7 @@ async fn search(
             &query.resource_types,
             &query.categories,
             &query.goals,
-            query.author,
+            author_id,
             query.author_name,
             query.jig_focus,
             query.other_keywords,

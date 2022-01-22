@@ -267,6 +267,7 @@ where
                 error::Service::DisabledService(it) => {
                     error::ServiceSession::DisabledService(it).into()
                 }
+                error::Service::Forbidden => error::VerifyEmail::Forbidden,
             })?;
 
             txn.commit().await?;
@@ -619,6 +620,7 @@ async fn verify_email_reset(
                 error::Service::DisabledService(it) => {
                     error::ServiceSession::DisabledService(it).into()
                 }
+                error::Service::Forbidden => error::VerifyEmail::Forbidden,
             })?;
 
             txn.commit().await?;
