@@ -5,7 +5,7 @@ use algolia::{
     ApiKey, AppId, Client as Inner,
 };
 use anyhow::Context;
-use chrono::Utc;
+use chrono::{DateTime, Utc};
 use core::settings::AlgoliaSettings;
 use futures::TryStreamExt;
 use serde::Serialize;
@@ -14,7 +14,7 @@ use shared::{
     domain::{
         category::CategoryId,
         image::{ImageId, ImageKind},
-        jig::{JigFocus, JigId, PrivacyLevel, UserOrMe},
+        jig::{JigFocus, JigId, PrivacyLevel},
         meta::{AffiliationId, AgeRangeId, GoalId, ImageStyleId, ImageTagIndex, ResourceTypeId},
     },
     media::MediaGroupKind,
@@ -54,6 +54,10 @@ struct BatchJig<'a> {
     locked: &'a bool,
     other_keywords: &'a str,
     translated_keywords: &'a str,
+    rating: Option<i16>,
+    likes: &'a i64,
+    plays: &'a i64,
+    published_at: Option<DateTime<Utc>>,
 }
 
 #[derive(Serialize)]
@@ -301,9 +305,18 @@ select jig.id,
        translated_keywords                                                                                          as "translated_keywords!",
        (select given_name || ' '::text || family_name
         from user_profile
-        where user_profile.user_id = jig.author_id)                                                                 as "author_name"
+        where user_profile.user_id = jig.author_id)                                                                 as "author_name",
+        rating                                                                                                      as "rating",
+        liked_count                                                                                                 as "likes!",
+        (   
+            select play_count
+            from jig_play_count "jpc"
+            where jpc.jig_id = jig.id
+        )                                                                                                           as "plays!",
+        published_at                                                                                                as "published_at"
 from jig
          inner join jig_data on live_id = jig_data.id
+         inner join jig_admin_data "jad" on jad.jig_id = jig.id
 where last_synced_at is null
    or (updated_at is not null and last_synced_at < updated_at)
 limit 100 for no key update skip locked;
@@ -341,6 +354,10 @@ limit 100 for no key update skip locked;
                 locked: &row.locked,
                 other_keywords: &row.other_keywords,
                 translated_keywords: &row.translated_keywords,
+                rating: row.rating,
+                likes: &row.likes,
+                plays: &row.plays,
+                published_at: row.published_at
             })
             .expect("failed to serialize BatchJig to json")
             {
