@@ -4,7 +4,7 @@ import "@elements/core/overlays/content";
 import "@elements/core/overlays/tooltip/confirm";
 import "@elements/core/overlays/tooltip/bubble";
 import "@elements/core/overlays/tooltip/info";
-import "@elements/core/overlays/tooltip/error";
+import "@elements/core/overlays/tooltip/error-tooltip";
 import {
     Anchor,
     ContentAnchor,
@@ -52,8 +52,8 @@ export const Example = (props?: Args) => {
             </overlay-tooltip-bubble>`;
     };
     const renderError = () => {
-        return `<overlay-tooltip-error target=".target" arrowNudge="${props.arrowNudge}" targetAnchor="${props.targetAnchor}" contentAnchor=${props.contentAnchor} strategy="${props.strategy}" marginX="${props.marginX}" marginY="${props.marginY}" ">
-            Body here
+        return `<overlay-tooltip-error target=".target" arrowNudge="${props.arrowNudge}" targetAnchor="${props.targetAnchor}" contentAnchor=${props.contentAnchor} strategy="${props.strategy}" marginX="${props.marginX}" marginY="${props.marginY}" maxWidth="200">
+            Body here Body here Body here Body here
             </overlay-tooltip-error>`;
     };
     return `<div class="target" style="position: absolute; top: 30vh; left: 50vw; width: 100rem; height: 100rem; background-color: black; color: white">
@@ -62,19 +62,17 @@ export const Example = (props?: Args) => {
                 <div style="position: absolute; top: 50rem; left: 0px; width: 100rem; height: 1px; background-color: yellow"></div>
             </div>
         </div>
-        <overlay-container>
-            ${
-                kind == "confirm"
-                    ? renderConfirm()
-                    : kind == "bubble"
-                    ? renderBubble()
-                    : kind == "info"
-                    ? renderInfo()
-                    : kind == "error"
-                    ? renderError()
-                    : ""
-            }
-        </overlay-container>
+        ${
+            kind == "confirm"
+                ? renderConfirm()
+                : kind == "bubble"
+                ? renderBubble()
+                : kind == "info"
+                ? renderInfo()
+                : kind == "error"
+                ? renderError()
+                : ""
+        }
 
     </div>`;
 };
