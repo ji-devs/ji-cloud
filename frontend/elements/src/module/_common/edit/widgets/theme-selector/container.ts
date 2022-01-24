@@ -19,6 +19,11 @@ export class _ extends LitElement {
                         row-gap: 47px;
                     }
                 }
+                .top-line {
+                    display: grid;
+                    grid-template-columns: auto auto;
+                    justify-content: space-between;
+                }
                 h2 {
                     margin: 0px;
                     font-family: Poppins;
@@ -36,7 +41,10 @@ export class _ extends LitElement {
 
     render() {
         return html`
-            <h2>${STR_HEADER}</h2>
+            <div class="top-line">
+                <h2>${STR_HEADER}</h2>
+                <slot name="action"></slot>
+            </div>
             <div class="options">
                 <slot></slot>
             </div>

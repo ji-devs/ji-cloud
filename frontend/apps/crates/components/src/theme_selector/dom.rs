@@ -10,17 +10,29 @@ use crate::dialog::Dialog;
 const STR_APPLY_TO_JIG: &str = "Apply to JIG";
 const STR_APPLY_TO_MODULE: &str = "Apply to cover only";
 
-pub fn render_design(state: Rc<ThemeSelector>, slot: Option<&str>) -> Dom {
-    render("theme-selector-design-option", state, true, slot)
+pub fn render_design(state: Rc<ThemeSelector>, slot: Option<&str>, action: Option<Dom>) -> Dom {
+    render("theme-selector-design-option", state, true, slot, action)
 }
-pub fn render_cards(state: Rc<ThemeSelector>, slot: Option<&str>) -> Dom {
-    render("theme-selector-cards-option", state, false, slot)
+pub fn render_cards(state: Rc<ThemeSelector>, slot: Option<&str>, action: Option<Dom>) -> Dom {
+    render("theme-selector-cards-option", state, false, slot, action)
 }
 
-fn render(element_name: &str, state: Rc<ThemeSelector>, can_apply_to_jig: bool, slot: Option<&str>) -> Dom {
+fn render(
+    element_name: &str,
+    state: Rc<ThemeSelector>,
+    can_apply_to_jig: bool,
+    slot: Option<&str>,
+    action: Option<Dom>
+) -> Dom {
     html!("theme-selector", {
         .apply_if(slot.is_some(), |dom| {
             dom.property("slot", slot.unwrap_ji())
+        })
+        .apply_if(action.is_some(), |dom| {
+            dom.child(html!("empty-fragment", {
+                .property("slot", "action")
+                .child(action.unwrap_ji())
+            }))
         })
         .children(THEME_IDS.iter().copied()
           .map(|theme_id| {
