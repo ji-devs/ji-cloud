@@ -48,7 +48,8 @@ expression: body
     "privacyLevel": "unlisted",
     "locked": false,
     "otherKeywords": "",
-    "translatedKeywords": ""
+    "translatedKeywords": "",
+    "translatedDescription": null
   },
   "adminData": {
     "rating": null,

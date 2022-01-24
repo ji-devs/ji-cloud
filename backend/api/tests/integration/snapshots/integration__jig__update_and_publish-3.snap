@@ -45,7 +45,8 @@ expression: body
     "privacyLevel": "public",
     "locked": false,
     "otherKeywords": "",
-    "translatedKeywords": ""
+    "translatedKeywords": "",
+    "translatedDescription": {}
   },
   "adminData": {
     "rating": null,
