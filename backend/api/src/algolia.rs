@@ -322,8 +322,9 @@ select jig.id,
 from jig
          inner join jig_data on live_id = jig_data.id
          inner join jig_admin_data "jad" on jad.jig_id = jig.id
-where last_synced_at is null
-   or (updated_at is not null and last_synced_at < updated_at)
+where (last_synced_at is null
+   or (updated_at is not null and last_synced_at < updated_at))
+   and draft_or_live is not NULL
 limit 100 for no key update skip locked;
      "#
         )
@@ -362,7 +363,7 @@ limit 100 for no key update skip locked;
                 rating: row.rating,
                 likes: &row.likes,
                 plays: &row.plays,
-                published_at: row.published_at
+                published_at: row.published_at,
                 translated_description: row.translated_description,
             })
             .expect("failed to serialize BatchJig to json")

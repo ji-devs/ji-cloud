@@ -11,6 +11,7 @@ use super::{
 };
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use serde_json::value::Value;
 #[cfg(feature = "backend")]
 use sqlx::postgres::PgRow;
 use uuid::Uuid;
@@ -340,6 +341,9 @@ pub struct ImageMetadata {
     /// A string describing the image.
     pub description: String,
 
+    /// A translated descriptions of the image.
+    pub translated_description: Value,
+
     /// Whether or not the image is premium.
     pub is_premium: bool,
 
@@ -384,6 +388,7 @@ impl<'r> sqlx::FromRow<'r, PgRow> for ImageMetadata {
             kind,
             name,
             description,
+            translated_description,
             is_premium,
             publish_at,
             styles,
@@ -400,6 +405,7 @@ impl<'r> sqlx::FromRow<'r, PgRow> for ImageMetadata {
             kind,
             name,
             description,
+            translated_description,
             is_premium,
             publish_at,
             styles: styles.into_iter().map(|(it,)| it).collect(),
@@ -420,6 +426,7 @@ struct DbImage {
     pub kind: ImageKind,
     pub name: String,
     pub description: String,
+    pub translated_description: Value,
     pub is_premium: bool,
     pub publish_at: Option<DateTime<Utc>>,
     pub styles: Vec<(ImageStyleId,)>,

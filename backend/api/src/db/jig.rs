@@ -1,6 +1,6 @@
 use crate::translate::{multi_translation, translate_text};
 use anyhow::Context;
-use serde_json::value::Value;
+use serde_json::{json, value::Value};
 use shared::domain::{
     category::CategoryId,
     jig::{
@@ -222,7 +222,7 @@ select cte.jig_id                                          as "jig_id: JigId",
        jig_focus                                           as "jig_focus!: JigFocus",
        language,
        description,
-       translated_description                              as "translated_description?: Value",
+       translated_description                              as "translated_description!: Value",
        direction                                           as "direction: TextDirection",
        display_score,
        track_assessments,
@@ -382,7 +382,7 @@ select id,
        updated_at,
        language                                                                      as "language!",
        description                                                                   as "description!",
-       translated_description                                                        as "translated_description?: Value",
+       translated_description                                                        as "translated_description!: Value",
        direction                                                                     as "direction!: TextDirection",
        display_score                                                                 as "display_score!",
        track_assessments                                                             as "track_assessments!",
@@ -597,7 +597,7 @@ select  jig.id                                              as "jig_id: JigId",
        updated_at,
        language                                                                      as "language!",
        description                                                                   as "description!",
-       translated_description                                                        as "translated_description?: Value",
+       translated_description                                                        as "translated_description!: Value",
        direction                                                                     as "direction!: TextDirection",
        display_score                                                                 as "display_score!",
        track_assessments                                                             as "track_assessments!",

@@ -59,20 +59,20 @@ async fn media_clean(
 
 async fn translate_descriptions(
     google_translate_manager: ServiceData<GoogleTranslate>,
-    // bearer_auth: BearerAuth,
-    // jwks: Data<JwkVerifier>,
-    // user_agent: UserAgent,
+    bearer_auth: BearerAuth,
+    jwks: Data<JwkVerifier>,
+    user_agent: UserAgent,
 ) -> Result<HttpResponse, error::ServiceSession> {
-    // if user_agent
-    //     .0
-    //     .map_or(true, |it| it != "Google-Cloud-Scheduler")
-    // {
-    //     return Err(error::ServiceSession::Unauthorized);
-    // }
+    if user_agent
+        .0
+        .map_or(true, |it| it != "Google-Cloud-Scheduler")
+    {
+        return Err(error::ServiceSession::Unauthorized);
+    }
 
-    // let _claims: IdentityClaims = jwks
-    //     .verify_iam_api_invoker_oauth(bearer_auth.token(), 3)
-    //     .await?;
+    let _claims: IdentityClaims = jwks
+        .verify_iam_api_invoker_oauth(bearer_auth.token(), 3)
+        .await?;
 
     google_translate_manager.spawn_cron_jobs().await?;
 

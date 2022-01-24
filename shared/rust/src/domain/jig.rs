@@ -294,9 +294,7 @@ pub struct JigData {
     pub translated_keywords: String,
 
     /// translated descriptions
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub translated_description: Option<Value>,
+    pub translated_description: Value,
 }
 
 /// Access level for the jig.
