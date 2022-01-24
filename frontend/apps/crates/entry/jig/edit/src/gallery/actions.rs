@@ -97,15 +97,10 @@ impl JigGallery {
                 VisibleJigs::Draft => Some(false),
             };
 
-            let user_id = get_user()
-                .as_ref()
-                .map(|user| user.id.clone())
-                .expect_ji("Only logged in users are allowed here");
-
             let req = Some(JigSearchQuery {
                 q,
                 is_published,
-                author: Some(user_id),
+                author_id: Some(UserOrMe::Me),
                 jig_focus: Some(state.focus),
                 ..Default::default()
             });
@@ -170,7 +165,7 @@ impl JigGallery {
 
         match api_with_auth::<CreateResponse<ModuleId>, EmptyError, _>(&path, endpoints::jig::module::Create::METHOD, Some(req)).await {
             Ok(_) => {
-                
+
             },
             Err(_) => {
                 todo!()
