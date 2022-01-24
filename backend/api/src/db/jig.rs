@@ -1,6 +1,5 @@
 use crate::translate::translate_text;
 use anyhow::Context;
-use serde::{Deserialize, Serialize};
 use serde_json::value::Value;
 use shared::domain::{
     category::CategoryId,
@@ -610,7 +609,7 @@ from jig_data
     inner join cte on cte.id = jig_data.id
     inner join jig on jig_data.id = jig.draft_id or jig_data.id = jig.live_id
     inner join jig_admin_data "admin" on admin.jig_id = jig.id
-where cte.ord >= (20 * $2)
+where cte.ord > (20 * $2)
 order by ord asc
 limit 20
 "#,
