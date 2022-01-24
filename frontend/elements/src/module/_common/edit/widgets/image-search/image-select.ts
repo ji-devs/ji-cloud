@@ -272,7 +272,7 @@ export class _ extends LitElement {
             <div class="main">
                 <div class="top-row">
                     <h2>${this.label || nothing}</h2>
-                    <slot name="hide-overlay"></slot>
+                    <slot name="action"></slot>
                 </div>
                 <div class="controls">
                     <div class="search-row">

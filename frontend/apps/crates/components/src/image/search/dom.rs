@@ -17,6 +17,14 @@ const STR_JIGZI: &str = "Jigzi";
 const STR_SEARCH: &str = "Search";
 
 pub fn render(state: Rc<State>, slot: Option<&str>) -> Dom {
+    render_with_action(state, slot, None::<fn() -> Dom>)
+}
+
+pub fn render_with_action(
+    state: Rc<State>,
+    slot: Option<&str>,
+    get_action: Option<impl Fn() -> Dom + 'static>,
+) -> Dom {
     html!("empty-fragment", {
         .apply_if(slot.is_some(), move |dom| {
             dom.property("slot", slot.unwrap_ji())
@@ -27,13 +35,17 @@ pub fn render(state: Rc<State>, slot: Option<&str>) -> Dom {
                     .text("Loading...")
                 }))
             } else {
-                Some(render_loaded(state.clone()))
+                let action = match &get_action {
+                    Some(get_action) => Some(get_action()),
+                    None => None,
+                };
+                Some(render_loaded(state.clone(), action))
             }
         })))
     })
 }
 
-pub fn render_loaded(state: Rc<State>) -> Dom {
+pub fn render_loaded(state: Rc<State>, action: Option<Dom>) -> Dom {
     actions::fetch_init_data(Rc::clone(&state));
 
     html!("image-select", {
@@ -48,6 +60,12 @@ pub fn render_loaded(state: Rc<State>) -> Dom {
         .property_signal("recent", state.recent_list.signal_vec_cloned().len().map(|len| {
             len > 0
         }))
+        .apply_if(action.is_some(), |dom| {
+            dom.child(html!("empty-fragment", {
+                .property("slot", "action")
+                .child(action.unwrap_ji())
+            }))
+        })
         .children(render_controls(state.clone()))
         .children_signal_vec(state.recent_list.signal_vec_cloned().map(clone!(state => move |image| {
             render_image(Rc::clone(&state), image, "recent")
