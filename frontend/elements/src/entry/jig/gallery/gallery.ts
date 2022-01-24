@@ -172,6 +172,11 @@ export class _ extends LitElement {
                     gap: 34px;
                     justify-content: space-between;
                 }
+                .load-more {
+                    display: grid;
+                    grid-template-columns: auto;
+                    justify-content: center;
+                }
             `,
         ];
     }
@@ -274,6 +279,9 @@ export class _ extends LitElement {
                     </div>
                     <div class="recent-items">
                         <slot name="recent-items"></slot>
+                    </div>
+                    <div class="load-more">
+                        <slot name="load-more"></slot>
                     </div>
                 </div>
             </section>

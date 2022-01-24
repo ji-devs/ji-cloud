@@ -26,6 +26,10 @@ pub struct JigGallery {
     pub focus: JigFocus,
     pub loader: AsyncLoader,
     pub jigs: MutableVec<JigResponse>,
+    /// Total JIGs that can be fetched
+    pub total_jig_count: Mutable<Option<u64>>,
+    /// The next page to call when request a page of JIGs
+    pub next_page: Mutable<u32>,
     pub visible_jigs: Rc<Mutable<VisibleJigs>>,
     pub age_ranges: Mutable<Vec<AgeRange>>,
     pub confirm_delete: Mutable<Option<JigId>>,
@@ -37,6 +41,8 @@ impl JigGallery {
             focus,
             loader: AsyncLoader::new(),
             jigs: MutableVec::new(),
+            total_jig_count: Mutable::new(None),
+            next_page: Mutable::new(0),
             visible_jigs: Rc::new(Mutable::new(VisibleJigs::All)),
             age_ranges: Mutable::new(vec![]),
             confirm_delete: Mutable::new(None),

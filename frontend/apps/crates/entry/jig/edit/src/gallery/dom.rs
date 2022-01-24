@@ -3,6 +3,7 @@ use components::module::_common::thumbnail::ModuleThumbnail;
 use components::page_header::state::PageLinks;
 use components::{page_footer, page_header};
 use dominator::{clone, html, Dom};
+use futures_signals::map_ref;
 use futures_signals::signal::SignalExt;
 use futures_signals::signal_vec::SignalVecExt;
 use std::rc::Rc;
@@ -23,6 +24,8 @@ const STR_DELETE_CONTENT: &'static str = "Are you sure you want to delete this J
 const STR_DELETE_CONFIRM: &'static str = "Delete JIG";
 const STR_DELETE_CANCEL: &'static str = "Don't delete";
 
+const STR_LOAD_MORE: &str = "See more";
+
 impl JigGallery {
     fn visible_jigs_option_string(visible_jigs: &VisibleJigs) -> &'static str {
         match visible_jigs {
@@ -36,6 +39,19 @@ impl JigGallery {
         let state = self;
 
         state.load_data();
+
+        let load_more_signal = map_ref! {
+            let total_jig_count = state.total_jig_count.signal_cloned(),
+            let jigs = state.jigs.signal_vec_cloned().to_signal_cloned()
+                => {
+                    match total_jig_count {
+                        Some(total_jig_count) => {
+                            (jigs.len() as u64) < *total_jig_count
+                        },
+                        None => false
+                    }
+                }
+        };
 
         html!("empty-fragment", {
             .child(page_header::dom::render(Rc::new(page_header::state::State::new()), None, Some(PageLinks::Create)))
@@ -167,6 +183,24 @@ impl JigGallery {
                                 }),
                             ])
                         })
+                    })))
+                    .child_signal(load_more_signal.map(clone!(state => move |load_more| {
+                        if load_more {
+                            Some(html!("button-rect", {
+                                .property("slot", "load-more")
+                                .property("color", "blue")
+                                .property("type", "filled")
+                                .property_signal("disabled", state.loader.is_loading())
+                                .text(STR_LOAD_MORE)
+                                .event(clone!(state => move |_: events::Click| {
+                                    state.loader.load(clone!(state => async move {
+                                        state.load_data();
+                                    }));
+                                }))
+                            }))
+                        } else {
+                            None
+                        }
                     })))
                 })
             )
