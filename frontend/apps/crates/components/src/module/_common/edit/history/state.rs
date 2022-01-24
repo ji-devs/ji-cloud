@@ -1,4 +1,4 @@
-use std::ops::Index;
+use std::{ops::Index, fmt::Debug};
 
 use futures_signals::{
     map_ref,
@@ -6,9 +6,10 @@ use futures_signals::{
     signal_vec::{MutableVec, SignalVecExt},
 };
 
+#[derive(Debug)]
 pub struct HistoryState<T, OnSaveFn, OnUndoRedoFn>
 where
-    T: Clone,
+    T: Clone + Debug,
     OnSaveFn: Fn(T),
     OnUndoRedoFn: Fn(T),
 {
@@ -20,7 +21,7 @@ where
 
 impl<T, OnSaveFn, OnUndoRedoFn> HistoryState<T, OnSaveFn, OnUndoRedoFn>
 where
-    T: Clone + 'static,
+    T: Clone + Debug + 'static,
     OnSaveFn: Fn(T) + 'static,
     OnUndoRedoFn: Fn(T) + 'static,
 {

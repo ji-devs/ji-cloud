@@ -1,10 +1,11 @@
 use dominator::{clone, html, Dom};
 
-use std::rc::Rc;
+use std::{rc::Rc, fmt::Debug};
 use utils::events;
 
 use crate::module::_common::edit::history::state::HistoryState;
 
+#[derive(Debug)]
 pub struct ControllerDom {}
 
 //TODO - move on_undoredo into HistoryState itself
@@ -14,7 +15,7 @@ impl ControllerDom {
         on_preview: OnPreviewFn,
     ) -> Dom
     where
-        T: Clone + 'static,
+        T: Clone + Debug + 'static,
         OnChangeFn: Fn(T) + 'static,
         OnUndoRedoFn: Fn(T) + 'static,
         OnPreviewFn: Fn() + 'static,
