@@ -152,7 +152,6 @@ limit 10 for no key update skip locked;
         .map_ok(|row| ImageTranslateDescriptions {
             image_id: row.id,
             description: row.description
-            
         })
         .try_collect()
         .await?;
@@ -211,7 +210,6 @@ limit 50 for no key update skip locked;
         .map_ok(|row| JigTranslateDescriptions {
             jig_data_id: row.id,
             description: row.description
-            
         })
         .try_collect()
         .await?;
