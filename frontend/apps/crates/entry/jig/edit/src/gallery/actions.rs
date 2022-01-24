@@ -51,6 +51,7 @@ impl JigGallery {
         };
 
         let req = JigBrowseQuery {
+            page: Some(*self.next_page.lock_ref()),
             is_published,
             author_id: Some(UserOrMe::Me),
             jig_focus: Some(state.focus),
@@ -65,8 +66,18 @@ impl JigGallery {
         )
             .await
         {
-            Ok(resp) => {
-                state.jigs.lock_mut().replace_cloned(resp.jigs);
+            Ok(mut resp) => {
+                // Update the total count and increment the next page so that a future call will
+                // call the correct page.
+                state.total_jig_count.set(Some(resp.total_jig_count));
+                *state.next_page.lock_mut() += 1;
+
+                // Append results to the current list.
+                let mut new_list = state.jigs.lock_ref().to_vec();
+                new_list.append(&mut resp.jigs);
+
+                // Update the list with the new list.
+                state.jigs.lock_mut().replace_cloned(new_list);
             }
             Err(_) => {}
         }
