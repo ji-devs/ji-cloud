@@ -8,6 +8,7 @@ expression: body
     "id": "3095d05e-f2c7-11ea-89c3-3b621dd74a1f",
     "name": "test",
     "description": "testest",
+    "translated_description": {},
     "is_premium": true,
     "kind": "Canvas",
     "publish_at": null,

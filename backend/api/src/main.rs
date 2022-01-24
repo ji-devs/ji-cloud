@@ -16,7 +16,7 @@ use std::thread;
 use anyhow::Context;
 use core::settings::{self, SettingsManager};
 
-use ji_cloud_api::{algolia, db, http, jwk, logger, service};
+use ji_cloud_api::{algolia, db, http, jwk, logger, service, translate};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -36,6 +36,7 @@ async fn main() -> anyhow::Result<()> {
         jwk_verifier,
         mail_client,
         media_upload_cleaner,
+        google_translate,
         _guard,
     ) = {
         log::trace!("initializing settings and processes");
@@ -87,6 +88,8 @@ async fn main() -> anyhow::Result<()> {
         let media_upload_cleaner =
             service::upload::cleaner::UploadCleaner::new(db_pool.clone(), db::UPLOADS_DB_SCHEMA)?;
 
+        let google_translate = translate::GoogleTranslate::new(db_pool.clone(), &runtime_settings)?;
+
         let jwk_verifier =
             jwk::create_verifier(settings.jwk_audience_settings(&runtime_settings).await?);
 
@@ -109,6 +112,7 @@ async fn main() -> anyhow::Result<()> {
             jwk_verifier,
             mail_client,
             media_upload_cleaner,
+            google_translate,
             guard,
         )
     };
@@ -126,6 +130,7 @@ async fn main() -> anyhow::Result<()> {
             mail_client,
             algolia_manager,
             media_upload_cleaner,
+            google_translate,
         )
     });
 

@@ -39,7 +39,8 @@ expression: body
     "privacyLevel": "unlisted",
     "locked": false,
     "otherKeywords": "",
-    "translatedKeywords": ""
+    "translatedKeywords": "",
+    "translatedDescription": {}
   },
   "adminData": {
     "rating": null,

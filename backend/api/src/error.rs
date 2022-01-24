@@ -126,6 +126,7 @@ pub enum ServiceKind {
     Mail,
     FirebaseCloudMessaging,
     UploadCleaner,
+    GoogleTranslate,
 }
 
 impl ServiceKind {
@@ -140,6 +141,7 @@ impl ServiceKind {
             Self::Mail => "Sendgrid Mail",
             Self::FirebaseCloudMessaging => "Firebase Cloud Messaging",
             Self::UploadCleaner => "Media Upload Cleaner",
+            Self::GoogleTranslate => "Google Translate",
         }
     }
 }

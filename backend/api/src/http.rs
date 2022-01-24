@@ -17,6 +17,7 @@ use sqlx::postgres::PgPool;
 use crate::{
     error::BasicError,
     service::{self, mail, s3, upload::cleaner, ServiceData},
+    translate,
 };
 
 mod cors;
@@ -115,6 +116,7 @@ pub async fn build_and_run(
     mail_client: Option<mail::Client>,
     algolia_manager: Option<crate::algolia::Manager>,
     media_upload_cleaner: Option<cleaner::UploadCleaner>,
+    google_translate: Option<translate::GoogleTranslate>,
 ) -> anyhow::Result<()> {
     let app = build(
         pool,
@@ -128,6 +130,7 @@ pub async fn build_and_run(
         mail_client,
         algolia_manager,
         media_upload_cleaner,
+        google_translate,
     )?;
     app.run_until_stopped().await?;
 
@@ -146,6 +149,7 @@ pub fn build(
     mail_client: Option<mail::Client>,
     algolia_manager: Option<crate::algolia::Manager>,
     media_upload_cleaner: Option<cleaner::UploadCleaner>,
+    google_translate: Option<translate::GoogleTranslate>,
 ) -> anyhow::Result<Application> {
     let local_insecure = settings.is_local();
     let api_port = settings.api_port;
@@ -158,6 +162,7 @@ pub fn build(
     let mail_client = mail_client.map(ServiceData::new);
     let algolia_manager = algolia_manager.map(ServiceData::new);
     let media_upload_cleaner = media_upload_cleaner.map(ServiceData::new);
+    let google_translate = google_translate.map(ServiceData::new);
 
     let server = actix_web::HttpServer::new(move || {
         let app = actix_web::App::new()
@@ -201,6 +206,10 @@ pub fn build(
 
         let app = match media_upload_cleaner.clone() {
             Some(media_upload_cleaner) => app.app_data(media_upload_cleaner),
+            None => app,
+        };
+        let app = match google_translate.clone() {
+            Some(google_translate) => app.app_data(google_translate),
             None => app,
         };
         app.app_data(Data::from(jwk_verifier.clone()))

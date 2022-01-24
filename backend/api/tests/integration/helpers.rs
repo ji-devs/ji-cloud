@@ -213,6 +213,7 @@ pub async fn initialize_server_and_get_db(
         mail,
         None,
         None,
+        None,
     )
     .expect("failed to initialize server");
 

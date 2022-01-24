@@ -227,6 +227,14 @@ pub struct AlgoliaSettings {
     pub frontend_search_key: Option<String>,
 }
 
+/// Settings to initialize a google translate client.
+#[derive(Clone, Debug)]
+pub struct GoogleTranslateSettings {
+    /// The key that the backend uses for translating via google translate.
+    /// If [`None`], translating will be disabled.
+    pub google_api_key: Option<String>,
+}
+
 /// Settings for the email (sendgrid) client.
 #[derive(Clone, Debug)]
 pub struct EmailClientSettings {
@@ -529,6 +537,45 @@ impl SettingsManager {
 
     /// Load the settings for Algolia.
     pub async fn algolia_settings(&self) -> anyhow::Result<Option<AlgoliaSettings>> {
+        // Don't early return right away, notify of the other missing vars first.
+        let application_id = self
+            .get_varying_secret(keys::algolia::APPLICATION_ID)
+            .await?;
+
+        let media_index = self.get_varying_secret(keys::algolia::MEDIA_INDEX).await?;
+
+        let jig_index = self.get_varying_secret(keys::algolia::JIG_INDEX).await?;
+
+        let management_key = self
+            .get_varying_secret(keys::algolia::MANAGEMENT_KEY)
+            .await?;
+
+        let backend_search_key = self
+            .get_varying_secret(keys::algolia::BACKEND_SEARCH_KEY)
+            .await?;
+
+        let frontend_search_key = self
+            .get_varying_secret(keys::algolia::FRONTEND_SEARCH_KEY)
+            .await?;
+
+        // *now* returning is okay.
+        let application_id = match application_id {
+            Some(id) => id,
+            None => return Ok(None),
+        };
+
+        Ok(Some(AlgoliaSettings {
+            application_id,
+            backend_search_key,
+            management_key,
+            media_index,
+            jig_index,
+            frontend_search_key,
+        }))
+    }
+
+    /// Load the settings for Algolia.
+    pub async fn google_translate_settings(&self) -> anyhow::Result<Option<AlgoliaSettings>> {
         // Don't early return right away, notify of the other missing vars first.
         let application_id = self
             .get_varying_secret(keys::algolia::APPLICATION_ID)

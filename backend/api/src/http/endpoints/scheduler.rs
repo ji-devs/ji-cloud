@@ -10,6 +10,7 @@ use crate::{
     extractor::UserAgent,
     jwk::{IdentityClaims, JwkVerifier},
     service::{upload::cleaner::UploadCleaner, ServiceData},
+    translate::GoogleTranslate,
 };
 
 async fn batch_update(
@@ -56,6 +57,28 @@ async fn media_clean(
     Ok(HttpResponse::Ok().finish())
 }
 
+async fn translate_descriptions(
+    google_translate_manager: ServiceData<GoogleTranslate>,
+    bearer_auth: BearerAuth,
+    jwks: Data<JwkVerifier>,
+    user_agent: UserAgent,
+) -> Result<HttpResponse, error::ServiceSession> {
+    if user_agent
+        .0
+        .map_or(true, |it| it != "Google-Cloud-Scheduler")
+    {
+        return Err(error::ServiceSession::Unauthorized);
+    }
+
+    let _claims: IdentityClaims = jwks
+        .verify_iam_api_invoker_oauth(bearer_auth.token(), 3)
+        .await?;
+
+    google_translate_manager.spawn_cron_jobs().await?;
+
+    Ok(HttpResponse::Ok().finish())
+}
+
 pub fn configure(cfg: &mut ServiceConfig) {
     cfg.route(
         "/v1/scheduler/update-algolia",
@@ -64,5 +87,9 @@ pub fn configure(cfg: &mut ServiceConfig) {
     cfg.route(
         "/v1/scheduler/media-clean",
         method(http::Method::POST).to(media_clean),
+    );
+    cfg.route(
+        "/v1/scheduler/translate-descriptions",
+        method(http::Method::POST).to(translate_descriptions),
     );
 }
