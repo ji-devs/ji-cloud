@@ -1,7 +1,7 @@
 //! Types for JIGs.
 
 pub mod additional_resource;
-pub use additional_resource::{AdditionalResource, AdditionalResourceId};
+pub use additional_resource::{AdditionalResource, AdditionalResourceId, ResourceContent};
 
 pub mod curation;
 

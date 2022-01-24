@@ -57,11 +57,16 @@ export class _ extends LitElement {
     @property()
     resourceType: string = "";
 
+    @property()
+    resourceHref: string = "";
+
     render() {
         return html`
             <div class="label" title=${this.label}>
                 <fa-icon icon="fa-light fa-check"></fa-icon>
-                ${ this.label }
+                ${this.resourceHref === "" 
+                    ? html`${ this.label }` 
+                    : html`<a href="${this.resourceHref}" target="_blank">${ this.label }</a>` }
             </div>
             <div class="second-line">
                 <span class="resource-type">${this.resourceType}</span>
