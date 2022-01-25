@@ -59,6 +59,7 @@ impl SoundboardItem {
             state.base.audio_manager.play_clip_on_ended(
                 state.base.activity_media_url(&audio_filename),
                 clone!(state => move || {
+                    state.hotspot.fade_out();
                     if let Some(index) = state.jump_index {
                         log::info!("going to index {}!", index);
 

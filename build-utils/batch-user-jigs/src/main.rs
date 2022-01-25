@@ -62,21 +62,25 @@ async fn main() {
 async fn get_futures(ctx:Arc<Context>) -> Vec<impl Future> {
     let mut futures = Vec::new();
 
-    let url = format!("{}{}?authorId=me&jigFocus=modules", ctx.opts.get_remote_target().api_url(), endpoints::jig::Browse::PATH);
+    async fn do_browse(ctx:&Context, page:usize) -> JigBrowseResponse {
+        let url = format!("{}{}?authorId=me&jigFocus=modules&page={}&draftOrLive=draft", ctx.opts.get_remote_target().api_url(), endpoints::jig::Browse::PATH, page);
 
-    let res = ctx.client
-        .get(&url)
-        .header("Authorization", &format!("Bearer {}", ctx.token))
-        .send()
-        .await
-        .unwrap();
+        let res = ctx.client
+            .get(&url)
+            .header("Authorization", &format!("Bearer {}", ctx.token))
+            .send()
+            .await
+            .unwrap();
 
-    if !res.status().is_success() {
-        log::error!("error code: {}, details: {:?}", res.status().as_str(), res);
-        panic!("unable to get jigs pages!"); 
+
+        if !res.status().is_success() {
+            log::error!("error code: {}, details: {:?}", res.status().as_str(), res);
+            panic!("unable to get jigs pages!"); 
+        }
+
+        res.json().await.unwrap()
     }
-
-    let JigBrowseResponse { pages, total_jig_count, ..} = res.json().await.unwrap();
+    let JigBrowseResponse { pages, total_jig_count, ..} = do_browse(&ctx, 0).await;
 
     log::info!("Updating {} pages, {} jigs total ", pages, total_jig_count);
 
@@ -84,22 +88,9 @@ async fn get_futures(ctx:Arc<Context>) -> Vec<impl Future> {
         futures.push({
             let ctx = ctx.clone();
             async move {
-                let url = format!("{}{}?authorId=me&jigFocus=modules&page={}", ctx.opts.get_remote_target().api_url(), endpoints::jig::Browse::PATH, page);
                 log::info!("loading jigs for page {}", page);
 
-                let res = ctx.client
-                    .get(&url)
-                    .header("Authorization", &format!("Bearer {}", ctx.token))
-                    .send()
-                    .await
-                    .unwrap();
-
-                if !res.status().is_success() {
-                    log::error!("error code: {}, details: {:?}", res.status().as_str(), res);
-                    panic!("unable to browse jigs at page {}!", page); 
-                }
-
-                let JigBrowseResponse { jigs, total_jig_count, ..} = res.json().await.unwrap();
+                let JigBrowseResponse { jigs, ..} = do_browse(&ctx, 0).await;
 
                 for jig in jigs {
                     for module in jig.jig_data.modules {
