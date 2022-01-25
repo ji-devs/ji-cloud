@@ -74,6 +74,7 @@ pub fn get_jig() -> JigResponse {
             locked: true,
             other_keywords: String::from(""),
             translated_keywords: String::from(""),
+            translated_description: serde_json::Value::Null,
         },
         jig_focus: JigFocus::Modules,
         likes: 0,
