@@ -48,6 +48,7 @@ pub enum MenuTabKind {
     Question,
     Select,
     Text,
+    DualList,
     Theme,
     Tooltip,
     Video,
@@ -69,6 +70,7 @@ impl MenuTabKind {
             Self::Question => "question",
             Self::Select => "select",
             Self::Text => "text",
+            Self::DualList => "text", // Same str value as Self::Text
             Self::Theme => "theme",
             Self::Tooltip => "tooltip",
             Self::Video => "video",

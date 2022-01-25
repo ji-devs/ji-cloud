@@ -23,60 +23,55 @@ use shared::{
     domain::jig::module::body::{Image, _groups::cards::Mode},
     config as shared_config,
 };
-use utils::unwrap::UnwrapJiExt;
 use std::rc::Rc;
 
 pub struct Step1<RawData: RawDataExt, E: ExtraExt> {
     pub base: Rc<CardsBase<RawData, E>>,
-    pub widget: OnceCell<Widget>,
+    pub tabs: OnceCell<Vec<Tab>>,
     pub tab_index: Mutable<Option<usize>>,
 }
 
 impl<RawData: RawDataExt, E: ExtraExt> Step1<RawData, E> {
     pub fn new(base: Rc<CardsBase<RawData, E>>, tab_index: Mutable<Option<usize>>) -> Rc<Self> {
+        // If the tab index isn't set yet, make it the first tab
+        if tab_index.lock_ref().is_none() {
+            tab_index.set(Some(0));
+        }
+
         let state = Rc::new(Self {
             base: base.clone(),
-            widget: OnceCell::default(),
+            tabs: OnceCell::default(),
             tab_index,
         });
 
         // Widgets require a reference to the top-level state so that they can have access to any
         // fields they might require in callbacks.
-        let widget = match base.mode {
+        let tabs = match base.mode {
             Mode::WordsAndImages => {
-                let kind = match base.debug.step1_tab {
-                    Some(kind) => kind,
-                    None => MenuTabKind::Text,
-                };
-
-                let tab = Mutable::new(Tab::new(state.clone(), kind));
-                Widget::Tabs(tab)
+                vec![
+                    Tab::new(state.clone(), MenuTabKind::Text),
+                    Tab::new(state.clone(), MenuTabKind::Image),
+                ]
             }
-            Mode::Duplicate | Mode::Lettering => {
-                Widget::Single(Rc::new(make_single_list(state.clone())))
-            }
-            _ => Widget::Dual(Rc::new(make_dual_list(state.clone()))),
+            Mode::Duplicate | Mode::Lettering => vec![Tab::new(state.clone(), MenuTabKind::Text)],
+            _ => vec![Tab::new(state.clone(), MenuTabKind::DualList)],
         };
 
+        // TODO add audio tab to all modes
+
         // `set()` will return an Err if the cell already has a value. However, because we are
-        // using this purely to lazily set a widget immediately after initializing the state, the
+        // using this purely to lazily set the tabs immediately after initializing the state, the
         // error here will never occur.
-        let _ = state.widget.set(widget);
+        let _ = state.tabs.set(tabs);
 
         state
     }
 }
 
 #[derive(Clone)]
-pub enum Widget {
+pub enum Tab {
     Single(Rc<SingleListState>),
     Dual(Rc<DualListState>),
-    Tabs(Mutable<Tab>),
-}
-
-#[derive(Clone)]
-pub enum Tab {
-    Text(Rc<SingleListState>),
     Image(Rc<ImageSearchState>),
 }
 
@@ -97,7 +92,8 @@ impl Tab {
 
                 Self::Image(Rc::new(state))
             }
-            MenuTabKind::Text => Self::Text(Rc::new(make_single_list(state))),
+            MenuTabKind::Text => Self::Single(Rc::new(make_single_list(state))),
+            MenuTabKind::DualList => Self::Dual(Rc::new(make_dual_list(state))),
 
             _ => unimplemented!("unsupported tab kind!"),
         }
@@ -105,14 +101,9 @@ impl Tab {
 
     pub fn kind(&self) -> MenuTabKind {
         match self {
-            Self::Text(_) => MenuTabKind::Text,
+            Self::Single(_) => MenuTabKind::Text,
+            Self::Dual(_) => MenuTabKind::DualList,
             Self::Image(_) => MenuTabKind::Image,
-        }
-    }
-    pub fn as_index(&self) -> usize {
-        match self {
-            Self::Text(_) => 0,
-            Self::Image(_) => 1,
         }
     }
 }
@@ -130,12 +121,10 @@ fn make_single_list<RawData: RawDataExt, E: ExtraExt>(
         clone!(state => move |list| {
             state.base.replace_single_list(list);
 
-            // If the current mode is words and images, and the current widget is a Tab, then at
-            // this point the user can be navigated directly to the Image tab.
+            // If the current mode is words and images, then at this point the user can be
+            // navigated directly to the Image tab.
             if matches!(state.base.mode, Mode::WordsAndImages) {
-                if let Widget::Tabs(tab) = state.widget.get().unwrap_ji() {
-                    tab.set(Tab::new(state.clone(), MenuTabKind::Image));
-                }
+                state.tab_index.set_neq(Some(1));
             }
         }),
         config::get_single_list_init_word,

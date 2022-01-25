@@ -1,6 +1,5 @@
 use super::state::*;
 use dominator::{clone, html, Dom};
-use futures_signals::signal::Mutable;
 use futures_signals::signal::SignalExt;
 use std::rc::Rc;
 use utils::prelude::*;
@@ -16,62 +15,45 @@ pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<Step1<RawData, E>>) ->
     html!("empty-fragment", {
         .style("display", "contents")
         .child_signal(state.base.is_empty_signal().map(clone!(state => move |is_empty| {
-            Some(match state.widget.get().unwrap_ji() {
-                Widget::Single(single) => {
-
-                    html!("module-sidebar-body", {
+            Some(html!("menu-tabs", {
+                .children(state.tabs.get().unwrap_ji().iter().enumerate().map(|(idx, tab)| {
+                    let enabled = idx == 0 || (idx > 0 && !is_empty);
+                    render_tab(state.clone(), tab.kind(), idx, enabled)
+                }))
+                .child(html!("module-sidebar-body", {
                         .property("slot", "body")
-                        .child(
-                            if !is_empty {
-                                render_non_empty(state.clone())
-                            } else {
-                                render_single_list(single.clone())
-                            }
-                        )
-                    })
-                },
-                Widget::Dual(dual) => {
-                    html!("module-sidebar-body", {
-                        .property("slot", "body")
-                        .child(
-                            if !is_empty {
-                                render_non_empty(state.clone())
-                            } else {
-                                render_dual_list(dual.clone())
-                            }
-                        )
-                    })
-                },
-                Widget::Tabs(tab) => {
-                    html!("menu-tabs", {
-                        .future(tab.signal_ref(|tab| tab.as_index()).dedupe().for_each(clone!(state => move |index| {
-                            state.tab_index.set(Some(index));
-                            async move {}
-                        })))
-                        .children(&mut [
-                            render_tab(state.clone(), tab.clone(), MenuTabKind::Text, true),
-                            render_tab(state.clone(), tab.clone(), MenuTabKind::Image, !is_empty),
-                            html!("module-sidebar-body", {
-                                .property("slot", "body")
-                                .child_signal(tab.signal_cloned().map(clone!(state, is_empty => move |tab| {
-                                    match tab {
-                                        Tab::Text(single) => {
-                                            Some(if !is_empty {
-                                                render_non_empty(state.clone())
-                                            } else {
-                                                render_single_list(single)
-                                            })
-                                        },
-                                        Tab::Image(image) => {
-                                            Some(render_image_search(image, None))
-                                        },
+                        .child_signal(state.tab_index.signal_cloned().map(clone!(state, is_empty => move |current_tab_idx| {
+                            let tab = match current_tab_idx {
+                                Some(current_tab_idx) => match state.tabs.get() {
+                                    Some(tabs) => tabs.get(current_tab_idx),
+                                    None => None,
+                                },
+                                None => None,
+                            };
+                            match tab {
+                                Some(Tab::Single(single)) => {
+                                    if !is_empty {
+                                        Some(render_non_empty(state.clone()))
+                                    } else {
+                                        Some(render_single_list(single.clone()))
                                     }
-                                })))
-                            })
-                        ])
+                                },
+                                Some(Tab::Dual(dual)) => {
+                                    if !is_empty {
+                                        Some(render_non_empty(state.clone()))
+                                    } else {
+                                        Some(render_dual_list(dual.clone()))
+                                    }
+                                }
+                                Some(Tab::Image(image)) => {
+                                    Some(render_image_search(image.clone(), None))
+                                },
+                                _ => None,
+                            }
+                        })))
                     })
-                }
-            })
+                )
+            }))
         })))
     })
 }
@@ -94,8 +76,8 @@ fn render_non_empty<RawData: RawDataExt, E: ExtraExt>(state: Rc<Step1<RawData, E
 
 fn render_tab<RawData: RawDataExt, E: ExtraExt>(
     state: Rc<Step1<RawData, E>>,
-    tab: Mutable<Tab>,
     tab_kind: MenuTabKind,
+    idx: usize,
     enabled: bool,
 ) -> Dom {
     MenuTab::render(
@@ -103,11 +85,11 @@ fn render_tab<RawData: RawDataExt, E: ExtraExt>(
             tab_kind,
             false,
             enabled,
-            clone!(tab => move || tab.signal_ref(clone!(tab_kind => move |curr| {
-                curr.kind() == tab_kind
-            }))),
-            clone!(state, tab_kind => move || {
-                tab.set(Tab::new(state.clone(), tab_kind));
+            clone!(state => move || state.tab_index.signal_ref(move |current_tab_idx| {
+                current_tab_idx.as_ref().map_or(false, |current_tab_idx| *current_tab_idx == idx)
+            })),
+            clone!(state => move || {
+                state.tab_index.set_neq(Some(idx))
             }),
         ),
         Some("tabs"),
