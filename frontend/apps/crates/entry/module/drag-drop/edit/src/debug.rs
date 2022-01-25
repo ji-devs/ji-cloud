@@ -7,7 +7,7 @@ use shared::{
         jig::{
             module::{
                 body::{
-                    Image, Instructions, ThemeChoice, Transform,
+                    Image, Instructions, Transform,
                     _groups::design::{
                         Backgrounds, Sprite, Sticker, Text, Trace, TraceKind, TraceShape,
                     },
@@ -120,7 +120,7 @@ impl DebugSettings {
                                     kind: item_kind.clone()
                                 }
                             }).collect(),
-                            theme: ThemeChoice::Override(ThemeId::Chalkboard),
+                            theme: ThemeId::Chalkboard,
                             instructions: Instructions::default(),
                             backgrounds: Backgrounds {
                                 layer_1: None, //Some(Background::Color(hex_to_rgba8("#ff0000"))),

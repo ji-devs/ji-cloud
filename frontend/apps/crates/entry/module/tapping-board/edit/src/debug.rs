@@ -8,7 +8,7 @@ use shared::{
         image::ImageId,
         jig::{
             module::body::{
-                Audio, Image, Instructions, ThemeChoice, Transform,
+                Audio, Image, Instructions, Transform,
                 _groups::design::{
                     Backgrounds, BaseContent, Sprite, Sticker, Text, Trace, TraceKind, TraceShape,
                 },
@@ -90,7 +90,7 @@ impl DebugSettings {
                             })
                             .collect(),
                         base: BaseContent {
-                            theme: ThemeChoice::Override(ThemeId::Chalkboard),
+                            theme: ThemeId::Chalkboard,
                             instructions: Instructions::default(),
                             stickers: init_data
                                 .stickers

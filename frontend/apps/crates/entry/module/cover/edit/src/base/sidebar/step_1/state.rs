@@ -16,9 +16,7 @@ impl Step1 {
             sidebar.base.set_theme(theme_choice);
         }));
         let theme_selector = Rc::new(ThemeSelector::new(
-            sidebar.base.jig_id,
-            sidebar.base.jig_theme_id.clone(),
-            sidebar.base.theme_id.clone(),
+            sidebar.base.theme_id.read_only(),
             callbacks,
         ));
 

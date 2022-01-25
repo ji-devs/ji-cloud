@@ -8,7 +8,7 @@ use shared::{
         image::ImageId,
         jig::{
             module::body::{
-                Image, Instructions, ThemeChoice,
+                Image, Instructions,
                 _groups::design::{Backgrounds, BaseContent, Sprite, Sticker, Text},
                 video::{Content, Mode, ModuleData as RawData, Step},
             },
@@ -64,7 +64,7 @@ impl DebugSettings {
                     content: Some(Content {
                         mode: Mode::Introduction,
                         base: BaseContent {
-                            theme: ThemeChoice::Override(ThemeId::Chalkboard),
+                            theme: ThemeId::Chalkboard,
                             instructions: Instructions::default(),
                             stickers: init_data
                                 .stickers

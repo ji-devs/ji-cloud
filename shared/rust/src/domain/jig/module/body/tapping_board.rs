@@ -1,6 +1,6 @@
 use crate::domain::jig::module::{
     body::{
-        Body, BodyConvert, BodyExt, ModeExt, StepExt, ThemeChoice,
+        Body, BodyConvert, BodyExt, ModeExt, StepExt, ThemeId,
         _groups::design::{BaseContent, Trace},
     },
     ModuleKind,
@@ -72,7 +72,7 @@ impl BodyExt<Mode, Step> for ModuleData {
             .map(|content| content.editor_state.steps_completed.clone())
     }
 
-    fn get_theme(&self) -> Option<ThemeChoice> {
+    fn get_theme(&self) -> Option<ThemeId> {
         self.content.as_ref().map(|content| content.base.theme)
     }
 }

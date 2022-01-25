@@ -1,16 +1,13 @@
 use dominator::{clone, Dom};
 use dominator_helpers::futures::AsyncLoader;
-use futures_signals::{
-    map_ref,
-    signal::{Mutable, ReadOnlyMutable, Signal, SignalExt},
-};
+use futures_signals::signal::{Mutable, Signal, SignalExt};
 use std::collections::HashSet;
 use std::{marker::PhantomData, rc::Rc};
 
 use super::super::{actions::HistoryStateImpl, state::*};
 use shared::domain::jig::{
     module::{
-        body::{BodyExt, ModeExt, StepExt, ThemeChoice},
+        body::{BodyExt, ModeExt, StepExt, ThemeId},
         ModuleId,
     },
     JigData, JigId, ModuleKind,
@@ -19,8 +16,6 @@ use std::future::Future;
 use utils::prelude::*;
 
 use crate::module::_common::edit::post_preview::state::PostPreview;
-
-use wasm_bindgen_futures::spawn_local;
 
 /// This is passed *to* the consumer in order to get a BaseInit
 pub struct BaseInitFromRawArgs<RawData, Mode, Step>
@@ -31,9 +26,7 @@ where
 {
     pub step: Mutable<Step>, //not intended to be changed lower down, just for passing back really
     pub steps_completed: Mutable<HashSet<Step>>,
-    pub theme_choice: Mutable<ThemeChoice>,
-    pub theme_id: ReadOnlyMutable<ThemeId>, //derived from jig and module theme
-    pub jig_theme_id: Mutable<ThemeId>,
+    pub theme_id: Mutable<ThemeId>,
     pub jig_id: JigId,
     pub module_id: ModuleId,
     pub jig: JigData,
@@ -62,45 +55,15 @@ where
         let steps_completed =
             Mutable::new(raw.get_editor_state_steps_completed().unwrap_or_default());
 
-        let theme_choice = Mutable::new(raw.get_theme().unwrap_or_default());
-
-        let jig_theme_id = Mutable::new(jig.theme);
-
-        let theme_id_sig = {
-            map_ref! {
-                let jig_theme_id = jig_theme_id.signal(),
-                let theme = theme_choice.signal()
-                    => {
-                    match *theme {
-                        ThemeChoice::Jig => *jig_theme_id,
-                        ThemeChoice::Override(theme_id) => theme_id
-                    }
-                }
-            }
-        };
-
-        let theme_id = Mutable::new(match theme_choice.get() {
-            ThemeChoice::Jig => jig.theme,
-            ThemeChoice::Override(id) => id,
-        });
-
-        //TODO: - hold onto this somewhere?
-        spawn_local(clone!(theme_id => async move {
-            let _ = theme_id_sig.for_each(clone!(theme_id => move |id| {
-                theme_id.set_neq(id);
-                async {}
-            })).await;
-        }));
+        let theme_id = Mutable::new(raw.get_theme().unwrap_or_default());
 
         Self {
             step,
             steps_completed,
-            theme_choice,
-            theme_id: theme_id.read_only(),
+            theme_id,
             jig_id,
             module_id,
             jig,
-            jig_theme_id,
             raw,
             source,
             history,
@@ -175,7 +138,7 @@ where
         // extract the things from init args that need to be shared
         // even if just for applying the debug override
         let step = init_args.step.clone();
-        let theme_choice = init_args.theme_choice.clone();
+        let theme_id = init_args.theme_id.clone();
         let steps_completed = init_args.steps_completed.clone();
         let jig = init_args.jig.clone();
         let mode = init_args.raw.mode();
@@ -188,7 +151,7 @@ where
             step.set_neq(force_step);
         }
         if let Some(force_theme) = init.force_theme {
-            theme_choice.set_neq(force_theme);
+            theme_id.set_neq(force_theme);
         }
 
         // setup a reactor on the step stuff, independent of the dom rendering
@@ -234,7 +197,7 @@ where
     Overlay: OverlayExt + 'static,
 {
     pub force_step: Option<Step>,
-    pub force_theme: Option<ThemeChoice>,
+    pub force_theme: Option<ThemeId>,
     pub base: Rc<Base>,
     pub main: Rc<Main>,
     pub sidebar: Rc<Sidebar>,

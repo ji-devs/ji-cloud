@@ -1,5 +1,5 @@
 use crate::domain::jig::module::{
-    body::{Body, BodyConvert, BodyExt, StepExt, ThemeChoice, _groups::design::*},
+    body::{Body, BodyConvert, BodyExt, StepExt, ThemeId, _groups::design::*},
     ModuleKind,
 };
 use serde::{Deserialize, Serialize};
@@ -71,7 +71,7 @@ impl BodyExt<(), Step> for ModuleData {
             .map(|content| content.editor_state.steps_completed.clone())
     }
 
-    fn get_theme(&self) -> Option<ThemeChoice> {
+    fn get_theme(&self) -> Option<ThemeId> {
         self.content.as_ref().map(|content| content.base.theme)
     }
 }

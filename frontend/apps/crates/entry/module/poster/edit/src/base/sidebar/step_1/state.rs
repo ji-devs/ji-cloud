@@ -58,7 +58,7 @@ impl Tab {
             }
             MenuTabKind::FillColor => {
                 let state = ColorPickerState::new(
-                    base.theme_id.clone(),
+                    base.theme_id.read_only(),
                     None,
                     Some(String::from(STR_SELECT_BACKGROUND_COLOR)),
                     Some(clone!(base => move |color| {

@@ -56,9 +56,7 @@ impl Tab {
                     base.set_theme(theme);
                 }));
                 let state = ThemeSelector::new(
-                    base.jig_id,
-                    base.jig_theme_id.clone(),
-                    base.theme_id.clone(),
+                    base.theme_id.read_only(),
                     callbacks,
                 );
                 Self::Theme(Rc::new(state))
@@ -79,7 +77,7 @@ impl Tab {
 
             MenuTabKind::FillColor => {
                 let state = ColorPickerState::new(
-                    base.theme_id.clone(),
+                    base.theme_id.read_only(),
                     None,
                     Some(String::from(STR_SELECT_BACKGROUND_COLOR)),
                     Some(clone!(base => move |color| {

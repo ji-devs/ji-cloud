@@ -1,13 +1,6 @@
-use dominator_helpers::futures::AsyncLoader;
-use shared::domain::jig::{
-    module::body::{ThemeChoice, ThemeId},
-    JigId,
-};
+use shared::domain::jig::module::body::ThemeId;
 
-use futures_signals::{
-    map_ref,
-    signal::{Mutable, ReadOnlyMutable, Signal},
-};
+use futures_signals::signal::{ReadOnlyMutable, Signal, SignalExt};
 
 /*
  * jig_theme_id is a mutable because we need to set it here, but it doesn't get pushed to history
@@ -16,47 +9,25 @@ use futures_signals::{
  */
 
 pub struct ThemeSelector {
-    pub(super) jig_id: JigId,
-    pub(super) jig_theme_id: Mutable<ThemeId>,
     pub(super) theme_id: ReadOnlyMutable<ThemeId>,
     pub(super) callbacks: ThemeSelectorCallbacks,
-    pub(super) jig_id_saver: AsyncLoader,
-    pub(super) apply_to_jig_popup_active: Mutable<bool>,
 }
 
 impl ThemeSelector {
     pub fn new(
-        jig_id: JigId,
-        jig_theme_id: Mutable<ThemeId>,
         theme_id: ReadOnlyMutable<ThemeId>,
         callbacks: ThemeSelectorCallbacks,
     ) -> Self {
         Self {
-            jig_id,
-            jig_theme_id,
             theme_id,
             callbacks,
-            jig_id_saver: AsyncLoader::new(),
-            apply_to_jig_popup_active: Mutable::new(false),
         }
     }
 
-    pub fn selected_state_signal(&self, theme_id: ThemeId) -> impl Signal<Item = SelectedState> {
-        map_ref! {
-            let jig_theme_id = self.jig_theme_id.signal(),
-            let selected_theme_id = self.theme_id.signal()
-                => move {
-                //The current brief is that there is no UI difference
-                //between selected and de-selected jig id
-                if theme_id == *jig_theme_id {
-                    SelectedState::Jig
-                } else if theme_id == *selected_theme_id {
-                    SelectedState::Selected
-                } else {
-                    SelectedState::None
-                }
-            }
-        }
+    pub fn selected_signal(&self, theme_id: ThemeId) -> impl Signal<Item = bool> {
+        self.theme_id.signal().map(move |selected_theme_id| {
+            theme_id == selected_theme_id
+        })
     }
 }
 
@@ -68,11 +39,11 @@ pub enum SelectedState {
 }
 
 pub struct ThemeSelectorCallbacks {
-    pub on_change: Box<dyn Fn(ThemeChoice)>,
+    pub on_change: Box<dyn Fn(ThemeId)>,
 }
 
 impl ThemeSelectorCallbacks {
-    pub fn new(on_change: impl Fn(ThemeChoice) + 'static) -> Self {
+    pub fn new(on_change: impl Fn(ThemeId) + 'static) -> Self {
         Self {
             on_change: Box::new(on_change),
         }

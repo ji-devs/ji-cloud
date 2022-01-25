@@ -5,8 +5,8 @@ use shared::{
         image::ImageId,
         jig::{
             module::body::{
-                Image, Instructions, ThemeChoice,
-                _groups::cards::{BaseContent, Card as RawCard, CardContent as RawCardContent, CardPair as RawCardPair, Mode},
+                Image, Instructions,
+                _groups::cards::{BaseContent, Card as RawCard, CardPair as RawCardPair, Mode},
                 matching::{Content, ModuleData as RawData, PlayerSettings},
             },
             module::ModuleId,
@@ -52,7 +52,7 @@ impl DebugSettings {
                         },
                         base: BaseContent {
                             mode,
-                            theme: ThemeChoice::Override(ThemeId::Chalkboard),
+                            theme: ThemeId::Chalkboard,
                             instructions: Instructions::default(),
                             pairs: if init_data.with_pairs {
                                 config::get_debug_pairs(mode)
@@ -60,32 +60,18 @@ impl DebugSettings {
                                     .take(2)
                                     .chain(config::get_debug_pairs(mode).into_iter())
                                     .map(|(word_1, word_2)| match mode {
-                                        Mode::WordsAndImages => {
-                                            RawCardPair(
-                                                RawCard {
-                                                    audio: None,
-                                                    card_content: RawCardContent::Text(word_1)
-                                                },
-                                                RawCard {
-                                                    audio: None,
-                                                    card_content: RawCardContent::Image(Some(Image {
-                                                        id: ImageId(
-                                                            Uuid::parse_str(IMAGE_UUID).unwrap_ji(),
-                                                        ),
-                                                        lib: MediaLibrary::User,
-                                                    }))
-                                                },
-                                            )
-                                        }
+                                        Mode::WordsAndImages => RawCardPair(
+                                            RawCard::Text(word_1),
+                                            RawCard::Image(Some(Image {
+                                                id: ImageId(
+                                                    Uuid::parse_str(IMAGE_UUID).unwrap_ji(),
+                                                ),
+                                                lib: MediaLibrary::User,
+                                            })),
+                                        ),
                                         _ => RawCardPair(
-                                            RawCard {
-                                                audio: None,
-                                                card_content: RawCardContent::Text(word_1)
-                                            },
-                                            RawCard {
-                                                audio: None,
-                                                card_content: RawCardContent::Text(word_2)
-                                            },
+                                            RawCard::Text(word_1),
+                                            RawCard::Text(word_2),
                                         ),
                                     })
                                     .collect()

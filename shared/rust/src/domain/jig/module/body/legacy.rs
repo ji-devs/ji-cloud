@@ -6,7 +6,7 @@ pub mod design;
 pub mod slide;
 
 use crate::domain::jig::module::{
-    body::{Body, BodyConvert, BodyExt, ThemeChoice},
+    body::{Body, BodyConvert, BodyExt, ThemeId},
     ModuleKind,
 };
 use serde::{Deserialize, Serialize};
@@ -66,7 +66,7 @@ impl BodyExt<(), ()> for ModuleData {
         None
     }
 
-    fn get_theme(&self) -> Option<ThemeChoice> {
+    fn get_theme(&self) -> Option<ThemeId> {
         None
     }
 }

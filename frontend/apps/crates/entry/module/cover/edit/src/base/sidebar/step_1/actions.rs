@@ -1,9 +1,9 @@
 use crate::base::state::*;
-use shared::domain::jig::module::body::ThemeChoice;
+use shared::domain::jig::module::body::ThemeId;
 
 impl Base {
-    pub fn set_theme(&self, theme: ThemeChoice) {
-        self.theme_choice.set_neq(theme);
+    pub fn set_theme(&self, theme: ThemeId) {
+        self.theme_id.set_neq(theme);
 
         self.history.push_modify(move |raw| {
             if let Some(content) = &mut raw.content {

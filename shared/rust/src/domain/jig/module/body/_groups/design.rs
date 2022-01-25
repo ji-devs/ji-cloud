@@ -1,5 +1,5 @@
 use crate::domain::jig::module::body::{
-    Audio, Background, Image, Instructions, ThemeChoice, Transform,
+    Audio, Background, Image, Instructions, ThemeId, Transform,
 };
 use serde::{Deserialize, Serialize};
 
@@ -10,7 +10,7 @@ pub struct BaseContent {
     pub instructions: Instructions,
 
     /// The module's theme.
-    pub theme: ThemeChoice,
+    pub theme: ThemeId,
 
     /// Backgrounds
     pub backgrounds: Backgrounds,

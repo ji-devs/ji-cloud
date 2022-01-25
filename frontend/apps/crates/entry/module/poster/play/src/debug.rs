@@ -11,7 +11,7 @@ use shared::{
         jig::{
             module::{
                 body::{
-                    Image, Instructions, ThemeChoice,
+                    Image, Instructions,
                     _groups::design::{Backgrounds, BaseContent, Sprite, Sticker, Text},
                     poster::{Content, Mode, ModuleData as RawData},
                 },
@@ -57,7 +57,7 @@ impl DebugSettings {
                     content: Some(Content {
                         mode: Mode::Poster,
                         base: BaseContent {
-                            theme: ThemeChoice::Override(ThemeId::Chalkboard),
+                            theme: ThemeId::Chalkboard,
                             instructions: Instructions {
                                 text: Some("Heya World!".to_string()),
                                 ..Instructions::default()

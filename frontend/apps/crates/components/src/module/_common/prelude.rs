@@ -3,7 +3,7 @@ pub use shared::{
     api::endpoints::{self, ApiEndpoint},
     domain::jig::{
         module::{
-            body::{Audio, Image, ThemeChoice},
+            body::{Audio, Image, ThemeId},
             ModuleId,
         },
         JigId,

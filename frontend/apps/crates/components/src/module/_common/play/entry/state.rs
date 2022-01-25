@@ -7,7 +7,7 @@ use shared::{
     api::endpoints::{self, jig::module::*, ApiEndpoint},
     domain::jig::{
         module::{
-            body::{BodyExt, ModeExt, StepExt, ThemeChoice, ThemeId},
+            body::{BodyExt, ModeExt, StepExt, ThemeId},
             *,
         },
         *,
@@ -327,10 +327,7 @@ where
         source: InitSource,
     ) -> Self {
         let theme_id = match raw.get_theme() {
-            Some(theme_choice) => match theme_choice {
-                ThemeChoice::Jig => jig.theme,
-                ThemeChoice::Override(theme_id) => theme_id,
-            },
+            Some(theme_id) => theme_id,
             None => {
                 log::warn!("this shouldn't happen! playing a module with no theme id...");
                 ThemeId::default()
