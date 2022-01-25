@@ -197,7 +197,8 @@ where
                         privacy_level: PrivacyLevel::default(),
                         locked: true,
                         other_keywords: String::from(""),
-                        translated_keywords: String::from("")
+                        translated_keywords: String::from(""),
+                        translated_description: serde_json::Value::Null,
                     });
                 }
 

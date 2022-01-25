@@ -3,7 +3,7 @@ use std::rc::Rc;
 
 use super::callbacks::Callbacks;
 use futures_signals::{
-    signal::{Mutable, Signal, SignalExt},
+    signal::{Mutable, Signal},
     signal_vec::{MutableVec, SignalVecExt},
 };
 use web_sys::HtmlElement;
