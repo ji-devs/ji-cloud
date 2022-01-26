@@ -251,9 +251,13 @@ pub(super) async fn publish_draft_to_live(
 
     let mut txn = db.begin().await?;
 
+    println!("before live/draft");
+
     let (draft_id, live_id) = db::jig::get_draft_and_live_ids(&mut *txn, jig_id)
         .await
         .ok_or(error::JigCloneDraft::ResourceNotFound)?;
+
+    println!("meh");
 
     let draft = db::jig::get_one(&db, jig_id, DraftOrLive::Draft)
         .await?
@@ -274,7 +278,11 @@ pub(super) async fn publish_draft_to_live(
         return Err(error::JigCloneDraft::IncompleteModules);
     }
 
+    println!("before new_live");
+
     let new_live_id = db::jig::clone_data(&mut txn, &draft_id, DraftOrLive::Live).await?;
+
+    println!("after new_live");
 
     sqlx::query!(
         //language=SQL

@@ -60,8 +60,7 @@ struct BatchJig<'a> {
     plays: &'a i64,
     published_at: Option<DateTime<Utc>>,
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    translated_description: Option<Value>,
+    translated_description: &'a Value,
 }
 
 #[derive(Serialize)]
@@ -268,7 +267,7 @@ select jig.id,
        display_name                                                                                                 as "name",
        language                                                                                                     as "language!",
        description                                                                                                  as "description!",
-       translated_description                                                                                       as "translated_description?: Value",
+       translated_description                                                                                       as "translated_description!",
        array((select affiliation_id
               from jig_data_affiliation
               where jig_data_id = jig_data.id))                                                                     as "affiliations!",
@@ -364,7 +363,7 @@ limit 100 for no key update skip locked;
                 likes: &row.likes,
                 plays: &row.plays,
                 published_at: row.published_at,
-                translated_description: row.translated_description,
+                translated_description: &row.translated_description,
             })
             .expect("failed to serialize BatchJig to json")
             {

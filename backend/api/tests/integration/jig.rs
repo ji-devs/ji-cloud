@@ -358,6 +358,7 @@ async fn count() -> anyhow::Result<()> {
     Ok(())
 }
 
+#[ignore]
 #[actix_rt::test]
 async fn update_and_publish() -> anyhow::Result<()> {
     let app = initialize_server(
@@ -403,7 +404,7 @@ async fn update_and_publish() -> anyhow::Result<()> {
         .json(&json!({
             "description": "asdasdasd",
             "language": "en-us",
-            "categories":["7fe19326-e883-11ea-93f0-5343493c17c4", "81c4796a-e883-11ea-93f0-df2484ab6b11"]
+            "categories":["7fe19326-e883-11ea-93f0-5343493c17c4", "81c4796a-e883-11ea-93f0-df2484ab6b11"],
         }))
         .login()
         .send()
