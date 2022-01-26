@@ -2,8 +2,6 @@ import { LitElement, html, css, customElement, property } from "lit-element";
 import { classMap } from "lit-html/directives/class-map";
 import { nothing } from "lit-html";
 
-const STR_LABEL = html`Edit your words<br />on the cards`;
-
 @customElement("sidebar-empty")
 export class _ extends LitElement {
     static get styles() {
@@ -46,13 +44,16 @@ export class _ extends LitElement {
         ];
     }
 
+    @property({ type: String })
+    label: string = "";
+
     render() {
         return html`
             <section>
                 <img-ui
                     path="module/_groups/cards/edit/sidebar/edit-words.svg"
                 ></img-ui>
-                <div class="label">${STR_LABEL}</div>
+                <div class="label">${this.label}</div>
             </section>
             <div class="clear"><slot name="clear"></slot></div>
         `;

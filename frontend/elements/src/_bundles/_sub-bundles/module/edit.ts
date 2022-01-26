@@ -19,6 +19,7 @@ import "@elements/core/drag/container";
 import "@elements/core/menu/container";
 import "@elements/core/menu/kebab";
 import "@elements/core/menu/menu-line";
+import "@elements/core/menu/menu-items";
 import "@elements/core/module-page/grid-resize";
 import "@elements/core/module-page/grid-plain";
 import "@elements/core/nav/steps-nav";

@@ -13,8 +13,8 @@ use crate::{
             state::{Options as SingleListOptions, State as SingleListState},
         },
     },
-    module::_groups::cards::edit::{config, state::*, strings},
-    tabs::MenuTabKind,
+    module::_groups::cards::edit::{config, state::*, actions, strings},
+    tabs::MenuTabKind, audio::input::AudioInput,
 };
 use dominator::clone;
 use futures_signals::signal::Mutable;
@@ -29,6 +29,7 @@ pub struct Step1<RawData: RawDataExt, E: ExtraExt> {
     pub base: Rc<CardsBase<RawData, E>>,
     pub tabs: OnceCell<Vec<Tab>>,
     pub tab_index: Mutable<Option<usize>>,
+    pub audio: Mutable<Option<Rc<AudioInput>>>,
 }
 
 impl<RawData: RawDataExt, E: ExtraExt> Step1<RawData, E> {
@@ -42,11 +43,12 @@ impl<RawData: RawDataExt, E: ExtraExt> Step1<RawData, E> {
             base: base.clone(),
             tabs: OnceCell::default(),
             tab_index,
+            audio: Mutable::new(None),
         });
 
         // Widgets require a reference to the top-level state so that they can have access to any
         // fields they might require in callbacks.
-        let tabs = match base.mode {
+        let mut tabs = match base.mode {
             Mode::WordsAndImages => {
                 vec![
                     Tab::new(state.clone(), MenuTabKind::Text),
@@ -57,7 +59,7 @@ impl<RawData: RawDataExt, E: ExtraExt> Step1<RawData, E> {
             _ => vec![Tab::new(state.clone(), MenuTabKind::DualList)],
         };
 
-        // TODO add audio tab to all modes
+        tabs.push(Tab::new(state.clone(), MenuTabKind::Audio));
 
         // `set()` will return an Err if the cell already has a value. However, because we are
         // using this purely to lazily set the tabs immediately after initializing the state, the
@@ -68,11 +70,15 @@ impl<RawData: RawDataExt, E: ExtraExt> Step1<RawData, E> {
     }
 }
 
-#[derive(Clone)]
 pub enum Tab {
+    /// Single column list of text
     Single(Rc<SingleListState>),
+    /// Dual column list of text
     Dual(Rc<DualListState>),
+    /// Image selection
     Image(Rc<ImageSearchState>),
+    /// Audio recording or upload
+    Audio,
 }
 
 impl Tab {
@@ -94,6 +100,7 @@ impl Tab {
             }
             MenuTabKind::Text => Self::Single(Rc::new(make_single_list(state))),
             MenuTabKind::DualList => Self::Dual(Rc::new(make_dual_list(state))),
+            MenuTabKind::Audio => Self::Audio,
 
             _ => unimplemented!("unsupported tab kind!"),
         }
@@ -104,6 +111,7 @@ impl Tab {
             Self::Single(_) => MenuTabKind::Text,
             Self::Dual(_) => MenuTabKind::DualList,
             Self::Image(_) => MenuTabKind::Image,
+            Self::Audio => MenuTabKind::Audio,
         }
     }
 }
@@ -114,7 +122,7 @@ fn make_single_list<RawData: RawDataExt, E: ExtraExt>(
     let _mode = state.base.mode;
 
     let callbacks = SingleListCallbacks::new(
-        |text| super::actions::limit_text(config::SINGLE_LIST_CHAR_LIMIT, text),
+        |text| actions::limit_text(config::SINGLE_LIST_CHAR_LIMIT, text),
         clone!(state => move |tooltip| {
             state.base.tooltips.list_error.set(tooltip);
         }),
@@ -143,7 +151,7 @@ fn make_dual_list<RawData: RawDataExt, E: ExtraExt>(
     let mode = state.base.mode;
 
     let callbacks = DualListCallbacks::new(
-        |text| super::actions::limit_text(config::DUAL_LIST_CHAR_LIMIT, text),
+        |text| actions::limit_text(config::DUAL_LIST_CHAR_LIMIT, text),
         clone!(state => move |tooltip| {
             state.base.tooltips.list_error.set(tooltip);
         }),

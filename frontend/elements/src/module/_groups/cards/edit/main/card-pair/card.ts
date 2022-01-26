@@ -7,7 +7,7 @@ import {
     Mode,
     Side,
     StyleKind,
-    getContentStyle,
+    getContentStyleConfig,
 } from "@elements/module/_groups/cards/helpers";
 import { styleMap } from "lit-html/directives/style-map";
 
@@ -25,6 +25,16 @@ export class _ extends LitElement {
                     --card-size: 160px;
                     --border-size: 1px;
                     --img-padding: 10px;
+
+                    --theme-color: --theme-blank-cards-color;
+                    --theme-border-color: --theme-blank-cards-border-color;
+                    --theme-border-color-light: --theme-blank-cards-border-color-light-hsl;
+                    --theme-background-color: --theme-blank-cards-fill-color;
+                    --theme-font-family: --theme-blank-cards-font-family;
+
+                    /* Required for child elements which make use of these */
+                    --color: var(--theme-color);
+                    --font-family: var(--theme-font-family);
                 }
                 section {
                     transition: transform 0.8s;
@@ -33,16 +43,29 @@ export class _ extends LitElement {
 
                 :host([dragOver]) section.editing .front {
                     border-style: dashed;
-                    border-radius: 16px;
                     border-width: 3px;
-                    background-color: var(--light-blue-1);
+                    border-color: rgb(var(--theme-border-color));
+                    margin: 0;
+                }
+
+                :host([selected]) section.editing .front {
+                    border-width: 3px;
+                    border-color: rgb(var(--theme-border-color));
+                    margin: 0;
                 }
 
                 .front {
                     border-style: solid;
                     border-radius: 16px;
                     border-width: var(--border-size);
-                    background-color: white;
+
+                    border-color: hsl(var(--theme-border-color-light));
+                    background-color: rgb(var(--theme-background-color));
+                    margin: 2px;
+                }
+
+                section.editing .front:hover {
+                    border-color: rgb(var(--theme-border-color));
                 }
 
                 .front,
@@ -56,17 +79,6 @@ export class _ extends LitElement {
                 section {
                     width: var(--card-size);
                     height: var(--card-size);
-                }
-
-                ::slotted(*) {
-                    --img-size: calc(
-                        var(--card-size) -
-                            ((var(--border-size) * 2) + var(--img-padding))
-                    );
-                    padding: calc(var(--img-padding) / 2);
-                    width: var(--img-size);
-                    height: var(--img-size);
-                    object-fit: contain;
                 }
 
                 :host([inverted]) section {
@@ -97,6 +109,31 @@ export class _ extends LitElement {
                 ::slotted(*) {
                     display: grid;
                     place-content: center;
+                    --img-size: calc(
+                        var(--card-size) -
+                            ((var(--border-size) * 2) + var(--img-padding))
+                    );
+                    padding: calc(var(--img-padding) / 2);
+                    width: var(--img-size);
+                    height: var(--img-size);
+                    object-fit: contain;
+                }
+                slot[name="menu"]::slotted(*) {
+                    position: absolute;
+                    top: -20px;
+                    left: 137px;
+                    display: inline-block;
+                    width: 32px;
+                    height: 32px;
+                }
+
+                slot[name="audio"]::slotted(*) {
+                    position: absolute;
+                    top: -20px;
+                    left: 100px;
+                    display: inline-block;
+                    width: 32px;
+                    height: 32px;
                 }
             `,
         ];
@@ -104,6 +141,9 @@ export class _ extends LitElement {
 
     @property({ type: Boolean, reflect: true })
     dragOver: boolean = false;
+
+    @property({ type: Boolean, reflect: true })
+    selected: boolean = false;
 
     @property({ type: Boolean })
     flippable: boolean = false;
@@ -127,17 +167,27 @@ export class _ extends LitElement {
     @property()
     styleKind: StyleKind = "theme";
 
-    render() {
-        const { flippable, theme, editing, mode, side, styleKind } = this;
+    updated() {
+        const { theme, mode, side, styleKind } = this;
+        const styleConfig = getContentStyleConfig(theme, mode, side);
+        this.style.setProperty("--theme-color", styleConfig.color);
+        this.style.setProperty("--theme-border-color", styleConfig.borderColor);
+        this.style.setProperty("--theme-border-color-light", styleConfig.borderColorLight);
+        this.style.setProperty("--theme-background-color", styleConfig.backgroundColor);
+        this.style.setProperty("--theme-font-family", styleConfig.fontFamily);
+    }
 
-        const contentStyle = getContentStyle(styleKind, theme, mode, side);
+    render() {
+        const { flippable, theme, editing } = this;
 
         return html`
             <section class="${classMap({ flippable, editing })}">
-                <div class="front" style=${contentStyle}><slot></slot></div>
+                <div class="front"><slot></slot></div>
                 <div class="back">
                     <img-ui path="${cardBackFullPath(theme)}"></img-ui>
                 </div>
+                <div class="audio"><slot name="audio"></slot></div>
+                <div class="menu"><slot name="menu"></slot></div>
             </section>
         `;
     }

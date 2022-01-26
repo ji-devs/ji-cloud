@@ -14,7 +14,11 @@ type IconKind =
     | "paste"
     | "print"
     | "reuse"
-    | "set-jig-theme";
+    | "set-jig-theme"
+    | "text"
+    | "record-sound"
+    | "image"
+;
 
 const STR_LABEL_LOOKUP: any = {
     copy: "Copy",
@@ -47,6 +51,7 @@ const STR_LABEL_LOOKUP: any = {
     ["use-content-as"]: "Use content as",
     //Theme selector
     ["set-jig-theme"]: "Set JIG theme",
+    ["text"]: "Edit text",
 };
 
 @customElement("menu-line")

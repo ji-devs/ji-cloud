@@ -1,15 +1,19 @@
 use super::state::*;
 use dominator::{clone, html, Dom};
-use futures_signals::signal::SignalExt;
+use futures_signals::{signal::SignalExt, signal_vec::SignalVecExt, map_ref};
+use shared::domain::jig::module::body::Audio;
 use std::rc::Rc;
 use utils::prelude::*;
 
 use crate::{
     image::search::dom::render as render_image_search,
     lists::{dual::dom::render as render_dual_list, single::dom::render as render_single_list},
-    module::_groups::cards::edit::{state::*, strings},
-    tabs::{MenuTab, MenuTabKind},
+    module::_groups::cards::{edit::{state::*, strings}, lookup::Side},
+    tabs::{MenuTab, MenuTabKind}, audio::input::{AudioInput, AudioInputOptions, AudioInputCallbacks},
 };
+
+const STR_NONEMPTY_LIST_LABEL: &str = "Edit your words on the cards";
+const STR_EMPTY_AUDIO_SELECTION: &str = "Select a card or pair of cards to add audio";
 
 pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<Step1<RawData, E>>) -> Dom {
     html!("empty-fragment", {
@@ -30,6 +34,7 @@ pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<Step1<RawData, E>>) ->
                                 },
                                 None => None,
                             };
+
                             match tab {
                                 Some(Tab::Single(single)) => {
                                     if !is_empty {
@@ -48,6 +53,111 @@ pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<Step1<RawData, E>>) ->
                                 Some(Tab::Image(image)) => {
                                     Some(render_image_search(image.clone(), None))
                                 },
+                                Some(Tab::Audio) => {
+                                    // TODO use map_ref! to get the vec
+                                    let audio_signal = |state: Rc<Step1<RawData, E>>|  map_ref! {
+                                        let selected_pair = state.base.selected_pair.signal_cloned(),
+                                        let pairs = state.base.pairs.signal_vec_cloned().to_signal_cloned()
+                                            => {
+                                                match selected_pair {
+                                                    Some((idx, side)) => {
+                                                        let pair = pairs.get(*idx).unwrap_ji();
+                                                        let audio = match side {
+                                                            SelectedSide::One(side) => {
+                                                                let card = match side {
+                                                                    Side::Left => &pair.0,
+                                                                    Side::Right => &pair.1,
+                                                                };
+
+                                                                card.audio.clone()
+                                                            },
+                                                            SelectedSide::Both => {
+                                                                // Only use the audio if both pairs have the _same_ audio file
+                                                                if pair.0.audio.is_some()
+                                                                    && pair.1.audio.is_some()
+                                                                    && pair.0.audio == pair.1.audio
+                                                                {
+                                                                    pair.0.audio.clone()
+                                                                } else {
+                                                                    None
+                                                                }
+                                                            },
+                                                        };
+
+                                                        (Some(idx.clone()), audio, Some(side.clone()))
+                                                    },
+                                                    None => (None, None, None)
+                                                }
+                                            }
+                                    };
+
+                                    Some(html!("empty-fragment", {
+                                        .child_signal(audio_signal(state.clone()).map(clone!(state => move |(idx, _, selected_side)| {
+                                            if let Some(idx) = idx {
+
+                                                let opts = AudioInputOptions::new(Some(
+                                                    audio_signal(state.clone()).map(|(_, audio, _)| audio),
+                                                ));
+
+                                                let callbacks = AudioInputCallbacks::new(
+                                                    Some(clone!(state, selected_side => move |audio: Audio| {
+                                                        state.base.replace_pair(idx, |mut pair| {
+                                                            match selected_side.clone().unwrap_ji() {
+                                                                SelectedSide::One(side) => {
+                                                                    match side {
+                                                                        Side::Left => {
+                                                                            pair.0.audio = Some(audio);
+                                                                        },
+                                                                        Side::Right => {
+                                                                            pair.1.audio = Some(audio);
+                                                                        }
+                                                                    }
+                                                                }
+                                                                SelectedSide::Both => {
+                                                                    pair.0.audio = Some(audio.clone());
+                                                                    pair.1.audio = Some(audio);
+                                                                }
+                                                            }
+
+                                                            pair
+                                                        });
+                                                    })),
+                                                    Some(clone!(state, selected_side => move || {
+                                                        state.base.replace_pair(idx, |mut pair| {
+                                                            match selected_side.clone().unwrap_ji() {
+                                                                SelectedSide::One(side) => {
+                                                                    match side {
+                                                                        Side::Left => {
+                                                                            pair.0.audio = None;
+                                                                        },
+                                                                        Side::Right => {
+                                                                            pair.1.audio = None;
+                                                                        }
+                                                                    }
+                                                                }
+                                                                SelectedSide::Both => {
+                                                                    pair.0.audio = None;
+                                                                    pair.1.audio = None;
+                                                                }
+                                                            }
+
+                                                            pair
+                                                        });
+                                                    })),
+                                                );
+
+                                                Some(AudioInput::render(AudioInput::new(opts, callbacks), None))
+                                            } else {
+                                                Some(render_empty_audio())
+                                            }
+                                            /* match audio {
+                                                Some(audio) => Some(AudioInput::render(audio.clone(), None)),
+                                                None => Some(render_empty_audio()),
+                                            } */
+                                            // None
+                                        })))
+                                    }))
+                                },
                                 _ => None,
                             }
                         })))
@@ -58,8 +168,15 @@ pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<Step1<RawData, E>>) ->
     })
 }
 
+fn render_empty_audio() -> Dom {
+    html!("sidebar-empty", {
+        .property("label", STR_EMPTY_AUDIO_SELECTION)
+    })
+}
+
 fn render_non_empty<RawData: RawDataExt, E: ExtraExt>(state: Rc<Step1<RawData, E>>) -> Dom {
     html!("sidebar-empty", {
+        .property("label", STR_NONEMPTY_LIST_LABEL)
         .child(
             html!("button-rect", {
                 .property("slot", "clear")
