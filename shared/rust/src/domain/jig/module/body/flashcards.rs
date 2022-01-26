@@ -80,11 +80,15 @@ impl BodyExt<Mode, Step> for ModuleData {
         ModuleKind::Flashcards
     }
 
-    fn new_mode(mode: Mode) -> Self {
+    fn new_with_mode_and_theme(mode: Mode, theme: ThemeId) -> Self {
         ModuleData {
             content: Some(Content {
-                base: BaseContent::new(mode),
-                ..Content::default()
+                base: BaseContent {
+                    mode,
+                    theme,
+                    ..Default::default()
+                },
+                ..Default::default()
             }),
         }
     }

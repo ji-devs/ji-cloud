@@ -32,11 +32,15 @@ impl BodyExt<Mode, Step> for ModuleData {
         ModuleKind::TappingBoard
     }
 
-    fn new_mode(mode: Mode) -> Self {
+    fn new_with_mode_and_theme(mode: Mode, theme: ThemeId) -> Self {
         ModuleData {
             content: Some(Content {
                 mode,
-                ..Content::default()
+                base: BaseContent {
+                    theme,
+                    ..Default::default()
+                },
+                ..Default::default()
             }),
         }
     }

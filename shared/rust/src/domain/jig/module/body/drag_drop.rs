@@ -32,11 +32,12 @@ impl BodyExt<Mode, Step> for ModuleData {
         ModuleKind::DragDrop
     }
 
-    fn new_mode(mode: Mode) -> Self {
+    fn new_with_mode_and_theme(mode: Mode, theme: ThemeId) -> Self {
         ModuleData {
             content: Some(Content {
                 mode,
-                ..Content::default()
+                theme,
+                ..Default::default()
             }),
         }
     }

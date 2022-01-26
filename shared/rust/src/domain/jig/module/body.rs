@@ -156,7 +156,7 @@ pub trait BodyExt<Mode: ModeExt, Step: StepExt>:
 
     /// given a Mode, get a new Self
     /// will usually populate an inner .content
-    fn new_mode(mode: Mode) -> Self;
+    fn new_with_mode_and_theme(mode: Mode, theme_id: ThemeId) -> Self;
 
     /// Fetch the mode for this module
     fn mode(&self) -> Option<Mode>;

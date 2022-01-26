@@ -34,7 +34,8 @@ impl BodyExt<(), Step> for ModuleData {
     fn kind() -> ModuleKind {
         ModuleKind::ResourceCover
     }
-    fn new_mode(_mode: ()) -> Self {
+
+    fn new_with_mode_and_theme(_mode: (), _theme_id: ThemeId) -> Self {
         ModuleData {
             content: Some(Content::default()),
         }
