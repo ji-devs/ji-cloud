@@ -151,23 +151,13 @@ where
             on_init_ready: RefCell::new(None),
         });
 
-        let is_draft: bool = utils::routes::is_param_bool("draft");
-
         *_self.on_init_ready.borrow_mut() = Some(Box::new(clone!(_self => move || {
-            _self.raw_loader.load(clone!(_self, init_from_raw, is_draft => async move {
+            _self.raw_loader.load(clone!(_self, init_from_raw => async move {
                 if !_self.opts.skip_load_jig {
                     *_self.jig.borrow_mut() = {
 
-
-                            let resp = {
-                                if is_draft {
-                                    let path = endpoints::jig::GetDraft::PATH.replace("{id}",&_self.opts.jig_id.0.to_string());
-                                    api_no_auth::<JigResponse, EmptyError, ()>(&path, endpoints::jig::GetDraft::METHOD, None).await
-                                } else {
-                                    let path = endpoints::jig::GetLive::PATH.replace("{id}",&_self.opts.jig_id.0.to_string());
-                                    api_no_auth::<JigResponse, EmptyError, ()>(&path, endpoints::jig::GetLive::METHOD, None).await
-                                }
-                            };
+                            let path = endpoints::jig::GetDraft::PATH.replace("{id}",&_self.opts.jig_id.0.to_string());
+                            let resp = api_no_auth::<JigResponse, EmptyError, ()>(&path, endpoints::jig::GetDraft::METHOD, None).await;
 
                             match resp {
                                 Ok(resp) => {
@@ -211,19 +201,11 @@ where
                         (force_raw, InitSource::ForceRaw)
                     } else {
                         let resp = {
-                            if is_draft {
-                                let path = GetDraft::PATH
-                                    .replace("{id}",&_self.opts.jig_id.0.to_string())
-                                    .replace("{module_id}",&_self.opts.module_id.0.to_string());
+                            let path = GetDraft::PATH
+                                .replace("{id}",&_self.opts.jig_id.0.to_string())
+                                .replace("{module_id}",&_self.opts.module_id.0.to_string());
 
-                                api_no_auth::<ModuleResponse, EmptyError, ()>(&path, GetDraft::METHOD, None).await
-                            } else {
-                                let path = GetLive::PATH
-                                    .replace("{id}",&_self.opts.jig_id.0.to_string())
-                                    .replace("{module_id}",&_self.opts.module_id.0.to_string());
-
-                                api_no_auth::<ModuleResponse, EmptyError, ()>(&path, GetLive::METHOD, None).await
-                            }
+                            api_no_auth::<ModuleResponse, EmptyError, ()>(&path, GetDraft::METHOD, None).await
                         };
 
                         match resp {
