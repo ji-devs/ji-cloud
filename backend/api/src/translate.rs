@@ -3,9 +3,9 @@ use core::settings::RuntimeSettings;
 use futures::TryStreamExt;
 use reqwest::{self};
 use serde::{Deserialize, Serialize};
-use serde_json::{json, value::Value};
+use serde_json::json;
 use sqlx::PgPool;
-use std::collections::BTreeMap;
+use std::collections::HashMap;
 
 use shared::domain::image::ImageId;
 use uuid::Uuid;
@@ -55,6 +55,7 @@ struct Detection {
 struct DetectLanguage {
     language: String,
 }
+
 ////////////////////////////////////////////////////////////
 
 #[derive(Debug, Deserialize)]
@@ -70,7 +71,7 @@ struct Translation {
 }
 
 const LANGUAGES: &'static [&str] = &[
-    "iw", "es", "pt", "ru", "fr", "nl", "sv", "ar", "de", "hu", "it", "yi",
+    "en", "iw", "es", "pt", "ru", "fr", "nl", "sv", "ar", "de", "hu", "it", "yi",
 ];
 
 #[derive(Debug, Deserialize)]
@@ -132,7 +133,7 @@ impl GoogleTranslate {
     }
 
     async fn update_image_translations(&self) -> anyhow::Result<bool> {
-        log::info!("reached update images descriptions");
+        log::info!("reached update images translation descriptions");
         let mut txn = self.db.begin().await?;
 
         // todo: allow for some way to do a partial update (for example, by having a channel for queueing partial updates)
@@ -166,7 +167,7 @@ limit 10 for no key update skip locked;
         );
 
         for t in requests {
-            let translated_description: Option<Value> =
+            let translated_description: Option<HashMap<String, String>> =
                 multi_translation(&t.description, &self.api_key).await?;
 
             sqlx::query!(
@@ -191,7 +192,7 @@ limit 10 for no key update skip locked;
     }
 
     async fn update_jig_translations(&self) -> anyhow::Result<bool> {
-        log::info!("reached update images");
+        log::info!("reached update JIG description translation");
         let mut txn = self.db.begin().await?;
 
         // todo: allow for some way to do a partial update (for example, by having a channel for queueing partial updates)
@@ -223,7 +224,7 @@ limit 50 for no key update skip locked;
         for t in requests {
             println!("jig_data_id: {:?}", t.jig_data_id);
 
-            let translated_description: Option<Value> =
+            let translated_description: Option<HashMap<String, String>> =
                 multi_translation(&t.description, &self.api_key).await?;
 
             sqlx::query!(
@@ -288,7 +289,10 @@ pub async fn translate_text(
     Ok(Some(translate))
 }
 
-pub async fn multi_translation(description: &str, api_key: &str) -> anyhow::Result<Option<Value>> {
+pub async fn multi_translation(
+    description: &str,
+    api_key: &str,
+) -> anyhow::Result<Option<HashMap<String, String>>> {
     //https://cloud.google.com/translate/docs/languages
     //https://cloud.google.com/translate/docs/reference/rest/v2/translate
     let res = reqwest::Client::new()
@@ -317,7 +321,7 @@ pub async fn multi_translation(description: &str, api_key: &str) -> anyhow::Resu
 
     let src = &v[0];
 
-    let mut translation_list = BTreeMap::new();
+    let mut translation_list = HashMap::new();
 
     for l in LANGUAGES {
         let text = if l != src {
@@ -335,7 +339,9 @@ pub async fn multi_translation(description: &str, api_key: &str) -> anyhow::Resu
         }
     }
 
-    let list_json = serde_json::to_value(translation_list).unwrap();
+    if translation_list.is_empty() {
+        return Ok(None);
+    }
 
-    Ok(Some(list_json))
+    Ok(Some(translation_list))
 }

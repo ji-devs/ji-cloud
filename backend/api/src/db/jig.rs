@@ -14,6 +14,7 @@ use shared::domain::{
     user::UserScope,
 };
 use sqlx::{PgConnection, PgPool};
+use std::collections::HashMap;
 use uuid::Uuid;
 
 use crate::error;
@@ -40,7 +41,7 @@ pub async fn create(
 ) -> Result<JigId, CreateJigError> {
     let mut txn = pool.begin().await?;
 
-    let translated_description: Option<Value> = if !description.is_empty() {
+    let translated_description: Option<HashMap<String, String>> = if !description.is_empty() {
         let translate_text = match &api_key {
             Some(key) => multi_translation(description, key)
                 .await
@@ -123,7 +124,7 @@ pub async fn create_jig_data(
     description: &str,
     default_player_settings: &JigPlayerSettings,
     draft_or_live: DraftOrLive,
-    translated_description: &Option<Value>,
+    translated_description: &Option<HashMap<String, String>>,
 ) -> Result<Uuid, CreateJigError> {
     log::warn!("description: {}", description);
 
@@ -131,8 +132,8 @@ pub async fn create_jig_data(
         // language=SQL
         r#"
 insert into jig_data
-   (display_name, language, description, direction, display_score, track_assessments, drag_assist, draft_or_live, translated_description)
-values ($1, $2, $3, $4, $5, $6, $7, $8, $9::jsonb)
+   (display_name, language, description, direction, display_score, track_assessments, drag_assist, draft_or_live)
+values ($1, $2, $3, $4, $5, $6, $7, $8)
 returning id
 "#,
         display_name,
@@ -143,10 +144,24 @@ returning id
         default_player_settings.track_assessments,
         default_player_settings.drag_assist,
         draft_or_live as i16,
-        json!(translated_description)
     )
     .fetch_one(&mut *txn)
     .await?;
+
+    if let Some(translation) = translated_description {
+        sqlx::query!(
+            // language=SQL
+            r#"
+    update jig_data
+    set translated_description = $2::jsonb
+    where id = $1
+    "#,
+            &jig_data.id,
+            json!(translation)
+        )
+        .execute(&mut *txn)
+        .await?;
+    }
 
     super::recycle_metadata(&mut *txn, "jig_data", jig_data.id, goals).await?;
     super::recycle_metadata(&mut *txn, "jig_data", jig_data.id, categories).await?;
@@ -222,7 +237,7 @@ select cte.jig_id                                          as "jig_id: JigId",
        jig_focus                                           as "jig_focus!: JigFocus",
        language,
        description,
-       translated_description                              as "translated_description!: Value",
+       translated_description                              as "translated_description",
        direction                                           as "direction: TextDirection",
        display_score,
        track_assessments,
@@ -317,13 +332,13 @@ from jig_data
                 locked: row.locked,
                 other_keywords: row.other_keywords,
                 translated_keywords: row.translated_keywords,
-                translated_description: row.translated_description,
+                translated_description: serde_json::from_value::<HashMap<String, String>>(row.translated_description).expect("could not deserialize translated descriptions"),
             },
             admin_data: JigAdminData {
                 rating: row.rating,
                 blocked: row.blocked,
                 curated: row.curated,
-            },
+            }
         });
 
     Ok(jig)
@@ -382,7 +397,7 @@ select id,
        updated_at,
        language                                                                      as "language!",
        description                                                                   as "description!",
-       translated_description                                                        as "translated_description!: Value",
+       translated_description                                                        as "translated_description!",
        direction                                                                     as "direction!: TextDirection",
        display_score                                                                 as "display_score!",
        track_assessments                                                             as "track_assessments!",
@@ -509,7 +524,10 @@ where draft_or_live is not null
                 locked: jig_data_row.locked,
                 other_keywords: jig_data_row.other_keywords,
                 translated_keywords: jig_data_row.translated_keywords,
-                translated_description: jig_data_row.translated_description,
+                translated_description: serde_json::from_value::<HashMap<String, String>>(
+                    jig_data_row.translated_description,
+                )
+                .expect("could not deserialize translated descriptions"),
             },
             admin_data: JigAdminData {
                 rating: jig_row.rating,
@@ -576,7 +594,7 @@ pub async fn browse(
         //language=SQL
         r#"
 with cte as (
-    select * from unnest($1::uuid[]) with ordinality t(id, ord) order by ord desc
+    select * from unnest($1::uuid[]) with ordinality t(id, ord) order by ord asc
 )
 select  jig.id                                              as "jig_id: JigId",
         privacy_level                                       as "privacy_level: PrivacyLevel",
@@ -597,7 +615,7 @@ select  jig.id                                              as "jig_id: JigId",
        updated_at,
        language                                                                      as "language!",
        description                                                                   as "description!",
-       translated_description                                                        as "translated_description!: Value",
+       translated_description                                                        as "translated_description!",
        direction                                                                     as "direction!: TextDirection",
        display_score                                                                 as "display_score!",
        track_assessments                                                             as "track_assessments!",
@@ -730,7 +748,10 @@ limit 20
                 locked: jig_data_row.locked,
                 other_keywords: jig_data_row.other_keywords,
                 translated_keywords: jig_data_row.translated_keywords,
-                translated_description: jig_data_row.translated_description,
+                translated_description: serde_json::from_value::<HashMap<String, String>>(
+                    jig_data_row.translated_description,
+                )
+                .expect("could not deserialize translated descriptions"),
             },
             admin_data: JigAdminData {
                 rating: jig_data_row.rating,
@@ -1096,6 +1117,7 @@ pub async fn clone_data(
     from_data_id: &Uuid,
     draft_or_live: DraftOrLive,
 ) -> Result<Uuid, error::JigCloneDraft> {
+    println!("here in clone");
     let new_id = sqlx::query!(
         //language=SQL
         r#"
@@ -1119,7 +1141,7 @@ select display_name,
        privacy_level,
        other_keywords,
        translated_keywords,
-       translated_description
+       translated_description::jsonb
 from jig_data
 where id = $1
 returning id
@@ -1129,6 +1151,8 @@ returning id
     .fetch_one(&mut *txn)
     .await?
     .id;
+
+    println!("after in clone");
 
     update_draft_or_live(txn, new_id, draft_or_live).await?;
 

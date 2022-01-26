@@ -40,7 +40,7 @@ expression: body
     "locked": false,
     "otherKeywords": "",
     "translatedKeywords": "",
-    "translatedDescription": null
+    "translatedDescription": {}
   },
   "adminData": {
     "rating": null,

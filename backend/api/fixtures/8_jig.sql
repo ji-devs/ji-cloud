@@ -1,26 +1,26 @@
 insert into jig_data (id, display_name, created_at, updated_at, language, last_synced_at, description, theme,
                       audio_background, audio_feedback_negative, audio_feedback_positive, direction, privacy_level, display_score,
-                      drag_assist, track_assessments, draft_or_live)
+                      drag_assist, track_assessments, draft_or_live, translated_description)
 values ('d4cad43c-1dd5-11ec-8426-83d4a42e3ac9', 'name', '2021-03-04 00:46:26.134651+00', -- live
         '2021-03-04 00:46:26.134651+00', 'en', '2021-03-04 00:46:26.134651+00', 'test description', 0, null,
-        array [0, 1], array [0, 1, 2], 0, 0,  true, true, true, 1),
+        array [0, 1], array [0, 1, 2], 0, 0,  true, true, true, 1, '{}'::jsonb),
        ('d4cad4c8-1dd5-11ec-8426-a37eda7ce03f', 'name', '2021-03-04 00:46:26.134651+00', -- draft
         '2021-03-04 00:46:26.134651+00', 'en', '2021-03-04 00:46:26.134651+00', 'test description', 0, null,
-        array [0, 1], array [0, 1, 2], 0, 1, true, true, true, 0),
+        array [0, 1], array [0, 1, 2], 0, 1, true, true, true, 0, '{}'::jsonb),
        ('d4cad52c-1dd5-11ec-8426-f7f3e8ceccb2', 'name', '2021-03-04 00:46:26.134651+00', -- live
         '2021-03-04 00:46:26.134651+00', 'en', '2021-03-04 00:46:26.134651+00', 'test description', 0, null,
-        array [0, 1], array [0, 1, 2], 0, 0, true, true, true, 1),
+        array [0, 1], array [0, 1, 2], 0, 0, true, true, true, 1, '{}'::jsonb),
 
        ('38ef2e9c-9d7f-4a96-aed4-164f7f42bf0c', 'name', '2021-03-04 00:46:26.134651+00', -- live
         '2021-03-04 00:46:26.134651+00', 'en', '2021-03-04 00:46:26.134651+00', 'test description', 0, null,
-        array [0, 1], array [0, 1, 2], 0, 0, true, true, true, 1),
+        array [0, 1], array [0, 1, 2], 0, 0, true, true, true, 1, '{}'::jsonb),
        ('456f571e-ea27-460e-b065-2bbd77d350ae', 'name', '2021-03-04 00:46:26.134651+00', -- draft
         '2021-03-04 00:46:26.134651+00', 'en', '2021-03-04 00:46:26.134651+00', 'test description', 0, null,
-        array [0, 1], array [0, 1, 2], 0, 1, true, true, true, 0),
+        array [0, 1], array [0, 1, 2], 0, 1, true, true, true, 0, '{}'::jsonb),
 
        ('d4cad586-1dd5-11ec-8426-fbcd3fd01e2a', 'draft name', '2021-03-06 00:46:26.134651+00', -- draft
         '2021-03-06 00:46:26.134651+00', 'he', '2021-03-07 00:46:26.134651+00', 'draft test description', 1, 0,
-        array []::smallint[], array []::smallint[], 1, 1, false, false, false, 0);
+        array []::smallint[], array []::smallint[], 1, 1, false, false, false, 0, '{}'::jsonb);
 
 
 insert into jig (id, creator_id, author_id, live_id, draft_id)
