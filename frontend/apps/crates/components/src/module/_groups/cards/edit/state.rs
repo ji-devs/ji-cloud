@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use super::debug::DebugSettings;
-use crate::{module::_common::edit::prelude::*, tooltip::state::State as TooltipState};
+use crate::{module::{_common::edit::prelude::*, _groups::cards::lookup::Side}, tooltip::state::State as TooltipState};
 use dominator_helpers::signals::EitherSignal;
 use futures_signals::{
     map_ref,
@@ -12,7 +12,7 @@ use shared::domain::jig::{
     module::{
         body::{
             Background, BodyExt, Image, Instructions, ThemeChoice,
-            _groups::cards::{self as raw, BaseContent, Mode, Step},
+            _groups::cards::{self as raw, BaseContent, Mode, Step}, Audio,
         },
         ModuleId,
     },
@@ -73,9 +73,16 @@ pub struct CardsBase<RawData: RawDataExt, E: ExtraExt> {
     pub module_kind: ModuleKind,
     pub tooltips: Tooltips,
     pub pairs: MutableVec<(Card, Card)>,
+    pub selected_pair: Mutable<Option<(usize, SelectedSide)>>,
     pub background: Mutable<Option<Background>>,
     pub extra: E,
     pub debug: DebugSettings,
+}
+
+#[derive(Clone)]
+pub enum SelectedSide {
+    One(Side),
+    Both,
 }
 
 pub struct Tooltips {
@@ -135,6 +142,7 @@ impl<RawData: RawDataExt, E: ExtraExt> CardsBase<RawData, E> {
             mode,
             tooltips: Tooltips::new(),
             pairs: MutableVec::new_with_values(pairs),
+            selected_pair: Mutable::new(None),
             background,
             extra,
             module_kind,
@@ -205,62 +213,84 @@ impl<RawData: RawDataExt, E: ExtraExt> BaseExt<Step> for CardsBase<RawData, E> {
     }
 }
 
-#[derive(Debug, Clone)]
-pub enum Card {
+#[derive(Clone)]
+pub struct Card {
+    pub audio: Option<Audio>,
+    pub card_content: CardContent,
+}
+
+#[derive(Clone)]
+pub enum CardContent {
     Text(Mutable<String>),
     Image(Mutable<Option<Image>>),
 }
 
 impl Card {
     pub fn new_text(data: String) -> Self {
-        Self::Text(Mutable::new(data))
+        Self {
+            audio: None,
+            card_content: CardContent::Text(Mutable::new(data)),
+        }
     }
     pub fn new_image(data: Option<Image>) -> Self {
-        Self::Image(Mutable::new(data))
+        Self {
+            audio: None,
+            card_content: CardContent::Image(Mutable::new(data)),
+        }
     }
 
     pub fn as_text_mutable(&self) -> &Mutable<String> {
-        match self {
-            Self::Text(m) => m,
+        match &self.card_content {
+            CardContent::Text(m) => m,
             _ => panic!("not a text type!"),
         }
     }
     pub fn as_image_mutable(&self) -> &Mutable<Option<Image>> {
-        match self {
-            Self::Image(m) => m,
+        match &self.card_content {
+            CardContent::Image(m) => m,
             _ => panic!("not an image type!"),
         }
     }
 
     pub fn get_is_valid_data(&self) -> bool {
-        match self {
-            Self::Text(text) => !text.lock_ref().is_empty(),
-            Self::Image(image) => image.lock_ref().is_some(),
+        match &self.card_content {
+            CardContent::Text(text) => !text.lock_ref().is_empty(),
+            CardContent::Image(image) => image.lock_ref().is_some(),
         }
     }
 
     pub fn is_valid_data_signal(&self) -> impl Signal<Item = bool> {
-        match self {
-            Self::Text(text) => EitherSignal::Left(text.signal_ref(|text| !text.is_empty())),
-            Self::Image(image) => EitherSignal::Right(image.signal_ref(|image| image.is_some())),
+        match &self.card_content {
+            CardContent::Text(text) => EitherSignal::Left(text.signal_ref(|text| !text.is_empty())),
+            CardContent::Image(image) => EitherSignal::Right(image.signal_ref(|image| image.is_some())),
         }
     }
 }
 
 impl From<raw::Card> for Card {
     fn from(raw_card: raw::Card) -> Self {
-        match raw_card {
-            raw::Card::Text(x) => Card::new_text(x),
-            raw::Card::Image(x) => Card::new_image(x),
+        let card_content = match raw_card.card_content {
+            raw::CardContent::Text(x) => CardContent::Text(Mutable::new(x)),
+            raw::CardContent::Image(x) => CardContent::Image(Mutable::new(x)),
+        };
+
+        Self {
+            audio: raw_card.audio,
+            card_content,
         }
     }
 }
 
 impl From<Card> for raw::Card {
     fn from(card: Card) -> Self {
-        match card {
-            Card::Text(x) => raw::Card::Text(x.get_cloned()),
-            Card::Image(x) => raw::Card::Image(x.get_cloned()),
+        let card_content = match card.card_content {
+            CardContent::Text(x) => raw::CardContent::Text(x.get_cloned()),
+            CardContent::Image(x) => raw::CardContent::Image(x.get_cloned()),
+        };
+
+        Self {
+            audio: card.audio,
+            card_content,
         }
     }
 }

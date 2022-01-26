@@ -16,6 +16,9 @@ pub struct MainCard<RawData: RawDataExt, E: ExtraExt> {
     pub input_ref: Rc<RefCell<Option<HtmlElement>>>,
     pub editing_active: Mutable<bool>,
     pub is_image: bool,
+    pub is_hovering: Mutable<bool>,
+    pub menu_open: Mutable<bool>,
+    pub menu_container_elem: Mutable<Option<HtmlElement>>,
     pub callbacks: CardCallbacks,
 }
 
@@ -28,8 +31,8 @@ impl<RawData: RawDataExt, E: ExtraExt> MainCard<RawData, E> {
         card: Card,
         other: Card,
     ) -> Rc<Self> {
-        let is_image = match card {
-            Card::Image(_) => true,
+        let is_image = match card.card_content {
+            CardContent::Image(_) => true,
             _ => false,
         };
 
@@ -50,6 +53,9 @@ impl<RawData: RawDataExt, E: ExtraExt> MainCard<RawData, E> {
             input_ref: Rc::new(RefCell::new(None)),
             editing_active: Mutable::new(false),
             is_image,
+            is_hovering: Mutable::new(false),
+            menu_open: Mutable::new(false),
+            menu_container_elem: Mutable::new(None),
             callbacks,
         })
     }

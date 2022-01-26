@@ -10,7 +10,7 @@
 import { mediaUi } from "@utils/path";
 import THEMES_JSON from "../../../config/themes.json";
 import FONTS_JSON from "../../../config/fonts.json";
-import { hexStringToNumber, hexNumberToRgb } from "@utils/hex";
+import { hexStringToNumber, hexNumberToRgb, rgbToHsl } from "@utils/hex";
 
 export type ThemeId = keyof typeof THEMES_JSON;
 
@@ -82,6 +82,18 @@ function setRootVars() {
             }
         };
 
+        // Returns a lightened color as a HSL value
+        const lighten = (mapping: ColorMapping, amount: number): string => {
+            const hexString = theme.colors[mapping];
+            const hexNumber = hexStringToNumber(hexString);
+            const [r, g, b] = hexNumberToRgb(hexNumber);
+            let [h, s, l] = rgbToHsl(r, g, b);
+
+            // Decrease the lightness to darken the color by {amount}
+            l = l + amount > 100 ? 100 : l + amount;
+            return `${h}, ${s}%, ${l}%`;
+        };
+
         const fontFamily = (mapping: FontFamilyMapping): string => {
             return theme.fontFamilies[mapping];
         };
@@ -131,6 +143,10 @@ function setRootVars() {
             style.setProperty(
                 `--theme-${id}-cards-border-color-var`,
                 rgb(value.borderColor, "var")
+            );
+            style.setProperty(
+                `--theme-${id}-cards-border-color-light-hsl`,
+                lighten(value.borderColor, 25)
             );
             style.setProperty(
                 `--theme-${id}-cards-fill-color`,

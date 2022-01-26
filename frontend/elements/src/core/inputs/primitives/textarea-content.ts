@@ -20,9 +20,6 @@ export class _ extends LitElement {
     static get styles() {
         return [
             css`
-                :host {
-                    cursor: text;
-                }
                 .hiddenClickArea {
                     position: absolute;
                     top: 0;
@@ -50,6 +47,7 @@ export class _ extends LitElement {
                     padding: 0 1px;
                     min-width: 2px;
                     min-height: 1em;
+                    background-color: rgb(var(--theme-background-color));
                 }
 
                 textarea.visible,

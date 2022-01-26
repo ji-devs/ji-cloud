@@ -1,4 +1,5 @@
-use dominator::{clone, html, Dom, EventOptions};
+use dominator::{clone, html, Dom, EventOptions, with_node};
+use web_sys::HtmlElement;
 use std::rc::Rc;
 use wasm_bindgen_futures::spawn_local;
 
@@ -10,11 +11,10 @@ use crate::{
     image::search::types::*,
     module::_groups::cards::{
         edit::{config, state::*},
-        lookup,
-    },
+        lookup::{self, Side},
+    }, overlay::handle::OverlayHandle,
 };
 use futures_signals::signal::SignalExt;
-use js_sys::Reflect;
 use shared::domain::jig::module::body::{
     ModeExt,
     _groups::cards::{Mode, Step},
@@ -26,28 +26,153 @@ pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<MainCard<RawData, E>>)
         .property("side", state.side.as_str_id())
         .property("flippable", state.step == Step::Two)
         .property("editing", state.step == Step::One)
+        .property_signal("selected", state.base.selected_pair.signal_cloned().map(clone!(state => move |selected| {
+            selected.map_or(false, |(idx, side)| {
+                let correct_idx = state.index.get().unwrap_or_default() == idx;
+
+                let correct_side = match side {
+                    SelectedSide::One(side) => side == state.side,
+                    SelectedSide::Both => true,
+                };
+
+                correct_idx && correct_side
+            })
+        })))
         .property_signal("dragOver", state.editing_active.signal())
         .property_signal("theme", state.base.theme_id_str_signal())
         .property("mode", state.base.mode.as_str_id())
+        .apply_if(state.card.audio.is_some(), |dom| {
+            dom.child(html!("button-icon", {
+                .property("slot", "audio")
+                .property("icon", "audio")
+            }))
+        })
+        .apply_if(state.step == Step::One, |dom| {
+            dom.child(html!("menu-kebab", {
+                .property("slot", "menu")
+                .property("positioningEnabled", false)
+                .property_signal("customContainer", state.menu_container_elem.signal_cloned())
+                .property_signal("visible", state.menu_open.signal_cloned())
+                .with_node!(button_elem => {
+                    .child_signal(state.menu_open.signal_cloned().map(clone!(state => move |is_open| {
+                        if is_open {
+                            Some(html!("empty-fragment", {
+                                .apply(OverlayHandle::lifecycle(clone!(state, button_elem => move || {
+                                    html!("menu-items", {
+                                        .property("target", button_elem.clone())
+                                        .apply_if(matches!(state.card.card_content, CardContent::Text(_)), clone!(state => move |dom| {
+                                            dom.child(html!("menu-line", {
+                                                .property("icon", "text")
+                                                .event(clone!(state => move |_evt:events::Click| {
+                                                    state.close_menu();
+                                                    state.editing_active.set_neq(true);
 
-        .event(clone!(state => move |_evt:events::Click| {
-            if let Some(input_ref) = state.input_ref.borrow().as_ref() {
-                let _  = Reflect::set(input_ref, &JsValue::from_str("editing"), &JsValue::from_bool(true));
-                state.editing_active.set_neq(true);
-            }
+                                                    if let Some(on_click) = state.callbacks.on_click.as_ref() {
+                                                        (on_click) ();
+                                                    }
+                                                }))
+                                            }))
+                                        }))
+                                        .apply_if(matches!(state.card.card_content, CardContent::Image(_)), clone!(state => move |dom| {
+                                            dom.child_signal(state.card.as_image_mutable().signal_cloned().map(clone!(state => move |image| {
+                                                match image {
+                                                    Some(_) => {
+                                                        Some(html!("menu-line", {
+                                                            .property("icon", "image")
+                                                            .property("customLabel", "Remove image")
+                                                            .event(clone!(state => move |_evt:events::Click| {
+                                                                state.close_menu();
+                                                                let index = state.index.get().unwrap_or_default();
+                                                                state.remove_card_image(index, state.side)
+                                                            }))
+                                                        }))
+                                                    },
+                                                    None => None,
+                                                }
+                                            })))
+                                        }))
+                                        .apply_if(state.card.audio.is_some(), clone!(state => move |dom| {
+                                            dom.child(html!("menu-line", {
+                                                .property("icon", "record-sound")
+                                                .property("customLabel", "Remove audio")
+                                                .event(clone!(state => move |_evt:events::Click| {
+                                                    state.close_menu();
+                                                    let index = state.index.get().unwrap_or_default();
+                                                    state.base.replace_pair(index, |mut pair| {
+                                                        match state.side {
+                                                            Side::Left => { pair.0.audio = None },
+                                                            Side::Right => { pair.1.audio = None },
+                                                        }
 
-            if let Some(on_click) = state.callbacks.on_click.as_ref() {
-                (on_click) ();
+                                                        pair
+                                                    })
+                                                    // todo match side so we know how to construct
+                                                    // the new pair and replace it in the list
+                                                    // state.remove_card_image(index, state.side)
+                                                }))
+                                            }))
+                                        }))
+                                        .child(html!("menu-line", {
+                                            .property("icon", "delete")
+                                            .property("customLabel", "Delete pair")
+                                            .event(clone!(state => move |_evt:events::Click| {
+                                                state.close_menu();
+                                                // TODO confirm modal
+                                                state.delete_pair(state.index.get().unwrap_or_default());
+                                            }))
+                                        }))
+                                        .after_inserted(clone!(state => move |elem| {
+                                            state.menu_container_elem.set(Some(elem));
+                                        }))
+                                    })
+                                })))
+                            }))
+                        } else {
+                            None
+                        }
+                    })))
+                })
+                .event_with_options(&EventOptions::bubbles(), clone!(state => move |_e: events::Open| {
+                    state.menu_open.set_neq(true);
+                }))
+                .event_with_options(&EventOptions::bubbles(), clone!(state => move |_e: events::Close| {
+                    state.close_menu();
+                }))
+            }))
+        })
+        .event(clone!(state => move |_evt: events::MouseEnter| {
+            state.is_hovering.set_neq(true);
+        }))
+        .event(clone!(state => move |_evt: events::MouseLeave| {
+            state.is_hovering.set_neq(false);
+        }))
+        .event(clone!(state => move |evt: events::Click| {
+            // [Ty] Prevents clicking on the menu kebab from selecting the card. The click event
+            // fires here first and then in the menu-kebab element, so stopPropagation fails.
+            let should_toggle = match evt.target() {
+                Some(target) => {
+                    let target: JsValue = target.into();
+                    let element: HtmlElement = target.into();
+                    let tag_name = element.tag_name().to_lowercase();
+                    let tag_name = tag_name.as_str();
+                    tag_name != "menu-kebab" && tag_name != "button-icon"
+                },
+                _ => true
+            };
+
+            if should_toggle {
+                state.toggle_selection();
             }
         }))
         .child({
-            match &state.card {
-                Card::Text(data) => {
+            match &state.card.card_content {
+                CardContent::Text(data) => {
                     html!("input-textarea-content", {
                         .property_signal("value", data.signal_cloned())
                         .property_signal("fontSize", data.signal_cloned().map(|value| {
                             lookup::get_card_font_size(&value, None)
                         }))
+                        .property_signal("editing", state.editing_active.signal_cloned())
                         .property("clickMode", "none")
                         .property("constrainWidth", config::CARD_TEXT_LIMIT_WIDTH)
                         .property("constrainHeight", config::CARD_TEXT_LIMIT_HEIGHT)
@@ -81,7 +206,7 @@ pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<MainCard<RawData, E>>)
                         }))
                     })
                 },
-                Card::Image(image) => {
+                CardContent::Image(image) => {
                     html!("div", {
                         .event_with_options(
                             &EventOptions::preventable(),

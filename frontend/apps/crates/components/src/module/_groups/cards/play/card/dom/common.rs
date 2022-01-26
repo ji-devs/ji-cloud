@@ -3,7 +3,7 @@ use utils::prelude::*;
 use wasm_bindgen::JsValue;
 
 use crate::module::_groups::cards::lookup;
-use shared::domain::jig::module::body::_groups::cards::Card;
+use shared::domain::jig::module::body::_groups::cards::{Card, CardContent};
 
 //must match @elements/module/_groups/cards/play/card/styles.ts
 //export type Size = "memory" | "flashcards" | "quiz-option" | "quiz-target" | "matching";
@@ -65,8 +65,8 @@ pub struct SimpleTransform {
 }
 
 pub(super) fn render_media(card: &Card, size: &Size, slot: Option<&str>) -> Dom {
-    match &card {
-        Card::Text(s) => {
+    match &card.card_content {
+        CardContent::Text(s) => {
             html!("card-text", {
                 .apply_if(slot.is_some(), |dom| {
                     dom.property("slot", slot.unwrap_ji())
@@ -77,7 +77,7 @@ pub(super) fn render_media(card: &Card, size: &Size, slot: Option<&str>) -> Dom 
                 })
             })
         }
-        Card::Image(image) => match image {
+        CardContent::Image(image) => match image {
             Some(image) => image.render(slot),
             None => {
                 html!("img-ui", {

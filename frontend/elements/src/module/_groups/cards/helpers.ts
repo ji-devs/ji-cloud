@@ -74,3 +74,27 @@ export const getContentStyle = (
                 : `var(--theme-${theme}-cards-font-family)`,
     });
 };
+
+export const getContentStyleConfig = (
+    theme: ThemeId,
+    mode: Mode,
+    side: Side,
+) => {
+    let color = `var(--theme-${theme}-cards-color)`;
+    let borderColor = `var(--theme-${theme}-cards-border-color-var)`;
+    let borderColorLight = `var(--theme-${theme}-cards-border-color-light-hsl)`
+    let backgroundColor = `var(--theme-${theme}-cards-fill-color-var)`;
+    let fontFamily = mode === "lettering"
+        ? side === "left"
+            ? `var(--theme-${theme}-cards-font-family-lettering-left)`
+            : `var(--theme-${theme}-cards-font-family-lettering-right)`
+        : `var(--theme-${theme}-cards-font-family)`;
+
+    return {
+        color,
+        borderColor,
+        borderColorLight,
+        backgroundColor,
+        fontFamily,
+    }
+};

@@ -7,3 +7,4 @@ pub mod overlay;
 pub mod sidebar;
 pub mod state;
 pub mod strings;
+pub mod actions;
