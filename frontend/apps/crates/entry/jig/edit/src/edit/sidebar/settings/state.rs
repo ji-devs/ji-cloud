@@ -71,7 +71,6 @@ impl State {
 #[derive(Clone, Debug)]
 pub enum ActiveSettingsPopup {
     Main,
-    Theme,
     Background,
     Feedback(FeedbackTab),
 }

@@ -27,13 +27,6 @@ pub fn render(state: Rc<State>) -> Dom {
             }),
             html!("jig-settings-button", {
                 .property("slot", "creator")
-                .property("kind", "theme")
-                .event(clone!(state => move|_: events::Click| {
-                    set_active_popup(Rc::clone(&state), ActiveSettingsPopup::Theme);
-                }))
-            }),
-            html!("jig-settings-button", {
-                .property("slot", "creator")
                 .property("kind", "background")
                 .event(clone!(state => move|_: events::Click| {
                     set_active_popup(Rc::clone(&state), ActiveSettingsPopup::Background);

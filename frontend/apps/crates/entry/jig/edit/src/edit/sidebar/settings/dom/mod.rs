@@ -13,7 +13,6 @@ pub const STR_BACK_TO_SETTINGS: &'static str = "Back to JIG settings";
 mod background;
 mod feedback;
 mod main;
-mod themes;
 
 pub fn render(state: Rc<State>) -> Dom {
     html!("anchored-overlay", {
@@ -46,7 +45,6 @@ pub fn render(state: Rc<State>) -> Dom {
         .child_signal(state.active_popup.signal_cloned().map(clone!(state => move|active_popup| {
             match active_popup {
                 Some(ActiveSettingsPopup::Main) => Some(main::render(Rc::clone(&state))),
-                Some(ActiveSettingsPopup::Theme) => Some(themes::render(Rc::clone(&state))),
                 Some(ActiveSettingsPopup::Background) => Some(background::render(Rc::clone(&state))),
                 Some(ActiveSettingsPopup::Feedback(tab)) => Some(feedback::render(Rc::clone(&state), tab.clone())),
                 None => None
