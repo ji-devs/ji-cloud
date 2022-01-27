@@ -1,5 +1,6 @@
 use components::module::_common::edit::prelude::*;
 
+use components::module::_groups::design::design_ext::DesignExt;
 use components::{
     backgrounds::{callbacks::Callbacks as BackgroundsCallbacks, state::Backgrounds},
     stickers::{
@@ -13,10 +14,11 @@ use futures_signals::signal::{self, Mutable, ReadOnlyMutable, Signal};
 use shared::domain::jig::{
     module::{
         body::{
+            BodyExt,
             cover::{ModuleData as RawData, Step},
-            Instructions,
+            Instructions
         },
-        ModuleId,
+        ModuleId
     },
     JigId,
 };
@@ -155,5 +157,23 @@ impl BaseExt<Step> for Base {
 
     fn get_module_id(&self) -> ModuleId {
         self.module_id
+    }
+}
+
+impl DesignExt for Base {
+    fn get_backgrounds(&self) -> Rc<Backgrounds> {
+        Rc::clone(&self.backgrounds)
+    }
+
+    fn get_theme(&self) -> Mutable<ThemeId> {
+        self.theme_id.clone()
+    }
+
+    fn set_theme(&self, theme: ThemeId) {
+        self.theme_id.set(theme.clone());
+
+        self.history.push_modify(|raw| {
+            raw.set_theme(theme);
+        });
     }
 }

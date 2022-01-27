@@ -4,7 +4,7 @@ use components::{
         callbacks::Callbacks as StickersCallbacks,
         state::{Sticker, Stickers},
     },
-    text_editor::{callbacks::Callbacks as TextEditorCallbacks, state::State as TextEditorState},
+    text_editor::{callbacks::Callbacks as TextEditorCallbacks, state::State as TextEditorState}, module::_groups::design::design_ext::DesignExt,
 };
 use components::{module::_common::edit::prelude::*, stickers::video::state::Video};
 use dominator::clone;
@@ -16,7 +16,7 @@ use shared::domain::jig::{
             video::{
                 DoneAction, Mode, ModuleData as RawData, PlaySettings as RawPlaySettings, Step,
             },
-            Instructions,
+            Instructions, BodyExt,
         },
         ModuleId,
     },
@@ -227,5 +227,23 @@ impl BaseExt<Step> for Base {
     }
     fn get_module_id(&self) -> ModuleId {
         self.module_id
+    }
+}
+
+impl DesignExt for Base {
+    fn get_backgrounds(&self) -> Rc<Backgrounds> {
+        Rc::clone(&self.backgrounds)
+    }
+
+    fn get_theme(&self) -> Mutable<ThemeId> {
+        self.theme_id.clone()
+    }
+
+    fn set_theme(&self, theme: ThemeId) {
+        self.theme_id.set(theme.clone());
+
+        self.history.push_modify(|raw| {
+            raw.set_theme(theme);
+        });
     }
 }
