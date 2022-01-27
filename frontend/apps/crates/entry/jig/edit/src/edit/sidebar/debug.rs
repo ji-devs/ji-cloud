@@ -1,6 +1,8 @@
 #![allow(unused_imports)]
 #![allow(dead_code)]
 
+use std::collections::HashMap;
+
 use shared::domain::jig::{
     AudioEffects,
     DraftOrLive,
@@ -74,7 +76,7 @@ pub fn get_jig() -> JigResponse {
             locked: true,
             other_keywords: String::from(""),
             translated_keywords: String::from(""),
-            translated_description: serde_json::Value::Null,
+            translated_description: HashMap::new(),
         },
         jig_focus: JigFocus::Modules,
         likes: 0,

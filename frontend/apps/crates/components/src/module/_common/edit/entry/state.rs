@@ -2,6 +2,7 @@ use dominator::{clone, DomHandle};
 use futures_signals::signal::{Mutable, Signal, SignalExt};
 
 use std::cell::RefCell;
+use std::collections::HashMap;
 use std::convert::{TryFrom, TryInto};
 use std::future::Future;
 use std::rc::Rc;
@@ -198,7 +199,7 @@ where
                         locked: true,
                         other_keywords: String::from(""),
                         translated_keywords: String::from(""),
-                        translated_description: serde_json::Value::Null,
+                        translated_description: HashMap::new(),
                     });
                 }
 
