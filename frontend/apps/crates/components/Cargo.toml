@@ -102,6 +102,7 @@ lists = []
 audio_mixer = []
 theme_selector = []
 module_groups_cards = []
+module_groups_design = []
 collision = []
 firebase = []
 hebrew_buttons = []
@@ -140,6 +141,7 @@ all= [
     "audio_mixer",
     "theme_selector",
     "module_groups_cards",
+    "module_groups_design",
     "collision",
     "firebase",
     "hebrew_buttons",

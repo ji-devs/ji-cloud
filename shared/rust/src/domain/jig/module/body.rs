@@ -167,6 +167,9 @@ pub trait BodyExt<Mode: ModeExt, Step: StepExt>:
     /// Get the current theme
     fn get_theme(&self) -> Option<ThemeId>;
 
+    /// Set the current theme
+    fn set_theme(&mut self, theme_id: ThemeId);
+
     /// Set editor state step
     fn set_editor_state_step(&mut self, step: Step);
     /// Set editor state steps completed

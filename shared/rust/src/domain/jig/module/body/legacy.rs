@@ -67,6 +67,10 @@ impl BodyExt<(), ()> for ModuleData {
         None
     }
 
+    fn set_theme(&mut self, _theme_id: ThemeId) {
+        
+    }
+
     fn get_theme(&self) -> Option<ThemeId> {
         None
     }

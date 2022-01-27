@@ -73,6 +73,12 @@ impl BodyExt<Mode, Step> for ModuleData {
             .map(|content| content.editor_state.steps_completed.clone())
     }
 
+    fn set_theme(&mut self, theme_id: ThemeId) {
+        if let Some(content) = self.content.as_mut() {
+            content.theme = theme_id;
+        }
+    }
+
     fn get_theme(&self) -> Option<ThemeId> {
         self.content.as_ref().map(|content| content.theme)
     }

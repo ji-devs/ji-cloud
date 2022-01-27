@@ -78,6 +78,12 @@ impl BodyExt<(), Step> for ModuleData {
             .map(|content| content.editor_state.steps_completed.clone())
     }
 
+    fn set_theme(&mut self, theme_id: ThemeId) {
+        if let Some(content) = self.content.as_mut() {
+            content.base.theme = theme_id;
+        }
+    }
+
     fn get_theme(&self) -> Option<ThemeId> {
         self.content.as_ref().map(|content| content.base.theme)
     }
@@ -125,8 +131,6 @@ pub enum Step {
     Two,
     /// Step 3
     Three,
-    /// Step 4
-    Four,
 }
 
 impl Default for Step {
@@ -140,8 +144,7 @@ impl StepExt for Step {
         match self {
             Self::One => Some(Self::Two),
             Self::Two => Some(Self::Three),
-            Self::Three => Some(Self::Four),
-            Self::Four => None,
+            Self::Three => None,
         }
     }
 
@@ -150,28 +153,25 @@ impl StepExt for Step {
             Self::One => 1,
             Self::Two => 2,
             Self::Three => 3,
-            Self::Four => 4,
         }
     }
 
     fn label(&self) -> &'static str {
-        const STR_THEME: &'static str = "Theme";
         const STR_DESIGN: &'static str = "Design";
         const STR_CONTENT: &'static str = "Content";
         const STR_PREVIEW: &'static str = "Preview";
 
         match self {
-            Self::One => STR_THEME,
-            Self::Two => STR_DESIGN,
-            Self::Three => STR_CONTENT,
-            Self::Four => STR_PREVIEW,
+            Self::One => STR_DESIGN,
+            Self::Two => STR_CONTENT,
+            Self::Three => STR_PREVIEW,
         }
     }
 
     fn get_list() -> Vec<Self> {
-        vec![Self::One, Self::Two, Self::Three, Self::Four]
+        vec![Self::One, Self::Two, Self::Three]
     }
     fn get_preview() -> Self {
-        Self::Four
+        Self::Three
     }
 }
