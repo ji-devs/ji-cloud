@@ -3,7 +3,7 @@ import "@elements/core/inputs/composed/search";
 import "@elements/core/inputs/composed/checkbox";
 import "@elements/core/inputs/primitives/file";
 import "@elements/core/images/ji";
-import "@elements/core/window/window-loader-block";
+import "@elements/core/loaders/window-loader-block";
 import "@elements/core/buttons/rectangle";
 import "@elements/core/progress-bar/progress-bar";
 import "@elements/_bundles/_sub-bundles/all";

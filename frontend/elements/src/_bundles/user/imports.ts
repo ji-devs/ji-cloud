@@ -32,4 +32,4 @@ import "@elements/core/lists/list-vertical";
 import "@elements/core/lists/list-horizontal";
 import "@elements/core/images/ji";
 import "@elements/core/images/ui";
-import "@elements/core/window/window-loader-block";
+import "@elements/core/loaders/window-loader-block";

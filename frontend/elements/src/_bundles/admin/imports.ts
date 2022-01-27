@@ -39,7 +39,7 @@ import "@elements/core/menu/ellipses";
 import "@elements/core/buttons/expand";
 import "@elements/core/buttons/rectangle";
 import "@elements/core/buttons/fa-button";
-import "@elements/core/window/window-loader-block";
+import "@elements/core/loaders/window-loader-block";
 import "@elements/core/images/ji";
 import "@elements/core/images/ui";
 import "@elements/core/images/composed/module-screenshot";
