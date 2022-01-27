@@ -15,6 +15,7 @@ use shared::{
     error::EmptyError,
 };
 use std::cell::RefCell;
+use std::collections::HashMap;
 use std::convert::{TryFrom, TryInto};
 use std::future::Future;
 use std::marker::PhantomData;
@@ -111,7 +112,7 @@ where
                         locked: true,
                         other_keywords: String::from(""),
                         translated_keywords: String::from(""),
-                        translated_description: serde_json::Value::Null,
+                        translated_description: HashMap::new(),
                     })
                 } else {
 
