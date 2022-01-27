@@ -10,7 +10,7 @@ use crate::edit::sidebar::settings::{
 
 use super::super::state::State;
 
-const STR_DISPLAY_SCORE: &'static str = "Display score";
+// const STR_DISPLAY_SCORE: &'static str = "Display score";
 const STR_ASSESSMENT_MODE: &'static str = "Assessment mode";
 const STR_DRAG_ASSIST: &'static str = "Drag & Drop assist";
 
@@ -61,16 +61,16 @@ pub fn render(state: Rc<State>) -> Dom {
                     //         update_jig_settings(Rc::clone(&state));
                     //     }))
                     // }),
-                    html!("label", {
-                        .child(html!("input-switch", {
-                            .property_signal("enabled", state.display_score.signal())
-                            .event(clone!(state => move|evt :events::CustomToggle| {
-                                state.display_score.set(evt.value());
-                                update_jig_settings(Rc::clone(&state));
-                            }))
-                        }))
-                        .text(STR_DISPLAY_SCORE)
-                    }),
+                    // html!("label", {
+                    //     .child(html!("input-switch", {
+                    //         .property_signal("enabled", state.display_score.signal())
+                    //         .event(clone!(state => move|evt :events::CustomToggle| {
+                    //             state.display_score.set(evt.value());
+                    //             update_jig_settings(Rc::clone(&state));
+                    //         }))
+                    //     }))
+                    //     .text(STR_DISPLAY_SCORE)
+                    // }),
                     html!("label", {
                         .child(html!("input-switch", {
                             .property_signal("enabled", state.track_assessments.signal())
