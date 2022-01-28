@@ -4,8 +4,7 @@ use dominator::{clone, events, html, with_node, Dom};
 use futures_signals::signal::{Signal, SignalExt};
 use strum::IntoEnumIterator;
 use web_sys::HtmlSelectElement;
-
-use crate::player::sidebar::state::ReportType;
+use shared::domain::jig::report::JigReportType;
 
 use super::super::{
     actions,
@@ -61,10 +60,10 @@ fn render_active(state: Rc<State>) -> Vec<Dom> {
                 .with_node!(select => {
                     .property("slot", "select")
                     .child(html!("option"))
-                    .children(ReportType::iter().map(|option| {
+                    .children(JigReportType::iter().map(|option| {
                         html!("option", {
                             .property("value", option.to_value_str())
-                            .text(option.to_locale_str())
+                            .text(&option.as_str())
                         })
                     }))
                     .event(clone!(state => move |_: events::Change| {
@@ -72,7 +71,7 @@ fn render_active(state: Rc<State>) -> Vec<Dom> {
                         if value.is_empty() {
                             state.report_type.set(None);
                         } else {
-                            let report_type = ReportType::from_value_str(&value);
+                            let report_type = JigReportType::from_value_str(&value);
                             state.report_type.set(Some(report_type));
                         }
                     }))
