@@ -1,6 +1,7 @@
 //! Types for Jig short codes for sharing
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use strum_macros::EnumIter;
 use uuid::Uuid;
 
 use super::JigId;
@@ -70,7 +71,7 @@ pub struct JigReportEmail {
 }
 
 /// Type of report
-#[derive(Serialize, Deserialize, Copy, Clone, Eq, PartialEq, Debug)]
+#[derive(Serialize, Deserialize, Copy, Clone, Eq, PartialEq, Debug, EnumIter)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[serde(rename_all = "camelCase")]
 #[repr(i16)]
@@ -100,6 +101,16 @@ impl JigReportType {
             JigReportType::JiTapGameNotPlaying => "Ji Tap Game Not Playing",
             JigReportType::Other => "Other",
         }
+    }
+
+    #[allow(missing_docs)]
+    pub fn to_value_str(&self) -> String {
+        serde_json::to_string(&self).unwrap()
+    }
+
+    #[allow(missing_docs)]
+    pub fn from_value_str(s: &str) -> Self {
+        serde_json::from_str(s).unwrap()
     }
 }
 

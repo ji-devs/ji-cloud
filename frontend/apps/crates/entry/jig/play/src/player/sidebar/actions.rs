@@ -2,11 +2,18 @@ use std::rc::Rc;
 
 use dominator::clone;
 use shared::{
-    api::{endpoints::meta, ApiEndpoint},
-    domain::meta::MetadataResponse,
+    api::{
+        endpoints::{jig::report, meta},
+        ApiEndpoint,
+    },
+    domain::{
+        jig::{report::CreateJigReport, ReportId},
+        meta::MetadataResponse,
+        CreateResponse,
+    },
     error::EmptyError,
 };
-use utils::prelude::api_no_auth;
+use utils::prelude::{api_no_auth, api_with_auth};
 
 use crate::player::sidebar::state::ReportStatus;
 
@@ -14,20 +21,19 @@ use super::state::State;
 
 pub fn send_report(state: Rc<State>) {
     state.player_state.loader.load(clone!(state => async move {
-        let report_type = state.report_type.lock_ref();
-        log::info!("Sending report: {:?}", report_type);
-        // TODO: actually send report
-        state.report_status.set(ReportStatus::Sent);
+        let report_type = state.report_type.lock_ref().unwrap();
 
-        // TODO: enable once we actually send the reports
-        // spawn_local(clone!(state => async move {
-        //     TimeoutFuture::new(5_000).await;
-        //     let mut report_status = state.report_status.lock_mut();
-        //     // only update if status hasn't changed
-        //     if *report_status == ReportStatus::Sent {
-        //         *report_status = ReportStatus::Default;
-        //     }
-        // }));
+        let id = &state.player_state.jig_id.0.to_string();
+        let path = report::Create::PATH.replace("{id}", &id);
+        let response = api_with_auth::<CreateResponse<ReportId>, EmptyError, CreateJigReport>(
+            &path,
+            report::Create::METHOD,
+            Some(CreateJigReport {
+                report_type
+        })).await;
+        if let Ok(_res) = response {
+            state.report_status.set(ReportStatus::Sent);
+        }
     }));
 }
 
