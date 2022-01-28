@@ -48,9 +48,6 @@ export class _ extends LitElement {
     }
 
     render() {
-        console.log("Rending menu-items");
-        return html`
-            <slot></slot>
-        `;
+        return html`<slot></slot>`;
     }
 }

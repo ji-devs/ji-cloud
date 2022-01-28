@@ -76,6 +76,25 @@ pub struct Card {
     pub card_content: CardContent,
 }
 
+// Required because we need to be able to handle the data for the original Card enum, and also data
+// from the new Card struct.
+//
+// I.e. converts from
+//
+// [{"Text": "Some words"}, {"Image": {<Image data>}}]
+//
+// to
+//
+// [{
+//   audio: null,
+//   card_content: {"Text": "Some words"}
+// }, {
+//   audio: null,
+//   card_content: {"Image": {<Image data>}}
+// }]
+//
+// TODO Create a content migration to migrate all existing JIGs with card game modules so that
+// their card data matches the new Card struct and delete this Deserialize implementation.
 impl<'de> de::Deserialize<'de> for Card {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
