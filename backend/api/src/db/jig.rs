@@ -13,7 +13,7 @@ use shared::domain::{
     meta::{AffiliationId, AgeRangeId, GoalId, ResourceTypeId as TypeId},
     user::UserScope,
 };
-use sqlx::{PgConnection, PgPool};
+use sqlx::{types::Json, PgConnection, PgPool};
 use std::collections::HashMap;
 use uuid::Uuid;
 
@@ -202,7 +202,7 @@ pub async fn get_one(
     id: JigId,
     draft_or_live: DraftOrLive,
 ) -> anyhow::Result<Option<JigResponse>> {
-    let jig = sqlx::query!( //language=SQL
+    let res = sqlx::query!( //language=SQL
         r#"
 with cte as (
     select id      as "jig_id",
@@ -237,7 +237,7 @@ select cte.jig_id                                          as "jig_id: JigId",
        jig_focus                                           as "jig_focus!: JigFocus",
        language,
        description,
-       translated_description                              as "translated_description",
+       translated_description                              as "translated_description!: Json<HashMap<String, String>>",
        direction                                           as "direction: TextDirection",
        display_score,
        track_assessments,
@@ -283,63 +283,83 @@ from jig_data
         id.0,
         draft_or_live as i16,
     )
-        .fetch_optional(pool)
-        .await?
-        .map(|row| JigResponse {
-            id: row.jig_id,
-            published_at: row.published_at,
-            creator_id: row.creator_id,
-            author_id: row.author_id,
-            author_name: row.author_name,
-            likes: row.liked_count,
-            plays: row.play_count,
-            jig_focus: row.jig_focus,
-            jig_data: JigData {
-                draft_or_live,
-                display_name: row.display_name,
-                language: row.language,
-                modules: row
-                    .modules
-                    .into_iter()
-                    .map(|(id, kind, is_complete)| LiteModule { id, kind, is_complete })
-                    .collect(),
-                goals: row.goals.into_iter().map(|(it, )| it).collect(),
-                categories: row.categories.into_iter().map(|(it, )| it).collect(),
-                last_edited: row.updated_at,
-                description: row.description,
-                default_player_settings: JigPlayerSettings {
-                    direction: row.direction,
-                    display_score: row.display_score,
-                    track_assessments: row.track_assessments,
-                    drag_assist: row.drag_assist,
-                },
-                theme: row.theme,
-                age_ranges: row.age_ranges.into_iter().map(|(it, )| it).collect(),
-                affiliations: row.affiliations.into_iter().map(|(it, )| it).collect(),
-                additional_resources: row.additional_resource.into_iter().map(|(id, display_name, resource_type_id, resource_content)| {
-                    AdditionalResource {
+        .fetch_optional(pool).await?;
+
+    let jig = res.map(|row| JigResponse {
+        id: row.jig_id,
+        published_at: row.published_at,
+        creator_id: row.creator_id,
+        author_id: row.author_id,
+        author_name: row.author_name,
+        likes: row.liked_count,
+        plays: row.play_count,
+        jig_focus: row.jig_focus,
+        jig_data: JigData {
+            draft_or_live,
+            display_name: row.display_name,
+            language: row.language,
+            modules: row
+                .modules
+                .into_iter()
+                .map(|(id, kind, is_complete)| LiteModule {
+                    id,
+                    kind,
+                    is_complete,
+                })
+                .collect(),
+            goals: row.goals.into_iter().map(|(it,)| it).collect(),
+            categories: row.categories.into_iter().map(|(it,)| it).collect(),
+            last_edited: row.updated_at,
+            description: row.description,
+            default_player_settings: JigPlayerSettings {
+                direction: row.direction,
+                display_score: row.display_score,
+                track_assessments: row.track_assessments,
+                drag_assist: row.drag_assist,
+            },
+            theme: row.theme,
+            age_ranges: row.age_ranges.into_iter().map(|(it,)| it).collect(),
+            affiliations: row.affiliations.into_iter().map(|(it,)| it).collect(),
+            additional_resources: row
+                .additional_resource
+                .into_iter()
+                .map(
+                    |(id, display_name, resource_type_id, resource_content)| AdditionalResource {
                         id,
                         display_name,
                         resource_type_id,
-                        resource_content: serde_json::from_value::<ResourceContent>(resource_content).unwrap(),
-                    }}).collect(),
-                audio_background: row.audio_background,
-                audio_effects: AudioEffects {
-                    feedback_positive: row.audio_feedback_positive.into_iter().map(|(it, )| it).collect(),
-                    feedback_negative: row.audio_feedback_negative.into_iter().map(|(it, )| it).collect(),
-                },
-                privacy_level: row.privacy_level,
-                locked: row.locked,
-                other_keywords: row.other_keywords,
-                translated_keywords: row.translated_keywords,
-                translated_description: serde_json::from_value::<HashMap<String, String>>(row.translated_description).expect("could not deserialize translated descriptions"),
+                        resource_content: serde_json::from_value::<ResourceContent>(
+                            resource_content,
+                        )
+                        .unwrap(),
+                    },
+                )
+                .collect(),
+            audio_background: row.audio_background,
+            audio_effects: AudioEffects {
+                feedback_positive: row
+                    .audio_feedback_positive
+                    .into_iter()
+                    .map(|(it,)| it)
+                    .collect(),
+                feedback_negative: row
+                    .audio_feedback_negative
+                    .into_iter()
+                    .map(|(it,)| it)
+                    .collect(),
             },
-            admin_data: JigAdminData {
-                rating: row.rating,
-                blocked: row.blocked,
-                curated: row.curated,
-            }
-        });
+            privacy_level: row.privacy_level,
+            locked: row.locked,
+            other_keywords: row.other_keywords,
+            translated_keywords: row.translated_keywords,
+            translated_description: row.translated_description.0,
+        },
+        admin_data: JigAdminData {
+            rating: row.rating,
+            blocked: row.blocked,
+            curated: row.curated,
+        },
+    });
 
     Ok(jig)
 }
@@ -397,7 +417,7 @@ select id,
        updated_at,
        language                                                                      as "language!",
        description                                                                   as "description!",
-       translated_description                                                        as "translated_description!",
+       translated_description                                                        as "translated_description!: Json<HashMap<String,String>>",
        direction                                                                     as "direction!: TextDirection",
        display_score                                                                 as "display_score!",
        track_assessments                                                             as "track_assessments!",
@@ -524,10 +544,7 @@ where draft_or_live is not null
                 locked: jig_data_row.locked,
                 other_keywords: jig_data_row.other_keywords,
                 translated_keywords: jig_data_row.translated_keywords,
-                translated_description: serde_json::from_value::<HashMap<String, String>>(
-                    jig_data_row.translated_description,
-                )
-                .expect("could not deserialize translated descriptions"),
+                translated_description: jig_data_row.translated_description.0,
             },
             admin_data: JigAdminData {
                 rating: jig_row.rating,
@@ -615,7 +632,7 @@ select  jig.id                                              as "jig_id: JigId",
        updated_at,
        language                                                                      as "language!",
        description                                                                   as "description!",
-       translated_description                                                        as "translated_description!",
+       translated_description                                                        as "translated_description!: Json<HashMap<String,String>>",
        direction                                                                     as "direction!: TextDirection",
        display_score                                                                 as "display_score!",
        track_assessments                                                             as "track_assessments!",
@@ -748,10 +765,7 @@ limit 20
                 locked: jig_data_row.locked,
                 other_keywords: jig_data_row.other_keywords,
                 translated_keywords: jig_data_row.translated_keywords,
-                translated_description: serde_json::from_value::<HashMap<String, String>>(
-                    jig_data_row.translated_description,
-                )
-                .expect("could not deserialize translated descriptions"),
+                translated_description: jig_data_row.translated_description.0,
             },
             admin_data: JigAdminData {
                 rating: jig_data_row.rating,
@@ -882,23 +896,28 @@ where id = $1
     }
 
     if let Some(description) = description {
-        let translate_text = match &api_key {
-            Some(key) => multi_translation(description, key)
-                .await
-                .context("could not translate text")?,
-            None => None,
+        let translated_description: Option<HashMap<String, String>> = if !description.is_empty() {
+            let translate_text: Option<HashMap<String, String>> = match &api_key {
+                Some(key) => multi_translation(description, key)
+                    .await
+                    .context("could not translate text")?,
+                None => None,
+            };
+            translate_text
+        } else {
+            None
         };
 
         sqlx::query!(
             r#"
 update jig_data
 set description = $2,
-    translated_description = (case when ($3::jsonb is not null) then $3::jsonb else (translated_description) end),
+    translated_description = (case when length($2) <> 0 then $3::jsonb else '{}'::jsonb end),
     updated_at = now()
 where id = $1 and $2 is distinct from description"#,
             draft_id,
             description,
-            json!(translate_text)
+            json!(translated_description)
         )
         .execute(&mut txn)
         .await?;
