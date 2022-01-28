@@ -4,7 +4,9 @@
  */
 use crate::{
     config,
-    domain::jig::module::body::{Background, Image, Instructions, ModeExt, StepExt, ThemeChoice, Audio},
+    domain::jig::module::body::{
+        Audio, Background, Image, Instructions, ModeExt, StepExt, ThemeChoice,
+    },
 };
 use serde::{de, Deserialize, Serialize};
 use std::collections::HashSet;
@@ -109,7 +111,6 @@ impl<'de> de::Deserialize<'de> for Card {
                 let mut card_content: Option<CardContent> = None;
 
                 while let Some(key) = access.next_key()? {
-
                     match key {
                         CardField::Text => {
                             if card_content.is_some() {
@@ -141,7 +142,8 @@ impl<'de> de::Deserialize<'de> for Card {
                 }
 
                 let audio = audio.map_or(None, |audio| audio);
-                let card_content = card_content.ok_or_else(|| de::Error::missing_field("card_content"))?;
+                let card_content =
+                    card_content.ok_or_else(|| de::Error::missing_field("card_content"))?;
 
                 Ok(Card {
                     audio,
