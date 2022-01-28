@@ -36,6 +36,11 @@ export class _ extends LitElement {
                 :host {
                     background-color: #ffffff;
                 }
+                popup-body {
+                    border-radius: 16px;
+                    box-shadow: rgb(0 0 0 / 25%) 0px 3px 16px 0px;
+                    background-color: #ffffff;
+                }
                 .body {
                     padding: 0 32px 32px 32px;
                     display: grid;
