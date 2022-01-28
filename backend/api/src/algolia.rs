@@ -9,7 +9,7 @@ use chrono::{DateTime, Utc};
 use core::settings::AlgoliaSettings;
 use futures::TryStreamExt;
 use serde::Serialize;
-use serde_json::value::Value;
+use std::collections::HashMap;
 
 use shared::{
     domain::{
@@ -20,7 +20,7 @@ use shared::{
     },
     media::MediaGroupKind,
 };
-use sqlx::PgPool;
+use sqlx::{types::Json, PgPool};
 use std::convert::TryInto;
 use uuid::Uuid;
 
@@ -59,17 +59,13 @@ struct BatchJig<'a> {
     likes: &'a i64,
     plays: &'a i64,
     published_at: Option<DateTime<Utc>>,
-    #[serde(default)]
-    translated_description: &'a Value,
+    translated_description: &'a Vec<String>,
 }
 
 #[derive(Serialize)]
 struct BatchImage<'a> {
     name: &'a str,
     description: &'a str,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    translated_description: Option<Value>,
     styles: &'a [Uuid],
     style_names: &'a [String],
     age_ranges: &'a [Uuid],
@@ -83,6 +79,7 @@ struct BatchImage<'a> {
     media_subkind: &'a str,
     #[serde(rename = "_tags")]
     tags: Vec<&'static str>,
+    translated_description: &'a Vec<String>,
 }
 
 #[derive(Serialize)]
@@ -267,7 +264,7 @@ select jig.id,
        display_name                                                                                                 as "name",
        language                                                                                                     as "language!",
        description                                                                                                  as "description!",
-       translated_description                                                                                       as "translated_description!",
+       translated_description                                                                                       as "translated_description!: Json<HashMap<String, String>>",
        array((select affiliation_id
               from jig_data_affiliation
               where jig_data_id = jig_data.id))                                                                     as "affiliations!",
@@ -337,6 +334,12 @@ limit 100 for no key update skip locked;
                 tags.push(HAS_AUTHOR_TAG);
             }
 
+            let mut translation: Vec<String> = Vec::new();
+
+            for value in row.translated_description.0.values() {
+                translation.push(value.to_string());
+            }
+
             algolia::request::BatchWriteRequest::UpdateObject {
             body: match serde_json::to_value(&BatchJig {
                 name: &row.name,
@@ -363,7 +366,7 @@ limit 100 for no key update skip locked;
                 likes: &row.likes,
                 plays: &row.plays,
                 published_at: row.published_at,
-                translated_description: &row.translated_description,
+                translated_description: &translation,
             })
             .expect("failed to serialize BatchJig to json")
             {
@@ -430,7 +433,7 @@ select id,
        name,
        kind                                                                                     as "kind!: ImageKind",
        description,
-       translated_description                                                                   as "translated_description?: Value",
+       translated_description                                                                   as "translated_description!: Json<HashMap<String, String>>",
        array((select affiliation_id from image_affiliation where image_id = image_metadata.id)) as "affiliations!",
        array((select affiliation.display_name
               from affiliation
@@ -481,12 +484,18 @@ limit 100 for no key update skip locked;
                 tags.push(PREMIUM_TAG);
             }
 
+            let mut translation: Vec<String> = Vec::new();
+
+            for value in row.translated_description.0.values() {
+                translation.push(value.to_string());
+            }
+
             algolia::request::BatchWriteRequest::UpdateObject {
             body: match serde_json::to_value(&BatchMedia::Image(BatchImage {
                 media_subkind: &row.kind.to_str(),
                 name: &row.name,
                 description: &row.description,
-                translated_description: row.translated_description,
+                translated_description: &translation,
                 styles: &row.styles,
                 style_names: &row.style_names,
                 age_ranges: &row.age_ranges,
