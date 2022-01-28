@@ -96,7 +96,6 @@ export class _ extends LitElement {
     }
 
     updated(changed: any) {
-        // TODO need to passin customContainer somehow
         if (typeof changed.get("visible") === "boolean") {
             const { visible } = this;
             this.removeGlobalListener();
