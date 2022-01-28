@@ -4,7 +4,6 @@ use shared::domain::jig::JigId;
 use utils::{events, jig::JigPlayerOptions, routes::{JigRoute, Route}};
 
 use super::{super::state::State as JigEditState, actions, state::*};
-use components::share_jig;
 use std::rc::Rc;
 
 pub fn render(jig_id: JigId, jig_edit_state: Rc<JigEditState>) -> Dom {
@@ -37,7 +36,7 @@ fn render_modules_focused_actions(state: &Rc<State>) -> Vec<Dom> {
     });
 
     vec![
-        share_jig::dom::render(Rc::clone(&state.share_state), share_anchor, Some("actions")),
+        Rc::clone(&state.share_state).render(share_anchor, Some("actions")),
         html!("post-publish-action", {
             .property("slot", "actions")
             .property("kind", "new-jig")

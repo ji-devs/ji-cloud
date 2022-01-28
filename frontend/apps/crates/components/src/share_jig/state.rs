@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use awsm_web::loaders::helpers::AsyncLoader;
 use futures_signals::signal::Mutable;
 use shared::domain::jig::JigId;
@@ -6,7 +8,7 @@ use utils::routes::{JigRoute, Route};
 
 use utils::prelude::*;
 
-pub struct State {
+pub struct ShareJig {
     pub active_popup: Mutable<Option<ActivePopup>>,
     pub student_code: Mutable<Option<String>>,
     pub loader: AsyncLoader,
@@ -15,16 +17,16 @@ pub struct State {
     pub link_copied: Mutable<bool>,
 }
 
-impl State {
-    pub fn new(jig_id: JigId) -> Self {
-        Self {
+impl ShareJig {
+    pub fn new(jig_id: JigId) -> Rc<Self> {
+        Rc::new(Self {
             jig_id,
             student_code: Mutable::new(None),
             loader: AsyncLoader::new(),
             active_popup: Mutable::new(None),
             copied_embed: Mutable::new(false),
             link_copied: Mutable::new(false),
-        }
+        })
     }
 
     pub fn embed_code(&self) -> String {
