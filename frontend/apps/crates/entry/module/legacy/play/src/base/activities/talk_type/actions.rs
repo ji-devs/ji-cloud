@@ -49,7 +49,7 @@ impl TalkTypeItem {
             Some(texts) => {
                 let value = &*state.value.lock_ref();
 
-                if texts.iter().any(|text| text == value) {
+                if texts.iter().any(|text| text.to_lowercase() == value.to_lowercase()) {
                     state.phase.set(TalkTypeItemPhase::Correct);
                     state.base.audio_manager.play_positive_clip();
                     parent.evaluate_all();
