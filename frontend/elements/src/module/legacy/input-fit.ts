@@ -26,6 +26,7 @@ export class _ extends LitElement {
         ];
     }
 
+
     firstUpdated(_changed: any) {
         this.resize();
     }
@@ -55,6 +56,7 @@ export class _ extends LitElement {
     resize() {
         const input = this.shadowRoot?.getElementById("input") as HTMLInputElement;
 
+
         const isOverflowing = () => {
             return input.clientWidth < input.scrollWidth || input.clientHeight < input.scrollHeight;
         }
@@ -69,6 +71,8 @@ export class _ extends LitElement {
 
         input.style.fontSize = `${curr - margin}px`;
     }
+
+
 
     @property({type: Number})
     x:number = 0;
@@ -96,8 +100,9 @@ export class _ extends LitElement {
             position: "absolute",
             top: `${y}px`,
             left: `${x}px`,
-            width: `${width}px`,
-            height: `${height}px`,
+            width: `${Math.round(width)}px`,
+            height: `${Math.round(height)}px`,
+            lineHeight: `${Math.round(height)}px`,
         });
         return html`
             <input 
