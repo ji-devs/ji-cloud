@@ -59,21 +59,30 @@ impl SoundboardItem {
             state.base.audio_manager.play_clip_on_ended(
                 state.base.activity_media_url(&audio_filename),
                 clone!(state => move || {
+                    log::info!("clip ended!");
                     state.hotspot.fade_out();
-                    if let Some(index) = state.jump_index {
-                        log::info!("going to index {}!", index);
-
-                        state.base.navigate(NavigationTarget::Index(index));
-                    } else {
-                        let all_revealed = parent.items.iter().all(|item| item.revealed.get());
-
-                        if all_revealed {
-                            log::info!("finished all, going next");
-                            state.base.navigate(NavigationTarget::Next);
-                        }
-                    };
+                    state.do_maybe_jump(&parent);
                 })
             );
+        } else {
+            log::info!("no sound!");
+            state.do_maybe_jump(&parent);
         }
+    }
+
+    fn do_maybe_jump(&self, parent: &Soundboard) {
+        let state = self;
+
+        if let Some(index) = state.jump_index {
+            log::info!("going to index {}!", index);
+            state.base.navigate(NavigationTarget::Index(index));
+        } else {
+            let all_revealed = parent.items.iter().all(|item| item.revealed.get());
+
+            if all_revealed {
+                log::info!("finished all, going next");
+                state.base.navigate(NavigationTarget::Next);
+            }
+        };
     }
 }
