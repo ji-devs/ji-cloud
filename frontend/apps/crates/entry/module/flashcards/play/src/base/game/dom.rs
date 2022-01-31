@@ -64,7 +64,6 @@ fn flip_controller(
 ) -> impl FnOnce(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement> {
     move |dom| {
         dom
-            .property_signal("eventOnFlipped", state.gate.signal().map(move |gate| gate == Gate::Flipping))
             .property_signal("flipped", state.gate.signal().map(move |gate| {
                 if gate == Gate::Waiting || gate == Gate::FinishingFlip {
                     initial

@@ -1,7 +1,13 @@
 use super::state::*;
-use components::module::_groups::cards::lookup::Side;
+use components::{
+    module::_groups::cards::{
+        play::card::dom::FLIPPED_AUDIO_EFFECT,
+        lookup::Side
+    },
+    audio::mixer::{AUDIO_MIXER, AudioPath, AudioSourceExt},
+};
 use gloo_timers::future::TimeoutFuture;
-use shared::domain::jig::module::body::_groups::cards::CardPair;
+use shared::domain::jig::module::body::_groups::cards::{CardPair, Card};
 
 use crate::base::state::Base;
 
@@ -31,6 +37,15 @@ impl Game {
 
     pub fn flip(state: Rc<Self>) {
         if state.gate.get() == Gate::Waiting {
+            // Play card flipping sound effect
+            AUDIO_MIXER.with(clone!(state => move |mixer| {
+                mixer.play_oneshot_on_ended(
+                    // Then play the cards audio clip
+                    AudioPath::new_cdn(FLIPPED_AUDIO_EFFECT.to_string()),
+                    move || play_card_audio(&state.current.get_cloned().other)
+                )
+            }));
+
             state.animation_loader.load(clone!(state => async move {
                 state.gate.set(Gate::Flipping);
                 TimeoutFuture::new(crate::config::SHOW_TIME).await;
@@ -64,7 +79,7 @@ pub(super) fn get_fresh_deck(base: &Base, rng: &mut ThreadRng) -> Vec<CardPair> 
 
 pub(super) fn get_current(base: &Base, deck: &mut Vec<CardPair>) -> Option<Current> {
     deck.pop().map(|pair| {
-        if base.settings.swap {
+        let current = if base.settings.swap {
             Current {
                 card: pair.0,
                 other: pair.1,
@@ -76,6 +91,18 @@ pub(super) fn get_current(base: &Base, deck: &mut Vec<CardPair>) -> Option<Curre
                 other: pair.0,
                 side: Side::Right,
             }
-        }
+        };
+
+        play_card_audio(&current.card);
+
+        current
     })
+}
+
+fn play_card_audio(card: &Card) {
+    if let Some(audio) = &card.audio {
+        AUDIO_MIXER.with(|mixer| {
+            mixer.play_oneshot(audio.as_source())
+        });
+    }
 }

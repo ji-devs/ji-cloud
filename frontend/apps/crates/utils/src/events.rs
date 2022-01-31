@@ -235,16 +235,6 @@ make_custom_event_serde!(
     CustomCancelData
 );
 
-// Custom Card Flipped
-#[derive(Deserialize, Debug)]
-pub struct CustomCardFlippedData;
-
-make_custom_event_serde!(
-    "custom-card-flipped",
-    CustomCardFlipped,
-    CustomCardFlippedData
-);
-
 // Custom Rating
 #[derive(Deserialize, Debug)]
 pub struct CustomRatingData {
