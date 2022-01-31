@@ -20,8 +20,46 @@ use shared::domain::jig::module::body::{
     _groups::cards::{Mode, Step},
 };
 
+const STR_CONFIRM_TITLE: &'static str = "Warning";
+
+const STR_REMOVE_CONTENT_IMAGE: &'static str = "Are you sure you want to remove this image?";
+const STR_REMOVE_CONTENT_AUDIO: &'static str = "Are you sure you want to remove this audio clip?";
+const STR_REMOVE_CONFIRM: &'static str = "Remove";
+const STR_REMOVE_CANCEL: &'static str = "Don't remove";
+
+const STR_DELETE_CONTENT_PAIR: &'static str = "Are you sure you want to delete this pair?";
+const STR_DELETE_CONFIRM: &'static str = "Delete Pair";
+const STR_DELETE_CANCEL: &'static str = "Don't delete";
+
 pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<MainCard<RawData, E>>) -> Dom {
     html!("main-card", {
+        .child_signal(state.confirm_action.signal_cloned().map(clone!(state => move |confirm_action| {
+            if let Some(confirm_action) = confirm_action {
+                Some(html!("empty-fragment", {
+                    // The empty-fragment is required so that we can render the overly inside
+                    // a signal, but adding the fragment upsets the layout of the cards because of
+                    // their positioning. Setting it's display to none resolves the layout.
+                    .style("display", "none")
+                    .apply(OverlayHandle::lifecycle(clone!(state => move || {
+                        let confirm_action = confirm_action.clone();
+                        html!("modal-confirm", {
+                            .property("dangerous", true)
+                            .property("title", confirm_action.title)
+                            .property("content", confirm_action.content)
+                            .property("cancel_text", confirm_action.cancel)
+                            .property("confirm_text", confirm_action.confirm)
+                            .event(clone!(state => move |_evt: events::CustomCancel| state.confirm_action.set(None)))
+                            .event(clone!(state => move |_evt: events::CustomConfirm| {
+                                state.confirm_action.set(None);
+                                (confirm_action.handler)();
+                            }))
+                })
+                    })))
+                }))
+            } else {
+                None
+            }
+        })))
         .property("slot", state.side.as_str_id())
         .property("side", state.side.as_str_id())
         .property("flippable", state.step == Step::Two)
@@ -82,8 +120,16 @@ pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<MainCard<RawData, E>>)
                                                             .property("customLabel", "Remove image")
                                                             .event(clone!(state => move |_evt:events::Click| {
                                                                 state.close_menu();
-                                                                let index = state.index.get().unwrap_or_default();
-                                                                state.remove_card_image(index, state.side)
+                                                                state.confirm_action.set(Some(Rc::new(ModalAction::new(
+                                                                    STR_CONFIRM_TITLE,
+                                                                    STR_REMOVE_CONTENT_IMAGE,
+                                                                    STR_REMOVE_CONFIRM,
+                                                                    STR_REMOVE_CANCEL,
+                                                                    Rc::new(clone!(state => move || {
+                                                                        let index = state.index.get().unwrap_or_default();
+                                                                        state.remove_card_image(index, state.side);
+                                                                    }))
+                                                                ))))
                                                             }))
                                                         }))
                                                     },
@@ -97,18 +143,23 @@ pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<MainCard<RawData, E>>)
                                                 .property("customLabel", "Remove audio")
                                                 .event(clone!(state => move |_evt:events::Click| {
                                                     state.close_menu();
-                                                    let index = state.index.get().unwrap_or_default();
-                                                    state.base.replace_pair(index, |mut pair| {
-                                                        match state.side {
-                                                            Side::Left => { pair.0.audio = None },
-                                                            Side::Right => { pair.1.audio = None },
-                                                        }
+                                                    state.confirm_action.set(Some(Rc::new(ModalAction::new(
+                                                        STR_CONFIRM_TITLE,
+                                                        STR_REMOVE_CONTENT_AUDIO,
+                                                        STR_REMOVE_CONFIRM,
+                                                        STR_REMOVE_CANCEL,
+                                                        Rc::new(clone!(state => move || {
+                                                            let index = state.index.get().unwrap_or_default();
+                                                            state.base.replace_pair(index, |mut pair| {
+                                                                match state.side {
+                                                                    Side::Left => { pair.0.audio = None },
+                                                                    Side::Right => { pair.1.audio = None },
+                                                                }
 
-                                                        pair
-                                                    })
-                                                    // todo match side so we know how to construct
-                                                    // the new pair and replace it in the list
-                                                    // state.remove_card_image(index, state.side)
+                                                                pair
+                                                            })
+                                                        }))
+                                                    ))))
                                                 }))
                                             }))
                                         }))
@@ -117,8 +168,15 @@ pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<MainCard<RawData, E>>)
                                             .property("customLabel", "Delete pair")
                                             .event(clone!(state => move |_evt:events::Click| {
                                                 state.close_menu();
-                                                // TODO confirm modal
-                                                state.delete_pair(state.index.get().unwrap_or_default());
+                                                state.confirm_action.set(Some(Rc::new(ModalAction::new(
+                                                    STR_CONFIRM_TITLE,
+                                                    STR_DELETE_CONTENT_PAIR,
+                                                    STR_DELETE_CONFIRM,
+                                                    STR_DELETE_CANCEL,
+                                                    Rc::new(clone!(state => move || {
+                                                        state.delete_pair(state.index.get().unwrap_or_default());
+                                                    }))
+                                                ))))
                                             }))
                                         }))
                                         .after_inserted(clone!(state => move |elem| {
