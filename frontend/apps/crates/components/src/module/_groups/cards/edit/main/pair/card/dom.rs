@@ -8,6 +8,7 @@ use wasm_bindgen::prelude::*;
 
 use super::state::*;
 use crate::{
+    audio::mixer::{AudioSourceExt, AUDIO_MIXER},
     image::search::types::*,
     module::_groups::cards::{
         edit::{config, state::*},
@@ -83,6 +84,12 @@ pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<MainCard<RawData, E>>)
             dom.child(html!("button-icon", {
                 .property("slot", "audio")
                 .property("icon", "audio")
+                .event(clone!(state => move |_evt:events::Click| {
+                    let audio = state.card.audio.as_ref().unwrap_ji();
+                    AUDIO_MIXER.with(|mixer| {
+                        mixer.play_oneshot(audio.as_source())
+                    });
+                }))
             }))
         })
         .apply_if(state.step == Step::One, |dom| {
