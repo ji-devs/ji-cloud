@@ -54,7 +54,6 @@ pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<Step1<RawData, E>>) ->
                                     Some(render_image_search(image.clone(), None))
                                 },
                                 Some(Tab::Audio) => {
-                                    // TODO use map_ref! to get the vec
                                     let audio_signal = |state: Rc<Step1<RawData, E>>|  map_ref! {
                                         let selected_pair = state.base.selected_pair.signal_cloned(),
                                         let pairs = state.base.pairs.signal_vec_cloned().to_signal_cloned()
