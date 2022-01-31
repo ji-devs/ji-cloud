@@ -19,7 +19,7 @@ export const Landing = (props?: Partial<Args>) => {
             <jig-play-play-button slot="play-button"></jig-play-play-button>
 
             <jig-play-play-pause slot="play-pause-button" mode="play"></jig-play-play-pause>
-            <jig-play-replay slot="replay-background"></jig-play-replay>
+            <jig-play-done-action slot="replay-background"></jig-play-done-action>
             <jig-play-background-music slot="background"></jig-play-background-music>
             <jig-play-points-indicator slot="indicators" value="210"></jig-play-points-indicator>
             <jig-play-timer-indicator slot="indicators" value="02:52"></jig-play-timer-indicator>

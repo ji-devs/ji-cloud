@@ -11,7 +11,11 @@ export class _ extends LitElement {
                     position: fixed;
                     top: 0;
                     left: 0;
-                    z-index: 2;
+                    /*
+                        using at least 5 for jig/animation-play-state,
+                        but this can probably be set to a lower number if we replace main with a custom element
+                    */
+                    z-index: 5;
                 }
             `,
         ];

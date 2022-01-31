@@ -18,7 +18,7 @@ import "@elements/entry/jig/play/play-button";
 import "@elements/entry/jig/play/play-pause";
 import "@elements/entry/jig/play/points-indicator";
 import "@elements/entry/jig/play/progress-bar";
-import "@elements/entry/jig/play/replay";
+import "@elements/entry/jig/play/done-action";
 import "@elements/entry/jig/play/timer-indicator";
 import "@elements/entry/jig/play/time-up-popup";
 import "@elements/entry/jig/play/done-popup";

@@ -1,10 +1,12 @@
 use super::{actions, sidebar};
+use components::share_jig::ShareJig;
 use dominator::{clone, events, html, with_node, Dom};
 use dominator_helpers::{events::Message, signals::DefaultSignal};
 use futures_signals::map_ref;
 use futures_signals::signal::{Signal, SignalExt};
 use js_sys::Reflect;
 use shared::domain::jig::{JigResponse, ModuleKind};
+use utils::iframe::{JigPlayerToPlayerPopup, IframeMessageExt};
 use std::rc::Rc;
 use utils::{
     iframe::{IframeAction, ModuleToJigPlayerMessage},
@@ -258,14 +260,37 @@ fn render_done_popup(state: Rc<State>) -> impl Signal<Item = Option<Dom>> {
                             };
                             if !state.player_options.track_assessments {
                                 dom = dom.child(
-                                    html!("jig-play-replay", {
+                                    html!("jig-play-done-action", {
                                         .property("slot", "actions")
+                                        .property("kind", "replay")
                                         .event(clone!(state => move |_: events::Click| {
                                             actions::navigate_to_index(
                                                 Rc::clone(&state),
                                                 0
                                             );
                                         }))
+                                    })
+                                );
+                            }
+                            if !state.player_options.is_student {
+                                dom = dom.child(ShareJig::new(state.jig_id).render(
+                                    html!("jig-play-done-action", {
+                                        .text("share")
+                                        .property("kind", "share")
+                                    }),
+                                    Some("actions")
+                                ));
+                            }
+                            if is_iframe() {
+                                dom = dom.child(
+                                    html!("jig-play-done-action", {
+                                        .property("slot", "actions")
+                                        .property("kind", "exit")
+                                        .text("exit")
+                                        .event(|_: events::Click| {
+                                            let e = IframeAction::new(JigPlayerToPlayerPopup::Close).try_post_message_to_parent();
+                                            log::info!("{:?}", e);
+                                        })
                                     })
                                 );
                             }
@@ -304,8 +329,9 @@ fn render_time_up_popup(state: Rc<State>) -> impl Signal<Item = Option<Dom>> {
                         .apply(|mut dom| {
                             if !state.player_options.track_assessments {
                                 dom = dom.child(
-                                    html!("jig-play-replay", {
+                                    html!("jig-play-done-action", {
                                         .property("slot", "actions")
+                                        .property("kind", "replay")
                                         .event(clone!(state => move |_: events::Click| {
                                             actions::reload_iframe(Rc::clone(&state));
                                         }))
@@ -352,4 +378,10 @@ fn render_time_indicator(state: Rc<State>) -> impl Signal<Item = Option<Dom>> {
             }
         }
     }))
+}
+
+pub fn is_iframe() -> bool {
+    let window = web_sys::window().unwrap_ji();
+    let top = window.top().unwrap_ji().unwrap_ji();
+    window != top
 }

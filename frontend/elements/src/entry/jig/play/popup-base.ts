@@ -1,5 +1,5 @@
-import { css, html, LitElement, property } from "lit-element";
-import { nothing, TemplateResult } from "lit-html";
+import { css, html, LitElement } from "lit-element";
+import { TemplateResult } from "lit-html";
 
 export class PopupBase extends LitElement {
     static get styles() {
@@ -13,7 +13,8 @@ export class PopupBase extends LitElement {
                     box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
                 }
                 .top-section {
-                    min-height: 560px;
+                    height: 560px;
+                    max-height: 70vh;
                     background-color: #192150d9;
                     display: grid;
                     align-items: center;
@@ -22,11 +23,13 @@ export class PopupBase extends LitElement {
                     row-gap: 36px;
                     text-align: center;
                 }
-                ::slotted([slot="actions"]) {
+                .actions {
                     height: 164px;
                     background-color: #ffffff;
-                    display: grid;
-                    place-content: center;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    column-gap: 50px;
                 }
             `,
         ];
@@ -35,7 +38,9 @@ export class PopupBase extends LitElement {
     renderBase(body: () => TemplateResult) {
         return html`
             <div class="top-section">${body()}</div>
-            <slot name="actions"></slot>
+            <div class="actions">
+                <slot name="actions"></slot>
+            </div>
         `;
     }
 }

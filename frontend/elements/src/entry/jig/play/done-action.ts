@@ -1,7 +1,9 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 import { actionStyles } from "./action-styles";
 
-@customElement("jig-play-replay")
+export type Kind = "replay" | "exit" | "share";
+
+@customElement("jig-play-done-action")
 export class _ extends LitElement {
     static get styles() {
         return [
@@ -14,10 +16,13 @@ export class _ extends LitElement {
         ];
     }
 
+    @property()
+    kind: Kind = "replay";
+
     render() {
         return html`
             <button class="action huge">
-                <img-ui path="entry/jig/play/replay.svg"></img-ui>
+                <img-ui path="entry/jig/play/${this.kind}.svg"></img-ui>
             </button>
         `;
     }

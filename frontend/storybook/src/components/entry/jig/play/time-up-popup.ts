@@ -19,7 +19,7 @@ export const TimeUpPopup = (props?: Partial<Args>) => {
     return `
         <jig-play-time-up-popup ${argsToAttrs(props)}>
             <div slot="actions">
-                <jig-play-replay></jig-play-replay>
+                <jig-play-done-action></jig-play-done-action>
             </div>
         </jig-play-time-up-popup>
     `;

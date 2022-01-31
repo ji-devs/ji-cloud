@@ -19,7 +19,7 @@ export const DonePopup = (props?: Partial<Args>) => {
     return `
         <jig-play-done-popup ${argsToAttrs(props)}>
             <div slot="actions">
-                <jig-play-replay></jig-play-replay>
+                <jig-play-done-action></jig-play-done-action>
             </div>
         </jig-play-done-popup>
     `;

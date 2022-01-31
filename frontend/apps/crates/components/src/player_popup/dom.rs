@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
-use utils::{events, prelude::SETTINGS, routes::{JigRoute, Route}, unwrap::UnwrapJiExt};
+use utils::{events, prelude::SETTINGS, routes::{JigRoute, Route}, unwrap::UnwrapJiExt, iframe::{JigPlayerToPlayerPopup, IframeInit}};
 
 use super::state::PlayerPopup;
 
@@ -36,6 +36,15 @@ impl PlayerPopup {
                                 };
                                 url
                             })
+                            .global_event(clone!(state => move |event: events::Message| {
+                                if let Ok(data) = event.try_serde_data::<IframeInit<JigPlayerToPlayerPopup>>() {
+                                    match data.data {
+                                        JigPlayerToPlayerPopup::Close => {
+                                            (state.callbacks.close)();
+                                        },
+                                    }
+                                }
+                            }))
                         }))
                     },
                 }
