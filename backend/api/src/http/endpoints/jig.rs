@@ -270,9 +270,12 @@ pub(super) async fn publish_draft_to_live(
         .is_empty();
 
     // If no modules or modules without content, prevent publishing.
-    if !modules_valid || !has_modules {
-        return Err(error::JigCloneDraft::IncompleteModules);
-    }
+    // NOTE: we temporarily allow publishing jig without content
+    // since curation also uses this endpoint and some jigs have already been published without content
+    // and those jigs have to be curated
+    // if !modules_valid || !has_modules {
+    //     return Err(error::JigCloneDraft::IncompleteModules);
+    // }
 
     let new_live_id = db::jig::clone_data(&mut txn, &draft_id, DraftOrLive::Live).await?;
 
