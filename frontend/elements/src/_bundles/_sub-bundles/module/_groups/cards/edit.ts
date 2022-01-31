@@ -1,3 +1,4 @@
+import "@elements/core/modals/confirm";
 import "@elements/module/_groups/cards/_common/main-empty";
 import "@elements/module/_groups/cards/edit/header/button-add";
 import "@elements/module/_groups/cards/edit/main/main";
