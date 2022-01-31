@@ -35,7 +35,6 @@ fn render_main_card(state: Rc<Base>, card_state: Rc<CardState>) -> Dom {
     render_card_mixin(options, |dom| {
         dom
             .style_signal("visibility", card_state.is_found().map(|found| if found { "hidden" } else { "visible" }))
-            .property_signal("eventOnFlipped", state.flip_state.signal_ref(|flip_state| matches!(flip_state, FlipState::One(_))))
             .property_signal("flipped", card_state.is_flipped(&state))
             .event(clone!(state, card_id => move |_evt:events::Click| {
                 if let Some((id_1, id_2)) = super::actions::card_click(state.clone(), card_id) {

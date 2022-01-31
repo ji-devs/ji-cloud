@@ -43,10 +43,6 @@ impl Game {
                                 children.push(render_card_mixin(options, |dom| {
                                     dom
                                         .property_signal(
-                                            "eventOnFlipped",
-                                            phase.signal().map(clone!(state => move |_| is_incorrect_choice(&state, &pair_id)))
-                                        )
-                                        .property_signal(
                                             "effect",
                                             phase.signal().map(move |phase| {
                                                 match phase {

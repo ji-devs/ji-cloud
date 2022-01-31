@@ -1,10 +1,10 @@
-use crate::{module::_groups::cards::lookup::Side, audio::mixer::{AUDIO_MIXER, AudioPath}};
+use crate::module::_groups::cards::lookup::Side;
 use dominator::{html, Dom, DomBuilder};
 use shared::domain::jig::module::body::{
     ModeExt,
     _groups::cards::{Card, Mode},
 };
-use utils::{events, prelude::*};
+use utils::prelude::*;
 use web_sys::HtmlElement;
 
 use super::common::*;
@@ -132,11 +132,6 @@ where
         })
         .apply_if(mixin.is_some(), |dom| {
             (mixin.unwrap_ji()) (dom)
-        })
-        .event(move |_evt: events::CustomCardFlipped| {
-            AUDIO_MIXER.with(|mixer| {
-                mixer.play_oneshot(AudioPath::new_cdn(super::FLIPPED_AUDIO_EFFECT.to_string()))
-            });
         })
     })
 }
