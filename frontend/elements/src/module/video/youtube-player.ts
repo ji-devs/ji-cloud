@@ -36,6 +36,7 @@ export class _ extends LitElement {
                     background-color: black;
                 }
                 iframe {
+                    position: var(--yt-iframe-position);
                     height: 100%;
                     width: 100%;
                 }

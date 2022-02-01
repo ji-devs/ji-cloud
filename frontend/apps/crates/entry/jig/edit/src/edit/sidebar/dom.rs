@@ -64,7 +64,7 @@ impl SidebarDom {
             .global_event(clone!(state => move |evt: Message| {
                 match evt.try_serde_data::<IframeAction<ModuleToJigEditorMessage>>() {
                     Err(_e) => {
-                        log::info!("{:?}", _e);
+
                     },
                     Ok(m) => {
                         actions::on_iframe_message(Rc::clone(&state), m.data)
