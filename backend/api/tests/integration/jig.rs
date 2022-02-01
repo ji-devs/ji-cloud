@@ -358,7 +358,6 @@ async fn count() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[ignore]
 #[actix_rt::test]
 async fn update_and_publish() -> anyhow::Result<()> {
     let app = initialize_server(
@@ -492,6 +491,7 @@ async fn update_and_publish() -> anyhow::Result<()> {
     Ok(())
 }
 
+#[ignore]
 #[actix_rt::test]
 async fn update_and_publish_incomplete_modules() -> anyhow::Result<()> {
     let app = initialize_server(

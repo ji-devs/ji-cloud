@@ -27,7 +27,6 @@ pub(crate) mod report;
 
 pub async fn create(
     pool: &PgPool,
-    api_key: &Option<String>,
     display_name: &str,
     goals: &[GoalId],
     categories: &[CategoryId],
@@ -41,18 +40,6 @@ pub async fn create(
 ) -> Result<JigId, CreateJigError> {
     let mut txn = pool.begin().await?;
 
-    let translated_description: Option<HashMap<String, String>> = if !description.is_empty() {
-        let translate_text = match &api_key {
-            Some(key) => multi_translation(description, key)
-                .await
-                .context("could not translate text")?,
-            None => None,
-        };
-        translate_text
-    } else {
-        None
-    };
-
     let draft_id = create_jig_data(
         &mut txn,
         display_name,
@@ -64,7 +51,6 @@ pub async fn create(
         description,
         default_player_settings,
         DraftOrLive::Draft,
-        &translated_description,
     )
     .await?;
 
@@ -79,7 +65,6 @@ pub async fn create(
         description,
         default_player_settings,
         DraftOrLive::Live,
-        &translated_description,
     )
     .await?;
 
@@ -124,7 +109,6 @@ pub async fn create_jig_data(
     description: &str,
     default_player_settings: &JigPlayerSettings,
     draft_or_live: DraftOrLive,
-    translated_description: &Option<HashMap<String, String>>,
 ) -> Result<Uuid, CreateJigError> {
     log::warn!("description: {}", description);
 
@@ -147,21 +131,6 @@ returning id
     )
     .fetch_one(&mut *txn)
     .await?;
-
-    if let Some(translation) = translated_description {
-        sqlx::query!(
-            // language=SQL
-            r#"
-    update jig_data
-    set translated_description = $2::jsonb
-    where id = $1
-    "#,
-            &jig_data.id,
-            json!(translation)
-        )
-        .execute(&mut *txn)
-        .await?;
-    }
 
     super::recycle_metadata(&mut *txn, "jig_data", jig_data.id, goals).await?;
     super::recycle_metadata(&mut *txn, "jig_data", jig_data.id, categories).await?;
@@ -896,28 +865,15 @@ where id = $1
     }
 
     if let Some(description) = description {
-        let translated_description: Option<HashMap<String, String>> = if !description.is_empty() {
-            let translate_text: Option<HashMap<String, String>> = match &api_key {
-                Some(key) => multi_translation(description, key)
-                    .await
-                    .context("could not translate text")?,
-                None => None,
-            };
-            translate_text
-        } else {
-            None
-        };
-
         sqlx::query!(
             r#"
 update jig_data
 set description = $2,
-    translated_description = (case when length($2) <> 0 then $3::jsonb else '{}'::jsonb end),
+    translated_description = '{}',
     updated_at = now()
 where id = $1 and $2 is distinct from description"#,
             draft_id,
             description,
-            json!(translated_description)
         )
         .execute(&mut txn)
         .await?;

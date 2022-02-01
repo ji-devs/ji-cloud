@@ -32,7 +32,6 @@ pub mod report;
 /// Create a jig.
 async fn create(
     db: Data<PgPool>,
-    settings: Data<RuntimeSettings>,
     auth: TokenUser,
     req: Option<Json<<jig::Create as ApiEndpoint>::Req>>,
 ) -> Result<
@@ -43,7 +42,6 @@ async fn create(
     error::CreateWithMetadata,
 > {
     let db = db.as_ref();
-    let api_key = &settings.google_api_key;
 
     db::jig::authz(db, auth.0.user_id, None).await?;
 
@@ -65,7 +63,6 @@ async fn create(
 
     let id = db::jig::create(
         &*db,
-        api_key,
         &req.display_name,
         &req.goals,
         &req.categories,

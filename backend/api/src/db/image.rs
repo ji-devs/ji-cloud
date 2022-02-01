@@ -87,7 +87,6 @@ pub async fn update(
     description: Option<&str>,
     is_premium: Option<bool>,
     publish_at: Option<Option<DateTime<Utc>>>,
-    api_key: &Option<String>,
 ) -> anyhow::Result<bool> {
     if !sqlx::query!(
         r#"select exists(select 1 from image_metadata where id = $1) as "exists!""#,
@@ -114,23 +113,15 @@ where id = $1 and $2 is distinct from publish_at"#,
     }
 
     if let Some(description) = description {
-        let translate_text = match &api_key {
-            Some(key) => multi_translation(description, key)
-                .await
-                .context("could not translate text")?,
-            None => None,
-        };
-
         sqlx::query!(
             r#"
 update image_metadata
 set description = $2,
-    translated_description = (case when ($3::jsonb is not null) then $3::jsonb else (translated_description) end),
+    translated_description = '{}',
     updated_at = now()
 where id = $1 and $2 is distinct from description"#,
             id.0,
             description,
-            json!(translate_text)
         )
         .execute(&mut *conn)
         .await?;
