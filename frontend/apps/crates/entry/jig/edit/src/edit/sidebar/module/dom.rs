@@ -5,7 +5,7 @@ use web_sys::{HtmlElement, Node, ScrollIntoViewOptions, ScrollBehavior};
 
 use super::super::menu::dom as MenuDom;
 use super::{actions, state::*};
-use crate::edit::sidebar::state::{State as SidebarState, Module};
+use crate::edit::sidebar::state::{State as SidebarState, Module, ModuleHighlight};
 use components::module::_common::thumbnail::ModuleThumbnail;
 use futures_signals::signal::{SignalExt, Mutable};
 use shared::domain::jig::ModuleKind;
@@ -46,7 +46,6 @@ impl ModuleDom {
                 .signal_cloned(),
             let highlight_modules = sidebar_state.highlight_modules.signal_cloned()
                 => {
-                    log::info!("is_complete {:?}, highlight {:?}", is_complete, highlight_modules);
                     !is_complete && highlight_modules.is_some()
                 }
         };
@@ -165,7 +164,7 @@ impl ModuleDom {
                         })))
                         .child_signal(state.sidebar.highlight_modules.signal_cloned().map(clone!(state, elem => move |highlight| {
                             match highlight {
-                                Some(idx) => {
+                                Some(ModuleHighlight::Module(idx)) => {
                                     if idx == state.index {
                                         // Make sure that the module window is visible to the
                                         // teacher.
@@ -191,7 +190,7 @@ impl ModuleDom {
                                         None
                                     }
                                 },
-                                None => None,
+                                _ => None,
                             }
                         })))
                         .apply(OverlayHandle::lifecycle(clone!(state => move || {

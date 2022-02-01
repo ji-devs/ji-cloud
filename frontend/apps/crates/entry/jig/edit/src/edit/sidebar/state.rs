@@ -56,6 +56,15 @@ impl From<&Module> for LiteModule {
     }
 }
 
+/// Determines which window in the sidebar should be highlighted and show an error tooltip
+#[derive(Clone, PartialEq)]
+pub enum ModuleHighlight {
+    /// Module window with the index of the module in the `modules` list
+    Module(usize),
+    /// Publish window
+    Publish,
+}
+
 pub struct State {
     pub jig: JigResponse,
     pub jig_edit_state: Rc<JigEditState>,
@@ -69,7 +78,7 @@ pub struct State {
     /// Whether to highlight incomplete modules. This is useful so that we can _only_ highlight
     /// modules once the teacher performs a specific action, such as clicking "Publish".
     /// Holds the index of the first module in the list which is incomplete
-    pub highlight_modules: Mutable<Option<usize>>,
+    pub highlight_modules: Mutable<Option<ModuleHighlight>>,
     pub loader: AsyncLoader,
 }
 
@@ -135,14 +144,20 @@ impl State {
 
     /// Returns whether this JIG is publishable
     pub fn can_publish(&self) -> bool {
-        self.modules.lock_ref().into_iter().find(|module| {
+        let modules = self.modules.lock_ref();
+
+        let modules_len = modules.iter().filter(|module| module.is_some()).count();
+
+        let modules_valid = modules.into_iter().find(|module| {
             match &***module {
                 // Find the first module which isn't complete
                 Some(module) => !module.is_complete.get_cloned(),
                 None => false,
             }
         })
-        .is_none()
+        .is_none();
+
+        modules_len > 0 && modules_valid
     }
 
     /*
