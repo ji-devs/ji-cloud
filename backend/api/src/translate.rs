@@ -146,7 +146,8 @@ from image_metadata
      join image_upload on id = image_id
 where description <> '' and translated_description = '{}'
 and processed_at is not null
-limit 10 for no key update skip locked;
+order by coalesce(updated_at, created_at) desc
+limit 50 for no key update skip locked;
  "#
         )
         .fetch(&mut txn)
@@ -167,21 +168,36 @@ limit 10 for no key update skip locked;
         );
 
         for t in requests {
-            let translated_description: Option<HashMap<String, String>> =
-                multi_translation(&t.description, &self.api_key).await?;
+            let res: Option<Option<HashMap<String, String>>> =
+                multi_translation(&t.description, &self.api_key).await.ok();
 
-            sqlx::query!(
-                r#"
-                update image_metadata 
-                set translated_description = $2,
-                    updated_at = now()
-                where id = $1
-                "#,
-                t.image_id.0,
-                json!(translated_description)
-            )
-            .execute(&mut txn)
-            .await?;
+            if let Some(res) = res {
+                if let Some(res) = res {
+                    sqlx::query!(
+                        r#"
+                        update image_metadata 
+                        set translated_description = $2,
+                            updated_at = now()
+                        where id = $1
+                        "#,
+                        t.image_id.0,
+                        json!(res)
+                    )
+                    .execute(&mut txn)
+                    .await?;
+                } else {
+                    log::debug!("Empty translation list for image_id: {}", t.image_id.0,);
+                    continue;
+                };
+            } else {
+                log::debug!(
+                    "Could not translate image_id: {}, string: {}",
+                    t.image_id.0,
+                    t.description
+                );
+
+                continue;
+            }
         }
 
         txn.commit().await?;
@@ -204,6 +220,7 @@ select jig_data.id,
 from jig_data
 where description <> '' and translated_description = '{}'
 and draft_or_live is not NULL
+order by coalesce(updated_at, created_at) desc
 limit 50 for no key update skip locked;
  "#
         )
@@ -222,23 +239,36 @@ limit 50 for no key update skip locked;
         log::debug!("Updating a batch of {} jig description(s)", requests.len());
 
         for t in requests {
-            println!("jig_data_id: {:?}", t.jig_data_id);
+            let res: Option<Option<HashMap<String, String>>> =
+                multi_translation(&t.description, &self.api_key).await.ok();
 
-            let translated_description: Option<HashMap<String, String>> =
-                multi_translation(&t.description, &self.api_key).await?;
+            if let Some(res) = res {
+                if let Some(res) = res {
+                    sqlx::query!(
+                        r#"
+                            update jig_data 
+                            set translated_description = $2,
+                                updated_at = now()
+                            where id = $1
+                            "#,
+                        &t.jig_data_id,
+                        json!(res)
+                    )
+                    .execute(&mut txn)
+                    .await?;
+                } else {
+                    log::debug!("Empty translation list for jig_data_id: {}", t.jig_data_id);
+                    continue;
+                };
+            } else {
+                log::debug!(
+                    "Could not translate jig_data_id: {}, string: {}",
+                    t.jig_data_id,
+                    t.description
+                );
 
-            sqlx::query!(
-                r#"
-                update jig_data 
-                set translated_description = $2, 
-                    updated_at = now()
-                where id = $1
-                "#,
-                t.jig_data_id,
-                json!(translated_description)
-            )
-            .execute(&mut txn)
-            .await?;
+                continue;
+            };
         }
 
         txn.commit().await?;
@@ -303,7 +333,6 @@ pub async fn multi_translation(
         })
         .send()
         .await?
-        .error_for_status()?
         .json::<DetectLanguageResponse>()
         .await?;
 
@@ -345,3 +374,24 @@ pub async fn multi_translation(
 
     Ok(Some(translation_list))
 }
+
+// #[actix_rt::test]
+// async fn test_translated_description() -> anyhow::Result<()> {
+//     let api_key: &str = "";
+
+//     let this_arr: Vec<&str> = vec!["yes", "...", "passed", "", "nothing", ":?", ",", "Good"];
+
+//     for t in this_arr {
+//         let translated_description: Option<Option<HashMap<String, String>>> =
+//             multi_translation(t, api_key).await.ok();
+
+//         if let Some(translation) = translated_description {
+//             println!("result {:?}", translation);
+//             translation
+//         } else {
+//             continue;
+//         };
+//     }
+
+//     Ok(())
+// }

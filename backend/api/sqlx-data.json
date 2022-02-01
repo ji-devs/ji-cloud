@@ -14,6 +14,19 @@
       "nullable": []
     }
   },
+  "01a135ff430fa6ab0ac75454f6d1c25d2198d9f885e1abfdb4ca22c888df32a5": {
+    "query": "\nupdate jig_data\nset description = $2,\n    translated_description = '{}',\n    updated_at = now()\nwhere id = $1 and $2 is distinct from description",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "01c5b48afc9059f0f2a93cdb2882bcb8ae41ecabc737ca8f6c74e07363aa3650": {
     "query": "\nwith cte as (\n    select id      as \"jig_id\",\n           creator_id,\n           author_id,\n           liked_count,\n           play_count,\n           case\n               when $2 = 0 then jig.draft_id\n               when $2 = 1 then jig.live_id\n               end as \"draft_or_live_id\",\n           published_at,\n           rating,\n           blocked,\n           curated,\n           jig_focus\n    from jig\n    left join jig_play_count on jig_play_count.jig_id = jig.id\n    left join jig_admin_data \"admin\" on admin.jig_id = jig.id\n    where id = $1\n)\nselect cte.jig_id                                          as \"jig_id: JigId\",\n       display_name,\n       creator_id,\n       author_id,\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = author_id)            as \"author_name\",\n       published_at,\n       updated_at,\n       privacy_level                                       as \"privacy_level!: PrivacyLevel\",\n       jig_focus                                           as \"jig_focus!: JigFocus\",\n       language,\n       description,\n       translated_description                              as \"translated_description!: Json<HashMap<String, String>>\",\n       direction                                           as \"direction: TextDirection\",\n       display_score,\n       track_assessments,\n       drag_assist,\n       theme                                               as \"theme: ThemeId\",\n       audio_background                                    as \"audio_background: AudioBackground\",\n       liked_count,\n       play_count,\n       locked,\n       other_keywords,\n       translated_keywords,\n       rating                                               as \"rating?: JigRating\",\n       blocked                                              as \"blocked\",\n       curated,\n       array(select row (unnest(audio_feedback_positive))) as \"audio_feedback_positive!: Vec<(AudioFeedbackPositive,)>\",\n       array(select row (unnest(audio_feedback_negative))) as \"audio_feedback_negative!: Vec<(AudioFeedbackNegative,)>\",\n       array(\n               select row (jig_data_module.id, kind, is_complete)\n               from jig_data_module\n               where jig_data_id = cte.draft_or_live_id\n               order by \"index\"\n           )                                               as \"modules!: Vec<(ModuleId, ModuleKind, bool)>\",\n       array(select row (goal_id)\n             from jig_data_goal\n             where jig_data_id = cte.draft_or_live_id)     as \"goals!: Vec<(GoalId,)>\",\n       array(select row (category_id)\n             from jig_data_category\n             where jig_data_id = cte.draft_or_live_id)     as \"categories!: Vec<(CategoryId,)>\",\n       array(select row (affiliation_id)\n             from jig_data_affiliation\n             where jig_data_id = cte.draft_or_live_id)     as \"affiliations!: Vec<(AffiliationId,)>\",\n       array(select row (age_range_id)\n             from jig_data_age_range\n             where jig_data_id = cte.draft_or_live_id)     as \"age_ranges!: Vec<(AgeRangeId,)>\",\n       array(\n             select row (jdar.id, jdar.display_name, resource_type_id, resource_content)\n             from jig_data_additional_resource \"jdar\"\n             where jdar.jig_data_id = cte.draft_or_live_id\n       )                                                    as \"additional_resource!: Vec<(AddId, String, TypeId, Value)>\"\nfrom jig_data\n         inner join cte on cte.draft_or_live_id = jig_data.id\n",
     "describe": {
@@ -1087,30 +1100,6 @@
       ]
     }
   },
-  "1c6295ff6ff0440fbc6abb318643ded578e8007ec74a23b62fa309783a90b80d": {
-    "query": "\nselect jig_data.id,\n       description                                                                                    \nfrom jig_data\nwhere description <> '' and translated_description = '{}'\nand draft_or_live is not NULL\nlimit 50 for no key update skip locked;\n ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "description",
-          "type_info": "Text"
-        }
-      ],
-      "parameters": {
-        "Left": []
-      },
-      "nullable": [
-        false,
-        false
-      ]
-    }
-  },
   "1c72ff4451fa5342ae8ae20bb4169b62efa25b9b44c80ce26bf9a9619336dd60": {
     "query": "delete from user_pdf_library where id = $1",
     "describe": {
@@ -1207,19 +1196,6 @@
       "nullable": [
         true
       ]
-    }
-  },
-  "1f74ac47ded75d7e31917f63f9dd9c7f64a1647135610537490f130db8dff494": {
-    "query": "\n                update image_metadata \n                set translated_description = $2,\n                    updated_at = now()\n                where id = $1\n                ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Jsonb"
-        ]
-      },
-      "nullable": []
     }
   },
   "1f8df54bb87c543c4a975eb72c8c981ecd033664f68e66a2caff692ac30c14c3": {
@@ -1772,20 +1748,6 @@
       "nullable": []
     }
   },
-  "3a1e2c32f00cc6cdf63cbab4b9ba69e0ba09772485d363bfb3b3b7e09b6ca326": {
-    "query": "\nupdate image_metadata\nset description = $2,\n    translated_description = (case when ($3::jsonb is not null) then $3::jsonb else (translated_description) end),\n    updated_at = now()\nwhere id = $1 and $2 is distinct from description",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Text",
-          "Jsonb"
-        ]
-      },
-      "nullable": []
-    }
-  },
   "3ad66986079ea2df21f1a6af0c50510d362a19addcf3bc0f62b8f3948ea14cf8": {
     "query": "\nwith cte as (\n    select distinct style_id as id\n    from animation_style\n)\nselect id as \"id: AnimationStyleId\", display_name, created_at, updated_at\nfrom cte inner join style using (id)\norder by index\n        ",
     "describe": {
@@ -2267,6 +2229,30 @@
         ]
       },
       "nullable": []
+    }
+  },
+  "47ba2a8d778709b04f8f3670835606cefd05288068ca52c5e5e0f1be5c93c268": {
+    "query": "\nselect id                               as \"id!: ImageId\",\n       description                                                                                    \nfrom image_metadata\n     join image_upload on id = image_id\nwhere description <> '' and translated_description = '{}'\nand processed_at is not null\norder by coalesce(updated_at, created_at) desc\nlimit 50 for no key update skip locked;\n ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id!: ImageId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "description",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        false
+      ]
     }
   },
   "47f87006d700bed96cbf873d8addacbd9c160cf71e5cd0a4543b1fd7754d563d": {
@@ -2856,6 +2842,19 @@
       "nullable": []
     }
   },
+  "5daa06279831770307bdc0bbf7ecfad3ba4338634f2b76f518b0d3a93bdbc993": {
+    "query": "\nupdate image_metadata\nset description = $2,\n    translated_description = '{}',\n    updated_at = now()\nwhere id = $1 and $2 is distinct from description",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "5db8993ee5d00df44d48007636297504ce52b6f236c785cc04e4e39df9f4a3ce": {
     "query": "\n    update jig_curation_data\n    set age_ranges = $2\n    where jig_id = $1 and $2 is distinct from age_ranges\n                ",
     "describe": {
@@ -3099,6 +3098,30 @@
       ]
     }
   },
+  "65128054686ca484939559c5f09dd4ff6fae8fd4afe478a479718fd2d89d1cc2": {
+    "query": "\nselect jig_data.id,\n       description                                                                                    \nfrom jig_data\nwhere description <> '' and translated_description = '{}'\nand draft_or_live is not NULL\norder by coalesce(updated_at, created_at) desc\nlimit 50 for no key update skip locked;\n ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "description",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        false
+      ]
+    }
+  },
   "65bbbe5cb9eba5f0bf454b10f8b07ccf8eb3f519970d09868b486cbaa7d560a1": {
     "query": "delete from category where id = $1 returning index, parent_id",
     "describe": {
@@ -3227,19 +3250,6 @@
       "parameters": {
         "Left": [
           "Uuid"
-        ]
-      },
-      "nullable": []
-    }
-  },
-  "6c3391429d3d4be82e941052efd6f625da72296d4966ce33c2d08294150d437f": {
-    "query": "\n                update jig_data \n                set translated_description = $2, \n                    updated_at = now()\n                where id = $1\n                ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Jsonb"
         ]
       },
       "nullable": []
@@ -3543,30 +3553,6 @@
       ]
     }
   },
-  "79bbcde9131c0f616f4b615d8f05b8992a6c0959d5f09ac0060d2ee7d4eb6733": {
-    "query": "\nselect id                               as \"id!: ImageId\",\n       description                                                                                    \nfrom image_metadata\n     join image_upload on id = image_id\nwhere description <> '' and translated_description = '{}'\nand processed_at is not null\nlimit 10 for no key update skip locked;\n ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id!: ImageId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "description",
-          "type_info": "Text"
-        }
-      ],
-      "parameters": {
-        "Left": []
-      },
-      "nullable": [
-        false,
-        false
-      ]
-    }
-  },
   "79bce8bafae973dfdb2932091ebeeed4f007ecf2849cc8c859d45a1fea68a251": {
     "query": "\ndelete from jig_like\nwhere jig_id = $1 and user_id = $2\n    ",
     "describe": {
@@ -3714,19 +3700,6 @@
       "nullable": [
         false
       ]
-    }
-  },
-  "8108e894ca94d1b738db83844840b90f4c38f9f4b8b2ea01ed0b360f4716d9f1": {
-    "query": "\n    update jig_data\n    set translated_description = $2::jsonb\n    where id = $1\n    ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Jsonb"
-        ]
-      },
-      "nullable": []
     }
   },
   "81d346d41686f94b2bbb1477d0e7e407d67e12bb2c2cccfb474c536ddd8f0eeb": {
@@ -4763,20 +4736,6 @@
       ]
     }
   },
-  "a53f7c465013233c03f29022be634421c6a3bd823e2273ad29c0a44874bc20c4": {
-    "query": "\nupdate jig_data\nset description = $2,\n    translated_description = (case when length($2) <> 0 then $3::jsonb else '{}'::jsonb end),\n    updated_at = now()\nwhere id = $1 and $2 is distinct from description",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Text",
-          "Jsonb"
-        ]
-      },
-      "nullable": []
-    }
-  },
   "a5d7bd2b5b78d82c26f75b70d18ae63fb9e27031e080021e21c05cba75db48c9": {
     "query": "\nselect draft_id from jig join jig_data on jig.draft_id = jig_data.id where jig.id = $1 for update\n",
     "describe": {
@@ -4930,6 +4889,19 @@
       "nullable": [
         false
       ]
+    }
+  },
+  "abd49e91a2a6278531da084d0a7e251bd816eba32da855e0d1eb332ef6dccdf3": {
+    "query": "\n                        update image_metadata \n                        set translated_description = $2,\n                            updated_at = now()\n                        where id = $1\n                        ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Jsonb"
+        ]
+      },
+      "nullable": []
     }
   },
   "ada31ac34d9d4b99d869df3190ad4e105413aa9db4e285b48d7b04eca85d63ca": {
@@ -5577,6 +5549,19 @@
       "nullable": [
         false
       ]
+    }
+  },
+  "c978fbc346982e56b18ba41565e30eeab9e54d71e05d93a0444bd496a1ea7a91": {
+    "query": "\n                            update jig_data \n                            set translated_description = $2,\n                                updated_at = now()\n                            where id = $1\n                            ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Jsonb"
+        ]
+      },
+      "nullable": []
     }
   },
   "c9871e12739d5ae1acd8e3026e00ed927a54f717d5e5cd12f78456b99a7aa23b": {
