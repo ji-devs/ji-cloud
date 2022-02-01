@@ -1,6 +1,8 @@
-use dominator::{clone, html, Dom};
+use components::overlay::handle::OverlayHandle;
+use dominator::{clone, html, Dom, with_node};
 use dominator_helpers::events::Message;
 use futures::future::ready;
+use web_sys::{ScrollIntoViewOptions, ScrollBehavior};
 
 use super::{
     super::state::State as JigEditState,
@@ -106,6 +108,33 @@ impl SidebarDom {
                             .property("icon", "edit")
                         }))
                     }))
+                    .with_node!(elem => {
+                        .child_signal(state.highlight_modules.signal_cloned().map(clone!(state, elem => move |highlight| {
+                            match highlight {
+                                Some(ModuleHighlight::Publish) => {
+                                    // Make sure that the publish window is visible to the teacher.
+                                    elem.scroll_into_view_with_scroll_into_view_options(ScrollIntoViewOptions::new().behavior(ScrollBehavior::Smooth));
+                                    Some(html!("empty-fragment", {
+                                        .apply(OverlayHandle::lifecycle(clone!(state, elem => move || {
+                                            html!("overlay-tooltip-error", {
+                                                .text("Your JIG has no content.")
+                                                .property("target", elem.clone())
+                                                .property("targetAnchor", "tr")
+                                                .property("contentAnchor", "oppositeH")
+                                                .property("closeable", true)
+                                                .property("strategy", "track")
+                                                .style("width", "350px")
+                                                .event(clone!(state => move |_:events::Close| {
+                                                    state.highlight_modules.set_neq(None);
+                                                }))
+                                            })
+                                        })))
+                                    }))
+                                },
+                                _ => None,
+                            }
+                        })))
+                    })
                 }))
                 .children_signal_vec(state.modules
                     .signal_vec_cloned()

@@ -240,7 +240,12 @@ fn render_page(state: Rc<Publish>) -> Dom {
                     .child(html!("button-rect", {
                         .text(STR_PUBLISH)
                         .text(state.jig.focus_display())
-                        .property("disabled", state.jig.modules.lock_ref().iter().find(|m| !m.is_complete).is_some())
+                        .property(
+                            "disabled",
+                            state.jig.jig_focus.is_modules()
+                            && (state.jig.modules.lock_ref().len() == 0 // Disabled
+                                || state.jig.modules.lock_ref().iter().find(|m| !m.is_complete).is_some())
+                        )
                         .child(html!("fa-icon", {
                             .property("icon", "fa-light fa-rocket-launch")
                             .style("color", "var(--main-yellow)")
@@ -250,6 +255,7 @@ fn render_page(state: Rc<Publish>) -> Dom {
                         }))
                     }))
                     .child_signal(state.show_missing_info_popup.signal().map(clone!(state, elem => move |show_popup| {
+
                         if show_popup {
                             let on_close = clone!(state => move|| {
                                 state.show_missing_info_popup.set(false);

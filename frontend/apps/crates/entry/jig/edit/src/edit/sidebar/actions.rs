@@ -56,13 +56,23 @@ pub fn navigate_to_publish(state: Rc<State>) {
 
 pub fn set_highlight_modules(state: &Rc<State>, highlight: bool) {
     if highlight {
-        let idx = state.modules.lock_ref().iter()
-            .position(|module| match &**module {
-                    Some(module) => !module.is_complete.get_cloned(),
-                    None => false,
-                }
-            );
-        state.highlight_modules.set_neq(idx);
+        let modules = state.modules.lock_ref();
+
+        if modules.iter().filter(|module| module.is_some()).count() == 0 {
+            state.highlight_modules.set_neq(Some(ModuleHighlight::Publish))
+        } else {
+            let idx = modules.iter()
+                .position(|module| match &**module {
+                        Some(module) => !module.is_complete.get_cloned(),
+                        None => false,
+                    }
+                );
+            match idx {
+                Some(idx) => state.highlight_modules.set_neq(Some(ModuleHighlight::Module(idx))),
+                None => state.highlight_modules.set_neq(None),
+            }
+        }
+
     } else {
         state.highlight_modules.set_neq(None);
     }
