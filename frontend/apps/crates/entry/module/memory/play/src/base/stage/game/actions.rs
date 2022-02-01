@@ -2,7 +2,7 @@ use crate::base::state::*;
 
 use components::{
     module::_groups::cards::play::card::dom::FLIPPED_AUDIO_EFFECT,
-    audio::mixer::{AUDIO_MIXER, AudioPath, AudioSourceExt},
+    audio::mixer::{AUDIO_MIXER, AudioPath, AudioSourceExt, AudioMixer},
 };
 use dominator::clone;
 use gloo_timers::future::TimeoutFuture;
@@ -47,20 +47,29 @@ pub fn card_click(state: Rc<Base>, id: usize) -> Option<(usize, usize)> {
 pub fn evaluate(state: Rc<Base>, id_1: usize, id_2: usize) {
     spawn_local(async move {
         let play_effect = |positive: bool| {
-            AUDIO_MIXER.with(|mixer| {
-                let audio_path: AudioPath<'_> = if positive {
-                    mixer.get_random_positive().into()
-                } else {
-                    mixer.get_random_negative().into()
+            let card_state = state.cards.iter().find(|c| c.id == id_1);
+            if let Some(card_state) = card_state {
+                let play_feedback = move |mixer: &AudioMixer| {
+                    let audio_path: AudioPath<'_> = if positive {
+                        mixer.get_random_positive().into()
+                    } else {
+                        mixer.get_random_negative().into()
+                    };
+
+                    mixer.play_oneshot(audio_path);
                 };
 
-                mixer.play_oneshot_on_ended(audio_path, clone!(state => move || {
-                    let card_state = state.cards.iter().find(|c| c.id == id_1);
-                    if let Some(card_state) = card_state {
-                        play_card_audio(&card_state.card);
-                    }
-                }))
-            });
+                // Play the card audio first if it exists, and then the feedback effect
+                if let Some(audio) = &card_state.card.audio {
+                    AUDIO_MIXER.with(|mixer| {
+                        mixer.play_oneshot_on_ended(audio.as_source(), move || {
+                            AUDIO_MIXER.with(play_feedback);
+                        });
+                    });
+                } else {
+                    AUDIO_MIXER.with(play_feedback);
+                }
+            }
         };
 
         if state.pair_lookup[id_1] == id_2 {

@@ -29,6 +29,9 @@ where
                     } else {
                         html!("empty-fragment", {
                             .child_signal(state.base.step.signal_cloned().map(clone!(state => move |step| {
+                                // Reset card selection when changing step.
+                                state.base.selected_pair.set(None);
+
                                 Some(match step {
                                     Step::Three => {
                                         (state.render_settings) (Rc::new((state.get_settings) (state.base.clone())))
