@@ -16,14 +16,6 @@ export class _ extends LitElement {
                     height: 236px;
                 }
 
-                section.hover {
-                    background-color: #deecff;
-                }
-
-                section.hover > .close {
-                    display: block;
-                }
-
                 .close {
                     display: none;
                     position: relative;
@@ -61,54 +53,14 @@ export class _ extends LitElement {
         ];
     }
 
-    updated(changed: any) {
-        if (typeof changed.get("hoverLock") === "boolean") {
-            if (!this.hoverLock) {
-                this.hover = false;
-            }
-        }
-
-        if (typeof changed.get("hover") === "boolean") {
-            const { hoverLock } = this;
-            if (hoverLock) {
-                this.hover = true;
-            }
-        }
-    }
-
-    onEnter() {
-        if (this.hoverable) {
-            this.hover = true;
-        }
-    }
-
-    onLeave() {
-        if (this.hoverable) {
-            this.hover = false;
-        }
-    }
-
-    @property({ type: Boolean })
-    hover: boolean = false;
-
     @property({ type: Number })
     index: number = 0;
 
-    @property({ type: Boolean })
-    hoverable: boolean = false;
-
-    @property({ type: Boolean })
-    hoverLock: boolean = false;
-
     render() {
-        const { hover, index } = this;
+        const { index } = this;
 
         return html`
-            <section
-                class="${classMap({ hover })}"
-                @mouseenter="${this.onEnter}"
-                @mouseleave="${this.onLeave}"
-            >
+            <section>
                 <div class="close"><slot name="close"></slot></div>
                 <div class="cards">
                     <div class="right"><slot name="right"></slot></div>

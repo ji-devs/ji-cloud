@@ -125,6 +125,10 @@ impl<RawData: RawDataExt, E: ExtraExt> MainCard<RawData, E> {
     /// 1. If both cards are selected at the current index, select only the other card
     /// 1. If there is a selection at another index, deselect it
     pub fn toggle_selection(&self) {
+        if !self.can_select {
+            return;
+        }
+
         let current_idx = self.index.get_cloned().unwrap_or_default();
         let selected_pair = self.base.selected_pair.get_cloned();
 

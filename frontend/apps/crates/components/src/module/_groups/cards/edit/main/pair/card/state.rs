@@ -49,6 +49,8 @@ pub struct MainCard<RawData: RawDataExt, E: ExtraExt> {
     pub input_ref: Rc<RefCell<Option<HtmlElement>>>,
     pub editing_active: Mutable<bool>,
     pub is_image: bool,
+    /// Whether the card can be selected
+    pub can_select: bool,
     pub is_hovering: Mutable<bool>,
     /// Whether the context menu is currently open
     pub menu_open: Mutable<bool>,
@@ -90,6 +92,7 @@ impl<RawData: RawDataExt, E: ExtraExt> MainCard<RawData, E> {
             input_ref: Rc::new(RefCell::new(None)),
             editing_active: Mutable::new(false),
             is_image,
+            can_select: step == Step::One,
             is_hovering: Mutable::new(false),
             menu_open: Mutable::new(false),
             menu_container_elem: Mutable::new(None),

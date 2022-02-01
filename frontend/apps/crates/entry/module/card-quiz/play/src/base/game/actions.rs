@@ -5,7 +5,7 @@ use std::sync::atomic::Ordering;
 use components::{
     module::_common::play::prelude::*,
     module::_groups::cards::play::card::dom::FLIPPED_AUDIO_EFFECT,
-    audio::mixer::{AUDIO_MIXER, AudioPath, AudioSourceExt},
+    audio::mixer::{AUDIO_MIXER, AudioPath, AudioSourceExt, AudioMixer},
 };
 
 use crate::base::state::Phase;
@@ -83,14 +83,38 @@ impl Game {
     pub fn evaluate(state: Rc<Self>, pair_id: usize, phase: Mutable<CurrentPhase>) {
         if phase.get() == CurrentPhase::Waiting {
             spawn_local(clone!(state, pair_id, phase => async move {
-                let play_effect = |positive: bool| {
-                    AUDIO_MIXER.with(|mixer| {
-                        let audio_path: AudioPath<'_> = if positive {
-                            mixer.get_random_positive().into()
-                        } else {
-                            AudioPath::new_cdn(FLIPPED_AUDIO_EFFECT.to_string())
-                        };
+                if pair_id == state.current.lock_ref().as_ref().unwrap_ji().target.pair_id {
+                    let current = state.current.get_cloned();
+                    if let Some(current) = current {
+                        let card_id = current.others.iter().find(|card_id| card_id.pair_id == pair_id);
+                        if let Some(card_id) = card_id {
+                            let play_feedback = |mixer: &AudioMixer| {
+                                let audio_path: AudioPath<'_> = mixer.get_random_positive().into();
 
+                                mixer.play_oneshot(audio_path);
+                            };
+
+                            // Play the card audio first if it exists and then the feedback effect.
+                            if let Some(audio) = &card_id.card.audio {
+                                AUDIO_MIXER.with(move |mixer| {
+                                    mixer.play_oneshot_on_ended(audio.as_source(), move || {
+                                        AUDIO_MIXER.with(play_feedback);
+                                    })
+                                });
+                            } else {
+                                AUDIO_MIXER.with(play_feedback);
+                            }
+                        }
+                    }
+
+                    phase.set(CurrentPhase::Correct(pair_id));
+                    TimeoutFuture::new(crate::config::SUCCESS_TIME).await;
+                    Self::next(state);
+                } else {
+                    AUDIO_MIXER.with(|mixer| {
+                        let audio_path = AudioPath::new_cdn(FLIPPED_AUDIO_EFFECT.to_string());
+
+                        // Play the negative effect and then the card audio
                         mixer.play_oneshot_on_ended(audio_path, clone!(state => move || {
                             let current = state.current.get_cloned();
                             if let Some(current) = current {
@@ -105,16 +129,6 @@ impl Game {
                             }
                         }))
                     });
-                };
-
-                if pair_id == state.current.lock_ref().as_ref().unwrap_ji().target.pair_id {
-                    play_effect(true);
-
-                    phase.set(CurrentPhase::Correct(pair_id));
-                    TimeoutFuture::new(crate::config::SUCCESS_TIME).await;
-                    Self::next(state);
-                } else {
-                    play_effect(false);
                     phase.set(CurrentPhase::Wrong(pair_id));
                     // We should be able to safely assume that current is Some(_), but
                     // double-check here anyway because assumptions are bad.
