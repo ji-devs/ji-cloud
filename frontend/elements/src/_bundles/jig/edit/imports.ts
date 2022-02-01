@@ -66,3 +66,4 @@ import "@elements/entry/jig/edit/post-publish/post-publish-action";
 import "@elements/module/_groups/design/edit/sidebar/widgets/theme-selector/option";
 import "@elements/_bundles/_sub-bundles/hebrew-buttons";
 import "@elements/core/modals/confirm";
+import "@elements/core/modals/video";

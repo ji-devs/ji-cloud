@@ -8,11 +8,13 @@ use super::{
     selection::dom::SelectionDom,
     sidebar::dom::SidebarDom,
 };
-use components::player_popup::{PlayerPopup, PreviewPopupCallbacks};
+use components::{player_popup::{PlayerPopup, PreviewPopupCallbacks}, overlay::handle::OverlayHandle};
 use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
 use shared::domain::jig::{JigId, JigFocus};
 use utils::prelude::*;
+
+const STR_YT_VIDEO_ID: &str = "x4FYtTpQAt0";
 
 pub struct EditPage {}
 
@@ -64,6 +66,24 @@ impl EditPage {
                         JigEditRoute::PostPublish => {
                             Some(render_post_publish(jig_id.clone(), Rc::clone(&state)))
                         }
+                    }
+                })))
+                .child_signal(state.show_onboarding.signal_cloned().map(clone!(state => move |show| {
+                    if show {
+                        Some(html!("empty-fragment", {
+                            .apply(OverlayHandle::lifecycle(clone!(state => move || {
+                                html!("empty-fragment", {
+                                    .child(html!("modal-video", {
+                                        .property("videoId", STR_YT_VIDEO_ID)
+                                        .event(clone!(state => move |_evt: events::Close| {
+                                            state.set_permanently_closed();
+                                        }))
+                                    }))
+                                })
+                            })))
+                        }))
+                    } else {
+                        None
                     }
                 })))
             }))
