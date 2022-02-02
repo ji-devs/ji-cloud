@@ -11,6 +11,7 @@ use super::super::state::Publish;
 
 const STR_AGE_LABEL: &'static str = "Age range";
 const STR_AGE_PLACEHOLDER: &'static str = "Select one or more";
+const STR_ALL_AGES: &str = "All ages";
 
 impl Publish {
     pub fn render_ages(self: Rc<Self>) -> Dom {
@@ -31,6 +32,19 @@ impl Publish {
             //             submission_tried && value.is_empty()
             //         })
             // })
+            .child(html!("input-select-option", {
+                .text(STR_ALL_AGES)
+                .property_signal("selected", state.jig.age_ranges.signal_cloned().map(|age_ranges| {
+                    age_ranges.is_empty()
+                }))
+                .event(clone!(state => move |_: events::CustomSelectedChange| {
+                    state
+                        .jig
+                        .age_ranges
+                        .lock_mut()
+                        .clear();
+                }))
+            }))
             .children_signal_vec(state.ages.signal_cloned().map(clone!(state => move |ages| {
                 ages.iter().map(|age| {
                     render_age(&age, state.clone())

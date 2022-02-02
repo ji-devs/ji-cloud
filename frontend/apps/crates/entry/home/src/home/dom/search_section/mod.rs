@@ -69,16 +69,17 @@ pub fn render(state: Rc<State>, auto_search: bool) -> Dom {
                         }))
                         .children_signal_vec(state.search_options.age_ranges.signal_cloned().map(clone!(state => move|age_ranges| {
                             age_ranges.iter().map(|age_range| {
+                                let age_id = age_range.id.clone();
                                 html!("input-select-option", {
                                     .text(&age_range.display_name)
                                     .property_signal("selected", state.search_selected.age_ranges.signal_cloned().map(clone!(age_range => move |age_ranges| {
                                         age_ranges.contains(&age_range.id)
                                     })))
-                                    .event(clone!(state, age_range => move |_: events::CustomSelectedChange| {
+                                    .event(clone!(state => move |_: events::CustomSelectedChange| {
                                         let mut age_ranges = state.search_selected.age_ranges.lock_mut();
-                                        match age_ranges.contains(&age_range.id) {
-                                            true => age_ranges.remove(&age_range.id),
-                                            false => age_ranges.insert(age_range.id),
+                                        match age_ranges.contains(&age_id) {
+                                            true => age_ranges.remove(&age_id),
+                                            false => age_ranges.insert(age_id),
                                         };
                                     }))
                                 })
