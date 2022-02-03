@@ -37,7 +37,7 @@ export const STR_MODULE_DISPLAY_NAME: { [key in ModuleKind]: string } = {
     "tapping-board": "Listen & Learn",
     tracing: "Tracing",
     video: "Video Player",
-    "card-quiz": "Quiz Game",
+    "card-quiz": "Multiple Choice",
     "drag-drop": "Drag & Drop",
 };
 
@@ -47,7 +47,7 @@ export const STR_MODULE_CHOOSE_HEADER: { [key in ModuleKind]: string } = {
     flashcards: "Create a Set of Flashcards",
     matching: "Create a Matching Game",
     memory: "Create a Memory Game",
-    "card-quiz": "Create a Quiz Game",
+    "card-quiz": "Create a Multiple Choice Activity",
     "tapping-board": "Create a Listen & Learn Activity",
     poster: "Create a Talking Poster",
     "drag-drop": "Create a Drag & Drop Activity",
