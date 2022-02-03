@@ -1,7 +1,7 @@
 //! Types for users.
 
 use chrono::{DateTime, Utc};
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize, Serializer};
 use std::convert::TryFrom;
 use uuid::Uuid;
 
@@ -177,6 +177,67 @@ pub struct UserProfile {
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub location: Option<serde_json::Value>,
+}
+
+/// A user's profile export representation.
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct UserProfileExport {
+    /// The user's id.
+    pub id: Uuid,
+    /// The user's username.
+    pub username: String,
+    /// The user's email address.
+    pub email: String,
+    /// The user's given name (first name)
+    pub given_name: String,
+    /// The user's family name (last name)
+    pub family_name: String,
+    /// ID to the user's profile image in the user image library.
+    pub profile_image: Option<ImageId>,
+    /// The user's preferred language.
+    pub language: String,
+    /// When the user was created.
+    pub created_at: DateTime<Utc>,
+    /// When the user was last updated.
+    #[serde(default)]
+    pub updated_at: Option<DateTime<Utc>>,
+    /// The organization that the user belongs to.
+    #[serde(default)]
+    pub organization: Option<String>,
+    /// The persona of the user
+    #[serde(default)]
+    #[serde(serialize_with = "serialize_list")]
+    pub persona: Vec<String>,
+    /// The user's taught subjects.
+    #[serde(default)]
+    #[serde(serialize_with = "serialize_list")]
+    pub subjects: Vec<SubjectId>,
+    /// The user's age-ranges.
+    #[serde(default)]
+    #[serde(serialize_with = "serialize_list")]
+    pub age_ranges: Vec<AgeRangeId>,
+    /// The user's affiliations.
+    #[serde(default)]
+    #[serde(serialize_with = "serialize_list")]
+    pub affiliations: Vec<AffiliationId>,
+    /// The user's city
+    #[serde(default)]
+    pub city: Option<String>,
+    /// The user's country
+    #[serde(default)]
+    pub country: Option<String>,
+}
+
+fn serialize_list<S, T>(list: &Vec<T>, serializer: S) -> Result<S::Ok, S::Error>
+where
+    S: Serializer,
+    T: Serialize,
+{
+    list.iter()
+        .map(|v| serde_json::to_string(v).unwrap())
+        .collect::<Vec<String>>()
+        .join(", ")
+        .serialize(serializer)
 }
 
 impl UserProfile {

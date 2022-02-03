@@ -1421,27 +1421,6 @@
       "nullable": []
     }
   },
-  "2de098c6b9ee0874cf91614aff351a1538ddf0dbb477225708b253948abd264d": {
-    "query": "\n            select uploaded_at\n            from web_media_upload wmu\n            inner join web_media_library wml on wml.kind = $1 \n            where wmu.media_id = $2 for update",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "uploaded_at",
-          "type_info": "Timestamptz"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int2",
-          "Uuid"
-        ]
-      },
-      "nullable": [
-        true
-      ]
-    }
-  },
   "2fb018594a7a300fdb29db0a0e418938ce95df6cfd26ed7b42e245618c379701": {
     "query": "\nselect jig_id                               as \"jig_id!: JigId\",\n       display_name,\n       language,\n       goals,\n       categories,\n       description,\n       age_ranges,\n       affiliations,\n       additional_resources,\n       curation_status                          as \"curation_status!: JigCurationStatus\",\n       array(\n            select row (jcc.id, jcc.jig_id, comment, created_at, author_id)\n            from jig_curation_comment  \"jcc\"\n            where jcd.jig_id = jcc.jig_id\n            order by created_at desc\n       )                                                    as \"comments!: Vec<(CommentId, JigId, String, DateTime<Utc>, Uuid)>\",\n       array(\n           select row (jr.id, jr.jig_id, report_type, reporter_id,        \n                        (\n                        select given_name || ' '::text || family_name\n                        from user_profile\n                        where user_profile.user_id = reporter_id\n                        ),\n                        (\n                            select email::text\n                            from user_email\n                            where user_email.user_id = reporter_id\n                        ),\n                        created_at                                                                         \n            )\n           from jig_report \"jr\"\n           where jcd.jig_id = jr.jig_id\n           order by created_at desc\n       )                                                    as \"reports!: Vec<(JigReport)>\"\nfrom jig_curation_data \"jcd\"\nwhere jig_id = $1\n",
     "describe": {
@@ -2521,6 +2500,111 @@
       "nullable": []
     }
   },
+  "525e414ae58849a2e81ea1bc48b789e26f4e0adc859cbb325a53242a2d5ccf94": {
+    "query": "\nselect user_id              as \"id!\",\n    username                as \"username!\",\n    user_email.email::text  as \"email!\",\n    given_name              as \"given_name!\",\n    family_name             as \"family_name!\",\n    profile_image_id        as \"profile_image?: ImageId\",\n    language                as \"language!\",\n    user_profile.created_at as \"created_at!\",\n    user_profile.updated_at,\n    organization,\n    persona                 as \"persona!: Vec<String>\",\n    location,\n    array(select subject_id from user_subject where user_subject.user_id = \"user\".id) as \"subjects!: Vec<Uuid>\",\n    array(select affiliation_id from user_affiliation where user_affiliation.user_id = \"user\".id) as \"affiliations!: Vec<Uuid>\",\n    array(select age_range_id from user_age_range where user_age_range.user_id = \"user\".id) as \"age_ranges!: Vec<Uuid>\"\nfrom \"user\"\n    inner join user_profile on \"user\".id = user_profile.user_id\n    inner join user_email using(user_id)\nwhere\n    (\n        user_profile.created_at >= case when $1::timestamptz is null then to_timestamp('-infinity') else $1 end\n        and user_profile.created_at < case when $2::timestamptz is null then to_timestamp('infinity') else $2 end\n    )\n    or (\n        user_profile.updated_at >= case when $1::timestamptz is null then to_timestamp('-infinity') else $1 end\n        and user_profile.updated_at < case when $2::timestamptz is null then to_timestamp('infinity') else $2 end\n    )\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id!",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "username!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "email!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "given_name!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "family_name!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 5,
+          "name": "profile_image?: ImageId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 6,
+          "name": "language!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 7,
+          "name": "created_at!",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 8,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 9,
+          "name": "organization",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 10,
+          "name": "persona!: Vec<String>",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 11,
+          "name": "location",
+          "type_info": "Jsonb"
+        },
+        {
+          "ordinal": 12,
+          "name": "subjects!: Vec<Uuid>",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 13,
+          "name": "affiliations!: Vec<Uuid>",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 14,
+          "name": "age_ranges!: Vec<Uuid>",
+          "type_info": "UuidArray"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Timestamptz",
+          "Timestamptz"
+        ]
+      },
+      "nullable": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
+    }
+  },
   "5330258c1771d3e64b884d567ed1290ab484fb36f84360c05a1ac06fb8e11032": {
     "query": "\ninsert into jig_data_affiliation(jig_data_id, affiliation_id)\nselect $2, affiliation_id\nfrom jig_data_affiliation\nwhere jig_data_id = $1\n        ",
     "describe": {
@@ -2532,6 +2616,140 @@
         ]
       },
       "nullable": []
+    }
+  },
+  "55f6173b885847956231438a0f6bb21651b7d21074dbd6ae5cffb9d55cbd68bd": {
+    "query": "\nselect user_id as \"id\",\n    username,\n    user_email.email::text as \"email!\",\n    given_name,\n    family_name,\n    profile_image_id       as \"profile_image?: ImageId\",\n    language,\n    locale,\n    opt_into_edu_resources,\n    over_18,\n    timezone,\n    user_profile.created_at,\n    user_profile.updated_at,\n    organization,\n    persona                as \"persona!: Vec<String>\",\n    location,\n    array(select scope from user_scope where user_scope.user_id = \"user\".id) as \"scopes!: Vec<i16>\",\n    array(select subject_id from user_subject where user_subject.user_id = \"user\".id) as \"subjects!: Vec<Uuid>\",\n    array(select affiliation_id from user_affiliation where user_affiliation.user_id = \"user\".id) as \"affiliations!: Vec<Uuid>\",\n    array(select age_range_id from user_age_range where user_age_range.user_id = \"user\".id) as \"age_ranges!: Vec<Uuid>\"\nfrom \"user\"\n    inner join user_profile on \"user\".id = user_profile.user_id\n    inner join user_email using(user_id)\nwhere id = $1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "username",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "email!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "given_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "family_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 5,
+          "name": "profile_image?: ImageId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 6,
+          "name": "language",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 7,
+          "name": "locale",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 8,
+          "name": "opt_into_edu_resources",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 9,
+          "name": "over_18",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 10,
+          "name": "timezone",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 11,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 12,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 13,
+          "name": "organization",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 14,
+          "name": "persona!: Vec<String>",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 15,
+          "name": "location",
+          "type_info": "Jsonb"
+        },
+        {
+          "ordinal": 16,
+          "name": "scopes!: Vec<i16>",
+          "type_info": "Int2Array"
+        },
+        {
+          "ordinal": 17,
+          "name": "subjects!: Vec<Uuid>",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 18,
+          "name": "affiliations!: Vec<Uuid>",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 19,
+          "name": "age_ranges!: Vec<Uuid>",
+          "type_info": "UuidArray"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        null,
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        true,
+        true,
+        null,
+        null,
+        null,
+        null
+      ]
     }
   },
   "56567f2d09b683dfb6209093ff0ded597cda78b614466626b84956d955eb69c6": {
@@ -2773,6 +2991,27 @@
         true,
         true,
         true,
+        true
+      ]
+    }
+  },
+  "5cd7636d958f3bcd952a1f43385608a494bf08b39cfa6ffed6250bf8545713d6": {
+    "query": "\n            select uploaded_at\n            from web_media_upload wmu\n            inner join web_media_library wml on wml.kind = $1\n            where wmu.media_id = $2 for update",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "uploaded_at",
+          "type_info": "Timestamptz"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int2",
+          "Uuid"
+        ]
+      },
+      "nullable": [
         true
       ]
     }
@@ -6239,140 +6478,6 @@
         ]
       },
       "nullable": [
-        null
-      ]
-    }
-  },
-  "fa8b9973605e5780317d3223db27eadae27f7bee15f8ea1cb739b8e15016b19f": {
-    "query": "\nselect user_id as \"id\",\n    username,\n    user_email.email::text                                                              as \"email!\",\n    given_name,\n    family_name,\n    profile_image_id                                                                    as \"profile_image?: ImageId\",\n    language,\n    locale,\n    opt_into_edu_resources,\n    over_18,\n    timezone,\n    user_profile.created_at,\n    user_profile.updated_at,\n    organization,\n    persona as \"persona!: Vec<String>\",\n    location,\n    array(select scope from user_scope where user_scope.user_id = \"user\".id) as \"scopes!: Vec<i16>\",\n    array(select subject_id from user_subject where user_subject.user_id = \"user\".id) as \"subjects!: Vec<Uuid>\",\n    array(select affiliation_id from user_affiliation where user_affiliation.user_id = \"user\".id) as \"affiliations!: Vec<Uuid>\",\n    array(select age_range_id from user_age_range where user_age_range.user_id = \"user\".id) as \"age_ranges!: Vec<Uuid>\"\nfrom \"user\"\n    inner join user_profile on \"user\".id = user_profile.user_id\n    inner join user_email using(user_id)\nwhere id = $1",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "username",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "email!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 3,
-          "name": "given_name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 4,
-          "name": "family_name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 5,
-          "name": "profile_image?: ImageId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 6,
-          "name": "language",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 7,
-          "name": "locale",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 8,
-          "name": "opt_into_edu_resources",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 9,
-          "name": "over_18",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 10,
-          "name": "timezone",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 11,
-          "name": "created_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 12,
-          "name": "updated_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 13,
-          "name": "organization",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 14,
-          "name": "persona!: Vec<String>",
-          "type_info": "TextArray"
-        },
-        {
-          "ordinal": 15,
-          "name": "location",
-          "type_info": "Jsonb"
-        },
-        {
-          "ordinal": 16,
-          "name": "scopes!: Vec<i16>",
-          "type_info": "Int2Array"
-        },
-        {
-          "ordinal": 17,
-          "name": "subjects!: Vec<Uuid>",
-          "type_info": "UuidArray"
-        },
-        {
-          "ordinal": 18,
-          "name": "affiliations!: Vec<Uuid>",
-          "type_info": "UuidArray"
-        },
-        {
-          "ordinal": 19,
-          "name": "age_ranges!: Vec<Uuid>",
-          "type_info": "UuidArray"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        null,
-        false,
-        false,
-        true,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        true,
-        true,
-        true,
-        true,
-        null,
-        null,
-        null,
         null
       ]
     }

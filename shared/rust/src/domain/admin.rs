@@ -38,3 +38,22 @@ pub struct AdminMediaItem {
     /// An arbitrary (ascii) string representing the current state of the media.
     pub file_etag: Option<String>,
 }
+
+/// Type of data export to perform
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "lowercase")]
+pub enum ExportType {
+    /// Export user profiles
+    Profiles,
+}
+
+/// Request to export data
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ExportDataRequest {
+    /// The type of data to export
+    pub export_type: ExportType,
+    /// Optionally the date to export data from
+    pub from_date: Option<chrono::DateTime<Utc>>,
+    /// Optionally the date to export data to
+    pub to_date: Option<chrono::DateTime<Utc>>,
+}
