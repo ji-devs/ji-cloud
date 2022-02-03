@@ -1,8 +1,11 @@
 use super::ApiEndpoint;
 use crate::{
     api::Method,
-    domain::{admin::AdminListMediaResponse, session::NewSessionResponse},
-    error::EmptyError,
+    domain::{
+        admin::{AdminListMediaResponse, ExportDataRequest},
+        session::NewSessionResponse,
+    },
+    error::{ApiError, EmptyError},
 };
 
 /// Impersonate another user.
@@ -36,5 +39,15 @@ impl ApiEndpoint for ListMedia {
     type Res = AdminListMediaResponse;
     type Err = EmptyError;
     const PATH: &'static str = "/v0/admin/media";
+    const METHOD: Method = Method::Get;
+}
+
+/// Export data
+pub struct ExportData;
+impl ApiEndpoint for ExportData {
+    type Req = ExportDataRequest;
+    type Res = ();
+    type Err = ApiError<()>;
+    const PATH: &'static str = "/v1/admin/export";
     const METHOD: Method = Method::Get;
 }

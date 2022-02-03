@@ -288,3 +288,82 @@ pub enum MetaKind {
     /// [`ImageTag`]
     Tag,
 }
+
+/// Representation of a Google autocomplete result
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct GoogleLocation {
+    /// Input text
+    pub input: String,
+    /// Place returned by Google
+    pub place: GooglePlace,
+}
+
+/// Representation of a Google Place
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct GooglePlace {
+    /// List of address components
+    pub address_components: Vec<GoogleAddressComponent>,
+}
+
+impl GooglePlace {
+    /// Finds the first address component of this Google Place which matches the Address Type
+    pub fn address_component_by_type(
+        &self,
+        address_type: GoogleAddressType,
+    ) -> Option<&GoogleAddressComponent> {
+        self.address_components.iter().find(|component| {
+            component
+                .types
+                .iter()
+                .find(|t| **t == address_type)
+                .is_some()
+        })
+    }
+}
+
+/// Representation of a Google Address Component
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct GoogleAddressComponent {
+    /// Components long name
+    pub long_name: String,
+    /// Components short name
+    pub short_name: String,
+    /// List of address types associated with the component
+    pub types: Vec<GoogleAddressType>,
+}
+
+impl std::fmt::Display for GoogleAddressComponent {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.long_name)
+    }
+}
+
+impl From<&GoogleAddressComponent> for String {
+    fn from(component: &GoogleAddressComponent) -> String {
+        format!("{}", component)
+    }
+}
+
+/// Representation of common Google Address Types
+#[derive(Clone, Serialize, Eq, PartialEq, Deserialize, Debug)]
+#[serde(rename_all = "snake_case")]
+pub enum GoogleAddressType {
+    /// Indicates an incorporated city or town political entity
+    Locality,
+    /// Indicates a first-order civil entity below a locality
+    Sublocality,
+    /// Indicates a postal code as used to address postal mail within the country
+    PostalCode,
+    /// Indicates the national political entity
+    Country,
+    /// Indicates a first-order civil entity below the country level
+    #[serde(rename = "administrative_area_level_1")]
+    AdministrativeAreaLevel1,
+    /// Indicates a second-order civil entity below the country level
+    #[serde(rename = "administrative_area_level_2")]
+    AdministrativeAreaLevel2,
+    /// Indicates a political entity
+    Political,
+    /// Any other address type found [here](https://developers.google.com/maps/documentation/geocoding/requests-geocoding#Types)
+    Other(String),
+}

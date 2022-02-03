@@ -1,8 +1,15 @@
+use chrono::{DateTime, Utc};
 use chrono_tz::Tz;
 use shared::domain::{
     image::ImageId,
-    meta::{AffiliationId, AgeRangeId, SubjectId},
-    user::{CreateProfileRequest, OtherUser, PatchProfileRequest, UserProfile, UserScope},
+    meta::{
+        AffiliationId, AgeRangeId, GoogleAddressComponent, GoogleAddressType, GoogleLocation,
+        SubjectId,
+    },
+    user::{
+        CreateProfileRequest, OtherUser, PatchProfileRequest, UserProfile, UserProfileExport,
+        UserScope,
+    },
 };
 use sqlx::{PgConnection, PgPool};
 use std::{convert::TryFrom, str::FromStr};
@@ -32,10 +39,10 @@ pub async fn get_profile(db: &sqlx::PgPool, id: Uuid) -> anyhow::Result<Option<U
         r#"
 select user_id as "id",
     username,
-    user_email.email::text                                                              as "email!",
+    user_email.email::text as "email!",
     given_name,
     family_name,
-    profile_image_id                                                                    as "profile_image?: ImageId",
+    profile_image_id       as "profile_image?: ImageId",
     language,
     locale,
     opt_into_edu_resources,
@@ -44,7 +51,7 @@ select user_id as "id",
     user_profile.created_at,
     user_profile.updated_at,
     organization,
-    persona as "persona!: Vec<String>",
+    persona                as "persona!: Vec<String>",
     location,
     array(select scope from user_scope where user_scope.user_id = "user".id) as "scopes!: Vec<i16>",
     array(select subject_id from user_subject where user_subject.user_id = "user".id) as "subjects!: Vec<Uuid>",
@@ -94,6 +101,96 @@ where id = $1"#,
         age_ranges: row.age_ranges.into_iter().map(AgeRangeId).collect(),
         affiliations: row.affiliations.into_iter().map(AffiliationId).collect(),
     }))
+}
+
+pub async fn user_profiles_by_date_range(
+    db: &sqlx::PgPool,
+    from_date: Option<DateTime<Utc>>,
+    to_date: Option<DateTime<Utc>>,
+) -> anyhow::Result<Vec<UserProfileExport>> {
+    let rows = sqlx::query!(
+        //language=SQL
+        r#"
+select user_id              as "id!",
+    username                as "username!",
+    user_email.email::text  as "email!",
+    given_name              as "given_name!",
+    family_name             as "family_name!",
+    profile_image_id        as "profile_image?: ImageId",
+    language                as "language!",
+    user_profile.created_at as "created_at!",
+    user_profile.updated_at,
+    organization,
+    persona                 as "persona!: Vec<String>",
+    location,
+    array(select subject_id from user_subject where user_subject.user_id = "user".id) as "subjects!: Vec<Uuid>",
+    array(select affiliation_id from user_affiliation where user_affiliation.user_id = "user".id) as "affiliations!: Vec<Uuid>",
+    array(select age_range_id from user_age_range where user_age_range.user_id = "user".id) as "age_ranges!: Vec<Uuid>"
+from "user"
+    inner join user_profile on "user".id = user_profile.user_id
+    inner join user_email using(user_id)
+where
+    (
+        user_profile.created_at >= case when $1::timestamptz is null then to_timestamp('-infinity') else $1 end
+        and user_profile.created_at < case when $2::timestamptz is null then to_timestamp('infinity') else $2 end
+    )
+    or (
+        user_profile.updated_at >= case when $1::timestamptz is null then to_timestamp('-infinity') else $1 end
+        and user_profile.updated_at < case when $2::timestamptz is null then to_timestamp('infinity') else $2 end
+    )
+"#,
+        from_date,
+        to_date,
+    )
+    .fetch_all(db)
+    .await?;
+
+    Ok(rows
+        .into_iter()
+        .map(|row| {
+            // TODO I'm unsure how to get the string value deserialized to
+            // a serde_json::Value::Object variant in the resultset.
+            // This logic gets the string representation, and converts it into an Object and then
+            // finally the GoogleAddressComponent.
+            let location = row.location.map_or(None, |location_str| {
+                location_str.as_str().map_or(None, |location_str| {
+                    serde_json::from_str(&location_str).ok()
+                })
+            });
+            let location: Option<GoogleLocation> = location.map_or(None, |location_value| {
+                serde_json::from_value(location_value).ok()
+            });
+
+            let city: Option<&GoogleAddressComponent> = location.as_ref().map_or(None, |l| {
+                l.place
+                    .address_component_by_type(GoogleAddressType::Locality)
+            });
+
+            let country: Option<&GoogleAddressComponent> = location.as_ref().map_or(None, |l| {
+                l.place
+                    .address_component_by_type(GoogleAddressType::Country)
+            });
+
+            UserProfileExport {
+                id: row.id,
+                username: row.username,
+                email: row.email,
+                given_name: row.given_name,
+                family_name: row.family_name,
+                profile_image: row.profile_image,
+                language: row.language,
+                created_at: row.created_at,
+                updated_at: row.updated_at,
+                organization: row.organization,
+                persona: row.persona,
+                city: city.map(|c| c.into()),
+                country: country.map(|c| c.into()),
+                subjects: row.subjects.into_iter().map(SubjectId).collect(),
+                age_ranges: row.age_ranges.into_iter().map(AgeRangeId).collect(),
+                affiliations: row.affiliations.into_iter().map(AffiliationId).collect(),
+            }
+        })
+        .collect())
 }
 
 pub async fn exists(db: &sqlx::PgPool, id: Uuid) -> sqlx::Result<bool> {
