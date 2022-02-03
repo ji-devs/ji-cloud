@@ -21,7 +21,7 @@ expression: body
             },
             "mode": "Duplicate",
             "pairs": [],
-            "theme": "Jig",
+            "theme": "Blank",
             "background": null
           },
           "player_settings": {
