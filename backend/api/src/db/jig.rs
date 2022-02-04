@@ -1,6 +1,6 @@
-use crate::translate::{multi_translation, translate_text};
+use crate::translate::translate_text;
 use anyhow::Context;
-use serde_json::{json, value::Value};
+use serde_json::value::Value;
 use shared::domain::{
     category::CategoryId,
     jig::{

@@ -137,6 +137,9 @@ pub struct AgeRange {
     /// The age range's name.
     pub display_name: String,
 
+    /// The age range's abbreviated name.
+    pub short_display_name: Option<String>,
+
     /// When the age range was created.
     pub created_at: DateTime<Utc>,
 
