@@ -45,7 +45,7 @@ pub async fn get_age_ranges(db: &PgPool) -> sqlx::Result<Vec<AgeRange>> {
     sqlx::query_as!(
         AgeRange,
         r#"
-            select id as "id: AgeRangeId", display_name, created_at, updated_at from age_range
+            select id as "id: AgeRangeId", display_name, short_display_name, created_at, updated_at from age_range
             order by index
         "#
     )
