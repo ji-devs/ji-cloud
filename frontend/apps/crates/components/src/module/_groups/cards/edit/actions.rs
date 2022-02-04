@@ -1,5 +1,5 @@
 use crate::module::_groups::cards::edit::state::*;
-use shared::domain::jig::module::body::{Background, ThemeChoice};
+use shared::domain::jig::module::body::{Background, ThemeId};
 use shared::domain::jig::module::body::_groups::cards::{CardPair as RawCardPair, Mode};
 use unicode_segmentation::UnicodeSegmentation;
 use utils::prelude::*;
@@ -87,8 +87,8 @@ impl<RawData: RawDataExt, E: ExtraExt> CardsBase<RawData, E> {
         });
     }
 
-    pub fn set_theme(&self, theme: ThemeChoice) {
-        self.theme_choice.set_neq(theme);
+    pub fn set_theme(&self, theme: ThemeId) {
+        self.theme_id.set_neq(theme);
 
         self.history.push_modify(move |raw| {
             if let Some(content) = raw.get_content_mut() {
