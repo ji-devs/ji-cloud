@@ -6,7 +6,6 @@ use shared::domain::jig::module::body::StepExt;
 use utils::events;
 use web_sys::HtmlElement;
 use crate::{
-    image::search::dom::render as render_image_search,
     image::search::dom::render_with_action as render_image_search_with_action,
     tabs::{MenuTab, MenuTabKind},
     overlay::handle::OverlayHandle,
@@ -102,8 +101,20 @@ impl<Step, Base> CustomBackground<Step, Base> where
                                     });
                                     Some(render_image_search_with_action(state, None, Some(color)))
                                 },
-                                Tab::Overlay(state) => {
-                                    Some(render_image_search(state, None))
+                                Tab::Overlay(overlay_state) => {
+                                    let delete = clone!(state => move|| {
+                                        html!("button-rect", {
+                                            .property("kind", "text")
+                                            .property("color", "blue")
+                                            .child(html!("fa-icon", {
+                                                .property("icon", "fa-light fa-trash-can")
+                                                .event(clone!(state => move |_: events::Click| {
+                                                    state.remove_overlay();
+                                                }))
+                                            }))
+                                        })
+                                    });
+                                    Some(render_image_search_with_action(overlay_state, None, Some(delete)))
                                 },
                             }
                         })))
