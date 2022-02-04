@@ -2,7 +2,7 @@ use crate::domain::jig::module::{
     body::{Body, BodyConvert, BodyExt, StepExt, ThemeId, _groups::design::*},
     ModuleKind,
 };
-use serde::{Deserialize, Serialize};
+use serde::{de::IntoDeserializer, Deserialize, Serialize};
 use std::collections::HashSet;
 use std::convert::TryFrom;
 
@@ -122,8 +122,14 @@ pub struct EditorState {
     pub steps_completed: HashSet<Step>,
 }
 
+// TODO Currently there exists some Cover modules with an editor_state which has the step set to
+// Four, or Four in the steps_completed field. The workaround here is to tell serde to make use of
+// the custom Deserialize implementation (and Serialize) by using itself as a remote type.
+// See https://serde.rs/remote-derive.html
+
 /// The Steps
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[serde(remote = "Step")]
 pub enum Step {
     /// Step 1
     One,
@@ -131,6 +137,29 @@ pub enum Step {
     Two,
     /// Step 3
     Three,
+}
+
+impl<'de> Deserialize<'de> for Step {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let value = String::deserialize(deserializer)?;
+        if value == "Four" {
+            Ok(Self::Three)
+        } else {
+            Step::deserialize(value.into_deserializer())
+        }
+    }
+}
+
+impl Serialize for Step {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        Step::serialize(&self, serializer)
+    }
 }
 
 impl Default for Step {
