@@ -1,11 +1,7 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 import { classMap } from "lit-html/directives/class-map";
-import { nothing } from "lit-html";
 import { ThemeId, THEMES } from "@elements/_themes/themes";
 import { cardBackIconPath } from "@elements/module/_groups/cards/helpers";
-import "@elements/module/_common/edit/widgets/theme-selector/jig";
-
-export type STATE = "idle" | "selected" | "jig";
 
 @customElement("theme-selector-cards-option")
 export class _ extends LitElement {
@@ -34,7 +30,7 @@ export class _ extends LitElement {
                     border: solid 3px var(--light-blue-4);
                 }
 
-                :host([state="selected"]) section {
+                :host([selected]) section {
                     border: solid 3px var(--light-blue-4);
                     background-color: var(--light-blue-3);
                 }
@@ -110,8 +106,7 @@ export class _ extends LitElement {
                     display: none;
                 }
 
-                :host([state="selected"]) .label,
-                :host([state="jig"]) .label {
+                :host([selected]) .label {
                     color: var(--main-blue);
                 }
 
@@ -127,8 +122,8 @@ export class _ extends LitElement {
     @property()
     theme: ThemeId = "blank";
 
-    @property({ reflect: true })
-    state: STATE = "idle";
+    @property({ type: Boolean, reflect: true })
+    selected: boolean = false;
 
     @property({ type: Boolean })
     hover: boolean = false;
@@ -142,10 +137,10 @@ export class _ extends LitElement {
     }
 
     render() {
-        const { theme, state, hover } = this;
+        const { theme, hover } = this;
 
         const sectionClasses = classMap({
-            hover: hover && state !== "jig",
+            hover,
         });
 
         const imageClass = classMap({
@@ -160,15 +155,9 @@ export class _ extends LitElement {
                 @mouseenter="${this.onEnter.bind(this)}"
                 @mouseleave="${this.onLeave.bind(this)}"
             >
-                ${state == "jig"
-                    ? html`<theme-selector-jig
-                          class="jig"
-                      ></theme-selector-jig>`
-                    : nothing}
                 <div class="content">
                     <div class="right">
                         <img-ui path="${cardBackIconPath(theme)}"></img-ui>
-                        ${state === "selected" ? renderMenu() : nothing}
                     </div>
                     <div class="left">
                         <img-ui
@@ -185,12 +174,4 @@ export class _ extends LitElement {
             </section>
         `;
     }
-}
-
-function renderMenu() {
-    return html`
-        <menu-kebab class="menu" offsetVertical="0" offsetHorizontal="32">
-            <slot name="menu"></slot>
-        </menu-kebab>
-    `;
 }

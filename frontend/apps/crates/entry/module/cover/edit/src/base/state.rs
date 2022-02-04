@@ -1,5 +1,6 @@
 use components::module::_common::edit::prelude::*;
 
+use components::module::_groups::design::design_ext::DesignExt;
 use components::{
     backgrounds::{callbacks::Callbacks as BackgroundsCallbacks, state::Backgrounds},
     stickers::{
@@ -13,10 +14,11 @@ use futures_signals::signal::{self, Mutable, ReadOnlyMutable, Signal};
 use shared::domain::jig::{
     module::{
         body::{
+            BodyExt,
             cover::{ModuleData as RawData, Step},
-            Instructions, ThemeChoice,
+            Instructions
         },
-        ModuleId,
+        ModuleId
     },
     JigId,
 };
@@ -26,12 +28,10 @@ use utils::prelude::*;
 pub struct Base {
     pub history: Rc<HistoryStateImpl<RawData>>,
     pub step: ReadOnlyMutable<Step>,
-    pub theme_choice: Mutable<ThemeChoice>,
-    pub theme_id: ReadOnlyMutable<ThemeId>,
+    pub theme_id: Mutable<ThemeId>,
     pub instructions: Mutable<Instructions>,
     pub jig_id: JigId,
     pub module_id: ModuleId,
-    pub jig_theme_id: Mutable<ThemeId>,
     // Cover-specific
     pub backgrounds: Rc<Backgrounds>,
     pub stickers: Rc<Stickers<Sticker>>,
@@ -43,12 +43,10 @@ impl Base {
         let BaseInitFromRawArgs {
             raw,
             jig_id,
-            jig_theme_id,
             theme_id,
             module_id,
             history,
             step,
-            theme_choice,
             ..
         } = init_args;
 
@@ -62,7 +60,7 @@ impl Base {
         let stickers_ref: Rc<RefCell<Option<Rc<Stickers<Sticker>>>>> = Rc::new(RefCell::new(None));
 
         let text_editor = TextEditorState::new(
-            theme_id.clone(),
+            theme_id.read_only(),
             None,
             TextEditorCallbacks::new(
                 //New text
@@ -88,7 +86,7 @@ impl Base {
 
         let backgrounds = Rc::new(Backgrounds::from_raw(
             &base_content.backgrounds,
-            theme_id.clone(),
+            theme_id.read_only(),
             BackgroundsCallbacks::new(Some(clone!(history => move |raw_bgs| {
                 history.push_modify(|raw| {
                     if let Some(content) = &mut raw.content {
@@ -127,10 +125,8 @@ impl Base {
         let _self = Rc::new(Self {
             jig_id,
             module_id,
-            jig_theme_id,
             history,
             step: step.read_only(),
-            theme_choice,
             theme_id,
             instructions,
             text_editor,
@@ -161,5 +157,23 @@ impl BaseExt<Step> for Base {
 
     fn get_module_id(&self) -> ModuleId {
         self.module_id
+    }
+}
+
+impl DesignExt for Base {
+    fn get_backgrounds(&self) -> Rc<Backgrounds> {
+        Rc::clone(&self.backgrounds)
+    }
+
+    fn get_theme(&self) -> Mutable<ThemeId> {
+        self.theme_id.clone()
+    }
+
+    fn set_theme(&self, theme: ThemeId) {
+        self.theme_id.set(theme.clone());
+
+        self.history.push_modify(|raw| {
+            raw.set_theme(theme);
+        });
     }
 }

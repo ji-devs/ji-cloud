@@ -4,13 +4,10 @@
  */
 use crate::{
     config,
-    domain::jig::module::body::{
-        Audio, Background, Image, Instructions, ModeExt, StepExt, ThemeChoice,
-    },
+    domain::jig::module::body::{Background, Image, Instructions, ModeExt, StepExt, ThemeId},
 };
-use serde::{de, Deserialize, Serialize};
+use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
-use std::fmt;
 
 /// The base content for card modules
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]
@@ -28,7 +25,7 @@ pub struct BaseContent {
     pub pairs: Vec<CardPair>,
 
     /// The ID of the module's theme.
-    pub theme: ThemeChoice,
+    pub theme: ThemeId,
 
     /// The optional background override
     pub background: Option<Background>,
@@ -66,117 +63,9 @@ pub struct EditorState {
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct CardPair(pub Card, pub Card);
 
-/// Data for individual cards
-#[derive(Clone, Serialize, Debug)]
-pub struct Card {
-    /// Recorded audio associated with the card
-    pub audio: Option<Audio>,
-
-    /// Content associated with the card
-    pub card_content: CardContent,
-}
-
-// Required because we need to be able to handle the data for the original Card enum, and also data
-// from the new Card struct.
-//
-// I.e. converts from
-//
-// [{"Text": "Some words"}, {"Image": {<Image data>}}]
-//
-// to
-//
-// [{
-//   audio: null,
-//   card_content: {"Text": "Some words"}
-// }, {
-//   audio: null,
-//   card_content: {"Image": {<Image data>}}
-// }]
-//
-// TODO Create a content migration to migrate all existing JIGs with card game modules so that
-// their card data matches the new Card struct and delete this Deserialize implementation.
-impl<'de> de::Deserialize<'de> for Card {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: de::Deserializer<'de>,
-    {
-        #[derive(Debug, Deserialize)]
-        #[serde(field_identifier)]
-        enum CardField {
-            #[serde(rename = "audio")]
-            Audio,
-            #[serde(rename = "card_content")]
-            CardContent,
-            #[serde(rename = "Text")]
-            Text,
-            #[serde(rename = "Image")]
-            Image,
-        }
-
-        struct CardVisitor;
-
-        impl<'de> de::Visitor<'de> for CardVisitor {
-            type Value = Card;
-
-            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-                formatter.write_str("A CardContent or Card map")
-            }
-
-            fn visit_map<M>(self, mut access: M) -> Result<Self::Value, M::Error>
-            where
-                M: de::MapAccess<'de>,
-            {
-                let mut audio: Option<Option<Audio>> = None;
-                let mut card_content: Option<CardContent> = None;
-
-                while let Some(key) = access.next_key()? {
-                    match key {
-                        CardField::Text => {
-                            if card_content.is_some() {
-                                return Err(de::Error::duplicate_field("card_content"));
-                            }
-                            card_content = Some(CardContent::Text(access.next_value()?));
-                            break;
-                        }
-                        CardField::Image => {
-                            if card_content.is_some() {
-                                return Err(de::Error::duplicate_field("card_content"));
-                            }
-                            card_content = Some(CardContent::Image(access.next_value()?));
-                            break;
-                        }
-                        CardField::Audio => {
-                            if audio.is_some() {
-                                return Err(de::Error::duplicate_field("audio"));
-                            }
-                            audio = Some(access.next_value()?);
-                        }
-                        CardField::CardContent => {
-                            if card_content.is_some() {
-                                return Err(de::Error::duplicate_field("card_content"));
-                            }
-                            card_content = Some(access.next_value()?);
-                        }
-                    }
-                }
-
-                let audio = audio.map_or(None, |audio| audio);
-                let card_content =
-                    card_content.ok_or_else(|| de::Error::missing_field("card_content"))?;
-
-                Ok(Card {
-                    audio,
-                    card_content,
-                })
-            }
-        }
-
-        deserializer.deserialize_map(CardVisitor)
-    }
-}
-/// The content of a card
+/// An individual card.
 #[derive(Clone, Serialize, Deserialize, Debug)]
-pub enum CardContent {
+pub enum Card {
     // todo(@dakom): document this
     #[allow(missing_docs)]
     Text(String),
@@ -189,9 +78,9 @@ pub enum CardContent {
 impl Card {
     /// Whether the variants value is empty
     pub fn is_empty(&self) -> bool {
-        match &self.card_content {
-            CardContent::Text(value) if value.trim().len() == 0 => true,
-            CardContent::Image(None) => true,
+        match self {
+            Self::Text(value) if value.trim().len() == 0 => true,
+            Self::Image(None) => true,
             _ => false,
         }
     }
@@ -247,8 +136,8 @@ impl Mode {
                         // the 2nd card should be an Image variant.
                         pair.0.is_empty()
                             || pair.1.is_empty()
-                            || !matches!(pair.0.card_content, CardContent::Text(_))
-                            || !matches!(pair.1.card_content, CardContent::Image(_))
+                            || !matches!(pair.0, Card::Text(_))
+                            || !matches!(pair.1, Card::Image(_))
                     })
                     .is_none()
             }
@@ -260,8 +149,8 @@ impl Mode {
                         // Neither card should be empty, and both cards must be Image variants.
                         pair.0.is_empty()
                             || pair.1.is_empty()
-                            || !matches!(pair.0.card_content, CardContent::Text(_))
-                            || !matches!(pair.1.card_content, CardContent::Text(_))
+                            || !matches!(pair.0, Card::Text(_))
+                            || !matches!(pair.1, Card::Text(_))
                     })
                     .is_none()
             }

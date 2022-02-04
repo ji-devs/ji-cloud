@@ -1,20 +1,18 @@
 use super::super::state::Sidebar;
 use crate::base::state::Base;
 use components::{
-    backgrounds::actions::Layer,
-    color_select::state::State as ColorPickerState,
+    audio::input::{AudioInput, AudioInputCallbacks, AudioInputOptions},
     image::search::{
         callbacks::Callbacks as ImageSearchCallbacks,
         state::{ImageSearchKind, ImageSearchOptions, State as ImageSearchState},
     },
+    stickers::state::Stickers,
     tabs::MenuTabKind,
 };
 use dominator::clone;
-use futures_signals::signal::Mutable;
-use shared::domain::jig::module::body::Background;
+use futures_signals::signal::{Mutable, SignalExt};
+use shared::domain::jig::module::body::Audio;
 use std::rc::Rc;
-
-const STR_SELECT_BACKGROUND_COLOR: &str = "Select background color";
 
 pub struct Step2 {
     pub tab: Mutable<Tab>,
@@ -23,82 +21,79 @@ pub struct Step2 {
 
 impl Step2 {
     pub fn new(sidebar: Rc<Sidebar>) -> Rc<Self> {
-        let kind = match crate::debug::settings().bg_tab {
+        let kind = match crate::debug::settings().content_tab {
             Some(kind) => kind,
-            None => MenuTabKind::BackgroundImage,
+            None => MenuTabKind::Text,
         };
 
         let tab = Mutable::new(Tab::new(sidebar.base.clone(), kind));
 
-        Rc::new(Self { sidebar, tab })
+        Rc::new(Self { tab, sidebar })
     }
 }
 
 #[derive(Clone)]
 pub enum Tab {
-    BackgroundImage(Rc<ImageSearchState>),
-    FillColor(Rc<ColorPickerState>),
-    Overlay(Rc<ImageSearchState>),
+    Text, // uses top-level state since it must be toggled from main too
+    Image(Rc<ImageSearchState>),
+    Audio(Rc<AudioInput>),
 }
 
 impl Tab {
     pub fn new(base: Rc<Base>, kind: MenuTabKind) -> Self {
         match kind {
-            MenuTabKind::BackgroundImage => {
+            MenuTabKind::Text => Self::Text,
+            MenuTabKind::Image => {
                 let opts = ImageSearchOptions {
-                    kind: ImageSearchKind::Background,
+                    kind: ImageSearchKind::Sticker,
                     ..ImageSearchOptions::default()
                 };
 
                 let callbacks = ImageSearchCallbacks::new(Some(clone!(base => move |image| {
-                    base.backgrounds.set_layer(Layer::One, Background::Image(image));
+                    log::info!("{:?}", image);
+                    Stickers::add_sprite(base.stickers.clone(), image);
                 })));
                 let state = ImageSearchState::new(opts, callbacks);
 
-                Self::BackgroundImage(Rc::new(state))
+                Self::Image(Rc::new(state))
             }
-            MenuTabKind::FillColor => {
-                let state = ColorPickerState::new(
-                    base.theme_id.clone(),
-                    None,
-                    Some(String::from(STR_SELECT_BACKGROUND_COLOR)),
-                    Some(clone!(base => move |color| {
-                        base.backgrounds.set_layer(Layer::One, Background::Color(color));
+            MenuTabKind::Audio => {
+                let opts = AudioInputOptions::new(Some(
+                    base.instructions
+                        .signal_cloned()
+                        .map(|instructions| instructions.audio),
+                ));
+
+                let callbacks = AudioInputCallbacks::new(
+                    Some(clone!(base => move |audio:Audio| {
+                        base.set_instructions_audio(Some(audio));
+                    })),
+                    Some(clone!(base => move || {
+                        base.set_instructions_audio(None);
                     })),
                 );
-                Self::FillColor(Rc::new(state))
+
+                let state = AudioInput::new(opts, callbacks);
+
+                Self::Audio(state)
             }
-            MenuTabKind::Overlay => {
-                let opts = ImageSearchOptions {
-                    kind: ImageSearchKind::Overlay,
-                    ..ImageSearchOptions::default()
-                };
-
-                let callbacks = ImageSearchCallbacks::new(Some(clone!(base => move |image| {
-                    base.backgrounds.set_layer(Layer::Two, Background::Image(image));
-                })));
-                let state = ImageSearchState::new(opts, callbacks);
-
-                Self::Overlay(Rc::new(state))
-            }
-
-            kind => unimplemented!("unsupported tab kind! {:?}", kind),
+            _ => unimplemented!("unsupported tab kind!"),
         }
     }
 
     pub fn kind(&self) -> MenuTabKind {
         match self {
-            Self::BackgroundImage(_) => MenuTabKind::BackgroundImage,
-            Self::FillColor(_) => MenuTabKind::FillColor,
-            Self::Overlay(_) => MenuTabKind::Overlay,
+            Self::Text => MenuTabKind::Text,
+            Self::Image(_) => MenuTabKind::Image,
+            Self::Audio(_) => MenuTabKind::Audio,
         }
     }
 
     pub fn as_index(&self) -> usize {
         match self {
-            Self::BackgroundImage(_) => 0,
-            Self::FillColor(_) => 1,
-            Self::Overlay(_) => 2,
+            Self::Text => 0,
+            Self::Image(_) => 1,
+            Self::Audio(_) => 2,
         }
     }
 }

@@ -1,6 +1,6 @@
 use crate::domain::jig::module::{
     body::{
-        Audio, Body, BodyConvert, BodyExt, Instructions, ModeExt, StepExt, ThemeChoice, Transform,
+        Audio, Body, BodyConvert, BodyExt, Instructions, ModeExt, StepExt, ThemeId, Transform,
         _groups::design::{Backgrounds, Sticker, Trace},
     },
     ModuleKind,
@@ -32,11 +32,12 @@ impl BodyExt<Mode, Step> for ModuleData {
         ModuleKind::DragDrop
     }
 
-    fn new_mode(mode: Mode) -> Self {
+    fn new_with_mode_and_theme(mode: Mode, theme: ThemeId) -> Self {
         ModuleData {
             content: Some(Content {
                 mode,
-                ..Content::default()
+                theme,
+                ..Default::default()
             }),
         }
     }
@@ -72,7 +73,13 @@ impl BodyExt<Mode, Step> for ModuleData {
             .map(|content| content.editor_state.steps_completed.clone())
     }
 
-    fn get_theme(&self) -> Option<ThemeChoice> {
+    fn set_theme(&mut self, theme_id: ThemeId) {
+        if let Some(content) = self.content.as_mut() {
+            content.theme = theme_id;
+        }
+    }
+
+    fn get_theme(&self) -> Option<ThemeId> {
         self.content.as_ref().map(|content| content.theme)
     }
 }
@@ -97,7 +104,7 @@ pub struct Content {
     pub instructions: Instructions,
 
     /// The module's theme.
-    pub theme: ThemeChoice,
+    pub theme: ThemeId,
 
     /// Backgrounds
     pub backgrounds: Backgrounds,

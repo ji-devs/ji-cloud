@@ -67,8 +67,9 @@ where
                         app.opts.module_id,
                         app.jig.borrow().clone().unwrap_ji()
                     );
+                    let theme_id = jig.theme;
 
-                    let raw = RawData::new_mode(mode);
+                    let raw = RawData::new_with_mode_and_theme(mode, theme_id);
                     let history = app.history.borrow().as_ref().unwrap_ji().clone();
                     history.push_modify(clone!(raw => |init| {
                         *init = raw;

@@ -1,5 +1,5 @@
 use crate::domain::jig::module::{
-    body::{Body, BodyConvert, BodyExt, StepExt, ThemeChoice, _groups::design::*},
+    body::{Body, BodyConvert, BodyExt, StepExt, ThemeId, _groups::design::*},
     ModuleKind,
 };
 use serde::{Deserialize, Serialize};
@@ -34,7 +34,8 @@ impl BodyExt<(), Step> for ModuleData {
     fn kind() -> ModuleKind {
         ModuleKind::ResourceCover
     }
-    fn new_mode(_mode: ()) -> Self {
+
+    fn new_with_mode_and_theme(_mode: (), _theme_id: ThemeId) -> Self {
         ModuleData {
             content: Some(Content::default()),
         }
@@ -71,7 +72,13 @@ impl BodyExt<(), Step> for ModuleData {
             .map(|content| content.editor_state.steps_completed.clone())
     }
 
-    fn get_theme(&self) -> Option<ThemeChoice> {
+    fn set_theme(&mut self, theme_id: ThemeId) {
+        if let Some(content) = self.content.as_mut() {
+            content.base.theme = theme_id;
+        }
+    }
+
+    fn get_theme(&self) -> Option<ThemeId> {
         self.content.as_ref().map(|content| content.base.theme)
     }
 }

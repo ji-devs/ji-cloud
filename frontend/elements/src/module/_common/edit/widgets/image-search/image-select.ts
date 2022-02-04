@@ -30,14 +30,14 @@ export class _ extends LitElement {
                     --image-width: var(--image-height);
                 }
                 :host([imageMode="background"]) {
-                    --image-width: 154px;
+                    --image-width: 142px;
                 }
                 @media (min-width: 1920px) {
                     :host {
                         --image-height: 118px;
                     }
                     :host([imageMode="background"]) {
-                        --image-width: 207px;
+                        --image-width: 190px;
                     }
                 }
 
@@ -75,6 +75,7 @@ export class _ extends LitElement {
                 }
                 .search-row ::slotted([slot="search-input"]) {
                     width: 100%;
+                    min-width: 150px;
                 }
                 .search-row ::slotted([slot="filters"]) {
                     grid-column: 2;

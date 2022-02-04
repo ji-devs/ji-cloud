@@ -26,6 +26,7 @@ export class _ extends LitElement {
                     box-sizing: border-box;
                 }
                 input {
+                    min-width: 100%;
                     border: 0;
                     font-size: 16px;
                     padding: 0;

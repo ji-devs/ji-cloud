@@ -8,7 +8,7 @@ use shared::{
         jig::{
             module::{
                 body::{
-                    Audio, Image, Instructions, ThemeChoice, Transform,
+                    Audio, Image, Instructions, Transform,
                     _groups::design::{
                         Backgrounds, BaseContent, Sprite, Sticker, Text, Trace, TraceKind,
                         TraceShape,
@@ -94,7 +94,7 @@ impl DebugSettings {
                             })
                             .collect(),
                         base: BaseContent {
-                            theme: ThemeChoice::Override(ThemeId::Chalkboard),
+                            theme: ThemeId::Chalkboard,
                             instructions: Instructions {
                                 text: Some("Heya World!".to_string()),
                                 ..Instructions::default()

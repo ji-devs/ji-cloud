@@ -20,7 +20,7 @@ use futures_signals::{
 use shared::domain::jig::{
     module::{
         body::{
-            Audio, Instructions, ThemeChoice, Transform,
+            Audio, Instructions, Transform,
             _groups::design::{Trace as RawTrace, TraceKind},
             drag_drop::{
                 Hint, Interactive as RawInteractive, Item as RawItem, ItemKind as RawItemKind,
@@ -37,12 +37,11 @@ use utils::prelude::*;
 pub struct Base {
     pub history: Rc<HistoryStateImpl<RawData>>,
     pub step: ReadOnlyMutable<Step>,
-    pub theme_choice: Mutable<ThemeChoice>,
     pub instructions: Mutable<Instructions>,
     pub jig_id: JigId,
     pub module_id: ModuleId,
     // DragDrop-specific
-    pub theme_id: ReadOnlyMutable<ThemeId>,
+    pub theme_id: Mutable<ThemeId>,
     pub backgrounds: Rc<Backgrounds>,
     pub stickers: Rc<Stickers<Item>>,
     pub traces: Rc<TracesEdit>,
@@ -165,7 +164,6 @@ impl Base {
             module_id,
             history,
             step,
-            theme_choice,
             theme_id,
             ..
         } = init_args;
@@ -180,7 +178,7 @@ impl Base {
         let stickers_ref: Rc<RefCell<Option<Rc<Stickers<Item>>>>> = Rc::new(RefCell::new(None));
 
         let text_editor = TextEditorState::new(
-            theme_id.clone(),
+            theme_id.read_only(),
             None,
             TextEditorCallbacks::new(
                 //New text
@@ -206,7 +204,7 @@ impl Base {
 
         let backgrounds = Rc::new(Backgrounds::from_raw(
             &content.backgrounds,
-            theme_id.clone(),
+            theme_id.read_only(),
             BackgroundsCallbacks::new(Some(clone!(history => move |raw_bgs| {
                 history.push_modify(|raw| {
                     if let Some(content) = &mut raw.content {
@@ -276,7 +274,6 @@ impl Base {
             theme_id,
             history,
             step: step.read_only(),
-            theme_choice,
             instructions,
             feedback,
             text_editor,

@@ -1,12 +1,13 @@
 use super::state::*;
-use dominator::{html, Dom};
+use dominator::Dom;
 use std::rc::Rc;
 
-use components::theme_selector::dom::render_design as render_theme_selector;
+use components::module::_groups::design::theme_background::ThemeBackground;
 
 pub fn render(state: Rc<Step1>) -> Dom {
-    html!("module-sidebar-body", {
-        .property("slot", "body")
-        .child(render_theme_selector(state.theme_selector.clone(), None, None))
-    })
+    let theme_background = ThemeBackground::new(
+        state.sidebar.base.clone()
+    );
+
+    theme_background.render()
 }

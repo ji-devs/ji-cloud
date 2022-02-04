@@ -6,7 +6,7 @@ pub mod design;
 pub mod slide;
 
 use crate::domain::jig::module::{
-    body::{Body, BodyConvert, BodyExt, ThemeChoice},
+    body::{Body, BodyConvert, BodyExt, ThemeId},
     ModuleKind,
 };
 use serde::{Deserialize, Serialize};
@@ -43,7 +43,8 @@ impl BodyExt<(), ()> for ModuleData {
     fn kind() -> ModuleKind {
         ModuleKind::Legacy
     }
-    fn new_mode(_mode: ()) -> Self {
+
+    fn new_with_mode_and_theme(_mode: (), _theme_id: ThemeId) -> Self {
         unimplemented!("can't create new legacy modules!")
     }
 
@@ -66,7 +67,9 @@ impl BodyExt<(), ()> for ModuleData {
         None
     }
 
-    fn get_theme(&self) -> Option<ThemeChoice> {
+    fn set_theme(&mut self, _theme_id: ThemeId) {}
+
+    fn get_theme(&self) -> Option<ThemeId> {
         None
     }
 }

@@ -156,7 +156,7 @@ pub trait BodyExt<Mode: ModeExt, Step: StepExt>:
 
     /// given a Mode, get a new Self
     /// will usually populate an inner .content
-    fn new_mode(mode: Mode) -> Self;
+    fn new_with_mode_and_theme(mode: Mode, theme_id: ThemeId) -> Self;
 
     /// Fetch the mode for this module
     fn mode(&self) -> Option<Mode>;
@@ -165,7 +165,10 @@ pub trait BodyExt<Mode: ModeExt, Step: StepExt>:
     fn requires_choose_mode(&self) -> bool;
 
     /// Get the current theme
-    fn get_theme(&self) -> Option<ThemeChoice>;
+    fn get_theme(&self) -> Option<ThemeId>;
+
+    /// Set the current theme
+    fn set_theme(&mut self, theme_id: ThemeId);
 
     /// Set editor state step
     fn set_editor_state_step(&mut self, step: Step);
@@ -377,22 +380,6 @@ impl StepExt for () {
     }
     fn get_preview() -> Self {
         ()
-    }
-}
-
-/// Theme choice, either jig or override
-#[derive(Clone, Copy, Eq, PartialEq, Serialize, Deserialize, Debug)]
-pub enum ThemeChoice {
-    /// Use the jig's theme
-    Jig,
-
-    /// Override it with a per-module choice
-    Override(ThemeId),
-}
-
-impl Default for ThemeChoice {
-    fn default() -> Self {
-        Self::Jig
     }
 }
 

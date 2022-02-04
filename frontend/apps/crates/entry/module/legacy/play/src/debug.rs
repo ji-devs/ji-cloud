@@ -17,7 +17,7 @@ use shared::{
         jig::{
             module::{
                 body::{
-                    Background, Image, Instructions, ThemeChoice, Transform,
+                    Background, Image, Instructions, Transform,
                     _groups::design::{Backgrounds, BaseContent, Sprite, Sticker, Text, Trace},
                     legacy::ModuleData as RawData,
                 },

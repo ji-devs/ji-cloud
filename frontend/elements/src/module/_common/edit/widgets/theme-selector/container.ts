@@ -1,6 +1,6 @@
 import { LitElement, html, css, customElement } from "lit-element";
 
-const STR_HEADER = "Select theme";
+const STR_HEADER = "Select a theme";
 
 @customElement("theme-selector")
 export class _ extends LitElement {

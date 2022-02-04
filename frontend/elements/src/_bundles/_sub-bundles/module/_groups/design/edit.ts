@@ -19,3 +19,8 @@ import "@elements/module/_common/edit/widgets/transform/box";
 //trace
 import "@elements/module/_common/edit/widgets/trace/edit-reshape-menu";
 import "@elements/module/_common/edit/widgets/trace/edit-reshape-menu-btn";
+
+//theme selector
+import "@elements/module/_common/edit/widgets/theme-selector/container";
+import "@elements/module/_common/edit/widgets/theme-selector/custom-background";
+import "@elements/module/_common/edit/widgets/theme-selector/background-color";
