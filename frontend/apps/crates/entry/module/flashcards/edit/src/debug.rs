@@ -5,7 +5,14 @@ use shared::domain::jig::{
     module::{
         body::{
             Instructions,
-            _groups::cards::{BaseContent, Card as RawCard, CardPair as RawCardPair, Mode, Step},
+            _groups::cards::{
+                BaseContent,
+                Card as RawCard,
+                CardContent as RawCardContent,
+                CardPair as RawCardPair,
+                Mode,
+                Step
+            },
             flashcards::{Content, ModuleData as RawData, PlayerSettings},
         },
         ModuleId,
@@ -53,11 +60,26 @@ impl DebugSettings {
                                     .into_iter()
                                     .map(|(word_1, word_2)| match mode {
                                         Mode::WordsAndImages => {
-                                            RawCardPair(RawCard::Text(word_1), RawCard::Image(None))
+                                            RawCardPair(
+                                                RawCard {
+                                                    audio: None,
+                                                    card_content: RawCardContent::Text(word_1)
+                                                },
+                                                RawCard {
+                                                    audio: None,
+                                                    card_content: RawCardContent::Image(None)
+                                                },
+                                            )
                                         }
                                         _ => RawCardPair(
-                                            RawCard::Text(word_1),
-                                            RawCard::Text(word_2),
+                                            RawCard {
+                                                audio: None,
+                                                card_content: RawCardContent::Text(word_1)
+                                            },
+                                            RawCard {
+                                                audio: None,
+                                                card_content: RawCardContent::Text(word_2)
+                                            },
                                         ),
                                     })
                                     .collect()
