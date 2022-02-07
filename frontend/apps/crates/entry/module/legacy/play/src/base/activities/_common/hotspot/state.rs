@@ -1,8 +1,7 @@
 use futures_signals::signal::Mutable;
 use shared::domain::jig::module::body::legacy::activity::Hotspot as RawHotspot;
 use std::rc::Rc;
-use components::animation::fade::Fade;
-use dominator::animation::{easing, MutableAnimation, Percentage};
+use dominator::animation::MutableAnimation;
 
 pub struct Hotspot {
     pub raw: RawHotspot,

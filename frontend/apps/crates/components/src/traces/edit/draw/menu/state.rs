@@ -20,7 +20,7 @@ impl Menu {
         Self { trace }
     }
 
-    pub fn get_pos(&self, _resize_info: &ResizeInfo) -> (f64, f64) {
+    pub fn _get_pos(&self, _resize_info: &ResizeInfo) -> (f64, f64) {
         let bounds = match self.trace.transform.get_dom_rect_bounds() {
             Some(bounds) => bounds,
             None => {

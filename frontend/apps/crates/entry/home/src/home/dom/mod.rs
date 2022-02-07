@@ -27,7 +27,7 @@ pub fn render(state: Rc<State>, auto_search: bool) -> Dom {
         .children(&mut [
             search_section::render(state.clone(), auto_search),
             html!("empty-fragment", {
-                .child_signal(state.mode.signal_cloned().map(clone!(state => move |mode| {
+                .child_signal(state.mode.signal_cloned().map(move |mode| {
                     match mode {
                         HomePageMode::Home => {
                             // Some(home_sections::render(state.clone()))
@@ -37,7 +37,7 @@ pub fn render(state: Rc<State>, auto_search: bool) -> Dom {
                             Some(search_results.render())
                         },
                     }
-                })))
+                }))
             }),
             page_footer::dom::render(None),
         ])

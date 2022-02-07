@@ -1,7 +1,7 @@
 use dominator::{apply_methods, clone, html, with_node, Dom, DomBuilder};
 use utils::resize::ResizeInfo;
 use web_sys::SvgElement;
-use dominator::animation::{easing, MutableAnimation, Percentage};
+use dominator::animation::easing;
 use components::{
     overlay::handle::OverlayHandle,
     traces::svg::{render_single_shape, ShapeStyle, ShapeStyleVar, SvgCallbacks, TransformSize},
