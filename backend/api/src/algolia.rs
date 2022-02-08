@@ -830,7 +830,7 @@ impl Client {
 
             and_filters.filters.push(Box::new(CommonFilter {
                 filter: FacetFilter {
-                    facet_name: "author".to_owned(),
+                    facet_name: "author_id".to_owned(),
                     value: author_id.to_string(),
                 },
                 invert: false,

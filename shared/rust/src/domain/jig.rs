@@ -812,7 +812,7 @@ pub struct JigSearchQuery {
 
     /// Optionally filter by author's id
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub author_id: Option<UserOrMe>,
 
     /// Optionally filter by the author's name
