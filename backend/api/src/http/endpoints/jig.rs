@@ -331,10 +331,6 @@ async fn search(
             UserOrMe::User(id) => id,
         });
 
-        db::jig::authz_list(&*db, user.0.user_id, author_id)
-            .await
-            .map_err(|_| error::Service::Forbidden)?;
-
         author_id
     } else {
         let author_id = query.author_id.map(|it| match it {
