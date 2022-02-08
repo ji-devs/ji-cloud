@@ -183,10 +183,14 @@ pub enum Mode {
     Sorting,
     #[allow(missing_docs)]
     WordBuilder,
+    /// Build a Sentence
+    SentenceBuilder,
     #[allow(missing_docs)]
     Matching,
     #[allow(missing_docs)]
     DressUp,
+    /// Build a Scene
+    SceneBuilder,
 }
 
 impl Default for Mode {
@@ -201,8 +205,10 @@ impl ModeExt for Mode {
             Self::SettingTable,
             Self::Sorting,
             Self::WordBuilder,
+            Self::SentenceBuilder,
             Self::Matching,
             Self::DressUp,
+            Self::SceneBuilder,
         ]
     }
 
@@ -211,24 +217,30 @@ impl ModeExt for Mode {
             Self::SettingTable => "setting-table",
             Self::Sorting => "sorting",
             Self::WordBuilder => "word-builder",
+            Self::SentenceBuilder => "sentence-builder",
             Self::Matching => "matching",
             Self::DressUp => "dress-up",
+            Self::SceneBuilder => "scene-builder",
         }
     }
 
     fn label(&self) -> &'static str {
-        const STR_SETTING_TABLE: &'static str = "Setting a table";
+        const STR_SETTING_TABLE: &'static str = "Set a Table";
         const STR_SORTING: &'static str = "Sorting";
-        const STR_WORD_BUILDER: &'static str = "Word builder";
+        const STR_WORD_BUILDER: &'static str = "Build a Word";
+        const STR_SENTENCE_BUILDER: &'static str = "Build a Sentence";
         const STR_MATCHING: &'static str = "Matching";
-        const STR_DRESS_UP: &'static str = "Dress-up";
+        const STR_DRESS_UP: &'static str = "Dress Up";
+        const STR_SCENE_BUILDER: &'static str = "Build a Scene";
 
         match self {
             Self::SettingTable => STR_SETTING_TABLE,
             Self::Sorting => STR_SORTING,
             Self::WordBuilder => STR_WORD_BUILDER,
+            Self::SentenceBuilder => STR_SENTENCE_BUILDER,
             Self::Matching => STR_MATCHING,
             Self::DressUp => STR_DRESS_UP,
+            Self::SceneBuilder => STR_SCENE_BUILDER,
         }
     }
 }

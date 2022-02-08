@@ -156,9 +156,9 @@ impl ModeExt for Mode {
     }
 
     fn label(&self) -> &'static str {
-        const STR_INTRODUCTION_LABEL: &'static str = "Introduction";
-        const STR_STORY_LABEL: &'static str = "Story";
-        const STR_SONG_LABEL: &'static str = "Song";
+        const STR_INTRODUCTION_LABEL: &'static str = "Introduce Your Topic";
+        const STR_STORY_LABEL: &'static str = "Tell a Story";
+        const STR_SONG_LABEL: &'static str = "Play a Song";
         const STR_HOWTO_LABEL: &'static str = "How to";
 
         match self {
