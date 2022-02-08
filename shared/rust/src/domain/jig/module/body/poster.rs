@@ -120,20 +120,20 @@ pub struct EditorState {
 #[derive(Clone, Copy, Serialize, Deserialize, Debug, PartialEq, Eq, Hash)]
 /// The mode
 pub enum Mode {
-    /// Storytime
-    StoryTime,
-    /// Teach a word
-    TeachAWord,
-    /// TalkingPictures
-    TalkingPictures,
-    /// Poster
-    Poster,
-    /// Map
-    Map,
-    /// Hear a song
-    HearASong,
     /// Printables
     Printables,
+    /// TalkingPictures
+    TalkingPictures,
+    /// Teach a word
+    TeachAWord,
+    /// Storytime
+    StoryTime,
+    /// Map
+    Map,
+    /// Poster
+    Poster,
+    /// Hear a song
+    HearASong,
 }
 
 impl Default for Mode {
@@ -145,45 +145,45 @@ impl Default for Mode {
 impl ModeExt for Mode {
     fn get_list() -> Vec<Self> {
         vec![
-            Self::StoryTime,
-            Self::TeachAWord,
-            Self::TalkingPictures,
-            Self::Poster,
-            Self::Map,
-            Self::HearASong,
             Self::Printables,
+            Self::TalkingPictures,
+            Self::TeachAWord,
+            Self::StoryTime,
+            Self::Map,
+            Self::Poster,
+            Self::HearASong,
         ]
     }
 
     fn as_str_id(&self) -> &'static str {
         match self {
-            Self::StoryTime => "story-time",
-            Self::TeachAWord => "teach-a-word",
-            Self::TalkingPictures => "talking-pictures",
-            Self::Poster => "poster",
-            Self::Map => "map",
-            Self::HearASong => "hear-a-song",
             Self::Printables => "printables",
+            Self::TalkingPictures => "talking-pictures",
+            Self::TeachAWord => "teach-a-word",
+            Self::StoryTime => "story-time",
+            Self::Map => "map",
+            Self::Poster => "poster",
+            Self::HearASong => "hear-a-song",
         }
     }
 
     fn label(&self) -> &'static str {
-        const STR_STORY_TIME_LABEL: &'static str = "Story time";
-        const STR_TEACH_A_WORD_LABEL: &'static str = "Teach a word";
-        const STR_TALKING_PICTURES_LABEL: &'static str = "Talking picture";
-        const STR_POSTER_LABEL: &'static str = "Poster";
-        const STR_MAP_LABEL: &'static str = "Map";
-        const STR_HEAR_A_SONG_LABEL: &'static str = "Hear a song";
         const STR_PRINTABLES_LABEL: &'static str = "Printables";
+        const STR_TALKING_PICTURES_LABEL: &'static str = "Talking Picture";
+        const STR_TEACH_A_WORD_LABEL: &'static str = "Teach a Word";
+        const STR_STORY_TIME_LABEL: &'static str = "Storytime";
+        const STR_MAP_LABEL: &'static str = "Map";
+        const STR_POSTER_LABEL: &'static str = "Poster";
+        const STR_HEAR_A_SONG_LABEL: &'static str = "Hear a song";
 
         match self {
-            Self::StoryTime => STR_STORY_TIME_LABEL,
-            Self::TeachAWord => STR_TEACH_A_WORD_LABEL,
-            Self::TalkingPictures => STR_TALKING_PICTURES_LABEL,
-            Self::Poster => STR_POSTER_LABEL,
-            Self::Map => STR_MAP_LABEL,
-            Self::HearASong => STR_HEAR_A_SONG_LABEL,
             Self::Printables => STR_PRINTABLES_LABEL,
+            Self::TalkingPictures => STR_TALKING_PICTURES_LABEL,
+            Self::TeachAWord => STR_TEACH_A_WORD_LABEL,
+            Self::StoryTime => STR_STORY_TIME_LABEL,
+            Self::Map => STR_MAP_LABEL,
+            Self::Poster => STR_POSTER_LABEL,
+            Self::HearASong => STR_HEAR_A_SONG_LABEL,
         }
     }
 }

@@ -306,12 +306,12 @@ impl ModeExt for Mode {
     fn label(&self) -> &'static str {
         const STR_DUPLICATE: &'static str = "Duplicate";
         const STR_WORDS_IMAGES: &'static str = "Words & Images";
-        const STR_BEGINS_WITH: &'static str = "What begins with...";
+        const STR_BEGINS_WITH: &'static str = "Begins with...";
         const STR_LETTERING: &'static str = "Lettering";
         const STR_RIDDLES: &'static str = "Riddles";
         const STR_OPPOSITES: &'static str = "Opposites";
         const STR_SYNONYMS: &'static str = "Synonyms";
-        const STR_TRANSLATE: &'static str = "Translate";
+        const STR_TRANSLATE: &'static str = "Translation";
 
         match self {
             Self::Duplicate => STR_DUPLICATE,
