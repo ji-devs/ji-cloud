@@ -1261,28 +1261,6 @@
       ]
     }
   },
-  "1fecc2613bdeb1cb5ef0e88661eb5a43f995623a28c26cf77cb01e50a7c9ebb7": {
-    "query": "select exists(select 1 from \"user_scope\" where user_id = $1 and (scope = $2 or scope = $3)) as \"exists!\"",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "exists!",
-          "type_info": "Bool"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int2",
-          "Int2"
-        ]
-      },
-      "nullable": [
-        null
-      ]
-    }
-  },
   "228687aa01cb6d5780d804f5ddf78a5e070fc552dbb3b3f8e5224b8a6a9e9b18": {
     "query": "\nselect id as \"id: ImageId\", kind as \"kind: ImageKind\"\nfrom user_image_library\n         join user_image_upload\n              on user_image_library.id = user_image_upload.image_id\nwhere processing_result is true\n  and user_id = $1\n  and (kind is not distinct from $2 or $2 is null)\norder by created_at desc\n",
     "describe": {
@@ -5150,6 +5128,28 @@
         ]
       },
       "nullable": []
+    }
+  },
+  "a9996186c133f11e9d24a68f2f686c99b5f65fc97b4de1ea89411b16b333afb5": {
+    "query": "select exists(\n            select 1\n            from \"user_scope\"\n            where\n                user_id = $1 and\n                (scope = $2 or scope = $3)\n        ) as \"exists!\"",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "exists!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2",
+          "Int2"
+        ]
+      },
+      "nullable": [
+        null
+      ]
     }
   },
   "ab605fef6d23ea4a74e80999574296f7b4fce2ed0029455be3d6541ee379d329": {
