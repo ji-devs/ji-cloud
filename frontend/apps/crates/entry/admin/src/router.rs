@@ -24,6 +24,7 @@ use crate::{
     locale::{dom::LocalePage, state::LoaderState as LocaleLoaderState},
     sidebar::Sidebar,
     curation::Curation,
+    export::Export,
 };
 use std::cell::RefCell;
 pub struct Router {
@@ -104,6 +105,7 @@ impl Router {
                                                 AdminRoute::ImageSearch(query) => Some(state.with_child(route, ImageSearchPage::render(query))),
                                                 AdminRoute::ImageTags => Some(state.with_child(route, ImageTags::render(ImageTags::new()))),
                                                 AdminRoute::Curation(curation_route) => Some(state.with_child(route, Curation::new(curation_route).render())),
+                                                AdminRoute::Export => Some(state.with_child(route, Export::new().render())),
                                                 _ => Some(state.with_child(route, html!("empty-fragment"))),
                                             }
                                         }

@@ -71,6 +71,7 @@ pub enum AdminRoute {
     ImageAdd,
     ImageTags,
     ImageMeta(ImageId, bool), //flag is for if it's a new image
+    Export,
 }
 
 impl AdminRoute {
@@ -86,7 +87,8 @@ impl AdminRoute {
             Self::Curation(_) => scopes.contains(&UserScope::AdminJig),
             Self::ImageSearch(_) | Self::ImageAdd | Self::ImageTags | Self::ImageMeta(_, _) => {
                 scopes.contains(&UserScope::ManageImage)
-            }
+            },
+            Self::Export => scopes.contains(&UserScope::Admin),
         }
     }
 }
@@ -256,7 +258,8 @@ impl Route {
             ["admin", "image-meta", id, flag] => {
                 let id = ImageId(Uuid::from_str(id).unwrap_ji());
                 Self::Admin(AdminRoute::ImageMeta(id, bool::from_str(flag).unwrap_ji()))
-            }
+            },
+            ["admin", "export"] => Self::Admin(AdminRoute::Export),
             ["admin"] => Self::Admin(AdminRoute::Landing),
             ["jig", "edit", "gallery"] => Self::Jig(JigRoute::Gallery),
             ["jig", "edit", "resource-gallery"] => Self::Jig(JigRoute::ResourceGallery),
@@ -444,6 +447,7 @@ impl From<&Route> for String {
                 AdminRoute::ImageMeta(id, is_new) => {
                     format!("/admin/image-meta/{}/{}", id.0.to_string(), is_new)
                 }
+                AdminRoute::Export => "/admin/export".to_string(),
             },
             Route::Jig(route) => match route {
                 JigRoute::Gallery => "/jig/edit/gallery".to_string(),
