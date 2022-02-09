@@ -325,6 +325,14 @@ async fn search(
 ) -> Result<Json<<jig::Search as ApiEndpoint>::Res>, error::Service> {
     let query = query.map_or_else(Default::default, Query::into_inner);
 
+    if claims.is_none() {
+        if let Some(user) = &query.author_id {
+            if user.to_owned() == UserOrMe::Me {
+                return Err(error::Service::Forbidden);
+            }
+        }
+    }
+
     let author_id: Option<Uuid> = if let Some(user) = claims {
         let author_id = query.author_id.map(|it| match it {
             UserOrMe::Me => user.0.user_id,
