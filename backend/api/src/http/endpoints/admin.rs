@@ -22,7 +22,7 @@ use uuid::Uuid;
 
 use crate::{
     db, error,
-    extractor::{ScopeAdmin, TokenUserWithScope},
+    extractor::{ScopeAdmin, TokenUserNoCsrfWithScope, TokenUserWithScope},
     image_ops::{regenerate_images, MediaKind},
     service::{s3, ServiceData},
     token::{create_auth_token, SessionMask},
@@ -258,7 +258,7 @@ async fn list_media(
 }
 
 async fn export_data(
-    _auth: TokenUserWithScope<ScopeAdmin>,
+    _auth: TokenUserNoCsrfWithScope<ScopeAdmin>,
     req: HttpRequest,
     db: Data<PgPool>,
     query: Query<<admin::ExportData as ApiEndpoint>::Req>,
