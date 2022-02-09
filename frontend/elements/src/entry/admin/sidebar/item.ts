@@ -7,7 +7,8 @@ export type ID =
     | "image-search"
     | "curation"
     | "category"
-    | "image-tags";
+    | "image-tags"
+    | "export";
 
 const STR_LABEL_LOOKUP: { [key in ID]: string } = {
     "image-add": "Add image",
@@ -16,6 +17,7 @@ const STR_LABEL_LOOKUP: { [key in ID]: string } = {
     "curation": "Curation",
     "category": "Edit categories",
     "locale": "Localization",
+    "export": "Export",
 };
 
 @customElement("admin-sidebar-item")

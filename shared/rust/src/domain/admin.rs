@@ -1,7 +1,7 @@
 //! Types for admin routes.
-
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use strum_macros::{Display, EnumIter};
 use uuid::Uuid;
 
 use crate::media::{MediaKind, MediaLibrary};
@@ -40,7 +40,7 @@ pub struct AdminMediaItem {
 }
 
 /// Type of data export to perform
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Display, EnumIter, Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
 #[serde(rename_all = "lowercase")]
 pub enum ExportType {
     /// Export user profiles

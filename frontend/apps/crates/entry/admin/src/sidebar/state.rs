@@ -32,6 +32,7 @@ impl Sidebar {
                     SidebarItem::new(AdminRoute::Curation(AdminCurationRoute::Table), profile, &curr_route),
                     SidebarItem::new(AdminRoute::Categories, profile, &curr_route),
                     SidebarItem::new(AdminRoute::Locale, profile, &curr_route),
+                    SidebarItem::new(AdminRoute::Export, profile, &curr_route),
                 ],
             })
             .to_signal_vec()
@@ -59,6 +60,7 @@ impl SidebarItem {
             AdminRoute::ImageMeta(_, _) => "image-search",
             AdminRoute::ImageSearch(_) => "image-search",
             AdminRoute::Curation(_) => "curation",
+            AdminRoute::Export => "export",
             AdminRoute::Landing => "",
         };
 
