@@ -86,6 +86,49 @@ fn check_cookie_csrf<'a>(
     }
 }
 
+async fn claims_for_scope(
+    db: &PgPool,
+    settings: &Data<RuntimeSettings>,
+    token_string: &str,
+    csrf: Option<&str>,
+    user_scope: UserScope,
+) -> Result<SessionClaims, actix_web::Error> {
+    let claims = check_login_token(
+        &db,
+        &token_string,
+        csrf,
+        &settings.token_secret,
+        SessionMask::GENERAL_API,
+    )
+    .await?;
+
+    let has_scope = sqlx::query!(
+        r#"select exists(
+            select 1
+            from "user_scope"
+            where
+                user_id = $1 and
+                (scope = $2 or scope = $3)
+        ) as "exists!""#,
+        claims.user_id,
+        user_scope as i16,
+        UserScope::Admin as i16
+    )
+    .fetch_optional(db)
+    .await
+    .map_err(Into::into)
+    .map_err(crate::error::ise)?
+    .map(|it| it.exists)
+    .ok_or_else(|| BasicError::new(StatusCode::FORBIDDEN))?;
+
+    if !has_scope {
+        // todo: message for which scope is needed
+        return Err(BasicError::new(StatusCode::FORBIDDEN).into());
+    }
+
+    Ok(claims)
+}
+
 #[repr(transparent)]
 pub struct TokenUser(pub SessionClaims);
 
@@ -234,32 +277,61 @@ impl<S: Scope> FromRequest for TokenUserWithScope<S> {
         };
 
         async move {
-            let csrf = csrf;
-            // todo: fix the race condition here (user deleted between the db access in `check_token` and `has_scope`)
-            let claims = check_login_token(
-                &db,
-                &token_string,
-                csrf.as_deref(),
-                &settings.token_secret,
-                SessionMask::GENERAL_API
-            )
-                .await?;
+            let claims =
+                claims_for_scope(&db, &settings, &token_string, csrf.as_deref(), S::scope())
+                    .await?;
 
-            let has_scope = sqlx::query!(
-                r#"select exists(select 1 from "user_scope" where user_id = $1 and (scope = $2 or scope = $3)) as "exists!""#,
-                claims.user_id,
-                S::scope() as i16,
-                UserScope::Admin as i16
-            )
-            .fetch_optional(&db)
-            .await
-            .map_err(Into::into)
-            .map_err(crate::error::ise)?.map(|it| it.exists).ok_or_else(|| BasicError::new(StatusCode::FORBIDDEN))?;
+            Ok(Self {
+                claims,
+                _phantom: PhantomData,
+            })
+        }
+        .boxed()
+        .into()
+    }
+}
 
-            if !has_scope {
-                // todo: message for which scope is needed
-                return Err(BasicError::new(StatusCode::FORBIDDEN).into());
+/// Special extractor which doesn't compare the user's CSRF token.1
+///
+/// **Note** that this extractor should only be used on GET requests which have _no_ side-effects.
+#[repr(transparent)]
+pub struct TokenUserNoCsrfWithScope<S: Scope> {
+    pub claims: SessionClaims,
+    _phantom: PhantomData<S>,
+}
+
+impl<S: Scope> FromRequest for TokenUserNoCsrfWithScope<S> {
+    type Config = ();
+    type Error = actix_web::Error;
+    type Future = ReadyOrNot<'static, Result<Self, Self::Error>>;
+    fn from_request(
+        req: &actix_web::HttpRequest,
+        _payload: &mut actix_web::dev::Payload,
+    ) -> Self::Future {
+        let settings: &Data<RuntimeSettings> = req.app_data().expect("Settings??");
+        let settings = Data::clone(settings);
+
+        let db: &Data<PgPool> = req.app_data().expect("Missing `Data` for db?");
+        let db = db.as_ref().clone();
+
+        let cookie = req.cookie(AUTH_COOKIE_NAME);
+
+        let token_string = match cookie {
+            Some(cookie) => cookie.value().to_owned(),
+            None => {
+                return futures::future::err(
+                    BasicError::with_message(
+                        StatusCode::UNAUTHORIZED,
+                        "Unauthorized: missing cookie".to_owned(),
+                    )
+                    .into(),
+                )
+                .into()
             }
+        };
+
+        async move {
+            let claims = claims_for_scope(&db, &settings, &token_string, None, S::scope()).await?;
 
             Ok(Self {
                 claims,
