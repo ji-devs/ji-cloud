@@ -167,9 +167,20 @@ export class _ extends LitElement {
         }
     };
 
+    connectedCallback() {
+        super.connectedCallback();
+        window.addEventListener("mousedown", this.onGlobalMouseDown);
+    }
     disconnectedCallback() {
+        super.disconnectedCallback();
+        window.removeEventListener("mousedown", this.onGlobalMouseDown);
         this.killInstance();
     }
+    private onGlobalMouseDown = (evt: MouseEvent) => {
+        if (!evt.composedPath().includes(this)) {
+            this.dispatchEvent(new Event("close"));
+        }
+    };
 
     render() {
         return html` <slot></slot> `;

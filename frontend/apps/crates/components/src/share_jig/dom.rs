@@ -62,6 +62,9 @@ impl ShareJig {
                             .property("target", &elem)
                             .property("contentAnchor", "oppositeH")
                             .property("targetAnchor", "tr")
+                            .event(clone!(state => move |_:events::Close| {
+                                state.active_popup.set(None);
+                            }))
                             .child(html!("empty-fragment", {
                                 .child_signal(state.active_popup.signal_cloned().map(clone!(state => move|active_popup| {
                                     match active_popup {
