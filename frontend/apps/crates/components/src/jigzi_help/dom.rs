@@ -2,9 +2,7 @@ use std::rc::Rc;
 
 use dominator::{clone, html, Dom, with_node};
 use futures_signals::{signal::SignalExt, map_ref};
-use js_sys::Reflect;
 use utils::events;
-use wasm_bindgen::JsValue;
 use web_sys::HtmlElement;
 
 use crate::overlay::handle::OverlayHandle;
@@ -12,9 +10,14 @@ use crate::overlay::handle::OverlayHandle;
 use super::state::JigziHelp;
 
 const MARGIN_X: i32 = 20;
+const STR_NO_SHOW_AGAIN: &str  = "Don’t show tips again";
 
 impl JigziHelp {
-    pub fn render(self: Rc<Self>, slot: Option<&'static str>) -> Dom {
+    pub fn render(
+        self: Rc<Self>,
+        slot: Option<&'static str>,
+        get_action: Rc<Option<impl Fn() -> Dom + 'static>>
+    ) -> Dom {
         let state = self;
         state.show_info_tooltip_delayed();
 
@@ -37,14 +40,14 @@ impl JigziHelp {
                 state.permanently_closed.set(false);
                 state.show_info_tooltip.set(true);
             }))
-            .child_signal(show_tooltip_signal.map(clone!(state => move|show_tooltip| {
+            .child_signal(show_tooltip_signal.map(clone!(state, get_action => move |show_tooltip| {
                 match show_tooltip {
                     false => None,
                     true => Some(
                         html!("empty-fragment" => HtmlElement, {
                             .with_node!(elem => {
                                 .apply(OverlayHandle::lifecycle(
-                                    clone!(state => move || {
+                                    clone!(state, get_action => move || {
                                         html!("overlay-tooltip-info", {
                                             .property("marginX", MARGIN_X)
                                             .property("target", &elem)
@@ -52,22 +55,33 @@ impl JigziHelp {
                                             .attribute("contentAnchor", "oppositeV")
                                             .property("title", &state.title)
                                             .property("body", &state.body)
-                                            .property("showPermanentlyClose", !&state.show_id.is_empty())
                                             .property("closeable", true)
                                             .property("strategy", "track")
                                             .event(clone!(state => move |_evt: events::Close| {
                                                 state.show_info_tooltip.set(false);
                                             }))
-                                            .event(clone!(state => move |_evt: events::PermanentlyClose| {
-                                                state.permanently_close();
+                                            .apply(clone!(get_action => move |dom| {
+                                                match &*get_action {
+                                                    Some(get_action) => {
+                                                        let child = get_action();
+                                                        dom.child(html!("empty-fragment", {
+                                                            .property("slot", "actions")
+                                                            .child(child)
+                                                        }))
+                                                    },
+                                                    None => dom
+                                                }
                                             }))
-                                            .after_inserted(move |elem| {
-                                                let _ = Reflect::set(
-                                                    &elem,
-                                                    &JsValue::from_str("selfClosed"),
-                                                    &JsValue::from_bool(false),
-                                                );
-                                            })
+                                            .child(html!("button-rect", {
+                                                .property("slot", "actions")
+                                                .property("kind", "text")
+                                                .property("color", "lightBlue")
+                                                .style("margin-left", "auto")
+                                                .text(STR_NO_SHOW_AGAIN)
+                                                .event(clone!(state => move |_evt: events::Click| {
+                                                    state.permanently_close();
+                                                }))
+                                            }))
                                         })
                                     })
                                 ))

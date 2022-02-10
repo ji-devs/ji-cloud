@@ -165,7 +165,7 @@ where
                         body,
                         "module-header"
                     )
-                    .render(Some("help"))
+                    .render(Some("help"), Rc::new(None::<fn() -> Dom>))
                 )
             } else {
                 None

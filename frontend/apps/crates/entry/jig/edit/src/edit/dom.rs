@@ -53,7 +53,7 @@ impl EditPage {
                     match route {
                         JigEditRoute::Landing => {
                             match jig_focus {
-                                JigFocus::Modules => Some(SelectionDom::render()),
+                                JigFocus::Modules => Some(SelectionDom::render(state.clone())),
                                 JigFocus::Resources => Some(Publish::render(Rc::clone(&state))),
                             }
                         },
