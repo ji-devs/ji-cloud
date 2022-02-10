@@ -31,6 +31,7 @@ pub struct State {
     pub callbacks: Callbacks,
     pub user: Rc<RefCell<Option<UserProfile>>>,
     pub next_page: RefCell<NextPage>,
+    pub recent: bool,
 }
 
 impl State {
@@ -41,6 +42,9 @@ impl State {
         init_loader.load(clone!(styles => async move {
             *styles.borrow_mut() = Some(get_styles().await);
         }));
+
+        // don't display recent in overlay
+        let recent = image_search_options.kind != ImageSearchKind::Overlay;
 
         Self {
             options: image_search_options,
@@ -56,6 +60,7 @@ impl State {
             user: Rc::new(RefCell::new(None)),
             search_mode: Mutable::new(SearchMode::Sticker(Rc::new(MutableVec::new()))),
             next_page: RefCell::new(NextPage::default()),
+            recent,
         }
     }
 }
@@ -64,7 +69,6 @@ pub struct ImageSearchOptions {
     pub kind: ImageSearchKind,
     pub upload: bool,
     pub filters: bool,
-    pub recent: bool,
     pub tags: Option<Vec<ImageTag>>,
     pub tags_priority: Option<Vec<ImageTag>>,
 }
@@ -75,7 +79,6 @@ impl Default for ImageSearchOptions {
             kind: ImageSearchKind::Sticker,
             upload: true,
             filters: true,
-            recent: true,
             tags: None,
             tags_priority: None,
         }
@@ -84,6 +87,7 @@ impl Default for ImageSearchOptions {
 
 // sticker is handled with ImageKind instead of ImageTag since we want all images to default to sticker
 // but don't wanna add all manually so we accepted this compromise
+#[derive(PartialEq)]
 pub enum ImageSearchKind {
     Background, // adds ImageTag::BackgroundLayer1 to the image_tags filter
     Overlay,    // adds ImageTag::BackgroundLayer2 to the image_tags filter

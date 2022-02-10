@@ -91,7 +91,7 @@ pub fn search(state: Rc<State>, page: Option<u32>) {
 pub fn fetch_init_data(state: Rc<State>) {
     state.loader.load(clone!(state => async move {
         let search = search_async(Rc::clone(&state), 0);
-        if state.options.recent {
+        if state.recent {
             join(
                 search,
                 get_recent(Rc::clone(&state))

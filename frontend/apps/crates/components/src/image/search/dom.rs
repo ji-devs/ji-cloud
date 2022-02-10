@@ -57,9 +57,9 @@ pub fn render_loaded(state: Rc<State>, action: Option<Dom>) -> Dom {
             }
         })
         .property_signal("loading", state.loader.is_loading())
-        .property_signal("recent", state.recent_list.signal_vec_cloned().len().map(|len| {
-            len > 0
-        }))
+        .property_signal("recent", state.recent_list.signal_vec_cloned().len().map(clone!(state => move |len| {
+            state.recent && len > 0
+        })))
         .apply_if(action.is_some(), |dom| {
             dom.child(html!("empty-fragment", {
                 .property("slot", "action")
@@ -73,7 +73,7 @@ pub fn render_loaded(state: Rc<State>, action: Option<Dom>) -> Dom {
         .children_signal_vec(state.search_mode.signal_cloned().switch_signal_vec(clone!(state => move |search_mode| {
             images_signal_vec(Rc::clone(&state), &search_mode)
         })))
-        .apply_if(state.options.recent, |dom| {
+        .apply_if(state.recent, |dom| {
             dom.child_signal(state.loader.is_loading().map(|is_loading| {
                 match is_loading {
                     false => None,
