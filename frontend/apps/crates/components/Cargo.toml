@@ -83,6 +83,7 @@ animation = []
 audio_input = []
 audio_player_button = []
 backgrounds = []
+categories_input = []
 color_select = []
 dialog = []
 image = []
@@ -122,6 +123,7 @@ all= [
     "audio_input", 
     "audio_player_button", 
     "backgrounds", 
+    "categories_input",
     "color_select", 
     "dialog", 
     "image", 

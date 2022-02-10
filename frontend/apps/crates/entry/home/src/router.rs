@@ -1,4 +1,5 @@
 use super::home;
+use components::overlay::container::OverlayContainer;
 use dominator::{html, Dom};
 use futures_signals::signal::Signal;
 use std::rc::Rc;
@@ -14,6 +15,7 @@ impl Router {
     pub fn render() -> Dom {
         html!("main", {
             .child_signal(Self::dom_signal())
+            .child(OverlayContainer::new().render(None))
         })
     }
 

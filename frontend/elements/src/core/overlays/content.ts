@@ -77,6 +77,26 @@ export class _ extends LitElement {
                 :host([zLayer="modal"]) {
                     z-index: 300;
                 }
+
+                :host([styled]) {
+                    border-radius: 16px;
+                    box-shadow: rgb(0 0 0 / 25%) 0px 3px 16px 0px;
+                    background-color: #ffffff;
+                    overflow: auto;
+                }
+                :host([styled])::-webkit-scrollbar-track {
+                    background-color: transparent;
+                }
+                :host([styled])::-webkit-scrollbar {
+                    width: 6px;
+                }
+                :host([styled])::-webkit-scrollbar-thumb {
+                    border-radius: 3px;
+                    background-color: #d3d4dd;
+                }
+                :host([styled])::-webkit-scrollbar-button {
+                    background-color: transparent;
+                }
             `,
         ];
     }
@@ -106,6 +126,9 @@ export class _ extends LitElement {
 
     @property({ type: Number })
     marginY: number = 0;
+
+    @property({ type: Boolean, reflect: true })
+    styled: boolean = false;
 
     firstUpdated(_changed: any) {
         this.bindInstance();

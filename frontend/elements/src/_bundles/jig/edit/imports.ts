@@ -4,6 +4,7 @@ import "@elements/core/inputs/composed/search";
 import "@elements/core/inputs/composed/select/select";
 import "@elements/core/inputs/composed/select/option";
 import "@elements/core/inputs/composed/select/option-group";
+import "@elements/core/inputs/composed/autocomplete-option";
 import "@elements/core/inputs/wrapper";
 import "@elements/core/inputs/composed/switch";
 import "@elements/core/inputs/primitives/file";

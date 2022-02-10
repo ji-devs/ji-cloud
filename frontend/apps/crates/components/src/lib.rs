@@ -18,6 +18,8 @@ pub mod backgrounds;
 pub mod box_outline;
 #[cfg(feature = "buttons")]
 pub mod buttons;
+#[cfg(feature = "categories_input")]
+pub mod categories_input;
 #[cfg(feature = "collision")]
 pub mod collision;
 #[cfg(feature = "color_select")]
