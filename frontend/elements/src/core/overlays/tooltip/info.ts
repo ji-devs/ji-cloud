@@ -11,8 +11,6 @@ import "@elements/core/buttons/icon";
 import "./container";
 import { Color } from "./container";
 
-const STR_NO_SHOW_AGAIN = "Don’t show tips again";
-
 @customElement("overlay-tooltip-info")
 export class _ extends LitElement {
     static get styles() {
@@ -77,14 +75,13 @@ export class _ extends LitElement {
                     width: 304px;
                     margin: 8px 0 36px 0;
                 }
-                .noshow {
-                    background: transparent;
-                    border: none;
-                    font-size: 13px;
-                    font-weight: 500;
-                    color: var(--light-blue-4);
-                    cursor: pointer;
-                    align-self: flex-end;
+                .actions {
+                    display: flex;
+                    flex-direction: row;
+                    justify-content: space-between;
+                }
+                .actions :last-child {
+                    margin-left: auto;
                 }
             `,
         ];
@@ -127,9 +124,6 @@ export class _ extends LitElement {
 
     @property()
     body: string = "";
-
-    @property({ type: Boolean })
-    showPermanentlyClose: boolean = false;
 
     @property({ type: Boolean })
     closeable: boolean = false;
@@ -188,20 +182,6 @@ export class _ extends LitElement {
         `;
     }
 
-    renderPermanentlyClose() {
-        if (!this.showPermanentlyClose) {
-            return nothing;
-        }
-
-        const onClick = () => {
-            this.dispatchEvent(new Event("permanently-close"));
-            this.onClose();
-        };
-        return html`
-            <button @click=${onClick} class="noshow">${STR_NO_SHOW_AGAIN}</button>
-        `;
-    }
-
     render() {
         const {
             container,
@@ -253,7 +233,9 @@ export class _ extends LitElement {
                         ${body !== ""
                             ? html`<section class="body">${body}</section>`
                             : nothing}
-                        ${this.renderPermanentlyClose()}
+                        <div class="actions">
+                            <slot name="actions"></slot>
+                        </div>
                     </section>
                 </tooltip-container>
             </overlay-content>
