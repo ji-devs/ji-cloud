@@ -198,6 +198,15 @@ function doScreenshot(url) {
     })
     .then(async (browser) => {
       const page = await browser.newPage();
+      await page.setRequestInterception(true);
+      page.on('request', req => {
+        // block HubSpot so that it doesn't show the cookies banner
+        if(req.url().startsWith("https://js.hs-scripts.com")) {
+          req.abort();
+        } else {
+          req.continue();
+        }
+      });
       await page.goto(url, { waitUntil: "networkidle0" });
       //removing this seems to be okay:
       //await page.waitFor(5000);
