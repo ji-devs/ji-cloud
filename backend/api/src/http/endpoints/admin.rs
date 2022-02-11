@@ -7,13 +7,13 @@ use actix_web::{
 use chrono::{DateTime, Duration, Utc};
 use core::settings::RuntimeSettings;
 use futures::TryStreamExt;
+use serde::ser::Serialize;
 use shared::{
     api::{endpoints::admin, ApiEndpoint},
     domain::{
-        admin::{AdminListMediaResponse, AdminMediaItem},
+        admin::{AdminListMediaResponse, AdminMediaItem, ExportDataRequest, ExportType},
         image::ImageKind,
         session::NewSessionResponse,
-        user::UserProfileExport,
     },
     media::{FileKind, MediaLibrary, PngImageFile},
 };
@@ -257,19 +257,43 @@ async fn list_media(
     Ok(Json(AdminListMediaResponse { media: items }))
 }
 
+async fn export_data_by_type(
+    db: &PgPool,
+    query: ExportDataRequest,
+) -> Result<Vec<impl Serialize>, error::Server> {
+    let data = match query.export_type {
+        ExportType::Profiles => {
+            db::user::user_profiles_by_date_range(&db, query.from_date, query.to_date).await?
+        }
+    };
+
+    Ok(data)
+}
+
 async fn export_data(
     _auth: TokenUserNoCsrfWithScope<ScopeAdmin>,
     req: HttpRequest,
     db: Data<PgPool>,
     query: Query<<admin::ExportData as ApiEndpoint>::Req>,
 ) -> actix_web::Result<HttpResponse, error::Server> {
-    let profiles: Vec<UserProfileExport> =
-        db::user::user_profiles_by_date_range(&db, query.from_date, query.to_date).await?;
-    profiles.iter();
+    let filename = {
+        let mut file_parts = vec!["jigzi".to_string()];
+        file_parts.push(format!("{}_export", query.export_type).to_lowercase());
 
-    let file_uuid = Uuid::new_v4();
-    let mut filename = std::env::temp_dir();
-    filename.push(format!("{}.csv", file_uuid));
+        if let Some(date) = query.from_date {
+            file_parts.push(format!("{}", date.format("%Y-%m-%d")));
+        }
+
+        if let Some(date) = query.to_date {
+            file_parts.push(format!("{}", date.format("%Y-%m-%d")));
+        }
+
+        let mut filename = std::env::temp_dir();
+        filename.push(format!("{}.csv", file_parts.join("_")));
+        filename
+    };
+
+    let data = export_data_by_type(&db, query.into_inner()).await?;
 
     let file = std::fs::File::create(&filename)?;
 
@@ -278,7 +302,7 @@ async fn export_data(
         .quote_style(csv::QuoteStyle::Necessary)
         .from_writer(file);
 
-    for profile in profiles.iter() {
+    for profile in data.iter() {
         writer.serialize(&profile)?;
     }
 

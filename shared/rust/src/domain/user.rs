@@ -211,15 +211,15 @@ pub struct UserProfileExport {
     /// The user's taught subjects.
     #[serde(default)]
     #[serde(serialize_with = "serialize_list")]
-    pub subjects: Vec<SubjectId>,
+    pub subjects: Vec<String>,
     /// The user's age-ranges.
     #[serde(default)]
     #[serde(serialize_with = "serialize_list")]
-    pub age_ranges: Vec<AgeRangeId>,
+    pub age_ranges: Vec<String>,
     /// The user's affiliations.
     #[serde(default)]
     #[serde(serialize_with = "serialize_list")]
-    pub affiliations: Vec<AffiliationId>,
+    pub affiliations: Vec<String>,
     /// The user's city
     #[serde(default)]
     pub city: Option<String>,

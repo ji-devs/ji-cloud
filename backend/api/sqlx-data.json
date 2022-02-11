@@ -2478,111 +2478,6 @@
       "nullable": []
     }
   },
-  "525e414ae58849a2e81ea1bc48b789e26f4e0adc859cbb325a53242a2d5ccf94": {
-    "query": "\nselect user_id              as \"id!\",\n    username                as \"username!\",\n    user_email.email::text  as \"email!\",\n    given_name              as \"given_name!\",\n    family_name             as \"family_name!\",\n    profile_image_id        as \"profile_image?: ImageId\",\n    language                as \"language!\",\n    user_profile.created_at as \"created_at!\",\n    user_profile.updated_at,\n    organization,\n    persona                 as \"persona!: Vec<String>\",\n    location,\n    array(select subject_id from user_subject where user_subject.user_id = \"user\".id) as \"subjects!: Vec<Uuid>\",\n    array(select affiliation_id from user_affiliation where user_affiliation.user_id = \"user\".id) as \"affiliations!: Vec<Uuid>\",\n    array(select age_range_id from user_age_range where user_age_range.user_id = \"user\".id) as \"age_ranges!: Vec<Uuid>\"\nfrom \"user\"\n    inner join user_profile on \"user\".id = user_profile.user_id\n    inner join user_email using(user_id)\nwhere\n    (\n        user_profile.created_at >= case when $1::timestamptz is null then to_timestamp('-infinity') else $1 end\n        and user_profile.created_at < case when $2::timestamptz is null then to_timestamp('infinity') else $2 end\n    )\n    or (\n        user_profile.updated_at >= case when $1::timestamptz is null then to_timestamp('-infinity') else $1 end\n        and user_profile.updated_at < case when $2::timestamptz is null then to_timestamp('infinity') else $2 end\n    )\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id!",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "username!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "email!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 3,
-          "name": "given_name!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 4,
-          "name": "family_name!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 5,
-          "name": "profile_image?: ImageId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 6,
-          "name": "language!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 7,
-          "name": "created_at!",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 8,
-          "name": "updated_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 9,
-          "name": "organization",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 10,
-          "name": "persona!: Vec<String>",
-          "type_info": "TextArray"
-        },
-        {
-          "ordinal": 11,
-          "name": "location",
-          "type_info": "Jsonb"
-        },
-        {
-          "ordinal": 12,
-          "name": "subjects!: Vec<Uuid>",
-          "type_info": "UuidArray"
-        },
-        {
-          "ordinal": 13,
-          "name": "affiliations!: Vec<Uuid>",
-          "type_info": "UuidArray"
-        },
-        {
-          "ordinal": 14,
-          "name": "age_ranges!: Vec<Uuid>",
-          "type_info": "UuidArray"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Timestamptz",
-          "Timestamptz"
-        ]
-      },
-      "nullable": [
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true
-      ]
-    }
-  },
   "5330258c1771d3e64b884d567ed1290ab484fb36f84360c05a1ac06fb8e11032": {
     "query": "\ninsert into jig_data_affiliation(jig_data_id, affiliation_id)\nselect $2, affiliation_id\nfrom jig_data_affiliation\nwhere jig_data_id = $1\n        ",
     "describe": {
@@ -5930,6 +5825,111 @@
       },
       "nullable": [
         false
+      ]
+    }
+  },
+  "d25b7fd117db9d6b42dde5f7c8e16e1e6e48f450a00c62c2bf4e8bd7bab2815a": {
+    "query": "\nselect user_id              as \"id!\",\n    username                as \"username!\",\n    user_email.email::text  as \"email!\",\n    given_name              as \"given_name!\",\n    family_name             as \"family_name!\",\n    profile_image_id        as \"profile_image?: ImageId\",\n    language                as \"language!\",\n    user_profile.created_at as \"created_at!\",\n    user_profile.updated_at,\n    organization,\n    persona                 as \"persona!: Vec<String>\",\n    location,\n    array(\n        select subject.display_name\n        from subject\n        inner join user_subject on subject.subject_id = user_subject.subject_id\n        where user_subject.user_id = \"user\".id\n    ) as \"subjects!: Vec<String>\",\n    array(\n        select affiliation.display_name\n        from affiliation\n        inner join user_affiliation on affiliation.id = user_affiliation.affiliation_id\n        where user_affiliation.user_id = \"user\".id\n    ) as \"affiliations!: Vec<String>\",\n    array(\n        select age_range.display_name\n        from age_range\n        inner join user_age_range on age_range.id = user_age_range.age_range_id\n        where user_age_range.user_id = \"user\".id\n    ) as \"age_ranges!: Vec<String>\"\nfrom \"user\"\n    inner join user_profile on \"user\".id = user_profile.user_id\n    inner join user_email using(user_id)\nwhere\n    (\n        user_profile.created_at >= case when $1::timestamptz is null then to_timestamp('-infinity') else $1 end\n        and user_profile.created_at < case when $2::timestamptz is null then to_timestamp('infinity') else $2 end\n    )\n    or (\n        user_profile.updated_at >= case when $1::timestamptz is null then to_timestamp('-infinity') else $1 end\n        and user_profile.updated_at < case when $2::timestamptz is null then to_timestamp('infinity') else $2 end\n    )\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id!",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "username!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "email!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "given_name!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "family_name!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 5,
+          "name": "profile_image?: ImageId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 6,
+          "name": "language!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 7,
+          "name": "created_at!",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 8,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 9,
+          "name": "organization",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 10,
+          "name": "persona!: Vec<String>",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 11,
+          "name": "location",
+          "type_info": "Jsonb"
+        },
+        {
+          "ordinal": 12,
+          "name": "subjects!: Vec<String>",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 13,
+          "name": "affiliations!: Vec<String>",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 14,
+          "name": "age_ranges!: Vec<String>",
+          "type_info": "TextArray"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Timestamptz",
+          "Timestamptz"
+        ]
+      },
+      "nullable": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
       ]
     }
   },
