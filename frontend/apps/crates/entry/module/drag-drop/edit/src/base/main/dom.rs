@@ -14,6 +14,10 @@ impl DomRenderable for Main {
         let theme_id = state.base.theme_id.get();
 
         html!("empty-fragment", {
+            .child(html!("img-ui", {
+                .property("path", "jig/play/design-grid.svg")
+                .style("height", "100%")
+            }))
             .child_signal(
                 state.sticker_phase_signal().map(clone!(state => move |sticker_phase| Some({
                     match sticker_phase {

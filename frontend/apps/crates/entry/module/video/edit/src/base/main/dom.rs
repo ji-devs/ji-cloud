@@ -16,8 +16,12 @@ use std::rc::Rc;
 
 impl DomRenderable for Main {
     fn render(state: Rc<Main>) -> Dom {
-        // rendering stickers manually so that video options can be passed in
         html!("empty-fragment", {
+            .child(html!("img-ui", {
+                .property("path", "jig/play/design-grid.svg")
+                .style("height", "100%")
+            }))
+            // rendering stickers manually so that video options can be passed in
             .children_signal_vec(state.base.stickers.list
                 .signal_vec_cloned()
                 .enumerate()

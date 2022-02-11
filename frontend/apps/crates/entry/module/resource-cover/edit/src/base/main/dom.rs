@@ -9,6 +9,10 @@ use std::rc::Rc;
 impl DomRenderable for Main {
     fn render(state: Rc<Main>) -> Dom {
         html!("empty-fragment", {
+            .child(html!("img-ui", {
+                .property("path", "jig/play/design-grid.svg")
+                .style("height", "100%")
+            }))
             .child(render_stickers(state.base.stickers.clone()))
         })
     }
