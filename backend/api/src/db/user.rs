@@ -123,9 +123,24 @@ select user_id              as "id!",
     organization,
     persona                 as "persona!: Vec<String>",
     location,
-    array(select subject_id from user_subject where user_subject.user_id = "user".id) as "subjects!: Vec<Uuid>",
-    array(select affiliation_id from user_affiliation where user_affiliation.user_id = "user".id) as "affiliations!: Vec<Uuid>",
-    array(select age_range_id from user_age_range where user_age_range.user_id = "user".id) as "age_ranges!: Vec<Uuid>"
+    array(
+        select subject.display_name
+        from subject
+        inner join user_subject on subject.subject_id = user_subject.subject_id
+        where user_subject.user_id = "user".id
+    ) as "subjects!: Vec<String>",
+    array(
+        select affiliation.display_name
+        from affiliation
+        inner join user_affiliation on affiliation.id = user_affiliation.affiliation_id
+        where user_affiliation.user_id = "user".id
+    ) as "affiliations!: Vec<String>",
+    array(
+        select age_range.display_name
+        from age_range
+        inner join user_age_range on age_range.id = user_age_range.age_range_id
+        where user_age_range.user_id = "user".id
+    ) as "age_ranges!: Vec<String>"
 from "user"
     inner join user_profile on "user".id = user_profile.user_id
     inner join user_email using(user_id)
@@ -185,9 +200,9 @@ where
                 persona: row.persona,
                 city: city.map(|c| c.into()),
                 country: country.map(|c| c.into()),
-                subjects: row.subjects.into_iter().map(SubjectId).collect(),
-                age_ranges: row.age_ranges.into_iter().map(AgeRangeId).collect(),
-                affiliations: row.affiliations.into_iter().map(AffiliationId).collect(),
+                subjects: row.subjects,
+                age_ranges: row.age_ranges,
+                affiliations: row.affiliations,
             }
         })
         .collect())
