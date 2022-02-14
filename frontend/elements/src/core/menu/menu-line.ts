@@ -109,6 +109,10 @@ export class _ extends LitElement {
     @property({ type: Boolean, reflect: true })
     active: boolean = false;
 
+    firstUpdated() {
+        this.tabIndex = 0;
+    }
+
     render() {
         const { icon, customLabel, active } = this;
         let { hover } = this;

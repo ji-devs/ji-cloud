@@ -24,9 +24,14 @@ impl Sprite {
     pub fn new(
         raw: &RawSprite,
         on_transform_finished: Option<impl Fn(Transform) + 'static>,
+        on_blur: Option<impl Fn() + 'static>,
     ) -> Self {
         let raw = raw.clone();
-        let transform_callbacks = TransformCallbacks::new(on_transform_finished, None::<fn()>);
+        let transform_callbacks = TransformCallbacks::new(
+            on_transform_finished,
+            None::<fn()>,
+            on_blur
+        );
         Self {
             image: Mutable::new(raw.image),
             transform: Rc::new(TransformState::new(

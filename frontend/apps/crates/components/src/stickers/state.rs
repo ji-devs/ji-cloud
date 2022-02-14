@@ -56,6 +56,9 @@ impl Sticker {
                 Some(clone!(stickers => move |_| {
                     stickers.call_change();
                 })),
+                Some(clone!(stickers => move || {
+                    stickers.deselect();
+                })),
             ))),
             RawSticker::Text(text) => Self::Text(Rc::new(Text::new(
                 stickers.text_editor.clone(),
@@ -63,12 +66,16 @@ impl Sticker {
                 Some(clone!(stickers => move |_| {
                     stickers.call_change();
                 })),
+                Some(clone!(stickers => move || {
+                    stickers.deselect();
+                })),
             ))),
             RawSticker::Video(video) => Self::Video(Rc::new(Video::new(
                 video,
                 Some(clone!(stickers => move |_| {
                     stickers.call_change();
                 })),
+                None::<fn()>
             ))),
         }
     }

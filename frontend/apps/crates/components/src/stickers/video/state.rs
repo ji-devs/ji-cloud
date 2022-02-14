@@ -21,12 +21,17 @@ impl Video {
     pub fn new(
         video: &RawVideo,
         on_transform_finished: Option<impl Fn(Transform) + 'static>,
+        on_blur: Option<impl Fn() + 'static>,
     ) -> Self {
         let video = video.clone();
         let is_playing = Mutable::new(false);
         let playing_started = Mutable::new(false);
 
-        let transform_callbacks = TransformCallbacks::new(on_transform_finished, None::<fn()>);
+        let transform_callbacks = TransformCallbacks::new(
+            on_transform_finished,
+            None::<fn()>,
+            on_blur
+        );
         Self {
             host: Mutable::new(video.host.clone()),
             transform: Rc::new(TransformState::new(

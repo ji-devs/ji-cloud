@@ -31,6 +31,9 @@ export class TransformBox extends LitElement {
     static get styles() {
         return [
             css`
+                :host(:focus) {
+                    outline: none;
+                }
                 svg,
                 img-ui,
                 #menu-btn {
@@ -104,6 +107,7 @@ export class TransformBox extends LitElement {
     }
 
     firstUpdated(_changedProperties: any) {
+        this.tabIndex = 0;
         this.updateMenuButtonLocation();
     }
 

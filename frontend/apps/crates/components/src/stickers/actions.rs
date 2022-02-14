@@ -87,6 +87,9 @@ impl<T: AsSticker> Stickers<T> {
             Some(clone!(_self => move |_| {
                 _self.call_change();
             })),
+            Some(clone!(_self => move || {
+                _self.deselect();
+            })),
         )))));
     }
 
@@ -97,6 +100,9 @@ impl<T: AsSticker> Stickers<T> {
             Some(clone!(_self => move |_| {
                 _self.call_change();
             })),
+            Some(clone!(_self => move || {
+                _self.deselect();
+            })),
         )))));
     }
 
@@ -106,6 +112,7 @@ impl<T: AsSticker> Stickers<T> {
             Some(clone!(_self => move |_| {
                 _self.call_change();
             })),
+            None::<fn()>
         )))));
     }
 

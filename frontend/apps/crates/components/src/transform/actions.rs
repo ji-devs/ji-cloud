@@ -1,14 +1,43 @@
+use std::rc::Rc;
+
 use super::state::*;
+use dominator::clone;
 use utils::drag::Drag;
 
 use utils::{math, prelude::*, resize::get_resize_info};
+use wasm_bindgen_futures::spawn_local;
+use web_sys::HtmlElement;
 
 //really this should be a min size, depends on the artwork
 //but this will do for now
 //the idea is we can't let them scale down so much that the controls look weird / dissapear
 const MIN_SCALE_PERC: f64 = 0.1;
 
+
+pub fn focus_within(elem: &HtmlElement) -> bool {
+    elem.matches(":focus-within").unwrap_ji()
+}
+
 impl TransformState {
+    pub(super) fn on_focus_out(self: &Rc<Self>, main_elem: &HtmlElement) {
+        let state = self;
+        spawn_local(clone!(state, main_elem => async move {
+            // give a chance for the overlay to get focused
+            gloo_timers::future::TimeoutFuture::new(0).await;
+
+            let drag_focused = match &*state.overlay_drag_elem.borrow() {
+                None => false,
+                Some(overlay_drag_elem) => focus_within(overlay_drag_elem),
+            };
+
+            if !focus_within(&main_elem) && !drag_focused {
+                if let Some(on_blur) = &state.callbacks.on_blur {
+                    (on_blur) ();
+                }
+            };
+        }))
+    }
+
     pub fn set_to_center(&self) {
         let transform = &mut self.transform.lock_mut();
         let resize_info = get_resize_info();

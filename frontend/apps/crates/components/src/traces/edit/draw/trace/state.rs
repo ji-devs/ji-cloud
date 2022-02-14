@@ -46,6 +46,7 @@ impl DrawTrace {
                         on_change_cb();
                     }),
                     None::<fn()>,
+                    None::<fn()>,
                 ),
             )),
             shape: Mutable::new(raw.shape.into()),

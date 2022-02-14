@@ -1,9 +1,7 @@
 use std::rc::Rc;
 
 use dominator::clone;
-use js_sys::Reflect;
 use utils::unwrap::UnwrapJiExt;
-use wasm_bindgen::{JsValue, JsCast};
 use wasm_bindgen_futures::spawn_local;
 use web_sys::HtmlElement;
 
@@ -29,12 +27,5 @@ impl CategoriesInput {
 }
 
 fn focus_within(elem: &HtmlElement) -> bool {
-    let matches_method = Reflect::get(
-        &elem,
-        &JsValue::from_str("matches")
-    ).unwrap_ji();
-    let arg = &JsValue::from_str(":focus-within");
-    let matches_method = matches_method.dyn_ref::<js_sys::Function>().unwrap_ji();
-    let result = matches_method.call1(&elem, arg).unwrap_ji();
-    result.as_bool().unwrap_ji()
+    elem.matches(":focus-within").unwrap_ji()
 }

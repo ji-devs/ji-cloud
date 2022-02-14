@@ -23,6 +23,7 @@ impl Text {
         editor: Rc<TextEditorState>,
         text: &RawText,
         on_transform_finished: Option<impl Fn(Transform) + 'static>,
+        on_blur: Option<impl Fn() + 'static>,
     ) -> Self {
         let text = text.clone();
         let is_editing = Mutable::new(false);
@@ -33,6 +34,7 @@ impl Text {
             Some(clone!(is_editing => move || {
                 is_editing.set_neq(true)
             })),
+            on_blur
         );
         Self {
             value: Mutable::new(text.value),

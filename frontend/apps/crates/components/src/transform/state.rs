@@ -2,6 +2,7 @@ use futures_signals::signal::{Mutable, Signal, SignalExt};
 
 use shared::domain::jig::module::body::Transform;
 use std::cell::RefCell;
+use std::rc::Rc;
 use utils::{drag::Drag, math::bounds, prelude::*, resize::get_resize_info};
 use utils::{
     math::{transform_signals, BoundsF64, OobbF64},
@@ -9,7 +10,7 @@ use utils::{
 };
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
-use web_sys::DomRect;
+use web_sys::{DomRect, HtmlElement};
 
 pub struct TransformState {
     pub size: Mutable<Option<(f64, f64)>>,
@@ -24,21 +25,25 @@ pub struct TransformState {
     pub(super) alt_pressed: RefCell<bool>,
     pub(super) dom_ref: RefCell<Option<TransformBoxElement>>,
     pub(super) callbacks: TransformCallbacks,
+    pub(super) overlay_drag_elem: Rc<RefCell<Option<HtmlElement>>>,
 }
 
 pub struct TransformCallbacks {
     pub on_action_finished: Option<Box<dyn Fn(Transform)>>,
     pub on_double_click: Option<Box<dyn Fn()>>,
+    pub on_blur: Option<Box<dyn Fn()>>,
 }
 
 impl TransformCallbacks {
     pub fn new(
         on_action_finished: Option<impl Fn(Transform) + 'static>,
         on_double_click: Option<impl Fn() + 'static>,
+        on_blur: Option<impl Fn() + 'static>,
     ) -> Self {
         Self {
             on_action_finished: on_action_finished.map(|f| Box::new(f) as _),
             on_double_click: on_double_click.map(|f| Box::new(f) as _),
+            on_blur: on_blur.map(|f| Box::new(f) as _),
         }
     }
 }
@@ -81,6 +86,7 @@ impl TransformState {
             menu_pos: Mutable::new(None),
             callbacks,
             dom_ref: RefCell::new(None),
+            overlay_drag_elem: Rc::new(RefCell::new(None)),
         }
     }
 

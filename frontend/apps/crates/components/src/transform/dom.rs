@@ -1,12 +1,12 @@
 use super::state::*;
 use crate::overlay::handle::OverlayHandle;
+use crate::transform::actions::focus_within;
 use dominator::{clone, html, with_node, Dom};
 use futures_signals::signal::SignalExt;
 use std::rc::Rc;
 use utils::prelude::*;
 use utils::resize::resize_info_signal;
 use web_sys::HtmlElement;
-
 use wasm_bindgen::JsCast;
 
 pub fn render_transform(
@@ -91,7 +91,18 @@ pub fn render_transform(
                 .global_event(clone!(state => move |evt:events::MouseMove| {
                     state.mouse_move(evt.x() as i32, evt.y() as i32);
                 }))
-
+                .with_node!(elem => {
+                    .event(clone!(state, elem => move |_: events::FocusOut| {
+                        state.on_focus_out(&elem);
+                    }))
+                })
+                .after_inserted(|elem| {
+                    wasm_bindgen_futures::spawn_local(clone!(elem => async move {
+                        gloo_timers::future::TimeoutFuture::new(0).await;
+                        // automatically focus so that blur works
+                        let _ = elem.focus();
+                    }));
+                })
             })
         )
         .child_signal(
@@ -105,14 +116,29 @@ pub fn render_transform(
                                 html!("empty-fragment", {
                                     .apply(OverlayHandle::lifecycle(
                                         clone!(pos, state, get_menu_contents => move || {
-                                            html!("overlay-drag", {
-                                                .property("target", web_sys::DomRect::new_with_x_and_y_and_width_and_height(pos.0 + 32.0, pos.1, 1.0, 1.0).unwrap_ji())
-                                                .child(html!("menu-container", {
-                                                    .child((get_menu_contents.as_ref())())
-                                                }))
-                                                .event(clone!(state => move |_evt:events::Close| {
-                                                    state.menu_pos.set(None);
-                                                }))
+                                            html!("overlay-drag" => HtmlElement, {
+                                                .with_node!(elem => {
+                                                    .property("target", web_sys::DomRect::new_with_x_and_y_and_width_and_height(pos.0 + 32.0, pos.1, 1.0, 1.0).unwrap_ji())
+                                                    .child(html!("menu-container", {
+                                                        .child((get_menu_contents.as_ref())())
+                                                    }))
+                                                    .event(clone!(state => move |_evt:events::Close| {
+                                                        state.menu_pos.set(None);
+                                                    }))
+                                                    .event(clone!(state, elem => move |_: events::FocusOut| {
+                                                        if !focus_within(&elem) {
+                                                            if let Some(on_blur) = &state.callbacks.on_blur {
+                                                                (on_blur) ();
+                                                            }
+                                                        };
+                                                    }))
+                                                    .after_inserted(clone!(state => move |elem| {
+                                                        *state.overlay_drag_elem.borrow_mut() = Some(elem);
+                                                    }))
+                                                    .after_removed(clone!(state => move|_|{
+                                                        *state.overlay_drag_elem.borrow_mut() = None;
+                                                    }))
+                                                })
                                             })
                                         })
                                     ))
