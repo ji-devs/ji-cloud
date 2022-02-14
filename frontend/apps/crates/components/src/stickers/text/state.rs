@@ -34,7 +34,13 @@ impl Text {
             Some(clone!(is_editing => move || {
                 is_editing.set_neq(true)
             })),
-            on_blur
+            on_blur.map(clone!(is_editing => move|on_blur| {
+                move || {
+                    if !is_editing.get() {
+                        on_blur();
+                    }
+                }
+            }))
         );
         Self {
             value: Mutable::new(text.value),
