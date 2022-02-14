@@ -451,6 +451,40 @@ pub enum AudioBackground {
     Jigzi2 = 3,
     #[allow(missing_docs)]
     Jigzi3 = 4,
+
+    // legacy only background audio
+    #[allow(missing_docs)]
+    LegacyCuckooToYou = 101,
+    #[allow(missing_docs)]
+    LegacyFirstEtude = 102,
+    #[allow(missing_docs)]
+    LegacyHanerotHalalu = 103,
+    #[allow(missing_docs)]
+    LegacyIslandRomp = 104,
+    #[allow(missing_docs)]
+    LegacyJiTap = 105,
+    #[allow(missing_docs)]
+    LegacyMaozTzur = 106,
+    #[allow(missing_docs)]
+    LegacyModehAni = 107,
+    #[allow(missing_docs)]
+    LegacyMonkeyBars = 108,
+    #[allow(missing_docs)]
+    LegacyMorningZoo = 109,
+    #[allow(missing_docs)]
+    LegacyNapTime = 110,
+    #[allow(missing_docs)]
+    LegacyPlaylandMarch = 111,
+    #[allow(missing_docs)]
+    LegacyShehechiyanu = 112,
+    #[allow(missing_docs)]
+    LegacySunAndNoClouds = 113,
+    #[allow(missing_docs)]
+    LegacyTeddysBear = 114,
+    #[allow(missing_docs)]
+    LegacyWanderingWalrus = 115,
+    #[allow(missing_docs)]
+    LegacyWindupLullaby = 116,
 }
 
 impl AudioBackground {

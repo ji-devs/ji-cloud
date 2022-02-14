@@ -142,6 +142,22 @@ impl From<jig::AudioBackground> for AudioPath<'_> {
             jig::AudioBackground::Jigzi1 => "music-loop/jigzi1.mp3",
             jig::AudioBackground::Jigzi2 => "music-loop/jigzi2.mp3",
             jig::AudioBackground::Jigzi3 => "music-loop/jigzi3.mp3",
+            jig::AudioBackground::LegacyCuckooToYou => "music-loop/cuckoo-to-you.mp3",
+            jig::AudioBackground::LegacyFirstEtude => "music-loop/first-etude.mp3",
+            jig::AudioBackground::LegacyHanerotHalalu => "music-loop/hanerot-halalu.mp3",
+            jig::AudioBackground::LegacyIslandRomp => "music-loop/island-romp.mp3",
+            jig::AudioBackground::LegacyJiTap => "music-loop/ji-tap.mp3",
+            jig::AudioBackground::LegacyMaozTzur => "music-loop/maoz-tzur.mp3",
+            jig::AudioBackground::LegacyModehAni => "music-loop/modeh-ani.mp3",
+            jig::AudioBackground::LegacyMonkeyBars => "music-loop/monkey-bars.mp3",
+            jig::AudioBackground::LegacyMorningZoo => "music-loop/morning-zoo.mp3",
+            jig::AudioBackground::LegacyNapTime => "music-loop/nap-time.mp3",
+            jig::AudioBackground::LegacyPlaylandMarch => "music-loop/playland-march.mp3",
+            jig::AudioBackground::LegacyShehechiyanu => "music-loop/shehechiyanu.mp3",
+            jig::AudioBackground::LegacySunAndNoClouds => "music-loop/sun-and-no-clouds.mp3",
+            jig::AudioBackground::LegacyTeddysBear => "music-loop/teddys-bear.mp3",
+            jig::AudioBackground::LegacyWanderingWalrus => "music-loop/wandering-walrus.mp3",
+            jig::AudioBackground::LegacyWindupLullaby => "music-loop/windup-lullaby.mp3",
         }))
     }
 }
