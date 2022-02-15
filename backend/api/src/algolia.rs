@@ -61,6 +61,7 @@ struct BatchJig<'a> {
     plays: &'a i64,
     published_at: Option<DateTime<Utc>>,
     translated_description: &'a Vec<String>,
+    blocked: &'a bool,
 }
 
 #[derive(Serialize)]
@@ -315,7 +316,8 @@ select jig.id,
             from jig_play_count "jpc"
             where jpc.jig_id = jig.id
         )                                                                                                           as "plays!",
-        published_at                                                                                                as "published_at"
+        published_at                                                                                                as "published_at",
+        blocked                                                                                                     as "blocked!"
 from jig
          inner join jig_data on live_id = jig_data.id
          inner join jig_admin_data "jad" on jad.jig_id = jig.id
@@ -368,6 +370,7 @@ limit 100 for no key update skip locked;
                 plays: &row.plays,
                 published_at: row.published_at,
                 translated_description: &translation,
+                blocked: &row.blocked
             })
             .expect("failed to serialize BatchJig to json")
             {
@@ -625,6 +628,25 @@ fn filters_for_ints_or<T: Into<i64> + Copy>(
     }
 }
 
+/// OR PrivacyLevel then append them to AND filter for a named facet
+fn filters_for_privacy(filters: &mut Vec<Box<dyn AndFilterable>>, privacy_level: &[PrivacyLevel]) {
+    let mut or_filters = algolia::filter::OrFilter::<TagFilter> { filters: vec![] };
+
+    for v in privacy_level {
+        let v: PrivacyLevel = (*v).into();
+        // Push onto OR filter
+        or_filters.filters.push(CommonFilter {
+            filter: TagFilter(v.as_str().to_owned()),
+            invert: false,
+        })
+    }
+
+    if !(or_filters.filters.is_empty()) {
+        // append all OR filters to AND filter
+        filters.push(Box::new(or_filters));
+    }
+}
+
 /// Filter with ordered priority.
 ///
 /// If using priority scoring, this can only rank the first 62 items.
@@ -820,7 +842,6 @@ impl Client {
         &self,
         query: &str,
         page: Option<u32>,
-        privacy_level: Option<PrivacyLevel>,
         language: Option<String>,
         age_ranges: &[AgeRangeId],
         affiliations: &[AffiliationId],
@@ -832,6 +853,8 @@ impl Client {
         jig_focus: Option<JigFocus>,
         other_keywords: Option<String>,
         translated_keywords: Option<String>,
+        privacy_level: &[PrivacyLevel],
+        blocked: Option<bool>,
     ) -> anyhow::Result<Option<(Vec<Uuid>, u32, u64)>> {
         let mut and_filters = algolia::filter::AndFilter { filters: vec![] };
 
@@ -870,18 +893,21 @@ impl Client {
             }))
         }
 
-        if let Some(privacy_level) = privacy_level {
-            and_filters.filters.push(Box::new(CommonFilter {
-                filter: TagFilter(privacy_level.as_str().to_owned()),
-                invert: false,
-            }))
-        }
-
         if let Some(language) = language {
             and_filters.filters.push(Box::new(CommonFilter {
                 filter: FacetFilter {
                     facet_name: "language".to_owned(),
                     value: language,
+                },
+                invert: false,
+            }))
+        }
+
+        if let Some(blocked) = blocked {
+            and_filters.filters.push(Box::new(CommonFilter {
+                filter: FacetFilter {
+                    facet_name: "blocked".to_owned(),
+                    value: blocked.to_string(),
                 },
                 invert: false,
             }))
@@ -906,6 +932,7 @@ impl Client {
             }))
         }
 
+        filters_for_privacy(&mut and_filters.filters, privacy_level);
         filters_for_ids_or(&mut and_filters.filters, "age_ranges", age_ranges);
         filters_for_ids_or(&mut and_filters.filters, "affiliations", affiliations);
         filters_for_ids_or(&mut and_filters.filters, "resource_types", resource_types);

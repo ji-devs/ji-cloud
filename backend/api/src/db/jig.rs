@@ -539,9 +539,13 @@ pub async fn browse(
     author_id: Option<Uuid>,
     jig_focus: Option<JigFocus>,
     draft_or_live: Option<DraftOrLive>,
+    privacy_level: Vec<PrivacyLevel>,
+    blocked: Option<bool>,
     page: i32,
 ) -> sqlx::Result<(Vec<JigResponse>, u64)> {
     let mut txn = db.begin().await?;
+
+    let privacy_level: Vec<i16> = privacy_level.iter().map(|x| *x as i16).collect();
 
     let jig = sqlx::query!(
         //language=SQL
@@ -552,16 +556,19 @@ pub async fn browse(
         left join jig_admin_data "admin" on admin.jig_id = jig.id
         left join jig_data "jig_dt" on jig_dt.id = jig.draft_id
         left join jig_data "jig_tt" on jig_tt.id = jig.live_id
-    where blocked = false
-        and (jig_dt.draft_or_live is not null and jig_tt.draft_or_live is not null)
+    where (jig_dt.draft_or_live is not null and jig_tt.draft_or_live is not null)
         and ((jig_dt.draft_or_live = $3 or $3 is null)
               or (jig_tt.draft_or_live = $3 or $3 is null))
         and (author_id = $1 or $1 is null)
         and (jig_focus = $2 or $2 is null)
+        and (blocked = $5 or $5 is null)
+        and (jig_dt.privacy_level = any($4) or jig_tt.privacy_level = any($4) or $4 = '{}')
         "#,
         author_id,
         jig_focus.map(|it| it as i16),
-        draft_or_live.map(|it| it as i16)
+        draft_or_live.map(|it| it as i16),
+        &privacy_level[..],
+        blocked,
     )
     .fetch_all(&mut txn)
     .await?;
@@ -1016,11 +1023,14 @@ where creator_id is not distinct from $1
 // `None` here means do not filter.
 pub async fn filtered_count(
     db: &PgPool,
-    privacy_level: Option<PrivacyLevel>,
+    privacy_level: Vec<PrivacyLevel>,
+    blocked: Option<bool>,
     author_id: Option<Uuid>,
     jig_focus: Option<JigFocus>,
     draft_or_live: Option<DraftOrLive>,
 ) -> sqlx::Result<u64> {
+    let privacy_level: Vec<i16> = privacy_level.iter().map(|x| *x as i16).collect();
+
     sqlx::query!(
         //language=SQL
         r#"
@@ -1029,16 +1039,18 @@ from jig
 left join jig_admin_data "admin" on admin.jig_id = jig.id
 left join jig_data "jig_dt" on jig_dt.id = jig.draft_id
 left join jig_data "jig_tt" on jig_tt.id = jig.live_id
-where (jig_dt.privacy_level = $1 or $1 is null)
-    and (author_id = $2 or $2 is null)
-    and (jig_focus = $3 or $3 is null)
-    and ((jig_dt.draft_or_live = $4 or $4 is null)
-    or (jig_tt.draft_or_live = $4 or $4 is null))
+where (author_id = $1 or $1 is null)
+    and (jig_focus = $2 or $2 is null)
+    and ((jig_dt.draft_or_live = $3 or $3 is null)
+    or (jig_tt.draft_or_live = $3 or $3 is null))
+    and (jig_dt.privacy_level = any($4) or jig_tt.privacy_level = any($4) or $4 = '{}')
+    and (blocked = $5 or $5 is null)
 "#,
-        privacy_level.map(|it| it as i16),
         author_id,
         jig_focus.map(|it| it as i16),
-        draft_or_live.map(|it| it as i16)
+        draft_or_live.map(|it| it as i16),
+        &privacy_level[..],
+        blocked
     )
     .fetch_one(db)
     .await
@@ -1469,40 +1481,23 @@ select exists (
     Ok(exists)
 }
 
-/////////
-// Auth based on user scope or jig ownership
-
-pub async fn authz_list(
-    db: &PgPool,
-    user_id: Uuid,
-    author_id: Option<Uuid>,
-) -> Result<(), error::Auth> {
-    let scopes: &[_] = if author_id == Some(user_id) {
-        &[
-            UserScope::Admin as i16,
-            UserScope::AdminJig as i16,
-            UserScope::ManageSelfJig as i16,
-        ][..]
-    } else {
-        &[UserScope::Admin as i16, UserScope::AdminJig as i16][..]
-    };
-
+pub async fn is_admin(db: &PgPool, user_id: Uuid) -> Result<bool, error::Auth> {
     let authed = sqlx::query!(
         r#"
 select exists(select 1 from user_scope where user_id = $1 and scope = any($2)) as "authed!"
 "#,
         user_id,
-        scopes,
+        &[UserScope::Admin as i16, UserScope::AdminJig as i16][..],
     )
     .fetch_one(db)
     .await?
     .authed;
 
     if !authed {
-        return Err(error::Auth::Forbidden);
+        return Ok(false);
     }
 
-    Ok(())
+    Ok(true)
 }
 
 pub async fn authz(db: &PgPool, user_id: Uuid, jig_id: Option<JigId>) -> Result<(), error::Auth> {

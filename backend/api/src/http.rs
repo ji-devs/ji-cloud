@@ -217,6 +217,7 @@ pub fn build(
         };
         app.app_data(Data::from(jwk_verifier.clone()))
             .wrap(cors::get(local_insecure))
+            // .wrap(actix_web::middleware::Logger::default())
             .wrap(TracingLogger::<JigziSpanBuilder>::new())
             .wrap_fn(log_ise)
             .app_data(

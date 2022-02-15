@@ -268,6 +268,8 @@ where
                     error::ServiceSession::DisabledService(it).into()
                 }
                 error::Service::Forbidden => error::VerifyEmail::Forbidden,
+
+                error::Service::ResourceNotFound => error::VerifyEmail::ResourceNotFound,
             })?;
 
             txn.commit().await?;
@@ -621,6 +623,8 @@ async fn verify_email_reset(
                     error::ServiceSession::DisabledService(it).into()
                 }
                 error::Service::Forbidden => error::VerifyEmail::Forbidden,
+
+                error::Service::ResourceNotFound => error::VerifyEmail::Forbidden,
             })?;
 
             txn.commit().await?;

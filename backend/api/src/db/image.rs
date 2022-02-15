@@ -1,9 +1,6 @@
 use super::{recycle_metadata, recycle_tags};
-use crate::translate::multi_translation;
-use anyhow::Context;
 use chrono::{DateTime, Utc};
 use futures::stream::BoxStream;
-use serde_json::json;
 use shared::domain::{
     category::CategoryId,
     image::{ImageId, ImageKind, ImageMetadata},
