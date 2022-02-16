@@ -11,7 +11,7 @@ import {
 const STR_BASIC_INFO = "Basic info";
 const STR_PROFILE_IMAGE = "Profile image";
 const STR_LOCATION = "Location";
-const STR_TEACHING_SETTINGS = "Teaching settings";
+const STR_JIGZI_FILTERS = "Jigzi Filters";
 const STR_MY_PROFILE = "My Profile";
 
 const STR_EMAIL = "Email";
@@ -25,6 +25,7 @@ const STR_SCHOOL_ORGANIZATION = "School/Organization";
 const STR_RELEVANT_AGE_GROUPS = "Relevant age groups";
 const STR_RELEVANT_SUBJECTS = "Relevant subjects";
 const STR_AFFILIATION = "Affiliation";
+const STR_FILTER_MESSAGE = "A note about our filters: Ji believes in making Jewish education accessible to ALL Jews, of all ages and affiliations. If you would like to see only what Jigzi tags as relevant to you, use these filters to fine-tune your search results. If you would like to see ALL our images, resources and JIGs leave these blank.";
 
 @customElement("user-profile")
 export class _ extends LitElement {
@@ -250,8 +251,8 @@ export class _ extends LitElement {
                     >
                     <a
                         @click="${this.scrollToSection}"
-                        href="#teaching-settings"
-                        >${STR_TEACHING_SETTINGS}</a
+                        href="#jigzi-filters"
+                        >${STR_JIGZI_FILTERS}</a
                     >
                 </nav>
             </aside>
@@ -305,16 +306,17 @@ export class _ extends LitElement {
                             <slot name="location"></slot>
                         </label>
                         <label>
+                            <span>${STR_SCHOOL_ORGANIZATION}</span>
+                            <slot name="school-organization"></slot>
+                        </label>
+                        <label>
                             <span>${STR_PREFERRED_LANGUAGE}</span>
                             <slot name="preferred-language"></slot>
                         </label>
                     </section>
-                    <section id="teaching-settings">
-                        <h2>${STR_TEACHING_SETTINGS}</h2>
-                        <label>
-                            <span>${STR_SCHOOL_ORGANIZATION}</span>
-                            <slot name="school-organization"></slot>
-                        </label>
+                    <section id="jigzi-filters">
+                        <h2>${STR_JIGZI_FILTERS}</h2>
+                        <p>${STR_FILTER_MESSAGE}</p>
                         <label class="tags-label">
                             <span>${STR_RELEVANT_AGE_GROUPS}</span>
                             <div class="tags-wrapper">

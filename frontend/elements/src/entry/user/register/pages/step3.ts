@@ -16,10 +16,11 @@ const STR_TITLE = "Sign Up - Step 3";
 const STR_SUBTITLE =
     "We want to provide content that is tailored to your needs and interests.";
 const STR_SUBSUBTITLE =
-    "Select as many as you like now. You can always edit this later under Teaching Settings in your profile page.";
+    "Select as many as you like now. You can always edit this later under Jigzi Filters in your profile page.";
 const STR_AGES_LABEL = "I'm interested in content for this age group:";
 const STR_AFFILIATIONS_LABEL = "I want to see content for these affiliations:";
 const STR_SUBJECTS_LABEL = "I'm interested in teaching these subjects:";
+const STR_FILTER_MESSAGE = "A note about our filters: Ji believes in making Jewish education accessible to ALL Jews, of all ages and affiliations. If you would like to see only what Jigzi tags as relevant to you, use these filters to fine-tune your search results. If you would like to see ALL our images, resources and JIGs leave these blank.";
 
 @customElement("page-register-step3")
 export class _ extends LitElement {
@@ -78,6 +79,8 @@ export class _ extends LitElement {
                 <h4 class="subtitle">
                     ${STR_SUBTITLE}<br />${STR_SUBSUBTITLE}
                 </h4>
+
+                <p>${STR_FILTER_MESSAGE}</p>
 
                 <div class="grid">
                     <div class="ages card-grey">
