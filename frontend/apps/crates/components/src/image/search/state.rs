@@ -14,7 +14,7 @@ use std::{cell::RefCell, collections::HashSet, rc::Rc};
 
 pub const RECENT_COUNT: u16 = 12;
 const STR_SELECT_IMAGE: &str = "Select image";
-const STR_SELECT_BACKGROUND: &str = "Select background";
+const STR_SELECT_BACKGROUND: &str = "Select a background";
 const STR_SELECT_OVERLAY: &str = "Search a shape or number";
 
 pub struct State {
