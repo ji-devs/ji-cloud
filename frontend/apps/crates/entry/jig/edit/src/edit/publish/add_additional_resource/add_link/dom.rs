@@ -1,9 +1,11 @@
 use std::{rc::Rc, str::FromStr};
 
-
-use dominator::{Dom, clone, html, with_node};
-use futures_signals::{map_ref, signal::{Signal, not}};
-use url::Url;
+use dominator::{clone, html, with_node, Dom};
+use futures_signals::{
+    map_ref,
+    signal::{not, Signal},
+};
+use url::{ParseError, Url};
 use utils::events;
 use web_sys::HtmlTextAreaElement;
 
@@ -43,24 +45,30 @@ impl AddLink {
                     .with_node!(elem => {
                         .property("slot", "textarea")
                         .property("spellcheck", "false")
-                        .event(clone!(state, elem => move |_: events::Input| {
+                        .event(clone!(state, elem => move |_: events::Change| {
                             let val = elem.value().trim().to_string();
                             let url = Url::from_str(&val);
 
-                            if val.is_empty() || url.is_ok() {
-                                let _ = elem.remove_attribute("error");
-                            } else {
-                                let _ = elem.set_attribute("error", "");
-                            }
-
                             match url {
                                 Ok(url) => {
+                                    let _ = elem.remove_attribute("error");
                                     state.url.set(Some(url));
                                 },
-                                Err(_) => {
-                                    state.url.set(None);
+                                Err(err) => {
+                                    match err {
+                                        ParseError::RelativeUrlWithoutBase => {
+                                            let url_with_https = prepend_https_to_url(&val);
+                                            let _ = elem.remove_attribute("error");
+                                            elem.set_value(url_with_https.as_str());
+                                            state.url.set(Some(url_with_https));
+                                        },
+                                        _ => {
+                                            let _ = elem.set_attribute("error", "");
+                                            state.url.set(None);
+                                        },
+                                    }
                                 },
-                            };
+                            }
                         }))
                     })
                 }),
@@ -119,4 +127,12 @@ impl AddLink {
                 }
         }
     }
+}
+
+fn prepend_https_to_url(url: &str) -> Url {
+    let mut fixed_url_string = String::new();
+    fixed_url_string.push_str("https://");
+    fixed_url_string.push_str(&url);
+    let fixed_url = Url::from_str(&fixed_url_string).unwrap();
+    fixed_url
 }
