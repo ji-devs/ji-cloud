@@ -715,6 +715,7 @@ impl Client {
     pub async fn search_image(
         &self,
         query: &str,
+        kind: Option<ImageKind>,
         page: Option<u32>,
         is_premium: Option<bool>,
         is_published: Option<bool>,
@@ -742,6 +743,16 @@ impl Client {
                 invert: !is_premium,
             }))
         }
+
+        if let Some(image_kind) = kind {
+            filters.filters.push(Box::new(CommonFilter {
+                filter: FacetFilter {
+                    facet_name: "media_subkind".to_owned(),
+                    value: image_kind.to_str().to_owned(),
+                },
+                invert: false,
+            }))
+        };
 
         filters_for_ids_or(&mut filters.filters, "styles", styles);
         filters_for_ids_or(&mut filters.filters, "age_ranges", age_ranges);
