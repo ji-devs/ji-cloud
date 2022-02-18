@@ -144,6 +144,7 @@ async fn search(
     let (ids, pages, total_hits) = algolia
         .search_image(
             &query.q,
+            query.kind,
             query.page,
             query.is_premium,
             query.is_published,
