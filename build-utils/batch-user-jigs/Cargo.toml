@@ -10,6 +10,7 @@ edition = "2018"
 shared = { path = "../../shared/rust" }
 utils = { path = "../../frontend/apps/crates/utils" }
 components = { path = "../../frontend/apps/crates/components" }
+legacy_transcode = { path = "../legacy-player/transcode", package="transcode" }
 scan_fmt = "0.2.6"
 structopt = "0.3.25"
 simplelog = "0.11.1"

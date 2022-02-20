@@ -1,6 +1,9 @@
 use std::fs::File;
 use std::io::Write;
+use reqwest::Client;
 use scan_fmt::scan_fmt;
+
+use crate::src_manifest::SrcManifest;
 
 pub struct JigInfoLogLine {
     pub jig_id: String,
@@ -21,4 +24,5 @@ impl JigInfoLogLine {
     pub fn write_line<W: Write>(self: &Self, mut output: W) {
         writeln!(output, "{} {} {}", self.jig_id, self.game_id, self.game_hash).unwrap();
     }
+
 }

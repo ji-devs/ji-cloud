@@ -17,6 +17,26 @@ pub struct SrcManifestData {
     pub data: SrcManifest,
 }
 
+impl SrcManifestData {
+    pub async fn load_game_id(client: &reqwest::Client, game_id:&str) -> Self {
+        let text = client
+            .get(&Self::url(game_id))
+            .send()
+            .await
+            .unwrap()
+            .error_for_status()
+            .unwrap()
+            .text()
+            .await
+            .unwrap();
+
+        serde_json::from_str(&text).unwrap()
+    }
+
+    pub fn url(game_id:&str) -> String {
+        format!("https://storage.googleapis.com/ji-cloud-legacy-eu-001/games/{}/json/game.json", game_id)
+    }
+}
 #[derive(Deserialize, Debug)]
 pub struct SrcManifest {
     /// Base url of the amazon bucket
@@ -55,6 +75,25 @@ impl SrcManifest {
                 "en"
             }
         }
+    }
+
+    pub async fn load_game_id(client: &reqwest::Client, game_id:&str) -> Self {
+        let text = client
+            .get(&Self::url(game_id))
+            .send()
+            .await
+            .unwrap()
+            .error_for_status()
+            .unwrap()
+            .text()
+            .await
+            .unwrap();
+
+        serde_json::from_str(&text).unwrap()
+    }
+
+    pub fn url(game_id:&str) -> String {
+        format!("https://storage.googleapis.com/ji-cloud-legacy-eu-001/games/{}/json/game.json", game_id)
     }
 }
 

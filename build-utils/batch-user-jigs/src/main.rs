@@ -2,10 +2,12 @@
 mod context;
 use context::*;
 mod options;
+use legacy_transcode::src_manifest::{SrcManifest, SrcManifestData};
 use options::*;
 
+use shared::domain::jig::{AudioBackground, JigUpdateDraftDataRequest};
 use simplelog::*;
-use std::future::Future;
+use std::{future::Future, process::exit};
 use std::sync::Arc;
 use futures::stream::{FuturesUnordered, StreamExt};
 use dotenv::dotenv;
@@ -62,7 +64,7 @@ async fn main() {
 async fn get_futures(ctx:Arc<Context>) -> Vec<impl Future> {
     let mut futures = Vec::new();
 
-    async fn do_browse(ctx:&Context, page:usize) -> JigBrowseResponse {
+    async fn do_browse(ctx:&Context, page:u32) -> JigBrowseResponse {
         let url = format!("{}{}?authorId=me&jigFocus=modules&page={}&draftOrLive=draft", ctx.opts.get_remote_target().api_url(), endpoints::jig::Browse::PATH, page);
 
         let res = ctx.client
@@ -90,13 +92,18 @@ async fn get_futures(ctx:Arc<Context>) -> Vec<impl Future> {
             async move {
                 log::info!("loading jigs for page {}", page);
 
-                let JigBrowseResponse { jigs, ..} = do_browse(&ctx, 0).await;
+                let JigBrowseResponse { jigs, ..} = do_browse(&ctx, page).await;
 
                 for jig in jigs {
+                    if ctx.opts.update_background_music {
+                        update_background_music(ctx.clone(), jig.id).await;
+                    }
                     for module in jig.jig_data.modules {
                         log::info!("updating jig {} module {}!", jig.id.0.to_string(), module.id.0.to_string()); 
-                        // currently update is just to queue screenshot for each module in the jig
-                        call_screenshot_service(ctx.clone(), jig.id, module.id, module.kind).await;
+                        if ctx.opts.update_screenshots {
+                            // currently update is just to queue screenshot for each module in the jig
+                            call_screenshot_service(ctx.clone(), jig.id, module.id, module.kind).await;
+                        }
                     }
                 }
             }
@@ -107,6 +114,103 @@ async fn get_futures(ctx:Arc<Context>) -> Vec<impl Future> {
 }
 
 
+pub async fn update_background_music(ctx:Arc<Context>, jig_id: JigId) {
+    let jig_id_str = jig_id.0.to_string();
+    let game_id = ctx.legacy_lookup.get(&jig_id_str).unwrap();
+    log::info!("loading manifest at {}", SrcManifestData::url(game_id));
+    let manifest = SrcManifestData::load_game_id(&ctx.client, game_id).await.data;
+
+    if let Some(music_file) = manifest.structure.music_file {
+        let target_music_file = music_file.split('/').last().unwrap_or(&music_file);
+        let target_music_file = target_music_file.split('.').next().unwrap_or(&target_music_file);
+        let target_music_file = target_music_file.to_lowercase();
+        let target_music_file = target_music_file.trim();
+        if !target_music_file.is_empty() {
+            let target_enum:Option<AudioBackground> = if target_music_file.contains("silence") {
+                None
+            } else if target_music_file.contains("hanerothalalu") {
+                Some(AudioBackground::LegacyHanerotHalalu)
+            } else if target_music_file.contains("jitap") {
+                Some(AudioBackground::LegacyJiTap)
+            } else if target_music_file.contains("maoztzur") {
+                Some(AudioBackground::LegacyMaozTzur)
+            } else if target_music_file.contains("modehani") {
+                Some(AudioBackground::LegacyModehAni)
+            } else if target_music_file.contains("shehechiyanu") {
+                Some(AudioBackground::LegacyShehechiyanu)
+            } else if target_music_file.contains("cuckoo") {
+                Some(AudioBackground::LegacyCuckooToYou)
+            } else if target_music_file.contains("morning-zoo") {
+                Some(AudioBackground::LegacyMorningZoo)
+            } else if target_music_file.contains("playland-march") {
+                Some(AudioBackground::LegacyPlaylandMarch)
+            } else if target_music_file.contains("wandering-walrus") {
+                Some(AudioBackground::LegacyWanderingWalrus)
+            } else if target_music_file.contains("island-romp") {
+                Some(AudioBackground::LegacyIslandRomp)
+            } else if target_music_file.contains("monkey-bars") {
+                Some(AudioBackground::LegacyMonkeyBars)
+            } else if target_music_file.contains("sun-and-no-clouds") {
+                Some(AudioBackground::LegacySunAndNoClouds)
+            } else if target_music_file.contains("first-etude") {
+                Some(AudioBackground::LegacyFirstEtude)
+            } else if target_music_file.contains("teddys-bear") {
+                Some(AudioBackground::LegacyTeddysBear)
+            } else if target_music_file.contains("nap-time") {
+                Some(AudioBackground::LegacyNapTime)
+            } else if target_music_file.contains("windup-lullaby") {
+                Some(AudioBackground::LegacyWindupLullaby)
+            } else if target_music_file.contains("silence") {
+                Some(AudioBackground::LegacyWindupLullaby)
+            } else {
+                panic!("unsupported bg music file: {}", music_file)
+            };
+
+            // no need to set in the case of "silence"
+            if let Some(target_enum) = target_enum {
+                log::info!("updating background music in jig {} (game id: {}), music file: {}", jig_id_str, game_id, music_file); 
+    
+                let req = JigUpdateDraftDataRequest {
+                    audio_background: Some(Some(target_enum)),
+                    ..Default::default()
+                };
+
+                if !ctx.opts.dry_run {
+
+                    let path = endpoints::jig::UpdateDraftData::PATH.replace("{id}", &jig_id_str);
+                    let url = format!("{}{}", ctx.opts.get_remote_target().api_url(), path);
+                    let res = ctx.client
+                        .patch(&url)
+                        .header("Authorization", &format!("Bearer {}", ctx.token))
+                        .json(&req)
+                        .send()
+                        .await
+                        .unwrap();
+
+                    if !res.status().is_success() {
+                        log::error!("error code: {}, details: {:?}", res.status().as_str(), res);
+                        panic!("unable to update jig!"); 
+                    }
+
+                    let path = endpoints::jig::Publish::PATH.replace("{id}", &jig_id_str);
+                    let url = format!("{}{}", ctx.opts.get_remote_target().api_url(), path);
+                    let res = ctx.client
+                        .put(&url)
+                        .header("Authorization", &format!("Bearer {}", ctx.token))
+                        .header("content-length", 0)
+                        .send()
+                        .await
+                        .unwrap();
+
+                    if !res.status().is_success() {
+                        log::error!("error code: {}, details: {:?}", res.status().as_str(), res);
+                        panic!("unable to update jig!"); 
+                    }
+                }
+            }
+        }
+    }
+}
 pub async fn call_screenshot_service(ctx:Arc<Context>, jig_id: JigId, module_id: ModuleId, kind: ModuleKind) {
     #[derive(Deserialize)]
     struct ScreenshotResponse {

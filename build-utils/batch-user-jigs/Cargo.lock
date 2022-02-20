@@ -127,6 +127,7 @@ dependencies = [
  "structopt",
  "tokio",
  "tokio-util",
+ "transcode",
  "url",
  "utils",
  "uuid",
@@ -1683,6 +1684,8 @@ dependencies = [
  "serde_json",
  "serde_repr",
  "serde_with",
+ "strum",
+ "strum_macros",
  "thiserror",
  "url",
  "uuid",
@@ -1969,6 +1972,34 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1f4ed65637b8390770814083d20756f87bfa2c21bf2f110babdc5438351746e4"
 dependencies = [
  "lazy_static",
+]
+
+[[package]]
+name = "transcode"
+version = "0.1.0"
+dependencies = [
+ "cfg-if 1.0.0",
+ "components",
+ "csv",
+ "dotenv",
+ "flate2",
+ "futures",
+ "image",
+ "log",
+ "reqwest",
+ "scan_fmt",
+ "serde",
+ "serde_json",
+ "serde_repr",
+ "serde_with",
+ "shared",
+ "simplelog",
+ "structopt",
+ "tokio",
+ "tokio-util",
+ "url",
+ "utils",
+ "uuid",
 ]
 
 [[package]]

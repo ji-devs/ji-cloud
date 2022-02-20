@@ -9,6 +9,12 @@ pub struct Opts {
     #[structopt(long, parse(try_from_str), default_value = "0")]
     pub batch_size: usize,
 
+    #[structopt(long, parse(try_from_str), default_value = "false")]
+    pub update_screenshots: bool,
+
+    #[structopt(long, parse(try_from_str), default_value = "true")]
+    pub update_background_music: bool,
+
     /// debug mode 
     #[structopt(long, parse(try_from_str), default_value = "false")]
     pub debug: bool,
