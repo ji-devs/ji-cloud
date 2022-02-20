@@ -34,14 +34,14 @@ pub struct PuzzleGame {
     pub cutouts_ctx: CanvasRenderingContext2d,
     pub click_canvas: HtmlCanvasElement,
     pub click_ctx: CanvasRenderingContext2d,
-    pub items: Vec<Rc<PuzzleItem>>,
+    pub locked_items: RefCell<Vec<Rc<PuzzleItem>>>,
+    pub free_items: RefCell<Vec<Rc<PuzzleItem>>>,
     pub drag_index: Cell<Option<usize>> 
 }
 
 pub struct PuzzleItem {
     pub base: Rc<Base>,
     pub raw: RawPuzzleItem,
-    pub completed: Cell<bool>,
     pub orig_transform_matrix: Matrix4, 
     pub curr_transform_matrix: RefCell<Matrix4>,
     pub drag: RefCell<Option<Rc<Drag>>>,
@@ -83,9 +83,10 @@ impl Puzzle {
 impl PuzzlePreview {
     pub fn new(parent: &Puzzle, cutouts_canvas: HtmlCanvasElement, effects: ImageEffect) -> Rc<Self> {
         let game = PuzzleGame::new(parent, cutouts_canvas, effects);
-        for item in game.items.iter() {
+
+        game.with_all_items_ref(|item| {
             *item.curr_transform_matrix.borrow_mut() = Matrix4::identity();
-        }
+        });
 
         Rc::new(Self {
             game,
@@ -113,12 +114,12 @@ impl PuzzleGame {
 
         let click_ctx = get_2d_context(&click_canvas, None).unwrap_ji();
 
-        let items = parent.raw.items
+        let free_items = RefCell::new(parent.raw.items
             .iter()
             .map(|raw| {
                 PuzzleItem::new(parent.base.clone(), &effects, raw.clone())
             })
-            .collect();
+            .collect());
 
         let _self = Rc::new(Self { 
             base: parent.base.clone(),
@@ -128,7 +129,8 @@ impl PuzzleGame {
             cutouts_ctx,
             click_canvas,
             click_ctx,
-            items,
+            locked_items: RefCell::new(Vec::new()),
+            free_items,
             drag_index: Cell::new(None)
         });
 
@@ -147,7 +149,6 @@ impl PuzzleItem{
         Rc::new(Self {
             base,
             raw,
-            completed: Cell::new(false),
             orig_transform_matrix: orig_transform_matrix.clone(),
             curr_transform_matrix: RefCell::new(orig_transform_matrix),
             drag: RefCell::new(None),

@@ -49,6 +49,32 @@ impl Puzzle {
 
 impl PuzzleGame {
 
+    pub fn with_all_items_ref(&self, f: impl Fn(&PuzzleItem)) {
+        let locked_items = self.locked_items.borrow();
+        let free_items = self.free_items.borrow();
+
+        for item in locked_items.iter() {
+            f(item);
+        }
+
+
+        if let Some(active_index) = self.drag_index.get() {
+            for item in free_items
+                .iter()
+                .enumerate()
+                .filter(|(idx, item)| *idx != active_index)
+                .map(|(_, item)| item) {
+                    f(item);
+                }
+
+            f(&free_items[active_index]);
+        } else {
+            for item in free_items.iter() {
+                f(item);
+            }
+        }
+
+    }
     pub fn draw(&self, resize_info: &ResizeInfo) {
         let canvas = &self.cutouts_canvas;
         let ctx = &self.cutouts_ctx;
@@ -61,12 +87,12 @@ impl PuzzleGame {
 
         //draw the cutouts
         ctx.set_fill_style(&JsValue::from_str("black"));
-        for item in self.items.iter() {
+        for item in self.free_items.borrow().iter() {
             draw_single_shape(ctx, resize_info, &item.raw.hotspot.shape, );
         }
 
         //draw the items
-        for item in self.items.iter() {
+        self.with_all_items_ref(|item| {
             ctx.save();
 
             let mut mat = item.curr_transform_matrix.borrow().clone();
@@ -78,7 +104,7 @@ impl PuzzleGame {
             ctx.draw_image_with_html_image_element_and_dw_and_dh(&self.effects.image_element, 0.0, 0.0, resize_info.width, resize_info.height).unwrap_ji();
 
             ctx.restore();
-        }
+        });
     }
 
     //this is unfortunately expensive, not sure why though.
@@ -94,7 +120,7 @@ impl PuzzleGame {
         ctx.clear_rect(0.0, 0.0, resize_info.width, resize_info.height);
 
 
-        for (index, item) in self.items.iter().enumerate() {
+        for (index, item) in self.free_items.borrow().iter().enumerate() {
 
 
             let r = 0xFF & (index >> 16);
@@ -147,11 +173,8 @@ impl PuzzleGame {
             //we use alpha just to check if there _is_ a hit
             if a != 0 {
                 let index = ((r << 16) | (g << 8) | b) as usize;
-                let item = &self.items[index];
-                if !item.completed.get() {
-                    self.items[index].start_drag(x, y);
-                    self.drag_index.set(Some(index));
-                }
+                self.free_items.borrow()[index].start_drag(x, y);
+                self.drag_index.set(Some(index));
                 //log::info!("got hit! {}, mouse: {} {}, canvas: {} {}", index, x, y, canvas_x, canvas_y);
             } else {
                 //log::info!("not hit! mouse: {} {}, canvas: {} {}", x, y, canvas_x, canvas_y);
@@ -161,23 +184,21 @@ impl PuzzleGame {
 
     pub fn try_move_drag(&self, x: i32, y: i32) {
         if let Some(index) = self.drag_index.get() {
-            self.items[index].try_move_drag(x, y);
+            self.free_items.borrow()[index].try_move_drag(x, y);
             self.draw(&get_resize_info());
         }
     }
 
     pub fn try_end_drag(&self, x: i32, y: i32) {
         if let Some(index) = self.drag_index.get() {
-            let item = &self.items[index];
+            let item = self.free_items.borrow()[index].clone();
 
             if item.try_end_drag(x, y) {
-                item.evaluate(self.raw.fly_back_to_origin);
+                if item.evaluate(self.raw.fly_back_to_origin) {
+                    self.free_items.borrow_mut().remove(index);
+                    self.locked_items.borrow_mut().push(item);
+                }
             }
-
-            //could potentially animate, which is why we preserve
-            //drag_index for now, otherwise it'll draw the clickable
-            //areas
-            self.draw(&get_resize_info());
 
             self.drag_index.set(None);
             self.draw(&get_resize_info());
@@ -187,7 +208,7 @@ impl PuzzleGame {
     }
 
     pub fn evaluate_all(&self) {
-        if self.items.iter().all(|item| item.completed.get()) {
+        if self.free_items.borrow().len() == 0 {
             log::info!("all finished!!");
             match self.raw.jump_index {
                 Some(index) => {
@@ -206,12 +227,10 @@ impl PuzzleGame {
 
 impl PuzzleItem {
     pub fn start_drag(&self, x: i32, y: i32) {
-        if !self.completed.get() {
-            *self.drag.borrow_mut() = Some(Rc::new(Drag::new(x, y, 0.0, 0.0, true)));
+        *self.drag.borrow_mut() = Some(Rc::new(Drag::new(x, y, 0.0, 0.0, true)));
 
-            if let Some(audio_filename) = self.raw.audio_filename.as_ref() {
-                self.base.audio_manager.play_clip(self.base.activity_media_url(audio_filename));
-            }
+        if let Some(audio_filename) = self.raw.audio_filename.as_ref() {
+            self.base.audio_manager.play_clip(self.base.activity_media_url(audio_filename));
         }
     }
 
@@ -237,20 +256,21 @@ impl PuzzleItem {
         }
     }
 
-    pub fn evaluate(&self, fly_back_to_origin: bool) {
+    pub fn evaluate(&self, fly_back_to_origin: bool) -> bool {
         let curr_t = self.curr_transform_matrix.borrow().get_translation();
         let dist = vec2::distance(&curr_t, &[0.0, 0.0]);
 
         if dist <= PUZZLE_DISTANCE_THRESHHOLD {
             *self.curr_transform_matrix.borrow_mut() = Matrix4::identity(); 
 
-            self.completed.set(true);
             self.base.audio_manager.play_positive_clip();
+            true
         } else {
             if fly_back_to_origin {
                 *self.curr_transform_matrix.borrow_mut() = self.orig_transform_matrix.clone();
             }
             self.base.audio_manager.play_negative_clip();
+            false
         }
     }
 }
@@ -279,14 +299,14 @@ impl PuzzlePreview {
     pub fn draw_animation(&self, perc:Percentage) {
 
         let t = perc.into_f64();
-        for item in self.game.items.iter() {
+        self.game.with_all_items_ref(|item| {
             let mut v = item.orig_transform_matrix.get_translation();
             v[0] *= t;
             v[1] *= t;
 
             let m = &mut *item.curr_transform_matrix.borrow_mut();
             m.translate(&v);
-        }
+        });
 
         self.game.draw(&get_resize_info());
     }
