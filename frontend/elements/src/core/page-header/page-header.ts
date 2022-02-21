@@ -6,6 +6,7 @@ export class _ extends LitElement {
         return [
             css`
                 :host {
+                    position: relative;
                     display: grid;
                     grid-template-columns: repeat(5, auto);
                     justify-content: space-between;
@@ -47,6 +48,16 @@ export class _ extends LitElement {
                     height: 100%;
                     align-items: center;
                 }
+                .beta {
+                    position: absolute;
+                    background-color: var(--dark-blue-5);
+                    color: #ffffff;
+                    left: 0;
+                    bottom: 0;
+                    transform: translateY(100%);
+                    border-radius: 0 0 12px 12px;
+                    margin-left: 1em;
+                }
             `,
         ];
     }
@@ -68,6 +79,9 @@ export class _ extends LitElement {
             <div class="user">
                 <slot name="user"></slot>
             </div>
+            <span class="beta">
+                <slot name="beta"></slot>
+            </span>
         `;
     }
 }

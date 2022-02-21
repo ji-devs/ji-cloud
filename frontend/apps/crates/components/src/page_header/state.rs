@@ -10,6 +10,7 @@ const TARGET_BLANK: &str = "_blank";
 pub struct State {
     pub logged_in: Mutable<LoggedInState>,
     pub loader: AsyncLoader,
+    pub beta_tooltip: Mutable<bool>,
 }
 
 impl State {
@@ -17,6 +18,7 @@ impl State {
         Self {
             logged_in: Mutable::new(LoggedInState::Loading),
             loader: AsyncLoader::new(),
+            beta_tooltip: Mutable::new(false),
         }
     }
 }
