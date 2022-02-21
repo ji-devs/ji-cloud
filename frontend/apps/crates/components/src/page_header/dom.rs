@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use dominator::{clone, html, Dom, EventOptions};
+use dominator::{clone, html, Dom, EventOptions, with_node};
 use futures_signals::signal::{Signal, SignalExt};
 use shared::domain::user::{UserProfile, UserScope};
 use strum::IntoEnumIterator;
@@ -9,8 +9,9 @@ use utils::{
     routes::{AdminRoute, Route, UserRoute}, unwrap::UnwrapJiExt,
 };
 use wasm_bindgen::JsValue;
+use web_sys::HtmlElement;
 
-use crate::page_header::state::{LoggedInState, PageLinks};
+use crate::{page_header::state::{LoggedInState, PageLinks}, overlay::handle::OverlayHandle};
 
 use super::{actions, state::State};
 
@@ -26,7 +27,7 @@ const STR_MY_PROFILE: &str = "My profile";
 const STR_MY_JIGS: &str = "My JIGs";
 const STR_MY_RESOURCES: &str = "My resources";
 
-pub fn render(state: Rc<State>, slot: Option<&str>, active_page: Option<PageLinks>) -> Dom {
+pub fn render(state: Rc<State>, slot: Option<&str>, active_page: Option<PageLinks>, render_beta: bool) -> Dom {
     actions::fetch_profile(Rc::clone(&state));
 
     html!("page-header", {
@@ -51,9 +52,46 @@ pub fn render(state: Rc<State>, slot: Option<&str>, active_page: Option<PageLink
             .property("size", "small")
             .property("bold", true)
             .property("href", DONATE_LINK)
-            .property("target", "_black")
+            .property("target", "_blank")
             .text(STR_DONATE)
         }))
+        .apply_if(render_beta, |dom| {
+            dom.child(html!("beta-button", {
+                .property("slot", "beta")
+                .event(clone!(state => move |_evt: events::Click| {
+                    state.beta_tooltip.set_neq(true);
+                }))
+                .with_node!(elem => {
+                    .child_signal(state.beta_tooltip.signal_cloned().map(clone!(state, elem => move |show_tooltip| {
+                        match show_tooltip {
+                            false => None,
+                            true => Some(
+                                html!("empty-fragment" => HtmlElement, {
+                                    .apply(OverlayHandle::lifecycle(
+                                        clone!(state, elem => move || {
+                                            html!("overlay-tooltip-info", {
+                                                .property("target", &elem)
+                                                .property("color", "light-orange")
+                                                .attribute("targetAnchor", "mm")
+                                                .attribute("contentAnchor", "bl")
+                                                .property("closeable", true)
+                                                .property("strategy", "track")
+                                                .event(clone!(state => move |_evt: events::Close| {
+                                                    state.beta_tooltip.set_neq(false);
+                                                }))
+                                                .child(html!("beta-tooltip-content", {
+                                                    .property("slot", "body")
+                                                }))
+                                            })
+                                        })
+                                    ))
+                                })
+                            ),
+                        }
+                    })))
+                })
+            }))
+        })
         .apply(|dom| {
             if let Some(PageLinks::Home) = active_page {
                 dom.child(html!("page-header-student-code", {

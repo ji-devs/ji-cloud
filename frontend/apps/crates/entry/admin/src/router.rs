@@ -78,6 +78,7 @@ impl Router {
                                 Rc::new(components::page_header::state::State::new()),
                                 None,
                                 None,
+                                false,
                             ));
 
                             if let Some(profile) = profile {

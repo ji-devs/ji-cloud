@@ -22,7 +22,7 @@ use iframe::Iframe;
 pub fn render(state: Rc<State>, auto_search: bool) -> Dom {
     html!("home-full", {
         .child_signal(state.mode.signal_ref(|mode| {
-            Some(page_header::dom::render(Rc::new(page_header::state::State::new()), None, Some(PageLinks::from(mode))))
+            Some(page_header::dom::render(Rc::new(page_header::state::State::new()), None, Some(PageLinks::from(mode)), true))
         }))
         .children(&mut [
             search_section::render(state.clone(), auto_search),

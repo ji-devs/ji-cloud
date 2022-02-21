@@ -75,6 +75,9 @@ export class _ extends LitElement {
                     width: 304px;
                     margin: 8px 0 36px 0;
                 }
+                :host([color="light-orange"]) .body {
+                    color: var(--dark-gray-6);
+                }
                 .actions {
                     display: flex;
                     flex-direction: row;
@@ -232,7 +235,7 @@ export class _ extends LitElement {
                             : nothing}
                         ${body !== ""
                             ? html`<section class="body">${body}</section>`
-                            : nothing}
+                            : html`<section class="body"><slot name="body"></slot></section>`}
                         <div class="actions">
                             <slot name="actions"></slot>
                         </div>

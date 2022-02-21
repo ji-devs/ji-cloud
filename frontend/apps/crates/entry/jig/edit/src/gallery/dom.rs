@@ -54,7 +54,7 @@ impl JigGallery {
         };
 
         html!("empty-fragment", {
-            .child(page_header::dom::render(Rc::new(page_header::state::State::new()), None, Some(PageLinks::Create)))
+            .child(page_header::dom::render(Rc::new(page_header::state::State::new()), None, Some(PageLinks::Create), true))
             .child_signal(state.confirm_delete.signal().map(clone!(state => move |confirm_delete| {
                 confirm_delete.map(|jig_id| {
                     html!("modal-confirm", {
