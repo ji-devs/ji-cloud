@@ -6,6 +6,7 @@ use legacy_transcode::src_manifest::{SrcManifest, SrcManifestData};
 use options::*;
 
 use shared::domain::jig::{AudioBackground, JigUpdateDraftDataRequest};
+use reqwest::StatusCode;
 use simplelog::*;
 use std::{future::Future, process::exit};
 use std::sync::Arc;
@@ -64,47 +65,71 @@ async fn main() {
 async fn get_futures(ctx:Arc<Context>) -> Vec<impl Future> {
     let mut futures = Vec::new();
 
-    async fn do_browse(ctx:&Context, page:u32) -> JigBrowseResponse {
-        let url = format!("{}{}?authorId=me&jigFocus=modules&page={}&draftOrLive=draft", ctx.opts.get_remote_target().api_url(), endpoints::jig::Browse::PATH, page);
-
+    async fn do_browse(ctx:&Context, page:usize) -> Result<JigBrowseResponse, reqwest::Error> {
+        let url = format!("{}{}?authorId=me&jigFocus=modules&page={}&draftOrLive=live", ctx.opts.get_remote_target().api_url(), endpoints::jig::Browse::PATH, page);
         let res = ctx.client
             .get(&url)
             .header("Authorization", &format!("Bearer {}", ctx.token))
             .send()
-            .await
-            .unwrap();
+            .await;
 
+        let res = res.unwrap();
 
         if !res.status().is_success() {
             log::error!("error code: {}, details: {:?}", res.status().as_str(), res);
-            panic!("unable to get jigs pages!"); 
         }
 
-        res.json().await.unwrap()
+        res.json().await
     }
-    let JigBrowseResponse { pages, total_jig_count, ..} = do_browse(&ctx, 0).await;
+    let JigBrowseResponse { pages, total_jig_count, ..} = do_browse(&ctx, 0).await.unwrap();
 
     log::info!("Updating {} pages, {} jigs total ", pages, total_jig_count);
 
-    for page in (0..pages) {
+    for page in (0..=21) {
         futures.push({
             let ctx = ctx.clone();
             async move {
-                log::info!("loading jigs for page {}", page);
+                match do_browse(&ctx, page).await {
+                    Ok(res) => {
+                        log::info!("loading jigs for page {}", page);
 
-                let JigBrowseResponse { jigs, ..} = do_browse(&ctx, page).await;
+                        let JigBrowseResponse { jigs, .. } = res;
 
-                for jig in jigs {
-                    if ctx.opts.update_background_music {
-                        update_background_music(ctx.clone(), jig.id).await;
-                    }
-                    for module in jig.jig_data.modules {
-                        log::info!("updating jig {} module {}!", jig.id.0.to_string(), module.id.0.to_string()); 
-                        if ctx.opts.update_screenshots {
-                            // currently update is just to queue screenshot for each module in the jig
-                            call_screenshot_service(ctx.clone(), jig.id, module.id, module.kind).await;
+                        for jig in jigs {
+                            if ctx.opts.update_background_music {
+                                update_background_music(ctx.clone(), jig.id).await;
+                            }
+
+                            if ctx.opts.update_screenshots {
+                                for module in jig.jig_data.modules {
+            
+                                let url = format!("{}/screenshot/{}/{}/thumb.jpg", ctx.opts.get_remote_target().uploads_url(), jig.id.0.to_string(), module.id.0.to_string());
+                                let res = ctx.client
+                                    .get(&url)
+                                    .send()
+                                    .await
+                                    .unwrap();
+            
+                                    match res.status() {
+                                        StatusCode::NOT_FOUND => {
+                                            log::info!("updating {}/screenshot/{}/{}/thumb.jpg", ctx.opts.get_remote_target().uploads_url(), jig.id.0.to_string(), module.id.0.to_string()); 
+                                            // currently update is just to queue screenshot for each module in the jig
+                                            call_screenshot_service(ctx.clone(), jig.id, module.id, module.kind).await;
+                                        },
+                                        StatusCode::OK => {
+                                            log::info!("skipping {}/screenshot/{}/{}/thumb.jpg", ctx.opts.get_remote_target().uploads_url(), jig.id.0.to_string(), module.id.0.to_string()); 
+                                        }
+                                        e => {
+                                            log::info!("error {:?} {}/screenshot/{}/{}/thumb.jpg", e, ctx.opts.get_remote_target().uploads_url(), jig.id.0.to_string(), module.id.0.to_string());
+                                        },
+                                    }
+                                }
+                            }
                         }
-                    }
+                    },
+                    Err(_) => {
+
+                    },
                 }
             }
         });
@@ -204,7 +229,7 @@ pub async fn update_background_music(ctx:Arc<Context>, jig_id: JigId) {
 
                     if !res.status().is_success() {
                         log::error!("error code: {}, details: {:?}", res.status().as_str(), res);
-                        panic!("unable to update jig!"); 
+                        panic!("unable to publish jig!"); 
                     }
                 }
             }

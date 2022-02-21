@@ -109,7 +109,6 @@ name = "batch_user_jigs"
 version = "0.1.0"
 dependencies = [
  "cfg-if 1.0.0",
- "components",
  "csv",
  "dotenv",
  "flate2",
