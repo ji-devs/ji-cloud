@@ -15,11 +15,7 @@ impl ModuleThumbnail {
                 dom.property("slot", slot.unwrap_ji())
             })
             .event(clone!(state => move |_evt:events::ImageError| {
-                spawn_local(clone!(state => async move {
-                    if let Some(module) = &state.module {
-                        call_screenshot_service(state.jig_id, module.id, module.kind).await;
-                    }
-                }))
+                state.on_image_load_error();
             }))
             .property("jigId", state.jig_id.0.to_string())
             .apply(clone!(state => move |dom| {
@@ -62,19 +58,7 @@ impl ModuleThumbnail {
                 dom.property("slot", slot.unwrap_ji())
             })
             .event(clone!(state => move |_evt: events::ImageError| {
-                if let Some(module) = &state.module {
-                    // We need to ensure that the screenshot is only generated for activities which
-                    // have their content set, otherwise it will render a possible error page.
-                    if module.is_complete {
-                        spawn_local(clone!(state => async move {
-                                // Don't need to clone module, we can fetch it out of state. Also,
-                                // unwrapping is fine here as we've already validated that it is
-                                // Some.
-                                let module = state.module.as_ref().unwrap_ji();
-                                call_screenshot_service(state.jig_id, module.id, module.kind).await;
-                        }))
-                    }
-                }
+                state.on_image_load_error();
             }))
             .property("jigId", state.jig_id.0.to_string())
             .apply(clone!(state => move |dom| {
@@ -101,5 +85,24 @@ impl ModuleThumbnail {
                 let _ = listener.borrow_mut().take();
             }))
         })
+    }
+
+    fn on_image_load_error(self: &Rc<Self>) {
+        let state = self;
+        if let Some(module) = &state.module {
+            // We need to ensure that the screenshot is only generated for activities which
+            // have their content set, otherwise it will render a possible error page.
+            if module.is_complete {
+                spawn_local(clone!(state => async move {
+                    // Don't need to clone module, we can fetch it out of state. Also,
+                    // unwrapping is fine here as we've already validated that it is
+                    // Some.
+                    let module = state.module.as_ref().unwrap_ji();
+                    call_screenshot_service(state.jig_id, module.id, module.kind).await;
+                }))
+            } else {
+                log::info!("not complete");
+            }
+        }
     }
 }
