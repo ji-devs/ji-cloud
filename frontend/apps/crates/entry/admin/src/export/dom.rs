@@ -1,5 +1,4 @@
-use chrono::TimeZone;
-use dominator::{clone, html, Dom, with_node, text_signal};
+use dominator::{clone, html, Dom, with_node};
 use futures_signals::{signal::SignalExt, map_ref};
 use shared::{
     api::{ApiEndpoint, endpoints::admin::ExportData},
@@ -7,8 +6,8 @@ use shared::{
 };
 use strum::IntoEnumIterator;
 use utils::{init::settings::SETTINGS, events, unwrap::UnwrapJiExt};
-use std::{rc::Rc, convert::AsRef};
-use web_sys::{HtmlInputElement, HtmlElement};
+use std::rc::Rc;
+use web_sys::HtmlInputElement;
 use wasm_bindgen::prelude::*;
 use super::Export;
 
@@ -41,33 +40,29 @@ impl Export {
                     })
                 }))
             }))
-            .child(html!("input-wrapper" => HtmlElement, {
-                .with_node!(wrapper => {
-                    .property("label", "From date")
-                    .child(html!("input" => HtmlInputElement, {
-                        .property("type", "date")
-                        .property("pattern", "\\d{4}-\\d{2}-\\d{2}")
-                        .with_node!(input => {
-                            .event(clone!(state => move |_: events::Input| {
-                                state.set_date(&state.from_date, &input.value().into());
-                            }))
-                        })
-                    }))
-                })
+            .child(html!("input-wrapper", {
+                .property("label", "From date")
+                .child(html!("input" => HtmlInputElement, {
+                    .property("type", "date")
+                    .property("pattern", "\\d{4}-\\d{2}-\\d{2}")
+                    .with_node!(input => {
+                        .event(clone!(state => move |_: events::Input| {
+                            state.set_date(&state.from_date, &input.value().into());
+                        }))
+                    })
+                }))
             }))
-            .child(html!("input-wrapper" => HtmlElement, {
-                .with_node!(wrapper => {
-                    .property("label", "To date")
-                    .child(html!("input" => HtmlInputElement, {
-                        .property("type", "date")
-                        .property("pattern", "\\d{4}-\\d{2}-\\d{2}")
-                        .with_node!(input => {
-                            .event(clone!(state => move |_: events::Input| {
-                                state.set_date(&state.to_date, &input.value().into());
-                            }))
-                        })
-                    }))
-                })
+            .child(html!("input-wrapper", {
+                .property("label", "To date")
+                .child(html!("input" => HtmlInputElement, {
+                    .property("type", "date")
+                    .property("pattern", "\\d{4}-\\d{2}-\\d{2}")
+                    .with_node!(input => {
+                        .event(clone!(state => move |_: events::Input| {
+                            state.set_date(&state.to_date, &input.value().into());
+                        }))
+                    })
+                }))
             }))
             .child(html!("button-rect", {
                 .property("kind", "filled")

@@ -62,7 +62,7 @@ impl PuzzleGame {
             for item in free_items
                 .iter()
                 .enumerate()
-                .filter(|(idx, item)| *idx != active_index)
+                .filter(|(idx, _item)| *idx != active_index)
                 .map(|(_, item)| item) {
                     f(item);
                 }
