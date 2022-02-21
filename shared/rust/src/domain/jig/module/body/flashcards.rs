@@ -44,7 +44,7 @@ pub enum DisplayMode {
 
 impl Default for DisplayMode {
     fn default() -> Self {
-        Self::Single
+        Self::Double
     }
 }
 
