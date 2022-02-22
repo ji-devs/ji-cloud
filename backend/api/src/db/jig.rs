@@ -580,7 +580,7 @@ pub async fn browse(
         //language=SQL
         r#"
 with cte as (
-    select * from unnest($1::uuid[]) with ordinality t(id, ord) order by ord asc
+    select * from unnest($1::uuid[]) with ordinality t(id, ord) order by ord desc
 )
 select  jig.id                                              as "jig_id: JigId",
         privacy_level                                       as "privacy_level: PrivacyLevel",
@@ -645,7 +645,7 @@ from jig_data
     inner join jig on jig_data.id = jig.draft_id or jig_data.id = jig.live_id
     inner join jig_admin_data "admin" on admin.jig_id = jig.id
 where cte.ord > (20 * $2)
-order by ord asc
+order by coalesce(updated_at, created_at) desc
 limit 20
 "#,
         &jig_data_ids,
