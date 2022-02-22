@@ -15,6 +15,80 @@ expression: body
       "plays": 0,
       "jigFocus": "modules",
       "jigData": {
+        "draftOrLive": "live",
+        "displayName": "name",
+        "modules": [
+          {
+            "id": "a6b248f8-1dd7-11ec-8426-975953035335",
+            "kind": "Cover",
+            "is_complete": false
+          },
+          {
+            "id": "a6b24970-1dd7-11ec-8426-57136b411853",
+            "kind": "Flashcards",
+            "is_complete": false
+          },
+          {
+            "id": "a6b249c0-1dd7-11ec-8426-f77e58fd17c6",
+            "kind": "Memory",
+            "is_complete": false
+          }
+        ],
+        "ageRanges": [],
+        "affiliations": [],
+        "goals": [],
+        "language": "en",
+        "categories": [],
+        "additionalResources": [
+          {
+            "id": "286b828c-1dd9-11ec-8426-571b03b2d3df",
+            "displayName": "link test",
+            "resourceTypeId": "a91aca34-519e-11ec-ab46-175eaaf1ff23",
+            "link": "url://url.url.url/urlese"
+          },
+          {
+            "id": "286b82fa-1dd9-11ec-8426-2b6953011bae",
+            "displayName": "link test",
+            "resourceTypeId": "a91aca34-519e-11ec-ab46-175eaaf1ff23",
+            "link": "url://url.url.url/url"
+          }
+        ],
+        "description": "test description",
+        "lastEdited": "[last_edited]",
+        "defaultPlayerSettings": {
+          "direction": "ltr",
+          "displayScore": true,
+          "trackAssessments": true,
+          "dragAssist": true
+        },
+        "theme": "Blank",
+        "audioBackground": null,
+        "audioEffects": {
+          "feedbackPositive": "[audio]",
+          "feedbackNegative": "[audio]"
+        },
+        "privacyLevel": "public",
+        "locked": false,
+        "otherKeywords": "",
+        "translatedKeywords": "",
+        "translatedDescription": {}
+      },
+      "adminData": {
+        "rating": null,
+        "blocked": false,
+        "curated": false
+      }
+    },
+    {
+      "id": "0cc084bc-7c83-11eb-9f77-e3218dffb008",
+      "publishedAt": null,
+      "creatorId": "1f241e1b-b537-493f-a230-075cb16315be",
+      "authorId": "1f241e1b-b537-493f-a230-075cb16315be",
+      "authorName": "Bobby Tables",
+      "likes": 0,
+      "plays": 0,
+      "jigFocus": "modules",
+      "jigData": {
         "draftOrLive": "draft",
         "displayName": "name",
         "modules": [
@@ -63,51 +137,6 @@ expression: body
         },
         "theme": "Blank",
         "audioBackground": null,
-        "audioEffects": {
-          "feedbackPositive": "[audio]",
-          "feedbackNegative": "[audio]"
-        },
-        "privacyLevel": "unlisted",
-        "locked": false,
-        "otherKeywords": "",
-        "translatedKeywords": "",
-        "translatedDescription": {}
-      },
-      "adminData": {
-        "rating": null,
-        "blocked": false,
-        "curated": false
-      }
-    },
-    {
-      "id": "3a71522a-cd77-11eb-8dc1-af3e35f7c743",
-      "publishedAt": null,
-      "creatorId": "1f241e1b-b537-493f-a230-075cb16315be",
-      "authorId": "1f241e1b-b537-493f-a230-075cb16315be",
-      "authorName": "Bobby Tables",
-      "likes": 0,
-      "plays": 0,
-      "jigFocus": "modules",
-      "jigData": {
-        "draftOrLive": "draft",
-        "displayName": "draft name",
-        "modules": [],
-        "ageRanges": [],
-        "affiliations": [],
-        "goals": [],
-        "language": "he",
-        "categories": [],
-        "additionalResources": [],
-        "description": "draft test description",
-        "lastEdited": "[last_edited]",
-        "defaultPlayerSettings": {
-          "direction": "rtl",
-          "displayScore": false,
-          "trackAssessments": false,
-          "dragAssist": false
-        },
-        "theme": "Jigzi",
-        "audioBackground": "funForKids",
         "audioEffects": {
           "feedbackPositive": "[audio]",
           "feedbackNegative": "[audio]"
@@ -176,7 +205,7 @@ expression: body
       }
     },
     {
-      "id": "0cc084bc-7c83-11eb-9f77-e3218dffb008",
+      "id": "19becb2b-bff7-4c1b-bb2c-16f2e098d3d3",
       "publishedAt": null,
       "creatorId": "1f241e1b-b537-493f-a230-075cb16315be",
       "authorId": "1f241e1b-b537-493f-a230-075cb16315be",
@@ -189,19 +218,9 @@ expression: body
         "displayName": "name",
         "modules": [
           {
-            "id": "a6b248f8-1dd7-11ec-8426-975953035335",
+            "id": "865eeae6-f081-49bb-87bb-827296a8a82b",
             "kind": "Cover",
-            "is_complete": false
-          },
-          {
-            "id": "a6b24970-1dd7-11ec-8426-57136b411853",
-            "kind": "Flashcards",
-            "is_complete": false
-          },
-          {
-            "id": "a6b249c0-1dd7-11ec-8426-f77e58fd17c6",
-            "kind": "Memory",
-            "is_complete": false
+            "is_complete": true
           }
         ],
         "ageRanges": [],
@@ -209,20 +228,7 @@ expression: body
         "goals": [],
         "language": "en",
         "categories": [],
-        "additionalResources": [
-          {
-            "id": "286b828c-1dd9-11ec-8426-571b03b2d3df",
-            "displayName": "link test",
-            "resourceTypeId": "a91aca34-519e-11ec-ab46-175eaaf1ff23",
-            "link": "url://url.url.url/urlese"
-          },
-          {
-            "id": "286b82fa-1dd9-11ec-8426-2b6953011bae",
-            "displayName": "link test",
-            "resourceTypeId": "a91aca34-519e-11ec-ab46-175eaaf1ff23",
-            "link": "url://url.url.url/url"
-          }
-        ],
+        "additionalResources": [],
         "description": "test description",
         "lastEdited": "[last_edited]",
         "defaultPlayerSettings": {
@@ -259,30 +265,30 @@ expression: body
       "plays": 0,
       "jigFocus": "modules",
       "jigData": {
-        "draftOrLive": "live",
-        "displayName": "name",
+        "draftOrLive": "draft",
+        "displayName": "draft name",
         "modules": [],
         "ageRanges": [],
         "affiliations": [],
         "goals": [],
-        "language": "en",
+        "language": "he",
         "categories": [],
         "additionalResources": [],
-        "description": "test description",
+        "description": "draft test description",
         "lastEdited": "[last_edited]",
         "defaultPlayerSettings": {
-          "direction": "ltr",
-          "displayScore": true,
-          "trackAssessments": true,
-          "dragAssist": true
+          "direction": "rtl",
+          "displayScore": false,
+          "trackAssessments": false,
+          "dragAssist": false
         },
-        "theme": "Blank",
-        "audioBackground": null,
+        "theme": "Jigzi",
+        "audioBackground": "funForKids",
         "audioEffects": {
           "feedbackPositive": "[audio]",
           "feedbackNegative": "[audio]"
         },
-        "privacyLevel": "public",
+        "privacyLevel": "unlisted",
         "locked": false,
         "otherKeywords": "",
         "translatedKeywords": "",
@@ -295,7 +301,7 @@ expression: body
       }
     },
     {
-      "id": "19becb2b-bff7-4c1b-bb2c-16f2e098d3d3",
+      "id": "3a71522a-cd77-11eb-8dc1-af3e35f7c743",
       "publishedAt": null,
       "creatorId": "1f241e1b-b537-493f-a230-075cb16315be",
       "authorId": "1f241e1b-b537-493f-a230-075cb16315be",
@@ -306,13 +312,7 @@ expression: body
       "jigData": {
         "draftOrLive": "live",
         "displayName": "name",
-        "modules": [
-          {
-            "id": "865eeae6-f081-49bb-87bb-827296a8a82b",
-            "kind": "Cover",
-            "is_complete": true
-          }
-        ],
+        "modules": [],
         "ageRanges": [],
         "affiliations": [],
         "goals": [],
