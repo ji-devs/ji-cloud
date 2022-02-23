@@ -13,7 +13,7 @@ use crate::{
 };
 
 const STR_NONEMPTY_LIST_LABEL: &str = "Edit your words on the cards";
-const STR_EMPTY_AUDIO_SELECTION: &str = "Select a card or pair of cards to add audio";
+const STR_EMPTY_AUDIO_SELECTION: &str = "Select a card or a pair of cards to add audio";
 
 pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<Step1<RawData, E>>) -> Dom {
     html!("empty-fragment", {
