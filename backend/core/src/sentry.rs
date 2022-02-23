@@ -7,6 +7,7 @@ pub fn init(
     let options = sentry::ClientOptions {
         dsn: sentry::IntoDsn::into_dsn(dsn)?,
         environment: Some(std::borrow::Cow::Borrowed(remote_target.as_str())),
+        traces_sample_rate: 1.0, // TODO decrease this
         ..Default::default()
     };
 

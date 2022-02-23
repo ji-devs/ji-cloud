@@ -15,6 +15,8 @@ use std::thread;
 
 use anyhow::Context;
 use core::settings::{self, SettingsManager};
+use sentry_tracing::EventFilter;
+use tracing_subscriber::{fmt::format::FmtSpan, layer::SubscriberExt, EnvFilter, Registry};
 
 use ji_cloud_api::{algolia, db, http, jwk, logger, service, translate};
 
@@ -41,10 +43,31 @@ async fn main() -> anyhow::Result<()> {
     ) = {
         log::trace!("initializing settings and processes");
         let remote_target = settings::read_remote_target()?;
-
         let settings: SettingsManager = SettingsManager::new(remote_target).await?;
 
+        // `guard` needs to remain in scope so that we don't lose our Sentry config.
         let guard = core::sentry::init(settings.sentry_api_key().await?.as_deref(), remote_target)?;
+
+        // Sentry is weird. By default info! and below events are used as breadcrumbs. I don't want
+        // this, I want insight into the actual functioning of the system, not just errors.
+        let sentry_layer = sentry_tracing::layer()
+            .event_filter(|_md| EventFilter::Event)
+            .span_filter(|_md| true);
+
+        let fmt_layer =
+            tracing_subscriber::fmt::layer().with_span_events(FmtSpan::NEW | FmtSpan::CLOSE);
+
+        // Use the RUST_LOG= environment variable to set which minimum trace level to use.
+        let env_filter =
+            EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info"));
+
+        let tracing_subscriber = Registry::default()
+            .with(env_filter)
+            .with(sentry_layer)
+            .with(fmt_layer);
+
+        tracing::subscriber::set_global_default(tracing_subscriber)
+            .expect("Unable to set global subscriber");
 
         let runtime_settings = settings.runtime_settings().await?;
 
