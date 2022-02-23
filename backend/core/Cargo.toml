@@ -21,10 +21,11 @@ serde = {version = "1.0.127", features = ["derive"]}
 shared = {path = "../../shared/rust", features = ["backend"]}
 sqlx = {version = "0.5.6", default-features = false, features = ["postgres", "runtime-tokio-native-tls"], optional = true}
 yup-oauth2 = "6.0.0"
+tracing = "0.1.31"
 
 [features]
 db = ["sqlx"]
 
 [dependencies.sentry]
 features = ["anyhow", "backtrace", "contexts", "panic", "transport"]
-version = "0.23.0"
+version = "0.24.3"

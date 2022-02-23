@@ -14,6 +14,7 @@ use shared::{
     },
 };
 use sqlx::PgPool;
+use tracing::instrument;
 use uuid::Uuid;
 
 use crate::{
@@ -91,6 +92,7 @@ async fn create(
     ))
 }
 
+#[instrument(skip_all)]
 async fn get_live(
     db: Data<PgPool>,
     path: web::Path<JigId>,
@@ -317,6 +319,7 @@ async fn clone(
 }
 
 /// Search for jigs.
+#[instrument(skip_all)]
 async fn search(
     db: Data<PgPool>,
     claims: Option<TokenUser>,

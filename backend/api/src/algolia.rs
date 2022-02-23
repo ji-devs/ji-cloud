@@ -10,6 +10,7 @@ use core::settings::AlgoliaSettings;
 use futures::TryStreamExt;
 use serde::Serialize;
 use std::collections::HashMap;
+use tracing::instrument;
 
 use shared::{
     domain::{
@@ -156,7 +157,7 @@ impl Manager {
         let algolia_version = sqlx::query!(
             r#"
 with new_row as (
-    insert into "settings" default values on conflict(singleton) do nothing returning algolia_index_version    
+    insert into "settings" default values on conflict(singleton) do nothing returning algolia_index_version
 )
 select algolia_index_version as "algolia_index_version!" from new_row
 union
@@ -301,7 +302,7 @@ select jig.id,
        privacy_level                                                                                                as "privacy_level!: PrivacyLevel",
        jig_focus                                                                                                    as "jig_focus!: JigFocus",
        author_id                                                                                                    as "author_id",
-       locked                                                                                                       as "locked!",  
+       locked                                                                                                       as "locked!",
        other_keywords                                                                                               as "other_keywords!",
        translated_keywords                                                                                          as "translated_keywords!",
        (select given_name || ' '::text || family_name
@@ -309,7 +310,7 @@ select jig.id,
         where user_profile.user_id = jig.author_id)                                                                 as "author_name",
         rating                                                                                                      as "rating",
         liked_count                                                                                                 as "likes!",
-        (   
+        (
             select play_count
             from jig_play_count "jpc"
             where jpc.jig_id = jig.id
@@ -814,6 +815,7 @@ impl Client {
         Ok(())
     }
 
+    #[instrument(skip_all)]
     pub async fn search_jig(
         &self,
         query: &str,
