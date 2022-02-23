@@ -254,7 +254,7 @@ from image_metadata
          inner join unnest($1::uuid[])
     with ordinality t(id, ord) USING (id)
 where processing_result is not distinct from true
-order by random()
+order by id
 "#).bind(ids)
     .fetch(db)
 }
