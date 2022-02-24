@@ -15,7 +15,7 @@ use shared::domain::{
 };
 use sqlx::{types::Json, PgConnection, PgPool};
 use std::collections::HashMap;
-use tracing::instrument;
+use tracing::{instrument, Instrument};
 use uuid::Uuid;
 
 use crate::error;
@@ -374,6 +374,7 @@ where blocked = false
         ids,
     )
     .fetch_all(&mut txn)
+    .instrument(tracing::info_span!("query jigs"))
     .await?;
 
     let jig_data_ids: Vec<Uuid> = match draft_or_live {
@@ -432,7 +433,9 @@ where draft_or_live is not null
 "#,
         &jig_data_ids
     )
-        .fetch_all(&mut txn).await?;
+        .fetch_all(&mut txn)
+        .instrument(tracing::info_span!("query jig_data"))
+        .await?;
 
     let v = jig
         .into_iter()

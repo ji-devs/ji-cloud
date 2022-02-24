@@ -10,7 +10,7 @@ use core::settings::AlgoliaSettings;
 use futures::TryStreamExt;
 use serde::Serialize;
 use std::collections::HashMap;
-use tracing::instrument;
+use tracing::{instrument, Instrument};
 
 use shared::{
     domain::{
@@ -926,6 +926,7 @@ impl Client {
                     sum_or_filters_scores: false,
                 },
             )
+            .instrument(tracing::info_span!("perform algolia search"))
             .await?;
 
         let pages = results.page_count.try_into()?;
