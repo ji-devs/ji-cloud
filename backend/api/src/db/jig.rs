@@ -15,7 +15,7 @@ use shared::domain::{
 };
 use sqlx::{types::Json, PgConnection, PgPool};
 use std::collections::HashMap;
-use tracing::{info_span, instrument};
+use tracing::instrument;
 use uuid::Uuid;
 
 use crate::error;
@@ -173,172 +173,164 @@ pub async fn get_one(
     id: JigId,
     draft_or_live: DraftOrLive,
 ) -> anyhow::Result<Option<JigResponse>> {
-    let res = {
-        let query_span = info_span!("query");
-        let _query_guard = query_span.enter();
-        sqlx::query!( //language=SQL
-            r#"
+    let res = sqlx::query!( //language=SQL
+        r#"
 with cte as (
     select id      as "jig_id",
-        creator_id,
-        author_id,
-        liked_count,
-        play_count,
-        case
-            when $2 = 0 then jig.draft_id
-            when $2 = 1 then jig.live_id
-            end as "draft_or_live_id",
-        published_at,
-        rating,
-        blocked,
-        curated,
-        jig_focus
+           creator_id,
+           author_id,
+           liked_count,
+           play_count,
+           case
+               when $2 = 0 then jig.draft_id
+               when $2 = 1 then jig.live_id
+               end as "draft_or_live_id",
+           published_at,
+           rating,
+           blocked,
+           curated,
+           jig_focus
     from jig
     left join jig_play_count on jig_play_count.jig_id = jig.id
     left join jig_admin_data "admin" on admin.jig_id = jig.id
     where id = $1
 )
 select cte.jig_id                                          as "jig_id: JigId",
-    display_name,
-    creator_id,
-    author_id,
-    (select given_name || ' '::text || family_name
+       display_name,
+       creator_id,
+       author_id,
+       (select given_name || ' '::text || family_name
         from user_profile
         where user_profile.user_id = author_id)            as "author_name",
-    published_at,
-    updated_at,
-    privacy_level                                       as "privacy_level!: PrivacyLevel",
-    jig_focus                                           as "jig_focus!: JigFocus",
-    language,
-    description,
-    translated_description                              as "translated_description!: Json<HashMap<String, String>>",
-    direction                                           as "direction: TextDirection",
-    display_score,
-    track_assessments,
-    drag_assist,
-    theme                                               as "theme: ThemeId",
-    audio_background                                    as "audio_background: AudioBackground",
-    liked_count,
-    play_count,
-    locked,
-    other_keywords,
-    translated_keywords,
-    rating                                               as "rating?: JigRating",
-    blocked                                              as "blocked",
-    curated,
-    array(select row (unnest(audio_feedback_positive))) as "audio_feedback_positive!: Vec<(AudioFeedbackPositive,)>",
-    array(select row (unnest(audio_feedback_negative))) as "audio_feedback_negative!: Vec<(AudioFeedbackNegative,)>",
-    array(
-            select row (jig_data_module.id, kind, is_complete)
-            from jig_data_module
-            where jig_data_id = cte.draft_or_live_id
-            order by "index"
-        )                                               as "modules!: Vec<(ModuleId, ModuleKind, bool)>",
-    array(select row (goal_id)
-            from jig_data_goal
-            where jig_data_id = cte.draft_or_live_id)     as "goals!: Vec<(GoalId,)>",
-    array(select row (category_id)
-            from jig_data_category
-            where jig_data_id = cte.draft_or_live_id)     as "categories!: Vec<(CategoryId,)>",
-    array(select row (affiliation_id)
-            from jig_data_affiliation
-            where jig_data_id = cte.draft_or_live_id)     as "affiliations!: Vec<(AffiliationId,)>",
-    array(select row (age_range_id)
-            from jig_data_age_range
-            where jig_data_id = cte.draft_or_live_id)     as "age_ranges!: Vec<(AgeRangeId,)>",
-    array(
-            select row (jdar.id, jdar.display_name, resource_type_id, resource_content)
-            from jig_data_additional_resource "jdar"
-            where jdar.jig_data_id = cte.draft_or_live_id
-    )                                                    as "additional_resource!: Vec<(AddId, String, TypeId, Value)>"
+       published_at,
+       updated_at,
+       privacy_level                                       as "privacy_level!: PrivacyLevel",
+       jig_focus                                           as "jig_focus!: JigFocus",
+       language,
+       description,
+       translated_description                              as "translated_description!: Json<HashMap<String, String>>",
+       direction                                           as "direction: TextDirection",
+       display_score,
+       track_assessments,
+       drag_assist,
+       theme                                               as "theme: ThemeId",
+       audio_background                                    as "audio_background: AudioBackground",
+       liked_count,
+       play_count,
+       locked,
+       other_keywords,
+       translated_keywords,
+       rating                                               as "rating?: JigRating",
+       blocked                                              as "blocked",
+       curated,
+       array(select row (unnest(audio_feedback_positive))) as "audio_feedback_positive!: Vec<(AudioFeedbackPositive,)>",
+       array(select row (unnest(audio_feedback_negative))) as "audio_feedback_negative!: Vec<(AudioFeedbackNegative,)>",
+       array(
+               select row (jig_data_module.id, kind, is_complete)
+               from jig_data_module
+               where jig_data_id = cte.draft_or_live_id
+               order by "index"
+           )                                               as "modules!: Vec<(ModuleId, ModuleKind, bool)>",
+       array(select row (goal_id)
+             from jig_data_goal
+             where jig_data_id = cte.draft_or_live_id)     as "goals!: Vec<(GoalId,)>",
+       array(select row (category_id)
+             from jig_data_category
+             where jig_data_id = cte.draft_or_live_id)     as "categories!: Vec<(CategoryId,)>",
+       array(select row (affiliation_id)
+             from jig_data_affiliation
+             where jig_data_id = cte.draft_or_live_id)     as "affiliations!: Vec<(AffiliationId,)>",
+       array(select row (age_range_id)
+             from jig_data_age_range
+             where jig_data_id = cte.draft_or_live_id)     as "age_ranges!: Vec<(AgeRangeId,)>",
+       array(
+             select row (jdar.id, jdar.display_name, resource_type_id, resource_content)
+             from jig_data_additional_resource "jdar"
+             where jdar.jig_data_id = cte.draft_or_live_id
+       )                                                    as "additional_resource!: Vec<(AddId, String, TypeId, Value)>"
 from jig_data
-        inner join cte on cte.draft_or_live_id = jig_data.id
+         inner join cte on cte.draft_or_live_id = jig_data.id
 "#,
-            id.0,
-            draft_or_live as i16,
-        )
-            .fetch_optional(pool).await?
-    };
+        id.0,
+        draft_or_live as i16,
+    )
+        .fetch_optional(pool).await?;
 
-    let jig = {
-        let map_span = info_span!("map");
-        let _map_guard = map_span.enter();
-        res.map(|row| JigResponse {
-            id: row.jig_id,
-            published_at: row.published_at,
-            creator_id: row.creator_id,
-            author_id: row.author_id,
-            author_name: row.author_name,
-            likes: row.liked_count,
-            plays: row.play_count,
-            jig_focus: row.jig_focus,
-            jig_data: JigData {
-                draft_or_live,
-                display_name: row.display_name,
-                language: row.language,
-                modules: row
-                    .modules
-                    .into_iter()
-                    .map(|(id, kind, is_complete)| LiteModule {
+    let jig = res.map(|row| JigResponse {
+        id: row.jig_id,
+        published_at: row.published_at,
+        creator_id: row.creator_id,
+        author_id: row.author_id,
+        author_name: row.author_name,
+        likes: row.liked_count,
+        plays: row.play_count,
+        jig_focus: row.jig_focus,
+        jig_data: JigData {
+            draft_or_live,
+            display_name: row.display_name,
+            language: row.language,
+            modules: row
+                .modules
+                .into_iter()
+                .map(|(id, kind, is_complete)| LiteModule {
+                    id,
+                    kind,
+                    is_complete,
+                })
+                .collect(),
+            goals: row.goals.into_iter().map(|(it,)| it).collect(),
+            categories: row.categories.into_iter().map(|(it,)| it).collect(),
+            last_edited: row.updated_at,
+            description: row.description,
+            default_player_settings: JigPlayerSettings {
+                direction: row.direction,
+                display_score: row.display_score,
+                track_assessments: row.track_assessments,
+                drag_assist: row.drag_assist,
+            },
+            theme: row.theme,
+            age_ranges: row.age_ranges.into_iter().map(|(it,)| it).collect(),
+            affiliations: row.affiliations.into_iter().map(|(it,)| it).collect(),
+            additional_resources: row
+                .additional_resource
+                .into_iter()
+                .map(
+                    |(id, display_name, resource_type_id, resource_content)| AdditionalResource {
                         id,
-                        kind,
-                        is_complete,
-                    })
-                    .collect(),
-                goals: row.goals.into_iter().map(|(it,)| it).collect(),
-                categories: row.categories.into_iter().map(|(it,)| it).collect(),
-                last_edited: row.updated_at,
-                description: row.description,
-                default_player_settings: JigPlayerSettings {
-                    direction: row.direction,
-                    display_score: row.display_score,
-                    track_assessments: row.track_assessments,
-                    drag_assist: row.drag_assist,
-                },
-                theme: row.theme,
-                age_ranges: row.age_ranges.into_iter().map(|(it,)| it).collect(),
-                affiliations: row.affiliations.into_iter().map(|(it,)| it).collect(),
-                additional_resources: row
-                    .additional_resource
+                        display_name,
+                        resource_type_id,
+                        resource_content: serde_json::from_value::<ResourceContent>(
+                            resource_content,
+                        )
+                        .unwrap(),
+                    },
+                )
+                .collect(),
+            audio_background: row.audio_background,
+            audio_effects: AudioEffects {
+                feedback_positive: row
+                    .audio_feedback_positive
                     .into_iter()
-                    .map(|(id, display_name, resource_type_id, resource_content)| {
-                        AdditionalResource {
-                            id,
-                            display_name,
-                            resource_type_id,
-                            resource_content: serde_json::from_value::<ResourceContent>(
-                                resource_content,
-                            )
-                            .unwrap(),
-                        }
-                    })
+                    .map(|(it,)| it)
                     .collect(),
-                audio_background: row.audio_background,
-                audio_effects: AudioEffects {
-                    feedback_positive: row
-                        .audio_feedback_positive
-                        .into_iter()
-                        .map(|(it,)| it)
-                        .collect(),
-                    feedback_negative: row
-                        .audio_feedback_negative
-                        .into_iter()
-                        .map(|(it,)| it)
-                        .collect(),
-                },
-                privacy_level: row.privacy_level,
-                locked: row.locked,
-                other_keywords: row.other_keywords,
-                translated_keywords: row.translated_keywords,
-                translated_description: row.translated_description.0,
+                feedback_negative: row
+                    .audio_feedback_negative
+                    .into_iter()
+                    .map(|(it,)| it)
+                    .collect(),
             },
-            admin_data: JigAdminData {
-                rating: row.rating,
-                blocked: row.blocked,
-                curated: row.curated,
-            },
-        })
-    };
+            privacy_level: row.privacy_level,
+            locked: row.locked,
+            other_keywords: row.other_keywords,
+            translated_keywords: row.translated_keywords,
+            translated_description: row.translated_description.0,
+        },
+        admin_data: JigAdminData {
+            rating: row.rating,
+            blocked: row.blocked,
+            curated: row.curated,
+        },
+    });
 
     Ok(jig)
 }
@@ -351,13 +343,9 @@ pub async fn get_by_ids(
 ) -> sqlx::Result<Vec<JigResponse>> {
     let mut txn = db.begin().await?;
 
-    let jig = {
-        let query_span = tracing::info_span!("jigs query");
-        let _span_guard = query_span.enter();
-
-        sqlx::query!(
-            //language=SQL
-            r#"
+    let jig = sqlx::query!(
+        //language=SQL
+        r#"
 select jig.id                                       as "id!: JigId",
        creator_id,
        author_id                                as "author_id",
@@ -382,24 +370,20 @@ from jig
     with ordinality t(id, ord) using (id)
     inner join jig_admin_data "admin" on admin.jig_id = jig.id
 where blocked = false
-"#,
-            ids,
-        )
-        .fetch_all(&mut txn)
-        .await?
-    };
+    "#,
+        ids,
+    )
+    .fetch_all(&mut txn)
+    .await?;
 
     let jig_data_ids: Vec<Uuid> = match draft_or_live {
         DraftOrLive::Draft => jig.iter().map(|it| it.draft_id).collect(),
         DraftOrLive::Live => jig.iter().map(|it| it.live_id).collect(),
     };
 
-    let jig_data = {
-        let query_span = tracing::info_span!("jig data query");
-        let _span_guard = query_span.enter();
-        sqlx::query!(
-            //language=SQL
-            r#"
+    let jig_data = sqlx::query!(
+        //language=SQL
+        r#"
 select id,
        display_name                                                                  as "display_name!",
        updated_at,
@@ -446,111 +430,101 @@ from jig_data
     with ordinality t(id, ord) using (id)
 where draft_or_live is not null
 "#,
-            &jig_data_ids
-        )
-            .fetch_all(&mut txn).await?
-    };
+        &jig_data_ids
+    )
+        .fetch_all(&mut txn).await?;
 
-    let v = {
-        let jigs_span = tracing::info_span!("map jigs");
-        let _jigs_span_guard = jigs_span.enter();
-
-        jig.into_iter()
-            .zip(jig_data.into_iter())
-            .map(|(jig_row, jig_data_row)| {
-                let jig_span = tracing::info_span!("map jig");
-                let _jig_span_guard = jig_span.enter();
-
-                JigResponse {
-                    id: jig_row.id,
-                    published_at: jig_row.published_at,
-                    creator_id: jig_row.creator_id,
-                    author_id: jig_row.author_id,
-                    author_name: jig_row.author_name,
-                    likes: jig_row.liked_count,
-                    plays: jig_row.play_count,
-                    jig_focus: jig_row.jig_focus,
-                    jig_data: JigData {
-                        draft_or_live,
-                        display_name: jig_data_row.display_name,
-                        language: jig_data_row.language,
-                        modules: jig_data_row
-                            .modules
-                            .into_iter()
-                            .map(|(id, kind, is_complete)| LiteModule {
-                                id,
-                                kind,
-                                is_complete,
-                            })
-                            .collect(),
-                        goals: jig_data_row.goals.into_iter().map(|(it,)| it).collect(),
-                        categories: jig_data_row
-                            .categories
-                            .into_iter()
-                            .map(|(it,)| it)
-                            .collect(),
-                        last_edited: jig_data_row.updated_at,
-                        description: jig_data_row.description,
-                        default_player_settings: JigPlayerSettings {
-                            direction: jig_data_row.direction,
-                            display_score: jig_data_row.display_score,
-                            track_assessments: jig_data_row.track_assessments,
-                            drag_assist: jig_data_row.drag_assist,
-                        },
-                        theme: jig_data_row.theme,
-                        age_ranges: jig_data_row
-                            .age_ranges
-                            .into_iter()
-                            .map(|(it,)| it)
-                            .collect(),
-                        affiliations: jig_data_row
-                            .affiliations
-                            .into_iter()
-                            .map(|(it,)| it)
-                            .collect(),
-                        additional_resources: jig_data_row
-                            .additional_resource
-                            .into_iter()
-                            .map(|(id, display_name, resource_type_id, resource_content)| {
-                                AdditionalResource {
-                                    id,
-                                    display_name,
-                                    resource_type_id,
-                                    resource_content: serde_json::from_value::<ResourceContent>(
-                                        resource_content,
-                                    )
-                                    .unwrap(),
-                                }
-                            })
-                            .collect(),
-                        audio_background: jig_data_row.audio_background,
-                        audio_effects: AudioEffects {
-                            feedback_positive: jig_data_row
-                                .audio_feedback_positive
-                                .into_iter()
-                                .map(|(it,)| it)
-                                .collect(),
-                            feedback_negative: jig_data_row
-                                .audio_feedback_negative
-                                .into_iter()
-                                .map(|(it,)| it)
-                                .collect(),
-                        },
-                        privacy_level: jig_data_row.privacy_level,
-                        locked: jig_data_row.locked,
-                        other_keywords: jig_data_row.other_keywords,
-                        translated_keywords: jig_data_row.translated_keywords,
-                        translated_description: jig_data_row.translated_description.0,
-                    },
-                    admin_data: JigAdminData {
-                        rating: jig_row.rating,
-                        blocked: jig_row.blocked,
-                        curated: jig_row.curated,
-                    },
-                }
-            })
-            .collect()
-    };
+    let v = jig
+        .into_iter()
+        .zip(jig_data.into_iter())
+        .map(|(jig_row, jig_data_row)| JigResponse {
+            id: jig_row.id,
+            published_at: jig_row.published_at,
+            creator_id: jig_row.creator_id,
+            author_id: jig_row.author_id,
+            author_name: jig_row.author_name,
+            likes: jig_row.liked_count,
+            plays: jig_row.play_count,
+            jig_focus: jig_row.jig_focus,
+            jig_data: JigData {
+                draft_or_live,
+                display_name: jig_data_row.display_name,
+                language: jig_data_row.language,
+                modules: jig_data_row
+                    .modules
+                    .into_iter()
+                    .map(|(id, kind, is_complete)| LiteModule {
+                        id,
+                        kind,
+                        is_complete,
+                    })
+                    .collect(),
+                goals: jig_data_row.goals.into_iter().map(|(it,)| it).collect(),
+                categories: jig_data_row
+                    .categories
+                    .into_iter()
+                    .map(|(it,)| it)
+                    .collect(),
+                last_edited: jig_data_row.updated_at,
+                description: jig_data_row.description,
+                default_player_settings: JigPlayerSettings {
+                    direction: jig_data_row.direction,
+                    display_score: jig_data_row.display_score,
+                    track_assessments: jig_data_row.track_assessments,
+                    drag_assist: jig_data_row.drag_assist,
+                },
+                theme: jig_data_row.theme,
+                age_ranges: jig_data_row
+                    .age_ranges
+                    .into_iter()
+                    .map(|(it,)| it)
+                    .collect(),
+                affiliations: jig_data_row
+                    .affiliations
+                    .into_iter()
+                    .map(|(it,)| it)
+                    .collect(),
+                additional_resources: jig_data_row
+                    .additional_resource
+                    .into_iter()
+                    .map(|(id, display_name, resource_type_id, resource_content)| {
+                        AdditionalResource {
+                            id,
+                            display_name,
+                            resource_type_id,
+                            resource_content: serde_json::from_value::<ResourceContent>(
+                                resource_content,
+                            )
+                            .unwrap(),
+                        }
+                    })
+                    .collect(),
+                audio_background: jig_data_row.audio_background,
+                audio_effects: AudioEffects {
+                    feedback_positive: jig_data_row
+                        .audio_feedback_positive
+                        .into_iter()
+                        .map(|(it,)| it)
+                        .collect(),
+                    feedback_negative: jig_data_row
+                        .audio_feedback_negative
+                        .into_iter()
+                        .map(|(it,)| it)
+                        .collect(),
+                },
+                privacy_level: jig_data_row.privacy_level,
+                locked: jig_data_row.locked,
+                other_keywords: jig_data_row.other_keywords,
+                translated_keywords: jig_data_row.translated_keywords,
+                translated_description: jig_data_row.translated_description.0,
+            },
+            admin_data: JigAdminData {
+                rating: jig_row.rating,
+                blocked: jig_row.blocked,
+                curated: jig_row.curated,
+            },
+        })
+        .collect();
 
     txn.rollback().await?;
 
