@@ -54,8 +54,7 @@ async fn main() -> anyhow::Result<()> {
             .event_filter(|_md| EventFilter::Event)
             .span_filter(|_md| true);
 
-        let fmt_layer =
-            tracing_subscriber::fmt::layer().with_span_events(FmtSpan::NEW | FmtSpan::CLOSE);
+        let fmt_layer = tracing_subscriber::fmt::layer().with_span_events(FmtSpan::CLOSE);
 
         // Use the RUST_LOG= environment variable to set which minimum trace level to use.
         let env_filter =
