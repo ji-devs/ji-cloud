@@ -16,7 +16,7 @@ actix-rt = "2.3.0"
 actix-service = "2.0.1"
 actix-web = "4.0.0-beta.9"
 actix-web-httpauth = "0.6.0-beta.2"
-tracing-actix-web = "0.4.0-beta.12"
+tracing-actix-web = {version = "0.4.0-beta.12", default-features = false}
 
 algolia = {git = "https://github.com/RickyLB/algolia-rs", branch = "main"}
 anyhow = "1.0.44"
@@ -45,6 +45,7 @@ rgb = "0.8.27"
 rusoto_core = "0.47.0"
 rusoto_s3 = "0.47.0"
 rusoto_signature = "0.47.0"
+sentry-tracing = "0.24.3"
 serde = {version = "1.0.130", features = ["derive"]}
 serde_derive = "1.0.130"
 serde_json = {version = "1.0.68", features = ["preserve_order"]}
@@ -68,9 +69,6 @@ version = "0.17.4"
 
 [dependencies.sentry]
 features = ["anyhow", "backtrace", "contexts", "panic", "tracing", "transport"]
-version = "0.24.3"
-
-[dependencies.sentry-tracing]
 version = "0.24.3"
 
 [dependencies.sqlx]
