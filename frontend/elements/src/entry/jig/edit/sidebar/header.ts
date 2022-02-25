@@ -102,6 +102,9 @@ export class _ extends LitElement {
                     display: inline-grid;
                     place-content: center;
                 }
+                ::slotted([slot="settings"]:hover) {
+                    background-color: var(--light-blue-6);
+                }
             `,
         ];
     }
