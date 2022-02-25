@@ -1,7 +1,7 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 import "@elements/core/images/ui";
 
-const STR_LABEL = "Create your own";
+const STR_LABEL = "New JIG";
 
 @customElement("jig-gallery-create")
 export class _ extends LitElement {

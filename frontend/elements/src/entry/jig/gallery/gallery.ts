@@ -16,9 +16,9 @@ import { JigFocus } from "@elements/module/_common/types";
 const STR_JIG = "JIG";
 const STR_RESOURCE = "Resource";
 
-const STR_CREATE_JIG = "Create a New ";
-const STR_TEMPLATE_PARAGRAPH = "Create a new JIG (Jewish Interactive Game). Choose the activities designed to fit your teaching goals and you'll have a complete interactive lesson in just a snap!";
-const STR_RECENT_1 = "My Recent";
+const STR_GALLERY_HEADING = "Learning Through Creation";
+const STR_TEMPLATE_PARAGRAPH = "Create a new JIG (Jewish Interactive Game) in just a snap! Choose activities that fit your teaching goals to develop complete interactive lessons for your students.";
+const STR_RECENT_1 = "My";
 const STR_RECENT_2 = "s";
 const STR_SEE_ALL_TEMPLATES = "See all templates";
 const STR_SEE_LESS_TEMPLATES = "See less templates";
@@ -212,7 +212,7 @@ export class _ extends LitElement {
                 <div class="width-holder">
                     <div class="text-side">
                         <h1 class="create-jig-header">
-                            ${STR_CREATE_JIG + this.focusString()}
+                            ${STR_GALLERY_HEADING}
                         </h1>
                         <p class="template-paragraph">
                             ${STR_TEMPLATE_PARAGRAPH}
