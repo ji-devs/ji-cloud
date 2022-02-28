@@ -759,6 +759,17 @@ pub struct JigBrowseQuery {
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub draft_or_live: Option<DraftOrLive>,
+
+    /// Optionally filter jig by their privacy level
+    #[serde(default)]
+    #[serde(deserialize_with = "super::from_csv")]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub privacy_level: Vec<PrivacyLevel>,
+
+    /// Optionally filter jig by blocked status
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub blocked: Option<bool>,
 }
 
 /// Response for [`Browse`](crate::api::endpoints::jig::Browse).
@@ -846,7 +857,7 @@ pub struct JigSearchQuery {
 
     /// Optionally filter by author's id
     #[serde(default)]
-    // #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub author_id: Option<UserOrMe>,
 
     /// Optionally filter by the author's name
@@ -868,6 +879,17 @@ pub struct JigSearchQuery {
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub translated_keywords: Option<String>,
+
+    /// Optionally search for jigs by privacy level
+    #[serde(default)]
+    #[serde(deserialize_with = "super::from_csv")]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub privacy_level: Vec<PrivacyLevel>,
+
+    /// Optionally search for blocked or non-blocked jigs
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub blocked: Option<bool>,
 }
 
 /// Response for successful search.

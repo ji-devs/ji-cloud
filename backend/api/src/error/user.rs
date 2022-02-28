@@ -129,6 +129,7 @@ pub enum VerifyEmail {
     Email(Email),
     ServiceSession(ServiceSession),
     Forbidden,
+    ResourceNotFound,
 }
 
 impl<T: Into<anyhow::Error>> From<T> for VerifyEmail {
@@ -156,6 +157,11 @@ impl Into<actix_web::Error> for VerifyEmail {
             Self::ServiceSession(e) => e.into(),
             Self::Forbidden => BasicError::with_message(
                 StatusCode::FORBIDDEN,
+                "Current user does not have access".to_owned(),
+            )
+            .into(),
+            Self::ResourceNotFound => BasicError::with_message(
+                StatusCode::NOT_FOUND,
                 "Current user does not have access".to_owned(),
             )
             .into(),

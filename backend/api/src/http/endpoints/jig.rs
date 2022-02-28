@@ -199,30 +199,35 @@ async fn delete_all(
 
 async fn browse(
     db: Data<PgPool>,
-    claims: TokenUser,
+    claims: Option<TokenUser>,
     query: Option<Query<<jig::Browse as ApiEndpoint>::Req>>,
 ) -> Result<Json<<jig::Browse as ApiEndpoint>::Res>, error::Auth> {
     let query = query.map_or_else(Default::default, Query::into_inner);
 
-    let author_id = query.author_id.map(|it| match it {
-        UserOrMe::Me => claims.0.user_id,
-        UserOrMe::User(id) => id,
-    });
-
-    db::jig::authz_list(&*db, claims.0.user_id, author_id).await?;
+    let (author_id, privacy_level, blocked) = auth_claims(
+        db.as_ref(),
+        claims,
+        query.author_id,
+        query.privacy_level,
+        query.blocked,
+    )
+    .await?;
 
     let (jigs, count) = db::jig::browse(
         db.as_ref(),
         author_id,
         query.jig_focus,
         query.draft_or_live,
+        privacy_level.to_owned(),
+        blocked,
         query.page.unwrap_or(0) as i32,
     )
     .await?;
 
     let total_count = db::jig::filtered_count(
         db.as_ref(),
-        None,
+        privacy_level.to_owned(),
+        blocked,
         author_id,
         query.jig_focus,
         query.draft_or_live,
@@ -254,19 +259,19 @@ pub(super) async fn publish_draft_to_live(
         .await
         .ok_or(error::JigCloneDraft::ResourceNotFound)?;
 
-    let draft = db::jig::get_one(&db, jig_id, DraftOrLive::Draft)
-        .await?
-        .ok_or(error::JigCloneDraft::ResourceNotFound)?; // Not strictly necessary, we already know the JIG exists.
+    // let draft = db::jig::get_one(&db, jig_id, DraftOrLive::Draft)
+    //     .await?
+    //     .ok_or(error::JigCloneDraft::ResourceNotFound)?; // Not strictly necessary, we already know the JIG exists.
 
-    let modules = draft.jig_data.modules;
+    // let modules = draft.jig_data.modules;
     // Check that modules have been configured on the JIG
-    let has_modules = !modules.is_empty();
+    // let has_modules = !modules.is_empty();
     // Check whether the draft's modules all have content
-    let modules_valid = modules
-        .into_iter()
-        .filter(|module| !module.is_complete)
-        .collect::<Vec<LiteModule>>()
-        .is_empty();
+    // let modules_valid = modules
+    //     .into_iter()
+    //     .filter(|module| !module.is_complete)
+    //     .collect::<Vec<LiteModule>>()
+    //     .is_empty();
 
     // If no modules or modules without content, prevent publishing.
     // NOTE: we temporarily allow publishing jig without content
@@ -328,39 +333,19 @@ async fn search(
 ) -> Result<Json<<jig::Search as ApiEndpoint>::Res>, error::Service> {
     let query = query.map_or_else(Default::default, Query::into_inner);
 
-    if claims.is_none() {
-        if let Some(user) = &query.author_id {
-            if user.to_owned() == UserOrMe::Me {
-                return Err(error::Service::Forbidden);
-            }
-        }
-    }
-
-    let author_id: Option<Uuid> = if let Some(user) = claims {
-        let author_id = query.author_id.map(|it| match it {
-            UserOrMe::Me => user.0.user_id,
-            UserOrMe::User(id) => id,
-        });
-
-        author_id
-    } else {
-        let author_id = query.author_id.map(|it| match it {
-            UserOrMe::Me => None,
-            UserOrMe::User(id) => Some(id),
-        });
-
-        if let Some(id) = author_id {
-            id
-        } else {
-            None
-        }
-    };
+    let (author_id, privacy_level, blocked) = auth_claims(
+        &*db,
+        claims,
+        query.author_id,
+        query.privacy_level,
+        query.blocked,
+    )
+    .await?;
 
     let (ids, pages, total_hits) = algolia
         .search_jig(
             &query.q,
             query.page,
-            Some(PrivacyLevel::Public),
             query.language,
             &query.age_ranges,
             &query.affiliations,
@@ -372,6 +357,8 @@ async fn search(
             query.jig_focus,
             query.other_keywords,
             query.translated_keywords,
+            &privacy_level,
+            blocked,
         )
         .await?
         .ok_or_else(|| error::Service::DisabledService(ServiceKind::Algolia))?;
@@ -447,6 +434,65 @@ async fn play(db: Data<PgPool>, path: web::Path<JigId>) -> Result<HttpResponse, 
     db::jig::jig_play(&*db, path.into_inner()).await?;
 
     Ok(HttpResponse::NoContent().finish())
+}
+
+async fn auth_claims(
+    db: &PgPool,
+    claims: Option<TokenUser>,
+    author_id: Option<UserOrMe>,
+    privacy_level: Vec<PrivacyLevel>,
+    blocked: Option<bool>,
+) -> Result<(Option<Uuid>, Vec<PrivacyLevel>, Option<bool>), error::Auth> {
+    log::warn!("privacy: {:?}", privacy_level);
+    log::warn!("author: {:?}", author_id);
+
+    if let Some(user) = claims {
+        let is_admin = db::jig::is_admin(&*db, user.0.user_id).await?;
+
+        if let Some(author) = author_id {
+            let (author_id, privacy, blocked) = match author {
+                UserOrMe::Me => {
+                    log::warn!("me");
+                    (Some(user.0.user_id), privacy_level, blocked)
+                }
+                UserOrMe::User(id) => {
+                    log::warn!("user");
+
+                    if is_admin {
+                        let block = if let Some(block) = blocked {
+                            Some(block)
+                        } else {
+                            None
+                        };
+                        (Some(id), privacy_level, block)
+                    } else {
+                        (Some(id), vec![PrivacyLevel::Public], Some(false))
+                    }
+                }
+            };
+            log::warn!("result: {:?} {:?} {:?}", author_id, privacy, blocked);
+            return Ok((author_id, privacy, blocked));
+        } else {
+            log::warn!("Nothing");
+
+            if is_admin {
+                return Ok((None, privacy_level, None));
+            } else {
+                return Ok((None, vec![PrivacyLevel::Public], Some(false)));
+            }
+        };
+    } else {
+        let author_id = author_id.map(|it| match it {
+            UserOrMe::Me => None,
+            UserOrMe::User(id) => Some(id),
+        });
+
+        if let Some(id) = author_id {
+            return Ok((id, vec![PrivacyLevel::Public], Some(false)));
+        } else {
+            return Err(error::Auth::Forbidden);
+        }
+    };
 }
 
 pub fn configure(cfg: &mut ServiceConfig) {

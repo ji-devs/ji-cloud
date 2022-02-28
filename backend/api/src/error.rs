@@ -161,11 +161,22 @@ pub enum Service {
     InternalServerError(anyhow::Error),
     DisabledService(ServiceKind),
     Forbidden,
+    ResourceNotFound,
 }
 
 impl<T: Into<anyhow::Error>> From<T> for Service {
     fn from(e: T) -> Self {
         Self::InternalServerError(e.into())
+    }
+}
+
+impl From<Auth> for Service {
+    fn from(e: Auth) -> Self {
+        match e {
+            Auth::InternalServerError(e) => Self::InternalServerError(e),
+            Auth::Forbidden => Self::Forbidden,
+            Auth::ResourceNotFound(_) => Self::ResourceNotFound,
+        }
     }
 }
 
@@ -175,6 +186,7 @@ impl Into<actix_web::Error> for Service {
             Self::InternalServerError(e) => ise(e),
             Self::DisabledService(s) => s.into(),
             Self::Forbidden => BasicError::new(http::StatusCode::FORBIDDEN).into(),
+            Self::ResourceNotFound => BasicError::new(http::StatusCode::NOT_FOUND).into(),
         }
     }
 }

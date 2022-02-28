@@ -1074,29 +1074,6 @@
       "nullable": []
     }
   },
-  "1c2c17db162048500c44d0f1b794f014c828fbeb4b2bb949eb020ed15bf43c5f": {
-    "query": "\nselect count(*) as \"count!: i64\"\nfrom jig\nleft join jig_admin_data \"admin\" on admin.jig_id = jig.id\nleft join jig_data \"jig_dt\" on jig_dt.id = jig.draft_id\nleft join jig_data \"jig_tt\" on jig_tt.id = jig.live_id\nwhere (jig_dt.privacy_level = $1 or $1 is null)\n    and (author_id = $2 or $2 is null)\n    and (jig_focus = $3 or $3 is null)\n    and ((jig_dt.draft_or_live = $4 or $4 is null)\n    or (jig_tt.draft_or_live = $4 or $4 is null))\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "count!: i64",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int2",
-          "Uuid",
-          "Int2",
-          "Int2"
-        ]
-      },
-      "nullable": [
-        null
-      ]
-    }
-  },
   "1c34eda829dd92980a83bf0ff3b38800febb950fd3b6e5f3e3694938b7bc19e3": {
     "query": "\nselect display_name                               as \"display_name!\",    \n       report_type                                as \"report_type!: JigReportType\",                  \n       (\n            select given_name || ' '::text || family_name\n            from user_profile\n            where user_profile.user_id = reporter_id\n        )                                       as \"name?\",\n        (\n            select email::text\n            from user_email\n            where user_email.user_id = reporter_id\n        )                                       as \"email?\",\n        (\n            select given_name || ' '::text || family_name\n            from user_profile\n            where user_profile.user_id = creator_id\n        )                                       as \"creator_name!\"\nfrom jig_report\n    left join jig on jig.id = jig_report.jig_id\n    left join jig_data on jig_data.id = jig.live_id\nwhere jig_report.id = $1 and jig_report.jig_id = $2\n",
     "describe": {
@@ -1288,6 +1265,180 @@
       ]
     }
   },
+  "2800f1b856851cab6a545fcc35026f8ee366ec153c8176e145d68c38096513a4": {
+    "query": "\nselect jig.id,\n       display_name                                                                                                 as \"name\",\n       language                                                                                                     as \"language!\",\n       description                                                                                                  as \"description!\",\n       translated_description                                                                                       as \"translated_description!: Json<HashMap<String, String>>\",\n       array((select affiliation_id\n              from jig_data_affiliation\n              where jig_data_id = jig_data.id))                                                                     as \"affiliations!\",\n       array((select affiliation.display_name\n              from affiliation\n                       inner join jig_data_affiliation on affiliation.id = jig_data_affiliation.affiliation_id\n              where jig_data_affiliation.jig_data_id = jig_data.id))                                                as \"affiliation_names!\",\n        array((select resource_type_id\n                from jig_data_additional_resource\n                where jig_data_id = jig_data.id))                                                                     as \"resource_types!\",\n        array((select resource_type.display_name\n              from resource_type\n                        inner join jig_data_additional_resource on resource_type.id = jig_data_additional_resource.resource_type_id\n             where jig_data_additional_resource.jig_data_id = jig_data.id))                                         as \"resource_type_names!\",\n       array((select age_range_id\n              from jig_data_age_range\n              where jig_data_id = jig_data.id))                                                                     as \"age_ranges!\",\n       array((select age_range.display_name\n              from age_range\n                       inner join jig_data_age_range on age_range.id = jig_data_age_range.age_range_id\n              where jig_data_age_range.jig_data_id = jig_data.id))                                                  as \"age_range_names!\",\n       array((select goal_id from jig_data_goal where jig_data_id = jig_data.id))                                   as \"goals!\",\n       array((select goal.display_name\n              from goal\n                       inner join jig_data_goal on goal.id = jig_data_goal.goal_id\n              where jig_data_goal.jig_data_id = jig_data.id))                                                       as \"goal_names!\",\n       array((select category_id\n              from jig_data_category\n              where jig_data_id = jig_data.id))                                                                     as \"categories!\",\n       array((select name\n              from category\n                       inner join jig_data_category on category.id = jig_data_category.category_id\n              where jig_data_category.jig_data_id = jig_data.id))                                                   as \"category_names!\",\n       privacy_level                                                                                                as \"privacy_level!: PrivacyLevel\",\n       jig_focus                                                                                                    as \"jig_focus!: JigFocus\",\n       author_id                                                                                                    as \"author_id\",\n       locked                                                                                                       as \"locked!\",\n       other_keywords                                                                                               as \"other_keywords!\",\n       translated_keywords                                                                                          as \"translated_keywords!\",\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = jig.author_id)                                                                 as \"author_name\",\n        rating                                                                                                      as \"rating\",\n        liked_count                                                                                                 as \"likes!\",\n        (\n            select play_count\n            from jig_play_count \"jpc\"\n            where jpc.jig_id = jig.id\n        )                                                                                                           as \"plays!\",\n        published_at                                                                                                as \"published_at\",\n        blocked                                                                                                     as \"blocked!\"\nfrom jig\n         inner join jig_data on live_id = jig_data.id\n         inner join jig_admin_data \"jad\" on jad.jig_id = jig.id\nwhere (last_synced_at is null\n   or (updated_at is not null and last_synced_at < updated_at))\n   and draft_or_live is not NULL\nlimit 100 for no key update skip locked;\n     ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "language!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "description!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "translated_description!: Json<HashMap<String, String>>",
+          "type_info": "Jsonb"
+        },
+        {
+          "ordinal": 5,
+          "name": "affiliations!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 6,
+          "name": "affiliation_names!",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 7,
+          "name": "resource_types!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 8,
+          "name": "resource_type_names!",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 9,
+          "name": "age_ranges!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 10,
+          "name": "age_range_names!",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 11,
+          "name": "goals!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 12,
+          "name": "goal_names!",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 13,
+          "name": "categories!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 14,
+          "name": "category_names!",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 15,
+          "name": "privacy_level!: PrivacyLevel",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 16,
+          "name": "jig_focus!: JigFocus",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 17,
+          "name": "author_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 18,
+          "name": "locked!",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 19,
+          "name": "other_keywords!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 20,
+          "name": "translated_keywords!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 21,
+          "name": "author_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 22,
+          "name": "rating",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 23,
+          "name": "likes!",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 24,
+          "name": "plays!",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 25,
+          "name": "published_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 26,
+          "name": "blocked!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        null,
+        true,
+        false,
+        null,
+        true,
+        false
+      ]
+    }
+  },
   "29a0f9148a4fa42c0e68388554eca61b27aae6fd7ce9dda131ad6571523833ad": {
     "query": "select\n  id as \"id!\",\n  case\n    kind -- PngCanvasImage\n    when 0 then 3 -- PngStickerImage\n    when 1 then 0\n  end :: int2 \"kind!: MediaKind\",\n  created_at as \"created_at!\",\n  updated_at,\n  uploaded_at,\n  0 :: int2 as \"library!: MediaLibrary\" -- global\nfrom\n  image_metadata\n  left join image_upload on image_id = id\nunion all\nselect\n  id as \"id!\",\n  case\n    kind -- GifAnimation\n    when 0 then 1 -- SpritesheetAnimation\n    when 1 then 2\n  end :: int2 \"kind!: MediaKind\",\n  created_at as \"created_at!\",\n  updated_at,\n  uploaded_at,\n  0 :: int2 as \"library!: MediaLibrary\" -- global\nfrom\n  animation_metadata\n  left join global_animation_upload on animation_id = id\nunion all\nselect\n  id as \"id!\",\n  -- PngStickerImage\n  0 :: int2 as \"kind!: MediaKind\",\n  created_at as \"created_at!\",\n  updated_at,\n  uploaded_at,\n  1 :: int2 as \"library!: MediaLibrary\" -- user\nfrom\n  user_image_library\n  left join user_image_upload on image_id = id\nunion all\nselect\n  id as \"id!\",\n  -- Mp3Audio\n  4 :: int2 as \"kind!: MediaKind\",\n  created_at as \"created_at!\",\n  updated_at,\n  uploaded_at,\n  1 :: int2 as \"library!: MediaLibrary\" -- user\nfrom\n  user_audio_library\n  left join user_audio_upload on audio_id = id\nunion all\nselect\n  id as \"id!\",\n  kind as \"kind!: MediaKind\",\n  created_at as \"created_at!\",\n  updated_at,\n  uploaded_at,\n  2 :: int2 as \"library!: MediaLibrary\" -- web\nfrom web_media_upload wmu\ninner join web_media_library wml on wml.kind = kind\nwhere wmu.media_id = media_id ",
     "describe": {
@@ -1333,34 +1484,6 @@
         null,
         null,
         null
-      ]
-    }
-  },
-  "2afb5e944e653036cac881d1758257055a14ebb5a521fc0caad5b0cdd03a36fd": {
-    "query": "\n    select live_id                                  as \"live_id!\",\n           draft_id                                 as \"draft_id!\"\n    from jig\n        left join jig_admin_data \"admin\" on admin.jig_id = jig.id\n        left join jig_data \"jig_dt\" on jig_dt.id = jig.draft_id\n        left join jig_data \"jig_tt\" on jig_tt.id = jig.live_id\n    where blocked = false\n        and (jig_dt.draft_or_live is not null and jig_tt.draft_or_live is not null)\n        and ((jig_dt.draft_or_live = $3 or $3 is null)\n              or (jig_tt.draft_or_live = $3 or $3 is null))\n        and (author_id = $1 or $1 is null)\n        and (jig_focus = $2 or $2 is null)\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "live_id!",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "draft_id!",
-          "type_info": "Uuid"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int2",
-          "Int2"
-        ]
-      },
-      "nullable": [
-        true,
-        true
       ]
     }
   },
@@ -1614,6 +1737,36 @@
         ]
       },
       "nullable": []
+    }
+  },
+  "37c9950cb3f677051bb319ed1c3fa3dcaa4f4826639c44667af2402e361425f9": {
+    "query": "\n    select live_id                                  as \"live_id!\",\n           draft_id                                 as \"draft_id!\"\n    from jig\n        left join jig_admin_data \"admin\" on admin.jig_id = jig.id\n        left join jig_data \"jig_dt\" on jig_dt.id = jig.draft_id\n        left join jig_data \"jig_tt\" on jig_tt.id = jig.live_id\n    where (jig_dt.draft_or_live is not null and jig_tt.draft_or_live is not null)\n        and ((jig_dt.draft_or_live = $3 or $3 is null)\n              or (jig_tt.draft_or_live = $3 or $3 is null))\n        and (author_id = $1 or $1 is null)\n        and (jig_focus = $2 or $2 is null)\n        and (blocked = $5 or $5 is null)\n        and (jig_dt.privacy_level = any($4) or jig_tt.privacy_level = any($4) or $4 = '{}')\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "live_id!",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "draft_id!",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2",
+          "Int2",
+          "Int2Array",
+          "Bool"
+        ]
+      },
+      "nullable": [
+        true,
+        true
+      ]
     }
   },
   "3918bfb62ce2fc30caba4d3714bb94f494ec5f1f3e00a8ec1c55784c347bec9a": {
@@ -3266,174 +3419,6 @@
       },
       "nullable": [
         null
-      ]
-    }
-  },
-  "71109aad836d2e9c03986757b79a7f1b3a2b6db5310b17d3838e211d2af200bb": {
-    "query": "\nselect jig.id,\n       display_name                                                                                                 as \"name\",\n       language                                                                                                     as \"language!\",\n       description                                                                                                  as \"description!\",\n       translated_description                                                                                       as \"translated_description!: Json<HashMap<String, String>>\",\n       array((select affiliation_id\n              from jig_data_affiliation\n              where jig_data_id = jig_data.id))                                                                     as \"affiliations!\",\n       array((select affiliation.display_name\n              from affiliation\n                       inner join jig_data_affiliation on affiliation.id = jig_data_affiliation.affiliation_id\n              where jig_data_affiliation.jig_data_id = jig_data.id))                                                as \"affiliation_names!\",\n        array((select resource_type_id\n                from jig_data_additional_resource\n                where jig_data_id = jig_data.id))                                                                     as \"resource_types!\",\n        array((select resource_type.display_name\n              from resource_type\n                        inner join jig_data_additional_resource on resource_type.id = jig_data_additional_resource.resource_type_id\n             where jig_data_additional_resource.jig_data_id = jig_data.id))                                         as \"resource_type_names!\",\n       array((select age_range_id\n              from jig_data_age_range\n              where jig_data_id = jig_data.id))                                                                     as \"age_ranges!\",\n       array((select age_range.display_name\n              from age_range\n                       inner join jig_data_age_range on age_range.id = jig_data_age_range.age_range_id\n              where jig_data_age_range.jig_data_id = jig_data.id))                                                  as \"age_range_names!\",\n       array((select goal_id from jig_data_goal where jig_data_id = jig_data.id))                                   as \"goals!\",\n       array((select goal.display_name\n              from goal\n                       inner join jig_data_goal on goal.id = jig_data_goal.goal_id\n              where jig_data_goal.jig_data_id = jig_data.id))                                                       as \"goal_names!\",\n       array((select category_id\n              from jig_data_category\n              where jig_data_id = jig_data.id))                                                                     as \"categories!\",\n       array((select name\n              from category\n                       inner join jig_data_category on category.id = jig_data_category.category_id\n              where jig_data_category.jig_data_id = jig_data.id))                                                   as \"category_names!\",\n       privacy_level                                                                                                as \"privacy_level!: PrivacyLevel\",\n       jig_focus                                                                                                    as \"jig_focus!: JigFocus\",\n       author_id                                                                                                    as \"author_id\",\n       locked                                                                                                       as \"locked!\",\n       other_keywords                                                                                               as \"other_keywords!\",\n       translated_keywords                                                                                          as \"translated_keywords!\",\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = jig.author_id)                                                                 as \"author_name\",\n        rating                                                                                                      as \"rating\",\n        liked_count                                                                                                 as \"likes!\",\n        (\n            select play_count\n            from jig_play_count \"jpc\"\n            where jpc.jig_id = jig.id\n        )                                                                                                           as \"plays!\",\n        published_at                                                                                                as \"published_at\"\nfrom jig\n         inner join jig_data on live_id = jig_data.id\n         inner join jig_admin_data \"jad\" on jad.jig_id = jig.id\nwhere (last_synced_at is null\n   or (updated_at is not null and last_synced_at < updated_at))\n   and draft_or_live is not NULL\nlimit 100 for no key update skip locked;\n     ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "language!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 3,
-          "name": "description!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 4,
-          "name": "translated_description!: Json<HashMap<String, String>>",
-          "type_info": "Jsonb"
-        },
-        {
-          "ordinal": 5,
-          "name": "affiliations!",
-          "type_info": "UuidArray"
-        },
-        {
-          "ordinal": 6,
-          "name": "affiliation_names!",
-          "type_info": "TextArray"
-        },
-        {
-          "ordinal": 7,
-          "name": "resource_types!",
-          "type_info": "UuidArray"
-        },
-        {
-          "ordinal": 8,
-          "name": "resource_type_names!",
-          "type_info": "TextArray"
-        },
-        {
-          "ordinal": 9,
-          "name": "age_ranges!",
-          "type_info": "UuidArray"
-        },
-        {
-          "ordinal": 10,
-          "name": "age_range_names!",
-          "type_info": "TextArray"
-        },
-        {
-          "ordinal": 11,
-          "name": "goals!",
-          "type_info": "UuidArray"
-        },
-        {
-          "ordinal": 12,
-          "name": "goal_names!",
-          "type_info": "TextArray"
-        },
-        {
-          "ordinal": 13,
-          "name": "categories!",
-          "type_info": "UuidArray"
-        },
-        {
-          "ordinal": 14,
-          "name": "category_names!",
-          "type_info": "TextArray"
-        },
-        {
-          "ordinal": 15,
-          "name": "privacy_level!: PrivacyLevel",
-          "type_info": "Int2"
-        },
-        {
-          "ordinal": 16,
-          "name": "jig_focus!: JigFocus",
-          "type_info": "Int2"
-        },
-        {
-          "ordinal": 17,
-          "name": "author_id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 18,
-          "name": "locked!",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 19,
-          "name": "other_keywords!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 20,
-          "name": "translated_keywords!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 21,
-          "name": "author_name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 22,
-          "name": "rating",
-          "type_info": "Int2"
-        },
-        {
-          "ordinal": 23,
-          "name": "likes!",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 24,
-          "name": "plays!",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 25,
-          "name": "published_at",
-          "type_info": "Timestamptz"
-        }
-      ],
-      "parameters": {
-        "Left": []
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        false,
-        false,
-        true,
-        false,
-        false,
-        false,
-        null,
-        true,
-        false,
-        null,
-        true
       ]
     }
   },
@@ -6066,6 +6051,30 @@
       },
       "nullable": [
         true
+      ]
+    }
+  },
+  "e0fb2ebfec5eabf81803639e34fcbd088b41d8216b9a26859e7d33b1717cf4d5": {
+    "query": "\nselect count(*) as \"count!: i64\"\nfrom jig\nleft join jig_admin_data \"admin\" on admin.jig_id = jig.id\nleft join jig_data \"jig_dt\" on jig_dt.id = jig.draft_id\nleft join jig_data \"jig_tt\" on jig_tt.id = jig.live_id\nwhere (author_id = $1 or $1 is null)\n    and (jig_focus = $2 or $2 is null)\n    and ((jig_dt.draft_or_live = $3 or $3 is null)\n    or (jig_tt.draft_or_live = $3 or $3 is null))\n    and (jig_dt.privacy_level = any($4) or jig_tt.privacy_level = any($4) or $4 = '{}')\n    and (blocked = $5 or $5 is null)\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "count!: i64",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2",
+          "Int2",
+          "Int2Array",
+          "Bool"
+        ]
+      },
+      "nullable": [
+        null
       ]
     }
   },
