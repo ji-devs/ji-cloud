@@ -8,7 +8,7 @@ use utils::prelude::api_with_auth_empty;
 use wasm_bindgen_futures::spawn_local;
 use std::marker::PhantomData;
 use std::rc::Rc;
-use crate::module::_groups::design::design_ext::DesignExt;
+use crate::module::_groups::design::edit::design_ext::DesignExt;
 use crate::theme_selector::state::{ThemeSelector, ThemeSelectorCallbacks};
 use crate::module::_common::edit::entry::prelude::BaseExt;
 

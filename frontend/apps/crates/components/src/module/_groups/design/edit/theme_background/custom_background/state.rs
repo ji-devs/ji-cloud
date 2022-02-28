@@ -10,7 +10,7 @@ use crate::{
         state::{ImageSearchKind, ImageSearchOptions, State as ImageSearchState},
     },
     tabs::MenuTabKind,
-    module::{_common::edit::entry::prelude::BaseExt, _groups::design::design_ext::DesignExt},
+    module::{_common::edit::entry::prelude::BaseExt, _groups::design::edit::design_ext::DesignExt},
     color_select::state::State as ColorPickerState,
 };
 

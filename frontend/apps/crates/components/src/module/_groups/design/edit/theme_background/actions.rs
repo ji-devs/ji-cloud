@@ -3,7 +3,7 @@ use std::rc::Rc;
 use dominator::clone;
 use shared::domain::jig::module::body::StepExt;
 
-use crate::module::{_common::edit::entry::prelude::BaseExt, _groups::design::design_ext::DesignExt};
+use crate::module::{_common::edit::entry::prelude::BaseExt, _groups::design::edit::design_ext::DesignExt};
 
 use super::{ThemeBackground, custom_background::CustomBackground};
 
@@ -19,7 +19,7 @@ impl<Step, Base> ThemeBackground<Step, Base> where
         }));
 
         let custom_background = CustomBackground::new(
-        Rc::clone(&state.base),
+            Rc::clone(&state.base),
             on_close
         );
 

@@ -4,7 +4,7 @@ use components::{
         callbacks::Callbacks as StickersCallbacks,
         state::{Sticker, Stickers},
     },
-    text_editor::{callbacks::Callbacks as TextEditorCallbacks, state::State as TextEditorState}, module::_groups::design::design_ext::DesignExt,
+    text_editor::{callbacks::Callbacks as TextEditorCallbacks, state::State as TextEditorState}, module::_groups::design::edit::design_ext::DesignExt,
 };
 use components::{module::_common::edit::prelude::*, stickers::video::state::Video};
 use dominator::clone;

@@ -1,4 +1,4 @@
-use crate::module::_groups::design::design_ext::DesignExt;
+use crate::module::_groups::design::edit::design_ext::DesignExt;
 use crate::module::_common::edit::entry::prelude::BaseExt;
 use dominator::{clone, html, Dom};
 use shared::domain::jig::module::body::StepExt;

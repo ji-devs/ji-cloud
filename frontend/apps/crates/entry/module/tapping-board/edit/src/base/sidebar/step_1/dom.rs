@@ -1,5 +1,5 @@
 use super::state::*;
-use components::module::_groups::design::theme_background::ThemeBackground;
+use components::module::_groups::design::edit::theme_background::ThemeBackground;
 use dominator::Dom;
 use std::rc::Rc;
 

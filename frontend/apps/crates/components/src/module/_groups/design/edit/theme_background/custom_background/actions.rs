@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use shared::domain::jig::module::body::StepExt;
-use crate::{module::{_common::edit::entry::prelude::BaseExt, _groups::design::design_ext::DesignExt}, backgrounds::actions::Layer};
+use crate::{module::{_common::edit::entry::prelude::BaseExt, _groups::design::edit::design_ext::DesignExt}, backgrounds::actions::Layer};
 
 use super::state::CustomBackground;
 

@@ -1,6 +1,3 @@
-// theme selector
-import "@elements/module/_groups/design/edit/sidebar/widgets/theme-selector/option";
-
 //wysiwyg text editor
 import "@elements/module/_common/edit/widgets/text-editor-controls/text-editor-controls";
 import "@elements/module/_common/edit/widgets/text-editor-controls/button";
@@ -24,3 +21,4 @@ import "@elements/module/_common/edit/widgets/trace/edit-reshape-menu-btn";
 import "@elements/module/_common/edit/widgets/theme-selector/container";
 import "@elements/module/_common/edit/widgets/theme-selector/custom-background";
 import "@elements/module/_common/edit/widgets/theme-selector/background-color";
+import "@elements/module/_groups/design/edit/sidebar/widgets/theme-selector/option";

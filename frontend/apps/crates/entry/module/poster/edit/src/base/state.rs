@@ -1,6 +1,6 @@
 use components::module::_common::edit::prelude::*;
 
-use components::module::_groups::design::design_ext::DesignExt;
+use components::module::_groups::design::edit::design_ext::DesignExt;
 use components::{
     backgrounds::{callbacks::Callbacks as BackgroundsCallbacks, state::Backgrounds},
     stickers::{
