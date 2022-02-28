@@ -1,4 +1,7 @@
-use crate::module::_groups::design::edit::design_ext::DesignExt;
+use crate::module::_groups::design::edit::{
+    design_ext::DesignExt,
+    theme_background::STR_DESIGN_FROM_SCRATCH,
+};
 use crate::module::_common::edit::entry::prelude::BaseExt;
 use dominator::{clone, html, Dom};
 use shared::domain::jig::module::body::StepExt;
@@ -8,9 +11,6 @@ use utils::prelude::*;
 use crate::theme_selector::dom::render_design as render_theme_selector;
 
 use super::ThemeBackground;
-
-
-const STR_DESIGN_FROM_SCRATCH: &str = "Design from scratch";
 
 impl<Step, Base> ThemeBackground<Step, Base> where
     Step: StepExt + 'static,

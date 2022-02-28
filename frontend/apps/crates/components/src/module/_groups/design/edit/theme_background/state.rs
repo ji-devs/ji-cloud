@@ -14,6 +14,7 @@ use crate::module::_common::edit::entry::prelude::BaseExt;
 
 use super::custom_background::CustomBackground;
 
+pub const STR_DESIGN_FROM_SCRATCH: &str = "Design from scratch";
 
 pub struct ThemeBackground<Step, Base> where
     Step: StepExt + 'static,

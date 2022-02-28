@@ -1,7 +1,5 @@
-import { LitElement, html, css, customElement } from "lit-element";
+import { LitElement, html, css, customElement, property } from "lit-element";
 import "@elements/core/buttons/fa-button";
-
-const STR_HEADER = "Design from scratch";
 
 @customElement("theme-custom-background")
 export class _ extends LitElement {
@@ -23,28 +21,61 @@ export class _ extends LitElement {
                     display: grid;
                     grid-template-rows: min-content minmax(0px, 1fr);
                     row-gap: 24px;
+                    scrollbar-width: thin;
+                    scrollbar-color: #e7f0fe transparent;
+                }
+                :host([tabbed]) .main {
                     overflow: hidden;
+                }
+                :host(:not([tabbed])) .main {
+                    padding: 12px;
+                    overflow: auto;
+                }
+                .main::-webkit-scrollbar-track {
+                    background-color: transparent;
+                }
+                .main::-webkit-scrollbar {
+                    width: 8px;
+                }
+                .main::-webkit-scrollbar-thumb {
+                    border-radius: 4px;
+                    background-color: #c1c1c1;
+                }
+                .main::-webkit-scrollbar-button {
+                    background-color: transparent;
+                    height: 8px;
                 }
                 h2 {
                     font-size: 24px;
                     font-weight: 600;
                     color: #fd7076;
+                    margin: 0;
+                }
+                :host([tabbed]) h2 {
                     margin: 0 12px;
                 }
                 ::slotted([slot=close]) {
                     grid-area: 1 / 1;
                     justify-self: end;
+                    align-self: start;
                     margin-top: 16px;
                     margin-right: 16px;
+                    z-index: 1;
                 }
             `,
         ];
     }
 
+    @property({ type: Boolean, reflect: true })
+    tabbed: boolean = false;
+
+    @property()
+    header = "";
+
     render() {
         return html`
             <div class="main">
-                <h2>${STR_HEADER}</h2>
+                <h2>${this.header}</h2>
                 <slot></slot>
             </div>
             <slot name="close"></slot>
