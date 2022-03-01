@@ -1378,6 +1378,19 @@ where jig_id = $1 and $2 is distinct from blocked
         )
         .execute(&mut txn)
         .await?;
+
+        sqlx::query!(
+            //language=SQL
+            r#"
+update jig_data
+set updated_at = now()
+from jig
+where jig.live_id = $1
+            "#,
+            jig_id.0,
+        )
+        .execute(&mut txn)
+        .await?;
     }
 
     if let Some(curated) = curated {
