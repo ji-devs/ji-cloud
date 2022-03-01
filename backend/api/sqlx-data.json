@@ -1781,98 +1781,6 @@
       ]
     }
   },
-  "3918bfb62ce2fc30caba4d3714bb94f494ec5f1f3e00a8ec1c55784c347bec9a": {
-    "query": "\nselect jig.id                                       as \"id!: JigId\",\n       creator_id,\n       author_id                                as \"author_id\",\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = author_id) as \"author_name\",\n       live_id                                  as \"live_id!\",\n       draft_id                                 as \"draft_id!\",\n       published_at,\n       liked_count                              as \"liked_count!\",\n       (\n           select play_count\n           from jig_play_count\n           where jig_play_count.jig_id = jig.id\n       )                                        as \"play_count!\",\n       rating                                   as \"rating?: JigRating\",\n       blocked                                  as \"blocked!\",\n       curated                                  as \"curated!\",\n       jig_focus                                as \"jig_focus!: JigFocus\"\nfrom jig\n         inner join unnest($1::uuid[])\n    with ordinality t(id, ord) using (id)\n    inner join jig_admin_data \"admin\" on admin.jig_id = jig.id\nwhere blocked = false\n    ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id!: JigId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "creator_id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 2,
-          "name": "author_id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 3,
-          "name": "author_name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 4,
-          "name": "live_id!",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 5,
-          "name": "draft_id!",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 6,
-          "name": "published_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 7,
-          "name": "liked_count!",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 8,
-          "name": "play_count!",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 9,
-          "name": "rating?: JigRating",
-          "type_info": "Int2"
-        },
-        {
-          "ordinal": 10,
-          "name": "blocked!",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 11,
-          "name": "curated!",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 12,
-          "name": "jig_focus!: JigFocus",
-          "type_info": "Int2"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "UuidArray"
-        ]
-      },
-      "nullable": [
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true
-      ]
-    }
-  },
   "399f537a8091d51635c2cd32bf16449c26317d1f56c576064968a2bfd57953e0": {
     "query": "\nupdate locale_entry\nset\n    bundle_id = coalesce(bundle_id, $2),\n    item_kind_id = coalesce($3, item_kind_id),\n    english = coalesce($4, english),\n    hebrew = coalesce($5, hebrew),\n    status = coalesce($6, status),\n    in_app = coalesce($7, in_app),\n    in_element = coalesce($8, in_element),\n    in_mock = coalesce($9, in_mock),\n    section = case when $10 then $11 else section end,\n    zeplin_reference = case when $12 then $13 else zeplin_reference end,\n    comments = case when $14 then $15 else comments end\nwhere id = $1",
     "describe": {
@@ -3347,6 +3255,99 @@
         ]
       },
       "nullable": []
+    }
+  },
+  "6af7e706432d0cc98da7edf38892fb6f6488f2cb54996538233480b3a12103d0": {
+    "query": "\nselect jig.id                                       as \"id!: JigId\",\n       creator_id,\n       author_id                                as \"author_id\",\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = author_id) as \"author_name\",\n       live_id                                  as \"live_id!\",\n       draft_id                                 as \"draft_id!\",\n       published_at,\n       liked_count                              as \"liked_count!\",\n       (\n           select play_count\n           from jig_play_count\n           where jig_play_count.jig_id = jig.id\n       )                                        as \"play_count!\",\n       rating                                   as \"rating?: JigRating\",\n       blocked                                  as \"blocked!\",\n       curated                                  as \"curated!\",\n       jig_focus                                as \"jig_focus!: JigFocus\"\nfrom jig\n         inner join unnest($1::uuid[])\n    with ordinality t(id, ord) using (id)\n    inner join jig_admin_data \"admin\" on admin.jig_id = jig.id\n    where blocked = $2 or $2 is null\n    ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id!: JigId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "creator_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 2,
+          "name": "author_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 3,
+          "name": "author_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "live_id!",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 5,
+          "name": "draft_id!",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 6,
+          "name": "published_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 7,
+          "name": "liked_count!",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 8,
+          "name": "play_count!",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 9,
+          "name": "rating?: JigRating",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 10,
+          "name": "blocked!",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 11,
+          "name": "curated!",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 12,
+          "name": "jig_focus!: JigFocus",
+          "type_info": "Int2"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "UuidArray",
+          "Bool"
+        ]
+      },
+      "nullable": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
     }
   },
   "6db1735f61450670c2ca115000a413f3b2eb9d4874eeec7e749f6243b2db5f7d": {

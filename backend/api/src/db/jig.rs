@@ -340,6 +340,7 @@ pub async fn get_by_ids(
     db: &PgPool,
     ids: &[Uuid],
     draft_or_live: DraftOrLive,
+    blocked: Option<bool>,
 ) -> sqlx::Result<Vec<JigResponse>> {
     let mut txn = db.begin().await?;
 
@@ -369,9 +370,10 @@ from jig
          inner join unnest($1::uuid[])
     with ordinality t(id, ord) using (id)
     inner join jig_admin_data "admin" on admin.jig_id = jig.id
-where blocked = false
+    where blocked = $2 or $2 is null
     "#,
         ids,
+        blocked
     )
     .fetch_all(&mut txn)
     .instrument(tracing::info_span!("query jigs"))
