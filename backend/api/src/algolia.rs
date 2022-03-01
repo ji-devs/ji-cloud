@@ -854,7 +854,6 @@ impl Client {
         other_keywords: Option<String>,
         translated_keywords: Option<String>,
         privacy_level: &[PrivacyLevel],
-        blocked: Option<bool>,
     ) -> anyhow::Result<Option<(Vec<Uuid>, u32, u64)>> {
         let mut and_filters = algolia::filter::AndFilter { filters: vec![] };
 
@@ -898,16 +897,6 @@ impl Client {
                 filter: FacetFilter {
                     facet_name: "language".to_owned(),
                     value: language,
-                },
-                invert: false,
-            }))
-        }
-
-        if let Some(blocked) = blocked {
-            and_filters.filters.push(Box::new(CommonFilter {
-                filter: FacetFilter {
-                    facet_name: "blocked".to_owned(),
-                    value: blocked.to_string(),
                 },
                 invert: false,
             }))

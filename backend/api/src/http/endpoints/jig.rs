@@ -358,12 +358,11 @@ async fn search(
             query.other_keywords,
             query.translated_keywords,
             &privacy_level,
-            blocked,
         )
         .await?
         .ok_or_else(|| error::Service::DisabledService(ServiceKind::Algolia))?;
 
-    let jigs: Vec<_> = db::jig::get_by_ids(db.as_ref(), &ids, DraftOrLive::Live).await?;
+    let jigs: Vec<_> = db::jig::get_by_ids(db.as_ref(), &ids, DraftOrLive::Live, blocked).await?;
 
     Ok(Json(JigSearchResponse {
         jigs,
@@ -443,21 +442,17 @@ async fn auth_claims(
     privacy_level: Vec<PrivacyLevel>,
     blocked: Option<bool>,
 ) -> Result<(Option<Uuid>, Vec<PrivacyLevel>, Option<bool>), error::Auth> {
-    log::warn!("privacy: {:?}", privacy_level);
-    log::warn!("author: {:?}", author_id);
+    if claims.is_none() && author_id == Some(UserOrMe::Me) {
+        return Err(error::Auth::Forbidden);
+    };
 
     if let Some(user) = claims {
         let is_admin = db::jig::is_admin(&*db, user.0.user_id).await?;
 
         if let Some(author) = author_id {
             let (author_id, privacy, blocked) = match author {
-                UserOrMe::Me => {
-                    log::warn!("me");
-                    (Some(user.0.user_id), privacy_level, blocked)
-                }
+                UserOrMe::Me => (Some(user.0.user_id), privacy_level, blocked),
                 UserOrMe::User(id) => {
-                    log::warn!("user");
-
                     if is_admin {
                         let block = if let Some(block) = blocked {
                             Some(block)
@@ -470,11 +465,8 @@ async fn auth_claims(
                     }
                 }
             };
-            log::warn!("result: {:?} {:?} {:?}", author_id, privacy, blocked);
             return Ok((author_id, privacy, blocked));
         } else {
-            log::warn!("Nothing");
-
             if is_admin {
                 return Ok((None, privacy_level, None));
             } else {
@@ -490,7 +482,7 @@ async fn auth_claims(
         if let Some(id) = author_id {
             return Ok((id, vec![PrivacyLevel::Public], Some(false)));
         } else {
-            return Err(error::Auth::Forbidden);
+            return Ok((None, vec![PrivacyLevel::Public], Some(false)));
         }
     };
 }
