@@ -461,18 +461,6 @@ export class _ extends LitElement {
                 </section>
                 <section class="bottom-section">
                     <a
-                        class="kid-safe"
-                        href="https://www.kidsafeseal.com/certifiedproducts/jitap_app.html"
-                        target="_blank"
-                    >
-                        <img
-                            border="0"
-                            width="588"
-                            alt="Ji Tap - Create, Play & Inspire - Jewish games is certified by the kidSAFE Seal Program."
-                            src="https://www.kidsafeseal.com/sealimage/759811657582664246/jitap_app_extralarge_darktm.png"
-                        />
-                    </a>
-                    <a
                         href="https://www.jewishinteractive.org/privacy-policy/"
                         target="_blank"
                         >${STR_PRIVACY}</a
