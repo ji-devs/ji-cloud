@@ -552,19 +552,16 @@ pub async fn browse(
     let jig = sqlx::query!(
         //language=SQL
         r#"
-    select live_id                                  as "live_id!",
-           draft_id                                 as "draft_id!"
-    from jig
-        left join jig_admin_data "admin" on admin.jig_id = jig.id
-        left join jig_data "jig_dt" on jig_dt.id = jig.draft_id
-        left join jig_data "jig_tt" on jig_tt.id = jig.live_id
-    where (jig_dt.draft_or_live is not null and jig_tt.draft_or_live is not null)
-        and ((jig_dt.draft_or_live = $3 or $3 is null)
-              or (jig_tt.draft_or_live = $3 or $3 is null))
+    select jig_data.id as "id!"
+    from jig_data
+          inner join jig on (draft_id = jig_data.id or live_id = jig_data.id)
+          inner join jig_admin_data "admin" on admin.jig_id = jig.id
+    where (jig_data.draft_or_live = $3 or $3 is null)
         and (author_id = $1 or $1 is null)
         and (jig_focus = $2 or $2 is null)
         and (blocked = $5 or $5 is null)
-        and (jig_dt.privacy_level = any($4) or jig_tt.privacy_level = any($4) or $4 = '{}')
+        and (jig_data.privacy_level = any($4) or $4 = '{}')
+    order by coalesce(updated_at, created_at) desc
         "#,
         author_id,
         jig_focus.map(|it| it as i16),
@@ -575,18 +572,7 @@ pub async fn browse(
     .fetch_all(&mut txn)
     .await?;
 
-    let jig_data_ids: Vec<Uuid> = if let Some(draft_or_live) = draft_or_live {
-        let choose = match draft_or_live {
-            DraftOrLive::Draft => jig.iter().map(|it| it.draft_id).collect(),
-            DraftOrLive::Live => jig.iter().map(|it| it.live_id).collect(),
-        };
-        choose
-    } else {
-        let draft_ids: Vec<Uuid> = jig.iter().map(|it| it.draft_id).collect();
-        let live_ids: Vec<Uuid> = jig.iter().map(|it| it.live_id).collect();
-
-        [&draft_ids[..], &live_ids[..]].concat()
-    };
+    let jig_data_ids: Vec<Uuid> = jig.iter().map(|it| it.id).collect();
 
     let count = jig_data_ids.len() as u64;
 
@@ -668,7 +654,7 @@ limit 20
     )
         .fetch_all(&mut txn).await?;
 
-    let v = jig_data
+    let v: Vec<_> = jig_data
         .into_iter()
         .map(|jig_data_row| JigResponse {
             id: jig_data_row.jig_id,
@@ -993,7 +979,6 @@ where id is not distinct from $3
     .await?;
 
     txn.commit().await?;
-
     Ok(())
 }
 
@@ -1039,13 +1024,11 @@ pub async fn filtered_count(
 select count(*) as "count!: i64"
 from jig
 left join jig_admin_data "admin" on admin.jig_id = jig.id
-left join jig_data "jig_dt" on jig_dt.id = jig.draft_id
-left join jig_data "jig_tt" on jig_tt.id = jig.live_id
+left join jig_data on (draft_id = jig_data.id or live_id = jig_data.id)
 where (author_id = $1 or $1 is null)
+    and (jig_data.draft_or_live = $3 or $3 is null)
     and (jig_focus = $2 or $2 is null)
-    and ((jig_dt.draft_or_live = $3 or $3 is null)
-    or (jig_tt.draft_or_live = $3 or $3 is null))
-    and (jig_dt.privacy_level = any($4) or jig_tt.privacy_level = any($4) or $4 = '{}')
+    and (jig_data.privacy_level = any($4) or $4 = '{}')
     and (blocked = $5 or $5 is null)
 "#,
         author_id,

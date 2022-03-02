@@ -1751,36 +1751,6 @@
       "nullable": []
     }
   },
-  "37c9950cb3f677051bb319ed1c3fa3dcaa4f4826639c44667af2402e361425f9": {
-    "query": "\n    select live_id                                  as \"live_id!\",\n           draft_id                                 as \"draft_id!\"\n    from jig\n        left join jig_admin_data \"admin\" on admin.jig_id = jig.id\n        left join jig_data \"jig_dt\" on jig_dt.id = jig.draft_id\n        left join jig_data \"jig_tt\" on jig_tt.id = jig.live_id\n    where (jig_dt.draft_or_live is not null and jig_tt.draft_or_live is not null)\n        and ((jig_dt.draft_or_live = $3 or $3 is null)\n              or (jig_tt.draft_or_live = $3 or $3 is null))\n        and (author_id = $1 or $1 is null)\n        and (jig_focus = $2 or $2 is null)\n        and (blocked = $5 or $5 is null)\n        and (jig_dt.privacy_level = any($4) or jig_tt.privacy_level = any($4) or $4 = '{}')\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "live_id!",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "draft_id!",
-          "type_info": "Uuid"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int2",
-          "Int2",
-          "Int2Array",
-          "Bool"
-        ]
-      },
-      "nullable": [
-        true,
-        true
-      ]
-    }
-  },
   "399f537a8091d51635c2cd32bf16449c26317d1f56c576064968a2bfd57953e0": {
     "query": "\nupdate locale_entry\nset\n    bundle_id = coalesce(bundle_id, $2),\n    item_kind_id = coalesce($3, item_kind_id),\n    english = coalesce($4, english),\n    hebrew = coalesce($5, hebrew),\n    status = coalesce($6, status),\n    in_app = coalesce($7, in_app),\n    in_element = coalesce($8, in_element),\n    in_mock = coalesce($9, in_mock),\n    section = case when $10 then $11 else section end,\n    zeplin_reference = case when $12 then $13 else zeplin_reference end,\n    comments = case when $14 then $15 else comments end\nwhere id = $1",
     "describe": {
@@ -5537,6 +5507,30 @@
       ]
     }
   },
+  "bceb6a9e161a3511d23e097488b2ad85ec88f00ee5046304363786d85e8db4c6": {
+    "query": "\n    select jig_data.id as \"id!\"\n    from jig_data\n          inner join jig on (draft_id = jig_data.id or live_id = jig_data.id)\n          inner join jig_admin_data \"admin\" on admin.jig_id = jig.id\n    where (jig_data.draft_or_live = $3 or $3 is null)\n        and (author_id = $1 or $1 is null)\n        and (jig_focus = $2 or $2 is null)\n        and (blocked = $5 or $5 is null)\n        and (jig_data.privacy_level = any($4) or $4 = '{}')\n    order by coalesce(updated_at, created_at) desc\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id!",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2",
+          "Int2",
+          "Int2Array",
+          "Bool"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
   "bfd314e70437482954c5dfb3a40ab08990a0bea43779d810e9dd903e87e10c81": {
     "query": "\nupdate jig_admin_data\nset curated = coalesce($2, curated)\nwhere jig_id = $1 and $2 is distinct from curated\n            ",
     "describe": {
@@ -6067,30 +6061,6 @@
       ]
     }
   },
-  "e0fb2ebfec5eabf81803639e34fcbd088b41d8216b9a26859e7d33b1717cf4d5": {
-    "query": "\nselect count(*) as \"count!: i64\"\nfrom jig\nleft join jig_admin_data \"admin\" on admin.jig_id = jig.id\nleft join jig_data \"jig_dt\" on jig_dt.id = jig.draft_id\nleft join jig_data \"jig_tt\" on jig_tt.id = jig.live_id\nwhere (author_id = $1 or $1 is null)\n    and (jig_focus = $2 or $2 is null)\n    and ((jig_dt.draft_or_live = $3 or $3 is null)\n    or (jig_tt.draft_or_live = $3 or $3 is null))\n    and (jig_dt.privacy_level = any($4) or jig_tt.privacy_level = any($4) or $4 = '{}')\n    and (blocked = $5 or $5 is null)\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "count!: i64",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int2",
-          "Int2",
-          "Int2Array",
-          "Bool"
-        ]
-      },
-      "nullable": [
-        null
-      ]
-    }
-  },
   "e2879fa5a3c098c9cbcea806e2d51168ba02e91b8f928a7bc2cd1f7f36872faa": {
     "query": "\nwith cte as (\n    select distinct style_id as id\n    from image_style\n)\nselect id as \"id: ImageStyleId\", display_name, created_at, updated_at\nfrom cte inner join style using (id)\norder by index\n        ",
     "describe": {
@@ -6607,6 +6577,30 @@
         ]
       },
       "nullable": []
+    }
+  },
+  "feb832ba0196fbfa8d6ae6259f8b9d43bb994c72e4336042b2dc9d1845f3368b": {
+    "query": "\nselect count(*) as \"count!: i64\"\nfrom jig\nleft join jig_admin_data \"admin\" on admin.jig_id = jig.id\nleft join jig_data on (draft_id = jig_data.id or live_id = jig_data.id)\nwhere (author_id = $1 or $1 is null)\n    and (jig_data.draft_or_live = $3 or $3 is null)\n    and (jig_focus = $2 or $2 is null)\n    and (jig_data.privacy_level = any($4) or $4 = '{}')\n    and (blocked = $5 or $5 is null)\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "count!: i64",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2",
+          "Int2",
+          "Int2Array",
+          "Bool"
+        ]
+      },
+      "nullable": [
+        null
+      ]
     }
   }
 }
