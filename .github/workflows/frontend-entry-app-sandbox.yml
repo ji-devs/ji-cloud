@@ -81,7 +81,7 @@ jobs:
 
       - name: deploy to google cloud
         # run: gsutil -m rsync -d -r frontend/apps/dist/${{ matrix.app }}/js gs://ji-cloud-sandbox-frontend-origin-eu-001/${{ matrix.app }}/js
-        run: gsutil -m cp -Z -r frontend/apps/dist/${{ matrix.app }}/js gs://ji-cloud-sandbox-frontend-origin-eu-001/${{ matrix.app }}/js
+        run: gsutil -m cp -Z -r frontend/apps/dist/${{ matrix.app }}/js gs://ji-cloud-sandbox-frontend-origin-eu-001/${{ matrix.app }}
         
       - name: Notify slack of all status
         uses: pullreminders/slack-action@master
