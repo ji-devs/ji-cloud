@@ -13,44 +13,45 @@ impl AgeRangeVecExt for Vec<AgeRange> {
         if selected.len() == self.len() || selected.len() == 0 {
             STR_ALL_AGES.to_string()
         } else if selected.len() == 1 {
-            let age = self.iter().find(|age| selected.contains(&age.id));
-
-            if let Some(age) = age {
-                let age_text = age
-                    .short_display_name
-                    .as_ref()
-                    .unwrap_or(&age.display_name)
-                    .to_string();
-
-                age_text
-            } else {
-                String::new()
-            }
+            get_age_text(self, selected, false)
         } else {
-            let first_age = self.iter().find(|age| selected.contains(&age.id));
-            let last_age = self.iter().rev().find(|age| selected.contains(&age.id));
-
-            if let (Some(first_age), Some(last_age)) = (first_age, last_age) {
-                let first_age_text = first_age
-                    .short_display_name
-                    .as_ref()
-                    .unwrap_or(&first_age.display_name);
-
-                let last_age_text = last_age
-                    .short_display_name
-                    .as_ref()
-                    .unwrap_or(&last_age.display_name);
-
-                let mut age_text = String::new();
-
-                age_text.push_str(first_age_text);
+            let first_age_text = get_age_text(self, selected, false);
+            let last_age_text = get_age_text(self, selected, true);
+            let mut age_text = String::new();
+            if first_age_text != "" && last_age_text != "" {
+                age_text.push_str(&first_age_text);
                 age_text.push_str(STR_DASH);
-                age_text.push_str(last_age_text);
-
-                age_text
-            } else {
-                String::new()
+                age_text.push_str(&last_age_text);
             }
+            age_text
         }
+    }
+}
+
+fn get_age_text(ages: &Vec<AgeRange>, selected: &Vec<AgeRangeId>, get_last: bool) -> String {
+    match get_last {
+        false => ages
+            .iter()
+            .find(|age| selected.contains(&age.id))
+            .map(|age_range| {
+                age_range
+                    .short_display_name
+                    .as_ref()
+                    .unwrap_or(&age_range.display_name)
+                    .to_string()
+            })
+            .unwrap_or(String::new()),
+        true => ages
+            .iter()
+            .rev()
+            .find(|age| selected.contains(&age.id))
+            .map(|age_range| {
+                age_range
+                    .short_display_name
+                    .as_ref()
+                    .unwrap_or(&age_range.display_name)
+                    .to_string()
+            })
+            .unwrap_or(String::new()),
     }
 }
