@@ -1,13 +1,15 @@
-use std::{rc::Rc, cell::RefCell};
+use std::{cell::RefCell, rc::Rc};
 
 use dominator_helpers::futures::AsyncLoader;
-use futures_signals::{signal_vec::MutableVec, signal::Mutable};
-use shared::domain::{jig::JigResponse, meta::{AgeRange, Affiliation}};
+use futures_signals::{signal::Mutable, signal_vec::MutableVec};
+use shared::domain::meta::{Affiliation, AgeRange};
 use utils::routes::AdminCurationRoute;
+
+use super::jig::state::jig::EditableJig;
 
 pub struct Curation {
     pub route: Mutable<AdminCurationRoute>,
-    pub jigs: MutableVec<JigResponse>,
+    pub jigs: MutableVec<Rc<EditableJig>>,
     pub fetch_mode: RefCell<FetchMode>,
     pub loader: AsyncLoader,
     pub ages: Mutable<Vec<AgeRange>>,
@@ -34,5 +36,5 @@ impl Curation {
 #[derive(Clone, Debug)]
 pub enum FetchMode {
     Browse,
-    Search(String)
+    Search(String),
 }

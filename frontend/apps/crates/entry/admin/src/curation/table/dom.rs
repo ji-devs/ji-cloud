@@ -1,11 +1,17 @@
+use crate::curation::jig::state::jig::EditableJig;
+
 use super::state::*;
 use components::module::_common::thumbnail::ModuleThumbnail;
-use dominator::{clone, html, Dom, with_node};
-use futures_signals::{signal_vec::SignalVecExt, signal::{Signal, SignalExt}, map_ref};
-use shared::domain::{jig::JigResponse, meta::{AgeRangeId, AffiliationId}};
-use web_sys::HtmlSelectElement;
+use dominator::{clone, html, with_node, Dom};
+use futures_signals::{
+    map_ref,
+    signal::{Signal, SignalExt},
+    signal_vec::SignalVecExt,
+};
+use shared::domain::meta::{AffiliationId, AgeRangeId};
 use std::rc::Rc;
-use utils::{languages::Language, events, routes::AdminCurationRoute};
+use utils::{events, languages::Language, routes::AdminCurationRoute};
+use web_sys::HtmlSelectElement;
 
 impl CurationTable {
     pub fn render(self: Rc<Self>) -> Dom {
@@ -74,7 +80,7 @@ impl CurationTable {
                     state.curation_state.go_to_page(active_page + 1);
                 }))
             }))
-            .children_signal_vec(state.curation_state.jigs.signal_vec_cloned().map(clone!(state => move |jig: JigResponse| {
+            .children_signal_vec(state.curation_state.jigs.signal_vec_cloned().map(clone!(state => move |jig: Rc<EditableJig>| {
                 let jig_id = jig.id.clone();
                 html!("admin-curation-table-line", {
                     .child(html!("div", {
@@ -83,7 +89,7 @@ impl CurationTable {
                         .style("align-items", "start")
                         .style("padding", "0")
                         .children((0..3).filter_map(|i| {
-                            jig.jig_data.modules.get(i).map(|module| {
+                            jig.modules.get(i).map(|module| {
                                 ModuleThumbnail::render(
                                     Rc::new(ModuleThumbnail {
                                         jig_id: jig.id,
@@ -97,23 +103,53 @@ impl CurationTable {
                     }))
                     .children(&mut [
                         html!("a", {
-                            .text(&jig.jig_data.display_name)
+                            .text_signal(jig.display_name.signal_cloned())
                             .event(clone!(state => move |_: events::Click| {
                                 let route = AdminCurationRoute::Jig(jig_id);
                                 state.curation_state.navigate_to(route);
                             }))
                         }),
+
                         html!("span", {
-                            .text(&jig.author_name.unwrap_or_default())
-                        }),
-                        html!("star-rating", {
-                            .property("rating", jig.admin_data.rating.map(|rating| {
-                                rating as u8
+                            .child(html!("fa-button", {
+                                .property("slot", "block")
+                                .style_signal("color", jig.blocked.signal().map(|blocked| {
+                                    match blocked {
+                                        true => "red",
+                                        false => "green",
+                                    }
+                                }))
+                                .property_signal("icon", jig.blocked.signal().map(|blocked| {
+                                    match blocked {
+                                        true => "fa-solid fa-eye-slash",
+                                        false => "fa-solid fa-eye",
+                                    }
+                                }))
+                                .property_signal("title", jig.blocked.signal().map(|blocked| {
+                                    match blocked {
+                                        true => "Blocked",
+                                        false => "Visible",
+                                    }
+                                }))
+                                .event(clone!(jig => move |_: events::Click| {
+                                    let mut blocked = jig.blocked.lock_mut();
+                                    *blocked = !*blocked;
+
+                                    jig.save_and_publish();
+                                }))
                             }))
                         }),
-                        // html!("span", {
-                        //     .text("AUTHOR BADGE")
-                        // }),
+                        html!("span", {
+                            .text(&jig.author_name)
+                        }),
+                        html!("star-rating", {
+                            .property_signal("rating", jig.rating.signal().map(|rating| {
+                                match rating {
+                                    Some(rating) => rating as u8,
+                                    None => 0,
+                                }
+                            }))
+                        }),
                         html!("span", {
                             .text(&match jig.published_at {
                                 Some(published_at) => published_at.format("%b %e, %Y").to_string(),
@@ -121,30 +157,33 @@ impl CurationTable {
                             })
                         }),
                         html!("span", {
-                            .text(Language::code_to_display_name(&jig.jig_data.language))
-                        }),
-                        // html!("span", {
-                        //     .text("CURATORS")
-                        // }),
-                        html!("span", {
-                            .style("display", "flex")
-                            .style("flex-wrap", "wrap")
-                            .style("column-gap", "16px")
-                            .children(jig.jig_data.age_ranges.into_iter().map(|age_id| {
-                                html!("span", {
-                                    .text_signal(state.age_label(age_id))
-                                })
+                            .text_signal(jig.language.signal_cloned().map(|language| {
+                                Language::code_to_display_name(&language)
                             }))
                         }),
                         html!("span", {
                             .style("display", "flex")
                             .style("flex-wrap", "wrap")
                             .style("column-gap", "16px")
-                            .children(jig.jig_data.affiliations.into_iter().map(|affiliation_id| {
-                                html!("span", {
-                                    .text_signal(state.affiliation_label(affiliation_id))
-                                })
-                            }))
+                            .children_signal_vec(jig.age_ranges.signal_cloned().map(clone!(state => move |ages_hash| {
+                                ages_hash.into_iter().map(|age_id| {
+                                    html!("span", {
+                                        .text_signal(state.age_label(age_id))
+                                    })
+                                }).collect()
+                            })).to_signal_vec())
+                        }),
+                        html!("span", {
+                            .style("display", "flex")
+                            .style("flex-wrap", "wrap")
+                            .style("column-gap", "16px")
+                            .children_signal_vec(jig.affiliations.signal_cloned().map(clone!(state => move |affiliation_hash| {
+                                affiliation_hash.into_iter().map(|affiliation_id| {
+                                    html!("span", {
+                                        .text_signal(state.affiliation_label(affiliation_id))
+                                    })
+                                }).collect()
+                            })).to_signal_vec())
                         }),
                     ])
                 })
@@ -162,13 +201,20 @@ impl CurationTable {
         })
     }
 
-    fn affiliation_label(self: &Rc<Self>, affiliation_id: AffiliationId) -> impl Signal<Item = String> {
-        self.curation_state.affiliations.signal_ref(move |affiliations| {
-            let affiliation = affiliations.iter().find(|affiliation| affiliation.id == affiliation_id);
-            match affiliation {
-                Some(affiliation) => affiliation.display_name.clone(),
-                None => "-".to_string(),
-            }
-        })
+    fn affiliation_label(
+        self: &Rc<Self>,
+        affiliation_id: AffiliationId,
+    ) -> impl Signal<Item = String> {
+        self.curation_state
+            .affiliations
+            .signal_ref(move |affiliations| {
+                let affiliation = affiliations
+                    .iter()
+                    .find(|affiliation| affiliation.id == affiliation_id);
+                match affiliation {
+                    Some(affiliation) => affiliation.display_name.clone(),
+                    None => "-".to_string(),
+                }
+            })
     }
 }

@@ -2,10 +2,17 @@ use std::rc::Rc;
 
 use dominator::clone;
 use futures::join;
-use shared::{domain::jig::{JigBrowseQuery, JigId, JigResponse, JigSearchQuery, JigFocus, DraftOrLive}, api::{endpoints, ApiEndpoint}, error::EmptyError};
-use utils::{prelude::{ApiEndpointExt, api_with_auth}, routes::{AdminCurationRoute, Route, AdminRoute}};
+use shared::{
+    api::{endpoints, ApiEndpoint},
+    domain::jig::{DraftOrLive, JigBrowseQuery, JigFocus, JigId, JigResponse, JigSearchQuery},
+    error::EmptyError,
+};
+use utils::{
+    prelude::{api_with_auth, ApiEndpointExt},
+    routes::{AdminCurationRoute, AdminRoute, Route},
+};
 
-use super::{Curation, FetchMode};
+use super::{jig::state::jig::EditableJig, Curation, FetchMode};
 
 impl Curation {
     pub fn load_data(self: &Rc<Self>) {
@@ -32,15 +39,16 @@ impl Curation {
         // clone right away to free the lock
         let fetch_mode = self.fetch_mode.borrow().clone();
         let res = match fetch_mode {
-            FetchMode::Browse => {
-                self.load_jigs_browse().await
-            },
-            FetchMode::Search(query) => {
-                self.load_jigs_search(query.clone()).await
-            },
+            FetchMode::Browse => self.load_jigs_browse().await,
+            FetchMode::Search(query) => self.load_jigs_search(query.clone()).await,
         };
 
-        self.jigs.lock_mut().replace_cloned(res.jigs);
+        self.jigs.lock_mut().replace_cloned(
+            res.jigs
+                .into_iter()
+                .map(|jig| Rc::new(jig.into()))
+                .collect(),
+        );
         // self.set_total_page(res.total_page);
 
         self.total_pages.set_neq(Some(res.total_pages));
@@ -56,12 +64,10 @@ impl Curation {
 
         match endpoints::jig::Browse::api_with_auth(Some(req)).await {
             Err(_) => todo!(),
-            Ok(res) => {
-                JigListResponse {
-                    jigs: res.jigs,
-                    total_pages: res.pages,
-                }
-            }
+            Ok(res) => JigListResponse {
+                jigs: res.jigs,
+                total_pages: res.pages,
+            },
         }
     }
 
@@ -75,12 +81,10 @@ impl Curation {
 
         match endpoints::jig::Search::api_with_auth(Some(req)).await {
             Err(_) => todo!(),
-            Ok(res) => {
-                JigListResponse {
-                    jigs: res.jigs,
-                    total_pages: res.pages,
-                }
-            }
+            Ok(res) => JigListResponse {
+                jigs: res.jigs,
+                total_pages: res.pages,
+            },
         }
     }
 
@@ -97,7 +101,7 @@ impl Curation {
         Route::Admin(AdminRoute::Curation(route)).push_state();
     }
 
-    pub async fn get_jig(self: Rc<Self>, jig_id: JigId) -> JigResponse {
+    pub async fn get_jig(self: Rc<Self>, jig_id: JigId) -> Rc<EditableJig> {
         let jig = self
             .jigs
             .lock_ref()
@@ -105,16 +109,12 @@ impl Curation {
             .find(|jig| jig.id == jig_id)
             .cloned();
         match jig {
-            Some(jig) => {
-                jig
-            }
-            None => {
-                self.load_jig(&jig_id).await
-            },
+            Some(jig) => jig,
+            None => Rc::new(self.load_jig(&jig_id).await),
         }
     }
 
-    async fn load_jig(self: &Rc<Self>, jig_id: &JigId) -> JigResponse {
+    async fn load_jig(self: &Rc<Self>, jig_id: &JigId) -> EditableJig {
         let path = endpoints::jig::GetDraft::PATH.replace("{id}", &jig_id.0.to_string());
 
         match api_with_auth::<JigResponse, EmptyError, ()>(
@@ -124,9 +124,7 @@ impl Curation {
         )
         .await
         {
-            Ok(jig) => {
-                jig
-            }
+            Ok(jig) => jig.into(),
             Err(_) => {
                 todo!()
             }
