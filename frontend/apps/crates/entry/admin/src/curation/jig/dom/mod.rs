@@ -9,8 +9,6 @@ use std::rc::Rc;
 
 mod affiliation;
 mod age;
-// mod categories_select;
-// mod category_pills;
 mod language;
 
 impl CurationJig {
@@ -20,7 +18,7 @@ impl CurationJig {
             .property("slot", "jig-details")
             .child(html!("window-loader-block", {
                 .property("slot", "loader")
-                .property_signal("visible", state.loader.is_loading())
+                .property_signal("visible", state.jig.loader.is_loading())
             }))
             .children(&mut [
                 html!("button-rect", {
@@ -64,7 +62,7 @@ impl CurationJig {
                             .property("color", "blue")
                             .text("Save and republish")
                             .event(clone!(state => move |_: events::Click| {
-                                state.save_and_publish();
+                                state.jig.save_and_publish();
                             }))
                         }),
                     ])
@@ -132,7 +130,7 @@ impl CurationJig {
             .child(ModuleThumbnail::render(
                 Rc::new(ModuleThumbnail {
                     jig_id: state.jig_id,
-                    module: state.jig.modules.lock_ref().get(0).cloned(),
+                    module: state.jig.modules.get(0).cloned(),
                     is_jig_fallback: true,
                 }),
                 Some("player")
