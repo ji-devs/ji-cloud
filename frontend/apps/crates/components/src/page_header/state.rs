@@ -18,7 +18,7 @@ impl State {
         Self {
             logged_in: Mutable::new(LoggedInState::Loading),
             loader: AsyncLoader::new(),
-            beta_tooltip: Mutable::new(false),
+            beta_tooltip: Mutable::new(true),
         }
     }
 }
