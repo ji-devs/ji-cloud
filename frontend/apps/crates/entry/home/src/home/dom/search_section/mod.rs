@@ -124,6 +124,7 @@ pub fn render(state: Rc<State>, auto_search: bool) -> Dom {
                     }),
                     html!("button-rect", {
                         .property("slot", "button")
+                        .property("size", "small")
                         .property("bold", true)
                         .text(STR_SEARCH)
                         .event(clone!(state => move |_: events::Click| {

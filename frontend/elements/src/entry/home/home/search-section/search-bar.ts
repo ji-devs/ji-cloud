@@ -55,6 +55,40 @@ export class _ extends LitElement {
                     left: calc(100% + 32px);
                     text-align: center;
                 }
+
+                /* mobile */
+                @media (max-width: 1000px) {
+                    .bar {
+                        border-radius: 12px;
+                        padding: 10px;
+                        row-gap: 22px;
+                        grid-template-columns: auto auto;
+                        grid-template-rows: repeat(3, auto);
+                        height: unset;
+                    }
+
+                    ::slotted([slot="query"]) {
+                        grid-column: 1 / span 2;
+                        border-bottom: solid 1px var(--light-gray-2);
+                    }
+
+                    ::slotted([slot="age"]) {
+                        border-left: none;
+                    }
+
+                    ::slotted([slot="age"]),
+                    ::slotted([slot="language"]) {
+                        font-size: 14px;
+                    }
+
+                    ::slotted([slot="button"]) {
+                        /* cover .bar border */
+                        height: unset;
+                        font-size: unset;
+                        grid-column: 1 / span 2;
+                        justify-self: center;
+                    }
+                }
             `,
         ];
     }

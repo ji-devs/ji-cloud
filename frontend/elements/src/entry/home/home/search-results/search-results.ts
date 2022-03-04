@@ -43,6 +43,13 @@ export class _ extends LitElement {
                     justify-content: center;
                     margin-top: 50px;
                 }
+
+                /* mobile */
+                @media (max-width: 1000px) {
+                    h1 {
+                        font-size: 20px;
+                    }
+                }
             `,
         ];
     }

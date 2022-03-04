@@ -186,6 +186,25 @@ export class _ extends LitElement {
                     justify-content: center;
                     align-items: center;
                 }
+
+                /* mobile */
+                @media (max-width: 1000px) {
+                    .width-holder {
+                        display: block;
+                    }
+                    .divider {
+                        display: none;
+                    }
+                    h2 {
+                        margin: 20px 0;
+                    }
+                    .columns {
+                        display: block;
+                    }
+                    .column {
+                        margin: 10px 0;
+                    }
+                }
             `,
         ];
     }

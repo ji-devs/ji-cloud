@@ -58,6 +58,21 @@ export class _ extends LitElement {
                     border-radius: 0 0 12px 12px;
                     margin-left: 1em;
                 }
+
+                /* mobile */
+                @media (max-width: 1000px) {
+                    :host {
+                        justify-content: center;
+                    }
+                    nav, .donate, .student-code, .user {
+                        display: none;
+                    }
+                    .beta {
+                        left: 50%;
+                        transform: translate(-50%, 100%);
+                        margin-left: 0;
+                    }
+                }
             `,
         ];
     }

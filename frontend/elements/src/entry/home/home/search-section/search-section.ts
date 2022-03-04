@@ -49,7 +49,7 @@ export class _ extends LitElement {
                     transition: width 0.3s;
                 }
                 .center-3 {
-                    width: 1000px;
+                    /* width: 1000px; */
                     margin: 0 auto;
                     display: grid;
                     row-gap: 15px;
@@ -82,6 +82,22 @@ export class _ extends LitElement {
                     grid-column: 2;
                     grid-row: 1;
                 }
+
+                /* mobile */
+                @media (max-width: 1000px) {
+                    :host([mode="results"]) .width-holder {
+                        justify-content: center;
+                    }
+                    .jigzi {
+                        height: 40px;
+                    }
+                    h1 {
+                        font-size: 28px;
+                    }
+                    h4 {
+                        font-size: 18px;
+                    }
+                }
             `,
         ];
     }
@@ -108,9 +124,9 @@ export class _ extends LitElement {
                             </h1>
                             <h4>
                                 ${STR_MAKE_LEARNING}
-                                <span class="results-count"
-                                    >${numberFormat(this.resultsCount)}</span
-                                >
+                                <span class="results-count">
+                                    ${numberFormat(this.resultsCount)}
+                                </span>
                                 ${STR_JIGS}
                             </h4>
                             <slot name="search-bar"></slot>

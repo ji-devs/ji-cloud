@@ -50,7 +50,7 @@ export class _ extends LitElement {
                     color: var(--dark-blue-4);
                 }
                 .results-count {
-                    font-size: 24px;
+                    font-size: .6em;
                     font-weight: 500;
                 }
                 .results {
@@ -70,6 +70,25 @@ export class _ extends LitElement {
                 }
                 .load-more ::slotted(*) {
                     margin-bottom: 40px;
+                }
+
+                /* mobile */
+                @media (max-width: 1000px) {
+                    :host {
+                        padding: 5px;
+                    }
+                    .top-line {
+                        justify-content: center;
+                    }
+                    .left-side img-ui {
+                        position: static;
+                    }
+                    h2 {
+                        font-size: 40px;
+                    }
+                    .results {
+                        justify-content: center;
+                    }
                 }
             `,
         ];
