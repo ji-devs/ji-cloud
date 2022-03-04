@@ -25,6 +25,9 @@ pub mod recent;
 pub mod tag;
 pub mod user;
 
+const MAX_PAGE_LIMIT: u32 = 100;
+const DEFAULT_PAGE_LIMIT: u32 = 20;
+
 /// Create an image in the global image library.
 async fn create(
     db: Data<PgPool>,
@@ -141,6 +144,10 @@ async fn search(
 ) -> Result<Json<<endpoints::image::Search as ApiEndpoint>::Res>, error::Service> {
     let query = query.map_or_else(Default::default, Query::into_inner);
 
+    let page_limit = page_limit(query.page_limit)
+        .await
+        .map_err(|e| error::Service::InternalServerError(e))?;
+
     let (ids, pages, total_hits) = algolia
         .search_image(
             &query.q,
@@ -154,6 +161,7 @@ async fn search(
             &query.categories,
             &query.tags,
             &query.tags_priority,
+            page_limit,
         )
         .await?
         .ok_or_else(|| error::Service::DisabledService(ServiceKind::Algolia))?;
@@ -178,21 +186,29 @@ async fn browse(
 ) -> Result<Json<<endpoints::image::Browse as ApiEndpoint>::Res>, error::Server> {
     let query = query.map_or_else(Default::default, Query::into_inner);
 
+    let page_limit = page_limit(query.page_limit)
+        .await
+        .map_err(|e| error::Server(e))?;
+
     let images: Vec<_> = db::image::list(
         db.as_ref(),
         query.is_published,
         query.kind,
         query.page.unwrap_or(0) as i32,
+        page_limit,
     )
     .err_into::<error::Server>()
     .and_then(|metadata: ImageMetadata| async { Ok(ImageResponse { metadata }) })
     .try_collect()
     .await?;
 
+    log::warn!("images: {:?}", images.len());
+
     let total_count =
         db::image::filtered_count(db.as_ref(), query.is_published, query.kind).await?;
 
-    let pages = (total_count / 20 + (total_count % 20 != 0) as u64) as u32;
+    let pages = (total_count / (page_limit as u64)
+        + (total_count % (page_limit as u64) != 0) as u64) as u32;
 
     Ok(Json(ImageBrowseResponse {
         images,
@@ -277,6 +293,20 @@ async fn delete(
     .await;
 
     Ok(HttpResponse::NoContent().finish())
+}
+
+async fn page_limit(page_limit: Option<u32>) -> anyhow::Result<u32> {
+    if let Some(limit) = page_limit {
+        match limit > 0 && limit <= MAX_PAGE_LIMIT {
+            true => {
+                log::warn!("page limit: {:?}", limit);
+                Ok(limit)
+            }
+            false => Err(anyhow::anyhow!("Page limit should be within 1-100")),
+        }
+    } else {
+        Ok(DEFAULT_PAGE_LIMIT)
+    }
 }
 
 pub fn configure(cfg: &mut ServiceConfig) {

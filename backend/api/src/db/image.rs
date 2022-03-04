@@ -177,6 +177,7 @@ pub fn list(
     is_published: Option<bool>,
     kind: Option<ImageKind>,
     page: i32,
+    page_limit: u32,
 ) -> BoxStream<'_, sqlx::Result<ImageMetadata>> {
     sqlx::query_as(
 r#"
@@ -199,12 +200,13 @@ from (image_metadata
 where processing_result is not distinct from true 
     and (publish_at < now() is not distinct from $1 or $1 is null)
     and (kind is not distinct from $3 or $3 is null) 
-order by coalesce(updated_at, created_at) desc
-limit 20 offset 20 * $2
+order by id
+limit $4 offset ($4 * $2)
 "#)
     .bind(is_published)
     .bind(page)
     .bind(kind.map(|it| it as i16))
+    .bind(page_limit as i16)
     .fetch(db)
 }
 
@@ -252,7 +254,8 @@ from image_metadata
     with ordinality t(id, ord) USING (id)
 where processing_result is not distinct from true
 order by id
-"#).bind(ids)
+"#)
+    .bind(ids)
     .fetch(db)
 }
 

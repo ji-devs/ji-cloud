@@ -770,6 +770,11 @@ pub struct JigBrowseQuery {
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub blocked: Option<bool>,
+
+    /// The hits per page to be returned
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub page_limit: Option<u32>,
 }
 
 /// Response for [`Browse`](crate::api::endpoints::jig::Browse).
@@ -890,6 +895,11 @@ pub struct JigSearchQuery {
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub blocked: Option<bool>,
+
+    /// The hits per page to be returned
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub page_limit: Option<u32>,
 }
 
 /// Response for successful search.

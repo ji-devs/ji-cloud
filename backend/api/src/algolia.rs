@@ -748,6 +748,7 @@ impl Client {
         categories: &[CategoryId],
         tags: &[ImageTagIndex],
         tags_priority: &[ImageTagIndex],
+        page_limit: u32,
     ) -> anyhow::Result<Option<(Vec<Uuid>, u32, u64)>> {
         let mut filters = algolia::filter::AndFilter {
             filters: vec![Box::new(media_filter(MediaGroupKind::Image, false))],
@@ -801,7 +802,7 @@ impl Client {
                     get_ranking_info: true,
                     filters: Some(filters),
                     optional_filters: Some(optional_filters),
-                    hits_per_page: None,
+                    hits_per_page: Some(page_limit as u16),
                     sum_or_filters_scores: true,
                 },
             )
@@ -854,6 +855,8 @@ impl Client {
         other_keywords: Option<String>,
         translated_keywords: Option<String>,
         privacy_level: &[PrivacyLevel],
+        page_limit: u32,
+        blocked: Option<bool>,
     ) -> anyhow::Result<Option<(Vec<Uuid>, u32, u64)>> {
         let mut and_filters = algolia::filter::AndFilter { filters: vec![] };
 
@@ -921,6 +924,16 @@ impl Client {
             }))
         }
 
+        if let Some(blocked) = blocked {
+            and_filters.filters.push(Box::new(CommonFilter {
+                filter: FacetFilter {
+                    facet_name: "blocked".to_owned(),
+                    value: blocked.to_string(),
+                },
+                invert: false,
+            }))
+        }
+
         filters_for_privacy(&mut and_filters.filters, privacy_level);
         filters_for_ids_or(&mut and_filters.filters, "age_ranges", age_ranges);
         filters_for_ids_or(&mut and_filters.filters, "affiliations", affiliations);
@@ -938,7 +951,7 @@ impl Client {
                     get_ranking_info: true,
                     filters: Some(and_filters),
                     optional_filters: None,
-                    hits_per_page: None,
+                    hits_per_page: Some(page_limit as u16),
                     sum_or_filters_scores: false,
                 },
             )
