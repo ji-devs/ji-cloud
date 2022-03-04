@@ -116,7 +116,8 @@ export class _ extends LitElement {
                         grid-template-rows: 1fr 50px;
                     }
                     .bottom-bar {
-                        grid-template-columns: 30px 450px 30px;
+                        grid-template-columns: 30px 1fr 30px;
+                        padding: 0 80px;
                     }
                 }
             `,
