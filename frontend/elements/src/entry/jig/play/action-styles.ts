@@ -34,4 +34,23 @@ export const actionStyles = css`
         height: 100%;
         width: 100%;
     }
+
+    /* mobile */
+    @media (max-width: 1000px) {
+        .action.huge {
+            height: 64px;
+            width: 64px;
+            padding: 15px;
+        }
+        .action.large {
+            height: 32px;
+            width: 32px;
+            padding: 6px;
+        }
+        .action.small {
+            height: 24px;
+            width: 24px;
+            padding: 5px;
+        }
+    }
 `;

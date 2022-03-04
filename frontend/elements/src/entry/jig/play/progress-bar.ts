@@ -19,6 +19,16 @@ export class _ extends LitElement {
                     height: 12px;
                     transition: width 0.3s;
                 }
+
+                /* mobile */
+                @media (max-width: 1000px) {
+                    :host {
+                        padding: 4px;
+                    }
+                    .bar {
+                        height: 6px;
+                    }
+                }
             `,
         ];
     }

@@ -25,7 +25,6 @@ export class _ extends LitElement {
                     transform: translateX(0px);
                 }
                 ::slotted([slot="opener"]) {
-                    background-color: transparent;
                     border: 0;
                     padding: 0;
                     grid-column: 2;
@@ -128,6 +127,30 @@ export class _ extends LitElement {
                 .modules::-webkit-scrollbar-thumb {
                     border-radius: 4px;
                     background-color: var(--light-gray-1);
+                }
+
+                /* mobile */
+                @media (max-width: 1000px) {
+                    ::slotted([slot="opener"]) {
+                        margin-top: 10px;
+                        height: 60px;
+                        width: 60px;
+                        margin-left: -10px;
+                        background-size: 80px;
+                    }
+                    h2 {
+                        font-size: 16px;
+                    }
+                    .heading {
+                        padding: 4px 6px;
+                        row-gap: 0;
+                    }
+                    .logo img-ui {
+                        height: 24px;
+                    }
+                    ::slotted([slot="close"]) {
+                        margin: -8px -12px 0px 0px;
+                    }
                 }
             `,
         ];

@@ -106,6 +106,19 @@ export class _ extends LitElement {
                 ::slotted(dialog-overlay) {
                     z-index: 4;
                 }
+
+                /* mobile */
+                @media (max-width: 1000px) {
+                    :host([isLegacy]) ::slotted([slot="iframe"]){
+                        height: calc(100% - 50px);
+                    }
+                    .controls {
+                        grid-template-rows: 1fr 50px;
+                    }
+                    .bottom-bar {
+                        grid-template-columns: 30px 450px 30px;
+                    }
+                }
             `,
         ];
     }
