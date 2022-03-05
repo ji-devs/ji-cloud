@@ -155,6 +155,7 @@ pub struct ImageUpdateRequest {
 /// * `kind` field must match the case as represented in the returned json body (`PascalCase`?).
 /// * Vector fields, such as `age_ranges` should be given as a comma separated vector (CSV).
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
+#[serde(rename_all = "camelCase")]
 pub struct ImageSearchQuery {
     /// The query string.
     #[serde(default)]
@@ -258,6 +259,11 @@ pub struct ImageSearchQuery {
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub is_published: Option<bool>,
+
+    /// The limit of results per page.
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub page_limit: Option<u32>,
 }
 
 /// Response for successful search.
@@ -291,6 +297,11 @@ pub struct ImageBrowseQuery {
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub page: Option<u32>,
+
+    /// The limit of results per page.
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub page_limit: Option<u32>,
 }
 
 /// Response for [`Browse`](crate::api::endpoints::image::Browse).

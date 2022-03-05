@@ -30,6 +30,9 @@ pub mod module;
 mod player;
 pub mod report;
 
+const DEFAULT_PAGE_LIMIT: u32 = 20;
+const MAX_PAGE_LIMIT: u32 = 100;
+
 /// Create a jig.
 async fn create(
     db: Data<PgPool>,
@@ -213,6 +216,10 @@ async fn browse(
     )
     .await?;
 
+    let page_limit = page_limit(query.page_limit)
+        .await
+        .map_err(|e| error::Auth::InternalServerError(e))?;
+
     let (jigs, count) = db::jig::browse(
         db.as_ref(),
         author_id,
@@ -221,6 +228,7 @@ async fn browse(
         privacy_level.to_owned(),
         blocked,
         query.page.unwrap_or(0) as i32,
+        page_limit,
     )
     .await?;
 
@@ -333,6 +341,10 @@ async fn search(
 ) -> Result<Json<<jig::Search as ApiEndpoint>::Res>, error::Service> {
     let query = query.map_or_else(Default::default, Query::into_inner);
 
+    let page_limit = page_limit(query.page_limit)
+        .await
+        .map_err(|e| error::Service::InternalServerError(e))?;
+
     let (author_id, privacy_level, blocked) = auth_claims(
         &*db,
         claims,
@@ -358,11 +370,13 @@ async fn search(
             query.other_keywords,
             query.translated_keywords,
             &privacy_level,
+            page_limit,
+            blocked,
         )
         .await?
         .ok_or_else(|| error::Service::DisabledService(ServiceKind::Algolia))?;
 
-    let jigs: Vec<_> = db::jig::get_by_ids(db.as_ref(), &ids, DraftOrLive::Live, blocked).await?;
+    let jigs: Vec<_> = db::jig::get_by_ids(db.as_ref(), &ids, DraftOrLive::Live).await?;
 
     Ok(Json(JigSearchResponse {
         jigs,
@@ -433,6 +447,17 @@ async fn play(db: Data<PgPool>, path: web::Path<JigId>) -> Result<HttpResponse, 
     db::jig::jig_play(&*db, path.into_inner()).await?;
 
     Ok(HttpResponse::NoContent().finish())
+}
+
+async fn page_limit(page_limit: Option<u32>) -> anyhow::Result<u32> {
+    if let Some(limit) = page_limit {
+        match limit > 0 && limit <= MAX_PAGE_LIMIT {
+            true => Ok(limit),
+            false => Err(anyhow::anyhow!("Page limit should be within 1-100")),
+        }
+    } else {
+        Ok(DEFAULT_PAGE_LIMIT)
+    }
 }
 
 async fn auth_claims(

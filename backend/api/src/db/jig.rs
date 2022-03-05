@@ -340,7 +340,6 @@ pub async fn get_by_ids(
     db: &PgPool,
     ids: &[Uuid],
     draft_or_live: DraftOrLive,
-    blocked: Option<bool>,
 ) -> sqlx::Result<Vec<JigResponse>> {
     let mut txn = db.begin().await?;
 
@@ -370,10 +369,8 @@ from jig
          inner join unnest($1::uuid[])
     with ordinality t(id, ord) using (id)
     inner join jig_admin_data "admin" on admin.jig_id = jig.id
-    where blocked = $2 or $2 is null
     "#,
         ids,
-        blocked
     )
     .fetch_all(&mut txn)
     .instrument(tracing::info_span!("query jigs"))
@@ -544,6 +541,7 @@ pub async fn browse(
     privacy_level: Vec<PrivacyLevel>,
     blocked: Option<bool>,
     page: i32,
+    page_limit: u32,
 ) -> sqlx::Result<(Vec<JigResponse>, u64)> {
     let mut txn = db.begin().await?;
 
@@ -554,7 +552,7 @@ pub async fn browse(
         r#"
     select jig_data.id as "id!"
     from jig_data
-          inner join jig on (draft_id = jig_data.id or live_id = jig_data.id)
+          inner join jig on (draft_id = jig_data.id or (live_id = jig_data.id and last_synced_at is not null))
           inner join jig_admin_data "admin" on admin.jig_id = jig.id
     where (jig_data.draft_or_live = $3 or $3 is null)
         and (author_id = $1 or $1 is null)
@@ -645,12 +643,13 @@ from jig_data
     inner join cte on cte.id = jig_data.id
     inner join jig on jig_data.id = jig.draft_id or jig_data.id = jig.live_id
     inner join jig_admin_data "admin" on admin.jig_id = jig.id
-where cte.ord > (20 * $2)
+where cte.ord >= (1 * $3 * $2)
 order by coalesce(updated_at, created_at) desc
-limit 20
+limit $3
 "#,
         &jig_data_ids,
-        page
+        page,
+        page_limit as i32
     )
         .fetch_all(&mut txn).await?;
 
