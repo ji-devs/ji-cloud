@@ -371,7 +371,7 @@ async fn search(
             query.translated_keywords,
             &privacy_level,
             page_limit,
-            None, // blocked,
+            blocked,
         )
         .await?
         .ok_or_else(|| error::Service::DisabledService(ServiceKind::Algolia))?;
