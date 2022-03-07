@@ -62,6 +62,7 @@ struct SpaPageInfo {
     firebase: bool,
     google_maps_url: Option<String>,
     local_dev: bool,
+    include_hubspot: bool,
 }
 
 fn spa_template(settings: &RuntimeSettings, spa: SpaPage) -> actix_web::Result<HttpResponse> {
@@ -82,6 +83,12 @@ fn spa_template(settings: &RuntimeSettings, spa: SpaPage) -> actix_web::Result<H
         firebase: matches!(spa, SpaPage::User),
         google_maps_url,
         local_dev: settings.is_local(),
+        include_hubspot: match spa {
+            SpaPage::Jig(ModuleJigPageKind::Play) => false,
+            SpaPage::Module(_, __) => false,
+            SpaPage::LegacyJig => false,
+            _ => true,
+        },
     };
 
     let info = info.render().map_err(ErrorInternalServerError)?;

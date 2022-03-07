@@ -31,10 +31,11 @@
     </script>
     <!-- End Google Tag Manager -->
 
-    
+    {% if include_hubspot -%}
     <!-- Hubspot Tracking Code -->
     <script type="text/javascript" id="hs-script-loader" async defer src="//js.hs-scripts.com/2636713.js"></script>
     <!-- End Hubspot Tracking Code -->
+    {% endif -%}
 
     {% if local_dev -%}
     <script src="/static/js/reload.js"></script>
