@@ -31,7 +31,7 @@ impl ShareJig {
 
     pub fn embed_code(&self) -> String {
         let link = self.jig_link();
-        format!(r#"<iframe src="{}" width="800" height="450"></iframe>"#, link)
+        format!(r#"<iframe src="{}" width="960" height="540"></iframe>"#, link)
     }
 
     pub fn jig_link(&self) -> String {
