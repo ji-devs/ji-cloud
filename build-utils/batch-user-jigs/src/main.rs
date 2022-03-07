@@ -85,7 +85,7 @@ async fn get_futures(ctx:Arc<Context>) -> Vec<impl Future> {
 
     log::info!("Updating {} pages, {} jigs total ", pages, total_jig_count);
 
-    for page in (0..=21) {
+    for page in (0..=pages as usize) {
         futures.push({
             let ctx = ctx.clone();
             async move {
