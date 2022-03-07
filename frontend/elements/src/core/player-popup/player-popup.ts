@@ -24,27 +24,21 @@ export class _ extends LitElement {
                     top: 0;
                     left: 0;
                     z-index: 9999;
-                    display: grid;
-                    place-content: center;
                     height: 100vh;
                     width: 100vw;
                     background-color: #ececec;
                 }
-                ::slotted(*) {
-                    grid-row: 1;
-                    grid-column: 1;
-                }
                 .iframe-wrapper {
-                    grid-row: 1;
-                    grid-column: 1;
-                    height: 100%;
-                    width: 100%;
                     max-height: 100vh;
                     max-width: 100vw;
                     background-color: #ffffff;
                     border: 0;
                     aspect-ratio: 16 / 9;
                     box-shadow: 0 3px 16px 0 rgba(0, 0, 0, 0.16);
+                    position: relative;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    margin: 0 auto;
                 }
                 .iframe-wrapper ::slotted(iframe) {
                     height: 100%;
@@ -52,8 +46,6 @@ export class _ extends LitElement {
                     aspect-ratio: 16 / 9;
                 }
                 ::slotted([slot="close"]) {
-                    justify-self: end;
-                    align-self: start;
                     margin: 16px;
                     background-color: var(--dark-blue-8);
                     border: solid 1px var(--light-blue-3);
@@ -66,6 +58,9 @@ export class _ extends LitElement {
                     line-height: 1em;
                     font-family: "OpenSans-light";
                     z-index: 1;
+                    position: absolute;
+                    top: 0;
+                    right: 0;
                 }
             `,
         ];
@@ -89,8 +84,8 @@ export class _ extends LitElement {
         return html`
             <div class="iframe-wrapper">
                 <slot name="iframe"></slot>
+                <slot name="close"></slot>
             </div>
-            <slot name="close"></slot>
         `;
     }
 }
