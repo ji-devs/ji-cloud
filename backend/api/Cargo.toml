@@ -63,6 +63,9 @@ hashfn = "0.2.0"
 core = { path = "../core", features = ["db"] }
 shared = { path = "../../shared/rust", features = ["backend"] }
 csv = "1.1.6"
+opentelemetry = "0.17.0"
+opentelemetry-otlp = "0.10.0"
+tracing-opentelemetry = "0.17.2"
 
 [dependencies.sendgrid]
 default-features = false
