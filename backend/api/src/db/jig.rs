@@ -533,6 +533,7 @@ where draft_or_live is not null
     Ok(v)
 }
 
+#[instrument(skip_all)]
 pub async fn browse(
     db: &sqlx::Pool<sqlx::Postgres>,
     author_id: Option<Uuid>,
@@ -568,6 +569,7 @@ pub async fn browse(
         blocked,
     )
     .fetch_all(&mut txn)
+    .instrument(tracing::info_span!("query jigs"))
     .await?;
 
     let jig_data_ids: Vec<_> = jig.iter().map(|it| it.id).collect();
@@ -650,7 +652,9 @@ limit $3
         page,
         page_limit as i32,
     )
-        .fetch_all(&mut txn).await?;
+        .fetch_all(&mut txn)
+        .instrument(tracing::info_span!("query jig_data"))
+        .await?;
 
     let v: Vec<_> = jig_data
         .into_iter()
@@ -1006,6 +1010,7 @@ where creator_id is not distinct from $1
 }
 
 // `None` here means do not filter.
+#[instrument(skip_all)]
 pub async fn filtered_count(
     db: &PgPool,
     privacy_level: Vec<PrivacyLevel>,
