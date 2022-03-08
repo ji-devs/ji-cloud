@@ -1,6 +1,6 @@
 use crate::translate::translate_text;
 use anyhow::Context;
-use serde_json::value::Value;
+use serde_json::{json, value::Value};
 use shared::domain::{
     category::CategoryId,
     jig::{
@@ -570,7 +570,7 @@ pub async fn browse(
     .fetch_all(&mut txn)
     .await?;
 
-    let jig_data_ids: Vec<Uuid> = jig.iter().map(|it| it.id).collect();
+    let jig_data_ids: Vec<_> = jig.iter().map(|it| it.id).collect();
 
     let count = jig_data_ids.len() as u64;
 
@@ -579,7 +579,7 @@ pub async fn browse(
         //language=SQL
         r#"
 with cte as (
-    select * from unnest($1::uuid[]) with ordinality t(id, ord) order by ord desc
+    select * from unnest($1::uuid[]) with ordinality t(id, ord) order by ord
 )
 select  jig.id                                              as "jig_id: JigId",
         privacy_level                                       as "privacy_level: PrivacyLevel",
@@ -639,17 +639,16 @@ select  jig.id                                              as "jig_id: JigId",
        rating                                     as "rating!: Option<JigRating>",
        blocked                                    as "blocked!",
        curated                                    as "curated!"
-from jig_data
-    inner join cte on cte.id = jig_data.id
-    inner join jig on jig_data.id = jig.draft_id or jig_data.id = jig.live_id
+from cte
+    inner join jig_data on cte.id = jig_data.id
+    inner join jig on (jig_data.id = jig.draft_id or (jig_data.id = jig.live_id and last_synced_at is not null))
     inner join jig_admin_data "admin" on admin.jig_id = jig.id
 where cte.ord >= (1 * $3 * $2)
-order by coalesce(updated_at, created_at) desc
-limit $3
+limit $3 
 "#,
         &jig_data_ids,
         page,
-        page_limit as i32
+        page_limit as i32,
     )
         .fetch_all(&mut txn).await?;
 
