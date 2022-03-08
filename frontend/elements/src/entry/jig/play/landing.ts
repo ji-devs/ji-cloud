@@ -117,7 +117,10 @@ export class _ extends LitElement {
                     }
                     .bottom-bar {
                         grid-template-columns: 30px 1fr 30px;
-                        padding: 0 80px;
+                        padding: 0 120px;
+                    }
+                    .bottom-right ::slotted([slot="background"]) {
+                        margin-right: -30px;
                     }
                 }
             `,

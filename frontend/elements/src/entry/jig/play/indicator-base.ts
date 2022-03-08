@@ -7,6 +7,7 @@ export class IndicatorBase extends LitElement {
                 :host {
                     width: 94px;
                     height: 98px;
+                    justify-items: center;
                     display: inline-grid;
                     justify-content: center;
                     align-content: space-evenly;
@@ -19,6 +20,8 @@ export class IndicatorBase extends LitElement {
                     text-align: center;
                 }
                 img-ui {
+                    height: 30px;
+                    width: 30px;
                     display: grid;
                     place-content: center;
                 }
@@ -26,6 +29,21 @@ export class IndicatorBase extends LitElement {
                     font-size: 22px;
                     font-weight: 500;
                     color: var(--dark-blue-8);
+                }
+
+                /* mobile */
+                @media (max-width: 1000px) {
+                    :host {
+                        width: 50px;
+                        height: 58px;
+                    }
+                    img-ui {
+                        height: 16px;
+                        width: 16px;
+                    }
+                    .value {
+                        font-size: 10px;
+                    }
                 }
             `,
         ];
