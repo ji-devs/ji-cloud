@@ -450,7 +450,7 @@ async fn play(db: Data<PgPool>, path: web::Path<JigId>) -> Result<HttpResponse, 
     Ok(HttpResponse::NoContent().finish())
 }
 
-#[instrument(skip_all)]
+#[instrument]
 async fn page_limit(page_limit: Option<u32>) -> anyhow::Result<u32> {
     if let Some(limit) = page_limit {
         match limit > 0 && limit <= MAX_PAGE_LIMIT {
@@ -462,7 +462,7 @@ async fn page_limit(page_limit: Option<u32>) -> anyhow::Result<u32> {
     }
 }
 
-#[instrument(skip_all)]
+#[instrument(skip(db, claims))]
 async fn auth_claims(
     db: &PgPool,
     claims: Option<TokenUser>,
