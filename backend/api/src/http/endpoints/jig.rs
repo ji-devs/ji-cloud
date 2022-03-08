@@ -243,7 +243,7 @@ async fn browse(
     )
     .await?;
 
-    let pages = (count / 20 + (count % 20 != 0) as u64) as u32;
+    let pages = (count / (page_limit as u64) + (count % (page_limit as u64) != 0) as u64) as u32;
 
     Ok(Json(JigBrowseResponse {
         jigs,
