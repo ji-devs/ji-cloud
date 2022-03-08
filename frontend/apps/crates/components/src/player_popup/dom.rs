@@ -27,6 +27,7 @@ impl PlayerPopup {
                         Some(html!("iframe", {
                             .style("border", "0")
                             .property("slot", "iframe")
+                            .property("allow", "autoplay; fullscreen")
                             .property("src", {
                                 let url: String = Route::Jig(JigRoute::Play(state.jig_id, None, state.player_options.clone())).into();
                                 let url = unsafe {
