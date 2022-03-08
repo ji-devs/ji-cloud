@@ -200,6 +200,7 @@ async fn delete_all(
     Ok(HttpResponse::NoContent().finish())
 }
 
+#[instrument(skip_all)]
 async fn browse(
     db: Data<PgPool>,
     claims: Option<TokenUser>,
@@ -449,6 +450,7 @@ async fn play(db: Data<PgPool>, path: web::Path<JigId>) -> Result<HttpResponse, 
     Ok(HttpResponse::NoContent().finish())
 }
 
+#[instrument(skip_all)]
 async fn page_limit(page_limit: Option<u32>) -> anyhow::Result<u32> {
     if let Some(limit) = page_limit {
         match limit > 0 && limit <= MAX_PAGE_LIMIT {
@@ -460,6 +462,7 @@ async fn page_limit(page_limit: Option<u32>) -> anyhow::Result<u32> {
     }
 }
 
+#[instrument(skip_all)]
 async fn auth_claims(
     db: &PgPool,
     claims: Option<TokenUser>,
