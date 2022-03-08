@@ -5,8 +5,10 @@ use shared::domain::meta::{
 };
 use shared::media::MediaGroupKind;
 use sqlx::{postgres::PgDatabaseError, PgPool};
+use tracing::instrument;
 use uuid::Uuid;
 
+#[instrument(skip(db))]
 pub async fn get_image_styles(db: &PgPool) -> sqlx::Result<Vec<ImageStyle>> {
     sqlx::query_as!(
         ImageStyle,
@@ -24,6 +26,7 @@ order by index
     .await
 }
 
+#[instrument(skip(db))]
 pub async fn get_animation_styles(db: &PgPool) -> sqlx::Result<Vec<AnimationStyle>> {
     sqlx::query_as!(
         AnimationStyle,
@@ -41,6 +44,7 @@ order by index
     .await
 }
 
+#[instrument(skip(db))]
 pub async fn get_age_ranges(db: &PgPool) -> sqlx::Result<Vec<AgeRange>> {
     sqlx::query_as!(
         AgeRange,
@@ -53,6 +57,7 @@ pub async fn get_age_ranges(db: &PgPool) -> sqlx::Result<Vec<AgeRange>> {
     .await
 }
 
+#[instrument(skip(db))]
 pub async fn get_affiliations(db: &PgPool) -> sqlx::Result<Vec<Affiliation>> {
     sqlx::query_as!(
         Affiliation,
@@ -65,6 +70,7 @@ pub async fn get_affiliations(db: &PgPool) -> sqlx::Result<Vec<Affiliation>> {
     .await
 }
 
+#[instrument(skip(db))]
 pub async fn get_subjects(db: &PgPool) -> sqlx::Result<Vec<Subject>> {
     sqlx::query_as!(
         Subject,
@@ -77,6 +83,7 @@ pub async fn get_subjects(db: &PgPool) -> sqlx::Result<Vec<Subject>> {
     .await
 }
 
+#[instrument(skip(db))]
 pub async fn get_goals(db: &PgPool) -> sqlx::Result<Vec<Goal>> {
     sqlx::query_as!(
         Goal,
@@ -89,6 +96,7 @@ order by index
     .await
 }
 
+#[instrument(skip(db))]
 pub async fn get_additional_resources(db: &PgPool) -> sqlx::Result<Vec<ResourceType>> {
     sqlx::query_as!(
         ResourceType,
@@ -101,6 +109,7 @@ order by index
     .await
 }
 
+#[instrument(skip(db))]
 pub async fn get_image_tags(db: &PgPool) -> sqlx::Result<Vec<ImageTag>> {
     sqlx::query_as!(
         ImageTag,

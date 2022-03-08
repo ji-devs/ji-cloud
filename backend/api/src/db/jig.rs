@@ -167,7 +167,7 @@ impl From<serde_json::Error> for CreateJigError {
     }
 }
 
-#[instrument(skip_all)]
+#[instrument(skip(pool))]
 pub async fn get_one(
     pool: &PgPool,
     id: JigId,
@@ -335,7 +335,7 @@ from jig_data
     Ok(jig)
 }
 
-#[instrument(skip_all)]
+#[instrument(skip(db))]
 pub async fn get_by_ids(
     db: &PgPool,
     ids: &[Uuid],
@@ -533,7 +533,7 @@ where draft_or_live is not null
     Ok(v)
 }
 
-#[instrument(skip_all)]
+#[instrument(skip(db))]
 pub async fn browse(
     db: &sqlx::Pool<sqlx::Postgres>,
     author_id: Option<Uuid>,
@@ -1010,7 +1010,7 @@ where creator_id is not distinct from $1
 }
 
 // `None` here means do not filter.
-#[instrument(skip_all)]
+#[instrument(skip(db))]
 pub async fn filtered_count(
     db: &PgPool,
     privacy_level: Vec<PrivacyLevel>,
