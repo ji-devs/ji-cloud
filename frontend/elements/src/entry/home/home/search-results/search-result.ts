@@ -26,6 +26,7 @@ export class _ extends LitElement {
                     width: 354px;
                     height: 384px;
                     perspective: 1000px;
+                    position: relative;
                 }
                 :host(:hover) .wrapper {
                     transform: rotateY(180deg);
@@ -40,6 +41,7 @@ export class _ extends LitElement {
                     border-radius: 20px;
                     box-shadow: 0 3px 12px 0 rgba(0, 0, 0, 0.12);
                     overflow: hidden;
+                    position: absolute;
                 }
                 .main {
                     grid-column: 1;
@@ -61,7 +63,7 @@ export class _ extends LitElement {
                     margin-top: 8px;
                     display: -webkit-box;
                     -webkit-line-clamp: 2;
-                    -webkit-box-orient: vertical;  
+                    -webkit-box-orient: vertical;
                     overflow: hidden;
                 }
                 .main .played-liked {
