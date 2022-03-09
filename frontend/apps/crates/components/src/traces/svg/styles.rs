@@ -114,6 +114,7 @@ pub static SVG_CLASS: Lazy<String> = Lazy::new(|| {
     class! {
         .style("position", "absolute")
         .style("top", "0")
+        .style("left", "0")
     }
 });
 

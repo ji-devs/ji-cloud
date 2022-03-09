@@ -149,11 +149,6 @@ pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<Step1<RawData, E>>) ->
                                             } else {
                                                 Some(render_empty_audio())
                                             }
-                                            /* match audio {
-                                                Some(audio) => Some(AudioInput::render(audio.clone(), None)),
-                                                None => Some(render_empty_audio()),
-                                            } */
-                                            // None
                                         })))
                                     }))
                                 },
@@ -170,12 +165,16 @@ pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<Step1<RawData, E>>) ->
 fn render_empty_audio() -> Dom {
     html!("sidebar-empty", {
         .property("label", STR_EMPTY_AUDIO_SELECTION)
+        .property("imagePath", "module/_groups/cards/edit/sidebar/edit-words.svg")
+        .property("imageOffset", 32)
     })
 }
 
 fn render_non_empty<RawData: RawDataExt, E: ExtraExt>(state: Rc<Step1<RawData, E>>) -> Dom {
     html!("sidebar-empty", {
         .property("label", STR_NONEMPTY_LIST_LABEL)
+        .property("imagePath", "module/_groups/cards/edit/sidebar/edit-words.svg")
+        .property("imageOffset", 32)
         .child(
             html!("button-rect", {
                 .property("slot", "clear")

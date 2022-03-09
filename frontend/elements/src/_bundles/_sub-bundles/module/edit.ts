@@ -31,6 +31,7 @@ import "@elements/module/_common/edit/header";
 import "@elements/module/_groups/cards/_common/main-empty";
 import "@elements/module/_common/edit/preview-header";
 import "@elements/module/_common/edit/sidebar";
+import "@elements/module/_common/edit/sidebar-empty";
 import "@elements/module/_common/edit/sidebar-body";
 import "@elements/module/_common/edit/widgets/header-controller";
 import "@elements/module/_common/edit/widgets/choose-mode/choose-mode";

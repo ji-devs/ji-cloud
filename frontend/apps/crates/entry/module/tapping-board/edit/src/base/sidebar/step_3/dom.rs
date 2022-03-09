@@ -10,6 +10,8 @@ use futures_signals::signal::{Mutable, SignalExt};
 use utils::prelude::*;
 use web_sys::HtmlTextAreaElement;
 
+const STR_EMPTY_SELECTION: &str = "Trace and select to add audio or label";
+
 pub fn render(state: Rc<Step3>) -> Dom {
     html!("empty-fragment", {
         .style("display", "contents")
@@ -20,44 +22,53 @@ pub fn render(state: Rc<Step3>) -> Dom {
                 selected_tab.signal_cloned().map(clone!(selected_tab, state => move |kind| {
                     //from selected_tab kind is a None, no trace is selected - don't show anything
                     //TODO- empty-fragment so we can set tab_index?
-                    kind.map(|_| {
-                        //otherwise, it means a trace is selected
-                        html!("menu-tabs", {
-                            // just for setting the tooltip index
-                            .future(
-                                state
-                                    .tab_signal(selected_tab.signal())
-                                    .map(|tab|
-                                        tab
-                                            .map(|tab| tab.as_index())
-                                            .unwrap_or_default()
-                                    )
-                                    .dedupe()
-                                    .for_each(clone!(state => move |index| {
-                                        state.sidebar.tab_index.set(Some(index));
-                                        async move {}
-                                    }))
-                            )
-                            .children(&mut [
-                                //pass down our mutable so that we can switch tabs
-                                render_tab(state.clone(), MenuTabKind::Audio, selected_tab.clone()),
-                                render_tab(state.clone(), MenuTabKind::Label, selected_tab.clone()),
-                                html!("module-sidebar-body", {
-                                    .property("slot", "body")
-                                    .child_signal(
-                                        //based on the selected tab kind, create and render the tab state
-                                        state
-                                            .tab_signal(selected_tab.signal())
-                                            .map(clone!(state => move |tab| {
-                                                tab.map(|tab| {
-                                                    render_tab_body(state.clone(), tab)
-                                                })
-                                            }))
-                                    )
-                                })
-                            ])
-                        })
-                    })
+
+                    match kind {
+                        Some(_) => {
+                            //otherwise, it means a trace is selected
+                            Some(html!("menu-tabs", {
+                                // just for setting the tooltip index
+                                .future(
+                                    state
+                                        .tab_signal(selected_tab.signal())
+                                        .map(|tab|
+                                            tab
+                                                .map(|tab| tab.as_index())
+                                                .unwrap_or_default()
+                                        )
+                                        .dedupe()
+                                        .for_each(clone!(state => move |index| {
+                                            state.sidebar.tab_index.set(Some(index));
+                                            async move {}
+                                        }))
+                                )
+                                .children(&mut [
+                                    //pass down our mutable so that we can switch tabs
+                                    render_tab(state.clone(), MenuTabKind::Audio, selected_tab.clone()),
+                                    render_tab(state.clone(), MenuTabKind::Label, selected_tab.clone()),
+                                    html!("module-sidebar-body", {
+                                        .property("slot", "body")
+                                        .child_signal(
+                                            //based on the selected tab kind, create and render the tab state
+                                            state
+                                                .tab_signal(selected_tab.signal())
+                                                .map(clone!(state => move |tab| {
+                                                    tab.map(|tab| {
+                                                        render_tab_body(state.clone(), tab)
+                                                    })
+                                                }))
+                                        )
+                                    })
+                                ])
+                            }))
+                        }
+                        None => {
+                            Some(html!("sidebar-empty", {
+                                .property("label", STR_EMPTY_SELECTION)
+                                .property("imagePath", "module/_common/edit/sidebar/illustration-trace-area.svg")
+                            }))
+                        }
+                    }
                 }))
             }))
             .flatten()
