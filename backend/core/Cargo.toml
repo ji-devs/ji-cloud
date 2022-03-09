@@ -28,4 +28,4 @@ db = ["sqlx"]
 
 [dependencies.sentry]
 features = ["anyhow", "backtrace", "contexts", "panic", "transport"]
-version = "0.24.3"
+version = "0.25.0"
