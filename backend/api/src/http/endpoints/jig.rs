@@ -3,6 +3,7 @@ use actix_web::{
     HttpResponse,
 };
 use core::settings::RuntimeSettings;
+use futures::try_join;
 use shared::{
     api::{endpoints::jig, ApiEndpoint},
     domain::{
@@ -200,7 +201,7 @@ async fn delete_all(
     Ok(HttpResponse::NoContent().finish())
 }
 
-#[instrument(skip_all)]
+#[instrument(skip(db, claims))]
 async fn browse(
     db: Data<PgPool>,
     claims: Option<TokenUser>,
@@ -221,7 +222,7 @@ async fn browse(
         .await
         .map_err(|e| error::Auth::InternalServerError(e))?;
 
-    let (jigs, count) = db::jig::browse(
+    let browse_future = db::jig::browse(
         db.as_ref(),
         author_id,
         query.jig_focus,
@@ -230,18 +231,18 @@ async fn browse(
         blocked,
         query.page.unwrap_or(0) as i32,
         page_limit,
-    )
-    .await?;
+    );
 
-    let total_count = db::jig::filtered_count(
+    let total_count_future = db::jig::filtered_count(
         db.as_ref(),
         privacy_level.to_owned(),
         blocked,
         author_id,
         query.jig_focus,
         query.draft_or_live,
-    )
-    .await?;
+    );
+
+    let ((jigs, count), total_count) = try_join!(browse_future, total_count_future,)?;
 
     let pages = (count / (page_limit as u64) + (count % (page_limit as u64) != 0) as u64) as u32;
 

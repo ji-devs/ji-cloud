@@ -45,7 +45,7 @@ rgb = "0.8.27"
 rusoto_core = "0.47.0"
 rusoto_s3 = "0.47.0"
 rusoto_signature = "0.47.0"
-sentry-tracing = "0.24.3"
+sentry-tracing = "0.25.0"
 serde = {version = "1.0.130", features = ["derive"]}
 serde_derive = "1.0.130"
 serde_json = {version = "1.0.68", features = ["preserve_order"]}
@@ -69,7 +69,7 @@ version = "0.17.4"
 
 [dependencies.sentry]
 features = ["anyhow", "backtrace", "contexts", "panic", "tracing", "transport"]
-version = "0.24.3"
+version = "0.25.0"
 
 [dependencies.sqlx]
 default-features = false
