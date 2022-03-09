@@ -1,5 +1,4 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
-import { classMap } from "lit-html/directives/class-map";
 import { nothing } from "lit-html";
 
 @customElement("sidebar-empty")
@@ -8,6 +7,7 @@ export class _ extends LitElement {
         return [
             css`
                 :host {
+                    --image-offset: 0px;
                     display: flex;
                     flex-direction: column;
                     justify-content: center;
@@ -16,7 +16,7 @@ export class _ extends LitElement {
                 }
                 img-ui {
                     margin-bottom: 24px;
-                    transform: translateX(32px);
+                    transform: translateX(var(--image-offset));
                 }
                 .label {
                     font-size: 18px;
@@ -45,15 +45,31 @@ export class _ extends LitElement {
     }
 
     @property({ type: String })
-    label: string = "";
+    label?: string;
+
+    @property({ type: String })
+    imagePath?: string;
+
+    @property({ type: Number, reflect: true })
+    imageOffset: number = 0;
+
+    firstUpdated(_changed: any) {
+        this.style.setProperty('--image-offset', `${this.imageOffset}px`);
+    }
+
+    renderImage() {
+        return this.imagePath ? html`<img-ui path=${this.imagePath}></img-ui>` : nothing;
+    }
+
+    renderLabel() {
+        return this.label ? html`<div class="label">${this.label}</div>` : nothing;
+    }
 
     render() {
         return html`
             <section>
-                <img-ui
-                    path="module/_groups/cards/edit/sidebar/edit-words.svg"
-                ></img-ui>
-                <div class="label">${this.label}</div>
+                ${this.renderImage()}
+                ${this.renderLabel()}
             </section>
             <div class="clear"><slot name="clear"></slot></div>
         `;
