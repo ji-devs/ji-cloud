@@ -7,7 +7,7 @@ pub fn init(
 ) -> anyhow::Result<sentry::ClientInitGuard> {
     // Sample rate defaults to 0.4 if not set as an environment variable
     let traces_sample_rate =
-        req_env("SENTRY_SAMPLE_RATE").map_or(Ok(0.4), |value| value.parse::<f32>())?;
+        req_env("SENTRY_SAMPLE_RATE").map_or(Ok(0.8), |value| value.parse::<f32>())?;
 
     let dsn = dsn.unwrap_or("");
     let options = sentry::ClientOptions {
