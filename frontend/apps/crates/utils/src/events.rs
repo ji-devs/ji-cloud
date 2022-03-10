@@ -47,6 +47,25 @@ temp_make_event!(FocusOut, "focusout" => web_sys::Event);
 
 make_custom_event_serde!("module-resize", ModuleResizeEvent, ResizeInfo);
 
+macro_rules! make_pointer_event {
+    ($name:ident, $type:literal => $event:path) => {
+        temp_make_event!($name, $type => $event);
+
+        impl $name {
+            #[inline] pub fn x(&self) -> i32 { self.event.x() }
+            #[inline] pub fn y(&self) -> i32 { self.event.y() }
+
+            #[inline] pub fn pointer_id(&self) -> i32 { self.event.pointer_id() }
+        }
+    };
+}
+
+make_pointer_event!(PointerDown, "pointerdown" => web_sys::PointerEvent);
+make_pointer_event!(PointerEnter, "pointerenter" => web_sys::PointerEvent);
+make_pointer_event!(PointerLeave, "pointerleave" => web_sys::PointerEvent);
+make_pointer_event!(PointerMove, "pointermove" => web_sys::PointerEvent);
+make_pointer_event!(PointerUp, "pointerup" => web_sys::PointerEvent);
+
 // Custom Bounds
 #[derive(Deserialize, Debug)]
 pub struct CustomBoundsData {

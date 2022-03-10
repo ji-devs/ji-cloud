@@ -54,8 +54,13 @@ pub fn render_top(state: Rc<CardTop>) -> Dom {
 }
 
 pub fn render_bottom(state: Rc<CardBottom>) -> Dom {
-    html!("empty-fragment", {
+    html!("div", {
         .property("slot", "bottom")
+        .style("touch-action", "none")
+        .event(clone!(state => move |evt:events::PointerDown| {
+            let elem: HtmlElement = evt.dyn_target().unwrap_ji();
+            super::actions::start_drag(state.clone(), elem, evt.x(), evt.y());
+        }))
         .child_signal(state.phase.signal_cloned().map(clone!(state => move |phase| {
             let theme_id = state.theme_id;
             let mode = state.mode;
@@ -66,13 +71,9 @@ pub fn render_bottom(state: Rc<CardBottom>) -> Dom {
                 BottomPhase::Show => {
                     let mut options = CardOptions::new(card, theme_id, mode, side, Size::Matching);
                     options.flipped = true;
-                    render_card_mixin(options, |dom| {
-                        dom
-                            .event(clone!(state => move |evt:events::MouseDown| {
-                                let elem:HtmlElement = evt.dyn_target().unwrap_ji();
-
-                                super::actions::start_drag(state.clone(), elem, evt.x(), evt.y());
-                            }))
+                    render_card_mixin(options, |mut dom| {
+                        // block events on the element so that it's parent gets them (needed for touch)
+                        dom.style("pointer-events", "none")
                     })
                 },
                 BottomPhase::Remove => {
@@ -98,11 +99,11 @@ pub fn render_drag(state: Rc<CardDrag>) -> Dom {
     render_card_mixin(options, |dom| {
         dom.property("hasTransform", true)
             .style_signal("transform", state.drag.transform_signal())
-            .global_event(clone!(state => move |_evt:events::MouseUp| {
+            .global_event(clone!(state => move |_evt:events::PointerUp| {
                 state.on_release();
                 //on_mouse_up(evt.x() as i32, evt.y() as i32);
             }))
-            .global_event(clone!(state => move |evt:events::MouseMove| {
+            .global_event(clone!(state => move |evt:events::PointerMove| {
                 if let Some(_point) = state.drag.update(evt.x(), evt.y()) {
                     state.evaluate_drag_over();
                 }
