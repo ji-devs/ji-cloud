@@ -15,8 +15,11 @@ async fn main() -> anyhow::Result<()> {
     let (_guard, settings) = {
         let settings = SettingsManager::new(remote_target).await?;
 
-        let guard =
-            core::sentry::init(settings.sentry_pages_key().await?.as_deref(), remote_target)?;
+        let guard = core::sentry::init(
+            settings.sentry_pages_key().await?.as_deref(),
+            remote_target,
+            settings.sentry_sample_rate().await?,
+        )?;
 
         (guard, settings.runtime_settings().await?)
     };

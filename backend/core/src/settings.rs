@@ -24,6 +24,9 @@ use std::{
     time::{SystemTime, UNIX_EPOCH},
 };
 
+/// When the sample rate is not set using a GCP secret or environment variable, default to 1
+const DEFAULT_SAMPLE_RATE: f32 = 1f32;
+
 /// Reads a `RemoteTarget` from the arguments passed to the command.
 pub fn read_remote_target() -> anyhow::Result<RemoteTarget> {
     let remote_target = match std::env::args().nth(1).as_deref() {
@@ -494,6 +497,16 @@ impl SettingsManager {
         self.get_optional_secret(keys::SENTRY_DSN_PAGES)
             .await
             .map(|it| it.filter(|it| !it.is_empty()))
+    }
+
+    /// Load the sample rate for Sentry tracing.
+    pub async fn sentry_sample_rate(&self) -> anyhow::Result<f32> {
+        let sample_rate_value = self.get_optional_secret(keys::SENTRY_SAMPLE_RATE).await?;
+
+        Ok(match sample_rate_value {
+            Some(value) => value.parse::<f32>().unwrap_or(DEFAULT_SAMPLE_RATE),
+            None => DEFAULT_SAMPLE_RATE,
+        })
     }
 
     /// Load the key required for initializing sentry (for pages)
