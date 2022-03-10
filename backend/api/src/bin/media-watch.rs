@@ -53,8 +53,11 @@ async fn main() -> anyhow::Result<()> {
         let settings: SettingsManager = SettingsManager::new(remote_target).await?;
 
         // FIXME use a sentry DSN for a media-watch specific project
-        let sentry_guard =
-            core::sentry::init(settings.sentry_api_key().await?.as_deref(), remote_target)?;
+        let sentry_guard = core::sentry::init(
+            settings.sentry_api_key().await?.as_deref(),
+            remote_target,
+            settings.sentry_sample_rate().await?,
+        )?;
 
         let db_pool = db::get_pool(
             settings
