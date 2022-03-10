@@ -9,6 +9,7 @@ use rusoto_s3::{
 };
 use shared::media::{self, media_key, FileKind, MediaLibrary, PngImageFile};
 use tokio::io::AsyncReadExt;
+use tracing::instrument;
 use uuid::Uuid;
 
 #[derive(Clone)]
@@ -93,6 +94,7 @@ impl Client {
         Ok(())
     }
 
+    #[instrument(skip(self, library, original, resized, thumbnail))]
     pub async fn upload_png_images(
         &self,
         library: MediaLibrary,

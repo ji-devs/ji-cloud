@@ -10,6 +10,7 @@ use shared::{
     },
 };
 use sqlx::PgPool;
+use tracing::instrument;
 
 use crate::{
     db, error,
@@ -41,6 +42,7 @@ impl Into<actix_web::Error> for CreateError {
 }
 
 /// Get a tree of categories.
+#[instrument(skip(db))]
 async fn get_categories(
     db: Data<PgPool>,
     req: Option<Query<<category::Get as ApiEndpoint>::Req>>,

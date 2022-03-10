@@ -1,8 +1,10 @@
 use futures::stream::BoxStream;
 use shared::domain::image::{user::UserImage, ImageId, ImageKind};
 use sqlx::{PgConnection, PgPool};
+use tracing::{instrument, Instrument};
 use uuid::Uuid;
 
+#[instrument(skip(pool))]
 pub async fn create(pool: &PgPool, user_id: &Uuid, kind: ImageKind) -> sqlx::Result<ImageId> {
     let mut txn = pool.begin().await?;
     let id: ImageId = sqlx::query!(
@@ -16,11 +18,13 @@ returning id as "id: ImageId"
         kind as i16,
     )
     .fetch_one(&mut txn)
+    .instrument(tracing::info_span!("inser user_image_library"))
     .await?
     .id;
 
     sqlx::query!("insert into user_image_upload (image_id) values ($1)", id.0)
         .execute(&mut txn)
+        .instrument(tracing::info_span!("inser user_image_upload"))
         .await?;
 
     txn.commit().await?;

@@ -28,6 +28,7 @@ use shared::{
     media::MediaLibrary,
 };
 use sqlx::{postgres::PgDatabaseError, Acquire, PgConnection, PgPool};
+use tracing::{instrument, Instrument};
 use uuid::Uuid;
 
 use crate::token::{create_update_email_token, validate_token};
@@ -43,6 +44,7 @@ use crate::{
 mod color;
 mod font;
 
+#[instrument(skip(txn, email_address, mail))]
 async fn send_verification_email(
     txn: &mut PgConnection,
     user_id: Uuid,
@@ -71,6 +73,7 @@ async fn send_verification_email(
     Ok(())
 }
 
+#[instrument(skip(txn, email_address, mail))]
 async fn send_password_email(
     txn: &mut PgConnection,
     user_id: Uuid,
@@ -99,6 +102,7 @@ async fn send_password_email(
     Ok(())
 }
 
+#[instrument(skip(txn, mail))]
 async fn send_reset_email(
     txn: &mut PgConnection,
     user_id: Uuid,
@@ -128,6 +132,7 @@ async fn send_reset_email(
     Ok(())
 }
 
+#[instrument(skip_all)]
 async fn hash_password(pass: String) -> anyhow::Result<String> {
     let pass_hash = actix_web::web::block(move || {
         let password_hasher = Argon2::default();
@@ -144,6 +149,7 @@ async fn hash_password(pass: String) -> anyhow::Result<String> {
 }
 
 /// Create a user
+#[instrument(skip_all)]
 async fn create_user(
     config: Data<RuntimeSettings>,
     mail: ServiceData<mail::Client>,
@@ -164,6 +170,7 @@ async fn create_user(
         &req.email
     )
     .fetch_one(&mut txn)
+    .instrument(tracing::info_span!("check basic exists"))
     .await?
     .exists;
 
@@ -172,6 +179,7 @@ async fn create_user(
         &req.email
     )
     .fetch_one(&mut txn)
+    .instrument(tracing::info_span!("check google exists"))
     .await?
     .exists;
     match (exists_basic, exists_google) {
@@ -188,6 +196,7 @@ async fn create_user(
 
     let user = sqlx::query!(r#"insert into "user" default values returning id"#)
         .fetch_one(&mut txn)
+        .instrument(tracing::info_span!("insert user"))
         .await?;
 
     let pass_hash = hash_password(req.password).await?;
@@ -199,6 +208,7 @@ async fn create_user(
         pass_hash.to_string(),
     )
     .execute(&mut txn)
+    .instrument(tracing::info_span!("insert user_basic_auth"))
     .await?;
 
     send_verification_email(
@@ -217,6 +227,7 @@ async fn create_user(
 }
 
 /// Verify emails
+#[instrument(skip_all)]
 async fn verify_email(
     config: Data<RuntimeSettings>,
     mail: ServiceData<mail::Client>,
@@ -242,6 +253,7 @@ where
                 email
             )
             .fetch_optional(&mut txn)
+            .instrument(tracing::info_span!("get user_id"))
             .await?;
 
             let user = match user {
@@ -288,7 +300,7 @@ insert into user_email (user_id, email)
 select session.user_id, user_auth_basic.email
 from session
 inner join user_auth_basic on user_auth_basic.user_id = session.user_id
-where 
+where
     session.token = $1 and
     session.expires_at > now() and
     (session.scope_mask & $2) = $2
@@ -298,6 +310,7 @@ returning user_id
                 SessionMask::VERIFY_EMAIL.bits(),
             )
             .fetch_optional(&mut txn) // Result<Option<UserId>, Error>
+            .instrument(tracing::info_span!("insert user_email"))
             .await
             .map_err(|err| match err {
                 sqlx::Error::Database(err)
@@ -343,6 +356,7 @@ returning user_id
 }
 
 /// Lookup a user.
+#[instrument(skip(db))]
 async fn user_lookup(
     db: Data<PgPool>,
     query: Query<UserLookupQuery>,
@@ -364,6 +378,7 @@ fn validate_register_req(req: &CreateProfileRequest) -> Result<(), error::UserUp
 }
 
 /// Create a user profile.
+#[instrument(skip_all)]
 async fn create_profile(
     settings: Data<RuntimeSettings>,
     db: Data<PgPool>,
@@ -425,6 +440,7 @@ async fn create_profile(
         .json(NewSessionResponse { csrf }))
 }
 
+#[instrument(skip(pool, s3))]
 async fn create_user_profile_image(
     pool: &PgPool,
     s3: &s3::Client,
@@ -440,7 +456,11 @@ async fn create_user_profile_image(
         .build()?;
 
     // todo: this `?` should be a ClientError or "proxy/gateway error"
-    let mut response: reqwest::Response = client.get(url).send().await?;
+    let mut response: reqwest::Response = client
+        .get(url)
+        .send()
+        .instrument(tracing::info_span!("fetch url"))
+        .await?;
 
     let mut data = Vec::new();
 
@@ -462,6 +482,7 @@ async fn create_user_profile_image(
         let original = image::load_from_memory(&data)?;
         crate::image_ops::generate_images(&original, ImageKind::Sticker)
     })
+    .instrument(tracing::info_span!("process image"))
     .await??;
 
     // upload to ID
@@ -486,12 +507,14 @@ where image_id = $1
         profile_image_id.0
     )
     .execute(pool)
+    .instrument(tracing::info_span!("update user_image_upload"))
     .await?;
 
     Ok(profile_image_id)
 }
 
 /// reset user email
+#[instrument(skip(settings, mail, db, claims))]
 async fn email_reset(
     settings: Data<RuntimeSettings>,
     mail: ServiceData<mail::Client>,
@@ -511,6 +534,7 @@ async fn email_reset(
         &req.email
     )
     .fetch_one(&mut txn)
+    .instrument(tracing::info_span!("validate email"))
     .await?
     .exists;
 
@@ -519,6 +543,7 @@ async fn email_reset(
         &req.email
     )
     .fetch_one(&mut txn)
+    .instrument(tracing::info_span!("check google exists"))
     .await?
     .exists;
 
@@ -581,6 +606,7 @@ pub struct EmailToken {
 }
 
 /// Verify email reset email
+#[instrument(skip(settings, mail, db))]
 async fn verify_email_reset(
     settings: Data<RuntimeSettings>,
     mail: ServiceData<mail::Client>,
@@ -646,6 +672,7 @@ async fn verify_email_reset(
                 token.user_id
             )
             .fetch_optional(&mut txn)
+            .instrument(tracing::info_span!("email exists"))
             .await?;
 
             let email = match email {
@@ -659,7 +686,7 @@ async fn verify_email_reset(
             // update user_auth_basic table
             sqlx::query!(
                 r#"
-        update user_auth_basic 
+        update user_auth_basic
         set email = $3::text
         where user_id = $1 and email = $2::text
         "#,
@@ -668,12 +695,13 @@ async fn verify_email_reset(
                 token.email
             )
             .execute(&mut txn)
+            .instrument(tracing::info_span!("update user_auth_basic"))
             .await?;
 
             // update user_email table
             sqlx::query!(
                 r#"
-        update user_email 
+        update user_email
         set email = $3::text
         where user_id = $1 and email = $2::text
         "#,
@@ -682,11 +710,13 @@ async fn verify_email_reset(
                 token.email
             )
             .execute(&mut txn)
+            .instrument(tracing::info_span!("update user_email"))
             .await?;
 
             if force_logout {
                 sqlx::query!("delete from session where user_id = $1", &token.user_id)
                     .execute(&mut txn)
+                    .instrument(tracing::info_span!("force logout"))
                     .await?;
             }
 
@@ -697,6 +727,7 @@ async fn verify_email_reset(
     }
 }
 
+#[instrument(skip_all)]
 pub fn validate_email_token(
     paseto_token: String,
     token_key: &[u8; 32],
@@ -716,6 +747,7 @@ pub fn validate_email_token(
 }
 
 /// Update your profile.
+#[instrument(skip(db, claims))]
 async fn patch_profile(
     db: Data<PgPool>,
     claims: TokenUser,
@@ -729,6 +761,7 @@ async fn patch_profile(
 }
 
 /// Get a user's profile.
+#[instrument(skip_all)]
 async fn get_profile(
     db: Data<PgPool>,
     claims: TokenUser,
@@ -742,6 +775,7 @@ async fn get_profile(
 }
 
 /// Delete your account
+#[instrument(skip_all)]
 async fn delete(
     db: Data<PgPool>,
     session: TokenSessionOf<SessionDelete>,
@@ -757,6 +791,7 @@ async fn delete(
 }
 
 /// Reset password
+#[instrument(skip_all)]
 async fn reset_password(
     config: Data<RuntimeSettings>,
     req: Json<<ResetPassword as ApiEndpoint>::Req>,
@@ -772,6 +807,7 @@ async fn reset_password(
         &req.email
     )
     .fetch_optional(&mut txn)
+    .instrument(tracing::info_span!("get user_id"))
     .await?;
 
     let user_id = match user {
@@ -794,6 +830,7 @@ async fn reset_password(
 }
 
 /// Change password
+#[instrument(skip_all)]
 async fn put_password(
     db: Data<PgPool>,
     req: Json<<ChangePassword as ApiEndpoint>::Req>,
@@ -821,6 +858,7 @@ async fn put_password(
         user_id
     )
     .fetch_optional(&mut txn)
+    .instrument(tracing::info_span!("get email address"))
     .await?;
 
     let email = match email {
@@ -832,6 +870,7 @@ async fn put_password(
 
     sqlx::query!("delete from user_auth_basic where user_id = $1", user_id)
         .execute(&mut txn)
+        .instrument(tracing::info_span!("delete user_auth_basic"))
         .await?;
 
     let user_to_delete = sqlx::query!(
@@ -840,6 +879,7 @@ async fn put_password(
         email as _
     )
     .fetch_optional(&mut txn)
+    .instrument(tracing::info_span!("get user_id"))
     .await?;
 
     if let Some(user_to_delete) = user_to_delete {
@@ -848,6 +888,7 @@ async fn put_password(
             user_to_delete.user_id
         )
         .execute(&mut txn)
+        .instrument(tracing::info_span!("delete user_to_delete"))
         .await?;
     }
 
@@ -861,11 +902,13 @@ values ($1, $2::text, $3)
         pass_hash.to_string(),
     )
     .execute(&mut txn)
+    .instrument(tracing::info_span!("insert user_auth_basic"))
     .await?;
 
     if force_logout {
         sqlx::query!("delete from session where user_id = $1", user_id)
             .execute(&mut txn)
+            .instrument(tracing::info_span!("delete session"))
             .await?;
     }
 

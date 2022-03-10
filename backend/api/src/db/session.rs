@@ -1,5 +1,6 @@
 use chrono::{DateTime, Utc};
 use sqlx::PgConnection;
+use tracing::instrument;
 use uuid::Uuid;
 
 use crate::token::SessionMask;
@@ -13,6 +14,7 @@ fn generate_session_token() -> String {
     base64::encode_config(&bytes, base64::URL_SAFE)
 }
 
+#[instrument(skip(conn))]
 pub async fn create(
     conn: &mut PgConnection,
     user_id: Uuid,
@@ -22,7 +24,7 @@ pub async fn create(
 ) -> sqlx::Result<String> {
     let session = generate_session_token();
     sqlx::query!(
-        "insert into session (token, user_id, impersonator_id, expires_at, scope_mask) values ($1, $2, $3, $4, $5)", 
+        "insert into session (token, user_id, impersonator_id, expires_at, scope_mask) values ($1, $2, $3, $4, $5)",
         &session,
         user_id,
         impersonator_id,
@@ -34,6 +36,7 @@ pub async fn create(
     Ok(session)
 }
 
+#[instrument(skip(conn))]
 pub async fn clear_any(
     conn: &mut PgConnection,
     user_id: Uuid,
@@ -51,6 +54,7 @@ pub async fn clear_any(
 }
 
 /// finds a one time session and deletes it after verifying its valididity.
+#[instrument(skip_all)]
 pub async fn get_onetime(
     txn: &mut PgConnection,
     min_mask: SessionMask,
@@ -67,6 +71,7 @@ pub async fn get_onetime(
     Ok(res.map(|it| it.user_id))
 }
 
+#[instrument(skip_all)]
 pub async fn delete(txn: &mut PgConnection, token: &str) -> sqlx::Result<()> {
     sqlx::query!("delete from session where token = $1", &token)
         .execute(txn)
