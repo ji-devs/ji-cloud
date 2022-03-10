@@ -35,7 +35,7 @@ impl Default for JigPlayerSettings {
 }
 
 /// Sets text direction for the jig.
-#[derive(Serialize, Deserialize, Copy, Clone, Debug)]
+#[derive(Serialize, Deserialize, Copy, Clone, Debug, PartialEq)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[repr(i16)]
 pub enum TextDirection {
@@ -51,6 +51,18 @@ pub enum TextDirection {
 impl Default for TextDirection {
     fn default() -> Self {
         Self::LeftToRight
+    }
+}
+
+impl TextDirection {
+    /// check if is left to right
+    pub fn is_ltr(&self) -> bool {
+        self == &Self::LeftToRight
+    }
+
+    /// check if is right to left
+    pub fn is_rtl(&self) -> bool {
+        self == &Self::RightToLeft
     }
 }
 

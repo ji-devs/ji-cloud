@@ -86,6 +86,9 @@ export class _ extends LitElement {
                     justify-content: center;
                     grid-gap: 16px;
                 }
+                :host([rtl]) .bottom-bar {
+                    transform: scale(-1, 1);
+                }
                 .bottom-right {
                     grid-row: 2;
                     grid-column: 3;
@@ -132,6 +135,9 @@ export class _ extends LitElement {
 
     @property({ type: Boolean, reflect: true })
     isLegacy = false;
+
+    @property({ type: Boolean, reflect: true })
+    rtl: boolean = false;
 
     render() {
         return html`
