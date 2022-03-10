@@ -6,6 +6,7 @@ use rand::Rng;
 use serde_json::json;
 use shared::domain::{session::AUTH_COOKIE_NAME, user::UserScope};
 use sqlx::PgPool;
+use tracing::instrument;
 use uuid::Uuid;
 
 use crate::error::{self, BasicError};
@@ -105,7 +106,7 @@ pub async fn check_login_token(
         r#"
 select user_id
 from session
-where 
+where
     token = $1 and
     expires_at < now() is not true and
     (scope_mask & $2) = $2 and
@@ -206,6 +207,7 @@ pub fn create_player_session_instance_token(
         .map_err(|err| anyhow::anyhow!("failed to create player session instance token: {}", err))
 }
 
+#[instrument(skip_all)]
 pub fn create_update_email_token(
     token_secret: &[u8; 32],
     valid_duration: Duration,

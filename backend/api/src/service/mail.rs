@@ -1,6 +1,7 @@
 use core::settings::EmailClientSettings;
 use sendgrid::v3::{Content, Email, Message, Personalization, SGMap, Sender};
 use shared::domain::jig::report::JigReportEmail;
+use tracing::instrument;
 
 use crate::error;
 
@@ -29,6 +30,7 @@ impl Client {
         }
     }
 
+    #[instrument(skip_all)]
     pub async fn send_signup_verify(
         &self,
         template: SignupVerifyTemplate<'_>,
@@ -47,6 +49,7 @@ impl Client {
         Ok(())
     }
 
+    #[instrument(skip_all)]
     pub async fn send_password_reset(
         &self,
         template: PasswordResetTemplate<'_>,
@@ -100,9 +103,9 @@ impl Client {
 
         let value = format!(
             r#"{} with email {} has reported "{}" for the following reason: "{}".
-            
+
             URL: {}
-            Created by: {} 
+            Created by: {}
                "#,
             reporter_name,
             reporter_email,

@@ -23,6 +23,7 @@ use sqlx::{
     PgConnection,
 };
 use std::fmt::Write as _;
+use tracing::{instrument, Instrument};
 use uuid::Uuid;
 
 /// Mirrors the database schema for uploads for each media kind.
@@ -92,19 +93,28 @@ impl Metadata for GoalId {
     const TABLE: &'static str = "goal";
 }
 
+#[instrument(skip(conn, meta))]
 async fn recycle_metadata<'a, T: Metadata>(
     conn: &mut PgConnection,
     table: &str,
     id: Uuid,
     meta: &[T],
 ) -> sqlx::Result<()> {
+    // [Ty] Necessary because for reasons unknown to me, I cannot pass T::TABLE directly into the
+    // the info_span! macro as an argument.
+    let table_name_suffix = T::TABLE;
+
     sqlx::query(&format!(
         "delete from {0}_{1} where {0}_id = $1",
-        table,
-        T::TABLE
+        table, table_name_suffix
     ))
     .bind(id)
     .execute(&mut *conn)
+    .instrument(tracing::info_span!(
+        "delete {}_{}",
+        table,
+        table_name_suffix
+    ))
     .await?;
 
     for meta in meta.chunks(i16::MAX as usize - 1) {
@@ -116,7 +126,10 @@ async fn recycle_metadata<'a, T: Metadata>(
             query = query.bind(uuid);
         }
 
-        query.execute(&mut *conn).await?;
+        query
+            .execute(&mut *conn)
+            .instrument(tracing::info_span!("insert metadata"))
+            .await?;
     }
 
     Ok(())
@@ -126,7 +139,7 @@ fn generate_metadata_insert(base_table: &str, meta_kind: &str, binds: usize) -> 
     debug_assert_ne!(binds, 0);
     debug_assert_ne!(binds, i16::MAX as usize);
 
-    log::error!("{}", meta_kind);
+    tracing::debug!("Table {}_{}", base_table, meta_kind);
 
     let mut s = format!(
         "insert into {0}_{1} ({0}_id, {1}_id) values($1, $2)",

@@ -13,11 +13,13 @@ use shared::domain::{
 };
 use sqlx::{PgConnection, PgPool};
 use std::{convert::TryFrom, str::FromStr};
+use tracing::{instrument, Instrument};
 use uuid::Uuid;
 
 use super::{nul_if_empty, recycle_metadata};
 use crate::error;
 
+#[instrument(skip(db))]
 pub async fn lookup(
     db: &sqlx::PgPool,
     id: Option<Uuid>,
@@ -33,6 +35,7 @@ pub async fn lookup(
     .await?)
 }
 
+#[instrument(skip(db))]
 pub async fn get_profile(db: &sqlx::PgPool, id: Uuid) -> anyhow::Result<Option<UserProfile>> {
     let row = sqlx::query!(
         //language=SQL
@@ -69,8 +72,6 @@ where id = $1"#,
     let row = match row {
         Some(row) => row,
         None => {
-            println!("after row");
-
             return Ok(None);
         }
     };
@@ -218,6 +219,7 @@ pub async fn exists(db: &sqlx::PgPool, id: Uuid) -> sqlx::Result<bool> {
     .map(|it| it.exists)
 }
 
+#[instrument(skip(txn, req))]
 pub async fn upsert_profile(
     txn: &mut sqlx::Transaction<'_, sqlx::Postgres>,
     req: &CreateProfileRequest,
@@ -260,6 +262,7 @@ set
         req.location.as_ref(),
     )
     .execute(&mut *txn)
+    .instrument(tracing::info_span!("insert user_profile"))
     .await?;
 
     sqlx::query!(
@@ -268,6 +271,7 @@ set
         UserScope::ManageSelfJig as i16
     )
     .execute(&mut *txn)
+    .instrument(tracing::info_span!("insert user_scope"))
     .await?;
 
     update_metadata(
@@ -282,6 +286,7 @@ set
     Ok(())
 }
 
+#[instrument(skip(db, req))]
 pub async fn update_profile(
     db: &PgPool,
     user_id: Uuid,
@@ -297,6 +302,7 @@ select exists(select 1 from user_profile where user_id = $1 for update) as "exis
         user_id
     )
     .fetch_one(&mut txn)
+    .instrument(tracing::info_span!("user exists"))
     .await?
     .exists
     {
@@ -316,6 +322,7 @@ where user_id = $1 and organization is distinct from $2"#,
             organization
         )
         .execute(&mut txn)
+        .instrument(tracing::info_span!("update organization"))
         .await?;
     }
 
@@ -330,6 +337,7 @@ where user_id = $1 and location is distinct from $2"#,
             location
         )
         .execute(&mut txn)
+        .instrument(tracing::info_span!("update location"))
         .await?;
     }
 
@@ -345,6 +353,7 @@ where user_id = $1 and profile_image_id is distinct from $2
             profile_image.map(|it| it.0),
         )
         .execute(&mut txn)
+        .instrument(tracing::info_span!("update profile_image"))
         .await?;
     }
 
@@ -360,6 +369,7 @@ where user_id = $1 and persona is distinct from $2
             &persona
         )
         .execute(&mut txn)
+        .instrument(tracing::info_span!("update persona"))
         .await?;
     }
 
@@ -393,6 +403,7 @@ where user_id = $1
         req.opt_into_edu_resources,
     )
     .execute(&mut txn)
+    .instrument(tracing::info_span!("update user_profile"))
     .await?;
 
     update_metadata(
@@ -409,6 +420,7 @@ where user_id = $1
     Ok(())
 }
 
+#[instrument(skip(conn))]
 pub async fn update_metadata(
     conn: &mut PgConnection,
     user_id: Uuid,

@@ -7,8 +7,10 @@ use shared::domain::category::{Category, CategoryId};
 use shared::domain::user::UserScope;
 use sqlx::{Executor, PgPool};
 use std::convert::TryFrom;
+use tracing::instrument;
 use uuid::Uuid;
 
+#[instrument(skip_all)]
 pub async fn get_top_level(db: &sqlx::PgPool) -> anyhow::Result<Vec<Category>> {
     sqlx::query!(
         r#"
@@ -48,6 +50,7 @@ order by index
     .map_err(Into::into)
 }
 
+#[instrument(skip(db))]
 pub async fn get_exact(db: &sqlx::PgPool, ids: &[Uuid]) -> sqlx::Result<Vec<Category>> {
     sqlx::query!(
         //language=SQL
@@ -85,6 +88,7 @@ order by t.ord
     .await
 }
 
+#[instrument(skip(db))]
 pub async fn get_subtree(db: &sqlx::PgPool, ids: &[Uuid]) -> sqlx::Result<Vec<Category>> {
     sqlx::query_file_as!(RawCategory, "query/category/get_subtree.sql", ids)
         .fetch_all(db)
@@ -92,6 +96,7 @@ pub async fn get_subtree(db: &sqlx::PgPool, ids: &[Uuid]) -> sqlx::Result<Vec<Ca
         .map(build_tree)
 }
 
+#[instrument(skip_all)]
 pub async fn get_tree(db: &sqlx::PgPool) -> sqlx::Result<Vec<Category>> {
     sqlx::query_as!(
         RawCategory,
@@ -113,6 +118,7 @@ from category
     .map(build_tree)
 }
 
+#[instrument(skip_all)]
 pub async fn get_ancestor_tree(db: &sqlx::PgPool, ids: &[Uuid]) -> sqlx::Result<Vec<Category>> {
     sqlx::query_file_as!(RawCategory, "query/category/get_ancestor_tree.sql", ids)
         .fetch_all(db)
@@ -120,6 +126,7 @@ pub async fn get_ancestor_tree(db: &sqlx::PgPool, ids: &[Uuid]) -> sqlx::Result<
         .map(build_tree)
 }
 
+#[instrument(skip(db))]
 pub async fn create(
     db: &sqlx::PgPool,
     name: &str,
@@ -292,6 +299,7 @@ where id = $2
     Ok(())
 }
 
+#[instrument(skip(db))]
 pub async fn update(
     db: &sqlx::PgPool,
     CategoryId(id): CategoryId,
