@@ -2,12 +2,14 @@
 mod context;
 use context::*;
 mod options;
+use futures::lock::Mutex;
 use legacy_transcode::src_manifest::{SrcManifest, SrcManifestData};
 use options::*;
 
 use shared::domain::jig::{AudioBackground, JigUpdateDraftDataRequest};
 use reqwest::StatusCode;
 use simplelog::*;
+use std::collections::HashSet;
 use std::{future::Future, process::exit};
 use std::sync::Arc;
 use futures::stream::{FuturesUnordered, StreamExt};
@@ -63,6 +65,8 @@ async fn main() {
 }
 
 async fn get_futures(ctx:Arc<Context>) -> Vec<impl Future> {
+    let mut mem = Arc::new(Mutex::new(HashSet::new()));
+
     let mut futures = Vec::new();
 
     async fn do_browse(ctx:&Context, page:usize) -> Result<JigBrowseResponse, reqwest::Error> {
@@ -88,6 +92,7 @@ async fn get_futures(ctx:Arc<Context>) -> Vec<impl Future> {
     for page in (0..=pages as usize) {
         futures.push({
             let ctx = ctx.clone();
+            let mem = mem.clone();
             async move {
                 match do_browse(&ctx, page).await {
                     Ok(res) => {
@@ -96,12 +101,17 @@ async fn get_futures(ctx:Arc<Context>) -> Vec<impl Future> {
                         let JigBrowseResponse { jigs, .. } = res;
 
                         for jig in jigs {
+                            if mem.lock().await.contains(&jig.id.0) {
+                                println!("duplicate {:?}", jig.id.0);
+                            }
+                            mem.lock().await.insert(jig.id.0.clone());
+
                             if ctx.opts.update_background_music {
                                 update_background_music(ctx.clone(), jig.id).await;
                             }
 
                             if ctx.opts.update_screenshots {
-                                for module in jig.jig_data.modules {
+                                for module in jig.jig_data.modules.iter().take(1) {
             
                                 let url = format!("{}/screenshot/{}/{}/thumb.jpg", ctx.opts.get_remote_target().uploads_url(), jig.id.0.to_string(), module.id.0.to_string());
                                 let res = ctx.client

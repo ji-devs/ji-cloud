@@ -6,13 +6,13 @@ use shared::config::RemoteTarget;
 #[structopt(name = "ji tap transcoder", about = "ji tap downloader/transcoder")]
 pub struct Opts {
     /// batch size to help throttle connections 
-    #[structopt(long, parse(try_from_str), default_value = "0")]
+    #[structopt(long, parse(try_from_str), default_value = "1000")]
     pub batch_size: usize,
 
-    #[structopt(long, parse(try_from_str), default_value = "false")]
+    #[structopt(long, parse(try_from_str), default_value = "true")]
     pub update_screenshots: bool,
 
-    #[structopt(long, parse(try_from_str), default_value = "true")]
+    #[structopt(long, parse(try_from_str), default_value = "false")]
     pub update_background_music: bool,
 
     /// debug mode 
@@ -30,7 +30,7 @@ pub struct Opts {
     #[structopt(long, default_value = "release")]
     pub remote_target: String,
 
-    #[structopt(long, default_value = "")]
+    #[structopt(long, default_value = "v2.local.ZL54qXfXrtqWoubng3huU7rNF-u3pZPEWuR3RR7xSKQ5bylue2RMh-M_fQJ161ADFh1txRFzJQwbjLRaa4XjyXcvzCbr2CKgaliPmnapiq4mevEXjKH9531Z1NlHYjleqlQFES5c_N42CEBeyqfUOMeMNLB4r0zRadmmepghgbzEZ2OrWhW_7SMJ7wNnXPp3sHq-bD24MhuXrkgbq4okO9we7snLqGWLhyM0BEW0Y6KX0P7ksLcpFxKHPdtBDCDglIQo-GkqL5QRUGA5PJJ4AmJODAnSZ-FGT31iKNMiLyiPgSplRd-RL7g9sKwOpW54jRBndMZVzfg9aBJ0-K07omRml2MsCAHFLXwHlETvKeFd6UwXrZJhzct9wMJ7.YXV0aG9yaXplZA")]
     pub token: String,
 }
 

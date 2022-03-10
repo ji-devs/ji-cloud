@@ -44,6 +44,7 @@ export default {
             serverPath: "/js/",
             debug: true,
             watchPatterns,
+            // cargoArgs: ["--features", "release"],
             cargoArgs: ["--features", "local quiet"],
             watch: true,
         }),
@@ -57,6 +58,7 @@ export default {
             open: true,
             historyApiFallback: true,
             port: APP_PORT,
+            host: '0.0.0.0',
         }),
 
         livereload("dist"),

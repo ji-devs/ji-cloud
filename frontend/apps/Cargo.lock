@@ -355,9 +355,7 @@ dependencies = [
  "futures",
  "futures-signals",
  "gloo-timers",
- "htmlescape",
  "js-sys",
- "jsonwebtoken",
  "log",
  "serde",
  "serde-wasm-bindgen",
@@ -372,7 +370,6 @@ dependencies = [
  "wasm-logger",
  "web-sys",
  "wee_alloc",
- "zxcvbn",
 ]
 
 [[package]]
@@ -1150,15 +1147,12 @@ dependencies = [
  "beach_map",
  "cfg-if 1.0.0",
  "chrono",
- "const_format",
  "discard",
  "dominator",
  "dominator_helpers",
  "futures",
  "futures-signals",
  "gloo-timers",
- "htmlescape",
- "itertools",
  "js-sys",
  "log",
  "once_cell",
@@ -1169,7 +1163,6 @@ dependencies = [
  "serde-wasm-bindgen",
  "serde_json",
  "serde_qs",
- "serde_repr",
  "shared",
  "strum 0.22.0",
  "strum_macros 0.22.0",
@@ -1191,26 +1184,6 @@ checksum = "a06aeb73f470f66dcdbf7223caeebb85984942f22f1adb2a088cf9668146bbbc"
 dependencies = [
  "cfg-if 1.0.0",
  "wasm-bindgen",
-]
-
-[[package]]
-name = "const_format"
-version = "0.2.22"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "22bc6cd49b0ec407b680c3e380182b6ac63b73991cb7602de350352fc309b614"
-dependencies = [
- "const_format_proc_macros",
-]
-
-[[package]]
-name = "const_format_proc_macros"
-version = "0.2.22"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ef196d5d972878a48da7decb7686eded338b4858fbabeed513d63a7c98b2b82d"
-dependencies = [
- "proc-macro2",
- "quote",
- "unicode-xid",
 ]
 
 [[package]]
@@ -2432,8 +2405,6 @@ dependencies = [
  "futures",
  "futures-signals",
  "gloo-timers",
- "htmlescape",
- "itertools",
  "js-sys",
  "lazy_static",
  "log",
@@ -2443,7 +2414,6 @@ dependencies = [
  "serde-wasm-bindgen",
  "serde_json",
  "serde_qs",
- "serde_repr",
  "shared",
  "strum 0.22.0",
  "strum_macros 0.22.0",

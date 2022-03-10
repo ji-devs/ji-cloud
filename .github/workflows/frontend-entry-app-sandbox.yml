@@ -72,6 +72,12 @@ jobs:
         working-directory: "./frontend/apps"
         env:
           LOCAL_CDN_FRONTEND_DIR: ${{ github.workspace }}/frontend
+
+      - name: update apt-get
+        run: sudo apt-get update
+
+      - name: install brotli
+        run: sudo apt-get install brotli
       
       - name: install google cloud sdk
         uses: google-github-actions/setup-gcloud@master
@@ -80,8 +86,8 @@ jobs:
           service_account_key: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON_KEY_SANDBOX }}
 
       - name: deploy to google cloud
-        # run: gsutil -m rsync -d -r frontend/apps/dist/${{ matrix.app }}/js gs://ji-cloud-sandbox-frontend-origin-eu-001/${{ matrix.app }}/js
-        run: gsutil -m cp -Z -r frontend/apps/dist/${{ matrix.app }}/js gs://ji-cloud-sandbox-frontend-origin-eu-001/${{ matrix.app }}
+        run: gsutil -m rsync -d -r frontend/apps/dist/${{ matrix.app }}/js gs://ji-cloud-sandbox-frontend-origin-eu-001/${{ matrix.app }}/js
+        # run: gsutil -m cp -Z -r frontend/apps/dist/${{ matrix.app }}/js gs://ji-cloud-sandbox-frontend-origin-eu-001/${{ matrix.app }}
         
       - name: Notify slack of all status
         uses: pullreminders/slack-action@master

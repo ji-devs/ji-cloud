@@ -11,10 +11,8 @@ shared = {path = "../../../../shared/rust", features = ["wasm"]}
 chrono = { version = "0.4.19", features = ["wasmbind"] }
 thiserror = "1.0.30"
 futures = "0.3.17"
-itertools = "0.10.1"
 async-trait = "0.1.51"
 serde = { version = "1.0.130", features = ["derive"] }
-serde_repr = "0.1.7"
 base64 = "0.13.0"
 strum = "0.22.0"
 strum_macros = "0.22.0"
@@ -32,36 +30,35 @@ serde_qs = "0.8.5"
 dominator = "0.5.22"
 futures-signals = "0.3.23"
 dominator_helpers = "0.7.2"
-htmlescape = "0.3.1"
 gloo-timers = "0.2.1"
 console_error_panic_hook = "0.1.7"
 wasm-logger = { version = "0.2.0", optional = true }
 web-sys = { version = "0.3.55", features = [
-    'Url',
-    'Request',
-    'RequestInit',
-    'RequestCredentials',
-    'Response',
-    'RequestMode',
-    'Headers',
-    'Window',
-    'Document',
-    'Element',
-    'Location',
+    #'Url',
+    #'Request',
+    #'RequestInit',
+    #'RequestCredentials',
+    #'Response',
+    #'RequestMode',
+    #'Headers',
+    #'Window',
+    #'Document',
+    #'Element',
+    #'Location',
     'Storage',
-    'UrlSearchParams',
-    'CssStyleDeclaration',
-    'DomRect',
-    'HtmlDocument',
-    'HtmlImageElement',
-    'History',
-    'CustomEvent',
-    'HtmlCanvasElement',
-    'CanvasRenderingContext2d',
-    'ImageData',
-    'Blob',
-    'BlobPropertyBag',
-    'Worker',
+    #'UrlSearchParams',
+    #'CssStyleDeclaration',
+    #'DomRect',
+    #'HtmlDocument',
+    #'HtmlImageElement',
+    #'History',
+    #'CustomEvent',
+    #'HtmlCanvasElement',
+    #'CanvasRenderingContext2d',
+    #'ImageData',
+    #'Blob',
+    #'BlobPropertyBag',
+    #'Worker',
     'PointerEvent',
 ] }
 awsm_web = { version = "0.32.0", features = ["loaders", "image", "serde_iso", "canvas"] }

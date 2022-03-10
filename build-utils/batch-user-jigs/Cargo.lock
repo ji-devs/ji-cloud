@@ -268,15 +268,12 @@ dependencies = [
  "beach_map",
  "cfg-if 1.0.0",
  "chrono",
- "const_format",
  "discard",
  "dominator",
  "dominator_helpers",
  "futures",
  "futures-signals",
  "gloo-timers",
- "htmlescape",
- "itertools",
  "js-sys",
  "log",
  "once_cell",
@@ -287,7 +284,6 @@ dependencies = [
  "serde-wasm-bindgen",
  "serde_json",
  "serde_qs",
- "serde_repr",
  "shared",
  "strum",
  "strum_macros",
@@ -309,26 +305,6 @@ checksum = "a06aeb73f470f66dcdbf7223caeebb85984942f22f1adb2a088cf9668146bbbc"
 dependencies = [
  "cfg-if 1.0.0",
  "wasm-bindgen",
-]
-
-[[package]]
-name = "const_format"
-version = "0.2.22"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "22bc6cd49b0ec407b680c3e380182b6ac63b73991cb7602de350352fc309b614"
-dependencies = [
- "const_format_proc_macros",
-]
-
-[[package]]
-name = "const_format_proc_macros"
-version = "0.2.22"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ef196d5d972878a48da7decb7686eded338b4858fbabeed513d63a7c98b2b82d"
-dependencies = [
- "proc-macro2",
- "quote",
- "unicode-xid",
 ]
 
 [[package]]
@@ -767,12 +743,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "htmlescape"
-version = "0.3.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e9025058dae765dee5070ec375f591e2ba14638c63feff74f13805a72e523163"
-
-[[package]]
 name = "http"
 version = "0.2.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -913,15 +883,6 @@ name = "ipnet"
 version = "2.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "68f2d64f2edebec4ce84ad108148e67e1064789bee435edc5b60ad398714a3a9"
-
-[[package]]
-name = "itertools"
-version = "0.10.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a9a9d19fa1e79b6215ff29b9d6880b706147f16e9b1dbb1e4e5947b5b02bc5e3"
-dependencies = [
- "either",
-]
 
 [[package]]
 name = "itoa"
@@ -2078,8 +2039,6 @@ dependencies = [
  "futures",
  "futures-signals",
  "gloo-timers",
- "htmlescape",
- "itertools",
  "js-sys",
  "lazy_static",
  "log",
@@ -2089,7 +2048,6 @@ dependencies = [
  "serde-wasm-bindgen",
  "serde_json",
  "serde_qs",
- "serde_repr",
  "shared",
  "strum",
  "strum_macros",

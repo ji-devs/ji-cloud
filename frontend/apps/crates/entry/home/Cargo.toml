@@ -22,30 +22,29 @@ console_error_panic_hook = { version = "0.1.7", optional = true }
 wasm-bindgen = "0.2.78"
 js-sys = "0.3.55"
 web-sys = { version = "0.3.55", features = [
-    'Url',
-    'Request',
-    'RequestInit',
-    'Response',
-    'RequestMode',
-    'Headers',
-    'Document', 
-    'DocumentFragment',
-    'HtmlTemplateElement',
-    'Window',
+    # 'Url',
+    # 'Request',
+    # 'RequestInit',
+    # 'Response',
+    # 'RequestMode',
+    # 'Headers',
+    # 'Document', 
+    # 'DocumentFragment',
+    # 'HtmlTemplateElement',
+    # 'Window',
     'Storage',
-    'Location',
-    'Element',
-    'CssStyleDeclaration',
-    'DomTokenList',
-    'HtmlCollection',
-    'HtmlInputElement',
+    # 'Location',
+    # 'Element',
+    # 'CssStyleDeclaration',
+    # 'DomTokenList',
+    # 'HtmlCollection',
+    # 'HtmlInputElement',
     'HtmlSelectElement',
-    'KeyboardEvent',
-    'MouseEvent',
+    # 'KeyboardEvent',
+    # 'MouseEvent',
 ] }
 uuid = { version = "0.8.2", features = ["serde", "wasm-bindgen"] }
 wasm-bindgen-futures = "0.4.28"
-htmlescape = "0.3.1"
 dominator = "0.5.22"
 futures-signals = "0.3.23"
 dominator_helpers = "0.7.2"
@@ -60,12 +59,12 @@ discard = "1.0.4"
 gloo-timers = { version = "0.2.1", features = ["futures"] }
 
 #SPA specific
-jsonwebtoken = "7.2.0"
 chrono = { version = "0.4.19", features = ["serde"] }
 chrono-tz = { version = "0.6.0", features = ["serde"] }
-zxcvbn = "2.1.2"
 strum = "0.23.0"
 strum_macros = "0.23.1"
+# strum = "0.22.0"
+# strum_macros = "0.22.0"
 
 [features]
 default = ["wee_alloc"]

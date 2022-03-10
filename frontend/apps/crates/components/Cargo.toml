@@ -11,13 +11,10 @@ utils = {path = "../utils"}
 shared = {path = "../../../../shared/rust", features = ["wasm"]}
 chrono = { version = "0.4.19", features = ["wasmbind"] }
 futures = "0.3.17"
-itertools = "0.10.1"
 async-trait = "0.1.51"
 serde = { version = "1.0.130", features = ["derive"] }
-serde_repr = "0.1.7"
 strum = "0.22.0"
 strum_macros = "0.22.0"
-const_format = { version = "0.2.22", features = ["const_generics"] }
 log = "0.4.14"
 serde_json = "1.0.70"
 cfg-if = "1.0.0"
@@ -34,35 +31,34 @@ dominator = "0.5.22"
 discard = "1.0.4"
 futures-signals = "0.3.23"
 dominator_helpers = "0.7.2"
-htmlescape = "0.3.1"
 unicode-segmentation = "1.8.0"
 rand = "0.8.4"
 thiserror = "1.0.30"
 
 web-sys = { version = "0.3.55", features = [
-    'Url',
-    'Request',
-    'RequestInit',
-    'RequestCredentials',
-    'Response',
-    'RequestMode',
-    'Headers',
-    'Window',
-    'Document',
-    'Element',
-    'Location',
-    'Storage',
+    # 'Url',
+    # 'Request',
+    # 'RequestInit',
+    # 'RequestCredentials',
+    # 'Response',
+    # 'RequestMode',
+    # 'Headers',
+    # 'Window',
+    # 'Document',
+    # 'Element',
+    # 'Location',
+    # 'Storage',
     'UrlSearchParams',
-    'CssStyleDeclaration',
-    'DomRect',
-    'HtmlDocument',
-    'HtmlImageElement',
-    'HtmlCanvasElement',
-    'History',
+    # 'CssStyleDeclaration',
+    # 'DomRect',
+    # 'HtmlDocument',
+    # 'HtmlImageElement',
+    # 'HtmlCanvasElement',
+    # 'History',
     'CustomEvent',
-    'HtmlAudioElement',
+    # 'HtmlAudioElement',
     'HtmlIFrameElement',
-    'CanvasRenderingContext2d',
+    # 'CanvasRenderingContext2d',
     'HtmlSelectElement',
     'Performance',
     'Path2d'
