@@ -9,11 +9,16 @@ use crate::{
     image::search::dom::render as render_image_search,
     lists::{dual::dom::render as render_dual_list, single::dom::render as render_single_list},
     module::_groups::cards::{edit::{state::*, strings}, lookup::Side},
-    tabs::{MenuTab, MenuTabKind}, audio::input::{AudioInput, AudioInputOptions, AudioInputCallbacks},
+    tabs::{MenuTab, MenuTabKind}, audio::input::{AudioInput, AudioInputOptions, AudioInputCallbacks}, overlay::handle::OverlayHandle,
 };
 
 const STR_NONEMPTY_LIST_LABEL: &str = "Edit your words on the cards";
 const STR_EMPTY_AUDIO_SELECTION: &str = "Select a card or a pair of cards to add audio";
+
+const STR_DELETE_TITLE: &'static str = "Warning";
+const STR_DELETE_CONTENT: &'static str = "Are you sure you want to delete this list?";
+const STR_DELETE_CONFIRM: &'static str = "Yes, go ahead!";
+const STR_DELETE_CANCEL: &'static str = "No, keep this list";
 
 pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<Step1<RawData, E>>) -> Dom {
     html!("empty-fragment", {
@@ -182,10 +187,33 @@ fn render_non_empty<RawData: RawDataExt, E: ExtraExt>(state: Rc<Step1<RawData, E
                 .property("color", "blue")
                 .text(strings::STR_CREATE_NEW_LIST)
                 .event(clone!(state => move |_evt:events::Click| {
-                    state.base.clear_all();
+                    state.confirm_clear.set_neq(true);
                 }))
             })
         )
+        .child_signal(state.confirm_clear.signal_cloned().map(clone!(state => move |confirm_clear| {
+            if confirm_clear {
+                Some(html!("empty-fragment", {
+                    .style("display", "none")
+                    .apply(OverlayHandle::lifecycle(clone!(state => move || {
+                        html!("modal-confirm", {
+                            .property("dangerous", true)
+                            .property("title", STR_DELETE_TITLE)
+                            .property("content", STR_DELETE_CONTENT)
+                            .property("cancel_text", STR_DELETE_CANCEL)
+                            .property("confirm_text", STR_DELETE_CONFIRM)
+                            .event(clone!(state => move |_evt: events::CustomCancel| state.confirm_clear.set_neq(false)))
+                            .event(clone!(state => move |_evt: events::CustomConfirm| {
+                                state.confirm_clear.set_neq(false);
+                                state.base.clear_all();
+                            }))
+                        })
+                    })))
+                }))
+            } else {
+                None
+            }
+        })))
     })
 }
 
