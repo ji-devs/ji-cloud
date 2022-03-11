@@ -1,6 +1,5 @@
-use crate::fetch::*;
 use once_cell::sync::OnceCell;
-use shared::{api::endpoints::user::Profile, domain::user::UserProfile};
+use shared::domain::user::UserProfile;
 
 static USER: OnceCell<UserProfile> = OnceCell::new();
 

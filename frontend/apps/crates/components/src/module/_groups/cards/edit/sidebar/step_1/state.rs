@@ -30,6 +30,7 @@ pub struct Step1<RawData: RawDataExt, E: ExtraExt> {
     pub tabs: OnceCell<Vec<Tab>>,
     pub tab_index: Mutable<Option<usize>>,
     pub audio: Mutable<Option<Rc<AudioInput>>>,
+    pub confirm_clear: Mutable<bool>,
 }
 
 impl<RawData: RawDataExt, E: ExtraExt> Step1<RawData, E> {
@@ -44,6 +45,7 @@ impl<RawData: RawDataExt, E: ExtraExt> Step1<RawData, E> {
             tabs: OnceCell::default(),
             tab_index,
             audio: Mutable::new(None),
+            confirm_clear: Mutable::new(false),
         });
 
         // Widgets require a reference to the top-level state so that they can have access to any

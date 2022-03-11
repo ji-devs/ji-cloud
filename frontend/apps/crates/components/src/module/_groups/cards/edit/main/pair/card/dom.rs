@@ -54,7 +54,7 @@ pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<MainCard<RawData, E>>)
                                 state.confirm_action.set(None);
                                 (confirm_action.handler)();
                             }))
-                })
+                        })
                     })))
                 }))
             } else {
