@@ -46,12 +46,6 @@ pub struct ResourceTypeId(pub Uuid);
 #[cfg_attr(feature = "backend", sqlx(transparent))]
 pub struct SubjectId(pub Uuid);
 
-/// Wrapper type around [`Uuid`], represents [`Goal::id`].
-#[derive(Hash, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[cfg_attr(feature = "backend", sqlx(transparent))]
-pub struct GoalId(pub Uuid);
-
 /// Wrapper type around [`Uuid`], represents [`Report::id`].
 #[derive(Hash, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
@@ -65,7 +59,6 @@ into_uuid!(
     ResourceTypeId,
     AgeRangeId,
     SubjectId,
-    GoalId,
     ReportId
 );
 
@@ -195,22 +188,6 @@ pub struct Subject {
     pub updated_at: Option<DateTime<Utc>>,
 }
 
-/// Represents a goal.
-#[derive(Clone, Serialize, Deserialize, Debug)]
-pub struct Goal {
-    /// The id of the goal.
-    pub id: GoalId,
-
-    /// The goal's name.
-    pub display_name: String,
-
-    /// When the goal was created.
-    pub created_at: DateTime<Utc>,
-
-    /// When the goal was last updated.
-    pub updated_at: Option<DateTime<Utc>>,
-}
-
 /// Represents a tag.
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ImageTag {
@@ -251,9 +228,6 @@ pub struct MetadataResponse {
     /// All subjects the server has.
     pub subjects: Vec<Subject>,
 
-    /// All goals.
-    pub goals: Vec<Goal>,
-
     /// All tags for images.
     pub image_tags: Vec<ImageTag>,
 }
@@ -281,9 +255,6 @@ pub enum MetaKind {
 
     /// [`Subject`]
     Subject,
-
-    /// [`Goal`]
-    Goal,
 
     /// [`ImageTag`]
     Tag,

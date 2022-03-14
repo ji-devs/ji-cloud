@@ -14,8 +14,8 @@ use core::config::DB_POOL_CONNECTIONS;
 use shared::domain::{
     category::CategoryId,
     meta::{
-        AffiliationId, AgeRangeId, AnimationStyleId, GoalId, ImageStyleId, ImageTagIndex,
-        ResourceTypeId, SubjectId,
+        AffiliationId, AgeRangeId, AnimationStyleId, ImageStyleId, ImageTagIndex, ResourceTypeId,
+        SubjectId,
     },
 };
 use sqlx::{
@@ -87,10 +87,6 @@ impl Metadata for CategoryId {
 
 impl Metadata for SubjectId {
     const TABLE: &'static str = "subject";
-}
-
-impl Metadata for GoalId {
-    const TABLE: &'static str = "goal";
 }
 
 #[instrument(skip(conn, meta))]
