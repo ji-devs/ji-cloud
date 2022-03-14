@@ -413,7 +413,6 @@ function createState(opts: StateOpts): State {
             style.setProperty("left", `${x}px`);
         });
 
-        console.log(x, y);
         const newAnchor = `${contentAnchor}-${targetAnchor}`;
 
         if (lastAnchor !== newAnchor) {
