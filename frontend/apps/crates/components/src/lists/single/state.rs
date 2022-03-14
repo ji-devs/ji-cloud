@@ -14,6 +14,7 @@ pub struct State {
     pub error_element_ref: RefCell<Option<HtmlElement>>,
     pub callbacks: Callbacks,
     pub opts: Options,
+    pub confirm_clear: Mutable<bool>,
 }
 
 pub struct Options {
@@ -48,6 +49,7 @@ impl State {
             error_element_ref: RefCell::new(None),
             callbacks,
             opts,
+            confirm_clear: Mutable::new(false),
         }
     }
 

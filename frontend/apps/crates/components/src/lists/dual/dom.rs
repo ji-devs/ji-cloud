@@ -11,13 +11,18 @@ use crate::{
             Anchor, ContentAnchor, MoveStrategy, State as TooltipState, TooltipData, TooltipError,
             TooltipTarget,
         },
-    },
+    }, overlay::handle::OverlayHandle,
 };
 use futures_signals::{
     map_ref,
     signal::{Mutable, SignalExt},
     signal_vec::{MutableVec, SignalVecExt},
 };
+
+const STR_DELETE_TITLE: &'static str = "Warning";
+const STR_DELETE_CONTENT: &'static str = "Are you sure you want to delete this list?";
+const STR_DELETE_CONFIRM: &'static str = "Yes, go ahead!";
+const STR_DELETE_CANCEL: &'static str = "No, keep this list";
 
 pub fn render(state: Rc<State>) -> Dom {
     html!("sidebar-widget-dual-list", {
@@ -29,7 +34,7 @@ pub fn render(state: Rc<State>) -> Dom {
                 .property("color", "blue")
                 .text(super::strings::STR_CLEAR)
                 .event(clone!(state => move |_evt:events::Click| {
-                    state.clear();
+                    state.confirm_clear.set_neq(true);
                 }))
             }),
             html!("button-rect", {
@@ -69,8 +74,31 @@ pub fn render(state: Rc<State>) -> Dom {
                 }))
             }),
             render_column(state.clone(), ColumnSide::Left),
-            render_column(state, ColumnSide::Right),
+            render_column(state.clone(), ColumnSide::Right),
         ])
+        .child_signal(state.confirm_clear.signal_cloned().map(clone!(state => move |confirm_clear| {
+            if confirm_clear {
+                Some(html!("empty-fragment", {
+                    .style("display", "none")
+                    .apply(OverlayHandle::lifecycle(clone!(state => move || {
+                        html!("modal-confirm", {
+                            .property("dangerous", true)
+                            .property("title", STR_DELETE_TITLE)
+                            .property("content", STR_DELETE_CONTENT)
+                            .property("cancel_text", STR_DELETE_CANCEL)
+                            .property("confirm_text", STR_DELETE_CONFIRM)
+                            .event(clone!(state => move |_evt: events::CustomCancel| state.confirm_clear.set_neq(false)))
+                            .event(clone!(state => move |_evt: events::CustomConfirm| {
+                                state.confirm_clear.set_neq(false);
+                                state.clear();
+                            }))
+                        })
+                    })))
+                }))
+            } else {
+                None
+            }
+        })))
     })
 }
 
