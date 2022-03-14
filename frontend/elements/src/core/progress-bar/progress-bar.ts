@@ -3,6 +3,8 @@ import { nothing } from "lit-html";
 
 export type ProgressColor = "blue" | "green";
 
+const STR_UPLOADING_TEXT = "Uploading... please wait.";
+
 @customElement("progress-bar")
 export class _ extends LitElement {
     static get styles() {
@@ -26,11 +28,12 @@ export class _ extends LitElement {
                     height: 100%;
                     border-radius: var(--border-radius);
                     background-color: var(--background-color);
-                    overflow: hidden;
+                    
                 }
                 .bar {
                     height: 100%;
                     background-color: var(--color);
+                    margin-bottom: 8px;
                 }
                 :host([progress=infinite]) .bar {
                     width: 25%;
@@ -69,6 +72,7 @@ export class _ extends LitElement {
             ` : nothing}
             <div class="wrapper">
                 <div class="bar"></div>
+                <div>${STR_UPLOADING_TEXT}</div>
             </div>
         `;
     }
