@@ -7,19 +7,10 @@ use std::collections::HashSet;
 use std::convert::TryFrom;
 
 /// The body for [`Cover`](crate::domain::jig::module::ModuleKind::Cover) modules.
-#[derive(Clone, Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug, Default)]
 pub struct ModuleData {
     /// The content
     pub content: Option<Content>,
-}
-
-// cover always has data
-impl Default for ModuleData {
-    fn default() -> Self {
-        Self {
-            content: Some(Content::default()),
-        }
-    }
 }
 
 impl BodyExt<(), Step> for ModuleData {

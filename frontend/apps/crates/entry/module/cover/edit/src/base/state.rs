@@ -25,6 +25,8 @@ use shared::domain::jig::{
 use std::cell::RefCell;
 use std::rc::Rc;
 use utils::prelude::*;
+use super::actions::set_contents_with_theme;
+
 pub struct Base {
     pub history: Rc<HistoryStateImpl<RawData>>,
     pub step: ReadOnlyMutable<Step>,
@@ -41,14 +43,20 @@ pub struct Base {
 impl Base {
     pub async fn new(init_args: BaseInitFromRawArgs<RawData, (), Step>) -> Rc<Self> {
         let BaseInitFromRawArgs {
-            raw,
+            mut raw,
             jig_id,
             theme_id,
             module_id,
             history,
             step,
+            jig,
             ..
         } = init_args;
+
+        if raw.content.is_none() {
+            raw = set_contents_with_theme(jig_id.clone(), module_id.clone(), jig.theme, raw).await;
+            theme_id.set(jig.theme);
+        }
 
         let content = raw.content.unwrap_ji();
         let base_content = content.base;

@@ -3,7 +3,8 @@ use super::{
     sidebar::state::Sidebar, state::*,
 };
 use components::module::_common::edit::prelude::*;
-use shared::domain::jig::module::body::cover::{ModuleData as RawData, Step};
+use shared::domain::jig::module::{body::{cover::{ModuleData as RawData, Step, Content}, _groups::design::BaseContent}, ModuleUpdateRequest, StableOrUniqueId, ModuleBody};
+use utils::prelude::api_with_auth_empty;
 use std::rc::Rc;
 
 pub async fn init_from_raw(
@@ -29,4 +30,39 @@ pub async fn init_from_raw(
         footer: Rc::new(Footer::new(base.clone())),
         overlay: Rc::new(Overlay::new(base)),
     }
+}
+
+pub async fn set_contents_with_theme(jig_id: JigId, module_id: ModuleId, theme: ThemeId, mut module: RawData) -> RawData {
+    log::info!("{:?}", theme);
+    let content = Content {
+        base: BaseContent {
+            theme: theme.clone(),
+            ..Default::default()
+        },
+        ..Default::default()
+    };
+
+    module.content = Some(content);
+
+    let body = ModuleBody::Cover(module.clone());
+
+    let req = ModuleUpdateRequest {
+        id: StableOrUniqueId::Unique(module_id),
+        body: Some(body),
+        index: None,
+        is_complete: None,
+    };
+
+    let path = endpoints::jig::module::Update::PATH
+        .replace("{id}", &jig_id.0.to_string())
+        .replace("{module_id}", &module_id.0.to_string());
+
+    let _ = api_with_auth_empty::<EmptyError, _>(
+        &path,
+        endpoints::jig::module::Update::METHOD,
+        Some(req)
+    )
+        .await;
+
+    module
 }
