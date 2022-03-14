@@ -25,7 +25,7 @@ static MODULE_KINDS: &[ModuleKind] = &[
 const STR_TOOLTIP_TITLE: &str = "Let's build your JIG!";
 const STR_TOOLTIP_BODY: &str =
     "Select an activity and drag it to the body of your JIG. You can change the order at any time.";
-const STR_SHOW_ONBOARDING: &str = "Show onboarding";
+const STR_SHOW_ONBOARDING: &str = "Take the tour";
 
 pub struct SelectionDom {}
 

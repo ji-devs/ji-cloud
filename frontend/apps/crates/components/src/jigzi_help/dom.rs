@@ -10,7 +10,7 @@ use crate::overlay::handle::OverlayHandle;
 use super::state::JigziHelp;
 
 const MARGIN_X: i32 = 20;
-const STR_NO_SHOW_AGAIN: &str  = "Don’t show tips again";
+const STR_NO_SHOW_AGAIN: &str  = "I don't want help";
 
 impl JigziHelp {
     pub fn render(
