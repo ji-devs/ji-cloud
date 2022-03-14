@@ -16,7 +16,6 @@ pub async fn update(
     pool: &PgPool,
     jig_id: JigId,
     display_name: Option<bool>,
-    goals: Option<bool>,
     categories: Option<bool>,
     age_ranges: Option<bool>,
     affiliations: Option<bool>,
@@ -37,21 +36,6 @@ where jig_id = $1 and $2 is distinct from display_name
             "#,
             jig_id.0,
             display_name,
-        )
-        .execute(&mut txn)
-        .await?;
-    }
-
-    if let Some(goals) = goals {
-        sqlx::query!(
-            //language=SQL
-            r#"
-update jig_curation_data
-set goals = $2
-where jig_id = $1 and $2 is distinct from goals
-            "#,
-            jig_id.0,
-            goals,
         )
         .execute(&mut txn)
         .await?;
@@ -186,7 +170,6 @@ pub async fn get_curation(pool: &PgPool, jig_id: JigId) -> anyhow::Result<Option
 select jig_id                               as "jig_id!: JigId",
        display_name,
        language,
-       goals,
        categories,
        description,
        age_ranges,
@@ -230,7 +213,6 @@ where jig_id = $1
         fields_done: JigCurationFieldsDone {
             display_name: row.display_name,
             language: row.language,
-            goals: row.goals,
             categories: row.categories,
             description: row.description,
             age_ranges: row.age_ranges,

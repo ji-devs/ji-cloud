@@ -23,11 +23,6 @@ values ('a91aca34-519e-11ec-ab46-175eaaf1ff23', 'Coloring', 0, '2020-09-08T15:41
        ('a9219e7c-519e-11ec-ab46-63ad4c3d4eeb', 'Worksheet', 1, '2020-09-08T15:41:55.203383-07'),
        ('a939f454-519e-11ec-ab46-2fa68cd3a8c7', 'LessonPlan', 2, '2020-09-08T15:41:55.203383-07');
 
-insert into "goal" (id, display_name, index, created_at)
-values ('533898ea-3367-11eb-a473-8f2df3b13671', 'Lesson Component', 0, '2020-11-30 23:54:39.198381+00'),
-       ('533899b2-3367-11eb-a473-ef2577a4de84', 'Full Lesson', 1, '2020-11-30 23:54:39.198381+00'),
-       ('53389a20-3367-11eb-a473-bbdc8773362a', 'Assessment', 2, '2020-11-30 23:54:39.198381+00');
-
 insert into "image_tag" (index, display_name, created_at)
 values (0, 'A', '2021-04-22 19:53:37.997394+00'),
        (1, 'B', '2021-04-22 19:53:37.997394+00'),

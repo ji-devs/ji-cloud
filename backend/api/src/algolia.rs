@@ -17,7 +17,7 @@ use shared::{
         category::CategoryId,
         image::{ImageId, ImageKind},
         jig::{JigFocus, JigId, PrivacyLevel},
-        meta::{AffiliationId, AgeRangeId, GoalId, ImageStyleId, ImageTagIndex, ResourceTypeId},
+        meta::{AffiliationId, AgeRangeId, ImageStyleId, ImageTagIndex, ResourceTypeId},
     },
     media::MediaGroupKind,
 };
@@ -44,8 +44,6 @@ struct BatchJig<'a> {
     affiliation_names: &'a [String],
     resource_types: &'a [Uuid],
     resource_type_names: &'a [String],
-    goals: &'a [Uuid],
-    goal_names: &'a [String],
     categories: &'a [Uuid],
     category_names: &'a [String],
     author_id: Option<Uuid>,
@@ -288,11 +286,6 @@ select jig.id,
               from age_range
                        inner join jig_data_age_range on age_range.id = jig_data_age_range.age_range_id
               where jig_data_age_range.jig_data_id = jig_data.id))                                                  as "age_range_names!",
-       array((select goal_id from jig_data_goal where jig_data_id = jig_data.id))                                   as "goals!",
-       array((select goal.display_name
-              from goal
-                       inner join jig_data_goal on goal.id = jig_data_goal.goal_id
-              where jig_data_goal.jig_data_id = jig_data.id))                                                       as "goal_names!",
        array((select category_id
               from jig_data_category
               where jig_data_id = jig_data.id))                                                                     as "categories!",
@@ -348,8 +341,6 @@ limit 100 for no key update skip locked;
                 name: &row.name,
                 language: &row.language,
                 description: &row.description,
-                goals: &row.goals,
-                goal_names: &row.goal_names,
                 age_ranges: &row.age_ranges,
                 age_range_names: &row.age_range_names,
                 affiliations: &row.affiliations,
@@ -848,7 +839,6 @@ impl Client {
         affiliations: &[AffiliationId],
         resource_types: &[ResourceTypeId],
         categories: &[CategoryId],
-        goals: &[GoalId],
         author_id: Option<Uuid>,
         author_name: Option<String>,
         jig_focus: Option<JigFocus>,
@@ -939,7 +929,6 @@ impl Client {
         filters_for_ids_or(&mut and_filters.filters, "affiliations", affiliations);
         filters_for_ids_or(&mut and_filters.filters, "resource_types", resource_types);
         filters_for_ids_or(&mut and_filters.filters, "categories", categories);
-        filters_for_ids_or(&mut and_filters.filters, "goals", goals);
 
         let results: SearchResponse = self
             .inner

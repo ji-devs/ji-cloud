@@ -44,9 +44,6 @@ pub struct JigCurationFieldsDone {
     /// Language of JIG
     pub language: bool,
 
-    /// Goals of JIG
-    pub goals: bool,
-
     /// Categories of JIG
     pub categories: bool,
 
@@ -68,7 +65,6 @@ impl Default for JigCurationFieldsDone {
         Self {
             display_name: false,
             language: false,
-            goals: false,
             categories: false,
             description: false,
             age_ranges: false,

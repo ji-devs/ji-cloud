@@ -27,7 +27,7 @@ use uuid::Uuid;
 
 use super::{
     category::CategoryId,
-    meta::{AffiliationId, AgeRangeId, GoalId, ResourceTypeId},
+    meta::{AffiliationId, AgeRangeId, ResourceTypeId},
 };
 use crate::domain::jig::module::body::ThemeId;
 
@@ -133,11 +133,6 @@ pub struct JigCreateRequest {
     /// The JIG's name.
     #[serde(default)]
     pub display_name: String,
-
-    /// The goals of this JIG.
-    #[serde(skip_serializing_if = "Vec::is_empty")]
-    #[serde(default)]
-    pub goals: Vec<GoalId>,
 
     /// This JIG's age ranges.
     #[serde(skip_serializing_if = "Vec::is_empty")]
@@ -252,9 +247,6 @@ pub struct JigData {
 
     /// This jig's affiliations.
     pub affiliations: Vec<AffiliationId>,
-
-    /// The goals of this jig.
-    pub goals: Vec<GoalId>,
 
     /// The language the jig uses.
     ///
@@ -669,11 +661,6 @@ pub struct JigUpdateDraftDataRequest {
     #[serde(default)]
     pub categories: Option<Vec<CategoryId>>,
 
-    /// The goals of this jig.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(default)]
-    pub goals: Option<Vec<GoalId>>,
-
     /// The jig's age ranges.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
@@ -847,13 +834,6 @@ pub struct JigSearchQuery {
     #[serde(deserialize_with = "super::from_csv")]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub categories: Vec<CategoryId>,
-
-    /// Optionally filter by `goals`
-    #[serde(default)]
-    #[serde(serialize_with = "super::csv_encode_uuids")]
-    #[serde(deserialize_with = "super::from_csv")]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
-    pub goals: Vec<GoalId>,
 
     /// Optionally filter by `is_published`. This means that the jig's `publish_at < now()`.
     #[serde(default)]

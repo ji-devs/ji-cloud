@@ -10,7 +10,7 @@ use shared::domain::{
         DeleteUserJigs, DraftOrLive, JigAdminData, JigData, JigFocus, JigId, JigPlayerSettings,
         JigRating, JigResponse, LiteModule, ModuleKind, PrivacyLevel, TextDirection,
     },
-    meta::{AffiliationId, AgeRangeId, GoalId, ResourceTypeId as TypeId},
+    meta::{AffiliationId, AgeRangeId, ResourceTypeId as TypeId},
     user::UserScope,
 };
 use sqlx::{types::Json, PgConnection, PgPool};
@@ -29,7 +29,6 @@ pub(crate) mod report;
 pub async fn create(
     pool: &PgPool,
     display_name: &str,
-    goals: &[GoalId],
     categories: &[CategoryId],
     age_ranges: &[AgeRangeId],
     affiliations: &[AffiliationId],
@@ -44,7 +43,6 @@ pub async fn create(
     let draft_id = create_jig_data(
         &mut txn,
         display_name,
-        goals,
         categories,
         age_ranges,
         affiliations,
@@ -58,7 +56,6 @@ pub async fn create(
     let live_id = create_jig_data(
         &mut txn,
         display_name,
-        goals,
         categories,
         age_ranges,
         affiliations,
@@ -102,7 +99,6 @@ values ($1, 0)
 pub async fn create_jig_data(
     txn: &mut PgConnection, // FIXME does this work?
     display_name: &str,
-    goals: &[GoalId],
     categories: &[CategoryId],
     age_ranges: &[AgeRangeId],
     affiliations: &[AffiliationId],
@@ -133,7 +129,6 @@ returning id
     .fetch_one(&mut *txn)
     .await?;
 
-    super::recycle_metadata(&mut *txn, "jig_data", jig_data.id, goals).await?;
     super::recycle_metadata(&mut *txn, "jig_data", jig_data.id, categories).await?;
     super::recycle_metadata(&mut *txn, "jig_data", jig_data.id, age_ranges).await?;
     super::recycle_metadata(&mut *txn, "jig_data", jig_data.id, affiliations).await?;
@@ -231,9 +226,6 @@ select cte.jig_id                                          as "jig_id: JigId",
                where jig_data_id = cte.draft_or_live_id
                order by "index"
            )                                               as "modules!: Vec<(ModuleId, ModuleKind, bool)>",
-       array(select row (goal_id)
-             from jig_data_goal
-             where jig_data_id = cte.draft_or_live_id)     as "goals!: Vec<(GoalId,)>",
        array(select row (category_id)
              from jig_data_category
              where jig_data_id = cte.draft_or_live_id)     as "categories!: Vec<(CategoryId,)>",
@@ -278,7 +270,6 @@ from jig_data
                     is_complete,
                 })
                 .collect(),
-            goals: row.goals.into_iter().map(|(it,)| it).collect(),
             categories: row.categories.into_iter().map(|(it,)| it).collect(),
             last_edited: row.updated_at,
             description: row.description,
@@ -404,9 +395,6 @@ select id,
                where jig_data_id = jig_data.id
                order by "index"
            )                                               as "modules!: Vec<(ModuleId, ModuleKind, bool)>",
-       array(select row (goal_id)
-             from jig_data_goal
-             where jig_data_id = jig_data.id)     as "goals!: Vec<(GoalId,)>",
        array(select row (category_id)
              from jig_data_category
              where jig_data_id = jig_data.id)     as "categories!: Vec<(CategoryId,)>",
@@ -461,7 +449,6 @@ where draft_or_live is not null
                         is_complete,
                     })
                     .collect(),
-                goals: jig_data_row.goals.into_iter().map(|(it,)| it).collect(),
                 categories: jig_data_row
                     .categories
                     .into_iter()
@@ -618,9 +605,6 @@ select  jig.id                                              as "jig_id: JigId",
                where jig_data_id = jig_data.id
                order by "index"
            )                                               as "modules!: Vec<(ModuleId, ModuleKind, bool)>",
-       array(select row (goal_id)
-             from jig_data_goal
-             where jig_data_id = jig_data.id)     as "goals!: Vec<(GoalId,)>",
        array(select row (category_id)
              from jig_data_category
              where jig_data_id = jig_data.id)     as "categories!: Vec<(CategoryId,)>",
@@ -680,7 +664,6 @@ limit $3
                         is_complete,
                     })
                     .collect(),
-                goals: jig_data_row.goals.into_iter().map(|(it,)| it).collect(),
                 categories: jig_data_row
                     .categories
                     .into_iter()
@@ -757,7 +740,6 @@ pub async fn update_draft(
     api_key: &Option<String>,
     id: JigId,
     display_name: Option<&str>,
-    goals: Option<&[GoalId]>,
     categories: Option<&[CategoryId]>,
     age_ranges: Option<&[AgeRangeId]>,
     affiliations: Option<&[AffiliationId]>,
@@ -925,12 +907,6 @@ where id = $1
     )
     .execute(&mut txn)
     .await?;
-
-    if let Some(goals) = goals {
-        super::recycle_metadata(&mut txn, "jig_data", draft_id, goals)
-            .await
-            .map_err(super::meta::handle_metadata_err)?;
-    }
 
     if let Some(categories) = categories {
         super::recycle_metadata(&mut txn, "jig_data", draft_id, categories)
@@ -1200,20 +1176,6 @@ where jig_data_id = $1
 insert into jig_data_category(jig_data_id, category_id)
 select $2, category_id
 from jig_data_category
-where jig_data_id = $1
-        "#,
-        from_data_id,
-        new_id,
-    )
-    .execute(&mut *txn)
-    .await?;
-
-    sqlx::query!(
-        //language=SQL
-        r#"
-insert into jig_data_goal(jig_data_id, goal_id)
-select $2, goal_id
-from jig_data_goal
 where jig_data_id = $1
         "#,
         from_data_id,

@@ -139,14 +139,12 @@ fn add_jig_index<'a>(
                     Attribute("category_names".to_owned()),
                     Attribute("age_range_names".to_owned()),
                     Attribute("affiliation_names".to_owned()),
-                    Attribute("goal_names".to_owned()),
                 ])
                 .single(Attribute("author_name".to_owned()))
                 .single(Attribute("language".to_owned()))
                 .finish(),
         ),
         attributes_for_faceting: Some(vec![
-            FacetAttribute::filter_only(Attribute("goals".to_owned())),
             FacetAttribute::filter_only(Attribute("age_ranges".to_owned())),
             FacetAttribute::filter_only(Attribute("affiliations".to_owned())),
             FacetAttribute::filter_only(Attribute("categories".to_owned())),

@@ -31,7 +31,6 @@ async fn update_curation(
         &*db,
         jig_id,
         req.display_name,
-        req.goals,
         req.categories,
         req.age_ranges,
         req.affiliations,

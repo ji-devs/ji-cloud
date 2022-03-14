@@ -9,24 +9,7 @@ expression: body
     "stable_id": "[stable_id]",
     "body": {
       "cover": {
-        "content": {
-          "editor_state": {
-            "step": "One",
-            "steps_completed": []
-          },
-          "base": {
-            "instructions": {
-              "text": null,
-              "audio": null
-            },
-            "theme": "Blank",
-            "backgrounds": {
-              "layer_1": null,
-              "layer_2": null
-            },
-            "stickers": []
-          }
-        }
+        "content": null
       }
     },
     "is_complete": false,

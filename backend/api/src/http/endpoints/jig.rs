@@ -69,7 +69,6 @@ async fn create(
     let id = db::jig::create(
         &*db,
         &req.display_name,
-        &req.goals,
         &req.categories,
         &req.age_ranges,
         &req.affiliations,
@@ -139,7 +138,6 @@ async fn update_draft(
         api_key,
         id,
         req.display_name.as_deref(),
-        req.goals.as_deref(),
         req.categories.as_deref(),
         req.age_ranges.as_deref(),
         req.affiliations.as_deref(),
@@ -365,7 +363,6 @@ async fn search(
             &query.affiliations,
             &query.resource_types,
             &query.categories,
-            &query.goals,
             author_id,
             query.author_name,
             query.jig_focus,
