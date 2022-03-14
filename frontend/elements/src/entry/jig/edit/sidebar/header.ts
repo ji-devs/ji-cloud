@@ -34,8 +34,7 @@ export class _ extends LitElement {
                     margin-right: -10px;
                 }
                 :host([isModulePage]) .close {
-                    opacity: 0;
-                    cursor: inherit;
+                    display: none;
                 }
                 :host([collapsed]) .close {
                     margin-right: 0px;
