@@ -2,12 +2,14 @@
 mod context;
 use context::*;
 mod options;
+use futures::lock::Mutex;
 use legacy_transcode::src_manifest::{SrcManifest, SrcManifestData};
 use options::*;
 
 use shared::domain::jig::{AudioBackground, JigUpdateDraftDataRequest};
 use reqwest::StatusCode;
 use simplelog::*;
+use std::collections::HashSet;
 use std::{future::Future, process::exit};
 use std::sync::Arc;
 use futures::stream::{FuturesUnordered, StreamExt};
@@ -63,6 +65,8 @@ async fn main() {
 }
 
 async fn get_futures(ctx:Arc<Context>) -> Vec<impl Future> {
+    let mut mem = Arc::new(Mutex::new(HashSet::new()));
+
     let mut futures = Vec::new();
 
     async fn do_browse(ctx:&Context, page:usize) -> Result<JigBrowseResponse, reqwest::Error> {
@@ -88,14 +92,23 @@ async fn get_futures(ctx:Arc<Context>) -> Vec<impl Future> {
     for page in (0..=pages as usize) {
         futures.push({
             let ctx = ctx.clone();
+            let mem = mem.clone();
             async move {
                 match do_browse(&ctx, page).await {
                     Ok(res) => {
-                        log::info!("loading jigs for page {}", page);
+                        // log::info!("loading jigs for page {}", page);
 
                         let JigBrowseResponse { jigs, .. } = res;
 
                         for jig in jigs {
+
+                            if ctx.opts.log_duplicate_jig {
+                                if mem.lock().await.contains(&jig.id.0) {
+                                    println!("Duplicate: {:?}", jig.id.0);
+                                }
+                                mem.lock().await.insert(jig.id.0.clone());
+                            }
+
                             if ctx.opts.update_background_music {
                                 update_background_music(ctx.clone(), jig.id).await;
                             }

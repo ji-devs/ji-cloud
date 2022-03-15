@@ -6,14 +6,17 @@ use shared::config::RemoteTarget;
 #[structopt(name = "ji tap transcoder", about = "ji tap downloader/transcoder")]
 pub struct Opts {
     /// batch size to help throttle connections 
-    #[structopt(long, parse(try_from_str), default_value = "0")]
+    #[structopt(long, parse(try_from_str), default_value = "50")]
     pub batch_size: usize,
 
     #[structopt(long, parse(try_from_str), default_value = "false")]
     pub update_screenshots: bool,
 
-    #[structopt(long, parse(try_from_str), default_value = "true")]
+    #[structopt(long, parse(try_from_str), default_value = "false")]
     pub update_background_music: bool,
+
+    #[structopt(long, parse(try_from_str), default_value = "true")]
+    pub log_duplicate_jig: bool,
 
     /// debug mode 
     #[structopt(long, parse(try_from_str), default_value = "false")]
