@@ -35,12 +35,18 @@ export class _ extends LitElement {
                 :host(:hover) .circle {
                     background-color: var(--light-orange-3);
                 }
+                @media(max-width: 1280px) {
+                    :host .label {
+                        font-size: 14px;
+                    }
+                }
                 .label {
                     text-align: center;
                     transition: color 0.3s;
                     line-height: 1.5;
                     font-weight: 600;
                     width: 116px;
+                    font-size: 16px;
                 }
                 :host(:hover) .label {
                     color: var(--main-blue);
