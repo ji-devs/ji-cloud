@@ -17,6 +17,7 @@ const STR_PRODUCT_TITLE = "Product";
 const STR_PRODUCT_MANAGE_CLASSROOM = "Manage classroom";
 const STR_PRODUCT_CREATE_ACTIVITIES = "Create activities";
 const STR_PRODUCT_JOIN_COMMUNITY = "Join community";
+const STR_JIGZI_ROADMAP = "Jigzi Roadmap";
 
 const STR_HELP_TITLE = "Help";
 const STR_HELP_SUPPORT = "Support & FAQ";
@@ -274,6 +275,12 @@ export class _ extends LitElement {
                                     <a href="${COMING_SOON_ALERT}"
                                         >${STR_PRODUCT_JOIN_COMMUNITY}</a
                                     >
+                                </li>
+                                <li>
+                                    <a
+                                        href="https://www.jewishinteractive.org/flipbook/index.html?page=1"
+                                        target="_blank"
+                                    >${STR_JIGZI_ROADMAP}</a>
                                 </li>
                             </ul>
                         </div>
