@@ -98,7 +98,6 @@ where
                         modules: Vec::new(),
                         age_ranges: Vec::new(),
                         affiliations: Vec::new(),
-                        goals: Vec::new(),
                         language: String::from(Language::default().code()),
                         categories: Vec::new(),
                         additional_resources: Vec::new(),
