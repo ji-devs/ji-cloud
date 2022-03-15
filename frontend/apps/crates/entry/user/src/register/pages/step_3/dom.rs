@@ -21,10 +21,8 @@ impl Step3Page {
         let meta_options: Mutable<Option<MetaOptions>> = Mutable::new(None);
 
         html!("page-register-step3", {
-            .future(clone!(state, meta_options => async move {
+            .future(clone!(meta_options => async move {
                 let meta = MetaOptions::load().await.unwrap_ji();
-                state.pre_select(&meta);
-
                 meta_options.set(Some(meta));
             }))
             .children_signal_vec(Self::get_children(meta_options, state))

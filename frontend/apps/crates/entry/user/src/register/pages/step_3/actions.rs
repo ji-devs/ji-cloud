@@ -8,23 +8,8 @@ use shared::{
     },
 };
 use std::rc::Rc;
-use utils::{api_helpers::meta::MetaOptions, prelude::*, storage};
+use utils::{prelude::*, storage};
 use uuid::Uuid;
-
-impl State {
-    pub fn pre_select(&self, meta: &MetaOptions) {
-        let affiliations = &mut *self.affiliations.borrow_mut();
-        let age_ranges = &mut *self.age_ranges.borrow_mut();
-
-        for (id, _) in meta.affiliations.iter() {
-            affiliations.insert(id.clone());
-        }
-
-        for (id, _) in meta.age_ranges.iter() {
-            age_ranges.insert(id.clone());
-        }
-    }
-}
 
 pub fn submit(state: Rc<State>) {
     let age_ranges: Vec<AgeRangeId> = state

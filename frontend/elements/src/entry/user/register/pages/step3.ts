@@ -31,7 +31,7 @@ export class _ extends LitElement {
                     display: grid;
                     grid-template-columns: 1fr 1fr;
                     grid-template-rows: 1fr 1fr;
-                    gap: 32px 31px;
+                    gap: 16px 16px;
                     grid-auto-flow: row;
                     grid-template-areas:
                         "tl tr"
