@@ -40,6 +40,7 @@ export class _ extends LitElement {
                     transition: color 0.3s;
                     line-height: 1.5;
                     font-weight: 600;
+                    width: 116px;
                 }
                 :host(:hover) .label {
                     color: var(--main-blue);
