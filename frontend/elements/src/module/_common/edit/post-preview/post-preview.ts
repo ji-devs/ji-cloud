@@ -49,11 +49,15 @@ export class _ extends LitElement {
                 .bottom-section {
                     background-color: var(--light-orange-1);
                     display: grid;
-                    grid-template-columns: repeat(3, 116px) 1px repeat(2, 116px);
                     column-gap: 48px;
                     justify-content: center;
                     align-items: center;
                     padding: 46px 0;
+                }
+                .bottom-section .actions {
+                    display: grid;
+                    grid-template-columns: repeat(3, 116px) 1px repeat(2, 116px);
+                    column-gap: 48px;
                 }
                 .bottom-section-centered {
                     background-color: var(--light-orange-1);
@@ -149,16 +153,19 @@ function renderConvertable(module: ModuleKind) {
     return html`
         <div class="bottom-section">
             <h3 class="action-header">${STR_ACTION_HEADER}</h3>
-            <h4 class="action-use-in-header">
-                ${STR_USE_IN_PREFIX} ${STR_MODULE_DISPLAY_NAME[module]}
-                ${STR_USE_IN_SUFFIX}
-            </h4>
-            <slot class="module-1" name="module-1"></slot>
-            <slot class="module-2" name="module-2"></slot>
-            <slot class="module-3" name="module-3"></slot>
-            <div class="divider"></div>
-            <slot class="action-print" name="action-print"></slot>
-            <slot class="action-continue" name="action-continue"></slot>
+            <div class="actions">
+                <h4 class="action-use-in-header">
+                    ${STR_USE_IN_PREFIX} ${STR_MODULE_DISPLAY_NAME[module]}
+                    ${STR_USE_IN_SUFFIX}
+                </h4>
+                <slot class="module-1" name="module-1"></slot>
+                <slot class="module-2" name="module-2"></slot>
+                <slot class="module-3" name="module-3"></slot>
+                <div class="divider"></div>
+                <slot class="action-print" name="action-print"></slot>
+                <slot class="action-publish" name="action-publish"></slot>
+                <slot class="action-continue" name="action-continue"></slot>
+            </div>
         </div>
     `;
 }

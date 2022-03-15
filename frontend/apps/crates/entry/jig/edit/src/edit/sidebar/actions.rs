@@ -175,6 +175,9 @@ pub fn on_iframe_message(state: Rc<State>, message: ModuleToJigEditorMessage) {
                 JigEditRoute::Landing
             )));
         }
+        ModuleToJigEditorMessage::Publish => {
+            navigate_to_publish(state);
+        }
     }
 }
 

@@ -47,6 +47,15 @@ where
             */
             .child(
                 html!("post-preview-action", {
+                    .property("slot", "action-publish")
+                    .property("kind", "publish")
+                    .event(clone!(state => move |_evt:events::Click| {
+                        state.publish();
+                    }))
+                })
+            )
+            .child(
+                html!("post-preview-action", {
                     .property("slot", "action-continue")
                     .property("kind", "continue")
                     .event(clone!(state => move |_evt:events::Click| {

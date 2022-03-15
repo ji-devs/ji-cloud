@@ -5,12 +5,13 @@ import {
     STR_MODULE_DISPLAY_NAME,
 } from "@elements/module/_common/types";
 
-export type Kind = ModuleKind | "print" | "continue";
+export type Kind = ModuleKind | "print" | "continue" | "publish";
 
 const STR_LABEL_LOOKUP: { [key in Kind]: string } = {
     ...STR_MODULE_DISPLAY_NAME,
     print: "Print the cards",
-    continue: "Continue",
+    continue: "Add new activity",
+    publish: "Publish JIG",
 };
 
 @customElement("post-preview-action")
@@ -53,12 +54,12 @@ export class _ extends LitElement {
     render() {
         const { kind } = this;
 
-        const isModule = kind !== "continue" && kind !== "print";
+        const isModule = kind !== "continue" && kind !== "print" && kind !== "publish";
 
         const path = isModule
             ? `module/_common/edit/post-preview/module/${kind}.svg`
             : `module/_common/edit/post-preview/${this.kind}${
-                  this.kind === "continue" ? ".png" : ".svg"
+                  this.kind === "continue" || this.kind === "publish" ? ".png" : ".svg"
               }`;
 
         return html`

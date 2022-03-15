@@ -36,6 +36,21 @@ impl PostPreview {
         }
     }
 
+    pub fn publish(&self) {
+        let msg = IframeAction::new(ModuleToJigEditorMessage::Publish);
+
+        if let Err(_) = msg.try_post_message_to_editor() {
+            log::info!("Couldn't post message to top... redirect!");
+
+            let route: String = Route::Jig(JigRoute::Edit(
+                self.jig_id,
+                JigFocus::Modules, // only module focused jigs are should be here
+                JigEditRoute::Landing
+            )).into();
+            dominator::routing::go_to_url(&route);
+        }
+    }
+
     pub fn duplicate_module<RawData, Mode, Step>(&self, target_kind: ModuleKind, raw_data: RawData)
     where
         RawData: BodyExt<Mode, Step> + 'static,
