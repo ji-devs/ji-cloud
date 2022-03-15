@@ -57,6 +57,7 @@ export default {
             open: true,
             historyApiFallback: true,
             port: APP_PORT,
+            // host: '0.0.0.0',
         }),
 
         livereload("dist"),
