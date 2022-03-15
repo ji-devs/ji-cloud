@@ -19,24 +19,37 @@ export class _ extends LitElement {
         return [
             css`
                 :host {
-                    height: 800px;
                     width: 90%;
                     max-width: 1232px;
                     display: grid;
-                    grid-template-rows: 440px 360px;
+                    grid-template-rows: 1fr 1fr;
                     box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
                     border-radius: 32px;
                     overflow: auto;
                     margin: 20px 0;
-                    max-height: calc(100vh - 40px);
+                    height: calc(100vh - 40px);
+                }
+                @media screen and (max-width: 1280px) {
+                    .top-section .message {
+                        font-size: 16px;
+                    }
+                    .bottom-section .action-header, .bottom-section-centered .action-header {
+                        font-size: 24px;
+                    }
                 }
                 .top-section {
                     background-color: #fff;
                     display: grid;
                     grid-template-rows: auto min-content;
                     justify-content: center;
-                    padding: 60px 0;
+                    padding: 30px 0;
+                    grid-gap: 30px;
                     justify-items: center;
+                }
+                .top-section img-ui {
+                    width: 240px;
+                    display: grid;
+                    align-content: center;
                 }
                 .message {
                     text-align: center;
@@ -53,7 +66,7 @@ export class _ extends LitElement {
                     justify-content: center;
                     align-items: center;
                     align-content: center;
-                    padding: 46px 0;
+                    padding: 30px 0;
                 }
                 .bottom-section .actions {
                     display: grid;
