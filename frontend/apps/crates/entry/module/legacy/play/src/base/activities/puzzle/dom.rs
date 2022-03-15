@@ -14,6 +14,7 @@ impl Puzzle {
         let state = self;
 
         html!("canvas" => web_sys::HtmlCanvasElement, {
+            .style("touch-action", "none")
             .class(&*styles::FULL_STAGE)
             .with_node!(canvas => {
                 .future(state.init_phase.signal_cloned().for_each(clone!(state, canvas => move |init_phase| {
@@ -51,7 +52,7 @@ impl Puzzle {
                     } 
                 }
             }))
-            .event(clone!(state => move |evt:events::MouseDown| {
+            .event(clone!(state => move |evt:events::PointerDown| {
                 match state.init_phase.get_cloned() {
                     InitPhase::Playing(game) => {
                         game.start_drag(evt.x(), evt.y());
@@ -59,7 +60,7 @@ impl Puzzle {
                     _ => {}
                 }
             }))
-            .global_event(clone!(state => move |evt:events::MouseMove| {
+            .global_event(clone!(state => move |evt:events::PointerMove| {
                 match state.init_phase.get_cloned() {
                     InitPhase::Playing(game) => {
                         game.try_move_drag(evt.x(), evt.y());
@@ -67,7 +68,15 @@ impl Puzzle {
                     _ => {}
                 }
             }))
-            .global_event(clone!(state => move |evt:events::MouseUp| {
+            .global_event(clone!(state => move |evt:events::PointerUp| {
+                match state.init_phase.get_cloned() {
+                    InitPhase::Playing(game) => {
+                        game.try_end_drag(evt.x(), evt.y());
+                    },
+                    _ => {}
+                }
+            }))
+            .global_event(clone!(state => move |evt:events::PointerCancel| {
                 match state.init_phase.get_cloned() {
                     InitPhase::Playing(game) => {
                         game.try_end_drag(evt.x(), evt.y());

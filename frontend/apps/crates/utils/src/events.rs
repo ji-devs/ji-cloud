@@ -65,6 +65,7 @@ make_pointer_event!(PointerEnter, "pointerenter" => web_sys::PointerEvent);
 make_pointer_event!(PointerLeave, "pointerleave" => web_sys::PointerEvent);
 make_pointer_event!(PointerMove, "pointermove" => web_sys::PointerEvent);
 make_pointer_event!(PointerUp, "pointerup" => web_sys::PointerEvent);
+make_pointer_event!(PointerCancel, "pointercancel" => web_sys::PointerEvent);
 
 // Custom Bounds
 #[derive(Deserialize, Debug)]
