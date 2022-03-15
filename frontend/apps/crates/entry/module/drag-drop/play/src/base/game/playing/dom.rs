@@ -19,6 +19,9 @@ pub fn render(state: Rc<PlayState>) -> Dom {
     let targets_ready = Mutable::new(false);
 
     html!("empty-fragment", {
+        // display block for touch action to work
+        .style("display", "block")
+        .style("touch-action", "none")
         .future(state.all_interactive_items_have_sizes().for_each(clone!(state, targets_ready => move |x| {
             clone!(state, targets_ready => async move {
                 if x {
@@ -63,13 +66,18 @@ pub fn render(state: Rc<PlayState>) -> Dom {
                                                     if ready { "block" } else { "none" }
                                                 }))
                                         })
-                                        .event(clone!(item => move |evt:events::MouseDown| {
+                                        .event(clone!(item => move |evt:events::PointerDown| {
                                             item.start_drag(evt.x() as i32, evt.y() as i32);
                                         }))
-                                        .global_event(clone!(item => move |evt:events::MouseMove| {
+                                        .global_event(clone!(item => move |evt:events::PointerMove| {
                                             item.try_move_drag(evt.x() as i32, evt.y() as i32);
                                         }))
-                                        .global_event(clone!(state, item => move |evt:events::MouseUp| {
+                                        .global_event(clone!(state, item => move |evt:events::PointerUp| {
+                                            if item.try_end_drag(evt.x() as i32, evt.y() as i32) {
+                                                PlayState::evaluate(state.clone(), item.clone());
+                                            }
+                                        }))
+                                        .global_event(clone!(state, item => move |evt:events::PointerCancel| {
                                             if item.try_end_drag(evt.x() as i32, evt.y() as i32) {
                                                 PlayState::evaluate(state.clone(), item.clone());
                                             }
