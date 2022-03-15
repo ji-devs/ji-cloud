@@ -21,7 +21,9 @@ export const ProgressBar = (props?: Partial<Args>) => {
 
     return `
         <div style="height: 10px; margin: 25px; width: 350px;">
-            <progress-bar ${argsToAttrs(props)}></progress-bar>
+            <progress-bar ${argsToAttrs(props)}>
+                <div slot="progress-label">Processing...</div>
+            </progress-bar>
         </div>
     `;
 };
