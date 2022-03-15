@@ -9,6 +9,8 @@ use wasm_bindgen_futures::spawn_local;
 use super::{super::actions::file_change, player};
 use crate::audio::input::state::{AudioInput, AudioInputAddMethod, AudioInputMode};
 
+const STR_UPLOADING_TEXT: &str = "Uploading... please wait.";
+
 pub fn render(state: Rc<AudioInput>, mode: AudioInputMode, add_method: AudioInputAddMethod) -> Dom {
     match mode {
         AudioInputMode::Playing(audio) => player::dom::render(state, audio),
@@ -73,6 +75,10 @@ fn render_uploading() -> Dom {
                 step = 0.5;
             };
             progress as i32
+        }))
+        .child(html!("div", {
+            .property("slot", "progress-label")
+            .text(STR_UPLOADING_TEXT)
         }))
     })
 }
