@@ -56,13 +56,18 @@ export class _ extends LitElement {
                 }
                 .bottom-section .actions {
                     display: grid;
-                    grid-template-columns: repeat(3, 116px) 1px repeat(2, 116px);
+                    grid-template-columns: repeat(3, 116px) 1px repeat(3, 116px);
+                    column-gap: 48px;
+                }
+                .bottom-section-centered .actions {
+                    display: grid;
+                    grid-auto-flow: column;
+                    justify-content: center;
                     column-gap: 48px;
                 }
                 .bottom-section-centered {
                     background-color: var(--light-orange-1);
-                    display: flex;
-                    flex-direction: column;
+                    display: grid;
                     column-gap: 48px;
                     justify-content: center;
                     align-items: center;
@@ -85,26 +90,11 @@ export class _ extends LitElement {
                     margin-bottom: 12px;
                     font-weight: 500;
                 }
-                ::slotted([slot="module-1"]) {
-                    grid-column: 1;
-                }
-                ::slotted([slot="module-2"]) {
-                    grid-column: 2;
-                }
-                ::slotted([slot="module-3"]) {
-                    grid-column: 3;
-                }
                 .divider {
                     width: 1px;
                     background-color: var(--light-orange-6);
                     grid-column: 4;
                     height: 112px;
-                }
-                ::slotted([slot="action-print"]) {
-                    grid-column: 5;
-                }
-                ::slotted([slot="action-continue"]) {
-                    grid-column: 6;
                 }
             `,
         ];
@@ -144,8 +134,11 @@ function renderNonConvertable() {
     return html`
         <div class="bottom-section-centered">
             <h3 class="action-header">${STR_ACTION_HEADER}</h3>
-            <slot class="action-print" name="action-print"></slot>
-            <slot class="action-continue" name="action-continue"></slot>
+            <div class="actions">
+                <slot class="action-print" name="action-print"></slot>
+                <slot class="action-publish" name="action-publish"></slot>
+                <slot class="action-continue" name="action-continue"></slot>
+            </div>
         </div>
     `;
 }
