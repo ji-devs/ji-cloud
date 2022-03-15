@@ -52,11 +52,12 @@ export class _ extends LitElement {
                     column-gap: 48px;
                     justify-content: center;
                     align-items: center;
+                    align-content: center;
                     padding: 46px 0;
                 }
                 .bottom-section .actions {
                     display: grid;
-                    grid-template-columns: repeat(3, 116px) 1px repeat(3, 116px);
+                    grid-template-columns: repeat(3, 116px) 1px repeat(2, 116px);
                     column-gap: 48px;
                 }
                 .bottom-section-centered .actions {
@@ -90,11 +91,28 @@ export class _ extends LitElement {
                     margin-bottom: 12px;
                     font-weight: 500;
                 }
-                .divider {
+                .bottom-section .actions ::slotted([slot="module-1"]) {
+                    grid-column: 1;
+                }
+                .bottom-section .actions ::slotted([slot="module-2"]) {
+                    grid-column: 2;
+                }
+                .bottom-section .actions ::slotted([slot="module-3"]) {
+                    grid-column: 3;
+                }
+                .bottom-section .actions .divider {
                     width: 1px;
                     background-color: var(--light-orange-6);
                     grid-column: 4;
                     height: 112px;
+                .bottom-section .actions ::slotted([slot="action-print"]) {
+                    grid-column: 5;
+                }
+                .bottom-section .actions ::slotted([slot="action-publish"]) {
+                    grid-column: 6;
+                }
+                .bottom-section .actions ::slotted([slot="action-continue"]) {
+                    grid-column: 7;
                 }
             `,
         ];
