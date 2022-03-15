@@ -62,7 +62,6 @@ pub fn get_jig() -> JigResponse {
             ],
             age_ranges: Vec::new(),
             affiliations: Vec::new(),
-            goals: Vec::new(),
             language: String::new(),
             categories: Vec::new(),
             additional_resources: Vec::new(),
