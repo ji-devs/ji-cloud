@@ -20,7 +20,7 @@ export const ProgressBar = (props?: Partial<Args>) => {
     props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
 
     return `
-        <div style="height: 10px">
+        <div style="height: 10px; margin: 25px; width: 350px;">
             <progress-bar ${argsToAttrs(props)}></progress-bar>
         </div>
     `;

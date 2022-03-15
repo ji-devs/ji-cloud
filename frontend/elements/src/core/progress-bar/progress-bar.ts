@@ -28,12 +28,12 @@ export class _ extends LitElement {
                     height: 100%;
                     border-radius: var(--border-radius);
                     background-color: var(--background-color);
-                    
+                    margin-bottom: 8px;
+                    overflow: hidden;
                 }
                 .bar {
                     height: 100%;
                     background-color: var(--color);
-                    margin-bottom: 8px;
                 }
                 :host([progress=infinite]) .bar {
                     width: 25%;
@@ -72,8 +72,8 @@ export class _ extends LitElement {
             ` : nothing}
             <div class="wrapper">
                 <div class="bar"></div>
-                <div>${STR_UPLOADING_TEXT}</div>
             </div>
+            <div>${STR_UPLOADING_TEXT}</div>
         `;
     }
 }
