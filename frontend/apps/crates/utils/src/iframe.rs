@@ -189,6 +189,7 @@ pub enum ModuleToJigEditorMessage {
     Next,
     /// Whenever a modules completion status changes, i.e. meets the minimum required content.
     Complete(ModuleId, bool),
+    Publish,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
