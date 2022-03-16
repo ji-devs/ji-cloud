@@ -31,7 +31,7 @@ pub fn load_initial(
     state.loader.load(clone!(state, ret => async move {
 
         let path = endpoints::image::Get::PATH.replace("{id}",&state.id.0.to_string());
-        let cat_req = GetCategoryRequest{ ids: Vec::new(), scope: Some( CategoryTreeScope::Decendants) } ;
+        let cat_req = GetCategoryRequest{ ids: Vec::new(), scope: Some( CategoryTreeScope::Descendants) } ;
         match (
             api_with_auth::<ImageResponse, EmptyError, ()>(&path, endpoints::image::Get::METHOD, None).await,
             api_with_auth::<CategoryResponse, EmptyError, _>(endpoints::category::Get::PATH, endpoints::category::Get::METHOD, Some(cat_req)).await,

@@ -60,7 +60,7 @@ pub enum CategoryTreeScope {
     Ancestors,
 
     /// Follow the children down.
-    Decendants,
+    Descendants,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -88,7 +88,7 @@ pub struct CreateCategoryRequest {
 ///
 /// ### get all categories
 /// ```ignore
-/// GetCategoryRequest { ids: vec![], scope: Some(CategoryTreeScope::Decendants) }
+/// GetCategoryRequest { ids: vec![], scope: Some(CategoryTreeScope::Descendants) }
 /// ```
 ///
 /// ### get exact categories
@@ -103,7 +103,7 @@ pub struct CreateCategoryRequest {
 ///
 /// ### get exact categories and their decendants.
 /// ```ignore
-/// GetCategoryRequest { ids: vec![id1, id2, ...], scope: Some(CategoryTreeScope::Decendants) }
+/// GetCategoryRequest { ids: vec![id1, id2, ...], scope: Some(CategoryTreeScope::Descendants) }
 /// ```
 #[derive(Serialize, Deserialize, Debug, Default)]
 pub struct GetCategoryRequest {

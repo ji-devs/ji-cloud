@@ -111,6 +111,7 @@ select id,
        (select count(*) from jig_data_category where category_id = id)::int8 as "jig_count!",
        user_scopes
 from category
+order by index
 "#
     )
     .fetch_all(db)

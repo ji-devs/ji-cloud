@@ -140,7 +140,7 @@ impl SearchOptions {
     async fn load_categories(&self) -> Result<(), EmptyError> {
         let req = GetCategoryRequest {
             ids: Vec::new(),
-            scope: Some(CategoryTreeScope::Decendants),
+            scope: Some(CategoryTreeScope::Descendants),
         };
 
         match api_no_auth::<CategoryResponse, EmptyError, GetCategoryRequest>(
