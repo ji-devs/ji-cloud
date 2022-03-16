@@ -14,7 +14,10 @@
 use std::thread;
 
 use anyhow::Context;
-use core::settings::{self, SettingsManager};
+use core::{
+    env::env_bool,
+    settings::{self, SettingsManager},
+};
 use sentry_tracing::EventFilter;
 use tracing_subscriber::{fmt::format::FmtSpan, layer::SubscriberExt, EnvFilter, Registry};
 
@@ -64,13 +67,15 @@ async fn main() -> anyhow::Result<()> {
         let env_filter =
             EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info"));
 
-        let tracing_subscriber = Registry::default()
-            .with(env_filter)
-            .with(sentry_layer)
-            .with(fmt_layer);
+        let tracing_subscriber = Registry::default().with(env_filter).with(sentry_layer);
 
-        tracing::subscriber::set_global_default(tracing_subscriber)
-            .expect("Unable to set global subscriber");
+        if env_bool("ENABLE_TRACING_LOGS") {
+            tracing::subscriber::set_global_default(tracing_subscriber.with(fmt_layer))
+                .expect("Unable to set global subscriber");
+        } else {
+            tracing::subscriber::set_global_default(tracing_subscriber)
+                .expect("Unable to set global subscriber");
+        }
 
         let runtime_settings = settings.runtime_settings().await?;
 
