@@ -46,9 +46,7 @@ impl BaseContent {
     /// Convenience method to determine whether pairs have been configured correctly
     pub fn is_valid(&self) -> bool {
         let pair_len = self.pairs.len();
-        pair_len >= config::MIN_LIST_WORDS
-            && pair_len <= config::MAX_LIST_WORDS
-            && self.mode.pairs_valid(&self.pairs)
+        pair_len >= config::MIN_LIST_WORDS && self.mode.pairs_valid(&self.pairs)
     }
 }
 
