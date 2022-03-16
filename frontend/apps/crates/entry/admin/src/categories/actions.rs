@@ -25,7 +25,7 @@ pub fn load_categories(state: Rc<State>) {
     state.loader.load(clone!(state => async move {
         let req = GetCategoryRequest {
             ids: Vec::new(),
-            scope: Some(CategoryTreeScope::Decendants)
+            scope: Some(CategoryTreeScope::Descendants)
         };
 
         match api_with_auth::<CategoryResponse, EmptyError, _>(endpoints::category::Get::PATH, endpoints::category::Get::METHOD, Some(req)).await {

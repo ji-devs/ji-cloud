@@ -178,7 +178,7 @@ async fn load_jig(jig_id: JigId) -> Result<JigResponse, EmptyError> {
 async fn load_categories() -> Result<Vec<Category>, EmptyError> {
     let req = GetCategoryRequest {
         ids: Vec::new(),
-        scope: Some(CategoryTreeScope::Decendants),
+        scope: Some(CategoryTreeScope::Descendants),
     };
 
     match api_with_auth::<CategoryResponse, EmptyError, GetCategoryRequest>(

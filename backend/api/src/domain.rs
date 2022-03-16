@@ -9,8 +9,9 @@ use shared::domain::{
     category::{Category, CategoryId},
     session::AUTH_COOKIE_NAME,
 };
-use std::convert::TryFrom;
+use std::{borrow::Borrow, cell::RefCell, convert::TryFrom, rc::Rc};
 use std::{collections::HashMap, fmt};
+use tracing::instrument;
 use uuid::Uuid;
 
 #[derive(Debug)]
@@ -26,61 +27,95 @@ pub struct RawCategory {
     pub user_scopes: Vec<i16>,
 }
 
-pub fn build_tree(mut categories: Vec<RawCategory>) -> Vec<Category> {
-    let mut parent_to_id_index: HashMap<Option<Uuid>, Vec<usize>> = HashMap::new();
-
-    for (idx, category) in categories.iter().enumerate() {
-        parent_to_id_index
-            .entry(category.parent_id)
-            .and_modify(|it| it.push(idx))
-            .or_insert_with(|| vec![idx]);
-    }
-
-    parent_to_id_index
-        .values_mut()
-        .for_each(|it| it.sort_unstable_by_key(|v| categories[*v].index));
-
-    build_tree_recursive(&parent_to_id_index, &mut categories, None)
+#[derive(Debug, Clone)]
+struct CategoryNode {
+    pub id: Uuid,
+    pub name: String,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: Option<DateTime<Utc>>,
+    pub image_count: i64,
+    pub jig_count: i64,
+    pub user_scopes: Vec<i16>,
+    pub children: Vec<Rc<RefCell<CategoryNode>>>,
 }
 
-fn build_tree_recursive(
-    parent_to_id_index: &HashMap<Option<Uuid>, Vec<usize>>,
-    categories: &mut Vec<RawCategory>,
-    seed_id: Option<Uuid>,
-) -> Vec<Category> {
-    let indices = match parent_to_id_index.get(&seed_id) {
-        Some(indecies) => indecies,
-        None => return Vec::new(),
-    };
+impl From<CategoryNode> for Category {
+    fn from(category_node: CategoryNode) -> Self {
+        Self {
+            id: CategoryId(category_node.id),
+            name: category_node.name,
+            created_at: category_node.created_at,
+            updated_at: category_node.updated_at,
+            image_count: category_node.image_count as u64,
+            jig_count: category_node.jig_count as u64,
+            user_scopes: {
+                category_node
+                    .user_scopes
+                    .into_iter()
+                    .map(|x| UserScope::try_from(x).expect("detected an invalid user scope"))
+                    .collect()
+            },
+            children: {
+                category_node
+                    .children
+                    .iter()
+                    .map(|category| {
+                        let category: CategoryNode = (**category).borrow().clone();
+                        category.into()
+                    })
+                    .collect()
+            },
+        }
+    }
+}
 
-    indices
-        .iter()
-        .copied()
-        .map(|category_index| {
-            let children = build_tree_recursive(
-                parent_to_id_index,
-                categories,
-                Some(categories[category_index].id),
-            );
+#[instrument(skip_all)]
+pub fn build_tree(categories: Vec<RawCategory>) -> Vec<Category> {
+    let mut nodes: Vec<Rc<RefCell<CategoryNode>>> = Vec::new();
+    let mut lookup: HashMap<Uuid, Rc<RefCell<CategoryNode>>> = HashMap::new();
 
-            let raw: &mut RawCategory = &mut categories[category_index];
-
-            Category {
-                id: CategoryId(raw.id),
+    // Now we know this category exists in the lookup table
+    for raw in categories.iter() {
+        lookup.insert(
+            raw.id.clone(),
+            Rc::new(RefCell::new(CategoryNode {
+                id: raw.id.clone(),
                 name: raw.name.clone(),
                 created_at: raw.created_at,
                 updated_at: raw.updated_at,
-                image_count: raw.image_count as u64,
-                jig_count: raw.jig_count as u64,
-                user_scopes: {
-                    raw.user_scopes
-                        .clone()
-                        .into_iter()
-                        .map(|x| UserScope::try_from(x).expect("detected an invalid user scope"))
-                        .collect()
-                },
-                children,
+                image_count: raw.image_count,
+                jig_count: raw.jig_count,
+                user_scopes: raw.user_scopes.clone(),
+                children: Vec::new(),
+            })),
+        );
+    }
+
+    for raw in categories.iter() {
+        let current_node = lookup
+            .get(&raw.id)
+            .expect("Category wasn't added to lookup map");
+        match raw.parent_id {
+            None => {
+                // This is a root category, add it to the nodes list
+                nodes.push(current_node.clone());
             }
+            Some(parent_id) => {
+                let parent_node = lookup
+                    .get(&parent_id)
+                    .expect("Parent caregory wasn't added to lookup map");
+                let mut parent_node = (**parent_node).borrow_mut();
+                parent_node.children.push(current_node.clone());
+            }
+        }
+    }
+
+    nodes
+        .iter()
+        .map(|node| {
+            let category: CategoryNode = (**node).borrow().clone();
+            let category: Category = category.into();
+            category
         })
         .collect()
 }

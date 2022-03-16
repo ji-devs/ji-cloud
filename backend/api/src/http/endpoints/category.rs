@@ -50,13 +50,13 @@ async fn get_categories(
     let req = req.map_or_else(GetCategoryRequest::default, Query::into_inner);
 
     let categories = match req.scope {
-        Some(CategoryTreeScope::Decendants) if req.ids.is_empty() => {
+        Some(CategoryTreeScope::Descendants) if req.ids.is_empty() => {
             db::category::get_tree(&db).await?
         }
         Some(CategoryTreeScope::Ancestors) | None if req.ids.is_empty() => {
             db::category::get_top_level(&db).await?
         }
-        Some(CategoryTreeScope::Decendants) => db::category::get_subtree(&db, &req.ids).await?,
+        Some(CategoryTreeScope::Descendants) => db::category::get_subtree(&db, &req.ids).await?,
         Some(CategoryTreeScope::Ancestors) => {
             db::category::get_ancestor_tree(&db, &req.ids).await?
         }

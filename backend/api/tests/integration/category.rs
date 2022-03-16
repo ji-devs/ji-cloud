@@ -98,7 +98,7 @@ async fn nested_top_level() -> anyhow::Result<()> {
 #[actix_rt::test]
 async fn nested_whole_tree() -> anyhow::Result<()> {
     get_nested_categories(&GetCategoryRequest {
-        scope: Some(CategoryTreeScope::Decendants),
+        scope: Some(CategoryTreeScope::Descendants),
         ids: vec![],
     })
     .await
@@ -107,7 +107,7 @@ async fn nested_whole_tree() -> anyhow::Result<()> {
 #[actix_rt::test]
 async fn nested_overlapping() -> anyhow::Result<()> {
     get_nested_categories(&GetCategoryRequest {
-        scope: Some(CategoryTreeScope::Decendants),
+        scope: Some(CategoryTreeScope::Descendants),
         ids: vec![
             "afbce03c-e90f-11ea-8281-cfde02f6b582".parse()?,
             "e315d3b2-e90f-11ea-8281-73cd69c14821".parse()?,
@@ -261,7 +261,7 @@ async fn update(id: Uuid, body: &serde_json::Value) -> anyhow::Result<()> {
 
     let resp = client
         .get(&format!(
-            "http://0.0.0.0:{}/v1/category?scope=Decendants",
+            "http://0.0.0.0:{}/v1/category?scope=Descendants",
             port
         ))
         .login()
