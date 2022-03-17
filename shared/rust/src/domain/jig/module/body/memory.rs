@@ -27,6 +27,8 @@ pub struct Content {
 pub struct PlayerSettings {
     /// time limit in minutes
     pub time_limit: Option<u32>,
+    /// amount of pairs to render
+    pub pairs_to_display: Option<u32>,
 }
 
 impl BodyExt<Mode, Step> for ModuleData {

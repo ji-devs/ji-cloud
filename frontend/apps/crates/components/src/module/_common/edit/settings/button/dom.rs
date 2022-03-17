@@ -1,5 +1,6 @@
 use super::state::*;
 use dominator::{clone, html, with_node, Dom, DomBuilder};
+use wasm_bindgen::JsValue;
 use std::rc::Rc;
 use utils::prelude::*;
 use web_sys::HtmlElement;
@@ -26,8 +27,24 @@ where
         .property("kind", state.kind.as_str_id())
         .property_signal("active", (state.active_signal) ())
         .apply_if(state.on_click.is_some(), |dom| {
-            dom.event(clone!(state => move |_evt:events::Click| {
-                (state.on_click.as_ref().unwrap_ji()) ();
+            dom.event(clone!(state => move |evt:events::Click| {
+                // Prevents clicks inside the settings bubble from toggling the state of the
+                // setting.
+                let should_click = match evt.target() {
+                    Some(target) => {
+                        let target: JsValue = target.into();
+                        let element: HtmlElement = target.into();
+                        match element.closest("module-settings-bubble") {
+                            Ok(Some(_)) => false,
+                            _ => true
+                        }
+                    },
+                    _ => true
+                };
+
+                if should_click {
+                    (state.on_click.as_ref().unwrap_ji()) ();
+                }
             }))
         })
         .apply_if(state.value.is_some(), |dom| {
@@ -105,7 +122,7 @@ fn get_input_kind(kind: SettingsButtonKind) -> Option<InputKind> {
     match kind {
         SettingsButtonKind::Attempts => Some(InputKind::Select(6)),
         SettingsButtonKind::NumChoices => Some(InputKind::Select(6)),
-        SettingsButtonKind::NumPairs => Some(InputKind::Select(6)),
+        SettingsButtonKind::NumPairs => Some(InputKind::Field),
 
         SettingsButtonKind::TimeLimit => Some(InputKind::Field),
         SettingsButtonKind::ContinueSome => Some(InputKind::Field),
