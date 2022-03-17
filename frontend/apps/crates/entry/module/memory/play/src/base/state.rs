@@ -1,4 +1,4 @@
-use shared::domain::jig::{
+use shared::{domain::jig::{
     module::{
         body::{
             Background, Instructions,
@@ -8,7 +8,7 @@ use shared::domain::jig::{
         ModuleId,
     },
     JigId,
-};
+}, config::MAX_LIST_WORDS};
 
 use super::card::state::*;
 use components::module::{_common::play::prelude::*, _groups::cards::lookup::Side};
@@ -53,18 +53,36 @@ impl Base {
             ..
         } = init_args;
 
-        let content = raw.content.unwrap_ji();
+        let mut rng = thread_rng();
 
-        let n_cards = content.base.pairs.len() * 2;
+        let mut content = raw.content.unwrap_ji();
+
+        let max_cards = content.player_settings.pairs_to_display
+            .map_or_else(|| {
+                let card_count = content.base.pairs.len();
+                if card_count > MAX_LIST_WORDS {
+                    MAX_LIST_WORDS
+                } else {
+                    card_count
+                }
+            }, |pairs_to_display| {
+                if pairs_to_display > MAX_LIST_WORDS as u32 {
+                    MAX_LIST_WORDS
+                } else {
+                    pairs_to_display as usize
+                }
+            });
+
+        let n_cards = max_cards * 2;
         let mut pair_lookup: Vec<usize> = vec![0; n_cards];
         let mut cards = {
-            let pairs = &content.base.pairs;
+            let pairs = &mut content.base.pairs;
+            pairs.shuffle(&mut rng);
 
-            let n_cards = pairs.len() * 2;
             let mut cards: Vec<Rc<CardState>> = Vec::with_capacity(n_cards);
             let mut index: usize = 0;
 
-            for pair in pairs.iter() {
+            for pair in pairs.iter().take(max_cards) {
                 let (card_1, card_2) = (&pair.0, &pair.1);
 
                 let id_1 = index;
@@ -91,8 +109,6 @@ impl Base {
         for card in cards.iter() {
             pair_lookup[card.id] = card.other_id;
         }
-
-        let mut rng = thread_rng();
 
         if !crate::debug::settings().no_shuffle {
             cards.shuffle(&mut rng);

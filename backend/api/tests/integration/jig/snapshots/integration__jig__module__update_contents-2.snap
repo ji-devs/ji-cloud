@@ -1,7 +1,6 @@
 ---
 source: tests/integration/jig/module.rs
 expression: body
-
 ---
 {
   "module": {
@@ -25,7 +24,8 @@ expression: body
             "background": null
           },
           "player_settings": {
-            "time_limit": null
+            "time_limit": null,
+            "pairs_to_display": null
           }
         }
       }

@@ -85,6 +85,13 @@ impl<T: Copy + Display + Eq + Default + FromStr + 'static> SettingsValue<T> {
             on_change: Box::new(on_change),
         }
     }
+
+    pub fn new_mutable(value: Mutable<T>, on_change: impl Fn(T) + 'static) -> Self {
+        Self {
+            curr: value,
+            on_change: Box::new(on_change),
+        }
+    }
 }
 
 impl<T: Copy + Display + Default + Eq + FromStr + 'static> SettingsValueExt for SettingsValue<T> {

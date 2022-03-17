@@ -38,7 +38,6 @@ export type Kind =
 
 const OneImage: Set<Kind> = new Set([
     "n_choices",
-    "n_pairs",
     "order",
     "rounds",
 ]);
@@ -61,7 +60,7 @@ const STR_LABEL: Record<Kind, string> = {
     "card-double": "side by side",
     "rounds": "pages per game",
     "n_choices": "cards per page",
-    "n_pairs": "cards per page",
+    "n_pairs": "pairs per game",
     "swap": "card position",
     "video-captions": "play with\ncaptions",
     "autoplay": "start automatically",
@@ -117,17 +116,26 @@ export class _ extends LitElement {
                 }
 
                 .circle {
-                    fill: #afcbf4;
+                    background-color: #afcbf4;
+                    border-radius: 50%;
+                    width: 24px;
+                    height: 24px;
+                    text-align: center;
+                    font-size: 14px;
+                    display: inline-grid;
+                    align-content: center;
+                    transform: translate(210%, -65%);
+                    color: #ffffff;
                 }
 
                 .circle.active {
-                    fill: #5893f9;
+                    background-color: #5893f9;
                 }
 
                 .label {
                     pointer-events: none;
                     width: 126px;
-                    margin-top: 8px;
+                    margin-top: 12px;
                     white-space: pre-wrap;
                     line-height: 1.14;
                     letter-spacing: normal;
@@ -209,7 +217,9 @@ export class _ extends LitElement {
                 </div>
                 <div class="label">${STR_LABEL[kind]}</div>
             </div>
-            <div class="bubble"><slot name="bubble"></slot></div>
+            ${active
+                ? html`<div class="bubble"><slot name="bubble"></slot></div>`
+                : nothing}
         `;
     }
 }
@@ -253,12 +263,8 @@ function renderNumber(num: number, hover: boolean, active: boolean) {
         hover,
         active,
     });
-    return svg`
-		<svg class="num-circle" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-		<g id="Group_17881" data-name="Group 17881" transform="translate(-55 -47)">
-		<circle class=${circleClass} id="Ellipse_770" data-name="Ellipse 770" cx="12" cy="12" r="12" transform="translate(55 47)" />
-		<text id="_2" data-name="2" transform="translate(67 64)" fill="#fff" font-size="14" font-family="Poppins-ExtraBold, Poppins" font-weight="800"><tspan x="-3.983" y="0">${num}</tspan></text>
-		</g>
-		</svg>
-	`;
+
+    return html`
+        <span class=${circleClass}>${num}</span>
+    `
 }
