@@ -6,94 +6,6 @@ expression: body
 {
   "jigs": [
     {
-      "id": "3a71522a-cd77-11eb-8dc1-af3e35f7c743",
-      "publishedAt": null,
-      "creatorId": "1f241e1b-b537-493f-a230-075cb16315be",
-      "authorId": "1f241e1b-b537-493f-a230-075cb16315be",
-      "authorName": "Bobby Tables",
-      "likes": 0,
-      "plays": 0,
-      "jigFocus": "modules",
-      "jigData": {
-        "draftOrLive": "live",
-        "displayName": "name",
-        "modules": [],
-        "ageRanges": [],
-        "affiliations": [],
-        "language": "en",
-        "categories": [],
-        "additionalResources": [],
-        "description": "test description",
-        "lastEdited": "[last_edited]",
-        "defaultPlayerSettings": {
-          "direction": "ltr",
-          "displayScore": true,
-          "trackAssessments": true,
-          "dragAssist": true
-        },
-        "theme": "Blank",
-        "audioBackground": null,
-        "audioEffects": {
-          "feedbackPositive": "[audio]",
-          "feedbackNegative": "[audio]"
-        },
-        "privacyLevel": "public",
-        "locked": false,
-        "otherKeywords": "",
-        "translatedKeywords": "",
-        "translatedDescription": {}
-      },
-      "adminData": {
-        "rating": null,
-        "blocked": false,
-        "curated": false
-      }
-    },
-    {
-      "id": "3a71522a-cd77-11eb-8dc1-af3e35f7c743",
-      "publishedAt": null,
-      "creatorId": "1f241e1b-b537-493f-a230-075cb16315be",
-      "authorId": "1f241e1b-b537-493f-a230-075cb16315be",
-      "authorName": "Bobby Tables",
-      "likes": 0,
-      "plays": 0,
-      "jigFocus": "modules",
-      "jigData": {
-        "draftOrLive": "draft",
-        "displayName": "draft name",
-        "modules": [],
-        "ageRanges": [],
-        "affiliations": [],
-        "language": "he",
-        "categories": [],
-        "additionalResources": [],
-        "description": "draft test description",
-        "lastEdited": "[last_edited]",
-        "defaultPlayerSettings": {
-          "direction": "rtl",
-          "displayScore": false,
-          "trackAssessments": false,
-          "dragAssist": false
-        },
-        "theme": "Jigzi",
-        "audioBackground": "funForKids",
-        "audioEffects": {
-          "feedbackPositive": "[audio]",
-          "feedbackNegative": "[audio]"
-        },
-        "privacyLevel": "unlisted",
-        "locked": false,
-        "otherKeywords": "",
-        "translatedKeywords": "",
-        "translatedDescription": {}
-      },
-      "adminData": {
-        "rating": null,
-        "blocked": false,
-        "curated": false
-      }
-    },
-    {
       "id": "0cc084bc-7c83-11eb-9f77-e3218dffb008",
       "publishedAt": null,
       "creatorId": "1f241e1b-b537-493f-a230-075cb16315be",
@@ -338,8 +250,96 @@ expression: body
         "blocked": false,
         "curated": false
       }
+    },
+    {
+      "id": "3a71522a-cd77-11eb-8dc1-af3e35f7c743",
+      "publishedAt": null,
+      "creatorId": "1f241e1b-b537-493f-a230-075cb16315be",
+      "authorId": "1f241e1b-b537-493f-a230-075cb16315be",
+      "authorName": "Bobby Tables",
+      "likes": 0,
+      "plays": 0,
+      "jigFocus": "modules",
+      "jigData": {
+        "draftOrLive": "draft",
+        "displayName": "draft name",
+        "modules": [],
+        "ageRanges": [],
+        "affiliations": [],
+        "language": "he",
+        "categories": [],
+        "additionalResources": [],
+        "description": "draft test description",
+        "lastEdited": "[last_edited]",
+        "defaultPlayerSettings": {
+          "direction": "rtl",
+          "displayScore": false,
+          "trackAssessments": false,
+          "dragAssist": false
+        },
+        "theme": "Jigzi",
+        "audioBackground": "funForKids",
+        "audioEffects": {
+          "feedbackPositive": "[audio]",
+          "feedbackNegative": "[audio]"
+        },
+        "privacyLevel": "unlisted",
+        "locked": false,
+        "otherKeywords": "",
+        "translatedKeywords": "",
+        "translatedDescription": {}
+      },
+      "adminData": {
+        "rating": null,
+        "blocked": false,
+        "curated": false
+      }
+    },
+    {
+      "id": "3a71522a-cd77-11eb-8dc1-af3e35f7c743",
+      "publishedAt": null,
+      "creatorId": "1f241e1b-b537-493f-a230-075cb16315be",
+      "authorId": "1f241e1b-b537-493f-a230-075cb16315be",
+      "authorName": "Bobby Tables",
+      "likes": 0,
+      "plays": 0,
+      "jigFocus": "modules",
+      "jigData": {
+        "draftOrLive": "live",
+        "displayName": "name",
+        "modules": [],
+        "ageRanges": [],
+        "affiliations": [],
+        "language": "en",
+        "categories": [],
+        "additionalResources": [],
+        "description": "test description",
+        "lastEdited": "[last_edited]",
+        "defaultPlayerSettings": {
+          "direction": "ltr",
+          "displayScore": true,
+          "trackAssessments": true,
+          "dragAssist": true
+        },
+        "theme": "Blank",
+        "audioBackground": null,
+        "audioEffects": {
+          "feedbackPositive": "[audio]",
+          "feedbackNegative": "[audio]"
+        },
+        "privacyLevel": "public",
+        "locked": false,
+        "otherKeywords": "",
+        "translatedKeywords": "",
+        "translatedDescription": {}
+      },
+      "adminData": {
+        "rating": null,
+        "blocked": false,
+        "curated": false
+      }
     }
   ],
   "pages": 1,
-  "totalJigCount": 6
+  "totalJigCount": 3
 }
