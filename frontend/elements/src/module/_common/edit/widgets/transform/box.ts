@@ -35,6 +35,10 @@ export class TransformBox extends LitElement {
                     outline: none;
                 }
                 svg,
+                img-ui {
+                    touch-action: none;
+                }
+                svg,
                 img-ui,
                 #menu-btn {
                     position: absolute;
@@ -175,7 +179,7 @@ export class TransformBox extends LitElement {
         );
     };
 
-    onResizeStart(pos: DotPos, evt: MouseEvent) {
+    onResizeStart(pos: DotPos, evt: PointerEvent) {
         this.dispatchEvent(
             new CustomEvent("transform-resize-start", {
                 detail: {
@@ -187,7 +191,7 @@ export class TransformBox extends LitElement {
         );
     }
 
-    onMoveStart(evt: MouseEvent) {
+    onMoveStart(evt: PointerEvent) {
         this.dispatchEvent(
             new CustomEvent("transform-move-start", {
                 detail: {
@@ -198,7 +202,7 @@ export class TransformBox extends LitElement {
         );
     }
 
-    onRotateStart(evt: MouseEvent) {
+    onRotateStart(evt: PointerEvent) {
         this.dispatchEvent(
             new CustomEvent("transform-rotate-start", {
                 detail: {
@@ -209,7 +213,7 @@ export class TransformBox extends LitElement {
         );
     }
 
-    onRectDoubleClick(evt: MouseEvent) {
+    onRectDoubleClick(evt: PointerEvent) {
         this.dispatchEvent(
             new CustomEvent("transform-rect-dblclick", {
                 detail: {
@@ -264,7 +268,7 @@ export class TransformBox extends LitElement {
 
             const svgs = [
                 svg`<svg width="${boxWidth}px" height="${boxHeight}px">
-                        <rect id="fillRect" x="${RECT_STROKE_SIZE}px" y="${RECT_STROKE_SIZE}px" width="${width}px" height="${height}px" @mousedown=${this.onMoveStart} @dblclick=${this.onRectDoubleClick} />
+                        <rect id="fillRect" x="${RECT_STROKE_SIZE}px" y="${RECT_STROKE_SIZE}px" width="${width}px" height="${height}px" @pointerdown=${this.onMoveStart} @dblclick=${this.onRectDoubleClick} />
                         </svg>`,
             ];
 
@@ -321,8 +325,8 @@ export class TransformBox extends LitElement {
 
                 return svg`
                     <svg id="dot-${pos}" width="${diameter}px" height="${diameter}px" style="left: calc(${x}px - ${DOT_RADIUS}px); top: calc(${y}px - ${DOT_RADIUS}px);">
-                        <circle class="dot ${pos}" cx="${DOT_RADIUS}px" cy="${DOT_RADIUS}px" r="${DOT_RADIUS}px" @mousedown=${(
-                    evt: MouseEvent
+                        <circle class="dot ${pos}" cx="${DOT_RADIUS}px" cy="${DOT_RADIUS}px" r="${DOT_RADIUS}px" @pointerdown=${(
+                    evt: PointerEvent
                 ) => this.onResizeStart(pos, evt)} />
                     </svg>
                 `;
@@ -363,7 +367,7 @@ export class TransformBox extends LitElement {
                     id="rotButton"
                     path="core/buttons/icon/rotate.svg"
                     style="${style}"
-                    @mousedown=${this.onRotateStart}
+                    @pointerdown=${this.onRotateStart}
                 ></img-ui>`;
             };
 
