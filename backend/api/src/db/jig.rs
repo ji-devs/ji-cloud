@@ -530,115 +530,104 @@ pub async fn browse(
     blocked: Option<bool>,
     page: i32,
     page_limit: u32,
-) -> sqlx::Result<(Vec<JigResponse>, u64)> {
+) -> sqlx::Result<Vec<JigResponse>> {
     let mut txn = db.begin().await?;
 
     let privacy_level: Vec<i16> = privacy_level.iter().map(|x| *x as i16).collect();
 
-    let jig = sqlx::query!(
-        //language=SQL
-        r#"
-    select jig_data.id as "id!"
+    //TODO: purge junk jig data from with draft_or_live is NULL
+    let jig_data = sqlx::query!(
+    //language=SQL
+    r#"
+with cte as (
+    select array(select jig_data.id as "id!"
     from jig_data
           inner join jig on (draft_id = jig_data.id or (live_id = jig_data.id and last_synced_at is not null))
           inner join jig_admin_data "admin" on admin.jig_id = jig.id
     where (jig_data.draft_or_live = $3 or $3 is null)
         and (author_id = $1 or $1 is null)
         and (jig_focus = $2 or $2 is null)
-        and (blocked = $5 or $5 is null)
-        and (jig_data.privacy_level = any($4) or $4 = '{}')
-    order by coalesce(updated_at, created_at) desc
-        "#,
-        author_id,
-        jig_focus.map(|it| it as i16),
-        draft_or_live.map(|it| it as i16),
-        &privacy_level[..],
-        blocked,
-    )
-    .fetch_all(&mut txn)
-    .instrument(tracing::info_span!("query jigs"))
-    .await?;
-
-    let jig_data_ids: Vec<_> = jig.iter().map(|it| it.id).collect();
-
-    let count = jig_data_ids.len() as u64;
-
-    //TODO: purge junk jig data from with draft_or_live is NULL
-    let jig_data = sqlx::query!(
-        //language=SQL
-        r#"
-with cte as (
-    select * from unnest($1::uuid[]) with ordinality t(id, ord) order by ord
+        and (blocked = $4 or $4 is null)
+        and (jig_data.privacy_level = any($5) or $5 = array[]::smallint[])
+    order by coalesce(updated_at, created_at) desc) as id
+),
+cte1 as (
+    select * from unnest((select distinct id from cte)) with ordinality t(id
+   , ord) order by ord
 )
-select  jig.id                                              as "jig_id: JigId",
-        privacy_level                                       as "privacy_level: PrivacyLevel",
-        jig_focus                                           as "jig_focus!: JigFocus",
-        creator_id,
-        author_id,
-        (select given_name || ' '::text || family_name
-         from user_profile
-         where user_profile.user_id = author_id)            as "author_name",
-        published_at,
-        liked_count,
-        (
-             select play_count
-             from jig_play_count
-             where jig_play_count.jig_id = jig.id
-        )                                                   as "play_count!",
-       display_name                                                                  as "display_name!",
-       updated_at,
-       language                                                                      as "language!",
-       description                                                                   as "description!",
-       translated_description                                                        as "translated_description!: Json<HashMap<String,String>>",
-       direction                                                                     as "direction!: TextDirection",
-       display_score                                                                 as "display_score!",
-       track_assessments                                                             as "track_assessments!",
-       drag_assist                                                                   as "drag_assist!",
-       theme                                                                         as "theme!: ThemeId",
-       audio_background                                                              as "audio_background!: Option<AudioBackground>",
-       draft_or_live                                                                 as "draft_or_live!: DraftOrLive",
-       array(select row (unnest(audio_feedback_positive)))                           as "audio_feedback_positive!: Vec<(AudioFeedbackPositive,)>",
-       array(select row (unnest(audio_feedback_negative)))                           as "audio_feedback_negative!: Vec<(AudioFeedbackNegative,)>",
-       array(
-               select row (jig_data_module.id, kind, is_complete)
-               from jig_data_module
-               where jig_data_id = jig_data.id
-               order by "index"
-           )                                               as "modules!: Vec<(ModuleId, ModuleKind, bool)>",
-       array(select row (category_id)
-             from jig_data_category
-             where jig_data_id = jig_data.id)     as "categories!: Vec<(CategoryId,)>",
-       array(select row (affiliation_id)
-             from jig_data_affiliation
-             where jig_data_id = jig_data.id)     as "affiliations!: Vec<(AffiliationId,)>",
-       array(select row (age_range_id)
-             from jig_data_age_range
-             where jig_data_id = jig_data.id)     as "age_ranges!: Vec<(AgeRangeId,)>",
-       array(
-                select row (jdar.id, jdar.display_name, resource_type_id, resource_content)
-                from jig_data_additional_resource "jdar"
-                where jdar.jig_data_id = jig_data.id
-            )                                               as "additional_resource!: Vec<(AddId, String, TypeId, Value)>",
-       locked                                     as "locked!",
-       other_keywords                             as "other_keywords!",
-       translated_keywords                        as "translated_keywords!",
-       rating                                     as "rating!: Option<JigRating>",
-       blocked                                    as "blocked!",
-       curated                                    as "curated!"
-from cte
-    inner join jig_data on cte.id = jig_data.id
-    inner join jig on (jig_data.id = jig.draft_id or (jig_data.id = jig.live_id and last_synced_at is not null))
-    inner join jig_admin_data "admin" on admin.jig_id = jig.id
-where cte.ord >= (1 * $3 * $2)
-limit $3 
+select jig.id                                              as "jig_id: JigId",
+    privacy_level                                       as "privacy_level: PrivacyLevel",
+    jig_focus                                           as "jig_focus!: JigFocus",
+    creator_id,
+    author_id,
+    (select given_name || ' '::text || family_name
+     from user_profile
+     where user_profile.user_id = author_id)            as "author_name",
+    published_at,
+    liked_count,
+    (
+         select play_count
+         from jig_play_count
+         where jig_play_count.jig_id = jig.id
+    )                                                   as "play_count!",
+   display_name                                                                  as "display_name!",
+   updated_at,
+   language                                                                      as "language!",
+   description                                                                   as "description!",
+   translated_description                                                        as "translated_description!: Json<HashMap<String,String>>",
+   direction                                                                     as "direction!: TextDirection",
+   display_score                                                                 as "display_score!",
+   track_assessments                                                             as "track_assessments!",
+   drag_assist                                                                   as "drag_assist!",
+   theme                                                                         as "theme!: ThemeId",
+   audio_background                                                              as "audio_background!: Option<AudioBackground>",
+   draft_or_live                                                                 as "draft_or_live!: DraftOrLive",
+   array(select row (unnest(audio_feedback_positive)))                           as "audio_feedback_positive!: Vec<(AudioFeedbackPositive,)>",
+   array(select row (unnest(audio_feedback_negative)))                           as "audio_feedback_negative!: Vec<(AudioFeedbackNegative,)>",
+   array(
+           select row (jig_data_module.id, kind, is_complete)
+           from jig_data_module
+           where jig_data_id = jig_data.id
+           order by "index"
+       )                                               as "modules!: Vec<(ModuleId, ModuleKind, bool)>",
+   array(select row (category_id)
+         from jig_data_category
+         where jig_data_id = jig_data.id)     as "categories!: Vec<(CategoryId,)>",
+   array(select row (affiliation_id)
+         from jig_data_affiliation
+         where jig_data_id = jig_data.id)     as "affiliations!: Vec<(AffiliationId,)>",
+   array(select row (age_range_id)
+         from jig_data_age_range
+         where jig_data_id = jig_data.id)     as "age_ranges!: Vec<(AgeRangeId,)>",
+   array(
+            select row (jdar.id, jdar.display_name, resource_type_id, resource_content)
+            from jig_data_additional_resource "jdar"
+            where jdar.jig_data_id = jig_data.id
+        )                                               as "additional_resource!: Vec<(AddId, String, TypeId, Value)>",
+   locked                                     as "locked!",
+   other_keywords                             as "other_keywords!",
+   translated_keywords                        as "translated_keywords!",
+   rating                                     as "rating!: Option<JigRating>",
+   blocked                                    as "blocked!",
+   curated                                    as "curated!"
+from cte1
+left join jig_data on cte1.id = jig_data.id
+left join jig on (jig_data.id = jig.draft_id or (jig_data.id = jig.live_id and last_synced_at is not null))
+left join jig_admin_data "admin" on admin.jig_id = jig.id
+where cte1.ord > (1 * $6 * $7)
+limit $7 
 "#,
-        &jig_data_ids,
-        page,
-        page_limit as i32,
-    )
-        .fetch_all(&mut txn)
-        .instrument(tracing::info_span!("query jig_data"))
-        .await?;
+    author_id,
+    jig_focus.map(|it| it as i16),
+    draft_or_live.map(|it| it as i16),
+    blocked,
+    &privacy_level[..],
+    page,
+    page_limit as i32,
+)
+    .fetch_all(&mut txn)
+    .instrument(tracing::info_span!("query jig_data"))
+    .await?;
 
     let v: Vec<_> = jig_data
         .into_iter()
@@ -732,7 +721,7 @@ limit $3
 
     txn.rollback().await?;
 
-    Ok((v, count))
+    Ok(v)
 }
 
 pub async fn update_draft(
@@ -994,20 +983,22 @@ pub async fn filtered_count(
     author_id: Option<Uuid>,
     jig_focus: Option<JigFocus>,
     draft_or_live: Option<DraftOrLive>,
-) -> sqlx::Result<u64> {
+) -> sqlx::Result<(u64, u64)> {
     let privacy_level: Vec<i16> = privacy_level.iter().map(|x| *x as i16).collect();
 
-    sqlx::query!(
+    log::warn!("privacy level: {:?}", privacy_level);
+
+    let jig_data = sqlx::query!(
         //language=SQL
         r#"
-select count(*) as "count!: i64"
-from jig
+select count(distinct jig_data.id) as "count!: i64"
+from jig_data
+left join jig on (draft_id = jig_data.id or (live_id = jig_data.id and last_synced_at is not null))
 left join jig_admin_data "admin" on admin.jig_id = jig.id
-left join jig_data on (draft_id = jig_data.id or live_id = jig_data.id)
 where (author_id = $1 or $1 is null)
     and (jig_data.draft_or_live = $3 or $3 is null)
     and (jig_focus = $2 or $2 is null)
-    and (jig_data.privacy_level = any($4) or $4 = '{}')
+    and (jig_data.privacy_level = any($4) or $4 = array[]::smallint[])
     and (blocked = $5 or $5 is null)
 "#,
         author_id,
@@ -1017,8 +1008,31 @@ where (author_id = $1 or $1 is null)
         blocked
     )
     .fetch_one(db)
-    .await
-    .map(|it| it.count as u64)
+    .await?;
+
+    let jig = sqlx::query!(
+        //language=SQL
+        r#"
+select count(distinct jig.id) as "count!: i64"
+from jig
+left join jig_admin_data "admin" on admin.jig_id = jig.id
+left join jig_data on (draft_id = jig_data.id or (live_id = jig_data.id and last_synced_at is not null))
+where (author_id = $1 or $1 is null)
+    and (jig_data.draft_or_live = $3 or $3 is null)
+    and (jig_focus = $2 or $2 is null)
+    and (jig_data.privacy_level = any($4) or $4 = array[]::smallint[])
+    and (blocked = $5 or $5 is null)
+"#,
+        author_id,
+        jig_focus.map(|it| it as i16),
+        draft_or_live.map(|it| it as i16),
+        &privacy_level[..],
+        blocked
+    )
+    .fetch_one(db)
+    .await?;
+
+    Ok((jig.count as u64, jig_data.count as u64))
 }
 
 pub async fn count(db: &PgPool, privacy_level: PrivacyLevel) -> sqlx::Result<u64> {

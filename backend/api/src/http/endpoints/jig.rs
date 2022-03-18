@@ -240,7 +240,7 @@ async fn browse(
         query.draft_or_live,
     );
 
-    let ((jigs, count), total_count) = try_join!(browse_future, total_count_future,)?;
+    let (jigs, (total_count, count)) = try_join!(browse_future, total_count_future,)?;
 
     let pages = (count / (page_limit as u64) + (count % (page_limit as u64) != 0) as u64) as u32;
 
