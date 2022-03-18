@@ -6,27 +6,22 @@ use futures::lock::Mutex;
 use legacy_transcode::src_manifest::{SrcManifest, SrcManifestData};
 use options::*;
 
-use shared::domain::jig::{AudioBackground, JigUpdateDraftDataRequest};
-use reqwest::StatusCode;
-use simplelog::*;
-use std::collections::HashSet;
-use std::{future::Future, process::exit};
-use std::sync::Arc;
-use futures::stream::{FuturesUnordered, StreamExt};
 use dotenv::dotenv;
-use structopt::StructOpt;
-use shared::{
-    api::{ApiEndpoint, endpoints},
-    domain::jig::{
-        JigId,
-        JigBrowseResponse,
-        module::{
-            ModuleId,
-            ModuleKind
-        }
-    }
-};
+use futures::stream::{FuturesUnordered, StreamExt};
+use reqwest::StatusCode;
 use serde::Deserialize;
+use shared::domain::jig::{AudioBackground, JigUpdateDraftDataRequest};
+use shared::{
+    api::{endpoints, ApiEndpoint},
+    domain::jig::{
+        module::{ModuleId, ModuleKind},
+        JigBrowseResponse, JigId,
+    },
+};
+use simplelog::*;
+use std::sync::Arc;
+use std::{future::Future, process::exit};
+use structopt::StructOpt;
 
 #[tokio::main]
 async fn main() {
@@ -64,14 +59,18 @@ async fn main() {
     log::info!("done!");
 }
 
-async fn get_futures(ctx:Arc<Context>) -> Vec<impl Future> {
-    let mut mem = Arc::new(Mutex::new(HashSet::new()));
-
+async fn get_futures(ctx: Arc<Context>) -> Vec<impl Future> {
     let mut futures = Vec::new();
 
-    async fn do_browse(ctx:&Context, page:usize) -> Result<JigBrowseResponse, reqwest::Error> {
-        let url = format!("{}{}?authorId=me&jigFocus=modules&page={}&draftOrLive=live", ctx.opts.get_remote_target().api_url(), endpoints::jig::Browse::PATH, page);
-        let res = ctx.client
+    async fn do_browse(ctx: &Context, page: usize) -> Result<JigBrowseResponse, reqwest::Error> {
+        let url = format!(
+            "{}{}?authorId=c3666fb2-827b-11eb-979f-0f06b8a150e4&jigFocus=modules&page={}&draftOrLive=live",
+            ctx.opts.get_remote_target().api_url(),
+            endpoints::jig::Browse::PATH,
+            page
+        );
+        let res = ctx
+            .client
             .get(&url)
             .header("Authorization", &format!("Bearer {}", ctx.token))
             .send()
@@ -85,7 +84,12 @@ async fn get_futures(ctx:Arc<Context>) -> Vec<impl Future> {
 
         res.json().await
     }
-    let JigBrowseResponse { pages, total_jig_count, ..} = do_browse(&ctx, 0).await.unwrap();
+    let JigBrowseResponse {
+        jigs,
+        pages,
+        total_jig_count,
+        ..
+    } = do_browse(&ctx, 0).await.unwrap();
 
     log::info!("Updating {} pages, {} jigs total ", pages, total_jig_count);
 
@@ -115,34 +119,54 @@ async fn get_futures(ctx:Arc<Context>) -> Vec<impl Future> {
 
                             if ctx.opts.update_screenshots {
                                 for module in jig.jig_data.modules {
-            
-                                let url = format!("{}/screenshot/{}/{}/thumb.jpg", ctx.opts.get_remote_target().uploads_url(), jig.id.0.to_string(), module.id.0.to_string());
-                                let res = ctx.client
-                                    .get(&url)
-                                    .send()
-                                    .await
-                                    .unwrap();
-            
+                                    let url = format!(
+                                        "{}/screenshot/{}/{}/thumb.jpg",
+                                        ctx.opts.get_remote_target().uploads_url(),
+                                        jig.id.0.to_string(),
+                                        module.id.0.to_string()
+                                    );
+                                    let res = ctx.client.get(&url).send().await.unwrap();
+
                                     match res.status() {
                                         StatusCode::NOT_FOUND => {
-                                            log::info!("updating {}/screenshot/{}/{}/thumb.jpg", ctx.opts.get_remote_target().uploads_url(), jig.id.0.to_string(), module.id.0.to_string()); 
+                                            log::info!(
+                                                "updating {}/screenshot/{}/{}/thumb.jpg",
+                                                ctx.opts.get_remote_target().uploads_url(),
+                                                jig.id.0.to_string(),
+                                                module.id.0.to_string()
+                                            );
                                             // currently update is just to queue screenshot for each module in the jig
-                                            call_screenshot_service(ctx.clone(), jig.id, module.id, module.kind).await;
-                                        },
+                                            call_screenshot_service(
+                                                ctx.clone(),
+                                                jig.id,
+                                                module.id,
+                                                module.kind,
+                                            )
+                                            .await;
+                                        }
                                         StatusCode::OK => {
-                                            log::info!("skipping {}/screenshot/{}/{}/thumb.jpg", ctx.opts.get_remote_target().uploads_url(), jig.id.0.to_string(), module.id.0.to_string()); 
+                                            log::info!(
+                                                "skipping {}/screenshot/{}/{}/thumb.jpg",
+                                                ctx.opts.get_remote_target().uploads_url(),
+                                                jig.id.0.to_string(),
+                                                module.id.0.to_string()
+                                            );
                                         }
                                         e => {
-                                            log::info!("error {:?} {}/screenshot/{}/{}/thumb.jpg", e, ctx.opts.get_remote_target().uploads_url(), jig.id.0.to_string(), module.id.0.to_string());
-                                        },
+                                            log::info!(
+                                                "error {:?} {}/screenshot/{}/{}/thumb.jpg",
+                                                e,
+                                                ctx.opts.get_remote_target().uploads_url(),
+                                                jig.id.0.to_string(),
+                                                module.id.0.to_string()
+                                            );
+                                        }
                                     }
                                 }
                             }
                         }
-                    },
-                    Err(_) => {
-
-                    },
+                    }
+                    Err(_) => {}
                 }
             }
         });
@@ -151,20 +175,24 @@ async fn get_futures(ctx:Arc<Context>) -> Vec<impl Future> {
     futures
 }
 
-
-pub async fn update_background_music(ctx:Arc<Context>, jig_id: JigId) {
+pub async fn update_background_music(ctx: Arc<Context>, jig_id: JigId) {
     let jig_id_str = jig_id.0.to_string();
     let game_id = ctx.legacy_lookup.get(&jig_id_str).unwrap();
     log::info!("loading manifest at {}", SrcManifestData::url(game_id));
-    let manifest = SrcManifestData::load_game_id(&ctx.client, game_id).await.data;
+    let manifest = SrcManifestData::load_game_id(&ctx.client, game_id)
+        .await
+        .data;
 
     if let Some(music_file) = manifest.structure.music_file {
         let target_music_file = music_file.split('/').last().unwrap_or(&music_file);
-        let target_music_file = target_music_file.split('.').next().unwrap_or(&target_music_file);
+        let target_music_file = target_music_file
+            .split('.')
+            .next()
+            .unwrap_or(&target_music_file);
         let target_music_file = target_music_file.to_lowercase();
         let target_music_file = target_music_file.trim();
         if !target_music_file.is_empty() {
-            let target_enum:Option<AudioBackground> = if target_music_file.contains("silence") {
+            let target_enum: Option<AudioBackground> = if target_music_file.contains("silence") {
                 None
             } else if target_music_file.contains("hanerothalalu") {
                 Some(AudioBackground::LegacyHanerotHalalu)
@@ -206,18 +234,23 @@ pub async fn update_background_music(ctx:Arc<Context>, jig_id: JigId) {
 
             // no need to set in the case of "silence"
             if let Some(target_enum) = target_enum {
-                log::info!("updating background music in jig {} (game id: {}), music file: {}", jig_id_str, game_id, music_file); 
-    
+                log::info!(
+                    "updating background music in jig {} (game id: {}), music file: {}",
+                    jig_id_str,
+                    game_id,
+                    music_file
+                );
+
                 let req = JigUpdateDraftDataRequest {
                     audio_background: Some(Some(target_enum)),
                     ..Default::default()
                 };
 
                 if !ctx.opts.dry_run {
-
                     let path = endpoints::jig::UpdateDraftData::PATH.replace("{id}", &jig_id_str);
                     let url = format!("{}{}", ctx.opts.get_remote_target().api_url(), path);
-                    let res = ctx.client
+                    let res = ctx
+                        .client
                         .patch(&url)
                         .header("Authorization", &format!("Bearer {}", ctx.token))
                         .json(&req)
@@ -227,12 +260,13 @@ pub async fn update_background_music(ctx:Arc<Context>, jig_id: JigId) {
 
                     if !res.status().is_success() {
                         log::error!("error code: {}, details: {:?}", res.status().as_str(), res);
-                        panic!("unable to update jig!"); 
+                        panic!("unable to update jig!");
                     }
 
                     let path = endpoints::jig::Publish::PATH.replace("{id}", &jig_id_str);
                     let url = format!("{}{}", ctx.opts.get_remote_target().api_url(), path);
-                    let res = ctx.client
+                    let res = ctx
+                        .client
                         .put(&url)
                         .header("Authorization", &format!("Bearer {}", ctx.token))
                         .header("content-length", 0)
@@ -242,14 +276,19 @@ pub async fn update_background_music(ctx:Arc<Context>, jig_id: JigId) {
 
                     if !res.status().is_success() {
                         log::error!("error code: {}, details: {:?}", res.status().as_str(), res);
-                        panic!("unable to publish jig!"); 
+                        panic!("unable to publish jig!");
                     }
                 }
             }
         }
     }
 }
-pub async fn call_screenshot_service(ctx:Arc<Context>, jig_id: JigId, module_id: ModuleId, kind: ModuleKind) {
+pub async fn call_screenshot_service(
+    ctx: Arc<Context>,
+    jig_id: JigId,
+    module_id: ModuleId,
+    kind: ModuleKind,
+) {
     #[derive(Deserialize)]
     struct ScreenshotResponse {
         jpg: String,
@@ -267,30 +306,36 @@ pub async fn call_screenshot_service(ctx:Arc<Context>, jig_id: JigId, module_id:
         kind.as_str()
     );
 
-    let res = ctx.client
-        .get(&url)
-        .send()
-        .await
-        .unwrap();
+    let res = ctx.client.get(&url).send().await.unwrap();
 
     if !res.status().is_success() {
         log::error!("error code: {}, details: {:?}", res.status().as_str(), res);
-        panic!("unable to call screenshot service for jig {} module {}!", jig_id.0.to_string(), module_id.0.to_string()); 
+        panic!(
+            "unable to call screenshot service for jig {} module {}!",
+            jig_id.0.to_string(),
+            module_id.0.to_string()
+        );
     }
 
-    let resp:ScreenshotResponse = res.json().await.unwrap();
+    let resp: ScreenshotResponse = res.json().await.unwrap();
 }
 
-fn init_logger(verbose:bool) {
+fn init_logger(verbose: bool) {
     if verbose {
-        CombinedLogger::init(vec![
-            TermLogger::new(LevelFilter::Info, Config::default(), TerminalMode::Mixed, ColorChoice::Auto),
-        ])
+        CombinedLogger::init(vec![TermLogger::new(
+            LevelFilter::Info,
+            Config::default(),
+            TerminalMode::Mixed,
+            ColorChoice::Auto,
+        )])
         .unwrap();
     } else {
-        CombinedLogger::init(vec![
-            TermLogger::new(LevelFilter::Warn, Config::default(), TerminalMode::Mixed, ColorChoice::Auto),
-        ])
+        CombinedLogger::init(vec![TermLogger::new(
+            LevelFilter::Warn,
+            Config::default(),
+            TerminalMode::Mixed,
+            ColorChoice::Auto,
+        )])
         .unwrap();
     }
 }
