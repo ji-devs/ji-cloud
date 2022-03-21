@@ -220,6 +220,8 @@ async fn browse(
         .await
         .map_err(|e| error::Auth::InternalServerError(e))?;
 
+    let resource_types = filters_for_ids_or(&query.resource_types[..]);
+
     let browse_future = db::jig::browse(
         db.as_ref(),
         author_id,
@@ -229,6 +231,7 @@ async fn browse(
         blocked,
         query.page.unwrap_or(0) as i32,
         page_limit,
+        resource_types.to_owned(),
     );
 
     let total_count_future = db::jig::filtered_count(
@@ -238,6 +241,7 @@ async fn browse(
         author_id,
         query.jig_focus,
         query.draft_or_live,
+        resource_types.to_owned(),
     );
 
     let (jigs, (total_count, count)) = try_join!(browse_future, total_count_future,)?;
@@ -249,6 +253,16 @@ async fn browse(
         pages,
         total_jig_count: total_count,
     }))
+}
+
+fn filters_for_ids_or<T: Into<Uuid> + Copy>(ids: &[T]) -> Vec<Uuid> {
+    let mut vect: Vec<Uuid> = vec![];
+    for id in ids.iter().copied() {
+        let id: Uuid = id.into();
+        vect.push(id);
+    }
+
+    vect
 }
 
 /// Copies the contents of the draft jig data to live
