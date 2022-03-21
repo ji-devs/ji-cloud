@@ -25,7 +25,6 @@ use shared::domain::jig::{
 use std::cell::RefCell;
 use std::rc::Rc;
 use utils::prelude::*;
-use super::actions::set_contents_with_theme;
 
 pub struct Base {
     pub history: Rc<HistoryStateImpl<RawData>>,
@@ -54,7 +53,11 @@ impl Base {
         } = init_args;
 
         if raw.content.is_none() {
-            raw = set_contents_with_theme(jig_id.clone(), module_id.clone(), jig.theme, raw).await;
+            raw = RawData::new_with_mode_and_theme((), jig.theme);
+            history.push_modify(clone!(raw => |init| {
+                *init = raw;
+            }));
+
             theme_id.set(jig.theme);
         }
 
