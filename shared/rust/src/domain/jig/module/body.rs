@@ -87,21 +87,17 @@ impl Body {
     /// create a new Body for a given ModuleKind
     pub fn new(kind: super::ModuleKind) -> Self {
         match kind {
-            super::ModuleKind::Cover => Self::Cover(cover::ModuleData::default()),
-            super::ModuleKind::ResourceCover => {
-                Self::ResourceCover(resource_cover::ModuleData::default())
-            }
-            super::ModuleKind::Memory => Self::MemoryGame(memory::ModuleData::default()),
-            super::ModuleKind::CardQuiz => Self::CardQuiz(card_quiz::ModuleData::default()),
-            super::ModuleKind::Flashcards => Self::Flashcards(flashcards::ModuleData::default()),
-            super::ModuleKind::Matching => Self::Matching(matching::ModuleData::default()),
-            super::ModuleKind::Poster => Self::Poster(poster::ModuleData::default()),
-            super::ModuleKind::Video => Self::Video(video::ModuleData::default()),
-            super::ModuleKind::TappingBoard => {
-                Self::TappingBoard(tapping_board::ModuleData::default())
-            }
-            super::ModuleKind::DragDrop => Self::DragDrop(drag_drop::ModuleData::default()),
-            super::ModuleKind::Legacy => Self::Legacy(legacy::ModuleData::default()),
+            super::ModuleKind::Cover => Self::Cover(Default::default()),
+            super::ModuleKind::ResourceCover => Self::ResourceCover(Default::default()),
+            super::ModuleKind::Memory => Self::MemoryGame(Default::default()),
+            super::ModuleKind::CardQuiz => Self::CardQuiz(Default::default()),
+            super::ModuleKind::Flashcards => Self::Flashcards(Default::default()),
+            super::ModuleKind::Matching => Self::Matching(Default::default()),
+            super::ModuleKind::Poster => Self::Poster(Default::default()),
+            super::ModuleKind::Video => Self::Video(Default::default()),
+            super::ModuleKind::TappingBoard => Self::TappingBoard(Default::default()),
+            super::ModuleKind::DragDrop => Self::DragDrop(Default::default()),
+            super::ModuleKind::Legacy => Self::Legacy(Default::default()),
             _ => unimplemented!("TODO!"),
         }
     }
