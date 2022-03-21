@@ -39,6 +39,9 @@ export class _ extends LitElement {
                 input {
                     margin: 0;
                 }
+                ::slotted([slot="label"]) {
+                    display: inline-block;
+                }
             `,
         ];
     }
@@ -77,13 +80,10 @@ export class _ extends LitElement {
             <div>
                 <div class="${errorwrapper}">
                     <label class="">
-                        <input
-                            ?disabled=${this.disabled}
-                            type="checkbox"
-                            .checked=${checked}
-                            @change="${this.onChange}"
-                        />
-                        <span class=""> ${label} </span>
+                        <input ?disabled=${this.disabled} type="checkbox" .checked=${checked} @change="${this.onChange}" />
+                        <span class="">
+                            <slot name="label">${label}</slot>
+                        </span>
                     </label>
                 </div>
                 ${isError ? html`<p class="error">${error}</p>` : nothing}
