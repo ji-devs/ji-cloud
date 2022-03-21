@@ -1,19 +1,5 @@
 {
   "db": "PostgreSQL",
-  "005fa026b9cc508f5cc6cf0bbc151a34c64e7be4b5dc03388e0c6f40795a4296": {
-    "query": "\nupdate jig_data\nset audio_feedback_positive = $2,\n    audio_feedback_negative = $3\nwhere id = $1 and ($2 <> audio_feedback_positive or $3 <> audio_feedback_negative)\n            ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int2Array",
-          "Int2Array"
-        ]
-      },
-      "nullable": []
-    }
-  },
   "01a135ff430fa6ab0ac75454f6d1c25d2198d9f885e1abfdb4ca22c888df32a5": {
     "query": "\nupdate jig_data\nset description = $2,\n    translated_description = '{}',\n    updated_at = now()\nwhere id = $1 and $2 is distinct from description",
     "describe": {
@@ -86,22 +72,6 @@
           "Bool",
           "Bool",
           "Timestamptz"
-        ]
-      },
-      "nullable": []
-    }
-  },
-  "0452f5078544e868686ddee838d64a9864b8ab4b6b6546eb3136c4d84662f176": {
-    "query": "\nupdate jig_data\nset direction = $2,\n    display_score = $3,\n    track_assessments = $4,\n    drag_assist = $5\nwhere id = $1 and\n    (($2 is distinct from direction) or\n     ($3 is distinct from display_score) or\n     ($4 is distinct from track_assessments) or\n     ($5 is distinct from drag_assist))\n            ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int2",
-          "Bool",
-          "Bool",
-          "Bool"
         ]
       },
       "nullable": []
@@ -1282,21 +1252,6 @@
       ]
     }
   },
-  "2d7e0033334aadbe1a71ec3e00c91578e2054888aff9f9ef049f35a438b0331d": {
-    "query": "\nupdate jig_data\nset display_name     = coalesce($2, display_name),\n    language         = coalesce($3, language),\n    theme            = coalesce($4, theme)\nwhere id = $1\n  and (($2::text is not null and $2 is distinct from display_name) or\n       ($3::text is not null and $3 is distinct from language) or\n       ($4::smallint is not null and $4 is distinct from theme))\n",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Text",
-          "Text",
-          "Int2"
-        ]
-      },
-      "nullable": []
-    }
-  },
   "30e211c77af70b7a52d9ffde24d7a442e3565e2135840cb8d2646bb7fa048509": {
     "query": "\nselect id,\n       kind as \"kind: MediaKind\",\n       created_at,\n       updated_at,\n       array(select media_url from web_media_library_url where media_id = $1) as \"urls!\"\nfrom web_media_library\nwhere id = $1",
     "describe": {
@@ -2157,6 +2112,20 @@
       "nullable": []
     }
   },
+  "565914a8fc1c1af596e272f153892585c460566614844181566d2a531e0a613a": {
+    "query": "\nupdate jig_data\nset audio_feedback_positive = $2,\n    audio_feedback_negative = $3,\n    updated_at = now()\nwhere id = $1 and ($2 <> audio_feedback_positive or $3 <> audio_feedback_negative)\n            ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2Array",
+          "Int2Array"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "57b72bbdece8deb3ac84c44b94157afbd3d50d16c893613f54145b9ca7e255d0": {
     "query": "insert into user_audio_upload (audio_id) values($1)",
     "describe": {
@@ -2164,19 +2133,6 @@
       "parameters": {
         "Left": [
           "Uuid"
-        ]
-      },
-      "nullable": []
-    }
-  },
-  "57f701d981a5ee17033b691727c78127188d0c6158118ff4d1a9d089b89825f3": {
-    "query": "\nupdate jig_data\nset audio_background = $2\nwhere id = $1 and $2 is distinct from audio_background\n            ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int2"
         ]
       },
       "nullable": []
@@ -5137,6 +5093,19 @@
       "nullable": []
     }
   },
+  "c340da8122545a5c5cffc7a9b7c8b03d6d7eed1e58ece1d6a462dbcebe030f10": {
+    "query": "\nupdate jig_data\nset audio_background = $2,\nupdated_at = now()\nwhere id = $1 and $2 is distinct from audio_background\n            ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "c84c613c4d8af5d5228646ffb25c2cd2825699626313634127fc09341ed715ac": {
     "query": "\nselect id as \"id: ImageId\", kind as \"kind: ImageKind\"\nfrom user_image_library\n         inner join user_image_upload\n                    on user_image_library.id = user_image_upload.image_id\nwhere user_id = $1\n  and id = $2\n  and processing_result is true\n        ",
     "describe": {
@@ -5424,6 +5393,21 @@
           "Uuid",
           "Int2",
           "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "cbe91f67c21c82fba293fc2b95ea89ad4e7a5c29eadc612db2809bf4f0eda980": {
+    "query": "\nupdate jig_data\nset display_name     = coalesce($2, display_name),\n    language         = coalesce($3, language),\n    theme            = coalesce($4, theme),\n    updated_at = now()\n\nwhere id = $1\n  and (($2::text is not null and $2 is distinct from display_name) or\n       ($3::text is not null and $3 is distinct from language) or\n       ($4::smallint is not null and $4 is distinct from theme))\n",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Text",
+          "Int2"
         ]
       },
       "nullable": []
@@ -6237,6 +6221,22 @@
       "parameters": {
         "Left": [
           "Uuid",
+          "Bool"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "ed33c777a7166f4c7db4075c12401c927fb2abd75eb4cd1c30be257e1844ed0d": {
+    "query": "\nupdate jig_data\nset direction = $2,\n    display_score = $3,\n    track_assessments = $4,\n    drag_assist = $5,\n    updated_at = now()\nwhere id = $1 and\n    (($2 is distinct from direction) or\n     ($3 is distinct from display_score) or\n     ($4 is distinct from track_assessments) or\n     ($5 is distinct from drag_assist))\n            ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2",
+          "Bool",
+          "Bool",
           "Bool"
         ]
       },

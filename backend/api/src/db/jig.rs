@@ -765,7 +765,8 @@ select draft_id from jig join jig_data on jig.draft_id = jig_data.id where jig.i
             //language=SQL
             r#"
 update jig_data
-set audio_background = $2
+set audio_background = $2,
+updated_at = now()
 where id = $1 and $2 is distinct from audio_background
             "#,
             draft_id,
@@ -782,7 +783,8 @@ where id = $1 and $2 is distinct from audio_background
             r#"
 update jig_data
 set audio_feedback_positive = $2,
-    audio_feedback_negative = $3
+    audio_feedback_negative = $3,
+    updated_at = now()
 where id = $1 and ($2 <> audio_feedback_positive or $3 <> audio_feedback_negative)
             "#,
             draft_id,
@@ -809,7 +811,8 @@ update jig_data
 set direction = $2,
     display_score = $3,
     track_assessments = $4,
-    drag_assist = $5
+    drag_assist = $5,
+    updated_at = now()
 where id = $1 and
     (($2 is distinct from direction) or
      ($3 is distinct from display_score) or
@@ -887,7 +890,9 @@ where id = $1 and $2 is distinct from other_keywords"#,
 update jig_data
 set display_name     = coalesce($2, display_name),
     language         = coalesce($3, language),
-    theme            = coalesce($4, theme)
+    theme            = coalesce($4, theme),
+    updated_at = now()
+
 where id = $1
   and (($2::text is not null and $2 is distinct from display_name) or
        ($3::text is not null and $3 is distinct from language) or
