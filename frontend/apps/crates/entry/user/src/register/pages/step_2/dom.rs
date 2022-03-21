@@ -110,39 +110,34 @@ impl Step2Page {
                     }))
                 }),
                 html!("div", {
-                    .style("display", "flex")
                     .property("slot", "checkbox")
                     .child(
                         html!("input-checkbox", {
                             .property_signal("error", state.terms_error_str())
-                            .property("label", STR_TERMS_LABEL_ONE)
+                            .child(html!("div", {
+                                .property("slot", "label")
+                                .text(STR_TERMS_LABEL_ONE)
+                                .child(html!("a", {
+                                    .attribute("href", "https://www.jewishinteractive.org/terms-and-conditions/")
+                                    .text(STR_TERMS_TERMS)
+                                    .attribute("target", "_blank")
+                                    .style("color", "var(--main-blue)")
+                                }))
+                                .child(html!("span", {
+                                    .text(STR_TERMS_LABEL_TWO)
+                                }))
+                                .child(html!("a", {
+                                    .attribute("target", "_blank")
+                                    .attribute("href", "https://www.jewishinteractive.org/privacy-policy/")
+                                    .text(STR_TERMS_PRIVACY)
+                                    .style("color", "var(--main-blue)")
+                                }))
+                                .text(". *")
+                            }))
                             .event(clone!(state => move |evt:events::CustomToggle| {
                                 *state.terms.borrow_mut() = evt.value();
                                 state.evaluate_terms_error();
                             }))
-                        })
-                    )
-                    .child(
-                        html!("div", {
-                            //whatever.. good enough for now
-                            .style("gap", ".5em")
-                            .style("margin-left", ".5em")
-                            .child(html!("a", {
-                                .attribute("href", "https://www.jewishinteractive.org/terms-and-conditions/")
-                                .text(STR_TERMS_TERMS)
-                                .attribute("target", "_blank")
-                                .style("color", "var(--main-blue)")
-                            }))
-                            .child(html!("span", {
-                                .text(STR_TERMS_LABEL_TWO)
-                            }))
-                            .child(html!("a", {
-                                .attribute("target", "_blank")
-                                .attribute("href", "https://www.jewishinteractive.org/privacy-policy/")
-                                .text(STR_TERMS_PRIVACY)
-                                .style("color", "var(--main-blue)")
-                            }))
-                            .text(". *")
                         })
                     )
                 }),

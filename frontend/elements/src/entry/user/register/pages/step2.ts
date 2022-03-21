@@ -30,6 +30,9 @@ export class _ extends LitElement {
                 .bottom {
                     margin-top: 20px;
                 }
+                ::slotted([slot="committed-to-privacy"]) {
+                    width: 60%;
+                }
             `,
         ];
     }

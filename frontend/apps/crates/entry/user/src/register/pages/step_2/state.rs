@@ -55,7 +55,7 @@ pub enum TermsError {
 impl TermsError {
     pub fn as_str(&self) -> &'static str {
         match self {
-            Self::Unchecked => "need to select!",
+            Self::Unchecked => "",
         }
     }
 }
