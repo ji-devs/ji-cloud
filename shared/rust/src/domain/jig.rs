@@ -762,6 +762,13 @@ pub struct JigBrowseQuery {
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub page_limit: Option<u32>,
+
+    /// Optionally filter by `additional resources`
+    #[serde(default)]
+    #[serde(serialize_with = "super::csv_encode_uuids")]
+    #[serde(deserialize_with = "super::from_csv")]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub resource_types: Vec<ResourceTypeId>,
 }
 
 /// Response for [`Browse`](crate::api::endpoints::jig::Browse).

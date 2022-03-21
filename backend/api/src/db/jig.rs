@@ -530,6 +530,7 @@ pub async fn browse(
     blocked: Option<bool>,
     page: i32,
     page_limit: u32,
+    resource_types: Vec<Uuid>,
 ) -> sqlx::Result<Vec<JigResponse>> {
     let mut txn = db.begin().await?;
 
@@ -540,15 +541,17 @@ pub async fn browse(
     //language=SQL
     r#"
 with cte as (
-    select array(select jig_data.id as "id!"
-    from jig_data
-          inner join jig on (draft_id = jig_data.id or (live_id = jig_data.id and last_synced_at is not null))
-          inner join jig_admin_data "admin" on admin.jig_id = jig.id
-    where (jig_data.draft_or_live = $3 or $3 is null)
+    select array(select jd.id as "id!"
+    from jig_data "jd"
+          left join jig on (draft_id = jd.id or (live_id = jd.id and jd.last_synced_at is not null))
+          left join jig_admin_data "admin" on admin.jig_id = jig.id
+          left join jig_data_additional_resource "resource" on jd.id = resource.jig_data_id
+    where (jd.draft_or_live = $3 or $3 is null)
         and (author_id = $1 or $1 is null)
         and (jig_focus = $2 or $2 is null)
         and (blocked = $4 or $4 is null)
-        and (jig_data.privacy_level = any($5) or $5 = array[]::smallint[])
+        and (jd.privacy_level = any($5) or $5 = array[]::smallint[])
+        and (resource.resource_type_id = any($8) or $8 = array[]::uuid[])
     order by coalesce(updated_at, created_at) desc) as id
 ),
 cte1 as (
@@ -624,6 +627,7 @@ limit $7
     &privacy_level[..],
     page,
     page_limit as i32,
+    &resource_types[..],
 )
     .fetch_all(&mut txn)
     .instrument(tracing::info_span!("query jig_data"))
@@ -983,10 +987,9 @@ pub async fn filtered_count(
     author_id: Option<Uuid>,
     jig_focus: Option<JigFocus>,
     draft_or_live: Option<DraftOrLive>,
+    resource_types: Vec<Uuid>,
 ) -> sqlx::Result<(u64, u64)> {
     let privacy_level: Vec<i16> = privacy_level.iter().map(|x| *x as i16).collect();
-
-    log::warn!("privacy level: {:?}", privacy_level);
 
     let jig_data = sqlx::query!(
         //language=SQL
@@ -995,17 +998,20 @@ select count(distinct jig_data.id) as "count!: i64"
 from jig_data
 left join jig on (draft_id = jig_data.id or (live_id = jig_data.id and last_synced_at is not null))
 left join jig_admin_data "admin" on admin.jig_id = jig.id
+left join jig_data_additional_resource "resource" on jig_data.id = resource.jig_data_id
 where (author_id = $1 or $1 is null)
     and (jig_data.draft_or_live = $3 or $3 is null)
     and (jig_focus = $2 or $2 is null)
     and (jig_data.privacy_level = any($4) or $4 = array[]::smallint[])
     and (blocked = $5 or $5 is null)
+    and (resource.resource_type_id = any($6) or $6 = array[]::uuid[])
 "#,
         author_id,
         jig_focus.map(|it| it as i16),
         draft_or_live.map(|it| it as i16),
         &privacy_level[..],
-        blocked
+        blocked,
+        &resource_types[..]
     )
     .fetch_one(db)
     .await?;
@@ -1017,17 +1023,20 @@ select count(distinct jig.id) as "count!: i64"
 from jig
 left join jig_admin_data "admin" on admin.jig_id = jig.id
 left join jig_data on (draft_id = jig_data.id or (live_id = jig_data.id and last_synced_at is not null))
+left join jig_data_additional_resource "resource" on jig_data.id = resource.jig_data_id
 where (author_id = $1 or $1 is null)
     and (jig_data.draft_or_live = $3 or $3 is null)
     and (jig_focus = $2 or $2 is null)
     and (jig_data.privacy_level = any($4) or $4 = array[]::smallint[])
     and (blocked = $5 or $5 is null)
+    and (resource.resource_type_id = any($6) or $6 = array[]::uuid[])
 "#,
         author_id,
         jig_focus.map(|it| it as i16),
         draft_or_live.map(|it| it as i16),
         &privacy_level[..],
-        blocked
+        blocked,
+        &resource_types[..]
     )
     .fetch_one(db)
     .await?;

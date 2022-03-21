@@ -88,6 +88,152 @@ expression: body
       "plays": 0,
       "jigFocus": "modules",
       "jigData": {
+        "draftOrLive": "live",
+        "displayName": "name",
+        "modules": [
+          {
+            "id": "a6b248f8-1dd7-11ec-8426-975953035335",
+            "kind": "Cover",
+            "is_complete": false
+          },
+          {
+            "id": "a6b24970-1dd7-11ec-8426-57136b411853",
+            "kind": "Flashcards",
+            "is_complete": false
+          },
+          {
+            "id": "a6b249c0-1dd7-11ec-8426-f77e58fd17c6",
+            "kind": "Memory",
+            "is_complete": false
+          }
+        ],
+        "ageRanges": [],
+        "affiliations": [],
+        "language": "en",
+        "categories": [],
+        "additionalResources": [
+          {
+            "id": "286b828c-1dd9-11ec-8426-571b03b2d3df",
+            "displayName": "link test",
+            "resourceTypeId": "a91aca34-519e-11ec-ab46-175eaaf1ff23",
+            "link": "url://url.url.url/urlese"
+          },
+          {
+            "id": "286b82fa-1dd9-11ec-8426-2b6953011bae",
+            "displayName": "link test",
+            "resourceTypeId": "a91aca34-519e-11ec-ab46-175eaaf1ff23",
+            "link": "url://url.url.url/url"
+          }
+        ],
+        "description": "test description",
+        "lastEdited": "[last_edited]",
+        "defaultPlayerSettings": {
+          "direction": "ltr",
+          "displayScore": true,
+          "trackAssessments": true,
+          "dragAssist": true
+        },
+        "theme": "Blank",
+        "audioBackground": null,
+        "audioEffects": {
+          "feedbackPositive": "[audio]",
+          "feedbackNegative": "[audio]"
+        },
+        "privacyLevel": "public",
+        "locked": false,
+        "otherKeywords": "",
+        "translatedKeywords": "",
+        "translatedDescription": {}
+      },
+      "adminData": {
+        "rating": null,
+        "blocked": false,
+        "curated": false
+      }
+    },
+    {
+      "id": "0cc084bc-7c83-11eb-9f77-e3218dffb008",
+      "publishedAt": null,
+      "creatorId": "1f241e1b-b537-493f-a230-075cb16315be",
+      "authorId": "1f241e1b-b537-493f-a230-075cb16315be",
+      "authorName": "Bobby Tables",
+      "likes": 0,
+      "plays": 0,
+      "jigFocus": "modules",
+      "jigData": {
+        "draftOrLive": "draft",
+        "displayName": "name",
+        "modules": [
+          {
+            "id": "a6b24a06-1dd7-11ec-8426-635a3a7ea572",
+            "kind": "Cover",
+            "is_complete": false
+          },
+          {
+            "id": "a6b24a42-1dd7-11ec-8426-a7165f9281a2",
+            "kind": "Flashcards",
+            "is_complete": false
+          },
+          {
+            "id": "a6b24a88-1dd7-11ec-8426-57525d09b22c",
+            "kind": "Memory",
+            "is_complete": false
+          }
+        ],
+        "ageRanges": [],
+        "affiliations": [],
+        "language": "en",
+        "categories": [],
+        "additionalResources": [
+          {
+            "id": "286b834a-1dd9-11ec-8426-6f641a50e23f",
+            "displayName": "link test",
+            "resourceTypeId": "a91aca34-519e-11ec-ab46-175eaaf1ff23",
+            "link": "url://url.url.url/urls/s"
+          },
+          {
+            "id": "286b8390-1dd9-11ec-8426-fbeb80c504d9",
+            "displayName": "link test",
+            "resourceTypeId": "a91aca34-519e-11ec-ab46-175eaaf1ff23",
+            "link": "url://url.url.url/url/s"
+          }
+        ],
+        "description": "test description",
+        "lastEdited": "[last_edited]",
+        "defaultPlayerSettings": {
+          "direction": "ltr",
+          "displayScore": true,
+          "trackAssessments": true,
+          "dragAssist": true
+        },
+        "theme": "Blank",
+        "audioBackground": null,
+        "audioEffects": {
+          "feedbackPositive": "[audio]",
+          "feedbackNegative": "[audio]"
+        },
+        "privacyLevel": "unlisted",
+        "locked": false,
+        "otherKeywords": "",
+        "translatedKeywords": "",
+        "translatedDescription": {}
+      },
+      "adminData": {
+        "rating": null,
+        "blocked": false,
+        "curated": false
+      }
+    },
+    {
+      "id": "0cc084bc-7c83-11eb-9f77-e3218dffb008",
+      "publishedAt": null,
+      "creatorId": "1f241e1b-b537-493f-a230-075cb16315be",
+      "authorId": "1f241e1b-b537-493f-a230-075cb16315be",
+      "authorName": "Bobby Tables",
+      "likes": 0,
+      "plays": 0,
+      "jigFocus": "modules",
+      "jigData": {
         "draftOrLive": "draft",
         "displayName": "name",
         "modules": [
@@ -161,56 +307,6 @@ expression: body
       "plays": 0,
       "jigFocus": "modules",
       "jigData": {
-        "draftOrLive": "draft",
-        "displayName": "name",
-        "modules": [
-          {
-            "id": "56841805-d762-478b-8f07-e263917058b9",
-            "kind": "Cover",
-            "is_complete": true
-          }
-        ],
-        "ageRanges": [],
-        "affiliations": [],
-        "language": "en",
-        "categories": [],
-        "additionalResources": [],
-        "description": "test description",
-        "lastEdited": "[last_edited]",
-        "defaultPlayerSettings": {
-          "direction": "ltr",
-          "displayScore": true,
-          "trackAssessments": true,
-          "dragAssist": true
-        },
-        "theme": "Blank",
-        "audioBackground": null,
-        "audioEffects": {
-          "feedbackPositive": "[audio]",
-          "feedbackNegative": "[audio]"
-        },
-        "privacyLevel": "unlisted",
-        "locked": false,
-        "otherKeywords": "",
-        "translatedKeywords": "",
-        "translatedDescription": {}
-      },
-      "adminData": {
-        "rating": null,
-        "blocked": false,
-        "curated": false
-      }
-    },
-    {
-      "id": "19becb2b-bff7-4c1b-bb2c-16f2e098d3d3",
-      "publishedAt": null,
-      "creatorId": "1f241e1b-b537-493f-a230-075cb16315be",
-      "authorId": "1f241e1b-b537-493f-a230-075cb16315be",
-      "authorName": "Bobby Tables",
-      "likes": 0,
-      "plays": 0,
-      "jigFocus": "modules",
-      "jigData": {
         "draftOrLive": "live",
         "displayName": "name",
         "modules": [
@@ -240,6 +336,56 @@ expression: body
           "feedbackNegative": "[audio]"
         },
         "privacyLevel": "public",
+        "locked": false,
+        "otherKeywords": "",
+        "translatedKeywords": "",
+        "translatedDescription": {}
+      },
+      "adminData": {
+        "rating": null,
+        "blocked": false,
+        "curated": false
+      }
+    },
+    {
+      "id": "19becb2b-bff7-4c1b-bb2c-16f2e098d3d3",
+      "publishedAt": null,
+      "creatorId": "1f241e1b-b537-493f-a230-075cb16315be",
+      "authorId": "1f241e1b-b537-493f-a230-075cb16315be",
+      "authorName": "Bobby Tables",
+      "likes": 0,
+      "plays": 0,
+      "jigFocus": "modules",
+      "jigData": {
+        "draftOrLive": "draft",
+        "displayName": "name",
+        "modules": [
+          {
+            "id": "56841805-d762-478b-8f07-e263917058b9",
+            "kind": "Cover",
+            "is_complete": true
+          }
+        ],
+        "ageRanges": [],
+        "affiliations": [],
+        "language": "en",
+        "categories": [],
+        "additionalResources": [],
+        "description": "test description",
+        "lastEdited": "[last_edited]",
+        "defaultPlayerSettings": {
+          "direction": "ltr",
+          "displayScore": true,
+          "trackAssessments": true,
+          "dragAssist": true
+        },
+        "theme": "Blank",
+        "audioBackground": null,
+        "audioEffects": {
+          "feedbackPositive": "[audio]",
+          "feedbackNegative": "[audio]"
+        },
+        "privacyLevel": "unlisted",
         "locked": false,
         "otherKeywords": "",
         "translatedKeywords": "",
