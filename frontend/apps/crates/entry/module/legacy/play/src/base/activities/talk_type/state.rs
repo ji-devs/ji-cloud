@@ -72,7 +72,19 @@ impl TalkTypeItem {
     pub fn new(base: Rc<Base>, raw: RawTalkTypeItem, rng: &mut ThreadRng) -> Rc<Self> {
         let bounds = raw.hotspot.shape.calc_bounds(None).expect_ji("could not calc bounds");
 
-        let hint_letters = match raw.texts.as_ref() {
+
+        let hint_letters = match raw.texts.as_ref().and_then(|text| {
+                let text:Vec<&String> = text
+                    .iter()
+                    .filter(|text| !text.is_empty())
+                    .collect();
+                
+                if !text.is_empty() {
+                    Some(text)
+                } else {
+                    None
+                }
+            }) {
             Some(text) => {
                 let letters:Vec<HintLetter> = text[0]
                     .graphemes(true)
