@@ -53,6 +53,10 @@ impl SoundboardItem {
             log::info!("first time!");
         }
 
+        for item in &parent.items {
+            item.hotspot.tooltip_text.set(None);
+        }
+
         state.hotspot.tooltip_text.set(state.text.clone());
 
         if let Some(audio_filename) = state.audio_filename.as_ref() {
