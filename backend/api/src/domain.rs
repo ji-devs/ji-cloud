@@ -22,8 +22,6 @@ pub struct RawCategory {
     pub index: i16,
     pub created_at: DateTime<Utc>,
     pub updated_at: Option<DateTime<Utc>>,
-    pub image_count: i64,
-    pub jig_count: i64,
     pub user_scopes: Vec<i16>,
 }
 
@@ -33,8 +31,6 @@ struct CategoryNode {
     pub name: String,
     pub created_at: DateTime<Utc>,
     pub updated_at: Option<DateTime<Utc>>,
-    pub image_count: i64,
-    pub jig_count: i64,
     pub user_scopes: Vec<i16>,
     pub children: Vec<Rc<RefCell<CategoryNode>>>,
 }
@@ -46,8 +42,6 @@ impl From<CategoryNode> for Category {
             name: category_node.name,
             created_at: category_node.created_at,
             updated_at: category_node.updated_at,
-            image_count: category_node.image_count as u64,
-            jig_count: category_node.jig_count as u64,
             user_scopes: {
                 category_node
                     .user_scopes
@@ -83,8 +77,6 @@ pub fn build_tree(categories: Vec<RawCategory>) -> Vec<Category> {
                 name: raw.name.clone(),
                 created_at: raw.created_at,
                 updated_at: raw.updated_at,
-                image_count: raw.image_count,
-                jig_count: raw.jig_count,
                 user_scopes: raw.user_scopes.clone(),
                 children: Vec::new(),
             })),

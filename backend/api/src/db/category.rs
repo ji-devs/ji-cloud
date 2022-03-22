@@ -18,8 +18,6 @@ select id                                                                 as "id
        name,
        created_at,
        updated_at,
-       (select count(*)::int8 from image_category where category_id = id) as "image_count!",
-       (select count(*)::int8 from jig_data_category where category_id = id) as "jig_count!",
        user_scopes
 from category
 where parent_id is null
@@ -33,8 +31,6 @@ order by index
         updated_at: it.updated_at,
         name: it.name,
         children: vec![],
-        image_count: it.image_count as u64,
-        jig_count: it.jig_count as u64,
         user_scopes: {
             let scopes = it
                 .user_scopes
@@ -59,8 +55,6 @@ select id                                                                 as "id
        name                                                               as "name!",
        created_at                                                         as "created_at!",
        updated_at,
-       (select count(*)::int8 from image_category where category_id = id) as "image_count!",
-       (select count(*)::int8 from jig_data_category where category_id = id)   as "jig_count!",
        user_scopes                                                        as "user_scopes!"
 from category
          inner join unnest($1::uuid[]) with ordinality t(id, ord) USING (id)
@@ -75,8 +69,6 @@ order by t.ord
         created_at: it.created_at,
         updated_at: it.updated_at,
         children: vec![],
-        image_count: it.image_count as u64,
-        jig_count: it.jig_count as u64,
         user_scopes: {
             it.user_scopes
                 .into_iter()
@@ -107,8 +99,6 @@ select id,
        index,
        created_at,
        updated_at,
-       (select count(*) from image_category where category_id = id)::int8 as "image_count!",
-       (select count(*) from jig_data_category where category_id = id)::int8 as "jig_count!",
        user_scopes
 from category
 order by index

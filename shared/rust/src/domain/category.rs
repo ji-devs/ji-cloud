@@ -45,12 +45,6 @@ pub struct Category {
 
     /// When the category was last updated.
     pub updated_at: Option<DateTime<Utc>>,
-
-    /// The number of images associated with the category.
-    pub image_count: u64,
-
-    /// The number of JIGs associated with the category.
-    pub jig_count: u64,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
