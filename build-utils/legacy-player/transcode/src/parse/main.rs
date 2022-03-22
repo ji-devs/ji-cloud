@@ -28,7 +28,8 @@ use options::*;
 mod convert;
 
 // url
-// http://localhost:4104/module/legacy/play/debug?slide_index=0&game_id=ID
+// http://localhost:4104/module/legacy/play/debug/debug?game_id=ID&slide_index=0
+// or maybe? http://localhost:4104/module/legacy/play/debug?slide_index=0&game_id=ID
 
 #[tokio::main]
 async fn main() {

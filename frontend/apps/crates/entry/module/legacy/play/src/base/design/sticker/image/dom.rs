@@ -46,8 +46,15 @@ impl ImagePlayer {
                 .event(clone!(state => move |_evt:events::Load| {
                     if state.size.get_cloned().is_none() {
 
-                        let width = elem.natural_width() as f64;
-                        let height = elem.natural_height() as f64;
+                        let mut width = elem.natural_width() as f64;
+                        let mut height = elem.natural_height() as f64;
+
+                        // ugly hack... would be much better to fix at the source
+                        // but, whatever...
+                        if state.raw.filename.contains("_txt") {
+                            width /= 2.0;
+                            height /= 2.0;
+                        }
 
                         state.size.set(Some((width, height)));
 

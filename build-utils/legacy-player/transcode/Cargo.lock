@@ -1642,6 +1642,8 @@ dependencies = [
  "serde_json",
  "serde_repr",
  "serde_with",
+ "strum",
+ "strum_macros",
  "thiserror",
  "url",
  "uuid",
