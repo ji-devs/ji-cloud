@@ -16,6 +16,7 @@ use std::future::Future;
 use utils::prelude::*;
 
 use crate::module::_common::edit::post_preview::state::PostPreview;
+use crate::tabs::MenuTabKind;
 
 /// This is passed *to* the consumer in order to get a BaseInit
 pub struct BaseInitFromRawArgs<RawData, Mode, Step>
@@ -237,9 +238,8 @@ pub trait MainDomRenderable: DomRenderable {
 }
 
 pub trait SidebarExt: DomRenderable {
-    type TabIndexSignal: Signal<Item = Option<usize>>;
-
-    fn tab_index(&self) -> Self::TabIndexSignal;
+    type TabKindSignal: Signal<Item = Option<MenuTabKind>>;
+    fn tab_kind(&self) -> Self::TabKindSignal;
 }
 
 pub trait HeaderExt: DomRenderable {}

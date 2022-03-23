@@ -10,8 +10,8 @@ use std::rc::Rc;
 
 pub fn render(state: Rc<Step1>) -> Dom {
     html!("menu-tabs", {
-        .future(state.tab.signal_ref(|tab| tab.as_index()).dedupe().for_each(clone!(state => move |index| {
-            state.sidebar.tab_index.set(Some(index));
+        .future(state.tab.signal_ref(|tab| tab.kind()).dedupe().for_each(clone!(state => move |kind| {
+            state.sidebar.tab_kind.set(Some(kind));
             async move {}
         })))
         .children(&mut [

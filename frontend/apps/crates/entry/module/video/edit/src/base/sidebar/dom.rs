@@ -15,7 +15,7 @@ impl DomRenderable for Sidebar {
     fn render(state: Rc<Sidebar>) -> Dom {
         html!("empty-fragment", {
             .future(state.base.step.signal_cloned().dedupe().for_each(clone!(state => move |_step| {
-                state.tab_index.set(None);
+                state.tab_kind.set(None);
                 async move {}
             })))
             .style("display", "contents")

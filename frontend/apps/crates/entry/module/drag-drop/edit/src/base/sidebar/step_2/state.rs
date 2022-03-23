@@ -81,11 +81,4 @@ impl Tab {
             Self::Audio(_) => MenuTabKind::Audio,
         }
     }
-
-    pub fn as_index(&self) -> usize {
-        match self {
-            Self::Select => 0,
-            Self::Audio(_) => 1,
-        }
-    }
 }

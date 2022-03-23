@@ -92,12 +92,4 @@ impl Tab {
             Self::Overlay(_) => MenuTabKind::Overlay,
         }
     }
-
-    pub fn as_index(&self) -> usize {
-        match self {
-            Self::BackgroundImage(_) => 0,
-            Self::FillColor(_) => 1,
-            Self::Overlay(_) => 2,
-        }
-    }
 }

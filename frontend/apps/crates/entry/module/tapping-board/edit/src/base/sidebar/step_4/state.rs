@@ -75,11 +75,4 @@ impl Tab {
             Self::Instructions(_) => MenuTabKind::Instructions,
         }
     }
-
-    pub fn as_index(&self) -> usize {
-        match self {
-            Self::Settings(_) => 0,
-            Self::Instructions(_) => 1,
-        }
-    }
 }

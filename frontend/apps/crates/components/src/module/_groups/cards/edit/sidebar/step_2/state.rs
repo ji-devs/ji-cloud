@@ -1,4 +1,4 @@
-use crate::{module::_groups::cards::edit::state::*, theme_selector::state::{ThemeSelectorCallbacks, ThemeSelector}};
+use crate::{module::_groups::cards::edit::state::*, theme_selector::state::{ThemeSelectorCallbacks, ThemeSelector}, tabs::MenuTabKind};
 use dominator::clone;
 use futures_signals::signal::Mutable;
 use shared::{api::{endpoints, ApiEndpoint}, domain::jig::JigUpdateDraftDataRequest, error::EmptyError};
@@ -14,10 +14,11 @@ pub struct Step2<RawData: RawDataExt, E: ExtraExt> {
     pub base: Rc<CardsBase<RawData, E>>,
     pub theme_selector: Rc<ThemeSelector>,
     pub custom_background: Mutable<Option<Rc<CustomBackground<RawData, E>>>>,
+    pub tab_kind: Mutable<Option<MenuTabKind>>,
 }
 
 impl<RawData: RawDataExt, E: ExtraExt> Step2<RawData, E> {
-    pub fn new(base: Rc<CardsBase<RawData, E>>, _tab_index: Mutable<Option<usize>>) -> Rc<Self> {
+    pub fn new(base: Rc<CardsBase<RawData, E>>, tab_kind: Mutable<Option<MenuTabKind>>) -> Rc<Self> {
         let callbacks = ThemeSelectorCallbacks::new(clone!(base => move |theme_id| {
             base.set_theme(theme_id);
 
@@ -48,6 +49,7 @@ impl<RawData: RawDataExt, E: ExtraExt> Step2<RawData, E> {
             base,
             theme_selector,
             custom_background: Mutable::new(None),
+            tab_kind,
         })
     }
 }

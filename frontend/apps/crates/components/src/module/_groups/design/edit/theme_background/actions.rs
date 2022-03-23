@@ -16,10 +16,11 @@ impl<Step, Base> ThemeBackground<Step, Base> where
 
         let on_close = Box::new(clone!(state => move || {
             state.custom_background.set(None);
+            state.tab_kind.set_neq(None);
         }));
 
         let custom_background = CustomBackground::new(
-            Rc::clone(&state.base),
+            Rc::clone(&state),
             on_close
         );
 

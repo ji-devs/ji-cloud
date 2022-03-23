@@ -27,14 +27,14 @@ pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<Step1<RawData, E>>) ->
             Some(html!("menu-tabs", {
                 .children(state.tabs.get().unwrap_ji().iter().enumerate().map(|(idx, tab)| {
                     let enabled = idx == 0 || (idx > 0 && !is_empty);
-                    render_tab(state.clone(), tab.kind(), idx, enabled)
+                    render_tab(state.clone(), tab.kind(), enabled)
                 }))
                 .child(html!("module-sidebar-body", {
                         .property("slot", "body")
-                        .child_signal(state.tab_index.signal_cloned().map(clone!(state, is_empty => move |current_tab_idx| {
-                            let tab = match current_tab_idx {
-                                Some(current_tab_idx) => match state.tabs.get() {
-                                    Some(tabs) => tabs.get(current_tab_idx),
+                        .child_signal(state.tab_kind.signal_cloned().map(clone!(state, is_empty => move |current_tab_kind| {
+                            let tab = match current_tab_kind {
+                                Some(current_tab_kind) => match state.tabs.get() {
+                                    Some(tabs) => tabs.iter().find(|tab| tab.kind() == current_tab_kind),
                                     None => None,
                                 },
                                 None => None,
@@ -220,7 +220,6 @@ fn render_non_empty<RawData: RawDataExt, E: ExtraExt>(state: Rc<Step1<RawData, E
 fn render_tab<RawData: RawDataExt, E: ExtraExt>(
     state: Rc<Step1<RawData, E>>,
     tab_kind: MenuTabKind,
-    idx: usize,
     enabled: bool,
 ) -> Dom {
     MenuTab::render(
@@ -228,11 +227,11 @@ fn render_tab<RawData: RawDataExt, E: ExtraExt>(
             tab_kind,
             false,
             enabled,
-            clone!(state => move || state.tab_index.signal_ref(move |current_tab_idx| {
-                current_tab_idx.as_ref().map_or(false, |current_tab_idx| *current_tab_idx == idx)
+            clone!(state => move || state.tab_kind.signal_ref(move |current_tab_kind| {
+                current_tab_kind.as_ref().map_or(false, |current_tab_kind| *current_tab_kind == tab_kind)
             })),
             clone!(state => move || {
-                state.tab_index.set_neq(Some(idx))
+                state.tab_kind.set_neq(Some(tab_kind))
             }),
         ),
         Some("tabs"),

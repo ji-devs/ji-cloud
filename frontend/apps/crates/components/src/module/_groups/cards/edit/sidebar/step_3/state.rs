@@ -20,7 +20,7 @@ where
     pub base: Rc<CardsBase<RawData, E>>,
     pub tab: Mutable<Tab<SettingsState>>,
     pub get_settings: GetSettingsStateFn,
-    pub tab_index: Mutable<Option<usize>>,
+    pub tab_kind: Mutable<Option<MenuTabKind>>,
 }
 
 impl<RawData, E, GetSettingsStateFn, SettingsState>
@@ -34,7 +34,7 @@ where
     pub fn new(
         base: Rc<CardsBase<RawData, E>>,
         get_settings: GetSettingsStateFn,
-        tab_index: Mutable<Option<usize>>,
+        tab_kind: Mutable<Option<MenuTabKind>>,
     ) -> Rc<Self> {
         let kind = match base.debug.step3_tab {
             Some(kind) => kind,
@@ -47,7 +47,7 @@ where
             base,
             tab,
             get_settings,
-            tab_index,
+            tab_kind,
         })
     }
 }
