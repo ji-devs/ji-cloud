@@ -68,12 +68,4 @@ impl Tab {
             Self::Image(_) => MenuTabKind::Image,
         }
     }
-
-    pub fn as_index(&self) -> usize {
-        match self {
-            Self::Video => 0,
-            Self::Text => 1,
-            Self::Image(_) => 2,
-        }
-    }
 }

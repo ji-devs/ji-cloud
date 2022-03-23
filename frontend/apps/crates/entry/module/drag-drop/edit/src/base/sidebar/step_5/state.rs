@@ -99,12 +99,4 @@ impl Tab {
             Self::Feedback(_) => MenuTabKind::Feedback,
         }
     }
-
-    pub fn as_index(&self) -> usize {
-        match self {
-            Self::Settings(_) => 0,
-            Self::Instructions(_) => 1,
-            Self::Feedback(_) => 2,
-        }
-    }
 }

@@ -1,4 +1,4 @@
-use crate::module::{_common::edit::prelude::*, _groups::cards::edit::state::*};
+use crate::{module::{_common::edit::prelude::*, _groups::cards::edit::state::*}, tabs::MenuTabKind};
 use dominator::Dom;
 use futures_signals::signal::{Mutable, Signal};
 use std::rc::Rc;
@@ -14,7 +14,7 @@ where
     pub base: Rc<CardsBase<RawData, E>>,
     pub get_settings: GetSettingsStateFn,
     pub render_settings: RenderSettingsStateFn,
-    pub tab_index: Mutable<Option<usize>>,
+    pub tab_kind: Mutable<Option<MenuTabKind>>,
 }
 
 impl<RawData, E, GetSettingsStateFn, RenderSettingsStateFn, SettingsState>
@@ -35,7 +35,7 @@ where
             base,
             get_settings,
             render_settings,
-            tab_index: Mutable::new(None),
+            tab_kind: Mutable::new(None),
         }
     }
 }
@@ -49,9 +49,9 @@ where
     RenderSettingsStateFn: Fn(Rc<SettingsState>) -> Dom + Clone + 'static,
     SettingsState: 'static,
 {
-    type TabIndexSignal = impl Signal<Item = Option<usize>>;
+    type TabKindSignal = impl Signal<Item = Option<MenuTabKind>>;
 
-    fn tab_index(&self) -> Self::TabIndexSignal {
-        self.tab_index.signal()
+    fn tab_kind(&self) -> Self::TabKindSignal {
+        self.tab_kind.signal()
     }
 }

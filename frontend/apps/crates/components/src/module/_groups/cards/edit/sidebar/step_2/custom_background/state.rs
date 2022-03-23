@@ -9,7 +9,7 @@ use crate::{
         state::{ImageSearchKind, ImageSearchOptions, State as ImageSearchState},
     },
     module::_groups::cards::edit::state::{RawDataExt, ExtraExt, CardsBase},
-    color_select::state::State as ColorPickerState,
+    color_select::state::State as ColorPickerState, tabs::MenuTabKind,
 };
 
 const STR_FILL_COLOR: &str = "Fill color";
@@ -20,11 +20,16 @@ pub struct CustomBackground<RawData: RawDataExt, E: ExtraExt> {
     pub colors_open: Mutable<bool>,
     pub color_state: Rc<ColorPickerState>,
     pub background_state: Rc<ImageSearchState>,
+    pub tab_kind: Mutable<Option<MenuTabKind>>,
 }
 
 
 impl<RawData: RawDataExt, E: ExtraExt> CustomBackground<RawData, E> {
-    pub fn new(base: Rc<CardsBase<RawData, E>>, on_close: Box<dyn Fn()>) -> Rc<Self> {
+    pub fn new(
+        base: Rc<CardsBase<RawData, E>>,
+        tab_kind: Mutable<Option<MenuTabKind>>,
+        on_close: Box<dyn Fn()>
+    ) -> Rc<Self> {
         let color_state = Rc::new(ColorPickerState::new(
             base.theme_id.read_only(),
             None,
@@ -50,6 +55,7 @@ impl<RawData: RawDataExt, E: ExtraExt> CustomBackground<RawData, E> {
             colors_open: Mutable::new(false),
             color_state,
             background_state,
+            tab_kind,
         })
     }
 }

@@ -28,22 +28,17 @@ use std::rc::Rc;
 pub struct Step1<RawData: RawDataExt, E: ExtraExt> {
     pub base: Rc<CardsBase<RawData, E>>,
     pub tabs: OnceCell<Vec<Tab>>,
-    pub tab_index: Mutable<Option<usize>>,
+    pub tab_kind: Mutable<Option<MenuTabKind>>,
     pub audio: Mutable<Option<Rc<AudioInput>>>,
     pub confirm_clear: Mutable<bool>,
 }
 
 impl<RawData: RawDataExt, E: ExtraExt> Step1<RawData, E> {
-    pub fn new(base: Rc<CardsBase<RawData, E>>, tab_index: Mutable<Option<usize>>) -> Rc<Self> {
-        // If the tab index isn't set yet, make it the first tab
-        if tab_index.lock_ref().is_none() {
-            tab_index.set(Some(0));
-        }
-
+    pub fn new(base: Rc<CardsBase<RawData, E>>, tab_kind: Mutable<Option<MenuTabKind>>) -> Rc<Self> {
         let state = Rc::new(Self {
             base: base.clone(),
             tabs: OnceCell::default(),
-            tab_index,
+            tab_kind,
             audio: Mutable::new(None),
             confirm_clear: Mutable::new(false),
         });
@@ -67,6 +62,11 @@ impl<RawData: RawDataExt, E: ExtraExt> Step1<RawData, E> {
         // using this purely to lazily set the tabs immediately after initializing the state, the
         // error here will never occur.
         let _ = state.tabs.set(tabs);
+
+                // If the tab index isn't set yet, make it the first tab
+        if state.tab_kind.lock_ref().is_none() {
+            state.tab_kind.set(get_tab_kind_from_idx(state.clone(), 0));
+        }
 
         state
     }
@@ -118,6 +118,19 @@ impl Tab {
     }
 }
 
+fn get_tab_kind_from_idx<RawData: RawDataExt, E: ExtraExt>(
+    state: Rc<Step1<RawData, E>>,
+    idx: usize,
+) -> Option<MenuTabKind> {
+    if let Some(tabs) = state.tabs.get() {
+        if let Some(tab) = tabs.get(idx) {
+            return Some(tab.kind())
+        }
+    }
+
+    None
+}
+
 fn make_single_list<RawData: RawDataExt, E: ExtraExt>(
     state: Rc<Step1<RawData, E>>,
 ) -> SingleListState {
@@ -134,7 +147,7 @@ fn make_single_list<RawData: RawDataExt, E: ExtraExt>(
             // If the current mode is words and images, then at this point the user can be
             // navigated directly to the Image tab.
             if matches!(state.base.mode, Mode::WordsAndImages) {
-                state.tab_index.set_neq(Some(1));
+                state.tab_kind.set_neq(get_tab_kind_from_idx(state.clone(), 1));
             }
         }),
         config::get_single_list_init_word,

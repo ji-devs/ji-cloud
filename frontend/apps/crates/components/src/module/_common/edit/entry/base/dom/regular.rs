@@ -7,7 +7,7 @@ use futures_signals::{
 };
 use serde::Deserialize;
 use wasm_bindgen::JsValue;
-use std::rc::Rc;
+use std::{rc::Rc, collections::HashMap};
 
 use crate::{jigzi_help::JigziHelp, module::_common::edit::header::controller::dom::ControllerDom};
 
@@ -91,16 +91,20 @@ where
 
     //TODO - load from localization endpoint
     let str_config_url =
-        utils::path::config_cdn_url(format!("module/_header/{}.json", module_kind));
+        utils::path::config_cdn_url(format!("module/_header/tips/{}.json", module_kind));
 
-    #[derive(Deserialize, Default, Clone)]
+    #[derive(Debug, Deserialize, Default, Clone)]
     struct HeaderConfig {
         title: String,
         steps: Vec<HeaderConfigStep>,
     }
-    #[derive(Deserialize, Default, Clone)]
+    #[derive(Debug, Deserialize, Default, Clone)]
     struct HeaderConfigStep {
-        tabs: Vec<HeaderConfigTab>,
+        #[serde(default)]
+        #[serde(rename = "default")]
+        default_content: Option<HeaderConfigTab>,
+        #[serde(default)]
+        tabs: HashMap<String, HeaderConfigTab>,
     }
     #[derive(Debug, Deserialize, Default, Clone)]
     struct HeaderConfigTab {
@@ -114,20 +118,22 @@ where
         map_ref! {
             let header_config = header_config.signal_cloned(),
             let step = state.step.signal_cloned(),
-            let tab_index = state.sidebar.tab_index()
+            let tab_kind = state.sidebar.tab_kind()
             => {
-
                 let step_index = step.as_number() - 1;
-                let tab_index = tab_index.unwrap_or_default();
-
-                //log::info!("step: {}, tab: {}", step_index, tab_index);
-
                 let tab_config = header_config.steps.get(step_index)
                     .and_then(|step_config| {
-                        step_config.tabs.get(tab_index)
-                    } );
+                        match tab_kind {
+                            Some(tab_kind) => {
+                                step_config.tabs
+                                    .get(&format!("{}", tab_kind))
+                                    .or(step_config.default_content.as_ref())
+                            }
+                            None => step_config.default_content.as_ref(),
+                        }
+                    });
 
-                tab_config.cloned().unwrap_or_default()
+                tab_config.cloned()
             }
         }
     });
@@ -141,9 +147,7 @@ where
                         .await
                         .unwrap_or_default()
                 },
-                Err(_) => {
-                    HeaderConfig::default()
-                }
+                Err(_) => Default::default()
             };
 
             header_config.set(data);
@@ -156,19 +160,24 @@ where
         })
         .property("subtitle", state.mode.map_or(JsValue::UNDEFINED, |m| JsValue::from_str(m.label())))
         .child_signal(tab_config_sig().map(|tab| {
-            let HeaderConfigTab {title, body} = tab;
+            match tab {
+                Some(tab) => {
+                    let HeaderConfigTab {title, body} = tab;
 
-            if !title.is_empty() && !body.is_empty() {
-                Some(
-                    JigziHelp::new(
-                        title,
-                        body,
-                        "module-header"
-                    )
-                    .render(Some("help"), Rc::new(None::<fn() -> Dom>))
-                )
-            } else {
-                None
+                    if !title.is_empty() && !body.is_empty() {
+                        Some(
+                            JigziHelp::new(
+                                title,
+                                body,
+                                "module-header"
+                            )
+                            .render(Some("help"), Rc::new(None::<fn() -> Dom>))
+                        )
+                    } else {
+                        None
+                    }
+                }
+                None => None
             }
         }))
         .child(ControllerDom::render(

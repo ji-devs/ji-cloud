@@ -10,7 +10,7 @@ use crate::{
         state::{ImageSearchKind, ImageSearchOptions, State as ImageSearchState},
     },
     tabs::MenuTabKind,
-    module::{_common::edit::entry::prelude::BaseExt, _groups::design::edit::design_ext::DesignExt},
+    module::{_common::edit::entry::prelude::BaseExt, _groups::design::edit::{design_ext::DesignExt, theme_background::ThemeBackground}},
     color_select::state::State as ColorPickerState,
 };
 
@@ -26,7 +26,7 @@ where
     pub colors_open: Mutable<bool>,
     pub color_state: Rc<ColorPickerState>,
     pub tab: Mutable<Tab>,
-    pub tab_index: Mutable<Option<usize>>,
+    pub tab_kind: Mutable<Option<MenuTabKind>>,
     _step: PhantomData<Step>,
 }
 
@@ -35,25 +35,25 @@ impl<Step, Base> CustomBackground<Step, Base> where
     Step: StepExt + 'static,
     Base: BaseExt<Step> + DesignExt + 'static,
 {
-    pub fn new(base: Rc<Base>, on_close: Box<dyn Fn()>) -> Rc<Self> {
+    pub fn new(state: Rc<ThemeBackground<Step, Base>>, on_close: Box<dyn Fn()>) -> Rc<Self> {
         let color_state = Rc::new(ColorPickerState::new(
-            base.get_theme().read_only(),
+            state.base.get_theme().read_only(),
             None,
             Some(String::from(STR_FILL_COLOR)),
-            Some(clone!(base => move |color| {
-                base.get_backgrounds().set_layer(Layer::One, Background::Color(color));
+            Some(clone!(state => move |color| {
+                state.base.get_backgrounds().set_layer(Layer::One, Background::Color(color));
             })),
         ));
 
-        let tab = Mutable::new(Tab::new(base.clone(), MenuTabKind::BackgroundImage));
+        let tab = Mutable::new(Tab::new(state.base.clone(), MenuTabKind::BackgroundImage));
 
         Rc::new(Self {
-            base,
+            base: state.base.clone(),
             on_close,
             colors_open: Mutable::new(false),
             color_state,
             tab,
-            tab_index: Mutable::new(None),
+            tab_kind: state.tab_kind.clone(),
             _step: PhantomData,
         })
     }

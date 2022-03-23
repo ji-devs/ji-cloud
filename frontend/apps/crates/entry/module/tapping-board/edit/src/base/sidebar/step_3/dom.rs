@@ -27,21 +27,10 @@ pub fn render(state: Rc<Step3>) -> Dom {
                         Some(_) => {
                             //otherwise, it means a trace is selected
                             Some(html!("menu-tabs", {
-                                // just for setting the tooltip index
-                                .future(
-                                    state
-                                        .tab_signal(selected_tab.signal())
-                                        .map(|tab|
-                                            tab
-                                                .map(|tab| tab.as_index())
-                                                .unwrap_or_default()
-                                        )
-                                        .dedupe()
-                                        .for_each(clone!(state => move |index| {
-                                            state.sidebar.tab_index.set(Some(index));
-                                            async move {}
-                                        }))
-                                )
+                                .future(selected_tab.signal_cloned().dedupe().for_each(clone!(state => move |kind| {
+                                    state.sidebar.tab_kind.set(kind.clone());
+                                    async move {}
+                                })))
                                 .children(&mut [
                                     //pass down our mutable so that we can switch tabs
                                     render_tab(state.clone(), MenuTabKind::Audio, selected_tab.clone()),

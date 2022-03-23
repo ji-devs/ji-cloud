@@ -114,14 +114,4 @@ impl Tab {
             Self::StickerText => MenuTabKind::Text,
         }
     }
-
-    pub fn as_index(&self) -> usize {
-        match self {
-            Self::BackgroundImage(_) => 0,
-            Self::FillColor(_) => 1,
-            Self::BgOverlay(_) => 2,
-            Self::StickerImage(_) => 3,
-            Self::StickerText => 4,
-        }
-    }
 }

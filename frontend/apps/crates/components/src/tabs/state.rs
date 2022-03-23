@@ -1,5 +1,6 @@
 use dominator_helpers::signals::{box_signal_fn, BoxSignalFn};
 use futures_signals::signal::Signal;
+use strum_macros::Display;
 use std::rc::Rc;
 
 pub struct MenuTab {
@@ -33,7 +34,8 @@ impl MenuTab {
     }
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Display)]
+#[strum(serialize_all = "kebab-case")]
 pub enum MenuTabKind {
     Answer,
     Audio,
@@ -48,32 +50,9 @@ pub enum MenuTabKind {
     Question,
     Select,
     Text,
+    #[strum(serialize = "text")]
     DualList,
     Theme,
     Tooltip,
     Video,
-}
-
-impl MenuTabKind {
-    pub const fn as_str(&self) -> &'static str {
-        match self {
-            Self::Answer => "answer",
-            Self::Audio => "audio",
-            Self::BackgroundImage => "background-image",
-            Self::FillColor => "fill-color",
-            Self::Feedback => "feedback",
-            Self::Image => "image",
-            Self::Instructions => "instructions",
-            Self::Label => "label",
-            Self::Overlay => "overlay",
-            Self::PlaySettings => "play-settings",
-            Self::Question => "question",
-            Self::Select => "select",
-            Self::Text => "text",
-            Self::DualList => "text", // Same str value as Self::Text
-            Self::Theme => "theme",
-            Self::Tooltip => "tooltip",
-            Self::Video => "video",
-        }
-    }
 }

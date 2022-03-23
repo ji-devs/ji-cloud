@@ -9,6 +9,7 @@ use wasm_bindgen_futures::spawn_local;
 use std::marker::PhantomData;
 use std::rc::Rc;
 use crate::module::_groups::design::edit::design_ext::DesignExt;
+use crate::tabs::MenuTabKind;
 use crate::theme_selector::state::{ThemeSelector, ThemeSelectorCallbacks};
 use crate::module::_common::edit::entry::prelude::BaseExt;
 
@@ -23,6 +24,7 @@ pub struct ThemeBackground<Step, Base> where
     pub base: Rc<Base>,
     pub theme_selector: Rc<ThemeSelector>,
     pub custom_background: Mutable<Option<Rc<CustomBackground<Step, Base>>>>,
+    pub tab_kind: Mutable<Option<MenuTabKind>>,
     _step: PhantomData<Step>,
 }
 
@@ -30,7 +32,7 @@ impl<Step, Base> ThemeBackground<Step, Base> where
     Step: StepExt + 'static,
     Base: BaseExt<Step> + DesignExt + 'static,
 {
-    pub fn new(base: Rc<Base>) -> Rc<Self> {
+    pub fn new(base: Rc<Base>, tab_kind: Mutable<Option<MenuTabKind>>) -> Rc<Self> {
 
         let callbacks = ThemeSelectorCallbacks::new(clone!(base => move |theme_id| {
             base.set_theme(theme_id);
@@ -62,6 +64,7 @@ impl<Step, Base> ThemeBackground<Step, Base> where
             base,
             theme_selector,
             custom_background: Mutable::new(None),
+            tab_kind,
             _step: PhantomData,
         })
     }

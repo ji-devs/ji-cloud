@@ -38,8 +38,8 @@ impl<Step, Base> CustomBackground<Step, Base> where
                 }))
             }))
             .child(html!("menu-tabs", {
-                .future(state.tab.signal_ref(|tab| tab.as_index()).dedupe().for_each(clone!(state => move |index| {
-                    state.tab_index.set(Some(index));
+                .future(state.tab.signal_ref(|tab| tab.kind()).dedupe().for_each(clone!(state => move |kind| {
+                    state.tab_kind.set(Some(kind));
                     async move {}
                 })))
                 .children(&mut [
