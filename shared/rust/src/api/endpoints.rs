@@ -60,3 +60,6 @@ pub mod locale;
 
 /// Pdf endpoints
 pub mod pdf;
+
+/// Learning Path endpoints
+pub mod learning_path;

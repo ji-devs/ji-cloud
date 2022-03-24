@@ -4,8 +4,8 @@ use crate::{
 };
 use http::StatusCode;
 use shared::domain::{
+    additional_resource::{AdditionalResourceCreateRequest, ResourceContent},
     image::ImageId,
-    jig::additional_resource::{AdditionalResourceCreateRequest, ResourceContent},
     meta::ResourceTypeId,
 };
 use std::str::FromStr;

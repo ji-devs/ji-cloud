@@ -2,7 +2,7 @@ create table learning_path_data
 (
     id                      uuid                     default uuid_generate_v1mc() not null    
         primary key,
-    draft_or_live           smallint                 not null,
+    draft_or_live           smallint,
     display_name            text                     default ''::text             not null,
     language                text                                                  not null,
     description             text                     default ''::text             not null,
@@ -20,35 +20,34 @@ create table learning_path
     id           uuid     default uuid_generate_v1mc() not null
         primary key,
     creator_id   uuid
-        references "user"
+        references "user" (id)
             on delete cascade,
     author_id    uuid
-        references "user"
+        references "user" (id)
             on delete cascade,
     live_id      uuid                                  not null
-        references learning_path_data
+        references learning_path_data (id)
             on delete restrict,
     draft_id     uuid                                  not null
-        references learning_path_data
+        references learning_path_data (id)
             on delete restrict,
     published_at timestamp with time zone,
     likes  bigint   default 0                    not null
-        constraint learning_path_liked_count_check
             check (likes >= 0),
     plays  bigint   default 0                    not null
-        constraint learning_path_play_count_check
             check (plays >= 0)
-    
+    constraint jig_check check (live_id <> draft_id)
 );
 
 -- JIGs added to Learning Paths
-create table learning_path_jig (
+create table learning_path_data_jig (
     learning_path_data_id   uuid                        not null 
-        references "learning_path_data"
+        references learning_path_data(id)
             on delete cascade,
     jig_id    uuid                                      not null
-        references "jig"
-            on delete cascade
+        references "jig" (id)
+            on delete cascade, 
+    unique (learning_path_data_id, jig_id)
 );
 
 create table learning_path_data_resource
@@ -56,48 +55,50 @@ create table learning_path_data_resource
     id               uuid  default uuid_generate_v1mc() not null
         primary key,
     learning_path_data_id      uuid                               not null
-        references learning_path_data
+        references learning_path_data (id)
             on delete cascade,
     display_name     text                               not null,
     resource_type_id uuid                               not null
         references resource_type,
     resource_content jsonb default '{}'::jsonb          not null,
-    constraint learning_path_data_resource_unique
         unique (learning_path_data_id, resource_content, resource_type_id)
 );
 
 create table learning_path_data_affiliation
 (
     learning_path_data_id    uuid not null
-        references learning_path_data
+        references learning_path_data (id)
             on delete cascade,
     affiliation_id uuid not null
-        references affiliation
+        references affiliation (id), 
+        unique (learning_path_data_id, affiliation_id)
 );
 
 create table learning_path_data_age_range
 (
     learning_path_data_id  uuid not null
-        references learning_path_data
+        references learning_path_data (id)
             on delete cascade,
     age_range_id uuid not null
-        references age_range
+        references age_range (id), 
+        unique (learning_path_data_id, age_range_id)
 );
 
 create table learning_path_data_category
 (
     learning_path_data_id uuid not null
-        references learning_path_data
+        references learning_path_data(id)
             on delete cascade,
     category_id uuid not null
-        references category
-            on delete cascade
+        references category(id)
+            on delete cascade,
+        unique (learning_path_data_id, category_id)
 );
 
 create table learning_path_like
 (
     learning_path_id     uuid                                   not null
-        references learning_path
+        references learning_path (id)
             on delete cascade,
     user_id    uuid                                   not null,
     created_at timestamp with time zone default now() not null,

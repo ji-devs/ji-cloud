@@ -1,10 +1,10 @@
 use crate::translate::translate_text;
 use anyhow::Context;
-use serde_json::{json, value::Value};
+use serde_json::value::Value;
 use shared::domain::{
+    additional_resource::{AdditionalResource, AdditionalResourceId as AddId, ResourceContent},
     category::CategoryId,
     jig::{
-        additional_resource::{AdditionalResource, AdditionalResourceId as AddId, ResourceContent},
         module::{body::ThemeId, ModuleId},
         AudioBackground, AudioEffects, AudioFeedbackNegative, AudioFeedbackPositive,
         DeleteUserJigs, DraftOrLive, JigAdminData, JigData, JigFocus, JigId, JigPlayerSettings,
@@ -1138,8 +1138,6 @@ returning id
     .fetch_one(&mut *txn)
     .await?
     .id;
-
-    println!("after in clone");
 
     update_draft_or_live(txn, new_id, draft_or_live).await?;
 

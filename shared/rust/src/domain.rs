@@ -31,12 +31,14 @@ macro_rules! into_i16_index {
     };
 }
 
+pub mod additional_resource;
 pub mod admin;
 pub mod animation;
 pub mod audio;
 pub mod category;
 pub mod image;
 pub mod jig;
+pub mod learning_path;
 pub mod locale;
 pub mod media;
 pub mod meta;

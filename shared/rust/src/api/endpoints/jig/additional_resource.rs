@@ -1,7 +1,7 @@
 use crate::{
     api::Method,
     domain::{
-        jig::additional_resource::{
+        additional_resource::{
             AdditionalResource, AdditionalResourceCreateRequest, AdditionalResourceId,
             AdditionalResourceUpdateRequest,
         },

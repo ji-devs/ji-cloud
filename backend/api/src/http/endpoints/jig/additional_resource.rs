@@ -5,10 +5,8 @@ use actix_web::{
 use shared::{
     api::{endpoints::jig::additional_resource, ApiEndpoint},
     domain::{
-        jig::{
-            additional_resource::{AdditionalResource, AdditionalResourceId},
-            DraftOrLive, JigId,
-        },
+        additional_resource::{AdditionalResource, AdditionalResourceId},
+        jig::{DraftOrLive, JigId},
         CreateResponse,
     },
 };

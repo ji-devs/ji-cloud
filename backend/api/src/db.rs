@@ -3,6 +3,7 @@ pub(crate) mod audio;
 pub(crate) mod category;
 pub(crate) mod image;
 pub(crate) mod jig;
+pub(crate) mod learning_path;
 pub(crate) mod locale;
 pub(crate) mod media;
 pub(crate) mod meta;
@@ -13,6 +14,7 @@ pub(crate) mod user;
 use core::config::DB_POOL_CONNECTIONS;
 use shared::domain::{
     category::CategoryId,
+    jig::JigId,
     meta::{
         AffiliationId, AgeRangeId, AnimationStyleId, ImageStyleId, ImageTagIndex, ResourceTypeId,
         SubjectId,
@@ -59,6 +61,10 @@ pub async fn get_pool(connect_options: PgConnectOptions) -> anyhow::Result<PgPoo
 
 trait Metadata: Into<Uuid> + Copy {
     const TABLE: &'static str;
+}
+
+impl Metadata for JigId {
+    const TABLE: &'static str = "jig";
 }
 
 impl Metadata for AffiliationId {
