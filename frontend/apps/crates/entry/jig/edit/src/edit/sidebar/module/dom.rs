@@ -12,7 +12,6 @@ use shared::domain::jig::ModuleKind;
 use std::rc::Rc;
 use std::str::FromStr;
 use utils::prelude::*;
-use wasm_bindgen::prelude::*;
 
 const STR_DELETE_TITLE: &'static str = "Warning";
 const STR_DELETE_CONTENT: &'static str = "Are you sure you want to delete this activity?";
@@ -124,21 +123,9 @@ impl ModuleDom {
                         .property_signal("incomplete", is_incomplete_signal)
                         .property("activeModuleKind", state.kind_str())
                         .property("coverOnly", state.index == 0)
-                        .event_with_options(
-                            &EventOptions::preventable(),
-                            |evt:events::DragOver| {
-                                if let Some(data_transfer) = evt.data_transfer() {
-                                    if data_transfer.types().index_of(&JsValue::from_str("module_kind"), 0) != -1 {
-                                        evt.prevent_default();
-                                    }
-                                }
-                            }
-                        )
-                        .event_with_options(&EventOptions::preventable(), clone!(state => move |evt:events::Drop| {
-                            evt.prevent_default(); // needed so that Firefox doesn't open the image
-                            if let Some(data_transfer) = evt.data_transfer() {
-                                if let Some(module_kind) = data_transfer.get_data("module_kind").ok() {
-                                    let kind:ModuleKind = ModuleKind::from_str(&module_kind).unwrap_ji();
+                        .event(clone!(state => move |evt:events::CustomDrop| {
+                            if let Some(detail) = evt.detail().as_string() {
+                                if let Ok(kind) = ModuleKind::from_str(&detail) {
                                     actions::on_module_kind_drop(
                                         Rc::clone(&state),
                                         kind

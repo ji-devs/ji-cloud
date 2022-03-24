@@ -70,10 +70,18 @@ export class _ extends LitElement {
                     justify-content: center;
                     align-items: center;
                 }
-                img-ui {
+                ::slotted([slot=stationery]) {
                     cursor: grab;
                 }
-
+                ::slotted([slot=dragged]) {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    z-index: 1;
+                    cursor: grabbing;
+                    /* for elementFromPoint not to return the dragged element */
+                    pointer-events: none;
+                }
                 .overlay {
                     display: none;
                 }
@@ -97,22 +105,11 @@ export class _ extends LitElement {
         ];
     }
 
-    onEnter() {
-        this.hover = true;
-    }
-
-    onLeave() {
-        this.hover = false;
-    }
-
     @property({ reflect: true })
     module: ModuleKind = "memory";
 
     @property({ type: Boolean })
     drag: boolean = false;
-
-    @property({ type: Boolean })
-    hover: boolean = false;
 
     @property({ type: Boolean, reflect: true })
     private overlayShown: boolean = false;
@@ -125,21 +122,13 @@ export class _ extends LitElement {
     }
 
     render() {
-        const { module, drag, hover } = this;
-
-        const iconSuffix = drag ? `-drag` : hover ? `-hover` : ``;
-
-        const iconPath = `entry/jig/modules/large/${module}${iconSuffix}.svg`;
         return html`
-            <section
-                @mouseenter="${this.onEnter}"
-                @mouseleave="${this.onLeave}"
-                @click=${this.showOverlay}
-            >
+            <section @click=${this.showOverlay}>
                 <div class="top">
-                    <img-ui path="${iconPath}"></img-ui>
+                    <slot name="stationery"></slot>
+                    <slot name="dragged"></slot>
                 </div>
-                <div class="bottom">${STR_MODULE_DISPLAY_NAME[module]}</div>
+                <div class="bottom">${STR_MODULE_DISPLAY_NAME[this.module]}</div>
             </section>
             <div class="overlay">
                 <p>${STR_DRAG_ME}</p>

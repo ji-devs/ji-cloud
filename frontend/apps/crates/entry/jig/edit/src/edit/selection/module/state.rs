@@ -1,13 +1,33 @@
-use futures_signals::signal::Mutable;
+use std::{rc::Rc, cell::RefCell};
+
+use futures_signals::{signal::{Mutable, Signal}, map_ref};
+use shared::domain::jig::ModuleKind;
+use utils::drag::Drag;
+use web_sys::HtmlElement;
 
 pub struct State {
-    pub is_dragging: Mutable<bool>,
+    pub kind: ModuleKind,
+    pub drag: Mutable<Option<Rc<Drag>>>,
+    pub element_hovered: Rc<RefCell<Option<HtmlElement>>>,
+    pub hover: Mutable<bool>,
 }
 
 impl State {
-    pub fn new() -> Self {
+    pub fn new(kind: ModuleKind) -> Self {
         Self {
-            is_dragging: Mutable::new(false),
+            kind,
+            drag: Mutable::new(None),
+            hover: Mutable::new(false),
+            element_hovered: Rc::new(RefCell::new(None)),
+        }
+    }
+
+    pub fn hover_or_drag_signal(self: &Rc<Self>) -> impl Signal<Item = bool> {
+        map_ref! {
+            let hover = self.hover.signal(),
+            let drag = self.drag.signal_cloned() => move {
+                *hover || drag.is_some()
+            }
         }
     }
 }

@@ -47,7 +47,9 @@ web-sys = { version = "0.3.55", features = [
     'File',
     'DomRect',
     'ScrollIntoViewOptions',
-    'ScrollBehavior'
+    'ScrollBehavior',
+    'CustomEvent',
+    'CustomEventInit',
 ] }
 wasm-bindgen-futures = "0.4.28"
 htmlescape = "0.3.1"

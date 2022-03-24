@@ -95,22 +95,22 @@ export class _ extends LitElement {
     @query(".wrapper")
     wrapper!: HTMLElement;
 
-    addDragClass() {
-        this.wrapper.classList.add("drag-over");
-    }
-    removeDragClass() {
-        this.wrapper.classList.remove("drag-over");
+    protected firstUpdated() {
+        this.addEventListener("custom-drag-enter", () => {
+            this.wrapper.classList.add("drag-over");
+        });
+        this.addEventListener("custom-drag-leave", _e => {
+            this.wrapper.classList.remove("drag-over");
+        });
+        this.addEventListener("custom-drop", () => {
+            this.wrapper.classList.remove("drag-over");
+        });
     }
 
     // prettier-ignore
     render() {
         return html`
-            <div
-                class="wrapper"
-                @dragover="${this.addDragClass}"
-                @dragleave="${this.removeDragClass}"
-                @drop="${this.removeDragClass}"
-            >
+            <div class="wrapper">
                 ${this.state === "empty"
                     ? html`
                           <!-- keep in one line -->
