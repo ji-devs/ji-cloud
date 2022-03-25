@@ -12,7 +12,7 @@ use utils::{
     routes::{AdminCurationRoute, AdminRoute, Route},
 };
 
-use super::{jig::state::jig::EditableJig, Curation, FetchMode};
+use super::{Curation, EditableJig, FetchMode};
 
 impl Curation {
     pub fn load_data(self: &Rc<Self>) {

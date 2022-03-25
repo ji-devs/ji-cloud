@@ -1,9 +1,11 @@
-mod state;
-mod dom;
 mod actions;
+mod dom;
+mod editable_jig;
+mod state;
 
-mod table;
 mod jig;
+mod table;
 
-pub use state::*;
 pub use dom::*;
+pub use editable_jig::*;
+pub use state::*;
