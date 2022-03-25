@@ -45,7 +45,7 @@ impl<RawData: RawDataExt, E: ExtraExt> CustomBackground<RawData, E> {
         };
 
         let callbacks = ImageSearchCallbacks::new(Some(clone!(base => move |image| {
-            base.background.set(Some(Background::Image(image)))
+            base.set_bg(Background::Image(image));
         })));
         let background_state = Rc::new(ImageSearchState::new(opts, callbacks));
 
