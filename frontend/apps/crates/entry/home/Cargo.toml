@@ -28,7 +28,7 @@ web-sys = { version = "0.3.55", features = [
     'Response',
     'RequestMode',
     'Headers',
-    'Document', 
+    'Document',
     'DocumentFragment',
     'HtmlTemplateElement',
     'Window',
