@@ -4,10 +4,10 @@
     "name": "app",
     "version": "0.1.0",
     "scripts": {
-        "build:watch": "cross-env RUSTUP_TOOLCHAIN=nightly rollup --config rollup.local.js --watch",
-        "build:watch:backtrace": "cross-env RUSTUP_TOOLCHAIN=nightly RUSTFLAGS=\"-Z macro-backtrace\" rollup --config rollup.local.js --watch",
-        "build:release": "cross-env RUSTUP_TOOLCHAIN=nightly rollup --config rollup.release.js",
-        "build:sandbox": "cross-env RUSTUP_TOOLCHAIN=nightly rollup --config rollup.sandbox.js"
+        "build:watch": "rollup --config rollup.local.js --watch",
+        "build:watch:backtrace": "cross-env RUSTFLAGS=\"-Z macro-backtrace\" rollup --config rollup.local.js --watch",
+        "build:release": "rollup --config rollup.release.js",
+        "build:sandbox": "rollup --config rollup.sandbox.js"
     },
     "dependencies": {
         "@rollup/plugin-node-resolve": "^13.1.1",
