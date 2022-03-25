@@ -3,11 +3,7 @@ use futures_signals::signal::Mutable;
 use shared::domain::jig::JigId;
 use std::rc::Rc;
 
-use crate::curation::Curation;
-
-use self::jig::EditableJig;
-
-pub mod jig;
+use crate::curation::{Curation, EditableJig};
 
 pub struct CurationJig {
     pub jig_id: JigId,

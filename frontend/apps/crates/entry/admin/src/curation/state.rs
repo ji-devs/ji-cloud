@@ -5,7 +5,7 @@ use futures_signals::{signal::Mutable, signal_vec::MutableVec};
 use shared::domain::meta::{Affiliation, AgeRange};
 use utils::routes::AdminCurationRoute;
 
-use super::jig::state::jig::EditableJig;
+use super::EditableJig;
 
 pub struct Curation {
     pub route: Mutable<AdminCurationRoute>,

@@ -1,4 +1,4 @@
-use crate::curation::jig::state::jig::EditableJig;
+use crate::curation::EditableJig;
 
 use super::state::*;
 use components::module::_common::thumbnail::ModuleThumbnail;
