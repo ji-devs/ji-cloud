@@ -1,4 +1,4 @@
-name: Entry - App - Release 
+name: Entry - App - Release
 
 on:
   push:
@@ -26,7 +26,7 @@ jobs:
       - name: checkout repo
         uses: actions/checkout@v1
 
-      - name: Extract label 
+      - name: Extract label
         shell: bash
         run: echo "##[set-output name=label;]$(echo \"[${GITHUB_REF#refs/heads/} - module/${{ matrix.app }} - app]\")"
         id: extract_label
@@ -38,8 +38,9 @@ jobs:
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
+      # https://github.com/rust-lang/rust/issues/95267
       - name: make nightly the default
-        run: rustup default nightly
+        run: rustup default nightly-2022-03-22
 
       - name: install node
         uses: actions/setup-node@v2
@@ -51,28 +52,28 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: extract cargo-make to folder 
+      - name: extract cargo-make to folder
         run: unzip -j cargo-make.zip -d cargo-make
-      
+
       - name: add cargo-make to path
         uses: dakom/actions-path@master
         with:
           path: ${{github.workspace}}/cargo-make
 
       - name: install npm deps
-        run: npm ci 
+        run: npm ci
         working-directory: "./frontend/apps"
 
       - name: install npm deps (build-utils)
-        run: npm ci 
+        run: npm ci
         working-directory: "./frontend/build-utils"
 
-      - name: build 
+      - name: build
         run: cargo make release "${{ matrix.app }}"
         working-directory: "./frontend/apps"
         env:
           LOCAL_CDN_FRONTEND_DIR: ${{ github.workspace }}/frontend
-      
+
       - name: install google cloud sdk
         uses: google-github-actions/setup-gcloud@v0
         with:
@@ -81,7 +82,7 @@ jobs:
 
       - name: deploy to google cloud
         run: gsutil -m rsync -d -r frontend/apps/dist/${{ matrix.app }}/js gs://ji-cloud-frontend-origin-eu-001/${{ matrix.app }}/js
-        
+
       - name: Notify slack of all status
         uses: pullreminders/slack-action@master
         with:
