@@ -1,6 +1,7 @@
 name: Entry - App - Sandbox
 
 on:
+  workflow_dispatch:
   push:
     branches: [ sandbox ]
     paths:
