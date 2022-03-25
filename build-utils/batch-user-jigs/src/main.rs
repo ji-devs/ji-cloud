@@ -19,6 +19,7 @@ use shared::{
     },
 };
 use simplelog::*;
+use std::collections::HashSet;
 use std::sync::Arc;
 use std::{future::Future, process::exit};
 use structopt::StructOpt;
@@ -60,13 +61,17 @@ async fn main() {
 }
 
 async fn get_futures(ctx: Arc<Context>) -> Vec<impl Future> {
+    let mut mem = Arc::new(Mutex::new(HashSet::new()));
+
     let mut futures = Vec::new();
 
     async fn do_browse(ctx: &Context, page: usize) -> Result<JigBrowseResponse, reqwest::Error> {
+        let ji_tap = "9b819dce-5e2a-11ec-9e39-bb74dda33501";
         let url = format!(
-            "{}{}?authorId=c3666fb2-827b-11eb-979f-0f06b8a150e4&jigFocus=modules&page={}&draftOrLive=live",
+            "{}{}?authorId={}&jigFocus=modules&page={}&draftOrLive=live",
             ctx.opts.get_remote_target().api_url(),
             endpoints::jig::Browse::PATH,
+            ji_tap,
             page
         );
         let res = ctx
@@ -85,7 +90,6 @@ async fn get_futures(ctx: Arc<Context>) -> Vec<impl Future> {
         res.json().await
     }
     let JigBrowseResponse {
-        jigs,
         pages,
         total_jig_count,
         ..
