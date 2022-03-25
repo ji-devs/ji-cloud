@@ -19,34 +19,17 @@ pub fn render(state: Rc<State>) -> Dom {
                             state.toggle_autoplay();
                         }),
                     )),
-                    None,
-                    Some(SettingsButton::new_click(
-                        SettingsButtonKind::ContinueNextActivity,
-                        clone!(state => move || {
-                            state.base.play_settings.done_action.signal_ref(|done_action| {
-                                matches!(done_action, Some(DoneAction::Next))
-                            })
-                        }),
-                        clone!(state => move || {
-                            state.set_unset_next_action(Some(DoneAction::Next));
-                        }),
-                    )),
-                    Some(SettingsButton::new_click(
-                        SettingsButtonKind::Loop,
-                        clone!(state => move || {
-                            state.base.play_settings.done_action.signal_ref(|done_action| {
-                                matches!(done_action, Some(DoneAction::Loop))
-                            })
-                        }),
-                        clone!(state => move || {
-                            state.set_unset_next_action(Some(DoneAction::Loop));
-                        }),
-                    )),
-                ],
-            ),
-            (
-                LineKind::VideoFeatures,
-                vec![
+                    // Some(SettingsButton::new_click(
+                    //     SettingsButtonKind::Loop,
+                    //     clone!(state => move || {
+                    //         state.base.play_settings.done_action.signal_ref(|done_action| {
+                    //             matches!(done_action, Some(DoneAction::Loop))
+                    //         })
+                    //     }),
+                    //     clone!(state => move || {
+                    //         state.set_unset_next_action(Some(DoneAction::Loop));
+                    //     }),
+                    // )),
                     Some(SettingsButton::new_click(
                         SettingsButtonKind::VideoCaptions,
                         clone!(state => move || {
@@ -63,6 +46,33 @@ pub fn render(state: Rc<State>) -> Dom {
                         }),
                         clone!(state => move || {
                             state.toggle_muted();
+                        }),
+                    )),
+                ],
+            ),
+            (
+                LineKind::Next,
+                vec![
+                    Some(SettingsButton::new_click(
+                        SettingsButtonKind::ContinueClick,
+                        clone!(state => move || {
+                            state.base.play_settings.done_action.signal_ref(|done_action| {
+                                matches!(done_action, None)
+                            })
+                        }),
+                        clone!(state => move || {
+                            state.set_unset_next_action(None);
+                        }),
+                    )),
+                    Some(SettingsButton::new_click(
+                        SettingsButtonKind::ContinueAutomatically,
+                        clone!(state => move || {
+                            state.base.play_settings.done_action.signal_ref(|done_action| {
+                                matches!(done_action, Some(DoneAction::Next))
+                            })
+                        }),
+                        clone!(state => move || {
+                            state.set_unset_next_action(Some(DoneAction::Next));
                         }),
                     )),
                 ],

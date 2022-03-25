@@ -34,7 +34,7 @@ export type Kind =
     | "autoplay"
     | "mute"
     | "loop"
-    | "continue-next-activity";
+    | "continue-automatically";
 
 const OneImage: Set<Kind> = new Set([
     "n_choices",
@@ -66,7 +66,7 @@ const STR_LABEL: Record<Kind, string> = {
     "autoplay": "start automatically",
     "mute": "play without sound",
     "loop": "play on loop",
-    "continue-next-activity": "continue to\nnext activity\nautomatically",
+    "continue-automatically": "automatically after video",
 };
 
 @customElement("module-settings-button")
