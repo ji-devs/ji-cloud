@@ -143,7 +143,7 @@ fn render_bg(bg: &Background) -> Option<Dom> {
             .style("position", "absolute")
             .style("top", "0")
             .style("left", "0")
-            .style("display", "block")
+            .style("object-fit", "contain")
             .style("width", "100%")
             .style("height", "100%")
             .property("id", image.id.0.to_string())
