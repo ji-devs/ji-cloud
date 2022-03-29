@@ -9,7 +9,7 @@ use shared::{
     domain::{
         jig::{
             DeleteUserJigs, DraftOrLive, JigBrowseResponse, JigCountResponse, JigCreateRequest,
-            JigId, JigLikedResponse, JigSearchResponse, LiteModule, PrivacyLevel, UserOrMe,
+            JigId, JigLikedResponse, JigSearchResponse, PrivacyLevel, UserOrMe,
         },
         CreateResponse,
     },

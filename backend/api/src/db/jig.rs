@@ -1492,6 +1492,19 @@ select exists(select 1 from user_scope where user_id = $1 and scope = any($2)) a
 
     Ok(true)
 }
+pub async fn is_logged_in(db: &PgPool, user_id: Uuid) -> Result<(), error::Auth> {
+    sqlx::query!(
+        r#"
+select exists(select 1 from user_scope where user_id = $1) as "authed!"
+"#,
+        user_id,
+    )
+    .fetch_one(db)
+    .await?
+    .authed;
+
+    Ok(())
+}
 
 pub async fn authz(db: &PgPool, user_id: Uuid, jig_id: Option<JigId>) -> Result<(), error::Auth> {
     let authed = match jig_id {
