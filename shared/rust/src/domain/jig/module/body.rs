@@ -477,6 +477,24 @@ pub struct Transform {
     pub origin: Vec3,
 }
 
+impl Transform {
+    /// Create a new Transform
+    pub fn identity() -> Self {
+        Self {
+            translation: Vec3([0.0, 0.0, 0.0]),
+            rotation: Vec4([0.0, 0.0, 0.0, 1.0]),
+            scale: Vec3([1.0, 1.0, 1.0]),
+            origin: Vec3([0.0, 0.0, 0.0]),
+        }
+    }
+}
+
+impl Default for Transform {
+    fn default() -> Self {
+        Self::identity()
+    }
+}
+
 /// Theme Ids. Used in various modules
 /// See the frontend extension trait for more info
 #[derive(Clone, Copy, Eq, PartialEq, Serialize, Deserialize, Debug)]

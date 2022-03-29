@@ -14,13 +14,10 @@
 
 use super::mat4::Matrix4;
 use crate::resize::ResizeInfo;
-use shared::domain::jig::module::body::{Transform, Vec3, Vec4};
+use shared::domain::jig::module::body::Transform;
 
 pub trait TransformExt: Clone {
     fn to_mat4(&self) -> Matrix4;
-
-    /// Create a new Transform
-    fn identity() -> Self;
 
     /// rotate around the z axis, in radians
     fn rotate_z(&mut self, angle: f64);
@@ -149,15 +146,6 @@ impl TransformExt for Transform {
         t.set_translation_identity();
         t.rotation.0 = super::quat::invert(&t.rotation.0);
         t.to_mat4().as_matrix_string()
-    }
-    /// Create a new Transform
-    fn identity() -> Self {
-        Self {
-            translation: Vec3([0.0, 0.0, 0.0]),
-            rotation: Vec4([0.0, 0.0, 0.0, 1.0]),
-            scale: Vec3([1.0, 1.0, 1.0]),
-            origin: Vec3([0.0, 0.0, 0.0]),
-        }
     }
 
     fn set_scale_identity(&mut self) {

@@ -3,8 +3,11 @@ use crate::domain::jig::module::body::{
 };
 use serde::{Deserialize, Serialize};
 
+/// Default text for `Text`
+pub const DEFAULT_TEXT_VALUE: &str = "Shalom שָׁלוֹם";
+
 /// The base content for design modules that don't need custom Sticker wrappers
-#[derive(Default, Clone, Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct BaseContent {
     /// The instructions for the module.
     pub instructions: Instructions,
@@ -17,6 +20,21 @@ pub struct BaseContent {
 
     /// Stickers
     pub stickers: Vec<Sticker>,
+}
+
+impl Default for BaseContent {
+    fn default() -> Self {
+        Self {
+            instructions: Default::default(),
+            theme: Default::default(),
+            backgrounds: Default::default(),
+            stickers: vec![
+                Sticker::Text(
+                    Default::default()
+                )
+            ]
+        }
+    }
 }
 
 #[derive(Clone, Default, Serialize, Deserialize, Debug)]
@@ -63,6 +81,34 @@ pub struct Text {
     pub value: String,
     /// The Transform
     pub transform: Transform,
+}
+
+impl Default for Text {
+    fn default() -> Self {
+        Self::from_str(DEFAULT_TEXT_VALUE)
+    }
+}
+
+impl Text {
+    // value is the ready slate json and str is just a string of text
+
+    /// Create a new Text from a str
+    pub fn from_str(text: &str) -> Self {
+        Self::from_value(Self::value_from_str(text))
+    }
+
+    /// Create a new Text from value
+    pub fn from_value(value: String) -> Self {
+        Self {
+            value,
+            transform: Transform::identity(),
+        }
+    }
+
+    /// Get a value string from a str
+    pub fn value_from_str(text: &str) -> String {
+        format!(r#"{{"version":"0.1.0","content":[{{"children":[{{"text":"{}","element":"H1"}}]}}]}}"#, text)
+    }
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]

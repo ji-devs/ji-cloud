@@ -3,7 +3,7 @@ use crate::stickers::video::state::Video;
 use super::{
     sprite::{ext::*, state::*},
     state::*,
-    text::{ext::*, state::*},
+    text::state::*,
     video::ext::*,
 };
 use dominator::clone;
@@ -96,7 +96,7 @@ impl<T: AsSticker> Stickers<T> {
     pub fn add_text(_self: Rc<Self>, value: String) {
         _self.add_sticker(T::new_from_sticker(Sticker::Text(Rc::new(Text::new(
             _self.text_editor.clone(),
-            &RawText::new(value),
+            &RawText::from_value(value),
             Some(clone!(_self => move |_| {
                 _self.call_change();
             })),

@@ -1,5 +1,4 @@
 use crate::hebrew_buttons::HebrewButtons;
-use crate::text_editor::config::STR_NEW_TEXT;
 use crate::text_editor::font_css_converter::font_to_css;
 use crate::text_editor::wysiwyg_types::ControlsChange;
 use dominator::{clone, html, Dom};
@@ -7,6 +6,7 @@ use futures_signals::{signal::SignalExt, signal_vec::SignalVecExt};
 use std::rc::Rc;
 use strum::IntoEnumIterator;
 use utils::prelude::*;
+use shared::domain::jig::module::body::_groups::design::{Text as RawText, DEFAULT_TEXT_VALUE};
 
 use super::super::super::state::State;
 use super::super::super::wysiwyg_types::{Align, ElementType, Font, Weight, BOLD_WEIGHT};
@@ -45,7 +45,7 @@ pub fn render(state: Rc<State>) -> Dom {
                     if let Some(on_new_text) = state.callbacks.on_new_text.as_ref() {
                         //TODO - this should create a slate value
                         //with the current settings and only replace the text
-                        (on_new_text) (&State::text_to_value(STR_NEW_TEXT));
+                        (on_new_text) (&RawText::value_from_str(DEFAULT_TEXT_VALUE));
                     }
                 }))
             }),

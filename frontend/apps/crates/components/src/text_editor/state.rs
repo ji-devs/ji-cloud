@@ -55,10 +55,6 @@ impl State {
         _self
     }
 
-    pub fn text_to_value(text: &str) -> String {
-        format!("{{\"version\":\"0.1.0\",\"content\":[{{\"children\":[{{\"text\":\"{}\",\"element\":\"H1\"}}]}}]}}", text)
-    }
-
     pub fn set_value(&self, value: Option<String>) {
         self.value.replace(value);
         if let Some(wysiwyg_ref) = &*self.wysiwyg_ref.lock_ref() {
