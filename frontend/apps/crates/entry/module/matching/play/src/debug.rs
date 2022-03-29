@@ -78,6 +78,16 @@ impl DebugSettings {
                                                 })),
                                             },
                                         ),
+                                        Mode::Images => RawCardPair(
+                                            RawCard {
+                                                audio: None,
+                                                card_content: RawCardContent::Image(None),
+                                            },
+                                            RawCard {
+                                                audio: None,
+                                                card_content: RawCardContent::Image(None),
+                                            },
+                                        ),
                                         _ => RawCardPair(
                                             RawCard {
                                                 audio: None,

@@ -229,8 +229,11 @@ pub enum Mode {
     #[allow(missing_docs)]
     Synonyms = 6,
 
-    /// Translate from one language to another.
+    /// Translate from one language to another
     Translate = 7,
+
+    /// Pairs of cards with images only
+    Images = 8,
 }
 
 impl Mode {
@@ -251,12 +254,25 @@ impl Mode {
                     })
                     .is_none()
             }
+            // Image/Image pairs
+            Self::Images => {
+                pairs
+                    .iter()
+                    .find(|pair| {
+                        // Neither card should be empty, and both cards must be Image variants.
+                        pair.0.is_empty()
+                            || pair.1.is_empty()
+                            || !matches!(pair.0.card_content, CardContent::Image(_))
+                            || !matches!(pair.1.card_content, CardContent::Image(_))
+                    })
+                    .is_none()
+            }
             // Text/Text pairs
             _ => {
                 pairs
                     .iter()
                     .find(|pair| {
-                        // Neither card should be empty, and both cards must be Image variants.
+                        // Neither card should be empty, and both cards must be Text variants.
                         pair.0.is_empty()
                             || pair.1.is_empty()
                             || !matches!(pair.0.card_content, CardContent::Text(_))
@@ -279,6 +295,7 @@ impl ModeExt for Mode {
         vec![
             Self::Duplicate,
             Self::WordsAndImages,
+            Self::Images,
             Self::BeginsWith,
             Self::Lettering,
             Self::Riddles,
@@ -298,6 +315,7 @@ impl ModeExt for Mode {
             Self::Opposites => "opposites",
             Self::Synonyms => "synonyms",
             Self::Translate => "translate",
+            Self::Images => "images",
         }
     }
 
@@ -310,6 +328,7 @@ impl ModeExt for Mode {
         const STR_OPPOSITES: &'static str = "Opposites";
         const STR_SYNONYMS: &'static str = "Synonyms";
         const STR_TRANSLATE: &'static str = "Translation";
+        const STR_IMAGES: &'static str = "Images";
 
         match self {
             Self::Duplicate => STR_DUPLICATE,
@@ -320,6 +339,7 @@ impl ModeExt for Mode {
             Self::Opposites => STR_OPPOSITES,
             Self::Synonyms => STR_SYNONYMS,
             Self::Translate => STR_TRANSLATE,
+            Self::Images => STR_IMAGES,
         }
     }
 }

@@ -12,7 +12,7 @@ export class _ extends LitElement {
                 }
                 section {
                     display: grid;
-                    grid-template-columns: repeat(auto-fit, 353px);
+                    grid-template-columns: repeat(auto-fill, 353px);
                     justify-content: center;
                     width: 100%;
                     margin: 24px;

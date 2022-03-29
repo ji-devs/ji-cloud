@@ -4,6 +4,7 @@ import "@elements/module/_groups/cards/edit/header/button-add";
 import "@elements/module/_groups/cards/edit/main/main";
 import "@elements/module/_groups/cards/edit/main/card-pair/card";
 import "@elements/module/_groups/cards/edit/main/card-pair/pair";
+import "@elements/module/_groups/cards/edit/main/add-pair";
 import "@elements/module/_groups/cards/play/card/card";
 import "@elements/module/_groups/cards/play/card/text";
 import "@elements/module/_groups/cards/play/card/empty";

@@ -89,6 +89,27 @@ impl<RawData: RawDataExt, E: ExtraExt> CardsBase<RawData, E> {
         });
     }
 
+    pub fn add_pair(&self) {
+        let pair = match self.mode {
+            Mode::WordsAndImages => (Card::new_text("".to_string()), Card::new_image(None)),
+            Mode::Images => (Card::new_image(None), Card::new_image(None)),
+            _ => (
+                Card::new_text("".to_string()),
+                Card::new_text("".to_string()),
+            ),
+        };
+
+        self.pairs.lock_mut().push_cloned(pair.clone());
+
+        self.history.push_modify(move |raw| {
+            if let Some(content) = &mut raw.get_content_mut() {
+                content
+                    .pairs
+                    .push(RawCardPair(pair.0.into(), pair.1.into()));
+            }
+        });
+    }
+
     pub fn set_theme(&self, theme: ThemeId) {
         self.theme_id.set_neq(theme);
 

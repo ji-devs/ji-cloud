@@ -80,10 +80,13 @@ export const getContentStyleConfig = (
     mode: Mode,
     side: Side,
 ) => {
-    let color = `var(--theme-${theme}-cards-color)`;
-    let borderColor = `var(--theme-${theme}-cards-border-color-var)`;
-    let borderColorLight = `var(--theme-${theme}-cards-border-color-light-hsl)`
-    let backgroundColor = `var(--theme-${theme}-cards-fill-color-var)`;
+    let {
+        color,
+        borderColor,
+        borderColorLight,
+        backgroundColor,
+    } = getContentStyleColors(theme);
+
     let fontFamily = mode === "lettering"
         ? side === "left"
             ? `var(--theme-${theme}-cards-font-family-lettering-left)`
@@ -98,3 +101,19 @@ export const getContentStyleConfig = (
         fontFamily,
     }
 };
+
+export const getContentStyleColors = (
+    theme: ThemeId,
+) => {
+    let color = `var(--theme-${theme}-cards-color)`;
+    let borderColor = `var(--theme-${theme}-cards-border-color-var)`;
+    let borderColorLight = `var(--theme-${theme}-cards-border-color-light-hsl)`
+    let backgroundColor = `var(--theme-${theme}-cards-fill-color-var)`;
+
+    return {
+        color,
+        borderColor,
+        borderColorLight,
+        backgroundColor,
+    }
+}

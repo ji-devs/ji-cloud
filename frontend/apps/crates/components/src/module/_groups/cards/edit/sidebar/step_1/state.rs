@@ -56,6 +56,7 @@ impl<RawData: RawDataExt, E: ExtraExt> Step1<RawData, E> {
                     Tab::new(state.clone(), MenuTabKind::Image),
                 ]
             }
+            Mode::Images => vec![Tab::new(state.clone(), MenuTabKind::Image)],
             Mode::Duplicate | Mode::Lettering => vec![Tab::new(state.clone(), MenuTabKind::Text)],
             _ => vec![Tab::new(state.clone(), MenuTabKind::DualList)],
         };

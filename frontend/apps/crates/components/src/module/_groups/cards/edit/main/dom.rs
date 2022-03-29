@@ -8,6 +8,7 @@ use dominator::{clone, html, Dom};
 use futures_signals::{signal::SignalExt, signal_vec::SignalVecExt};
 use shared::domain::jig::module::body::_groups::cards::Step;
 use std::rc::Rc;
+use utils::events;
 
 impl<RawData, E, GetSettingsStateFn, RenderSettingsStateFn, SettingsState> DomRenderable
     for Main<RawData, E, GetSettingsStateFn, RenderSettingsStateFn, SettingsState>
@@ -87,5 +88,16 @@ pub fn render_main_cards<RawData: RawDataExt, E: ExtraExt>(
                     render_pair(pair)
                 }))
         })
+        .child_signal(base.show_add_pair_signal().map(clone!(base => move |show| {
+            if show {
+                Some(html!("add-pair", {
+                    .event(clone!(base => move|_: events::Click| {
+                        base.add_pair();
+                    }))
+                }))
+            } else {
+                None
+            }
+        })))
     })
 }

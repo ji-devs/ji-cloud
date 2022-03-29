@@ -79,6 +79,8 @@ pub fn get_debug_pairs(mode: Mode) -> Vec<(String, String)> {
                 .iter()
                 .map(|word| (word.to_string(), "".to_string()))
                 .collect(),
+            // Images/Images doesn't use lists at all
+            Mode::Images => vec![("".to_string(), "".to_string())],
             _ => config.init.dual_list_words.clone(),
         })
         .unwrap_ji()
