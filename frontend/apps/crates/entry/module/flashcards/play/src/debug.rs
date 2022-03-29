@@ -80,6 +80,26 @@ impl DebugSettings {
                                                 })),
                                             },
                                         ),
+                                        Mode::Images => RawCardPair(
+                                            RawCard {
+                                                audio: None,
+                                                card_content: RawCardContent::Image(Some(Image {
+                                                    id: ImageId(
+                                                        Uuid::parse_str(IMAGE_UUID).unwrap_ji(),
+                                                    ),
+                                                    lib: MediaLibrary::User,
+                                                })),
+                                            },
+                                            RawCard {
+                                                audio: None,
+                                                card_content: RawCardContent::Image(Some(Image {
+                                                    id: ImageId(
+                                                        Uuid::parse_str(IMAGE_UUID).unwrap_ji(),
+                                                    ),
+                                                    lib: MediaLibrary::User,
+                                                })),
+                                            },
+                                        ),
                                         _ => RawCardPair(
                                             RawCard {
                                                 audio: None,

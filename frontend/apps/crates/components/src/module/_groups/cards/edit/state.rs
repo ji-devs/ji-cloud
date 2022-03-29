@@ -129,7 +129,7 @@ impl<RawData: RawDataExt, E: ExtraExt> CardsBase<RawData, E> {
 
         let background = Mutable::new(content.background);
 
-        Rc::new(Self {
+        let state = Rc::new(Self {
             jig_id,
             module_id,
             history,
@@ -144,7 +144,17 @@ impl<RawData: RawDataExt, E: ExtraExt> CardsBase<RawData, E> {
             extra,
             module_kind,
             debug: debug.unwrap_or_default(),
-        })
+        });
+
+        // Because images mode doesn't give the teacher a way to initialize a list, we create
+        // a default pair of cards for them to add images into.
+        if let Mode::Images = state.mode {
+            if state.pairs.lock_ref().is_empty() {
+                state.add_pair();
+            }
+        }
+
+        state
     }
 
     pub fn clone_pairs_raw(&self) -> Vec<(raw::Card, raw::Card)> {
@@ -161,6 +171,19 @@ impl<RawData: RawDataExt, E: ExtraExt> CardsBase<RawData, E> {
             .len()
             .map(|len| len == 0)
             .dedupe()
+    }
+
+    pub fn show_add_pair_signal(&self) -> impl Signal<Item = bool> {
+        map_ref! {
+            let step = self.step.signal_cloned(),
+            let is_empty = self.is_empty_signal()
+            => {
+                match step {
+                    Step::One => !is_empty,
+                    _ => false
+                }
+            }
+        }
     }
 
     pub fn theme_id_str_signal(&self) -> impl Signal<Item = &'static str> {

@@ -23,17 +23,12 @@ pub fn get_debug_pairs(mode: Mode, n_cards: usize) -> Vec<(String, String)> {
             let mut cards = Vec::new();
 
             for _i in 0..n_cards {
-                cards.push(("hello".to_string(), "world".to_string()));
+                cards.push(("hello".into(), "world".into()));
             }
             cards
         }
-        Mode::WordsAndImages => vec![("hello", "")]
-            .iter()
-            .map(|(w1, w2)| (w1.to_string(), w2.to_string()))
-            .collect(),
-        _ => vec![("hello", "world")]
-            .iter()
-            .map(|(w1, w2)| (w1.to_string(), w2.to_string()))
-            .collect(),
+        Mode::WordsAndImages => vec![("hello".into(), "".into())],
+        Mode::Images => vec![("".into(), "".into())],
+        _ => vec![("hello".into(), "world".into())],
     }
 }
