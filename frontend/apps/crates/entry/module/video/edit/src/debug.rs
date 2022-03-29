@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-use components::stickers::{sprite::ext::*, text::ext::*};
+use components::stickers::sprite::ext::*;
 use components::tabs::MenuTabKind;
 use once_cell::sync::OnceCell;
 use shared::{
@@ -25,7 +25,7 @@ pub static SETTINGS: OnceCell<DebugSettings> = OnceCell::new();
 
 const IMAGE_UUID: &str = "e84dd7fe-c92d-11eb-8c82-cfd1d3fd13ff";
 
-pub const DEBUG_TEXT:&str = "{\"version\":\"0.1.0\",\"content\":[{\"children\":[{\"text\":\"text from rust\",\"element\":\"P1\"}]}]}";
+const DEBUG_TEXT: &str = "Text from rust";
 
 #[derive(Debug, Default)]
 pub struct DebugSettings {
@@ -71,7 +71,8 @@ impl DebugSettings {
                                 .iter()
                                 .map(|init| match init {
                                     InitSticker::Text => {
-                                        Sticker::Text(Text::new(DEBUG_TEXT.to_string()))
+                                        let text = Text::from_str(DEBUG_TEXT);
+                                        Sticker::Text(text)
                                     }
                                     InitSticker::Sprite => Sticker::Sprite(Sprite::new(Image {
                                         id: ImageId(Uuid::parse_str(IMAGE_UUID).unwrap_ji()),

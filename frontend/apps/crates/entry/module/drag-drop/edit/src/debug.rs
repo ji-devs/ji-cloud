@@ -1,4 +1,4 @@
-use components::stickers::{sprite::ext::*, text::ext::*};
+use components::stickers::sprite::ext::*;
 use components::tabs::MenuTabKind;
 use once_cell::sync::OnceCell;
 use shared::{
@@ -93,8 +93,7 @@ impl DebugSettings {
                                 let sticker = {
                                     match sticker_kind {
                                         InitSticker::Text => {
-                                            let value = components::text_editor::state::State::text_to_value(DEBUG_TEXT);
-                                            let mut text = Text::new(value);
+                                            let mut text = Text::from_str(DEBUG_TEXT);
 
                                             text.transform.set_translation_2d(*translation_x, *translation_y);
                                             text.transform.rotate_z(1.5);

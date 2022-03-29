@@ -2,7 +2,6 @@
 
 use components::stickers::{
     sprite::ext::*,
-    text::ext::*,
     video::ext::{VideoExt, YoutubeUrlExt},
 };
 use once_cell::sync::OnceCell;
@@ -77,11 +76,7 @@ impl DebugSettings {
                                 .iter()
                                 .map(|init| match init {
                                     InitSticker::Text => {
-                                        let value =
-                                            components::text_editor::state::State::text_to_value(
-                                                DEBUG_TEXT,
-                                            );
-                                        let text = Text::new(value);
+                                        let text = Text::from_str(DEBUG_TEXT);
                                         Sticker::Text(text)
                                     }
                                     InitSticker::Sprite => Sticker::Sprite(Sprite::new(Image {

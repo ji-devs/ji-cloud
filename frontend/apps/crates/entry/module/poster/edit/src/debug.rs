@@ -2,7 +2,7 @@
 #![allow(dead_code)]
 use futures_signals::{signal::SignalExt, signal_vec::SignalVecExt};
 
-use components::stickers::{sprite::ext::*, text::ext::*};
+use components::stickers::sprite::ext::*;
 use components::tabs::MenuTabKind;
 use once_cell::sync::OnceCell;
 use shared::{
@@ -73,11 +73,7 @@ impl DebugSettings {
                                 .iter()
                                 .map(|init| match init {
                                     InitSticker::Text => {
-                                        let value =
-                                            components::text_editor::state::State::text_to_value(
-                                                DEBUG_TEXT,
-                                            );
-                                        let text = Text::new(value);
+                                        let text = Text::from_str(DEBUG_TEXT);
                                         Sticker::Text(text)
                                     }
                                     InitSticker::Sprite => Sticker::Sprite(Sprite::new(Image {

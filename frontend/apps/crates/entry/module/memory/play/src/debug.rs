@@ -3,7 +3,7 @@
 
 use futures_signals::{signal::SignalExt, signal_vec::SignalVecExt};
 
-use components::stickers::{sprite::ext::*, text::ext::*};
+use components::stickers::sprite::ext::*;
 use once_cell::sync::OnceCell;
 use shared::{
     domain::{

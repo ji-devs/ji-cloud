@@ -32,7 +32,7 @@ pub static SETTINGS: OnceCell<DebugSettings> = OnceCell::new();
 //const IMAGE_UUID:&'static str = "bf2fe548-7ffd-11eb-b3ab-579026da8b36";
 const IMAGE_UUID: &str = "9da11e0a-c17b-11eb-b863-570eea18a3bd";
 
-pub const DEBUG_TEXT:&str = "{\"version\":\"0.1.0\",\"content\":[{\"children\":[{\"text\":\"text from rust\",\"element\":\"P1\"}]}]}";
+const DEBUG_TEXT: &str = "Text from rust";
 
 #[derive(Debug, Default)]
 pub struct DebugSettings {
