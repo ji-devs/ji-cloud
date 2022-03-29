@@ -1,6 +1,5 @@
 //see: https://github.com/rust-lang/cargo/issues/8010
 #![cfg_attr(feature = "quiet", allow(warnings))]
-#![feature(type_alias_impl_trait)]
 
 pub mod ages;
 pub mod api_helpers;
