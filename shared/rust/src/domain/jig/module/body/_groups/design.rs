@@ -28,11 +28,7 @@ impl Default for BaseContent {
             instructions: Default::default(),
             theme: Default::default(),
             backgrounds: Default::default(),
-            stickers: vec![
-                Sticker::Text(
-                    Default::default()
-                )
-            ]
+            stickers: vec![Sticker::Text(Default::default())],
         }
     }
 }
@@ -107,7 +103,10 @@ impl Text {
 
     /// Get a value string from a str
     pub fn value_from_str(text: &str) -> String {
-        format!(r#"{{"version":"0.1.0","content":[{{"children":[{{"text":"{}","element":"H1"}}]}}]}}"#, text)
+        format!(
+            r#"{{"version":"0.1.0","content":[{{"children":[{{"text":"{}","element":"H1"}}]}}]}}"#,
+            text
+        )
     }
 }
 
