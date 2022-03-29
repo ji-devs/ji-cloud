@@ -1,8 +1,8 @@
 use super::state::*;
+use crate::base::actions::NavigationTarget;
 use components::audio::mixer::{AudioPath, AUDIO_MIXER};
 use gloo_timers::callback::Timeout;
 use std::{rc::Rc, sync::atomic::Ordering};
-use crate::base::actions::NavigationTarget;
 
 use dominator::clone;
 

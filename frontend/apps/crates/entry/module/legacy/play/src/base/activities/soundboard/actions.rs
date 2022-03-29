@@ -66,7 +66,7 @@ impl SoundboardItem {
                     log::info!("clip ended!");
                     state.hotspot.fade_out();
                     state.do_maybe_jump(&parent);
-                })
+                }),
             );
         } else {
             log::info!("no sound!");

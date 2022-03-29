@@ -2,7 +2,13 @@ use std::rc::Rc;
 
 use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
-use utils::{events, prelude::SETTINGS, routes::{JigRoute, Route}, unwrap::UnwrapJiExt, iframe::{JigPlayerToPlayerPopup, IframeInit}};
+use utils::{
+    events,
+    iframe::{IframeInit, JigPlayerToPlayerPopup},
+    prelude::SETTINGS,
+    routes::{JigRoute, Route},
+    unwrap::UnwrapJiExt,
+};
 
 use super::state::PlayerPopup;
 

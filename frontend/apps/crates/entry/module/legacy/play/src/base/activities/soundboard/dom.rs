@@ -2,14 +2,10 @@ use super::state::*;
 use crate::base::styles::FULL_STAGE;
 use crate::config::HINT_TIME_MS;
 use dominator::{clone, html, svg, Dom};
-use futures_signals::{
-    signal::{self, SignalExt},
-};
+use futures_signals::signal::{self, SignalExt};
 use gloo_timers::future::TimeoutFuture;
 use std::rc::Rc;
-use utils::{
-    resize::{resize_info_signal, ResizeInfo},
-};
+use utils::resize::{resize_info_signal, ResizeInfo};
 
 use components::traces::svg::{ShapeStyle, ShapeStyleKind, ShapeStyleMode, ShapeStylePlayMode};
 

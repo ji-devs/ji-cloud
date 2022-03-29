@@ -1,10 +1,11 @@
 use components::{
     backgrounds::{callbacks::Callbacks as BackgroundsCallbacks, state::Backgrounds},
+    module::_groups::design::edit::design_ext::DesignExt,
     stickers::{
         callbacks::Callbacks as StickersCallbacks,
         state::{Sticker, Stickers},
     },
-    text_editor::{callbacks::Callbacks as TextEditorCallbacks, state::State as TextEditorState}, module::_groups::design::edit::design_ext::DesignExt,
+    text_editor::{callbacks::Callbacks as TextEditorCallbacks, state::State as TextEditorState},
 };
 use components::{module::_common::edit::prelude::*, stickers::video::state::Video};
 use dominator::clone;
@@ -16,7 +17,7 @@ use shared::domain::jig::{
             video::{
                 DoneAction, Mode, ModuleData as RawData, PlaySettings as RawPlaySettings, Step,
             },
-            Instructions, BodyExt,
+            BodyExt, Instructions,
         },
         ModuleId,
     },

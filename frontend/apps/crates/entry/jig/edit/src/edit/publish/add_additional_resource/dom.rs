@@ -1,17 +1,17 @@
-use std::{rc::Rc};
+use std::rc::Rc;
 
-use components::{
-    overlay::handle::OverlayHandle
-};
-use dominator::{Dom, clone, html, with_node};
+use components::overlay::handle::OverlayHandle;
+use dominator::{clone, html, with_node, Dom};
 use futures_signals::signal::SignalExt;
 
 use utils::events;
 use web_sys::HtmlElement;
 
-use crate::edit::{publish::add_additional_resource::{add_file::state::AddFile, add_link::state::AddLink}};
+use crate::edit::publish::add_additional_resource::{
+    add_file::state::AddFile, add_link::state::AddLink,
+};
 
-use super::state::{AddAdditionalResource, ActivePopup};
+use super::state::{ActivePopup, AddAdditionalResource};
 
 const STR_UPLOAD_FILE: &str = "Upload file";
 const STR_ADD_LINK: &str = "Add link";

@@ -17,14 +17,14 @@ use futures_signals::{
 
 use crate::{
     categories::dom::CategoriesPage,
+    curation::Curation,
+    export::Export,
     images::{
         add::dom::ImageAddPage, meta::dom::ImageMetaPage, search::dom::ImageSearchPage,
         tags::ImageTags,
     },
     locale::{dom::LocalePage, state::LoaderState as LocaleLoaderState},
     sidebar::Sidebar,
-    curation::Curation,
-    export::Export,
 };
 use std::cell::RefCell;
 pub struct Router {

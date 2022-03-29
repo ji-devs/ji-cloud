@@ -2,11 +2,8 @@ use std::rc::Rc;
 
 use super::debug::DebugSettings;
 use crate::{
-    module::{
-        _common::edit::prelude::*,
-        _groups::cards::lookup::Side
-    },
-    tooltip::state::State as TooltipState
+    module::{_common::edit::prelude::*, _groups::cards::lookup::Side},
+    tooltip::state::State as TooltipState,
 };
 use dominator_helpers::signals::EitherSignal;
 use futures_signals::{
@@ -17,8 +14,8 @@ use futures_signals::{
 use shared::domain::jig::{
     module::{
         body::{
-            Background, BodyExt, Image, Instructions,
-            _groups::cards::{self as raw, BaseContent, Mode, Step}, Audio,
+            Audio, Background, BodyExt, Image, Instructions,
+            _groups::cards::{self as raw, BaseContent, Mode, Step},
         },
         ModuleId,
     },
@@ -262,7 +259,9 @@ impl Card {
     pub fn is_valid_data_signal(&self) -> impl Signal<Item = bool> {
         match &self.card_content {
             CardContent::Text(text) => EitherSignal::Left(text.signal_ref(|text| !text.is_empty())),
-            CardContent::Image(image) => EitherSignal::Right(image.signal_ref(|image| image.is_some())),
+            CardContent::Image(image) => {
+                EitherSignal::Right(image.signal_ref(|image| image.is_some()))
+            }
         }
     }
 }

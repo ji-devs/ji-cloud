@@ -112,7 +112,7 @@ impl<T: AsSticker> Stickers<T> {
             Some(clone!(_self => move |_| {
                 _self.call_change();
             })),
-            None::<fn()>
+            None::<fn()>,
         )))));
     }
 

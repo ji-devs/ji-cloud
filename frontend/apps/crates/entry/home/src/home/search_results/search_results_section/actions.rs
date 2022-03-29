@@ -1,6 +1,10 @@
 use std::rc::Rc;
 
-use shared::{domain::jig::{JigSearchQuery, JigSearchResponse}, error::EmptyError, api::{endpoints, ApiEndpoint}};
+use shared::{
+    api::{endpoints, ApiEndpoint},
+    domain::jig::{JigSearchQuery, JigSearchResponse},
+    error::EmptyError,
+};
 use utils::prelude::api_no_auth;
 
 use super::SearchResultsSection;

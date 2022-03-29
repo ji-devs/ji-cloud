@@ -3,10 +3,10 @@ use crate::text_editor::font_css_converter::font_to_css;
 use crate::text_editor::wysiwyg_types::ControlsChange;
 use dominator::{clone, html, Dom};
 use futures_signals::{signal::SignalExt, signal_vec::SignalVecExt};
+use shared::domain::jig::module::body::_groups::design::{Text as RawText, DEFAULT_TEXT_VALUE};
 use std::rc::Rc;
 use strum::IntoEnumIterator;
 use utils::prelude::*;
-use shared::domain::jig::module::body::_groups::design::{Text as RawText, DEFAULT_TEXT_VALUE};
 
 use super::super::super::state::State;
 use super::super::super::wysiwyg_types::{Align, ElementType, Font, Weight, BOLD_WEIGHT};

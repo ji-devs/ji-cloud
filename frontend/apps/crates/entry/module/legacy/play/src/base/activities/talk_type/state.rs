@@ -1,18 +1,16 @@
 use crate::base::state::Base;
-use utils::{prelude::*, math::BoundsF64};
 use components::traces::utils::TraceShapeExt;
-use std::rc::Rc;
+use futures_signals::signal::Mutable;
+use rand::prelude::*;
 use std::cell::RefCell;
 use std::fmt;
-use futures_signals::signal::Mutable;
+use std::rc::Rc;
 use unicode_segmentation::UnicodeSegmentation;
-use rand::prelude::*;
-
+use utils::{math::BoundsF64, prelude::*};
 
 use dominator::clone;
 use shared::domain::jig::module::body::legacy::activity::{
-    TalkType as RawTalkType,
-    TalkTypeItem as RawTalkTypeItem
+    TalkType as RawTalkType, TalkTypeItem as RawTalkTypeItem,
 };
 
 pub struct TalkType {
@@ -25,10 +23,14 @@ pub struct TalkType {
 impl TalkType {
     pub fn new(base: Rc<Base>, raw: RawTalkType) -> Rc<Self> {
         let mut rng = thread_rng();
-        let items = raw.items.iter().map(|raw_item| TalkTypeItem::new(base.clone(), raw_item.clone(), &mut rng)).collect();
+        let items = raw
+            .items
+            .iter()
+            .map(|raw_item| TalkTypeItem::new(base.clone(), raw_item.clone(), &mut rng))
+            .collect();
 
-        let _self = Rc::new(Self { 
-            base, 
+        let _self = Rc::new(Self {
+            base,
             raw,
             items,
             rng: RefCell::new(rng),
@@ -55,12 +57,12 @@ pub struct TalkTypeItem {
 pub enum TalkTypeItemPhase {
     Input,
     Wrong,
-    Correct 
+    Correct,
 }
 
 pub struct HintLetters {
     pub letters: Vec<HintLetter>,
-    pub indices: Vec<usize>
+    pub indices: Vec<usize>,
 }
 
 pub struct HintLetter {
@@ -70,47 +72,40 @@ pub struct HintLetter {
 
 impl TalkTypeItem {
     pub fn new(base: Rc<Base>, raw: RawTalkTypeItem, rng: &mut ThreadRng) -> Rc<Self> {
-        let bounds = raw.hotspot.shape.calc_bounds(None).expect_ji("could not calc bounds");
-
+        let bounds = raw
+            .hotspot
+            .shape
+            .calc_bounds(None)
+            .expect_ji("could not calc bounds");
 
         let hint_letters = match raw.texts.as_ref().and_then(|text| {
-                let text:Vec<&String> = text
-                    .iter()
-                    .filter(|text| !text.is_empty())
-                    .collect();
-                
-                if !text.is_empty() {
-                    Some(text)
-                } else {
-                    None
-                }
-            }) {
+            let text: Vec<&String> = text.iter().filter(|text| !text.is_empty()).collect();
+
+            if !text.is_empty() {
+                Some(text)
+            } else {
+                None
+            }
+        }) {
             Some(text) => {
-                let letters:Vec<HintLetter> = text[0]
+                let letters: Vec<HintLetter> = text[0]
                     .graphemes(true)
                     .into_iter()
-                    .map(|letter| {
-                        HintLetter {
-                            letter: letter.to_string(),
-                            revealed: false
-                        }
+                    .map(|letter| HintLetter {
+                        letter: letter.to_string(),
+                        revealed: false,
                     })
                     .collect();
 
-                let mut indices:Vec<usize> = (0..letters.len()).collect();
+                let mut indices: Vec<usize> = (0..letters.len()).collect();
                 indices.shuffle(rng);
 
-                RefCell::new(HintLetters {
-                    letters,
-                    indices
-                })
-            },
-            None => {
-                RefCell::new(HintLetters {
-                    letters: Vec::new(),
-                    indices: Vec::new()
-                })
+                RefCell::new(HintLetters { letters, indices })
             }
+            None => RefCell::new(HintLetters {
+                letters: Vec::new(),
+                indices: Vec::new(),
+            }),
         };
         Rc::new(Self {
             base,
@@ -131,7 +126,6 @@ impl fmt::Display for HintLetters {
             } else {
                 write!(f, "_")?;
             }
-
         }
         Ok(())
         //write!(f, "({}, {})", self.x, self.y)

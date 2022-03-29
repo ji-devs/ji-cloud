@@ -3,32 +3,19 @@ use components::module::_common::prelude::ModuleId;
 use dominator::clone;
 use futures::join;
 use shared::{
-    api::endpoints::{
-        self, ApiEndpoint
-    },
+    api::endpoints::{self, ApiEndpoint},
     domain::{
         jig::{
-            module::{ModuleCreateRequest, ModuleBody},
-            JigBrowseQuery,
-            UserOrMe,
-            JigBrowseResponse,
-            JigSearchResponse,
-            JigSearchQuery,
-            JigCreateRequest,
-            JigId,
-            ModuleKind,
-            JigResponse,
-            DraftOrLive,
+            module::{ModuleBody, ModuleCreateRequest},
+            DraftOrLive, JigBrowseQuery, JigBrowseResponse, JigCreateRequest, JigId, JigResponse,
+            JigSearchQuery, JigSearchResponse, ModuleKind, UserOrMe,
         },
         meta::MetadataResponse,
-        CreateResponse
+        CreateResponse,
     },
-    error::{
-        EmptyError,
-        MetadataNotFound
-    }
+    error::{EmptyError, MetadataNotFound},
 };
-use std::{rc::Rc};
+use std::rc::Rc;
 use utils::prelude::*;
 
 impl JigGallery {
@@ -62,9 +49,9 @@ impl JigGallery {
         match api_with_auth::<JigBrowseResponse, EmptyError, _>(
             &endpoints::jig::Browse::PATH,
             endpoints::jig::Browse::METHOD,
-            Some(req)
+            Some(req),
         )
-            .await
+        .await
         {
             Ok(mut resp) => {
                 // Update the total count and increment the next page so that a future call will
@@ -174,13 +161,17 @@ impl JigGallery {
 
         let path = endpoints::jig::module::Create::PATH.replace("{id}", &jig_id.0.to_string());
 
-        match api_with_auth::<CreateResponse<ModuleId>, EmptyError, _>(&path, endpoints::jig::module::Create::METHOD, Some(req)).await {
-            Ok(_) => {
-
-            },
+        match api_with_auth::<CreateResponse<ModuleId>, EmptyError, _>(
+            &path,
+            endpoints::jig::module::Create::METHOD,
+            Some(req),
+        )
+        .await
+        {
+            Ok(_) => {}
             Err(_) => {
                 todo!()
-            },
+            }
         }
     }
 

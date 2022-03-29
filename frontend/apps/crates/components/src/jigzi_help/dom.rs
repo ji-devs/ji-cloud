@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
-use dominator::{clone, html, Dom, with_node};
-use futures_signals::{signal::SignalExt, map_ref};
+use dominator::{clone, html, with_node, Dom};
+use futures_signals::{map_ref, signal::SignalExt};
 use utils::events;
 use web_sys::HtmlElement;
 
@@ -10,13 +10,13 @@ use crate::overlay::handle::OverlayHandle;
 use super::state::JigziHelp;
 
 const MARGIN_X: i32 = 20;
-const STR_NO_SHOW_AGAIN: &str  = "I don't want help";
+const STR_NO_SHOW_AGAIN: &str = "I don't want help";
 
 impl JigziHelp {
     pub fn render(
         self: Rc<Self>,
         slot: Option<&'static str>,
-        get_action: Rc<Option<impl Fn() -> Dom + 'static>>
+        get_action: Rc<Option<impl Fn() -> Dom + 'static>>,
     ) -> Dom {
         let state = self;
         state.show_info_tooltip_delayed();

@@ -1,12 +1,14 @@
-use std::rc::{Rc};
+use std::rc::Rc;
 
 use dominator_helpers::futures::AsyncLoader;
-use futures_signals::{signal::{Mutable, Signal}, signal_vec::{MutableVec, SignalVecExt}, map_ref};
-use shared::domain::jig::{JigResponse, JigSearchResponse, JigFocus, JigId};
-
+use futures_signals::{
+    map_ref,
+    signal::{Mutable, Signal},
+    signal_vec::{MutableVec, SignalVecExt},
+};
+use shared::domain::jig::{JigFocus, JigId, JigResponse, JigSearchResponse};
 
 use crate::home::state::SearchSelected;
-
 
 use super::super::super::state::SearchOptions;
 

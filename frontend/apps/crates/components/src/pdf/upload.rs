@@ -70,32 +70,31 @@ pub async fn upload_pdf(
 
                 let path = endpoints::pdf::user::Upload::PATH.replace("{id}", &id.0.to_string());
 
-                let resp =
-                    api_with_auth_status_abortable::<UserPdfUploadResponse, EmptyError, _>(
-                        &path,
-                        endpoints::pdf::user::Upload::METHOD,
-                        abort_controller,
-                        Some(req),
-                    )
-                    .await
-                    .map_err(|aborted| {
-                        if aborted {
-                            UploadError::Aborted
-                        } else {
-                            UploadError::Other(awsm_web::errors::Error::Empty)
-                        }
-                    })
-                    .and_then(|(resp, status)| {
-                        if status == 413 {
-                            let _ = web_sys::window()
-                                .unwrap_ji()
-                                .alert_with_message(STR_PDF_IS_TOO_LARGE);
-                            Err(UploadError::TooLarge)
-                        } else {
-                            side_effect_status_code(status);
-                            resp.map_err(|_| UploadError::Other(awsm_web::errors::Error::Empty))
-                        }
-                    })?;
+                let resp = api_with_auth_status_abortable::<UserPdfUploadResponse, EmptyError, _>(
+                    &path,
+                    endpoints::pdf::user::Upload::METHOD,
+                    abort_controller,
+                    Some(req),
+                )
+                .await
+                .map_err(|aborted| {
+                    if aborted {
+                        UploadError::Aborted
+                    } else {
+                        UploadError::Other(awsm_web::errors::Error::Empty)
+                    }
+                })
+                .and_then(|(resp, status)| {
+                    if status == 413 {
+                        let _ = web_sys::window()
+                            .unwrap_ji()
+                            .alert_with_message(STR_PDF_IS_TOO_LARGE);
+                        Err(UploadError::TooLarge)
+                    } else {
+                        side_effect_status_code(status);
+                        resp.map_err(|_| UploadError::Other(awsm_web::errors::Error::Empty))
+                    }
+                })?;
 
                 let UserPdfUploadResponse { session_uri } = resp;
                 session_uri

@@ -5,13 +5,13 @@
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 mod categories;
+mod curation;
 mod export;
 mod images;
 mod locale;
 mod router;
 mod sidebar;
 mod strings;
-mod curation;
 
 use router::Router;
 use wasm_bindgen::prelude::*;

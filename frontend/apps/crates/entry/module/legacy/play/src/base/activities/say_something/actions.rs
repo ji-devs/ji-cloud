@@ -1,8 +1,8 @@
 use super::state::SaySomething;
+use crate::base::actions::NavigationTarget;
 use dominator::clone;
 use shared::domain::jig::module::body::legacy::activity::AdvanceTrigger;
 use std::rc::Rc;
-use crate::base::actions::NavigationTarget;
 
 impl SaySomething {
     pub fn on_bg_click(self: Rc<Self>) {

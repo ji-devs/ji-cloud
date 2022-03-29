@@ -6,7 +6,7 @@ use components::{
         state::{ImageSearchKind, ImageSearchOptions, State as ImageSearchState},
     },
     stickers::state::Stickers,
-    tabs::MenuTabKind
+    tabs::MenuTabKind,
 };
 use dominator::clone;
 use futures_signals::signal::Mutable;

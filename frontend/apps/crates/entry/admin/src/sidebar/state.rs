@@ -29,7 +29,11 @@ impl Sidebar {
                     SidebarItem::new(AdminRoute::ImageAdd, profile, &curr_route),
                     SidebarItem::new(AdminRoute::ImageSearch(None), profile, &curr_route),
                     SidebarItem::new(AdminRoute::ImageTags, profile, &curr_route),
-                    SidebarItem::new(AdminRoute::Curation(AdminCurationRoute::Table), profile, &curr_route),
+                    SidebarItem::new(
+                        AdminRoute::Curation(AdminCurationRoute::Table),
+                        profile,
+                        &curr_route,
+                    ),
                     SidebarItem::new(AdminRoute::Categories, profile, &curr_route),
                     SidebarItem::new(AdminRoute::Locale, profile, &curr_route),
                     SidebarItem::new(AdminRoute::Export, profile, &curr_route),

@@ -177,7 +177,7 @@ impl Matrix4 {
         values[14] = values[14] + translation[2];
     }
 
-    pub fn get_translation(&self) -> [f64;3] {
+    pub fn get_translation(&self) -> [f64; 3] {
         let values = &self.0;
         [values[12], values[13], values[14]]
     }

@@ -70,7 +70,7 @@ fn affiliation_value_signal(state: Rc<CurationJig>) -> impl Signal<Item = String
                         output.push(affiliation.display_name.clone());
                     },
                     None => {
-                        
+
                     }
                 }
             });

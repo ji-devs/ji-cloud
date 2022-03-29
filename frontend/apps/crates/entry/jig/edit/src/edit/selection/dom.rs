@@ -3,8 +3,8 @@ use std::rc::Rc;
 use components::jigzi_help::JigziHelp;
 use dominator::{clone, html, Dom};
 
-use super::module::dom::ModuleDom;
 use super::super::state::State;
+use super::module::dom::ModuleDom;
 use shared::domain::jig::ModuleKind;
 use utils::events;
 

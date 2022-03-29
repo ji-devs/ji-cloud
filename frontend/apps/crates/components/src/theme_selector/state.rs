@@ -14,10 +14,7 @@ pub struct ThemeSelector {
 }
 
 impl ThemeSelector {
-    pub fn new(
-        theme_id: ReadOnlyMutable<ThemeId>,
-        callbacks: ThemeSelectorCallbacks,
-    ) -> Self {
+    pub fn new(theme_id: ReadOnlyMutable<ThemeId>, callbacks: ThemeSelectorCallbacks) -> Self {
         Self {
             theme_id,
             callbacks,
@@ -25,9 +22,9 @@ impl ThemeSelector {
     }
 
     pub fn selected_signal(&self, theme_id: ThemeId) -> impl Signal<Item = bool> {
-        self.theme_id.signal().map(move |selected_theme_id| {
-            theme_id == selected_theme_id
-        })
+        self.theme_id
+            .signal()
+            .map(move |selected_theme_id| theme_id == selected_theme_id)
     }
 }
 

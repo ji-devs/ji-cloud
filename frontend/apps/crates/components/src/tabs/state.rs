@@ -1,7 +1,7 @@
 use dominator_helpers::signals::{box_signal_fn, BoxSignalFn};
 use futures_signals::signal::Signal;
-use strum_macros::Display;
 use std::rc::Rc;
+use strum_macros::Display;
 
 pub struct MenuTab {
     pub kind: MenuTabKind,

@@ -1,5 +1,8 @@
 use crate::register::state::{Step, Step1Data};
-use futures_signals::{signal::{Mutable, Signal, SignalExt}, signal_vec::MutableVec};
+use futures_signals::{
+    signal::{Mutable, Signal, SignalExt},
+    signal_vec::MutableVec,
+};
 use std::cell::RefCell;
 
 pub struct State {

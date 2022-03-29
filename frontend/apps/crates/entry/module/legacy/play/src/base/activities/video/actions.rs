@@ -1,6 +1,6 @@
 use super::state::*;
-use std::rc::Rc;
 use crate::base::actions::NavigationTarget;
+use std::rc::Rc;
 use utils::unwrap::UnwrapJiExt;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;

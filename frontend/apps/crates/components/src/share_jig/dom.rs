@@ -2,6 +2,7 @@ use std::rc::Rc;
 
 use dominator::{clone, html, with_node, Dom, EventOptions};
 use futures_signals::signal::SignalExt;
+use gloo_timers::callback::Timeout;
 use shared::config::JIG_PLAYER_SESSION_VALID_DURATION_SECS;
 use utils::{
     clipboard, events,
@@ -9,10 +10,10 @@ use utils::{
     unwrap::UnwrapJiExt,
 };
 use web_sys::HtmlElement;
-use gloo_timers::callback::Timeout;
 
 use crate::{
     animation::fade::{Fade, FadeKind},
+    overlay::handle::OverlayHandle,
     tooltip::{
         dom::render as TooltipDom,
         state::{
@@ -20,7 +21,6 @@ use crate::{
             TooltipTarget,
         },
     },
-    overlay::handle::OverlayHandle,
 };
 
 use super::state::{ActivePopup, ShareJig};

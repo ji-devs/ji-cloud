@@ -1,20 +1,20 @@
 use std::rc::Rc;
 
-use dominator::{html, Dom, clone, with_node};
-use utils::events;
-use web_sys::HtmlElement;
 use crate::{
+    color_select::dom::render as render_color_picker,
     image::search::{
         dom::render_with_action as render_image_search_with_action,
         state::State as ImageSearchState,
     },
+    module::_groups::cards::edit::state::{ExtraExt, RawDataExt},
     overlay::handle::OverlayHandle,
-    color_select::dom::render as render_color_picker,
-    module::_groups::cards::edit::state::{RawDataExt, ExtraExt},
 };
+use dominator::{clone, html, with_node, Dom};
+use utils::events;
+use web_sys::HtmlElement;
 
-use super::state::CustomBackground;
 use super::super::state::STR_CHANGE_BACKGROUND;
+use super::state::CustomBackground;
 
 const STR_FILL_COLOR: &str = "Fill color";
 

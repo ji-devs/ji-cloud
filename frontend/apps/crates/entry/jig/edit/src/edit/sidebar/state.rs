@@ -96,7 +96,7 @@ impl State {
             // a cover on the JIG.
             None => {
                 modules.push(Rc::new(None));
-            },
+            }
             // If the first module is not a cover module, insert a placeholder module before that
             // so that a cover can still be set on the JIG.
             Some(module) => {
@@ -105,7 +105,7 @@ impl State {
                         modules.insert(0, Rc::new(None));
                     }
                 };
-            },
+            }
         };
 
         // add empty module at end
@@ -148,14 +148,16 @@ impl State {
 
         let modules_len = modules.iter().filter(|module| module.is_some()).count();
 
-        let modules_valid = modules.into_iter().find(|module| {
-            match &***module {
-                // Find the first module which isn't complete
-                Some(module) => !module.is_complete.get_cloned(),
-                None => false,
-            }
-        })
-        .is_none();
+        let modules_valid = modules
+            .into_iter()
+            .find(|module| {
+                match &***module {
+                    // Find the first module which isn't complete
+                    Some(module) => !module.is_complete.get_cloned(),
+                    None => false,
+                }
+            })
+            .is_none();
 
         modules_len > 0 && modules_valid
     }

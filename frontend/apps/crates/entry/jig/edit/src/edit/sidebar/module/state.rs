@@ -1,4 +1,4 @@
-use crate::edit::sidebar::state::{State as SidebarState, Module};
+use crate::edit::sidebar::state::{Module, State as SidebarState};
 use dominator::clone;
 use futures_signals::signal::{Mutable, Signal, SignalExt};
 use std::cell::RefCell;

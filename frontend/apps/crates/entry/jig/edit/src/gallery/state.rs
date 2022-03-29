@@ -2,7 +2,10 @@ use std::rc::Rc;
 
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::{signal::Mutable, signal_vec::MutableVec};
-use shared::domain::{jig::{JigFocus, JigResponse, JigId}, meta::AgeRange};
+use shared::domain::{
+    jig::{JigFocus, JigId, JigResponse},
+    meta::AgeRange,
+};
 use strum_macros::{Display, EnumIter, EnumString};
 
 #[allow(dead_code)] // TODO: delete once used

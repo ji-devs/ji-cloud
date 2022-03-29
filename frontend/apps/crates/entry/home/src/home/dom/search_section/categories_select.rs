@@ -1,5 +1,5 @@
 use components::categories_input;
-use dominator::{html, Dom, clone};
+use dominator::{clone, html, Dom};
 use futures_signals::{
     map_ref,
     signal::{Signal, SignalExt},

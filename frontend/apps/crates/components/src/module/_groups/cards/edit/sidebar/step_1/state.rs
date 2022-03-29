@@ -1,4 +1,5 @@
 use crate::{
+    audio::input::AudioInput,
     image::search::{
         callbacks::Callbacks as ImageSearchCallbacks,
         state::{ImageSearchKind, ImageSearchOptions, State as ImageSearchState},
@@ -13,15 +14,15 @@ use crate::{
             state::{Options as SingleListOptions, State as SingleListState},
         },
     },
-    module::_groups::cards::edit::{config, state::*, actions, strings},
-    tabs::MenuTabKind, audio::input::AudioInput,
+    module::_groups::cards::edit::{actions, config, state::*, strings},
+    tabs::MenuTabKind,
 };
 use dominator::clone;
 use futures_signals::signal::Mutable;
 use once_cell::sync::OnceCell;
 use shared::{
-    domain::jig::module::body::{Image, _groups::cards::Mode},
     config as shared_config,
+    domain::jig::module::body::{Image, _groups::cards::Mode},
 };
 use std::rc::Rc;
 
@@ -34,7 +35,10 @@ pub struct Step1<RawData: RawDataExt, E: ExtraExt> {
 }
 
 impl<RawData: RawDataExt, E: ExtraExt> Step1<RawData, E> {
-    pub fn new(base: Rc<CardsBase<RawData, E>>, tab_kind: Mutable<Option<MenuTabKind>>) -> Rc<Self> {
+    pub fn new(
+        base: Rc<CardsBase<RawData, E>>,
+        tab_kind: Mutable<Option<MenuTabKind>>,
+    ) -> Rc<Self> {
         let state = Rc::new(Self {
             base: base.clone(),
             tabs: OnceCell::default(),
@@ -63,7 +67,7 @@ impl<RawData: RawDataExt, E: ExtraExt> Step1<RawData, E> {
         // error here will never occur.
         let _ = state.tabs.set(tabs);
 
-                // If the tab index isn't set yet, make it the first tab
+        // If the tab index isn't set yet, make it the first tab
         if state.tab_kind.lock_ref().is_none() {
             state.tab_kind.set(get_tab_kind_from_idx(state.clone(), 0));
         }
@@ -124,7 +128,7 @@ fn get_tab_kind_from_idx<RawData: RawDataExt, E: ExtraExt>(
 ) -> Option<MenuTabKind> {
     if let Some(tabs) = state.tabs.get() {
         if let Some(tab) = tabs.get(idx) {
-            return Some(tab.kind())
+            return Some(tab.kind());
         }
     }
 
@@ -160,9 +164,7 @@ fn make_single_list<RawData: RawDataExt, E: ExtraExt>(
 
     SingleListState::new(options, callbacks)
 }
-fn make_dual_list<RawData: RawDataExt, E: ExtraExt>(
-    state: Rc<Step1<RawData, E>>,
-) -> DualListState {
+fn make_dual_list<RawData: RawDataExt, E: ExtraExt>(state: Rc<Step1<RawData, E>>) -> DualListState {
     let mode = state.base.mode;
 
     let callbacks = DualListCallbacks::new(

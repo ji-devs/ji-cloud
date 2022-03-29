@@ -4,10 +4,10 @@ use dominator::{clone, events, html, with_node, Dom};
 use futures_signals::signal::Mutable;
 use futures_signals::signal_vec::SignalVecExt;
 use shared::domain::locale::EntryStatus;
-use utils::unwrap::UnwrapJiExt;
 use std::clone::Clone;
 use std::rc::Rc;
 use url::Url;
+use utils::unwrap::UnwrapJiExt;
 use uuid::Uuid;
 use web_sys::{HtmlInputElement, HtmlSelectElement, HtmlTextAreaElement};
 

@@ -1,4 +1,4 @@
-use super::{state::*};
+use super::state::*;
 use components::module::_common::thumbnail::ModuleThumbnail;
 use components::page_header::state::PageLinks;
 use components::{page_footer, page_header};

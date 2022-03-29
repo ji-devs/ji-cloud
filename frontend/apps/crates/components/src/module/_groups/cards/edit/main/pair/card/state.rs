@@ -27,7 +27,7 @@ impl ModalAction {
         content: &'static str,
         confirm: &'static str,
         cancel: &'static str,
-        handler: Rc<dyn Fn()>
+        handler: Rc<dyn Fn()>,
     ) -> Self {
         Self {
             title,

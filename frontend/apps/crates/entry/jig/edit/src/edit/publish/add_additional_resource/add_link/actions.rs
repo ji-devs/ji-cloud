@@ -17,11 +17,10 @@ impl AddLink {
         let resource_type_id = self.resource_type.get_cloned().unwrap_ji().id;
 
         self.add_resources_state.loader.load(async move {
-            state.add_resources_state.save_additional_resource(
-                resource_content,
-                display_name,
-                resource_type_id,
-            ).await;
+            state
+                .add_resources_state
+                .save_additional_resource(resource_content, display_name, resource_type_id)
+                .await;
         });
     }
 }

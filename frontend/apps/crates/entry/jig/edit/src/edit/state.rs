@@ -1,11 +1,6 @@
 use futures_signals::signal::Mutable;
-use shared::domain::jig::{JigId, JigFocus};
-use utils::{
-    jig::JigPlayerOptions,
-    routes::JigEditRoute,
-    storage,
-    unwrap::UnwrapJiExt
-};
+use shared::domain::jig::{JigFocus, JigId};
+use utils::{jig::JigPlayerOptions, routes::JigEditRoute, storage, unwrap::UnwrapJiExt};
 
 pub struct State {
     pub route: Mutable<JigEditRoute>,

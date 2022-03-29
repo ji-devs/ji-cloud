@@ -10,13 +10,11 @@ use components::{
     player_popup::{PlayerPopup, PreviewPopupCallbacks},
 };
 
-
-
 use super::state::{HomePageMode, State};
 
 mod home_sections;
-mod search_section;
 mod iframe;
+mod search_section;
 use iframe::Iframe;
 
 pub fn render(state: Rc<State>, auto_search: bool) -> Dom {

@@ -2,6 +2,7 @@ use super::{actions::StageClick, audio::AudioManager, design::sticker::animation
 use awsm_web::loaders::fetch::fetch_url;
 use components::module::_common::play::prelude::*;
 use futures_signals::signal::Mutable;
+use shared::domain::jig::module::body::legacy::activity::Activity;
 use shared::domain::jig::{
     module::{
         body::{
@@ -20,7 +21,6 @@ use std::{
 };
 use utils::prelude::*;
 use web_sys::Worker;
-use shared::domain::jig::module::body::legacy::activity::Activity;
 
 pub struct Base {
     pub jig_id: JigId,
@@ -177,12 +177,10 @@ impl Base {
     pub fn should_render_design(&self) -> bool {
         match self.slide.activity.as_ref() {
             None => true,
-            Some(activity) => {
-                match activity {
-                    Activity::Puzzle(_) => false,
-                    _ => true
-                }
-            }
+            Some(activity) => match activity {
+                Activity::Puzzle(_) => false,
+                _ => true,
+            },
         }
     }
 }

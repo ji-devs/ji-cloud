@@ -41,8 +41,7 @@ impl Publish {
 
         // ensure the correct jig focus is set
         assert_eq!(
-            jig_edit_state.jig_focus,
-            jig.jig_focus,
+            jig_edit_state.jig_focus, jig.jig_focus,
             "Jig focus doesn't match the route"
         );
 
@@ -62,25 +61,19 @@ impl Publish {
 
         // navigate to cover if exists otherwise navigate to landing
         let route = match cover_module_id {
-            Some(cover_module_id) => {
-                JigEditRoute::Module(cover_module_id)
-            },
-            None => {
-                JigEditRoute::Landing
-            },
+            Some(cover_module_id) => JigEditRoute::Module(cover_module_id),
+            None => JigEditRoute::Landing,
         };
 
-        self.jig_edit_state
-            .route
-            .set(route);
+        self.jig_edit_state.route.set(route);
     }
 
     fn form_invalid(self: Rc<Self>) -> bool {
         self.jig.display_name.lock_ref().is_empty()
-            // || self.jig.description.lock_ref().is_empty()
-            // || self.jig.language.lock_ref().is_empty()
-            // || self.jig.age_ranges.lock_ref().is_empty()
-            // || self.jig.categories.lock_ref().is_empty()
+        // || self.jig.description.lock_ref().is_empty()
+        // || self.jig.language.lock_ref().is_empty()
+        // || self.jig.age_ranges.lock_ref().is_empty()
+        // || self.jig.categories.lock_ref().is_empty()
     }
 
     async fn save_and_publish(self: Rc<Self>) -> Result<(), ()> {

@@ -12,7 +12,7 @@ pub struct SimpleSelect<T: SimpleSelectItem, P, L> {
     pub(super) on_change: Option<Box<dyn Fn(Option<T>)>>,
 }
 
-impl<T:SimpleSelectItem + 'static, P, L> SimpleSelect<T, P, L> {
+impl<T: SimpleSelectItem + 'static, P, L> SimpleSelect<T, P, L> {
     pub fn new(
         label: Option<L>,
         placeholder: Option<P>,

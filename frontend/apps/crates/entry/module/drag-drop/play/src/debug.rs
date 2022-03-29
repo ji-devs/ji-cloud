@@ -77,10 +77,13 @@ impl DebugSettings {
             //debug always has to have some data
             //otherwise it will fail at load time
             data: Some(if let Some(init_data) = init_data {
-                RawData{
-                        content: Some(Content {
-                            mode: Mode::SettingTable,
-                            target_areas: init_data.traces.iter().map(|init| {
+                RawData {
+                    content: Some(Content {
+                        mode: Mode::SettingTable,
+                        target_areas: init_data
+                            .traces
+                            .iter()
+                            .map(|init| {
                                 let trace = {
                                     match init {
                                         InitTrace::Ellipse(x, y, w, h, transform_more) => {
@@ -97,7 +100,7 @@ impl DebugSettings {
                                                 audio: None,
                                                 text: None,
                                             }
-                                        },
+                                        }
                                         InitTrace::Path(x, y, path, transform_more) => {
                                             let mut transform = Transform::identity();
                                             transform.set_translation_2d(*x, *y);
@@ -112,7 +115,7 @@ impl DebugSettings {
                                                 audio: None,
                                                 text: None,
                                             }
-                                        },
+                                        }
                                         InitTrace::Rect(x, y, width, height, transform_more) => {
                                             let mut transform = Transform::identity();
                                             transform.set_translation_2d(*x, *y);
@@ -132,57 +135,75 @@ impl DebugSettings {
                                 };
 
                                 TargetArea { trace }
-                            }).collect(),
-                            items: init_data.stickers.iter().map(|(sticker_kind, item_kind, (translation_x, translation_y))| {
-                                let sticker = {
-                                    match sticker_kind {
-                                        InitSticker::Text => {
-                                            let mut text = Text::from_str(DEBUG_TEXT);
+                            })
+                            .collect(),
+                        items: init_data
+                            .stickers
+                            .iter()
+                            .map(
+                                |(sticker_kind, item_kind, (translation_x, translation_y))| {
+                                    let sticker = {
+                                        match sticker_kind {
+                                            InitSticker::Text => {
+                                                let mut text = Text::from_str(DEBUG_TEXT);
 
-                                            text.transform.set_translation_2d(*translation_x, *translation_y);
-                                            text.transform.rotate_z(1.0);
+                                                text.transform.set_translation_2d(
+                                                    *translation_x,
+                                                    *translation_y,
+                                                );
+                                                text.transform.rotate_z(1.0);
 
-                                            Sticker::Text(text)
-                                        },
-                                        InitSticker::Sprite => {
-                                            let mut sprite = Sprite::new(Image {
-                                                id: ImageId(Uuid::parse_str(IMAGE_UUID).unwrap_ji()),
-                                                lib: MediaLibrary::Global
-                                            });
+                                                Sticker::Text(text)
+                                            }
+                                            InitSticker::Sprite => {
+                                                let mut sprite = Sprite::new(Image {
+                                                    id: ImageId(
+                                                        Uuid::parse_str(IMAGE_UUID).unwrap_ji(),
+                                                    ),
+                                                    lib: MediaLibrary::Global,
+                                                });
 
-                                            sprite.transform.set_translation_2d(*translation_x, *translation_y);
-                                            sprite.transform.rotate_z(1.5);
-                                            sprite.transform.set_scale_2d(0.2, 1.3);
+                                                sprite.transform.set_translation_2d(
+                                                    *translation_x,
+                                                    *translation_y,
+                                                );
+                                                sprite.transform.rotate_z(1.5);
+                                                sprite.transform.set_scale_2d(0.2, 1.3);
 
-                                            Sticker::Sprite(sprite)
+                                                Sticker::Sprite(sprite)
+                                            }
                                         }
-                                    }
-                                };
+                                    };
 
-                                Item {
-                                    sticker,
-                                    kind: item_kind.clone()
-                                }
-                            }).collect(),
-                            theme: ThemeId::Chalkboard,
-                            instructions: Instructions::default(),
-                            //feedback: Instructions::default(),
-                            feedback: Instructions {
-                                text: Some("good job!".to_string()),
-                                audio: Some(Audio { id: AudioId(Uuid::parse_str(AUDIO_UUID).unwrap_ji()), lib: MediaLibrary::User}),
-                            },
-                            backgrounds: Backgrounds {
-                                layer_1: None, //Some(Background::Color(hex_to_rgba8("#ff0000"))),
-                                layer_2: None,
-                            },
-                            play_settings: PlaySettings {
-                                hint: Hint::Highlight,
-                                next: Next::ClickContinue,
-                                ..PlaySettings::default()
-                            },
-                            ..Content::default()
-                        })
-                    }
+                                    Item {
+                                        sticker,
+                                        kind: item_kind.clone(),
+                                    }
+                                },
+                            )
+                            .collect(),
+                        theme: ThemeId::Chalkboard,
+                        instructions: Instructions::default(),
+                        //feedback: Instructions::default(),
+                        feedback: Instructions {
+                            text: Some("good job!".to_string()),
+                            audio: Some(Audio {
+                                id: AudioId(Uuid::parse_str(AUDIO_UUID).unwrap_ji()),
+                                lib: MediaLibrary::User,
+                            }),
+                        },
+                        backgrounds: Backgrounds {
+                            layer_1: None, //Some(Background::Color(hex_to_rgba8("#ff0000"))),
+                            layer_2: None,
+                        },
+                        play_settings: PlaySettings {
+                            hint: Hint::Highlight,
+                            next: Next::ClickContinue,
+                            ..PlaySettings::default()
+                        },
+                        ..Content::default()
+                    }),
+                }
             } else {
                 RawData { content: None }
             }),

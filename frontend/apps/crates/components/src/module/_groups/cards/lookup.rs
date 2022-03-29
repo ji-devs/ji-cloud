@@ -42,9 +42,16 @@ pub fn get_card_font_size(value: &str, size: Option<&Size>) -> String {
 
             // Different card games have different sized cards, this scales the final font size per
             // card size.
-            let font_size_range = (FONT_SIZE_RANGE.0 * size_scale, FONT_SIZE_RANGE.1 * size_scale);
-            let scale = (font_size_range.1 - font_size_range.0 as f32) / (TEXT_LENGTH_RANGE.1 as f32 - TEXT_LENGTH_RANGE.0 as f32);
-            let capped = std::cmp::min(TEXT_LENGTH_RANGE.1, std::cmp::max(TEXT_LENGTH_RANGE.0, value_len)) - TEXT_LENGTH_RANGE.0;
+            let font_size_range = (
+                FONT_SIZE_RANGE.0 * size_scale,
+                FONT_SIZE_RANGE.1 * size_scale,
+            );
+            let scale = (font_size_range.1 - font_size_range.0 as f32)
+                / (TEXT_LENGTH_RANGE.1 as f32 - TEXT_LENGTH_RANGE.0 as f32);
+            let capped = std::cmp::min(
+                TEXT_LENGTH_RANGE.1,
+                std::cmp::max(TEXT_LENGTH_RANGE.0, value_len),
+            ) - TEXT_LENGTH_RANGE.0;
 
             capped as f32 * scale + font_size_range.0 as f32
         }

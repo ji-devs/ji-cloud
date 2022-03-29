@@ -41,12 +41,20 @@ impl SidebarSettings {
             pairs_to_display = MIN_LIST_WORDS as u32;
         }
 
-        self.base.extra.settings.pairs_to_display.set_neq(pairs_to_display);
+        self.base
+            .extra
+            .settings
+            .pairs_to_display
+            .set_neq(pairs_to_display);
     }
 
     pub fn toggle_use_default_pairs(&self) {
         let use_default_pairs = !self.base.extra.settings.use_default_pairs.get();
-        self.base.extra.settings.use_default_pairs.set_neq(use_default_pairs);
+        self.base
+            .extra
+            .settings
+            .use_default_pairs
+            .set_neq(use_default_pairs);
 
         if use_default_pairs {
             self.set_default_pairs();
@@ -83,7 +91,11 @@ impl SidebarSettings {
         }
 
         self.base.extra.settings.use_default_pairs.set_neq(false);
-        self.base.extra.settings.pairs_to_display.set_neq(pairs_to_display);
+        self.base
+            .extra
+            .settings
+            .pairs_to_display
+            .set_neq(pairs_to_display);
 
         self.base.history.push_modify(|raw| {
             if let Some(content) = &mut raw.content {

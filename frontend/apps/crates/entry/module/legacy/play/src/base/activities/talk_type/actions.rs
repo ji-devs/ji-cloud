@@ -2,26 +2,28 @@ use super::state::*;
 use crate::base::actions::NavigationTarget;
 use std::rc::Rc;
 
-
 impl TalkType {
-
     pub fn on_start(self: Rc<Self>) {
         let state = self;
 
         state.base.allow_stage_click();
 
         if let Some(audio_filename) = state.raw.audio_filename.as_ref() {
-            state.base.audio_manager.play_clip_on_ended(
-                state.base.activity_media_url(&audio_filename),
-                || {},
-            );
+            state
+                .base
+                .audio_manager
+                .play_clip_on_ended(state.base.activity_media_url(&audio_filename), || {});
         }
     }
 
     pub fn evaluate_all(self: Rc<Self>) {
         let state = self;
 
-        if state.items.iter().all(|item| item.phase.get() == TalkTypeItemPhase::Correct) {
+        if state
+            .items
+            .iter()
+            .all(|item| item.phase.get() == TalkTypeItemPhase::Correct)
+        {
             log::info!("all finished!");
 
             match state.raw.jump_index {
@@ -35,11 +37,9 @@ impl TalkType {
                     state.base.navigate(NavigationTarget::Next);
                 }
             }
-
         }
     }
 }
-
 
 impl TalkTypeItem {
     pub fn evaluate(self: Rc<Self>, parent: Rc<TalkType>) {
@@ -49,7 +49,10 @@ impl TalkTypeItem {
             Some(texts) => {
                 let value = &*state.value.lock_ref();
 
-                if texts.iter().any(|text| text.to_lowercase() == value.to_lowercase()) {
+                if texts
+                    .iter()
+                    .any(|text| text.to_lowercase() == value.to_lowercase())
+                {
                     state.phase.set(TalkTypeItemPhase::Correct);
                     state.base.audio_manager.play_positive_clip();
                     parent.evaluate_all();
@@ -59,7 +62,7 @@ impl TalkTypeItem {
                     match hint_letters.pop() {
                         Some(_) => {
                             // the newly revealed letter...
-                        },
+                        }
                         None => {
                             log::info!("out of hints!");
                         }
@@ -68,13 +71,11 @@ impl TalkTypeItem {
                     // not set_neq because we want it to always re-render
                     state.phase.set(TalkTypeItemPhase::Wrong);
 
-
                     state.base.audio_manager.play_negative_clip();
                 }
-            },
+            }
             None => {}
         };
-        
     }
 
     pub fn play_audio(&self) {
@@ -82,7 +83,6 @@ impl TalkTypeItem {
             let url = self.base.activity_media_url(audio_filename);
             self.base.audio_manager.play_clip(url);
         }
-
     }
 }
 

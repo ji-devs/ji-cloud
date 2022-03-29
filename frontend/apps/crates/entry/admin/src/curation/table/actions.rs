@@ -15,7 +15,7 @@ impl CurationTable {
         } else {
             *fetch_mode = FetchMode::Search(query);
         }
-        
+
         state.curation_state.active_page.set(0);
 
         state.loader.load(clone!(state => async move {

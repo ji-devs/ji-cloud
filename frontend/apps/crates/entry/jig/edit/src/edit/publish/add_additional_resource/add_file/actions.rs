@@ -1,7 +1,16 @@
 use std::rc::Rc;
 
 use components::{audio, image, pdf};
-use shared::{api::endpoints, domain::{audio::AudioId, image::{ImageId, ImageKind, user::UserImageCreateRequest}, jig::additional_resource::ResourceContent, pdf::PdfId}, media::MediaLibrary};
+use shared::{
+    api::endpoints,
+    domain::{
+        audio::AudioId,
+        image::{user::UserImageCreateRequest, ImageId, ImageKind},
+        jig::additional_resource::ResourceContent,
+        pdf::PdfId,
+    },
+    media::MediaLibrary,
+};
 use utils::{prelude::ApiEndpointExt, unwrap::UnwrapJiExt};
 use web_sys::{Blob, File};
 
@@ -23,11 +32,10 @@ impl AddFile {
 
         self.add_resources_state.loader.load(async move {
             let resource_content = upload_file(&file).await.unwrap_ji();
-            state.add_resources_state.save_additional_resource(
-                resource_content,
-                display_name,
-                resource_type_id,
-            ).await;
+            state
+                .add_resources_state
+                .save_additional_resource(resource_content, display_name, resource_type_id)
+                .await;
         })
     }
 
@@ -43,24 +51,16 @@ pub async fn upload_file(file: &File) -> Result<ResourceContent, anyhow::Error> 
     let mime_type = Blob::type_(&file);
 
     let value = if mime_type == MIME_PDF {
-
         let pdf_id = upload_pdf(file).await?;
         ResourceContent::PdfId(pdf_id)
-
     } else if mime_type.starts_with(MIME_START_IMAGE) {
-
         let image_id = upload_image(file).await?;
         ResourceContent::ImageId(image_id)
-
     } else if mime_type.starts_with(MIME_START_AUDIO) {
-
         let audio_id = upload_audio(file).await?;
         ResourceContent::AudioId(audio_id)
-
     } else {
-
         anyhow::bail!("We don't support {}", mime_type);
-
     };
 
     Ok(value)
@@ -76,12 +76,7 @@ async fn upload_image(file: &File) -> Result<ImageId, anyhow::Error> {
         .map_err(|_| anyhow::Error::msg("Error creating image in db"))?
         .id;
 
-    image::upload::upload_image(
-        image_id,
-        MediaLibrary::User,
-        file,
-        None
-    )
+    image::upload::upload_image(image_id, MediaLibrary::User, file, None)
         .await
         .map_err(|e| anyhow::Error::msg(e.to_string()))?;
 
@@ -94,12 +89,7 @@ async fn upload_audio(file: &File) -> Result<AudioId, anyhow::Error> {
         .map_err(|_| anyhow::Error::msg("Error creating audio in db"))?
         .id;
 
-    audio::upload::upload_audio(
-        audio_id,
-        MediaLibrary::User,
-        file,
-        None
-    )
+    audio::upload::upload_audio(audio_id, MediaLibrary::User, file, None)
         .await
         .map_err(|e| anyhow::Error::msg(e.to_string()))?;
 
@@ -112,12 +102,7 @@ async fn upload_pdf(file: &File) -> Result<PdfId, anyhow::Error> {
         .map_err(|_| anyhow::Error::msg("Error creating pdf in db"))?
         .id;
 
-    pdf::upload::upload_pdf(
-        pdf_id,
-        MediaLibrary::User,
-        file,
-        None
-    )
+    pdf::upload::upload_pdf(pdf_id, MediaLibrary::User, file, None)
         .await
         .map_err(|e| anyhow::Error::msg(e.to_string()))?;
 

@@ -63,16 +63,18 @@ fn flip_controller(
     initial: bool,
 ) -> impl FnOnce(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement> {
     move |dom| {
-        dom
-            .property_signal("flipped", state.gate.signal().map(move |gate| {
+        dom.property_signal(
+            "flipped",
+            state.gate.signal().map(move |gate| {
                 if gate == Gate::Waiting || gate == Gate::FinishingFlip {
                     initial
                 } else {
                     !initial
                 }
-            }))
-            .event(clone!(state => move |_evt:events::Click| {
-                Game::flip(state.clone());
-            }))
+            }),
+        )
+        .event(clone!(state => move |_evt:events::Click| {
+            Game::flip(state.clone());
+        }))
     }
 }

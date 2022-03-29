@@ -10,7 +10,7 @@ pub struct StageClick {
 
 pub enum NavigationTarget {
     Next,
-    Index(usize)
+    Index(usize),
 }
 
 impl StageClick {
@@ -34,13 +34,11 @@ impl Base {
 
     pub fn navigate(&self, target: NavigationTarget) {
         let msg = match target {
-            NavigationTarget::Next => {
-                IframeAction::new(ModuleToJigPlayerMessage::Next)
-            },
+            NavigationTarget::Next => IframeAction::new(ModuleToJigPlayerMessage::Next),
 
             NavigationTarget::Index(index) => {
                 IframeAction::new(ModuleToJigPlayerMessage::JumpToIndex(index))
-            },
+            }
         };
 
         // only allow navigating once

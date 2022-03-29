@@ -1,6 +1,6 @@
 use crate::module::_groups::cards::edit::state::*;
-use shared::domain::jig::module::body::{Background, ThemeId};
 use shared::domain::jig::module::body::_groups::cards::{CardPair as RawCardPair, Mode};
+use shared::domain::jig::module::body::{Background, ThemeId};
 use unicode_segmentation::UnicodeSegmentation;
 use utils::prelude::*;
 
@@ -82,7 +82,9 @@ impl<RawData: RawDataExt, E: ExtraExt> CardsBase<RawData, E> {
         self.history.push_modify(move |raw| {
             if let Some(content) = raw.get_content_mut() {
                 content.pairs.remove(idx);
-                content.pairs.insert(idx, RawCardPair(pair.0.into(), pair.1.into()))
+                content
+                    .pairs
+                    .insert(idx, RawCardPair(pair.0.into(), pair.1.into()))
             }
         });
     }
@@ -108,4 +110,3 @@ impl<RawData: RawDataExt, E: ExtraExt> CardsBase<RawData, E> {
         });
     }
 }
-

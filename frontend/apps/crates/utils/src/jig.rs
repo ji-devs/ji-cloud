@@ -2,8 +2,11 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
 use shared::{
-    domain::jig::{AudioBackground, AudioFeedbackNegative, AudioFeedbackPositive, JigPlayerSettings, TextDirection, additional_resource::ResourceContent},
-    media::{MediaLibrary, PngImageFile}
+    domain::jig::{
+        additional_resource::ResourceContent, AudioBackground, AudioFeedbackNegative,
+        AudioFeedbackPositive, JigPlayerSettings, TextDirection,
+    },
+    media::{MediaLibrary, PngImageFile},
 };
 
 use crate::path::{audio_lib_url, image_lib_url, pdf_lib_url};
@@ -179,7 +182,6 @@ impl From<JigPlayerSettings> for JigPlayerOptions {
     }
 }
 
-
 pub trait ResourceContentExt {
     fn get_link(&self) -> String;
 }
@@ -189,16 +191,12 @@ impl ResourceContentExt for ResourceContent {
         match self {
             ResourceContent::ImageId(image_id) => {
                 image_lib_url(MediaLibrary::User, PngImageFile::Original, image_id.clone())
-            },
+            }
             ResourceContent::AudioId(audio_id) => {
                 audio_lib_url(MediaLibrary::User, audio_id.clone())
-            },
-            ResourceContent::PdfId(pdf_id) => {
-                pdf_lib_url(MediaLibrary::User, pdf_id.clone())
-            },
-            ResourceContent::Link(url) => {
-                url.to_string()
-            },
+            }
+            ResourceContent::PdfId(pdf_id) => pdf_lib_url(MediaLibrary::User, pdf_id.clone()),
+            ResourceContent::Link(url) => url.to_string(),
         }
     }
 }

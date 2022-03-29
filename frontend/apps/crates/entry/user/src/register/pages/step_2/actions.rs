@@ -44,7 +44,8 @@ impl State {
     }
 
     pub fn evaluate_persona_error(&self) {
-        self.persona_error.set_neq(self.persona.lock_ref().is_empty());
+        self.persona_error
+            .set_neq(self.persona.lock_ref().is_empty());
     }
 }
 

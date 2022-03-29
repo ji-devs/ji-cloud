@@ -1,13 +1,10 @@
 use super::state::*;
-use std::rc::Rc;
-use futures_signals::signal::{SignalExt};
-use gloo_timers::future::TimeoutFuture;
 use crate::base::styles;
-use dominator::{html, Dom, clone, with_node};
-use utils::{
-    prelude::*,
-    image_effects::ImageEffect
-};
+use dominator::{clone, html, with_node, Dom};
+use futures_signals::signal::SignalExt;
+use gloo_timers::future::TimeoutFuture;
+use std::rc::Rc;
+use utils::{image_effects::ImageEffect, prelude::*};
 
 impl Puzzle {
     pub fn render(self: Rc<Self>) -> Dom {
@@ -49,7 +46,7 @@ impl Puzzle {
                             preview.game.draw(&resize_info);
                         },
                         _ => {}
-                    } 
+                    }
                 }
             }))
             .event(clone!(state => move |evt:events::PointerDown| {

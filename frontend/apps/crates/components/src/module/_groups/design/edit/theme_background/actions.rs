@@ -3,11 +3,14 @@ use std::rc::Rc;
 use dominator::clone;
 use shared::domain::jig::module::body::StepExt;
 
-use crate::module::{_common::edit::entry::prelude::BaseExt, _groups::design::edit::design_ext::DesignExt};
+use crate::module::{
+    _common::edit::entry::prelude::BaseExt, _groups::design::edit::design_ext::DesignExt,
+};
 
-use super::{ThemeBackground, custom_background::CustomBackground};
+use super::{custom_background::CustomBackground, ThemeBackground};
 
-impl<Step, Base> ThemeBackground<Step, Base> where
+impl<Step, Base> ThemeBackground<Step, Base>
+where
     Step: StepExt + 'static,
     Base: BaseExt<Step> + DesignExt + 'static,
 {
@@ -19,10 +22,7 @@ impl<Step, Base> ThemeBackground<Step, Base> where
             state.tab_kind.set_neq(None);
         }));
 
-        let custom_background = CustomBackground::new(
-            Rc::clone(&state),
-            on_close
-        );
+        let custom_background = CustomBackground::new(Rc::clone(&state), on_close);
 
         state.custom_background.set(Some(custom_background));
     }

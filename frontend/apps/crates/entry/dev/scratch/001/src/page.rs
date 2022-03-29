@@ -199,7 +199,8 @@ pub fn render_wysiwyg_output(value: Rc<Mutable<Option<String>>>, theme: Mutable<
 }
 
 fn render_text() -> Dom {
-    let value = shared::domain::jig::module::body::_groups::design::Text::value_from_str("text from rust");
+    let value =
+        shared::domain::jig::module::body::_groups::design::Text::value_from_str("text from rust");
     let value = Some(value);
     // let value = None;
 

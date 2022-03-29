@@ -1,9 +1,9 @@
+use super::svg::helpers::{path_command_to_string, path_to_string};
 use shared::domain::jig::module::body::_groups::design::{
     PathCommand, Trace as RawTrace, TraceShape as RawTraceShape,
 };
 use utils::{math::BoundsF64, prelude::*, resize::ResizeInfo};
 use web_sys::Path2d;
-use super::svg::helpers::{path_command_to_string, path_to_string};
 
 pub trait TraceExt {
     fn to_raw(&self) -> RawTrace;
@@ -59,34 +59,37 @@ impl TraceShapeExt for RawTraceShape {
         }
     }
 
-
     fn as_path2d(&self, resize_info: &ResizeInfo) -> Path2d {
-
         match self {
             RawTraceShape::PathCommands(commands) => {
-
-                let path_string = path_command_to_string(
-                    commands
-                        .iter()
-                        .map(|(command, absolute)| (denormalize_command(command, resize_info), *absolute)),
-                );
+                let path_string =
+                    path_command_to_string(commands.iter().map(|(command, absolute)| {
+                        (denormalize_command(command, resize_info), *absolute)
+                    }));
 
                 Path2d::new_with_path_string(&path_string).unwrap_ji()
             }
 
             RawTraceShape::Path(path) => {
                 let path_string = path_to_string(
-                    path 
-                        .iter()
+                    path.iter()
                         .map(|(x, y)| resize_info.get_pos_denormalized(*x, *y)),
                 );
 
                 Path2d::new_with_path_string(&path_string).unwrap_ji()
-            } 
+            }
             RawTraceShape::Ellipse(radius_x, radius_y) => {
                 let (radius_x, radius_y) = resize_info.get_pos_denormalized(*radius_x, *radius_y);
                 let path = Path2d::new().unwrap_ji();
-                let _ = path.ellipse(radius_x, radius_y, radius_x, radius_y, 0.0, 0.0, 2.0 * std::f64::consts::PI);
+                let _ = path.ellipse(
+                    radius_x,
+                    radius_y,
+                    radius_x,
+                    radius_y,
+                    0.0,
+                    0.0,
+                    2.0 * std::f64::consts::PI,
+                );
 
                 path
             }
@@ -115,7 +118,6 @@ pub enum ShapeRef<'a> {
 pub fn calc_bounds<'a>(shape: ShapeRef<'a>, offset: Option<(f64, f64)>) -> Option<BoundsF64> {
     let mut bounds = match shape {
         ShapeRef::PathCommands(commands) => {
-
             //Set to inverse of max values
             let mut left: f64 = 1.0;
             let mut right: f64 = 0.0;
@@ -131,20 +133,17 @@ pub fn calc_bounds<'a>(shape: ShapeRef<'a>, offset: Option<(f64, f64)>) -> Optio
                     rel_first = Some(rel);
                 }
 
-
                 let (x, y) = match command {
-
                     PathCommand::LineTo(x, y) => (Some(x), Some(y)),
                     PathCommand::HorizontalLineTo(x) => (Some(x), None),
                     PathCommand::VerticalLineTo(y) => (None, Some(y)),
-
 
                     //not using the point
                     PathCommand::ClosePath => (None, None),
 
                     // TODO: need to calculate all the extends manually.. or use dom or something
                     // for now, just use the x,y
-                    PathCommand::MoveTo(x,y) => (Some(x), Some(y)),
+                    PathCommand::MoveTo(x, y) => (Some(x), Some(y)),
                     PathCommand::CurveTo(_, _, _, _, x, y) => (Some(x), Some(y)),
                     PathCommand::SmoothCurveTo(_, _, x, y) => (Some(x), Some(y)),
                     PathCommand::QuadCurveTo(_, _, x, y) => (Some(x), Some(y)),
@@ -162,7 +161,7 @@ pub fn calc_bounds<'a>(shape: ShapeRef<'a>, offset: Option<(f64, f64)>) -> Optio
                         right = x;
                     }
                 }
-                
+
                 if let Some(y) = y {
                     let y = *y;
                     if y < top {

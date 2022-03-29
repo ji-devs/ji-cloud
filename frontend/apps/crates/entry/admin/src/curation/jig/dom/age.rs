@@ -70,7 +70,7 @@ fn age_value_signal(state: Rc<CurationJig>) -> impl Signal<Item = String> {
                         output.push(age.display_name.clone());
                     },
                     None => {
-                        
+
                     }
                 }
             });

@@ -14,23 +14,21 @@ pub fn render(state: Rc<SidebarSettings>) -> Dom {
         lines: vec![
             (
                 LineKind::GameDisplay,
-                vec![
-                    Some(SettingsButton::new_value_click(
-                        SettingsButtonKind::NumPairs,
-                        clone!(state => move || {
-                            state.base.extra.settings.use_default_pairs.signal().map(|v| !v)
+                vec![Some(SettingsButton::new_value_click(
+                    SettingsButtonKind::NumPairs,
+                    clone!(state => move || {
+                        state.base.extra.settings.use_default_pairs.signal().map(|v| !v)
+                    }),
+                    SettingsValue::new_mutable(
+                        state.settings().pairs_to_display.clone(),
+                        clone!(state => move |value| {
+                            state.set_pairs_to_display(value);
                         }),
-                        SettingsValue::new_mutable(
-                            state.settings().pairs_to_display.clone(),
-                            clone!(state => move |value| {
-                                state.set_pairs_to_display(value);
-                            }),
-                        ),
-                        clone!(state => move || {
-                            state.toggle_use_default_pairs();
-                        }),
-                    )),
-                ]
+                    ),
+                    clone!(state => move || {
+                        state.toggle_use_default_pairs();
+                    }),
+                ))],
             ),
             (
                 LineKind::TimeLimit,

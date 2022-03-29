@@ -54,7 +54,9 @@ impl State {
     }
 
     pub fn derive_list(&self) -> Option<Vec<String>> {
-        let list: Vec<String> = self.list.lock_ref()
+        let list: Vec<String> = self
+            .list
+            .lock_ref()
             .iter()
             .map(|value| value.get_cloned())
             .filter(|value| !value.trim().is_empty())

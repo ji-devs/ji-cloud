@@ -6,8 +6,8 @@ use shared::domain::jig::{JigId, JigSearchQuery};
 
 use components::page_header::state::PageLinks;
 
-use strum_macros::Display;
 use super::search_results::SearchResults;
+use strum_macros::Display;
 
 mod search_state;
 pub use search_state::*;

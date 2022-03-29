@@ -1,5 +1,6 @@
 use super::{
-    ask_questions::AskQuestions, say_something::SaySomething, soundboard::Soundboard, video::Video, talk_type::TalkType, puzzle::Puzzle,
+    ask_questions::AskQuestions, puzzle::Puzzle, say_something::SaySomething,
+    soundboard::Soundboard, talk_type::TalkType, video::Video,
 };
 use crate::base::state::Base;
 use dominator::{html, Dom};
@@ -22,7 +23,7 @@ impl Base {
                         self.allow_stage_click();
                         html!("empty-fragment")
                     }
-                },
+                }
                 Activity::TalkType(activity) => TalkType::new(self.clone(), activity).render(),
                 Activity::Puzzle(activity) => Puzzle::new(self.clone(), activity).render(),
                 // _ => html!("empty-fragment"),
@@ -30,7 +31,7 @@ impl Base {
             None => {
                 self.allow_stage_click();
                 html!("empty-fragment")
-            },
+            }
         }
     }
 }

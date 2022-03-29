@@ -1,10 +1,18 @@
-use crate::{module::_groups::cards::edit::state::*, theme_selector::state::{ThemeSelectorCallbacks, ThemeSelector}, tabs::MenuTabKind};
+use crate::{
+    module::_groups::cards::edit::state::*,
+    tabs::MenuTabKind,
+    theme_selector::state::{ThemeSelector, ThemeSelectorCallbacks},
+};
 use dominator::clone;
 use futures_signals::signal::Mutable;
-use shared::{api::{endpoints, ApiEndpoint}, domain::jig::JigUpdateDraftDataRequest, error::EmptyError};
+use shared::{
+    api::{endpoints, ApiEndpoint},
+    domain::jig::JigUpdateDraftDataRequest,
+    error::EmptyError,
+};
+use std::rc::Rc;
 use utils::prelude::api_with_auth_empty;
 use wasm_bindgen_futures::spawn_local;
-use std::rc::Rc;
 
 use super::custom_background::CustomBackground;
 
@@ -18,7 +26,10 @@ pub struct Step2<RawData: RawDataExt, E: ExtraExt> {
 }
 
 impl<RawData: RawDataExt, E: ExtraExt> Step2<RawData, E> {
-    pub fn new(base: Rc<CardsBase<RawData, E>>, tab_kind: Mutable<Option<MenuTabKind>>) -> Rc<Self> {
+    pub fn new(
+        base: Rc<CardsBase<RawData, E>>,
+        tab_kind: Mutable<Option<MenuTabKind>>,
+    ) -> Rc<Self> {
         let callbacks = ThemeSelectorCallbacks::new(clone!(base => move |theme_id| {
             base.set_theme(theme_id);
 
@@ -40,10 +51,7 @@ impl<RawData: RawDataExt, E: ExtraExt> Step2<RawData, E> {
                     .await;
             }))
         }));
-        let theme_selector = Rc::new(ThemeSelector::new(
-            base.theme_id.read_only(),
-            callbacks,
-        ));
+        let theme_selector = Rc::new(ThemeSelector::new(base.theme_id.read_only(), callbacks));
 
         Rc::new(Self {
             base,

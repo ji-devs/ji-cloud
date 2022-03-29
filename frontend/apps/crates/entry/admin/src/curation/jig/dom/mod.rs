@@ -1,11 +1,14 @@
 use super::state::CurationJig;
-use components::{player_popup::{PlayerPopup, PreviewPopupCallbacks}, module::_common::thumbnail::ModuleThumbnail};
-use dominator::{html, Dom, clone, with_node};
+use components::{
+    module::_common::thumbnail::ModuleThumbnail,
+    player_popup::{PlayerPopup, PreviewPopupCallbacks},
+};
+use dominator::{clone, html, with_node, Dom};
 use futures_signals::signal::SignalExt;
 use shared::domain::jig::JigRating;
-use utils::{events, routes::AdminCurationRoute, jig::JigPlayerOptions, unwrap::UnwrapJiExt};
-use web_sys::{HtmlInputElement, HtmlTextAreaElement};
 use std::rc::Rc;
+use utils::{events, jig::JigPlayerOptions, routes::AdminCurationRoute, unwrap::UnwrapJiExt};
+use web_sys::{HtmlInputElement, HtmlTextAreaElement};
 
 mod affiliation;
 mod age;

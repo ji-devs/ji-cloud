@@ -2,7 +2,7 @@ use dominator::{clone, html, Dom};
 
 use super::state::*;
 use components::module::_groups::cards::play::card::dom::{
-    render_card, render_card_mixin, CardOptions, Size, Effect,
+    render_card, render_card_mixin, CardOptions, Effect, Size,
 };
 use futures_signals::signal::SignalExt;
 use std::rc::Rc;
@@ -78,7 +78,12 @@ impl Game {
 }
 
 fn is_incorrect_choice(state: &Rc<Game>, pair_id: &usize) -> bool {
-    state.current.lock_ref().as_ref().unwrap_ji().incorrect_choices
+    state
+        .current
+        .lock_ref()
+        .as_ref()
+        .unwrap_ji()
+        .incorrect_choices
         .borrow()
         .iter()
         .find(|id| *id == pair_id)

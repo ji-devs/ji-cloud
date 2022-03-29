@@ -2,8 +2,8 @@ use std::rc::Rc;
 
 use dominator::clone;
 use gloo_timers::future::TimeoutFuture;
-use wasm_bindgen_futures::spawn_local;
 use utils::{storage, unwrap::UnwrapJiExt};
+use wasm_bindgen_futures::spawn_local;
 
 use super::JigziHelp;
 

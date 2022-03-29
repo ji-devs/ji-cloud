@@ -1,7 +1,10 @@
 use std::rc::Rc;
 
 use dominator::clone;
-use shared::{api::{ApiEndpoint, endpoints}, error::EmptyError};
+use shared::{
+    api::{endpoints, ApiEndpoint},
+    error::EmptyError,
+};
 use utils::{prelude::api_with_auth_empty, unwrap::UnwrapJiExt};
 
 use super::state::AdditionalResourceComponent;

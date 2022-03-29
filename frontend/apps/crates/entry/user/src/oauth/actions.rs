@@ -6,7 +6,8 @@ use shared::{
 use utils::{
     fetch::{api_no_auth, api_no_auth_with_credentials},
     routes::*,
-    storage, unwrap::UnwrapJiExt,
+    storage,
+    unwrap::UnwrapJiExt,
 };
 use wasm_bindgen::prelude::*;
 
@@ -32,10 +33,7 @@ pub async fn redirect(service_kind: GetOAuthUrlServiceKind, url_kind: OAuthUrlKi
     if let Ok(resp) =
         api_no_auth::<GetOAuthUrlResponse, EmptyError, ()>(&path, GetOAuthUrl::METHOD, None).await
     {
-        let _ = web_sys::window()
-            .unwrap_ji()
-            .location()
-            .set_href(&resp.url);
+        let _ = web_sys::window().unwrap_ji().location().set_href(&resp.url);
         //unsafe { crate::oauth::actions::oauth_open_window(&resp.url, "oauth"); }
     }
 }

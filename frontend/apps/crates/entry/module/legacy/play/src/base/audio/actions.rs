@@ -1,15 +1,18 @@
 use super::*;
-use components::audio::mixer::{AudioSource, AUDIO_MIXER, AudioPath};
+use components::audio::mixer::{AudioPath, AudioSource, AUDIO_MIXER};
 use gloo_timers::callback::Timeout;
 
 impl AudioManager {
-
     pub fn play_positive_clip(&self) {
-        self.play_clip(AudioPath::from(AUDIO_MIXER.with(|mixer| mixer.get_random_positive())).url());
+        self.play_clip(
+            AudioPath::from(AUDIO_MIXER.with(|mixer| mixer.get_random_positive())).url(),
+        );
     }
 
     pub fn play_negative_clip(&self) {
-        self.play_clip(AudioPath::from(AUDIO_MIXER.with(|mixer| mixer.get_random_negative())).url());
+        self.play_clip(
+            AudioPath::from(AUDIO_MIXER.with(|mixer| mixer.get_random_negative())).url(),
+        );
     }
 
     pub fn play_clip(&self, url: String) {

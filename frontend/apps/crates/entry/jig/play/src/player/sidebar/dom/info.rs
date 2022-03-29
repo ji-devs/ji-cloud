@@ -6,7 +6,11 @@ use futures_signals::{
     signal::{Signal, SignalExt},
 };
 use shared::domain::jig::JigResponse;
-use utils::{ages::AgeRangeVecExt, events, jig::{published_at_string, ResourceContentExt}};
+use utils::{
+    ages::AgeRangeVecExt,
+    events,
+    jig::{published_at_string, ResourceContentExt},
+};
 
 use super::{super::state::State, report};
 

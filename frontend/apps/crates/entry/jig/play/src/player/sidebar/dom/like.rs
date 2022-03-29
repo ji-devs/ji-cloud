@@ -4,13 +4,11 @@ use dominator::{clone, html, Dom};
 
 use shared::{
     api::{endpoints::jig, ApiEndpoint},
-    error::EmptyError, domain::jig::JigResponse,
+    domain::jig::JigResponse,
+    error::EmptyError,
 };
 
-use utils::{
-    prelude::api_with_auth_empty,
-    events
-};
+use utils::{events, prelude::api_with_auth_empty};
 
 use super::super::state::State;
 
@@ -58,4 +56,3 @@ pub fn render(state: Rc<State>, jig: &JigResponse) -> Dom {
         }))
     })
 }
-

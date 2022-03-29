@@ -1,8 +1,8 @@
 use crate::base::state::*;
 
 use components::{
+    audio::mixer::{AudioMixer, AudioPath, AudioSourceExt, AUDIO_MIXER},
     module::_groups::cards::play::card::dom::FLIPPED_AUDIO_EFFECT,
-    audio::mixer::{AUDIO_MIXER, AudioPath, AudioSourceExt, AudioMixer},
 };
 use dominator::clone;
 use gloo_timers::future::TimeoutFuture;
@@ -89,15 +89,12 @@ pub fn evaluate(state: Rc<Base>, id_1: usize, id_2: usize) {
             TimeoutFuture::new(2_000).await;
         }
 
-
         state.flip_state.set(FlipState::None);
     })
 }
 
 fn play_card_audio(card: &Card) {
     if let Some(audio) = &card.audio {
-        AUDIO_MIXER.with(|mixer| {
-            mixer.play_oneshot(audio.as_source())
-        });
+        AUDIO_MIXER.with(|mixer| mixer.play_oneshot(audio.as_source()));
     }
 }

@@ -44,7 +44,11 @@ impl AudioSettings {
 
         self.positive = {
             if !jig.audio_effects.feedback_positive.is_empty() {
-                jig.audio_effects.feedback_positive.clone().into_iter().collect()
+                jig.audio_effects
+                    .feedback_positive
+                    .clone()
+                    .into_iter()
+                    .collect()
             } else {
                 AudioFeedbackPositive::variants()
             }
@@ -52,7 +56,11 @@ impl AudioSettings {
 
         self.negative = {
             if !jig.audio_effects.feedback_negative.is_empty() {
-                jig.audio_effects.feedback_negative.clone().into_iter().collect()
+                jig.audio_effects
+                    .feedback_negative
+                    .clone()
+                    .into_iter()
+                    .collect()
             } else {
                 AudioFeedbackNegative::variants()
             }

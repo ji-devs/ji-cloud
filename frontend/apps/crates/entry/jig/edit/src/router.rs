@@ -20,15 +20,11 @@ impl Router {
     fn dom_signal() -> impl Signal<Item = Option<Dom>> {
         Self::signal().map(|route| match route {
             Route::Jig(route) => match route {
-                JigRoute::Gallery => Some(
-                    JigGallery::new(JigFocus::Modules).render()
-                ),
-                JigRoute::ResourceGallery => Some(
-                    JigGallery::new(JigFocus::Resources).render()
-                ),
-                JigRoute::Edit(jig_id, jig_focus, route) => Some(
-                    EditPage::render(jig_id, jig_focus, route)
-                ),
+                JigRoute::Gallery => Some(JigGallery::new(JigFocus::Modules).render()),
+                JigRoute::ResourceGallery => Some(JigGallery::new(JigFocus::Resources).render()),
+                JigRoute::Edit(jig_id, jig_focus, route) => {
+                    Some(EditPage::render(jig_id, jig_focus, route))
+                }
                 _ => None,
             },
             _ => None,

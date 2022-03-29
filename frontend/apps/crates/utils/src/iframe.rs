@@ -1,15 +1,15 @@
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
-use wasm_bindgen::prelude::*;
-use std::cell::Cell;
 use crate::unwrap::UnwrapJiExt;
+use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use shared::domain::jig::{module::ModuleId, LiteModule};
+use std::cell::Cell;
+use wasm_bindgen::prelude::*;
 
 pub const IFRAME_DATA_PARAM: &str = "iframe_data";
 
 #[derive(Clone, Debug, Copy, Eq, PartialEq)]
 pub enum IframeTarget {
     Top,
-    Parent
+    Parent,
 }
 
 thread_local! {

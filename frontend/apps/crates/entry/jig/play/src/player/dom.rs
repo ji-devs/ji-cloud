@@ -6,8 +6,8 @@ use futures_signals::map_ref;
 use futures_signals::signal::{Signal, SignalExt};
 use js_sys::Reflect;
 use shared::domain::jig::{JigResponse, ModuleKind};
-use utils::iframe::{JigPlayerToPlayerPopup, IframeMessageExt};
 use std::rc::Rc;
+use utils::iframe::{IframeMessageExt, JigPlayerToPlayerPopup};
 use utils::{
     iframe::{IframeAction, ModuleToJigPlayerMessage},
     prelude::SETTINGS,
@@ -189,9 +189,7 @@ fn active_module_valid_signal(state: Rc<State>) -> impl Signal<Item = bool> {
     jig_and_active_module_signal(state).map(|(jig, active_module_index)| {
         match jig {
             Some(jig) => match &jig.jig_data.modules.get(active_module_index) {
-                Some(module) => {
-                    module.is_complete || matches!(module.kind, ModuleKind::Legacy)
-                },
+                Some(module) => module.is_complete || matches!(module.kind, ModuleKind::Legacy),
                 None => true, // Active module isn't in the list
             },
             None => true, // Jig isn't set

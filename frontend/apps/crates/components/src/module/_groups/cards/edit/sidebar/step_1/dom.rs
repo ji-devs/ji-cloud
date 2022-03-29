@@ -1,15 +1,20 @@
 use super::state::*;
 use dominator::{clone, html, Dom};
-use futures_signals::{signal::SignalExt, signal_vec::SignalVecExt, map_ref};
+use futures_signals::{map_ref, signal::SignalExt, signal_vec::SignalVecExt};
 use shared::domain::jig::module::body::Audio;
 use std::rc::Rc;
 use utils::prelude::*;
 
 use crate::{
+    audio::input::{AudioInput, AudioInputCallbacks, AudioInputOptions},
     image::search::dom::render as render_image_search,
     lists::{dual::dom::render as render_dual_list, single::dom::render as render_single_list},
-    module::_groups::cards::{edit::{state::*, strings}, lookup::Side},
-    tabs::{MenuTab, MenuTabKind}, audio::input::{AudioInput, AudioInputOptions, AudioInputCallbacks}, overlay::handle::OverlayHandle,
+    module::_groups::cards::{
+        edit::{state::*, strings},
+        lookup::Side,
+    },
+    overlay::handle::OverlayHandle,
+    tabs::{MenuTab, MenuTabKind},
 };
 
 const STR_NONEMPTY_LIST_LABEL: &str = "Edit your words on the cards";

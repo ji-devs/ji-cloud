@@ -9,11 +9,7 @@ use shared::{
     domain::{
         jig::{
             module::{ModuleCreateRequest, ModuleId, ModuleResponse},
-            JigId,
-            JigPlayerSettings,
-            JigResponse,
-            JigUpdateDraftDataRequest,
-            LiteModule,
+            JigId, JigPlayerSettings, JigResponse, JigUpdateDraftDataRequest, LiteModule,
             ModuleKind,
         },
         CreateResponse,
@@ -35,7 +31,10 @@ pub async fn load_jig(jig_id: JigId, jig_cell: Rc<RefCell<Option<JigResponse>>>)
     .await
     {
         Ok(resp) => {
-            assert!(resp.jig_focus.is_modules(), "only module focused jigs should be here");
+            assert!(
+                resp.jig_focus.is_modules(),
+                "only module focused jigs should be here"
+            );
             *jig_cell.borrow_mut() = Some(resp);
         }
         Err(_) => {}
@@ -50,7 +49,7 @@ pub fn navigate_to_publish(state: Rc<State>) {
     Route::push_state(Route::Jig(JigRoute::Edit(
         jig_id,
         state.jig.jig_focus,
-        JigEditRoute::Publish
+        JigEditRoute::Publish,
     )));
 }
 
@@ -59,20 +58,21 @@ pub fn set_highlight_modules(state: &Rc<State>, highlight: bool) {
         let modules = state.modules.lock_ref();
 
         if modules.iter().filter(|module| module.is_some()).count() == 0 {
-            state.highlight_modules.set_neq(Some(ModuleHighlight::Publish))
+            state
+                .highlight_modules
+                .set_neq(Some(ModuleHighlight::Publish))
         } else {
-            let idx = modules.iter()
-                .position(|module| match &**module {
-                        Some(module) => !module.is_complete.get_cloned(),
-                        None => false,
-                    }
-                );
+            let idx = modules.iter().position(|module| match &**module {
+                Some(module) => !module.is_complete.get_cloned(),
+                None => false,
+            });
             match idx {
-                Some(idx) => state.highlight_modules.set_neq(Some(ModuleHighlight::Module(idx))),
+                Some(idx) => state
+                    .highlight_modules
+                    .set_neq(Some(ModuleHighlight::Module(idx))),
                 None => state.highlight_modules.set_neq(None),
             }
         }
-
     } else {
         state.highlight_modules.set_neq(None);
     }
@@ -153,7 +153,7 @@ pub fn on_iframe_message(state: Rc<State>, message: ModuleToJigEditorMessage) {
                 // Oh my.
                 match &***module {
                     Some(module) => *module.id() == module_id,
-                    None => false
+                    None => false,
                 }
             });
 
@@ -164,15 +164,12 @@ pub fn on_iframe_message(state: Rc<State>, message: ModuleToJigEditorMessage) {
             }
         }
         ModuleToJigEditorMessage::Next => {
-            state
-                .jig_edit_state
-                .route
-                .set_neq(JigEditRoute::Landing);
+            state.jig_edit_state.route.set_neq(JigEditRoute::Landing);
             let jig_id = state.jig.id;
             Route::push_state(Route::Jig(JigRoute::Edit(
                 jig_id,
                 state.jig.jig_focus,
-                JigEditRoute::Landing
+                JigEditRoute::Landing,
             )));
         }
         ModuleToJigEditorMessage::Publish => {

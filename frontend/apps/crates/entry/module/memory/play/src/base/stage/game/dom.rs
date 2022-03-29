@@ -4,7 +4,7 @@ use futures_signals::signal::SignalExt;
 use std::rc::Rc;
 use utils::prelude::*;
 
-use components::module::_groups::cards::play::card::dom::{Size, render_card_mixin, CardOptions};
+use components::module::_groups::cards::play::card::dom::{render_card_mixin, CardOptions, Size};
 
 pub fn render(state: Rc<Base>) -> Dom {
     html!("play-main", {
@@ -33,16 +33,20 @@ fn render_main_card(state: Rc<Base>, card_state: Rc<CardState>) -> Dom {
     );
 
     render_card_mixin(options, |dom| {
-        dom
-            .style_signal("visibility", card_state.is_found().map(|found| if found { "hidden" } else { "visible" }))
-            .property_signal("flipped", card_state.is_flipped(&state))
-            .event(clone!(state, card_id => move |_evt:events::Click| {
-                if let Some((id_1, id_2)) = super::actions::card_click(state.clone(), card_id) {
-                    super::actions::evaluate(state.clone(), id_1, id_2);
-                }
-            }))
-            .after_inserted(clone!(card_state => move |elem| {
-                *card_state.main_elem.borrow_mut() = Some(elem);
-            }))
+        dom.style_signal(
+            "visibility",
+            card_state
+                .is_found()
+                .map(|found| if found { "hidden" } else { "visible" }),
+        )
+        .property_signal("flipped", card_state.is_flipped(&state))
+        .event(clone!(state, card_id => move |_evt:events::Click| {
+            if let Some((id_1, id_2)) = super::actions::card_click(state.clone(), card_id) {
+                super::actions::evaluate(state.clone(), id_1, id_2);
+            }
+        }))
+        .after_inserted(clone!(card_state => move |elem| {
+            *card_state.main_elem.borrow_mut() = Some(elem);
+        }))
     })
 }

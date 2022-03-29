@@ -74,11 +74,11 @@ impl State {
         let left = into_list(self.left.lock_ref());
         let right = into_list(self.right.lock_ref());
 
-        self.clone().filtered_list(&left, &right)
-            .map(|list| list.iter()
+        self.clone().filtered_list(&left, &right).map(|list| {
+            list.iter()
                 .map(|(left, right)| (left.to_string(), right.to_string()))
                 .collect()
-            )
+        })
     }
 
     pub fn is_valid_signal(self: &Rc<Self>) -> impl Signal<Item = bool> {
@@ -89,7 +89,8 @@ impl State {
                 .signal_vec_cloned()
                 .map_signal(|inner| inner.signal_cloned())
                 .to_signal_map(|value| {
-                    value.iter()
+                    value
+                        .iter()
                         .map(|value| value.to_owned())
                         .collect::<Vec<String>>()
                 })
@@ -114,10 +115,15 @@ impl State {
     ///
     /// Note: an owned Rc<Self> is required because a caller can be inside a signals callback and
     /// we need to guarantee that `self` remains valid.
-    fn filtered_list<'a>(self: Rc<Self>, left: &'a Vec<String>, right: &'a Vec<String>) -> Option<Vec<(&'a str, &'a str)>> {
+    fn filtered_list<'a>(
+        self: Rc<Self>,
+        left: &'a Vec<String>,
+        right: &'a Vec<String>,
+    ) -> Option<Vec<(&'a str, &'a str)>> {
         // We need to recreate the iterator because it is consumed
         let create_iter = |left: &'a Vec<String>, right: &'a Vec<String>| {
-            left.iter().zip(right.iter())
+            left.iter()
+                .zip(right.iter())
                 // Make sure that we won't be checking whether strings like "   " are empty. This also
                 // cleans up strings wrapped with whitespace.
                 .map(|(left, right)| (left.trim(), right.trim()))
@@ -131,7 +137,9 @@ impl State {
             // Ensure that each row has both left and right values set.
             // Because both lists are prefilled with empty strings, we need to check that either
             // side is empty, but not both sides as that would be an empty row.
-            .find(|(left, right)| (left.is_empty() || right.is_empty()) && !(left.is_empty() && right.is_empty()))
+            .find(|(left, right)| {
+                (left.is_empty() || right.is_empty()) && !(left.is_empty() && right.is_empty())
+            })
             .is_none();
 
         if contents_valid {
@@ -164,4 +172,3 @@ impl State {
         self.is_placeholder.set_neq(true);
     }
 }
-

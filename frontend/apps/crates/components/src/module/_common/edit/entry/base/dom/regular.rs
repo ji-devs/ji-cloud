@@ -6,8 +6,8 @@ use futures_signals::{
     signal::{Mutable, SignalExt},
 };
 use serde::Deserialize;
+use std::{collections::HashMap, rc::Rc};
 use wasm_bindgen::JsValue;
-use std::{rc::Rc, collections::HashMap};
 
 use crate::{jigzi_help::JigziHelp, module::_common::edit::header::controller::dom::ControllerDom};
 

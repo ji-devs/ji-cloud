@@ -1,6 +1,8 @@
 use crate::{path::image_lib_url, prelude::*};
 use awsm_web::canvas::{get_2d_context, CanvasToBlobFuture};
-use web_sys::{window, Blob, CanvasRenderingContext2d, HtmlImageElement, HtmlCanvasElement, ImageData};
+use web_sys::{
+    window, Blob, CanvasRenderingContext2d, HtmlCanvasElement, HtmlImageElement, ImageData,
+};
 
 use wasm_bindgen::JsCast;
 
@@ -17,7 +19,11 @@ pub struct ImageEffect {
 
 impl ImageEffect {
     pub async fn new(src: Image, canvas: Option<HtmlCanvasElement>) -> Self {
-        Self::new_url(&image_lib_url(src.lib, PngImageFile::Resized, src.id), canvas).await
+        Self::new_url(
+            &image_lib_url(src.lib, PngImageFile::Resized, src.id),
+            canvas,
+        )
+        .await
     }
 
     pub async fn new_url(url: &str, canvas: Option<HtmlCanvasElement>) -> Self {

@@ -48,7 +48,7 @@ impl Category {
         id: CategoryId,
         name: String,
         children: Option<Vec<Rc<Self>>>,
-        editing: bool
+        editing: bool,
     ) -> Self {
         Self {
             id,

@@ -12,7 +12,10 @@ pub struct AdditionalResourceComponent {
 }
 
 impl AdditionalResourceComponent {
-    pub fn new(additional_resource: AdditionalResource, publish_state: Rc<PublishState>) -> Rc<Self> {
+    pub fn new(
+        additional_resource: AdditionalResource,
+        publish_state: Rc<PublishState>,
+    ) -> Rc<Self> {
         Rc::new(Self {
             loader: AsyncLoader::new(),
             publish_state,

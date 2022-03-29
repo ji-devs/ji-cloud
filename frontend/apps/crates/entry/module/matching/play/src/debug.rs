@@ -7,11 +7,8 @@ use shared::{
             module::body::{
                 Image, Instructions,
                 _groups::cards::{
-                    BaseContent,
-                    Card as RawCard,
-                    CardContent as RawCardContent,
-                    CardPair as RawCardPair,
-                    Mode
+                    BaseContent, Card as RawCard, CardContent as RawCardContent,
+                    CardPair as RawCardPair, Mode,
                 },
                 matching::{Content, ModuleData as RawData, PlayerSettings},
             },
@@ -66,31 +63,29 @@ impl DebugSettings {
                                     .take(2)
                                     .chain(config::get_debug_pairs(mode).into_iter())
                                     .map(|(word_1, word_2)| match mode {
-                                        Mode::WordsAndImages => {
-                                            RawCardPair(
-                                                RawCard {
-                                                    audio: None,
-                                                    card_content: RawCardContent::Text(word_1)
-                                                },
-                                                RawCard {
-                                                    audio: None,
-                                                    card_content: RawCardContent::Image(Some(Image {
-                                                        id: ImageId(
-                                                            Uuid::parse_str(IMAGE_UUID).unwrap_ji(),
-                                                        ),
-                                                        lib: MediaLibrary::User,
-                                                    }))
-                                                },
-                                            )
-                                        },
-                                        _ => RawCardPair(
+                                        Mode::WordsAndImages => RawCardPair(
                                             RawCard {
                                                 audio: None,
-                                                card_content: RawCardContent::Text(word_1)
+                                                card_content: RawCardContent::Text(word_1),
                                             },
                                             RawCard {
                                                 audio: None,
-                                                card_content: RawCardContent::Text(word_2)
+                                                card_content: RawCardContent::Image(Some(Image {
+                                                    id: ImageId(
+                                                        Uuid::parse_str(IMAGE_UUID).unwrap_ji(),
+                                                    ),
+                                                    lib: MediaLibrary::User,
+                                                })),
+                                            },
+                                        ),
+                                        _ => RawCardPair(
+                                            RawCard {
+                                                audio: None,
+                                                card_content: RawCardContent::Text(word_1),
+                                            },
+                                            RawCard {
+                                                audio: None,
+                                                card_content: RawCardContent::Text(word_2),
                                             },
                                         ),
                                     })

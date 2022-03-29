@@ -1,6 +1,6 @@
 use dominator::{clone, html, Dom};
 
-use std::{rc::Rc, fmt::Debug};
+use std::{fmt::Debug, rc::Rc};
 use utils::events;
 
 use crate::module::_common::edit::history::state::HistoryState;

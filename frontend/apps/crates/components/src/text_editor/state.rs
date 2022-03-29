@@ -7,7 +7,8 @@ use futures_signals::signal::{Mutable, ReadOnlyMutable, SignalExt};
 use js_sys::Reflect;
 use utils::{
     fonts::font_families_iter,
-    themes::{ThemeId, ThemeIdExt}, unwrap::UnwrapJiExt,
+    themes::{ThemeId, ThemeIdExt},
+    unwrap::UnwrapJiExt,
 };
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
@@ -83,7 +84,8 @@ impl State {
             None => {
                 let reset_value_method =
                     Reflect::get(wysiwyg_ref, &JsValue::from_str("clearValue")).unwrap_ji();
-                let reset_value_method = reset_value_method.dyn_ref::<js_sys::Function>().unwrap_ji();
+                let reset_value_method =
+                    reset_value_method.dyn_ref::<js_sys::Function>().unwrap_ji();
                 let _ = reset_value_method.call0(wysiwyg_ref);
             }
         };

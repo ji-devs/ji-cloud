@@ -1,5 +1,9 @@
 use dominator::{clone, html, with_node, Dom};
-use futures_signals::{map_ref, signal::{Mutable, SignalExt}, signal_vec::SignalVecExt};
+use futures_signals::{
+    map_ref,
+    signal::{Mutable, SignalExt},
+    signal_vec::SignalVecExt,
+};
 use shared::domain::jig::PrivacyLevel;
 use utils::{
     events,
@@ -7,8 +11,8 @@ use utils::{
 };
 use web_sys::{HtmlElement, HtmlInputElement, HtmlTextAreaElement};
 
-use super::additional_resource::AdditionalResourceComponent;
 use super::add_additional_resource::AddAdditionalResource;
+use super::additional_resource::AdditionalResourceComponent;
 
 use super::super::state::State as JigEditState;
 use super::state::Publish;
@@ -27,8 +31,8 @@ use components::{
 use std::rc::Rc;
 
 pub mod age;
-pub mod category_pills;
 pub mod categories_select;
+pub mod category_pills;
 pub mod language;
 
 const STR_PUBLISH: &str = "Publish ";

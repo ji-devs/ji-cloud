@@ -1,8 +1,8 @@
 use super::state::*;
 use components::{
     image::search::dom::render as render_image_search,
-    text_editor::dom::render_controls as render_text_editor,
     tabs::{MenuTab, MenuTabKind},
+    text_editor::dom::render_controls as render_text_editor,
 };
 use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;

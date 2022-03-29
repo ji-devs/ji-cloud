@@ -6,12 +6,8 @@ use shared::domain::jig::{
         body::{
             Instructions,
             _groups::cards::{
-                BaseContent,
-                Card as RawCard,
-                CardContent as RawCardContent,
-                CardPair as RawCardPair,
-                Mode,
-                Step
+                BaseContent, Card as RawCard, CardContent as RawCardContent,
+                CardPair as RawCardPair, Mode, Step,
             },
             flashcards::{Content, ModuleData as RawData, PlayerSettings},
         },
@@ -59,26 +55,24 @@ impl DebugSettings {
                                 config::get_debug_pairs(mode)
                                     .into_iter()
                                     .map(|(word_1, word_2)| match mode {
-                                        Mode::WordsAndImages => {
-                                            RawCardPair(
-                                                RawCard {
-                                                    audio: None,
-                                                    card_content: RawCardContent::Text(word_1)
-                                                },
-                                                RawCard {
-                                                    audio: None,
-                                                    card_content: RawCardContent::Image(None)
-                                                },
-                                            )
-                                        }
-                                        _ => RawCardPair(
+                                        Mode::WordsAndImages => RawCardPair(
                                             RawCard {
                                                 audio: None,
-                                                card_content: RawCardContent::Text(word_1)
+                                                card_content: RawCardContent::Text(word_1),
                                             },
                                             RawCard {
                                                 audio: None,
-                                                card_content: RawCardContent::Text(word_2)
+                                                card_content: RawCardContent::Image(None),
+                                            },
+                                        ),
+                                        _ => RawCardPair(
+                                            RawCard {
+                                                audio: None,
+                                                card_content: RawCardContent::Text(word_1),
+                                            },
+                                            RawCard {
+                                                audio: None,
+                                                card_content: RawCardContent::Text(word_2),
                                             },
                                         ),
                                     })

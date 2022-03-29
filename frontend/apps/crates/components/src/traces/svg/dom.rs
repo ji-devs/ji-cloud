@@ -331,7 +331,6 @@ where
     T: Signal<Item = (Transform, (f64, f64))> + 'static,
     S: Signal<Item = ShapeStyle> + 'static,
 {
-
     let path_string = path_to_string(
         points
             .iter()
@@ -399,4 +398,3 @@ where
         .apply(|dom| SvgCallbacks::mixin(callbacks, dom))
     })
 }
-

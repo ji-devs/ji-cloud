@@ -1,6 +1,9 @@
-use std::{rc::Rc, cell::RefCell};
+use std::{cell::RefCell, rc::Rc};
 
-use futures_signals::{signal::{Mutable, Signal}, map_ref};
+use futures_signals::{
+    map_ref,
+    signal::{Mutable, Signal},
+};
 use shared::domain::jig::ModuleKind;
 use utils::drag::Drag;
 use web_sys::HtmlElement;

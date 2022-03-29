@@ -7,7 +7,7 @@ use components::{
         callbacks::Callbacks as ImageSearchCallbacks,
         state::{ImageSearchKind, ImageSearchOptions, State as ImageSearchState},
     },
-    tabs::MenuTabKind
+    tabs::MenuTabKind,
 };
 use dominator::clone;
 use futures_signals::signal::Mutable;

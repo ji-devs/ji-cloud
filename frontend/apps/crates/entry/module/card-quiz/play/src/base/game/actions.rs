@@ -3,9 +3,9 @@ use super::state::*;
 use std::sync::atomic::Ordering;
 
 use components::{
+    audio::mixer::{AudioMixer, AudioPath, AudioSourceExt, AUDIO_MIXER},
     module::_common::play::prelude::*,
     module::_groups::cards::play::card::dom::FLIPPED_AUDIO_EFFECT,
-    audio::mixer::{AUDIO_MIXER, AudioPath, AudioSourceExt, AudioMixer},
 };
 
 use crate::base::state::Phase;

@@ -17,7 +17,7 @@ use web_sys::{HtmlElement, HtmlInputElement};
 
 use crate::{
     profile::{change_password, dom::options_popup::PopupCallbacks, state::ActivePopup},
-    strings::register::step_2::{STR_PERSONA_OPTIONS, STR_LOCATION_PLACEHOLDER},
+    strings::register::step_2::{STR_LOCATION_PLACEHOLDER, STR_PERSONA_OPTIONS},
 };
 
 use super::{actions, state::State};

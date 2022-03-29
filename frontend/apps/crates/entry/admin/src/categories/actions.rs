@@ -9,7 +9,10 @@ use shared::{
     error::EmptyError,
 };
 use std::rc::Rc;
-use utils::{fetch::{api_with_auth, api_with_auth_empty}, unwrap::UnwrapJiExt};
+use utils::{
+    fetch::{api_with_auth, api_with_auth_empty},
+    unwrap::UnwrapJiExt,
+};
 
 use dominator::clone;
 use wasm_bindgen::prelude::*;

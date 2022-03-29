@@ -10,6 +10,7 @@ use futures_signals::{
     CancelableFutureHandle,
 };
 use once_cell::sync::OnceCell;
+use serde::Deserialize;
 use shared::{
     domain::{
         audio::AudioId,
@@ -34,7 +35,6 @@ use utils::{colors::*, prelude::*};
 use uuid::Uuid;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
-use serde::{Deserialize};
 
 pub static SETTINGS: OnceCell<DebugSettings> = OnceCell::new();
 
@@ -74,7 +74,7 @@ pub async fn init(jig_id: JigId, _module_id: ModuleId) {
                     .unwrap_ji();
 
                 let slide_id = game.data.structure.slides[slide_index].slide_id();
-                
+
                 RawData { game_id, slide_id }
             }
             None => RawData::default(),
@@ -106,7 +106,7 @@ pub struct DebugGameManifestStructure {
 
 #[derive(Deserialize, Debug)]
 pub struct DebugGameSlide {
-    #[serde(rename="filePath")]
+    #[serde(rename = "filePath")]
     pub file_path: String,
 }
 

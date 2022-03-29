@@ -1,13 +1,10 @@
 use super::state::*;
 use components::{
-    module::_groups::cards::{
-        play::card::dom::FLIPPED_AUDIO_EFFECT,
-        lookup::Side
-    },
-    audio::mixer::{AUDIO_MIXER, AudioPath, AudioSourceExt},
+    audio::mixer::{AudioPath, AudioSourceExt, AUDIO_MIXER},
+    module::_groups::cards::{lookup::Side, play::card::dom::FLIPPED_AUDIO_EFFECT},
 };
 use gloo_timers::future::TimeoutFuture;
-use shared::domain::jig::module::body::_groups::cards::{CardPair, Card};
+use shared::domain::jig::module::body::_groups::cards::{Card, CardPair};
 
 use crate::base::state::Base;
 
@@ -24,8 +21,7 @@ impl Game {
 
         //borrow-checker fails with if/else here
         {
-            if let Some(next) = get_current(&self.base, &mut self.deck.borrow_mut())
-            {
+            if let Some(next) = get_current(&self.base, &mut self.deck.borrow_mut()) {
                 self.current.set(next);
                 return;
             }
@@ -101,8 +97,6 @@ pub(super) fn get_current(base: &Base, deck: &mut Vec<CardPair>) -> Option<Curre
 
 fn play_card_audio(card: &Card) {
     if let Some(audio) = &card.audio {
-        AUDIO_MIXER.with(|mixer| {
-            mixer.play_oneshot(audio.as_source())
-        });
+        AUDIO_MIXER.with(|mixer| mixer.play_oneshot(audio.as_source()));
     }
 }

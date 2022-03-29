@@ -1,14 +1,17 @@
-use shared::{domain::jig::{
-    module::{
-        body::{
-            Background, Instructions,
-            _groups::cards::{CardPair as RawCardPair, Mode, Step},
-            memory::{ModuleData as RawData, PlayerSettings},
+use shared::{
+    config::MAX_LIST_WORDS,
+    domain::jig::{
+        module::{
+            body::{
+                Background, Instructions,
+                _groups::cards::{CardPair as RawCardPair, Mode, Step},
+                memory::{ModuleData as RawData, PlayerSettings},
+            },
+            ModuleId,
         },
-        ModuleId,
+        JigId,
     },
-    JigId,
-}, config::MAX_LIST_WORDS};
+};
 
 use super::card::state::*;
 use components::module::{_common::play::prelude::*, _groups::cards::lookup::Side};
@@ -57,21 +60,23 @@ impl Base {
 
         let mut content = raw.content.unwrap_ji();
 
-        let max_cards = content.player_settings.pairs_to_display
-            .map_or_else(|| {
+        let max_cards = content.player_settings.pairs_to_display.map_or_else(
+            || {
                 let card_count = content.base.pairs.len();
                 if card_count > MAX_LIST_WORDS {
                     MAX_LIST_WORDS
                 } else {
                     card_count
                 }
-            }, |pairs_to_display| {
+            },
+            |pairs_to_display| {
                 if pairs_to_display > MAX_LIST_WORDS as u32 {
                     MAX_LIST_WORDS
                 } else {
                     pairs_to_display as usize
                 }
-            });
+            },
+        );
 
         let n_cards = max_cards * 2;
         let mut pair_lookup: Vec<usize> = vec![0; n_cards];

@@ -13,7 +13,6 @@ use web_sys::HtmlElement;
 //the idea is we can't let them scale down so much that the controls look weird / dissapear
 const MIN_SCALE_PERC: f64 = 0.1;
 
-
 pub fn focus_within(elem: &HtmlElement) -> bool {
     elem.matches(":focus-within").unwrap_ji()
 }

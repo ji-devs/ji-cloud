@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use dominator::{Dom, clone, events, html, with_node};
+use dominator::{clone, events, html, with_node, Dom};
 use utils::unwrap::UnwrapJiExt;
 use web_sys::HtmlElement;
 
@@ -9,10 +9,7 @@ use crate::overlay::handle::OverlayHandle;
 use super::state::Dialog;
 
 impl Dialog {
-    pub fn render(
-        get_dom: impl Fn() -> Dom + 'static,
-        on_close: Option<Box<dyn Fn()>>
-    ) -> Dom {
+    pub fn render(get_dom: impl Fn() -> Dom + 'static, on_close: Option<Box<dyn Fn()>>) -> Dom {
         let on_close = Rc::new(on_close);
 
         html!("empty-fragment" => HtmlElement, {

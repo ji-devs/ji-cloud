@@ -1,6 +1,6 @@
-use std::{rc::Rc, collections::HashSet, cell::RefCell, pin::Pin};
+use std::{cell::RefCell, collections::HashSet, pin::Pin, rc::Rc};
 
-use futures_signals::signal::{Mutable, Signal, Broadcaster};
+use futures_signals::signal::{Broadcaster, Mutable, Signal};
 use shared::domain::category::{Category, CategoryId};
 use web_sys::HtmlElement;
 
@@ -19,9 +19,8 @@ impl CategoriesInput {
         value: Pin<Box<dyn Signal<Item = String>>>,
         placeholder: String,
         categories: Vec<Category>,
-        selected_categories: Mutable<HashSet<CategoryId>>
+        selected_categories: Mutable<HashSet<CategoryId>>,
     ) -> Rc<Self> {
-
         let mut all_categories = vec![];
         get_categories_labels(categories, &mut all_categories, None);
 
@@ -37,7 +36,11 @@ impl CategoriesInput {
     }
 }
 
-fn get_categories_labels(nested_categories: Vec<Category>, flat_categories: &mut Vec<Category>, parent_name: Option<String>) {
+fn get_categories_labels(
+    nested_categories: Vec<Category>,
+    flat_categories: &mut Vec<Category>,
+    parent_name: Option<String>,
+) {
     for mut category in nested_categories {
         let children = category.children;
         category.children = vec![];

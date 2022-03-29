@@ -1,7 +1,7 @@
-use dominator::{clone, html, Dom, EventOptions, with_node};
-use web_sys::HtmlElement;
+use dominator::{clone, html, with_node, Dom, EventOptions};
 use std::rc::Rc;
 use wasm_bindgen_futures::spawn_local;
+use web_sys::HtmlElement;
 
 use utils::prelude::*;
 use wasm_bindgen::prelude::*;
@@ -13,7 +13,8 @@ use crate::{
     module::_groups::cards::{
         edit::{config, state::*},
         lookup::{self, Side},
-    }, overlay::handle::OverlayHandle,
+    },
+    overlay::handle::OverlayHandle,
 };
 use futures_signals::signal::SignalExt;
 use shared::domain::jig::module::body::{

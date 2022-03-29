@@ -31,7 +31,10 @@ impl ShareJig {
 
     pub fn embed_code(&self) -> String {
         let link = self.jig_link();
-        format!(r#"<iframe src="{}" width="960" height="540"></iframe>"#, link)
+        format!(
+            r#"<iframe src="{}" width="960" height="540"></iframe>"#,
+            link
+        )
     }
 
     pub fn jig_link(&self) -> String {
@@ -40,7 +43,7 @@ impl ShareJig {
             None,
             JigPlayerOptions::default(),
         ))
-            .to_string();
+        .to_string();
         let origin = web_sys::window()
             .unwrap_ji()
             .location()

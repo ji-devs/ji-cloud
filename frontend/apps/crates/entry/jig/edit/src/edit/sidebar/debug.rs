@@ -4,19 +4,8 @@
 use std::collections::HashMap;
 
 use shared::domain::jig::{
-    AudioEffects,
-    DraftOrLive,
-    JigAdminData,
-    JigData,
-    JigFocus,
-    JigId,
-    JigPlayerSettings,
-    JigRating,
-    JigResponse,
-    LiteModule,
-    ModuleKind,
-    PrivacyLevel,
-    module::ModuleId
+    module::ModuleId, AudioEffects, DraftOrLive, JigAdminData, JigData, JigFocus, JigId,
+    JigPlayerSettings, JigRating, JigResponse, LiteModule, ModuleKind, PrivacyLevel,
 };
 use utils::themes::ThemeId;
 use uuid::Uuid;

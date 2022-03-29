@@ -14,11 +14,10 @@ use futures_signals::signal::{self, Mutable, ReadOnlyMutable, Signal};
 use shared::domain::jig::{
     module::{
         body::{
-            BodyExt,
             cover::{ModuleData as RawData, Step},
-            Instructions
+            BodyExt, Instructions,
         },
-        ModuleId
+        ModuleId,
     },
     JigId,
 };

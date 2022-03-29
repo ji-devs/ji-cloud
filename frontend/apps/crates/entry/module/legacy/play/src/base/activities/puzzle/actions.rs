@@ -10,7 +10,7 @@
     Then, when the screen is clicked, we read the pixel at that position
     and reverse the process to get the shape index
 
-    It _might_ be possible to use alpha, but it's unclear whether this 
+    It _might_ be possible to use alpha, but it's unclear whether this
     skews the internal data with blending, canvas composite mode, etc.
 
     So we only support up to 16,777,216 shapes... should be more than enough ;)
@@ -20,16 +20,19 @@
 */
 
 use super::state::*;
-use dominator::{clone, animation::Percentage};
-use std::rc::Rc;
-use futures_signals::{
-    signal::{SignalExt}
-};
-use utils::{prelude::*, drag::Drag, resize::{ResizeInfo, get_resize_info}, math::{mat4::{Matrix4}, vec2}};
-use components::traces::{canvas::{draw_single_shape, apply_transform_mat4, clip_single_shape}};
 use crate::base::actions::NavigationTarget;
-use wasm_bindgen::prelude::*;
 use crate::config::PUZZLE_DISTANCE_THRESHHOLD;
+use components::traces::canvas::{apply_transform_mat4, clip_single_shape, draw_single_shape};
+use dominator::{animation::Percentage, clone};
+use futures_signals::signal::SignalExt;
+use std::rc::Rc;
+use utils::{
+    drag::Drag,
+    math::{mat4::Matrix4, vec2},
+    prelude::*,
+    resize::{get_resize_info, ResizeInfo},
+};
+use wasm_bindgen::prelude::*;
 
 impl Puzzle {
     pub fn on_start(self: Rc<Self>) {
@@ -39,16 +42,17 @@ impl Puzzle {
             log::info!("showing preview...");
         }
         if let Some(audio_filename) = state.raw.audio_filename.as_ref() {
-            state.base.audio_manager.play_clip(state.base.activity_media_url(&audio_filename));
+            state
+                .base
+                .audio_manager
+                .play_clip(state.base.activity_media_url(&audio_filename));
         }
 
         state.base.allow_stage_click();
     }
-
 }
 
 impl PuzzleGame {
-
     pub fn with_all_items_ref(&self, f: impl Fn(&PuzzleItem)) {
         let locked_items = self.locked_items.borrow();
         let free_items = self.free_items.borrow();
@@ -57,15 +61,15 @@ impl PuzzleGame {
             f(item);
         }
 
-
         if let Some(active_index) = self.drag_index.get() {
             for item in free_items
                 .iter()
                 .enumerate()
                 .filter(|(idx, _item)| *idx != active_index)
-                .map(|(_, item)| item) {
-                    f(item);
-                }
+                .map(|(_, item)| item)
+            {
+                f(item);
+            }
 
             f(&free_items[active_index]);
         } else {
@@ -73,7 +77,6 @@ impl PuzzleGame {
                 f(item);
             }
         }
-
     }
     pub fn draw(&self, resize_info: &ResizeInfo) {
         let canvas = &self.cutouts_canvas;
@@ -83,12 +86,19 @@ impl PuzzleGame {
         canvas.set_height(resize_info.height as u32);
 
         //draw complete background
-        ctx.draw_image_with_html_image_element_and_dw_and_dh(&self.effects.image_element, 0.0, 0.0, resize_info.width, resize_info.height).unwrap_ji();
+        ctx.draw_image_with_html_image_element_and_dw_and_dh(
+            &self.effects.image_element,
+            0.0,
+            0.0,
+            resize_info.width,
+            resize_info.height,
+        )
+        .unwrap_ji();
 
         //draw the cutouts
         ctx.set_fill_style(&JsValue::from_str("black"));
         for item in self.free_items.borrow().iter() {
-            draw_single_shape(ctx, resize_info, &item.raw.hotspot.shape, );
+            draw_single_shape(ctx, resize_info, &item.raw.hotspot.shape);
         }
 
         //draw the items
@@ -101,7 +111,14 @@ impl PuzzleGame {
 
             clip_single_shape(&ctx, resize_info, &item.raw.hotspot.shape);
 
-            ctx.draw_image_with_html_image_element_and_dw_and_dh(&self.effects.image_element, 0.0, 0.0, resize_info.width, resize_info.height).unwrap_ji();
+            ctx.draw_image_with_html_image_element_and_dw_and_dh(
+                &self.effects.image_element,
+                0.0,
+                0.0,
+                resize_info.width,
+                resize_info.height,
+            )
+            .unwrap_ji();
 
             ctx.restore();
         });
@@ -110,7 +127,6 @@ impl PuzzleGame {
     //this is unfortunately expensive, not sure why though.
     //in any case, should only run when waiting for a click
     pub fn draw_click_detection(&self, resize_info: &ResizeInfo) {
-
         let canvas = &self.click_canvas;
         let ctx = &self.click_ctx;
 
@@ -119,10 +135,7 @@ impl PuzzleGame {
 
         ctx.clear_rect(0.0, 0.0, resize_info.width, resize_info.height);
 
-
         for (index, item) in self.free_items.borrow().iter().enumerate() {
-
-
             let r = 0xFF & (index >> 16);
             let g = 0xFF & (index >> 8);
             let b = 0xFF & index;
@@ -136,7 +149,7 @@ impl PuzzleGame {
             //         "yellow".to_string()
             //     }
             // };
-            
+
             let color = format!("#{:02x}{:02x}{:02x}", r, g, b);
 
             ctx.save();
@@ -153,9 +166,7 @@ impl PuzzleGame {
         }
     }
 
-
     pub fn start_drag(&self, x: i32, y: i32) {
-
         let resize_info = get_resize_info();
         self.draw_click_detection(&resize_info);
 
@@ -220,7 +231,6 @@ impl PuzzleGame {
                     self.base.navigate(NavigationTarget::Next);
                 }
             };
-
         }
     }
 }
@@ -230,7 +240,9 @@ impl PuzzleItem {
         *self.drag.borrow_mut() = Some(Rc::new(Drag::new(x, y, 0.0, 0.0, true)));
 
         if let Some(audio_filename) = self.raw.audio_filename.as_ref() {
-            self.base.audio_manager.play_clip(self.base.activity_media_url(audio_filename));
+            self.base
+                .audio_manager
+                .play_clip(self.base.activity_media_url(audio_filename));
         }
     }
 
@@ -261,7 +273,7 @@ impl PuzzleItem {
         let dist = vec2::distance(&curr_t, &[0.0, 0.0]);
 
         if dist <= PUZZLE_DISTANCE_THRESHHOLD {
-            *self.curr_transform_matrix.borrow_mut() = Matrix4::identity(); 
+            *self.curr_transform_matrix.borrow_mut() = Matrix4::identity();
 
             self.base.audio_manager.play_positive_clip();
             true
@@ -275,29 +287,30 @@ impl PuzzleItem {
     }
 }
 
-
 impl PuzzlePreview {
     pub fn start_animation(self: Rc<Self>, parent: Rc<Puzzle>) {
         let state = self;
 
         state.loader.load(
-            state.animation.signal().for_each(clone!(state, parent => move |t| {
+            state
+                .animation
+                .signal()
+                .for_each(clone!(state, parent => move |t| {
 
-                state.draw_animation(t);
+                    state.draw_animation(t);
 
-                if t == Percentage::END {
-                    parent.init_phase.set(InitPhase::Playing(state.game.clone()));
-                }
+                    if t == Percentage::END {
+                        parent.init_phase.set(InitPhase::Playing(state.game.clone()));
+                    }
 
-                async {}
-            }))
+                    async {}
+                })),
         );
 
         state.animation.animate_to(Percentage::END);
     }
 
-    pub fn draw_animation(&self, perc:Percentage) {
-
+    pub fn draw_animation(&self, perc: Percentage) {
         let t = perc.into_f64();
         self.game.with_all_items_ref(|item| {
             let mut v = item.orig_transform_matrix.get_translation();

@@ -1,4 +1,4 @@
-use std::{ops::Index, fmt::Debug};
+use std::{fmt::Debug, ops::Index};
 
 use futures_signals::{
     map_ref,

@@ -12,8 +12,8 @@ pub(crate) async fn init() {
             // `USER` is private and the only way to initialize it is through `init` - `set()`
             // should never fail at this point.
             let _ = USER.set(user);
-        },
-        _ => {},
+        }
+        _ => {}
     }
 }
 

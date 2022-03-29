@@ -1,7 +1,11 @@
 use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
 use shared::domain::jig::JigId;
-use utils::{events, jig::JigPlayerOptions, routes::{JigRoute, Route}};
+use utils::{
+    events,
+    jig::JigPlayerOptions,
+    routes::{JigRoute, Route},
+};
 
 use super::{super::state::State as JigEditState, actions, state::*};
 use std::rc::Rc;

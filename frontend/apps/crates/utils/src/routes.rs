@@ -2,7 +2,7 @@ use crate::jig::JigPlayerOptions;
 use serde::{Deserialize, Serialize};
 use shared::domain::{
     image::{ImageId, ImageSearchQuery},
-    jig::{module::ModuleId, JigId, JigSearchQuery, ModuleKind, JigFocus},
+    jig::{module::ModuleId, JigFocus, JigId, JigSearchQuery, ModuleKind},
     session::OAuthUserProfile,
     user::UserScope,
 };
@@ -87,7 +87,7 @@ impl AdminRoute {
             Self::Curation(_) => scopes.contains(&UserScope::AdminJig),
             Self::ImageSearch(_) | Self::ImageAdd | Self::ImageTags | Self::ImageMeta(_, _) => {
                 scopes.contains(&UserScope::ManageImage)
-            },
+            }
             Self::Export => scopes.contains(&UserScope::Admin),
         }
     }
@@ -96,7 +96,7 @@ impl AdminRoute {
 #[derive(Debug, Clone)]
 pub enum AdminCurationRoute {
     Table,
-    Jig(JigId)
+    Jig(JigId),
 }
 
 #[derive(Debug, Clone)]
@@ -242,7 +242,7 @@ impl Route {
             ["admin", "curation", jig_id] => {
                 let jig_id = JigId(Uuid::from_str(jig_id).unwrap_ji());
                 Self::Admin(AdminRoute::Curation(AdminCurationRoute::Jig(jig_id)))
-            },
+            }
             ["admin", "locale"] => Self::Admin(AdminRoute::Locale),
             ["admin", "categories"] => Self::Admin(AdminRoute::Categories),
             ["admin", "image-search"] => {
@@ -258,7 +258,7 @@ impl Route {
             ["admin", "image-meta", id, flag] => {
                 let id = ImageId(Uuid::from_str(id).unwrap_ji());
                 Self::Admin(AdminRoute::ImageMeta(id, bool::from_str(flag).unwrap_ji()))
-            },
+            }
             ["admin", "export"] => Self::Admin(AdminRoute::Export),
             ["admin"] => Self::Admin(AdminRoute::Landing),
             ["jig", "edit", "gallery"] => Self::Jig(JigRoute::Gallery),
@@ -272,7 +272,7 @@ impl Route {
                     focus,
                     JigEditRoute::Publish,
                 ))
-            },
+            }
             ["jig", "edit", jig_id, "post-publish"] => {
                 let focus = params_map.get(JIG_FOCUS_KEY).unwrap_or_default();
                 let focus = JigFocus::try_from(focus.as_str()).unwrap_or_default();
@@ -282,7 +282,7 @@ impl Route {
                     focus,
                     JigEditRoute::PostPublish,
                 ))
-            },
+            }
             ["jig", "edit", "debug"] => {
                 let focus = params_map.get(JIG_FOCUS_KEY).unwrap_or_default();
                 let focus = JigFocus::try_from(focus.as_str()).unwrap_or_default();
@@ -292,7 +292,7 @@ impl Route {
                     focus,
                     JigEditRoute::Landing,
                 ))
-            },
+            }
             ["jig", "edit", jig_id] => {
                 let focus = params_map.get(JIG_FOCUS_KEY).unwrap_or_default();
                 let focus = JigFocus::try_from(focus.as_str()).unwrap_or_default();
@@ -302,7 +302,7 @@ impl Route {
                     focus,
                     JigEditRoute::Landing,
                 ))
-            },
+            }
             ["jig", "edit", jig_id, module_id] => {
                 let focus = params_map.get(JIG_FOCUS_KEY).unwrap_or_default();
                 let focus = JigFocus::try_from(focus.as_str()).unwrap_or_default();
@@ -312,7 +312,7 @@ impl Route {
                     focus,
                     JigEditRoute::Module(ModuleId(Uuid::from_str(module_id).unwrap_ji())),
                 ))
-            },
+            }
             ["jig", "play", "debug"] => {
                 let search: JigPlayerOptions = serde_qs::from_str(&params_string).unwrap_ji();
 
@@ -431,7 +431,9 @@ impl From<&Route> for String {
                 AdminRoute::Landing => "/admin".to_string(),
                 AdminRoute::Curation(curation_route) => match curation_route {
                     AdminCurationRoute::Table => "/admin/curation".to_string(),
-                    AdminCurationRoute::Jig(jig_id) => format!("/admin/curation/{}", jig_id.0.to_string()),
+                    AdminCurationRoute::Jig(jig_id) => {
+                        format!("/admin/curation/{}", jig_id.0.to_string())
+                    }
                 },
                 AdminRoute::Locale => "/admin/locale".to_string(),
                 AdminRoute::Categories => "/admin/categories".to_string(),
@@ -455,23 +457,34 @@ impl From<&Route> for String {
                 JigRoute::Edit(jig_id, jig_focus, route) => {
                     let focus_str = match jig_focus {
                         JigFocus::Modules => String::new(),
-                        JigFocus::Resources => format!("?{}={}", JIG_FOCUS_KEY, JigFocus::Resources.as_str()),
+                        JigFocus::Resources => {
+                            format!("?{}={}", JIG_FOCUS_KEY, JigFocus::Resources.as_str())
+                        }
                     };
                     match route {
                         JigEditRoute::Landing => {
                             format!("/jig/edit/{}{}", jig_id.0.to_string(), focus_str)
-                        },
+                        }
                         JigEditRoute::Module(module_id) => {
-                            format!("/jig/edit/{}/{}{}", jig_id.0.to_string(), module_id.0.to_string(), focus_str)
-                        },
+                            format!(
+                                "/jig/edit/{}/{}{}",
+                                jig_id.0.to_string(),
+                                module_id.0.to_string(),
+                                focus_str
+                            )
+                        }
                         JigEditRoute::Publish => {
                             format!("/jig/edit/{}/publish{}", jig_id.0.to_string(), focus_str)
-                        },
+                        }
                         JigEditRoute::PostPublish => {
-                            format!("/jig/edit/{}/post-publish{}", jig_id.0.to_string(), focus_str)
+                            format!(
+                                "/jig/edit/{}/post-publish{}",
+                                jig_id.0.to_string(),
+                                focus_str
+                            )
                         }
                     }
-                },
+                }
                 JigRoute::Play(jig_id, module_id, player_settings) => {
                     let query = serde_qs::to_string(&player_settings).unwrap_ji();
                     if let Some(module_id) = module_id {

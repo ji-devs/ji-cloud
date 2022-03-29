@@ -71,21 +71,23 @@ pub fn render_page_body<RawData, Mode, Step, Base>(
                 })
             }));
 
-    state.page_body_switcher.load(sig.for_each(clone!(state => move |dom| {
-        {
-            // Discard the previous body and set the current handle to None.
-            // This forces dominator to release all references held by this handle.
-            let current_handle = state.dom_body_handle.replace(None);
-            if let Some(current_handle) = current_handle {
-                current_handle.discard();
+    state
+        .page_body_switcher
+        .load(sig.for_each(clone!(state => move |dom| {
+            {
+                // Discard the previous body and set the current handle to None.
+                // This forces dominator to release all references held by this handle.
+                let current_handle = state.dom_body_handle.replace(None);
+                if let Some(current_handle) = current_handle {
+                    current_handle.discard();
+                }
             }
-        }
 
-        // Append the new body and set the handle.
-        let handle = dominator::append_dom(&dominator::get_id("root"), dom);
-        state.dom_body_handle.set(Some(handle));
-        async move {}
-    })));
+            // Append the new body and set the handle.
+            let handle = dominator::append_dom(&dominator::get_id("root"), dom);
+            state.dom_body_handle.set(Some(handle));
+            async move {}
+        })));
 }
 
 //This is just a placeholder to get messages

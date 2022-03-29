@@ -1,10 +1,10 @@
 use std::rc::Rc;
 
-use shared::domain::jig::ModuleKind;
-use utils::{unwrap::UnwrapJiExt, drag::Drag};
-use wasm_bindgen::{JsValue, JsCast};
-use web_sys::{CustomEvent, CustomEventInit, HtmlElement};
 use super::state::State;
+use shared::domain::jig::ModuleKind;
+use utils::{drag::Drag, unwrap::UnwrapJiExt};
+use wasm_bindgen::{JsCast, JsValue};
+use web_sys::{CustomEvent, CustomEventInit, HtmlElement};
 
 impl State {
     pub fn on_pointer_down(self: &Rc<Self>, elem: &HtmlElement, x: i32, y: i32) {
@@ -57,8 +57,7 @@ fn trigger_enter_leave_events(state: &Rc<State>, x: f32, y: f32) {
 fn trigger_drop(kind: &ModuleKind, x: f32, y: f32) {
     let mut options = CustomEventInit::new();
     options.detail(&JsValue::from_str(kind.as_str()));
-    let event = CustomEvent::new_with_event_init_dict("custom-drop", &options)
-        .unwrap_ji();
+    let event = CustomEvent::new_with_event_init_dict("custom-drop", &options).unwrap_ji();
 
     if let Some(elem) = element_from_point(x, y) {
         let _ = elem.dispatch_event(&event);
@@ -71,9 +70,7 @@ fn element_from_point(x: f32, y: f32) -> Option<HtmlElement> {
         .document()
         .unwrap_ji()
         .element_from_point(x, y)
-        .map(|elem| {
-            elem.dyn_into().unwrap_ji()
-        })
+        .map(|elem| elem.dyn_into().unwrap_ji())
 }
 
 fn create_event(name: &str) -> CustomEvent {

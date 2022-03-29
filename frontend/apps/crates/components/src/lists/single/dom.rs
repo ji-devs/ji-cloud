@@ -5,13 +5,14 @@ use utils::prelude::*;
 use super::state::*;
 use crate::{
     hebrew_buttons::HebrewButtons,
+    overlay::handle::OverlayHandle,
     tooltip::{
         callbacks::TooltipErrorCallbacks,
         state::{
             Anchor, ContentAnchor, MoveStrategy, State as TooltipState, TooltipData, TooltipError,
             TooltipTarget,
         },
-    }, overlay::handle::OverlayHandle,
+    },
 };
 use futures_signals::{map_ref, signal::SignalExt, signal_vec::SignalVecExt};
 

@@ -9,10 +9,8 @@ impl Sticker {
             Self::Image(state) => {
                 log::info!("image");
                 state.render()
-            },
-            Self::Animation(state) => {
-                state.render()
-            },
+            }
+            Self::Animation(state) => state.render(),
         }
     }
 }

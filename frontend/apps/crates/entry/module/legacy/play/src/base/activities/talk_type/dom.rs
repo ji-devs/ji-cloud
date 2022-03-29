@@ -1,17 +1,17 @@
 use super::state::*;
 
-use std::rc::Rc;
-use utils::{prelude::*, resize::{ResizeInfo, resize_info_signal}};
 use crate::base::styles;
 use crate::config::HINT_TIME_MS;
-use futures_signals::signal::{SignalExt};
-use dominator::{html, Dom, clone, with_node};
-
-
+use dominator::{clone, html, with_node, Dom};
+use futures_signals::signal::SignalExt;
+use std::rc::Rc;
+use utils::{
+    prelude::*,
+    resize::{resize_info_signal, ResizeInfo},
+};
 
 use components::overlay::handle::OverlayHandle;
 use gloo_timers::future::TimeoutFuture;
-
 
 impl TalkType {
     pub fn render(self: Rc<Self>) -> Dom {
@@ -54,18 +54,18 @@ impl TalkTypeItem {
                     }
                 })
             })))
-            .property("y", bounds.y) 
-            .property("x", bounds.x) 
-            .property("width", bounds.width) 
-            .property("height", bounds.height) 
-            .property_signal("value", state.value.signal_cloned()) 
+            .property("y", bounds.y)
+            .property("x", bounds.x)
+            .property("width", bounds.width)
+            .property("height", bounds.height)
+            .property_signal("value", state.value.signal_cloned())
             .property_signal("color", state.phase.signal().map(|phase| {
                 match phase {
                     TalkTypeItemPhase::Wrong => "red",
                     TalkTypeItemPhase::Correct => "green",
                     _ => ""
                 }
-            })) 
+            }))
             .event(clone!(state => move |_evt:events::Focus| {
                 state.play_audio();
             }))

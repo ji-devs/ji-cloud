@@ -1,7 +1,9 @@
 use std::rc::{Rc, Weak};
 
-
-use futures_signals::{signal::{Signal, Mutable}, map_ref};
+use futures_signals::{
+    map_ref,
+    signal::{Mutable, Signal},
+};
 use shared::domain::jig::JigFocus;
 use utils::unwrap::UnwrapJiExt;
 

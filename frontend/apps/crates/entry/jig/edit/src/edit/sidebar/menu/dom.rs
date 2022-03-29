@@ -6,7 +6,7 @@ use crate::edit::sidebar::{
         actions::{self, MoveTarget},
         state::State as ModuleState,
     },
-    state::{State as SidebarState, Module},
+    state::{Module, State as SidebarState},
 };
 use dominator::{clone, html, Dom, EventOptions};
 use shared::domain::jig::{module::ModuleId, ModuleKind};
@@ -51,7 +51,7 @@ fn menu_items(state: &Rc<State>, module_state: &Rc<ModuleState>) -> Vec<Dom> {
                 // item_copy(state.clone()),
                 item_paste(state, &module_state.sidebar),
             ]
-        },
+        }
         _ => {
             let mut v = vec![];
             if let Some(module) = &*module_state.module {
@@ -110,11 +110,7 @@ fn item_move_down(state: &Rc<State>, module: &Rc<ModuleState>) -> Dom {
     })
 }
 
-fn item_duplicate(
-    state: &Rc<State>,
-    sidebar_state: &Rc<SidebarState>,
-    module_id: ModuleId,
-) -> Dom {
+fn item_duplicate(state: &Rc<State>, sidebar_state: &Rc<SidebarState>, module_id: ModuleId) -> Dom {
     html!("menu-line", {
         .property("slot", "lines")
         .property("icon", "duplicate")
@@ -160,11 +156,7 @@ fn item_paste(state: &Rc<State>, sidebar_state: &Rc<SidebarState>) -> Dom {
     })
 }
 
-fn item_duplicate_as(
-    state: &Rc<State>,
-    sidebar_state: &Rc<SidebarState>,
-    module: &Module,
-) -> Dom {
+fn item_duplicate_as(state: &Rc<State>, sidebar_state: &Rc<SidebarState>, module: &Module) -> Dom {
     let is_card = CARD_KINDS.contains(&module.kind());
 
     html!("empty-fragment", {
@@ -208,4 +200,3 @@ fn item_duplicate_as(
 //         }))
 //     })
 // }
-

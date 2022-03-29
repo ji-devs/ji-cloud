@@ -1,5 +1,5 @@
-use std::fmt::Write;
 use shared::domain::jig::module::body::_groups::design::PathCommand;
+use std::fmt::Write;
 use utils::prelude::*;
 
 pub fn path_command_to_string(path: impl Iterator<Item = (PathCommand, bool)>) -> String {

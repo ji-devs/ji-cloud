@@ -1,11 +1,12 @@
-use std::{rc::Rc};
+use std::rc::Rc;
 
-
-use dominator::{Dom, clone, html};
-use futures_signals::{map_ref, signal::{Signal, not}};
+use dominator::{clone, html, Dom};
+use futures_signals::{
+    map_ref,
+    signal::{not, Signal},
+};
 
 use utils::events;
-
 
 use crate::edit::publish::add_additional_resource::ActivePopup;
 

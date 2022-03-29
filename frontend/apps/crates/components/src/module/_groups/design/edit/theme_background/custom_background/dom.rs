@@ -1,27 +1,30 @@
 use std::rc::Rc;
 
-use dominator::{html, Dom, clone, with_node};
-use futures_signals::signal::SignalExt;
-use shared::domain::jig::module::body::StepExt;
-use utils::events;
-use web_sys::HtmlElement;
 use crate::{
+    color_select::dom::render as render_color_picker,
     image::search::{
         dom::render_with_action as render_image_search_with_action,
         state::State as ImageSearchState,
     },
-    tabs::{MenuTab, MenuTabKind},
+    module::{
+        _common::edit::entry::prelude::BaseExt, _groups::design::edit::design_ext::DesignExt,
+    },
     overlay::handle::OverlayHandle,
-    color_select::dom::render as render_color_picker,
-    module::{_common::edit::entry::prelude::BaseExt, _groups::design::edit::design_ext::DesignExt},
+    tabs::{MenuTab, MenuTabKind},
 };
+use dominator::{clone, html, with_node, Dom};
+use futures_signals::signal::SignalExt;
+use shared::domain::jig::module::body::StepExt;
+use utils::events;
+use web_sys::HtmlElement;
 
-use super::state::{CustomBackground, Tab};
 use super::super::state::STR_DESIGN_FROM_SCRATCH;
+use super::state::{CustomBackground, Tab};
 
 const STR_FILL_COLOR: &str = "Fill color";
 
-impl<Step, Base> CustomBackground<Step, Base> where
+impl<Step, Base> CustomBackground<Step, Base>
+where
     Step: StepExt + 'static,
     Base: BaseExt<Step> + DesignExt + 'static,
 {

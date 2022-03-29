@@ -1,9 +1,9 @@
 use dominator::{clone, html, Dom};
 use dominator_helpers::events::Message;
 use futures_signals::signal::{Mutable, SignalExt};
+use serde::{Deserialize, Serialize};
 use std::rc::Rc;
 use web_sys::HtmlIFrameElement;
-use serde::{Serialize, Deserialize};
 
 const STR_IFRAME_URL: &str = "https://www.jewishinteractive.org/jigzi-home";
 const INT_IFRAME_PADDING: usize = 30;

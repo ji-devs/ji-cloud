@@ -1,8 +1,8 @@
 use super::state::*;
 use dominator::{clone, html, with_node, Dom, DomBuilder};
-use wasm_bindgen::JsValue;
 use std::rc::Rc;
 use utils::prelude::*;
+use wasm_bindgen::JsValue;
 use web_sys::HtmlElement;
 
 pub fn render_button(state: Rc<SettingsButton>) -> Dom {

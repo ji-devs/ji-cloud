@@ -1,7 +1,11 @@
-use std::{rc::Rc, ops::Range};
+use std::{ops::Range, rc::Rc};
 
-use dominator::{html, Dom, clone, with_node};
-use futures_signals::{signal_vec::{SignalVec, SignalVecExt}, signal::{SignalExt, Signal}, map_ref};
+use dominator::{clone, html, with_node, Dom};
+use futures_signals::{
+    map_ref,
+    signal::{Signal, SignalExt},
+    signal_vec::{SignalVec, SignalVecExt},
+};
 use shared::domain::category::Category;
 use utils::{events, unwrap::UnwrapJiExt};
 use web_sys::HtmlInputElement;
@@ -105,29 +109,32 @@ impl CategoriesInput {
     fn filtered_options_signal(self: &Rc<Self>) -> impl SignalVec<Item = (Category, Range<usize>)> {
         let state = self;
 
-        state.input.signal_ref(clone!(state => move |input| {
-            state.all_categories.iter().filter_map(|category| {
+        state
+            .input
+            .signal_ref(clone!(state => move |input| {
+                state.all_categories.iter().filter_map(|category| {
 
-                let category_name = category.name.to_lowercase();
-                let input = input.to_lowercase();
-                let contains = category_name.contains(&input);
+                    let category_name = category.name.to_lowercase();
+                    let input = input.to_lowercase();
+                    let contains = category_name.contains(&input);
 
-                match contains {
-                    false => None,
-                    true => {
-                        let start = category_name.find(&input).unwrap();
-                        let range = start..(start + input.len());
-                        Some((category.clone(), range))
-                    },
-                }
+                    match contains {
+                        false => None,
+                        true => {
+                            let start = category_name.find(&input).unwrap();
+                            let range = start..(start + input.len());
+                            Some((category.clone(), range))
+                        },
+                    }
 
-            }).collect()
-        })).to_signal_vec()
+                }).collect()
+            }))
+            .to_signal_vec()
     }
 
     // `None` if the input value should not be touched
     fn input_value_signal(self: &Rc<Self>) -> impl Signal<Item = Option<String>> {
-        map_ref!{
+        map_ref! {
             let focused = self.focused.signal(),
             let value = self.value.signal_cloned() => move {
                 match focused {

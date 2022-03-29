@@ -1,10 +1,10 @@
 use std::rc::Rc;
 
-use dominator::{Dom, html, clone};
-use futures_signals::signal::{SignalExt, from_future};
+use dominator::{clone, html, Dom};
+use futures_signals::signal::{from_future, SignalExt};
 use utils::routes::AdminCurationRoute;
 
-use crate::curation::{table::state::CurationTable, jig::state::CurationJig};
+use crate::curation::{jig::state::CurationJig, table::state::CurationTable};
 
 use super::Curation;
 

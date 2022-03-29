@@ -1,15 +1,16 @@
-use std::rc::Rc;
 use dominator::clone;
 use futures_signals::signal::Mutable;
 use shared::domain::jig::module::body::Background;
+use std::rc::Rc;
 
 use crate::{
+    color_select::state::State as ColorPickerState,
     image::search::{
         callbacks::Callbacks as ImageSearchCallbacks,
         state::{ImageSearchKind, ImageSearchOptions, State as ImageSearchState},
     },
-    module::_groups::cards::edit::state::{RawDataExt, ExtraExt, CardsBase},
-    color_select::state::State as ColorPickerState, tabs::MenuTabKind,
+    module::_groups::cards::edit::state::{CardsBase, ExtraExt, RawDataExt},
+    tabs::MenuTabKind,
 };
 
 const STR_FILL_COLOR: &str = "Fill color";
@@ -23,12 +24,11 @@ pub struct CustomBackground<RawData: RawDataExt, E: ExtraExt> {
     pub tab_kind: Mutable<Option<MenuTabKind>>,
 }
 
-
 impl<RawData: RawDataExt, E: ExtraExt> CustomBackground<RawData, E> {
     pub fn new(
         base: Rc<CardsBase<RawData, E>>,
         tab_kind: Mutable<Option<MenuTabKind>>,
-        on_close: Box<dyn Fn()>
+        on_close: Box<dyn Fn()>,
     ) -> Rc<Self> {
         let color_state = Rc::new(ColorPickerState::new(
             base.theme_id.read_only(),

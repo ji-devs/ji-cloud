@@ -69,11 +69,9 @@ pub struct PlayerOptions {
 /// JIG is published.
 pub fn can_load_liked_status(jig: &JigResponse) -> bool {
     match utils::init::user::get_user() {
-        Some(user) if jig.jig_data.draft_or_live.is_live() => {
-            match jig.author_id {
-                Some(author_id) => author_id != user.id,
-                None => true
-            }
+        Some(user) if jig.jig_data.draft_or_live.is_live() => match jig.author_id {
+            Some(author_id) => author_id != user.id,
+            None => true,
         },
         _ => false, // No logged-in user
     }

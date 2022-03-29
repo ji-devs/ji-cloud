@@ -1,13 +1,12 @@
+use dominator::animation::MutableAnimation;
 use futures_signals::signal::Mutable;
 use shared::domain::jig::module::body::legacy::activity::Hotspot as RawHotspot;
 use std::rc::Rc;
-use dominator::animation::MutableAnimation;
 
 pub struct Hotspot {
     pub raw: RawHotspot,
     pub tooltip_text: Mutable<Option<String>>,
-    pub fade_animation: MutableAnimation
-
+    pub fade_animation: MutableAnimation,
 }
 
 impl Hotspot {

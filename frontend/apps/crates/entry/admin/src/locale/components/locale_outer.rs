@@ -8,9 +8,9 @@ use futures_signals::map_ref;
 use futures_signals::signal::SignalExt;
 use futures_signals::signal_vec::SignalVecExt;
 use shared::domain::locale::ItemKind;
-use utils::unwrap::UnwrapJiExt;
 use std::rc::Rc;
 use utils::events;
+use utils::unwrap::UnwrapJiExt;
 use uuid::Uuid;
 use web_sys::HtmlSelectElement;
 

@@ -1,17 +1,21 @@
 use std::rc::Rc;
 
-use dominator::{clone, html, Dom, EventOptions, with_node};
+use dominator::{clone, html, with_node, Dom, EventOptions};
 use futures_signals::signal::{Signal, SignalExt};
 use shared::domain::user::{UserProfile, UserScope};
 use strum::IntoEnumIterator;
 use utils::{
     events,
-    routes::{AdminRoute, Route, UserRoute}, unwrap::UnwrapJiExt,
+    routes::{AdminRoute, Route, UserRoute},
+    unwrap::UnwrapJiExt,
 };
 use wasm_bindgen::JsValue;
 use web_sys::HtmlElement;
 
-use crate::{page_header::state::{LoggedInState, PageLinks}, overlay::handle::OverlayHandle};
+use crate::{
+    overlay::handle::OverlayHandle,
+    page_header::state::{LoggedInState, PageLinks},
+};
 
 use super::{actions, state::State};
 
@@ -27,7 +31,12 @@ const STR_MY_PROFILE: &str = "My profile";
 const STR_MY_JIGS: &str = "My JIGs";
 const STR_MY_RESOURCES: &str = "My resources";
 
-pub fn render(state: Rc<State>, slot: Option<&str>, active_page: Option<PageLinks>, render_beta: bool) -> Dom {
+pub fn render(
+    state: Rc<State>,
+    slot: Option<&str>,
+    active_page: Option<PageLinks>,
+    render_beta: bool,
+) -> Dom {
     actions::fetch_profile(Rc::clone(&state));
 
     html!("page-header", {

@@ -75,7 +75,7 @@ impl Sticker {
                 Some(clone!(stickers => move |_| {
                     stickers.call_change();
                 })),
-                None::<fn()>
+                None::<fn()>,
             ))),
         }
     }

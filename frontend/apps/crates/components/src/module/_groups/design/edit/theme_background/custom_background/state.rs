@@ -1,17 +1,20 @@
-use std::{rc::Rc, marker::PhantomData};
 use dominator::clone;
 use futures_signals::signal::Mutable;
-use shared::domain::jig::module::body::{StepExt, Background};
+use shared::domain::jig::module::body::{Background, StepExt};
+use std::{marker::PhantomData, rc::Rc};
 
 use crate::{
     backgrounds::actions::Layer,
+    color_select::state::State as ColorPickerState,
     image::search::{
         callbacks::Callbacks as ImageSearchCallbacks,
         state::{ImageSearchKind, ImageSearchOptions, State as ImageSearchState},
     },
+    module::{
+        _common::edit::entry::prelude::BaseExt,
+        _groups::design::edit::{design_ext::DesignExt, theme_background::ThemeBackground},
+    },
     tabs::MenuTabKind,
-    module::{_common::edit::entry::prelude::BaseExt, _groups::design::edit::{design_ext::DesignExt, theme_background::ThemeBackground}},
-    color_select::state::State as ColorPickerState,
 };
 
 const STR_FILL_COLOR: &str = "Fill color";
@@ -30,8 +33,8 @@ where
     _step: PhantomData<Step>,
 }
 
-
-impl<Step, Base> CustomBackground<Step, Base> where
+impl<Step, Base> CustomBackground<Step, Base>
+where
     Step: StepExt + 'static,
     Base: BaseExt<Step> + DesignExt + 'static,
 {
@@ -69,7 +72,7 @@ impl Tab {
     pub fn new<Step, Base>(base: Rc<Base>, kind: MenuTabKind) -> Self
     where
         Step: StepExt + 'static,
-        Base: BaseExt<Step> + DesignExt + 'static
+        Base: BaseExt<Step> + DesignExt + 'static,
     {
         match kind {
             MenuTabKind::BackgroundImage => {

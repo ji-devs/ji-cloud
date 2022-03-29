@@ -1,7 +1,7 @@
-use dominator::{html, Dom};
-use futures_signals::{signal::SignalExt, map_ref};
-use std::rc::Rc;
 use crate::home::search_results::search_results_section::SearchResultsSection;
+use dominator::{html, Dom};
+use futures_signals::{map_ref, signal::SignalExt};
+use std::rc::Rc;
 
 use super::state::SearchResults;
 

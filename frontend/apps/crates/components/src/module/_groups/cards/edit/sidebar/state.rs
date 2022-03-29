@@ -1,4 +1,7 @@
-use crate::{module::{_common::edit::prelude::*, _groups::cards::edit::state::*}, tabs::MenuTabKind};
+use crate::{
+    module::{_common::edit::prelude::*, _groups::cards::edit::state::*},
+    tabs::MenuTabKind,
+};
 use dominator::Dom;
 use futures_signals::signal::{Mutable, Signal};
 use std::rc::Rc;

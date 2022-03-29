@@ -2,7 +2,9 @@ use crate::module::_groups::cards::{edit::state::*, lookup::Side};
 use dominator::clone;
 use shared::domain::jig::module::body::{
     Image,
-    _groups::cards::{BaseContent as RawBaseContent, Card as RawCard, CardContent as RawCardContent, Mode},
+    _groups::cards::{
+        BaseContent as RawBaseContent, Card as RawCard, CardContent as RawCardContent, Mode,
+    },
 };
 use utils::prelude::*;
 
@@ -62,24 +64,15 @@ impl<RawData: RawDataExt, E: ExtraExt> MainCard<RawData, E> {
     }
 
     pub fn remove_card_image(&self, pair_index: usize, side: Side) {
-        self.with_pair(
-            pair_index,
-            side,
-            move |_mode, card, _other| {
-                card.as_image_mutable().set_neq(None);
-            },
-        );
+        self.with_pair(pair_index, side, move |_mode, card, _other| {
+            card.as_image_mutable().set_neq(None);
+        });
 
         self.base.history.push_modify(|raw| {
             if let Some(content) = raw.get_content_mut() {
-                with_raw_pair(
-                    content,
-                    pair_index,
-                    side,
-                    move |_mode, card, _other| {
-                        card.card_content = RawCardContent::Image(None);
-                    },
-                );
+                with_raw_pair(content, pair_index, side, move |_mode, card, _other| {
+                    card.card_content = RawCardContent::Image(None);
+                });
             }
         });
     }
@@ -143,22 +136,28 @@ impl<RawData: RawDataExt, E: ExtraExt> MainCard<RawData, E> {
                             self.base.selected_pair.set(None);
                         } else {
                             // If toggling on the current index but a different card, select both.
-                            self.base.selected_pair.set(Some((selected_idx, SelectedSide::Both)));
+                            self.base
+                                .selected_pair
+                                .set(Some((selected_idx, SelectedSide::Both)));
                         }
-                    },
+                    }
                     (true, SelectedSide::Both) => {
                         // if toggling when both are selected, deselect the current card.
-                        self.base.selected_pair.set(Some((selected_idx, SelectedSide::One(self.side.negate()))));
-                    },
+                        self.base
+                            .selected_pair
+                            .set(Some((selected_idx, SelectedSide::One(self.side.negate()))));
+                    }
                     _ => {
                         self.base.selected_pair.set(None);
                         // Alternatively, we could select cards on a new idx instead of resetting
                         // the selection.
                     }
                 }
-            },
+            }
             None => {
-                self.base.selected_pair.set(Some((current_idx, SelectedSide::One(self.side))));
+                self.base
+                    .selected_pair
+                    .set(Some((current_idx, SelectedSide::One(self.side))));
             }
         }
     }

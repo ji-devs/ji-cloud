@@ -27,9 +27,9 @@
 
     That said, the data structure is changed so that it's one step closer to that simplicity
 */
+use awsm_web::tick::Raf;
 use futures_signals::signal::Mutable;
 use gloo::events::EventListener;
-use awsm_web::tick::Raf;
 use gloo_timers::callback::Timeout;
 
 use shared::domain::jig::module::body::legacy::design::{
@@ -44,7 +44,7 @@ use web_sys::{CanvasRenderingContext2d, Element, HtmlCanvasElement, ImageData, W
 
 use awsm_web::workers::new_worker_from_js;
 use dominator::clone;
-use js_sys::{Reflect};
+use js_sys::Reflect;
 use serde::{Deserialize, Serialize};
 use std::cell::Cell;
 use utils::prelude::*;
@@ -69,7 +69,7 @@ pub struct AnimationPlayer {
     pub last_paint_data: RefCell<Option<ImageData>>,
     pub frame_infos: RefCell<Vec<FrameInfo>>,
     pub timer: RefCell<Option<Timeout>>,
-    pub raf: RefCell<Option<Raf>>
+    pub raf: RefCell<Option<Raf>>,
 }
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
@@ -136,7 +136,6 @@ impl AnimationPlayer {
         //     data: GifWorkerEventData::Init(10.2, 45.6)
         // }));
 
-
         let state = Rc::new(Self {
             base,
             raw,
@@ -159,9 +158,7 @@ impl AnimationPlayer {
             raf: RefCell::new(None),
         });
 
-        *state.raf.borrow_mut() = Some(Raf::new(|_tick| {
-
-        }));
+        *state.raf.borrow_mut() = Some(Raf::new(|_tick| {}));
 
         *state.worker_listener.borrow_mut() = Some(EventListener::new(
             &state.worker,
@@ -196,8 +193,8 @@ impl AnimationPlayer {
                             _ => {}
                         }
 
-                    } 
-                } 
+                    }
+                }
             }),
         ));
 
@@ -236,7 +233,6 @@ impl AnimationPlayer {
                 .unwrap_ji(),
         )
     }
-
 }
 
 pub struct Controller {
@@ -265,7 +261,7 @@ pub struct Controller {
 
     pub interactive: bool,
 
-    pub should_play_on_start: bool
+    pub should_play_on_start: bool,
 }
 
 impl Controller {
@@ -285,8 +281,7 @@ impl Controller {
             hide_toggle: raw.hide_toggle,
             audio_filename: raw.audio_filename.clone(),
             interactive,
-            should_play_on_start
+            should_play_on_start,
         }
     }
-
 }

@@ -1,6 +1,6 @@
 use components::categories_input;
 use dominator::{html, Dom};
-use futures_signals::{signal::Signal, map_ref};
+use futures_signals::{map_ref, signal::Signal};
 use std::rc::Rc;
 use utils::unwrap::UnwrapJiExt;
 

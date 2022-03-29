@@ -1,8 +1,7 @@
-use crate::module::_groups::design::edit::{
-    design_ext::DesignExt,
-    theme_background::STR_DESIGN_FROM_SCRATCH,
-};
 use crate::module::_common::edit::entry::prelude::BaseExt;
+use crate::module::_groups::design::edit::{
+    design_ext::DesignExt, theme_background::STR_DESIGN_FROM_SCRATCH,
+};
 use dominator::{clone, html, Dom};
 use shared::domain::jig::module::body::StepExt;
 use std::rc::Rc;
@@ -12,9 +11,10 @@ use crate::theme_selector::dom::render_design as render_theme_selector;
 
 use super::ThemeBackground;
 
-impl<Step, Base> ThemeBackground<Step, Base> where
+impl<Step, Base> ThemeBackground<Step, Base>
+where
     Step: StepExt + 'static,
-    Base: BaseExt<Step> + DesignExt + 'static
+    Base: BaseExt<Step> + DesignExt + 'static,
 {
     pub fn render(self: Rc<Self>) -> Dom {
         let state = self;
@@ -44,6 +44,5 @@ impl<Step, Base> ThemeBackground<Step, Base> where
                 }
             })))
         })
-
     }
 }

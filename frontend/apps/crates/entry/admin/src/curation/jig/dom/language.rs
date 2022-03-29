@@ -1,7 +1,10 @@
 use dominator::{clone, html, Dom};
 use futures_signals::signal::{Signal, SignalExt};
 use std::rc::Rc;
-use utils::{events, languages::{Language, JIG_LANGUAGES}};
+use utils::{
+    events,
+    languages::{Language, JIG_LANGUAGES},
+};
 
 use crate::curation::jig::state::CurationJig;
 
@@ -48,10 +51,17 @@ fn render_language(Language(lang_code, land_label): &Language, state: Rc<Curatio
 }
 
 fn language_value_signal(state: Rc<CurationJig>) -> impl Signal<Item = &'static str> {
-    state.jig.language.signal_cloned().map(move |selected_language| {
-        match JIG_LANGUAGES.iter().find(|Language(lang_code, _)| lang_code == &selected_language) {
-            Some(lang) => lang.1,
-            None => ""
-        }
-    })
+    state
+        .jig
+        .language
+        .signal_cloned()
+        .map(move |selected_language| {
+            match JIG_LANGUAGES
+                .iter()
+                .find(|Language(lang_code, _)| lang_code == &selected_language)
+            {
+                Some(lang) => lang.1,
+                None => "",
+            }
+        })
 }

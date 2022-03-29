@@ -1,8 +1,8 @@
 use components::overlay::handle::OverlayHandle;
-use dominator::{clone, html, Dom, with_node};
+use dominator::{clone, html, with_node, Dom};
 use dominator_helpers::events::Message;
 use futures::future::ready;
-use web_sys::{ScrollIntoViewOptions, ScrollBehavior};
+use web_sys::{ScrollBehavior, ScrollIntoViewOptions};
 
 use super::{
     super::state::State as JigEditState,

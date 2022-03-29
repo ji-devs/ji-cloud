@@ -2,7 +2,10 @@ use std::{collections::HashMap, rc::Rc};
 
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::Mutable;
-use shared::domain::{category::{Category, CategoryId}, meta::{Affiliation, AgeRange, ResourceType}};
+use shared::domain::{
+    category::{Category, CategoryId},
+    meta::{Affiliation, AgeRange, ResourceType},
+};
 use utils::languages::{Language, JIG_LANGUAGES};
 
 use super::super::state::State as JigEditState;

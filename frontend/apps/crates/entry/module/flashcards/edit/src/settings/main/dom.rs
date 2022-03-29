@@ -6,7 +6,7 @@ use components::module::_groups::cards::{
     lookup::Side,
     play::card::dom::{render_card, CardOptions, Size},
 };
-use futures_signals::{signal::SignalExt, map_ref};
+use futures_signals::{map_ref, signal::SignalExt};
 
 use shared::domain::jig::module::body::flashcards::DisplayMode;
 

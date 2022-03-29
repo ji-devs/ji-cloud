@@ -6,8 +6,8 @@ use futures_signals::signal::SignalExt;
 use std::rc::Rc;
 use utils::prelude::*;
 use utils::resize::resize_info_signal;
-use web_sys::HtmlElement;
 use wasm_bindgen::JsCast;
+use web_sys::HtmlElement;
 
 pub fn render_transform(
     state: Rc<TransformState>,

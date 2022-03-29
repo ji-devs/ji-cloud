@@ -1,13 +1,13 @@
 use components::overlay::handle::OverlayHandle;
-use dominator::{Dom, EventOptions, clone, html, with_node, DomBuilder};
+use dominator::{clone, html, with_node, Dom, DomBuilder, EventOptions};
 use futures_signals::map_ref;
-use web_sys::{HtmlElement, Node, ScrollIntoViewOptions, ScrollBehavior};
+use web_sys::{HtmlElement, Node, ScrollBehavior, ScrollIntoViewOptions};
 
 use super::super::menu::dom as MenuDom;
 use super::{actions, state::*};
-use crate::edit::sidebar::state::{State as SidebarState, Module, ModuleHighlight};
+use crate::edit::sidebar::state::{Module, ModuleHighlight, State as SidebarState};
 use components::module::_common::thumbnail::ModuleThumbnail;
-use futures_signals::signal::{SignalExt, Mutable};
+use futures_signals::signal::{Mutable, SignalExt};
 use shared::domain::jig::ModuleKind;
 use std::rc::Rc;
 use std::str::FromStr;
@@ -221,7 +221,9 @@ impl ModuleDom {
         })
     }
 
-    pub fn render_add_button<A>(state: &Rc<State>) -> impl FnOnce(DomBuilder<A>) -> DomBuilder<A> + '_
+    pub fn render_add_button<A>(
+        state: &Rc<State>,
+    ) -> impl FnOnce(DomBuilder<A>) -> DomBuilder<A> + '_
     where
         A: AsRef<Node>,
     {
@@ -229,7 +231,13 @@ impl ModuleDom {
             // If this module is anything other than a placeholder, the add button could be displayed.
             let current_module_should_add = state.module.is_some();
             let next_module_should_show_add = {
-                match state.sidebar.modules.lock_ref().to_vec().get(state.index + 1) {
+                match state
+                    .sidebar
+                    .modules
+                    .lock_ref()
+                    .to_vec()
+                    .get(state.index + 1)
+                {
                     // If the next module is anything other than a placeholder, then this module can
                     // potentially display the the add button.
                     Some(module) => module.is_some(),

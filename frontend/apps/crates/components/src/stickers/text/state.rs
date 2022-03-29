@@ -40,7 +40,7 @@ impl Text {
                         on_blur();
                     }
                 }
-            }))
+            })),
         );
         Self {
             value: Mutable::new(text.value),

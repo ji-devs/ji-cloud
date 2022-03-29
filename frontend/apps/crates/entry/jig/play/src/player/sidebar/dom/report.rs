@@ -2,9 +2,9 @@ use std::rc::Rc;
 
 use dominator::{clone, events, html, with_node, Dom};
 use futures_signals::signal::{Signal, SignalExt};
+use shared::domain::jig::report::JigReportType;
 use strum::IntoEnumIterator;
 use web_sys::HtmlSelectElement;
-use shared::domain::jig::report::JigReportType;
 
 use super::super::{
     actions,

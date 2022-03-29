@@ -180,7 +180,7 @@ fn render_controls(state: Rc<State>) -> Vec<Dom> {
     match state.options.kind {
         ImageSearchKind::Overlay => {
             // overlay can only search in jigzi and doesn't have filters or upload
-        },
+        }
         ImageSearchKind::Background | ImageSearchKind::Sticker => {
             vec.push(html!("label", {
                 .property("slot", "source-options")
@@ -216,7 +216,7 @@ fn render_controls(state: Rc<State>) -> Vec<Dom> {
                 }))
                 .text(STR_WEB)
             }));
-        
+
             if options.upload {
                 vec.push(html!("image-search-upload", {
                     .property("slot", "upload")
@@ -233,7 +233,7 @@ fn render_controls(state: Rc<State>) -> Vec<Dom> {
             if options.filters {
                 vec.push(render_filters(state.clone()));
             }
-        },
+        }
     };
 
     vec.push(html!("input-search", {

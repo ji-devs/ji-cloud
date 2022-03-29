@@ -6,9 +6,9 @@ use futures_signals::{
     signal::Mutable,
     signal_vec::{MutableSignalVec, MutableVec},
 };
-use utils::unwrap::UnwrapJiExt;
 use std::rc::Rc;
 use utils::events;
+use utils::unwrap::UnwrapJiExt;
 
 fn render_list(
     slot: &str,

@@ -7,8 +7,8 @@ use utils::events;
 
 use crate::player::sidebar::actions::load_ages;
 
-use super::state::State;
 use super::super::state::can_load_liked_status;
+use super::state::State;
 
 pub(super) mod info;
 pub(super) mod like;

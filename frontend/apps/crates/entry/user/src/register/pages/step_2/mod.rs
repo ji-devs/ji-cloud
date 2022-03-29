@@ -11,11 +11,11 @@ pub struct Language(utils::languages::Language);
 
 impl SimpleSelectItem for Language {
     fn value(&self) -> &str {
-        self.0.0
+        self.0 .0
     }
 
     fn label(&self) -> &str {
-        self.0.1
+        self.0 .1
     }
 }
 

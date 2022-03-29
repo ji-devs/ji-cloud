@@ -1,4 +1,4 @@
-use std::{rc::Rc};
+use std::rc::Rc;
 
 use futures_signals::signal::Mutable;
 use shared::domain::meta::ResourceType;

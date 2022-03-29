@@ -2,7 +2,11 @@ use awsm_web::loaders::helpers::AsyncLoader;
 use futures_signals::signal::Mutable;
 use shared::domain::user::UserProfile;
 use strum_macros::EnumIter;
-use utils::{routes::{HomeRoute, JigRoute, Route}, storage, unwrap::UnwrapJiExt};
+use utils::{
+    routes::{HomeRoute, JigRoute, Route},
+    storage,
+    unwrap::UnwrapJiExt,
+};
 
 const TARGET_SELF: &str = "_self";
 const TARGET_BLANK: &str = "_blank";
@@ -18,7 +22,8 @@ impl State {
         let show_beta_tooltip = {
             if let Ok(local_storage) = storage::get_local_storage() {
                 // If we have access to local_storage, and the item is not set, show the tooltip...
-                let show_beta_tooltip = local_storage.get_item("beta-tooltip").unwrap_ji().is_none();
+                let show_beta_tooltip =
+                    local_storage.get_item("beta-tooltip").unwrap_ji().is_none();
 
                 if show_beta_tooltip {
                     // And then immediately set the item so that it isn't shown again

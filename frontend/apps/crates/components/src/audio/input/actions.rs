@@ -34,14 +34,16 @@ impl AudioInput {
             }
             None => {
                 match previous_mode {
-                    AudioInputMode::Empty | AudioInputMode::Recording | AudioInputMode::Uploading => {
+                    AudioInputMode::Empty
+                    | AudioInputMode::Recording
+                    | AudioInputMode::Uploading => {
                         // don't trigger on_delete since there wasn't any value here in the first place
-                    },
+                    }
                     AudioInputMode::Playing(_) | AudioInputMode::Stopped(_) => {
                         if let Some(on_delete) = &self.callbacks.on_delete {
                             (on_delete)();
                         }
-                    },
+                    }
                 }
             }
         }

@@ -12,11 +12,7 @@ pub struct JigziHelp {
 }
 
 impl JigziHelp {
-    pub fn new(
-        title: String,
-        body: String,
-        show_id: &str,
-    ) -> Rc<Self> {
+    pub fn new(title: String, body: String, show_id: &str) -> Rc<Self> {
         let permanently_closed = storage::get_local_storage()
             .unwrap_ji()
             .get_item(&format!("tooltip-{}", show_id))

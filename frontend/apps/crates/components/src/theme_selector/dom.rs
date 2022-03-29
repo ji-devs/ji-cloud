@@ -14,7 +14,7 @@ fn render(
     element_name: &str,
     state: Rc<ThemeSelector>,
     slot: Option<&str>,
-    action: Option<Dom>
+    action: Option<Dom>,
 ) -> Dom {
     html!("theme-selector", {
         .apply_if(slot.is_some(), |dom| {

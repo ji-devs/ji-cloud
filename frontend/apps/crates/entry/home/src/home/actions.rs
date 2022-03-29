@@ -5,12 +5,9 @@ use dominator::clone;
 use futures::join;
 
 use shared::{
-    api::{
-        endpoints::jig,
-        ApiEndpoint,
-    },
+    api::{endpoints::jig, ApiEndpoint},
     domain::jig::JigCountResponse,
-    error::EmptyError
+    error::EmptyError,
 };
 use std::rc::Rc;
 use utils::prelude::*;
@@ -73,14 +70,16 @@ async fn fetch_profile(state: Rc<State>) {
         Some(profile) => {
             state.is_logged_in.set(true);
             state.search_selected.set_from_profile(profile);
-        },
-        None => {},
+        }
+        None => {}
     }
 }
 
 async fn search_async(state: Rc<State>) {
     let search_state = SearchResults::new(&state, true);
-    state.mode.set(HomePageMode::Search(Rc::clone(&search_state)));
+    state
+        .mode
+        .set(HomePageMode::Search(Rc::clone(&search_state)));
 
     let req = state.search_selected.to_search_request();
     Route::Home(HomeRoute::Search(Some(req.clone()))).push_state();

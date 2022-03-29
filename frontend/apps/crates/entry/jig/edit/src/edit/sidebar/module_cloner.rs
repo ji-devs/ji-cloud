@@ -2,9 +2,7 @@ use shared::{
     api::endpoints::{jig::module, ApiEndpoint},
     domain::{
         jig::{
-            module::{
-                Module, ModuleBody, ModuleCreateRequest, ModuleId, ModuleResponse,
-            },
+            module::{Module, ModuleBody, ModuleCreateRequest, ModuleId, ModuleResponse},
             JigId, LiteModule,
         },
         CreateResponse,

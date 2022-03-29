@@ -1,13 +1,13 @@
-use dominator::{apply_methods, clone, html, with_node, Dom, DomBuilder};
-use utils::resize::ResizeInfo;
-use web_sys::SvgElement;
-use dominator::animation::easing;
 use components::{
     overlay::handle::OverlayHandle,
     traces::svg::{render_single_shape, ShapeStyle, ShapeStyleVar, SvgCallbacks, TransformSize},
 };
-use futures_signals::signal::{Signal, SignalExt};
+use dominator::animation::easing;
 use dominator::animation::Percentage;
+use dominator::{apply_methods, clone, html, with_node, Dom, DomBuilder};
+use futures_signals::signal::{Signal, SignalExt};
+use utils::resize::ResizeInfo;
+use web_sys::SvgElement;
 
 use super::state::*;
 
@@ -46,7 +46,7 @@ impl Hotspot {
                                     // but we don't show the tooltip right away either, so all good
                                     .child_signal(tooltip_text.signal_ref(clone!(elem, fade_animation => move |text| {
                                         text.as_ref().map(|text| {
-                                            
+
                                             fade_animation.animate_to(Percentage::new(0.0));
 
                                             let value_signal = fade_animation

@@ -1,11 +1,8 @@
 use super::{super::state::*, state::*};
-use std::rc::Rc;
 use components::audio::mixer::{
-    play_random_positive,
-    play_random_negative,
-    AudioSourceExt,
-    AUDIO_MIXER
+    play_random_negative, play_random_positive, AudioSourceExt, AUDIO_MIXER,
 };
+use std::rc::Rc;
 use utils::math::BoundsF64;
 use web_sys::HtmlElement;
 
@@ -89,9 +86,7 @@ pub fn start_drag(state: Rc<CardBottom>, elem: HtmlElement, x: i32, y: i32) {
             .set(Some(Rc::new(CardDrag::new((*state).clone(), elem, x, y))));
 
         if let Some(audio) = &state.card.audio {
-            AUDIO_MIXER.with(|mixer| {
-                mixer.play_oneshot(audio.as_source())
-            });
+            AUDIO_MIXER.with(|mixer| mixer.play_oneshot(audio.as_source()));
         }
     }
 }

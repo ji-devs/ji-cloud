@@ -38,20 +38,16 @@ impl ModuleThumbnail {
     pub fn render_live(state: Rc<Self>, slot: Option<&str>) -> Dom {
         let mutable = Mutable::new(());
 
-        let listener = Rc::new(RefCell::new(
-            match &state.module {
-                Some(_) => Some(
-                    crate::firebase::listen_for_screenshot_updates(
-                        &state.jig_id,
-                        &state.module.clone().unwrap_ji().id,
-                        clone!(mutable => move || {
-                            mutable.set(());
-                        }),
-                    ),
-                ),
-                None => None
-            }
-        ));
+        let listener = Rc::new(RefCell::new(match &state.module {
+            Some(_) => Some(crate::firebase::listen_for_screenshot_updates(
+                &state.jig_id,
+                &state.module.clone().unwrap_ji().id,
+                clone!(mutable => move || {
+                    mutable.set(());
+                }),
+            )),
+            None => None,
+        }));
 
         html!("img-module-screenshot", {
             .apply_if(slot.is_some(), |dom| {

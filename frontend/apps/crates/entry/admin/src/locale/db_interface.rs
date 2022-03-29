@@ -9,7 +9,10 @@ use shared::{
     },
     error::EmptyError,
 };
-use utils::{fetch::{api_with_auth, api_with_auth_empty}, unwrap::UnwrapJiExt};
+use utils::{
+    fetch::{api_with_auth, api_with_auth_empty},
+    unwrap::UnwrapJiExt,
+};
 use uuid::Uuid;
 
 pub async fn get_bundles() -> Vec<Bundle> {

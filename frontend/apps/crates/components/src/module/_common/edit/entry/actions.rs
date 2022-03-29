@@ -163,7 +163,8 @@ pub fn save<RawData, Mode, Step>(
         let _ = api_with_auth_empty::<EmptyError, _>(&path, Update::METHOD, req).await;
 
         // Update the sidebar with this modules completion status
-        let _ = IframeAction::new(ModuleToJigEditorMessage::Complete(module_id, is_complete)).try_post_message_to_editor();
+        let _ = IframeAction::new(ModuleToJigEditorMessage::Complete(module_id, is_complete))
+            .try_post_message_to_editor();
 
         if is_complete {
             // Only generate a screenshot if the module has the minimum required content.

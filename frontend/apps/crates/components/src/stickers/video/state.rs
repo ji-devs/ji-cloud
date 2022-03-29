@@ -27,11 +27,8 @@ impl Video {
         let is_playing = Mutable::new(false);
         let playing_started = Mutable::new(false);
 
-        let transform_callbacks = TransformCallbacks::new(
-            on_transform_finished,
-            None::<fn()>,
-            on_blur
-        );
+        let transform_callbacks =
+            TransformCallbacks::new(on_transform_finished, None::<fn()>, on_blur);
         Self {
             host: Mutable::new(video.host.clone()),
             transform: Rc::new(TransformState::new(

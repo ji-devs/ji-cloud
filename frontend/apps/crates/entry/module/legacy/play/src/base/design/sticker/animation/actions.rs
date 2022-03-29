@@ -1,21 +1,14 @@
-
-
-
 use gloo_timers::callback::Timeout;
 
-use shared::domain::jig::module::body::legacy::design::{
-    HideToggle,
-};
-
+use shared::domain::jig::module::body::legacy::design::HideToggle;
 
 use std::ops::{Mul, Sub};
-use std::sync::atomic::{Ordering};
-use std::{rc::Rc};
-use web_sys::{ImageData};
+use std::rc::Rc;
+use std::sync::atomic::Ordering;
+use web_sys::ImageData;
 
 use dominator::clone;
 use js_sys::{Object, Reflect};
-
 
 use utils::prelude::*;
 use wasm_bindgen::prelude::*;
@@ -88,9 +81,7 @@ impl Controller {
     }
 }
 
-
 impl AnimationPlayer {
-
     pub fn request_frame(self: Rc<Self>) {
         self.blit_time.set(Self::curr_time());
 
@@ -129,12 +120,16 @@ impl AnimationPlayer {
         });
     }
     pub fn repaint_for_hidden(&self, hidden: bool) {
-
         let ctx = self.paint_ctx.borrow();
         let ctx = ctx.as_ref().unwrap_ji();
 
         if hidden {
-            ctx.clear_rect(0.0, 0.0, ctx.canvas().unwrap_ji().width().into(), ctx.canvas().unwrap_ji().height().into());
+            ctx.clear_rect(
+                0.0,
+                0.0,
+                ctx.canvas().unwrap_ji().width().into(),
+                ctx.canvas().unwrap_ji().height().into(),
+            );
         } else {
             if let Some(img_data) = self.last_paint_data.borrow().as_ref() {
                 self.map_current_frame(|_frame_index, frame_info| {
@@ -180,7 +175,10 @@ impl AnimationPlayer {
             let ctx = self.paint_ctx.borrow();
             let ctx = ctx.as_ref().unwrap_ji();
 
-            if !self.controller.hidden.get() && ((frame_index == 0 && write_cache) || self.controller.playing.load(Ordering::SeqCst))  {
+            if !self.controller.hidden.get()
+                && ((frame_index == 0 && write_cache)
+                    || self.controller.playing.load(Ordering::SeqCst))
+            {
                 ctx.put_image_data_with_dirty_x_and_dirty_y_and_dirty_width_and_dirty_height(
                     img_data,
                     0.0,
@@ -199,7 +197,6 @@ impl AnimationPlayer {
 
         self.next_frame();
     }
-
 
     fn curr_time() -> f64 {
         web_sys::window()

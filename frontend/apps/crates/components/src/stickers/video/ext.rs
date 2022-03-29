@@ -3,8 +3,8 @@ use shared::domain::jig::module::body::{
     Transform,
     _groups::design::{Video, VideoHost, YoutubeUrl},
 };
-use utils::prelude::*;
 use url::Url;
+use utils::prelude::*;
 
 pub trait VideoExt {
     fn new(value: VideoHost) -> Self;
@@ -27,7 +27,6 @@ const EMBED_IFRAME_BASE: &str = "<iframe ";
 const EMBED_URL_BASE: &str = "https://www.youtube.com/embed/";
 
 fn get_id_from_url(url: &str) -> Result<&str, ()> {
-
     let id;
     //when is_id passes all tests, this can be removed
     let mut check_extracted_id = true;
@@ -40,28 +39,20 @@ fn get_id_from_url(url: &str) -> Result<&str, ()> {
     } else if url.starts_with(EMBED_IFRAME_BASE) || url.starts_with(EMBED_URL_BASE) {
         id = extract_id_iframe(url);
     } else if url.find(ANY_YOUTUBE_DOMAIN).is_some() {
-
         let url = match url.find("http") {
             Some(pos) => &url[pos..],
-            None => url
+            None => url,
         };
 
         match Url::parse(url) {
-            Ok(real_url) => {
-                match real_url.query_pairs().find(|pair| pair.0 == "v") {
-                    Some(_) => {
-                        id = extract_any_v(url);
-                        check_extracted_id = false;
-                    },
-                    None => {
-                        return Err(())
-                    }
+            Ok(real_url) => match real_url.query_pairs().find(|pair| pair.0 == "v") {
+                Some(_) => {
+                    id = extract_any_v(url);
+                    check_extracted_id = false;
                 }
-
+                None => return Err(()),
             },
-            _ => {
-                return Err(())
-            }
+            _ => return Err(()),
         }
     } else {
         return Err(());
@@ -145,7 +136,7 @@ mod tests {
             "UQosz5VNsjY",
             "https://www.youtube.com/watch?app=desktop&feature=youtu.be&v=7BvLp4VdW1A",
             "https://m.youtube.com/watch?v=0op1YgeiDl8-",
-            "חשבון פשוטhttps://www.youtube.com/watch?v=lgZtuGgAZvo"
+            "חשבון פשוטhttps://www.youtube.com/watch?v=lgZtuGgAZvo",
         ];
 
         for url in valid_url_vec {

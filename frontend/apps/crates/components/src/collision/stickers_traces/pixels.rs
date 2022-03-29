@@ -7,7 +7,7 @@
     For example, shape 0's R value is 0, shape 1's R value is 1
     and this goes on, filling RGB sequentially
 
-    Then, when we want to know which shape is at a coordinate, 
+    Then, when we want to know which shape is at a coordinate,
     we read the pixel and reverse the process to get the shape index
 
     This can be used for anything, but so far here we then check how much
@@ -16,10 +16,10 @@
     The reason for not doing the same process on the target to be pixel-perfect
     in both directions, is that the use case was for the "drag and drop"
     module where the target is an HtmlImageElement with various levels of transparency.
-    
+
     There might be an opportunity to support that, but it could get very tricky and/or slow.
 
-    Note: it _might_ be possible to use alpha, but it's unclear whether this 
+    Note: it _might_ be possible to use alpha, but it's unclear whether this
     skews the internal data with blending, canvas composite mode, etc.
 
     So we only support up to 16,777,216 shapes... should be more than enough ;)
