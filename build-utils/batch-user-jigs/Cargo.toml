@@ -8,7 +8,6 @@ edition = "2018"
 
 [dependencies]
 shared = { path = "../../shared/rust" }
-utils = { path = "../../frontend/apps/crates/utils" }
 legacy_transcode = { path = "../legacy-player/transcode", package="transcode" }
 scan_fmt = "0.2.6"
 structopt = "0.3.25"
