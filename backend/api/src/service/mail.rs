@@ -7,6 +7,8 @@ use crate::error;
 
 use super::Service;
 
+const SENDER_NAME: &str = "Jigzi";
+
 pub struct Client {
     client: Sender,
 
@@ -23,7 +25,7 @@ impl Client {
     pub fn new(settings: EmailClientSettings) -> Self {
         Client {
             client: Sender::new(settings.api_key),
-            sender_email: Email::new(settings.sender_email),
+            sender_email: Email::new(settings.sender_email).set_name(SENDER_NAME),
             signup_verify_template: settings.signup_verify_template,
             password_reset_template: settings.password_reset_template,
             email_reset_template: settings.email_reset_template,
