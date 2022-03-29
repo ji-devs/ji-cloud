@@ -618,7 +618,7 @@ left join jig_data on cte1.id = jig_data.id
 left join jig on (jig_data.id = jig.draft_id or (jig_data.id = jig.live_id and last_synced_at is not null))
 left join jig_admin_data "admin" on admin.jig_id = jig.id
 where cte1.ord > (1 * $6 * $7)
-limit $7 
+limit $7
 "#,
     author_id,
     jig_focus.map(|it| it as i16),
@@ -1019,6 +1019,7 @@ where (author_id = $1 or $1 is null)
         &resource_types[..]
     )
     .fetch_one(db)
+    .instrument(tracing::info_span!("count jig_data"))
     .await?;
 
     let jig = sqlx::query!(
@@ -1044,6 +1045,7 @@ where (author_id = $1 or $1 is null)
         &resource_types[..]
     )
     .fetch_one(db)
+    .instrument(tracing::info_span!("count jig"))
     .await?;
 
     Ok((jig.count as u64, jig_data.count as u64))
