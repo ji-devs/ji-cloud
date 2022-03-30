@@ -13,14 +13,14 @@ use std::rc::Rc;
 use super::super::state::Sidebar;
 use super::play_settings::state::*;
 
-pub struct Step5 {
+pub struct Step4 {
     pub tab: Mutable<Tab>,
     pub sidebar: Rc<Sidebar>,
 }
 
-impl Step5 {
+impl Step4 {
     pub fn new(sidebar: Rc<Sidebar>) -> Rc<Self> {
-        let kind = match crate::debug::settings().step_5_tab {
+        let kind = match crate::debug::settings().step_4_tab {
             Some(kind) => kind,
             None => MenuTabKind::PlaySettings,
         };

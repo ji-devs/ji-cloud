@@ -8,6 +8,9 @@ export class _ extends LitElement {
     static get styles() {
         return [
             css`
+                :host {
+                    display: flex;
+                }
                 :host([disabled]) {
                     pointer-events: none;
                 }

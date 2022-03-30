@@ -1,3 +1,5 @@
+use crate::base::sidebar::state::{StickerPhase, TracePhase};
+
 use super::{drag::*, select::*, state::*};
 use components::module::_common::edit::prelude::*;
 use components::{
@@ -19,26 +21,27 @@ impl DomRenderable for Main {
                 .style("height", "100%")
             }))
             .child_signal(
-                state.sticker_phase_signal().map(clone!(state => move |sticker_phase| Some({
+                state.sidebar.sticker_phase.signal_cloned().map(clone!(state => move |sticker_phase| {
                     match sticker_phase {
-                        StickerPhase::Scene => {
-                            render_stickers(state.base.stickers.clone())
+                        Some(StickerPhase::Scene) => {
+                            Some(render_stickers(state.base.stickers.clone()))
                         },
-                        StickerPhase::Select(state) => {
-                            MainSelect::render(state)
+                        Some(StickerPhase::Select(state)) => {
+                            Some(MainSelect::render(state))
                         },
-                        StickerPhase::Drag(state) => {
-                            MainDrag::render(state)
+                        Some(StickerPhase::Drag(state)) => {
+                            Some(MainDrag::render(state))
                         },
-                        StickerPhase::Static => {
+                        Some(StickerPhase::Static) => {
                             let raw_stickers = state.base.stickers.to_raw();
-                            render_stickers_raw(&raw_stickers, theme_id)
-                        }
+                            Some(render_stickers_raw(&raw_stickers, theme_id))
+                        },
+                        _ => None
                     }
-                })))
+                }))
             )
             .child_signal(
-                state.trace_phase_signal().map(clone!(state => move |trace_phase| {
+                state.sidebar.trace_phase.signal_cloned().map(clone!(state => move |trace_phase| {
                     trace_phase.map(|trace_phase| {
                         match trace_phase {
                             TracePhase::Edit => {

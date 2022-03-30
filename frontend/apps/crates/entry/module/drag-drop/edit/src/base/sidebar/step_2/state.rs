@@ -1,15 +1,16 @@
-use crate::base::state::*;
+use super::super::state::Sidebar;
+use crate::base::state::Base;
 use components::{
-    audio::input::{AudioInput, AudioInputCallbacks, AudioInputOptions},
+    image::search::{
+        callbacks::Callbacks as ImageSearchCallbacks,
+        state::{ImageSearchKind, ImageSearchOptions, State as ImageSearchState},
+    },
+    stickers::state::Stickers,
     tabs::MenuTabKind,
 };
 use dominator::clone;
-use dominator_helpers::signals::{rc_signal_fn, RcSignalFn};
-use futures_signals::signal::{Mutable, SignalExt};
-use shared::domain::jig::module::body::Audio;
+use futures_signals::signal::Mutable;
 use std::rc::Rc;
-
-use super::super::state::Sidebar;
 
 pub struct Step2 {
     pub tab: Mutable<Tab>,
@@ -18,67 +19,42 @@ pub struct Step2 {
 
 impl Step2 {
     pub fn new(sidebar: Rc<Sidebar>) -> Rc<Self> {
-        let kind = match crate::debug::settings().step_2_tab {
-            Some(kind) => kind,
-            None => MenuTabKind::Select,
-        };
-
-        let tab = Mutable::new(Tab::new(sidebar.base.clone(), kind));
-
+        let tab = Mutable::new(Tab::new(sidebar.base.clone(), MenuTabKind::Text));
         Rc::new(Self { sidebar, tab })
     }
 }
 
 #[derive(Clone)]
 pub enum Tab {
-    Select,
-    Audio(RcSignalFn<Option<Rc<AudioInput>>>),
+    StickerImage(Rc<ImageSearchState>),
+    StickerText,
 }
 
 impl Tab {
     pub fn new(base: Rc<Base>, kind: MenuTabKind) -> Self {
         match kind {
-            MenuTabKind::Select => Self::Select,
-            MenuTabKind::Audio => {
-                let cb = clone!(base => move || {
-                    base.selected_item_kind_signal()
-                        .map(clone!(base => move |index_item_kind| {
-                            index_item_kind.and_then(|(index, item_kind)| {
+            MenuTabKind::Image => {
+                let opts = ImageSearchOptions {
+                    kind: ImageSearchKind::Sticker,
+                    ..ImageSearchOptions::default()
+                };
 
-                                match item_kind {
-                                    ItemKind::Static => None,
-                                    ItemKind::Interactive(data) => {
-                                        let opts = AudioInputOptions::new(
-                                            Some(data.audio.signal_cloned())
-                                        );
+                let callbacks = ImageSearchCallbacks::new(Some(clone!(base => move |image| {
+                    Stickers::add_sprite(base.stickers.clone(), image);
+                })));
+                let state = ImageSearchState::new(opts, callbacks);
 
-                                        let callbacks = AudioInputCallbacks::new(
-                                            Some(clone!(base => move |audio:Audio| {
-                                               base.set_drag_item_audio(index, Some(audio));
-                                            })),
-                                            Some(clone!(base => move || {
-                                               base.set_drag_item_audio(index, None);
-                                            })),
-                                        );
-
-                                        Some(AudioInput::new(opts, callbacks))
-                                    }
-                                }
-                            })
-                        }))
-                });
-
-                Self::Audio(rc_signal_fn(cb))
+                Self::StickerImage(Rc::new(state))
             }
-
+            MenuTabKind::Text => Self::StickerText,
             _ => unimplemented!("unsupported tab kind!"),
         }
     }
 
     pub fn kind(&self) -> MenuTabKind {
         match self {
-            Self::Select => MenuTabKind::Select,
-            Self::Audio(_) => MenuTabKind::Audio,
+            Self::StickerImage(_) => MenuTabKind::Image,
+            Self::StickerText => MenuTabKind::Text,
         }
     }
 }

@@ -55,4 +55,6 @@ pub enum MenuTabKind {
     Theme,
     Tooltip,
     Video,
+    Trace,
+    Place,
 }

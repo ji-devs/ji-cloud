@@ -26,12 +26,14 @@ pub async fn init_from_raw(
 
     let base = Base::new(init_args).await;
 
+    let sidebar = Rc::new(Sidebar::new(base.clone()));
+
     BaseInit {
         force_step,
         force_theme: None,
         base: base.clone(),
-        main: Rc::new(Main::new(base.clone())),
-        sidebar: Rc::new(Sidebar::new(base.clone())),
+        main: Rc::new(Main::new(base.clone(), sidebar.clone())),
+        sidebar,
         header: Rc::new(Header::new(base.clone())),
         footer: Rc::new(Footer::new(base.clone())),
         overlay: Rc::new(Overlay::new(base)),
