@@ -1,4 +1,4 @@
-use super::{super::password::state::*, state::*};
+use super::state::*;
 use dominator::clone;
 use shared::{
     api::endpoints::{user, ApiEndpoint},
@@ -8,16 +8,16 @@ use shared::{
 use std::rc::Rc;
 use utils::prelude::*;
 
-pub fn change_password(state: Rc<PasswordResetPage>) {
-    state.password.clear_status();
+const STR_ERROR_RESETTING: &str = "Error resetting your password, please try again";
 
-    if state.password.strength.get() != PasswordStrength::Strong {
-        state.password.status.set(Some(PasswordStatus::PwWeak));
+pub fn change_password(state: Rc<PasswordResetPage>) {
+    if !state.password.password_acceptable() {
         return;
     }
 
     state.loader.load(clone!(state => async move {
-        let password:String = state.password.value.borrow().clone();
+        state.tried_to_submit.set(true);
+        let password:String = state.password.get_value();
         let query = ChangePasswordRequest::Change {
             token: state.token.clone(),
             password,
@@ -32,7 +32,7 @@ pub fn change_password(state: Rc<PasswordResetPage>) {
                 dominator::routing::go_to_url(&route);
             },
             Err(_err) => {
-                state.password.status.set(Some(PasswordStatus::ResetError));
+                state.password.set_error(STR_ERROR_RESETTING);
             }
         }
     }));

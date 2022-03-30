@@ -1,4 +1,5 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
+import { ifDefined } from "lit-html/directives/if-defined";
 import "../wrapper";
 
 @customElement("input-password")
@@ -20,7 +21,7 @@ export class _ extends LitElement {
     placeholder: string = "";
 
     @property()
-    hint: string = "";
+    hint?: string;
 
     @property({ type: Boolean })
     visible: boolean = false;
@@ -62,7 +63,7 @@ export class _ extends LitElement {
             <input-wrapper
                 label="${this.label}"
                 ?error="${this.error}"
-                hint="${this.hint}"
+                hint="${ifDefined(this.hint)}"
             >
                 <input
                     placeholder="${this.placeholder}"

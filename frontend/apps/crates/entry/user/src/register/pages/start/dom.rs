@@ -1,44 +1,38 @@
-use super::{actions, state::*};
+use super::state::RegisterStart;
 use dominator::{clone, html, with_node, Dom};
-use futures_signals::signal::{Mutable, SignalExt};
+use futures_signals::signal::SignalExt;
 use std::rc::Rc;
 use web_sys::HtmlInputElement;
 
-use crate::{
-    register::{components::footer::Footer, state::Step},
-    strings,
-};
+use crate::{register::components::footer::Footer, strings};
 use utils::events;
 
 const STR_GOOGLE_LABEL: &str = "Sign up with Google";
 
-pub struct StartPage {}
-
-impl StartPage {
-    pub fn render(step: Mutable<Step>, _is_no_auth: bool) -> Dom {
-        let state = Rc::new(State::new(step));
+impl RegisterStart {
+    pub fn render(self: Rc<Self>) -> Dom {
+        let state = self;
 
         html!("empty-fragment", {
             .child(html!("window-loader-block", {
                 .property_signal("visible", state.loader.is_loading())
             }))
             .child(html!("page-register-start", {
-                .property_signal("passwordStrength", state.password.get_strength())
+                .property_signal("passwordStrength", state.password.strength_signal())
                 .children(vec![
                     html!("input-wrapper", {
                         .property("slot", "email")
                         .property("label", strings::STR_EMAIL_LABEL)
-                        .property_signal("error", state.email_error().map(|err| {
-                            !err.is_empty()
+                        .property_signal("error", state.show_email_error_signal().map(|err| {
+                            err.is_some()
                         }))
-                        .property_signal("hint", state.email_error())
+                        .property_signal("hint", state.show_email_error_signal())
                         .child(html!("input" => HtmlInputElement, {
                             .with_node!(elem => {
                                 .property("type", "email")
                                 .attribute("autocomplete", "email")
                                 .event(clone!(state => move |_:events::Input| {
-                                    state.clear_email_status();
-                                    *state.email.borrow_mut() = elem.value();
+                                    state.update_email(elem.value());
                                 }))
                             })
                         }))
@@ -48,21 +42,19 @@ impl StartPage {
                         .property("label", strings::STR_PASSWORD_CREATE_LABEL)
                         .property("placeholder", strings::STR_PASSWORD_PLACEHOLDER)
                         .property("autocomplete", "new-password")
-                        .property_signal("error", state.password.error().map(|err| {
-                            !err.is_empty()
+                        .property_signal("error", state.show_password_error_signal().map(|err| {
+                            err.is_some()
                         }))
-                        .property_signal("hint", state.password.error())
+                        .property_signal("hint", state.show_password_error_signal())
                         .event(clone!(state => move |evt:events::CustomInput| {
-                            state.password.clear_status();
-                            *state.password.value.borrow_mut() = evt.value();
-                            state.password.update_strength();
+                            state.password.update_value(evt.value());
                         }))
                     }),
                     html!("button-google", {
                         .property("slot", "google")
                         .property("label", STR_GOOGLE_LABEL)
                         .event(clone!(state => move |_evt:events::Click| {
-                            actions::register_google(state.clone())
+                            state.register_google()
                         }))
                     }),
                     html!("button-rect-icon", {
@@ -72,7 +64,7 @@ impl StartPage {
                         .property("iconAfter", "arrow")
                         .text(strings::STR_CONTINUE)
                         .event(clone!(state => move |_evt:events::Click| {
-                            actions::register_email(state.clone())
+                            state.register_email()
                         }))
                     }),
                     Footer::render(),

@@ -1,3 +1,6 @@
-pub(super) mod actions;
-pub mod dom;
-pub(super) mod state;
+mod actions;
+mod dom;
+mod state;
+
+pub use dom::*;
+pub use state::*;

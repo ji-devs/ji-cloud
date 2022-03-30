@@ -8,12 +8,12 @@ mod debug;
 mod email;
 mod login;
 mod oauth;
-mod password;
+mod password_handler;
 mod profile;
 mod register;
+mod reset;
 mod router;
 mod strings;
-mod reset;
 
 use wasm_bindgen::prelude::*;
 

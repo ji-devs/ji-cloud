@@ -12,21 +12,19 @@ impl PasswordResetPage {
             .child(html!("window-loader-block", {
                 .property_signal("visible", state.loader.is_loading())
             }))
-            .property_signal("passwordStrength", state.password.get_strength())
+            .property_signal("passwordStrength", state.password.strength_signal())
             .child(
                     html!("input-password", {
                         .property("slot", "password")
                         .property("label", strings::STR_PASSWORD_CREATE_LABEL)
                         .property("placeholder", strings::STR_PASSWORD_PLACEHOLDER)
                         .property("autocomplete", "new-password")
-                        .property_signal("error", state.password.error().map(|err| {
-                            !err.is_empty()
+                        .property_signal("error", state.show_error_signal().map(|err| {
+                            err.is_some()
                         }))
-                        .property_signal("hint", state.password.error())
+                        .property_signal("hint", state.show_error_signal())
                         .event(clone!(state => move |evt:events::CustomInput| {
-                            state.password.clear_status();
-                            *state.password.value.borrow_mut() = evt.value();
-                            state.password.update_strength();
+                            state.password.update_value(evt.value());
                         }))
                     })
             )

@@ -119,7 +119,7 @@ export class _ extends LitElement {
     label: string = "";
 
     @property()
-    hint: string = "";
+    hint?: string;
 
     @property({ type: Boolean, reflect: true })
     error: boolean = false;

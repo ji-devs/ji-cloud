@@ -8,61 +8,64 @@ use shared::{
 use std::rc::Rc;
 use utils::prelude::*;
 
-use crate::password::state::*;
+const STR_EMAIL_IN_USE: &str = "An account is already set up with this email address";
+const STR_EMAIL_INVALID: &str = "Invalid email address";
+const STR_EMAIL_EMPTY: &str = "Email can't be empty";
 
-pub fn register_email(state: Rc<State>) {
-    state.clear_email_status();
-    state.password.clear_status();
+impl RegisterStart {
+    pub fn register_email(self: &Rc<Self>) {
+        let state = self;
 
-    let mut early_exit = false;
+        state.tried_to_submit.set(true);
 
-    if state.password.value.borrow().len() < 6 {
-        state.password.status.set(Some(PasswordStatus::PwShort));
-        early_exit = true;
-    }
+        let email = state.email.borrow().clone();
+        let password = state.password.get_value();
 
-    let email: String = state.email.borrow().clone();
-    let password: String = state.password.value.borrow().clone();
+        if !state.password.password_acceptable() || state.email_error.lock_ref().is_some() {
+            return;
+        }
 
-    if email.is_empty() {
-        state.email_status.set(Some(EmailStatus::EmptyEmail));
-        early_exit = true;
-    }
+        state.loader.load(clone!(state => async move {
+            let query = CreateUserRequest {
+                email: email.clone(),
+                password
+            };
 
-    if early_exit {
-        return;
-    }
+            let (resp, status):(Result<(), EmptyError>, u16) = api_no_auth_empty_status(user::Create::PATH, user::Create::METHOD, Some(query)).await;
 
-    state.loader.load(clone!(state => async move {
-        let query = CreateUserRequest {
-            email: email.clone(),
-            password
-        };
-
-        let (resp, status):(Result<(), EmptyError>, u16) = api_no_auth_empty_status(user::Create::PATH, user::Create::METHOD, Some(query)).await;
-
-        match resp {
-            Ok(_) => {
-                let route:String = Route::User(UserRoute::SendEmailConfirmation(email)).into();
-                dominator::routing::go_to_url(&route);
-            },
-            Err(_err) => {
-                if status == 409 {
-                    state.email_status.set(Some(EmailStatus::EmailExists));
-                } else {
-                    state.email_status.set(Some(EmailStatus::InvalidEmail));
+            match resp {
+                Ok(_) => {
+                    let route:String = Route::User(UserRoute::SendEmailConfirmation(email)).into();
+                    dominator::routing::go_to_url(&route);
+                },
+                Err(_) => {
+                    if status == 409 {
+                        state.email_error.set(Some(STR_EMAIL_IN_USE));
+                    } else {
+                        state.email_error.set(Some(STR_EMAIL_INVALID));
+                    }
                 }
             }
-        }
-    }));
-}
+        }));
+    }
 
-pub fn register_google(state: Rc<State>) {
-    state.clear_email_status();
-    state.password.clear_status();
+    pub fn register_google(self: &Rc<Self>) {
+        self.loader.load(async {
+            crate::oauth::actions::redirect(GetOAuthUrlServiceKind::Google, OAuthUrlKind::Register)
+                .await;
+        });
+    }
 
-    state.loader.load(async {
-        crate::oauth::actions::redirect(GetOAuthUrlServiceKind::Google, OAuthUrlKind::Register)
-            .await;
-    });
+    pub fn update_email(self: &Rc<Self>, email: String) {
+        let error = if email.is_empty() {
+            Some(STR_EMAIL_EMPTY)
+        } else if !email.contains('@') {
+            Some(STR_EMAIL_INVALID)
+        } else {
+            None
+        };
+        self.email_error.set(error);
+
+        *self.email.borrow_mut() = email;
+    }
 }
