@@ -1,4 +1,4 @@
-use super::{super::state::*, state::*};
+use super::{super::password::state::*, state::*};
 use dominator::clone;
 use shared::{
     api::endpoints::{user, ApiEndpoint},

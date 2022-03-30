@@ -2,7 +2,7 @@ use utils::routes::*;
 
 use crate::{
     email::confirmation::SendEmailConfirmationPage, email::verify::VerifyEmailPage,
-    login::dom::LoginPage, oauth::dom::OauthPage, password::reset::PasswordResetPage,
+    login::dom::LoginPage, oauth::dom::OauthPage, reset::PasswordResetPage,
     profile::dom::ProfilePage, register::dom::RegisterPage,
     register::pages::complete::dom::CompletePage as RegisterCompletePage, register::state::Step,
 };

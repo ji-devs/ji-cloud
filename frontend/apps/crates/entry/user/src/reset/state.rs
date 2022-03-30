@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use super::super::state::*;
+use super::super::password::state::*;
 use dominator_helpers::futures::AsyncLoader;
 
 pub struct PasswordResetPage {

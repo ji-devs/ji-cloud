@@ -13,6 +13,7 @@ mod profile;
 mod register;
 mod router;
 mod strings;
+mod reset;
 
 use wasm_bindgen::prelude::*;
 
