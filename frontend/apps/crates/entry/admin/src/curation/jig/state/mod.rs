@@ -17,7 +17,7 @@ impl CurationJig {
     pub fn new(curation_state: Rc<Curation>, jig_id: JigId, jig: Rc<EditableJig>) -> Rc<Self> {
         Rc::new(Self {
             jig_id,
-            jig: jig.into(),
+            jig,
             loader: AsyncLoader::new(),
             curation_state,
             player_open: Mutable::new(false),

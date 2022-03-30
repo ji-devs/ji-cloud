@@ -20,8 +20,8 @@ const STR_DESCRIPTION: &str = "Image description";
 const STR_NEXT: &str = "Next";
 const STR_PUBLISH: &str = "Publish";
 
-const STR_DELETE_TITLE: &'static str = "Warning";
-const STR_DELETE_CONTENT: &'static str = "Are you sure you want to delete this image?";
+const STR_DELETE_TITLE: &str = "Warning";
+const STR_DELETE_CONTENT: &str = "Are you sure you want to delete this image?";
 
 pub struct ImageMetaPage {}
 

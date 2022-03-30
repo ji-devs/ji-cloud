@@ -170,7 +170,7 @@ impl EntryRow {
                         Column::ZeplinReference => {
                             html!("locale-cell", {
                                 .child(html!("locale-hover-link", {
-                                    .property_signal("link", entry_ref.zeplin_reference.signal_ref(|url| Self::url_option_string(url)))
+                                    .property_signal("link", entry_ref.zeplin_reference.signal_ref(Self::url_option_string))
                                     .child(html!("input" => HtmlInputElement, {
                                         .with_node!(elem => {
                                             .property("type", "url")

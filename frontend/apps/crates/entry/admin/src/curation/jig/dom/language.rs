@@ -8,12 +8,12 @@ use utils::{
 
 use crate::curation::jig::state::CurationJig;
 
-const STR_LANGUAGE_LABEL: &'static str = "Language of instructions";
-const STR_LANGUAGE_PLACEHOLDER: &'static str = "Select language";
+const STR_LANGUAGE_LABEL: &str = "Language of instructions";
+const STR_LANGUAGE_PLACEHOLDER: &str = "Select language";
 
 impl CurationJig {
     pub fn render_languages(self: &Rc<Self>) -> Dom {
-        let state = Rc::clone(&self);
+        let state = Rc::clone(self);
         html!("input-select", {
             .property("slot", "language")
             .property("label", STR_LANGUAGE_LABEL)
@@ -38,7 +38,7 @@ impl CurationJig {
 
 fn render_language(Language(lang_code, land_label): &Language, state: Rc<CurationJig>) -> Dom {
     html!("input-select-option", {
-        .text(&land_label)
+        .text(land_label)
         .property_signal("selected", state.jig.language.signal_cloned().map(clone!(lang_code => move |selected_lang| {
             lang_code == &selected_lang
         })))

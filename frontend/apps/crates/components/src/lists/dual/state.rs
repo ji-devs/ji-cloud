@@ -105,7 +105,7 @@ impl State {
             let left = left_sig,
             let right = right_sig
                 => move {
-                    state.clone().filtered_list(&left, &right).is_some()
+                    state.clone().filtered_list(left, right).is_some()
                 }
         }
     }

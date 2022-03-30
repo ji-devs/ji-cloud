@@ -20,10 +20,10 @@ use futures_signals::{
     signal_vec::{MutableVec, SignalVecExt},
 };
 
-const STR_DELETE_TITLE: &'static str = "Warning";
-const STR_DELETE_CONTENT: &'static str = "Are you sure you want to delete this list?";
-const STR_DELETE_CONFIRM: &'static str = "Yes, go ahead!";
-const STR_DELETE_CANCEL: &'static str = "No, keep this list";
+const STR_DELETE_TITLE: &str = "Warning";
+const STR_DELETE_CONTENT: &str = "Are you sure you want to delete this list?";
+const STR_DELETE_CONFIRM: &str = "Yes, go ahead!";
+const STR_DELETE_CANCEL: &str = "No, keep this list";
 
 pub fn render(state: Rc<State>) -> Dom {
     html!("sidebar-widget-dual-list", {

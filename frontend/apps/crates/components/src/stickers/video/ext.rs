@@ -38,7 +38,7 @@ fn get_id_from_url(url: &str) -> Result<&str, ()> {
         id = extract_id_share(url);
     } else if url.starts_with(EMBED_IFRAME_BASE) || url.starts_with(EMBED_URL_BASE) {
         id = extract_id_iframe(url);
-    } else if url.find(ANY_YOUTUBE_DOMAIN).is_some() {
+    } else if url.contains(ANY_YOUTUBE_DOMAIN) {
         let url = match url.find("http") {
             Some(pos) => &url[pos..],
             None => url,
@@ -69,7 +69,7 @@ fn get_id_from_url(url: &str) -> Result<&str, ()> {
 fn extract_any_v(url: &str) -> &str {
     let start_bytes = url.find("v=").unwrap_or(0) + 2;
     let rest = &url[start_bytes..];
-    let end_bytes = start_bytes + rest.find("&").unwrap_or(rest.len());
+    let end_bytes = start_bytes + rest.find('&').unwrap_or(rest.len());
     &url[start_bytes..end_bytes]
 }
 

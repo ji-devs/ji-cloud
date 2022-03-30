@@ -9,12 +9,12 @@ use utils::events;
 
 use crate::curation::jig::state::CurationJig;
 
-const STR_AFFILIATION_LABEL: &'static str = "Affiliation";
-const STR_AFFILIATION_PLACEHOLDER: &'static str = "Select one or more";
+const STR_AFFILIATION_LABEL: &str = "Affiliation";
+const STR_AFFILIATION_PLACEHOLDER: &str = "Select one or more";
 
 impl CurationJig {
     pub fn render_affiliations(self: &Rc<Self>) -> Dom {
-        let state = Rc::clone(&self);
+        let state = Rc::clone(self);
         html!("input-select", {
             .property("slot", "affiliation")
             .property("label", STR_AFFILIATION_LABEL)
@@ -33,7 +33,7 @@ impl CurationJig {
             // })
             .children_signal_vec(state.curation_state.affiliations.signal_cloned().map(clone!(state => move |affiliations| {
                 affiliations.iter().map(|affiliation| {
-                    render_affiliation(&affiliation, state.clone())
+                    render_affiliation(affiliation, state.clone())
                 }).collect()
             })).to_signal_vec())
         })
@@ -41,7 +41,7 @@ impl CurationJig {
 }
 
 fn render_affiliation(affiliation: &Affiliation, state: Rc<CurationJig>) -> Dom {
-    let affiliation_id = affiliation.id.clone();
+    let affiliation_id = affiliation.id;
     html!("input-select-option", {
         .text(&affiliation.display_name)
         .property_signal("selected", state.jig.affiliations.signal_cloned().map(clone!(affiliation_id => move |affiliations| {

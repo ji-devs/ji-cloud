@@ -190,12 +190,10 @@ impl ResourceContentExt for ResourceContent {
     fn get_link(&self) -> String {
         match self {
             ResourceContent::ImageId(image_id) => {
-                image_lib_url(MediaLibrary::User, PngImageFile::Original, image_id.clone())
+                image_lib_url(MediaLibrary::User, PngImageFile::Original, *image_id)
             }
-            ResourceContent::AudioId(audio_id) => {
-                audio_lib_url(MediaLibrary::User, audio_id.clone())
-            }
-            ResourceContent::PdfId(pdf_id) => pdf_lib_url(MediaLibrary::User, pdf_id.clone()),
+            ResourceContent::AudioId(audio_id) => audio_lib_url(MediaLibrary::User, *audio_id),
+            ResourceContent::PdfId(pdf_id) => pdf_lib_url(MediaLibrary::User, *pdf_id),
             ResourceContent::Link(url) => url.to_string(),
         }
     }

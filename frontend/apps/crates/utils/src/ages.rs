@@ -5,12 +5,12 @@ const STR_ALL_AGES: &str = "All Ages";
 const STR_DASH: &str = "-";
 
 pub trait AgeRangeVecExt {
-    fn range_string(&self, selected: &Vec<AgeRangeId>) -> String;
+    fn range_string(&self, selected: &[AgeRangeId]) -> String;
 }
 
 impl AgeRangeVecExt for Vec<AgeRange> {
-    fn range_string(&self, selected: &Vec<AgeRangeId>) -> String {
-        if selected.len() == self.len() || selected.len() == 0 {
+    fn range_string(&self, selected: &[AgeRangeId]) -> String {
+        if selected.len() == self.len() || selected.is_empty() {
             STR_ALL_AGES.to_string()
         } else if selected.len() == 1 {
             get_age_text(self, selected, false)
@@ -18,7 +18,7 @@ impl AgeRangeVecExt for Vec<AgeRange> {
             let first_age_text = get_age_text(self, selected, false);
             let last_age_text = get_age_text(self, selected, true);
             let mut age_text = String::new();
-            if first_age_text != "" && last_age_text != "" {
+            if !first_age_text.is_empty() && !last_age_text.is_empty() {
                 age_text.push_str(&first_age_text);
                 age_text.push_str(STR_DASH);
                 age_text.push_str(&last_age_text);
@@ -28,7 +28,7 @@ impl AgeRangeVecExt for Vec<AgeRange> {
     }
 }
 
-fn get_age_text(ages: &Vec<AgeRange>, selected: &Vec<AgeRangeId>, get_last: bool) -> String {
+fn get_age_text(ages: &[AgeRange], selected: &[AgeRangeId], get_last: bool) -> String {
     match get_last {
         false => ages
             .iter()
@@ -40,7 +40,7 @@ fn get_age_text(ages: &Vec<AgeRange>, selected: &Vec<AgeRangeId>, get_last: bool
                     .unwrap_or(&age_range.display_name)
                     .to_string()
             })
-            .unwrap_or(String::new()),
+            .unwrap_or_default(),
         true => ages
             .iter()
             .rev()
@@ -52,6 +52,6 @@ fn get_age_text(ages: &Vec<AgeRange>, selected: &Vec<AgeRangeId>, get_last: bool
                     .unwrap_or(&age_range.display_name)
                     .to_string()
             })
-            .unwrap_or(String::new()),
+            .unwrap_or_default(),
     }
 }

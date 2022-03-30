@@ -161,7 +161,7 @@ pub fn aabb_no_rotation_transform_px(
     }
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Default)]
 pub struct BoundsF64 {
     pub x: f64,
     pub y: f64,
@@ -195,16 +195,6 @@ impl BoundsF64 {
                 self.y += self.height
             }
             self.invert_y = invert_y;
-        }
-    }
-
-    pub fn new() -> Self {
-        Self {
-            x: 0.0,
-            y: 0.0,
-            width: 0.0,
-            height: 0.0,
-            invert_y: false,
         }
     }
 

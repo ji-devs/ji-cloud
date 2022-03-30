@@ -7,10 +7,10 @@ use super::{actions, state::*};
 
 use utils::events;
 
-const STR_DELETE_TITLE: &'static str = "Warning";
-const STR_DELETE_CONTENT: &'static str = "Deleting the category \"{category}\" will also remove it from any images or JIGs associated with it. Are you sure you want to delete this category?";
-const STR_DELETE_CONFIRM: &'static str = "Delete category";
-const STR_DELETE_CANCEL: &'static str = "Don't delete";
+const STR_DELETE_TITLE: &str = "Warning";
+const STR_DELETE_CONTENT: &str = "Deleting the category \"{category}\" will also remove it from any images or JIGs associated with it. Are you sure you want to delete this category?";
+const STR_DELETE_CONFIRM: &str = "Delete category";
+const STR_DELETE_CANCEL: &str = "Don't delete";
 
 pub struct CategoriesPage {}
 
@@ -22,8 +22,7 @@ impl CategoriesPage {
 
         html!("empty-fragment", {
             .child_signal(state.deleting.signal_cloned().map(clone!(state => move |deleting| {
-                if let Some(content_state) = deleting {
-                    Some(html!("modal-confirm", {
+                deleting.map(|content_state| html!("modal-confirm", {
                         .property("dangerous", true)
                         .property("title", STR_DELETE_TITLE)
                         .property("content", STR_DELETE_CONTENT.replace("{category}", &content_state.cat.name.get_cloned()))
@@ -35,9 +34,6 @@ impl CategoriesPage {
                             actions::delete_category(content_state.clone());
                         }))
                     }))
-                } else {
-                    None
-                }
             })))
             .child(
                 html!("category-page", {

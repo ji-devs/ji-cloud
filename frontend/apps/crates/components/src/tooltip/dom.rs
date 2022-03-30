@@ -26,7 +26,7 @@ where
                     ..
                 } = &**data;
                 html!("overlay-tooltip-error", {
-                    .apply(|dom| mixin(dom))
+                    .apply(mixin)
                     .text(body)
 
                     .apply_if(state.container.is_some(), |dom| {
@@ -58,7 +58,7 @@ where
                     ..
                 } = &**data;
                 html!("overlay-tooltip-confirm", {
-                    .apply(|dom| mixin(dom))
+                    .apply(mixin)
                     .property("header", header)
                     .property("confirmLabel", confirm_label)
                     .property("cancelLabel", cancel_label)
@@ -94,7 +94,7 @@ where
                     ..
                 } = &**data;
                 html!("overlay-tooltip-bubble", {
-                    .apply(|dom| mixin(dom))
+                    .apply(mixin)
                     .text(body)
                     .apply_if(state.container.is_some(), |dom| {
                         dom.property("container", state.container.as_ref().unwrap_ji().as_value())
@@ -122,7 +122,7 @@ where
                         ..
                     } = &**data;
                     html!("overlay-tooltip-bubble", {
-                        .apply(|dom| mixin(dom))
+                        .apply(mixin)
                         .text(body)
                         .property_signal("target", bounds.denormalize_fixed_signal().map(|bounds| {
                             let rect:DomRect = bounds.into();

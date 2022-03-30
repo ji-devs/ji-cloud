@@ -34,8 +34,8 @@ pub async fn call_screenshot_service(jig_id: JigId, module_id: ModuleId, kind: M
     let url = format!(
         "{}?jig={}&module={}&kind={}",
         screenshot_url,
-        jig_id.0.to_string(),
-        module_id.0.to_string(),
+        jig_id.0,
+        module_id.0,
         kind.as_str()
     );
 

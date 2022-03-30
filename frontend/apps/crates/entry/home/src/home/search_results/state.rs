@@ -37,7 +37,7 @@ impl SearchResults {
                 Rc::clone(&home_state.search_selected),
                 home_state.play_jig.clone(),
             ),
-            _home_state: Rc::downgrade(&home_state),
+            _home_state: Rc::downgrade(home_state),
         })
     }
 

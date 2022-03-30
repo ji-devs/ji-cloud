@@ -76,7 +76,7 @@ pub trait ThemeIdExt {
 
     fn get_text_editor_fonts(self) -> &'static [String];
 
-    fn as_str_id(self) -> &'static str;
+    fn as_str_id(&self) -> &'static str;
 
     //It's safe to just call this whenever, it will lazily init the config
     fn map_theme<F, A>(self, mapper: F) -> A
@@ -105,7 +105,7 @@ impl ThemeIdExt for ThemeId {
         self.map_theme(|theme| theme.text_editor.font_list.as_slice())
     }
 
-    fn as_str_id(self) -> &'static str {
+    fn as_str_id(&self) -> &'static str {
         match self {
             ThemeId::Blank => "blank",
             ThemeId::Jigzi => "jigzi",

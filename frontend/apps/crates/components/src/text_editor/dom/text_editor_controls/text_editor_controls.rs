@@ -200,7 +200,7 @@ fn render_font_option(state: Rc<State>, font: &Font) -> Dom {
         .property_signal("selected", state.controls.signal_cloned().map(clone!(font => move |controls| {
             controls.font == font
         })))
-        .text(&font.to_string())
+        .text(font)
         .event(clone!(state, font => move |evt: events::CustomSelectedChange| {
             if evt.selected() {
                 state.set_control_value(ControlsChange::Font(font.clone()))

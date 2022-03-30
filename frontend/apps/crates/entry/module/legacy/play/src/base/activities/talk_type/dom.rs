@@ -40,7 +40,7 @@ impl TalkTypeItem {
     ) -> Dom {
         let state = self;
         let bounds = state.bounds.denormalize(resize_info);
-        let mut abs_bounds = bounds.clone();
+        let mut abs_bounds = bounds;
         abs_bounds.x += resize_info.x;
         abs_bounds.y += resize_info.y;
 

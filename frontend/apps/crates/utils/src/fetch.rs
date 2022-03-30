@@ -746,8 +746,8 @@ where
 // Helper functions
 /////////////////////////////////////////////////////////
 
-fn api_get_query<'a, T: Serialize>(
-    endpoint: &'a str,
+fn api_get_query<T: Serialize>(
+    endpoint: &str,
     method: Method,
     data: Option<T>,
 ) -> (String, Option<T>) {

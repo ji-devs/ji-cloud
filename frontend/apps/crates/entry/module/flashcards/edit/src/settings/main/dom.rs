@@ -15,7 +15,7 @@ pub fn render(state: Rc<MainSettings>) -> Dom {
         let display_mode = state.display_mode.signal(),
         let swap = state.base.extra.settings.swap.signal()
             => {
-                (display_mode.clone(), swap.clone())
+                (*display_mode, *swap)
             }
     };
 

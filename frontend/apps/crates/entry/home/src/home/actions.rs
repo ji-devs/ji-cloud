@@ -82,7 +82,7 @@ async fn search_async(state: Rc<State>) {
         .set(HomePageMode::Search(Rc::clone(&search_state)));
 
     let req = state.search_selected.to_search_request();
-    Route::Home(HomeRoute::Search(Some(req.clone()))).push_state();
+    Route::Home(HomeRoute::Search(Some(Box::new(req.clone())))).push_state();
 
     join!(
         search_state.jigs.load_items(req.clone()),

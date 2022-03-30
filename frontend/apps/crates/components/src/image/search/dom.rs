@@ -35,10 +35,7 @@ pub fn render_with_action(
                     .text("Loading...")
                 }))
             } else {
-                let action = match &get_action {
-                    Some(get_action) => Some(get_action()),
-                    None => None,
-                };
+                let action = get_action.as_ref().map(|get_action| get_action());
                 Some(render_loaded(state.clone(), action))
             }
         })))

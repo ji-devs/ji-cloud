@@ -250,7 +250,7 @@ impl DesignExt for Base {
     }
 
     fn set_theme(&self, theme: ThemeId) {
-        self.theme_id.set(theme.clone());
+        self.theme_id.set(theme);
 
         self.history.push_modify(|raw| {
             raw.set_theme(theme);

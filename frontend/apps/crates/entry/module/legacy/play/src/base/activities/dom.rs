@@ -17,7 +17,7 @@ impl Base {
                 Activity::Soundboard(activity) => Soundboard::new(self.clone(), activity).render(),
                 Activity::Video(activity) => Video::new(self.clone(), activity).render(),
                 Activity::AskQuestions(activity) => {
-                    if activity.items.len() > 0 {
+                    if !activity.items.is_empty() {
                         AskQuestions::new(self.clone(), activity).render()
                     } else {
                         self.allow_stage_click();

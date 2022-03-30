@@ -6,7 +6,7 @@ use shared::domain::{
     session::OAuthUserProfile,
     user::UserScope,
 };
-use std::{fmt::Debug, str::FromStr};
+use std::{fmt::{Debug, Display}, str::FromStr};
 use uuid::Uuid;
 use wasm_bindgen::prelude::*;
 use web_sys::Url;
@@ -32,7 +32,7 @@ pub enum Route {
 #[derive(Debug, Clone)]
 pub enum HomeRoute {
     Home,
-    Search(Option<JigSearchQuery>),
+    Search(Option<Box<JigSearchQuery>>),
 }
 
 #[derive(Debug, Clone)]
@@ -146,6 +146,13 @@ pub enum OauthData {
 }
 pub type OauthCode = String;
 
+impl Display for Route {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let s: String = self.into();
+        write!(f, "{}", s)
+    }
+}
+
 impl Route {
     pub fn redirect(self) {
         let location = web_sys::window().unwrap_ji().location();
@@ -157,10 +164,6 @@ impl Route {
         let history = web_sys::window().unwrap_ji().history().unwrap_ji();
         let url: String = self.into();
         let _ = history.push_state_with_url(&JsValue::NULL, "", Some(&url));
-    }
-
-    pub fn to_string(&self) -> String {
-        self.into()
     }
 
     pub fn from_url(url: &str) -> Self {
@@ -180,7 +183,7 @@ impl Route {
             [""] => Self::Home(HomeRoute::Home),
             ["home", "search"] => {
                 let search: JigSearchQuery = serde_qs::from_str(&params_string).unwrap_ji();
-                Self::Home(HomeRoute::Search(Some(search)))
+                Self::Home(HomeRoute::Search(Some(Box::new(search))))
             }
             ["kids"] => Self::Kids(KidsRoute::StudentCode(None)),
             ["kids", code] => Self::Kids(KidsRoute::StudentCode(Some(code.to_string()))),
@@ -432,7 +435,7 @@ impl From<&Route> for String {
                 AdminRoute::Curation(curation_route) => match curation_route {
                     AdminCurationRoute::Table => "/admin/curation".to_string(),
                     AdminCurationRoute::Jig(jig_id) => {
-                        format!("/admin/curation/{}", jig_id.0.to_string())
+                        format!("/admin/curation/{}", jig_id.0)
                     }
                 },
                 AdminRoute::Locale => "/admin/locale".to_string(),
@@ -447,7 +450,7 @@ impl From<&Route> for String {
                 AdminRoute::ImageAdd => "/admin/image-add".to_string(),
                 AdminRoute::ImageTags => "/admin/image-tags".to_string(),
                 AdminRoute::ImageMeta(id, is_new) => {
-                    format!("/admin/image-meta/{}/{}", id.0.to_string(), is_new)
+                    format!("/admin/image-meta/{}/{}", id.0, is_new)
                 }
                 AdminRoute::Export => "/admin/export".to_string(),
             },
@@ -463,39 +466,25 @@ impl From<&Route> for String {
                     };
                     match route {
                         JigEditRoute::Landing => {
-                            format!("/jig/edit/{}{}", jig_id.0.to_string(), focus_str)
+                            format!("/jig/edit/{}{}", jig_id.0, focus_str)
                         }
                         JigEditRoute::Module(module_id) => {
-                            format!(
-                                "/jig/edit/{}/{}{}",
-                                jig_id.0.to_string(),
-                                module_id.0.to_string(),
-                                focus_str
-                            )
+                            format!("/jig/edit/{}/{}{}", jig_id.0, module_id.0, focus_str)
                         }
                         JigEditRoute::Publish => {
-                            format!("/jig/edit/{}/publish{}", jig_id.0.to_string(), focus_str)
+                            format!("/jig/edit/{}/publish{}", jig_id.0, focus_str)
                         }
                         JigEditRoute::PostPublish => {
-                            format!(
-                                "/jig/edit/{}/post-publish{}",
-                                jig_id.0.to_string(),
-                                focus_str
-                            )
+                            format!("/jig/edit/{}/post-publish{}", jig_id.0, focus_str)
                         }
                     }
                 }
                 JigRoute::Play(jig_id, module_id, player_settings) => {
                     let query = serde_qs::to_string(&player_settings).unwrap_ji();
                     if let Some(module_id) = module_id {
-                        format!(
-                            "/jig/play/{}/{}?{}",
-                            jig_id.0.to_string(),
-                            module_id.0.to_string(),
-                            query
-                        )
+                        format!("/jig/play/{}/{}?{}", jig_id.0, module_id.0, query)
                     } else {
-                        format!("/jig/play/{}?{}", jig_id.0.to_string(), query)
+                        format!("/jig/play/{}?{}", jig_id.0, query)
                     }
                 }
             },
@@ -503,14 +492,14 @@ impl From<&Route> for String {
                 ModuleRoute::Edit(kind, jig_id, module_id) => format!(
                     "/module/{}/edit/{}/{}",
                     kind.as_str(),
-                    jig_id.0.to_string(),
-                    module_id.0.to_string()
+                    jig_id.0,
+                    module_id.0
                 ),
                 ModuleRoute::Play(kind, jig_id, module_id) => format!(
                     "/module/{}/play/{}/{}",
                     kind.as_str(),
-                    jig_id.0.to_string(),
-                    module_id.0.to_string()
+                    jig_id.0,
+                    module_id.0
                 ),
             },
             Route::NotFound => "/404".to_string(),

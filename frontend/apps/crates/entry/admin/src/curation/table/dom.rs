@@ -81,7 +81,7 @@ impl CurationTable {
                 }))
             }))
             .children_signal_vec(state.curation_state.jigs.signal_vec_cloned().map(clone!(state => move |jig: Rc<EditableJig>| {
-                let jig_id = jig.id.clone();
+                let jig_id = jig.id;
                 html!("admin-curation-table-line", {
                     .child(html!("div", {
                         .style("display", "grid")

@@ -135,7 +135,9 @@ impl PuzzleGame {
                 .collect(),
         );
 
-        let _self = Rc::new(Self {
+        
+
+        Rc::new(Self {
             base: parent.base.clone(),
             raw: parent.raw.clone(),
             effects,
@@ -146,9 +148,7 @@ impl PuzzleGame {
             locked_items: RefCell::new(Vec::new()),
             free_items,
             drag_index: Cell::new(None),
-        });
-
-        _self
+        })
     }
 }
 

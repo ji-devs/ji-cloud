@@ -106,10 +106,10 @@ impl PuzzleGame {
             ctx.save();
 
             let mut mat = item.curr_transform_matrix.borrow().clone();
-            mat.denormalize(&resize_info);
-            apply_transform_mat4(&ctx, &mat);
+            mat.denormalize(resize_info);
+            apply_transform_mat4(ctx, &mat);
 
-            clip_single_shape(&ctx, resize_info, &item.raw.hotspot.shape);
+            clip_single_shape(ctx, resize_info, &item.raw.hotspot.shape);
 
             ctx.draw_image_with_html_image_element_and_dw_and_dh(
                 &self.effects.image_element,
@@ -155,11 +155,11 @@ impl PuzzleGame {
             ctx.save();
 
             let mut mat = item.curr_transform_matrix.borrow().clone();
-            mat.denormalize(&resize_info);
-            apply_transform_mat4(&ctx, &mat);
+            mat.denormalize(resize_info);
+            apply_transform_mat4(ctx, &mat);
 
             ctx.set_fill_style(&JsValue::from_str(&color));
-            if !draw_single_shape(&ctx, resize_info, &item.raw.hotspot.shape) {
+            if !draw_single_shape(ctx, resize_info, &item.raw.hotspot.shape) {
                 ctx.fill();
             }
             ctx.restore();
@@ -204,11 +204,9 @@ impl PuzzleGame {
         if let Some(index) = self.drag_index.get() {
             let item = self.free_items.borrow()[index].clone();
 
-            if item.try_end_drag(x, y) {
-                if item.evaluate(self.raw.fly_back_to_origin) {
-                    self.free_items.borrow_mut().remove(index);
-                    self.locked_items.borrow_mut().push(item);
-                }
+            if item.try_end_drag(x, y) && item.evaluate(self.raw.fly_back_to_origin) {
+                self.free_items.borrow_mut().remove(index);
+                self.locked_items.borrow_mut().push(item);
             }
 
             self.drag_index.set(None);

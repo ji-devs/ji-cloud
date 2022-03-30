@@ -81,12 +81,10 @@ impl Step2Page {
                                         // event is selected.
                                         state.persona.lock_mut().push_cloned(persona.to_string());
                                     }
-                                } else {
-                                    if let Some(pos) = pos {
-                                        // Only remove the selection if it does exist and the event
-                                        // is not selected.
-                                        state.persona.lock_mut().remove(pos);
-                                    }
+                                } else if let Some(pos) = pos {
+                                    // Only remove the selection if it does exist and the event
+                                    // is not selected.
+                                    state.persona.lock_mut().remove(pos);
                                 }
 
                                 state.evaluate_persona_error();

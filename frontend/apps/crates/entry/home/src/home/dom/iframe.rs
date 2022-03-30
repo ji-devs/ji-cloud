@@ -26,14 +26,14 @@ impl Iframe {
         })
     }
     pub fn render(self: Rc<Self>) -> Dom {
-        let state = self.clone();
+        let state = self;
         html!("iframe" => HtmlIFrameElement, {
             .style("width", "100%")
             .style("border", "none")
             .style_signal("height", state.height.signal()
                 .map(|height| {
-                    let adjusted_height = height.to_string() + "px";
-                    adjusted_height
+                    
+                    height.to_string() + "px"
                 })
             )
             .global_event(clone!(state => move |event: Message| {

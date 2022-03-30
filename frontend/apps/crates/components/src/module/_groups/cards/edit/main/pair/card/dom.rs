@@ -22,22 +22,21 @@ use shared::domain::jig::module::body::{
     _groups::cards::{Mode, Step},
 };
 
-const STR_CONFIRM_TITLE: &'static str = "Warning";
+const STR_CONFIRM_TITLE: &str = "Warning";
 
-const STR_REMOVE_CONTENT_IMAGE: &'static str = "Are you sure you want to remove this image?";
-const STR_REMOVE_CONTENT_AUDIO: &'static str = "Are you sure you want to remove this audio clip?";
-const STR_REMOVE_CONFIRM: &'static str = "Remove";
-const STR_REMOVE_CANCEL: &'static str = "Don't remove";
+const STR_REMOVE_CONTENT_IMAGE: &str = "Are you sure you want to remove this image?";
+const STR_REMOVE_CONTENT_AUDIO: &str = "Are you sure you want to remove this audio clip?";
+const STR_REMOVE_CONFIRM: &str = "Remove";
+const STR_REMOVE_CANCEL: &str = "Don't remove";
 
-const STR_DELETE_CONTENT_PAIR: &'static str = "Are you sure you want to delete this pair?";
-const STR_DELETE_CONFIRM: &'static str = "Delete Pair";
-const STR_DELETE_CANCEL: &'static str = "Don't delete";
+const STR_DELETE_CONTENT_PAIR: &str = "Are you sure you want to delete this pair?";
+const STR_DELETE_CONFIRM: &str = "Delete Pair";
+const STR_DELETE_CANCEL: &str = "Don't delete";
 
 pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<MainCard<RawData, E>>) -> Dom {
     html!("main-card", {
         .child_signal(state.confirm_action.signal_cloned().map(clone!(state => move |confirm_action| {
-            if let Some(confirm_action) = confirm_action {
-                Some(html!("empty-fragment", {
+            confirm_action.map(|confirm_action| html!("empty-fragment", {
                     // The empty-fragment is required so that we can render the overly inside
                     // a signal, but adding the fragment upsets the layout of the cards because of
                     // their positioning. Setting it's display to none resolves the layout.
@@ -58,9 +57,6 @@ pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<MainCard<RawData, E>>)
                         })
                     })))
                 }))
-            } else {
-                None
-            }
         })))
         .property("slot", state.side.as_str_id())
         .property("side", state.side.as_str_id())
@@ -121,9 +117,7 @@ pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<MainCard<RawData, E>>)
                                         }))
                                         .apply_if(matches!(state.card.card_content, CardContent::Image(_)), clone!(state => move |dom| {
                                             dom.child_signal(state.card.as_image_mutable().signal_cloned().map(clone!(state => move |image| {
-                                                match image {
-                                                    Some(_) => {
-                                                        Some(html!("menu-line", {
+                                                image.map(|_| html!("menu-line", {
                                                             .property("icon", "image")
                                                             .property("customLabel", "Remove image")
                                                             .event(clone!(state => move |_evt:events::Click| {
@@ -140,9 +134,6 @@ pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<MainCard<RawData, E>>)
                                                                 ))))
                                                             }))
                                                         }))
-                                                    },
-                                                    None => None,
-                                                }
                                             })))
                                         }))
                                         .apply_if(state.card.audio.is_some(), clone!(state => move |dom| {

@@ -188,12 +188,10 @@ impl ProfilePage {
                                         // event is selected.
                                         state.user.persona.lock_mut().push_cloned(persona.to_string());
                                     }
-                                } else {
-                                    if let Some(pos) = pos {
-                                        // Only remove the selection if it does exist and the event
-                                        // is not selected.
-                                        state.user.persona.lock_mut().remove(pos);
-                                    }
+                                } else if let Some(pos) = pos {
+                                    // Only remove the selection if it does exist and the event
+                                    // is not selected.
+                                    state.user.persona.lock_mut().remove(pos);
                                 }
 
                                 actions::save_profile(Rc::clone(&state));

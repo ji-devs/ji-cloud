@@ -20,10 +20,10 @@ use crate::{
 const STR_NONEMPTY_LIST_LABEL: &str = "Edit your words on the cards";
 const STR_EMPTY_AUDIO_SELECTION: &str = "Select a card or a pair of cards to add audio";
 
-const STR_DELETE_TITLE: &'static str = "Warning";
-const STR_DELETE_CONTENT: &'static str = "Are you sure you want to delete this list?";
-const STR_DELETE_CONFIRM: &'static str = "Yes, go ahead!";
-const STR_DELETE_CANCEL: &'static str = "No, keep this list";
+const STR_DELETE_TITLE: &str = "Warning";
+const STR_DELETE_CONTENT: &str = "Are you sure you want to delete this list?";
+const STR_DELETE_CONFIRM: &str = "Yes, go ahead!";
+const STR_DELETE_CANCEL: &str = "No, keep this list";
 
 pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<Step1<RawData, E>>) -> Dom {
     html!("empty-fragment", {
@@ -93,7 +93,7 @@ pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<Step1<RawData, E>>) ->
                                                             },
                                                         };
 
-                                                        (Some(idx.clone()), audio, Some(side.clone()))
+                                                        (Some(*idx), audio, Some(side.clone()))
                                                     },
                                                     None => (None, None, None)
                                                 }

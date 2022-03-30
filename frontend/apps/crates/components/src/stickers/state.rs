@@ -167,7 +167,7 @@ impl<T: AsSticker> Stickers<T> {
     where
         F: FnOnce(&T) -> A,
     {
-        self.list.lock_ref().get(index).map(|x| f(x))
+        self.list.lock_ref().get(index).map(f)
     }
 
     pub fn get(&self, index: usize) -> Option<Sticker> {

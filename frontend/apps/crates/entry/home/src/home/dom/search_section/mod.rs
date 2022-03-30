@@ -69,7 +69,7 @@ pub fn render(state: Rc<State>, auto_search: bool) -> Dom {
                         }))
                         .children_signal_vec(state.search_options.age_ranges.signal_cloned().map(clone!(state => move|age_ranges| {
                             age_ranges.iter().map(|age_range| {
-                                let age_id = age_range.id.clone();
+                                let age_id = age_range.id;
                                 html!("input-select-option", {
                                     .text(&age_range.display_name)
                                     .property_signal("selected", state.search_selected.age_ranges.signal_cloned().map(clone!(age_range => move |age_ranges| {

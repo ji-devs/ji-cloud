@@ -86,17 +86,12 @@ pub struct DragWait {
 impl Drag {
     //Top-level state changes
     pub fn get_active(&self) -> bool {
-        match *self.state.lock_ref() {
-            DragState::Active => true,
-            _ => false,
-        }
+        matches!(*self.state.lock_ref(), DragState::Active)
     }
 
     pub fn active_signal(&self) -> impl Signal<Item = bool> {
-        self.state.signal_ref(move |state| match state {
-            DragState::Active => true,
-            _ => false,
-        })
+        self.state
+            .signal_ref(move |state| matches!(state, DragState::Active))
     }
 
     //position

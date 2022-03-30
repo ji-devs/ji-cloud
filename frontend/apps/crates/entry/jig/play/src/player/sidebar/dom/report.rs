@@ -63,7 +63,7 @@ fn render_active(state: Rc<State>) -> Vec<Dom> {
                     .children(JigReportType::iter().map(|option| {
                         html!("option", {
                             .property("value", option.to_value_str())
-                            .text(&option.as_str())
+                            .text(option.as_str())
                         })
                     }))
                     .event(clone!(state => move |_: events::Change| {

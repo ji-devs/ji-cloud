@@ -37,7 +37,7 @@ impl<T: SimpleSelectItem + 'static, P: ToString + 'static, L: ToString + 'static
                     None => JsValue::NULL,
                     // Use the label here because the input-select element uses the value as the
                     // display value for rendering the selected item in the placeholder field.
-                    Some(value) => JsValue::from_str(&value.label())
+                    Some(value) => JsValue::from_str(value.label())
                 }
             }))
             .apply_if(state.label.is_some(), |dom| {
@@ -48,7 +48,7 @@ impl<T: SimpleSelectItem + 'static, P: ToString + 'static, L: ToString + 'static
             })
             .children(state.values.iter().map(clone!(state => move |value| {
                 html!("input-select-option", {
-                    .text(&value.label())
+                    .text(value.label())
                     .event(clone!(state, value => move |evt:events::CustomSelectedChange| {
                         if evt.selected() {
                             state.value.set(Some(value.clone()));

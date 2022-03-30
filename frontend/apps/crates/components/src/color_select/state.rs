@@ -79,6 +79,6 @@ impl State {
     }
 
     fn get_theme_colors(theme_id: ThemeId) -> Vec<RGBA8> {
-        theme_id.get_colors().iter().copied().collect()
+        theme_id.get_colors().to_vec()
     }
 }

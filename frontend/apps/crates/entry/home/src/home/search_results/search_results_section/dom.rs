@@ -123,7 +123,7 @@ impl SearchResultsSection {
                         .property("icon", "fa-light fa-file")
                     }))
                     .text(" ")
-                    .text_signal(state.resource_type_name(resource.resource_type_id.clone()))
+                    .text_signal(state.resource_type_name(resource.resource_type_id))
                 })
             }))
             .apply(|dom| {

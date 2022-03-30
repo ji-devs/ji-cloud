@@ -113,7 +113,7 @@ pub fn render(
         })
         .children_signal_vec(state.logged_in.signal_cloned().map(clone!(state => move|logged_in| {
             match logged_in {
-                LoggedInState::LoggedIn(user) => render_logged_in(Rc::clone(&state), &user),
+                LoggedInState::LoggedIn(user) => render_logged_in(Rc::clone(&state), user),
                 LoggedInState::LoggedOut => render_logged_out(),
                 LoggedInState::Loading => vec![],
             }

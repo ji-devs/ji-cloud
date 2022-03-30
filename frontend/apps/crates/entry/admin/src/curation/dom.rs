@@ -28,11 +28,11 @@ impl Curation {
                     },
                     AdminCurationRoute::Jig(jig_id) => {
                         html!("empty-fragment", {
-                            .child_signal(from_future(state.clone().get_jig(jig_id.clone())).map(clone!(state => move|jig| {
+                            .child_signal(from_future(state.clone().get_jig(*jig_id)).map(clone!(state => move|jig| {
                                 jig.map(|jig| {
                                     CurationJig::new(
                                         Rc::clone(&state),
-                                        jig.id.clone(),
+                                        jig.id,
                                         jig
                                     ).render()
                                 })

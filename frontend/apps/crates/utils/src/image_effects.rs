@@ -81,7 +81,7 @@ impl ImageEffect {
         for x in 0..width {
             for y in 0..height {
                 let offset = y * (width * 4) + x * 4;
-                let r = data[offset + 0];
+                let r = data[offset];
                 let g = data[offset + 1];
                 let b = data[offset + 2];
                 let a = &mut data[offset + 3];

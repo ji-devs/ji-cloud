@@ -130,21 +130,19 @@ impl AnimationPlayer {
                 ctx.canvas().unwrap_ji().width().into(),
                 ctx.canvas().unwrap_ji().height().into(),
             );
-        } else {
-            if let Some(img_data) = self.last_paint_data.borrow().as_ref() {
-                self.map_current_frame(|_frame_index, frame_info| {
-                    ctx.put_image_data_with_dirty_x_and_dirty_y_and_dirty_width_and_dirty_height(
-                        img_data,
-                        0.0,
-                        0.0,
-                        frame_info.x as f64,
-                        frame_info.y as f64,
-                        frame_info.width as f64,
-                        frame_info.height as f64,
-                    )
-                    .unwrap_ji();
-                })
-            }
+        } else if let Some(img_data) = self.last_paint_data.borrow().as_ref() {
+            self.map_current_frame(|_frame_index, frame_info| {
+                ctx.put_image_data_with_dirty_x_and_dirty_y_and_dirty_width_and_dirty_height(
+                    img_data,
+                    0.0,
+                    0.0,
+                    frame_info.x as f64,
+                    frame_info.y as f64,
+                    frame_info.width as f64,
+                    frame_info.height as f64,
+                )
+                .unwrap_ji();
+            })
         }
     }
     pub fn paint(self: Rc<Self>, img_data: &ImageData, write_cache: bool) {

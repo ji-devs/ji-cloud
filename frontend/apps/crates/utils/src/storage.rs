@@ -33,5 +33,5 @@ pub fn get_local_storage() -> Result<Storage, JsValue> {
     window()
         .unwrap_ji()
         .local_storage()?
-        .ok_or(JsValue::from_str("could not get local storage!"))
+        .ok_or_else(|| JsValue::from_str("could not get local storage!"))
 }

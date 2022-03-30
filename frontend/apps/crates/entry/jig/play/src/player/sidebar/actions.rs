@@ -24,7 +24,7 @@ pub fn send_report(state: Rc<State>) {
         let report_type = state.report_type.lock_ref().unwrap();
 
         let id = &state.player_state.jig_id.0.to_string();
-        let path = report::Create::PATH.replace("{id}", &id);
+        let path = report::Create::PATH.replace("{id}", id);
         let response = api_with_auth::<CreateResponse<ReportId>, EmptyError, CreateJigReport>(
             &path,
             report::Create::METHOD,

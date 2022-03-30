@@ -28,7 +28,7 @@ pub fn render(state: Rc<Step3>) -> Dom {
                             //otherwise, it means a trace is selected
                             Some(html!("menu-tabs", {
                                 .future(selected_tab.signal_cloned().dedupe().for_each(clone!(state => move |kind| {
-                                    state.sidebar.tab_kind.set(kind.clone());
+                                    state.sidebar.tab_kind.set(kind);
                                     async move {}
                                 })))
                                 .children(&mut [

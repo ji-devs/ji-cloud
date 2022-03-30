@@ -212,7 +212,7 @@ impl ShareJig {
     }
 
     fn render_share_embed(self: &Rc<Self>) -> Dom {
-        let state = Rc::clone(&self);
+        let state = Rc::clone(self);
         html!("share-jig-embed", {
             .property("slot", "overlay")
             .property("value", state.embed_code())
