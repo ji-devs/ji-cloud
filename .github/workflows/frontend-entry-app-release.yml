@@ -39,9 +39,8 @@ jobs:
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
-      # https://github.com/rust-lang/rust/issues/95267
       - name: make nightly the default
-        run: rustup default nightly-2022-03-22
+        run: rustup default nightly
 
       - name: install node
         uses: actions/setup-node@v2
