@@ -1,30 +1,38 @@
 use super::state::*;
+use crate::base::sidebar::state::StickerPhase;
 use components::{
-    audio::input::AudioInput,
+    image::search::dom::render as render_image_search,
     tabs::{MenuTab, MenuTabKind},
+    text_editor::dom::render_controls as render_text_editor,
 };
 use dominator::{clone, html, Dom};
-use futures_signals::signal::{Signal, SignalExt};
+use futures_signals::signal::SignalExt;
 use std::rc::Rc;
 
 pub fn render_step_2(state: Rc<Step2>) -> Dom {
+    state
+        .sidebar
+        .sticker_phase
+        .set_neq(Some(StickerPhase::Scene));
+    state.sidebar.trace_phase.set_neq(None);
+
     html!("menu-tabs", {
         .future(state.tab.signal_ref(|tab| tab.kind()).dedupe().for_each(clone!(state => move |kind| {
             state.sidebar.tab_kind.set(Some(kind));
             async move {}
         })))
         .children(&mut [
-            render_tab(state.clone(), MenuTabKind::Select),
-            render_tab(state.clone(), MenuTabKind::Audio),
+            render_tab(state.clone(), MenuTabKind::Text),
+            render_tab(state.clone(), MenuTabKind::Image),
             html!("module-sidebar-body", {
                 .property("slot", "body")
                 .child_signal(state.tab.signal_cloned().map(clone!(state => move |tab| {
                     match tab {
-                        Tab::Select => {
-                            Some(html!("div", {.text(crate::strings::STR_SIDEBAR_SELECT) }))
+                        Tab::StickerImage(state) => {
+                            Some(render_image_search(state, None))
                         },
-                        Tab::Audio(audio_signal_fn) => {
-                            Some(render_audio(state.clone(), audio_signal_fn()))
+                        Tab::StickerText => {
+                            Some(render_text_editor(state.sidebar.base.text_editor.clone()))
                         },
                     }
                 })))
@@ -48,22 +56,4 @@ fn render_tab(state: Rc<Step2>, tab_kind: MenuTabKind) -> Dom {
         ),
         Some("tabs"),
     )
-}
-
-fn render_audio(
-    _state: Rc<Step2>,
-    audio_state_signal: impl Signal<Item = Option<Rc<AudioInput>>> + 'static,
-) -> Dom {
-    html!("empty-fragment", {
-        .child_signal(audio_state_signal.map(|audio_state| Some({
-            match audio_state {
-                Some(audio_state) => {
-                    AudioInput::render(audio_state, None)
-                },
-                None => {
-                    html!("div", {.text("TODO! (disabled audio input)") })
-                }
-            }
-        })))
-    })
 }

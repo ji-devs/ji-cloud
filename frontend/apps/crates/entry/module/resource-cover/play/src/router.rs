@@ -32,7 +32,7 @@ pub fn render(state: Rc<Router>) {
                     let app = create_state(jig_id, module_id);
                     render_page_body(app.clone());
                     *state.app.borrow_mut() = Some(app);
-                }              
+                }
                 async {}
             })),
     );

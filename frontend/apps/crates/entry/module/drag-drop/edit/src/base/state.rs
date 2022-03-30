@@ -1,4 +1,7 @@
-use components::{module::_common::edit::prelude::*, stickers::state::Sticker};
+use components::{
+    module::{_common::edit::prelude::*, _groups::design::edit::design_ext::DesignExt},
+    stickers::state::Sticker,
+};
 
 use dominator_helpers::signals::OptionSignal;
 
@@ -26,6 +29,7 @@ use shared::domain::jig::{
                 Hint, Interactive as RawInteractive, Item as RawItem, ItemKind as RawItemKind,
                 Mode, ModuleData as RawData, Next, PlaySettings as RawPlaySettings, Step,
             },
+            BodyExt,
         },
         ModuleId,
     },
@@ -332,5 +336,23 @@ impl BaseExt<Step> for Base {
     }
     fn get_module_id(&self) -> ModuleId {
         self.module_id
+    }
+}
+
+impl DesignExt for Base {
+    fn get_backgrounds(&self) -> Rc<Backgrounds> {
+        Rc::clone(&self.backgrounds)
+    }
+
+    fn get_theme(&self) -> Mutable<ThemeId> {
+        self.theme_id.clone()
+    }
+
+    fn set_theme(&self, theme: ThemeId) {
+        self.theme_id.set(theme.clone());
+
+        self.history.push_modify(|raw| {
+            raw.set_theme(theme);
+        });
     }
 }

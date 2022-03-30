@@ -20,7 +20,9 @@ export type TabKind =
     | "text"
     | "theme"
     | "tooltip"
-    | "video";
+    | "video"
+    | "trace"
+    | "place";
 
 const STR_ICON_OVERRIDE: Partial<{
     [key in TabKind]: TabKind;
@@ -50,6 +52,8 @@ const STR_LABEL_LOOKUP: {
     theme: "Theme",
     tooltip: "Tooltip", //Not in zeplin
     video: "Video", //Not in Zeplin
+    trace: "Trace",
+    place: "Place",
 };
 
 const getIcon = (kind: TabKind): TabKind => {

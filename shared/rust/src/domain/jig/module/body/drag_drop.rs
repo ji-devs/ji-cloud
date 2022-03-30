@@ -258,8 +258,6 @@ pub enum Step {
     Four,
     /// Step 5
     Five,
-    /// Step 6
-    Six,
 }
 
 impl Default for Step {
@@ -275,8 +273,7 @@ impl StepExt for Step {
             Self::Two => Some(Self::Three),
             Self::Three => Some(Self::Four),
             Self::Four => Some(Self::Five),
-            Self::Five => Some(Self::Six),
-            Self::Six => None,
+            Self::Five => None,
         }
     }
 
@@ -287,18 +284,16 @@ impl StepExt for Step {
             Self::Three => 3,
             Self::Four => 4,
             Self::Five => 5,
-            Self::Six => 6,
         }
     }
 
     fn label(&self) -> &'static str {
         //TODO - localizaton
-        const STR_1: &'static str = "Scene";
-        const STR_2: &'static str = "Drag Start";
-        const STR_3: &'static str = "Drop Areas";
-        const STR_4: &'static str = "Drag End";
-        const STR_5: &'static str = "Settings";
-        const STR_6: &'static str = "Preview";
+        const STR_1: &'static str = "Design";
+        const STR_2: &'static str = "Content";
+        const STR_3: &'static str = "Interaction";
+        const STR_4: &'static str = "Settings";
+        const STR_5: &'static str = "Preview";
 
         match self {
             Self::One => STR_1,
@@ -306,21 +301,13 @@ impl StepExt for Step {
             Self::Three => STR_3,
             Self::Four => STR_4,
             Self::Five => STR_5,
-            Self::Six => STR_6,
         }
     }
 
     fn get_list() -> Vec<Self> {
-        vec![
-            Self::One,
-            Self::Two,
-            Self::Three,
-            Self::Four,
-            Self::Five,
-            Self::Six,
-        ]
+        vec![Self::One, Self::Two, Self::Three, Self::Four, Self::Five]
     }
     fn get_preview() -> Self {
-        Self::Six
+        Self::Five
     }
 }

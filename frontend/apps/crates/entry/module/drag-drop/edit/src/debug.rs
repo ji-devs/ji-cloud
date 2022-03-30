@@ -40,7 +40,7 @@ pub struct DebugSettings {
     pub draw_kind: Option<TraceKind>,
     pub step_1_tab: Option<MenuTabKind>,
     pub step_2_tab: Option<MenuTabKind>,
-    pub step_5_tab: Option<MenuTabKind>,
+    pub step_4_tab: Option<MenuTabKind>,
 }
 
 #[derive(Clone, Debug)]
@@ -159,7 +159,7 @@ impl DebugSettings {
             skip_load_jig: true,
             step_1_tab: Some(MenuTabKind::Image),
             step_2_tab: Some(MenuTabKind::Select),
-            step_5_tab: Some(MenuTabKind::PlaySettings),
+            step_4_tab: Some(MenuTabKind::PlaySettings),
         }
     }
 }
