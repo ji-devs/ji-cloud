@@ -27,15 +27,15 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: nightly-2022-03-22
+          toolchain: nightly
           override: true
           components: rustfmt
-      
+
       - uses: actions-rs/cargo@v1
         with:
           command: check
           args: --all --manifest-path frontend/apps/Cargo.toml
-      
+
       - uses: actions-rs/cargo@v1
         with:
           command: fmt
@@ -64,9 +64,8 @@ jobs:
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
-      # https://github.com/rust-lang/rust/issues/95267
       - name: make nightly the default
-        run: rustup default nightly-2022-03-22
+        run: rustup default nightly
 
       - name: install node
         uses: actions/setup-node@v2
