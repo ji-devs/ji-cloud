@@ -16,8 +16,8 @@ on:
     - 'frontend/apps/crates/entry/kids/**'
 
 jobs:
-  format:
-    name: Format
+  check:
+    name: Check (deny warning, fmt, clippy)
     runs-on: ubuntu-latest
     env:
       RUSTFLAGS: -D warnings
