@@ -176,7 +176,7 @@ impl ProfilePage {
                             .property_signal(
                                 "selected",
                                 state.user.persona.signal_vec_cloned().to_signal_cloned().map(move |p| {
-                                    p.iter().find(|p| p == persona).is_some()
+                                    p.iter().any(|p| p == persona)
                                 })
                             )
                             .event(clone!(state => move |evt: events::CustomSelectedChange| {

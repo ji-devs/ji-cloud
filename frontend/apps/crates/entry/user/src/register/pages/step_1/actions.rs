@@ -37,10 +37,12 @@ pub fn submit(state: Rc<State>) {
         return;
     }
 
+    let username = state.username.borrow().clone();
+
     state
         .username_taken_loader
         .load(clone!(state => async move {
-            if username_exists(state.username.borrow().clone()).await {
+            if username_exists(username).await {
                 state.username_status.set(Some(NameError::Exists));
             } else {
                 next_step(state);

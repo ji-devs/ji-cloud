@@ -52,11 +52,10 @@ pub fn save_profile(state: Rc<State>) {
     state.loader.load(clone!(state => async move {
         let info = state.user.to_update();
 
-        //match api_with_auth_empty::<EmptyError, PatchProfileRequest>(user::PatchProfile::PATH, user::PatchProfile::METHOD, Some(info)).await {
-        match user::PatchProfile::api_with_auth_empty(Some(info)).await {
-            Err(_) => {},
-            Ok(_) => {},
-        };
+        let res = user::PatchProfile::api_with_auth_empty(Some(info)).await;
+        if let Err(_err) = res {
+            todo!()
+        }
     }));
 }
 
