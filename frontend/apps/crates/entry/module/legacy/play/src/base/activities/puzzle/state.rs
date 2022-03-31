@@ -135,8 +135,6 @@ impl PuzzleGame {
                 .collect(),
         );
 
-        
-
         Rc::new(Self {
             base: parent.base.clone(),
             raw: parent.raw.clone(),

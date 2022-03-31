@@ -32,7 +32,7 @@ impl Iframe {
             .style("border", "none")
             .style_signal("height", state.height.signal()
                 .map(|height| {
-                    
+
                     height.to_string() + "px"
                 })
             )

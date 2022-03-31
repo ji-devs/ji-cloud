@@ -6,7 +6,10 @@ use shared::domain::{
     session::OAuthUserProfile,
     user::UserScope,
 };
-use std::{fmt::{Debug, Display}, str::FromStr};
+use std::{
+    fmt::{Debug, Display},
+    str::FromStr,
+};
 use uuid::Uuid;
 use wasm_bindgen::prelude::*;
 use web_sys::Url;
