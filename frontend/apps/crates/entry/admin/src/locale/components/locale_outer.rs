@@ -19,7 +19,7 @@ const STR_ADD_ENTRY: &str = "Add a text";
 pub struct LocaleOuterDom {}
 
 impl LocaleOuterDom {
-    pub fn get_item_kind_name_by_id(map: &Vec<ItemKind>, id: Option<Uuid>) -> String {
+    pub fn get_item_kind_name_by_id(map: &[ItemKind], id: Option<Uuid>) -> String {
         match id {
             Some(id) => map
                 .iter()

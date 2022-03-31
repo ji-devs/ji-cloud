@@ -72,14 +72,14 @@ impl Router {
                     let route = dominator::routing::url().signal_ref(|url| Route::from_url(url)),
                     let profile = state.profile.signal_cloned()
                         => move {
-                            let mut children:Vec<Dom> = Vec::new();
-
-                            children.push(components::page_header::dom::render(
+                            let header = components::page_header::dom::render(
                                 Rc::new(components::page_header::state::State::new()),
                                 None,
                                 None,
                                 false,
-                            ));
+                            );
+
+                            let mut children = vec![header];
 
                             if let Some(profile) = profile {
                                 let dom = match route.clone() {

@@ -25,7 +25,7 @@ fn render_list(
                     e.is_some() && e.unwrap_ji() == column
                 })))
                 .event(clone!(selected, column => move |_: events::Click| {
-                    if selected.lock_ref().is_none() || &selected.lock_ref().clone().unwrap_ji() != &column {
+                    if selected.lock_ref().is_none() || selected.lock_ref().clone().unwrap_ji() != column {
                         selected.set(Some(column.clone()));
                     } else {
                         selected.set(None);

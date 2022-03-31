@@ -29,13 +29,9 @@ impl ImageSearchPage {
                     query.page = None;
                 }))
                 .event(|evt:events::CustomRoute| {
-                    match evt.route().as_ref() {
-                        "add" => {
-                            let route:String = Route::Admin(AdminRoute::ImageAdd).into();
-                            dominator::routing::go_to_url(&route);
-                        },
-                        _ => {
-                        }
+                    if evt.route() == "add" {
+                        let route:String = Route::Admin(AdminRoute::ImageAdd).into();
+                        dominator::routing::go_to_url(&route);
                     }
                 })
                 .child(PaginationDom::render(state.clone(), "pagination-top"))

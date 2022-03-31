@@ -74,11 +74,15 @@ impl SidebarItem {
         };
 
         let selected = match curr_route {
-            AdminRoute::ImageMeta(_, _) | AdminRoute::ImageSearch(_) => match target_route {
-                AdminRoute::ImageMeta(_, _) | AdminRoute::ImageSearch(_) => true,
-                _ => false,
+            AdminRoute::ImageMeta(_, _) | AdminRoute::ImageSearch(_) => {
+                matches!(
+                    target_route,
+                    AdminRoute::ImageMeta(_, _) | AdminRoute::ImageSearch(_)
+                )
             },
-            _ => std::mem::discriminant(&target_route) == std::mem::discriminant(curr_route),
+            _ => std::mem::discriminant(&target_route) == {
+                std::mem::discriminant(curr_route)
+            },
         };
 
         Rc::new(Self {

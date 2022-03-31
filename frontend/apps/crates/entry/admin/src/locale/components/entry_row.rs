@@ -104,7 +104,7 @@ impl EntryRow {
                                                     html!("option", {
                                                         .property("text", &item_kind.name)
                                                         .property("value", &item_kind.id.to_string())
-                                                        .property("selected", entry_ref.item_kind_id.is_some() && &entry_ref.item_kind_id.unwrap_ji() == &item_kind.id)
+                                                        .property("selected", entry_ref.item_kind_id.is_some() && entry_ref.item_kind_id.unwrap_ji() == item_kind.id)
                                                     })
                                                 })
                                         )
@@ -299,7 +299,7 @@ impl EntryRow {
                                                     html!("option", {
                                                         .property("text", &bundle.name)
                                                         .property("value", &bundle.id.to_string())
-                                                        .property("selected", &entry_ref.bundle_id == &bundle.id)
+                                                        .property("selected", entry_ref.bundle_id == bundle.id)
                                                     })
                                                 })
                                         )

@@ -272,13 +272,13 @@ impl State {
     }
 
     fn generate_options<T>(
-        entry_vec: &Vec<DisplayableEntry>,
+        entry_slice: &[DisplayableEntry],
         f: fn(&DisplayableEntry) -> T,
     ) -> BTreeMap<T, bool>
     where
         T: Ord,
     {
-        entry_vec.iter().map(|t| (f(t), true)).collect()
+        entry_slice.iter().map(|t| (f(t), true)).collect()
     }
 }
 

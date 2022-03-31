@@ -40,7 +40,7 @@ fn render_language(Language(lang_code, land_label): &Language, state: Rc<Curatio
     html!("input-select-option", {
         .text(land_label)
         .property_signal("selected", state.jig.language.signal_cloned().map(clone!(lang_code => move |selected_lang| {
-            lang_code == &selected_lang
+            lang_code == selected_lang
         })))
         .event(clone!(state, lang_code => move |evt: events::CustomSelectedChange| {
             if evt.selected() {
