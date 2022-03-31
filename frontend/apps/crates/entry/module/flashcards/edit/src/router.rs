@@ -28,26 +28,11 @@ pub fn render(state: Rc<Router>) {
         dominator::routing::url()
             .signal_ref(|url| Route::from_url(url))
             .for_each(clone!(state => move |route| {
-                match route {
-                    Route::Module(route) => {
-                        match route {
-                            ModuleRoute::Edit(kind, jig_id, module_id) => {
-                                match kind {
-                                    ModuleKind::Flashcards => {
-                                        let app = create_state(jig_id, module_id);
-                                        render_page_body(app.clone());
-                                        *state.app.borrow_mut() = Some(app);
-                                    }
-                                    _ => {
-                                        log::info!("unsupported route!!")
-                                    }
-                                }
-                            }
-                            _ => {}
-                        }
-                    },
-                    _ => {}
-                };
+                if let Route::Module(ModuleRoute::Edit(ModuleKind::Flashcards, jig_id, module_id)) = route {
+                    let app = create_state(jig_id, module_id);
+                    render_page_body(app.clone());
+                    *state.app.borrow_mut() = Some(app);
+                }
                 async {}
             })),
     );

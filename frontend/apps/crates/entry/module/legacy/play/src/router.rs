@@ -29,24 +29,11 @@ pub fn render(state: Rc<Router>) {
             .signal_ref(|url| Route::from_url(url))
             .for_each(clone!(state => move |route| {
                 clone!(state => async move {
-                    match route {
-                        Route::Module(route) => {
-                            match route {
-                                ModuleRoute::Play(kind, jig_id, module_id) => {
-                                    match kind {
-                                        ModuleKind::Legacy => {
-                                            let app = create_state(jig_id, module_id).await;
-                                            render_page_body(app.clone());
-                                            *state.app.borrow_mut() = Some(app);
-                                        }
-                                        _ => {}
-                                    }
-                                }
-                                _ => {}
-                            }
-                        },
-                        _ => {}
-                    };
+                    if let Route::Module(ModuleRoute::Play(ModuleKind::Legacy, jig_id, module_id)) = route {
+                        let app = create_state(jig_id, module_id).await;
+                        render_page_body(app.clone());
+                        *state.app.borrow_mut() = Some(app);
+                    }
                 })
             })),
     );
