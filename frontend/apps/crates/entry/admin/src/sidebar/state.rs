@@ -79,10 +79,8 @@ impl SidebarItem {
                     target_route,
                     AdminRoute::ImageMeta(_, _) | AdminRoute::ImageSearch(_)
                 )
-            },
-            _ => std::mem::discriminant(&target_route) == {
-                std::mem::discriminant(curr_route)
-            },
+            }
+            _ => std::mem::discriminant(&target_route) == { std::mem::discriminant(curr_route) },
         };
 
         Rc::new(Self {
