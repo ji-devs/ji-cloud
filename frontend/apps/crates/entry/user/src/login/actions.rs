@@ -1,20 +1,25 @@
 use super::state::*;
 use dominator::clone;
 use shared::{
-    api::endpoints::{session, user, ApiEndpoint},
-    domain::{session::*, user::*},
+    api::endpoints::{session, ApiEndpoint},
+    domain::session::*,
     error::EmptyError,
 };
 use std::rc::Rc;
 use utils::{prelude::*, storage};
 
-pub fn signin_email(state: Rc<State>) {
-    state.clear_email_status();
-    state.clear_password_status();
+const STR_INVALID_COMBINATION: &str = "Invalid email or password combination";
+
+pub fn signin_email(state: Rc<LoginPage>) {
+    state.tried_to_submit.set(true);
+
+    if !state.email.email_acceptable() {
+        return;
+    }
 
     state.loader.load(clone!(state => async move {
-        let email:String = state.email.borrow().clone();
-        let password:String = state.password.borrow().clone();
+        let email = state.email.get_value();
+        let password = state.password.borrow().clone();
 
         let (resp, _):(Result<CreateSessionResponse, EmptyError>, u16) = api_with_basic_token_status(session::Create::PATH, &email, &password, session::Create::METHOD, None::<()>).await;
 
@@ -30,45 +35,20 @@ pub fn signin_email(state: Rc<State>) {
                 }
             },
             Err(_err) => {
-                state.status.set(Some(Status::BadCredentials));
+                state.email.set_error(STR_INVALID_COMBINATION);
+                state.password_error.set(Some(STR_INVALID_COMBINATION));
             }
         }
     }));
 }
 
-pub fn signin_google(state: Rc<State>) {
-    state.clear_email_status();
-    state.clear_password_status();
-
+pub fn signin_google(state: Rc<LoginPage>) {
     state.loader.load(async {
         crate::oauth::actions::redirect(GetOAuthUrlServiceKind::Google, OAuthUrlKind::Login).await;
     });
 }
 
-pub fn forgot_password(state: Rc<State>) {
-    state.clear_password_status();
-
-    state.loader.load(clone!(state => async move {
-        let email:String = state.email.borrow().clone();
-
-        let query = ResetPasswordRequest {
-            email
-        };
-
-        let resp:Result<(), EmptyError> = api_no_auth_empty(user::ResetPassword::PATH, user::ResetPassword::METHOD, Some(query)).await;
-
-        match resp {
-            Ok(_) => {
-                state.status.set(Some(Status::PasswordResetSent));
-            },
-            Err(_err) => {
-                log::error!("Got error!")
-            }
-        }
-    }));
-}
-
-pub fn go_register(_state: Rc<State>) {
+pub fn go_register(_state: Rc<LoginPage>) {
     let route: String = Route::User(UserRoute::Register).into();
     dominator::routing::go_to_url(&route);
 }

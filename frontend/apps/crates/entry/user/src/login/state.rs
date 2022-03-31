@@ -1,74 +1,42 @@
 use dominator_helpers::futures::AsyncLoader;
-use futures_signals::signal::{Mutable, Signal, SignalExt};
-use std::cell::RefCell;
+use futures_signals::{
+    map_ref,
+    signal::{Mutable, Signal},
+};
+use std::{cell::RefCell, rc::Rc};
 
-pub struct State {
+use crate::email_handler::EmailHandler;
+
+pub struct LoginPage {
     pub loader: AsyncLoader,
-    pub email: RefCell<String>,
+    pub email: EmailHandler,
     pub password: RefCell<String>,
-    pub status: Mutable<Option<Status>>,
+    pub password_error: Mutable<Option<&'static str>>,
+    pub reset_password_popup: Mutable<bool>,
+    pub tried_to_submit: Mutable<bool>,
 }
-impl State {
-    pub fn new() -> Self {
-        Self {
+impl LoginPage {
+    pub fn new() -> Rc<Self> {
+        Rc::new(Self {
             loader: AsyncLoader::new(),
-            email: RefCell::new("".to_string()),
+            email: EmailHandler::new(),
             password: RefCell::new("".to_string()),
-            status: Mutable::new(None),
-        }
+            password_error: Mutable::new(None),
+            reset_password_popup: Mutable::new(false),
+            tried_to_submit: Mutable::new(false),
+        })
     }
 
-    pub fn clear_email_status(&self) {
-        if self
-            .status
-            .get_cloned()
-            .and_then(|x| x.email_error())
-            .is_some()
-        {
-            self.status.set(None);
-        }
-    }
-    pub fn clear_password_status(&self) {
-        if self
-            .status
-            .get_cloned()
-            .and_then(|x| x.password_error())
-            .is_some()
-        {
-            self.status.set(None);
-        }
-    }
-
-    pub fn email_error(&self) -> impl Signal<Item = &'static str> {
-        self.status
-            .signal_cloned()
-            .map(|err| err.and_then(|err| err.email_error()).unwrap_or(""))
-    }
-
-    pub fn password_error(&self) -> impl Signal<Item = &'static str> {
-        self.status
-            .signal_cloned()
-            .map(|err| err.and_then(|err| err.password_error()).unwrap_or(""))
-    }
-}
-
-#[derive(Debug, Clone)]
-pub enum Status {
-    BadCredentials,
-    PasswordResetSent,
-}
-
-impl Status {
-    pub fn email_error(&self) -> Option<&'static str> {
-        match self {
-            Self::PasswordResetSent => Some("Check your email at this address!"),
-            Self::BadCredentials => Some("Invalid email or password"),
-        }
-    }
-    pub fn password_error(&self) -> Option<&'static str> {
-        match self {
-            Self::PasswordResetSent => Some("Password reset link sent!"),
-            Self::BadCredentials => Some("Invalid email or password"),
+    pub fn show_email_error_signal(&self) -> impl Signal<Item = Option<&'static str>> {
+        map_ref! {
+            let error = self.email.error_signal(),
+            let tried_to_submit = self.tried_to_submit.signal() => move {
+                if error.is_some() && *tried_to_submit {
+                    Some(error.unwrap())
+                } else {
+                    None
+                }
+            }
         }
     }
 }

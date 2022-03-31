@@ -1,4 +1,6 @@
-use super::{actions, state::*};
+use crate::login::send_reset_link::{SendResetLink, SendResetLinkCallbacks};
+
+use super::{actions, state::LoginPage};
 use dominator::{clone, html, with_node, Dom};
 use futures_signals::signal::SignalExt;
 use std::rc::Rc;
@@ -8,12 +10,24 @@ use utils::events;
 
 const STR_GOOGLE_LABEL: &str = "Log in with Google";
 
-pub struct LoginPage {}
 impl LoginPage {
-    pub fn render() -> Dom {
-        let state = Rc::new(State::new());
+    pub fn render(self: &Rc<Self>) -> Dom {
+        let state = self;
 
         html!("empty-fragment", {
+            .child_signal(state.reset_password_popup.signal().map(clone!(state => move |reset_password_popup| {
+                match reset_password_popup {
+                    false => None,
+                    true => {
+                        let callbacks = SendResetLinkCallbacks::new(
+                            clone!(state => move|| {
+                                state.reset_password_popup.set(false);
+                            })
+                        );
+                        Some(SendResetLink::new(callbacks).render())
+                    },
+                }
+            })))
             .child(html!("window-loader-block", {
                 .property_signal("visible", state.loader.is_loading())
             }))
@@ -22,17 +36,16 @@ impl LoginPage {
                     html!("input-wrapper", {
                         .property("slot", "email")
                         .property("label", crate::strings::STR_EMAIL_LABEL)
-                        .property_signal("hint", state.email_error())
-                        .property_signal("error", state.email_error().map(|err| {
-                            !err.is_empty()
+                        .property_signal("hint", state.show_email_error_signal())
+                        .property_signal("error", state.show_email_error_signal().map(|err| {
+                            err.is_some()
                         }))
                         .child(html!("input" => HtmlInputElement, {
                             .with_node!(elem => {
                                 .property("type", "email")
                                 .attribute("autocomplete", "email")
                                 .event(clone!(state => move |_:events::Input| {
-                                    state.clear_email_status();
-                                    *state.email.borrow_mut() = elem.value();
+                                    state.email.update_value(elem.value());
                                 }))
                             })
                         }))
@@ -41,12 +54,11 @@ impl LoginPage {
                         .property("slot", "password")
                         .property("label", crate::strings::STR_PASSWORD_LABEL)
                         .property("placeholder", crate::strings::STR_PASSWORD_PLACEHOLDER)
-                        .property_signal("hint", state.password_error())
-                        .property_signal("error", state.password_error().map(|err| {
-                            !err.is_empty()
+                        .property_signal("hint", state.password_error.signal_cloned())
+                        .property_signal("error", state.password_error.signal_ref(|err| {
+                            err.is_some()
                         }))
                         .event(clone!(state => move |evt:events::CustomInput| {
-                            state.clear_password_status();
                             *state.password.borrow_mut() = evt.value();
                         }))
                     }),
@@ -63,7 +75,7 @@ impl LoginPage {
                         .property("color", "blue")
                         .text(crate::strings::STR_PASSWORD_FORGOTTEN)
                         .event(clone!(state => move |_evt:events::Click| {
-                            actions::forgot_password(state.clone())
+                            state.reset_password_popup.set(true);
                         }))
                     }),
                     html!("button-rect-icon", {

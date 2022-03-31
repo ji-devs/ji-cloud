@@ -1,8 +1,9 @@
+use components::overlay::container::OverlayContainer;
 use utils::routes::*;
 
 use crate::{
     email::confirmation::SendEmailConfirmationPage, email::verify::VerifyEmailPage,
-    login::dom::LoginPage, oauth::dom::OauthPage, profile::dom::ProfilePage,
+    login::LoginPage, oauth::dom::OauthPage, profile::dom::ProfilePage,
     register::dom::RegisterPage,
     register::pages::complete::dom::CompletePage as RegisterCompletePage, register::state::Step,
     reset::PasswordResetPage,
@@ -31,7 +32,7 @@ impl Router {
                     Some(OauthPage::render(data, OAuthUrlKind::Register))
                 }
                 UserRoute::LoginOauth(data) => Some(OauthPage::render(data, OAuthUrlKind::Login)),
-                UserRoute::Login(_) => Some(LoginPage::render()),
+                UserRoute::Login(_) => Some(LoginPage::new().render()),
                 UserRoute::Profile(ProfileSection::Landing) => Some(ProfilePage::render()),
                 UserRoute::RegisterComplete => Some(RegisterCompletePage::render()),
                 UserRoute::ContinueRegistration(oauth_profile) => {
@@ -53,6 +54,9 @@ impl Router {
     }
 
     pub fn render(&self) -> Dom {
-        html!("main", { .child_signal(Self::dom_signal()) } )
+        html!("main", {
+            .child_signal(Self::dom_signal())
+            .child(OverlayContainer::new().render(None))
+        })
     }
 }

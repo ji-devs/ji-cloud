@@ -15,11 +15,14 @@ pub struct PasswordHandler {
 
 impl PasswordHandler {
     pub fn new() -> Self {
-        Self {
+        let _self = Self {
             strength: Mutable::new(PasswordStrength::None),
             value: RefCell::new("".to_string()),
             error: Mutable::new(None),
-        }
+        };
+        _self.update_errors();
+        _self.update_strength();
+        _self
     }
 
     pub fn password_acceptable(&self) -> bool {

@@ -6,6 +6,7 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 mod debug;
 mod email;
+mod email_handler;
 mod login;
 mod oauth;
 mod password_handler;
