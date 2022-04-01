@@ -223,7 +223,7 @@ pub(super) async fn publish_draft_to_live(
     db: Data<PgPool>,
     claims: TokenUser,
     learning_path_id: Path<LearningPathId>,
-) -> Result<HttpResponse, error::JigCloneDraft> {
+) -> Result<HttpResponse, error::CloneDraft> {
     let learning_path_id = learning_path_id.into_inner();
 
     db::learning_path::authz(&*db, claims.0.user_id, Some(learning_path_id)).await?;
@@ -233,7 +233,7 @@ pub(super) async fn publish_draft_to_live(
     let (draft_id, live_id) =
         db::learning_path::get_draft_and_live_ids(&mut *txn, learning_path_id)
             .await
-            .ok_or(error::JigCloneDraft::ResourceNotFound)?;
+            .ok_or(error::CloneDraft::ResourceNotFound)?;
 
     let new_live_id = db::learning_path::clone_data(&mut txn, &draft_id, DraftOrLive::Live).await?;
 
@@ -257,14 +257,12 @@ delete from learning_path_data where id = $1
     .execute(&mut *txn)
     .await?;
 
-    log::info!("AOSIJDOAIJSD");
-
     txn.commit().await?;
 
     Ok(HttpResponse::NoContent().finish())
 }
 
-/// Search for jigs.
+/// Search for Learning Paths.
 #[instrument(skip_all)]
 async fn search(
     db: Data<PgPool>,

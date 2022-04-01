@@ -35,7 +35,7 @@ pub async fn create(
     sqlx::query!(
         r#"
 insert into learning_path_data_resource (learning_path_data_id, resource_type_id, resource_content, display_name)
-values ((select draft_id from jig where id = $1), $2, $3, $4)
+values ((select draft_id from learning_path where id = $1), $2, $3, $4)
 returning id as "id!: AdditionalResourceId"
         "#,
         learning_path_id.0,
@@ -57,14 +57,20 @@ pub async fn get(
 ) -> anyhow::Result<(String, ResourceTypeId, ResourceContent), error::NotFound> {
     let mut txn = pool.begin().await?;
 
+    log::warn!("Before get_draft_and_live_ids: {:?}", learning_path_id);
+
     let (draft_id, live_id) = super::get_draft_and_live_ids(&mut txn, learning_path_id)
         .await
         .ok_or(error::NotFound::ResourceNotFound)?;
+
+    log::warn!("After draft_live: {:?}, live_ids: {:?}", draft_id, live_id);
 
     let learning_path_data_id = match draft_or_live {
         DraftOrLive::Draft => draft_id,
         DraftOrLive::Live => live_id,
     };
+
+    log::warn!("After live_ids: {:?}", learning_path_data_id);
 
     if !sqlx::query!(
         //language=SQL

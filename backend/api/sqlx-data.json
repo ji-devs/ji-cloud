@@ -5410,29 +5410,6 @@
       ]
     }
   },
-  "bb763e0f58f23dc7dfecddfc0f22838ff10941d337decff290bec9252880cdef": {
-    "query": "\ninsert into learning_path_data_resource (learning_path_data_id, resource_type_id, resource_content, display_name)\nvalues ((select draft_id from jig where id = $1), $2, $3, $4)\nreturning id as \"id!: AdditionalResourceId\"\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id!: AdditionalResourceId",
-          "type_info": "Uuid"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid",
-          "Jsonb",
-          "Text"
-        ]
-      },
-      "nullable": [
-        false
-      ]
-    }
-  },
   "bc43edfc2dcbeea691560c655987b29f3a3c919223487912f63be464fec522a4": {
     "query": "\nselect exists(select 1 from user_profile where user_id = $1 for update) as \"exists!\"\n    ",
     "describe": {
@@ -7540,6 +7517,29 @@
         false,
         true,
         false,
+        false
+      ]
+    }
+  },
+  "ff55b3529583151e6450cd7e4bb27c17a2a9068b8571371698f165edc0c89c74": {
+    "query": "\ninsert into learning_path_data_resource (learning_path_data_id, resource_type_id, resource_content, display_name)\nvalues ((select draft_id from learning_path where id = $1), $2, $3, $4)\nreturning id as \"id!: AdditionalResourceId\"\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id!: AdditionalResourceId",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid",
+          "Jsonb",
+          "Text"
+        ]
+      },
+      "nullable": [
         false
       ]
     }

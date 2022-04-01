@@ -1103,7 +1103,7 @@ pub async fn clone_data(
     txn: &mut PgConnection,
     from_data_id: &Uuid,
     draft_or_live: DraftOrLive,
-) -> Result<Uuid, error::JigCloneDraft> {
+) -> Result<Uuid, error::CloneDraft> {
     println!("here in clone");
     let new_id = sqlx::query!(
         //language=SQL
@@ -1221,12 +1221,12 @@ pub async fn clone_jig(
     db: &PgPool,
     parent: JigId,
     user_id: Uuid,
-) -> Result<JigId, error::JigCloneDraft> {
+) -> Result<JigId, error::CloneDraft> {
     let mut txn = db.begin().await?;
 
     let (draft_id, live_id) = get_draft_and_live_ids(&mut *txn, parent)
         .await
-        .ok_or(error::JigCloneDraft::ResourceNotFound)?;
+        .ok_or(error::CloneDraft::ResourceNotFound)?;
 
     let new_draft_id = clone_data(&mut txn, &draft_id, DraftOrLive::Draft).await?;
     let new_live_id = clone_data(&mut txn, &live_id, DraftOrLive::Live).await?;

@@ -769,7 +769,7 @@ pub async fn clone_data(
     txn: &mut PgConnection,
     from_data_id: &Uuid,
     draft_or_live: DraftOrLive,
-) -> Result<Uuid, error::JigCloneDraft> {
+) -> Result<Uuid, error::CloneDraft> {
     println!("here in clone");
     let new_id = sqlx::query!(
         //language=SQL

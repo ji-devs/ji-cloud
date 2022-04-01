@@ -254,7 +254,7 @@ pub fn build(
             .configure(endpoints::meta::configure)
             .configure(endpoints::jig::configure)
             .configure(endpoints::jig::module::configure)
-            .configure(endpoints::jig::additional_resource::configure)
+            .configure(endpoints::additional_resource::configure)
             .configure(endpoints::jig::report::configure)
             .configure(endpoints::jig::curation::configure)
             .configure(endpoints::learning_path::configure)
