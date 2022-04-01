@@ -1,7 +1,4 @@
-#![allow(dead_code)] // this should be removed eventually
-
 pub const STR_AUTH_OAUTH_LOGIN_FAIL: &str = "Create an account first :)";
-pub const STR_CHANGE_EMAIL: &str = "Change email account";
 pub const STR_SUBMIT: &str = "Submit";
 pub const STR_CONTINUE: &str = "Continue";
 pub const STR_EMAIL_LABEL: &str = "Email *";
@@ -36,12 +33,10 @@ pub mod register {
         pub const STR_USERNAME_LABEL: &str = "Create a username *";
         pub const STR_USERNAME_PLACEHOLDER: &str = "This will be public to all Jigzi members";
         pub const STR_18: &str = "I am over 18 *";
-        pub const STR_CONTINUE: &str = "Continue";
         pub const STR_NEXT: &str = "Next";
     }
 
     pub mod step_2 {
-        pub const STR_SUBMIT: &str = "Submit";
         pub const STR_LOCATION_LABEL: &str = "Location *";
         pub const STR_LOCATION_PLACEHOLDER: &str = "City, State";
         pub const STR_PERSONA_LABEL: &str = "I am signing up as a... *";
@@ -73,8 +68,5 @@ pub mod register {
 
     pub mod step_3 {
         pub const STR_SUBMIT: &str = "Submit";
-        pub const STR_AGE_LABEL: &str = "Which age group are you interested in?";
-        pub const STR_AFFILIATION_LABEL: &str =
-            "Content from which affiliations do you want to see?";
     }
 }
