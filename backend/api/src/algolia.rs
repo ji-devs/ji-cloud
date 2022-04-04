@@ -161,12 +161,17 @@ impl Manager {
         log::info!("reached updates for spawning jobs");
 
         for count in 0..2 {
-            let res = if count == 0 {
-                self.update_images()
+            let res = match count {
+                0 => self
+                    .update_images()
                     .await
-                    .context("update images task errored")
-            } else {
-                self.update_jigs().await.context("update jigs task errored")
+                    .context("update images task errored"),
+                1 => self.update_jigs().await.context("update jigs task errored"),
+                2 => self
+                    .update_learning_paths()
+                    .await
+                    .context("update learning paths task errored"),
+                _ => continue,
             };
 
             match res {
@@ -208,14 +213,19 @@ select algolia_index_version as "algolia_index_version!" from "settings"
         let migrations_to_run = &migration::INDEXING_MIGRATIONS[(algolia_version as usize)..];
 
         for (idx, (_, updater)) in migrations_to_run.iter().enumerate() {
-            updater(&self.inner, &self.media_index, &self.jig_index)
-                .await
-                .with_context(|| {
-                    anyhow::anyhow!(
-                        "error while running algolia updater #{}",
-                        idx + (algolia_version as usize) + 1
-                    )
-                })?;
+            updater(
+                &self.inner,
+                &self.media_index,
+                &self.jig_index,
+                &self.learning_path_index,
+            )
+            .await
+            .with_context(|| {
+                anyhow::anyhow!(
+                    "error while running algolia updater #{}",
+                    idx + (algolia_version as usize) + 1
+                )
+            })?;
         }
 
         // currently this can only be "no resync" or "complete resync" but eventually
@@ -362,7 +372,6 @@ from jig
          inner join jig_admin_data "jad" on jad.jig_id = jig.id
 where (last_synced_at is null
    or (updated_at is not null and last_synced_at < updated_at))
-   and draft_or_live is not NULL
 limit 100 for no key update skip locked;
      "#
         )
@@ -585,7 +594,7 @@ limit 100 for no key update skip locked;
     }
 
     async fn update_learning_paths(&self) -> anyhow::Result<bool> {
-        log::info!("reached update jigs");
+        log::info!("reached update learning_paths");
         let mut txn = self.db.begin().await?;
 
         let is_outdated = sqlx::query!(
@@ -656,7 +665,6 @@ from learning_path
          inner join learning_path_data on live_id = learning_path_data.id
 where (last_synced_at is null
    or (updated_at is not null and last_synced_at < updated_at))
-   and draft_or_live is not NULL
 limit 100 for no key update skip locked;
      "#
         )
@@ -700,10 +708,10 @@ limit 100 for no key update skip locked;
                 published_at: row.published_at,
                 translated_description: &translation,
             })
-            .expect("failed to serialize BatchJig to json")
+            .expect("failed to serialize BatchLearningPath to json")
             {
                 serde_json::Value::Object(map) => map,
-                _ => panic!("failed to serialize BatchJig to json map"),
+                _ => panic!("failed to serialize BatchLearningPath to json map"),
             },
             object_id: row.id.to_string(),
         }})
@@ -715,19 +723,19 @@ limit 100 for no key update skip locked;
             return Ok(true);
         }
 
-        log::debug!("Updating a batch of {} jigs(s)", requests.len());
+        log::debug!("Updating a batch of {} learning_path(s)", requests.len());
 
         let request = algolia::request::BatchWriteRequests { requests };
         let ids = self.batch_learning_paths(request).await?;
 
-        log::debug!("Updated a batch of {} jigs(s)", ids.len());
+        log::debug!("Updated a batch of {} learning_path(s)", ids.len());
 
         sqlx::query!(
             //language=SQL
             r#"
-update jig_data
+update learning_path_data
 set last_synced_at = now()
-where jig_data.id = any (select live_id from jig where jig.id = any ($1))
+where learning_path_data.id = any (select live_id from learning_path where learning_path.id = any ($1))
 "#,
             &ids
         )
@@ -736,7 +744,7 @@ where jig_data.id = any (select live_id from jig where jig.id = any ($1))
 
         txn.commit().await?;
 
-        log::info!("completed update jigs");
+        log::info!("completed update learning_path");
 
         Ok(true)
     }

@@ -157,7 +157,7 @@ async fn delete(
 
     db::learning_path::delete(&*db, id).await?;
 
-    // algolia.delete_learning_path(id).await;
+    algolia.delete_learning_path(id).await;
 
     Ok(HttpResponse::NoContent().finish())
 }

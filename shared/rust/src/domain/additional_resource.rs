@@ -100,7 +100,7 @@ pub struct AdditionalResourceUpdateRequest {
     pub resource_content: Option<ResourceContent>,
 }
 
-/// Request to update an `AdditionalResource`.
+/// Request to get `AdditionalResource` associated with a live Jig or Learning Path.
 ///
 /// [`additional_resource::Update`](crate::api::endpoints::additional_resource::GetLive)
 #[derive(Serialize, Deserialize, Debug)]
@@ -113,7 +113,7 @@ pub struct AdditionalResourceGetLiveQuery {
     pub id: Uuid,
 }
 
-/// Request to update an `AdditionalResource`.
+/// Request to get `AdditionalResource` associated with a draft Jig or Learning Path.
 ///
 /// [`additional_resource::AdditionalResourceGetDraftQuery`](crate::api::endpoints::additional_resource::GetDraft)
 #[derive(Serialize, Deserialize, Debug)]
