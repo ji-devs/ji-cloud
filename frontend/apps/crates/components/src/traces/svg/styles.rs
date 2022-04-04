@@ -248,7 +248,7 @@ pub(super) static SHAPE_MODE_EDIT_WITHOUT_CUTOUT_INCORRECT_CLASS: Lazy<String> =
 pub(super) static SHAPE_MODE_PLAY_SELECTED_GENERAL_CLASS: Lazy<String> = Lazy::new(|| {
     class! {
         .style("stroke", "#005aff")
-        .style("stroke-width", "8")
+        .style("stroke-width", "4")
     }
 });
 
