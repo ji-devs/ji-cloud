@@ -12,7 +12,7 @@ mod oauth;
 mod password_handler;
 mod profile;
 mod register;
-mod reset;
+mod reset_password;
 mod router;
 mod strings;
 

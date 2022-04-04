@@ -11,7 +11,7 @@ use crate::{
         pages::complete::dom::CompletePage as RegisterCompletePage,
         state::Step,
     },
-    reset::PasswordResetPage,
+    reset_password::PasswordResetPage,
 };
 use dominator::{html, Dom};
 use futures_signals::signal::{Signal, SignalExt};
