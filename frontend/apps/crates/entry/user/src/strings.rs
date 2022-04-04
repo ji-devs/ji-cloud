@@ -12,16 +12,6 @@ pub const STR_EMPTY_USERNAME: &str = "Empty username!";
 pub const STR_PASSWORD_LABEL: &str = "Password *";
 pub const STR_PASSWORD_FORGOTTEN: &str = "Forgot your password?";
 
-pub mod profile {
-    pub const STR_FORGOT_PASSWORD: &str = "Forgot your password?";
-    pub const STR_SAVE: &str = "Save";
-    pub const STR_CANCEL: &str = "Cancel";
-    pub const STR_CURRENT_PASSWORD_LABEL: &str = "Current password";
-    pub const STR_NEW_PASSWORD_LABEL: &str = "New password";
-    pub const STR_RETYPE_NEW_PASSWORD_LABEL: &str = "Retype new password";
-    pub const STR_PASSWORD_PLACEHOLDER: &str = "Type your password";
-}
-
 pub mod register {
     pub mod complete {
         pub const STR_SUBMIT: &str = "Go to Jigzi";

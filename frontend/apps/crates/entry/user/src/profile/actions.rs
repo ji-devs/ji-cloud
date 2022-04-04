@@ -3,19 +3,48 @@ use std::rc::Rc;
 use components::image::upload::upload_image;
 use dominator::clone;
 use futures::future::join;
+use gloo_timers::future::TimeoutFuture;
 use shared::{
     api::endpoints::{self, meta, user, ApiEndpoint},
     domain::{
         image::{user::UserImageCreateRequest, ImageId, ImageKind},
-        meta::MetadataResponse,
+        meta::MetadataResponse, user::ResetPasswordRequest,
     },
     error::EmptyError,
     media::MediaLibrary,
 };
+use wasm_bindgen_futures::spawn_local;
 
-use super::state::State;
+use super::state::{State, ResetPasswordStatus};
 use utils::{fetch::api_with_auth, prelude::*, unwrap::UnwrapJiExt};
 use web_sys::File;
+
+impl State {
+    pub fn send_reset_password(self: &Rc<Self>) {
+        let state = self;
+
+        state.reset_password_status.set(ResetPasswordStatus::Loading);
+
+        spawn_local(clone!(state => async move {
+            let req = ResetPasswordRequest {
+                email: state.user.email.get_cloned()
+            };
+
+            let res = endpoints::user::ResetPassword::api_no_auth_empty(Some(req)).await;
+
+            match res {
+                Ok(_) => {
+                    state.reset_password_status.set(ResetPasswordStatus::Sent);
+                },
+                Err(_err) => {
+                    todo!()
+                }
+            }
+            TimeoutFuture::new(5000).await;
+            state.reset_password_status.set(ResetPasswordStatus::default());
+        }));
+    }
+}
 
 pub fn load_initial_data(state: Rc<State>) {
     state.loader.load(clone!(state => async move {

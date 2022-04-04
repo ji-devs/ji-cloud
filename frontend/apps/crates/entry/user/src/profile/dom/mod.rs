@@ -16,7 +16,7 @@ use wasm_bindgen::JsValue;
 use web_sys::{HtmlElement, HtmlInputElement};
 
 use crate::{
-    profile::{change_password, dom::options_popup::PopupCallbacks, state::ActivePopup},
+    profile::{dom::options_popup::PopupCallbacks, state::{ActivePopup, ResetPasswordStatus}},
     strings::register::step_2::{STR_LOCATION_PLACEHOLDER, STR_PERSONA_OPTIONS},
 };
 
@@ -26,6 +26,8 @@ mod options_popup;
 
 const STR_EDIT: &str = " Edit";
 const STR_REMOVE_IMAGE: &str = "remove image";
+
+const STR_RESET_PASSWORD_SENT: &str = "We just send you a reset password email!";
 
 const STR_AFFILIATION_HEADER: &str = "Affiliation";
 const STR_AFFILIATION_SUBHEADER: &str = "What type of content do you want to access?";
@@ -100,19 +102,6 @@ impl ProfilePage {
                     .child(html!("img-ui", {
                         .property("slot", "icon")
                         .property("path", "core/inputs/pencil-blue-darker.svg")
-                    }))
-                }),
-                html!("div", {
-                    .property("slot", "password-edit")
-                    .child(html!("button-rect", {
-                        .property("kind", "outline")
-                        .property("color", "blue")
-                        .property("size", "small")
-                        .property("slot", "relevant-subjects-edit")
-                        .text(STR_EDIT)
-                        .event(clone!(state => move |_: events::Click| {
-                            state.active_popup.set(ActivePopup::ResetPassword)
-                        }))
                     }))
                 }),
                 html!("input-wrapper", {
@@ -348,6 +337,32 @@ impl ProfilePage {
                     }))
                 }),
             ])
+            .child_signal(state.reset_password_status.signal().map(clone!(state => move |status| {
+                Some(match status {
+                    ResetPasswordStatus::Ready | ResetPasswordStatus::Loading => {
+                        html!("div", {
+                            .property("slot", "reset-password")
+                            .child(html!("button-rect", {
+                                .property("kind", "outline")
+                                .property("color", "blue")
+                                .property("size", "small")
+                                .property("slot", "relevant-subjects-edit")
+                                .property("disabled", status == ResetPasswordStatus::Loading)
+                                .text(STR_EDIT)
+                                .event(clone!(state => move |_: events::Click| {
+                                    state.send_reset_password();
+                                }))
+                            }))
+                        })
+                    },
+                    ResetPasswordStatus::Sent => {
+                        html!("p", {
+                            .property("slot", "reset-password")
+                            .text(STR_RESET_PASSWORD_SENT)
+                        })
+                    },
+                })
+            })))
             .child_signal(render_popups(Rc::clone(&state)))
         })
     }
@@ -422,10 +437,6 @@ fn render_popups(state: Rc<State>) -> impl Signal<Item = Option<Dom>> {
                                 };
 
                                 options_popup::render::<AgeRangeId, AgeRange>(Rc::clone(&state), STR_AGE_HEADER, STR_AGE_SUBHEADER, callbacks)
-                            },
-                            ActivePopup::ResetPassword => {
-                                // let state = Rc::new(change_password::state::State::new());
-                                change_password::dom::render(Rc::clone(&state))
                             },
                         };
 

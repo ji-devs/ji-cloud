@@ -36,9 +36,9 @@ where
         .property("header", header)
         .property("subheader", subheader)
         .children(&mut [
-            html!("button-empty", {
+            html!("fa-button", {
                 .property("slot", "close")
-                .text("×")
+                .property("icon", "fa-light fa-xmark")
                 .event(clone!(state => move |_: events::Click| {
                     state.active_popup.set(ActivePopup::None);
                     actions::save_profile(Rc::clone(&state));

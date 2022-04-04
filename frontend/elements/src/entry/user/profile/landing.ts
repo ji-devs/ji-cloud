@@ -53,6 +53,12 @@ export class _ extends LitElement {
                     overflow: hidden;
                     margin: 0 auto 20px auto;
                 }
+                ::slotted(p[slot=reset-password]) {
+                    margin: 0;
+                    color: var(--dark-green-1);
+                    font-weight: 400;
+                    font-size: 14px;
+                }
                 .name {
                     font-size: 22px;
                     font-weight: 500;
@@ -270,7 +276,7 @@ export class _ extends LitElement {
                                 <span>${STR_PASSWORD}</span>
                                 <div class="password-wrapper">
                                     <span>************</span>
-                                    <slot name="password-edit"></slot>
+                                    <slot name="reset-password"></slot>
                                 </div>
                             </label>
                             <label>

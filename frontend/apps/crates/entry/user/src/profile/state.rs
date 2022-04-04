@@ -10,6 +10,7 @@ use uuid::Uuid;
 pub struct State {
     pub user: ProfilePageUser,
     pub active_popup: Mutable<ActivePopup>,
+    pub reset_password_status: Mutable<ResetPasswordStatus>,
     pub loader: AsyncLoader,
     pub metadata: Mutable<Option<MetadataResponse>>,
 }
@@ -19,16 +20,29 @@ impl State {
         Self {
             user: ProfilePageUser::empty(),
             active_popup: Mutable::new(ActivePopup::None),
+            reset_password_status: Mutable::new(ResetPasswordStatus::default()),
             loader: AsyncLoader::new(),
             metadata: Mutable::new(None),
         }
     }
 }
 
+#[derive(Clone, Copy, PartialEq)]
+pub enum ResetPasswordStatus {
+    Ready,
+    Loading,
+    Sent
+}
+
+impl Default for ResetPasswordStatus {
+    fn default() -> Self {
+        Self::Ready
+    }
+}
+
 #[derive(Clone)]
 pub enum ActivePopup {
     None,
-    ResetPassword,
     Affiliation,
     Subjects,
     Age,
@@ -90,7 +104,6 @@ impl ProfilePageUser {
     }
 
     pub fn to_update(&self) -> PatchProfileRequest {
-        log::warn!("Waiting on API fix");
         PatchProfileRequest {
             given_name: Some(self.given_name.get_cloned()),
             family_name: Some(self.family_name.get_cloned()),

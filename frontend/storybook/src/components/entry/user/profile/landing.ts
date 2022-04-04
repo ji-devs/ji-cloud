@@ -28,7 +28,7 @@ export const Profile = (props?: Partial<Args>) => {
             <input-wrapper slot="email">
                 <input>
             </input-wrapper>
-            <button-rect kind="outline" color="blue" size="small" slot="password-edit">Edit</button-rect>
+            <button-rect kind="outline" color="blue" size="small" slot="reset-password">Edit</button-rect>
             <input-wrapper slot="first-name">
                 <input>
             </input-wrapper>
