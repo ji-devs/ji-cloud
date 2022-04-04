@@ -98,6 +98,7 @@ impl SendResetLink {
     fn render_sent(self: &Rc<Self>) -> Dom {
         let state = self;
         html!("div", {
+            .style("padding", "30px")
             .property("slot", "body")
             .children(&mut [
                 html!("h2", {
