@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::{signal::Mutable, signal_vec::MutableVec};
 use shared::domain::{
@@ -7,7 +9,7 @@ use shared::domain::{
 };
 use uuid::Uuid;
 
-pub struct State {
+pub struct ProfilePage {
     pub user: ProfilePageUser,
     pub active_popup: Mutable<ActivePopup>,
     pub reset_password_status: Mutable<ResetPasswordStatus>,
@@ -15,15 +17,15 @@ pub struct State {
     pub metadata: Mutable<Option<MetadataResponse>>,
 }
 
-impl State {
-    pub fn new() -> Self {
-        Self {
+impl ProfilePage {
+    pub fn new() -> Rc<Self> {
+        Rc::new(Self {
             user: ProfilePageUser::empty(),
             active_popup: Mutable::new(ActivePopup::None),
             reset_password_status: Mutable::new(ResetPasswordStatus::default()),
             loader: AsyncLoader::new(),
             metadata: Mutable::new(None),
-        }
+        })
     }
 }
 

@@ -8,9 +8,9 @@ use futures_signals::{
 use shared::domain::meta::MetadataResponse;
 use utils::events;
 
-use crate::profile::{actions, state::ActivePopup};
+use crate::profile::state::ActivePopup;
 
-use super::super::state::{ProfilePageUser, State};
+use super::super::state::{ProfilePageUser, ProfilePage};
 
 const STR_DONE: &str = "Done";
 
@@ -22,7 +22,7 @@ pub struct PopupCallbacks<I, S> {
 }
 
 pub fn render<I, S>(
-    state: Rc<State>,
+    state: Rc<ProfilePage>,
     header: &str,
     subheader: &str,
     callbacks: PopupCallbacks<I, S>,
@@ -41,7 +41,7 @@ where
                 .property("icon", "fa-light fa-xmark")
                 .event(clone!(state => move |_: events::Click| {
                     state.active_popup.set(ActivePopup::None);
-                    actions::save_profile(Rc::clone(&state));
+                    state.save_profile();
                 }))
             }),
             html!("button-rect", {
@@ -81,7 +81,7 @@ where
                                     },
                                 };
 
-                                actions::save_profile(Rc::clone(&state));
+                                state.save_profile();
                             }))
                         })
                     })).collect::<Vec<Dom>>()

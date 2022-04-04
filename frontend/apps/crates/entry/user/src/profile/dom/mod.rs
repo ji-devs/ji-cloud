@@ -23,7 +23,7 @@ use crate::{
     strings::register::step_2::{STR_LOCATION_PLACEHOLDER, STR_PERSONA_OPTIONS},
 };
 
-use super::{actions, state::State};
+use super::state::ProfilePage;
 
 mod options_popup;
 
@@ -41,18 +41,16 @@ const STR_SUBJECT_SUBHEADER: &str = "Which subjects are you interested in?";
 const STR_AGE_HEADER: &str = "Relevant Age Group";
 const STR_AGE_SUBHEADER: &str = "Which age group are you interested in?";
 
-pub struct ProfilePage {}
-
 impl ProfilePage {
-    pub fn render() -> Dom {
-        let state = Rc::new(State::new());
+    pub fn render(self: Rc<Self>) -> Dom {
+        let state = self;
 
-        actions::load_initial_data(state.clone());
+        state.load_initial_data();
 
         html!("user-profile", {
             .child(page_header::dom::render(Rc::new(page_header::state::State::new()), Some("page-header"), None, true))
             .property_signal("email", state.user.email.signal_cloned())
-            .property_signal("name", full_name_signal(Rc::clone(&state)))
+            .property_signal("name", state.full_name_signal())
             .children(&mut [
                 html!("profile-image", {
                     .property("slot", "profile-image")
@@ -77,7 +75,7 @@ impl ProfilePage {
                     .property("slot", "profile-image-edit")
                     .text("✎")
                     .event(clone!(state => move |evt: events::CustomFile| {
-                        actions::set_profile_image(Rc::clone(&state), evt.file());
+                        state.set_profile_image(evt.file());
                     }))
                 }),
                 html!("button-rect", {
@@ -88,7 +86,7 @@ impl ProfilePage {
                     .text(STR_REMOVE_IMAGE)
                     .event(clone!(state => move |_: events::Click| {
                         state.user.profile_image.set(None);
-                        actions::save_profile(Rc::clone(&state));
+                        state.save_profile();
                     }))
                 }),
                 html!("input-wrapper", {
@@ -98,7 +96,7 @@ impl ProfilePage {
                             .property_signal("value", state.user.email.signal_cloned())
                             .event(clone!(state => move |_: events::Input| {
                                 state.user.email.set(elem.value());
-                                actions::save_profile(Rc::clone(&state));
+                                state.save_profile();
                             }))
                         })
                     }))
@@ -114,7 +112,7 @@ impl ProfilePage {
                             .property_signal("value", state.user.given_name.signal_cloned())
                             .event(clone!(state => move |_: events::Input| {
                                 state.user.given_name.set(elem.value());
-                                actions::save_profile(Rc::clone(&state));
+                                state.save_profile();
                             }))
                         })
                     }))
@@ -130,7 +128,7 @@ impl ProfilePage {
                             .property_signal("value", state.user.family_name.signal_cloned())
                             .event(clone!(state => move |_: events::Input| {
                                 state.user.family_name.set(elem.value());
-                                actions::save_profile(Rc::clone(&state));
+                                state.save_profile();
                             }))
                         })
                     }))
@@ -186,7 +184,7 @@ impl ProfilePage {
                                     state.user.persona.lock_mut().remove(pos);
                                 }
 
-                                actions::save_profile(Rc::clone(&state));
+                                state.save_profile();
                             }))
                         })
                     }))
@@ -204,7 +202,7 @@ impl ProfilePage {
                         .event(clone!(state => move |evt: events::GoogleLocation| {
                             let raw = serde_json::to_value(evt.raw_json()).unwrap_ji();
                             state.user.location.set(Some(raw));
-                            actions::save_profile(Rc::clone(&state));
+                            state.save_profile();
                         }))
                     }))
                     .child(html!("img-ui", {
@@ -222,7 +220,7 @@ impl ProfilePage {
                             .text(lang.display_name())
                             .event(clone!(state => move |_: events::CustomSelectedChange| {
                                 state.user.language.set(lang.code().to_string());
-                                actions::save_profile(Rc::clone(&state));
+                                state.save_profile();
                             }))
                         })
                     }))
@@ -234,7 +232,7 @@ impl ProfilePage {
                             .property_signal("value", state.user.organization.signal_cloned().map(|i| i.unwrap_or_default()))
                             .event(clone!(state => move |_: events::Input| {
                                 state.user.organization.set(Some(elem.value()));
-                                actions::save_profile(Rc::clone(&state));
+                                state.save_profile();
                             }))
                         })
                     }))
@@ -366,96 +364,97 @@ impl ProfilePage {
                     },
                 })
             })))
-            .child_signal(render_popups(Rc::clone(&state)))
+            .child_signal(state.render_popups())
         })
     }
-}
 
-fn render_popups(state: Rc<State>) -> impl Signal<Item = Option<Dom>> {
-    state.active_popup.signal_cloned().map(clone!(state => move|active_popup| {
-        match active_popup {
-            ActivePopup::None => None,
-            _ => {
-                Some(html!("dialog-overlay", {
-                    .property("slot", "popup")
-                    .property("open", true)
-                    .property("autoClose", false)
-                    .event(clone!(state => move |_: events::Close| {
-                        log::info!("hay");
-                        state.active_popup.set(ActivePopup::None);
+    fn render_popups(self: &Rc<Self>) -> impl Signal<Item = Option<Dom>> {
+        let state = self;
+        state.active_popup.signal_cloned().map(clone!(state => move|active_popup| {
+            match active_popup {
+                ActivePopup::None => None,
+                _ => {
+                    Some(html!("dialog-overlay", {
+                        .property("slot", "popup")
+                        .property("open", true)
+                        .property("autoClose", false)
+                        .event(clone!(state => move |_: events::Close| {
+                            log::info!("hay");
+                            state.active_popup.set(ActivePopup::None);
+                        }))
+                        .apply(|dom| {
+                            let child = match active_popup {
+                                ActivePopup::None => unreachable!(),
+                                ActivePopup::Affiliation => {
+                                    let callbacks = PopupCallbacks {
+                                        get_options_list: Box::new(|meta| {
+                                            &meta.affiliations
+                                        }),
+                                        get_selected_list: Box::new(|user| {
+                                            &user.affiliations
+                                        }),
+                                        get_id_from_struct: Box::new(|affiliation: &Affiliation| {
+                                            &affiliation.id
+                                        }),
+                                        get_display_name: Box::new(|affiliation: &Affiliation| {
+                                            &affiliation.display_name
+                                        }),
+                                    };
+
+                                    options_popup::render::<AffiliationId, Affiliation>(Rc::clone(&state), STR_AFFILIATION_HEADER, STR_AFFILIATION_SUBHEADER, callbacks)
+                                },
+                                ActivePopup::Subjects => {
+                                    let callbacks = PopupCallbacks {
+                                        get_options_list: Box::new(|meta| {
+                                            &meta.subjects
+                                        }),
+                                        get_selected_list: Box::new(|user| {
+                                            &user.subjects
+                                        }),
+                                        get_id_from_struct: Box::new(|subject: &Subject| {
+                                            &subject.id
+                                        }),
+                                        get_display_name: Box::new(|subject: &Subject| {
+                                            &subject.display_name
+                                        }),
+                                    };
+
+                                    options_popup::render::<SubjectId, Subject>(Rc::clone(&state), STR_SUBJECT_HEADER, STR_SUBJECT_SUBHEADER, callbacks)
+                                },
+                                ActivePopup::Age => {
+                                    let callbacks = PopupCallbacks {
+                                        get_options_list: Box::new(|meta| {
+                                            &meta.age_ranges
+                                        }),
+                                        get_selected_list: Box::new(|user| {
+                                            &user.age_ranges
+                                        }),
+                                        get_id_from_struct: Box::new(|age_range: &AgeRange| {
+                                            &age_range.id
+                                        }),
+                                        get_display_name: Box::new(|age: &AgeRange| {
+                                            &age.display_name
+                                        }),
+                                    };
+
+                                    options_popup::render::<AgeRangeId, AgeRange>(Rc::clone(&state), STR_AGE_HEADER, STR_AGE_SUBHEADER, callbacks)
+                                },
+                            };
+
+                            dom.child(child)
+                        })
                     }))
-                    .apply(|dom| {
-                        let child = match active_popup {
-                            ActivePopup::None => unreachable!(),
-                            ActivePopup::Affiliation => {
-                                let callbacks = PopupCallbacks {
-                                    get_options_list: Box::new(|meta| {
-                                        &meta.affiliations
-                                    }),
-                                    get_selected_list: Box::new(|user| {
-                                        &user.affiliations
-                                    }),
-                                    get_id_from_struct: Box::new(|affiliation: &Affiliation| {
-                                        &affiliation.id
-                                    }),
-                                    get_display_name: Box::new(|affiliation: &Affiliation| {
-                                        &affiliation.display_name
-                                    }),
-                                };
-
-                                options_popup::render::<AffiliationId, Affiliation>(Rc::clone(&state), STR_AFFILIATION_HEADER, STR_AFFILIATION_SUBHEADER, callbacks)
-                            },
-                            ActivePopup::Subjects => {
-                                let callbacks = PopupCallbacks {
-                                    get_options_list: Box::new(|meta| {
-                                        &meta.subjects
-                                    }),
-                                    get_selected_list: Box::new(|user| {
-                                        &user.subjects
-                                    }),
-                                    get_id_from_struct: Box::new(|subject: &Subject| {
-                                        &subject.id
-                                    }),
-                                    get_display_name: Box::new(|subject: &Subject| {
-                                        &subject.display_name
-                                    }),
-                                };
-
-                                options_popup::render::<SubjectId, Subject>(Rc::clone(&state), STR_SUBJECT_HEADER, STR_SUBJECT_SUBHEADER, callbacks)
-                            },
-                            ActivePopup::Age => {
-                                let callbacks = PopupCallbacks {
-                                    get_options_list: Box::new(|meta| {
-                                        &meta.age_ranges
-                                    }),
-                                    get_selected_list: Box::new(|user| {
-                                        &user.age_ranges
-                                    }),
-                                    get_id_from_struct: Box::new(|age_range: &AgeRange| {
-                                        &age_range.id
-                                    }),
-                                    get_display_name: Box::new(|age: &AgeRange| {
-                                        &age.display_name
-                                    }),
-                                };
-
-                                options_popup::render::<AgeRangeId, AgeRange>(Rc::clone(&state), STR_AGE_HEADER, STR_AGE_SUBHEADER, callbacks)
-                            },
-                        };
-
-                        dom.child(child)
-                    })
-                }))
-            },
-        }
-    }))
-}
-
-fn full_name_signal(state: Rc<State>) -> impl Signal<Item = String> {
-    (map_ref! {
-        let given_name = state.user.given_name.signal_cloned(),
-        let family_name = state.user.family_name.signal_cloned() =>
-            (given_name.clone(), family_name.clone())
-    })
-    .map(move |(given_name, family_name)| format!("{} {}", given_name, family_name))
+                },
+            }
+        }))
+    }
+    
+    fn full_name_signal(self: &Rc<Self>) -> impl Signal<Item = String> {
+        (map_ref! {
+            let given_name = self.user.given_name.signal_cloned(),
+            let family_name = self.user.family_name.signal_cloned() =>
+                (given_name.clone(), family_name.clone())
+        })
+        .map(move |(given_name, family_name)| format!("{} {}", given_name, family_name))
+    }
 }

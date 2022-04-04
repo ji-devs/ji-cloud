@@ -3,9 +3,14 @@ use utils::routes::*;
 
 use crate::{
     email::confirmation::SendEmailConfirmationPage, email::verify::VerifyEmailPage,
-    login::LoginPage, oauth::dom::OauthPage, profile::dom::ProfilePage,
-    register::dom::RegisterPage,
-    register::pages::complete::dom::CompletePage as RegisterCompletePage, register::state::Step,
+    login::LoginPage,
+    oauth::dom::OauthPage,
+    profile::state::ProfilePage,
+    register::{
+        dom::RegisterPage,
+        pages::complete::dom::CompletePage as RegisterCompletePage,
+        state::Step,
+    },
     reset::PasswordResetPage,
 };
 use dominator::{html, Dom};
@@ -33,7 +38,7 @@ impl Router {
                 }
                 UserRoute::LoginOauth(data) => Some(OauthPage::render(data, OAuthUrlKind::Login)),
                 UserRoute::Login(_) => Some(LoginPage::new().render()),
-                UserRoute::Profile(ProfileSection::Landing) => Some(ProfilePage::render()),
+                UserRoute::Profile(ProfileSection::Landing) => Some(ProfilePage::new().render()),
                 UserRoute::RegisterComplete => Some(RegisterCompletePage::render()),
                 UserRoute::ContinueRegistration(oauth_profile) => {
                     Some(RegisterPage::render(Some(Step::One(oauth_profile)), false))
