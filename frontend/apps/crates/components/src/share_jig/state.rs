@@ -41,7 +41,10 @@ impl ShareJig {
         let url = Route::Jig(JigRoute::Play(
             self.jig_id,
             None,
-            JigPlayerOptions::default(),
+            JigPlayerOptions {
+                is_student: true,
+                ..Default::default()
+            },
         ))
         .to_string();
         let origin = web_sys::window()
