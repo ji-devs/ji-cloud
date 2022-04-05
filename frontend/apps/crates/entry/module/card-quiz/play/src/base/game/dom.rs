@@ -86,6 +86,5 @@ fn is_incorrect_choice(state: &Rc<Game>, pair_id: &usize) -> bool {
         .incorrect_choices
         .borrow()
         .iter()
-        .find(|id| *id == pair_id)
-        .is_some()
+        .any(|id| id == pair_id)
 }
