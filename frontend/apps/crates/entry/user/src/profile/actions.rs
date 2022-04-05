@@ -8,14 +8,15 @@ use shared::{
     api::endpoints::{self, meta, user, ApiEndpoint},
     domain::{
         image::{user::UserImageCreateRequest, ImageId, ImageKind},
-        meta::MetadataResponse, user::ResetPasswordRequest,
+        meta::MetadataResponse,
+        user::ResetPasswordRequest,
     },
     error::EmptyError,
     media::MediaLibrary,
 };
 use wasm_bindgen_futures::spawn_local;
 
-use super::state::{State, ResetPasswordStatus};
+use super::state::{ResetPasswordStatus, State};
 use utils::{fetch::api_with_auth, prelude::*, unwrap::UnwrapJiExt};
 use web_sys::File;
 
@@ -23,7 +24,9 @@ impl State {
     pub fn send_reset_password(self: &Rc<Self>) {
         let state = self;
 
-        state.reset_password_status.set(ResetPasswordStatus::Loading);
+        state
+            .reset_password_status
+            .set(ResetPasswordStatus::Loading);
 
         spawn_local(clone!(state => async move {
             let req = ResetPasswordRequest {

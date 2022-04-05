@@ -16,7 +16,10 @@ use wasm_bindgen::JsValue;
 use web_sys::{HtmlElement, HtmlInputElement};
 
 use crate::{
-    profile::{dom::options_popup::PopupCallbacks, state::{ActivePopup, ResetPasswordStatus}},
+    profile::{
+        dom::options_popup::PopupCallbacks,
+        state::{ActivePopup, ResetPasswordStatus},
+    },
     strings::register::step_2::{STR_LOCATION_PLACEHOLDER, STR_PERSONA_OPTIONS},
 };
 

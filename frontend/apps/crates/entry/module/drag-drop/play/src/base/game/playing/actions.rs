@@ -124,22 +124,13 @@ impl PlayState {
 }
 
 pub enum AudioEffect {
-    Drag,
     Correct,
     Wrong,
 }
 
 impl AudioEffect {
-    pub fn is_loop(&self) -> bool {
-        match self {
-            AudioEffect::Drag => true,
-            _ => false,
-        }
-    }
-
     pub fn as_path(&self) -> AudioPath<'_> {
         let filename = match self {
-            AudioEffect::Drag => "drag-loop",
             AudioEffect::Correct => "correct",
             AudioEffect::Wrong => "wrong",
         };
@@ -157,7 +148,7 @@ impl InteractiveItem {
     }
     pub fn play_audio_effect(&self, effect: AudioEffect) {
         *self.audio_effect_handle.borrow_mut() =
-            Some(AUDIO_MIXER.with(|mixer| mixer.play(effect.as_path(), effect.is_loop())));
+            Some(AUDIO_MIXER.with(|mixer| mixer.play(effect.as_path(), false)));
     }
 
     pub fn stop_all_audio(&self) {
@@ -168,7 +159,6 @@ impl InteractiveItem {
     pub fn start_drag(&self, x: i32, y: i32) {
         if !self.completed.get() {
             self.try_play_user_audio();
-            self.play_audio_effect(AudioEffect::Drag);
 
             self.drag
                 .set(Some(Rc::new(Drag::new(x, y, 0.0, 0.0, true))));
