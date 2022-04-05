@@ -4,7 +4,8 @@ pub mod curation;
 pub mod report;
 pub use report::{JigReport, ReportId};
 
-use crate::domain::additional_resource::AdditionalResource;
+pub mod additional_resource;
+pub use additional_resource::{AdditionalResource, AdditionalResourceId};
 
 pub mod module;
 // avoid breaking Changes

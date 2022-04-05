@@ -9,7 +9,7 @@ use shared::domain::{
     category::{Category, CategoryId},
     session::AUTH_COOKIE_NAME,
 };
-use std::{borrow::Borrow, cell::RefCell, convert::TryFrom, rc::Rc};
+use std::{cell::RefCell, convert::TryFrom, rc::Rc};
 use std::{collections::HashMap, fmt};
 use tracing::instrument;
 use uuid::Uuid;

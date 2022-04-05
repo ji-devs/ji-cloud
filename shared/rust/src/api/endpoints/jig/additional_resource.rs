@@ -1,10 +1,9 @@
 use crate::{
     api::Method,
     domain::{
-        additional_resource::{
-            AdditionalResource, AdditionalResourceCreateRequest, AdditionalResourceGetDraftQuery,
-            AdditionalResourceGetLiveQuery, AdditionalResourceId, AdditionalResourceUpdateRequest,
-            DeleteAdditionalResourceRequest,
+        jig::additional_resource::{
+            AdditionalResource, AdditionalResourceCreateRequest, AdditionalResourceId,
+            AdditionalResourceUpdateRequest,
         },
         CreateResponse,
     },
@@ -13,7 +12,7 @@ use crate::{
 
 use super::ApiEndpoint;
 
-/// Get an additional resource on a draft JIG or Learning Path copy by id.
+/// Get an additional resource on a draft JIG copy by id.
 ///
 /// # Authorization
 /// Standard
@@ -21,17 +20,17 @@ use super::ApiEndpoint;
 /// # Errors
 ///
 /// * [`Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.
-/// * [`NotFound`](http::StatusCode::NOT_FOUND) if the additional resource or the parent JIG or Learning Path doesn't exist.
+/// * [`NotFound`](http::StatusCode::NOT_FOUND) if the additional resource or the parent JIG doesn't exist.
 pub struct GetDraft;
 impl ApiEndpoint for GetDraft {
-    type Req = AdditionalResourceGetDraftQuery;
+    type Req = ();
     type Res = AdditionalResource;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/additional-resource/{additional_resource_id}/draft";
+    const PATH: &'static str = "/v1/jig/{id}/draft/additional-resource/{additional_resource_id}";
     const METHOD: Method = Method::Get;
 }
 
-/// Get an additional resource on a draft JIG or Learning Path copy by id.
+/// Get an additional resource on a live JIG copy by id.
 ///
 /// # Authorization
 /// Standard
@@ -39,17 +38,17 @@ impl ApiEndpoint for GetDraft {
 /// # Errors
 ///
 /// * [`Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.
-/// * [`NotFound`](http::StatusCode::NOT_FOUND) if the additional resource or the parent JIG or Learning Path doesn't exist.
+/// * [`NotFound`](http::StatusCode::NOT_FOUND) if the additional resource or the parent JIG doesn't exist.
 pub struct GetLive;
 impl ApiEndpoint for GetLive {
-    type Req = AdditionalResourceGetLiveQuery;
+    type Req = ();
     type Res = AdditionalResource;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/additional-resource/{additional_resource_id}/live";
+    const PATH: &'static str = "/v1/jig/{id}/live/additional-resource/{additional_resource_id}";
     const METHOD: Method = Method::Get;
 }
 
-/// Add an additional resource to a draft JIG or Learning Path.
+/// Add an additional resource to a draft JIG.
 ///
 /// # Authorization
 ///
@@ -65,11 +64,11 @@ impl ApiEndpoint for Create {
     type Req = AdditionalResourceCreateRequest;
     type Res = CreateResponse<AdditionalResourceId>;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/additional-resource";
+    const PATH: &'static str = "/v1/jig/{id}/draft/additional-resource";
     const METHOD: Method = Method::Post;
 }
 
-/// Update an additional resources to a draft JIG or Learning Path.
+/// Update an additional resources to a draft JIG.
 ///
 /// # Authorization
 ///
@@ -85,11 +84,11 @@ impl ApiEndpoint for Update {
     type Req = AdditionalResourceUpdateRequest;
     type Res = ();
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/additional-resource/{additional_resource_id}";
+    const PATH: &'static str = "/v1/jig/{id}/additional-resource/{additional_resource_id}";
     const METHOD: Method = Method::Patch;
 }
 
-/// Delete an additional resource URL from a draft JIG or Learning Path.
+/// Delete an additional resource URL from a draft JIG.
 ///
 /// # Authorization
 ///
@@ -99,13 +98,13 @@ impl ApiEndpoint for Update {
 ///
 /// * [`Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.
 /// * [`Forbidden`](http::StatusCode::FORBIDDEN) if the user does not have sufficient permission to perform the action.
-/// * [`NotFound`](http::StatusCode::NOT_FOUND) if the additional resource or parent JIG or Learning Path does not exist.
+/// * [`NotFound`](http::StatusCode::NOT_FOUND) if the additional resource or parent JIG does not exist.
 /// * [`BadRequest`](http::StatusCode::BAD_REQUEST) if the given `id` is not a [`Uuid`](uuid::Uuid) or the request is missing/invalid.
 pub struct Delete;
 impl ApiEndpoint for Delete {
-    type Req = DeleteAdditionalResourceRequest;
+    type Req = ();
     type Res = ();
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/additional-resource/{additional_resource_id}";
+    const PATH: &'static str = "/v1/jig/{id}/draft/additional-resource/{additional_resource_id}";
     const METHOD: Method = Method::Delete;
 }

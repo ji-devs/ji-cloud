@@ -1,9 +1,9 @@
 use serde::{Deserialize, Serialize};
 use serde_json::{json, value::Value};
 use shared::domain::{
-    additional_resource::{AdditionalResourceId, ResourceContent},
     audio::AudioId,
     image::ImageId,
+    jig::additional_resource::{AdditionalResourceId, ResourceContent},
     jig::{DraftOrLive, JigId},
     meta::ResourceTypeId,
     pdf::PdfId,

@@ -2,8 +2,10 @@ use crate::translate::translate_text;
 use anyhow::Context;
 use serde_json::value::Value;
 use shared::domain::{
-    additional_resource::{AdditionalResource, AdditionalResourceId as AddId, ResourceContent},
     category::CategoryId,
+    jig::additional_resource::{
+        AdditionalResource, AdditionalResourceId as AddId, ResourceContent,
+    },
     jig::{
         module::{body::ThemeId, ModuleId},
         AudioBackground, AudioEffects, AudioFeedbackNegative, AudioFeedbackPositive,

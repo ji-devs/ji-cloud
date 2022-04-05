@@ -1,10 +1,10 @@
 use serde::{Deserialize, Serialize};
 use serde_json::{json, value::Value};
 use shared::domain::{
-    additional_resource::{AdditionalResourceId, ResourceContent},
     audio::AudioId,
     image::ImageId,
     jig::DraftOrLive,
+    learning_path::additional_resource::{AdditionalResourceId, ResourceContent},
     learning_path::LearningPathId,
     meta::ResourceTypeId,
     pdf::PdfId,

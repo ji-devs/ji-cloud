@@ -11,6 +11,9 @@ use crate::{
     error::{EmptyError, MetadataNotFound},
 };
 
+/// Endpoints for Learning Path additional resources.
+pub mod additional_resource;
+
 use super::ApiEndpoint;
 
 /// Create a Learning Path and it's draft and live data copies.

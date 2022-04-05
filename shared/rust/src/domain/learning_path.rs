@@ -6,11 +6,13 @@ use std::collections::HashMap;
 use uuid::Uuid;
 
 use super::{
-    additional_resource::AdditionalResource,
     category::CategoryId,
     jig::{DraftOrLive, JigId, PrivacyLevel, UserOrMe},
     meta::{AffiliationId, AgeRangeId, ResourceTypeId},
 };
+
+pub mod additional_resource;
+pub use additional_resource::{AdditionalResource, AdditionalResourceId};
 
 /// Wrapper type around [`Uuid`], represents the ID of a Learning Path.
 #[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]

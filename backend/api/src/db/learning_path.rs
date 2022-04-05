@@ -2,9 +2,11 @@ use crate::translate::translate_text;
 use anyhow::Context;
 use serde_json::value::Value;
 use shared::domain::{
-    additional_resource::{AdditionalResource, AdditionalResourceId as AddId, ResourceContent},
     category::CategoryId,
     jig::{DraftOrLive, JigId, PrivacyLevel},
+    learning_path::additional_resource::{
+        AdditionalResource, AdditionalResourceId as AddId, ResourceContent,
+    },
     learning_path::{LearningPathData, LearningPathId, LearningPathResponse},
     meta::{AffiliationId, AgeRangeId, ResourceTypeId as TypeId},
     user::UserScope,
@@ -756,7 +758,7 @@ pub async fn get_draft_and_live_ids(
         r#"
 select draft_id, live_id from learning_path where id = $1
 "#,
-        learning_path_id.0
+        learning_path_id.0,
     )
     .fetch_optional(&mut *txn)
     .await

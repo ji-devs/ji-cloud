@@ -26,6 +26,8 @@ use crate::{
     service::ServiceData,
 };
 
+pub mod additional_resource;
+
 const DEFAULT_PAGE_LIMIT: u32 = 20;
 const MAX_PAGE_LIMIT: u32 = 100;
 
