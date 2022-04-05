@@ -57,9 +57,11 @@ impl Client {
         template: PasswordResetTemplate<'_>,
         to: Email,
         link: String,
+        first_name: String,
     ) -> anyhow::Result<()> {
         let mut template_data = SGMap::new();
         template_data.insert("url".to_string(), link);
+        template_data.insert("firstname".to_string(), first_name);
 
         let message = Message::new(self.sender_email.clone())
             .set_template_id(&template.0)
@@ -75,9 +77,11 @@ impl Client {
         template: EmailResetTemplate<'_>,
         to: Email,
         link: String,
+        first_name: String,
     ) -> anyhow::Result<()> {
         let mut template_data = SGMap::new();
         template_data.insert("url".to_string(), link);
+        template_data.insert("firstname".to_string(), first_name);
 
         let message = Message::new(self.sender_email.clone())
             .set_template_id(&template.0)

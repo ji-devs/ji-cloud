@@ -6555,6 +6555,26 @@
       "nullable": []
     }
   },
+  "dc5e4bfd066126930dad28ab25adeceabbe52d53236bb74f1ba26cf733147ffb": {
+    "query": "\nselect given_name\nfrom user_profile\nwhere user_id = $1\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "given_name",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
   "dc8da44975f6204d9fb85b7780e3bf4f214020c2c8a61c79b5cb5f7fa60ba325": {
     "query": "\nupdate learning_path_data\nset last_synced_at = now()\nwhere learning_path_data.id = any (select live_id from learning_path where learning_path.id = any ($1))\n",
     "describe": {

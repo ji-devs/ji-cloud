@@ -666,6 +666,22 @@ update user_font
     Ok(true)
 }
 
+pub async fn get_first_name(txn: &mut PgConnection, user_id: Uuid) -> sqlx::Result<String> {
+    let given_name = sqlx::query!(
+        r#"
+select given_name
+from user_profile
+where user_id = $1
+        "#,
+        user_id
+    )
+    .fetch_one(txn)
+    .await?
+    .given_name;
+
+    Ok(given_name)
+}
+
 pub async fn get_fonts(db: &sqlx::PgPool, user_id: Uuid) -> sqlx::Result<Vec<String>> {
     let font_names = sqlx::query!(
         r#"

@@ -255,11 +255,6 @@ pub struct EmailClientSettings {
     /// all related routes will return "501 - Not Implemented" and a warning will be emitted.
     pub sender_email: String,
 
-    /// Email client jigzi email address.
-    /// Is optional. If missing, all mailing services will be disabled,
-    /// all related routes will return "501 - Not Implemented" and a warning will be emitted.
-    // pub jigzi_info_email: String,
-
     /// Email client template ID for verifying emails at signup.
     /// Is optional. If missing, email verification (at signup) will be disabled,
     /// all related routes will return "501 - Not Implemented" and a warning will be emitted.

@@ -90,13 +90,15 @@ async fn send_password_email(
     )
     .await?;
 
+    let first_name = db::user::get_first_name(&mut *txn, user_id).await?;
+
     let template = mail
         .password_reset_template()
         .map_err(error::Service::DisabledService)?;
 
     let email_link = format!("{}/user/password-reset/{}", pages_url, session);
 
-    mail.send_password_reset(template, Email::new(email_address), email_link)
+    mail.send_password_reset(template, Email::new(email_address), email_link, first_name)
         .await?;
 
     Ok(())
@@ -119,6 +121,8 @@ async fn send_reset_email(
     )
     .await?;
 
+    let first_name = db::user::get_first_name(&mut *txn, user_id).await?;
+
     let template = mail
         .email_reset_template()
         .map_err(error::Service::DisabledService)?;
@@ -126,7 +130,7 @@ async fn send_reset_email(
     let email_link = format!("{}/user/verify-email-reset/{}", pages_url, session);
 
     // email_link contains the session id
-    mail.send_email_reset(template, Email::new(email_address), email_link)
+    mail.send_email_reset(template, Email::new(email_address), email_link, first_name)
         .await?;
 
     Ok(())
