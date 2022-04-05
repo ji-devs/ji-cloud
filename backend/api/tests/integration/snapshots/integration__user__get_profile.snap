@@ -7,6 +7,7 @@ expression: body
   "id": "1f241e1b-b537-493f-a230-075cb16315be",
   "username": "test",
   "email": "test@test.test",
+  "is_oauth": false,
   "given_name": "Bobby",
   "family_name": "Tables",
   "profile_image": null,

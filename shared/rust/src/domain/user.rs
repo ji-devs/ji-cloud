@@ -111,6 +111,9 @@ pub struct UserProfile {
     /// The user's email address.
     pub email: String,
 
+    /// Indicator for Oauth email
+    pub is_oauth: bool,
+
     /// The user's given name (first name)
     pub given_name: String,
 

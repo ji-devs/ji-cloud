@@ -37,6 +37,7 @@ pub async fn lookup(
 
 #[instrument(skip(db))]
 pub async fn get_profile(db: &sqlx::PgPool, id: Uuid) -> anyhow::Result<Option<UserProfile>> {
+    log::warn!("in get_profile: {:?}", id);
     let row = sqlx::query!(
         //language=SQL
         r#"
@@ -46,6 +47,7 @@ select user_id as "id",
     given_name,
     family_name,
     profile_image_id       as "profile_image?: ImageId",
+    (select case when exists(select * from user_auth_google where user_id = $1) = true then 1 else 0 end)     as "is_oauth!: bool",           
     language,
     locale,
     opt_into_edu_resources,
@@ -80,6 +82,7 @@ where id = $1"#,
         id: row.id,
         username: row.username,
         email: row.email,
+        is_oauth: row.is_oauth,
         given_name: row.given_name,
         family_name: row.family_name,
         profile_image: row.profile_image,
