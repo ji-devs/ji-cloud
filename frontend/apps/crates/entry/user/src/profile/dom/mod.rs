@@ -448,7 +448,7 @@ impl ProfilePage {
             }
         }))
     }
-    
+
     fn full_name_signal(self: &Rc<Self>) -> impl Signal<Item = String> {
         (map_ref! {
             let given_name = self.user.given_name.signal_cloned(),

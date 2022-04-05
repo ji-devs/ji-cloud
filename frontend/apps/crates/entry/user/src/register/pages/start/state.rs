@@ -1,4 +1,6 @@
-use crate::{password_handler::PasswordHandler, register::state::Step, email_handler::EmailHandler};
+use crate::{
+    email_handler::EmailHandler, password_handler::PasswordHandler, register::state::Step,
+};
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::{
     map_ref,

@@ -10,7 +10,7 @@ use utils::events;
 
 use crate::profile::state::ActivePopup;
 
-use super::super::state::{ProfilePageUser, ProfilePage};
+use super::super::state::{ProfilePage, ProfilePageUser};
 
 const STR_DONE: &str = "Done";
 

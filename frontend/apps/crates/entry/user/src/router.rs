@@ -2,14 +2,13 @@ use components::overlay::container::OverlayContainer;
 use utils::routes::*;
 
 use crate::{
-    email::confirmation::SendEmailConfirmationPage, email::verify::VerifyEmailPage,
+    email::confirmation::SendEmailConfirmationPage,
+    email::verify::VerifyEmailPage,
     login::LoginPage,
     oauth::dom::OauthPage,
     profile::state::ProfilePage,
     register::{
-        dom::RegisterPage,
-        pages::complete::dom::CompletePage as RegisterCompletePage,
-        state::Step,
+        dom::RegisterPage, pages::complete::dom::CompletePage as RegisterCompletePage, state::Step,
     },
     reset_password::PasswordResetPage,
 };
