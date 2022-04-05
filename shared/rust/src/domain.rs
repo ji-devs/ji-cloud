@@ -37,6 +37,7 @@ pub mod audio;
 pub mod category;
 pub mod image;
 pub mod jig;
+pub mod learning_path;
 pub mod locale;
 pub mod media;
 pub mod meta;

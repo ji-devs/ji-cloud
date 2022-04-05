@@ -1,10 +1,12 @@
 use crate::translate::translate_text;
 use anyhow::Context;
-use serde_json::{json, value::Value};
+use serde_json::value::Value;
 use shared::domain::{
     category::CategoryId,
+    jig::additional_resource::{
+        AdditionalResource, AdditionalResourceId as AddId, ResourceContent,
+    },
     jig::{
-        additional_resource::{AdditionalResource, AdditionalResourceId as AddId, ResourceContent},
         module::{body::ThemeId, ModuleId},
         AudioBackground, AudioEffects, AudioFeedbackNegative, AudioFeedbackPositive,
         DeleteUserJigs, DraftOrLive, JigAdminData, JigData, JigFocus, JigId, JigPlayerSettings,
@@ -1103,7 +1105,7 @@ pub async fn clone_data(
     txn: &mut PgConnection,
     from_data_id: &Uuid,
     draft_or_live: DraftOrLive,
-) -> Result<Uuid, error::JigCloneDraft> {
+) -> Result<Uuid, error::CloneDraft> {
     println!("here in clone");
     let new_id = sqlx::query!(
         //language=SQL
@@ -1138,8 +1140,6 @@ returning id
     .fetch_one(&mut *txn)
     .await?
     .id;
-
-    println!("after in clone");
 
     update_draft_or_live(txn, new_id, draft_or_live).await?;
 
@@ -1223,12 +1223,12 @@ pub async fn clone_jig(
     db: &PgPool,
     parent: JigId,
     user_id: Uuid,
-) -> Result<JigId, error::JigCloneDraft> {
+) -> Result<JigId, error::CloneDraft> {
     let mut txn = db.begin().await?;
 
     let (draft_id, live_id) = get_draft_and_live_ids(&mut *txn, parent)
         .await
-        .ok_or(error::JigCloneDraft::ResourceNotFound)?;
+        .ok_or(error::CloneDraft::ResourceNotFound)?;
 
     let new_draft_id = clone_data(&mut txn, &draft_id, DraftOrLive::Draft).await?;
     let new_live_id = clone_data(&mut txn, &live_id, DraftOrLive::Live).await?;

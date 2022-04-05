@@ -270,7 +270,7 @@ pub(super) async fn publish_draft_to_live(
     db: Data<PgPool>,
     claims: TokenUser,
     jig_id: Path<JigId>,
-) -> Result<HttpResponse, error::JigCloneDraft> {
+) -> Result<HttpResponse, error::CloneDraft> {
     let jig_id = jig_id.into_inner();
 
     db::jig::authz(&*db, claims.0.user_id, Some(jig_id)).await?;
@@ -279,11 +279,11 @@ pub(super) async fn publish_draft_to_live(
 
     let (draft_id, live_id) = db::jig::get_draft_and_live_ids(&mut *txn, jig_id)
         .await
-        .ok_or(error::JigCloneDraft::ResourceNotFound)?;
+        .ok_or(error::CloneDraft::ResourceNotFound)?;
 
     // let draft = db::jig::get_one(&db, jig_id, DraftOrLive::Draft)
     //     .await?
-    //     .ok_or(error::JigCloneDraft::ResourceNotFound)?; // Not strictly necessary, we already know the JIG exists.
+    //     .ok_or(error::CloneDraft::ResourceNotFound)?; // Not strictly necessary, we already know the JIG exists.
 
     // let modules = draft.jig_data.modules;
     // Check that modules have been configured on the JIG
@@ -300,7 +300,7 @@ pub(super) async fn publish_draft_to_live(
     // since curation also uses this endpoint and some jigs have already been published without content
     // and those jigs have to be curated
     // if !modules_valid || !has_modules {
-    //     return Err(error::JigCloneDraft::IncompleteModules);
+    //     return Err(error::CloneDraft::IncompleteModules);
     // }
 
     let new_live_id = db::jig::clone_data(&mut txn, &draft_id, DraftOrLive::Live).await?;
@@ -337,7 +337,7 @@ async fn clone(
     db: Data<PgPool>,
     claims: TokenUser,
     parent: web::Path<JigId>,
-) -> Result<HttpResponse, error::JigCloneDraft> {
+) -> Result<HttpResponse, error::CloneDraft> {
     db::jig::authz(&*db, claims.0.user_id, None).await?;
 
     let id = db::jig::clone_jig(db.as_ref(), parent.into_inner(), claims.0.user_id).await?;

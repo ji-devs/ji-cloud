@@ -1,12 +1,11 @@
 //! Types for JIGs.
-
-pub mod additional_resource;
-pub use additional_resource::{AdditionalResource, AdditionalResourceId, ResourceContent};
-
 pub mod curation;
 
 pub mod report;
 pub use report::{JigReport, ReportId};
+
+pub mod additional_resource;
+pub use additional_resource::{AdditionalResource, AdditionalResourceId};
 
 pub mod module;
 // avoid breaking Changes

@@ -574,7 +574,7 @@ impl Into<actix_web::Error> for UserRecentImage {
     }
 }
 
-pub enum JigCloneDraft {
+pub enum CloneDraft {
     ResourceNotFound,
     UnprocessableEntity,
     IncompleteModules,
@@ -583,13 +583,13 @@ pub enum JigCloneDraft {
     InternalServerError(anyhow::Error),
 }
 
-impl<T: Into<anyhow::Error>> From<T> for JigCloneDraft {
+impl<T: Into<anyhow::Error>> From<T> for CloneDraft {
     fn from(e: T) -> Self {
         Self::InternalServerError(e.into())
     }
 }
 
-impl From<Auth> for JigCloneDraft {
+impl From<Auth> for CloneDraft {
     fn from(e: Auth) -> Self {
         match e {
             Auth::InternalServerError(e) => Self::InternalServerError(e),
@@ -599,7 +599,7 @@ impl From<Auth> for JigCloneDraft {
     }
 }
 
-impl Into<actix_web::Error> for JigCloneDraft {
+impl Into<actix_web::Error> for CloneDraft {
     fn into(self) -> actix_web::Error {
         match self {
             Self::ResourceNotFound => BasicError::with_message(
@@ -610,7 +610,7 @@ impl Into<actix_web::Error> for JigCloneDraft {
 
             Self::UnprocessableEntity => BasicError::with_message(
                 http::StatusCode::UNPROCESSABLE_ENTITY,
-                "Called method not allowed on this jig".to_owned(),
+                "Called method not allowed".to_owned(),
             )
             .into(),
 
@@ -622,7 +622,7 @@ impl Into<actix_web::Error> for JigCloneDraft {
 
             Self::Conflict => BasicError::with_message(
                 http::StatusCode::CONFLICT,
-                "A draft already exists for this jig".to_owned(),
+                "A draft already exists".to_owned(),
             )
             .into(),
 

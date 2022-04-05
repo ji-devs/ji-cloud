@@ -94,6 +94,11 @@ pub mod algolia {
     /// search related routes will return a "501 - Not Implemented" and a warning will be emitted.
     pub const JIG_INDEX: &str = "ALGOLIA_JIG_INDEX";
 
+    /// The index to use for indexing and backend searches.
+    /// Is optional. If missing, *Learning Path* indexing will be disabled,
+    /// search related routes will return a "501 - Not Implemented" and a warning will be emitted.
+    pub const LEARNING_PATH_INDEX: &str = "ALGOLIA_LEARNING_PATH_INDEX";
+
     /// The key the backend uses for managing- indexing- [`MEDIA_INDEX`] and [`JIG_INDEX`].
     /// Needs the `addObject`, `deleteObject`, `settings`, and `editSettings` ACLs, access to `MEDIA_INDEX`, and `JIG_INDEX`.
     /// Is optional. If missing, indexing will be disabled, and a warning will be logged.
