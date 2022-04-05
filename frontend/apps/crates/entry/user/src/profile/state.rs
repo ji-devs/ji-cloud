@@ -31,7 +31,7 @@ impl State {
 pub enum ResetPasswordStatus {
     Ready,
     Loading,
-    Sent
+    Sent,
 }
 
 impl Default for ResetPasswordStatus {
