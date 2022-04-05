@@ -1,7 +1,6 @@
 import { MEDIA_UI } from "@utils/path";
 import { LitElement, html, css, customElement, property } from "lit-element";
-
-import "@elements/entry/user/_common/base-page";
+import "@elements/entry/user/_common/auth-page";
 
 const STR_TITLE = "Sign Up - Step 1";
 
@@ -77,7 +76,7 @@ export class _ extends LitElement {
 
     render() {
         return html`
-            <base-page>
+            <auth-page img="entry/user/side/step-1.webp">
                 <h1>${STR_TITLE}</h1>
                 <div class="inside-wrapper">
                     <div class="two-row">
@@ -99,7 +98,7 @@ export class _ extends LitElement {
                     </div>
                     <slot name="footer"></slot>
                 </div>
-            </base-page>
+            </auth-page>
         `;
     }
 }

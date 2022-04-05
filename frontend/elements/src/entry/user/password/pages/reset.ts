@@ -1,6 +1,6 @@
 import { MEDIA_UI } from "@utils/path";
 import { LitElement, html, css, customElement, property } from "lit-element";
-import "@elements/entry/user/_common/base-page";
+import "@elements/entry/user/_common/auth-page";
 import { Strength as PasswordStrength } from "@elements/entry/user/register/widgets/password-strength";
 
 const STR_TITLE = "Create a new password";
@@ -76,7 +76,7 @@ export class _ extends LitElement {
         const { passwordStrength } = this;
 
         return html`
-            <base-page>
+            <auth-page img="entry/user/side/main.webp">
                 <h1>${STR_TITLE}</h1>
                 <div class="inside-wrapper">
                     <form
@@ -98,7 +98,7 @@ export class _ extends LitElement {
                 <div class="account-wrapper">
                     <title-ji color="black">${STR_AFTER}</title-ji>
                 </div>
-            </base-page>
+            </auth-page>
         `;
     }
 }

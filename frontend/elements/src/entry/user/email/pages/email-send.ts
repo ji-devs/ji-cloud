@@ -1,7 +1,7 @@
 import { LitElement, html, css, customElement } from "lit-element";
 import "@elements/entry/user/_common/footer/contact";
 import "@elements/entry/user/email/buttons/email-send";
-import "@elements/entry/user/_common/base-page";
+import "@elements/entry/user/_common/auth-page";
 
 const STR_TITLE = "Woohoo! We just sent you an email.";
 const STR_SUBTITLE1 = "You're one step closer to the Jigzi family!";
@@ -48,7 +48,7 @@ export class _ extends LitElement {
 
     render() {
         return html`
-            <base-page>
+            <auth-page img="entry/user/side/confirm-email.webp">
                 <div class="title">${STR_TITLE}</div>
                 <div class="subtitle">
                     ${STR_SUBTITLE1}
@@ -60,7 +60,7 @@ export class _ extends LitElement {
                 <slot name="send"></slot>
                 <slot name="submit"></slot>
                 <footer-contact></footer-contact>
-            </base-page>
+            </auth-page>
         `;
     }
 }

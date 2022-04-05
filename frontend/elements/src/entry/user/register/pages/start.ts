@@ -3,7 +3,7 @@ import { LitElement, html, css, customElement, property } from "lit-element";
 import "@elements/entry/user/register/widgets/password-strength";
 import { Strength as PasswordStrength } from "@elements/entry/user/register/widgets/password-strength";
 import "@elements/core/dividers/or-divider";
-import "@elements/entry/user/_common/base-page";
+import "@elements/entry/user/_common/auth-page";
 const STR_TITLE = "Sign Up";
 
 @customElement("page-register-start")
@@ -73,7 +73,7 @@ export class _ extends LitElement {
         const { passwordStrength } = this;
 
         return html`
-            <base-page>
+            <auth-page img="entry/user/side/main.webp">
                 <h1>${STR_TITLE}</h1>
                 <div class="inside-wrapper">
                     <slot name="google"></slot>
@@ -98,7 +98,7 @@ export class _ extends LitElement {
                     <p></p>
                 </div>
                 <slot name="footer"></slot>
-            </base-page>
+            </auth-page>
         `;
     }
 }

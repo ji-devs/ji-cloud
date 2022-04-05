@@ -1,7 +1,6 @@
-import { MEDIA_UI } from "@utils/path";
 import { LitElement, html, css, customElement, property } from "lit-element";
 import "@elements/core/dividers/or-divider";
-import "@elements/entry/user/_common/base-page";
+import "@elements/entry/user/_common/auth-page";
 
 const STR_TITLE = "Login";
 
@@ -73,29 +72,25 @@ export class _ extends LitElement {
 
     render() {
         return html`
-          <base-page>
-          <h1>${STR_TITLE}</h1>
+            <auth-page img="entry/user/side/main.webp">
+                <h1>${STR_TITLE}</h1>
 
-          <div class="inside-wrapper">
-            <slot name="google"></slot>
+                <div class="inside-wrapper">
+                    <slot name="google"></slot>
 
-            <or-divider></or-divider>
+                    <or-divider></or-divider>
 
-            <form @submit=${(evt: Event) => {
-                evt.preventDefault();
-            }}>
-              <slot name="email"></slot>
-              <div class="spacer"></div>
-              <slot name="password"> </slot>
-              <slot name="password-forgot"></slot>
+                    <form @submit=${(evt: Event) => {evt.preventDefault()}}>
+                        <slot name="email"></slot>
+                        <div class="spacer"></div>
+                        <slot name="password"> </slot>
+                        <slot name="password-forgot"></slot>
+                        <slot name="submit"></slot>
+                    </form>
+                </div>
 
-              <slot name="submit"></slot>
-            </form>
-          </div>
-
-            <slot name="footer"></slot>
-          </div>
-        </base-page>
-    `;
+                <slot name="footer"></slot>
+            </auth-page>
+        `;
     }
 }

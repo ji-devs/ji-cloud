@@ -10,7 +10,7 @@ import {
 import "@elements/core/lists/list-horizontal";
 import "@elements/core/lists/list-vertical";
 import "@elements/core/titles/ji";
-import "@elements/entry/user/_common/base-page";
+import "@elements/entry/user/_common/auth-page";
 
 const STR_TITLE = "Sign Up - Step 3";
 const STR_SUBTITLE =
@@ -73,7 +73,7 @@ export class _ extends LitElement {
 
     render() {
         return html`
-            <base-page>
+            <auth-page img="entry/user/side/step-3.webp">
                 <h1>${STR_TITLE}</h1>
 
                 <h4 class="subtitle">
@@ -102,7 +102,7 @@ export class _ extends LitElement {
                 <div class="submit">
                     <slot name="submit"></slot>
                 </div>
-            </base-page>
+            </auth-page>
         `;
     }
 }

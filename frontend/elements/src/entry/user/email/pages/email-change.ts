@@ -1,8 +1,7 @@
-import { MEDIA_UI } from "@utils/path";
 import { LitElement, html, css, customElement, property } from "lit-element";
 import "@elements/entry/user/_common/footer/contact";
 import "@elements/core/titles/ji";
-import "@elements/entry/user/_common/base-page";
+import "@elements/entry/user/_common/auth-page";
 
 const STR_TITLE = "Change Email Account";
 const STR_SUB = "This is the email that you filled in. You can change it now.";
@@ -73,7 +72,7 @@ export class _ extends LitElement {
 
     render() {
         return html`
-            <base-page>
+            <auth-page img="entry/user/side/main.webp">
                 <h1>${STR_TITLE}</h1>
                 <title-ji color="black" class="sub">${STR_SUB}</title-ji>
                 <div class="inside-wrapper">
@@ -82,7 +81,7 @@ export class _ extends LitElement {
                     <slot name="submit"></slot>
                 </div>
                 <footer-contact></footer-contact>
-            </base-page>
+            </auth-page>
         `;
     }
 }
