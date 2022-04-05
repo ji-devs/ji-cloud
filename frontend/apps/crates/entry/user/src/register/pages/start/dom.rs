@@ -32,7 +32,7 @@ impl RegisterStart {
                                 .property("type", "email")
                                 .attribute("autocomplete", "email")
                                 .event(clone!(state => move |_:events::Input| {
-                                    state.update_email(elem.value());
+                                    state.email.update_value(elem.value());
                                 }))
                             })
                         }))

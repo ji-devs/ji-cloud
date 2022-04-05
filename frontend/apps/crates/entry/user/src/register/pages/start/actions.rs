@@ -9,8 +9,7 @@ use std::rc::Rc;
 use utils::prelude::*;
 
 const STR_EMAIL_IN_USE: &str = "An account is already set up with this email address";
-const STR_EMAIL_INVALID: &str = "Invalid email address";
-const STR_EMAIL_EMPTY: &str = "Email can't be empty";
+const STR_ERROR: &str = "Error signing up";
 
 impl RegisterStart {
     pub fn register_email(self: &Rc<Self>) {
@@ -18,10 +17,10 @@ impl RegisterStart {
 
         state.tried_to_submit.set(true);
 
-        let email = state.email.borrow().clone();
+        let email = state.email.get_value();
         let password = state.password.get_value();
 
-        if !state.password.password_acceptable() || state.email_error.lock_ref().is_some() {
+        if !state.password.password_acceptable() || state.email.email_acceptable() {
             return;
         }
 
@@ -40,9 +39,10 @@ impl RegisterStart {
                 },
                 Err(_) => {
                     if status == 409 {
-                        state.email_error.set(Some(STR_EMAIL_IN_USE));
+                        state.email.set_error(STR_EMAIL_IN_USE);
                     } else {
-                        state.email_error.set(Some(STR_EMAIL_INVALID));
+                        state.email.set_error(STR_ERROR);
+                        state.password.set_error(STR_ERROR);
                     }
                 }
             }
@@ -54,18 +54,5 @@ impl RegisterStart {
             crate::oauth::actions::redirect(GetOAuthUrlServiceKind::Google, OAuthUrlKind::Register)
                 .await;
         });
-    }
-
-    pub fn update_email(self: &Rc<Self>, email: String) {
-        let error = if email.is_empty() {
-            Some(STR_EMAIL_EMPTY)
-        } else if !email.contains('@') {
-            Some(STR_EMAIL_INVALID)
-        } else {
-            None
-        };
-        self.email_error.set(error);
-
-        *self.email.borrow_mut() = email;
     }
 }
