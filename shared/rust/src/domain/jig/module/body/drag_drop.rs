@@ -12,6 +12,8 @@ use std::convert::TryFrom;
 mod play_settings;
 pub use play_settings::*;
 
+use super::_groups::design::Text;
+
 /// The body for [`DragDrop`](crate::domain::jig::module::ModuleKind::DragDrop) modules.
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]
 pub struct ModuleData {
@@ -37,6 +39,10 @@ impl BodyExt<Mode, Step> for ModuleData {
             content: Some(Content {
                 mode,
                 theme,
+                items: vec![Item {
+                    sticker: Sticker::Text(Text::default()),
+                    kind: ItemKind::Static,
+                }],
                 ..Default::default()
             }),
         }
