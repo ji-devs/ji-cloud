@@ -8,6 +8,7 @@ use crate::{register::components::footer::Footer, strings};
 use utils::events;
 
 const STR_GOOGLE_LABEL: &str = "Sign up with Google";
+const STR_REGISTER_FIRST: &str = "Please register before logging in";
 
 impl RegisterStart {
     pub fn render(self: Rc<Self>) -> Dom {
@@ -18,6 +19,12 @@ impl RegisterStart {
                 .property_signal("visible", state.loader.is_loading())
             }))
             .child(html!("page-register-start", {
+                .apply_if(state.login_before_register, |dom| {
+                    dom.child(html!("p", {
+                        .property("slot", "alert")
+                        .text(STR_REGISTER_FIRST)
+                    }))
+                })
                 .property_signal("passwordStrength", state.password.strength_signal())
                 .children(vec![
                     html!("input-wrapper", {

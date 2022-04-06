@@ -6,6 +6,7 @@ use futures_signals::{
     map_ref,
     signal::{Mutable, Signal},
 };
+use utils::routes::RegisterQuery;
 use std::rc::Rc;
 
 pub struct RegisterStart {
@@ -14,17 +15,20 @@ pub struct RegisterStart {
     pub password: PasswordHandler,
     pub step: Mutable<Step>,
     pub tried_to_submit: Mutable<bool>,
+    pub login_before_register: bool,
 }
 
 impl RegisterStart {
     // _is_no_auth check's if user was logged out
-    pub fn new(step: Mutable<Step>, _is_no_auth: bool) -> Rc<Self> {
+    pub fn new(step: Mutable<Step>, query: RegisterQuery) -> Rc<Self> {
+
         Rc::new(Self {
             loader: AsyncLoader::new(),
             email: EmailHandler::new(),
             password: PasswordHandler::new(),
             step,
             tried_to_submit: Mutable::new(false),
+            login_before_register: query.login_before_register,
         })
     }
 

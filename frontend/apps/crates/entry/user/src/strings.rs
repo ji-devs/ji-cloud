@@ -1,4 +1,3 @@
-pub const STR_AUTH_OAUTH_LOGIN_FAIL: &str = "Create an account first :)";
 pub const STR_SUBMIT: &str = "Submit";
 pub const STR_CONTINUE: &str = "Continue";
 pub const STR_EMAIL_LABEL: &str = "Email *";

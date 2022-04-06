@@ -30,7 +30,7 @@ impl Router {
     fn dom_signal() -> impl Signal<Item = Option<Dom>> {
         Self::signal().map(|route| match route {
             Route::User(route) => match route {
-                UserRoute::Register => Some(RegisterPage::render(None, false)),
+                UserRoute::Register(query) => Some(RegisterPage::render(None, query)),
                 UserRoute::NoAuth => Some(RegisterPage::render(None, true)),
                 UserRoute::RegisterOauth(data) => {
                     Some(OauthPage::render(data, OAuthUrlKind::Register))
@@ -40,7 +40,7 @@ impl Router {
                 UserRoute::Profile(ProfileSection::Landing) => Some(ProfilePage::new().render()),
                 UserRoute::RegisterComplete => Some(RegisterCompletePage::render()),
                 UserRoute::ContinueRegistration(oauth_profile) => {
-                    Some(RegisterPage::render(Some(Step::One(oauth_profile)), false))
+                    Some(RegisterPage::render(Some(Step::One(oauth_profile)), Default::default()))
                 }
                 UserRoute::SendEmailConfirmation(email) => Some(SendEmailConfirmationPage::render(
                     SendEmailConfirmationPage::new(email),

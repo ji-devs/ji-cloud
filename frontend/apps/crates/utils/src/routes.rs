@@ -45,7 +45,7 @@ pub enum UserRoute {
     RegisterOauth(OauthData),
     LoginOauth(OauthData),
     Login(String),
-    Register,
+    Register(RegisterQuery),
     ContinueRegistration(Option<OAuthUserProfile>),
     SendEmailConfirmation(String), //the email address
     VerifyEmail(String),           //the token
@@ -75,6 +75,20 @@ pub enum AdminRoute {
     ImageTags,
     ImageMeta(ImageId, bool), //flag is for if it's a new image
     Export,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct RegisterQuery {
+    #[serde(default)]
+    pub login_before_register: bool,
+}
+
+impl RegisterQuery {
+    pub fn login_before_register() -> Self {
+        Self {
+            login_before_register: true
+        }
+    }
 }
 
 impl AdminRoute {
@@ -206,7 +220,10 @@ impl Route {
                 let redirect = params_map.get("redirect").unwrap_or_default();
                 Self::User(UserRoute::Login(redirect))
             }
-            ["user", "register"] => Self::User(UserRoute::Register),
+            ["user", "register"] => {
+                let query = serde_qs::from_str(&params_string).unwrap_ji();
+                Self::User(UserRoute::Register(query))
+            },
 
             ["user", "register-oauth"] => {
                 if let Some(code) = params_map.get("code") {
@@ -422,7 +439,10 @@ impl From<&Route> for String {
                 UserRoute::Login(redirect) => {
                     format!("/user/login?redirect={}", redirect)
                 }
-                UserRoute::Register => "/user/register".to_string(),
+                UserRoute::Register(data) => {
+                    let query = serde_qs::to_string(&data).unwrap_ji();
+                    format!("/user/register?{}", query)
+                },
                 UserRoute::RegisterOauth(_) => "/user/register-oauth".to_string(),
                 UserRoute::LoginOauth(_) => "/user/login-oauth".to_string(),
                 UserRoute::SendEmailConfirmation(email) => {

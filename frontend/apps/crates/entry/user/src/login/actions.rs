@@ -49,7 +49,7 @@ pub fn signin_google(state: Rc<LoginPage>) {
 }
 
 pub fn go_register(_state: Rc<LoginPage>) {
-    let route: String = Route::User(UserRoute::Register).into();
+    let route: String = Route::User(UserRoute::Register(Default::default())).into();
     dominator::routing::go_to_url(&route);
 }
 

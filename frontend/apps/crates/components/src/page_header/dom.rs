@@ -220,7 +220,7 @@ fn render_logged_out() -> Vec<Dom> {
             .property("slot", "user")
             .property("kind", "text")
             .property("color", "black")
-            .property("href", &Route::User(UserRoute::Register).to_string())
+            .property("href", &Route::User(UserRoute::Register(Default::default())).to_string())
             .text(STR_SIGN_UP)
         }),
         html!("button-rect", {

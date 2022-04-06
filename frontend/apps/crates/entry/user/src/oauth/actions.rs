@@ -63,10 +63,7 @@ pub async fn finalize(req: CreateSessionOAuthRequest, url_kind: OAuthUrlKind) {
                         dominator::routing::go_to_url(&route);
                     }
                     OAuthUrlKind::Login => {
-                        let _ = web_sys::window()
-                            .unwrap_ji()
-                            .alert_with_message(crate::strings::STR_AUTH_OAUTH_LOGIN_FAIL);
-                        let route: String = Route::User(UserRoute::Register).into();
+                        let route = Route::User(UserRoute::Register(RegisterQuery::login_before_register())).to_string();
                         dominator::routing::go_to_url(&route);
                     }
                 }

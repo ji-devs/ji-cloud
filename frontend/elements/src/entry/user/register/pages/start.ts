@@ -1,4 +1,3 @@
-import { MEDIA_UI } from "@utils/path";
 import { LitElement, html, css, customElement, property } from "lit-element";
 import "@elements/entry/user/register/widgets/password-strength";
 import { Strength as PasswordStrength } from "@elements/entry/user/register/widgets/password-strength";
@@ -13,6 +12,14 @@ export class _ extends LitElement {
             css`
                 .inside-wrapper {
                     width: 296px;
+                }
+                ::slotted([slot=alert]) {
+                    color: var(--dark-red-1);
+                    background-color: var(--light-red-1);
+                    border-radius: 3px;
+                    margin: 0;
+                    padding: 26px;
+                    font-size: 18px;
                 }
                 h1 {
                     font-size: 32px;
@@ -74,6 +81,7 @@ export class _ extends LitElement {
 
         return html`
             <auth-page img="entry/user/side/main.webp">
+                <slot name="alert"></slot>
                 <h1>${STR_TITLE}</h1>
                 <div class="inside-wrapper">
                     <slot name="google"></slot>
