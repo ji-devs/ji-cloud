@@ -92,13 +92,8 @@ impl ProfilePage {
                 html!("input-wrapper", {
                     .property("slot", "email")
                     .child(html!("input" => HtmlInputElement, {
-                        .with_node!(elem => {
-                            .property_signal("value", state.user.email.signal_cloned())
-                            .event(clone!(state => move |_: events::Input| {
-                                state.user.email.set(elem.value());
-                                state.save_profile();
-                            }))
-                        })
+                        .property_signal("value", state.user.email.signal_cloned())
+                        .property("readOnly", true)
                     }))
                     .child(html!("img-ui", {
                         .property("slot", "icon")
