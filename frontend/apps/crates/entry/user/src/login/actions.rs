@@ -29,8 +29,10 @@ pub fn signin_email(state: Rc<LoginPage>) {
                     CreateSessionResponse::Login(resp) => {
                         do_success(&resp.csrf);
                     },
-                    CreateSessionResponse::Register{response: _, oauth_profile: _} => {
-                        panic!("didn't expect register response here!");
+                    CreateSessionResponse::Register{response, oauth_profile} => {
+                        storage::save_csrf_token(&response.csrf);
+                        let route = Route::User(UserRoute::ContinueRegistration(oauth_profile)).to_string();
+                        dominator::routing::go_to_url(&route);
                     }
                 }
             },
