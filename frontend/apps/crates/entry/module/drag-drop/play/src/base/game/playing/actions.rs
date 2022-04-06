@@ -37,7 +37,6 @@ impl PlayState {
 
             if let Some(index) = get_hit_index(hit_source, &traces).await {
                 *item.target_index.borrow_mut() = Some(index);
-                log::info!("got hit! {}", index);
             }
         }
     }
@@ -59,23 +58,6 @@ impl PlayState {
             })
             .all(|item| item.completed.get());
 
-        if all_completed {
-            state.feedback_player.set(Some(
-                InstructionsPlayer::new(
-                    state.game.base.feedback.clone(),
-                    Some(clone!(state => move || {
-                        match state.game.base.settings.next {
-                            Next::PlaceAll => {
-                                state.game.base.set_play_phase(ModulePlayPhase::Ending(Some(ModuleEnding::Next)));
-                            },
-                            _ => {
-                                log::info!("game finished but settings is click to continue");
-                            }
-                        }
-                    }))
-                )
-            ));
-        }
         all_completed
     }
 
@@ -104,7 +86,6 @@ impl PlayState {
                             debug_render_hit_trace(index, &traces);
                         }
                         if index == target_index {
-                            log::info!("GOT A WINNER!");
                             is_correct = true;
                         }
                     }
@@ -121,6 +102,27 @@ impl PlayState {
                 item.completed.set_neq(true);
                 if !Self::evaluate_all_completed(state.clone()) {
                     item.play_audio_effect(AudioEffect::Correct);
+                } else {
+                    // Play JIG positive feedback sound
+                    AUDIO_MIXER.with(|mixer| {
+                        let positive_audio: AudioPath<'_> = mixer.get_random_positive().into();
+                        mixer.play_oneshot_on_ended(positive_audio, move || {
+                            // Once the positive feedback effect has played, we can show/play the
+                            // feedback for the activity. If we played this at the same time, it
+                            // we could have two audio clips playing simultaneously which would be
+                            // noisy and distracting from the intent of the feedbacks.
+                            state.feedback_player.set(Some(
+                                InstructionsPlayer::new(
+                                    state.game.base.feedback.clone(),
+                                    Some(clone!(state => move || {
+                                        if matches!(state.game.base.settings.next, Next::PlaceAll) {
+                                            state.game.base.set_play_phase(ModulePlayPhase::Ending(Some(ModuleEnding::Next)));
+                                        }
+                                    }))
+                                )
+                            ));
+                        });
+                    });
                 }
             } else {
                 item.play_audio_effect(AudioEffect::Wrong);
@@ -130,7 +132,9 @@ impl PlayState {
 }
 
 pub enum AudioEffect {
+    /// Drop sound
     Correct,
+    /// Sliding back sound
     Wrong,
 }
 
@@ -148,18 +152,15 @@ impl AudioEffect {
 impl InteractiveItem {
     pub fn try_play_user_audio(&self) {
         if let Some(audio) = self.audio.as_ref() {
-            *self.audio_user_handle.borrow_mut() =
-                Some(AUDIO_MIXER.with(|mixer| mixer.play(audio.as_source(), false)));
+            AUDIO_MIXER.with(|mixer| {
+                mixer.play_oneshot(audio.as_source());
+            });
         }
     }
     pub fn play_audio_effect(&self, effect: AudioEffect) {
-        *self.audio_effect_handle.borrow_mut() =
-            Some(AUDIO_MIXER.with(|mixer| mixer.play(effect.as_path(), false)));
-    }
-
-    pub fn stop_all_audio(&self) {
-        *self.audio_user_handle.borrow_mut() = None;
-        *self.audio_effect_handle.borrow_mut() = None;
+        AUDIO_MIXER.with(|mixer| {
+            mixer.play_oneshot(effect.as_path());
+        });
     }
 
     pub fn start_drag(&self, x: i32, y: i32) {
@@ -188,8 +189,6 @@ impl InteractiveItem {
     }
 
     pub fn try_end_drag(&self, _x: i32, _y: i32) -> bool {
-        self.stop_all_audio();
-
         if self.drag.lock_ref().is_some() {
             let _drag = self.drag.lock_mut().take().unwrap_ji();
             //self.curr_offset.set((0.0, 0.0));
