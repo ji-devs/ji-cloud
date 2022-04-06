@@ -51,11 +51,10 @@ impl PlayState {
         signal_vec::always(
             self.items
                 .iter()
-                .filter(|item| match item {
-                    PlayItem::Interactive(_) => true,
-                    _ => false,
+                .filter_map(|item| match item {
+                    PlayItem::Interactive(item) => Some(item.clone()),
+                    _ => None,
                 })
-                .map(|item| item.get_interactive_unchecked())
                 .collect::<Vec<Rc<InteractiveItem>>>(),
         )
         .filter_signal_cloned(|data| data.size.signal_cloned().map(|size| size.is_none()))
@@ -67,22 +66,6 @@ impl PlayState {
 pub enum PlayItem {
     Static(Sticker),
     Interactive(Rc<InteractiveItem>),
-}
-
-impl PlayItem {
-    pub fn get_interactive_unchecked(&self) -> Rc<InteractiveItem> {
-        match self {
-            Self::Interactive(data) => data.clone(),
-            _ => panic!("not interctive!"),
-        }
-    }
-
-    pub fn is_interactive(&self) -> bool {
-        match self {
-            Self::Interactive(_) => true,
-            _ => false,
-        }
-    }
 }
 
 pub struct InteractiveItem {
