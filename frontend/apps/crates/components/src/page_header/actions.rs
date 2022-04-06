@@ -4,7 +4,7 @@ use dominator::clone;
 use shared::api::endpoints;
 use utils::{
     prelude::{get_user, ApiEndpointExt},
-    routes::{Route, UserRoute, LoginQuery},
+    routes::{LoginQuery, Route, UserRoute},
     storage::delete_csrf_token,
     unwrap::UnwrapJiExt,
 };

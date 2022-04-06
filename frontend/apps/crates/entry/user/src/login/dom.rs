@@ -9,7 +9,8 @@ use web_sys::HtmlInputElement;
 use utils::events;
 
 const STR_GOOGLE_LABEL: &str = "Log in with Google";
-const STR_BASIC_TRIED_OAUTH: &str = "Looks like you didn't sign up with Google, try logging in with a password";
+const STR_BASIC_TRIED_OAUTH: &str =
+    "Looks like you didn't sign up with Google, try logging in with a password";
 
 impl LoginPage {
     pub fn render(self: &Rc<Self>) -> Dom {

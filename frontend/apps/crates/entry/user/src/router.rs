@@ -39,9 +39,10 @@ impl Router {
                 UserRoute::Login(query) => Some(LoginPage::new(query).render()),
                 UserRoute::Profile(ProfileSection::Landing) => Some(ProfilePage::new().render()),
                 UserRoute::RegisterComplete => Some(RegisterCompletePage::render()),
-                UserRoute::ContinueRegistration(oauth_profile) => {
-                    Some(RegisterPage::render(Some(Step::One(oauth_profile)), Default::default()))
-                }
+                UserRoute::ContinueRegistration(oauth_profile) => Some(RegisterPage::render(
+                    Some(Step::One(oauth_profile)),
+                    Default::default(),
+                )),
                 UserRoute::SendEmailConfirmation(email) => Some(SendEmailConfirmationPage::render(
                     SendEmailConfirmationPage::new(email),
                 )),

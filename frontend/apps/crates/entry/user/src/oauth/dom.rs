@@ -9,7 +9,6 @@ pub struct OauthPage {}
 
 impl OauthPage {
     pub fn render(data: OauthData, redirect_kind: OAuthUrlKind) -> Dom {
-
         spawn_local(async move {
             actions::finalize(data, redirect_kind).await;
         });

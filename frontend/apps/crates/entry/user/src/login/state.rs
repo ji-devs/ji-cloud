@@ -3,8 +3,8 @@ use futures_signals::{
     map_ref,
     signal::{Mutable, Signal},
 };
-use utils::routes::LoginQuery;
 use std::{cell::RefCell, rc::Rc};
+use utils::routes::LoginQuery;
 
 use crate::email_handler::EmailHandler;
 

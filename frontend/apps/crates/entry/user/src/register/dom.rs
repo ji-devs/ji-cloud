@@ -1,8 +1,8 @@
 use super::state::*;
 use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
-use utils::routes::RegisterQuery;
 use std::rc::Rc;
+use utils::routes::RegisterQuery;
 
 use super::pages::{
     start::RegisterStart, step_1::dom::Step1Page, step_2::dom::Step2Page, step_3::dom::Step3Page,

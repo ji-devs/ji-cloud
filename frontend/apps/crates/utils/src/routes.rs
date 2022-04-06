@@ -87,7 +87,7 @@ pub struct RegisterQuery {
 impl RegisterQuery {
     pub fn login_before_register() -> Self {
         Self {
-            login_before_register: true
+            login_before_register: true,
         }
     }
 }
@@ -251,7 +251,7 @@ impl Route {
             ["user", "register"] => {
                 let query = serde_qs::from_str(&params_string).unwrap_ji();
                 Self::User(UserRoute::Register(query))
-            },
+            }
 
             ["user", "register-oauth"] => {
                 if let Some(code) = params_map.get("code") {
@@ -471,7 +471,7 @@ impl From<&Route> for String {
                 UserRoute::Register(data) => {
                     let query = serde_qs::to_string(&data).unwrap_ji();
                     format!("/user/register?{}", query)
-                },
+                }
                 UserRoute::RegisterOauth(_) => "/user/register-oauth".to_string(),
                 UserRoute::LoginOauth(_) => "/user/login-oauth".to_string(),
                 UserRoute::SendEmailConfirmation(email) => {

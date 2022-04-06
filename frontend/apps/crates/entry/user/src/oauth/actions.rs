@@ -3,12 +3,7 @@ use shared::{
     domain::session::*,
     error::EmptyError,
 };
-use utils::{
-    fetch::api_no_auth,
-    routes::*,
-    storage,
-    unwrap::UnwrapJiExt, prelude::ApiEndpointExt,
-};
+use utils::{fetch::api_no_auth, prelude::ApiEndpointExt, routes::*, storage, unwrap::UnwrapJiExt};
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen(module = "/js/oauth.js")]
@@ -30,8 +25,12 @@ pub async fn redirect(service_kind: GetOAuthUrlServiceKind, url_kind: OAuthUrlKi
     let path = endpoints::session::GetOAuthUrl::PATH
         .replace("{service}", &service_kind_str)
         .replace("{kind}", &url_kind_str);
-    if let Ok(resp) =
-        api_no_auth::<GetOAuthUrlResponse, EmptyError, ()>(&path, endpoints::session::GetOAuthUrl::METHOD, None).await
+    if let Ok(resp) = api_no_auth::<GetOAuthUrlResponse, EmptyError, ()>(
+        &path,
+        endpoints::session::GetOAuthUrl::METHOD,
+        None,
+    )
+    .await
     {
         let _ = web_sys::window().unwrap_ji().location().set_href(&resp.url);
         //unsafe { crate::oauth::actions::oauth_open_window(&resp.url, "oauth"); }
@@ -40,42 +39,38 @@ pub async fn redirect(service_kind: GetOAuthUrlServiceKind, url_kind: OAuthUrlKi
 
 pub async fn finalize(data: OauthData, redirect_kind: OAuthUrlKind) {
     let req = match data {
-        OauthData::Google(code) => {
-            CreateSessionOAuthRequest::Google {
-                code,
-                redirect_kind
-            }
-        }
+        OauthData::Google(code) => CreateSessionOAuthRequest::Google {
+            code,
+            redirect_kind,
+        },
     };
 
-    let (res, status) = endpoints::session::CreateOAuth::api_no_auth_with_credentials_status(Some(req)).await;
+    let (res, status) =
+        endpoints::session::CreateOAuth::api_no_auth_with_credentials_status(Some(req)).await;
 
     match res {
-        Ok(res) => {
-            match res {
-                CreateSessionResponse::Login(resp) => {
-                    crate::login::actions::do_success(&resp.csrf);
-                }
-                CreateSessionResponse::Register {
-                    response,
-                    oauth_profile,
-                } => {
-                    let csrf = response.csrf;
-                    storage::save_csrf_token(&csrf);
-                    let route = Route::User(UserRoute::ContinueRegistration(oauth_profile)).to_string();
-                    dominator::routing::go_to_url(&route);
-                }
+        Ok(res) => match res {
+            CreateSessionResponse::Login(resp) => {
+                crate::login::actions::do_success(&resp.csrf);
+            }
+            CreateSessionResponse::Register {
+                response,
+                oauth_profile,
+            } => {
+                let csrf = response.csrf;
+                storage::save_csrf_token(&csrf);
+                let route = Route::User(UserRoute::ContinueRegistration(oauth_profile)).to_string();
+                dominator::routing::go_to_url(&route);
             }
         },
-        Err(_) => {
-            match status {
-                409 => {
-                    let route = Route::User(UserRoute::Login(LoginQuery::basic_tried_oauth())).to_string();
-                    dominator::routing::go_to_url(&route);
-                },
-                _ => {
-                    todo!();
-                }
+        Err(_) => match status {
+            409 => {
+                let route =
+                    Route::User(UserRoute::Login(LoginQuery::basic_tried_oauth())).to_string();
+                dominator::routing::go_to_url(&route);
+            }
+            _ => {
+                todo!();
             }
         },
     }
