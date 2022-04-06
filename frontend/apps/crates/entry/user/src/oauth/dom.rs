@@ -21,7 +21,7 @@ impl OauthPage {
                         }
                     }
                 };
-                actions::finalize(req, redirect_kind).await;
+                actions::finalize(req).await;
 
                 is_loading.set_neq(false);
 

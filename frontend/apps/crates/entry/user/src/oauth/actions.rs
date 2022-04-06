@@ -37,7 +37,7 @@ pub async fn redirect(service_kind: GetOAuthUrlServiceKind, url_kind: OAuthUrlKi
         //unsafe { crate::oauth::actions::oauth_open_window(&resp.url, "oauth"); }
     }
 }
-pub async fn finalize(req: CreateSessionOAuthRequest, url_kind: OAuthUrlKind) {
+pub async fn finalize(req: CreateSessionOAuthRequest) {
     if let Ok(resp) = api_no_auth_with_credentials::<CreateSessionResponse, EmptyError, _>(
         CreateOAuth::PATH,
         CreateOAuth::METHOD,
@@ -54,19 +54,10 @@ pub async fn finalize(req: CreateSessionOAuthRequest, url_kind: OAuthUrlKind) {
                 oauth_profile,
             } => {
                 let csrf = response.csrf;
-
-                match url_kind {
-                    OAuthUrlKind::Register => {
-                        storage::save_csrf_token(&csrf);
-                        let route: String =
-                            Route::User(UserRoute::ContinueRegistration(oauth_profile)).into();
-                        dominator::routing::go_to_url(&route);
-                    }
-                    OAuthUrlKind::Login => {
-                        let route = Route::User(UserRoute::Register(RegisterQuery::login_before_register())).to_string();
-                        dominator::routing::go_to_url(&route);
-                    }
-                }
+                storage::save_csrf_token(&csrf);
+                let route: String =
+                    Route::User(UserRoute::ContinueRegistration(oauth_profile)).into();
+                dominator::routing::go_to_url(&route);
             }
         }
     }

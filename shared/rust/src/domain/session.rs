@@ -149,6 +149,7 @@ pub enum CreateSessionOAuthRequest {
         code: String,
 
         /// Which OAuth url was used
+        /// Not sure if this is needed anymore
         redirect_kind: OAuthUrlKind,
     },
 }
