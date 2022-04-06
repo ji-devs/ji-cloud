@@ -130,6 +130,23 @@ pub enum GetOAuthUrlServiceKind {
     Google,
 }
 
+/// OAuth provider for emails
+#[derive(Serialize, Deserialize, Debug, Copy, Clone)]
+#[serde(rename_all = "camelCase")]
+pub enum OAuthProvider {
+    /// Google OAuth v2
+    Google,
+}
+
+impl OAuthProvider {
+    #[allow(missing_docs)]
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Self::Google => "Google",
+        }
+    }
+}
+
 /// Response for what URL to use for OAuth callback.
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]

@@ -1,6 +1,6 @@
 use core::settings::EmailClientSettings;
 use sendgrid::v3::{Content, Email, Message, Personalization, SGMap, Sender};
-use shared::domain::jig::report::JigReportEmail;
+use shared::domain::{jig::report::JigReportEmail, session::OAuthProvider};
 use tracing::instrument;
 
 use crate::error;
@@ -66,6 +66,36 @@ impl Client {
         let message = Message::new(self.sender_email.clone())
             .set_template_id(&template.0)
             .add_personalization(Personalization::new(to).add_dynamic_template_data(template_data));
+
+        self.client.send(&message).await?;
+
+        Ok(())
+    }
+
+    #[instrument(skip_all)]
+    pub async fn send_oauth_password_reset(
+        &self,
+        to: Email,
+        oauth_provider: OAuthProvider,
+    ) -> anyhow::Result<()> {
+        let subject = format!("Reset your password");
+
+        let value = format!(
+            r#" 
+Looks like you requested a reset password link but you didn't sign up with a password, you signed up with a {} account. 
+Please try logging in with your {} account.
+            "#,
+            oauth_provider.as_str(),
+            oauth_provider.as_str()
+        );
+        let message = Message::new(self.sender_email.clone())
+            .add_personalization(Personalization::new(to))
+            .set_subject(&subject)
+            .add_content(
+                Content::new()
+                    .set_content_type("text/plain")
+                    .set_value(value),
+            );
 
         self.client.send(&message).await?;
 

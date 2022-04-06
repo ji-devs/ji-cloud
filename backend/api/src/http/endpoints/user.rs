@@ -22,7 +22,7 @@ use shared::{
     },
     domain::{
         image::{ImageId, ImageKind},
-        session::NewSessionResponse,
+        session::{NewSessionResponse, OAuthProvider},
         user::{ChangePasswordRequest, CreateProfileRequest, UserLookupQuery, VerifyEmailRequest},
     },
     media::MediaLibrary,
@@ -80,6 +80,7 @@ async fn send_password_email(
     email_address: String,
     mail: &mail::Client,
     pages_url: &str,
+    is_oauth: bool,
 ) -> Result<(), error::Service> {
     let session = db::session::create(
         &mut *txn,
@@ -90,16 +91,21 @@ async fn send_password_email(
     )
     .await?;
 
-    let first_name = db::user::get_first_name(&mut *txn, user_id).await?;
+    if !is_oauth {
+        let first_name = db::user::get_first_name(&mut *txn, user_id).await?;
 
-    let template = mail
-        .password_reset_template()
-        .map_err(error::Service::DisabledService)?;
+        let template = mail
+            .password_reset_template()
+            .map_err(error::Service::DisabledService)?;
 
-    let email_link = format!("{}/user/password-reset/{}", pages_url, session);
+        let email_link = format!("{}/user/password-reset/{}", pages_url, session);
 
-    mail.send_password_reset(template, Email::new(email_address), email_link, first_name)
-        .await?;
+        mail.send_password_reset(template, Email::new(email_address), email_link, first_name)
+            .await?;
+    } else {
+        mail.send_oauth_password_reset(Email::new(email_address), OAuthProvider::Google)
+            .await?;
+    }
 
     Ok(())
 }
@@ -806,16 +812,26 @@ async fn reset_password(
 
     let mut txn = db.begin().await?;
 
+    // includes check for oauth email
     let user = sqlx::query!(
-        "select user_id from user_email where email = $1::text",
+        r#"
+        select user_id,
+        (
+            select case 
+                when exists(select * from user_auth_basic where user_auth_basic.email = $1::text) = true then false 
+                else true 
+                end
+        )     as "is_oauth!"      
+         from user_email 
+         where email = $1::text"#,
         &req.email
     )
     .fetch_optional(&mut txn)
     .instrument(tracing::info_span!("get user_id"))
     .await?;
 
-    let user_id = match user {
-        Some(user) => user.user_id,
+    let (user_id, is_oauth) = match user {
+        Some(user) => (user.user_id, user.is_oauth),
         None => return Ok(HttpResponse::NoContent().finish()),
     };
 
@@ -825,6 +841,7 @@ async fn reset_password(
         req.email,
         mail.as_ref(),
         &config.remote_target().pages_url(),
+        is_oauth,
     )
     .await?;
 

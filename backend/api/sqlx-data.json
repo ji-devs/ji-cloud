@@ -3381,26 +3381,6 @@
       "nullable": []
     }
   },
-  "6db1735f61450670c2ca115000a413f3b2eb9d4874eeec7e749f6243b2db5f7d": {
-    "query": "select user_id from user_email where email = $1::text",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "user_id",
-          "type_info": "Uuid"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Text"
-        ]
-      },
-      "nullable": [
-        false
-      ]
-    }
-  },
   "6dcc3e22fd2bb64cec50f447237de2968384af1de326d4b26b8816611f2cc2e5": {
     "query": "select algolia_index_version != $1 as \"outdated!\" from settings",
     "describe": {
@@ -7225,6 +7205,32 @@
         ]
       },
       "nullable": [
+        null
+      ]
+    }
+  },
+  "fa63b22f946e502a15f4353b4af07df300a31dcf3b8feabfa30dae706a998c66": {
+    "query": "\n        select user_id,\n        (\n            select case \n                when exists(select * from user_auth_basic where user_auth_basic.email = $1::text) = true then false \n                else true \n                end\n        )     as \"is_oauth!\"      \n         from user_email \n         where email = $1::text",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "user_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "is_oauth!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
         null
       ]
     }
