@@ -20,7 +20,7 @@ impl RegisterStart {
         let email = state.email.get_value();
         let password = state.password.get_value();
 
-        if !state.password.password_acceptable() || state.email.email_acceptable() {
+        if !state.password.password_acceptable() || !state.email.email_acceptable() {
             return;
         }
 
