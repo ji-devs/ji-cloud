@@ -227,7 +227,7 @@ fn render_logged_out() -> Vec<Dom> {
             .property("slot", "user")
             .property("kind", "text")
             .property("color", "black")
-            .property("href", &Route::User(UserRoute::Login(String::new())).to_string())
+            .property("href", &Route::User(UserRoute::Login(Default::default())).to_string())
             .text(STR_LOGIN)
             .event_with_options(
                 &EventOptions::preventable(),

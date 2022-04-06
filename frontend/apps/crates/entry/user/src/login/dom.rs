@@ -9,6 +9,7 @@ use web_sys::HtmlInputElement;
 use utils::events;
 
 const STR_GOOGLE_LABEL: &str = "Log in with Google";
+const STR_BASIC_TRIED_OAUTH: &str = "Looks like you didn't sign up with Google, try logging in with a password";
 
 impl LoginPage {
     pub fn render(self: &Rc<Self>) -> Dom {
@@ -32,6 +33,12 @@ impl LoginPage {
                 .property_signal("visible", state.loader.is_loading())
             }))
             .child(html!("page-login-landing", {
+                .apply_if(state.basic_tried_oauth, |dom| {
+                    dom.child(html!("p", {
+                        .property("slot", "alert")
+                        .text(STR_BASIC_TRIED_OAUTH)
+                    }))
+                })
                 .children(vec![
                     html!("input-wrapper", {
                         .property("slot", "email")

@@ -3,6 +3,7 @@ use futures_signals::{
     map_ref,
     signal::{Mutable, Signal},
 };
+use utils::routes::LoginQuery;
 use std::{cell::RefCell, rc::Rc};
 
 use crate::email_handler::EmailHandler;
@@ -14,9 +15,10 @@ pub struct LoginPage {
     pub password_error: Mutable<Option<&'static str>>,
     pub reset_password_popup: Mutable<bool>,
     pub tried_to_submit: Mutable<bool>,
+    pub basic_tried_oauth: bool,
 }
 impl LoginPage {
-    pub fn new() -> Rc<Self> {
+    pub fn new(query: LoginQuery) -> Rc<Self> {
         Rc::new(Self {
             loader: AsyncLoader::new(),
             email: EmailHandler::new(),
@@ -24,6 +26,7 @@ impl LoginPage {
             password_error: Mutable::new(None),
             reset_password_popup: Mutable::new(false),
             tried_to_submit: Mutable::new(false),
+            basic_tried_oauth: query.basic_tried_oauth,
         })
     }
 

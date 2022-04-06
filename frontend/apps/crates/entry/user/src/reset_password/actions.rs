@@ -33,7 +33,7 @@ impl PasswordResetPage {
 
             match resp {
                 Ok(_) => {
-                    let route:String = Route::User(UserRoute::Login(String::new())).into();
+                    let route:String = Route::User(UserRoute::Login(Default::default())).into();
                     dominator::routing::go_to_url(&route);
                 },
                 Err(_err) => {

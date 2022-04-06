@@ -4,7 +4,7 @@ use dominator::clone;
 use shared::api::endpoints;
 use utils::{
     prelude::{get_user, ApiEndpointExt},
-    routes::{Route, UserRoute},
+    routes::{Route, UserRoute, LoginQuery},
     storage::delete_csrf_token,
     unwrap::UnwrapJiExt,
 };
@@ -44,9 +44,8 @@ pub fn navigate_to_login() {
         location.pathname().unwrap_ji(),
         location.search().unwrap_ji()
     );
-    let redirect: String = js_sys::encode_uri_component(&redirect).into();
 
-    let route: String = Route::User(UserRoute::Login(redirect)).to_string();
+    let route: String = Route::User(UserRoute::Login(LoginQuery::redirect(redirect))).to_string();
 
     let url = format!("{}{}", origin, route);
 

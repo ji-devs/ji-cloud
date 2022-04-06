@@ -44,7 +44,7 @@ pub enum UserRoute {
     Profile(ProfileSection),
     RegisterOauth(OauthData),
     LoginOauth(OauthData),
-    Login(String),
+    Login(LoginQuery),
     Register(RegisterQuery),
     ContinueRegistration(Option<OAuthUserProfile>),
     SendEmailConfirmation(String), //the email address
@@ -79,6 +79,7 @@ pub enum AdminRoute {
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct RegisterQuery {
+    /// user tried logging in before creating an account
     #[serde(default)]
     pub login_before_register: bool,
 }
@@ -87,6 +88,33 @@ impl RegisterQuery {
     pub fn login_before_register() -> Self {
         Self {
             login_before_register: true
+        }
+    }
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct LoginQuery {
+    #[serde(default)]
+    #[serde(skip_serializing_if = "String::is_empty")]
+    pub redirect: String,
+
+    /// user with basic auth tried using OAuth
+    #[serde(default)]
+    #[serde(skip_serializing_if = "std::ops::Not::not")]
+    pub basic_tried_oauth: bool,
+}
+
+impl LoginQuery {
+    pub fn redirect(redirect: String) -> Self {
+        Self {
+            redirect,
+            ..Default::default()
+        }
+    }
+    pub fn basic_tried_oauth() -> Self {
+        Self {
+            basic_tried_oauth: true,
+            ..Default::default()
         }
     }
 }
@@ -217,8 +245,8 @@ impl Route {
                 Self::User(UserRoute::Profile(ProfileSection::ChangeEmail))
             }
             ["user", "login"] => {
-                let redirect = params_map.get("redirect").unwrap_or_default();
-                Self::User(UserRoute::Login(redirect))
+                let query = serde_qs::from_str(&params_string).unwrap_ji();
+                Self::User(UserRoute::Login(query))
             }
             ["user", "register"] => {
                 let query = serde_qs::from_str(&params_string).unwrap_ji();
@@ -437,7 +465,8 @@ impl From<&Route> for String {
                     }
                 },
                 UserRoute::Login(redirect) => {
-                    format!("/user/login?redirect={}", redirect)
+                    let query = serde_qs::to_string(&redirect).unwrap_ji();
+                    format!("/user/login?{}", query)
                 }
                 UserRoute::Register(data) => {
                     let query = serde_qs::to_string(&data).unwrap_ji();

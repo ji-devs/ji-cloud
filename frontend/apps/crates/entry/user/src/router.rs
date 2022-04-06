@@ -31,12 +31,12 @@ impl Router {
         Self::signal().map(|route| match route {
             Route::User(route) => match route {
                 UserRoute::Register(query) => Some(RegisterPage::render(None, query)),
-                UserRoute::NoAuth => Some(LoginPage::new().render()),
+                UserRoute::NoAuth => Some(LoginPage::new(Default::default()).render()),
                 UserRoute::RegisterOauth(data) => {
                     Some(OauthPage::render(data, OAuthUrlKind::Register))
                 }
                 UserRoute::LoginOauth(data) => Some(OauthPage::render(data, OAuthUrlKind::Login)),
-                UserRoute::Login(_) => Some(LoginPage::new().render()),
+                UserRoute::Login(query) => Some(LoginPage::new(query).render()),
                 UserRoute::Profile(ProfileSection::Landing) => Some(ProfilePage::new().render()),
                 UserRoute::RegisterComplete => Some(RegisterCompletePage::render()),
                 UserRoute::ContinueRegistration(oauth_profile) => {
