@@ -17,14 +17,10 @@ use shared::domain::jig::module::body::drag_drop::Next;
 
 impl PlayState {
     pub async fn set_targets(&self) {
-        let items = self
-            .items
-            .iter()
-            .filter(|item| match item {
-                PlayItem::Interactive(_) => true,
-                _ => false,
-            })
-            .map(|item| item.get_interactive_unchecked());
+        let items = self.items.iter().filter_map(|item| match item {
+            PlayItem::Interactive(item) => Some(item.clone()),
+            _ => None,
+        });
 
         let traces: Vec<&Trace> = self
             .game
@@ -50,8 +46,18 @@ impl PlayState {
         let all_completed = state
             .items
             .iter()
-            .filter(|item| item.is_interactive())
-            .all(|item| item.get_interactive_unchecked().completed.get());
+            .filter_map(|item| {
+                match item {
+                    PlayItem::Interactive(item) => {
+                        // Only return items which are interactive _and_ have a target trace so
+                        // that we can end the game correctly when there are items which aren't
+                        // meant to be placed anywhere.
+                        item.target_index.borrow().as_ref().map(|_| item.clone())
+                    }
+                    _ => None,
+                }
+            })
+            .all(|item| item.completed.get());
 
         if all_completed {
             state.feedback_player.set(Some(
