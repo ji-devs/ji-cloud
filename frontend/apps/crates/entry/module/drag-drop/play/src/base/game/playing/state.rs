@@ -1,5 +1,4 @@
 use crate::base::game::state::*;
-use components::audio::mixer::AudioHandle;
 use dominator::clone;
 use futures_signals::{
     signal::{Mutable, Signal, SignalExt},
@@ -72,8 +71,6 @@ pub struct InteractiveItem {
     pub sticker: Sticker,
     pub completed: Mutable<bool>,
     pub audio: Option<Audio>,
-    pub audio_effect_handle: RefCell<Option<AudioHandle>>,
-    pub audio_user_handle: RefCell<Option<AudioHandle>>,
     pub target_transform: Transform,
     pub curr_transform: Mutable<Transform>,
     pub drag: Mutable<Option<Rc<Drag>>>,
@@ -100,8 +97,6 @@ impl InteractiveItem {
             drag: Mutable::new(None),
             size: Mutable::new(None),
             target_index: RefCell::new(None),
-            audio_effect_handle: RefCell::new(None),
-            audio_user_handle: RefCell::new(None),
         })
     }
 
