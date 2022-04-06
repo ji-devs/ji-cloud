@@ -773,7 +773,6 @@ pub fn side_effect_status_code(status_code: u16) {
     match status_code {
         403 | 401 => {
             Route::User(UserRoute::NoAuth).redirect();
-            //web_sys::window().unwrap_ji().alert_with_message(crate::strings::STR_AUTH_ALERT);
         }
         _ => {}
     }

@@ -31,7 +31,7 @@ impl Router {
         Self::signal().map(|route| match route {
             Route::User(route) => match route {
                 UserRoute::Register(query) => Some(RegisterPage::render(None, query)),
-                UserRoute::NoAuth => Some(RegisterPage::render(None, true)),
+                UserRoute::NoAuth => Some(LoginPage::new().render()),
                 UserRoute::RegisterOauth(data) => {
                     Some(OauthPage::render(data, OAuthUrlKind::Register))
                 }
