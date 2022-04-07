@@ -212,7 +212,7 @@ async fn create_user(
     let pass_hash = hash_password(req.password).await?;
 
     sqlx::query!(
-        "insert into user_auth_basic (user_id, email, password) values ($1, lower($2::text), $3)",
+        "insert into user_auth_basic (user_id, email, password) values ($1, $2::text, $3)",
         user.id,
         &req.email,
         pass_hash.to_string(),
@@ -307,7 +307,7 @@ where
             let user = sqlx::query!(
                 r#"
 insert into user_email (user_id, email)
-select session.user_id, lower(user_auth_basic.email)
+select session.user_id, user_auth_basic.email
 from session
 inner join user_auth_basic on user_auth_basic.user_id = session.user_id
 where
@@ -697,7 +697,7 @@ async fn verify_email_reset(
             sqlx::query!(
                 r#"
         update user_auth_basic
-        set email = lower($3::text)
+        set email = $3::text
         where user_id = $1 and lower(email) = lower($2::text)
         "#,
                 token.user_id,
@@ -712,7 +712,7 @@ async fn verify_email_reset(
             sqlx::query!(
                 r#"
         update user_email
-        set email = lower($3::text)
+        set email = $3::text
         where user_id = $1 and lower(email) = lower($2::text)
         "#,
                 token.user_id,
@@ -917,7 +917,7 @@ async fn put_password(
     sqlx::query!(
         r#"
 insert into user_auth_basic (user_id, email, password)
-values ($1, lower($2::text), $3)
+values ($1, $2::text, $3)
 "#,
         user_id,
         &email,
