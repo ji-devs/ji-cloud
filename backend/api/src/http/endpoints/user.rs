@@ -82,16 +82,16 @@ async fn send_password_email(
     pages_url: &str,
     is_oauth: bool,
 ) -> Result<(), error::Service> {
-    let session = db::session::create(
-        &mut *txn,
-        user_id,
-        Some(&(Utc::now() + Duration::hours(1))),
-        SessionMask::CHANGE_PASSWORD,
-        None,
-    )
-    .await?;
-
     if !is_oauth {
+        let session = db::session::create(
+            &mut *txn,
+            user_id,
+            Some(&(Utc::now() + Duration::hours(1))),
+            SessionMask::CHANGE_PASSWORD,
+            None,
+        )
+        .await?;
+
         let first_name = db::user::get_first_name(&mut *txn, user_id).await?;
 
         let template = mail
