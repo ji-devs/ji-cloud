@@ -20,6 +20,20 @@
       ]
     }
   },
+  "0114f0a11ad67661ae15e9a7e423a3e80d1b515d68dde361a4f5be7c03cb1b4d": {
+    "query": "\n        update user_email\n        set email = $3::text\n        where user_id = $1 and lower(email) = lower($2::text)\n        ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "016ee605ffadd845b4275efbdd83e704e6553346bfdb86c968027d6f363d087b": {
     "query": "select exists(select 1 from user_auth_basic where lower(email) = lower($1)) as \"exists!\"",
     "describe": {
@@ -761,20 +775,6 @@
       "nullable": []
     }
   },
-  "1223b677d6d4bfc7c52124c81fee8060b1df6ec06c9d49e541eb05d74c13d6c2": {
-    "query": "\ninsert into user_auth_basic (user_id, email, password)\nvalues ($1, lower($2::text), $3)\n",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Text",
-          "Text"
-        ]
-      },
-      "nullable": []
-    }
-  },
   "124802b593631b117b5b2e1d2eb43712d579be04d5b218f7c19f382f3fe5dcca": {
     "query": "\ninsert into locale_entry (bundle_id, section, item_kind_id, english, hebrew, status, zeplin_reference, comments, in_app, in_element, in_mock)\nvalues ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)\nreturning id\n",
     "describe": {
@@ -991,20 +991,6 @@
         "Left": [
           "Uuid",
           "Bool"
-        ]
-      },
-      "nullable": []
-    }
-  },
-  "189a23542a49e73204303c4e99a99ae50b3f206a0a57c1907317147a5a1931c0": {
-    "query": "insert into user_auth_basic (user_id, email, password) values ($1, lower($2::text), $3)",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Text",
-          "Text"
         ]
       },
       "nullable": []
@@ -1290,6 +1276,20 @@
       "parameters": {
         "Left": [
           "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "1c7400d27c33a6b7204302b5cf2ced8fb445de00304be5b424133f3b7afbf1cb": {
+    "query": "insert into user_auth_basic (user_id, email, password) values ($1, $2::text, $3)",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Text"
         ]
       },
       "nullable": []
@@ -2869,6 +2869,20 @@
       "parameters": {
         "Left": [
           "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "5abe0dafa155f68985ccfc54f6baae31e6bb83c17f018e34c90a6b22cf62a303": {
+    "query": "\n        update user_auth_basic\n        set email = $3::text\n        where user_id = $1 and lower(email) = lower($2::text)\n        ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Text"
         ]
       },
       "nullable": []
@@ -5064,27 +5078,6 @@
       "nullable": []
     }
   },
-  "a79beb44c6b74ffaec5d3a6baa84ead4271534451b7b36bb57547cc4c984fc6b": {
-    "query": "\ninsert into user_email (user_id, email)\nselect session.user_id, lower(user_auth_basic.email)\nfrom session\ninner join user_auth_basic on user_auth_basic.user_id = session.user_id\nwhere\n    session.token = $1 and\n    session.expires_at > now() and\n    (session.scope_mask & $2) = $2\nreturning user_id\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "user_id",
-          "type_info": "Uuid"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Int2"
-        ]
-      },
-      "nullable": [
-        false
-      ]
-    }
-  },
   "a85530d1d83a7f3cd3786da68f5b489fbddbf411d735cf114817e4417768520b": {
     "query": "\nselect index as \"index: ImageTagIndex\", display_name from \"image_tag\"\norder by index\n            ",
     "describe": {
@@ -6020,20 +6013,6 @@
       ]
     }
   },
-  "c9eae9c44a499d533fd0196ee90d8f72ff3a5447cd8c47bd7fbfebe5e87b5b40": {
-    "query": "\n        update user_email\n        set email = lower($3::text)\n        where user_id = $1 and lower(email) = lower($2::text)\n        ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Text",
-          "Text"
-        ]
-      },
-      "nullable": []
-    }
-  },
   "ca807853c119226252820e8cd0f9476d114f3e5e98ffed0dcd059d05063760a4": {
     "query": "\nupdate jig_admin_data\nset rating = coalesce($2, rating)\nwhere jig_id = $1 and $2 is distinct from rating\n            ",
     "describe": {
@@ -6488,20 +6467,6 @@
       ]
     }
   },
-  "d541dbdcd0ad8b538e2814284985277f713a51d6b27a147da3355c96b0b1d858": {
-    "query": "\n        update user_auth_basic\n        set email = lower($3::text)\n        where user_id = $1 and lower(email) = lower($2::text)\n        ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Text",
-          "Text"
-        ]
-      },
-      "nullable": []
-    }
-  },
   "d5f7bcda61b8abb751cc560960d08dbc327b476eb3b9ee8b7e8acb627833fbce": {
     "query": "\nupdate jig_data_additional_resource\nset resource_content = $3\nwhere jig_data_id = $1 and id = $2\n            ",
     "describe": {
@@ -6557,6 +6522,27 @@
       },
       "nullable": [
         null
+      ]
+    }
+  },
+  "d887591f2db05a599975d03c3f5adec7074d0d085e2f89c3482a93e74a42d524": {
+    "query": "\ninsert into user_email (user_id, email)\nselect session.user_id, user_auth_basic.email\nfrom session\ninner join user_auth_basic on user_auth_basic.user_id = session.user_id\nwhere\n    session.token = $1 and\n    session.expires_at > now() and\n    (session.scope_mask & $2) = $2\nreturning user_id\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "user_id",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Int2"
+        ]
+      },
+      "nullable": [
+        false
       ]
     }
   },
@@ -7373,6 +7359,20 @@
         false,
         false
       ]
+    }
+  },
+  "fe196f274875c6e293c5e80be927ac1e35c46f7699975b24a28b8cc1c136881d": {
+    "query": "\ninsert into user_auth_basic (user_id, email, password)\nvalues ($1, $2::text, $3)\n",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Text"
+        ]
+      },
+      "nullable": []
     }
   },
   "fe1a652565a2e6c99e61cf71bf5567080bcebb8aed0a47fcd76c4d76b265fc2a": {
