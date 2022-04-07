@@ -212,7 +212,7 @@ async fn create_user(
     let pass_hash = hash_password(req.password).await?;
 
     sqlx::query!(
-        "insert into user_auth_basic (user_id, email, password) values ($1, $2::text, $3)",
+        "insert into user_auth_basic (user_id, email, password) values ($1, lower($2::text), $3)",
         user.id,
         &req.email,
         pass_hash.to_string(),
@@ -257,8 +257,8 @@ async fn verify_email(
 select user_id
 from user_auth_basic
 where
-    email = $1::text and
-    not exists(select 1 from user_email where email = $1)
+    lower(email) = lower($1::text) and
+    not exists(select 1 from user_email where lower(email) = lower($1))
 "#,
                 email
             )
@@ -307,7 +307,7 @@ where
             let user = sqlx::query!(
                 r#"
 insert into user_email (user_id, email)
-select session.user_id, user_auth_basic.email
+select session.user_id, lower(user_auth_basic.email)
 from session
 inner join user_auth_basic on user_auth_basic.user_id = session.user_id
 where
@@ -540,7 +540,7 @@ async fn email_reset(
     // 0. validate the email
     // FIXME simplify these queries - maybe make this a separate function to be used with update email
     let exists_basic = sqlx::query!(
-        r#"select exists(select 1 from user_auth_basic where email = lower($1)) as "exists!""#,
+        r#"select exists(select 1 from user_auth_basic where lower(email) = lower($1)) as "exists!""#,
         &req.email
     )
     .fetch_one(&mut txn)
@@ -549,7 +549,7 @@ async fn email_reset(
     .exists;
 
     let exists_google = sqlx::query!(
-        r#"select exists(select 1 from user_email where email = lower($1)) as "exists!""#,
+        r#"select exists(select 1 from user_email where lower(email) = lower($1)) as "exists!""#,
         &req.email
     )
     .fetch_one(&mut txn)
@@ -697,8 +697,8 @@ async fn verify_email_reset(
             sqlx::query!(
                 r#"
         update user_auth_basic
-        set email = $3::text
-        where user_id = $1 and email = $2::text
+        set email = lower($3::text)
+        where user_id = $1 and lower(email) = lower($2::text)
         "#,
                 token.user_id,
                 &email,
@@ -712,8 +712,8 @@ async fn verify_email_reset(
             sqlx::query!(
                 r#"
         update user_email
-        set email = $3::text
-        where user_id = $1 and email = $2::text
+        set email = lower($3::text)
+        where user_id = $1 and lower(email) = lower($2::text)
         "#,
                 token.user_id,
                 &email,
@@ -817,13 +817,14 @@ async fn reset_password(
         r#"
         select user_id,
         (
-            select case 
-                when exists(select * from user_auth_basic where user_auth_basic.email = $1::text) = true then false 
-                else true 
-                end
+           select
+             case 
+                when exists(select 1 from user_auth_basic where lower(user_auth_basic.email) = lower($1::text)) = true then false
+                else true
+            end
         )     as "is_oauth!"      
          from user_email 
-         where email = $1::text"#,
+         where lower(email) = lower($1::text)"#,
         &req.email
     )
     .fetch_optional(&mut txn)
@@ -834,7 +835,7 @@ async fn reset_password(
         Some(user) => (user.user_id, user.is_oauth),
         None => return Ok(HttpResponse::NoContent().finish()),
     };
-
+    //select exists(select 1 from user_email where email = lower($1)
     send_password_email(
         &mut txn,
         user_id,
@@ -895,7 +896,7 @@ async fn put_password(
         .await?;
 
     let user_to_delete = sqlx::query!(
-        r#"select user_id from user_auth_basic where user_id <> $1 and email = $2 for update"#,
+        r#"select user_id from user_auth_basic where user_id <> $1 and lower(email) = lower($2) for update"#,
         user_id,
         email as _
     )
@@ -916,7 +917,7 @@ async fn put_password(
     sqlx::query!(
         r#"
 insert into user_auth_basic (user_id, email, password)
-values ($1, $2::text, $3)
+values ($1, lower($2::text), $3)
 "#,
         user_id,
         &email,
