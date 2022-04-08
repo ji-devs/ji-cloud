@@ -33,8 +33,8 @@ pub struct SearchSelected {
     pub query: Mutable<String>,
 }
 
-impl SearchSelected {
-    pub fn new() -> Self {
+impl Default for SearchSelected {
+    fn default() -> Self {
         Self {
             affiliations: Mutable::new(HashSet::new()),
             categories: Mutable::new(HashSet::new()),
@@ -43,7 +43,9 @@ impl SearchSelected {
             query: Mutable::new(String::new()),
         }
     }
+}
 
+impl SearchSelected {
     pub fn set_from_profile(&self, profile: &UserProfile) {
         let mut affiliations = self.affiliations.lock_mut();
         if !profile.affiliations.is_empty() {
@@ -71,15 +73,10 @@ impl SearchSelected {
     pub fn to_search_request(&self) -> JigSearchQuery {
         log::info!("{:?}", self);
         JigSearchQuery {
-            q: self.query.lock_ref().to_owned(),
-            age_ranges: self.age_ranges.lock_ref().to_owned().into_iter().collect(),
-            affiliations: self
-                .affiliations
-                .lock_ref()
-                .to_owned()
-                .into_iter()
-                .collect(),
-            categories: self.categories.lock_ref().to_owned().into_iter().collect(),
+            q: self.query.get_cloned(),
+            age_ranges: self.age_ranges.get_cloned().into_iter().collect(),
+            affiliations: self.affiliations.get_cloned().into_iter().collect(),
+            categories: self.categories.get_cloned().into_iter().collect(),
             page: Some(0),
             language: self.language.get_cloned(),
             ..Default::default()
@@ -96,8 +93,8 @@ pub struct SearchOptions {
     pub languages: Rc<Vec<Language>>,
 }
 
-impl SearchOptions {
-    pub fn new() -> Self {
+impl Default for SearchOptions {
+    fn default() -> Self {
         Self {
             age_ranges: Mutable::new(vec![]),
             affiliations: Mutable::new(vec![]),
@@ -107,7 +104,9 @@ impl SearchOptions {
             languages: Rc::new(JIG_LANGUAGES.clone()),
         }
     }
+}
 
+impl SearchOptions {
     pub async fn populate_options(&self) {
         let _ = join!(self.load_metadata(), self.load_categories());
     }
