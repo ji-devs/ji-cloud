@@ -176,11 +176,8 @@ impl Base {
 
     pub fn should_render_design(&self) -> bool {
         match self.slide.activity.as_ref() {
-            None => true,
-            Some(activity) => match activity {
-                Activity::Puzzle(_) => false,
-                _ => true,
-            },
+            Some(Activity::Puzzle(_)) => false,
+            _ => true,
         }
     }
 }

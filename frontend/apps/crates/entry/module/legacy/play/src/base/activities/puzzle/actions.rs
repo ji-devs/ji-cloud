@@ -259,11 +259,7 @@ impl PuzzleItem {
     }
 
     pub fn try_end_drag(&self, _x: i32, _y: i32) -> bool {
-        if let Some(_drag) = self.drag.borrow_mut().take() {
-            true
-        } else {
-            false
-        }
+        self.drag.borrow().is_some()
     }
 
     pub fn evaluate(&self, fly_back_to_origin: bool) -> bool {

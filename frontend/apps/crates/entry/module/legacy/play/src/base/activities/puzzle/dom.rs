@@ -50,35 +50,27 @@ impl Puzzle {
                 }
             }))
             .event(clone!(state => move |evt:events::PointerDown| {
-                match state.init_phase.get_cloned() {
-                    InitPhase::Playing(game) => {
-                        game.start_drag(evt.x(), evt.y());
-                    },
-                    _ => {}
+                let init_phase = state.init_phase.get_cloned();
+                if let InitPhase::Playing(game) = init_phase {
+                    game.start_drag(evt.x(), evt.y());
                 }
             }))
             .global_event(clone!(state => move |evt:events::PointerMove| {
-                match state.init_phase.get_cloned() {
-                    InitPhase::Playing(game) => {
-                        game.try_move_drag(evt.x(), evt.y());
-                    },
-                    _ => {}
+                let init_phase = state.init_phase.get_cloned();
+                if let InitPhase::Playing(game) = init_phase {
+                    game.try_move_drag(evt.x(), evt.y());
                 }
             }))
             .global_event(clone!(state => move |evt:events::PointerUp| {
-                match state.init_phase.get_cloned() {
-                    InitPhase::Playing(game) => {
-                        game.try_end_drag(evt.x(), evt.y());
-                    },
-                    _ => {}
+                let init_phase = state.init_phase.get_cloned();
+                if let InitPhase::Playing(game) = init_phase {
+                    game.try_end_drag(evt.x(), evt.y());
                 }
             }))
             .global_event(clone!(state => move |evt:events::PointerCancel| {
-                match state.init_phase.get_cloned() {
-                    InitPhase::Playing(game) => {
-                        game.try_end_drag(evt.x(), evt.y());
-                    },
-                    _ => {}
+                let init_phase = state.init_phase.get_cloned();
+                if let InitPhase::Playing(game) = init_phase {
+                    game.try_end_drag(evt.x(), evt.y());
                 }
             }))
         })
