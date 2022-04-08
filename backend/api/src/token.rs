@@ -38,6 +38,7 @@ bitflags::bitflags! {
         const DELETE_ACCOUNT = 0b0000_0000_0001_0000;
         const CHANGE_EMAIL = 0b0000_0000_0010_0000;
         const REPORT_EMAIL = 0b0000_0000_0100_0000;
+        const WELCOME_EMAIL = 0b0000_0000_1000_0000;
 
         const GENERAL = Self::GENERAL_API.bits | Self::DELETE_ACCOUNT.bits;
         const ONE_TIME = Self::CHANGE_PASSWORD.bits | Self::VERIFY_EMAIL.bits;
