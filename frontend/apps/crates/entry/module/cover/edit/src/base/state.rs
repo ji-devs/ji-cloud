@@ -10,7 +10,7 @@ use components::{
     text_editor::{callbacks::Callbacks as TextEditorCallbacks, state::State as TextEditorState},
 };
 use dominator::clone;
-use futures_signals::signal::{self, Mutable, ReadOnlyMutable, Signal};
+use futures_signals::signal::{Mutable, ReadOnlyMutable};
 use shared::domain::jig::{
     module::{
         body::{
@@ -32,6 +32,7 @@ pub struct Base {
     pub instructions: Mutable<Instructions>,
     pub jig_id: JigId,
     pub module_id: ModuleId,
+    pub continue_next_fn: ContinueNextFn,
     // Cover-specific
     pub backgrounds: Rc<Backgrounds>,
     pub stickers: Rc<Stickers<Sticker>>,
@@ -137,6 +138,7 @@ impl Base {
             module_id,
             history,
             step: step.read_only(),
+            continue_next_fn: Mutable::new(None),
             theme_id,
             instructions,
             text_editor,
@@ -151,14 +153,22 @@ impl Base {
 }
 
 impl BaseExt<Step> for Base {
-    type NextStepAllowedSignal = impl Signal<Item = bool>;
-
     fn allowed_step_change(&self, _from: Step, _to: Step) -> bool {
         true
     }
 
-    fn next_step_allowed_signal(&self) -> Self::NextStepAllowedSignal {
-        signal::always(true)
+    fn can_continue_next(&self) -> ReadOnlyMutable<bool> {
+        Mutable::new(true).read_only()
+    }
+
+    fn continue_next(&self) -> bool {
+        match self.step.get() {
+            Step::Two => match self.continue_next_fn.get_cloned() {
+                Some(continue_next_fn) => continue_next_fn(),
+                None => false,
+            },
+            _ => false,
+        }
     }
 
     fn get_jig_id(&self) -> JigId {

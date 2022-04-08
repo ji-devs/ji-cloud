@@ -50,6 +50,13 @@ where
             tab_kind,
         })
     }
+
+    pub fn next_kind(&self) -> Option<MenuTabKind> {
+        match self.tab_kind.get() {
+            Some(MenuTabKind::PlaySettings) => Some(MenuTabKind::Instructions),
+            _ => None,
+        }
+    }
 }
 
 pub enum Tab<SettingsState> {

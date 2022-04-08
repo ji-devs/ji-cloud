@@ -75,6 +75,20 @@ impl<RawData: RawDataExt, E: ExtraExt> Step1<RawData, E> {
 
         state
     }
+
+    pub fn next_kind(&self) -> Option<MenuTabKind> {
+        match self.tab_kind.get() {
+            Some(MenuTabKind::Text | MenuTabKind::DualList) => {
+                if matches!(self.base.mode, Mode::WordsAndImages) {
+                    Some(MenuTabKind::Image)
+                } else {
+                    Some(MenuTabKind::Audio)
+                }
+            }
+            Some(MenuTabKind::Image) => Some(MenuTabKind::Audio),
+            _ => None,
+        }
+    }
 }
 
 pub enum Tab {

@@ -1,6 +1,6 @@
 use dominator::{clone, Dom};
 use dominator_helpers::futures::AsyncLoader;
-use futures_signals::signal::{Mutable, Signal, SignalExt};
+use futures_signals::signal::{Mutable, ReadOnlyMutable, Signal, SignalExt};
 use std::collections::HashSet;
 use std::{marker::PhantomData, rc::Rc};
 
@@ -211,19 +211,25 @@ pub trait DomRenderable {
     fn render(state: Rc<Self>) -> Dom;
 }
 
-pub trait BaseExt<Step: StepExt> {
-    // using these in practice will require
-    // #![feature(type_alias_impl_trait)]
-    // and the implementor will have
-    // type FooSignal = impl Signal<Item = Foo>
-    type NextStepAllowedSignal: Signal<Item = bool>;
+/// Convenience alias for commonly used custom continue functions
+pub type ContinueNextFn = Mutable<Option<Rc<dyn Fn() -> bool>>>;
 
+pub trait BaseExt<Step: StepExt> {
+    /// Whether the step in the modules sidebar can be changed
     fn allowed_step_change(&self, from: Step, to: Step) -> bool;
 
-    fn next_step_allowed_signal(&self) -> Self::NextStepAllowedSignal;
+    /// A signal used to determine whether the module navigation can proceed to the next tab/step
+    fn can_continue_next(&self) -> ReadOnlyMutable<bool>;
 
+    /// Custom module-level navigation
+    ///
+    /// Returns `false` if the module implementing this didn't handle the navigation.
+    fn continue_next(&self) -> bool;
+
+    /// Current JIG's ID
     fn get_jig_id(&self) -> JigId;
 
+    /// Current module's ID
     fn get_module_id(&self) -> ModuleId;
 }
 

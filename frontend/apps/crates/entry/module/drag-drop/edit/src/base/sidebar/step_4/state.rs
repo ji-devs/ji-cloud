@@ -29,6 +29,14 @@ impl Step4 {
 
         Rc::new(Self { sidebar, tab })
     }
+
+    pub fn next_kind(&self) -> Option<MenuTabKind> {
+        match self.tab.get_cloned().kind() {
+            MenuTabKind::PlaySettings => Some(MenuTabKind::Instructions),
+            MenuTabKind::Instructions => Some(MenuTabKind::Feedback),
+            _ => None,
+        }
+    }
 }
 
 #[derive(Clone)]

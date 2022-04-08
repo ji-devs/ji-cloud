@@ -12,6 +12,19 @@ use futures_signals::signal::{Signal, SignalExt};
 use std::rc::Rc;
 
 pub fn render_step_3(state: Rc<Step3>) -> Dom {
+    state
+        .sidebar
+        .base
+        .continue_next_fn
+        .set(Some(Rc::new(clone!(state => move || {
+            if let Some(kind) = state.next_kind() {
+                state.tab.set(Tab::new(state.sidebar.base.clone(), kind));
+                true
+            } else {
+                false
+            }
+        }))));
+
     html!("menu-tabs", {
         .future(state.tab.signal_cloned().for_each(clone!(state => move |tab| {
             let (sticker_phase, trace_phase) = match tab {

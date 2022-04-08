@@ -19,6 +19,19 @@ where
     SettingsState: 'static,
     RenderSettingsFn: Fn(Rc<SettingsState>) -> Dom + Clone + 'static,
 {
+    state.base.can_continue_next.set_neq(true);
+    state
+        .base
+        .continue_next_fn
+        .set(Some(Rc::new(clone!(state => move || {
+            if let Some(kind) = state.next_kind() {
+                state.tab.set(Tab::new(state.base.clone(), kind, state.get_settings.clone()));
+                true
+            } else {
+                false
+            }
+        }))));
+
     html!("menu-tabs", {
         .future(state.tab.signal_ref(|tab| tab.kind()).dedupe().for_each(clone!(state => move |kind| {
             state.tab_kind.set(Some(kind));
