@@ -9,7 +9,7 @@ use components::{
 };
 use components::{module::_common::edit::prelude::*, stickers::video::state::Video};
 use dominator::clone;
-use futures_signals::signal::{self, Mutable, ReadOnlyMutable, Signal};
+use futures_signals::signal::{Mutable, ReadOnlyMutable};
 use futures_signals::signal_vec::{SignalVecExt, VecDiff};
 use shared::domain::jig::{
     module::{
@@ -34,6 +34,8 @@ pub struct Base {
     pub instructions: Mutable<Instructions>,
     pub jig_id: JigId,
     pub module_id: ModuleId,
+    pub can_continue_next: Mutable<bool>,
+    pub continue_next_fn: ContinueNextFn,
     // Video-specific
     pub backgrounds: Rc<Backgrounds>,
     pub stickers: Rc<Stickers<Sticker>>,
@@ -151,6 +153,8 @@ impl Base {
             module_id,
             history,
             step: step.read_only(),
+            can_continue_next: Mutable::new(false),
+            continue_next_fn: Mutable::new(None),
             theme_id,
             instructions,
             text_editor,
@@ -213,14 +217,26 @@ impl Base {
 }
 
 impl BaseExt<Step> for Base {
-    type NextStepAllowedSignal = impl Signal<Item = bool>;
-
-    fn allowed_step_change(&self, _from: Step, _to: Step) -> bool {
-        true
+    fn allowed_step_change(&self, _from: Step, to: Step) -> bool {
+        match to {
+            // Only allow changing to steps 3 and 4 if the video URL has actually been set.
+            Step::Three | Step::Four => self.video.get_cloned().is_some(),
+            _ => true,
+        }
     }
 
-    fn next_step_allowed_signal(&self) -> Self::NextStepAllowedSignal {
-        signal::always(true)
+    fn can_continue_next(&self) -> ReadOnlyMutable<bool> {
+        self.can_continue_next.read_only()
+    }
+
+    fn continue_next(&self) -> bool {
+        match self.step.get() {
+            Step::Two | Step::Three => match self.continue_next_fn.get_cloned() {
+                Some(continue_next_fn) => continue_next_fn(),
+                None => false,
+            },
+            _ => false,
+        }
     }
 
     fn get_jig_id(&self) -> JigId {

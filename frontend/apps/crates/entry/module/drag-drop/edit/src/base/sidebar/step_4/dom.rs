@@ -16,6 +16,19 @@ pub fn render_step_4(state: Rc<Step4>) -> Dom {
         .set_neq(Some(StickerPhase::Static));
     state.sidebar.trace_phase.set_neq(None);
 
+    state
+        .sidebar
+        .base
+        .continue_next_fn
+        .set(Some(Rc::new(clone!(state => move || {
+            if let Some(kind) = state.next_kind() {
+                state.tab.set(Tab::new(state.sidebar.base.clone(), kind));
+                true
+            } else {
+                false
+            }
+        }))));
+
     html!("menu-tabs", {
         .future(state.tab.signal_ref(|tab| tab.kind()).dedupe().for_each(clone!(state => move |kind| {
             state.sidebar.tab_kind.set_neq(Some(kind));

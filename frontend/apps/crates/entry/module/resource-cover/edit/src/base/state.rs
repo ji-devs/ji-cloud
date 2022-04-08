@@ -30,6 +30,7 @@ pub struct Base {
     pub instructions: Mutable<Instructions>,
     pub jig_id: JigId,
     pub module_id: ModuleId,
+    pub continue_next_fn: ContinueNextFn,
     // ResourceCover-specific
     pub backgrounds: Rc<Backgrounds>,
     pub stickers: Rc<Stickers<Sticker>>,
@@ -125,6 +126,7 @@ impl Base {
             module_id,
             history,
             step: step.read_only(),
+            continue_next_fn: Mutable::new(None),
             theme_id,
             instructions,
             text_editor,
@@ -139,14 +141,19 @@ impl Base {
 }
 
 impl BaseExt<Step> for Base {
-    type NextStepAllowedSignal = impl Signal<Item = bool>;
-
     fn allowed_step_change(&self, _from: Step, _to: Step) -> bool {
         true
     }
 
-    fn next_step_allowed_signal(&self) -> Self::NextStepAllowedSignal {
-        signal::always(true)
+    fn can_continue_next(&self) -> ReadOnlyMutable<bool> {
+        Mutable::new(true).read_only()
+    }
+
+    fn continue_next(&self) -> bool {
+        // TODO Resource cover doesn't seem to be used(?), always returning false here means that
+        // when clicking Continue in a Resource Cover module, the sidebar will navigate to the next
+        // step.
+        false
     }
 
     fn get_jig_id(&self) -> JigId {

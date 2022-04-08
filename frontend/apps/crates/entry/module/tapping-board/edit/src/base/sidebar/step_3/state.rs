@@ -69,6 +69,13 @@ impl Step3 {
     }
 }
 
+pub fn next_kind(kind: &MenuTabKind) -> Option<MenuTabKind> {
+    match kind {
+        MenuTabKind::Audio => Some(MenuTabKind::Label),
+        _ => None,
+    }
+}
+
 #[derive(Clone)]
 pub enum Tab {
     Label(usize, Mutable<Option<String>>),

@@ -1,7 +1,7 @@
 use super::state::*;
 use dominator::{clone, html, Dom};
 use futures_signals::{map_ref, signal::SignalExt, signal_vec::SignalVecExt};
-use shared::domain::jig::module::body::Audio;
+use shared::domain::jig::module::body::{Audio, _groups::cards::Mode};
 use std::rc::Rc;
 use utils::prelude::*;
 
@@ -26,8 +26,50 @@ const STR_DELETE_CONFIRM: &str = "Yes, go ahead!";
 const STR_DELETE_CANCEL: &str = "No, keep this list";
 
 pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<Step1<RawData, E>>) -> Dom {
+    let continue_signal = map_ref! {
+        let is_empty = state.base.is_empty_signal(),
+        let is_valid = state.base.is_valid_signal(),
+        let tab_kind = state.tab_kind.signal()
+            => {
+            let tab_kind = match tab_kind {
+                Some(kind) => Some(kind.clone()),
+                None => None,
+            };
+            (is_empty.clone(), is_valid.clone(), tab_kind)
+        }
+    };
+
+    state
+        .base
+        .continue_next_fn
+        .set(Some(Rc::new(clone!(state => move || {
+            if let Some(kind) = state.next_kind() {
+                state.tab_kind.set_neq(Some(kind));
+                true
+            } else {
+                false
+            }
+        }))));
+
     html!("empty-fragment", {
         .style("display", "contents")
+        .future(continue_signal.for_each(clone!(state => move |(is_empty, is_valid, tab_kind)| {
+            let can_continue = if matches!(tab_kind, Some(MenuTabKind::Text | MenuTabKind:: DualList)) {
+                // If we're on Text, DualList, we can continue to the next tabs...
+                match state.base.mode {
+                    Mode::WordsAndImages => !is_empty, // If the list is not empty
+                    _ => is_valid, // or the list is valid
+                }
+            } else {
+                // But, if we're on the Image or Audio tab, we can only continue if the list of
+                // cards are valid.
+                is_valid
+            };
+
+            state.base.can_continue_next.set_neq(can_continue);
+
+            async move {}
+        })))
         .child_signal(state.base.is_empty_signal().map(clone!(state => move |is_empty| {
             Some(html!("menu-tabs", {
                 .children(state.tabs.get().unwrap_ji().iter().enumerate().map(|(idx, tab)| {

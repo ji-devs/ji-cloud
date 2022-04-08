@@ -31,6 +31,13 @@ impl Step2 {
     }
 }
 
+pub fn next_kind(kind: &MenuTabKind) -> Option<MenuTabKind> {
+    match kind {
+        MenuTabKind::Text => Some(MenuTabKind::Image),
+        _ => None,
+    }
+}
+
 #[derive(Clone)]
 pub enum Tab {
     Text, // uses top-level state since it must be toggled from main too
