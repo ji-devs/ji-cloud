@@ -7162,6 +7162,26 @@
       ]
     }
   },
+  "f627e289a9e43d3c1a06bd8dff5c9cc875d7fb7435bf8f7fef35685a211bd9d5": {
+    "query": "\nselect email::text\nfrom user_email\nwhere user_id = $1\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "email",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
   "f7803338a676de1c4fad713fa774406743480aea8ceb9a4b6ba8ec80b74f9b3d": {
     "query": "update image_metadata set last_synced_at = null",
     "describe": {

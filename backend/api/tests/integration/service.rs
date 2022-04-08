@@ -31,6 +31,7 @@ impl TestServicesSettings {
     const TEST_SIGNUP_VERIFY_TEMPLATE: &'static str = "TEST_SIGNUP_VERIFY_TEMPLATE";
     const TEST_SIGNUP_PASSWORD_RESET_TEMPLATE: &'static str = "TEST_SIGNUP_PASSWORD_RESET_TEMPLATE";
     const TEST_EMAIL_RESET_TEMPLATE: &'static str = "TEST_EMAIL_RESET_TEMPLATE";
+    const TEST_WELCOME_JIGZI_TEMPLATE: &'static str = "TEST_WELCOME_JIGZI_TEMPLATE";
 
     pub async fn new() -> anyhow::Result<Self> {
         let (token, project_id) = match req_env("TEST_SERVICE_ACCOUNT_JSON") {
@@ -161,14 +162,30 @@ impl TestServicesSettings {
 
         let env_email_reset_template = req_env("TEST_EMAIL_RESET_TEMPLATE").ok();
 
+        let google_welcome_jigzi_template = self
+            .get_gcp_managed_secret(Self::TEST_WELCOME_JIGZI_TEMPLATE)
+            .await
+            .ok();
+
         let email_reset_template = match google_email_reset_template {
             Some(google_email_reset_template) => Some(google_email_reset_template),
             None => env_email_reset_template,
         };
 
+        let env_welcome_jigzi_template = req_env("TEST_WELCOME_JIGZI_TEMPLATE").ok();
+
+        let welcome_jigzi_template = match google_welcome_jigzi_template {
+            Some(google_welcome_jigzi_template) => Some(google_welcome_jigzi_template),
+            None => env_welcome_jigzi_template,
+        };
+
         println!(
-            "end keys {:?} {:?} {:?} {:?}",
-            api_key, sender_email, signup_verify_template, password_reset_template
+            "end keys {:?} {:?} {:?} {:?} {:?}",
+            api_key,
+            sender_email,
+            signup_verify_template,
+            password_reset_template,
+            welcome_jigzi_template
         );
 
         let (api_key, sender_email) = match (api_key, sender_email) {
@@ -182,6 +199,7 @@ impl TestServicesSettings {
             signup_verify_template,
             password_reset_template,
             email_reset_template,
+            welcome_jigzi_template,
         };
 
         let client = mail::Client::new(settings);

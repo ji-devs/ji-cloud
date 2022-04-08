@@ -74,6 +74,32 @@ async fn send_verification_email(
 }
 
 #[instrument(skip(txn, email_address, mail))]
+async fn send_welcome_jigzi_email(
+    txn: &mut PgConnection,
+    user_id: Uuid,
+    email_address: String,
+    mail: &mail::Client,
+    pages_url: &str,
+) -> Result<(), error::Service> {
+    let first_name = db::user::get_first_name(&mut *txn, user_id).await?;
+
+    let template = mail
+        .welcome_jigzi_template()
+        .map_err(error::Service::DisabledService)?;
+
+    mail.send_welcome_jigzi(
+        template,
+        Email::new(email_address),
+        pages_url.to_string(),
+        first_name,
+    )
+    .await
+    .map_err(|e| error::Service::InternalServerError(e))?;
+
+    Ok(())
+}
+
+#[instrument(skip(txn, email_address, mail))]
 async fn send_password_email(
     txn: &mut PgConnection,
     user_id: Uuid,
@@ -395,6 +421,7 @@ async fn create_profile(
     s3: ServiceData<s3::Client>,
     signup_user: TokenSessionOf<SessionCreateProfile>,
     req: Json<CreateProfileRequest>,
+    mail: ServiceData<mail::Client>,
 ) -> actix_web::Result<HttpResponse, error::UserUpdate> {
     validate_register_req(&req)?;
 
@@ -442,6 +469,23 @@ async fn create_profile(
         login_ttl,
         &session,
     )?;
+
+    let email = db::user::get_email(&mut txn, signup_user.claims.user_id).await?;
+
+    send_welcome_jigzi_email(
+        &mut txn,
+        signup_user.claims.user_id,
+        email,
+        &mail,
+        &settings.remote_target().pages_url(),
+    )
+    .await
+    .map_err(|e| {
+        error::UserUpdate::InternalServerError(anyhow::anyhow!(
+            "failed to send welcome jigzi email: {:?}",
+            e
+        ))
+    })?;
 
     txn.commit().await?;
 
