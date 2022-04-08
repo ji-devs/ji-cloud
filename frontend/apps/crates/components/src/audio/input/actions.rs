@@ -99,7 +99,7 @@ pub async fn file_change(state: Rc<AudioInput>, file: File) {
         }
     };
 
-    if let Some(_) = err {
+    if err.is_some() {
         state.mode.set(AudioInputMode::Empty);
     }
 }

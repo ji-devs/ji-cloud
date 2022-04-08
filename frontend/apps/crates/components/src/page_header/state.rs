@@ -17,6 +17,12 @@ pub struct State {
     pub beta_tooltip: Mutable<bool>,
 }
 
+impl Default for State {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl State {
     pub fn new() -> Self {
         let show_beta_tooltip = {

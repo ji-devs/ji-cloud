@@ -12,7 +12,7 @@ impl Ending {
         log::info!("MODULE ENDED");
         let msg = IframeAction::new(ModuleToJigPlayerMessage::Stop);
 
-        if let Err(_) = msg.try_post_message_to_player() {
+        if msg.try_post_message_to_player().is_err() {
             log::info!("Couldn't post message to player!");
         }
 
@@ -22,7 +22,7 @@ impl Ending {
                     log::info!("ending is next, transitioning...");
                     let msg = IframeAction::new(ModuleToJigPlayerMessage::Next);
 
-                    if let Err(_) = msg.try_post_message_to_player() {
+                    if msg.try_post_message_to_player().is_err() {
                         log::info!("Couldn't post message to player... redirect!");
                     }
                 }

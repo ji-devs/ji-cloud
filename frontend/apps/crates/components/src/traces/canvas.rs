@@ -108,10 +108,7 @@ pub fn draw_single_shape(
         }
     }
 
-    match shape {
-        TraceShape::PathCommands(_) => true,
-        _ => false,
-    }
+    matches!(shape, TraceShape::PathCommands(_))
 }
 
 pub fn draw_path_commands(

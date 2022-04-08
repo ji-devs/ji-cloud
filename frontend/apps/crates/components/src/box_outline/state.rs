@@ -20,10 +20,7 @@ pub enum BoxOutlineStyle {
 
 impl BoxOutlineStyle {
     pub const fn line_hidden(&self) -> bool {
-        match self {
-            Self::Hidden => true,
-            _ => false,
-        }
+        matches!(self, Self::Hidden)
     }
 }
 

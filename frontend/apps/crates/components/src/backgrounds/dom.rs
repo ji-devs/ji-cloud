@@ -1,5 +1,5 @@
 use dominator::{html, Dom};
-use std::rc::Rc;
+use std::{rc::Rc, vec};
 use utils::{colors::*, prelude::*};
 
 use futures_signals::{
@@ -18,9 +18,9 @@ pub fn render_backgrounds(bg: Rc<Backgrounds>, slot: Option<&str>) -> Dom {
         let layer_1 = bg.layer_1.signal_cloned(),
         let layer_2 = bg.layer_2.signal_cloned()
             => {
-                let mut children:Vec<Dom> = Vec::new();
-
-                children.push(render_theme_bg(*theme_id));
+                let mut children = vec![
+                    render_theme_bg(*theme_id)
+                ];
 
                 if let Some(layer_1) = layer_1 {
                     if let Some(dom) = render_bg(layer_1) {
@@ -55,9 +55,7 @@ pub fn render_single_background(
         let theme_id = theme_id_signal,
         let layer = bg_signal
             => {
-                let mut children:Vec<Dom> = Vec::new();
-
-                children.push(render_theme_bg(*theme_id));
+                let mut children = vec![render_theme_bg(*theme_id)];
 
                 if let Some(layer) = layer {
                     if let Some(dom) = render_bg(layer) {
@@ -79,9 +77,7 @@ pub fn render_single_background(
     })
 }
 pub fn render_backgrounds_raw(bg: &RawBackgrounds, theme_id: ThemeId, slot: Option<&str>) -> Dom {
-    let mut children: Vec<Dom> = Vec::new();
-
-    children.push(render_theme_bg(theme_id));
+    let mut children = vec![render_theme_bg(theme_id)];
 
     if let Some(layer_1) = bg.layer_1.as_ref() {
         if let Some(dom) = render_bg(layer_1) {
@@ -108,9 +104,7 @@ pub fn render_single_background_raw(
     theme_id: ThemeId,
     slot: Option<&str>,
 ) -> Dom {
-    let mut children: Vec<Dom> = Vec::new();
-
-    children.push(render_theme_bg(theme_id));
+    let mut children = vec![render_theme_bg(theme_id)];
 
     if let Some(bg) = bg.as_ref() {
         if let Some(dom) = render_bg(bg) {

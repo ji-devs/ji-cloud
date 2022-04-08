@@ -47,9 +47,11 @@ pub fn render(
             html!("page-header-link", {
                 .property("slot", "links")
                 .property("kind", page_link.kind_str())
-                .property("active", match &active_page {
-                    Some(active_page) if active_page == &page_link => true,
-                    _ => false,
+                .property("active", {
+                    matches!(
+                        &active_page,
+                        Some(active_page) if active_page == &page_link
+                    )
                 })
                 .property("href", &page_link.route())
                 .property("target", page_link.target())
@@ -124,9 +126,8 @@ pub fn render(
 fn has_privileges(state: Rc<State>, scope: UserScope) -> impl Signal<Item = bool> {
     state
         .logged_in
-        .signal_ref(move |logged_in_state| match logged_in_state {
-            LoggedInState::LoggedIn(profile) if profile.scopes.contains(&scope) => true,
-            _ => false,
+        .signal_ref(move |logged_in_state| {
+            matches!(logged_in_state, LoggedInState::LoggedIn(profile) if profile.scopes.contains(&scope))
         })
 }
 

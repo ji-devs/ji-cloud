@@ -35,10 +35,7 @@ impl UploadError {
     }
 
     pub fn is_too_large(&self) -> bool {
-        match self {
-            Self::TooLarge => true,
-            _ => false,
-        }
+        matches!(self, Self::TooLarge)
     }
 }
 

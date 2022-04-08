@@ -29,12 +29,7 @@ pub fn wait_for_upload_ready(
         None => waitForUploadReady(&media_id.to_string(), library.to_str(), None),
     };
 
-    async move {
-        match JsFuture::from(promise).await {
-            Ok(_) => true,
-            Err(_) => false,
-        }
-    }
+    async move { JsFuture::from(promise).await.is_ok() }
 }
 
 static GLOBAL_SCREENSHOT_LISTENER_COUNT: AtomicUsize = AtomicUsize::new(0);

@@ -48,7 +48,7 @@ pub fn render(state: Rc<State>, slot: Option<&str>) -> Dom {
     })
 }
 
-fn render_static_section(state: Rc<State>, color_options: &Vec<RGBA8>, label: &str) -> Dom {
+fn render_static_section(state: Rc<State>, color_options: &[RGBA8], label: &str) -> Dom {
     html!("color-select-section", {
         .property("slot", "sections")
         .property("label", label)

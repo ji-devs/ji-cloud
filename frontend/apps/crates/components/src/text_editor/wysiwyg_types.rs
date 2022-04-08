@@ -62,6 +62,12 @@ pub struct ControlsState {
     pub underline: bool,
 }
 
+impl Default for ControlsState {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl ControlsState {
     // maybe take from js default
     pub fn new() -> Self {

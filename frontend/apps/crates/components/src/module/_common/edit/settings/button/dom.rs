@@ -34,10 +34,11 @@ where
                     Some(target) => {
                         let target: JsValue = target.into();
                         let element: HtmlElement = target.into();
-                        match element.closest("module-settings-bubble") {
-                            Ok(Some(_)) => false,
-                            _ => true
-                        }
+
+                        !matches!(
+                            element.closest("module-settings-bubble"),
+                            Ok(Some(_))
+                        )
                     },
                     _ => true
                 };

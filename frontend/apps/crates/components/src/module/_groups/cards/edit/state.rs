@@ -90,6 +90,13 @@ pub struct Tooltips {
     pub delete: Mutable<Option<Rc<TooltipState>>>,
     pub list_error: Mutable<Option<Rc<TooltipState>>>,
 }
+
+impl Default for Tooltips {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Tooltips {
     pub fn new() -> Self {
         Self {

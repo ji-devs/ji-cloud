@@ -70,10 +70,7 @@ impl<RawData: RawDataExt, E: ExtraExt> MainCard<RawData, E> {
         card: Card,
         other: Card,
     ) -> Rc<Self> {
-        let is_image = match card.card_content {
-            CardContent::Image(_) => true,
-            _ => false,
-        };
+        let is_image = matches!(card.card_content, CardContent::Image(_));
 
         let callbacks = {
             if is_image {

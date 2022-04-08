@@ -10,26 +10,17 @@ pub enum ModulePageKind {
 
 impl ModulePageKind {
     pub fn is_resize(&self) -> bool {
-        match self {
-            Self::GridResize
-            | Self::GridResizeScrollable
-            | Self::GridResizePreview
-            | Self::Iframe => true,
-            _ => false,
-        }
+        matches!(
+            self,
+            Self::GridResize | Self::GridResizeScrollable | Self::GridResizePreview | Self::Iframe
+        )
     }
     pub fn add_scrollable_attribute(&self) -> bool {
-        match self {
-            Self::GridResizeScrollable => true,
-            _ => false,
-        }
+        self == &Self::GridResizeScrollable
     }
 
     pub fn add_preview_attribute(&self) -> bool {
-        match self {
-            Self::GridResizePreview => true,
-            _ => false,
-        }
+        matches!(self, Self::GridResizePreview)
     }
     pub fn element_name(&self) -> &str {
         match self {

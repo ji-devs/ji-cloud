@@ -131,7 +131,7 @@ where
 
                 //Wait until the iframe sends its empty message
                 //Then send back the current raw data from history
-                if let Ok(_) = evt.try_serde_data::<IframeInit<EmptyMessage>>() {
+                if evt.try_serde_data::<IframeInit<EmptyMessage>>().is_ok() {
                     let data = state.history.get_current();
 
                     let msg:IframeInit<RawData> = IframeInit::new(data);

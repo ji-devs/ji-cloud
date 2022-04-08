@@ -136,7 +136,7 @@ pub async fn get_hit_index<'a, V: AsRef<Trace>>(
 
     let sticker = &*sticker;
 
-    let transform = &*transform_override.unwrap_or(Cow::Borrowed(sticker.transform()));
+    let transform = &*transform_override.unwrap_or_else(|| Cow::Borrowed(sticker.transform()));
     let oobb = bounds::oobb_transform_px(true, transform, Some(size), &resize_info);
     let aabb = oobb.to_aabb();
 
@@ -204,7 +204,7 @@ pub async fn get_hit_index<'a, V: AsRef<Trace>>(
     for x in 0..width {
         for y in 0..height {
             let offset = y * (width * 4) + x * 4;
-            let r = data[offset + 0] as u32;
+            let r = data[offset] as u32;
             let g = data[offset + 1] as u32;
             let b = data[offset + 2] as u32;
             let a = data[offset + 3];
