@@ -18,7 +18,7 @@ const STR_ADD_LINK: &str = "Add link";
 
 impl AddAdditionalResource {
     pub fn render(self: Rc<Self>) -> Dom {
-        let state = Rc::clone(&self);
+        let state = self;
         html!("empty-fragment", {
             .style("display", "contents")
             .property("slot", "resources")
@@ -43,18 +43,15 @@ impl AddAdditionalResource {
                 }
             })))
             .child_signal(state.active_popup.signal().map(clone!(state => move|active_popup| {
-                match active_popup {
-                    None => None,
-                    Some(popup) => {
-                        Some(state.render_popup(popup))
-                    }
-                }
+                active_popup.map(|popup| {
+                    state.render_popup(popup)
+                })
             })))
         })
     }
 
     fn render_popup(self: &Rc<Self>, popup: ActivePopup) -> Dom {
-        let state = Rc::clone(&self);
+        let state = Rc::clone(self);
         html!("div" => HtmlElement, {
             .with_node!(elem => {
                 .apply(OverlayHandle::lifecycle(
@@ -84,7 +81,7 @@ impl AddAdditionalResource {
     }
 
     fn render_main_popup(self: &Rc<Self>) -> Dom {
-        let state = Rc::clone(&self);
+        let state = self;
         html!("jig-edit-publish-resource-add", {
             .children(&mut [
                 html!("fa-button", {

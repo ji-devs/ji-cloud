@@ -37,7 +37,9 @@ pub async fn load_jig(jig_id: JigId, jig_cell: Rc<RefCell<Option<JigResponse>>>)
             );
             *jig_cell.borrow_mut() = Some(resp);
         }
-        Err(_) => {}
+        Err(_) => {
+            todo!();
+        }
     }
 }
 
@@ -93,17 +95,14 @@ pub fn update_display_name(state: Rc<State>, value: String) {
             ..Default::default()
         };
 
-        match update_jig(&state.jig.id, req).await {
-            Ok(_) => {},
-            Err(_) => {},
-        }
+        let _ = update_jig(&state.jig.id, req).await;
     }));
 }
 
 pub fn duplicate_module(state: Rc<State>, module_id: &ModuleId) {
     state.loader.load(clone!(state, module_id => async move {
         let module = super::module_cloner::clone_module(&state.jig.id, &module_id, &state.jig.id).await.unwrap_ji();
-        populate_added_module(state.clone(), module);
+        populate_added_module(state, module);
     }));
 }
 
@@ -113,15 +112,15 @@ pub fn _player_settings_change_signal(state: Rc<State>) -> impl Signal<Item = Ji
         let display_score = state.settings.display_score.signal(),
         let track_assessments = state.settings.track_assessments.signal(),
         let drag_assist = state.settings.drag_assist.signal()
-        => ( direction.clone(), display_score.clone(), track_assessments.clone(), drag_assist.clone())
+        => ( *direction, *display_score, *track_assessments, *drag_assist)
     };
 
     sig.map(
         |(direction, display_score, track_assessments, drag_assist)| JigPlayerSettings {
-            direction: direction.clone(),
-            display_score: display_score.clone(),
-            track_assessments: track_assessments.clone(),
-            drag_assist: drag_assist.clone(),
+            direction,
+            display_score,
+            track_assessments,
+            drag_assist,
         },
     )
 }
@@ -149,7 +148,7 @@ pub fn on_iframe_message(state: Rc<State>, message: ModuleToJigEditorMessage) {
         }
         ModuleToJigEditorMessage::Complete(module_id, is_complete) => {
             let modules = state.modules.lock_ref();
-            let module = modules.into_iter().find(|module| {
+            let module = modules.iter().find(|module| {
                 // Oh my.
                 match &***module {
                     Some(module) => *module.id() == module_id,

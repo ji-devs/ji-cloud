@@ -8,7 +8,7 @@ use crate::edit::sidebar::settings::state::ActiveSettingsPopup;
 
 use super::state::State;
 
-pub const STR_BACK_TO_SETTINGS: &'static str = "Back to JIG settings";
+pub const STR_BACK_TO_SETTINGS: &str = "Back to JIG settings";
 
 mod background;
 mod feedback;
@@ -46,7 +46,7 @@ pub fn render(state: Rc<State>) -> Dom {
             match active_popup {
                 Some(ActiveSettingsPopup::Main) => Some(main::render(Rc::clone(&state))),
                 Some(ActiveSettingsPopup::Background) => Some(background::render(Rc::clone(&state))),
-                Some(ActiveSettingsPopup::Feedback(tab)) => Some(feedback::render(Rc::clone(&state), tab.clone())),
+                Some(ActiveSettingsPopup::Feedback(tab)) => Some(feedback::render(Rc::clone(&state), tab)),
                 None => None
             }
         })))

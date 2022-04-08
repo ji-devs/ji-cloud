@@ -12,9 +12,9 @@ use crate::edit::sidebar::settings::{
 
 use super::super::state::State;
 
-// const STR_DISPLAY_SCORE: &'static str = "Display score";
-const STR_ASSESSMENT_MODE: &'static str = "Assessment mode";
-const STR_DRAG_ASSIST: &'static str = "Drag & Drop assist";
+// const STR_DISPLAY_SCORE: &str = "Display score";
+const STR_ASSESSMENT_MODE: &str = "Assessment mode";
+const STR_DRAG_ASSIST: &str = "Drag & Drop assist";
 
 pub fn render(state: Rc<State>) -> Dom {
     html!("jig-settings", {

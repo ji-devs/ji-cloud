@@ -9,8 +9,8 @@ use utils::{events, unwrap::UnwrapJiExt};
 
 use super::super::state::Publish;
 
-const STR_AGE_LABEL: &'static str = "Age range";
-const STR_AGE_PLACEHOLDER: &'static str = "Select one or more";
+const STR_AGE_LABEL: &str = "Age range";
+const STR_AGE_PLACEHOLDER: &str = "Select one or more";
 const STR_ALL_AGES: &str = "All ages";
 
 impl Publish {
@@ -47,7 +47,7 @@ impl Publish {
             }))
             .children_signal_vec(state.ages.signal_cloned().map(clone!(state => move |ages| {
                 ages.iter().map(|age| {
-                    render_age(&age, state.clone())
+                    render_age(age, state.clone())
                 }).collect()
             })).to_signal_vec())
         })
@@ -55,7 +55,7 @@ impl Publish {
 }
 
 fn render_age(age: &AgeRange, state: Rc<Publish>) -> Dom {
-    let age_id = age.id.clone();
+    let age_id = age.id;
     html!("input-select-option", {
         .text(&age.display_name)
         .property_signal("selected", state.jig.age_ranges.signal_cloned().map(clone!(age_id => move |ages| {

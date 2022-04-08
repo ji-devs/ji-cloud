@@ -13,10 +13,10 @@ use std::rc::Rc;
 use std::str::FromStr;
 use utils::prelude::*;
 
-const STR_DELETE_TITLE: &'static str = "Warning";
-const STR_DELETE_CONTENT: &'static str = "Are you sure you want to delete this activity?";
-const STR_DELETE_CONFIRM: &'static str = "Delete activity";
-const STR_DELETE_CANCEL: &'static str = "Don't delete";
+const STR_DELETE_TITLE: &str = "Warning";
+const STR_DELETE_CONTENT: &str = "Are you sure you want to delete this activity?";
+const STR_DELETE_CONFIRM: &str = "Delete activity";
+const STR_DELETE_CANCEL: &str = "Don't delete";
 
 pub struct ModuleDom {}
 
@@ -92,10 +92,14 @@ impl ModuleDom {
                 .property("index", index as u32)
                 .property_signal("collapsed", state.sidebar.collapsed.signal())
                 .property_signal("selected", state.sidebar.jig_edit_state.route.signal_ref(clone!(module => move |route| {
-                    match (&*module, route) {
-                        (Some(module), JigEditRoute::Module(module_id)) if module_id == module.id() => true,
-                        _ => false,
-                    }
+                    matches!(
+                        (&*module, route),
+                        (Some(module), JigEditRoute::Module(module_id)) if module_id == module.id()
+                    )
+                    // match (&*module, route) {
+                    //     (Some(module), JigEditRoute::Module(module_id)) if module_id == module.id() => true,
+                    //     _ => false,
+                    // }
                 })))
                 // TODO:
                 // .event(|_evt:events::MouseDown| {
@@ -139,7 +143,7 @@ impl ModuleDom {
                                 (Some(module), _) => {
                                     Some(ModuleThumbnail::render_live(
                                         Rc::new(ModuleThumbnail {
-                                            jig_id: state.sidebar.jig.id.clone(),
+                                            jig_id: state.sidebar.jig.id,
                                             module: Some(module.into()),
                                             is_jig_fallback: false,
                                         }),

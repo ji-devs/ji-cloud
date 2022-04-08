@@ -7,7 +7,7 @@ use super::state::AddLink;
 
 impl AddLink {
     pub fn save(self: &Rc<Self>) {
-        let state = Rc::clone(&self);
+        let state = Rc::clone(self);
 
         state.add_resources_state.active_popup.set(None);
 

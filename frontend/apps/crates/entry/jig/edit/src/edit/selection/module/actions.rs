@@ -14,7 +14,7 @@ impl State {
 
     pub fn on_pointer_move(self: &Rc<Self>, drag: &Rc<Drag>, x: i32, y: i32) {
         drag.update(x, y);
-        trigger_enter_leave_events(&self, x as f32, y as f32);
+        trigger_enter_leave_events(self, x as f32, y as f32);
     }
 
     pub fn on_pointer_up(self: &Rc<Self>, x: i32, y: i32) {

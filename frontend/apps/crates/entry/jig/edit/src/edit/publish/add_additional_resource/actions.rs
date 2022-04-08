@@ -19,11 +19,11 @@ impl AddAdditionalResource {
         display_name: String,
         resource_type_id: ResourceTypeId,
     ) {
-        let state = Rc::clone(&self);
+        let state = Rc::clone(self);
 
         let req = AdditionalResourceCreateRequest {
             display_name: display_name.clone(),
-            resource_type_id: resource_type_id.clone(),
+            resource_type_id,
             resource_content: resource_content.clone(),
         };
 

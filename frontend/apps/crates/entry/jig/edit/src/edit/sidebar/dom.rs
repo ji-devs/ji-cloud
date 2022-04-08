@@ -165,7 +165,7 @@ impl SidebarDom {
                     drag_actions::mouse_move(state.clone(), evt.x(), evt.y());
                 }))
             }))
-            .child(DraggingDom::render(state.clone()))
+            .child(DraggingDom::render(state))
         })
     }
 }

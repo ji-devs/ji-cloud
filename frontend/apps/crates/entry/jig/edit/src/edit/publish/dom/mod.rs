@@ -62,7 +62,7 @@ impl Publish {
             }))
             .property("slot", "main")
             .child_signal(state.signal_cloned().map(|state| {
-                state.map(|state| render_page(state.clone()))
+                state.map(render_page)
             }))
             .child(html!("window-loader-block", {
                 .property_signal("visible", state.signal_ref(|state| state.is_none()))
@@ -78,7 +78,7 @@ fn render_page(state: Rc<Publish>) -> Dom {
         let has_modules = !modules.is_empty();
 
         let invalid_module = modules.iter().find(|module| !module.is_complete);
-        (has_modules, invalid_module.map(|module| module.clone()))
+        (has_modules, invalid_module.cloned())
     };
 
     html!("jig-edit-publish", {
@@ -95,7 +95,7 @@ fn render_page(state: Rc<Publish>) -> Dom {
         .children(&mut [
             ModuleThumbnail::render_live(
                 Rc::new(ModuleThumbnail {
-                    jig_id: state.jig.id.clone(),
+                    jig_id: state.jig.id,
                     //Cover module (first module) is guaranteed to exist
                     module: state.jig.modules.lock_ref().first().cloned(),
                     is_jig_fallback: true,
@@ -230,7 +230,7 @@ fn render_page(state: Rc<Publish>) -> Dom {
                 .event(clone!(state => move |_: events::Click| {
                     state.jig_edit_state.route.set_neq(JigEditRoute::Landing);
                     let url:String = Route::Jig(JigRoute::Edit(
-                        state.jig.id.clone(),
+                        state.jig.id,
                         state.jig.jig_focus,
                         JigEditRoute::Landing
                     )).into();
@@ -248,7 +248,7 @@ fn render_page(state: Rc<Publish>) -> Dom {
                             "disabled",
                             state.jig.jig_focus.is_modules()
                             && (state.jig.modules.lock_ref().len() == 0 // Disabled
-                                || state.jig.modules.lock_ref().iter().find(|m| !m.is_complete).is_some())
+                                || state.jig.modules.lock_ref().iter().any(|m| !m.is_complete))
                         )
                         .child(html!("fa-icon", {
                             .property("icon", "fa-light fa-rocket-launch")

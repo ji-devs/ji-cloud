@@ -77,7 +77,9 @@ pub fn delete(state: Rc<State>) {
                 Ok(_) => {
                     state.sidebar.modules.lock_mut().remove(index);
                 },
-                Err(_) => {}
+                Err(_) => {
+                    todo!();
+                }
             }
         } else {
             // The module is placeholder, it is not persisted so it can be removed from the list with
@@ -144,7 +146,7 @@ pub fn assign_kind(state: Rc<State>, kind: ModuleKind) {
                 }
 
                 let req = ModuleUpdateRequest {
-                    id: StableOrUniqueId::Unique(id.clone()),
+                    id: StableOrUniqueId::Unique(id),
                     index: Some(index.try_into().unwrap_ji()),
                     body: None,
                     is_complete: None,
@@ -153,7 +155,7 @@ pub fn assign_kind(state: Rc<State>, kind: ModuleKind) {
                 match update_module(&state.sidebar.jig.id, &id, req).await {
                     Ok(_) => {
                         state.sidebar.collapsed.set(true);
-                        state.sidebar.jig_edit_state.route.set(JigEditRoute::Module(id.clone()));
+                        state.sidebar.jig_edit_state.route.set(JigEditRoute::Module(id));
                         Route::push_state(Route::Jig(JigRoute::Edit(
                             state.sidebar.jig.id,
                             state.sidebar.jig.jig_focus,
@@ -199,11 +201,7 @@ pub fn move_index(state: Rc<State>, move_target: MoveTarget) {
                     is_complete: None,
                 };
 
-                match update_module(&state.sidebar.jig.id, module.id(), req).await {
-                    Ok(_) => {
-                    },
-                    Err(_) => {},
-                }
+                let _ = update_module(&state.sidebar.jig.id, module.id(), req).await;
             }
         }
     }));

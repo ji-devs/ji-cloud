@@ -20,7 +20,7 @@ use utils::prelude::*;
 
 impl JigGallery {
     pub fn load_data(self: &Rc<Self>) {
-        let state = Rc::clone(&self);
+        let state = self;
         state.loader.load(clone!(state => async move {
             join!(
                 state.load_jigs(),
@@ -30,7 +30,7 @@ impl JigGallery {
     }
 
     async fn load_jigs(self: &Rc<Self>) {
-        let state = Rc::clone(&self);
+        let state = self;
         let is_published = match *state.visible_jigs.lock_ref() {
             VisibleJigs::All => None,
             VisibleJigs::Published => Some(true),
@@ -47,7 +47,7 @@ impl JigGallery {
         };
 
         match api_with_auth::<JigBrowseResponse, EmptyError, _>(
-            &endpoints::jig::Browse::PATH,
+            endpoints::jig::Browse::PATH,
             endpoints::jig::Browse::METHOD,
             Some(req),
         )
@@ -66,12 +66,14 @@ impl JigGallery {
                 // Update the list with the new list.
                 state.jigs.lock_mut().replace_cloned(new_list);
             }
-            Err(_) => {}
+            Err(_) => {
+                todo!();
+            }
         }
     }
 
     async fn load_ages(self: &Rc<Self>) {
-        let state = Rc::clone(&self);
+        let state = Rc::clone(self);
         match api_with_auth::<MetadataResponse, EmptyError, ()>(
             endpoints::meta::Get::PATH,
             endpoints::meta::Get::METHOD,
@@ -87,7 +89,7 @@ impl JigGallery {
     }
 
     pub fn search_jigs(self: &Rc<Self>, q: String) {
-        let state = Rc::clone(&self);
+        let state = self;
         state.loader.load(clone!(state => async move {
             let is_published = match *state.visible_jigs.lock_ref() {
                 VisibleJigs::All => None,
@@ -104,27 +106,29 @@ impl JigGallery {
             });
 
             match api_with_auth::<JigSearchResponse, EmptyError, _>(
-                &endpoints::jig::Search::PATH,
+                endpoints::jig::Search::PATH,
                 endpoints::jig::Search::METHOD,
                 req
             ).await {
                 Ok(resp) => {
                     state.jigs.lock_mut().replace_cloned(resp.jigs);
                 },
-                Err(_) => {},
+                Err(_) => {
+                    todo!();
+                },
             }
         }));
     }
 
     pub fn load_jigs_regular(self: &Rc<Self>) {
-        let state = Rc::clone(&self);
+        let state = self;
         state.loader.load(clone!(state => async move {
             state.load_jigs().await
         }));
     }
 
     pub fn create_jig(self: &Rc<Self>) {
-        let state = Rc::clone(&self);
+        let state = self;
         state.loader.load(clone!(state => async move {
             let req = JigCreateRequest {
                 jig_focus: state.focus,
@@ -132,7 +136,7 @@ impl JigGallery {
             };
 
             match api_with_auth::<CreateResponse<JigId>, MetadataNotFound, _>(
-                &endpoints::jig::Create::PATH,
+                endpoints::jig::Create::PATH,
                 endpoints::jig::Create::METHOD,
                 Some(req),
             )
@@ -176,7 +180,7 @@ impl JigGallery {
     }
 
     pub fn copy_jig(self: &Rc<Self>, jig_id: &JigId) {
-        let state = Rc::clone(&self);
+        let state = self;
         let path = endpoints::jig::Clone::PATH.replace("{id}", &jig_id.0.to_string());
 
         state.loader.load(clone!(state => async move {
@@ -188,17 +192,21 @@ impl JigGallery {
                         Ok(resp) => {
                             state.jigs.lock_mut().push_cloned(resp);
                         },
-                        Err(_) => {},
+                        Err(_) => {
+                            todo!();
+                        },
                     };
 
                 },
-                Err(_) => {},
+                Err(_) => {
+                    todo!();
+                },
             };
         }));
     }
 
     pub fn delete_jig(self: &Rc<Self>, jig_id: JigId) {
-        let state = Rc::clone(&self);
+        let state = self;
         state.loader.load(clone!(state => async move {
             let path = endpoints::jig::Delete::PATH.replace("{id}",&jig_id.0.to_string());
             match api_with_auth_empty::<EmptyError, ()>(&path, endpoints::jig::Delete::METHOD, None).await {
@@ -207,7 +215,9 @@ impl JigGallery {
                         jig.id != jig_id
                     });
                 },
-                Err(_) => {}
+                Err(_) => {
+                    todo!();
+                }
             }
         }));
     }

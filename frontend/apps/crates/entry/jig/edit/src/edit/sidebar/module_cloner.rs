@@ -16,11 +16,11 @@ pub async fn clone_module(
     orig_module_id: &ModuleId,
     new_jig_id: &JigId,
 ) -> Result<LiteModule, EmptyError> {
-    let module = get_module(&orig_jig_id, &orig_module_id).await.unwrap_ji();
+    let module = get_module(orig_jig_id, orig_module_id).await.unwrap_ji();
 
     let id = create_module(new_jig_id, module.body.clone()).await?;
     Ok(LiteModule {
-        id: id,
+        id,
         kind: module.body.kind(),
         is_complete: module.is_complete,
     })
