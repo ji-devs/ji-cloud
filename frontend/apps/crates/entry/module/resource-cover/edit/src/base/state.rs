@@ -9,7 +9,7 @@ use components::{
     text_editor::{callbacks::Callbacks as TextEditorCallbacks, state::State as TextEditorState},
 };
 use dominator::clone;
-use futures_signals::signal::{self, Mutable, ReadOnlyMutable, Signal};
+use futures_signals::signal::{Mutable, ReadOnlyMutable};
 use shared::domain::jig::{
     module::{
         body::{
