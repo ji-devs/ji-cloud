@@ -49,7 +49,7 @@ impl EmailHandler {
         let email = &self.value.borrow();
         let error = if email.is_empty() {
             Some(STR_EMAIL_EMPTY)
-        } else if valid_email(email) {
+        } else if !valid_email(email) {
             Some(STR_EMAIL_INVALID)
         } else {
             None
