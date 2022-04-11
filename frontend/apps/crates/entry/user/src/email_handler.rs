@@ -28,6 +28,7 @@ impl EmailHandler {
     }
 
     pub fn update_value(&self, value: String) {
+        value = value.trim();
         *self.value.borrow_mut() = value;
         self.update_errors();
     }
@@ -54,5 +55,9 @@ impl EmailHandler {
             None
         };
         self.error.set(error);
+    }
+
+    fn valid_email(email: &str) -> bool {
+        email.contains('@') && !email.contains(' ')
     }
 }
