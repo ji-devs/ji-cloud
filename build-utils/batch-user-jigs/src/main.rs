@@ -19,7 +19,7 @@ use shared::{
     },
 };
 use simplelog::*;
-use std::collections::HashSet;
+use std::collections::HashMap;
 use std::sync::Arc;
 use std::{future::Future, process::exit};
 use structopt::StructOpt;
@@ -61,9 +61,9 @@ async fn main() {
 }
 
 async fn get_futures(ctx: Arc<Context>) -> Vec<impl Future> {
-    let mut mem = Arc::new(Mutex::new(HashSet::new()));
-
     let mut futures = Vec::new();
+
+    let mut mem = Arc::new(Mutex::new(HashMap::new()));
 
     async fn do_browse(ctx: &Context, page: usize) -> Result<JigBrowseResponse, reqwest::Error> {
         let ji_tap = "9b819dce-5e2a-11ec-9e39-bb74dda33501";
@@ -109,12 +109,17 @@ async fn get_futures(ctx: Arc<Context>) -> Vec<impl Future> {
                         let JigBrowseResponse { jigs, .. } = res;
 
                         for jig in jigs {
-
                             if ctx.opts.log_duplicate_jig {
-                                if mem.lock().await.contains(&jig.id.0) {
-                                    println!("Duplicate: {:?}", jig.id.0);
+                                if mem.lock().await.contains_key(&jig.id.0) {
+                                    println!(
+                                        "jig_id: {:?}, first_page: {:?}, second page: {}",
+                                        jig.id.0,
+                                        mem.lock().await.get(&jig.id.0),
+                                        page
+                                    );
                                 }
-                                mem.lock().await.insert(jig.id.0.clone());
+
+                                mem.lock().await.insert(jig.id.0.clone(), page);
                             }
 
                             if ctx.opts.update_background_music {

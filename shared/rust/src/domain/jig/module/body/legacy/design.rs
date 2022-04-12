@@ -34,7 +34,7 @@ pub struct Sticker {
     /// the original sticker kind
     /// ideally we'd ditch this
     /// but it's helpful for debugging
-    pub kind: StickerKind 
+    pub kind: StickerKind,
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
@@ -45,7 +45,6 @@ pub enum StickerKind {
     Image,
     Text(Option<String>),
 }
-
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone, Copy)]
 #[serde(rename_all = "snake_case")]
