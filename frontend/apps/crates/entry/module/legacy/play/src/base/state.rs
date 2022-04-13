@@ -85,7 +85,7 @@ impl Base {
             .to_string();
 
         let url = utils::path::legacy_cdn_url(format!(
-            "{}/json/slides/{}.json",
+            "{}/json/slides/{}.json?foo=bar",
             raw.game_id, slide_id
         ));
 

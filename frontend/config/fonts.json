@@ -216,5 +216,25 @@
     "ArimaMadurai-regular": {
         "file": "Arima/ArimaMadurai-Regular.ttf",
         "format": "truetype"
+    },
+    "TaameyDavidCLM": {
+        "file": "TaameyDavidCLM.woff2",
+        "format": "woff2"
+    },
+    "TaameyFrank": {
+        "file": "TaameyFrankCLM.woff2",
+        "format": "woff2"
+    },
+    "KeterYG": {
+        "file": "KeterYG.woff2",
+        "format": "woff2"
+    },
+    "FiraGO": {
+        "file": "FiraGO.woff2",
+        "format": "woff2"
+    },
+    "KeterAramTsova": {
+        "file": "KeterAramTsova.woff2",
+        "format": "woff2"
     }
 }

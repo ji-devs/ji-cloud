@@ -13,3 +13,18 @@ pub fn height_signal(size: impl Signal<Item = Option<(f64, f64)>>) -> impl Signa
         Some(size) => format!("{}rem", size.1),
     })
 }
+
+
+pub fn width_signal_px(size: impl Signal<Item = Option<(f64, f64)>>) -> impl Signal<Item = String> {
+    size.map(|size| match size {
+        None => "0".to_string(),
+        Some(size) => format!("{}px", size.0),
+    })
+}
+
+pub fn height_signal_px(size: impl Signal<Item = Option<(f64, f64)>>) -> impl Signal<Item = String> {
+    size.map(|size| match size {
+        None => "0".to_string(),
+        Some(size) => format!("{}px", size.1),
+    })
+}

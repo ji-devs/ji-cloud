@@ -7,7 +7,7 @@ use shared::config::RemoteTarget;
 pub struct Opts {
 
     /////////////////// GLOBAL //////////////////////////////////
-    #[structopt(long, parse(try_from_str), default_value = "false")]
+    #[structopt(long, parse(try_from_str), default_value = "true")]
     pub set_debug_values: bool,
     //#[structopt(long, default_value="/Users/dakom/Downloads/output", parse(from_os_str))]
     //#[structopt(long, default_value="E:\\JI\\output", parse(from_os_str))]
@@ -33,14 +33,14 @@ pub struct Opts {
     #[structopt(long, parse(try_from_str), default_value = "false")]
     pub process_download_albums: bool,
     // if false, won't update or create jigs
-    #[structopt(long, parse(try_from_str), default_value = "true")]
+    #[structopt(long, parse(try_from_str), default_value = "false")]
     pub process_update_jigs: bool,
     // if false, won't do any transcoding of json
     // however, currently, will be forced to true if process_transcode_game_media is true
-    #[structopt(long, parse(try_from_str), default_value = "false")]
+    #[structopt(long, parse(try_from_str), default_value = "true")]
     pub process_transcode_game_json: bool,
     // if false, won't do any transcoding of media
-    #[structopt(long, parse(try_from_str), default_value = "false")]
+    #[structopt(long, parse(try_from_str), default_value = "true")]
     pub process_transcode_game_media: bool,
 
     /////////////////// ALBUMS //////////////////////////////////
@@ -148,7 +148,7 @@ impl Opts {
             self.download_jigs_page_stop_limit = Some(3);
             //self.transcode_only_game_id = Some("18514".to_string());
             //self.transcode_only_game_id = Some("37".to_string());
-            self.transcode_only_game_id = Some("12438".to_string());
+            self.transcode_only_game_id = Some("3484".to_string());
         } 
 
         if self.token.is_empty() {

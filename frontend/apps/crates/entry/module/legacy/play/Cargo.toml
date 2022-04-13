@@ -52,6 +52,8 @@ web-sys = { version = "0.3.55", features = [
     'HtmlIFrameElement',
     'Worker',
     'WorkerOptions',
+    'DomParser',
+    'SupportedType'
 ] }
 wasm-bindgen-futures = "0.4.28"
 dominator = "0.5.22"

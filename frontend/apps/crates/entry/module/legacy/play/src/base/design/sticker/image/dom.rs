@@ -1,4 +1,4 @@
-use dominator::{clone, html, with_node, Dom};
+use dominator::{dom_builder,clone, html, with_node, Dom};
 use futures_signals::signal::SignalExt;
 
 use std::rc::Rc;
@@ -59,8 +59,6 @@ impl ImagePlayer {
                             }
 
                             state.size.set(Some((width, height)));
-
-
                         }
 
                         *state.controller.elem.borrow_mut() = Some(elem.clone().unchecked_into());
@@ -71,8 +69,6 @@ impl ImagePlayer {
                 })
             })
         } else {
-            log::info!("{:?}", state.raw);
-
             html!("div" => web_sys:: HtmlDivElement, {
                 .style_signal("opacity", state.controller.hidden.signal().map(|hidden| {
                     if hidden {
@@ -94,12 +90,26 @@ impl ImagePlayer {
                     state.base.insert_stage_click_listener(clone!(state => move |stage_click| {
                         state.controller.handle_click(stage_click);
                     }));
-
-                    let html = state.get_text().unwrap_ji();
-
-                    //TODO -add html here?
+                }))
+                .child(dom_builder!(parse_html(state.get_text().unwrap_ji()), {
                 }))
             })
         }
     }
+}
+
+fn parse_html(html: &str) -> web_sys::HtmlElement {
+    let parser = web_sys::DomParser::new().unwrap();
+
+    // NOTE: this is error-prone, if the text itself contains "px" then it will be replaced
+    // should instead parse as proper stylesheet, or at least a regex to replace the pattern
+    // properly
+    let html = html.replace("px", "rem");
+    let document = parser.parse_from_string(&html, web_sys::SupportedType::TextHtml).unwrap();
+
+    document.body()
+        .unwrap()
+        .first_element_child()
+        .unwrap()
+        .unchecked_into()
 }
