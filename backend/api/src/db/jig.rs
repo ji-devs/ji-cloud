@@ -357,7 +357,7 @@ select jig.id                                       as "id!: JigId",
        rating                                   as "rating?: JigRating",
        blocked                                  as "blocked!",
        curated                                  as "curated!",
-       jig_focus                                as "jig_focus!: JigFocus"
+       jig_focus                                as "jig_focus!: JigFocus"       
 from jig
          inner join unnest($1::uuid[])
     with ordinality t(id, ord) using (id)
@@ -418,7 +418,6 @@ select id,
 from jig_data
          inner join unnest($1::uuid[])
     with ordinality t(id, ord) using (id)
-where draft_or_live is not null
 "#,
         &jig_data_ids
     )
@@ -554,7 +553,7 @@ with cte as (
         and (blocked = $4 or $4 is null)
         and (jd.privacy_level = any($5) or $5 = array[]::smallint[])
         and (resource.resource_type_id = any($8) or $8 = array[]::uuid[])
-    order by coalesce(updated_at, created_at) desc) as id
+    order by coalesce(updated_at, created_at) desc, jig_id) as id
 ),
 cte1 as (
     select * from unnest((select distinct id from cte)) with ordinality t(id
@@ -619,7 +618,8 @@ from cte1
 left join jig_data on cte1.id = jig_data.id
 left join jig on (jig_data.id = jig.draft_id or (jig_data.id = jig.live_id and last_synced_at is not null))
 left join jig_admin_data "admin" on admin.jig_id = jig.id
-where cte1.ord > (1 * $6 * $7)
+where ord > (1 * $6 * $7)
+order by ord asc
 limit $7
 "#,
     author_id,
