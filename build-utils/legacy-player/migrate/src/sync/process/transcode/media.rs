@@ -43,23 +43,29 @@ pub async fn run(ctx:Arc<Context>, medias: Arc<Mutex<Vec<Media>>>) {
         let mut handles = Vec::new();
         let transcode_commands:Arc<Vec<TranscodeCommand>> = Arc::new(transcode_commands.lock().await.clone());
         let n_threads = ctx.opts.transcode_media_convert_thread_size;
-        for i in 0..n_threads {
-            handles.push({
-                let transcode_commands = transcode_commands.clone();
-                thread::spawn(move || {
-                    if let Some(chunk) = transcode_commands.chunks(n_threads).nth(i) {
-                        for item in chunk.into_iter() {
-                            do_transcode(item);
+        if n_threads > 0 {
+            for i in 0..n_threads {
+                handles.push({
+                    let transcode_commands = transcode_commands.clone();
+                    thread::spawn(move || {
+                        if let Some(chunk) = transcode_commands.chunks(n_threads).nth(i) {
+                            for item in chunk.into_iter() {
+                                do_transcode(item);
+                            }
                         }
-                    }
-                })
-            });
+                    })
+                });
+            }
+            for h in handles {
+                h.join().unwrap();
+            }
+        } else {
+            for item in transcode_commands.iter() {
+                do_transcode(item);
+            }
         }
 
 
-        for h in handles {
-            h.join().unwrap();
-        }
     }
 
 }

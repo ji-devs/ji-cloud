@@ -9,7 +9,7 @@ pub struct Opts {
     /////////////////// GLOBAL //////////////////////////////////
     #[structopt(long, parse(try_from_str), default_value = "true")]
     pub set_debug_values: bool,
-    //#[structopt(long, default_value="/Users/dakom/Downloads/output", parse(from_os_str))]
+    #[structopt(long, default_value="/Users/dakom/Downloads/output", parse(from_os_str))]
     //#[structopt(long, default_value="E:\\JI\\output", parse(from_os_str))]
     #[structopt(long, default_value="/home/david/archive/legacy-cdn/transcode", parse(from_os_str))]
     pub output_dir: PathBuf,
@@ -106,7 +106,7 @@ pub struct Opts {
     pub transcode_convert_media: bool,
     #[structopt(long, parse(try_from_str), default_value = "100")]
     pub transcode_media_download_batch_size: usize,
-    #[structopt(long, parse(try_from_str), default_value = "4")]
+    #[structopt(long, parse(try_from_str), default_value = "0")]
     pub transcode_media_convert_thread_size: usize,
     //if use the data_url via API instead of structure url in album 
     #[structopt(long, parse(try_from_str), default_value = "true")]
