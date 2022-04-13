@@ -16,7 +16,7 @@ use components::module::_common::play::prelude::*;
 use shared::domain::jig::module::body::drag_drop::Next;
 
 impl PlayState {
-    pub async fn set_targets(&self) {
+    pub fn set_targets(&self) {
         let items = self.items.iter().filter_map(|item| match item {
             PlayItem::Interactive(item) => Some(item.clone()),
             _ => None,
@@ -35,7 +35,7 @@ impl PlayState {
                 .get_hit_source(Some(SourceTransformOverride::Target))
                 .unwrap_ji();
 
-            if let Some(index) = get_hit_index(hit_source, &traces).await {
+            if let Some(index) = get_hit_index(hit_source, &traces) {
                 *item.target_index.borrow_mut() = Some(index);
             }
         }
@@ -79,7 +79,7 @@ impl PlayState {
                         .map(|area| &area.trace)
                         .collect();
 
-                    if let Some(index) = get_hit_index(hit_source, &traces).await {
+                    if let Some(index) = get_hit_index(hit_source, &traces) {
                         if DEBUGGING_EVALUATION_RESULT
                             && (!DEBUGGING_EVALUATION_RESULT_ONLY_MATCH || index == target_index)
                         {

@@ -28,6 +28,7 @@ use shared::domain::jig::{
             drag_drop::{
                 Hint, Interactive as RawInteractive, Item as RawItem, ItemKind as RawItemKind,
                 Mode, ModuleData as RawData, Next, PlaySettings as RawPlaySettings, Step,
+                TargetArea,
             },
             BodyExt,
         },
@@ -50,6 +51,9 @@ pub struct Base {
     pub backgrounds: Rc<Backgrounds>,
     pub stickers: Rc<Stickers<Item>>,
     pub traces: Rc<TracesEdit>,
+    /// List of areas which a sticker can be dropped into so that we can confirm whether a sticker
+    /// has actually been dropped into a trace area.
+    pub target_areas: Rc<Vec<TargetArea>>,
     pub text_editor: Rc<TextEditorState>,
     pub play_settings: Rc<PlaySettings>,
 
@@ -245,11 +249,17 @@ impl Base {
 
         *stickers_ref.borrow_mut() = Some(stickers.clone());
 
+        // A Vec holding both TraceAreas and Traces
+        let trace_data = &content
+            .target_areas
+            .iter()
+            .map(|target_area| (target_area.clone(), target_area.trace.clone()))
+            .collect::<Vec<(TargetArea, RawTrace)>>();
+
         let traces = TracesEdit::from_raw(
-            &content
-                .target_areas
+            &trace_data
                 .iter()
-                .map(|target_area| target_area.trace.clone())
+                .map(|(_, trace)| trace.clone())
                 .collect::<Vec<RawTrace>>(),
             crate::debug::settings()
                 .draw_kind
@@ -286,6 +296,7 @@ impl Base {
             backgrounds,
             stickers,
             traces,
+            target_areas: Rc::new(trace_data.iter().map(|(area, _)| area.clone()).collect()),
             play_settings: Rc::new(PlaySettings::new(content.play_settings)),
             drag_item_selected_index: Mutable::new(None),
         });

@@ -25,7 +25,7 @@ pub fn render(state: Rc<PlayState>) -> Dom {
         .future(state.all_interactive_items_have_sizes().for_each(clone!(state, targets_ready => move |x| {
             clone!(state, targets_ready => async move {
                 if x {
-                    state.set_targets().await;
+                    state.set_targets();
                     targets_ready.set_neq(true);
                 }
             })
