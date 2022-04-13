@@ -7,7 +7,7 @@ use shared::config::RemoteTarget;
 pub struct Opts {
 
     /////////////////// GLOBAL //////////////////////////////////
-    #[structopt(long, parse(try_from_str), default_value = "true")]
+    #[structopt(long, parse(try_from_str), default_value = "false")]
     pub set_debug_values: bool,
     #[structopt(long, default_value="/Users/dakom/Downloads/output", parse(from_os_str))]
     //#[structopt(long, default_value="E:\\JI\\output", parse(from_os_str))]
