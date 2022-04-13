@@ -106,7 +106,7 @@ pub struct Opts {
     pub transcode_convert_media: bool,
     #[structopt(long, parse(try_from_str), default_value = "100")]
     pub transcode_media_download_batch_size: usize,
-    #[structopt(long, parse(try_from_str), default_value = "0")]
+    #[structopt(long, parse(try_from_str), default_value = "4")]
     pub transcode_media_convert_thread_size: usize,
     //if use the data_url via API instead of structure url in album 
     #[structopt(long, parse(try_from_str), default_value = "true")]

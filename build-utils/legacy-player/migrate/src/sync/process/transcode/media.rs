@@ -125,21 +125,6 @@ async fn get_download_futures(ctx:Arc<Context>, medias: Vec<Media>, transcode_co
 
                                     let mut dest_file = std::fs::File::create(&dest_path).unwrap();
                                     std::io::copy(&mut cursor, &mut dest_file).unwrap();
-
-                                    let src_path_str = dest_path.to_str().unwrap();
-                                    if let Some((transcode, filename_dest)) = media.transcode.as_ref() {
-                                        let dest_file_path = dest_dir.join(filename_dest);
-                                        if !ctx.opts.transcode_media_skip_convert_exists || !dest_file_path.exists() {
-                                            let dest_file_path_str = dest_file_path.to_str().unwrap();
-
-                                            transcode_commands.lock().await.push(TranscodeCommand {
-                                                src: src_path_str.to_string(),
-                                                dest: dest_file_path_str.to_string(),
-                                                cmd: *transcode
-                                            });
-                                        }
-                                    }
-
                                 },
                                 Err(err) => {
                                     if ctx.opts.transcode_allow_empty_media {
@@ -155,6 +140,21 @@ async fn get_download_futures(ctx:Arc<Context>, medias: Vec<Media>, transcode_co
                         }
                     }
                 }
+
+                let src_path_str = dest_path.to_str().unwrap();
+                if let Some((transcode, filename_dest)) = media.transcode.as_ref() {
+                    let dest_file_path = dest_dir.join(filename_dest);
+                    if !ctx.opts.transcode_media_skip_convert_exists || !dest_file_path.exists() {
+                        let dest_file_path_str = dest_file_path.to_str().unwrap();
+
+                        transcode_commands.lock().await.push(TranscodeCommand {
+                            src: src_path_str.to_string(),
+                            dest: dest_file_path_str.to_string(),
+                            cmd: *transcode
+                        });
+                    }
+                }
+
             }
         });
     }
