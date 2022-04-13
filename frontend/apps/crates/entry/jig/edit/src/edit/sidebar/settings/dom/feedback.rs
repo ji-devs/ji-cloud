@@ -16,8 +16,8 @@ use utils::{events, jig::JigAudioExt};
 
 use super::super::state::State;
 
-const STR_CORRECT: &'static str = "Correct answer";
-const STR_MISTAKE: &'static str = "Mistake";
+const STR_CORRECT: &str = "Correct answer";
+const STR_MISTAKE: &str = "Mistake";
 
 pub fn render(state: Rc<State>, tab: FeedbackTab) -> Dom {
     html!("jig-audio-body", {
@@ -173,7 +173,7 @@ where
                             let handle = AUDIO_MIXER.with(move |mixer| mixer.add_source(path, AudioClipOptions {
                                 auto_play: true,
                                 is_loop: false,
-                                on_ended: on_ended,
+                                on_ended,
                             }));
                             *audio_handles[index] = Some(handle);
                         },

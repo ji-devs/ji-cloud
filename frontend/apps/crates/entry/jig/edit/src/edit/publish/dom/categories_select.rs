@@ -6,8 +6,8 @@ use utils::unwrap::UnwrapJiExt;
 
 use super::super::state::Publish;
 
-const STR_CATEGORIES_LABEL: &'static str = "Keywords";
-const STR_CATEGORIES_PLACEHOLDER: &'static str = "Select one or more";
+const STR_CATEGORIES_LABEL: &str = "Keywords";
+const STR_CATEGORIES_PLACEHOLDER: &str = "Select one or more";
 
 impl Publish {
     pub fn render_categories_select(self: Rc<Self>) -> Dom {

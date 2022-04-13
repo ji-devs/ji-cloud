@@ -18,7 +18,7 @@ const STR_BACK: &str = "Back";
 
 impl AddFile {
     pub fn render(self: &Rc<Self>) -> Dom {
-        let state = Rc::clone(&self);
+        let state = Rc::clone(self);
         html!("jig-edit-publish-resource-add-file", {
             .children(&mut [
                 html!("button-rect", {

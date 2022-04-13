@@ -19,6 +19,8 @@ pub struct Client {
     password_reset_template: Option<String>,
 
     email_reset_template: Option<String>,
+
+    welcome_jigzi_template: Option<String>,
 }
 
 impl Client {
@@ -29,6 +31,7 @@ impl Client {
             signup_verify_template: settings.signup_verify_template,
             password_reset_template: settings.password_reset_template,
             email_reset_template: settings.email_reset_template,
+            welcome_jigzi_template: settings.welcome_jigzi_template,
         }
     }
 
@@ -41,6 +44,27 @@ impl Client {
     ) -> anyhow::Result<()> {
         let mut template_data = SGMap::new();
         template_data.insert("url".to_string(), link);
+
+        let message = Message::new(self.sender_email.clone())
+            .set_template_id(&template.0)
+            .add_personalization(Personalization::new(to).add_dynamic_template_data(template_data));
+
+        self.client.send(&message).await?;
+
+        Ok(())
+    }
+
+    #[instrument(skip_all)]
+    pub async fn send_welcome_jigzi(
+        &self,
+        template: WelcomeJigziTemplate<'_>,
+        to: Email,
+        link: String,
+        first_name: String,
+    ) -> anyhow::Result<()> {
+        let mut template_data = SGMap::new();
+        template_data.insert("url".to_string(), link);
+        template_data.insert("firstname".to_string(), first_name);
 
         let message = Message::new(self.sender_email.clone())
             .set_template_id(&template.0)
@@ -186,6 +210,14 @@ Please try logging in with your {} account.
             .map(EmailResetTemplate)
             .ok_or(error::ServiceKind::Mail)
     }
+
+    pub fn welcome_jigzi_template(&self) -> Result<WelcomeJigziTemplate<'_>, error::ServiceKind> {
+        // todo: make the error more specific?
+        self.welcome_jigzi_template
+            .as_deref()
+            .map(WelcomeJigziTemplate)
+            .ok_or(error::ServiceKind::Mail)
+    }
 }
 
 impl Service for Client {
@@ -203,3 +235,7 @@ pub struct PasswordResetTemplate<'a>(&'a str);
 #[repr(transparent)]
 #[derive(Debug, Clone, Copy)]
 pub struct EmailResetTemplate<'a>(&'a str);
+
+#[repr(transparent)]
+#[derive(Debug, Clone, Copy)]
+pub struct WelcomeJigziTemplate<'a>(&'a str);

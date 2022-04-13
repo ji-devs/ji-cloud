@@ -1,5 +1,59 @@
 {
   "db": "PostgreSQL",
+  "005f46a09213036954e6be291a69637e9fb497859a57307c9fe14c41237da320": {
+    "query": "select exists(select 1 from user_email where lower(email) = lower($1)) as \"exists!\"",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "exists!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
+  "0114f0a11ad67661ae15e9a7e423a3e80d1b515d68dde361a4f5be7c03cb1b4d": {
+    "query": "\n        update user_email\n        set email = $3::text\n        where user_id = $1 and lower(email) = lower($2::text)\n        ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "016ee605ffadd845b4275efbdd83e704e6553346bfdb86c968027d6f363d087b": {
+    "query": "select exists(select 1 from user_auth_basic where lower(email) = lower($1)) as \"exists!\"",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "exists!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
   "01a135ff430fa6ab0ac75454f6d1c25d2198d9f885e1abfdb4ca22c888df32a5": {
     "query": "\nupdate jig_data\nset description = $2,\n    translated_description = '{}',\n    updated_at = now()\nwhere id = $1 and $2 is distinct from description",
     "describe": {
@@ -2066,20 +2120,6 @@
       "nullable": []
     }
   },
-  "3e940a4ae4a432d2cc0ce4a8de4f98eacd1a9b8b356ecfaeeb5c9cd686ad008e": {
-    "query": "\n        update user_email\n        set email = $3::text\n        where user_id = $1 and email = $2::text\n        ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Text",
-          "Text"
-        ]
-      },
-      "nullable": []
-    }
-  },
   "3f7ad7f5eb03139f9584aa6928a1b805b4f8908a1df023a12a7cf8cba3d56d26": {
     "query": "delete from session where token = $1",
     "describe": {
@@ -2834,6 +2874,46 @@
       "nullable": []
     }
   },
+  "5abe0dafa155f68985ccfc54f6baae31e6bb83c17f018e34c90a6b22cf62a303": {
+    "query": "\n        update user_auth_basic\n        set email = $3::text\n        where user_id = $1 and lower(email) = lower($2::text)\n        ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "5afaa3307160dc3533595bb23eee566063c5438ab380b5cc6b4a43ca70587f05": {
+    "query": "\n        select user_id,\n        (\n           select\n             case \n                when exists(select 1 from user_auth_basic where lower(user_auth_basic.email) = lower($1::text)) = true then false\n                else true\n            end\n        )     as \"is_oauth!\"      \n         from user_email \n         where lower(email) = lower($1::text)",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "user_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "is_oauth!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        null
+      ]
+    }
+  },
   "5cd7636d958f3bcd952a1f43385608a494bf08b39cfa6ffed6250bf8545713d6": {
     "query": "\n            select uploaded_at\n            from web_media_upload wmu\n            inner join web_media_library wml on wml.kind = $1\n            where wmu.media_id = $2 for update",
     "describe": {
@@ -3551,8 +3631,21 @@
       ]
     }
   },
-  "74b512fde797ad5d92d4a9fca1ce7d546e799815ed95169ad0591de8db129393": {
-    "query": "\nselect user_id\nfrom user_auth_basic\nwhere\n    email = $1::text and\n    not exists(select 1 from user_email where email = $1)\n",
+  "74c6d0eed7fb5101276b5b17bc0d0e46b6439fb6109f2e7f687fe2fbced76bd2": {
+    "query": "\ninsert into learning_path_data_affiliation(learning_path_data_id, affiliation_id)\nselect $2, affiliation_id\nfrom learning_path_data_affiliation\nwhere learning_path_data_id = $1\n        ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "753945ec260e2138745530fe1234766c02d7ac7841c1729648a7202e8680b4d0": {
+    "query": "\nselect user_id\nfrom user_auth_basic\nwhere\n    lower(email) = lower($1::text) and\n    not exists(select 1 from user_email where lower(email) = lower($1))\n",
     "describe": {
       "columns": [
         {
@@ -3569,19 +3662,6 @@
       "nullable": [
         false
       ]
-    }
-  },
-  "74c6d0eed7fb5101276b5b17bc0d0e46b6439fb6109f2e7f687fe2fbced76bd2": {
-    "query": "\ninsert into learning_path_data_affiliation(learning_path_data_id, affiliation_id)\nselect $2, affiliation_id\nfrom learning_path_data_affiliation\nwhere learning_path_data_id = $1\n        ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid"
-        ]
-      },
-      "nullable": []
     }
   },
   "758bee136eaae799c8beef0e069597d0f67cfc590d5ecc6a4353d24b3474e39b": {
@@ -4461,20 +4541,6 @@
       "nullable": []
     }
   },
-  "8f1e210ff17b689cd69ae47b2eb88e74893142db5328e8919768818648693bbd": {
-    "query": "\n        update user_auth_basic\n        set email = $3::text\n        where user_id = $1 and email = $2::text\n        ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Text",
-          "Text"
-        ]
-      },
-      "nullable": []
-    }
-  },
   "8f373a91b6dab0b7b89a03f5479b2ebe6dd2657bc06ebbe3aca37b1bac312f0e": {
     "query": "\nwith cte as (\n    insert into user_font\n    (user_id, name, index)\n    values ($1, $2, (select count(*) from user_font where user_id = $1)) returning name\n), names as (\n    select name\n    from user_font\n    where user_id = $1\n    order by index\n)\nselect name as \"name!\" from names\nunion all\nselect name as \"name!\" from cte\n        ",
     "describe": {
@@ -4553,32 +4619,6 @@
         ]
       },
       "nullable": []
-    }
-  },
-  "95cc52570b87e1413c93a9588cee5f081824028c269803aba12a578cada7395b": {
-    "query": "select user_id from user_auth_basic where user_id <> $1 and email = $2 for update",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "user_id",
-          "type_info": "Uuid"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          {
-            "Custom": {
-              "name": "citext",
-              "kind": "Simple"
-            }
-          }
-        ]
-      },
-      "nullable": [
-        false
-      ]
     }
   },
   "974e49b8fa518e9402ae2494147cd25953503851952b4ba97d635a2aeb5bd729": {
@@ -6586,6 +6626,27 @@
       "nullable": []
     }
   },
+  "dd82525ef6af4b7d662bc138aec9dd0cda94bb7c5ffd5d0f3983e52947bdc13b": {
+    "query": "select user_id from user_auth_basic where user_id <> $1 and lower(email) = lower($2) for update",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "user_id",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
   "dda8d8d2bc07da17016ae44616deda2fe94bf8a0db546e60b07200c95caa40f1": {
     "query": "select uploaded_at from user_image_upload where image_id = $1 for update",
     "describe": {
@@ -7101,6 +7162,26 @@
       ]
     }
   },
+  "f627e289a9e43d3c1a06bd8dff5c9cc875d7fb7435bf8f7fef35685a211bd9d5": {
+    "query": "\nselect email::text\nfrom user_email\nwhere user_id = $1\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "email",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
   "f7803338a676de1c4fad713fa774406743480aea8ceb9a4b6ba8ec80b74f9b3d": {
     "query": "update image_metadata set last_synced_at = null",
     "describe": {
@@ -7205,32 +7286,6 @@
         ]
       },
       "nullable": [
-        null
-      ]
-    }
-  },
-  "fa63b22f946e502a15f4353b4af07df300a31dcf3b8feabfa30dae706a998c66": {
-    "query": "\n        select user_id,\n        (\n            select case \n                when exists(select * from user_auth_basic where user_auth_basic.email = $1::text) = true then false \n                else true \n                end\n        )     as \"is_oauth!\"      \n         from user_email \n         where email = $1::text",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "user_id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "is_oauth!",
-          "type_info": "Bool"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Text"
-        ]
-      },
-      "nullable": [
-        false,
         null
       ]
     }

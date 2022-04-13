@@ -27,8 +27,19 @@ pub fn render(state: Rc<Step3>) -> Dom {
                         Some(_) => {
                             //otherwise, it means a trace is selected
                             Some(html!("menu-tabs", {
-                                .future(selected_tab.signal_cloned().dedupe().for_each(clone!(state => move |kind| {
+                                .future(selected_tab.signal_cloned().dedupe().for_each(clone!(state, selected_tab => move |kind| {
                                     state.sidebar.tab_kind.set(kind);
+
+                                    // A trace is selected, so there should be some tabs rendered,
+                                    // tell Continue to navigate to the next tab
+                                    state.sidebar.base.continue_next_fn.set(Some(Rc::new(clone!(selected_tab => move || {
+                                        if let Some(kind) = next_kind(&kind.unwrap_ji()) {
+                                            selected_tab.set_neq(Some(kind));
+                                            true
+                                        } else {
+                                            false
+                                        }
+                                    }))));
                                     async move {}
                                 })))
                                 .children(&mut [
@@ -52,6 +63,8 @@ pub fn render(state: Rc<Step3>) -> Dom {
                             }))
                         }
                         None => {
+                            // When no traces are selected, we can just continue to the next step.
+                            state.sidebar.base.continue_next_fn.set(Some(Rc::new(|| false)));
                             Some(html!("sidebar-empty", {
                                 .property("label", STR_EMPTY_SELECTION)
                                 .property("imagePath", "module/_common/edit/sidebar/illustration-trace-area.svg")

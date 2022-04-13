@@ -7,7 +7,7 @@ use uuid::Uuid;
 
 use super::state::State;
 
-pub const COPY_MODULE_KEY: &'static str = "COPY_MODULE";
+pub const COPY_MODULE_KEY: &str = "COPY_MODULE";
 pub fn copy_module(state: Rc<State>, module_id: &ModuleId) {
     let value = format!("{},{}", &state.jig.id.0, &module_id.0);
 

@@ -94,10 +94,7 @@ impl CardChoice<TopPhase> {
         }
     }
     pub fn is_landed(&self) -> bool {
-        match self.phase.get_cloned() {
-            TopPhase::Landed => true,
-            _ => false,
-        }
+        matches!(self.phase.get_cloned(), TopPhase::Landed)
     }
 }
 

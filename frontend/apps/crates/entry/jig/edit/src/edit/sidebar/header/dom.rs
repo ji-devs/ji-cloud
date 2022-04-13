@@ -7,8 +7,8 @@ use web_sys::HtmlInputElement;
 use super::super::{actions as sidebar_actions, settings, state::State as SidebarState};
 use utils::prelude::*;
 
-const STR_MY_JIGS: &'static str = "My JIGs";
-const STR_SEARCH_PLACEHOLDER: &'static str = "My JIG’s name";
+const STR_MY_JIGS: &str = "My JIGs";
+const STR_SEARCH_PLACEHOLDER: &str = "My JIG’s name";
 
 pub struct HeaderDom {}
 
@@ -46,7 +46,7 @@ impl HeaderDom {
                     .event(clone!(sidebar_state => move |_:events::Click| {
                         sidebar_state.jig_edit_state.route.set_neq(JigEditRoute::Landing);
                         let url:String = Route::Jig(JigRoute::Edit(
-                            sidebar_state.jig.id.clone(),
+                            sidebar_state.jig.id,
                             sidebar_state.jig.jig_focus,
                             JigEditRoute::Landing
                         )).into();

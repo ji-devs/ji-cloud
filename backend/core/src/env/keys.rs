@@ -68,6 +68,11 @@ pub mod email {
     /// Is optional. If missing, email resetting will be disabled,
     /// all related routes will return "501 - Not Implemented" and a warning will be emitted.
     pub const EMAIL_RESET_TEMPLATE: &str = "EMAIL_RESET_TEMPLATE";
+
+    /// Email client template ID for Welcome to Jigzi emails.
+    /// Is optional. If missing, email resetting will be disabled,
+    /// all related routes will return "501 - Not Implemented" and a warning will be emitted.
+    pub const EMAIL_WELCOME_JIGZI_TEMPLATE: &str = "EMAIL_WELCOME_JIGZI_TEMPLATE";
 }
 
 #[cfg(feature = "db")]

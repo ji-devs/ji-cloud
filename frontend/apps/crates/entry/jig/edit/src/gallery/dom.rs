@@ -12,17 +12,17 @@ use utils::ages::AgeRangeVecExt;
 use utils::jig::published_at_string;
 use utils::prelude::*;
 
-const STR_DELETE: &'static str = "Delete";
-const STR_DUPLICATE: &'static str = "Duplicate";
-const STR_SEARCH: &'static str = "Search";
-const STR_SHOW_JIG_ALL: &'static str = "Show all my JIGs";
-const STR_SHOW_JIG_PUBLISHED: &'static str = "Show published JIGs";
-const STR_SHOW_JIG_DRAFT: &'static str = "Show drafts";
+const STR_DELETE: &str = "Delete";
+const STR_DUPLICATE: &str = "Duplicate";
+const STR_SEARCH: &str = "Search";
+const STR_SHOW_JIG_ALL: &str = "Show all my JIGs";
+const STR_SHOW_JIG_PUBLISHED: &str = "Show published JIGs";
+const STR_SHOW_JIG_DRAFT: &str = "Show drafts";
 
-const STR_DELETE_TITLE: &'static str = "Warning";
-const STR_DELETE_CONTENT: &'static str = "Are you sure you want to delete this JIG?";
-const STR_DELETE_CONFIRM: &'static str = "Delete JIG";
-const STR_DELETE_CANCEL: &'static str = "Don't delete";
+const STR_DELETE_TITLE: &str = "Warning";
+const STR_DELETE_CONTENT: &str = "Are you sure you want to delete this JIG?";
+const STR_DELETE_CONFIRM: &str = "Delete JIG";
+const STR_DELETE_CANCEL: &str = "Don't delete";
 
 const STR_LOAD_MORE: &str = "See more";
 
@@ -110,11 +110,7 @@ impl JigGallery {
                                 .property("value", &option.to_string())
                                 .text(Self::visible_jigs_option_string(&option))
                                 .property_signal("selected", state.visible_jigs.signal_cloned().map(clone!(option => move |visible_jigs| {
-                                    if visible_jigs == option {
-                                        true
-                                    } else {
-                                        false
-                                    }
+                                    visible_jigs == option
                                 })))
                                 .event(clone!(state, option => move |evt: events::CustomSelectedChange| {
                                     if evt.selected() {
@@ -158,7 +154,7 @@ impl JigGallery {
                             })
                             .child(ModuleThumbnail::render(
                                 Rc::new(ModuleThumbnail {
-                                    jig_id: jig.id.clone(),
+                                    jig_id: jig.id,
                                     module: jig.jig_data.modules.first().cloned(),
                                     is_jig_fallback: true,
                                 }),

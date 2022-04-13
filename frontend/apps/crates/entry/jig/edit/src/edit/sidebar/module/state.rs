@@ -51,14 +51,14 @@ impl State {
     pub fn window_state_signal(state: Rc<State>) -> impl Signal<Item = &'static str> {
         state.sidebar.jig_edit_state.route.signal_ref(clone!(state => move |route| {
             match &*state.module {
-                None => return "empty",
+                None => "empty",
                 Some(this_module) => {
                     match route {
-                        JigEditRoute::Module(active_module_id) if active_module_id == this_module.id() => return "active",
-                        _ => return "thumbnail",
+                        JigEditRoute::Module(active_module_id) if active_module_id == this_module.id() => "active",
+                        _ => "thumbnail",
                     }
                 }
-            };
+            }
         }))
     }
 
@@ -72,11 +72,7 @@ impl State {
                         let _pos_x = pos.x as f64;
                         let pos_y = pos.y as f64 + 100.0;
                         let rect = elem.get_bounding_client_rect();
-                        if pos_y > rect.y() && pos_y < (rect.y() + rect.height()) {
-                            true
-                        } else {
-                            false
-                        }
+                        pos_y > rect.y() && pos_y < (rect.y() + rect.height())
                     },
                     _ => false
                 }

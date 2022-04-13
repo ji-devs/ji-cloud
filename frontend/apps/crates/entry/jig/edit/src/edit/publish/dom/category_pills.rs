@@ -13,7 +13,7 @@ impl Publish {
             .property("slot", "category-labels")
             .children_signal_vec(state.jig.categories.signal_cloned().map(clone!(state => move|categories| {
                 categories.iter()
-                    .map(|category_id| render_pill(state.clone(), category_id.clone()))
+                    .map(|category_id| render_pill(state.clone(), *category_id))
                     .collect()
             })).to_signal_vec())
         })

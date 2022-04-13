@@ -11,7 +11,7 @@ use super::state::AdditionalResourceComponent;
 
 impl AdditionalResourceComponent {
     pub fn delete(self: &Rc<Self>) {
-        let state = Rc::clone(&self);
+        let state = self;
         state.loader.load(clone!(state => async move {
             let jig_id = state.publish_state.jig.id.0.to_string();
             let resource_id = state.additional_resource.id.0.to_string();

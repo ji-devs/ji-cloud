@@ -26,7 +26,7 @@ impl State {
     pub fn new(jig: &JigResponse) -> Self {
         Self {
             theme: Mutable::new(jig.jig_data.theme),
-            background_audio: Mutable::new(jig.jig_data.audio_background.clone()),
+            background_audio: Mutable::new(jig.jig_data.audio_background),
             feedback_positive: Mutable::new(HashSet::from_iter(
                 jig.jig_data.audio_effects.feedback_positive.iter().cloned(),
             )),
@@ -37,7 +37,7 @@ impl State {
             display_score: Mutable::new(jig.jig_data.default_player_settings.display_score),
             track_assessments: Mutable::new(jig.jig_data.default_player_settings.track_assessments),
             drag_assist: Mutable::new(jig.jig_data.default_player_settings.drag_assist),
-            jig_id: jig.id.clone(),
+            jig_id: jig.id,
             active_popup: Mutable::new(None),
             loader: AsyncLoader::new(),
         }

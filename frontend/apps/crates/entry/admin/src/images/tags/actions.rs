@@ -23,7 +23,9 @@ impl ImageTags {
                             .collect()
                     );
                 },
-                Err(_) => {}
+                Err(_) => {
+                    todo!();
+                }
             }
         }));
     }

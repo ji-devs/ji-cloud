@@ -22,7 +22,7 @@ const MIME_PDF: &str = "application/pdf";
 
 impl AddFile {
     pub fn save(self: &Rc<Self>) {
-        let state = Rc::clone(&self);
+        let state = Rc::clone(self);
 
         state.add_resources_state.active_popup.set(None);
 
@@ -48,7 +48,7 @@ impl AddFile {
     // }
 }
 pub async fn upload_file(file: &File) -> Result<ResourceContent, anyhow::Error> {
-    let mime_type = Blob::type_(&file);
+    let mime_type = Blob::type_(file);
 
     let value = if mime_type == MIME_PDF {
         let pdf_id = upload_pdf(file).await?;

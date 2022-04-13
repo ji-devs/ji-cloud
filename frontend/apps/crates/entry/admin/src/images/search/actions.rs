@@ -21,7 +21,9 @@ pub fn search(state: Rc<State>, query: ImageSearchQuery) {
             Ok(res) => {
                 state.response.set(Some(res))
             },
-            Err(_) => {}
+            Err(_) => {
+                todo!();
+            },
         }
     }));
 }

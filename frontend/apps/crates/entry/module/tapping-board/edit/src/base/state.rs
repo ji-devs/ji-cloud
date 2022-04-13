@@ -15,7 +15,7 @@ use components::{
 };
 use dominator::clone;
 use futures_signals::{
-    signal::{self, Mutable, ReadOnlyMutable, Signal},
+    signal::{Mutable, ReadOnlyMutable},
     signal_vec::MutableVec,
 };
 use shared::domain::jig::module::body::BodyExt;
@@ -49,6 +49,7 @@ pub struct Base {
     pub traces_meta: MutableVec<TraceMeta>,
     pub text_editor: Rc<TextEditorState>,
     pub play_settings: Rc<PlaySettings>,
+    pub continue_next_fn: ContinueNextFn,
 }
 
 pub struct PlaySettings {
@@ -213,6 +214,7 @@ impl Base {
             traces,
             traces_meta,
             play_settings: Rc::new(PlaySettings::new(content.play_settings)),
+            continue_next_fn: Mutable::new(None),
         });
 
         *_self_ref.borrow_mut() = Some(_self.clone());
@@ -222,14 +224,22 @@ impl Base {
 }
 
 impl BaseExt<Step> for Base {
-    type NextStepAllowedSignal = impl Signal<Item = bool>;
-
     fn allowed_step_change(&self, _from: Step, _to: Step) -> bool {
         true
     }
 
-    fn next_step_allowed_signal(&self) -> Self::NextStepAllowedSignal {
-        signal::always(true)
+    fn can_continue_next(&self) -> ReadOnlyMutable<bool> {
+        Mutable::new(true).read_only()
+    }
+
+    fn continue_next(&self) -> bool {
+        match self.step.get() {
+            Step::Two | Step::Three | Step::Four => match self.continue_next_fn.get_cloned() {
+                Some(continue_next_fn) => continue_next_fn(),
+                None => false,
+            },
+            _ => false,
+        }
     }
 
     fn get_jig_id(&self) -> JigId {

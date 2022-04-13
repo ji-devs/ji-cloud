@@ -75,7 +75,7 @@ pub fn render(state: Rc<State>) -> Dom {
                 }))
                 .event(clone!(state => move |e: events::CustomChange| {
                     let value = e.value();
-                    let value = u8::from_str_radix(&value, 10).unwrap_or(24);
+                    let value = value.parse().unwrap_or(24);
                     state.set_control_value(ControlsChange::FontSize(value))
                 }))
             }),

@@ -16,7 +16,7 @@ pub struct State {
 impl State {
     pub fn new(jig_id: JigId, jig_edit_state: Rc<JigEditState>) -> Self {
         Self {
-            jig_id: jig_id.clone(),
+            jig_id,
             loader: AsyncLoader::new(),
             share_state: ShareJig::new(jig_id),
             jig_edit_state,

@@ -19,7 +19,7 @@ const STR_BACK: &str = "Back";
 
 impl AddLink {
     pub fn render(self: &Rc<Self>) -> Dom {
-        let state = Rc::clone(&self);
+        let state = Rc::clone(self);
         html!("jig-edit-publish-resource-add-link", {
             .children(&mut [
                 html!("button-rect", {
@@ -132,7 +132,6 @@ impl AddLink {
 fn prepend_https_to_url(url: &str) -> Url {
     let mut fixed_url_string = String::new();
     fixed_url_string.push_str("https://");
-    fixed_url_string.push_str(&url);
-    let fixed_url = Url::from_str(&fixed_url_string).unwrap();
-    fixed_url
+    fixed_url_string.push_str(url);
+    Url::from_str(&fixed_url_string).unwrap()
 }

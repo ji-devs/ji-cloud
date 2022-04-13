@@ -5,8 +5,8 @@ use utils::{events, languages::Language};
 
 use super::super::state::Publish;
 
-const STR_LANGUAGE_LABEL: &'static str = "Language of instruction";
-const STR_LANGUAGE_PLACEHOLDER: &'static str = "Select language";
+const STR_LANGUAGE_LABEL: &str = "Language of instruction";
+const STR_LANGUAGE_PLACEHOLDER: &str = "Select language";
 
 impl Publish {
     pub fn render_languages(self: Rc<Self>) -> Dom {
@@ -35,9 +35,9 @@ impl Publish {
 
 fn render_language(Language(lang_code, land_label): &Language, state: Rc<Publish>) -> Dom {
     html!("input-select-option", {
-        .text(&land_label)
+        .text(land_label)
         .property_signal("selected", state.jig.language.signal_cloned().map(clone!(lang_code => move |selected_lang| {
-            lang_code == &selected_lang
+            lang_code == selected_lang
         })))
         .event(clone!(state, lang_code => move |evt: events::CustomSelectedChange| {
             if evt.selected() {

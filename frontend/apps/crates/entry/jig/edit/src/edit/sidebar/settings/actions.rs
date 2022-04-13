@@ -32,15 +32,11 @@ pub fn update_jig_settings(state: Rc<State>) {
     let path = endpoints::jig::UpdateDraftData::PATH.replace("{id}", &state.jig_id.0.to_string());
 
     state.loader.load(async move {
-        match api_with_auth_empty::<EmptyError, _>(
+        let _ = api_with_auth_empty::<EmptyError, _>(
             &path,
             endpoints::jig::UpdateDraftData::METHOD,
             Some(req),
         )
-        .await
-        {
-            Ok(_) => {}
-            Err(_) => {}
-        };
+        .await;
     });
 }

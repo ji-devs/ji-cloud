@@ -114,7 +114,7 @@ impl State {
         // Initialize these here so that we can move `jig` into the initialization of Self and
         // still keep the ordering of the fields.
         let jig_display_name = jig.jig_data.display_name.clone();
-        let jig_published_at = jig.published_at.clone();
+        let jig_published_at = jig.published_at;
         let settings_state = SettingsState::new(&jig);
 
         Self {
@@ -148,16 +148,13 @@ impl State {
 
         let modules_len = modules.iter().filter(|module| module.is_some()).count();
 
-        let modules_valid = modules
-            .into_iter()
-            .find(|module| {
-                match &***module {
-                    // Find the first module which isn't complete
-                    Some(module) => !module.is_complete.get_cloned(),
-                    None => false,
-                }
-            })
-            .is_none();
+        let modules_valid = !modules.iter().any(|module| {
+            match &**module {
+                // Find the first module which isn't complete
+                Some(module) => !module.is_complete.get_cloned(),
+                None => false,
+            }
+        });
 
         modules_len > 0 && modules_valid
     }

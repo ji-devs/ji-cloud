@@ -34,6 +34,12 @@ pub struct AudioRecorder {
     vmsg: Recorder,
 }
 
+impl Default for AudioRecorder {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl AudioRecorder {
     pub fn new() -> Self {
         let config = RecorderConfig {

@@ -26,14 +26,20 @@ pub struct State {
     pub play_jig: Mutable<Option<JigId>>,
 }
 
+impl Default for State {
+    fn default() -> Self {
+        Self::new_with_search_selected(SearchSelected::default())
+    }
+}
+
 impl State {
     pub fn new() -> Self {
-        Self::new_with_search_selected(SearchSelected::new())
+        Default::default()
     }
     pub fn new_search(query_params: Option<JigSearchQuery>) -> Self {
         let search_selected = match query_params {
             Some(query_params) => SearchSelected::from_search_request(query_params),
-            None => SearchSelected::new(),
+            None => SearchSelected::default(),
         };
         Self::new_with_search_selected(search_selected)
     }
@@ -43,7 +49,7 @@ impl State {
             loader: AsyncLoader::new(),
             mode: Mutable::new(HomePageMode::Home),
             is_logged_in: Mutable::new(false),
-            search_options: Rc::new(SearchOptions::new()),
+            search_options: Rc::new(SearchOptions::default()),
             quick_searches: Self::get_quick_searches(),
             whats_new: Self::get_whats_new(),
             parents_testimonials: Self::get_parents_testimonials(),
@@ -150,8 +156,8 @@ pub enum HomePageMode {
 impl From<&HomePageMode> for PageLinks {
     fn from(mode: &HomePageMode) -> PageLinks {
         match mode {
-            &HomePageMode::Home => PageLinks::Home,
-            &HomePageMode::Search(..) => PageLinks::Content,
+            HomePageMode::Home => PageLinks::Home,
+            HomePageMode::Search(..) => PageLinks::Content,
         }
     }
 }

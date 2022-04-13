@@ -27,7 +27,8 @@ impl EmailHandler {
         self.error.signal_ref(|e| e.is_none())
     }
 
-    pub fn update_value(&self, value: String) {
+    pub fn update_value(&self, mut value: String) {
+        value = value.trim().to_string();
         *self.value.borrow_mut() = value;
         self.update_errors();
     }
@@ -48,11 +49,15 @@ impl EmailHandler {
         let email = &self.value.borrow();
         let error = if email.is_empty() {
             Some(STR_EMAIL_EMPTY)
-        } else if !email.contains('@') {
+        } else if !valid_email(email) {
             Some(STR_EMAIL_INVALID)
         } else {
             None
         };
         self.error.set(error);
     }
+}
+
+fn valid_email(email: &str) -> bool {
+    email.contains('@') && !email.contains(' ')
 }

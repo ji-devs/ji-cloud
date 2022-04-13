@@ -164,7 +164,9 @@ pub fn load_jig(state: Rc<State>) {
                 state.jig.set(Some(jig));
                 state.jig_liked.set(Some(jig_liked));
             },
-            Err(_) => {},
+            Err(_) => {
+                todo!();
+            },
         }
     }));
 }

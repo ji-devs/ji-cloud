@@ -13,10 +13,10 @@ use shared::domain::jig::{module::ModuleId, ModuleKind};
 use std::rc::Rc;
 use utils::events;
 
-const STR_COPY: &'static str = "Copy to another Jig";
-const STR_PASTE: &'static str = "Paste from another JIG";
-const STR_DUPLICATE_AS: &'static str = "Duplicate content as:";
-// const STR_EDIT_SETTINGS: &'static str = "Edit setting";
+const STR_COPY: &str = "Copy to another Jig";
+const STR_PASTE: &str = "Paste from another JIG";
+const STR_DUPLICATE_AS: &str = "Duplicate content as:";
+// const STR_EDIT_SETTINGS: &str = "Edit setting";
 
 const CARD_KINDS: [ModuleKind; 4] = [
     ModuleKind::Memory,
@@ -157,7 +157,7 @@ fn item_paste(state: &Rc<State>, sidebar_state: &Rc<SidebarState>) -> Dom {
 }
 
 fn item_duplicate_as(state: &Rc<State>, sidebar_state: &Rc<SidebarState>, module: &Module) -> Dom {
-    let is_card = CARD_KINDS.contains(&module.kind());
+    let is_card = CARD_KINDS.contains(module.kind());
 
     html!("empty-fragment", {
         .property("slot", "advanced")

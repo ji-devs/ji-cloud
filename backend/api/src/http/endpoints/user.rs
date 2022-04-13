@@ -74,6 +74,32 @@ async fn send_verification_email(
 }
 
 #[instrument(skip(txn, email_address, mail))]
+async fn send_welcome_jigzi_email(
+    txn: &mut PgConnection,
+    user_id: Uuid,
+    email_address: String,
+    mail: &mail::Client,
+    pages_url: &str,
+) -> Result<(), error::Service> {
+    let first_name = db::user::get_first_name(&mut *txn, user_id).await?;
+
+    let template = mail
+        .welcome_jigzi_template()
+        .map_err(error::Service::DisabledService)?;
+
+    mail.send_welcome_jigzi(
+        template,
+        Email::new(email_address),
+        pages_url.to_string(),
+        first_name,
+    )
+    .await
+    .map_err(|e| error::Service::InternalServerError(e))?;
+
+    Ok(())
+}
+
+#[instrument(skip(txn, email_address, mail))]
 async fn send_password_email(
     txn: &mut PgConnection,
     user_id: Uuid,
@@ -257,8 +283,8 @@ async fn verify_email(
 select user_id
 from user_auth_basic
 where
-    email = $1::text and
-    not exists(select 1 from user_email where email = $1)
+    lower(email) = lower($1::text) and
+    not exists(select 1 from user_email where lower(email) = lower($1))
 "#,
                 email
             )
@@ -395,6 +421,7 @@ async fn create_profile(
     s3: ServiceData<s3::Client>,
     signup_user: TokenSessionOf<SessionCreateProfile>,
     req: Json<CreateProfileRequest>,
+    mail: ServiceData<mail::Client>,
 ) -> actix_web::Result<HttpResponse, error::UserUpdate> {
     validate_register_req(&req)?;
 
@@ -442,6 +469,23 @@ async fn create_profile(
         login_ttl,
         &session,
     )?;
+
+    let email = db::user::get_email(&mut txn, signup_user.claims.user_id).await?;
+
+    send_welcome_jigzi_email(
+        &mut txn,
+        signup_user.claims.user_id,
+        email,
+        &mail,
+        &settings.remote_target().pages_url(),
+    )
+    .await
+    .map_err(|e| {
+        error::UserUpdate::InternalServerError(anyhow::anyhow!(
+            "failed to send welcome jigzi email: {:?}",
+            e
+        ))
+    })?;
 
     txn.commit().await?;
 
@@ -540,7 +584,7 @@ async fn email_reset(
     // 0. validate the email
     // FIXME simplify these queries - maybe make this a separate function to be used with update email
     let exists_basic = sqlx::query!(
-        r#"select exists(select 1 from user_auth_basic where email = lower($1)) as "exists!""#,
+        r#"select exists(select 1 from user_auth_basic where lower(email) = lower($1)) as "exists!""#,
         &req.email
     )
     .fetch_one(&mut txn)
@@ -549,7 +593,7 @@ async fn email_reset(
     .exists;
 
     let exists_google = sqlx::query!(
-        r#"select exists(select 1 from user_email where email = lower($1)) as "exists!""#,
+        r#"select exists(select 1 from user_email where lower(email) = lower($1)) as "exists!""#,
         &req.email
     )
     .fetch_one(&mut txn)
@@ -698,7 +742,7 @@ async fn verify_email_reset(
                 r#"
         update user_auth_basic
         set email = $3::text
-        where user_id = $1 and email = $2::text
+        where user_id = $1 and lower(email) = lower($2::text)
         "#,
                 token.user_id,
                 &email,
@@ -713,7 +757,7 @@ async fn verify_email_reset(
                 r#"
         update user_email
         set email = $3::text
-        where user_id = $1 and email = $2::text
+        where user_id = $1 and lower(email) = lower($2::text)
         "#,
                 token.user_id,
                 &email,
@@ -817,13 +861,14 @@ async fn reset_password(
         r#"
         select user_id,
         (
-            select case 
-                when exists(select * from user_auth_basic where user_auth_basic.email = $1::text) = true then false 
-                else true 
-                end
+           select
+             case 
+                when exists(select 1 from user_auth_basic where lower(user_auth_basic.email) = lower($1::text)) = true then false
+                else true
+            end
         )     as "is_oauth!"      
          from user_email 
-         where email = $1::text"#,
+         where lower(email) = lower($1::text)"#,
         &req.email
     )
     .fetch_optional(&mut txn)
@@ -834,7 +879,7 @@ async fn reset_password(
         Some(user) => (user.user_id, user.is_oauth),
         None => return Ok(HttpResponse::NoContent().finish()),
     };
-
+    //select exists(select 1 from user_email where email = lower($1)
     send_password_email(
         &mut txn,
         user_id,
@@ -895,7 +940,7 @@ async fn put_password(
         .await?;
 
     let user_to_delete = sqlx::query!(
-        r#"select user_id from user_auth_basic where user_id <> $1 and email = $2 for update"#,
+        r#"select user_id from user_auth_basic where user_id <> $1 and lower(email) = lower($2) for update"#,
         user_id,
         email as _
     )

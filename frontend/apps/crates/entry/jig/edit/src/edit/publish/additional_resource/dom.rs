@@ -8,7 +8,7 @@ use super::state::AdditionalResourceComponent;
 
 impl AdditionalResourceComponent {
     pub fn render(self: Rc<Self>) -> Dom {
-        let state = self.clone();
+        let state = self;
         let resource_content = &state.additional_resource.resource_content;
         log::info!("{:#?}", resource_content.get_link());
         html!("jig-edit-publish-resource", {

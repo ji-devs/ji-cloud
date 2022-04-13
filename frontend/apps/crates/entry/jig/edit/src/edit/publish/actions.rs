@@ -57,7 +57,7 @@ impl Publish {
     }
 
     pub fn navigate_to_cover(&self) {
-        let cover_module_id = self.jig.modules.lock_ref().first().map(|m| m.id.clone());
+        let cover_module_id = self.jig.modules.lock_ref().first().map(|m| m.id);
 
         // navigate to cover if exists otherwise navigate to landing
         let route = match cover_module_id {
@@ -138,7 +138,7 @@ fn get_categories_labels(
 ) {
     for category in categories {
         let name = format!("{}{}", base_name, category.name);
-        lookup.insert(category.id.clone(), name.clone());
+        lookup.insert(category.id, name.clone());
 
         let base_name = name + "/";
         get_categories_labels(&category.children, lookup, &base_name);
@@ -149,11 +149,11 @@ fn set_default_values(jig: &mut JigData, meta: &MetadataResponse) {
     let available_affiliations = meta
         .affiliations
         .iter()
-        .map(|affiliation| affiliation.id.clone())
+        .map(|affiliation| affiliation.id)
         .collect();
     jig.affiliations = available_affiliations;
 
-    let available_ages = meta.age_ranges.iter().map(|age| age.id.clone()).collect();
+    let available_ages = meta.age_ranges.iter().map(|age| age.id).collect();
     jig.age_ranges = available_ages;
 
     jig.privacy_level = PrivacyLevel::default()
@@ -162,10 +162,7 @@ fn set_default_values(jig: &mut JigData, meta: &MetadataResponse) {
 async fn load_jig(jig_id: JigId) -> Result<JigResponse, EmptyError> {
     let path = jig::GetDraft::PATH.replace("{id}", &jig_id.0.to_string());
 
-    match api_with_auth::<JigResponse, EmptyError, ()>(&path, jig::GetDraft::METHOD, None).await {
-        Ok(resp) => Ok(resp),
-        Err(e) => Err(e),
-    }
+    api_with_auth::<JigResponse, EmptyError, ()>(&path, jig::GetDraft::METHOD, None).await
 }
 
 async fn load_categories() -> Result<Vec<Category>, EmptyError> {
@@ -187,14 +184,6 @@ async fn load_categories() -> Result<Vec<Category>, EmptyError> {
 }
 
 pub async fn load_metadata() -> Result<MetadataResponse, EmptyError> {
-    match api_with_auth::<MetadataResponse, EmptyError, ()>(
-        meta::Get::PATH,
-        meta::Get::METHOD,
-        None,
-    )
-    .await
-    {
-        Ok(res) => Ok(res),
-        Err(e) => Err(e),
-    }
+    api_with_auth::<MetadataResponse, EmptyError, ()>(meta::Get::PATH, meta::Get::METHOD, None)
+        .await
 }

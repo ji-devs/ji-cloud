@@ -133,14 +133,13 @@ impl State {
         // then the filter would simply _remove_ invalid values which would be fine, but it
         // would affect the UX - If a teacher added 6 words for the left, and only 5 on the right
         // by accident, they'd have to recapture their entries again to correct the mistake.
-        let contents_valid = create_iter(left, right)
+        let contents_valid = !create_iter(left, right)
             // Ensure that each row has both left and right values set.
             // Because both lists are prefilled with empty strings, we need to check that either
             // side is empty, but not both sides as that would be an empty row.
-            .find(|(left, right)| {
+            .any(|(left, right)| {
                 (left.is_empty() || right.is_empty()) && !(left.is_empty() && right.is_empty())
-            })
-            .is_none();
+            });
 
         if contents_valid {
             let list: Vec<(&str, &str)> = create_iter(left, right)

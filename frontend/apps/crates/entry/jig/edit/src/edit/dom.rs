@@ -45,7 +45,7 @@ impl EditPage {
                 */
                 .apply(|dom| {
                     match jig_focus {
-                        JigFocus::Modules => dom.child(SidebarDom::render(jig_id.clone(), state.clone())),
+                        JigFocus::Modules => dom.child(SidebarDom::render(jig_id, state.clone())),
                         JigFocus::Resources => dom,
                     }
                 })
@@ -58,13 +58,13 @@ impl EditPage {
                             }
                         },
                         JigEditRoute::Module(module_id) => {
-                            Some(IframeDom::render(jig_id.clone(), module_id.clone()))
+                            Some(IframeDom::render(jig_id, module_id))
                         },
                         JigEditRoute::Publish => {
                             Some(Publish::render(Rc::clone(&state)))
                         }
                         JigEditRoute::PostPublish => {
-                            Some(render_post_publish(jig_id.clone(), Rc::clone(&state)))
+                            Some(render_post_publish(jig_id, Rc::clone(&state)))
                         }
                     }
                 })))
@@ -94,7 +94,7 @@ impl EditPage {
                     });
                     PlayerPopup::new(
                         jig_id,
-                        settings.into(),
+                        settings,
                         PreviewPopupCallbacks::new(close)
                     ).render(None)
                 })

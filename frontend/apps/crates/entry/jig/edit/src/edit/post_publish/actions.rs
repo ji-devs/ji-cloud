@@ -25,7 +25,7 @@ pub fn create_jig(state: Rc<State>) {
         };
 
         match api_with_auth::<CreateResponse<JigId>, EmptyError, _>(
-            &jig::Create::PATH,
+            jig::Create::PATH,
             jig::Create::METHOD,
             Some(req),
         )
@@ -36,7 +36,9 @@ pub fn create_jig(state: Rc<State>) {
                     Route::Jig(JigRoute::Edit(resp.id, jig_focus, JigEditRoute::Landing)).into();
                 dominator::routing::go_to_url(&url);
             }
-            Err(_) => {}
+            Err(_) => {
+                todo!();
+            }
         }
     });
 }

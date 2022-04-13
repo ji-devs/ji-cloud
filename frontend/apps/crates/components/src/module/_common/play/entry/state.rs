@@ -253,13 +253,7 @@ pub struct Ready<Base> {
 
 impl<RawData, Base> InitPhase<RawData, Base> {
     pub fn waiting_iframe_raw(&self) -> bool {
-        match self {
-            Self::Loading(kind) => match kind {
-                LoadingKind::Iframe => true,
-                _ => false,
-            },
-            _ => false,
-        }
+        matches!(self, Self::Loading(LoadingKind::Iframe))
     }
 
     pub fn loading_kind_unchecked(&self) -> &LoadingKind<RawData> {

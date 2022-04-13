@@ -685,6 +685,28 @@ where user_id = $1
     Ok(given_name)
 }
 
+pub async fn get_email(txn: &mut PgConnection, user_id: Uuid) -> sqlx::Result<String> {
+    let email: Option<String> = sqlx::query!(
+        r#"
+select email::text
+from user_email
+where user_id = $1
+        "#,
+        user_id
+    )
+    .fetch_one(txn)
+    .await?
+    .email;
+
+    let email = if let Some(email) = email {
+        email
+    } else {
+        return Err(sqlx::Error::RowNotFound);
+    };
+
+    Ok(email)
+}
+
 pub async fn get_fonts(db: &sqlx::PgPool, user_id: Uuid) -> sqlx::Result<Vec<String>> {
     let font_names = sqlx::query!(
         r#"

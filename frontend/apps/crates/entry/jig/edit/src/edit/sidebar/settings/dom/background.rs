@@ -92,7 +92,7 @@ fn line(
                         }
                     })))
                     .event(clone!(state, option => move |_ :events::Change| {
-                        actions::on_background_audio_click(Rc::clone(&state), elem.checked(), option.clone());
+                        actions::on_background_audio_click(Rc::clone(&state), elem.checked(), option);
                     }))
                 })
             }),
@@ -122,7 +122,7 @@ fn line(
                             let handle = AUDIO_MIXER.with(|mixer| mixer.add_source(option.as_source(), AudioClipOptions {
                                 auto_play: true,
                                 is_loop: false,
-                                on_ended: on_ended,
+                                on_ended,
                             }));
                             *audio_handles[index] = Some(handle);
                         },

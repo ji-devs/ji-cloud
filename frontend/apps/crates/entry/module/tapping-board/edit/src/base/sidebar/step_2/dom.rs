@@ -12,6 +12,14 @@ pub fn render(state: Rc<Step2>) -> Dom {
     html!("menu-tabs", {
         .future(state.tab.signal_ref(|tab| tab.kind()).dedupe().for_each(clone!(state => move |kind| {
             state.sidebar.tab_kind.set(Some(kind));
+            state.sidebar.base.continue_next_fn.set(Some(Rc::new(clone!(state => move || {
+                if let Some(kind) = next_kind(&kind) {
+                        state.tab.set(Tab::new(state.sidebar.base.clone(), kind));
+                    true
+                } else {
+                    false
+                }
+            }))));
             async move {}
         })))
         .children(&mut [

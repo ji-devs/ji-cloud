@@ -31,6 +31,13 @@ impl Step4 {
     }
 }
 
+pub fn next_kind(kind: &MenuTabKind) -> Option<MenuTabKind> {
+    match kind {
+        MenuTabKind::PlaySettings => Some(MenuTabKind::Instructions),
+        _ => None,
+    }
+}
+
 #[derive(Clone)]
 pub enum Tab {
     Settings(Rc<PlaySettingsState>),

@@ -76,6 +76,8 @@ pub struct CardsBase<RawData: RawDataExt, E: ExtraExt> {
     pub pairs: MutableVec<(Card, Card)>,
     pub selected_pair: Mutable<Option<(usize, SelectedSide)>>,
     pub background: Mutable<Option<Background>>,
+    pub can_continue_next: Mutable<bool>,
+    pub continue_next_fn: ContinueNextFn,
     pub extra: E,
     pub debug: DebugSettings,
 }
@@ -90,6 +92,13 @@ pub struct Tooltips {
     pub delete: Mutable<Option<Rc<TooltipState>>>,
     pub list_error: Mutable<Option<Rc<TooltipState>>>,
 }
+
+impl Default for Tooltips {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Tooltips {
     pub fn new() -> Self {
         Self {
@@ -124,6 +133,8 @@ impl<RawData: RawDataExt, E: ExtraExt> CardsBase<RawData, E> {
             .map(|pair| (pair.0.clone().into(), pair.1.clone().into()))
             .collect();
 
+        let pairs = MutableVec::new_with_values(pairs);
+
         let mode = content.mode;
         let instructions = Mutable::new(content.instructions);
 
@@ -138,9 +149,11 @@ impl<RawData: RawDataExt, E: ExtraExt> CardsBase<RawData, E> {
             instructions,
             mode,
             tooltips: Tooltips::new(),
-            pairs: MutableVec::new_with_values(pairs),
+            pairs,
             selected_pair: Mutable::new(None),
             background,
+            can_continue_next: Mutable::new(false),
+            continue_next_fn: Mutable::new(None),
             extra,
             module_kind,
             debug: debug.unwrap_or_default(),
@@ -189,24 +202,8 @@ impl<RawData: RawDataExt, E: ExtraExt> CardsBase<RawData, E> {
     pub fn theme_id_str_signal(&self) -> impl Signal<Item = &'static str> {
         self.theme_id.signal().map(|id| id.as_str_id())
     }
-}
 
-//the requirement for this indirection might be a compiler bug...
-//I couldn't reproduce it on playground
-//here was the latest attempt: https://play.rust-lang.org/?version=nightly&mode=debug&edition=2018&gist=75e158fa8d226b8fdc505ec8551ca259
-
-impl<RawData: RawDataExt, E: ExtraExt> BaseExt<Step> for CardsBase<RawData, E> {
-    type NextStepAllowedSignal = impl Signal<Item = bool>;
-
-    fn get_jig_id(&self) -> JigId {
-        self.jig_id
-    }
-
-    fn get_module_id(&self) -> ModuleId {
-        self.module_id
-    }
-
-    fn allowed_step_change(&self, _from: Step, _to: Step) -> bool {
+    pub fn is_valid(&self) -> bool {
         self.pairs
             .lock_ref()
             .iter()
@@ -215,9 +212,7 @@ impl<RawData: RawDataExt, E: ExtraExt> BaseExt<Step> for CardsBase<RawData, E> {
             >= 2
     }
 
-    fn next_step_allowed_signal(&self) -> Self::NextStepAllowedSignal {
-        let _mode = self.mode;
-
+    pub fn is_valid_signal(&self) -> impl Signal<Item = bool> {
         self.pairs
             .signal_vec_cloned()
             .map_signal(|(card_1, card_2)| {
@@ -230,6 +225,42 @@ impl<RawData: RawDataExt, E: ExtraExt> BaseExt<Step> for CardsBase<RawData, E> {
                 }
             })
             .to_signal_map(|xs| xs.iter().filter(|x| **x).count() >= 2)
+    }
+}
+
+//the requirement for this indirection might be a compiler bug...
+//I couldn't reproduce it on playground
+//here was the latest attempt: https://play.rust-lang.org/?version=nightly&mode=debug&edition=2018&gist=75e158fa8d226b8fdc505ec8551ca259
+
+impl<RawData: RawDataExt, E: ExtraExt> BaseExt<Step> for CardsBase<RawData, E> {
+    fn get_jig_id(&self) -> JigId {
+        self.jig_id
+    }
+
+    fn get_module_id(&self) -> ModuleId {
+        self.module_id
+    }
+
+    fn allowed_step_change(&self, _from: Step, _to: Step) -> bool {
+        self.is_valid()
+    }
+
+    fn can_continue_next(&self) -> ReadOnlyMutable<bool> {
+        self.can_continue_next.read_only()
+    }
+
+    fn continue_next(&self) -> bool {
+        if self.can_continue_next.get() {
+            match self.step.get() {
+                Step::One | Step::Three => match self.continue_next_fn.get_cloned() {
+                    Some(continue_next_fn) => continue_next_fn(),
+                    None => false,
+                },
+                _ => false,
+            }
+        } else {
+            false
+        }
     }
 }
 

@@ -17,7 +17,7 @@ use components::{
 use dominator::clone;
 use futures_signals::{
     map_ref,
-    signal::{self, Mutable, ReadOnlyMutable, Signal, SignalExt},
+    signal::{Mutable, ReadOnlyMutable, Signal, SignalExt},
     signal_vec::SignalVecExt,
 };
 use shared::domain::jig::{
@@ -28,6 +28,7 @@ use shared::domain::jig::{
             drag_drop::{
                 Hint, Interactive as RawInteractive, Item as RawItem, ItemKind as RawItemKind,
                 Mode, ModuleData as RawData, Next, PlaySettings as RawPlaySettings, Step,
+                TargetArea,
             },
             BodyExt,
         },
@@ -44,11 +45,15 @@ pub struct Base {
     pub instructions: Mutable<Instructions>,
     pub jig_id: JigId,
     pub module_id: ModuleId,
+    pub continue_next_fn: ContinueNextFn,
     // DragDrop-specific
     pub theme_id: Mutable<ThemeId>,
     pub backgrounds: Rc<Backgrounds>,
     pub stickers: Rc<Stickers<Item>>,
     pub traces: Rc<TracesEdit>,
+    /// List of areas which a sticker can be dropped into so that we can confirm whether a sticker
+    /// has actually been dropped into a trace area.
+    pub target_areas: Rc<Vec<TargetArea>>,
     pub text_editor: Rc<TextEditorState>,
     pub play_settings: Rc<PlaySettings>,
 
@@ -244,11 +249,17 @@ impl Base {
 
         *stickers_ref.borrow_mut() = Some(stickers.clone());
 
+        // A Vec holding both TraceAreas and Traces
+        let trace_data = &content
+            .target_areas
+            .iter()
+            .map(|target_area| (target_area.clone(), target_area.trace.clone()))
+            .collect::<Vec<(TargetArea, RawTrace)>>();
+
         let traces = TracesEdit::from_raw(
-            &content
-                .target_areas
+            &trace_data
                 .iter()
-                .map(|target_area| target_area.trace.clone())
+                .map(|(_, trace)| trace.clone())
                 .collect::<Vec<RawTrace>>(),
             crate::debug::settings()
                 .draw_kind
@@ -278,12 +289,14 @@ impl Base {
             theme_id,
             history,
             step: step.read_only(),
+            continue_next_fn: Mutable::new(None),
             instructions,
             feedback,
             text_editor,
             backgrounds,
             stickers,
             traces,
+            target_areas: Rc::new(trace_data.iter().map(|(area, _)| area.clone()).collect()),
             play_settings: Rc::new(PlaySettings::new(content.play_settings)),
             drag_item_selected_index: Mutable::new(None),
         });
@@ -321,14 +334,22 @@ impl Base {
 }
 
 impl BaseExt<Step> for Base {
-    type NextStepAllowedSignal = impl Signal<Item = bool>;
-
     fn allowed_step_change(&self, _from: Step, _to: Step) -> bool {
         true
     }
 
-    fn next_step_allowed_signal(&self) -> Self::NextStepAllowedSignal {
-        signal::always(true)
+    fn can_continue_next(&self) -> ReadOnlyMutable<bool> {
+        Mutable::new(true).read_only()
+    }
+
+    fn continue_next(&self) -> bool {
+        match self.step.get() {
+            Step::Two | Step::Three | Step::Four => match self.continue_next_fn.get_cloned() {
+                Some(continue_next_fn) => continue_next_fn(),
+                None => false,
+            },
+            _ => false,
+        }
     }
 
     fn get_jig_id(&self) -> JigId {
