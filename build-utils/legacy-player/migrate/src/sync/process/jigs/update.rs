@@ -139,50 +139,52 @@ async fn get_sanitize_jigs_futures(ctx: Arc<Context>, local_stats:Arc<Mutex<Loca
 
     for (game_id, jig_list) in game_to_jig.into_iter() {
         local_stats.lock().await.games_unaccounted.insert(game_id.clone());
-        futures.push({
-            let jigs_lookup = jigs_lookup.clone();
-            let ctx = ctx.clone();
-            let local_stats = local_stats.clone();
-            async move {
-                if jig_list.len() > 1 {
-                    let mut sorted = jig_list.clone();
+        if ctx.opts.update_jigs_delete_duplicates {
+            futures.push({
+                let jigs_lookup = jigs_lookup.clone();
+                let ctx = ctx.clone();
+                let local_stats = local_stats.clone();
+                async move {
+                    if jig_list.len() > 1 {
+                        let mut sorted = jig_list.clone();
 
-                    sorted.sort_by(|a, b| a.published_at.partial_cmp(&b.published_at).unwrap());
-                    sorted.remove(0);
+                        sorted.sort_by(|a, b| a.published_at.partial_cmp(&b.published_at).unwrap());
+                        sorted.remove(0);
 
-                    log::info!("has multiple");
-                    for jig in sorted.iter() {
-                        log::info!("deleting {} {:?}", jig.id.0.to_string(), jig.published_at);
-                        jigs_lookup.lock().await.jig_to_game.remove(&jig.id.0.to_string());
-   
-                        if !ctx.opts.dry_run {
-                            let url = format!("{}{}", 
-                                ctx.opts.get_remote_target().api_url(), 
-                                endpoints::jig::Delete::PATH.replace("{id}", &jig.id.0.to_string())
-                            );
+                        log::info!("has multiple");
+                        for jig in sorted.iter() {
+                            log::info!("deleting {} {:?}", jig.id.0.to_string(), jig.published_at);
+                            jigs_lookup.lock().await.jig_to_game.remove(&jig.id.0.to_string());
+       
+                            if !ctx.opts.dry_run {
+                                let url = format!("{}{}", 
+                                    ctx.opts.get_remote_target().api_url(), 
+                                    endpoints::jig::Delete::PATH.replace("{id}", &jig.id.0.to_string())
+                                );
 
-                            let res = ctx
-                                .client 
-                                .delete(&url)
-                                .header("AUTHORIZATION", &format!("Bearer {}", &ctx.opts.token))
-                                .header("content-length", 0)
-                                .send()
-                                .await
-                                .unwrap();
+                                let res = ctx
+                                    .client 
+                                    .delete(&url)
+                                    .header("AUTHORIZATION", &format!("Bearer {}", &ctx.opts.token))
+                                    .header("content-length", 0)
+                                    .send()
+                                    .await
+                                    .unwrap();
 
-                            if !res.status().is_success() {
-                                log::error!("error code: {}, details: {:?}", res.status().as_str(), res);
-                                log::error!("Failed to delete all jig {}", jig.id.0.to_string());
+                                if !res.status().is_success() {
+                                    log::error!("error code: {}, details: {:?}", res.status().as_str(), res);
+                                    log::error!("Failed to delete all jig {}", jig.id.0.to_string());
+                                }
                             }
+
+                            local_stats.lock().await.n_deleted += 1;
                         }
 
-                        local_stats.lock().await.n_deleted += 1;
+                        jigs_lookup.lock().await.game_to_jig.insert(game_id, sorted);
                     }
-
-                    jigs_lookup.lock().await.game_to_jig.insert(game_id, sorted);
                 }
-            }
-        });
+            });
+        }
     }
 
     futures
@@ -306,7 +308,7 @@ async fn update_jig(ctx: &Context, local_stats:Arc<Mutex<LocalStats>>, jig_id: &
         if !res.status().is_success() {
             log::error!("error code: {}, details: {:?}", res.status().as_str(), res);
             log::error!("unable to update jig: {:#?}", req);
-            //panic!("unable to update jig!"); 
+            panic!("unable to update jig {}!", jig_id); 
         }
     }
 }
@@ -325,7 +327,7 @@ async fn get_local_meta(ctx:&Context) -> LocalMeta {
 
     if !res.status().is_success() {
         log::error!("error code: {}, details: {:?}", res.status().as_str(), res);
-        panic!("Failed to get jig data");
+        panic!("Failed to get meta data");
     }
 
     let MetadataResponse { affiliations, age_ranges, .. } = res.json().await.unwrap();
