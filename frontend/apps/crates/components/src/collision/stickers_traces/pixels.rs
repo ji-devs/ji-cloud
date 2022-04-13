@@ -73,7 +73,7 @@ pub enum StickerBoundsKind {
     Auto,
 }
 
-pub async fn get_hit_index<'a, V: AsRef<Trace>>(
+pub fn get_hit_index<'a, V: AsRef<Trace>>(
     source: StickerHitSource<'a>,
     traces: &[V],
 ) -> Option<usize> {
