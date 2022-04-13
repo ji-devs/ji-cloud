@@ -152,6 +152,7 @@ impl PuzzleGame {
 
 impl PuzzleItem {
     pub fn new(base: Rc<Base>, _effects: &ImageEffect, raw: RawPuzzleItem) -> Rc<Self> {
+
         let orig_transform_matrix = match raw.hotspot.transform_matrix {
             None => Matrix4::identity(),
             Some(values) => Matrix4::new_direct(values),

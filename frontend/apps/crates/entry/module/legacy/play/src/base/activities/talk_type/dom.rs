@@ -54,6 +54,7 @@ impl TalkTypeItem {
                     }
                 })
             })))
+            .property("largestText", state.hint_letters.borrow().largest_text.clone())
             .property("y", bounds.y)
             .property("x", bounds.x)
             .property("width", bounds.width)

@@ -1,32 +1,22 @@
 [package]
-name = "transcode"
+name = "migrate"
 version = "0.1.0"
 authors = ["David Komer <david.komer@gmail.com>"]
 edition = "2018"
 
 [[bin]]
-name = "parse"
-path = "src/parse/main.rs"
-
-[[bin]]
-name = "create_jig"
-path = "src/create_jig/main.rs"
-
-[[bin]]
-name = "update_jig"
-path = "src/update_jig/main.rs"
-
-[[bin]]
-name = "download_albums"
-path = "src/download_albums/main.rs"
+name = "sync"
+path = "src/sync/main.rs"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 shared = { path = "../../../shared/rust" }
+utils= { path = "../../../frontend/apps/crates/utils" }
+components = { path = "../../../frontend/apps/crates/components" }
 scan_fmt = "0.2.6"
 structopt = "0.3.25"
-simplelog = "0.11.1"
+simplelog = "0.11.2"
 cfg-if = "1.0.0"
 dotenv = "0.15.0"
 log = "0.4.14"

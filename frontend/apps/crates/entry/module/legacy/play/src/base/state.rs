@@ -75,9 +75,18 @@ impl Base {
             ..
         } = init_args;
 
+        log::info!("{:#?}", raw);
+       
+        // updated in latest migration tool
+        // but not all previous modules
+        let slide_id = raw.slide_id
+            .trim_matches('/')
+            .replace("/", "-")
+            .to_string();
+
         let url = utils::path::legacy_cdn_url(format!(
-            "{}/json/slides/{}.json",
-            raw.game_id, raw.slide_id
+            "{}/json/slides/{}.json?db=foo",
+            raw.game_id, slide_id
         ));
 
         log::info!("loading {}", url);
@@ -96,7 +105,7 @@ impl Base {
             theme_id,
             module_phase: init_args.play_phase,
             game_id: raw.game_id,
-            slide_id: raw.slide_id,
+            slide_id,
             slide,
             workers: RefCell::new(HashMap::new()),
             bg_click_listener: RefCell::new(None),

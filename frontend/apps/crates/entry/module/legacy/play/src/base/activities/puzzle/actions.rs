@@ -277,7 +277,14 @@ impl PuzzleItem {
             true
         } else {
             if fly_back_to_origin {
-                *self.curr_transform_matrix.borrow_mut() = self.orig_transform_matrix.clone();
+
+                let v = self.orig_transform_matrix.get_translation();
+                let m = &mut *self.curr_transform_matrix.borrow_mut();
+
+                m.translate(&v);
+                // not entirely sure why this doesn't work... maybe z coords?
+                // whatever...
+                //*self.curr_transform_matrix.borrow_mut() = self.orig_transform_matrix.clone();
             }
             self.base.audio_manager.play_negative_clip();
             false

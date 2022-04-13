@@ -15,7 +15,7 @@ pub fn legacy_cdn_url<T: AsRef<str>>(path: T) -> String {
     if crate::routes::is_param_bool("example") {
         media_url(&format!("legacy/examples/{}", path.as_ref()))
     } else {
-        legacy_url(&format!("games/{}", path.as_ref()))
+        legacy_url(&format!("transcode/games/{}", path.as_ref()))
     }
 }
 

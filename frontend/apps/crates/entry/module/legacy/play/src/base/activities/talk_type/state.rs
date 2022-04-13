@@ -63,6 +63,7 @@ pub enum TalkTypeItemPhase {
 pub struct HintLetters {
     pub letters: Vec<HintLetter>,
     pub indices: Vec<usize>,
+    pub largest_text: String
 }
 
 pub struct HintLetter {
@@ -100,11 +101,15 @@ impl TalkTypeItem {
                 let mut indices: Vec<usize> = (0..letters.len()).collect();
                 indices.shuffle(rng);
 
-                RefCell::new(HintLetters { letters, indices })
+                let largest_text = text.iter().fold("", |acc, curr| {
+                   if curr.len() > acc.len() { curr } else { acc }
+                });
+                RefCell::new(HintLetters { letters, indices, largest_text: largest_text.to_string() })
             }
             None => RefCell::new(HintLetters {
                 letters: Vec::new(),
                 indices: Vec::new(),
+                largest_text: "".to_string(),
             }),
         };
         Rc::new(Self {

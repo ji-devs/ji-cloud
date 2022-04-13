@@ -30,7 +30,22 @@ pub struct Sticker {
 
     /// override the size
     pub override_size: Option<(f64, f64)>,
+
+    /// the original sticker kind
+    /// ideally we'd ditch this
+    /// but it's helpful for debugging
+    pub kind: StickerKind 
 }
+
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+#[serde(rename_all = "snake_case")]
+pub enum StickerKind {
+    Background,
+    Animation,
+    Image,
+    Text(Option<String>),
+}
+
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone, Copy)]
 #[serde(rename_all = "snake_case")]

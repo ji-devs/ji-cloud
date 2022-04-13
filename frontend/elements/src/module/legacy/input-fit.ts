@@ -55,21 +55,25 @@ export class _ extends LitElement {
 
     resize() {
         const input = this.shadowRoot?.getElementById("input") as HTMLInputElement;
-
-
-        const isOverflowing = () => {
-            return input.clientWidth < input.scrollWidth || input.clientHeight < input.scrollHeight;
-        }
-
-        let curr = 12;
-        const max = 128;
         const margin = 3;
 
-        do {
-            input.style.fontSize = `${curr++}px`;
-        } while(!isOverflowing() && curr < max);
+        //if(this.largestText != "") {
+            //input.style.fontSize = `${(this.largestText.length * 120) - margin}rem`;
+        //} else {
 
-        input.style.fontSize = `${curr - margin}px`;
+            const isOverflowing = () => {
+                return input.clientWidth < input.scrollWidth || input.clientHeight < input.scrollHeight;
+            }
+
+            let curr = 12;
+            const max = 128;
+
+            do {
+                input.style.fontSize = `${curr++}px`;
+            } while(!isOverflowing() && curr < max);
+
+            input.style.fontSize = `${curr - margin}px`;
+            //}
     }
 
 
@@ -85,6 +89,9 @@ export class _ extends LitElement {
 
     @property({type: Number})
     height:number = 0;
+
+    @property()
+    largestText:string = "";
 
     @property()
     value:string = "";

@@ -25,48 +25,81 @@ impl ImagePlayer {
 
         log::info!("Loading {}!", state.raw.filename);
 
-        html!("img" => web_sys:: HtmlImageElement, {
-            .attribute("src", &state.base.design_media_url(&state.raw.filename))
-            .style_signal("opacity", state.controller.hidden.signal().map(|hidden| {
-                if hidden {
-                    "0"
-                } else {
-                    "1"
-                }
-            }))
-            .style("cursor", if state.controller.interactive {"pointer"} else {"initial"})
-            .style("display", "block")
-            .style("position", "absolute")
-            .style_signal("width", width_signal(state.size.signal_cloned()))
-            .style_signal("height", height_signal(state.size.signal_cloned()))
-            .style_signal("top", bounds::size_height_center_rem_signal(state.size.signal()))
-            .style_signal("left", bounds::size_width_center_rem_signal(state.size.signal()))
-            .style_signal("transform", transform_signal)
-            .with_node!(elem => {
-                .event(clone!(state => move |_evt:events::Load| {
-                    if state.size.get_cloned().is_none() {
 
-                        let mut width = elem.natural_width() as f64;
-                        let mut height = elem.natural_height() as f64;
+        if state.get_text().is_none() || !state.raw.filename.is_empty() {
+            html!("img" => web_sys:: HtmlImageElement, {
+                .attribute("src", &state.base.design_media_url(&state.raw.filename))
+                .style_signal("opacity", state.controller.hidden.signal().map(|hidden| {
+                    if hidden {
+                        "0"
+                    } else {
+                        "1"
+                    }
+                }))
+                .style("cursor", if state.controller.interactive {"pointer"} else {"initial"})
+                .style("display", "block")
+                .style("position", "absolute")
+                .style_signal("width", width_signal(state.size.signal_cloned()))
+                .style_signal("height", height_signal(state.size.signal_cloned()))
+                .style_signal("top", bounds::size_height_center_rem_signal(state.size.signal()))
+                .style_signal("left", bounds::size_width_center_rem_signal(state.size.signal()))
+                .style_signal("transform", transform_signal)
+                .with_node!(elem => {
+                    .event(clone!(state => move |_evt:events::Load| {
+                        if state.size.get_cloned().is_none() {
 
-                        // ugly hack... would be much better to fix at the source
-                        // but, whatever...
-                        if state.raw.filename.contains("_txt") {
-                            width /= 2.0;
-                            height /= 2.0;
+                            let mut width = elem.natural_width() as f64;
+                            let mut height = elem.natural_height() as f64;
+
+                            // ugly hack... would be much better to fix at the source
+                            // but, whatever...
+                            if state.get_text().is_some() {
+                                width /= 2.0;
+                                height /= 2.0;
+                            }
+
+                            state.size.set(Some((width, height)));
+
+
                         }
 
-                        state.size.set(Some((width, height)));
+                        *state.controller.elem.borrow_mut() = Some(elem.clone().unchecked_into());
+                        state.base.insert_stage_click_listener(clone!(state => move |stage_click| {
+                            state.controller.handle_click(stage_click);
+                        }));
+                    }))
+                })
+            })
+        } else {
+            log::info!("{:?}", state.raw);
 
-
+            html!("div" => web_sys:: HtmlDivElement, {
+                .style_signal("opacity", state.controller.hidden.signal().map(|hidden| {
+                    if hidden {
+                        "0"
+                    } else {
+                        "1"
                     }
-
+                }))
+                .style("cursor", if state.controller.interactive {"pointer"} else {"initial"})
+                .style("display", "block")
+                .style("position", "absolute")
+                .style_signal("width", width_signal(state.size.signal_cloned()))
+                .style_signal("height", height_signal(state.size.signal_cloned()))
+                .style_signal("top", bounds::size_height_center_rem_signal(state.size.signal()))
+                .style_signal("left", bounds::size_width_center_rem_signal(state.size.signal()))
+                .style_signal("transform", transform_signal)
+                .after_inserted(clone!(state => move |elem| {
                     *state.controller.elem.borrow_mut() = Some(elem.clone().unchecked_into());
                     state.base.insert_stage_click_listener(clone!(state => move |stage_click| {
                         state.controller.handle_click(stage_click);
                     }));
+
+                    let html = state.get_text().unwrap_ji();
+
+                    //TODO -add html here?
                 }))
             })
-        })
+        }
     }
 }

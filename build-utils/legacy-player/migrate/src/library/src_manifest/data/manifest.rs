@@ -37,7 +37,7 @@ impl SrcManifestData {
         format!("https://storage.googleapis.com/ji-cloud-legacy-eu-001/games/{}/json/game.json", game_id)
     }
 }
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct SrcManifest {
     /// Base url of the amazon bucket
     pub base_url: String,
@@ -97,7 +97,7 @@ impl SrcManifest {
     }
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct ManifestStructure {
     #[serde(rename="musicFile")]
     pub music_file: Option<String>,
@@ -115,13 +115,13 @@ pub struct ManifestStructure {
     pub slides: Vec<Slide>,
 }
 
-#[derive(Deserialize, Debug, Default)]
+#[derive(Deserialize, Debug, Default, Clone)]
 pub struct ManifestSettings {
     #[serde(rename="quizParameters")]
     pub quiz: Option<QuizSettings>,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct QuizSettings {
     #[serde(rename="activityTimeLimit")]
     pub activity_time_limit: Option<f64>,
@@ -139,7 +139,7 @@ pub struct QuizSettings {
 pub type PrimaryKey = usize;
 
 #[repr(u8)]
-#[derive(Deserialize_repr, PartialEq, Debug)]
+#[derive(Deserialize_repr, PartialEq, Debug, Clone)]
 pub enum ShuffleType {
     None = 0,
     AllSlides = 1,
@@ -149,7 +149,7 @@ pub enum ShuffleType {
 //see: https://developer.mozilla.org/en-US/docs/Web/CSS/transform-function/matrix
 pub type Transform = [f64;6];
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct AlbumStore {
     pub album: Album,
 
@@ -159,14 +159,14 @@ pub struct AlbumStore {
     pub public: Option<bool>
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct Album {
     #[serde(rename="pk")]
     pub key: PrimaryKey,
     pub fields: AlbumFields,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct AlbumFields {
     pub name: Option<String>,
     pub description: Option<String>,
@@ -176,7 +176,7 @@ pub struct AlbumFields {
 }
 
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct AlbumAuthor {
     pub first_name: Option<String>,
     pub last_name: Option<String>,

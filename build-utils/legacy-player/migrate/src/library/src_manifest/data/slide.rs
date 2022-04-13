@@ -5,7 +5,7 @@ use std::fs::File;
 use std::fmt;
 use super::*;
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct Slide {
     #[serde(rename="filePath")]
     pub file_path: String,

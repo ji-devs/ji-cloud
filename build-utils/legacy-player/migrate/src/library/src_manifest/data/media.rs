@@ -2,7 +2,10 @@ use std::path::PathBuf;
 
 use shared::domain::jig::module::body::legacy::design::Animation;
 use uuid::Uuid;
+
+#[derive(Clone, Debug)]
 pub struct Media {
+    pub game_id: String,
     pub url: String,
     pub basepath: String,
     pub filename: String,
@@ -19,6 +22,7 @@ impl Media {
     }
 }
 
+#[derive(Clone, Debug, Copy)]
 pub enum MediaTranscode {
     Audio,
     Video

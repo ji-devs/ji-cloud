@@ -4,8 +4,9 @@ use std::path::{Path, PathBuf};
 use std::fs::File;
 use std::fmt;
 use super::*;
+use shared::domain::jig::module::body::legacy::design::StickerKind as DestStickerKind;
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct Layer {
     pub width: Option<f64>,
     pub height: Option<f64>,
@@ -63,13 +64,25 @@ impl Default for ShowKind {
 }
 
 #[repr(u8)]
-#[derive(PartialEq, Debug, Clone, Copy)]
+#[derive(PartialEq, Debug, Clone)]
 pub enum LayerKind {
     Background,
     Animation,
     Image,
     Text,
 }
+
+impl LayerKind {
+    pub fn convert(&self, layer:&Layer) -> DestStickerKind {
+        match self {
+            LayerKind::Background => DestStickerKind::Background,
+            LayerKind::Animation => DestStickerKind::Animation,
+            LayerKind::Image => DestStickerKind::Image,
+            LayerKind::Text => DestStickerKind::Text(layer.html.clone()),
+        }
+    }
+}
+
 pub fn layer_kind_deser<'de, D>(deserializer: D) -> Result<LayerKind, D::Error>
 where
     D: Deserializer<'de>,

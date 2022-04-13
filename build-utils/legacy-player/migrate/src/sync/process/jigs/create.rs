@@ -3,7 +3,7 @@
 use std::{future::Future, path::PathBuf, vec};
 use components::module::_common::prelude::Image;
 use dotenv::dotenv;
-use shared::{domain::{image::user::UserImageUploadResponse, jig::{module::{body::Background, ModuleUpdateRequest}, PrivacyLevel}, meta::{GoalId, AgeRangeId, AffiliationId}}, media::MediaLibrary, config::RemoteTarget};
+use shared::{domain::{image::user::UserImageUploadResponse, jig::{module::{body::Background, ModuleUpdateRequest}, PrivacyLevel}, meta::{AgeRangeId, AffiliationId}}, media::MediaLibrary, config::RemoteTarget};
 use tokio_util::codec::{BytesCodec, FramedRead};
 use reqwest::Body;
 use simplelog::*;
@@ -14,9 +14,8 @@ use std::io::Write;
 use std::sync::{Arc, atomic::Ordering};
 use std::convert::TryInto;
 use uuid::Uuid;
-use ::transcode::{
+use ::migrate::{
     src_manifest::*,
-    jig_log::JigInfoLogLine
 };
 use futures::stream::{FuturesUnordered, StreamExt};
 pub use shared::{
@@ -69,169 +68,43 @@ use flate2::Compression;
 use flate2::write::ZlibEncoder;
 use std::process::Command;
 use reqwest::Client; 
+use crate::context::Context;
 
-mod context;
-use context::*;
-mod options;
-use options::*;
 
-#[tokio::main]
-async fn main() {
-    dotenv().ok();
+pub struct LocalMeta {
+    pub affiliations: Vec<AffiliationId>,
+    pub age_ranges: Vec<AgeRangeId>,
+}
 
-    let mut opts = Opts::from_args();
-    init_logger(opts.verbose);
-    opts.sanitize();
+pub async fn run(ctx: &Context, local_meta: &LocalMeta, manifest: &SrcManifest) -> String {
+    log::info!("creating jig for game_id: {}", manifest.game_id());
 
-    let ctx = Arc::new(Context::new(opts).await);
-
-    if ctx.opts.delete_all_jigs_first {
-        delete_all_jigs_first(&ctx).await;
-        log::info!("deleted all jigs!");
-    }
-
-    // log::warn!("exiting early for now, once all jigs are deleted pick it up again!");
-    // std::process::exit(0);
-
-    let batch_size = *&ctx.opts.batch_size;
-    let mut jobs = get_futures(ctx.clone()).await;
-
-    if batch_size == 0 {
-        for job in jobs {
-            job.await;
-        }
+    let image_id = if !ctx.opts.update_jigs_skip_cover_page && manifest.structure.slides.len() > 0 {
+        Some(upload_cover_image(ctx, &manifest.game_id(), &manifest.structure.slides[0]).await)
     } else {
-        //See: https://users.rust-lang.org/t/awaiting-futuresunordered/49295/5
-        //Idea is we try to have a saturated queue of futures
+        None
+    };
+    
+    let jig_id = make_jig(ctx, local_meta, manifest).await;
+    log::info!("got jig id: {}", jig_id.0.to_string());
+    assign_modules(ctx, &manifest.game_id(), &jig_id, manifest).await;
 
-        let mut futures = FuturesUnordered::new();
-
-        while let Some(next_job) = jobs.pop() {
-            while futures.len() >= batch_size {
-                futures.next().await;
-            }
-            futures.push(next_job);
-        }
-        while let Some(_) = futures.next().await {}
-    }
-
-    log::info!("completed {}", ctx.completed_count.load(Ordering::SeqCst));
-}
-
-async fn delete_all_jigs_first(ctx:&Context) {
-
-    let url = format!("{}{}", 
-        ctx.opts.get_remote_target().api_url(), 
-        endpoints::jig::DeleteAll::PATH
-    );
-
-    log::info!("url: {}", url);
-
-    let res = ctx
-        .client 
-        .delete(&url)
-        .header("AUTHORIZATION", &format!("Bearer {}", &ctx.token))
-        .header("content-length", 0)
-        .send()
-        .await
-        .unwrap();
-
-    if !res.status().is_success() {
-        log::error!("error code: {}, details: {:?}", res.status().as_str(), res);
-        panic!("Failed to delete all jigs");
-    }
-}
-
-async fn get_futures(ctx:Arc<Context>) -> Vec<impl Future> {
-    match ctx.opts.game_id.clone() {
-        None => {
-
-            let res = ctx 
-                .client
-                .get(&ctx.opts.game_ids_list_url)
-                .send()
-                .await
-                .unwrap();
-
-            if !res.status().is_success() {
-                log::error!("error code: {}, details: {:?}", res.status().as_str(), res);
-                panic!("Failed to get jig data");
-            }
-
-            res
-                .text()
-                .await
-                .unwrap()
-                .lines()
-                .map(|line| parse(ctx.clone(), line.to_string()))
-                .collect()
-        },
-        Some(game_id) => {
-            vec![parse(ctx.clone(), game_id)]
-        }
-    }
-}
-async fn parse(ctx: Arc<Context>, game_id: String) {
-    let ctx = &ctx;
-
-    if let Some(game_id) = ctx.skip_game_ids.iter().find(|skip_game_id| game_id == **skip_game_id) {
-        log::info!("skipping {}", game_id);
-    } else {
-        let url = format!("https://storage.googleapis.com/ji-cloud-legacy-eu-001/games/{}/json/game.json", game_id);
-
-        let res = ctx 
-            .client
-            .get(&url)
-            .send()
-            .await
-            .unwrap();
-
-        if !res.status().is_success() {
-            log::error!("error code: {}, details: {:?}", res.status().as_str(), res);
-            panic!("Failed to get game json for {}", game_id);
+    if !ctx.opts.dry_run {
+        if let Some(image_id) = image_id {
+            log::info!("setting cover");
+            assign_cover_image(ctx, &jig_id, image_id).await;
         }
 
-        let data:SrcManifestData = serde_json::from_str(&res.text().await.unwrap()).unwrap();
-        let manifest = data.data; 
-
-        log::info!("{}: {} slides", game_id, manifest.structure.slides.len());
-
-        let image_id = if !ctx.opts.skip_cover_page && manifest.structure.slides.len() > 0 {
-            Some(upload_cover_image(ctx, &game_id, &manifest.structure.slides[0]).await)
-        } else {
-            None
-        };
-        
-        let jig_id = make_jig(ctx, &manifest).await;
-        log::info!("got jig id: {}", jig_id.0.to_string());
-        assign_modules(ctx, &game_id, &jig_id, &manifest).await;
-
-        if !ctx.opts.dry_run {
-            if let Some(image_id) = image_id {
-                log::info!("setting cover");
-                assign_cover_image(ctx, &jig_id, image_id).await;
-            }
-
-            publish_jig(ctx, &jig_id).await;
-
-            let game_hash = manifest.album_store.album.fields.hash.unwrap_or_else(|| "[unknown]".to_string());
-
-        
-            JigInfoLogLine {
-                jig_id: jig_id.0.to_string(),
-                game_id,
-                game_hash
-            }.write_line(&ctx.info_log);
-        }
+        publish_jig(ctx, &jig_id).await;
     }
 
-    ctx.completed_count.fetch_add(1, Ordering::SeqCst);
+    jig_id.0.to_string()
 }
 
-async fn upload_cover_image(ctx:&Context, game_id: &str, slide: &transcode::src_manifest::Slide) -> ImageId {
+async fn upload_cover_image(ctx:&Context, game_id: &str, slide: &migrate::src_manifest::Slide) -> ImageId {
     //get file info
 
-    let url = format!("https://storage.googleapis.com/ji-cloud-legacy-eu-001/games/{}/media/slides/{}", game_id, slide.image_full);
+    let url = format!("https://storage.googleapis.com/ji-cloud-legacy-eu-001/transcode/games/{}/media/slides/{}", game_id, slide.image_full);
 
     let res = ctx 
         .client
@@ -275,7 +148,7 @@ async fn upload_cover_image(ctx:&Context, game_id: &str, slide: &transcode::src_
         let res = ctx 
             .client
             .post(url)
-            .header("AUTHORIZATION", &format!("Bearer {}", &ctx.token))
+            .header("AUTHORIZATION", &format!("Bearer {}", &ctx.opts.token))
             .json(&req_data)
             .send()
             .await
@@ -310,7 +183,7 @@ async fn upload_cover_image(ctx:&Context, game_id: &str, slide: &transcode::src_
         let res = ctx 
             .client
             .put(url)
-            .header("AUTHORIZATION", &format!("Bearer {}", &ctx.token))
+            .header("AUTHORIZATION", &format!("Bearer {}", &ctx.opts.token))
             .json(&req_data)
             .send()
             .await
@@ -365,7 +238,7 @@ async fn assign_cover_image(ctx:&Context, jig_id: &JigId, image_id: ImageId) {
     let res = ctx 
         .client
         .get(url)
-        .header("AUTHORIZATION", &format!("Bearer {}", &ctx.token))
+        .header("AUTHORIZATION", &format!("Bearer {}", &ctx.opts.token))
         .send()
         .await
         .unwrap();
@@ -391,7 +264,7 @@ async fn assign_cover_image(ctx:&Context, jig_id: &JigId, image_id: ImageId) {
     let res = ctx 
         .client
         .get(url)
-        .header("AUTHORIZATION", &format!("Bearer {}", &ctx.token))
+        .header("AUTHORIZATION", &format!("Bearer {}", &ctx.opts.token))
         .send()
         .await
         .unwrap();
@@ -438,7 +311,7 @@ async fn assign_cover_image(ctx:&Context, jig_id: &JigId, image_id: ImageId) {
     let res = ctx
         .client 
         .patch(url)
-        .header("AUTHORIZATION", &format!("Bearer {}", &ctx.token))
+        .header("AUTHORIZATION", &format!("Bearer {}", &ctx.opts.token))
         .json(&req_data)
         .send()
         .await
@@ -459,7 +332,7 @@ async fn assign_cover_image(ctx:&Context, jig_id: &JigId, image_id: ImageId) {
     let res = ctx 
         .client
         .patch(url)
-        .header("AUTHORIZATION", &format!("Bearer {}", &ctx.token))
+        .header("AUTHORIZATION", &format!("Bearer {}", &ctx.opts.token))
         .send()
         .await
         .unwrap();
@@ -470,7 +343,7 @@ async fn assign_cover_image(ctx:&Context, jig_id: &JigId, image_id: ImageId) {
     }
 }
 
-async fn make_jig(ctx:&Context, manifest: &SrcManifest) -> JigId {
+async fn make_jig(ctx:&Context, local_meta: &LocalMeta, manifest: &SrcManifest) -> JigId {
 
     let author_byline = match &manifest.album_store.album.fields.author {
         None => "(Originally created on Ji Tap)".to_string(),
@@ -490,9 +363,8 @@ async fn make_jig(ctx:&Context, manifest: &SrcManifest) -> JigId {
 
     let req = JigCreateRequest { 
         display_name: manifest.album_store.album.fields.name.clone().unwrap_or_default(),
-        goals: Vec::new(), 
-        age_ranges: ctx.age_ranges.clone(), 
-        affiliations: ctx.affiliations.clone(), 
+        age_ranges: local_meta.age_ranges.clone(), 
+        affiliations: local_meta.affiliations.clone(), 
         language: Some(manifest.lang_str().to_string()),
         categories: Vec::new(), 
         description: format!("{} {}", 
@@ -513,7 +385,7 @@ async fn make_jig(ctx:&Context, manifest: &SrcManifest) -> JigId {
 
         let res = ctx.client
             .post(&url)
-            .header("Authorization", &format!("Bearer {}", ctx.token))
+            .header("Authorization", &format!("Bearer {}", ctx.opts.token))
             .json(&req)
             .send()
             .await
@@ -550,7 +422,7 @@ async fn make_jig(ctx:&Context, manifest: &SrcManifest) -> JigId {
     if !ctx.opts.dry_run {
         let res = ctx.client
             .patch(&url)
-            .header("Authorization", &format!("Bearer {}", ctx.token))
+            .header("Authorization", &format!("Bearer {}", ctx.opts.token))
             .json(&req)
             .send()
             .await
@@ -593,7 +465,7 @@ async fn assign_modules(ctx:&Context, game_id: &str, jig_id: &JigId, manifest: &
 
                 let res = ctx.client
                     .post(&url)
-                    .header("Authorization", &format!("Bearer {}", ctx.token))
+                    .header("Authorization", &format!("Bearer {}", ctx.opts.token))
                     .json(&req)
                     .send()
                     .await
@@ -624,7 +496,7 @@ async fn publish_jig(ctx:&Context, jig_id: &JigId) {
 
     let res = ctx.client
         .put(&url)
-        .header("Authorization", &format!("Bearer {}", ctx.token))
+        .header("Authorization", &format!("Bearer {}", ctx.opts.token))
         .header("content-length", 0)
         .send()
         .await
@@ -636,18 +508,26 @@ async fn publish_jig(ctx:&Context, jig_id: &JigId) {
     }
 }
 
+async fn delete_all_jigs_first(ctx:&Context) {
 
+    let url = format!("{}{}", 
+        ctx.opts.get_remote_target().api_url(), 
+        endpoints::jig::DeleteAll::PATH
+    );
 
-fn init_logger(verbose:bool) {
-    if verbose {
-        CombinedLogger::init(vec![
-            TermLogger::new(LevelFilter::Info, Config::default(), TerminalMode::Mixed, ColorChoice::Auto),
-        ])
+    log::info!("url: {}", url);
+
+    let res = ctx
+        .client 
+        .delete(&url)
+        .header("AUTHORIZATION", &format!("Bearer {}", &ctx.opts.token))
+        .header("content-length", 0)
+        .send()
+        .await
         .unwrap();
-    } else {
-        CombinedLogger::init(vec![
-            TermLogger::new(LevelFilter::Warn, Config::default(), TerminalMode::Mixed, ColorChoice::Auto),
-        ])
-        .unwrap();
+
+    if !res.status().is_success() {
+        log::error!("error code: {}, details: {:?}", res.status().as_str(), res);
+        panic!("Failed to delete all jigs");
     }
 }
