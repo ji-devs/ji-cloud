@@ -30,17 +30,17 @@ pub struct Opts {
     #[structopt(long, parse(try_from_str), default_value = "true")]
     pub clear_log_files: bool,
     // if false, won't download the albums at all (will still read them as needed)
-    #[structopt(long, parse(try_from_str), default_value = "false")]
+    #[structopt(long, parse(try_from_str), default_value = "true")]
     pub process_download_albums: bool,
     // if false, won't update or create jigs
-    #[structopt(long, parse(try_from_str), default_value = "false")]
+    #[structopt(long, parse(try_from_str), default_value = "true")]
     pub process_update_jigs: bool,
     // if false, won't do any transcoding of json
     // however, currently, will be forced to true if process_transcode_game_media is true
-    #[structopt(long, parse(try_from_str), default_value = "true")]
+    #[structopt(long, parse(try_from_str), default_value = "false")]
     pub process_transcode_game_json: bool,
     // if false, won't do any transcoding of media
-    #[structopt(long, parse(try_from_str), default_value = "true")]
+    #[structopt(long, parse(try_from_str), default_value = "false")]
     pub process_transcode_game_media: bool,
 
     /////////////////// ALBUMS //////////////////////////////////
@@ -77,7 +77,7 @@ pub struct Opts {
     pub update_jigs_batch_size: usize,
     #[structopt(long, parse(try_from_str), default_value = "true")]
     pub update_jigs_skip_cover_page: bool,
-    #[structopt(long, parse(try_from_str), default_value = "false")]
+    #[structopt(long, parse(try_from_str), default_value = "true")]
     pub update_jigs_delete_duplicates: bool,
 
     /////////////////// TRANSCODE ALL //////////////////////////////////
