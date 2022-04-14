@@ -273,7 +273,6 @@ impl PuzzleItem {
             true
         } else {
             if fly_back_to_origin {
-
                 let v = self.orig_transform_matrix.get_translation();
                 let m = &mut *self.curr_transform_matrix.borrow_mut();
 

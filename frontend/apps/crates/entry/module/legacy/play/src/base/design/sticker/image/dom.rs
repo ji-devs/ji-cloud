@@ -1,4 +1,4 @@
-use dominator::{dom_builder,clone, html, with_node, Dom};
+use dominator::{clone, dom_builder, html, with_node, Dom};
 use futures_signals::signal::SignalExt;
 
 use std::rc::Rc;
@@ -24,7 +24,6 @@ impl ImagePlayer {
         });
 
         log::info!("Loading {}!", state.raw.filename);
-
 
         if state.get_text().is_none() || !state.raw.filename.is_empty() {
             html!("img" => web_sys:: HtmlImageElement, {
@@ -105,9 +104,12 @@ fn parse_html(html: &str) -> web_sys::HtmlElement {
     // should instead parse as proper stylesheet, or at least a regex to replace the pattern
     // properly
     let html = html.replace("px", "rem");
-    let document = parser.parse_from_string(&html, web_sys::SupportedType::TextHtml).unwrap();
+    let document = parser
+        .parse_from_string(&html, web_sys::SupportedType::TextHtml)
+        .unwrap();
 
-    document.body()
+    document
+        .body()
         .unwrap()
         .first_element_child()
         .unwrap()

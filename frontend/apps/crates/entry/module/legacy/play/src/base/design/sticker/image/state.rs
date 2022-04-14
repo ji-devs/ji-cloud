@@ -4,7 +4,9 @@ use crate::base::state::Base;
 use std::{cell::RefCell, rc::Rc, sync::atomic::AtomicBool};
 use web_sys::Element;
 
-use shared::domain::jig::module::body::legacy::design::{HideToggle, Sticker as RawSticker, StickerKind as RawStickerKind};
+use shared::domain::jig::module::body::legacy::design::{
+    HideToggle, Sticker as RawSticker, StickerKind as RawStickerKind,
+};
 
 pub struct ImagePlayer {
     pub base: Rc<Base>,
@@ -29,11 +31,10 @@ impl ImagePlayer {
     pub fn get_text(&self) -> Option<&str> {
         match &self.raw.kind {
             RawStickerKind::Text(s) => s.as_ref().map(|s| s.as_ref()),
-            _ => None
+            _ => None,
         }
     }
 }
-
 
 pub struct Controller {
     pub base: Rc<Base>,
