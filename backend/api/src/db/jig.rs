@@ -894,7 +894,6 @@ set display_name     = coalesce($2, display_name),
     language         = coalesce($3, language),
     theme            = coalesce($4, theme),
     updated_at = now()
-
 where id = $1
   and (($2::text is not null and $2 is distinct from display_name) or
        ($3::text is not null and $3 is distinct from language) or
