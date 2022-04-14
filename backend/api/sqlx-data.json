@@ -2913,6 +2913,19 @@
       "nullable": []
     }
   },
+  "5601dd44734fd3fd36085ae59a079b2e4a674d19c2eb13881bf55a59a2f5a076": {
+    "query": "\n                            update jig_data \n                            set translated_description = $2,\n                                last_synced_at = null\n                            where id = $1\n                            ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Jsonb"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "56567f2d09b683dfb6209093ff0ded597cda78b614466626b84956d955eb69c6": {
     "query": "\n        update jig_play_count\n        set play_count = play_count + 1\n        where jig_id = $1\n        ",
     "describe": {
@@ -3623,30 +3636,6 @@
       },
       "nullable": [
         null
-      ]
-    }
-  },
-  "65128054686ca484939559c5f09dd4ff6fae8fd4afe478a479718fd2d89d1cc2": {
-    "query": "\nselect jig_data.id,\n       description                                                                                    \nfrom jig_data\nwhere description <> '' and translated_description = '{}'\nand draft_or_live is not NULL\norder by coalesce(updated_at, created_at) desc\nlimit 50 for no key update skip locked;\n ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "description",
-          "type_info": "Text"
-        }
-      ],
-      "parameters": {
-        "Left": []
-      },
-      "nullable": [
-        false,
-        false
       ]
     }
   },
@@ -4998,6 +4987,30 @@
       "nullable": []
     }
   },
+  "9560d8cba3dd20fb8a8e8fa399c7a1fc39679d3250fd46a2de943118d299a643": {
+    "query": "\nselect jig_data.id,\n       description                                                                                    \nfrom jig_data\ninner join jig on live_id = jig_data.id\nwhere (description <> '' and translated_description = '{}')\nand (updated_at is not null and last_synced_at < updated_at)\norder by coalesce(updated_at, created_at) desc\nlimit 50 for no key update skip locked;\n ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "description",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        false
+      ]
+    }
+  },
   "974e49b8fa518e9402ae2494147cd25953503851952b4ba97d635a2aeb5bd729": {
     "query": "\nwith delete as (\n        delete from user_color\n    where user_id = $1 and index = $2\n)\nselect 1 as discard\nfrom user_color\nwhere user_id = $1 and index > $2\nfor update\n",
     "describe": {
@@ -5579,19 +5592,6 @@
       ]
     }
   },
-  "abd49e91a2a6278531da084d0a7e251bd816eba32da855e0d1eb332ef6dccdf3": {
-    "query": "\n                        update image_metadata \n                        set translated_description = $2,\n                            updated_at = now()\n                        where id = $1\n                        ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Jsonb"
-        ]
-      },
-      "nullable": []
-    }
-  },
   "ada31ac34d9d4b99d869df3190ad4e105413aa9db4e285b48d7b04eca85d63ca": {
     "query": "\ninsert into jig (creator_id, author_id, parents, live_id, draft_id, published_at, jig_focus)\nselect creator_id, $2, array_append(parents, $1), $3, $4, published_at, jig_focus\nfrom jig\nwhere id = $1\nreturning id as \"id!: JigId\"\n",
     "describe": {
@@ -6046,6 +6046,19 @@
       ]
     }
   },
+  "c85e214d1de848ed319a8a7ac8dd39e4b599e66c746c281bacfc8363b4b3028f": {
+    "query": "\n                        update image_metadata \n                        set translated_description = $2,\n                        last_synced_at = null\n                        where id = $1\n                        ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Jsonb"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "c877be5757f8787c2da80469a4fc50641fb63358e6516d05c7159d9c8060ac52": {
     "query": "\nselect kind as \"kind: MediaKind\"\nfrom web_media_library\ninner join web_media_upload on web_media_library.id = web_media_upload.media_id\nwhere (id = $1 and uploaded_at is not null and processed_at >= uploaded_at is not true)\nfor no key update of web_media_upload\nfor share of web_media_library\nskip locked\n        ",
     "describe": {
@@ -6093,19 +6106,6 @@
       "parameters": {
         "Left": [
           "Uuid",
-          "Uuid",
-          "Jsonb"
-        ]
-      },
-      "nullable": []
-    }
-  },
-  "c978fbc346982e56b18ba41565e30eeab9e54d71e05d93a0444bd496a1ea7a91": {
-    "query": "\n                            update jig_data \n                            set translated_description = $2,\n                                updated_at = now()\n                            where id = $1\n                            ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
           "Uuid",
           "Jsonb"
         ]
@@ -6168,21 +6168,6 @@
           "Uuid",
           "Int2",
           "Text"
-        ]
-      },
-      "nullable": []
-    }
-  },
-  "cbe91f67c21c82fba293fc2b95ea89ad4e7a5c29eadc612db2809bf4f0eda980": {
-    "query": "\nupdate jig_data\nset display_name     = coalesce($2, display_name),\n    language         = coalesce($3, language),\n    theme            = coalesce($4, theme),\n    updated_at = now()\n\nwhere id = $1\n  and (($2::text is not null and $2 is distinct from display_name) or\n       ($3::text is not null and $3 is distinct from language) or\n       ($4::smallint is not null and $4 is distinct from theme))\n",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Text",
-          "Text",
-          "Int2"
         ]
       },
       "nullable": []
@@ -7057,6 +7042,21 @@
         "Left": [
           "Uuid",
           "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "ec0634a118b7b9bbb6e590b8c99335fd5e20ece848cf14310e136f0d1b1d8248": {
+    "query": "\nupdate jig_data\nset display_name     = coalesce($2, display_name),\n    language         = coalesce($3, language),\n    theme            = coalesce($4, theme),\n    updated_at = now()\nwhere id = $1\n  and (($2::text is not null and $2 is distinct from display_name) or\n       ($3::text is not null and $3 is distinct from language) or\n       ($4::smallint is not null and $4 is distinct from theme))\n",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Text",
+          "Int2"
         ]
       },
       "nullable": []

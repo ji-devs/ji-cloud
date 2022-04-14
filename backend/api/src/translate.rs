@@ -177,7 +177,7 @@ limit 50 for no key update skip locked;
                         r#"
                         update image_metadata 
                         set translated_description = $2,
-                            updated_at = now()
+                        last_synced_at = null
                         where id = $1
                         "#,
                         t.image_id.0,
@@ -218,8 +218,9 @@ limit 50 for no key update skip locked;
 select jig_data.id,
        description                                                                                    
 from jig_data
-where description <> '' and translated_description = '{}'
-and draft_or_live is not NULL
+inner join jig on live_id = jig_data.id
+where (description <> '' and translated_description = '{}')
+and (updated_at is not null and last_synced_at < updated_at)
 order by coalesce(updated_at, created_at) desc
 limit 50 for no key update skip locked;
  "#
@@ -248,7 +249,7 @@ limit 50 for no key update skip locked;
                         r#"
                             update jig_data 
                             set translated_description = $2,
-                                updated_at = now()
+                                last_synced_at = null
                             where id = $1
                             "#,
                         &t.jig_data_id,
