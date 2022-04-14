@@ -1,7 +1,6 @@
 ---
 source: tests/integration/jig.rs
 expression: body
-
 ---
 {
   "jigs": [
@@ -307,56 +306,6 @@ expression: body
       "plays": 0,
       "jigFocus": "modules",
       "jigData": {
-        "draftOrLive": "draft",
-        "displayName": "name",
-        "modules": [
-          {
-            "id": "56841805-d762-478b-8f07-e263917058b9",
-            "kind": "Cover",
-            "is_complete": true
-          }
-        ],
-        "ageRanges": [],
-        "affiliations": [],
-        "language": "en",
-        "categories": [],
-        "additionalResources": [],
-        "description": "test description",
-        "lastEdited": "[last_edited]",
-        "defaultPlayerSettings": {
-          "direction": "ltr",
-          "displayScore": true,
-          "trackAssessments": true,
-          "dragAssist": true
-        },
-        "theme": "Blank",
-        "audioBackground": null,
-        "audioEffects": {
-          "feedbackPositive": "[audio]",
-          "feedbackNegative": "[audio]"
-        },
-        "privacyLevel": "unlisted",
-        "locked": false,
-        "otherKeywords": "",
-        "translatedKeywords": "",
-        "translatedDescription": {}
-      },
-      "adminData": {
-        "rating": null,
-        "blocked": false,
-        "curated": false
-      }
-    },
-    {
-      "id": "19becb2b-bff7-4c1b-bb2c-16f2e098d3d3",
-      "publishedAt": null,
-      "creatorId": "1f241e1b-b537-493f-a230-075cb16315be",
-      "authorId": "1f241e1b-b537-493f-a230-075cb16315be",
-      "authorName": "Bobby Tables",
-      "likes": 0,
-      "plays": 0,
-      "jigFocus": "modules",
-      "jigData": {
         "draftOrLive": "live",
         "displayName": "name",
         "modules": [
@@ -386,6 +335,56 @@ expression: body
           "feedbackNegative": "[audio]"
         },
         "privacyLevel": "public",
+        "locked": false,
+        "otherKeywords": "",
+        "translatedKeywords": "",
+        "translatedDescription": {}
+      },
+      "adminData": {
+        "rating": null,
+        "blocked": false,
+        "curated": false
+      }
+    },
+    {
+      "id": "19becb2b-bff7-4c1b-bb2c-16f2e098d3d3",
+      "publishedAt": null,
+      "creatorId": "1f241e1b-b537-493f-a230-075cb16315be",
+      "authorId": "1f241e1b-b537-493f-a230-075cb16315be",
+      "authorName": "Bobby Tables",
+      "likes": 0,
+      "plays": 0,
+      "jigFocus": "modules",
+      "jigData": {
+        "draftOrLive": "draft",
+        "displayName": "name",
+        "modules": [
+          {
+            "id": "56841805-d762-478b-8f07-e263917058b9",
+            "kind": "Cover",
+            "is_complete": true
+          }
+        ],
+        "ageRanges": [],
+        "affiliations": [],
+        "language": "en",
+        "categories": [],
+        "additionalResources": [],
+        "description": "test description",
+        "lastEdited": "[last_edited]",
+        "defaultPlayerSettings": {
+          "direction": "ltr",
+          "displayScore": true,
+          "trackAssessments": true,
+          "dragAssist": true
+        },
+        "theme": "Blank",
+        "audioBackground": null,
+        "audioEffects": {
+          "feedbackPositive": "[audio]",
+          "feedbackNegative": "[audio]"
+        },
+        "privacyLevel": "unlisted",
         "locked": false,
         "otherKeywords": "",
         "translatedKeywords": "",
