@@ -295,7 +295,6 @@ select algolia_index_version as "algolia_index_version!" from "settings"
         Ok(ids?)
     }
 
-    // FIXME drafts
     async fn update_jigs(&self) -> anyhow::Result<bool> {
         log::info!("reached update jigs");
         let mut txn = self.db.begin().await?;

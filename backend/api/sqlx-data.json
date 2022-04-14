@@ -3916,6 +3916,30 @@
       ]
     }
   },
+  "70bc01df773bc3310f26520197e37ee13c656e13730151b9f280d4a27936ff15": {
+    "query": "\nselect learning_path_data.id,\n       description                                                                                    \nfrom learning_path_data\ninner join learning_path on live_id = learning_path_data.id\nwhere description <> '' \n      and translated_description = '{}'\n      and published_at is not null\norder by coalesce(updated_at, created_at) desc\nlimit 50 for no key update skip locked;\n ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "description",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        false
+      ]
+    }
+  },
   "72b024e92b7f83b7e9fbb725e9955b62d22c676d62a8bbe2ce46be9cb163a991": {
     "query": "update image_upload set uploaded_at = now(), processing_result = null where image_id = $1",
     "describe": {
@@ -6957,6 +6981,19 @@
       "parameters": {
         "Left": [
           "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "e4f6aadbbf1e176bf9bf8bc75aff3cc0f9a7af050b50f243fbfbf26f2bee1a51": {
+    "query": "\n                            update learning_path_data \n                            set translated_description = $2,\n                                last_synced_at = null\n                            where id = $1\n                            ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Jsonb"
         ]
       },
       "nullable": []
