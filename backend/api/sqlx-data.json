@@ -2886,6 +2886,30 @@
       ]
     }
   },
+  "516c8be3e0f16a12e28e3b9d004fef45fb3ed8c2e16de55bb9521922d2ebf052": {
+    "query": "\nselect jig_data.id,\n       description                                                                                    \nfrom jig_data\ninner join jig on live_id = jig_data.id\nwhere (description <> '' and translated_description = '{}')\norder by coalesce(updated_at, created_at) desc\nlimit 50 for no key update skip locked;\n ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "description",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        false
+      ]
+    }
+  },
   "51a40f41372d3ac245973b6c148c56e71684c771e64465cf5c188241d4416d4a": {
     "query": "\nupdate category\nset index = index - 1, updated_at = now()\nwhere index > $1 and index <= $2 is not false and parent_id is not distinct from $3\n",
     "describe": {
@@ -4985,30 +5009,6 @@
         ]
       },
       "nullable": []
-    }
-  },
-  "9560d8cba3dd20fb8a8e8fa399c7a1fc39679d3250fd46a2de943118d299a643": {
-    "query": "\nselect jig_data.id,\n       description                                                                                    \nfrom jig_data\ninner join jig on live_id = jig_data.id\nwhere (description <> '' and translated_description = '{}')\nand (updated_at is not null and last_synced_at < updated_at)\norder by coalesce(updated_at, created_at) desc\nlimit 50 for no key update skip locked;\n ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "description",
-          "type_info": "Text"
-        }
-      ],
-      "parameters": {
-        "Left": []
-      },
-      "nullable": [
-        false,
-        false
-      ]
     }
   },
   "974e49b8fa518e9402ae2494147cd25953503851952b4ba97d635a2aeb5bd729": {

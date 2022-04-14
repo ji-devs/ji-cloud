@@ -220,7 +220,6 @@ select jig_data.id,
 from jig_data
 inner join jig on live_id = jig_data.id
 where (description <> '' and translated_description = '{}')
-and (updated_at is not null and last_synced_at < updated_at)
 order by coalesce(updated_at, created_at) desc
 limit 50 for no key update skip locked;
  "#
