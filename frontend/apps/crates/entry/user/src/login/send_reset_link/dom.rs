@@ -9,7 +9,7 @@ use web_sys::{HtmlElement, HtmlInputElement};
 use super::state::SendResetLink;
 
 const STR_DISMISS: &str = "Dismiss";
-const STR_RESET_PASSWORD: &str = "Reset Password";
+const STR_RESET_PASSWORD: &str = "Password Reset";
 
 // NOTE: using lots of inline styles since this page was never formally defined
 
@@ -102,13 +102,13 @@ impl SendResetLink {
             .property("slot", "body")
             .children(&mut [
                 html!("h2", {
-                    .text("Check you inbox.")
+                    .text("Check your inbox")
                 }),
                 html!("p", {
-                    .text("We send you a reset password link to your inbox if there's an account associated with this email address.")
+                    .text("If there is a Jigzi account associated with this email address, a password reset link has been sent to your inbox.")
                 }),
                 html!("p", {
-                    .text("Please make sure to check your spam folder if you can't find it.")
+                    .text("If you don't see an email from us, please be sure to check your spam folder.")
                 }),
                 html!("button-rect", {
                     .text(STR_DISMISS)

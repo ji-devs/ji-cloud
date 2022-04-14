@@ -4,8 +4,8 @@ use utils::unwrap::UnwrapJiExt;
 
 use zxcvbn::{zxcvbn, Entropy};
 
-const STR_PASSWORD_SHORT: &str = "Password can't be empty";
-const STR_PASSWORD_EMPTY: &str = "Your password should be at least 6 characters.";
+const STR_PASSWORD_SHORT: &str = "Your password should be at least 6 characters";
+const STR_PASSWORD_EMPTY: &str = "Password can't be empty";
 
 pub struct PasswordHandler {
     pub(super) strength: Mutable<PasswordStrength>,

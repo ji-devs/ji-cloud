@@ -5,7 +5,7 @@ import { Strength as PasswordStrength } from "@elements/entry/user/register/widg
 
 const STR_TITLE = "Create a new password";
 //const STR_AFTER = "You’ll be logged in automatically after this";
-const STR_AFTER = "You will need to log in after this";
+const STR_AFTER = "You will need to log in again after changing your password";
 
 @customElement("page-password-reset")
 export class _ extends LitElement {

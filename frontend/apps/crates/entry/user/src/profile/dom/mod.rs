@@ -30,7 +30,7 @@ mod options_popup;
 const STR_EDIT: &str = " Edit";
 const STR_REMOVE_IMAGE: &str = "remove image";
 
-const STR_RESET_PASSWORD_SENT: &str = "We just send you a reset password email!";
+const STR_RESET_PASSWORD_SENT: &str = "We just sent you a reset password email!";
 
 const STR_AFFILIATION_HEADER: &str = "Affiliation";
 const STR_AFFILIATION_SUBHEADER: &str = "What type of content do you want to access?";
