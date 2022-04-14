@@ -76,6 +76,8 @@ pub struct Opts {
     #[structopt(long, parse(try_from_str), default_value = "0")]
     pub update_jigs_batch_size: usize,
     #[structopt(long, parse(try_from_str), default_value = "true")]
+    pub update_jigs_modify: bool,
+    #[structopt(long, parse(try_from_str), default_value = "true")]
     pub update_jigs_skip_cover_page: bool,
     #[structopt(long, parse(try_from_str), default_value = "true")]
     pub update_jigs_delete_duplicates: bool,

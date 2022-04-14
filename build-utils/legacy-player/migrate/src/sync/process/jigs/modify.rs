@@ -76,7 +76,6 @@ struct LocalStats {
     pub n_created: usize,
     pub n_deleted: usize,
     pub unknown_audio: HashSet<String>,
-    pub games_unaccounted: HashSet<String>,
     pub jigs_unaccounted: HashSet<String>,
 }
 
@@ -85,11 +84,13 @@ pub async fn run(ctx:Arc<Context>, jigs: JigsLookupArc) {
 
     let local_stats = Arc::new(Mutex::new(LocalStats::default()));
 
-    let mut jobs = get_sanitize_jigs_futures(ctx.clone(), local_stats.clone(), local_meta.clone(), jigs.clone()).await;
+    let mut jobs = get_create_or_update_jigs_futures(ctx.clone(), local_stats.clone(), local_meta.clone(), jigs.clone()).await;
     _run(ctx.clone(), jobs).await;
 
-    let mut jobs = get_update_jigs_futures(ctx.clone(), local_stats.clone(), local_meta.clone(), jigs.clone()).await;
-    _run(ctx.clone(), jobs).await;
+    if ctx.opts.update_jigs_delete_duplicates {
+        let mut jobs = get_delete_jig_duplicates_futures(ctx.clone(), local_stats.clone(), local_meta.clone(), jigs.clone()).await;
+        _run(ctx.clone(), jobs).await;
+    }
 
     let local_stats = local_stats.lock().await;
 
@@ -104,8 +105,6 @@ pub async fn run(ctx:Arc<Context>, jigs: JigsLookupArc) {
 
     log::info!("created {} new jigs", local_stats.n_created);
     log::info!("updated {} existing jigs", local_stats.n_updated);
-    log::info!("unaccounted for {} games (existing jigs which have no tt manifest)", local_stats.games_unaccounted.len());
-
 }
 
 async fn _run(ctx: Arc<Context>, mut jobs: Vec<impl Future>) {
@@ -132,64 +131,57 @@ async fn _run(ctx: Arc<Context>, mut jobs: Vec<impl Future>) {
 
 }
 
-async fn get_sanitize_jigs_futures(ctx: Arc<Context>, local_stats:Arc<Mutex<LocalStats>>, local_meta: Arc<LocalMeta>, jigs_lookup: JigsLookupArc) -> Vec<impl Future> {
+async fn get_delete_jig_duplicates_futures(ctx: Arc<Context>, local_stats:Arc<Mutex<LocalStats>>, local_meta: Arc<LocalMeta>, jigs_lookup: JigsLookupArc) -> Vec<impl Future> {
     let mut futures = Vec::new();
     
     let game_to_jig = jigs_lookup.lock().await.game_to_jig.clone();
 
     for (game_id, jig_list) in game_to_jig.into_iter() {
-        local_stats.lock().await.games_unaccounted.insert(game_id.clone());
-        if ctx.opts.update_jigs_delete_duplicates {
-            futures.push({
-                let jigs_lookup = jigs_lookup.clone();
-                let ctx = ctx.clone();
-                let local_stats = local_stats.clone();
-                async move {
-                    if jig_list.len() > 1 {
-                        let mut sorted = jig_list.clone();
+        futures.push({
+            let ctx = ctx.clone();
+            let local_stats = local_stats.clone();
+            let mut sorted = jig_list.clone();
+            async move {
+                if jig_list.len() > 1 {
 
-                        sorted.sort_by(|a, b| a.published_at.partial_cmp(&b.published_at).unwrap());
-                        sorted.remove(0);
+                    sorted.sort_by(|a, b| a.published_at.partial_cmp(&b.published_at).unwrap());
+                    sorted.remove(0);
 
-                        log::info!("has multiple");
-                        for jig in sorted.iter() {
-                            log::info!("deleting {} {:?}", jig.id.0.to_string(), jig.published_at);
-                            jigs_lookup.lock().await.jig_to_game.remove(&jig.id.0.to_string());
-       
-                            if !ctx.opts.dry_run {
-                                let url = format!("{}{}", 
-                                    ctx.opts.get_remote_target().api_url(), 
-                                    endpoints::jig::Delete::PATH.replace("{id}", &jig.id.0.to_string())
-                                );
+                    log::info!("has multiple");
+                    for jig in sorted.iter() {
+                        log::info!("deleting {} {:?}", jig.id.0.to_string(), jig.published_at);
+   
+                        if !ctx.opts.dry_run {
+                            let url = format!("{}{}", 
+                                ctx.opts.get_remote_target().api_url(), 
+                                endpoints::jig::Delete::PATH.replace("{id}", &jig.id.0.to_string())
+                            );
 
-                                let res = ctx
-                                    .client 
-                                    .delete(&url)
-                                    .header("AUTHORIZATION", &format!("Bearer {}", &ctx.opts.token))
-                                    .header("content-length", 0)
-                                    .send()
-                                    .await
-                                    .unwrap();
+                            let res = ctx
+                                .client 
+                                .delete(&url)
+                                .header("AUTHORIZATION", &format!("Bearer {}", &ctx.opts.token))
+                                .header("content-length", 0)
+                                .send()
+                                .await
+                                .unwrap();
 
-                                if !res.status().is_success() {
-                                    log::error!("error code: {}, details: {:?}", res.status().as_str(), res);
-                                    log::error!("Failed to delete all jig {}", jig.id.0.to_string());
-                                }
+                            if !res.status().is_success() {
+                                log::error!("error code: {}, details: {:?}", res.status().as_str(), res);
+                                log::error!("Failed to delete all jig {}", jig.id.0.to_string());
                             }
-
-                            local_stats.lock().await.n_deleted += 1;
                         }
 
-                        jigs_lookup.lock().await.game_to_jig.insert(game_id, sorted);
+                        local_stats.lock().await.n_deleted += 1;
                     }
                 }
-            });
-        }
+            }
+        });
     }
 
     futures
 }
-async fn get_update_jigs_futures(ctx: Arc<Context>, local_stats:Arc<Mutex<LocalStats>>, local_meta: Arc<LocalMeta>, jigs: JigsLookupArc) -> Vec<impl Future> {
+async fn get_create_or_update_jigs_futures(ctx: Arc<Context>, local_stats:Arc<Mutex<LocalStats>>, local_meta: Arc<LocalMeta>, jigs: JigsLookupArc) -> Vec<impl Future> {
     let mut futures = Vec::new();
 
     let paths = fs::read_dir(&ctx.games_dir).unwrap();
@@ -203,9 +195,6 @@ async fn get_update_jigs_futures(ctx: Arc<Context>, local_stats:Arc<Mutex<LocalS
             let local_stats = local_stats.clone();
             async move {
                 let game_id = src_manifest.game_id();
-                local_stats.lock().await.games_unaccounted.remove(&game_id);
-
-                log::info!("{}", game_id);
 
                 match jigs.lock().await.game_to_jig.get(&game_id) {
                     Some(jig_list) => {
@@ -219,6 +208,10 @@ async fn get_update_jigs_futures(ctx: Arc<Context>, local_stats:Arc<Mutex<LocalS
                     None => {
                         if ctx.opts.update_jigs_create_if_not_exist {
                             let jig_id = crate::process::jigs::create::run(&ctx, &local_meta, &src_manifest).await;
+                            // NOTE - technically it would be good to add the newly created jig to
+                            // the lookup. But, whatever... right now that's only used after this
+                            // point to delete duplicates. and by definition if a jig was created
+                            // here it can't be a duplicate
                             update_jig(&ctx, local_stats.clone(), &jig_id, &src_manifest).await;
                             writeln!(&ctx.finished_log, "{} {} {} (created)", game_id, jig_id, src_manifest.album_store.album.fields.hash.as_ref().unwrap_or(&"[unknown]".to_string()));
                             local_stats.lock().await.n_created += 1;
@@ -229,7 +222,6 @@ async fn get_update_jigs_futures(ctx: Arc<Context>, local_stats:Arc<Mutex<LocalS
                 }
             }
         });
-
     }
 
     futures

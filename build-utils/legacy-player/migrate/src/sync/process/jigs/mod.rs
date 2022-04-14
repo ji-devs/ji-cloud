@@ -1,5 +1,6 @@
 pub mod download;
-pub mod update;
+pub mod modify;
+pub mod delete;
 pub mod create;
 
 use std::collections::HashMap;

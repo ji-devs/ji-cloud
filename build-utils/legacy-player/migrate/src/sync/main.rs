@@ -70,8 +70,15 @@ async fn main() {
     if ctx.opts.process_update_jigs {
         log::info!("downloading jigs..");
         let jigs = process::jigs::download::run(ctx.clone()).await;
-        log::info!("updating jigs..");
-        process::jigs::update::run(ctx.clone(), jigs.clone()).await;
+        if ctx.opts.update_jigs_modify {
+            log::info!("modifying jigs..");
+            process::jigs::modify::run(ctx.clone(), jigs.clone()).await;
+        }
+
+        if ctx.opts.update_jigs_delete_duplicates {
+            log::info!("deleting jigs..");
+            process::jigs::delete::run(ctx.clone(), jigs.clone()).await;
+        }
     }
     log::info!("done!");
 }
