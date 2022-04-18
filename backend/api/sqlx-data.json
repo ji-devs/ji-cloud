@@ -1327,6 +1327,141 @@
       ]
     }
   },
+  "1d9699c470532bb76c91d46d4a461ffbfd8ba96d44b89fef87845aed070bf2a4": {
+    "query": "\nwith cte as (\n    select id      as \"learning_path_id\",\n           creator_id,\n           author_id,\n           likes,\n           plays,\n           case\n               when $2 = 0 then learning_path.draft_id\n               when $2 = 1 then learning_path.live_id\n               end as \"draft_or_live_id\",\n           published_at\n    from learning_path\n    where id = $1\n)\nselect cte.learning_path_id                                          as \"learning_path_id: LearningPathId\",\n       display_name,\n       creator_id,\n       author_id,\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = author_id)            as \"author_name\",\n       published_at,\n       updated_at,\n       privacy_level                                       as \"privacy_level!: PrivacyLevel\",\n       language,\n       description,\n       translated_description                              as \"translated_description!: Json<HashMap<String, String>>\",\n       likes,\n       plays,\n       other_keywords,\n       translated_keywords,\n       array(select row (category_id)\n             from learning_path_data_category\n             where learning_path_data_id = cte.draft_or_live_id)     as \"categories!: Vec<(CategoryId,)>\",\n       array(select row (affiliation_id)\n             from learning_path_data_affiliation\n             where learning_path_data_id = cte.draft_or_live_id)     as \"affiliations!: Vec<(AffiliationId,)>\",\n       array(select row (age_range_id)\n             from learning_path_data_age_range\n             where learning_path_data_id = cte.draft_or_live_id)     as \"age_ranges!: Vec<(AgeRangeId,)>\",\n       array(\n             select row (jdar.id, jdar.display_name, resource_type_id, resource_content)\n             from learning_path_data_resource \"jdar\"\n             where jdar.learning_path_data_id = cte.draft_or_live_id\n       )                                                    as \"additional_resource!: Vec<(AddId, String, TypeId, Value)>\",\n       array(\n           select row(jig_id)\n           from learning_path_data_jig\n           where learning_path_data_id = cte.draft_or_live_id\n       )                                                     as \"items!: Vec<(JigId,)>\"\nfrom learning_path_data\n         inner join cte on cte.draft_or_live_id = learning_path_data.id\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "learning_path_id: LearningPathId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "display_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "creator_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 3,
+          "name": "author_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 4,
+          "name": "author_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 5,
+          "name": "published_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 6,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 7,
+          "name": "privacy_level!: PrivacyLevel",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 8,
+          "name": "language",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 9,
+          "name": "description",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 10,
+          "name": "translated_description!: Json<HashMap<String, String>>",
+          "type_info": "Jsonb"
+        },
+        {
+          "ordinal": 11,
+          "name": "likes",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 12,
+          "name": "plays",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 13,
+          "name": "other_keywords",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 14,
+          "name": "translated_keywords",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 15,
+          "name": "categories!: Vec<(CategoryId,)>",
+          "type_info": "RecordArray"
+        },
+        {
+          "ordinal": 16,
+          "name": "affiliations!: Vec<(AffiliationId,)>",
+          "type_info": "RecordArray"
+        },
+        {
+          "ordinal": 17,
+          "name": "age_ranges!: Vec<(AgeRangeId,)>",
+          "type_info": "RecordArray"
+        },
+        {
+          "ordinal": 18,
+          "name": "additional_resource!: Vec<(AddId, String, TypeId, Value)>",
+          "type_info": "RecordArray"
+        },
+        {
+          "ordinal": 19,
+          "name": "items!: Vec<(JigId,)>",
+          "type_info": "RecordArray"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int4"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        true,
+        true,
+        null,
+        true,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    }
+  },
   "1e42e953fa2d327cc392c6c2d4452b88773ab521e72d754f8b08ae44b005ef8f": {
     "query": "\ndelete\nfrom jig_player_session_instance\nwhere id = $1\nreturning ip_address, user_agent, (\n    select jig_id\n    from jig_player_session_instance\n             join jig_player_session on session_index = index\n) as \"jig_id!: JigId\"\n        ",
     "describe": {
@@ -1506,141 +1641,6 @@
       },
       "nullable": [
         false
-      ]
-    }
-  },
-  "307a68ef4f46e31966fe99571f4836553b0d6ed4c080f8a593da96b0be108bf1": {
-    "query": "\nwith cte as (\n    select id      as \"learning_path_id\",\n           creator_id,\n           author_id,\n           likes,\n           plays,\n           case\n               when $2 = 0 then learning_path.draft_id\n               when $2 = 1 then learning_path.live_id\n               end as \"draft_or_live_id\",\n           published_at\n    from learning_path\n    where id = $1\n)\nselect cte.learning_path_id                                          as \"learning_path_id: LearningPathId\",\n       display_name,\n       creator_id,\n       author_id,\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = author_id)            as \"author_name\",\n       published_at,\n       updated_at,\n       privacy_level                                       as \"privacy_level!: PrivacyLevel\",\n       language,\n       description,\n       translated_description                              as \"translated_description!: Json<HashMap<String, String>>\",\n       likes,\n       plays,\n       other_keywords,\n       translated_keywords,\n       array(select row (category_id)\n             from learning_path_data_category\n             where learning_path_data_id = cte.draft_or_live_id)     as \"categories!: Vec<(CategoryId,)>\",\n       array(select row (affiliation_id)\n             from learning_path_data_affiliation\n             where learning_path_data_id = cte.draft_or_live_id)     as \"affiliations!: Vec<(AffiliationId,)>\",\n       array(select row (age_range_id)\n             from learning_path_data_age_range\n             where learning_path_data_id = cte.draft_or_live_id)     as \"age_ranges!: Vec<(AgeRangeId,)>\",\n       array(\n             select row (jdar.id, jdar.display_name, resource_type_id, resource_content)\n             from learning_path_data_resource \"jdar\"\n             where jdar.learning_path_data_id = cte.draft_or_live_id\n       )                                                    as \"additional_resource!: Vec<(AddId, String, TypeId, Value)>\",\n       array(\n           select row(jig_id)\n           from learning_path_data_jig\n           where learning_path_data_jig.jig_id = cte.draft_or_live_id\n       )                                                     as \"items!: Vec<JigId>\"\nfrom learning_path_data\n         inner join cte on cte.draft_or_live_id = learning_path_data.id\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "learning_path_id: LearningPathId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "display_name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "creator_id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 3,
-          "name": "author_id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 4,
-          "name": "author_name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 5,
-          "name": "published_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 6,
-          "name": "updated_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 7,
-          "name": "privacy_level!: PrivacyLevel",
-          "type_info": "Int2"
-        },
-        {
-          "ordinal": 8,
-          "name": "language",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 9,
-          "name": "description",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 10,
-          "name": "translated_description!: Json<HashMap<String, String>>",
-          "type_info": "Jsonb"
-        },
-        {
-          "ordinal": 11,
-          "name": "likes",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 12,
-          "name": "plays",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 13,
-          "name": "other_keywords",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 14,
-          "name": "translated_keywords",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 15,
-          "name": "categories!: Vec<(CategoryId,)>",
-          "type_info": "RecordArray"
-        },
-        {
-          "ordinal": 16,
-          "name": "affiliations!: Vec<(AffiliationId,)>",
-          "type_info": "RecordArray"
-        },
-        {
-          "ordinal": 17,
-          "name": "age_ranges!: Vec<(AgeRangeId,)>",
-          "type_info": "RecordArray"
-        },
-        {
-          "ordinal": 18,
-          "name": "additional_resource!: Vec<(AddId, String, TypeId, Value)>",
-          "type_info": "RecordArray"
-        },
-        {
-          "ordinal": 19,
-          "name": "items!: Vec<JigId>",
-          "type_info": "RecordArray"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int4"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        true,
-        true,
-        null,
-        true,
-        true,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        null,
-        null,
-        null,
-        null,
-        null
       ]
     }
   },
