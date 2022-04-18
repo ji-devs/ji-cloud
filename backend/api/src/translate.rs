@@ -88,6 +88,13 @@ struct JigTranslateDescriptions {
     description: String,
 }
 
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct LearningPathTranslateDescriptions {
+    learning_path_data_id: Uuid,
+    description: String,
+}
+
 #[derive(Clone)]
 pub struct GoogleTranslate {
     pub db: PgPool,
@@ -107,15 +114,21 @@ impl GoogleTranslate {
     pub async fn spawn_cron_jobs(&self) -> anyhow::Result<()> {
         log::debug!("reached description translation cron job");
 
-        for count in 0..2 {
-            let res = if count == 0 {
-                self.update_jig_translations()
+        for count in 0..3 {
+            let res = match count {
+                0 => self
+                    .update_jig_translations()
                     .await
-                    .context("update jig description translation task errored")
-            } else {
-                self.update_image_translations()
+                    .context("update jig description translation task errored"),
+                1 => self
+                    .update_image_translations()
                     .await
-                    .context("update images description translation task errored")
+                    .context("update images description translation task errored"),
+                3 => self
+                    .update_learning_path_translations()
+                    .await
+                    .context("update learning path description translation task errored"),
+                _ => continue,
             };
 
             match res {
@@ -274,6 +287,85 @@ limit 50 for no key update skip locked;
         txn.commit().await?;
 
         log::info!("completed update jig description translations");
+
+        Ok(true)
+    }
+
+    async fn update_learning_path_translations(&self) -> anyhow::Result<bool> {
+        log::info!("reached update Learning Path description translation");
+        let mut txn = self.db.begin().await?;
+
+        // todo: allow for some way to do a partial update (for example, by having a channel for queueing partial updates)
+        let requests: Vec<_> = sqlx::query!(
+            //language=SQL
+            r#"
+select learning_path_data.id,
+       description                                                                                    
+from learning_path_data
+inner join learning_path on live_id = learning_path_data.id
+where description <> '' 
+      and translated_description = '{}'
+      and published_at is not null
+order by coalesce(updated_at, created_at) desc
+limit 50 for no key update skip locked;
+ "#
+        )
+        .fetch(&mut txn)
+        .map_ok(|row| LearningPathTranslateDescriptions {
+            learning_path_data_id: row.id,
+            description: row.description
+        })
+        .try_collect()
+        .await?;
+
+        if requests.is_empty() {
+            return Ok(true);
+        }
+
+        log::debug!(
+            "Updating a batch of {} Learning Path description(s)",
+            requests.len()
+        );
+
+        for t in requests {
+            let res: Option<Option<HashMap<String, String>>> =
+                multi_translation(&t.description, &self.api_key).await.ok();
+
+            if let Some(res) = res {
+                if let Some(res) = res {
+                    sqlx::query!(
+                        r#"
+                            update learning_path_data 
+                            set translated_description = $2,
+                                last_synced_at = null
+                            where id = $1
+                            "#,
+                        &t.learning_path_data_id,
+                        json!(res)
+                    )
+                    .execute(&mut txn)
+                    .await?;
+                } else {
+                    log::debug!(
+                        "Empty translation list for learning_path_id: {}",
+                        t.learning_path_data_id
+                    );
+                    continue;
+                };
+            } else {
+                log::debug!(
+                    "Could not translate learning_path_id: {}, string: {}",
+                    t.learning_path_data_id,
+                    t.description
+                );
+
+                continue;
+            };
+        }
+
+        txn.commit().await?;
+
+        log::info!("completed update Learning Path description translations");
 
         Ok(true)
     }
