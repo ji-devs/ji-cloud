@@ -198,8 +198,8 @@ select cte.learning_path_id                                          as "learnin
        array(
            select row(jig_id)
            from learning_path_data_jig
-           where learning_path_data_jig.jig_id = cte.draft_or_live_id
-       )                                                     as "items!: Vec<JigId>"
+           where learning_path_data_id = cte.draft_or_live_id
+       )                                                     as "items!: Vec<(JigId,)>"
 from learning_path_data
          inner join cte on cte.draft_or_live_id = learning_path_data.id
 "#,
@@ -244,7 +244,7 @@ from learning_path_data
             other_keywords: row.other_keywords,
             translated_keywords: row.translated_keywords,
             translated_description: row.translated_description.0,
-            items: row.items,
+            items: row.items.into_iter().map(|(it,)| it).collect(),
         },
     });
 

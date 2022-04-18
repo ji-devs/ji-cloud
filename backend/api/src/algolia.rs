@@ -160,7 +160,7 @@ impl Manager {
     pub async fn spawn_cron_jobs(&self) -> anyhow::Result<()> {
         log::info!("reached updates for spawning jobs");
 
-        for count in 0..2 {
+        for count in 0..3 {
             let res = match count {
                 0 => self
                     .update_images()
