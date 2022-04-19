@@ -9,15 +9,11 @@ const QUERY_TYPE: &str = "imageType";
 struct Image {
     thumbnail_url: url::Url,
     content_url: url::Url,
-    name: String,
 }
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct ImagesResponse {
-    read_link: String,
-    current_offset: i64,
-    next_offset: i64,
     value: Vec<Image>,
 }
 
