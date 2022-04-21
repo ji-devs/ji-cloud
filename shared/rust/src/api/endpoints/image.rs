@@ -143,3 +143,13 @@ impl ApiEndpoint for Delete {
     const PATH: &'static str = "/v1/image/{id}";
     const METHOD: Method = Method::Delete;
 }
+
+/// Update usage of an Image for metric purposes
+pub struct PutImageUsage;
+impl ApiEndpoint for PutImageUsage {
+    type Req = ();
+    type Res = ();
+    type Err = EmptyError;
+    const PATH: &'static str = "/v1/image/{id}/usage";
+    const METHOD: Method = Method::Put;
+}

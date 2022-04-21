@@ -1,29 +1,60 @@
-create table image_usage (
-    image_id                uuid                                  not null
+-- table keeps track of image usage expiration until reset
+CREATE TABLE image_usage (
+    image_id                uuid                NOT NULL
          references image_metadata(id)
          on delete cascade,
 
-    -- timestamp which 
-    reset_at              timestamp         default now()       not null
+    --Timestamp for initial image usage reset
+    usage_reset_at              timestamp with time zone      NOT NULL    DEFAULT now()
 );
 
-alter table image_metadata 
+ALTER TABLE image_metadata
+    ADD COLUMN  user_usage     bigint            DEFAULT 0;
 
 
-create trigger update_path_like
-    after insert
-    on learning_path_like
-    for each row
-execute procedure update_imageh_like();
+INSERT INTO image_usage(image_id)
+SELECT id
+FROM image_metadata;
 
-create function update_image_usage() returns trigger
+UPDATE image_metadata
+SET last_synced_at = NULL
+WHERE last_synced_at IS NOT NULL;
+
+
+-- Function to reset user usage amount
+CREATE FUNCTION set_reset_usage() RETURNS TRIGGER
     language plpgsql
 as
 $$
-begin
-    update learning_path
-    set liked_count = liked_count - 1
-    where id = OLD.learning_path_id;
-    return NULL;
-end;
-$$;      
+BEGIN
+    UPDATE image_metadata
+    SET user_usage = 0,
+        last_synced_at = NULL
+    WHERE id = NEW.image_id;
+    RETURN NULL;
+END;
+$$;
+
+CREATE TRIGGER set_reset_timestamp_at
+    AFTER UPDATE
+    ON image_usage
+    FOR EACH ROW
+EXECUTE PROCEDURE set_reset_usage();
+
+-- Adds new image_id and timestamp to image usage table
+CREATE FUNCTION add_image_usage() RETURNS TRIGGER
+    language plpgsql
+as
+$$
+BEGIN
+    INSERT INTO image_usage(image_id)
+    VALUES(NEW.id);
+    RETURN NULL;
+END;
+$$;
+
+CREATE TRIGGER trigger_add_image_usage
+    AFTER INSERT
+    ON image_metadata
+    FOR EACH ROW
+EXECUTE PROCEDURE add_image_usage();
