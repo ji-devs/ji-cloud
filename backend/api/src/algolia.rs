@@ -81,6 +81,7 @@ struct BatchImage<'a> {
     #[serde(rename = "_tags")]
     tags: Vec<&'static str>,
     translated_description: &'a Vec<String>,
+    user_usage: &'a i64,
 }
 
 #[derive(Serialize)]
@@ -474,6 +475,16 @@ where jig_data.id = any (select live_id from jig where jig.id = any ($1))
             return Ok(false);
         }
 
+        sqlx::query!(
+            r#"
+        update image_usage 
+        set usage_reset_at = now()
+        where usage_reset_at < now() - interval '14 days'
+            "#
+        )
+        .execute(&mut txn)
+        .await?;
+
         // todo: allow for some way to do a partial update (for example, by having a channel for queueing partial updates)
         let requests: Vec<_> = sqlx::query!(
             //language=SQL
@@ -512,7 +523,8 @@ select id,
                        inner join image_tag_join on image_tag.index = image_tag_join.tag_index
               where image_tag_join.image_id = image_metadata.id))                               as "tag_names!",
        (publish_at < now() is true)                                                             as "is_published!",
-       is_premium
+       is_premium,
+       user_usage                                                                               as "user_usage!"
 from image_metadata
          join image_upload on id = image_id
 where (last_synced_at is null or
@@ -555,7 +567,8 @@ limit 100 for no key update skip locked;
                 image_tag_names: &row.tag_names,
                 categories: &row.categories,
                 category_names: &row.category_names,
-                tags
+                tags,
+                user_usage: &row.user_usage
             }))
             .expect("failed to serialize BatchImage to json")
             {

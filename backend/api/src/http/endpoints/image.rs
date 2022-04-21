@@ -295,6 +295,28 @@ async fn delete(
     Ok(HttpResponse::NoContent().finish())
 }
 
+fn check_usage_exists(err: sqlx::Error) -> error::NotFound {
+    match err {
+        sqlx::Error::RowNotFound => error::NotFound::ResourceNotFound,
+
+        _ => error::NotFound::InternalServerError(err.into()),
+    }
+}
+
+/// Add user usage of an Image
+async fn put_image_usage(
+    db: Data<PgPool>,
+    _claims: TokenUser,
+    req: Path<ImageId>,
+) -> Result<HttpResponse, error::NotFound> {
+    let image = req.into_inner();
+    db::image::add_usage(&db, image)
+        .await
+        .map_err(check_usage_exists)?;
+
+    Ok(HttpResponse::NoContent().finish())
+}
+
 async fn page_limit(page_limit: Option<u32>) -> anyhow::Result<u32> {
     if let Some(limit) = page_limit {
         match limit > 0 && limit <= MAX_PAGE_LIMIT {
@@ -331,6 +353,10 @@ pub fn configure(cfg: &mut ServiceConfig) {
     .route(
         image::Delete::PATH,
         image::Delete::METHOD.route().to(delete),
+    )
+    .route(
+        image::PutImageUsage::PATH,
+        image::PutImageUsage::METHOD.route().to(put_image_usage),
     )
     .route(
         image::Upload::PATH,
