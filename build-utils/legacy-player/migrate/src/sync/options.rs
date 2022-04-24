@@ -30,7 +30,7 @@ pub struct Opts {
     #[structopt(long, parse(try_from_str), default_value = "true")]
     pub clear_log_files: bool,
     // if false, won't download the albums at all (will still read them as needed)
-    #[structopt(long, parse(try_from_str), default_value = "true")]
+    #[structopt(long, parse(try_from_str), default_value = "false")]
     pub process_download_albums: bool,
     // if false, won't update or create jigs
     #[structopt(long, parse(try_from_str), default_value = "true")]

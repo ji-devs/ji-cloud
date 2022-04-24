@@ -414,7 +414,7 @@ async fn make_jig(ctx:&Context, local_meta: &LocalMeta, manifest: &SrcManifest) 
         privacy_level: if manifest.album_store.public.unwrap_or(true) {
             Some(PrivacyLevel::Public)
         } else {
-            Some(PrivacyLevel::Private)
+            Some(PrivacyLevel::Unlisted)
         },
         ..Default::default()
     };

@@ -45,6 +45,7 @@ pub use shared::{
             JigBrowseResponse,
             JigUpdateDraftDataRequest,
             Module,
+                PrivacyLevel,
             module::{
                 ModuleCreateRequest, 
                 ModuleBody, 
@@ -235,6 +236,11 @@ async fn update_jig(ctx: &Context, local_stats:Arc<Mutex<LocalStats>>, jig_id: &
 
     let mut req = JigUpdateDraftDataRequest {
         language: Some(lang.to_string()),
+        privacy_level: if manifest.album_store.public.unwrap_or(true) {
+            Some(PrivacyLevel::Public)
+        } else {
+            Some(PrivacyLevel::Unlisted)
+        },
         ..Default::default()
     };
 
@@ -301,6 +307,25 @@ async fn update_jig(ctx: &Context, local_stats:Arc<Mutex<LocalStats>>, jig_id: &
             log::error!("error code: {}, details: {:?}", res.status().as_str(), res);
             log::error!("unable to update jig: {:#?}", req);
             panic!("unable to update jig {}!", jig_id); 
+        }
+
+
+        log::info!("publishing {}...", jig_id);
+
+        let path = endpoints::jig::Publish::PATH.replace("{id}", &jig_id);
+        let url = format!("{}{}", ctx.opts.get_remote_target().api_url(), path);
+
+        let res = ctx.client
+            .put(&url)
+            .header("Authorization", &format!("Bearer {}", ctx.opts.token))
+            .header("content-length", 0)
+            .send()
+            .await
+            .unwrap();
+
+        if !res.status().is_success() {
+            log::error!("error code: {}, details: {:?}", res.status().as_str(), res);
+            panic!("unable to publish jig!"); 
         }
     }
 }
