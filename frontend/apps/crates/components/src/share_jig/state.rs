@@ -30,19 +30,19 @@ impl ShareJig {
     }
 
     pub fn embed_code(&self) -> String {
-        let link = self.jig_link();
+        let link = self.jig_link(true);
         format!(
             r#"<iframe src="{}" width="960" height="540"></iframe>"#,
             link
         )
     }
 
-    pub fn jig_link(&self) -> String {
+    pub fn jig_link(&self, is_student: bool) -> String {
         let url = Route::Jig(JigRoute::Play(
             self.jig_id,
             None,
             JigPlayerOptions {
-                is_student: true,
+                is_student,
                 ..Default::default()
             },
         ))

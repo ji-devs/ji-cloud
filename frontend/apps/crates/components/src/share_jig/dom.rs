@@ -123,7 +123,7 @@ impl ShareJig {
                         }
                     }))
                     .event(clone!(state => move|_: events::Click| {
-                        clipboard::write_text(&state.jig_link());
+                        clipboard::write_text(&state.jig_link(false));
                         state.link_copied.set(true);
                         let timeout = Timeout::new(3_000, clone!(state => move || {
                             state.link_copied.set(false);
