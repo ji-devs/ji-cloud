@@ -85,7 +85,7 @@ impl ImagePlayer {
                 .style_signal("left", bounds::size_width_center_rem_signal(state.size.signal()))
                 .style_signal("transform", transform_signal)
                 .after_inserted(clone!(state => move |elem| {
-                    *state.controller.elem.borrow_mut() = Some(elem.clone().unchecked_into());
+                    *state.controller.elem.borrow_mut() = Some(elem.unchecked_into());
                     state.base.insert_stage_click_listener(clone!(state => move |stage_click| {
                         state.controller.handle_click(stage_click);
                     }));

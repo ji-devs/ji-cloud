@@ -31,11 +31,8 @@ pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<Step1<RawData, E>>) ->
         let is_valid = state.base.is_valid_signal(),
         let tab_kind = state.tab_kind.signal()
             => {
-            let tab_kind = match tab_kind {
-                Some(kind) => Some(kind.clone()),
-                None => None,
-            };
-            (is_empty.clone(), is_valid.clone(), tab_kind)
+            let tab_kind = tab_kind.as_ref().copied();
+            (*is_empty, *is_valid, tab_kind)
         }
     };
 
