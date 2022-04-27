@@ -60,7 +60,7 @@ const STR_PRIVACY = "Privacy Policy";
 const STR_TERMS = "Terms & Conditions";
 const STR_CHILD_PROTECTION = "Child Protection Policy";
 
-const STR_DEDICATION_TEXT = "Dedicated in memory of Yochanan Hillel ben Mordechai";
+const STR_DEDICATION_TEXT = "Dedicated in memory of Yochanan Hillel ben Mordechai (John Hillel Moshal)";
 
 const COMING_SOON_ALERT = "javascript:alert('Coming soon')";
 
