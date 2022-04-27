@@ -60,9 +60,7 @@ export class _ extends LitElement {
         return html`
             <main>
                 <header>
-                    <a href="/">
-                        <img-ui path="core/page-header/logo.svg"></img-ui>
-                    </a>
+                    <img-ui path="core/page-header/logo.svg"></img-ui>
                 </header>
                 <h1>${STR_TYPE_THE_CODE}</h1>
                 <slot name="input"></slot>
