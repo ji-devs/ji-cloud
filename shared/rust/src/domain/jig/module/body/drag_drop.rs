@@ -123,7 +123,7 @@ pub struct Content {
     /// Each item can possibly have multiple targets
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
-    pub item_targets: Vec<Item>,
+    pub item_targets: Vec<TargetTransform>,
 
     /// The editor state
     pub editor_state: EditorState,
@@ -159,6 +159,15 @@ pub struct Item {
 
     /// the kind
     pub kind: ItemKind,
+}
+
+/// Represents a possible placement for a sticker
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct TargetTransform {
+    /// Index of the sticker in the list of stickers
+    pub sticker_idx: usize,
+    /// Target transform for this sticker
+    pub transform: Transform,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
