@@ -442,6 +442,30 @@ pub enum AudioBackground {
     Jigzi2 = 3,
     #[allow(missing_docs)]
     Jigzi3 = 4,
+    #[allow(missing_docs)]
+    Awestruck = 5,
+    #[allow(missing_docs)]
+    BayBounce = 6,
+    #[allow(missing_docs)]
+    CalmAndReflective = 7,
+    #[allow(missing_docs)]
+    DayWithoutRain = 8,
+    #[allow(missing_docs)]
+    DestinationFreedom = 9,
+    #[allow(missing_docs)]
+    FutureMemories = 10,
+    #[allow(missing_docs)]
+    HappyInstrumental = 11,
+    #[allow(missing_docs)]
+    HappyWhistle = 12,
+    #[allow(missing_docs)]
+    KidsInstrumental = 13,
+    #[allow(missing_docs)]
+    PartyKids = 14,
+    #[allow(missing_docs)]
+    RhythmKids = 15,
+    #[allow(missing_docs)]
+    SunKissed = 16,
 
     // legacy only background audio
     #[allow(missing_docs)]
@@ -479,14 +503,26 @@ pub enum AudioBackground {
 }
 
 impl AudioBackground {
-    /// Get all enum variants
-    pub fn variants() -> Vec<AudioBackground> {
+    /// Get all enum variants (except legacy)
+    pub fn variants() -> Vec<Self> {
         vec![
-            AudioBackground::FunForKids,
-            AudioBackground::DancingHappy,
-            AudioBackground::Jigzi1,
-            AudioBackground::Jigzi2,
-            AudioBackground::Jigzi3,
+            Self::FunForKids,
+            Self::DancingHappy,
+            Self::Jigzi1,
+            Self::Jigzi2,
+            Self::Jigzi3,
+            Self::Awestruck,
+            Self::BayBounce,
+            Self::CalmAndReflective,
+            Self::DayWithoutRain,
+            Self::DestinationFreedom,
+            Self::FutureMemories,
+            Self::HappyInstrumental,
+            Self::HappyWhistle,
+            Self::KidsInstrumental,
+            Self::PartyKids,
+            Self::RhythmKids,
+            Self::SunKissed,
         ]
     }
 }
