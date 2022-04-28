@@ -60,12 +60,8 @@ impl DragItem {
                         bounds_kind: StickerBoundsKind::Auto,
                     };
 
-                    let traces: Vec<&Trace> = self
-                        .base
-                        .target_areas
-                        .iter()
-                        .map(|area| &area.trace)
-                        .collect();
+                    let target_areas = self.base.target_areas.lock_ref();
+                    let traces: Vec<&Trace> = target_areas.iter().map(|area| &area.trace).collect();
 
                     if get_hit_index(hit_source, &traces).is_some() {
                         // The hit_index doesn't matter - We don't actually save the target trace,
