@@ -47,14 +47,19 @@ impl Base {
      * meta and history
      */
     pub fn on_trace_added(&self, raw_trace: RawTrace) {
+        let target_area = TargetArea { trace: raw_trace };
+        self.target_areas
+            .lock_mut()
+            .push_cloned(target_area.clone());
         self.history.push_modify(move |raw| {
             if let Some(content) = &mut raw.content {
-                content.target_areas.push(TargetArea { trace: raw_trace })
+                content.target_areas.push(target_area)
             }
         });
     }
 
     pub fn on_trace_deleted(&self, index: usize) {
+        self.target_areas.lock_mut().remove(index);
         self.history.push_modify(move |raw| {
             if let Some(content) = &mut raw.content {
                 content.target_areas.remove(index);
@@ -63,6 +68,13 @@ impl Base {
     }
 
     pub fn on_trace_changed(&self, index: usize, raw_trace: RawTrace) {
+        let target_areas = self.target_areas.lock_mut().set_cloned(
+            index,
+            TargetArea {
+                trace: raw_trace.clone(),
+            },
+        );
+
         self.history.push_modify(move |raw| {
             if let Some(content) = &mut raw.content {
                 content.target_areas[index].trace = raw_trace;

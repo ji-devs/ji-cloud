@@ -18,7 +18,7 @@ use dominator::clone;
 use futures_signals::{
     map_ref,
     signal::{Mutable, ReadOnlyMutable, Signal, SignalExt},
-    signal_vec::SignalVecExt,
+    signal_vec::{MutableVec, SignalVecExt},
 };
 use shared::domain::jig::{
     module::{
@@ -53,7 +53,7 @@ pub struct Base {
     pub traces: Rc<TracesEdit>,
     /// List of areas which a sticker can be dropped into so that we can confirm whether a sticker
     /// has actually been dropped into a trace area.
-    pub target_areas: Rc<Vec<TargetArea>>,
+    pub target_areas: Rc<MutableVec<TargetArea>>,
     pub text_editor: Rc<TextEditorState>,
     pub play_settings: Rc<PlaySettings>,
 
@@ -296,7 +296,9 @@ impl Base {
             backgrounds,
             stickers,
             traces,
-            target_areas: Rc::new(trace_data.iter().map(|(area, _)| area.clone()).collect()),
+            target_areas: Rc::new(MutableVec::new_with_values(
+                trace_data.iter().map(|(area, _)| area.clone()).collect(),
+            )),
             play_settings: Rc::new(PlaySettings::new(content.play_settings)),
             drag_item_selected_index: Mutable::new(None),
         });
