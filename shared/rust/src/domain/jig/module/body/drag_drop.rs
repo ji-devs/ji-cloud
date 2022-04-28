@@ -118,6 +118,13 @@ pub struct Content {
     /// Items (wrapper around Sticker and metadata)
     pub items: Vec<Item>,
 
+    /// List of targets for items
+    ///
+    /// Each item can possibly have multiple targets
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub item_targets: Vec<Item>,
+
     /// The editor state
     pub editor_state: EditorState,
 
