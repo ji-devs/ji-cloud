@@ -4,7 +4,9 @@ use shared::domain::jig::{
         body::{
             Instructions,
             _groups::design::Backgrounds,
-            drag_drop::{Item, Mode, ModuleData as RawData, PlaySettings, Step, TargetArea},
+            drag_drop::{
+                Item, Mode, ModuleData as RawData, PlaySettings, Step, TargetArea, TargetTransform,
+            },
         },
         ModuleId,
     },
@@ -25,6 +27,7 @@ pub struct Base {
     pub settings: PlaySettings,
     pub backgrounds: Backgrounds,
     pub items: Vec<Item>,
+    pub item_targets: Vec<TargetTransform>,
     pub target_areas: Vec<TargetArea>,
     pub module_phase: Mutable<ModulePlayPhase>,
 }
@@ -52,6 +55,7 @@ impl Base {
             settings: content.play_settings,
             backgrounds: content.backgrounds,
             items: content.items,
+            item_targets: content.item_targets,
             target_areas: content.target_areas,
             module_phase: init_args.play_phase,
         })
