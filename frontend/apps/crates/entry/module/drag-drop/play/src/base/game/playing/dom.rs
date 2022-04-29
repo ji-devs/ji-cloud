@@ -44,7 +44,8 @@ pub fn render(state: Rc<PlayState>) -> Dom {
         .children( {
             state.items
                 .iter()
-                .map(|item| {
+                .enumerate()
+                .map(|(index, item)| {
                     match item {
                         PlayItem::Static(sticker) => {
                             render_sticker_raw(sticker, theme_id, None)
@@ -74,12 +75,12 @@ pub fn render(state: Rc<PlayState>) -> Dom {
                                         }))
                                         .global_event(clone!(state, item => move |evt:events::PointerUp| {
                                             if item.try_end_drag(evt.x() as i32, evt.y() as i32) {
-                                                PlayState::evaluate(state.clone(), item.clone());
+                                                PlayState::evaluate(state.clone(), index, item.clone());
                                             }
                                         }))
                                         .global_event(clone!(state, item => move |evt:events::PointerCancel| {
                                             if item.try_end_drag(evt.x() as i32, evt.y() as i32) {
-                                                PlayState::evaluate(state.clone(), item.clone());
+                                                PlayState::evaluate(state.clone(), index, item.clone());
                                             }
                                         }))
                                     })

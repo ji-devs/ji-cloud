@@ -4,11 +4,11 @@ use super::{
 };
 use components::module::_common::edit::prelude::*;
 use shared::domain::jig::module::body::{
-    Audio, Transform,
+    Audio,
     _groups::design::Trace as RawTrace,
     drag_drop::{
         Interactive as RawInteractive, ItemKind as RawItemKind, Mode, ModuleData as RawData, Step,
-        TargetArea,
+        TargetArea, TargetTransform,
     },
 };
 use std::rc::Rc;
@@ -68,7 +68,7 @@ impl Base {
     }
 
     pub fn on_trace_changed(&self, index: usize, raw_trace: RawTrace) {
-        let target_areas = self.target_areas.lock_mut().set_cloned(
+        self.target_areas.lock_mut().set_cloned(
             index,
             TargetArea {
                 trace: raw_trace.clone(),
@@ -139,23 +139,10 @@ impl Base {
         });
     }
 
-    pub fn set_drag_item_target_transform(&self, index: usize, transform: Transform) {
-        let list = &*self.stickers.list.lock_ref();
-        let item = &list[index];
-        let data = item.get_interactive_unchecked();
-
-        data.target_transform.set(Some(transform.clone()));
-
+    pub fn update_targets(&self, items: Vec<TargetTransform>) {
         self.history.push_modify(move |raw| {
             if let Some(content) = &mut raw.content {
-                match &mut content.items[index].kind {
-                    RawItemKind::Interactive(data) => {
-                        data.target_transform = Some(transform);
-                    }
-                    RawItemKind::Static => {
-                        panic!("saving offset on static item!?");
-                    }
-                }
+                content.item_targets = items;
             }
         });
     }

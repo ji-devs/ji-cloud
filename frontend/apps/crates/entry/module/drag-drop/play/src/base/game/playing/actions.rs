@@ -61,44 +61,43 @@ impl PlayState {
         all_completed
     }
 
-    pub fn evaluate(state: Rc<Self>, item: Rc<InteractiveItem>) {
+    pub fn evaluate(state: Rc<Self>, item_index: usize, item: Rc<InteractiveItem>) {
         spawn_local(async move {
-            let mut move_back = true;
             let mut is_correct = false;
-            if let Some(target_index) = item.target_index.borrow().as_ref() {
-                let target_index = *target_index;
 
-                if let Some(hit_source) =
-                    item.get_hit_source(Some(SourceTransformOverride::Current))
-                {
-                    let traces: Vec<&Trace> = state
+            if let Some(hit_source) = item.get_hit_source(Some(SourceTransformOverride::Current)) {
+                let traces: Vec<&Trace> = state
+                    .game
+                    .base
+                    .target_areas
+                    .iter()
+                    .map(|area| &area.trace)
+                    .collect();
+
+                if let Some(index) = get_hit_index(hit_source, &traces) {
+                    is_correct = state
                         .game
                         .base
-                        .target_areas
+                        .item_targets
                         .iter()
-                        .map(|area| &area.trace)
-                        .collect();
+                        .find(|item_target| {
+                            item_index == item_target.sticker_idx && item_target.trace_idx == index
+                        })
+                        .is_some();
 
-                    if let Some(index) = get_hit_index(hit_source, &traces) {
-                        if DEBUGGING_EVALUATION_RESULT
-                            && (!DEBUGGING_EVALUATION_RESULT_ONLY_MATCH || index == target_index)
-                        {
-                            debug_render_hit_trace(index, &traces);
-                        }
-                        if index == target_index {
-                            is_correct = true;
-                        }
+                    if DEBUGGING_EVALUATION_RESULT
+                        && (!DEBUGGING_EVALUATION_RESULT_ONLY_MATCH || is_correct)
+                    {
+                        debug_render_hit_trace(index, &traces);
                     }
                 }
-
-                move_back = !is_correct;
             }
 
-            if move_back {
+            if !is_correct {
+                // Move the item back to it's origin
                 item.move_back_to_origin();
-            }
-
-            if is_correct {
+                item.play_audio_effect(AudioEffect::Wrong);
+            } else {
                 item.completed.set_neq(true);
                 if !Self::evaluate_all_completed(state.clone()) {
                     item.play_audio_effect(AudioEffect::Correct);
@@ -124,8 +123,6 @@ impl PlayState {
                         });
                     });
                 }
-            } else {
-                item.play_audio_effect(AudioEffect::Wrong);
             }
         });
     }

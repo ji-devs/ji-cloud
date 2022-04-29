@@ -50,6 +50,7 @@ pub struct Base {
     pub theme_id: Mutable<ThemeId>,
     pub backgrounds: Rc<Backgrounds>,
     pub stickers: Rc<Stickers<Item>>,
+    pub sticker_targets: MutableVec<StickerTarget>,
     pub traces: Rc<TracesEdit>,
     /// List of areas which a sticker can be dropped into so that we can confirm whether a sticker
     /// has actually been dropped into a trace area.
@@ -59,6 +60,13 @@ pub struct Base {
 
     pub drag_item_selected_index: Mutable<Option<usize>>,
     pub feedback: Mutable<Instructions>,
+}
+
+#[derive(Clone)]
+pub struct StickerTarget {
+    pub trace_idx: usize,
+    pub sticker_idx: usize,
+    pub item: Item,
 }
 
 pub struct PlaySettings {
@@ -249,6 +257,32 @@ impl Base {
 
         *stickers_ref.borrow_mut() = Some(stickers.clone());
 
+        let sticker_targets = MutableVec::new_with_values(
+            content
+                .item_targets
+                .iter()
+                .filter(|target_transform| stickers.get_raw(target_transform.sticker_idx).is_some())
+                .map(|target_transform| {
+                    let item = Item::new(
+                        stickers.clone(),
+                        &RawItem {
+                            sticker: stickers.get_raw(target_transform.sticker_idx).unwrap_ji(),
+                            kind: RawItemKind::Interactive(RawInteractive {
+                                audio: None,
+                                target_transform: Some(target_transform.transform.clone()),
+                            }),
+                        },
+                    );
+
+                    StickerTarget {
+                        sticker_idx: target_transform.sticker_idx,
+                        trace_idx: target_transform.trace_idx,
+                        item,
+                    }
+                })
+                .collect(),
+        );
+
         // A Vec holding both TraceAreas and Traces
         let trace_data = &content
             .target_areas
@@ -295,6 +329,7 @@ impl Base {
             text_editor,
             backgrounds,
             stickers,
+            sticker_targets,
             traces,
             target_areas: Rc::new(MutableVec::new_with_values(
                 trace_data.iter().map(|(area, _)| area.clone()).collect(),
