@@ -2,10 +2,10 @@ use serde::{Deserialize, Serialize};
 use serde_json::{json, value::Value};
 use shared::domain::{
     audio::AudioId,
+    course::additional_resource::{AdditionalResourceId, ResourceContent},
+    course::CourseId,
     image::ImageId,
     jig::DraftOrLive,
-    learning_path::additional_resource::{AdditionalResourceId, ResourceContent},
-    learning_path::LearningPathId,
     meta::ResourceTypeId,
     pdf::PdfId,
 };
@@ -24,7 +24,7 @@ pub struct ResourceObject {
 
 pub async fn create(
     pool: &PgPool,
-    learning_path_id: LearningPathId,
+    course_id: CourseId,
     display_name: String,
     resource_type_id: ResourceTypeId,
     resource_content: ResourceContent,
@@ -34,11 +34,11 @@ pub async fn create(
 
     sqlx::query!(
         r#"
-insert into learning_path_data_resource (learning_path_data_id, resource_type_id, resource_content, display_name)
-values ((select draft_id from learning_path where id = $1), $2, $3, $4)
+insert into course_data_resource (course_data_id, resource_type_id, resource_content, display_name)
+values ((select draft_id from course where id = $1), $2, $3, $4)
 returning id as "id!: AdditionalResourceId"
         "#,
-        learning_path_id.0,
+        course_id.0,
         resource_type_id.0,
         resource,
         display_name
@@ -51,34 +51,34 @@ returning id as "id!: AdditionalResourceId"
 
 pub async fn get(
     pool: &PgPool,
-    learning_path_id: LearningPathId,
+    course_id: CourseId,
     draft_or_live: DraftOrLive,
     id: AdditionalResourceId,
 ) -> anyhow::Result<(String, ResourceTypeId, ResourceContent), error::NotFound> {
     let mut txn = pool.begin().await?;
 
-    log::warn!("Before get_draft_and_live_ids: {:?}", learning_path_id);
+    log::warn!("Before get_draft_and_live_ids: {:?}", course_id);
 
-    let (draft_id, live_id) = super::get_draft_and_live_ids(&mut txn, learning_path_id)
+    let (draft_id, live_id) = super::get_draft_and_live_ids(&mut txn, course_id)
         .await
         .ok_or(error::NotFound::ResourceNotFound)?;
 
     log::warn!("After draft_live: {:?}, live_ids: {:?}", draft_id, live_id);
 
-    let learning_path_data_id = match draft_or_live {
+    let course_data_id = match draft_or_live {
         DraftOrLive::Draft => draft_id,
         DraftOrLive::Live => live_id,
     };
 
-    log::warn!("After live_ids: {:?}", learning_path_data_id);
+    log::warn!("After live_ids: {:?}", course_data_id);
 
     if !sqlx::query!(
         //language=SQL
         r#"
-select exists(select 1 from learning_path_data_resource "jdar" where learning_path_data_id = $1
+select exists(select 1 from course_data_resource "jdar" where course_data_id = $1
     and jdar.id = $2) as "exists!"
     "#,
-        learning_path_data_id,
+        course_data_id,
         id.0,
     )
     .fetch_one(&mut txn)
@@ -93,11 +93,11 @@ select exists(select 1 from learning_path_data_resource "jdar" where learning_pa
 select display_name         as "display_name!",
        resource_type_id     as "resource_type_id!: ResourceTypeId",
        resource_content    as "resource_content!"
-from learning_path_data_resource "jdar"
-where learning_path_data_id = $1
+from course_data_resource "jdar"
+where course_data_id = $1
   and jdar.id = $2
         "#,
-        learning_path_data_id,
+        course_data_id,
         id.0,
     )
     .fetch_one(&mut txn)
@@ -112,7 +112,7 @@ where learning_path_data_id = $1
 
 pub async fn update(
     pool: &PgPool,
-    learning_path_id: LearningPathId,
+    course_id: CourseId,
     draft_or_live: DraftOrLive,
     id: AdditionalResourceId,
     display_name: Option<String>,
@@ -121,11 +121,11 @@ pub async fn update(
 ) -> anyhow::Result<(), error::Auth> {
     let mut txn = pool.begin().await?;
 
-    let (draft_id, live_id) = super::get_draft_and_live_ids(&mut txn, learning_path_id)
+    let (draft_id, live_id) = super::get_draft_and_live_ids(&mut txn, course_id)
         .await
-        .ok_or(anyhow::anyhow!("failed to get learning_path_data IDs"))?;
+        .ok_or(anyhow::anyhow!("failed to get course_data IDs"))?;
 
-    let learning_path_data_id = match draft_or_live {
+    let course_data_id = match draft_or_live {
         DraftOrLive::Draft => draft_id,
         DraftOrLive::Live => live_id,
     };
@@ -134,7 +134,7 @@ pub async fn update(
         sqlx::query!(
             //language=SQL
             r#"
-update learning_path_data_resource
+update course_data_resource
 set display_name = coalesce($2, display_name)
 where id = $1 and $2 is distinct from display_name
             "#,
@@ -149,7 +149,7 @@ where id = $1 and $2 is distinct from display_name
         sqlx::query!(
             //language=SQL
             r#"
-update learning_path_data_resource
+update course_data_resource
 set resource_type_id = coalesce($2, resource_type_id)
 where id = $1 and $2 is distinct from resource_type_id
             "#,
@@ -164,11 +164,11 @@ where id = $1 and $2 is distinct from resource_type_id
         sqlx::query!(
             //language=SQL
             r#"
-update learning_path_data_resource
+update course_data_resource
 set resource_content = $3
-where learning_path_data_id = $1 and id = $2
+where course_data_id = $1 and id = $2
             "#,
-            learning_path_data_id,
+            course_data_id,
             id.0,
             json!(resource_content)
         )
@@ -183,22 +183,22 @@ where learning_path_data_id = $1 and id = $2
 
 pub async fn delete(
     pool: &PgPool,
-    learning_path_id: LearningPathId,
+    course_id: CourseId,
     id: AdditionalResourceId,
 ) -> anyhow::Result<()> {
     let mut txn = pool.begin().await?;
 
-    let (draft_id, live_id) = super::get_draft_and_live_ids(&mut txn, learning_path_id)
+    let (draft_id, live_id) = super::get_draft_and_live_ids(&mut txn, course_id)
         .await
-        .ok_or(anyhow::anyhow!("failed to get learning_path_data IDs"))?;
+        .ok_or(anyhow::anyhow!("failed to get course_data IDs"))?;
 
     sqlx::query!(
         //language=SQL
         r#"
 delete
-from learning_path_data_resource
-where learning_path_data_id = $1
-   or learning_path_data_id = $2
+from course_data_resource
+where course_data_id = $1
+   or course_data_id = $2
     and id = $3
         "#,
         draft_id,

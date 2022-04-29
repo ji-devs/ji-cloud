@@ -229,9 +229,9 @@ pub struct AlgoliaSettings {
     /// This key should be ratelimited, and restricted to a specific set of indecies (the media one- currently actually the "images" one) and any search suggestion indecies.
     pub frontend_search_key: Option<String>,
 
-    /// The index to use for operations relating to Learning Paths on the algolia client.
+    /// The index to use for operations relating to Courses on the algolia client.
     /// If [`None`], indexing and searching will be disabled.
-    pub learning_path_index: Option<String>,
+    pub course_index: Option<String>,
 }
 
 /// Settings to initialize a google translate client.
@@ -563,9 +563,7 @@ impl SettingsManager {
 
         let jig_index = self.get_varying_secret(keys::algolia::JIG_INDEX).await?;
 
-        let learning_path_index = self
-            .get_varying_secret(keys::algolia::LEARNING_PATH_INDEX)
-            .await?;
+        let course_index = self.get_varying_secret(keys::algolia::COURSE_INDEX).await?;
 
         let management_key = self
             .get_varying_secret(keys::algolia::MANAGEMENT_KEY)
@@ -591,7 +589,7 @@ impl SettingsManager {
             management_key,
             media_index,
             jig_index,
-            learning_path_index,
+            course_index,
             frontend_search_key,
         }))
     }
@@ -607,9 +605,7 @@ impl SettingsManager {
 
         let jig_index = self.get_varying_secret(keys::algolia::JIG_INDEX).await?;
 
-        let learning_path_index = self
-            .get_varying_secret(keys::algolia::LEARNING_PATH_INDEX)
-            .await?;
+        let course_index = self.get_varying_secret(keys::algolia::COURSE_INDEX).await?;
 
         let management_key = self
             .get_varying_secret(keys::algolia::MANAGEMENT_KEY)
@@ -635,7 +631,7 @@ impl SettingsManager {
             management_key,
             media_index,
             jig_index,
-            learning_path_index,
+            course_index,
             frontend_search_key,
         }))
     }
@@ -651,10 +647,6 @@ impl SettingsManager {
         let api_key = self.get_varying_secret(keys::email::API_KEY).await?;
 
         let sender_email = self.get_varying_secret(keys::email::SENDER_EMAIL).await?;
-
-        // let jigzi_info_email = self
-        //     .get_varying_secret(keys::email::JIGZI_INFO_EMAIL)
-        //     .await?;
 
         let signup_verify_template = self
             .get_varying_secret(keys::email::SIGNUP_VERIFY_TEMPLATE)

@@ -1,9 +1,9 @@
 pub(crate) mod animation;
 pub(crate) mod audio;
 pub(crate) mod category;
+pub(crate) mod course;
 pub(crate) mod image;
 pub(crate) mod jig;
-pub(crate) mod learning_path;
 pub(crate) mod locale;
 pub(crate) mod media;
 pub(crate) mod meta;

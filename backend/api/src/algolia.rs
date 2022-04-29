@@ -15,9 +15,9 @@ use tracing::{instrument, Instrument};
 use shared::{
     domain::{
         category::CategoryId,
+        course::CourseId,
         image::{ImageId, ImageKind},
         jig::{JigFocus, JigId, PrivacyLevel},
-        learning_path::LearningPathId,
         meta::{AffiliationId, AgeRangeId, ImageStyleId, ImageTagIndex, ResourceTypeId},
     },
     media::MediaGroupKind,
@@ -84,7 +84,7 @@ struct BatchImage<'a> {
 }
 
 #[derive(Serialize)]
-struct BatchLearningPath<'a> {
+struct BatchCourse<'a> {
     name: &'a str,
     language: &'a str,
     description: &'a str,
@@ -124,24 +124,24 @@ pub struct Manager {
     pub inner: Inner,
     pub media_index: String,
     pub jig_index: String,
-    pub learning_path_index: String,
+    pub course_index: String,
 }
 
 impl Manager {
     pub fn new(settings: Option<AlgoliaSettings>, db: PgPool) -> anyhow::Result<Option<Self>> {
-        let (app_id, key, media_index, jig_index, learning_path_index) = match settings {
+        let (app_id, key, media_index, jig_index, course_index) = match settings {
             Some(settings) => match (
                 settings.management_key,
                 settings.media_index,
                 settings.jig_index,
-                settings.learning_path_index,
+                settings.course_index,
             ) {
-                (Some(key), Some(media_index), Some(jig_index), Some(learning_path_index)) => (
+                (Some(key), Some(media_index), Some(jig_index), Some(course_index)) => (
                     settings.application_id,
                     key,
                     media_index,
                     jig_index,
-                    learning_path_index,
+                    course_index,
                 ),
                 _ => return Ok(None),
             },
@@ -152,7 +152,7 @@ impl Manager {
             inner: Inner::new(AppId::new(app_id), ApiKey(key))?,
             media_index,
             jig_index,
-            learning_path_index,
+            course_index,
             db,
         }))
     }
@@ -168,9 +168,9 @@ impl Manager {
                     .context("update images task errored"),
                 1 => self.update_jigs().await.context("update jigs task errored"),
                 2 => self
-                    .update_learning_paths()
+                    .update_courses()
                     .await
-                    .context("update learning paths task errored"),
+                    .context("update courses task errored"),
                 _ => continue,
             };
 
@@ -217,7 +217,7 @@ select algolia_index_version as "algolia_index_version!" from "settings"
                 &self.inner,
                 &self.media_index,
                 &self.jig_index,
-                &self.learning_path_index,
+                &self.course_index,
             )
             .await
             .with_context(|| {
@@ -283,8 +283,8 @@ select algolia_index_version as "algolia_index_version!" from "settings"
         Ok(ids?)
     }
 
-    async fn batch_learning_paths(&self, batch: BatchWriteRequests) -> anyhow::Result<Vec<Uuid>> {
-        let resp = self.inner.batch(&self.learning_path_index, &batch).await?;
+    async fn batch_courses(&self, batch: BatchWriteRequests) -> anyhow::Result<Vec<Uuid>> {
+        let resp = self.inner.batch(&self.course_index, &batch).await?;
 
         let ids: Result<Vec<_>, _> = resp
             .object_ids
@@ -592,8 +592,8 @@ limit 100 for no key update skip locked;
         Ok(true)
     }
 
-    async fn update_learning_paths(&self) -> anyhow::Result<bool> {
-        log::info!("reached update learning_paths");
+    async fn update_courses(&self) -> anyhow::Result<bool> {
+        log::info!("reached update courses");
         let mut txn = self.db.begin().await?;
 
         let is_outdated = sqlx::query!(
@@ -612,43 +612,43 @@ limit 100 for no key update skip locked;
         let requests: Vec<_> = sqlx::query!(
             //language=SQL
             r#"
-select learning_path.id,
+select course.id,
        display_name                                                                                                 as "name",
        language                                                                                                     as "language!",
        description                                                                                                  as "description!",
        translated_description                                                                                       as "translated_description!: Json<HashMap<String, String>>",
        array((select affiliation_id
-              from learning_path_data_affiliation
-              where learning_path_data_id = learning_path_data.id))                                                                     as "affiliations!",
+              from course_data_affiliation
+              where course_data_id = course_data.id))                                                                     as "affiliations!",
        array((select affiliation.display_name
               from affiliation
-                       inner join learning_path_data_affiliation on affiliation.id = learning_path_data_affiliation.affiliation_id
-              where learning_path_data_affiliation.learning_path_data_id = learning_path_data.id))                                                as "affiliation_names!",
+                       inner join course_data_affiliation on affiliation.id = course_data_affiliation.affiliation_id
+              where course_data_affiliation.course_data_id = course_data.id))                                                as "affiliation_names!",
         array((select resource_type_id
-                from learning_path_data_resource
-                where learning_path_data_id = learning_path_data.id))                                                                     as "resource_types!",
+                from course_data_resource
+                where course_data_id = course_data.id))                                                                     as "resource_types!",
         array((select resource_type.display_name
               from resource_type
-                        inner join learning_path_data_resource on resource_type.id = learning_path_data_resource.resource_type_id
-             where learning_path_data_resource.learning_path_data_id = learning_path_data.id))                                         as "resource_type_names!",
+                        inner join course_data_resource on resource_type.id = course_data_resource.resource_type_id
+             where course_data_resource.course_data_id = course_data.id))                                         as "resource_type_names!",
        array((select age_range_id
-              from learning_path_data_age_range
-              where learning_path_data_id = learning_path_data.id))                                                                     as "age_ranges!",
+              from course_data_age_range
+              where course_data_id = course_data.id))                                                                     as "age_ranges!",
        array((select age_range.display_name
               from age_range
-                       inner join learning_path_data_age_range on age_range.id = learning_path_data_age_range.age_range_id
-              where learning_path_data_age_range.learning_path_data_id = learning_path_data.id))                                                  as "age_range_names!",
+                       inner join course_data_age_range on age_range.id = course_data_age_range.age_range_id
+              where course_data_age_range.course_data_id = course_data.id))                                                  as "age_range_names!",
        array((select category_id
-              from learning_path_data_category
-              where learning_path_data_id = learning_path_data.id))                                                                     as "categories!",
+              from course_data_category
+              where course_data_id = course_data.id))                                                                     as "categories!",
        array((select name
               from category
-                       inner join learning_path_data_category on category.id = learning_path_data_category.category_id
-              where learning_path_data_category.learning_path_data_id = learning_path_data.id))                                                   as "category_names!",
+                       inner join course_data_category on category.id = course_data_category.category_id
+              where course_data_category.course_data_id = course_data.id))                                                   as "category_names!",
         array(
            (select jig_id
-            from learning_path_data_jig
-            where learning_path_data_jig.learning_path_data_id = learning_path_data.id)
+            from course_data_jig
+            where course_data_jig.course_data_id = course_data.id)
        )                                                                                                            as "items!",
        privacy_level                                                                                                as "privacy_level!: PrivacyLevel",
        author_id                                                                                                    as "author_id",
@@ -656,12 +656,12 @@ select learning_path.id,
        translated_keywords                                                                                          as "translated_keywords!",
        (select given_name || ' '::text || family_name
         from user_profile
-        where user_profile.user_id = learning_path.author_id)                                                       as "author_name",
+        where user_profile.user_id = course.author_id)                                                       as "author_name",
         likes                                                                                                       as "likes!",
         plays                                                                                                       as "plays!",
         published_at                                                                                                as "published_at"
-from learning_path
-         inner join learning_path_data on live_id = learning_path_data.id
+from course
+         inner join course_data on live_id = course_data.id
 where (last_synced_at is null
    or (updated_at is not null and last_synced_at < updated_at))
 limit 100 for no key update skip locked;
@@ -684,7 +684,7 @@ limit 100 for no key update skip locked;
             }
 
             algolia::request::BatchWriteRequest::UpdateObject {
-            body: match serde_json::to_value(&BatchLearningPath {
+            body: match serde_json::to_value(&BatchCourse {
                 name: &row.name,
                 language: &row.language,
                 description: &row.description,
@@ -707,10 +707,10 @@ limit 100 for no key update skip locked;
                 published_at: row.published_at,
                 translated_description: &translation,
             })
-            .expect("failed to serialize BatchLearningPath to json")
+            .expect("failed to serialize BatchCourse to json")
             {
                 serde_json::Value::Object(map) => map,
-                _ => panic!("failed to serialize BatchLearningPath to json map"),
+                _ => panic!("failed to serialize BatchCourse to json map"),
             },
             object_id: row.id.to_string(),
         }})
@@ -722,19 +722,19 @@ limit 100 for no key update skip locked;
             return Ok(true);
         }
 
-        log::debug!("Updating a batch of {} learning_path(s)", requests.len());
+        log::debug!("Updating a batch of {} course(s)", requests.len());
 
         let request = algolia::request::BatchWriteRequests { requests };
-        let ids = self.batch_learning_paths(request).await?;
+        let ids = self.batch_courses(request).await?;
 
-        log::debug!("Updated a batch of {} learning_path(s)", ids.len());
+        log::debug!("Updated a batch of {} course(s)", ids.len());
 
         sqlx::query!(
             //language=SQL
             r#"
-update learning_path_data
+update course_data
 set last_synced_at = now()
-where learning_path_data.id = any (select live_id from learning_path where learning_path.id = any ($1))
+where course_data.id = any (select live_id from course where course.id = any ($1))
 "#,
             &ids
         )
@@ -743,7 +743,7 @@ where learning_path_data.id = any (select live_id from learning_path where learn
 
         txn.commit().await?;
 
-        log::info!("completed update learning_path");
+        log::info!("completed update course");
 
         Ok(true)
     }
@@ -907,7 +907,7 @@ pub struct Client {
     inner: Inner,
     media_index: String,
     jig_index: String,
-    learning_path_index: String,
+    course_index: String,
 }
 
 impl Client {
@@ -915,17 +915,17 @@ impl Client {
         if let Some(settings) = settings {
             let app_id = algolia::AppId::new(settings.application_id);
 
-            let (inner, media_index, jig_index, learning_path_index) = match (
+            let (inner, media_index, jig_index, course_index) = match (
                 settings.backend_search_key,
                 settings.media_index,
                 settings.jig_index,
-                settings.learning_path_index,
+                settings.course_index,
             ) {
-                (Some(key), Some(media_index), Some(jig_index), Some(learning_path_index)) => (
+                (Some(key), Some(media_index), Some(jig_index), Some(course_index)) => (
                     Inner::new(app_id, ApiKey(key))?,
                     media_index,
                     jig_index,
-                    learning_path_index,
+                    course_index,
                 ),
                 _ => return Ok(None),
             };
@@ -934,7 +934,7 @@ impl Client {
                 inner,
                 media_index,
                 jig_index,
-                learning_path_index,
+                course_index,
             }))
         } else {
             Ok(None)
@@ -1194,7 +1194,7 @@ impl Client {
     }
 
     #[instrument(skip_all)]
-    pub async fn search_learning_path(
+    pub async fn search_course(
         &self,
         query: &str,
         page: Option<u32>,
@@ -1277,7 +1277,7 @@ impl Client {
         let results: SearchResponse = self
             .inner
             .search(
-                &self.learning_path_index,
+                &self.course_index,
                 SearchQuery::<'_, String, AndFilter> {
                     query: Some(query),
                     page,
@@ -1303,22 +1303,19 @@ impl Client {
         Ok(Some((results, pages, total_hits)))
     }
 
-    pub async fn delete_learning_path(&self, id: LearningPathId) {
-        if let Err(e) = self.try_delete_learning_path(id).await {
+    pub async fn delete_course(&self, id: CourseId) {
+        if let Err(e) = self.try_delete_course(id).await {
             log::warn!(
-                "failed to delete learning_path with id {} from algolia: {}",
+                "failed to delete course with id {} from algolia: {}",
                 id.0.to_hyphenated(),
                 e
             );
         }
     }
 
-    pub async fn try_delete_learning_path(
-        &self,
-        LearningPathId(id): LearningPathId,
-    ) -> anyhow::Result<()> {
+    pub async fn try_delete_course(&self, CourseId(id): CourseId) -> anyhow::Result<()> {
         self.inner
-            .delete_object(&self.learning_path_index, &id.to_string())
+            .delete_object(&self.course_index, &id.to_string())
             .await?;
 
         Ok(())

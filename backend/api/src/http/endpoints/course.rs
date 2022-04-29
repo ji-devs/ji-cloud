@@ -5,13 +5,10 @@ use actix_web::{
 use core::settings::RuntimeSettings;
 use futures::try_join;
 use shared::{
-    api::{endpoints::learning_path, ApiEndpoint},
+    api::{endpoints::course, ApiEndpoint},
     domain::{
+        course::{CourseBrowseResponse, CourseCreateRequest, CourseId, CourseSearchResponse},
         jig::{DraftOrLive, PrivacyLevel, UserOrMe},
-        learning_path::{
-            LearningPathBrowseResponse, LearningPathCreateRequest, LearningPathId,
-            LearningPathSearchResponse,
-        },
         CreateResponse,
     },
 };
@@ -20,7 +17,7 @@ use tracing::instrument;
 use uuid::Uuid;
 
 use crate::{
-    db::{self, learning_path::CreateLearningPathError},
+    db::{self, course::CreateCourseError},
     error::{self, ServiceKind},
     extractor::TokenUser,
     service::ServiceData,
@@ -31,23 +28,23 @@ pub mod additional_resource;
 const DEFAULT_PAGE_LIMIT: u32 = 20;
 const MAX_PAGE_LIMIT: u32 = 100;
 
-/// Create a Learning Path
+/// Create a Course
 async fn create(
     db: Data<PgPool>,
     auth: TokenUser,
-    req: Option<Json<<learning_path::Create as ApiEndpoint>::Req>>,
+    req: Option<Json<<course::Create as ApiEndpoint>::Req>>,
 ) -> Result<
     (
-        Json<<learning_path::Create as ApiEndpoint>::Res>,
+        Json<<course::Create as ApiEndpoint>::Res>,
         actix_web::http::StatusCode,
     ),
     error::CreateWithMetadata,
 > {
     let db = db.as_ref();
 
-    db::learning_path::authz(db, auth.0.user_id, None).await?;
+    db::course::authz(db, auth.0.user_id, None).await?;
 
-    let req = req.map_or_else(LearningPathCreateRequest::default, Json::into_inner);
+    let req = req.map_or_else(CourseCreateRequest::default, Json::into_inner);
     let creator_id = auth.0.user_id;
 
     let language = match req.language {
@@ -63,7 +60,7 @@ async fn create(
         }
     };
 
-    let id = db::learning_path::create(
+    let id = db::course::create(
         &*db,
         &req.display_name,
         &req.categories,
@@ -75,8 +72,8 @@ async fn create(
     )
     .await
     .map_err(|e| match e {
-        CreateLearningPathError::Sqlx(e) => db::meta::handle_metadata_err(e).into(),
-        CreateLearningPathError::InternalServerError(e) => {
+        CreateCourseError::Sqlx(e) => db::meta::handle_metadata_err(e).into(),
+        CreateCourseError::InternalServerError(e) => {
             error::CreateWithMetadata::InternalServerError(e.into())
         }
     })?;
@@ -90,44 +87,42 @@ async fn create(
 #[instrument(skip_all)]
 async fn get_live(
     db: Data<PgPool>,
-    path: web::Path<LearningPathId>,
-) -> Result<Json<<learning_path::GetLive as ApiEndpoint>::Res>, error::NotFound> {
-    let learning_path_response =
-        db::learning_path::get_one(&db, path.into_inner(), DraftOrLive::Live)
-            .await?
-            .ok_or(error::NotFound::ResourceNotFound)?;
+    path: web::Path<CourseId>,
+) -> Result<Json<<course::GetLive as ApiEndpoint>::Res>, error::NotFound> {
+    let course_response = db::course::get_one(&db, path.into_inner(), DraftOrLive::Live)
+        .await?
+        .ok_or(error::NotFound::ResourceNotFound)?;
 
-    Ok(Json(learning_path_response))
+    Ok(Json(course_response))
 }
 
 async fn get_draft(
     db: Data<PgPool>,
-    path: web::Path<LearningPathId>,
-) -> Result<Json<<learning_path::GetDraft as ApiEndpoint>::Res>, error::NotFound> {
-    let learning_path_response =
-        db::learning_path::get_one(&db, path.into_inner(), DraftOrLive::Draft)
-            .await?
-            .ok_or(error::NotFound::ResourceNotFound)?;
+    path: web::Path<CourseId>,
+) -> Result<Json<<course::GetDraft as ApiEndpoint>::Res>, error::NotFound> {
+    let course_response = db::course::get_one(&db, path.into_inner(), DraftOrLive::Draft)
+        .await?
+        .ok_or(error::NotFound::ResourceNotFound)?;
 
-    Ok(Json(learning_path_response))
+    Ok(Json(course_response))
 }
 
-/// Update a Learning Path's draft data.
+/// Update a Course's draft data.
 async fn update_draft(
     db: Data<PgPool>,
     settings: Data<RuntimeSettings>,
     claims: TokenUser,
-    req: Option<Json<<learning_path::UpdateDraftData as ApiEndpoint>::Req>>,
-    path: web::Path<LearningPathId>,
+    req: Option<Json<<course::UpdateDraftData as ApiEndpoint>::Req>>,
+    path: web::Path<CourseId>,
 ) -> Result<HttpResponse, error::UpdateWithMetadata> {
     let id = path.into_inner();
     let api_key = &settings.google_api_key;
 
-    db::learning_path::authz(&*db, claims.0.user_id, Some(id)).await?;
+    db::course::authz(&*db, claims.0.user_id, Some(id)).await?;
 
     let req = req.map_or_else(Default::default, Json::into_inner);
 
-    db::learning_path::update_draft(
+    db::course::update_draft(
         &*db,
         api_key,
         id,
@@ -146,20 +141,20 @@ async fn update_draft(
     Ok(HttpResponse::NoContent().finish())
 }
 
-/// Delete a Learning Path.
+/// Delete a Course.
 async fn delete(
     db: Data<PgPool>,
     claims: TokenUser,
-    path: web::Path<LearningPathId>,
+    path: web::Path<CourseId>,
     algolia: ServiceData<crate::algolia::Client>,
 ) -> Result<HttpResponse, error::Delete> {
     let id = path.into_inner();
 
-    db::learning_path::authz(&*db, claims.0.user_id, Some(id)).await?;
+    db::course::authz(&*db, claims.0.user_id, Some(id)).await?;
 
-    db::learning_path::delete(&*db, id).await?;
+    db::course::delete(&*db, id).await?;
 
-    algolia.delete_learning_path(id).await;
+    algolia.delete_course(id).await;
 
     Ok(HttpResponse::NoContent().finish())
 }
@@ -168,8 +163,8 @@ async fn delete(
 async fn browse(
     db: Data<PgPool>,
     claims: Option<TokenUser>,
-    query: Option<Query<<learning_path::Browse as ApiEndpoint>::Req>>,
-) -> Result<Json<<learning_path::Browse as ApiEndpoint>::Res>, error::Auth> {
+    query: Option<Query<<course::Browse as ApiEndpoint>::Req>>,
+) -> Result<Json<<course::Browse as ApiEndpoint>::Res>, error::Auth> {
     let query = query.map_or_else(Default::default, Query::into_inner);
 
     let (author_id, privacy_level) =
@@ -181,7 +176,7 @@ async fn browse(
 
     let resource_types = filters_for_ids_or(&query.resource_types[..]);
 
-    let browse_future = db::learning_path::browse(
+    let browse_future = db::course::browse(
         db.as_ref(),
         author_id,
         query.draft_or_live,
@@ -191,7 +186,7 @@ async fn browse(
         resource_types.to_owned(),
     );
 
-    let total_count_future = db::learning_path::filtered_count(
+    let total_count_future = db::course::filtered_count(
         db.as_ref(),
         privacy_level.to_owned(),
         author_id,
@@ -199,14 +194,14 @@ async fn browse(
         resource_types.to_owned(),
     );
 
-    let (learning_paths, (total_count, count)) = try_join!(browse_future, total_count_future,)?;
+    let (courses, (total_count, count)) = try_join!(browse_future, total_count_future,)?;
 
     let pages = (count / (page_limit as u64) + (count % (page_limit as u64) != 0) as u64) as u32;
 
-    Ok(Json(LearningPathBrowseResponse {
-        learning_paths,
+    Ok(Json(CourseBrowseResponse {
+        courses,
         pages,
-        total_learning_path_count: total_count,
+        total_course_count: total_count,
     }))
 }
 
@@ -220,39 +215,38 @@ fn filters_for_ids_or<T: Into<Uuid> + Copy>(ids: &[T]) -> Vec<Uuid> {
     vect
 }
 
-/// Copies the contents of the draft Learning Path data to live
+/// Copies the contents of the draft Course data to live
 pub(super) async fn publish_draft_to_live(
     db: Data<PgPool>,
     claims: TokenUser,
-    learning_path_id: Path<LearningPathId>,
+    course_id: Path<CourseId>,
 ) -> Result<HttpResponse, error::CloneDraft> {
-    let learning_path_id = learning_path_id.into_inner();
+    let course_id = course_id.into_inner();
 
-    db::learning_path::authz(&*db, claims.0.user_id, Some(learning_path_id)).await?;
+    db::course::authz(&*db, claims.0.user_id, Some(course_id)).await?;
 
     let mut txn = db.begin().await?;
 
-    let (draft_id, live_id) =
-        db::learning_path::get_draft_and_live_ids(&mut *txn, learning_path_id)
-            .await
-            .ok_or(error::CloneDraft::ResourceNotFound)?;
+    let (draft_id, live_id) = db::course::get_draft_and_live_ids(&mut *txn, course_id)
+        .await
+        .ok_or(error::CloneDraft::ResourceNotFound)?;
 
-    let new_live_id = db::learning_path::clone_data(&mut txn, &draft_id, DraftOrLive::Live).await?;
+    let new_live_id = db::course::clone_data(&mut txn, &draft_id, DraftOrLive::Live).await?;
 
     sqlx::query!(
         //language=SQL
-        "update learning_path set live_id = $1, published_at = now() where id = $2",
+        "update course set live_id = $1, published_at = now() where id = $2",
         new_live_id,
-        learning_path_id.0
+        course_id.0
     )
     .execute(&mut *txn)
     .await?;
 
-    // should drop all the entries in the metadata tables that FK to the live learning_path_data row
+    // should drop all the entries in the metadata tables that FK to the live course_data row
     sqlx::query!(
         //language=SQL
         r#"
-delete from learning_path_data where id = $1
+delete from course_data where id = $1
     "#,
         live_id,
     )
@@ -264,14 +258,14 @@ delete from learning_path_data where id = $1
     Ok(HttpResponse::NoContent().finish())
 }
 
-/// Search for Learning Paths.
+/// Search for Courses.
 #[instrument(skip_all)]
 async fn search(
     db: Data<PgPool>,
     claims: Option<TokenUser>,
     algolia: ServiceData<crate::algolia::Client>,
-    query: Option<Query<<learning_path::Search as ApiEndpoint>::Req>>,
-) -> Result<Json<<learning_path::Search as ApiEndpoint>::Res>, error::Service> {
+    query: Option<Query<<course::Search as ApiEndpoint>::Req>>,
+) -> Result<Json<<course::Search as ApiEndpoint>::Res>, error::Service> {
     let query = query.map_or_else(Default::default, Query::into_inner);
 
     let page_limit = page_limit(query.page_limit)
@@ -282,7 +276,7 @@ async fn search(
         auth_claims(&*db, claims, query.author_id, query.privacy_level).await?;
 
     let (ids, pages, total_hits) = algolia
-        .search_learning_path(
+        .search_course(
             &query.q,
             query.page,
             query.language,
@@ -301,13 +295,12 @@ async fn search(
         .await?
         .ok_or_else(|| error::Service::DisabledService(ServiceKind::Algolia))?;
 
-    let learning_paths: Vec<_> =
-        db::learning_path::get_by_ids(db.as_ref(), &ids, DraftOrLive::Live).await?;
+    let courses: Vec<_> = db::course::get_by_ids(db.as_ref(), &ids, DraftOrLive::Live).await?;
 
-    Ok(Json(LearningPathSearchResponse {
-        learning_paths,
+    Ok(Json(CourseSearchResponse {
+        courses,
         pages,
-        total_learning_path_count: total_hits,
+        total_course_count: total_hits,
     }))
 }
 
@@ -335,7 +328,7 @@ async fn auth_claims(
     };
 
     if let Some(user) = claims {
-        let is_admin = db::learning_path::is_admin(&*db, user.0.user_id).await?;
+        let is_admin = db::course::is_admin(&*db, user.0.user_id).await?;
 
         if let Some(author) = author_id {
             let (author_id, privacy) = match author {
@@ -372,39 +365,35 @@ async fn auth_claims(
 
 pub fn configure(cfg: &mut ServiceConfig) {
     cfg.route(
-        learning_path::Create::PATH,
-        learning_path::Create::METHOD.route().to(create),
+        course::Create::PATH,
+        course::Create::METHOD.route().to(create),
     )
     .route(
-        learning_path::GetLive::PATH,
-        learning_path::GetLive::METHOD.route().to(get_live),
+        course::GetLive::PATH,
+        course::GetLive::METHOD.route().to(get_live),
     )
     .route(
-        learning_path::GetDraft::PATH,
-        learning_path::GetDraft::METHOD.route().to(get_draft),
+        course::GetDraft::PATH,
+        course::GetDraft::METHOD.route().to(get_draft),
     )
     .route(
-        learning_path::Publish::PATH,
-        learning_path::Publish::METHOD
-            .route()
-            .to(publish_draft_to_live),
+        course::Publish::PATH,
+        course::Publish::METHOD.route().to(publish_draft_to_live),
     )
     .route(
-        learning_path::Browse::PATH,
-        learning_path::Browse::METHOD.route().to(browse),
+        course::Browse::PATH,
+        course::Browse::METHOD.route().to(browse),
     )
     .route(
-        learning_path::Search::PATH,
-        learning_path::Search::METHOD.route().to(search),
+        course::Search::PATH,
+        course::Search::METHOD.route().to(search),
     )
     .route(
-        learning_path::UpdateDraftData::PATH,
-        learning_path::UpdateDraftData::METHOD
-            .route()
-            .to(update_draft),
+        course::UpdateDraftData::PATH,
+        course::UpdateDraftData::METHOD.route().to(update_draft),
     )
     .route(
-        learning_path::Delete::PATH,
-        learning_path::Delete::METHOD.route().to(delete),
+        course::Delete::PATH,
+        course::Delete::METHOD.route().to(delete),
     );
 }

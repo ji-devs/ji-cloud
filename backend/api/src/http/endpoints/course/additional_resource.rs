@@ -3,13 +3,13 @@ use actix_web::{
     HttpResponse,
 };
 use shared::{
-    api::{endpoints::learning_path::additional_resource, ApiEndpoint},
+    api::{endpoints::course::additional_resource, ApiEndpoint},
     domain::{
-        jig::DraftOrLive,
-        learning_path::{
+        course::{
             additional_resource::{AdditionalResource, AdditionalResourceId},
-            LearningPathId,
+            CourseId,
         },
+        jig::DraftOrLive,
         CreateResponse,
     },
 };
@@ -21,7 +21,7 @@ use crate::{db, error, extractor::TokenUser};
 async fn create(
     db: Data<PgPool>,
     auth: TokenUser,
-    parent: Path<LearningPathId>,
+    parent: Path<CourseId>,
     req: Json<<additional_resource::Create as ApiEndpoint>::Req>,
 ) -> Result<
     (
@@ -33,11 +33,11 @@ async fn create(
 > {
     let parent_id = parent.into_inner();
 
-    db::learning_path::authz(&*db, auth.0.user_id, Some(parent_id)).await?;
+    db::course::authz(&*db, auth.0.user_id, Some(parent_id)).await?;
 
     let req = req.into_inner();
 
-    let id = db::learning_path::additional_resource::create(
+    let id = db::course::additional_resource::create(
         &*db,
         parent_id,
         req.display_name,
@@ -53,16 +53,16 @@ async fn create(
 async fn update(
     db: Data<PgPool>,
     auth: TokenUser,
-    path: Path<(LearningPathId, AdditionalResourceId)>,
+    path: Path<(CourseId, AdditionalResourceId)>,
     req: Json<<additional_resource::Update as ApiEndpoint>::Req>,
 ) -> Result<HttpResponse, error::Auth> {
     let (parent_id, additional_resource_id) = path.into_inner();
 
     let req = req.into_inner();
 
-    db::learning_path::authz(&*db, auth.0.user_id, Some(parent_id)).await?;
+    db::course::authz(&*db, auth.0.user_id, Some(parent_id)).await?;
 
-    db::learning_path::additional_resource::update(
+    db::course::additional_resource::update(
         &*db,
         parent_id,
         DraftOrLive::Draft,
@@ -76,22 +76,21 @@ async fn update(
     Ok(HttpResponse::NoContent().finish())
 }
 
-/// Get an additional resource on a draft LearningPath.
+/// Get an additional resource on a draft Course.
 async fn get_draft(
     db: Data<PgPool>,
     _auth: TokenUser,
-    path: Path<(LearningPathId, AdditionalResourceId)>,
+    path: Path<(CourseId, AdditionalResourceId)>,
 ) -> Result<Json<<additional_resource::GetDraft as ApiEndpoint>::Res>, error::NotFound> {
     let (parent_id, additional_resource_id) = path.into_inner();
 
-    let (display_name, resource_type_id, resource_content) =
-        db::learning_path::additional_resource::get(
-            &db,
-            parent_id,
-            DraftOrLive::Draft,
-            additional_resource_id,
-        )
-        .await?;
+    let (display_name, resource_type_id, resource_content) = db::course::additional_resource::get(
+        &db,
+        parent_id,
+        DraftOrLive::Draft,
+        additional_resource_id,
+    )
+    .await?;
 
     Ok(Json(AdditionalResource {
         id: additional_resource_id,
@@ -105,18 +104,17 @@ async fn get_draft(
 async fn get_live(
     db: Data<PgPool>,
     _auth: TokenUser,
-    path: Path<(LearningPathId, AdditionalResourceId)>,
+    path: Path<(CourseId, AdditionalResourceId)>,
 ) -> Result<Json<<additional_resource::GetDraft as ApiEndpoint>::Res>, error::NotFound> {
     let (parent_id, additional_resource_id) = path.into_inner();
 
-    let (display_name, resource_type_id, resource_content) =
-        db::learning_path::additional_resource::get(
-            &db,
-            parent_id,
-            DraftOrLive::Live,
-            additional_resource_id,
-        )
-        .await?;
+    let (display_name, resource_type_id, resource_content) = db::course::additional_resource::get(
+        &db,
+        parent_id,
+        DraftOrLive::Live,
+        additional_resource_id,
+    )
+    .await?;
 
     Ok(Json(AdditionalResource {
         id: additional_resource_id,
@@ -130,13 +128,13 @@ async fn get_live(
 async fn delete(
     db: Data<PgPool>,
     auth: TokenUser,
-    path: Path<(LearningPathId, AdditionalResourceId)>,
+    path: Path<(CourseId, AdditionalResourceId)>,
 ) -> Result<HttpResponse, error::Delete> {
     let (parent_id, additional_resource_id) = path.into_inner();
 
-    db::learning_path::authz(&*db, auth.0.user_id, Some(parent_id)).await?;
+    db::course::authz(&*db, auth.0.user_id, Some(parent_id)).await?;
 
-    db::learning_path::additional_resource::delete(&*db, parent_id, additional_resource_id).await?;
+    db::course::additional_resource::delete(&*db, parent_id, additional_resource_id).await?;
 
     Ok(HttpResponse::NoContent().finish())
 }
