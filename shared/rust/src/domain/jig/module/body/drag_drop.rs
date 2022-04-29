@@ -166,8 +166,10 @@ pub struct Item {
 pub struct TargetTransform {
     /// Index of the sticker in the list of stickers
     pub sticker_idx: usize,
-    /// Target transform for this sticker
+    /// Target transform for this sticker for rendering during edit
     pub transform: Transform,
+    /// Index of the trace in which this item can be placed
+    pub trace_idx: usize,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
