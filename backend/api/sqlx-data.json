@@ -67,6 +67,32 @@
       "nullable": []
     }
   },
+  "028a39dbccbe063de367c06c73959dee25793addad0a13388cd4d464a2496005": {
+    "query": "\nselect draft_id, live_id from course where id = $1\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "draft_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "live_id",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false,
+        false
+      ]
+    }
+  },
   "02c99d434bef7ea8602e6e462c5e93d9a0e11f47771b10b90d9482e79c18cfb0": {
     "query": "delete from web_media_library_url where media_url = $1",
     "describe": {
@@ -143,19 +169,6 @@
       "nullable": []
     }
   },
-  "05a7ff4dd3080eb1e71389e19047f2b39f6a09459599fdc9ec46f2bedf64a1d6": {
-    "query": "\ninsert into learning_path_data_jig(learning_path_data_id, jig_id)\nselect $2, jig_id\nfrom learning_path_data_jig\nwhere learning_path_data_id = $1\n        ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid"
-        ]
-      },
-      "nullable": []
-    }
-  },
   "07a08e527260ed80e9a98a2f24bf76fb43524033f639b527bfa99b26839a76d1": {
     "query": "\ninsert into jig_data_module (stable_id, \"index\", jig_data_id, kind, is_complete, contents)\nselect stable_id, \"index\", $2 as \"jig_id\", kind, is_complete, contents\nfrom jig_data_module\nwhere jig_data_id = $1\n        ",
     "describe": {
@@ -167,28 +180,6 @@
         ]
       },
       "nullable": []
-    }
-  },
-  "07bdf6249041decfc6019cb946cc2c94e12454e80a8ab122d947dc5f51eb5bde": {
-    "query": "insert into learning_path (creator_id, author_id, live_id, draft_id) values ($1, $1, $2, $3) returning id",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id",
-          "type_info": "Uuid"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid",
-          "Uuid"
-        ]
-      },
-      "nullable": [
-        false
-      ]
     }
   },
   "07c23d4be4038602fadd286c040a438b0366a8308e634d0ef4f5325c7b07b225": {
@@ -509,20 +500,6 @@
       "nullable": []
     }
   },
-  "0ffe4d3a8aa46b3d84c6e23196cc1b747d856e8153c36ac003f0d3886e3f3bc5": {
-    "query": "\ndelete\nfrom learning_path_data_resource\nwhere learning_path_data_id = $1\n   or learning_path_data_id = $2\n    and id = $3\n        ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid",
-          "Uuid"
-        ]
-      },
-      "nullable": []
-    }
-  },
   "102535bed5d4048f3f9f8e1698b38371e26577f7d70fc4eb8367588485a170ae": {
     "query": "\nwith cte as (\n    select id      as \"jig_id\",\n           creator_id,\n           author_id,\n           liked_count,\n           play_count,\n           case\n               when $2 = 0 then jig.draft_id\n               when $2 = 1 then jig.live_id\n               end as \"draft_or_live_id\",\n           published_at,\n           rating,\n           blocked,\n           curated,\n           jig_focus\n    from jig\n    left join jig_play_count on jig_play_count.jig_id = jig.id\n    left join jig_admin_data \"admin\" on admin.jig_id = jig.id\n    where id = $1\n)\nselect cte.jig_id                                          as \"jig_id: JigId\",\n       display_name,\n       creator_id,\n       author_id,\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = author_id)            as \"author_name\",\n       published_at,\n       updated_at,\n       privacy_level                                       as \"privacy_level!: PrivacyLevel\",\n       jig_focus                                           as \"jig_focus!: JigFocus\",\n       language,\n       description,\n       translated_description                              as \"translated_description!: Json<HashMap<String, String>>\",\n       direction                                           as \"direction: TextDirection\",\n       display_score,\n       track_assessments,\n       drag_assist,\n       theme                                               as \"theme: ThemeId\",\n       audio_background                                    as \"audio_background: AudioBackground\",\n       liked_count,\n       play_count,\n       locked,\n       other_keywords,\n       translated_keywords,\n       rating                                               as \"rating?: JigRating\",\n       blocked                                              as \"blocked\",\n       curated,\n       array(select row (unnest(audio_feedback_positive))) as \"audio_feedback_positive!: Vec<(AudioFeedbackPositive,)>\",\n       array(select row (unnest(audio_feedback_negative))) as \"audio_feedback_negative!: Vec<(AudioFeedbackNegative,)>\",\n       array(\n               select row (jig_data_module.id, kind, is_complete)\n               from jig_data_module\n               where jig_data_id = cte.draft_or_live_id\n               order by \"index\"\n           )                                               as \"modules!: Vec<(ModuleId, ModuleKind, bool)>\",\n       array(select row (category_id)\n             from jig_data_category\n             where jig_data_id = cte.draft_or_live_id)     as \"categories!: Vec<(CategoryId,)>\",\n       array(select row (affiliation_id)\n             from jig_data_affiliation\n             where jig_data_id = cte.draft_or_live_id)     as \"affiliations!: Vec<(AffiliationId,)>\",\n       array(select row (age_range_id)\n             from jig_data_age_range\n             where jig_data_id = cte.draft_or_live_id)     as \"age_ranges!: Vec<(AgeRangeId,)>\",\n       array(\n             select row (jdar.id, jdar.display_name, resource_type_id, resource_content)\n             from jig_data_additional_resource \"jdar\"\n             where jdar.jig_data_id = cte.draft_or_live_id\n       )                                                    as \"additional_resource!: Vec<(AddId, String, TypeId, Value)>\"\nfrom jig_data\n         inner join cte on cte.draft_or_live_id = jig_data.id\n",
     "describe": {
@@ -736,6 +713,141 @@
       ]
     }
   },
+  "10c90514e14dae19c70cd46fd15c0394ca2a89a28dcddbaa6576aa4b8ad98eef": {
+    "query": "\nwith cte as (\n    select id      as \"course_id\",\n           creator_id,\n           author_id,\n           likes,\n           plays,\n           case\n               when $2 = 0 then course.draft_id\n               when $2 = 1 then course.live_id\n               end as \"draft_or_live_id\",\n           published_at\n    from course\n    where id = $1\n)\nselect cte.course_id                                          as \"course_id: CourseId\",\n       display_name,\n       creator_id,\n       author_id,\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = author_id)            as \"author_name\",\n       published_at,\n       updated_at,\n       privacy_level                                       as \"privacy_level!: PrivacyLevel\",\n       language,\n       description,\n       translated_description                              as \"translated_description!: Json<HashMap<String, String>>\",\n       likes,\n       plays,\n       other_keywords,\n       translated_keywords,\n       array(select row (category_id)\n             from course_data_category\n             where course_data_id = cte.draft_or_live_id)     as \"categories!: Vec<(CategoryId,)>\",\n       array(select row (affiliation_id)\n             from course_data_affiliation\n             where course_data_id = cte.draft_or_live_id)     as \"affiliations!: Vec<(AffiliationId,)>\",\n       array(select row (age_range_id)\n             from course_data_age_range\n             where course_data_id = cte.draft_or_live_id)     as \"age_ranges!: Vec<(AgeRangeId,)>\",\n       array(\n             select row (jdar.id, jdar.display_name, resource_type_id, resource_content)\n             from course_data_resource \"jdar\"\n             where jdar.course_data_id = cte.draft_or_live_id\n       )                                                    as \"additional_resource!: Vec<(AddId, String, TypeId, Value)>\",\n       array(\n           select row(jig_id)\n           from course_data_jig\n           where course_data_id = cte.draft_or_live_id\n       )                                                     as \"items!: Vec<(JigId,)>\"\nfrom course_data\n         inner join cte on cte.draft_or_live_id = course_data.id\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "course_id: CourseId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "display_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "creator_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 3,
+          "name": "author_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 4,
+          "name": "author_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 5,
+          "name": "published_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 6,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 7,
+          "name": "privacy_level!: PrivacyLevel",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 8,
+          "name": "language",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 9,
+          "name": "description",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 10,
+          "name": "translated_description!: Json<HashMap<String, String>>",
+          "type_info": "Jsonb"
+        },
+        {
+          "ordinal": 11,
+          "name": "likes",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 12,
+          "name": "plays",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 13,
+          "name": "other_keywords",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 14,
+          "name": "translated_keywords",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 15,
+          "name": "categories!: Vec<(CategoryId,)>",
+          "type_info": "RecordArray"
+        },
+        {
+          "ordinal": 16,
+          "name": "affiliations!: Vec<(AffiliationId,)>",
+          "type_info": "RecordArray"
+        },
+        {
+          "ordinal": 17,
+          "name": "age_ranges!: Vec<(AgeRangeId,)>",
+          "type_info": "RecordArray"
+        },
+        {
+          "ordinal": 18,
+          "name": "additional_resource!: Vec<(AddId, String, TypeId, Value)>",
+          "type_info": "RecordArray"
+        },
+        {
+          "ordinal": 19,
+          "name": "items!: Vec<(JigId,)>",
+          "type_info": "RecordArray"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int4"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        true,
+        true,
+        null,
+        true,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    }
+  },
   "1150af6395059759109a8e8200058064186a44dc8db4e6098dd1fa449e6a8e7f": {
     "query": "\nupdate user_profile\nset location = $2\nwhere user_id = $1 and location is distinct from $2",
     "describe": {
@@ -941,6 +1053,39 @@
       ]
     }
   },
+  "165139235ae83a8b495edd7b0881336edd94c88970cf44da028ffc1806bf2a19": {
+    "query": "\nselect display_name         as \"display_name!\",\n       resource_type_id     as \"resource_type_id!: ResourceTypeId\",\n       resource_content    as \"resource_content!\"\nfrom course_data_resource \"jdar\"\nwhere course_data_id = $1\n  and jdar.id = $2\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "display_name!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 1,
+          "name": "resource_type_id!: ResourceTypeId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 2,
+          "name": "resource_content!",
+          "type_info": "Jsonb"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false
+      ]
+    }
+  },
   "16b8e7596de9c8c57e8a50d4b6788e6d7874603ce815762fae2380223a4ddfc0": {
     "query": "select id as \"id: AudioId\" from user_audio_library order by created_at desc",
     "describe": {
@@ -1079,6 +1224,19 @@
         "Left": [
           "Int2",
           "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "1ab7020421fe6db5755143b488adb73f547bebecd211deed9a0e19dd23da0e92": {
+    "query": "\nupdate course_data_resource\nset resource_type_id = coalesce($2, resource_type_id)\nwhere id = $1 and $2 is distinct from resource_type_id\n            ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
         ]
       },
       "nullable": []
@@ -1327,141 +1485,6 @@
       ]
     }
   },
-  "1d9699c470532bb76c91d46d4a461ffbfd8ba96d44b89fef87845aed070bf2a4": {
-    "query": "\nwith cte as (\n    select id      as \"learning_path_id\",\n           creator_id,\n           author_id,\n           likes,\n           plays,\n           case\n               when $2 = 0 then learning_path.draft_id\n               when $2 = 1 then learning_path.live_id\n               end as \"draft_or_live_id\",\n           published_at\n    from learning_path\n    where id = $1\n)\nselect cte.learning_path_id                                          as \"learning_path_id: LearningPathId\",\n       display_name,\n       creator_id,\n       author_id,\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = author_id)            as \"author_name\",\n       published_at,\n       updated_at,\n       privacy_level                                       as \"privacy_level!: PrivacyLevel\",\n       language,\n       description,\n       translated_description                              as \"translated_description!: Json<HashMap<String, String>>\",\n       likes,\n       plays,\n       other_keywords,\n       translated_keywords,\n       array(select row (category_id)\n             from learning_path_data_category\n             where learning_path_data_id = cte.draft_or_live_id)     as \"categories!: Vec<(CategoryId,)>\",\n       array(select row (affiliation_id)\n             from learning_path_data_affiliation\n             where learning_path_data_id = cte.draft_or_live_id)     as \"affiliations!: Vec<(AffiliationId,)>\",\n       array(select row (age_range_id)\n             from learning_path_data_age_range\n             where learning_path_data_id = cte.draft_or_live_id)     as \"age_ranges!: Vec<(AgeRangeId,)>\",\n       array(\n             select row (jdar.id, jdar.display_name, resource_type_id, resource_content)\n             from learning_path_data_resource \"jdar\"\n             where jdar.learning_path_data_id = cte.draft_or_live_id\n       )                                                    as \"additional_resource!: Vec<(AddId, String, TypeId, Value)>\",\n       array(\n           select row(jig_id)\n           from learning_path_data_jig\n           where learning_path_data_id = cte.draft_or_live_id\n       )                                                     as \"items!: Vec<(JigId,)>\"\nfrom learning_path_data\n         inner join cte on cte.draft_or_live_id = learning_path_data.id\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "learning_path_id: LearningPathId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "display_name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "creator_id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 3,
-          "name": "author_id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 4,
-          "name": "author_name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 5,
-          "name": "published_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 6,
-          "name": "updated_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 7,
-          "name": "privacy_level!: PrivacyLevel",
-          "type_info": "Int2"
-        },
-        {
-          "ordinal": 8,
-          "name": "language",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 9,
-          "name": "description",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 10,
-          "name": "translated_description!: Json<HashMap<String, String>>",
-          "type_info": "Jsonb"
-        },
-        {
-          "ordinal": 11,
-          "name": "likes",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 12,
-          "name": "plays",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 13,
-          "name": "other_keywords",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 14,
-          "name": "translated_keywords",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 15,
-          "name": "categories!: Vec<(CategoryId,)>",
-          "type_info": "RecordArray"
-        },
-        {
-          "ordinal": 16,
-          "name": "affiliations!: Vec<(AffiliationId,)>",
-          "type_info": "RecordArray"
-        },
-        {
-          "ordinal": 17,
-          "name": "age_ranges!: Vec<(AgeRangeId,)>",
-          "type_info": "RecordArray"
-        },
-        {
-          "ordinal": 18,
-          "name": "additional_resource!: Vec<(AddId, String, TypeId, Value)>",
-          "type_info": "RecordArray"
-        },
-        {
-          "ordinal": 19,
-          "name": "items!: Vec<(JigId,)>",
-          "type_info": "RecordArray"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int4"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        true,
-        true,
-        null,
-        true,
-        true,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        null,
-        null,
-        null,
-        null,
-        null
-      ]
-    }
-  },
   "1e42e953fa2d327cc392c6c2d4452b88773ab521e72d754f8b08ae44b005ef8f": {
     "query": "\ndelete\nfrom jig_player_session_instance\nwhere id = $1\nreturning ip_address, user_agent, (\n    select jig_id\n    from jig_player_session_instance\n             join jig_player_session on session_index = index\n) as \"jig_id!: JigId\"\n        ",
     "describe": {
@@ -1494,20 +1517,6 @@
       ]
     }
   },
-  "1ec526e9e23970dbc34a737a9fb28c9f5225f67286712d43adea94127471bfa2": {
-    "query": "\nupdate learning_path_data\nset display_name     = coalesce($2, display_name),\n    language         = coalesce($3, language),\n    updated_at = now()\nwhere id = $1\n  and (($2::text is not null and $2 is distinct from display_name) or\n       ($3::text is not null and $3 is distinct from language))\n",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Text",
-          "Text"
-        ]
-      },
-      "nullable": []
-    }
-  },
   "1f632d95656642bf59d0e5223e62370d4bb13f7bdc65cb3aa9171e6b39114c6d": {
     "query": "select uploaded_at from image_upload where image_id = $1 for update",
     "describe": {
@@ -1525,6 +1534,30 @@
       },
       "nullable": [
         true
+      ]
+    }
+  },
+  "1f71ca99a1eecffb1010b95cd7d4d1a4dd2168f07bf6526fbf98d3991d0eb22d": {
+    "query": "\nselect course_data.id,\n       description                                                                                    \nfrom course_data\ninner join course on live_id = course_data.id\nwhere description <> '' \n      and translated_description = '{}'\n      and published_at is not null\norder by coalesce(updated_at, created_at) desc\nlimit 50 for no key update skip locked;\n ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "description",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        false
       ]
     }
   },
@@ -1546,6 +1579,29 @@
       },
       "nullable": [
         false
+      ]
+    }
+  },
+  "21fd5260a8991c6ca6127a8293f05f115fd454ee6ef6367bfc0941a6b5feffee": {
+    "query": "\nselect count(distinct course.id) as \"count!: i64\"\nfrom course\nleft join course_data on (draft_id = course_data.id or (live_id = course_data.id and last_synced_at is not null))\nleft join course_data_resource \"resource\" on course_data.id = resource.course_data_id\nwhere (author_id = $1 or $1 is null)\n    and (course_data.draft_or_live = $2 or $2 is null)\n    and (course_data.privacy_level = any($3) or $3 = array[]::smallint[])\n    and (resource.resource_type_id = any($4) or $4 = array[]::uuid[])\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "count!: i64",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2",
+          "Int2Array",
+          "UuidArray"
+        ]
+      },
+      "nullable": [
+        null
       ]
     }
   },
@@ -1642,6 +1698,20 @@
       "nullable": [
         false
       ]
+    }
+  },
+  "2d7bafd7b464bb3dd87cf57bc759efe7e5cb73de4ee63feed43f08e2edc1270f": {
+    "query": "\nwith del_data as (\n    delete from course_data\n        where id is not distinct from $1 or id is not distinct from $2)\ndelete\nfrom course\nwhere id is not distinct from $3\n\n",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid",
+          "Uuid"
+        ]
+      },
+      "nullable": []
     }
   },
   "30e211c77af70b7a52d9ffde24d7a442e3565e2135840cb8d2646bb7fa048509": {
@@ -1937,35 +2007,13 @@
       ]
     }
   },
-  "36f4421b8115afd8e5d5542a86d1f18863005a872a354eacf8410de7e06d7fab": {
-    "query": "\nselect count(distinct learning_path.id) as \"count!: i64\"\nfrom learning_path\nleft join learning_path_data on (draft_id = learning_path_data.id or (live_id = learning_path_data.id and last_synced_at is not null))\nleft join learning_path_data_resource \"resource\" on learning_path_data.id = resource.learning_path_data_id\nwhere (author_id = $1 or $1 is null)\n    and (learning_path_data.draft_or_live = $2 or $2 is null)\n    and (learning_path_data.privacy_level = any($3) or $3 = array[]::smallint[])\n    and (resource.resource_type_id = any($4) or $4 = array[]::uuid[])\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "count!: i64",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int2",
-          "Int2Array",
-          "UuidArray"
-        ]
-      },
-      "nullable": [
-        null
-      ]
-    }
-  },
-  "39382a838c0d6a98f6e94aeaf3a3eade4eba8ecbffb23445493081754a5c88ee": {
-    "query": "\ninsert into learning_path_data_resource(learning_path_data_id, resource_type_id, display_name, resource_content)\nselect $2, resource_type_id, display_name, resource_content\nfrom learning_path_data_resource\nwhere learning_path_data_id = $1\n        ",
+  "391179cc32e75ffc1449762c744f7b5f1e6eb52eb5f10fd6288f7afc59383811": {
+    "query": "\ndelete\nfrom course_data_resource\nwhere course_data_id = $1\n   or course_data_id = $2\n    and id = $3\n        ",
     "describe": {
       "columns": [],
       "parameters": {
         "Left": [
+          "Uuid",
           "Uuid",
           "Uuid"
         ]
@@ -2120,53 +2168,8 @@
       "nullable": []
     }
   },
-  "3f7ad7f5eb03139f9584aa6928a1b805b4f8908a1df023a12a7cf8cba3d56d26": {
-    "query": "delete from session where token = $1",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Text"
-        ]
-      },
-      "nullable": []
-    }
-  },
-  "3f99e454492126b25c9e34a7b0fb9e88046940524ae6ce1a4f00e79de6d3f2f3": {
-    "query": "\nselect display_name         as \"display_name!\",\n       resource_type_id     as \"resource_type_id!: ResourceTypeId\",\n       resource_content    as \"resource_content!\"\nfrom learning_path_data_resource \"jdar\"\nwhere learning_path_data_id = $1\n  and jdar.id = $2\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "display_name!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 1,
-          "name": "resource_type_id!: ResourceTypeId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 2,
-          "name": "resource_content!",
-          "type_info": "Jsonb"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false
-      ]
-    }
-  },
-  "4165eeb4cc05e9c4ab1779498a40aa0092b0c0c98d427d970e89153365208e5b": {
-    "query": "\nselect  id,\n        display_name                                       as \"display_name!\",\n        updated_at,\n        privacy_level                                      as \"privacy_level!: PrivacyLevel\",\n        language                                           as \"language!\",           \n        description                                         as \"description!\",\n        translated_description                              as \"translated_description!: Json<HashMap<String, String>>\",\n        other_keywords                             as \"other_keywords!\",\n        translated_keywords                        as \"translated_keywords!\",\n        array(select row (category_id)\n            from learning_path_data_category\n            where learning_path_data_id = learning_path_data.id)     as \"categories!: Vec<(CategoryId,)>\",\n        array(select row (affiliation_id)\n            from learning_path_data_affiliation\n            where learning_path_data_id = learning_path_data.id)     as \"affiliations!: Vec<(AffiliationId,)>\",\n        array(select row (age_range_id)\n            from learning_path_data_age_range\n            where learning_path_data_id = learning_path_data.id)     as \"age_ranges!: Vec<(AgeRangeId,)>\",\n        array(\n            select row (jdar.id, jdar.display_name, resource_type_id, resource_content)\n            from learning_path_data_resource \"jdar\"\n            where jdar.learning_path_data_id = learning_path_data.id\n        )                                                    as \"additional_resource!: Vec<(AddId, String, TypeId, Value)>\",\n        array(\n            select row(jig_id)\n            from learning_path_data_jig\n            where learning_path_data_jig.learning_path_data_id = learning_path_data.id\n        )                                                     as \"items!: Vec<JigId>\"\nfrom learning_path_data\n         inner join unnest($1::uuid[])\n    with ordinality t(id, ord) using (id)\n",
+  "3e4fa4031473dce58b72ec7f87e19bae79148ab2a614f091c4c3ba0095e908f0": {
+    "query": "\nselect  id,\n        display_name                                       as \"display_name!\",\n        updated_at,\n        privacy_level                                      as \"privacy_level!: PrivacyLevel\",\n        language                                           as \"language!\",           \n        description                                         as \"description!\",\n        translated_description                              as \"translated_description!: Json<HashMap<String, String>>\",\n        other_keywords                             as \"other_keywords!\",\n        translated_keywords                        as \"translated_keywords!\",\n        array(select row (category_id)\n            from course_data_category\n            where course_data_id = course_data.id)     as \"categories!: Vec<(CategoryId,)>\",\n        array(select row (affiliation_id)\n            from course_data_affiliation\n            where course_data_id = course_data.id)     as \"affiliations!: Vec<(AffiliationId,)>\",\n        array(select row (age_range_id)\n            from course_data_age_range\n            where course_data_id = course_data.id)     as \"age_ranges!: Vec<(AgeRangeId,)>\",\n        array(\n            select row (jdar.id, jdar.display_name, resource_type_id, resource_content)\n            from course_data_resource \"jdar\"\n            where jdar.course_data_id = course_data.id\n        )                                                    as \"additional_resource!: Vec<(AddId, String, TypeId, Value)>\",\n        array(\n            select row(jig_id)\n            from course_data_jig\n            where course_data_jig.course_data_id = course_data.id\n        )                                                     as \"items!: Vec<JigId>\"\nfrom course_data\n         inner join unnest($1::uuid[])\n    with ordinality t(id, ord) using (id)\n",
     "describe": {
       "columns": [
         {
@@ -2261,6 +2264,18 @@
         true,
         true
       ]
+    }
+  },
+  "3f7ad7f5eb03139f9584aa6928a1b805b4f8908a1df023a12a7cf8cba3d56d26": {
+    "query": "delete from session where token = $1",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": []
     }
   },
   "41d611eeb98a3c32644ff2440ecdb979eefaa5e86a155d4c2e57aabb42415fea": {
@@ -2504,8 +2519,29 @@
       ]
     }
   },
-  "4b3d65dbc97c5a934734e8aae61b33c21e7dd9e4057e35546c0779db67389104": {
-    "query": "\nselect learning_path.id,\n       display_name                                                                                                 as \"name\",\n       language                                                                                                     as \"language!\",\n       description                                                                                                  as \"description!\",\n       translated_description                                                                                       as \"translated_description!: Json<HashMap<String, String>>\",\n       array((select affiliation_id\n              from learning_path_data_affiliation\n              where learning_path_data_id = learning_path_data.id))                                                                     as \"affiliations!\",\n       array((select affiliation.display_name\n              from affiliation\n                       inner join learning_path_data_affiliation on affiliation.id = learning_path_data_affiliation.affiliation_id\n              where learning_path_data_affiliation.learning_path_data_id = learning_path_data.id))                                                as \"affiliation_names!\",\n        array((select resource_type_id\n                from learning_path_data_resource\n                where learning_path_data_id = learning_path_data.id))                                                                     as \"resource_types!\",\n        array((select resource_type.display_name\n              from resource_type\n                        inner join learning_path_data_resource on resource_type.id = learning_path_data_resource.resource_type_id\n             where learning_path_data_resource.learning_path_data_id = learning_path_data.id))                                         as \"resource_type_names!\",\n       array((select age_range_id\n              from learning_path_data_age_range\n              where learning_path_data_id = learning_path_data.id))                                                                     as \"age_ranges!\",\n       array((select age_range.display_name\n              from age_range\n                       inner join learning_path_data_age_range on age_range.id = learning_path_data_age_range.age_range_id\n              where learning_path_data_age_range.learning_path_data_id = learning_path_data.id))                                                  as \"age_range_names!\",\n       array((select category_id\n              from learning_path_data_category\n              where learning_path_data_id = learning_path_data.id))                                                                     as \"categories!\",\n       array((select name\n              from category\n                       inner join learning_path_data_category on category.id = learning_path_data_category.category_id\n              where learning_path_data_category.learning_path_data_id = learning_path_data.id))                                                   as \"category_names!\",\n        array(\n           (select jig_id\n            from learning_path_data_jig\n            where learning_path_data_jig.learning_path_data_id = learning_path_data.id)\n       )                                                                                                            as \"items!\",\n       privacy_level                                                                                                as \"privacy_level!: PrivacyLevel\",\n       author_id                                                                                                    as \"author_id\",\n       other_keywords                                                                                               as \"other_keywords!\",\n       translated_keywords                                                                                          as \"translated_keywords!\",\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = learning_path.author_id)                                                       as \"author_name\",\n        likes                                                                                                       as \"likes!\",\n        plays                                                                                                       as \"plays!\",\n        published_at                                                                                                as \"published_at\"\nfrom learning_path\n         inner join learning_path_data on live_id = learning_path_data.id\nwhere (last_synced_at is null\n   or (updated_at is not null and last_synced_at < updated_at))\nlimit 100 for no key update skip locked;\n     ",
+  "4b59765bf5f97002c95e723a2d831e75df863ce1f73be3c0cc7714aee57b54a7": {
+    "query": "\nselect exists(\n        select 1\n        from user_font\n        where user_id = $1\n            and index = $2\n        for update\n) as \"exists!\"\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "exists!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
+  "4c91639d4d1026a89ababa2998909ef032a349848e0a1899ebb42e9a4c0dc30e": {
+    "query": "\nselect course.id,\n       display_name                                                                                                 as \"name\",\n       language                                                                                                     as \"language!\",\n       description                                                                                                  as \"description!\",\n       translated_description                                                                                       as \"translated_description!: Json<HashMap<String, String>>\",\n       array((select affiliation_id\n              from course_data_affiliation\n              where course_data_id = course_data.id))                                                                     as \"affiliations!\",\n       array((select affiliation.display_name\n              from affiliation\n                       inner join course_data_affiliation on affiliation.id = course_data_affiliation.affiliation_id\n              where course_data_affiliation.course_data_id = course_data.id))                                                as \"affiliation_names!\",\n        array((select resource_type_id\n                from course_data_resource\n                where course_data_id = course_data.id))                                                                     as \"resource_types!\",\n        array((select resource_type.display_name\n              from resource_type\n                        inner join course_data_resource on resource_type.id = course_data_resource.resource_type_id\n             where course_data_resource.course_data_id = course_data.id))                                         as \"resource_type_names!\",\n       array((select age_range_id\n              from course_data_age_range\n              where course_data_id = course_data.id))                                                                     as \"age_ranges!\",\n       array((select age_range.display_name\n              from age_range\n                       inner join course_data_age_range on age_range.id = course_data_age_range.age_range_id\n              where course_data_age_range.course_data_id = course_data.id))                                                  as \"age_range_names!\",\n       array((select category_id\n              from course_data_category\n              where course_data_id = course_data.id))                                                                     as \"categories!\",\n       array((select name\n              from category\n                       inner join course_data_category on category.id = course_data_category.category_id\n              where course_data_category.course_data_id = course_data.id))                                                   as \"category_names!\",\n        array(\n           (select jig_id\n            from course_data_jig\n            where course_data_jig.course_data_id = course_data.id)\n       )                                                                                                            as \"items!\",\n       privacy_level                                                                                                as \"privacy_level!: PrivacyLevel\",\n       author_id                                                                                                    as \"author_id\",\n       other_keywords                                                                                               as \"other_keywords!\",\n       translated_keywords                                                                                          as \"translated_keywords!\",\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = course.author_id)                                                       as \"author_name\",\n        likes                                                                                                       as \"likes!\",\n        plays                                                                                                       as \"plays!\",\n        published_at                                                                                                as \"published_at\"\nfrom course\n         inner join course_data on live_id = course_data.id\nwhere (last_synced_at is null\n   or (updated_at is not null and last_synced_at < updated_at))\nlimit 100 for no key update skip locked;\n     ",
     "describe": {
       "columns": [
         {
@@ -2645,27 +2681,6 @@
         false,
         false,
         true
-      ]
-    }
-  },
-  "4b59765bf5f97002c95e723a2d831e75df863ce1f73be3c0cc7714aee57b54a7": {
-    "query": "\nselect exists(\n        select 1\n        from user_font\n        where user_id = $1\n            and index = $2\n        for update\n) as \"exists!\"\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "exists!",
-          "type_info": "Bool"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int2"
-        ]
-      },
-      "nullable": [
-        null
       ]
     }
   },
@@ -2853,6 +2868,19 @@
       ]
     }
   },
+  "4dcbd40d11584afd1488f437343dc9bdc58897c7e5c1f05dd4be25db788b5e72": {
+    "query": "\ninsert into course_data_age_range(course_data_id, age_range_id)\nselect $2, age_range_id\nfrom course_data_age_range\nwhere course_data_id = $1\n        ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "4fb49fe4ad3204755e0a09d701e36d421c6a6696509bd37c238b1a835e022d7b": {
     "query": "\ninsert into jig_like(jig_id, user_id)\nvalues ($1, $2)\n            ",
     "describe": {
@@ -2988,33 +3016,6 @@
       "nullable": []
     }
   },
-  "57bb58f2addcf4c796fc02c319f95e3be425fc0f8283d48b20ea07ca7f20b638": {
-    "query": "\nwith del_data as (\n    delete from learning_path_data\n        where id is not distinct from $1 or id is not distinct from $2)\ndelete\nfrom learning_path\nwhere id is not distinct from $3\n\n",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid",
-          "Uuid"
-        ]
-      },
-      "nullable": []
-    }
-  },
-  "5809ec5425984b8ef2f627762d775f841bf1d46c9c5a0d63c9817190005faf9f": {
-    "query": "update learning_path set live_id = $1, published_at = now() where id = $2",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid"
-        ]
-      },
-      "nullable": []
-    }
-  },
   "5842389dd9a03ba291f04a518e3eccc249eb3664c1ecd12b294de7a81d132a59": {
     "query": "delete from user_audio_library where id = $1",
     "describe": {
@@ -3061,6 +3062,28 @@
         ]
       },
       "nullable": []
+    }
+  },
+  "5a313ec777ef83ffab443c1a2da405969ff1cc04c9252b62df0da4ca22442364": {
+    "query": "insert into course (creator_id, author_id, live_id, draft_id) values ($1, $1, $2, $3) returning id",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid",
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false
+      ]
     }
   },
   "5abe0dafa155f68985ccfc54f6baae31e6bb83c17f018e34c90a6b22cf62a303": {
@@ -3374,19 +3397,6 @@
       "nullable": []
     }
   },
-  "5d8f3974354967869368598763151d147729fb27d049f14850bef5cec7842562": {
-    "query": "\nupdate learning_path_data_resource\nset resource_type_id = coalesce($2, resource_type_id)\nwhere id = $1 and $2 is distinct from resource_type_id\n            ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid"
-        ]
-      },
-      "nullable": []
-    }
-  },
   "5daa06279831770307bdc0bbf7ecfad3ba4338634f2b76f518b0d3a93bdbc993": {
     "query": "\nupdate image_metadata\nset description = $2,\n    translated_description = '{}',\n    updated_at = now()\nwhere id = $1 and $2 is distinct from description",
     "describe": {
@@ -3454,26 +3464,6 @@
         false,
         true,
         null
-      ]
-    }
-  },
-  "5ec41e8bdfcc3afb1e44d64a7943d58c0bf25856a5626efeddd8ca269a3088f1": {
-    "query": "\nselect draft_id from learning_path join learning_path_data on learning_path.draft_id = learning_path_data.id where learning_path.id = $1 for update\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "draft_id",
-          "type_info": "Uuid"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      },
-      "nullable": [
-        false
       ]
     }
   },
@@ -3642,6 +3632,20 @@
       ]
     }
   },
+  "6499d356fcd8a874a788f21f49a6d1dc28499768a0abecfc152fa0e506965e0e": {
+    "query": "\nupdate course_data\nset display_name     = coalesce($2, display_name),\n    language         = coalesce($3, language),\n    updated_at = now()\nwhere id = $1\n  and (($2::text is not null and $2 is distinct from display_name) or\n       ($3::text is not null and $3 is distinct from language))\n",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "64cfdb8662f781313ee5765279e6d4b9a03cc12c3873a00386e94a1eda9e472b": {
     "query": "\nwith delete as (\n        delete from user_font\n    where user_id = $1 and index = $2\n)\nselect 1 as discard\nfrom user_font\nwhere user_id = $1 and index > $2\nfor update\n        ",
     "describe": {
@@ -3686,6 +3690,29 @@
       "nullable": [
         false,
         true
+      ]
+    }
+  },
+  "66c7f2798010ff1fc00b0ec452672d72b7bef299ec172672b47578822c963f0f": {
+    "query": "\ninsert into course_data\n   (display_name, language, description, draft_or_live)\nvalues ($1, $2, $3, $4)\nreturning id\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text",
+          "Text",
+          "Int2"
+        ]
+      },
+      "nullable": [
+        false
       ]
     }
   },
@@ -3838,19 +3865,6 @@
       ]
     }
   },
-  "6b152d916e5d85952101efdc1bc5eefe813ddbe5717c891230cccf217d6dd1c3": {
-    "query": "\nupdate learning_path_data\nset description = $2,\n    updated_at = now()\nwhere id = $1 and $2 is distinct from description",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Text"
-        ]
-      },
-      "nullable": []
-    }
-  },
   "6dcc3e22fd2bb64cec50f447237de2968384af1de326d4b26b8816611f2cc2e5": {
     "query": "select algolia_index_version != $1 as \"outdated!\" from settings",
     "describe": {
@@ -3916,30 +3930,6 @@
       ]
     }
   },
-  "70bc01df773bc3310f26520197e37ee13c656e13730151b9f280d4a27936ff15": {
-    "query": "\nselect learning_path_data.id,\n       description                                                                                    \nfrom learning_path_data\ninner join learning_path on live_id = learning_path_data.id\nwhere description <> '' \n      and translated_description = '{}'\n      and published_at is not null\norder by coalesce(updated_at, created_at) desc\nlimit 50 for no key update skip locked;\n ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "description",
-          "type_info": "Text"
-        }
-      ],
-      "parameters": {
-        "Left": []
-      },
-      "nullable": [
-        false,
-        false
-      ]
-    }
-  },
   "72b024e92b7f83b7e9fbb725e9955b62d22c676d62a8bbe2ce46be9cb163a991": {
     "query": "update image_upload set uploaded_at = now(), processing_result = null where image_id = $1",
     "describe": {
@@ -3970,6 +3960,29 @@
       ]
     }
   },
+  "72e5bef48e9d7cd559375819fe7571ce8abe96f315491482ae4f89b0a0722d25": {
+    "query": "\ninsert into course_data_resource (course_data_id, resource_type_id, resource_content, display_name)\nvalues ((select draft_id from course where id = $1), $2, $3, $4)\nreturning id as \"id!: AdditionalResourceId\"\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id!: AdditionalResourceId",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid",
+          "Jsonb",
+          "Text"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
   "7325c7ed63eb3cf5405a37c590c086cb0f1c457f27f6b53eacd26bb6dac849ec": {
     "query": "insert into user_image_upload (image_id) values ($1)",
     "describe": {
@@ -3977,19 +3990,6 @@
       "parameters": {
         "Left": [
           "Uuid"
-        ]
-      },
-      "nullable": []
-    }
-  },
-  "7354648317db201e3a9613ea81eb99f4bde2bb0174e986685410736a38e3fef7": {
-    "query": "\nupdate learning_path_data\nset draft_or_live = $2\nwhere id = $1\n            ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int2"
         ]
       },
       "nullable": []
@@ -4043,19 +4043,6 @@
       "nullable": [
         false
       ]
-    }
-  },
-  "74c6d0eed7fb5101276b5b17bc0d0e46b6439fb6109f2e7f687fe2fbced76bd2": {
-    "query": "\ninsert into learning_path_data_affiliation(learning_path_data_id, affiliation_id)\nselect $2, affiliation_id\nfrom learning_path_data_affiliation\nwhere learning_path_data_id = $1\n        ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid"
-        ]
-      },
-      "nullable": []
     }
   },
   "753945ec260e2138745530fe1234766c02d7ac7841c1729648a7202e8680b4d0": {
@@ -4114,27 +4101,6 @@
       ]
     }
   },
-  "75cb8f3aa428da38db8ec21afc7c23bd6267352908f63964f12e83a83b32d07e": {
-    "query": "\nselect exists(select 1 from learning_path_data_resource \"jdar\" where learning_path_data_id = $1\n    and jdar.id = $2) as \"exists!\"\n    ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "exists!",
-          "type_info": "Bool"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid"
-        ]
-      },
-      "nullable": [
-        null
-      ]
-    }
-  },
   "75e02a67b94a983658f9fd56de48e3eb99738391c236ba6cbba1e1d6b42ad4fb": {
     "query": "\nselect count(distinct jig_data.id) as \"count!: i64\"\nfrom jig_data\nleft join jig on (draft_id = jig_data.id or (live_id = jig_data.id and last_synced_at is not null))\nleft join jig_admin_data \"admin\" on admin.jig_id = jig.id\nleft join jig_data_additional_resource \"resource\" on jig_data.id = resource.jig_data_id\nwhere (author_id = $1 or $1 is null)\n    and (jig_data.draft_or_live = $3 or $3 is null)\n    and (jig_focus = $2 or $2 is null)\n    and (jig_data.privacy_level = any($4) or $4 = array[]::smallint[])\n    and (blocked = $5 or $5 is null)\n    and (resource.resource_type_id = any($6) or $6 = array[]::uuid[])\n",
     "describe": {
@@ -4180,19 +4146,6 @@
       ]
     }
   },
-  "761ae6deb3b23b61db662d2a4456b803626e84719075fbfc92d3fd7f4203a67b": {
-    "query": "\ninsert into learning_path_data_category(learning_path_data_id, category_id)\nselect $2, category_id\nfrom learning_path_data_category\nwhere learning_path_data_id = $1\n        ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid"
-        ]
-      },
-      "nullable": []
-    }
-  },
   "76f5138776b2544741d5bd7a20298dd4309fa398f23fac98b74873899a0f88b3": {
     "query": "\ninsert into image_tag (index, display_name)\nvalues ($1, $2)\nreturning index as \"index: ImageTagIndex\", display_name\n            ",
     "describe": {
@@ -4233,29 +4186,6 @@
       "nullable": []
     }
   },
-  "79c4eb3e61eb239c879d67d4dae655d447a480711e5b55aeee89dc76f4c6f6b5": {
-    "query": "\nselect exists (\n    select 1 from user_scope where user_id = $1 and scope = any($2)\n) or (\n    exists (select 1 from user_scope where user_id = $1 and scope = $3) and\n    not exists (select 1 from learning_path where learning_path.id = $4 and learning_path.author_id <> $1)\n) as \"authed!\"\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "authed!",
-          "type_info": "Bool"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int2Array",
-          "Int2",
-          "Uuid"
-        ]
-      },
-      "nullable": [
-        null
-      ]
-    }
-  },
   "7a3746ec8866c890e58cd4e3cd5a876235b1b9b116d9f5fbb7aab1187000c86f": {
     "query": "insert into web_media_upload (media_id, uploaded_at) values ($1, now())",
     "describe": {
@@ -4263,6 +4193,19 @@
       "parameters": {
         "Left": [
           "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "7bf5a4f544cb4407f7ec650dc97dfd852353d332be1fdd164b560b245f283325": {
+    "query": "\nupdate course_data\nset privacy_level = coalesce($2, privacy_level),\n    updated_at = now()\nwhere id = $1\n  and $2 is distinct from privacy_level\n    ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2"
         ]
       },
       "nullable": []
@@ -4357,6 +4300,33 @@
         false,
         false
       ]
+    }
+  },
+  "8002a58a2dfa494ffa463d70fe62cd1a6ca1a26e64f76cee1ca2a23ac58f802f": {
+    "query": "\nupdate course_data_resource\nset resource_content = $3\nwhere course_data_id = $1 and id = $2\n            ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid",
+          "Jsonb"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "802a16b43ef2c116e61773daabc6aa9b9a98da019cbc79c113ab5c170ee424f1": {
+    "query": "\ninsert into course_data_resource(course_data_id, resource_type_id, display_name, resource_content)\nselect $2, resource_type_id, display_name, resource_content\nfrom course_data_resource\nwhere course_data_id = $1\n        ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      },
+      "nullable": []
     }
   },
   "80e114ec0b610550438d73280239678e249985eb19134c9917b39b34ead292c6": {
@@ -5035,6 +5005,19 @@
       "nullable": []
     }
   },
+  "95e80749cb3ce69fdb52cbc6de1835b2e5770c6a350ad0a8d05541eb17c788aa": {
+    "query": "\ninsert into course_data_category(course_data_id, category_id)\nselect $2, category_id\nfrom course_data_category\nwhere course_data_id = $1\n        ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "974e49b8fa518e9402ae2494147cd25953503851952b4ba97d635a2aeb5bd729": {
     "query": "\nwith delete as (\n        delete from user_color\n    where user_id = $1 and index = $2\n)\nselect 1 as discard\nfrom user_color\nwhere user_id = $1 and index > $2\nfor update\n",
     "describe": {
@@ -5369,24 +5352,17 @@
       ]
     }
   },
-  "a2bdfed68815e8b0576da18e9deea665c52936e738b20c988881d7bc8f1d1d21": {
-    "query": "\ninsert into learning_path_data\n(display_name, created_at, updated_at, language, last_synced_at, description, privacy_level, other_keywords, translated_keywords, translated_description)\nselect display_name,\n       created_at,\n       updated_at,\n       language,\n       last_synced_at,\n       description,\n       privacy_level,\n       other_keywords,\n       translated_keywords,\n       translated_description::jsonb\nfrom learning_path_data\nwhere id = $1\nreturning id\n        ",
+  "a3a0d802e467e00ed92f87b3d017f3b62b32857ab01483fde968ed79f1e7cd80": {
+    "query": "\ninsert into course_data_jig(course_data_id, jig_id)\nselect $2, jig_id\nfrom course_data_jig\nwhere course_data_id = $1\n        ",
     "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id",
-          "type_info": "Uuid"
-        }
-      ],
+      "columns": [],
       "parameters": {
         "Left": [
+          "Uuid",
           "Uuid"
         ]
       },
-      "nullable": [
-        false
-      ]
+      "nullable": []
     }
   },
   "a4970e4a6b9f203bbc4c123f495e95a26a661265f6a10d19287e1342310aaac6": {
@@ -5437,6 +5413,19 @@
         false,
         false
       ]
+    }
+  },
+  "a5b950a69c6f5d240bd48db3550afa9ae783df37c733ba0922e153eccf3c53c4": {
+    "query": "update course set live_id = $1, published_at = now() where id = $2",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      },
+      "nullable": []
     }
   },
   "a5d7bd2b5b78d82c26f75b70d18ae63fb9e27031e080021e21c05cba75db48c9": {
@@ -5490,6 +5479,29 @@
         ]
       },
       "nullable": []
+    }
+  },
+  "a7f21fe9fd7563bc9d20d4189e693b5f9e4c7fdc0c18a926ea1e6dd9bd1c0c53": {
+    "query": "\nselect count(distinct course_data.id) as \"count!: i64\"\nfrom course_data\nleft join course on (draft_id = course_data.id or (live_id = course_data.id and last_synced_at is not null))\nleft join course_data_resource \"resource\" on course_data.id = resource.course_data_id\nwhere (author_id = $1 or $1 is null)\n    and (course_data.draft_or_live = $2 or $2 is null)\n    and (course_data.privacy_level = any($3) or $3 = array[]::smallint[])\n    and (resource.resource_type_id = any($4) or $4 = array[]::uuid[])\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "count!: i64",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2",
+          "Int2Array",
+          "UuidArray"
+        ]
+      },
+      "nullable": [
+        null
+      ]
     }
   },
   "a85530d1d83a7f3cd3786da68f5b489fbddbf411d735cf114817e4417768520b": {
@@ -5639,19 +5651,6 @@
       ]
     }
   },
-  "aeb92a83a7c9bd4e4e6bd67ebed8e8653f699a6050837fc50a118e0a958a1d8a": {
-    "query": "\ninsert into learning_path_data_age_range(learning_path_data_id, age_range_id)\nselect $2, age_range_id\nfrom learning_path_data_age_range\nwhere learning_path_data_id = $1\n        ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid"
-        ]
-      },
-      "nullable": []
-    }
-  },
   "aec729ae876f9816b6a64f6527c6e8497140391a8bebb7a00fc5418cb07682a8": {
     "query": "\ndelete from image_tag where index = $1\n            ",
     "describe": {
@@ -5695,17 +5694,24 @@
       ]
     }
   },
-  "b1617fe080cb41c7a48d44948a512573d4b5e4dfcf6c36b4a6ebe4041f91131b": {
-    "query": "\nupdate learning_path_data\nset privacy_level = coalesce($2, privacy_level),\n    updated_at = now()\nwhere id = $1\n  and $2 is distinct from privacy_level\n    ",
+  "b16c8686d6dd580d8d45a8ec9174425b692c17ea1a9f0c19958d9f6b871639c3": {
+    "query": "\nselect draft_id from course join course_data on course.draft_id = course_data.id where course.id = $1 for update\n",
     "describe": {
-      "columns": [],
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "draft_id",
+          "type_info": "Uuid"
+        }
+      ],
       "parameters": {
         "Left": [
-          "Uuid",
-          "Int2"
+          "Uuid"
         ]
       },
-      "nullable": []
+      "nullable": [
+        false
+      ]
     }
   },
   "b1a15c616e8f86aa4d7bd37701eb692298a9b55afafa797e6ded14ba650f2bb3": {
@@ -5750,6 +5756,74 @@
         ]
       },
       "nullable": []
+    }
+  },
+  "b24c10572f54596c549634f7e63a46923ea7bf6e96ee95b00ad0200c97e90274": {
+    "query": "\nselect course.id                                       as \"id!: CourseId\",\n       creator_id,\n       author_id                                as \"author_id\",\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = author_id) as \"author_name\",\n       live_id                                  as \"live_id!\",\n       draft_id                                 as \"draft_id!\",\n       published_at,\n       likes                                    as \"likes!\",\n       plays                                    as \"plays!\"\nfrom course\n         inner join unnest($1::uuid[])\n    with ordinality t(id, ord) using (id)\n    ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id!: CourseId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "creator_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 2,
+          "name": "author_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 3,
+          "name": "author_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "live_id!",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 5,
+          "name": "draft_id!",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 6,
+          "name": "published_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 7,
+          "name": "likes!",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 8,
+          "name": "plays!",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "UuidArray"
+        ]
+      },
+      "nullable": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
     }
   },
   "b4338c9f23e8fad86b9bc505f8d366e02ca2c59cb4ac11255ef3d84e68daf79c": {
@@ -5804,6 +5878,18 @@
       ]
     }
   },
+  "b6906cb50f7eea8476c665abc8040a27746c83a515e2dfbfab5017cea6c2aa4b": {
+    "query": "\nupdate course_data\nset last_synced_at = now()\nwhere course_data.id = any (select live_id from course where course.id = any ($1))\n",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "UuidArray"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "b73bc1e83d2008fc5b9cc7e9a6c9a6b67b136c45a41e39a8929b554dc5c98485": {
     "query": "update \"settings\" set algolia_index_version = $1",
     "describe": {
@@ -5811,6 +5897,165 @@
       "parameters": {
         "Left": [
           "Int2"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "b7561fcc6b265e4d46497fd8f24348cdaa237028630ff08a2099bc27bcc345aa": {
+    "query": "\nwith cte as (\n    select array(select jd.id as \"id!\"\n    from course_data \"jd\"\n          left join course on (draft_id = jd.id or (live_id = jd.id and jd.last_synced_at is not null))\n          left join course_data_resource \"resource\" on jd.id = resource.course_data_id\n    where (author_id = $1 or $1 is null)\n        and (jd.draft_or_live = $2 or $2 is null)\n        and (jd.privacy_level = any($3) or $3 = array[]::smallint[])\n        and (resource.resource_type_id = any($4) or $4 = array[]::uuid[])\n    order by coalesce(updated_at, created_at) desc) as id\n),\ncte1 as (\n    select * from unnest((select distinct id from cte)) with ordinality t(id\n   , ord) order by ord\n)\nselect course.id                                                         as \"course_id: CourseId\",\n    privacy_level                                                               as \"privacy_level: PrivacyLevel\",\n    creator_id,\n    author_id,\n    (select given_name || ' '::text || family_name\n     from user_profile\n     where user_profile.user_id = author_id)                                     as \"author_name\",\n    published_at,\n    likes,\n    plays,\n    display_name                                                                  as \"display_name!\",\n    updated_at,\n    language                                                                      as \"language!\",\n    description                                                                   as \"description!\",\n    translated_description                                                        as \"translated_description!: Json<HashMap<String,String>>\",\n    draft_or_live                                                                 as \"draft_or_live!: DraftOrLive\",\n    other_keywords                                                                as \"other_keywords!\",\n    translated_keywords                                                           as \"translated_keywords!\",\n    array(select row (category_id)\n            from course_data_category\n            where course_data_id = course_data.id)     as \"categories!: Vec<(CategoryId,)>\",\n    array(select row (affiliation_id)\n            from course_data_affiliation\n            where course_data_id = course_data.id)     as \"affiliations!: Vec<(AffiliationId,)>\",\n    array(select row (age_range_id)\n            from course_data_age_range\n            where course_data_id = course_data.id)     as \"age_ranges!: Vec<(AgeRangeId,)>\",\n    array(\n                select row (jdar.id, jdar.display_name, resource_type_id, resource_content)\n                from course_data_resource \"jdar\"\n                where jdar.course_data_id = course_data.id\n            )                                               as \"additional_resource!: Vec<(AddId, String, TypeId, Value)>\",\n    array(\n        select row(jig_id)\n        from course_data_jig\n        where course_data_jig.course_data_id = course_data.id\n    )                                                     as \"items!: Vec<JigId>\"\nfrom cte1\nleft join course_data on cte1.id = course_data.id\nleft join course on (course_data.id = course.draft_id or (course_data.id = course.live_id and last_synced_at is not null))\nwhere cte1.ord > (1 * $5 * $6)\nlimit $6\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "course_id: CourseId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "privacy_level: PrivacyLevel",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 2,
+          "name": "creator_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 3,
+          "name": "author_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 4,
+          "name": "author_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 5,
+          "name": "published_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 6,
+          "name": "likes",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 7,
+          "name": "plays",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 8,
+          "name": "display_name!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 9,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 10,
+          "name": "language!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 11,
+          "name": "description!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 12,
+          "name": "translated_description!: Json<HashMap<String,String>>",
+          "type_info": "Jsonb"
+        },
+        {
+          "ordinal": 13,
+          "name": "draft_or_live!: DraftOrLive",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 14,
+          "name": "other_keywords!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 15,
+          "name": "translated_keywords!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 16,
+          "name": "categories!: Vec<(CategoryId,)>",
+          "type_info": "RecordArray"
+        },
+        {
+          "ordinal": 17,
+          "name": "affiliations!: Vec<(AffiliationId,)>",
+          "type_info": "RecordArray"
+        },
+        {
+          "ordinal": 18,
+          "name": "age_ranges!: Vec<(AgeRangeId,)>",
+          "type_info": "RecordArray"
+        },
+        {
+          "ordinal": 19,
+          "name": "additional_resource!: Vec<(AddId, String, TypeId, Value)>",
+          "type_info": "RecordArray"
+        },
+        {
+          "ordinal": 20,
+          "name": "items!: Vec<JigId>",
+          "type_info": "RecordArray"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2",
+          "Int2Array",
+          "UuidArray",
+          "Int4",
+          "Int4"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        true,
+        true,
+        null,
+        true,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    }
+  },
+  "b7d83cfd90ef7d1f18b8f070a52bccb1dc58d040a1e012e776c9cd47704efc27": {
+    "query": "\nupdate course_data\nset other_keywords = $2,\n    translated_keywords = (case when ($3::text is not null) then $3::text else (translated_keywords) end),\n    updated_at = now()\nwhere id = $1 and $2 is distinct from other_keywords",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Text"
         ]
       },
       "nullable": []
@@ -5856,18 +6101,6 @@
       ]
     }
   },
-  "bae7376c6edd6b1751f2c1cb076610dd407c5e99a6da589877da2ff3c02f0693": {
-    "query": "\ndelete from learning_path_data where id = $1\n    ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      },
-      "nullable": []
-    }
-  },
   "bb5a9faaff748e864bcb9fb956585e7577313b263dbf2fe0e146a8c48af134c9": {
     "query": "select user_id as \"id\" from user_profile where (user_id = $1 and $1 is not null) or (username = $2 and $2 is not null)",
     "describe": {
@@ -5906,32 +6139,6 @@
       },
       "nullable": [
         null
-      ]
-    }
-  },
-  "bc4aa4344cc8f4c6bb132af46114f57c49db83e72fbd2018cf6382d11074c61a": {
-    "query": "\nselect draft_id, live_id from learning_path where id = $1\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "draft_id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "live_id",
-          "type_info": "Uuid"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      },
-      "nullable": [
-        false,
-        false
       ]
     }
   },
@@ -5993,6 +6200,19 @@
       ]
     }
   },
+  "c246c68ccde97dbaa17e814a1edee07768d47484d2f99d21ddbae5248117613b": {
+    "query": "\n                            update course_data \n                            set translated_description = $2,\n                                last_synced_at = null\n                            where id = $1\n                            ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Jsonb"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "c2ba8ddd6ad6e28535559d4452b655095914cb90514490dac438fc27b686bde5": {
     "query": "\nupdate jig_data_module\nset\n    index = case when index = $2 then $3 else index + 1 end,\n    updated_at = now()\nwhere jig_data_id = $1 and index between $3 and $2\n",
     "describe": {
@@ -6018,29 +6238,6 @@
         ]
       },
       "nullable": []
-    }
-  },
-  "c4646ae764cf707e9915d9d43efad21b6e155a1fecfb2a19a6630aada7f067c3": {
-    "query": "\nselect count(distinct learning_path_data.id) as \"count!: i64\"\nfrom learning_path_data\nleft join learning_path on (draft_id = learning_path_data.id or (live_id = learning_path_data.id and last_synced_at is not null))\nleft join learning_path_data_resource \"resource\" on learning_path_data.id = resource.learning_path_data_id\nwhere (author_id = $1 or $1 is null)\n    and (learning_path_data.draft_or_live = $2 or $2 is null)\n    and (learning_path_data.privacy_level = any($3) or $3 = array[]::smallint[])\n    and (resource.resource_type_id = any($4) or $4 = array[]::uuid[])\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "count!: i64",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int2",
-          "Int2Array",
-          "UuidArray"
-        ]
-      },
-      "nullable": [
-        null
-      ]
     }
   },
   "c84c613c4d8af5d5228646ffb25c2cd2825699626313634127fc09341ed715ac": {
@@ -6121,20 +6318,6 @@
       "nullable": [
         false
       ]
-    }
-  },
-  "c9016230b51ad45093dcdedbaf82a5385c7851f01d150e0ca881bb40ab2e4b07": {
-    "query": "\nupdate learning_path_data_resource\nset resource_content = $3\nwhere learning_path_data_id = $1 and id = $2\n            ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid",
-          "Jsonb"
-        ]
-      },
-      "nullable": []
     }
   },
   "c9871e12739d5ae1acd8e3026e00ed927a54f717d5e5cd12f78456b99a7aa23b": {
@@ -6623,29 +6806,6 @@
       "nullable": []
     }
   },
-  "d7cf665757d7f1888bc233f1b3195f6d16ba5957844fafc2e00665cbfa86ecc8": {
-    "query": "\ninsert into learning_path_data\n   (display_name, language, description, draft_or_live)\nvalues ($1, $2, $3, $4)\nreturning id\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id",
-          "type_info": "Uuid"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Text",
-          "Text",
-          "Int2"
-        ]
-      },
-      "nullable": [
-        false
-      ]
-    }
-  },
   "d8032d2eb89764dbd098df12c400d66030d32259400b2f539d60658605ca7648": {
     "query": "\nselect count(*) as \"count!: i64\" \nfrom image_metadata\n        inner join image_upload on image_id = id \nwhere processing_result is not distinct from true \n    and (publish_at < now() is not distinct from $1 or $1 is null)\n    and (kind is not distinct from $2 or $2 is null)",
     "describe": {
@@ -6743,18 +6903,6 @@
       ]
     }
   },
-  "dc8da44975f6204d9fb85b7780e3bf4f214020c2c8a61c79b5cb5f7fa60ba325": {
-    "query": "\nupdate learning_path_data\nset last_synced_at = now()\nwhere learning_path_data.id = any (select live_id from learning_path where learning_path.id = any ($1))\n",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "UuidArray"
-        ]
-      },
-      "nullable": []
-    }
-  },
   "dce1ba23b612bd8fa029a70a2e43b93f5158cbf0f24377b079e70d5d6c29a97c": {
     "query": "\nupdate user_profile\nset organization = $2\nwhere user_id = $1 and organization is distinct from $2",
     "describe": {
@@ -6763,6 +6911,19 @@
         "Left": [
           "Uuid",
           "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "dd600a259ed3681915cc195311f529237e69284d80b248b34483c9fece560cbc": {
+    "query": "\nupdate course_data\nset draft_or_live = $2\nwhere id = $1\n            ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2"
         ]
       },
       "nullable": []
@@ -6789,6 +6950,26 @@
       ]
     }
   },
+  "dd87acace48d19371be436174408184426e2b4a84ff01fb0465ea5298675fa7f": {
+    "query": "\ninsert into course_data\n(display_name, created_at, updated_at, language, last_synced_at, description, privacy_level, other_keywords, translated_keywords, translated_description)\nselect display_name,\n       created_at,\n       updated_at,\n       language,\n       last_synced_at,\n       description,\n       privacy_level,\n       other_keywords,\n       translated_keywords,\n       translated_description::jsonb\nfrom course_data\nwhere id = $1\nreturning id\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
   "dda8d8d2bc07da17016ae44616deda2fe94bf8a0db546e60b07200c95caa40f1": {
     "query": "select uploaded_at from user_image_upload where image_id = $1 for update",
     "describe": {
@@ -6806,6 +6987,50 @@
       },
       "nullable": [
         true
+      ]
+    }
+  },
+  "df44d75bf1f59bebe2f20e0fbe5035c73a74b7daa14b4c842175485158d125a4": {
+    "query": "\nselect exists (\n    select 1 from user_scope where user_id = $1 and scope = any($2)\n) or (\n    exists (select 1 from user_scope where user_id = $1 and scope = $3) and\n    not exists (select 1 from course where course.id = $4 and course.author_id <> $1)\n) as \"authed!\"\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "authed!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2Array",
+          "Int2",
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
+  "e02fab7a9e662c32aef4e4649249b057b8e160137e3eb6f7ffd21e39d654e466": {
+    "query": "\nselect exists(select 1 from course_data_resource \"jdar\" where course_data_id = $1\n    and jdar.id = $2) as \"exists!\"\n    ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "exists!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        null
       ]
     }
   },
@@ -6986,19 +7211,6 @@
       "nullable": []
     }
   },
-  "e4f6aadbbf1e176bf9bf8bc75aff3cc0f9a7af050b50f243fbfbf26f2bee1a51": {
-    "query": "\n                            update learning_path_data \n                            set translated_description = $2,\n                                last_synced_at = null\n                            where id = $1\n                            ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Jsonb"
-        ]
-      },
-      "nullable": []
-    }
-  },
   "e57b7c587be57d904c82ee82ea48df2b8e02a38dd1a4c1c7fee015385d66d155": {
     "query": "update user_pdf_upload set processed_at = now(), processing_result = true where pdf_id = $1",
     "describe": {
@@ -7084,6 +7296,19 @@
       "nullable": []
     }
   },
+  "ebf961d5777f0009b3717b25f4328a1d4e8230adc40135440a107f570062e9f6": {
+    "query": "\nupdate course_data\nset description = $2,\n    updated_at = now()\nwhere id = $1 and $2 is distinct from description",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "ec0634a118b7b9bbb6e590b8c99335fd5e20ece848cf14310e136f0d1b1d8248": {
     "query": "\nupdate jig_data\nset display_name     = coalesce($2, display_name),\n    language         = coalesce($3, language),\n    theme            = coalesce($4, theme),\n    updated_at = now()\nwhere id = $1\n  and (($2::text is not null and $2 is distinct from display_name) or\n       ($3::text is not null and $3 is distinct from language) or\n       ($4::smallint is not null and $4 is distinct from theme))\n",
     "describe": {
@@ -7112,6 +7337,18 @@
       "nullable": []
     }
   },
+  "ed07a0bf0907ac9428772e386480174ad64a167e00993a53743e1c3b9b33ce08": {
+    "query": "\ndelete from course_data where id = $1\n    ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "ed33c777a7166f4c7db4075c12401c927fb2abd75eb4cd1c30be257e1844ed0d": {
     "query": "\nupdate jig_data\nset direction = $2,\n    display_score = $3,\n    track_assessments = $4,\n    drag_assist = $5,\n    updated_at = now()\nwhere id = $1 and\n    (($2 is distinct from direction) or\n     ($3 is distinct from display_score) or\n     ($4 is distinct from track_assessments) or\n     ($5 is distinct from drag_assist))\n            ",
     "describe": {
@@ -7123,19 +7360,6 @@
           "Bool",
           "Bool",
           "Bool"
-        ]
-      },
-      "nullable": []
-    }
-  },
-  "eda450156608c1f910f8e4424f4e3d54f58a7b1fa4ca61b160b134af5830ab23": {
-    "query": "\nupdate learning_path_data_resource\nset display_name = coalesce($2, display_name)\nwhere id = $1 and $2 is distinct from display_name\n            ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Text"
         ]
       },
       "nullable": []
@@ -7159,219 +7383,6 @@
       },
       "nullable": [
         null
-      ]
-    }
-  },
-  "f0fb12aa8abb09d8791e331a89fd1e9b381d2978144bad29b7f1e86c7a6098c9": {
-    "query": "\nwith cte as (\n    select array(select jd.id as \"id!\"\n    from learning_path_data \"jd\"\n          left join learning_path on (draft_id = jd.id or (live_id = jd.id and jd.last_synced_at is not null))\n          left join learning_path_data_resource \"resource\" on jd.id = resource.learning_path_data_id\n    where (author_id = $1 or $1 is null)\n        and (jd.draft_or_live = $2 or $2 is null)\n        and (jd.privacy_level = any($3) or $3 = array[]::smallint[])\n        and (resource.resource_type_id = any($4) or $4 = array[]::uuid[])\n    order by coalesce(updated_at, created_at) desc) as id\n),\ncte1 as (\n    select * from unnest((select distinct id from cte)) with ordinality t(id\n   , ord) order by ord\n)\nselect learning_path.id                                                         as \"learning_path_id: LearningPathId\",\n    privacy_level                                                               as \"privacy_level: PrivacyLevel\",\n    creator_id,\n    author_id,\n    (select given_name || ' '::text || family_name\n     from user_profile\n     where user_profile.user_id = author_id)                                     as \"author_name\",\n    published_at,\n    likes,\n    plays,\n    display_name                                                                  as \"display_name!\",\n    updated_at,\n    language                                                                      as \"language!\",\n    description                                                                   as \"description!\",\n    translated_description                                                        as \"translated_description!: Json<HashMap<String,String>>\",\n    draft_or_live                                                                 as \"draft_or_live!: DraftOrLive\",\n    other_keywords                                                                as \"other_keywords!\",\n    translated_keywords                                                           as \"translated_keywords!\",\n    array(select row (category_id)\n            from learning_path_data_category\n            where learning_path_data_id = learning_path_data.id)     as \"categories!: Vec<(CategoryId,)>\",\n    array(select row (affiliation_id)\n            from learning_path_data_affiliation\n            where learning_path_data_id = learning_path_data.id)     as \"affiliations!: Vec<(AffiliationId,)>\",\n    array(select row (age_range_id)\n            from learning_path_data_age_range\n            where learning_path_data_id = learning_path_data.id)     as \"age_ranges!: Vec<(AgeRangeId,)>\",\n    array(\n                select row (jdar.id, jdar.display_name, resource_type_id, resource_content)\n                from learning_path_data_resource \"jdar\"\n                where jdar.learning_path_data_id = learning_path_data.id\n            )                                               as \"additional_resource!: Vec<(AddId, String, TypeId, Value)>\",\n    array(\n        select row(jig_id)\n        from learning_path_data_jig\n        where learning_path_data_jig.learning_path_data_id = learning_path_data.id\n    )                                                     as \"items!: Vec<JigId>\"\nfrom cte1\nleft join learning_path_data on cte1.id = learning_path_data.id\nleft join learning_path on (learning_path_data.id = learning_path.draft_id or (learning_path_data.id = learning_path.live_id and last_synced_at is not null))\nwhere cte1.ord > (1 * $5 * $6)\nlimit $6\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "learning_path_id: LearningPathId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "privacy_level: PrivacyLevel",
-          "type_info": "Int2"
-        },
-        {
-          "ordinal": 2,
-          "name": "creator_id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 3,
-          "name": "author_id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 4,
-          "name": "author_name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 5,
-          "name": "published_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 6,
-          "name": "likes",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 7,
-          "name": "plays",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 8,
-          "name": "display_name!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 9,
-          "name": "updated_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 10,
-          "name": "language!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 11,
-          "name": "description!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 12,
-          "name": "translated_description!: Json<HashMap<String,String>>",
-          "type_info": "Jsonb"
-        },
-        {
-          "ordinal": 13,
-          "name": "draft_or_live!: DraftOrLive",
-          "type_info": "Int2"
-        },
-        {
-          "ordinal": 14,
-          "name": "other_keywords!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 15,
-          "name": "translated_keywords!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 16,
-          "name": "categories!: Vec<(CategoryId,)>",
-          "type_info": "RecordArray"
-        },
-        {
-          "ordinal": 17,
-          "name": "affiliations!: Vec<(AffiliationId,)>",
-          "type_info": "RecordArray"
-        },
-        {
-          "ordinal": 18,
-          "name": "age_ranges!: Vec<(AgeRangeId,)>",
-          "type_info": "RecordArray"
-        },
-        {
-          "ordinal": 19,
-          "name": "additional_resource!: Vec<(AddId, String, TypeId, Value)>",
-          "type_info": "RecordArray"
-        },
-        {
-          "ordinal": 20,
-          "name": "items!: Vec<JigId>",
-          "type_info": "RecordArray"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int2",
-          "Int2Array",
-          "UuidArray",
-          "Int4",
-          "Int4"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        true,
-        true,
-        null,
-        true,
-        false,
-        false,
-        false,
-        true,
-        false,
-        false,
-        false,
-        true,
-        false,
-        false,
-        null,
-        null,
-        null,
-        null,
-        null
-      ]
-    }
-  },
-  "f157a0a4901be3efcd56f717438c2bc7b2b40cfc69b7182ba3c0f9fd190296af": {
-    "query": "\nselect learning_path.id                                       as \"id!: LearningPathId\",\n       creator_id,\n       author_id                                as \"author_id\",\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = author_id) as \"author_name\",\n       live_id                                  as \"live_id!\",\n       draft_id                                 as \"draft_id!\",\n       published_at,\n       likes                                    as \"likes!\",\n       plays                                    as \"plays!\"\nfrom learning_path\n         inner join unnest($1::uuid[])\n    with ordinality t(id, ord) using (id)\n    ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id!: LearningPathId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "creator_id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 2,
-          "name": "author_id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 3,
-          "name": "author_name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 4,
-          "name": "live_id!",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 5,
-          "name": "draft_id!",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 6,
-          "name": "published_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 7,
-          "name": "likes!",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 8,
-          "name": "plays!",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "UuidArray"
-        ]
-      },
-      "nullable": [
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true
       ]
     }
   },
@@ -7444,26 +7455,38 @@
       ]
     }
   },
+  "f64ca413cb24e2061000716eccedd908608e9546bb2970bf9dd078e6a8f6eef2": {
+    "query": "\ninsert into course_data_affiliation(course_data_id, affiliation_id)\nselect $2, affiliation_id\nfrom course_data_affiliation\nwhere course_data_id = $1\n        ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "f65d66fd5c93ed44d622034a55b8db3173b70a1800852d6de4064e60718a2cc5": {
+    "query": "\nupdate course_data_resource\nset display_name = coalesce($2, display_name)\nwhere id = $1 and $2 is distinct from display_name\n            ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "f7803338a676de1c4fad713fa774406743480aea8ceb9a4b6ba8ec80b74f9b3d": {
     "query": "update image_metadata set last_synced_at = null",
     "describe": {
       "columns": [],
       "parameters": {
         "Left": []
-      },
-      "nullable": []
-    }
-  },
-  "f848cf81dae7c1a0c72c4a45e1b097e5296c7e81dfa6cf5ad6363948e411409b": {
-    "query": "\nupdate learning_path_data\nset other_keywords = $2,\n    translated_keywords = (case when ($3::text is not null) then $3::text else (translated_keywords) end),\n    updated_at = now()\nwhere id = $1 and $2 is distinct from other_keywords",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Text",
-          "Text"
-        ]
       },
       "nullable": []
     }
@@ -7655,29 +7678,6 @@
         ]
       },
       "nullable": []
-    }
-  },
-  "ff55b3529583151e6450cd7e4bb27c17a2a9068b8571371698f165edc0c89c74": {
-    "query": "\ninsert into learning_path_data_resource (learning_path_data_id, resource_type_id, resource_content, display_name)\nvalues ((select draft_id from learning_path where id = $1), $2, $3, $4)\nreturning id as \"id!: AdditionalResourceId\"\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id!: AdditionalResourceId",
-          "type_info": "Uuid"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid",
-          "Jsonb",
-          "Text"
-        ]
-      },
-      "nullable": [
-        false
-      ]
     }
   }
 }

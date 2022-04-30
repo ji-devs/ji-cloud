@@ -62,4 +62,4 @@ pub mod locale;
 pub mod pdf;
 
 /// Learning Path endpoints
-pub mod learning_path;
+pub mod course;

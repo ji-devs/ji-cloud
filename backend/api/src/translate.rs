@@ -90,8 +90,8 @@ struct JigTranslateDescriptions {
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
-struct LearningPathTranslateDescriptions {
-    learning_path_data_id: Uuid,
+struct CourseTranslateDescriptions {
+    course_data_id: Uuid,
     description: String,
 }
 
@@ -125,9 +125,9 @@ impl GoogleTranslate {
                     .await
                     .context("update images description translation task errored"),
                 3 => self
-                    .update_learning_path_translations()
+                    .update_course_translations()
                     .await
-                    .context("update learning path description translation task errored"),
+                    .context("update course description translation task errored"),
                 _ => continue,
             };
 
@@ -291,18 +291,18 @@ limit 50 for no key update skip locked;
         Ok(true)
     }
 
-    async fn update_learning_path_translations(&self) -> anyhow::Result<bool> {
-        log::info!("reached update Learning Path description translation");
+    async fn update_course_translations(&self) -> anyhow::Result<bool> {
+        log::info!("reached update Course description translation");
         let mut txn = self.db.begin().await?;
 
         // todo: allow for some way to do a partial update (for example, by having a channel for queueing partial updates)
         let requests: Vec<_> = sqlx::query!(
             //language=SQL
             r#"
-select learning_path_data.id,
+select course_data.id,
        description                                                                                    
-from learning_path_data
-inner join learning_path on live_id = learning_path_data.id
+from course_data
+inner join course on live_id = course_data.id
 where description <> '' 
       and translated_description = '{}'
       and published_at is not null
@@ -311,8 +311,8 @@ limit 50 for no key update skip locked;
  "#
         )
         .fetch(&mut txn)
-        .map_ok(|row| LearningPathTranslateDescriptions {
-            learning_path_data_id: row.id,
+        .map_ok(|row| CourseTranslateDescriptions {
+            course_data_id: row.id,
             description: row.description
         })
         .try_collect()
@@ -323,7 +323,7 @@ limit 50 for no key update skip locked;
         }
 
         log::debug!(
-            "Updating a batch of {} Learning Path description(s)",
+            "Updating a batch of {} Course description(s)",
             requests.len()
         );
 
@@ -335,27 +335,24 @@ limit 50 for no key update skip locked;
                 if let Some(res) = res {
                     sqlx::query!(
                         r#"
-                            update learning_path_data 
+                            update course_data 
                             set translated_description = $2,
                                 last_synced_at = null
                             where id = $1
                             "#,
-                        &t.learning_path_data_id,
+                        &t.course_data_id,
                         json!(res)
                     )
                     .execute(&mut txn)
                     .await?;
                 } else {
-                    log::debug!(
-                        "Empty translation list for learning_path_id: {}",
-                        t.learning_path_data_id
-                    );
+                    log::debug!("Empty translation list for course_id: {}", t.course_data_id);
                     continue;
                 };
             } else {
                 log::debug!(
-                    "Could not translate learning_path_id: {}, string: {}",
-                    t.learning_path_data_id,
+                    "Could not translate course_id: {}, string: {}",
+                    t.course_data_id,
                     t.description
                 );
 
@@ -365,7 +362,7 @@ limit 50 for no key update skip locked;
 
         txn.commit().await?;
 
-        log::info!("completed update Learning Path description translations");
+        log::info!("completed update Course description translations");
 
         Ok(true)
     }
