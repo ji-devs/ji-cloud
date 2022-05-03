@@ -39,6 +39,7 @@ export class _ extends LitElement {
                     background-color: var(--white);
                     display: grid;
                     grid-template-rows: 1fr 40px;
+                    cursor: grab;
                 }
                 .bottom {
                     display: flex;
@@ -56,12 +57,13 @@ export class _ extends LitElement {
                     text-align: center;
                     color: var(--dark-gray-6);
                     background-color: var(--light-blue-2);
+                    position: relative;
                 }
                 :host([module="cover"]) .bottom {
                     background-color: var(--light-orange-1);
                 }
                 /* ":host([module])" is to increase the specificity because of previous selector */
-                :host([module]) section:hover .bottom {
+                :host([module]) .top:hover + .bottom {
                     color: white;
                     background-color: var(--dark-blue-5);
                 }
@@ -101,6 +103,12 @@ export class _ extends LitElement {
                     font-size: 24px;
                     font-weight: bold;
                 }
+                ::slotted([slot=extra]) {
+                    display: inline-block;
+                    position: absolute;
+                    right: 0;
+                    margin-right: 12px;
+                }
             `,
         ];
     }
@@ -128,10 +136,14 @@ export class _ extends LitElement {
                     <slot name="stationery"></slot>
                     <slot name="dragged"></slot>
                 </div>
-                <div class="bottom">${STR_MODULE_DISPLAY_NAME[this.module]}</div>
+                <div class="bottom">
+                    ${STR_MODULE_DISPLAY_NAME[this.module]}
+                    <slot name="extra"></slot>
+                </div>
             </section>
             <div class="overlay">
                 <p>${STR_DRAG_ME}</p>
+
                 <img-ui path="entry/jig/arrow-drag-me.svg"></img-ui>
             </div>
         `;
