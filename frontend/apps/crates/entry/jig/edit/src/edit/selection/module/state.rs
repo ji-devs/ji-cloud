@@ -13,6 +13,7 @@ pub struct State {
     pub drag: Mutable<Option<Rc<Drag>>>,
     pub element_hovered: Rc<RefCell<Option<HtmlElement>>>,
     pub hover: Mutable<bool>,
+    pub show_autogen_tooltip: Mutable<bool>,
 }
 
 impl State {
@@ -22,6 +23,7 @@ impl State {
             drag: Mutable::new(None),
             hover: Mutable::new(false),
             element_hovered: Rc::new(RefCell::new(None)),
+            show_autogen_tooltip: Mutable::new(false),
         }
     }
 

@@ -18,11 +18,38 @@ export class _ extends LitElement {
         ];
     }
 
-    @property()
+    @property({ type: String })
     path: string = "";
+
+    @property({ type: String })
+    hoverPath: string | null = null;
 
     @property({ type: Boolean })
     draggable: boolean = true;
+
+    @property({ type: Boolean })
+    private hover: boolean = false;
+
+    connectedCallback() {
+        super.connectedCallback();
+        this.addEventListener("pointerenter", this.onMouseEnter);
+        this.addEventListener("pointerleave", this.onMouseLeave);
+    }
+
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        this.removeEventListener("pointerenter", this.onMouseEnter);
+        this.removeEventListener("pointerleave", this.onMouseLeave);
+    }
+
+    onMouseEnter() {
+        this.hover = true;
+    }
+
+    onMouseLeave() {
+        this.hover = false;
+    }
+
 
     onLoad(evt: Event) {
         const img = evt.currentTarget as HTMLImageElement;
@@ -39,9 +66,9 @@ export class _ extends LitElement {
     }
 
     render() {
-        const { path, draggable } = this;
+        const { path, hoverPath, draggable } = this;
 
-        const src = mediaUi(path);
+        const src = mediaUi(this.hover && hoverPath !== null ? hoverPath : path);
 
         if (sameOrigin(src)) {
             return html`<img .draggable=${draggable} .src="${src}" @load="${this.onLoad}" ></img>`;

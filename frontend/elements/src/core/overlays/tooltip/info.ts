@@ -75,6 +75,9 @@ export class _ extends LitElement {
                     width: 304px;
                     margin: 8px 0 36px 0;
                 }
+                :host([removeMargins]) .body {
+                    margin: inherit;
+                }
                 :host([color="light-orange"]) .body {
                     color: var(--dark-gray-6);
                 }
@@ -172,6 +175,8 @@ export class _ extends LitElement {
     @property({ type: Number })
     arrowNudge: number = 0;
 
+    @property({ type: Boolean, reflect: true })
+    removeMargins: boolean = false;
 
     renderClose() {
         if (!this.closeable) {
