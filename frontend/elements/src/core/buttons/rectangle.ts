@@ -51,7 +51,7 @@ export class _ extends LitElement {
                     --color: var(--light-gray-4);
                 }
                 :host([color="red"]) {
-                    --color: #fd6b71;
+                    --color: var(--main-red);
                 }
                 :host([color="red"]:hover) {
                     --color: #ed6065;

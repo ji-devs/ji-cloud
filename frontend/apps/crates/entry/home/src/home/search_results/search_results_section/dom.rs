@@ -90,11 +90,13 @@ impl SearchResultsSection {
                 Some("image")
             ))
             .apply_if(!jig.jig_data.categories.is_empty(), clone!(state => move |dom| {
+                log::info!("matches {}", matches!(state.focus, JigFocus::Modules));
                 dom.child(html!("home-search-result-details", {
                     .property("slot", "categories")
                     .child(html!("div", {
                         .children(jig.jig_data.categories.iter().map(|category_id| {
                             html!("home-search-result-category", {
+                                .property("filled", matches!(state.focus, JigFocus::Modules))
                                 .property_signal("label", {
                                     state.search_options.category_label_lookup.signal_cloned().map(clone!(category_id => move |category_label_lookup| {
                                         match category_label_lookup.get(&category_id) {
@@ -131,7 +133,7 @@ impl SearchResultsSection {
                     JigFocus::Modules => {
                         dom.child(html!("button-rect", {
                             .property("slot", "play-button")
-                            .property("color", "blue")
+                            .property("color", "red")
                             .property("bold", true)
                             .text("Play")
                             .event({

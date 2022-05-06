@@ -8,7 +8,6 @@ export class _ extends LitElement {
         return [
             css`
                 :host {
-                    border: solid var(--light-blue-3) 1px;
                     box-sizing: border-box;
                     overflow: hidden;
                     display: inline-block;
