@@ -118,13 +118,14 @@ export class _ extends LitElement {
                     grid-column: 1;
                     grid-row: 1;
                     height: 100%;
-                    color: #ffffff;
+                    color: var(--white);
                     display: grid;
                     grid-template-rows: 1fr auto;
                     transform: rotateY(180deg);
                 }
                 :host([kind=jig]) .hover {
-                    background-color: var(--dark-blue-2);
+                    background-color: var(--light-orange-1);
+                    color: var(--dark-gray-5);
                 }
                 :host([kind=resource]) .hover {
                     background-color: #00844c;
@@ -137,7 +138,7 @@ export class _ extends LitElement {
                     scrollbar-width: thin;
                 }
                 :host([kind=jig]) .hover {
-                    scrollbar-color: var(--light-blue-5) transparent;
+                    scrollbar-color: var(--light-gray-2) transparent;
                 }
                 :host([kind=resource]) .hover {
                     scrollbar-color: #3f9c6f transparent;
@@ -163,8 +164,11 @@ export class _ extends LitElement {
                     font-size: 16px;
                     font-weight: 600;
                 }
+                :host([kind=jig]) .hover .title {
+                    color: var(--dark-blue-4);
+                }
                 :host([kind=jig]) .hover home-search-result-details:not(:last-child) {
-                    border-bottom: solid 1px #3c7df0;
+                    border-bottom: solid 1px var(--light-orange-3);
                 }
                 :host([kind=resource]) .hover home-search-result-details:not(:last-child) {
                     border-bottom: solid 1px #3f9c6f;
@@ -174,7 +178,7 @@ export class _ extends LitElement {
                     --closed-height: 36px;
                 }
                 :host([kind=jig]) ::slotted(home-search-result-details) {
-                    border-bottom: solid 1px #3c7df0;
+                    border-bottom: solid 1px var(--light-orange-3);
                 }
                 :host([kind=resource]) ::slotted(home-search-result-details) {
                     border-bottom: solid 1px #3f9c6f;
@@ -186,7 +190,7 @@ export class _ extends LitElement {
                     padding: 10px 0;
                 }
                 .hover ::slotted(a[slot=additional-resources]) {
-                    color: #ffffff;
+                    color: var(--dark-gray-5);
                     text-decoration: none;
                     font-size: 14px;
                     display: flex;
@@ -199,7 +203,7 @@ export class _ extends LitElement {
                 }
                 .hover .published-at {
                     font-size: 14px;
-                    font-weight: 500;
+                    font-weight: 250;
                     margin: 4px 0;
                     display: flex;
                     align-items: center;
@@ -221,7 +225,11 @@ export class _ extends LitElement {
                     display: flex;
                     justify-content: space-between;
                     flex-wrap: wrap;
-                    margin: 6px 0;
+                    padding: 10px 0;
+                    border-bottom: solid 1px #3f9c6f;
+                }
+                :host([kind=jig]) .hover .author-section {
+                    border-bottom: solid 1px var(--light-orange-3);
                 }
                 .hover .author-section .left-side {
                     display: flex;
@@ -346,12 +354,6 @@ export class _ extends LitElement {
                 <div class="hover">
                     <div class="scrollable-content">
                         <h3 class="title">${this.title}</h3>
-                        <p class="published-at">
-                            <img-ui
-                                path="entry/home/search-results/time.svg"
-                            ></img-ui>
-                            ${this.publishedAt}
-                        </p>
                         <div class="collapsibles">
                             <slot name="categories"></slot>
                             <home-search-result-details>
@@ -388,6 +390,14 @@ export class _ extends LitElement {
                                         icon="fa-light fa-chevron-right"
                                     ></fa-icon>
                                 </a> -->
+                            </div>
+                            <div class="published-at">
+                                ${this.kind === "jig"
+                                    ? html`<img-ui path="entry/home/search-results/clock.svg"></img-ui>`
+                                    : html`<img-ui path="entry/home/search-results/time.svg"></img-ui>`
+                                }
+
+                                ${this.publishedAt}
                             </div>
                         </div>
                     </div>

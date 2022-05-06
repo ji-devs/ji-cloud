@@ -8,11 +8,17 @@ export class _ extends LitElement {
                 :host {
                     display: inline-block;
                     box-sizing: border-box;
-                    border: solid 1px #ffffff;
-                    padding: 3px 12px;
+                    padding: 2px 12px;
                     font-size: 14px;
-                    border-radius: 20px;
-                    color: #ffffff;
+                    border-radius: 16px;
+                    border: solid 1px var(--white);
+                    color: var(--white);
+                }
+
+                :host([filled]) {
+                    border: solid 1px var(--light-orange-3);
+                    background-color: var(--white);
+                    color: var(--dark-gray-5);
                 }
             `,
         ];
@@ -20,6 +26,9 @@ export class _ extends LitElement {
 
     @property()
     label: string = "";
+
+    @property({ type: Boolean, reflect: true })
+    filled: boolean = false;
 
     render() {
         return html` ${this.label} `;
