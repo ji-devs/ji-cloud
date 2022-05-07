@@ -1,6 +1,4 @@
-use crate::domain::jig::module::body::{
-    Audio, Background, Image, Instructions, ThemeId, Transform,
-};
+use crate::domain::module::body::{Audio, Background, Image, Instructions, ThemeId, Transform};
 use serde::{Deserialize, Serialize};
 
 /// Default text for `Text`

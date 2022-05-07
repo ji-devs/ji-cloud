@@ -8,6 +8,7 @@ use shared::domain::{
     course::{CourseData, CourseId, CourseResponse},
     jig::JigId,
     meta::{AffiliationId, AgeRangeId, ResourceTypeId as TypeId},
+    module::{LiteModule, ModuleId, ModuleKind},
     user::UserScope,
 };
 use sqlx::{types::Json, PgConnection, PgPool};
@@ -18,6 +19,7 @@ use uuid::Uuid;
 use crate::error;
 
 pub(crate) mod additional_resource;
+pub(crate) mod module;
 
 pub async fn create(
     pool: &PgPool,
@@ -162,6 +164,12 @@ select cte.course_id                                          as "course_id: Cou
        plays,
        other_keywords,
        translated_keywords,
+       (
+            select row(course_data_module.id, kind, is_complete) 
+            from course_data_module                
+            where course_data_id = cte.draft_or_live_id and "index" = 0 
+            order by "index"
+        )                                                   as "cover?: (ModuleId, ModuleKind, bool)",
        array(select row (category_id)
              from course_data_category
              where course_data_id = cte.draft_or_live_id)     as "categories!: Vec<(CategoryId,)>",
@@ -204,6 +212,11 @@ from course_data
             categories: row.categories.into_iter().map(|(it,)| it).collect(),
             last_edited: row.updated_at,
             description: row.description,
+            cover: row.cover.map(|(id, kind, is_complete)| LiteModule {
+                id,
+                kind,
+                is_complete,
+            }),
             age_ranges: row.age_ranges.into_iter().map(|(it,)| it).collect(),
             affiliations: row.affiliations.into_iter().map(|(it,)| it).collect(),
             additional_resources: row
@@ -279,6 +292,12 @@ select  id,
         translated_description                              as "translated_description!: Json<HashMap<String, String>>",
         other_keywords                             as "other_keywords!",
         translated_keywords                        as "translated_keywords!",
+        (
+            select row(course_data_module.id, kind, is_complete) 
+            from course_data_module                
+            where course_data_id = course_data.id and "index" = 0 
+            order by "index"
+        )                                                   as "cover?: (ModuleId, ModuleKind, bool)",
         array(select row (category_id)
             from course_data_category
             where course_data_id = course_data.id)     as "categories!: Vec<(CategoryId,)>",
@@ -322,6 +341,13 @@ from course_data
                 draft_or_live,
                 display_name: course_data_row.display_name,
                 language: course_data_row.language,
+                cover: course_data_row
+                    .cover
+                    .map(|(id, kind, is_complete)| LiteModule {
+                        id,
+                        kind,
+                        is_complete,
+                    }),
                 categories: course_data_row
                     .categories
                     .into_iter()
@@ -419,6 +445,12 @@ select course.id                                                         as "cou
     draft_or_live                                                                 as "draft_or_live!: DraftOrLive",
     other_keywords                                                                as "other_keywords!",
     translated_keywords                                                           as "translated_keywords!",
+    (
+        select row(course_data_module.id, kind, is_complete) 
+        from course_data_module                
+        where course_data_id = course_data.id and "index" = 0 
+        order by "index"
+    )                                                   as "cover?: (ModuleId, ModuleKind, bool)",
     array(select row (category_id)
             from course_data_category
             where course_data_id = course_data.id)     as "categories!: Vec<(CategoryId,)>",
@@ -469,6 +501,13 @@ limit $6
                 draft_or_live: course_data_row.draft_or_live,
                 display_name: course_data_row.display_name,
                 language: course_data_row.language,
+                cover: course_data_row
+                    .cover
+                    .map(|(id, kind, is_complete)| LiteModule {
+                        id,
+                        kind,
+                        is_complete,
+                    }),
                 categories: course_data_row
                     .categories
                     .into_iter()

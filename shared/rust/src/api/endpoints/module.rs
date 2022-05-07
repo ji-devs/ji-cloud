@@ -1,8 +1,9 @@
 use crate::{
     api::Method,
     domain::{
-        jig::module::{
-            ModuleCreateRequest, ModuleDeleteRequest, ModuleId, ModuleResponse, ModuleUpdateRequest,
+        module::{
+            ModuleCreateRequest, ModuleDeleteRequest, ModuleDraftQuery, ModuleId, ModuleLiveQuery,
+            ModuleResponse, ModuleUpdateRequest,
         },
         CreateResponse,
     },
@@ -11,7 +12,7 @@ use crate::{
 
 use super::ApiEndpoint;
 
-/// Get a Module by it's concrete ID or stable ID.
+/// Get a Module by it's concrete ID.
 ///
 /// # Authorization
 /// No authorization required.
@@ -20,27 +21,27 @@ use super::ApiEndpoint;
 /// * [`NotFound`](http::StatusCode::NOT_FOUND) if the module does not exist, or the parent jig doesn't exist.
 pub struct GetLive;
 impl ApiEndpoint for GetLive {
-    type Req = ();
+    type Req = ModuleLiveQuery;
     type Res = ModuleResponse;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/jig/{id}/live/module/{module_id}";
+    const PATH: &'static str = "/v1/module/live/{module_id}";
     const METHOD: Method = Method::Get;
 }
 
-/// Get a Module by it's concrete ID or stable ID.
+/// Get a Module by it's concrete ID.
 ///
 /// # Authorization
-/// * One of `Admin`, `AdminJig`,, or `ManageSelfJig` for owned JIGs
+/// * One of `Admin`, `AdminJig`,, or `ManageSelfJig` for owned JIGs or Courses
 ///
 /// # Errors
 /// * [`Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.
 /// * [`NotFound`](http::StatusCode::NOT_FOUND) if the module does not exist, or the parent jig doesn't exist.
 pub struct GetDraft;
 impl ApiEndpoint for GetDraft {
-    type Req = ();
+    type Req = ModuleDraftQuery;
     type Res = ModuleResponse;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/jig/{id}/draft/module/{module_id}";
+    const PATH: &'static str = "/v1/module/draft/{module_id}";
     const METHOD: Method = Method::Get;
 }
 
@@ -59,7 +60,7 @@ impl ApiEndpoint for Create {
     type Req = ModuleCreateRequest;
     type Res = CreateResponse<ModuleId>;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/jig/{id}/draft/module";
+    const PATH: &'static str = "/v1/module/draft";
     const METHOD: Method = Method::Post;
 }
 
@@ -79,7 +80,7 @@ impl ApiEndpoint for Update {
     type Req = ModuleUpdateRequest;
     type Res = ();
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/jig/{id}/draft/module";
+    const PATH: &'static str = "/v1/module/draft/{module_id}";
     const METHOD: Method = Method::Patch;
 }
 
@@ -99,6 +100,6 @@ impl ApiEndpoint for Delete {
     type Req = ModuleDeleteRequest;
     type Res = ();
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/jig/{id}/draft/module";
+    const PATH: &'static str = "/v1/module/draft/{module_id}";
     const METHOD: Method = Method::Delete;
 }

@@ -4,9 +4,8 @@ pub mod curation;
 pub mod report;
 pub use report::{JigReport, ReportId};
 
-pub mod module;
-// avoid breaking Changes
-pub use module::{LiteModule, Module, ModuleKind};
+pub mod additional_resource;
+pub use additional_resource::{AdditionalResource, AdditionalResourceId};
 
 pub mod player;
 pub use player::{JigPlayerSettings, TextDirection};
@@ -24,8 +23,9 @@ use super::{
     asset::{DraftOrLive, PrivacyLevel, UserOrMe},
     category::CategoryId,
     meta::{AffiliationId, AgeRangeId, ResourceTypeId},
+    module::LiteModule,
 };
-use crate::domain::jig::module::body::ThemeId;
+use crate::domain::module::body::ThemeId;
 
 /// Wrapper type around [`Uuid`], represents the ID of a JIG.
 #[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
@@ -88,6 +88,9 @@ pub struct JigData {
     /// The JIG's name.
     pub display_name: String,
 
+    /// The JIG's cover module.
+    pub cover: Option<LiteModule>,
+
     /// The JIG's remaining modules.
     ///
     /// NOTE: the first module will always exist and will always be of type cover
@@ -119,7 +122,7 @@ pub struct JigData {
     /// Default player settings for this jig.
     pub default_player_settings: JigPlayerSettings,
 
-    /// Theme for this jig, identified by `[ThemeId](jig::module::body::ThemeId)`.
+    /// Theme for this jig, identified by `[ThemeId](module::body::ThemeId)`.
     pub theme: ThemeId,
 
     /// Background audio
@@ -573,7 +576,7 @@ pub struct JigUpdateDraftDataRequest {
     #[serde(default)]
     pub default_player_settings: Option<JigPlayerSettings>,
 
-    /// Theme for this jig, identified by `[ThemeId](jig::module::body::ThemeId)`.
+    /// Theme for this jig, identified by `[ThemeId](module::body::ThemeId)`.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub theme: Option<ThemeId>,

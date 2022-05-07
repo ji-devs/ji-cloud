@@ -1,21 +1,21 @@
-use crate::domain::jig::module::{
-    body::{Body, BodyConvert, BodyExt, ModeExt, StepExt, ThemeId, _groups::design::*},
+use crate::domain::module::{
+    body::{Body, BodyConvert, BodyExt, StepExt, ThemeId, _groups::design::*},
     ModuleKind,
 };
-use serde::{Deserialize, Serialize};
+use serde::{de::IntoDeserializer, Deserialize, Serialize};
 use std::collections::HashSet;
 use std::convert::TryFrom;
 
-/// The body for [`Poster`](crate::domain::jig::module::ModuleKind::Poster) modules.
-#[derive(Default, Clone, Serialize, Deserialize, Debug)]
+/// The body for [`Cover`](crate::domain::module::ModuleKind::Cover) modules.
+#[derive(Clone, Serialize, Deserialize, Debug, Default)]
 pub struct ModuleData {
     /// The content
     pub content: Option<Content>,
 }
 
-impl BodyExt<Mode, Step> for ModuleData {
+impl BodyExt<(), Step> for ModuleData {
     fn as_body(&self) -> Body {
-        Body::Poster(self.clone())
+        Body::Cover(self.clone())
     }
 
     fn is_complete(&self) -> bool {
@@ -23,13 +23,12 @@ impl BodyExt<Mode, Step> for ModuleData {
     }
 
     fn kind() -> ModuleKind {
-        ModuleKind::Poster
+        ModuleKind::Cover
     }
 
-    fn new_with_mode_and_theme(mode: Mode, theme: ThemeId) -> Self {
+    fn new_with_mode_and_theme(_mode: (), theme: ThemeId) -> Self {
         ModuleData {
             content: Some(Content {
-                mode,
                 base: BaseContent {
                     theme,
                     ..Default::default()
@@ -39,12 +38,12 @@ impl BodyExt<Mode, Step> for ModuleData {
         }
     }
 
-    fn mode(&self) -> Option<Mode> {
-        self.content.as_ref().map(|c| c.mode.clone())
+    fn mode(&self) -> Option<()> {
+        None
     }
 
     fn requires_choose_mode(&self) -> bool {
-        self.content.is_none()
+        false
     }
 
     fn set_editor_state_step(&mut self, step: Step) {
@@ -88,20 +87,17 @@ impl TryFrom<Body> for ModuleData {
 
     fn try_from(body: Body) -> Result<Self, Self::Error> {
         match body {
-            Body::Poster(data) => Ok(data),
-            _ => Err("cannot convert body to poster!"),
+            Body::Cover(data) => Ok(data),
+            _ => Err("cannot convert body to cover!"),
         }
     }
 }
 
-/// The body for [`Poster`](crate::domain::jig::module::ModuleKind::Poster) modules.
+/// The body for [`Cover`](crate::domain::module::ModuleKind::Cover) modules.
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]
 pub struct Content {
     /// The editor state
     pub editor_state: EditorState,
-
-    /// The mode
-    pub mode: Mode,
 
     /// The base content for all design modules
     pub base: BaseContent,
@@ -117,79 +113,14 @@ pub struct EditorState {
     pub steps_completed: HashSet<Step>,
 }
 
-#[derive(Clone, Copy, Serialize, Deserialize, Debug, PartialEq, Eq, Hash)]
-/// The mode
-pub enum Mode {
-    /// Printables
-    Printables,
-    /// TalkingPictures
-    TalkingPictures,
-    /// Teach a word
-    TeachAWord,
-    /// Storytime
-    StoryTime,
-    /// Map
-    Map,
-    /// Poster
-    Poster,
-    /// Hear a song
-    HearASong,
-}
-
-impl Default for Mode {
-    fn default() -> Self {
-        Self::Poster
-    }
-}
-
-impl ModeExt for Mode {
-    fn get_list() -> Vec<Self> {
-        vec![
-            Self::Printables,
-            Self::TalkingPictures,
-            Self::TeachAWord,
-            Self::StoryTime,
-            Self::Map,
-            Self::Poster,
-            Self::HearASong,
-        ]
-    }
-
-    fn as_str_id(&self) -> &'static str {
-        match self {
-            Self::Printables => "printables",
-            Self::TalkingPictures => "talking-pictures",
-            Self::TeachAWord => "teach-a-word",
-            Self::StoryTime => "story-time",
-            Self::Map => "map",
-            Self::Poster => "poster",
-            Self::HearASong => "hear-a-song",
-        }
-    }
-
-    fn label(&self) -> &'static str {
-        const STR_PRINTABLES_LABEL: &'static str = "Printables";
-        const STR_TALKING_PICTURES_LABEL: &'static str = "Talking Picture";
-        const STR_TEACH_A_WORD_LABEL: &'static str = "Teach a Word";
-        const STR_STORY_TIME_LABEL: &'static str = "Storytime";
-        const STR_MAP_LABEL: &'static str = "Map";
-        const STR_POSTER_LABEL: &'static str = "Poster";
-        const STR_HEAR_A_SONG_LABEL: &'static str = "Hear a song";
-
-        match self {
-            Self::Printables => STR_PRINTABLES_LABEL,
-            Self::TalkingPictures => STR_TALKING_PICTURES_LABEL,
-            Self::TeachAWord => STR_TEACH_A_WORD_LABEL,
-            Self::StoryTime => STR_STORY_TIME_LABEL,
-            Self::Map => STR_MAP_LABEL,
-            Self::Poster => STR_POSTER_LABEL,
-            Self::HearASong => STR_HEAR_A_SONG_LABEL,
-        }
-    }
-}
+// TODO Currently there exists some Cover modules with an editor_state which has the step set to
+// Four, or Four in the steps_completed field. The workaround here is to tell serde to make use of
+// the custom Deserialize implementation (and Serialize) by using itself as a remote type.
+// See https://serde.rs/remote-derive.html
 
 /// The Steps
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[serde(remote = "Step")]
 pub enum Step {
     /// Step 1
     One,
@@ -197,8 +128,29 @@ pub enum Step {
     Two,
     /// Step 3
     Three,
-    /// Step 4
-    Four,
+}
+
+impl<'de> Deserialize<'de> for Step {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let value = String::deserialize(deserializer)?;
+        if value == "Four" {
+            Ok(Self::Three)
+        } else {
+            Step::deserialize(value.into_deserializer())
+        }
+    }
+}
+
+impl Serialize for Step {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        Step::serialize(&self, serializer)
+    }
 }
 
 impl Default for Step {
@@ -212,8 +164,7 @@ impl StepExt for Step {
         match self {
             Self::One => Some(Self::Two),
             Self::Two => Some(Self::Three),
-            Self::Three => Some(Self::Four),
-            Self::Four => None,
+            Self::Three => None,
         }
     }
 
@@ -222,28 +173,25 @@ impl StepExt for Step {
             Self::One => 1,
             Self::Two => 2,
             Self::Three => 3,
-            Self::Four => 4,
         }
     }
 
     fn label(&self) -> &'static str {
         const STR_DESIGN: &'static str = "Design";
         const STR_CONTENT: &'static str = "Content";
-        const STR_SETTINGS: &'static str = "Settings";
         const STR_PREVIEW: &'static str = "Preview";
 
         match self {
             Self::One => STR_DESIGN,
             Self::Two => STR_CONTENT,
-            Self::Three => STR_SETTINGS,
-            Self::Four => STR_PREVIEW,
+            Self::Three => STR_PREVIEW,
         }
     }
 
     fn get_list() -> Vec<Self> {
-        vec![Self::One, Self::Two, Self::Three, Self::Four]
+        vec![Self::One, Self::Two, Self::Three]
     }
     fn get_preview() -> Self {
-        Self::Four
+        Self::Three
     }
 }

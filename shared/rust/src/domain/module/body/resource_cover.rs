@@ -1,4 +1,4 @@
-use crate::domain::jig::module::{
+use crate::domain::module::{
     body::{Body, BodyConvert, BodyExt, StepExt, ThemeId, _groups::design::*},
     ModuleKind,
 };
@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::convert::TryFrom;
 
-/// The body for [`Cover`](crate::domain::jig::module::ModuleKind::Cover) modules.
+/// The body for [`Cover`](crate::domain::module::ModuleKind::Cover) modules.
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct ModuleData {
     /// The content
@@ -96,7 +96,7 @@ impl TryFrom<Body> for ModuleData {
     }
 }
 
-/// The body for [`Cover`](crate::domain::jig::module::ModuleKind::Cover) modules.
+/// The body for [`Cover`](crate::domain::module::ModuleKind::Cover) modules.
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]
 pub struct Content {
     /// The editor state

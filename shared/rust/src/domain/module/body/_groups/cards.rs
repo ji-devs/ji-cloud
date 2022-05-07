@@ -4,9 +4,7 @@
  */
 use crate::{
     config,
-    domain::jig::module::body::{
-        Audio, Background, Image, Instructions, ModeExt, StepExt, ThemeId,
-    },
+    domain::module::body::{Audio, Background, Image, Instructions, ModeExt, StepExt, ThemeId},
 };
 use serde::{de, Deserialize, Serialize};
 use std::collections::HashSet;

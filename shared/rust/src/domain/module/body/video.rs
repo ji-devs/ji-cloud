@@ -1,21 +1,23 @@
-use crate::domain::jig::module::{
-    body::{Body, BodyConvert, BodyExt, StepExt, ThemeId, _groups::design::*},
+use crate::domain::module::{
+    body::{Body, BodyExt, ModeExt, StepExt, ThemeId, _groups::design::*},
     ModuleKind,
 };
-use serde::{de::IntoDeserializer, Deserialize, Serialize};
+use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::convert::TryFrom;
 
-/// The body for [`Cover`](crate::domain::jig::module::ModuleKind::Cover) modules.
-#[derive(Clone, Serialize, Deserialize, Debug, Default)]
+use super::BodyConvert;
+
+/// The body for [`Video`](crate::domain::module::ModuleKind::Video) modules.
+#[derive(Default, Clone, Serialize, Deserialize, Debug)]
 pub struct ModuleData {
     /// The content
     pub content: Option<Content>,
 }
 
-impl BodyExt<(), Step> for ModuleData {
+impl BodyExt<Mode, Step> for ModuleData {
     fn as_body(&self) -> Body {
-        Body::Cover(self.clone())
+        Body::Video(self.clone())
     }
 
     fn is_complete(&self) -> bool {
@@ -23,12 +25,13 @@ impl BodyExt<(), Step> for ModuleData {
     }
 
     fn kind() -> ModuleKind {
-        ModuleKind::Cover
+        ModuleKind::Video
     }
 
-    fn new_with_mode_and_theme(_mode: (), theme: ThemeId) -> Self {
+    fn new_with_mode_and_theme(mode: Mode, theme: ThemeId) -> Self {
         ModuleData {
             content: Some(Content {
+                mode,
                 base: BaseContent {
                     theme,
                     ..Default::default()
@@ -38,12 +41,12 @@ impl BodyExt<(), Step> for ModuleData {
         }
     }
 
-    fn mode(&self) -> Option<()> {
-        None
+    fn mode(&self) -> Option<Mode> {
+        self.content.as_ref().map(|c| c.mode.clone())
     }
 
     fn requires_choose_mode(&self) -> bool {
-        false
+        self.content.is_none()
     }
 
     fn set_editor_state_step(&mut self, step: Step) {
@@ -87,20 +90,26 @@ impl TryFrom<Body> for ModuleData {
 
     fn try_from(body: Body) -> Result<Self, Self::Error> {
         match body {
-            Body::Cover(data) => Ok(data),
-            _ => Err("cannot convert body to cover!"),
+            Body::Video(data) => Ok(data),
+            _ => Err("cannot convert body to video!"),
         }
     }
 }
 
-/// The body for [`Cover`](crate::domain::jig::module::ModuleKind::Cover) modules.
+/// The body for [`Video`](crate::domain::module::ModuleKind::Video) modules.
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]
 pub struct Content {
     /// The editor state
     pub editor_state: EditorState,
 
+    /// The mode
+    pub mode: Mode,
+
     /// The base content for all design modules
     pub base: BaseContent,
+
+    /// Play settings
+    pub play_settings: PlaySettings,
 }
 
 /// Editor state
@@ -113,14 +122,56 @@ pub struct EditorState {
     pub steps_completed: HashSet<Step>,
 }
 
-// TODO Currently there exists some Cover modules with an editor_state which has the step set to
-// Four, or Four in the steps_completed field. The workaround here is to tell serde to make use of
-// the custom Deserialize implementation (and Serialize) by using itself as a remote type.
-// See https://serde.rs/remote-derive.html
+#[derive(Clone, Copy, Serialize, Deserialize, Debug, PartialEq, Eq, Hash)]
+/// The mode
+pub enum Mode {
+    /// Introduction
+    Introduction,
+    /// Story
+    Story,
+    /// Song
+    Song,
+    /// Howto
+    Howto,
+}
+
+impl Default for Mode {
+    fn default() -> Self {
+        Self::Introduction
+    }
+}
+
+impl ModeExt for Mode {
+    fn get_list() -> Vec<Self> {
+        vec![Self::Introduction, Self::Story, Self::Song, Self::Howto]
+    }
+
+    fn as_str_id(&self) -> &'static str {
+        match self {
+            Self::Introduction => "introduction",
+            Self::Story => "story",
+            Self::Song => "song",
+            Self::Howto => "howto",
+        }
+    }
+
+    fn label(&self) -> &'static str {
+        const STR_INTRODUCTION_LABEL: &'static str = "Introduce Your Topic";
+        const STR_STORY_LABEL: &'static str = "Tell a Story";
+        const STR_SONG_LABEL: &'static str = "Play a Song";
+        const STR_HOWTO_LABEL: &'static str = "How to";
+
+        match self {
+            Self::Introduction => STR_INTRODUCTION_LABEL,
+            Self::Story => STR_STORY_LABEL,
+            Self::Song => STR_SONG_LABEL,
+            Self::Howto => STR_HOWTO_LABEL,
+        }
+    }
+}
 
 /// The Steps
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
-#[serde(remote = "Step")]
 pub enum Step {
     /// Step 1
     One,
@@ -128,29 +179,8 @@ pub enum Step {
     Two,
     /// Step 3
     Three,
-}
-
-impl<'de> Deserialize<'de> for Step {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: serde::Deserializer<'de>,
-    {
-        let value = String::deserialize(deserializer)?;
-        if value == "Four" {
-            Ok(Self::Three)
-        } else {
-            Step::deserialize(value.into_deserializer())
-        }
-    }
-}
-
-impl Serialize for Step {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer,
-    {
-        Step::serialize(&self, serializer)
-    }
+    /// Step 4
+    Four,
 }
 
 impl Default for Step {
@@ -164,7 +194,8 @@ impl StepExt for Step {
         match self {
             Self::One => Some(Self::Two),
             Self::Two => Some(Self::Three),
-            Self::Three => None,
+            Self::Three => Some(Self::Four),
+            Self::Four => None,
         }
     }
 
@@ -173,25 +204,55 @@ impl StepExt for Step {
             Self::One => 1,
             Self::Two => 2,
             Self::Three => 3,
+            Self::Four => 4,
         }
     }
 
     fn label(&self) -> &'static str {
-        const STR_DESIGN: &'static str = "Design";
+        //TODO - localizaton
+        const STR_BACKGROUND: &'static str = "Design";
         const STR_CONTENT: &'static str = "Content";
+        const STR_SETTINGS: &'static str = "Settings";
         const STR_PREVIEW: &'static str = "Preview";
 
         match self {
-            Self::One => STR_DESIGN,
+            Self::One => STR_BACKGROUND,
             Self::Two => STR_CONTENT,
-            Self::Three => STR_PREVIEW,
+            Self::Three => STR_SETTINGS,
+            Self::Four => STR_PREVIEW,
         }
     }
 
     fn get_list() -> Vec<Self> {
-        vec![Self::One, Self::Two, Self::Three]
+        vec![Self::One, Self::Two, Self::Three, Self::Four]
     }
     fn get_preview() -> Self {
-        Self::Three
+        Self::Four
     }
+}
+
+/// Video play settings
+#[derive(Default, Clone, Debug, Serialize, Deserialize)]
+pub struct PlaySettings {
+    /// show captions
+    pub captions: bool,
+
+    /// play with sound
+    pub muted: bool,
+
+    /// autoplay
+    pub autoplay: bool,
+
+    /// what to do when done
+    pub done_action: Option<DoneAction>,
+}
+
+/// what to do when done playing video
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+pub enum DoneAction {
+    /// loop the video
+    Loop,
+
+    /// move on to next activity
+    Next,
 }

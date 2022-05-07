@@ -1,14 +1,18 @@
-use crate::domain::jig::module::{
-    body::{Body, BodyExt, ModeExt, StepExt, ThemeId, _groups::design::*},
+use crate::domain::module::{
+    body::{
+        Body, BodyConvert, BodyExt, ModeExt, StepExt, ThemeId,
+        _groups::design::{BaseContent, Trace},
+    },
     ModuleKind,
 };
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::convert::TryFrom;
 
-use super::BodyConvert;
+mod play_settings;
+pub use play_settings::*;
 
-/// The body for [`Video`](crate::domain::jig::module::ModuleKind::Video) modules.
+/// The body for [`TappingBoard`](crate::domain::module::ModuleKind::TappingBoard) modules.
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]
 pub struct ModuleData {
     /// The content
@@ -17,7 +21,7 @@ pub struct ModuleData {
 
 impl BodyExt<Mode, Step> for ModuleData {
     fn as_body(&self) -> Body {
-        Body::Video(self.clone())
+        Body::TappingBoard(self.clone())
     }
 
     fn is_complete(&self) -> bool {
@@ -25,7 +29,7 @@ impl BodyExt<Mode, Step> for ModuleData {
     }
 
     fn kind() -> ModuleKind {
-        ModuleKind::Video
+        ModuleKind::TappingBoard
     }
 
     fn new_with_mode_and_theme(mode: Mode, theme: ThemeId) -> Self {
@@ -90,25 +94,28 @@ impl TryFrom<Body> for ModuleData {
 
     fn try_from(body: Body) -> Result<Self, Self::Error> {
         match body {
-            Body::Video(data) => Ok(data),
-            _ => Err("cannot convert body to video!"),
+            Body::TappingBoard(data) => Ok(data),
+            _ => Err("cannot convert body to Listen & Learn!"),
         }
     }
 }
 
-/// The body for [`Video`](crate::domain::jig::module::ModuleKind::Video) modules.
+/// The body for [`TappingBoard`](crate::domain::module::ModuleKind::TappingBoard) modules.
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]
 pub struct Content {
+    /// The base content for all design modules
+    pub base: BaseContent,
+
     /// The editor state
     pub editor_state: EditorState,
 
     /// The mode
     pub mode: Mode,
 
-    /// The base content for all design modules
-    pub base: BaseContent,
+    /// Traces
+    pub traces: Vec<Trace>,
 
-    /// Play settings
+    /// play settings
     pub play_settings: PlaySettings,
 }
 
@@ -125,47 +132,82 @@ pub struct EditorState {
 #[derive(Clone, Copy, Serialize, Deserialize, Debug, PartialEq, Eq, Hash)]
 /// The mode
 pub enum Mode {
-    /// Introduction
-    Introduction,
-    /// Story
-    Story,
-    /// Song
-    Song,
-    /// Howto
-    Howto,
+    /// Words mode
+    Words,
+    /// Images mode
+    Images,
+    /// Talk mode
+    Talk,
+    /// Read mode
+    Read,
+    /// Scene mode
+    Scene,
+    /// Photo album mode
+    PhotoAlbum,
+    /// Comic mode
+    Comic,
+    /// Timeline mode
+    Timeline,
+    /// Family Tree mode
+    FamilyTree,
 }
 
 impl Default for Mode {
     fn default() -> Self {
-        Self::Introduction
+        Self::Words
     }
 }
 
 impl ModeExt for Mode {
     fn get_list() -> Vec<Self> {
-        vec![Self::Introduction, Self::Story, Self::Song, Self::Howto]
+        vec![
+            Self::Words,
+            Self::Images,
+            Self::Talk,
+            Self::Read,
+            Self::Scene,
+            Self::PhotoAlbum,
+            Self::Comic,
+            Self::Timeline,
+            Self::FamilyTree,
+        ]
     }
 
     fn as_str_id(&self) -> &'static str {
         match self {
-            Self::Introduction => "introduction",
-            Self::Story => "story",
-            Self::Song => "song",
-            Self::Howto => "howto",
+            Self::Words => "words",
+            Self::Images => "images",
+            Self::Talk => "talk",
+            Self::Read => "read",
+            Self::Scene => "scene",
+            Self::PhotoAlbum => "photo-album",
+            Self::Comic => "comic",
+            Self::Timeline => "timeline",
+            Self::FamilyTree => "family-tree",
         }
     }
 
     fn label(&self) -> &'static str {
-        const STR_INTRODUCTION_LABEL: &'static str = "Introduce Your Topic";
-        const STR_STORY_LABEL: &'static str = "Tell a Story";
-        const STR_SONG_LABEL: &'static str = "Play a Song";
-        const STR_HOWTO_LABEL: &'static str = "How to";
+        const STR_WORDS_LABEL: &'static str = "Words";
+        const STR_IMAGES_LABEL: &'static str = "Images";
+        const STR_TALK_LABEL: &'static str = "Talking Pictures";
+        const STR_READ_LABEL: &'static str = "Read Along";
+        const STR_SCENE_LABEL: &'static str = "Scene";
+        const STR_PHOTO_ALBUM_LABEL: &'static str = "Photo Album";
+        const STR_COMIC_LABEL: &'static str = "Comics";
+        const STR_TIMELINE_LABEL: &'static str = "Timeline";
+        const STR_FAMILY_TREE_LABEL: &'static str = "Family Tree";
 
         match self {
-            Self::Introduction => STR_INTRODUCTION_LABEL,
-            Self::Story => STR_STORY_LABEL,
-            Self::Song => STR_SONG_LABEL,
-            Self::Howto => STR_HOWTO_LABEL,
+            Self::Words => STR_WORDS_LABEL,
+            Self::Images => STR_IMAGES_LABEL,
+            Self::Talk => STR_TALK_LABEL,
+            Self::Read => STR_READ_LABEL,
+            Self::Scene => STR_SCENE_LABEL,
+            Self::PhotoAlbum => STR_PHOTO_ALBUM_LABEL,
+            Self::Comic => STR_COMIC_LABEL,
+            Self::Timeline => STR_TIMELINE_LABEL,
+            Self::FamilyTree => STR_FAMILY_TREE_LABEL,
         }
     }
 }
@@ -181,6 +223,8 @@ pub enum Step {
     Three,
     /// Step 4
     Four,
+    /// Step 5
+    Five,
 }
 
 impl Default for Step {
@@ -195,7 +239,8 @@ impl StepExt for Step {
             Self::One => Some(Self::Two),
             Self::Two => Some(Self::Three),
             Self::Three => Some(Self::Four),
-            Self::Four => None,
+            Self::Four => Some(Self::Five),
+            Self::Five => None,
         }
     }
 
@@ -205,54 +250,29 @@ impl StepExt for Step {
             Self::Two => 2,
             Self::Three => 3,
             Self::Four => 4,
+            Self::Five => 5,
         }
     }
 
     fn label(&self) -> &'static str {
-        //TODO - localizaton
         const STR_BACKGROUND: &'static str = "Design";
         const STR_CONTENT: &'static str = "Content";
+        const STR_INTERACTION: &'static str = "Interaction";
         const STR_SETTINGS: &'static str = "Settings";
         const STR_PREVIEW: &'static str = "Preview";
-
         match self {
             Self::One => STR_BACKGROUND,
             Self::Two => STR_CONTENT,
-            Self::Three => STR_SETTINGS,
-            Self::Four => STR_PREVIEW,
+            Self::Three => STR_INTERACTION,
+            Self::Four => STR_SETTINGS,
+            Self::Five => STR_PREVIEW,
         }
     }
 
     fn get_list() -> Vec<Self> {
-        vec![Self::One, Self::Two, Self::Three, Self::Four]
+        vec![Self::One, Self::Two, Self::Three, Self::Four, Self::Five]
     }
     fn get_preview() -> Self {
-        Self::Four
+        Self::Five
     }
-}
-
-/// Video play settings
-#[derive(Default, Clone, Debug, Serialize, Deserialize)]
-pub struct PlaySettings {
-    /// show captions
-    pub captions: bool,
-
-    /// play with sound
-    pub muted: bool,
-
-    /// autoplay
-    pub autoplay: bool,
-
-    /// what to do when done
-    pub done_action: Option<DoneAction>,
-}
-
-/// what to do when done playing video
-#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
-pub enum DoneAction {
-    /// loop the video
-    Loop,
-
-    /// move on to next activity
-    Next,
 }

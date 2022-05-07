@@ -27,7 +27,6 @@ use crate::{
 };
 
 pub mod curation;
-pub mod module;
 mod player;
 pub mod report;
 

@@ -2,7 +2,6 @@
 
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use std::fmt;
 use std::str::FromStr;
 use uuid::Uuid;
 
@@ -11,85 +10,26 @@ pub mod body;
 
 pub use body::Body as ModuleBody;
 
+use crate::domain::{course::CourseId, jig::JigId};
+
 /// Wrapper type around [`Uuid`](Uuid), represents the **unique ID** of a module.
 ///
 /// This uniquely identifies a module. There is no other module that shares this ID.
-///
-/// See also [`StableOrUniqueId`] for the two ways to identify a specific module.
 #[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
 #[serde(rename_all = "camelCase")]
 pub struct ModuleId(pub Uuid);
 
-/// Wrapper type around [`Uuid`](Uuid), represents the **stable ID** of a module.
-///
-/// # Notes
-/// This is unique for a specific [JIG data](super::JigData) copy (draft or live). In other words, the tuple
-/// `(JigId, DraftOrLive, StableModuleId)` uniquely identifies a specific module.
-///
-/// This ID remains stable when:
-/// * Publishing JIG data from draft to live
-/// * Cloning a JIG through [`jig::Clone`](crate::api::endpoints::jig::Clone)
-///
-/// See also [`StableOrUniqueId`] for the two ways to identify a specific module.
-#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[cfg_attr(feature = "backend", sqlx(transparent))]
-#[serde(rename_all = "camelCase")]
-pub struct StableModuleId(pub Uuid);
-
-/// Which way of finding a module to use when looking it up.
-///
-/// # Note:
-/// The mapping between `ModuleId` and the triple `(JigId, DraftOrLive, StableModuleId)` is one-to-one.
+/// Helps with identifying a modules parent_id (JIG or Course)
 #[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
-pub enum StableOrUniqueId {
-    /// Unique ID for the module.
-    Unique(ModuleId),
+pub enum AssetId {
+    /// JIG ID associated with the module.
+    JigId(JigId),
 
-    /// Stable ID for the module.
-    ///
-    /// This is unique for a specific [JIG data](super::JigData) copy (draft or live). In other words, the tuple
-    /// `(JigId, DraftOrLive, StableModuleId)` uniquely identifies a specific module.
-    ///
-    /// This ID remains stable when:
-    /// * Publishing JIG data from draft to live with [`jig::Publish`](crate::api::endpoints::jig::Publish)
-    /// * Cloning a JIG through [`jig::Clone`](crate::api::endpoints::jig::Clone)
-    Stable(StableModuleId),
-}
-
-impl fmt::Display for StableOrUniqueId {
-    // Format IDs into a string
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            StableOrUniqueId::Unique(id) => {
-                write!(f, "{}", id.0)
-            }
-            StableOrUniqueId::Stable(id) => {
-                write!(f, "{}", id.0)
-            }
-        }
-    }
-}
-
-impl StableOrUniqueId {
-    /// Returns [`Some`] if `self` is `Self::Unique`, [`None`] otherwise.
-    pub fn unique(self) -> Option<ModuleId> {
-        match self {
-            StableOrUniqueId::Unique(id) => Some(id),
-            StableOrUniqueId::Stable(_) => None,
-        }
-    }
-
-    /// Returns [`Some`] if `self` is `Self::Stable`, [`None`] otherwise.
-    pub fn stable(self) -> Option<StableModuleId> {
-        match self {
-            StableOrUniqueId::Unique(_) => None,
-            StableOrUniqueId::Stable(id) => Some(id),
-        }
-    }
+    /// Course ID associated with the module.
+    CourseId(CourseId),
 }
 
 /// Represents the various kinds of data a module can represent.
@@ -193,6 +133,50 @@ impl FromStr for ModuleKind {
         Ok(res)
     }
 }
+impl ModuleBody {
+    /// Maps module content from request body
+    pub fn map_module_contents(body: &Self) -> anyhow::Result<(ModuleKind, serde_json::Value)> {
+        let kind = body.kind();
+
+        let body = match body {
+            Self::CardQuiz(body) => serde_json::to_value(body)?,
+            Self::Cover(body) => serde_json::to_value(body)?,
+            Self::ResourceCover(body) => serde_json::to_value(body)?,
+            Self::DragDrop(body) => serde_json::to_value(body)?,
+            Self::Flashcards(body) => serde_json::to_value(body)?,
+            Self::Matching(body) => serde_json::to_value(body)?,
+            Self::MemoryGame(body) => serde_json::to_value(body)?,
+            Self::Poster(body) => serde_json::to_value(body)?,
+            Self::TappingBoard(body) => serde_json::to_value(body)?,
+            Self::Video(body) => serde_json::to_value(body)?,
+            Self::Legacy(body) => serde_json::to_value(body)?,
+        };
+
+        Ok((kind, body))
+    }
+
+    /// Transforms module content from database
+    pub fn transform_response_kind(
+        contents: serde_json::Value,
+        kind: ModuleKind,
+    ) -> anyhow::Result<Self> {
+        match kind {
+            ModuleKind::CardQuiz => Ok(Self::CardQuiz(serde_json::from_value(contents)?)),
+            ModuleKind::Cover => Ok(Self::Cover(serde_json::from_value(contents)?)),
+            ModuleKind::ResourceCover => Ok(Self::ResourceCover(serde_json::from_value(contents)?)),
+            ModuleKind::DragDrop => Ok(Self::DragDrop(serde_json::from_value(contents)?)),
+            ModuleKind::Flashcards => Ok(Self::Flashcards(serde_json::from_value(contents)?)),
+            ModuleKind::Matching => Ok(Self::Matching(serde_json::from_value(contents)?)),
+            ModuleKind::Memory => Ok(Self::MemoryGame(serde_json::from_value(contents)?)),
+            ModuleKind::Poster => Ok(Self::Poster(serde_json::from_value(contents)?)),
+            ModuleKind::TappingBoard => Ok(Self::TappingBoard(serde_json::from_value(contents)?)),
+            ModuleKind::Video => Ok(Self::Video(serde_json::from_value(contents)?)),
+            ModuleKind::Legacy => Ok(Self::Legacy(serde_json::from_value(contents)?)),
+
+            _ => anyhow::bail!("Unimplemented response kind"),
+        }
+    }
+}
 
 /// Minimal information about a module.
 #[derive(Clone, Serialize, Deserialize, Debug)]
@@ -214,9 +198,6 @@ pub struct Module {
     /// The module's unique ID.
     pub id: ModuleId,
 
-    /// The module's stable ID.
-    pub stable_id: StableModuleId,
-
     /// The module's body.
     pub body: ModuleBody,
 
@@ -236,16 +217,30 @@ pub struct Module {
 /// Request to create a new `Module`.
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ModuleCreateRequest {
+    /// ID for Course or JIG
+    #[serde(flatten)]
+    pub parent_id: AssetId,
+
     /// The module's body.
     pub body: ModuleBody,
 }
 
-impl Default for ModuleCreateRequest {
-    fn default() -> Self {
-        ModuleCreateRequest {
-            body: ModuleBody::Cover(Default::default()),
-        }
-    }
+/// Search for Live module.
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct ModuleLiveQuery {
+    /// The query string.
+    #[serde(flatten)]
+    pub parent_id: AssetId,
+}
+
+/// Search for Draft module.
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct ModuleDraftQuery {
+    /// The query string.
+    #[serde(flatten)]
+    pub parent_id: AssetId,
 }
 
 /// Response for successfully finding a module
@@ -260,8 +255,9 @@ pub struct ModuleResponse {
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct ModuleUpdateRequest {
-    /// Identifies the module to be updated, either through the stable or unique ID.
-    pub id: StableOrUniqueId,
+    /// ID for Course or JIG
+    #[serde(flatten)]
+    pub parent_id: AssetId,
 
     /// The module's body.
     #[serde(default)]
@@ -283,8 +279,9 @@ pub struct ModuleUpdateRequest {
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct ModuleDeleteRequest {
-    /// Identifies the module to be updated, either through the stable or unique ID.
-    pub id: StableOrUniqueId,
+    /// ID for Course or JIG
+    #[serde(flatten)]
+    pub parent_id: AssetId,
 }
 
-into_uuid![ModuleId, StableModuleId];
+into_uuid![ModuleId];

@@ -1,6 +1,6 @@
 use anyhow::Context;
 use shared::domain::{
-    jig::JigId,
+    course::CourseId,
     module::{Module, ModuleBody, ModuleId, ModuleKind},
 };
 use sqlx::PgPool;
@@ -8,9 +8,8 @@ use std::cmp;
 
 pub async fn create(
     pool: &PgPool,
-    parent: JigId,
+    parent: CourseId,
     body: ModuleBody,
-    is_complete: bool,
 ) -> anyhow::Result<(ModuleId, u16)> {
     let (kind, body) = ModuleBody::map_module_contents(&body)?;
 
@@ -19,7 +18,7 @@ pub async fn create(
     let draft_id = sqlx::query!(
         //language=SQL
         r#"
-select draft_id from jig where jig.id = $1
+select draft_id from course where course.id = $1
 "#,
         parent.0,
     )
@@ -30,14 +29,13 @@ select draft_id from jig where jig.id = $1
     let res = sqlx::query!(
         //language=SQL
         r#"
-insert into jig_data_module (jig_data_id, kind, contents, index, is_complete)
-values ($1, $2, $3, (select count(*) from jig_data_module where jig_data_id = $1), $4)
+insert into course_data_module (course_data_id, kind, contents, index)
+values ($1, $2, $3, (select count(*) from course_data_module where course_data_id = $1))
 returning id, "index"
 "#,
         draft_id,
         kind as i16,
         body,
-        is_complete,
     )
     .fetch_one(&mut txn)
     .await
@@ -51,7 +49,7 @@ returning id, "index"
 
 pub async fn get_live(
     pool: &PgPool,
-    parent: JigId,
+    parent: CourseId,
     id: ModuleId,
 ) -> anyhow::Result<Option<Module>> {
     let module = sqlx::query!(
@@ -63,8 +61,8 @@ select id          as "id: ModuleId",
        updated_at  as "updated_at",
        kind        as "kind: ModuleKind",
        is_complete as "is_complete"
-from jig_data_module
-where jig_data_id = (select live_id from jig where jig.id = $1) and jig_data_module.id is not distinct from $2
+from course_data_module
+where course_data_id = (select live_id from course where course.id = $1) and course_data_module.id is not distinct from $2
 "#,
         parent.0,
         id.0,
@@ -93,7 +91,7 @@ where jig_data_id = (select live_id from jig where jig.id = $1) and jig_data_mod
 /// FIXME dedup this from live JIG
 pub async fn get_draft(
     pool: &PgPool,
-    parent: JigId,
+    parent: CourseId,
     id: ModuleId,
 ) -> anyhow::Result<Option<Module>> {
     let module = sqlx::query!(
@@ -105,8 +103,8 @@ select id          as "id: ModuleId",
        updated_at  as "updated_at",
        kind        as "kind: ModuleKind",
        is_complete as "is_complete"
-from jig_data_module
-where jig_data_id = (select draft_id from jig where jig.id = $1) and jig_data_module.id is not distinct from $2
+from course_data_module
+where course_data_id = (select draft_id from course where course.id = $1) and course_data_module.id is not distinct from $2
 "#,
         parent.0,
         id.0,
@@ -134,8 +132,8 @@ where jig_data_id = (select draft_id from jig where jig.id = $1) and jig_data_mo
 
 pub async fn update(
     pool: &PgPool,
-    parent_id: JigId,
-    id: ModuleId,
+    parent_id: CourseId,
+    module_id: ModuleId,
     body: Option<&ModuleBody>,
     new_index: Option<u16>,
     is_complete: Option<bool>,
@@ -150,7 +148,7 @@ pub async fn update(
     let draft_id = sqlx::query!(
         //language=SQL
         r#"
-select draft_id from jig where jig.id = $1
+select draft_id from course where course.id = $1
 "#,
         parent_id.0,
     )
@@ -161,11 +159,11 @@ select draft_id from jig where jig.id = $1
     let index = sqlx::query!(
         //language=SQL
         r#"
-select index from jig_data_module
-where jig_data_id = $1 and jig_data_module.id is not distinct from $2
+select index from course_data_module
+where course_data_id = $1 and course_data_module.id is not distinct from $2
 "#,
         draft_id,
-        id.0,
+        module_id.0
     )
     .fetch_optional(&mut txn)
     .await?;
@@ -178,11 +176,11 @@ where jig_data_id = $1 and jig_data_module.id is not distinct from $2
     sqlx::query!(
         //language=SQL
         r#"
-update jig_data_module
+update course_data_module
 set contents    = coalesce($3, contents),
     kind        = coalesce($4, kind),
     is_complete = coalesce($5, is_complete)
-where jig_data_id = $1
+where course_data_id = $1
   and index = $2
 "#,
         draft_id,
@@ -199,7 +197,7 @@ where jig_data_id = $1
 
         let max_index = sqlx::query!(
             //language=SQL
-            r#"select count(*) - 1 as "max_index!" from jig_data_module where jig_data_id = $1"#,
+            r#"select count(*) - 1 as "max_index!" from course_data_module where course_data_id = $1"#,
             draft_id
         )
         .fetch_one(&mut txn)
@@ -212,11 +210,11 @@ where jig_data_id = $1
             sqlx::query!(
                 //language=SQL
                 r#"
-update jig_data_module
+update course_data_module
 set
     index = case when index = $2 then $3 else index + 1 end,
     updated_at = now()
-where jig_data_id = $1 and index between $3 and $2
+where course_data_id = $1 and index between $3 and $2
 "#,
                 draft_id,
                 index,
@@ -228,11 +226,11 @@ where jig_data_id = $1 and index between $3 and $2
             sqlx::query!(
                 //language=SQL
                 r#"
-update jig_data_module
+update course_data_module
 set
     index = case when index = $2 then $3 else index - 1 end,
     updated_at = now()
-where jig_data_id = $1 and index between $2 and $3
+where course_data_id = $1 and index between $2 and $3
 "#,
                 parent_id.0,
                 index,
@@ -248,13 +246,13 @@ where jig_data_id = $1 and index between $2 and $3
     Ok(true)
 }
 
-pub async fn delete(pool: &PgPool, parent: JigId, id: ModuleId) -> anyhow::Result<()> {
+pub async fn delete(pool: &PgPool, parent: CourseId, id: ModuleId) -> anyhow::Result<()> {
     let mut txn = pool.begin().await?;
 
     let draft_id = sqlx::query!(
         //language=SQL
         r#"
-select draft_id from jig where jig.id = $1
+select draft_id from course where course.id = $1
 "#,
         parent.0,
     )
@@ -266,8 +264,8 @@ select draft_id from jig where jig.id = $1
         //language=SQL
         r#"
 delete
-from jig_data_module
-where jig_data_id = $1 and jig_data_module.id is not distinct from $2
+from course_data_module
+where course_data_id = $1 and course_data_module.id is not distinct from $2
 returning index
 "#,
         draft_id,
@@ -281,9 +279,9 @@ returning index
         sqlx::query!(
             //language=SQL
             r#"
-update jig_data_module
+update course_data_module
 set index = index - 1
-where jig_data_id = $1
+where course_data_id = $1
   and index > $2
 "#,
             draft_id,

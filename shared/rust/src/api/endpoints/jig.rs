@@ -16,6 +16,9 @@ use super::ApiEndpoint;
 /// Endpoints for jig modules.
 pub mod module;
 
+/// Endpoints for jig additional resources.
+pub mod additional_resource;
+
 /// Endpoints for jig player sessions.
 pub mod player;
 

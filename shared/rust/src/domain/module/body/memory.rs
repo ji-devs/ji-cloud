@@ -1,4 +1,4 @@
-use crate::domain::jig::module::{
+use crate::domain::module::{
     body::{Body, BodyConvert, BodyExt, ThemeId, _groups::cards::*},
     ModuleKind,
 };
@@ -6,14 +6,14 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::convert::TryFrom;
 
-/// The body for [`Memory`](crate::domain::jig::module::ModuleKind::Memory) modules.
+/// The body for [`Memory`](crate::domain::module::ModuleKind::Memory) modules.
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]
 pub struct ModuleData {
     /// The content
     pub content: Option<Content>,
 }
 
-/// The content for [`Memory`](crate::domain::jig::module::ModuleKind::Memory) modules.
+/// The content for [`Memory`](crate::domain::module::ModuleKind::Memory) modules.
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]
 pub struct Content {
     /// The base content for all cards modules

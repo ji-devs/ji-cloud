@@ -11,6 +11,7 @@ use super::{
     category::CategoryId,
     jig::JigId,
     meta::{AffiliationId, AgeRangeId, ResourceTypeId},
+    module::LiteModule,
 };
 
 /// Wrapper type around [`Uuid`], represents the ID of a Course.
@@ -89,6 +90,9 @@ pub struct CourseData {
     /// translated descriptions
     #[serde(default)]
     pub translated_description: HashMap<String, String>,
+
+    /// This Course's cover.
+    pub cover: Option<LiteModule>,
 
     /// This Course's age ranges.
     pub age_ranges: Vec<AgeRangeId>,

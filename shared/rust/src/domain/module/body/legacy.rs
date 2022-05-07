@@ -5,7 +5,7 @@ pub mod design;
 #[allow(missing_docs)]
 pub mod slide;
 
-use crate::domain::jig::module::{
+use crate::domain::module::{
     body::{Body, BodyConvert, BodyExt, ThemeId},
     ModuleKind,
 };
@@ -13,7 +13,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::convert::TryFrom;
 
-/// The body for [`Legacy`](crate::domain::jig::module::ModuleKind::Legacy) modules.
+/// The body for [`Legacy`](crate::domain::module::ModuleKind::Legacy) modules.
 /// This just points to the folder where legacy slides are loaded
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]
 pub struct ModuleData {
