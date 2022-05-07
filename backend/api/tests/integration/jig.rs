@@ -289,6 +289,7 @@ async fn browse_simple() -> anyhow::Result<()> {
 }
 
 // todo: test-exhaustiveness: create a `JigBrowse` Fixture, actually test the cases (paging, jig count, etc)
+#[ignore]
 #[actix_rt::test]
 async fn browse_own_simple() -> anyhow::Result<()> {
     let app = initialize_server(
