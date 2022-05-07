@@ -69,3 +69,5 @@ pub mod additional_resource;
 
 /// Badge endpoints
 pub mod badge;
+/// Module endpoints
+pub mod module;

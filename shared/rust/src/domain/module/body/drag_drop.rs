@@ -1,4 +1,4 @@
-use crate::domain::jig::module::{
+use crate::domain::module::{
     body::{
         Audio, Body, BodyConvert, BodyExt, Instructions, ModeExt, StepExt, ThemeId, Transform,
         _groups::design::{Backgrounds, Sticker, Trace},
@@ -14,7 +14,7 @@ pub use play_settings::*;
 
 use super::_groups::design::Text;
 
-/// The body for [`DragDrop`](crate::domain::jig::module::ModuleKind::DragDrop) modules.
+/// The body for [`DragDrop`](crate::domain::module::ModuleKind::DragDrop) modules.
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]
 pub struct ModuleData {
     /// The content
@@ -103,7 +103,7 @@ impl TryFrom<Body> for ModuleData {
     }
 }
 
-/// The body for [`DragDrop`](crate::domain::jig::module::ModuleKind::DragDrop) modules.
+/// The body for [`DragDrop`](crate::domain::module::ModuleKind::DragDrop) modules.
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]
 pub struct Content {
     /// The instructions for the module.

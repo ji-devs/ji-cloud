@@ -1,8 +1,12 @@
 use http::StatusCode;
 
-use shared::domain::jig::module::{
-    body::memory, ModuleBody, ModuleCreateRequest, ModuleId, ModuleUpdateRequest, StableOrUniqueId,
+use shared::domain::{
+    jig::JigId,
+    module::{
+        body::memory, AssetId, ModuleBody, ModuleCreateRequest, ModuleKind, ModuleUpdateRequest,
+    },
 };
+use uuid::Uuid;
 
 use crate::{
     fixture::Fixture,
@@ -19,7 +23,7 @@ async fn get_live() -> anyhow::Result<()> {
 
     let resp = client
         .get(&format!(
-            "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008/live/module/a6b24970-1dd7-11ec-8426-57136b411853",
+            "http://0.0.0.0:{}/v1/module/live/a6b24970-1dd7-11ec-8426-57136b411853?jigId=0cc084bc-7c83-11eb-9f77-e3218dffb008",
             port
         ))
         .login()
@@ -47,11 +51,13 @@ async fn create_default() -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
-        .post(&format!(
-            "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008/draft/module",
-            port
-        ))
-        .json(&ModuleCreateRequest::default())
+        .post(&format!("http://0.0.0.0:{}/v1/module/draft", port))
+        .json(&ModuleCreateRequest {
+            parent_id: AssetId::JigId(JigId(Uuid::parse_str(
+                "0cc084bc-7c83-11eb-9f77-e3218dffb008",
+            )?)),
+            body: ModuleBody::new(ModuleKind::Cover),
+        })
         .login()
         .send()
         .await?
@@ -74,7 +80,7 @@ async fn create_default() -> anyhow::Result<()> {
 
     let resp = client
         .get(&format!(
-            "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008/draft/module/{}",
+            "http://0.0.0.0:{}/v1/module/draft/{}?jigId=0cc084bc-7c83-11eb-9f77-e3218dffb008",
             port, id
         ))
         .query(&[("q", "unique")])
@@ -104,13 +110,14 @@ async fn update_empty() -> anyhow::Result<()> {
 
     let resp = client
         .patch(&format!(
-            "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008/draft/module",
+            "http://0.0.0.0:{}/v1/module/draft/a6b24a42-1dd7-11ec-8426-a7165f9281a2",
             port
         ))
         .json(&ModuleUpdateRequest {
-            id: StableOrUniqueId::Unique(ModuleId(uuid::Uuid::parse_str(
-                "a6b24a42-1dd7-11ec-8426-a7165f9281a2",
+            parent_id: AssetId::JigId(JigId(uuid::Uuid::parse_str(
+                "0cc084bc-7c83-11eb-9f77-e3218dffb008",
             )?)),
+
             is_complete: None,
             body: None,
             index: None,
@@ -124,7 +131,7 @@ async fn update_empty() -> anyhow::Result<()> {
 
     let resp = client
         .get(&format!(
-            "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008/draft/module/a6b24a42-1dd7-11ec-8426-a7165f9281a2",
+            "http://0.0.0.0:{}/v1/module/draft/a6b24a42-1dd7-11ec-8426-a7165f9281a2?jigId=0cc084bc-7c83-11eb-9f77-e3218dffb008",
             port
         ))
         .login()
@@ -155,13 +162,13 @@ async fn update_contents() -> anyhow::Result<()> {
 
     let resp = client
         .patch(&format!(
-            "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008/draft/module",
+            "http://0.0.0.0:{}/v1/module/draft/a6b24a06-1dd7-11ec-8426-635a3a7ea572",
             port
         ))
         .login()
         .json(&ModuleUpdateRequest {
-            id: StableOrUniqueId::Unique(ModuleId(uuid::Uuid::parse_str(
-                "a6b24970-1dd7-11ec-8426-57136b411853",
+            parent_id: AssetId::JigId(JigId(uuid::Uuid::parse_str(
+                "0cc084bc-7c83-11eb-9f77-e3218dffb008",
             )?)),
             body: Some(ModuleBody::MemoryGame(memory::ModuleData {
                 content: Some(memory::Content {
@@ -179,7 +186,7 @@ async fn update_contents() -> anyhow::Result<()> {
 
     let resp = client
         .get(&format!(
-            "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008/draft/module/a6b24970-1dd7-11ec-8426-57136b411853",
+            "http://0.0.0.0:{}/v1/module/draft/a6b24a06-1dd7-11ec-8426-635a3a7ea572?jigId=0cc084bc-7c83-11eb-9f77-e3218dffb008",
             port
         ))
         .login()
@@ -195,7 +202,7 @@ async fn update_contents() -> anyhow::Result<()> {
 
     let resp = client
         .get(&format!(
-            "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008/draft/module/a6b24a42-1dd7-11ec-8426-a7165f9281a2",
+            "http://0.0.0.0:{}/v1/module/draft/a6b24a06-1dd7-11ec-8426-635a3a7ea572?jigId=0cc084bc-7c83-11eb-9f77-e3218dffb008",
             port
         ))
         .login()

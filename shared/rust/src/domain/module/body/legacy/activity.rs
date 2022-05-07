@@ -1,4 +1,4 @@
-use crate::domain::jig::module::body::_groups::design::{TraceShape, YoutubeUrl};
+use crate::domain::module::body::_groups::design::{TraceShape, YoutubeUrl};
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 

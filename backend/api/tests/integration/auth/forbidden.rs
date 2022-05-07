@@ -6,7 +6,11 @@ use crate::{
     fixture::Fixture,
     helpers::{initialize_server, LoginExt},
 };
-use shared::domain::jig::module::{ModuleUpdateRequest, StableModuleId, StableOrUniqueId};
+use shared::domain::{
+    jig::JigId,
+    module::{AssetId, ModuleBody, ModuleKind},
+};
+use uuid::Uuid;
 
 async fn forbidden(
     route: &str,
@@ -146,11 +150,16 @@ async fn jig_clone() -> anyhow::Result<()> {
 
 #[actix_rt::test]
 async fn module_post() -> anyhow::Result<()> {
-    use shared::domain::jig::module::ModuleCreateRequest;
+    use shared::domain::module::ModuleCreateRequest;
 
     forbidden(
-        "v1/jig/00000000-0000-0000-0000-000000000000/draft/module",
-        Some(&serde_json::to_value(ModuleCreateRequest::default())?),
+        "v1/module/draft",
+        Some(&serde_json::to_value(ModuleCreateRequest {
+            parent_id: AssetId::JigId(JigId(Uuid::parse_str(
+                "00000000-0000-0000-0000-000000000000",
+            )?)),
+            body: ModuleBody::new(ModuleKind::Cover),
+        })?),
         Method::POST,
     )
     .await
@@ -158,21 +167,9 @@ async fn module_post() -> anyhow::Result<()> {
 
 #[actix_rt::test]
 async fn module_patch() -> anyhow::Result<()> {
-    log::info!(
-        "{:?}",
-        ModuleUpdateRequest {
-            id: StableOrUniqueId::Stable(StableModuleId(uuid::Uuid::parse_str(
-                "00000000-0000-0000-0000-000000000000"
-            )?)),
-            index: None,
-            body: None,
-            is_complete: None,
-        }
-    );
-
     forbidden(
-        "v1/jig/00000000-0000-0000-0000-000000000000/draft/module",
-        Some(&serde_json::json!({"id": { "stable": "00000000-0000-0000-0000-000000000000"}})),
+        "v1/module/draft/00000000-0000-0000-0000-000000000000",
+        Some(&serde_json::json!({"jigId": "00000000-0000-0000-0000-000000000000"})),
         Method::PATCH,
     )
     .await
@@ -181,8 +178,8 @@ async fn module_patch() -> anyhow::Result<()> {
 #[actix_rt::test]
 async fn module_delete() -> anyhow::Result<()> {
     forbidden(
-        "v1/jig/00000000-0000-0000-0000-000000000000/draft/module",
-        Some(&serde_json::json!({"id": { "stable": "00000000-0000-0000-0000-000000000000"}})),
+        "v1/module/draft/00000000-0000-0000-0000-000000000000",
+        Some(&serde_json::json!({"jigId": "00000000-0000-0000-0000-000000000000"})),
         Method::DELETE,
     )
     .await

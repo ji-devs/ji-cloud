@@ -1,4 +1,4 @@
-use crate::domain::jig::module::{
+use crate::domain::module::{
     body::{Body, BodyConvert, BodyExt, ModeExt, ThemeId, _groups::cards::*},
     ModuleKind,
 };
@@ -6,61 +6,53 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::convert::TryFrom;
 
-/// The body for [`Flashcards`](crate::domain::jig::module::ModuleKind::Flashcards) modules.
+/// The body for [`Matching`](crate::domain::module::ModuleKind::Matching) modules.
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]
 pub struct ModuleData {
     /// The content
     pub content: Option<Content>,
 }
 
-/// The content for [`Flashcards`](crate::domain::jig::module::ModuleKind::Flashcards) modules.
+/// The content for [`Matching`](crate::domain::module::ModuleKind::Matching) modules.
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]
 pub struct Content {
     /// The base content for all cards modules
     pub base: BaseContent,
+
     /// Settings for playback
     pub player_settings: PlayerSettings,
 }
 
 /// Player settings
-#[derive(Default, Clone, Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct PlayerSettings {
-    /// display mode
-    pub display_mode: DisplayMode,
+    /// number of choices
+    pub n_choices: u8,
 
     /// swap the display to be primary left vs. right
-    #[serde(default)]
     pub swap: bool,
+
+    /// number of rounds to play
+    pub n_rounds: u32,
+
+    /// time limit in minutes
+    pub time_limit: Option<u32>,
 }
 
-/// Display Mode
-#[derive(Clone, Copy, Serialize, Deserialize, Debug, Eq, PartialEq)]
-pub enum DisplayMode {
-    /// Single sided cards
-    Single,
-    /// Double sided cards
-    Double,
-}
-
-impl Default for DisplayMode {
+impl Default for PlayerSettings {
     fn default() -> Self {
-        Self::Double
-    }
-}
-
-impl DisplayMode {
-    /// Get it as a string
-    pub fn as_str_id(&self) -> &'static str {
-        match self {
-            Self::Single => "single",
-            Self::Double => "double",
+        Self {
+            n_choices: 3,
+            swap: false,
+            n_rounds: 1,
+            time_limit: None,
         }
     }
 }
 
 impl BodyExt<Mode, Step> for ModuleData {
     fn as_body(&self) -> Body {
-        Body::Flashcards(self.clone())
+        Body::Matching(self.clone())
     }
 
     fn choose_mode_list() -> Vec<Mode> {
@@ -69,7 +61,6 @@ impl BodyExt<Mode, Step> for ModuleData {
             .filter(|mode| *mode != Mode::Duplicate)
             .collect()
     }
-
     fn is_complete(&self) -> bool {
         self.content
             .as_ref()
@@ -77,7 +68,7 @@ impl BodyExt<Mode, Step> for ModuleData {
     }
 
     fn kind() -> ModuleKind {
-        ModuleKind::Flashcards
+        ModuleKind::Matching
     }
 
     fn new_with_mode_and_theme(mode: Mode, theme: ThemeId) -> Self {
@@ -139,7 +130,7 @@ impl BodyConvert for ModuleData {
     fn convertable_list() -> Vec<ModuleKind> {
         vec![
             ModuleKind::Memory,
-            ModuleKind::Matching,
+            ModuleKind::Flashcards,
             ModuleKind::CardQuiz,
         ]
     }
@@ -151,14 +142,14 @@ impl BodyConvert for ModuleData {
             }),
         })
     }
-    fn convert_to_matching(&self) -> Result<super::matching::ModuleData, &'static str> {
-        Ok(super::matching::ModuleData {
+    fn convert_to_flashcards(&self) -> Result<super::flashcards::ModuleData, &'static str> {
+        Ok(super::flashcards::ModuleData {
             content: self
                 .content
                 .as_ref()
-                .map(|content| super::matching::Content {
+                .map(|content| super::flashcards::Content {
                     base: content.base.clone(),
-                    player_settings: super::matching::PlayerSettings::default(),
+                    player_settings: super::flashcards::PlayerSettings::default(),
                 }),
         })
     }
@@ -181,7 +172,7 @@ impl TryFrom<Body> for ModuleData {
 
     fn try_from(body: Body) -> Result<Self, Self::Error> {
         match body {
-            Body::Flashcards(data) => Ok(data),
+            Body::Matching(data) => Ok(data),
             _ => Err("cannot convert body to flashcards!"),
         }
     }

@@ -34,22 +34,22 @@ values ('0cc084bc-7c83-11eb-9f77-e3218dffb008', '1f241e1b-b537-493f-a230-075cb16
         '1f241e1b-b537-493f-a230-075cb16315be', '38ef2e9c-9d7f-4a96-aed4-164f7f42bf0c',
         '456f571e-ea27-460e-b065-2bbd77d350ae');
 
-insert into jig_data_module (id, stable_id, jig_data_id, index, kind, is_complete, contents, created_at)
-values ('a6b248f8-1dd7-11ec-8426-975953035335', '0cbfdd82-7c83-11eb-9f77-d7d86264c3bc',
+insert into jig_data_module (id, jig_data_id, index, kind, is_complete, contents, created_at)
+values ('a6b248f8-1dd7-11ec-8426-975953035335', 
         'd4cad43c-1dd5-11ec-8426-83d4a42e3ac9', 0, 0, false, '{}', '2021-03-04 00:46:26.134651+00'),
-       ('a6b24970-1dd7-11ec-8426-57136b411853', '0cc03a02-7c83-11eb-9f77-f77f9ad65e9a',
+       ('a6b24970-1dd7-11ec-8426-57136b411853', 
         'd4cad43c-1dd5-11ec-8426-83d4a42e3ac9', 1, 1, false, '{}', '2021-03-04 00:46:26.134651+00'),
-       ('a6b249c0-1dd7-11ec-8426-f77e58fd17c6', '5fac2632-cd4a-11eb-ae4e-7b9a797001a5',
+       ('a6b249c0-1dd7-11ec-8426-f77e58fd17c6', 
         'd4cad43c-1dd5-11ec-8426-83d4a42e3ac9', 2, 3, false, '{}', '2021-03-04 00:46:26.134651+00'),
-       ('a6b24a06-1dd7-11ec-8426-635a3a7ea572', '0cbfdd82-7c83-11eb-9f77-d7d86264c3bc',
+       ('a6b24a06-1dd7-11ec-8426-635a3a7ea572', 
         'd4cad4c8-1dd5-11ec-8426-a37eda7ce03f', 0, 0, false, '{}', '2021-03-04 00:46:26.134651+00'),
-       ('a6b24a42-1dd7-11ec-8426-a7165f9281a2', '0cc03a02-7c83-11eb-9f77-f77f9ad65e9a',
+       ('a6b24a42-1dd7-11ec-8426-a7165f9281a2', 
         'd4cad4c8-1dd5-11ec-8426-a37eda7ce03f', 1, 1, false, '{}', '2021-03-04 00:46:26.134651+00'),
-       ('a6b24a88-1dd7-11ec-8426-57525d09b22c', '5fac2632-cd4a-11eb-ae4e-7b9a797001a5',
+       ('a6b24a88-1dd7-11ec-8426-57525d09b22c', 
         'd4cad4c8-1dd5-11ec-8426-a37eda7ce03f', 2, 3, false, '{}', '2021-03-04 00:46:26.134651+00'),
-       ('56841805-d762-478b-8f07-e263917058b9', 'e780f91a-0a95-45e0-82e2-fbf5a5d1489e',
+       ('56841805-d762-478b-8f07-e263917058b9', 
         '456f571e-ea27-460e-b065-2bbd77d350ae', 0, 0, true, '{}', '2021-03-04 00:46:26.134651+00'),
-       ('865eeae6-f081-49bb-87bb-827296a8a82b', '1bda342c-4e2c-4ed9-a8b8-5ae3eafc8a66',
+       ('865eeae6-f081-49bb-87bb-827296a8a82b', 
         '38ef2e9c-9d7f-4a96-aed4-164f7f42bf0c', 0, 0, true, '{}', '2021-03-04 00:46:26.134651+00');
 
 
