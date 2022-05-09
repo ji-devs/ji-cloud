@@ -47,6 +47,7 @@ impl ShareJig {
                 }))
                 .child(html!("empty-fragment", {
                     .property("slot", "anchor")
+                    .style("display", "flex")
                     .event(clone!(state => move |_: events::Click| {
                         let new_value = match &*state.active_popup.lock_ref() {
                             Some(_) => None,

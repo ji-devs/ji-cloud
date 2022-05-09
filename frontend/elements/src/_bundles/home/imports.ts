@@ -1,5 +1,6 @@
 import "@elements/_bundles/_sub-bundles/page/header";
 import "@elements/_bundles/_sub-bundles/all";
+import "@elements/core/buttons/icon-label";
 import "@elements/core/images/ui";
 import "@elements/core/images/ji";
 import "@elements/core/inputs/composed/select/select";
@@ -8,6 +9,11 @@ import "@elements/core/inputs/composed/select/option-group";
 import "@elements/core/images/composed/module-screenshot";
 import "@elements/core/inputs/composed/autocomplete-option";
 import "@elements/core/player-popup/player-popup";
+import "@elements/core/share-jig/embed";
+import "@elements/core/share-jig/main";
+import "@elements/core/share-jig/option";
+import "@elements/core/share-jig/students";
+import "@elements/core/share-jig/gen-code-button";
 import "@elements/entry/home/home/home-full";
 import "@elements/entry/home/home/search-section/search-section";
 import "@elements/entry/home/home/search-section/search-bar";

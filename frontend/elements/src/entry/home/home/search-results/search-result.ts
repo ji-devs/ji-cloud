@@ -28,7 +28,7 @@ export class _ extends LitElement {
                     perspective: 1000px;
                     position: relative;
                 }
-                :host(:hover) .wrapper {
+                :host(:hover) .wrapper, :host([flipped]) .wrapper {
                     transform: rotateY(180deg);
                 }
                 .main,
@@ -236,11 +236,24 @@ export class _ extends LitElement {
                     align-items: center;
                     column-gap: 6px;
                 }
-                .hover .play-button-wrapper {
+                .hover .result-actions {
                     height: 82px;
                     box-shadow: 0 3px 12px 0 rgba(0, 0, 0, 0.12);
                     display: grid;
-                    place-content: center;
+                    place-content:
+                    display: grid;
+                    grid-template-columns: 50% 50%;
+                    padding: 0 24px; center;
+                }
+                .hover .extra-actions {
+                    margin-right: auto;
+                    display: flex;
+                    gap: 8px;
+                    align-items: center;
+                }
+                .hover .primary-action {
+                    margin-left: auto;
+                    align-self: center;
                 }
             `,
         ];
@@ -284,6 +297,9 @@ export class _ extends LitElement {
 
     @property({ type: Boolean })
     showAdditionalResources: boolean = true;
+
+    @property({ type: Boolean, reflect: true })
+    flipped: boolean = false;
 
     renderCount(label: string, count: number) {
         // See related comment in renderCountDivider.
@@ -401,8 +417,13 @@ export class _ extends LitElement {
                             </div>
                         </div>
                     </div>
-                    <div class="play-button-wrapper">
-                        <slot name="play-button"></slot>
+                    <div class="result-actions">
+                        <div class="extra-actions">
+                            <slot name="actions"></slot>
+                        </div>
+                        <div class="primary-action">
+                            <slot name="play-button"></slot>
+                        </div>
                     </div>
                 </div>
             </div>

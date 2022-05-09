@@ -1,5 +1,5 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
-import { nothing } from "lit-html";
+import { nothing, Part } from "lit-html";
 import { classMap } from "lit-html/directives/class-map";
 import "@elements/core/images/ui";
 
@@ -80,6 +80,15 @@ export class _ extends LitElement {
     @property()
     icon: IconKind = "circle-check";
 
+    @property()
+    iconPath?: string;
+
+    @property()
+    iconHoverPath?: string;
+
+    @property()
+    iconActivePath?: string;
+
     @property({ reflect: true })
     size: IconSize | undefined;
 
@@ -116,9 +125,8 @@ export class _ extends LitElement {
         }
     }
 
-    render() {
+    renderKnownIcon() {
         const { icon, hover, active } = this;
-
         const filename =
             icon === "circle-check"
                 ? "circle-check-green"
@@ -147,30 +155,71 @@ export class _ extends LitElement {
             visible: isActive,
         });
 
-        /* to try and minimize missing image flashes, load them all
-      TODO - sprite sheets
-    */
         const regularImage = html`<img-ui
             class=${regularClasses}
             path="${basePath}/${filename}.svg"
         ></img-ui>`;
         const hoverImage = hoverSet.has(icon)
             ? html`<img-ui
-                  class=${hoverClasses}
-                  path="${basePath}/${filename}-hover.svg"
-              ></img-ui>`
+                class=${hoverClasses}
+                path="${basePath}/${filename}-hover.svg"
+            ></img-ui>`
             : nothing;
         const activeImage = activeSet.has(icon)
             ? html`<img-ui
-                  class=${activeClasses}
-                  path="${basePath}/${filename}-active.svg"
-              ></img-ui>`
+                class=${activeClasses}
+                path="${basePath}/${filename}-active.svg"
+            ></img-ui>`
             : nothing;
 
         const images = html` ${regularImage} ${hoverImage} ${activeImage} `;
 
+        /* to try and minimize missing image flashes, load them all
+        TODO - sprite sheets
+        */
         return wrapperSet.has(icon)
             ? html`<div class="wrapper">${images}</div>`
             : images;
+    }
+
+    renderIconFromPath() {
+        const { iconPath, iconHoverPath, iconActivePath, hover, active } = this;
+
+        const regularClasses = classMap({
+            visible: !active && !hover,
+        });
+        const hoverClasses = classMap({
+            visible: hover && !active,
+        });
+        const activeClasses = classMap({
+            visible: active,
+        });
+
+        const regularImage = html`<img-ui
+            class=${regularClasses}
+            path=${iconPath}
+        ></img-ui>`;
+        const hoverImage = iconHoverPath
+            ? html`<img-ui
+                class=${hoverClasses}
+                path=${iconHoverPath}
+            ></img-ui>`
+            : nothing;
+        const activeImage = iconActivePath
+            ? html`<img-ui
+                class=${activeClasses}
+                path=${iconActivePath}
+            ></img-ui>`
+            : nothing;
+
+        return html` ${regularImage} ${hoverImage} ${activeImage} `;
+    }
+
+    render() {
+        if (this.iconPath) {
+            return this.renderIconFromPath();
+        } else {
+            return this.renderKnownIcon();
+        }
     }
 }
