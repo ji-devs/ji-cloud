@@ -118,12 +118,12 @@ async fn main() -> anyhow::Result<()> {
 
         let algolia_manager = crate::algolia::Manager::new(algolia_settings, db_pool.clone())?;
 
-        if let Some(algolia_manager) = &algolia_manager {
-            algolia_manager
-                .migrate()
-                .await
-                .context("Algolia migration failed")?;
-        }
+        // if let Some(algolia_manager) = &algolia_manager {
+        //     algolia_manager
+        //         .migrate()
+        //         .await
+        //         .context("Algolia migration failed")?;
+        // }
 
         let media_upload_cleaner =
             service::upload::cleaner::UploadCleaner::new(db_pool.clone(), db::UPLOADS_DB_SCHEMA)?;
