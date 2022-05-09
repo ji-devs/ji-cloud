@@ -1,6 +1,6 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 
-export type Kind = "students" | "embed" | "copy";
+export type Kind = "students" | "embed" | "copy" | "google-classroom";
 
 @customElement("share-jig-option")
 export class _ extends LitElement {
@@ -27,6 +27,9 @@ export class _ extends LitElement {
                     background-color: var(--light-blue-2);
                     border-radius: 50%;
                 }
+                img-ui {
+                    width: 32px;
+                }
             `,
         ];
     }
@@ -35,6 +38,7 @@ export class _ extends LitElement {
     kind: Kind = "students";
 
     render() {
+
         return html`
             <slot slot="back" name="back"></slot>
             <slot slot="close" name="close"></slot>

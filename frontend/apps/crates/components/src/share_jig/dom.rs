@@ -3,13 +3,14 @@ use std::rc::Rc;
 use dominator::{clone, html, with_node, Dom, EventOptions};
 use futures_signals::signal::SignalExt;
 use gloo_timers::callback::Timeout;
+use js_sys::encode_uri_component;
 use shared::config::JIG_PLAYER_SESSION_VALID_DURATION_SECS;
 use utils::{
     clipboard, events,
     routes::{KidsRoute, Route},
     unwrap::UnwrapJiExt,
 };
-use web_sys::HtmlElement;
+use web_sys::{window, HtmlElement};
 
 use crate::{
     animation::fade::{Fade, FadeKind},
@@ -29,6 +30,7 @@ const STR_BACK: &str = "Back";
 const STR_COPIED: &str = "Copied to the clipboard";
 const STR_COPY_CODE: &str = "Copy Code";
 const JIGZI_BASE_URL: &str = "https://jigzi.org";
+const STR_CLASSROOM: &str = "Share to Google Classroom";
 const STR_STUDENTS_LABEL: &str = "Share with students";
 const STR_EMBED_LABEL: &str = "Embed this JIG";
 const STR_COPY_LABEL: &str = "Copy JIG link";
@@ -106,6 +108,16 @@ impl ShareJig {
                     .text(STR_STUDENTS_LABEL)
                     .event(clone!(state => move |_: events::Click| {
                         state.active_popup.set(Some(ActivePopup::ShareStudents));
+                    }))
+                }),
+                html!("share-jig-option", {
+                    .property("kind", "google-classroom")
+                    .text(STR_CLASSROOM)
+                    .event(clone!(state => move |_: events::Click| {
+                        if let Some(window) = window() {
+                            let share_url = format!("https://classroom.google.com/share?url={}", encode_uri_component(&state.jig_link(true)));
+                            let _ = window.open_with_url_and_target(&share_url, "_blank");
+                        }
                     }))
                 }),
                 html!("share-jig-option", {
