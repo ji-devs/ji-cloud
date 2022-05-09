@@ -8,7 +8,7 @@ use shared::domain::{
     jig::{JigFocus, JigResponse},
     meta::ResourceTypeId,
 };
-use std::{rc::Rc, str::FromStr};
+use std::rc::Rc;
 use utils::{
     ages::AgeRangeVecExt,
     events,
@@ -16,7 +16,6 @@ use utils::{
     prelude::get_user,
     routes::{JigEditRoute, JigRoute, Route},
 };
-use uuid::Uuid;
 
 use super::state::SearchResultsSection;
 
