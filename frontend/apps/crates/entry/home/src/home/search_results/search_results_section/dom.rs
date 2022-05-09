@@ -1,4 +1,4 @@
-use components::module::_common::thumbnail::ModuleThumbnail;
+use components::{module::_common::thumbnail::ModuleThumbnail, share_jig::ShareJig};
 use dominator::{clone, html, Dom};
 use futures_signals::{
     signal::{Signal, SignalExt},
@@ -8,12 +8,15 @@ use shared::domain::{
     jig::{JigFocus, JigResponse},
     meta::ResourceTypeId,
 };
-use std::rc::Rc;
+use std::{rc::Rc, str::FromStr};
 use utils::{
     ages::AgeRangeVecExt,
     events,
     jig::{published_at_string, ResourceContentExt},
+    prelude::get_user,
+    routes::{JigEditRoute, JigRoute, Route},
 };
+use uuid::Uuid;
 
 use super::state::SearchResultsSection;
 
@@ -22,6 +25,9 @@ const STR_LOAD_MORE: &str = "See more";
 impl SearchResultsSection {
     pub fn render(self: &Rc<Self>) -> Dom {
         let state = self;
+
+        // Only set this once, but I don't want to add once_cell crate when it's not really needed.
+        state.user.set(get_user().cloned());
 
         html!("home-search-results-section", {
             .property("slot", "sections")
@@ -59,6 +65,7 @@ impl SearchResultsSection {
     fn render_result(self: &Rc<Self>, jig: &JigResponse) -> Dom {
         let state = self;
         let jig_ages = jig.jig_data.age_ranges.clone();
+        let share_jig = ShareJig::new(jig.id);
 
         html!("home-search-result", {
             .property("slot", "results")
@@ -67,6 +74,7 @@ impl SearchResultsSection {
             .property("likedCount", jig.likes)
             .property("author", &jig.author_name.clone().unwrap_or_default())
             .property("language", &jig.jig_data.language)
+            .property_signal("flipped", share_jig.active_popup.signal_cloned().map(|active_popup| active_popup.is_some()))
             .property("kind", match state.focus {
                 JigFocus::Modules => "jig",
                 JigFocus::Resources => "resource",
@@ -90,7 +98,6 @@ impl SearchResultsSection {
                 Some("image")
             ))
             .apply_if(!jig.jig_data.categories.is_empty(), clone!(state => move |dom| {
-                log::info!("matches {}", matches!(state.focus, JigFocus::Modules));
                 dom.child(html!("home-search-result-details", {
                     .property("slot", "categories")
                     .child(html!("div", {
@@ -129,20 +136,47 @@ impl SearchResultsSection {
                 })
             }))
             .apply(|dom| {
+                let user_id = state.user.get_cloned().map(|user| user.id);
+
                 match jig.jig_focus {
                     JigFocus::Modules => {
-                        dom.child(html!("button-rect", {
-                            .property("slot", "play-button")
-                            .property("color", "red")
-                            .property("bold", true)
-                            .text("Play")
-                            .event({
-                                let jig_id = jig.id;
-                                clone!(state => move |_: events::Click| {
-                                    state.play_jig.set(Some(jig_id));
-                                })
+                        dom
+                            .child(share_jig.render(
+                                html!("button-icon-label", {
+                                    .property("slot", "actions")
+                                    .property("iconPath", "search/cards/share-backside.svg")
+                                    .property("iconHoverPath", "search/cards/share-backside-hover.svg")
+                                    .property("label", "Share")
+                                }),
+                                Some("actions"),
+                            ))
+                            .apply_if(Uuid::from_str("6ef067d8-5e41-11ec-8074-370723105f68").ok() == user_id, move |dom| {
+                                dom.child(html!("button-icon-label", {
+                                    .property("slot", "actions")
+                                    .property("iconPath", "search/cards/edit-backside.svg")
+                                    .property("iconHoverPath", "search/cards/edit-backside-hover.svg")
+                                    .property("label", "Edit")
+                                    .property("href", {
+                                        String::from(Route::Jig(JigRoute::Edit(
+                                            jig.id,
+                                            jig.jig_focus,
+                                            JigEditRoute::Landing
+                                        )))
+                                    })
+                                }))
                             })
-                        }))
+                            .child(html!("button-rect", {
+                                .property("slot", "play-button")
+                                .property("color", "red")
+                                .property("bold", true)
+                                .text("Play")
+                                .event({
+                                    let jig_id = jig.id;
+                                    clone!(state => move |_: events::Click| {
+                                        state.play_jig.set(Some(jig_id));
+                                    })
+                                })
+                            }))
                     },
                     JigFocus::Resources => {
                         dom.child({

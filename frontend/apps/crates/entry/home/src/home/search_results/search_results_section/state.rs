@@ -6,7 +6,10 @@ use futures_signals::{
     signal::{Mutable, Signal},
     signal_vec::{MutableVec, SignalVecExt},
 };
-use shared::domain::jig::{JigFocus, JigId, JigResponse, JigSearchResponse};
+use shared::domain::{
+    jig::{JigFocus, JigId, JigResponse, JigSearchResponse},
+    user::UserProfile,
+};
 
 use crate::home::state::SearchSelected;
 
@@ -21,6 +24,7 @@ pub struct SearchResultsSection {
     pub search_options: Rc<SearchOptions>,
     pub search_selected: Rc<SearchSelected>,
     pub play_jig: Mutable<Option<JigId>>,
+    pub user: Mutable<Option<UserProfile>>,
 }
 
 impl SearchResultsSection {
@@ -39,6 +43,7 @@ impl SearchResultsSection {
             search_options,
             search_selected,
             play_jig,
+            user: Mutable::new(None),
         })
     }
 

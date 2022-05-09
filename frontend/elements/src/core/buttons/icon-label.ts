@@ -9,11 +9,15 @@ export class _ extends LitElement {
     static get styles() {
         return [
             css`
-                :host {
+                :host, a {
                     display: inline-flex;
                     align-items: center;
                     gap: 8px;
                     cursor: pointer;
+                }
+
+                a {
+                    text-decoration: none;
                 }
 
                 :host([labelColor="blue"]) .label {
@@ -38,6 +42,15 @@ export class _ extends LitElement {
     icon: IconKind = "circle-check";
 
     @property()
+    iconPath?: string;
+
+    @property()
+    iconHoverPath?: string;
+
+    @property()
+    iconActivePath?: string;
+
+    @property()
     size: IconSize | undefined;
 
     @property({ type: Boolean, reflect: true })
@@ -45,6 +58,9 @@ export class _ extends LitElement {
 
     @property({ type: Boolean, reflect: true })
     active: boolean = false;
+
+    @property({ type: String })
+    href?: string;
 
     @property()
     label: string = "";
@@ -73,11 +89,14 @@ export class _ extends LitElement {
     }
 
     render() {
-        const { icon, active, hover, label, size } = this;
+        const { icon, active, hover, label, size, iconPath, iconHoverPath, iconActivePath } = this;
 
-        return html`
+        const inner = html`
             <button-icon
                 .icon=${icon}
+                .iconPath=${iconPath}
+                .iconHoverPath=${iconHoverPath}
+                .iconActivePath=${iconActivePath}
                 .active=${active}
                 .hover=${hover}
                 .size=${size}
@@ -85,5 +104,7 @@ export class _ extends LitElement {
             ></button-icon>
             <div class="label">${label}</div>
         `;
+
+        return this.href ? html`<a href=${this.href}>${inner}</a>` : inner;
     }
 }
