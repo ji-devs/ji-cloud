@@ -150,7 +150,7 @@ impl SearchResultsSection {
                                 }),
                                 Some("actions"),
                             ))
-                            .apply_if(Uuid::from_str("6ef067d8-5e41-11ec-8074-370723105f68").ok() == user_id, move |dom| {
+                            .apply_if(jig.author_id == user_id, move |dom| {
                                 dom.child(html!("button-icon-label", {
                                     .property("slot", "actions")
                                     .property("iconPath", "search/cards/edit-backside.svg")
