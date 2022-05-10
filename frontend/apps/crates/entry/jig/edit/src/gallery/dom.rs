@@ -144,8 +144,7 @@ impl JigGallery {
                             .apply(|dom| {
                                 match jig.published_at {
                                     None => {
-                                        // dom.property("draft", true)
-                                        dom
+                                        dom.property("draft", true)
                                     },
                                     Some(published_at) => {
                                         dom.property("publishedAt", published_at_string(published_at, true))
