@@ -15,6 +15,30 @@ export class _ extends LitElement {
     static get styles() {
         return [
             css`
+                @keyframes jump {
+                    0% {
+                        transform: scaleX(-1) translateY(0px);
+                    }
+                    20% {
+                        transform: scaleX(-1) translateY(0px);
+                    }
+                    36% {
+                        transform: scaleX(-1) translateY(-78px);
+                    }
+                    62% {
+                        transform: scaleX(-1) translateY(-55px);
+                    }
+                    68% {
+                        transform: scaleX(-1) translateY(-64px);
+                    }
+                    84% {
+                        transform: scaleX(-1) translateY(-58px);
+                    }
+                    100% {
+                        transform: scaleX(-1) translateY(-60px);
+                    }
+                }
+
                 :host {
                     display: inline-block;
                     perspective: 2000px;
@@ -255,6 +279,17 @@ export class _ extends LitElement {
                     margin-left: auto;
                     align-self: center;
                 }
+
+                img-ui.jiggling {
+                    position: absolute;
+                    top: 0%;
+                    left: 5%;
+                }
+
+                :host(:hover) img-ui.jiggling {
+                    animation: jump 1s ease-in-out;
+                    transform: scaleX(-1) translateY(-60px);
+                }
             `,
         ];
     }
@@ -329,8 +364,15 @@ export class _ extends LitElement {
     }
 
     render() {
+        let jiggling = this.kind === 'jig'
+            ? html`<img-ui
+                    class="jiggling"
+                    path="search/cards/jig-jiggling.svg"
+                ></img-ui>`
+            : nothing
         return html`
             <div class="wrapper">
+                ${jiggling}
                 <div class="main">
                     <slot name="image"></slot>
                     <h3 class="title">${this.title}</h3>
