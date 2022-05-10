@@ -25,13 +25,13 @@ export class _ extends LitElement {
                     36% {
                         transform: scaleX(-1) translateY(-78px);
                     }
-                    62% {
+                    52% {
                         transform: scaleX(-1) translateY(-55px);
                     }
-                    68% {
+                    70% {
                         transform: scaleX(-1) translateY(-64px);
                     }
-                    84% {
+                    90% {
                         transform: scaleX(-1) translateY(-58px);
                     }
                     100% {
@@ -289,6 +289,13 @@ export class _ extends LitElement {
                 :host(:hover) img-ui.jiggling {
                     animation: jump 1s ease-in-out;
                     transform: scaleX(-1) translateY(-60px);
+                }
+                @media not all and (min-resolution:.001dpcm) {
+                    @supports (-webkit-appearance:none) {
+                        img-ui.jiggling {
+                            display: none;
+                        }
+                    }
                 }
             `,
         ];
