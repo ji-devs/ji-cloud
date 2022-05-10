@@ -143,6 +143,7 @@ impl SearchResultsSection {
                             .child(share_jig.render(
                                 html!("button-icon-label", {
                                     .property("slot", "actions")
+                                    .property("labelColor", "dark-blue")
                                     .property("iconPath", "search/cards/share-backside.svg")
                                     .property("iconHoverPath", "search/cards/share-backside-hover.svg")
                                     .property("label", "Share")
@@ -152,6 +153,7 @@ impl SearchResultsSection {
                             .apply_if(jig.author_id == user_id, move |dom| {
                                 dom.child(html!("button-icon-label", {
                                     .property("slot", "actions")
+                                    .property("labelColor", "dark-blue")
                                     .property("iconPath", "search/cards/edit-backside.svg")
                                     .property("iconHoverPath", "search/cards/edit-backside-hover.svg")
                                     .property("label", "Edit")
@@ -164,10 +166,12 @@ impl SearchResultsSection {
                                     })
                                 }))
                             })
-                            .child(html!("button-rect", {
+                            .child(html!("button-rect-icon", {
                                 .property("slot", "play-button")
                                 .property("color", "red")
                                 .property("bold", true)
+                                .property("size", "small")
+                                .property("iconBeforePath", "search/cards/play.svg")
                                 .text("Play")
                                 .event({
                                     let jig_id = jig.id;

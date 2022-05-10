@@ -2,7 +2,7 @@ import { LitElement, html, css, customElement, property } from "lit-element";
 import { IconKind, IconSize } from "./icon";
 import "./icon";
 
-export type LabelColor = "blue";
+export type LabelColor = "blue" | "dark-blue";
 
 @customElement("button-icon-label")
 export class _ extends LitElement {
@@ -12,7 +12,7 @@ export class _ extends LitElement {
                 :host, a {
                     display: inline-flex;
                     align-items: center;
-                    gap: 8px;
+                    gap: 2px;
                     cursor: pointer;
                 }
 
@@ -22,6 +22,13 @@ export class _ extends LitElement {
 
                 :host([labelColor="blue"]) .label {
                     color: var(--main-blue);
+                }
+
+                :host([labelColor="dark-blue"]) .label {
+                    color: var(--dark-blue-1);
+                }
+                :host(:hover[labelColor="dark-blue"]) .label {
+                    color: var(--dark-blue-2);
                 }
 
                 .label {
