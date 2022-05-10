@@ -47,8 +47,15 @@ export class _ extends LitElement {
 
     @property()
     iconBefore?: IconBefore;
+
+    @property({ type: String })
+    iconBeforePath?: string;
+
     @property()
     iconAfter?: IconAfter;
+
+    @property({ type: String })
+    iconAfterPath?: string;
 
     connectedCallback() {
         super.connectedCallback();
@@ -64,25 +71,31 @@ export class _ extends LitElement {
 
     render() {
         const { iconBefore, iconAfter, color, disabled } = this;
+        let { iconBeforePath, iconAfterPath } = this;
 
-        const iconBeforePath =
-            iconBefore === "magnifier"
-                ? "core/buttons/rect/magnifier.svg"
-                : iconBefore === "share"
-                ? `core/buttons/rect/share-${color}.svg`
-                : iconBefore === "create"
-                ? `core/buttons/rect/plus-${color}.svg`
-                : iconBefore === "play"
-                ? `core/buttons/rect/play-${color}.svg`
-                : iconBefore === "plus"
-                ? getPlus(color)
-                : nothing;
-        const iconAfterPath =
-            iconAfter === "arrow"
-                ? getArrow(disabled)
-                : iconAfter === "done"
-                ? "core/buttons/rect/done-check.svg"
-                : "";
+        if (!iconBeforePath) {
+            iconBeforePath =
+                iconBefore === "magnifier"
+                    ? "core/buttons/rect/magnifier.svg"
+                    : iconBefore === "share"
+                    ? `core/buttons/rect/share-${color}.svg`
+                    : iconBefore === "create"
+                    ? `core/buttons/rect/plus-${color}.svg`
+                    : iconBefore === "play"
+                    ? `core/buttons/rect/play-${color}.svg`
+                    : iconBefore === "plus"
+                    ? getPlus(color)
+                    : undefined
+        }
+
+        if (!iconAfterPath) {
+            iconAfterPath =
+                iconAfter === "arrow"
+                    ? getArrow(disabled)
+                    : iconAfter === "done"
+                    ? "core/buttons/rect/done-check.svg"
+                    : undefined;
+        }
 
         return html`
             <button-rect
@@ -97,10 +110,10 @@ export class _ extends LitElement {
                 target="${ifDefined(this.target)}"
             >
                 <div class="content">
-                    ${iconBefore &&
+                    ${iconBeforePath &&
                     html`<img-ui path="${iconBeforePath}"></img-ui>`}
                     <slot></slot>
-                    ${iconAfter &&
+                    ${iconAfterPath &&
                     html`<img-ui path="${iconAfterPath}"></img-ui>`}
                 </div>
             </button-rect>
@@ -108,7 +121,7 @@ export class _ extends LitElement {
     }
 }
 function getPlus(color: Color) {
-    return color === "blue" ? "core/inputs/plus-white.svg" : nothing;
+    return color === "blue" ? "core/inputs/plus-white.svg" : undefined;
 }
 
 function getArrow(disabled: boolean) {

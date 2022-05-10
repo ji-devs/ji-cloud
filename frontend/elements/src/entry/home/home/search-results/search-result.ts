@@ -290,6 +290,7 @@ export class _ extends LitElement {
                     animation: jump 1s ease-in-out;
                     transform: scaleX(-1) translateY(-60px);
                 }
+
                 @media not all and (min-resolution:.001dpcm) {
                     @supports (-webkit-appearance:none) {
                         img-ui.jiggling {

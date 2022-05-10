@@ -1,6 +1,7 @@
 import "@elements/_bundles/_sub-bundles/page/header";
 import "@elements/_bundles/_sub-bundles/all";
 import "@elements/core/buttons/icon-label";
+import "@elements/core/buttons/rectangle-icon";
 import "@elements/core/images/ui";
 import "@elements/core/images/ji";
 import "@elements/core/inputs/composed/select/select";
