@@ -12,6 +12,7 @@ use serde::Serialize;
 use std::collections::HashMap;
 use tracing::{instrument, Instrument};
 
+use hashfn;
 use shared::{
     domain::{
         asset::PrivacyLevel,
@@ -186,6 +187,76 @@ impl Manager {
                 }
             }
         }
+
+        Ok(())
+    }
+
+    pub async fn set_index_settings(&self) -> anyhow::Result<()> {
+        let mut txn = self.db.begin().await?;
+
+        let algolia_version = sqlx::query!(
+            r#"
+with new_row as (
+    insert into "settings" default values on conflict(singleton) do nothing returning algolia_index_version
+)
+select algolia_index_version as "algolia_index_version!" from new_row
+union
+select algolia_index_version as "algolia_index_version!" from "settings"
+"#,
+        )
+        .fetch_one(&mut txn)
+        .await?
+        .algolia_index_version;
+
+        if algolia_version == migration::INDEX_VERSION {
+            return Ok(());
+        }
+
+        let migrations_to_run = &migration::INDEXING_MIGRATIONS[(algolia_version as usize)..];
+
+        for (idx, (_, updater)) in migrations_to_run.iter().enumerate() {
+            updater(
+                &self.inner,
+                &self.media_index,
+                &self.jig_index,
+                &self.course_index,
+            )
+            .await
+            .with_context(|| {
+                anyhow::anyhow!(
+                    "error while running algolia updater #{}",
+                    idx + (algolia_version as usize) + 1
+                )
+            })?;
+        }
+
+        // currently this can only be "no resync" or "complete resync" but eventually
+        // we might want to be able to "resync everything that's only had an initial sync" or "everything that has had an update"
+        let resync_mask =
+            migrations_to_run
+                .iter()
+                .fold(ResyncKind::None, |acc, &(curr, _)| match (acc, curr) {
+                    (_, ResyncKind::Complete) | (ResyncKind::Complete, _) => ResyncKind::Complete,
+                    _ => ResyncKind::None,
+                });
+
+        match resync_mask {
+            ResyncKind::Complete => {
+                sqlx::query!("update image_metadata set last_synced_at = null")
+                    .execute(&mut txn)
+                    .await?;
+            }
+            ResyncKind::None => {}
+        }
+
+        sqlx::query!(
+            r#"update "settings" set algolia_index_version = $1"#,
+            migration::INDEX_VERSION
+        )
+        .execute(&mut txn)
+        .await?;
+
+        txn.commit().await?;
 
         Ok(())
     }
