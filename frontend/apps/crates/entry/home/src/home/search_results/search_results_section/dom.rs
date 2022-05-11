@@ -146,6 +146,7 @@ impl SearchResultsSection {
                                     .property("labelColor", "dark-blue")
                                     .property("iconPath", "search/cards/share-backside.svg")
                                     .property("iconHoverPath", "search/cards/share-backside-hover.svg")
+                                    .property("gapOverride", "0px")
                                     .property("label", "Share")
                                 }),
                                 Some("actions"),
@@ -156,6 +157,7 @@ impl SearchResultsSection {
                                     .property("labelColor", "dark-blue")
                                     .property("iconPath", "search/cards/edit-backside.svg")
                                     .property("iconHoverPath", "search/cards/edit-backside-hover.svg")
+                                    .property("gapOverride", "0px")
                                     .property("label", "Edit")
                                     .property("href", {
                                         String::from(Route::Jig(JigRoute::Edit(
