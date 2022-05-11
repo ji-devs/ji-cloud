@@ -9,10 +9,13 @@ export class _ extends LitElement {
     static get styles() {
         return [
             css`
+                :host {
+                    --gap-override: 4px;
+                }
                 :host, a {
                     display: inline-flex;
                     align-items: center;
-                    gap: 2px;
+                    gap: var(--gap-override);
                     cursor: pointer;
                 }
 
@@ -75,6 +78,9 @@ export class _ extends LitElement {
     @property({ reflect: true })
     labelColor: LabelColor = "blue";
 
+    @property({ type: String })
+    gapOverride?: string;
+
     connectedCallback() {
         super.connectedCallback();
         this.addEventListener("mouseenter", this.onMouseEnter);
@@ -85,6 +91,12 @@ export class _ extends LitElement {
         super.disconnectedCallback();
         this.removeEventListener("mouseenter", this.onMouseEnter);
         this.removeEventListener("mouseleave", this.onMouseLeave);
+    }
+
+    updated() {
+        if (this.gapOverride) {
+            this.style.setProperty("--gap-override", this.gapOverride);
+        }
     }
 
     onMouseEnter() {

@@ -272,7 +272,7 @@ export class _ extends LitElement {
                 .hover .extra-actions {
                     margin-right: auto;
                     display: flex;
-                    gap: 8px;
+                    gap: 16px;
                     align-items: center;
                 }
                 .hover .primary-action {
