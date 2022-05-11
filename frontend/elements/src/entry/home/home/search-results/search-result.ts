@@ -291,6 +291,10 @@ export class _ extends LitElement {
                     transform: scaleX(-1) translateY(-60px);
                 }
 
+                /*
+                * [Ty] Added to temporarily disable the jiggling on the back of search result
+                * cards
+                */
                 @media not all and (min-resolution:.001dpcm) {
                     @supports (-webkit-appearance:none) {
                         img-ui.jiggling {
