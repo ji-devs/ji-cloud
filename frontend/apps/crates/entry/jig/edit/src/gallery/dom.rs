@@ -132,11 +132,11 @@ impl JigGallery {
                             .property("slot", "recent-items")
                             .property("label", jig.jig_data.display_name.clone())
                             .property("href", {
-                                String::from(Route::Jig(JigRoute::Edit(
+                                String::from(Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
                                     jig.id,
                                     jig.jig_focus,
                                     JigEditRoute::Landing
-                                )))
+                                ))))
                             })
                             .property_signal("ages", state.age_ranges.signal_cloned().map(move|age_ranges| {
                                 age_ranges.range_string(&jig_ages)

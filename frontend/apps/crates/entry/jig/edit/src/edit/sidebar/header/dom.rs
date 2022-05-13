@@ -35,7 +35,7 @@ impl HeaderDom {
                     .property("weight", "medium")
                     .text(STR_MY_JIGS)
                     .event(|_:events::Click| {
-                        let url:String = Route::Jig(JigRoute::Gallery).into();
+                        let url:String = Route::Asset(AssetRoute::JigGallery).into();
                         dominator::routing::go_to_url(&url);
                     })
                 }),
@@ -45,11 +45,11 @@ impl HeaderDom {
                     .property("icon", "fa-light fa-grid")
                     .event(clone!(sidebar_state => move |_:events::Click| {
                         sidebar_state.jig_edit_state.route.set_neq(JigEditRoute::Landing);
-                        let url:String = Route::Jig(JigRoute::Edit(
+                        let url:String = Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
                             sidebar_state.jig.id,
                             sidebar_state.jig.jig_focus,
                             JigEditRoute::Landing
-                        )).into();
+                        ))).into();
                         dominator::routing::go_to_url(&url);
                     }))
                 }),

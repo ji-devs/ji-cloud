@@ -48,11 +48,11 @@ pub fn navigate_to_publish(state: Rc<State>) {
     state.collapsed.set(true);
 
     let jig_id = state.jig.id;
-    Route::push_state(Route::Jig(JigRoute::Edit(
+    Route::push_state(Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
         jig_id,
         state.jig.jig_focus,
         JigEditRoute::Publish,
-    )));
+    ))));
 }
 
 pub fn set_highlight_modules(state: &Rc<State>, highlight: bool) {
@@ -165,11 +165,11 @@ pub fn on_iframe_message(state: Rc<State>, message: ModuleToJigEditorMessage) {
         ModuleToJigEditorMessage::Next => {
             state.jig_edit_state.route.set_neq(JigEditRoute::Landing);
             let jig_id = state.jig.id;
-            Route::push_state(Route::Jig(JigRoute::Edit(
+            Route::push_state(Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
                 jig_id,
                 state.jig.jig_focus,
                 JigEditRoute::Landing,
-            )));
+            ))));
         }
         ModuleToJigEditorMessage::Publish => {
             navigate_to_publish(state);

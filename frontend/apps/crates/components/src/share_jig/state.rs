@@ -4,7 +4,7 @@ use awsm_web::loaders::helpers::AsyncLoader;
 use futures_signals::signal::Mutable;
 use shared::domain::jig::JigId;
 use utils::jig::JigPlayerOptions;
-use utils::routes::{JigRoute, Route};
+use utils::routes::{AssetRoute, Route};
 
 use utils::prelude::*;
 
@@ -42,7 +42,7 @@ impl ShareJig {
     }
 
     pub fn jig_link(&self, is_student: bool) -> String {
-        let url = Route::Jig(JigRoute::Play(
+        let url = Route::Asset(AssetRoute::Play(
             self.jig_id,
             None,
             JigPlayerOptions {

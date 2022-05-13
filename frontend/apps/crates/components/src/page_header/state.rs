@@ -3,7 +3,7 @@ use futures_signals::signal::Mutable;
 use shared::domain::user::UserProfile;
 use strum_macros::EnumIter;
 use utils::{
-    routes::{HomeRoute, JigRoute, Route},
+    routes::{AssetRoute, HomeRoute, Route},
     storage,
     unwrap::UnwrapJiExt,
 };
@@ -85,7 +85,7 @@ impl PageLinks {
         match self {
             Self::Home => Route::Home(HomeRoute::Home).to_string(),
             Self::Content => Route::Home(HomeRoute::Search(None)).to_string(),
-            Self::Create => Route::Jig(JigRoute::Gallery).to_string(),
+            Self::Create => Route::Asset(AssetRoute::JigGallery).to_string(),
             Self::Community => "javascript:alert(\"Coming soon\")".to_string(),
             Self::Classroom => "javascript:alert(\"Coming soon\")".to_string(),
             Self::About => "https://www.jewishinteractive.org/ji-about-us".to_string(),

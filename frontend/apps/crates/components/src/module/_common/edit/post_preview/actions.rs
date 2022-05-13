@@ -25,11 +25,11 @@ impl PostPreview {
         if msg.try_post_message_to_editor().is_err() {
             log::info!("Couldn't post message to top... redirect!");
 
-            let route: String = Route::Jig(JigRoute::Edit(
+            let route: String = Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
                 self.jig_id,
                 JigFocus::Modules, // only module focused jigs are should be here
                 JigEditRoute::Landing,
-            ))
+            )))
             .into();
             dominator::routing::go_to_url(&route);
         }
@@ -41,11 +41,11 @@ impl PostPreview {
         if msg.try_post_message_to_editor().is_err() {
             log::info!("Couldn't post message to top... redirect!");
 
-            let route: String = Route::Jig(JigRoute::Edit(
+            let route: String = Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
                 self.jig_id,
                 JigFocus::Modules, // only module focused jigs are should be here
                 JigEditRoute::Landing,
-            ))
+            )))
             .into();
             dominator::routing::go_to_url(&route);
         }
@@ -86,11 +86,11 @@ impl PostPreview {
 
                     if msg.try_post_message_to_editor().is_err() {
                         log::info!("Couldn't post message to parent... redirect!");
-                        let route: String = Route::Jig(JigRoute::Edit(
+                        let route: String = Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
                             jig_id,
                             JigFocus::Modules, // only module focused jigs are should be here
                             JigEditRoute::Module(module_id),
-                        ))
+                        )))
                         .into();
                         dominator::routing::go_to_url(&route);
                     }

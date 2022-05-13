@@ -10,7 +10,7 @@ use shared::{
 };
 use utils::{
     prelude::api_with_auth,
-    routes::{JigEditRoute, JigRoute, Route},
+    routes::{AssetEditRoute, AssetRoute, JigEditRoute, Route},
 };
 
 use super::state::State;
@@ -32,8 +32,12 @@ pub fn create_jig(state: Rc<State>) {
         .await
         {
             Ok(resp) => {
-                let url: String =
-                    Route::Jig(JigRoute::Edit(resp.id, jig_focus, JigEditRoute::Landing)).into();
+                let url: String = Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
+                    resp.id,
+                    jig_focus,
+                    JigEditRoute::Landing,
+                )))
+                .into();
                 dominator::routing::go_to_url(&url);
             }
             Err(_) => {

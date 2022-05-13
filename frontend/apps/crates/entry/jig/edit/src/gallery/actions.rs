@@ -147,11 +147,11 @@ impl JigGallery {
                     if state.focus.is_resources() {
                         Self::add_resource_cover(&resp.id).await;
                     }
-                    let url: String = Route::Jig(JigRoute::Edit(
+                    let url: String = Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
                         resp.id,
                         state.focus,
                         JigEditRoute::Landing
-                    )).into();
+                    ))).into();
                     dominator::routing::go_to_url(&url);
                 }
                 Err(_) => todo!("")

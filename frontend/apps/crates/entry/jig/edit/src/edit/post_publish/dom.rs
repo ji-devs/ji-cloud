@@ -4,7 +4,7 @@ use shared::domain::jig::JigId;
 use utils::{
     events,
     jig::JigPlayerOptions,
-    routes::{JigRoute, Route},
+    routes::{AssetRoute, Route},
 };
 
 use super::{super::state::State as JigEditState, actions, state::*};
@@ -71,7 +71,7 @@ fn render_resources_focused_actions(state: &Rc<State>) -> Vec<Dom> {
             .property("kind", "view-resources")
             .property("slot", "actions")
             .event(|_: events::Click| {
-                Route::Jig(JigRoute::ResourceGallery).redirect();
+                Route::Asset(AssetRoute::ResourceGallery).redirect();
             })
         }),
     ]

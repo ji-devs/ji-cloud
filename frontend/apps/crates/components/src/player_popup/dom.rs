@@ -6,7 +6,7 @@ use utils::{
     events,
     iframe::{IframeInit, JigPlayerToPlayerPopup},
     prelude::SETTINGS,
-    routes::{JigRoute, Route},
+    routes::{AssetRoute, Route},
     unwrap::UnwrapJiExt,
 };
 
@@ -35,7 +35,7 @@ impl PlayerPopup {
                             .property("slot", "iframe")
                             .property("allow", "autoplay; fullscreen")
                             .property("src", {
-                                let url: String = Route::Jig(JigRoute::Play(state.jig_id, None, state.player_options.clone())).into();
+                                let url: String = Route::Asset(AssetRoute::Play(state.jig_id, None, state.player_options.clone())).into();
                                 let url = unsafe {
                                     SETTINGS.get_unchecked()
                                         .remote_target

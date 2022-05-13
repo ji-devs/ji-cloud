@@ -14,7 +14,7 @@ use shared::{
 };
 use utils::{
     prelude::{api_with_auth, api_with_auth_empty, UnwrapJiExt},
-    routes::{JigEditRoute, JigRoute, Route},
+    routes::{AssetEditRoute, AssetRoute, JigEditRoute, Route},
 };
 
 use super::super::state::State as JigEditState;
@@ -112,11 +112,11 @@ impl Publish {
 
                     state.jig_edit_state.route.set_neq(JigEditRoute::PostPublish);
 
-                    let url: String = Route::Jig(JigRoute::Edit(
+                    let url: String = Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
                         state.jig.id,
                         state.jig.jig_focus,
                         JigEditRoute::PostPublish
-                    )).into();
+                    ))).into();
                     log::info!("{}", url);
 
                     /* this will cause a full refresh - but preserves history

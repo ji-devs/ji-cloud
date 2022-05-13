@@ -1,6 +1,7 @@
 use crate::jig::JigPlayerOptions;
 use serde::{Deserialize, Serialize};
 use shared::domain::{
+    course::CourseId,
     image::{ImageId, ImageSearchQuery},
     jig::{module::ModuleId, JigFocus, JigId, JigSearchQuery, ModuleKind},
     session::OAuthUserProfile,
@@ -27,7 +28,7 @@ pub enum Route {
     Kids(KidsRoute),
     Admin(AdminRoute),
     Home(HomeRoute),
-    Jig(JigRoute),
+    Asset(AssetRoute),
     Module(ModuleRoute),
     Dev(DevRoute),
 }
@@ -145,18 +146,34 @@ pub enum AdminCurationRoute {
 }
 
 #[derive(Debug, Clone)]
-pub enum JigRoute {
-    Gallery,
+pub enum AssetRoute {
+    JigGallery,
+    CourseGallery,
     ResourceGallery,
-    // might make sense to move JigFocus one level up and get rid of ResourceGallery
-    Edit(JigId, JigFocus, JigEditRoute),
+    /// Here for compatibility reasons, can probably go away in a few months
+    // RedirectToJig(String),
+    Edit(AssetEditRoute),
     Play(JigId, Option<ModuleId>, JigPlayerOptions),
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum AssetEditRoute {
+    Jig(JigId, JigFocus, JigEditRoute),
+    Course(CourseId, CourseEditRoute),
 }
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum JigEditRoute {
     Landing,
     Module(ModuleId),
+    Publish,
+    PostPublish,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum CourseEditRoute {
+    Landing,
+    Cover,
     Publish,
     PostPublish,
 }
@@ -312,62 +329,91 @@ impl Route {
             }
             ["admin", "export"] => Self::Admin(AdminRoute::Export),
             ["admin"] => Self::Admin(AdminRoute::Landing),
-            ["jig", "edit", "gallery"] => Self::Jig(JigRoute::Gallery),
-            ["jig", "edit", "resource-gallery"] => Self::Jig(JigRoute::ResourceGallery),
-            ["jig", "edit", jig_id, "publish"] => {
+            // ["jig", "edit", path] => Self::Asset(AssetRoute::RedirectToJig(path.to_string())),
+            ["asset", "edit", "jig-gallery"] => Self::Asset(AssetRoute::JigGallery),
+            ["asset", "edit", "course-gallery"] => Self::Asset(AssetRoute::CourseGallery),
+            ["asset", "edit", "resource-gallery"] => Self::Asset(AssetRoute::ResourceGallery),
+            ["asset", "edit", "jig", jig_id, "publish"] => {
                 let focus = params_map.get(JIG_FOCUS_KEY).unwrap_or_default();
                 let focus = JigFocus::try_from(focus.as_str()).unwrap_or_default();
 
-                Self::Jig(JigRoute::Edit(
+                Self::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
                     JigId(Uuid::from_str(jig_id).unwrap_ji()),
                     focus,
                     JigEditRoute::Publish,
-                ))
+                )))
             }
-            ["jig", "edit", jig_id, "post-publish"] => {
+            ["asset", "edit", "jig", jig_id, "post-publish"] => {
                 let focus = params_map.get(JIG_FOCUS_KEY).unwrap_or_default();
                 let focus = JigFocus::try_from(focus.as_str()).unwrap_or_default();
 
-                Self::Jig(JigRoute::Edit(
+                Self::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
                     JigId(Uuid::from_str(jig_id).unwrap_ji()),
                     focus,
                     JigEditRoute::PostPublish,
-                ))
+                )))
             }
-            ["jig", "edit", "debug"] => {
+            ["asset", "edit", "jig", "debug"] => {
                 let focus = params_map.get(JIG_FOCUS_KEY).unwrap_or_default();
                 let focus = JigFocus::try_from(focus.as_str()).unwrap_or_default();
 
-                Self::Jig(JigRoute::Edit(
+                Self::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
                     JigId(Uuid::from_u128(0)),
                     focus,
                     JigEditRoute::Landing,
-                ))
+                )))
             }
-            ["jig", "edit", jig_id] => {
+            ["asset", "edit", "jig", jig_id] => {
                 let focus = params_map.get(JIG_FOCUS_KEY).unwrap_or_default();
                 let focus = JigFocus::try_from(focus.as_str()).unwrap_or_default();
 
-                Self::Jig(JigRoute::Edit(
+                Self::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
                     JigId(Uuid::from_str(jig_id).unwrap_ji()),
                     focus,
                     JigEditRoute::Landing,
-                ))
+                )))
             }
-            ["jig", "edit", jig_id, module_id] => {
+            ["asset", "edit", "jig", jig_id, module_id] => {
                 let focus = params_map.get(JIG_FOCUS_KEY).unwrap_or_default();
                 let focus = JigFocus::try_from(focus.as_str()).unwrap_or_default();
 
-                Self::Jig(JigRoute::Edit(
+                Self::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
                     JigId(Uuid::from_str(jig_id).unwrap_ji()),
                     focus,
                     JigEditRoute::Module(ModuleId(Uuid::from_str(module_id).unwrap_ji())),
-                ))
+                )))
+            }
+            ["asset", "edit", "course", course_id, "publish"] => {
+                Self::Asset(AssetRoute::Edit(AssetEditRoute::Course(
+                    CourseId(Uuid::from_str(course_id).unwrap_ji()),
+                    CourseEditRoute::Publish,
+                )))
+            }
+            ["asset", "edit", "course", course_id, "post-publish"] => {
+                Self::Asset(AssetRoute::Edit(AssetEditRoute::Course(
+                    CourseId(Uuid::from_str(course_id).unwrap_ji()),
+                    CourseEditRoute::PostPublish,
+                )))
+            }
+            ["asset", "edit", "course", "debug"] => Self::Asset(AssetRoute::Edit(
+                AssetEditRoute::Course(CourseId(Uuid::from_u128(0)), CourseEditRoute::Landing),
+            )),
+            ["asset", "edit", "course", course_id] => {
+                Self::Asset(AssetRoute::Edit(AssetEditRoute::Course(
+                    CourseId(Uuid::from_str(course_id).unwrap_ji()),
+                    CourseEditRoute::Landing,
+                )))
+            }
+            ["asset", "edit", "course", course_id, "cover"] => {
+                Self::Asset(AssetRoute::Edit(AssetEditRoute::Course(
+                    CourseId(Uuid::from_str(course_id).unwrap_ji()),
+                    CourseEditRoute::Cover,
+                )))
             }
             ["jig", "play", "debug"] => {
                 let search: JigPlayerOptions = serde_qs::from_str(&params_string).unwrap_ji();
 
-                Self::Jig(JigRoute::Play(
+                Self::Asset(AssetRoute::Play(
                     JigId(Uuid::from_u128(0)),
                     Some(ModuleId(Uuid::from_u128(0))),
                     search,
@@ -376,7 +422,7 @@ impl Route {
             ["jig", "play", jig_id] => {
                 let search: JigPlayerOptions = serde_qs::from_str(&params_string).unwrap_ji();
 
-                Self::Jig(JigRoute::Play(
+                Self::Asset(AssetRoute::Play(
                     JigId(Uuid::from_str(jig_id).unwrap_ji()),
                     None,
                     search,
@@ -386,7 +432,7 @@ impl Route {
             ["jig", "play", jig_id, module_id] => {
                 let search: JigPlayerOptions = serde_qs::from_str(&params_string).unwrap_ji();
 
-                Self::Jig(JigRoute::Play(
+                Self::Asset(AssetRoute::Play(
                     JigId(Uuid::from_str(jig_id).unwrap_ji()),
                     Some(ModuleId(Uuid::from_str(module_id).unwrap_ji())),
                     search,
@@ -506,32 +552,49 @@ impl From<&Route> for String {
                 }
                 AdminRoute::Export => "/admin/export".to_string(),
             },
-            Route::Jig(route) => match route {
-                JigRoute::Gallery => "/jig/edit/gallery".to_string(),
-                JigRoute::ResourceGallery => "/jig/edit/resource-gallery".to_string(),
-                JigRoute::Edit(jig_id, jig_focus, route) => {
-                    let focus_str = match jig_focus {
-                        JigFocus::Modules => String::new(),
-                        JigFocus::Resources => {
-                            format!("?{}={}", JIG_FOCUS_KEY, JigFocus::Resources.as_str())
-                        }
-                    };
-                    match route {
-                        JigEditRoute::Landing => {
-                            format!("/jig/edit/{}{}", jig_id.0, focus_str)
-                        }
-                        JigEditRoute::Module(module_id) => {
-                            format!("/jig/edit/{}/{}{}", jig_id.0, module_id.0, focus_str)
-                        }
-                        JigEditRoute::Publish => {
-                            format!("/jig/edit/{}/publish{}", jig_id.0, focus_str)
-                        }
-                        JigEditRoute::PostPublish => {
-                            format!("/jig/edit/{}/post-publish{}", jig_id.0, focus_str)
+            Route::Asset(route) => match route {
+                AssetRoute::JigGallery => "/asset/edit/jig-gallery".to_string(),
+                AssetRoute::CourseGallery => "/asset/edit/course-gallery".to_string(),
+                AssetRoute::ResourceGallery => "/asset/edit/resource-gallery".to_string(),
+                AssetRoute::Edit(route) => match route {
+                    AssetEditRoute::Jig(jig_id, jig_focus, route) => {
+                        let focus_str = match jig_focus {
+                            JigFocus::Modules => String::new(),
+                            JigFocus::Resources => {
+                                format!("?{}={}", JIG_FOCUS_KEY, JigFocus::Resources.as_str())
+                            }
+                        };
+                        match route {
+                            JigEditRoute::Landing => {
+                                format!("/asset/edit/jig/{}{}", jig_id.0, focus_str)
+                            }
+                            JigEditRoute::Module(module_id) => {
+                                format!("/asset/edit/jig/{}/{}{}", jig_id.0, module_id.0, focus_str)
+                            }
+                            JigEditRoute::Publish => {
+                                format!("/asset/edit/jig/{}/publish{}", jig_id.0, focus_str)
+                            }
+                            JigEditRoute::PostPublish => {
+                                format!("/asset/edit/jig/{}/post-publish{}", jig_id.0, focus_str)
+                            }
                         }
                     }
-                }
-                JigRoute::Play(jig_id, module_id, player_settings) => {
+                    AssetEditRoute::Course(course_id, route) => match route {
+                        CourseEditRoute::Landing => {
+                            format!("/asset/edit/course/{}", course_id.0)
+                        }
+                        CourseEditRoute::Cover => {
+                            format!("/asset/edit/course/{}/cover", course_id.0)
+                        }
+                        CourseEditRoute::Publish => {
+                            format!("/asset/edit/course/{}/publish", course_id.0)
+                        }
+                        CourseEditRoute::PostPublish => {
+                            format!("/asset/edit/course/{}/post-publish", course_id.0)
+                        }
+                    },
+                },
+                AssetRoute::Play(jig_id, module_id, player_settings) => {
                     let query = serde_qs::to_string(&player_settings).unwrap_ji();
                     if let Some(module_id) = module_id {
                         format!("/jig/play/{}/{}?{}", jig_id.0, module_id.0, query)

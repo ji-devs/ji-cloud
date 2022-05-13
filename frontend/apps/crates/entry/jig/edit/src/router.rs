@@ -1,6 +1,6 @@
 use components::overlay::container::OverlayContainer;
 use shared::domain::jig::JigFocus;
-use utils::routes::{JigRoute, Route};
+use utils::routes::{AssetEditRoute, AssetRoute, Route};
 
 use crate::{edit::dom::EditPage, gallery::state::JigGallery};
 use dominator::{html, Dom};
@@ -19,10 +19,10 @@ impl Router {
 
     fn dom_signal() -> impl Signal<Item = Option<Dom>> {
         Self::signal().map(|route| match route {
-            Route::Jig(route) => match route {
-                JigRoute::Gallery => Some(JigGallery::new(JigFocus::Modules).render()),
-                JigRoute::ResourceGallery => Some(JigGallery::new(JigFocus::Resources).render()),
-                JigRoute::Edit(jig_id, jig_focus, route) => {
+            Route::Asset(route) => match route {
+                AssetRoute::JigGallery => Some(JigGallery::new(JigFocus::Modules).render()),
+                AssetRoute::ResourceGallery => Some(JigGallery::new(JigFocus::Resources).render()),
+                AssetRoute::Edit(AssetEditRoute::Jig(jig_id, jig_focus, route)) => {
                     Some(EditPage::render(jig_id, jig_focus, route))
                 }
                 _ => None,

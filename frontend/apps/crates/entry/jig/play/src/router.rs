@@ -3,7 +3,7 @@ use components::overlay::container::OverlayContainer;
 use dominator::{html, Dom};
 use futures_signals::signal::{Signal, SignalExt};
 use std::rc::Rc;
-use utils::routes::{JigRoute, Route};
+use utils::routes::{AssetRoute, Route};
 
 pub struct Router {}
 
@@ -18,9 +18,9 @@ impl Router {
 
     fn dom_signal() -> impl Signal<Item = Option<Dom>> {
         Self::signal().map(|route| match route {
-            Route::Jig(JigRoute::Play(jig_id, module_id, player_options)) => Some(player_render(
-                Rc::new(PlayerState::new(jig_id, module_id, player_options)),
-            )),
+            Route::Asset(AssetRoute::Play(jig_id, module_id, player_options)) => Some(
+                player_render(Rc::new(PlayerState::new(jig_id, module_id, player_options))),
+            ),
             _ => None,
         })
     }

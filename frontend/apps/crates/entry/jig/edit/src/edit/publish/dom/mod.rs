@@ -7,7 +7,7 @@ use futures_signals::{
 use shared::domain::asset::PrivacyLevel;
 use utils::{
     events,
-    routes::{JigEditRoute, JigRoute, Route},
+    routes::{AssetEditRoute, AssetRoute, JigEditRoute, Route},
 };
 use web_sys::{HtmlElement, HtmlInputElement, HtmlTextAreaElement};
 
@@ -229,11 +229,11 @@ fn render_page(state: Rc<Publish>) -> Dom {
                 .text(STR_PUBLISH_LATER)
                 .event(clone!(state => move |_: events::Click| {
                     state.jig_edit_state.route.set_neq(JigEditRoute::Landing);
-                    let url:String = Route::Jig(JigRoute::Edit(
+                    let url:String = Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
                         state.jig.id,
                         state.jig.jig_focus,
                         JigEditRoute::Landing
-                    )).into();
+                    ))).into();
                     dominator::routing::go_to_url(&url);
                 }))
             }),

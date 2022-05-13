@@ -14,7 +14,7 @@ use utils::{
     events,
     jig::{published_at_string, ResourceContentExt},
     prelude::get_user,
-    routes::{JigEditRoute, JigRoute, Route},
+    routes::{AssetEditRoute, AssetRoute, JigEditRoute, Route},
 };
 
 use super::state::SearchResultsSection;
@@ -160,11 +160,11 @@ impl SearchResultsSection {
                                     .property("gapOverride", "0px")
                                     .property("label", "Edit")
                                     .property("href", {
-                                        String::from(Route::Jig(JigRoute::Edit(
+                                        String::from(Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
                                             jig.id,
                                             jig.jig_focus,
                                             JigEditRoute::Landing
-                                        )))
+                                        ))))
                                     })
                                 }))
                             })
