@@ -15,6 +15,8 @@ pub struct ShareJig {
     pub jig_id: JigId,
     pub copied_embed: Mutable<bool>,
     pub link_copied: Mutable<bool>,
+    pub copied_student_url: Mutable<bool>,
+    pub copied_student_code: Mutable<bool>,
 }
 
 impl ShareJig {
@@ -26,6 +28,8 @@ impl ShareJig {
             active_popup: Mutable::new(None),
             copied_embed: Mutable::new(false),
             link_copied: Mutable::new(false),
+            copied_student_url: Mutable::new(false),
+            copied_student_code: Mutable::new(false),
         })
     }
 

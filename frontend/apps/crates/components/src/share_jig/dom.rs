@@ -2,7 +2,6 @@ use std::rc::Rc;
 
 use dominator::{clone, html, with_node, Dom, EventOptions};
 use futures_signals::signal::SignalExt;
-use gloo_timers::callback::Timeout;
 use js_sys::encode_uri_component;
 use shared::config::JIG_PLAYER_SESSION_VALID_DURATION_SECS;
 use utils::{
@@ -12,23 +11,17 @@ use utils::{
 };
 use web_sys::{window, HtmlElement};
 
-use crate::{
-    animation::fade::{Fade, FadeKind},
-    overlay::handle::OverlayHandle,
-    tooltip::{
-        dom::render as TooltipDom,
-        state::{
-            Anchor, ContentAnchor, MoveStrategy, State as TooltipState, TooltipBubble, TooltipData,
-            TooltipTarget,
-        },
-    },
-};
+use crate::overlay::handle::OverlayHandle;
 
 use super::state::{ActivePopup, ShareJig};
 
 const STR_BACK: &str = "Back";
-const STR_COPIED: &str = "Copied to the clipboard";
-const STR_COPY_CODE: &str = "Copy Code";
+const STR_STUDENTS_COPY_CODE_LABEL: &str = "Copy code";
+const STR_STUDENTS_COPIED_CODE_LABEL: &str = "Student code copied";
+const STR_STUDENTS_COPY_URL_LABEL: &str = "Copy URL";
+const STR_STUDENTS_COPIED_URL_LABEL: &str = "URL copied";
+const STR_EMBED_COPY_CODE_LABEL: &str = "Copy code";
+const STR_EMBED_COPIED_CODE_LABEL: &str = "Embed code copied";
 const JIGZI_BASE_URL: &str = "https://jigzi.org";
 const STR_CLASSROOM: &str = "Share to Google Classroom";
 const STR_STUDENTS_LABEL: &str = "Share with students";
@@ -137,11 +130,7 @@ impl ShareJig {
                     }))
                     .event(clone!(state => move|_: events::Click| {
                         clipboard::write_text(&state.jig_link(false));
-                        state.link_copied.set(true);
-                        let timeout = Timeout::new(3_000, clone!(state => move || {
-                            state.link_copied.set(false);
-                        }));
-                        timeout.forget();
+                        ShareJig::set_copied_mutable(state.link_copied.clone());
                     }))
                 }),
             ])
@@ -199,13 +188,16 @@ impl ShareJig {
                     .property("slot", "copy-url")
                     .property("color", "blue")
                     .property("kind", "text")
-                    .text("Copy URL")
+                    .text_signal(state.copied_student_url.signal().map(|copied| {
+                        if copied { STR_STUDENTS_COPIED_URL_LABEL } else { STR_STUDENTS_COPY_URL_LABEL }
+                    }))
                     .property_signal("disabled", state.student_code.signal_ref(|x| x.is_none()))
                     .event(clone!(state => move |_: events::Click| {
                         if let Some(student_code) = &*state.student_code.lock_ref() {
                             let url = String::from(JIGZI_BASE_URL);
                             let url = url + &Route::Kids(KidsRoute::StudentCode(Some(student_code.clone()))).to_string();
                             clipboard::write_text(&url);
+                            ShareJig::set_copied_mutable(state.copied_student_url.clone());
                         };
                     }))
                 }),
@@ -214,10 +206,13 @@ impl ShareJig {
                     .property("kind", "text")
                     .property("color", "blue")
                     .property_signal("disabled", state.student_code.signal_ref(|x| x.is_none()))
-                    .text(STR_COPY_CODE)
+                    .text_signal(state.copied_student_code.signal().map(|copied| {
+                        if copied { STR_STUDENTS_COPIED_CODE_LABEL } else { STR_STUDENTS_COPY_CODE_LABEL }
+                    }))
                     .event(clone!(state => move|_: events::Click| {
                         let student_code = state.student_code.get_cloned().unwrap_ji();
                         clipboard::write_text(&student_code);
+                        ShareJig::set_copied_mutable(state.copied_student_code.clone());
                     }))
                 }),
             ])
@@ -247,50 +242,17 @@ impl ShareJig {
                     }))
                 }),
                 html!("div", {
-                    .with_node!(elem => {
-                        .property("slot", "copy")
-                        .child(html!("button-rect", {
-                            .property("kind", "text")
-                            .text("Copy code")
-                            .event(clone!(state => move |_: events::Click| {
-                                clipboard::write_text(&state.embed_code());
-                                state.copied_embed.set(true);
-                            }))
+                    .property("slot", "copy")
+                    .child(html!("button-rect", {
+                        .property("kind", "text")
+                        .text_signal(state.copied_embed.signal().map(|copied| {
+                            if copied { STR_EMBED_COPIED_CODE_LABEL } else { STR_EMBED_COPY_CODE_LABEL }
                         }))
-                        .child_signal(state.copied_embed.signal().map(move |copied_embed| {
-                            match copied_embed {
-                                false => None,
-                                true => {
-                                    let fade = Fade::new(
-                                        FadeKind::Out,
-                                        500.0,
-                                        false,
-                                        Some(4000.0),
-                                        Some(clone!(state => move || {
-                                            state.copied_embed.set(false);
-                                        }))
-                                    );
-
-                                    Some(html!("div", {
-                                        .apply(|dom| fade.render(dom))
-                                        .child({
-                                            let tooltip = TooltipData::Bubble(Rc::new(TooltipBubble {
-                                                target_anchor: Anchor::MiddleRight,
-                                                content_anchor: ContentAnchor::OppositeH,
-                                                //slot: Some(String::from("copy")),
-                                                body: String::from(STR_COPIED),
-                                                max_width: None,
-                                            }));
-
-                                            let target = TooltipTarget::Element(elem.clone(), MoveStrategy::Track);
-
-                                            TooltipDom(Rc::new(TooltipState::new(target, tooltip)))
-                                        })
-                                    }))
-                                }
-                            }
+                        .event(clone!(state => move |_: events::Click| {
+                            clipboard::write_text(&state.embed_code());
+                            ShareJig::set_copied_mutable(state.copied_embed.clone());
                         }))
-                    })
+                    }))
                     .event_with_options(
                         &EventOptions::bubbles(),
                         |evt: events::Click| {
