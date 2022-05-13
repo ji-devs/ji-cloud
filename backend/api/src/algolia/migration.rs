@@ -2,20 +2,25 @@ use algolia::{
     model::attribute::{Attribute, FacetAttribute, SearchableAttributes},
     request::SetSettings,
 };
-use futures::future::BoxFuture;
 
-#[derive(Copy, Clone, Debug)]
-pub enum ResyncKind {
-    None,
-    Complete,
-}
+use sqlx::PgConnection;
 
-async fn media_index<'a>(
-    client: &'a super::Inner,
-    media_index: &'a str,
-    _jig_index: &'a str,
-    _course_index: &'a str,
-) -> BoxFuture<'a, anyhow::Result<()>> {
+use hashfn::hashfn;
+
+const JIG_INDEX: &str = "jig_index";
+const MEDIA_INDEX: &str = "media_index";
+const COURSE_INDEX: &str = "course_index";
+
+pub(crate) const JIG_HASH: &'static str = JIG_INDEX_HASH;
+pub(crate) const MEDIA_HASH: &'static str = MEDIA_INDEX_HASH;
+pub(crate) const COURSE_HASH: &'static str = COURSE_INDEX_HASH;
+
+#[hashfn]
+pub(crate) async fn media_index(
+    txn: &mut PgConnection,
+    client: &super::Inner,
+    media_index: &str,
+) -> anyhow::Result<()> {
     let settings = SetSettings {
         searchable_attributes: Some(
             SearchableAttributes::build()
@@ -36,18 +41,19 @@ async fn media_index<'a>(
         ]),
     };
 
-    Box::pin(async move {
-        client.set_settings(media_index, &settings).await?;
-        Ok(())
-    })
+    client.set_settings(media_index, &settings).await?;
+
+    sqlx::query!(r#"update algolia_index_settings set updated_at = now(), index_hash = $1 where index_name = $2"#, MEDIA_INDEX_HASH, MEDIA_INDEX).execute(txn).await?;
+
+    Ok(())
 }
 
-async fn jig_index<'a>(
-    client: &'a super::Inner,
-    _media_index: &'a str,
-    jig_index: &'a str,
-    _course_index: &'a str,
-) -> BoxFuture<'a, anyhow::Result<()>> {
+#[hashfn]
+pub(crate) async fn jig_index(
+    txn: &mut PgConnection,
+    client: &super::Inner,
+    jig_index: &str,
+) -> anyhow::Result<()> {
     let settings = SetSettings {
         searchable_attributes: Some(
             SearchableAttributes::build()
@@ -79,18 +85,19 @@ async fn jig_index<'a>(
         ]),
     };
 
-    Box::pin(async move {
-        client.set_settings(jig_index, &settings).await?;
-        Ok(())
-    })
+    client.set_settings(jig_index, &settings).await?;
+
+    sqlx::query!(r#"update algolia_index_settings set updated_at = now(), index_hash = $1 where index_name = $2"#, JIG_INDEX_HASH, JIG_INDEX).execute(txn).await?;
+
+    Ok(())
 }
 
-async fn course_index<'a>(
-    client: &'a super::Inner,
-    _media_index: &'a str,
-    _jig_index: &'a str,
-    course_index: &'a str,
-) -> BoxFuture<'a, anyhow::Result<()>> {
+#[hashfn]
+pub(crate) async fn course_index(
+    txn: &mut PgConnection,
+    client: &super::Inner,
+    course_index: &str,
+) -> anyhow::Result<()> {
     let settings = SetSettings {
         searchable_attributes: Some(
             SearchableAttributes::build()
@@ -121,30 +128,9 @@ async fn course_index<'a>(
         ]),
     };
 
-    Box::pin(async move {
-        client.set_settings(course_index, &settings).await?;
-        Ok(())
-    })
+    client.set_settings(course_index, &settings).await?;
+
+    sqlx::query!(r#"update algolia_index_settings set updated_at = now(), index_hash = $1 where index_name = $2"#, COURSE_INDEX_HASH, COURSE_INDEX).execute(txn).await?;
+
+    Ok(())
 }
-
-#[ignore]
-#[inline(always)]
-fn empty<'a>(
-    _client: &'a super::Inner,
-    _media_index: &'a str,
-    _jig_index: &'a str,
-    _course_index: &'a str,
-) -> BoxFuture<'a, anyhow::Result<()>> {
-    Box::pin(futures::future::ok(()))
-}
-
-pub type MigrateFunction =
-    for<'a> fn(&'a super::Inner, &'a str, &'a str, &'a str) -> BoxFuture<'a, anyhow::Result<()>>;
-
-pub const INDEXING_MIGRATIONS: &[(ResyncKind, MigrateFunction)] = &[
-    (ResyncKind::None, media_index),
-    (ResyncKind::None, jig_index),
-    (ResyncKind::None, course_index),
-];
-
-pub const INDEX_VERSION: i16 = INDEXING_MIGRATIONS.len() as i16;
