@@ -1,10 +1,14 @@
 use std::rc::Rc;
 
 use dominator::clone;
+use futures_signals::signal::Mutable;
+use gloo_timers::callback::Timeout;
 use shared::{api::endpoints::jig, domain::jig::JigPlayerSettings};
 use utils::prelude::*;
 
 use super::state::ShareJig;
+
+const COPIED_TIMEOUT: u32 = 3_000;
 
 impl ShareJig {
     pub(super) fn generate_student_code(self: &Rc<Self>) {
@@ -23,5 +27,16 @@ impl ShareJig {
                 },
             };
         }));
+    }
+
+    pub fn set_copied_mutable(copied: Mutable<bool>) {
+        copied.set(true);
+        let timeout = Timeout::new(
+            COPIED_TIMEOUT,
+            clone!(copied => move || {
+                copied.set(false);
+            }),
+        );
+        timeout.forget();
     }
 }
