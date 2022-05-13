@@ -7,7 +7,8 @@ use uuid::Uuid;
 
 use super::{
     category::CategoryId,
-    jig::{DraftOrLive, JigId, PrivacyLevel, UserOrMe},
+    jig::JigId,
+    asset::{DraftOrLive, PrivacyLevel, UserOrMe},
     meta::{AffiliationId, AgeRangeId, ResourceTypeId},
 };
 

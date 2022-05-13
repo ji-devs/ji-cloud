@@ -4,8 +4,9 @@ use std::rc::Rc;
 
 use futures_signals::signal::Mutable;
 use futures_signals::signal_vec::MutableVec;
+use shared::domain::asset::PrivacyLevel;
 use shared::domain::jig::additional_resource::AdditionalResource;
-use shared::domain::jig::{JigFocus, PrivacyLevel};
+use shared::domain::jig::JigFocus;
 use shared::domain::meta::AffiliationId;
 use shared::domain::{
     category::CategoryId,

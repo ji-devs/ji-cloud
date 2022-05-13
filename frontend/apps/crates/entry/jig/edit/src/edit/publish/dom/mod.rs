@@ -4,7 +4,7 @@ use futures_signals::{
     signal::{Mutable, SignalExt},
     signal_vec::SignalVecExt,
 };
-use shared::domain::jig::PrivacyLevel;
+use shared::domain::asset::PrivacyLevel;
 use utils::{
     events,
     routes::{JigEditRoute, JigRoute, Route},

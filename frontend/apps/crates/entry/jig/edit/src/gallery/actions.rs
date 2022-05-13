@@ -5,10 +5,11 @@ use futures::join;
 use shared::{
     api::endpoints::{self, ApiEndpoint},
     domain::{
+        asset::{DraftOrLive, UserOrMe},
         jig::{
             module::{ModuleBody, ModuleCreateRequest},
-            DraftOrLive, JigBrowseQuery, JigBrowseResponse, JigCreateRequest, JigId, JigResponse,
-            JigSearchQuery, JigSearchResponse, ModuleKind, UserOrMe,
+            JigBrowseQuery, JigBrowseResponse, JigCreateRequest, JigId, JigResponse,
+            JigSearchQuery, JigSearchResponse, ModuleKind,
         },
         meta::MetadataResponse,
         CreateResponse,

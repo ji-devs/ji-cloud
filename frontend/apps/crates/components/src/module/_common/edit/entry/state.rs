@@ -1,5 +1,6 @@
 use dominator::{clone, DomHandle};
 use futures_signals::signal::{Mutable, Signal, SignalExt};
+use shared::domain::asset::{DraftOrLive, PrivacyLevel};
 
 use std::cell::RefCell;
 use std::collections::HashMap;

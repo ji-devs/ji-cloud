@@ -4,7 +4,10 @@ use dominator::clone;
 use futures::join;
 use shared::{
     api::{endpoints, ApiEndpoint},
-    domain::jig::{DraftOrLive, JigBrowseQuery, JigFocus, JigId, JigResponse, JigSearchQuery},
+    domain::{
+        asset::DraftOrLive,
+        jig::{JigBrowseQuery, JigFocus, JigId, JigResponse, JigSearchQuery},
+    },
     error::EmptyError,
 };
 use utils::{

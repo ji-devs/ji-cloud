@@ -3,9 +3,10 @@
 
 use std::collections::HashMap;
 
+use shared::domain::asset::{DraftOrLive, PrivacyLevel};
 use shared::domain::jig::{
-    module::ModuleId, AudioEffects, DraftOrLive, JigAdminData, JigData, JigFocus, JigId,
-    JigPlayerSettings, JigRating, JigResponse, LiteModule, ModuleKind, PrivacyLevel,
+    module::ModuleId, AudioEffects, JigAdminData, JigData, JigFocus, JigId, JigPlayerSettings,
+    JigRating, JigResponse, LiteModule, ModuleKind,
 };
 use utils::themes::ThemeId;
 use uuid::Uuid;

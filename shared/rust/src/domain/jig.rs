@@ -19,12 +19,11 @@ use serde::{Deserialize, Serialize};
 use std::{
     collections::{HashMap, HashSet},
     convert::TryFrom,
-    fmt,
-    str::FromStr,
 };
 use uuid::Uuid;
 
 use super::{
+    asset::{DraftOrLive, PrivacyLevel, UserOrMe},
     category::CategoryId,
     meta::{AffiliationId, AgeRangeId, ResourceTypeId},
 };
@@ -35,93 +34,6 @@ use crate::domain::jig::module::body::ThemeId;
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
 pub struct JigId(pub Uuid);
-
-/// Special parameter for allowing implicit `me` as a user.
-#[derive(Clone, Eq, PartialEq, Debug)]
-pub enum UserOrMe {
-    /// We should use the user found in the session auth.
-    Me,
-
-    /// we should use the provided user.
-    User(Uuid),
-}
-
-impl serde::Serialize for UserOrMe {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer,
-    {
-        match self {
-            UserOrMe::Me => serializer.serialize_str("me"),
-            UserOrMe::User(id) => serializer.collect_str(&id.to_hyphenated()),
-        }
-    }
-}
-
-impl<'de> serde::Deserialize<'de> for UserOrMe {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: serde::Deserializer<'de>,
-    {
-        struct Visitor;
-
-        impl<'de> serde::de::Visitor<'de> for Visitor {
-            type Value = UserOrMe;
-
-            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-                formatter.write_str("`me` or `<uuid>`")
-            }
-
-            fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
-            where
-                E: serde::de::Error,
-            {
-                if value == "me" {
-                    Ok(UserOrMe::Me)
-                } else {
-                    Uuid::from_str(value)
-                        .map(UserOrMe::User)
-                        .map_err(|e| E::custom(format!("failed to parse id: {}", e)))
-                }
-            }
-        }
-
-        deserializer.deserialize_str(Visitor)
-    }
-}
-
-/// Access level for the jig.
-#[derive(Serialize, Deserialize, Copy, Clone, Eq, PartialEq, Debug)]
-#[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[serde(rename_all = "camelCase")]
-#[repr(i16)]
-pub enum PrivacyLevel {
-    /// Publicly available and indexed. Can be shared with others.
-    Public = 0,
-
-    /// Not indexed, but can be accessed by non-owners if the id is known. "Private" in the front-end
-    Unlisted = 1,
-
-    /// NOT IMPLEMENTED. Only available to the author.
-    Private = 2,
-}
-
-impl PrivacyLevel {
-    /// Represents the privacy level as a `str`. Relevant for Algolia tag filtering.
-    pub fn as_str(&self) -> &'static str {
-        match self {
-            Self::Public => "public",
-            Self::Unlisted => "unlisted",
-            Self::Private => "private",
-        }
-    }
-}
-
-impl Default for PrivacyLevel {
-    fn default() -> Self {
-        Self::Public
-    }
-}
 
 /// Request to create a new JIG.
 ///
@@ -166,64 +78,6 @@ pub struct JigCreateRequest {
     /// Primary material for jig
     #[serde(default)]
     pub jig_focus: JigFocus,
-}
-
-/// Whether the data is draft or live.
-#[derive(Serialize, Deserialize, Clone, Copy, Debug)]
-#[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[serde(rename_all = "camelCase")]
-#[repr(i16)]
-pub enum DraftOrLive {
-    /// Represents a draft copy
-    Draft = 0,
-    /// Represents a live copy
-    Live = 1,
-}
-
-impl DraftOrLive {
-    /// Returns `true` for a [`Self::Live`] value.
-    ///
-    /// ```
-    /// let x = DraftOrLive::Live;
-    /// assert_eq!(x.is_live(), true);
-    ///
-    /// let x = DraftOrLive::Draft;
-    /// assert_eq!(x.is_live(), false);
-    /// ```
-    pub fn is_live(&self) -> bool {
-        matches!(*self, DraftOrLive::Live)
-    }
-
-    /// Returns `true` for a [`Draft`] value.
-    ///
-    /// ```
-    /// let x = DraftOrLive::Live;
-    /// assert_eq!(x.is_draft(), false);
-    ///
-    /// let x = DraftOrLive::Draft;
-    /// assert_eq!(x.is_draft(), true);
-    /// ```
-    pub fn is_draft(&self) -> bool {
-        !self.is_live()
-    }
-}
-
-impl From<DraftOrLive> for bool {
-    fn from(draft_or_live: DraftOrLive) -> Self {
-        match draft_or_live {
-            DraftOrLive::Draft => false,
-            DraftOrLive::Live => true,
-        }
-    }
-}
-
-impl From<bool> for DraftOrLive {
-    fn from(draft_or_live: bool) -> Self {
-        match draft_or_live {
-            false => DraftOrLive::Draft,
-            true => DraftOrLive::Live,
-        }
-    }
 }
 
 /// The over-the-wire representation of a JIG's data. This can either be the live copy or the draft copy.

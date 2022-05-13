@@ -5,8 +5,9 @@ use futures::join;
 use shared::{
     api::endpoints::{category, jig, meta, ApiEndpoint},
     domain::{
+        asset::PrivacyLevel,
         category::{Category, CategoryId, CategoryResponse, CategoryTreeScope, GetCategoryRequest},
-        jig::{JigData, JigId, JigResponse, JigUpdateDraftDataRequest, PrivacyLevel},
+        jig::{JigData, JigId, JigResponse, JigUpdateDraftDataRequest},
         meta::MetadataResponse,
     },
     error::{EmptyError, MetadataNotFound},
