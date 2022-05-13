@@ -45,18 +45,29 @@ impl PlayState {
         let all_completed = state
             .items
             .iter()
-            .filter_map(|item| {
+            .enumerate()
+            .filter_map(|(idx, item)| {
                 match item {
                     PlayItem::Interactive(item) => {
-                        // Only return items which are interactive _and_ have a target trace so
+                        // Only return items which are interactive _and_ have target traces so
                         // that we can end the game correctly when there are items which aren't
                         // meant to be placed anywhere.
-                        item.target_index.borrow().as_ref().map(|_| item.clone())
+                        // Note: We only care that a sticker has a target trace, not which one it
+                        // is in. The `all()` call will ensure that all the items are completed
+                        // correctly. So we look for the first target trace that matches this
+                        // sticker.
+                        state
+                            .game
+                            .base
+                            .item_targets
+                            .iter()
+                            .find(|item_target| idx == item_target.sticker_idx)
+                            .map(|_| item.completed.get())
                     }
                     _ => None,
                 }
             })
-            .all(|item| item.completed.get());
+            .all(|completed| completed);
 
         all_completed
     }
