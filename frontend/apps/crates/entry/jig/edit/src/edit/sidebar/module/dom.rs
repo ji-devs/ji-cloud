@@ -6,7 +6,7 @@ use web_sys::{HtmlElement, Node, ScrollBehavior, ScrollIntoViewOptions};
 use super::super::menu::dom as MenuDom;
 use super::{actions, state::*};
 use crate::edit::sidebar::state::{Module, ModuleHighlight, State as SidebarState};
-use components::module::_common::thumbnail::ModuleThumbnail;
+use components::module::_common::thumbnail::{ModuleThumbnail, ThumbnailFallback};
 use futures_signals::signal::{Mutable, SignalExt};
 use shared::domain::jig::ModuleKind;
 use std::rc::Rc;
@@ -143,9 +143,9 @@ impl ModuleDom {
                                 (Some(module), _) => {
                                     Some(ModuleThumbnail::render_live(
                                         Rc::new(ModuleThumbnail {
-                                            jig_id: state.sidebar.jig.id,
+                                            asset_id: state.sidebar.jig.id.into(),
                                             module: Some(module.into()),
-                                            is_jig_fallback: false,
+                                            fallback: ThumbnailFallback::Module,
                                         }),
                                         Some("thumbnail")
                                     ))

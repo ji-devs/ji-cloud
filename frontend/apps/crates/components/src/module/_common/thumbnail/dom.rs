@@ -17,7 +17,7 @@ impl ModuleThumbnail {
             .event(clone!(state => move |_evt:events::ImageError| {
                 state.on_image_load_error();
             }))
-            .property("jigId", state.jig_id.0.to_string())
+            .property("jigId", state.asset_id.uuid().to_string())
             .apply(clone!(state => move |dom| {
                 match &state.module {
                     Some(module) => dom.property("moduleId", module.id.0.to_string()),
@@ -26,7 +26,7 @@ impl ModuleThumbnail {
             }))
             .apply(clone!(state => move |dom| {
                 match &state.module {
-                    Some(module) if !state.is_jig_fallback => {
+                    Some(module) if state.fallback == ThumbnailFallback::Module => {
                         dom.property("moduleKind", module.kind.as_str())
                     },
                     _ => dom
@@ -40,7 +40,7 @@ impl ModuleThumbnail {
 
         let listener = Rc::new(RefCell::new(state.module.as_ref().map(|_| {
             crate::firebase::listen_for_screenshot_updates(
-                &state.jig_id,
+                &state.asset_id,
                 &state.module.clone().unwrap_ji().id,
                 clone!(mutable => move || {
                     mutable.set(());
@@ -55,7 +55,7 @@ impl ModuleThumbnail {
             .event(clone!(state => move |_evt: events::ImageError| {
                 state.on_image_load_error();
             }))
-            .property("jigId", state.jig_id.0.to_string())
+            .property("jigId", state.asset_id.uuid().to_string())
             .apply(clone!(state => move |dom| {
                 match &state.module {
                     None => dom,
@@ -69,7 +69,7 @@ impl ModuleThumbnail {
             .property("cacheBust", true)
             .apply(clone!(state => move |dom| {
                 match &state.module {
-                    Some(module) if !state.is_jig_fallback => {
+                    Some(module) if state.fallback == ThumbnailFallback::Module => {
                         dom.property("moduleKind", module.kind.as_str())
                     },
                     _ => dom
@@ -93,7 +93,7 @@ impl ModuleThumbnail {
                     // unwrapping is fine here as we've already validated that it is
                     // Some.
                     let module = state.module.as_ref().unwrap_ji();
-                    call_screenshot_service(state.jig_id, module.id, module.kind).await;
+                    call_screenshot_service(state.asset_id.clone(), module.id, module.kind).await;
                 }))
             } else {
                 log::info!("not complete");

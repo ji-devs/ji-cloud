@@ -18,7 +18,7 @@ use super::super::state::State as JigEditState;
 use super::state::Publish;
 use components::{
     hebrew_buttons::HebrewButtons,
-    module::_common::thumbnail::ModuleThumbnail,
+    module::_common::thumbnail::{ModuleThumbnail, ThumbnailFallback},
     tooltip::{
         callbacks::TooltipErrorCallbacks,
         dom::render as TooltipDom,
@@ -95,10 +95,10 @@ fn render_page(state: Rc<Publish>) -> Dom {
         .children(&mut [
             ModuleThumbnail::render_live(
                 Rc::new(ModuleThumbnail {
-                    jig_id: state.jig.id,
+                    asset_id: state.jig.id.into(),
                     //Cover module (first module) is guaranteed to exist
                     module: state.jig.modules.lock_ref().first().cloned(),
-                    is_jig_fallback: true,
+                    fallback: ThumbnailFallback::Asset,
                 }),
                 Some("img")
             ),

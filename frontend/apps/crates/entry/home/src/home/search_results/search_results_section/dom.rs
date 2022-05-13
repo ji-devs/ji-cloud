@@ -1,4 +1,4 @@
-use components::{module::_common::thumbnail::ModuleThumbnail, share_jig::ShareJig};
+use components::{module::_common::thumbnail::{ModuleThumbnail, ThumbnailFallback}, share_jig::ShareJig};
 use dominator::{clone, html, Dom};
 use futures_signals::{
     signal::{Signal, SignalExt},
@@ -90,9 +90,9 @@ impl SearchResultsSection {
             .property("description", jig.jig_data.description.clone())
             .child(ModuleThumbnail::render(
                 Rc::new(ModuleThumbnail {
-                    jig_id: jig.id,
+                    asset_id: jig.id.into(),
                     module: jig.jig_data.modules.first().cloned(),
-                    is_jig_fallback: true,
+                    fallback: ThumbnailFallback::Asset,
                 }),
                 Some("image")
             ))

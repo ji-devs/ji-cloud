@@ -121,6 +121,14 @@ impl AssetId {
             _ => panic!(),
         }
     }
+
+    /// get the id uuid
+    pub fn uuid(&self) -> &Uuid {
+        match self {
+            Self::JigId(jig_id) => &jig_id.0,
+            Self::CourseId(course_id) => &course_id.0,
+        }
+    }
 }
 
 /// Asset

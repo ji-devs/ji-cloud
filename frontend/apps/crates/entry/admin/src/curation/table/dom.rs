@@ -1,7 +1,7 @@
 use crate::curation::EditableJig;
 
 use super::state::*;
-use components::module::_common::thumbnail::ModuleThumbnail;
+use components::module::_common::thumbnail::{ModuleThumbnail, ThumbnailFallback};
 use dominator::{clone, html, with_node, Dom};
 use futures_signals::{
     map_ref,
@@ -92,9 +92,9 @@ impl CurationTable {
                             jig.modules.get(i).map(|module| {
                                 ModuleThumbnail::render(
                                     Rc::new(ModuleThumbnail {
-                                        jig_id: jig.id,
+                                        asset_id: jig.id.into(),
                                         module: Some(module.clone()),
-                                        is_jig_fallback: true,
+                                        fallback: ThumbnailFallback::Asset,
                                     }),
                                     None
                                 )

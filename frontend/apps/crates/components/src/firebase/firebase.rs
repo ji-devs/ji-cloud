@@ -1,7 +1,7 @@
 use awsm_web::loaders::helpers::AbortController;
 use js_sys::Promise;
 use shared::{
-    domain::jig::{module::ModuleId, JigId},
+    domain::{jig::module::ModuleId, asset::AssetId},
     media::MediaLibrary,
 };
 use std::future::Future;
@@ -56,7 +56,7 @@ impl Drop for ScreenshotListener {
 }
 
 pub fn listen_for_screenshot_updates(
-    jig_id: &JigId,
+    asset_id: &AssetId,
     module_id: &ModuleId,
     on_update: impl FnMut() + 'static,
 ) -> ScreenshotListener {
@@ -65,7 +65,7 @@ pub fn listen_for_screenshot_updates(
     let listener = ScreenshotListener::new(on_update);
 
     listenForScreenshotUpdates(
-        &jig_id.0.to_string(),
+        &asset_id.uuid().to_string(),
         &module_id.0.to_string(),
         listener.id,
         &listener.closure,

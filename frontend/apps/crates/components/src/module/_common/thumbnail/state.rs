@@ -1,9 +1,14 @@
-use shared::domain::jig::{module::LiteModule, JigId};
+use shared::domain::{jig::module::LiteModule, asset::AssetId};
 
 pub struct ModuleThumbnail {
-    pub jig_id: JigId,
+    pub asset_id: AssetId,
     pub module: Option<LiteModule>,
-    /// If this is set to true it will use the jig thumbnail fallback
-    /// Otherwise it uses the module thumbnail fallback
-    pub is_jig_fallback: bool,
+    pub fallback: ThumbnailFallback,
+}
+
+
+#[derive(Clone, Copy, PartialEq)]
+pub enum ThumbnailFallback {
+    Asset,
+    Module,
 }

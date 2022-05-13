@@ -169,7 +169,7 @@ pub fn save<RawData, Mode, Step>(
         if is_complete {
             // Only generate a screenshot if the module has the minimum required content.
             screenshot_loader.load(async move {
-                call_screenshot_service(jig_id, module_id, RawData::kind()).await;
+                call_screenshot_service(jig_id.into(), module_id, RawData::kind()).await;
             });
         }
     });

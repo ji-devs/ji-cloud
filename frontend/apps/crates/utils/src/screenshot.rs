@@ -3,7 +3,7 @@ use serde::Deserialize;
 use super::init::settings::SETTINGS;
 use crate::unwrap::UnwrapJiExt;
 use awsm_web::loaders::fetch::fetch_url;
-use shared::domain::jig::{module::ModuleId, JigId, ModuleKind};
+use shared::domain::{jig::{module::ModuleId, ModuleKind}, asset::AssetId};
 
 pub const SCREENSHOT_PARAM: &str = "screenshot";
 
@@ -28,13 +28,13 @@ struct ScreenshotResponse {
     task_url: String,
 }
 
-pub async fn call_screenshot_service(jig_id: JigId, module_id: ModuleId, kind: ModuleKind) {
+pub async fn call_screenshot_service(asset_id: AssetId, module_id: ModuleId, kind: ModuleKind) {
     let screenshot_url = SETTINGS.get().unwrap_ji().remote_target.screenshot_url();
 
     let url = format!(
         "{}?jig={}&module={}&kind={}",
         screenshot_url,
-        jig_id.0,
+        asset_id.uuid(),
         module_id.0,
         kind.as_str()
     );

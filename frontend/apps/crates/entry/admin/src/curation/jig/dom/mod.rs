@@ -1,6 +1,6 @@
 use super::state::CurationJig;
 use components::{
-    module::_common::thumbnail::ModuleThumbnail,
+    module::_common::thumbnail::{ModuleThumbnail, ThumbnailFallback},
     player_popup::{PlayerPopup, PreviewPopupCallbacks},
 };
 use dominator::{clone, html, with_node, Dom};
@@ -132,9 +132,9 @@ impl CurationJig {
             ])
             .child(ModuleThumbnail::render(
                 Rc::new(ModuleThumbnail {
-                    jig_id: state.jig_id,
+                    asset_id: state.jig_id.into(),
                     module: state.jig.modules.get(0).cloned(),
-                    is_jig_fallback: true,
+                    fallback: ThumbnailFallback::Asset,
                 }),
                 Some("player")
             ))

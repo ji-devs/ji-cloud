@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use components::module::_common::thumbnail::ModuleThumbnail;
+use components::module::_common::thumbnail::{ModuleThumbnail, ThumbnailFallback};
 use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
 use utils::events;
@@ -91,9 +91,9 @@ pub fn render(state: Rc<State>) -> Dom {
                                 }))
                                 .child(ModuleThumbnail::render_live(
                                     Rc::new(ModuleThumbnail {
-                                        jig_id: state.player_state.jig_id,
+                                        asset_id: state.player_state.jig_id.into(),
                                         module: Some(module.clone()),
-                                        is_jig_fallback: false,
+                                        fallback: ThumbnailFallback::Module,
                                     }),
                                     Some("window")
                                 ))

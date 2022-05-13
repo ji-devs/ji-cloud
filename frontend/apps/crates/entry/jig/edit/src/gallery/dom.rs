@@ -1,5 +1,5 @@
 use super::state::*;
-use components::module::_common::thumbnail::ModuleThumbnail;
+use components::module::_common::thumbnail::{ModuleThumbnail, ThumbnailFallback};
 use components::page_header::state::PageLinks;
 use components::{page_footer, page_header};
 use dominator::{clone, html, Dom};
@@ -154,9 +154,9 @@ impl JigGallery {
                             })
                             .child(ModuleThumbnail::render(
                                 Rc::new(ModuleThumbnail {
-                                    jig_id: jig.id,
+                                    asset_id: jig.id.into(),
                                     module: jig.jig_data.modules.first().cloned(),
-                                    is_jig_fallback: true,
+                                    fallback: ThumbnailFallback::Asset,
                                 }),
                                 Some("thumbnail")
                             ))
