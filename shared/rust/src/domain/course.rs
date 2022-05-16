@@ -6,9 +6,9 @@ use std::collections::HashMap;
 use uuid::Uuid;
 
 use super::{
+    asset::{DraftOrLive, PrivacyLevel, UserOrMe},
     category::CategoryId,
     jig::JigId,
-    asset::{DraftOrLive, PrivacyLevel, UserOrMe},
     meta::{AffiliationId, AgeRangeId, ResourceTypeId},
 };
 

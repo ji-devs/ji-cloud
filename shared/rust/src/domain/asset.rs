@@ -1,6 +1,10 @@
 //! Types for Assets, Jig and LearningPath.
 
-use std::{collections::HashMap, fmt::{self, Debug}, str::FromStr};
+use std::{
+    collections::HashMap,
+    fmt::{self, Debug},
+    str::FromStr,
+};
 
 // use dyn_clone::DynClone;
 use serde::{Deserialize, Serialize};
@@ -12,10 +16,12 @@ use crate::domain::{
     meta::{AffiliationId, AgeRangeId},
 };
 
-use super::{jig::{LiteModule, JigId, JigResponse}, course::{CourseId, CourseResponse}};
+use super::{
+    course::{CourseId, CourseResponse},
+    jig::{JigId, JigResponse, LiteModule},
+};
 
 pub mod additional_resource;
-
 
 // /// fdsa
 // pub trait IdTrait: DynClone + Debug {
@@ -36,7 +42,6 @@ pub mod additional_resource;
 // }
 
 // dyn_clone::clone_trait_object!(IdTrait);
-
 
 //     // Id: Copy + PartialEq
 // /// Asset
@@ -277,7 +282,6 @@ impl Asset {
 }
 
 // dyn_clone::clone_trait_object!(Asset);
-
 
 /// Special parameter for allowing implicit `me` as a user.
 #[derive(Clone, Eq, PartialEq, Debug)]
