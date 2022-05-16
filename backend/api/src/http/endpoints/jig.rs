@@ -9,8 +9,8 @@ use shared::{
     domain::{
         asset::{DraftOrLive, PrivacyLevel, UserOrMe},
         jig::{
-            DeleteUserJigs, JigBrowseResponse, JigCountResponse, JigCreateRequest,
-            JigId, JigLikedResponse, JigSearchResponse,
+            DeleteUserJigs, JigBrowseResponse, JigCountResponse, JigCreateRequest, JigId,
+            JigLikedResponse, JigSearchResponse,
         },
         CreateResponse,
     },
