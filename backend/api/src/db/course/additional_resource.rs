@@ -1,11 +1,11 @@
 use serde::{Deserialize, Serialize};
 use serde_json::{json, value::Value};
 use shared::domain::{
+    asset::DraftOrLive,
     audio::AudioId,
     course::additional_resource::{AdditionalResourceId, ResourceContent},
     course::CourseId,
     image::ImageId,
-    jig::DraftOrLive,
     meta::ResourceTypeId,
     pdf::PdfId,
 };

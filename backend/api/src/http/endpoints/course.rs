@@ -7,8 +7,8 @@ use futures::try_join;
 use shared::{
     api::{endpoints::course, ApiEndpoint},
     domain::{
+        asset::{DraftOrLive, PrivacyLevel, UserOrMe},
         course::{CourseBrowseResponse, CourseCreateRequest, CourseId, CourseSearchResponse},
-        jig::{DraftOrLive, PrivacyLevel, UserOrMe},
         CreateResponse,
     },
 };

@@ -7,9 +7,10 @@ use futures::try_join;
 use shared::{
     api::{endpoints::jig, ApiEndpoint},
     domain::{
+        asset::{DraftOrLive, PrivacyLevel, UserOrMe},
         jig::{
-            DeleteUserJigs, DraftOrLive, JigBrowseResponse, JigCountResponse, JigCreateRequest,
-            JigId, JigLikedResponse, JigSearchResponse, PrivacyLevel, UserOrMe,
+            DeleteUserJigs, JigBrowseResponse, JigCountResponse, JigCreateRequest,
+            JigId, JigLikedResponse, JigSearchResponse,
         },
         CreateResponse,
     },

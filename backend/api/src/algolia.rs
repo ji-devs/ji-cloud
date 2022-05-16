@@ -14,10 +14,11 @@ use tracing::{instrument, Instrument};
 
 use shared::{
     domain::{
+        asset::PrivacyLevel,
         category::CategoryId,
         course::CourseId,
         image::{ImageId, ImageKind},
-        jig::{JigFocus, JigId, PrivacyLevel},
+        jig::{JigFocus, JigId},
         meta::{AffiliationId, AgeRangeId, ImageStyleId, ImageTagIndex, ResourceTypeId},
     },
     media::MediaGroupKind,

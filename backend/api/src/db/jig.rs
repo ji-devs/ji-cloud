@@ -2,6 +2,9 @@ use crate::translate::translate_text;
 use anyhow::Context;
 use serde_json::value::Value;
 use shared::domain::{
+    asset::{
+        DraftOrLive, PrivacyLevel,
+    },
     category::CategoryId,
     jig::additional_resource::{
         AdditionalResource, AdditionalResourceId as AddId, ResourceContent,
@@ -9,8 +12,8 @@ use shared::domain::{
     jig::{
         module::{body::ThemeId, ModuleId},
         AudioBackground, AudioEffects, AudioFeedbackNegative, AudioFeedbackPositive,
-        DeleteUserJigs, DraftOrLive, JigAdminData, JigData, JigFocus, JigId, JigPlayerSettings,
-        JigRating, JigResponse, LiteModule, ModuleKind, PrivacyLevel, TextDirection,
+        DeleteUserJigs, JigAdminData, JigData, JigFocus, JigId, JigPlayerSettings,
+        JigRating, JigResponse, LiteModule, ModuleKind, TextDirection,
     },
     meta::{AffiliationId, AgeRangeId, ResourceTypeId as TypeId},
     user::UserScope,
