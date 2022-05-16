@@ -1,16 +1,16 @@
 use super::state::*;
 use crate::edit::sidebar::{
+    jig::actions as jig_actions,
     jig::copy_paste_module::{copy_module, paste_module},
+    spot::jig::actions as jig_spot_actions,
     spot::{
         actions::{self, MoveTarget},
         state::State as SpotState,
     },
-    jig::actions as jig_actions,
-    spot::jig::actions as jig_spot_actions,
-    state::{State as SidebarState, SidebarSpotItem},
+    state::{SidebarSpotItem, State as SidebarState},
 };
 use dominator::{clone, html, Dom, EventOptions};
-use shared::domain::jig::{module::ModuleId, ModuleKind, LiteModule};
+use shared::domain::jig::{module::ModuleId, LiteModule, ModuleKind};
 use std::rc::Rc;
 use utils::events;
 
@@ -49,7 +49,11 @@ fn menu_items(state: &Rc<State>, module_state: &Rc<SpotState>) -> Vec<Dom> {
     }
 }
 
-fn menu_items_jig(state: &Rc<State>, module_state: &Rc<SpotState>, module: &Option<Rc<LiteModule>>) -> Vec<Dom> {
+fn menu_items_jig(
+    state: &Rc<State>,
+    module_state: &Rc<SpotState>,
+    module: &Option<Rc<LiteModule>>,
+) -> Vec<Dom> {
     match module_state.index {
         0 => {
             vec![
@@ -162,7 +166,11 @@ fn item_paste(state: &Rc<State>, sidebar_state: &Rc<SidebarState>) -> Dom {
     })
 }
 
-fn item_duplicate_as(state: &Rc<State>, sidebar_state: &Rc<SidebarState>, module: &LiteModule) -> Dom {
+fn item_duplicate_as(
+    state: &Rc<State>,
+    sidebar_state: &Rc<SidebarState>,
+    module: &LiteModule,
+) -> Dom {
     let is_card = CARD_KINDS.contains(&module.kind);
 
     html!("empty-fragment", {

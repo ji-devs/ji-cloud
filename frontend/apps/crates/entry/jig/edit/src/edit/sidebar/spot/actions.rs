@@ -1,10 +1,13 @@
+use super::jig::actions as jig_spot_actions;
 use super::state::State;
-use crate::edit::sidebar::{dragging::state::State as DragState, state::{SidebarSpotItem, SidebarSpot}};
-use std::rc::Rc;
+use crate::edit::sidebar::{
+    dragging::state::State as DragState,
+    state::{SidebarSpot, SidebarSpotItem},
+};
 use dominator::clone;
 use shared::domain::jig::ModuleKind;
+use std::rc::Rc;
 use utils::prelude::*;
-use super::jig::actions as jig_spot_actions;
 
 #[allow(dead_code)] // this should be removed eventually
 pub fn mouse_down(state: Rc<State>, x: i32, y: i32) {
@@ -15,11 +18,10 @@ pub fn mouse_down(state: Rc<State>, x: i32, y: i32) {
 }
 
 pub fn add_empty_module_after(state: Rc<State>) {
-    state
-        .sidebar
-        .modules
-        .lock_mut()
-        .insert_cloned(state.index + 1, Rc::new(SidebarSpot::new_empty(&state.sidebar.jig)));
+    state.sidebar.modules.lock_mut().insert_cloned(
+        state.index + 1,
+        Rc::new(SidebarSpot::new_empty(&state.sidebar.jig)),
+    );
     state
         .sidebar
         .jig_edit_state

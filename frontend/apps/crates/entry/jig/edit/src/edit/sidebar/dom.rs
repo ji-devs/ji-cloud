@@ -6,13 +6,12 @@ use web_sys::{ScrollBehavior, ScrollIntoViewOptions};
 
 use super::{
     super::state::State as JigEditState,
+    actions, debug,
     dragging::{actions as drag_actions, dom::DraggingDom},
     header::dom::HeaderDom,
+    jig::actions as jig_actions,
     spot::dom::ItemDom,
     state::*,
-    actions,
-    debug,
-    jig::actions as jig_actions,
 };
 use futures_signals::{
     map_ref,

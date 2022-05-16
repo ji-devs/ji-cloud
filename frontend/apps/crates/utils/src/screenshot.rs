@@ -3,7 +3,10 @@ use serde::Deserialize;
 use super::init::settings::SETTINGS;
 use crate::unwrap::UnwrapJiExt;
 use awsm_web::loaders::fetch::fetch_url;
-use shared::domain::{jig::{module::ModuleId, ModuleKind}, asset::AssetId};
+use shared::domain::{
+    asset::AssetId,
+    jig::{module::ModuleId, ModuleKind},
+};
 
 pub const SCREENSHOT_PARAM: &str = "screenshot";
 

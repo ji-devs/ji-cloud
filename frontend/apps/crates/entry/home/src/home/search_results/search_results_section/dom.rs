@@ -1,4 +1,7 @@
-use components::{module::_common::thumbnail::{ModuleThumbnail, ThumbnailFallback}, share_jig::ShareJig};
+use components::{
+    module::_common::thumbnail::{ModuleThumbnail, ThumbnailFallback},
+    share_jig::ShareJig,
+};
 use dominator::{clone, html, Dom};
 use futures_signals::{
     signal::{Signal, SignalExt},

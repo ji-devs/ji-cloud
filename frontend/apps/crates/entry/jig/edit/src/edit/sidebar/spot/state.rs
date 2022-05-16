@@ -1,4 +1,4 @@
-use crate::edit::sidebar::state::{State as SidebarState, SidebarSpot, SidebarSpotItem};
+use crate::edit::sidebar::state::{SidebarSpot, SidebarSpotItem, State as SidebarState};
 use dominator::clone;
 use futures_signals::signal::{Mutable, Signal, SignalExt};
 use std::cell::RefCell;
@@ -50,7 +50,8 @@ impl State {
 
     pub fn is_last_module(&self) -> bool {
         // self.index < self.total_len - 2 && (&*self.module).is_some()
-        self.index < self.total_len - 2 && matches!(&self.module.item, SidebarSpotItem::Jig(Some(_)))
+        self.index < self.total_len - 2
+            && matches!(&self.module.item, SidebarSpotItem::Jig(Some(_)))
     }
 
     pub fn window_state_signal(state: Rc<State>) -> impl Signal<Item = &'static str> {
@@ -90,16 +91,20 @@ impl State {
 
     pub fn is_selected_signal(self: &Rc<Self>) -> impl Signal<Item = bool> {
         let state = Rc::clone(self);
-        state.sidebar.jig_edit_state.route.signal_ref(clone!(state => move|route| {
-            match &state.module.item {
-                SidebarSpotItem::Jig(Some(module)) => {
-                    matches!(
-                        route,
-                        JigEditRoute::Module(module_id) if module_id == &module.id
-                    )
+        state
+            .sidebar
+            .jig_edit_state
+            .route
+            .signal_ref(clone!(state => move|route| {
+                match &state.module.item {
+                    SidebarSpotItem::Jig(Some(module)) => {
+                        matches!(
+                            route,
+                            JigEditRoute::Module(module_id) if module_id == &module.id
+                        )
+                    }
+                    _ => false
                 }
-                _ => false
-            }
-        }))
+            }))
     }
 }

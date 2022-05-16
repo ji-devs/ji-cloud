@@ -6,8 +6,7 @@ use shared::{
     domain::{
         jig::{
             module::{ModuleCreateRequest, ModuleId, ModuleResponse, ModuleUpdateRequest},
-            JigId, JigResponse, JigUpdateDraftDataRequest, LiteModule,
-            ModuleKind, JigFocus,
+            JigFocus, JigId, JigResponse, JigUpdateDraftDataRequest, LiteModule, ModuleKind,
         },
         CreateResponse,
     },
@@ -15,7 +14,7 @@ use shared::{
 };
 use std::cell::RefCell;
 use std::rc::Rc;
-use utils::{iframe::ModuleToJigEditorMessage, prelude::*, jig::JigPlayerOptions};
+use utils::{iframe::ModuleToJigEditorMessage, jig::JigPlayerOptions, prelude::*};
 
 pub async fn load_jig(jig_id: JigId, jig_cell: Rc<RefCell<Option<JigResponse>>>) {
     let path = endpoints::jig::GetDraft::PATH.replace("{id}", &jig_id.0.to_string());
@@ -139,10 +138,7 @@ pub fn on_iframe_message(state: Rc<State>, message: ModuleToJigEditorMessage) {
             ))));
         }
         ModuleToJigEditorMessage::Publish => {
-            navigate_to_publish(
-                Rc::clone(&state),
-                state.jig.unwrap_jig()
-            );
+            navigate_to_publish(Rc::clone(&state), state.jig.unwrap_jig());
         }
     }
 }

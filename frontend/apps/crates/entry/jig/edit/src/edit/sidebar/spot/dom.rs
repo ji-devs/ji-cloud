@@ -4,12 +4,14 @@ use futures_signals::map_ref;
 use web_sys::{HtmlElement, Node, ScrollBehavior, ScrollIntoViewOptions};
 
 use super::super::jig::menu::dom as MenuDom;
-use super::{actions, state::*};
-use super::jig::actions as jig_spot_actions;
 use super::super::spot::actions as spot_actions;
-use crate::edit::sidebar::state::{ModuleHighlight, State as SidebarState, SidebarSpot, SidebarSpotItem};
+use super::jig::actions as jig_spot_actions;
+use super::{actions, state::*};
+use crate::edit::sidebar::state::{
+    ModuleHighlight, SidebarSpot, SidebarSpotItem, State as SidebarState,
+};
 use components::module::_common::thumbnail::{ModuleThumbnail, ThumbnailFallback};
-use futures_signals::signal::{SignalExt, not};
+use futures_signals::signal::{not, SignalExt};
 use shared::domain::jig::ModuleKind;
 use std::rc::Rc;
 use std::str::FromStr;

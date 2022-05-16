@@ -1,11 +1,14 @@
+use super::super::super::jig::actions as jig_actions;
 use super::super::super::spot::state::State as SpotState;
 use crate::edit::sidebar::state::{SidebarSpot, SidebarSpotItem};
 use dominator::clone;
-use shared::{domain::{jig::module::*, jig::*, CreateResponse}, api::{endpoints, ApiEndpoint}, error::EmptyError};
+use shared::{
+    api::{endpoints, ApiEndpoint},
+    domain::{jig::module::*, jig::*, CreateResponse},
+    error::EmptyError,
+};
 use std::rc::Rc;
 use utils::prelude::*;
-use super::super::super::jig::actions as jig_actions;
-
 
 pub fn edit(state: Rc<SpotState>) {
     let jig_id = state.sidebar.jig.unwrap_jig().id;
@@ -29,19 +32,20 @@ pub fn edit(state: Rc<SpotState>) {
 
 pub async fn delete(state: Rc<SpotState>) {
     if let Some(module) = &*state.module.item.unwrap_module() {
-
         let path = endpoints::jig::module::Delete::PATH
-        .replace("{id}", &state.sidebar.jig.unwrap_jig().id.0.to_string());
+            .replace("{id}", &state.sidebar.jig.unwrap_jig().id.0.to_string());
 
         let req = ModuleDeleteRequest {
-            id: StableOrUniqueId::Unique(module.id)
+            id: StableOrUniqueId::Unique(module.id),
         };
 
         api_with_auth_empty::<EmptyError, _>(
             &path,
             endpoints::jig::module::Delete::METHOD,
-            Some(req)
-        ).await.unwrap();
+            Some(req),
+        )
+        .await
+        .unwrap();
     }
 }
 

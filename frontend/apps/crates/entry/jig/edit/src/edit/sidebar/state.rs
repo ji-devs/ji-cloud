@@ -4,7 +4,10 @@ use futures_signals::{
     signal::{Mutable, Signal, SignalExt},
     signal_vec::MutableVec,
 };
-use shared::domain::{jig::{JigResponse, LiteModule}, asset::Asset};
+use shared::domain::{
+    asset::Asset,
+    jig::{JigResponse, LiteModule},
+};
 use std::rc::Rc;
 use utils::math::PointI32;
 
@@ -53,9 +56,7 @@ impl State {
         // let jig_published_at = jig.published_at;
         let jig_published_at = None;
         let settings_state = match &jig {
-            Asset::Jig(jig) => {
-                SidebarSetting::Jig(Rc::new(SettingsState::new(&jig)))
-            },
+            Asset::Jig(jig) => SidebarSetting::Jig(Rc::new(SettingsState::new(&jig))),
             Asset::Course(_) => todo!(),
         };
 
@@ -75,8 +76,7 @@ impl State {
     }
 
     fn get_jig_spots(jig: &JigResponse) -> Vec<Rc<SidebarSpot>> {
-        jig
-            .jig_data
+        jig.jig_data
             .modules
             .iter()
             .map(|module| Rc::new(module.clone().into()))
@@ -97,11 +97,12 @@ impl State {
     pub fn can_publish(&self) -> bool {
         let modules = self.modules.lock_ref();
 
-        let modules_len = modules.iter().filter(|module| module.item.is_some()).count();
+        let modules_len = modules
+            .iter()
+            .filter(|module| module.item.is_some())
+            .count();
 
-        let modules_valid = !modules.iter().any(|module| {
-            module.is_incomplete.get()
-        });
+        let modules_valid = !modules.iter().any(|module| module.is_incomplete.get());
 
         modules_len > 0 && modules_valid
     }
@@ -133,11 +134,9 @@ pub struct SidebarSpot {
 impl SidebarSpot {
     pub fn new_empty(asset: &Asset) -> Self {
         match asset {
-            Asset::Jig(_) => {
-                Self {
-                    item: SidebarSpotItem::Jig(None),
-                    is_incomplete: Mutable::new(false),
-                }
+            Asset::Jig(_) => Self {
+                item: SidebarSpotItem::Jig(None),
+                is_incomplete: Mutable::new(false),
             },
             Asset::Course(_) => todo!(),
         }
