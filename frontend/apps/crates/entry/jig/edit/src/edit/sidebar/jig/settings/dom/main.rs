@@ -5,7 +5,7 @@ use futures_signals::signal::SignalExt;
 use shared::domain::jig::TextDirection;
 use utils::events;
 
-use crate::edit::sidebar::settings::{
+use crate::edit::sidebar::jig::settings::{
     actions::{set_active_popup, update_jig_settings},
     state::{ActiveSettingsPopup, FeedbackTab},
 };

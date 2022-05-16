@@ -1,10 +1,12 @@
-use crate::edit::sidebar::actions::get_player_settings;
 use dominator::{clone, html, with_node, Dom};
 use futures_signals::signal::SignalExt;
+use shared::domain::{asset::Asset, jig::JigFocus};
 use std::rc::Rc;
 use web_sys::HtmlInputElement;
 
-use super::super::{actions as sidebar_actions, settings, state::State as SidebarState};
+use crate::edit::sidebar::{state::SidebarSetting, jig::actions::get_player_settings};
+
+use super::super::{actions as sidebar_actions, jig::settings, state::State as SidebarState};
 use utils::prelude::*;
 
 const STR_MY_JIGS: &str = "My JIGs";
@@ -20,6 +22,13 @@ impl HeaderDom {
             .property_signal("isModulePage", sidebar_state.jig_edit_state.route.signal_cloned().map(|route| {
                 matches!(route, JigEditRoute::Landing)
             }))
+            .apply(|dom| {
+                match &sidebar_state.settings {
+                    SidebarSetting::Jig(settings) => {
+                        dom.child(settings::dom::render(Rc::clone(&settings)))
+                    },
+                }
+            })
             .children(&mut [
                 html!("jig-edit-sidebar-close-button", {
                     .property("slot", "close")
@@ -38,20 +47,6 @@ impl HeaderDom {
                         let url:String = Route::Asset(AssetRoute::JigGallery).into();
                         dominator::routing::go_to_url(&url);
                     })
-                }),
-                settings::dom::render(Rc::clone(&sidebar_state.settings)),
-                html!("fa-button", {
-                    .property("slot", "modules")
-                    .property("icon", "fa-light fa-grid")
-                    .event(clone!(sidebar_state => move |_:events::Click| {
-                        sidebar_state.jig_edit_state.route.set_neq(JigEditRoute::Landing);
-                        let url:String = Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
-                            sidebar_state.jig.id,
-                            sidebar_state.jig.jig_focus,
-                            JigEditRoute::Landing
-                        ))).into();
-                        dominator::routing::go_to_url(&url);
-                    }))
                 }),
                 html!("input-wrapper", {
                     .property("slot", "input")
@@ -73,11 +68,35 @@ impl HeaderDom {
                 html!("jig-edit-sidebar-preview-button", {
                     .property("slot", "preview")
                     .event(clone!(sidebar_state => move |_: events::Click| {
-                        let settings = get_player_settings(Rc::clone(&sidebar_state));
-                        sidebar_state.jig_edit_state.play_jig.set(Some(settings));
+                        match &sidebar_state.settings {
+                            SidebarSetting::Jig(jig) => {
+                                let settings = get_player_settings(Rc::clone(&jig));
+                                sidebar_state.jig_edit_state.play_jig.set(Some(settings));
+                            },
+                        }
                     }))
                 }),
             ])
+            .apply(clone!(sidebar_state => move|dom| {
+                if let Asset::Jig(_) = &sidebar_state.jig {
+                    dom.child(html!("fa-button", {
+                        .property("slot", "modules")
+                        .property("icon", "fa-light fa-grid")
+                        .event(clone!(sidebar_state => move |_:events::Click| {
+                            sidebar_state.jig_edit_state.route.set_neq(JigEditRoute::Landing);
+                            let jig = sidebar_state.jig.unwrap_jig();
+                            let url = Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
+                                jig.id,
+                                JigFocus::Modules,
+                                JigEditRoute::Landing
+                            ))).to_string();
+                            dominator::routing::go_to_url(&url);
+                        }))
+                    }))
+                } else {
+                    dom
+                }
+            }))
         })
     }
 }

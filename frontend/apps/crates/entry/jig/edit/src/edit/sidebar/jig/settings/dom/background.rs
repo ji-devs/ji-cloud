@@ -5,7 +5,7 @@ use components::audio::mixer::{AudioSourceExt, AUDIO_MIXER};
 use dominator::{clone, html, with_node, Dom};
 use web_sys::HtmlInputElement;
 
-use crate::edit::sidebar::settings::{
+use crate::edit::sidebar::jig::settings::{
     actions::{self, set_active_popup},
     dom::STR_BACK_TO_SETTINGS,
     state::ActiveSettingsPopup,

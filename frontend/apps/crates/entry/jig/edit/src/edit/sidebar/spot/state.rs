@@ -1,4 +1,4 @@
-use crate::edit::sidebar::state::{Module, State as SidebarState};
+use crate::edit::sidebar::state::{State as SidebarState, SidebarSpot, SidebarSpotItem};
 use dominator::clone;
 use futures_signals::signal::{Mutable, Signal, SignalExt};
 use std::cell::RefCell;
@@ -8,7 +8,7 @@ use utils::routes::JigEditRoute;
 use web_sys::HtmlElement;
 
 pub struct State {
-    pub module: Rc<Option<Module>>,
+    pub module: Rc<SidebarSpot>,
     pub tried_module_at_cover: Mutable<bool>,
     pub sidebar: Rc<SidebarState>,
     pub drag: Mutable<Option<Drag>>,
@@ -23,7 +23,7 @@ impl State {
         sidebar: Rc<SidebarState>,
         index: usize,
         total_len: usize,
-        module: Rc<Option<Module>>,
+        module: Rc<SidebarSpot>,
     ) -> Self {
         Self {
             module,
@@ -38,26 +38,35 @@ impl State {
     }
 
     pub fn kind_str(&self) -> &'static str {
-        match &*self.module {
-            None => "",
-            Some(module) => module.kind().as_str(),
+        // match &*self.module {
+        //     None => "",
+        //     Some(module) => module.kind().as_str(),
+        // }
+        match &self.module.item {
+            SidebarSpotItem::Jig(Some(module)) => module.kind.as_str(),
+            _ => "",
         }
     }
 
     pub fn is_last_module(&self) -> bool {
-        self.index < self.total_len - 2 && (&*self.module).is_some()
+        // self.index < self.total_len - 2 && (&*self.module).is_some()
+        self.index < self.total_len - 2 && matches!(&self.module.item, SidebarSpotItem::Jig(Some(_)))
     }
 
     pub fn window_state_signal(state: Rc<State>) -> impl Signal<Item = &'static str> {
         state.sidebar.jig_edit_state.route.signal_ref(clone!(state => move |route| {
-            match &*state.module {
-                None => "empty",
-                Some(this_module) => {
-                    match route {
-                        JigEditRoute::Module(active_module_id) if active_module_id == this_module.id() => "active",
-                        _ => "thumbnail",
+            match &state.module.item {
+                SidebarSpotItem::Jig(module) => {
+                    match module {
+                        None => "empty",
+                        Some(this_module) => {
+                            match route {
+                                JigEditRoute::Module(active_module_id) if active_module_id == &this_module.id => "active",
+                                _ => "thumbnail",
+                            }
+                        }
                     }
-                }
+                },
             }
         }))
     }
@@ -77,5 +86,20 @@ impl State {
                     _ => false
                 }
             }))
+    }
+
+    pub fn is_selected_signal(self: &Rc<Self>) -> impl Signal<Item = bool> {
+        let state = Rc::clone(self);
+        state.sidebar.jig_edit_state.route.signal_ref(clone!(state => move|route| {
+            match &state.module.item {
+                SidebarSpotItem::Jig(Some(module)) => {
+                    matches!(
+                        route,
+                        JigEditRoute::Module(module_id) if module_id == &module.id
+                    )
+                }
+                _ => false
+            }
+        }))
     }
 }

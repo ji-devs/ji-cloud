@@ -8,9 +8,11 @@ use super::{
     super::state::State as JigEditState,
     dragging::{actions as drag_actions, dom::DraggingDom},
     header::dom::HeaderDom,
-    module::dom::ModuleDom,
+    spot::dom::ItemDom,
     state::*,
-    {actions, debug},
+    actions,
+    debug,
+    jig::actions as jig_actions,
 };
 use futures_signals::{
     map_ref,
@@ -40,7 +42,7 @@ impl SidebarDom {
                 if jig_id == JigId(Uuid::from_u128(0)) {
                     *jig.borrow_mut() = Some(debug::get_jig());
                 } else {
-                    actions::load_jig(jig_id, jig.clone()).await;
+                    jig_actions::load_jig(jig_id, jig.clone()).await;
                 }
 
                 is_loading.set_neq(false);
@@ -58,7 +60,7 @@ impl SidebarDom {
     }
 
     fn render_loaded(jig: JigResponse, jig_edit_state: Rc<JigEditState>) -> Dom {
-        let state = Rc::new(State::new(jig, jig_edit_state));
+        let state = Rc::new(State::new(jig.into(), jig_edit_state));
 
         html!("empty-fragment", {
             .global_event(clone!(state => move |evt: Message| {
@@ -67,7 +69,7 @@ impl SidebarDom {
 
                     },
                     Ok(m) => {
-                        actions::on_iframe_message(Rc::clone(&state), m.data)
+                        jig_actions::on_iframe_message(Rc::clone(&state), m.data)
                     },
                 };
             }))
@@ -155,7 +157,7 @@ impl SidebarDom {
                         }
                     }))
                     .map(clone!(state => move |(index, len, drag_target_index, module)| {
-                        ModuleDom::render(state.clone(), index, drag_target_index, len, module)
+                        ItemDom::render(state.clone(), index, drag_target_index, len, module)
                     }))
                 )
                 .global_event(clone!(state => move |evt:events::MouseUp| {

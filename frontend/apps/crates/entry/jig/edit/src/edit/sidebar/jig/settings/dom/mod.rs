@@ -4,7 +4,7 @@ use dominator::{class, clone, html, pseudo, Dom};
 use futures_signals::signal::SignalExt;
 use utils::events;
 
-use crate::edit::sidebar::settings::state::ActiveSettingsPopup;
+use crate::edit::sidebar::jig::settings::state::ActiveSettingsPopup;
 
 use super::state::State;
 

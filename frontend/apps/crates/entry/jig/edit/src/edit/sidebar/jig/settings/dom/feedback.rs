@@ -5,7 +5,7 @@ use awsm_web::audio::AudioClipOptions;
 use components::audio::mixer::{AudioHandle, AudioPath, AUDIO_MIXER};
 use dominator::{clone, html, Dom};
 
-use crate::edit::sidebar::settings::{
+use crate::edit::sidebar::jig::settings::{
     actions::{set_active_popup, update_jig_settings},
     dom::STR_BACK_TO_SETTINGS,
     state::{ActiveSettingsPopup, FeedbackTab},

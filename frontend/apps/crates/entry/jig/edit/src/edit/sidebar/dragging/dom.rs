@@ -5,7 +5,7 @@ use std::rc::Rc;
 use crate::edit::sidebar::state::State as SidebarState;
 use futures_signals::signal::SignalExt;
 
-use super::super::module::state::State as ModuleState;
+use super::super::spot::state::State as ItemState;
 
 pub struct DraggingDom {}
 
@@ -40,7 +40,7 @@ impl DraggingDom {
                                 .property("dragging", true)
                                 .child(html!("jig-edit-sidebar-module-window", {
                                     .property("slot", "window")
-                                    .property_signal("state", ModuleState::window_state_signal(Rc::clone(module)))
+                                    .property_signal("state", ItemState::window_state_signal(Rc::clone(module)))
                                 }))
                             })
                         })
