@@ -330,6 +330,21 @@ impl Route {
             ["admin", "export"] => Self::Admin(AdminRoute::Export),
             ["admin"] => Self::Admin(AdminRoute::Landing),
             // ["jig", "edit", path] => Self::Asset(AssetRoute::RedirectToJig(path.to_string())),
+            ["jig", "edit"] | ["jig", "edit", _] | ["jig", "edit", _, _] => {
+                let url: String = url.pathname();
+                let mut url: Vec<&str> = url.split('/').collect();
+                url.remove(0);
+                url.remove(0);
+                url.remove(0);
+                let url = url.join("/");
+                let url = format!("/asset/edit/jig/{}", url);
+                let _ = web_sys::window()
+                    .unwrap()
+                    .location()
+                    .set_pathname(&url);
+
+                unreachable!()
+            },
             ["asset", "edit", "jig-gallery"] => Self::Asset(AssetRoute::JigGallery),
             ["asset", "edit", "course-gallery"] => Self::Asset(AssetRoute::CourseGallery),
             ["asset", "edit", "resource-gallery"] => Self::Asset(AssetRoute::ResourceGallery),
