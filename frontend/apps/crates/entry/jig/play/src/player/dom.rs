@@ -23,7 +23,9 @@ pub fn render(state: Rc<State>) -> Dom {
     actions::load_jig(state.clone());
 
     html!("jig-play-landing", {
-        .property("rtl", state.player_options.direction.is_rtl())
+        .property_signal("rtl", state.jig.signal_cloned().map(|jig| {
+            jig.map(|jig| jig.jig_data.default_player_settings.direction.is_rtl())
+        }))
         .property_signal("paused", state.paused.signal())
         .property_signal("isLegacy", state.jig.signal_ref(|jig| {
             if let Some(jig) = jig {
