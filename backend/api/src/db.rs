@@ -1,5 +1,6 @@
 pub(crate) mod animation;
 pub(crate) mod audio;
+pub(crate) mod badge;
 pub(crate) mod category;
 pub(crate) mod course;
 pub(crate) mod image;

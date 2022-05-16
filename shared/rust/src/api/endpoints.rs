@@ -61,8 +61,11 @@ pub mod locale;
 /// Pdf endpoints
 pub mod pdf;
 
-/// Learning Path endpoints
+/// Course endpoints
 pub mod course;
 
 /// Additional Resource endpoints
 pub mod additional_resource;
+
+/// Badge endpoints
+pub mod badge;
