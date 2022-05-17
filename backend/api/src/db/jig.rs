@@ -7,8 +7,8 @@ use shared::domain::{
     category::CategoryId,
     jig::{
         AudioBackground, AudioEffects, AudioFeedbackNegative, AudioFeedbackPositive,
-        DeleteUserJigs, DraftOrLive, JigAdminData, JigData, JigFocus, JigId, JigPlayerSettings,
-        JigRating, JigResponse, PrivacyLevel, TextDirection,
+        DeleteUserJigs, JigAdminData, JigData, JigFocus, JigId, JigPlayerSettings, JigRating,
+        JigResponse, TextDirection,
     },
     meta::{AffiliationId, AgeRangeId, ResourceTypeId as TypeId},
     module::{body::ThemeId, LiteModule, ModuleId, ModuleKind},

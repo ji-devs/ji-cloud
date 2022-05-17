@@ -10,6 +10,7 @@ pub async fn create(
     pool: &PgPool,
     parent: CourseId,
     body: ModuleBody,
+    is_complete: bool,
 ) -> anyhow::Result<(ModuleId, u16)> {
     let (kind, body) = ModuleBody::map_module_contents(&body)?;
 
@@ -29,13 +30,14 @@ select draft_id from course where course.id = $1
     let res = sqlx::query!(
         //language=SQL
         r#"
-insert into course_data_module (course_data_id, kind, contents, index)
-values ($1, $2, $3, (select count(*) from course_data_module where course_data_id = $1))
+insert into course_data_module (course_data_id, kind, contents, index, is_complete)
+values ($1, $2, $3, (select count(*) from course_data_module where course_data_id = $1), $4)
 returning id, "index"
 "#,
         draft_id,
         kind as i16,
         body,
+        is_complete
     )
     .fetch_one(&mut txn)
     .await

@@ -15,11 +15,12 @@ use crate::domain::{
     category::CategoryId,
     // learning_path::AdditionalResource,
     meta::{AffiliationId, AgeRangeId},
+    module::LiteModule,
 };
 
 use super::{
     course::{CourseId, CourseResponse},
-    jig::{JigId, JigResponse, LiteModule},
+    jig::{JigId, JigResponse},
 };
 
 /// AssetType
