@@ -1105,7 +1105,6 @@ pub async fn clone_data(
     from_data_id: &Uuid,
     draft_or_live: DraftOrLive,
 ) -> Result<Uuid, error::CloneDraft> {
-    println!("here in clone");
     let new_id = sqlx::query!(
         //language=SQL
         r#"

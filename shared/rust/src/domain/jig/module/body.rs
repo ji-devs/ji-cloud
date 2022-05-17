@@ -118,6 +118,23 @@ impl Body {
             Self::Legacy(data) => data.convert_to_body(kind),
         }
     }
+
+    /// Helper to check whether the inner data is complete
+    pub fn is_complete(&self) -> bool {
+        match self {
+            Self::MemoryGame(data) => data.is_complete(),
+            Self::Matching(data) => data.is_complete(),
+            Self::Flashcards(data) => data.is_complete(),
+            Self::CardQuiz(data) => data.is_complete(),
+            Self::Poster(data) => data.is_complete(),
+            Self::Video(data) => data.is_complete(),
+            Self::TappingBoard(data) => data.is_complete(),
+            Self::DragDrop(data) => data.is_complete(),
+            Self::Cover(data) => data.is_complete(),
+            Self::ResourceCover(data) => data.is_complete(),
+            Self::Legacy(data) => data.is_complete(),
+        }
+    }
 }
 
 /// Extension trait for interop
