@@ -6,6 +6,7 @@ use std::{
     str::FromStr,
 };
 
+use chrono::{DateTime, Utc};
 // use dyn_clone::DynClone;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -22,70 +23,6 @@ use super::{
 };
 
 pub mod additional_resource;
-
-// /// fdsa
-// pub trait IdTrait: DynClone + Debug {
-//     /// fdsa
-//     fn uuid(&self) -> &Uuid;
-// }
-
-// impl PartialEq for dyn IdTrait {
-//     fn eq(&self, other: &Self) -> bool {
-//         self.uuid() == other.uuid()
-//     }
-// }
-
-// impl IdTrait for Box<dyn IdTrait> {
-//     fn uuid(&self) -> &Uuid {
-//         self.deref().uuid()
-//     }
-// }
-
-// dyn_clone::clone_trait_object!(IdTrait);
-
-//     // Id: Copy + PartialEq
-// /// Asset
-// pub trait Asset: DynClone + Debug {
-//     /// get id
-//     fn id(&self) -> Box<dyn IdTrait>;
-
-//     /// get display_name
-//     fn display_name(&self) -> &String;
-
-//     /// get language
-//     fn language(&self) -> &String;
-
-//     /// get description
-//     fn description(&self) -> &String;
-
-//     /// get cover
-//     fn cover(&self) -> Option<&LiteModule>;
-
-//     /// get privacy_level
-//     fn privacy_level(&self) -> &PrivacyLevel;
-
-//     /// get other_keywords
-//     fn other_keywords(&self) -> &String;
-
-//     /// get translated_keywords
-//     fn translated_keywords(&self) -> &String;
-
-//     /// get age_ranges
-//     fn age_ranges(&self) -> &Vec<AgeRangeId>;
-
-//     /// get affiliations
-//     fn affiliations(&self) -> &Vec<AffiliationId>;
-
-//     /// get categories
-//     fn categories(&self) -> &Vec<CategoryId>;
-
-//     // fn additional_resources(&self) -> &Vec<AdditionalResource>;
-
-//     /// get translated_description
-//     fn translated_description(&self) -> &HashMap<String, String>;
-// }
-
-// dyn_clone::clone_trait_object!(Asset);
 
 /// AssetId
 #[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
@@ -184,6 +121,14 @@ impl Asset {
         }
     }
 
+    /// get id
+    pub fn published_at(&self) -> Option<DateTime<Utc>> {
+        match self {
+            Self::Jig(jig) => jig.published_at,
+            Self::Course(course) => course.published_at,
+        }
+    }
+
     /// get display_name
     pub fn display_name(&self) -> &String {
         match self {
@@ -210,11 +155,10 @@ impl Asset {
 
     /// get cover
     pub fn cover(&self) -> Option<&LiteModule> {
-        // match self {
-        //     Self::Jig(jig) => &jig.cover,
-        //     Self::Course(course) => &course.cover,
-        // }
-        todo!()
+        match self {
+            Self::Jig(jig) => jig.jig_data.modules.first(),
+            Self::Course(_) => todo!(),
+        }
     }
 
     /// get privacy_level
