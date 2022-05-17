@@ -1,71 +1,43 @@
-use super::state::*;
-use components::module::_common::prelude::ModuleId;
+use super::{jig::actions as jig_actions, state::*};
 use dominator::clone;
 use futures::join;
-use shared::{
-    api::endpoints::{self, ApiEndpoint},
-    domain::{
-        asset::{DraftOrLive, UserOrMe},
-        jig::{
-            module::{ModuleBody, ModuleCreateRequest},
-            JigBrowseQuery, JigBrowseResponse, JigCreateRequest, JigId, JigResponse,
-            JigSearchQuery, JigSearchResponse, ModuleKind,
-        },
-        meta::MetadataResponse,
-        CreateResponse,
-    },
-    error::{EmptyError, MetadataNotFound},
-};
+use shared::{api::endpoints, domain::asset::AssetId};
 use std::rc::Rc;
 use utils::prelude::*;
 
-impl JigGallery {
+impl Gallery {
     pub fn load_data(self: &Rc<Self>) {
         let state = self;
         state.loader.load(clone!(state => async move {
             join!(
-                state.load_jigs(),
+                state.load_assets(),
                 state.load_ages(),
             );
         }));
     }
 
-    async fn load_jigs(self: &Rc<Self>) {
+    async fn load_assets(self: &Rc<Self>) {
         let state = self;
-        let is_published = match *state.visible_jigs.lock_ref() {
-            VisibleJigs::All => None,
-            VisibleJigs::Published => Some(true),
-            VisibleJigs::Draft => Some(false),
+        let is_published = match *state.visible_assets.lock_ref() {
+            VisibleAssets::All => None,
+            VisibleAssets::Published => Some(true),
+            VisibleAssets::Draft => Some(false),
         };
 
-        let req = JigBrowseQuery {
-            page: Some(*self.next_page.lock_ref()),
-            is_published,
-            author_id: Some(UserOrMe::Me),
-            jig_focus: Some(state.focus),
-            draft_or_live: Some(DraftOrLive::Draft),
-            ..Default::default()
-        };
-
-        match api_with_auth::<JigBrowseResponse, EmptyError, _>(
-            endpoints::jig::Browse::PATH,
-            endpoints::jig::Browse::METHOD,
-            Some(req),
-        )
-        .await
-        {
-            Ok(mut resp) => {
+        match jig_actions::load_jigs(state, is_published).await {
+            Ok(resp) => {
                 // Update the total count and increment the next page so that a future call will
                 // call the correct page.
-                state.total_jig_count.set(Some(resp.total_jig_count));
+                state.total_asset_count.set(Some(resp.total_jig_count));
                 *state.next_page.lock_mut() += 1;
 
                 // Append results to the current list.
-                let mut new_list = state.jigs.lock_ref().to_vec();
-                new_list.append(&mut resp.jigs);
+                let mut new_list = state.assets.lock_ref().to_vec();
+                let mut jigs = resp.jigs.into_iter().map(|jig| jig.into()).collect();
+                new_list.append(&mut jigs);
 
                 // Update the list with the new list.
-                state.jigs.lock_mut().replace_cloned(new_list);
+                state.assets.lock_mut().replace_cloned(new_list);
             }
             Err(_) => {
                 todo!();
@@ -75,13 +47,7 @@ impl JigGallery {
 
     async fn load_ages(self: &Rc<Self>) {
         let state = Rc::clone(self);
-        match api_with_auth::<MetadataResponse, EmptyError, ()>(
-            endpoints::meta::Get::PATH,
-            endpoints::meta::Get::METHOD,
-            None,
-        )
-        .await
-        {
+        match endpoints::meta::Get::api_with_auth(None).await {
             Err(_e) => {}
             Ok(res) => {
                 state.age_ranges.set(res.age_ranges);
@@ -89,131 +55,61 @@ impl JigGallery {
         }
     }
 
-    pub fn search_jigs(self: &Rc<Self>, q: String) {
+    pub fn search_assets(self: &Rc<Self>, q: String) {
         let state = self;
         state.loader.load(clone!(state => async move {
-            let is_published = match *state.visible_jigs.lock_ref() {
-                VisibleJigs::All => None,
-                VisibleJigs::Published => Some(true),
-                VisibleJigs::Draft => Some(false),
+            let is_published = match *state.visible_assets.lock_ref() {
+                VisibleAssets::All => None,
+                VisibleAssets::Published => Some(true),
+                VisibleAssets::Draft => Some(false),
             };
 
-            let req = Some(JigSearchQuery {
-                q,
-                is_published,
-                author_id: Some(UserOrMe::Me),
-                jig_focus: Some(state.focus),
-                ..Default::default()
-            });
-
-            match api_with_auth::<JigSearchResponse, EmptyError, _>(
-                endpoints::jig::Search::PATH,
-                endpoints::jig::Search::METHOD,
-                req
-            ).await {
-                Ok(resp) => {
-                    state.jigs.lock_mut().replace_cloned(resp.jigs);
-                },
-                Err(_) => {
-                    todo!();
-                },
-            }
+            let assets = jig_actions::search_jigs(q, is_published)
+                .await
+                .unwrap_ji();
+            state.assets.lock_mut().replace_cloned(assets);
         }));
     }
 
-    pub fn load_jigs_regular(self: &Rc<Self>) {
+    pub fn load_assets_regular(self: &Rc<Self>) {
         let state = self;
         state.loader.load(clone!(state => async move {
-            state.load_jigs().await
+            state.load_assets().await
         }));
     }
 
-    pub fn create_jig(self: &Rc<Self>) {
+    pub fn create_asset(self: &Rc<Self>) {
+        let state = Rc::clone(&self);
+        state.loader.load(clone!(state => async move {
+            jig_actions::create_jig(state.focus).await;
+        }));
+    }
+
+    pub fn copy_asset(self: &Rc<Self>, asset_id: AssetId) {
+        let state = Rc::clone(&self);
+        state.loader.load(clone!(state => async move {
+            let asset = match asset_id {
+                AssetId::JigId(jig_id) => jig_actions::copy_jig(jig_id).await,
+                AssetId::CourseId(_) => todo!(),
+            };
+            state.assets.lock_mut().push_cloned(asset.unwrap_ji());
+        }));
+    }
+
+    pub fn delete_asset(self: &Rc<Self>, asset_id: AssetId) {
         let state = self;
         state.loader.load(clone!(state => async move {
-            let req = JigCreateRequest {
-                jig_focus: state.focus,
-                ..Default::default()
+            let result = match asset_id {
+                AssetId::JigId(jig_id) => {
+                    jig_actions::delete_jig(jig_id).await
+                },
+                AssetId::CourseId(_) => todo!(),
             };
 
-            match api_with_auth::<CreateResponse<JigId>, MetadataNotFound, _>(
-                endpoints::jig::Create::PATH,
-                endpoints::jig::Create::METHOD,
-                Some(req),
-            )
-            .await
-            {
-                Ok(resp) => {
-                    if state.focus.is_resources() {
-                        Self::add_resource_cover(&resp.id).await;
-                    }
-                    let url: String = Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
-                        resp.id,
-                        state.focus,
-                        JigEditRoute::Landing
-                    ))).into();
-                    dominator::routing::go_to_url(&url);
-                }
-                Err(_) => todo!("")
-            }
-        }));
-    }
-
-    async fn add_resource_cover(jig_id: &JigId) {
-        let req = ModuleCreateRequest {
-            body: ModuleBody::new(ModuleKind::ResourceCover),
-        };
-
-        let path = endpoints::jig::module::Create::PATH.replace("{id}", &jig_id.0.to_string());
-
-        match api_with_auth::<CreateResponse<ModuleId>, EmptyError, _>(
-            &path,
-            endpoints::jig::module::Create::METHOD,
-            Some(req),
-        )
-        .await
-        {
-            Ok(_) => {}
-            Err(_) => {
-                todo!()
-            }
-        }
-    }
-
-    pub fn copy_jig(self: &Rc<Self>, jig_id: &JigId) {
-        let state = self;
-        let path = endpoints::jig::Clone::PATH.replace("{id}", &jig_id.0.to_string());
-
-        state.loader.load(clone!(state => async move {
-            match api_with_auth::<CreateResponse<JigId>, EmptyError, ()>(&path, endpoints::jig::Clone::METHOD, None).await {
-                Ok(resp) => {
-
-                    let path = endpoints::jig::GetDraft::PATH.replace("{id}", &resp.id.0.to_string());
-                    match api_with_auth::<JigResponse, EmptyError, ()>(&path, endpoints::jig::GetDraft::METHOD, None).await {
-                        Ok(resp) => {
-                            state.jigs.lock_mut().push_cloned(resp);
-                        },
-                        Err(_) => {
-                            todo!();
-                        },
-                    };
-
-                },
-                Err(_) => {
-                    todo!();
-                },
-            };
-        }));
-    }
-
-    pub fn delete_jig(self: &Rc<Self>, jig_id: JigId) {
-        let state = self;
-        state.loader.load(clone!(state => async move {
-            let path = endpoints::jig::Delete::PATH.replace("{id}",&jig_id.0.to_string());
-            match api_with_auth_empty::<EmptyError, ()>(&path, endpoints::jig::Delete::METHOD, None).await {
+            match result {
                 Ok(_) => {
-                    state.jigs.lock_mut().retain(|jig| {
-                        jig.id != jig_id
+                    state.assets.lock_mut().retain(|asset| {
+                        asset.id() != asset_id
                     });
                 },
                 Err(_) => {

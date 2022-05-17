@@ -6,6 +6,7 @@ use dominator::{clone, html, Dom};
 use futures_signals::map_ref;
 use futures_signals::signal::SignalExt;
 use futures_signals::signal_vec::SignalVecExt;
+use shared::domain::asset::Asset;
 use std::rc::Rc;
 use strum::IntoEnumIterator;
 use utils::ages::AgeRangeVecExt;
@@ -26,12 +27,12 @@ const STR_DELETE_CANCEL: &str = "Don't delete";
 
 const STR_LOAD_MORE: &str = "See more";
 
-impl JigGallery {
-    fn visible_jigs_option_string(visible_jigs: &VisibleJigs) -> &'static str {
+impl Gallery {
+    fn visible_assets_option_string(visible_jigs: &VisibleAssets) -> &'static str {
         match visible_jigs {
-            VisibleJigs::All => STR_SHOW_JIG_ALL,
-            VisibleJigs::Published => STR_SHOW_JIG_PUBLISHED,
-            VisibleJigs::Draft => STR_SHOW_JIG_DRAFT,
+            VisibleAssets::All => STR_SHOW_JIG_ALL,
+            VisibleAssets::Published => STR_SHOW_JIG_PUBLISHED,
+            VisibleAssets::Draft => STR_SHOW_JIG_DRAFT,
         }
     }
 
@@ -41,12 +42,12 @@ impl JigGallery {
         state.load_data();
 
         let load_more_signal = map_ref! {
-            let total_jig_count = state.total_jig_count.signal_cloned(),
-            let jigs = state.jigs.signal_vec_cloned().to_signal_cloned()
+            let total_asset_count = state.total_asset_count.signal_cloned(),
+            let assets = state.assets.signal_vec_cloned().to_signal_cloned()
                 => {
-                    match total_jig_count {
-                        Some(total_jig_count) => {
-                            (jigs.len() as u64) < *total_jig_count
+                    match total_asset_count {
+                        Some(total_asset_count) => {
+                            (assets.len() as u64) < *total_asset_count
                         },
                         None => false
                     }
@@ -66,7 +67,7 @@ impl JigGallery {
                         .event(clone!(state => move |_evt: events::CustomCancel| state.confirm_delete.set_neq(None)))
                         .event(clone!(state => move |_evt: events::CustomConfirm| {
                             state.confirm_delete.set_neq(None);
-                            state.delete_jig(jig_id);
+                            state.delete_asset(jig_id);
                         }))
                     })
                 })
@@ -77,7 +78,7 @@ impl JigGallery {
                     .child(html!("jig-gallery-create", {
                         .property("slot", "create-jig")
                         .event(clone!(state => move |_: events::Click| {
-                            state.create_jig();
+                            state.create_asset();
                         }))
                     }))
                     // .apply_if(state.focus.is_modules(), move |dom| {
@@ -95,27 +96,27 @@ impl JigGallery {
                         .event(clone!(state => move |evt: events::CustomSearch| {
                             let value = evt.query();
                             if !value.is_empty() {
-                                state.search_jigs(value);
+                                state.search_assets(value);
                             } else {
-                                state.load_jigs_regular();
+                                state.load_assets_regular();
                             }
                         }))
                     }))
                     .child(html!("input-select", {
                         .visible(false)
                         .property("slot", "filters")
-                        .property_signal("value", state.visible_jigs.signal_cloned().map(|visible_jigs| Self::visible_jigs_option_string(&visible_jigs)))
-                        .children(VisibleJigs::iter().map(|option| {
+                        .property_signal("value", state.visible_assets.signal_cloned().map(|visible_jigs| Self::visible_assets_option_string(&visible_jigs)))
+                        .children(VisibleAssets::iter().map(|option| {
                             html!("input-select-option", {
                                 .property("value", &option.to_string())
-                                .text(Self::visible_jigs_option_string(&option))
-                                .property_signal("selected", state.visible_jigs.signal_cloned().map(clone!(option => move |visible_jigs| {
+                                .text(Self::visible_assets_option_string(&option))
+                                .property_signal("selected", state.visible_assets.signal_cloned().map(clone!(option => move |visible_jigs| {
                                     visible_jigs == option
                                 })))
                                 .event(clone!(state, option => move |evt: events::CustomSelectedChange| {
                                     if evt.selected() {
-                                        state.visible_jigs.set(option.clone());
-                                        state.load_jigs_regular();
+                                        state.visible_assets.set(option.clone());
+                                        state.load_assets_regular();
                                     }
                                 }))
                             })
@@ -126,23 +127,28 @@ impl JigGallery {
                     //     .property("slot", "recent-items")
                     //     .property_signal("visible", state.loader.is_loading())
                     // }))
-                    .children_signal_vec(state.jigs.signal_vec_cloned().map(clone!(state => move |jig| {
-                        let jig_ages = jig.jig_data.age_ranges.clone();
+                    .children_signal_vec(state.assets.signal_vec_cloned().map(clone!(state => move |jig| {
+                        let jig_ages = jig.age_ranges().clone();
                         html!("jig-gallery-recent", {
                             .property("slot", "recent-items")
-                            .property("label", jig.jig_data.display_name.clone())
+                            .property("label", jig.display_name())
                             .property("href", {
-                                String::from(Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
-                                    jig.id,
-                                    jig.jig_focus,
-                                    JigEditRoute::Landing
-                                ))))
+                                match &jig {
+                                    Asset::Jig(jig) => {
+                                        String::from(Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
+                                            jig.id,
+                                            jig.jig_focus,
+                                            JigEditRoute::Landing
+                                        ))))
+                                    },
+                                    Asset::Course(_) => todo!(),
+                                }
                             })
                             .property_signal("ages", state.age_ranges.signal_cloned().map(move|age_ranges| {
                                 age_ranges.range_string(&jig_ages)
                             }))
                             .apply(|dom| {
-                                match jig.published_at {
+                                match jig.published_at() {
                                     None => {
                                         // dom.property("draft", true)
                                         dom
@@ -154,8 +160,8 @@ impl JigGallery {
                             })
                             .child(ModuleThumbnail::render(
                                 Rc::new(ModuleThumbnail {
-                                    asset_id: jig.id.into(),
-                                    module: jig.jig_data.modules.first().cloned(),
+                                    asset_id: jig.id(),
+                                    module: jig.cover().cloned(),
                                     fallback: ThumbnailFallback::Asset,
                                 }),
                                 Some("thumbnail")
@@ -166,7 +172,7 @@ impl JigGallery {
                                     .property("icon", "duplicate")
                                     .text(STR_DUPLICATE)
                                     .event(clone!(state, jig => move |_: events::Click| {
-                                        state.copy_jig(&jig.id);
+                                        state.copy_asset(jig.id().clone());
                                     }))
                                 }),
                                 html!("menu-line", {
@@ -174,7 +180,7 @@ impl JigGallery {
                                     .property("icon", "delete")
                                     .text(STR_DELETE)
                                     .event(clone!(state, jig => move |_: events::Click| {
-                                        state.confirm_delete.set_neq(Some(jig.id));
+                                        state.confirm_delete.set_neq(Some(jig.id()));
                                     }))
                                 }),
                             ])
