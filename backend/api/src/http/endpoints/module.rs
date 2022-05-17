@@ -22,17 +22,17 @@ async fn create(
     req: Json<<module::Create as ApiEndpoint>::Req>,
 ) -> Result<HttpResponse, error::Auth> {
     let req = req.into_inner();
+    let is_complete = req.body.is_complete();
 
     let (id, _index) = match req.parent_id {
         AssetId::JigId(jig_id) => {
             db::jig::authz(&*db, auth.0.user_id, Some(jig_id)).await?;
 
-            db::jig::module::create(&*db, jig_id, req.body).await?
+            db::jig::module::create(&*db, jig_id, req.body, is_complete).await?
         }
         AssetId::CourseId(course_id) => {
             db::course::authz(&*db, auth.0.user_id, Some(course_id)).await?;
-
-            db::course::module::create(&*db, course_id, req.body).await?
+            db::course::module::create(&*db, course_id, req.body, is_complete).await?
         }
     };
 
