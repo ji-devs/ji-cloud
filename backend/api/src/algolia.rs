@@ -27,8 +27,6 @@ use sqlx::{types::Json, PgPool};
 use std::convert::TryInto;
 use uuid::Uuid;
 
-use migration::ResyncKind;
-
 mod migration;
 
 const PREMIUM_TAG: &'static str = "premium";
@@ -83,7 +81,6 @@ struct BatchImage<'a> {
     tags: Vec<&'static str>,
     translated_description: &'a Vec<String>,
 }
-
 #[derive(Serialize)]
 struct BatchCourse<'a> {
     name: &'a str,
@@ -115,6 +112,22 @@ struct BatchCourse<'a> {
 #[serde(rename_all = "camelCase")]
 enum BatchMedia<'a> {
     Image(BatchImage<'a>),
+}
+
+enum AlgoliaIndices {
+    MediaIndex,
+    JigIndex,
+    CourseIndex,
+}
+
+impl AlgoliaIndices {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Self::MediaIndex => migration::MEDIA_INDEX,
+            Self::JigIndex => migration::JIG_INDEX,
+            Self::CourseIndex => migration::COURSE_INDEX,
+        }
+    }
 }
 
 /// Manager for background task that reads updated jigs or media from the database, then
@@ -193,67 +206,41 @@ impl Manager {
     pub async fn migrate(&self) -> anyhow::Result<()> {
         let mut txn = self.db.begin().await?;
 
-        let algolia_version = sqlx::query!(
+        let index = sqlx::query!(
             r#"
-with new_row as (
-    insert into "settings" default values on conflict(singleton) do nothing returning algolia_index_version
-)
-select algolia_index_version as "algolia_index_version!" from new_row
-union
-select algolia_index_version as "algolia_index_version!" from "settings"
-"#,
+            select index_name as "name: String"
+            from algolia_index_settings
+            where (index_name = $1 and index_hash <> $2) 
+            or (index_name = $3 and index_hash <> $4)
+            or (index_name = $5 and index_hash <> $6)
+            "#,
+            AlgoliaIndices::MediaIndex.as_str(),
+            migration::MEDIA_HASH.to_owned(),
+            AlgoliaIndices::JigIndex.as_str(),
+            migration::JIG_HASH.to_owned(),
+            AlgoliaIndices::CourseIndex.as_str(),
+            migration::COURSE_HASH.to_owned(),
         )
-        .fetch_one(&mut txn)
+        .fetch_all(&mut txn)
         .await?
-        .algolia_index_version;
+        .into_iter()
+        .map(|x| x.name)
+        .collect::<Vec<String>>();
 
-        if algolia_version == migration::INDEX_VERSION {
-            return Ok(());
-        }
-
-        let migrations_to_run = &migration::INDEXING_MIGRATIONS[(algolia_version as usize)..];
-
-        for (idx, (_, updater)) in migrations_to_run.iter().enumerate() {
-            updater(
-                &self.inner,
-                &self.media_index,
-                &self.jig_index,
-                &self.course_index,
-            )
-            .await
-            .with_context(|| {
-                anyhow::anyhow!(
-                    "error while running algolia updater #{}",
-                    idx + (algolia_version as usize) + 1
-                )
-            })?;
-        }
-
-        // currently this can only be "no resync" or "complete resync" but eventually
-        // we might want to be able to "resync everything that's only had an initial sync" or "everything that has had an update"
-        let resync_mask =
-            migrations_to_run
-                .iter()
-                .fold(ResyncKind::None, |acc, &(curr, _)| match (acc, curr) {
-                    (_, ResyncKind::Complete) | (ResyncKind::Complete, _) => ResyncKind::Complete,
-                    _ => ResyncKind::None,
-                });
-
-        match resync_mask {
-            ResyncKind::Complete => {
-                sqlx::query!("update image_metadata set last_synced_at = null")
-                    .execute(&mut txn)
-                    .await?;
+        for i in index {
+            match i.as_str() {
+                migration::MEDIA_INDEX => {
+                    migration::media_index(&mut txn, &self.inner, &self.media_index).await?
+                }
+                migration::JIG_INDEX => {
+                    migration::jig_index(&mut txn, &self.inner, &self.jig_index).await?
+                }
+                migration::COURSE_INDEX => {
+                    migration::course_index(&mut txn, &self.inner, &self.course_index).await?
+                }
+                _ => return Err(anyhow::anyhow!("Index has not been added")),
             }
-            ResyncKind::None => {}
         }
-
-        sqlx::query!(
-            r#"update "settings" set algolia_index_version = $1"#,
-            migration::INDEX_VERSION
-        )
-        .execute(&mut txn)
-        .await?;
 
         txn.commit().await?;
 
@@ -299,18 +286,6 @@ select algolia_index_version as "algolia_index_version!" from "settings"
     async fn update_jigs(&self) -> anyhow::Result<bool> {
         log::info!("reached update jigs");
         let mut txn = self.db.begin().await?;
-
-        let is_outdated = sqlx::query!(
-            r#"select algolia_index_version != $1 as "outdated!" from settings"#,
-            migration::INDEX_VERSION
-        )
-        .fetch_one(&mut txn)
-        .await?
-        .outdated;
-
-        if is_outdated {
-            return Ok(false);
-        }
 
         // todo: allow for some way to do a partial update (for example, by having a channel for queueing partial updates)
         let requests: Vec<_> = sqlx::query!(
@@ -463,18 +438,6 @@ where jig_data.id = any (select live_id from jig where jig.id = any ($1))
         log::info!("reached update images");
         let mut txn = self.db.begin().await?;
 
-        let is_outdated = sqlx::query!(
-            r#"select algolia_index_version != $1 as "outdated!" from settings"#,
-            migration::INDEX_VERSION
-        )
-        .fetch_one(&mut txn)
-        .await?
-        .outdated;
-
-        if is_outdated {
-            return Ok(false);
-        }
-
         // todo: allow for some way to do a partial update (for example, by having a channel for queueing partial updates)
         let requests: Vec<_> = sqlx::query!(
             //language=SQL
@@ -596,18 +559,6 @@ limit 100 for no key update skip locked;
     async fn update_courses(&self) -> anyhow::Result<bool> {
         log::info!("reached update courses");
         let mut txn = self.db.begin().await?;
-
-        let is_outdated = sqlx::query!(
-            r#"select algolia_index_version != $1 as "outdated!" from settings"#,
-            migration::INDEX_VERSION
-        )
-        .fetch_one(&mut txn)
-        .await?
-        .outdated;
-
-        if is_outdated {
-            return Ok(false);
-        }
 
         // todo: allow for some way to do a partial update (for example, by having a channel for queueing partial updates)
         let requests: Vec<_> = sqlx::query!(
