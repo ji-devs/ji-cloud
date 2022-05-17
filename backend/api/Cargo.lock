@@ -1386,8 +1386,9 @@ dependencies = [
 
 [[package]]
 name = "hashfn"
-version = "0.1.0"
-source = "git+https://github.com/johnnynotsolucky/hashfn?branch=main#db4cf86e82479d4c9f857d5234883adc1cfc5558"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bd411a8d6fe6ed182c435b1e011c269a6c581efa9da9672b37863b2c1c0871dd"
 dependencies = [
  "quote",
  "sha2 0.10.2",

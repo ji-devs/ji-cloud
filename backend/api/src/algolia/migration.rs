@@ -7,15 +7,11 @@ use sqlx::PgConnection;
 
 use hashfn::hashfn;
 
-const JIG_INDEX: &str = "jig_index";
-const MEDIA_INDEX: &str = "media_index";
-const COURSE_INDEX: &str = "course_index";
+pub const JIG_INDEX: &str = "jig_index";
+pub const MEDIA_INDEX: &str = "media_index";
+pub const COURSE_INDEX: &str = "course_index";
 
-pub(crate) const JIG_HASH: &'static str = JIG_INDEX_HASH;
-pub(crate) const MEDIA_HASH: &'static str = MEDIA_INDEX_HASH;
-pub(crate) const COURSE_HASH: &'static str = COURSE_INDEX_HASH;
-
-#[hashfn]
+#[hashfn(MEDIA_HASH)]
 pub(crate) async fn media_index(
     txn: &mut PgConnection,
     client: &super::Inner,
@@ -43,12 +39,12 @@ pub(crate) async fn media_index(
 
     client.set_settings(media_index, &settings).await?;
 
-    sqlx::query!(r#"update algolia_index_settings set updated_at = now(), index_hash = $1 where index_name = $2"#, MEDIA_INDEX_HASH, MEDIA_INDEX).execute(txn).await?;
+    sqlx::query!(r#"update algolia_index_settings set updated_at = now(), index_hash = $1 where index_name = $2"#, MEDIA_HASH, MEDIA_INDEX).execute(txn).await?;
 
     Ok(())
 }
 
-#[hashfn]
+#[hashfn(JIG_HASH)]
 pub(crate) async fn jig_index(
     txn: &mut PgConnection,
     client: &super::Inner,
@@ -87,12 +83,12 @@ pub(crate) async fn jig_index(
 
     client.set_settings(jig_index, &settings).await?;
 
-    sqlx::query!(r#"update algolia_index_settings set updated_at = now(), index_hash = $1 where index_name = $2"#, JIG_INDEX_HASH, JIG_INDEX).execute(txn).await?;
+    sqlx::query!(r#"update algolia_index_settings set updated_at = now(), index_hash = $1 where index_name = $2"#, JIG_HASH, JIG_INDEX).execute(txn).await?;
 
     Ok(())
 }
 
-#[hashfn]
+#[hashfn(COURSE_HASH)]
 pub(crate) async fn course_index(
     txn: &mut PgConnection,
     client: &super::Inner,
@@ -130,7 +126,7 @@ pub(crate) async fn course_index(
 
     client.set_settings(course_index, &settings).await?;
 
-    sqlx::query!(r#"update algolia_index_settings set updated_at = now(), index_hash = $1 where index_name = $2"#, COURSE_INDEX_HASH, COURSE_INDEX).execute(txn).await?;
+    sqlx::query!(r#"update algolia_index_settings set updated_at = now(), index_hash = $1 where index_name = $2"#, COURSE_HASH, COURSE_INDEX).execute(txn).await?;
 
     Ok(())
 }

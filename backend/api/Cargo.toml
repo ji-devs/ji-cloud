@@ -57,7 +57,7 @@ tracing = "0.1.31"
 url = { version = "2.2.2", features = ["serde"] }
 uuid = "0.8.2"
 quote = "1.0.18"
-hashfn = { git = "https://github.com/johnnynotsolucky/hashfn", branch = "main" }
+hashfn = "0.2.0"
 
 # project deps
 core = { path = "../core", features = ["db"] }

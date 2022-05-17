@@ -33,10 +33,6 @@ const PREMIUM_TAG: &'static str = "premium";
 const PUBLISHED_TAG: &'static str = "published"; // not currently used
 const HAS_AUTHOR_TAG: &'static str = "hasAuthor";
 
-pub const JIG_INDEX: &str = "jig_index";
-pub const MEDIA_INDEX: &str = "media_index";
-pub const COURSE_INDEX: &str = "course_index";
-
 #[derive(Serialize)]
 struct BatchJig<'a> {
     name: &'a str,
@@ -125,12 +121,11 @@ enum AlgoliaIndices {
 }
 
 impl AlgoliaIndices {
-    /// Represents the privacy level as a `str`. Relevant for Algolia tag filtering.
     pub fn as_str(&self) -> &'static str {
         match self {
-            Self::MediaIndex => "media_index",
-            Self::JigIndex => "jig_index",
-            Self::CourseIndex => "course_index",
+            Self::MediaIndex => migration::MEDIA_INDEX,
+            Self::JigIndex => migration::JIG_INDEX,
+            Self::CourseIndex => migration::COURSE_INDEX,
         }
     }
 }
@@ -234,11 +229,13 @@ impl Manager {
 
         for i in index {
             match i.as_str() {
-                "media_index" => {
+                migration::MEDIA_INDEX => {
                     migration::media_index(&mut txn, &self.inner, &self.media_index).await?
                 }
-                "jig_index" => migration::jig_index(&mut txn, &self.inner, &self.jig_index).await?,
-                "course_index" => {
+                migration::JIG_INDEX => {
+                    migration::jig_index(&mut txn, &self.inner, &self.jig_index).await?
+                }
+                migration::COURSE_INDEX => {
                     migration::course_index(&mut txn, &self.inner, &self.course_index).await?
                 }
                 _ => return Err(anyhow::anyhow!("Index has not been added")),
