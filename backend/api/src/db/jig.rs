@@ -357,7 +357,7 @@ select jig.id                                       as "id!: JigId",
        rating                                   as "rating?: JigRating",
        blocked                                  as "blocked!",
        curated                                  as "curated!",
-       jig_focus                                as "jig_focus!: JigFocus"       
+       jig_focus                                as "jig_focus!: JigFocus"
 from jig
          inner join unnest($1::uuid[])
     with ordinality t(id, ord) using (id)
@@ -616,7 +616,14 @@ select jig.id                                              as "jig_id: JigId",
    curated                                    as "curated!"
 from cte1
 left join jig_data on cte1.id = jig_data.id
-left join jig on (jig_data.id = jig.draft_id or (jig_data.id = jig.live_id and last_synced_at is not null))
+inner join jig on (
+    jig_data.id = jig.draft_id
+    or (
+        jig_data.id = jig.live_id
+        and last_synced_at is not null
+        and jig.published_at is not null
+    )
+)
 left join jig_admin_data "admin" on admin.jig_id = jig.id
 where ord > (1 * $6 * $7)
 order by ord asc
