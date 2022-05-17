@@ -31,7 +31,8 @@ async fn create(
 
     let req = req.into_inner();
 
-    let (id, _index) = db::jig::module::create(&*db, parent_id, req.body).await?;
+    let is_complete = req.body.is_complete();
+    let (id, _index) = db::jig::module::create(&*db, parent_id, req.body, is_complete).await?;
 
     Ok(HttpResponse::Created().json(CreateResponse { id }))
 }

@@ -2329,34 +2329,6 @@
     },
     "query": "insert into session (token, user_id, impersonator_id, expires_at, scope_mask) values ($1, $2, $3, $4, $5)"
   },
-  "4485adb8cd789a26f1d0930478a2870c60300ec8612b076a059358c2baaa69a6": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "index",
-          "ordinal": 1,
-          "type_info": "Int2"
-        }
-      ],
-      "nullable": [
-        false,
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int2",
-          "Jsonb"
-        ]
-      }
-    },
-    "query": "\ninsert into jig_data_module (jig_data_id, kind, contents, index)\nvalues ($1, $2, $3, (select count(*) from jig_data_module where jig_data_id = $1))\nreturning id, \"index\"\n"
-  },
   "477cc11eb6ff88e4c8c0779c11ab3480de42748968c29564bc0e70db1f18a9bc": {
     "describe": {
       "columns": [],
@@ -5468,6 +5440,35 @@
       }
     },
     "query": "delete from session where token = $1 and (scope_mask & $2) = $2 returning user_id"
+  },
+  "a665288fc26ec7d8d82a6d2859310b10a0a1057effe65e67503e2e2f06d6a1c2": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "index",
+          "ordinal": 1,
+          "type_info": "Int2"
+        }
+      ],
+      "nullable": [
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2",
+          "Jsonb",
+          "Bool"
+        ]
+      }
+    },
+    "query": "\ninsert into jig_data_module (jig_data_id, kind, contents, index, is_complete)\nvalues ($1, $2, $3, (select count(*) from jig_data_module where jig_data_id = $1), $4)\nreturning id, \"index\"\n"
   },
   "a7597f668f530133865fe74a396da14ff51dcb53fc0537df95964ae98649ce1d": {
     "describe": {
