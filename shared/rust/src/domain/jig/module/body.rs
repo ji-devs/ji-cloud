@@ -36,6 +36,9 @@ pub mod card_quiz;
 /// Matching
 pub mod matching;
 
+/// Find the Answer
+pub mod find_answer;
+
 /// Legacy
 pub mod legacy;
 
@@ -79,6 +82,9 @@ pub enum Body {
     /// Module is a Resource Cover.
     ResourceCover(resource_cover::ModuleData),
 
+    /// Module is a Find the Answer, and has Find the Answer's body.
+    FindAnswer(find_answer::ModuleData),
+
     /// Module is a legacy, and has a legacy's body.
     Legacy(legacy::ModuleData),
 }
@@ -97,6 +103,7 @@ impl Body {
             super::ModuleKind::Video => Self::Video(Default::default()),
             super::ModuleKind::TappingBoard => Self::TappingBoard(Default::default()),
             super::ModuleKind::DragDrop => Self::DragDrop(Default::default()),
+            super::ModuleKind::FindAnswer => Self::FindAnswer(Default::default()),
             super::ModuleKind::Legacy => Self::Legacy(Default::default()),
             _ => unimplemented!("TODO!"),
         }
@@ -115,6 +122,7 @@ impl Body {
             Self::DragDrop(data) => data.convert_to_body(kind),
             Self::Cover(data) => data.convert_to_body(kind),
             Self::ResourceCover(data) => data.convert_to_body(kind),
+            Self::FindAnswer(data) => data.convert_to_body(kind),
             Self::Legacy(data) => data.convert_to_body(kind),
         }
     }
@@ -132,6 +140,7 @@ impl Body {
             Self::DragDrop(data) => data.is_complete(),
             Self::Cover(data) => data.is_complete(),
             Self::ResourceCover(data) => data.is_complete(),
+            Self::FindAnswer(data) => data.is_complete(),
             Self::Legacy(data) => data.is_complete(),
         }
     }
@@ -212,6 +221,7 @@ pub trait BodyExt<Mode: ModeExt, Step: StepExt>:
             ModuleKind::DragDrop => Ok(Body::DragDrop(self.convert_to_drag_drop()?)),
             ModuleKind::Cover => Ok(Body::Cover(self.convert_to_cover()?)),
             ModuleKind::ResourceCover => Ok(Body::ResourceCover(self.convert_to_resource_cover()?)),
+            ModuleKind::FindAnswer => Ok(Body::FindAnswer(self.convert_to_find_answer()?)),
             ModuleKind::Legacy => Ok(Body::Legacy(self.convert_to_legacy()?)),
             _ => unimplemented!(
                 "cannot convert from {} to {}",
@@ -265,6 +275,10 @@ pub trait BodyConvert {
     /// Resource Cover
     fn convert_to_resource_cover(&self) -> Result<resource_cover::ModuleData, &'static str> {
         Err("cannot convert to resource cover!")
+    }
+    /// Resource Cover
+    fn convert_to_find_answer(&self) -> Result<find_answer::ModuleData, &'static str> {
+        Err("cannot convert to find the answer!")
     }
     /// Video
     fn convert_to_video(&self) -> Result<video::ModuleData, &'static str> {
@@ -332,6 +346,7 @@ impl Body {
             Self::Video(_) => super::ModuleKind::Video,
             Self::TappingBoard(_) => super::ModuleKind::TappingBoard,
             Self::DragDrop(_) => super::ModuleKind::DragDrop,
+            Self::FindAnswer(_) => super::ModuleKind::FindAnswer,
             Self::Legacy(_) => super::ModuleKind::Legacy,
         }
     }
