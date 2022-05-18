@@ -57,11 +57,9 @@ pub(crate) async fn jig_index(
                 .single(Attribute("author_name".to_owned()))
                 .single(Attribute("translated_keywords".to_owned()))
                 .single(Attribute("description".to_owned()))
-                .multi(vec![
-                    Attribute("category_names".to_owned()),
-                    Attribute("translated_description".to_owned()),
-                    Attribute("resource_type_names".to_owned()),
-                ])
+                .single(Attribute("category_names".to_owned()))
+                .single(Attribute("translated_description".to_owned()))
+                .single(Attribute("resource_type_names".to_owned()))
                 .single(Attribute("language".to_owned()))
                 .single(Attribute("other_keywords".to_owned()))
                 .finish(),
