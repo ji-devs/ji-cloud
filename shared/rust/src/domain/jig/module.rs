@@ -135,6 +135,9 @@ pub enum ModuleKind {
 
     /// ResourceCover
     ResourceCover = 12,
+
+    /// Find the Answer
+    FindAnswer = 13,
 }
 
 impl ModuleKind {
@@ -154,6 +157,7 @@ impl ModuleKind {
             Self::Video => "video",
             Self::CardQuiz => "card-quiz",
             Self::Legacy => "legacy",
+            Self::FindAnswer => "find-answer",
         }
     }
 
@@ -182,6 +186,7 @@ impl FromStr for ModuleKind {
             "video" => Self::Video,
             "card-quiz" => Self::CardQuiz,
             "legacy" => Self::Legacy,
+            "find-answer" => Self::FindAnswer,
             _ => anyhow::bail!("Invalid ModuleKind: {}", s),
         };
 
