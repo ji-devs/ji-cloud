@@ -112,6 +112,13 @@ pub async fn admin_template(settings: Data<RuntimeSettings>) -> actix_web::Resul
     spa_template(&settings, SpaPage::Admin)
 }
 
+pub async fn gallery_template(
+    settings: Data<RuntimeSettings>,
+    _path: Path<String>,
+) -> actix_web::Result<HttpResponse> {
+    spa_template(&settings, SpaPage::Jig(ModuleJigPageKind::Edit))
+}
+
 pub async fn jig_template(
     settings: Data<RuntimeSettings>,
     path: Path<(ModuleJigPageKind, String, String)>,
