@@ -1,18 +1,17 @@
 use futures_signals::signal::{Mutable, Signal};
-use std::cell::RefCell;
 
 const STR_EMAIL_INVALID: &str = "Invalid email";
 const STR_EMAIL_EMPTY: &str = "Email address can't be empty";
 
 pub struct EmailHandler {
-    pub(super) value: RefCell<String>,
+    pub(super) value: Mutable<String>,
     pub(super) error: Mutable<Option<&'static str>>,
 }
 
 impl EmailHandler {
     pub fn new() -> Self {
         let _self = Self {
-            value: RefCell::new("".to_string()),
+            value: Mutable::new(String::new()),
             error: Mutable::new(None),
         };
         _self.update_errors();
@@ -20,16 +19,17 @@ impl EmailHandler {
     }
 
     pub fn email_acceptable(&self) -> bool {
-        self.error.lock_ref().is_none()
+        let email = &self.value.lock_ref();
+        get_error(email).is_none()
     }
 
     pub fn email_acceptable_signal(&self) -> impl Signal<Item = bool> {
-        self.error.signal_ref(|e| e.is_none())
+        self.value.signal_ref(|e| get_error(&*e).is_none())
     }
 
     pub fn update_value(&self, mut value: String) {
         value = value.trim().to_string();
-        *self.value.borrow_mut() = value;
+        self.value.set(value);
         self.update_errors();
     }
 
@@ -38,7 +38,7 @@ impl EmailHandler {
     }
 
     pub fn get_value(&self) -> String {
-        self.value.borrow().clone()
+        self.value.get_cloned()
     }
 
     pub fn error_signal(&self) -> impl Signal<Item = Option<&'static str>> {
@@ -46,15 +46,19 @@ impl EmailHandler {
     }
 
     fn update_errors(&self) {
-        let email = &self.value.borrow();
-        let error = if email.is_empty() {
-            Some(STR_EMAIL_EMPTY)
-        } else if !valid_email(email) {
-            Some(STR_EMAIL_INVALID)
-        } else {
-            None
-        };
+        let email = &self.value.lock_ref();
+        let error = get_error(&email);
         self.error.set(error);
+    }
+}
+
+fn get_error(email: &str) -> Option<&'static str> {
+    if email.is_empty() {
+        Some(STR_EMAIL_EMPTY)
+    } else if !valid_email(email) {
+        Some(STR_EMAIL_INVALID)
+    } else {
+        None
     }
 }
 
