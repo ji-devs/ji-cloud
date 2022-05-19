@@ -12,11 +12,11 @@ pub fn configure(config: &mut ServiceConfig) {
         .route("/admin/{path:.*}", web::get().to(spa::admin_template))
         .route("/admin", web::get().to(spa::admin_template))
         .route(
-            "/asset/{page_kind}/{jig_id}",
+            "/asset/{page_kind}/{asset_kind}/{jig_id}",
             web::get().to(spa::jig_template),
         )
         .route(
-            "/asset/{page_kind}/{jig_id}/{module_id}",
+            "/asset/{page_kind}/{asset_kind}/{jig_id}/{module_id}",
             web::get().to(spa::jig_template_with_module),
         )
         .route("/legacy/play/{jig_id}", web::get().to(spa::legacy_template))

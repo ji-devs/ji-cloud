@@ -410,7 +410,7 @@ impl Route {
                     CourseEditRoute::Cover,
                 )))
             }
-            ["jig", "play", "debug"] => {
+            ["asset", "play", "jig", "debug"] => {
                 let search: JigPlayerOptions = serde_qs::from_str(&params_string).unwrap_ji();
 
                 Self::Asset(AssetRoute::Play(
@@ -419,7 +419,7 @@ impl Route {
                     search,
                 ))
             }
-            ["jig", "play", jig_id] => {
+            ["asset", "play", "jig", jig_id] => {
                 let search: JigPlayerOptions = serde_qs::from_str(&params_string).unwrap_ji();
 
                 Self::Asset(AssetRoute::Play(
@@ -429,7 +429,7 @@ impl Route {
                 ))
             }
 
-            ["jig", "play", jig_id, module_id] => {
+            ["asset", "play", "jig", jig_id, module_id] => {
                 let search: JigPlayerOptions = serde_qs::from_str(&params_string).unwrap_ji();
 
                 Self::Asset(AssetRoute::Play(
@@ -597,9 +597,9 @@ impl From<&Route> for String {
                 AssetRoute::Play(jig_id, module_id, player_settings) => {
                     let query = serde_qs::to_string(&player_settings).unwrap_ji();
                     if let Some(module_id) = module_id {
-                        format!("/jig/play/{}/{}?{}", jig_id.0, module_id.0, query)
+                        format!("/asset/play/jig/{}/{}?{}", jig_id.0, module_id.0, query)
                     } else {
-                        format!("/jig/play/{}?{}", jig_id.0, query)
+                        format!("/asset/play/jig/{}?{}", jig_id.0, query)
                     }
                 }
             },
