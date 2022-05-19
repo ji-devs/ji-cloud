@@ -36,6 +36,8 @@ const ALLOWED_APP_NAMES = [
     "module/tapping-board/play",
     "module/drag-drop/edit",
     "module/drag-drop/play",
+    "module/find-answer/edit",
+    "module/find-answer/play",
     "dev/scratch/001",
     "dev/showcase/001",
     "module/legacy/play",

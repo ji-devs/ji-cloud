@@ -15,6 +15,7 @@ export class _ extends LitElement {
                 :host, a {
                     display: inline-flex;
                     align-items: center;
+                    justify-content: center;
                     gap: var(--gap-override);
                     cursor: pointer;
                 }

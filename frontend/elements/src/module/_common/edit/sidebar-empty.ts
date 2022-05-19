@@ -26,6 +26,12 @@ export class _ extends LitElement {
                     color: var(--dark-gray-6);
                 }
 
+                .label ::slotted(div) {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                }
+
                 section {
                     display: flex;
                     flex-direction: column;
@@ -61,15 +67,15 @@ export class _ extends LitElement {
         return this.imagePath ? html`<img-ui path=${this.imagePath}></img-ui>` : nothing;
     }
 
-    renderLabel() {
-        return this.label ? html`<div class="label">${this.label}</div>` : nothing;
-    }
-
     render() {
         return html`
             <section>
                 ${this.renderImage()}
-                ${this.renderLabel()}
+                <div class="label">
+                    <slot>
+                        ${this.label}
+                    </slot>
+                </div>
             </section>
             <div class="clear"><slot name="clear"></slot></div>
         `;

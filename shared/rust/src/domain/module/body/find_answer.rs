@@ -97,7 +97,7 @@ impl TryFrom<Body> for ModuleData {
     fn try_from(body: Body) -> Result<Self, Self::Error> {
         match body {
             Body::FindAnswer(data) => Ok(data),
-            _ => Err("cannot convert body to Listen & Learn!"),
+            _ => Err("cannot convert body to Find the Answer!"),
         }
     }
 }

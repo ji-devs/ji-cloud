@@ -24,6 +24,8 @@ use super::wysiwyg_types::{
 pub struct State {
     pub controls: Mutable<ControlsState>,
     pub wysiwyg_ref: Mutable<Option<HtmlElement>>,
+    /// Optional reference to the wysiwyg-output-renderer
+    pub renderer_ref: Mutable<Option<HtmlElement>>,
     pub fonts: Mutable<Vec<String>>,
     pub value: RefCell<Option<String>>,
     pub theme_id: ReadOnlyMutable<ThemeId>,
@@ -42,6 +44,7 @@ impl State {
         let _self = Rc::new(Self {
             controls: Mutable::new(ControlsState::new()),
             wysiwyg_ref: Mutable::new(None),
+            renderer_ref: Mutable::new(None),
             fonts: Mutable::new(vec![]),
             callbacks,
             value: RefCell::new(value),
@@ -89,6 +92,20 @@ impl State {
                 let _ = reset_value_method.call0(wysiwyg_ref);
             }
         };
+    }
+
+    /// Retrieves the text value without any formatting or tags
+    pub fn get_text_value(&self) -> Option<String> {
+        let renderer_ref = &*self.renderer_ref.lock_ref();
+        renderer_ref
+            .clone()
+            .map(|renderer_ref| {
+                let value =
+                    Reflect::get(&renderer_ref, &JsValue::from_str("textValue")).unwrap_ji();
+
+                value.as_string()
+            })
+            .unwrap_or_default()
     }
 
     fn handle_fonts(state: Rc<State>) {

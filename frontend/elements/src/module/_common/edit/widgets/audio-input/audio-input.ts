@@ -46,7 +46,7 @@ export class _ extends LitElement {
                     border-style: solid;
                 }
                 ::slotted(progress-bar[slot="main-content"]) {
-                    width: 272px;
+                    width: 75%;
                 }
                 ::slotted(input-file[slot="main-content"]) {
                     height: 100%;

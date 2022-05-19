@@ -7,6 +7,10 @@ export class _ extends LitElement {
     static get styles() {
         return [
             css`
+                :host > section {
+                    width: 32px;
+                    height: 32px;
+                }
                 .menu-container {
                     display: none;
                     position: fixed;
