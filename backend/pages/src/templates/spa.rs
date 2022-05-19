@@ -112,26 +112,11 @@ pub async fn admin_template(settings: Data<RuntimeSettings>) -> actix_web::Resul
     spa_template(&settings, SpaPage::Admin)
 }
 
-pub async fn gallery_template(
-    settings: Data<RuntimeSettings>,
-    _path: Path<String>,
-) -> actix_web::Result<HttpResponse> {
-    spa_template(&settings, SpaPage::Jig(ModuleJigPageKind::Edit))
-}
-
 pub async fn jig_template(
     settings: Data<RuntimeSettings>,
-    path: Path<(ModuleJigPageKind, String, String)>,
+    path: Path<(ModuleJigPageKind, String)>,
 ) -> actix_web::Result<HttpResponse> {
-    let (page_kind, _asset_kind, _jig_id) = path.into_inner();
-    spa_template(&settings, SpaPage::Jig(page_kind))
-}
-
-pub async fn jig_template_with_module(
-    settings: Data<RuntimeSettings>,
-    path: Path<(ModuleJigPageKind, String, String, String)>,
-) -> actix_web::Result<HttpResponse> {
-    let (page_kind, _asset_kind, _jig_id, _module_id) = path.into_inner();
+    let (page_kind, _asset_kind) = path.into_inner();
     spa_template(&settings, SpaPage::Jig(page_kind))
 }
 
