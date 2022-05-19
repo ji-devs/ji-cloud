@@ -12,16 +12,13 @@ pub fn configure(config: &mut ServiceConfig) {
         .route("/admin/{path:.*}", web::get().to(spa::admin_template))
         .route("/admin", web::get().to(spa::admin_template))
         .route(
-            "/asset/edit/{gallery_kind}",
+            "/asset/{page_kind}/{path:.*}",
             web::get().to(spa::gallery_template),
         )
+        // jig route is just to redirect old urls
         .route(
-            "/asset/{page_kind}/{asset_kind}/{jig_id}",
-            web::get().to(spa::jig_template),
-        )
-        .route(
-            "/asset/{page_kind}/{asset_kind}/{jig_id}/{module_id}",
-            web::get().to(spa::jig_template_with_module),
+            "/jig/{page_kind}/{path:.*}",
+            web::get().to(spa::jig_template)
         )
         .route("/legacy/play/{jig_id}", web::get().to(spa::legacy_template))
         .route(
