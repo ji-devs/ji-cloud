@@ -439,6 +439,19 @@ impl Route {
                 ))
             }
 
+            ["jig", play_or_edit] | ["jig", play_or_edit, _] | ["jig", play_or_edit, _, _] => {
+                let url: String = url.pathname();
+                let mut url: Vec<&str> = url.split('/').collect();
+                url.remove(0);
+                url.remove(0);
+                url.remove(0);
+                let url = url.join("/");
+                let url = format!("/asset/{}/jig/{}", play_or_edit, url);
+                let _ = web_sys::window().unwrap().location().set_pathname(&url);
+
+                unreachable!()
+            }
+
             ["module", kind, "edit", "debug"] | ["module", kind, "edit", "debug", "debug"] => {
                 Self::Module(ModuleRoute::Edit(
                     ModuleKind::from_str(kind).expect_ji("unknown module kind!"),
