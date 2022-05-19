@@ -12,6 +12,7 @@ pub enum LineKind {
     Score,
     VideoPlay,
     VideoFeatures,
+    Ordering,
 }
 
 impl LineKind {
@@ -27,6 +28,7 @@ impl LineKind {
             Self::Score => "score",
             Self::VideoPlay => "video-play",
             Self::VideoFeatures => "video-features",
+            Self::Ordering => "ordering",
         }
     }
 }

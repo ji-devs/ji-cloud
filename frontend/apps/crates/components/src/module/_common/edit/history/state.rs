@@ -97,15 +97,28 @@ where
     /// and expects the caller to modify it before pushing
     /// internally calls push()
     pub fn push_modify<M: FnOnce(&mut T)>(&self, modify: M) {
-        let mut value = {
+        self.maybe_push_modify(|mut raw| {
+            modify(&mut raw);
+            Some(raw)
+        })
+    }
+
+    /// Modifies the history if the result is `Some()`
+    ///
+    /// Same as `push_modify`.
+    pub fn maybe_push_modify<M>(&self, modify: M)
+    where
+        M: FnOnce(T) -> Option<T>,
+    {
+        let value = {
             let cursor = self.cursor.get();
             let old_ref = self.history.lock_ref();
             old_ref.index(cursor).clone()
         };
 
-        modify(&mut value);
-
-        self.push(value);
+        if let Some(value) = modify(value) {
+            self.push(value);
+        }
     }
 
     /// Helper to save without pushing new state

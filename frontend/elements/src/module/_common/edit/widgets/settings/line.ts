@@ -17,7 +17,8 @@ export type Kind =
     | "attempts"
     | "score"
     | "video-play"
-    | "video-features";
+    | "video-features"
+    | "ordering";
 
 const STR_LABEL: Record<Kind, string> = {
     "card-view": "How should your cards be displayed?",
@@ -30,6 +31,7 @@ const STR_LABEL: Record<Kind, string> = {
     "score": "Would you like to include score?",
     "video-play": "How to play your video:",
     "video-features": "Play features",
+    "ordering": "Would you like questions to be asked in order?",
 };
 
 @customElement("module-settings-line")

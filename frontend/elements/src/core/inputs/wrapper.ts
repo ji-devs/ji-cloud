@@ -15,6 +15,12 @@ export class _ extends LitElement {
             css`
                 :host {
                     display: grid;
+                    --border-color: var(--light-blue-5);
+                    --background-color: var(--white);
+                }
+                :host([error]) .inner-wrapper {
+                    --border-color: var(--red-alert);
+                    --background-color: var(--light-red-alert);
                 }
                 .outer-wrapper {
                     grid-row: 1;
@@ -32,9 +38,9 @@ export class _ extends LitElement {
                     transform: translateY(-100%);
                 }
                 .inner-wrapper {
-                    border: solid 1px var(--light-blue-5);
+                    border: solid 1px var(--border-color);
                     border-radius: 14px;
-                    padding: 8px 16px;
+                    padding: 0px 16px;
                     display: grid;
                     grid-template-columns: 1fr min-content;
                     grid-template-rows: min-content 1fr;
@@ -44,16 +50,18 @@ export class _ extends LitElement {
                     background-color: var(--background-color);
                     grid-row: 2;
                 }
+                :host([pad]) .inner-wrapper {
+                    padding: 8px 16px;
+                }
                 .inner-wrapper:focus-within,
                 :host([focus-within]) .inner-wrapper {
                     border-color: var(--dark-blue-3);
                     border-width: 2px;
                     /* removing one pixel to account for thicker border */
-                    padding: 7px 15px;
+                    padding: 0px 15px;
                 }
-                :host([error]) .inner-wrapper {
-                    border-color: var(--red-alert);
-                    background-color: var(--light-red-alert);
+                :host([focus-within][pad]) .inner-wrapper {
+                    padding: 7px 15px;
                 }
                 .label {
                     grid-column: 1;
@@ -123,6 +131,9 @@ export class _ extends LitElement {
 
     @property({ type: Boolean, reflect: true })
     error: boolean = false;
+
+    @property({ type: Boolean, reflect: true })
+    pad: boolean = true;
 
     @query("slot#main-slot")
     private mainSlot!: HTMLSlotElement;

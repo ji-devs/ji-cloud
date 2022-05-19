@@ -9,7 +9,8 @@ export type ModuleKind =
     | "tracing"
     | "video"
     | "card-quiz"
-    | "drag-drop";
+    | "drag-drop"
+    | "find-answer";
 
 export const moduleKinds: Array<ModuleKind> = [
     "cover",
@@ -23,6 +24,7 @@ export const moduleKinds: Array<ModuleKind> = [
     "video",
     "card-quiz",
     "drag-drop",
+    "find-answer",
 ];
 
 //TODO - move these to JSON
@@ -39,6 +41,7 @@ export const STR_MODULE_DISPLAY_NAME: { [key in ModuleKind]: string } = {
     video: "Video Player",
     "card-quiz": "Multiple Choice",
     "drag-drop": "Drag & Drop",
+    "find-answer": "Find the Answer",
 };
 
 export const STR_MODULE_CHOOSE_HEADER: { [key in ModuleKind]: string } = {
@@ -53,6 +56,7 @@ export const STR_MODULE_CHOOSE_HEADER: { [key in ModuleKind]: string } = {
     "drag-drop": "Create a Drag & Drop Activity",
     tracing: "Create a Tracing Activity",
     video: "Create a Video Activity",
+    "find-answer": "Create a Find the Answer Activity",
 };
 
 export type JigFocus = "modules" | "resources";

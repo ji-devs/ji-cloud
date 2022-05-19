@@ -20,6 +20,8 @@ static MODULE_KINDS: &[ModuleKind] = &[
     //ModuleKind::Tracing,
     ModuleKind::Video,
     //ModuleKind::VisualQuiz,
+    #[cfg(any(feature = "local", feature = "sandbox"))]
+    ModuleKind::FindAnswer,
 ];
 
 const STR_TOOLTIP_TITLE: &str = "Let's build your JIG!";

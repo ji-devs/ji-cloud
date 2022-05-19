@@ -98,6 +98,12 @@ pub fn render_sticker_text<T: AsSticker>(
                             stickers.select_index(index);
                         }
                     }))
+                    .after_inserted(clone!(text => move |elem| {
+                        text.editor.renderer_ref.set(Some(elem));
+                    }))
+                    .after_removed(clone!(text => move |_elem| {
+                        text.editor.renderer_ref.set(None);
+                    }))
                 }))
             } else {
                 // the full wysiwyg editor with green outline

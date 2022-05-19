@@ -67,6 +67,19 @@ export class _ extends LitElement {
         else this.value = JSON.parse(v);
     }
 
+    public get textValue() {
+        const text = [];
+        for (const element of this.value.content) {
+            for (const leaf of element.children) {
+                if (leaf.text) {
+                    text.push(leaf.text);
+                }
+            }
+        }
+
+        return text.join("");
+    }
+
     // keep the render functions in one line since we're using `white-space: pre-wrap` so every extra new-line or whitespace will be reflected on the output
     // prettier-ignore
     private renderElement(element: EditorElement) {
