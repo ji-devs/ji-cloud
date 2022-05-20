@@ -23,6 +23,9 @@ pub struct State {
     pub timer: Mutable<Option<Timer>>,
     pub points: Mutable<u32>,
     pub iframe: Rc<RefCell<Option<HtmlIFrameElement>>>,
+    /// Indicates that the JIG has been started. This can be true when paused is true and when done
+    /// is true.
+    pub started: Mutable<bool>,
     pub paused: Mutable<bool>,
     pub done: Mutable<bool>,
     pub player_options: JigPlayerOptions,
@@ -48,6 +51,7 @@ impl State {
             timer: Mutable::new(None),
             points: Mutable::new(0),
             iframe: Rc::new(RefCell::new(None)),
+            started: Mutable::new(false),
             paused: Mutable::new(false),
             done: Mutable::new(false),
             player_options,

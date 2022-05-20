@@ -235,11 +235,11 @@ pub fn sent_iframe_message(state: Rc<State>, data: JigToModulePlayerMessage) {
     match &*state.iframe.borrow() {
         None => todo!(),
         Some(iframe) => {
-            let m = IframeAction::new(data);
+            let message = IframeAction::new(data);
             let _ = iframe
                 .content_window()
                 .unwrap_ji()
-                .post_message(&m.into(), &iframe_origin);
+                .post_message(&message.into(), &iframe_origin);
         }
     };
 }
@@ -265,10 +265,17 @@ pub fn on_iframe_message(state: Rc<State>, message: ModuleToJigPlayerMessage) {
         ModuleToJigPlayerMessage::JumpToId(module_id) => {
             navigate_to_module(state, &module_id);
         }
+        ModuleToJigPlayerMessage::Ready => {
+            // Tell iframe that it can play audio if the game's been started!
+            if state.started.get() {
+                sent_iframe_message(Rc::clone(&state), JigToModulePlayerMessage::AudioReady);
+            }
+        }
     };
 }
 
 fn start_player(state: Rc<State>, time: Option<u32>) {
+    state.started.set_neq(true);
     // If bg audio is not yet set (i.e. first module to be ready) initialize the audio once the jig is started
     if state.bg_audio_handle.borrow().is_none() {
         if let Some(jig) = state.jig.get_cloned() {

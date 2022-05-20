@@ -171,10 +171,13 @@ pub enum JigToModulePlayerMessage {
     TimerDone,
     Play,
     Pause,
+    /// Ready(None) when we're still waiting for the iframe message
+    AudioReady,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub enum ModuleToJigPlayerMessage {
+    Ready,
     AddPoints(u32),
     Start(Option<u32>),
     Stop,

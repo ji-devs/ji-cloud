@@ -1,7 +1,10 @@
 use std::rc::Rc;
 
 use discard::Discard;
-use futures_signals::signal::{Mutable, SignalExt};
+use futures_signals::{
+    map_ref,
+    signal::{Mutable, SignalExt},
+};
 
 use dominator::{clone, events, html, Dom};
 
@@ -9,7 +12,7 @@ use utils::{events::ModuleResizeEvent, iframe::*, prelude::*, resize::*};
 
 use super::{ending::*, loading::dom::render_loading, state::*};
 use crate::{
-    audio::mixer::AUDIO_MIXER, instructions::player::InstructionsPlayer,
+    audio::mixer::{AUDIO_MIXER, AudioPath}, instructions::player::InstructionsPlayer,
     module::_common::play::prelude::*, overlay::container::OverlayContainer,
 };
 use shared::domain::jig::module::body::{BodyExt, ModeExt, StepExt};
@@ -157,7 +160,7 @@ where
 
         .apply_if(jig_player, |dom| {
             dom
-                .global_event(|evt:dominator_helpers::events::Message| {
+                .global_event(clone!(state => move |evt: dominator_helpers::events::Message| {
                     if let Ok(msg) = evt.try_serde_data::<IframeAction<JigToModulePlayerMessage>>() {
                         match msg.data {
                             JigToModulePlayerMessage::Play => {
@@ -167,42 +170,57 @@ where
                                 AUDIO_MIXER.with(|mixer| mixer.pause_all());
                             },
                             JigToModulePlayerMessage::TimerDone => {
+
+                            }
+                            JigToModulePlayerMessage::AudioReady => {
+                                state.audio_ready.set_neq(true);
                             }
                         }
                     } else {
                         log::info!("hmmm got other iframe message...");
                     }
-                })
+                }))
                 .after_inserted(|_elem| {
-                    //On mount - send an empty IframeInit message to let the player know we're ready
-                    IframeInit::empty()
-                        .try_post_message_to_player()
-                        .unwrap_ji();
+                    //On mount - send a message to let the player know we're ready
+                    let msg = IframeAction::new(ModuleToJigPlayerMessage::Ready);
+                    msg.try_post_message_to_player().unwrap_ji();
                 })
         })
 
         .apply_if(!is_screenshot, |dom| {
-            dom.child_signal(base.play_phase().signal().map(clone!(base => move |curr_play_phase| {
-                match curr_play_phase {
-                    ModulePlayPhase::Preload => {
+            let play_phase_audio_signal = map_ref! {
+                let play_phase = base.play_phase().signal(),
+                let audio_ready = state.audio_ready.signal_cloned()
+                => {
+                    (play_phase.clone(), audio_ready.clone())
+                }
+            };
+            dom.child_signal(play_phase_audio_signal.map(clone!(base => move |(curr_play_phase, audio_ready)| {
+                match (curr_play_phase, audio_ready) {
+                    (ModulePlayPhase::Preload, _) => {
                         Some(html!("module-preload", {
                         }))
                     },
 
-                    ModulePlayPhase::Init => {
-                        Some(html!("module-play-button", {
-                            .event(clone!(base => move |_evt:events::Click| {
-                                start_playback(base.clone());
+                    (ModulePlayPhase::Init, audio_ready) => {
+                        if audio_ready {
+                            start_playback(base.clone());
+                            None
+                        } else {
+                            Some(html!("module-play-button", {
+                                .event(clone!(base => move |_evt:events::Click| {
+                                    start_playback(base.clone());
+                                }))
+                                /* .after_inserted(clone!(state, base => move |_elem| {
+                                    if AUDIO_MIXER.with(|mixer| mixer.context_available()) || state.opts.skip_play {
+                                        start_playback(base);
+                                    }
+                                })) */
                             }))
-                            .after_inserted(clone!(state, base => move |_elem| {
-                                if AUDIO_MIXER.with(|mixer| mixer.context_available()) || state.opts.skip_play {
-                                    start_playback(base);
-                                }
-                            }))
-                        }))
+                        }
                     },
 
-                    ModulePlayPhase::Playing => {
+                    (ModulePlayPhase::Playing, _) => {
                         if jig_player {
                             let timer_seconds = base.get_timer_minutes().map(|minutes| minutes * 60);
 
@@ -218,7 +236,7 @@ where
                         }
                         None
                     },
-                    ModulePlayPhase::Ending(ending) => {
+                    (ModulePlayPhase::Ending(ending), _) => {
                         Some(Ending::render(Ending::new(ending)))
                     }
                 }

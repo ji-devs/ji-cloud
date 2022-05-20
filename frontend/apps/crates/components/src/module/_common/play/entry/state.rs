@@ -37,6 +37,7 @@ where
     pub(super) raw_loader: AsyncLoader,
     pub(super) page_body_switcher: AsyncLoader,
     pub(super) dom_body_handle: Mutable<Option<DomHandle>>,
+    pub(super) audio_ready: Mutable<bool>,
     phantom: PhantomData<(Mode, Step)>,
 }
 
@@ -87,6 +88,7 @@ where
             raw_loader: AsyncLoader::new(),
             page_body_switcher: AsyncLoader::new(),
             dom_body_handle: Mutable::new(None),
+            audio_ready: Mutable::new(false),
             phantom: PhantomData,
         });
 

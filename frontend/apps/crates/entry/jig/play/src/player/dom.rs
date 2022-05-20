@@ -89,7 +89,7 @@ pub fn render(state: Rc<State>) -> Dom {
                 None
             }
         }))
-        .child_signal(active_module_valid_signal(Rc::clone(&state)).map(clone!(state => move |valid| {
+        .child_signal(active_module_valid_signal(Rc::clone(&state)).dedupe().map(clone!(state => move |valid| {
             if valid {
                 Some(html!("iframe" => HtmlIFrameElement, {
                     .property("allow", "autoplay; fullscreen")
