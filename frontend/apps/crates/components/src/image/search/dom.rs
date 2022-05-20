@@ -319,6 +319,7 @@ fn render_filters_web(state: &Rc<State>) -> Dom {
         .property("slot", "filters")
         .children(
             ImageType::iter()
+                .filter(|it| it != &ImageType::AnimatedGif)
                 .map(clone!(state => move |image_type| {
                     html!("image-search-style-option", {
                         .property("slot", "style-options")
@@ -342,6 +343,7 @@ fn render_filters_web(state: &Rc<State>) -> Dom {
                                 None => Some(image_type),
                             };
                             state.selected_image_type.set(value);
+                            actions::search(state.clone(), None);
                         }))
 
                     })
