@@ -1,9 +1,9 @@
 use serde::{Deserialize, Serialize};
 use serde_json::{json, value::Value};
 use shared::domain::{
+    additional_resource::{AdditionalResourceId, ResourceContent},
     asset::DraftOrLive,
     audio::AudioId,
-    course::additional_resource::{AdditionalResourceId, ResourceContent},
     course::CourseId,
     image::ImageId,
     meta::ResourceTypeId,

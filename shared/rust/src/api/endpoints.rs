@@ -63,3 +63,6 @@ pub mod pdf;
 
 /// Learning Path endpoints
 pub mod course;
+
+/// Additional Resource endpoints
+pub mod additional_resource;

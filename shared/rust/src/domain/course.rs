@@ -6,14 +6,12 @@ use std::collections::HashMap;
 use uuid::Uuid;
 
 use super::{
+    additional_resource::AdditionalResource,
     asset::{DraftOrLive, PrivacyLevel, UserOrMe},
     category::CategoryId,
     jig::JigId,
     meta::{AffiliationId, AgeRangeId, ResourceTypeId},
 };
-
-pub mod additional_resource;
-pub use additional_resource::{AdditionalResource, AdditionalResourceId};
 
 /// Wrapper type around [`Uuid`], represents the ID of a Course.
 #[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]

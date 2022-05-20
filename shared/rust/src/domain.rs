@@ -31,6 +31,7 @@ macro_rules! into_i16_index {
     };
 }
 
+pub mod additional_resource;
 pub mod admin;
 pub mod animation;
 pub mod asset;

@@ -2,11 +2,9 @@ use crate::translate::translate_text;
 use anyhow::Context;
 use serde_json::value::Value;
 use shared::domain::{
+    additional_resource::{AdditionalResource, AdditionalResourceId as AddId, ResourceContent},
     asset::{DraftOrLive, PrivacyLevel},
     category::CategoryId,
-    course::additional_resource::{
-        AdditionalResource, AdditionalResourceId as AddId, ResourceContent,
-    },
     course::{CourseData, CourseId, CourseResponse},
     jig::JigId,
     meta::{AffiliationId, AgeRangeId, ResourceTypeId as TypeId},
