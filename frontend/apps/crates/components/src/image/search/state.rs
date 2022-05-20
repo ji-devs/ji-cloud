@@ -7,7 +7,7 @@ use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::Mutable;
 use futures_signals::signal_vec::MutableVec;
 use shared::domain::meta::ImageStyle;
-use shared::domain::search::WebImageSearchItem;
+use shared::domain::search::{ImageType, WebImageSearchItem};
 use shared::domain::user::UserProfile;
 use shared::domain::{jig::module::body::Image, meta::ImageStyleId};
 use std::{cell::RefCell, collections::HashSet, rc::Rc};
@@ -28,6 +28,7 @@ pub struct State {
     pub query: Mutable<String>,
     pub styles: Rc<RefCell<Option<Vec<ImageStyle>>>>,
     pub selected_styles: Rc<RefCell<HashSet<ImageStyleId>>>,
+    pub selected_image_type: Mutable<Option<ImageType>>,
     pub callbacks: Callbacks,
     pub user: Rc<RefCell<Option<UserProfile>>>,
     pub next_page: RefCell<NextPage>,
@@ -53,6 +54,7 @@ impl State {
             init_loader,
             loader: AsyncLoader::new(),
             selected_styles: Rc::new(RefCell::new(selected_styles)),
+            selected_image_type: Mutable::new(None),
             checkbox_checked: Mutable::new(true),
             query: Mutable::new(String::new()),
             styles,

@@ -129,7 +129,7 @@ async fn search_async_web(state: Rc<State>) {
 
     let req = WebImageSearchQuery {
         q: state.query.lock_ref().clone(),
-        ..Default::default()
+        image_type: state.selected_image_type.get_cloned(),
     };
 
     let res = endpoints::search::WebImageSearch::api_with_auth(Some(req)).await;

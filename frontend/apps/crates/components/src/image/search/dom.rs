@@ -6,8 +6,12 @@ use futures_signals::{
     signal::SignalExt,
     signal_vec::{MutableVec, SignalVec, SignalVecExt},
 };
-use shared::domain::{jig::module::body::Image, search::WebImageSearchItem};
+use shared::domain::{
+    jig::module::body::Image,
+    search::{ImageType, WebImageSearchItem},
+};
 use std::{pin::Pin, rc::Rc};
+use strum::IntoEnumIterator;
 use utils::prelude::*;
 
 const STR_SHOW_ONLY_BACKGROUNDS: &str = "Only background";
@@ -228,7 +232,7 @@ fn render_controls(state: Rc<State>) -> Vec<Dom> {
             }
 
             if options.filters {
-                vec.push(render_filters(state.clone()));
+                vec.push(render_filters(&state));
             }
         }
     };
@@ -251,9 +255,20 @@ fn render_controls(state: Rc<State>) -> Vec<Dom> {
     vec
 }
 
-fn render_filters(state: Rc<State>) -> Dom {
-    html!("image-search-filters", {
+fn render_filters(state: &Rc<State>) -> Dom {
+    html!("empty-fragment", {
         .property("slot", "filters")
+        .child_signal(state.search_mode.signal_cloned().map(clone!(state => move |search_mode| {
+            Some(match search_mode {
+                SearchMode::Sticker(_) => render_filters_sticker(&state),
+                SearchMode::Web(_) => render_filters_web(&state),
+            })
+        })))
+    })
+}
+
+fn render_filters_sticker(state: &Rc<State>) -> Dom {
+    html!("image-search-filters", {
         .apply(|dom| {
             dom.child(html!("input-checkbox", {
                 .property("label", {
@@ -264,9 +279,6 @@ fn render_filters(state: Rc<State>) -> Dom {
                 })
                 .property("slot", "background-checkbox")
                 .property("checked", true)
-                .property_signal("disabled", state.search_mode.signal_ref(|search_mode| {
-                    search_mode.is_web()
-                }))
                 .event(clone!(state => move |evt: events::CustomToggle| {
                     state.checkbox_checked.set(evt.value());
                     actions::search(state.clone(), None);
@@ -295,6 +307,42 @@ fn render_filters(state: Rc<State>) -> Dom {
                                 actions::search(state.clone(), None);
                             }))
                         })
+
+                    })
+                }))
+        )
+    })
+}
+
+fn render_filters_web(state: &Rc<State>) -> Dom {
+    html!("image-search-filters", {
+        .property("slot", "filters")
+        .children(
+            ImageType::iter()
+                .map(clone!(state => move |image_type| {
+                    html!("image-search-style-option", {
+                        .property("slot", "style-options")
+                        .property("label", image_type.to_str())
+                        .property_signal("selected", state.selected_image_type.signal().map(move |selected_image_type| {
+                            match selected_image_type {
+                                Some(selected) => selected == image_type,
+                                None => false,
+                            }
+                        }))
+                        .event(clone!(state => move |_: events::CustomToggle| {
+                            let selected = state.selected_image_type.get();
+                            let value = match selected {
+                                Some(selected) => {
+                                    if selected == image_type {
+                                        None
+                                    } else {
+                                        Some(image_type)
+                                    }
+                                },
+                                None => Some(image_type),
+                            };
+                            state.selected_image_type.set(value);
+                        }))
 
                     })
                 }))

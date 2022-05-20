@@ -1,6 +1,7 @@
 //! types for searching
 
 use serde::{Deserialize, Serialize};
+use strum_macros::EnumIter;
 
 /// Represents the response given when an api key for algolia is requested.
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -24,7 +25,7 @@ pub struct WebImageSearchQuery {
 }
 
 /// Represents different types of images
-#[derive(Serialize, Deserialize, Copy, Clone, Debug)]
+#[derive(Serialize, Deserialize, Copy, Clone, Debug, PartialEq, EnumIter)]
 #[serde(rename_all = "camelCase")]
 pub enum ImageType {
     /// Animated Gif Images
