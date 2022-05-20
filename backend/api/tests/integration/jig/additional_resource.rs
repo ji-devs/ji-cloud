@@ -4,8 +4,10 @@ use crate::{
 };
 use http::StatusCode;
 use shared::domain::{
+    additional_resource::{AdditionalResourceCreateRequest, AssetIdResource, ResourceContent},
+    asset::AssetId,
     image::ImageId,
-    jig::additional_resource::{AdditionalResourceCreateRequest, ResourceContent},
+    jig::JigId,
     meta::ResourceTypeId,
 };
 use std::str::FromStr;
@@ -21,14 +23,21 @@ async fn create() -> anyhow::Result<()> {
 
     let resp = client
         .post(&format!(
-            "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008/draft/additional-resource",
+            "http://0.0.0.0:{}/v1/additional-resource/draft",
             port
         ))
         .login()
         .json(&AdditionalResourceCreateRequest {
+            asset_id: AssetId::JigId(JigId(
+                uuid::Uuid::parse_str("0cc084bc-7c83-11eb-9f77-e3218dffb008").unwrap(),
+            )),
             display_name: "testing".to_string(),
-            resource_type_id: ResourceTypeId(Uuid::from_str("a939f454-519e-11ec-ab46-2fa68cd3a8c7").unwrap()),
-            resource_content: ResourceContent::ImageId(ImageId(Uuid::from_str("a974ce0e-ef6e-11eb-ad5a-bf4be1413928").unwrap()))
+            resource_type_id: ResourceTypeId(
+                Uuid::from_str("a939f454-519e-11ec-ab46-2fa68cd3a8c7").unwrap(),
+            ),
+            resource_content: ResourceContent::ImageId(ImageId(
+                Uuid::from_str("a974ce0e-ef6e-11eb-ad5a-bf4be1413928").unwrap(),
+            )),
         })
         .send()
         .await?
@@ -55,7 +64,7 @@ async fn get_draft() -> anyhow::Result<()> {
 
     let resp = client
         .get(&format!(
-            "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008/draft/additional-resource/286b8390-1dd9-11ec-8426-fbeb80c504d9",
+            "http://0.0.0.0:{}/v1/additional-resource/286b8390-1dd9-11ec-8426-fbeb80c504d9/draft?jigId=0cc084bc-7c83-11eb-9f77-e3218dffb008",
             port
         ))
         .login()
@@ -84,7 +93,7 @@ async fn get_live() -> anyhow::Result<()> {
 
     let resp = client
         .get(&format!(
-            "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008/live/additional-resource/286b828c-1dd9-11ec-8426-571b03b2d3df",
+            "http://0.0.0.0:{}/v1/additional-resource/286b828c-1dd9-11ec-8426-571b03b2d3df/live?jigId=0cc084bc-7c83-11eb-9f77-e3218dffb008",
             port
         ))
         .login()
@@ -113,9 +122,13 @@ async fn delete() -> anyhow::Result<()> {
 
     let resp = client
         .delete(&format!(
-            "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008/draft/additional-resource/286b8390-1dd9-11ec-8426-fbeb80c504d9",
+            "http://0.0.0.0:{}/v1/additional-resource/286b8390-1dd9-11ec-8426-fbeb80c504d9/draft?jigId=0cc084bc-7c83-11eb-9f77-e3218dffb008",
             port
         ))
+        .json(&AssetIdResource {
+            asset_id: Some(AssetId::JigId(JigId(
+                uuid::Uuid::parse_str("0cc084bc-7c83-11eb-9f77-e3218dffb008").unwrap()))),
+})
         .login()
         .send()
         .await?

@@ -4,9 +4,6 @@ pub mod curation;
 pub mod report;
 pub use report::{JigReport, ReportId};
 
-pub mod additional_resource;
-pub use additional_resource::{AdditionalResource, AdditionalResourceId};
-
 pub mod module;
 // avoid breaking Changes
 pub use module::{LiteModule, Module, ModuleKind};
@@ -23,6 +20,7 @@ use std::{
 use uuid::Uuid;
 
 use super::{
+    additional_resource::AdditionalResource,
     asset::{DraftOrLive, PrivacyLevel, UserOrMe},
     category::CategoryId,
     meta::{AffiliationId, AgeRangeId, ResourceTypeId},

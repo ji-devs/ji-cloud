@@ -10,9 +10,6 @@ use crate::{
     error::{EmptyError, MetadataNotFound},
 };
 
-/// Endpoints for Course additional resources.
-pub mod additional_resource;
-
 use super::ApiEndpoint;
 
 /// Create a Course and it's draft and live data copies.
