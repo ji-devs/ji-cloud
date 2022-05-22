@@ -2,9 +2,12 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
 use shared::{
-    domain::jig::{
-        additional_resource::ResourceContent, AudioBackground, AudioFeedbackNegative,
-        AudioFeedbackPositive, JigPlayerSettings, TextDirection,
+    domain::{
+        additional_resource::ResourceContent, 
+        jig::{
+            AudioBackground, AudioFeedbackNegative,
+            AudioFeedbackPositive, JigPlayerSettings, TextDirection,
+        }
     },
     media::{MediaLibrary, PngImageFile},
 };

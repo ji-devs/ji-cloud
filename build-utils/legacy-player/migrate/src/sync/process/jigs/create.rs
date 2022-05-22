@@ -3,7 +3,7 @@
 use std::{future::Future, path::PathBuf, vec};
 use components::module::_common::prelude::Image;
 use dotenv::dotenv;
-use shared::{domain::{image::user::UserImageUploadResponse, jig::{module::{body::Background, ModuleUpdateRequest}, PrivacyLevel}, meta::{AgeRangeId, AffiliationId}}, media::MediaLibrary, config::RemoteTarget};
+use shared::{domain::{image::user::UserImageUploadResponse, jig::{module::{body::Background, ModuleUpdateRequest}}, meta::{AgeRangeId, AffiliationId}}, media::MediaLibrary, config::RemoteTarget};
 use tokio_util::codec::{BytesCodec, FramedRead};
 use reqwest::Body;
 use simplelog::*;
@@ -25,6 +25,7 @@ pub use shared::{
     },
     domain::{
         CreateResponse,
+        asset::PrivacyLevel,
         image::{
             ImageId,
             ImageKind,

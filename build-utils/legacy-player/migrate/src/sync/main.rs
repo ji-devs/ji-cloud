@@ -41,7 +41,7 @@ async fn main() {
     let ctx = Arc::new(Context::new(opts));
 
 
-    if ctx.opts.transcode_only_game_id.is_none() {
+    if ctx.opts.transcode_only_game_id.is_none() && ctx.opts.transcode_only_game_ids_file.is_none() {
         if ctx.opts.process_download_albums && (!ctx.opts.albums_skip_if_stats_completed || !ctx.stats.lock().await.downloaded_tt_albums) {
             log::info!("downloading albums..");
             process::albums::run(ctx.clone()).await;

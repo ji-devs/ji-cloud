@@ -14,6 +14,8 @@ use flate2::write::ZlibEncoder;
 use std::process::Command;
 use reqwest::Client; 
 use futures::stream::{FuturesUnordered, StreamExt};
+use std::io::{self, BufRead};
+use std::path::Path;
 use crate::{context::Context, options::Opts};
 
 pub struct GameJsonUrl {
@@ -33,6 +35,13 @@ pub fn load(ctx:&Context) -> Vec<GameJsonUrl> {
 
     if let Some(game_id) = ctx.opts.transcode_only_game_id.as_ref() {
         return vec![GameJsonUrl::new(format!("https://jitap.net/store/api/album/{}/structure/", game_id), game_id.to_string())];
+    } else if let Some(game_ids_file) = ctx.opts.transcode_only_game_ids_file.as_ref() {
+        return read_lines(game_ids_file)
+            .into_iter()
+            .map(|game_id| {
+                GameJsonUrl::new(format!("https://jitap.net/store/api/album/{}/structure/", game_id), game_id)
+            })
+            .collect()
     }
 
     #[derive(Deserialize)]
@@ -117,4 +126,13 @@ pub fn load(ctx:&Context) -> Vec<GameJsonUrl> {
 
     results
     
+}
+
+fn read_lines<P>(filename: P) -> Vec<String> 
+where P: AsRef<Path>, {
+    let err_msg = format!("{} not found!", filename.as_ref().display());
+    let file = File::open(filename).expect(&err_msg);
+    io::BufReader::new(file).lines()
+        .map(|line| line.unwrap())
+        .collect()
 }
