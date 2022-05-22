@@ -207,7 +207,7 @@ async fn get_slide_futures(ctx:Arc<Context>, loaded_manifests: Vec<SrcManifest>,
     futures
 }
 
-fn text_to_manifest(ctx:&Context, text:String) -> Option<(SrcManifest, String)> {
+fn text_to_manifest(ctx:&Context, text:String, error_context: &str) -> Option<(SrcManifest, String)> {
     #[derive(Deserialize, Debug)]
     pub struct MinimalSrcManifestData {
         pub data: MinimalSrcManifest
@@ -268,9 +268,9 @@ fn text_to_manifest(ctx:&Context, text:String) -> Option<(SrcManifest, String)> 
     match manifest {
         Ok(manifest) => Some((manifest, text)),
         Err(err) => {
-            writeln!(&ctx.errors_log, "{} unable to parse manifest, error: {:?}", game_id, err).unwrap();
+            writeln!(&ctx.errors_log, "{} unable to parse manifest at {}, error: {:?}", game_id, error_context, err).unwrap();
             if ctx.opts.transcode_panic_on_manifest_parse_error {
-                panic!("{} unable to parse manifest, error: {:?}", game_id, err);
+                panic!("{} unable to parse manifest at {}, error: {:?}", game_id, error_context, err);
             } else {
                 None
             }
@@ -279,8 +279,10 @@ fn text_to_manifest(ctx:&Context, text:String) -> Option<(SrcManifest, String)> 
 }
 
 pub fn load_file(ctx: &Context, path:PathBuf) -> Option<(SrcManifest, String)> {
+
+    let error_context = path.display().to_string();
     match std::fs::read_to_string(path) {
-        Ok(text) => text_to_manifest(ctx, text),
+        Ok(text) => text_to_manifest(ctx, text, &error_context),
         Err(_) => None
     }
 }
@@ -300,7 +302,7 @@ async fn load_url(ctx: &Context, url:&str) -> Option<(SrcManifest, String)> {
     };
     
     match text {
-        Ok(text) => text_to_manifest(ctx, text),
+        Ok(text) => text_to_manifest(ctx, text, url),
         Err(_) => {
 
             writeln!(&ctx.errors_log, "unknown unable to load manifest raw text at {}", url).unwrap();
