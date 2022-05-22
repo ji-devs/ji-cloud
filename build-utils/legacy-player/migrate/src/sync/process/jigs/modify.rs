@@ -35,6 +35,7 @@ pub use shared::{
                 UserImageUploadRequest,
             },
         },
+        asset::PrivacyLevel,
         category::CategoryId,
         jig::{
             JigId,
@@ -45,7 +46,6 @@ pub use shared::{
             JigBrowseResponse,
             JigUpdateDraftDataRequest,
             Module,
-                PrivacyLevel,
             module::{
                 ModuleCreateRequest, 
                 ModuleBody, 

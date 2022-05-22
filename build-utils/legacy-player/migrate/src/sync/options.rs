@@ -9,7 +9,7 @@ pub struct Opts {
     /////////////////// GLOBAL //////////////////////////////////
     #[structopt(long, parse(try_from_str), default_value = "false")]
     pub set_debug_values: bool,
-    #[structopt(long, default_value="/Users/dakom/Downloads/output", parse(from_os_str))]
+    //#[structopt(long, default_value="/Users/dakom/Downloads/output", parse(from_os_str))]
     //#[structopt(long, default_value="E:\\JI\\output", parse(from_os_str))]
     #[structopt(long, default_value="/home/david/archive/legacy-cdn/transcode", parse(from_os_str))]
     pub output_dir: PathBuf,
@@ -37,10 +37,10 @@ pub struct Opts {
     pub process_update_jigs: bool,
     // if false, won't do any transcoding of json
     // however, currently, will be forced to true if process_transcode_game_media is true
-    #[structopt(long, parse(try_from_str), default_value = "false")]
+    #[structopt(long, parse(try_from_str), default_value = "true")]
     pub process_transcode_game_json: bool,
     // if false, won't do any transcoding of media
-    #[structopt(long, parse(try_from_str), default_value = "false")]
+    #[structopt(long, parse(try_from_str), default_value = "true")]
     pub process_transcode_game_media: bool,
 
     /////////////////// ALBUMS //////////////////////////////////
@@ -85,6 +85,9 @@ pub struct Opts {
     /////////////////// TRANSCODE ALL //////////////////////////////////
     #[structopt(long, parse(try_from_str))]
     pub transcode_only_game_id: Option<String>,
+    /// this and transcode_only_game_id are set, the single id takes precedence over the file
+    #[structopt(long, parse(try_from_str))]
+    pub transcode_only_game_ids_file: Option<String>,
     /////////////////// TRANSCODE JSON //////////////////////////////////
     /// batch size to help throttle connections 
     #[structopt(long, parse(try_from_str), default_value = "100")]
