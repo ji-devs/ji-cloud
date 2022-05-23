@@ -13,8 +13,9 @@ use shared::{
     domain::{
         asset::PrivacyLevel,
         category::CategoryId,
+        additional_resource::AdditionalResource,
         jig::{
-            additional_resource::AdditionalResource, JigFocus, JigId, JigRating, JigResponse,
+            JigFocus, JigId, JigRating, JigResponse,
             JigUpdateAdminDataRequest, JigUpdateDraftDataRequest, LiteModule,
         },
         meta::AffiliationId,

@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use shared::domain::jig::additional_resource::ResourceContent;
+use shared::domain::additional_resource::ResourceContent;
 use utils::unwrap::UnwrapJiExt;
 
 use super::state::AddLink;

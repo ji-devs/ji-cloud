@@ -16,13 +16,13 @@ impl AdditionalResourceComponent {
             let jig_id = state.publish_state.jig.id.0.to_string();
             let resource_id = state.additional_resource.id.0.to_string();
 
-            let path = endpoints::jig::additional_resource::Delete::PATH
+            let path = endpoints::additional_resource::Delete::PATH
                 .replace("{id}", &jig_id)
                 .replace("{additional_resource_id}", &resource_id);
 
             let res = api_with_auth_empty::<EmptyError, ()>(
                 &path,
-                endpoints::jig::additional_resource::Delete::METHOD,
+                endpoints::additional_resource::Delete::METHOD,
                 None
             ).await;
 

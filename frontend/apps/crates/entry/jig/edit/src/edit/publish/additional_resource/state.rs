@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use awsm_web::loaders::helpers::AsyncLoader;
-use shared::domain::jig::additional_resource::AdditionalResource;
+use shared::domain::additional_resource::AdditionalResource;
 
 use super::super::state::Publish as PublishState;
 

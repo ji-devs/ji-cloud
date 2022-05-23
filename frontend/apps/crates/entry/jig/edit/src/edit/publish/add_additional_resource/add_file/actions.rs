@@ -6,7 +6,7 @@ use shared::{
     domain::{
         audio::AudioId,
         image::{user::UserImageCreateRequest, ImageId, ImageKind},
-        jig::additional_resource::ResourceContent,
+        additional_resource::ResourceContent,
         pdf::PdfId,
     },
     media::MediaLibrary,
