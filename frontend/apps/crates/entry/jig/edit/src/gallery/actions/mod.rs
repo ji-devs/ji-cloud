@@ -1,9 +1,11 @@
-use super::{jig::actions as jig_actions, state::*};
+use super::state::*;
 use dominator::clone;
 use futures::join;
 use shared::{api::endpoints, domain::asset::AssetId};
 use std::rc::Rc;
 use utils::prelude::*;
+
+mod jig_actions;
 
 impl Gallery {
     pub fn load_data(self: &Rc<Self>) {
