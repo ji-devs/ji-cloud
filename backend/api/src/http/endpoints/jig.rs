@@ -463,7 +463,7 @@ async fn play(db: Data<PgPool>, path: web::Path<JigId>) -> Result<HttpResponse, 
 }
 
 #[instrument]
-async fn page_limit(page_limit: Option<u32>) -> anyhow::Result<u32> {
+pub(crate) async fn page_limit(page_limit: Option<u32>) -> anyhow::Result<u32> {
     if let Some(limit) = page_limit {
         match limit > 0 && limit <= MAX_PAGE_LIMIT {
             true => Ok(limit),
