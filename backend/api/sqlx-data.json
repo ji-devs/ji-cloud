@@ -357,6 +357,182 @@
       "nullable": []
     }
   },
+  "0d4bf8bdd2faff7b6246b7ef39204f16e4a7d23bc9c4f4f55adf74ea979af218": {
+    "query": "\nselect user_id as \"id\",\n    username,\n    user_email.email::text as \"email!\",\n    given_name,\n    family_name,\n    profile_image_id       as \"profile_image?: ImageId\",\n    (select case when exists(select * from user_auth_google where user_id = $1) = true then 1 else 0 end)     as \"is_oauth!: bool\",           \n    language,\n    locale,\n    bio,    \n    location_public, \n    language_public, \n    persona_public, \n    organization_public, \n    opt_into_edu_resources,\n    over_18,\n    timezone,\n    user_profile.created_at,\n    user_profile.updated_at,\n    organization,\n    persona                as \"persona!: Vec<String>\",\n    location,\n    array(select scope from user_scope where user_scope.user_id = \"user\".id) as \"scopes!: Vec<i16>\",\n    array(select subject_id from user_subject where user_subject.user_id = \"user\".id) as \"subjects!: Vec<Uuid>\",\n    array(select affiliation_id from user_affiliation where user_affiliation.user_id = \"user\".id) as \"affiliations!: Vec<Uuid>\",\n    array(select age_range_id from user_age_range where user_age_range.user_id = \"user\".id) as \"age_ranges!: Vec<Uuid>\",\n    array(select badge.id \n        from badge_member bm \n        inner join badge on bm.id = badge.id \n        where bm.user_id = \"user\".id or badge.creator_id = \"user\".id\n    ) as \"badges!: Vec<Uuid>\"\nfrom \"user\"\n    inner join user_profile on \"user\".id = user_profile.user_id\n    inner join user_email using(user_id)\nwhere id = $1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "username",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "email!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "given_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "family_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 5,
+          "name": "profile_image?: ImageId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 6,
+          "name": "is_oauth!: bool",
+          "type_info": "Int4"
+        },
+        {
+          "ordinal": 7,
+          "name": "language",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 8,
+          "name": "locale",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 9,
+          "name": "bio",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 10,
+          "name": "location_public",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 11,
+          "name": "language_public",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 12,
+          "name": "persona_public",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 13,
+          "name": "organization_public",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 14,
+          "name": "opt_into_edu_resources",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 15,
+          "name": "over_18",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 16,
+          "name": "timezone",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 17,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 18,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 19,
+          "name": "organization",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 20,
+          "name": "persona!: Vec<String>",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 21,
+          "name": "location",
+          "type_info": "Jsonb"
+        },
+        {
+          "ordinal": 22,
+          "name": "scopes!: Vec<i16>",
+          "type_info": "Int2Array"
+        },
+        {
+          "ordinal": 23,
+          "name": "subjects!: Vec<Uuid>",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 24,
+          "name": "affiliations!: Vec<Uuid>",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 25,
+          "name": "age_ranges!: Vec<Uuid>",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 26,
+          "name": "badges!: Vec<Uuid>",
+          "type_info": "UuidArray"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        null,
+        false,
+        false,
+        true,
+        null,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        true,
+        true,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    }
+  },
   "0db02aca55bd8f7c7ecdf168ac6d80c6a556ebf2efc5cdafe0afee57a49aeff1": {
     "query": "\nselect id,  kind as \"kind: AnimationKind\"\nfrom animation_metadata\ninner join global_animation_upload on animation_metadata.id = global_animation_upload.animation_id\nwhere (id = $1 and uploaded_at is not null and processed_at >= uploaded_at is not true)\nfor no key update of global_animation_upload\nfor share of animation_metadata\nskip locked\n",
     "describe": {
@@ -1387,146 +1563,6 @@
       ]
     }
   },
-  "1c3f7c50863cf95f4e1a158b98f211fefefd1bfdaa13d6c6a5d85d75d8c5df7e": {
-    "query": "\nselect user_id as \"id\",\n    username,\n    user_email.email::text as \"email!\",\n    given_name,\n    family_name,\n    profile_image_id       as \"profile_image?: ImageId\",\n    (select case when exists(select * from user_auth_google where user_id = $1) = true then 1 else 0 end)     as \"is_oauth!: bool\",           \n    language,\n    locale,\n    opt_into_edu_resources,\n    over_18,\n    timezone,\n    user_profile.created_at,\n    user_profile.updated_at,\n    organization,\n    persona                as \"persona!: Vec<String>\",\n    location,\n    array(select scope from user_scope where user_scope.user_id = \"user\".id) as \"scopes!: Vec<i16>\",\n    array(select subject_id from user_subject where user_subject.user_id = \"user\".id) as \"subjects!: Vec<Uuid>\",\n    array(select affiliation_id from user_affiliation where user_affiliation.user_id = \"user\".id) as \"affiliations!: Vec<Uuid>\",\n    array(select age_range_id from user_age_range where user_age_range.user_id = \"user\".id) as \"age_ranges!: Vec<Uuid>\"\nfrom \"user\"\n    inner join user_profile on \"user\".id = user_profile.user_id\n    inner join user_email using(user_id)\nwhere id = $1",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "username",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "email!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 3,
-          "name": "given_name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 4,
-          "name": "family_name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 5,
-          "name": "profile_image?: ImageId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 6,
-          "name": "is_oauth!: bool",
-          "type_info": "Int4"
-        },
-        {
-          "ordinal": 7,
-          "name": "language",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 8,
-          "name": "locale",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 9,
-          "name": "opt_into_edu_resources",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 10,
-          "name": "over_18",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 11,
-          "name": "timezone",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 12,
-          "name": "created_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 13,
-          "name": "updated_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 14,
-          "name": "organization",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 15,
-          "name": "persona!: Vec<String>",
-          "type_info": "TextArray"
-        },
-        {
-          "ordinal": 16,
-          "name": "location",
-          "type_info": "Jsonb"
-        },
-        {
-          "ordinal": 17,
-          "name": "scopes!: Vec<i16>",
-          "type_info": "Int2Array"
-        },
-        {
-          "ordinal": 18,
-          "name": "subjects!: Vec<Uuid>",
-          "type_info": "UuidArray"
-        },
-        {
-          "ordinal": 19,
-          "name": "affiliations!: Vec<Uuid>",
-          "type_info": "UuidArray"
-        },
-        {
-          "ordinal": 20,
-          "name": "age_ranges!: Vec<Uuid>",
-          "type_info": "UuidArray"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        null,
-        false,
-        false,
-        true,
-        null,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        true,
-        true,
-        true,
-        true,
-        null,
-        null,
-        null,
-        null
-      ]
-    }
-  },
   "1c72ff4451fa5342ae8ae20bb4169b62efa25b9b44c80ce26bf9a9619336dd60": {
     "query": "delete from user_pdf_library where id = $1",
     "describe": {
@@ -2248,6 +2284,30 @@
         "Left": [
           "Text",
           "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "38d7a9b792c7e4aee253d6dc1829fa7069e345009de354830ebff82c3f34cf74": {
+    "query": "\nupdate user_profile\nset username               = coalesce($2, username),\n    given_name             = coalesce($3, given_name),\n    family_name            = coalesce($4, family_name),\n    language               = coalesce($5, language),\n    locale                 = coalesce($6, locale),\n    timezone               = coalesce($7, timezone),\n    opt_into_edu_resources = coalesce($8, opt_into_edu_resources),\n    persona_public         = coalesce($9, persona_public),\n    organization_public    = coalesce($10, organization_public),\n    location_public         = coalesce($11, location_public),\n    language_public         = coalesce($12, language_public),\n    bio                    = coalesce($13, bio)\nwhere user_id = $1\n  and (($2::text is not null and $2 is distinct from username) or\n       ($3::text is not null and $3 is distinct from given_name) or\n       ($4::text is not null and $4 is distinct from family_name) or\n       ($5::text is not null and $5 is distinct from language) or\n       ($6::text is not null and $6 is distinct from locale) or\n       ($7::text is not null and $7 is distinct from timezone) or\n       ($8::bool is not null and $8 is distinct from opt_into_edu_resources) or\n       ($9::bool is not null and $9 is distinct from persona_public) or\n       ($10::bool is not null and $10 is distinct from organization_public) or\n       ($11::bool is not null and $11 is distinct from location_public) or\n       ($12::bool is not null and $12 is distinct from language_public) or\n       ($13::text is not null and $13 is distinct from bio)\n    )\n    ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Text",
+          "Text",
+          "Text",
+          "Text",
+          "Text",
+          "Bool",
+          "Bool",
+          "Bool",
+          "Bool",
+          "Bool",
+          "Text"
         ]
       },
       "nullable": []
@@ -6133,25 +6193,6 @@
         "Left": [
           "Uuid",
           "Int2"
-        ]
-      },
-      "nullable": []
-    }
-  },
-  "b215f3c20b41f2ac1dbf3c8fdc2a98635a0bad092530bdd53654bb0a53674e24": {
-    "query": "\nupdate user_profile\nset username               = coalesce($2, username),\n    given_name             = coalesce($3, given_name),\n    family_name            = coalesce($4, family_name),\n    language               = coalesce($5, language),\n    locale                 = coalesce($6, locale),\n    timezone               = coalesce($7, timezone),\n    opt_into_edu_resources = coalesce($8, opt_into_edu_resources)\nwhere user_id = $1\n  and (($2::text is not null and $2 is distinct from username) or\n       ($3::text is not null and $3 is distinct from given_name) or\n       ($4::text is not null and $4 is distinct from family_name) or\n       ($5::text is not null and $5 is distinct from language) or\n       ($6::text is not null and $6 is distinct from locale) or\n       ($7::text is not null and $7 is distinct from timezone) or\n       ($8::bool is not null and $8 is distinct from opt_into_edu_resources) )\n    ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Text",
-          "Text",
-          "Text",
-          "Text",
-          "Text",
-          "Text",
-          "Bool"
         ]
       },
       "nullable": []
