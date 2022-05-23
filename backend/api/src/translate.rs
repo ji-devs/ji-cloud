@@ -76,23 +76,23 @@ const LANGUAGES: &'static [&str] = &[
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
-struct ImageTranslateDescriptions {
+struct ImageTranslate {
     image_id: ImageId,
-    description: String,
+    text: String,
 }
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
-struct JigTranslateDescriptions {
+struct JigTranslate {
     jig_data_id: Uuid,
-    description: String,
+    text: String,
 }
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
-struct CourseTranslateDescriptions {
+struct CourseTranslate {
     course_data_id: Uuid,
-    description: String,
+    text: String,
 }
 
 #[derive(Clone)]
@@ -117,17 +117,20 @@ impl GoogleTranslate {
         for count in 0..3 {
             let res = match count {
                 0 => self
-                    .update_jig_translations()
-                    .await
-                    .context("update jig description translation task errored"),
-                1 => self
                     .update_image_translations()
                     .await
-                    .context("update images description translation task errored"),
-                3 => self
+                    .context("update image translation task errored"),
+
+                1 => self
+                    .update_jig_translations()
+                    .await
+                    .context("update jig translation task errored"),
+
+                2 => self
                     .update_course_translations()
                     .await
-                    .context("update course description translation task errored"),
+                    .context("update course translation task errored"),
+
                 _ => continue,
             };
 
@@ -146,17 +149,16 @@ impl GoogleTranslate {
     }
 
     async fn update_image_translations(&self) -> anyhow::Result<bool> {
-        log::info!("reached update images translation descriptions");
+        log::info!("reached update images translation");
         let mut txn = self.db.begin().await?;
 
-        // todo: allow for some way to do a partial update (for example, by having a channel for queueing partial updates)
-        let requests: Vec<_> = sqlx::query!(
+        let descriptions: Vec<_> = sqlx::query!(
             //language=SQL
             r#"
 select id                               as "id!: ImageId",
        description                                                                                    
 from image_metadata
-     join image_upload on id = image_id
+     inner join image_upload on id = image_id
 where description <> '' and translated_description = '{}'
 and processed_at is not null
 order by coalesce(updated_at, created_at) desc
@@ -164,37 +166,54 @@ limit 50 for no key update skip locked;
  "#
         )
         .fetch(&mut txn)
-        .map_ok(|row| ImageTranslateDescriptions {
+        .map_ok(|row| ImageTranslate {
             image_id: row.id,
-            description: row.description
+            text: row.description
         })
         .try_collect()
         .await?;
 
-        if requests.is_empty() {
+        let names: Vec<_> = sqlx::query!(
+            //language=SQL
+            r#"
+select id                               as "id!: ImageId",
+       name
+from image_metadata
+     inner join image_upload on id = image_id
+where name <> '' and translated_name = '{}'
+and processed_at is not null
+order by coalesce(updated_at, created_at) desc
+limit 50 for no key update skip locked;
+ "#
+        )
+        .fetch(&mut txn)
+        .map_ok(|row| ImageTranslate {
+            image_id: row.id,
+            text: row.name,
+        })
+        .try_collect()
+        .await?;
+
+        if descriptions.is_empty() && names.is_empty() {
             return Ok(true);
         }
 
-        log::debug!(
-            "Updating a batch of {} image description(s)",
-            requests.len()
-        );
+        for t in descriptions {
+            println!("Descriptions {}", t.text);
+            let descriptions: Option<Option<HashMap<String, String>>> =
+                multi_translation(&t.text, &self.api_key).await.ok();
 
-        for t in requests {
-            let res: Option<Option<HashMap<String, String>>> =
-                multi_translation(&t.description, &self.api_key).await.ok();
-
-            if let Some(res) = res {
-                if let Some(res) = res {
+            if let Some(descriptions) = descriptions {
+                if let Some(descriptions) = descriptions {
                     sqlx::query!(
                         r#"
-                        update image_metadata 
-                        set translated_description = $2,
-                        last_synced_at = null
-                        where id = $1
-                        "#,
+                            update image_metadata 
+                            set translated_description = $2,
+                            last_synced_at = null
+                            where id = $1
+                            "#,
                         t.image_id.0,
-                        json!(res)
+                        json!(descriptions)
                     )
                     .execute(&mut txn)
                     .await?;
@@ -204,9 +223,44 @@ limit 50 for no key update skip locked;
                 };
             } else {
                 log::debug!(
-                    "Could not translate image_id: {}, string: {}",
+                    "Could not translate image_id: {}, description: {}",
                     t.image_id.0,
-                    t.description
+                    t.text
+                );
+
+                continue;
+            }
+        }
+
+        for t in names {
+            println!("names: {}", t.text);
+
+            let names: Option<Option<HashMap<String, String>>> =
+                multi_translation(&t.text, &self.api_key).await.ok();
+
+            if let Some(names) = names {
+                if let Some(names) = names {
+                    sqlx::query!(
+                        r#"
+                            update image_metadata 
+                            set translated_name = $2,
+                            last_synced_at = null
+                            where id = $1
+                            "#,
+                        t.image_id.0,
+                        json!(names)
+                    )
+                    .execute(&mut txn)
+                    .await?;
+                } else {
+                    log::debug!("Empty translation list for image_id: {}", t.image_id.0,);
+                    continue;
+                };
+            } else {
+                log::debug!(
+                    "Could not translate image_id: {}, description: {}",
+                    t.image_id.0,
+                    t.text
                 );
 
                 continue;
@@ -215,45 +269,68 @@ limit 50 for no key update skip locked;
 
         txn.commit().await?;
 
-        log::info!("completed update image description translations");
+        log::info!("completed update image translations");
 
         Ok(true)
     }
 
     async fn update_jig_translations(&self) -> anyhow::Result<bool> {
-        log::info!("reached update JIG description translation");
+        log::info!("reached update JIG translation");
         let mut txn = self.db.begin().await?;
 
         // todo: allow for some way to do a partial update (for example, by having a channel for queueing partial updates)
-        let requests: Vec<_> = sqlx::query!(
+        let descriptions: Vec<_> = sqlx::query!(
             //language=SQL
             r#"
 select jig_data.id,
        description                                                                                    
 from jig_data
 inner join jig on live_id = jig_data.id
-where (description <> '' and translated_description = '{}')
+where description <> '' and translated_description = '{}'
+and published_at is not null 
 order by coalesce(updated_at, created_at) desc
 limit 50 for no key update skip locked;
  "#
         )
         .fetch(&mut txn)
-        .map_ok(|row| JigTranslateDescriptions {
+        .map_ok(|row| JigTranslate {
             jig_data_id: row.id,
-            description: row.description
+            text: row.description
         })
         .try_collect()
         .await?;
 
-        if requests.is_empty() {
+        // todo: allow for some way to do a partial update (for example, by having a channel for queueing partial updates)
+        let display_names: Vec<_> = sqlx::query!(
+            //language=SQL
+            r#"
+select jig_data.id,
+       display_name
+from jig_data
+inner join jig on live_id = jig_data.id
+where display_name <> '' and translated_name = '{}'
+and published_at is not null 
+order by coalesce(updated_at, created_at) desc
+limit 50 for no key update skip locked;
+         "#
+        )
+        .fetch(&mut txn)
+        .map_ok(|row| JigTranslate {
+            jig_data_id: row.id,
+            text: row.display_name,
+        })
+        .try_collect()
+        .await?;
+
+        if descriptions.is_empty() && display_names.is_empty() {
             return Ok(true);
         }
 
-        log::debug!("Updating a batch of {} jig description(s)", requests.len());
+        for t in descriptions {
+            println!("Descriptions {}", t.text);
 
-        for t in requests {
             let res: Option<Option<HashMap<String, String>>> =
-                multi_translation(&t.description, &self.api_key).await.ok();
+                multi_translation(&t.text, &self.api_key).await.ok();
 
             if let Some(res) = res {
                 if let Some(res) = res {
@@ -277,7 +354,42 @@ limit 50 for no key update skip locked;
                 log::debug!(
                     "Could not translate jig_data_id: {}, string: {}",
                     t.jig_data_id,
-                    t.description
+                    t.text
+                );
+
+                continue;
+            };
+        }
+
+        for t in display_names {
+            println!("names {}", t.text);
+
+            let res: Option<Option<HashMap<String, String>>> =
+                multi_translation(&t.text, &self.api_key).await.ok();
+
+            if let Some(res) = res {
+                if let Some(res) = res {
+                    sqlx::query!(
+                        r#"
+                            update jig_data 
+                            set translated_name = $2,
+                                last_synced_at = null
+                            where id = $1
+                            "#,
+                        &t.jig_data_id,
+                        json!(res)
+                    )
+                    .execute(&mut txn)
+                    .await?;
+                } else {
+                    log::debug!("Empty translation list for jig_data_id: {}", t.jig_data_id);
+                    continue;
+                };
+            } else {
+                log::debug!(
+                    "Could not translate jig_data_id: {}, string: {}",
+                    t.jig_data_id,
+                    t.text
                 );
 
                 continue;
@@ -286,17 +398,16 @@ limit 50 for no key update skip locked;
 
         txn.commit().await?;
 
-        log::info!("completed update jig description translations");
+        log::info!("completed update jig translations");
 
         Ok(true)
     }
 
     async fn update_course_translations(&self) -> anyhow::Result<bool> {
-        log::info!("reached update Course description translation");
+        log::info!("reached update Course translation");
         let mut txn = self.db.begin().await?;
 
-        // todo: allow for some way to do a partial update (for example, by having a channel for queueing partial updates)
-        let requests: Vec<_> = sqlx::query!(
+        let descriptions: Vec<_> = sqlx::query!(
             //language=SQL
             r#"
 select course_data.id,
@@ -311,25 +422,44 @@ limit 50 for no key update skip locked;
  "#
         )
         .fetch(&mut txn)
-        .map_ok(|row| CourseTranslateDescriptions {
+        .map_ok(|row| CourseTranslate {
             course_data_id: row.id,
-            description: row.description
+            text: row.description
         })
         .try_collect()
         .await?;
 
-        if requests.is_empty() {
+        let names: Vec<_> = sqlx::query!(
+            //language=SQL
+            r#"
+select course_data.id,
+       display_name                                                                                   
+from course_data
+inner join course on live_id = course_data.id
+where display_name <> '' 
+      and translated_name = '{}'
+      and published_at is not null
+order by coalesce(updated_at, created_at) desc
+limit 50 for no key update skip locked;
+ "#
+        )
+        .fetch(&mut txn)
+        .map_ok(|row| CourseTranslate {
+            course_data_id: row.id,
+            text: row.display_name
+        })
+        .try_collect()
+        .await?;
+
+        if descriptions.is_empty() && names.is_empty() {
             return Ok(true);
         }
 
-        log::debug!(
-            "Updating a batch of {} Course description(s)",
-            requests.len()
-        );
+        for t in descriptions {
+            println!("Descriptions {}", t.text);
 
-        for t in requests {
             let res: Option<Option<HashMap<String, String>>> =
-                multi_translation(&t.description, &self.api_key).await.ok();
+                multi_translation(&t.text, &self.api_key).await.ok();
 
             if let Some(res) = res {
                 if let Some(res) = res {
@@ -353,16 +483,50 @@ limit 50 for no key update skip locked;
                 log::debug!(
                     "Could not translate course_id: {}, string: {}",
                     t.course_data_id,
-                    t.description
+                    t.text
                 );
 
                 continue;
             };
         }
 
+        for t in names {
+            println!("names {}", t.text);
+
+            let res: Option<Option<HashMap<String, String>>> =
+                multi_translation(&t.text, &self.api_key).await.ok();
+
+            if let Some(res) = res {
+                if let Some(res) = res {
+                    sqlx::query!(
+                        r#"
+                            update course_data 
+                            set translated_name = $2,
+                                last_synced_at = null
+                            where id = $1
+                            "#,
+                        &t.course_data_id,
+                        json!(res)
+                    )
+                    .execute(&mut txn)
+                    .await?;
+                } else {
+                    log::debug!("Empty translation list for course_id: {}", t.course_data_id);
+                    continue;
+                };
+            } else {
+                log::debug!(
+                    "Could not translate course_id: {}, string: {}",
+                    t.course_data_id,
+                    t.text
+                );
+
+                continue;
+            };
+        }
         txn.commit().await?;
 
-        log::info!("completed update Course description translations");
+        log::info!("completed update Course translations");
 
         Ok(true)
     }
@@ -454,7 +618,7 @@ pub async fn multi_translation(
             translation_list.insert(l.to_owned().to_owned(), meep);
         } else {
             translation_list.insert(l.to_owned().to_owned(), description.to_owned());
-        }
+        };
     }
 
     if translation_list.is_empty() {

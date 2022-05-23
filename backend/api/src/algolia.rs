@@ -58,6 +58,7 @@ struct BatchJig<'a> {
     likes: &'a i64,
     plays: &'a i64,
     published_at: Option<DateTime<Utc>>,
+    translated_name: &'a Vec<String>,
     translated_description: &'a Vec<String>,
     blocked: &'a bool,
 }
@@ -79,6 +80,7 @@ struct BatchImage<'a> {
     media_subkind: &'a str,
     #[serde(rename = "_tags")]
     tags: Vec<&'static str>,
+    translated_name: &'a Vec<String>,
     translated_description: &'a Vec<String>,
 }
 #[derive(Serialize)]
@@ -104,6 +106,7 @@ struct BatchCourse<'a> {
     likes: &'a i64,
     plays: &'a i64,
     published_at: Option<DateTime<Utc>>,
+    translated_name: &'a Vec<String>,
     translated_description: &'a Vec<String>,
 }
 
@@ -296,6 +299,7 @@ select jig.id,
        language                                                                                                     as "language!",
        description                                                                                                  as "description!",
        translated_description                                                                                       as "translated_description!: Json<HashMap<String, String>>",
+       translated_name                                                                                              as "translated_name!: Json<HashMap<String, String>>",
        array((select affiliation_id
               from jig_data_affiliation
               where jig_data_id = jig_data.id))                                                                     as "affiliations!",
@@ -360,10 +364,16 @@ limit 100 for no key update skip locked;
                 tags.push(HAS_AUTHOR_TAG);
             }
 
-            let mut translation: Vec<String> = Vec::new();
+            let mut translation_description: Vec<String> = Vec::new();
 
             for value in row.translated_description.0.values() {
-                translation.push(value.to_string());
+                translation_description.push(value.to_string());
+            }
+
+            let mut translation_name: Vec<String> = Vec::new();
+
+            for value in row.translated_name.0.values() {
+                translation_name.push(value.to_string());
             }
 
             algolia::request::BatchWriteRequest::UpdateObject {
@@ -390,7 +400,8 @@ limit 100 for no key update skip locked;
                 likes: &row.likes,
                 plays: &row.plays,
                 published_at: row.published_at,
-                translated_description: &translation,
+                translated_name: &translation_name,
+                translated_description: &translation_description,
                 blocked: &row.blocked
             })
             .expect("failed to serialize BatchJig to json")
@@ -447,6 +458,7 @@ select id,
        kind                                                                                     as "kind!: ImageKind",
        description,
        translated_description                                                                   as "translated_description!: Json<HashMap<String, String>>",
+       translated_name                                                                          as "translated_name!: Json<HashMap<String, String>>",
        array((select affiliation_id from image_affiliation where image_id = image_metadata.id)) as "affiliations!",
        array((select affiliation.display_name
               from affiliation
@@ -497,18 +509,24 @@ limit 100 for no key update skip locked;
                 tags.push(PREMIUM_TAG);
             }
 
-            let mut translation: Vec<String> = Vec::new();
+            let mut translation_description: Vec<String> = Vec::new();
 
             for value in row.translated_description.0.values() {
-                translation.push(value.to_string());
+                translation_description.push(value.to_string());
             }
 
+            let mut translation_name: Vec<String> = Vec::new();
+
+            for value in row.translated_name.0.values() {
+                translation_name.push(value.to_string());
+            }
             algolia::request::BatchWriteRequest::UpdateObject {
             body: match serde_json::to_value(&BatchMedia::Image(BatchImage {
                 media_subkind: &row.kind.to_str(),
                 name: &row.name,
                 description: &row.description,
-                translated_description: &translation,
+                translated_name: &translation_name,
+                translated_description: &translation_description,
                 styles: &row.styles,
                 style_names: &row.style_names,
                 age_ranges: &row.age_ranges,
@@ -569,6 +587,7 @@ select course.id,
        language                                                                                                     as "language!",
        description                                                                                                  as "description!",
        translated_description                                                                                       as "translated_description!: Json<HashMap<String, String>>",
+       translated_name                                                                                              as "translated_name!: Json<HashMap<String, String>>",
        array((select affiliation_id
               from course_data_affiliation
               where course_data_id = course_data.id))                                                                     as "affiliations!",
@@ -629,10 +648,16 @@ limit 100 for no key update skip locked;
                 tags.push(HAS_AUTHOR_TAG);
             }
 
-            let mut translation: Vec<String> = Vec::new();
+            let mut translation_description: Vec<String> = Vec::new();
 
             for value in row.translated_description.0.values() {
-                translation.push(value.to_string());
+                translation_description.push(value.to_string());
+            }
+
+            let mut translation_name: Vec<String> = Vec::new();
+
+            for value in row.translated_name.0.values() {
+                translation_name.push(value.to_string());
             }
 
             algolia::request::BatchWriteRequest::UpdateObject {
@@ -657,7 +682,8 @@ limit 100 for no key update skip locked;
                 likes: &row.likes,
                 plays: &row.plays,
                 published_at: row.published_at,
-                translated_description: &translation,
+                translated_description: &translation_description,
+                translated_name: &translation_name,
             })
             .expect("failed to serialize BatchCourse to json")
             {
