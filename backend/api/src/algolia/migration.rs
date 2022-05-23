@@ -23,6 +23,7 @@ pub(crate) async fn media_index(
                 .single(Attribute("name".to_owned()))
                 .single(Attribute("description".to_owned()))
                 .single(Attribute("translated_description".to_owned()))
+                .single(Attribute("translated_name".to_owned()))
                 .finish(),
         ),
         attributes_for_faceting: Some(vec![
@@ -62,6 +63,7 @@ pub(crate) async fn jig_index(
                 .single(Attribute("resource_type_names".to_owned()))
                 .single(Attribute("language".to_owned()))
                 .single(Attribute("other_keywords".to_owned()))
+                .single(Attribute("translated_name".to_owned()))
                 .finish(),
         ),
         attributes_for_faceting: Some(vec![
@@ -104,6 +106,7 @@ pub(crate) async fn course_index(
                 .single(Attribute("resource_type_names".to_owned()))
                 .single(Attribute("language".to_owned()))
                 .single(Attribute("other_keywords".to_owned()))
+                .single(Attribute("translated_name".to_owned()))
                 .finish(),
         ),
         attributes_for_faceting: Some(vec![
