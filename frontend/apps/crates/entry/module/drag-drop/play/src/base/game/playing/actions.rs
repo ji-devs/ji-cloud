@@ -91,10 +91,9 @@ impl PlayState {
                         .base
                         .item_targets
                         .iter()
-                        .find(|item_target| {
+                        .any(|item_target| {
                             item_index == item_target.sticker_idx && item_target.trace_idx == index
-                        })
-                        .is_some();
+                        });
 
                     if DEBUGGING_EVALUATION_RESULT
                         && (!DEBUGGING_EVALUATION_RESULT_ONLY_MATCH || is_correct)

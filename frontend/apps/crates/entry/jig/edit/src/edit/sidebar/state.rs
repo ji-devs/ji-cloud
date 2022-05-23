@@ -56,7 +56,7 @@ impl State {
         // let jig_published_at = jig.published_at;
         let jig_published_at = None;
         let settings_state = match &jig {
-            Asset::Jig(jig) => SidebarSetting::Jig(Rc::new(SettingsState::new(&jig))),
+            Asset::Jig(jig) => SidebarSetting::Jig(Rc::new(SettingsState::new(jig))),
             Asset::Course(_) => todo!(),
         };
 

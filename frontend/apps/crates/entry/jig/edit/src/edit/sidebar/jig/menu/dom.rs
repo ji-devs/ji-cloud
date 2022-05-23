@@ -81,7 +81,7 @@ fn menu_items_jig(
             v.push(item_delete(state, module_state));
             if let Some(module) = module {
                 v.push(item_copy(state, &module_state.sidebar, module.id));
-                v.push(item_duplicate_as(state, &module_state.sidebar, &module));
+                v.push(item_duplicate_as(state, &module_state.sidebar, module));
             }
             v
         }

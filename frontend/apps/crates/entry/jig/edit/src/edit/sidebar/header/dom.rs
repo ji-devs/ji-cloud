@@ -25,7 +25,7 @@ impl HeaderDom {
             .apply(|dom| {
                 match &sidebar_state.settings {
                     SidebarSetting::Jig(settings) => {
-                        dom.child(settings::dom::render(Rc::clone(&settings)))
+                        dom.child(settings::dom::render(Rc::clone(settings)))
                     },
                 }
             })
@@ -70,7 +70,7 @@ impl HeaderDom {
                     .event(clone!(sidebar_state => move |_: events::Click| {
                         match &sidebar_state.settings {
                             SidebarSetting::Jig(jig) => {
-                                let settings = get_player_settings(Rc::clone(&jig));
+                                let settings = get_player_settings(Rc::clone(jig));
                                 sidebar_state.jig_edit_state.play_jig.set(Some(settings));
                             },
                         }

@@ -158,11 +158,9 @@ impl DragItem {
                         // This item can be placed if it is not a placed item and does not exist in
                         // the hit trace.
                         if !self.is_placed_item && !sticker_exists {}
-                    } else {
-                        if self.is_placed_item {
-                            state.placed_items.lock_mut().remove(idx);
-                            state.base.sticker_targets.lock_mut().remove(idx);
-                        }
+                    } else if self.is_placed_item {
+                        state.placed_items.lock_mut().remove(idx);
+                        state.base.sticker_targets.lock_mut().remove(idx);
                     }
 
                     // Save the target list. This will also update the transforms if a sticker has

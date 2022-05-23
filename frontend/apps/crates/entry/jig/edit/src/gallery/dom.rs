@@ -172,7 +172,7 @@ impl Gallery {
                                     .property("icon", "duplicate")
                                     .text(STR_DUPLICATE)
                                     .event(clone!(state, jig => move |_: events::Click| {
-                                        state.copy_asset(jig.id().clone());
+                                        state.copy_asset(jig.id());
                                     }))
                                 }),
                                 html!("menu-line", {

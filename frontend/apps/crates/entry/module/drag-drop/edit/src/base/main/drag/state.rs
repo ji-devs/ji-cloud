@@ -29,7 +29,7 @@ impl MainDrag {
                     kind: Mutable::new(match item.kind.get_cloned() {
                         ItemKind::Static => ItemKind::Static,
                         ItemKind::Interactive(data) => ItemKind::Interactive(Interactive {
-                            audio: data.audio.clone(),
+                            audio: data.audio,
                             target_transform: Mutable::new(None),
                         }),
                     }),

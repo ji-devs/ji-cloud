@@ -47,7 +47,7 @@ impl EmailHandler {
 
     fn update_errors(&self) {
         let email = &self.value.lock_ref();
-        let error = get_error(&email);
+        let error = get_error(email);
         self.error.set(error);
     }
 }

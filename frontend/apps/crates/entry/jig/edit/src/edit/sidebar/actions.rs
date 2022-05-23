@@ -8,7 +8,7 @@ pub fn navigate_to_publish(state: Rc<State>) {
     state.collapsed.set(true);
     match &state.jig {
         Asset::Jig(jig) => {
-            jig_actions::navigate_to_publish(Rc::clone(&state), &jig);
+            jig_actions::navigate_to_publish(Rc::clone(&state), jig);
         }
         Asset::Course(_) => todo!(),
     }

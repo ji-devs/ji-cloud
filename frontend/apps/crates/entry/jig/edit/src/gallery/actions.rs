@@ -79,14 +79,14 @@ impl Gallery {
     }
 
     pub fn create_asset(self: &Rc<Self>) {
-        let state = Rc::clone(&self);
+        let state = Rc::clone(self);
         state.loader.load(clone!(state => async move {
             jig_actions::create_jig(state.focus).await;
         }));
     }
 
     pub fn copy_asset(self: &Rc<Self>, asset_id: AssetId) {
-        let state = Rc::clone(&self);
+        let state = Rc::clone(self);
         state.loader.load(clone!(state => async move {
             let asset = match asset_id {
                 AssetId::JigId(jig_id) => jig_actions::copy_jig(jig_id).await,
