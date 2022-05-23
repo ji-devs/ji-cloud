@@ -3,11 +3,11 @@ use serde::{Deserialize, Serialize};
 
 use shared::{
     domain::{
-        additional_resource::ResourceContent, 
+        additional_resource::ResourceContent,
         jig::{
-            AudioBackground, AudioFeedbackNegative,
-            AudioFeedbackPositive, JigPlayerSettings, TextDirection,
-        }
+            AudioBackground, AudioFeedbackNegative, AudioFeedbackPositive, JigPlayerSettings,
+            TextDirection,
+        },
     },
     media::{MediaLibrary, PngImageFile},
 };

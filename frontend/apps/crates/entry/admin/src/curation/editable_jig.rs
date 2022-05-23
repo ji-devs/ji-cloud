@@ -11,12 +11,12 @@ use futures_signals::signal_vec::MutableVec;
 use shared::{
     api::{endpoints, ApiEndpoint},
     domain::{
+        additional_resource::AdditionalResource,
         asset::PrivacyLevel,
         category::CategoryId,
-        additional_resource::AdditionalResource,
         jig::{
-            JigFocus, JigId, JigRating, JigResponse,
-            JigUpdateAdminDataRequest, JigUpdateDraftDataRequest, LiteModule,
+            JigFocus, JigId, JigRating, JigResponse, JigUpdateAdminDataRequest,
+            JigUpdateDraftDataRequest, LiteModule,
         },
         meta::AffiliationId,
         meta::AgeRangeId,

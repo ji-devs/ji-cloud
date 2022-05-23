@@ -86,14 +86,9 @@ impl PlayState {
                     .collect();
 
                 if let Some(index) = get_hit_index(hit_source, &traces) {
-                    is_correct = state
-                        .game
-                        .base
-                        .item_targets
-                        .iter()
-                        .any(|item_target| {
-                            item_index == item_target.sticker_idx && item_target.trace_idx == index
-                        });
+                    is_correct = state.game.base.item_targets.iter().any(|item_target| {
+                        item_index == item_target.sticker_idx && item_target.trace_idx == index
+                    });
 
                     if DEBUGGING_EVALUATION_RESULT
                         && (!DEBUGGING_EVALUATION_RESULT_ONLY_MATCH || is_correct)
