@@ -11,7 +11,7 @@ use std::rc::Rc;
 use utils::prelude::*;
 
 pub fn edit(state: Rc<SpotState>) {
-    let jig_id = state.sidebar.jig.unwrap_jig().id;
+    let jig_id = state.sidebar.asset.unwrap_jig().id;
 
     if let SidebarSpotItem::Jig(Some(module)) = &state.module.item {
         let module_id = module.id;
@@ -33,7 +33,7 @@ pub fn edit(state: Rc<SpotState>) {
 pub async fn delete(state: Rc<SpotState>) {
     if let Some(module) = &*state.module.item.unwrap_module() {
         let path = endpoints::jig::module::Delete::PATH
-            .replace("{id}", &state.sidebar.jig.unwrap_jig().id.0.to_string());
+            .replace("{id}", &state.sidebar.asset.unwrap_jig().id.0.to_string());
 
         let req = ModuleDeleteRequest {
             id: StableOrUniqueId::Unique(module.id),
@@ -51,7 +51,7 @@ pub async fn delete(state: Rc<SpotState>) {
 
 pub fn assign_kind(state: Rc<SpotState>, kind: ModuleKind) {
     state.sidebar.loader.load(clone!(state => async move {
-        let jig_id = state.sidebar.jig.unwrap_jig().id;
+        let jig_id = state.sidebar.asset.unwrap_jig().id;
 
         let req = Some(ModuleCreateRequest {
             body: ModuleBody::new(kind),
@@ -92,7 +92,7 @@ pub fn assign_kind(state: Rc<SpotState>, kind: ModuleKind) {
 
                     // if this is the empty module at the end
                     if !placeholder_exists {
-                        modules.push_cloned(Rc::new(SidebarSpot::new_empty(&state.sidebar.jig)));
+                        modules.push_cloned(Rc::new(SidebarSpot::new_empty(&state.sidebar.asset)));
                     }
                 }
 
@@ -133,5 +133,5 @@ pub async fn update_module_index(state: Rc<SpotState>, module: &LiteModule, inde
         is_complete: None,
     };
 
-    let _ = jig_actions::update_module(&state.sidebar.jig.unwrap_jig().id, &module.id, req).await;
+    let _ = jig_actions::update_module(&state.sidebar.asset.unwrap_jig().id, &module.id, req).await;
 }

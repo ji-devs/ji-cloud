@@ -9,7 +9,7 @@ use super::super::state::State;
 
 pub const COPY_MODULE_KEY: &str = "COPY_MODULE";
 pub fn copy_module(state: Rc<State>, module_id: &ModuleId) {
-    let value = format!("{},{}", &state.jig.unwrap_jig().id.0, &module_id.0);
+    let value = format!("{},{}", &state.asset.unwrap_jig().id.0, &module_id.0);
 
     let local_storage = get_local_storage().unwrap_ji();
 
@@ -39,7 +39,7 @@ pub fn paste_module(state: Rc<State>) {
         None => log::warn!("No module to paste"),
         Some((jig_id, module_id)) => {
             state.loader.load(clone!(state => async move {
-                let module = super::module_cloner::clone_module(&jig_id, &module_id, &state.jig.unwrap_jig().id).await.unwrap_ji();
+                let module = super::module_cloner::clone_module(&jig_id, &module_id, &state.asset.unwrap_jig().id).await.unwrap_ji();
                 state.modules.lock_mut().push_cloned(Rc::new(module.into()));
             }));
         }

@@ -68,7 +68,7 @@ pub async fn update_display_name(jig_id: JigId, value: String) {
 
 pub fn duplicate_module(state: Rc<State>, module_id: &ModuleId) {
     state.loader.load(clone!(state, module_id => async move {
-        let jig_id = state.jig.unwrap_jig().id;
+        let jig_id = state.asset.unwrap_jig().id;
         let module = super::module_cloner::clone_module(&jig_id, &module_id, &jig_id).await.unwrap_ji();
         populate_added_module(state, module);
     }));
@@ -130,7 +130,7 @@ pub fn on_iframe_message(state: Rc<State>, message: ModuleToJigEditorMessage) {
         }
         ModuleToJigEditorMessage::Next => {
             state.jig_edit_state.route.set_neq(JigEditRoute::Landing);
-            let jig_id = state.jig.unwrap_jig().id;
+            let jig_id = state.asset.unwrap_jig().id;
             Route::push_state(Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
                 jig_id,
                 JigFocus::Modules,
@@ -138,7 +138,7 @@ pub fn on_iframe_message(state: Rc<State>, message: ModuleToJigEditorMessage) {
             ))));
         }
         ModuleToJigEditorMessage::Publish => {
-            navigate_to_publish(Rc::clone(&state), state.jig.unwrap_jig());
+            navigate_to_publish(Rc::clone(&state), state.asset.unwrap_jig());
         }
     }
 }
@@ -164,7 +164,7 @@ pub fn use_module_as(state: Rc<State>, target_kind: ModuleKind, source_module_id
     state.loader.load(clone!(state => async move {
         let target_module_id: Result<(ModuleId, bool), EmptyError> = async {
             let path = endpoints::jig::module::GetDraft::PATH
-                .replace("{id}", &state.jig.unwrap_jig().id.0.to_string())
+                .replace("{id}", &state.asset.unwrap_jig().id.0.to_string())
                 .replace("{module_id}", &source_module_id.0.to_string());
 
             let source_module = api_with_auth::<ModuleResponse, EmptyError, ()>(
@@ -176,7 +176,7 @@ pub fn use_module_as(state: Rc<State>, target_kind: ModuleKind, source_module_id
             let target_body = source_module.body.convert_to_body(target_kind).unwrap_ji();
 
             let path = endpoints::jig::module::Create::PATH
-                .replace("{id}", &state.jig.unwrap_jig().id.0.to_string());
+                .replace("{id}", &state.asset.unwrap_jig().id.0.to_string());
 
             let req = ModuleCreateRequest { body: target_body };
 

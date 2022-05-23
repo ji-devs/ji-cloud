@@ -25,7 +25,7 @@ pub enum ModuleHighlight {
 }
 
 pub struct State {
-    pub jig: Asset,
+    pub asset: Asset,
     pub jig_edit_state: Rc<JigEditState>,
     pub name: Mutable<String>,
     pub publish_at: Mutable<Option<DateTime<Utc>>>,
@@ -61,7 +61,7 @@ impl State {
         };
 
         Self {
-            jig,
+            asset: jig,
             jig_edit_state,
             name: Mutable::new(jig_display_name),
             publish_at: Mutable::new(jig_published_at),

@@ -20,7 +20,7 @@ pub fn mouse_down(state: Rc<State>, x: i32, y: i32) {
 pub fn add_empty_module_after(state: Rc<State>) {
     state.sidebar.modules.lock_mut().insert_cloned(
         state.index + 1,
-        Rc::new(SidebarSpot::new_empty(&state.sidebar.jig)),
+        Rc::new(SidebarSpot::new_empty(&state.sidebar.asset)),
     );
     state
         .sidebar

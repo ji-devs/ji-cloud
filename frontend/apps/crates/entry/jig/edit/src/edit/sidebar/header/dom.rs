@@ -78,13 +78,13 @@ impl HeaderDom {
                 }),
             ])
             .apply(clone!(sidebar_state => move|dom| {
-                if let Asset::Jig(_) = &sidebar_state.jig {
+                if let Asset::Jig(_) = &sidebar_state.asset {
                     dom.child(html!("fa-button", {
                         .property("slot", "modules")
                         .property("icon", "fa-light fa-grid")
                         .event(clone!(sidebar_state => move |_:events::Click| {
                             sidebar_state.jig_edit_state.route.set_neq(JigEditRoute::Landing);
-                            let jig = sidebar_state.jig.unwrap_jig();
+                            let jig = sidebar_state.asset.unwrap_jig();
                             let url = Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
                                 jig.id,
                                 JigFocus::Modules,

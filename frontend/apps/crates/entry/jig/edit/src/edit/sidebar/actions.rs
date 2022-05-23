@@ -6,7 +6,7 @@ use std::rc::Rc;
 
 pub fn navigate_to_publish(state: Rc<State>) {
     state.collapsed.set(true);
-    match &state.jig {
+    match &state.asset {
         Asset::Jig(jig) => {
             jig_actions::navigate_to_publish(Rc::clone(&state), jig);
         }
@@ -46,7 +46,7 @@ pub fn update_display_name(state: Rc<State>, value: String) {
     state.loader.load(clone!(state => async move {
         state.name.set(value.clone());
 
-        match &state.jig {
+        match &state.asset {
             Asset::Jig(jig) => {
                 jig_actions::update_display_name(jig.id, value).await;
             },

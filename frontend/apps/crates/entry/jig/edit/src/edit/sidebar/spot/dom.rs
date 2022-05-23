@@ -138,7 +138,7 @@ impl ItemDom {
                                         (Some(module), _) => {
                                             Some(ModuleThumbnail::render_live(
                                                 Rc::new(ModuleThumbnail {
-                                                    asset_id: state.sidebar.jig.id(),
+                                                    asset_id: state.sidebar.asset.id(),
                                                     module: Some((**module).clone()),
                                                     fallback: ThumbnailFallback::Module,
                                                 }),
