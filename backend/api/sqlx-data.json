@@ -383,6 +383,18 @@
       ]
     }
   },
+  "0de0ed51c2ffff0feea0415480cbe103d99fccdeee8a4e8bc7ab5ea33baf541f": {
+    "query": "delete from badge where id = $1",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "0e9cec4ea69218f08784c12a17bcd8b15c22486f0e76051fea80fd21b12af760": {
     "query": "\nselect id                                   as \"id!: ReportId\",\n       jig_id                               as \"jig_id!: JigId\",    \n       report_type                          as \"report_type!: JigReportType\",                  \n       created_at,\n       reporter_id                          as \"reporter_id?: Uuid\",\n       (\n            select given_name || ' '::text || family_name\n            from user_profile\n            where user_profile.user_id = reporter_id\n        )                                       as \"name?\",\n        (\n            select email::text\n            from user_email\n            where user_email.user_id = reporter_id\n        )                                       as \"email?\"\nfrom jig_report\nwhere id = $1 and jig_id = $2\n",
     "describe": {
@@ -520,6 +532,56 @@
         false,
         true,
         true,
+        false,
+        false,
+        false
+      ]
+    }
+  },
+  "0eef5ce484b8cb531f0475e452c41a554fcdc8a2788c3ce5079f5992cac8991e": {
+    "query": "\nselect id            as \"badge_id: BadgeId\",\n       display_name,\n       description,\n       thumbnail,\n       member_count,\n       creator_id\nfrom badge\nwhere id = $1\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "badge_id: BadgeId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "display_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "description",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "thumbnail",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "member_count",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 5,
+          "name": "creator_id",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
         false,
         false,
         false
@@ -1955,6 +2017,26 @@
       "nullable": [
         false,
         false
+      ]
+    }
+  },
+  "259d9c7f6f021c53d6e3c0219087a2704262903695b401b771c3df4c86736a7f": {
+    "query": "\nselect exists(select 1 from badge where id = $1) as \"valid!\"\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "valid!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        null
       ]
     }
   },
@@ -3585,6 +3667,58 @@
       ]
     }
   },
+  "5f1654b068540d0475c39fd9a6cca4ed27f4890d51449af97480de0dd9a73017": {
+    "query": "\nselect  id            as \"badge_id!: BadgeId\",\n        display_name,\n        description,\n        thumbnail,\n        member_count  as \"member_count!: u32\",\n        creator_id\nfrom badge\nwhere (creator_id = $1 or $1 is null)\norder by coalesce(updated_at, created_at)\noffset $2\nlimit $3\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "badge_id!: BadgeId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "display_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "description",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "thumbnail",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "member_count!: u32",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 5,
+          "name": "creator_id",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int8",
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  },
   "5f3fd649e82c3d0a8deb3a4c0bd9c6afddb137b24f8b45ed4e673acb8f00b651": {
     "query": "\nselect draft_id, live_id from jig where id = $1\n",
     "describe": {
@@ -3983,6 +4117,19 @@
       ]
     }
   },
+  "6c08cf1710c8c16b6638793e9c277650406f619b08a17ad90f660b22e37b746f": {
+    "query": "\nupdate badge\nset thumbnail = $2,\n    updated_at = now()\nwhere id = $1 and $2 is distinct from thumbnail",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "6d3b3c8363db91c0ea121dbf82f2c0565715528efc5e29128ce312cae1b5cecb": {
     "query": "\nselect id                               as \"id!: ImageId\",\n       name\nfrom image_metadata\n     inner join image_upload on id = image_id\nwhere name <> '' and translated_name = '{}'\nand processed_at is not null\norder by coalesce(updated_at, created_at) desc\nlimit 50 for no key update skip locked;\n ",
     "describe": {
@@ -4050,6 +4197,19 @@
       "nullable": [
         null
       ]
+    }
+  },
+  "714a2c9ed6d5d2ea567705f2675e62e361670844e2e670eeb740142027aac29f": {
+    "query": "delete from badge_member where id = $1 and user_id = $2",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      },
+      "nullable": []
     }
   },
   "72b024e92b7f83b7e9fbb725e9955b62d22c676d62a8bbe2ce46be9cb163a991": {
@@ -4652,6 +4812,19 @@
       ]
     }
   },
+  "85907d4b12e82852c4227a40049a7660bcfe60e0db1af74a69ab78719edfd8dd": {
+    "query": "\ninsert into badge_member(id, user_id) values($1, $2)\n",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "8731b3b67aae4e9ceaab3893d91215f857dbe9642a301409ebc50fc1860342b6": {
     "query": "\nselect\n    id as \"id: u32\",\n    bundle_id,\n    section,\n    item_kind_id,\n    english,\n    hebrew,\n    status as \"status: EntryStatus\",\n    zeplin_reference,\n    comments,\n    in_app, \n    in_element, \n    in_mock\nfrom locale_entry\nwhere $2 or bundle_id = any($1)\norder by id\n",
     "describe": {
@@ -5028,6 +5201,29 @@
       ]
     }
   },
+  "9199c7382b8eb2a31a82ff5c6ec17f8f655e9f37ad35d208505f38f34311ed15": {
+    "query": "\ninsert into badge (display_name, description, thumbnail, creator_id) values ($1, $2, $3, $4)\nreturning id as \"id: BadgeId\"\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: BadgeId",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text",
+          "Text",
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
   "92e7e3facfda24dfb313e2722bea2617cc539d7355ea50942753fbf85e4f6141": {
     "query": "\nselect count(*) as \"count!: i64\"\nfrom jig_data\ninner join jig on jig.live_id = jig_data.id\nwhere (privacy_level = coalesce($1, privacy_level))\nand (jig_focus = coalesce($1, jig_focus))\n",
     "describe": {
@@ -5261,6 +5457,19 @@
       "nullable": [
         null
       ]
+    }
+  },
+  "9da78f700f5b23931400af7b083c8a45ed5626351474feb3167762f5a7a393b8": {
+    "query": "\nupdate badge\nset description = $2,\n    updated_at = now()\nwhere id = $1 and $2 is distinct from description\n",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text"
+        ]
+      },
+      "nullable": []
     }
   },
   "9e3fc9a239cb6ad98628e2f2bf16be1ab3d6db751bb97bedaaf004500f6bcffc": {
@@ -6413,6 +6622,29 @@
       "nullable": []
     }
   },
+  "c7cba4dc7fcc038705c7bc094ee538387699a3ebd40264b37682881da0264e30": {
+    "query": "\nselect exists (\n    select 1 from user_scope where user_id = $1 and scope = any($2)\n) or (\n    exists (select 1 from user_scope where user_id = $1 and scope = $3) and\n    not exists (select 1 from badge where id = $4 and badge.creator_id <> $1)\n) as \"authed!\"\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "authed!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2Array",
+          "Int2",
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
   "c8443565f9d806c81734c6872732491404fb4303094d36a98c80a77b6803ce08": {
     "query": "\n                            update jig_data \n                            set translated_name = $2,\n                                last_synced_at = null\n                            where id = $1\n                            ",
     "describe": {
@@ -6707,6 +6939,26 @@
       "nullable": []
     }
   },
+  "d0b2a9d27a75a862d25f98c71d6a8db359218d1e59e724cc5f9f37c79f0b0d92": {
+    "query": "select exists(select 1 from badge where id = $1) as \"exists!\"",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "exists!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
   "d1095b2f79187d6c7b251d3f39a7470e5e97b69c4424b638aec44fcb0f1d3deb": {
     "query": "\nselect exists(select 1 from user_scope where user_id = $1) as \"authed!\"\n",
     "describe": {
@@ -6941,6 +7193,26 @@
         false,
         null,
         null
+      ]
+    }
+  },
+  "d31d56bb21b3ddd3b14d7008d5caac383c97c65ca1761d5d4c0d7b211a51f25f": {
+    "query": "\nselect user_id  \nfrom badge_member\nwhere id = $1\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "user_id",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false
       ]
     }
   },
@@ -7329,6 +7601,19 @@
       "nullable": []
     }
   },
+  "e5351e959e33bb598708690ff2e0d43eb2c71fae98a5e0701bc33d206536299b": {
+    "query": "\nupdate badge\nset display_name = $2,\n    updated_at = now()\nwhere id = $1 and $2 is distinct from display_name\n",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "e57b7c587be57d904c82ee82ea48df2b8e02a38dd1a4c1c7fee015385d66d155": {
     "query": "update user_pdf_upload set processed_at = now(), processing_result = true where pdf_id = $1",
     "describe": {
@@ -7661,6 +7946,26 @@
         ]
       },
       "nullable": []
+    }
+  },
+  "f951c47c977ad9c1fe4bf37a7f73c95d8e96dfe2924f8a6bc40fe9d2f3148897": {
+    "query": "\nselect count(distinct id) as \"count!: i64\"\n    from badge\n    where creator_id = $1 or $1 is null\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "count!: i64",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        null
+      ]
     }
   },
   "f9df2f28e8d06b6804d2bfc813d94ee93bbebe9148b2d2f5e00857adfed502ed": {
