@@ -22,8 +22,6 @@ use super::{
     jig::{JigId, JigResponse, LiteModule},
 };
 
-pub mod additional_resource;
-
 /// AssetId
 #[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
