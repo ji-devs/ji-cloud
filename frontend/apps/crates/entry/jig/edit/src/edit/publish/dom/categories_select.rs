@@ -20,7 +20,7 @@ impl Publish {
                 Box::pin(state.category_value_signal()),
                 STR_CATEGORIES_PLACEHOLDER.to_string(),
                 state.categories.get_cloned(),
-                state.jig.categories.clone()
+                state.asset.categories().clone()
             ).render(None))
         })
     }
@@ -28,7 +28,7 @@ impl Publish {
     fn category_value_signal(self: &Rc<Self>) -> impl Signal<Item = String> {
         let state = self;
         map_ref! {
-            let selected_categories = state.jig.categories.signal_cloned(),
+            let selected_categories = state.asset.categories().signal_cloned(),
             let category_label_lookup = state.category_label_lookup.signal_cloned() => {
 
                 let len = selected_categories.len();

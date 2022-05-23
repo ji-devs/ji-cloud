@@ -1,7 +1,6 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 import "@elements/core/images/ui";
 import { nothing } from "lit-html";
-import { JigFocus } from "@elements/module/_common/types";
 
 const STR_HEADER_FIRST = "Publish your";
 const STR_HEADER_SECOND = "This information helps users find your JIG";
@@ -49,7 +48,7 @@ export class _ extends LitElement {
                     color: #4a4a4a;
                     margin: 0;
                 }
-                :host([jigFocus=resources]) h3 {
+                :host([showResourceColumn]) h3 {
                     display: none;
                 }
                 .main {
@@ -139,8 +138,11 @@ export class _ extends LitElement {
         ];
     }
 
-    @property({ reflect: true })
-    jigFocus: JigFocus = "modules";
+    @property({ type: Boolean, reflect: true })
+    resourceOnTop: boolean = false;
+
+    @property()
+    assetDisplayName: string = "";
 
     render() {
         return html`
@@ -150,11 +152,11 @@ export class _ extends LitElement {
                         <div class="header">
                             <h1>
                                 ${STR_HEADER_FIRST}
-                                ${this.jigFocus === "modules" ? "JIG" : "resource"}!
+                                ${this.assetDisplayName}!
                             </h1>
                             <h3>${STR_HEADER_SECOND}</h3>
                             ${
-                                this.jigFocus === "resources" ? html`
+                                this.resourceOnTop ? html`
                                     <slot name="resources"></slot>
                                 ` : nothing
                             }
@@ -182,7 +184,7 @@ export class _ extends LitElement {
                                 </div>
                             </div>
                             ${
-                                this.jigFocus === "modules" ? html`
+                                !this.resourceOnTop ? html`
                                     <div class="column-4 additional-resources">
                                         <slot name="resources"></slot>
                                     </div>

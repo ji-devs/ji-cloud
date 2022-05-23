@@ -14,8 +14,8 @@ use web_sys::{HtmlElement, HtmlInputElement, HtmlTextAreaElement};
 use super::add_additional_resource::AddAdditionalResource;
 use super::additional_resource::AdditionalResourceComponent;
 
-use super::super::state::State as JigEditState;
 use super::state::Publish;
+use super::{super::state::State as JigEditState, editable_assets::EditableAsset};
 use components::{
     hebrew_buttons::HebrewButtons,
     module::_common::thumbnail::{ModuleThumbnail, ThumbnailFallback},
@@ -72,32 +72,23 @@ impl Publish {
 }
 
 fn render_page(state: Rc<Publish>) -> Dom {
-    let (has_modules, invalid_module) = {
-        let modules = state.jig.modules.lock_ref();
-
-        let has_modules = !modules.is_empty();
-
-        let invalid_module = modules.iter().find(|module| !module.is_complete);
-        (has_modules, invalid_module.cloned())
-    };
-
     html!("jig-edit-publish", {
-        .property("jigFocus", state.jig.jig_focus.as_str())
-        .apply_if(state.jig.jig_focus.is_resources(), |dom| {
-            // TODO set content for no activities and content for incomplete activities.
-            if !has_modules {
-                // TODO
-            } else if let Some(_invalid_module) = invalid_module {
-                // TODO
-            }
-            dom
-        })
+        .property("assetDisplayName", state.asset_type_name())
+        .property("resourceOnTop", state.asset.is_resource())
+        // .apply_if(state.jig.jig_focus.is_resources(), |dom| {
+        //     // TODO set content for no activities and content for incomplete activities.
+        //     if !has_modules {
+        //         // TODO
+        //     } else if let Some(_invalid_module) = invalid_module {
+        //         // TODO
+        //     }
+        //     dom
+        // })
         .children(&mut [
             ModuleThumbnail::render_live(
                 Rc::new(ModuleThumbnail {
-                    asset_id: state.jig.id.into(),
-                    //Cover module (first module) is guaranteed to exist
-                    module: state.jig.modules.lock_ref().first().cloned(),
+                    asset_id: state.asset.id(),
+                    module: state.asset.cover().clone(),
                     fallback: ThumbnailFallback::Asset,
                 }),
                 Some("img")
@@ -113,19 +104,19 @@ fn render_page(state: Rc<Publish>) -> Dom {
                 .with_node!(elem => {
                     .property("slot", "public")
                     .text(STR_PUBLIC_LABEL_1)
-                    .text(state.jig.focus_display())
+                    .text(state.asset_type_name())
                     .text(STR_PUBLIC_LABEL_2)
                     .child(html!("input-switch", {
-                        .property_signal("enabled", state.jig.privacy_level.signal().map(|privacy_level| {
+                        .property_signal("enabled", state.asset.privacy_level().signal().map(|privacy_level| {
                             privacy_level == PrivacyLevel::Public
                         }))
                         .event(clone!(state => move |evt: events::CustomToggle| {
                             let value = evt.value();
                             if value {
-                                state.jig.privacy_level.set(PrivacyLevel::Public);
+                                state.asset.privacy_level().set(PrivacyLevel::Public);
                                 state.show_public_popup.set(false);
                             } else {
-                                state.jig.privacy_level.set(PrivacyLevel::Unlisted);
+                                state.asset.privacy_level().set(PrivacyLevel::Unlisted);
                                 state.show_public_popup.set(true);
                             }
                         }))
@@ -135,14 +126,13 @@ fn render_page(state: Rc<Publish>) -> Dom {
                             false => None,
                             true => {
                                 Some(html!("tooltip-info", {
-
                                     .property("title", STR_PUBLIC_POPUP_TITLE)
                                     .property("body", format!(
                                         "{}{}{}{}{}",
                                         STR_PUBLIC_POPUP_BODY_1,
-                                        state.jig.focus_display(),
+                                        state.asset_type_name(),
                                         STR_PUBLIC_POPUP_BODY_2,
-                                        state.jig.focus_display(),
+                                        state.asset_type_name(),
                                         STR_PUBLIC_POPUP_BODY_3
                                     ))
                                     .property("closeable", true)
@@ -159,11 +149,11 @@ fn render_page(state: Rc<Publish>) -> Dom {
             }),
             html!("input-wrapper", {
                 .property("slot", "name")
-                .property("label", format!("{}{}",  state.jig.focus_display(), STR_NAME_LABEL))
+                .property("label", format!("{}{}",  state.asset_type_name(), STR_NAME_LABEL))
                 .property_signal("error", {
                     (map_ref! {
                         let submission_tried = state.submission_tried.signal(),
-                        let value = state.jig.display_name.signal_cloned()
+                        let value = state.asset.display_name().signal_cloned()
                             => (*submission_tried, value.clone())
                     })
                         .map(|(submission_tried, value)| {
@@ -175,11 +165,11 @@ fn render_page(state: Rc<Publish>) -> Dom {
                 })
                 .child(html!("input" => HtmlInputElement, {
                     .with_node!(elem => {
-                        .property("placeholder", format!("{}{}{}", STR_NAME_PLACEHOLDER_1, state.jig.focus_display(), STR_NAME_PLACEHOLDER_2))
-                        .property_signal("value", state.jig.display_name.signal_cloned())
+                        .property("placeholder", format!("{}{}{}", STR_NAME_PLACEHOLDER_1, state.asset_type_name(), STR_NAME_PLACEHOLDER_2))
+                        .property_signal("value", state.asset.display_name().signal_cloned())
                         .event(clone!(state => move |_evt: events::Input| {
                             let value = elem.value();
-                            state.jig.display_name.set(value);
+                            state.asset.display_name().set(value);
                         }))
                     })
                 }))
@@ -190,7 +180,7 @@ fn render_page(state: Rc<Publish>) -> Dom {
                 // .property_signal("error", {
                 //     (map_ref! {
                 //         let submission_tried = state.submission_tried.signal(),
-                //         let value = state.jig.description.signal_cloned()
+                //         let value = state.asset.description().signal_cloned()
                 //             => (*submission_tried, value.clone())
                 //     })
                 //         .map(|(submission_tried, value)| {
@@ -205,13 +195,13 @@ fn render_page(state: Rc<Publish>) -> Dom {
                         .property("placeholder", format!(
                             "{}{}{}",
                             STR_DESCRIPTION_PLACEHOLDER_1,
-                            state.jig.focus_display(),
+                            state.asset_type_name(),
                             STR_DESCRIPTION_PLACEHOLDER_2
                         ))
-                        .text_signal(state.jig.description.signal_cloned())
+                        .text_signal(state.asset.description().signal_cloned())
                         .event(clone!(state => move |_: events::Input| {
                             let value = elem.value();
-                            state.jig.description.set(value);
+                            state.asset.description().set(value);
                         }))
                     })
                 }))
@@ -228,12 +218,16 @@ fn render_page(state: Rc<Publish>) -> Dom {
                 .property("kind", "text")
                 .text(STR_PUBLISH_LATER)
                 .event(clone!(state => move |_: events::Click| {
-                    state.jig_edit_state.route.set_neq(JigEditRoute::Landing);
-                    let url:String = Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
-                        state.jig.id,
-                        state.jig.jig_focus,
-                        JigEditRoute::Landing
-                    ))).into();
+                    let url = match &state.asset {
+                        EditableAsset::Jig(jig) => {
+                            state.jig_edit_state.route.set_neq(JigEditRoute::Landing);
+                            Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
+                                jig.id,
+                                jig.jig_focus,
+                                JigEditRoute::Landing
+                            ))).to_string()
+                        },
+                    };
                     dominator::routing::go_to_url(&url);
                 }))
             }),
@@ -243,13 +237,8 @@ fn render_page(state: Rc<Publish>) -> Dom {
                 .with_node!(elem => {
                     .child(html!("button-rect", {
                         .text(STR_PUBLISH)
-                        .text(state.jig.focus_display())
-                        .property(
-                            "disabled",
-                            state.jig.jig_focus.is_modules()
-                            && (state.jig.modules.lock_ref().len() == 0 // Disabled
-                                || state.jig.modules.lock_ref().iter().any(|m| !m.is_complete))
-                        )
+                        .text(state.asset_type_name())
+                        .property("disabled", state.is_ready_to_publish())
                         .child(html!("fa-icon", {
                             .property("icon", "fa-light fa-rocket-launch")
                             .style("color", "var(--main-yellow)")
@@ -282,22 +271,22 @@ fn render_page(state: Rc<Publish>) -> Dom {
                 })
             }),
         ])
-        .apply_if(state.jig.jig_focus.is_modules(), |dom|{
+        .apply_if(!state.asset.is_resource(), clone!(state => move |dom|{
             dom
-                .children_signal_vec(state.jig.additional_resources.signal_vec_cloned().map(clone!(state => move |additional_resource| {
+                .children_signal_vec(state.asset.additional_resources().signal_vec_cloned().map(clone!(state => move |additional_resource| {
                     AdditionalResourceComponent::new(
                         additional_resource,
                         Rc::clone(&state)
                     ).render()
                 })))
                 .child(AddAdditionalResource::new(Rc::clone(&state)).render())
-        })
-        .apply_if(state.jig.jig_focus.is_resources(), |dom|{
-            dom.child_signal(state.jig.additional_resources.signal_vec_cloned().len().map(clone!(state => move|len| {
+        }))
+        .apply_if(state.asset.is_resource(), |dom|{
+            dom.child_signal(state.asset.additional_resources().signal_vec_cloned().len().map(clone!(state => move|len| {
                 if len == 0 {
                     Some(AddAdditionalResource::new(Rc::clone(&state)).render())
                 } else {
-                    let resource = state.jig.additional_resources.lock_ref()[0].clone();
+                    let resource = state.asset.additional_resources().lock_ref()[0].clone();
                     Some(
                         AdditionalResourceComponent::new(
                             resource,

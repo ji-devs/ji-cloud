@@ -36,19 +36,19 @@ impl Publish {
 fn render_language(Language(lang_code, land_label): &Language, state: Rc<Publish>) -> Dom {
     html!("input-select-option", {
         .text(land_label)
-        .property_signal("selected", state.jig.language.signal_cloned().map(clone!(lang_code => move |selected_lang| {
+        .property_signal("selected", state.asset.language().signal_cloned().map(clone!(lang_code => move |selected_lang| {
             lang_code == selected_lang
         })))
         .event(clone!(state, lang_code => move |evt: events::CustomSelectedChange| {
             if evt.selected() {
-                state.jig.language.set(lang_code.to_string());
+                state.asset.language().set(lang_code.to_string());
             }
         }))
     })
 }
 
 fn language_value_signal(state: Rc<Publish>) -> impl Signal<Item = &'static str> {
-    state.jig.language.signal_cloned().map(clone!(state => move |selected_language| {
+    state.asset.language().signal_cloned().map(clone!(state => move |selected_language| {
         match state.languages.iter().find(|Language(lang_code, _)| lang_code == &selected_language) {
             Some(lang) => lang.1,
             None => ""

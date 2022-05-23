@@ -11,7 +11,7 @@ impl Publish {
         let state = Rc::clone(&self);
         html!("div", {
             .property("slot", "category-labels")
-            .children_signal_vec(state.jig.categories.signal_cloned().map(clone!(state => move|categories| {
+            .children_signal_vec(state.asset.categories().signal_cloned().map(clone!(state => move|categories| {
                 categories.iter()
                     .map(|category_id| render_pill(state.clone(), *category_id))
                     .collect()
@@ -28,7 +28,7 @@ fn render_pill(state: Rc<Publish>, category_id: CategoryId) -> Dom {
         .child(html!("pill-close-delete", {
             .property("slot", "delete")
             .event(clone!(state => move |_: events::Click| {
-                state.jig.categories.lock_mut().remove(&category_id);
+                state.asset.categories().lock_mut().remove(&category_id);
             }))
         }))
     })

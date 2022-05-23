@@ -4,9 +4,9 @@ use components::{audio, image, pdf};
 use shared::{
     api::endpoints,
     domain::{
+        additional_resource::ResourceContent,
         audio::AudioId,
         image::{user::UserImageCreateRequest, ImageId, ImageKind},
-        additional_resource::ResourceContent,
         pdf::PdfId,
     },
     media::MediaLibrary,

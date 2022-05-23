@@ -3,32 +3,36 @@ use std::{collections::HashMap, rc::Rc};
 use dominator::clone;
 use futures::join;
 use shared::{
-    api::endpoints::{category, jig, meta, ApiEndpoint},
+    api::endpoints::{category, meta, ApiEndpoint},
     domain::{
         asset::PrivacyLevel,
         category::{Category, CategoryId, CategoryResponse, CategoryTreeScope, GetCategoryRequest},
-        jig::{JigData, JigId, JigResponse, JigUpdateDraftDataRequest},
+        jig::JigFocus,
         meta::MetadataResponse,
     },
-    error::{EmptyError, MetadataNotFound},
+    error::EmptyError,
 };
 use utils::{
-    prelude::{api_with_auth, api_with_auth_empty, UnwrapJiExt},
-    routes::{AssetEditRoute, AssetRoute, JigEditRoute, Route},
+    prelude::{api_with_auth, UnwrapJiExt},
+    routes::JigEditRoute,
 };
 
+use crate::edit::publish::editable_assets::EditableAsset;
+
 use super::super::state::State as JigEditState;
-use super::{publish_jig::PublishJig, state::Publish};
+use super::state::Publish;
+
+mod jig_actions;
 
 impl Publish {
     pub async fn load_new(jig_edit_state: Rc<JigEditState>) -> Self {
-        let jig = load_jig(jig_edit_state.jig_id);
+        let asset = jig_actions::load_jig(jig_edit_state.jig_id);
         let categories = load_categories();
         let meta = load_metadata();
 
-        let (jig, categories, meta) = join!(jig, categories, meta);
+        let (asset, categories, meta) = join!(asset, categories, meta);
 
-        let mut jig = jig.unwrap_ji();
+        let asset = asset.unwrap_ji();
 
         let categories = categories.unwrap_ji();
         let mut category_label_lookup = HashMap::new();
@@ -36,18 +40,21 @@ impl Publish {
 
         let meta = meta.unwrap_ji();
 
-        if jig.published_at.is_none() {
-            set_default_values(&mut jig.jig_data, &meta);
+        if asset.published_at().is_none() {
+            set_default_values(&asset, &meta);
         }
 
         // ensure the correct jig focus is set
-        assert_eq!(
-            jig_edit_state.jig_focus, jig.jig_focus,
-            "Jig focus doesn't match the route"
-        );
+        #[allow(irrefutable_let_patterns)] // TODO: remove once enum has another option
+        if let EditableAsset::Jig(jig) = &asset {
+            assert_eq!(
+                jig_edit_state.jig_focus, jig.jig_focus,
+                "Jig focus doesn't match the route"
+            );
+        };
 
         Self::new(
-            PublishJig::new(jig),
+            asset,
             categories,
             category_label_lookup,
             meta.age_ranges,
@@ -58,7 +65,7 @@ impl Publish {
     }
 
     pub fn navigate_to_cover(&self) {
-        let cover_module_id = self.jig.modules.lock_ref().first().map(|m| m.id);
+        let cover_module_id = self.asset.cover().as_ref().map(|m| m.id);
 
         // navigate to cover if exists otherwise navigate to landing
         let route = match cover_module_id {
@@ -69,32 +76,23 @@ impl Publish {
         self.jig_edit_state.route.set(route);
     }
 
-    fn form_invalid(self: Rc<Self>) -> bool {
-        self.jig.display_name.lock_ref().is_empty()
+    // used to show tooltip, can probably be combined with `is_ready_to_publish` somehow
+    fn form_invalid(self: &Rc<Self>) -> bool {
+        self.asset.display_name().lock_ref().is_empty()
         // || self.jig.description.lock_ref().is_empty()
         // || self.jig.language.lock_ref().is_empty()
         // || self.jig.age_ranges.lock_ref().is_empty()
         // || self.jig.categories.lock_ref().is_empty()
     }
 
-    async fn save_and_publish(self: Rc<Self>) -> Result<(), ()> {
-        let state = Rc::clone(&self);
-        let path = jig::UpdateDraftData::PATH.replace("{id}", &state.jig.id.0.to_string());
-        let req = state.jig.to_jig_update_request();
-        api_with_auth_empty::<MetadataNotFound, JigUpdateDraftDataRequest>(
-            &path,
-            jig::UpdateDraftData::METHOD,
-            Some(req),
-        )
-        .await
-        .map_err(|_| ())?;
-
-        let path = jig::Publish::PATH.replace("{id}", &state.jig.id.0.to_string());
-        api_with_auth_empty::<EmptyError, ()>(&path, jig::Publish::METHOD, None)
-            .await
-            .map_err(|_| ())?;
-
-        Ok(())
+    // used to disable button
+    pub fn is_ready_to_publish(self: &Rc<Self>) -> bool {
+        match &self.asset {
+            EditableAsset::Jig(jig) => match jig.jig_focus {
+                JigFocus::Modules => jig.modules.iter().any(|m| !m.is_complete),
+                JigFocus::Resources => jig.cover.is_some(),
+            },
+        }
     }
 
     pub fn save_jig(self: Rc<Self>) {
@@ -106,28 +104,17 @@ impl Publish {
         };
 
         state.loader.load(clone!(state => async move {
-            match Rc::clone(&state).save_and_publish().await {
-                Ok(_) => {
-                    state.submission_tried.set(false);
-
-                    state.jig_edit_state.route.set_neq(JigEditRoute::PostPublish);
-
-                    let url: String = Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
-                        state.jig.id,
-                        state.jig.jig_focus,
-                        JigEditRoute::PostPublish
-                    ))).into();
-                    log::info!("{}", url);
-
-                    /* this will cause a full refresh - but preserves history
-                    * see the .future in EditPage too
-                    dominator::routing::go_to_url(&url);
-                    */
+            match &state.asset {
+                EditableAsset::Jig(jig) => {
+                    jig_actions::save_and_publish_jig(jig)
+                        .await
+                        .unwrap_ji()
                 },
-                Err(_) => {
-                    let _ = web_sys::window().unwrap_ji().alert_with_message("Error!");
-                }
-            }
+            };
+
+            state.submission_tried.set(false);
+
+            state.jig_edit_state.route.set_neq(JigEditRoute::PostPublish);
         }));
     }
 }
@@ -146,24 +133,18 @@ fn get_categories_labels(
     }
 }
 
-fn set_default_values(jig: &mut JigData, meta: &MetadataResponse) {
+fn set_default_values(asset: &EditableAsset, meta: &MetadataResponse) {
     let available_affiliations = meta
         .affiliations
         .iter()
         .map(|affiliation| affiliation.id)
         .collect();
-    jig.affiliations = available_affiliations;
+    asset.affiliations().replace(available_affiliations);
 
     let available_ages = meta.age_ranges.iter().map(|age| age.id).collect();
-    jig.age_ranges = available_ages;
+    asset.age_ranges().replace(available_ages);
 
-    jig.privacy_level = PrivacyLevel::default()
-}
-
-async fn load_jig(jig_id: JigId) -> Result<JigResponse, EmptyError> {
-    let path = jig::GetDraft::PATH.replace("{id}", &jig_id.0.to_string());
-
-    api_with_auth::<JigResponse, EmptyError, ()>(&path, jig::GetDraft::METHOD, None).await
+    asset.privacy_level().replace(PrivacyLevel::default());
 }
 
 async fn load_categories() -> Result<Vec<Category>, EmptyError> {

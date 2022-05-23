@@ -2,10 +2,11 @@ use std::collections::HashSet;
 use std::iter::FromIterator;
 use std::rc::Rc;
 
+use chrono::{DateTime, Utc};
 use futures_signals::signal::Mutable;
 use futures_signals::signal_vec::MutableVec;
-use shared::domain::asset::PrivacyLevel;
 use shared::domain::additional_resource::AdditionalResource;
+use shared::domain::asset::PrivacyLevel;
 use shared::domain::jig::JigFocus;
 use shared::domain::meta::AffiliationId;
 use shared::domain::{
@@ -14,14 +15,14 @@ use shared::domain::{
     meta::AgeRangeId,
 };
 
-const STR_JIG: &str = "JIG";
-const STR_RESOURCE: &str = "Resource";
-
 #[derive(Clone)]
-pub struct PublishJig {
+pub struct EditableJig {
     pub id: JigId,
-    // modules only for read
-    pub modules: Mutable<Vec<LiteModule>>,
+    // cover and modules only for read
+    pub cover: Option<LiteModule>,
+    pub modules: Vec<LiteModule>,
+    pub published_at: Option<DateTime<Utc>>,
+    pub jig_focus: JigFocus,
     pub display_name: Mutable<String>,
     pub description: Mutable<String>,
     pub age_ranges: Mutable<HashSet<AgeRangeId>>,
@@ -30,14 +31,14 @@ pub struct PublishJig {
     pub affiliations: Mutable<HashSet<AffiliationId>>,
     pub additional_resources: Rc<MutableVec<AdditionalResource>>,
     pub privacy_level: Mutable<PrivacyLevel>,
-    pub jig_focus: JigFocus,
 }
 
-impl From<JigResponse> for PublishJig {
+impl From<JigResponse> for EditableJig {
     fn from(jig: JigResponse) -> Self {
         Self {
             id: jig.id,
-            modules: Mutable::new(jig.jig_data.modules),
+            cover: jig.jig_data.modules.first().cloned(),
+            modules: jig.jig_data.modules,
             display_name: Mutable::new(jig.jig_data.display_name),
             description: Mutable::new(jig.jig_data.description.clone()),
             age_ranges: Mutable::new(HashSet::from_iter(jig.jig_data.age_ranges)),
@@ -48,17 +49,19 @@ impl From<JigResponse> for PublishJig {
                 jig.jig_data.additional_resources,
             )),
             privacy_level: Mutable::new(jig.jig_data.privacy_level),
+            published_at: jig.published_at,
             jig_focus: jig.jig_focus,
         }
     }
 }
 
-impl PublishJig {
+impl EditableJig {
     pub fn new(jig: JigResponse) -> Self {
         Self {
             id: jig.id,
             display_name: Mutable::new(jig.jig_data.display_name),
-            modules: Mutable::new(jig.jig_data.modules),
+            cover: jig.jig_data.modules.first().cloned(),
+            modules: jig.jig_data.modules,
             description: Mutable::new(jig.jig_data.description),
             age_ranges: Mutable::new(HashSet::from_iter(jig.jig_data.age_ranges)),
             language: Mutable::new(jig.jig_data.language),
@@ -68,6 +71,7 @@ impl PublishJig {
                 jig.jig_data.additional_resources,
             )),
             privacy_level: Mutable::new(jig.jig_data.privacy_level),
+            published_at: jig.published_at,
             jig_focus: jig.jig_focus,
         }
     }
@@ -83,14 +87,6 @@ impl PublishJig {
             affiliations: Some(self.affiliations.get_cloned().into_iter().collect()),
             privacy_level: Some(self.privacy_level.get()),
             ..Default::default()
-        }
-    }
-
-    /// a displayable string for jig_focus
-    pub fn focus_display(&self) -> &'static str {
-        match self.jig_focus {
-            JigFocus::Modules => STR_JIG,
-            JigFocus::Resources => STR_RESOURCE,
         }
     }
 }

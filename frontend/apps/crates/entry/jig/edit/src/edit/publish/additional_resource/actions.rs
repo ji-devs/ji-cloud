@@ -1,29 +1,30 @@
 use std::rc::Rc;
 
+use super::state::AdditionalResourceComponent;
 use dominator::clone;
 use shared::{
     api::{endpoints, ApiEndpoint},
+    domain::additional_resource::AssetIdResource,
     error::EmptyError,
 };
 use utils::{prelude::api_with_auth_empty, unwrap::UnwrapJiExt};
-
-use super::state::AdditionalResourceComponent;
 
 impl AdditionalResourceComponent {
     pub fn delete(self: &Rc<Self>) {
         let state = self;
         state.loader.load(clone!(state => async move {
-            let jig_id = state.publish_state.jig.id.0.to_string();
             let resource_id = state.additional_resource.id.0.to_string();
 
             let path = endpoints::additional_resource::Delete::PATH
-                .replace("{id}", &jig_id)
                 .replace("{additional_resource_id}", &resource_id);
 
-            let res = api_with_auth_empty::<EmptyError, ()>(
+            let req = AssetIdResource {
+                asset_id: Some(state.publish_state.asset.id()),
+            };
+            let res = api_with_auth_empty::<EmptyError, AssetIdResource>(
                 &path,
                 endpoints::additional_resource::Delete::METHOD,
-                None
+                Some(req)
             ).await;
 
             match res {
@@ -31,7 +32,7 @@ impl AdditionalResourceComponent {
                     todo!();
                 },
                 Ok(_) => {
-                    let mut additional_resources = state.publish_state.jig.additional_resources.lock_mut();
+                    let mut additional_resources = state.publish_state.asset.additional_resources().lock_mut();
                     let current_additional_resource_id = state.additional_resource.id;
                     let index = additional_resources.iter().position(move |additional_resource| {
                         additional_resource.id == current_additional_resource_id
