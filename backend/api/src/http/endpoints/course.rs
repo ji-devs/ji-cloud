@@ -23,8 +23,8 @@ use crate::{
     service::ServiceData,
 };
 
-const DEFAULT_PAGE_LIMIT: u32 = 20;
-const MAX_PAGE_LIMIT: u32 = 100;
+pub const DEFAULT_PAGE_LIMIT: u32 = 20;
+pub const MAX_PAGE_LIMIT: u32 = 100;
 
 /// Create a Course
 async fn create(

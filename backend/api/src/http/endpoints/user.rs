@@ -10,20 +10,24 @@ use core::{config::IMAGE_BODY_SIZE_LIMIT, settings::RuntimeSettings};
 use rand::thread_rng;
 use sendgrid::v3::Email;
 use serde::{Deserialize, Serialize};
-use shared::domain::user::{ResetEmailResponse, VerifyResetEmailRequest};
 use shared::{
     api::endpoints::{
         user::{
-            ChangePassword, Create, CreateColor, CreateFont, CreateProfile, Delete, DeleteColor,
-            DeleteFont, GetColors, GetFonts, PatchProfile, Profile, ResetEmail, ResetPassword,
-            UpdateColor, UpdateFont, UserLookup, VerifyEmail, VerifyResetEmail,
+            BrowseCourses, BrowseFollowers, BrowseFollowing, BrowsePublicUser, BrowseResources,
+            BrowseUserJigs, ChangePassword, Create, CreateColor, CreateFont, CreateProfile, Delete,
+            DeleteColor, DeleteFont, Follow, GetColors, GetFonts, GetPublicUser, PatchProfile,
+            Profile, ResetEmail, ResetPassword, Unfollow, UpdateColor, UpdateFont, UserLookup,
+            VerifyEmail, VerifyResetEmail,
         },
         ApiEndpoint,
     },
     domain::{
         image::{ImageId, ImageKind},
         session::{NewSessionResponse, OAuthProvider},
-        user::{ChangePasswordRequest, CreateProfileRequest, UserLookupQuery, VerifyEmailRequest},
+        user::{
+            ChangePasswordRequest, CreateProfileRequest, ResetEmailResponse, UserLookupQuery,
+            VerifyEmailRequest, VerifyResetEmailRequest,
+        },
     },
     media::MediaLibrary,
 };
@@ -43,6 +47,7 @@ use crate::{
 
 mod color;
 mod font;
+pub mod public_user;
 
 #[instrument(skip(txn, email_address, mail))]
 async fn send_verification_email(
@@ -1038,5 +1043,49 @@ pub fn configure(cfg: &mut ServiceConfig) {
         .route(
             DeleteFont::PATH,
             DeleteFont::METHOD.route().to(font::delete),
+        )
+        .route(
+            GetPublicUser::PATH,
+            GetPublicUser::METHOD.route().to(public_user::get),
+        )
+        .route(
+            BrowsePublicUser::PATH,
+            BrowsePublicUser::METHOD.route().to(public_user::browse),
+        )
+        .route(
+            BrowseUserJigs::PATH,
+            BrowseUserJigs::METHOD
+                .route()
+                .to(public_user::browse_user_jigs),
+        )
+        .route(
+            BrowseResources::PATH,
+            BrowseResources::METHOD
+                .route()
+                .to(public_user::browse_user_resources),
+        )
+        .route(
+            BrowseCourses::PATH,
+            BrowseCourses::METHOD
+                .route()
+                .to(public_user::browse_user_courses),
+        )
+        .route(
+            BrowseFollowers::PATH,
+            BrowseFollowers::METHOD
+                .route()
+                .to(public_user::browse_user_followers),
+        )
+        .route(
+            BrowseFollowing::PATH,
+            BrowseFollowing::METHOD
+                .route()
+                .to(public_user::browse_user_followings),
+        )
+        .route(Follow::PATH, Follow::METHOD.route().to(public_user::follow))
+        .route(Follow::PATH, Follow::METHOD.route().to(public_user::follow))
+        .route(
+            Unfollow::PATH,
+            Unfollow::METHOD.route().to(public_user::unfollow),
         );
 }

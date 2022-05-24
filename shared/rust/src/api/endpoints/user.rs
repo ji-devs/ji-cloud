@@ -16,6 +16,7 @@ use crate::{
 mod colors;
 mod fonts;
 mod profile;
+mod public_user;
 
 pub use colors::{
     Create as CreateColor, Delete as DeleteColor, Get as GetColors, Update as UpdateColor,
@@ -26,6 +27,12 @@ pub use fonts::{
 };
 
 pub use profile::{Create as CreateProfile, Get as Profile, Patch as PatchProfile};
+
+pub use public_user::{
+    BrowseFollowers, BrowsePublicUser, BrowseFollowing,
+    BrowseUserCourses as BrowseCourses, BrowseUserJigs, BrowseUserResources as BrowseResources,
+    Follow, Get as GetPublicUser, SearchPublicUser, Unfollow,
+};
 
 /// Create a new user.
 ///

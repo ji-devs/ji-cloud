@@ -11,6 +11,8 @@ use crate::domain::{
     meta::{AffiliationId, AgeRangeId, SubjectId},
 };
 
+pub mod public_user;
+
 /// Represents a user's permissions.
 ///
 /// Note: 5 was "ManageModule", and has been deleted, but cannot be replaced(?)
@@ -254,32 +256,6 @@ pub struct UserProfileExport {
     /// The user's country
     #[serde(default)]
     pub country: Option<String>,
-}
-
-/// A lite profile for other Users to view
-pub struct PublicUser {
-    /// User Id
-    pub id: Uuid,
-    /// Username of User
-    pub username: String,
-    /// First name of User
-    pub given_name: String,
-    /// Lastname of User
-    pub family_name: String,
-    /// Bio of User
-    pub bio: String,
-    /// Profile image of User
-    pub profile_image: Option<ImageId>,
-    /// Language of User
-    pub language: Option<String>, // only here if language_public is true
-    /// Organization of User
-    pub organization: Option<String>, // only here if organization_public is true
-    /// Persona of User
-    pub persona: Vec<String>, // only here if persona_public is true
-    /// Location of User
-    pub location: Option<serde_json::Value>, // only here if location_public is true
-    /// Badges associated of User
-    pub badges: Vec<BadgeId>,
 }
 
 fn serialize_list<S, T>(list: &Vec<T>, serializer: S) -> Result<S::Ok, S::Error>
