@@ -6,6 +6,7 @@ use std::convert::TryFrom;
 use uuid::Uuid;
 
 use crate::domain::{
+    badge::BadgeId,
     image::ImageId,
     meta::{AffiliationId, AgeRangeId, SubjectId},
 };
@@ -138,6 +139,30 @@ pub struct UserProfile {
     /// The user's timezone.
     pub timezone: chrono_tz::Tz,
 
+    /// Bio for User
+    pub bio: String,
+
+    /// Allow location to public
+    #[serde(default)]
+    pub location_public: bool,
+
+    /// Allow location to public
+    #[serde(default)]
+    pub organization_public: bool, // default to false
+
+    /// Allow location to public
+    #[serde(default)]
+    pub persona_public: bool, // default to false
+
+    /// Allow location to public
+    #[serde(default)]
+    pub language_public: bool, // default to false
+
+    /// User associated Badges
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub badges: Vec<BadgeId>,
+
     /// The scopes associated with the user.
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
@@ -229,6 +254,32 @@ pub struct UserProfileExport {
     /// The user's country
     #[serde(default)]
     pub country: Option<String>,
+}
+
+/// A lite profile for other Users to view
+pub struct PublicUser {
+    /// User Id
+    pub id: Uuid,
+    /// Username of User
+    pub username: String,
+    /// First name of User
+    pub given_name: String,
+    /// Lastname of User
+    pub family_name: String,
+    /// Bio of User
+    pub bio: String,
+    /// Profile image of User
+    pub profile_image: Option<ImageId>,
+    /// Language of User
+    pub language: Option<String>, // only here if language_public is true
+    /// Organization of User
+    pub organization: Option<String>, // only here if organization_public is true
+    /// Persona of User
+    pub persona: Vec<String>, // only here if persona_public is true
+    /// Location of User
+    pub location: Option<serde_json::Value>, // only here if location_public is true
+    /// Badges associated of User
+    pub badges: Vec<BadgeId>,
 }
 
 fn serialize_list<S, T>(list: &Vec<T>, serializer: S) -> Result<S::Ok, S::Error>
@@ -384,6 +435,11 @@ pub struct PatchProfileRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub profile_image: Option<Option<ImageId>>,
 
+    /// The user's bio
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub bio: Option<String>,
+
     // todo: create a struct that enforces format like `en_us`
     /// the language the user prefers to communicate with.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -403,6 +459,26 @@ pub struct PatchProfileRequest {
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub opt_into_edu_resources: Option<bool>,
+
+    /// Publicize Users organization
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub organization_public: Option<bool>,
+
+    /// Publicize user persona
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub persona_public: Option<bool>,
+
+    /// Publicize user lanuage
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub language_public: Option<bool>,
+
+    /// Publicize user location
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub location_public: Option<bool>,
 
     /// The organization that the user belongs to.
     ///

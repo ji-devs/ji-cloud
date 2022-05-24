@@ -126,6 +126,11 @@ async fn patch_profile() -> anyhow::Result<()> {
             given_name: Some("name".to_owned()),
             family_name: Some("nameson".to_owned()),
             profile_image: None, // FIXME
+            bio: Some("a test user".to_owned()),
+            language_public: Some(true),
+            organization_public: Some(true),
+            persona_public: Some(true),
+            location_public: Some(true),
             language: Some("en_US".to_owned()),
             locale: Some("en_US".to_owned()),
             timezone: None,

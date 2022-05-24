@@ -16,6 +16,11 @@ expression: body
   "opt_into_edu_resources": false,
   "over_18": true,
   "timezone": "US/Pacific",
+  "bio": "a test user",
+  "location_public": true,
+  "organization_public": true,
+  "persona_public": true,
+  "language_public": true,
   "scopes": [
     "Admin"
   ],
