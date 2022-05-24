@@ -22,6 +22,19 @@ use super::{
     jig::{JigId, JigResponse, LiteModule},
 };
 
+/// AssetType
+#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
+pub enum AssetType {
+    /// JIG
+    Jig,
+
+    /// Resource
+    Resource,
+
+    /// Course
+    Course,
+}
+
 /// AssetId
 #[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
