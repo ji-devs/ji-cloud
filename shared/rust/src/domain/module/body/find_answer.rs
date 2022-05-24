@@ -1,4 +1,4 @@
-use crate::domain::jig::module::{
+use crate::domain::module::{
     body::{
         Body, BodyConvert, BodyExt, ModeExt, StepExt, ThemeId,
         _groups::design::{BaseContent, Trace},
