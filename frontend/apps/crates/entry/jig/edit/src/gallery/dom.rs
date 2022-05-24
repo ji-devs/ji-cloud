@@ -1,5 +1,4 @@
 use super::state::*;
-use components::module::_common::thumbnail::{ModuleThumbnail, ThumbnailFallback};
 use components::page_header::state::PageLinks;
 use components::{page_footer, page_header};
 use dominator::{clone, html, Dom};
@@ -74,7 +73,7 @@ impl Gallery {
             })))
             .child(
                 html!("jig-gallery", {
-                    .property("jigFocus", state.focus.as_str())
+                    .property("assetDisplayName", state.asset_type_name())
                     .child(html!("jig-gallery-create", {
                         .property("slot", "create-jig")
                         .event(clone!(state => move |_: events::Click| {
@@ -141,7 +140,12 @@ impl Gallery {
                                             JigEditRoute::Landing
                                         ))))
                                     },
-                                    Asset::Course(_) => todo!(),
+                                    Asset::Course(course) => {
+                                        String::from(Route::Asset(AssetRoute::Edit(AssetEditRoute::Course(
+                                            course.id,
+                                            CourseEditRoute::Landing
+                                        ))))
+                                    },
                                 }
                             })
                             .property_signal("ages", state.age_ranges.signal_cloned().map(move|age_ranges| {
@@ -158,14 +162,14 @@ impl Gallery {
                                     },
                                 }
                             })
-                            .child(ModuleThumbnail::render(
-                                Rc::new(ModuleThumbnail {
-                                    asset_id: jig.id(),
-                                    module: jig.cover().cloned(),
-                                    fallback: ThumbnailFallback::Asset,
-                                }),
-                                Some("thumbnail")
-                            ))
+                            // .child(ModuleThumbnail::render(
+                            //     Rc::new(ModuleThumbnail {
+                            //         asset_id: jig.id(),
+                            //         module: jig.cover().cloned(),
+                            //         fallback: ThumbnailFallback::Asset,
+                            //     }),
+                            //     Some("thumbnail")
+                            // ))
                             .children(&mut [
                                 html!("menu-line", {
                                     .property("slot", "menu-content")

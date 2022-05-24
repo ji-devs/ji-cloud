@@ -11,10 +11,6 @@ import "@elements/core/images/ui";
 import { mediaUi } from "@utils/path";
 import { classMap } from "lit-html/directives/class-map";
 import { nothing } from "lit-html";
-import { JigFocus } from "@elements/module/_common/types";
-
-const STR_JIG = "JIG";
-const STR_RESOURCE = "Resource";
 
 const STR_CREATE_JIG = "Create a New ";
 const STR_TEMPLATE_PARAGRAPH = "Create a new JIG (Jewish Interactive Game). Choose the activities designed to fit your teaching goals and you'll have a complete interactive lesson in just a snap!";
@@ -185,18 +181,10 @@ export class _ extends LitElement {
     title: string = "";
 
     @property()
-    jigFocus: JigFocus = "modules";
+    assetDisplayName: string = "";
 
     @state()
     private allTemplatesVisible = false;
-
-    private focusString() {
-        if (this.jigFocus === "resources") {
-            return STR_RESOURCE;
-        } else {
-            return STR_JIG;
-        }
-    }
 
     render() {
         return html`
@@ -212,7 +200,7 @@ export class _ extends LitElement {
                 <div class="width-holder">
                     <div class="text-side">
                         <h1 class="create-jig-header">
-                            ${STR_CREATE_JIG + this.focusString()}
+                            ${STR_CREATE_JIG + this.assetDisplayName}
                         </h1>
                         <p class="template-paragraph">
                             ${STR_TEMPLATE_PARAGRAPH}
@@ -230,7 +218,7 @@ export class _ extends LitElement {
                             </div>
                         </div>
                         <!-- ${
-                            this.jigFocus === "resources" ? nothing : html`
+                            this.assetDisplayName === "jig" ? html`
                                 <div class="see-all-templates-button">
                                     <button-rect
                                         kind="text"
@@ -250,7 +238,7 @@ export class _ extends LitElement {
                                         </span>
                                     </button-rect>
                                 </div>
-                            `
+                            ` : nothing
                         } -->
                     </div>
                 </div>
@@ -272,7 +260,7 @@ export class _ extends LitElement {
                     <div class="recent-top-line">
                         <h2 class="recent-header">
                             ${STR_RECENT_1}
-                            ${`${this.focusString()}${STR_RECENT_2}`}
+                            ${`${this.assetDisplayName}${STR_RECENT_2}`}
                         </h2>
                         <slot class="filters" name="filters"></slot>
                         <slot class="search-input" name="search-input"></slot>

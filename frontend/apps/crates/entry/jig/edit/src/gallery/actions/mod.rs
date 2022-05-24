@@ -1,11 +1,12 @@
 use super::state::*;
 use dominator::clone;
 use futures::join;
-use shared::{api::endpoints, domain::asset::AssetId};
+use shared::{api::endpoints, domain::{asset::{AssetId, AssetType}, jig::JigFocus}};
 use std::rc::Rc;
 use utils::prelude::*;
 
 mod jig_actions;
+mod course_actions;
 
 impl Gallery {
     pub fn load_data(self: &Rc<Self>) {
@@ -26,17 +27,22 @@ impl Gallery {
             VisibleAssets::Draft => Some(false),
         };
 
-        match jig_actions::load_jigs(state, is_published).await {
-            Ok(resp) => {
+        let res = match state.asset_type {
+            AssetType::Jig => jig_actions::load_jigs(state, is_published).await,
+            AssetType::Resource => jig_actions::load_jigs(state, is_published).await,
+            AssetType::Course => course_actions::load_courses(state, is_published).await,
+        };
+
+        match res {
+            Ok((mut assets, total_jig_count)) => {
                 // Update the total count and increment the next page so that a future call will
                 // call the correct page.
-                state.total_asset_count.set(Some(resp.total_jig_count));
+                state.total_asset_count.set(Some(total_jig_count));
                 *state.next_page.lock_mut() += 1;
 
                 // Append results to the current list.
                 let mut new_list = state.assets.lock_ref().to_vec();
-                let mut jigs = resp.jigs.into_iter().map(|jig| jig.into()).collect();
-                new_list.append(&mut jigs);
+                new_list.append(&mut assets);
 
                 // Update the list with the new list.
                 state.assets.lock_mut().replace_cloned(new_list);
@@ -66,9 +72,13 @@ impl Gallery {
                 VisibleAssets::Draft => Some(false),
             };
 
-            let assets = jig_actions::search_jigs(q, is_published)
-                .await
-                .unwrap_ji();
+            let assets = match state.asset_type {
+                AssetType::Jig => jig_actions::search_jigs(q, is_published).await,
+                AssetType::Resource => jig_actions::search_jigs(q, is_published).await,
+                AssetType::Course => course_actions::search_courses(q, is_published).await,
+            };
+
+            let assets = assets.unwrap_ji();
             state.assets.lock_mut().replace_cloned(assets);
         }));
     }
@@ -83,7 +93,11 @@ impl Gallery {
     pub fn create_asset(self: &Rc<Self>) {
         let state = Rc::clone(self);
         state.loader.load(clone!(state => async move {
-            jig_actions::create_jig(state.focus).await;
+            match state.asset_type {
+                AssetType::Jig => jig_actions::create_jig(JigFocus::Modules).await,
+                AssetType::Resource => jig_actions::create_jig(JigFocus::Resources).await,
+                AssetType::Course => course_actions::create_course().await,
+            };
         }));
     }
 
@@ -92,7 +106,7 @@ impl Gallery {
         state.loader.load(clone!(state => async move {
             let asset = match asset_id {
                 AssetId::JigId(jig_id) => jig_actions::copy_jig(jig_id).await,
-                AssetId::CourseId(_) => todo!(),
+                AssetId::CourseId(course_id) => course_actions::copy_course(course_id).await,
             };
             state.assets.lock_mut().push_cloned(asset.unwrap_ji());
         }));
@@ -105,7 +119,9 @@ impl Gallery {
                 AssetId::JigId(jig_id) => {
                     jig_actions::delete_jig(jig_id).await
                 },
-                AssetId::CourseId(_) => todo!(),
+                AssetId::CourseId(course_id) => {
+                    course_actions::delete_course(course_id).await
+                },
             };
 
             match result {

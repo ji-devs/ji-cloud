@@ -3,7 +3,7 @@ use std::rc::Rc;
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::{signal::Mutable, signal_vec::MutableVec};
 use shared::domain::{
-    asset::{Asset, AssetId},
+    asset::{Asset, AssetId, AssetType},
     jig::JigFocus,
     meta::AgeRange,
 };
@@ -19,6 +19,10 @@ pub const TEMPLATE_KINDS: &[&str] = &[
     "parsha",
 ];
 
+const STR_JIG: &str = "JIG";
+const STR_RESOURCE: &str = "Resource";
+const STR_COURSE: &str = "Course";
+
 #[derive(Debug, Clone, PartialEq, EnumIter, Display, EnumString)]
 pub enum VisibleAssets {
     All,
@@ -27,7 +31,7 @@ pub enum VisibleAssets {
 }
 
 pub struct Gallery {
-    pub focus: JigFocus,
+    pub asset_type: AssetType,
     pub loader: AsyncLoader,
     pub assets: MutableVec<Asset>,
     /// Total assets that can be fetched
@@ -40,9 +44,9 @@ pub struct Gallery {
 }
 
 impl Gallery {
-    pub fn new(focus: JigFocus) -> Rc<Self> {
+    pub fn new(asset_type: AssetType) -> Rc<Self> {
         Rc::new(Self {
-            focus,
+            asset_type,
             loader: AsyncLoader::new(),
             assets: MutableVec::new(),
             total_asset_count: Mutable::new(None),
@@ -51,5 +55,22 @@ impl Gallery {
             age_ranges: Mutable::new(vec![]),
             confirm_delete: Mutable::new(None),
         })
+    }
+
+    pub(super) fn get_jig_focus(&self) -> JigFocus {
+        match self.asset_type {
+            AssetType::Jig => JigFocus::Modules,
+            AssetType::Resource => JigFocus::Resources,
+            _ => panic!("Not a jig or resource"),
+        }
+    }
+
+    /// a displayable string for the asset type
+    pub(super) fn asset_type_name(&self) -> &'static str {
+        match &self.asset_type {
+            AssetType::Jig => STR_JIG,
+            AssetType::Resource => STR_RESOURCE,
+            AssetType::Course => STR_COURSE,
+        }
     }
 }

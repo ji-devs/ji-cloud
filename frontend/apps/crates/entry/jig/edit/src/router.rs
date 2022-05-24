@@ -1,5 +1,5 @@
 use components::overlay::container::OverlayContainer;
-use shared::domain::jig::JigFocus;
+use shared::domain::asset::AssetType;
 use utils::routes::{AssetEditRoute, AssetRoute, Route};
 
 use crate::{edit::dom::EditPage, gallery::state::Gallery};
@@ -20,8 +20,9 @@ impl Router {
     fn dom_signal() -> impl Signal<Item = Option<Dom>> {
         Self::signal().map(|route| match route {
             Route::Asset(route) => match route {
-                AssetRoute::JigGallery => Some(Gallery::new(JigFocus::Modules).render()),
-                AssetRoute::ResourceGallery => Some(Gallery::new(JigFocus::Resources).render()),
+                AssetRoute::JigGallery => Some(Gallery::new(AssetType::Jig).render()),
+                AssetRoute::ResourceGallery => Some(Gallery::new(AssetType::Resource).render()),
+                AssetRoute::CourseGallery => Some(Gallery::new(AssetType::Course).render()),
                 AssetRoute::Edit(AssetEditRoute::Jig(jig_id, jig_focus, route)) => {
                     Some(EditPage::render(jig_id, jig_focus, route))
                 }

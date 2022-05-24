@@ -19,12 +19,12 @@ use utils::prelude::*;
 pub async fn load_jigs(
     state: &Rc<Gallery>,
     is_published: Option<bool>,
-) -> Result<JigBrowseResponse, ()> {
+) -> Result<(Vec<Asset>, u64), ()> {
     let req = JigBrowseQuery {
         page: Some(*state.next_page.lock_ref()),
         is_published,
         author_id: Some(UserOrMe::Me),
-        jig_focus: Some(state.focus),
+        jig_focus: Some(state.get_jig_focus()),
         draft_or_live: Some(DraftOrLive::Draft),
         ..Default::default()
     };
@@ -34,8 +34,12 @@ pub async fn load_jigs(
         endpoints::jig::Browse::METHOD,
         Some(req),
     )
-    .await
-    .map_err(|_| ())
+        .await
+        .map(|res| {
+            let assets = res.jigs.into_iter().map(|jig| jig.into()).collect();
+            (assets, res.total_jig_count)
+        })
+        .map_err(|_| ())
 }
 
 pub async fn search_jigs(q: String, is_published: Option<bool>) -> Result<Vec<Asset>, ()> {
