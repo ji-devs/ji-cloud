@@ -149,6 +149,7 @@ impl ModuleBody {
             Self::Poster(body) => serde_json::to_value(body)?,
             Self::TappingBoard(body) => serde_json::to_value(body)?,
             Self::Video(body) => serde_json::to_value(body)?,
+            Self::FindAnswer(body) => serde_json::to_value(body)?,
             Self::Legacy(body) => serde_json::to_value(body)?,
         };
 
@@ -171,6 +172,7 @@ impl ModuleBody {
             ModuleKind::Poster => Ok(Self::Poster(serde_json::from_value(contents)?)),
             ModuleKind::TappingBoard => Ok(Self::TappingBoard(serde_json::from_value(contents)?)),
             ModuleKind::Video => Ok(Self::Video(serde_json::from_value(contents)?)),
+            ModuleKind::FindAnswer => Ok(Self::FindAnswer(serde_json::from_value(contents)?)),
             ModuleKind::Legacy => Ok(Self::Legacy(serde_json::from_value(contents)?)),
 
             _ => anyhow::bail!("Unimplemented response kind"),

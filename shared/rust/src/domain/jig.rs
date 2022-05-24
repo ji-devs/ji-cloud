@@ -4,9 +4,6 @@ pub mod curation;
 pub mod report;
 pub use report::{JigReport, ReportId};
 
-pub mod additional_resource;
-pub use additional_resource::{AdditionalResource, AdditionalResourceId};
-
 pub mod player;
 pub use player::{JigPlayerSettings, TextDirection};
 
