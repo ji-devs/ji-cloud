@@ -35,6 +35,23 @@ pub enum AssetType {
     Course,
 }
 
+impl AssetType {
+    /// check if jig
+    pub fn is_jig(&self) -> bool {
+        matches!(self, Self::Jig)
+    }
+
+    /// check if resource
+    pub fn is_resource(&self) -> bool {
+        matches!(self, Self::Resource)
+    }
+
+    /// check if course
+    pub fn is_course(&self) -> bool {
+        matches!(self, Self::Course)
+    }
+}
+
 /// AssetId
 #[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -81,6 +98,16 @@ impl AssetId {
             Self::JigId(jig_id) => &jig_id.0,
             Self::CourseId(course_id) => &course_id.0,
         }
+    }
+
+    /// check if jig
+    pub fn is_jig_id(&self) -> bool {
+        matches!(self, Self::JigId(_))
+    }
+
+    /// check if course
+    pub fn is_course_id(&self) -> bool {
+        matches!(self, Self::CourseId(_))
     }
 }
 
