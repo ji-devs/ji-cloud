@@ -5,7 +5,7 @@ use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
 use utils::events;
 
-use crate::player::sidebar::actions::load_ages;
+use crate::jig::sidebar::actions::load_ages;
 
 use super::super::state::can_load_liked_status;
 use super::state::State;

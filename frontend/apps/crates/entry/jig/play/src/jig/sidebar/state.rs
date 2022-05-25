@@ -4,11 +4,11 @@ use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::Mutable;
 use shared::domain::{jig::report::JigReportType, meta::AgeRange};
 
-use super::super::state::State as PlayerState;
+use super::super::state::JigPlayer;
 
 pub struct State {
     pub sidebar_open: Mutable<bool>,
-    pub player_state: Rc<PlayerState>,
+    pub player_state: Rc<JigPlayer>,
     pub info_popup_active: Mutable<bool>,
     pub report_status: Mutable<ReportStatus>,
     pub report_type: Mutable<Option<JigReportType>>,
@@ -17,7 +17,7 @@ pub struct State {
 }
 
 impl State {
-    pub fn new(player_state: Rc<PlayerState>) -> Self {
+    pub fn new(player_state: Rc<JigPlayer>) -> Self {
         Self {
             info_popup_active: Mutable::new(false),
             sidebar_open: Mutable::new(false),

@@ -9,7 +9,7 @@ use web_sys::HtmlIFrameElement;
 
 use super::timer::Timer;
 
-pub struct State {
+pub struct JigPlayer {
     pub jig_id: JigId,
     pub jig: Mutable<Option<JigResponse>>,
     /// Loaded after [`State`] is initialized necessitating an Option
@@ -30,13 +30,13 @@ pub struct State {
     pub bg_audio_playing: Mutable<bool>,
 }
 
-impl State {
+impl JigPlayer {
     pub fn new(
         jig_id: JigId,
         _module_id: Option<ModuleId>,
         player_options: JigPlayerOptions,
-    ) -> Self {
-        Self {
+    ) -> Rc<Self> {
+        Rc::new(Self {
             jig_id,
             jig: Mutable::new(None),
             jig_liked: Mutable::new(None),
@@ -53,7 +53,7 @@ impl State {
             player_options,
             bg_audio_handle: Rc::new(RefCell::new(None)),
             bg_audio_playing: Mutable::new(true),
-        }
+        })
     }
 }
 

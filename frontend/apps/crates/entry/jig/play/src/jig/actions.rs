@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use super::{
-    state::{can_load_liked_status, State},
+    state::{can_load_liked_status, JigPlayer},
     timer::Timer,
 };
 use awsm_web::audio::{AudioClipOptions, AudioHandle};
@@ -26,7 +26,7 @@ use wasm_bindgen_futures::spawn_local;
 
 const TRACK_MODULE_COUNT: usize = 3;
 
-pub fn toggle_background_audio(state: Rc<State>) {
+pub fn toggle_background_audio(state: Rc<JigPlayer>) {
     let bg_audio_handle = state.bg_audio_handle.borrow();
 
     match &*bg_audio_handle {
@@ -41,17 +41,17 @@ pub fn toggle_background_audio(state: Rc<State>) {
     };
 }
 
-pub fn play_background_audio(state: &State, audio_handle: &AudioHandle) {
+pub fn play_background_audio(state: &JigPlayer, audio_handle: &AudioHandle) {
     audio_handle.play();
     state.bg_audio_playing.set(true);
 }
 
-pub fn pause_background_audio(state: &State, audio_handle: &AudioHandle) {
+pub fn pause_background_audio(state: &JigPlayer, audio_handle: &AudioHandle) {
     audio_handle.pause();
     state.bg_audio_playing.set(false);
 }
 
-pub fn navigate_forward(state: Rc<State>) {
+pub fn navigate_forward(state: Rc<JigPlayer>) {
     let active_module = state.active_module.get();
 
     let module_count = (&*state.jig.lock_ref())
@@ -95,20 +95,20 @@ pub fn navigate_forward(state: Rc<State>) {
     }
 }
 
-pub fn navigate_back(state: Rc<State>) {
+pub fn navigate_back(state: Rc<JigPlayer>) {
     let active_module = state.active_module.get();
     if active_module != 0 {
         navigate_to_index(state, active_module - 1);
     }
 }
 
-pub fn navigate_to_index(state: Rc<State>, index: usize) {
+pub fn navigate_to_index(state: Rc<JigPlayer>, index: usize) {
     state.active_module.set(index);
     state.timer.set(None);
     state.done.set(false);
 }
 
-pub fn navigate_to_module(state: Rc<State>, module_id: &ModuleId) {
+pub fn navigate_to_module(state: Rc<JigPlayer>, module_id: &ModuleId) {
     if let Some(jig) = &*state.jig.lock_ref() {
         let index = jig
             .jig_data
@@ -122,7 +122,7 @@ pub fn navigate_to_module(state: Rc<State>, module_id: &ModuleId) {
     }
 }
 
-pub fn load_jig(state: Rc<State>) {
+pub fn load_jig(state: Rc<JigPlayer>) {
     state.loader.load(clone!(state => async move {
         let (jig, jig_liked) = match state.player_options.draft {
             false => {
@@ -171,7 +171,7 @@ pub fn load_jig(state: Rc<State>) {
     }));
 }
 
-fn init_audio(state: &State, background_audio: AudioBackground) {
+fn init_audio(state: &JigPlayer, background_audio: AudioBackground) {
     let handle = AUDIO_MIXER.with(|mixer| {
         mixer.add_source(
             background_audio.as_source(),
@@ -188,7 +188,7 @@ fn init_audio(state: &State, background_audio: AudioBackground) {
     state.bg_audio_playing.set(true);
 }
 
-pub fn start_timer(state: Rc<State>, time: u32) {
+pub fn start_timer(state: Rc<JigPlayer>, time: u32) {
     let timer = Timer::new(time);
 
     spawn_local(timer.time.signal().for_each(clone!(state => move|time| {
@@ -201,7 +201,7 @@ pub fn start_timer(state: Rc<State>, time: u32) {
     state.timer.set(Some(timer));
 }
 
-pub fn toggle_paused(state: Rc<State>) {
+pub fn toggle_paused(state: Rc<JigPlayer>) {
     let paused = !state.paused.get();
 
     // set state to paused
@@ -223,7 +223,7 @@ pub fn toggle_paused(state: Rc<State>) {
     sent_iframe_message(Rc::clone(&state), iframe_message);
 }
 
-pub fn sent_iframe_message(state: Rc<State>, data: JigToModulePlayerMessage) {
+pub fn sent_iframe_message(state: Rc<JigPlayer>, data: JigToModulePlayerMessage) {
     let iframe_origin: String = Route::Home(HomeRoute::Home).into();
     let iframe_origin = unsafe {
         SETTINGS
@@ -244,7 +244,7 @@ pub fn sent_iframe_message(state: Rc<State>, data: JigToModulePlayerMessage) {
     };
 }
 
-pub fn on_iframe_message(state: Rc<State>, message: ModuleToJigPlayerMessage) {
+pub fn on_iframe_message(state: Rc<JigPlayer>, message: ModuleToJigPlayerMessage) {
     match message {
         ModuleToJigPlayerMessage::AddPoints(amount) => {
             let mut points = state.points.lock_mut();
@@ -268,7 +268,7 @@ pub fn on_iframe_message(state: Rc<State>, message: ModuleToJigPlayerMessage) {
     };
 }
 
-fn start_player(state: Rc<State>, time: Option<u32>) {
+fn start_player(state: Rc<JigPlayer>, time: Option<u32>) {
     // If bg audio is not yet set (i.e. first module to be ready) initialize the audio once the jig is started
     if state.bg_audio_handle.borrow().is_none() {
         if let Some(jig) = state.jig.get_cloned() {
@@ -290,7 +290,7 @@ fn start_player(state: Rc<State>, time: Option<u32>) {
     }
 }
 
-pub fn reload_iframe(state: Rc<State>) {
+pub fn reload_iframe(state: Rc<JigPlayer>) {
     match &*state.iframe.borrow() {
         None => {}
         Some(iframe) => {

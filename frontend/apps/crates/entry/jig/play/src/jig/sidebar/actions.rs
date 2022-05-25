@@ -15,7 +15,7 @@ use shared::{
 };
 use utils::prelude::{api_no_auth, api_with_auth};
 
-use crate::player::sidebar::state::ReportStatus;
+use crate::jig::sidebar::state::ReportStatus;
 
 use super::state::State;
 
