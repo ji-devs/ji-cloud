@@ -179,12 +179,6 @@ pub enum CourseEditRoute {
 }
 
 #[derive(Debug, Clone)]
-pub enum JigPlayMode {
-    Producer,
-    Audience,
-}
-
-#[derive(Debug, Clone)]
 pub enum ModuleRoute {
     Edit(ModuleKind, JigId, ModuleId),
     Play(ModuleKind, JigId, ModuleId),
