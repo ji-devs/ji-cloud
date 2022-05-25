@@ -1,11 +1,13 @@
 use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
-use shared::domain::jig::JigId;
+use shared::domain::jig::{JigId, JigFocus};
 use utils::{
     events,
     jig::JigPlayerOptions,
     routes::{AssetRoute, Route},
 };
+
+use crate::edit::state::AssetPlayerSettings;
 
 use super::{super::state::State as JigEditState, actions, state::*};
 use std::rc::Rc;
@@ -15,17 +17,16 @@ pub fn render(jig_id: JigId, jig_edit_state: Rc<JigEditState>) -> Dom {
 
     html!("post-publish", {
         .property("slot", "main")
-        .property("jigFocus", state.jig_edit_state.jig_focus.as_str())
         .apply(clone!(state => move |dom| {
             match state.jig_edit_state.jig_focus {
-                shared::domain::jig::JigFocus::Modules => {
-                    dom.children(
-                        render_modules_focused_actions(&state)
-                    )
-                },
-                shared::domain::jig::JigFocus::Resources => {
+                JigFocus::Resources => {
                     dom.children(
                         render_resources_focused_actions(&state)
+                    )
+                },
+                _ => {
+                    dom.children(
+                        render_modules_focused_actions(&state)
                     )
                 },
             }
@@ -52,7 +53,8 @@ fn render_modules_focused_actions(state: &Rc<State>) -> Vec<Dom> {
             .property("kind", "play-jig")
             .property("slot", "actions")
             .event(clone!(state => move |_: events::Click| {
-                state.jig_edit_state.play_jig.set(Some(JigPlayerOptions::default()));
+                let settings = AssetPlayerSettings::Jig(JigPlayerOptions::default());
+                state.jig_edit_state.play_jig.set(Some(settings));
             }))
         }),
     ]

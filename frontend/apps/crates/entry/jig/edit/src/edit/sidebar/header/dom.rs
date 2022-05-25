@@ -4,7 +4,7 @@ use shared::domain::{asset::Asset, jig::JigFocus};
 use std::rc::Rc;
 use web_sys::HtmlInputElement;
 
-use crate::edit::sidebar::{jig::actions::get_player_settings, state::SidebarSetting};
+use crate::edit::{sidebar::{jig::actions::get_player_settings, state::SidebarSetting}, state::AssetPlayerSettings};
 
 use super::super::{actions as sidebar_actions, jig::settings, state::State as SidebarState};
 use utils::prelude::*;
@@ -71,6 +71,7 @@ impl HeaderDom {
                         match &sidebar_state.settings {
                             SidebarSetting::Jig(jig) => {
                                 let settings = get_player_settings(Rc::clone(jig));
+                                let settings = AssetPlayerSettings::Jig(settings);
                                 sidebar_state.jig_edit_state.play_jig.set(Some(settings));
                             },
                         }

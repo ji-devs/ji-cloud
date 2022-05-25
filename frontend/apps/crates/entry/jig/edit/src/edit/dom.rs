@@ -3,15 +3,12 @@ use std::rc::Rc;
 use super::{
     super::edit::publish::Publish, iframe::dom::IframeDom,
     post_publish::dom::render as render_post_publish, selection::dom::SelectionDom,
-    sidebar::dom::SidebarDom, state::State,
+    sidebar::dom::SidebarDom, state::{State, AssetPlayerSettings},
 };
-use components::{
-    overlay::handle::OverlayHandle,
-    player_popup::{PlayerPopup, PreviewPopupCallbacks},
-};
+use components::{overlay::handle::OverlayHandle, player_popup::{PlayerPopup, PreviewPopupCallbacks}};
 use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
-use shared::domain::jig::{JigFocus, JigId};
+use shared::domain::{jig::JigFocus, asset::AssetId};
 use utils::prelude::*;
 
 const STR_YT_VIDEO_ID: &str = "x4FYtTpQAt0";
@@ -19,8 +16,8 @@ const STR_YT_VIDEO_ID: &str = "x4FYtTpQAt0";
 pub struct EditPage {}
 
 impl EditPage {
-    pub fn render(jig_id: JigId, jig_focus: JigFocus, route: JigEditRoute) -> Dom {
-        let state = Rc::new(State::new(jig_id, jig_focus, route));
+    pub fn render(asset_id: AssetId, jig_focus: JigFocus, route: JigEditRoute) -> Dom {
+        let state = Rc::new(State::new(asset_id, jig_focus, route));
 
         html!("empty-fragment", {
             .child(html!("jig-edit-page", {
@@ -43,28 +40,26 @@ impl EditPage {
                     async {}
                 })))
                 */
-                .apply(|dom| {
-                    match jig_focus {
-                        JigFocus::Modules => dom.child(SidebarDom::render(jig_id, state.clone())),
-                        JigFocus::Resources => dom,
-                    }
+                .apply_if(!state.jig_focus.is_resources(), |dom| {
+                    dom.child(SidebarDom::render(*asset_id.unwrap_jig(), state.clone()))
                 })
-                .child_signal(state.route.signal_cloned().map(clone!(state, jig_id => move |route| {
+                .child_signal(state.route.signal_cloned().map(clone!(state, asset_id => move |route| {
                     match route {
                         JigEditRoute::Landing => {
-                            match jig_focus {
-                                JigFocus::Modules => Some(SelectionDom::render(state.clone())),
-                                JigFocus::Resources => Some(Publish::render(Rc::clone(&state))),
+                            if state.jig_focus.is_resources() {
+                                Some(Publish::render(Rc::clone(&state)))
+                            } else {
+                                Some(SelectionDom::render(state.clone()))
                             }
                         },
                         JigEditRoute::Module(module_id) => {
-                            Some(IframeDom::render(jig_id, module_id))
+                            Some(IframeDom::render(*asset_id.unwrap_jig(), module_id))
                         },
                         JigEditRoute::Publish => {
                             Some(Publish::render(Rc::clone(&state)))
                         }
                         JigEditRoute::PostPublish => {
-                            Some(render_post_publish(jig_id, Rc::clone(&state)))
+                            Some(render_post_publish(*asset_id.unwrap_jig(), Rc::clone(&state)))
                         }
                     }
                 })))
@@ -89,14 +84,19 @@ impl EditPage {
             }))
             .child_signal(state.play_jig.signal_cloned().map(clone!(state => move|play_jig| {
                 play_jig.map(|settings| {
-                    let close = clone!(state => move || {
-                        state.play_jig.set(None);
-                    });
-                    PlayerPopup::new(
-                        jig_id,
-                        settings,
-                        PreviewPopupCallbacks::new(close)
-                    ).render(None)
+                    match settings {
+                        AssetPlayerSettings::Jig(settings) => {
+                            let close = clone!(state => move || {
+                                state.play_jig.set(None);
+                            });
+                            PlayerPopup::new(
+                                *asset_id.unwrap_jig(),
+                                settings,
+                                PreviewPopupCallbacks::new(close)
+                            ).render(None)
+                        },
+                        // AssetPlayerSettings::Course => todo!(),
+                    }
                 })
             })))
         })
