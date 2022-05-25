@@ -153,7 +153,7 @@ pub enum AssetRoute {
     /// Here for compatibility reasons, can probably go away in a few months
     // RedirectToJig(String),
     Edit(AssetEditRoute),
-    Play(JigId, Option<ModuleId>, JigPlayerOptions),
+    Play(AssetPlayRoute),
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -176,6 +176,12 @@ pub enum CourseEditRoute {
     Cover,
     Publish,
     PostPublish,
+}
+
+#[derive(Debug, Clone)]
+pub enum AssetPlayRoute {
+    Jig(JigId, Option<ModuleId>, JigPlayerOptions),
+    Course(CourseId),
 }
 
 #[derive(Debug, Clone)]
@@ -407,30 +413,36 @@ impl Route {
             ["asset", "play", "jig", "debug"] => {
                 let search: JigPlayerOptions = serde_qs::from_str(&params_string).unwrap_ji();
 
-                Self::Asset(AssetRoute::Play(
+                Self::Asset(AssetRoute::Play(AssetPlayRoute::Jig(
                     JigId(Uuid::from_u128(0)),
                     Some(ModuleId(Uuid::from_u128(0))),
                     search,
-                ))
+                )))
             }
             ["asset", "play", "jig", jig_id] => {
                 let search: JigPlayerOptions = serde_qs::from_str(&params_string).unwrap_ji();
 
-                Self::Asset(AssetRoute::Play(
+                Self::Asset(AssetRoute::Play(AssetPlayRoute::Jig(
                     JigId(Uuid::from_str(jig_id).unwrap_ji()),
                     None,
                     search,
-                ))
+                )))
             }
 
             ["asset", "play", "jig", jig_id, module_id] => {
                 let search: JigPlayerOptions = serde_qs::from_str(&params_string).unwrap_ji();
 
-                Self::Asset(AssetRoute::Play(
+                Self::Asset(AssetRoute::Play(AssetPlayRoute::Jig(
                     JigId(Uuid::from_str(jig_id).unwrap_ji()),
                     Some(ModuleId(Uuid::from_str(module_id).unwrap_ji())),
                     search,
-                ))
+                )))
+            }
+
+            ["asset", "play", "course", course_id] => {
+                Self::Asset(AssetRoute::Play(AssetPlayRoute::Course(
+                    CourseId(Uuid::from_str(course_id).unwrap_ji())
+                )))
             }
 
             ["jig", play_or_edit] | ["jig", play_or_edit, _] | ["jig", play_or_edit, _, _] => {
@@ -601,14 +613,21 @@ impl From<&Route> for String {
                         }
                     },
                 },
-                AssetRoute::Play(jig_id, module_id, player_settings) => {
-                    let query = serde_qs::to_string(&player_settings).unwrap_ji();
-                    if let Some(module_id) = module_id {
-                        format!("/asset/play/jig/{}/{}?{}", jig_id.0, module_id.0, query)
-                    } else {
-                        format!("/asset/play/jig/{}?{}", jig_id.0, query)
+                AssetRoute::Play(route) => {
+                    match route {
+                        AssetPlayRoute::Jig(jig_id, module_id, player_settings) => {
+                            let query = serde_qs::to_string(&player_settings).unwrap_ji();
+                            if let Some(module_id) = module_id {
+                                format!("/asset/play/jig/{}/{}?{}", jig_id.0, module_id.0, query)
+                            } else {
+                                format!("/asset/play/jig/{}?{}", jig_id.0, query)
+                            }
+                        },
+                        AssetPlayRoute::Course(course_id) => {
+                            format!("/asset/play/course/{}", course_id.0)
+                        },
                     }
-                }
+                },
             },
             Route::Module(route) => match route {
                 ModuleRoute::Edit(kind, jig_id, module_id) => format!(

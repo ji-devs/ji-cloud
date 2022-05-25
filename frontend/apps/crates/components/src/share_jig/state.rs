@@ -42,14 +42,14 @@ impl ShareJig {
     }
 
     pub fn jig_link(&self, is_student: bool) -> String {
-        let url = Route::Asset(AssetRoute::Play(
+        let url = Route::Asset(AssetRoute::Play(AssetPlayRoute::Jig(
             self.jig_id,
             None,
             JigPlayerOptions {
                 is_student,
                 ..Default::default()
             },
-        ))
+        )))
         .to_string();
         let origin = web_sys::window()
             .unwrap_ji()

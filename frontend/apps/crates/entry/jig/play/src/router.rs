@@ -17,9 +17,16 @@ impl Router {
 
     fn dom_signal() -> impl Signal<Item = Option<Dom>> {
         Self::signal().map(|route| match route {
-            Route::Asset(AssetRoute::Play(jig_id, module_id, player_options)) => Some(
-                JigPlayer::new(jig_id, module_id, player_options).render(),
-            ),
+            Route::Asset(AssetRoute::Play(route)) => {
+                Some(match route {
+                    utils::routes::AssetPlayRoute::Jig(jig_id, module_id, player_options) => {
+                        JigPlayer::new(jig_id, module_id, player_options).render()
+                    },
+                    utils::routes::AssetPlayRoute::Course(_) => {
+                        todo!()
+                    },
+                })
+            },
             _ => None,
         })
     }
