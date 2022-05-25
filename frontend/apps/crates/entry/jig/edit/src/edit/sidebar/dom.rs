@@ -10,6 +10,7 @@ use super::{
     dragging::{actions as drag_actions, dom::DraggingDom},
     header::dom::HeaderDom,
     jig::actions as jig_actions,
+    course::actions as course_actions,
     spot::dom::ItemDom,
     state::*,
 };
@@ -18,8 +19,7 @@ use futures_signals::{
     signal::{Mutable, SignalExt},
     signal_vec::SignalVecExt,
 };
-use shared::domain::jig::{JigId, JigResponse};
-use std::cell::RefCell;
+use shared::domain::{jig::JigId, asset::AssetId, course::CourseId};
 use std::rc::Rc;
 use uuid::Uuid;
 
@@ -31,36 +31,40 @@ use utils::{
 pub struct SidebarDom {}
 
 impl SidebarDom {
-    pub fn render(jig_id: JigId, jig_edit_state: Rc<JigEditState>) -> Dom {
-        let is_loading = Mutable::new(true);
-        let jig = Rc::new(RefCell::new(None));
+    pub fn render(asset_id: AssetId, jig_edit_state: Rc<JigEditState>) -> Dom {
+        let asset = Mutable::new(None);
 
         html!("empty-fragment", {
             .property("slot", "sidebar")
-            .future(clone!(is_loading, jig, jig_id => async move {
-                if jig_id == JigId(Uuid::from_u128(0)) {
-                    *jig.borrow_mut() = Some(debug::get_jig());
-                } else {
-                    jig_actions::load_jig(jig_id, jig.clone()).await;
-                }
-
-                is_loading.set_neq(false);
-
+            .future(clone!(asset, asset_id => async move {
+                match asset_id {
+                    AssetId::JigId(jig_id) => {
+                        if jig_id == JigId(Uuid::from_u128(0)) {
+                            asset.set(Some(debug::get_jig().into()));
+                        } else {
+                            jig_actions::load_jig(jig_id, asset.clone()).await;
+                        }
+                    },
+                    AssetId::CourseId(course_id) => {
+                        if course_id == CourseId(Uuid::from_u128(0)) {
+                            // asset.set(Some(debug::get_course().into()));
+                            todo!()
+                        } else {
+                            course_actions::load_course(course_id, asset.clone()).await;
+                        }
+                    },
+                };
             }))
-            .child_signal(is_loading.signal().map(clone!(jig, jig_edit_state => move |loading| {
-                if loading {
-                    None
-                } else {
-                    let jig = jig.borrow_mut().take().unwrap_ji();
-                    Some(Self::render_loaded(jig, Rc::clone(&jig_edit_state)))
-                }
+            .child_signal(asset.signal_cloned().map(clone!(jig_edit_state => move |asset| {
+                asset.map(|asset| {
+                    let state = Rc::new(State::new(asset, Rc::clone(&jig_edit_state)));
+                    Self::render_loaded(state)
+                })
             })))
         })
     }
 
-    fn render_loaded(jig: JigResponse, jig_edit_state: Rc<JigEditState>) -> Dom {
-        let state = Rc::new(State::new(jig.into(), jig_edit_state));
-
+    fn render_loaded(state: Rc<State>) -> Dom {
         html!("empty-fragment", {
             .global_event(clone!(state => move |evt: Message| {
                 match evt.try_serde_data::<IframeAction<ModuleToJigEditorMessage>>() {

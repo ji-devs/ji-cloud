@@ -3,7 +3,7 @@ use std::rc::Rc;
 use super::{
     super::edit::publish::Publish, iframe::dom::IframeDom,
     post_publish::dom::render as render_post_publish, selection::dom::SelectionDom,
-    sidebar::dom::SidebarDom, state::{State, AssetPlayerSettings},
+    sidebar::dom::SidebarDom, state::{State, AssetPlayerSettings}, course::jig_selection::state::JigSelection,
 };
 use components::{overlay::handle::OverlayHandle, player_popup::{PlayerPopup, PreviewPopupCallbacks}};
 use dominator::{clone, html, Dom};
@@ -41,7 +41,7 @@ impl EditPage {
                 })))
                 */
                 .apply_if(!state.jig_focus.is_resources(), |dom| {
-                    dom.child(SidebarDom::render(*asset_id.unwrap_jig(), state.clone()))
+                    dom.child(SidebarDom::render(asset_id, state.clone()))
                 })
                 .child_signal(state.route.signal_cloned().map(clone!(state, asset_id => move |route| {
                     match route {
@@ -65,7 +65,24 @@ impl EditPage {
                                 }
                             }
                         },
-                        AssetEditRoute::Course(_, _) => todo!(),
+                        AssetEditRoute::Course(course_id, course_edit_route) => {
+                            match course_edit_route {
+                                CourseEditRoute::Landing => {
+                                    // Some(SelectionDom::render(state.clone()))
+                                    // todo!()
+                                    Some(JigSelection::new(course_id).render())
+                                },
+                                CourseEditRoute::Cover => {
+                                    todo!()
+                                },
+                                CourseEditRoute::Publish => {
+                                    todo!()
+                                },
+                                CourseEditRoute::PostPublish => {
+                                    todo!()
+                                },
+                            }
+                        },
                     }
                 })))
                 .child_signal(state.show_onboarding.signal_cloned().map(clone!(state => move |show| {

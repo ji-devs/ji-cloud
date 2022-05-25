@@ -1,6 +1,7 @@
 use super::super::state::State;
 use super::settings::state::State as SettingsState;
 use dominator::clone;
+use futures_signals::signal::Mutable;
 use shared::{
     api::endpoints::{self, ApiEndpoint},
     domain::{
@@ -12,11 +13,10 @@ use shared::{
     },
     error::EmptyError,
 };
-use std::cell::RefCell;
 use std::rc::Rc;
 use utils::{iframe::ModuleToJigEditorMessage, jig::JigPlayerOptions, prelude::*};
 
-pub async fn load_jig(jig_id: JigId, jig_cell: Rc<RefCell<Option<JigResponse>>>) {
+pub async fn load_jig(jig_id: JigId, jig_mutable: Mutable<Option<Asset>>) {
     let path = endpoints::jig::GetDraft::PATH.replace("{id}", &jig_id.0.to_string());
 
     match api_with_auth::<JigResponse, EmptyError, ()>(
@@ -31,7 +31,7 @@ pub async fn load_jig(jig_id: JigId, jig_cell: Rc<RefCell<Option<JigResponse>>>)
                 resp.jig_focus.is_modules(),
                 "only module focused jigs should be here"
             );
-            *jig_cell.borrow_mut() = Some(resp);
+            jig_mutable.set(Some(resp.into()));
         }
         Err(_) => {
             todo!();
@@ -40,14 +40,7 @@ pub async fn load_jig(jig_id: JigId, jig_cell: Rc<RefCell<Option<JigResponse>>>)
 }
 
 pub fn navigate_to_publish(state: Rc<State>, jig: &JigResponse) {
-    match state.asset {
-        Asset::Jig(_) => {
-            state.jig_edit_state.set_route_jig(JigEditRoute::Publish);
-        },
-        Asset::Course(_) => {
-            state.jig_edit_state.set_route_course(CourseEditRoute::Publish);
-        },
-    };
+    state.jig_edit_state.set_route_jig(JigEditRoute::Publish);
     state.collapsed.set(true);
 
     let jig_id = jig.id;
