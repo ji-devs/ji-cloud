@@ -16,7 +16,7 @@ const STR_YT_VIDEO_ID: &str = "x4FYtTpQAt0";
 pub struct EditPage {}
 
 impl EditPage {
-    pub fn render(asset_id: AssetId, jig_focus: JigFocus, route: JigEditRoute) -> Dom {
+    pub fn render(asset_id: AssetId, jig_focus: JigFocus, route: AssetEditRoute) -> Dom {
         let state = Rc::new(State::new(asset_id, jig_focus, route));
 
         html!("empty-fragment", {
@@ -45,22 +45,27 @@ impl EditPage {
                 })
                 .child_signal(state.route.signal_cloned().map(clone!(state, asset_id => move |route| {
                     match route {
-                        JigEditRoute::Landing => {
-                            if state.jig_focus.is_resources() {
-                                Some(Publish::render(Rc::clone(&state)))
-                            } else {
-                                Some(SelectionDom::render(state.clone()))
+                        AssetEditRoute::Jig(_jig_id, _jig_focus, jig_edit_route) => {
+                            match jig_edit_route {
+                                JigEditRoute::Landing => {
+                                    if state.jig_focus.is_resources() {
+                                        Some(Publish::render(Rc::clone(&state)))
+                                    } else {
+                                        Some(SelectionDom::render(state.clone()))
+                                    }
+                                },
+                                JigEditRoute::Module(module_id) => {
+                                    Some(IframeDom::render(*asset_id.unwrap_jig(), module_id))
+                                },
+                                JigEditRoute::Publish => {
+                                    Some(Publish::render(Rc::clone(&state)))
+                                }
+                                JigEditRoute::PostPublish => {
+                                    Some(render_post_publish(*asset_id.unwrap_jig(), Rc::clone(&state)))
+                                }
                             }
                         },
-                        JigEditRoute::Module(module_id) => {
-                            Some(IframeDom::render(*asset_id.unwrap_jig(), module_id))
-                        },
-                        JigEditRoute::Publish => {
-                            Some(Publish::render(Rc::clone(&state)))
-                        }
-                        JigEditRoute::PostPublish => {
-                            Some(render_post_publish(*asset_id.unwrap_jig(), Rc::clone(&state)))
-                        }
+                        AssetEditRoute::Course(_, _) => todo!(),
                     }
                 })))
                 .child_signal(state.show_onboarding.signal_cloned().map(clone!(state => move |show| {

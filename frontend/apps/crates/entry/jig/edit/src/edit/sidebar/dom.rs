@@ -75,15 +75,18 @@ impl SidebarDom {
             .child(html!("jig-edit-sidebar", {
                 .future(clone!(state => async move {
                     state.jig_edit_state.route.signal_cloned().for_each(clone!(state => move |route| {
-                        if route == JigEditRoute::Landing {
-                            state.collapsed.set(false);
-                        }
+                        let should_collapse = !matches!(
+                            route,
+                            AssetEditRoute::Course(_, _) | AssetEditRoute::Jig(_, _, JigEditRoute::Landing)
+                        );
+                        state.collapsed.set(should_collapse);
                         ready(())
                     })).await
                 }))
                 .property_signal("collapsed", state.collapsed.signal())
                 .property_signal("isModulePage", state.jig_edit_state.route.signal_cloned().map(|route| {
-                    route == JigEditRoute::Landing
+                    // TODO: change?
+                    matches!(route, AssetEditRoute::Jig(_, _, JigEditRoute::Landing))
                 }))
                 .property_signal("loading", state.loader.is_loading())
                 .child(HeaderDom::render(state.clone()))
@@ -94,7 +97,10 @@ impl SidebarDom {
                     }))
                     .property_signal("collapsed", state.collapsed.signal())
                     .property_signal("selected", state.jig_edit_state.route.signal_cloned().map(|route| {
-                        matches!(route, JigEditRoute::Publish)
+                        matches!(
+                            route,
+                            AssetEditRoute::Jig(_, _, JigEditRoute::Publish) | AssetEditRoute::Course(_, CourseEditRoute::Publish)
+                        )
                     }))
                     .event(clone!(state => move |_ :events::Click| {
                         if state.can_publish() {

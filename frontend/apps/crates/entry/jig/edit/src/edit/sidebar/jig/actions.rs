@@ -8,7 +8,7 @@ use shared::{
             module::{ModuleCreateRequest, ModuleId, ModuleResponse, ModuleUpdateRequest},
             JigFocus, JigId, JigResponse, JigUpdateDraftDataRequest, LiteModule, ModuleKind,
         },
-        CreateResponse,
+        CreateResponse, asset::Asset,
     },
     error::EmptyError,
 };
@@ -40,7 +40,14 @@ pub async fn load_jig(jig_id: JigId, jig_cell: Rc<RefCell<Option<JigResponse>>>)
 }
 
 pub fn navigate_to_publish(state: Rc<State>, jig: &JigResponse) {
-    state.jig_edit_state.route.set_neq(JigEditRoute::Publish);
+    match state.asset {
+        Asset::Jig(_) => {
+            state.jig_edit_state.set_route_jig(JigEditRoute::Publish);
+        },
+        Asset::Course(_) => {
+            state.jig_edit_state.set_route_course(CourseEditRoute::Publish);
+        },
+    };
     state.collapsed.set(true);
 
     let jig_id = jig.id;
@@ -129,7 +136,7 @@ pub fn on_iframe_message(state: Rc<State>, message: ModuleToJigEditorMessage) {
             }
         }
         ModuleToJigEditorMessage::Next => {
-            state.jig_edit_state.route.set_neq(JigEditRoute::Landing);
+            state.jig_edit_state.set_route_jig(JigEditRoute::Landing);
             let jig_id = state.asset.unwrap_jig().id;
             Route::push_state(Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
                 jig_id,
@@ -156,8 +163,7 @@ fn populate_added_module(state: Rc<State>, module: LiteModule) {
 
     state
         .jig_edit_state
-        .route
-        .set_neq(JigEditRoute::Module(module_id));
+        .set_route_jig(JigEditRoute::Module(module_id));
 }
 
 pub fn use_module_as(state: Rc<State>, target_kind: ModuleKind, source_module_id: ModuleId) {

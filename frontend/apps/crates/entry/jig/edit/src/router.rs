@@ -23,16 +23,16 @@ impl Router {
                 AssetRoute::JigGallery => Some(Gallery::new(AssetType::Jig).render()),
                 AssetRoute::ResourceGallery => Some(Gallery::new(AssetType::Resource).render()),
                 AssetRoute::CourseGallery => Some(Gallery::new(AssetType::Course).render()),
-                AssetRoute::Edit(AssetEditRoute::Jig(jig_id, jig_focus, route)) => {
-                    match jig_focus {
-                        JigFocus::Modules => {
-                            Some(EditPage::render(jig_id.into(), JigFocus::Modules, route))
+                AssetRoute::Edit(route) => {
+                    match route {
+                        AssetEditRoute::Jig(jig_id, focus, _) => {
+                            Some(EditPage::render(jig_id.into(), focus, route))
                         },
-                        JigFocus::Resources => {
-                            Some(EditPage::render(jig_id.into(), JigFocus::Resources, route))
+                        AssetEditRoute::Course(course_id, _) => {
+                            Some(EditPage::render(course_id.into(), JigFocus::Modules, route))
                         },
                     }
-                }
+                },
                 _ => None,
             },
             _ => None,

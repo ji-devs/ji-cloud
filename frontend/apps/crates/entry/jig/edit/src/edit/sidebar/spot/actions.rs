@@ -25,8 +25,7 @@ pub fn add_empty_module_after(state: Rc<State>) {
     state
         .sidebar
         .jig_edit_state
-        .route
-        .set_neq(JigEditRoute::Landing);
+        .set_route_jig(JigEditRoute::Landing);
 }
 
 pub enum MoveTarget {

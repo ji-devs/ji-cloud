@@ -20,7 +20,8 @@ impl HeaderDom {
             .property("slot", "header")
             .property_signal("collapsed", sidebar_state.collapsed.signal())
             .property_signal("isModulePage", sidebar_state.jig_edit_state.route.signal_cloned().map(|route| {
-                matches!(route, JigEditRoute::Landing)
+                // TODO: change?
+                matches!(route, AssetEditRoute::Jig(_, _, JigEditRoute::Landing))
             }))
             .apply(|dom| {
                 match &sidebar_state.settings {
@@ -84,7 +85,7 @@ impl HeaderDom {
                         .property("slot", "modules")
                         .property("icon", "fa-light fa-grid")
                         .event(clone!(sidebar_state => move |_:events::Click| {
-                            sidebar_state.jig_edit_state.route.set_neq(JigEditRoute::Landing);
+                            sidebar_state.jig_edit_state.set_route_jig(JigEditRoute::Landing);
                             let jig = sidebar_state.asset.unwrap_jig();
                             let url = Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
                                 jig.id,

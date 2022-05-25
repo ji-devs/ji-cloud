@@ -220,7 +220,7 @@ fn render_page(state: Rc<Publish>) -> Dom {
                 .event(clone!(state => move |_: events::Click| {
                     let url = match &state.asset {
                         EditableAsset::Jig(jig) => {
-                            state.jig_edit_state.route.set_neq(JigEditRoute::Landing);
+                            state.jig_edit_state.set_route_jig(JigEditRoute::Landing);
                             Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
                                 jig.id,
                                 jig.jig_focus,

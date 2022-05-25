@@ -4,7 +4,7 @@ use futures_signals::signal::{Mutable, Signal, SignalExt};
 use std::cell::RefCell;
 use std::rc::Rc;
 use utils::drag::Drag;
-use utils::routes::JigEditRoute;
+use utils::routes::{JigEditRoute, AssetEditRoute};
 use web_sys::HtmlElement;
 
 pub struct State {
@@ -62,7 +62,7 @@ impl State {
                         None => "empty",
                         Some(this_module) => {
                             match route {
-                                JigEditRoute::Module(active_module_id) if active_module_id == &this_module.id => "active",
+                                AssetEditRoute::Jig(_, _, JigEditRoute::Module(active_module_id)) if active_module_id == &this_module.id => "active",
                                 _ => "thumbnail",
                             }
                         }
@@ -100,7 +100,7 @@ impl State {
                     SidebarSpotItem::Jig(Some(module)) => {
                         matches!(
                             route,
-                            JigEditRoute::Module(module_id) if module_id == &module.id
+                            AssetEditRoute::Jig(_, _, JigEditRoute::Module(module_id)) if module_id == &module.id
                         )
                     }
                     _ => false

@@ -70,13 +70,16 @@ impl Publish {
     pub fn navigate_to_cover(&self) {
         let cover_module_id = self.asset.cover().as_ref().map(|m| m.id);
 
-        // navigate to cover if exists otherwise navigate to landing
-        let route = match cover_module_id {
-            Some(cover_module_id) => JigEditRoute::Module(cover_module_id),
-            None => JigEditRoute::Landing,
+        match &self.asset {
+            EditableAsset::Jig(_) => {
+                // navigate to cover if exists otherwise navigate to landing
+                let route = match cover_module_id {
+                    Some(cover_module_id) => JigEditRoute::Module(cover_module_id),
+                    None => JigEditRoute::Landing,
+                };
+                self.jig_edit_state.set_route_jig(route);
+            },
         };
-
-        self.jig_edit_state.route.set(route);
     }
 
     // used to show tooltip, can probably be combined with `is_ready_to_publish` somehow
@@ -117,7 +120,7 @@ impl Publish {
 
             state.submission_tried.set(false);
 
-            state.jig_edit_state.route.set_neq(JigEditRoute::PostPublish);
+            state.jig_edit_state.set_route_jig(JigEditRoute::PostPublish);
         }));
     }
 }

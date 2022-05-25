@@ -106,7 +106,7 @@ impl ItemDom {
                                         jig_spot_actions::edit(state.clone())
                                     },
                                     None => {
-                                        state.sidebar.jig_edit_state.route.set_neq(JigEditRoute::Landing);
+                                        state.sidebar.jig_edit_state.set_route_jig(JigEditRoute::Landing);
                                     },
                                 }
                             },
@@ -134,7 +134,7 @@ impl ItemDom {
                             match &module.item {
                                 SidebarSpotItem::Jig(module) => {
                                     match (&*module, route) {
-                                        (Some(module), JigEditRoute::Module(module_id)) if module_id == &module.id => None,
+                                        (Some(module), AssetEditRoute::Jig(_, _, JigEditRoute::Module(module_id))) if module_id == &module.id => None,
                                         (Some(module), _) => {
                                             Some(ModuleThumbnail::render_live(
                                                 Rc::new(ModuleThumbnail {
