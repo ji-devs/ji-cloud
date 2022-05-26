@@ -48,7 +48,7 @@ export class _ extends LitElement {
                 ::slotted([slot="close"]) {
                     margin: 16px;
                     background-color: var(--dark-blue-8);
-                    border: solid 1px var(--light-blue-3);
+                    border: solid 2px var(--light-blue-3);
                     border-radius: 50%;
                     color: #ffffff;
                     height: 40px;
@@ -61,6 +61,7 @@ export class _ extends LitElement {
                     position: absolute;
                     top: 0;
                     right: 0;
+                    padding: 0;
                 }
             `,
         ];
