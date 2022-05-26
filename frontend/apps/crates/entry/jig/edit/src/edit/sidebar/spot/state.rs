@@ -4,7 +4,7 @@ use futures_signals::signal::{Mutable, Signal, SignalExt};
 use std::cell::RefCell;
 use std::rc::Rc;
 use utils::drag::Drag;
-use utils::routes::{JigEditRoute, AssetEditRoute};
+use utils::routes::{AssetEditRoute, JigEditRoute};
 use web_sys::HtmlElement;
 
 pub struct State {

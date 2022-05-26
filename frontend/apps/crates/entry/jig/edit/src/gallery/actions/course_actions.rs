@@ -4,7 +4,8 @@ use shared::{
     domain::{
         asset::{Asset, DraftOrLive, UserOrMe},
         course::{
-            CourseBrowseQuery, CourseBrowseResponse, CourseCreateRequest, CourseId, CourseSearchQuery,
+            CourseBrowseQuery, CourseBrowseResponse, CourseCreateRequest, CourseId,
+            CourseSearchQuery,
         },
         CreateResponse,
     },
@@ -30,12 +31,16 @@ pub async fn load_courses(
         endpoints::course::Browse::METHOD,
         Some(req),
     )
-        .await
-        .map(|res| {
-            let assets = res.courses.into_iter().map(|course| course.into()).collect();
-            (assets, res.total_course_count)
-        })
-        .map_err(|_| ())
+    .await
+    .map(|res| {
+        let assets = res
+            .courses
+            .into_iter()
+            .map(|course| course.into())
+            .collect();
+        (assets, res.total_course_count)
+    })
+    .map_err(|_| ())
 }
 
 pub async fn search_courses(q: String, is_published: Option<bool>) -> Result<Vec<Asset>, ()> {
@@ -48,7 +53,12 @@ pub async fn search_courses(q: String, is_published: Option<bool>) -> Result<Vec
 
     endpoints::course::Search::api_with_auth(Some(req))
         .await
-        .map(|resp| resp.courses.into_iter().map(|course| course.into()).collect())
+        .map(|resp| {
+            resp.courses
+                .into_iter()
+                .map(|course| course.into())
+                .collect()
+        })
         .map_err(|_| ())
 }
 

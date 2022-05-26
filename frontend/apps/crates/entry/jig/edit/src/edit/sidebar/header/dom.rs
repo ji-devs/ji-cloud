@@ -4,7 +4,10 @@ use shared::domain::{asset::Asset, jig::JigFocus};
 use std::rc::Rc;
 use web_sys::HtmlInputElement;
 
-use crate::edit::{sidebar::{jig::actions::get_player_settings, state::SidebarSetting}, state::AssetPlayerSettings};
+use crate::edit::{
+    sidebar::{jig::actions::get_player_settings, state::SidebarSetting},
+    state::AssetPlayerSettings,
+};
 
 use super::super::{actions as sidebar_actions, jig::settings, state::State as SidebarState};
 use utils::prelude::*;

@@ -1,4 +1,4 @@
-use crate::{jig::state::JigPlayer, course::state::CoursePlayer};
+use crate::{course::state::CoursePlayer, jig::state::JigPlayer};
 use components::overlay::container::OverlayContainer;
 use dominator::{html, Dom};
 use futures_signals::signal::{Signal, SignalExt};
@@ -17,16 +17,14 @@ impl Router {
 
     fn dom_signal() -> impl Signal<Item = Option<Dom>> {
         Self::signal().map(|route| match route {
-            Route::Asset(AssetRoute::Play(route)) => {
-                Some(match route {
-                    utils::routes::AssetPlayRoute::Jig(jig_id, module_id, player_options) => {
-                        JigPlayer::new(jig_id, module_id, player_options).render()
-                    },
-                    utils::routes::AssetPlayRoute::Course(course_id) => {
-                        CoursePlayer::new(course_id).render()
-                    },
-                })
-            },
+            Route::Asset(AssetRoute::Play(route)) => Some(match route {
+                utils::routes::AssetPlayRoute::Jig(jig_id, module_id, player_options) => {
+                    JigPlayer::new(jig_id, module_id, player_options).render()
+                }
+                utils::routes::AssetPlayRoute::Course(course_id) => {
+                    CoursePlayer::new(course_id).render()
+                }
+            }),
             _ => None,
         })
     }

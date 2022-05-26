@@ -1,12 +1,18 @@
 use super::state::*;
 use dominator::clone;
 use futures::join;
-use shared::{api::endpoints, domain::{asset::{AssetId, AssetType}, jig::JigFocus}};
+use shared::{
+    api::endpoints,
+    domain::{
+        asset::{AssetId, AssetType},
+        jig::JigFocus,
+    },
+};
 use std::rc::Rc;
 use utils::prelude::*;
 
-mod jig_actions;
 mod course_actions;
+mod jig_actions;
 
 impl Gallery {
     pub fn load_data(self: &Rc<Self>) {

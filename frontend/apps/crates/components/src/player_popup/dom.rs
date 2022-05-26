@@ -6,7 +6,7 @@ use utils::{
     events,
     iframe::{IframeInit, JigPlayerToPlayerPopup},
     prelude::SETTINGS,
-    routes::{AssetRoute, Route, AssetPlayRoute},
+    routes::{AssetPlayRoute, AssetRoute, Route},
     unwrap::UnwrapJiExt,
 };
 

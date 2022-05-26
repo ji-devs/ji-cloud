@@ -1,6 +1,6 @@
 use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
-use shared::domain::jig::{JigId, JigFocus};
+use shared::domain::jig::{JigFocus, JigId};
 use utils::{
     events,
     jig::JigPlayerOptions,

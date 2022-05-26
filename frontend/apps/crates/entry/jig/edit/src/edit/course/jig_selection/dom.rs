@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use dominator::{html, Dom, clone, with_node};
+use dominator::{clone, html, with_node, Dom};
 use futures_signals::signal_vec::SignalVecExt;
 use shared::domain::jig::JigId;
 use utils::events;
@@ -8,7 +8,6 @@ use uuid::Uuid;
 use web_sys::HtmlInputElement;
 
 use super::state::JigSelection;
-
 
 impl JigSelection {
     pub fn render(self: Rc<Self>) -> Dom {

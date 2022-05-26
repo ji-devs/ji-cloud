@@ -1,8 +1,12 @@
 use std::rc::Rc;
 
 use dominator::clone;
-use shared::{domain::course::{CourseUpdateDraftDataRequest, CourseResponse}, api::{endpoints, ApiEndpoint}, error::EmptyError};
-use utils::prelude::{api_with_auth_empty, api_with_auth};
+use shared::{
+    api::{endpoints, ApiEndpoint},
+    domain::course::{CourseResponse, CourseUpdateDraftDataRequest},
+    error::EmptyError,
+};
+use utils::prelude::{api_with_auth, api_with_auth_empty};
 
 use super::state::JigSelection;
 

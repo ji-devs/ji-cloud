@@ -3,17 +3,13 @@ use futures_signals::signal::Mutable;
 use shared::{
     api::endpoints::{self, ApiEndpoint},
     domain::{
-        course::{
-            CourseId, CourseResponse, CourseUpdateDraftDataRequest,
-        },
         asset::Asset,
+        course::{CourseId, CourseResponse, CourseUpdateDraftDataRequest},
     },
     error::EmptyError,
 };
 use std::rc::Rc;
-use utils::{
-    prelude::*
-};
+use utils::prelude::*;
 
 pub async fn load_course(course_id: CourseId, jig_mutable: Mutable<Option<Asset>>) {
     let path = endpoints::course::GetDraft::PATH.replace("{id}", &course_id.0.to_string());
@@ -36,7 +32,9 @@ pub async fn load_course(course_id: CourseId, jig_mutable: Mutable<Option<Asset>
 
 #[allow(dead_code)] // TODO: remove once used
 pub fn navigate_to_publish(state: Rc<State>, course: &CourseResponse) {
-    state.jig_edit_state.set_route_course(CourseEditRoute::Publish);
+    state
+        .jig_edit_state
+        .set_route_course(CourseEditRoute::Publish);
     state.collapsed.set(true);
 
     let course_id = course.id;
@@ -46,10 +44,17 @@ pub fn navigate_to_publish(state: Rc<State>, course: &CourseResponse) {
     ))));
 }
 
-pub async fn update_course(course_id: &CourseId, req: CourseUpdateDraftDataRequest) -> Result<(), EmptyError> {
+pub async fn update_course(
+    course_id: &CourseId,
+    req: CourseUpdateDraftDataRequest,
+) -> Result<(), EmptyError> {
     let path = endpoints::course::UpdateDraftData::PATH.replace("{id}", &course_id.0.to_string());
-    api_with_auth_empty::<EmptyError, _>(&path, endpoints::course::UpdateDraftData::METHOD, Some(req))
-        .await
+    api_with_auth_empty::<EmptyError, _>(
+        &path,
+        endpoints::course::UpdateDraftData::METHOD,
+        Some(req),
+    )
+    .await
 }
 
 #[allow(dead_code)] // TODO: remove once used

@@ -6,11 +6,12 @@ use web_sys::{ScrollBehavior, ScrollIntoViewOptions};
 
 use super::{
     super::state::State as JigEditState,
-    actions, debug,
+    actions,
+    course::actions as course_actions,
+    debug,
     dragging::{actions as drag_actions, dom::DraggingDom},
     header::dom::HeaderDom,
     jig::actions as jig_actions,
-    course::actions as course_actions,
     spot::dom::ItemDom,
     state::*,
 };
@@ -19,7 +20,7 @@ use futures_signals::{
     signal::{Mutable, SignalExt},
     signal_vec::SignalVecExt,
 };
-use shared::domain::{jig::JigId, asset::AssetId, course::CourseId};
+use shared::domain::{asset::AssetId, course::CourseId, jig::JigId};
 use std::rc::Rc;
 use uuid::Uuid;
 

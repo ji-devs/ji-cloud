@@ -9,11 +9,15 @@ pub struct ModuleThumbnail {
 }
 
 impl ModuleThumbnail {
-    pub fn new(asset_id: AssetId, module: Option<LiteModule>, fallback: ThumbnailFallback) -> Rc<Self> {
+    pub fn new(
+        asset_id: AssetId,
+        module: Option<LiteModule>,
+        fallback: ThumbnailFallback,
+    ) -> Rc<Self> {
         Rc::new(ModuleThumbnail {
             asset_id,
             module,
-            fallback
+            fallback,
         })
     }
 }

@@ -1,8 +1,11 @@
-use components::{player_popup::{PlayerPopup, PreviewPopupCallbacks}, module::_common::thumbnail::{ModuleThumbnail, ThumbnailFallback}};
-use dominator::{html, Dom, clone};
+use components::{
+    module::_common::thumbnail::{ModuleThumbnail, ThumbnailFallback},
+    player_popup::{PlayerPopup, PreviewPopupCallbacks},
+};
+use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
-use utils::{events, jig::JigPlayerOptions};
 use std::rc::Rc;
+use utils::{events, jig::JigPlayerOptions};
 
 use super::state::CoursePlayer;
 
@@ -14,7 +17,7 @@ impl CoursePlayer {
         html!("div", {
             .children_signal_vec(state.jigs.signal_ref(clone!(state => move |jigs| {
                 jigs.iter().map(|jig| {
-                    let jig_id = jig.id.clone();
+                    let jig_id = jig.id;
                     html!("button", {
                         .style("display", "block")
                         .children(&mut [

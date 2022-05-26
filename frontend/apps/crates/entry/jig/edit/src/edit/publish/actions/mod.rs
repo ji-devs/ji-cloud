@@ -5,7 +5,7 @@ use futures::join;
 use shared::{
     api::endpoints::{category, meta, ApiEndpoint},
     domain::{
-        asset::{PrivacyLevel, AssetId},
+        asset::{AssetId, PrivacyLevel},
         category::{Category, CategoryId, CategoryResponse, CategoryTreeScope, GetCategoryRequest},
         jig::JigFocus,
         meta::MetadataResponse,
@@ -27,7 +27,7 @@ mod jig_actions;
 impl Publish {
     pub async fn load_new(jig_edit_state: Rc<JigEditState>) -> Self {
         let asset = match jig_edit_state.asset_id {
-            AssetId::JigId(jig_id) =>  jig_actions::load_jig(jig_id),
+            AssetId::JigId(jig_id) => jig_actions::load_jig(jig_id),
             AssetId::CourseId(_course_id) => todo!(),
         };
         let categories = load_categories();
@@ -78,7 +78,7 @@ impl Publish {
                     None => JigEditRoute::Landing,
                 };
                 self.jig_edit_state.set_route_jig(route);
-            },
+            }
         };
     }
 

@@ -1,14 +1,21 @@
 use std::rc::Rc;
 
 use super::{
-    super::edit::publish::Publish, iframe::dom::IframeDom,
-    post_publish::dom::render as render_post_publish, selection::dom::SelectionDom,
-    sidebar::dom::SidebarDom, state::{State, AssetPlayerSettings}, course::jig_selection::state::JigSelection,
+    super::edit::publish::Publish,
+    course::jig_selection::state::JigSelection,
+    iframe::dom::IframeDom,
+    post_publish::dom::render as render_post_publish,
+    selection::dom::SelectionDom,
+    sidebar::dom::SidebarDom,
+    state::{AssetPlayerSettings, State},
 };
-use components::{overlay::handle::OverlayHandle, player_popup::{PlayerPopup, PreviewPopupCallbacks}};
+use components::{
+    overlay::handle::OverlayHandle,
+    player_popup::{PlayerPopup, PreviewPopupCallbacks},
+};
 use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
-use shared::domain::{jig::JigFocus, asset::AssetId};
+use shared::domain::{asset::AssetId, jig::JigFocus};
 use utils::prelude::*;
 
 const STR_YT_VIDEO_ID: &str = "x4FYtTpQAt0";

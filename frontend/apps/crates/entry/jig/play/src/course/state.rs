@@ -2,7 +2,10 @@ use std::{collections::HashSet, rc::Rc};
 
 use awsm_web::loaders::helpers::AsyncLoader;
 use futures_signals::signal::Mutable;
-use shared::domain::{course::{CourseId, CourseResponse}, jig::{JigId, JigResponse}};
+use shared::domain::{
+    course::{CourseId, CourseResponse},
+    jig::{JigId, JigResponse},
+};
 
 pub struct CoursePlayer {
     pub course_id: CourseId,

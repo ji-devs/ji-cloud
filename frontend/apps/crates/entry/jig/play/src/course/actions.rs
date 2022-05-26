@@ -2,7 +2,14 @@ use std::rc::Rc;
 
 use dominator::clone;
 use futures::future::try_join_all;
-use shared::{api::{endpoints, ApiEndpoint}, domain::{course::CourseResponse, jig::{JigId, JigResponse}}, error::EmptyError};
+use shared::{
+    api::{endpoints, ApiEndpoint},
+    domain::{
+        course::CourseResponse,
+        jig::{JigId, JigResponse},
+    },
+    error::EmptyError,
+};
 use utils::{prelude::api_no_auth, unwrap::UnwrapJiExt};
 
 use super::state::CoursePlayer;
@@ -37,11 +44,8 @@ impl CoursePlayer {
         }));
     }
 
-
     async fn load_jigs(self: &Rc<Self>, jig_ids: Vec<JigId>) {
-        let jigs = try_join_all(
-            jig_ids.iter().map(|jig_id| self.load_jig(jig_id))
-        )
+        let jigs = try_join_all(jig_ids.iter().map(|jig_id| self.load_jig(jig_id)))
             .await
             .unwrap_ji();
 
@@ -50,11 +54,7 @@ impl CoursePlayer {
 
     async fn load_jig(self: &Rc<Self>, jig_id: &JigId) -> Result<JigResponse, ()> {
         let path = endpoints::jig::GetLive::PATH.replace("{id}", &jig_id.0.to_string());
-        api_no_auth::<JigResponse, EmptyError, ()>(
-            &path,
-            endpoints::jig::GetLive::METHOD,
-            None
-        )
+        api_no_auth::<JigResponse, EmptyError, ()>(&path, endpoints::jig::GetLive::METHOD, None)
             .await
             .map_err(|_| ())
     }

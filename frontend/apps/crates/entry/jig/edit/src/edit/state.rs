@@ -1,6 +1,11 @@
 use futures_signals::signal::Mutable;
 use shared::domain::{asset::AssetId, jig::JigFocus};
-use utils::{jig::JigPlayerOptions, routes::{AssetEditRoute, JigEditRoute, CourseEditRoute}, storage, unwrap::UnwrapJiExt};
+use utils::{
+    jig::JigPlayerOptions,
+    routes::{AssetEditRoute, CourseEditRoute, JigEditRoute},
+    storage,
+    unwrap::UnwrapJiExt,
+};
 
 pub struct State {
     pub route: Mutable<AssetEditRoute>,
@@ -29,15 +34,21 @@ impl State {
 
     pub fn set_route_jig(&self, route: JigEditRoute) {
         assert!(&self.asset_id.is_jig_id());
-        self.route.set(AssetEditRoute::Jig(*self.asset_id.unwrap_jig(), self.jig_focus, route));
+        self.route.set(AssetEditRoute::Jig(
+            *self.asset_id.unwrap_jig(),
+            self.jig_focus,
+            route,
+        ));
     }
 
     pub fn set_route_course(&self, route: CourseEditRoute) {
         assert!(&self.asset_id.is_jig_id());
-        self.route.set(AssetEditRoute::Course(*self.asset_id.unwrap_course(), route));
+        self.route.set(AssetEditRoute::Course(
+            *self.asset_id.unwrap_course(),
+            route,
+        ));
     }
 }
-
 
 #[derive(Clone)]
 pub(super) enum AssetPlayerSettings {

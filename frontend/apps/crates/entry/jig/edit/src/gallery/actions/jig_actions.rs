@@ -34,12 +34,12 @@ pub async fn load_jigs(
         endpoints::jig::Browse::METHOD,
         Some(req),
     )
-        .await
-        .map(|res| {
-            let assets = res.jigs.into_iter().map(|jig| jig.into()).collect();
-            (assets, res.total_jig_count)
-        })
-        .map_err(|_| ())
+    .await
+    .map(|res| {
+        let assets = res.jigs.into_iter().map(|jig| jig.into()).collect();
+        (assets, res.total_jig_count)
+    })
+    .map_err(|_| ())
 }
 
 pub async fn search_jigs(q: String, is_published: Option<bool>) -> Result<Vec<Asset>, ()> {

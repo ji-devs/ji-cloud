@@ -5,11 +5,12 @@ use futures_signals::signal::Mutable;
 use shared::{
     api::endpoints::{self, ApiEndpoint},
     domain::{
+        asset::Asset,
         jig::{
             module::{ModuleCreateRequest, ModuleId, ModuleResponse, ModuleUpdateRequest},
             JigFocus, JigId, JigResponse, JigUpdateDraftDataRequest, LiteModule, ModuleKind,
         },
-        CreateResponse, asset::Asset,
+        CreateResponse,
     },
     error::EmptyError,
 };

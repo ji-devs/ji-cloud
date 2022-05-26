@@ -1,8 +1,8 @@
-use std::{rc::Rc, cell::RefCell};
+use std::{cell::RefCell, rc::Rc};
 
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal_vec::MutableVec;
-use shared::domain::{jig::JigId, course::CourseId};
+use shared::domain::{course::CourseId, jig::JigId};
 
 pub struct JigSelection {
     pub course_id: CourseId,
