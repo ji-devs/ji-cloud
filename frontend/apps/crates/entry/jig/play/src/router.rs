@@ -1,4 +1,4 @@
-use crate::jig::state::JigPlayer;
+use crate::{jig::state::JigPlayer, course::state::CoursePlayer};
 use components::overlay::container::OverlayContainer;
 use dominator::{html, Dom};
 use futures_signals::signal::{Signal, SignalExt};
@@ -22,8 +22,8 @@ impl Router {
                     utils::routes::AssetPlayRoute::Jig(jig_id, module_id, player_options) => {
                         JigPlayer::new(jig_id, module_id, player_options).render()
                     },
-                    utils::routes::AssetPlayRoute::Course(_) => {
-                        todo!()
+                    utils::routes::AssetPlayRoute::Course(course_id) => {
+                        CoursePlayer::new(course_id).render()
                     },
                 })
             },

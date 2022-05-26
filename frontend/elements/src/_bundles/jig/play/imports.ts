@@ -11,6 +11,7 @@ import "@elements/core/share-jig/main";
 import "@elements/core/share-jig/option";
 import "@elements/core/share-jig/students";
 import "@elements/core/share-jig/gen-code-button";
+import "@elements/core/player-popup/player-popup";
 import "@elements/entry/jig/play/background-music";
 import "@elements/entry/jig/play/landing";
 import "@elements/entry/jig/play/move-button";
