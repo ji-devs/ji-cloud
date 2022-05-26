@@ -1,11 +1,9 @@
 use http::StatusCode;
 
 use shared::domain::{
-    jig::JigId,
-    module::{
-        body::memory, ModuleBody, ModuleCreateRequest, ModuleKind, ModuleUpdateRequest,
-    },
     asset::AssetId,
+    jig::JigId,
+    module::{body::memory, ModuleBody, ModuleCreateRequest, ModuleKind, ModuleUpdateRequest},
 };
 use uuid::Uuid;
 

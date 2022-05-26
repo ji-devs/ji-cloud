@@ -7,9 +7,9 @@ use crate::{
     helpers::{initialize_server, LoginExt},
 };
 use shared::domain::{
+    asset::AssetId,
     jig::JigId,
     module::{ModuleBody, ModuleKind},
-    asset::AssetId,
 };
 use uuid::Uuid;
 
