@@ -9,7 +9,8 @@ use utils::screenshot::call_screenshot_service;
 use wasm_bindgen_futures::spawn_local;
 
 impl ModuleThumbnail {
-    pub fn render(state: Rc<Self>, slot: Option<&str>) -> Dom {
+    pub fn render(self: Rc<Self>, slot: Option<&str>) -> Dom {
+        let state = self;
         html!("img-module-screenshot", {
             .apply_if(slot.is_some(), |dom| {
                 dom.property("slot", slot.unwrap_ji())
