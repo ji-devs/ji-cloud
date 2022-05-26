@@ -8,7 +8,8 @@ use crate::{
 };
 use shared::domain::{
     jig::JigId,
-    module::{AssetId, ModuleBody, ModuleKind},
+    module::{ModuleBody, ModuleKind},
+    asset::AssetId,
 };
 use uuid::Uuid;
 
