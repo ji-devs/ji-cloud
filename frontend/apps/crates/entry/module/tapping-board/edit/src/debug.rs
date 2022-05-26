@@ -6,6 +6,7 @@ use shared::{
     domain::{
         audio::AudioId,
         image::ImageId,
+        jig::JigId,
         module::body::{
             Audio, Image, Instructions, Transform,
             _groups::design::{
@@ -14,7 +15,6 @@ use shared::{
             tapping_board::{Content, Mode, ModuleData as RawData, Step},
         },
         module::ModuleId,
-        jig::JigId,
     },
     media::MediaLibrary,
 };

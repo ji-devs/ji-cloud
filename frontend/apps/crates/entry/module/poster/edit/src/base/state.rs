@@ -13,6 +13,7 @@ use dominator::clone;
 use futures_signals::signal::{Mutable, ReadOnlyMutable};
 use shared::domain::module::body::BodyExt;
 use shared::domain::{
+    jig::JigId,
     module::{
         body::{
             poster::{Mode, ModuleData as RawData, Step},
@@ -20,7 +21,6 @@ use shared::domain::{
         },
         ModuleId,
     },
-    jig::JigId,
 };
 use std::cell::RefCell;
 use std::rc::Rc;

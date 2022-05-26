@@ -1,8 +1,8 @@
 use shared::{
     api::endpoints::{module, ApiEndpoint},
     domain::{
-        module::{LiteModule, Module, ModuleBody, ModuleCreateRequest, ModuleId, ModuleResponse},
         jig::JigId,
+        module::{LiteModule, Module, ModuleBody, ModuleCreateRequest, ModuleId, ModuleResponse},
         CreateResponse,
     },
     error::EmptyError,
@@ -38,7 +38,7 @@ async fn get_module(jig_id: &JigId, module_id: &ModuleId) -> Result<Module, Empt
 async fn create_module(jig_id: &JigId, module_body: ModuleBody) -> Result<ModuleId, EmptyError> {
     let req = ModuleCreateRequest {
         body: module_body,
-        parent_id: jig_id.clone().into()
+        parent_id: (*jig_id).into(),
     };
     let res = api_with_auth::<CreateResponse<ModuleId>, EmptyError, ModuleCreateRequest>(
         module::Create::PATH,

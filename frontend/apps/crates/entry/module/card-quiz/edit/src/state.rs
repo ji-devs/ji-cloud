@@ -11,6 +11,7 @@ use components::module::{
 };
 use dominator::Dom;
 use shared::domain::{
+    jig::JigId,
     module::{
         body::{
             _groups::cards::{Mode, Step},
@@ -18,7 +19,6 @@ use shared::domain::{
         },
         ModuleId,
     },
-    jig::JigId,
 };
 use std::rc::Rc;
 use utils::prelude::*;

@@ -12,15 +12,14 @@ use futures_signals::{
     signal_vec::{MutableVec, SignalVecExt},
 };
 use shared::domain::{
+    jig::JigId,
     module::{
         body::{
             Audio, Background, BodyExt, Image, Instructions,
             _groups::cards::{self as raw, BaseContent, Mode, Step},
         },
-        ModuleId,
-        ModuleKind,
+        ModuleId, ModuleKind,
     },
-    jig::JigId,
 };
 use utils::prelude::*;
 

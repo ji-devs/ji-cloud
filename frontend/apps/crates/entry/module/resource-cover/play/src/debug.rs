@@ -4,6 +4,7 @@ use once_cell::sync::OnceCell;
 use shared::{
     domain::{
         image::ImageId,
+        jig::JigId,
         module::{
             body::{
                 Image, Instructions,
@@ -12,7 +13,6 @@ use shared::{
             },
             ModuleId,
         },
-        jig::JigId,
     },
     media::MediaLibrary,
 };

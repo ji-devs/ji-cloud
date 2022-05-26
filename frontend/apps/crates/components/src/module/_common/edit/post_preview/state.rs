@@ -1,7 +1,7 @@
 use dominator_helpers::futures::AsyncLoader;
 use shared::domain::{
     jig::JigId,
-    module::{ModuleId, ModuleKind}
+    module::{ModuleId, ModuleKind},
 };
 
 pub struct PostPreview {

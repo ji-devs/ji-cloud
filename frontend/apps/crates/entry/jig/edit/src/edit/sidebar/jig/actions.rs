@@ -7,7 +7,10 @@ use shared::{
     domain::{
         asset::Asset,
         jig::{JigFocus, JigId, JigResponse, JigUpdateDraftDataRequest},
-        module::{ModuleCreateRequest, ModuleId, ModuleResponse, ModuleUpdateRequest, LiteModule, ModuleKind},
+        module::{
+            LiteModule, ModuleCreateRequest, ModuleId, ModuleKind, ModuleResponse,
+            ModuleUpdateRequest,
+        },
         CreateResponse,
     },
     error::EmptyError,
@@ -212,6 +215,5 @@ pub async fn update_module(
     let path = endpoints::module::Update::PATH
         // .replace("{id}", &jig_id.0.to_string())
         .replace("{module_id}", &module_id.0.to_string());
-    api_with_auth_empty::<EmptyError, _>(&path, endpoints::module::Update::METHOD, Some(req))
-        .await
+    api_with_auth_empty::<EmptyError, _>(&path, endpoints::module::Update::METHOD, Some(req)).await
 }

@@ -15,6 +15,7 @@ use shared::{
     domain::{
         audio::AudioId,
         image::ImageId,
+        jig::JigId,
         module::{
             body::{
                 Background, Image, Instructions, Transform,
@@ -23,7 +24,6 @@ use shared::{
             },
             ModuleBody, ModuleCreateRequest, ModuleId,
         },
-        jig::JigId,
     },
     media::MediaLibrary,
 };

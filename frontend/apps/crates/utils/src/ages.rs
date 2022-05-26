@@ -1,5 +1,5 @@
-pub use shared::domain::module::body::ThemeId;
 use shared::domain::meta::{AgeRange, AgeRangeId};
+pub use shared::domain::module::body::ThemeId;
 
 const STR_ALL_AGES: &str = "All Ages";
 const STR_DASH: &str = "-";

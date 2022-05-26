@@ -4,6 +4,7 @@ use components::module::_common::play::prelude::*;
 use futures_signals::signal::Mutable;
 use shared::domain::module::body::legacy::activity::Activity;
 use shared::domain::{
+    jig::{JigData, JigId},
     module::{
         body::{
             legacy::{slide::Slide, ModuleData as RawData},
@@ -11,7 +12,6 @@ use shared::domain::{
         },
         ModuleId,
     },
-    jig::{JigData, JigId},
 };
 use std::{
     cell::RefCell,

@@ -1,5 +1,8 @@
 use dominator::{clone, html, Dom};
-use shared::domain::{module::{ModuleId, ModuleKind}, jig::JigId};
+use shared::domain::{
+    jig::JigId,
+    module::{ModuleId, ModuleKind},
+};
 use utils::prelude::*;
 
 use super::actions;

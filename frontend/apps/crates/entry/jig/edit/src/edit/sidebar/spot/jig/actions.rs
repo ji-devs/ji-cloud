@@ -4,7 +4,7 @@ use crate::edit::sidebar::state::{SidebarSpot, SidebarSpotItem};
 use dominator::clone;
 use shared::{
     api::{endpoints, ApiEndpoint},
-    domain::{module::*, jig::*, CreateResponse},
+    domain::{jig::*, module::*, CreateResponse},
     error::EmptyError,
 };
 use std::rc::Rc;
@@ -36,20 +36,15 @@ pub fn edit(state: Rc<SpotState>) {
 
 pub async fn delete(state: Rc<SpotState>) {
     if let Some(module) = &*state.module.item.unwrap_module() {
-        let path = endpoints::module::Delete::PATH
-            .replace("{module_id}", &module.id.0.to_string());
+        let path = endpoints::module::Delete::PATH.replace("{module_id}", &module.id.0.to_string());
 
         let req = ModuleDeleteRequest {
-            parent_id: state.sidebar.asset.id()
+            parent_id: state.sidebar.asset.id(),
         };
 
-        api_with_auth_empty::<EmptyError, _>(
-            &path,
-            endpoints::module::Delete::METHOD,
-            Some(req),
-        )
-        .await
-        .unwrap();
+        api_with_auth_empty::<EmptyError, _>(&path, endpoints::module::Delete::METHOD, Some(req))
+            .await
+            .unwrap();
     }
 }
 

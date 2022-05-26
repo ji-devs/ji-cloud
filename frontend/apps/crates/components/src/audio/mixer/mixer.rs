@@ -1,7 +1,7 @@
 use awsm_web::audio::AudioMixer as AwsmAudioMixer;
 use rand::prelude::*;
-use shared::domain::module::body::Audio;
 use shared::domain::jig::{self, AudioFeedbackNegative, AudioFeedbackPositive, JigData};
+use shared::domain::module::body::Audio;
 use std::cell::RefCell;
 use std::rc::Rc;
 use utils::{path, prelude::*};

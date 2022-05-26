@@ -3,11 +3,11 @@ use crate::module::_common::edit::history::state::HistoryState;
 use shared::{
     api::endpoints::{module::*, ApiEndpoint},
     domain::{
+        jig::*,
         module::{
             body::{BodyExt, ModeExt, StepExt},
             *,
         },
-        jig::*,
     },
     error::EmptyError,
 };

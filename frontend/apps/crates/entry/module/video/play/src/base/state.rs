@@ -1,6 +1,7 @@
 use components::module::_common::play::prelude::*;
 use futures_signals::signal::Mutable;
 use shared::domain::{
+    jig::JigId,
     module::{
         body::{
             Instructions,
@@ -9,7 +10,6 @@ use shared::domain::{
         },
         ModuleId,
     },
-    jig::JigId,
 };
 use std::rc::Rc;
 use utils::prelude::*;

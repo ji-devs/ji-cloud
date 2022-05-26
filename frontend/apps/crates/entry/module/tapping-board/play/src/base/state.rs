@@ -1,5 +1,6 @@
 use components::module::_common::play::prelude::*;
 use shared::domain::{
+    jig::{JigData, JigId},
     module::{
         body::{
             _groups::design::{Backgrounds, Sticker, Trace},
@@ -8,7 +9,6 @@ use shared::domain::{
         },
         ModuleId,
     },
-    jig::{JigData, JigId},
 };
 use utils::prelude::*;
 

@@ -2,12 +2,11 @@ use super::state::*;
 use shared::{
     api::endpoints::{self, ApiEndpoint},
     domain::{
+        jig::JigFocus,
         module::{
             body::{BodyExt, ModeExt, StepExt},
-            ModuleCreateRequest, ModuleId,
-            LiteModule, ModuleKind,
+            LiteModule, ModuleCreateRequest, ModuleId, ModuleKind,
         },
-        jig::JigFocus,
         CreateResponse,
     },
     error::EmptyError,

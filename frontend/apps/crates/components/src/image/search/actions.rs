@@ -21,8 +21,8 @@ use shared::{
     api::{endpoints, ApiEndpoint},
     domain::{
         image::{CreateResponse, ImageKind, ImageSearchQuery},
-        module::body::Image,
         meta::{ImageStyle, MetadataResponse},
+        module::body::Image,
     },
     error::EmptyError,
     media::MediaLibrary,

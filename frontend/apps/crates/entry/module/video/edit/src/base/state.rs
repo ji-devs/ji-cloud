@@ -12,6 +12,7 @@ use dominator::clone;
 use futures_signals::signal::{Mutable, ReadOnlyMutable};
 use futures_signals::signal_vec::{SignalVecExt, VecDiff};
 use shared::domain::{
+    jig::JigId,
     module::{
         body::{
             video::{
@@ -21,7 +22,6 @@ use shared::domain::{
         },
         ModuleId,
     },
-    jig::JigId,
 };
 use std::cell::RefCell;
 use std::rc::Rc;

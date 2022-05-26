@@ -1,8 +1,8 @@
 use super::base::state::*;
 use components::module::_common::play::prelude::*;
 use shared::domain::{
-    module::{body::legacy::ModuleData as RawData, ModuleId},
     jig::JigId,
+    module::{body::legacy::ModuleData as RawData, ModuleId},
 };
 use std::rc::Rc;
 pub type AppState = GenericState<RawData, (), (), Base>;

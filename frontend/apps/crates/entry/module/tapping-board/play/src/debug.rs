@@ -5,20 +5,17 @@ use shared::{
     domain::{
         audio::AudioId,
         image::ImageId,
+        jig::JigId,
         module::{
             body::{
                 Audio, Image, Instructions, Transform,
                 _groups::design::{
-                    Backgrounds, BaseContent, Sprite, Sticker, Text, Trace, TraceKind,
-                    TraceShape,
+                    Backgrounds, BaseContent, Sprite, Sticker, Text, Trace, TraceKind, TraceShape,
                 },
-                tapping_board::{
-                    Content, Hint, Mode, ModuleData as RawData, Next, PlaySettings,
-                },
+                tapping_board::{Content, Hint, Mode, ModuleData as RawData, Next, PlaySettings},
             },
             ModuleId,
         },
-        jig::JigId,
     },
     media::MediaLibrary,
 };

@@ -20,6 +20,7 @@ use futures_signals::{
 };
 use shared::domain::module::body::BodyExt;
 use shared::domain::{
+    jig::JigId,
     module::{
         body::{
             Instructions,
@@ -30,7 +31,6 @@ use shared::domain::{
         },
         ModuleId,
     },
-    jig::JigId,
 };
 use std::cell::RefCell;
 use std::rc::Rc;

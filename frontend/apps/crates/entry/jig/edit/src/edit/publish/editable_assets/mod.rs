@@ -9,8 +9,8 @@ use shared::domain::{
     additional_resource::AdditionalResource,
     asset::{AssetId, PrivacyLevel},
     category::CategoryId,
-    module::LiteModule,
     meta::{AffiliationId, AgeRangeId},
+    module::LiteModule,
 };
 
 pub enum EditableAsset {

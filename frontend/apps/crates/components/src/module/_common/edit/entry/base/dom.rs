@@ -9,11 +9,11 @@ use dominator::Dom;
 use std::rc::Rc;
 
 use shared::domain::{
+    jig::JigId,
     module::{
         body::{BodyExt, ModeExt, StepExt},
         ModuleId,
     },
-    jig::JigId,
 };
 
 pub fn render<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(

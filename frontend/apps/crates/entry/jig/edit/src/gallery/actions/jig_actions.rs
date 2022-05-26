@@ -89,7 +89,7 @@ pub async fn create_jig(focus: JigFocus) {
 async fn add_resource_cover(jig_id: &JigId) {
     let req = ModuleCreateRequest {
         body: ModuleBody::new(ModuleKind::ResourceCover),
-        parent_id: jig_id.clone().into(),
+        parent_id: (*jig_id).into(),
     };
 
     // let path = endpoints::module::Create::PATH.replace("{id}", &jig_id.0.to_string());

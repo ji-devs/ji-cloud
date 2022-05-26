@@ -1,11 +1,11 @@
 use super::base::state::*;
 use components::module::_common::play::prelude::*;
 use shared::domain::{
+    jig::JigId,
     module::{
         body::poster::{Mode, ModuleData as RawData, Step},
         ModuleId,
     },
-    jig::JigId,
 };
 use std::rc::Rc;
 pub type AppState = GenericState<RawData, Mode, Step, Base>;

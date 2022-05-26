@@ -12,8 +12,8 @@ use shared::domain::meta::AffiliationId;
 use shared::domain::{
     category::CategoryId,
     jig::{JigId, JigResponse, JigUpdateDraftDataRequest},
-    module::LiteModule,
     meta::AgeRangeId,
+    module::LiteModule,
 };
 
 #[derive(Clone)]

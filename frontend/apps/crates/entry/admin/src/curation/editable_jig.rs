@@ -18,9 +18,9 @@ use shared::{
             JigFocus, JigId, JigRating, JigResponse, JigUpdateAdminDataRequest,
             JigUpdateDraftDataRequest,
         },
-        module::LiteModule,
         meta::AffiliationId,
         meta::AgeRangeId,
+        module::LiteModule,
     },
     error::EmptyError,
 };

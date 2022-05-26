@@ -7,11 +7,11 @@ use shared::domain::module::body::Instructions;
 use shared::{
     api::endpoints::{self, module::*, ApiEndpoint},
     domain::{
+        jig::*,
         module::{
             body::{BodyExt, ModeExt, StepExt, ThemeId},
             *,
         },
-        jig::*,
     },
     error::EmptyError,
 };

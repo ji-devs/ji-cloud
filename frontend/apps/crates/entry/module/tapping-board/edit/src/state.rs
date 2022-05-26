@@ -4,11 +4,11 @@ use super::base::{
 };
 use components::module::_common::edit::prelude::*;
 use shared::domain::{
+    jig::JigId,
     module::{
         body::tapping_board::{Mode, ModuleData as RawData, Step},
         ModuleId,
     },
-    jig::JigId,
 };
 use std::rc::Rc;
 

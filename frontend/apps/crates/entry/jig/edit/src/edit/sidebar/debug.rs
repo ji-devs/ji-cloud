@@ -5,8 +5,11 @@ use std::collections::HashMap;
 
 use shared::domain::{
     asset::{DraftOrLive, PrivacyLevel},
-    jig::{JigRating, JigResponse, AudioEffects, JigAdminData, JigData, JigFocus, JigId, JigPlayerSettings},
-    module::{ModuleId, LiteModule, ModuleKind},
+    jig::{
+        AudioEffects, JigAdminData, JigData, JigFocus, JigId, JigPlayerSettings, JigRating,
+        JigResponse,
+    },
+    module::{LiteModule, ModuleId, ModuleKind},
 };
 use utils::themes::ThemeId;
 use uuid::Uuid;

@@ -2,6 +2,7 @@ use components::module::_groups::cards::edit::{config, debug::DebugSettings as B
 use components::tabs::MenuTabKind;
 use once_cell::sync::OnceCell;
 use shared::domain::{
+    jig::JigId,
     module::{
         body::{
             Instructions,
@@ -13,7 +14,6 @@ use shared::domain::{
         },
         ModuleId,
     },
-    jig::JigId,
 };
 use utils::prelude::*;
 use uuid::Uuid;

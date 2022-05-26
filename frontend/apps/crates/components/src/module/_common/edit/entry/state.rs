@@ -14,17 +14,17 @@ use dominator_helpers::{futures::AsyncLoader, signals::OptionSignal};
 //use super::actions::{HistoryChangeFn, HistoryUndoRedoFn};
 use super::{actions::*, base::state::*, choose::state::*};
 use shared::domain::{
+    jig::JigId,
     module::{
         body::{BodyExt, StepExt},
         ModuleId,
     },
-    jig::JigId,
 };
 use shared::{
     api::endpoints::{self, module::*, ApiEndpoint},
     domain::{
-        module::{body::ModeExt, *},
         jig::*,
+        module::{body::ModeExt, *},
     },
     error::EmptyError,
 };

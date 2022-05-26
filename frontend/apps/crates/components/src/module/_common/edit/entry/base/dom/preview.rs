@@ -12,11 +12,11 @@ use std::rc::Rc;
 use dominator_helpers::events::Message;
 use futures_signals::signal::SignalExt;
 use shared::domain::{
+    jig::JigId,
     module::{
         body::{BodyExt, ModeExt, StepExt},
         ModuleId, ModuleKind,
     },
-    jig::JigId,
 };
 use utils::{
     iframe::{EmptyMessage, IframeInit},

@@ -1,4 +1,5 @@
 use shared::domain::{
+    jig::JigId,
     module::{
         body::{
             Background, Instructions,
@@ -7,7 +8,6 @@ use shared::domain::{
         },
         ModuleId,
     },
-    jig::JigId,
 };
 
 use futures_signals::signal::Mutable;

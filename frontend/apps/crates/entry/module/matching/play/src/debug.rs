@@ -3,6 +3,7 @@ use once_cell::sync::OnceCell;
 use shared::{
     domain::{
         image::ImageId,
+        jig::JigId,
         module::body::{
             Image, Instructions,
             _groups::cards::{
@@ -12,7 +13,6 @@ use shared::{
             matching::{Content, ModuleData as RawData, PlayerSettings},
         },
         module::ModuleId,
-        jig::JigId,
     },
     media::MediaLibrary,
 };

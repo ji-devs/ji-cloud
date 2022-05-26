@@ -8,18 +8,17 @@ use once_cell::sync::OnceCell;
 use shared::{
     domain::{
         image::ImageId,
+        jig::JigId,
         module::{
             body::{
                 Image, Instructions,
                 _groups::design::{
-                    Backgrounds, BaseContent, Sprite, Sticker, Text, Video, VideoHost,
-                    YoutubeUrl,
+                    Backgrounds, BaseContent, Sprite, Sticker, Text, Video, VideoHost, YoutubeUrl,
                 },
                 video::{Content, DoneAction, Mode, ModuleData as RawData, PlaySettings},
             },
             ModuleId,
         },
-        jig::JigId,
     },
     media::MediaLibrary,
 };
