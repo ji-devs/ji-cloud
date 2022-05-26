@@ -1,6 +1,6 @@
 use futures_signals::signal::{Mutable, Signal, SignalExt};
 
-use shared::domain::jig::module::body::Transform;
+use shared::domain::module::body::Transform;
 use std::cell::RefCell;
 use std::rc::Rc;
 use utils::{drag::Drag, math::bounds, prelude::*, resize::get_resize_info};

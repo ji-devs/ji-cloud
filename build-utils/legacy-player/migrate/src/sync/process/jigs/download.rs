@@ -188,7 +188,7 @@ async fn get_jig_futures(ctx: Arc<Context>, jigs: JigsLookupArc, jig_list: Arc<M
 
                     let url = format!("{}{}", 
                         ctx.opts.get_remote_target().api_url(), 
-                        endpoints::jig::module::GetDraft::PATH
+                        endpoints::module::GetDraft::PATH
                             .replace("{id}", &jig_id_str)
                             .replace("{module_id}", &module_id_str)
                     );

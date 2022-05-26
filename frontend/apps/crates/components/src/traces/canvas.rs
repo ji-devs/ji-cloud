@@ -1,6 +1,6 @@
 use super::svg::helpers::path_command_to_string;
 use super::utils::*;
-use shared::domain::jig::module::body::{
+use shared::domain::module::body::{
     Transform,
     _groups::design::{PathCommand, Trace, TraceShape},
 };

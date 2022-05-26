@@ -4,7 +4,7 @@ use std::rc::Rc;
 use super::state::*;
 
 use components::module::_common::edit::settings::prelude::*;
-use shared::domain::jig::module::body::flashcards::DisplayMode;
+use shared::domain::module::body::flashcards::DisplayMode;
 
 pub fn render(state: Rc<SidebarSettings>) -> Dom {
     render_settings(Rc::new(ModuleSettings {

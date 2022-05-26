@@ -2,7 +2,7 @@ use super::super::state::*;
 use dominator::{html, Dom};
 use std::rc::Rc;
 
-use shared::domain::jig::module::body::{BodyExt, ModeExt, StepExt};
+use shared::domain::module::body::{BodyExt, ModeExt, StepExt};
 
 pub fn render_loading<RawData, Mode, Step, Base>(
     _state: Rc<GenericState<RawData, Mode, Step, Base>>,

@@ -2,7 +2,7 @@ use dominator::{clone, Dom};
 use std::rc::Rc;
 
 use super::state::State;
-use shared::domain::jig::module::body::tapping_board::{Hint, Next};
+use shared::domain::module::body::tapping_board::{Hint, Next};
 
 use components::module::_common::edit::settings::prelude::*;
 pub fn render(state: Rc<State>) -> Dom {

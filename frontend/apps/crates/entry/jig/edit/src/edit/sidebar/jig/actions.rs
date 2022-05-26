@@ -6,10 +6,8 @@ use shared::{
     api::endpoints::{self, ApiEndpoint},
     domain::{
         asset::Asset,
-        jig::{
-            module::{ModuleCreateRequest, ModuleId, ModuleResponse, ModuleUpdateRequest},
-            JigFocus, JigId, JigResponse, JigUpdateDraftDataRequest, LiteModule, ModuleKind,
-        },
+        jig::{JigFocus, JigId, JigResponse, JigUpdateDraftDataRequest},
+        module::{ModuleCreateRequest, ModuleId, ModuleResponse, ModuleUpdateRequest, LiteModule, ModuleKind},
         CreateResponse,
     },
     error::EmptyError,
@@ -163,26 +161,26 @@ fn populate_added_module(state: Rc<State>, module: LiteModule) {
 pub fn use_module_as(state: Rc<State>, target_kind: ModuleKind, source_module_id: ModuleId) {
     state.loader.load(clone!(state => async move {
         let target_module_id: Result<(ModuleId, bool), EmptyError> = async {
-            let path = endpoints::jig::module::GetDraft::PATH
+            let path = endpoints::module::GetDraft::PATH
                 .replace("{id}", &state.asset.unwrap_jig().id.0.to_string())
                 .replace("{module_id}", &source_module_id.0.to_string());
 
             let source_module = api_with_auth::<ModuleResponse, EmptyError, ()>(
                 &path,
-                endpoints::jig::module::GetDraft::METHOD,
+                endpoints::module::GetDraft::METHOD,
                 None
             ).await?.module;
 
             let target_body = source_module.body.convert_to_body(target_kind).unwrap_ji();
 
-            let path = endpoints::jig::module::Create::PATH
-                .replace("{id}", &state.asset.unwrap_jig().id.0.to_string());
-
-            let req = ModuleCreateRequest { body: target_body };
+            let req = ModuleCreateRequest {
+                body: target_body,
+                parent_id: state.asset.id(),
+            };
 
             let res = api_with_auth::<CreateResponse<ModuleId>, EmptyError, ModuleCreateRequest>(
-                &path,
-                endpoints::jig::module::Create::METHOD,
+                endpoints::module::Create::PATH,
+                endpoints::module::Create::METHOD,
                 Some(req),
             )
             .await?;
@@ -207,13 +205,13 @@ pub fn use_module_as(state: Rc<State>, target_kind: ModuleKind, source_module_id
 }
 
 pub async fn update_module(
-    jig_id: &JigId,
+    // jig_id: &JigId,
     module_id: &ModuleId,
     req: ModuleUpdateRequest,
 ) -> Result<(), EmptyError> {
-    let path = endpoints::jig::module::Update::PATH
-        .replace("{id}", &jig_id.0.to_string())
+    let path = endpoints::module::Update::PATH
+        // .replace("{id}", &jig_id.0.to_string())
         .replace("{module_id}", &module_id.0.to_string());
-    api_with_auth_empty::<EmptyError, _>(&path, endpoints::jig::module::Update::METHOD, Some(req))
+    api_with_auth_empty::<EmptyError, _>(&path, endpoints::module::Update::METHOD, Some(req))
         .await
 }

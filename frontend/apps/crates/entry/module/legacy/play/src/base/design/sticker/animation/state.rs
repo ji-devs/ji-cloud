@@ -32,7 +32,7 @@ use futures_signals::signal::Mutable;
 use gloo::events::EventListener;
 use gloo_timers::callback::Timeout;
 
-use shared::domain::jig::module::body::legacy::design::{
+use shared::domain::module::body::legacy::design::{
     Animation, HideToggle, Sticker as RawSticker,
 };
 

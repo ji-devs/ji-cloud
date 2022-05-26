@@ -16,8 +16,9 @@ use shared::{
         category::CategoryId,
         jig::{
             JigFocus, JigId, JigRating, JigResponse, JigUpdateAdminDataRequest,
-            JigUpdateDraftDataRequest, LiteModule,
+            JigUpdateDraftDataRequest,
         },
+        module::LiteModule,
         meta::AffiliationId,
         meta::AgeRangeId,
     },

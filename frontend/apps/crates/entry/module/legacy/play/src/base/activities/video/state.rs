@@ -6,7 +6,7 @@ use futures_signals::{
     map_ref,
     signal::{Mutable, Signal, SignalExt},
 };
-use shared::domain::jig::module::body::legacy::activity::Video as RawVideo;
+use shared::domain::module::body::legacy::activity::Video as RawVideo;
 use utils::{math::mat4::Matrix4, resize::resize_info_signal};
 use web_sys::{HtmlElement, HtmlVideoElement};
 

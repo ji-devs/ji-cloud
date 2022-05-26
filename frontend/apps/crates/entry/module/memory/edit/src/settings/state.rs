@@ -1,5 +1,5 @@
 use futures_signals::signal::Mutable;
-use shared::domain::jig::module::body::memory::Content;
+use shared::domain::module::body::memory::Content;
 
 pub struct Settings {
     pub time_limit: Mutable<u32>,

@@ -1,5 +1,5 @@
 use super::state::PlaySettingsState;
-use shared::domain::jig::module::body::drag_drop::{Hint, Next};
+use shared::domain::module::body::drag_drop::{Hint, Next};
 
 impl PlaySettingsState {
     pub fn set_hint(&self, hint: Hint) {

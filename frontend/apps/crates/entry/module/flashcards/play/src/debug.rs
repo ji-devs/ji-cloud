@@ -4,18 +4,16 @@ use once_cell::sync::OnceCell;
 use shared::{
     domain::{
         image::ImageId,
-        jig::{
-            module::body::{
-                Image, Instructions,
-                _groups::cards::{
-                    BaseContent, Card as RawCard, CardContent as RawCardContent,
-                    CardPair as RawCardPair, Mode,
-                },
-                flashcards::{Content, ModuleData as RawData, PlayerSettings},
+        module::body::{
+            Image, Instructions,
+            _groups::cards::{
+                BaseContent, Card as RawCard, CardContent as RawCardContent,
+                CardPair as RawCardPair, Mode,
             },
-            module::ModuleId,
-            JigId,
+            flashcards::{Content, ModuleData as RawData, PlayerSettings},
         },
+        module::ModuleId,
+        jig::JigId,
     },
     media::MediaLibrary,
 };
@@ -51,7 +49,7 @@ impl DebugSettings {
                     content: Some(Content {
                         player_settings: PlayerSettings {
                             display_mode:
-                                shared::domain::jig::module::body::flashcards::DisplayMode::Double,
+                                shared::domain::module::body::flashcards::DisplayMode::Double,
                             swap: false,
                         },
                         base: BaseContent {

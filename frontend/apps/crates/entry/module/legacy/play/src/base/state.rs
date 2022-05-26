@@ -2,8 +2,8 @@ use super::{actions::StageClick, audio::AudioManager, design::sticker::animation
 use awsm_web::loaders::fetch::fetch_url;
 use components::module::_common::play::prelude::*;
 use futures_signals::signal::Mutable;
-use shared::domain::jig::module::body::legacy::activity::Activity;
-use shared::domain::jig::{
+use shared::domain::module::body::legacy::activity::Activity;
+use shared::domain::{
     module::{
         body::{
             legacy::{slide::Slide, ModuleData as RawData},
@@ -11,7 +11,7 @@ use shared::domain::jig::{
         },
         ModuleId,
     },
-    JigData, JigId,
+    jig::{JigData, JigId},
 };
 use std::{
     cell::RefCell,

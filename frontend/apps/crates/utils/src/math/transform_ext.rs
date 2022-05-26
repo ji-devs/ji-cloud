@@ -14,7 +14,7 @@
 
 use super::mat4::Matrix4;
 use crate::resize::ResizeInfo;
-use shared::domain::jig::module::body::Transform;
+use shared::domain::module::body::Transform;
 
 pub trait TransformExt: Clone {
     fn to_mat4(&self) -> Matrix4;

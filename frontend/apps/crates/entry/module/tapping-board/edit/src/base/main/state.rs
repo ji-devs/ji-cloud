@@ -9,7 +9,7 @@ use futures_signals::{
 };
 use utils::prelude::*;
 
-use shared::domain::jig::module::body::tapping_board::Step;
+use shared::domain::module::body::tapping_board::Step;
 
 pub struct Main {
     pub base: Rc<Base>,

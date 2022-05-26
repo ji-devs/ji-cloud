@@ -4,7 +4,7 @@ use super::{
 };
 use crate::base::state::Base;
 use dominator::{html, Dom};
-use shared::domain::jig::module::body::legacy::activity::Activity;
+use shared::domain::module::body::legacy::activity::Activity;
 use std::rc::Rc;
 
 impl Base {

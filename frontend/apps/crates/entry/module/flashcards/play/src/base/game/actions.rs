@@ -4,7 +4,7 @@ use components::{
     module::_groups::cards::{lookup::Side, play::card::dom::FLIPPED_AUDIO_EFFECT},
 };
 use gloo_timers::future::TimeoutFuture;
-use shared::domain::jig::module::body::_groups::cards::{Card, CardPair};
+use shared::domain::module::body::_groups::cards::{Card, CardPair};
 
 use crate::base::state::Base;
 

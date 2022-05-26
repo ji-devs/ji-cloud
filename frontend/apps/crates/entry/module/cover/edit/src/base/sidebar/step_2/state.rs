@@ -11,7 +11,7 @@ use components::{
 };
 use dominator::clone;
 use futures_signals::signal::{Mutable, SignalExt};
-use shared::domain::jig::module::body::Audio;
+use shared::domain::module::body::Audio;
 use std::rc::Rc;
 
 pub struct Step2 {

@@ -1,5 +1,5 @@
 use crate::lists::dual::dom::ColumnSide;
-use shared::domain::jig::module::body::_groups::cards::Mode;
+use shared::domain::module::body::_groups::cards::Mode;
 
 pub const STR_DONE: &str = "Done";
 pub const STR_CLEAR: &str = "Clear";

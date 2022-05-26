@@ -1,7 +1,7 @@
 use crate::base::game::state::{CardPairId, Game};
 use components::module::_groups::cards::lookup::Side;
 use futures_signals::signal::Mutable;
-use shared::domain::jig::module::body::{
+use shared::domain::module::body::{
     ThemeId,
     _groups::cards::{Card, Mode},
 };

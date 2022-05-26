@@ -16,7 +16,7 @@ use futures_signals::{
     signal_vec::SignalVecExt,
 };
 
-use shared::domain::jig::module::body::_groups::design::TraceShape;
+use shared::domain::module::body::_groups::design::TraceShape;
 use web_sys::SvgElement;
 
 impl TracesEdit {

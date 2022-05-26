@@ -2,7 +2,7 @@ use super::card::state::*;
 use crate::base::state::Base;
 use futures_signals::signal::Mutable;
 use rand::prelude::*;
-use shared::domain::jig::module::body::_groups::cards::Card;
+use shared::domain::module::body::_groups::cards::Card;
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::atomic::AtomicUsize;

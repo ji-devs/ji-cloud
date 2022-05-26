@@ -2,7 +2,7 @@ use super::state::*;
 use components::module::_common::edit::prelude::*;
 use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
-use shared::domain::jig::module::body::tapping_board::Step;
+use shared::domain::module::body::tapping_board::Step;
 use std::rc::Rc;
 
 use super::{

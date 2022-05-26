@@ -11,15 +11,16 @@ use futures_signals::{
     signal::{Mutable, ReadOnlyMutable, Signal, SignalExt},
     signal_vec::{MutableVec, SignalVecExt},
 };
-use shared::domain::jig::{
+use shared::domain::{
     module::{
         body::{
             Audio, Background, BodyExt, Image, Instructions,
             _groups::cards::{self as raw, BaseContent, Mode, Step},
         },
         ModuleId,
+        ModuleKind,
     },
-    JigId, ModuleKind,
+    jig::JigId,
 };
 use utils::prelude::*;
 
@@ -28,7 +29,7 @@ pub trait RawDataExt: BodyExt<Mode, Step> + 'static {
     fn get_content_mut(&mut self) -> Option<&mut BaseContent>;
 }
 
-impl RawDataExt for shared::domain::jig::module::body::memory::ModuleData {
+impl RawDataExt for shared::domain::module::body::memory::ModuleData {
     fn get_content(&self) -> Option<&BaseContent> {
         self.content.as_ref().map(|content| &content.base)
     }
@@ -36,7 +37,7 @@ impl RawDataExt for shared::domain::jig::module::body::memory::ModuleData {
         self.content.as_mut().map(|content| &mut content.base)
     }
 }
-impl RawDataExt for shared::domain::jig::module::body::flashcards::ModuleData {
+impl RawDataExt for shared::domain::module::body::flashcards::ModuleData {
     fn get_content(&self) -> Option<&BaseContent> {
         self.content.as_ref().map(|content| &content.base)
     }
@@ -44,7 +45,7 @@ impl RawDataExt for shared::domain::jig::module::body::flashcards::ModuleData {
         self.content.as_mut().map(|content| &mut content.base)
     }
 }
-impl RawDataExt for shared::domain::jig::module::body::matching::ModuleData {
+impl RawDataExt for shared::domain::module::body::matching::ModuleData {
     fn get_content(&self) -> Option<&BaseContent> {
         self.content.as_ref().map(|content| &content.base)
     }
@@ -52,7 +53,7 @@ impl RawDataExt for shared::domain::jig::module::body::matching::ModuleData {
         self.content.as_mut().map(|content| &mut content.base)
     }
 }
-impl RawDataExt for shared::domain::jig::module::body::card_quiz::ModuleData {
+impl RawDataExt for shared::domain::module::body::card_quiz::ModuleData {
     fn get_content(&self) -> Option<&BaseContent> {
         self.content.as_ref().map(|content| &content.base)
     }

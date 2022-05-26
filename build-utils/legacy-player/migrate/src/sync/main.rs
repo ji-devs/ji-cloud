@@ -8,7 +8,7 @@ use structopt::StructOpt;
 use std::fs::{self, File};
 use std::io::{BufReader, Write};
 use serde::Deserialize;
-use shared::domain::jig::module::ModuleBody;
+use shared::domain::module::ModuleBody;
 use image::gif::{GifDecoder, GifEncoder};
 use image::{Frame, ImageDecoder, AnimationDecoder};
 use flate2::Compression;

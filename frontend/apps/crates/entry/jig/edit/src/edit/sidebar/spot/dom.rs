@@ -12,7 +12,7 @@ use crate::edit::sidebar::state::{
 };
 use components::module::_common::thumbnail::{ModuleThumbnail, ThumbnailFallback};
 use futures_signals::signal::{not, SignalExt};
-use shared::domain::jig::ModuleKind;
+use shared::domain::module::ModuleKind;
 use std::rc::Rc;
 use std::str::FromStr;
 use utils::prelude::*;

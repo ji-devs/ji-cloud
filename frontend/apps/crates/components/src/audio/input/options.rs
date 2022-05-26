@@ -1,5 +1,5 @@
 use futures_signals::signal::Signal;
-use shared::domain::jig::module::body::Audio;
+use shared::domain::module::body::Audio;
 
 pub struct AudioInputOptions<S: Signal<Item = Option<Audio>>> {
     /// This optional signal will cause the internal audio to change

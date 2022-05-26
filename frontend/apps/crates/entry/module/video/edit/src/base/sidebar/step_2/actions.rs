@@ -4,7 +4,7 @@ use components::stickers::{
     video::state::Video,
 };
 use js_sys::Reflect;
-use shared::domain::jig::module::body::_groups::design::VideoHost;
+use shared::domain::module::body::_groups::design::VideoHost;
 use std::rc::Rc;
 use wasm_bindgen::JsValue;
 use web_sys::HtmlElement;

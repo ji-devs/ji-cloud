@@ -1,5 +1,5 @@
 use futures_signals::signal::{Mutable, Signal, SignalExt};
-use shared::domain::jig::module::body::{
+use shared::domain::module::body::{
     Transform,
     _groups::design::{Video as RawVideo, VideoHost},
 };

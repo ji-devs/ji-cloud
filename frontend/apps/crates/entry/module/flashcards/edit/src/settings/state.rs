@@ -1,6 +1,6 @@
 use futures_signals::signal::Mutable;
 use rand::prelude::*;
-use shared::domain::jig::module::body::flashcards::{Content, DisplayMode};
+use shared::domain::module::body::flashcards::{Content, DisplayMode};
 use std::cell::RefCell;
 
 pub struct Settings {

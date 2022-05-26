@@ -9,7 +9,7 @@ use shared::domain::{
     additional_resource::AdditionalResource,
     asset::{AssetId, PrivacyLevel},
     category::CategoryId,
-    jig::LiteModule,
+    module::LiteModule,
     meta::{AffiliationId, AgeRangeId},
 };
 

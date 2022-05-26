@@ -3,7 +3,7 @@ use crate::module::_groups::design::edit::{
     design_ext::DesignExt, theme_background::STR_DESIGN_FROM_SCRATCH,
 };
 use dominator::{clone, html, Dom};
-use shared::domain::jig::module::body::StepExt;
+use shared::domain::module::body::StepExt;
 use std::rc::Rc;
 use utils::prelude::*;
 

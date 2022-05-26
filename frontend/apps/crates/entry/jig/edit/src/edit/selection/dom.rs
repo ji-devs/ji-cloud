@@ -5,7 +5,7 @@ use dominator::{clone, html, Dom};
 
 use super::super::state::State;
 use super::module::dom::ModuleDom;
-use shared::domain::jig::ModuleKind;
+use shared::domain::module::ModuleKind;
 use utils::events;
 
 static MODULE_KINDS: &[ModuleKind] = &[

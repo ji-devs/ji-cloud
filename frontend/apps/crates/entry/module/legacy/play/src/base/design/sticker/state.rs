@@ -1,4 +1,4 @@
-use shared::domain::jig::module::body::legacy::design::Sticker as RawSticker;
+use shared::domain::module::body::legacy::design::Sticker as RawSticker;
 
 use std::rc::Rc;
 

@@ -1,4 +1,4 @@
-use shared::domain::jig::ModuleKind;
+use shared::domain::module::ModuleKind;
 use std::rc::Rc;
 use utils::routes::{ModuleRoute, Route};
 

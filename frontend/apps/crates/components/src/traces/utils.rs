@@ -1,5 +1,5 @@
 use super::svg::helpers::{path_command_to_string, path_to_string};
-use shared::domain::jig::module::body::_groups::design::{
+use shared::domain::module::body::_groups::design::{
     PathCommand, Trace as RawTrace, TraceShape as RawTraceShape,
 };
 use utils::{math::BoundsF64, prelude::*, resize::ResizeInfo};

@@ -1,6 +1,6 @@
 use super::state::State;
 use dominator::{clone, Dom};
-use shared::domain::jig::module::body::video::DoneAction;
+use shared::domain::module::body::video::DoneAction;
 use std::rc::Rc;
 
 use components::module::_common::edit::settings::prelude::*;

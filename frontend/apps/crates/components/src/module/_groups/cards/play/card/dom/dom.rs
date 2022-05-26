@@ -1,6 +1,6 @@
 use crate::module::_groups::cards::lookup::Side;
 use dominator::{html, Dom, DomBuilder};
-use shared::domain::jig::module::body::{
+use shared::domain::module::body::{
     ModeExt,
     _groups::cards::{Card, Mode},
 };

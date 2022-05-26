@@ -2,13 +2,12 @@ use super::state::*;
 use shared::{
     api::endpoints::{self, ApiEndpoint},
     domain::{
-        jig::{
-            module::{
-                body::{BodyExt, ModeExt, StepExt},
-                ModuleCreateRequest, ModuleId,
-            },
-            JigFocus, LiteModule, ModuleKind,
+        module::{
+            body::{BodyExt, ModeExt, StepExt},
+            ModuleCreateRequest, ModuleId,
+            LiteModule, ModuleKind,
         },
+        jig::JigFocus,
         CreateResponse,
     },
     error::EmptyError,
@@ -59,15 +58,17 @@ impl PostPreview {
     {
         let target_body = raw_data.convert_to_body(target_kind).unwrap_ji();
 
-        let path = endpoints::jig::module::Create::PATH.replace("{id}", &self.jig_id.0.to_string());
-        let req = ModuleCreateRequest { body: target_body };
+        let req = ModuleCreateRequest {
+            body: target_body,
+            parent_id: self.jig_id.into(),
+        };
 
         let jig_id = self.jig_id;
 
         self.loader.load(async move {
             let res = api_with_auth::<CreateResponse<ModuleId>, EmptyError, ModuleCreateRequest>(
-                &path,
-                endpoints::jig::module::Create::METHOD,
+                endpoints::module::Create::PATH,
+                endpoints::module::Create::METHOD,
                 Some(req),
             )
             .await;

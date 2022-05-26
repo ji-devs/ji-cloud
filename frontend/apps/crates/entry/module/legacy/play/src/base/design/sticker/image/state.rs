@@ -4,7 +4,7 @@ use crate::base::state::Base;
 use std::{cell::RefCell, rc::Rc, sync::atomic::AtomicBool};
 use web_sys::Element;
 
-use shared::domain::jig::module::body::legacy::design::{
+use shared::domain::module::body::legacy::design::{
     HideToggle, Sticker as RawSticker, StickerKind as RawStickerKind,
 };
 

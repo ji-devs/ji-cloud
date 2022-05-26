@@ -15,7 +15,7 @@ use futures_signals::{
     signal::{Signal, SignalExt},
     signal_vec::MutableVecLockRef,
 };
-use shared::domain::jig::module::body::_groups::design::TraceShape as RawTraceShape;
+use shared::domain::module::body::_groups::design::TraceShape as RawTraceShape;
 use std::rc::Rc;
 use utils::resize::{resize_info_signal, ResizeInfo};
 

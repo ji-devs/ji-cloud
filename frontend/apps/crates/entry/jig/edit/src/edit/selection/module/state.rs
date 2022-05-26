@@ -4,7 +4,7 @@ use futures_signals::{
     map_ref,
     signal::{Mutable, Signal},
 };
-use shared::domain::jig::ModuleKind;
+use shared::domain::module::ModuleKind;
 use utils::drag::Drag;
 use web_sys::HtmlElement;
 

@@ -2,7 +2,7 @@ use crate::base::state::Base;
 use std::rc::Rc;
 
 use dominator::clone;
-use shared::domain::jig::module::body::legacy::activity::SaySomething as RawSaySomething;
+use shared::domain::module::body::legacy::activity::SaySomething as RawSaySomething;
 
 pub struct SaySomething {
     pub base: Rc<Base>,

@@ -8,7 +8,7 @@ use futures_signals::signal::SignalExt;
 use std::rc::Rc;
 use web_sys::HtmlElement;
 
-use shared::domain::jig::module::body::flashcards::DisplayMode;
+use shared::domain::module::body::flashcards::DisplayMode;
 
 use utils::prelude::*;
 

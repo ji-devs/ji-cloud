@@ -2,7 +2,7 @@ use crate::base::{activities::_common::hotspot::*, state::Base};
 use dominator::clone;
 use futures_signals::signal::Mutable;
 use gloo_timers::callback::Timeout;
-use shared::domain::jig::module::body::legacy::activity::{
+use shared::domain::module::body::legacy::activity::{
     AskQuestions as RawAskQuestions, QuestionItem as RawQuestionItem,
 };
 use std::{cell::RefCell, rc::Rc, sync::atomic::AtomicU8};

@@ -6,7 +6,8 @@ use futures_signals::{
 };
 use shared::domain::{
     asset::Asset,
-    jig::{JigResponse, LiteModule},
+    jig::JigResponse,
+    module::LiteModule,
 };
 use std::rc::Rc;
 use utils::math::PointI32;

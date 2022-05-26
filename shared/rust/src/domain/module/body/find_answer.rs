@@ -12,7 +12,7 @@ use std::convert::TryFrom;
 mod play_settings;
 pub use play_settings::*;
 
-/// The body for [`FindAnswer`](crate::domain::jig::module::ModuleKind::FindAnswer) modules.
+/// The body for [`FindAnswer`](crate::domain::module::ModuleKind::FindAnswer) modules.
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]
 pub struct ModuleData {
     /// The content
@@ -100,7 +100,7 @@ impl TryFrom<Body> for ModuleData {
     }
 }
 
-/// The body for [`FindAnswer`](crate::domain::jig::module::ModuleKind::FindAnswer) modules.
+/// The body for [`FindAnswer`](crate::domain::module::ModuleKind::FindAnswer) modules.
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]
 pub struct Content {
     /// The base content for all design modules

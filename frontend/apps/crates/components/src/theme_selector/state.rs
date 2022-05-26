@@ -1,4 +1,4 @@
-use shared::domain::jig::module::body::ThemeId;
+use shared::domain::module::body::ThemeId;
 
 use futures_signals::signal::{ReadOnlyMutable, Signal, SignalExt};
 

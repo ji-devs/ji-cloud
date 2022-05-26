@@ -3,7 +3,7 @@ use futures_signals::signal::SignalExt;
 use std::rc::Rc;
 
 use super::state::PlaySettingsState;
-use shared::domain::jig::module::body::drag_drop::{Hint, Next};
+use shared::domain::module::body::drag_drop::{Hint, Next};
 
 use components::module::_common::edit::settings::prelude::*;
 

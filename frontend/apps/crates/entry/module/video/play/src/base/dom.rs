@@ -9,8 +9,8 @@ use components::{
     },
 };
 use dominator::{clone, html, Dom};
-use shared::domain::jig::module::body::_groups::design::Sticker as RawSticker;
-use shared::domain::jig::module::body::video::DoneAction;
+use shared::domain::module::body::_groups::design::Sticker as RawSticker;
+use shared::domain::module::body::video::DoneAction;
 use std::rc::Rc;
 
 use super::state::*;

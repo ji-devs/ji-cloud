@@ -2,7 +2,7 @@
 use once_cell::sync::OnceCell;
 
 use serde::Deserialize;
-use shared::domain::jig::module::body::_groups::cards::Mode;
+use shared::domain::module::body::_groups::cards::Mode;
 use utils::prelude::*;
 
 pub const MAX_LIST_WORDS: usize = 14;

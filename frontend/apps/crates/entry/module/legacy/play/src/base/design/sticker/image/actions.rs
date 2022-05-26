@@ -2,7 +2,7 @@ use super::state::Controller;
 use std::sync::atomic::Ordering;
 
 use crate::base::actions::StageClick;
-use shared::domain::jig::module::body::legacy::design::HideToggle;
+use shared::domain::module::body::legacy::design::HideToggle;
 use utils::math::bounds::BoundsF64;
 
 impl Controller {

@@ -4,7 +4,7 @@ use futures_signals::{
     signal_vec::{MutableVec, SignalVecExt},
 };
 
-use shared::domain::jig::module::body::{
+use shared::domain::module::body::{
     Audio,
     _groups::design::{Trace as RawTrace, TraceKind},
 };

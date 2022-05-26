@@ -5,7 +5,7 @@ use serde::{
     de::{self, Deserializer},
     Deserialize,
 };
-pub use shared::domain::jig::module::body::ThemeId;
+pub use shared::domain::module::body::ThemeId;
 use std::{fmt, marker::PhantomData};
 
 //Set lazily, first time as-needed

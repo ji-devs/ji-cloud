@@ -3,7 +3,7 @@ use super::{
     sidebar::state::Sidebar, state::*,
 };
 use components::module::_common::edit::prelude::*;
-use shared::domain::jig::module::body::{
+use shared::domain::module::body::{
     Audio,
     _groups::design::Trace as RawTrace,
     drag_drop::{

@@ -3,15 +3,15 @@ use dominator::{clone, Dom, DomHandle};
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::Mutable;
 use shared::domain::asset::{DraftOrLive, PrivacyLevel};
-use shared::domain::jig::module::body::Instructions;
+use shared::domain::module::body::Instructions;
 use shared::{
-    api::endpoints::{self, jig::module::*, ApiEndpoint},
-    domain::jig::{
+    api::endpoints::{self, module::*, ApiEndpoint},
+    domain::{
         module::{
             body::{BodyExt, ModeExt, StepExt, ThemeId},
             *,
         },
-        *,
+        jig::*,
     },
     error::EmptyError,
 };
@@ -113,6 +113,7 @@ where
                         other_keywords: String::from(""),
                         translated_keywords: String::from(""),
                         translated_description: HashMap::new(),
+                        cover: None,
                     })
                 } else {
 

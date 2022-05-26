@@ -1,7 +1,7 @@
 use once_cell::sync::OnceCell;
 
 use serde::Deserialize;
-use shared::domain::jig::module::body::_groups::cards::Mode;
+use shared::domain::module::body::_groups::cards::Mode;
 use utils::prelude::*;
 
 pub static DUAL_LIST_CHAR_LIMIT: usize = 30;

@@ -2,7 +2,7 @@ use crate::base::sidebar::state::Sidebar;
 use components::audio::input::{AudioInput, AudioInputCallbacks, AudioInputOptions};
 use dominator::clone;
 use futures_signals::signal::SignalExt;
-use shared::domain::jig::module::body::Audio;
+use shared::domain::module::body::Audio;
 use std::rc::Rc;
 
 pub struct Step3 {

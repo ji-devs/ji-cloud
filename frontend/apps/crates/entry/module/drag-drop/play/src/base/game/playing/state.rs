@@ -4,7 +4,7 @@ use futures_signals::{
     signal::{Mutable, Signal, SignalExt},
     signal_vec::{self, SignalVecExt},
 };
-use shared::domain::jig::module::body::{
+use shared::domain::module::body::{
     Audio, Transform,
     _groups::design::Sticker,
     drag_drop::{Interactive, ItemKind},

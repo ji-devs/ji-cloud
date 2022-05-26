@@ -3,7 +3,7 @@ use std::rc::Rc;
 use components::stickers::video::ext::YoutubeUrlExt;
 use dominator::{clone, html, with_node, Dom};
 use futures_signals::signal::SignalExt;
-use shared::domain::jig::module::body::_groups::design::{VideoHost, YoutubeUrl};
+use shared::domain::module::body::_groups::design::{VideoHost, YoutubeUrl};
 use utils::events;
 use web_sys::{HtmlElement, HtmlInputElement};
 

@@ -1,5 +1,5 @@
 use super::state::*;
-use shared::domain::jig::module::body::ThemeId;
+use shared::domain::module::body::ThemeId;
 
 impl ThemeSelector {
     pub fn set_theme(&self, theme: ThemeId) {

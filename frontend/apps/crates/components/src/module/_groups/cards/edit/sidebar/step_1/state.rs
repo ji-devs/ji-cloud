@@ -22,7 +22,7 @@ use futures_signals::signal::Mutable;
 use once_cell::sync::OnceCell;
 use shared::{
     config as shared_config,
-    domain::jig::module::body::{Image, _groups::cards::Mode},
+    domain::module::body::{Image, _groups::cards::Mode},
 };
 use std::rc::Rc;
 

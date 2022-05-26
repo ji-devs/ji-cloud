@@ -1,4 +1,4 @@
-use shared::domain::jig::module::body::_groups::design::Backgrounds as RawBackgrounds;
+use shared::domain::module::body::_groups::design::Backgrounds as RawBackgrounds;
 
 pub struct Callbacks {
     pub on_change: Option<Box<dyn Fn(RawBackgrounds)>>,

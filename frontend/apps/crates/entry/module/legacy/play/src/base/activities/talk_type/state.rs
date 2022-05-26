@@ -9,7 +9,7 @@ use unicode_segmentation::UnicodeSegmentation;
 use utils::{math::BoundsF64, prelude::*};
 
 use dominator::clone;
-use shared::domain::jig::module::body::legacy::activity::{
+use shared::domain::module::body::legacy::activity::{
     TalkType as RawTalkType, TalkTypeItem as RawTalkTypeItem,
 };
 

@@ -1,4 +1,4 @@
-use shared::domain::jig::module::body::_groups::design::PathCommand;
+use shared::domain::module::body::_groups::design::PathCommand;
 use std::fmt::Write;
 use utils::prelude::*;
 

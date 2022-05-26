@@ -5,7 +5,7 @@ use super::super::{base::state::*, state::GenericState, state::*};
 use std::future::Future;
 use std::{marker::PhantomData, rc::Rc};
 
-use shared::domain::jig::module::body::{BodyExt, ModeExt, StepExt};
+use shared::domain::module::body::{BodyExt, ModeExt, StepExt};
 use utils::prelude::*;
 
 pub struct Choose<RawData, Mode, Step>

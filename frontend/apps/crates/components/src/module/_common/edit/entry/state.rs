@@ -13,18 +13,18 @@ use dominator_helpers::{futures::AsyncLoader, signals::OptionSignal};
 
 //use super::actions::{HistoryChangeFn, HistoryUndoRedoFn};
 use super::{actions::*, base::state::*, choose::state::*};
-use shared::domain::jig::{
+use shared::domain::{
     module::{
         body::{BodyExt, StepExt},
         ModuleId,
     },
-    JigId,
+    jig::JigId,
 };
 use shared::{
-    api::endpoints::{self, jig::module::*, ApiEndpoint},
-    domain::jig::{
+    api::endpoints::{self, module::*, ApiEndpoint},
+    domain::{
         module::{body::ModeExt, *},
-        *,
+        jig::*,
     },
     error::EmptyError,
 };
@@ -190,6 +190,7 @@ where
                         other_keywords: String::from(""),
                         translated_keywords: String::from(""),
                         translated_description: HashMap::new(),
+                        cover: None,
                     });
                 }
 

@@ -1,6 +1,6 @@
 use crate::module::_groups::cards::edit::state::*;
-use shared::domain::jig::module::body::_groups::cards::{CardPair as RawCardPair, Mode};
-use shared::domain::jig::module::body::{Background, ThemeId};
+use shared::domain::module::body::_groups::cards::{CardPair as RawCardPair, Mode};
+use shared::domain::module::body::{Background, ThemeId};
 use unicode_segmentation::UnicodeSegmentation;
 use utils::prelude::*;
 

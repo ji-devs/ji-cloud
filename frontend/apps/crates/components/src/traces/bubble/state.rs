@@ -6,7 +6,7 @@ use crate::tooltip::state::{
 use crate::tooltip::state::{MoveStrategy, TooltipContainer};
 use dominator::clone;
 use futures_signals::signal::Mutable;
-use shared::domain::jig::module::body::Audio;
+use shared::domain::module::body::Audio;
 use std::cell::Cell;
 use std::cell::RefCell;
 use std::rc::Rc;

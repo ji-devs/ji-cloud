@@ -10,7 +10,7 @@ use crate::edit::sidebar::{
     state::{SidebarSpotItem, State as SidebarState},
 };
 use dominator::{clone, html, Dom, EventOptions};
-use shared::domain::jig::{module::ModuleId, LiteModule, ModuleKind};
+use shared::domain::module::{ModuleId, LiteModule, ModuleKind};
 use std::rc::Rc;
 use utils::events;
 

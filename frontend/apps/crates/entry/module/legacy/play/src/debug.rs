@@ -15,17 +15,15 @@ use shared::{
     domain::{
         audio::AudioId,
         image::ImageId,
-        jig::{
-            module::{
-                body::{
-                    Background, Image, Instructions, Transform,
-                    _groups::design::{Backgrounds, BaseContent, Sprite, Sticker, Text, Trace},
-                    legacy::ModuleData as RawData,
-                },
-                ModuleBody, ModuleCreateRequest, ModuleId,
+        module::{
+            body::{
+                Background, Image, Instructions, Transform,
+                _groups::design::{Backgrounds, BaseContent, Sprite, Sticker, Text, Trace},
+                legacy::ModuleData as RawData,
             },
-            JigId,
+            ModuleBody, ModuleCreateRequest, ModuleId,
         },
+        jig::JigId,
     },
     media::MediaLibrary,
 };

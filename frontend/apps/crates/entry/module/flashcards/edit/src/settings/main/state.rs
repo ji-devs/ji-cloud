@@ -1,6 +1,6 @@
 use crate::state::*;
 use futures_signals::signal::Mutable;
-use shared::domain::jig::module::body::{_groups::cards::Card, flashcards::DisplayMode};
+use shared::domain::module::body::{_groups::cards::Card, flashcards::DisplayMode};
 use std::rc::Rc;
 use utils::prelude::*;
 

@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use shared::domain::jig::module::body::Image;
+use shared::domain::module::body::Image;
 use url::Url;
 use utils::unwrap::UnwrapJiExt;
 

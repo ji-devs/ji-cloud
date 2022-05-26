@@ -1,7 +1,7 @@
 use futures_signals::signal::{Mutable, ReadOnlyMutable};
 
 use super::callbacks::Callbacks;
-use shared::domain::jig::module::body::{
+use shared::domain::module::body::{
     Background, ThemeId, _groups::design::Backgrounds as RawBackgrounds,
 };
 

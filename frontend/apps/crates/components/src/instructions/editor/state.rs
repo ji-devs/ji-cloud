@@ -1,5 +1,5 @@
 use futures_signals::signal::{Mutable, Signal, SignalExt};
-use shared::domain::jig::module::body::{Audio, Instructions};
+use shared::domain::module::body::{Audio, Instructions};
 
 use super::callbacks::Callbacks;
 

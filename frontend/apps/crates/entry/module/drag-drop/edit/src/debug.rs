@@ -4,22 +4,20 @@ use once_cell::sync::OnceCell;
 use shared::{
     domain::{
         image::ImageId,
-        jig::{
-            module::{
-                body::{
-                    Image, Instructions, Transform,
-                    _groups::design::{
-                        Backgrounds, Sprite, Sticker, Text, Trace, TraceKind, TraceShape,
-                    },
-                    drag_drop::{
-                        Content, Hint, Interactive, Item, ItemKind, Mode, ModuleData as RawData,
-                        PlaySettings, Step, TargetArea,
-                    },
+        module::{
+            body::{
+                Image, Instructions, Transform,
+                _groups::design::{
+                    Backgrounds, Sprite, Sticker, Text, Trace, TraceKind, TraceShape,
                 },
-                ModuleId,
+                drag_drop::{
+                    Content, Hint, Interactive, Item, ItemKind, Mode, ModuleData as RawData,
+                    PlaySettings, Step, TargetArea,
+                },
             },
-            JigId,
+            ModuleId,
         },
+        jig::JigId,
     },
     media::MediaLibrary,
 };

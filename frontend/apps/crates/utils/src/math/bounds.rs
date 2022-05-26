@@ -6,7 +6,7 @@ use futures_signals::{
     map_ref,
     signal::{Signal, SignalExt},
 };
-use shared::domain::jig::module::body::Transform;
+use shared::domain::module::body::Transform;
 
 use crate::{prelude::*, resize::resize_info_signal};
 

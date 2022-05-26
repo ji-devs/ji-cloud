@@ -3,7 +3,7 @@ use super::{
     sidebar::state::Sidebar, state::*,
 };
 use components::module::_common::edit::prelude::*;
-use shared::domain::jig::module::body::{
+use shared::domain::module::body::{
     _groups::design::Trace,
     tapping_board::{Mode, ModuleData as RawData, Step},
 };

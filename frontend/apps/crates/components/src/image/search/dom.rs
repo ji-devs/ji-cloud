@@ -7,7 +7,7 @@ use futures_signals::{
     signal_vec::{MutableVec, SignalVec, SignalVecExt},
 };
 use shared::domain::{
-    jig::module::body::Image,
+    module::body::Image,
     search::{ImageType, WebImageSearchItem},
 };
 use std::{pin::Pin, rc::Rc};

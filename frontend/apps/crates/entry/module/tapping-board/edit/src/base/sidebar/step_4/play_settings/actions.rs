@@ -1,5 +1,5 @@
 use super::state::State;
-use shared::domain::jig::module::body::tapping_board::{Hint, Next};
+use shared::domain::module::body::tapping_board::{Hint, Next};
 
 impl State {
     pub fn set_hint(&self, hint: Hint) {

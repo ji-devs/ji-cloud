@@ -12,7 +12,7 @@ use futures_signals::{
 };
 
 use super::super::state::Sidebar;
-use shared::domain::jig::module::body::Audio;
+use shared::domain::module::body::Audio;
 
 pub struct Step3 {
     pub sidebar: Rc<Sidebar>,

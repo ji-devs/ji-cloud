@@ -1,7 +1,7 @@
 use utils::image_effects::ImageEffect;
 
 use super::state::Sprite;
-use shared::domain::jig::module::body::{Image, _groups::design::SpriteEffect};
+use shared::domain::module::body::{Image, _groups::design::SpriteEffect};
 
 impl Sprite {
     pub fn remove_white(&self) {

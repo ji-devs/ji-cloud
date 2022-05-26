@@ -4,17 +4,15 @@ use once_cell::sync::OnceCell;
 use shared::{
     domain::{
         image::ImageId,
-        jig::{
-            module::{
-                body::{
-                    Image, Instructions,
-                    _groups::design::{Backgrounds, BaseContent, Sprite, Sticker, Text},
-                    cover::{Content, ModuleData as RawData},
-                },
-                ModuleId,
+        module::{
+            body::{
+                Image, Instructions,
+                _groups::design::{Backgrounds, BaseContent, Sprite, Sticker, Text},
+                cover::{Content, ModuleData as RawData},
             },
-            JigId,
+            ModuleId,
         },
+        jig::JigId,
     },
     media::MediaLibrary,
 };

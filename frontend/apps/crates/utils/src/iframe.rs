@@ -1,6 +1,6 @@
 use crate::unwrap::UnwrapJiExt;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
-use shared::domain::jig::{module::ModuleId, LiteModule};
+use shared::domain::module::{ModuleId, LiteModule};
 use std::cell::Cell;
 use wasm_bindgen::prelude::*;
 

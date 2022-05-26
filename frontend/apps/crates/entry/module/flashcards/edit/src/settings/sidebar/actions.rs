@@ -1,6 +1,6 @@
 use super::state::*;
 
-use shared::domain::jig::module::body::flashcards::DisplayMode;
+use shared::domain::module::body::flashcards::DisplayMode;
 
 impl SidebarSettings {
     pub fn set_display_mode(&self, display_mode: DisplayMode) {

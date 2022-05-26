@@ -1,6 +1,6 @@
 use crate::base::state::*;
 
-use shared::domain::jig::module::body::_groups::design::Sticker as RawSticker;
+use shared::domain::module::body::_groups::design::Sticker as RawSticker;
 use std::rc::Rc;
 use utils::drag::Drag;
 

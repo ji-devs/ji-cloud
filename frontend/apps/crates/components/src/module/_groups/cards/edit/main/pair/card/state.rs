@@ -2,7 +2,7 @@ use super::callbacks::*;
 use crate::module::_groups::cards::{edit::state::*, lookup::Side};
 
 use futures_signals::signal::{Mutable, ReadOnlyMutable};
-use shared::domain::jig::module::body::_groups::cards::Step;
+use shared::domain::module::body::_groups::cards::Step;
 use std::{cell::RefCell, rc::Rc};
 use web_sys::HtmlElement;
 

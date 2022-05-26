@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use shared::domain::jig::module::body::legacy::design::Animation;
+use shared::domain::module::body::legacy::design::Animation;
 use uuid::Uuid;
 
 #[derive(Clone, Debug)]

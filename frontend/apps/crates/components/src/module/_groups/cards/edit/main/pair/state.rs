@@ -3,7 +3,7 @@ use crate::module::_groups::cards::{edit::state::*, lookup::Side};
 use futures_signals::signal::ReadOnlyMutable;
 use std::rc::Rc;
 
-use shared::domain::jig::module::body::_groups::cards::Step;
+use shared::domain::module::body::_groups::cards::Step;
 pub struct MainPair<RawData: RawDataExt, E: ExtraExt> {
     pub base: Rc<CardsBase<RawData, E>>,
     pub step: Step,

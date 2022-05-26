@@ -3,7 +3,7 @@ use super::{
     sidebar::state::Sidebar, state::*,
 };
 use components::module::_common::edit::prelude::*;
-use shared::domain::jig::module::body::cover::{ModuleData as RawData, Step};
+use shared::domain::module::body::cover::{ModuleData as RawData, Step};
 use std::rc::Rc;
 
 pub async fn init_from_raw(

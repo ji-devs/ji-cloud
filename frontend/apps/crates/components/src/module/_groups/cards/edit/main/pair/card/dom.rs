@@ -17,7 +17,7 @@ use crate::{
     overlay::handle::OverlayHandle,
 };
 use futures_signals::signal::SignalExt;
-use shared::domain::jig::module::body::{
+use shared::domain::module::body::{
     ModeExt,
     _groups::cards::{Mode, Step},
 };

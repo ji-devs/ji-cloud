@@ -6,7 +6,7 @@ use futures_signals::{
     signal::{Mutable, Signal, SignalExt},
     signal_vec::{SignalVec, SignalVecExt},
 };
-use shared::domain::jig::module::body::_groups::design::Sticker as RawSticker;
+use shared::domain::module::body::_groups::design::Sticker as RawSticker;
 use std::rc::Rc;
 use utils::drag::Drag;
 

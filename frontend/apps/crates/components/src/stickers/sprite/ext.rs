@@ -1,4 +1,4 @@
-use shared::domain::jig::module::body::{Image, Transform, _groups::design::Sprite};
+use shared::domain::module::body::{Image, Transform, _groups::design::Sprite};
 
 pub trait SpriteExt {
     fn new(image: Image) -> Self;

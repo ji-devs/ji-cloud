@@ -1,6 +1,6 @@
 use super::super::{base::state::*, state::*};
 use dominator::{html, Dom};
-use shared::domain::jig::module::body::{BodyExt, ModeExt, StepExt};
+use shared::domain::module::body::{BodyExt, ModeExt, StepExt};
 use std::rc::Rc;
 
 pub fn render<Mode, Step, RawData, Base, Main, Sidebar, Header, Footer, Overlay>(

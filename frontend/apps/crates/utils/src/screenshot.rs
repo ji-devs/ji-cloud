@@ -5,7 +5,7 @@ use crate::unwrap::UnwrapJiExt;
 use awsm_web::loaders::fetch::fetch_url;
 use shared::domain::{
     asset::AssetId,
-    jig::{module::ModuleId, ModuleKind},
+    module::{ModuleId, ModuleKind},
 };
 
 pub const SCREENSHOT_PARAM: &str = "screenshot";

@@ -3,7 +3,7 @@ use components::module::_common::play::entry::dom::render_page_body;
 use dominator::clone;
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::SignalExt;
-use shared::domain::jig::ModuleKind;
+use shared::domain::module::ModuleKind;
 use std::cell::RefCell;
 use std::rc::Rc;
 use utils::routes::{ModuleRoute, Route};

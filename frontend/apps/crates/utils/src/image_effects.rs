@@ -6,7 +6,7 @@ use web_sys::{
 
 use wasm_bindgen::JsCast;
 
-use shared::{domain::jig::module::body::Image, media::PngImageFile};
+use shared::{domain::module::body::Image, media::PngImageFile};
 
 pub struct ImageEffect {
     pub image_element: HtmlImageElement,

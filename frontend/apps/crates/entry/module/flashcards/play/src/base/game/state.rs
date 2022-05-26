@@ -4,7 +4,7 @@ use components::module::_groups::cards::lookup::Side;
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::Mutable;
 use rand::prelude::*;
-use shared::domain::jig::module::body::_groups::cards::{Card, CardPair};
+use shared::domain::module::body::_groups::cards::{Card, CardPair};
 use std::cell::RefCell;
 use std::rc::Rc;
 use utils::prelude::*;

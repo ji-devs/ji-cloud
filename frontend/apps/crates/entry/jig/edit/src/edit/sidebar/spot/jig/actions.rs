@@ -4,7 +4,7 @@ use crate::edit::sidebar::state::{SidebarSpot, SidebarSpotItem};
 use dominator::clone;
 use shared::{
     api::{endpoints, ApiEndpoint},
-    domain::{jig::module::*, jig::*, CreateResponse},
+    domain::{module::*, jig::*, CreateResponse},
     error::EmptyError,
 };
 use std::rc::Rc;
@@ -36,16 +36,16 @@ pub fn edit(state: Rc<SpotState>) {
 
 pub async fn delete(state: Rc<SpotState>) {
     if let Some(module) = &*state.module.item.unwrap_module() {
-        let path = endpoints::jig::module::Delete::PATH
-            .replace("{id}", &state.sidebar.asset.unwrap_jig().id.0.to_string());
+        let path = endpoints::module::Delete::PATH
+            .replace("{module_id}", &module.id.0.to_string());
 
         let req = ModuleDeleteRequest {
-            id: StableOrUniqueId::Unique(module.id),
+            parent_id: state.sidebar.asset.id()
         };
 
         api_with_auth_empty::<EmptyError, _>(
             &path,
-            endpoints::jig::module::Delete::METHOD,
+            endpoints::module::Delete::METHOD,
             Some(req),
         )
         .await
@@ -58,11 +58,15 @@ pub fn assign_kind(state: Rc<SpotState>, kind: ModuleKind) {
         let jig_id = state.sidebar.asset.unwrap_jig().id;
 
         let req = Some(ModuleCreateRequest {
+            parent_id: jig_id.into(),
             body: ModuleBody::new(kind),
         });
-        let path = endpoints::jig::module::Create::PATH.replace("{id}", &jig_id.0.to_string());
 
-        match api_with_auth::<CreateResponse<ModuleId>, EmptyError, _>(&path, endpoints::jig::module::Create::METHOD, req).await {
+        match api_with_auth::<CreateResponse<ModuleId>, EmptyError, _>(
+            endpoints::module::Create::PATH,
+            endpoints::module::Create::METHOD,
+            req
+        ).await {
             Ok(resp) => {
                 let id = resp.id;
                 let index = state.index;
@@ -101,13 +105,14 @@ pub fn assign_kind(state: Rc<SpotState>, kind: ModuleKind) {
                 }
 
                 let req = ModuleUpdateRequest {
-                    id: StableOrUniqueId::Unique(id),
+                    // id: StableOrUniqueId::Unique(id),
+                    parent_id: jig_id.into(),
                     index: Some(index.try_into().unwrap_ji()),
                     body: None,
                     is_complete: None,
                 };
 
-                match jig_actions::update_module(&jig_id, &id, req).await {
+                match jig_actions::update_module(&id, req).await {
                     Ok(_) => {
                         state.sidebar.collapsed.set(true);
                         state.sidebar.jig_edit_state.set_route_jig(JigEditRoute::Module(id));
@@ -131,11 +136,12 @@ pub fn assign_kind(state: Rc<SpotState>, kind: ModuleKind) {
 
 pub async fn update_module_index(state: Rc<SpotState>, module: &LiteModule, index: u16) {
     let req = ModuleUpdateRequest {
-        id: StableOrUniqueId::Unique(module.id),
+        // id: StableOrUniqueId::Unique(module.id),
+        parent_id: state.sidebar.asset.id(),
         index: Some(index),
         body: None,
         is_complete: None,
     };
 
-    let _ = jig_actions::update_module(&state.sidebar.asset.unwrap_jig().id, &module.id, req).await;
+    let _ = jig_actions::update_module(&module.id, req).await;
 }

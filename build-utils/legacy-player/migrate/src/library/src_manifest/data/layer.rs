@@ -4,7 +4,7 @@ use std::path::{Path, PathBuf};
 use std::fs::File;
 use std::fmt;
 use super::*;
-use shared::domain::jig::module::body::legacy::design::StickerKind as DestStickerKind;
+use shared::domain::module::body::legacy::design::StickerKind as DestStickerKind;
 
 #[derive(Deserialize, Debug, Clone)]
 pub struct Layer {

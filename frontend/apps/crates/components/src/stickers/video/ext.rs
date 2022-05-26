@@ -1,5 +1,5 @@
 use regex::Regex;
-use shared::domain::jig::module::body::{
+use shared::domain::module::body::{
     Transform,
     _groups::design::{Video, VideoHost, YoutubeUrl},
 };
@@ -118,7 +118,7 @@ impl YoutubeUrlExt for YoutubeUrl {
 
 #[cfg(test)]
 mod tests {
-    use shared::domain::jig::module::body::_groups::design::YoutubeUrl;
+    use shared::domain::module::body::_groups::design::YoutubeUrl;
 
     use crate::stickers::video::ext::YoutubeUrlExt;
 

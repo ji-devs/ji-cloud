@@ -7,7 +7,7 @@ use futures_signals::{
 
 use components::module::_groups::cards::lookup::Side;
 use rand::prelude::*;
-use shared::domain::jig::module::body::_groups::cards::Card;
+use shared::domain::module::body::_groups::cards::Card;
 use std::rc::Rc;
 
 pub struct MainSettings {

@@ -19,7 +19,7 @@ use dominator_helpers::signals::DefaultSignal;
 use futures_signals::signal::{Mutable, ReadOnlyMutable, SignalExt};
 use gloo_timers::future::TimeoutFuture;
 use js_sys::Reflect;
-use shared::domain::jig::module::body::{
+use shared::domain::module::body::{
     _groups::design::{Video as RawVideo, VideoHost, YoutubeUrl},
     video::DoneAction,
 };

@@ -1,6 +1,6 @@
 use super::state::*;
 use dominator::{clone, html, Dom};
-use shared::domain::jig::module::body::{BodyExt, ModeExt, StepExt};
+use shared::domain::module::body::{BodyExt, ModeExt, StepExt};
 use std::rc::Rc;
 use utils::prelude::*;
 

@@ -13,7 +13,7 @@ use web_sys::SvgElement;
 
 use super::{super::utils::*, helpers::*, state::*, styles::*};
 
-use shared::domain::jig::module::body::{
+use shared::domain::module::body::{
     Transform,
     _groups::design::{PathCommand, Trace, TraceShape},
 };

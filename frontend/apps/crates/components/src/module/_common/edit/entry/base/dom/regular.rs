@@ -11,7 +11,7 @@ use wasm_bindgen::JsValue;
 
 use crate::{jigzi_help::JigziHelp, module::_common::edit::header::controller::dom::ControllerDom};
 
-use shared::domain::jig::module::body::{BodyExt, ModeExt, StepExt};
+use shared::domain::module::body::{BodyExt, ModeExt, StepExt};
 use utils::prelude::*;
 
 pub fn render_main_bg<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(

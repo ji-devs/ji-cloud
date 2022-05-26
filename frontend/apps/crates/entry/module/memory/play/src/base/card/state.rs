@@ -8,7 +8,7 @@ use futures_signals::signal::{Mutable, Signal, SignalExt};
 use std::cell::RefCell;
 use web_sys::HtmlElement;
 
-use shared::domain::jig::module::body::_groups::cards::Card;
+use shared::domain::module::body::_groups::cards::Card;
 
 use components::module::_groups::cards::lookup::Side;
 

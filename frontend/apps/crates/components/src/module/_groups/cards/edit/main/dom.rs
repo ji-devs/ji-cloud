@@ -6,7 +6,7 @@ use crate::{
 };
 use dominator::{clone, html, Dom};
 use futures_signals::{signal::SignalExt, signal_vec::SignalVecExt};
-use shared::domain::jig::module::body::_groups::cards::Step;
+use shared::domain::module::body::_groups::cards::Step;
 use std::rc::Rc;
 use utils::events;
 

@@ -1,4 +1,4 @@
-use shared::domain::jig::module::body::Audio;
+use shared::domain::module::body::Audio;
 
 pub struct AudioInputCallbacks {
     pub on_add: Option<Box<dyn Fn(Audio)>>,

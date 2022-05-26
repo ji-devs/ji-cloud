@@ -1,4 +1,4 @@
-use shared::domain::jig::module::body::{
+use shared::domain::module::body::{
     Audio, Transform,
     _groups::design::{Trace as RawTrace, TraceKind, TraceShape},
 };

@@ -20,7 +20,7 @@ use futures_signals::{
     signal::{Mutable, ReadOnlyMutable, Signal, SignalExt},
     signal_vec::{MutableVec, SignalVecExt},
 };
-use shared::domain::jig::{
+use shared::domain::{
     module::{
         body::{
             Audio, Instructions, Transform,
@@ -34,7 +34,7 @@ use shared::domain::jig::{
         },
         ModuleId,
     },
-    JigId,
+    jig::JigId,
 };
 use std::cell::RefCell;
 use std::rc::Rc;

@@ -1,11 +1,11 @@
 use super::base::state::*;
 use components::module::_common::play::prelude::*;
-use shared::domain::jig::{
+use shared::domain::{
     module::{
         body::drag_drop::{Mode, ModuleData as RawData, Step},
         ModuleId,
     },
-    JigId,
+    jig::JigId,
 };
 use std::rc::Rc;
 

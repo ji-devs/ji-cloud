@@ -18,8 +18,8 @@ use futures_signals::{
     signal::{Mutable, ReadOnlyMutable},
     signal_vec::MutableVec,
 };
-use shared::domain::jig::module::body::BodyExt;
-use shared::domain::jig::{
+use shared::domain::module::body::BodyExt;
+use shared::domain::{
     module::{
         body::{
             Instructions,
@@ -30,7 +30,7 @@ use shared::domain::jig::{
         },
         ModuleId,
     },
-    JigId,
+    jig::JigId,
 };
 use std::cell::RefCell;
 use std::rc::Rc;

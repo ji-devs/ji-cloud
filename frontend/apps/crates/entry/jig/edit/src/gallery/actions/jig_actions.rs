@@ -5,10 +5,10 @@ use shared::{
     domain::{
         asset::{Asset, DraftOrLive, UserOrMe},
         jig::{
-            module::{ModuleBody, ModuleCreateRequest},
             JigBrowseQuery, JigBrowseResponse, JigCreateRequest, JigFocus, JigId, JigResponse,
-            JigSearchQuery, ModuleKind,
+            JigSearchQuery,
         },
+        module::{ModuleBody, ModuleCreateRequest, ModuleKind},
         CreateResponse,
     },
     error::{EmptyError, MetadataNotFound},
@@ -89,13 +89,14 @@ pub async fn create_jig(focus: JigFocus) {
 async fn add_resource_cover(jig_id: &JigId) {
     let req = ModuleCreateRequest {
         body: ModuleBody::new(ModuleKind::ResourceCover),
+        parent_id: jig_id.clone().into(),
     };
 
-    let path = endpoints::jig::module::Create::PATH.replace("{id}", &jig_id.0.to_string());
+    // let path = endpoints::module::Create::PATH.replace("{id}", &jig_id.0.to_string());
 
     match api_with_auth::<CreateResponse<ModuleId>, EmptyError, _>(
-        &path,
-        endpoints::jig::module::Create::METHOD,
+        endpoints::module::Create::PATH,
+        endpoints::module::Create::METHOD,
         Some(req),
     )
     .await

@@ -2,7 +2,7 @@ use futures_signals::{
     map_ref,
     signal::{Mutable, Signal, SignalExt},
 };
-use shared::domain::jig::module::body::{
+use shared::domain::module::body::{
     Image, Transform,
     _groups::design::{Sprite as RawSprite, SpriteEffect},
 };

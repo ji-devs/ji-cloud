@@ -9,7 +9,7 @@ use futures_signals::signal_vec::MutableVec;
 use shared::domain::meta::ImageStyle;
 use shared::domain::search::{ImageType, WebImageSearchItem};
 use shared::domain::user::UserProfile;
-use shared::domain::{jig::module::body::Image, meta::ImageStyleId};
+use shared::domain::{module::body::Image, meta::ImageStyleId};
 use std::{cell::RefCell, collections::HashSet, rc::Rc};
 
 pub const RECENT_COUNT: u16 = 12;

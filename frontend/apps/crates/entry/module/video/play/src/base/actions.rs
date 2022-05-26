@@ -1,6 +1,6 @@
 use components::stickers::video::dom::VideoRawRenderOptions;
 use futures_signals::signal::Mutable;
-use shared::domain::jig::module::body::video::{DoneAction, PlaySettings};
+use shared::domain::module::body::video::{DoneAction, PlaySettings};
 use std::rc::Rc;
 
 pub fn create_video_sticker_options(

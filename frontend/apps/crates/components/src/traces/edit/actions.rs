@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use shared::domain::jig::module::body::{Audio, Transform, _groups::design::Trace as RawTrace};
+use shared::domain::module::body::{Audio, Transform, _groups::design::Trace as RawTrace};
 
 use super::{draw::state::*, select::trace::state::*, state::*};
 use crate::traces::utils::TraceExt;

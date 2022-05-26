@@ -1,4 +1,4 @@
-use shared::domain::jig::module::body::_groups::design::VideoHost;
+use shared::domain::module::body::_groups::design::VideoHost;
 
 use super::state::Video;
 

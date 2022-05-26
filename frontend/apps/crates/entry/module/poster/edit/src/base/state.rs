@@ -11,8 +11,8 @@ use components::{
 };
 use dominator::clone;
 use futures_signals::signal::{Mutable, ReadOnlyMutable};
-use shared::domain::jig::module::body::BodyExt;
-use shared::domain::jig::{
+use shared::domain::module::body::BodyExt;
+use shared::domain::{
     module::{
         body::{
             poster::{Mode, ModuleData as RawData, Step},
@@ -20,7 +20,7 @@ use shared::domain::jig::{
         },
         ModuleId,
     },
-    JigId,
+    jig::JigId,
 };
 use std::cell::RefCell;
 use std::rc::Rc;

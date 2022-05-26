@@ -2,7 +2,7 @@ use super::state::*;
 use components::overlay::handle::OverlayHandle;
 use dominator::{clone, html, with_node, Dom};
 use futures_signals::signal::SignalExt;
-use shared::domain::jig::ModuleKind;
+use shared::domain::module::ModuleKind;
 use std::rc::Rc;
 use utils::{events, unwrap::UnwrapJiExt};
 use web_sys::HtmlElement;

@@ -2,7 +2,7 @@ use crate::base::state::*;
 use std::rc::Rc;
 
 use futures_signals::signal::Mutable;
-use shared::domain::jig::module::body::drag_drop::*;
+use shared::domain::module::body::drag_drop::*;
 
 pub struct Game {
     pub base: Rc<Base>,

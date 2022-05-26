@@ -21,7 +21,7 @@ use shared::{
     api::{endpoints, ApiEndpoint},
     domain::{
         image::{CreateResponse, ImageKind, ImageSearchQuery},
-        jig::module::body::Image,
+        module::body::Image,
         meta::{ImageStyle, MetadataResponse},
     },
     error::EmptyError,

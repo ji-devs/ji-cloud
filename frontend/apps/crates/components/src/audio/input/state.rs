@@ -3,7 +3,7 @@ use super::options::*;
 use super::recorder::AudioRecorder;
 use dominator::clone;
 use futures_signals::signal::{Mutable, Signal, SignalExt};
-use shared::domain::jig::module::body::Audio;
+use shared::domain::module::body::Audio;
 use std::cell::RefCell;
 use std::rc::Rc;
 use utils::prelude::*;

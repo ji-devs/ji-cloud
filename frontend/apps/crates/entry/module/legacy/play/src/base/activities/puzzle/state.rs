@@ -6,7 +6,7 @@ use futures_signals::{
     map_ref,
     signal::{Mutable, Signal},
 };
-use shared::domain::jig::module::body::legacy::activity::{
+use shared::domain::module::body::legacy::activity::{
     Puzzle as RawPuzzle, PuzzleItem as RawPuzzleItem,
 };
 use std::cell::{Cell, RefCell};

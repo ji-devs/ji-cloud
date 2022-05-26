@@ -2,7 +2,7 @@ use crate::base::game::state::*;
 use components::traces::{bubble::TraceBubble, utils::TraceExt};
 use dominator::clone;
 use futures_signals::signal::Mutable;
-use shared::domain::jig::module::body::_groups::design::Trace;
+use shared::domain::module::body::_groups::design::Trace;
 use std::{ops::Deref, rc::Rc};
 
 use std::collections::HashSet;

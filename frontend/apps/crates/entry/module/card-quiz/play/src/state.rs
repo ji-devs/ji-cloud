@@ -1,6 +1,6 @@
 use super::base::state::*;
 use components::module::_common::play::prelude::*;
-use shared::domain::jig::{
+use shared::domain::{
     module::{
         body::{
             _groups::cards::{Mode, Step},
@@ -8,7 +8,7 @@ use shared::domain::jig::{
         },
         ModuleId,
     },
-    JigId,
+    jig::JigId,
 };
 use std::rc::Rc;
 

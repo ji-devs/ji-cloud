@@ -1,7 +1,7 @@
 use super::state::*;
 use dominator::{clone, html, Dom};
 use futures_signals::{map_ref, signal::SignalExt, signal_vec::SignalVecExt};
-use shared::domain::jig::module::body::{Audio, _groups::cards::Mode};
+use shared::domain::module::body::{Audio, _groups::cards::Mode};
 use std::rc::Rc;
 use utils::prelude::*;
 

@@ -1,4 +1,4 @@
-pub use shared::domain::jig::module::body::ThemeId;
+pub use shared::domain::module::body::ThemeId;
 use shared::domain::meta::{AgeRange, AgeRangeId};
 
 const STR_ALL_AGES: &str = "All Ages";

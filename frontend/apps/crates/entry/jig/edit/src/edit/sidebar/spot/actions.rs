@@ -5,7 +5,7 @@ use crate::edit::sidebar::{
     state::{SidebarSpot, SidebarSpotItem},
 };
 use dominator::clone;
-use shared::domain::jig::ModuleKind;
+use shared::domain::module::ModuleKind;
 use std::rc::Rc;
 use utils::prelude::*;
 

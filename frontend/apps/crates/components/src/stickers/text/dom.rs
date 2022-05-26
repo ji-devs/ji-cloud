@@ -22,7 +22,7 @@ use futures_signals::{
     map_ref,
     signal::{Mutable, ReadOnlyMutable, SignalExt},
 };
-use shared::domain::jig::module::body::_groups::design::Text as RawText;
+use shared::domain::module::body::_groups::design::Text as RawText;
 use web_sys::HtmlElement;
 
 #[derive(Default)]

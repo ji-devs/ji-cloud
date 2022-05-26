@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use super::state::*;
-use shared::domain::jig::module::body::_groups::design::Trace;
+use shared::domain::module::body::_groups::design::Trace;
 use utils::{drag::Drag, prelude::*, resize::get_resize_info};
 
 use dominator::clone;
@@ -13,7 +13,7 @@ use components::instructions::player::InstructionsPlayer;
 use wasm_bindgen_futures::spawn_local;
 
 use components::module::_common::play::prelude::*;
-use shared::domain::jig::module::body::drag_drop::Next;
+use shared::domain::module::body::drag_drop::Next;
 
 impl PlayState {
     pub fn set_targets(&self) {

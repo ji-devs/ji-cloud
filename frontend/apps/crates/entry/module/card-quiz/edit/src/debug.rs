@@ -3,7 +3,7 @@ use components::{
     tabs::MenuTabKind,
 };
 use once_cell::sync::OnceCell;
-use shared::domain::jig::{
+use shared::domain::{
     module::{
         body::{
             Instructions,
@@ -15,7 +15,7 @@ use shared::domain::jig::{
         },
         ModuleId,
     },
-    JigId,
+    jig::JigId,
 };
 use utils::prelude::*;
 use uuid::Uuid;

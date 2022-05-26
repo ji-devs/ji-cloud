@@ -15,7 +15,7 @@ use std::rc::Rc;
 use utils::resize::{resize_info_signal, ResizeInfo};
 
 use super::state::*;
-use shared::domain::jig::module::body::_groups::design::{Trace, TraceShape};
+use shared::domain::module::body::_groups::design::{Trace, TraceShape};
 
 impl TracesShow {
     pub fn render(state: Rc<Self>) -> Dom {

@@ -1,5 +1,5 @@
 use components::module::_common::play::prelude::*;
-use shared::domain::jig::{
+use shared::domain::{
     module::{
         body::{
             Instructions,
@@ -10,7 +10,7 @@ use shared::domain::jig::{
         },
         ModuleId,
     },
-    JigData, JigId,
+    jig::{JigData, JigId},
 };
 use utils::prelude::*;
 

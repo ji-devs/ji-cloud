@@ -1,6 +1,6 @@
 use crate::audio::mixer::AudioHandle;
 use futures_signals::signal::Mutable;
-use shared::domain::jig::module::body::Audio;
+use shared::domain::module::body::Audio;
 use std::rc::Rc;
 
 pub struct AudioPlayerButton {

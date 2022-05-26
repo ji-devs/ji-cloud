@@ -6,7 +6,7 @@ use web_sys::HtmlTextAreaElement;
 use super::state::State;
 use crate::audio::input::{AudioInput, AudioInputCallbacks, AudioInputOptions};
 use futures_signals::signal::SignalExt;
-use shared::domain::jig::module::body::Audio;
+use shared::domain::module::body::Audio;
 
 pub const STR_INSTRUCTIONS_LABEL: &str = "Written instructions";
 pub const STR_INSTRUCTIONS_PLACEHOLDER: &str = "Type instructions";

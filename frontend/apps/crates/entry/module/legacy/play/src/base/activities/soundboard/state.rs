@@ -1,7 +1,7 @@
 use crate::base::{activities::_common::hotspot::*, state::Base};
 use dominator::clone;
 use futures_signals::signal::{Mutable, Signal, SignalExt};
-use shared::domain::jig::module::body::legacy::activity::{
+use shared::domain::module::body::legacy::activity::{
     Soundboard as RawSoundboard, SoundboardItem as RawSoundboardItem,
 };
 use std::rc::Rc;

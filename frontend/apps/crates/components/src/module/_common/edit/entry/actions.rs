@@ -1,13 +1,13 @@
 use super::state::*;
 use crate::module::_common::edit::history::state::HistoryState;
 use shared::{
-    api::endpoints::{jig::module::*, ApiEndpoint},
-    domain::jig::{
+    api::endpoints::{module::*, ApiEndpoint},
+    domain::{
         module::{
             body::{BodyExt, ModeExt, StepExt},
             *,
         },
-        *,
+        jig::*,
     },
     error::EmptyError,
 };
@@ -150,15 +150,16 @@ pub fn save<RawData, Mode, Step>(
 {
     save_loader.load(async move {
         let body = raw_data.as_body();
-        let path = Update::PATH.replace("{id}", &jig_id.0.to_string());
+        let path = Update::PATH.replace("{module_id}", &module_id.0.to_string());
 
         let is_complete = raw_data.is_complete();
 
         let req = Some(ModuleUpdateRequest {
-            id: StableOrUniqueId::Unique(module_id),
+            // id: StableOrUniqueId::Unique(module_id),
             is_complete: Some(is_complete),
             index: None,
             body: Some(body),
+            parent_id: jig_id.into(),
         });
         let _ = api_with_auth_empty::<EmptyError, _>(&path, Update::METHOD, req).await;
 

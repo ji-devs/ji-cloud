@@ -1,6 +1,6 @@
 use super::*;
 
-use shared::domain::jig::module::body::Transform;
+use shared::domain::module::body::Transform;
 
 use futures_signals::{
     map_ref,

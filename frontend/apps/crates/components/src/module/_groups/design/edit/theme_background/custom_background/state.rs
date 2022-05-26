@@ -1,6 +1,6 @@
 use dominator::clone;
 use futures_signals::signal::Mutable;
-use shared::domain::jig::module::body::{Background, StepExt};
+use shared::domain::module::body::{Background, StepExt};
 use std::{marker::PhantomData, rc::Rc};
 
 use crate::{

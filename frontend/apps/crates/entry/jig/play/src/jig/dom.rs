@@ -5,7 +5,7 @@ use dominator_helpers::{events::Message, signals::DefaultSignal};
 use futures_signals::map_ref;
 use futures_signals::signal::{Signal, SignalExt};
 use js_sys::Reflect;
-use shared::domain::jig::{JigResponse, ModuleKind};
+use shared::domain::{jig::JigResponse, module::ModuleKind};
 use std::rc::Rc;
 use utils::iframe::{IframeMessageExt, JigPlayerToPlayerPopup};
 use utils::{

@@ -1,4 +1,4 @@
-use shared::domain::jig::module::body::Image;
+use shared::domain::module::body::Image;
 
 pub struct Callbacks {
     pub on_select: Option<Box<dyn Fn(Image)>>,

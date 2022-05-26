@@ -10,7 +10,7 @@ use std::rc::Rc;
 use super::{callbacks::Callbacks, sprite::state::Sprite, text::state::Text, video::state::Video};
 use crate::{text_editor::state::State as TextEditorState, transform::state::TransformState};
 use dominator::clone;
-use shared::domain::jig::module::body::_groups::design::Sticker as RawSticker;
+use shared::domain::module::body::_groups::design::Sticker as RawSticker;
 
 pub trait AsSticker: AsRef<Sticker> + Clone + 'static {
     fn new_from_sticker(sticker: Sticker) -> Self;

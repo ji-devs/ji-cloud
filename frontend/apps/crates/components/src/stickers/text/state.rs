@@ -3,7 +3,7 @@ use futures_signals::signal::Mutable;
 use std::rc::Rc;
 
 use dominator::clone;
-use shared::domain::jig::module::body::{Transform, _groups::design::Text as RawText};
+use shared::domain::module::body::{Transform, _groups::design::Text as RawText};
 
 use crate::{
     text_editor::state::State as TextEditorState,

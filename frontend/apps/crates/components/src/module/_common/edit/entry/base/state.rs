@@ -5,12 +5,13 @@ use std::collections::HashSet;
 use std::{marker::PhantomData, rc::Rc};
 
 use super::super::{actions::HistoryStateImpl, state::*};
-use shared::domain::jig::{
+use shared::domain::{
     module::{
         body::{BodyExt, ModeExt, StepExt, ThemeId},
         ModuleId,
+        ModuleKind,
     },
-    JigData, JigId, ModuleKind,
+    jig::{JigData, JigId},
 };
 use std::future::Future;
 use utils::prelude::*;

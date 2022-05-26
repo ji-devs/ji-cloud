@@ -13,7 +13,7 @@ use utils::{events::ModuleResizeEvent, resize::*};
 use super::base::state::*;
 use super::state::*;
 use crate::{module::_common::edit::prelude::*, overlay::container::OverlayContainer};
-use shared::domain::jig::module::body::{BodyExt, ModeExt, StepExt};
+use shared::domain::module::body::{BodyExt, ModeExt, StepExt};
 
 pub fn render_page_body<Mode, Step, RawData, Base, Main, Sidebar, Header, Footer, Overlay>(
     state: Rc<GenericState<Mode, Step, RawData, Base, Main, Sidebar, Header, Footer, Overlay>>,

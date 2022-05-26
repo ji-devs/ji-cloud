@@ -5,8 +5,9 @@ use actix_web::{
 use shared::{
     api::{endpoints::module, ApiEndpoint},
     domain::{
-        module::{AssetId, ModuleId, ModuleResponse},
+        module::{ModuleId, ModuleResponse},
         CreateResponse,
+        asset::AssetId,
     },
 };
 use sqlx::PgPool;

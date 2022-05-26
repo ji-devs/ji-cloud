@@ -1,7 +1,7 @@
 use std::{rc::Rc, str::FromStr};
 
 use dominator::clone;
-use shared::domain::jig::{module::ModuleId, JigId};
+use shared::domain::{module::ModuleId, jig::JigId};
 use utils::{storage::get_local_storage, unwrap::UnwrapJiExt};
 use uuid::Uuid;
 

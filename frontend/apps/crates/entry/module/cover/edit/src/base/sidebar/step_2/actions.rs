@@ -1,6 +1,6 @@
 use crate::base::state::*;
 use dominator::clone;
-use shared::domain::jig::module::body::Audio;
+use shared::domain::module::body::Audio;
 
 impl Base {
     pub fn set_instructions_audio(&self, audio: Option<Audio>) {

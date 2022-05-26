@@ -3,18 +3,16 @@ use once_cell::sync::OnceCell;
 use shared::{
     domain::{
         image::ImageId,
-        jig::{
-            module::body::{
-                Image, Instructions,
-                _groups::cards::{
-                    BaseContent, Card as RawCard, CardContent as RawCardContent,
-                    CardPair as RawCardPair, Mode,
-                },
-                card_quiz::{Content, ModuleData as RawData, PlayerSettings},
+        module::body::{
+            Image, Instructions,
+            _groups::cards::{
+                BaseContent, Card as RawCard, CardContent as RawCardContent,
+                CardPair as RawCardPair, Mode,
             },
-            module::ModuleId,
-            JigId,
+            card_quiz::{Content, ModuleData as RawData, PlayerSettings},
         },
+        module::ModuleId,
+        jig::JigId,
     },
     media::MediaLibrary,
 };

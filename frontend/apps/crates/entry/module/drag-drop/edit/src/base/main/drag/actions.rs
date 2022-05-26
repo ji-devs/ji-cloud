@@ -5,7 +5,7 @@ use components::collision::stickers_traces::pixels::{
     get_hit_index, StickerBoundsKind, StickerHitSource,
 };
 use futures_signals::signal::Mutable;
-use shared::domain::jig::module::body::{_groups::design::Trace, drag_drop::TargetTransform};
+use shared::domain::module::body::{_groups::design::Trace, drag_drop::TargetTransform};
 use std::{borrow::Cow, rc::Rc};
 use utils::{drag::*, prelude::*, resize::get_resize_info};
 

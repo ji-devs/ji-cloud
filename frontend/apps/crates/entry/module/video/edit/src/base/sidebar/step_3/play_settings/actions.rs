@@ -1,5 +1,5 @@
 use super::state::State;
-use shared::domain::jig::module::body::video::DoneAction;
+use shared::domain::module::body::video::DoneAction;
 
 impl State {
     pub fn toggle_captions(&self) {

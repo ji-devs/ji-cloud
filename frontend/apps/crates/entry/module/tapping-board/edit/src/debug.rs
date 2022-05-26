@@ -6,17 +6,15 @@ use shared::{
     domain::{
         audio::AudioId,
         image::ImageId,
-        jig::{
-            module::body::{
-                Audio, Image, Instructions, Transform,
-                _groups::design::{
-                    Backgrounds, BaseContent, Sprite, Sticker, Text, Trace, TraceKind, TraceShape,
-                },
-                tapping_board::{Content, Mode, ModuleData as RawData, Step},
+        module::body::{
+            Audio, Image, Instructions, Transform,
+            _groups::design::{
+                Backgrounds, BaseContent, Sprite, Sticker, Text, Trace, TraceKind, TraceShape,
             },
-            module::ModuleId,
-            JigId,
+            tapping_board::{Content, Mode, ModuleData as RawData, Step},
         },
+        module::ModuleId,
+        jig::JigId,
     },
     media::MediaLibrary,
 };

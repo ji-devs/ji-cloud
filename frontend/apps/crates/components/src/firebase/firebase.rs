@@ -1,7 +1,7 @@
 use awsm_web::loaders::helpers::AbortController;
 use js_sys::Promise;
 use shared::{
-    domain::{asset::AssetId, jig::module::ModuleId},
+    domain::{asset::AssetId, module::ModuleId},
     media::MediaLibrary,
 };
 use std::future::Future;

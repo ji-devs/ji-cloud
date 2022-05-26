@@ -11,7 +11,7 @@ use components::{
 };
 use dominator::clone;
 use futures_signals::signal::Mutable;
-use shared::domain::jig::module::body::Background;
+use shared::domain::module::body::Background;
 use std::rc::Rc;
 
 const STR_SELECT_BACKGROUND_COLOR: &str = "Select background color";

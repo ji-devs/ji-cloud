@@ -3,7 +3,7 @@ use futures_signals::signal::Mutable;
 use std::rc::Rc;
 
 use crate::transform::state::{TransformCallbacks, TransformState};
-use shared::domain::jig::module::body::{
+use shared::domain::module::body::{
     Audio, Transform,
     _groups::design::{PathCommand, Trace as RawTrace, TraceKind, TraceShape as RawTraceShape},
 };

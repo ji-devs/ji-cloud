@@ -17,7 +17,7 @@ use futures_signals::{
     signal::{Mutable, ReadOnlyMutable, Signal, SignalExt},
     signal_vec::{SignalVec, SignalVecExt},
 };
-use shared::domain::jig::module::body::{Transform, _groups::design::Sticker as RawSticker};
+use shared::domain::module::body::{Transform, _groups::design::Sticker as RawSticker};
 use std::rc::Rc;
 use utils::prelude::*;
 use web_sys::HtmlElement;

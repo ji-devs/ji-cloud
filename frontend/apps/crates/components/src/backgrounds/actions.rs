@@ -1,6 +1,6 @@
 use super::state::*;
 use futures_signals::signal::Mutable;
-use shared::domain::jig::module::body::Background;
+use shared::domain::module::body::Background;
 
 pub enum Layer {
     One,

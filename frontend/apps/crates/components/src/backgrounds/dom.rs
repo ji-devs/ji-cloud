@@ -8,7 +8,7 @@ use futures_signals::{
 };
 
 use super::state::*;
-use shared::domain::jig::module::body::{
+use shared::domain::module::body::{
     Background, _groups::design::Backgrounds as RawBackgrounds,
 };
 

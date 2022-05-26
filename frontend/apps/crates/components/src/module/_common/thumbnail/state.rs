@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use shared::domain::{asset::AssetId, jig::module::LiteModule};
+use shared::domain::{asset::AssetId, module::LiteModule};
 
 pub struct ModuleThumbnail {
     pub asset_id: AssetId,

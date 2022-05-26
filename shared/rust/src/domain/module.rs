@@ -10,7 +10,7 @@ pub mod body;
 
 pub use body::Body as ModuleBody;
 
-use crate::domain::{course::CourseId, jig::JigId};
+use super::asset::AssetId;
 
 /// Wrapper type around [`Uuid`](Uuid), represents the **unique ID** of a module.
 ///
@@ -20,17 +20,6 @@ use crate::domain::{course::CourseId, jig::JigId};
 #[cfg_attr(feature = "backend", sqlx(transparent))]
 #[serde(rename_all = "camelCase")]
 pub struct ModuleId(pub Uuid);
-
-/// Helps with identifying a modules parent_id (JIG or Course)
-#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
-#[serde(rename_all = "camelCase")]
-pub enum AssetId {
-    /// JIG ID associated with the module.
-    JigId(JigId),
-
-    /// Course ID associated with the module.
-    CourseId(CourseId),
-}
 
 /// Represents the various kinds of data a module can represent.
 #[repr(i16)]

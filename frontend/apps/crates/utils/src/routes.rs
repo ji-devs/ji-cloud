@@ -3,7 +3,8 @@ use serde::{Deserialize, Serialize};
 use shared::domain::{
     course::CourseId,
     image::{ImageId, ImageSearchQuery},
-    jig::{module::ModuleId, JigFocus, JigId, JigSearchQuery, ModuleKind},
+    jig::{JigFocus, JigId, JigSearchQuery},
+    module::{ModuleId, ModuleKind},
     session::OAuthUserProfile,
     user::UserScope,
 };

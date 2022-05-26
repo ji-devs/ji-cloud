@@ -1,6 +1,6 @@
 use dominator_helpers::signals::{box_signal_fn, BoxSignalFn};
 use futures_signals::signal::{Signal, SignalExt};
-use shared::domain::jig::module::body::Transform;
+use shared::domain::module::body::Transform;
 use std::rc::Rc;
 use std::sync::atomic::{AtomicBool, Ordering};
 use utils::math::{bounds::BoundsF64, transform_signals};

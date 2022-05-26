@@ -1,6 +1,6 @@
 use super::state::*;
 
-use shared::domain::jig::module::body::{BodyExt, ModeExt, StepExt};
+use shared::domain::module::body::{BodyExt, ModeExt, StepExt};
 
 impl<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>
     AppBase<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>

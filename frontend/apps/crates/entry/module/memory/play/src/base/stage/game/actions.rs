@@ -6,7 +6,7 @@ use components::{
 };
 use dominator::clone;
 use gloo_timers::future::TimeoutFuture;
-use shared::domain::jig::module::body::_groups::cards::Card;
+use shared::domain::module::body::_groups::cards::Card;
 use std::rc::Rc;
 use wasm_bindgen_futures::spawn_local;
 

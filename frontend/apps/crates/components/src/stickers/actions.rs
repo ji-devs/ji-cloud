@@ -7,7 +7,7 @@ use super::{
     video::ext::*,
 };
 use dominator::clone;
-use shared::domain::jig::module::body::{
+use shared::domain::module::body::{
     Image,
     _groups::design::{
         Sprite as RawSprite, Sticker as RawSticker, Text as RawText, Video as RawVideo, VideoHost,

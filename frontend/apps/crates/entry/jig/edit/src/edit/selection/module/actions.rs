@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use super::state::State;
-use shared::domain::jig::ModuleKind;
+use shared::domain::module::ModuleKind;
 use utils::{drag::Drag, unwrap::UnwrapJiExt};
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{CustomEvent, CustomEventInit, HtmlElement};

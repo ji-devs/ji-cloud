@@ -1,6 +1,6 @@
 use dominator::animation::MutableAnimation;
 use futures_signals::signal::Mutable;
-use shared::domain::jig::module::body::legacy::activity::Hotspot as RawHotspot;
+use shared::domain::module::body::legacy::activity::Hotspot as RawHotspot;
 use std::rc::Rc;
 
 pub struct Hotspot {

@@ -7,7 +7,7 @@ use web_sys::SvgElement;
 
 use super::state::*;
 
-use shared::domain::jig::module::body::Transform;
+use shared::domain::module::body::Transform;
 
 impl<S> ShapeStyleVar<S>
 where

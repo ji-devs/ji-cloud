@@ -4,7 +4,7 @@ use super::{
 };
 use shared::{
     api::{endpoints, ApiEndpoint},
-    domain::{audio::AudioId, jig::module::body::Audio, CreateResponse},
+    domain::{audio::AudioId, module::body::Audio, CreateResponse},
     error::EmptyError,
     media::MediaLibrary,
 };

@@ -1,5 +1,5 @@
 use futures_signals::signal::Mutable;
-use shared::domain::jig::module::body::_groups::design::Trace;
+use shared::domain::module::body::_groups::design::Trace;
 use std::collections::HashSet;
 use std::rc::Rc;
 

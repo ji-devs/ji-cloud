@@ -2,7 +2,7 @@ use crate::base::state::*;
 use std::rc::Rc;
 
 use futures_signals::signal::Mutable;
-use shared::domain::jig::module::body::tapping_board::*;
+use shared::domain::module::body::tapping_board::*;
 
 pub struct Game {
     pub base: Rc<Base>,

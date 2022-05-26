@@ -3,7 +3,7 @@ use std::{cell::RefCell, rc::Rc};
 use awsm_web::{audio::AudioHandle, loaders::helpers::AsyncLoader};
 use futures_signals::signal::Mutable;
 use serde::{Deserialize, Serialize};
-use shared::domain::jig::{module::ModuleId, JigId, JigPlayerSettings, JigResponse};
+use shared::domain::{module::ModuleId, jig::{JigId, JigPlayerSettings, JigResponse}};
 use utils::jig::JigPlayerOptions;
 use web_sys::HtmlIFrameElement;
 

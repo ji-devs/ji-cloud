@@ -1,6 +1,6 @@
 use futures_signals::signal::Mutable;
 use rand::prelude::*;
-use shared::domain::jig::module::body::card_quiz::Content;
+use shared::domain::module::body::card_quiz::Content;
 use std::cell::RefCell;
 use std::rc::Rc;
 

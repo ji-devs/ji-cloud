@@ -27,7 +27,7 @@
     See Puzzle in Legacy Player for an isolated example of the same technique, but for click only
 */
 use awsm_web::{canvas::get_2d_context, dom::StyleExt};
-use shared::domain::jig::module::body::{
+use shared::domain::module::body::{
     Transform,
     _groups::design::{Sticker, Trace},
 };

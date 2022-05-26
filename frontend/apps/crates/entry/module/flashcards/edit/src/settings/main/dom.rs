@@ -8,7 +8,7 @@ use components::module::_groups::cards::{
 };
 use futures_signals::{map_ref, signal::SignalExt};
 
-use shared::domain::jig::module::body::flashcards::DisplayMode;
+use shared::domain::module::body::flashcards::DisplayMode;
 
 pub fn render(state: Rc<MainSettings>) -> Dom {
     let display_signal = map_ref! {

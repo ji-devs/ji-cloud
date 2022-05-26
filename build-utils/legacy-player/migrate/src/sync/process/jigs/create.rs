@@ -256,7 +256,7 @@ async fn assign_cover_image(ctx:&Context, jig_id: &JigId, image_id: ImageId) {
 
     let url = format!("{}{}", 
         ctx.opts.get_remote_target().api_url(), 
-        endpoints::jig::module::GetDraft::PATH
+        endpoints::module::GetDraft::PATH
             .replace("{id}", &jig_id.0.to_string())
             .replace("{module_id}", &lite_module.id.0.to_string())
     );
@@ -306,7 +306,7 @@ async fn assign_cover_image(ctx:&Context, jig_id: &JigId, image_id: ImageId) {
 
     let url = format!("{}{}", 
         ctx.opts.get_remote_target().api_url(), 
-        endpoints::jig::module::Update::PATH.replace("{id}", &jig_id.0.to_string())
+        endpoints::module::Update::PATH.replace("{id}", &jig_id.0.to_string())
     );
 
     let res = ctx
@@ -452,7 +452,7 @@ async fn assign_modules(ctx:&Context, game_id: &str, jig_id: &JigId, manifest: &
             )
         };
 
-        let path = endpoints::jig::module::Create::PATH.replace("{id}", &jig_id.0.to_string());
+        let path = endpoints::module::Create::PATH.replace("{id}", &jig_id.0.to_string());
         let url = format!("{}{}", ctx.opts.get_remote_target().api_url(), path);
 
         log::info!("calling {}", url);

@@ -1,7 +1,7 @@
 use components::module::_groups::cards::edit::{config, debug::DebugSettings as BaseDebugSettings};
 use components::tabs::MenuTabKind;
 use once_cell::sync::OnceCell;
-use shared::domain::jig::{
+use shared::domain::{
     module::{
         body::{
             Instructions,
@@ -13,7 +13,7 @@ use shared::domain::jig::{
         },
         ModuleId,
     },
-    JigId,
+    jig::JigId,
 };
 use utils::prelude::*;
 use uuid::Uuid;
@@ -44,7 +44,7 @@ impl DebugSettings {
                     content: Some(Content {
                         player_settings: PlayerSettings {
                             display_mode:
-                                shared::domain::jig::module::body::flashcards::DisplayMode::Single,
+                                shared::domain::module::body::flashcards::DisplayMode::Single,
                             swap: false,
                         },
                         base: BaseContent {

@@ -1,6 +1,6 @@
 use gloo_timers::callback::Timeout;
 
-use shared::domain::jig::module::body::legacy::design::HideToggle;
+use shared::domain::module::body::legacy::design::HideToggle;
 
 use std::ops::{Mul, Sub};
 use std::rc::Rc;

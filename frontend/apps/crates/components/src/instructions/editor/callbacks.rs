@@ -1,4 +1,4 @@
-use shared::domain::jig::module::body::Instructions;
+use shared::domain::module::body::Instructions;
 
 pub struct Callbacks {
     pub save: Box<dyn Fn(Instructions, bool)>, //the flag indicates whether it should be pushed to history too

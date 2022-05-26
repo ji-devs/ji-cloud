@@ -14,7 +14,7 @@ use crate::{
 };
 use dominator::{clone, html, with_node, Dom};
 use futures_signals::signal::SignalExt;
-use shared::domain::jig::module::body::StepExt;
+use shared::domain::module::body::StepExt;
 use utils::events;
 use web_sys::HtmlElement;
 

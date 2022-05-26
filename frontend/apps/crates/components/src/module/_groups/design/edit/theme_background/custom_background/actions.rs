@@ -6,7 +6,7 @@ use crate::{
         _common::edit::entry::prelude::BaseExt, _groups::design::edit::design_ext::DesignExt,
     },
 };
-use shared::domain::jig::module::body::StepExt;
+use shared::domain::module::body::StepExt;
 
 use super::state::CustomBackground;
 

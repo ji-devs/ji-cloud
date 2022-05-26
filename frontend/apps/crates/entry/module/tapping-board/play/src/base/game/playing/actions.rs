@@ -1,6 +1,6 @@
 use super::state::*;
 use components::module::_common::play::prelude::*;
-use shared::domain::jig::module::body::tapping_board::Next;
+use shared::domain::module::body::tapping_board::Next;
 use std::rc::Rc;
 
 impl PlayState {

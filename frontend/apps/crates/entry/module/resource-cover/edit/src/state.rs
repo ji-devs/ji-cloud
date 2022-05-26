@@ -3,12 +3,12 @@ use super::base::{
     overlay::state::Overlay, sidebar::state::Sidebar, state::Base,
 };
 use components::module::_common::edit::prelude::*;
-use shared::domain::jig::{
+use shared::domain::{
     module::{
         body::resource_cover::{ModuleData as RawData, Step},
         ModuleId,
     },
-    JigId,
+    jig::JigId,
 };
 use std::rc::Rc;
 

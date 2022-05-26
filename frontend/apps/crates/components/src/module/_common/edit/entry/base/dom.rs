@@ -8,12 +8,12 @@ use super::state::*;
 use dominator::Dom;
 use std::rc::Rc;
 
-use shared::domain::jig::{
+use shared::domain::{
     module::{
         body::{BodyExt, ModeExt, StepExt},
         ModuleId,
     },
-    JigId,
+    jig::JigId,
 };
 
 pub fn render<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(

@@ -1,6 +1,6 @@
 use shared::{
     config::MAX_LIST_WORDS,
-    domain::jig::{
+    domain::{
         module::{
             body::{
                 Background, Instructions,
@@ -9,7 +9,7 @@ use shared::{
             },
             ModuleId,
         },
-        JigId,
+        jig::JigId,
     },
 };
 

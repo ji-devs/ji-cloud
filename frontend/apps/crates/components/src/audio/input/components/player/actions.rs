@@ -1,6 +1,6 @@
 use crate::audio::input::state::{AudioInput, AudioInputMode};
 use futures_signals::signal::Mutable;
-use shared::domain::jig::module::body::Audio;
+use shared::domain::module::body::Audio;
 use web_sys::HtmlAudioElement;
 
 pub fn on_time_update(player: &HtmlAudioElement, current_time: &Mutable<i32>) {

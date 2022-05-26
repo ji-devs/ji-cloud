@@ -5,7 +5,7 @@ use crate::theme_selector::state::{ThemeSelector, ThemeSelectorCallbacks};
 use dominator::clone;
 use futures_signals::signal::Mutable;
 use shared::api::{endpoints, ApiEndpoint};
-use shared::domain::jig::module::body::StepExt;
+use shared::domain::module::body::StepExt;
 use shared::domain::jig::JigUpdateDraftDataRequest;
 use shared::error::EmptyError;
 use std::marker::PhantomData;

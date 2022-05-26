@@ -7,7 +7,7 @@ use super::{
 use crate::module::{_common::edit::prelude::*, _groups::cards::edit::state::*};
 use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
-use shared::domain::jig::module::body::_groups::cards::Step;
+use shared::domain::module::body::_groups::cards::Step;
 use std::rc::Rc;
 
 impl<RawData, E, GetSettingsStateFn, RenderSettingsStateFn, SettingsState> DomRenderable

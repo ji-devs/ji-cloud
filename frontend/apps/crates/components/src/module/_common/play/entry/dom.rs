@@ -12,7 +12,7 @@ use crate::{
     audio::mixer::AUDIO_MIXER, instructions::player::InstructionsPlayer,
     module::_common::play::prelude::*, overlay::container::OverlayContainer,
 };
-use shared::domain::jig::module::body::{BodyExt, ModeExt, StepExt};
+use shared::domain::module::body::{BodyExt, ModeExt, StepExt};
 
 pub fn render_page_body<RawData, Mode, Step, Base>(
     state: Rc<GenericState<RawData, Mode, Step, Base>>,

@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use dominator::clone;
-use shared::domain::jig::module::body::StepExt;
+use shared::domain::module::body::StepExt;
 
 use crate::module::{
     _common::edit::entry::prelude::BaseExt, _groups::design::edit::design_ext::DesignExt,

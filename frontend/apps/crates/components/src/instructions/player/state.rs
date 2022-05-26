@@ -2,7 +2,7 @@ use dominator::animation::MutableAnimation;
 
 use crate::animation::fade::*;
 use dominator::clone;
-use shared::domain::jig::module::body::Instructions;
+use shared::domain::module::body::Instructions;
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::atomic::AtomicBool;

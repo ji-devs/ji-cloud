@@ -1,6 +1,6 @@
 use shared::{
-    api::endpoints::{jig::module::*, ApiEndpoint},
-    domain::jig::{module::*, JigId},
+    api::endpoints::{module::*, ApiEndpoint},
+    domain::{module::*, jig::JigId},
     error::EmptyError,
 };
 use std::cell::RefCell;

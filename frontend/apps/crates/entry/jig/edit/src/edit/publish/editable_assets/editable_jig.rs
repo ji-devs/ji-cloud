@@ -11,7 +11,8 @@ use shared::domain::jig::JigFocus;
 use shared::domain::meta::AffiliationId;
 use shared::domain::{
     category::CategoryId,
-    jig::{JigId, JigResponse, JigUpdateDraftDataRequest, LiteModule},
+    jig::{JigId, JigResponse, JigUpdateDraftDataRequest},
+    module::LiteModule,
     meta::AgeRangeId,
 };
 
