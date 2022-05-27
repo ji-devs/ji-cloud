@@ -1505,57 +1505,6 @@
       "nullable": []
     }
   },
-  "1d0721d479663add09c1de3ec12805fa7865a3fb25367f77405b6d060def81a2": {
-    "query": "\nselect id          as \"id: ModuleId\",\n       contents    as \"body\",\n       created_at  as \"created_at\",\n       updated_at  as \"updated_at\",\n       kind        as \"kind: ModuleKind\",\n       is_complete as \"is_complete\"\nfrom jig_data_module\nwhere jig_data_id = (select live_id from jig where jig.id = $1) and jig_data_module.id is not distinct from $2\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id: ModuleId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "body",
-          "type_info": "Jsonb"
-        },
-        {
-          "ordinal": 2,
-          "name": "created_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 3,
-          "name": "updated_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 4,
-          "name": "kind: ModuleKind",
-          "type_info": "Int2"
-        },
-        {
-          "ordinal": 5,
-          "name": "is_complete",
-          "type_info": "Bool"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false
-      ]
-    }
-  },
   "1d1f0368934f600bc36f0955ac595e554d8d1aeb0632ddd325177529c983e0d9": {
     "query": "\nupdate jig_data\nset updated_at = now()\nfrom jig\nwhere jig.live_id = $1\n            ",
     "describe": {
@@ -2566,6 +2515,56 @@
       ]
     }
   },
+  "3bae9ebe8985f50000f0f1a3ba9badfaddfef99574b5ca5c35dd0aa8ca8b0fc8": {
+    "query": "\nselect cdm.id          as \"id!: ModuleId\",\n       contents    as \"body!\",\n       created_at  as \"created_at!\",\n       updated_at  as \"updated_at!\",\n       kind        as \"kind!: ModuleKind\",\n       is_complete as \"is_complete!\"\nfrom course_data_module \"cdm\"\ninner join course on course.live_id = cdm.course_data_id\nwhere cdm.id is not distinct from $1\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id!: ModuleId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "body!",
+          "type_info": "Jsonb"
+        },
+        {
+          "ordinal": 2,
+          "name": "created_at!",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 3,
+          "name": "updated_at!",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 4,
+          "name": "kind!: ModuleKind",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 5,
+          "name": "is_complete!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
+    }
+  },
   "3bc3d5919da8639f36fa262d3f7294004774ae8c98b735b8c569301c6d9fba60": {
     "query": "\ninsert into user_recent_image (user_id, image_id, media_library)\nvalues ($1, $2, $3)\nON CONFLICT (user_id, image_id) DO UPDATE\n  SET user_id = $1,\n    image_id = $2,\n    media_library = $3,\n    last_used = now()\nreturning image_id as \"id: ImageId\", media_library as \"library: MediaLibrary\", last_used as \"last_used: DateTime<Utc>\";\n        ",
     "describe": {
@@ -3486,57 +3485,6 @@
       "nullable": []
     }
   },
-  "6145c099074965487c25e6073c2c2fec9bca97bb535bfafc31126a8db2636d75": {
-    "query": "\nselect id          as \"id: ModuleId\",\n       contents    as \"body\",\n       created_at  as \"created_at\",\n       updated_at  as \"updated_at\",\n       kind        as \"kind: ModuleKind\",\n       is_complete as \"is_complete\"\nfrom course_data_module\nwhere course_data_id = (select live_id from course where course.id = $1) and course_data_module.id is not distinct from $2\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id: ModuleId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "body",
-          "type_info": "Jsonb"
-        },
-        {
-          "ordinal": 2,
-          "name": "created_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 3,
-          "name": "updated_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 4,
-          "name": "kind: ModuleKind",
-          "type_info": "Int2"
-        },
-        {
-          "ordinal": 5,
-          "name": "is_complete",
-          "type_info": "Bool"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false
-      ]
-    }
-  },
   "620638cd11c57d625c799e1d5ada2d57161cb59e06559bc3bd7ee3e3e3a8d5ee": {
     "query": "\nselect exists(select 1 from user_image_library where user_id = $1 and id = $2) as \"exists!\"\n    ",
     "describe": {
@@ -4244,57 +4192,6 @@
         ]
       },
       "nullable": []
-    }
-  },
-  "7b38900762e732a0e2c661cca21684aa12e80ea508759dc4a22d0907af6f5c67": {
-    "query": "\nselect id          as \"id: ModuleId\",\n       contents    as \"body\",\n       created_at  as \"created_at\",\n       updated_at  as \"updated_at\",\n       kind        as \"kind: ModuleKind\",\n       is_complete as \"is_complete\"\nfrom course_data_module\nwhere course_data_id = (select draft_id from course where course.id = $1) and course_data_module.id is not distinct from $2\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id: ModuleId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "body",
-          "type_info": "Jsonb"
-        },
-        {
-          "ordinal": 2,
-          "name": "created_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 3,
-          "name": "updated_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 4,
-          "name": "kind: ModuleKind",
-          "type_info": "Int2"
-        },
-        {
-          "ordinal": 5,
-          "name": "is_complete",
-          "type_info": "Bool"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false
-      ]
     }
   },
   "7bd597c30ec5ca63ee4d0bff84752fdafc662b1558efe0ea68467e51d32ab43f": {
@@ -5807,6 +5704,56 @@
       ]
     }
   },
+  "aa1255f482d548b4a3e189b1705edea716c0b82bb09e554a5122b13983a08236": {
+    "query": "\nselect cdm.id          as \"id!: ModuleId\",\n       contents    as \"body!\",\n       created_at  as \"created_at!\",\n       updated_at  as \"updated_at!\",\n       kind        as \"kind!: ModuleKind\",\n       is_complete as \"is_complete!\"\nfrom course_data_module \"cdm\"\ninner join course on course.draft_id = cdm.course_data_id\nwhere cdm.id is not distinct from $1\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id!: ModuleId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "body!",
+          "type_info": "Jsonb"
+        },
+        {
+          "ordinal": 2,
+          "name": "created_at!",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 3,
+          "name": "updated_at!",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 4,
+          "name": "kind!: ModuleKind",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 5,
+          "name": "is_complete!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
+    }
+  },
   "ab605fef6d23ea4a74e80999574296f7b4fce2ed0029455be3d6541ee379d329": {
     "query": "\ninsert into jig_data\n(display_name, created_at, updated_at, language, last_synced_at, description, theme, audio_background,\n audio_feedback_negative, audio_feedback_positive, direction, display_score, drag_assist, track_assessments, privacy_level, other_keywords, translated_keywords, translated_description)\nselect display_name,\n       created_at,\n       updated_at,\n       language,\n       last_synced_at,\n       description,\n       theme,\n       audio_background,\n       audio_feedback_negative,\n       audio_feedback_positive,\n       direction,\n       display_score,\n       drag_assist,\n       track_assessments,\n       privacy_level,\n       other_keywords,\n       translated_keywords,\n       translated_description::jsonb\nfrom jig_data\nwhere id = $1\nreturning id\n        ",
     "describe": {
@@ -6710,6 +6657,56 @@
       },
       "nullable": [
         false
+      ]
+    }
+  },
+  "c8c5640fff36f98fd0b308f9f42b46d8cc3a5786365125e4a8f442b1df715d58": {
+    "query": "\nselect jdm.id          as \"id!: ModuleId\",\n       contents    as \"body!\",\n       created_at  as \"created_at!\",\n       updated_at  as \"updated_at!\",\n       kind        as \"kind!: ModuleKind\",\n       is_complete as \"is_complete!\"\nfrom jig_data_module \"jdm\"\ninner join jig on jig.live_id = jdm.jig_data_id \nwhere jdm.id is not distinct from $1 \n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id!: ModuleId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "body!",
+          "type_info": "Jsonb"
+        },
+        {
+          "ordinal": 2,
+          "name": "created_at!",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 3,
+          "name": "updated_at!",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 4,
+          "name": "kind!: ModuleKind",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 5,
+          "name": "is_complete!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
       ]
     }
   },
@@ -7852,6 +7849,56 @@
       ]
     }
   },
+  "ea0bf9d029c261fd6d17e1ea5b8ea8aa10276f40dda9399e5234fcf225a98b71": {
+    "query": "\nselect jdm.id          as \"id!: ModuleId\",\n       contents    as \"body!\",\n       created_at  as \"created_at!\",\n       updated_at  as \"updated_at!\",\n       kind        as \"kind!: ModuleKind\",\n       is_complete as \"is_complete!\"\nfrom jig_data_module \"jdm\"\ninner join jig on jig.draft_id = jdm.jig_data_id \nwhere jdm.id is not distinct from $1 \n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id!: ModuleId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "body!",
+          "type_info": "Jsonb"
+        },
+        {
+          "ordinal": 2,
+          "name": "created_at!",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 3,
+          "name": "updated_at!",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 4,
+          "name": "kind!: ModuleKind",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 5,
+          "name": "is_complete!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
+    }
+  },
   "eb85238e221f20b3ad291f2bc9f6db1c632136d7e15358dbf5d0947c60a3aaa6": {
     "query": "insert into web_media_library_url (media_id, media_url) values ($1, $2)",
     "describe": {
@@ -8220,57 +8267,6 @@
         ]
       },
       "nullable": []
-    }
-  },
-  "f68f8d7c32d51ee3d99a137eae9769331300d6e8273991d3551743e206c3e6c8": {
-    "query": "\nselect id          as \"id: ModuleId\",\n       contents    as \"body\",\n       created_at  as \"created_at\",\n       updated_at  as \"updated_at\",\n       kind        as \"kind: ModuleKind\",\n       is_complete as \"is_complete\"\nfrom jig_data_module\nwhere jig_data_id = (select draft_id from jig where jig.id = $1) and jig_data_module.id is not distinct from $2\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id: ModuleId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "body",
-          "type_info": "Jsonb"
-        },
-        {
-          "ordinal": 2,
-          "name": "created_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 3,
-          "name": "updated_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 4,
-          "name": "kind: ModuleKind",
-          "type_info": "Int2"
-        },
-        {
-          "ordinal": 5,
-          "name": "is_complete",
-          "type_info": "Bool"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false
-      ]
     }
   },
   "f885c76fd750edde5adbd1d426d6f92c91f336d5ffbbcee318e1f18cf31ca72b": {

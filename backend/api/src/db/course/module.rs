@@ -49,24 +49,20 @@ returning id, "index"
     res
 }
 
-pub async fn get_live(
-    pool: &PgPool,
-    parent: CourseId,
-    id: ModuleId,
-) -> anyhow::Result<Option<Module>> {
+pub async fn get_live(pool: &PgPool, id: ModuleId) -> anyhow::Result<Option<Module>> {
     let module = sqlx::query!(
         //language=SQL
         r#"
-select id          as "id: ModuleId",
-       contents    as "body",
-       created_at  as "created_at",
-       updated_at  as "updated_at",
-       kind        as "kind: ModuleKind",
-       is_complete as "is_complete"
-from course_data_module
-where course_data_id = (select live_id from course where course.id = $1) and course_data_module.id is not distinct from $2
+select cdm.id          as "id!: ModuleId",
+       contents    as "body!",
+       created_at  as "created_at!",
+       updated_at  as "updated_at!",
+       kind        as "kind!: ModuleKind",
+       is_complete as "is_complete!"
+from course_data_module "cdm"
+inner join course on course.live_id = cdm.course_data_id
+where cdm.id is not distinct from $1
 "#,
-        parent.0,
         id.0,
     )
     .fetch_optional(pool)
@@ -91,28 +87,24 @@ where course_data_id = (select live_id from course where course.id = $1) and cou
 }
 
 /// FIXME dedup this from live JIG
-pub async fn get_draft(
-    pool: &PgPool,
-    parent: CourseId,
-    id: ModuleId,
-) -> anyhow::Result<Option<Module>> {
+pub async fn get_draft(pool: &PgPool, id: ModuleId) -> anyhow::Result<Option<Module>> {
     let module = sqlx::query!(
         //language=SQL
         r#"
-select id          as "id: ModuleId",
-       contents    as "body",
-       created_at  as "created_at",
-       updated_at  as "updated_at",
-       kind        as "kind: ModuleKind",
-       is_complete as "is_complete"
-from course_data_module
-where course_data_id = (select draft_id from course where course.id = $1) and course_data_module.id is not distinct from $2
+select cdm.id          as "id!: ModuleId",
+       contents    as "body!",
+       created_at  as "created_at!",
+       updated_at  as "updated_at!",
+       kind        as "kind!: ModuleKind",
+       is_complete as "is_complete!"
+from course_data_module "cdm"
+inner join course on course.draft_id = cdm.course_data_id
+where cdm.id is not distinct from $1
 "#,
-        parent.0,
         id.0,
     )
-        .fetch_optional(pool)
-        .await?;
+    .fetch_optional(pool)
+    .await?;
 
     let map_response = |body, kind| ModuleBody::transform_response_kind(body, kind);
 

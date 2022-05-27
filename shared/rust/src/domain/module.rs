@@ -216,24 +216,6 @@ pub struct ModuleCreateRequest {
     pub body: ModuleBody,
 }
 
-/// Search for Live module.
-#[derive(Serialize, Deserialize, Clone, Debug)]
-#[serde(rename_all = "camelCase")]
-pub struct ModuleLiveQuery {
-    /// The query string.
-    #[serde(flatten)]
-    pub parent_id: AssetId,
-}
-
-/// Search for Draft module.
-#[derive(Serialize, Deserialize, Clone, Debug)]
-#[serde(rename_all = "camelCase")]
-pub struct ModuleDraftQuery {
-    /// The query string.
-    #[serde(flatten)]
-    pub parent_id: AssetId,
-}
-
 /// Response for successfully finding a module
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ModuleResponse {
@@ -261,7 +243,7 @@ pub struct ModuleUpdateRequest {
     #[serde(default)]
     pub index: Option<u16>,
 
-    /// Whether the module is complete or not.
+    /// check if module is complete
     #[serde(default)]
     pub is_complete: Option<bool>,
 }

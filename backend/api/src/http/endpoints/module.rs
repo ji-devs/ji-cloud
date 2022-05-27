@@ -1,11 +1,11 @@
 use actix_web::{
-    web::{self, Data, Json, Query, ServiceConfig},
+    web::{self, Data, Json, ServiceConfig},
     HttpResponse,
 };
 use shared::{
     api::{endpoints::module, ApiEndpoint},
     domain::{
-        asset::AssetId,
+        asset::{AssetId, AssetType},
         module::{ModuleId, ModuleResponse},
         CreateResponse,
     },
@@ -43,16 +43,18 @@ async fn create(
 /// Get a Live.
 async fn get_live(
     db: Data<PgPool>,
-    path: web::Path<ModuleId>,
-    query: Query<<module::GetLive as ApiEndpoint>::Req>,
+    path: web::Path<(AssetType, ModuleId)>,
 ) -> Result<Json<<module::GetLive as ApiEndpoint>::Res>, error::NotFound> {
-    let (module_id, query) = (path.into_inner(), query.into_inner());
+    let asset = path.0;
+    let module_id = path.1;
 
-    let module = match query.parent_id {
-        AssetId::JigId(jig_id) => db::jig::module::get_live(&db, jig_id, module_id)
+    println!("Asset: {:?}", asset);
+
+    let module = match asset {
+        AssetType::Jig => db::jig::module::get_live(&db, module_id)
             .await?
             .ok_or(error::NotFound::ResourceNotFound)?,
-        AssetId::CourseId(course_id) => db::course::module::get_live(&db, course_id, module_id)
+        AssetType::Course => db::course::module::get_live(&db, module_id)
             .await?
             .ok_or(error::NotFound::ResourceNotFound)?,
     };
@@ -63,16 +65,16 @@ async fn get_live(
 /// Get a Draft module
 async fn get_draft(
     db: Data<PgPool>,
-    path: web::Path<ModuleId>,
-    query: Query<<module::GetDraft as ApiEndpoint>::Req>,
+    path: web::Path<(AssetType, ModuleId)>,
 ) -> Result<Json<<module::GetDraft as ApiEndpoint>::Res>, error::NotFound> {
-    let (module_id, query) = (path.into_inner(), query.into_inner());
+    let asset = path.0;
+    let module_id = path.1;
 
-    let module = match query.parent_id {
-        AssetId::JigId(jig_id) => db::jig::module::get_draft(&db, jig_id, module_id)
+    let module = match asset {
+        AssetType::Jig => db::jig::module::get_draft(&db, module_id)
             .await?
             .ok_or(error::NotFound::ResourceNotFound)?,
-        AssetId::CourseId(course_id) => db::course::module::get_draft(&db, course_id, module_id)
+        AssetType::Course => db::course::module::get_draft(&db, module_id)
             .await?
             .ok_or(error::NotFound::ResourceNotFound)?,
     };
