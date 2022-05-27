@@ -1,4 +1,5 @@
 use super::state::*;
+use components::module::_common::thumbnail::{ModuleThumbnail, ThumbnailFallback};
 use components::page_header::state::PageLinks;
 use components::{page_footer, page_header};
 use dominator::{clone, html, Dom};
@@ -162,14 +163,14 @@ impl Gallery {
                                     },
                                 }
                             })
-                            // .child(ModuleThumbnail::render(
-                            //     Rc::new(ModuleThumbnail {
-                            //         asset_id: jig.id(),
-                            //         module: jig.cover().cloned(),
-                            //         fallback: ThumbnailFallback::Asset,
-                            //     }),
-                            //     Some("thumbnail")
-                            // ))
+                            .child(ModuleThumbnail::render(
+                                Rc::new(ModuleThumbnail {
+                                    asset_id: jig.id(),
+                                    module: jig.cover().cloned(),
+                                    fallback: ThumbnailFallback::Asset,
+                                }),
+                                Some("thumbnail")
+                            ))
                             .children(&mut [
                                 html!("menu-line", {
                                     .property("slot", "menu-content")
