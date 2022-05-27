@@ -8,8 +8,8 @@ use shared::{
         asset::Asset,
         jig::{JigFocus, JigId, JigResponse, JigUpdateDraftDataRequest},
         module::{
-            LiteModule, ModuleCreateRequest, ModuleId, ModuleKind, ModuleResponse,
-            ModuleUpdateRequest,
+            LiteModule, ModuleCreateRequest, ModuleDraftQuery, ModuleId, ModuleKind,
+            ModuleResponse, ModuleUpdateRequest,
         },
         CreateResponse,
     },
@@ -164,14 +164,18 @@ fn populate_added_module(state: Rc<State>, module: LiteModule) {
 pub fn use_module_as(state: Rc<State>, target_kind: ModuleKind, source_module_id: ModuleId) {
     state.loader.load(clone!(state => async move {
         let target_module_id: Result<(ModuleId, bool), EmptyError> = async {
+            let req = ModuleDraftQuery {
+                parent_id: state.asset.id()
+            };
+
             let path = endpoints::module::GetDraft::PATH
-                .replace("{id}", &state.asset.unwrap_jig().id.0.to_string())
+                // .replace("{id}", &state.asset.unwrap_jig().id.0.to_string())
                 .replace("{module_id}", &source_module_id.0.to_string());
 
-            let source_module = api_with_auth::<ModuleResponse, EmptyError, ()>(
+            let source_module = api_with_auth::<ModuleResponse, EmptyError, _>(
                 &path,
                 endpoints::module::GetDraft::METHOD,
-                None
+                Some(req)
             ).await?.module;
 
             let target_body = source_module.body.convert_to_body(target_kind).unwrap_ji();

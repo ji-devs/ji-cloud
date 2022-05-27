@@ -202,11 +202,15 @@ where
                         (force_raw, InitSource::ForceRaw)
                     } else {
                         let resp = {
+                            let req = ModuleDraftQuery {
+                                parent_id: _self.opts.jig_id.into()
+                            };
+
                             let path = GetDraft::PATH
-                                .replace("{id}",&_self.opts.jig_id.0.to_string())
+                                // .replace("{id}",&_self.opts.jig_id.0.to_string())
                                 .replace("{module_id}",&_self.opts.module_id.0.to_string());
 
-                            api_no_auth::<ModuleResponse, EmptyError, ()>(&path, GetDraft::METHOD, None).await
+                            api_no_auth::<ModuleResponse, EmptyError, _>(&path, GetDraft::METHOD, Some(req)).await
                         };
 
                         match resp {
