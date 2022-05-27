@@ -42,7 +42,7 @@ export class _ extends LitElement {
         return html`
             <h1>You're using our beta version!</h1>
             <img-ui path="core/page-header/illustration-beta.png"></img-ui>
-            <div class="content">We gave you access to our prerelease version because we couldn't wait for you to start using Jigzi!</div>
+            <div class="content">We gave you access to our pre-release version because we couldn't wait for you to start using Jigzi!</div>
             <div class="content">For the best experience, use Chrome on a desktop.</div>
             <button-rect kind="text" color="blue" bold href="${HUBSPOT_LINK}" target="_blank">
                 Tell us what you think so far!
