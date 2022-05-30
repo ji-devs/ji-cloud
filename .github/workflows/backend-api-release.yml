@@ -1,6 +1,7 @@
 name: Api - Backend - Release
 
 on:
+  workflow_dispatch:
   push:
     branches: [ master ]
     paths:
@@ -15,7 +16,7 @@ jobs:
       - name: checkout repo
         uses: actions/checkout@v1
 
-      - name: Extract label 
+      - name: Extract label
         shell: bash
         run: echo "##[set-output name=label;]$(echo \"[${GITHUB_REF#refs/heads/} - backend/api]\")"
         id: extract_label
@@ -32,15 +33,15 @@ jobs:
         with:
           version: '295.0.0'
           service_account_key: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON_KEY }}
-      
+
       - name: download cargo-make release
         run: curl -u jewish-interactive:"$GITHUB_TOKEN" -s https://api.github.com/repos/sagiegurari/cargo-make/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/' | xargs -I {} wget -c https://github.com/sagiegurari/cargo-make/releases/latest/download/cargo-make-v{}-x86_64-unknown-linux-musl.zip -O cargo-make.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: extract cargo-make to folder 
+      - name: extract cargo-make to folder
         run: unzip -j cargo-make.zip -d cargo-make
-      
+
       - name: add cargo-make to path
         uses: dakom/actions-path@master
         with:
@@ -48,7 +49,7 @@ jobs:
 
       - name: build and deploy api
         run: cargo make release-api
-        
+
       - name: Notify slack of all status
         uses: pullreminders/slack-action@master
         with:
