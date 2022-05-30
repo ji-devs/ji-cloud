@@ -1,5 +1,5 @@
 import { argsToAttrs } from "@utils/attributes";
-import "@elements/entry/jig/play/sidebar/jig-info";
+import "@elements/entry/jig/play/jig/sidebar/jig-info";
 
 export default {
     title: "Entry / Jig / Play / Sidebar",

@@ -1,6 +1,6 @@
 import { argsToAttrs } from "@utils/attributes";
-import "@elements/entry/jig/play/move-button";
-import { Kind } from "@elements/entry/jig/play/move-button";
+import "@elements/entry/jig/play/jig/move-button";
+import { Kind } from "@elements/entry/jig/play/jig/move-button";
 
 export default {
     title: "Entry / Jig / Play",

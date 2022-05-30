@@ -1,5 +1,5 @@
 import { argsToAttrs } from "@utils/attributes";
-import "@elements/entry/jig/play/background-music";
+import "@elements/entry/jig/play/jig/background-music";
 
 export default {
     title: "Entry / Jig / Play",
