@@ -81,7 +81,7 @@ export class _ extends LitElement {
                     grid-row: 2;
                     grid-column: 1 / -1;
                     display: grid;
-                    grid-template-columns: 62px 450px 62px;
+                    grid-template-columns: 62px calc(100vw - 800px) 62px;
                     align-items: center;
                     justify-content: center;
                     grid-gap: 16px;
