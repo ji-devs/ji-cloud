@@ -1,6 +1,7 @@
 name: Api - Backend - Release
 
 on:
+  workflow_dispatch:
   push:
     branches: [ master ]
     paths:

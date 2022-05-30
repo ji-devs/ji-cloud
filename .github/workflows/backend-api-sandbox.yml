@@ -16,7 +16,6 @@ jobs:
         uses: actions/checkout@v1
 
       - name: Extract label
-      - name: Extract label
         shell: bash
         run: echo "##[set-output name=label;]$(echo \"[${GITHUB_REF#refs/heads/} - backend/api]\")"
         id: extract_label
