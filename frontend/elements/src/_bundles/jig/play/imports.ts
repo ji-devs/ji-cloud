@@ -30,3 +30,6 @@ import "@elements/entry/jig/play/jig/sidebar/report";
 import "@elements/entry/jig/play/jig/sidebar/sidebar";
 import "@elements/core/images/composed/module-screenshot";
 import "@elements/module/_groups/cards/_common/main-empty";
+import "@elements/entry/jig/play/course/course-main";
+import "@elements/entry/jig/play/course/course-item";
+import "@elements/core/buttons/fa-button";
