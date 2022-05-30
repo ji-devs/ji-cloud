@@ -44,7 +44,7 @@ CMD ["./ji-cloud-api", "release"]
 ## Sandbox        ##
 ####################
 
-FROM alpine:latest as sandbox 
+FROM alpine:latest as sandbox
 
 # Used at runtime
 ENV PROJECT_ID=ji-cloud-developer-sandbox

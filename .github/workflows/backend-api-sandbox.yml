@@ -14,7 +14,7 @@ jobs:
     steps:
       - name: checkout repo
         uses: actions/checkout@v1
-          ref: sandbox
+
       - name: Extract label
       - name: Extract label
         shell: bash
