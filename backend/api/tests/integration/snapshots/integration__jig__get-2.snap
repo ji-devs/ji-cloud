@@ -15,12 +15,12 @@ expression: body
   "jigData": {
     "draftOrLive": "live",
     "displayName": "name",
-    "cover": {
-      "id": "a6b248f8-1dd7-11ec-8426-975953035335",
-      "kind": "Cover",
-      "is_complete": false
-    },
     "modules": [
+      {
+        "id": "a6b248f8-1dd7-11ec-8426-975953035335",
+        "kind": "Cover",
+        "is_complete": false
+      },
       {
         "id": "a6b24970-1dd7-11ec-8426-57136b411853",
         "kind": "Flashcards",

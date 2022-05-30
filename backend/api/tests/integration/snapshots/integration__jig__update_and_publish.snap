@@ -15,12 +15,13 @@ expression: body
   "jigData": {
     "draftOrLive": "draft",
     "displayName": "name",
-    "cover": {
-      "id": "56841805-d762-478b-8f07-e263917058b9",
-      "kind": "Cover",
-      "is_complete": true
-    },
-    "modules": [],
+    "modules": [
+      {
+        "id": "56841805-d762-478b-8f07-e263917058b9",
+        "kind": "Cover",
+        "is_complete": true
+      }
+    ],
     "ageRanges": [],
     "affiliations": [],
     "language": "en",

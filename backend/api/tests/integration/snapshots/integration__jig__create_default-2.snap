@@ -15,7 +15,6 @@ expression: body
   "jigData": {
     "draftOrLive": "draft",
     "displayName": "",
-    "cover": null,
     "modules": [],
     "ageRanges": [],
     "affiliations": [],

@@ -85,9 +85,6 @@ pub struct JigData {
     /// The JIG's name.
     pub display_name: String,
 
-    /// The JIG's cover module.
-    pub cover: Option<LiteModule>,
-
     /// The JIG's remaining modules.
     ///
     /// NOTE: the first module will always exist and will always be of type cover

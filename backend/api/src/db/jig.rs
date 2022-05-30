@@ -221,17 +221,11 @@ select cte.jig_id                                          as "jig_id: JigId",
        curated,
        array(select row (unnest(audio_feedback_positive))) as "audio_feedback_positive!: Vec<(AudioFeedbackPositive,)>",
        array(select row (unnest(audio_feedback_negative))) as "audio_feedback_negative!: Vec<(AudioFeedbackNegative,)>",
-       (
-                select row(jig_data_module.id, kind, is_complete) 
-                from jig_data_module                
-                where jig_data_id = cte.draft_or_live_id and "index" = 0 
-                order by "index"
-       )                                                   as "cover?: (ModuleId, ModuleKind, bool)",
        array(
-               select row (jig_data_module.id, kind, is_complete)
-               from jig_data_module
-               where jig_data_id = cte.draft_or_live_id and "index" <> 0
-               order by "index"
+                select row (jig_data_module.id, kind, is_complete)
+                from jig_data_module
+                where jig_data_id = jig_data.id 
+                order by "index"
        )                                               as "modules!: Vec<(ModuleId, ModuleKind, bool)>",
        array(select row (category_id)
              from jig_data_category
@@ -268,11 +262,6 @@ from jig_data
             draft_or_live,
             display_name: row.display_name,
             language: row.language,
-            cover: row.cover.map(|(id, kind, is_complete)| LiteModule {
-                id,
-                kind,
-                is_complete,
-            }),
             modules: row
                 .modules
                 .into_iter()
@@ -401,18 +390,12 @@ select id,
        audio_background                                                              as "audio_background!: Option<AudioBackground>",
        array(select row (unnest(audio_feedback_positive)))                           as "audio_feedback_positive!: Vec<(AudioFeedbackPositive,)>",
        array(select row (unnest(audio_feedback_negative)))                           as "audio_feedback_negative!: Vec<(AudioFeedbackNegative,)>",
-       (
-                select row(jig_data_module.id, kind, is_complete) 
-                from jig_data_module                
-                where jig_data_id = jig_data.id and "index" = 0
-                order by "index"
-        )                                                   as "cover?: (ModuleId, ModuleKind, bool)",
        array(
-               select row (jig_data_module.id, kind, is_complete)
-               from jig_data_module
-               where jig_data_id = jig_data.id and "index" <> 0
-               order by "index"
-           )                                               as "modules!: Vec<(ModuleId, ModuleKind, bool)>",
+                select row (jig_data_module.id, kind, is_complete)
+                from jig_data_module
+                where jig_data_id = jig_data.id 
+                order by "index"
+       )                                               as "modules!: Vec<(ModuleId, ModuleKind, bool)>",
        array(select row (category_id)
              from jig_data_category
              where jig_data_id = jig_data.id)     as "categories!: Vec<(CategoryId,)>",
@@ -457,13 +440,6 @@ from jig_data
                 draft_or_live,
                 display_name: jig_data_row.display_name,
                 language: jig_data_row.language,
-                cover: jig_data_row
-                    .cover
-                    .map(|(id, kind, is_complete)| LiteModule {
-                        id,
-                        kind,
-                        is_complete,
-                    }),
                 modules: jig_data_row
                     .modules
                     .into_iter()
@@ -588,7 +564,7 @@ select jig.id                                              as "jig_id: JigId",
     creator_id,
     author_id,
     (select given_name || ' '::text || family_name
-     from user_profile
+        from user_profile
      where user_profile.user_id = author_id)            as "author_name",
     published_at,
     liked_count,
@@ -611,16 +587,10 @@ select jig.id                                              as "jig_id: JigId",
    draft_or_live                                                                 as "draft_or_live!: DraftOrLive",
    array(select row (unnest(audio_feedback_positive)))                           as "audio_feedback_positive!: Vec<(AudioFeedbackPositive,)>",
    array(select row (unnest(audio_feedback_negative)))                           as "audio_feedback_negative!: Vec<(AudioFeedbackNegative,)>",
-   (
-            select row(jig_data_module.id, kind, is_complete) 
-            from jig_data_module                
-            where jig_data_id = jig_data.id and "index" = 0
-            order by "index"
-   )                                                   as "cover?: (ModuleId, ModuleKind, bool)",
    array(
            select row (jig_data_module.id, kind, is_complete)
            from jig_data_module
-           where jig_data_id = jig_data.id and "index" <> 0
+           where jig_data_id = jig_data.id 
            order by "index"
     )                                               as "modules!: Vec<(ModuleId, ModuleKind, bool)>",
    array(select row (category_id)
@@ -686,13 +656,6 @@ limit $7
                 draft_or_live: jig_data_row.draft_or_live,
                 display_name: jig_data_row.display_name,
                 language: jig_data_row.language,
-                cover: jig_data_row
-                    .cover
-                    .map(|(id, kind, is_complete)| LiteModule {
-                        id,
-                        kind,
-                        is_complete,
-                    }),
                 modules: jig_data_row
                     .modules
                     .into_iter()
