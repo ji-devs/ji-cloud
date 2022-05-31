@@ -1083,7 +1083,6 @@ pub fn configure(cfg: &mut ServiceConfig) {
                 .to(public_user::browse_user_followings),
         )
         .route(Follow::PATH, Follow::METHOD.route().to(public_user::follow))
-        .route(Follow::PATH, Follow::METHOD.route().to(public_user::follow))
         .route(
             Unfollow::PATH,
             Unfollow::METHOD.route().to(public_user::unfollow),

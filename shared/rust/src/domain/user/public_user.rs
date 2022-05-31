@@ -3,10 +3,7 @@
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::domain::{
-    additional_resource::AdditionalResource, badge::BadgeId, course::CourseResponse,
-    image::ImageId, jig::JigResponse,
-};
+use crate::domain::{additional_resource::AdditionalResource, badge::BadgeId, image::ImageId};
 
 /// A lite profile for other Users to view
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -87,20 +84,6 @@ pub struct BrowsePublicUserJigsQuery {
     pub page_limit: Option<u32>,
 }
 
-/// Browse user profiles
-#[derive(Debug, Serialize, Deserialize, Clone)]
-#[serde(rename_all = "camelCase")]
-pub struct BrowsePublicUserJigsResponse {
-    /// the jigs returned.
-    pub jigs: Vec<JigResponse>,
-
-    /// The number of pages found.
-    pub pages: u32,
-
-    /// The total number of jigs found
-    pub total_jig_count: u64,
-}
-
 /// Query for [`Browse`](crate::api::endpoints::user::BrowseUserResources).
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
 #[serde(rename_all = "camelCase")]
@@ -143,20 +126,6 @@ pub struct BrowsePublicUserCoursesQuery {
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub page_limit: Option<u32>,
-}
-
-/// Browse User's Courses
-#[derive(Debug, Serialize, Deserialize, Clone)]
-#[serde(rename_all = "camelCase")]
-pub struct BrowsePublicUserCoursesResponse {
-    /// the course returned.
-    pub courses: Vec<CourseResponse>,
-
-    /// The number of pages found.
-    pub pages: u32,
-
-    /// The total number of courses found
-    pub total_course_count: u64,
 }
 
 /// Query for [`Browse`](crate::api::endpoints::user::BrowseFollowers).

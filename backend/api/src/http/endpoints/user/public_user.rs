@@ -5,13 +5,16 @@ use actix_web::{
 use futures::try_join;
 use shared::{
     api::{endpoints::user, ApiEndpoint},
-    domain::user::public_user::{
-        BrowsePublicUserCoursesResponse as BrowseCoursesResponse,
-        BrowsePublicUserFollowersResponse as BrowseFollowersResponse,
-        BrowsePublicUserFollowingResponse as BrowseFollowingsResponse,
-        BrowsePublicUserJigsResponse as BrowseJigsResponse,
-        BrowsePublicUserResourcesResponse as BrowseResourcesResponse, BrowsePublicUserResponse,
-        PublicUser,
+    domain::{
+        asset::DraftOrLive,
+        course::CourseBrowseResponse,
+        jig::JigBrowseResponse,
+        user::public_user::{
+            BrowsePublicUserFollowersResponse as BrowseFollowersResponse,
+            BrowsePublicUserFollowingResponse as BrowseFollowingsResponse,
+            BrowsePublicUserResourcesResponse as BrowseResourcesResponse, BrowsePublicUserResponse,
+            PublicUser,
+        },
     },
 };
 
@@ -27,7 +30,7 @@ use crate::{
 /// Get a User
 pub async fn get(
     db: Data<PgPool>,
-    _auth: TokenUser,
+    _auth: Option<TokenUser>,
     path: Path<Uuid>,
 ) -> Result<Json<<user::GetPublicUser as ApiEndpoint>::Res>, error::NotFound> {
     let user_id = path.into_inner();
@@ -37,10 +40,10 @@ pub async fn get(
     Ok(Json(user))
 }
 
-/// Get a User
+/// Browse Public User profiles
 pub async fn browse(
     db: Data<PgPool>,
-    _auth: TokenUser,
+    _auth: Option<TokenUser>,
     query: Option<Query<<user::BrowsePublicUser as ApiEndpoint>::Req>>,
 ) -> Result<Json<<user::BrowsePublicUser as ApiEndpoint>::Res>, error::NotFound> {
     let query = query.map_or_else(Default::default, Query::into_inner);
@@ -69,7 +72,7 @@ pub async fn browse(
 /// Get a Public Users Jigs
 pub async fn browse_user_jigs(
     db: Data<PgPool>,
-    _auth: TokenUser,
+    _auth: Option<TokenUser>,
     path: Path<Uuid>,
     query: Option<Query<<user::BrowseUserJigs as ApiEndpoint>::Req>>,
 ) -> Result<Json<<user::BrowseUserJigs as ApiEndpoint>::Res>, error::NotFound> {
@@ -82,31 +85,46 @@ pub async fn browse_user_jigs(
         .await
         .map_err(|e| error::NotFound::InternalServerError(e))?;
 
-    let browse_future = db::user::public_user::browse_user_jigs(
+    let privacy_level = vec![];
+    let resource_types = vec![];
+
+    let browse_future = db::jig::browse(
         &db,
-        user_id,
-        query.page.unwrap_or(0),
-        page_limit as u64,
+        Some(user_id),
+        None,
+        Some(DraftOrLive::Live),
+        privacy_level.to_owned(),
+        Some(false),
+        query.page.unwrap_or(0) as i32,
+        page_limit,
+        resource_types.to_owned(),
     );
 
-    let total_count_future = db::user::public_user::total_jig_count(db.as_ref(), user_id);
+    let total_count_future = db::jig::filtered_count(
+        db.as_ref(),
+        privacy_level.to_owned(),
+        Some(false),
+        Some(user_id),
+        None,
+        Some(DraftOrLive::Live),
+        resource_types.to_owned(),
+    );
 
-    let (jigs, total_jig_count) = try_join!(browse_future, total_count_future,)?;
+    let (jigs, (total_count, count)) = try_join!(browse_future, total_count_future,)?;
 
-    let pages = (total_jig_count / (page_limit as u64)
-        + (total_jig_count % (page_limit as u64) != 0) as u64) as u32;
+    let pages = (count / (page_limit as u64) + (count % (page_limit as u64) != 0) as u64) as u32;
 
-    Ok(Json(BrowseJigsResponse {
+    Ok(Json(JigBrowseResponse {
         jigs,
         pages,
-        total_jig_count,
+        total_jig_count: total_count,
     }))
 }
 
 /// Get a Public Users resources
 pub async fn browse_user_resources(
     db: Data<PgPool>,
-    _auth: TokenUser,
+    _auth: Option<TokenUser>,
     path: Path<Uuid>,
     query: Option<Query<<user::BrowseResources as ApiEndpoint>::Req>>,
 ) -> Result<Json<<user::BrowseResources as ApiEndpoint>::Res>, error::NotFound> {
@@ -126,7 +144,7 @@ pub async fn browse_user_resources(
         page_limit as u64,
     );
 
-    let total_count_future = db::user::public_user::total_resource_count(db.as_ref(), user_id);
+    let total_count_future = db::user::public_user::total_resource_count(&db, user_id);
 
     let (resources, total_resource_count) = try_join!(browse_future, total_count_future,)?;
 
@@ -143,7 +161,7 @@ pub async fn browse_user_resources(
 /// Get a Public Users Courses
 pub async fn browse_user_courses(
     db: Data<PgPool>,
-    _auth: TokenUser,
+    _auth: Option<TokenUser>,
     path: Path<Uuid>,
     query: Option<Query<<user::BrowseCourses as ApiEndpoint>::Req>>,
 ) -> Result<Json<<user::BrowseCourses as ApiEndpoint>::Res>, error::NotFound> {
@@ -152,28 +170,39 @@ pub async fn browse_user_courses(
         path.into_inner(),
     );
 
+    let privacy_level = vec![];
+    let resource_types = vec![];
+
     let page_limit = page_limit(query.page_limit)
         .await
         .map_err(|e| error::NotFound::InternalServerError(e))?;
 
-    let browse_future = db::user::public_user::browse_user_courses(
+    let browse_future = db::course::browse(
         &db,
-        user_id,
-        query.page.unwrap_or(0),
-        page_limit as u64,
+        Some(user_id),
+        Some(DraftOrLive::Live),
+        privacy_level.to_owned(),
+        query.page.unwrap_or(0) as i32,
+        page_limit,
+        resource_types.to_owned(),
     );
 
-    let total_count_future = db::user::public_user::total_course_count(db.as_ref(), user_id);
+    let total_count_future = db::course::filtered_count(
+        db.as_ref(),
+        privacy_level.to_owned(),
+        Some(user_id),
+        Some(DraftOrLive::Live),
+        resource_types.to_owned(),
+    );
 
-    let (courses, total_course_count) = try_join!(browse_future, total_count_future,)?;
+    let (courses, (total_count, count)) = try_join!(browse_future, total_count_future,)?;
 
-    let pages = (total_course_count / (page_limit as u64)
-        + (total_course_count % (page_limit as u64) != 0) as u64) as u32;
+    let pages = (count / (page_limit as u64) + (count % (page_limit as u64) != 0) as u64) as u32;
 
-    Ok(Json(BrowseCoursesResponse {
+    Ok(Json(CourseBrowseResponse {
         courses,
         pages,
-        total_course_count,
+        total_course_count: total_count,
     }))
 }
 
@@ -184,6 +213,12 @@ pub async fn follow(
     path: Path<Uuid>,
 ) -> Result<HttpResponse, error::NotFound> {
     let (user_id, follower_id) = (path.into_inner(), claims.0.user_id);
+
+    if user_id == follower_id {
+        return Err(error::NotFound::InternalServerError(anyhow::anyhow!(
+            "User cannot follow self"
+        )));
+    }
 
     db::user::public_user::follow(&db, user_id, follower_id).await?;
 

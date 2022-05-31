@@ -1,11 +1,15 @@
 use crate::{
     api::{ApiEndpoint, Method},
-    domain::user::public_user::{
-        BrowsePublicUserCoursesQuery, BrowsePublicUserCoursesResponse,
-        BrowsePublicUserFollowersQuery, BrowsePublicUserFollowersResponse,
-        BrowsePublicUserFollowingResponse, BrowsePublicUserFollowingsQuery,
-        BrowsePublicUserJigsQuery, BrowsePublicUserJigsResponse, BrowsePublicUserResourcesQuery,
-        BrowsePublicUserResourcesResponse, BrowsePublicUserResponse, PublicUser, UserBrowseQuery,
+    domain::{
+        course::CourseBrowseResponse,
+        jig::JigBrowseResponse,
+        user::public_user::{
+            BrowsePublicUserCoursesQuery, BrowsePublicUserFollowersQuery,
+            BrowsePublicUserFollowersResponse, BrowsePublicUserFollowingResponse,
+            BrowsePublicUserFollowingsQuery, BrowsePublicUserJigsQuery,
+            BrowsePublicUserResourcesQuery, BrowsePublicUserResourcesResponse,
+            BrowsePublicUserResponse, PublicUser, UserBrowseQuery,
+        },
     },
     error::EmptyError,
 };
@@ -44,7 +48,7 @@ impl ApiEndpoint for SearchPublicUser {
 pub struct BrowseUserJigs;
 impl ApiEndpoint for BrowseUserJigs {
     type Req = BrowsePublicUserJigsQuery;
-    type Res = BrowsePublicUserJigsResponse;
+    type Res = JigBrowseResponse;
     type Err = EmptyError;
     const PATH: &'static str = "/v1/user/{user_id}/public/jig/browse";
     const METHOD: Method = Method::Get;
@@ -64,7 +68,7 @@ impl ApiEndpoint for BrowseUserResources {
 pub struct BrowseUserCourses;
 impl ApiEndpoint for BrowseUserCourses {
     type Req = BrowsePublicUserCoursesQuery;
-    type Res = BrowsePublicUserCoursesResponse;
+    type Res = CourseBrowseResponse;
     type Err = EmptyError;
     const PATH: &'static str = "/v1/user/{user_id}/public/course/browse";
     const METHOD: Method = Method::Get;

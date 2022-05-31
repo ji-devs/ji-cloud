@@ -29,9 +29,9 @@ pub use fonts::{
 pub use profile::{Create as CreateProfile, Get as Profile, Patch as PatchProfile};
 
 pub use public_user::{
-    BrowseFollowers, BrowsePublicUser, BrowseFollowing,
-    BrowseUserCourses as BrowseCourses, BrowseUserJigs, BrowseUserResources as BrowseResources,
-    Follow, Get as GetPublicUser, SearchPublicUser, Unfollow,
+    BrowseFollowers, BrowseFollowing, BrowsePublicUser, BrowseUserCourses as BrowseCourses,
+    BrowseUserJigs, BrowseUserResources as BrowseResources, Follow, Get as GetPublicUser,
+    SearchPublicUser, Unfollow,
 };
 
 /// Create a new user.
