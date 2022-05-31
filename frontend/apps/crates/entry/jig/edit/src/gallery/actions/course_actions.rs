@@ -7,7 +7,7 @@ use shared::{
             CourseBrowseQuery, CourseBrowseResponse, CourseCreateRequest, CourseId,
             CourseSearchQuery,
         },
-        CreateResponse,
+        CreateResponse, module::{ModuleCreateRequest, ModuleBody, ModuleKind, ModuleId},
     },
     error::{EmptyError, MetadataNotFound},
 };
@@ -75,6 +75,7 @@ pub async fn create_course() {
     .await
     {
         Ok(resp) => {
+            add_cover(&resp.id).await;
             let url = Route::Asset(AssetRoute::Edit(AssetEditRoute::Course(
                 resp.id,
                 CourseEditRoute::Landing,
@@ -83,6 +84,28 @@ pub async fn create_course() {
             dominator::routing::go_to_url(&url);
         }
         Err(_) => todo!(""),
+    }
+}
+
+async fn add_cover(course_id: &CourseId) {
+    let req = ModuleCreateRequest {
+        body: ModuleBody::new(ModuleKind::ResourceCover),
+        parent_id: (*course_id).into(),
+    };
+
+    // let path = endpoints::module::Create::PATH.replace("{id}", &jig_id.0.to_string());
+
+    match api_with_auth::<CreateResponse<ModuleId>, EmptyError, _>(
+        endpoints::module::Create::PATH,
+        endpoints::module::Create::METHOD,
+        Some(req),
+    )
+    .await
+    {
+        Ok(_) => {}
+        Err(_) => {
+            todo!()
+        }
     }
 }
 

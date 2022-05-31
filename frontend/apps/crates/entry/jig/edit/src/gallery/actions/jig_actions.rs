@@ -72,7 +72,7 @@ pub async fn create_jig(focus: JigFocus) {
     {
         Ok(resp) => {
             if focus.is_resources() {
-                add_resource_cover(&resp.id).await;
+                add_cover(&resp.id).await;
             }
             let url = Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
                 resp.id,
@@ -86,7 +86,7 @@ pub async fn create_jig(focus: JigFocus) {
     }
 }
 
-async fn add_resource_cover(jig_id: &JigId) {
+async fn add_cover(jig_id: &JigId) {
     let req = ModuleCreateRequest {
         body: ModuleBody::new(ModuleKind::ResourceCover),
         parent_id: (*jig_id).into(),
