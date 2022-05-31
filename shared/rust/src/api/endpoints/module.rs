@@ -2,8 +2,7 @@ use crate::{
     api::Method,
     domain::{
         module::{
-            ModuleCreateRequest, ModuleDeleteRequest, ModuleDraftQuery, ModuleId, ModuleLiveQuery,
-            ModuleResponse, ModuleUpdateRequest,
+            ModuleCreateRequest, ModuleDeleteRequest, ModuleId, ModuleResponse, ModuleUpdateRequest,
         },
         CreateResponse,
     },
@@ -21,10 +20,10 @@ use super::ApiEndpoint;
 /// * [`NotFound`](http::StatusCode::NOT_FOUND) if the module does not exist, or the parent jig doesn't exist.
 pub struct GetLive;
 impl ApiEndpoint for GetLive {
-    type Req = ModuleLiveQuery;
+    type Req = ();
     type Res = ModuleResponse;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/module/live/{module_id}";
+    const PATH: &'static str = "/v1/{asset_type}/module/live/{module_id}";
     const METHOD: Method = Method::Get;
 }
 
@@ -38,10 +37,10 @@ impl ApiEndpoint for GetLive {
 /// * [`NotFound`](http::StatusCode::NOT_FOUND) if the module does not exist, or the parent jig doesn't exist.
 pub struct GetDraft;
 impl ApiEndpoint for GetDraft {
-    type Req = ModuleDraftQuery;
+    type Req = ();
     type Res = ModuleResponse;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/module/draft/{module_id}";
+    const PATH: &'static str = "/v1/{asset_type}/module/draft/{module_id}";
     const METHOD: Method = Method::Get;
 }
 

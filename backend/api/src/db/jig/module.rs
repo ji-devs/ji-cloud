@@ -49,24 +49,20 @@ returning id, "index"
     res
 }
 
-pub async fn get_live(
-    pool: &PgPool,
-    parent: JigId,
-    id: ModuleId,
-) -> anyhow::Result<Option<Module>> {
+pub async fn get_live(pool: &PgPool, id: ModuleId) -> anyhow::Result<Option<Module>> {
     let module = sqlx::query!(
         //language=SQL
         r#"
-select id          as "id: ModuleId",
-       contents    as "body",
-       created_at  as "created_at",
-       updated_at  as "updated_at",
-       kind        as "kind: ModuleKind",
-       is_complete as "is_complete"
-from jig_data_module
-where jig_data_id = (select live_id from jig where jig.id = $1) and jig_data_module.id is not distinct from $2
+select jdm.id          as "id!: ModuleId",
+       contents    as "body!",
+       created_at  as "created_at!",
+       updated_at  as "updated_at!",
+       kind        as "kind!: ModuleKind",
+       is_complete as "is_complete!"
+from jig_data_module "jdm"
+inner join jig on jig.live_id = jdm.jig_data_id 
+where jdm.id is not distinct from $1 
 "#,
-        parent.0,
         id.0,
     )
     .fetch_optional(pool)
@@ -90,29 +86,24 @@ where jig_data_id = (select live_id from jig where jig.id = $1) and jig_data_mod
     }
 }
 
-/// FIXME dedup this from live JIG
-pub async fn get_draft(
-    pool: &PgPool,
-    parent: JigId,
-    id: ModuleId,
-) -> anyhow::Result<Option<Module>> {
+pub async fn get_draft(pool: &PgPool, id: ModuleId) -> anyhow::Result<Option<Module>> {
     let module = sqlx::query!(
         //language=SQL
         r#"
-select id          as "id: ModuleId",
-       contents    as "body",
-       created_at  as "created_at",
-       updated_at  as "updated_at",
-       kind        as "kind: ModuleKind",
-       is_complete as "is_complete"
-from jig_data_module
-where jig_data_id = (select draft_id from jig where jig.id = $1) and jig_data_module.id is not distinct from $2
+select jdm.id          as "id!: ModuleId",
+       contents    as "body!",
+       created_at  as "created_at!",
+       updated_at  as "updated_at!",
+       kind        as "kind!: ModuleKind",
+       is_complete as "is_complete!"
+from jig_data_module "jdm"
+inner join jig on jig.draft_id = jdm.jig_data_id 
+where jdm.id is not distinct from $1 
 "#,
-        parent.0,
         id.0,
     )
-        .fetch_optional(pool)
-        .await?;
+    .fetch_optional(pool)
+    .await?;
 
     let map_response = |body, kind| ModuleBody::transform_response_kind(body, kind);
 

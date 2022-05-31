@@ -1,7 +1,7 @@
 use http::StatusCode;
 
 use shared::domain::{
-    asset::AssetId,
+    asset::{AssetId, AssetType},
     jig::JigId,
     module::{body::memory, ModuleBody, ModuleCreateRequest, ModuleKind, ModuleUpdateRequest},
 };
@@ -22,8 +22,9 @@ async fn get_live() -> anyhow::Result<()> {
 
     let resp = client
         .get(&format!(
-            "http://0.0.0.0:{}/v1/module/live/a6b24970-1dd7-11ec-8426-57136b411853?jigId=0cc084bc-7c83-11eb-9f77-e3218dffb008",
-            port
+            "http://0.0.0.0:{}/v1/{:?}/module/live/a6b24970-1dd7-11ec-8426-57136b411853",
+            port,
+            AssetType::Jig
         ))
         .login()
         .send()
@@ -79,8 +80,10 @@ async fn create_default() -> anyhow::Result<()> {
 
     let resp = client
         .get(&format!(
-            "http://0.0.0.0:{}/v1/module/draft/{}?jigId=0cc084bc-7c83-11eb-9f77-e3218dffb008",
-            port, id
+            "http://0.0.0.0:{}/v1/{:?}/module/draft/{}",
+            port,
+            AssetType::Jig,
+            id
         ))
         .query(&[("q", "unique")])
         .login()
@@ -110,7 +113,7 @@ async fn update_empty() -> anyhow::Result<()> {
     let resp = client
         .patch(&format!(
             "http://0.0.0.0:{}/v1/module/draft/a6b24a42-1dd7-11ec-8426-a7165f9281a2",
-            port
+            port,
         ))
         .json(&ModuleUpdateRequest {
             parent_id: AssetId::JigId(JigId(uuid::Uuid::parse_str(
@@ -130,8 +133,9 @@ async fn update_empty() -> anyhow::Result<()> {
 
     let resp = client
         .get(&format!(
-            "http://0.0.0.0:{}/v1/module/draft/a6b24a42-1dd7-11ec-8426-a7165f9281a2?jigId=0cc084bc-7c83-11eb-9f77-e3218dffb008",
-            port
+            "http://0.0.0.0:{}/v1/{:?}/module/draft/a6b24a42-1dd7-11ec-8426-a7165f9281a2",
+            port,
+            AssetType::Jig
         ))
         .login()
         .send()
@@ -185,8 +189,9 @@ async fn update_contents() -> anyhow::Result<()> {
 
     let resp = client
         .get(&format!(
-            "http://0.0.0.0:{}/v1/module/draft/a6b24a06-1dd7-11ec-8426-635a3a7ea572?jigId=0cc084bc-7c83-11eb-9f77-e3218dffb008",
-            port
+            "http://0.0.0.0:{}/v1/{:?}/module/draft/a6b24a06-1dd7-11ec-8426-635a3a7ea572",
+            port,
+            AssetType::Jig
         ))
         .login()
         .send()
@@ -201,8 +206,9 @@ async fn update_contents() -> anyhow::Result<()> {
 
     let resp = client
         .get(&format!(
-            "http://0.0.0.0:{}/v1/module/draft/a6b24a06-1dd7-11ec-8426-635a3a7ea572?jigId=0cc084bc-7c83-11eb-9f77-e3218dffb008",
-            port
+            "http://0.0.0.0:{}/v1/{:?}/module/draft/a6b24a06-1dd7-11ec-8426-635a3a7ea572",
+            port,
+            AssetType::Jig
         ))
         .login()
         .send()
