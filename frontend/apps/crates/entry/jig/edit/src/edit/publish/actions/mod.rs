@@ -1,7 +1,7 @@
-use std::{collections::HashMap, rc::Rc};
+use std::{collections::HashMap, rc::Rc, pin::Pin};
 
 use dominator::clone;
-use futures::join;
+use futures::{join, Future};
 use shared::{
     api::endpoints::{category, meta, ApiEndpoint},
     domain::{
@@ -14,7 +14,7 @@ use shared::{
 };
 use utils::{
     prelude::{api_with_auth, UnwrapJiExt},
-    routes::JigEditRoute,
+    routes::{JigEditRoute, CourseEditRoute},
 };
 
 use crate::edit::publish::editable_assets::EditableAsset;
@@ -23,12 +23,17 @@ use super::super::state::State as JigEditState;
 use super::state::Publish;
 
 mod jig_actions;
+mod course_actions;
 
 impl Publish {
     pub async fn load_new(jig_edit_state: Rc<JigEditState>) -> Self {
-        let asset = match jig_edit_state.asset_id {
-            AssetId::JigId(jig_id) => jig_actions::load_jig(jig_id),
-            AssetId::CourseId(_course_id) => todo!(),
+        let asset: Pin<Box<dyn Future<Output = Result<EditableAsset, ()>>>> = match jig_edit_state.asset_id {
+            AssetId::JigId(jig_id) => {
+                Box::pin(jig_actions::load_jig(jig_id))
+            },
+            AssetId::CourseId(course_id) => {
+                Box::pin(course_actions::load_course(course_id))
+            },
         };
         let categories = load_categories();
         let meta = load_metadata();
@@ -68,17 +73,21 @@ impl Publish {
     }
 
     pub fn navigate_to_cover(&self) {
-        let cover_module_id = self.asset.cover().as_ref().map(|m| m.id);
-
         match &self.asset {
             EditableAsset::Jig(_) => {
                 // navigate to cover if exists otherwise navigate to landing
+                let cover_module_id = self.asset.cover().as_ref().map(|m| m.id);
+
                 let route = match cover_module_id {
                     Some(cover_module_id) => JigEditRoute::Module(cover_module_id),
                     None => JigEditRoute::Landing,
                 };
+
                 self.jig_edit_state.set_route_jig(route);
             }
+            EditableAsset::Course(_) => {
+                self.jig_edit_state.set_route_course(CourseEditRoute::Cover);
+            },
         };
     }
 
@@ -98,10 +107,13 @@ impl Publish {
                 JigFocus::Modules => jig.modules.iter().any(|m| !m.is_complete),
                 JigFocus::Resources => jig.cover.is_some(),
             },
+            EditableAsset::Course(course) => {
+                course.cover.is_some()
+            },
         }
     }
 
-    pub fn save_jig(self: Rc<Self>) {
+    pub fn save_asset(self: Rc<Self>) {
         let state = Rc::clone(&self);
         if Rc::clone(&state).form_invalid() {
             state.submission_tried.set(true);
@@ -114,13 +126,18 @@ impl Publish {
                 EditableAsset::Jig(jig) => {
                     jig_actions::save_and_publish_jig(jig)
                         .await
-                        .unwrap_ji()
+                        .unwrap_ji();
+                    state.jig_edit_state.set_route_jig(JigEditRoute::PostPublish);
                 },
+                EditableAsset::Course(course) => {
+                    course_actions::save_and_publish_course(course)
+                        .await
+                        .unwrap_ji();
+                    state.jig_edit_state.set_route_course(CourseEditRoute::PostPublish);
+                }
             };
 
             state.submission_tried.set(false);
-
-            state.jig_edit_state.set_route_jig(JigEditRoute::PostPublish);
         }));
     }
 }

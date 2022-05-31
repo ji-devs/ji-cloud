@@ -7,7 +7,7 @@ use futures_signals::{
 use shared::domain::asset::PrivacyLevel;
 use utils::{
     events,
-    routes::{AssetEditRoute, AssetRoute, JigEditRoute, Route},
+    routes::{AssetEditRoute, AssetRoute, JigEditRoute, Route, CourseEditRoute},
 };
 use web_sys::{HtmlElement, HtmlInputElement, HtmlTextAreaElement};
 
@@ -227,6 +227,13 @@ fn render_page(state: Rc<Publish>) -> Dom {
                                 JigEditRoute::Landing
                             ))).to_string()
                         },
+                        EditableAsset::Course(course) => {
+                            state.jig_edit_state.set_route_jig(JigEditRoute::Landing);
+                            Route::Asset(AssetRoute::Edit(AssetEditRoute::Course(
+                                course.id,
+                                CourseEditRoute::Landing
+                            ))).to_string()
+                        },
                     };
                     dominator::routing::go_to_url(&url);
                 }))
@@ -244,7 +251,7 @@ fn render_page(state: Rc<Publish>) -> Dom {
                             .style("color", "var(--main-yellow)")
                         }))
                         .event(clone!(state => move |_: events::Click| {
-                            Rc::clone(&state).save_jig();
+                            Rc::clone(&state).save_asset();
                         }))
                     }))
                     .child_signal(state.show_missing_info_popup.signal().map(clone!(state, elem => move |show_popup| {

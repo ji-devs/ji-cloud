@@ -83,7 +83,7 @@ impl EditPage {
                                     todo!()
                                 },
                                 CourseEditRoute::Publish => {
-                                    todo!()
+                                    Some(Publish::render(Rc::clone(&state)))
                                 },
                                 CourseEditRoute::PostPublish => {
                                     todo!()

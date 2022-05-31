@@ -13,6 +13,7 @@ use super::{super::state::State as JigEditState, editable_assets::EditableAsset}
 
 const STR_JIG: &str = "JIG";
 const STR_RESOURCE: &str = "Resource";
+const STR_COURSE: &str = "Course";
 
 pub struct Publish {
     pub loader: AsyncLoader,
@@ -63,6 +64,7 @@ impl Publish {
                 JigFocus::Modules => STR_JIG,
                 JigFocus::Resources => STR_RESOURCE,
             },
+            EditableAsset::Course(_) => STR_COURSE,
         }
     }
 }
