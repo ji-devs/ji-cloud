@@ -413,21 +413,21 @@ pub async fn browse(
     //language=SQL
     r#"
 with cte as (
-    select array(select jd.id as "id!"
-    from course_data "jd"
-          left join course on (draft_id = jd.id or (live_id = jd.id and jd.last_synced_at is not null))
-          left join course_data_resource "resource" on jd.id = resource.course_data_id
+    select array(select cd.id as "id!"
+    from course_data "cd"
+          left join course on (draft_id = cd.id or (live_id = cd.id and cd.last_synced_at is not null and published_at is not null))
+          left join course_data_resource "resource" on cd.id = resource.course_data_id
     where (author_id = $1 or $1 is null)
-        and (jd.draft_or_live = $2 or $2 is null)
-        and (jd.privacy_level = any($3) or $3 = array[]::smallint[])
+        and (cd.draft_or_live = $2 or $2 is null)
+        and (cd.privacy_level = any($3) or $3 = array[]::smallint[])
         and (resource.resource_type_id = any($4) or $4 = array[]::uuid[])
-    order by coalesce(updated_at, created_at) desc) as id
+    order by coalesce(updated_at, created_at) desc, course.id) as id
 ),
 cte1 as (
     select * from unnest((select distinct id from cte)) with ordinality t(id
    , ord) order by ord
 )
-select course.id                                                         as "course_id: CourseId",
+select course.id                                                                as "course_id: CourseId",
     privacy_level                                                               as "privacy_level: PrivacyLevel",
     creator_id,
     author_id,
@@ -456,15 +456,14 @@ select course.id                                                         as "cou
             where course_data_id = course_data.id)     as "categories!: Vec<(CategoryId,)>",
     array(select row (affiliation_id)
             from course_data_affiliation
-            where course_data_id = course_data.id)     as "affiliations!: Vec<(AffiliationId,)>",
+            where course_data_id = course_data.id)          as "affiliations!: Vec<(AffiliationId,)>",
     array(select row (age_range_id)
             from course_data_age_range
-            where course_data_id = course_data.id)     as "age_ranges!: Vec<(AgeRangeId,)>",
-    array(
-                select row (jdar.id, jdar.display_name, resource_type_id, resource_content)
-                from course_data_resource "jdar"
-                where jdar.course_data_id = course_data.id
-            )                                               as "additional_resource!: Vec<(AddId, String, TypeId, Value)>",
+            where course_data_id = course_data.id)          as "age_ranges!: Vec<(AgeRangeId,)>",
+    array(select row (cdr.id, cdr.display_name, resource_type_id, resource_content)
+                from course_data_resource "cdr"
+                where cdr.course_data_id = course_data.id
+          )                                          as "additional_resource!: Vec<(AddId, String, TypeId, Value)>",
     array(
         select row(jig_id)
         from course_data_jig
@@ -472,8 +471,15 @@ select course.id                                                         as "cou
     )                                                     as "items!: Vec<JigId>"
 from cte1
 left join course_data on cte1.id = course_data.id
-left join course on (course_data.id = course.draft_id or (course_data.id = course.live_id and last_synced_at is not null))
-where cte1.ord > (1 * $5 * $6)
+inner join course on (
+    course_data.id = course.draft_id 
+    or (        
+        course_data.id = course.live_id
+        and last_synced_at is not null
+        and course.published_at is not null
+    )
+)
+where ord > (1 * $5 * $6)
 limit $6
 "#,
     author_id,
