@@ -36,7 +36,8 @@ impl ModuleThumbnail {
         })
     }
 
-    pub fn render_live(state: Rc<Self>, slot: Option<&str>) -> Dom {
+    pub fn render_live(self: Rc<Self>, slot: Option<&str>) -> Dom {
+        let state = self;
         let mutable = Mutable::new(());
 
         let listener = Rc::new(RefCell::new(state.module.as_ref().map(|_| {
