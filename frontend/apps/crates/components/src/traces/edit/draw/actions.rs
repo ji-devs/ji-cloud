@@ -32,6 +32,13 @@ impl Draw {
                 } else {
                     self.cancel();
                 }
+            } else {
+                // This branch is (I think) when bounds is 0x0 and `calc_bounds` returns None.
+                // There are a few other cases where a teacher is able to draw a short straight line
+                // down and releasing the mouse wouldn't clear the line. Canceling at this point
+                // clears the line correctly and also prevents a weird state when the teacher
+                // simply taps on the screen.
+                self.cancel();
             }
         }
     }
