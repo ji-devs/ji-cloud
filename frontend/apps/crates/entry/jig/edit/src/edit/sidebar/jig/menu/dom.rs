@@ -7,7 +7,7 @@ use crate::edit::sidebar::{
         actions::{self, MoveTarget},
         state::State as SpotState,
     },
-    state::{SidebarSpotItem, State as SidebarState},
+    state::State as SidebarState,
 };
 use dominator::{clone, html, Dom, EventOptions};
 use shared::domain::module::{LiteModule, ModuleId, ModuleKind};
@@ -44,9 +44,8 @@ pub fn render(module_state: &Rc<SpotState>) -> Dom {
 }
 
 fn menu_items(state: &Rc<State>, module_state: &Rc<SpotState>) -> Vec<Dom> {
-    match &module_state.module.item {
-        SidebarSpotItem::Jig(module) => menu_items_jig(state, module_state, module),
-    }
+    let module = module_state.module.item.unwrap_jig();
+    menu_items_jig(state, module_state, module)
 }
 
 fn menu_items_jig(

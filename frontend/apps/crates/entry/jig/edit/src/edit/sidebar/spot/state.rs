@@ -68,6 +68,10 @@ impl State {
                         }
                     }
                 },
+                SidebarSpotItem::Course(_course_spot) => {
+                    // TODO:
+                    "thumbnail"
+                },
             }
         }))
     }

@@ -3,12 +3,13 @@ use dominator::{clone, html, with_node, Dom, DomBuilder, EventOptions};
 use futures_signals::map_ref;
 use web_sys::{HtmlElement, Node, ScrollBehavior, ScrollIntoViewOptions};
 
-use super::super::jig::menu::dom as MenuDom;
+use super::super::jig::menu::dom as JigMenuDom;
+use super::super::course::menu::dom as CourseMenuDom;
 use super::super::spot::actions as spot_actions;
 use super::jig::actions as jig_spot_actions;
 use super::{actions, state::*};
 use crate::edit::sidebar::state::{
-    ModuleHighlight, SidebarSpot, SidebarSpotItem, State as SidebarState,
+    ModuleHighlight, SidebarSpot, SidebarSpotItem, State as SidebarState, CourseSpot,
 };
 use components::module::_common::thumbnail::{ModuleThumbnail, ThumbnailFallback};
 use futures_signals::signal::{not, SignalExt};
@@ -110,6 +111,9 @@ impl ItemDom {
                                     },
                                 }
                             },
+                            SidebarSpotItem::Course(_course_spot) => {
+                                todo!()
+                            }
                         }
                     })
                 )
@@ -148,6 +152,26 @@ impl ItemDom {
                                         _ => None,
                                     }
                                 },
+                                SidebarSpotItem::Course(course_spot) => {
+                                    course_spot.as_ref().map(|course_spot| {
+                                        match &**course_spot {
+                                            CourseSpot::Cover(cover) => {
+                                                ModuleThumbnail::new(
+                                                    state.sidebar.asset.id(),
+                                                    Some((*cover).clone()),
+                                                    ThumbnailFallback::Module,
+                                                ).render_live(Some("thumbnail"))
+                                            },
+                                            CourseSpot::Item(jig_id) => {
+                                                ModuleThumbnail::new(
+                                                    (*jig_id).into(),
+                                                    None,
+                                                    ThumbnailFallback::Module,
+                                                ).render_live(Some("thumbnail"))
+                                            },
+                                        }
+                                    })
+                                }
                             }
                         })))
                         .child_signal(state.sidebar.highlight_modules.signal_cloned().map(clone!(state, elem => move |highlight| {
@@ -213,10 +237,27 @@ impl ItemDom {
                 }))
                 // Add the menu only if the current module is not a placeholder or if it is, it is
                 // not the _last_ placeholder.
-                .apply_if(
-                    module.item.is_some() || (index <= total_len - 2 && module.item.is_none()),
-                    |dom| dom.child(MenuDom::render(&state))
-                )
+                // .apply_if(
+                //     module.item.is_some() || (index <= total_len - 2 && module.item.is_none()), // TODO: total_len - 2 might overflow
+                //     |dom| dom.child(MenuDom::render(&state))
+                // )
+                .apply(clone!(state => move|dom| {
+                    // match state.module {
+                    //     Asset::Jig(_) => {
+                    //         if module.item.is_some() || (index <= total_len - 2 && module.item.is_none()) { // TODO: total_len - 2 might overflow
+                    //             dom.child(MenuDom::render(&state))
+                    //         } else {
+                    //             dom
+                    //         }
+                    //     },
+                    //     Asset::Course(_) => todo!(),
+                    // }
+                    
+                    match module.item {
+                        SidebarSpotItem::Jig(_) => dom.child(JigMenuDom::render(&state)),
+                        SidebarSpotItem::Course(_) => dom.child(CourseMenuDom::render(&state)),
+                    }
+                }))
                 .apply(Self::render_add_button(&state))
             }))
         })

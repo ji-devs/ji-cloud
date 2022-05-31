@@ -124,7 +124,9 @@ impl EditPage {
                                 PreviewPopupCallbacks::new(close)
                             ).render(None)
                         },
-                        // AssetPlayerSettings::Course => todo!(),
+                        AssetPlayerSettings::Course => {
+                            todo!()
+                        },
                     }
                 })
             })))

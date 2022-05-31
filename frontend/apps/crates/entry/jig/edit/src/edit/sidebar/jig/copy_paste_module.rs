@@ -5,6 +5,8 @@ use shared::domain::{jig::JigId, module::ModuleId};
 use utils::{storage::get_local_storage, unwrap::UnwrapJiExt};
 use uuid::Uuid;
 
+use crate::edit::sidebar::state::SidebarSpot;
+
 use super::super::state::State;
 
 pub const COPY_MODULE_KEY: &str = "COPY_MODULE";
@@ -40,7 +42,7 @@ pub fn paste_module(state: Rc<State>) {
         Some((jig_id, module_id)) => {
             state.loader.load(clone!(state => async move {
                 let module = super::module_cloner::clone_module(&jig_id, &module_id, &state.asset.unwrap_jig().id).await.unwrap_ji();
-                state.modules.lock_mut().push_cloned(Rc::new(module.into()));
+                state.modules.lock_mut().push_cloned(SidebarSpot::new_jig_module(module));
             }));
         }
     }

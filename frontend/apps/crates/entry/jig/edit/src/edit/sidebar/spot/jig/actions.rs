@@ -35,7 +35,7 @@ pub fn edit(state: Rc<SpotState>) {
 }
 
 pub async fn delete(state: Rc<SpotState>) {
-    if let Some(module) = &*state.module.item.unwrap_module() {
+    if let Some(module) = &*state.module.item.unwrap_jig() {
         let path = endpoints::module::Delete::PATH.replace("{module_id}", &module.id.0.to_string());
 
         let req = ModuleDeleteRequest {
@@ -66,11 +66,11 @@ pub fn assign_kind(state: Rc<SpotState>, kind: ModuleKind) {
                 let id = resp.id;
                 let index = state.index;
 
-                let module = Rc::new(LiteModule {
+                let module = SidebarSpot::new_jig_module(LiteModule {
                     id,
                     kind,
                     is_complete: false,
-                }.into());
+                });
 
                 {
                     // Instead of replacing the module at the index, we remove the old module and

@@ -56,6 +56,9 @@ pub fn move_index(state: Rc<State>, move_target: MoveTarget) {
                         target as u16
                     ).await;
                 },
+                SidebarSpotItem::Course(_course_spot) => {
+                    todo!();
+                }
             }
         }
     }));

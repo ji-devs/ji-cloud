@@ -42,7 +42,7 @@ impl State {
     }
 
     pub fn set_route_course(&self, route: CourseEditRoute) {
-        assert!(&self.asset_id.is_jig_id());
+        assert!(&self.asset_id.is_course_id());
         self.route.set(AssetEditRoute::Course(
             *self.asset_id.unwrap_course(),
             route,
@@ -53,4 +53,5 @@ impl State {
 #[derive(Clone)]
 pub(super) enum AssetPlayerSettings {
     Jig(JigPlayerOptions),
+    Course,
 }

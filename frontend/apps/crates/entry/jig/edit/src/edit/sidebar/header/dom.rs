@@ -9,7 +9,12 @@ use crate::edit::{
     state::AssetPlayerSettings,
 };
 
-use super::super::{actions as sidebar_actions, jig::settings, state::State as SidebarState};
+use super::super::{
+    actions as sidebar_actions,
+    jig::settings as jig_settings,
+    course::settings as course_settings,
+    state::State as SidebarState
+};
 use utils::prelude::*;
 
 const STR_MY_JIGS: &str = "My JIGs";
@@ -29,7 +34,10 @@ impl HeaderDom {
             .apply(|dom| {
                 match &sidebar_state.settings {
                     SidebarSetting::Jig(settings) => {
-                        dom.child(settings::dom::render(Rc::clone(settings)))
+                        dom.child(jig_settings::dom::render(Rc::clone(settings)))
+                    },
+                    SidebarSetting::Course(settings) => {
+                        dom.child(course_settings::dom::render(Rc::clone(settings)))
                     },
                 }
             })
@@ -78,6 +86,9 @@ impl HeaderDom {
                                 let settings = AssetPlayerSettings::Jig(settings);
                                 sidebar_state.jig_edit_state.play_jig.set(Some(settings));
                             },
+                            SidebarSetting::Course(_course) => {
+                                sidebar_state.jig_edit_state.play_jig.set(Some(AssetPlayerSettings::Course));
+                            }
                         }
                     }))
                 }),

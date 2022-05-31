@@ -1,3 +1,5 @@
+use crate::edit::sidebar::state::SidebarSpot;
+
 use super::super::state::State;
 use super::settings::state::State as SettingsState;
 use dominator::clone;
@@ -120,7 +122,7 @@ pub fn on_iframe_message(state: Rc<State>, message: ModuleToJigEditorMessage) {
             let modules = state.modules.lock_ref();
             let module = modules.iter().find(|module| {
                 // Oh my.
-                match &*module.item.unwrap_module() {
+                match &*module.item.unwrap_jig() {
                     Some(module) => module.id == module_id,
                     None => false,
                 }
@@ -154,7 +156,7 @@ fn populate_added_module(state: Rc<State>, module: LiteModule) {
     state
         .modules
         .lock_mut()
-        .insert_cloned(insert_at_idx, Rc::new(module.into()));
+        .insert_cloned(insert_at_idx, SidebarSpot::new_jig_module(module));
 
     state
         .jig_edit_state
