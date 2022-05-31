@@ -195,8 +195,8 @@ impl Asset {
     /// get cover
     pub fn cover(&self) -> Option<&LiteModule> {
         match self {
-            Self::Jig(jig) => jig.jig_data.modules.first(),
-            Self::Course(_) => todo!(),
+            Self::Jig(jig) => jig.jig_data.modules.get(0),
+            Self::Course(course) => course.course_data.cover.as_ref(),
         }
     }
 
