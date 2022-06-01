@@ -13,6 +13,7 @@ on:
     - 'frontend/apps/crates/entry/home/**'
     - 'frontend/apps/crates/entry/jig/**'
     - 'frontend/apps/crates/entry/user/**'
+    - 'frontend/apps/crates/entry/community/**'
     - 'frontend/apps/crates/entry/kids/**'
 
 jobs:
@@ -46,7 +47,7 @@ jobs:
 
     strategy:
       matrix:
-        app: [admin, home, jig/edit, jig/play, user, kids]
+        app: [admin, home, jig/edit, jig/play, community, user, kids]
     steps:
 
       - name: checkout repo
