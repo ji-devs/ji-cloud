@@ -13,6 +13,7 @@ const ALLOWED_APP_NAMES = [
     "admin",
     "home",
     "kids",
+    "community",
     "jig/edit",
     "jig/play",
     "module/memory/edit",

@@ -25,6 +25,7 @@ const JIG_FOCUS_KEY: &str = "jig_focus";
 #[derive(Debug, Clone)]
 pub enum Route {
     NotFound,
+    Community(CommunityRoute),
     User(UserRoute),
     Kids(KidsRoute),
     Admin(AdminRoute),
@@ -53,6 +54,11 @@ pub enum UserRoute {
     VerifyEmail(String),           //the token
     PasswordReset(String),         //the token
     RegisterComplete,
+}
+
+#[derive(Debug, Clone)]
+pub enum CommunityRoute {
+    Landing
 }
 
 #[derive(Debug, Clone)]
@@ -258,6 +264,7 @@ impl Route {
                 let page = params_map.get("page").unwrap_or_default();
                 Self::Dev(DevRoute::Scratch(id.to_string(), page))
             }
+            ["community"] => Self::Community(CommunityRoute::Landing),
             ["user", "profile"] => Self::User(UserRoute::Profile(ProfileSection::Landing)),
             ["user", "profile", "change-email"] => {
                 Self::User(UserRoute::Profile(ProfileSection::ChangeEmail))
@@ -512,6 +519,9 @@ impl From<&Route> for String {
                     None => "/kids".to_string(),
                 },
             },
+            Route::Community(route) => match route {
+                CommunityRoute::Landing => format!("/community"),
+            }
             Route::Dev(route) => match route {
                 DevRoute::Showcase(id, page) => format!("/dev/showcase/{}?page={}", id, page),
                 DevRoute::Scratch(id, page) => format!("/dev/scratch/{}?page={}", id, page),
