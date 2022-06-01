@@ -51,7 +51,7 @@ async fn get_live(
     println!("Asset: {:?}", asset);
 
     let module = match asset {
-        AssetType::Jig => db::jig::module::get_live(&db, module_id)
+        AssetType::Jig | AssetType::Resource => db::jig::module::get_live(&db, module_id)
             .await?
             .ok_or(error::NotFound::ResourceNotFound)?,
         AssetType::Course => db::course::module::get_live(&db, module_id)
@@ -71,7 +71,7 @@ async fn get_draft(
     let module_id = path.1;
 
     let module = match asset {
-        AssetType::Jig => db::jig::module::get_draft(&db, module_id)
+        AssetType::Jig | AssetType::Resource => db::jig::module::get_draft(&db, module_id)
             .await?
             .ok_or(error::NotFound::ResourceNotFound)?,
         AssetType::Course => db::course::module::get_draft(&db, module_id)

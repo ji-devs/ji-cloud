@@ -29,6 +29,9 @@ pub enum AssetType {
     /// JIG
     Jig,
 
+    /// Resource
+    Resource,
+
     /// Course
     Course,
 }
@@ -37,6 +40,11 @@ impl AssetType {
     /// check if jig
     pub fn is_jig(&self) -> bool {
         matches!(self, Self::Jig)
+    }
+
+    /// check if resource
+    pub fn is_resource(&self) -> bool {
+        matches!(self, Self::Resource)
     }
 
     /// check if course
@@ -50,6 +58,7 @@ impl AssetType {
     pub fn as_str(&self) -> &'static str {
         match self {
             Self::Jig => "jig",
+            Self::Resource => "resource",
             Self::Course => "course",
         }
     }
