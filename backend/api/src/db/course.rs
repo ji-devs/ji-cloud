@@ -460,15 +460,15 @@ select course.id                                                                
     array(select row (age_range_id)
             from course_data_age_range
             where course_data_id = course_data.id)          as "age_ranges!: Vec<(AgeRangeId,)>",
-    array(select row (cdr.id, cdr.display_name, resource_type_id, resource_content)
-                from course_data_resource "cdr"
-                where cdr.course_data_id = course_data.id
+    array(select row (id, display_name, resource_type_id, resource_content)
+                from course_data_resource 
+                where course_data_id = course_data.id
           )                                          as "additional_resource!: Vec<(AddId, String, TypeId, Value)>",
     array(
         select row(jig_id)
         from course_data_jig
         where course_data_jig.course_data_id = course_data.id
-    )                                                     as "items!: Vec<JigId>"
+    )                                                     as "items!: Vec<(JigId,)>"
 from cte1
 left join course_data on cte1.id = course_data.id
 inner join course on (
@@ -550,7 +550,7 @@ limit $6
                 other_keywords: course_data_row.other_keywords,
                 translated_keywords: course_data_row.translated_keywords,
                 translated_description: course_data_row.translated_description.0,
-                items: course_data_row.items,
+                items: course_data_row.items.into_iter().map(|(it,)| it).collect(),
             },
         })
         .collect();

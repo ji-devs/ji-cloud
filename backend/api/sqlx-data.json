@@ -2868,6 +2868,157 @@
       "nullable": []
     }
   },
+  "4de2c77ab5716ea40775229deecb299169d9d3f1d63c9f1cf24b04c5f88b9f17": {
+    "query": "\nwith cte as (\n    select array(select cd.id as \"id!\"\n    from course_data \"cd\"\n          left join course on (draft_id = cd.id or (live_id = cd.id and cd.last_synced_at is not null and published_at is not null))\n          left join course_data_resource \"resource\" on cd.id = resource.course_data_id\n    where (author_id = $1 or $1 is null)\n        and (cd.draft_or_live = $2 or $2 is null)\n        and (cd.privacy_level = any($3) or $3 = array[]::smallint[])\n        and (resource.resource_type_id = any($4) or $4 = array[]::uuid[])\n    order by coalesce(updated_at, created_at) desc, course.id) as id\n),\ncte1 as (\n    select * from unnest((select distinct id from cte)) with ordinality t(id\n   , ord) order by ord\n)\nselect course.id                                                                as \"course_id: CourseId\",\n    privacy_level                                                               as \"privacy_level: PrivacyLevel\",\n    creator_id,\n    author_id,\n    (select given_name || ' '::text || family_name\n     from user_profile\n     where user_profile.user_id = author_id)                                     as \"author_name\",\n    published_at,\n    likes,\n    plays,\n    display_name                                                                  as \"display_name!\",\n    updated_at,\n    language                                                                      as \"language!\",\n    description                                                                   as \"description!\",\n    translated_description                                                        as \"translated_description!: Json<HashMap<String,String>>\",\n    draft_or_live                                                                 as \"draft_or_live!: DraftOrLive\",\n    other_keywords                                                                as \"other_keywords!\",\n    translated_keywords                                                           as \"translated_keywords!\",\n    (\n        select row(course_data_module.id, kind, is_complete) \n        from course_data_module                \n        where course_data_id = course_data.id and \"index\" = 0 \n        order by \"index\"\n    )                                                   as \"cover?: (ModuleId, ModuleKind, bool)\",\n    array(select row (category_id)\n            from course_data_category\n            where course_data_id = course_data.id)     as \"categories!: Vec<(CategoryId,)>\",\n    array(select row (affiliation_id)\n            from course_data_affiliation\n            where course_data_id = course_data.id)          as \"affiliations!: Vec<(AffiliationId,)>\",\n    array(select row (age_range_id)\n            from course_data_age_range\n            where course_data_id = course_data.id)          as \"age_ranges!: Vec<(AgeRangeId,)>\",\n    array(select row (id, display_name, resource_type_id, resource_content)\n                from course_data_resource \n                where course_data_id = course_data.id\n          )                                          as \"additional_resource!: Vec<(AddId, String, TypeId, Value)>\",\n    array(\n        select row(jig_id)\n        from course_data_jig\n        where course_data_jig.course_data_id = course_data.id\n    )                                                     as \"items!: Vec<(JigId,)>\"\nfrom cte1\nleft join course_data on cte1.id = course_data.id\ninner join course on (\n    course_data.id = course.draft_id \n    or (        \n        course_data.id = course.live_id\n        and last_synced_at is not null\n        and course.published_at is not null\n    )\n)\nwhere ord > (1 * $5 * $6)\nlimit $6\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "course_id: CourseId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "privacy_level: PrivacyLevel",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 2,
+          "name": "creator_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 3,
+          "name": "author_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 4,
+          "name": "author_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 5,
+          "name": "published_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 6,
+          "name": "likes",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 7,
+          "name": "plays",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 8,
+          "name": "display_name!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 9,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 10,
+          "name": "language!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 11,
+          "name": "description!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 12,
+          "name": "translated_description!: Json<HashMap<String,String>>",
+          "type_info": "Jsonb"
+        },
+        {
+          "ordinal": 13,
+          "name": "draft_or_live!: DraftOrLive",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 14,
+          "name": "other_keywords!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 15,
+          "name": "translated_keywords!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 16,
+          "name": "cover?: (ModuleId, ModuleKind, bool)",
+          "type_info": "Record"
+        },
+        {
+          "ordinal": 17,
+          "name": "categories!: Vec<(CategoryId,)>",
+          "type_info": "RecordArray"
+        },
+        {
+          "ordinal": 18,
+          "name": "affiliations!: Vec<(AffiliationId,)>",
+          "type_info": "RecordArray"
+        },
+        {
+          "ordinal": 19,
+          "name": "age_ranges!: Vec<(AgeRangeId,)>",
+          "type_info": "RecordArray"
+        },
+        {
+          "ordinal": 20,
+          "name": "additional_resource!: Vec<(AddId, String, TypeId, Value)>",
+          "type_info": "RecordArray"
+        },
+        {
+          "ordinal": 21,
+          "name": "items!: Vec<(JigId,)>",
+          "type_info": "RecordArray"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2",
+          "Int2Array",
+          "UuidArray",
+          "Int4",
+          "Int4"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        true,
+        true,
+        null,
+        true,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    }
+  },
   "4fb49fe4ad3204755e0a09d701e36d421c6a6696509bd37c238b1a835e022d7b": {
     "query": "\ninsert into jig_like(jig_id, user_id)\nvalues ($1, $2)\n            ",
     "describe": {
@@ -5409,157 +5560,6 @@
         ]
       },
       "nullable": []
-    }
-  },
-  "a45834393b55982d5bc3e78bf9b6d5a5fc2de90ecd886a52cccdae0ea9e0af4c": {
-    "query": "\nwith cte as (\n    select array(select cd.id as \"id!\"\n    from course_data \"cd\"\n          left join course on (draft_id = cd.id or (live_id = cd.id and cd.last_synced_at is not null and published_at is not null))\n          left join course_data_resource \"resource\" on cd.id = resource.course_data_id\n    where (author_id = $1 or $1 is null)\n        and (cd.draft_or_live = $2 or $2 is null)\n        and (cd.privacy_level = any($3) or $3 = array[]::smallint[])\n        and (resource.resource_type_id = any($4) or $4 = array[]::uuid[])\n    order by coalesce(updated_at, created_at) desc, course.id) as id\n),\ncte1 as (\n    select * from unnest((select distinct id from cte)) with ordinality t(id\n   , ord) order by ord\n)\nselect course.id                                                                as \"course_id: CourseId\",\n    privacy_level                                                               as \"privacy_level: PrivacyLevel\",\n    creator_id,\n    author_id,\n    (select given_name || ' '::text || family_name\n     from user_profile\n     where user_profile.user_id = author_id)                                     as \"author_name\",\n    published_at,\n    likes,\n    plays,\n    display_name                                                                  as \"display_name!\",\n    updated_at,\n    language                                                                      as \"language!\",\n    description                                                                   as \"description!\",\n    translated_description                                                        as \"translated_description!: Json<HashMap<String,String>>\",\n    draft_or_live                                                                 as \"draft_or_live!: DraftOrLive\",\n    other_keywords                                                                as \"other_keywords!\",\n    translated_keywords                                                           as \"translated_keywords!\",\n    (\n        select row(course_data_module.id, kind, is_complete) \n        from course_data_module                \n        where course_data_id = course_data.id and \"index\" = 0 \n        order by \"index\"\n    )                                                   as \"cover?: (ModuleId, ModuleKind, bool)\",\n    array(select row (category_id)\n            from course_data_category\n            where course_data_id = course_data.id)     as \"categories!: Vec<(CategoryId,)>\",\n    array(select row (affiliation_id)\n            from course_data_affiliation\n            where course_data_id = course_data.id)          as \"affiliations!: Vec<(AffiliationId,)>\",\n    array(select row (age_range_id)\n            from course_data_age_range\n            where course_data_id = course_data.id)          as \"age_ranges!: Vec<(AgeRangeId,)>\",\n    array(select row (cdr.id, cdr.display_name, resource_type_id, resource_content)\n                from course_data_resource \"cdr\"\n                where cdr.course_data_id = course_data.id\n          )                                          as \"additional_resource!: Vec<(AddId, String, TypeId, Value)>\",\n    array(\n        select row(jig_id)\n        from course_data_jig\n        where course_data_jig.course_data_id = course_data.id\n    )                                                     as \"items!: Vec<JigId>\"\nfrom cte1\nleft join course_data on cte1.id = course_data.id\ninner join course on (\n    course_data.id = course.draft_id \n    or (        \n        course_data.id = course.live_id\n        and last_synced_at is not null\n        and course.published_at is not null\n    )\n)\nwhere ord > (1 * $5 * $6)\nlimit $6\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "course_id: CourseId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "privacy_level: PrivacyLevel",
-          "type_info": "Int2"
-        },
-        {
-          "ordinal": 2,
-          "name": "creator_id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 3,
-          "name": "author_id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 4,
-          "name": "author_name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 5,
-          "name": "published_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 6,
-          "name": "likes",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 7,
-          "name": "plays",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 8,
-          "name": "display_name!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 9,
-          "name": "updated_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 10,
-          "name": "language!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 11,
-          "name": "description!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 12,
-          "name": "translated_description!: Json<HashMap<String,String>>",
-          "type_info": "Jsonb"
-        },
-        {
-          "ordinal": 13,
-          "name": "draft_or_live!: DraftOrLive",
-          "type_info": "Int2"
-        },
-        {
-          "ordinal": 14,
-          "name": "other_keywords!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 15,
-          "name": "translated_keywords!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 16,
-          "name": "cover?: (ModuleId, ModuleKind, bool)",
-          "type_info": "Record"
-        },
-        {
-          "ordinal": 17,
-          "name": "categories!: Vec<(CategoryId,)>",
-          "type_info": "RecordArray"
-        },
-        {
-          "ordinal": 18,
-          "name": "affiliations!: Vec<(AffiliationId,)>",
-          "type_info": "RecordArray"
-        },
-        {
-          "ordinal": 19,
-          "name": "age_ranges!: Vec<(AgeRangeId,)>",
-          "type_info": "RecordArray"
-        },
-        {
-          "ordinal": 20,
-          "name": "additional_resource!: Vec<(AddId, String, TypeId, Value)>",
-          "type_info": "RecordArray"
-        },
-        {
-          "ordinal": 21,
-          "name": "items!: Vec<JigId>",
-          "type_info": "RecordArray"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int2",
-          "Int2Array",
-          "UuidArray",
-          "Int4",
-          "Int4"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        true,
-        true,
-        null,
-        true,
-        false,
-        false,
-        false,
-        true,
-        false,
-        false,
-        false,
-        true,
-        false,
-        false,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null
-      ]
     }
   },
   "a47efec2570cc4f4dc91ac5cbeeef6c184bfbd3ced34a523919ab35a9ec17fc0": {
