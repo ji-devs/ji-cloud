@@ -1,6 +1,6 @@
 use dominator::{clone, DomHandle};
 use futures_signals::signal::{Mutable, Signal, SignalExt};
-use shared::domain::asset::{DraftOrLive, PrivacyLevel};
+use shared::domain::asset::{DraftOrLive, PrivacyLevel, AssetType};
 
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -190,7 +190,6 @@ where
                         other_keywords: String::from(""),
                         translated_keywords: String::from(""),
                         translated_description: HashMap::new(),
-                        cover: None,
                     });
                 }
 
@@ -202,15 +201,11 @@ where
                         (force_raw, InitSource::ForceRaw)
                     } else {
                         let resp = {
-                            let req = ModuleDraftQuery {
-                                parent_id: _self.opts.jig_id.into()
-                            };
-
                             let path = GetDraft::PATH
-                                // .replace("{id}",&_self.opts.jig_id.0.to_string())
+                                .replace("{asset_type}",AssetType::Jig.as_str())
                                 .replace("{module_id}",&_self.opts.module_id.0.to_string());
 
-                            api_no_auth::<ModuleResponse, EmptyError, _>(&path, GetDraft::METHOD, Some(req)).await
+                            api_no_auth::<ModuleResponse, EmptyError, ()>(&path, GetDraft::METHOD, None).await
                         };
 
                         match resp {

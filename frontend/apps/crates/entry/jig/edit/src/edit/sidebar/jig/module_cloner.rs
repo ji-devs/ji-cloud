@@ -3,21 +3,20 @@ use shared::{
     domain::{
         jig::JigId,
         module::{
-            LiteModule, Module, ModuleBody, ModuleCreateRequest, ModuleDraftQuery, ModuleId,
+            LiteModule, Module, ModuleBody, ModuleCreateRequest, ModuleId,
             ModuleResponse,
         },
-        CreateResponse,
+        CreateResponse, asset::AssetType,
     },
     error::EmptyError,
 };
 use utils::{fetch::api_with_auth, unwrap::UnwrapJiExt};
 
 pub async fn clone_module(
-    orig_jig_id: &JigId,
     orig_module_id: &ModuleId,
     new_jig_id: &JigId,
 ) -> Result<LiteModule, EmptyError> {
-    let module = get_module(orig_jig_id, orig_module_id).await.unwrap_ji();
+    let module = get_module(orig_module_id).await.unwrap_ji();
 
     let id = create_module(new_jig_id, module.body.clone()).await?;
     Ok(LiteModule {
@@ -27,17 +26,13 @@ pub async fn clone_module(
     })
 }
 
-async fn get_module(jig_id: &JigId, module_id: &ModuleId) -> Result<Module, EmptyError> {
-    let req = ModuleDraftQuery {
-        parent_id: (*jig_id).into(),
-    };
-
+async fn get_module(module_id: &ModuleId) -> Result<Module, EmptyError> {
     let path = module::GetDraft::PATH
-        // .replace("{id}", &jig_id.0.to_string())
+        .replace("{asset_type}",AssetType::Jig.as_str())
         .replace("{module_id}", &module_id.0.to_string());
 
     let res =
-        api_with_auth::<ModuleResponse, EmptyError, _>(&path, module::GetDraft::METHOD, Some(req))
+        api_with_auth::<ModuleResponse, EmptyError, ()>(&path, module::GetDraft::METHOD, None)
             .await?;
     Ok(res.module)
 }

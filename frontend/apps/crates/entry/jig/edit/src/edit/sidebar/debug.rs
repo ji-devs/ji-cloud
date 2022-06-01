@@ -69,7 +69,6 @@ pub fn get_jig() -> JigResponse {
             other_keywords: String::from(""),
             translated_keywords: String::from(""),
             translated_description: HashMap::new(),
-            cover: None,
         },
         jig_focus: JigFocus::Modules,
         likes: 0,

@@ -77,7 +77,7 @@ impl CoursePlayer {
             .child(
                 ModuleThumbnail::new(
                     jig_id.into(),
-                    jig.jig_data.cover.clone(),
+                    jig.jig_data.modules.get(0).cloned(),
                     ThumbnailFallback::Asset
                 ).render(Some("thumbnail"))
             )

@@ -7,10 +7,10 @@ use futures_signals::signal::Mutable;
 use shared::{
     api::endpoints::{self, ApiEndpoint},
     domain::{
-        asset::Asset,
+        asset::{Asset, AssetType},
         jig::{JigFocus, JigId, JigResponse, JigUpdateDraftDataRequest},
         module::{
-            LiteModule, ModuleCreateRequest, ModuleDraftQuery, ModuleId, ModuleKind,
+            LiteModule, ModuleCreateRequest, ModuleId, ModuleKind,
             ModuleResponse, ModuleUpdateRequest,
         },
         CreateResponse,
@@ -73,7 +73,7 @@ pub async fn update_display_name(jig_id: JigId, value: String) {
 pub fn duplicate_module(state: Rc<State>, module_id: &ModuleId) {
     state.loader.load(clone!(state, module_id => async move {
         let jig_id = state.asset.unwrap_jig().id;
-        let module = super::module_cloner::clone_module(&jig_id, &module_id, &jig_id).await.unwrap_ji();
+        let module = super::module_cloner::clone_module(&module_id, &jig_id).await.unwrap_ji();
         populate_added_module(state, module);
     }));
 }
@@ -166,18 +166,18 @@ fn populate_added_module(state: Rc<State>, module: LiteModule) {
 pub fn use_module_as(state: Rc<State>, target_kind: ModuleKind, source_module_id: ModuleId) {
     state.loader.load(clone!(state => async move {
         let target_module_id: Result<(ModuleId, bool), EmptyError> = async {
-            let req = ModuleDraftQuery {
-                parent_id: state.asset.id()
+            let asset_type = match state.asset {
+                Asset::Jig(_) => AssetType::Jig,
+                Asset::Course(_) => AssetType::Course,
             };
-
             let path = endpoints::module::GetDraft::PATH
-                // .replace("{id}", &state.asset.unwrap_jig().id.0.to_string())
+                .replace("{asset_type}",asset_type.as_str())
                 .replace("{module_id}", &source_module_id.0.to_string());
 
-            let source_module = api_with_auth::<ModuleResponse, EmptyError, _>(
+            let source_module = api_with_auth::<ModuleResponse, EmptyError, ()>(
                 &path,
                 endpoints::module::GetDraft::METHOD,
-                Some(req)
+                None
             ).await?.module;
 
             let target_body = source_module.body.convert_to_body(target_kind).unwrap_ji();

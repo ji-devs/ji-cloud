@@ -2,7 +2,7 @@ use crate::audio::mixer::AUDIO_MIXER;
 use dominator::{clone, Dom, DomHandle};
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::Mutable;
-use shared::domain::asset::{DraftOrLive, PrivacyLevel};
+use shared::domain::asset::{DraftOrLive, PrivacyLevel, AssetType};
 use shared::domain::module::body::Instructions;
 use shared::{
     api::endpoints::{self, module::*, ApiEndpoint},
@@ -113,7 +113,6 @@ where
                         other_keywords: String::from(""),
                         translated_keywords: String::from(""),
                         translated_description: HashMap::new(),
-                        cover: None,
                     })
                 } else {
 
@@ -168,23 +167,19 @@ where
                     None
                 },
                 LoadingKind::Remote => {
-                    let req = ModuleDraftQuery {
-                        parent_id: _self.opts.jig_id.into()
-                    };
-
                     let resp = {
                         if is_draft {
                             let path = GetDraft::PATH
-                                // .replace("{id}",&_self.opts.jig_id.0.to_string())
+                                .replace("{asset_type}",AssetType::Jig.as_str())
                                 .replace("{module_id}",&_self.opts.module_id.0.to_string());
 
-                            api_no_auth::<ModuleResponse, EmptyError, _>(&path, GetDraft::METHOD, Some(req)).await
+                            api_no_auth::<ModuleResponse, EmptyError, ()>(&path, GetDraft::METHOD, None).await
                         } else {
                             let path = GetLive::PATH
-                                // .replace("{id}",&_self.opts.jig_id.0.to_string())
+                                .replace("{asset_type}",AssetType::Jig.as_str())
                                 .replace("{module_id}",&_self.opts.module_id.0.to_string());
 
-                            api_no_auth::<ModuleResponse, EmptyError, _>(&path, GetLive::METHOD, Some(req)).await
+                            api_no_auth::<ModuleResponse, EmptyError, ()>(&path, GetLive::METHOD, None).await
                         }
                     };
 

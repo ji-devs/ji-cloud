@@ -20,8 +20,8 @@ impl IframeDom {
         html!("iframe" => web_sys::HtmlIFrameElement, {
             .property("allow", "autoplay; fullscreen")
             .property("slot", "main")
-            .future(clone!(jig_id, module_id, module_kind, is_loading => async move {
-                actions::load_module_kind(jig_id, module_id, module_kind).await;
+            .future(clone!(module_id, module_kind, is_loading => async move {
+                actions::load_module_kind(module_id, module_kind).await;
                 is_loading.set_neq(false);
             }))
             .style("width", "100%")
