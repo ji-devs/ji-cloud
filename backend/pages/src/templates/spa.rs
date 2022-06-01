@@ -106,7 +106,9 @@ pub async fn user_template(settings: Data<RuntimeSettings>) -> actix_web::Result
     spa_template(&settings, SpaPage::User)
 }
 
-pub async fn community_template(settings: Data<RuntimeSettings>) -> actix_web::Result<HttpResponse> {
+pub async fn community_template(
+    settings: Data<RuntimeSettings>,
+) -> actix_web::Result<HttpResponse> {
     spa_template(&settings, SpaPage::Community)
 }
 

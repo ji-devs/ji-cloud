@@ -8,7 +8,10 @@ pub fn configure(config: &mut ServiceConfig) {
         .route("/kids/{path:.*}", web::get().to(spa::kids_template))
         .route("/kids", web::get().to(spa::kids_template))
         .route("/community", web::get().to(spa::community_template))
-        .route("/community/{path:.*}", web::get().to(spa::community_template))
+        .route(
+            "/community/{path:.*}",
+            web::get().to(spa::community_template),
+        )
         .route("/user", web::get().to(spa::user_template))
         .route("/admin/{path:.*}", web::get().to(spa::admin_template))
         .route("/admin", web::get().to(spa::admin_template))
