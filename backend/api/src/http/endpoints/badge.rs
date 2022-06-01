@@ -4,7 +4,7 @@ use actix_web::{
 };
 use futures::try_join;
 use shared::{
-    api::{endpoints, ApiEndpoint},
+    api::{endpoints::badge, ApiEndpoint},
     domain::{
         asset::UserOrMe,
         badge::{BadgeBrowseResponse, BadgeId, BrowseMembersResponse},
@@ -24,7 +24,7 @@ use crate::{
 async fn create(
     db: Data<PgPool>,
     claims: TokenUser,
-    req: Json<<endpoints::badge::Create as ApiEndpoint>::Req>,
+    req: Json<<badge::Create as ApiEndpoint>::Req>,
 ) -> Result<HttpResponse, error::CreateWithMetadata> {
     let req = req.into_inner();
 
@@ -48,7 +48,7 @@ async fn create(
 async fn update(
     db: Data<PgPool>,
     claims: TokenUser,
-    req: Option<Json<<endpoints::badge::Update as ApiEndpoint>::Req>>,
+    req: Option<Json<<badge::Update as ApiEndpoint>::Req>>,
     path: Path<BadgeId>,
 ) -> Result<HttpResponse, error::UpdateWithMetadata> {
     let id = path.into_inner();
@@ -90,7 +90,7 @@ async fn delete(
 async fn get_one(
     db: Data<PgPool>,
     path: Path<BadgeId>,
-) -> Result<Json<<endpoints::badge::Get as ApiEndpoint>::Res>, error::NotFound> {
+) -> Result<Json<<badge::Get as ApiEndpoint>::Res>, error::NotFound> {
     let badge_response = db::badge::get_one(&db, path.into_inner())
         .await?
         .ok_or(error::NotFound::ResourceNotFound)?;
@@ -137,8 +137,10 @@ async fn leave(
 async fn browse(
     db: Data<PgPool>,
     claims: TokenUser,
-    query: Option<Query<<endpoints::badge::Browse as ApiEndpoint>::Req>>,
-) -> Result<Json<<endpoints::badge::Browse as ApiEndpoint>::Res>, error::Auth> {
+    query: Option<Query<<badge::Browse as ApiEndpoint>::Req>>,
+) -> Result<Json<<badge::Browse as ApiEndpoint>::Res>, error::Auth> {
+    println!("heelo");
+
     let query = query.map_or_else(Default::default, Query::into_inner);
 
     let creator_id = if let Some(user) = query.creator_id {
@@ -179,7 +181,7 @@ async fn browse_members(
     db: Data<PgPool>,
     _claims: TokenUser,
     path: Path<BadgeId>,
-) -> Result<Json<<endpoints::badge::BrowseMembers as ApiEndpoint>::Res>, error::NotFound> {
+) -> Result<Json<<badge::BrowseMembers as ApiEndpoint>::Res>, error::NotFound> {
     let id = path.into_inner();
 
     db::badge::valid_badge(&db, id)
@@ -196,10 +198,17 @@ async fn browse_members(
 }
 
 pub fn configure(cfg: &mut ServiceConfig) {
-    use endpoints::badge;
     cfg.route(
         badge::Create::PATH,
         badge::Create::METHOD.route().to(create),
+    )
+    .route(
+        badge::Browse::PATH,
+        badge::Browse::METHOD.route().to(browse),
+    )
+    .route(
+        badge::BrowseMembers::PATH,
+        badge::BrowseMembers::METHOD.route().to(browse_members),
     )
     .route(
         badge::Update::PATH,
@@ -217,17 +226,5 @@ pub fn configure(cfg: &mut ServiceConfig) {
     .route(
         badge::LeaveBadge::PATH,
         badge::LeaveBadge::METHOD.route().to(leave),
-    )
-    // .route(
-    //     badge::Search::PATH,
-    //     badge::Search::METHOD.route().to(search),
-    // )
-    .route(
-        badge::Browse::PATH,
-        badge::Browse::METHOD.route().to(browse),
-    )
-    .route(
-        badge::BrowseMembers::PATH,
-        badge::BrowseMembers::METHOD.route().to(browse_members),
     );
 }

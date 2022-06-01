@@ -134,6 +134,6 @@ impl ApiEndpoint for BrowseMembers {
     type Req = ();
     type Res = BrowseMembersResponse;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/badge/{id}";
+    const PATH: &'static str = "/v1/badge/{id}/members";
     const METHOD: Method = Method::Get;
 }
