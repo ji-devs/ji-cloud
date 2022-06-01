@@ -1,11 +1,11 @@
-mod editable_jig;
 mod editable_course;
+mod editable_jig;
 
 use std::{collections::HashSet, rc::Rc};
 
 use chrono::{DateTime, Utc};
-pub use editable_jig::EditableJig;
 pub use editable_course::EditableCourse;
+pub use editable_jig::EditableJig;
 use futures_signals::{signal::Mutable, signal_vec::MutableVec};
 use shared::domain::{
     additional_resource::AdditionalResource,

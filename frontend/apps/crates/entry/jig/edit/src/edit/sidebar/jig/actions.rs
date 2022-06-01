@@ -10,8 +10,8 @@ use shared::{
         asset::{Asset, AssetType},
         jig::{JigFocus, JigId, JigResponse, JigUpdateDraftDataRequest},
         module::{
-            LiteModule, ModuleCreateRequest, ModuleId, ModuleKind,
-            ModuleResponse, ModuleUpdateRequest,
+            LiteModule, ModuleCreateRequest, ModuleId, ModuleKind, ModuleResponse,
+            ModuleUpdateRequest,
         },
         CreateResponse,
     },

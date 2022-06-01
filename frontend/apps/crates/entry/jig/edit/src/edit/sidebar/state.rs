@@ -1,14 +1,18 @@
 use super::{
-    dragging::state::State as DragState,
+    course::settings::state::State as CourseSettingsState, dragging::state::State as DragState,
     jig::settings::state::State as JigSettingsState,
-    course::settings::state::State as CourseSettingsState,
 };
 use dominator_helpers::{futures::AsyncLoader, signals::OptionSignal};
 use futures_signals::{
     signal::{Mutable, Signal, SignalExt},
     signal_vec::MutableVec,
 };
-use shared::domain::{asset::Asset, jig::{JigResponse, JigId}, module::LiteModule, course::CourseResponse};
+use shared::domain::{
+    asset::Asset,
+    course::CourseResponse,
+    jig::{JigId, JigResponse},
+    module::LiteModule,
+};
 use std::rc::Rc;
 use utils::math::PointI32;
 
@@ -58,7 +62,9 @@ impl State {
         let jig_published_at = None;
         let settings_state = match &jig {
             Asset::Jig(jig) => SidebarSetting::Jig(Rc::new(JigSettingsState::new(jig))),
-            Asset::Course(course) => SidebarSetting::Course(Rc::new(CourseSettingsState::new(course))),
+            Asset::Course(course) => {
+                SidebarSetting::Course(Rc::new(CourseSettingsState::new(course)))
+            }
         };
 
         Self {
@@ -85,9 +91,9 @@ impl State {
     }
 
     fn get_course_spots(course: &CourseResponse) -> Vec<Rc<SidebarSpot>> {
-        let mut v = vec![
-            SidebarSpot::new_course_cover(course.course_data.cover.clone().unwrap())
-        ];
+        let mut v = vec![SidebarSpot::new_course_cover(
+            course.course_data.cover.clone().unwrap(),
+        )];
         for item in &course.course_data.items {
             v.push(SidebarSpot::new_course_item(item.clone()));
         }

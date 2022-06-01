@@ -1,8 +1,6 @@
 use awsm_web::loaders::helpers::AsyncLoader;
 use futures_signals::signal::Mutable;
-use shared::domain::course::{
-    CourseId, CourseResponse, CourseUpdateDraftDataRequest,
-};
+use shared::domain::course::{CourseId, CourseResponse, CourseUpdateDraftDataRequest};
 
 pub struct State {
     pub popup_open: Mutable<bool>,

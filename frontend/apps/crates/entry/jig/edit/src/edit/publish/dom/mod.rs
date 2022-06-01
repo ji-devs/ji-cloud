@@ -7,7 +7,7 @@ use futures_signals::{
 use shared::domain::asset::PrivacyLevel;
 use utils::{
     events,
-    routes::{AssetEditRoute, AssetRoute, JigEditRoute, Route, CourseEditRoute},
+    routes::{AssetEditRoute, AssetRoute, CourseEditRoute, JigEditRoute, Route},
 };
 use web_sys::{HtmlElement, HtmlInputElement, HtmlTextAreaElement};
 

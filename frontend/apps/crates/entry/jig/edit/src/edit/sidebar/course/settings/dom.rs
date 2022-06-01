@@ -4,7 +4,7 @@ use dominator::{class, clone, html, pseudo, Dom};
 use futures_signals::signal::SignalExt;
 use utils::events;
 
-use super::{state::State, actions::update_course_settings};
+use super::{actions::update_course_settings, state::State};
 
 pub fn render(state: Rc<State>) -> Dom {
     html!("anchored-overlay", {

@@ -7,7 +7,8 @@ use shared::{
             CourseBrowseQuery, CourseBrowseResponse, CourseCreateRequest, CourseId,
             CourseSearchQuery,
         },
-        CreateResponse, module::{ModuleCreateRequest, ModuleBody, ModuleKind, ModuleId},
+        module::{ModuleBody, ModuleCreateRequest, ModuleId, ModuleKind},
+        CreateResponse,
     },
     error::{EmptyError, MetadataNotFound},
 };

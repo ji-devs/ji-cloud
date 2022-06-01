@@ -38,29 +38,24 @@ fn menu_items_course(
     module: &Option<Rc<CourseSpot>>,
 ) -> Vec<Dom> {
     match module {
-        Some(module) => {
-            match &**module {
-                CourseSpot::Cover(_cover) => {
-                    vec![
-                        cover_edit(state, module_state),
-                    ]
-                }
-                CourseSpot::Item(_jig_id) => {
-                    vec![
-                        item_info(state, &module_state),
-                        item_play(state, &module_state),
-                        item_move_up(state, &module_state),
-                        item_move_down(state, &module_state),
-                        item_delete(state, &module_state),
-                    ]
-                }
+        Some(module) => match &**module {
+            CourseSpot::Cover(_cover) => {
+                vec![cover_edit(state, module_state)]
+            }
+            CourseSpot::Item(_jig_id) => {
+                vec![
+                    item_info(state, &module_state),
+                    item_play(state, &module_state),
+                    item_move_up(state, &module_state),
+                    item_move_down(state, &module_state),
+                    item_delete(state, &module_state),
+                ]
             }
         },
         None => {
             vec![]
-        },
+        }
     }
-    
 }
 
 fn cover_edit(_: &Rc<State>, module: &Rc<SpotState>) -> Dom {

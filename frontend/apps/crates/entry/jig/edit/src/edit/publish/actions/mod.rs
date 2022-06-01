@@ -1,4 +1,4 @@
-use std::{collections::HashMap, rc::Rc, pin::Pin};
+use std::{collections::HashMap, pin::Pin, rc::Rc};
 
 use dominator::clone;
 use futures::{join, Future};
@@ -14,7 +14,7 @@ use shared::{
 };
 use utils::{
     prelude::{api_with_auth, UnwrapJiExt},
-    routes::{JigEditRoute, CourseEditRoute},
+    routes::{CourseEditRoute, JigEditRoute},
 };
 
 use crate::edit::publish::editable_assets::EditableAsset;
@@ -22,19 +22,16 @@ use crate::edit::publish::editable_assets::EditableAsset;
 use super::super::state::State as JigEditState;
 use super::state::Publish;
 
-mod jig_actions;
 mod course_actions;
+mod jig_actions;
 
 impl Publish {
     pub async fn load_new(jig_edit_state: Rc<JigEditState>) -> Self {
-        let asset: Pin<Box<dyn Future<Output = Result<EditableAsset, ()>>>> = match jig_edit_state.asset_id {
-            AssetId::JigId(jig_id) => {
-                Box::pin(jig_actions::load_jig(jig_id))
-            },
-            AssetId::CourseId(course_id) => {
-                Box::pin(course_actions::load_course(course_id))
-            },
-        };
+        let asset: Pin<Box<dyn Future<Output = Result<EditableAsset, ()>>>> =
+            match jig_edit_state.asset_id {
+                AssetId::JigId(jig_id) => Box::pin(jig_actions::load_jig(jig_id)),
+                AssetId::CourseId(course_id) => Box::pin(course_actions::load_course(course_id)),
+            };
         let categories = load_categories();
         let meta = load_metadata();
 
@@ -87,7 +84,7 @@ impl Publish {
             }
             EditableAsset::Course(_) => {
                 self.jig_edit_state.set_route_course(CourseEditRoute::Cover);
-            },
+            }
         };
     }
 
@@ -107,9 +104,7 @@ impl Publish {
                 JigFocus::Modules => jig.modules.iter().any(|m| !m.is_complete),
                 JigFocus::Resources => jig.cover.is_some(),
             },
-            EditableAsset::Course(course) => {
-                course.cover.is_some()
-            },
+            EditableAsset::Course(course) => course.cover.is_some(),
         }
     }
 

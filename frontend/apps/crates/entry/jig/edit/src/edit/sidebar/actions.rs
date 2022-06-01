@@ -1,5 +1,5 @@
-use super::jig::actions as jig_actions;
 use super::course::actions as course_actions;
+use super::jig::actions as jig_actions;
 use super::state::*;
 use dominator::clone;
 use shared::domain::asset::Asset;
@@ -13,7 +13,7 @@ pub fn navigate_to_publish(state: Rc<State>) {
         }
         Asset::Course(course) => {
             course_actions::navigate_to_publish(Rc::clone(&state), course);
-        },
+        }
     }
 }
 

@@ -1,12 +1,10 @@
 use shared::{
     api::endpoints::{module, ApiEndpoint},
     domain::{
+        asset::AssetType,
         jig::JigId,
-        module::{
-            LiteModule, Module, ModuleBody, ModuleCreateRequest, ModuleId,
-            ModuleResponse,
-        },
-        CreateResponse, asset::AssetType,
+        module::{LiteModule, Module, ModuleBody, ModuleCreateRequest, ModuleId, ModuleResponse},
+        CreateResponse,
     },
     error::EmptyError,
 };
@@ -28,7 +26,7 @@ pub async fn clone_module(
 
 async fn get_module(module_id: &ModuleId) -> Result<Module, EmptyError> {
     let path = module::GetDraft::PATH
-        .replace("{asset_type}",AssetType::Jig.as_str())
+        .replace("{asset_type}", AssetType::Jig.as_str())
         .replace("{module_id}", &module_id.0.to_string());
 
     let res =

@@ -10,10 +10,8 @@ use crate::edit::{
 };
 
 use super::super::{
-    actions as sidebar_actions,
-    jig::settings as jig_settings,
-    course::settings as course_settings,
-    state::State as SidebarState
+    actions as sidebar_actions, course::settings as course_settings, jig::settings as jig_settings,
+    state::State as SidebarState,
 };
 use utils::prelude::*;
 

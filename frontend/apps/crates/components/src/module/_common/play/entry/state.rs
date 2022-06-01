@@ -2,7 +2,7 @@ use crate::audio::mixer::AUDIO_MIXER;
 use dominator::{clone, Dom, DomHandle};
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::Mutable;
-use shared::domain::asset::{DraftOrLive, PrivacyLevel, AssetType};
+use shared::domain::asset::{AssetType, DraftOrLive, PrivacyLevel};
 use shared::domain::module::body::Instructions;
 use shared::{
     api::endpoints::{self, module::*, ApiEndpoint},
