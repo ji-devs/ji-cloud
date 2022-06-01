@@ -4,6 +4,8 @@ use utils::routes::*;
 use dominator::{html, Dom};
 use futures_signals::signal::{Signal, SignalExt};
 
+use crate::{profile::CommunityProfile, members::CommunityMembers, badges::CommunityBadges};
+
 pub struct Router {}
 
 impl Router {
@@ -17,11 +19,20 @@ impl Router {
 
     fn dom_signal() -> impl Signal<Item = Option<Dom>> {
         Self::signal().map(|route| match route {
-            Route::Community(route) => match route {
-                CommunityRoute::Landing => Some(html!("div", {
+            Route::Community(route) => Some(match route {
+                CommunityRoute::Landing => html!("div", {
                     .text("community")
-                })),
-            },
+                }),
+                CommunityRoute::Profile => {
+                    CommunityProfile::new().render()
+                },
+                CommunityRoute::Members(_) => {
+                    CommunityMembers::new().render()
+                },
+                CommunityRoute::Badges(_) => {
+                    CommunityBadges::new().render()
+                },
+            }),
             _ => None,
         })
     }

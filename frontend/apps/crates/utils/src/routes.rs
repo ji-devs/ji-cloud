@@ -7,6 +7,7 @@ use shared::domain::{
     module::{ModuleId, ModuleKind},
     session::OAuthUserProfile,
     user::UserScope,
+    badge::BadgeId,
 };
 use std::{
     fmt::{Debug, Display},
@@ -58,7 +59,22 @@ pub enum UserRoute {
 
 #[derive(Debug, Clone)]
 pub enum CommunityRoute {
-    Landing
+    Landing,
+    Profile,
+    Members(CommunityMembersRoute),
+    Badges(CommunityBadgesRoute),
+}
+
+#[derive(Debug, Clone)]
+pub enum CommunityMembersRoute {
+    List,
+    Member(Uuid),
+}
+
+#[derive(Debug, Clone)]
+pub enum CommunityBadgesRoute {
+    List,
+    Badge(BadgeId),
 }
 
 #[derive(Debug, Clone)]
@@ -265,6 +281,17 @@ impl Route {
                 Self::Dev(DevRoute::Scratch(id.to_string(), page))
             }
             ["community"] => Self::Community(CommunityRoute::Landing),
+            ["community", "profile"] => Self::Community(CommunityRoute::Profile),
+            ["community", "members"] => Self::Community(CommunityRoute::Members(CommunityMembersRoute::List)),
+            ["community", "members", user_id] => {
+                let user_id = Uuid::from_str(user_id).unwrap_ji();
+                Self::Community(CommunityRoute::Members(CommunityMembersRoute::Member(user_id)))
+            },
+            ["community", "badges"] => Self::Community(CommunityRoute::Badges(CommunityBadgesRoute::List)),
+            ["community", "badges", badge_id] => {
+                let badge_id = BadgeId(Uuid::from_str(badge_id).unwrap_ji());
+                Self::Community(CommunityRoute::Badges(CommunityBadgesRoute::Badge(badge_id)))
+            }
             ["user", "profile"] => Self::User(UserRoute::Profile(ProfileSection::Landing)),
             ["user", "profile", "change-email"] => {
                 Self::User(UserRoute::Profile(ProfileSection::ChangeEmail))
@@ -521,6 +548,15 @@ impl From<&Route> for String {
             },
             Route::Community(route) => match route {
                 CommunityRoute::Landing => format!("/community"),
+                CommunityRoute::Profile => format!("/community/profile"),
+                CommunityRoute::Members(route) => match route {
+                    CommunityMembersRoute::List => format!("/community/members"),
+                    CommunityMembersRoute::Member(user_id) => format!("/community/members/{}", user_id),
+                },
+                CommunityRoute::Badges(route) => match route {
+                    CommunityBadgesRoute::List => format!("/community/badges"),
+                    CommunityBadgesRoute::Badge(badge_id) => format!("/community/badges/{}", badge_id.0),
+                },
             }
             Route::Dev(route) => match route {
                 DevRoute::Showcase(id, page) => format!("/dev/showcase/{}?page={}", id, page),
