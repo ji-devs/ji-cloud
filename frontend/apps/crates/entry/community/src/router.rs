@@ -4,7 +4,13 @@ use utils::routes::*;
 use dominator::{html, Dom};
 use futures_signals::signal::{Signal, SignalExt};
 
-use crate::{profile::CommunityProfile, members::CommunityMembers, badges_list::BadgesList, badge_details::BadgeDetails};
+use crate::{
+    profile::CommunityProfile,
+    members_list::MembersList,
+    member_details::MemberDetails,
+    badges_list::BadgesList,
+    badge_details::BadgeDetails
+};
 
 pub struct Router {}
 
@@ -26,8 +32,11 @@ impl Router {
                 CommunityRoute::Profile => {
                     CommunityProfile::new().render()
                 },
-                CommunityRoute::Members(_) => {
-                    CommunityMembers::new().render()
+                CommunityRoute::Members(route) => {
+                    match route {
+                        CommunityMembersRoute::List => MembersList::new().render(),
+                        CommunityMembersRoute::Member(_member_id) => MemberDetails::new().render(),
+                    }
                 },
                 CommunityRoute::Badges(route) => {
                     match route {
