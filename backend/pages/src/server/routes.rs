@@ -13,6 +13,7 @@ pub fn configure(config: &mut ServiceConfig) {
             web::get().to(spa::community_template),
         )
         .route("/user", web::get().to(spa::user_template))
+        .route("/user/{path:.*}", web::get().to(spa::user_template))
         .route("/admin/{path:.*}", web::get().to(spa::admin_template))
         .route("/admin", web::get().to(spa::admin_template))
         .route(
