@@ -7,7 +7,8 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 mod router;
 mod profile;
 mod members;
-mod badges;
+mod badges_list;
+mod badge_details;
 
 use wasm_bindgen::prelude::*;
 
