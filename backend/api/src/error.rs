@@ -6,7 +6,10 @@
 //!     * `actix_web::Error` -- server errors, used by actix for error logging
 //!     * `anyhow::Error` -- general intermediate error representation
 
-use actix_web::HttpResponse;
+use actix_web::{
+    error::{JsonPayloadError, PathError, QueryPayloadError},
+    HttpResponse, ResponseError,
+};
 use shared::error::{ApiError, EmptyError, MetadataNotFound};
 
 use crate::db::meta::MetaWrapperError;
@@ -30,6 +33,50 @@ use shared::domain::meta::MetaKind;
 // mostly used in this module
 #[allow(clippy::clippy::module_name_repetitions)]
 pub type BasicError = ApiError<EmptyError>;
+
+/// Represents actix-web config errors
+#[derive(Debug)]
+pub enum ConfigError {
+    JsonPayloadError(JsonPayloadError),
+    QueryPayloadError(QueryPayloadError),
+    PathError(PathError),
+}
+
+impl From<actix_web::error::JsonPayloadError> for ConfigError {
+    fn from(error: JsonPayloadError) -> Self {
+        ConfigError::JsonPayloadError(error)
+    }
+}
+
+impl From<actix_web::error::QueryPayloadError> for ConfigError {
+    fn from(error: QueryPayloadError) -> Self {
+        ConfigError::QueryPayloadError(error)
+    }
+}
+
+impl From<actix_web::error::PathError> for ConfigError {
+    fn from(error: PathError) -> Self {
+        ConfigError::PathError(error)
+    }
+}
+
+impl From<ConfigError> for actix_web::Error {
+    fn from(error: ConfigError) -> Self {
+        match error {
+            ConfigError::JsonPayloadError(error) => {
+                BasicError::with_message(error.status_code(), "Invalid JSON body".to_string())
+                    .into()
+            }
+            ConfigError::QueryPayloadError(error) => {
+                BasicError::with_message(error.status_code(), "Invalid query".to_string()).into()
+            }
+            ConfigError::PathError(error) => {
+                BasicError::with_message(error.status_code(), "Invalid path parameters".to_string())
+                    .into()
+            }
+        }
+    }
+}
 
 #[non_exhaustive]
 pub enum Auth {

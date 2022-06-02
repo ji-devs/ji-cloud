@@ -31,7 +31,7 @@ use core::{
 };
 use ji_cloud_api::{
     db, error,
-    http::{bad_request_handler, Application},
+    http::{config_error_handler, Application},
     logger,
     service::{
         event_arc::{self, audit_log, EventResource, EventSource},
@@ -194,11 +194,9 @@ fn build_media_watch(
             .app_data(
                 actix_web::web::JsonConfig::default()
                     .limit(JSON_BODY_LIMIT as usize)
-                    .error_handler(|_, _| bad_request_handler()),
+                    .error_handler(config_error_handler),
             )
-            .app_data(
-                actix_web::web::QueryConfig::default().error_handler(|_, _| bad_request_handler()),
-            )
+            .app_data(actix_web::web::QueryConfig::default().error_handler(config_error_handler))
             .service(process_uploaded_media_trigger)
     });
 

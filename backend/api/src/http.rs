@@ -6,7 +6,7 @@ use actix_web::{
     error::Error,
     middleware::{Compat, Condition},
     web::{method, Data},
-    HttpResponse,
+    HttpRequest, HttpResponse,
 };
 use core::{
     config::JSON_BODY_LIMIT,
@@ -20,7 +20,7 @@ use tracing::Span;
 use tracing_actix_web::{root_span, DefaultRootSpanBuilder, RootSpanBuilder, TracingLogger};
 
 use crate::{
-    error::BasicError,
+    error::{BasicError, ConfigError},
     service::{self, mail, s3, upload::cleaner, ServiceData},
     translate,
 };
@@ -234,14 +234,10 @@ pub fn build(
             .app_data(
                 actix_web::web::JsonConfig::default()
                     .limit(JSON_BODY_LIMIT as usize)
-                    .error_handler(|_, _| bad_request_handler()),
+                    .error_handler(config_error_handler),
             )
-            .app_data(
-                actix_web::web::QueryConfig::default().error_handler(|_, _| bad_request_handler()),
-            )
-            .app_data(
-                actix_web::web::PathConfig::default().error_handler(|_, _| bad_request_handler()),
-            )
+            .app_data(actix_web::web::QueryConfig::default().error_handler(config_error_handler))
+            .app_data(actix_web::web::PathConfig::default().error_handler(config_error_handler))
             .external_resource(
                 "google_cloud_oauth",
                 "https://accounts.google.com/o/oauth2/v2/auth",
@@ -297,8 +293,15 @@ async fn no_content_response() -> HttpResponse {
     HttpResponse::NoContent().finish()
 }
 
-pub fn bad_request_handler() -> actix_web::Error {
-    BasicError::new(http::StatusCode::BAD_REQUEST).into()
+/// Utility function to convert a `ConfigError` into an `actix_web::Error`
+pub fn config_error_handler<E>(error: E, _req: &HttpRequest) -> actix_web::Error
+where
+    E: Into<ConfigError>,
+{
+    // Convert the error into our custom user-facing error, and then into an actix error.
+    // Note: error.into().into() works fine, but doesn't look pretty.
+    let config_error = error.into();
+    config_error.into()
 }
 
 pub struct JigziSpanBuilder;
