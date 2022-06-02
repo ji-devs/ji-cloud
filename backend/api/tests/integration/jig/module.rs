@@ -22,7 +22,7 @@ async fn get_live() -> anyhow::Result<()> {
 
     let resp = client
         .get(&format!(
-            "http://0.0.0.0:{}/v1/{:?}/module/live/a6b24970-1dd7-11ec-8426-57136b411853",
+            "http://0.0.0.0:{}/v1/{}/module/live/a6b24970-1dd7-11ec-8426-57136b411853",
             port,
             AssetType::Jig
         ))
@@ -80,7 +80,7 @@ async fn create_default() -> anyhow::Result<()> {
 
     let resp = client
         .get(&format!(
-            "http://0.0.0.0:{}/v1/{:?}/module/draft/{}",
+            "http://0.0.0.0:{}/v1/{}/module/draft/{}",
             port,
             AssetType::Jig,
             id
@@ -133,7 +133,7 @@ async fn update_empty() -> anyhow::Result<()> {
 
     let resp = client
         .get(&format!(
-            "http://0.0.0.0:{}/v1/{:?}/module/draft/a6b24a42-1dd7-11ec-8426-a7165f9281a2",
+            "http://0.0.0.0:{}/v1/{}/module/draft/a6b24a42-1dd7-11ec-8426-a7165f9281a2",
             port,
             AssetType::Jig
         ))
@@ -189,7 +189,7 @@ async fn update_contents() -> anyhow::Result<()> {
 
     let resp = client
         .get(&format!(
-            "http://0.0.0.0:{}/v1/{:?}/module/draft/a6b24a06-1dd7-11ec-8426-635a3a7ea572",
+            "http://0.0.0.0:{}/v1/{}/module/draft/a6b24a06-1dd7-11ec-8426-635a3a7ea572",
             port,
             AssetType::Jig
         ))
@@ -206,7 +206,7 @@ async fn update_contents() -> anyhow::Result<()> {
 
     let resp = client
         .get(&format!(
-            "http://0.0.0.0:{}/v1/{:?}/module/draft/a6b24a06-1dd7-11ec-8426-635a3a7ea572",
+            "http://0.0.0.0:{}/v1/{}/module/draft/a6b24a06-1dd7-11ec-8426-635a3a7ea572",
             port,
             AssetType::Jig
         ))

@@ -9,6 +9,7 @@ use std::{
 use chrono::{DateTime, Utc};
 // use dyn_clone::DynClone;
 use serde::{Deserialize, Serialize};
+use strum_macros::Display;
 use uuid::Uuid;
 
 use crate::domain::{
@@ -24,7 +25,9 @@ use super::{
 };
 
 /// AssetType
-#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug, Display)]
+#[serde(rename_all = "lowercase")]
+#[strum(serialize_all = "snake_case")]
 pub enum AssetType {
     /// JIG
     Jig,
