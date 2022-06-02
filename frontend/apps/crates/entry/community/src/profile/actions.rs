@@ -1,5 +1,3 @@
 use super::CommunityProfile;
 
-impl CommunityProfile {
-
-}
+impl CommunityProfile {}

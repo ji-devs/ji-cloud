@@ -5,11 +5,8 @@ use dominator::{html, Dom};
 use futures_signals::signal::{Signal, SignalExt};
 
 use crate::{
-    profile::CommunityProfile,
-    members_list::MembersList,
-    member_details::MemberDetails,
-    badges_list::BadgesList,
-    badge_details::BadgeDetails
+    badge_details::BadgeDetails, badges_list::BadgesList, member_details::MemberDetails,
+    members_list::MembersList, profile::CommunityProfile,
 };
 
 pub struct Router {}
@@ -29,20 +26,14 @@ impl Router {
                 CommunityRoute::Landing => html!("div", {
                     .text("community")
                 }),
-                CommunityRoute::Profile => {
-                    CommunityProfile::new().render()
+                CommunityRoute::Profile => CommunityProfile::new().render(),
+                CommunityRoute::Members(route) => match route {
+                    CommunityMembersRoute::List => MembersList::new().render(),
+                    CommunityMembersRoute::Member(_member_id) => MemberDetails::new().render(),
                 },
-                CommunityRoute::Members(route) => {
-                    match route {
-                        CommunityMembersRoute::List => MembersList::new().render(),
-                        CommunityMembersRoute::Member(_member_id) => MemberDetails::new().render(),
-                    }
-                },
-                CommunityRoute::Badges(route) => {
-                    match route {
-                        CommunityBadgesRoute::List => BadgesList::new().render(),
-                        CommunityBadgesRoute::Badge(badge_id) => BadgeDetails::new(badge_id).render(),
-                    }
+                CommunityRoute::Badges(route) => match route {
+                    CommunityBadgesRoute::List => BadgesList::new().render(),
+                    CommunityBadgesRoute::Badge(badge_id) => BadgeDetails::new(badge_id).render(),
                 },
             }),
             _ => None,

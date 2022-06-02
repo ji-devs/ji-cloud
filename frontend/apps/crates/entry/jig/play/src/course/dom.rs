@@ -17,7 +17,7 @@ impl CoursePlayer {
         html!("div", {
             .child_signal(state.course.signal_ref(clone!(state => move|course| {
                 course.as_ref().map(|course| {
-                    state.render_course(&course)
+                    state.render_course(course)
                 })
             })))
             .child_signal(state.active_jig.signal_cloned().map(clone!(state => move|active_jig| {

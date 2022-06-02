@@ -4,12 +4,12 @@
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
-mod router;
-mod profile;
-mod members_list;
-mod member_details;
-mod badges_list;
 mod badge_details;
+mod badges_list;
+mod member_details;
+mod members_list;
+mod profile;
+mod router;
 
 use wasm_bindgen::prelude::*;
 

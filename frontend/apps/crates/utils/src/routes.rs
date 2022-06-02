@@ -1,13 +1,13 @@
 use crate::jig::JigPlayerOptions;
 use serde::{Deserialize, Serialize};
 use shared::domain::{
+    badge::BadgeId,
     course::CourseId,
     image::{ImageId, ImageSearchQuery},
     jig::{JigFocus, JigId, JigSearchQuery},
     module::{ModuleId, ModuleKind},
     session::OAuthUserProfile,
     user::UserScope,
-    badge::BadgeId,
 };
 use std::{
     fmt::{Debug, Display},
@@ -282,15 +282,23 @@ impl Route {
             }
             ["community"] => Self::Community(CommunityRoute::Landing),
             ["community", "profile"] => Self::Community(CommunityRoute::Profile),
-            ["community", "members"] => Self::Community(CommunityRoute::Members(CommunityMembersRoute::List)),
+            ["community", "members"] => {
+                Self::Community(CommunityRoute::Members(CommunityMembersRoute::List))
+            }
             ["community", "members", user_id] => {
                 let user_id = Uuid::from_str(user_id).unwrap_ji();
-                Self::Community(CommunityRoute::Members(CommunityMembersRoute::Member(user_id)))
-            },
-            ["community", "badges"] => Self::Community(CommunityRoute::Badges(CommunityBadgesRoute::List)),
+                Self::Community(CommunityRoute::Members(CommunityMembersRoute::Member(
+                    user_id,
+                )))
+            }
+            ["community", "badges"] => {
+                Self::Community(CommunityRoute::Badges(CommunityBadgesRoute::List))
+            }
             ["community", "badges", badge_id] => {
                 let badge_id = BadgeId(Uuid::from_str(badge_id).unwrap_ji());
-                Self::Community(CommunityRoute::Badges(CommunityBadgesRoute::Badge(badge_id)))
+                Self::Community(CommunityRoute::Badges(CommunityBadgesRoute::Badge(
+                    badge_id,
+                )))
             }
             ["user", "profile"] => Self::User(UserRoute::Profile(ProfileSection::Landing)),
             ["user", "profile", "change-email"] => {
@@ -547,17 +555,21 @@ impl From<&Route> for String {
                 },
             },
             Route::Community(route) => match route {
-                CommunityRoute::Landing => format!("/community"),
-                CommunityRoute::Profile => format!("/community/profile"),
+                CommunityRoute::Landing => "/community".to_string(),
+                CommunityRoute::Profile => "/community/profile".to_string(),
                 CommunityRoute::Members(route) => match route {
-                    CommunityMembersRoute::List => format!("/community/members"),
-                    CommunityMembersRoute::Member(user_id) => format!("/community/members/{}", user_id),
+                    CommunityMembersRoute::List => "/community/members".to_string(),
+                    CommunityMembersRoute::Member(user_id) => {
+                        format!("/community/members/{}", user_id)
+                    }
                 },
                 CommunityRoute::Badges(route) => match route {
-                    CommunityBadgesRoute::List => format!("/community/badges"),
-                    CommunityBadgesRoute::Badge(badge_id) => format!("/community/badges/{}", badge_id.0),
+                    CommunityBadgesRoute::List => "/community/badges".to_string(),
+                    CommunityBadgesRoute::Badge(badge_id) => {
+                        format!("/community/badges/{}", badge_id.0)
+                    }
                 },
-            }
+            },
             Route::Dev(route) => match route {
                 DevRoute::Showcase(id, page) => format!("/dev/showcase/{}?page={}", id, page),
                 DevRoute::Scratch(id, page) => format!("/dev/scratch/{}?page={}", id, page),

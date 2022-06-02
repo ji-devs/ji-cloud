@@ -95,7 +95,7 @@ impl State {
             course.course_data.cover.clone().unwrap(),
         )];
         for item in &course.course_data.items {
-            v.push(SidebarSpot::new_course_item(item.clone()));
+            v.push(SidebarSpot::new_course_item(*item));
         }
         v
     }

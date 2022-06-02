@@ -1,7 +1,11 @@
 use std::rc::Rc;
 
 use dominator::clone;
-use shared::{api::{endpoints, ApiEndpoint}, domain::badge::Badge, error::EmptyError};
+use shared::{
+    api::{endpoints, ApiEndpoint},
+    domain::badge::Badge,
+    error::EmptyError,
+};
 use utils::prelude::api_no_auth;
 
 use super::BadgeDetails;

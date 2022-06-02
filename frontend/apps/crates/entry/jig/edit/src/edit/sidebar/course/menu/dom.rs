@@ -44,11 +44,11 @@ fn menu_items_course(
             }
             CourseSpot::Item(_jig_id) => {
                 vec![
-                    item_info(state, &module_state),
-                    item_play(state, &module_state),
-                    item_move_up(state, &module_state),
-                    item_move_down(state, &module_state),
-                    item_delete(state, &module_state),
+                    item_info(state, module_state),
+                    item_play(state, module_state),
+                    item_move_up(state, module_state),
+                    item_move_down(state, module_state),
+                    item_delete(state, module_state),
                 ]
             }
         },

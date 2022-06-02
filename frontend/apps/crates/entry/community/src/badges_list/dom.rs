@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use dominator::{Dom, html, clone};
+use dominator::{clone, html, Dom};
 use futures_signals::signal_vec::SignalVecExt;
 use shared::domain::badge::Badge;
 
