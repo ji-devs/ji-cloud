@@ -9,8 +9,18 @@ export class _ extends LitElement {
                     display: grid;
                     grid-template-columns: auto auto;
                     justify-content: space-between;
+                    align-items: center;
                     padding: 40px 30px;
                     background-color: #fff6d9;
+                }
+                h1 {
+                    color: var(--dark-blue-4);
+                    font-size: 40px;
+                    font-weight: 800;
+                    margin: 0;
+                }
+                ::slotted([slot=create-button]) {
+                    justify-self: end;
                 }
                 ::slotted([slot=pagination]),
                 .items {
@@ -18,7 +28,10 @@ export class _ extends LitElement {
                 }
                 .items {
                     display: grid;
+                    /* grid-template-columns: auto auto auto auto auto; */
                     row-gap: 24px;
+                    column-gap: 24px;
+                    align-items: center;
                 }
             `,
         ];
