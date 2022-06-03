@@ -1,15 +1,34 @@
 use std::rc::Rc;
 
-use components::overlay::container::OverlayContainer;
+use components::{
+    overlay::container::OverlayContainer,
+    page_header::{self, state::PageLinks},
+};
 use dominator::{html, Dom};
 use futures_signals::signal::Signal;
-use utils::routes::{Route, CommunityRoute, CommunityMembersRoute, CommunityBadgesRoute};
+use shared::domain::user::UserProfile;
+use utils::{
+    prelude::get_user,
+    routes::{CommunityBadgesRoute, CommunityMembersRoute, CommunityRoute, Route},
+};
 
-use crate::{state::Community, profile::CommunityProfile, members_list::MembersList, badges_list::BadgesList, badge_details::BadgeDetails, member_details::MemberDetails};
+use crate::{
+    badge_details::BadgeDetails, badges_list::BadgesList, member_details::MemberDetails,
+    members_list::MembersList, profile::CommunityProfile, state::Community,
+};
 
 impl Community {
     pub fn render(self: &Rc<Self>) -> Dom {
         html!("main", {
+            // main header
+            .child(page_header::dom::render(
+                Rc::new(page_header::state::State::new()),
+                None,
+                Some(PageLinks::Community),
+                true
+            ))
+            // community header
+            .child(self.render_header())
             .child_signal(Self::dom_signal())
             .child(OverlayContainer::new().render(None))
         })
@@ -30,11 +49,65 @@ impl Community {
                     },
                     CommunityRoute::Badges(route) => match route {
                         CommunityBadgesRoute::List => BadgesList::new().render(),
-                        CommunityBadgesRoute::Badge(badge_id) => BadgeDetails::new(badge_id).render(),
+                        CommunityBadgesRoute::Badge(badge_id) => {
+                            BadgeDetails::new(badge_id).render()
+                        }
                     },
                 }),
                 _ => None,
             }
+        })
+    }
+
+    fn render_header(self: &Rc<Self>) -> Dom {
+        html!("community-header", {
+            .child(self.render_nav())
+        })
+    }
+
+    fn render_nav(self: &Rc<Self>) -> Dom {
+        html!("nav", {
+            .property("slot", "nav")
+            .children(&mut [
+                html!("community-nav-item", {
+                    .child({
+                        match get_user() {
+                            Some(UserProfile { profile_image: Some(image_id), .. }) => {
+                                html!("profile-image", {
+                                    .property("slot", "profile-image")
+                                    .property("imageId", &image_id.0.to_string())
+                                })
+                            },
+                            _ => {
+                                html!("fa-icon", {
+                                    .property("icon", "fa-thin fa-user-tie-hair")
+                                })
+                            },
+                        }
+                    })
+                    .property("label", "My profile")
+                }),
+                html!("community-nav-item", {
+                    .property("href", "/community/badges")
+                    .property("label", "Badges")
+                    .child(html!("fa-icon", {
+                        .property("icon", "fa-thin fa-circle-nodes")
+                    }))
+                }),
+                html!("community-nav-item", {
+                    .property("href", "/community/members")
+                    .property("label", "Members")
+                    .child(html!("fa-icon", {
+                        .property("icon", "fa-thin fa-circle-nodes")
+                    }))
+                }),
+                html!("community-nav-item", {
+                    .property("label", "ProDev")
+                    .child(html!("fa-icon", {
+                        .property("icon", "fa-thin fa-circle-nodes")
+                    }))
+                }),
+            ])
         })
     }
 }

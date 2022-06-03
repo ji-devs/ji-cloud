@@ -6,10 +6,10 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 mod badge_details;
 mod badges_list;
+mod dom;
 mod member_details;
 mod members_list;
 mod profile;
-mod dom;
 mod state;
 
 use state::Community;
@@ -24,8 +24,5 @@ pub async fn main_js() {
 
     utils::init::init().await;
 
-    dominator::append_dom(
-        &dominator::get_id("root"),
-        Community::new().render()
-    );
+    dominator::append_dom(&dominator::get_id("root"), Community::new().render());
 }

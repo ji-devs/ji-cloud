@@ -14,6 +14,16 @@ export class _ extends LitElement {
                     padding: 40px 30px;
                     background-color: #f2777f;
                 }
+                h2 {
+                    margin: 0;
+                    color: #fed758;
+                    font-size: 48px;
+                    font-weight: 900;
+                }
+                ::slotted([slot=nav]) {
+                    display: flex;
+                    column-gap: 40px;
+                }
             `,
         ];
     }

@@ -1,13 +1,9 @@
 use std::rc::Rc;
 
-pub struct Community {
-
-}
+pub struct Community {}
 
 impl Community {
     pub fn new() -> Rc<Self> {
-        Rc::new(Self {
-
-        })
+        Rc::new(Self {})
     }
 }
