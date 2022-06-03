@@ -12,6 +12,7 @@ use shared::{
     },
 };
 use sqlx::PgPool;
+use uuid::Uuid;
 
 use crate::{
     db::{self},
@@ -136,21 +137,12 @@ async fn leave(
 
 async fn browse(
     db: Data<PgPool>,
-    claims: TokenUser,
+    claims: Option<TokenUser>,
     query: Option<Query<<badge::Browse as ApiEndpoint>::Req>>,
 ) -> Result<Json<<badge::Browse as ApiEndpoint>::Res>, error::Auth> {
-    println!("heelo");
-
     let query = query.map_or_else(Default::default, Query::into_inner);
 
-    let creator_id = if let Some(user) = query.creator_id {
-        match user {
-            UserOrMe::Me => Some(claims.0.user_id),
-            UserOrMe::User(id) => Some(id),
-        }
-    } else {
-        None
-    };
+    let creator_id = auth_claims(&db, claims, query.creator_id).await?;
 
     let page_limit = page_limit(query.page_limit)
         .await
@@ -195,6 +187,75 @@ async fn browse_members(
     let count = members.len() as u32;
 
     Ok(Json(BrowseMembersResponse { members, count }))
+}
+
+async fn auth_claims(
+    db: &PgPool,
+    claims: Option<TokenUser>,
+    creator_id: Option<UserOrMe>,
+) -> Result<Option<Uuid>, error::Auth> {
+    //Check if user is logged in. If not, users cannot use UserOrMe::Me
+    let id = if let Some(token) = claims {
+        let id = if let Some(creator) = creator_id {
+            let creator_id = match creator {
+                UserOrMe::Me => Some(token.0.user_id),
+                UserOrMe::User(id) => {
+                    if !sqlx::query!(
+                        //language=SQL
+                        r#"
+            select exists(select 1 from user_profile where user_id = $1 for update) as "exists!"
+                "#,
+                        id
+                    )
+                    .fetch_one(db)
+                    .await?
+                    .exists
+                    {
+                        return Err(error::Auth::ResourceNotFound(
+                            "Creator Id does not exist".to_string(),
+                        ));
+                    }
+
+                    Some(id)
+                }
+            };
+            creator_id
+        } else {
+            None
+        };
+        id
+    } else {
+        let id = if let Some(creator) = creator_id {
+            let creator = match creator {
+                UserOrMe::Me => return Err(error::Auth::Forbidden),
+                UserOrMe::User(id) => {
+                    if !sqlx::query!(
+                        //language=SQL
+                        r#"
+                select exists(select 1 from user_profile where user_id = $1 for update) as "exists!"
+                    "#,
+                        id
+                    )
+                    .fetch_one(db)
+                    .await?
+                    .exists
+                    {
+                        return Err(error::Auth::ResourceNotFound(
+                            "Creator Id does not exist".to_string(),
+                        ));
+                    }
+
+                    Some(id)
+                }
+            };
+            creator
+        } else {
+            None
+        };
+        id
+    };
+
+    Ok(id)
 }
 
 pub fn configure(cfg: &mut ServiceConfig) {
