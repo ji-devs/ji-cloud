@@ -12,6 +12,8 @@ use std::convert::TryFrom;
 mod play_settings;
 pub use play_settings::*;
 
+use super::Audio;
+
 /// The body for [`FindAnswer`](crate::domain::module::ModuleKind::FindAnswer) modules.
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]
 pub struct ModuleData {
@@ -112,11 +114,33 @@ pub struct Content {
     /// The mode
     pub mode: Mode,
 
-    /// Traces
-    pub traces: Vec<Trace>,
+    /// Questions
+    pub questions: Vec<Question>,
 
     /// play settings
     pub play_settings: PlaySettings,
+}
+
+/// Represents a single question
+#[derive(Default, Clone, Serialize, Deserialize, Debug)]
+pub struct Question {
+    /// Title of the question
+    pub title: String,
+
+    /// The question text
+    pub question_text: String,
+
+    /// Optional audio for the question
+    pub question_audio: Option<Audio>,
+
+    /// Optional text for incorrect choices
+    pub incorrect_text: Option<String>,
+
+    /// Optional audio for incorrect choices
+    pub incorrect_audio: Option<Audio>,
+
+    /// Traces
+    pub traces: Vec<Trace>,
 }
 
 /// Editor state
@@ -132,82 +156,58 @@ pub struct EditorState {
 #[derive(Clone, Copy, Serialize, Deserialize, Debug, PartialEq, Eq, Hash)]
 /// The mode
 pub enum Mode {
-    /// Words mode
-    Words,
-    /// Images mode
-    Images,
-    /// Talk mode
-    Talk,
-    /// Read mode
-    Read,
+    /// Family mode
+    Family,
+    /// Map mode
+    Map,
+    /// Multiple mode
+    MultipleChoice,
     /// Scene mode
     Scene,
-    /// Photo album mode
-    PhotoAlbum,
-    /// Comic mode
-    Comic,
-    /// Timeline mode
-    Timeline,
-    /// Family Tree mode
-    FamilyTree,
+    /// Text mode
+    Text,
 }
 
 impl Default for Mode {
     fn default() -> Self {
-        Self::Words
+        Self::Family
     }
 }
 
 impl ModeExt for Mode {
     fn get_list() -> Vec<Self> {
         vec![
-            Self::Words,
-            Self::Images,
-            Self::Talk,
-            Self::Read,
+            Self::Family,
+            Self::Map,
+            Self::MultipleChoice,
             Self::Scene,
-            Self::PhotoAlbum,
-            Self::Comic,
-            Self::Timeline,
-            Self::FamilyTree,
+            Self::Text,
         ]
     }
 
     fn as_str_id(&self) -> &'static str {
         match self {
-            Self::Words => "words",
-            Self::Images => "images",
-            Self::Talk => "talk",
-            Self::Read => "read",
+            Self::Family => "family",
+            Self::Map => "map",
+            Self::MultipleChoice => "multiple-choice",
             Self::Scene => "scene",
-            Self::PhotoAlbum => "photo-album",
-            Self::Comic => "comic",
-            Self::Timeline => "timeline",
-            Self::FamilyTree => "family-tree",
+            Self::Text => "text",
         }
     }
 
     fn label(&self) -> &'static str {
-        const STR_WORDS_LABEL: &'static str = "Words";
-        const STR_IMAGES_LABEL: &'static str = "Images";
-        const STR_TALK_LABEL: &'static str = "Talking Pictures";
-        const STR_READ_LABEL: &'static str = "Read Along";
+        const STR_FAMILY_LABEL: &'static str = "Family";
+        const STR_MAP_LABEL: &'static str = "Map";
+        const STR_MULTIPLE_CHOICE_LABEL: &'static str = "Multiple Choice";
         const STR_SCENE_LABEL: &'static str = "Scene";
-        const STR_PHOTO_ALBUM_LABEL: &'static str = "Photo Album";
-        const STR_COMIC_LABEL: &'static str = "Comics";
-        const STR_TIMELINE_LABEL: &'static str = "Timeline";
-        const STR_FAMILY_TREE_LABEL: &'static str = "Family Tree";
+        const STR_TEXT_LABEL: &'static str = "Text";
 
         match self {
-            Self::Words => STR_WORDS_LABEL,
-            Self::Images => STR_IMAGES_LABEL,
-            Self::Talk => STR_TALK_LABEL,
-            Self::Read => STR_READ_LABEL,
+            Self::Family => STR_FAMILY_LABEL,
+            Self::Map => STR_MAP_LABEL,
+            Self::MultipleChoice => STR_MULTIPLE_CHOICE_LABEL,
             Self::Scene => STR_SCENE_LABEL,
-            Self::PhotoAlbum => STR_PHOTO_ALBUM_LABEL,
-            Self::Comic => STR_COMIC_LABEL,
-            Self::Timeline => STR_TIMELINE_LABEL,
-            Self::FamilyTree => STR_FAMILY_TREE_LABEL,
+            Self::Text => STR_TEXT_LABEL,
         }
     }
 }

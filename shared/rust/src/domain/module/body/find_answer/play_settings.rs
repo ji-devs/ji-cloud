@@ -3,26 +3,32 @@ use serde::{Deserialize, Serialize};
 /// Play settings
 #[derive(Clone, Default, Serialize, Deserialize, Debug)]
 pub struct PlaySettings {
-    /// hint style
-    pub hint: Hint,
+    /// Question ordering
+    pub ordering: Ordering,
 
-    /// next style
+    /// number of attempts
+    pub n_attempts: Option<u8>,
+
+    /// time limit in minutes
+    pub time_limit: Option<u32>,
+
+    /// Next style
     pub next: Next,
 }
 
-/// Hint
+/// Ordering of questions
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
-pub enum Hint {
-    /// None
-    None,
+pub enum Ordering {
+    /// Questions should be randomized
+    Randomize,
 
-    /// Highlight
-    Highlight,
+    /// Questions should be shown in order
+    InOrder,
 }
 
-impl Default for Hint {
+impl Default for Ordering {
     fn default() -> Self {
-        Self::Highlight
+        Self::Randomize
     }
 }
 
