@@ -9,8 +9,10 @@ mod badges_list;
 mod member_details;
 mod members_list;
 mod profile;
-mod router;
+mod dom;
+mod state;
 
+use state::Community;
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen(start)]
@@ -22,6 +24,8 @@ pub async fn main_js() {
 
     utils::init::init().await;
 
-    let router = router::Router::new();
-    dominator::append_dom(&dominator::get_id("root"), router.render());
+    dominator::append_dom(
+        &dominator::get_id("root"),
+        Community::new().render()
+    );
 }
