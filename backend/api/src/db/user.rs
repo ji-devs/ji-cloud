@@ -336,7 +336,8 @@ select exists(select 1 from user_profile where user_id = $1 for update) as "exis
             //language=SQL
             r#"
 update user_profile
-set organization = $2
+set organization = $2,
+    updated_at = now()
 where user_id = $1 and organization is distinct from $2"#,
             user_id,
             organization
@@ -351,7 +352,8 @@ where user_id = $1 and organization is distinct from $2"#,
             //language=SQL
             r#"
 update user_profile
-set location = $2
+set location = $2,
+    updated_at = now()
 where user_id = $1 and location is distinct from $2"#,
             user_id,
             location
@@ -366,7 +368,8 @@ where user_id = $1 and location is distinct from $2"#,
             //language=SQL
             r#"
 update user_profile
-set profile_image_id = $2
+set profile_image_id = $2,
+    updated_at = now()
 where user_id = $1 and profile_image_id is distinct from $2
         "#,
             user_id,
@@ -382,7 +385,8 @@ where user_id = $1 and profile_image_id is distinct from $2
             //language=SQL
             r#"
 update user_profile
-set persona = $2
+set persona = $2,
+    updated_at = now()
 where user_id = $1 and persona is distinct from $2
         "#,
             user_id,
@@ -408,7 +412,8 @@ set username               = coalesce($2, username),
     organization_public    = coalesce($10, organization_public),
     location_public         = coalesce($11, location_public),
     language_public         = coalesce($12, language_public),
-    bio                    = coalesce($13, bio)
+    bio                    = coalesce($13, bio),
+    updated_at             = coalesce(now(), updated_at)
 where user_id = $1
   and (($2::text is not null and $2 is distinct from username) or
        ($3::text is not null and $3 is distinct from given_name) or

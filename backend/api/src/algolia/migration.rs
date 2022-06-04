@@ -10,6 +10,8 @@ use hashfn::hashfn;
 pub const JIG_INDEX: &str = "jig_index";
 pub const MEDIA_INDEX: &str = "media_index";
 pub const COURSE_INDEX: &str = "course_index";
+pub const BADGE_INDEX: &str = "badge_index";
+pub const PUBLIC_USER_INDEX: &str = "public_user_index";
 
 #[hashfn(MEDIA_HASH)]
 pub(crate) async fn media_index(
@@ -126,6 +128,71 @@ pub(crate) async fn course_index(
     client.set_settings(course_index, &settings).await?;
 
     sqlx::query!(r#"update algolia_index_settings set updated_at = now(), index_hash = $1 where index_name = $2"#, COURSE_HASH, COURSE_INDEX).execute(txn).await?;
+
+    Ok(())
+}
+
+#[hashfn(BADGE_HASH)]
+pub(crate) async fn badge_index(
+    txn: &mut PgConnection,
+    client: &super::Inner,
+    badge_index: &str,
+) -> anyhow::Result<()> {
+    let settings = SetSettings {
+        searchable_attributes: Some(
+            SearchableAttributes::build()
+                .single(Attribute("name".to_owned()))
+                .single(Attribute("creator_name".to_owned()))
+                .single(Attribute("description".to_owned()))
+                .single(Attribute("language".to_owned()))
+                .single(Attribute("member_count".to_owned()))
+                .finish(),
+        ),
+        attributes_for_faceting: Some(vec![
+            FacetAttribute::filter_only(Attribute("creator_id".to_owned())),
+            FacetAttribute::filter_only(Attribute("creator_name".to_owned())),
+            FacetAttribute::filter_only(Attribute("language".to_owned())),
+        ]),
+    };
+
+    client.set_settings(badge_index, &settings).await?;
+
+    sqlx::query!(r#"update algolia_index_settings set updated_at = now(), index_hash = $1 where index_name = $2"#, BADGE_HASH, BADGE_INDEX).execute(txn).await?;
+
+    Ok(())
+}
+
+#[hashfn(PUBLIC_USER_HASH)]
+pub(crate) async fn public_user_index(
+    txn: &mut PgConnection,
+    client: &super::Inner,
+    public_user_index: &str,
+) -> anyhow::Result<()> {
+    let settings = SetSettings {
+        searchable_attributes: Some(
+            SearchableAttributes::build()
+                .single(Attribute("username".to_owned()))
+                .single(Attribute("name".to_owned()))
+                .single(Attribute("bio".to_owned()))
+                .single(Attribute("language".to_owned()))
+                .single(Attribute("organization".to_owned()))
+                .single(Attribute("persona".to_owned()))
+                .single(Attribute("location".to_owned()))
+                .finish(),
+        ),
+        attributes_for_faceting: Some(vec![
+            FacetAttribute::filter_only(Attribute("creator_id".to_owned())),
+            FacetAttribute::filter_only(Attribute("creator_name".to_owned())),
+            FacetAttribute::filter_only(Attribute("language".to_owned())),
+            FacetAttribute::filter_only(Attribute("organization".to_owned())),
+            FacetAttribute::filter_only(Attribute("persona".to_owned())),
+            FacetAttribute::filter_only(Attribute("location".to_owned())),
+        ]),
+    };
+
+    client.set_settings(public_user_index, &settings).await?;
+
+    sqlx::query!(r#"update algolia_index_settings set updated_at = now(), index_hash = $1 where index_name = $2"#, PUBLIC_USER_HASH, PUBLIC_USER_INDEX).execute(txn).await?;
 
     Ok(())
 }

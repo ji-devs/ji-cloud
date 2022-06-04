@@ -226,12 +226,20 @@ pub struct AlgoliaSettings {
     pub jig_index: Option<String>,
 
     /// The key to use for the *frontend* for the algolia client.
-    /// This key should be ratelimited, and restricted to a specific set of indecies (the media one- currently actually the "images" one) and any search suggestion indecies.
+    /// This key should be ratelimited, and restricted to a specific set of indicies (the media one- currently actually the "images" one) and any search suggestion indecies.
     pub frontend_search_key: Option<String>,
 
     /// The index to use for operations relating to Courses on the algolia client.
     /// If [`None`], indexing and searching will be disabled.
     pub course_index: Option<String>,
+
+    /// The index to use for operations relating to Badge on the algolia client.
+    /// If [`None`], indexing and searching will be disabled.
+    pub badge_index: Option<String>,
+
+    /// The index to use for operations relating to Public User on the algolia client.
+    /// If [`None`], indexing and searching will be disabled.
+    pub public_user_index: Option<String>,
 }
 
 /// Settings to initialize a google translate client.
@@ -565,47 +573,11 @@ impl SettingsManager {
 
         let course_index = self.get_varying_secret(keys::algolia::COURSE_INDEX).await?;
 
-        let management_key = self
-            .get_varying_secret(keys::algolia::MANAGEMENT_KEY)
+        let badge_index = self.get_varying_secret(keys::algolia::BADGE_INDEX).await?;
+
+        let public_user_index = self
+            .get_varying_secret(keys::algolia::PUBLIC_USER_INDEX)
             .await?;
-
-        let backend_search_key = self
-            .get_varying_secret(keys::algolia::BACKEND_SEARCH_KEY)
-            .await?;
-
-        let frontend_search_key = self
-            .get_varying_secret(keys::algolia::FRONTEND_SEARCH_KEY)
-            .await?;
-
-        // *now* returning is okay.
-        let application_id = match application_id {
-            Some(id) => id,
-            None => return Ok(None),
-        };
-
-        Ok(Some(AlgoliaSettings {
-            application_id,
-            backend_search_key,
-            management_key,
-            media_index,
-            jig_index,
-            course_index,
-            frontend_search_key,
-        }))
-    }
-
-    /// Load the settings for Algolia.
-    pub async fn google_translate_settings(&self) -> anyhow::Result<Option<AlgoliaSettings>> {
-        // Don't early return right away, notify of the other missing vars first.
-        let application_id = self
-            .get_varying_secret(keys::algolia::APPLICATION_ID)
-            .await?;
-
-        let media_index = self.get_varying_secret(keys::algolia::MEDIA_INDEX).await?;
-
-        let jig_index = self.get_varying_secret(keys::algolia::JIG_INDEX).await?;
-
-        let course_index = self.get_varying_secret(keys::algolia::COURSE_INDEX).await?;
 
         let management_key = self
             .get_varying_secret(keys::algolia::MANAGEMENT_KEY)
@@ -632,6 +604,8 @@ impl SettingsManager {
             media_index,
             jig_index,
             course_index,
+            badge_index,
+            public_user_index,
             frontend_search_key,
         }))
     }

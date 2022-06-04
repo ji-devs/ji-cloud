@@ -2,17 +2,9 @@ use crate::error;
 // use serde_json::value::Value;
 use shared::domain::{
     additional_resource::{AdditionalResource, AdditionalResourceId as AddId, ResourceContent},
-    // asset::{DraftOrLive, PrivacyLevel},
     badge::BadgeId,
-    // category::CategoryId,
-    // course::{CourseData, CourseId, CourseResponse},
     image::ImageId,
-    // jig::{
-    //     AudioBackground, AudioEffects, AudioFeedbackNegative, AudioFeedbackPositive, JigAdminData,
-    //     JigData, JigFocus, JigId, JigPlayerSettings, JigRating, JigResponse, TextDirection,
-    // },
     meta::ResourceTypeId as TypeId,
-    // module::{body::ThemeId, LiteModule, ModuleId, ModuleKind},
     user::public_user::PublicUser,
 };
 use sqlx::PgPool;
