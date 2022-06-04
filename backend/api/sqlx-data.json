@@ -705,6 +705,24 @@
       "nullable": []
     }
   },
+  "11319985ecea201f5e49cbec8f9c58b5920d0b67dba317d7836982c2e556be96": {
+    "query": "\n        select count(*)             as \"count!: i64\"\n            from \"user\"\n        inner join user_profile on \"user\".id = user_profile.user_id\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "count!: i64",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
   "1150af6395059759109a8e8200058064186a44dc8db4e6098dd1fa449e6a8e7f": {
     "query": "\nupdate user_profile\nset location = $2\nwhere user_id = $1 and location is distinct from $2",
     "describe": {
@@ -1523,29 +1541,6 @@
       ]
     }
   },
-  "21fd5260a8991c6ca6127a8293f05f115fd454ee6ef6367bfc0941a6b5feffee": {
-    "query": "\nselect count(distinct course.id) as \"count!: i64\"\nfrom course\nleft join course_data on (draft_id = course_data.id or (live_id = course_data.id and last_synced_at is not null))\nleft join course_data_resource \"resource\" on course_data.id = resource.course_data_id\nwhere (author_id = $1 or $1 is null)\n    and (course_data.draft_or_live = $2 or $2 is null)\n    and (course_data.privacy_level = any($3) or $3 = array[]::smallint[])\n    and (resource.resource_type_id = any($4) or $4 = array[]::uuid[])\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "count!: i64",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int2",
-          "Int2Array",
-          "UuidArray"
-        ]
-      },
-      "nullable": [
-        null
-      ]
-    }
-  },
   "22681b84f812bdeb3912a33d0aa40db3eb26266888001f8d4166f0b9336d7336": {
     "query": "\nselect jig.id,\n       display_name                                                                                                 as \"name\",\n       language                                                                                                     as \"language!\",\n       description                                                                                                  as \"description!\",\n       translated_description                                                                                       as \"translated_description!: Json<HashMap<String, String>>\",\n       translated_name                                                                                              as \"translated_name!: Json<HashMap<String, String>>\",\n       array((select affiliation_id\n              from jig_data_affiliation\n              where jig_data_id = jig_data.id))                                                                     as \"affiliations!\",\n       array((select affiliation.display_name\n              from affiliation\n                       inner join jig_data_affiliation on affiliation.id = jig_data_affiliation.affiliation_id\n              where jig_data_affiliation.jig_data_id = jig_data.id))                                                as \"affiliation_names!\",\n        array((select resource_type_id\n                from jig_data_additional_resource\n                where jig_data_id = jig_data.id))                                                                     as \"resource_types!\",\n        array((select resource_type.display_name\n              from resource_type\n                        inner join jig_data_additional_resource on resource_type.id = jig_data_additional_resource.resource_type_id\n             where jig_data_additional_resource.jig_data_id = jig_data.id))                                         as \"resource_type_names!\",\n       array((select age_range_id\n              from jig_data_age_range\n              where jig_data_id = jig_data.id))                                                                     as \"age_ranges!\",\n       array((select age_range.display_name\n              from age_range\n                       inner join jig_data_age_range on age_range.id = jig_data_age_range.age_range_id\n              where jig_data_age_range.jig_data_id = jig_data.id))                                                  as \"age_range_names!\",\n       array((select category_id\n              from jig_data_category\n              where jig_data_id = jig_data.id))                                                                     as \"categories!\",\n       array((select name\n              from category\n                       inner join jig_data_category on category.id = jig_data_category.category_id\n              where jig_data_category.jig_data_id = jig_data.id))                                                   as \"category_names!\",\n       privacy_level                                                                                                as \"privacy_level!: PrivacyLevel\",\n       jig_focus                                                                                                    as \"jig_focus!: JigFocus\",\n       author_id                                                                                                    as \"author_id\",\n       locked                                                                                                       as \"locked!\",\n       other_keywords                                                                                               as \"other_keywords!\",\n       translated_keywords                                                                                          as \"translated_keywords!\",\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = jig.author_id)                                                                 as \"author_name\",\n        rating                                                                                                      as \"rating\",\n        liked_count                                                                                                 as \"likes!\",\n        (\n            select play_count\n            from jig_play_count \"jpc\"\n            where jpc.jig_id = jig.id\n        )                                                                                                           as \"plays!\",\n        published_at                                                                                                as \"published_at\",\n        blocked                                                                                                     as \"blocked!\"\nfrom jig\n         inner join jig_data on live_id = jig_data.id\n         inner join jig_admin_data \"jad\" on jad.jig_id = jig.id\nwhere (last_synced_at is null\n   or (updated_at is not null and last_synced_at < updated_at))\nlimit 100 for no key update skip locked;\n     ",
     "describe": {
@@ -2187,6 +2182,26 @@
       "nullable": []
     }
   },
+  "35451335fc556855641faadf4b36d867c309cb77ed92281fb5e690425bc6883e": {
+    "query": "\n        select count(user_id)  as \"count!: i64\"\n        from user_follow \n        where follower_id = $1\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "count!: i64",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
   "38d7a9b792c7e4aee253d6dc1829fa7069e345009de354830ebff82c3f34cf74": {
     "query": "\nupdate user_profile\nset username               = coalesce($2, username),\n    given_name             = coalesce($3, given_name),\n    family_name            = coalesce($4, family_name),\n    language               = coalesce($5, language),\n    locale                 = coalesce($6, locale),\n    timezone               = coalesce($7, timezone),\n    opt_into_edu_resources = coalesce($8, opt_into_edu_resources),\n    persona_public         = coalesce($9, persona_public),\n    organization_public    = coalesce($10, organization_public),\n    location_public         = coalesce($11, location_public),\n    language_public         = coalesce($12, language_public),\n    bio                    = coalesce($13, bio)\nwhere user_id = $1\n  and (($2::text is not null and $2 is distinct from username) or\n       ($3::text is not null and $3 is distinct from given_name) or\n       ($4::text is not null and $4 is distinct from family_name) or\n       ($5::text is not null and $5 is distinct from language) or\n       ($6::text is not null and $6 is distinct from locale) or\n       ($7::text is not null and $7 is distinct from timezone) or\n       ($8::bool is not null and $8 is distinct from opt_into_edu_resources) or\n       ($9::bool is not null and $9 is distinct from persona_public) or\n       ($10::bool is not null and $10 is distinct from organization_public) or\n       ($11::bool is not null and $11 is distinct from location_public) or\n       ($12::bool is not null and $12 is distinct from language_public) or\n       ($13::text is not null and $13 is distinct from bio)\n    )\n    ",
     "describe": {
@@ -2434,156 +2449,6 @@
         ]
       },
       "nullable": []
-    }
-  },
-  "3d578fe495ec4eca29e87f56560bd5bf236401373848b8594ec89af108ae9e5a": {
-    "query": "\nselect course.id,\n       display_name                                                                                                 as \"name\",\n       language                                                                                                     as \"language!\",\n       description                                                                                                  as \"description!\",\n       translated_description                                                                                       as \"translated_description!: Json<HashMap<String, String>>\",\n       translated_name                                                                                              as \"translated_name!: Json<HashMap<String, String>>\",\n       array((select affiliation_id\n              from course_data_affiliation\n              where course_data_id = course_data.id))                                                                     as \"affiliations!\",\n       array((select affiliation.display_name\n              from affiliation\n                       inner join course_data_affiliation on affiliation.id = course_data_affiliation.affiliation_id\n              where course_data_affiliation.course_data_id = course_data.id))                                                as \"affiliation_names!\",\n        array((select resource_type_id\n                from course_data_resource\n                where course_data_id = course_data.id))                                                                     as \"resource_types!\",\n        array((select resource_type.display_name\n              from resource_type\n                        inner join course_data_resource on resource_type.id = course_data_resource.resource_type_id\n             where course_data_resource.course_data_id = course_data.id))                                         as \"resource_type_names!\",\n       array((select age_range_id\n              from course_data_age_range\n              where course_data_id = course_data.id))                                                                     as \"age_ranges!\",\n       array((select age_range.display_name\n              from age_range\n                       inner join course_data_age_range on age_range.id = course_data_age_range.age_range_id\n              where course_data_age_range.course_data_id = course_data.id))                                                  as \"age_range_names!\",\n       array((select category_id\n              from course_data_category\n              where course_data_id = course_data.id))                                                                     as \"categories!\",\n       array((select name\n              from category\n                       inner join course_data_category on category.id = course_data_category.category_id\n              where course_data_category.course_data_id = course_data.id))                                                   as \"category_names!\",\n        array(\n           (select jig_id\n            from course_data_jig\n            where course_data_jig.course_data_id = course_data.id)\n       )                                                                                                            as \"items!\",\n       privacy_level                                                                                                as \"privacy_level!: PrivacyLevel\",\n       author_id                                                                                                    as \"author_id\",\n       other_keywords                                                                                               as \"other_keywords!\",\n       translated_keywords                                                                                          as \"translated_keywords!\",\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = course.author_id)                                                       as \"author_name\",\n        likes                                                                                                       as \"likes!\",\n        plays                                                                                                       as \"plays!\",\n        published_at                                                                                                as \"published_at\"\nfrom course\n         inner join course_data on live_id = course_data.id\nwhere (last_synced_at is null\n   or (updated_at is not null and last_synced_at < updated_at))\nlimit 100 for no key update skip locked;\n     ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "language!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 3,
-          "name": "description!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 4,
-          "name": "translated_description!: Json<HashMap<String, String>>",
-          "type_info": "Jsonb"
-        },
-        {
-          "ordinal": 5,
-          "name": "translated_name!: Json<HashMap<String, String>>",
-          "type_info": "Jsonb"
-        },
-        {
-          "ordinal": 6,
-          "name": "affiliations!",
-          "type_info": "UuidArray"
-        },
-        {
-          "ordinal": 7,
-          "name": "affiliation_names!",
-          "type_info": "TextArray"
-        },
-        {
-          "ordinal": 8,
-          "name": "resource_types!",
-          "type_info": "UuidArray"
-        },
-        {
-          "ordinal": 9,
-          "name": "resource_type_names!",
-          "type_info": "TextArray"
-        },
-        {
-          "ordinal": 10,
-          "name": "age_ranges!",
-          "type_info": "UuidArray"
-        },
-        {
-          "ordinal": 11,
-          "name": "age_range_names!",
-          "type_info": "TextArray"
-        },
-        {
-          "ordinal": 12,
-          "name": "categories!",
-          "type_info": "UuidArray"
-        },
-        {
-          "ordinal": 13,
-          "name": "category_names!",
-          "type_info": "TextArray"
-        },
-        {
-          "ordinal": 14,
-          "name": "items!",
-          "type_info": "UuidArray"
-        },
-        {
-          "ordinal": 15,
-          "name": "privacy_level!: PrivacyLevel",
-          "type_info": "Int2"
-        },
-        {
-          "ordinal": 16,
-          "name": "author_id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 17,
-          "name": "other_keywords!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 18,
-          "name": "translated_keywords!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 19,
-          "name": "author_name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 20,
-          "name": "likes!",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 21,
-          "name": "plays!",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 22,
-          "name": "published_at",
-          "type_info": "Timestamptz"
-        }
-      ],
-      "parameters": {
-        "Left": []
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        false,
-        true,
-        false,
-        false,
-        null,
-        false,
-        false,
-        true
-      ]
     }
   },
   "3f7ad7f5eb03139f9584aa6928a1b805b4f8908a1df023a12a7cf8cba3d56d26": {
@@ -3052,6 +2917,156 @@
       ]
     }
   },
+  "51801176088ee1b2370ca407b8e16860f998814711d05d7cb4ba36267eaf9f50": {
+    "query": "\nselect course.id,\n       display_name                                                                                                 as \"name\",\n       language                                                                                                     as \"language!\",\n       description                                                                                                  as \"description!\",\n       translated_description                                                                                       as \"translated_description!: Json<HashMap<String, String>>\",\n       translated_name                                                                                              as \"translated_name!: Json<HashMap<String, String>>\",\n       array((select affiliation_id\n              from course_data_affiliation\n              where course_data_id = course_data.id))                                                                     as \"affiliations!\",\n       array((select affiliation.display_name\n              from affiliation\n                       inner join course_data_affiliation on affiliation.id = course_data_affiliation.affiliation_id\n              where course_data_affiliation.course_data_id = course_data.id))                                                as \"affiliation_names!\",\n        array((select resource_type_id\n                from course_data_resource\n                where course_data_id = course_data.id))                                                                     as \"resource_types!\",\n        array((select resource_type.display_name\n              from resource_type\n                        inner join course_data_resource on resource_type.id = course_data_resource.resource_type_id\n             where course_data_resource.course_data_id = course_data.id))                                         as \"resource_type_names!\",\n       array((select age_range_id\n              from course_data_age_range\n              where course_data_id = course_data.id))                                                                     as \"age_ranges!\",\n       array((select age_range.display_name\n              from age_range\n                       inner join course_data_age_range on age_range.id = course_data_age_range.age_range_id\n              where course_data_age_range.course_data_id = course_data.id))                                                  as \"age_range_names!\",\n       array((select category_id\n              from course_data_category\n              where course_data_id = course_data.id))                                                                     as \"categories!\",\n       array((select name\n              from category\n                       inner join course_data_category on category.id = course_data_category.category_id\n              where course_data_category.course_data_id = course_data.id))                                                   as \"category_names!\",\n        array(\n           (select jig_id\n            from course_data_jig\n            where course_data_jig.course_data_id = course_data.id)\n       )                                                                                                            as \"items!\",\n       privacy_level                                                                                                as \"privacy_level!: PrivacyLevel\",\n       author_id                                                                                                    as \"author_id\",\n       other_keywords                                                                                               as \"other_keywords!\",\n       translated_keywords                                                                                          as \"translated_keywords!\",\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = course.author_id)                                                       as \"author_name\",\n        likes                                                                                                       as \"likes!\",\n        plays                                                                                                       as \"plays!\",\n        published_at                                                                                                as \"published_at\"\nfrom course\n         inner join course_data on live_id = course_data.id\nwhere last_synced_at is null\n    or (updated_at is not null and last_synced_at < updated_at)\n    or (published_at < now() is true and last_synced_at < published_at)\nlimit 100 for no key update skip locked;\n     ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "language!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "description!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "translated_description!: Json<HashMap<String, String>>",
+          "type_info": "Jsonb"
+        },
+        {
+          "ordinal": 5,
+          "name": "translated_name!: Json<HashMap<String, String>>",
+          "type_info": "Jsonb"
+        },
+        {
+          "ordinal": 6,
+          "name": "affiliations!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 7,
+          "name": "affiliation_names!",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 8,
+          "name": "resource_types!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 9,
+          "name": "resource_type_names!",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 10,
+          "name": "age_ranges!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 11,
+          "name": "age_range_names!",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 12,
+          "name": "categories!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 13,
+          "name": "category_names!",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 14,
+          "name": "items!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 15,
+          "name": "privacy_level!: PrivacyLevel",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 16,
+          "name": "author_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 17,
+          "name": "other_keywords!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 18,
+          "name": "translated_keywords!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 19,
+          "name": "author_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 20,
+          "name": "likes!",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 21,
+          "name": "plays!",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 22,
+          "name": "published_at",
+          "type_info": "Timestamptz"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        false,
+        true,
+        false,
+        false,
+        null,
+        false,
+        false,
+        true
+      ]
+    }
+  },
   "51a40f41372d3ac245973b6c148c56e71684c771e64465cf5c188241d4416d4a": {
     "query": "\nupdate category\nset index = index - 1, updated_at = now()\nwhere index > $1 and index <= $2 is not false and parent_id is not distinct from $3\n",
     "describe": {
@@ -3060,6 +3075,19 @@
         "Left": [
           "Int2",
           "Int2",
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "520d422c41cb46765a696172e5b37e168577f310ef6625e764331052e100c6a3": {
+    "query": "\n    delete from user_follow where user_id = $1 and follower_id = $2\n            ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
           "Uuid"
         ]
       },
@@ -4389,6 +4417,86 @@
       ]
     }
   },
+  "7972163e5793dcdffefba058ff52c7d1c80ca065a3d85a212d553ddf2646355d": {
+    "query": "\n    select  user_id as \"id\",\n            username,\n            given_name,\n            family_name,\n            bio,\n            profile_image_id       as \"profile_image?: ImageId\",\n            (select language from user_profile where user_profile.user_id = \"user\".id and language_public is true)      as \"language?\",\n            (select organization from user_profile where user_profile.user_id = \"user\".id and organization_public is true)  as \"organization?\", \n            (select array(select language from user_profile where user_profile.user_id = \"user\".id and persona_public is true))      as \"persona!:Vec<String>\", \n            (select location from user_profile where user_profile.user_id = \"user\".id and location_public is true)      as \"location?\", \n            array(select badge.id \n                from badge_member bm \n                inner join badge on bm.id = badge.id \n                where bm.user_id = \"user\".id\n            ) as \"badges!: Vec<BadgeId>\"\n        from \"user\"\n            inner join user_profile on \"user\".id = user_profile.user_id\n        where id = $1\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "username",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "given_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "family_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "bio",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 5,
+          "name": "profile_image?: ImageId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 6,
+          "name": "language?",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 7,
+          "name": "organization?",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 8,
+          "name": "persona!:Vec<String>",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 9,
+          "name": "location?",
+          "type_info": "Jsonb"
+        },
+        {
+          "ordinal": 10,
+          "name": "badges!: Vec<BadgeId>",
+          "type_info": "UuidArray"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    }
+  },
   "79bce8bafae973dfdb2932091ebeeed4f007ecf2849cc8c859d45a1fea68a251": {
     "query": "\ndelete from jig_like\nwhere jig_id = $1 and user_id = $2\n    ",
     "describe": {
@@ -5075,6 +5183,29 @@
       ]
     }
   },
+  "8d9da8ad852c46dd681bc088429b06a6b67b1bb92d1283c6569a3fd9e8cdf5e6": {
+    "query": "\nselect count(distinct course_data.id) as \"count!: i64\"\nfrom course_data\nleft join course on (draft_id = course_data.id or (live_id = course_data.id and last_synced_at is not null and published_at is not null))\nleft join course_data_resource \"resource\" on course_data.id = resource.course_data_id\nwhere (author_id = $1 or $1 is null)\n    and (course_data.draft_or_live = $2 or $2 is null)\n    and (course_data.privacy_level = any($3) or $3 = array[]::smallint[])\n    and (resource.resource_type_id = any($4) or $4 = array[]::uuid[])\n\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "count!: i64",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2",
+          "Int2Array",
+          "UuidArray"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
   "8dd0d15f8499b6b424752b11db318e0eaa9da44e1067c6ce84f0d02355ebe816": {
     "query": "insert into jig (creator_id, author_id, live_id, draft_id, jig_focus) values ($1, $1, $2, $3, $4) returning id",
     "describe": {
@@ -5202,6 +5333,88 @@
       },
       "nullable": [
         false
+      ]
+    }
+  },
+  "923dd2e08f093a2b7a0ccbb6286bae15cbb015f2089f43c7d53341117a42e2fb": {
+    "query": "\n        with following as (\n            select user_id \n            from user_follow \n            where follower_id = $1\n            order by coalesce(followed_at) desc\n        )\n        select  id                     as \"id!\",\n                username               as \"username!\",\n                given_name             as \"given_name!\",\n                family_name            as \"family_name!\",\n                bio                    as \"bio!\",\n                profile_image_id       as \"profile_image?: ImageId\",\n                (select language from user_profile where user_profile.user_id = \"user\".id and language_public is true)      as \"language?\",\n                (select organization from user_profile where user_profile.user_id = \"user\".id and organization_public is true)  as \"organization?\",\n                (select array(select persona from user_profile where user_profile.user_id = \"user\".id and persona_public is true))      as \"persona!\",\n                (select location from user_profile where user_profile.user_id = \"user\".id and location_public is true)      as \"location?\",\n                array(select badge.id\n                    from badge_member bm\n                    inner join badge on bm.id = badge.id\n                    where bm.user_id = \"user\".id\n                ) as \"badges!: Vec<BadgeId>\"\n            from \"user\"\n            inner join user_profile on \"user\".id = user_profile.user_id\n            inner join following on (following.user_id = \"user\".id)\n            offset $2\n            limit $3\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id!",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "username!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "given_name!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "family_name!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "bio!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 5,
+          "name": "profile_image?: ImageId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 6,
+          "name": "language?",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 7,
+          "name": "organization?",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 8,
+          "name": "persona!",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 9,
+          "name": "location?",
+          "type_info": "Jsonb"
+        },
+        {
+          "ordinal": 10,
+          "name": "badges!: Vec<BadgeId>",
+          "type_info": "UuidArray"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int8",
+          "Int8"
+        ]
+      },
+      "nullable": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
       ]
     }
   },
@@ -5576,6 +5789,27 @@
       ]
     }
   },
+  "a389e007d6a7514aff8da23c6bd72ca1c15b2cb0e776d951d3b4e0daaaed64bb": {
+    "query": "\n    select exists(select 1 from user_follow where user_id = $1 and follower_id = $2) as \"exists!\"\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "exists!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
   "a3a0d802e467e00ed92f87b3d017f3b62b32857ab01483fde968ed79f1e7cd80": {
     "query": "\ninsert into course_data_jig(course_data_id, jig_id)\nselect $2, jig_id\nfrom course_data_jig\nwhere course_data_id = $1\n        ",
     "describe": {
@@ -5815,29 +6049,6 @@
         ]
       },
       "nullable": []
-    }
-  },
-  "a7f21fe9fd7563bc9d20d4189e693b5f9e4c7fdc0c18a926ea1e6dd9bd1c0c53": {
-    "query": "\nselect count(distinct course_data.id) as \"count!: i64\"\nfrom course_data\nleft join course on (draft_id = course_data.id or (live_id = course_data.id and last_synced_at is not null))\nleft join course_data_resource \"resource\" on course_data.id = resource.course_data_id\nwhere (author_id = $1 or $1 is null)\n    and (course_data.draft_or_live = $2 or $2 is null)\n    and (course_data.privacy_level = any($3) or $3 = array[]::smallint[])\n    and (resource.resource_type_id = any($4) or $4 = array[]::uuid[])\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "count!: i64",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int2",
-          "Int2Array",
-          "UuidArray"
-        ]
-      },
-      "nullable": [
-        null
-      ]
     }
   },
   "a85530d1d83a7f3cd3786da68f5b489fbddbf411d735cf114817e4417768520b": {
@@ -6324,6 +6535,88 @@
       ]
     }
   },
+  "b0d6951dba97cd232afa6936328fbab99022f44430515de0e1e580bf6ee2845f": {
+    "query": "\n        with followers as (\n            select follower_id \n            from user_follow \n            where user_id = $1\n            order by coalesce(followed_at) desc\n        )\n        select  id         as \"id!\",\n                username               as \"username!\",\n                given_name             as \"given_name!\",\n                family_name            as \"family_name!\",\n                bio                    as \"bio!\",\n                profile_image_id       as \"profile_image?: ImageId\",\n                (select language from user_profile where user_profile.user_id = \"user\".id and language_public is true)      as \"language?\",\n                (select organization from user_profile where user_profile.user_id = \"user\".id and organization_public is true)  as \"organization?\",\n                (select array(select persona from user_profile where user_profile.user_id = \"user\".id and persona_public is true))      as \"persona!: Vec<String>\",\n                (select location from user_profile where user_profile.user_id = \"user\".id and location_public is true)      as \"location?\",\n                (select array(select badge.id\n                    from badge_member bm\n                    inner join badge on bm.id = badge.id\n                    where bm.user_id = \"user\".id\n                )) as \"badges!: Vec<(BadgeId,)>\"\n            from \"user\"\n            inner join user_profile on \"user\".id = user_profile.user_id\n            inner join followers on (followers.follower_id = \"user\".id)\n            offset $2\n            limit $3\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id!",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "username!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "given_name!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "family_name!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "bio!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 5,
+          "name": "profile_image?: ImageId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 6,
+          "name": "language?",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 7,
+          "name": "organization?",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 8,
+          "name": "persona!: Vec<String>",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 9,
+          "name": "location?",
+          "type_info": "Jsonb"
+        },
+        {
+          "ordinal": 10,
+          "name": "badges!: Vec<(BadgeId,)>",
+          "type_info": "UuidArray"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int8",
+          "Int8"
+        ]
+      },
+      "nullable": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
+    }
+  },
   "b16c8686d6dd580d8d45a8ec9174425b692c17ea1a9f0c19958d9f6b871639c3": {
     "query": "\nselect draft_id from course join course_data on course.draft_id = course_data.id where course.id = $1 for update\n",
     "describe": {
@@ -6568,6 +6861,26 @@
       ]
     }
   },
+  "ba6ef792954fd255cfb73b182f23a3ba6b0472d4f26140c503504b48e7974a18": {
+    "query": "\n        select count(follower_id)  as \"count!: i64\"\n        from user_follow \n        where user_id = $1\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "count!: i64",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
   "ba7c4c90935d487d2217c74eacc4362e96f8dc07c9f45e3741b4a46b3cf06155": {
     "query": "\nselect draft_id from jig where jig.id = $1\n",
     "describe": {
@@ -6728,6 +7041,29 @@
         ]
       },
       "nullable": []
+    }
+  },
+  "c67c2bac7353d837bdc2c140d929c0bab082bd0f27f7cd0a2bb55d17dc017a7b": {
+    "query": "\nselect count(distinct course.id) as \"count!: i64\"\nfrom course\nleft join course_data on (draft_id = course_data.id or (live_id = course_data.id and last_synced_at is not null and published_at is not null))\nleft join course_data_resource \"resource\" on course_data.id = resource.course_data_id\nwhere (author_id = $1 or $1 is null)\n    and (course_data.draft_or_live = $2 or $2 is null)\n    and (course_data.privacy_level = any($3) or $3 = array[]::smallint[])\n    and (resource.resource_type_id = any($4) or $4 = array[]::uuid[])\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "count!: i64",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2",
+          "Int2Array",
+          "UuidArray"
+        ]
+      },
+      "nullable": [
+        null
+      ]
     }
   },
   "c7cba4dc7fcc038705c7bc094ee538387699a3ebd40264b37682881da0264e30": {
@@ -7083,6 +7419,46 @@
         ]
       },
       "nullable": []
+    }
+  },
+  "ce747bd7f9c44586191697c005d5569f932b3f602b9a651c64f84f87ec1fa7b1": {
+    "query": "\n        with cte as (\n            select distinct jdar.id              as id,\n                    jdar.display_name,\n                   resource_type_id,\n                   resource_content,\n                   author_id,\n                   updated_at,\n                   created_at\n            from jig_data_additional_resource \"jdar\"\n            inner join jig on jig.live_id = jdar.jig_data_id\n            inner join jig_data on jig.live_id = jig_data.id\n            where author_id = $1\n           ),\n           cte1 as (\n              select distinct cdr.id              as id,\n                cdr.display_name,\n                resource_type_id,\n                resource_content,\n                author_id,\n                updated_at,\n                created_at\n          from course_data_resource \"cdr\"\n          inner join course on course.live_id = cdr.course_data_id\n          inner join course_data on course.live_id = course_data.id\n          where author_id = $1\n          ),\n          cte2 as (\n            select * from unnest(array(select id from (select id from cte union all select id from cte1) resource)) with ordinality t(id\n           , ord) order by ord\n         )\n          select cte3.id                     as \"id!: AddId\",\n                 display_name           as \"display_name!\",\n                 resource_type_id       as \"resource_type_id!: TypeId\",\n                 resource_content        as \"resource_content!\"\n         from\n          (select * from cte\n          union all\n          select * from cte1) cte3\n        inner join cte2 on cte2.id = cte3.id\n        where ord > (1 * $2 * $3)\n        order by ord asc\n        limit $3\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id!: AddId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "display_name!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "resource_type_id!: TypeId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 3,
+          "name": "resource_content!",
+          "type_info": "Jsonb"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int4",
+          "Int4"
+        ]
+      },
+      "nullable": [
+        null,
+        null,
+        null,
+        null
+      ]
     }
   },
   "ceee83d2943409d2f3a3e5a70b7ae3d423d39cf2b15af44565c6f4100abcfc31": {
@@ -7795,6 +8171,87 @@
       ]
     }
   },
+  "de0314e3495cd2e6bd309c4ec7abaeb4421e44ff929470cd838a227bdbb80853": {
+    "query": "\n        with cte as (\n            select array(select id  as \"id!\"\n            from \"user\"\n            inner join user_profile \"up\" on \"user\".id = up.user_id\n            order by family_name asc) as id\n        ),\n        cte1 as (\n            select * from unnest((select distinct id from cte)) with ordinality t(id\n           , ord) order by ord\n        )\n        select  user_id                as \"id!\",\n                username               as \"username!\",\n                given_name             as \"given_name!\",\n                family_name            as \"family_name!\",\n                bio                    as \"bio!\",\n                profile_image_id       as \"profile_image?: ImageId\",\n                (select language from user_profile where user_profile.user_id = \"user\".id and language_public is true)      as \"language?\",\n                (select organization from user_profile where user_profile.user_id = \"user\".id and organization_public is true)  as \"organization?\", \n                (select array(select persona from user_profile where user_profile.user_id = \"user\".id and persona_public is true))      as \"persona!: Vec<String>\", \n                (select location from user_profile where user_profile.user_id = \"user\".id and location_public is true)      as \"location?\", \n                (select array(select badge.id \n                    from badge_member bm \n                    inner join badge on bm.id = badge.id \n                    where bm.user_id = \"user\".id\n                )) as \"badges!: Vec<(BadgeId,)>\"\n            from \"user\"\n            inner join user_profile on \"user\".id = user_profile.user_id\n            inner join cte1 on cte1.id = \"user\".id\n            where ord > (1 * $1 * $2)\n            order by ord \n            limit $2\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id!",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "username!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "given_name!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "family_name!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "bio!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 5,
+          "name": "profile_image?: ImageId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 6,
+          "name": "language?",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 7,
+          "name": "organization?",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 8,
+          "name": "persona!: Vec<String>",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 9,
+          "name": "location?",
+          "type_info": "Jsonb"
+        },
+        {
+          "ordinal": 10,
+          "name": "badges!: Vec<(BadgeId,)>",
+          "type_info": "UuidArray"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    }
+  },
   "df44d75bf1f59bebe2f20e0fbe5035c73a74b7daa14b4c842175485158d125a4": {
     "query": "\nselect exists (\n    select 1 from user_scope where user_id = $1 and scope = any($2)\n) or (\n    exists (select 1 from user_scope where user_id = $1 and scope = $3) and\n    not exists (select 1 from course where course.id = $4 and course.author_id <> $1)\n) as \"authed!\"\n",
     "describe": {
@@ -8196,6 +8653,26 @@
       ]
     }
   },
+  "f12fedbf6dc6311b9b3627643fcf30f391fa5f55dd97683ebe04d8b9cb4209d6": {
+    "query": "\n        with cte as (\n            select distinct jdar.id             as \"id\",\n                   updated_at,\n                   created_at\n            from jig_data_additional_resource \"jdar\"\n            inner join jig on jig.live_id = jdar.jig_data_id\n            inner join jig_data on jig.live_id = jig_data.id\n            where author_id = $1\n           ),\n           cte1 as (\n              select  distinct cdr.id          as \"id\",\n                      updated_at,\n                      created_at\n          from course_data_resource \"cdr\"\n          inner join course on course.live_id = cdr.course_data_id\n          inner join course_data on course.live_id = course_data.id\n          where author_id = $1\n          )\n          select count(id)                     as \"count!: i64\"\n         from\n          (select * from cte\n          union all\n          select * from cte1) resources",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "count!: i64",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
   "f4463110f5544135bbcbb441792aad08a4e34be4dbf2994b9525b6ae031e3b5f": {
     "query": "\nupdate jig_curation_data\nset language = $2\nwhere jig_id = $1 and $2 is distinct from language\n            ",
     "describe": {
@@ -8373,6 +8850,19 @@
       "nullable": [
         null
       ]
+    }
+  },
+  "f974b082e368569d9fbd114820b6ee4a71a6de61f9eaff5eb323cb47f787a25d": {
+    "query": "\n    insert into user_follow(user_id, follower_id, followed_at)\n    values($1, $2, now())\n            ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      },
+      "nullable": []
     }
   },
   "f9df2f28e8d06b6804d2bfc813d94ee93bbebe9148b2d2f5e00857adfed502ed": {
