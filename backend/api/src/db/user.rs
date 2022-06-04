@@ -17,6 +17,8 @@ use std::{convert::TryFrom, str::FromStr};
 use tracing::{instrument, Instrument};
 use uuid::Uuid;
 
+pub(crate) mod public_user;
+
 use super::{nul_if_empty, recycle_metadata};
 use crate::error;
 

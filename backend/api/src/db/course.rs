@@ -735,12 +735,13 @@ pub async fn filtered_count(
         r#"
 select count(distinct course_data.id) as "count!: i64"
 from course_data
-left join course on (draft_id = course_data.id or (live_id = course_data.id and last_synced_at is not null))
+left join course on (draft_id = course_data.id or (live_id = course_data.id and last_synced_at is not null and published_at is not null))
 left join course_data_resource "resource" on course_data.id = resource.course_data_id
 where (author_id = $1 or $1 is null)
     and (course_data.draft_or_live = $2 or $2 is null)
     and (course_data.privacy_level = any($3) or $3 = array[]::smallint[])
     and (resource.resource_type_id = any($4) or $4 = array[]::uuid[])
+
 "#,
         author_id,
         draft_or_live.map(|it| it as i16),
@@ -755,7 +756,7 @@ where (author_id = $1 or $1 is null)
         r#"
 select count(distinct course.id) as "count!: i64"
 from course
-left join course_data on (draft_id = course_data.id or (live_id = course_data.id and last_synced_at is not null))
+left join course_data on (draft_id = course_data.id or (live_id = course_data.id and last_synced_at is not null and published_at is not null))
 left join course_data_resource "resource" on course_data.id = resource.course_data_id
 where (author_id = $1 or $1 is null)
     and (course_data.draft_or_live = $2 or $2 is null)
