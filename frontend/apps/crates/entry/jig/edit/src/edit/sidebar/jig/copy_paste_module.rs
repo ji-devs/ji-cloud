@@ -42,7 +42,8 @@ pub fn paste_module(state: Rc<State>) {
         Some(module_id) => {
             state.loader.load(clone!(state => async move {
                 let module = super::module_cloner::clone_module(&module_id, &state.asset.unwrap_jig().id).await.unwrap_ji();
-                state.modules.lock_mut().push_cloned(SidebarSpot::new_jig_module(module));
+                let mut modules = state.modules.lock_mut();
+                modules.insert_cloned(modules.len() - 2, SidebarSpot::new_jig_module(Some(module)));
             }));
         }
     }
