@@ -207,6 +207,44 @@ limit $3
         .collect())
 }
 
+pub async fn get_by_ids(db: &PgPool, ids: &[Uuid]) -> sqlx::Result<Vec<Badge>> {
+    let mut txn = db.begin().await?;
+
+    let res: Vec<_> = sqlx::query!(
+        //language=SQL
+        r#"
+select  id            as "badge_id!: BadgeId",
+        display_name   as "display_name!",
+        description     as "description!",
+        thumbnail       as "thumbnail!",
+        member_count  as "member_count!: u32",
+        creator_id    as "creator_id!"
+from badge
+inner join unnest($1::uuid[])
+with ordinality t(id, ord) using (id)
+"#,
+        ids
+    )
+    .fetch_all(&mut txn)
+    .await?;
+
+    let v = res
+        .into_iter()
+        .map(|row| Badge {
+            id: row.badge_id,
+            display_name: row.display_name,
+            created_by: row.creator_id,
+            description: row.description,
+            thumbnail: Url::parse(&row.thumbnail).unwrap(),
+            member_count: row.member_count,
+        })
+        .collect();
+
+    txn.rollback().await?;
+
+    Ok(v)
+}
+
 pub async fn browse_badge_members(db: &PgPool, id: BadgeId) -> anyhow::Result<Vec<Uuid>> {
     let mut txn = db.begin().await?;
 

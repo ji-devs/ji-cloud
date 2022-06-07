@@ -139,6 +139,20 @@ pub struct BadgeSearchQuery {
     pub page_limit: Option<u32>,
 }
 
+/// Response for [`Search`](crate::api::endpoints::badge::Search).
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct BadgeSearchResponse {
+    /// the Badges returned.
+    pub badges: Vec<Badge>,
+
+    /// The number of pages found.
+    pub pages: u32,
+
+    /// The total number of Badges found
+    pub total_badge_count: u64,
+}
+
 /// Members associated with Badge
 #[derive(Serialize, Deserialize)]
 pub struct BrowseMembersResponse {

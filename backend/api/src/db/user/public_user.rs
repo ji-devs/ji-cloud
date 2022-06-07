@@ -1,18 +1,11 @@
-use crate::error;
+use crate::{error, extractor::TokenUser};
 // use serde_json::value::Value;
 use shared::domain::{
     additional_resource::{AdditionalResource, AdditionalResourceId as AddId, ResourceContent},
-    // asset::{DraftOrLive, PrivacyLevel},
+    asset::UserOrMe,
     badge::BadgeId,
-    // category::CategoryId,
-    // course::{CourseData, CourseId, CourseResponse},
     image::ImageId,
-    // jig::{
-    //     AudioBackground, AudioEffects, AudioFeedbackNegative, AudioFeedbackPositive, JigAdminData,
-    //     JigData, JigFocus, JigId, JigPlayerSettings, JigRating, JigResponse, TextDirection,
-    // },
     meta::ResourceTypeId as TypeId,
-    // module::{body::ThemeId, LiteModule, ModuleId, ModuleKind},
     user::public_user::PublicUser,
 };
 use sqlx::PgPool;
@@ -270,6 +263,128 @@ pub async fn unfollow(
     txn.commit().await?;
 
     Ok(())
+}
+
+pub async fn get_by_ids(db: &PgPool, ids: &[Uuid]) -> sqlx::Result<Vec<PublicUser>> {
+    let mut txn = db.begin().await?;
+
+    let res: Vec<_> = sqlx::query!(
+        //language=SQL
+        r#"
+        select  user_id                as "id!",
+                username               as "username!",
+                given_name             as "given_name!",
+                family_name            as "family_name!",
+                bio                    as "bio!",
+                profile_image_id       as "profile_image?: ImageId",
+                (select language from user_profile where user_profile.user_id = "user".id and language_public is true)      as "language?",
+                (select organization from user_profile where user_profile.user_id = "user".id and organization_public is true)  as "organization?", 
+                (select array(select persona from user_profile where user_profile.user_id = "user".id and persona_public is true))      as "persona!: Vec<String>", 
+                (select location from user_profile where user_profile.user_id = "user".id and location_public is true)      as "location?", 
+                (select array(select badge.id 
+                    from badge_member bm 
+                    inner join badge on bm.id = badge.id 
+                    where bm.user_id = "user".id
+                )) as "badges!: Vec<(BadgeId,)>"
+                from "user"
+                inner join user_profile on "user".id = user_profile.user_id
+                inner join unnest($1::uuid[])
+                with ordinality t(id, ord) using (id)
+"#,
+        ids
+    )
+    .fetch_all(&mut txn)
+    .await?;
+
+    let v = res
+        .into_iter()
+        .map(|row| PublicUser {
+            id: row.id,
+            username: row.username,
+            given_name: row.given_name,
+            family_name: row.family_name,
+            bio: row.bio,
+            profile_image: row.profile_image,
+            language: row.language,
+            organization: row.organization,
+            persona: row.persona,
+            location: row.location,
+            badges: row.badges.into_iter().map(|(x,)| x).collect(),
+        })
+        .collect();
+
+    txn.rollback().await?;
+
+    Ok(v)
+}
+
+pub(crate) async fn auth_claims(
+    db: &PgPool,
+    claims: Option<TokenUser>,
+    user_id: Option<UserOrMe>,
+) -> Result<Option<Uuid>, error::Auth> {
+    //Check if user is logged in. If not, users cannot use UserOrMe::Me
+    let id = if let Some(token) = claims {
+        let id = if let Some(user) = user_id {
+            let user_id = match user {
+                UserOrMe::Me => Some(token.0.user_id),
+                UserOrMe::User(id) => {
+                    if !sqlx::query!(
+                        //language=SQL
+                        r#"
+            select exists(select 1 from user_profile where user_id = $1 for update) as "exists!"
+                "#,
+                        id
+                    )
+                    .fetch_one(db)
+                    .await?
+                    .exists
+                    {
+                        return Err(error::Auth::ResourceNotFound(
+                            "user Id does not exist".to_string(),
+                        ));
+                    }
+
+                    Some(id)
+                }
+            };
+            user_id
+        } else {
+            None
+        };
+        id
+    } else {
+        let id = if let Some(user) = user_id {
+            let user = match user {
+                UserOrMe::Me => return Err(error::Auth::Forbidden),
+                UserOrMe::User(id) => {
+                    if !sqlx::query!(
+                        //language=SQL
+                        r#"
+                select exists(select 1 from user_profile where user_id = $1 for update) as "exists!"
+                    "#,
+                        id
+                    )
+                    .fetch_one(db)
+                    .await?
+                    .exists
+                    {
+                        return Err(error::Auth::ResourceNotFound(
+                            "user Id does not exist".to_string(),
+                        ));
+                    }
+
+                    Some(id)
+                }
+            };
+            user
+        } else {
+            None
+        };
+        id
+    };
+
+    Ok(id)
 }
 
 pub async fn browse_followers(

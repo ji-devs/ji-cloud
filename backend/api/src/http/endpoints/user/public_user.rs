@@ -13,7 +13,7 @@ use shared::{
             BrowsePublicUserFollowersResponse as BrowseFollowersResponse,
             BrowsePublicUserFollowingResponse as BrowseFollowingsResponse,
             BrowsePublicUserResourcesResponse as BrowseResourcesResponse, BrowsePublicUserResponse,
-            PublicUser,
+            PublicUser, SearchPublicUserResponse,
         },
     },
 };
@@ -22,9 +22,11 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::{
-    db, error,
+    db,
+    error::{self, ServiceKind},
     extractor::TokenUser,
     http::endpoints::course::{DEFAULT_PAGE_LIMIT, MAX_PAGE_LIMIT},
+    service::ServiceData,
 };
 
 /// Get a User
@@ -38,6 +40,45 @@ pub async fn get(
     let user: PublicUser = db::user::public_user::get(&db, user_id).await?;
 
     Ok(Json(user))
+}
+
+/// Search for public user profile.
+pub async fn search(
+    db: Data<PgPool>,
+    claims: Option<TokenUser>,
+    algolia: ServiceData<crate::algolia::Client>,
+    query: Option<Query<<user::Search as ApiEndpoint>::Req>>,
+) -> Result<Json<<user::Search as ApiEndpoint>::Res>, error::Service> {
+    let query = query.map_or_else(Default::default, Query::into_inner);
+
+    let page_limit = page_limit(query.page_limit)
+        .await
+        .map_err(|e| error::Service::InternalServerError(e))?;
+
+    let user_id = db::user::public_user::auth_claims(&db, claims, query.user_id).await?;
+
+    let (ids, pages, total_hits) = algolia
+        .search_public_user(
+            &query.q,
+            query.username,
+            query.name,
+            user_id,
+            query.language,
+            query.organization,
+            query.persona,
+            page_limit,
+            query.page,
+        )
+        .await?
+        .ok_or_else(|| error::Service::DisabledService(ServiceKind::Algolia))?;
+
+    let users: Vec<_> = db::user::public_user::get_by_ids(db.as_ref(), &ids).await?;
+
+    Ok(Json(SearchPublicUserResponse {
+        users,
+        pages,
+        total_user_count: total_hits,
+    }))
 }
 
 /// Browse Public User profiles

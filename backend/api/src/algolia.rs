@@ -15,6 +15,7 @@ use tracing::{instrument, Instrument};
 use shared::{
     domain::{
         asset::PrivacyLevel,
+        badge::BadgeId,
         category::CategoryId,
         course::CourseId,
         image::{ImageId, ImageKind},
@@ -111,6 +112,28 @@ struct BatchCourse<'a> {
 }
 
 #[derive(Serialize)]
+struct BatchBadge<'a> {
+    name: &'a str,
+    description: &'a str,
+    creator_id: &'a Uuid,
+    creator_name: &'a str,
+    thumbnail: &'a str,
+    member_count: &'a i64,
+}
+
+#[derive(Serialize)]
+struct BatchPublicUser<'a> {
+    username: &'a str,
+    name: &'a str,
+    bio: &'a str,
+    language: Option<String>,
+    organization: Option<String>,
+    location: Option<String>,
+    persona: &'a Option<Vec<String>>,
+    badges: &'a [Uuid],
+}
+
+#[derive(Serialize)]
 #[serde(tag = "media_kind")]
 #[serde(rename_all = "camelCase")]
 enum BatchMedia<'a> {
@@ -121,6 +144,8 @@ enum AlgoliaIndices {
     MediaIndex,
     JigIndex,
     CourseIndex,
+    BadgeIndex,
+    PublicUserIndex,
 }
 
 impl AlgoliaIndices {
@@ -129,11 +154,13 @@ impl AlgoliaIndices {
             Self::MediaIndex => migration::MEDIA_INDEX,
             Self::JigIndex => migration::JIG_INDEX,
             Self::CourseIndex => migration::COURSE_INDEX,
+            Self::BadgeIndex => migration::BADGE_INDEX,
+            Self::PublicUserIndex => migration::PUBLIC_USER_INDEX,
         }
     }
 }
 
-/// Manager for background task that reads updated jigs or media from the database, then
+/// Manager for background task that reads updated jigs, media, courses, badges, public_user from the database, then
 /// performs batch updates to the indices.
 #[derive(Clone)]
 pub struct Manager {
@@ -142,34 +169,50 @@ pub struct Manager {
     pub media_index: String,
     pub jig_index: String,
     pub course_index: String,
+    pub badge_index: String,
+    pub public_user_index: String,
 }
 
 impl Manager {
     pub fn new(settings: Option<AlgoliaSettings>, db: PgPool) -> anyhow::Result<Option<Self>> {
-        let (app_id, key, media_index, jig_index, course_index) = match settings {
-            Some(settings) => match (
-                settings.management_key,
-                settings.media_index,
-                settings.jig_index,
-                settings.course_index,
-            ) {
-                (Some(key), Some(media_index), Some(jig_index), Some(course_index)) => (
-                    settings.application_id,
-                    key,
-                    media_index,
-                    jig_index,
-                    course_index,
-                ),
-                _ => return Ok(None),
-            },
-            None => return Ok(None),
-        };
+        let (app_id, key, media_index, jig_index, course_index, badge_index, public_user_index) =
+            match settings {
+                Some(settings) => match (
+                    settings.management_key,
+                    settings.media_index,
+                    settings.jig_index,
+                    settings.course_index,
+                    settings.badge_index,
+                    settings.public_user_index,
+                ) {
+                    (
+                        Some(key),
+                        Some(media_index),
+                        Some(jig_index),
+                        Some(course_index),
+                        Some(badge_index),
+                        Some(public_user_index),
+                    ) => (
+                        settings.application_id,
+                        key,
+                        media_index,
+                        jig_index,
+                        course_index,
+                        badge_index,
+                        public_user_index,
+                    ),
+                    _ => return Ok(None),
+                },
+                None => return Ok(None),
+            };
 
         Ok(Some(Self {
             inner: Inner::new(AppId::new(app_id), ApiKey(key))?,
             media_index,
             jig_index,
             course_index,
+            badge_index,
+            public_user_index,
             db,
         }))
     }
@@ -177,7 +220,7 @@ impl Manager {
     pub async fn spawn_cron_jobs(&self) -> anyhow::Result<()> {
         log::info!("reached updates for spawning jobs");
 
-        for count in 0..3 {
+        for count in 0..5 {
             let res = match count {
                 0 => self
                     .update_images()
@@ -188,6 +231,14 @@ impl Manager {
                     .update_courses()
                     .await
                     .context("update courses task errored"),
+                3 => self
+                    .update_badges()
+                    .await
+                    .context("update badges task errored"),
+                4 => self
+                    .update_public_users()
+                    .await
+                    .context("update public users task errored"),
                 _ => continue,
             };
 
@@ -216,6 +267,8 @@ impl Manager {
             where (index_name = $1 and index_hash <> $2) 
             or (index_name = $3 and index_hash <> $4)
             or (index_name = $5 and index_hash <> $6)
+            or (index_name = $7 and index_hash <> $8)
+            or (index_name = $9 and index_hash <> $10)
             "#,
             AlgoliaIndices::MediaIndex.as_str(),
             migration::MEDIA_HASH.to_owned(),
@@ -223,6 +276,10 @@ impl Manager {
             migration::JIG_HASH.to_owned(),
             AlgoliaIndices::CourseIndex.as_str(),
             migration::COURSE_HASH.to_owned(),
+            AlgoliaIndices::BadgeIndex.as_str(),
+            migration::BADGE_HASH.to_owned(),
+            AlgoliaIndices::PublicUserIndex.as_str(),
+            migration::PUBLIC_USER_HASH.to_owned(),
         )
         .fetch_all(&mut txn)
         .await?
@@ -233,15 +290,28 @@ impl Manager {
         for i in index {
             match i.as_str() {
                 migration::MEDIA_INDEX => {
-                    migration::media_index(&mut txn, &self.inner, &self.media_index).await?
+                    continue;
+                    // migration::media_index(&mut txn, &self.inner, &self.media_index).await?
                 }
                 migration::JIG_INDEX => {
-                    migration::jig_index(&mut txn, &self.inner, &self.jig_index).await?
+                    continue;
+                    // migration::jig_index(&mut txn, &self.inner, &self.jig_index).await?
                 }
                 migration::COURSE_INDEX => {
-                    migration::course_index(&mut txn, &self.inner, &self.course_index).await?
+                    continue;
+                    // migration::course_index(&mut txn, &self.inner, &self.course_index).await?
                 }
-                _ => return Err(anyhow::anyhow!("Index has not been added")),
+                migration::BADGE_INDEX => {
+                    migration::badge_index(&mut txn, &self.inner, &self.badge_index).await?
+                }
+                migration::PUBLIC_USER_INDEX => {
+                    migration::public_user_index(&mut txn, &self.inner, &self.public_user_index)
+                        .await?
+                }
+                _ => {
+                    println!("index name: {}", i);
+                    return Err(anyhow::anyhow!("Index has not been added"));
+                }
             }
         }
 
@@ -276,6 +346,30 @@ impl Manager {
 
     async fn batch_courses(&self, batch: BatchWriteRequests) -> anyhow::Result<Vec<Uuid>> {
         let resp = self.inner.batch(&self.course_index, &batch).await?;
+
+        let ids: Result<Vec<_>, _> = resp
+            .object_ids
+            .into_iter()
+            .map(|id| Uuid::parse_str(&id))
+            .collect();
+
+        Ok(ids?)
+    }
+
+    async fn batch_badges(&self, batch: BatchWriteRequests) -> anyhow::Result<Vec<Uuid>> {
+        let resp = self.inner.batch(&self.badge_index, &batch).await?;
+
+        let ids: Result<Vec<_>, _> = resp
+            .object_ids
+            .into_iter()
+            .map(|id| Uuid::parse_str(&id))
+            .collect();
+
+        Ok(ids?)
+    }
+
+    async fn batch_public_users(&self, batch: BatchWriteRequests) -> anyhow::Result<Vec<Uuid>> {
+        let resp = self.inner.batch(&self.public_user_index, &batch).await?;
 
         let ids: Result<Vec<_>, _> = resp
             .object_ids
@@ -349,8 +443,9 @@ select jig.id,
 from jig
          inner join jig_data on live_id = jig_data.id
          inner join jig_admin_data "jad" on jad.jig_id = jig.id
-where (last_synced_at is null
-   or (updated_at is not null and last_synced_at < updated_at))
+where ((last_synced_at is null and published_at is not null)
+   or (updated_at is not null and last_synced_at < updated_at)
+    or (published_at < now() is true and last_synced_at < published_at))
 limit 100 for no key update skip locked;
      "#
         )
@@ -491,7 +586,7 @@ select id,
        is_premium
 from image_metadata
          join image_upload on id = image_id
-where (last_synced_at is null or
+where ((last_synced_at is null and publish_at is not null) or
        (updated_at is not null and last_synced_at < updated_at) or
        (publish_at < now() is true and last_synced_at < publish_at))
   and processed_at is not null
@@ -633,7 +728,7 @@ select course.id,
         published_at                                                                                                as "published_at"
 from course
          inner join course_data on live_id = course_data.id
-where last_synced_at is null
+where (last_synced_at is null and published_at is not null)
     or (updated_at is not null and last_synced_at < updated_at)
     or (published_at < now() is true and last_synced_at < published_at)
 limit 100 for no key update skip locked;
@@ -723,6 +818,151 @@ where course_data.id = any (select live_id from course where course.id = any ($1
         txn.commit().await?;
 
         log::info!("completed update course");
+
+        Ok(true)
+    }
+
+    async fn update_public_users(&self) -> anyhow::Result<bool> {
+        log::info!("reached update user profile");
+        let mut txn = self.db.begin().await?;
+
+        let requests: Vec<_> = sqlx::query!(
+            //language=SQL
+            r#"
+     select user_id                                  as "id!",
+            username                                 as "username!",
+            given_name || ' '::text || family_name   as "creator_name!",
+            bio                                      as "bio!",
+            (select language from user_profile where user_profile.user_id = "user".id and language_public is true)  as "language?", 
+            (select organization from user_profile where user_profile.user_id = "user".id and organization_public is true)  as "organization?", 
+            (select persona from user_profile where user_profile.user_id = "user".id and persona_public is true)      as "persona?: Vec<String>", 
+            (select location from user_profile where user_profile.user_id = "user".id and location_public is true)      as "location?: String", 
+            (select array(select badge.id 
+                from badge_member bm 
+                inner join badge on bm.id = badge.id 
+                where bm.user_id = "user".id
+            )) as "badges!"
+        from user_profile "up"
+        inner join "user" on "user".id = up.user_id
+where (last_synced_at is null or
+       (up.updated_at is not null and last_synced_at < up.updated_at))
+limit 100 for no key update skip locked;
+     "#
+        )
+        .fetch(&mut txn)
+        .map_ok(|row| {
+
+            algolia::request::BatchWriteRequest::UpdateObject {
+            body: match serde_json::to_value(&BatchPublicUser {
+                username: &row.username,
+                name: &row.creator_name,
+                bio : &row.bio,
+                language: row.language,
+                organization: row.organization,
+                persona: &row.persona,
+                location: row.location,
+                badges: &row.badges
+            })
+            .expect("failed to serialize BatchPublicUser to json")
+            {
+                serde_json::Value::Object(map) => map,
+                _ => panic!("failed to serialize BatchPublicUser to json map"),
+            },
+            object_id: row.id.to_string(),
+        }})
+        .try_collect()
+        .await?;
+
+        if requests.is_empty() {
+            return Ok(true);
+        }
+
+        log::debug!("Updating a batch of {} user profile(s)", requests.len());
+
+        let request = algolia::request::BatchWriteRequests { requests };
+        let ids = self.batch_public_users(request).await?;
+
+        log::debug!("Updated a batch of {} user profile(s)", ids.len());
+
+        sqlx::query!(
+            "update user_profile set last_synced_at = now() where user_id = any($1)",
+            &ids
+        )
+        .execute(&mut txn)
+        .await?;
+
+        txn.commit().await?;
+
+        log::info!("completed update user profiles");
+
+        Ok(true)
+    }
+
+    async fn update_badges(&self) -> anyhow::Result<bool> {
+        log::info!("reached update badges");
+        let mut txn = self.db.begin().await?;
+
+        let requests: Vec<_> = sqlx::query!(
+            //language=SQL
+            r#"
+     select id                     as "id!",
+            display_name           as "name!",
+            description            as "description!",
+            (select given_name || ' '::text || family_name
+            from user_profile
+            where user_profile.user_id = badge.creator_id)                                                       as "creator_name!",
+            creator_id             as "creator_id!",
+            thumbnail              as "thumbnail!",
+            member_count           as "member_count!"
+    from badge
+where (last_synced_at is null or
+       (updated_at is not null and last_synced_at < updated_at))
+limit 100 for no key update skip locked;
+     "#
+        )
+        .fetch(&mut txn)
+        .map_ok(|row| {
+
+            algolia::request::BatchWriteRequest::UpdateObject {
+            body: match serde_json::to_value(&BatchBadge {
+                name: &row.name,
+                description: &row.description,
+                creator_id: &row.creator_id,
+                creator_name: &row.creator_name,
+                thumbnail: &row.thumbnail,
+                member_count: &row.member_count,
+            })
+            .expect("failed to serialize BatchBadge to json")
+            {
+                serde_json::Value::Object(map) => map,
+                _ => panic!("failed to serialize BatchBadge to json map"),
+            },
+            object_id: row.id.to_string(),
+        }})
+        .try_collect()
+        .await?;
+
+        if requests.is_empty() {
+            return Ok(true);
+        }
+
+        log::debug!("Updating a batch of {} badge(s)", requests.len());
+
+        let request = algolia::request::BatchWriteRequests { requests };
+        let ids = self.batch_badges(request).await?;
+
+        log::debug!("Updated a batch of {} badge(s)", ids.len());
+
+        sqlx::query!(
+            "update badge set last_synced_at = now() where id = any($1)",
+            &ids
+        )
+        .execute(&mut txn)
+        .await?;
+
+        txn.commit().await?;
+
+        log::info!("completed update badges");
 
         Ok(true)
     }
@@ -887,6 +1127,8 @@ pub struct Client {
     media_index: String,
     jig_index: String,
     course_index: String,
+    badge_index: String,
+    public_user_index: String,
 }
 
 impl Client {
@@ -894,26 +1136,40 @@ impl Client {
         if let Some(settings) = settings {
             let app_id = algolia::AppId::new(settings.application_id);
 
-            let (inner, media_index, jig_index, course_index) = match (
-                settings.backend_search_key,
-                settings.media_index,
-                settings.jig_index,
-                settings.course_index,
-            ) {
-                (Some(key), Some(media_index), Some(jig_index), Some(course_index)) => (
-                    Inner::new(app_id, ApiKey(key))?,
-                    media_index,
-                    jig_index,
-                    course_index,
-                ),
-                _ => return Ok(None),
-            };
+            let (inner, media_index, jig_index, course_index, badge_index, public_user_index) =
+                match (
+                    settings.backend_search_key,
+                    settings.media_index,
+                    settings.jig_index,
+                    settings.course_index,
+                    settings.badge_index,
+                    settings.public_user_index,
+                ) {
+                    (
+                        Some(key),
+                        Some(media_index),
+                        Some(jig_index),
+                        Some(course_index),
+                        Some(badge_index),
+                        Some(public_user_index),
+                    ) => (
+                        Inner::new(app_id, ApiKey(key))?,
+                        media_index,
+                        jig_index,
+                        course_index,
+                        badge_index,
+                        public_user_index,
+                    ),
+                    _ => return Ok(None),
+                };
 
             Ok(Some(Self {
                 inner,
                 media_index,
                 jig_index,
                 course_index,
+                badge_index,
+                public_user_index,
             }))
         } else {
             Ok(None)
@@ -1295,6 +1551,206 @@ impl Client {
     pub async fn try_delete_course(&self, CourseId(id): CourseId) -> anyhow::Result<()> {
         self.inner
             .delete_object(&self.course_index, &id.to_string())
+            .await?;
+
+        Ok(())
+    }
+
+    #[instrument(skip_all)]
+    pub async fn search_badge(
+        &self,
+        query: &str,
+        creator_id: Option<Uuid>,
+        creator_name: Option<String>,
+        page_limit: u32,
+        page: Option<u32>,
+    ) -> anyhow::Result<Option<(Vec<Uuid>, u32, u64)>> {
+        let mut and_filters = algolia::filter::AndFilter { filters: vec![] };
+
+        if let Some(creator_id) = creator_id {
+            and_filters.filters.push(Box::new(CommonFilter {
+                filter: FacetFilter {
+                    facet_name: "creator_id".to_owned(),
+                    value: creator_id.to_string(),
+                },
+                invert: false,
+            }))
+        }
+
+        if let Some(creator_name) = creator_name {
+            and_filters.filters.push(Box::new(CommonFilter {
+                filter: FacetFilter {
+                    facet_name: "creator_name".to_owned(),
+                    value: creator_name,
+                },
+                invert: false,
+            }))
+        }
+
+        let results: SearchResponse = self
+            .inner
+            .search(
+                &self.badge_index,
+                SearchQuery::<'_, String, AndFilter> {
+                    query: Some(query),
+                    page,
+                    get_ranking_info: true,
+                    filters: Some(and_filters),
+                    optional_filters: None,
+                    hits_per_page: Some(page_limit as u16),
+                    sum_or_filters_scores: false,
+                },
+            )
+            .instrument(tracing::info_span!("perform algolia search"))
+            .await?;
+
+        let pages = results.page_count.try_into()?;
+        let total_hits = results.hit_count as u64;
+
+        let results = results
+            .hits
+            .into_iter()
+            .map(|hit| hit.object_id.parse())
+            .collect::<Result<Vec<_>, _>>()?;
+
+        Ok(Some((results, pages, total_hits)))
+    }
+
+    pub async fn delete_badge(&self, id: BadgeId) {
+        if let Err(e) = self.try_delete_badge(id).await {
+            log::warn!(
+                "failed to delete badge with id {} from algolia: {}",
+                id.0.to_hyphenated(),
+                e
+            );
+        }
+    }
+
+    pub async fn try_delete_badge(&self, BadgeId(id): BadgeId) -> anyhow::Result<()> {
+        self.inner
+            .delete_object(&self.badge_index, &id.to_string())
+            .await?;
+
+        Ok(())
+    }
+
+    #[instrument(skip_all)]
+    pub async fn search_public_user(
+        &self,
+        query: &str,
+        username: Option<String>,
+        name: Option<String>,
+        user_id: Option<Uuid>,
+        language: Option<String>,
+        organization: Option<String>,
+        persona: Option<Vec<String>>,
+        page_limit: u32,
+        page: Option<u32>,
+    ) -> anyhow::Result<Option<(Vec<Uuid>, u32, u64)>> {
+        let mut and_filters = algolia::filter::AndFilter { filters: vec![] };
+
+        if let Some(user_id) = user_id {
+            and_filters.filters.push(Box::new(CommonFilter {
+                filter: FacetFilter {
+                    facet_name: "user_id".to_owned(),
+                    value: user_id.to_string(),
+                },
+                invert: false,
+            }))
+        }
+
+        if let Some(name) = name {
+            and_filters.filters.push(Box::new(CommonFilter {
+                filter: FacetFilter {
+                    facet_name: "name".to_owned(),
+                    value: name.to_string(),
+                },
+                invert: false,
+            }))
+        }
+
+        if let Some(username) = username {
+            and_filters.filters.push(Box::new(CommonFilter {
+                filter: FacetFilter {
+                    facet_name: "username".to_owned(),
+                    value: username,
+                },
+                invert: false,
+            }))
+        }
+
+        if let Some(organization) = organization {
+            and_filters.filters.push(Box::new(CommonFilter {
+                filter: FacetFilter {
+                    facet_name: "organization".to_owned(),
+                    value: organization,
+                },
+                invert: false,
+            }))
+        }
+
+        if let Some(language) = language {
+            and_filters.filters.push(Box::new(CommonFilter {
+                filter: FacetFilter {
+                    facet_name: "language".to_owned(),
+                    value: language,
+                },
+                invert: false,
+            }))
+        }
+
+        if let Some(persona) = persona {
+            and_filters.filters.push(Box::new(CommonFilter {
+                filter: FacetFilter {
+                    facet_name: "persona".to_owned(),
+                    value: persona.into_iter().map(|x| x).collect(),
+                },
+                invert: false,
+            }))
+        }
+
+        let results: SearchResponse = self
+            .inner
+            .search(
+                &self.public_user_index,
+                SearchQuery::<'_, String, AndFilter> {
+                    query: Some(query),
+                    page,
+                    get_ranking_info: true,
+                    filters: Some(and_filters),
+                    optional_filters: None,
+                    hits_per_page: Some(page_limit as u16),
+                    sum_or_filters_scores: false,
+                },
+            )
+            .instrument(tracing::info_span!("perform algolia search"))
+            .await?;
+
+        let pages = results.page_count.try_into()?;
+        let total_hits = results.hit_count as u64;
+
+        let results = results
+            .hits
+            .into_iter()
+            .map(|hit| hit.object_id.parse())
+            .collect::<Result<Vec<_>, _>>()?;
+
+        Ok(Some((results, pages, total_hits)))
+    }
+
+    pub async fn delete_public_user(&self, id: Uuid) {
+        if let Err(e) = self.try_delete_public_user(id).await {
+            log::warn!(
+                "failed to delete public user with id {} from algolia: {}",
+                id.to_hyphenated(),
+                e
+            );
+        }
+    }
+
+    pub async fn try_delete_public_user(&self, id: Uuid) -> anyhow::Result<()> {
+        self.inner
+            .delete_object(&self.public_user_index, &id.to_string())
             .await?;
 
         Ok(())
