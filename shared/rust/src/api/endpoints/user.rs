@@ -31,7 +31,7 @@ pub use profile::{Create as CreateProfile, Get as Profile, Patch as PatchProfile
 pub use public_user::{
     BrowseFollowers, BrowseFollowing, BrowsePublicUser, BrowseUserCourses as BrowseCourses,
     BrowseUserJigs, BrowseUserResources as BrowseResources, Follow, Get as GetPublicUser,
-    SearchPublicUser, Unfollow,
+    SearchPublicUser as Search, Unfollow,
 };
 
 /// Create a new user.

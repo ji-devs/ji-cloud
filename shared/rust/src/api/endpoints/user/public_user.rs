@@ -8,7 +8,8 @@ use crate::{
             BrowsePublicUserFollowersResponse, BrowsePublicUserFollowingResponse,
             BrowsePublicUserFollowingsQuery, BrowsePublicUserJigsQuery,
             BrowsePublicUserResourcesQuery, BrowsePublicUserResourcesResponse,
-            BrowsePublicUserResponse, PublicUser, UserBrowseQuery,
+            BrowsePublicUserResponse, PublicUser, SearchPublicUserQuery, SearchPublicUserResponse,
+            UserBrowseQuery,
         },
     },
     error::EmptyError,
@@ -37,8 +38,8 @@ impl ApiEndpoint for BrowsePublicUser {
 /// Search user profile
 pub struct SearchPublicUser;
 impl ApiEndpoint for SearchPublicUser {
-    type Req = ();
-    type Res = BrowsePublicUserResponse;
+    type Req = SearchPublicUserQuery;
+    type Res = SearchPublicUserResponse;
     type Err = EmptyError;
     const PATH: &'static str = "/v1/user/public";
     const METHOD: Method = Method::Get;

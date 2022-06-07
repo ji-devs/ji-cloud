@@ -3,7 +3,9 @@
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::domain::{additional_resource::AdditionalResource, badge::BadgeId, image::ImageId};
+use crate::domain::{
+    additional_resource::AdditionalResource, asset::UserOrMe, badge::BadgeId, image::ImageId,
+};
 
 /// A lite profile for other Users to view
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -61,6 +63,68 @@ pub struct UserBrowseQuery {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct BrowsePublicUserResponse {
+    /// User Id
+    pub users: Vec<PublicUser>,
+    /// Pages
+    pub pages: u32,
+    /// number of users
+    pub total_user_count: u64,
+}
+
+/// Query for [`Browse`](crate::api::endpoints::user::Search).
+#[derive(Serialize, Deserialize, Clone, Debug, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct SearchPublicUserQuery {
+    /// The query string.
+    #[serde(default)]
+    #[serde(skip_serializing_if = "String::is_empty")]
+    pub q: String,
+
+    /// The page number of the Badges to get.
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub page: Option<u32>,
+
+    /// Optionally filter by user's id
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<UserOrMe>,
+
+    /// Optionally filter by the user's username
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub username: Option<String>,
+
+    /// Optionally filter by the user's name
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+
+    /// Optionally filter by the user's language
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub language: Option<String>,
+
+    /// Optionally filter by the user's organization
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub organization: Option<String>,
+
+    /// Optionally filter by the user's persona(s)
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub persona: Option<Vec<String>>,
+
+    /// The hits per page to be returned
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub page_limit: Option<u32>,
+}
+
+/// A lite profile for other Users to view
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct SearchPublicUserResponse {
     /// User Id
     pub users: Vec<PublicUser>,
     /// Pages

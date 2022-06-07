@@ -16,8 +16,8 @@ use shared::{
             BrowseCourses, BrowseFollowers, BrowseFollowing, BrowsePublicUser, BrowseResources,
             BrowseUserJigs, ChangePassword, Create, CreateColor, CreateFont, CreateProfile, Delete,
             DeleteColor, DeleteFont, Follow, GetColors, GetFonts, GetPublicUser, PatchProfile,
-            Profile, ResetEmail, ResetPassword, Unfollow, UpdateColor, UpdateFont, UserLookup,
-            VerifyEmail, VerifyResetEmail,
+            Profile, ResetEmail, ResetPassword, Search, Unfollow, UpdateColor, UpdateFont,
+            UserLookup, VerifyEmail, VerifyResetEmail,
         },
         ApiEndpoint,
     },
@@ -838,6 +838,7 @@ async fn get_profile(
 async fn delete(
     db: Data<PgPool>,
     session: TokenSessionOf<SessionDelete>,
+    algolia: ServiceData<crate::algolia::Client>,
 ) -> Result<NoContentClearAuth, error::Server> {
     sqlx::query!(
         r#"delete from "user" where id = $1"#,
@@ -845,6 +846,8 @@ async fn delete(
     )
     .execute(db.as_ref())
     .await?;
+
+    algolia.delete_public_user(session.claims.user_id).await;
 
     Ok(NoContentClearAuth)
 }
@@ -1048,6 +1051,7 @@ pub fn configure(cfg: &mut ServiceConfig) {
             GetPublicUser::PATH,
             GetPublicUser::METHOD.route().to(public_user::get),
         )
+        .route(Search::PATH, Search::METHOD.route().to(public_user::search))
         .route(
             BrowsePublicUser::PATH,
             BrowsePublicUser::METHOD.route().to(public_user::browse),

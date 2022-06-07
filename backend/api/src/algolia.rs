@@ -1637,6 +1637,7 @@ impl Client {
         query: &str,
         username: Option<String>,
         name: Option<String>,
+        user_id: Option<Uuid>,
         language: Option<String>,
         organization: Option<String>,
         persona: Option<Vec<String>>,
@@ -1644,6 +1645,16 @@ impl Client {
         page: Option<u32>,
     ) -> anyhow::Result<Option<(Vec<Uuid>, u32, u64)>> {
         let mut and_filters = algolia::filter::AndFilter { filters: vec![] };
+
+        if let Some(user_id) = user_id {
+            and_filters.filters.push(Box::new(CommonFilter {
+                filter: FacetFilter {
+                    facet_name: "user_id".to_owned(),
+                    value: user_id.to_string(),
+                },
+                invert: false,
+            }))
+        }
 
         if let Some(name) = name {
             and_filters.filters.push(Box::new(CommonFilter {

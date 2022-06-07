@@ -76,7 +76,7 @@ async fn delete(
     db: Data<PgPool>,
     claims: TokenUser,
     path: Path<BadgeId>,
-    // algolia: ServiceData<crate::algolia::Client>,
+    algolia: ServiceData<crate::algolia::Client>,
 ) -> Result<HttpResponse, error::Delete> {
     let id = path.into_inner();
 
@@ -84,7 +84,7 @@ async fn delete(
 
     db::badge::delete(&*db, id).await?;
 
-    // algolia.delete_jig(id).await;
+    algolia.delete_badge(id).await;
 
     Ok(HttpResponse::NoContent().finish())
 }
