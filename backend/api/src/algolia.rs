@@ -129,7 +129,7 @@ struct BatchPublicUser<'a> {
     language: Option<String>,
     organization: Option<String>,
     location: Option<String>,
-    persona: Option<&'a [String]>,
+    persona: &'a Option<Vec<String>>,
     badges: &'a [Uuid],
 }
 
@@ -290,13 +290,16 @@ impl Manager {
         for i in index {
             match i.as_str() {
                 migration::MEDIA_INDEX => {
-                    migration::media_index(&mut txn, &self.inner, &self.media_index).await?
+                    continue;
+                    // migration::media_index(&mut txn, &self.inner, &self.media_index).await?
                 }
                 migration::JIG_INDEX => {
-                    migration::jig_index(&mut txn, &self.inner, &self.jig_index).await?
+                    continue;
+                    // migration::jig_index(&mut txn, &self.inner, &self.jig_index).await?
                 }
                 migration::COURSE_INDEX => {
-                    migration::course_index(&mut txn, &self.inner, &self.course_index).await?
+                    continue;
+                    // migration::course_index(&mut txn, &self.inner, &self.course_index).await?
                 }
                 migration::BADGE_INDEX => {
                     migration::badge_index(&mut txn, &self.inner, &self.badge_index).await?
@@ -832,7 +835,7 @@ where course_data.id = any (select live_id from course where course.id = any ($1
             bio                                      as "bio!",
             (select language from user_profile where user_profile.user_id = "user".id and language_public is true)  as "language?", 
             (select organization from user_profile where user_profile.user_id = "user".id and organization_public is true)  as "organization?", 
-            (select array(select persona from user_profile where user_profile.user_id = "user".id and persona_public is true))      as "persona?", 
+            (select persona from user_profile where user_profile.user_id = "user".id and persona_public is true)      as "persona?: Vec<String>", 
             (select location from user_profile where user_profile.user_id = "user".id and location_public is true)      as "location?: String", 
             (select array(select badge.id 
                 from badge_member bm 
@@ -856,7 +859,7 @@ limit 100 for no key update skip locked;
                 bio : &row.bio,
                 language: row.language,
                 organization: row.organization,
-                persona: row.persona.as_deref(),
+                persona: &row.persona,
                 location: row.location,
                 badges: &row.badges
             })
