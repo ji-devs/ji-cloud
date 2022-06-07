@@ -66,11 +66,11 @@ pub fn assign_kind(state: Rc<SpotState>, kind: ModuleKind) {
                 let id = resp.id;
                 let index = state.index;
 
-                let module = SidebarSpot::new_jig_module(LiteModule {
+                let module = SidebarSpot::new_jig_module(Some(LiteModule {
                     id,
                     kind,
                     is_complete: false,
-                });
+                }));
 
                 {
                     // Instead of replacing the module at the index, we remove the old module and

@@ -11,9 +11,9 @@ use shared::domain::{
     asset::Asset,
     course::CourseResponse,
     jig::{JigId, JigResponse},
-    module::LiteModule,
+    module::{LiteModule, ModuleKind},
 };
-use std::rc::Rc;
+use std::{rc::Rc, vec};
 use utils::math::PointI32;
 
 use chrono::{DateTime, Utc};
@@ -83,11 +83,27 @@ impl State {
     }
 
     fn get_jig_spots(jig: &JigResponse) -> Vec<Rc<SidebarSpot>> {
-        jig.jig_data
+        let mut add_cover = false;
+
+        if !matches!(
+            jig.jig_data.modules.get(0),
+            Some(cover) if cover.kind == ModuleKind::Cover
+        ) {
+            // not cover exists
+            add_cover = true;
+        };
+        
+        let mut modules: Vec<Rc<SidebarSpot>> = jig.jig_data
             .modules
             .iter()
-            .map(|module| SidebarSpot::new_jig_module(module.clone()))
-            .collect()
+            .map(|module| SidebarSpot::new_jig_module(Some(module.clone())))
+            .collect();
+
+        if add_cover {
+            modules.push(SidebarSpot::new_jig_module(None));
+        };
+
+        modules
     }
 
     fn get_course_spots(course: &CourseResponse) -> Vec<Rc<SidebarSpot>> {
@@ -159,13 +175,16 @@ impl SidebarSpot {
             is_incomplete: Mutable::new(false),
         }
     }
-}
 
-impl SidebarSpot {
-    pub fn new_jig_module(module: LiteModule) -> Rc<Self> {
+    pub fn new_jig_module(module: Option<LiteModule>) -> Rc<Self> {
         Rc::new(Self {
-            is_incomplete: Mutable::new(!module.is_complete),
-            item: SidebarSpotItem::Jig(Some(Rc::new(module))),
+            is_incomplete: Mutable::new(match &module {
+                Some(module) => !module.is_complete,
+                None => false,
+            }),
+            item: SidebarSpotItem::Jig(module.map(|module| {
+                Rc::new(module)
+            })),
         })
     }
 

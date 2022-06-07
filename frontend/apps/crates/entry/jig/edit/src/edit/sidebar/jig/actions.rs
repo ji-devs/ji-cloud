@@ -156,7 +156,7 @@ fn populate_added_module(state: Rc<State>, module: LiteModule) {
     state
         .modules
         .lock_mut()
-        .insert_cloned(insert_at_idx, SidebarSpot::new_jig_module(module));
+        .insert_cloned(insert_at_idx, SidebarSpot::new_jig_module(Some(module)));
 
     state
         .jig_edit_state
