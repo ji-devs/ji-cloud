@@ -7,7 +7,7 @@ use shared::{
     api::{endpoints::badge, ApiEndpoint},
     domain::{
         asset::UserOrMe,
-        badge::{BadgeBrowseResponse, BadgeId, BrowseMembersResponse},
+        badge::{BadgeBrowseResponse, BadgeId, BadgeSearchResponse, BrowseMembersResponse},
         CreateResponse,
     },
 };
@@ -16,9 +16,10 @@ use uuid::Uuid;
 
 use crate::{
     db::{self},
-    error::{self},
+    error::{self, ServiceKind},
     extractor::TokenUser,
     http::endpoints::jig::page_limit,
+    service::ServiceData,
 };
 
 /// Create an Badge.
@@ -133,6 +134,41 @@ async fn leave(
         .map_err(|e| error::NotFound::InternalServerError(e))?;
 
     Ok(HttpResponse::NoContent().finish())
+}
+
+/// Search for Badges.
+async fn search(
+    db: Data<PgPool>,
+    claims: Option<TokenUser>,
+    algolia: ServiceData<crate::algolia::Client>,
+    query: Option<Query<<badge::Search as ApiEndpoint>::Req>>,
+) -> Result<Json<<badge::Search as ApiEndpoint>::Res>, error::Service> {
+    let query = query.map_or_else(Default::default, Query::into_inner);
+
+    let page_limit = page_limit(query.page_limit)
+        .await
+        .map_err(|e| error::Service::InternalServerError(e))?;
+
+    let creator_id = auth_claims(&db, claims, query.creator_id).await?;
+
+    let (ids, pages, total_hits) = algolia
+        .search_badge(
+            &query.q,
+            creator_id,
+            query.creator_name,
+            page_limit,
+            query.page,
+        )
+        .await?
+        .ok_or_else(|| error::Service::DisabledService(ServiceKind::Algolia))?;
+
+    let badges: Vec<_> = db::badge::get_by_ids(db.as_ref(), &ids).await?;
+
+    Ok(Json(BadgeSearchResponse {
+        badges,
+        pages,
+        total_badge_count: total_hits,
+    }))
 }
 
 async fn browse(
@@ -266,6 +302,10 @@ pub fn configure(cfg: &mut ServiceConfig) {
     .route(
         badge::Browse::PATH,
         badge::Browse::METHOD.route().to(browse),
+    )
+    .route(
+        badge::Search::PATH,
+        badge::Search::METHOD.route().to(search),
     )
     .route(
         badge::BrowseMembers::PATH,

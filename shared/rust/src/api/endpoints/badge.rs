@@ -3,7 +3,7 @@ use crate::{
     domain::{
         badge::{
             Badge, BadgeBrowseQuery, BadgeBrowseResponse, BadgeCreateRequest, BadgeId,
-            BadgeUpdateRequest, BrowseMembersResponse,
+            BadgeSearchQuery, BadgeSearchResponse, BadgeUpdateRequest, BrowseMembersResponse,
         },
         CreateResponse,
     },
@@ -12,18 +12,8 @@ use crate::{
 
 use super::ApiEndpoint;
 
-/// Create a Badge and it's draft and live data copies.
-///
-/// * New Courses are all set to `PrivacyLevel::Unlisted` by default
-///
-/// # Flow:
-/// 1. Create a Badge and its two data copies with [`Create`]
-/// 2. Optionally update Badge info such as privacy, author with [`Update`]
-/// 3. Make updates to draft data:
-///     a. Patch Badge data through [`UpdateDraftData`]
+/// Create a Badge.
 
-/// 4. Finalize draft changes by calling [`Publish`]
-///
 /// # Authorization
 /// * One of `Admin`, `AdminJig`, or `ManageSelfJig`
 pub struct Create;
@@ -35,14 +25,7 @@ impl ApiEndpoint for Create {
     const METHOD: Method = Method::Post;
 }
 
-/// Update the draft data of a Badge.
-///
-/// Note that a copy of the Badge's draft or live data can not be fetched directly, but only as a part
-/// of one of the following routes:
-/// * [`GetLive`] fetches live copies
-/// * [`Search`]
-///
-/// See [`Badge Data`](crate::domain::course::CourseData) for the over-the-wire representation.
+/// Update the Badge.
 ///
 /// # Authorization
 /// * One of `Admin`, `AdminJig`, or `ManageSelfJig` for owned Courses
@@ -65,18 +48,18 @@ impl ApiEndpoint for Browse {
     const METHOD: Method = Method::Get;
 }
 
-// /// Search for Courses.
-// ///
-// /// # Authorization
-// /// * None
-// pub struct Search;
-// impl ApiEndpoint for Search {
-//     type Req = BadgeSearchQuery;
-//     type Res = BadgeSearchResponse;
-//     type Err = EmptyError;
-//     const PATH: &'static str = "/v1/badge";
-//     const METHOD: Method = Method::Get;
-// }
+/// Search for Badges.
+///
+/// # Authorization
+/// * None
+pub struct Search;
+impl ApiEndpoint for Search {
+    type Req = BadgeSearchQuery;
+    type Res = BadgeSearchResponse;
+    type Err = EmptyError;
+    const PATH: &'static str = "/v1/badge";
+    const METHOD: Method = Method::Get;
+}
 
 /// Delete a Badge.
 ///
@@ -91,7 +74,7 @@ impl ApiEndpoint for Delete {
     const METHOD: Method = Method::Delete;
 }
 
-/// Get a Badge's draft data by ID.
+/// Get a Badge's by ID.
 ///
 /// # Authorization
 /// * One of `Admin`, `AdminJig`,, or `ManageSelfJig` for owned Badges
