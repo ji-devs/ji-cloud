@@ -35,17 +35,17 @@ pub async fn call_screenshot_service(
     asset_id: AssetId,
     module_id: ModuleId,
     kind: ModuleKind,
-    draft_of_live: DraftOrLive,
+    draft_or_live: DraftOrLive,
 ) {
     let screenshot_url = SETTINGS.get().unwrap_ji().remote_target.screenshot_url();
 
     let url = format!(
-        "{}?jig={}&module={}&kind={}&draft_of_live{}",
+        "{}?jig={}&module={}&kind={}&draft_or_live={}",
         screenshot_url,
         asset_id.uuid(),
         module_id.0,
         kind.as_str(),
-        draft_of_live.as_str(),
+        draft_or_live.as_str(),
     );
 
     match fetch_url(&url).await {
