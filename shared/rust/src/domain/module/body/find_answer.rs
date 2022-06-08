@@ -12,7 +12,7 @@ use std::convert::TryFrom;
 mod play_settings;
 pub use play_settings::*;
 
-use super::Audio;
+use super::{Audio, Transform};
 
 /// The body for [`FindAnswer`](crate::domain::module::ModuleKind::FindAnswer) modules.
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]
@@ -117,8 +117,30 @@ pub struct Content {
     /// Questions
     pub questions: Vec<Question>,
 
+    /// Sticker index of the related question sticker
+    pub question_field: QuestionField,
+
     /// play settings
     pub play_settings: PlaySettings,
+}
+
+/// The type of field to be used for displaying question text.
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub enum QuestionField {
+    /// Index of the text sticker to be used as the question field.
+    Text(usize),
+    /// When the teacher hasn't added or selected a text sticker, a dynamic label will be added to
+    /// display the question. The teacher can move this around.
+    ///
+    /// Note (Ty): We won't make use of the scale field right now, but at some point we should add
+    /// the ability to scale the label text
+    Dynamic(Transform),
+}
+
+impl Default for QuestionField {
+    fn default() -> Self {
+        QuestionField::Dynamic(Transform::default())
+    }
 }
 
 /// Represents a single question
