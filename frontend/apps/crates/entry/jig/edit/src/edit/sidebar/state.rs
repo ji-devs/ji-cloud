@@ -92,8 +92,9 @@ impl State {
             // not cover exists
             add_cover = true;
         };
-        
-        let mut modules: Vec<Rc<SidebarSpot>> = jig.jig_data
+
+        let mut modules: Vec<Rc<SidebarSpot>> = jig
+            .jig_data
             .modules
             .iter()
             .map(|module| SidebarSpot::new_jig_module(Some(module.clone())))
@@ -182,9 +183,7 @@ impl SidebarSpot {
                 Some(module) => !module.is_complete,
                 None => false,
             }),
-            item: SidebarSpotItem::Jig(module.map(|module| {
-                Rc::new(module)
-            })),
+            item: SidebarSpotItem::Jig(module.map(|module| Rc::new(module))),
         })
     }
 
