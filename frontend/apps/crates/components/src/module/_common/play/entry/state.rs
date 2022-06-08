@@ -79,7 +79,7 @@ where
             }
         };
 
-        let mut draft_or_live: DraftOrLive = utils::routes::get_param("draft_or_life")
+        let mut draft_or_live: DraftOrLive = utils::routes::get_param("draft_or_live")
             .map(|dl| DraftOrLive::from_str(&dl).unwrap_ji())
             .unwrap_or(DraftOrLive::Live);
 
