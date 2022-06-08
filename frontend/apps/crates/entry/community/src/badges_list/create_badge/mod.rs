@@ -1,5 +1,4 @@
 mod actions;
-mod create_badge;
 mod dom;
 mod state;
 

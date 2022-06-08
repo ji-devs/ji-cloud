@@ -13,9 +13,9 @@ dependencies = [
 
 [[package]]
 name = "anyhow"
-version = "1.0.48"
+version = "1.0.57"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "62e1f47f7dc0422027a4e370dd4548d4d66b26782e513e98dca1e689e058a80e"
+checksum = "08f9b8508dccb7687a1d6c4ce66b2b0ecef467c94667de27d8d7fe1f8d2a9cdc"
 
 [[package]]
 name = "app-admin"
@@ -131,6 +131,7 @@ dependencies = [
 name = "app-community"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "awsm_web 0.32.0",
  "cfg-if 1.0.0",
  "components",
@@ -149,6 +150,7 @@ dependencies = [
  "serde-wasm-bindgen",
  "serde_json",
  "shared",
+ "url",
  "utils",
  "uuid",
  "wasm-bindgen",

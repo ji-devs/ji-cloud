@@ -49,6 +49,7 @@ export class _ extends LitElement {
                 <slot name="sort-header"></slot>
                 <slot name="items"></slot>
             </div>
+            <slot name="popup"></slot>
         `;
     }
 }
