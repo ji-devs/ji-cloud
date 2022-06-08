@@ -7,7 +7,7 @@ use crate::{
         },
         CreateResponse,
     },
-    error::{EmptyError, MetadataNotFound},
+    error::EmptyError,
 };
 
 use super::ApiEndpoint;
@@ -20,7 +20,7 @@ pub struct Create;
 impl ApiEndpoint for Create {
     type Req = BadgeCreateRequest;
     type Res = CreateResponse<BadgeId>;
-    type Err = MetadataNotFound;
+    type Err = EmptyError;
     const PATH: &'static str = "/v1/badge";
     const METHOD: Method = Method::Post;
 }
@@ -33,7 +33,7 @@ pub struct Update;
 impl ApiEndpoint for Update {
     type Req = BadgeUpdateRequest;
     type Res = ();
-    type Err = MetadataNotFound;
+    type Err = EmptyError;
     const PATH: &'static str = "/v1/badge/{id}";
     const METHOD: Method = Method::Patch;
 }
