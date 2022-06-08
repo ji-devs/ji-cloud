@@ -62,7 +62,7 @@ function queueScreenshot(location, project, baseUrl, endpoint, finalUrl) {
     const { respondError, respondJson } = makeResponders(res);
 
     return parseQuery(req.query)
-      .then(({ jig, module, kind }) => {
+      .then(({ jig, module, kind, draftOrLive }) => {
         if (_tasksClient == undefined) {
           _tasksClient = new CloudTasksClient();
         }
@@ -72,7 +72,7 @@ function queueScreenshot(location, project, baseUrl, endpoint, finalUrl) {
         const QUEUE = "screenshot";
         const parent = client.queuePath(project, location, QUEUE);
 
-        const url = `${baseUrl}/${endpoint}?jig=${jig}&module=${module}&kind=${kind}`;
+        const url = `${baseUrl}/${endpoint}?jig=${jig}&module=${module}&kind=${kind}&draft_or_live=${draftOrLive}`;
 
         const task = {
           httpRequest: {
@@ -128,7 +128,7 @@ function makeSaveScreenshot(baseUrl, bucketName, finalUrl) {
     getScreenshotUrl(req, baseUrl)
       .then((url) => doScreenshot(url))
       .then(({ fullBuffer, thumbBuffer }) => {
-        return parseQuery(req.query).then(({ jig, module, kind }) => {
+        return parseQuery(req.query).then(({ jig, module, kind, draftOrLive }) => {
           const bucket = new Storage().bucket(bucketName);
           const fullFile = bucket.file(`screenshot/${jig}/${module}/full.jpg`);
           const thumbFile = bucket.file(
@@ -312,19 +312,19 @@ function gmToBuffer(data) {
 }
 
 function getScreenshotUrl(req, baseUrl) {
-  return parseQuery(req.query).then(({ jig, module, kind }) => {
-    return `${baseUrl}/module/${kind}/play/${jig}/${module}?screenshot=true`;
+  return parseQuery(req.query).then(({ jig, module, kind, draftOrLive }) => {
+    return `${baseUrl}/module/${kind}/play/${jig}/${module}?screenshot=true&draft_or_live=${draftOrLive}`;
   });
 }
 function parseQuery(query) {
   return new Promise((resolve, reject) => {
-    const { jig, module, kind } = query;
-    if (!jig || !module || !kind || jig == "" || module == "" || kind == "") {
+    const { jig, module, kind, draft_or_live } = query;
+    if (!jig || !module || !kind || !draft_or_live || jig == "" || module == "" || kind == "" || draft_or_live == "") {
       reject("not enough data!");
     } else if (!validateUuid(jig) || !validateUuid(module)) {
       reject("invalid uuid");
     } else {
-      resolve({ jig, module, kind });
+      resolve({ jig, module, kind, draftOrLive: draft_or_live });
     }
   });
 }

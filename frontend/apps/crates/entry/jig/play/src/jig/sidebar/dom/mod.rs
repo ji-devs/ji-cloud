@@ -94,6 +94,7 @@ pub fn render(state: Rc<State>) -> Dom {
                                         asset_id: state.player_state.jig_id.into(),
                                         module: Some(module.clone()),
                                         fallback: ThumbnailFallback::Module,
+                                        draft_or_live: state.player_state.player_options.draft_or_live
                                     }),
                                     Some("window")
                                 ))

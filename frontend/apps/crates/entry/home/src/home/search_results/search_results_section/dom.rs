@@ -8,6 +8,7 @@ use futures_signals::{
     signal_vec::SignalVecExt,
 };
 use shared::domain::{
+    asset::DraftOrLive,
     jig::{JigFocus, JigResponse},
     meta::ResourceTypeId,
 };
@@ -96,6 +97,7 @@ impl SearchResultsSection {
                     asset_id: jig.id.into(),
                     module: jig.jig_data.modules.first().cloned(),
                     fallback: ThumbnailFallback::Asset,
+                    draft_or_live: DraftOrLive::Live
                 }),
                 Some("image")
             ))

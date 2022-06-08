@@ -4,7 +4,7 @@ use futures_signals::{
     signal::{Mutable, SignalExt},
     signal_vec::SignalVecExt,
 };
-use shared::domain::asset::PrivacyLevel;
+use shared::domain::asset::{DraftOrLive, PrivacyLevel};
 use utils::{
     events,
     routes::{AssetEditRoute, AssetRoute, CourseEditRoute, JigEditRoute, Route},
@@ -90,6 +90,7 @@ fn render_page(state: Rc<Publish>) -> Dom {
                     asset_id: state.asset.id(),
                     module: state.asset.cover().clone(),
                     fallback: ThumbnailFallback::Asset,
+                    draft_or_live: DraftOrLive::Draft,
                 }),
                 Some("img")
             ),

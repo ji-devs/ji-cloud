@@ -8,7 +8,10 @@ use futures_signals::{
     signal::{Signal, SignalExt},
     signal_vec::SignalVecExt,
 };
-use shared::domain::meta::{AffiliationId, AgeRangeId};
+use shared::domain::{
+    asset::DraftOrLive,
+    meta::{AffiliationId, AgeRangeId},
+};
 use std::rc::Rc;
 use utils::{events, languages::Language, routes::AdminCurationRoute};
 use web_sys::HtmlSelectElement;
@@ -95,6 +98,7 @@ impl CurationTable {
                                         asset_id: jig.id.into(),
                                         module: Some(module.clone()),
                                         fallback: ThumbnailFallback::Asset,
+                                        draft_or_live: DraftOrLive::Live,
                                     }),
                                     None
                                 )

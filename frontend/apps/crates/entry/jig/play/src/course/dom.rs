@@ -48,7 +48,8 @@ impl CoursePlayer {
                 ModuleThumbnail::new(
                     course.id.into(),
                     course.course_data.cover.clone(),
-                    ThumbnailFallback::Asset
+                    ThumbnailFallback::Asset,
+                    state.draft_or_live,
                 ).render(Some("thumbnail"))
             )
             .children_signal_vec(state.jigs.signal_ref(clone!(state => move |jigs| {
@@ -78,7 +79,8 @@ impl CoursePlayer {
                 ModuleThumbnail::new(
                     jig_id.into(),
                     jig.jig_data.modules.get(0).cloned(),
-                    ThumbnailFallback::Asset
+                    ThumbnailFallback::Asset,
+                    state.draft_or_live,
                 ).render(Some("thumbnail"))
             )
             .child(html!("fa-button", {

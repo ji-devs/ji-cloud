@@ -7,7 +7,7 @@ use futures_signals::signal::Mutable;
 use shared::{
     api::endpoints::{self, ApiEndpoint},
     domain::{
-        asset::{Asset, AssetType},
+        asset::{Asset, AssetType, DraftOrLive},
         jig::{JigFocus, JigId, JigResponse, JigUpdateDraftDataRequest},
         module::{
             LiteModule, ModuleCreateRequest, ModuleId, ModuleKind, ModuleResponse,
@@ -109,7 +109,7 @@ pub fn get_player_settings(settings_state: Rc<SettingsState>) -> JigPlayerOption
         track_assessments,
         drag_assist,
         is_student: false,
-        draft: true,
+        draft_or_live: DraftOrLive::Draft,
     }
 }
 

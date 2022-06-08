@@ -95,7 +95,7 @@ impl ModuleThumbnail {
                     // unwrapping is fine here as we've already validated that it is
                     // Some.
                     let module = state.module.as_ref().unwrap_ji();
-                    call_screenshot_service(state.asset_id, module.id, module.kind).await;
+                    call_screenshot_service(state.asset_id, module.id, module.kind, state.draft_or_live).await;
                 }))
             } else {
                 log::info!("not complete");

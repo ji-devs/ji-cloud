@@ -380,6 +380,16 @@ pub enum DraftOrLive {
 }
 
 impl DraftOrLive {
+    /// create draft variant
+    pub fn draft() -> Self {
+        Self::Draft
+    }
+
+    /// create live variant
+    pub fn live() -> Self {
+        Self::Live
+    }
+
     /// Returns `true` for a [`Self::Live`] value.
     ///
     /// ```
@@ -404,6 +414,25 @@ impl DraftOrLive {
     /// ```
     pub fn is_draft(&self) -> bool {
         !self.is_live()
+    }
+
+    /// get str `draft` of `live`
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            DraftOrLive::Draft => "draft",
+            DraftOrLive::Live => "life",
+        }
+    }
+}
+
+impl FromStr for DraftOrLive {
+    type Err = String;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "draft" => Ok(Self::Draft),
+            "live" => Ok(Self::Live),
+            s => Err(format!("Can't create DraftFroLive from {:?}", s)),
+        }
     }
 }
 

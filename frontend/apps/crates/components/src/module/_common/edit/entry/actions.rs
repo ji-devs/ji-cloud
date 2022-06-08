@@ -3,6 +3,7 @@ use crate::module::_common::edit::history::state::HistoryState;
 use shared::{
     api::endpoints::{module::*, ApiEndpoint},
     domain::{
+        asset::DraftOrLive,
         jig::*,
         module::{
             body::{BodyExt, ModeExt, StepExt},
@@ -170,7 +171,13 @@ pub fn save<RawData, Mode, Step>(
         if is_complete {
             // Only generate a screenshot if the module has the minimum required content.
             screenshot_loader.load(async move {
-                call_screenshot_service(jig_id.into(), module_id, RawData::kind()).await;
+                call_screenshot_service(
+                    jig_id.into(),
+                    module_id,
+                    RawData::kind(),
+                    DraftOrLive::Draft,
+                )
+                .await;
             });
         }
     });

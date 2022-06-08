@@ -13,7 +13,10 @@ use dominator::clone;
 use futures_signals::signal::SignalExt;
 use shared::{
     api::{endpoints::jig, ApiEndpoint},
-    domain::jig::{AudioBackground, JigLikedResponse, JigResponse},
+    domain::{
+        asset::DraftOrLive,
+        jig::{AudioBackground, JigLikedResponse, JigResponse},
+    },
     error::EmptyError,
 };
 use utils::{
@@ -64,7 +67,7 @@ pub fn navigate_forward(state: Rc<JigPlayer>) {
         // - The JIG is not a draft;
         // - The play hasn't been tracked yet;
         // - Either TRACK_MODULE_COUNT count of modules have been played or the JIG is done.
-        let should_track = !state.player_options.draft
+        let should_track = !state.player_options.draft_or_live.is_draft()
             && !*state.play_tracked.borrow()
             && (*state.played_modules.borrow() + 1 == TRACK_MODULE_COUNT || is_done);
 
@@ -124,8 +127,8 @@ pub fn navigate_to_module(state: Rc<JigPlayer>, module_id: &ModuleId) {
 
 pub fn load_jig(state: Rc<JigPlayer>) {
     state.loader.load(clone!(state => async move {
-        let (jig, jig_liked) = match state.player_options.draft {
-            false => {
+        let (jig, jig_liked) = match state.player_options.draft_or_live {
+            DraftOrLive::Live => {
                 let jig = {
                     let path = jig::GetLive::PATH.replace("{id}", &state.jig_id.0.to_string());
                     api_no_auth::<JigResponse, EmptyError, ()>(&path, jig::GetLive::METHOD, None).await
@@ -148,7 +151,7 @@ pub fn load_jig(state: Rc<JigPlayer>) {
 
                 (jig, jig_liked)
             },
-            true => {
+            DraftOrLive::Draft => {
                 let jig = {
                     let path = jig::GetDraft::PATH.replace("{id}", &state.jig_id.0.to_string());
                     api_no_auth::<JigResponse, EmptyError, ()>(&path, jig::GetDraft::METHOD, None).await

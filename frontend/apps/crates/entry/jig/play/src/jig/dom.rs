@@ -114,8 +114,8 @@ impl JigPlayer {
                                                 active_module.id
                                             )).into();
 
-                                            if state.player_options.draft {
-                                                route = format!("{}?draft=true", route);
+                                            if state.player_options.draft_or_live.is_draft() {
+                                                route = format!("{}?draft_or_live=draft", route);
                                             }
 
                                             let url = unsafe {

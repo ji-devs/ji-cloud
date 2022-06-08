@@ -6,7 +6,7 @@ use dominator::{clone, html, Dom};
 use futures_signals::map_ref;
 use futures_signals::signal::SignalExt;
 use futures_signals::signal_vec::SignalVecExt;
-use shared::domain::asset::Asset;
+use shared::domain::asset::{Asset, DraftOrLive};
 use std::rc::Rc;
 use strum::IntoEnumIterator;
 use utils::ages::AgeRangeVecExt;
@@ -168,6 +168,7 @@ impl Gallery {
                                     asset_id: jig.id(),
                                     module: jig.cover().cloned(),
                                     fallback: ThumbnailFallback::Asset,
+                                    draft_or_live: DraftOrLive::Draft
                                 }),
                                 Some("thumbnail")
                             ))

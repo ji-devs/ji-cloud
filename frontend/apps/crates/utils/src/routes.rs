@@ -1,6 +1,7 @@
 use crate::jig::JigPlayerOptions;
 use serde::{Deserialize, Serialize};
 use shared::domain::{
+    asset::DraftOrLive,
     badge::BadgeId,
     course::CourseId,
     image::{ImageId, ImageSearchQuery},
@@ -463,12 +464,18 @@ impl Route {
                 )))
             }
             ["asset", "play", "jig", jig_id] => {
-                let search: JigPlayerOptions = serde_qs::from_str(&params_string).unwrap_ji();
+                let mut options: JigPlayerOptions = serde_qs::from_str(&params_string).unwrap_ji();
+
+                // if url param `draft=true` set draft_or_live to draft.
+                // Here for legacy reasons, since this was the way we used to specify draft
+                if is_param_bool("draft") {
+                    options.draft_or_live = DraftOrLive::Draft;
+                };
 
                 Self::Asset(AssetRoute::Play(AssetPlayRoute::Jig(
                     JigId(Uuid::from_str(jig_id).unwrap_ji()),
                     None,
-                    search,
+                    options,
                 )))
             }
 

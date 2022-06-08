@@ -1,6 +1,7 @@
 use components::overlay::handle::OverlayHandle;
 use dominator::{clone, html, with_node, Dom, DomBuilder, EventOptions};
 use futures_signals::map_ref;
+use shared::domain::asset::DraftOrLive;
 use web_sys::{HtmlElement, Node, ScrollBehavior, ScrollIntoViewOptions};
 
 use super::super::course::menu::dom as CourseMenuDom;
@@ -145,6 +146,7 @@ impl ItemDom {
                                                     asset_id: state.sidebar.asset.id(),
                                                     module: Some((**module).clone()),
                                                     fallback: ThumbnailFallback::Module,
+                                                    draft_or_live: DraftOrLive::Draft,
                                                 }),
                                                 Some("thumbnail")
                                             ))
@@ -160,6 +162,7 @@ impl ItemDom {
                                                     state.sidebar.asset.id(),
                                                     Some((*cover).clone()),
                                                     ThumbnailFallback::Module,
+                                                    DraftOrLive::Draft,
                                                 ).render_live(Some("thumbnail"))
                                             },
                                             CourseSpot::Item(jig_id) => {
@@ -167,6 +170,7 @@ impl ItemDom {
                                                     (*jig_id).into(),
                                                     None,
                                                     ThumbnailFallback::Module,
+                                                    DraftOrLive::Draft,
                                                 ).render_live(Some("thumbnail"))
                                             },
                                         }

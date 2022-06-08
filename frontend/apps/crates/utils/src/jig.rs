@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 use shared::{
     domain::{
         additional_resource::ResourceContent,
+        asset::DraftOrLive,
         jig::{
             AudioBackground, AudioFeedbackNegative, AudioFeedbackPositive, JigPlayerSettings,
             TextDirection,
@@ -178,8 +179,8 @@ pub struct JigPlayerOptions {
     #[serde(default)]
     pub is_student: bool,
 
-    #[serde(default)]
-    pub draft: bool,
+    #[serde(default = "DraftOrLive::live")]
+    pub draft_or_live: DraftOrLive,
 }
 
 impl Default for JigPlayerOptions {
@@ -207,7 +208,7 @@ impl From<JigPlayerSettings> for JigPlayerOptions {
             track_assessments: settings.track_assessments,
             drag_assist: settings.drag_assist,
             is_student: false,
-            draft: false,
+            draft_or_live: DraftOrLive::Live,
         }
     }
 }

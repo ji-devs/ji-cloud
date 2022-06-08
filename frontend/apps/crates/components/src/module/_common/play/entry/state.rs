@@ -21,6 +21,7 @@ use std::convert::{TryFrom, TryInto};
 use std::future::Future;
 use std::marker::PhantomData;
 use std::rc::Rc;
+use std::str::FromStr;
 use utils::languages::Language;
 use utils::{iframe::*, prelude::*};
 
@@ -78,7 +79,15 @@ where
             }
         };
 
-        let is_draft: bool = utils::routes::is_param_bool("draft");
+        let mut draft_or_live: DraftOrLive = utils::routes::get_param("draft_or_life")
+            .map(|dl| DraftOrLive::from_str(&dl).unwrap_ji())
+            .unwrap_or(DraftOrLive::Live);
+
+        // if url param `draft=true` set draft_or_live to draft.
+        // Here for legacy reasons, since this was the way we used to specify draft
+        if utils::routes::is_param_bool("draft") {
+            draft_or_live = DraftOrLive::Draft;
+        };
 
         let _self = Rc::new(Self {
             opts,
@@ -116,14 +125,15 @@ where
                     })
                 } else {
 
-                    let resp = {
-                        if is_draft {
+                    let resp = match draft_or_live {
+                        DraftOrLive::Draft => {
                             let path = endpoints::jig::GetDraft::PATH.replace("{id}",&_self.opts.jig_id.0.to_string());
                             api_no_auth::<JigResponse, EmptyError, ()>(&path, endpoints::jig::GetDraft::METHOD, None).await
-                        } else {
+                        },
+                        DraftOrLive::Live => {
                             let path = endpoints::jig::GetLive::PATH.replace("{id}",&_self.opts.jig_id.0.to_string());
                             api_no_auth::<JigResponse, EmptyError, ()>(&path, endpoints::jig::GetLive::METHOD, None).await
-                        }
+                        },
                     };
 
                     match resp {
@@ -167,20 +177,21 @@ where
                     None
                 },
                 LoadingKind::Remote => {
-                    let resp = {
-                        if is_draft {
+                    let resp = match draft_or_live {
+                        DraftOrLive::Draft => {
                             let path = GetDraft::PATH
                                 .replace("{asset_type}",AssetType::Jig.as_str())
                                 .replace("{module_id}",&_self.opts.module_id.0.to_string());
 
                             api_no_auth::<ModuleResponse, EmptyError, ()>(&path, GetDraft::METHOD, None).await
-                        } else {
+                        },
+                        DraftOrLive::Live => {
                             let path = GetLive::PATH
                                 .replace("{asset_type}",AssetType::Jig.as_str())
                                 .replace("{module_id}",&_self.opts.module_id.0.to_string());
 
                             api_no_auth::<ModuleResponse, EmptyError, ()>(&path, GetLive::METHOD, None).await
-                        }
+                        },
                     };
 
                     match resp {

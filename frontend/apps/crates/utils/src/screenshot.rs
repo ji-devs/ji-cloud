@@ -4,7 +4,7 @@ use super::init::settings::SETTINGS;
 use crate::unwrap::UnwrapJiExt;
 use awsm_web::loaders::fetch::fetch_url;
 use shared::domain::{
-    asset::AssetId,
+    asset::{AssetId, DraftOrLive},
     module::{ModuleId, ModuleKind},
 };
 
@@ -31,15 +31,21 @@ struct ScreenshotResponse {
     task_url: String,
 }
 
-pub async fn call_screenshot_service(asset_id: AssetId, module_id: ModuleId, kind: ModuleKind) {
+pub async fn call_screenshot_service(
+    asset_id: AssetId,
+    module_id: ModuleId,
+    kind: ModuleKind,
+    draft_of_live: DraftOrLive,
+) {
     let screenshot_url = SETTINGS.get().unwrap_ji().remote_target.screenshot_url();
 
     let url = format!(
-        "{}?jig={}&module={}&kind={}",
+        "{}?jig={}&module={}&kind={}&draft_of_live{}",
         screenshot_url,
         asset_id.uuid(),
         module_id.0,
-        kind.as_str()
+        kind.as_str(),
+        draft_of_live.as_str(),
     );
 
     match fetch_url(&url).await {

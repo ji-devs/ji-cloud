@@ -5,7 +5,7 @@ use components::{
 };
 use dominator::{clone, html, with_node, Dom};
 use futures_signals::signal::SignalExt;
-use shared::domain::jig::JigRating;
+use shared::domain::{asset::DraftOrLive, jig::JigRating};
 use std::rc::Rc;
 use utils::{events, jig::JigPlayerOptions, routes::AdminCurationRoute, unwrap::UnwrapJiExt};
 use web_sys::{HtmlInputElement, HtmlTextAreaElement};
@@ -135,6 +135,7 @@ impl CurationJig {
                     asset_id: state.jig_id.into(),
                     module: state.jig.modules.get(0).cloned(),
                     fallback: ThumbnailFallback::Asset,
+                    draft_or_live: DraftOrLive::Live,
                 }),
                 Some("player")
             ))
