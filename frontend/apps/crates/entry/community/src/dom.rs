@@ -43,7 +43,9 @@ impl Community {
                 CommunityRoute::Profile => CommunityProfile::new().render(),
                 CommunityRoute::Members(route) => match route {
                     CommunityMembersRoute::List => MembersList::new().render(),
-                    CommunityMembersRoute::Member(_member_id) => MemberDetails::new().render(),
+                    CommunityMembersRoute::Member(member_id) => {
+                        MemberDetails::new(member_id).render()
+                    }
                 },
                 CommunityRoute::Badges(route) => match route {
                     CommunityBadgesRoute::List => BadgesList::new().render(),

@@ -3,6 +3,7 @@ use std::rc::Rc;
 use dominator::{clone, html, Dom};
 use futures_signals::signal_vec::SignalVecExt;
 use shared::domain::user::public_user::PublicUser;
+use utils::routes::{CommunityMembersRoute, CommunityRoute, Route};
 use wasm_bindgen::JsValue;
 
 use super::MembersList;
@@ -32,6 +33,9 @@ impl MembersList {
             .style("column-gap", "10px")
             .style("align-items", "center")
             .property("slot", "items")
+            .apply(move |dom| dominator::on_click_go_to_url!(dom, {
+                Route::Community(CommunityRoute::Members(CommunityMembersRoute::Member(member.id))).to_string()
+            }))
             .child(html!("profile-image", {
                 .style("height", "40px")
                 .style("width", "40px")
