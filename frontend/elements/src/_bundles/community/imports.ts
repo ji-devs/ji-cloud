@@ -7,5 +7,7 @@ import "@elements/entry/community/header";
 import "@elements/entry/community/list";
 import "@elements/entry/community/list-badge";
 import "@elements/entry/community/list-badge-header";
+import "@elements/entry/community/list-member";
+import "@elements/entry/community/list-member-header";
 import "@elements/entry/community/nav-item";
 import "@elements/entry/community/create-badge";
