@@ -5,7 +5,7 @@ use components::{
     page_header::{self, state::PageLinks},
 };
 use dominator::{html, Dom};
-use futures_signals::signal::Signal;
+use futures_signals::signal::{Signal, SignalExt};
 use shared::domain::user::UserProfile;
 use utils::{
     prelude::get_user,
@@ -35,27 +35,22 @@ impl Community {
     }
 
     fn dom_signal() -> impl Signal<Item = Option<Dom>> {
-        dominator::routing::url().signal_ref(|url| {
-            let route = Route::from_url(url);
-            match route {
-                Route::Community(route) => Some(match route {
-                    CommunityRoute::Landing => html!("div", {
-                        .text("community")
-                    }),
-                    CommunityRoute::Profile => CommunityProfile::new().render(),
-                    CommunityRoute::Members(route) => match route {
-                        CommunityMembersRoute::List => MembersList::new().render(),
-                        CommunityMembersRoute::Member(_member_id) => MemberDetails::new().render(),
-                    },
-                    CommunityRoute::Badges(route) => match route {
-                        CommunityBadgesRoute::List => BadgesList::new().render(),
-                        CommunityBadgesRoute::Badge(badge_id) => {
-                            BadgeDetails::new(badge_id).render()
-                        }
-                    },
+        Community::route_signal().map(|route| match route {
+            Route::Community(route) => Some(match route {
+                CommunityRoute::Landing => html!("div", {
+                    .text("community")
                 }),
-                _ => None,
-            }
+                CommunityRoute::Profile => CommunityProfile::new().render(),
+                CommunityRoute::Members(route) => match route {
+                    CommunityMembersRoute::List => MembersList::new().render(),
+                    CommunityMembersRoute::Member(_member_id) => MemberDetails::new().render(),
+                },
+                CommunityRoute::Badges(route) => match route {
+                    CommunityBadgesRoute::List => BadgesList::new().render(),
+                    CommunityBadgesRoute::Badge(badge_id) => BadgeDetails::new(badge_id).render(),
+                },
+            }),
+            _ => None,
         })
     }
 
@@ -70,6 +65,9 @@ impl Community {
             .property("slot", "nav")
             .children(&mut [
                 html!("community-nav-item", {
+                    .property_signal("active", Community::route_signal().map(|route| {
+                        matches!(route, Route::Community(CommunityRoute::Landing))
+                    }))
                     .child({
                         match get_user() {
                             Some(UserProfile { profile_image: Some(image_id), .. }) => {
@@ -86,19 +84,32 @@ impl Community {
                         }
                     })
                     .property("label", "My profile")
-                }),
-                html!("community-nav-item", {
-                    .property("href", "/community/badges")
-                    .property("label", "Badges")
-                    .child(html!("fa-icon", {
-                        .property("icon", "fa-thin fa-circle-nodes")
+                    .apply(move |dom| dominator::on_click_go_to_url!(dom, {
+                        Route::Community(CommunityRoute::Landing).to_string()
                     }))
                 }),
                 html!("community-nav-item", {
-                    .property("href", "/community/members")
-                    .property("label", "Members")
+                    .property("label", "Badges")
+                    .property_signal("active", Community::route_signal().map(|route| {
+                        matches!(route, Route::Community(CommunityRoute::Badges(_)))
+                    }))
                     .child(html!("fa-icon", {
                         .property("icon", "fa-thin fa-circle-nodes")
+                    }))
+                    .apply(move |dom| dominator::on_click_go_to_url!(dom, {
+                        Route::Community(CommunityRoute::Badges(CommunityBadgesRoute::List)).to_string()
+                    }))
+                }),
+                html!("community-nav-item", {
+                    .property("label", "Members")
+                    .property_signal("active", Community::route_signal().map(|route| {
+                        matches!(route, Route::Community(CommunityRoute::Members(_)))
+                    }))
+                    .child(html!("fa-icon", {
+                        .property("icon", "fa-thin fa-circle-nodes")
+                    }))
+                    .apply(move |dom| dominator::on_click_go_to_url!(dom, {
+                        Route::Community(CommunityRoute::Members(CommunityMembersRoute::List)).to_string()
                     }))
                 }),
                 html!("community-nav-item", {
