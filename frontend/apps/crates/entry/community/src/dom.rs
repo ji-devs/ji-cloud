@@ -74,7 +74,6 @@ impl Community {
                         match get_user() {
                             Some(UserProfile { profile_image: Some(image_id), .. }) => {
                                 html!("profile-image", {
-                                    .property("slot", "profile-image")
                                     .property("imageId", &image_id.0.to_string())
                                 })
                             },
@@ -108,7 +107,7 @@ impl Community {
                         matches!(route, Route::Community(CommunityRoute::Members(_)))
                     }))
                     .child(html!("fa-icon", {
-                        .property("icon", "fa-thin fa-circle-nodes")
+                        .property("icon", "fa-thin fa-people-group")
                     }))
                     .apply(move |dom| dominator::on_click_go_to_url!(dom, {
                         Route::Community(CommunityRoute::Members(CommunityMembersRoute::List)).to_string()
@@ -117,7 +116,7 @@ impl Community {
                 html!("community-nav-item", {
                     .property("label", "ProDev")
                     .child(html!("fa-icon", {
-                        .property("icon", "fa-thin fa-circle-nodes")
+                        .property("icon", "fa-thin fa-clapperboard-play")
                     }))
                 }),
             ])

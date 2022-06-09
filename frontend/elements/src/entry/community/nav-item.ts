@@ -9,11 +9,28 @@ export class _ extends LitElement {
                     display: grid;
                     row-gap: 8px;
                     text-decoration: none;
+                    justify-items: center;
                 }
                 ::slotted(*) {
                     width: 56px;
                     height: 56px;
                     border-radius: 50%;
+                    overflow: hidden;
+                }
+                ::slotted(fa-icon) {
+                    border: solid 2px #ffffff;
+                    background-color: #fee0e2;
+                    color: #f2777f;
+                    display: inline-grid;
+                    place-content: center;
+                    font-size: 28px;
+                    box-sizing: border-box;
+                }
+                :host([active]) ::slotted(*) {
+                    box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
+                }
+                :host([active]) ::slotted(fa-icon) {
+                    background-color: #ffffff;
                 }
                 .label {
                     font-size: 14px;
