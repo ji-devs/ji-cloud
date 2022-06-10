@@ -1,6 +1,10 @@
 use std::rc::Rc;
 
-use dominator::{html, Dom};
+use components::module::_common::thumbnail::{ModuleThumbnail, ThumbnailFallback};
+use dominator::{clone, html, Dom};
+use futures_signals::signal::SignalExt;
+use shared::domain::{asset::DraftOrLive, jig::JigResponse};
+use utils::events;
 use wasm_bindgen::JsValue;
 
 use super::{Creations, MemberDetails};
@@ -11,12 +15,26 @@ impl MemberDetails {
         state.load_data();
 
         html!("div", {
-            .child_signal(state.member.signal_ref(move |member| {
+            .child_signal(state.member.signal_ref(clone!(state => move |member| {
                 member.as_ref().map(|member| {
-                    html!("div", {
-                        .style("border", "dashed 1px blue")
-                        .style("padding", "10px")
-                        .style("margin", "10px")
+                    html!("community-member-details", {
+                        .property("bio", &member.bio)
+                        .apply(|mut dom| {
+                            if let Some(_location) = &member.location {
+                                // add city
+                                // dom = dom.property("city", city)
+                            }
+                            if let Some(language) = &member.language {
+                                dom = dom.property("language", language)
+                            }
+                            if let Some(organization) = &member.organization {
+                                dom = dom.property("organization", organization)
+                            }
+                            if !member.persona.is_empty() {
+                                dom = dom.property("persona", member.persona.join(", "));
+                            }
+                            dom
+                        })
                         .children(&mut [
                             html!("profile-image", {
                                 .style("height", "40px")
@@ -40,54 +58,82 @@ impl MemberDetails {
                                 .text("family_name: ")
                                 .text(&member.family_name)
                             }),
-                            html!("p", {
-                                .text("bio: ")
-                                .text(&member.bio)
+                        ])
+                        .children(&mut [
+                            html!("community-member-details-tab", {
+                                .property("slot", "creation-tabs")
+                                .text("JIGs")
+                                .property_signal("active", state.creations.signal_ref(|creations| {
+                                    matches!(creations, Creations::Jigs(_))
+                                }))
+                                .event(clone!(state => move |_: events::Click| {
+                                    state.set_active_creations(Creations::Jigs(None));
+                                }))
+                            }),
+                            html!("community-member-details-tab", {
+                                .property("slot", "creation-tabs")
+                                .text("Resources")
+                                .property_signal("active", state.creations.signal_ref(|creations| {
+                                    matches!(creations, Creations::Resources(_))
+                                }))
+                                .event(clone!(state => move |_: events::Click| {
+                                    state.set_active_creations(Creations::Resources(None));
+                                }))
                             }),
                         ])
-                        .apply(|mut dom| {
-                            if let Some(language) = &member.language {
-                                dom = dom.child(html!("p", {
-                                    .text("language: ")
-                                    .text(language)
-                                }))
+                        .children_signal_vec(state.creations.signal_ref(clone!(state => move |creations| {
+                            match creations {
+                                Creations::Jigs(Some(jigs)) => {
+                                    if jigs.is_empty() {
+                                        vec![
+                                            html!("div", {
+                                                .property("slot", "creation-assets")
+                                                .text("User has no JIGs")
+                                            })
+                                        ]
+                                    } else {
+                                        jigs.iter().map(clone!(state => move |jig| {
+                                            state.render_jig(jig)
+                                        })).collect()
+                                    }
+                                },
+                                Creations::Resources(Some(resources)) => {
+                                    if resources.is_empty() {
+                                        vec![
+                                            html!("div", {
+                                                .property("slot", "creation-assets")
+                                                .text("User has no resources")
+                                            })
+                                        ]
+                                    } else {
+                                        resources.iter().map(clone!(state => move |resources| {
+                                            state.render_jig(resources)
+                                        })).collect()
+                                    }
+                                },
+                                Creations::Jigs(None) | Creations::Resources(None) => vec![
+                                    html!("progress", {
+                                        .property("slot", "creation-assets")
+                                    })
+                                ]
                             }
-                            dom
-                        })
-                        .apply(|mut dom| {
-                            if let Some(organization) = &member.organization {
-                                dom = dom.child(html!("p", {
-                                    .text("organization: ")
-                                    .text(organization)
-                                }))
-                            }
-                            dom
-                        })
-                        .children(member.persona.iter().map(|persona| {
-                            html!("p", {
-                                .text("persona: ")
-                                .text(&persona)
-                            })
-                        }))
+                        })).to_signal_vec())
                     })
                 })
-            }))
-            .child_signal(state.creations.signal_ref(|creations| {
-                Some(match creations {
-                    Creations::Jigs(Some(jigs)) => {
-                        html!("div", {
-                            .children(jigs.iter().map(|jig| {
-                                html!("p", {
-                                    .text(&jig.jig_data.display_name)
-                                })
-                            }))
-                        })
-                    },
-                    Creations::Jigs(None) => html!("div", {
-                        .text("loading")
-                    })
-                })
-            }))
+            })))
+        })
+    }
+
+    fn render_jig(self: &Rc<Self>, jig: &JigResponse) -> Dom {
+        html!("community-asset", {
+            .child(ModuleThumbnail::new(
+                jig.id.into(),
+                jig.jig_data.modules.get(0).cloned(),
+                ThumbnailFallback::Asset,
+                DraftOrLive::Live,
+            ).render(Some("thumbnail")))
+            .property("slot", "creation-assets")
+            .property("name", &jig.jig_data.display_name)
         })
     }
 }

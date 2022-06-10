@@ -4,7 +4,11 @@ use dominator::clone;
 use futures::future::join;
 use shared::{
     api::{endpoints, ApiEndpoint},
-    domain::{asset::UserOrMe, jig::JigBrowseQuery, user::public_user::PublicUser},
+    domain::{
+        asset::{DraftOrLive, UserOrMe},
+        jig::{JigBrowseQuery, JigFocus},
+        user::public_user::PublicUser,
+    },
     error::EmptyError,
 };
 use utils::prelude::{api_no_auth, ApiEndpointExt};
@@ -41,16 +45,45 @@ impl MemberDetails {
         }
     }
 
+    pub fn set_active_creations(self: &Rc<Self>, creations: Creations) {
+        let state = self;
+        state.creations.set(Creations::Jigs(None));
+        state.loader.load(clone!(state => async move {
+            match creations {
+                Creations::Jigs(_) => state.load_members_jigs().await,
+                Creations::Resources(_) => state.load_members_resources().await,
+            };
+        }));
+    }
+
     async fn load_members_jigs(self: &Rc<Self>) {
         let state = self;
 
         let req = JigBrowseQuery {
             author_id: Some(UserOrMe::User(state.member_id)),
+            draft_or_live: Some(DraftOrLive::Live),
+            jig_focus: Some(JigFocus::Modules),
             ..Default::default()
         };
 
         match endpoints::jig::Browse::api_no_auth(Some(req)).await {
             Ok(res) => state.creations.set(Creations::Jigs(Some(res.jigs))),
+            Err(_) => todo!(),
+        }
+    }
+
+    async fn load_members_resources(self: &Rc<Self>) {
+        let state = self;
+
+        let req = JigBrowseQuery {
+            author_id: Some(UserOrMe::User(state.member_id)),
+            draft_or_live: Some(DraftOrLive::Live),
+            jig_focus: Some(JigFocus::Resources),
+            ..Default::default()
+        };
+
+        match endpoints::jig::Browse::api_no_auth(Some(req)).await {
+            Ok(res) => state.creations.set(Creations::Resources(Some(res.jigs))),
             Err(_) => todo!(),
         }
     }

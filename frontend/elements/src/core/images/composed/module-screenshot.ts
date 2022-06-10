@@ -1,6 +1,8 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 import { MediaSizeOptions } from "@utils/path";
 import { ModuleKind } from "@elements/module/_common/types";
+import "../ui";
+import "../ji";
 
 @customElement("img-module-screenshot")
 export class _ extends LitElement {

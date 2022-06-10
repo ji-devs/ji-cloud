@@ -25,5 +25,6 @@ impl MemberDetails {
 
 pub enum Creations {
     Jigs(Option<Vec<JigResponse>>),
+    Resources(Option<Vec<JigResponse>>),
     // Courses(Option<Vec<CourseResponse>>),
 }
