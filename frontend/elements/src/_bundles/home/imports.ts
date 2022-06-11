@@ -36,3 +36,4 @@ import "@elements/entry/home/home/search-results/search-results-section";
 import "@elements/entry/home/home/search-results/search-result";
 import "@elements/entry/home/home/search-results/search-result-details";
 import "@elements/entry/home/home/search-results/search-result-category";
+import "@elements/entry/jig/_common/age-range";

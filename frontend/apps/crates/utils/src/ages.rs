@@ -1,29 +1,25 @@
 use shared::domain::meta::{AgeRange, AgeRangeId};
 pub use shared::domain::module::body::ThemeId;
 
+use crate::prelude::UnwrapJiExt;
+
 const STR_ALL_AGES: &str = "All Ages";
-const STR_DASH: &str = "-";
 
 pub trait AgeRangeVecExt {
-    fn range_string(&self, selected: &[AgeRangeId]) -> String;
+    fn range(&self, selected: &[AgeRangeId]) -> (String, Option<String>);
 }
 
 impl AgeRangeVecExt for Vec<AgeRange> {
-    fn range_string(&self, selected: &[AgeRangeId]) -> String {
+    fn range(&self, selected: &[AgeRangeId]) -> (String, Option<String>) {
         if selected.len() == self.len() || selected.is_empty() {
-            STR_ALL_AGES.to_string()
+            (STR_ALL_AGES.to_string(), None)
         } else if selected.len() == 1 {
-            get_age_text(self, selected, false)
+            (get_age_text(self, selected, false), None)
         } else {
             let first_age_text = get_age_text(self, selected, false);
             let last_age_text = get_age_text(self, selected, true);
-            let mut age_text = String::new();
-            if !first_age_text.is_empty() && !last_age_text.is_empty() {
-                age_text.push_str(&first_age_text);
-                age_text.push_str(STR_DASH);
-                age_text.push_str(&last_age_text);
-            }
-            age_text
+
+            (first_age_text, Some(last_age_text))
         }
     }
 }
@@ -40,7 +36,7 @@ fn get_age_text(ages: &[AgeRange], selected: &[AgeRangeId], get_last: bool) -> S
                     .unwrap_or(&age_range.display_name)
                     .to_string()
             })
-            .unwrap_or_default(),
+            .unwrap_ji(),
         true => ages
             .iter()
             .rev()
@@ -52,6 +48,6 @@ fn get_age_text(ages: &[AgeRange], selected: &[AgeRangeId], get_last: bool) -> S
                     .unwrap_or(&age_range.display_name)
                     .to_string()
             })
-            .unwrap_or_default(),
+            .unwrap_ji(),
     }
 }

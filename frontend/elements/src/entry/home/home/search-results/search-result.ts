@@ -325,9 +325,6 @@ export class _ extends LitElement {
     likedCount: number = 0;
 
     @property()
-    ages: string = "";
-
-    @property()
     language: string = "";
 
     @property({ type: Boolean, reflect: true })
@@ -394,12 +391,7 @@ export class _ extends LitElement {
                         ${this.renderCount(STR_LIKED, this.likedCount)}
                     </div>
                     <div class="ages-language">
-                        <div class="age">
-                            <img-ui
-                                path="entry/home/search-results/age.svg"
-                            ></img-ui>
-                            <span class="count">${this.ages}</span>
-                        </div>
+                        <slot name="ages"></slot>
                         <div class="language">
                             <img-ui
                                 path="entry/home/search-results/language.svg"

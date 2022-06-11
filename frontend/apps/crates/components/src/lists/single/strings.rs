@@ -1,4 +1,4 @@
-pub const STR_DONE: &str = "Done";
+pub const STR_DONE: &str = "Generate";
 pub const STR_CLEAR: &str = "Clear";
 
 pub mod error {

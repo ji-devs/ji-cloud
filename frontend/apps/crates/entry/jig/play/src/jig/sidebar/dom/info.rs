@@ -10,6 +10,7 @@ use utils::{
     ages::AgeRangeVecExt,
     events,
     jig::{published_at_string, ResourceContentExt},
+    unwrap::UnwrapJiExt,
 };
 
 use super::{super::state::State, report};
@@ -70,8 +71,14 @@ fn render_jig_info(state: Rc<State>, jig: &JigResponse) -> Dom {
             }
         })
         .property("description", &jig.jig_data.description)
-        .property_signal("ages", state.all_ages.signal_cloned().map(clone!(jig => move|all_ages| {
-            all_ages.range_string(&jig.jig_data.age_ranges)
+        .child_signal(state.all_ages.signal_cloned().map(clone!(jig => move |age_ranges| {
+            let range = age_ranges.range(&jig.jig_data.age_ranges);
+            Some(html!("age-range", {
+                .property("slot", "ages")
+                .property("icon", "entry/jig/play/sidebar/age.svg")
+                .property("from", range.0)
+                .property("to", range.1)
+            }))
         })))
         .child(html!("button-empty", {
             .property("slot", "close")

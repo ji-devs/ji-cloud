@@ -2,7 +2,7 @@ import { LitElement, html, css, customElement, property } from "lit-element";
 import { classMap } from "lit-html/directives/class-map";
 import { nothing } from "lit-html";
 
-const STR_EMPTY = "No preview yet";
+const STR_EMPTY = "Add words to get started";
 
 @customElement("main-empty")
 export class _ extends LitElement {

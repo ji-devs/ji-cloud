@@ -22,6 +22,9 @@ const STR_SHOW_JIG_DRAFT: &str = "Show drafts";
 
 const STR_DELETE_TITLE: &str = "Warning";
 const STR_DELETE_CONTENT: &str = "Are you sure you want to delete this JIG?";
+const STR_DELETE_CONTENT_WARNING_1: &str = "Deleting in Jigzi is ";
+const STR_DELETE_CONTENT_WARNING_2: &str = "permanent";
+const STR_DELETE_CONTENT_WARNING_3: &str = " and cannot be undone.";
 const STR_DELETE_CONFIRM: &str = "Delete JIG";
 const STR_DELETE_CANCEL: &str = "Don't delete";
 
@@ -61,9 +64,21 @@ impl Gallery {
                     html!("modal-confirm", {
                         .property("dangerous", true)
                         .property("title", STR_DELETE_TITLE)
-                        .property("content", STR_DELETE_CONTENT)
                         .property("cancel_text", STR_DELETE_CANCEL)
                         .property("confirm_text", STR_DELETE_CONFIRM)
+                        .child(html!("div", {
+                            .property("slot", "content")
+                            .child(html!("p", {
+                                .text(STR_DELETE_CONTENT)
+                            }))
+                            .child(html!("p", {
+                                .text(STR_DELETE_CONTENT_WARNING_1)
+                                .child(html!("strong", {
+                                    .text(STR_DELETE_CONTENT_WARNING_2)
+                                }))
+                                .text(STR_DELETE_CONTENT_WARNING_3)
+                            }))
+                        }))
                         .event(clone!(state => move |_evt: events::CustomCancel| state.confirm_delete.set_neq(None)))
                         .event(clone!(state => move |_evt: events::CustomConfirm| {
                             state.confirm_delete.set_neq(None);
@@ -149,9 +164,19 @@ impl Gallery {
                                     },
                                 }
                             })
-                            .property_signal("ages", state.age_ranges.signal_cloned().map(move|age_ranges| {
-                                age_ranges.range_string(&jig_ages)
-                            }))
+                            .child_signal(state.age_ranges.signal_cloned().map(clone!(jig => move |age_ranges| {
+                                let icon = match jig.published_at() {
+                                    None => "entry/jig/gallery/age-icon-draft.svg",
+                                    Some(_) => "entry/jig/gallery/age-icon.svg",
+                                };
+                                let range = age_ranges.range(&jig_ages);
+                                Some(html!("age-range", {
+                                    .property("slot", "ages")
+                                    .property("icon", icon)
+                                    .property("from", range.0)
+                                    .property("to", range.1)
+                                }))
+                            })))
                             .apply(|dom| {
                                 match jig.published_at() {
                                     None => {

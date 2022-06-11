@@ -88,8 +88,14 @@ impl SearchResultsSection {
                     None => String::new(),
                 }
             })
-            .property_signal("ages", state.search_options.age_ranges.signal_cloned().map(move |age_ranges| {
-                age_ranges.range_string(&jig_ages)
+            .child_signal(state.search_options.age_ranges.signal_cloned().map(move |age_ranges| {
+                let range = age_ranges.range(&jig_ages);
+                Some(html!("age-range", {
+                    .property("slot", "ages")
+                    .property("icon", "entry/home/search-results/age.svg")
+                    .property("from", range.0)
+                    .property("to", range.1)
+                }))
             }))
             .property("description", jig.jig_data.description.clone())
             .child(ModuleThumbnail::render(

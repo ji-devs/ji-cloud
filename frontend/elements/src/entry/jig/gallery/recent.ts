@@ -95,9 +95,6 @@ export class _ extends LitElement {
     draft = false;
 
     @property()
-    ages: string = "";
-
-    @property()
     publishedAt: string = "";
 
     @property()
@@ -133,14 +130,7 @@ export class _ extends LitElement {
                     </div>
                     <div class="bottom-section">
                         <span class="label main-text">${this.label}</span>
-                        <span class="ages">
-                            <img-ui
-                                path="entry/jig/gallery/age-icon${this.draft
-                                    ? "-draft"
-                                    : ""}.svg"
-                            ></img-ui>
-                            ${this.ages}
-                        </span>
+                        <slot name="ages"></slot>
                         <span class="last-edited">${this.publishedAt}</span>
                     </div>
                 </div>

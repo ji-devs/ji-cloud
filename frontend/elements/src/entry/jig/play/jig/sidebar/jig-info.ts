@@ -129,9 +129,6 @@ export class _ extends LitElement {
     likedCount?: number;
 
     @property()
-    ages: string = "";
-
-    @property()
     language: string = "";
 
     @property({ type: Boolean })
@@ -176,10 +173,7 @@ export class _ extends LitElement {
                         </div>
                         <div class="second-line">
                             <span>
-                                <img-ui
-                                    path="entry/jig/play/sidebar/age.svg"
-                                ></img-ui>
-                                ${this.ages}
+                                <slot name="ages"></slot>
                             </span>
                             <span>
                                 <img-ui
