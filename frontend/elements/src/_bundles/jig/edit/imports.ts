@@ -37,6 +37,7 @@ import "@elements/entry/jig/edit/sidebar/module/menu";
 import "@elements/entry/jig/edit/sidebar/module/window";
 import "@elements/entry/jig/edit/sidebar/header";
 import "@elements/entry/jig/_common/sidebar-modules/module";
+import "@elements/entry/jig/_common/age-range";
 import "@elements/entry/jig/edit/sidebar/publish";
 import "@elements/entry/jig/edit/sidebar/filler";
 import "@elements/entry/jig/edit/sidebar/close-button";

@@ -1,5 +1,6 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 import { classMap } from "lit-html/directives/class-map";
+import { unsafeHTML } from "lit-html/directives/unsafe-html";
 import { BaseButton } from "@elements/_styles/buttons";
 import "@elements/core/buttons/icon";
 import "@elements/core/buttons/rectangle";
@@ -200,12 +201,6 @@ export class _ extends BaseButton {
         `;
     }
 
-    renderContent() {
-        return html`
-            <div class="content">${this.content}</div>
-        `;
-    }
-
     render() {
         return html`
             <div class="overlay" @click=${this.onAnyClick}></div>
@@ -219,7 +214,11 @@ export class _ extends BaseButton {
                 <div class="contents">
                     ${this.renderTitle()}
                     <div class="divider"></div>
-                    ${this.renderContent()}
+                    <div class="content">
+                        <slot name="content">
+                            ${this.content}
+                        </slot>
+                    </div>
                     ${this.renderActions()}
                 </div>
             </div>

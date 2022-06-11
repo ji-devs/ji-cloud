@@ -24,6 +24,7 @@ import "@elements/entry/jig/play/jig/timer-indicator";
 import "@elements/entry/jig/play/jig/time-up-popup";
 import "@elements/entry/jig/play/jig/done-popup";
 import "@elements/entry/jig/_common/sidebar-modules/module";
+import "@elements/entry/jig/_common/age-range";
 import "@elements/entry/jig/play/jig/sidebar/action";
 import "@elements/entry/jig/play/jig/sidebar/jig-info";
 import "@elements/entry/jig/play/jig/sidebar/report";
