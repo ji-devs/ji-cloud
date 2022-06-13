@@ -14,7 +14,7 @@ use utils::{
 
 use crate::{
     badge_details::BadgeDetails, badges_list::BadgesList, member_details::MemberDetails,
-    members_list::MembersList, profile::CommunityProfile, state::Community,
+    members_list::MembersList, state::Community,
 };
 
 impl Community {
@@ -40,7 +40,6 @@ impl Community {
                 CommunityRoute::Landing => html!("div", {
                     .text("community")
                 }),
-                CommunityRoute::Profile => CommunityProfile::new().render(),
                 CommunityRoute::Members(route) => match route {
                     CommunityMembersRoute::List => MembersList::new().render(),
                     CommunityMembersRoute::Member(member_id) => {

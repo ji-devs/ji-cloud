@@ -61,7 +61,6 @@ pub enum UserRoute {
 #[derive(Debug, Clone)]
 pub enum CommunityRoute {
     Landing,
-    Profile,
     Members(CommunityMembersRoute),
     Badges(CommunityBadgesRoute),
 }
@@ -282,7 +281,6 @@ impl Route {
                 Self::Dev(DevRoute::Scratch(id.to_string(), page))
             }
             ["community"] => Self::Community(CommunityRoute::Landing),
-            ["community", "profile"] => Self::Community(CommunityRoute::Profile),
             ["community", "members"] => {
                 Self::Community(CommunityRoute::Members(CommunityMembersRoute::List))
             }
@@ -563,7 +561,6 @@ impl From<&Route> for String {
             },
             Route::Community(route) => match route {
                 CommunityRoute::Landing => "/community".to_string(),
-                CommunityRoute::Profile => "/community/profile".to_string(),
                 CommunityRoute::Members(route) => match route {
                     CommunityMembersRoute::List => "/community/members".to_string(),
                     CommunityMembersRoute::Member(user_id) => {

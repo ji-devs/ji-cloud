@@ -9,7 +9,6 @@ mod badges_list;
 mod dom;
 mod member_details;
 mod members_list;
-mod profile;
 mod state;
 
 use state::Community;
