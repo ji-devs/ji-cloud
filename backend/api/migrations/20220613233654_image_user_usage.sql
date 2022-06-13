@@ -28,7 +28,7 @@ as
 $$
 BEGIN
     UPDATE image_metadata
-    SET user_usage = 0,
+    SET usage = 0,
         last_synced_at = NULL
     WHERE id = NEW.image_id;
     RETURN NULL;

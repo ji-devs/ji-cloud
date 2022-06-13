@@ -23,7 +23,6 @@ pub(crate) async fn media_index(
         searchable_attributes: Some(
             SearchableAttributes::build()
                 .single(Attribute("name".to_owned()))
-                .single(Attribute("description".to_owned()))
                 .single(Attribute("translated_description".to_owned()))
                 .single(Attribute("translated_name".to_owned()))
                 .finish(),

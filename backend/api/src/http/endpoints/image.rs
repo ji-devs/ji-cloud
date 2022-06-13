@@ -304,7 +304,7 @@ fn check_usage_exists(err: sqlx::Error) -> error::NotFound {
 }
 
 /// Add user usage of an Image
-async fn put_image_usage(
+async fn use_image(
     db: Data<PgPool>,
     _claims: TokenUser,
     req: Path<ImageId>,
@@ -356,7 +356,7 @@ pub fn configure(cfg: &mut ServiceConfig) {
     )
     .route(
         image::PutImageUsage::PATH,
-        image::PutImageUsage::METHOD.route().to(put_image_usage),
+        image::PutImageUsage::METHOD.route().to(use_image),
     )
     .route(
         image::Upload::PATH,

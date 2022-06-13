@@ -150,6 +150,6 @@ impl ApiEndpoint for PutImageUsage {
     type Req = ();
     type Res = ();
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/image/{id}/usage";
-    const METHOD: Method = Method::Put;
+    const PATH: &'static str = "/v1/image/{id}/use";
+    const METHOD: Method = Method::Patch;
 }

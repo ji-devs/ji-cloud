@@ -263,7 +263,7 @@ pub async fn add_usage(db: &PgPool, id: ImageId) -> sqlx::Result<()> {
     sqlx::query!(
         r#"
 update image_metadata 
-set user_usage = user_usage + 1
+set usage = usage + 1
 where id = $1
 "#,
         id.0,
