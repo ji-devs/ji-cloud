@@ -59,7 +59,11 @@ pub fn render_bottom(state: Rc<CardBottom>) -> Dom {
         .style("touch-action", "none")
         .event(clone!(state => move |evt:events::PointerDown| {
             let elem: HtmlElement = evt.dyn_target().unwrap_ji();
-            super::actions::start_drag(state.clone(), elem, evt.x(), evt.y());
+            if let BottomPhase::Show = state.phase.get_cloned() {
+                // Only fire off start_drag if the card the teacher is attempting to drag is _not_
+                // an empty-card.
+                super::actions::start_drag(state.clone(), elem, evt.x(), evt.y());
+            }
         }))
         .child_signal(state.phase.signal_cloned().map(clone!(state => move |phase| {
             let theme_id = state.theme_id;
