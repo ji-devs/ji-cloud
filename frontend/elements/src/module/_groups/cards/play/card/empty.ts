@@ -21,6 +21,9 @@ export class _ extends LitElement {
         return [
             ...cardStyles,
             css`
+                :host {
+                    cursor: default;
+                }
                 .translucent {
                     border: solid 2rem var(--light-blue-4);
                     background-color: rgba(255, 255, 255, 0.8);
