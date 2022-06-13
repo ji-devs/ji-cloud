@@ -1,7 +1,7 @@
 import { LitElement, html, customElement, property, css, PropertyValues, state } from "lit-element";
 import faIcons from "./icons.json";
 
-const ROOT = "https://ka-p.fontawesome.com/releases/v6.0.0-beta1";
+const ROOT = "https://ka-p.fontawesome.com/releases/v6.1.1";
 const END = "?token=da13958c29";
 
 function addMainCss() {
