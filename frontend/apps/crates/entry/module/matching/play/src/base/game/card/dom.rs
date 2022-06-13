@@ -75,10 +75,7 @@ pub fn render_bottom(state: Rc<CardBottom>) -> Dom {
                 BottomPhase::Show => {
                     let mut options = CardOptions::new(card, theme_id, mode, side, Size::Matching);
                     options.flipped = true;
-                    render_card_mixin(options, |dom| {
-                        // block events on the element so that it's parent gets them (needed for touch)
-                        dom.style("pointer-events", "none")
-                    })
+                    render_card(options)
                 },
                 BottomPhase::Remove => {
                     let options = EmptyCardOptions::new(EmptyKind::Translucent, theme_id, Size::Matching);
