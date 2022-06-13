@@ -1,9 +1,9 @@
 use std::rc::Rc;
 
-use dominator::{clone, html, Dom, link};
+use dominator::{clone, html, link, Dom};
 use futures_signals::signal::SignalExt;
 use shared::domain::{badge::Badge, user::public_user::PublicUser};
-use utils::routes::{Route, CommunityRoute, CommunityMembersRoute, CommunityBadgesRoute};
+use utils::routes::{CommunityBadgesRoute, CommunityMembersRoute, CommunityRoute, Route};
 use wasm_bindgen::JsValue;
 
 use super::CommunityLanding;

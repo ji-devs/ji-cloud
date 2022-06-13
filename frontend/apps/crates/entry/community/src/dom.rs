@@ -9,7 +9,7 @@ use futures_signals::signal::{Signal, SignalExt};
 use shared::domain::user::UserProfile;
 use utils::{
     prelude::get_user,
-    routes::{CommunityBadgesRoute, CommunityMembersRoute, CommunityRoute, Route},
+    routes::{CommunityBadgesRoute, CommunityMembersRoute, CommunityRoute, Route, UserRoute},
 };
 
 use crate::{
@@ -83,7 +83,14 @@ impl Community {
                     })
                     .property("label", "My profile")
                     .apply(move |dom| dominator::on_click_go_to_url!(dom, {
-                        Route::Community(CommunityRoute::Landing).to_string()
+                        match get_user() {
+                            Some(user) => {
+                                Route::Community(CommunityRoute::Members(CommunityMembersRoute::Member(user.id))).to_string()
+                            },
+                            _ => {
+                                Route::User(UserRoute::Login(Default::default())).to_string()
+                            },
+                        }
                     }))
                 }),
                 html!("community-nav-item", {
