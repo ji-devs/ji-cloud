@@ -9,7 +9,7 @@ CREATE TABLE image_usage (
 );
 
 ALTER TABLE image_metadata
-    ADD COLUMN  user_usage     bigint            DEFAULT 0;
+    ADD COLUMN  usage     bigint     NOT NULL       DEFAULT 0;
 
 
 INSERT INTO image_usage(image_id)
