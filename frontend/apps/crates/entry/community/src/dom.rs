@@ -13,8 +13,8 @@ use utils::{
 };
 
 use crate::{
-    badge_details::BadgeDetails, badges_list::BadgesList, member_details::MemberDetails,
-    members_list::MembersList, state::Community,
+    badge_details::BadgeDetails, badges_list::BadgesList, landing::CommunityLanding,
+    member_details::MemberDetails, members_list::MembersList, state::Community,
 };
 
 impl Community {
@@ -37,9 +37,7 @@ impl Community {
     fn dom_signal() -> impl Signal<Item = Option<Dom>> {
         Community::route_signal().map(|route| match route {
             Route::Community(route) => Some(match route {
-                CommunityRoute::Landing => html!("div", {
-                    .text("community")
-                }),
+                CommunityRoute::Landing => CommunityLanding::new().render(),
                 CommunityRoute::Members(route) => match route {
                     CommunityMembersRoute::List => MembersList::new().render(),
                     CommunityMembersRoute::Member(member_id) => {
