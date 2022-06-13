@@ -14,7 +14,7 @@ export class _ extends LitElement {
                     display: flex;
                     flex-direction: column;
                     align-items: center;
-                    justify-content: center;
+                    justify-content: flex-start;
                     width: 100%;
                     height: 100%;
                 }
@@ -26,7 +26,7 @@ export class _ extends LitElement {
                 }
                 .bottom {
                     display: flex;
-                    margin-bottom: 38rem;
+                    margin-top: 38rem;
                     gap: 38rem;
                 }
                 .container {
