@@ -6,6 +6,7 @@ use js_sys::encode_uri_component;
 use shared::config::JIG_PLAYER_SESSION_VALID_DURATION_SECS;
 use utils::{
     clipboard, events,
+    prelude::SETTINGS,
     routes::{KidsRoute, Route},
     unwrap::UnwrapJiExt,
 };
@@ -145,7 +146,7 @@ impl ShareJig {
                 match student_code {
                     None => String::new(),
                     Some(student_code) => {
-                        let url = String::from(JIGZI_BASE_URL);
+                        let url = unsafe { SETTINGS.get_unchecked().remote_target.pages_url_iframe() };
                         url + &Route::Kids(KidsRoute::StudentCode(Some(student_code))).to_string()
                     },
                 }
@@ -194,7 +195,7 @@ impl ShareJig {
                     .property_signal("disabled", state.student_code.signal_ref(|x| x.is_none()))
                     .event(clone!(state => move |_: events::Click| {
                         if let Some(student_code) = &*state.student_code.lock_ref() {
-                            let url = String::from(JIGZI_BASE_URL);
+                            let url = unsafe { SETTINGS.get_unchecked().remote_target.pages_url_iframe() };
                             let url = url + &Route::Kids(KidsRoute::StudentCode(Some(student_code.clone()))).to_string();
                             clipboard::write_text(&url);
                             ShareJig::set_copied_mutable(state.copied_student_url.clone());
