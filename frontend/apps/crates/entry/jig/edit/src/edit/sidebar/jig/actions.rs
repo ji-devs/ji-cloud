@@ -129,7 +129,7 @@ pub fn on_iframe_message(state: Rc<State>, message: ModuleToJigEditorMessage) {
             });
 
             if let Some(module) = module {
-                module.is_incomplete.set_neq(is_complete);
+                module.is_incomplete.set_neq(!is_complete);
             }
         }
         ModuleToJigEditorMessage::Next => {
