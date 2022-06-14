@@ -1240,8 +1240,8 @@ pub async fn clone_jig(
     let new_jig = sqlx::query!(
         //language=SQL
         r#"
-insert into jig (creator_id, author_id, parents, live_id, draft_id, published_at, jig_focus)
-select creator_id, $2, array_append(parents, $1), $3, $4, published_at, jig_focus
+insert into jig (creator_id, author_id, parents, live_id, draft_id, jig_focus)
+select creator_id, $2, array_append(parents, $1), $3, $4, jig_focus
 from jig
 where id = $1
 returning id as "id!: JigId"
