@@ -146,13 +146,6 @@ pub struct IdentityClaims {
     pub expire_at: u64,
 }
 
-#[derive(Debug, Deserialize)]
-struct FirebaseClaims {
-    pub sub: String,
-    pub iat: u64,
-    pub auth_time: u64,
-}
-
 #[derive(Debug)]
 pub struct JwkVerifier {
     // use a vec instead of a hashmap because there are typically

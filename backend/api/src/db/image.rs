@@ -259,6 +259,21 @@ order by ord
     .fetch(db)
 }
 
+pub async fn add_usage(db: &PgPool, id: ImageId) -> sqlx::Result<()> {
+    sqlx::query!(
+        r#"
+update image_metadata 
+set usage = usage + 1
+where id = $1
+"#,
+        id.0,
+    )
+    .execute(db)
+    .await?;
+
+    Ok(())
+}
+
 pub async fn delete(db: &PgPool, image: ImageId) -> sqlx::Result<()> {
     let mut conn = db.begin().await?;
 
