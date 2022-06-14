@@ -420,7 +420,7 @@ impl DraftOrLive {
     pub fn as_str(&self) -> &'static str {
         match self {
             DraftOrLive::Draft => "draft",
-            DraftOrLive::Live => "life",
+            DraftOrLive::Live => "live",
         }
     }
 }
