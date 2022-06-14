@@ -23,7 +23,6 @@ const STR_STUDENTS_COPY_URL_LABEL: &str = "Copy URL";
 const STR_STUDENTS_COPIED_URL_LABEL: &str = "URL copied";
 const STR_EMBED_COPY_CODE_LABEL: &str = "Copy code";
 const STR_EMBED_COPIED_CODE_LABEL: &str = "Embed code copied";
-const JIGZI_BASE_URL: &str = "https://jigzi.org";
 const STR_CLASSROOM: &str = "Share to Google Classroom";
 const STR_STUDENTS_LABEL: &str = "Share with students";
 const STR_EMBED_LABEL: &str = "Embed this JIG";
