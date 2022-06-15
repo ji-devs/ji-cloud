@@ -10,6 +10,7 @@ mod dom;
 mod landing;
 mod member_details;
 mod members_list;
+mod search;
 mod state;
 
 use state::Community;

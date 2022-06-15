@@ -61,8 +61,16 @@ pub enum UserRoute {
 #[derive(Debug, Clone)]
 pub enum CommunityRoute {
     Landing,
+    Search(Box<CommunitySearchQuery>),
     Members(CommunityMembersRoute),
     Badges(CommunityBadgesRoute),
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, Default)]
+pub struct CommunitySearchQuery {
+    #[serde(default)]
+    #[serde(skip_serializing_if = "String::is_empty")]
+    pub q: String,
 }
 
 #[derive(Debug, Clone)]
@@ -281,6 +289,10 @@ impl Route {
                 Self::Dev(DevRoute::Scratch(id.to_string(), page))
             }
             ["community"] => Self::Community(CommunityRoute::Landing),
+            ["community", "search"] => {
+                let search: CommunitySearchQuery = serde_qs::from_str(&params_string).unwrap_ji();
+                Self::Community(CommunityRoute::Search(Box::new(search)))
+            }
             ["community", "members"] => {
                 Self::Community(CommunityRoute::Members(CommunityMembersRoute::List))
             }
@@ -561,6 +573,10 @@ impl From<&Route> for String {
             },
             Route::Community(route) => match route {
                 CommunityRoute::Landing => "/community".to_string(),
+                CommunityRoute::Search(search) => {
+                    let query = serde_qs::to_string(&search).unwrap_ji();
+                    format!("/home/search?{}", query)
+                }
                 CommunityRoute::Members(route) => match route {
                     CommunityMembersRoute::List => "/community/members".to_string(),
                     CommunityMembersRoute::Member(user_id) => {

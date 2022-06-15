@@ -14,8 +14,11 @@ use utils::{
 
 use crate::{
     badge_details::BadgeDetails, badges_list::BadgesList, landing::CommunityLanding,
-    member_details::MemberDetails, members_list::MembersList, state::Community,
+    member_details::MemberDetails, members_list::MembersList, search::CommunitySearch,
+    state::Community,
 };
+
+const STR_SEARCH: &str = "Hebrew teachers";
 
 impl Community {
     pub fn render(self: &Rc<Self>) -> Dom {
@@ -38,6 +41,7 @@ impl Community {
         Community::route_signal().map(|route| match route {
             Route::Community(route) => Some(match route {
                 CommunityRoute::Landing => CommunityLanding::new().render(),
+                CommunityRoute::Search(search) => CommunitySearch::new(*search).render(),
                 CommunityRoute::Members(route) => match route {
                     CommunityMembersRoute::List => MembersList::new().render(),
                     CommunityMembersRoute::Member(member_id) => {
@@ -55,7 +59,18 @@ impl Community {
 
     fn render_header(self: &Rc<Self>) -> Dom {
         html!("community-header", {
-            .child(self.render_nav())
+            .children(&mut [
+                self.render_nav(),
+                html!("input", {
+                    .property("slot", "search-input")
+                    .property("type", "search")
+                    .property("placeholder", STR_SEARCH)
+                }),
+                html!("fa-button", {
+                    .property("slot", "search-button")
+                    .property("icon", "fa-solid fa-magnifying-glass")
+                }),
+            ])
         })
     }
 
