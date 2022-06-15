@@ -4,6 +4,7 @@ import "@elements/core/buttons/fa-button";
 import "@elements/core/inputs/wrapper";
 import "@elements/core/icon/fa-icon";
 import "@elements/core/images/composed/module-screenshot";
+import "@elements/core/panic/panic-message";
 import "@elements/entry/community/landing";
 import "@elements/entry/community/header";
 import "@elements/entry/community/pagination";
