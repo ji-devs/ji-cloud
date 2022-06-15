@@ -17,7 +17,10 @@ impl CreateBadge {
         state.loader.load(clone!(state => async move {
             match state.save_badge_async().await {
                 Ok(badge) => {
-                    state.badge_list_state.badges.lock_mut().insert_cloned(0, badge);
+                    let mut badges = state.badge_list_state.badges.lock_mut();
+                    if let Some(badges) = &mut *badges {
+                        badges.insert(0, badge);
+                    }
                     state.badge_list_state.create_popup_open.set(false);
                 },
                 Err(_) => todo!(),

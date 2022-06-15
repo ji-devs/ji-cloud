@@ -6,6 +6,7 @@ import "@elements/core/icon/fa-icon";
 import "@elements/core/images/composed/module-screenshot";
 import "@elements/entry/community/landing";
 import "@elements/entry/community/header";
+import "@elements/entry/community/pagination";
 import "@elements/entry/community/list";
 import "@elements/entry/community/list-badge";
 import "@elements/entry/community/list-badge-header";
