@@ -6,7 +6,7 @@ use shared::domain::user::{UserProfile, UserScope};
 use strum::IntoEnumIterator;
 use utils::{
     events,
-    routes::{AdminRoute, Route, UserRoute},
+    routes::{AdminRoute, AssetRoute, Route, UserRoute},
     unwrap::UnwrapJiExt,
 };
 use wasm_bindgen::JsValue;
@@ -168,7 +168,7 @@ fn render_logged_in(state: Rc<State>, user: &UserProfile) -> Vec<Dom> {
         ])
         .child(html!("a", {
             .property("slot", "user-links")
-            .property("href", "/jig/edit/gallery")
+            .property("href", Route::Asset(AssetRoute::JigGallery).to_string())
             .child(html!("img-ui", {
                 .property("path", "core/page-header/jig-icon.svg")
             }))
@@ -180,7 +180,7 @@ fn render_logged_in(state: Rc<State>, user: &UserProfile) -> Vec<Dom> {
                 true => {
                     Some(html!("a", {
                         .property("slot", "user-links")
-                        .property("href", "/jig/edit/resource-gallery")
+                        .property("href", Route::Asset(AssetRoute::ResourceGallery).to_string())
                         .child(html!("fa-icon", {
                             .property("icon", "fa-light fa-lightbulb-on")
                         }))
@@ -191,7 +191,8 @@ fn render_logged_in(state: Rc<State>, user: &UserProfile) -> Vec<Dom> {
         }))
         .child(html!("a", {
             .property("slot", "user-links")
-            .property("href", "/user/profile")
+            .property("href", Route::User(UserRoute::Profile(Default::default())).to_string())
+
             .child(html!("fa-icon", {
                 .property("icon", "fa-light fa-gear")
             }))
@@ -203,10 +204,7 @@ fn render_logged_in(state: Rc<State>, user: &UserProfile) -> Vec<Dom> {
                 true => {
                     Some(html!("a", {
                         .property("slot", "admin")
-                        .property("href", {
-                            let url: String = Route::Admin(AdminRoute::Landing).into();
-                            url
-                        })
+                        .property("href", Route::Admin(AdminRoute::Landing).to_string())
                         .text(STR_ADMIN)
                     }))
                 }

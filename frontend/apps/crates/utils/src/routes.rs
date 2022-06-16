@@ -96,6 +96,12 @@ pub enum ProfileSection {
     ChangeEmail,
 }
 
+impl Default for ProfileSection {
+    fn default() -> Self {
+        Self::Landing
+    }
+}
+
 #[derive(Debug, Clone)]
 pub enum AdminRoute {
     Landing,
