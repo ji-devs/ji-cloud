@@ -168,7 +168,7 @@ fn render_logged_in(state: Rc<State>, user: &UserProfile) -> Vec<Dom> {
         ])
         .child(html!("a", {
             .property("slot", "user-links")
-            .property("href", "/jig/edit/gallery")
+            .property("href", "/asset/edit/jig-gallery")
             .child(html!("img-ui", {
                 .property("path", "core/page-header/jig-icon.svg")
             }))
@@ -180,7 +180,7 @@ fn render_logged_in(state: Rc<State>, user: &UserProfile) -> Vec<Dom> {
                 true => {
                     Some(html!("a", {
                         .property("slot", "user-links")
-                        .property("href", "/jig/edit/resource-gallery")
+                        .property("href", "/asset/edit/resource-gallery")
                         .child(html!("fa-icon", {
                             .property("icon", "fa-light fa-lightbulb-on")
                         }))
