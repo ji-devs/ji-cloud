@@ -33,6 +33,9 @@ export class _ extends LitElement {
                     margin-left: 8px;
                     background-color: transparent;
                 }
+                input::placeholder {
+                    color: var(--light-gray-3);
+                }
                 input:focus {
                     outline: none;
                 }

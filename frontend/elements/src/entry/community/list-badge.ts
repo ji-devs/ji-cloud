@@ -19,6 +19,7 @@ export class _ extends LitElement {
                     box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.08);
                     border: solid 1px var(--light-orange-3);
                     background-color: #ffffff;
+                    cursor: pointer;
                 }
                 ::slotted([slot=img]) {
                     height: 104px;

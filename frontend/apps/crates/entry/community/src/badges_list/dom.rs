@@ -4,7 +4,10 @@ use components::overlay::handle::OverlayHandle;
 use dominator::{class, clone, html, pseudo, with_node, Dom};
 use futures_signals::{map_ref, signal::SignalExt};
 use shared::domain::badge::Badge;
-use utils::events;
+use utils::{
+    events,
+    routes::{CommunityBadgesRoute, CommunityRoute, Route},
+};
 use web_sys::HtmlInputElement;
 
 use super::{create_badge::CreateBadge, BadgesList};
@@ -128,6 +131,9 @@ impl BadgesList {
             .property("name", &badge.display_name)
             .property("member-count", badge.member_count)
             .property("description", &badge.description)
+            .apply(move |dom| dominator::on_click_go_to_url!(dom, {
+                Route::Community(CommunityRoute::Badges(CommunityBadgesRoute::Badge(badge.id))).to_string()
+            }))
             .child(html!("img", {
                 .property("slot", "img")
                 .property("src", badge.thumbnail.as_str())
