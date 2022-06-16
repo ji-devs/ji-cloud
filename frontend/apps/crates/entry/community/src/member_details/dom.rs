@@ -1,10 +1,16 @@
 use std::rc::Rc;
 
-use components::module::_common::thumbnail::{ModuleThumbnail, ThumbnailFallback};
+use components::{
+    module::_common::thumbnail::{ModuleThumbnail, ThumbnailFallback},
+    player_popup::{PlayerPopup, PreviewPopupCallbacks},
+};
 use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
 use shared::domain::{asset::DraftOrLive, jig::JigResponse};
-use utils::events;
+use utils::{
+    events,
+    jig::{JigPlayerOptions, ResourceContentExt},
+};
 use wasm_bindgen::JsValue;
 
 use super::{Creations, MemberDetails};
@@ -107,7 +113,7 @@ impl MemberDetails {
                                         ]
                                     } else {
                                         resources.iter().map(clone!(state => move |resources| {
-                                            state.render_jig(resources)
+                                            state.render_resource(resources)
                                         })).collect()
                                     }
                                 },
@@ -121,10 +127,24 @@ impl MemberDetails {
                     })
                 })
             })))
+            .child_signal(state.play_jig.signal_cloned().map(clone!(state => move|play_jig| {
+                play_jig.map(|jig_id| {
+                    let close = clone!(state => move || {
+                        state.play_jig.set(None);
+                    });
+                    PlayerPopup::new(
+                        jig_id,
+                        JigPlayerOptions::default(),
+                        PreviewPopupCallbacks::new(close)
+                    ).render(None)
+                })
+            })))
         })
     }
 
     fn render_jig(self: &Rc<Self>, jig: &JigResponse) -> Dom {
+        let state = self;
+        let jig_id = jig.id;
         html!("community-asset", {
             .child(ModuleThumbnail::new(
                 jig.id.into(),
@@ -134,6 +154,31 @@ impl MemberDetails {
             ).render(Some("thumbnail")))
             .property("slot", "creation-assets")
             .property("name", &jig.jig_data.display_name)
+            .event(clone!(state => move |_:events::Click| {
+                state.play_jig.set(Some(jig_id));
+            }))
+        })
+    }
+
+    fn render_resource(self: &Rc<Self>, jig: &JigResponse) -> Dom {
+        let link = match jig.jig_data.additional_resources.first() {
+            Some(resource) => resource.resource_content.get_link(),
+            None => {
+                // should not be here
+                String::new()
+            }
+        };
+
+        html!("community-asset", {
+            .child(ModuleThumbnail::new(
+                jig.id.into(),
+                jig.jig_data.modules.get(0).cloned(),
+                ThumbnailFallback::Asset,
+                DraftOrLive::Live,
+            ).render(Some("thumbnail")))
+            .property("slot", "creation-assets")
+            .property("name", &jig.jig_data.display_name)
+            .property("href", link)
         })
     }
 }

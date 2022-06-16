@@ -6,6 +6,7 @@ import "@elements/core/inputs/composed/search";
 import "@elements/core/icon/fa-icon";
 import "@elements/core/images/composed/module-screenshot";
 import "@elements/core/panic/panic-message";
+import "@elements/core/player-popup/player-popup";
 import "@elements/entry/community/landing";
 import "@elements/entry/community/main";
 import "@elements/entry/community/search";

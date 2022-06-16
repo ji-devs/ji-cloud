@@ -2,7 +2,10 @@ use std::rc::Rc;
 
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::Mutable;
-use shared::domain::{jig::JigResponse, user::public_user::PublicUser};
+use shared::domain::{
+    jig::{JigId, JigResponse},
+    user::public_user::PublicUser,
+};
 use uuid::Uuid;
 
 pub struct MemberDetails {
@@ -10,6 +13,7 @@ pub struct MemberDetails {
     pub member: Mutable<Option<PublicUser>>,
     pub loader: AsyncLoader,
     pub creations: Mutable<Creations>,
+    pub play_jig: Mutable<Option<JigId>>,
 }
 
 impl MemberDetails {
@@ -19,6 +23,7 @@ impl MemberDetails {
             member: Mutable::new(None),
             loader: AsyncLoader::new(),
             creations: Mutable::new(Creations::Jigs(None)),
+            play_jig: Mutable::new(None),
         })
     }
 }
