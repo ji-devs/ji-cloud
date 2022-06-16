@@ -57,9 +57,9 @@ pub async fn search_jigs(q: String, is_published: Option<bool>) -> Result<Vec<As
         .map_err(|_| ())
 }
 
-pub async fn create_jig(focus: JigFocus) {
+pub async fn create_jig(jig_focus: JigFocus) {
     let req = JigCreateRequest {
-        jig_focus: JigFocus::Modules,
+        jig_focus,
         ..Default::default()
     };
 
@@ -71,7 +71,7 @@ pub async fn create_jig(focus: JigFocus) {
     .await
     {
         Ok(resp) => {
-            if focus.is_resources() {
+            if jig_focus.is_resources() {
                 add_cover(&resp.id).await;
             }
             let url = Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
