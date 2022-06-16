@@ -146,7 +146,7 @@ insert into badge_member(id, user_id) values($1, $2)
         id.0,
         user_id
     )
-    .fetch_one(db)
+    .execute(db)
     .await
     .map_err(|_| anyhow::anyhow!("User is already a member of this badge"))?;
 
@@ -190,8 +190,8 @@ pub async fn browse(
                 display_name        as "display_name!",
                 description         as "description!",
                 thumbnail           as "thumbnail!",
-                member_count  as "member_count!: u32",
-                creator_id    as "creator_id!"
+                member_count        as "member_count!",
+                creator_id          as "creator_id!"
         from "badge"
             inner join cte1 on cte1.id = "badge".id
             where ord > (1 * $2 * $3)
@@ -213,7 +213,7 @@ pub async fn browse(
             created_by: row.creator_id,
             description: row.description,
             thumbnail: Url::parse(&row.thumbnail).unwrap(),
-            member_count: row.member_count,
+            member_count: row.member_count as u32,
         })
         .collect();
 
