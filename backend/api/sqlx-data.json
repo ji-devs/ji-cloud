@@ -668,58 +668,6 @@
       ]
     }
   },
-  "0ed109c3a80e39c71fee8fbd935ac8d21a0862c559c49a09ac708f5749d2bbd7": {
-    "query": "\n        with cte as (\n            select array(select id  as \"id!\"\n            from \"badge\"\n            where creator_id = $1 or $1 is null\n            order by coalesce(updated_at, created_at)) as id\n        ),\n        cte1 as (\n            select * from unnest((select distinct id from cte)) with ordinality t(id\n           , ord) order by ord\n        )\n        select  badge.id            as \"badge_id!: BadgeId\",\n                display_name        as \"display_name!\",\n                description         as \"description!\",\n                thumbnail           as \"thumbnail!\",\n                member_count  as \"member_count!: u32\",\n                creator_id    as \"creator_id!\"\n        from \"badge\"\n            inner join cte1 on cte1.id = \"badge\".id\n            where ord > (1 * $2 * $3)\n            order by ord \n            limit $3\n            ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "badge_id!: BadgeId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "display_name!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "description!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 3,
-          "name": "thumbnail!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 4,
-          "name": "member_count!: u32",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 5,
-          "name": "creator_id!",
-          "type_info": "Uuid"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int4",
-          "Int4"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false
-      ]
-    }
-  },
   "0eef5ce484b8cb531f0475e452c41a554fcdc8a2788c3ce5079f5992cac8991e": {
     "query": "\nselect id            as \"badge_id: BadgeId\",\n       display_name,\n       description,\n       thumbnail,\n       member_count,\n       creator_id\nfrom badge\nwhere id = $1\n",
     "describe": {
@@ -5414,6 +5362,58 @@
         ]
       },
       "nullable": []
+    }
+  },
+  "954f689bd8a447d0d4a611bc7a44ab0d5c478e223941be58d6fc48bb70d0a019": {
+    "query": "\n        with cte as (\n            select array(select id  as \"id!\"\n            from \"badge\"\n            where creator_id = $1 or $1 is null\n            order by coalesce(updated_at, created_at)) as id\n        ),\n        cte1 as (\n            select * from unnest((select distinct id from cte)) with ordinality t(id\n           , ord) order by ord\n        )\n        select  badge.id            as \"badge_id!: BadgeId\",\n                display_name        as \"display_name!\",\n                description         as \"description!\",\n                thumbnail           as \"thumbnail!\",\n                member_count        as \"member_count!\",\n                creator_id          as \"creator_id!\"\n        from \"badge\"\n            inner join cte1 on cte1.id = \"badge\".id\n            where ord > (1 * $2 * $3)\n            order by ord \n            limit $3\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "badge_id!: BadgeId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "display_name!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "description!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "thumbnail!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "member_count!",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 5,
+          "name": "creator_id!",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int4",
+          "Int4"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ]
     }
   },
   "95e80749cb3ce69fdb52cbc6de1835b2e5770c6a350ad0a8d05541eb17c788aa": {
