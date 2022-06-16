@@ -172,29 +172,40 @@ pub async fn browse(
     page_limit: u32,
     page: i32,
 ) -> sqlx::Result<Vec<Badge>> {
-    let res: Vec<_> = sqlx::query!(
-        //language=SQL
+    let mut txn = db.begin().await?;
+
+    let badge_data = sqlx::query!(
         r#"
-select  id            as "badge_id!: BadgeId",
-        display_name,
-        description,
-        thumbnail,
-        member_count  as "member_count!: u32",
-        creator_id
-from badge
-where (creator_id = $1 or $1 is null)
-order by coalesce(updated_at, created_at)
-offset $2
-limit $3
-"#,
+        with cte as (
+            select array(select id  as "id!"
+            from "badge"
+            where creator_id = $1 or $1 is null
+            order by coalesce(updated_at, created_at)) as id
+        ),
+        cte1 as (
+            select * from unnest((select distinct id from cte)) with ordinality t(id
+           , ord) order by ord
+        )
+        select  badge.id            as "badge_id!: BadgeId",
+                display_name        as "display_name!",
+                description         as "description!",
+                thumbnail           as "thumbnail!",
+                member_count  as "member_count!: u32",
+                creator_id    as "creator_id!"
+        from "badge"
+            inner join cte1 on cte1.id = "badge".id
+            where ord > (1 * $2 * $3)
+            order by ord 
+            limit $3
+            "#,
         creator_id,
-        page as i64,
+        page as i32,
         page_limit as i32,
     )
-    .fetch_all(db)
+    .fetch_all(&mut txn)
     .await?;
 
-    Ok(res
+    let res = badge_data
         .into_iter()
         .map(|row| Badge {
             id: row.badge_id,
@@ -204,7 +215,11 @@ limit $3
             thumbnail: Url::parse(&row.thumbnail).unwrap(),
             member_count: row.member_count,
         })
-        .collect())
+        .collect();
+
+    txn.rollback().await?;
+
+    Ok(res)
 }
 
 pub async fn get_by_ids(db: &PgPool, ids: &[Uuid]) -> sqlx::Result<Vec<Badge>> {
