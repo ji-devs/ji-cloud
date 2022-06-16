@@ -22,16 +22,25 @@ const STR_SEARCH: &str = "Hebrew teachers";
 
 impl Community {
     pub fn render(self: &Rc<Self>) -> Dom {
-        html!("main", {
-            // main header
-            .child(page_header::dom::render(
-                Rc::new(page_header::state::State::new()),
-                None,
-                Some(PageLinks::Community),
-                true
-            ))
-            // community header
-            .child(self.render_header())
+        html!("community-main", {
+            .children(&mut [
+                page_header::dom::render(
+                    Rc::new(page_header::state::State::new()),
+                    Some("jigzi-header"),
+                    Some(PageLinks::Community),
+                    true
+                ),
+                self.render_nav(),
+                html!("input", {
+                    .property("slot", "search-input")
+                    .property("type", "search")
+                    .property("placeholder", STR_SEARCH)
+                }),
+                html!("fa-button", {
+                    .property("slot", "search-button")
+                    .property("icon", "fa-solid fa-magnifying-glass")
+                }),
+            ])
             .child_signal(self.dom_signal())
             .child(OverlayContainer::new().render(None))
         })
@@ -61,23 +70,6 @@ impl Community {
             }),
             _ => None,
         }))
-    }
-
-    fn render_header(self: &Rc<Self>) -> Dom {
-        html!("community-header", {
-            .children(&mut [
-                self.render_nav(),
-                html!("input", {
-                    .property("slot", "search-input")
-                    .property("type", "search")
-                    .property("placeholder", STR_SEARCH)
-                }),
-                html!("fa-button", {
-                    .property("slot", "search-button")
-                    .property("icon", "fa-solid fa-magnifying-glass")
-                }),
-            ])
-        })
     }
 
     fn render_nav(self: &Rc<Self>) -> Dom {

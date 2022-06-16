@@ -10,8 +10,6 @@ export class _ extends LitElement {
                     grid-template-columns: auto auto;
                     justify-content: space-between;
                     align-items: center;
-                    padding: 40px 30px;
-                    background-color: #fff6d9;
                 }
                 h1 {
                     color: var(--dark-blue-4);

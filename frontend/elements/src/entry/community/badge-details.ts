@@ -21,8 +21,6 @@ export class _ extends LitElement {
                     display: grid;
                     grid-template-columns: 300px 1fr;
                     gap: 40px;
-                    padding: 40px;
-                    background-color: #fff6d9;
                 }
                 .top-section {
                     grid-column: 1 / -1;

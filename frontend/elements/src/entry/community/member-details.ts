@@ -20,8 +20,6 @@ export class _ extends LitElement {
                     display: grid;
                     grid-template-columns: 300px 1fr;
                     gap: 40px;
-                    padding: 40px;
-                    background-color: #fff6d9;
                 }
                 section {
                     padding: 40px;

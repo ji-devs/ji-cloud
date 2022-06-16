@@ -9,12 +9,10 @@ export class _ extends LitElement {
         return [
             css`
                 :host {
-                    background-color: #fff6d9;
                     display: grid;
                     grid-template-columns: auto auto;
                     align-items: start;
                     gap: 40px;
-                    padding: 40px;
                 }
                 section {
                     padding: 36px;
