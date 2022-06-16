@@ -97,7 +97,7 @@ impl ApiEndpoint for JoinBadge {
     type Req = ();
     type Res = ();
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/badge/{id}";
+    const PATH: &'static str = "/v1/badge/{id}/join";
     const METHOD: Method = Method::Post;
 }
 
@@ -107,7 +107,7 @@ impl ApiEndpoint for LeaveBadge {
     type Req = ();
     type Res = ();
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/badge/{id}";
+    const PATH: &'static str = "/v1/badge/{id}/leave";
     const METHOD: Method = Method::Delete;
 }
 
