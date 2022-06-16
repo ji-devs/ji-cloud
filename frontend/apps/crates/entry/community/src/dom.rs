@@ -4,7 +4,7 @@ use components::{
     overlay::container::OverlayContainer,
     page_header::{self, state::PageLinks},
 };
-use dominator::{html, Dom};
+use dominator::{clone, html, Dom};
 use futures_signals::signal::{Signal, SignalExt};
 use shared::domain::user::UserProfile;
 use utils::{
@@ -32,13 +32,14 @@ impl Community {
             ))
             // community header
             .child(self.render_header())
-            .child_signal(Self::dom_signal())
+            .child_signal(self.dom_signal())
             .child(OverlayContainer::new().render(None))
         })
     }
 
-    fn dom_signal() -> impl Signal<Item = Option<Dom>> {
-        Community::route_signal().map(|route| match route {
+    fn dom_signal(self: &Rc<Self>) -> impl Signal<Item = Option<Dom>> {
+        let state = self;
+        Community::route_signal().map(clone!(state => move |route| match route {
             Route::Community(route) => Some(match route {
                 CommunityRoute::Landing => CommunityLanding::new().render(),
                 CommunityRoute::Search(search) => CommunitySearch::new(*search).render(),
@@ -50,11 +51,16 @@ impl Community {
                 },
                 CommunityRoute::Badges(route) => match route {
                     CommunityBadgesRoute::List => BadgesList::new().render(),
-                    CommunityBadgesRoute::Badge(badge_id) => BadgeDetails::new(badge_id).render(),
+                    CommunityBadgesRoute::Badge(badge_id) => {
+                        BadgeDetails::new(
+                            Rc::clone(&state),
+                            badge_id
+                        ).render()
+                    },
                 },
             }),
             _ => None,
-        })
+        }))
     }
 
     fn render_header(self: &Rc<Self>) -> Dom {

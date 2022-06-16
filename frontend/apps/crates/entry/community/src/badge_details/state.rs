@@ -7,20 +7,24 @@ use shared::domain::{
     user::public_user::PublicUser,
 };
 
+use crate::state::Community;
+
 pub struct BadgeDetails {
     pub badge_id: BadgeId,
     pub badge: Mutable<Option<Badge>>,
     pub members: MutableVec<PublicUser>,
     pub loader: AsyncLoader,
+    pub community_state: Rc<Community>,
 }
 
 impl BadgeDetails {
-    pub fn new(badge_id: BadgeId) -> Rc<Self> {
+    pub fn new(community_state: Rc<Community>, badge_id: BadgeId) -> Rc<Self> {
         Rc::new(Self {
             badge_id,
             badge: Mutable::new(None),
             members: MutableVec::new(),
             loader: AsyncLoader::new(),
+            community_state,
         })
     }
 }
