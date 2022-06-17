@@ -581,7 +581,7 @@ impl From<&Route> for String {
                 CommunityRoute::Landing => "/community".to_string(),
                 CommunityRoute::Search(search) => {
                     let query = serde_qs::to_string(&search).unwrap_ji();
-                    format!("/home/search?{}", query)
+                    format!("/community/search?{}", query)
                 }
                 CommunityRoute::Members(route) => match route {
                     CommunityMembersRoute::List => "/community/members".to_string(),
