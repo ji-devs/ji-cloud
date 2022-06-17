@@ -7,7 +7,10 @@ use shared::{
     domain::badge::Badge,
     error::EmptyError,
 };
-use utils::prelude::{api_no_auth, api_with_auth_empty};
+use utils::{
+    prelude::{api_no_auth, api_with_auth_empty},
+    unwrap::UnwrapJiExt,
+};
 
 use super::BadgeDetails;
 
@@ -60,9 +63,9 @@ impl BadgeDetails {
             match api_with_auth_empty::<EmptyError, ()>(&path, endpoints::badge::JoinBadge::METHOD, None).await
             {
                 Ok(_) => {
-                    let mut user = state.community_state.user.get_cloned();
+                    let mut user = state.community_state.user.get_cloned().unwrap_ji();
                     user.badges.push(state.badge_id);
-                    state.community_state.user.set(user);
+                    state.community_state.user.set(Some(user));
                 }
                 Err(_) => todo!(),
             }
@@ -77,9 +80,10 @@ impl BadgeDetails {
             match api_with_auth_empty::<EmptyError, ()>(&path, endpoints::badge::LeaveBadge::METHOD, None).await
             {
                 Ok(_) => {
-                    let mut user = state.community_state.user.get_cloned();
+                    let mut user = state.community_state.user.get_cloned().unwrap_ji();
                     let index = user.badges.iter().position(|badge| *badge == state.badge_id).unwrap();
                     user.badges.remove(index);
+                    state.community_state.user.set(Some(user));
                 }
                 Err(_) => todo!(),
             }

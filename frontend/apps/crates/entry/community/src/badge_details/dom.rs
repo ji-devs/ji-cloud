@@ -51,7 +51,10 @@ impl BadgeDetails {
                             }),
                         ])
                         .child_signal(state.community_state.user.signal_ref(clone!(state => move |user| {
-                            let is_member = user.badges.iter().any(|badge| badge == &state.badge_id);
+                            let is_member = match user {
+                                Some(user) => user.badges.iter().any(|badge| badge == &state.badge_id),
+                                None => false,
+                            };
                             Some(match is_member {
                                 true => {
                                     html!("button-rect", {

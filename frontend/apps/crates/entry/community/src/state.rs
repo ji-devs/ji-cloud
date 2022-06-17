@@ -2,17 +2,16 @@ use std::rc::Rc;
 
 use futures_signals::signal::{Mutable, Signal};
 use shared::domain::user::UserProfile;
-use utils::{prelude::get_user, routes::Route, unwrap::UnwrapJiExt};
+use utils::{prelude::get_user, routes::Route};
 
 pub struct Community {
-    pub user: Mutable<UserProfile>,
+    pub user: Mutable<Option<UserProfile>>,
 }
 
 impl Community {
     pub fn new() -> Rc<Self> {
-        let user = get_user().expect_ji("user not ready").clone();
         Rc::new(Self {
-            user: Mutable::new(user),
+            user: Mutable::new(get_user().cloned()),
         })
     }
 
