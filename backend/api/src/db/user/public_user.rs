@@ -415,9 +415,9 @@ pub async fn browse_followers(
                 (select location from user_profile where user_profile.user_id = "user".id and location_public is true)      as "location?",
                 (select array(select badge.id
                     from badge_member bm
-                    inner join badge on bm.id = badge.id
-                    where bm.user_id = "user".id
-                )) as "badges!: Vec<(BadgeId,)>"
+                    left join badge on bm.id = badge.id
+                    where bm.user_id = "user".id or badge.creator_id = "user".id 
+                )) as "badges!: Vec<BadgeId>"
             from "user"
             inner join user_profile on "user".id = user_profile.user_id
             inner join followers on (followers.follower_id = "user".id)
@@ -444,7 +444,7 @@ pub async fn browse_followers(
             organization: row.organization,
             persona: row.persona,
             location: row.location,
-            badges: row.badges.into_iter().map(|(x,)| x).collect(),
+            badges: row.badges,
         })
         .collect();
 
@@ -481,8 +481,8 @@ pub async fn browse_following(
                 (select location from user_profile where user_profile.user_id = "user".id and location_public is true)      as "location?",
                 array(select badge.id
                     from badge_member bm
-                    inner join badge on bm.id = badge.id
-                    where bm.user_id = "user".id
+                    left join badge on bm.id = badge.id
+                    where bm.user_id = "user".id or badge.creator_id = "user".id 
                 ) as "badges!: Vec<BadgeId>"
             from "user"
             inner join user_profile on "user".id = user_profile.user_id
