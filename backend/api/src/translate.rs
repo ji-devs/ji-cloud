@@ -156,7 +156,7 @@ impl GoogleTranslate {
             //language=SQL
             r#"
 select id                               as "id!: ImageId",
-       description                                                                                    
+       description
 from image_metadata
      inner join image_upload on id = image_id
 where description <> '' and translated_description = '{}'
@@ -168,7 +168,7 @@ limit 50 for no key update skip locked;
         .fetch(&mut txn)
         .map_ok(|row| ImageTranslate {
             image_id: row.id,
-            text: row.description
+            text: row.description,
         })
         .try_collect()
         .await?;
@@ -199,71 +199,74 @@ limit 50 for no key update skip locked;
         }
 
         for t in descriptions {
-            println!("Descriptions {}", t.text);
-            let descriptions: Option<Option<HashMap<String, String>>> =
-                multi_translation(&t.text, &self.api_key).await.ok();
+            let descriptions: anyhow::Result<Option<HashMap<String, String>>> =
+                multi_translation(&t.text, &self.api_key).await;
 
-            if let Some(descriptions) = descriptions {
-                if let Some(descriptions) = descriptions {
-                    sqlx::query!(
-                        r#"
-                            update image_metadata 
-                            set translated_description = $2,
-                            last_synced_at = null
-                            where id = $1
-                            "#,
+            match descriptions {
+                Ok(descriptions) => {
+                    if let Some(descriptions) = descriptions {
+                        sqlx::query!(
+                            r#"
+                                update image_metadata
+                                set translated_description = $2,
+                                last_synced_at = null
+                                where id = $1
+                                "#,
+                            t.image_id.0,
+                            json!(descriptions)
+                        )
+                        .execute(&mut txn)
+                        .await?;
+                    } else {
+                        log::warn!("Empty translation list for image_id: {}", t.image_id.0,);
+                        continue;
+                    };
+                }
+                Err(error) => {
+                    log::error!(
+                        "Could not translate image description. image_id: {}, error: {}",
                         t.image_id.0,
-                        json!(descriptions)
-                    )
-                    .execute(&mut txn)
-                    .await?;
-                } else {
-                    log::debug!("Empty translation list for image_id: {}", t.image_id.0,);
-                    continue;
-                };
-            } else {
-                log::debug!(
-                    "Could not translate image_id: {}, description: {}",
-                    t.image_id.0,
-                    t.text
-                );
+                        error,
+                    );
 
-                continue;
+                    continue;
+                }
             }
         }
 
         for t in names {
-            println!("names: {}", t.text);
+            let names: anyhow::Result<Option<HashMap<String, String>>> =
+                multi_translation(&t.text, &self.api_key).await;
 
-            let names: Option<Option<HashMap<String, String>>> =
-                multi_translation(&t.text, &self.api_key).await.ok();
-
-            if let Some(names) = names {
-                if let Some(names) = names {
-                    sqlx::query!(
-                        r#"
-                            update image_metadata 
-                            set translated_name = $2,
-                            last_synced_at = null
-                            where id = $1
-                            "#,
+            match names {
+                Ok(names) => {
+                    if let Some(names) = names {
+                        sqlx::query!(
+                            r#"
+                                update image_metadata
+                                set translated_name = $2,
+                                last_synced_at = null
+                                where id = $1
+                                "#,
+                            t.image_id.0,
+                            json!(names)
+                        )
+                        .execute(&mut txn)
+                        .await?;
+                    } else {
+                        log::warn!("Empty translation list for image_id: {}", t.image_id.0,);
+                        continue;
+                    };
+                }
+                Err(error) => {
+                    log::error!(
+                        "Could not translate image name. image_id: {}, error: {}",
                         t.image_id.0,
-                        json!(names)
-                    )
-                    .execute(&mut txn)
-                    .await?;
-                } else {
-                    log::debug!("Empty translation list for image_id: {}", t.image_id.0,);
-                    continue;
-                };
-            } else {
-                log::debug!(
-                    "Could not translate image_id: {}, description: {}",
-                    t.image_id.0,
-                    t.text
-                );
+                        error,
+                    );
 
-                continue;
+                    continue;
+                }
             }
         }
 
@@ -283,11 +286,11 @@ limit 50 for no key update skip locked;
             //language=SQL
             r#"
 select jig_data.id,
-       description                                                                                    
+       description
 from jig_data
 inner join jig on live_id = jig_data.id
 where description <> '' and translated_description = '{}'
-and published_at is not null 
+and published_at is not null
 order by coalesce(updated_at, created_at) desc
 limit 50 for no key update skip locked;
  "#
@@ -295,7 +298,7 @@ limit 50 for no key update skip locked;
         .fetch(&mut txn)
         .map_ok(|row| JigTranslate {
             jig_data_id: row.id,
-            text: row.description
+            text: row.description,
         })
         .try_collect()
         .await?;
@@ -309,7 +312,7 @@ select jig_data.id,
 from jig_data
 inner join jig on live_id = jig_data.id
 where display_name <> '' and translated_name = '{}'
-and published_at is not null 
+and published_at is not null
 order by coalesce(updated_at, created_at) desc
 limit 50 for no key update skip locked;
          "#
@@ -336,7 +339,7 @@ limit 50 for no key update skip locked;
                 if let Some(res) = res {
                     sqlx::query!(
                         r#"
-                            update jig_data 
+                            update jig_data
                             set translated_description = $2,
                                 last_synced_at = null
                             where id = $1
@@ -371,7 +374,7 @@ limit 50 for no key update skip locked;
                 if let Some(res) = res {
                     sqlx::query!(
                         r#"
-                            update jig_data 
+                            update jig_data
                             set translated_name = $2,
                                 last_synced_at = null
                             where id = $1
@@ -411,10 +414,10 @@ limit 50 for no key update skip locked;
             //language=SQL
             r#"
 select course_data.id,
-       description                                                                                    
+       description
 from course_data
 inner join course on live_id = course_data.id
-where description <> '' 
+where description <> ''
       and translated_description = '{}'
       and published_at is not null
 order by coalesce(updated_at, created_at) desc
@@ -424,7 +427,7 @@ limit 50 for no key update skip locked;
         .fetch(&mut txn)
         .map_ok(|row| CourseTranslate {
             course_data_id: row.id,
-            text: row.description
+            text: row.description,
         })
         .try_collect()
         .await?;
@@ -433,10 +436,10 @@ limit 50 for no key update skip locked;
             //language=SQL
             r#"
 select course_data.id,
-       display_name                                                                                   
+       display_name
 from course_data
 inner join course on live_id = course_data.id
-where display_name <> '' 
+where display_name <> ''
       and translated_name = '{}'
       and published_at is not null
 order by coalesce(updated_at, created_at) desc
@@ -446,7 +449,7 @@ limit 50 for no key update skip locked;
         .fetch(&mut txn)
         .map_ok(|row| CourseTranslate {
             course_data_id: row.id,
-            text: row.display_name
+            text: row.display_name,
         })
         .try_collect()
         .await?;
@@ -465,7 +468,7 @@ limit 50 for no key update skip locked;
                 if let Some(res) = res {
                     sqlx::query!(
                         r#"
-                            update course_data 
+                            update course_data
                             set translated_description = $2,
                                 last_synced_at = null
                             where id = $1
@@ -500,7 +503,7 @@ limit 50 for no key update skip locked;
                 if let Some(res) = res {
                     sqlx::query!(
                         r#"
-                            update course_data 
+                            update course_data
                             set translated_name = $2,
                                 last_synced_at = null
                             where id = $1
