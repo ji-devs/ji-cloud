@@ -282,7 +282,7 @@ pub async fn unfollow(
 /// Get a Public User's Followers
 pub async fn browse_user_followers(
     db: Data<PgPool>,
-    _auth: TokenUser,
+    _auth: Option<TokenUser>,
     path: Path<Uuid>,
     query: Option<Query<<user::BrowseFollowers as ApiEndpoint>::Req>>,
 ) -> Result<Json<<user::BrowseFollowers as ApiEndpoint>::Res>, error::NotFound> {
@@ -319,7 +319,7 @@ pub async fn browse_user_followers(
 /// Get a Public User's Followers
 pub async fn browse_user_followings(
     db: Data<PgPool>,
-    _auth: TokenUser,
+    _auth: Option<TokenUser>,
     path: Path<Uuid>,
     query: Option<Query<<user::BrowseFollowing as ApiEndpoint>::Req>>,
 ) -> Result<Json<<user::BrowseFollowing as ApiEndpoint>::Res>, error::NotFound> {
