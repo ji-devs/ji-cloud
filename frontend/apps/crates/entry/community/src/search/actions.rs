@@ -43,6 +43,7 @@ impl CommunitySearch {
     async fn search_members_async(self: &Rc<Self>, page: u32) {
         let state = self;
         let req = SearchPublicUserQuery {
+            q: state.query.q.clone(),
             page: Some(page),
             page_limit: Some(SEARCH_PAGE_LIMIT),
             ..Default::default()
@@ -60,6 +61,7 @@ impl CommunitySearch {
     async fn search_badges_async(self: &Rc<Self>, page: u32) {
         let state = self;
         let req = BadgeSearchQuery {
+            q: state.query.q.clone(),
             page: Some(page),
             page_limit: Some(SEARCH_PAGE_LIMIT),
             ..Default::default()

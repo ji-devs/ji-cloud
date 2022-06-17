@@ -19,7 +19,7 @@ impl CommunitySearch {
         state.search();
 
         html!("community-search", {
-            .property("query", "")
+            .property("query", &state.query.q)
             .property_signal("memberCount", state.member_count.signal())
             .children_signal_vec(state.members.signal_vec_cloned().map(clone!(state => move|member| {
                 state.render_member(&member)

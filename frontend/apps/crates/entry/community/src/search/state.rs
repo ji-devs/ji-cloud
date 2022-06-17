@@ -13,16 +13,18 @@ pub struct CommunitySearch {
     pub badges: MutableVec<Badge>,
     pub badge_count: Mutable<u32>,
     pub loader: AsyncLoader,
+    pub query: CommunitySearchQuery,
 }
 
 impl CommunitySearch {
-    pub fn new(_search: CommunitySearchQuery) -> Rc<Self> {
+    pub fn new(query: CommunitySearchQuery) -> Rc<Self> {
         Rc::new(Self {
             members: MutableVec::new(),
             member_count: Mutable::new(0),
             badges: MutableVec::new(),
             badge_count: Mutable::new(0),
             loader: AsyncLoader::new(),
+            query,
         })
     }
 }
