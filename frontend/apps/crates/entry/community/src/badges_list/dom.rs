@@ -18,7 +18,7 @@ impl BadgesList {
         state.load_badges();
 
         html!("community-list", {
-            .property("header", "badges")
+            .property("header", "Badges")
             .child(html!("button-rect", {
                 .property("slot", "create-button")
                 .property("color", "blue")
