@@ -22,12 +22,12 @@ pub async fn get(db: &PgPool, user_id: Uuid) -> sqlx::Result<PublicUser> {
             bio,
             profile_image_id       as "profile_image?: ImageId",
             (select language from user_profile where user_profile.user_id = "user".id and language_public is true)      as "language?",
-            (select organization from user_profile where user_profile.user_id = "user".id and organization_public is true)  as "organization?", 
-            (select array(select language from user_profile where user_profile.user_id = "user".id and persona_public is true))      as "persona!:Vec<String>", 
-            (select location from user_profile where user_profile.user_id = "user".id and location_public is true)      as "location?", 
-            array(select badge.id 
-                from badge_member bm 
-                inner join badge on bm.id = badge.id 
+            (select organization from user_profile where user_profile.user_id = "user".id and organization_public is true)  as "organization?",
+            (select array(select language from user_profile where user_profile.user_id = "user".id and persona_public is true))      as "persona!:Vec<String>",
+            (select location from user_profile where user_profile.user_id = "user".id and location_public is true)      as "location?",
+            array(select badge.id
+                from badge_member bm
+                inner join badge on bm.id = badge.id
                 where bm.user_id = "user".id
             ) as "badges!: Vec<BadgeId>"
         from "user"
@@ -68,27 +68,26 @@ pub async fn browse_users(
                 bio                    as "bio!",
                 profile_image_id       as "profile_image?: ImageId",
                 (select language from user_profile where user_profile.user_id = "user".id and language_public is true)      as "language?",
-                (select organization from user_profile where user_profile.user_id = "user".id and organization_public is true)  as "organization?", 
-                (select array(select persona from user_profile where user_profile.user_id = "user".id and persona_public is true))      as "persona!: Vec<String>", 
-                (select location from user_profile where user_profile.user_id = "user".id and location_public is true)      as "location?", 
-                (select array(select badge.id 
-                    from badge_member bm 
-                    inner join badge on bm.id = badge.id 
+                (select organization from user_profile where user_profile.user_id = "user".id and organization_public is true)  as "organization?",
+                (select array(select persona from user_profile where user_profile.user_id = "user".id and persona_public is true))      as "persona!: Vec<String>",
+                (select location from user_profile where user_profile.user_id = "user".id and location_public is true)      as "location?",
+                (select array(select badge.id
+                    from badge_member bm
+                    inner join badge on bm.id = badge.id
                     where bm.user_id = "user".id
                 )) as "badges!: Vec<(BadgeId,)>"
             from "user"
             inner join user_profile on "user".id = user_profile.user_id
             inner join cte1 on cte1.id = "user".id
             where ord > (1 * $1 * $2)
-            order by ord 
+            order by ord
             limit $2
             "#,
             page as i32,
             page_limit as i32,
         )
             .fetch_all(&mut txn)
-            .await
-            .map_err(|_| anyhow::anyhow!("failed to fetch users"))?;
+            .await?;
 
     let res: Vec<_> = user_data
         .into_iter()
@@ -278,12 +277,12 @@ pub async fn get_by_ids(db: &PgPool, ids: &[Uuid]) -> sqlx::Result<Vec<PublicUse
                 bio                    as "bio!",
                 profile_image_id       as "profile_image?: ImageId",
                 (select language from user_profile where user_profile.user_id = "user".id and language_public is true)      as "language?",
-                (select organization from user_profile where user_profile.user_id = "user".id and organization_public is true)  as "organization?", 
-                (select array(select persona from user_profile where user_profile.user_id = "user".id and persona_public is true))      as "persona!: Vec<String>", 
-                (select location from user_profile where user_profile.user_id = "user".id and location_public is true)      as "location?", 
-                (select array(select badge.id 
-                    from badge_member bm 
-                    inner join badge on bm.id = badge.id 
+                (select organization from user_profile where user_profile.user_id = "user".id and organization_public is true)  as "organization?",
+                (select array(select persona from user_profile where user_profile.user_id = "user".id and persona_public is true))      as "persona!: Vec<String>",
+                (select location from user_profile where user_profile.user_id = "user".id and location_public is true)      as "location?",
+                (select array(select badge.id
+                    from badge_member bm
+                    inner join badge on bm.id = badge.id
                     where bm.user_id = "user".id
                 )) as "badges!: Vec<(BadgeId,)>"
                 from "user"
@@ -398,8 +397,8 @@ pub async fn browse_followers(
     let user_data = sqlx::query!(
         r#"
         with followers as (
-            select follower_id 
-            from user_follow 
+            select follower_id
+            from user_follow
             where user_id = $1
             order by coalesce(followed_at) desc
         )
@@ -416,7 +415,7 @@ pub async fn browse_followers(
                 (select array(select badge.id
                     from badge_member bm
                     left join badge on bm.id = badge.id
-                    where bm.user_id = "user".id or badge.creator_id = "user".id 
+                    where bm.user_id = "user".id or badge.creator_id = "user".id
                 )) as "badges!: Vec<BadgeId>"
             from "user"
             inner join user_profile on "user".id = user_profile.user_id
@@ -464,8 +463,8 @@ pub async fn browse_following(
     let user_data = sqlx::query!(
         r#"
         with following as (
-            select user_id 
-            from user_follow 
+            select user_id
+            from user_follow
             where follower_id = $1
             order by coalesce(followed_at) desc
         )
@@ -482,7 +481,7 @@ pub async fn browse_following(
                 array(select badge.id
                     from badge_member bm
                     left join badge on bm.id = badge.id
-                    where bm.user_id = "user".id or badge.creator_id = "user".id 
+                    where bm.user_id = "user".id or badge.creator_id = "user".id
                 ) as "badges!: Vec<BadgeId>"
             from "user"
             inner join user_profile on "user".id = user_profile.user_id
@@ -571,7 +570,7 @@ pub async fn total_follower_count(db: &PgPool, user_id: Uuid) -> sqlx::Result<u6
     let total_follower = sqlx::query!(
         r#"
         select count(follower_id)  as "count!: i64"
-        from user_follow 
+        from user_follow
         where user_id = $1
             "#,
         user_id
@@ -586,7 +585,7 @@ pub async fn total_following_count(db: &PgPool, follower_id: Uuid) -> sqlx::Resu
     let total_following = sqlx::query!(
         r#"
         select count(user_id)  as "count!: i64"
-        from user_follow 
+        from user_follow
         where follower_id = $1
             "#,
         follower_id
