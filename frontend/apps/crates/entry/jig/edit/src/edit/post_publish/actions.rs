@@ -13,9 +13,9 @@ use utils::{
     routes::{AssetEditRoute, AssetRoute, JigEditRoute, Route},
 };
 
-use super::state::State;
+use super::state::PostPublish;
 
-pub fn create_jig(state: Rc<State>) {
+pub fn create_jig(state: Rc<PostPublish>) {
     let jig_focus = state.jig_edit_state.jig_focus;
 
     state.loader.load(async move {

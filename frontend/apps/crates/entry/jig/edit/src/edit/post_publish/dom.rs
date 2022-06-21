@@ -1,6 +1,6 @@
 use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
-use shared::domain::jig::{JigFocus, JigId};
+use shared::domain::jig::JigFocus;
 use utils::{
     events,
     jig::JigPlayerOptions,
@@ -9,32 +9,33 @@ use utils::{
 
 use crate::edit::state::AssetPlayerSettings;
 
-use super::{super::state::State as JigEditState, actions, state::*};
+use super::{actions, state::*};
 use std::rc::Rc;
 
-pub fn render(jig_id: JigId, jig_edit_state: Rc<JigEditState>) -> Dom {
-    let state = Rc::new(State::new(jig_id, jig_edit_state));
-
-    html!("post-publish", {
-        .property("slot", "main")
-        .apply(clone!(state => move |dom| {
-            match state.jig_edit_state.jig_focus {
-                JigFocus::Resources => {
-                    dom.children(
-                        render_resources_focused_actions(&state)
-                    )
-                },
-                _ => {
-                    dom.children(
-                        render_modules_focused_actions(&state)
-                    )
-                },
-            }
-        }))
-    })
+impl PostPublish {
+    pub fn render(self: Rc<Self>) -> Dom {
+        let state = self;
+        html!("post-publish", {
+            .property("slot", "main")
+            .apply(clone!(state => move |dom| {
+                match state.jig_edit_state.jig_focus {
+                    JigFocus::Resources => {
+                        dom.children(
+                            render_resources_focused_actions(&state)
+                        )
+                    },
+                    _ => {
+                        dom.children(
+                            render_modules_focused_actions(&state)
+                        )
+                    },
+                }
+            }))
+        })
+    }
 }
 
-fn render_modules_focused_actions(state: &Rc<State>) -> Vec<Dom> {
+fn render_modules_focused_actions(state: &Rc<PostPublish>) -> Vec<Dom> {
     let share_anchor = html!("post-publish-action", {
         .property("kind", "share")
         .property_signal("active", state.share_state.active_popup.signal_cloned().map(|active| active.is_some()))
@@ -60,7 +61,7 @@ fn render_modules_focused_actions(state: &Rc<State>) -> Vec<Dom> {
     ]
 }
 
-fn render_resources_focused_actions(state: &Rc<State>) -> Vec<Dom> {
+fn render_resources_focused_actions(state: &Rc<PostPublish>) -> Vec<Dom> {
     vec![
         html!("post-publish-action", {
             .property("slot", "actions")

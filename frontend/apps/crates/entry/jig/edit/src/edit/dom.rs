@@ -4,7 +4,7 @@ use super::{
     super::edit::publish::Publish,
     course::jig_selection::state::JigSelection,
     iframe::dom::IframeDom,
-    post_publish::dom::render as render_post_publish,
+    post_publish::PostPublish,
     selection::dom::SelectionDom,
     sidebar::dom::SidebarDom,
     state::{AssetPlayerSettings, State},
@@ -68,7 +68,10 @@ impl EditPage {
                                     Some(Publish::render(Rc::clone(&state)))
                                 }
                                 JigEditRoute::PostPublish => {
-                                    Some(render_post_publish(*asset_id.unwrap_jig(), Rc::clone(&state)))
+                                    Some(PostPublish::new(
+                                        *asset_id.unwrap_jig(),
+                                        Rc::clone(&state)
+                                    ).render())
                                 }
                             }
                         },
