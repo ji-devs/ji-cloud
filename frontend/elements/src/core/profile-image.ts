@@ -9,8 +9,11 @@ export class _ extends LitElement {
             css`
                 img-ui,
                 img-ji {
+                    display: inline-block;
                     height: inherit;
                     width: inherit;
+                    border-radius: 50%;
+                    overflow: hidden;
                 }
             `,
         ];

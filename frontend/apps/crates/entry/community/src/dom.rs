@@ -28,6 +28,8 @@ const STR_SEARCH: &str = "Hebrew teachers";
 impl Community {
     pub fn render(self: &Rc<Self>) -> Dom {
         let state = self;
+        state.load_data();
+
         html!("community-main", {
             .children(&mut [
                 page_header::dom::render(
@@ -79,7 +81,10 @@ impl Community {
                 CommunityRoute::Members(route) => match route {
                     CommunityMembersRoute::List => MembersList::new().render(),
                     CommunityMembersRoute::Member(member_id) => {
-                        MemberDetails::new(member_id).render()
+                        MemberDetails::new(
+                            Rc::clone(&state),
+                            member_id
+                        ).render()
                     }
                 },
                 CommunityRoute::Badges(route) => match route {

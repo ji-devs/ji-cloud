@@ -4,6 +4,7 @@
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
+mod actions;
 mod badge_details;
 mod badges_list;
 mod dom;

@@ -19,7 +19,28 @@ export class _ extends LitElement {
                 :host {
                     display: grid;
                     grid-template-columns: 300px 1fr;
+                    align-items: start;
                     gap: 40px;
+                }
+                .top {
+                    grid-column: 1 / -1;
+                    display: grid;
+                    grid-template-columns: 120px 1fr auto;
+                    align-items: start;
+                    column-gap: 32px;
+                }
+                .top ::slotted(profile-image) {
+                    display: inline-block;
+                    height: 120px;
+                    width: 120px;
+                    border-radius: 50%;
+                    overflow: hidden;
+                }
+                .top h1 {
+                    font-size: 40px;
+                    font-weight: 800;
+                    color: var(--dark-blue-4);
+                    margin: 0;
                 }
                 section {
                     padding: 40px;
@@ -48,7 +69,11 @@ export class _ extends LitElement {
                     font-size: 22px;
                     text-align: center;
                 }
-                .creation-tabs {
+                .right-sections {
+                    display: grid;
+                    gap: inherit;
+                }
+                .creation-tabs, .connection-tabs {
                     border-bottom: var(--main-blue) 1px solid;
                     margin: 40px 0;
                 }
@@ -60,6 +85,9 @@ export class _ extends LitElement {
             `,
         ];
     }
+
+    @property()
+    name: string = "";
 
     @property()
     city?: string;
@@ -78,6 +106,11 @@ export class _ extends LitElement {
 
     render() {
         return html`
+            <div class="top">
+                <slot name="profile-image"></slot>
+                <h1>${this.name}</h1>
+                <slot name="follow"></slot>
+            </div>
             <section class="about">
                 <h3>${STR_ABOUT}</h3>
                 ${
@@ -124,15 +157,26 @@ export class _ extends LitElement {
                 <hr>
                 <h3>${STR_BADGE}</h3>
             </section>
-            <section class="creations">
-                <h3>${STR_CREATIONS}</h3>
-                <div class="creation-tabs">
-                    <slot name="creation-tabs"></slot>
-                </div>
-                <div class="creation-assets">
-                    <slot name="creation-assets"></slot>
-                </div>
-            </section>
+            <div class="right-sections">
+                <section class="creations">
+                    <h3>${STR_CREATIONS}</h3>
+                    <div class="creation-tabs">
+                        <slot name="creation-tabs"></slot>
+                    </div>
+                    <div class="creation-assets">
+                        <slot name="creation-assets"></slot>
+                    </div>
+                </section>
+                <section class="connections">
+                    <h3>${STR_CREATIONS}</h3>
+                    <div class="connection-tabs">
+                        <slot name="connection-tabs"></slot>
+                    </div>
+                    <div class="connection-members">
+                        <slot name="connection-members"></slot>
+                    </div>
+                </section>
+            </div>
         `;
     }
 }

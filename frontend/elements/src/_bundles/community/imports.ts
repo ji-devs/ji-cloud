@@ -17,6 +17,7 @@ import "@elements/entry/community/list-badge";
 import "@elements/entry/community/list-badge-header";
 import "@elements/entry/community/member-details";
 import "@elements/entry/community/member-details-tab";
+import "@elements/entry/community/member-details-connection";
 import "@elements/entry/community/list-member";
 import "@elements/entry/community/list-member-header";
 import "@elements/entry/community/asset";
