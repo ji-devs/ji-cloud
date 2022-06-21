@@ -1,6 +1,6 @@
 use components::{
     module::_common::thumbnail::{ModuleThumbnail, ThumbnailFallback},
-    share_jig::ShareJig,
+    share_asset::ShareAsset,
 };
 use dominator::{clone, html, Dom};
 use futures_signals::{
@@ -68,7 +68,7 @@ impl SearchResultsSection {
     fn render_result(self: &Rc<Self>, jig: &JigResponse) -> Dom {
         let state = self;
         let jig_ages = jig.jig_data.age_ranges.clone();
-        let share_jig = ShareJig::new(jig.id);
+        let share_jig = ShareAsset::new(jig.id.into());
 
         html!("home-search-result", {
             .property("slot", "results")

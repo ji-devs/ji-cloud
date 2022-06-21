@@ -6,16 +6,16 @@ use gloo_timers::callback::Timeout;
 use shared::{api::endpoints::jig, domain::jig::JigPlayerSettings};
 use utils::prelude::*;
 
-use super::state::ShareJig;
+use super::state::ShareAsset;
 
 const COPIED_TIMEOUT: u32 = 3_000;
 
-impl ShareJig {
+impl ShareAsset {
     pub(super) fn generate_student_code(self: &Rc<Self>) {
         let state = self;
         state.loader.load(clone!(state => async move {
             let req = shared::domain::jig::player::JigPlayerSessionCreateRequest {
-                jig_id: state.jig_id,
+                jig_id: *state.asset_id.unwrap_jig(),
                 settings: JigPlayerSettings::default(),
             };
 

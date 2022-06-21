@@ -65,7 +65,7 @@ impl AssetEditState {
                                 }
                                 JigEditRoute::PostPublish => {
                                     Some(PostPublish::new(
-                                        *state.asset_id.unwrap_jig(),
+                                        state.asset_id,
                                         Rc::clone(&state)
                                     ).render())
                                 }
@@ -85,7 +85,10 @@ impl AssetEditState {
                                     Some(Publish::render(Rc::clone(&state)))
                                 },
                                 CourseEditRoute::PostPublish => {
-                                    todo!()
+                                    Some(PostPublish::new(
+                                        state.asset_id,
+                                        Rc::clone(&state)
+                                    ).render())
                                 },
                             }
                         },

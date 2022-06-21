@@ -48,7 +48,7 @@ pub mod pdf;
 #[cfg(feature = "player_popup")]
 pub mod player_popup;
 #[cfg(feature = "share_jig")]
-pub mod share_jig;
+pub mod share_asset;
 #[cfg(feature = "stickers")]
 pub mod stickers;
 #[cfg(feature = "tabs")]

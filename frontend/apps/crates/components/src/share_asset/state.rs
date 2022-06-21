@@ -2,27 +2,27 @@ use std::rc::Rc;
 
 use awsm_web::loaders::helpers::AsyncLoader;
 use futures_signals::signal::Mutable;
-use shared::domain::jig::JigId;
+use shared::domain::asset::AssetId;
 use utils::jig::JigPlayerOptions;
 use utils::routes::{AssetRoute, Route};
 
 use utils::prelude::*;
 
-pub struct ShareJig {
+pub struct ShareAsset {
     pub active_popup: Mutable<Option<ActivePopup>>,
     pub student_code: Mutable<Option<String>>,
     pub loader: AsyncLoader,
-    pub jig_id: JigId,
+    pub asset_id: AssetId,
     pub copied_embed: Mutable<bool>,
     pub link_copied: Mutable<bool>,
     pub copied_student_url: Mutable<bool>,
     pub copied_student_code: Mutable<bool>,
 }
 
-impl ShareJig {
-    pub fn new(jig_id: JigId) -> Rc<Self> {
+impl ShareAsset {
+    pub fn new(asset_id: AssetId) -> Rc<Self> {
         Rc::new(Self {
-            jig_id,
+            asset_id,
             student_code: Mutable::new(None),
             loader: AsyncLoader::new(),
             active_popup: Mutable::new(None),
@@ -42,15 +42,18 @@ impl ShareJig {
     }
 
     pub fn jig_link(&self, is_student: bool) -> String {
-        let url = Route::Asset(AssetRoute::Play(AssetPlayRoute::Jig(
-            self.jig_id,
-            None,
-            JigPlayerOptions {
-                is_student,
-                ..Default::default()
-            },
-        )))
-        .to_string();
+        let url = match self.asset_id {
+            AssetId::JigId(jig_id) => Route::Asset(AssetRoute::Play(AssetPlayRoute::Jig(
+                jig_id,
+                None,
+                JigPlayerOptions {
+                    is_student,
+                    ..Default::default()
+                },
+            )))
+            .to_string(),
+            AssetId::CourseId(_) => todo!(),
+        };
         let origin = web_sys::window()
             .unwrap_ji()
             .location()

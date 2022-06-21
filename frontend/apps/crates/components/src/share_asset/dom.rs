@@ -14,7 +14,7 @@ use web_sys::{window, HtmlElement};
 
 use crate::overlay::handle::OverlayHandle;
 
-use super::state::{ActivePopup, ShareJig};
+use super::state::{ActivePopup, ShareAsset};
 
 const STR_BACK: &str = "Back";
 const STR_STUDENTS_COPY_CODE_LABEL: &str = "Copy code";
@@ -29,7 +29,7 @@ const STR_EMBED_LABEL: &str = "Embed this JIG";
 const STR_COPY_LABEL: &str = "Copy JIG link";
 const STR_COPIED_LABEL: &str = "JIG link copied";
 
-impl ShareJig {
+impl ShareAsset {
     pub fn render(self: Rc<Self>, anchor: Dom, slot: Option<&str>) -> Dom {
         let state = self;
         html!("empty-fragment" => HtmlElement, {
@@ -130,7 +130,7 @@ impl ShareJig {
                     }))
                     .event(clone!(state => move|_: events::Click| {
                         clipboard::write_text(&state.jig_link(false));
-                        ShareJig::set_copied_mutable(state.link_copied.clone());
+                        ShareAsset::set_copied_mutable(state.link_copied.clone());
                     }))
                 }),
             ])
@@ -197,7 +197,7 @@ impl ShareJig {
                             let url = unsafe { SETTINGS.get_unchecked().remote_target.pages_url_iframe() };
                             let url = url + &Route::Kids(KidsRoute::StudentCode(Some(student_code.clone()))).to_string();
                             clipboard::write_text(&url);
-                            ShareJig::set_copied_mutable(state.copied_student_url.clone());
+                            ShareAsset::set_copied_mutable(state.copied_student_url.clone());
                         };
                     }))
                 }),
@@ -212,7 +212,7 @@ impl ShareJig {
                     .event(clone!(state => move|_: events::Click| {
                         let student_code = state.student_code.get_cloned().unwrap_ji();
                         clipboard::write_text(&student_code);
-                        ShareJig::set_copied_mutable(state.copied_student_code.clone());
+                        ShareAsset::set_copied_mutable(state.copied_student_code.clone());
                     }))
                 }),
             ])
@@ -250,7 +250,7 @@ impl ShareJig {
                         }))
                         .event(clone!(state => move |_: events::Click| {
                             clipboard::write_text(&state.embed_code());
-                            ShareJig::set_copied_mutable(state.copied_embed.clone());
+                            ShareAsset::set_copied_mutable(state.copied_embed.clone());
                         }))
                     }))
                     .event_with_options(

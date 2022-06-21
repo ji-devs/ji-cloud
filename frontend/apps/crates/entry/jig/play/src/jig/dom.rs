@@ -1,5 +1,5 @@
 use super::{actions, sidebar};
-use components::share_jig::ShareJig;
+use components::share_asset::ShareAsset;
 use dominator::{clone, events, html, with_node, Dom};
 use dominator_helpers::{events::Message, signals::DefaultSignal};
 use futures_signals::map_ref;
@@ -277,7 +277,7 @@ fn render_done_popup(state: Rc<JigPlayer>) -> impl Signal<Item = Option<Dom>> {
                                 );
                             }
                             if !state.player_options.is_student {
-                                dom = dom.child(ShareJig::new(state.jig_id).render(
+                                dom = dom.child(ShareAsset::new(state.jig_id.into()).render(
                                     html!("jig-play-done-action", {
                                         .text("share")
                                         .property("kind", "share")
