@@ -246,7 +246,7 @@ fn render_page(state: Rc<Publish>) -> Dom {
                     .child(html!("button-rect", {
                         .text(STR_PUBLISH)
                         .text(state.asset_type_name())
-                        .property("disabled", state.is_ready_to_publish())
+                        .property("disabled", !state.is_ready_to_publish())
                         .child(html!("fa-icon", {
                             .property("icon", "fa-light fa-rocket-launch")
                             .style("color", "var(--main-yellow)")

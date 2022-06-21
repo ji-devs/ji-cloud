@@ -101,7 +101,7 @@ impl Publish {
     pub fn is_ready_to_publish(self: &Rc<Self>) -> bool {
         match &self.asset {
             EditableAsset::Jig(jig) => match jig.jig_focus {
-                JigFocus::Modules => jig.modules.iter().any(|m| !m.is_complete),
+                JigFocus::Modules => jig.modules.iter().all(|m| m.is_complete),
                 JigFocus::Resources => jig.cover.is_some(),
             },
             EditableAsset::Course(course) => course.cover.is_some(),
