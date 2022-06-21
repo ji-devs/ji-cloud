@@ -199,7 +199,6 @@ limit 50 for no key update skip locked;
         }
 
         for t in descriptions {
-            println!("Descriptions {}", t.text);
             let descriptions: Option<Option<HashMap<String, String>>> =
                 multi_translation(&t.text, &self.api_key).await.ok();
 
@@ -233,8 +232,6 @@ limit 50 for no key update skip locked;
         }
 
         for t in names {
-            println!("names: {}", t.text);
-
             let names: Option<Option<HashMap<String, String>>> =
                 multi_translation(&t.text, &self.api_key).await.ok();
 
@@ -327,8 +324,6 @@ limit 50 for no key update skip locked;
         }
 
         for t in descriptions {
-            println!("Descriptions {}", t.text);
-
             let res: Option<Option<HashMap<String, String>>> =
                 multi_translation(&t.text, &self.api_key).await.ok();
 
@@ -362,8 +357,6 @@ limit 50 for no key update skip locked;
         }
 
         for t in display_names {
-            println!("names {}", t.text);
-
             let res: Option<Option<HashMap<String, String>>> =
                 multi_translation(&t.text, &self.api_key).await.ok();
 
@@ -456,8 +449,6 @@ limit 50 for no key update skip locked;
         }
 
         for t in descriptions {
-            println!("Descriptions {}", t.text);
-
             let res: Option<Option<HashMap<String, String>>> =
                 multi_translation(&t.text, &self.api_key).await.ok();
 
@@ -491,8 +482,6 @@ limit 50 for no key update skip locked;
         }
 
         for t in names {
-            println!("names {}", t.text);
-
             let res: Option<Option<HashMap<String, String>>> =
                 multi_translation(&t.text, &self.api_key).await.ok();
 
