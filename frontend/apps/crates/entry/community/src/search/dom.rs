@@ -40,8 +40,8 @@ impl CommunitySearch {
             .class(&*MEMBER_LIST_GRID_COLUMNS)
             .property("slot", "members")
             .property("name", &format!("{} {}", member.given_name, member.family_name))
-            .property("city", "New York")
-            .property("state", "NY")
+            // .property("city", "New York")
+            // .property("state", "NY")
             .apply(|mut dom| {
                 if let Some(language) = &member.language {
                     dom = dom.property("language", language);
