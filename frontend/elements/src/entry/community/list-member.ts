@@ -14,7 +14,7 @@ export class _ extends LitElement {
                     padding: 12px 24px;
                     display: grid;
                     align-items: center;
-                    grid-template-columns: auto auto auto auto auto;
+                    justify-content: space-between;
                     column-gap: 24px;
                     border-radius: 16px;
                     box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.08);

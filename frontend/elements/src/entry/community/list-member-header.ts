@@ -18,7 +18,7 @@ export class _ extends LitElement {
                     border-radius: 8px;
                     display: grid;
                     align-items: center;
-                    grid-template-columns: auto auto auto auto;
+                    justify-content: space-between;
                 }
                 .name {
                     grid-column: 2;

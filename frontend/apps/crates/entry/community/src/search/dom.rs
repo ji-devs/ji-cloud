@@ -11,6 +11,8 @@ use wasm_bindgen::JsValue;
 
 use super::CommunitySearch;
 
+use crate::state::{BADGE_LIST_GRID_COLUMNS, MEMBER_LIST_GRID_COLUMNS};
+
 const STR_SEE_MORE: &str = "See more";
 
 impl CommunitySearch {
@@ -35,6 +37,7 @@ impl CommunitySearch {
 
     fn render_member(self: &Rc<Self>, member: &PublicUser) -> Dom {
         html!("community-list-member", {
+            .class(&*MEMBER_LIST_GRID_COLUMNS)
             .property("slot", "members")
             .property("name", &format!("{} {}", member.given_name, member.family_name))
             .property("city", "New York")
@@ -62,6 +65,7 @@ impl CommunitySearch {
 
     fn render_badge(self: &Rc<Self>, badge: &Badge) -> Dom {
         html!("community-list-badge", {
+            .class(&*BADGE_LIST_GRID_COLUMNS)
             .property("slot", "badges")
             .property("name", &badge.display_name)
             .property("member-count", badge.member_count)

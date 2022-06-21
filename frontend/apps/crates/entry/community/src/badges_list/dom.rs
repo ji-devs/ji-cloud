@@ -10,6 +10,8 @@ use utils::{
 };
 use web_sys::HtmlInputElement;
 
+use crate::state::BADGE_LIST_GRID_COLUMNS;
+
 use super::{create_badge::CreateBadge, BadgesList};
 
 impl BadgesList {
@@ -28,6 +30,7 @@ impl BadgesList {
                 }))
             }))
             .child(html!("community-list-badge-header", {
+                .class(&*BADGE_LIST_GRID_COLUMNS)
                 .property("slot", "sort-header")
             }))
             .child(html!("community-pagination", {
@@ -127,6 +130,7 @@ impl BadgesList {
 
     fn render_badge(self: &Rc<Self>, badge: &Badge) -> Dom {
         html!("community-list-badge", {
+            .class(&*BADGE_LIST_GRID_COLUMNS)
             .property("slot", "items")
             .property("name", &badge.display_name)
             .property("member-count", badge.member_count)
