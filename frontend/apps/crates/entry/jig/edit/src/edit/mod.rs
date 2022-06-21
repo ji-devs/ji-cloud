@@ -1,9 +1,12 @@
-pub mod actions;
-pub(super) mod course;
-pub mod dom;
-pub(super) mod iframe;
-pub(super) mod post_publish;
-pub(super) mod publish;
-pub(super) mod selection;
-pub(super) mod sidebar;
-pub(super) mod state;
+mod actions;
+mod course;
+mod dom;
+mod iframe;
+mod post_publish;
+mod publish;
+mod selection;
+mod sidebar;
+mod state;
+
+pub use dom::*;
+pub use state::*;

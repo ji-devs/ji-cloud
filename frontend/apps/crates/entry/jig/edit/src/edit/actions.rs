@@ -1,7 +1,7 @@
-use super::state::*;
+use super::state::AssetEditState;
 use utils::{storage, unwrap::UnwrapJiExt};
 
-impl State {
+impl AssetEditState {
     pub fn set_permanently_closed(&self) {
         let _ = storage::get_local_storage()
             .unwrap_ji()

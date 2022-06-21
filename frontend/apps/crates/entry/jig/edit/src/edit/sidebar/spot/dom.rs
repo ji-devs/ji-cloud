@@ -108,7 +108,7 @@ impl ItemDom {
                                         jig_spot_actions::edit(state.clone())
                                     },
                                     None => {
-                                        state.sidebar.jig_edit_state.set_route_jig(JigEditRoute::Landing);
+                                        state.sidebar.asset_edit_state.set_route_jig(JigEditRoute::Landing);
                                     },
                                 }
                             },
@@ -135,7 +135,7 @@ impl ItemDom {
                                 }
                             }
                         }))
-                        .child_signal(state.sidebar.jig_edit_state.route.signal_ref(clone!(state, module => move |route| {
+                        .child_signal(state.sidebar.asset_edit_state.route.signal_ref(clone!(state, module => move |route| {
                             match &module.item {
                                 SidebarSpotItem::Jig(module) => {
                                     match (&*module, route) {

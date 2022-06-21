@@ -15,7 +15,7 @@ use super::add_additional_resource::AddAdditionalResource;
 use super::additional_resource::AdditionalResourceComponent;
 
 use super::state::Publish;
-use super::{super::state::State as JigEditState, editable_assets::EditableAsset};
+use super::{super::state::AssetEditState, editable_assets::EditableAsset};
 use components::{
     hebrew_buttons::HebrewButtons,
     module::_common::thumbnail::{ModuleThumbnail, ThumbnailFallback},
@@ -52,12 +52,12 @@ const STR_PUBLIC_POPUP_BODY_3: &str = " with the Jigzi community.";
 const STR_MISSING_INFO_TOOLTIP: &str = "Please fill in the missing information.";
 
 impl Publish {
-    pub fn render(jig_edit_state: Rc<JigEditState>) -> Dom {
+    pub fn render(asset_edit_state: Rc<AssetEditState>) -> Dom {
         let state: Mutable<Option<Rc<Publish>>> = Mutable::new(None);
 
         html!("empty-fragment", {
             .future(clone!(state => async move {
-                let _state = Publish::load_new(jig_edit_state).await;
+                let _state = Publish::load_new(asset_edit_state).await;
                 state.set(Some(Rc::new(_state)));
             }))
             .property("slot", "main")
@@ -221,7 +221,7 @@ fn render_page(state: Rc<Publish>) -> Dom {
                 .event(clone!(state => move |_: events::Click| {
                     let url = match &state.asset {
                         EditableAsset::Jig(jig) => {
-                            state.jig_edit_state.set_route_jig(JigEditRoute::Landing);
+                            state.asset_edit_state.set_route_jig(JigEditRoute::Landing);
                             Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
                                 jig.id,
                                 jig.jig_focus,
@@ -229,7 +229,7 @@ fn render_page(state: Rc<Publish>) -> Dom {
                             ))).to_string()
                         },
                         EditableAsset::Course(course) => {
-                            state.jig_edit_state.set_route_jig(JigEditRoute::Landing);
+                            state.asset_edit_state.set_route_jig(JigEditRoute::Landing);
                             Route::Asset(AssetRoute::Edit(AssetEditRoute::Course(
                                 course.id,
                                 CourseEditRoute::Landing

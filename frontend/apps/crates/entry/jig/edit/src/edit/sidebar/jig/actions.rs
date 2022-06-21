@@ -44,7 +44,7 @@ pub async fn load_jig(jig_id: JigId, jig_mutable: Mutable<Option<Asset>>) {
 }
 
 pub fn navigate_to_publish(state: Rc<State>, jig: &JigResponse) {
-    state.jig_edit_state.set_route_jig(JigEditRoute::Publish);
+    state.asset_edit_state.set_route_jig(JigEditRoute::Publish);
     state.collapsed.set(true);
 
     let jig_id = jig.id;
@@ -133,7 +133,7 @@ pub fn on_iframe_message(state: Rc<State>, message: ModuleToJigEditorMessage) {
             }
         }
         ModuleToJigEditorMessage::Next => {
-            state.jig_edit_state.set_route_jig(JigEditRoute::Landing);
+            state.asset_edit_state.set_route_jig(JigEditRoute::Landing);
             let jig_id = state.asset.unwrap_jig().id;
             Route::push_state(Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
                 jig_id,
@@ -159,7 +159,7 @@ fn populate_added_module(state: Rc<State>, module: LiteModule) {
         .insert_cloned(insert_at_idx, SidebarSpot::new_jig_module(Some(module)));
 
     state
-        .jig_edit_state
+        .asset_edit_state
         .set_route_jig(JigEditRoute::Module(module_id));
 }
 

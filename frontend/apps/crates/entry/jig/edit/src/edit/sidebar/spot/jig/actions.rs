@@ -17,7 +17,7 @@ pub fn edit(state: Rc<SpotState>) {
         let module_id = module.id;
         state
             .sidebar
-            .jig_edit_state
+            .asset_edit_state
             .route
             .set_neq(AssetEditRoute::Jig(
                 jig_id,
@@ -110,7 +110,7 @@ pub fn assign_kind(state: Rc<SpotState>, kind: ModuleKind) {
                 match jig_actions::update_module(&id, req).await {
                     Ok(_) => {
                         state.sidebar.collapsed.set(true);
-                        state.sidebar.jig_edit_state.set_route_jig(JigEditRoute::Module(id));
+                        state.sidebar.asset_edit_state.set_route_jig(JigEditRoute::Module(id));
                         Route::push_state(Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
                             jig_id,
                             JigFocus::Modules,

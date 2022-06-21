@@ -7,7 +7,7 @@ use super::{
     post_publish::PostPublish,
     selection::dom::SelectionDom,
     sidebar::dom::SidebarDom,
-    state::{AssetPlayerSettings, State},
+    state::{AssetEditState, AssetPlayerSettings},
 };
 use components::{
     overlay::handle::OverlayHandle,
@@ -15,17 +15,13 @@ use components::{
 };
 use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
-use shared::domain::{asset::AssetId, jig::JigFocus};
 use utils::prelude::*;
 
 const STR_YT_VIDEO_ID: &str = "x4FYtTpQAt0";
 
-pub struct EditPage {}
-
-impl EditPage {
-    pub fn render(asset_id: AssetId, jig_focus: JigFocus, route: AssetEditRoute) -> Dom {
-        let state = Rc::new(State::new(asset_id, jig_focus, route));
-
+impl AssetEditState {
+    pub fn render(self: Rc<Self>) -> Dom {
+        let state = self;
         html!("empty-fragment", {
             .child(html!("jig-edit-page", {
                 /*
@@ -48,9 +44,9 @@ impl EditPage {
                 })))
                 */
                 .apply_if(!state.jig_focus.is_resources(), |dom| {
-                    dom.child(SidebarDom::render(asset_id, state.clone()))
+                    dom.child(SidebarDom::render(state.asset_id, state.clone()))
                 })
-                .child_signal(state.route.signal_cloned().map(clone!(state, asset_id => move |route| {
+                .child_signal(state.route.signal_cloned().map(clone!(state => move |route| {
                     match route {
                         AssetEditRoute::Jig(_jig_id, _jig_focus, jig_edit_route) => {
                             match jig_edit_route {
@@ -62,14 +58,14 @@ impl EditPage {
                                     }
                                 },
                                 JigEditRoute::Module(module_id) => {
-                                    Some(IframeDom::render(*asset_id.unwrap_jig(), module_id))
+                                    Some(IframeDom::render(*state.asset_id.unwrap_jig(), module_id))
                                 },
                                 JigEditRoute::Publish => {
                                     Some(Publish::render(Rc::clone(&state)))
                                 }
                                 JigEditRoute::PostPublish => {
                                     Some(PostPublish::new(
-                                        *asset_id.unwrap_jig(),
+                                        *state.asset_id.unwrap_jig(),
                                         Rc::clone(&state)
                                     ).render())
                                 }
@@ -122,7 +118,7 @@ impl EditPage {
                                 state.play_jig.set(None);
                             });
                             PlayerPopup::new(
-                                *asset_id.unwrap_jig(),
+                                *state.asset_id.unwrap_jig(),
                                 settings,
                                 PreviewPopupCallbacks::new(close)
                             ).render(None)

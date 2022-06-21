@@ -16,7 +16,7 @@ use utils::{
 use super::state::PostPublish;
 
 pub fn create_jig(state: Rc<PostPublish>) {
-    let jig_focus = state.jig_edit_state.jig_focus;
+    let jig_focus = state.asset_edit_state.jig_focus;
 
     state.loader.load(async move {
         let req = JigCreateRequest {

@@ -19,16 +19,16 @@ use utils::{
 
 use crate::edit::publish::editable_assets::EditableAsset;
 
-use super::super::state::State as JigEditState;
+use super::super::state::AssetEditState;
 use super::state::Publish;
 
 mod course_actions;
 mod jig_actions;
 
 impl Publish {
-    pub async fn load_new(jig_edit_state: Rc<JigEditState>) -> Self {
+    pub async fn load_new(asset_edit_state: Rc<AssetEditState>) -> Self {
         let asset: Pin<Box<dyn Future<Output = Result<EditableAsset, ()>>>> =
-            match jig_edit_state.asset_id {
+            match asset_edit_state.asset_id {
                 AssetId::JigId(jig_id) => Box::pin(jig_actions::load_jig(jig_id)),
                 AssetId::CourseId(course_id) => Box::pin(course_actions::load_course(course_id)),
             };
@@ -53,7 +53,7 @@ impl Publish {
         #[allow(irrefutable_let_patterns)] // TODO: remove once enum has another option
         if let EditableAsset::Jig(jig) = &asset {
             assert_eq!(
-                jig_edit_state.jig_focus, jig.jig_focus,
+                asset_edit_state.jig_focus, jig.jig_focus,
                 "Jig focus doesn't match the route"
             );
         };
@@ -65,7 +65,7 @@ impl Publish {
             meta.age_ranges,
             meta.affiliations,
             meta.resource_types,
-            jig_edit_state,
+            asset_edit_state,
         )
     }
 
@@ -80,10 +80,11 @@ impl Publish {
                     None => JigEditRoute::Landing,
                 };
 
-                self.jig_edit_state.set_route_jig(route);
+                self.asset_edit_state.set_route_jig(route);
             }
             EditableAsset::Course(_) => {
-                self.jig_edit_state.set_route_course(CourseEditRoute::Cover);
+                self.asset_edit_state
+                    .set_route_course(CourseEditRoute::Cover);
             }
         };
     }
@@ -122,13 +123,13 @@ impl Publish {
                     jig_actions::save_and_publish_jig(jig)
                         .await
                         .unwrap_ji();
-                    state.jig_edit_state.set_route_jig(JigEditRoute::PostPublish);
+                    state.asset_edit_state.set_route_jig(JigEditRoute::PostPublish);
                 },
                 EditableAsset::Course(course) => {
                     course_actions::save_and_publish_course(course)
                         .await
                         .unwrap_ji();
-                    state.jig_edit_state.set_route_course(CourseEditRoute::PostPublish);
+                    state.asset_edit_state.set_route_course(CourseEditRoute::PostPublish);
                 }
             };
 

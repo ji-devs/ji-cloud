@@ -18,7 +18,7 @@ use utils::math::PointI32;
 
 use chrono::{DateTime, Utc};
 
-use super::super::state::State as JigEditState;
+use super::super::state::AssetEditState;
 
 /// Determines which window in the sidebar should be highlighted and show an error tooltip
 #[derive(Clone, PartialEq)]
@@ -31,7 +31,7 @@ pub enum ModuleHighlight {
 
 pub struct State {
     pub asset: Asset,
-    pub jig_edit_state: Rc<JigEditState>,
+    pub asset_edit_state: Rc<AssetEditState>,
     pub name: Mutable<String>,
     pub publish_at: Mutable<Option<DateTime<Utc>>>,
     pub modules: MutableVec<Rc<SidebarSpot>>,
@@ -47,7 +47,7 @@ pub struct State {
 }
 
 impl State {
-    pub fn new(jig: Asset, jig_edit_state: Rc<JigEditState>) -> Self {
+    pub fn new(jig: Asset, asset_edit_state: Rc<AssetEditState>) -> Self {
         let mut modules = match &jig {
             Asset::Jig(jig) => Self::get_jig_spots(jig),
             Asset::Course(course) => Self::get_course_spots(course),
@@ -69,7 +69,7 @@ impl State {
 
         Self {
             asset: jig,
-            jig_edit_state,
+            asset_edit_state,
             name: Mutable::new(jig_display_name),
             publish_at: Mutable::new(jig_published_at),
             modules: MutableVec::new_with_values(modules),

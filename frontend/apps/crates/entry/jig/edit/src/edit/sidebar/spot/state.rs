@@ -55,7 +55,7 @@ impl State {
     }
 
     pub fn window_state_signal(state: Rc<State>) -> impl Signal<Item = &'static str> {
-        state.sidebar.jig_edit_state.route.signal_ref(clone!(state => move |route| {
+        state.sidebar.asset_edit_state.route.signal_ref(clone!(state => move |route| {
             match &state.module.item {
                 SidebarSpotItem::Jig(module) => {
                     match module {
@@ -97,7 +97,7 @@ impl State {
         let state = Rc::clone(self);
         state
             .sidebar
-            .jig_edit_state
+            .asset_edit_state
             .route
             .signal_ref(clone!(state => move|route| {
                 match &state.module.item {

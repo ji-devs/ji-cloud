@@ -33,7 +33,7 @@ pub async fn load_course(course_id: CourseId, jig_mutable: Mutable<Option<Asset>
 #[allow(dead_code)] // TODO: remove once used
 pub fn navigate_to_publish(state: Rc<State>, course: &CourseResponse) {
     state
-        .jig_edit_state
+        .asset_edit_state
         .set_route_course(CourseEditRoute::Publish);
     state.collapsed.set(true);
 

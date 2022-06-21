@@ -3,7 +3,7 @@ use std::rc::Rc;
 use components::jigzi_help::JigziHelp;
 use dominator::{clone, html, Dom};
 
-use super::super::state::State;
+use super::super::state::AssetEditState;
 use super::module::dom::ModuleDom;
 use shared::domain::module::ModuleKind;
 use utils::events;
@@ -30,7 +30,7 @@ const STR_SHOW_ONBOARDING: &str = "Take the tour";
 pub struct SelectionDom {}
 
 impl SelectionDom {
-    pub fn render(state: Rc<State>) -> Dom {
+    pub fn render(state: Rc<AssetEditState>) -> Dom {
         html!("jig-edit-selection", {
             .property("slot", "main")
             .children(

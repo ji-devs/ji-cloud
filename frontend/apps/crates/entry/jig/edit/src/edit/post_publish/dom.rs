@@ -18,7 +18,7 @@ impl PostPublish {
         html!("post-publish", {
             .property("slot", "main")
             .apply(clone!(state => move |dom| {
-                match state.jig_edit_state.jig_focus {
+                match state.asset_edit_state.jig_focus {
                     JigFocus::Resources => {
                         dom.children(
                             render_resources_focused_actions(&state)
@@ -55,7 +55,7 @@ fn render_modules_focused_actions(state: &Rc<PostPublish>) -> Vec<Dom> {
             .property("slot", "actions")
             .event(clone!(state => move |_: events::Click| {
                 let settings = AssetPlayerSettings::Jig(JigPlayerOptions::default());
-                state.jig_edit_state.play_jig.set(Some(settings));
+                state.asset_edit_state.play_jig.set(Some(settings));
             }))
         }),
     ]

@@ -5,7 +5,7 @@ use futures::future::ready;
 use web_sys::{ScrollBehavior, ScrollIntoViewOptions};
 
 use super::{
-    super::state::State as JigEditState,
+    super::state::AssetEditState,
     actions,
     course::actions as course_actions,
     debug,
@@ -32,7 +32,7 @@ use utils::{
 pub struct SidebarDom {}
 
 impl SidebarDom {
-    pub fn render(asset_id: AssetId, jig_edit_state: Rc<JigEditState>) -> Dom {
+    pub fn render(asset_id: AssetId, asset_edit_state: Rc<AssetEditState>) -> Dom {
         let asset = Mutable::new(None);
 
         html!("empty-fragment", {
@@ -56,9 +56,9 @@ impl SidebarDom {
                     },
                 };
             }))
-            .child_signal(asset.signal_cloned().map(clone!(jig_edit_state => move |asset| {
+            .child_signal(asset.signal_cloned().map(clone!(asset_edit_state => move |asset| {
                 asset.map(|asset| {
-                    let state = Rc::new(State::new(asset, Rc::clone(&jig_edit_state)));
+                    let state = Rc::new(State::new(asset, Rc::clone(&asset_edit_state)));
                     Self::render_loaded(state)
                 })
             })))
@@ -79,7 +79,7 @@ impl SidebarDom {
             }))
             .child(html!("jig-edit-sidebar", {
                 .future(clone!(state => async move {
-                    state.jig_edit_state.route.signal_cloned().for_each(clone!(state => move |route| {
+                    state.asset_edit_state.route.signal_cloned().for_each(clone!(state => move |route| {
                         let should_collapse = !matches!(
                             route,
                             AssetEditRoute::Course(_, _) | AssetEditRoute::Jig(_, _, JigEditRoute::Landing)
@@ -89,7 +89,7 @@ impl SidebarDom {
                     })).await
                 }))
                 .property_signal("collapsed", state.collapsed.signal())
-                .property_signal("isModulePage", state.jig_edit_state.route.signal_cloned().map(|route| {
+                .property_signal("isModulePage", state.asset_edit_state.route.signal_cloned().map(|route| {
                     // TODO: change?
                     matches!(route, AssetEditRoute::Jig(_, _, JigEditRoute::Landing))
                 }))
@@ -101,7 +101,7 @@ impl SidebarDom {
                         publish_at.is_some()
                     }))
                     .property_signal("collapsed", state.collapsed.signal())
-                    .property_signal("selected", state.jig_edit_state.route.signal_cloned().map(|route| {
+                    .property_signal("selected", state.asset_edit_state.route.signal_cloned().map(|route| {
                         matches!(
                             route,
                             AssetEditRoute::Jig(_, _, JigEditRoute::Publish) | AssetEditRoute::Course(_, CourseEditRoute::Publish)

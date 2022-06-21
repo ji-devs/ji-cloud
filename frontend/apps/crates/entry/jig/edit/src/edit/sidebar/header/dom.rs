@@ -25,7 +25,7 @@ impl HeaderDom {
         html!("jig-edit-sidebar-header", {
             .property("slot", "header")
             .property_signal("collapsed", sidebar_state.collapsed.signal())
-            .property_signal("isModulePage", sidebar_state.jig_edit_state.route.signal_cloned().map(|route| {
+            .property_signal("isModulePage", sidebar_state.asset_edit_state.route.signal_cloned().map(|route| {
                 // TODO: change?
                 matches!(route, AssetEditRoute::Jig(_, _, JigEditRoute::Landing))
             }))
@@ -82,10 +82,10 @@ impl HeaderDom {
                             SidebarSetting::Jig(jig) => {
                                 let settings = get_player_settings(Rc::clone(jig));
                                 let settings = AssetPlayerSettings::Jig(settings);
-                                sidebar_state.jig_edit_state.play_jig.set(Some(settings));
+                                sidebar_state.asset_edit_state.play_jig.set(Some(settings));
                             },
                             SidebarSetting::Course(_course) => {
-                                sidebar_state.jig_edit_state.play_jig.set(Some(AssetPlayerSettings::Course));
+                                sidebar_state.asset_edit_state.play_jig.set(Some(AssetPlayerSettings::Course));
                             }
                         }
                     }))
@@ -97,7 +97,7 @@ impl HeaderDom {
                         .property("slot", "modules")
                         .property("icon", "fa-light fa-grid")
                         .event(clone!(sidebar_state => move |_:events::Click| {
-                            sidebar_state.jig_edit_state.set_route_jig(JigEditRoute::Landing);
+                            sidebar_state.asset_edit_state.set_route_jig(JigEditRoute::Landing);
                             let jig = sidebar_state.asset.unwrap_jig();
                             let url = Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
                                 jig.id,

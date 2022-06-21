@@ -9,7 +9,7 @@ use shared::domain::{
 };
 use utils::languages::{Language, JIG_LANGUAGES};
 
-use super::{super::state::State as JigEditState, editable_assets::EditableAsset};
+use super::{super::state::AssetEditState, editable_assets::EditableAsset};
 
 const STR_JIG: &str = "JIG";
 const STR_RESOURCE: &str = "Resource";
@@ -27,7 +27,7 @@ pub struct Publish {
     pub submission_tried: Mutable<bool>,
     pub show_missing_info_popup: Mutable<bool>,
     pub languages: Vec<Language>,
-    pub jig_edit_state: Rc<JigEditState>,
+    pub asset_edit_state: Rc<AssetEditState>,
     pub show_public_popup: Mutable<bool>,
 }
 
@@ -39,7 +39,7 @@ impl Publish {
         ages: Vec<AgeRange>,
         affiliations: Vec<Affiliation>,
         resource_types: Vec<ResourceType>,
-        jig_edit_state: Rc<JigEditState>,
+        asset_edit_state: Rc<AssetEditState>,
     ) -> Self {
         Self {
             loader: AsyncLoader::new(),
@@ -53,7 +53,7 @@ impl Publish {
             show_missing_info_popup: Mutable::new(false),
             languages: JIG_LANGUAGES.clone(),
             show_public_popup: Mutable::new(false),
-            jig_edit_state,
+            asset_edit_state,
         }
     }
 

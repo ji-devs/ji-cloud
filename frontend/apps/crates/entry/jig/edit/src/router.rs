@@ -2,7 +2,7 @@ use components::overlay::container::OverlayContainer;
 use shared::domain::{asset::AssetType, jig::JigFocus};
 use utils::routes::{AssetEditRoute, AssetRoute, Route};
 
-use crate::{edit::dom::EditPage, gallery::state::Gallery};
+use crate::{edit::AssetEditState, gallery::state::Gallery};
 use dominator::{html, Dom};
 use futures_signals::signal::{Signal, SignalExt};
 
@@ -25,11 +25,11 @@ impl Router {
                 AssetRoute::CourseGallery => Some(Gallery::new(AssetType::Course).render()),
                 AssetRoute::Edit(route) => match route {
                     AssetEditRoute::Jig(jig_id, focus, _) => {
-                        Some(EditPage::render(jig_id.into(), focus, route))
+                        Some(AssetEditState::new(jig_id.into(), focus, route).render())
                     }
-                    AssetEditRoute::Course(course_id, _) => {
-                        Some(EditPage::render(course_id.into(), JigFocus::Modules, route))
-                    }
+                    AssetEditRoute::Course(course_id, _) => Some(
+                        AssetEditState::new(course_id.into(), JigFocus::Modules, route).render(),
+                    ),
                 },
                 _ => None,
             },

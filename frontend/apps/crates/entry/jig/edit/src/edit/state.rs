@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use futures_signals::signal::Mutable;
 use shared::domain::{asset::AssetId, jig::JigFocus};
 use utils::{
@@ -7,7 +9,7 @@ use utils::{
     unwrap::UnwrapJiExt,
 };
 
-pub struct State {
+pub struct AssetEditState {
     pub route: Mutable<AssetEditRoute>,
     pub jig_focus: JigFocus,
     pub asset_id: AssetId,
@@ -15,21 +17,21 @@ pub struct State {
     pub(super) play_jig: Mutable<Option<AssetPlayerSettings>>,
 }
 
-impl State {
-    pub fn new(asset_id: AssetId, jig_focus: JigFocus, route: AssetEditRoute) -> Self {
+impl AssetEditState {
+    pub fn new(asset_id: AssetId, jig_focus: JigFocus, route: AssetEditRoute) -> Rc<Self> {
         let show_onboarding = storage::get_local_storage()
             .unwrap_ji()
             .get_item("onboarding")
             .unwrap_ji()
             .is_none(); // We don't care about the value, only that the item is present
 
-        Self {
+        Rc::new(Self {
             asset_id,
             jig_focus,
             route: Mutable::new(route),
             play_jig: Mutable::new(None),
             show_onboarding: Mutable::new(show_onboarding),
-        }
+        })
     }
 
     pub fn set_route_jig(&self, route: JigEditRoute) {
