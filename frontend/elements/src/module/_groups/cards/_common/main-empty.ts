@@ -24,6 +24,7 @@ export class _ extends LitElement {
 
                 img-ui {
                     transform: translateX(-14px);
+                    width: 200px;
                 }
 
                 .label {
