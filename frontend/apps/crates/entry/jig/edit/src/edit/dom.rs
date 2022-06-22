@@ -3,7 +3,7 @@ use std::rc::Rc;
 use super::{
     super::edit::publish::Publish,
     course::jig_selection::state::JigSelection,
-    iframe::dom::IframeDom,
+    module_iframe::ModuleIframe,
     post_publish::PostPublish,
     selection::dom::SelectionDom,
     sidebar::dom::SidebarDom,
@@ -58,7 +58,7 @@ impl AssetEditState {
                                     }
                                 },
                                 JigEditRoute::Module(module_id) => {
-                                    Some(IframeDom::render(*state.asset_id.unwrap_jig(), module_id))
+                                    Some(ModuleIframe::new(state.asset_id, module_id).render())
                                 },
                                 JigEditRoute::Publish => {
                                     Some(Publish::render(Rc::clone(&state)))

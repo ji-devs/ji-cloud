@@ -1,7 +1,7 @@
 mod actions;
 mod course;
 mod dom;
-mod iframe;
+mod module_iframe;
 mod post_publish;
 mod publish;
 mod selection;
