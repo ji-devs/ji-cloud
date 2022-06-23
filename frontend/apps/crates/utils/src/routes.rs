@@ -210,7 +210,7 @@ pub enum JigEditRoute {
 #[derive(Debug, Clone, PartialEq)]
 pub enum CourseEditRoute {
     Landing,
-    Cover,
+    Cover(ModuleId),
     Publish,
     PostPublish,
 }
@@ -464,10 +464,10 @@ impl Route {
                     CourseEditRoute::Landing,
                 )))
             }
-            ["asset", "edit", "course", course_id, "cover"] => {
+            ["asset", "edit", "course", course_id, "cover", cover_id] => {
                 Self::Asset(AssetRoute::Edit(AssetEditRoute::Course(
                     CourseId(Uuid::from_str(course_id).unwrap_ji()),
-                    CourseEditRoute::Cover,
+                    CourseEditRoute::Cover(ModuleId(Uuid::from_str(cover_id).unwrap_ji())),
                 )))
             }
             ["asset", "play", "jig", "debug"] => {
@@ -685,8 +685,8 @@ impl From<&Route> for String {
                         CourseEditRoute::Landing => {
                             format!("/asset/edit/course/{}", course_id.0)
                         }
-                        CourseEditRoute::Cover => {
-                            format!("/asset/edit/course/{}/cover", course_id.0)
+                        CourseEditRoute::Cover(cover_id) => {
+                            format!("/asset/edit/course/{}/cover/{}", course_id.0, cover_id.0)
                         }
                         CourseEditRoute::Publish => {
                             format!("/asset/edit/course/{}/publish", course_id.0)

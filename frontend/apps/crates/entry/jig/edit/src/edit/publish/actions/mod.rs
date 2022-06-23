@@ -70,11 +70,11 @@ impl Publish {
     }
 
     pub fn navigate_to_cover(&self) {
+        // navigate to cover if exists otherwise navigate to landing
+        let cover_module_id = self.asset.cover().as_ref().map(|m| m.id);
+
         match &self.asset {
             EditableAsset::Jig(_) => {
-                // navigate to cover if exists otherwise navigate to landing
-                let cover_module_id = self.asset.cover().as_ref().map(|m| m.id);
-
                 let route = match cover_module_id {
                     Some(cover_module_id) => JigEditRoute::Module(cover_module_id),
                     None => JigEditRoute::Landing,
@@ -84,7 +84,7 @@ impl Publish {
             }
             EditableAsset::Course(_) => {
                 self.asset_edit_state
-                    .set_route_course(CourseEditRoute::Cover);
+                    .set_route_course(CourseEditRoute::Cover(cover_module_id.unwrap_ji()));
             }
         };
     }

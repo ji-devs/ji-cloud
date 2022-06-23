@@ -74,11 +74,9 @@ impl AssetEditState {
                         AssetEditRoute::Course(course_id, course_edit_route) => {
                             match course_edit_route {
                                 CourseEditRoute::Landing => {
-                                    // Some(SelectionDom::render(state.clone()))
-                                    // todo!()
                                     Some(JigSelection::new(course_id).render())
                                 },
-                                CourseEditRoute::Cover => {
+                                CourseEditRoute::Cover(_cover_id) => {
                                     todo!()
                                 },
                                 CourseEditRoute::Publish => {
