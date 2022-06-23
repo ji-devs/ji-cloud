@@ -38,7 +38,7 @@ impl Fixture {
             Self::MetaImage => include_str!("../../fixtures/15_meta_kinds_image.sql"),
             Self::MetaAnimation => include_str!("../../fixtures/16_meta_kinds_animation.sql"),
             Self::MetaAudio => include_str!("../../fixtures/17_meta_kinds_audio.sql"),
-            Self::Badge => include_str!("../../fixtures/17_meta_kinds_audio.sql"),
+            Self::Badge => include_str!("../../fixtures/18_badge.sql"),
         }
     }
 }
