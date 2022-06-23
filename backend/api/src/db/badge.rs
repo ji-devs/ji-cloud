@@ -96,6 +96,8 @@ where id = $1 and $2 is distinct from thumbnail"#,
         .await?;
     }
 
+    txn.commit().await?;
+
     Ok(true)
 }
 
