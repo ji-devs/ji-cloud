@@ -1,0 +1,9 @@
+---
+source: tests/integration/badge.rs
+expression: body
+
+---
+{
+  "members": [],
+  "count": 0
+}

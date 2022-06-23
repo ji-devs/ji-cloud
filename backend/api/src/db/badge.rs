@@ -96,6 +96,8 @@ where id = $1 and $2 is distinct from thumbnail"#,
         .await?;
     }
 
+    txn.commit().await?;
+
     Ok(true)
 }
 
@@ -117,7 +119,9 @@ select id            as "badge_id: BadgeId",
        description,
        thumbnail,
        member_count,
-       creator_id
+       creator_id,
+       created_at,
+       updated_at
 from badge
 where id = $1
 "#,
@@ -133,6 +137,8 @@ where id = $1
         description: row.description,
         thumbnail: Url::parse(&row.thumbnail).unwrap(),
         member_count: row.member_count as u32,
+        created_at: row.created_at,
+        last_edited: row.updated_at,
     });
 
     Ok(badge)
@@ -191,7 +197,9 @@ pub async fn browse(
                 description         as "description!",
                 thumbnail           as "thumbnail!",
                 member_count        as "member_count!",
-                creator_id          as "creator_id!"
+                creator_id          as "creator_id!",
+                created_at,
+                updated_at   
         from "badge"
             inner join cte1 on cte1.id = "badge".id
             where ord > (1 * $2 * $3)
@@ -214,6 +222,8 @@ pub async fn browse(
             description: row.description,
             thumbnail: Url::parse(&row.thumbnail).unwrap(),
             member_count: row.member_count as u32,
+            created_at: row.created_at,
+            last_edited: row.updated_at,
         })
         .collect();
 
@@ -233,7 +243,9 @@ select  id            as "badge_id!: BadgeId",
         description     as "description!",
         thumbnail       as "thumbnail!",
         member_count  as "member_count!: u32",
-        creator_id    as "creator_id!"
+        creator_id    as "creator_id!",
+        created_at    as "created_at!",
+        updated_at   
 from badge
 inner join unnest($1::uuid[])
 with ordinality t(id, ord) using (id)
@@ -252,6 +264,8 @@ with ordinality t(id, ord) using (id)
             description: row.description,
             thumbnail: Url::parse(&row.thumbnail).unwrap(),
             member_count: row.member_count,
+            created_at: row.created_at,
+            last_edited: row.updated_at,
         })
         .collect();
 

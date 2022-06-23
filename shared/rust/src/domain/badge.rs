@@ -1,5 +1,6 @@
 //! Types for Badges.
 
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -32,6 +33,12 @@ pub struct Badge {
 
     /// Thumbnail URL
     pub thumbnail: url::Url,
+
+    /// When Badge was created
+    pub created_at: DateTime<Utc>,
+
+    /// When Badge was last edited
+    pub last_edited: Option<DateTime<Utc>>,
 }
 
 /// Request to create a new Badge.
