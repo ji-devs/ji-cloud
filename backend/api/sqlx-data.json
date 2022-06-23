@@ -251,56 +251,6 @@
       "nullable": []
     }
   },
-  "06a7a243872129730d4c02b3b755e0b764d2dad0e34a447c9eb3fa795f2d2075": {
-    "query": "\nselect  id            as \"badge_id!: BadgeId\",\n        display_name   as \"display_name!\",\n        description     as \"description!\",\n        thumbnail       as \"thumbnail!\",\n        member_count  as \"member_count!: u32\",\n        creator_id    as \"creator_id!\"\nfrom badge\ninner join unnest($1::uuid[])\nwith ordinality t(id, ord) using (id)\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "badge_id!: BadgeId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "display_name!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "description!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 3,
-          "name": "thumbnail!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 4,
-          "name": "member_count!: u32",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 5,
-          "name": "creator_id!",
-          "type_info": "Uuid"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "UuidArray"
-        ]
-      },
-      "nullable": [
-        true,
-        true,
-        true,
-        true,
-        true,
-        true
-      ]
-    }
-  },
   "07c23d4be4038602fadd286c040a438b0366a8308e634d0ef4f5325c7b07b225": {
     "query": "\n            update image_tag set index = $2 where index = $1\n            ",
     "describe": {
@@ -755,56 +705,6 @@
         false,
         true,
         true,
-        false,
-        false,
-        false
-      ]
-    }
-  },
-  "0eef5ce484b8cb531f0475e452c41a554fcdc8a2788c3ce5079f5992cac8991e": {
-    "query": "\nselect id            as \"badge_id: BadgeId\",\n       display_name,\n       description,\n       thumbnail,\n       member_count,\n       creator_id\nfrom badge\nwhere id = $1\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "badge_id: BadgeId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "display_name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "description",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 3,
-          "name": "thumbnail",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 4,
-          "name": "member_count",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 5,
-          "name": "creator_id",
-          "type_info": "Uuid"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
         false,
         false,
         false
@@ -1687,6 +1587,70 @@
         false,
         false,
         false
+      ]
+    }
+  },
+  "2adc05165150c122b8d0f39ba44e73d13d762424b8c426d9ed4032cbbe7a7db5": {
+    "query": "\n        with cte as (\n            select array(select id  as \"id!\"\n            from \"badge\"\n            where creator_id = $1 or $1 is null\n            order by coalesce(updated_at, created_at)) as id\n        ),\n        cte1 as (\n            select * from unnest((select distinct id from cte)) with ordinality t(id\n           , ord) order by ord\n        )\n        select  badge.id            as \"badge_id!: BadgeId\",\n                display_name        as \"display_name!\",\n                description         as \"description!\",\n                thumbnail           as \"thumbnail!\",\n                member_count        as \"member_count!\",\n                creator_id          as \"creator_id!\",\n                created_at,\n                updated_at   \n        from \"badge\"\n            inner join cte1 on cte1.id = \"badge\".id\n            where ord > (1 * $2 * $3)\n            order by ord \n            limit $3\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "badge_id!: BadgeId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "display_name!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "description!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "thumbnail!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "member_count!",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 5,
+          "name": "creator_id!",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 6,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 7,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int4",
+          "Int4"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true
       ]
     }
   },
@@ -5422,21 +5386,8 @@
       ]
     }
   },
-  "943425e13636b972656a1c40172ae281420bdd0c840c0bac045bc1b1cdbc6957": {
-    "query": "\nupdate jig_data_additional_resource\nset resource_type_id = coalesce($2, resource_type_id)\nwhere id = $1 and $2 is distinct from resource_type_id\n            ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid"
-        ]
-      },
-      "nullable": []
-    }
-  },
-  "954f689bd8a447d0d4a611bc7a44ab0d5c478e223941be58d6fc48bb70d0a019": {
-    "query": "\n        with cte as (\n            select array(select id  as \"id!\"\n            from \"badge\"\n            where creator_id = $1 or $1 is null\n            order by coalesce(updated_at, created_at)) as id\n        ),\n        cte1 as (\n            select * from unnest((select distinct id from cte)) with ordinality t(id\n           , ord) order by ord\n        )\n        select  badge.id            as \"badge_id!: BadgeId\",\n                display_name        as \"display_name!\",\n                description         as \"description!\",\n                thumbnail           as \"thumbnail!\",\n                member_count        as \"member_count!\",\n                creator_id          as \"creator_id!\"\n        from \"badge\"\n            inner join cte1 on cte1.id = \"badge\".id\n            where ord > (1 * $2 * $3)\n            order by ord \n            limit $3\n            ",
+  "93f5b1c50545b17f779661d1d63489f8af0821c7bcb44a8427a804c4fe8d3076": {
+    "query": "\nselect  id            as \"badge_id!: BadgeId\",\n        display_name   as \"display_name!\",\n        description     as \"description!\",\n        thumbnail       as \"thumbnail!\",\n        member_count  as \"member_count!: u32\",\n        creator_id    as \"creator_id!\",\n        created_at    as \"created_at!\",\n        updated_at   \nfrom badge\ninner join unnest($1::uuid[])\nwith ordinality t(id, ord) using (id)\n",
     "describe": {
       "columns": [
         {
@@ -5461,30 +5412,53 @@
         },
         {
           "ordinal": 4,
-          "name": "member_count!",
+          "name": "member_count!: u32",
           "type_info": "Int8"
         },
         {
           "ordinal": 5,
           "name": "creator_id!",
           "type_info": "Uuid"
+        },
+        {
+          "ordinal": 6,
+          "name": "created_at!",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 7,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
         }
       ],
       "parameters": {
         "Left": [
-          "Uuid",
-          "Int4",
-          "Int4"
+          "UuidArray"
         ]
       },
       "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
       ]
+    }
+  },
+  "943425e13636b972656a1c40172ae281420bdd0c840c0bac045bc1b1cdbc6957": {
+    "query": "\nupdate jig_data_additional_resource\nset resource_type_id = coalesce($2, resource_type_id)\nwhere id = $1 and $2 is distinct from resource_type_id\n            ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      },
+      "nullable": []
     }
   },
   "95e80749cb3ce69fdb52cbc6de1835b2e5770c6a350ad0a8d05541eb17c788aa": {
@@ -8932,6 +8906,68 @@
       },
       "nullable": [
         false
+      ]
+    }
+  },
+  "f06e619ef854fab8c5bcf8ccc868affab5206c6300d2da1b1cb48cf62efdd72f": {
+    "query": "\nselect id            as \"badge_id: BadgeId\",\n       display_name,\n       description,\n       thumbnail,\n       member_count,\n       creator_id,\n       created_at,\n       updated_at\nfrom badge\nwhere id = $1\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "badge_id: BadgeId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "display_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "description",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "thumbnail",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "member_count",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 5,
+          "name": "creator_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 6,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 7,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true
       ]
     }
   },
