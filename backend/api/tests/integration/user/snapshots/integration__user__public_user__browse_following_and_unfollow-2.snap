@@ -1,0 +1,21 @@
+---
+source: tests/integration/user/public_user.rs
+expression: body
+
+---
+{
+  "followings": [
+    {
+      "id": "a641fd6e-e41b-11eb-8176-57df101c2201",
+      "username": "test2",
+      "givenName": "Scrappy",
+      "familyName": "Doo",
+      "bio": "",
+      "profileImage": null,
+      "organization": "test2 org",
+      "badges": []
+    }
+  ],
+  "pages": 1,
+  "totalFollowingCount": 1
+}

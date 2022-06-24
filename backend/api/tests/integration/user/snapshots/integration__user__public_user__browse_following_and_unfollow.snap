@@ -1,0 +1,32 @@
+---
+source: tests/integration/user/public_user.rs
+expression: body
+
+---
+{
+  "followings": [
+    {
+      "id": "7b96a41c-e406-11eb-8176-efd86dd7f444",
+      "username": "test1",
+      "givenName": "Post",
+      "familyName": "Gres",
+      "bio": "",
+      "profileImage": null,
+      "language": "en_US",
+      "organization": "test1 org",
+      "badges": []
+    },
+    {
+      "id": "a641fd6e-e41b-11eb-8176-57df101c2201",
+      "username": "test2",
+      "givenName": "Scrappy",
+      "familyName": "Doo",
+      "bio": "",
+      "profileImage": null,
+      "organization": "test2 org",
+      "badges": []
+    }
+  ],
+  "pages": 1,
+  "totalFollowingCount": 2
+}

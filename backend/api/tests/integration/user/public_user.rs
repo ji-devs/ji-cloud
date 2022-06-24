@@ -311,3 +311,70 @@ async fn browse_follower_and_follow() -> anyhow::Result<()> {
 
     Ok(())
 }
+
+#[actix_rt::test]
+async fn browse_following_and_unfollow() -> anyhow::Result<()> {
+    let app = initialize_server(
+        &[
+            Fixture::User,
+            Fixture::MetaKinds,
+            Fixture::Jig,
+            Fixture::PublicUser,
+            Fixture::Course,
+        ],
+        &[],
+    )
+    .await;
+
+    let port = app.port();
+
+    let client = reqwest::Client::new();
+
+    let resp = client
+        .get(&format!(
+            "http://0.0.0.0:{}/v1/user/{}/public/following/browse",
+            port, "1f241e1b-b537-493f-a230-075cb16315be"
+        ))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    assert_eq!(resp.status(), StatusCode::OK);
+
+    let body: serde_json::Value = resp.json().await?;
+
+    insta::assert_json_snapshot!(body);
+
+    let resp = client
+        .delete(&format!(
+            "http://0.0.0.0:{}/v1/user/{}/unfollow",
+            port, "7b96a41c-e406-11eb-8176-efd86dd7f444"
+        ))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    assert_eq!(resp.status(), StatusCode::NO_CONTENT);
+
+    let resp = client
+        .get(&format!(
+            "http://0.0.0.0:{}/v1/user/{}/public/following/browse",
+            port, "1f241e1b-b537-493f-a230-075cb16315be"
+        ))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    assert_eq!(resp.status(), StatusCode::OK);
+
+    app.stop(false).await;
+
+    let body: serde_json::Value = resp.json().await?;
+
+    insta::assert_json_snapshot!(body);
+
+    Ok(())
+}
