@@ -20,7 +20,7 @@ use futures_signals::{
 };
 use shared::domain::module::body::BodyExt;
 use shared::domain::{
-    jig::JigId,
+    asset::AssetId,
     module::{
         body::{
             Instructions,
@@ -40,7 +40,7 @@ pub struct Base {
     pub step: ReadOnlyMutable<Step>,
     pub theme_id: Mutable<ThemeId>,
     pub instructions: Mutable<Instructions>,
-    pub jig_id: JigId,
+    pub asset_id: AssetId,
     pub module_id: ModuleId,
     // TappingBoard-specific
     pub backgrounds: Rc<Backgrounds>,
@@ -89,7 +89,7 @@ impl Base {
     pub async fn new(init_args: BaseInitFromRawArgs<RawData, Mode, Step>) -> Rc<Self> {
         let BaseInitFromRawArgs {
             raw,
-            jig_id,
+            asset_id,
             module_id,
             history,
             step,
@@ -202,7 +202,7 @@ impl Base {
         );
 
         let _self = Rc::new(Self {
-            jig_id,
+            asset_id,
             module_id,
             theme_id,
             history,
@@ -242,8 +242,8 @@ impl BaseExt<Step> for Base {
         }
     }
 
-    fn get_jig_id(&self) -> JigId {
-        self.jig_id
+    fn get_asset_id(&self) -> AssetId {
+        self.asset_id
     }
     fn get_module_id(&self) -> ModuleId {
         self.module_id

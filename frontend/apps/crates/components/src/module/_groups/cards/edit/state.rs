@@ -12,6 +12,7 @@ use futures_signals::{
     signal_vec::{MutableVec, SignalVecExt},
 };
 use shared::domain::{
+    asset::AssetId,
     jig::JigId,
     module::{
         body::{
@@ -116,7 +117,7 @@ impl<RawData: RawDataExt, E: ExtraExt> CardsBase<RawData, E> {
     ) -> Rc<Self> {
         let BaseInitFromRawArgs {
             raw,
-            jig_id,
+            asset_id,
             module_id,
             theme_id,
             history,
@@ -141,7 +142,7 @@ impl<RawData: RawDataExt, E: ExtraExt> CardsBase<RawData, E> {
         let background = Mutable::new(content.background);
 
         let state = Rc::new(Self {
-            jig_id,
+            jig_id: *asset_id.unwrap_jig(),
             module_id,
             history,
             step: step.read_only(),
@@ -233,8 +234,8 @@ impl<RawData: RawDataExt, E: ExtraExt> CardsBase<RawData, E> {
 //here was the latest attempt: https://play.rust-lang.org/?version=nightly&mode=debug&edition=2018&gist=75e158fa8d226b8fdc505ec8551ca259
 
 impl<RawData: RawDataExt, E: ExtraExt> BaseExt<Step> for CardsBase<RawData, E> {
-    fn get_jig_id(&self) -> JigId {
-        self.jig_id
+    fn get_asset_id(&self) -> AssetId {
+        self.jig_id.into()
     }
 
     fn get_module_id(&self) -> ModuleId {

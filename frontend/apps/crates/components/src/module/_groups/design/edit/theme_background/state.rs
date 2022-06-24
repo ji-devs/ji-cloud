@@ -5,6 +5,7 @@ use crate::theme_selector::state::{ThemeSelector, ThemeSelectorCallbacks};
 use dominator::clone;
 use futures_signals::signal::Mutable;
 use shared::api::{endpoints, ApiEndpoint};
+use shared::domain::asset::AssetId;
 use shared::domain::jig::JigUpdateDraftDataRequest;
 use shared::domain::module::body::StepExt;
 use shared::error::EmptyError;
@@ -38,23 +39,24 @@ where
         let callbacks = ThemeSelectorCallbacks::new(clone!(base => move |theme_id| {
             base.set_theme(theme_id);
 
-            spawn_local(clone!(base => async move {
-                let jig_id = base.get_jig_id().0.to_string();
+            // if asset is Jig update theme
+            if let AssetId::JigId(jig_id) = base.get_asset_id() {
+                spawn_local(async move {
+                    let path = endpoints::jig::UpdateDraftData::PATH.replace("{id}", &jig_id.0.to_string());
 
-                let path = endpoints::jig::UpdateDraftData::PATH.replace("{id}", &jig_id);
+                    let req = JigUpdateDraftDataRequest {
+                        theme: Some(theme_id),
+                        ..JigUpdateDraftDataRequest::default()
+                    };
 
-                let req = JigUpdateDraftDataRequest {
-                    theme: Some(theme_id),
-                    ..JigUpdateDraftDataRequest::default()
-                };
-
-                let _ = api_with_auth_empty::<EmptyError, _>(
-                    &path,
-                    endpoints::jig::UpdateDraftData::METHOD,
-                    Some(req),
-                )
-                    .await;
-            }))
+                    let _ = api_with_auth_empty::<EmptyError, _>(
+                        &path,
+                        endpoints::jig::UpdateDraftData::METHOD,
+                        Some(req),
+                    )
+                        .await;
+                })
+            }
         }));
         let theme_selector = Rc::new(ThemeSelector::new(base.get_theme().read_only(), callbacks));
 

@@ -4,7 +4,7 @@ use super::base::{
 };
 use components::module::_common::edit::prelude::*;
 use shared::domain::{
-    jig::JigId,
+    asset::AssetId,
     module::{
         body::poster::{Mode, ModuleData as RawData, Step},
         ModuleId,
@@ -14,10 +14,10 @@ use std::rc::Rc;
 
 pub type AppState = GenericState<Mode, Step, RawData, Base, Main, Sidebar, Header, Footer, Overlay>;
 
-pub fn create_state(jig_id: JigId, module_id: ModuleId) -> Rc<AppState> {
-    crate::debug::init(jig_id, module_id);
+pub fn create_state(asset_id: AssetId, module_id: ModuleId) -> Rc<AppState> {
+    crate::debug::init(asset_id, module_id);
 
-    let mut opts = StateOpts::new(jig_id, module_id);
+    let mut opts = StateOpts::new(asset_id, module_id);
     opts.force_raw = crate::debug::settings().data.clone();
     opts.is_main_scrollable = false;
     opts.skip_save_for_debug = crate::debug::settings().skip_save;

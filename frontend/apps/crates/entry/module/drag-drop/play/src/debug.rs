@@ -2,9 +2,9 @@ use components::stickers::sprite::ext::*;
 use once_cell::sync::OnceCell;
 use shared::{
     domain::{
+        asset::AssetId,
         audio::AudioId,
         image::ImageId,
-        jig::JigId,
         module::{
             body::{
                 Audio, Image, Instructions, Transform,
@@ -211,8 +211,8 @@ impl DebugSettings {
     }
 }
 
-pub fn init(jig_id: JigId, _module_id: ModuleId) {
-    if jig_id == JigId(Uuid::from_u128(0)) {
+pub fn init(asset_id: AssetId, _module_id: ModuleId) {
+    if asset_id.uuid() == &Uuid::from_u128(0) {
         SETTINGS
             .set(DebugSettings::debug(Some(InitData {
                 stickers: vec![

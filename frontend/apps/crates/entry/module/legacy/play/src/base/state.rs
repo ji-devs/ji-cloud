@@ -4,7 +4,7 @@ use components::module::_common::play::prelude::*;
 use futures_signals::signal::Mutable;
 use shared::domain::module::body::legacy::activity::Activity;
 use shared::domain::{
-    jig::{JigData, JigId},
+    asset::{Asset, AssetId},
     module::{
         body::{
             legacy::{slide::Slide, ModuleData as RawData},
@@ -23,9 +23,9 @@ use utils::prelude::*;
 use web_sys::Worker;
 
 pub struct Base {
-    pub jig_id: JigId,
+    pub asset_id: AssetId,
     pub module_id: ModuleId,
-    pub jig: JigData,
+    pub asset: Asset,
     pub theme_id: ThemeId,
     pub module_phase: Mutable<ModulePlayPhase>,
     pub game_id: String,
@@ -67,9 +67,9 @@ impl WorkerList {
 impl Base {
     pub async fn new(init_args: InitFromRawArgs<RawData, (), ()>) -> Rc<Self> {
         let InitFromRawArgs {
-            jig_id,
+            asset_id,
             module_id,
-            jig,
+            asset,
             raw,
             theme_id,
             ..
@@ -94,9 +94,9 @@ impl Base {
             .unwrap_ji();
 
         let _self = Rc::new(Self {
-            jig_id,
+            asset_id,
             module_id,
-            jig,
+            asset,
             theme_id,
             module_phase: init_args.play_phase,
             game_id: raw.game_id,

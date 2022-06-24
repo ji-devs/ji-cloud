@@ -28,8 +28,8 @@ pub fn render(state: Rc<Router>) {
         dominator::routing::url()
             .signal_ref(|url| Route::from_url(url))
             .for_each(clone!(state => move |route| {
-                if let Route::Module(ModuleRoute::Edit(ModuleKind::CardQuiz, jig_id, module_id)) = route {
-                    let app = create_state(jig_id, module_id);
+                if let Route::Module(ModuleRoute::Edit(ModuleKind::CardQuiz, asset_id, module_id)) = route {
+                    let app = create_state(asset_id, module_id);
                     render_page_body(app.clone());
                     *state.app.borrow_mut() = Some(app);
                 }

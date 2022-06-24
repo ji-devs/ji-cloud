@@ -1,6 +1,7 @@
 use dominator::{clone, DomHandle};
 use futures_signals::signal::{Mutable, Signal, SignalExt};
-use shared::domain::asset::{AssetType, DraftOrLive, PrivacyLevel};
+use shared::domain::asset::{Asset, AssetId, AssetType, DraftOrLive, PrivacyLevel};
+use shared::domain::course::CourseResponse;
 
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -46,7 +47,7 @@ where
 {
     pub phase:
         Mutable<Rc<Phase<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>>,
-    pub(super) jig: RefCell<Option<JigData>>,
+    pub(super) asset: RefCell<Option<Asset>>,
     pub(super) opts: StateOpts<RawData>,
     pub(super) raw_loader: AsyncLoader,
     pub(super) screenshot_loader: Rc<AsyncLoader>,
@@ -80,7 +81,7 @@ where
 pub struct StateOpts<RawData> {
     pub skip_save_for_debug: bool,
     pub skip_load_jig: bool,
-    pub jig_id: JigId,
+    pub asset_id: AssetId,
     pub module_id: ModuleId,
     //the step which is for previewing
     pub is_main_scrollable: bool,
@@ -88,11 +89,11 @@ pub struct StateOpts<RawData> {
 }
 
 impl<RawData> StateOpts<RawData> {
-    pub fn new(jig_id: JigId, module_id: ModuleId) -> Self {
+    pub fn new(asset_id: AssetId, module_id: ModuleId) -> Self {
         Self {
             skip_save_for_debug: false,
             skip_load_jig: false,
-            jig_id,
+            asset_id,
             module_id,
             is_main_scrollable: true,
             force_raw: None,
@@ -139,7 +140,7 @@ where
     {
         let _self = Rc::new(Self {
             opts,
-            jig: RefCell::new(None),
+            asset: RefCell::new(None),
             phase: Mutable::new(Rc::new(Phase::Init)),
             history: RefCell::new(None),
             raw_loaded: Mutable::new(false),
@@ -155,14 +156,33 @@ where
         *_self.on_init_ready.borrow_mut() = Some(Box::new(clone!(_self => move || {
             _self.raw_loader.load(clone!(_self, init_from_raw => async move {
                 if !_self.opts.skip_load_jig {
-                    *_self.jig.borrow_mut() = {
-
-                            let path = endpoints::jig::GetDraft::PATH.replace("{id}",&_self.opts.jig_id.0.to_string());
-                            let resp = api_no_auth::<JigResponse, EmptyError, ()>(&path, endpoints::jig::GetDraft::METHOD, None).await;
+                    *_self.asset.borrow_mut() = {
+                            let resp = match _self.opts.asset_id {
+                                AssetId::JigId(jig_id) => {
+                                    let path = endpoints::jig::GetDraft::PATH.replace("{id}", &jig_id.0.to_string());
+                                    api_no_auth::<JigResponse, EmptyError, ()>(
+                                        &path,
+                                        endpoints::jig::GetDraft::METHOD,
+                                        None
+                                    )
+                                        .await
+                                        .map(|jig| Asset::Jig(jig))
+                                },
+                                AssetId::CourseId(course_id) => {
+                                    let path = endpoints::course::GetDraft::PATH.replace("{id}", &course_id.0.to_string());
+                                    api_no_auth::<CourseResponse, EmptyError, ()>(
+                                        &path,
+                                        endpoints::course::GetDraft::METHOD,
+                                        None
+                                    )
+                                        .await
+                                        .map(|course| Asset::Course(course))
+                                },
+                            };
 
                             match resp {
-                                Ok(resp) => {
-                                    Some(resp.jig_data)
+                                Ok(asset) => {
+                                    Some(asset)
                                 },
                                 Err(_) => {
                                     panic!("error loading jig!")
@@ -170,31 +190,48 @@ where
                             }
                     };
                 } else {
-                    *_self.jig.borrow_mut() = Some(JigData {
-                        draft_or_live: DraftOrLive::Draft,
-                        display_name: String::from("debug!"),
-                        modules: Vec::new(),
-                        age_ranges: Vec::new(),
-                        affiliations: Vec::new(),
-                        language: String::from(Language::default().code()),
-                        categories: Vec::new(),
-                        additional_resources: Vec::new(),
-                        description: String::from("debug"),
-                        last_edited: None,
-                        theme: ThemeId::default(),
-                        audio_background: None,
-                        audio_effects: AudioEffects::default(),
-                        default_player_settings: JigPlayerSettings::default(),
-                        privacy_level: PrivacyLevel::default(),
-                        locked: true,
-                        other_keywords: String::from(""),
-                        translated_keywords: String::from(""),
-                        translated_description: HashMap::new(),
-                    });
+                    *_self.asset.borrow_mut() = Some(Asset::Jig(JigResponse {
+                        id: JigId(uuid::Uuid::from_u128(0)),
+                        admin_data: JigAdminData {
+                            rating: None,
+                            blocked: false,
+                            curated: true,
+                        },
+                        creator_id: None,
+                        author_id: None,
+                        author_name: None,
+                        published_at: None,
+                        jig_focus: JigFocus::Modules,
+                        likes: 0,
+                        plays: 0,
+                        jig_data: JigData {
+                            draft_or_live: DraftOrLive::Draft,
+                            display_name: String::from("debug!"),
+                            modules: Vec::new(),
+                            age_ranges: Vec::new(),
+                            affiliations: Vec::new(),
+                            language: String::from(Language::default().code()),
+                            categories: Vec::new(),
+                            additional_resources: Vec::new(),
+                            description: String::from("debug"),
+                            last_edited: None,
+                            theme: ThemeId::default(),
+                            audio_background: None,
+                            audio_effects: AudioEffects::default(),
+                            default_player_settings: JigPlayerSettings::default(),
+                            privacy_level: PrivacyLevel::default(),
+                            locked: true,
+                            other_keywords: String::from(""),
+                            translated_keywords: String::from(""),
+                            translated_description: HashMap::new(),
+                        },
+                    }));
                 }
 
-                let jig = _self.jig.borrow().clone().unwrap_ji();
-                AUDIO_MIXER.with(|mixer| mixer.set_from_jig(&jig));
+                let asset = _self.asset.borrow().clone().unwrap_ji();
+                if let Asset::Jig(jig) = &asset {
+                    AUDIO_MIXER.with(|mixer| mixer.set_from_jig(&jig.jig_data));
+                };
 
                 let (raw, init_source) = {
                     if let Some(force_raw) = _self.opts.force_raw.clone() {
@@ -202,7 +239,7 @@ where
                     } else {
                         let resp = {
                             let path = GetDraft::PATH
-                                .replace("{asset_type}",AssetType::Jig.as_str())
+                                .replace("{asset_type}",AssetType::from(&_self.opts.asset_id).as_str())
                                 .replace("{module_id}",&_self.opts.module_id.0.to_string());
 
                             api_no_auth::<ModuleResponse, EmptyError, ()>(&path, GetDraft::METHOD, None).await
@@ -226,7 +263,7 @@ where
                         _self.opts.skip_save_for_debug,
                         _self.screenshot_loader.clone(),
                         _self.save_loader.clone(),
-                        _self.opts.jig_id,
+                        _self.opts.asset_id,
                         _self.opts.module_id,
                     ),
                     Self::reset_from_history(_self.clone(), init_from_raw.clone())
@@ -234,8 +271,8 @@ where
 
                 *_self.history.borrow_mut() = Some(history.clone());
 
-                let (jig_id, module_id) = (
-                    _self.opts.jig_id,
+                let (asset_id, module_id) = (
+                    _self.opts.asset_id,
                     _self.opts.module_id,
                 );
 
@@ -247,9 +284,9 @@ where
                         _self.clone(),
                         init_from_raw.clone(),
                         BaseInitFromRawArgs::new(
-                            jig_id,
+                            asset_id,
                             module_id,
-                            jig,
+                            asset,
                             raw,
                             init_source,
                             history.clone()

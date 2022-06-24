@@ -9,7 +9,7 @@ use dominator::Dom;
 use std::rc::Rc;
 
 use shared::domain::{
-    jig::JigId,
+    asset::AssetId,
     module::{
         body::{BodyExt, ModeExt, StepExt},
         ModuleId,
@@ -18,7 +18,7 @@ use shared::domain::{
 
 pub fn render<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(
     preview_mode: Option<PreviewMode>,
-    jig_id: JigId,
+    asset_id: AssetId,
     module_id: ModuleId,
     state: Rc<AppBase<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>,
 ) -> Vec<Dom>
@@ -38,14 +38,14 @@ where
             PreviewMode::Preview => {
                 vec![
                     render_preview_header(RawData::kind(), state.clone()),
-                    render_preview_main(RawData::kind(), jig_id, module_id, state.clone()),
-                    render_preview_overlay(RawData::kind(), jig_id, module_id, state),
+                    render_preview_main(RawData::kind(), asset_id, module_id, state.clone()),
+                    render_preview_overlay(RawData::kind(), asset_id, module_id, state),
                 ]
             }
             PreviewMode::PostPreview(_) => {
                 vec![render_preview_overlay(
                     RawData::kind(),
-                    jig_id,
+                    asset_id,
                     module_id,
                     state,
                 )]

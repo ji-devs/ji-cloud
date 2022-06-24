@@ -1,7 +1,7 @@
 use crate::jig::JigPlayerOptions;
 use serde::{Deserialize, Serialize};
 use shared::domain::{
-    asset::DraftOrLive,
+    asset::{AssetId, AssetType, DraftOrLive},
     badge::BadgeId,
     course::CourseId,
     image::{ImageId, ImageSearchQuery},
@@ -223,8 +223,8 @@ pub enum AssetPlayRoute {
 
 #[derive(Debug, Clone)]
 pub enum ModuleRoute {
-    Edit(ModuleKind, JigId, ModuleId),
-    Play(ModuleKind, JigId, ModuleId),
+    Edit(ModuleKind, AssetId, ModuleId),
+    Play(ModuleKind, AssetId, ModuleId),
 }
 
 #[derive(Debug, Clone)]
@@ -522,30 +522,48 @@ impl Route {
                 unreachable!()
             }
 
-            ["module", kind, "edit", "debug"] | ["module", kind, "edit", "debug", "debug"] => {
+            ["module", kind, asset_type, "edit", "debug"]
+            | ["module", kind, asset_type, "edit", "debug", "debug"] => {
+                let asset_id = AssetType::try_from(*asset_type)
+                    .unwrap_ji()
+                    .to_asset_id(Uuid::from_u128(0));
                 Self::Module(ModuleRoute::Edit(
                     ModuleKind::from_str(kind).expect_ji("unknown module kind!"),
-                    JigId(Uuid::from_u128(0)),
+                    asset_id,
                     ModuleId(Uuid::from_u128(0)),
                 ))
             }
-            ["module", kind, "edit", jig_id, module_id] => Self::Module(ModuleRoute::Edit(
-                ModuleKind::from_str(kind).expect_ji("unknown module kind!"),
-                JigId(Uuid::from_str(jig_id).unwrap_ji()),
-                ModuleId(Uuid::from_str(module_id).unwrap_ji()),
-            )),
-            ["module", kind, "play", "debug"] | ["module", kind, "play", "debug", "debug"] => {
+            ["module", kind, asset_type, "edit", jig_id, module_id] => {
+                let asset_id = AssetType::try_from(*asset_type)
+                    .unwrap_ji()
+                    .to_asset_id(Uuid::from_str(jig_id).unwrap_ji());
+                Self::Module(ModuleRoute::Edit(
+                    ModuleKind::from_str(kind).expect_ji("unknown module kind!"),
+                    asset_id,
+                    ModuleId(Uuid::from_str(module_id).unwrap_ji()),
+                ))
+            }
+            ["module", kind, asset_type, "play", "debug"]
+            | ["module", kind, asset_type, "play", "debug", "debug"] => {
+                let asset_id = AssetType::try_from(*asset_type)
+                    .unwrap_ji()
+                    .to_asset_id(Uuid::from_u128(0));
                 Self::Module(ModuleRoute::Play(
                     ModuleKind::from_str(kind).expect_ji("unknown module kind!"),
-                    JigId(Uuid::from_u128(0)),
+                    asset_id,
                     ModuleId(Uuid::from_u128(0)),
                 ))
             }
-            ["module", kind, "play", jig_id, module_id] => Self::Module(ModuleRoute::Play(
-                ModuleKind::from_str(kind).expect_ji("unknown module kind!"),
-                JigId(Uuid::from_str(jig_id).unwrap_ji()),
-                ModuleId(Uuid::from_str(module_id).unwrap_ji()),
-            )),
+            ["module", kind, asset_type, "play", jig_id, module_id] => {
+                let asset_id = AssetType::try_from(*asset_type)
+                    .unwrap_ji()
+                    .to_asset_id(Uuid::from_str(jig_id).unwrap_ji());
+                Self::Module(ModuleRoute::Play(
+                    ModuleKind::from_str(kind).expect_ji("unknown module kind!"),
+                    asset_id,
+                    ModuleId(Uuid::from_str(module_id).unwrap_ji()),
+                ))
+            }
 
             _ => Self::NotFound,
         }
@@ -711,16 +729,18 @@ impl From<&Route> for String {
                 },
             },
             Route::Module(route) => match route {
-                ModuleRoute::Edit(kind, jig_id, module_id) => format!(
-                    "/module/{}/edit/{}/{}",
+                ModuleRoute::Edit(kind, asset_id, module_id) => format!(
+                    "/module/{}/{}/edit/{}/{}",
                     kind.as_str(),
-                    jig_id.0,
+                    AssetType::from(asset_id),
+                    asset_id.uuid(),
                     module_id.0
                 ),
-                ModuleRoute::Play(kind, jig_id, module_id) => format!(
-                    "/module/{}/play/{}/{}",
+                ModuleRoute::Play(kind, asset_id, module_id) => format!(
+                    "/module/{}/{}/play/{}/{}",
                     kind.as_str(),
-                    jig_id.0,
+                    AssetType::from(asset_id),
+                    asset_id.uuid(),
                     module_id.0
                 ),
             },

@@ -2,7 +2,8 @@ use crate::audio::mixer::AUDIO_MIXER;
 use dominator::{clone, Dom, DomHandle};
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::Mutable;
-use shared::domain::asset::{AssetType, DraftOrLive, PrivacyLevel};
+use shared::domain::asset::{Asset, AssetId, AssetType, DraftOrLive, PrivacyLevel};
+use shared::domain::course::CourseResponse;
 use shared::domain::module::body::Instructions;
 use shared::{
     api::endpoints::{self, module::*, ApiEndpoint},
@@ -24,6 +25,7 @@ use std::rc::Rc;
 use std::str::FromStr;
 use utils::languages::Language;
 use utils::{iframe::*, prelude::*};
+use uuid::Uuid;
 
 pub struct GenericState<RawData, Mode, Step, Base>
 where
@@ -33,7 +35,7 @@ where
     Step: StepExt + 'static,
 {
     pub(super) phase: Mutable<Rc<InitPhase<RawData, Base>>>,
-    pub(super) jig: RefCell<Option<JigData>>,
+    pub(super) asset: RefCell<Option<Asset>>,
     pub(super) opts: StateOpts<RawData>,
     pub(super) raw_loader: AsyncLoader,
     pub(super) page_body_switcher: AsyncLoader,
@@ -91,7 +93,7 @@ where
 
         let _self = Rc::new(Self {
             opts,
-            jig: RefCell::new(None),
+            asset: RefCell::new(None),
             phase: Mutable::new(Rc::new(InitPhase::Loading(loading_kind))),
             raw_loader: AsyncLoader::new(),
             page_body_switcher: AsyncLoader::new(),
@@ -100,45 +102,71 @@ where
         });
 
         _self.raw_loader.load(clone!(_self, init_from_raw => async move {
-            *_self.jig.borrow_mut() = {
+            *_self.asset.borrow_mut() = {
                 if _self.opts.skip_load_jig {
-                    Some(JigData {
-                        draft_or_live: DraftOrLive::Draft,
-                        display_name: String::from("debug!"),
-                        modules: Vec::new(),
-                        age_ranges: Vec::new(),
-                        affiliations: Vec::new(),
-                        language: String::from(Language::default().code()),
-                        categories: Vec::new(),
-                        additional_resources: Vec::new(),
-                        description: String::from("debug"),
-                        last_edited: None,
-                        theme: ThemeId::default(),
-                        audio_background: None,
-                        audio_effects: AudioEffects::default(),
-                        default_player_settings: JigPlayerSettings::default(),
-                        privacy_level: PrivacyLevel::default(),
-                        locked: true,
-                        other_keywords: String::from(""),
-                        translated_keywords: String::from(""),
-                        translated_description: HashMap::new(),
-                    })
-                } else {
-
-                    let resp = match draft_or_live {
-                        DraftOrLive::Draft => {
-                            let path = endpoints::jig::GetDraft::PATH.replace("{id}",&_self.opts.jig_id.0.to_string());
-                            api_no_auth::<JigResponse, EmptyError, ()>(&path, endpoints::jig::GetDraft::METHOD, None).await
+                    Some(Asset::Jig(JigResponse {
+                        id: JigId(Uuid::from_u128(0)),
+                        admin_data: JigAdminData {
+                            rating: None,
+                            blocked: false,
+                            curated: true,
                         },
-                        DraftOrLive::Live => {
-                            let path = endpoints::jig::GetLive::PATH.replace("{id}",&_self.opts.jig_id.0.to_string());
-                            api_no_auth::<JigResponse, EmptyError, ()>(&path, endpoints::jig::GetLive::METHOD, None).await
+                        creator_id: None,
+                        author_id: None,
+                        author_name: None,
+                        published_at: None,
+                        jig_data: JigData {
+                            draft_or_live: DraftOrLive::Draft,
+                            display_name: String::from("debug!"),
+                            modules: Vec::new(),
+                            age_ranges: Vec::new(),
+                            affiliations: Vec::new(),
+                            language: String::from(Language::default().code()),
+                            categories: Vec::new(),
+                            additional_resources: Vec::new(),
+                            description: String::from("debug"),
+                            last_edited: None,
+                            theme: ThemeId::default(),
+                            audio_background: None,
+                            audio_effects: AudioEffects::default(),
+                            default_player_settings: JigPlayerSettings::default(),
+                            privacy_level: PrivacyLevel::default(),
+                            locked: true,
+                            other_keywords: String::from(""),
+                            translated_keywords: String::from(""),
+                            translated_description: HashMap::new(),
+                        },
+                        jig_focus: JigFocus::Modules,
+                        likes: 0,
+                        plays: 0,
+                    }))
+                } else {
+                    let resp = match _self.opts.asset_id {
+                        AssetId::JigId(jig_id) => {
+                            let path = endpoints::jig::GetDraft::PATH.replace("{id}", &jig_id.0.to_string());
+                            api_no_auth::<JigResponse, EmptyError, ()>(
+                                &path,
+                                endpoints::jig::GetDraft::METHOD,
+                                None
+                            )
+                                .await
+                                .map(|jig| Asset::Jig(jig))
+                        },
+                        AssetId::CourseId(course_id) => {
+                            let path = endpoints::course::GetDraft::PATH.replace("{id}", &course_id.0.to_string());
+                            api_no_auth::<CourseResponse, EmptyError, ()>(
+                                &path,
+                                endpoints::course::GetDraft::METHOD,
+                                None
+                            )
+                                .await
+                                .map(|course| Asset::Course(course))
                         },
                     };
 
                     match resp {
-                        Ok(resp) => {
-                            Some(resp.jig_data)
+                        Ok(asset) => {
+                            Some(asset)
                         },
                         Err(_) => {
                             panic!("error loading jig!")
@@ -148,9 +176,11 @@ where
             };
 
 
-            let jig = _self.jig.borrow().as_ref().unwrap_ji().clone();
+            let asset = _self.asset.borrow().as_ref().unwrap_ji().clone();
 
-            AUDIO_MIXER.with(|mixer| mixer.set_from_jig(&jig));
+            if let Asset::Jig(jig) = &asset {
+                AUDIO_MIXER.with(|mixer| mixer.set_from_jig(&jig.jig_data));
+            };
 
             let raw_source_player = match _self.phase.get_cloned().loading_kind_unchecked() {
                 LoadingKind::Direct(raw) => Some((raw.clone(), InitSource::ForceRaw, false)),
@@ -159,12 +189,12 @@ where
                         Rc::new(Box::new(clone!(init_from_raw, _self => move |raw| {
                             _self.raw_loader.load(clone!(init_from_raw, _self => async move {
 
-                                let (jig_id, module_id, jig) = (
-                                    _self.opts.jig_id,
+                                let (asset_id, module_id, jig) = (
+                                    _self.opts.asset_id,
                                     _self.opts.module_id,
-                                    _self.jig.borrow().as_ref().unwrap_ji().clone()
+                                    _self.asset.borrow().as_ref().unwrap_ji().clone()
                                 );
-                                let base = init_from_raw(InitFromRawArgs::new(jig_id, module_id, jig, raw, InitSource::IframeData)).await;
+                                let base = init_from_raw(InitFromRawArgs::new(asset_id, module_id, jig, raw, InitSource::IframeData)).await;
 
                                 _self.phase.set(Rc::new(InitPhase::Ready(Ready {
                                     base,
@@ -180,14 +210,14 @@ where
                     let resp = match draft_or_live {
                         DraftOrLive::Draft => {
                             let path = GetDraft::PATH
-                                .replace("{asset_type}",AssetType::Jig.as_str())
+                                .replace("{asset_type}",AssetType::from(&_self.opts.asset_id).as_str())
                                 .replace("{module_id}",&_self.opts.module_id.0.to_string());
 
                             api_no_auth::<ModuleResponse, EmptyError, ()>(&path, GetDraft::METHOD, None).await
                         },
                         DraftOrLive::Live => {
                             let path = GetLive::PATH
-                                .replace("{asset_type}",AssetType::Jig.as_str())
+                                .replace("{asset_type}",AssetType::from(&_self.opts.asset_id).as_str())
                                 .replace("{module_id}",&_self.opts.module_id.0.to_string());
 
                             api_no_auth::<ModuleResponse, EmptyError, ()>(&path, GetLive::METHOD, None).await
@@ -208,12 +238,12 @@ where
 
             if let Some((raw, init_source, jig_player)) = raw_source_player {
 
-                let (jig_id, module_id, jig) = (
-                    _self.opts.jig_id,
+                let (asset_id, module_id, asset) = (
+                    _self.opts.asset_id,
                     _self.opts.module_id,
-                    _self.jig.borrow().as_ref().unwrap_ji().clone()
+                    _self.asset.borrow().as_ref().unwrap_ji().clone()
                 );
-                let base = init_from_raw(InitFromRawArgs::new(jig_id, module_id, jig, raw, init_source)).await;
+                let base = init_from_raw(InitFromRawArgs::new(asset_id, module_id, asset, raw, init_source)).await;
 
                 _self.phase.set(Rc::new(InitPhase::Ready(Ready {
                     base,
@@ -228,7 +258,7 @@ where
 
 #[derive(Debug, Clone)]
 pub struct StateOpts<RawData> {
-    pub jig_id: JigId,
+    pub asset_id: AssetId,
     pub module_id: ModuleId,
     pub force_raw: Option<RawData>,
     pub force_raw_even_in_iframe: bool,
@@ -237,9 +267,9 @@ pub struct StateOpts<RawData> {
 }
 
 impl<RawData> StateOpts<RawData> {
-    pub fn new(jig_id: JigId, module_id: ModuleId) -> Self {
+    pub fn new(asset_id: AssetId, module_id: ModuleId) -> Self {
         Self {
-            jig_id,
+            asset_id,
             module_id,
             force_raw: None,
             force_raw_even_in_iframe: false,
@@ -307,9 +337,9 @@ where
     Mode: ModeExt + 'static,
     Step: StepExt + 'static,
 {
-    pub jig_id: JigId,
+    pub asset_id: AssetId,
     pub module_id: ModuleId,
-    pub jig: JigData,
+    pub asset: Asset,
     pub raw: RawData,
     pub source: InitSource,
     pub theme_id: ThemeId,
@@ -324,9 +354,9 @@ where
     Step: StepExt + 'static,
 {
     pub fn new(
-        jig_id: JigId,
+        asset_id: AssetId,
         module_id: ModuleId,
-        jig: JigData,
+        asset: Asset,
         raw: RawData,
         source: InitSource,
     ) -> Self {
@@ -339,10 +369,10 @@ where
         };
 
         Self {
-            jig_id,
+            asset_id,
             module_id,
             theme_id,
-            jig,
+            asset,
             raw,
             source,
             play_phase: Mutable::new(if RawData::has_preload() {

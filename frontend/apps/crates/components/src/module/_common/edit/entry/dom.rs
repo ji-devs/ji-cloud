@@ -91,7 +91,7 @@ pub fn render_page_body<Mode, Step, RawData, Base, Main, Sidebar, Header, Footer
                                     Phase::Base(app_base) => {
                                         super::base::dom::render(
                                             preview_mode.clone(),
-                                            state.opts.jig_id,
+                                            state.opts.asset_id,
                                             state.opts.module_id,
                                             app_base.clone()
                                         )

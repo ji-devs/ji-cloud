@@ -1,7 +1,7 @@
 use components::module::_common::play::prelude::*;
 use futures_signals::signal::Mutable;
 use shared::domain::{
-    jig::JigId,
+    asset::AssetId,
     module::{
         body::{
             Instructions,
@@ -15,7 +15,7 @@ use std::rc::Rc;
 use utils::prelude::*;
 
 pub struct Base {
-    pub jig_id: JigId,
+    pub asset_id: AssetId,
     pub module_id: ModuleId,
     pub theme_id: ThemeId,
     pub instructions: Instructions,
@@ -28,7 +28,7 @@ pub struct Base {
 impl Base {
     pub async fn new(init_args: InitFromRawArgs<RawData, Mode, Step>) -> Rc<Self> {
         let InitFromRawArgs {
-            jig_id,
+            asset_id,
             module_id,
             raw,
             theme_id,
@@ -39,7 +39,7 @@ impl Base {
         let base_content = content.base;
 
         Rc::new(Self {
-            jig_id,
+            asset_id,
             module_id,
             theme_id,
             instructions: base_content.instructions,

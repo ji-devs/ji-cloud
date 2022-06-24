@@ -62,7 +62,7 @@ pub enum ModuleKind {
     /// Legacy
     Legacy = 11,
 
-    /// ResourceCover
+    /// ResourceCover user for resources and course cover
     ResourceCover = 12,
 
     /// Find the Answer

@@ -1,6 +1,5 @@
 use dominator::{clone, html, Dom};
 
-use shared::domain::asset::AssetId;
 use utils::prelude::*;
 
 use super::ModuleIframe;
@@ -22,14 +21,7 @@ impl ModuleIframe {
                 match module_kind {
                     None => String::new(),
                     Some(module_kind) => {
-                        let path = match state.asset_id {
-                            AssetId::JigId(jig_id) => {
-                                Route::Module(ModuleRoute::Edit(module_kind, jig_id, state.module_id)).to_string()
-                            },
-                            AssetId::CourseId(_course_id) => {
-                                todo!()
-                            },
-                        };
+                        let path = Route::Module(ModuleRoute::Edit(module_kind, state.asset_id, state.module_id)).to_string();
                         let url = unsafe {
                             SETTINGS.get_unchecked()
                                 .remote_target

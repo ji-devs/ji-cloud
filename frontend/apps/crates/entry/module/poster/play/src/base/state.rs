@@ -1,6 +1,6 @@
 use components::module::_common::play::prelude::*;
 use shared::domain::{
-    jig::{JigData, JigId},
+    asset::{Asset, AssetId},
     module::{
         body::{
             _groups::design::{Backgrounds, Sticker},
@@ -16,9 +16,9 @@ use futures_signals::signal::Mutable;
 use std::rc::Rc;
 
 pub struct Base {
-    pub jig_id: JigId,
+    pub asset_id: AssetId,
     pub module_id: ModuleId,
-    pub jig: JigData,
+    pub asset: Asset,
     pub theme_id: ThemeId,
     pub instructions: Instructions,
     pub backgrounds: Backgrounds,
@@ -29,9 +29,9 @@ pub struct Base {
 impl Base {
     pub async fn new(init_args: InitFromRawArgs<RawData, Mode, Step>) -> Rc<Self> {
         let InitFromRawArgs {
-            jig_id,
+            asset_id,
             module_id,
-            jig,
+            asset,
             raw,
             theme_id,
             ..
@@ -41,9 +41,9 @@ impl Base {
         let base_content = content.base;
 
         Rc::new(Self {
-            jig_id,
+            asset_id,
             module_id,
-            jig,
+            asset,
             theme_id,
             instructions: base_content.instructions,
             backgrounds: base_content.backgrounds,

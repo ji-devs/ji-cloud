@@ -11,7 +11,7 @@ use components::module::{
 };
 use dominator::Dom;
 use shared::domain::{
-    jig::JigId,
+    asset::AssetId,
     module::{
         body::{
             _groups::cards::{Mode, Step},
@@ -52,11 +52,11 @@ impl Extra {
 
 impl ExtraExt for Extra {}
 
-pub fn create_state(jig_id: JigId, module_id: ModuleId) -> Rc<AppState> {
-    crate::debug::init(jig_id, module_id);
+pub fn create_state(asset_id: AssetId, module_id: ModuleId) -> Rc<AppState> {
+    crate::debug::init(asset_id, module_id);
     let debug_settings = crate::debug::settings();
 
-    let mut opts = StateOpts::new(jig_id, module_id);
+    let mut opts = StateOpts::new(asset_id, module_id);
     opts.force_raw = debug_settings.data.clone();
     opts.is_main_scrollable = true;
     opts.skip_save_for_debug = debug_settings.skip_save;

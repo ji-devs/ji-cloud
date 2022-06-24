@@ -12,7 +12,7 @@ use components::{
 use dominator::clone;
 use futures_signals::signal::{Mutable, ReadOnlyMutable};
 use shared::domain::{
-    jig::JigId,
+    asset::AssetId,
     module::{
         body::{
             cover::{ModuleData as RawData, Step},
@@ -30,7 +30,7 @@ pub struct Base {
     pub step: ReadOnlyMutable<Step>,
     pub theme_id: Mutable<ThemeId>,
     pub instructions: Mutable<Instructions>,
-    pub jig_id: JigId,
+    pub asset_id: AssetId,
     pub module_id: ModuleId,
     pub continue_next_fn: ContinueNextFn,
     // Cover-specific
@@ -43,22 +43,22 @@ impl Base {
     pub async fn new(init_args: BaseInitFromRawArgs<RawData, (), Step>) -> Rc<Self> {
         let BaseInitFromRawArgs {
             mut raw,
-            jig_id,
+            asset_id,
             theme_id,
             module_id,
             history,
             step,
-            jig,
+            asset,
             ..
         } = init_args;
 
         if raw.content.is_none() {
-            raw = RawData::new_with_mode_and_theme((), jig.theme);
+            raw = RawData::new_with_mode_and_theme((), asset.theme());
             history.push_modify(clone!(raw => |init| {
                 *init = raw;
             }));
 
-            theme_id.set(jig.theme);
+            theme_id.set(asset.theme());
         }
 
         let content = raw.content.unwrap_ji();
@@ -134,7 +134,7 @@ impl Base {
         *stickers_ref.borrow_mut() = Some(stickers.clone());
 
         let _self = Rc::new(Self {
-            jig_id,
+            asset_id,
             module_id,
             history,
             step: step.read_only(),
@@ -171,8 +171,8 @@ impl BaseExt<Step> for Base {
         }
     }
 
-    fn get_jig_id(&self) -> JigId {
-        self.jig_id
+    fn get_asset_id(&self) -> AssetId {
+        self.asset_id
     }
 
     fn get_module_id(&self) -> ModuleId {

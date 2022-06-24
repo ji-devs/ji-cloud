@@ -1,6 +1,6 @@
 use components::module::_common::play::prelude::*;
 use shared::domain::{
-    jig::{JigData, JigId},
+    asset::{Asset, AssetId},
     module::{
         body::{
             Instructions,
@@ -18,9 +18,9 @@ use futures_signals::signal::Mutable;
 use std::rc::Rc;
 
 pub struct Base {
-    pub jig_id: JigId,
+    pub asset_id: AssetId,
     pub module_id: ModuleId,
-    pub jig: JigData,
+    pub asset: Asset,
     pub theme_id: ThemeId,
     pub instructions: Instructions,
     pub feedback: Instructions,
@@ -35,9 +35,9 @@ pub struct Base {
 impl Base {
     pub async fn new(init_args: InitFromRawArgs<RawData, Mode, Step>) -> Rc<Self> {
         let InitFromRawArgs {
-            jig_id,
+            asset_id,
             module_id,
-            jig,
+            asset,
             raw,
             theme_id,
             ..
@@ -46,9 +46,9 @@ impl Base {
         let content = raw.content.unwrap_ji();
 
         Rc::new(Self {
-            jig_id,
+            asset_id,
             module_id,
-            jig,
+            asset,
             theme_id,
             instructions: content.instructions,
             feedback: content.feedback,

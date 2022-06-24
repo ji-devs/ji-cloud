@@ -110,7 +110,7 @@ impl JigPlayer {
                                         Some(active_module) => {
                                             let mut route: String = Route::Module(ModuleRoute::Play(
                                                 active_module.kind,
-                                                state.jig_id,
+                                                state.jig_id.into(),
                                                 active_module.id
                                             )).into();
 

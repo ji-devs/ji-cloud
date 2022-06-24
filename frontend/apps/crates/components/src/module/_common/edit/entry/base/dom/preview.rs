@@ -12,7 +12,7 @@ use std::rc::Rc;
 use dominator_helpers::events::Message;
 use futures_signals::signal::SignalExt;
 use shared::domain::{
-    jig::JigId,
+    asset::AssetId,
     module::{
         body::{BodyExt, ModeExt, StepExt},
         ModuleId, ModuleKind,
@@ -40,7 +40,7 @@ where
 {
     let post_preview = Rc::new(PostPreview::new(
         RawData::kind(),
-        state.base.get_jig_id(),
+        state.base.get_asset_id(),
         state.base.get_module_id(),
     ));
 
@@ -63,7 +63,7 @@ where
 
 pub fn render_preview_overlay<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(
     _module_kind: ModuleKind,
-    _jig_id: JigId,
+    _asset_id: AssetId,
     _module_id: ModuleId,
     state: Rc<AppBase<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>,
 ) -> Dom
@@ -96,7 +96,7 @@ where
 
 pub fn render_preview_main<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(
     module_kind: ModuleKind,
-    jig_id: JigId,
+    asset_id: AssetId,
     module_id: ModuleId,
     state: Rc<AppBase<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>,
 ) -> Dom
@@ -112,7 +112,8 @@ where
     Overlay: OverlayExt + 'static,
 {
     let url = {
-        let route: String = Route::Module(ModuleRoute::Play(module_kind, jig_id, module_id)).into();
+        let route: String =
+            Route::Module(ModuleRoute::Play(module_kind, asset_id, module_id)).into();
 
         let url = unsafe { SETTINGS.get_unchecked().remote_target.spa_iframe(&route) };
 

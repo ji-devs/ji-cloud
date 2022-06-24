@@ -1,16 +1,16 @@
 use super::base::state::*;
 use components::module::_common::play::prelude::*;
 use shared::domain::{
-    jig::JigId,
+    asset::AssetId,
     module::{body::legacy::ModuleData as RawData, ModuleId},
 };
 use std::rc::Rc;
 pub type AppState = GenericState<RawData, (), (), Base>;
 
-pub async fn create_state(jig_id: JigId, module_id: ModuleId) -> Rc<AppState> {
-    crate::debug::init(jig_id, module_id).await;
+pub async fn create_state(asset_id: AssetId, module_id: ModuleId) -> Rc<AppState> {
+    crate::debug::init(asset_id, module_id).await;
 
-    let mut opts = StateOpts::new(jig_id, module_id);
+    let mut opts = StateOpts::new(asset_id, module_id);
     opts.force_raw = crate::debug::settings().data.clone();
     opts.skip_load_jig = crate::debug::settings().skip_load_jig;
 

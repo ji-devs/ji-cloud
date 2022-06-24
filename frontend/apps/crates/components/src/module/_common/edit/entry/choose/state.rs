@@ -62,12 +62,12 @@ where
             on_mode_change: Box::new(move |mode| {
                 loader.load(clone!(init_from_raw, app => async move {
 
-                    let (jig_id, module_id, jig) = (
-                        app.opts.jig_id,
+                    let (asset_id, module_id, asset) = (
+                        app.opts.asset_id,
                         app.opts.module_id,
-                        app.jig.borrow().clone().unwrap_ji()
+                        app.asset.borrow().clone().unwrap_ji()
                     );
-                    let theme_id = jig.theme;
+                    let theme_id = asset.theme();
 
                     let raw = RawData::new_with_mode_and_theme(mode, theme_id);
                     let history = app.history.borrow().as_ref().unwrap_ji().clone();
@@ -80,9 +80,9 @@ where
                         app.clone(),
                         init_from_raw.clone(),
                         BaseInitFromRawArgs::new(
-                            jig_id,
+                            asset_id,
                             module_id,
-                            jig,
+                            asset,
                             raw,
                             InitSource::ChooseMode,
                             history

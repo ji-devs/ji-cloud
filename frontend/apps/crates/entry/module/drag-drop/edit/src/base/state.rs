@@ -21,7 +21,7 @@ use futures_signals::{
     signal_vec::{MutableVec, SignalVecExt},
 };
 use shared::domain::{
-    jig::JigId,
+    asset::AssetId,
     module::{
         body::{
             Audio, Instructions, Transform,
@@ -43,7 +43,7 @@ pub struct Base {
     pub history: Rc<HistoryStateImpl<RawData>>,
     pub step: ReadOnlyMutable<Step>,
     pub instructions: Mutable<Instructions>,
-    pub jig_id: JigId,
+    pub asset_id: AssetId,
     pub module_id: ModuleId,
     pub continue_next_fn: ContinueNextFn,
     // DragDrop-specific
@@ -177,7 +177,7 @@ impl Base {
     pub async fn new(init_args: BaseInitFromRawArgs<RawData, Mode, Step>) -> Rc<Self> {
         let BaseInitFromRawArgs {
             raw,
-            jig_id,
+            asset_id,
             module_id,
             history,
             step,
@@ -318,7 +318,7 @@ impl Base {
         );
 
         let _self = Rc::new(Self {
-            jig_id,
+            asset_id,
             module_id,
             theme_id,
             history,
@@ -389,8 +389,8 @@ impl BaseExt<Step> for Base {
         }
     }
 
-    fn get_jig_id(&self) -> JigId {
-        self.jig_id
+    fn get_asset_id(&self) -> AssetId {
+        self.asset_id
     }
     fn get_module_id(&self) -> ModuleId {
         self.module_id

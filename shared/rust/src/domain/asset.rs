@@ -3,7 +3,7 @@
 use std::{
     collections::HashMap,
     fmt::{self, Debug},
-    str::FromStr,
+    str::FromStr, convert::TryFrom,
 };
 
 use chrono::{DateTime, Utc};
@@ -21,7 +21,7 @@ use crate::domain::{
 
 use super::{
     course::{CourseId, CourseResponse},
-    jig::{JigId, JigResponse},
+    jig::{JigId, JigResponse}, module::body::ThemeId,
 };
 
 /// AssetType
@@ -54,15 +54,44 @@ impl AssetType {
     pub fn is_course(&self) -> bool {
         matches!(self, Self::Course)
     }
-}
 
-impl AssetType {
     /// Represents the asset type as a `str`
     pub fn as_str(&self) -> &'static str {
         match self {
             Self::Jig => "jig",
             Self::Resource => "resource",
             Self::Course => "course",
+        }
+    }
+
+    /// Create asset id from self and uuid
+    pub fn to_asset_id(&self, uuid: Uuid) -> AssetId {
+        match self {
+            AssetType::Jig => JigId(uuid).into(),
+            AssetType::Resource => JigId(uuid).into(),
+            AssetType::Course => CourseId(uuid).into(),
+        }
+    }
+}
+
+impl From<&AssetId> for AssetType {
+    fn from(asset_id: &AssetId) -> Self {
+        match asset_id {
+            AssetId::JigId(_) => AssetType::Jig,
+            AssetId::CourseId(_) => AssetType::Course,
+        }
+    }
+}
+
+impl TryFrom<&str> for AssetType {
+    type Error = ();
+
+    fn try_from(s: &str) -> Result<Self, Self::Error> {
+        match s {
+            "jig" => Ok(Self::Jig),
+            "resource" => Ok(Self::Resource),
+            "course" => Ok(Self::Course),
+            _ => Err(())
         }
     }
 }
@@ -274,6 +303,14 @@ impl Asset {
         match self {
             Self::Jig(jig) => &jig.jig_data.translated_description,
             Self::Course(course) => &course.course_data.translated_description,
+        }
+    }
+
+    /// get theme
+    pub fn theme(&self) -> ThemeId {
+        match self {
+            Self::Jig(jig) => jig.jig_data.theme,
+            Self::Course(_) => ThemeId::default(),
         }
     }
 }

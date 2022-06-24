@@ -1,7 +1,7 @@
 use shared::{
     config::MAX_LIST_WORDS,
     domain::{
-        jig::JigId,
+        asset::AssetId,
         module::{
             body::{
                 Background, Instructions,
@@ -24,7 +24,7 @@ use std::{cell::RefCell, rc::Rc};
 use utils::prelude::*;
 
 pub struct Base {
-    pub jig_id: JigId,
+    pub asset_id: AssetId,
     pub module_id: ModuleId,
     pub mode: Mode,
     pub pair_lookup: Vec<usize>,
@@ -48,9 +48,9 @@ pub enum FlipState {
 impl Base {
     pub async fn new(init_args: InitFromRawArgs<RawData, Mode, Step>) -> Rc<Self> {
         let InitFromRawArgs {
-            jig_id,
+            asset_id,
             module_id,
-            jig: _,
+            asset: _,
             raw,
             theme_id,
             ..
@@ -120,7 +120,7 @@ impl Base {
         }
 
         Rc::new(Self {
-            jig_id,
+            asset_id,
             module_id,
             mode: content.base.mode,
             pair_lookup,

@@ -76,8 +76,8 @@ impl AssetEditState {
                                 CourseEditRoute::Landing => {
                                     Some(JigSelection::new(course_id).render())
                                 },
-                                CourseEditRoute::Cover(_cover_id) => {
-                                    todo!()
+                                CourseEditRoute::Cover(cover_id) => {
+                                    Some(ModuleIframe::new(state.asset_id, cover_id).render())
                                 },
                                 CourseEditRoute::Publish => {
                                     Some(Publish::render(Rc::clone(&state)))

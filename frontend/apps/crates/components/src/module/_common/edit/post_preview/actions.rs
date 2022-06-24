@@ -24,8 +24,8 @@ impl PostPreview {
             log::info!("Couldn't post message to top... redirect!");
 
             let route: String = Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
-                self.jig_id,
-                JigFocus::Modules, // only module focused jigs are should be here
+                *self.asset_id.unwrap_jig(), // TODO: handle all types of assets
+                JigFocus::Modules,           // only module focused jigs are should be here
                 JigEditRoute::Landing,
             )))
             .into();
@@ -40,8 +40,8 @@ impl PostPreview {
             log::info!("Couldn't post message to top... redirect!");
 
             let route: String = Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
-                self.jig_id,
-                JigFocus::Modules, // only module focused jigs are should be here
+                *self.asset_id.unwrap_jig(), // TODO: handle all types of assets
+                JigFocus::Modules,           // only module focused jigs are should be here
                 JigEditRoute::Landing,
             )))
             .into();
@@ -59,10 +59,10 @@ impl PostPreview {
 
         let req = ModuleCreateRequest {
             body: target_body,
-            parent_id: self.jig_id.into(),
+            parent_id: self.asset_id.into(),
         };
 
-        let jig_id = self.jig_id;
+        let asset_id = self.asset_id;
 
         self.loader.load(async move {
             let res = api_with_auth::<CreateResponse<ModuleId>, EmptyError, ModuleCreateRequest>(
@@ -87,8 +87,8 @@ impl PostPreview {
                     if msg.try_post_message_to_editor().is_err() {
                         log::info!("Couldn't post message to parent... redirect!");
                         let route: String = Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
-                            jig_id,
-                            JigFocus::Modules, // only module focused jigs are should be here
+                            *(asset_id.unwrap_jig()), // TODO: handle all types of assets
+                            JigFocus::Modules,        // only module focused jigs are should be here
                             JigEditRoute::Module(module_id),
                         )))
                         .into();

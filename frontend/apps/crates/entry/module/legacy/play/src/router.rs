@@ -29,8 +29,8 @@ pub fn render(state: Rc<Router>) {
             .signal_ref(|url| Route::from_url(url))
             .for_each(clone!(state => move |route| {
                 clone!(state => async move {
-                    if let Route::Module(ModuleRoute::Play(ModuleKind::Legacy, jig_id, module_id)) = route {
-                        let app = create_state(jig_id, module_id).await;
+                    if let Route::Module(ModuleRoute::Play(ModuleKind::Legacy, asset_id, module_id)) = route {
+                        let app = create_state(asset_id, module_id).await;
                         render_page_body(app.clone());
                         *state.app.borrow_mut() = Some(app);
                     }

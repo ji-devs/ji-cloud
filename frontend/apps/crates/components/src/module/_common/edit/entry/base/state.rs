@@ -1,16 +1,14 @@
 use dominator::{clone, Dom};
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::{Mutable, ReadOnlyMutable, Signal, SignalExt};
+use shared::domain::asset::{Asset, AssetId};
 use std::collections::HashSet;
 use std::{marker::PhantomData, rc::Rc};
 
 use super::super::{actions::HistoryStateImpl, state::*};
-use shared::domain::{
-    jig::{JigData, JigId},
-    module::{
-        body::{BodyExt, ModeExt, StepExt, ThemeId},
-        ModuleId, ModuleKind,
-    },
+use shared::domain::module::{
+    body::{BodyExt, ModeExt, StepExt, ThemeId},
+    ModuleId, ModuleKind,
 };
 use std::future::Future;
 use utils::prelude::*;
@@ -28,9 +26,9 @@ where
     pub step: Mutable<Step>, //not intended to be changed lower down, just for passing back really
     pub steps_completed: Mutable<HashSet<Step>>,
     pub theme_id: Mutable<ThemeId>,
-    pub jig_id: JigId,
+    pub asset_id: AssetId,
     pub module_id: ModuleId,
-    pub jig: JigData,
+    pub asset: Asset,
     pub raw: RawData,
     pub source: InitSource,
     pub history: Rc<HistoryStateImpl<RawData>>,
@@ -45,9 +43,9 @@ where
     Step: StepExt + 'static,
 {
     pub fn new(
-        jig_id: JigId,
+        asset_id: AssetId,
         module_id: ModuleId,
-        jig: JigData,
+        asset: Asset,
         raw: RawData,
         source: InitSource,
         history: Rc<HistoryStateImpl<RawData>>,
@@ -62,9 +60,9 @@ where
             step,
             steps_completed,
             theme_id,
-            jig_id,
+            asset_id,
             module_id,
-            jig,
+            asset,
             raw,
             source,
             history,
@@ -92,7 +90,7 @@ where
 {
     pub preview_step_reactor: AsyncLoader,
     pub step: Mutable<Step>,
-    pub jig: JigData,
+    pub asset: Asset,
     pub base: Rc<Base>,
     pub main: Rc<Main>,
     pub sidebar: Rc<Sidebar>,
@@ -141,7 +139,7 @@ where
         let step = init_args.step.clone();
         let theme_id = init_args.theme_id.clone();
         let steps_completed = init_args.steps_completed.clone();
-        let jig = init_args.jig.clone();
+        let asset = init_args.asset.clone();
         let mode = init_args.raw.mode();
 
         // get a BaseInit
@@ -170,7 +168,7 @@ where
 
         Self {
             step,
-            jig,
+            asset,
             base: init.base,
             main: init.main,
             sidebar: init.sidebar,
@@ -227,7 +225,7 @@ pub trait BaseExt<Step: StepExt> {
     fn continue_next(&self) -> bool;
 
     /// Current JIG's ID
-    fn get_jig_id(&self) -> JigId;
+    fn get_asset_id(&self) -> AssetId;
 
     /// Current module's ID
     fn get_module_id(&self) -> ModuleId;

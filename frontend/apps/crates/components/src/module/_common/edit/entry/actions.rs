@@ -3,8 +3,7 @@ use crate::module::_common::edit::history::state::HistoryState;
 use shared::{
     api::endpoints::{module::*, ApiEndpoint},
     domain::{
-        asset::DraftOrLive,
-        jig::*,
+        asset::{AssetId, DraftOrLive},
         module::{
             body::{BodyExt, ModeExt, StepExt},
             *,
@@ -81,10 +80,10 @@ where
                 .reset_from_history_loader
                 .load(clone!(_self, init_from_raw => async move {
 
-                    let (jig_id, module_id, jig) = (
-                        _self.opts.jig_id,
+                    let (asset_id, module_id, asset) = (
+                        _self.opts.asset_id,
                         _self.opts.module_id,
-                        _self.jig.borrow().clone().unwrap_ji()
+                        _self.asset.borrow().clone().unwrap_ji()
                     );
 
                     if raw.requires_choose_mode() {
@@ -94,9 +93,9 @@ where
                             _self.clone(),
                             init_from_raw.clone(),
                             BaseInitFromRawArgs::new(
-                                jig_id,
+                                asset_id,
                                 module_id,
-                                jig,
+                                asset,
                                 raw,
                                 InitSource::History,
                                 _self.history.borrow().as_ref().unwrap_ji().clone()
@@ -117,7 +116,7 @@ pub fn save_history<RawData, Mode, Step>(
     skip_for_debug: bool,
     screenshot_loader: Rc<AsyncLoader>,
     save_loader: Rc<AsyncLoader>,
-    jig_id: JigId,
+    asset_id: AssetId,
     module_id: ModuleId,
 ) -> Box<dyn Fn(RawData)>
 where
@@ -131,7 +130,7 @@ where
                 raw_data,
                 screenshot_loader.clone(),
                 save_loader.clone(),
-                jig_id,
+                asset_id,
                 module_id,
             );
         }
@@ -142,7 +141,7 @@ pub fn save<RawData, Mode, Step>(
     raw_data: RawData,
     screenshot_loader: Rc<AsyncLoader>,
     save_loader: Rc<AsyncLoader>,
-    jig_id: JigId,
+    asset_id: AssetId,
     module_id: ModuleId,
 ) where
     RawData: BodyExt<Mode, Step> + 'static,
@@ -160,7 +159,7 @@ pub fn save<RawData, Mode, Step>(
             is_complete: Some(is_complete),
             index: None,
             body: Some(body),
-            parent_id: jig_id.into(),
+            parent_id: asset_id,
         });
         let _ = api_with_auth_empty::<EmptyError, _>(&path, Update::METHOD, req).await;
 
@@ -171,13 +170,8 @@ pub fn save<RawData, Mode, Step>(
         if is_complete {
             // Only generate a screenshot if the module has the minimum required content.
             screenshot_loader.load(async move {
-                call_screenshot_service(
-                    jig_id.into(),
-                    module_id,
-                    RawData::kind(),
-                    DraftOrLive::Draft,
-                )
-                .await;
+                call_screenshot_service(asset_id, module_id, RawData::kind(), DraftOrLive::Draft)
+                    .await;
             });
         }
     });

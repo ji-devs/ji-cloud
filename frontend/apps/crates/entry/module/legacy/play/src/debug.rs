@@ -13,6 +13,7 @@ use once_cell::sync::OnceCell;
 use serde::Deserialize;
 use shared::{
     domain::{
+        asset::AssetId,
         audio::AudioId,
         image::ImageId,
         jig::JigId,
@@ -55,8 +56,8 @@ impl DebugSettings {
     }
 }
 
-pub async fn init(jig_id: JigId, _module_id: ModuleId) {
-    if jig_id == JigId(Uuid::from_u128(0)) {
+pub async fn init(asset_id: AssetId, _module_id: ModuleId) {
+    if asset_id.uuid() == &Uuid::from_u128(0) {
         //is debug, so just load game.json to get slide id
         let data = match utils::routes::get_param("game_id") {
             Some(game_id) => {

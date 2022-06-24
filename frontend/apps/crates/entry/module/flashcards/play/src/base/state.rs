@@ -1,5 +1,5 @@
 use shared::domain::{
-    jig::JigId,
+    asset::AssetId,
     module::{
         body::{
             Background, Instructions,
@@ -19,7 +19,7 @@ use utils::prelude::*;
 use super::game::state::Game;
 
 pub struct Base {
-    pub jig_id: JigId,
+    pub asset_id: AssetId,
     pub module_id: ModuleId,
     pub mode: Mode,
     pub theme_id: ThemeId,
@@ -40,9 +40,9 @@ pub enum Phase {
 impl Base {
     pub async fn new(init_args: InitFromRawArgs<RawData, Mode, Step>) -> Rc<Self> {
         let InitFromRawArgs {
-            jig_id,
+            asset_id,
             module_id,
-            jig: _,
+            asset: _,
             raw,
             theme_id,
             ..
@@ -51,7 +51,7 @@ impl Base {
         let content = raw.content.unwrap_ji();
 
         let _self = Rc::new(Self {
-            jig_id,
+            asset_id,
             module_id,
             mode: content.base.mode,
             theme_id,
