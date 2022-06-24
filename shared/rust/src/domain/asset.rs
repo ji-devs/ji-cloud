@@ -2,8 +2,9 @@
 
 use std::{
     collections::HashMap,
+    convert::TryFrom,
     fmt::{self, Debug},
-    str::FromStr, convert::TryFrom,
+    str::FromStr,
 };
 
 use chrono::{DateTime, Utc};
@@ -21,7 +22,8 @@ use crate::domain::{
 
 use super::{
     course::{CourseId, CourseResponse},
-    jig::{JigId, JigResponse}, module::body::ThemeId,
+    jig::{JigId, JigResponse},
+    module::body::ThemeId,
 };
 
 /// AssetType
@@ -91,7 +93,7 @@ impl TryFrom<&str> for AssetType {
             "jig" => Ok(Self::Jig),
             "resource" => Ok(Self::Resource),
             "course" => Ok(Self::Course),
-            _ => Err(())
+            _ => Err(()),
         }
     }
 }
