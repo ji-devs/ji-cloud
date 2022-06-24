@@ -112,5 +112,5 @@ impl ApiEndpoint for Unfollow {
     type Res = ();
     type Err = EmptyError;
     const PATH: &'static str = "/v1/user/{user_id}/unfollow";
-    const METHOD: Method = Method::Post;
+    const METHOD: Method = Method::Delete;
 }

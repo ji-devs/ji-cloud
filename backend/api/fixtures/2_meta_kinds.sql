@@ -1,4 +1,4 @@
-insert into style (id, display_name, index, created_at)
+    insert into style (id, display_name, index, created_at)
 values ('6389eaa0-de76-11ea-b7ab-0399bcf84df2', 'A', 0, '2020-08-14T14:37:44.569428-07:00'),
        ('6389ff7c-de76-11ea-b7ab-9b5661dd4f70', 'B', 1, '2020-08-14T14:37:44.569428-07:00'),
        ('638a02a6-de76-11ea-b7ab-9300ed788cc1', 'C', 2, '2020-08-14T14:37:44.569428-07:00');
