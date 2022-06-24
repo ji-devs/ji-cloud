@@ -16,6 +16,7 @@ use sqlx::PgPool;
 
 mod color;
 mod font;
+mod public_user;
 
 #[actix_rt::test]
 async fn get_profile() -> anyhow::Result<()> {
