@@ -730,14 +730,14 @@ impl From<&Route> for String {
             },
             Route::Module(route) => match route {
                 ModuleRoute::Edit(kind, asset_id, module_id) => format!(
-                    "/module/{}/{}/edit/{}/{}",
+                    "/module/{}/edit/{}/{}/{}",
                     kind.as_str(),
                     AssetType::from(asset_id),
                     asset_id.uuid(),
                     module_id.0
                 ),
                 ModuleRoute::Play(kind, asset_id, module_id) => format!(
-                    "/module/{}/{}/play/{}/{}",
+                    "/module/{}/play/{}/{}/{}",
                     kind.as_str(),
                     AssetType::from(asset_id),
                     asset_id.uuid(),
