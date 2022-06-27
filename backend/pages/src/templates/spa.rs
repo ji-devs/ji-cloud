@@ -144,9 +144,9 @@ pub async fn legacy_template_with_module(
 
 pub async fn module_template(
     settings: Data<RuntimeSettings>,
-    path: Path<(String, ModuleJigPageKind, String, String)>,
+    path: Path<(String, ModuleJigPageKind, String)>,
 ) -> actix_web::Result<HttpResponse> {
-    let (module_kind, page_kind, _jig_id, _module_id) = path.into_inner();
+    let (module_kind, page_kind, _) = path.into_inner();
     spa_template(&settings, SpaPage::Module(module_kind, page_kind))
 }
 
