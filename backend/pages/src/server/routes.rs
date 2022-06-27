@@ -31,7 +31,7 @@ pub fn configure(config: &mut ServiceConfig) {
             web::get().to(spa::legacy_template_with_module),
         )
         .route(
-            "/module/{kind}/{page_kind}/{jig_id}/{module_id}",
+            "/module/{kind}/{page_kind}/{path:.*}",
             web::get().to(spa::module_template),
         )
         .route("/dev/{path:.*}", web::get().to(spa::dev_template))
