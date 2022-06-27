@@ -522,8 +522,8 @@ impl Route {
                 unreachable!()
             }
 
-            ["module", kind, asset_type, "edit", "debug"]
-            | ["module", kind, asset_type, "edit", "debug", "debug"] => {
+            ["module", kind, "edit", asset_type, "debug"]
+            | ["module", kind, "edit", asset_type, "debug", "debug"] => {
                 let asset_id = AssetType::try_from(*asset_type)
                     .unwrap_ji()
                     .to_asset_id(Uuid::from_u128(0));
@@ -533,18 +533,18 @@ impl Route {
                     ModuleId(Uuid::from_u128(0)),
                 ))
             }
-            ["module", kind, asset_type, "edit", jig_id, module_id] => {
+            ["module", kind, "edit", asset_type, asset_id, module_id] => {
                 let asset_id = AssetType::try_from(*asset_type)
                     .unwrap_ji()
-                    .to_asset_id(Uuid::from_str(jig_id).unwrap_ji());
+                    .to_asset_id(Uuid::from_str(asset_id).unwrap_ji());
                 Self::Module(ModuleRoute::Edit(
                     ModuleKind::from_str(kind).expect_ji("unknown module kind!"),
                     asset_id,
                     ModuleId(Uuid::from_str(module_id).unwrap_ji()),
                 ))
             }
-            ["module", kind, asset_type, "play", "debug"]
-            | ["module", kind, asset_type, "play", "debug", "debug"] => {
+            ["module", kind, "play", asset_type, "debug"]
+            | ["module", kind, "play", asset_type, "debug", "debug"] => {
                 let asset_id = AssetType::try_from(*asset_type)
                     .unwrap_ji()
                     .to_asset_id(Uuid::from_u128(0));
@@ -554,10 +554,10 @@ impl Route {
                     ModuleId(Uuid::from_u128(0)),
                 ))
             }
-            ["module", kind, asset_type, "play", jig_id, module_id] => {
+            ["module", kind, "play", asset_type, asset_id, module_id] => {
                 let asset_id = AssetType::try_from(*asset_type)
                     .unwrap_ji()
-                    .to_asset_id(Uuid::from_str(jig_id).unwrap_ji());
+                    .to_asset_id(Uuid::from_str(asset_id).unwrap_ji());
                 Self::Module(ModuleRoute::Play(
                     ModuleKind::from_str(kind).expect_ji("unknown module kind!"),
                     asset_id,
