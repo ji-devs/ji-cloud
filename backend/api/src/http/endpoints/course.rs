@@ -144,7 +144,7 @@ async fn delete(
     db: Data<PgPool>,
     claims: TokenUser,
     path: web::Path<CourseId>,
-    algolia: ServiceData<crate::algolia::Client>,
+    algolia: ServiceData<crate::algolia::Manager>,
 ) -> Result<HttpResponse, error::Delete> {
     let id = path.into_inner();
 

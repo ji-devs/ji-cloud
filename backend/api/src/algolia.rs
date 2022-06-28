@@ -976,6 +976,96 @@ limit 100 for no key update skip locked;
 
         Ok(true)
     }
+
+    pub async fn delete_image(&self, id: ImageId) {
+        if let Err(e) = self.try_delete_image(id).await {
+            log::warn!(
+                "failed to delete image with id {} from algolia: {}",
+                id.0.to_hyphenated(),
+                e
+            );
+        }
+    }
+
+    pub async fn try_delete_image(&self, ImageId(id): ImageId) -> anyhow::Result<()> {
+        self.inner
+            .delete_object(&self.media_index, &id.to_string())
+            .await?;
+
+        Ok(())
+    }
+
+    pub async fn delete_jig(&self, id: JigId) {
+        if let Err(e) = self.try_delete_jig(id).await {
+            log::warn!(
+                "failed to delete jig with id {} from algolia: {}",
+                id.0.to_hyphenated(),
+                e
+            );
+        }
+    }
+
+    pub async fn try_delete_jig(&self, JigId(id): JigId) -> anyhow::Result<()> {
+        self.inner
+            .delete_object(&self.jig_index, &id.to_string())
+            .await?;
+
+        Ok(())
+    }
+
+    pub async fn delete_badge(&self, id: BadgeId) {
+        if let Err(e) = self.try_delete_badge(id).await {
+            log::warn!(
+                "failed to delete badge with id {} from algolia: {}",
+                id.0.to_hyphenated(),
+                e
+            );
+        }
+    }
+
+    pub async fn try_delete_badge(&self, BadgeId(id): BadgeId) -> anyhow::Result<()> {
+        self.inner
+            .delete_object(&self.badge_index, &id.to_string())
+            .await?;
+
+        Ok(())
+    }
+
+    pub async fn delete_course(&self, id: CourseId) {
+        if let Err(e) = self.try_delete_course(id).await {
+            log::warn!(
+                "failed to delete course with id {} from algolia: {}",
+                id.0.to_hyphenated(),
+                e
+            );
+        }
+    }
+
+    pub async fn try_delete_course(&self, CourseId(id): CourseId) -> anyhow::Result<()> {
+        self.inner
+            .delete_object(&self.course_index, &id.to_string())
+            .await?;
+
+        Ok(())
+    }
+
+    pub async fn delete_public_user(&self, id: Uuid) {
+        if let Err(e) = self.try_delete_public_user(id).await {
+            log::warn!(
+                "failed to delete public user with id {} from algolia: {}",
+                id.to_hyphenated(),
+                e
+            );
+        }
+    }
+
+    pub async fn try_delete_public_user(&self, id: Uuid) -> anyhow::Result<()> {
+        self.inner
+            .delete_object(&self.public_user_index, &id.to_string())
+            .await?;
+
+        Ok(())
+    }
 }
 
 #[derive(Clone)]
@@ -1272,24 +1362,6 @@ impl Client {
         Ok(Some((results, pages, total_hits)))
     }
 
-    pub async fn delete_image(&self, id: ImageId) {
-        if let Err(e) = self.try_delete_image(id).await {
-            log::warn!(
-                "failed to delete image with id {} from algolia: {}",
-                id.0.to_hyphenated(),
-                e
-            );
-        }
-    }
-
-    pub async fn try_delete_image(&self, ImageId(id): ImageId) -> anyhow::Result<()> {
-        self.inner
-            .delete_object(&self.media_index, &id.to_string())
-            .await?;
-
-        Ok(())
-    }
-
     #[instrument(skip_all)]
     pub async fn search_jig(
         &self,
@@ -1420,24 +1492,6 @@ impl Client {
         Ok(Some((results, pages, total_hits)))
     }
 
-    pub async fn delete_jig(&self, id: JigId) {
-        if let Err(e) = self.try_delete_jig(id).await {
-            log::warn!(
-                "failed to delete jig with id {} from algolia: {}",
-                id.0.to_hyphenated(),
-                e
-            );
-        }
-    }
-
-    pub async fn try_delete_jig(&self, JigId(id): JigId) -> anyhow::Result<()> {
-        self.inner
-            .delete_object(&self.jig_index, &id.to_string())
-            .await?;
-
-        Ok(())
-    }
-
     #[instrument(skip_all)]
     pub async fn search_course(
         &self,
@@ -1548,24 +1602,6 @@ impl Client {
         Ok(Some((results, pages, total_hits)))
     }
 
-    pub async fn delete_course(&self, id: CourseId) {
-        if let Err(e) = self.try_delete_course(id).await {
-            log::warn!(
-                "failed to delete course with id {} from algolia: {}",
-                id.0.to_hyphenated(),
-                e
-            );
-        }
-    }
-
-    pub async fn try_delete_course(&self, CourseId(id): CourseId) -> anyhow::Result<()> {
-        self.inner
-            .delete_object(&self.course_index, &id.to_string())
-            .await?;
-
-        Ok(())
-    }
-
     #[instrument(skip_all)]
     pub async fn search_badge(
         &self,
@@ -1624,24 +1660,6 @@ impl Client {
             .collect::<Result<Vec<_>, _>>()?;
 
         Ok(Some((results, pages, total_hits)))
-    }
-
-    pub async fn delete_badge(&self, id: BadgeId) {
-        if let Err(e) = self.try_delete_badge(id).await {
-            log::warn!(
-                "failed to delete badge with id {} from algolia: {}",
-                id.0.to_hyphenated(),
-                e
-            );
-        }
-    }
-
-    pub async fn try_delete_badge(&self, BadgeId(id): BadgeId) -> anyhow::Result<()> {
-        self.inner
-            .delete_object(&self.badge_index, &id.to_string())
-            .await?;
-
-        Ok(())
     }
 
     #[instrument(skip_all)]
@@ -1746,23 +1764,5 @@ impl Client {
             .collect::<Result<Vec<_>, _>>()?;
 
         Ok(Some((results, pages, total_hits)))
-    }
-
-    pub async fn delete_public_user(&self, id: Uuid) {
-        if let Err(e) = self.try_delete_public_user(id).await {
-            log::warn!(
-                "failed to delete public user with id {} from algolia: {}",
-                id.to_hyphenated(),
-                e
-            );
-        }
-    }
-
-    pub async fn try_delete_public_user(&self, id: Uuid) -> anyhow::Result<()> {
-        self.inner
-            .delete_object(&self.public_user_index, &id.to_string())
-            .await?;
-
-        Ok(())
     }
 }

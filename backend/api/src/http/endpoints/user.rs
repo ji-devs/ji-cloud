@@ -838,7 +838,7 @@ async fn get_profile(
 async fn delete(
     db: Data<PgPool>,
     session: TokenSessionOf<SessionDelete>,
-    algolia: ServiceData<crate::algolia::Client>,
+    algolia: ServiceData<crate::algolia::Manager>,
 ) -> Result<NoContentClearAuth, error::Server> {
     sqlx::query!(
         r#"delete from "user" where id = $1"#,
