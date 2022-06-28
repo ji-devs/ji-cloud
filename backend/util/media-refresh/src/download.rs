@@ -15,6 +15,7 @@ pub async fn run(
 ) -> anyhow::Result<()> {
     let client = crate::create_http_client(&token, &csrf)?;
 
+    panic!("This api endpoint has been removed");
     let response = client
         .get(&format!("{}/v0/admin/media", endpoint))
         .send()
