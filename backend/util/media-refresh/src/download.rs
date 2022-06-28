@@ -39,7 +39,7 @@ pub async fn run(
         .await?;
 
     data.media
-        .retain(|it| matches!(it.kind, MediaKind::Image(_)));
+        .retain(|it| matches!(it.kind, MediaKind::Image));
 
     tokio::task::spawn_blocking(move || -> anyhow::Result<()> {
         let writer = File::create(&output_file)?;

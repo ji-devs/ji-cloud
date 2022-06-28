@@ -28,8 +28,7 @@ pub enum MediaKind {
 impl MediaKind {
     pub fn to_shared(self) -> SharedMediaKind {
         match self {
-            Self::PngStickerImage => SharedMediaKind::Image(ImageKind::Sticker),
-            Self::PngCanvasImage => SharedMediaKind::Image(ImageKind::Canvas),
+            Self::PngStickerImage | Self::PngCanvasImage => SharedMediaKind::Image,
             Self::GifAnimation => SharedMediaKind::Animation(AnimationKind::Gif),
             Self::SpritesheetAnimation => SharedMediaKind::Animation(AnimationKind::Spritesheet),
             Self::Mp3Audio => SharedMediaKind::Audio(AudioKind::Mp3),

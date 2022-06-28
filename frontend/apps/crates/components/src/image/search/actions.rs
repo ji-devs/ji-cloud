@@ -39,7 +39,7 @@ pub async fn web_to_image(url: Url) -> Result<Image, ()> {
         .await
         .map_err(|_| ())?;
 
-    if !matches!(res.kind, MediaKind::Image(_)) {
+    if !matches!(res.kind, MediaKind::Image) {
         unreachable!("Only images here");
     }
 

@@ -1,6 +1,6 @@
 //! Mostly contains functions for getting the `key`/url of media stored in s3.
 
-use crate::domain::{animation::AnimationKind, audio::AudioKind, image::ImageKind};
+use crate::domain::{animation::AnimationKind, audio::AudioKind};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -95,7 +95,7 @@ pub enum MediaKind {
     Animation(AnimationKind),
 
     /// Media is an Image
-    Image(ImageKind),
+    Image,
 
     /// Media is audio
     Audio(AudioKind),
