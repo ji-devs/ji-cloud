@@ -159,7 +159,7 @@ async fn delete(
     db: Data<PgPool>,
     claims: TokenUser,
     path: web::Path<JigId>,
-    algolia: ServiceData<crate::algolia::Client>,
+    algolia: ServiceData<crate::algolia::Manager>,
 ) -> Result<HttpResponse, error::Delete> {
     let id = path.into_inner();
 
@@ -176,7 +176,7 @@ async fn delete(
 async fn delete_all(
     db: Data<PgPool>,
     claims: TokenUser,
-    algolia: ServiceData<crate::algolia::Client>,
+    algolia: ServiceData<crate::algolia::Manager>,
 ) -> Result<HttpResponse, error::Delete> {
     db::jig::authz(&*db, claims.0.user_id, None).await?;
 

@@ -271,7 +271,7 @@ fn check_conflict_delete(err: sqlx::Error) -> error::Delete {
 /// Delete an image from the global image library.
 async fn delete(
     db: Data<PgPool>,
-    algolia: ServiceData<crate::algolia::Client>,
+    algolia: ServiceData<crate::algolia::Manager>,
     _claims: TokenUserWithScope<ScopeManageImage>,
     req: Path<ImageId>,
     s3: ServiceData<s3::Client>,
