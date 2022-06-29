@@ -28,6 +28,26 @@ dependencies = ["check-sqlx"]
 command = "cargo"
 args = ["watch", "-w", "../../shared/rust", "-w", ".", "-x", "test -- --nocapture"]
 
+###################
+## Docker        ##
+###################
+
+[tasks.compose-build]
+command = "docker-compose"
+args = ["--file", "docker-compose.local.yml", "build"]
+
+[tasks.compose-up]
+command = "docker-compose"
+args = ["--file", "docker-compose.local.yml", "up", "-d", "--remove-orphans"]
+
+[tasks.compose-down]
+command = "docker-compose"
+args = ["--file", "docker-compose.local.yml", "down"]
+
+[tasks.compose-test]
+command = "docker-compose"
+args = ["--file", "docker-compose.local.yml", "run", "app", "/app/backend/api/docker/test.sh"]
+dependencies = ["compose-up"]
 
 ###################
 ## Dev           ##

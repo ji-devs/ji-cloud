@@ -1,3 +1,4 @@
+# Running
 ## How to run this API locally
 
 * copy `.env.sample` to `.env`
@@ -43,9 +44,26 @@ cargo sqlx prepare -- --lib
 cargo sqlx prepare -- --test integration
 ```
 
+# Testing
 
+## With docker-compose
 
-##How to test API after getting it to run locally
+From the `backend/api` directory, run `cargo make compose-test`:
+
+```
+cd backend/api
+cargo make compose-test
+```
+
+This will build a local rust-based image and run the tests against a db service inside a container.
+
+The db service will remain running, and can be shutdown with `cargo make composer-down`.
+
+**Note** that initially, the test command can take a while to run, but subsequent calls will be run quickly.
+
+# Without docker-compose
+
+## How to test API after getting it to run locally
 if you haven't done so already, install cargo-insta. This will be used to keep track of database edits and changes in the tests.
 
 ```bash
