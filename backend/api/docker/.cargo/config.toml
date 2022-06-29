@@ -1,0 +1,12 @@
+# Config for use inside docker images. This helps speed up the time it takes cargo to
+# update the crates-io registry by using a local clone of the registry instead.
+[net]
+git-fetch-with-cli = true
+
+[source]
+
+[source.mirror]
+registry = "file:///.cargo-build-index"
+
+[source.crates-io]
+replace-with = "mirror"

@@ -16,6 +16,10 @@ DOCKER_BUILDKIT = "1"
 script_runner = "@shell"
 script = ["gcloud auth configure-docker"]
 
+[tasks.gcloud-configure-docker-gar]
+script_runner = "@shell"
+script = ["gcloud auth configure-docker --quiet us-east1-docker.pkg.dev"]
+
 ###################
 ## PAGES         ##
 ###################
@@ -95,6 +99,60 @@ run_task = [{name = [
     "docker-publish-sandbox-api",
     "deploy-sandbox-api",
 ]}]
+
+[tasks.sandbox-api-build-test]
+run_task = [{name = [
+    "gcloud-configure-docker-gar",
+    "docker-build-api-builder",
+    # "docker-pull-api-builder",
+    # "docker-build-test-api",
+    # "docker-publish-test-api",
+]}]
+
+[tasks.docker-build-api-builder]
+command = "docker"
+args = [
+    "buildx",
+    "build",
+    "--file",
+    "backend/api/Dockerfile",
+    "--cache-from",
+    "us-east1-docker.pkg.dev/ji-cloud-developer-sandbox/docker/ji-cloud-api-builder:latest",
+    "--cache-to",
+    "type=registry,mode=max,ref=us-east1-docker.pkg.dev/ji-cloud-developer-sandbox/docker/ji-cloud-api-builder:latest",
+    "--tag",
+    "us-east1-docker.pkg.dev/ji-cloud-developer-sandbox/docker/ji-cloud-api-test:latest",
+    "--push",
+    "--target",
+    "app",
+    "."
+]
+
+# [tasks.docker-pull-api-builder]
+# command = "docker"
+# args = ["pull", "us-east1-docker.pkg.dev/ji-cloud-developer-sandbox/docker/ji-cloud-api-builder:latest"]
+
+# [tasks.docker-build-test-api]
+# command = "docker"
+# args = [
+#     "buildx",
+#     "build",
+#     "-f",
+#     "backend/api/Dockerfile",
+#     "--target",
+#     "sandbox",
+#     "--cache-from",
+#     "us-east1-docker.pkg.dev/ji-cloud-developer-sandbox/docker/ji-cloud-api-builder:latest",
+#     "-t",
+#     "us-east1-docker.pkg.dev/ji-cloud-developer-sandbox/docker/ji-cloud-api-build:test",
+#     "-o",
+#     "type=registry",
+#     "."
+# ]
+
+# [tasks.docker-publish-test-api]
+# command = "docker"
+# args = ["push", "us-east1-docker.pkg.dev/ji-cloud-developer-sandbox/docker/ji-cloud-api-build:test"]
 
 [tasks.docker-build-sandbox-api]
 command = "docker"
