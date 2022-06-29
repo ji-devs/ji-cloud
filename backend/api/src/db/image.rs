@@ -3,7 +3,7 @@ use chrono::{DateTime, Utc};
 use futures::stream::BoxStream;
 use shared::domain::{
     category::CategoryId,
-    image::{ImageId, ImageKind, ImageMetadata},
+    image::{ImageId, ImageMetadata, ImageSize},
     meta::{AffiliationId, AgeRangeId, ImageStyleId, ImageTagIndex},
 };
 use sqlx::{PgConnection, PgPool};
@@ -19,18 +19,18 @@ pub async fn create(
     description: &str,
     is_premium: bool,
     publish_at: Option<DateTime<Utc>>,
-    kind: ImageKind,
+    size: ImageSize,
 ) -> sqlx::Result<ImageId> {
     let id: ImageId = sqlx::query!(
         r#"
-insert into image_metadata (name, description, is_premium, publish_at, kind) values ($1, $2, $3, $4, $5)
+insert into image_metadata (name, description, is_premium, publish_at, size) values ($1, $2, $3, $4, $5)
 returning id as "id: ImageId"
         "#,
         name,
         description,
         is_premium,
         publish_at,
-        kind as i16,
+        size as i16,
     )
     .fetch_one(&mut *conn)
     .await?
@@ -145,11 +145,12 @@ where id = $1
 }
 
 pub async fn get_one(db: &PgPool, id: ImageId) -> sqlx::Result<Option<ImageMetadata>> {
+    println!("a1");
     sqlx::query_as(
 r#"
 select id,
        name,
-       kind,
+       size,
        description,
        translated_description,
        is_premium,
@@ -175,14 +176,14 @@ where id = $1
 pub fn list(
     db: &PgPool,
     is_published: Option<bool>,
-    kind: Option<ImageKind>,
+    size: Option<ImageSize>,
     page: i32,
     page_limit: u32,
 ) -> BoxStream<'_, sqlx::Result<ImageMetadata>> {
     sqlx::query_as(
 r#"
 select id,
-       kind,
+       size,
        name,
        description,
        translated_description,
@@ -199,13 +200,13 @@ from (image_metadata
          inner join image_upload on image_id = id)
 where processing_result is not distinct from true 
     and (publish_at < now() is not distinct from $1 or $1 is null)
-    and (kind is not distinct from $3 or $3 is null) 
+    and (size is not distinct from $3 or $3 is null) 
 order by id
 limit $4 offset ($4 * $2)
 "#)
     .bind(is_published)
     .bind(page)
-    .bind(kind.map(|it| it as i16))
+    .bind(size.map(|it| it as i16))
     .bind(page_limit as i16)
     .fetch(db)
 }
@@ -213,7 +214,7 @@ limit $4 offset ($4 * $2)
 pub async fn filtered_count(
     db: &PgPool,
     is_published: Option<bool>,
-    kind: Option<ImageKind>,
+    size: Option<ImageSize>,
 ) -> sqlx::Result<u64> {
     sqlx::query!(
         r#"
@@ -222,9 +223,9 @@ from image_metadata
         inner join image_upload on image_id = id 
 where processing_result is not distinct from true 
     and (publish_at < now() is not distinct from $1 or $1 is null)
-    and (kind is not distinct from $2 or $2 is null)"#,
+    and (size is not distinct from $2 or $2 is null)"#,
         is_published,
-        kind.map(|it| it as i16),
+        size.map(|it| it as i16),
     )
     .fetch_one(db)
     .await
@@ -235,7 +236,7 @@ pub fn get<'a>(db: &'a PgPool, ids: &'a [Uuid]) -> BoxStream<'a, sqlx::Result<Im
     sqlx::query_as(
 r#"
 select id,
-       kind,
+       size,
        name,
        description,
        translated_description,

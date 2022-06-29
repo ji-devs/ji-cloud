@@ -7,7 +7,7 @@ use gloo_timers::future::TimeoutFuture;
 use shared::{
     api::endpoints::{self, meta, user, ApiEndpoint},
     domain::{
-        image::{user::UserImageCreateRequest, ImageId, ImageKind},
+        image::{user::UserImageCreateRequest, ImageId, ImageSize},
         meta::MetadataResponse,
         user::ResetPasswordRequest,
     },
@@ -110,7 +110,7 @@ impl ProfilePage {
 
 async fn upload_profile_image(file: File) -> Result<ImageId, Box<dyn std::error::Error>> {
     let req = UserImageCreateRequest {
-        kind: ImageKind::UserProfile,
+        size: ImageSize::UserProfile,
     };
 
     let image_id = endpoints::image::user::Create::api_with_auth(Some(req))

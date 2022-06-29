@@ -28,11 +28,11 @@ pub(super) async fn create(
     claims: TokenUser,
     query: Json<<endpoints::image::user::Create as ApiEndpoint>::Req>,
 ) -> Result<HttpResponse, error::Server> {
-    let kind = query.kind;
+    let size = query.size;
 
     let user_id = claims.0.user_id;
 
-    let id = db::image::user::create(db.as_ref(), &user_id, kind).await?;
+    let id = db::image::user::create(db.as_ref(), &user_id, size).await?;
 
     Ok(HttpResponse::Created().json(CreateResponse { id }))
 }

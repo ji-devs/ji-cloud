@@ -1,11 +1,10 @@
 ---
 source: tests/integration/image/user.rs
 expression: body
-
 ---
 {
   "metadata": {
     "id": "[id]",
-    "kind": "Sticker"
+    "size": "Sticker"
   }
 }

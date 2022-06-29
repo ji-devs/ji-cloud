@@ -20,7 +20,7 @@ use shared::media::MediaKind;
 use shared::{
     api::{endpoints, ApiEndpoint},
     domain::{
-        image::{CreateResponse, ImageKind, ImageSearchQuery},
+        image::{CreateResponse, ImageSize, ImageSearchQuery},
         meta::{ImageStyle, MetadataResponse},
         module::body::Image,
     },
@@ -158,8 +158,8 @@ async fn search_async(state: Rc<State>, page: u32) {
         None => unreachable!("User should exist"),
     };
 
-    let kind = match &state.options.kind {
-        ImageSearchKind::Sticker if state.checkbox_checked.get() => Some(ImageKind::Sticker),
+    let size = match &state.options.kind {
+        ImageSearchKind::Sticker if state.checkbox_checked.get() => Some(ImageSize::Sticker),
         _ => None,
     };
 
@@ -187,7 +187,7 @@ async fn search_async(state: Rc<State>, page: u32) {
         page: Some(page),
         styles: state.selected_styles.borrow().iter().copied().collect(),
         affiliations,
-        kind,
+        size,
         tags: tags.iter().map(|x| ImageTagIndex(x.as_index())).collect(),
         tags_priority: state
             .options
@@ -308,7 +308,7 @@ pub fn add_recent(state: &State, image: &Image) {
 
 pub async fn upload_file(state: Rc<State>, file: File) {
     let req = UserImageCreateRequest {
-        kind: ImageKind::Sticker,
+        size: ImageSize::Sticker,
     };
 
     match api_with_auth::<CreateResponse, EmptyError, _>(

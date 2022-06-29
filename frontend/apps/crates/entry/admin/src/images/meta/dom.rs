@@ -61,7 +61,7 @@ impl ImageMetaPage {
                                     tags_priority: Vec::new(),
                                     is_premium: None,
                                     is_published: None,
-                                    kind: None,
+                                    size: None,
                                     page_limit: None,
                                 };
                                 let route:String = Route::Admin(AdminRoute::ImageSearch(Some(query))).into();

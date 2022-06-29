@@ -18,7 +18,7 @@ use shared::{
         badge::BadgeId,
         category::CategoryId,
         course::CourseId,
-        image::{ImageId, ImageKind},
+        image::{ImageId, ImageSize},
         jig::{JigFocus, JigId},
         meta::{AffiliationId, AgeRangeId, ImageStyleId, ImageTagIndex, ResourceTypeId},
     },
@@ -558,7 +558,7 @@ where jig_data.id = any (select live_id from jig where jig.id = any ($1))
             r#"
 select id,
        name,
-       kind                                                                                     as "kind!: ImageKind",
+       size                                                                                     as "size!: ImageSize",
        description,
        translated_description                                                                   as "translated_description!: Json<HashMap<String, String>>",
        translated_name                                                                          as "translated_name!: Json<HashMap<String, String>>",
@@ -626,7 +626,7 @@ limit 100 for no key update skip locked;
             }
             algolia::request::BatchWriteRequest::UpdateObject {
             body: match serde_json::to_value(&BatchMedia::Image(BatchImage {
-                media_subkind: &row.kind.to_str(),
+                media_subkind: &row.size.to_str(),
                 name: &row.name,
                 description: &row.description,
                 translated_name: &translation_name,
@@ -1280,7 +1280,7 @@ impl Client {
     pub async fn search_image(
         &self,
         query: &str,
-        kind: Option<ImageKind>,
+        size: Option<ImageSize>,
         page: Option<u32>,
         is_premium: Option<bool>,
         is_published: Option<bool>,
@@ -1310,11 +1310,11 @@ impl Client {
             }))
         }
 
-        if let Some(image_kind) = kind {
+        if let Some(image_size) = size {
             filters.filters.push(Box::new(CommonFilter {
                 filter: FacetFilter {
                     facet_name: "media_subkind".to_owned(),
-                    value: image_kind.to_str().to_owned(),
+                    value: image_size.to_str().to_owned(),
                 },
                 invert: false,
             }))

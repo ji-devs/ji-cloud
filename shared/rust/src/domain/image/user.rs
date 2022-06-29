@@ -2,13 +2,13 @@
 
 use serde::{Deserialize, Serialize};
 
-use super::{ImageId, ImageKind};
+use super::{ImageId, ImageSize};
 
 /// Request for creating a user image profile
 #[derive(Serialize, Deserialize, Debug)]
 pub struct UserImageCreateRequest {
-    /// The kind of the image. Most relevant for uploading user profile images
-    pub kind: ImageKind,
+    /// The size of the image. Most relevant for uploading user profile images
+    pub size: ImageSize,
 }
 
 /// Query for listing. This is optional. If used, should be included as part of the query string.
@@ -19,7 +19,7 @@ pub struct UserImageListQuery {
     /// Optionally filter by image kind. If included it will only return results of the corresponding
     /// kinds listed.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub kind: Option<ImageKind>,
+    pub kind: Option<ImageSize>,
 }
 
 /// Response for listing.
@@ -41,8 +41,8 @@ pub struct UserImageResponse {
 pub struct UserImage {
     /// The image's ID.
     pub id: ImageId,
-    /// The image kind
-    pub kind: ImageKind,
+    /// The image size
+    pub size: ImageSize,
     // more fields to be added
 }
 

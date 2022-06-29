@@ -53,7 +53,7 @@ async fn create() -> anyhow::Result<()> {
     let resp = client
         .post(&format!("http://0.0.0.0:{}/v1/user/me/image", port))
         .json(&json!({
-            "kind": "Sticker",
+            "size": "Sticker",
         }))
         .login()
         .send()

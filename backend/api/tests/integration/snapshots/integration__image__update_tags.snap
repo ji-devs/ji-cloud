@@ -1,7 +1,6 @@
 ---
 source: tests/integration/image.rs
 expression: body
-
 ---
 {
   "metadata": {
@@ -10,7 +9,7 @@ expression: body
     "description": "testest",
     "translated_description": {},
     "is_premium": false,
-    "kind": "Canvas",
+    "size": "Canvas",
     "publish_at": null,
     "styles": [],
     "tags": [

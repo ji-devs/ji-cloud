@@ -22,7 +22,7 @@ use shared::{
         ApiEndpoint,
     },
     domain::{
-        image::{ImageId, ImageKind},
+        image::{ImageId, ImageSize},
         session::{NewSessionResponse, OAuthProvider},
         user::{
             ChangePasswordRequest, CreateProfileRequest, ResetEmailResponse, UserLookupQuery,
@@ -507,7 +507,7 @@ async fn create_user_profile_image(
     user_id: &Uuid,
 ) -> anyhow::Result<ImageId> {
     // create entry in user library library -> ID
-    let profile_image_id = db::image::user::create(&*pool, user_id, ImageKind::UserProfile).await?;
+    let profile_image_id = db::image::user::create(&*pool, user_id, ImageSize::UserProfile).await?;
 
     let client: reqwest::Client = reqwest::ClientBuilder::new()
         .connect_timeout(std::time::Duration::from_secs(5))
@@ -539,7 +539,7 @@ async fn create_user_profile_image(
     // process
     let (original, resized, thumbnail) = actix_web::web::block(move || {
         let original = image::load_from_memory(&data)?;
-        crate::image_ops::generate_images(&original, ImageKind::Sticker)
+        crate::image_ops::generate_images(&original, ImageSize::Sticker)
     })
     .instrument(tracing::info_span!("process image"))
     .await??;

@@ -1,21 +1,21 @@
 use futures::stream::BoxStream;
-use shared::domain::image::{user::UserImage, ImageId, ImageKind};
+use shared::domain::image::{user::UserImage, ImageId, ImageSize};
 use sqlx::{PgConnection, PgPool};
 use tracing::{instrument, Instrument};
 use uuid::Uuid;
 
 #[instrument(skip(pool))]
-pub async fn create(pool: &PgPool, user_id: &Uuid, kind: ImageKind) -> sqlx::Result<ImageId> {
+pub async fn create(pool: &PgPool, user_id: &Uuid, size: ImageSize) -> sqlx::Result<ImageId> {
     let mut txn = pool.begin().await?;
     let id: ImageId = sqlx::query!(
         //language=SQL
         r#"
-insert into user_image_library (user_id, kind)
+insert into user_image_library (user_id, size)
 values ($1, $2)
 returning id as "id: ImageId"
 "#,
         user_id,
-        kind as i16,
+        size as i16,
     )
     .fetch_one(&mut txn)
     .instrument(tracing::info_span!("inser user_image_library"))
@@ -48,7 +48,7 @@ pub async fn get(db: &PgPool, user_id: Uuid, image_id: ImageId) -> sqlx::Result<
         UserImage,
         // language=SQL
         r#"
-select id as "id: ImageId", kind as "kind: ImageKind"
+select id as "id: ImageId", size as "size: ImageSize"
 from user_image_library
          inner join user_image_upload
                     on user_image_library.id = user_image_upload.image_id
@@ -66,23 +66,23 @@ where user_id = $1
 pub fn list(
     db: &PgPool,
     user_id: Uuid,
-    kind: Option<ImageKind>,
+    size: Option<ImageSize>,
 ) -> BoxStream<'_, sqlx::Result<UserImage>> {
     sqlx::query_as!(
         UserImage,
         // language=SQL
         r#"
-select id as "id: ImageId", kind as "kind: ImageKind"
+select id as "id: ImageId", size as "size: ImageSize"
 from user_image_library
          join user_image_upload
               on user_image_library.id = user_image_upload.image_id
 where processing_result is true
   and user_id = $1
-  and (kind is not distinct from $2 or $2 is null)
+  and (size is not distinct from $2 or $2 is null)
 order by created_at desc
 "#,
         user_id,
-        kind.map(|it| it as i16)
+        size.map(|it| it as i16)
     )
     .fetch(db)
 }

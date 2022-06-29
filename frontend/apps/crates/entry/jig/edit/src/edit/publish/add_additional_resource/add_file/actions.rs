@@ -6,7 +6,7 @@ use shared::{
     domain::{
         additional_resource::ResourceContent,
         audio::AudioId,
-        image::{user::UserImageCreateRequest, ImageId, ImageKind},
+        image::{user::UserImageCreateRequest, ImageId, ImageSize},
         pdf::PdfId,
     },
     media::MediaLibrary,
@@ -68,7 +68,7 @@ pub async fn upload_file(file: &File) -> Result<ResourceContent, anyhow::Error> 
 
 async fn upload_image(file: &File) -> Result<ImageId, anyhow::Error> {
     let req = UserImageCreateRequest {
-        kind: ImageKind::Sticker,
+        size: ImageSize::Sticker,
     };
 
     let image_id = endpoints::image::user::Create::api_with_auth(Some(req))

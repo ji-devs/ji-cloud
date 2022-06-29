@@ -43,7 +43,7 @@ async fn create(
         &req.description,
         req.is_premium,
         req.publish_at.map(DateTime::<Utc>::from),
-        req.kind,
+        req.size,
     )
     .await?;
 
@@ -128,9 +128,11 @@ async fn get_one(
     _claims: TokenUser,
     req: Path<ImageId>,
 ) -> Result<Json<<endpoints::image::Get as ApiEndpoint>::Res>, error::NotFound> {
+    println!("get one");
     let metadata = db::image::get_one(&db, req.into_inner())
         .await?
         .ok_or(error::NotFound::ResourceNotFound)?;
+    println!("should not be here");
 
     Ok(Json(ImageResponse { metadata }))
 }
@@ -151,7 +153,7 @@ async fn search(
     let (ids, pages, total_hits) = algolia
         .search_image(
             &query.q,
-            query.kind,
+            query.size,
             query.page,
             query.is_premium,
             query.is_published,
@@ -193,7 +195,7 @@ async fn browse(
     let images: Vec<_> = db::image::list(
         db.as_ref(),
         query.is_published,
-        query.kind,
+        query.size,
         query.page.unwrap_or(0) as i32,
         page_limit,
     )
@@ -205,7 +207,7 @@ async fn browse(
     log::warn!("images: {:?}", images.len());
 
     let total_count =
-        db::image::filtered_count(db.as_ref(), query.is_published, query.kind).await?;
+        db::image::filtered_count(db.as_ref(), query.is_published, query.size).await?;
 
     let pages = (total_count / (page_limit as u64)
         + (total_count % (page_limit as u64) != 0) as u64) as u32;

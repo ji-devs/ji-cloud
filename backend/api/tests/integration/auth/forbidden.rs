@@ -86,7 +86,7 @@ async fn image_post() -> anyhow::Result<()> {
                 "affiliations": [],
                 "categories": [],
                 "tags": [],
-                "kind": "Canvas",
+                "size": "Canvas",
         })),
         Method::POST,
     )

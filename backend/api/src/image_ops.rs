@@ -2,7 +2,7 @@ use image::{
     codecs::gif::GifDecoder, imageops::FilterType, AnimationDecoder, DynamicImage,
     GenericImageView, ImageOutputFormat,
 };
-use shared::domain::{animation::AnimationKind, audio::AudioKind, image::ImageKind};
+use shared::domain::{animation::AnimationKind, audio::AudioKind, image::ImageSize};
 use shared::media::MediaKind as SharedMediaKind;
 
 /// Kinds of media used with the web media library
@@ -55,20 +55,20 @@ pub fn detect_image_kind(data: &[u8]) -> anyhow::Result<MediaKind> {
 
 pub fn regenerate_images(
     original: &DynamicImage,
-    kind: ImageKind,
+    size: ImageSize,
 ) -> anyhow::Result<(Vec<u8>, Vec<u8>)> {
     let resized = {
-        let (width, height) = kind.size();
-        let new_image = match kind {
-            ImageKind::Canvas => original.resize_exact(width, height, FilterType::Nearest),
+        let (width, height) = size.size();
+        let new_image = match size {
+            ImageSize::Canvas => original.resize_exact(width, height, FilterType::Nearest),
 
-            ImageKind::Sticker if (width >= original.width() && height >= original.height()) => {
+            ImageSize::Sticker if (width >= original.width() && height >= original.height()) => {
                 original.clone()
             }
 
-            ImageKind::Sticker => original.resize(width, height, FilterType::Nearest),
+            ImageSize::Sticker => original.resize(width, height, FilterType::Nearest),
 
-            ImageKind::UserProfile => original.resize(width, height, FilterType::Nearest),
+            ImageSize::UserProfile => original.resize(width, height, FilterType::Nearest),
         };
 
         let mut buffer = Vec::new();
@@ -78,7 +78,7 @@ pub fn regenerate_images(
 
     let thumbnail = {
         let mut buffer = Vec::new();
-        let (width, height) = ImageKind::THUMBNAIL_SIZE;
+        let (width, height) = ImageSize::THUMBNAIL_SIZE;
         original
             .thumbnail(width, height)
             .write_to(&mut buffer, ImageOutputFormat::Png)?;
@@ -90,9 +90,9 @@ pub fn regenerate_images(
 
 pub fn generate_images(
     original: &DynamicImage,
-    kind: ImageKind,
+    size: ImageSize,
 ) -> anyhow::Result<(Vec<u8>, Vec<u8>, Vec<u8>)> {
-    let (resized, thumbnail) = regenerate_images(original, kind)?;
+    let (resized, thumbnail) = regenerate_images(original, size)?;
 
     let original = {
         let mut buffer = Vec::new();
@@ -115,7 +115,7 @@ mod tests {
 
         assert_eq!((1523, 1524), original.dimensions());
 
-        let (resized, _thumbnail) = regenerate_images(&original, ImageKind::Sticker)?;
+        let (resized, _thumbnail) = regenerate_images(&original, ImageSize::Sticker)?;
 
         let resized = image::load_from_memory(&resized)?;
 
@@ -132,7 +132,7 @@ mod tests {
 
         assert_eq!((1500, 418), original.dimensions());
 
-        let (resized, _thumbnail) = regenerate_images(&original, ImageKind::Sticker)?;
+        let (resized, _thumbnail) = regenerate_images(&original, ImageSize::Sticker)?;
 
         let resized = image::load_from_memory(&resized)?;
 

@@ -1,5 +1,5 @@
 use shared::{
-    domain::{animation::AnimationKind, image::ImageKind},
+    domain::{animation::AnimationKind, image::ImageSize},
     media::{FileKind, MediaLibrary, PngImageFile},
 };
 use sqlx::PgPool;
@@ -18,9 +18,9 @@ pub async fn process_image(
 
     let mut txn = db.begin().await?;
 
-    let kind = sqlx::query!(
+    let size = sqlx::query!(
         r#"
-select kind as "kind: ImageKind"
+select size as "size: ImageSize"
 from image_metadata
 inner join image_upload on image_metadata.id = image_upload.image_id
 where (id = $1 and uploaded_at is not null and processed_at >= uploaded_at is not true)
@@ -32,9 +32,9 @@ skip locked
     )
     .fetch_optional(&mut txn)
     .await?
-    .map(|it| it.kind);
+    .map(|it| it.size);
 
-    let kind = match kind {
+    let size = match size {
         Some(row) => row,
         None => {
             log::info!("Unprocessed image upload not found in database!");
@@ -67,7 +67,7 @@ skip locked
 
     let processed = tokio::task::spawn_blocking(move || -> Result<_, error::Upload> {
         let original = image::load_from_memory(&file).map_err(|_| error::Upload::InvalidMedia)?;
-        Ok(crate::image_ops::regenerate_images(&original, kind)?)
+        Ok(crate::image_ops::regenerate_images(&original, size)?)
     })
     .await
     .unwrap();
@@ -106,10 +106,10 @@ pub async fn process_user_image(
 ) -> anyhow::Result<bool> {
     let mut txn = db.begin().await?;
 
-    let kind = sqlx::query!(
+    let size = sqlx::query!(
         //language=SQL
         r#"
-select kind as "kind: ImageKind"
+select size as "size: ImageSize"
 from user_image_library
 inner join user_image_upload on user_image_library.id = user_image_upload.image_id
 where (id = $1 and uploaded_at is not null and processed_at >= uploaded_at is not true)
@@ -121,9 +121,9 @@ skip locked
     )
     .fetch_optional(&mut txn)
     .await?
-    .map(|it| it.kind);
+    .map(|it| it.size);
 
-    let kind = match kind {
+    let size = match size {
         Some(row) => row,
         None => {
             log::info!("Unprocessed user image upload not found in database!");
@@ -156,7 +156,7 @@ skip locked
 
     let processed = tokio::task::spawn_blocking(move || -> Result<_, error::Upload> {
         let original = image::load_from_memory(&file).map_err(|_| error::Upload::InvalidMedia)?;
-        Ok(crate::image_ops::regenerate_images(&original, kind)?)
+        Ok(crate::image_ops::regenerate_images(&original, size)?)
     })
     .await
     .unwrap();
@@ -245,7 +245,7 @@ skip locked
             if let Some(data) = file {
                 let (_original, resized, thumbnail) = actix_web::web::block(move || {
                     let original = image::load_from_memory(&data)?;
-                    crate::image_ops::generate_images(&original, ImageKind::Sticker)
+                    crate::image_ops::generate_images(&original, ImageSize::Sticker)
                 })
                 .await??;
 

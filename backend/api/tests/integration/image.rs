@@ -39,7 +39,7 @@ async fn create(
             "affiliations": affiliations,
             "categories": categories,
             "tags": tags,
-            "kind": "Canvas",
+            "size": "Canvas",
         }))
         .send()
         .await?
@@ -108,7 +108,7 @@ async fn create_error(kind: &str, id: &str) -> anyhow::Result<()> {
             "affiliations": [],
             "categories": [],
             "tags": [],
-            "kind": "Canvas",
+            "size": "Canvas",
             kind: [id],
         }))
         .send()
@@ -145,7 +145,7 @@ async fn create_error_tag(kind: &str, id: &i16) -> anyhow::Result<()> {
             "affiliations": [],
             "categories": [],
             "tags": [],
-            "kind": "Canvas",
+            "size": "Canvas",
             kind: [id],
         }))
         .send()
@@ -231,11 +231,14 @@ async fn get_metadata() -> anyhow::Result<()> {
 // todo: delete: edge case (never uploaded, should work even without s3), missing algolia
 
 async fn update(req: &serde_json::Value) -> anyhow::Result<()> {
+    println!("update in image.rs");
     let app = initialize_server(&[Fixture::User, Fixture::MetaKinds, Fixture::Image], &[]).await;
 
     let port = app.port();
 
     let client = reqwest::Client::new();
+    println!("a");
+
 
     let resp = client
         .patch(&format!(
@@ -247,8 +250,10 @@ async fn update(req: &serde_json::Value) -> anyhow::Result<()> {
         .send()
         .await?
         .error_for_status()?;
+        println!("b");
 
     assert_eq!(resp.status(), StatusCode::NO_CONTENT);
+    println!("c");
 
     let resp = client
         .get(&format!(
@@ -259,14 +264,17 @@ async fn update(req: &serde_json::Value) -> anyhow::Result<()> {
         .send()
         .await?
         .error_for_status()?;
+        println!("d");
 
     assert_eq!(resp.status(), StatusCode::OK);
 
     let body: serde_json::Value = resp.json().await?;
+    println!("e");
 
     app.stop(false).await;
 
     insta::assert_json_snapshot!(body, {".metadata.updated_at" => "[timestamp]"});
+    println!("f");
 
     Ok(())
 }
@@ -288,6 +296,7 @@ async fn update_styles() -> anyhow::Result<()> {
 
 #[actix_rt::test]
 async fn update_tags() -> anyhow::Result<()> {
+    println!("update_tags");
     update(&json!({"tags": [0, 2]})).await
 }
 
@@ -302,7 +311,7 @@ async fn browse() -> anyhow::Result<()> {
     // create a new image resource
     let resp = client
         .get(&format!("http://0.0.0.0:{}/v1/image/browse", port))
-        .query(&[("page", "0"), ("kind", "Canvas")])
+        .query(&[("page", "0"), ("size", "Canvas")])
         .login()
         .send()
         .await?
@@ -385,7 +394,7 @@ async fn create_media_and_upload_with_url() -> anyhow::Result<()> {
             "affiliations": [],
             "tags": [],
             "categories": [],
-            "kind": "Canvas",
+            "size": "Canvas",
         }))
         .login()
         .send()

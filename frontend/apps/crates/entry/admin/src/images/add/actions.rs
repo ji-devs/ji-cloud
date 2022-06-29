@@ -14,10 +14,10 @@ use web_sys::File;
 pub fn on_change(state: Rc<State>, value: String) {
     match value.as_ref() {
         "sticker" => {
-            *state.kind.borrow_mut() = ImageKind::Sticker;
+            *state.size.borrow_mut() = ImageSize::Sticker;
         }
         "canvas" => {
-            *state.kind.borrow_mut() = ImageKind::Canvas;
+            *state.size.borrow_mut() = ImageSize::Canvas;
         }
         _ => {
             log::info!("unknown value [{}]", value);
@@ -49,7 +49,7 @@ pub fn on_file(state: Rc<State>, file: File) {
             age_ranges,
             affiliations,
             categories: Vec::new(),
-            kind: *state.kind.borrow()
+            size: *state.size.borrow()
         };
 
         match api_with_auth::<CreateResponse, MetadataNotFound, _>(endpoints::image::Create::PATH, endpoints::image::Create::METHOD, Some(req)).await {

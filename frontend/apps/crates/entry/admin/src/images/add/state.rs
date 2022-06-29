@@ -1,11 +1,11 @@
-use shared::domain::image::ImageKind;
+use shared::domain::image::ImageSize;
 
 use dominator_helpers::futures::AsyncLoader;
 use std::cell::RefCell;
 use web_sys::HtmlInputElement;
 
 pub struct State {
-    pub kind: RefCell<ImageKind>,
+    pub size: RefCell<ImageSize>,
     pub file_input: RefCell<Option<HtmlInputElement>>,
     pub loader: AsyncLoader,
 }
@@ -13,7 +13,7 @@ pub struct State {
 impl State {
     pub fn new() -> Self {
         Self {
-            kind: RefCell::new(ImageKind::Sticker),
+            size: RefCell::new(ImageSize::Sticker),
             file_input: RefCell::new(None),
             loader: AsyncLoader::new(),
         }

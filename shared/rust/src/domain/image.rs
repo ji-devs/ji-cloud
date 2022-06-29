@@ -16,11 +16,11 @@ use sqlx::{postgres::PgRow, types::Json};
 use std::collections::HashMap;
 use uuid::Uuid;
 
-/// Represents different kinds of images (which affects how the size is stored in the db)
+/// Represents different sizes of images
 #[derive(Serialize, Deserialize, Copy, Clone, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[repr(i16)]
-pub enum ImageKind {
+pub enum ImageSize {
     /// The image is a canvas (background) image
     Canvas = 0,
     /// The image is a sticker.
@@ -29,7 +29,7 @@ pub enum ImageKind {
     UserProfile = 2,
 }
 
-impl ImageKind {
+impl ImageSize {
     /// The size of a thumbnail (Width x Height pixels).
     pub const THUMBNAIL_SIZE: (u32, u32) = (256, 144);
 
@@ -96,7 +96,7 @@ pub struct ImageCreateRequest {
     pub categories: Vec<CategoryId>,
 
     /// What kind of image this is.
-    pub kind: ImageKind,
+    pub size: ImageSize,
 }
 
 // todo: # errors doc section.
@@ -164,7 +164,7 @@ pub struct ImageSearchQuery {
     /// Optionally filter by `kind`
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub kind: Option<ImageKind>,
+    pub size: Option<ImageSize>,
 
     /// The page number of the images to get.
     #[serde(default)]
@@ -288,10 +288,10 @@ pub struct ImageBrowseQuery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub is_published: Option<bool>,
 
-    /// Optionally filter by `kind`
+    /// Optionally filter by `size`
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub kind: Option<ImageKind>,
+    pub size: Option<ImageSize>,
 
     /// The page number of the images to get.
     #[serde(default)]
@@ -358,8 +358,8 @@ pub struct ImageMetadata {
     /// Whether or not the image is premium.
     pub is_premium: bool,
 
-    /// What kind of image this is.
-    pub kind: ImageKind,
+    /// What size of image this is.
+    pub size: ImageSize,
 
     /// When the image should be considered published (if at all).
     pub publish_at: Option<DateTime<Utc>>,
@@ -396,7 +396,7 @@ impl<'r> sqlx::FromRow<'r, PgRow> for ImageMetadata {
     fn from_row(row: &'r PgRow) -> Result<Self, sqlx::Error> {
         let DbImage {
             id,
-            kind,
+            size,
             name,
             description,
             translated_description,
@@ -413,7 +413,7 @@ impl<'r> sqlx::FromRow<'r, PgRow> for ImageMetadata {
 
         Ok(Self {
             id,
-            kind,
+            size,
             name,
             description,
             translated_description: translated_description.0,
@@ -434,7 +434,7 @@ impl<'r> sqlx::FromRow<'r, PgRow> for ImageMetadata {
 #[cfg(feature = "backend")]
 struct DbImage {
     pub id: ImageId,
-    pub kind: ImageKind,
+    pub size: ImageSize,
     pub name: String,
     pub description: String,
     pub translated_description: Json<HashMap<String, String>>,

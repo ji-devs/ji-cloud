@@ -87,13 +87,13 @@ impl Default for ImageSearchOptions {
     }
 }
 
-// sticker is handled with ImageKind instead of ImageTag since we want all images to default to sticker
+// sticker is handled with ImageSize instead of ImageTag since we want all images to default to sticker
 // but don't wanna add all manually so we accepted this compromise
 #[derive(PartialEq)]
 pub enum ImageSearchKind {
     Background, // adds ImageTag::BackgroundLayer1 to the image_tags filter
     Overlay,    // adds ImageTag::BackgroundLayer2 to the image_tags filter
-    Sticker,    // sets `kind` to Some(ImageKind::Sticker)
+    Sticker,    // sets `size` to Some(ImageSize::Sticker)
 }
 
 impl ImageSearchKind {
