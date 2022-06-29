@@ -1,4 +1,4 @@
-use crate::edit::sidebar::state::SidebarSpot;
+use crate::edit::sidebar::state::{CourseSpot, SidebarSpot, SidebarSpotItem};
 
 use super::super::state::State;
 use super::settings::state::State as SettingsState;
@@ -113,17 +113,26 @@ pub fn get_player_settings(settings_state: Rc<SettingsState>) -> JigPlayerOption
     }
 }
 
+// TODO: move out of jig dir
 pub fn on_iframe_message(state: Rc<State>, message: ModuleToJigEditorMessage) {
     match message {
         ModuleToJigEditorMessage::AppendModule(module) => {
             populate_added_module(Rc::clone(&state), module);
         }
-        ModuleToJigEditorMessage::Complete(module_id, is_complete) => {
+        ModuleToJigEditorMessage::Complete(complete_module_id, is_complete) => {
             let modules = state.modules.lock_ref();
             let module = modules.iter().find(|module| {
                 // Oh my.
-                match &*module.item.unwrap_jig() {
-                    Some(module) => module.id == module_id,
+                // only modules should be here, either jig.modules or any asset cover
+                let current_module_id = match &module.item {
+                    SidebarSpotItem::Jig(module) => module.as_ref().map(|module| module.id),
+                    SidebarSpotItem::Course(item) => item.as_ref().map(|item| match &**item {
+                        CourseSpot::Cover(module) => module.id,
+                        CourseSpot::Item(_) => unreachable!("Only modules should be here"),
+                    }),
+                };
+                match current_module_id {
+                    Some(current_module_id) => current_module_id == complete_module_id,
                     None => false,
                 }
             });
