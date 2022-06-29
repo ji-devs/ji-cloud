@@ -154,7 +154,7 @@ impl CurationJig {
                             state.player_open.set(false);
                         });
                         Some(PlayerPopup::new(
-                            state.jig_id,
+                            state.jig_id.into(),
                             JigPlayerOptions::default(),
                             PreviewPopupCallbacks::new(Box::new(on_close)),
                         ).render(Some("player")))

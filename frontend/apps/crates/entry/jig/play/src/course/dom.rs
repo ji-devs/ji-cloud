@@ -26,7 +26,7 @@ impl CoursePlayer {
                         state.active_jig.set(None);
                     });
                     PlayerPopup::new(
-                        jig_id,
+                        jig_id.into(),
                         JigPlayerOptions::default(),
                         PreviewPopupCallbacks::new(close)
                     ).render(None)

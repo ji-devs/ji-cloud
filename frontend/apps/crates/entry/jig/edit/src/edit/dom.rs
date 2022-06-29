@@ -119,13 +119,21 @@ impl AssetEditState {
                                 state.play_jig.set(None);
                             });
                             PlayerPopup::new(
-                                *state.asset_id.unwrap_jig(),
+                                state.asset_id,
                                 settings,
                                 PreviewPopupCallbacks::new(close)
                             ).render(None)
                         },
                         AssetPlayerSettings::Course => {
-                            todo!()
+                            let close = clone!(state => move || {
+                                state.play_jig.set(None);
+                            });
+                            PlayerPopup::new(
+                                state.asset_id,
+                                // TODO: use course setting once added
+                                Default::default(),
+                                PreviewPopupCallbacks::new(close)
+                            ).render(None)
                         },
                     }
                 })

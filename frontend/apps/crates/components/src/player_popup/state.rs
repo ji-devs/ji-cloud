@@ -1,13 +1,13 @@
 use std::rc::Rc;
 
 use futures_signals::signal::Mutable;
-use shared::domain::jig::JigId;
+use shared::domain::asset::AssetId;
 use utils::jig::JigPlayerOptions;
 
 use super::PreviewPopupCallbacks;
 
 pub struct PlayerPopup {
-    pub jig_id: JigId,
+    pub asset_id: AssetId,
     pub player_options: JigPlayerOptions,
     pub open: Mutable<bool>,
     pub callbacks: PreviewPopupCallbacks,
@@ -15,12 +15,12 @@ pub struct PlayerPopup {
 
 impl PlayerPopup {
     pub fn new(
-        jig_id: JigId,
+        asset_id: AssetId,
         player_options: JigPlayerOptions,
         callbacks: PreviewPopupCallbacks,
     ) -> Rc<Self> {
         Rc::new(Self {
-            jig_id,
+            asset_id,
             player_options,
             open: Mutable::new(true),
             callbacks,

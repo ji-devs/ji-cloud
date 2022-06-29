@@ -52,7 +52,7 @@ pub fn render(state: Rc<State>, code: Option<String>) -> Dom {
                 let mut player_options: JigPlayerOptions = settings.into();
                 player_options.is_student = true;
                 PlayerPopup::new(
-                    jig_id,
+                    jig_id.into(),
                     player_options,
                     PreviewPopupCallbacks::new(close)
                 ).render(None)

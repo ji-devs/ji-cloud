@@ -2,6 +2,7 @@ use std::rc::Rc;
 
 use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
+use shared::domain::asset::AssetId;
 use utils::{
     events,
     iframe::{IframeInit, JigPlayerToPlayerPopup},
@@ -35,7 +36,11 @@ impl PlayerPopup {
                             .property("slot", "iframe")
                             .property("allow", "autoplay; fullscreen")
                             .property("src", {
-                                let url = Route::Asset(AssetRoute::Play(AssetPlayRoute::Jig(state.jig_id, None, state.player_options.clone()))).to_string();
+                                let url = match state.asset_id {
+                                    AssetId::JigId(jig_id) => Route::Asset(AssetRoute::Play(AssetPlayRoute::Jig(jig_id, None, state.player_options.clone()))),
+                                    AssetId::CourseId(course_id) => Route::Asset(AssetRoute::Play(AssetPlayRoute::Course(course_id))),
+                                }.to_string();
+
                                 let url = unsafe {
                                     SETTINGS.get_unchecked()
                                         .remote_target
