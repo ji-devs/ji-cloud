@@ -1,10 +1,7 @@
 use super::ApiEndpoint;
 use crate::{
     api::Method,
-    domain::{
-        admin::{ExportDataRequest},
-        session::NewSessionResponse,
-    },
+    domain::{admin::ExportDataRequest, session::NewSessionResponse},
     error::{ApiError, EmptyError},
 };
 
@@ -17,7 +14,6 @@ impl ApiEndpoint for Impersonate {
     const PATH: &'static str = "/v1/admin/session/user/{id}";
     const METHOD: Method = Method::Post;
 }
-
 
 /// Export data
 pub struct ExportData;
