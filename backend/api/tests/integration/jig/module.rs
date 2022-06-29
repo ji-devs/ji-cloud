@@ -161,8 +161,6 @@ async fn update_contents() -> anyhow::Result<()> {
 
     let client = reqwest::Client::new();
 
-    println!("Before module");
-
     let resp = client
         .patch(&format!(
             "http://0.0.0.0:{}/v1/module/draft/a6b24a06-1dd7-11ec-8426-635a3a7ea572",

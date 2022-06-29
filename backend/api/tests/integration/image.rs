@@ -231,14 +231,11 @@ async fn get_metadata() -> anyhow::Result<()> {
 // todo: delete: edge case (never uploaded, should work even without s3), missing algolia
 
 async fn update(req: &serde_json::Value) -> anyhow::Result<()> {
-    println!("update in image.rs");
     let app = initialize_server(&[Fixture::User, Fixture::MetaKinds, Fixture::Image], &[]).await;
 
     let port = app.port();
 
     let client = reqwest::Client::new();
-    println!("a");
-
 
     let resp = client
         .patch(&format!(
@@ -250,10 +247,8 @@ async fn update(req: &serde_json::Value) -> anyhow::Result<()> {
         .send()
         .await?
         .error_for_status()?;
-        println!("b");
 
     assert_eq!(resp.status(), StatusCode::NO_CONTENT);
-    println!("c");
 
     let resp = client
         .get(&format!(
@@ -264,17 +259,14 @@ async fn update(req: &serde_json::Value) -> anyhow::Result<()> {
         .send()
         .await?
         .error_for_status()?;
-        println!("d");
 
     assert_eq!(resp.status(), StatusCode::OK);
 
     let body: serde_json::Value = resp.json().await?;
-    println!("e");
 
     app.stop(false).await;
 
     insta::assert_json_snapshot!(body, {".metadata.updated_at" => "[timestamp]"});
-    println!("f");
 
     Ok(())
 }
@@ -296,7 +288,6 @@ async fn update_styles() -> anyhow::Result<()> {
 
 #[actix_rt::test]
 async fn update_tags() -> anyhow::Result<()> {
-    println!("update_tags");
     update(&json!({"tags": [0, 2]})).await
 }
 

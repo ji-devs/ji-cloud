@@ -128,11 +128,9 @@ async fn get_one(
     _claims: TokenUser,
     req: Path<ImageId>,
 ) -> Result<Json<<endpoints::image::Get as ApiEndpoint>::Res>, error::NotFound> {
-    println!("get one");
     let metadata = db::image::get_one(&db, req.into_inner())
         .await?
         .ok_or(error::NotFound::ResourceNotFound)?;
-    println!("should not be here");
 
     Ok(Json(ImageResponse { metadata }))
 }

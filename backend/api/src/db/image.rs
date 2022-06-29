@@ -145,7 +145,6 @@ where id = $1
 }
 
 pub async fn get_one(db: &PgPool, id: ImageId) -> sqlx::Result<Option<ImageMetadata>> {
-    println!("a1");
     sqlx::query_as(
 r#"
 select id,

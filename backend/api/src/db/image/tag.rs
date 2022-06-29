@@ -58,9 +58,7 @@ pub async fn update(
     display_name: Option<&str>,
     new_index: Option<i16>,
 ) -> Result<(), error::Tag> {
-    println!("0");
     let mut txn = db.begin().await?;
-    println!("1");
 
     let res = sqlx::query!(
         r#"select index as "index: i16" from image_tag where index = $1 for update"#,
@@ -69,13 +67,11 @@ pub async fn update(
     .fetch_optional(&mut txn)
     .await?;
 
-    println!("2");
     if res.is_none() {
         txn.commit().await?;
         return Err(error::Tag::ResourceNotFound);
     }
 
-    println!("3");
     if let Some(display_name) = display_name {
         sqlx::query!(
             r#"update image_tag set display_name = $2 where index = $1"#,
@@ -86,7 +82,6 @@ pub async fn update(
         .await?;
     }
 
-    println!("4");
     if let Some(new_index) = new_index {
         sqlx::query!(
             r#"
@@ -100,9 +95,7 @@ pub async fn update(
         .map_err(handle_tag_err)?;
     }
 
-    println!("5");
     txn.commit().await?;
-    println!("6");
 
     Ok(())
 }

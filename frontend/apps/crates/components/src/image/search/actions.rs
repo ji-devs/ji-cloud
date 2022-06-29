@@ -20,7 +20,7 @@ use shared::media::MediaKind;
 use shared::{
     api::{endpoints, ApiEndpoint},
     domain::{
-        image::{CreateResponse, ImageSize, ImageSearchQuery},
+        image::{CreateResponse, ImageSearchQuery, ImageSize},
         meta::{ImageStyle, MetadataResponse},
         module::body::Image,
     },
