@@ -1,0 +1,15 @@
+---
+source: tests/integration/circle.rs
+expression: body
+
+---
+{
+  "id": "[id]",
+  "displayName": "test circle",
+  "createdBy": "1f241e1b-b537-493f-a230-075cb16315be",
+  "description": "test description",
+  "memberCount": 0,
+  "image": "92d8c104-0aa4-11ec-9f5e-ef5b2539aa57",
+  "createdAt": "[created_at]",
+  "lastEdited": "[last_edited]"
+}

@@ -1,0 +1,11 @@
+---
+source: tests/integration/circle.rs
+expression: body
+
+---
+{
+  "members": [
+    "1f241e1b-b537-493f-a230-075cb16315be"
+  ],
+  "count": 1
+}

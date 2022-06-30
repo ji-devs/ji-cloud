@@ -1,0 +1,9 @@
+---
+source: tests/integration/circle.rs
+expression: body
+
+---
+{
+  "members": [],
+  "count": 0
+}
