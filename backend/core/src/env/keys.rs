@@ -105,9 +105,9 @@ pub mod algolia {
     pub const COURSE_INDEX: &str = "ALGOLIA_COURSE_INDEX";
 
     /// The index to use for indexing and backend searches.
-    /// Is optional. If missing, *Badge* indexing will be disabled,
+    /// Is optional. If missing, *circle* indexing will be disabled,
     /// search related routes will return a "501 - Not Implemented" and a warning will be emitted.
-    pub const BADGE_INDEX: &str = "ALGOLIA_BADGE_INDEX";
+    pub const CIRCLE_INDEX: &str = "ALGOLIA_CIRCLE_INDEX";
 
     /// The index to use for indexing and backend searches.
     /// Is optional. If missing, *Public User* indexing will be disabled,

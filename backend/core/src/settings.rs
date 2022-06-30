@@ -573,7 +573,7 @@ impl SettingsManager {
 
         let course_index = self.get_varying_secret(keys::algolia::COURSE_INDEX).await?;
 
-        let circle_index = self.get_varying_secret(keys::algolia::BADGE_INDEX).await?;
+        let circle_index = self.get_varying_secret(keys::algolia::CIRCLE_INDEX).await?;
 
         let public_user_index = self
             .get_varying_secret(keys::algolia::PUBLIC_USER_INDEX)

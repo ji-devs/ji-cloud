@@ -90,3 +90,9 @@ create trigger bump_circle_updated
     on circle_member
     for each row
 execute procedure bump_circle_updated_at();
+
+delete from algolia_index_settings where index_name = 'badge_index';
+
+insert into algolia_index_settings(index_name)
+values('circle_index');
+
