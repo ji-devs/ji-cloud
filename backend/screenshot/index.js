@@ -19,7 +19,7 @@ const FINAL_URL_RELEASE = "https://uploads.jicloud.org";
 
 require("dotenv").config();
 
-//TEST URL: http://localhost:8081/?jig=d46ca2d2-eeef-11eb-8c76-77f818ce2b73&module=d9f674c6-eeef-11eb-b38c-e75f7ef16f01&kind=tapping-board
+//TEST URL: http://localhost:8081/?asset=d46ca2d2-eeef-11eb-8c76-77f818ce2b73&asset_type=jig&module=d9f674c6-eeef-11eb-b38c-e75f7ef16f01&kind=tapping-board&draft_or_live=live
 
 exports.showScreenshotRelease = makeShowScreenshot("https://jigzi.org");
 exports.showScreenshotSandbox = makeShowScreenshot("https://sandbox.jigzi.org");
@@ -62,7 +62,7 @@ function queueScreenshot(location, project, baseUrl, endpoint, finalUrl) {
     const { respondError, respondJson } = makeResponders(res);
 
     return parseQuery(req.query)
-      .then(({ jig, module, kind, draftOrLive }) => {
+      .then(({ asset, assetType, module, kind, draftOrLive }) => {
         if (_tasksClient == undefined) {
           _tasksClient = new CloudTasksClient();
         }
@@ -72,7 +72,7 @@ function queueScreenshot(location, project, baseUrl, endpoint, finalUrl) {
         const QUEUE = "screenshot";
         const parent = client.queuePath(project, location, QUEUE);
 
-        const url = `${baseUrl}/${endpoint}?jig=${jig}&module=${module}&kind=${kind}&draft_or_live=${draftOrLive}`;
+        const url = `${baseUrl}/${endpoint}?asset=${asset}&asset_type=${assetType}&module=${module}&kind=${kind}&draft_or_live=${draftOrLive}`;
 
         const task = {
           httpRequest: {
@@ -87,7 +87,7 @@ function queueScreenshot(location, project, baseUrl, endpoint, finalUrl) {
         const request = { parent, task };
         return client.createTask(request).then(([response]) => {
           return {
-            jpg: `${finalUrl}/screenshot/${jig}/${module}/full.jpg`,
+            jpg: `${finalUrl}/screenshot/${asset}/${module}/full.jpg`,
             taskUrl: url,
             taskName: response.name,
           };
@@ -128,11 +128,11 @@ function makeSaveScreenshot(baseUrl, bucketName, finalUrl) {
     getScreenshotUrl(req, baseUrl)
       .then((url) => doScreenshot(url))
       .then(({ fullBuffer, thumbBuffer }) => {
-        return parseQuery(req.query).then(({ jig, module, kind, draftOrLive }) => {
+        return parseQuery(req.query).then(({ asset, assetType, module, kind, draftOrLive }) => {
           const bucket = new Storage().bucket(bucketName);
-          const fullFile = bucket.file(`screenshot/${jig}/${module}/full.jpg`);
+          const fullFile = bucket.file(`screenshot/${asset}/${module}/full.jpg`);
           const thumbFile = bucket.file(
-            `screenshot/${jig}/${module}/thumb.jpg`
+            `screenshot/${asset}/${module}/thumb.jpg`
           );
 
           return writeJpegToFile({ file: fullFile, data: fullBuffer }).then(
@@ -141,7 +141,7 @@ function makeSaveScreenshot(baseUrl, bucketName, finalUrl) {
         });
       })
       .then(() =>
-        parseQuery(req.query).then(({ jig, module, kind }) => {
+        parseQuery(req.query).then(({ asset, module, kind }) => {
           const db = initFirestore();
 
           const data = {
@@ -150,13 +150,13 @@ function makeSaveScreenshot(baseUrl, bucketName, finalUrl) {
 
           return db
             .collection("screenshot")
-            .doc(jig)
+            .doc(asset)
             .collection("modules")
             .doc(module)
             .set(data)
             .then(() => {
               return Object.assign(data, {
-                jpg: `${finalUrl}/screenshot/${jig}/${module}/full.jpg`,
+                jpg: `${finalUrl}/screenshot/${asset}/${module}/full.jpg`,
               });
             });
         })
@@ -312,19 +312,19 @@ function gmToBuffer(data) {
 }
 
 function getScreenshotUrl(req, baseUrl) {
-  return parseQuery(req.query).then(({ jig, module, kind, draftOrLive }) => {
-    return `${baseUrl}/module/${kind}/play/${jig}/${module}?screenshot=true&draft_or_live=${draftOrLive}`;
+  return parseQuery(req.query).then(({ asset, assetType, module, kind, draftOrLive }) => {
+    return `${baseUrl}/module/${kind}/play/${assetType}/${asset}/${module}?screenshot=true&draft_or_live=${draftOrLive}`;
   });
 }
 function parseQuery(query) {
   return new Promise((resolve, reject) => {
-    const { jig, module, kind, draft_or_live } = query;
-    if (!jig || !module || !kind || !draft_or_live || jig == "" || module == "" || kind == "" || draft_or_live == "") {
+    const { asset, asset_type, module, kind, draft_or_live } = query;
+    if (!asset || !module || !kind || !draft_or_live || asset == "" || asset_type == "" || module == "" || kind == "" || draft_or_live == "") {
       reject("not enough data!");
-    } else if (!validateUuid(jig) || !validateUuid(module)) {
+    } else if (!validateUuid(asset) || !validateUuid(module)) {
       reject("invalid uuid");
     } else {
-      resolve({ jig, module, kind, draftOrLive: draft_or_live });
+      resolve({ asset, assetType: asset_type, module, kind, draftOrLive: draft_or_live });
     }
   });
 }

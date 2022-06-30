@@ -4,7 +4,7 @@ use super::init::settings::SETTINGS;
 use crate::unwrap::UnwrapJiExt;
 use awsm_web::loaders::fetch::fetch_url;
 use shared::domain::{
-    asset::{AssetId, DraftOrLive},
+    asset::{AssetId, DraftOrLive, AssetType},
     module::{ModuleId, ModuleKind},
 };
 
@@ -39,10 +39,12 @@ pub async fn call_screenshot_service(
 ) {
     let screenshot_url = SETTINGS.get().unwrap_ji().remote_target.screenshot_url();
 
+    let asset_type: AssetType = (&asset_id).into();
     let url = format!(
-        "{}?jig={}&module={}&kind={}&draft_or_live={}",
+        "{}?asset={}&asset_type={}&module={}&kind={}&draft_or_live={}",
         screenshot_url,
         asset_id.uuid(),
+        asset_type.as_str(),
         module_id.0,
         kind.as_str(),
         draft_or_live.as_str(),
