@@ -4,7 +4,7 @@ use super::init::settings::SETTINGS;
 use crate::unwrap::UnwrapJiExt;
 use awsm_web::loaders::fetch::fetch_url;
 use shared::domain::{
-    asset::{AssetId, DraftOrLive, AssetType},
+    asset::{AssetId, AssetType, DraftOrLive},
     module::{ModuleId, ModuleKind},
 };
 

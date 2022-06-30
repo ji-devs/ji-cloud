@@ -1,12 +1,21 @@
 use std::rc::Rc;
 
+use components::image::upload::upload_image;
 use dominator::clone;
 use shared::{
     api::{endpoints, ApiEndpoint},
-    domain::badge::{Badge, BadgeCreateRequest},
+    domain::{
+        badge::{Badge, BadgeCreateRequest},
+        image::{user::UserImageCreateRequest, ImageId, ImageSize},
+    },
     error::EmptyError,
+    media::MediaLibrary,
 };
-use utils::prelude::{api_with_auth, ApiEndpointExt};
+use utils::{
+    prelude::{api_with_auth, ApiEndpointExt},
+    unwrap::UnwrapJiExt,
+};
+use web_sys::File;
 
 use super::CreateBadge;
 
@@ -31,9 +40,11 @@ impl CreateBadge {
     async fn save_badge_async(self: &Rc<Self>) -> anyhow::Result<Badge> {
         let state = self;
 
+        upload_badge_image(state.image.get_cloned().unwrap_ji()).await?;
+
         let req = BadgeCreateRequest {
-            display_name: state.name.borrow().clone(),
-            description: state.description.borrow().clone(),
+            display_name: state.name.get_cloned().unwrap_or_default(),
+            description: state.description.get_cloned().unwrap_or_default(),
             thumbnail: url::Url::parse(
                 "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==",
             )
@@ -49,4 +60,21 @@ impl CreateBadge {
 
         Ok(badge)
     }
+}
+
+async fn upload_badge_image(file: File) -> anyhow::Result<ImageId> {
+    let req = UserImageCreateRequest {
+        size: ImageSize::UserProfile,
+    };
+
+    let image_id = endpoints::image::user::Create::api_with_auth(Some(req))
+        .await
+        .map_err(|_err| anyhow::anyhow!("Error creating image in db"))?
+        .id;
+
+    upload_image(image_id, MediaLibrary::User, &file, None)
+        .await
+        .map_err(|_err| anyhow::anyhow!("Error uploading image"))?;
+
+    Ok(image_id)
 }

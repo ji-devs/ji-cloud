@@ -27,7 +27,6 @@ export class _ extends LitElement {
                     left: 50%;
                     transform: translate(-50%, -50%);
                     z-index: 10;
-                    
 
                     border-radius: 16px;
                     box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
@@ -37,8 +36,8 @@ export class _ extends LitElement {
                     display: grid;
                     grid-template-columns: 1fr 1fr;
                     grid-template-areas: 
-                        "name        logo"
-                        "description logo"
+                        "name        image"
+                        "description image"
                         "submit      submit";
                     grid-gap: 40px;
                 }
@@ -50,9 +49,16 @@ export class _ extends LitElement {
                 }
                 ::slotted([slot=description]) {
                     grid-area: description;
+                    height: 130px;
                 }
-                ::slotted([slot=logo]) {
-                    grid-area: logo;
+                ::slotted([slot=image]) {
+                    grid-area: image;
+                    display: grid;
+                    border: dashed 2px var(--light-blue-5);
+                    border-radius: 14px;
+                    color: var(--light-blue-5);
+                    font-size: 50px;
+                    height: 230px;
                 }
                 ::slotted([slot=submit]) {
                     grid-area: submit;
@@ -71,7 +77,7 @@ export class _ extends LitElement {
                 <div slot="body" class="body">
                     <slot name="name"></slot>
                     <slot name="description"></slot>
-                    <slot name="logo"></slot>
+                    <slot name="image"></slot>
                     <slot name="submit"></slot>
                 </div>
             </popup-body>

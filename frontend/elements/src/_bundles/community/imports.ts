@@ -1,6 +1,7 @@
 import "@elements/_bundles/_sub-bundles/page/header";
 import "@elements/core/buttons/rectangle";
 import "@elements/core/buttons/fa-button";
+import "@elements/core/inputs/primitives/file";
 import "@elements/core/inputs/wrapper";
 import "@elements/core/inputs/composed/search";
 import "@elements/core/icon/fa-icon";

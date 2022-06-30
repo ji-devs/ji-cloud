@@ -26,6 +26,7 @@ pub enum ImageSize {
     /// The image is a sticker.
     Sticker = 1,
     /// The image is a user profile picture
+    // TODO: Rename since it's also used for badges
     UserProfile = 2,
 }
 
