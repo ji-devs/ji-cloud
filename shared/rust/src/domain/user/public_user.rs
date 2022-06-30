@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use crate::domain::{
-    additional_resource::AdditionalResource, asset::UserOrMe, badge::BadgeId, image::ImageId,
+    additional_resource::AdditionalResource, asset::UserOrMe, circle::CircleId, image::ImageId,
 };
 
 /// A lite profile for other Users to view
@@ -39,9 +39,9 @@ pub struct PublicUser {
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub location: Option<serde_json::Value>, // only here if location_public is true
-    /// Badges associated of User
+    /// Circles associated of User
     #[serde(default)]
-    pub badges: Vec<BadgeId>,
+    pub circles: Vec<CircleId>,
 }
 
 /// Query for [`Browse`](crate::api::endpoints::user::Browse).
@@ -80,7 +80,7 @@ pub struct SearchPublicUserQuery {
     #[serde(skip_serializing_if = "String::is_empty")]
     pub q: String,
 
-    /// The page number of the Badges to get.
+    /// The page number of the Circles to get.
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub page: Option<u32>,

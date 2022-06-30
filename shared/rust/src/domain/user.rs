@@ -6,7 +6,7 @@ use std::convert::TryFrom;
 use uuid::Uuid;
 
 use crate::domain::{
-    badge::BadgeId,
+    circle::CircleId,
     image::ImageId,
     meta::{AffiliationId, AgeRangeId, SubjectId},
 };
@@ -160,10 +160,10 @@ pub struct UserProfile {
     #[serde(default)]
     pub language_public: bool, // default to false
 
-    /// User associated Badges
+    /// User associated Circles
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
-    pub badges: Vec<BadgeId>,
+    pub circles: Vec<CircleId>,
 
     /// The scopes associated with the user.
     #[serde(default)]

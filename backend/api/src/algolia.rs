@@ -15,8 +15,8 @@ use tracing::{instrument, Instrument};
 use shared::{
     domain::{
         asset::PrivacyLevel,
-        badge::BadgeId,
         category::CategoryId,
+        circle::CircleId,
         course::CourseId,
         image::{ImageId, ImageSize},
         jig::{JigFocus, JigId},
@@ -113,12 +113,12 @@ struct BatchCourse<'a> {
 }
 
 #[derive(Serialize)]
-struct BatchBadge<'a> {
+struct BatchCircle<'a> {
     name: &'a str,
     description: &'a str,
     creator_id: &'a Uuid,
     creator_name: &'a str,
-    thumbnail: &'a str,
+    image: &'a Uuid,
     member_count: &'a i64,
 }
 
@@ -131,7 +131,7 @@ struct BatchPublicUser<'a> {
     organization: Option<String>,
     location: Option<String>,
     persona: &'a Option<Vec<String>>,
-    badges: &'a [Uuid],
+    circles: &'a [Uuid],
 }
 
 #[derive(Serialize)]
@@ -145,7 +145,7 @@ enum AlgoliaIndices {
     MediaIndex,
     JigIndex,
     CourseIndex,
-    BadgeIndex,
+    CircleIndex,
     PublicUserIndex,
 }
 
@@ -155,13 +155,13 @@ impl AlgoliaIndices {
             Self::MediaIndex => migration::MEDIA_INDEX,
             Self::JigIndex => migration::JIG_INDEX,
             Self::CourseIndex => migration::COURSE_INDEX,
-            Self::BadgeIndex => migration::BADGE_INDEX,
+            Self::CircleIndex => migration::CIRCLE_INDEX,
             Self::PublicUserIndex => migration::PUBLIC_USER_INDEX,
         }
     }
 }
 
-/// Manager for background task that reads updated jigs, media, courses, badges, public_user from the database, then
+/// Manager for background task that reads updated jigs, media, courses, circles, public_user from the database, then
 /// performs batch updates to the indices.
 #[derive(Clone)]
 pub struct Manager {
@@ -170,20 +170,20 @@ pub struct Manager {
     pub media_index: String,
     pub jig_index: String,
     pub course_index: String,
-    pub badge_index: String,
+    pub circle_index: String,
     pub public_user_index: String,
 }
 
 impl Manager {
     pub fn new(settings: Option<AlgoliaSettings>, db: PgPool) -> anyhow::Result<Option<Self>> {
-        let (app_id, key, media_index, jig_index, course_index, badge_index, public_user_index) =
+        let (app_id, key, media_index, jig_index, course_index, circle_index, public_user_index) =
             match settings {
                 Some(settings) => match (
                     settings.management_key,
                     settings.media_index,
                     settings.jig_index,
                     settings.course_index,
-                    settings.badge_index,
+                    settings.circle_index,
                     settings.public_user_index,
                 ) {
                     (
@@ -191,7 +191,7 @@ impl Manager {
                         Some(media_index),
                         Some(jig_index),
                         Some(course_index),
-                        Some(badge_index),
+                        Some(circle_index),
                         Some(public_user_index),
                     ) => (
                         settings.application_id,
@@ -199,7 +199,7 @@ impl Manager {
                         media_index,
                         jig_index,
                         course_index,
-                        badge_index,
+                        circle_index,
                         public_user_index,
                     ),
                     _ => return Ok(None),
@@ -212,7 +212,7 @@ impl Manager {
             media_index,
             jig_index,
             course_index,
-            badge_index,
+            circle_index,
             public_user_index,
             db,
         }))
@@ -233,9 +233,9 @@ impl Manager {
                     .await
                     .context("update courses task errored"),
                 3 => self
-                    .update_badges()
+                    .update_circles()
                     .await
-                    .context("update badges task errored"),
+                    .context("update circles task errored"),
                 4 => self
                     .update_public_users()
                     .await
@@ -277,8 +277,8 @@ impl Manager {
             migration::JIG_HASH.to_owned(),
             AlgoliaIndices::CourseIndex.as_str(),
             migration::COURSE_HASH.to_owned(),
-            AlgoliaIndices::BadgeIndex.as_str(),
-            migration::BADGE_HASH.to_owned(),
+            AlgoliaIndices::CircleIndex.as_str(),
+            migration::CIRCLE_HASH.to_owned(),
             AlgoliaIndices::PublicUserIndex.as_str(),
             migration::PUBLIC_USER_HASH.to_owned(),
         )
@@ -299,8 +299,8 @@ impl Manager {
                 migration::COURSE_INDEX => {
                     migration::course_index(&mut txn, &self.inner, &self.course_index).await?
                 }
-                migration::BADGE_INDEX => {
-                    migration::badge_index(&mut txn, &self.inner, &self.badge_index).await?
+                migration::CIRCLE_INDEX => {
+                    migration::circle_index(&mut txn, &self.inner, &self.circle_index).await?
                 }
                 migration::PUBLIC_USER_INDEX => {
                     migration::public_user_index(&mut txn, &self.inner, &self.public_user_index)
@@ -354,8 +354,8 @@ impl Manager {
         Ok(ids?)
     }
 
-    async fn batch_badges(&self, batch: BatchWriteRequests) -> anyhow::Result<Vec<Uuid>> {
-        let resp = self.inner.batch(&self.badge_index, &batch).await?;
+    async fn batch_circles(&self, batch: BatchWriteRequests) -> anyhow::Result<Vec<Uuid>> {
+        let resp = self.inner.batch(&self.circle_index, &batch).await?;
 
         let ids: Result<Vec<_>, _> = resp
             .object_ids
@@ -847,11 +847,11 @@ where course_data.id = any (select live_id from course where course.id = any ($1
             (select organization from user_profile where user_profile.user_id = "user".id and organization_public is true)  as "organization?", 
             (select persona from user_profile where user_profile.user_id = "user".id and persona_public is true)      as "persona?: Vec<String>", 
             (select location from user_profile where user_profile.user_id = "user".id and location_public is true)      as "location?: String", 
-            (select array(select badge.id 
-                from badge_member bm 
-                inner join badge on bm.id = badge.id 
+            (select array(select circle.id 
+                from circle_member bm 
+                inner join circle on bm.id = circle.id 
                 where bm.user_id = "user".id
-            )) as "badges!"
+            )) as "circles!"
         from user_profile "up"
         inner join "user" on "user".id = up.user_id
 where (last_synced_at is null or
@@ -871,7 +871,7 @@ limit 100 for no key update skip locked;
                 organization: row.organization,
                 persona: &row.persona,
                 location: row.location,
-                badges: &row.badges
+                circles: &row.circles
             })
             .expect("failed to serialize BatchPublicUser to json")
             {
@@ -908,8 +908,8 @@ limit 100 for no key update skip locked;
         Ok(true)
     }
 
-    async fn update_badges(&self) -> anyhow::Result<bool> {
-        log::info!("reached update badges");
+    async fn update_circles(&self) -> anyhow::Result<bool> {
+        log::info!("reached update circles");
         let mut txn = self.db.begin().await?;
 
         let requests: Vec<_> = sqlx::query!(
@@ -920,11 +920,11 @@ limit 100 for no key update skip locked;
             description            as "description!",
             (select given_name || ' '::text || family_name
             from user_profile
-            where user_profile.user_id = badge.creator_id)                                                       as "creator_name!",
+            where user_profile.user_id = circle.creator_id)                                                       as "creator_name!",
             creator_id             as "creator_id!",
-            thumbnail              as "thumbnail!",
+            image                  as "image!",
             member_count           as "member_count!"
-    from badge
+    from circle
 where (last_synced_at is null or
        (updated_at is not null and last_synced_at < updated_at))
 limit 100 for no key update skip locked;
@@ -934,18 +934,18 @@ limit 100 for no key update skip locked;
         .map_ok(|row| {
 
             algolia::request::BatchWriteRequest::UpdateObject {
-            body: match serde_json::to_value(&BatchBadge {
+            body: match serde_json::to_value(&BatchCircle {
                 name: &row.name,
                 description: &row.description,
                 creator_id: &row.creator_id,
                 creator_name: &row.creator_name,
-                thumbnail: &row.thumbnail,
+                image: &row.image,
                 member_count: &row.member_count,
             })
-            .expect("failed to serialize BatchBadge to json")
+            .expect("failed to serialize BatchCircle to json")
             {
                 serde_json::Value::Object(map) => map,
-                _ => panic!("failed to serialize BatchBadge to json map"),
+                _ => panic!("failed to serialize BatchCircle to json map"),
             },
             object_id: row.id.to_string(),
         }})
@@ -956,15 +956,15 @@ limit 100 for no key update skip locked;
             return Ok(true);
         }
 
-        log::debug!("Updating a batch of {} badge(s)", requests.len());
+        log::debug!("Updating a batch of {} circle(s)", requests.len());
 
         let request = algolia::request::BatchWriteRequests { requests };
-        let ids = self.batch_badges(request).await?;
+        let ids = self.batch_circles(request).await?;
 
-        log::debug!("Updated a batch of {} badge(s)", ids.len());
+        log::debug!("Updated a batch of {} circle(s)", ids.len());
 
         sqlx::query!(
-            "update badge set last_synced_at = now() where id = any($1)",
+            "update circle set last_synced_at = now() where id = any($1)",
             &ids
         )
         .execute(&mut txn)
@@ -972,7 +972,7 @@ limit 100 for no key update skip locked;
 
         txn.commit().await?;
 
-        log::info!("completed update badges");
+        log::info!("completed update circles");
 
         Ok(true)
     }
@@ -1013,19 +1013,19 @@ limit 100 for no key update skip locked;
         Ok(())
     }
 
-    pub async fn delete_badge(&self, id: BadgeId) {
-        if let Err(e) = self.try_delete_badge(id).await {
+    pub async fn delete_circle(&self, id: CircleId) {
+        if let Err(e) = self.try_delete_circle(id).await {
             log::warn!(
-                "failed to delete badge with id {} from algolia: {}",
+                "failed to delete circle with id {} from algolia: {}",
                 id.0.to_hyphenated(),
                 e
             );
         }
     }
 
-    pub async fn try_delete_badge(&self, BadgeId(id): BadgeId) -> anyhow::Result<()> {
+    pub async fn try_delete_circle(&self, CircleId(id): CircleId) -> anyhow::Result<()> {
         self.inner
-            .delete_object(&self.badge_index, &id.to_string())
+            .delete_object(&self.circle_index, &id.to_string())
             .await?;
 
         Ok(())
@@ -1227,7 +1227,7 @@ pub struct Client {
     media_index: String,
     jig_index: String,
     course_index: String,
-    badge_index: String,
+    circle_index: String,
     public_user_index: String,
 }
 
@@ -1236,13 +1236,13 @@ impl Client {
         if let Some(settings) = settings {
             let app_id = algolia::AppId::new(settings.application_id);
 
-            let (inner, media_index, jig_index, course_index, badge_index, public_user_index) =
+            let (inner, media_index, jig_index, course_index, circle_index, public_user_index) =
                 match (
                     settings.backend_search_key,
                     settings.media_index,
                     settings.jig_index,
                     settings.course_index,
-                    settings.badge_index,
+                    settings.circle_index,
                     settings.public_user_index,
                 ) {
                     (
@@ -1250,14 +1250,14 @@ impl Client {
                         Some(media_index),
                         Some(jig_index),
                         Some(course_index),
-                        Some(badge_index),
+                        Some(circle_index),
                         Some(public_user_index),
                     ) => (
                         Inner::new(app_id, ApiKey(key))?,
                         media_index,
                         jig_index,
                         course_index,
-                        badge_index,
+                        circle_index,
                         public_user_index,
                     ),
                     _ => return Ok(None),
@@ -1268,7 +1268,7 @@ impl Client {
                 media_index,
                 jig_index,
                 course_index,
-                badge_index,
+                circle_index,
                 public_user_index,
             }))
         } else {
@@ -1603,7 +1603,7 @@ impl Client {
     }
 
     #[instrument(skip_all)]
-    pub async fn search_badge(
+    pub async fn search_circle(
         &self,
         query: &str,
         creator_id: Option<Uuid>,
@@ -1636,7 +1636,7 @@ impl Client {
         let results: SearchResponse = self
             .inner
             .search(
-                &self.badge_index,
+                &self.circle_index,
                 SearchQuery::<'_, String, AndFilter> {
                     query: Some(query),
                     page,

@@ -67,7 +67,7 @@ pub mod course;
 /// Additional Resource endpoints
 pub mod additional_resource;
 
-/// Badge endpoints
-pub mod badge;
+/// Circle endpoints
+pub mod circle;
 /// Module endpoints
 pub mod module;

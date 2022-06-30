@@ -1,7 +1,7 @@
 use chrono::{DateTime, Utc};
 use chrono_tz::Tz;
 use shared::domain::{
-    badge::BadgeId,
+    circle::CircleId,
     image::ImageId,
     meta::{
         AffiliationId, AgeRangeId, GoogleAddressComponent, GoogleAddressType, GoogleLocation,
@@ -70,11 +70,11 @@ select user_id as "id",
     array(select subject_id from user_subject where user_subject.user_id = "user".id) as "subjects!: Vec<Uuid>",
     array(select affiliation_id from user_affiliation where user_affiliation.user_id = "user".id) as "affiliations!: Vec<Uuid>",
     array(select age_range_id from user_age_range where user_age_range.user_id = "user".id) as "age_ranges!: Vec<Uuid>",
-    array(select badge.id 
-        from badge_member bm 
-        inner join badge on bm.id = badge.id 
-        where bm.user_id = "user".id or badge.creator_id = "user".id
-    ) as "badges!: Vec<Uuid>"
+    array(select circle.id 
+        from circle_member bm 
+        inner join circle on bm.id = circle.id 
+        where bm.user_id = "user".id or circle.creator_id = "user".id
+    ) as "circles!: Vec<Uuid>"
 from "user"
     inner join user_profile on "user".id = user_profile.user_id
     inner join user_email using(user_id)
@@ -122,7 +122,7 @@ where id = $1"#,
         subjects: row.subjects.into_iter().map(SubjectId).collect(),
         age_ranges: row.age_ranges.into_iter().map(AgeRangeId).collect(),
         affiliations: row.affiliations.into_iter().map(AffiliationId).collect(),
-        badges: row.badges.into_iter().map(BadgeId).collect(),
+        circles: row.circles.into_iter().map(CircleId).collect(),
     }))
 }
 

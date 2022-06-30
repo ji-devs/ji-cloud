@@ -262,7 +262,7 @@ pub fn build(
             .configure(endpoints::locale::configure)
             .configure(endpoints::scheduler::configure)
             .configure(endpoints::pdf::configure)
-            .configure(endpoints::badge::configure)
+            .configure(endpoints::circle::configure)
             .route("/", method(http::Method::GET).to(no_content_response))
     });
 
