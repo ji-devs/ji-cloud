@@ -5,13 +5,13 @@ use futures_signals::{map_ref, signal::Signal, signal_vec::SignalVecExt};
 use shared::domain::{badge::Badge, user::public_user::PublicUser};
 use utils::{
     events,
-    routes::{CommunityBadgesRoute, CommunityMembersRoute, CommunityRoute, Route},
+    routes::{CommunityCirclesRoute, CommunityMembersRoute, CommunityRoute, Route},
 };
 use wasm_bindgen::JsValue;
 
 use super::CommunitySearch;
 
-use crate::state::{BADGE_LIST_GRID_COLUMNS, MEMBER_LIST_GRID_COLUMNS};
+use crate::state::{CIRCLE_LIST_GRID_COLUMNS, MEMBER_LIST_GRID_COLUMNS};
 
 const STR_SEE_MORE: &str = "See more";
 
@@ -27,11 +27,11 @@ impl CommunitySearch {
                 state.render_member(&member)
             })))
             .child_signal(state.render_see_more_members())
-            .property_signal("badgeCount", state.member_count.signal())
-            .children_signal_vec(state.badges.signal_vec_cloned().map(clone!(state => move|badge| {
-                state.render_badge(&badge)
+            .property_signal("circleCount", state.member_count.signal())
+            .children_signal_vec(state.circles.signal_vec_cloned().map(clone!(state => move|circle| {
+                state.render_circle(&circle)
             })))
-            .child_signal(state.render_see_more_badges())
+            .child_signal(state.render_see_more_circles())
         })
     }
 
@@ -63,21 +63,21 @@ impl CommunitySearch {
         })
     }
 
-    fn render_badge(self: &Rc<Self>, badge: &Badge) -> Dom {
-        html!("community-list-badge", {
-            .class(&*BADGE_LIST_GRID_COLUMNS)
-            .property("slot", "badges")
-            .property("name", &badge.display_name)
-            .property("member-count", badge.member_count)
-            .property("description", &badge.description)
+    fn render_circle(self: &Rc<Self>, circle: &Badge) -> Dom {
+        html!("community-list-circle", {
+            .class(&*CIRCLE_LIST_GRID_COLUMNS)
+            .property("slot", "circles")
+            .property("name", &circle.display_name)
+            .property("member-count", circle.member_count)
+            .property("description", &circle.description)
             .apply(move |dom| dominator::on_click_go_to_url!(dom, {
-                Route::Community(CommunityRoute::Badges(CommunityBadgesRoute::Badge(badge.id))).to_string()
+                Route::Community(CommunityRoute::Circles(CommunityCirclesRoute::Circle(circle.id))).to_string()
             }))
             .child(html!("img", {
                 .property("slot", "img")
-                .property("src", badge.thumbnail.as_str())
+                .property("src", circle.thumbnail.as_str())
             }))
-            .child(html!("community-list-badge-status", {
+            .child(html!("community-list-circle-status", {
                 .property("slot", "status")
                 .property("status", "")
             }))
@@ -106,19 +106,19 @@ impl CommunitySearch {
         }
     }
 
-    fn render_see_more_badges(self: &Rc<Self>) -> impl Signal<Item = Option<Dom>> {
+    fn render_see_more_circles(self: &Rc<Self>) -> impl Signal<Item = Option<Dom>> {
         let state = Rc::clone(self);
         map_ref! {
-            let badge_count = state.badge_count.signal(),
-            let badge_len = state.badges.signal_vec_cloned().len() => move {
-                if *badge_count > *badge_len as u32 {
+            let circle_count = state.circle_count.signal(),
+            let circle_len = state.circles.signal_vec_cloned().len() => move {
+                if *circle_count > *circle_len as u32 {
                     Some(html!("button-rect", {
-                        .property("slot", "badges-see-more")
+                        .property("slot", "circles-see-more")
                         .property("color", "blue")
                         .property_signal("disabled", state.loader.is_loading())
                         .text(STR_SEE_MORE)
                         .event(clone!(state => move |_: events::Click| {
-                            state.load_more_badges();
+                            state.load_more_circles();
                         }))
                     }))
                 } else {

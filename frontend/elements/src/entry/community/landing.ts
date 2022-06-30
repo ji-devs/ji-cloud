@@ -1,7 +1,7 @@
 import { LitElement, html, css, customElement } from "lit-element";
 
 const STR_WELCOME_NEW_MEMBERS = "Welcome our new members";
-const STR_NEW_BADGES = "New badges";
+const STR_NEW_CIRCLES = "New circles";
 
 @customElement("community-landing")
 export class _ extends LitElement {
@@ -49,7 +49,7 @@ export class _ extends LitElement {
                 ::slotted([slot=members-link]) {
                     justify-self: center;
                 }
-                .badge-items {
+                .circle-items {
                     border-top: solid 1px var(--main-yellow);
                     padding: 16px 0;
                     display: grid;
@@ -57,11 +57,11 @@ export class _ extends LitElement {
                     justify-content: space-between;
                     row-gap: 30px;
                 }
-                ::slotted(div[slot=badges]) {
+                ::slotted(div[slot=circles]) {
                     display: grid;
                     justify-items: center;
                 }
-                ::slotted([slot=badges-link]) {
+                ::slotted([slot=circles-link]) {
                     justify-self: center;
                 }
             `,
@@ -80,15 +80,15 @@ export class _ extends LitElement {
                 </div>
                 <slot name="members-link"></slot>
             </section>
-            <section class="badge-section">
+            <section class="circle-section">
                 <h3>
                     <fa-icon icon="fa-solid fa-people-group"></fa-icon>
-                    ${STR_NEW_BADGES}
+                    ${STR_NEW_CIRCLES}
                 </h3>
-                <div class="badge-items">
-                    <slot name="badges"></slot>
+                <div class="circle-items">
+                    <slot name="circles"></slot>
                 </div>
-                <slot name="badges-link"></slot>
+                <slot name="circles-link"></slot>
             </section>
         `;
     }

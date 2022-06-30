@@ -5,20 +5,20 @@ use futures_signals::signal::not;
 use utils::events;
 use web_sys::{File, HtmlInputElement, HtmlTextAreaElement, Url};
 
-use super::CreateBadge;
+use super::CreateCircle;
 
-pub const STR_BADGE_NAME: &str = "Your badge name";
+pub const STR_CIRCLE_NAME: &str = "Your circle name";
 pub const STR_DESCRIPTION: &str = "Description";
 
-impl CreateBadge {
+impl CreateCircle {
     pub fn render(self: Rc<Self>) -> Dom {
         let state = self;
 
-        html!("community-create-badge", {
+        html!("community-create-circle", {
             .property("slot", "popup")
             .children(&mut [
                 html!("input-wrapper", {
-                    .property("label", STR_BADGE_NAME)
+                    .property("label", STR_CIRCLE_NAME)
                     .property("slot", "name")
                     .child(html!("input" => HtmlInputElement, {
                         .with_node!(input => {
@@ -46,7 +46,7 @@ impl CreateBadge {
                     .property("slot", "submit")
                     .property_signal("disabled", not(state.can_save_signal()))
                     .event(clone!(state => move |_: events::Click| {
-                        state.save_badges();
+                        state.save_circles();
                     }))
                 }),
                 html!("fa-button", {
@@ -54,7 +54,7 @@ impl CreateBadge {
                     .property("icon", "fa-regular fa-xmark")
                     .property_signal("disabled", state.loader.is_loading())
                     .event(clone!(state => move |_: events::Click| {
-                        state.badge_list_state.create_popup_open.set(false);
+                        state.circle_list_state.create_popup_open.set(false);
                     }))
                 }),
             ])

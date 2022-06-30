@@ -6,31 +6,31 @@ use futures_signals::{map_ref, signal::SignalExt};
 use shared::domain::badge::Badge;
 use utils::{
     events,
-    routes::{CommunityBadgesRoute, CommunityRoute, Route},
+    routes::{CommunityCirclesRoute, CommunityRoute, Route},
 };
 use web_sys::HtmlInputElement;
 
-use crate::state::BADGE_LIST_GRID_COLUMNS;
+use crate::state::CIRCLE_LIST_GRID_COLUMNS;
 
-use super::{create_badge::CreateBadge, BadgesList};
+use super::{create_circle::CreateCircle, CirclesList};
 
-impl BadgesList {
+impl CirclesList {
     pub fn render(self: Rc<Self>) -> Dom {
         let state = self;
-        state.load_badges();
+        state.load_circles();
 
         html!("community-list", {
-            .property("header", "Badges")
+            .property("header", "Circles")
             .child(html!("button-rect", {
                 .property("slot", "create-button")
                 .property("color", "blue")
-                .text("+ badge")
+                .text("+ circle")
                 .event(clone!(state => move |_: events::Click| {
                     state.create_popup_open.set(true);
                 }))
             }))
-            .child(html!("community-list-badge-header", {
-                .class(&*BADGE_LIST_GRID_COLUMNS)
+            .child(html!("community-list-circle-header", {
+                .class(&*CIRCLE_LIST_GRID_COLUMNS)
                 .property("slot", "sort-header")
             }))
             .child(html!("community-pagination", {
@@ -47,7 +47,7 @@ impl BadgesList {
                             let active_page = state.active_page.get();
                             if active_page > 1 {
                                 state.active_page.set(active_page - 1);
-                                state.load_badges();
+                                state.load_circles();
                             };
                         }))
                     }),
@@ -74,7 +74,7 @@ impl BadgesList {
                                 if let Ok(num) = value.parse::<u32>() {
                                     if num <= state.total_pages.get() {
                                         state.active_page.set(num);
-                                        state.load_badges();
+                                        state.load_circles();
                                     }
                                 };
                             }))
@@ -93,21 +93,21 @@ impl BadgesList {
                             state.active_page.replace_with(|active_page| {
                                 *active_page + 1
                             });
-                            state.load_badges();
+                            state.load_circles();
                         }))
                     }),
                 ])
             }))
-            .children_signal_vec(state.badges.signal_ref(clone!(state => move|badges| {
-                match badges {
+            .children_signal_vec(state.circles.signal_ref(clone!(state => move|circles| {
+                match circles {
                     None => {
                         vec![html!("progress", {
                             .property("slot", "items")
                         })]
                     },
-                    Some(badges) => {
-                        badges.iter().map(|badge| {
-                            state.render_badge(badge)
+                    Some(circles) => {
+                        circles.iter().map(|circle| {
+                            state.render_circle(circle)
                         }).collect()
                     },
                 }
@@ -119,7 +119,7 @@ impl BadgesList {
                         Some(html!("empty-fragment", {
                             .style("display", "none")
                             .apply(OverlayHandle::lifecycle(clone!(state => move || {
-                                CreateBadge::new(Rc::clone(&state)).render()
+                                CreateCircle::new(Rc::clone(&state)).render()
                             })))
                         }))
                     },
@@ -128,21 +128,21 @@ impl BadgesList {
         })
     }
 
-    fn render_badge(self: &Rc<Self>, badge: &Badge) -> Dom {
-        html!("community-list-badge", {
-            .class(&*BADGE_LIST_GRID_COLUMNS)
+    fn render_circle(self: &Rc<Self>, circle: &Badge) -> Dom {
+        html!("community-list-circle", {
+            .class(&*CIRCLE_LIST_GRID_COLUMNS)
             .property("slot", "items")
-            .property("name", &badge.display_name)
-            .property("member-count", badge.member_count)
-            .property("description", &badge.description)
+            .property("name", &circle.display_name)
+            .property("member-count", circle.member_count)
+            .property("description", &circle.description)
             .apply(move |dom| dominator::on_click_go_to_url!(dom, {
-                Route::Community(CommunityRoute::Badges(CommunityBadgesRoute::Badge(badge.id))).to_string()
+                Route::Community(CommunityRoute::Circles(CommunityCirclesRoute::Circle(circle.id))).to_string()
             }))
             .child(html!("img", {
                 .property("slot", "img")
-                .property("src", badge.thumbnail.as_str())
+                .property("src", circle.thumbnail.as_str())
             }))
-            .child(html!("community-list-badge-status", {
+            .child(html!("community-list-circle-status", {
                 .property("slot", "status")
                 .property("status", "")
             }))

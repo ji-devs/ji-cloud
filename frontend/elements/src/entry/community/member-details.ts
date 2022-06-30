@@ -4,7 +4,7 @@ import { nothing } from "lit-html";
 const STR_ABOUT = "About";
 const STR_CREATIONS = "Jigzi creations";
 const STR_BIO = "Bio";
-const STR_BADGE = "Badge";
+const STR_CIRCLE = "Circles";
 
 @customElement("community-member-details")
 export class _ extends LitElement {
@@ -155,7 +155,7 @@ export class _ extends LitElement {
                     ` : nothing
                 }
                 <hr>
-                <h3>${STR_BADGE}</h3>
+                <h3>${STR_CIRCLE}</h3>
             </section>
             <div class="right-sections">
                 <section class="creations">

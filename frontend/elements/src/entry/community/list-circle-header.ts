@@ -5,7 +5,7 @@ const STR_MEMBERS = "Members";
 const STR_ABOUT = "About";
 const STR_STATUS = "Status";
 
-@customElement("community-list-badge-header")
+@customElement("community-list-circle-header")
 export class _ extends LitElement {
     static get styles() {
         return [

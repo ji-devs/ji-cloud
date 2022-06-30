@@ -5,8 +5,8 @@
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 mod actions;
-mod badge_details;
-mod badges_list;
+mod circle_details;
+mod circle_list;
 mod dom;
 mod landing;
 mod member_details;

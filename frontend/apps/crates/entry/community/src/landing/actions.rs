@@ -16,7 +16,7 @@ impl CommunityLanding {
         state.loader.load(clone!(state => async move {
             join!(
                 state.load_top_members(),
-                state.load_top_badges(),
+                state.load_top_circles(),
             );
         }));
     }
@@ -36,7 +36,7 @@ impl CommunityLanding {
         }
     }
 
-    async fn load_top_badges(self: &Rc<Self>) {
+    async fn load_top_circles(self: &Rc<Self>) {
         let state = self;
         let req = BadgeBrowseQuery {
             page_limit: Some(6),
@@ -45,7 +45,7 @@ impl CommunityLanding {
 
         match endpoints::badge::Browse::api_no_auth(Some(req)).await {
             Ok(res) => {
-                state.top_badges.set(Some(res.badges));
+                state.top_circles.set(Some(res.badges));
             }
             Err(_) => todo!(),
         }

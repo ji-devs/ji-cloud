@@ -5,7 +5,7 @@ use futures_signals::signal_vec::SignalVecExt;
 use shared::domain::user::public_user::PublicUser;
 use utils::events;
 
-use super::BadgeDetails;
+use super::CircleDetails;
 
 const STR_CONTACT_ADMIN: &str = "Contact admin";
 const STR_INVITE: &str = "Invite";
@@ -13,22 +13,22 @@ const STR_MEMBER: &str = "Member";
 const STR_JOIN: &str = "Join";
 const STR_SEARCH_MEMBER: &str = "Search member";
 
-impl BadgeDetails {
+impl CircleDetails {
     pub fn render(self: Rc<Self>) -> Dom {
         let state = self;
         state.load_data();
 
         html!("empty-fragment", {
-            .child_signal(state.badge.signal_ref(clone!(state => move |badge| {
-                badge.as_ref().map(|badge| {
-                    html!("community-badge-details", {
-                        .property("name", &badge.display_name)
-                        .property("description", &badge.description)
-                        .property("memberCount", badge.member_count)
+            .child_signal(state.circle.signal_ref(clone!(state => move |circle| {
+                circle.as_ref().map(|circle| {
+                    html!("community-circle-details", {
+                        .property("name", &circle.display_name)
+                        .property("description", &circle.description)
+                        .property("memberCount", circle.member_count)
                         .children(&mut [
                             html!("img", {
                                 .property("slot", "img")
-                                .property("src", badge.thumbnail.as_str())
+                                .property("src", circle.thumbnail.as_str())
                             }),
                             html!("button-rect", {
                                 .property("slot", "actions")
@@ -52,7 +52,7 @@ impl BadgeDetails {
                         ])
                         .child_signal(state.community_state.user.signal_ref(clone!(state => move |user| {
                             let is_member = match user {
-                                Some(user) => user.badges.iter().any(|badge| badge == &state.badge_id),
+                                Some(user) => user.badges.iter().any(|circle| circle == &state.circle_id),
                                 None => false,
                             };
                             Some(match is_member {
@@ -67,7 +67,7 @@ impl BadgeDetails {
                                         }))
                                         .text(STR_MEMBER)
                                         .event(clone!(state => move |_: events::Click| {
-                                            state.leave_badge();
+                                            state.leave_circle();
                                         }))
                                     })
                                 },
@@ -79,7 +79,7 @@ impl BadgeDetails {
                                         .property("color", "blue")
                                         .text(STR_JOIN)
                                         .event(clone!(state => move |_: events::Click| {
-                                            state.join_badge();
+                                            state.join_circle();
                                         }))
                                     })
                                 },

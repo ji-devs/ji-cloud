@@ -17,7 +17,7 @@ impl CommunitySearch {
         state.loader.load(clone!(state => async move {
             join!(
                 state.search_members_async(0),
-                state.search_badges_async(0),
+                state.search_circles_async(0),
             );
         }));
     }
@@ -31,12 +31,12 @@ impl CommunitySearch {
         }));
     }
 
-    pub fn load_more_badges(self: &Rc<Self>) {
+    pub fn load_more_circles(self: &Rc<Self>) {
         let state = self;
         state.loader.load(clone!(state => async move {
-            let badge_len = state.badges.lock_ref().len() as u32;
-            let next_page = badge_len / SEARCH_PAGE_LIMIT;
-            state.search_badges_async(next_page).await;
+            let circle_len = state.circles.lock_ref().len() as u32;
+            let next_page = circle_len / SEARCH_PAGE_LIMIT;
+            state.search_circles_async(next_page).await;
         }));
     }
 
@@ -58,7 +58,7 @@ impl CommunitySearch {
         }
     }
 
-    async fn search_badges_async(self: &Rc<Self>, page: u32) {
+    async fn search_circles_async(self: &Rc<Self>, page: u32) {
         let state = self;
         let req = BadgeSearchQuery {
             q: state.query.q.clone(),
@@ -69,8 +69,8 @@ impl CommunitySearch {
 
         match endpoints::badge::Search::api_no_auth(Some(req)).await {
             Ok(res) => {
-                state.badges.lock_mut().extend(res.badges);
-                state.badge_count.set_neq(res.total_badge_count as u32);
+                state.circles.lock_mut().extend(res.badges);
+                state.circle_count.set_neq(res.total_badge_count as u32);
             }
             Err(_) => todo!(),
         }

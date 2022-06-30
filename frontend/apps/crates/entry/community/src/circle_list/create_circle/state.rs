@@ -7,24 +7,24 @@ use futures_signals::{
 };
 use web_sys::File;
 
-use crate::badges_list::BadgesList;
+use crate::circle_list::CirclesList;
 
-pub struct CreateBadge {
+pub struct CreateCircle {
     pub loader: AsyncLoader,
     pub name: Mutable<Option<String>>,
     pub description: Mutable<Option<String>>,
     pub image: Mutable<Option<File>>,
-    pub badge_list_state: Rc<BadgesList>,
+    pub circle_list_state: Rc<CirclesList>,
 }
 
-impl CreateBadge {
-    pub fn new(badge_list_state: Rc<BadgesList>) -> Rc<Self> {
+impl CreateCircle {
+    pub fn new(circle_list_state: Rc<CirclesList>) -> Rc<Self> {
         Rc::new(Self {
             loader: AsyncLoader::new(),
             name: Mutable::default(),
             description: Mutable::default(),
             image: Mutable::default(),
-            badge_list_state,
+            circle_list_state,
         })
     }
 

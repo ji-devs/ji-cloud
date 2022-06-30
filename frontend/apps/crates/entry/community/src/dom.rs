@@ -11,14 +11,14 @@ use utils::{
     events,
     prelude::get_user,
     routes::{
-        CommunityBadgesRoute, CommunityMembersRoute, CommunityRoute, CommunitySearchQuery, Route,
+        CommunityCirclesRoute, CommunityMembersRoute, CommunityRoute, CommunitySearchQuery, Route,
         UserRoute,
     },
 };
 use web_sys::HtmlInputElement;
 
 use crate::{
-    badge_details::BadgeDetails, badges_list::BadgesList, landing::CommunityLanding,
+    circle_details::CircleDetails, circle_list::CirclesList, landing::CommunityLanding,
     member_details::MemberDetails, members_list::MembersList, search::CommunitySearch,
     state::Community,
 };
@@ -87,12 +87,12 @@ impl Community {
                         ).render()
                     }
                 },
-                CommunityRoute::Badges(route) => match route {
-                    CommunityBadgesRoute::List => BadgesList::new().render(),
-                    CommunityBadgesRoute::Badge(badge_id) => {
-                        BadgeDetails::new(
+                CommunityRoute::Circles(route) => match route {
+                    CommunityCirclesRoute::List => CirclesList::new().render(),
+                    CommunityCirclesRoute::Circle(circle_id) => {
+                        CircleDetails::new(
                             Rc::clone(&state),
-                            badge_id
+                            circle_id
                         ).render()
                     },
                 },
@@ -136,15 +136,15 @@ impl Community {
                     }))
                 }),
                 html!("community-nav-item", {
-                    .property("label", "Badges")
+                    .property("label", "Circles")
                     .property_signal("active", Community::route_signal().map(|route| {
-                        matches!(route, Route::Community(CommunityRoute::Badges(_)))
+                        matches!(route, Route::Community(CommunityRoute::Circles(_)))
                     }))
                     .child(html!("fa-icon", {
                         .property("icon", "fa-thin fa-circle-nodes")
                     }))
                     .apply(move |dom| dominator::on_click_go_to_url!(dom, {
-                        Route::Community(CommunityRoute::Badges(CommunityBadgesRoute::List)).to_string()
+                        Route::Community(CommunityRoute::Circles(CommunityCirclesRoute::List)).to_string()
                     }))
                 }),
                 html!("community-nav-item", {

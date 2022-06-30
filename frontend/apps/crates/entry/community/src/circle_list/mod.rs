@@ -1,5 +1,5 @@
 mod actions;
-mod create_badge;
+mod create_circle;
 mod dom;
 mod state;
 

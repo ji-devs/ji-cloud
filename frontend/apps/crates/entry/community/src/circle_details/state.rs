@@ -9,19 +9,19 @@ use shared::domain::{
 
 use crate::state::Community;
 
-pub struct BadgeDetails {
-    pub badge_id: BadgeId,
-    pub badge: Mutable<Option<Badge>>,
+pub struct CircleDetails {
+    pub circle_id: BadgeId,
+    pub circle: Mutable<Option<Badge>>,
     pub members: MutableVec<PublicUser>,
     pub loader: AsyncLoader,
     pub community_state: Rc<Community>,
 }
 
-impl BadgeDetails {
-    pub fn new(community_state: Rc<Community>, badge_id: BadgeId) -> Rc<Self> {
+impl CircleDetails {
+    pub fn new(community_state: Rc<Community>, circle_id: BadgeId) -> Rc<Self> {
         Rc::new(Self {
-            badge_id,
-            badge: Mutable::new(None),
+            circle_id,
+            circle: Mutable::new(None),
             members: MutableVec::new(),
             loader: AsyncLoader::new(),
             community_state,

@@ -32,7 +32,7 @@ impl Community {
     }
 }
 
-pub(super) static BADGE_LIST_GRID_COLUMNS: Lazy<String> = Lazy::new(|| {
+pub(super) static CIRCLE_LIST_GRID_COLUMNS: Lazy<String> = Lazy::new(|| {
     class! {
         .style("grid-template-columns", "108px 200px 50px 400px 138px")
     }

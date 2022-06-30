@@ -6,7 +6,7 @@ use shared::domain::{badge::Badge, user::public_user::PublicUser};
 
 pub struct CommunityLanding {
     pub top_members: Mutable<Option<Vec<PublicUser>>>,
-    pub top_badges: Mutable<Option<Vec<Badge>>>,
+    pub top_circles: Mutable<Option<Vec<Badge>>>,
     pub loader: AsyncLoader,
 }
 
@@ -15,7 +15,7 @@ impl CommunityLanding {
         Rc::new(Self {
             loader: AsyncLoader::new(),
             top_members: Mutable::new(None),
-            top_badges: Mutable::new(None),
+            top_circles: Mutable::new(None),
         })
     }
 }

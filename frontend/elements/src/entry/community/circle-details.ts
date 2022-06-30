@@ -3,7 +3,7 @@ import { LitElement, html, css, customElement, property } from "lit-element";
 const STR_MEMBERS = "Members";
 const STR_ABOUT = "About";
 
-@customElement("community-badge-details")
+@customElement("community-circle-details")
 export class _ extends LitElement {
     static get styles() {
         return [

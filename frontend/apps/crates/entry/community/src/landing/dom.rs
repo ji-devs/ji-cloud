@@ -3,7 +3,7 @@ use std::rc::Rc;
 use dominator::{clone, html, link, Dom};
 use futures_signals::signal::SignalExt;
 use shared::domain::{badge::Badge, user::public_user::PublicUser};
-use utils::routes::{CommunityBadgesRoute, CommunityMembersRoute, CommunityRoute, Route};
+use utils::routes::{CommunityCirclesRoute, CommunityMembersRoute, CommunityRoute, Route};
 use wasm_bindgen::JsValue;
 
 use super::CommunityLanding;
@@ -36,24 +36,24 @@ impl CommunityLanding {
                     Route::Community(CommunityRoute::Members(CommunityMembersRoute::List)).to_string()
                 }))
             }))
-            .children_signal_vec(state.top_badges.signal_ref(clone!(state => move |top_badges| {
-                match top_badges {
+            .children_signal_vec(state.top_circles.signal_ref(clone!(state => move |top_circles| {
+                match top_circles {
                     None => vec![html!("progress", {
-                        .property("slot", "badges")
+                        .property("slot", "circles")
                     })],
-                    Some(top_badges) => {
-                        top_badges.iter().map(|badge| {
-                            state.render_badge(badge)
+                    Some(top_circles) => {
+                        top_circles.iter().map(|circle| {
+                            state.render_circle(circle)
                         }).collect()
                     },
                 }
             })).to_signal_vec())
             .child(html!("button-rect", {
-                .property("slot", "badges-link")
+                .property("slot", "circles-link")
                 .property("color", "blue")
                 .text(STR_SEE_MORE)
                 .apply(move |dom| dominator::on_click_go_to_url!(dom, {
-                    Route::Community(CommunityRoute::Badges(CommunityBadgesRoute::List)).to_string()
+                    Route::Community(CommunityRoute::Circles(CommunityCirclesRoute::List)).to_string()
                 }))
             }))
         })
@@ -79,18 +79,18 @@ impl CommunityLanding {
         })
     }
 
-    fn render_badge(self: &Rc<Self>, badge: &Badge) -> Dom {
+    fn render_circle(self: &Rc<Self>, circle: &Badge) -> Dom {
         html!("div", {
-            .property("slot", "badges")
+            .property("slot", "circles")
             .child(html!("img", {
                 .style("height", "90px")
                 .style("width", "90px")
                 .style("box-shadow", "0 0 8px 0 rgba(0, 0, 0, 0.06)")
                 .style("border", "solid 1px var(--light-gray-1)")
                 .style("border-radius", "50%")
-                .property("src", badge.thumbnail.as_str())
+                .property("src", circle.thumbnail.as_str())
             }))
-            .text(&badge.display_name)
+            .text(&circle.display_name)
         })
     }
 }

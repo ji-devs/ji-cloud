@@ -4,10 +4,10 @@ use dominator::clone;
 use shared::{api::endpoints, domain::badge::BadgeBrowseQuery};
 use utils::prelude::ApiEndpointExt;
 
-use super::BadgesList;
+use super::CirclesList;
 
-impl BadgesList {
-    pub fn load_badges(self: &Rc<Self>) {
+impl CirclesList {
+    pub fn load_circles(self: &Rc<Self>) {
         let state = self;
 
         state.loader.load(clone!(state => async move {
@@ -19,7 +19,7 @@ impl BadgesList {
 
             match endpoints::badge::Browse::api_no_auth(Some(req)).await {
                 Ok(res) => {
-                    state.badges.set(Some(res.badges));
+                    state.circles.set(Some(res.badges));
                     let page_count = page_count(res.total_badge_count as u32, state.items_per_page);
                     state.total_pages.set(page_count);
                 },

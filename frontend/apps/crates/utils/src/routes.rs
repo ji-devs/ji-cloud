@@ -63,7 +63,7 @@ pub enum CommunityRoute {
     Landing,
     Search(Box<CommunitySearchQuery>),
     Members(CommunityMembersRoute),
-    Badges(CommunityBadgesRoute),
+    Circles(CommunityCirclesRoute),
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
@@ -80,9 +80,9 @@ pub enum CommunityMembersRoute {
 }
 
 #[derive(Debug, Clone)]
-pub enum CommunityBadgesRoute {
+pub enum CommunityCirclesRoute {
     List,
-    Badge(BadgeId),
+    Circle(BadgeId),
 }
 
 #[derive(Debug, Clone)]
@@ -309,11 +309,11 @@ impl Route {
                 )))
             }
             ["community", "badges"] => {
-                Self::Community(CommunityRoute::Badges(CommunityBadgesRoute::List))
+                Self::Community(CommunityRoute::Circles(CommunityCirclesRoute::List))
             }
             ["community", "badges", badge_id] => {
                 let badge_id = BadgeId(Uuid::from_str(badge_id).unwrap_ji());
-                Self::Community(CommunityRoute::Badges(CommunityBadgesRoute::Badge(
+                Self::Community(CommunityRoute::Circles(CommunityCirclesRoute::Circle(
                     badge_id,
                 )))
             }
@@ -607,9 +607,9 @@ impl From<&Route> for String {
                         format!("/community/members/{}", user_id)
                     }
                 },
-                CommunityRoute::Badges(route) => match route {
-                    CommunityBadgesRoute::List => "/community/badges".to_string(),
-                    CommunityBadgesRoute::Badge(badge_id) => {
+                CommunityRoute::Circles(route) => match route {
+                    CommunityCirclesRoute::List => "/community/badges".to_string(),
+                    CommunityCirclesRoute::Circle(badge_id) => {
                         format!("/community/badges/{}", badge_id.0)
                     }
                 },

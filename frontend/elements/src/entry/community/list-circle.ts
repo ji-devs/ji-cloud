@@ -1,6 +1,6 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 
-@customElement("community-list-badge")
+@customElement("community-list-circle")
 export class _ extends LitElement {
     static get styles() {
         return [

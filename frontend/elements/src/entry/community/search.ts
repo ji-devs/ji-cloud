@@ -4,7 +4,7 @@ const STR_WE_FOUND = "We found";
 const STR_AND = "and";
 const STR_FOR = "for";
 const STR_MEMBERS = "Members";
-const STR_BADGES = "Badges";
+const STR_CIRCLES = "Circles";
 
 @customElement("community-search")
 export class _ extends LitElement {
@@ -61,20 +61,20 @@ export class _ extends LitElement {
     memberCount: number = 0;
 
     @property({ type: Number })
-    badgeCount: number = 0;
+    circleCount: number = 0;
 
     @query("#members")
     private membersSection!: HTMLElement;
 
-    @query("#badges")
-    private badgesSection!: HTMLElement;
+    @query("#circles")
+    private circlesSection!: HTMLElement;
 
     scrollToMembers() {
         this.membersSection.scrollIntoView({behavior: "smooth"});
     }
 
-    scrollToBadges() {
-        this.badgesSection.scrollIntoView({behavior: "smooth"});
+    scrollToCircles() {
+        this.circlesSection.scrollIntoView({behavior: "smooth"});
     }
 
     render() {
@@ -86,9 +86,9 @@ export class _ extends LitElement {
                     ${ STR_MEMBERS }
                 </a>
                 ${ STR_AND }
-                <a @click=${this.scrollToBadges}>
-                    ${ this.badgeCount }
-                    ${ STR_BADGES }
+                <a @click=${this.scrollToCircles}>
+                    ${ this.circleCount }
+                    ${ STR_CIRCLES }
                 </a>
                 ${ STR_FOR }
                 "${ this.query }"
@@ -104,16 +104,16 @@ export class _ extends LitElement {
                 </div>
                 <slot name="members-see-more"></slot>
             </section>
-            <section id="badges">
+            <section id="circles">
                 <h4>
-                    ${ STR_BADGES }
-                    (${ this.badgeCount })
+                    ${ STR_CIRCLES }
+                    (${ this.circleCount })
                 </h4>
-                <slot name="badges-sort"></slot>
+                <slot name="circles-sort"></slot>
                 <div class="items">
-                    <slot name="badges"></slot>
+                    <slot name="circles"></slot>
                 </div>
-                <slot name="badges-see-more"></slot>
+                <slot name="circles-see-more"></slot>
             </section>
         `;
     }

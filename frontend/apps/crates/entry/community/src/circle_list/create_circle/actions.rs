@@ -17,30 +17,30 @@ use utils::{
 };
 use web_sys::File;
 
-use super::CreateBadge;
+use super::CreateCircle;
 
-impl CreateBadge {
-    pub fn save_badges(self: &Rc<Self>) {
+impl CreateCircle {
+    pub fn save_circles(self: &Rc<Self>) {
         let state = self;
 
         state.loader.load(clone!(state => async move {
-            match state.save_badge_async().await {
-                Ok(badge) => {
-                    let mut badges = state.badge_list_state.badges.lock_mut();
-                    if let Some(badges) = &mut *badges {
-                        badges.insert(0, badge);
+            match state.save_circle_async().await {
+                Ok(circle) => {
+                    let mut circles = state.circle_list_state.circles.lock_mut();
+                    if let Some(circles) = &mut *circles {
+                        circles.insert(0, circle);
                     }
-                    state.badge_list_state.create_popup_open.set(false);
+                    state.circle_list_state.create_popup_open.set(false);
                 },
                 Err(_) => todo!(),
             }
         }));
     }
 
-    async fn save_badge_async(self: &Rc<Self>) -> anyhow::Result<Badge> {
+    async fn save_circle_async(self: &Rc<Self>) -> anyhow::Result<Badge> {
         let state = self;
 
-        upload_badge_image(state.image.get_cloned().unwrap_ji()).await?;
+        upload_circle_image(state.image.get_cloned().unwrap_ji()).await?;
 
         let req = BadgeCreateRequest {
             display_name: state.name.get_cloned().unwrap_or_default(),
@@ -54,15 +54,15 @@ impl CreateBadge {
         let id = endpoints::badge::Create::api_with_auth(Some(req)).await?.id;
 
         let path = endpoints::badge::Get::PATH.replace("{id}", &id.0.to_string());
-        let badge =
+        let circle =
             api_with_auth::<Badge, EmptyError, ()>(&path, endpoints::badge::Get::METHOD, None)
                 .await?;
 
-        Ok(badge)
+        Ok(circle)
     }
 }
 
-async fn upload_badge_image(file: File) -> anyhow::Result<ImageId> {
+async fn upload_circle_image(file: File) -> anyhow::Result<ImageId> {
     let req = UserImageCreateRequest {
         size: ImageSize::UserProfile,
     };

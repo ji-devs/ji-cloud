@@ -10,8 +10,8 @@ pub const SEARCH_PAGE_LIMIT: u32 = 5;
 pub struct CommunitySearch {
     pub members: MutableVec<PublicUser>,
     pub member_count: Mutable<u32>,
-    pub badges: MutableVec<Badge>,
-    pub badge_count: Mutable<u32>,
+    pub circles: MutableVec<Badge>,
+    pub circle_count: Mutable<u32>,
     pub loader: AsyncLoader,
     pub query: CommunitySearchQuery,
 }
@@ -21,8 +21,8 @@ impl CommunitySearch {
         Rc::new(Self {
             members: MutableVec::new(),
             member_count: Mutable::new(0),
-            badges: MutableVec::new(),
-            badge_count: Mutable::new(0),
+            circles: MutableVec::new(),
+            circle_count: Mutable::new(0),
             loader: AsyncLoader::new(),
             query,
         })
