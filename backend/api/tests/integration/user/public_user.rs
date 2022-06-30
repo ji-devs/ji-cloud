@@ -7,7 +7,16 @@ use crate::{
 
 #[actix_rt::test]
 async fn browse_public_user() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::PublicUser, Fixture::Badge], &[]).await;
+    let app = initialize_server(
+        &[
+            Fixture::User,
+            Fixture::Image,
+            Fixture::PublicUser,
+            Fixture::Circle,
+        ],
+        &[],
+    )
+    .await;
 
     let port = app.port();
 

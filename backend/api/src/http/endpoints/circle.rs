@@ -4,10 +4,10 @@ use actix_web::{
 };
 use futures::try_join;
 use shared::{
-    api::{endpoints::badge, ApiEndpoint},
+    api::{endpoints::circle, ApiEndpoint},
     domain::{
         asset::UserOrMe,
-        badge::{BadgeBrowseResponse, BadgeId, BadgeSearchResponse, BrowseMembersResponse},
+        circle::{BrowseMembersResponse, CircleBrowseResponse, CircleId, CircleSearchResponse},
         CreateResponse,
     },
 };
@@ -22,21 +22,21 @@ use crate::{
     service::ServiceData,
 };
 
-/// Create an Badge.
+/// Create an Circle.
 async fn create(
     db: Data<PgPool>,
     claims: TokenUser,
-    req: Json<<badge::Create as ApiEndpoint>::Req>,
+    req: Json<<circle::Create as ApiEndpoint>::Req>,
 ) -> Result<HttpResponse, error::CreateWithMetadata> {
     let req = req.into_inner();
 
     let mut txn = db.begin().await?;
 
-    let id = db::badge::create(
+    let id = db::circle::create(
         &mut txn,
         &req.display_name,
         &req.description,
-        req.thumbnail,
+        req.image,
         claims.0.user_id,
     )
     .await?;
@@ -46,72 +46,72 @@ async fn create(
     Ok(HttpResponse::Created().json(CreateResponse { id }))
 }
 
-/// Update a Badge
+/// Update a Circle
 async fn update(
     db: Data<PgPool>,
     claims: TokenUser,
-    req: Option<Json<<badge::Update as ApiEndpoint>::Req>>,
-    path: Path<BadgeId>,
+    req: Option<Json<<circle::Update as ApiEndpoint>::Req>>,
+    path: Path<CircleId>,
 ) -> Result<HttpResponse, error::UpdateWithMetadata> {
     let id = path.into_inner();
 
-    db::badge::authz(&*db, claims.0.user_id, Some(id)).await?;
+    db::circle::authz(&*db, claims.0.user_id, Some(id)).await?;
 
     let req = req.map_or_else(Default::default, Json::into_inner);
 
-    db::badge::update(
+    db::circle::update(
         &*db,
         id,
         req.display_name.as_deref(),
         req.description.as_deref(),
-        req.thumbnail,
+        req.image,
     )
     .await?;
 
     Ok(HttpResponse::NoContent().finish())
 }
 
-/// Delete a Badge
+/// Delete a Circle
 async fn delete(
     db: Data<PgPool>,
     claims: TokenUser,
-    path: Path<BadgeId>,
+    path: Path<CircleId>,
     algolia: ServiceData<crate::algolia::Manager>,
 ) -> Result<HttpResponse, error::Delete> {
     let id = path.into_inner();
 
-    db::badge::authz(&*db, claims.0.user_id, Some(id)).await?;
+    db::circle::authz(&*db, claims.0.user_id, Some(id)).await?;
 
-    db::badge::delete(&*db, id).await?;
+    db::circle::delete(&*db, id).await?;
 
-    algolia.delete_badge(id).await;
+    algolia.delete_circle(id).await;
 
     Ok(HttpResponse::NoContent().finish())
 }
 
 async fn get_one(
     db: Data<PgPool>,
-    path: Path<BadgeId>,
-) -> Result<Json<<badge::Get as ApiEndpoint>::Res>, error::NotFound> {
-    let badge_response = db::badge::get_one(&db, path.into_inner())
+    path: Path<CircleId>,
+) -> Result<Json<<circle::Get as ApiEndpoint>::Res>, error::NotFound> {
+    let circle_response = db::circle::get_one(&db, path.into_inner())
         .await?
         .ok_or(error::NotFound::ResourceNotFound)?;
 
-    Ok(Json(badge_response))
+    Ok(Json(circle_response))
 }
 
 async fn join(
     db: Data<PgPool>,
     claims: TokenUser,
-    path: Path<BadgeId>,
+    path: Path<CircleId>,
 ) -> Result<HttpResponse, error::NotFound> {
     let id = path.into_inner();
 
-    db::badge::valid_badge(&db, id)
+    db::circle::valid_circle(&db, id)
         .await
         .map_err(|_| error::NotFound::ResourceNotFound)?;
 
-    db::badge::join_badge(&db, claims.0.user_id, id)
+    db::circle::join_circle(&db, claims.0.user_id, id)
         .await
         .map_err(|e| error::NotFound::InternalServerError(e))?;
 
@@ -121,28 +121,28 @@ async fn join(
 async fn leave(
     db: Data<PgPool>,
     claims: TokenUser,
-    path: Path<BadgeId>,
+    path: Path<CircleId>,
 ) -> Result<HttpResponse, error::NotFound> {
     let id = path.into_inner();
 
-    db::badge::valid_badge(&db, id)
+    db::circle::valid_circle(&db, id)
         .await
         .map_err(|_| error::NotFound::ResourceNotFound)?;
 
-    db::badge::leave_badge(&db, claims.0.user_id, id)
+    db::circle::leave_circle(&db, claims.0.user_id, id)
         .await
         .map_err(|e| error::NotFound::InternalServerError(e))?;
 
     Ok(HttpResponse::NoContent().finish())
 }
 
-/// Search for Badges.
+/// Search for Circles.
 async fn search(
     db: Data<PgPool>,
     claims: Option<TokenUser>,
     algolia: ServiceData<crate::algolia::Client>,
-    query: Option<Query<<badge::Search as ApiEndpoint>::Req>>,
-) -> Result<Json<<badge::Search as ApiEndpoint>::Res>, error::Service> {
+    query: Option<Query<<circle::Search as ApiEndpoint>::Req>>,
+) -> Result<Json<<circle::Search as ApiEndpoint>::Res>, error::Service> {
     let query = query.map_or_else(Default::default, Query::into_inner);
 
     let page_limit = page_limit(query.page_limit)
@@ -152,7 +152,7 @@ async fn search(
     let creator_id = auth_claims(&db, claims, query.creator_id).await?;
 
     let (ids, pages, total_hits) = algolia
-        .search_badge(
+        .search_circle(
             &query.q,
             creator_id,
             query.creator_name,
@@ -162,20 +162,20 @@ async fn search(
         .await?
         .ok_or_else(|| error::Service::DisabledService(ServiceKind::Algolia))?;
 
-    let badges: Vec<_> = db::badge::get_by_ids(db.as_ref(), &ids).await?;
+    let circles: Vec<_> = db::circle::get_by_ids(db.as_ref(), &ids).await?;
 
-    Ok(Json(BadgeSearchResponse {
-        badges,
+    Ok(Json(CircleSearchResponse {
+        circles,
         pages,
-        total_badge_count: total_hits,
+        total_circle_count: total_hits,
     }))
 }
 
 async fn browse(
     db: Data<PgPool>,
     claims: Option<TokenUser>,
-    query: Option<Query<<badge::Browse as ApiEndpoint>::Req>>,
-) -> Result<Json<<badge::Browse as ApiEndpoint>::Res>, error::Auth> {
+    query: Option<Query<<circle::Browse as ApiEndpoint>::Req>>,
+) -> Result<Json<<circle::Browse as ApiEndpoint>::Res>, error::Auth> {
     let query = query.map_or_else(Default::default, Query::into_inner);
 
     let creator_id = auth_claims(&db, claims, query.creator_id).await?;
@@ -184,39 +184,39 @@ async fn browse(
         .await
         .map_err(|e| error::Auth::InternalServerError(e))?;
 
-    let browse_future = db::badge::browse(
+    let browse_future = db::circle::browse(
         db.as_ref(),
         creator_id,
         page_limit,
         query.page.unwrap_or(0) as i32,
     );
 
-    let total_count_future = db::badge::filtered_count(db.as_ref(), creator_id);
+    let total_count_future = db::circle::filtered_count(db.as_ref(), creator_id);
 
-    let (badges, total_count) = try_join!(browse_future, total_count_future,)?;
+    let (circles, total_count) = try_join!(browse_future, total_count_future,)?;
 
     let pages = (total_count / (page_limit as u64)
         + (total_count % (page_limit as u64) != 0) as u64) as u32;
 
-    Ok(Json(BadgeBrowseResponse {
-        badges,
+    Ok(Json(CircleBrowseResponse {
+        circles,
         pages,
-        total_badge_count: total_count,
+        total_circle_count: total_count,
     }))
 }
 
 async fn browse_members(
     db: Data<PgPool>,
     _claims: TokenUser,
-    path: Path<BadgeId>,
-) -> Result<Json<<badge::BrowseMembers as ApiEndpoint>::Res>, error::NotFound> {
+    path: Path<CircleId>,
+) -> Result<Json<<circle::BrowseMembers as ApiEndpoint>::Res>, error::NotFound> {
     let id = path.into_inner();
 
-    db::badge::valid_badge(&db, id)
+    db::circle::valid_circle(&db, id)
         .await
         .map_err(|_| error::NotFound::ResourceNotFound)?;
 
-    let members = db::badge::browse_badge_members(&db, id)
+    let members = db::circle::browse_circle_members(&db, id)
         .await
         .map_err(|e| error::NotFound::InternalServerError(e))?;
 
@@ -296,36 +296,36 @@ async fn auth_claims(
 
 pub fn configure(cfg: &mut ServiceConfig) {
     cfg.route(
-        badge::Create::PATH,
-        badge::Create::METHOD.route().to(create),
+        circle::Create::PATH,
+        circle::Create::METHOD.route().to(create),
     )
     .route(
-        badge::Browse::PATH,
-        badge::Browse::METHOD.route().to(browse),
+        circle::Browse::PATH,
+        circle::Browse::METHOD.route().to(browse),
     )
     .route(
-        badge::Search::PATH,
-        badge::Search::METHOD.route().to(search),
+        circle::Search::PATH,
+        circle::Search::METHOD.route().to(search),
     )
     .route(
-        badge::BrowseMembers::PATH,
-        badge::BrowseMembers::METHOD.route().to(browse_members),
+        circle::BrowseMembers::PATH,
+        circle::BrowseMembers::METHOD.route().to(browse_members),
     )
     .route(
-        badge::Update::PATH,
-        badge::Update::METHOD.route().to(update),
+        circle::Update::PATH,
+        circle::Update::METHOD.route().to(update),
     )
     .route(
-        badge::Delete::PATH,
-        badge::Delete::METHOD.route().to(delete),
+        circle::Delete::PATH,
+        circle::Delete::METHOD.route().to(delete),
     )
-    .route(badge::Get::PATH, badge::Get::METHOD.route().to(get_one))
+    .route(circle::Get::PATH, circle::Get::METHOD.route().to(get_one))
     .route(
-        badge::JoinBadge::PATH,
-        badge::JoinBadge::METHOD.route().to(join),
+        circle::JoinCircle::PATH,
+        circle::JoinCircle::METHOD.route().to(join),
     )
     .route(
-        badge::LeaveBadge::PATH,
-        badge::LeaveBadge::METHOD.route().to(leave),
+        circle::LeaveCircle::PATH,
+        circle::LeaveCircle::METHOD.route().to(leave),
     );
 }

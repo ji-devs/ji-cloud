@@ -10,7 +10,7 @@ use hashfn::hashfn;
 pub const JIG_INDEX: &str = "jig_index";
 pub const MEDIA_INDEX: &str = "media_index";
 pub const COURSE_INDEX: &str = "course_index";
-pub const BADGE_INDEX: &str = "badge_index";
+pub const CIRCLE_INDEX: &str = "circle_index";
 pub const PUBLIC_USER_INDEX: &str = "public_user_index";
 
 #[hashfn(MEDIA_HASH)]
@@ -131,11 +131,11 @@ pub(crate) async fn course_index(
     Ok(())
 }
 
-#[hashfn(BADGE_HASH)]
-pub(crate) async fn badge_index(
+#[hashfn(CIRCLE_HASH)]
+pub(crate) async fn circle_index(
     txn: &mut PgConnection,
     client: &super::Inner,
-    badge_index: &str,
+    circle_index: &str,
 ) -> anyhow::Result<()> {
     let settings = SetSettings {
         searchable_attributes: Some(
@@ -154,9 +154,9 @@ pub(crate) async fn badge_index(
         ]),
     };
 
-    client.set_settings(badge_index, &settings).await?;
+    client.set_settings(circle_index, &settings).await?;
 
-    sqlx::query!(r#"update algolia_index_settings set updated_at = now(), index_hash = $1 where index_name = $2"#, BADGE_HASH, BADGE_INDEX).execute(txn).await?;
+    sqlx::query!(r#"update algolia_index_settings set updated_at = now(), index_hash = $1 where index_name = $2"#, CIRCLE_HASH, CIRCLE_INDEX).execute(txn).await?;
 
     Ok(())
 }

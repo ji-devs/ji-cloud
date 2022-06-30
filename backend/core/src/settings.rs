@@ -233,9 +233,9 @@ pub struct AlgoliaSettings {
     /// If [`None`], indexing and searching will be disabled.
     pub course_index: Option<String>,
 
-    /// The index to use for operations relating to Badge on the algolia client.
+    /// The index to use for operations relating to Circle on the algolia client.
     /// If [`None`], indexing and searching will be disabled.
-    pub badge_index: Option<String>,
+    pub circle_index: Option<String>,
 
     /// The index to use for operations relating to Public User on the algolia client.
     /// If [`None`], indexing and searching will be disabled.
@@ -573,7 +573,7 @@ impl SettingsManager {
 
         let course_index = self.get_varying_secret(keys::algolia::COURSE_INDEX).await?;
 
-        let badge_index = self.get_varying_secret(keys::algolia::BADGE_INDEX).await?;
+        let circle_index = self.get_varying_secret(keys::algolia::CIRCLE_INDEX).await?;
 
         let public_user_index = self
             .get_varying_secret(keys::algolia::PUBLIC_USER_INDEX)
@@ -604,7 +604,7 @@ impl SettingsManager {
             media_index,
             jig_index,
             course_index,
-            badge_index,
+            circle_index,
             public_user_index,
             frontend_search_key,
         }))

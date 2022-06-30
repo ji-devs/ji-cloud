@@ -1,9 +1,9 @@
 use shared::domain::{
-    badge::{Badge, BadgeId},
+    circle::{Circle, CircleId},
+    image::ImageId,
     user::UserScope,
 };
 use sqlx::{PgConnection, PgPool};
-use url::Url;
 use uuid::Uuid;
 
 use crate::error;
@@ -12,17 +12,23 @@ pub async fn create(
     conn: &mut PgConnection,
     display_name: &str,
     description: &str,
-    thumbnail: url::Url,
+    image: Option<ImageId>,
     creator_id: Uuid,
-) -> sqlx::Result<BadgeId> {
-    let id: BadgeId = sqlx::query!(
+) -> sqlx::Result<CircleId> {
+    let image_id = if let Some(id) = image {
+        Some(id.0)
+    } else {
+        None
+    };
+
+    let id: CircleId = sqlx::query!(
         r#"
-insert into badge (display_name, description, thumbnail, creator_id) values ($1, $2, $3, $4)
-returning id as "id: BadgeId"
+insert into circle (display_name, description, image, creator_id) values ($1, $2, $3, $4)
+returning id as "id: CircleId"
         "#,
         display_name,
         description,
-        thumbnail.as_str(),
+        image_id,
         creator_id,
     )
     .fetch_one(&mut *conn)
@@ -34,15 +40,15 @@ returning id as "id: BadgeId"
 
 pub async fn update(
     pool: &PgPool,
-    id: BadgeId,
+    id: CircleId,
     display_name: Option<&str>,
     description: Option<&str>,
-    thumbnail: Option<url::Url>,
+    image: Option<ImageId>,
 ) -> anyhow::Result<bool> {
     let mut txn = pool.begin().await?;
 
     if !sqlx::query!(
-        r#"select exists(select 1 from badge where id = $1) as "exists!""#,
+        r#"select exists(select 1 from circle where id = $1) as "exists!""#,
         id.0
     )
     .fetch_one(&mut txn)
@@ -55,7 +61,7 @@ pub async fn update(
     if let Some(display_name) = display_name {
         sqlx::query!(
             r#"
-update badge
+update circle
 set display_name = $2,
     updated_at = now()
 where id = $1 and $2 is distinct from display_name
@@ -70,7 +76,7 @@ where id = $1 and $2 is distinct from display_name
     if let Some(description) = description {
         sqlx::query!(
             r#"
-update badge
+update circle
 set description = $2,
     updated_at = now()
 where id = $1 and $2 is distinct from description
@@ -82,15 +88,15 @@ where id = $1 and $2 is distinct from description
         .await?;
     }
 
-    if let Some(thumbnail) = thumbnail {
+    if let Some(image) = image {
         sqlx::query!(
             r#"
-update badge
-set thumbnail = $2,
+update circle
+set image = $2,
     updated_at = now()
-where id = $1 and $2 is distinct from thumbnail"#,
+where id = $1 and $2 is distinct from image"#,
             id.0,
-            thumbnail.as_str(),
+            image.0,
         )
         .execute(&mut txn)
         .await?;
@@ -101,28 +107,28 @@ where id = $1 and $2 is distinct from thumbnail"#,
     Ok(true)
 }
 
-pub async fn delete(db: &PgPool, id: BadgeId) -> sqlx::Result<()> {
+pub async fn delete(db: &PgPool, id: CircleId) -> sqlx::Result<()> {
     let mut conn = db.begin().await?;
 
-    sqlx::query!("delete from badge where id = $1", id.0)
+    sqlx::query!("delete from circle where id = $1", id.0)
         .execute(&mut conn)
         .await?;
 
     conn.commit().await
 }
 
-pub async fn get_one(db: &PgPool, id: BadgeId) -> anyhow::Result<Option<Badge>> {
+pub async fn get_one(db: &PgPool, id: CircleId) -> anyhow::Result<Option<Circle>> {
     let res = sqlx::query!(
         r#"
-select id            as "badge_id: BadgeId",
+select id            as "circle_id: CircleId",
        display_name,
        description,
-       thumbnail,
+       image         as "image?: ImageId",
        member_count,
        creator_id,
        created_at,
        updated_at
-from badge
+from circle
 where id = $1
 "#,
         id.0
@@ -130,44 +136,44 @@ where id = $1
     .fetch_optional(db)
     .await?;
 
-    let badge = res.map(|row| Badge {
-        id: row.badge_id,
+    let circle = res.map(|row| Circle {
+        id: row.circle_id,
         display_name: row.display_name,
         created_by: row.creator_id,
         description: row.description,
-        thumbnail: Url::parse(&row.thumbnail).unwrap(),
+        image: row.image,
         member_count: row.member_count as u32,
         created_at: row.created_at,
         last_edited: row.updated_at,
     });
 
-    Ok(badge)
+    Ok(circle)
 }
 
-pub async fn join_badge(db: &PgPool, user_id: Uuid, id: BadgeId) -> anyhow::Result<()> {
+pub async fn join_circle(db: &PgPool, user_id: Uuid, id: CircleId) -> anyhow::Result<()> {
     sqlx::query!(
         r#"
-insert into badge_member(id, user_id) values($1, $2)
+insert into circle_member(id, user_id) values($1, $2)
 "#,
         id.0,
         user_id
     )
     .execute(db)
     .await
-    .map_err(|_| anyhow::anyhow!("User is already a member of this badge"))?;
+    .map_err(|_| anyhow::anyhow!("User is already a member of this circle"))?;
 
     Ok(())
 }
 
-pub async fn leave_badge(db: &PgPool, user_id: Uuid, id: BadgeId) -> anyhow::Result<()> {
+pub async fn leave_circle(db: &PgPool, user_id: Uuid, id: CircleId) -> anyhow::Result<()> {
     sqlx::query!(
-        "delete from badge_member where id = $1 and user_id = $2",
+        "delete from circle_member where id = $1 and user_id = $2",
         id.0,
         user_id
     )
     .execute(db)
     .await
-    .map_err(|_| anyhow::anyhow!("User is not part of badge"))?;
+    .map_err(|_| anyhow::anyhow!("User is not part of circle"))?;
 
     Ok(())
 }
@@ -177,14 +183,14 @@ pub async fn browse(
     creator_id: Option<Uuid>,
     page_limit: u32,
     page: i32,
-) -> sqlx::Result<Vec<Badge>> {
+) -> sqlx::Result<Vec<Circle>> {
     let mut txn = db.begin().await?;
 
-    let badge_data = sqlx::query!(
+    let circle_data = sqlx::query!(
         r#"
         with cte as (
             select array(select id  as "id!"
-            from "badge"
+            from "circle"
             where creator_id = $1 or $1 is null
             order by coalesce(updated_at, created_at)) as id
         ),
@@ -192,16 +198,16 @@ pub async fn browse(
             select * from unnest((select distinct id from cte)) with ordinality t(id
            , ord) order by ord
         )
-        select  badge.id            as "badge_id!: BadgeId",
+        select  circle.id            as "circle_id!: CircleId",
                 display_name        as "display_name!",
                 description         as "description!",
-                thumbnail           as "thumbnail!",
+                image               as "image?: ImageId",
                 member_count        as "member_count!",
                 creator_id          as "creator_id!",
                 created_at,
                 updated_at   
-        from "badge"
-            inner join cte1 on cte1.id = "badge".id
+        from "circle"
+            inner join cte1 on cte1.id = "circle".id
             where ord > (1 * $2 * $3)
             order by ord 
             limit $3
@@ -213,14 +219,14 @@ pub async fn browse(
     .fetch_all(&mut txn)
     .await?;
 
-    let res = badge_data
+    let res = circle_data
         .into_iter()
-        .map(|row| Badge {
-            id: row.badge_id,
+        .map(|row| Circle {
+            id: row.circle_id,
             display_name: row.display_name,
             created_by: row.creator_id,
             description: row.description,
-            thumbnail: Url::parse(&row.thumbnail).unwrap(),
+            image: row.image,
             member_count: row.member_count as u32,
             created_at: row.created_at,
             last_edited: row.updated_at,
@@ -232,21 +238,21 @@ pub async fn browse(
     Ok(res)
 }
 
-pub async fn get_by_ids(db: &PgPool, ids: &[Uuid]) -> sqlx::Result<Vec<Badge>> {
+pub async fn get_by_ids(db: &PgPool, ids: &[Uuid]) -> sqlx::Result<Vec<Circle>> {
     let mut txn = db.begin().await?;
 
     let res: Vec<_> = sqlx::query!(
         //language=SQL
         r#"
-select  id            as "badge_id!: BadgeId",
-        display_name   as "display_name!",
-        description     as "description!",
-        thumbnail       as "thumbnail!",
+select  id            as "circle_id!: CircleId",
+        display_name  as "display_name!",
+        description   as "description!",
+        image         as "image?: ImageId",
         member_count  as "member_count!: u32",
         creator_id    as "creator_id!",
         created_at    as "created_at!",
         updated_at   
-from badge
+from circle
 inner join unnest($1::uuid[])
 with ordinality t(id, ord) using (id)
 "#,
@@ -257,12 +263,12 @@ with ordinality t(id, ord) using (id)
 
     let v = res
         .into_iter()
-        .map(|row| Badge {
-            id: row.badge_id,
+        .map(|row| Circle {
+            id: row.circle_id,
             display_name: row.display_name,
             created_by: row.creator_id,
             description: row.description,
-            thumbnail: Url::parse(&row.thumbnail).unwrap(),
+            image: row.image,
             member_count: row.member_count,
             created_at: row.created_at,
             last_edited: row.updated_at,
@@ -274,14 +280,14 @@ with ordinality t(id, ord) using (id)
     Ok(v)
 }
 
-pub async fn browse_badge_members(db: &PgPool, id: BadgeId) -> anyhow::Result<Vec<Uuid>> {
+pub async fn browse_circle_members(db: &PgPool, id: CircleId) -> anyhow::Result<Vec<Uuid>> {
     let mut txn = db.begin().await?;
 
     let res = sqlx::query!(
         //language=SQL
         r#"
 select user_id  
-from badge_member
+from circle_member
 where id = $1
 "#,
         id.0
@@ -294,10 +300,10 @@ where id = $1
     Ok(res.into_iter().map(|row| row.user_id).collect())
 }
 
-pub async fn valid_badge(db: &PgPool, id: BadgeId) -> anyhow::Result<()> {
+pub async fn valid_circle(db: &PgPool, id: CircleId) -> anyhow::Result<()> {
     sqlx::query!(
         r#"
-select exists(select 1 from badge where id = $1) as "valid!"
+select exists(select 1 from circle where id = $1) as "valid!"
 "#,
         id.0
     )
@@ -310,9 +316,9 @@ select exists(select 1 from badge where id = $1) as "valid!"
 pub async fn authz(
     db: &PgPool,
     user_id: Uuid,
-    badge_id: Option<BadgeId>,
+    circle_id: Option<CircleId>,
 ) -> Result<(), error::Auth> {
-    let authed = match badge_id {
+    let authed = match circle_id {
         None => {
             sqlx::query!(
                 r#"
@@ -337,7 +343,7 @@ select exists (
     select 1 from user_scope where user_id = $1 and scope = any($2)
 ) or (
     exists (select 1 from user_scope where user_id = $1 and scope = $3) and
-    not exists (select 1 from badge where id = $4 and badge.creator_id <> $1)
+    not exists (select 1 from circle where id = $4 and circle.creator_id <> $1)
 ) as "authed!"
 "#,
                 user_id,
@@ -359,11 +365,11 @@ select exists (
 }
 
 pub async fn filtered_count(db: &PgPool, creator_id: Option<Uuid>) -> sqlx::Result<u64> {
-    let badge = sqlx::query!(
+    let circle = sqlx::query!(
         //language=SQL
         r#"
 select count(distinct id) as "count!: i64"
-    from badge
+    from circle
     where creator_id = $1 or $1 is null
 "#,
         creator_id,
@@ -371,5 +377,5 @@ select count(distinct id) as "count!: i64"
     .fetch_one(db)
     .await?;
 
-    Ok(badge.count as u64)
+    Ok(circle.count as u64)
 }

@@ -26,7 +26,7 @@ pub enum ImageSize {
     /// The image is a sticker.
     Sticker = 1,
     /// The image is a user profile picture
-    // TODO: Rename since it's also used for badges
+    // TODO: Rename since it's also used for circles
     UserProfile = 2,
 }
 
@@ -391,7 +391,7 @@ pub struct ImageMetadata {
 pub type CreateResponse = super::CreateResponse<ImageId>;
 
 // HACK: we can't get `Vec<_>` directly from the DB, so we have to work around it for now.
-// see: https://github.com/launchbadge/sqlx/issues/298
+// see: https://github.com/launch/sqlx/issues/298
 #[cfg(feature = "backend")]
 impl<'r> sqlx::FromRow<'r, PgRow> for ImageMetadata {
     fn from_row(row: &'r PgRow) -> Result<Self, sqlx::Error> {

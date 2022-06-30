@@ -1,6 +1,6 @@
 use http::StatusCode;
 use serde_json::json;
-use shared::domain::{badge::BadgeId, CreateResponse};
+use shared::domain::{circle::CircleId, CreateResponse};
 
 use crate::{
     fixture::Fixture,
@@ -9,18 +9,18 @@ use crate::{
 
 #[actix_rt::test]
 async fn create() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User], &[]).await;
+    let app = initialize_server(&[Fixture::User, Fixture::Image], &[]).await;
 
     let port = app.port();
 
     let client = reqwest::Client::new();
 
     let resp = client
-        .post(&format!("http://0.0.0.0:{}/v1/badge", port))
+        .post(&format!("http://0.0.0.0:{}/v1/circle", port))
         .json(&json!({
-            "displayName": "test badge",
+            "displayName": "test circle",
             "description": "test description",
-            "thumbnail": "https://www.jewishinteractive.org/wp-content/uploads/2022/05/create-reaction.png"
+            "image": "92d8c104-0aa4-11ec-9f5e-ef5b2539aa57"
         }))
         .login()
         .send()
@@ -29,14 +29,14 @@ async fn create() -> anyhow::Result<()> {
 
     assert_eq!(resp.status(), StatusCode::CREATED);
 
-    let body: CreateResponse<BadgeId> = resp.json().await?;
+    let body: CreateResponse<CircleId> = resp.json().await?;
 
     insta::assert_json_snapshot!(body, {".id" => "[id]"});
 
-    let badge_id = body.id.0;
+    let circle_id = body.id.0;
 
     let resp = client
-        .get(&format!("http://0.0.0.0:{}/v1/badge/{}", port, badge_id))
+        .get(&format!("http://0.0.0.0:{}/v1/circle/{}", port, circle_id))
         .login()
         .send()
         .await?
@@ -60,8 +60,8 @@ async fn create() -> anyhow::Result<()> {
 }
 
 #[actix_rt::test]
-async fn join_badge() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Badge], &[]).await;
+async fn join_circle() -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::Circle], &[]).await;
 
     let port = app.port();
 
@@ -69,7 +69,7 @@ async fn join_badge() -> anyhow::Result<()> {
 
     let resp = client
         .get(&format!(
-            "http://0.0.0.0:{}/v1/badge/{}/members",
+            "http://0.0.0.0:{}/v1/circle/{}/members",
             port, "a3126bec-f185-11ec-b9e4-5fa4e257b5a1"
         ))
         .login()
@@ -90,7 +90,7 @@ async fn join_badge() -> anyhow::Result<()> {
 
     let resp = client
         .post(&format!(
-            "http://0.0.0.0:{}/v1/badge/{}/join",
+            "http://0.0.0.0:{}/v1/circle/{}/join",
             port, "a3126bec-f185-11ec-b9e4-5fa4e257b5a1"
         ))
         .login()
@@ -102,7 +102,7 @@ async fn join_badge() -> anyhow::Result<()> {
 
     let resp = client
         .get(&format!(
-            "http://0.0.0.0:{}/v1/badge/{}/members",
+            "http://0.0.0.0:{}/v1/circle/{}/members",
             port, "a3126bec-f185-11ec-b9e4-5fa4e257b5a1"
         ))
         .login()
@@ -127,8 +127,8 @@ async fn join_badge() -> anyhow::Result<()> {
 }
 
 #[actix_rt::test]
-async fn leave_badge() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Badge], &[]).await;
+async fn leave_circle() -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::Circle], &[]).await;
 
     let port = app.port();
 
@@ -136,7 +136,7 @@ async fn leave_badge() -> anyhow::Result<()> {
 
     let resp = client
         .get(&format!(
-            "http://0.0.0.0:{}/v1/badge/{}",
+            "http://0.0.0.0:{}/v1/circle/{}",
             port, "829606d0-f185-11ec-b9e4-5fadfd7252f6"
         ))
         .login()
@@ -157,7 +157,7 @@ async fn leave_badge() -> anyhow::Result<()> {
 
     let resp = client
         .delete(&format!(
-            "http://0.0.0.0:{}/v1/badge/{}/leave",
+            "http://0.0.0.0:{}/v1/circle/{}/leave",
             port, "829606d0-f185-11ec-b9e4-5fadfd7252f6"
         ))
         .login()
@@ -169,7 +169,7 @@ async fn leave_badge() -> anyhow::Result<()> {
 
     let resp = client
         .get(&format!(
-            "http://0.0.0.0:{}/v1/badge/{}",
+            "http://0.0.0.0:{}/v1/circle/{}",
             port, "829606d0-f185-11ec-b9e4-5fadfd7252f6"
         ))
         .login()
@@ -194,15 +194,15 @@ async fn leave_badge() -> anyhow::Result<()> {
 }
 
 #[actix_rt::test]
-async fn browse_badges() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Badge], &[]).await;
+async fn browse_circles() -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::Circle], &[]).await;
 
     let port = app.port();
 
     let client = reqwest::Client::new();
 
     let resp = client
-        .get(&format!("http://0.0.0.0:{}/v1/badge/browse", port))
+        .get(&format!("http://0.0.0.0:{}/v1/circle/browse", port))
         .login()
         .send()
         .await?
@@ -225,8 +225,8 @@ async fn browse_badges() -> anyhow::Result<()> {
 }
 
 #[actix_rt::test]
-async fn update_badge() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Badge], &[]).await;
+async fn update_circle() -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::Circle], &[]).await;
 
     let port = app.port();
 
@@ -234,7 +234,7 @@ async fn update_badge() -> anyhow::Result<()> {
 
     let resp = client
         .get(&format!(
-            "http://0.0.0.0:{}/v1/badge/{}",
+            "http://0.0.0.0:{}/v1/circle/{}",
             port, "57a1eaaa-f182-11ec-a96e-13f3929f5b22"
         ))
         .login()
@@ -255,13 +255,13 @@ async fn update_badge() -> anyhow::Result<()> {
 
     let resp = client
         .patch(&format!(
-            "http://0.0.0.0:{}/v1/badge/{}",
+            "http://0.0.0.0:{}/v1/circle/{}",
             port, "57a1eaaa-f182-11ec-a96e-13f3929f5b22"
         ))
         .json(&json!({
-            "displayName": "update badge",
+            "displayName": "update circle",
             "description": "update description",
-            "thumbnail": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR0VKBsgtcc6vaIjsj5g9T41vLZsqBXYre_MQ&usqp=CAU"
+            "image": "92d8c258-0aa4-11ec-9f5e-036a94fd6227"
         }))
         .login()
         .send()
@@ -272,7 +272,7 @@ async fn update_badge() -> anyhow::Result<()> {
 
     let resp = client
         .get(&format!(
-            "http://0.0.0.0:{}/v1/badge/{}",
+            "http://0.0.0.0:{}/v1/circle/{}",
             port, "57a1eaaa-f182-11ec-a96e-13f3929f5b22"
         ))
         .login()

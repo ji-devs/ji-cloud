@@ -1,8 +1,8 @@
 mod animation;
 mod audio;
 mod auth;
-mod badge;
 mod category;
+mod circle;
 mod fixture;
 mod helpers;
 mod image;

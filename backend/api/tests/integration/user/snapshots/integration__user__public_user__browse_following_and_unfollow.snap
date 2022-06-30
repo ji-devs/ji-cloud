@@ -14,7 +14,7 @@ expression: body
       "profileImage": null,
       "language": "en_US",
       "organization": "test1 org",
-      "badges": []
+      "circles": []
     },
     {
       "id": "a641fd6e-e41b-11eb-8176-57df101c2201",
@@ -24,7 +24,7 @@ expression: body
       "bio": "",
       "profileImage": null,
       "organization": "test2 org",
-      "badges": []
+      "circles": []
     }
   ],
   "pages": 1,

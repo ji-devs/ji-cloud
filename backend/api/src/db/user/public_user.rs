@@ -3,7 +3,7 @@ use crate::{error, extractor::TokenUser};
 use shared::domain::{
     additional_resource::{AdditionalResource, AdditionalResourceId as AddId, ResourceContent},
     asset::UserOrMe,
-    badge::BadgeId,
+    circle::CircleId,
     image::ImageId,
     meta::ResourceTypeId as TypeId,
     user::public_user::PublicUser,
@@ -25,11 +25,11 @@ pub async fn get(db: &PgPool, user_id: Uuid) -> sqlx::Result<PublicUser> {
             (select organization from user_profile where user_profile.user_id = "user".id and organization_public is true)  as "organization?",
             (select array(select language from user_profile where user_profile.user_id = "user".id and persona_public is true))      as "persona!:Vec<String>",
             (select location from user_profile where user_profile.user_id = "user".id and location_public is true)      as "location?",
-            array(select badge.id
-                from badge_member bm
-                inner join badge on bm.id = badge.id
+            array(select circle.id
+                from circle_member bm
+                inner join circle on bm.id = circle.id
                 where bm.user_id = "user".id
-            ) as "badges!: Vec<BadgeId>"
+            ) as "circles!: Vec<CircleId>"
         from "user"
             inner join user_profile on "user".id = user_profile.user_id
         where id = $1
@@ -71,11 +71,11 @@ pub async fn browse_users(
                 (select organization from user_profile where user_profile.user_id = "user".id and organization_public is true)  as "organization?",
                 (select array(select persona from user_profile where user_profile.user_id = "user".id and persona_public is true))      as "persona!: Vec<String>",
                 (select location from user_profile where user_profile.user_id = "user".id and location_public is true)      as "location?",
-                (select array(select badge.id
-                    from badge_member bm
-                    inner join badge on bm.id = badge.id
+                (select array(select circle.id
+                    from circle_member bm
+                    inner join circle on bm.id = circle.id
                     where bm.user_id = "user".id
-                )) as "badges!: Vec<BadgeId>"
+                )) as "circles!: Vec<CircleId>"
             from "user"
             inner join user_profile on "user".id = user_profile.user_id
             inner join cte1 on cte1.id = "user".id
@@ -102,7 +102,7 @@ pub async fn browse_users(
             organization: row.organization,
             persona: row.persona,
             location: row.location,
-            badges: row.badges,
+            circles: row.circles,
         })
         .collect();
 
@@ -280,11 +280,11 @@ pub async fn get_by_ids(db: &PgPool, ids: &[Uuid]) -> sqlx::Result<Vec<PublicUse
                 (select organization from user_profile where user_profile.user_id = "user".id and organization_public is true)  as "organization?",
                 (select array(select persona from user_profile where user_profile.user_id = "user".id and persona_public is true))      as "persona!: Vec<String>",
                 (select location from user_profile where user_profile.user_id = "user".id and location_public is true)      as "location?",
-                (select array(select badge.id
-                    from badge_member bm
-                    inner join badge on bm.id = badge.id
+                (select array(select circle.id
+                    from circle_member bm
+                    inner join circle on bm.id = circle.id
                     where bm.user_id = "user".id
-                )) as "badges!: Vec<BadgeId>"
+                )) as "circles!: Vec<CircleId>"
                 from "user"
                 inner join user_profile on "user".id = user_profile.user_id
                 inner join unnest($1::uuid[])
@@ -308,7 +308,7 @@ pub async fn get_by_ids(db: &PgPool, ids: &[Uuid]) -> sqlx::Result<Vec<PublicUse
             organization: row.organization,
             persona: row.persona,
             location: row.location,
-            badges: row.badges,
+            circles: row.circles,
         })
         .collect();
 
@@ -412,11 +412,11 @@ pub async fn browse_followers(
                 (select organization from user_profile where user_profile.user_id = "user".id and organization_public is true)  as "organization?",
                 (select array(select persona from user_profile where user_profile.user_id = "user".id and persona_public is true))      as "persona!: Vec<String>",
                 (select location from user_profile where user_profile.user_id = "user".id and location_public is true)      as "location?",
-                (select array(select badge.id
-                    from badge_member bm
-                    left join badge on bm.id = badge.id
-                    where bm.user_id = "user".id or badge.creator_id = "user".id
-                )) as "badges!: Vec<BadgeId>"
+                (select array(select circle.id
+                    from circle_member bm
+                    left join circle on bm.id = circle.id
+                    where bm.user_id = "user".id or circle.creator_id = "user".id
+                )) as "circles!: Vec<CircleId>"
             from "user"
             inner join user_profile on "user".id = user_profile.user_id
             inner join followers on (followers.follower_id = "user".id)
@@ -443,7 +443,7 @@ pub async fn browse_followers(
             organization: row.organization,
             persona: row.persona,
             location: row.location,
-            badges: row.badges,
+            circles: row.circles,
         })
         .collect();
 
@@ -478,11 +478,11 @@ pub async fn browse_following(
                 (select organization from user_profile where user_profile.user_id = "user".id and organization_public is true)  as "organization?",
                 (select array(select persona from user_profile where user_profile.user_id = "user".id and persona_public is true))      as "persona!",
                 (select location from user_profile where user_profile.user_id = "user".id and location_public is true)      as "location?",
-                array(select badge.id
-                    from badge_member bm
-                    left join badge on bm.id = badge.id
-                    where bm.user_id = "user".id or badge.creator_id = "user".id
-                ) as "badges!: Vec<BadgeId>"
+                array(select circle.id
+                    from circle_member bm
+                    left join circle on bm.id = circle.id
+                    where bm.user_id = "user".id or circle.creator_id = "user".id
+                ) as "circles!: Vec<CircleId>"
             from "user"
             inner join user_profile on "user".id = user_profile.user_id
             inner join following on (following.user_id = "user".id)
@@ -509,7 +509,7 @@ pub async fn browse_following(
             organization: row.organization,
             persona: row.persona,
             location: row.location,
-            badges: row.badges,
+            circles: row.circles,
         })
         .collect();
 

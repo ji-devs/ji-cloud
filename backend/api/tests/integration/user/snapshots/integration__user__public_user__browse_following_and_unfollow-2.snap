@@ -13,7 +13,7 @@ expression: body
       "bio": "",
       "profileImage": null,
       "organization": "test2 org",
-      "badges": []
+      "circles": []
     }
   ],
   "pages": 1,

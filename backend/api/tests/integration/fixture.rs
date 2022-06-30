@@ -16,7 +16,7 @@ pub enum Fixture {
     MetaImage,
     MetaAnimation,
     MetaAudio,
-    Badge,
+    Circle,
     PublicUser,
     Course,
 }
@@ -40,7 +40,7 @@ impl Fixture {
             Self::MetaImage => include_str!("../../fixtures/15_meta_kinds_image.sql"),
             Self::MetaAnimation => include_str!("../../fixtures/16_meta_kinds_animation.sql"),
             Self::MetaAudio => include_str!("../../fixtures/17_meta_kinds_audio.sql"),
-            Self::Badge => include_str!("../../fixtures/18_badge.sql"),
+            Self::Circle => include_str!("../../fixtures/18_circle.sql"),
             Self::PublicUser => include_str!("../../fixtures/19_public_user.sql"),
             Self::Course => include_str!("../../fixtures/20_course.sql"),
         }
