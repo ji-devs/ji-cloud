@@ -7,8 +7,8 @@ use utils::events;
 
 use super::CircleDetails;
 
-const STR_CONTACT_ADMIN: &str = "Contact admin";
-const STR_INVITE: &str = "Invite";
+// const STR_CONTACT_ADMIN: &str = "Contact admin";
+// const STR_INVITE: &str = "Invite";
 const STR_MEMBER: &str = "Member";
 const STR_JOIN: &str = "Join";
 const STR_SEARCH_MEMBER: &str = "Search member";
@@ -30,20 +30,20 @@ impl CircleDetails {
                                 .property("slot", "img")
                                 .property("src", circle.thumbnail.as_str())
                             }),
-                            html!("button-rect", {
-                                .property("slot", "actions")
-                                .property("kind", "outline")
-                                .property("size", "small")
-                                .property("color", "blue")
-                                .text(STR_CONTACT_ADMIN)
-                            }),
-                            html!("button-rect", {
-                                .property("slot", "actions")
-                                .property("kind", "outline")
-                                .property("size", "small")
-                                .property("color", "blue")
-                                .text(STR_INVITE)
-                            }),
+                            // html!("button-rect", {
+                            //     .property("slot", "actions")
+                            //     .property("kind", "outline")
+                            //     .property("size", "small")
+                            //     .property("color", "blue")
+                            //     .text(STR_CONTACT_ADMIN)
+                            // }),
+                            // html!("button-rect", {
+                            //     .property("slot", "actions")
+                            //     .property("kind", "outline")
+                            //     .property("size", "small")
+                            //     .property("color", "blue")
+                            //     .text(STR_INVITE)
+                            // }),
                             // member-images
                             html!("input-search", {
                                 .property("slot", "member-search")
