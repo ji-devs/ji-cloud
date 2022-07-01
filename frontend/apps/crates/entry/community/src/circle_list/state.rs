@@ -2,11 +2,11 @@ use std::rc::Rc;
 
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::Mutable;
-use shared::domain::badge::Badge;
+use shared::domain::circle::Circle;
 
 pub struct CirclesList {
     pub items_per_page: u32,
-    pub circles: Mutable<Option<Vec<Badge>>>,
+    pub circles: Mutable<Option<Vec<Circle>>>,
     pub loader: AsyncLoader,
     pub create_popup_open: Mutable<bool>,
     pub total_pages: Mutable<u32>,

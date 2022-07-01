@@ -4,7 +4,7 @@ use dominator::clone;
 use futures::join;
 use shared::{
     api::endpoints,
-    domain::{badge::BadgeSearchQuery, user::public_user::SearchPublicUserQuery},
+    domain::{circle::CircleSearchQuery, user::public_user::SearchPublicUserQuery},
 };
 use utils::prelude::ApiEndpointExt;
 
@@ -60,17 +60,17 @@ impl CommunitySearch {
 
     async fn search_circles_async(self: &Rc<Self>, page: u32) {
         let state = self;
-        let req = BadgeSearchQuery {
+        let req = CircleSearchQuery {
             q: state.query.q.clone(),
             page: Some(page),
             page_limit: Some(SEARCH_PAGE_LIMIT),
             ..Default::default()
         };
 
-        match endpoints::badge::Search::api_no_auth(Some(req)).await {
+        match endpoints::circle::Search::api_no_auth(Some(req)).await {
             Ok(res) => {
-                state.circles.lock_mut().extend(res.badges);
-                state.circle_count.set_neq(res.total_badge_count as u32);
+                state.circles.lock_mut().extend(res.circles);
+                state.circle_count.set_neq(res.total_circle_count as u32);
             }
             Err(_) => todo!(),
         }

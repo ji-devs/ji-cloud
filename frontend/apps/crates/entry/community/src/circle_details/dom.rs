@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use dominator::{clone, html, Dom};
 use futures_signals::signal_vec::SignalVecExt;
-use shared::domain::user::public_user::PublicUser;
+use shared::{domain::user::public_user::PublicUser, media::MediaLibrary};
 use utils::events;
 
 use super::CircleDetails;
@@ -26,9 +26,13 @@ impl CircleDetails {
                         .property("description", &circle.description)
                         .property("memberCount", circle.member_count)
                         .children(&mut [
-                            html!("img", {
+                            html!("img-ji", {
                                 .property("slot", "img")
-                                .property("src", circle.thumbnail.as_str())
+                                .property("lib", MediaLibrary::User.to_str())
+                                .apply(|dom| match circle.image {
+                                    Some(image) => dom.property("id", &image.0.to_string()),
+                                    None => dom,
+                                })
                             }),
                             // html!("button-rect", {
                             //     .property("slot", "actions")
@@ -52,7 +56,7 @@ impl CircleDetails {
                         ])
                         .child_signal(state.community_state.user.signal_ref(clone!(state => move |user| {
                             let is_member = match user {
-                                Some(user) => user.badges.iter().any(|circle| circle == &state.circle_id),
+                                Some(user) => user.circles.iter().any(|circle| circle == &state.circle_id),
                                 None => false,
                             };
                             Some(match is_member {

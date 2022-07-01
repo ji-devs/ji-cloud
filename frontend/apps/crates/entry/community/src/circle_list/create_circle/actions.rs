@@ -5,7 +5,7 @@ use dominator::clone;
 use shared::{
     api::{endpoints, ApiEndpoint},
     domain::{
-        badge::{Badge, BadgeCreateRequest},
+        circle::{Circle, CircleCreateRequest},
         image::{user::UserImageCreateRequest, ImageId, ImageSize},
     },
     error::EmptyError,
@@ -37,25 +37,24 @@ impl CreateCircle {
         }));
     }
 
-    async fn save_circle_async(self: &Rc<Self>) -> anyhow::Result<Badge> {
+    async fn save_circle_async(self: &Rc<Self>) -> anyhow::Result<Circle> {
         let state = self;
 
-        upload_circle_image(state.image.get_cloned().unwrap_ji()).await?;
+        let image_id = upload_circle_image(state.image.get_cloned().unwrap_ji()).await?;
 
-        let req = BadgeCreateRequest {
+        let req = CircleCreateRequest {
             display_name: state.name.get_cloned().unwrap_or_default(),
             description: state.description.get_cloned().unwrap_or_default(),
-            thumbnail: url::Url::parse(
-                "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==",
-            )
-            .unwrap(),
+            image: Some(image_id),
         };
 
-        let id = endpoints::badge::Create::api_with_auth(Some(req)).await?.id;
+        let id = endpoints::circle::Create::api_with_auth(Some(req))
+            .await?
+            .id;
 
-        let path = endpoints::badge::Get::PATH.replace("{id}", &id.0.to_string());
+        let path = endpoints::circle::Get::PATH.replace("{id}", &id.0.to_string());
         let circle =
-            api_with_auth::<Badge, EmptyError, ()>(&path, endpoints::badge::Get::METHOD, None)
+            api_with_auth::<Circle, EmptyError, ()>(&path, endpoints::circle::Get::METHOD, None)
                 .await?;
 
         Ok(circle)

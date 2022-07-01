@@ -4,7 +4,7 @@ use dominator::clone;
 use futures::join;
 use shared::{
     api::{endpoints, ApiEndpoint},
-    domain::badge::Badge,
+    domain::circle::Circle,
     error::EmptyError,
 };
 use utils::{
@@ -29,8 +29,9 @@ impl CircleDetails {
     async fn load_circle(self: &Rc<Self>) {
         let state = self;
 
-        let path = endpoints::badge::Get::PATH.replace("{id}", &state.circle_id.0.to_string());
-        match api_no_auth::<Badge, EmptyError, ()>(&path, endpoints::badge::Get::METHOD, None).await
+        let path = endpoints::circle::Get::PATH.replace("{id}", &state.circle_id.0.to_string());
+        match api_no_auth::<Circle, EmptyError, ()>(&path, endpoints::circle::Get::METHOD, None)
+            .await
         {
             Ok(circle) => {
                 state.circle.set(Some(circle));
@@ -42,10 +43,10 @@ impl CircleDetails {
     async fn load_circle_members(self: &Rc<Self>) {
         // let state = self;
 
-        // let path = endpoints::badge::BrowseMembers::PATH.replace("{id}", &state.badge_id.0.to_string());
+        // let path = endpoints::circle::BrowseMembers::PATH.replace("{id}", &state.circle_id.0.to_string());
         // match api_no_auth::<BrowseMembersResponse, EmptyError, ()>(
         //     &path,
-        //     endpoints::badge::BrowseMembers::METHOD,
+        //     endpoints::circle::BrowseMembers::METHOD,
         //     None
         // ).await {
         //     Ok(res) => {
@@ -59,12 +60,12 @@ impl CircleDetails {
         let state = self;
 
         state.loader.load(clone!(state => async move {
-            let path = endpoints::badge::JoinBadge::PATH.replace("{id}", &state.circle_id.0.to_string());
-            match api_with_auth_empty::<EmptyError, ()>(&path, endpoints::badge::JoinBadge::METHOD, None).await
+            let path = endpoints::circle::JoinCircle::PATH.replace("{id}", &state.circle_id.0.to_string());
+            match api_with_auth_empty::<EmptyError, ()>(&path, endpoints::circle::JoinCircle::METHOD, None).await
             {
                 Ok(_) => {
                     let mut user = state.community_state.user.get_cloned().unwrap_ji();
-                    user.badges.push(state.circle_id);
+                    user.circles.push(state.circle_id);
                     state.community_state.user.set(Some(user));
                 }
                 Err(_) => todo!(),
@@ -76,13 +77,13 @@ impl CircleDetails {
         let state = self;
 
         state.loader.load(clone!(state => async move {
-            let path = endpoints::badge::LeaveBadge::PATH.replace("{id}", &state.circle_id.0.to_string());
-            match api_with_auth_empty::<EmptyError, ()>(&path, endpoints::badge::LeaveBadge::METHOD, None).await
+            let path = endpoints::circle::LeaveCircle::PATH.replace("{id}", &state.circle_id.0.to_string());
+            match api_with_auth_empty::<EmptyError, ()>(&path, endpoints::circle::LeaveCircle::METHOD, None).await
             {
                 Ok(_) => {
                     let mut user = state.community_state.user.get_cloned().unwrap_ji();
-                    let index = user.badges.iter().position(|circle| *circle == state.circle_id).unwrap();
-                    user.badges.remove(index);
+                    let index = user.circles.iter().position(|circle| *circle == state.circle_id).unwrap();
+                    user.circles.remove(index);
                     state.community_state.user.set(Some(user));
                 }
                 Err(_) => todo!(),

@@ -2,7 +2,10 @@ use std::rc::Rc;
 
 use dominator::{clone, html, Dom};
 use futures_signals::{map_ref, signal::Signal, signal_vec::SignalVecExt};
-use shared::domain::{badge::Badge, user::public_user::PublicUser};
+use shared::{
+    domain::{circle::Circle, user::public_user::PublicUser},
+    media::MediaLibrary,
+};
 use utils::{
     events,
     routes::{CommunityCirclesRoute, CommunityMembersRoute, CommunityRoute, Route},
@@ -63,7 +66,7 @@ impl CommunitySearch {
         })
     }
 
-    fn render_circle(self: &Rc<Self>, circle: &Badge) -> Dom {
+    fn render_circle(self: &Rc<Self>, circle: &Circle) -> Dom {
         html!("community-list-circle", {
             .class(&*CIRCLE_LIST_GRID_COLUMNS)
             .property("slot", "circles")
@@ -75,7 +78,11 @@ impl CommunitySearch {
             }))
             .child(html!("img", {
                 .property("slot", "img")
-                .property("src", circle.thumbnail.as_str())
+                .property("lib", MediaLibrary::User.to_str())
+                .apply(|dom| match circle.image {
+                    Some(image) => dom.property("id", &image.0.to_string()),
+                    None => dom,
+                })
             }))
             .child(html!("community-list-circle-status", {
                 .property("slot", "status")

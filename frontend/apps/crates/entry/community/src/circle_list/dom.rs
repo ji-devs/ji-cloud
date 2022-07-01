@@ -3,7 +3,7 @@ use std::rc::Rc;
 use components::overlay::handle::OverlayHandle;
 use dominator::{class, clone, html, pseudo, with_node, Dom};
 use futures_signals::{map_ref, signal::SignalExt};
-use shared::domain::badge::Badge;
+use shared::{domain::circle::Circle, media::MediaLibrary};
 use utils::{
     events,
     routes::{CommunityCirclesRoute, CommunityRoute, Route},
@@ -128,7 +128,7 @@ impl CirclesList {
         })
     }
 
-    fn render_circle(self: &Rc<Self>, circle: &Badge) -> Dom {
+    fn render_circle(self: &Rc<Self>, circle: &Circle) -> Dom {
         html!("community-list-circle", {
             .class(&*CIRCLE_LIST_GRID_COLUMNS)
             .property("slot", "items")
@@ -138,9 +138,13 @@ impl CirclesList {
             .apply(move |dom| dominator::on_click_go_to_url!(dom, {
                 Route::Community(CommunityRoute::Circles(CommunityCirclesRoute::Circle(circle.id))).to_string()
             }))
-            .child(html!("img", {
+            .child(html!("img-ji", {
                 .property("slot", "img")
-                .property("src", circle.thumbnail.as_str())
+                .property("lib", MediaLibrary::User.to_str())
+                .apply(|dom| match circle.image {
+                    Some(image) => dom.property("id", &image.0.to_string()),
+                    None => dom,
+                })
             }))
             .child(html!("community-list-circle-status", {
                 .property("slot", "status")

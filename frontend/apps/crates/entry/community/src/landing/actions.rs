@@ -4,7 +4,7 @@ use dominator::clone;
 use futures::join;
 use shared::{
     api::endpoints,
-    domain::{badge::BadgeBrowseQuery, user::public_user::UserBrowseQuery},
+    domain::{circle::CircleBrowseQuery, user::public_user::UserBrowseQuery},
 };
 use utils::prelude::ApiEndpointExt;
 
@@ -38,14 +38,14 @@ impl CommunityLanding {
 
     async fn load_top_circles(self: &Rc<Self>) {
         let state = self;
-        let req = BadgeBrowseQuery {
+        let req = CircleBrowseQuery {
             page_limit: Some(6),
             ..Default::default()
         };
 
-        match endpoints::badge::Browse::api_no_auth(Some(req)).await {
+        match endpoints::circle::Browse::api_no_auth(Some(req)).await {
             Ok(res) => {
-                state.top_circles.set(Some(res.badges));
+                state.top_circles.set(Some(res.circles));
             }
             Err(_) => todo!(),
         }

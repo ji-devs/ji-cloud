@@ -2,7 +2,10 @@ use std::rc::Rc;
 
 use dominator::{clone, html, link, Dom};
 use futures_signals::signal::SignalExt;
-use shared::domain::{badge::Badge, user::public_user::PublicUser};
+use shared::{
+    domain::{circle::Circle, user::public_user::PublicUser},
+    media::MediaLibrary,
+};
 use utils::routes::{CommunityCirclesRoute, CommunityMembersRoute, CommunityRoute, Route};
 use wasm_bindgen::JsValue;
 
@@ -79,7 +82,7 @@ impl CommunityLanding {
         })
     }
 
-    fn render_circle(self: &Rc<Self>, circle: &Badge) -> Dom {
+    fn render_circle(self: &Rc<Self>, circle: &Circle) -> Dom {
         html!("div", {
             .property("slot", "circles")
             .child(html!("img", {
@@ -88,7 +91,11 @@ impl CommunityLanding {
                 .style("box-shadow", "0 0 8px 0 rgba(0, 0, 0, 0.06)")
                 .style("border", "solid 1px var(--light-gray-1)")
                 .style("border-radius", "50%")
-                .property("src", circle.thumbnail.as_str())
+                .property("lib", MediaLibrary::User.to_str())
+                .apply(|dom| match circle.image {
+                    Some(image) => dom.property("id", &image.0.to_string()),
+                    None => dom,
+                })
             }))
             .text(&circle.display_name)
         })

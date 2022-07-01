@@ -308,10 +308,10 @@ impl Route {
                     user_id,
                 )))
             }
-            ["community", "badges"] => {
+            ["community", "circles"] => {
                 Self::Community(CommunityRoute::Circles(CommunityCirclesRoute::List))
             }
-            ["community", "badges", circle_id] => {
+            ["community", "circles", circle_id] => {
                 let circle_id = CircleId(Uuid::from_str(circle_id).unwrap_ji());
                 Self::Community(CommunityRoute::Circles(CommunityCirclesRoute::Circle(
                     circle_id,
@@ -608,9 +608,9 @@ impl From<&Route> for String {
                     }
                 },
                 CommunityRoute::Circles(route) => match route {
-                    CommunityCirclesRoute::List => "/community/badges".to_string(),
+                    CommunityCirclesRoute::List => "/community/circles".to_string(),
                     CommunityCirclesRoute::Circle(circle_id) => {
-                        format!("/community/badges/{}", circle_id.0)
+                        format!("/community/circles/{}", circle_id.0)
                     }
                 },
             },
