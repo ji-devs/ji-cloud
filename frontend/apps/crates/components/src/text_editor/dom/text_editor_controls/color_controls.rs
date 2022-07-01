@@ -1,4 +1,4 @@
-use super::super::super::state::State;
+use super::super::super::state::TextEditor;
 use crate::{
     color_select::{self, state::State as ColorPickerState},
     text_editor::wysiwyg_types::ControlsChange,
@@ -16,7 +16,7 @@ pub struct ColorState {
 }
 
 impl ColorState {
-    pub fn new(state: Rc<State>) -> Self {
+    pub fn new(state: Rc<TextEditor>) -> Self {
         let picker = Rc::new(ColorPickerState::new(
             (*state).theme_id.clone(),
             None,
@@ -50,7 +50,7 @@ pub enum ColorSelectFor {
     Box,
 }
 
-pub fn render(state: Rc<State>) -> Dom {
+pub fn render(state: Rc<TextEditor>) -> Dom {
     let color_state = state.color_state.borrow().as_ref().unwrap_ji().clone();
 
     html!("anchored-overlay", {

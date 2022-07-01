@@ -16,7 +16,7 @@ use components::{
         callbacks::Callbacks as ImageSearchCallbacks,
         state::{ImageSearchKind, ImageSearchOptions},
     },
-    text_editor,
+    text_editor::{self, TextEditor},
 };
 
 use utils::{prelude::*, themes::ThemeId};
@@ -129,12 +129,12 @@ pub fn render_color_select() -> Dom {
     })
 }
 
-pub fn render_text_editor_controls(state: Rc<text_editor::state::State>) -> Dom {
+pub fn render_text_editor_controls(state: Rc<TextEditor>) -> Dom {
     html!("div", {
         .style("grid-row", "1 / -1")
         .style("padding", "10px")
         .style("width", "492px")
-        .child(text_editor::dom::render_controls(state.clone()))
+        .child(state.render_controls())
         .child(html!("br"))
         .child(html!("br"))
         .child(html!("br"))
@@ -174,14 +174,14 @@ pub fn render_text_editor_controls(state: Rc<text_editor::state::State>) -> Dom 
     })
 }
 
-pub fn render_wysiwyg(state: Rc<text_editor::state::State>) -> Dom {
+pub fn render_wysiwyg(state: Rc<TextEditor>) -> Dom {
     html!("div", {
         .style("display", "block")
         .style("border", "green dashed 1px")
         .style("box-sizing", "border-box")
         .style("align-self", "baseline")
         .style("justify-self", "start")
-        .child(text_editor::dom::render_wysiwyg(state))
+        .child(state.render_wysiwyg())
     })
 }
 pub fn render_wysiwyg_output(value: Rc<Mutable<Option<String>>>, theme: Mutable<ThemeId>) -> Dom {
@@ -206,7 +206,7 @@ fn render_text() -> Dom {
 
     let value_change = Rc::new(Mutable::new(value.clone()));
 
-    let callbacks = text_editor::callbacks::Callbacks::new(
+    let callbacks = text_editor::TextEditorCallbacks::new(
         Some(Box::new(|_v: &str| {})),
         Some(Box::new(clone!(value_change => move |v: &str| {
             value_change.set(Some(v.to_string()));
@@ -217,7 +217,7 @@ fn render_text() -> Dom {
         })),
     );
     let theme = Mutable::new(ThemeId::HappyBrush);
-    let state = text_editor::state::State::new((*theme).clone(), value.clone(), callbacks);
+    let state = text_editor::TextEditor::new((*theme).clone(), value.clone(), callbacks);
 
     html!("div", {
         .style("display", "grid")

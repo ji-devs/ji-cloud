@@ -15,13 +15,13 @@ use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::spawn_local;
 use web_sys::HtmlElement;
 
-use super::callbacks::Callbacks;
+use super::callbacks::TextEditorCallbacks;
 use super::dom::text_editor_controls::color_controls::ColorState;
 use super::wysiwyg_types::{
     ControlsChange, ControlsState, ElementType, BOLD_WEIGHT, REGULAR_WEIGHT,
 };
 
-pub struct State {
+pub struct TextEditor {
     pub controls: Mutable<ControlsState>,
     pub wysiwyg_ref: Mutable<Option<HtmlElement>>,
     /// Optional reference to the wysiwyg-output-renderer
@@ -30,16 +30,16 @@ pub struct State {
     pub value: RefCell<Option<String>>,
     pub theme_id: ReadOnlyMutable<ThemeId>,
     pub color_state: RefCell<Option<Rc<ColorState>>>,
-    pub callbacks: Callbacks,
+    pub callbacks: TextEditorCallbacks,
 }
 
 pub const ELEMENT_DEFAULT_KEY: &str = "elementDefault";
 
-impl State {
+impl TextEditor {
     pub fn new(
         theme_id: ReadOnlyMutable<ThemeId>,
         value: Option<String>,
-        callbacks: Callbacks,
+        callbacks: TextEditorCallbacks,
     ) -> Rc<Self> {
         let _self = Rc::new(Self {
             controls: Mutable::new(ControlsState::new()),
@@ -108,7 +108,7 @@ impl State {
             .unwrap_or_default()
     }
 
-    fn handle_fonts(state: Rc<State>) {
+    fn handle_fonts(state: Rc<TextEditor>) {
         spawn_local(
             state
                 .theme_id

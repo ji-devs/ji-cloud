@@ -2,7 +2,6 @@ use super::{state::*, video};
 use components::{
     image::search::dom::render as render_image_search,
     tabs::{MenuTab, MenuTabKind},
-    text_editor::dom::render_controls as render_text_editor,
 };
 use dominator::{clone, html, Dom};
 use futures_signals::{map_ref, signal::SignalExt};
@@ -62,7 +61,7 @@ pub fn render(state: Rc<Step2>) -> Dom {
                                     Some(video::render(Rc::clone(&state)))
                                 },
                                 Tab::Text => {
-                                    Some(render_text_editor(state.sidebar.base.text_editor.clone()))
+                                    Some(state.sidebar.base.text_editor.render_controls())
                                 },
                                 Tab::Image(state) => {
                                     Some(render_image_search(state, None))

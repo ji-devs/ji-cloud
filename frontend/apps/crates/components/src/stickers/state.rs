@@ -8,7 +8,7 @@ use utils::prelude::TransformExt;
 use std::rc::Rc;
 
 use super::{callbacks::Callbacks, sprite::state::Sprite, text::state::Text, video::state::Video};
-use crate::{text_editor::state::State as TextEditorState, transform::state::TransformState};
+use crate::{text_editor::TextEditor, transform::state::TransformState};
 use dominator::clone;
 use shared::domain::module::body::_groups::design::Sticker as RawSticker;
 
@@ -20,7 +20,7 @@ pub trait AsSticker: AsRef<Sticker> + Clone + 'static {
 pub struct Stickers<T: AsSticker> {
     pub list: MutableVec<T>,
     pub selected_index: Mutable<Option<usize>>,
-    pub text_editor: Rc<TextEditorState>,
+    pub text_editor: Rc<TextEditor>,
     pub(super) callbacks: Callbacks<T>,
 }
 
@@ -113,7 +113,7 @@ impl<T: AsSticker> Stickers<T> {
             .collect()
     }
 
-    pub fn new(text_editor: Rc<TextEditorState>, callbacks: Callbacks<T>) -> Rc<Self> {
+    pub fn new(text_editor: Rc<TextEditor>, callbacks: Callbacks<T>) -> Rc<Self> {
         Rc::new(Self {
             text_editor,
             list: MutableVec::new(),

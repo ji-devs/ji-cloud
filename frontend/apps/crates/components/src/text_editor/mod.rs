@@ -1,6 +1,10 @@
-pub mod callbacks;
-pub(super) mod config;
-pub mod dom;
-pub mod font_css_converter;
-pub mod state;
-pub mod wysiwyg_types;
+mod callbacks;
+mod config;
+mod dom;
+mod font_css_converter;
+mod state;
+mod wysiwyg_types;
+
+pub use callbacks::*;
+pub use dom::*;
+pub use state::*;

@@ -11,7 +11,7 @@ use components::{
         callbacks::Callbacks as StickersCallbacks,
         state::{AsSticker, Stickers},
     },
-    text_editor::{callbacks::Callbacks as TextEditorCallbacks, state::State as TextEditorState},
+    text_editor::{TextEditor, TextEditorCallbacks},
     traces::edit::{TracesEdit, TracesEditCallbacks},
 };
 use dominator::clone;
@@ -55,7 +55,7 @@ pub struct Base {
     /// List of areas which a sticker can be dropped into so that we can confirm whether a sticker
     /// has actually been dropped into a trace area.
     pub target_areas: Rc<MutableVec<TargetArea>>,
-    pub text_editor: Rc<TextEditorState>,
+    pub text_editor: Rc<TextEditor>,
     pub play_settings: Rc<PlaySettings>,
 
     pub drag_item_selected_index: Mutable<Option<usize>>,
@@ -194,7 +194,7 @@ impl Base {
 
         let stickers_ref: Rc<RefCell<Option<Rc<Stickers<Item>>>>> = Rc::new(RefCell::new(None));
 
-        let text_editor = TextEditorState::new(
+        let text_editor = TextEditor::new(
             theme_id.read_only(),
             None,
             TextEditorCallbacks::new(

@@ -7,7 +7,7 @@ use components::{
         callbacks::Callbacks as StickersCallbacks,
         state::{Sticker, Stickers},
     },
-    text_editor::{callbacks::Callbacks as TextEditorCallbacks, state::State as TextEditorState},
+    text_editor::{TextEditor, TextEditorCallbacks},
     traces::edit::{TracesEdit, TracesEditCallbacks},
 };
 use dominator::clone;
@@ -47,7 +47,7 @@ pub struct Base {
     pub stickers: Rc<Stickers<Sticker>>,
     pub questions: MutableVec<Rc<Question>>,
     pub current_question: Mutable<Option<usize>>,
-    pub text_editor: Rc<TextEditorState>,
+    pub text_editor: Rc<TextEditor>,
     pub play_settings: Rc<PlaySettings>,
     pub continue_next_fn: ContinueNextFn,
 }
@@ -170,7 +170,7 @@ impl Base {
 
         let stickers_ref: Rc<RefCell<Option<Rc<Stickers<Sticker>>>>> = Rc::new(RefCell::new(None));
 
-        let text_editor = TextEditorState::new(
+        let text_editor = TextEditor::new(
             theme_id.read_only(),
             None,
             TextEditorCallbacks::new(

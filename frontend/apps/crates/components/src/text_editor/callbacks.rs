@@ -1,10 +1,10 @@
-pub struct Callbacks {
+pub struct TextEditorCallbacks {
     pub on_new_text: Option<Box<dyn Fn(&str)>>,
     pub on_change: Option<Box<dyn Fn(&str)>>,
     pub on_blur: Option<Box<dyn Fn()>>,
 }
 
-impl Callbacks {
+impl TextEditorCallbacks {
     pub fn new(
         on_new_text: Option<impl Fn(&str) + 'static>,
         on_change: Option<impl Fn(&str) + 'static>,

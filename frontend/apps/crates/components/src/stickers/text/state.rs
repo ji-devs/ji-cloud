@@ -6,7 +6,7 @@ use dominator::clone;
 use shared::domain::module::body::{Transform, _groups::design::Text as RawText};
 
 use crate::{
-    text_editor::state::State as TextEditorState,
+    text_editor::TextEditor,
     transform::state::{TransformCallbacks, TransformState},
 };
 
@@ -14,13 +14,13 @@ use crate::{
 pub struct Text {
     pub value: Mutable<String>,
     pub transform: Rc<TransformState>,
-    pub editor: Rc<TextEditorState>,
+    pub editor: Rc<TextEditor>,
     pub is_editing: Mutable<bool>,
 }
 
 impl Text {
     pub fn new(
-        editor: Rc<TextEditorState>,
+        editor: Rc<TextEditor>,
         text: &RawText,
         on_transform_finished: Option<impl Fn(Transform) + 'static>,
         on_blur: Option<impl Fn() + 'static>,

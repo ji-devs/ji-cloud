@@ -11,12 +11,9 @@ use super::{
     menu::dom::render_sticker_text_menu,
     state::Text,
 };
-use crate::{
-    text_editor::dom::render_wysiwyg,
-    transform::{
-        dom::render_transform,
-        state::{ResizeLevel, TransformState},
-    },
+use crate::transform::{
+    dom::render_transform,
+    state::{ResizeLevel, TransformState},
 };
 use futures_signals::{
     map_ref,
@@ -116,7 +113,7 @@ pub fn render_sticker_text<T: AsSticker>(
                     .style("box-sizing", "border-box")
                     .style("align-self", "baseline")
                     .apply(|dom| apply_transform(dom, &text.transform))
-                    .child(render_wysiwyg(text.editor.clone()))
+                    .child(text.editor.render_wysiwyg())
                 }))
             }
         })))
