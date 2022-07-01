@@ -15,8 +15,8 @@ export type Kind =
     | "color"
     | "highlight-color"
     | "box-color"
-    | "indent"
-    | "outdent";
+    | "left-to-right"
+    | "right-to-left";
 
 @customElement("text-editor-controls-button")
 export class _ extends LitElement {

@@ -12,8 +12,12 @@ export interface WysiwygValue {
 
 export type Color = string;
 export type FontSize = number;
-export type IndentCount = number;
 export type Font = string;
+
+export enum Direction {
+    LeftToRight = "LeftToRight",
+    RightToLeft = "RightToLeft",
+}
 
 export enum ElementType {
     H1 = "H1",
@@ -33,13 +37,13 @@ export interface ControllerState {
     element: ElementType;
     weight: Weight;
     align: Align;
+    direction: Direction;
     fontSize: FontSize;
     color?: Color;
     highlightColor?: Color;
     boxColor?: Color;
     italic: boolean;
     underline: boolean;
-    indentCount: IndentCount;
 }
 
 export const defaultState: ControllerState = {
@@ -47,6 +51,7 @@ export const defaultState: ControllerState = {
     element: ElementType.H1,
     weight: 400,
     align: Align.Left,
+    direction: Direction.LeftToRight,
     fontSize: 16,
 
     // keep here even undefined for Object.keys
@@ -55,13 +60,13 @@ export const defaultState: ControllerState = {
     boxColor: undefined,
     italic: false,
     underline: false,
-    indentCount: 0,
 };
 
 export type KeyLevel = "leaf" | "element" | "root";
 
 export function getKeyLevel<K extends keyof ControllerState>(key: K): KeyLevel {
-    if (key === "align" || key === "indentCount") return "element";
+    // if (key === "align" || key === "indentCount") return "element";
+    if (key === "align") return "element";
     if (key === "boxColor") return "root";
     else return "leaf";
 }

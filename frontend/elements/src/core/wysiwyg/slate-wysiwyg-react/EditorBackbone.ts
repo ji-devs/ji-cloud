@@ -16,17 +16,17 @@ import {
     ElementType,
     Font,
     FontSize,
-    IndentCount,
     Weight,
     getKeyLevel,
+    Direction,
 } from "../wysiwyg-types";
 
 export type EditorElement = {
     children: EditorText[];
     align?: Align;
-    indentCount?: IndentCount;
 };
 export type EditorText = {
+    direction?: Direction
     text?: string;
     underline?: boolean;
     italic?: boolean;

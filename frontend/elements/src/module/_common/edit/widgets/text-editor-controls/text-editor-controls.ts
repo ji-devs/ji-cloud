@@ -120,8 +120,8 @@ export class _ extends LitElement {
                         <slot name="align-left"></slot>
                         <slot name="align-center"></slot>
                         <slot name="align-right"></slot>
-                        <slot name="indent"></slot>
-                        <slot name="outdent"></slot>
+                        <slot name="left-to-right"></slot>
+                        <slot name="right-to-left"></slot>
                     </div>
                 </div>
                 <div class="row third">

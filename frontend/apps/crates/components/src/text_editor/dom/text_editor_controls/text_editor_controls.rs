@@ -1,6 +1,6 @@
 use crate::hebrew_buttons::HebrewButtons;
 use crate::text_editor::font_css_converter::font_to_css;
-use crate::text_editor::wysiwyg_types::ControlsChange;
+use crate::text_editor::wysiwyg_types::{ControlsChange, Direction};
 use dominator::{clone, html, Dom};
 use futures_signals::{signal::SignalExt, signal_vec::SignalVecExt};
 use shared::domain::module::body::_groups::design::{Text as RawText, DEFAULT_TEXT_VALUE};
@@ -102,28 +102,23 @@ impl TextEditor {
                     }))
                 }),
                 html!("text-editor-controls-button", {
-                    .property("kind", "indent")
-                    .property("slot", "indent")
+                    .property("kind", "left-to-right")
+                    .property("slot", "left-to-right")
                     .property_signal("active", state.controls.signal_cloned().map(|controls| {
-                        controls.indent_count > 0
+                        controls.direction == Direction::LeftToRight
                     }))
                     .event(clone!(state => move |_: events::Click| {
-                        let count: u8 = state.controls.lock_ref().indent_count + 1;
-                        state.set_control_value(ControlsChange::IndentCount(count))
+                        state.set_control_value(ControlsChange::Direction(Direction::LeftToRight))
                     }))
                 }),
                 html!("text-editor-controls-button", {
-                    .property("kind", "outdent")
-                    .property("slot", "outdent")
+                    .property("kind", "right-to-left")
+                    .property("slot", "right-to-left")
                     .event(clone!(state => move |_: events::Click| {
-                        let mut count: u8 = state.controls.lock_ref().indent_count;
-                        if count > 0 {
-                            count -= 1;
-                        }
-                        state.set_control_value(ControlsChange::IndentCount(count))
+                        state.set_control_value(ControlsChange::Direction(Direction::RightToLeft))
                     }))
                     .property_signal("active", state.controls.signal_cloned().map(|controls| {
-                        controls.indent_count == 0
+                        controls.direction == Direction::RightToLeft
                     }))
                 }),
                 color_controls::render(state.clone()),

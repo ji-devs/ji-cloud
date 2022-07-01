@@ -38,8 +38,8 @@ export const TextEditorControls = (props?: Partial<Args>) => {
             <text-editor-controls-button slot="align-left" kind="align-left"></text-editor-controls-button>
             <text-editor-controls-button slot="align-center" kind="align-center"></text-editor-controls-button>
             <text-editor-controls-button slot="align-right" kind="align-right"></text-editor-controls-button>
-            <text-editor-controls-button slot="indent" kind="indent"></text-editor-controls-button>
-            <text-editor-controls-button slot="outdent" kind="outdent"></text-editor-controls-button>
+            <text-editor-controls-button slot="left-to-right" kind="left-to-right"></text-editor-controls-button>
+            <text-editor-controls-button slot="right-to-left" kind="right-to-left"></text-editor-controls-button>
         </text-editor-controls>
     `;
 };

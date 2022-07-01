@@ -9,6 +9,19 @@ use strum_macros::{Display, EnumIter};
 
 use super::font_css_converter::font_to_css;
 
+#[derive(Serialize, Deserialize, Copy, Clone, Debug, PartialEq, Display)]
+#[serde(rename_all = "PascalCase")]
+pub enum Direction {
+    LeftToRight,
+    RightToLeft,
+}
+
+impl Default for Direction {
+    fn default() -> Self {
+        Self::LeftToRight
+    }
+}
+
 #[derive(Clone, Debug, EnumIter, Display, PartialEq, Serialize, Deserialize)]
 pub enum ElementType {
     H1,
@@ -38,7 +51,6 @@ impl Default for Align {
 }
 
 pub type FontSize = u8;
-pub type IndentCount = u8;
 pub type Weight = u16;
 pub type Font = String;
 pub type Color = String;
@@ -57,7 +69,7 @@ pub struct ControlsState {
     pub color: Option<Color>,
     pub highlight_color: Option<Color>,
     pub box_color: Option<Color>,
-    pub indent_count: IndentCount,
+    pub direction: Direction,
     pub italic: bool,
     pub underline: bool,
 }
@@ -80,7 +92,7 @@ impl ControlsState {
             color: None,
             highlight_color: None,
             box_color: None,
-            indent_count: 0,
+            direction: Direction::default(),
             italic: false,
             underline: false,
         }
@@ -98,7 +110,7 @@ pub enum ControlsChange {
     Color(Option<String>),
     HighlightColor(Option<String>),
     BoxColor(Option<String>),
-    IndentCount(IndentCount),
+    Direction(Direction),
     Italic(bool),
     Underline(bool),
 }
@@ -114,7 +126,7 @@ impl ControlsChange {
             Self::Weight(weight) => JsValue::from_f64(*weight as f64),
             Self::Align(align) => JsValue::from_str(&align.to_string()),
             Self::FontSize(font_size) => JsValue::from_f64(*font_size as f64),
-            Self::IndentCount(indent_count) => JsValue::from_f64(*indent_count as f64),
+            Self::Direction(direction) => JsValue::from_str(&direction.to_string()),
             Self::Italic(italic) => JsValue::from_bool(*italic),
             Self::Underline(underline) => JsValue::from_bool(*underline),
             Self::Color(color) => match color {

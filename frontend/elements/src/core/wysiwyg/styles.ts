@@ -5,7 +5,7 @@ import {
     EditorElement,
     EditorText,
 } from "./slate-wysiwyg-react/EditorBackbone";
-import { Align, WysiwygValue } from "./wysiwyg-types";
+import { Align, Direction, WysiwygValue } from "./wysiwyg-types";
 
 export const baseStyles = css`
     :host {
@@ -38,19 +38,16 @@ export const baseStyles = css`
 `;
 
 const TAB_SIZE = 50;
-export function getElementStyles(props: EditorElement) {
+export function getElementStyles(props: EditorElement): CSSProperties {
     const styles: CSSProperties = {};
 
     if (props.align === Align.Center) styles.textAlign = "center";
     else if (props.align === Align.Right) styles.textAlign = "right";
 
-    if (props.indentCount)
-        styles.textIndent = props.indentCount * TAB_SIZE + "rem";
-
     return styles;
 }
 
-export function getLeafStyles(text: EditorText) {
+export function getLeafStyles(text: EditorText): CSSProperties {
     const styles: CSSProperties = {};
 
     if (text.underline) styles.textDecoration = "underline";
@@ -63,6 +60,16 @@ export function getLeafStyles(text: EditorText) {
 
     return styles;
 }
+
+export function getLeafProps(text: EditorText) {
+    let props: any = {};
+    if (text.direction === Direction.RightToLeft) props.dir = "rtl";
+    return props;
+}
+
+// export function augmentLeafProps(props):  {
+
+// }
 
 export function getRootStyles(value: WysiwygValue) {
     if (value.boxColor) {

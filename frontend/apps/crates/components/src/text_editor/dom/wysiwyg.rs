@@ -35,7 +35,7 @@ impl TextEditor {
                     ControlsChange::Color(color) => controls.color = color,
                     ControlsChange::HighlightColor(highlight_color) => controls.highlight_color = highlight_color,
                     ControlsChange::BoxColor(box_color) => controls.box_color = box_color,
-                    ControlsChange::IndentCount(indent_count) => controls.indent_count = indent_count,
+                    ControlsChange::Direction(direction) => controls.direction = direction,
                     ControlsChange::Italic(italic) => controls.italic = italic,
                     ControlsChange::Underline(underline) => controls.underline = underline,
                 };
