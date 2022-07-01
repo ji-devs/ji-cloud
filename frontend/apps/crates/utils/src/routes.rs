@@ -2,7 +2,7 @@ use crate::jig::JigPlayerOptions;
 use serde::{Deserialize, Serialize};
 use shared::domain::{
     asset::{AssetId, AssetType, DraftOrLive},
-    badge::BadgeId,
+    circle::CircleId,
     course::CourseId,
     image::{ImageId, ImageSearchQuery},
     jig::{JigFocus, JigId, JigSearchQuery},
@@ -82,7 +82,7 @@ pub enum CommunityMembersRoute {
 #[derive(Debug, Clone)]
 pub enum CommunityCirclesRoute {
     List,
-    Circle(BadgeId),
+    Circle(CircleId),
 }
 
 #[derive(Debug, Clone)]
@@ -311,10 +311,10 @@ impl Route {
             ["community", "badges"] => {
                 Self::Community(CommunityRoute::Circles(CommunityCirclesRoute::List))
             }
-            ["community", "badges", badge_id] => {
-                let badge_id = BadgeId(Uuid::from_str(badge_id).unwrap_ji());
+            ["community", "badges", circle_id] => {
+                let circle_id = CircleId(Uuid::from_str(circle_id).unwrap_ji());
                 Self::Community(CommunityRoute::Circles(CommunityCirclesRoute::Circle(
-                    badge_id,
+                    circle_id,
                 )))
             }
             ["user", "profile"] => Self::User(UserRoute::Profile(ProfileSection::Landing)),
@@ -609,8 +609,8 @@ impl From<&Route> for String {
                 },
                 CommunityRoute::Circles(route) => match route {
                     CommunityCirclesRoute::List => "/community/badges".to_string(),
-                    CommunityCirclesRoute::Circle(badge_id) => {
-                        format!("/community/badges/{}", badge_id.0)
+                    CommunityCirclesRoute::Circle(circle_id) => {
+                        format!("/community/badges/{}", circle_id.0)
                     }
                 },
             },
