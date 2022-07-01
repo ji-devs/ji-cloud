@@ -20,7 +20,7 @@ impl MembersList {
         state.load_members();
 
         html!("community-list", {
-            .property("header", "Members")
+            .property("header", "Connect with members")
             .child(html!("community-list-member-header", {
                 .class(&*MEMBER_LIST_GRID_COLUMNS)
                 .property("slot", "sort-header")

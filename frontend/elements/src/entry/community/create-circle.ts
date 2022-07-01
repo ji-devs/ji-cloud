@@ -1,7 +1,7 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 import "@elements/core/popups/popup-body";
 
-const STR_CREATE = "Create a new circle";
+const STR_CREATE = "Start a new circle";
 
 @customElement("community-create-circle")
 export class _ extends LitElement {

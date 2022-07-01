@@ -7,7 +7,7 @@ use web_sys::{File, HtmlInputElement, HtmlTextAreaElement, Url};
 
 use super::CreateCircle;
 
-pub const STR_CIRCLE_NAME: &str = "Your circle name";
+pub const STR_CIRCLE_NAME: &str = "Circle name";
 pub const STR_DESCRIPTION: &str = "Description";
 
 impl CreateCircle {
@@ -21,6 +21,7 @@ impl CreateCircle {
                     .property("label", STR_CIRCLE_NAME)
                     .property("slot", "name")
                     .child(html!("input" => HtmlInputElement, {
+                        .property("placeholder", "Choose a name that aims to connect members")
                         .with_node!(input => {
                             .event(clone!(state => move |_: events::Input| {
                                 let value = input.value();
@@ -33,6 +34,7 @@ impl CreateCircle {
                     .property("label", STR_DESCRIPTION)
                     .property("slot", "description")
                     .child(html!("textarea" => HtmlTextAreaElement, {
+                        .property("placeholder", "Describe why members would want to join this circle")
                         .with_node!(input => {
                             .event(clone!(state => move |_: events::Input| {
                                 let value = input.value();

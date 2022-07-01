@@ -29,7 +29,8 @@ impl MemberDetails {
             .child_signal(state.member.signal_ref(clone!(state => move |member| {
                 member.as_ref().map(|member| {
                     html!("community-member-details", {
-                        .property("name", format!("{} {}", &member.given_name, &member.family_name))
+                        .property("givenName", &member.given_name)
+                        .property("familyName", &member.family_name)
                         .property("bio", &member.bio)
                         .apply(|mut dom| {
                             if let Some(_location) = &member.location {

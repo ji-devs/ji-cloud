@@ -2,7 +2,8 @@ import { LitElement, html, css, customElement, property } from "lit-element";
 import { nothing } from "lit-html";
 
 const STR_ABOUT = "About";
-const STR_CREATIONS = "Jigzi creations";
+const STR_CREATIONS = "'s creations";
+const STR_NETWORK = "'s network";
 const STR_BIO = "Bio";
 const STR_CIRCLE = "Circles";
 
@@ -87,7 +88,10 @@ export class _ extends LitElement {
     }
 
     @property()
-    name: string = "";
+    givenName: string = "";
+
+    @property()
+    familyName: string = "";
 
     @property()
     city?: string;
@@ -108,7 +112,7 @@ export class _ extends LitElement {
         return html`
             <div class="top">
                 <slot name="profile-image"></slot>
-                <h1>${this.name}</h1>
+                <h1>${this.givenName} ${this.familyName}</h1>
                 <slot name="follow"></slot>
             </div>
             <section class="about">
@@ -159,7 +163,7 @@ export class _ extends LitElement {
             </section>
             <div class="right-sections">
                 <section class="creations">
-                    <h3>${STR_CREATIONS}</h3>
+                    <h3>${this.givenName}${STR_CREATIONS}</h3>
                     <div class="creation-tabs">
                         <slot name="creation-tabs"></slot>
                     </div>
@@ -168,7 +172,7 @@ export class _ extends LitElement {
                     </div>
                 </section>
                 <section class="connections">
-                    <h3>${STR_CREATIONS}</h3>
+                    <h3>${this.givenName}${STR_NETWORK}</h3>
                     <div class="connection-tabs">
                         <slot name="connection-tabs"></slot>
                     </div>

@@ -23,7 +23,7 @@ use crate::{
     state::Community,
 };
 
-const STR_SEARCH: &str = "Hebrew teachers";
+const STR_SEARCH: &str = "Search Jigzi Community";
 
 impl Community {
     pub fn render(self: &Rc<Self>) -> Dom {

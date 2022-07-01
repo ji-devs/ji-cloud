@@ -20,11 +20,11 @@ impl CirclesList {
         state.load_circles();
 
         html!("community-list", {
-            .property("header", "Circles")
+            .property("header", "Join a circle")
             .child(html!("button-rect", {
                 .property("slot", "create-button")
                 .property("color", "blue")
-                .text("+ circle")
+                .text("Start a new circle")
                 .event(clone!(state => move |_: events::Click| {
                     state.create_popup_open.set(true);
                 }))
