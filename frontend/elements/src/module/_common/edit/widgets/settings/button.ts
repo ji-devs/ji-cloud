@@ -38,7 +38,6 @@ export type Kind =
 
 const OneImage: Set<Kind> = new Set([
     "n_choices",
-    "order",
     "rounds",
 ]);
 
