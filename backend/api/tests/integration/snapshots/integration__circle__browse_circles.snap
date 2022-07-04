@@ -1,7 +1,6 @@
 ---
 source: tests/integration/circle.rs
 expression: body
-
 ---
 {
   "circles": [
@@ -11,7 +10,7 @@ expression: body
       "createdBy": "1f241e1b-b537-493f-a230-075cb16315be",
       "description": "Test",
       "memberCount": 0,
-      "image": "7100451a-0a9b-11ec-9f5e-17d67fa55c21",
+      "image": "89125d88-ffaa-11eb-86a5-9fd50ab8d8df",
       "createdAt": "[created_at]",
       "lastEdited": "[last_edited]"
     },
@@ -21,7 +20,7 @@ expression: body
       "createdBy": "1f241e1b-b537-493f-a230-075cb16315be",
       "description": "Test2",
       "memberCount": 0,
-      "image": "92d8bd4e-0aa4-11ec-9f5e-93b65c5cdb5a",
+      "image": "8a2469b4-ffaa-11eb-86a5-330f321d2a3f",
       "createdAt": "[created_at]",
       "lastEdited": "[last_edited]"
     },
@@ -31,7 +30,7 @@ expression: body
       "createdBy": "7b96a41c-e406-11eb-8176-efd86dd7f444",
       "description": "Test1",
       "memberCount": 2,
-      "image": "71004740-0a9b-11ec-9f5e-ef9aad54a89e",
+      "image": "89fa4c10-ffaa-11eb-86a5-870d6a01dc37",
       "createdAt": "[created_at]",
       "lastEdited": "[last_edited]"
     }
