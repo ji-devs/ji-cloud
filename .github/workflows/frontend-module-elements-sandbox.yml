@@ -16,7 +16,7 @@ jobs:
       - name: checkout repo
         uses: actions/checkout@v1
 
-      - name: Extract label 
+      - name: Extract label
         shell: bash
         run: echo "##[set-output name=label;]$(echo \"[${GITHUB_REF#refs/heads/} - test - elements]\")"
         id: extract_label
@@ -34,13 +34,13 @@ jobs:
           node-version: '16'
 
       - name: install npm deps
-        run: npm ci 
+        run: npm ci
         working-directory: "./frontend/elements"
         env:
           FONTAWESOME_NPM_AUTH_TOKEN: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
 
-      - name: test elements 
-        run: npm run test 
+      - name: test elements
+        run: npm run test
         working-directory: "./frontend/elements"
         env:
           FONTAWESOME_NPM_AUTH_TOKEN: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
@@ -59,14 +59,14 @@ jobs:
 
     strategy:
       matrix:
-        app: [poster, video, tapping-board, drag-drop, memory, matching, flashcards, card-quiz, cover, resource-cover, legacy]
+        app: [poster, video, tapping-board, drag-drop, memory, matching, flashcards, card-quiz, cover, resource-cover, find-answer, legacy]
         mode: [edit, play]
     steps:
 
       - name: checkout repo
         uses: actions/checkout@v1
 
-      - name: Extract label 
+      - name: Extract label
         shell: bash
         run: echo "##[set-output name=label;]$(echo \"[${GITHUB_REF#refs/heads/} - module/${{ matrix.app }}/${{ matrix.mode }} - elements]\")"
         id: extract_label
@@ -84,15 +84,15 @@ jobs:
           node-version: '16'
 
       - name: install npm deps
-        run: npm ci 
+        run: npm ci
         working-directory: "./frontend/elements"
         env:
           FONTAWESOME_NPM_AUTH_TOKEN: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
 
-      - name: build elements 
+      - name: build elements
         run: npm run build:sandbox
         working-directory: "./frontend/elements"
-        env: 
+        env:
           APP_NAME: "module/${{ matrix.app }}/${{ matrix.mode }}"
           FONTAWESOME_NPM_AUTH_TOKEN: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
 
@@ -104,7 +104,7 @@ jobs:
 
       - name: deploy to google cloud
         run: gsutil -m rsync -d -r frontend/elements/dist/module/${{ matrix.app }}/${{ matrix.mode }} gs://ji-cloud-sandbox-frontend-origin-eu-001/module/${{ matrix.app }}/${{ matrix.mode }}/elements
-        
+
       - name: Notify slack of all status
         uses: pullreminders/slack-action@master
         with:
