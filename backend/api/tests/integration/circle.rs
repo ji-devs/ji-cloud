@@ -20,7 +20,7 @@ async fn create() -> anyhow::Result<()> {
         .json(&json!({
             "displayName": "test circle",
             "description": "test description",
-            "image": "92d8c104-0aa4-11ec-9f5e-ef5b2539aa57"
+            "image": "8a473dd6-ffaa-11eb-86a5-dba3538e5a15"
         }))
         .login()
         .send()
@@ -261,7 +261,7 @@ async fn update_circle() -> anyhow::Result<()> {
         .json(&json!({
             "displayName": "update circle",
             "description": "update description",
-            "image": "92d8c258-0aa4-11ec-9f5e-036a94fd6227"
+            "image": "8a473dd6-ffaa-11eb-86a5-dba3538e5a15"
         }))
         .login()
         .send()

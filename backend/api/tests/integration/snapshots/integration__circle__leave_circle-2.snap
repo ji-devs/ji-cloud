@@ -1,7 +1,6 @@
 ---
 source: tests/integration/circle.rs
 expression: body
-
 ---
 {
   "id": "829606d0-f185-11ec-b9e4-5fadfd7252f6",
@@ -9,7 +8,7 @@ expression: body
   "createdBy": "7b96a41c-e406-11eb-8176-efd86dd7f444",
   "description": "Test1",
   "memberCount": 1,
-  "image": "71004740-0a9b-11ec-9f5e-ef9aad54a89e",
+  "image": "89fa4c10-ffaa-11eb-86a5-870d6a01dc37",
   "createdAt": "[created_at]",
   "lastEdited": "[last_edited]"
 }
