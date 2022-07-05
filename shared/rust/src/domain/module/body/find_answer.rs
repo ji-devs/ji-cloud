@@ -27,7 +27,9 @@ impl BodyExt<Mode, Step> for ModuleData {
     }
 
     fn is_complete(&self) -> bool {
-        self.content.is_some()
+        self.content
+            .as_ref()
+            .map_or(false, |content| content.is_valid())
     }
 
     fn kind() -> ModuleKind {
@@ -124,6 +126,18 @@ pub struct Content {
     pub play_settings: PlaySettings,
 }
 
+impl Content {
+    /// Convenience method to determine whether questions have configured correctly
+    pub fn is_valid(&self) -> bool {
+        !self.questions.is_empty()
+            && self
+                .questions
+                .iter()
+                .find(|question| !question.is_valid())
+                .is_none()
+    }
+}
+
 /// The type of field to be used for displaying question text.
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub enum QuestionField {
@@ -163,6 +177,17 @@ pub struct Question {
 
     /// Traces
     pub traces: Vec<Trace>,
+}
+
+impl Question {
+    /// Convenience method to determine whether a question has been configured correctly
+    pub fn is_valid(&self) -> bool {
+        let has_title = !self.title.trim().is_empty();
+        let has_question = !self.question_text.is_empty() || self.question_audio.is_some();
+        let has_traces = !self.traces.is_empty();
+
+        has_title && has_question && has_traces
+    }
 }
 
 /// Editor state
