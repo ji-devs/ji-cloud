@@ -18,17 +18,6 @@ expression: body
       ]
     },
     {
-      "id": "7b96a41c-e406-11eb-8176-efd86dd7f444",
-      "username": "test1",
-      "givenName": "Post",
-      "familyName": "Gres",
-      "bio": "",
-      "profileImage": null,
-      "language": "en_US",
-      "organization": "test1 org",
-      "circles": []
-    },
-    {
       "id": "1f241e1b-b537-493f-a230-075cb16315be",
       "username": "test",
       "givenName": "Bobby",
@@ -38,6 +27,17 @@ expression: body
       "circles": [
         "829606d0-f185-11ec-b9e4-5fadfd7252f6"
       ]
+    },
+    {
+      "id": "7b96a41c-e406-11eb-8176-efd86dd7f444",
+      "username": "test1",
+      "givenName": "Post",
+      "familyName": "Gres",
+      "bio": "",
+      "profileImage": null,
+      "language": "en_US",
+      "organization": "test1 org",
+      "circles": []
     }
   ],
   "pages": 1,
