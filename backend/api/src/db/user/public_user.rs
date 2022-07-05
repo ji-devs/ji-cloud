@@ -55,7 +55,7 @@ pub async fn browse_users(
             select array(select id  as "id!"
             from "user"
             inner join user_profile "up" on "user".id = up.user_id
-            order by family_name asc) as id
+            order by "user".created_at desc) as id
         ),
         cte1 as (
             select * from unnest((select distinct id from cte)) with ordinality t(id

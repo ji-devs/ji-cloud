@@ -192,7 +192,7 @@ pub async fn browse(
             select array(select id  as "id!"
             from "circle"
             where creator_id = $1 or $1 is null
-            order by coalesce(updated_at, created_at)) as id
+            order by created_at desc) as id
         ),
         cte1 as (
             select * from unnest((select distinct id from cte)) with ordinality t(id
