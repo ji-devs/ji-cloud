@@ -53,8 +53,10 @@ export class _ extends LitElement {
                     width: 100%;
                 }
                 .actions {
-                    padding: 0 26px;
-                    display: grid;
+                    padding: 0;
+                    display: flex;
+                    flex-direction: row;
+                    justify-content: space-around;
                 }
                 .actions ::slotted(*) {
                     grid-column: 1;
