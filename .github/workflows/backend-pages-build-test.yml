@@ -1,0 +1,46 @@
+name: BUILD TEST Pages - Backend
+
+on:
+  push:
+    branches: [ docker-ci ]
+
+jobs:
+  bundle:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout repo
+        uses: actions/checkout@v1
+
+      - name: Extract label
+        shell: bash
+        run: echo "##[set-output name=label;]$(echo \"[${GITHUB_REF#refs/heads/} - backend/pages]\")"
+        id: extract_label
+
+      - id: 'auth'
+        uses: 'google-github-actions/auth@v0'
+        with:
+          credentials_json: '${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON_KEY_SANDBOX }}'
+
+      - name: install google cloud sdk
+        uses: google-github-actions/setup-gcloud@v0
+
+      - name: download cargo-make release
+        run: curl -u jewish-interactive:"$GITHUB_TOKEN" -s https://api.github.com/repos/sagiegurari/cargo-make/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/' | xargs -I {} wget -c https://github.com/sagiegurari/cargo-make/releases/latest/download/cargo-make-v{}-x86_64-unknown-linux-musl.zip -O cargo-make.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: extract cargo-make to folder
+        run: unzip -j cargo-make.zip -d cargo-make
+
+      - name: add cargo-make to path
+        uses: dakom/actions-path@master
+        with:
+          path: ${{github.workspace}}/cargo-make
+
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: build and deploy
+        run: cargo make sandbox-pages-build-test
+
