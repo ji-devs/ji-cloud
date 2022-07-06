@@ -85,7 +85,7 @@ impl CommunityLanding {
     fn render_circle(self: &Rc<Self>, circle: &Circle) -> Dom {
         html!("div", {
             .property("slot", "circles")
-            .child(html!("img", {
+            .child(html!("img-ji", {
                 .style("height", "90px")
                 .style("width", "90px")
                 .style("box-shadow", "0 0 8px 0 rgba(0, 0, 0, 0.06)")

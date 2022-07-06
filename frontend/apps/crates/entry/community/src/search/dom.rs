@@ -76,7 +76,7 @@ impl CommunitySearch {
             .apply(move |dom| dominator::on_click_go_to_url!(dom, {
                 Route::Community(CommunityRoute::Circles(CommunityCirclesRoute::Circle(circle.id))).to_string()
             }))
-            .child(html!("img", {
+            .child(html!("img-ji", {
                 .property("slot", "img")
                 .property("lib", MediaLibrary::User.to_str())
                 .apply(|dom| match circle.image {
