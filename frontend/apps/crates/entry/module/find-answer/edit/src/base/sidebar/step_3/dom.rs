@@ -379,13 +379,17 @@ fn render_tab_body(state: Rc<Step3>, tab: Tab) -> Dom {
 
                         let callbacks = AudioInputCallbacks::new(
                             Some(clone!(state, question => move |audio: Audio| {
-                                let mut lock = question.question_audio.lock_mut();
-                                *lock = Some(audio);
+                                {
+                                    let mut lock = question.question_audio.lock_mut();
+                                    *lock = Some(audio);
+                                }
                                 state.sidebar.base.save_question(index, question.clone());
                             })),
                             Some(clone!(state, question => move || {
-                                let mut lock = question.question_audio.lock_mut();
-                                *lock = None;
+                                {
+                                    let mut lock = question.question_audio.lock_mut();
+                                    *lock = None;
+                                }
                                 state.sidebar.base.save_question(index, question.clone());
                             })),
                         );
