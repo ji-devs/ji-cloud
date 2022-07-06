@@ -25,6 +25,7 @@ export class _ extends LitElement {
                     height: 104px;
                     width: 104px;
                     border-radius: 50%;
+                    overflow: hidden;
                     border: solid 2px #faef9c;
                 }
                 .name {

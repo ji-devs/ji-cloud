@@ -91,6 +91,7 @@ impl CommunityLanding {
                 .style("box-shadow", "0 0 8px 0 rgba(0, 0, 0, 0.06)")
                 .style("border", "solid 1px var(--light-gray-1)")
                 .style("border-radius", "50%")
+                .style("overflow", "hidden")
                 .property("lib", MediaLibrary::User.to_str())
                 .apply(|dom| match circle.image {
                     Some(image) => dom.property("id", &image.0.to_string()),
