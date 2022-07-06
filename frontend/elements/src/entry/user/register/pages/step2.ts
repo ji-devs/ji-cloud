@@ -14,21 +14,17 @@ export class _ extends LitElement {
                     font-weight: 900;
                     color: #5662a3;
                 }
-
-                .rows {
-                    max-width: 800px;
-                    display: flex;
-                    flex-direction: column;
-                    gap: 40px;
-                }
-                .row {
+                .inside-wrapper {
+                    max-width: 650px;
                     display: grid;
                     grid-template-columns: 1fr 1fr;
+                    align-items: start;
                     gap: 32px;
                 }
-
-                .bottom {
-                    margin-top: 20px;
+                ::slotted([slot=checkbox]),
+                ::slotted([slot=committed-to-privacy]),
+                ::slotted([slot=submit]) {
+                    grid-column: 1 / -1;
                 }
                 ::slotted([slot="committed-to-privacy"]) {
                     width: 60%;
@@ -41,19 +37,12 @@ export class _ extends LitElement {
         return html`
             <auth-page img="entry/user/side/step-2.webp">
                 <h1>${STR_TITLE}</h1>
-                <div class="rows">
-                    <div class="row">
-                        <slot name="location"></slot>
-                        <slot name="language"></slot>
-                    </div>
-                    <div class="row">
-                        <slot name="persona"></slot>
-                        <slot name="organization"></slot>
-                    </div>
-                </div>
-                <div class="bottom">
+                <div class="inside-wrapper">
+                    <slot name="location"></slot>
+                    <slot name="language"></slot>
+                    <slot name="persona"></slot>
+                    <slot name="organization"></slot>
                     <slot name="checkbox"> </slot>
-
                     <slot name="committed-to-privacy"></slot>
                     <slot name="submit"></slot>
                 </div>

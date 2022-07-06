@@ -17,7 +17,7 @@ impl Step1Page {
         html!("page-register-step1", {
             .children(vec![
                 html!("input-wrapper", {
-                    .property("slot", "topleft")
+                    .property("slot", "first-name")
                     .property("label", STR_FIRSTNAME_LABEL)
                     .property_signal("error", state.firstname_error().map(|err| {
                         !err.is_empty()
@@ -34,7 +34,7 @@ impl Step1Page {
                     }))
                 }),
                 html!("input-wrapper", {
-                    .property("slot", "topright")
+                    .property("slot", "last-name")
                     .property("label", STR_LASTNAME_LABEL)
                     .property_signal("error", state.lastname_error().map(|err| {
                         !err.is_empty()
