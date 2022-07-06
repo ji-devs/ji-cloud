@@ -78,7 +78,7 @@ RUN cargo +nightly zigbuild --release --target x86_64-unknown-linux-musl
 #
 # Build the actual project.
 #
-# This stage copies _all_ our project files over, and also copies the entire target directory generated in the api-cooker
+# This stage copies _all_ our project files over, and also copies the entire target directory generated in the dependencies
 # stage. `cargo build` does the rest of the work.
 FROM base AS builder
 COPY ./shared /shared
@@ -86,8 +86,8 @@ COPY ./backend/core /backend/core
 COPY ./backend/api /backend/api
 COPY --from=dependencies /backend/api/target /backend/api/target
 
-# We need to touch these files so that their timestamps are newer than what was used in the api-cooker layer, otherwise
-# cargo will not know to rebuild these crates. See the comment in the api-cooker stage.
+# We need to touch these files so that their timestamps are newer than what was used in the dependencies layer, otherwise
+# cargo will not know to rebuild these crates. See the comment in the dependencies stage.
 # Very hacky indeed.
 RUN touch /shared/rust/Cargo.toml
 RUN touch /shared/rust/src/lib.rs
