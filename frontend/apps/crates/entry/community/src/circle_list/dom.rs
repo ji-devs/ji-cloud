@@ -66,6 +66,7 @@ impl CirclesList {
                             .property("slot", "active-page")
                             .property("type", "number")
                             .property("min", 1)
+                            .property_signal("max", state.total_pages.signal())
                             .property_signal("value", state.active_page.signal().map(|active_page| {
                                 active_page.to_string()
                             }))
