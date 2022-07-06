@@ -37,6 +37,7 @@ export class _ extends LitElement {
                     width: 120px;
                     box-sizing: border-box;
                     border-radius: 50%;
+                    overflow: hidden;
                     border: solid 2px var(--main-yellow);
                 }
                 .top-section h1 {

@@ -3,7 +3,13 @@ use std::rc::Rc;
 use dominator::{clone, html, Dom};
 use futures_signals::signal_vec::SignalVecExt;
 use shared::{domain::user::public_user::PublicUser, media::MediaLibrary};
-use utils::events;
+use utils::{
+    events,
+    routes::{CommunityMembersRoute, CommunityRoute, Route},
+};
+use wasm_bindgen::JsValue;
+
+use crate::state::MEMBER_LIST_GRID_COLUMNS;
 
 use super::CircleDetails;
 
@@ -98,10 +104,32 @@ impl CircleDetails {
         })
     }
 
-    fn render_member(self: &Rc<Self>, _member: &PublicUser) -> Dom {
-        html!("div", {
-            .style("height", "20px")
+    fn render_member(self: &Rc<Self>, member: &PublicUser) -> Dom {
+        html!("community-list-member", {
             .property("slot", "members")
+            .class(&*MEMBER_LIST_GRID_COLUMNS)
+            .property("slot", "items")
+            .property("name", &format!("{} {}", member.given_name, member.family_name))
+            // .property("city", "New York")
+            // .property("state", "NY")
+            .apply(|mut dom| {
+                if let Some(language) = &member.language {
+                    dom = dom.property("language", language);
+                };
+                dom
+            })
+            .apply(move |dom| dominator::on_click_go_to_url!(dom, {
+                Route::Community(CommunityRoute::Members(CommunityMembersRoute::Member(member.id))).to_string()
+            }))
+            .child(html!("profile-image", {
+                .property("slot", "img")
+                .property("imageId", {
+                    match &member.profile_image {
+                        Some(image_id) => JsValue::from_str(&image_id.0.to_string()),
+                        None => JsValue::UNDEFINED,
+                    }
+                })
+            }))
         })
     }
 }
