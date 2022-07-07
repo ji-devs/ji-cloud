@@ -6,7 +6,7 @@ const STR_FOR = "for";
 const STR_MEMBERS = "Members";
 const STR_CIRCLES = "Circles";
 
-@customElement("community-search")
+@customElement("community-search-page")
 export class _ extends LitElement {
     static get styles() {
         return [

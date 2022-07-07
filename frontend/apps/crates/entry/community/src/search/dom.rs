@@ -23,7 +23,7 @@ impl CommunitySearch {
         let state = self;
         state.search();
 
-        html!("community-search", {
+        html!("community-search-page", {
             .property("query", &state.query.q)
             .property_signal("memberCount", state.member_count.signal())
             .children_signal_vec(state.members.signal_vec_cloned().map(clone!(state => move|member| {

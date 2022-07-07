@@ -10,10 +10,7 @@ use shared::domain::user::UserProfile;
 use utils::{
     events,
     prelude::get_user,
-    routes::{
-        CommunityCirclesRoute, CommunityMembersRoute, CommunityRoute, CommunitySearchQuery, Route,
-        UserRoute,
-    },
+    routes::{CommunityCirclesRoute, CommunityMembersRoute, CommunityRoute, Route, UserRoute},
     unwrap::UnwrapJiExt,
 };
 use web_sys::HtmlInputElement;
@@ -40,30 +37,39 @@ impl Community {
                     true
                 ),
                 self.render_nav(),
-                html!("input" => HtmlInputElement, {
-                    .with_node!(elem => {
-                        .property("slot", "search-input")
-                        .property("type", "search")
-                        .property("placeholder", STR_SEARCH)
-                        .property_signal("value", state.q.signal_cloned())
-                        .event(clone!(state => move |_: events::Input| {
-                            let value = elem.value();
-                            state.q.set(value);
-                        }))
-                    })
-                }),
-                html!("fa-button", {
-                    .property("slot", "search-button")
-                    .property("icon", "fa-solid fa-magnifying-glass")
-                    .event(clone!(state => move |_: events::Click| {
-                        let query = CommunitySearchQuery {
-                            q: state.q.get_cloned(),
-                        };
-                        dominator::routing::go_to_url(
-                            &Route::Community(CommunityRoute::Search(Box::new(query))).to_string()
-                        );
+                html!("form", {
+                    .property("slot", "search-bar")
+                    .event_with_options(
+                        &EventOptions::preventable(),
+                        clone!(state => move |e: events::Submit| {
+                            e.prevent_default();
+                            state.on_search_click();
+                        })
+                    )
+                    .child(html!("community-search-bar", {
+                        .children(&mut [
+                            html!("input" => HtmlInputElement, {
+                                .with_node!(elem => {
+                                    .property("slot", "search-input")
+                                    .property("type", "search")
+                                    .property("placeholder", STR_SEARCH)
+                                    .property_signal("value", state.q.signal_cloned())
+                                    .event(clone!(state => move |_: events::Input| {
+                                        let value = elem.value();
+                                        state.q.set(value);
+                                    }))
+                                })
+                            }),
+                            html!("fa-button", {
+                                .property("slot", "search-button")
+                                .property("icon", "fa-solid fa-magnifying-glass")
+                                .event(clone!(state => move |_: events::Click| {
+                                    state.on_search_click();
+                                }))
+                            }),
+                        ])
                     }))
-                }),
+                })
             ])
             .child_signal(self.dom_signal())
             .child(OverlayContainer::new().render(None))

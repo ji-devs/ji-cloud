@@ -10,7 +10,10 @@ use shared::{
     },
     error::EmptyError,
 };
-use utils::prelude::{api_no_auth, get_user};
+use utils::{
+    prelude::{api_no_auth, get_user},
+    routes::{CommunityRoute, CommunitySearchQuery, Route},
+};
 
 use crate::state::Community;
 
@@ -79,5 +82,14 @@ impl Community {
                 Err(_) => todo!(),
             }
         }
+    }
+
+    pub fn on_search_click(self: &Rc<Self>) {
+        let query = CommunitySearchQuery {
+            q: self.q.get_cloned(),
+        };
+        dominator::routing::go_to_url(
+            &Route::Community(CommunityRoute::Search(Box::new(query))).to_string(),
+        );
     }
 }
