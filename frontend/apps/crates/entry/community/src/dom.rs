@@ -112,75 +112,86 @@ impl Community {
         html!("nav", {
             .property("slot", "nav")
             .children(&mut [
-                html!("community-nav-item", {
-                    .property_signal("active", Community::route_signal().map(|route| {
-                        matches!(route, Route::Community(CommunityRoute::Landing))
-                    }))
-                    .child({
-                        match get_user() {
-                            Some(UserProfile { profile_image: Some(image_id), .. }) => {
-                                html!("profile-image", {
-                                    .property("imageId", &image_id.0.to_string())
-                                })
-                            },
-                            _ => {
-                                html!("fa-icon", {
-                                    .property("icon", "fa-thin fa-user-tie-hair")
-                                })
-                            },
-                        }
+                {
+                    let route = match get_user() {
+                        Some(user) => {
+                            Route::Community(CommunityRoute::Members(CommunityMembersRoute::Member(user.id))).to_string()
+                        },
+                        _ => {
+                            Route::User(UserRoute::Login(Default::default())).to_string()
+                        },
+                    };
+                    html!("community-nav-item", {
+                        .child({
+                            match get_user() {
+                                Some(UserProfile { profile_image: Some(image_id), .. }) => {
+                                    html!("profile-image", {
+                                        .property("imageId", &image_id.0.to_string())
+                                    })
+                                },
+                                _ => {
+                                    html!("fa-icon", {
+                                        .property("icon", "fa-thin fa-user-tie-hair")
+                                    })
+                                },
+                            }
+                        })
+                        .property("label", "My profile")
+                        .property("href", &route)
+                        .apply(move |dom| dominator::on_click_go_to_url!(dom, {
+                            route
+                        }))
                     })
-                    .property("label", "My profile")
-                    .apply(move |dom| dominator::on_click_go_to_url!(dom, {
-                        match get_user() {
-                            Some(user) => {
-                                Route::Community(CommunityRoute::Members(CommunityMembersRoute::Member(user.id))).to_string()
-                            },
-                            _ => {
-                                Route::User(UserRoute::Login(Default::default())).to_string()
-                            },
-                        }
-                    }))
-                }),
-                html!("community-nav-item", {
-                    .property("label", "Circles")
-                    .property_signal("active", Community::route_signal().map(|route| {
-                        matches!(route, Route::Community(CommunityRoute::Circles(_)))
-                    }))
-                    .child(html!("fa-icon", {
-                        .property("icon", "fa-thin fa-circle-nodes")
-                    }))
-                    .apply(move |dom| dominator::on_click_go_to_url!(dom, {
-                        Route::Community(CommunityRoute::Circles(CommunityCirclesRoute::List)).to_string()
-                    }))
-                }),
-                html!("community-nav-item", {
-                    .property("label", "Members")
-                    .property_signal("active", Community::route_signal().map(|route| {
-                        matches!(route, Route::Community(CommunityRoute::Members(_)))
-                    }))
-                    .child(html!("fa-icon", {
-                        .property("icon", "fa-thin fa-people-group")
-                    }))
-                    .apply(move |dom| dominator::on_click_go_to_url!(dom, {
-                        Route::Community(CommunityRoute::Members(CommunityMembersRoute::List)).to_string()
-                    }))
-                }),
-                html!("community-nav-item", {
-                    .property("label", "ProDev")
-                    .child(html!("fa-icon", {
-                        .property("icon", "fa-thin fa-clapperboard-play")
-                    }))
-                    .event_with_options(
-                        &EventOptions::preventable(),
-                        |e: events::Click| {
-                            e.prevent_default();
-                            let _ = web_sys::window()
-                                .unwrap_ji()
-                                .alert_with_message("Coming soon");
-                        }
-                    )
-                }),
+                },
+                {
+                    let route = Route::Community(CommunityRoute::Circles(CommunityCirclesRoute::List)).to_string();
+                    html!("community-nav-item", {
+                        .property("label", "Circles")
+                        .property("href", &route)
+                        .property_signal("active", Community::route_signal().map(|route| {
+                            matches!(route, Route::Community(CommunityRoute::Circles(_)))
+                        }))
+                        .child(html!("fa-icon", {
+                            .property("icon", "fa-thin fa-circle-nodes")
+                        }))
+                        .apply(move |dom| dominator::on_click_go_to_url!(dom, {
+                            route
+                        }))
+                    })
+                },
+                {
+                    let route = Route::Community(CommunityRoute::Members(CommunityMembersRoute::List)).to_string();
+                    html!("community-nav-item", {
+                        .property("label", "Members")
+                        .property("href", &route)
+                        .property_signal("active", Community::route_signal().map(|route| {
+                            matches!(route, Route::Community(CommunityRoute::Members(_)))
+                        }))
+                        .child(html!("fa-icon", {
+                            .property("icon", "fa-thin fa-people-group")
+                        }))
+                        .apply(move |dom| dominator::on_click_go_to_url!(dom, {
+                            route
+                        }))
+                    })
+                },
+                {
+                    html!("community-nav-item", {
+                        .property("label", "ProDev")
+                        .child(html!("fa-icon", {
+                            .property("icon", "fa-thin fa-clapperboard-play")
+                        }))
+                        .event_with_options(
+                            &EventOptions::preventable(),
+                            |e: events::Click| {
+                                e.prevent_default();
+                                let _ = web_sys::window()
+                                    .unwrap_ji()
+                                    .alert_with_message("Coming soon");
+                            }
+                        )
+                    })
+                },
             ])
         })
     }
