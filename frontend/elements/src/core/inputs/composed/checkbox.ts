@@ -1,5 +1,4 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
-import { nothing } from "lit-html";
 
 @customElement("input-checkbox")
 export class _ extends LitElement {
@@ -7,8 +6,11 @@ export class _ extends LitElement {
         return [
             css`
                 label {
-                    display: flex;
-                    align-items: baseline;
+                    display: inline-grid;
+                    grid-template-columns: auto auto;
+                    column-gap: 12px;
+                    justify-content: start;
+                    padding: 2px;
                     font-size: 14px;
                 }
                 @media (min-width: 1920px) {
@@ -16,31 +18,21 @@ export class _ extends LitElement {
                         font-size: 16px;
                     }
                 }
-                input {
-                    margin-right: 1px;
-                    display: inline-block;
-                }
-                span {
-                    margin-left: 12px;
-                    white-space: nowrap;
-                }
-                .errorwrapper {
+                :host([error]:not([error=''])) label {
                     border: solid 1px #f00813;
                     background-color: #fff4f4;
                     border-radius: 14px;
-                    padding: 2px 16px 2px 4px;
-                    margin-right: 16px;
                 }
-                div {
-                    display: flex;
-                    align-items: center;
-                    height: 30px;
+                .error {
+                    display: none;
                 }
-                input {
-                    margin: 0;
-                }
-                ::slotted([slot="label"]) {
-                    display: inline-block;
+                :host([error]:not([error=''])) .error {
+                    display: block;
+                    grid-column: 1 / -1;
+                    color: var(--red-alert);
+                    font-size: 14px;
+                    font-weight: 500;
+                    margin: 0px 8px;
                 }
             `,
         ];
@@ -63,31 +55,19 @@ export class _ extends LitElement {
     @property()
     label: string = "";
 
-    @property()
+    @property({ reflect: true })
     error: string = "";
 
     @property({ type: Boolean })
     disabled: boolean = false;
 
     render() {
-        const { label, error, checked } = this;
-
-        const isError: boolean = error !== "";
-
-        const errorwrapper = isError ? "errorwrapper" : "";
-
         return html`
-            <div>
-                <div class="${errorwrapper}">
-                    <label class="">
-                        <input ?disabled=${this.disabled} type="checkbox" .checked=${checked} @change="${this.onChange}" />
-                        <span class="">
-                            <slot name="label">${label}</slot>
-                        </span>
-                    </label>
-                </div>
-                ${isError ? html`<p class="error">${error}</p>` : nothing}
-            </div>
+            <label>
+                <input ?disabled=${this.disabled} type="checkbox" .checked=${this.checked} @change="${this.onChange}" />
+                <slot name="label">${this.label}</slot>
+            </label>
+            <p class="error">${this.error}</p>
         `;
     }
 }

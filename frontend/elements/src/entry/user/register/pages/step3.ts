@@ -37,7 +37,11 @@ export class _ extends LitElement {
                         "tl tr"
                         "bottom bottom";
                 }
-
+                ::slotted([slot=ages]),
+                ::slotted([slot=subjects]),
+                ::slotted([slot=affiliations]) {
+                    display: block;
+                }
                 .ages {
                     grid-area: tl;
                 }
