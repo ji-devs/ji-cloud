@@ -165,7 +165,7 @@ export class AnchoredOverlay extends LitElement {
         const maxHeight = window.innerHeight - top;
         this.overlay.style.setProperty("max-height", `${maxHeight}px`);
 
-        const maxWidth = window.innerWidth - top;
+        const maxWidth = window.innerWidth - left;
         this.overlay.style.setProperty("max-width", `${maxWidth}px`);
     }
 
