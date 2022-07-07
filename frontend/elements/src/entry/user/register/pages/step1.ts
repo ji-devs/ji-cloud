@@ -16,9 +16,13 @@ export class _ extends LitElement {
                 .inside-wrapper {
                     max-width: 650px;
                     display: grid;
-                    grid-template-columns: 1fr 1fr;
                     align-items: start;
                     gap: 32px;
+                }
+                @media (min-width: 1920px) {
+                    .inside-wrapper {
+                        grid-template-columns: 1fr 1fr;
+                    }
                 }
                 ::slotted([slot=username]),
                 ::slotted([slot=checkbox]),

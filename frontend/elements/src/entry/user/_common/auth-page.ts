@@ -13,12 +13,23 @@ export class _ extends LitElement {
             css`
                 :host {
                     display: grid;
-                    grid-template-columns: 480px 1fr;
                     height: 100vh;
+                    justify-content: center;
+                }
+                @media (min-width: 1920px) {
+                    :host {
+                        grid-template-columns: 480px 1fr;
+                    }
                 }
                 aside {
                     height: 100%;
                     background-color: #def4ff;
+                    display: none;
+                }
+                @media (min-width: 1920px) {
+                    aside {
+                        display: block;
+                    }
                 }
                 img-ui {
                     width: 100%;
@@ -28,12 +39,17 @@ export class _ extends LitElement {
                 }
                 .main {
                     box-sizing: border-box;
-                    padding: 80px;
                     display: flex;
                     flex-direction: column;
                     gap: 20px;
                     height: 100%;
                     overflow: auto;
+                    padding: 30px;
+                }
+                @media (min-width: 1920px) {
+                    .main {
+                        padding: 80px;
+                    }
                 }
             `,
         ];

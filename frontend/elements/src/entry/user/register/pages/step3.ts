@@ -29,29 +29,22 @@ export class _ extends LitElement {
             css`
                 .grid {
                     display: grid;
-                    grid-template-columns: 1fr 1fr;
-                    grid-template-rows: 1fr 1fr;
                     gap: 16px 16px;
                     grid-auto-flow: row;
-                    grid-template-areas:
-                        "tl tr"
-                        "bottom bottom";
+                }
+                @media (min-width: 1920px) {
+                    .grid {
+                        grid-template-columns: 1fr 1fr;
+                    }
                 }
                 ::slotted([slot=ages]),
                 ::slotted([slot=subjects]),
                 ::slotted([slot=affiliations]) {
                     display: block;
                 }
-                .ages {
-                    grid-area: tl;
-                }
-                .subjects {
-                    grid-area: tr;
-                }
                 .affiliations {
-                    grid-area: bottom;
+                    grid-column: 1 / -1;
                 }
-
                 .card-grey {
                     padding: 32px 32px 32px 32px;
                     border-radius: 14px;
@@ -62,12 +55,10 @@ export class _ extends LitElement {
                     font-weight: 900;
                     color: #5662a3;
                 }
-
                 .subtitle {
                     font-weight: 500;
                     color: var(--dark-gray-6);
                 }
-
                 .submit {
                     align-self: flex-start;
                 }
