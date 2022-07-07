@@ -134,7 +134,7 @@ impl CirclesList {
             .class(&*CIRCLE_LIST_GRID_COLUMNS)
             .property("slot", "items")
             .property("name", &circle.display_name)
-            .property("member-count", circle.member_count)
+            .property("memberCount", circle.member_count)
             .property("description", &circle.description)
             .apply(move |dom| dominator::on_click_go_to_url!(dom, {
                 Route::Community(CommunityRoute::Circles(CommunityCirclesRoute::Circle(circle.id))).to_string()
