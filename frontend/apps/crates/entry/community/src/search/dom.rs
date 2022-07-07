@@ -30,7 +30,7 @@ impl CommunitySearch {
                 state.render_member(&member)
             })))
             .child_signal(state.render_see_more_members())
-            .property_signal("circleCount", state.member_count.signal())
+            .property_signal("circleCount", state.circle_count.signal())
             .children_signal_vec(state.circles.signal_vec_cloned().map(clone!(state => move|circle| {
                 state.render_circle(&circle)
             })))
