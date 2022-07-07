@@ -32,8 +32,7 @@ export class _ extends LitElement {
                     color: var(--main-yellow);
                     margin-right: 5px;
                 }
-                ::slotted(a[slot=members]) {
-                    cursor: pointer;
+                ::slotted([slot=members]) {
                     text-decoration: none;
                     display: grid;
                     grid-template-columns: 64px 1fr;
@@ -57,9 +56,11 @@ export class _ extends LitElement {
                     justify-content: space-between;
                     row-gap: 30px;
                 }
-                ::slotted(div[slot=circles]) {
+                ::slotted([slot=circles]) {
                     display: grid;
                     justify-items: center;
+                    text-decoration: none;
+                    color: var(--dark-gray-6);
                 }
                 ::slotted([slot=circles-link]) {
                     justify-self: center;

@@ -83,7 +83,7 @@ impl CommunityLanding {
     }
 
     fn render_circle(self: &Rc<Self>, circle: &Circle) -> Dom {
-        html!("div", {
+        link!(Route::Community(CommunityRoute::Circles(CommunityCirclesRoute::Circle(circle.id))).to_string(), {
             .property("slot", "circles")
             .child(html!("img-ji", {
                 .style("height", "90px")
