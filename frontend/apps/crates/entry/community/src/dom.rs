@@ -4,7 +4,7 @@ use components::{
     overlay::container::OverlayContainer,
     page_header::{self, state::PageLinks},
 };
-use dominator::{clone, html, with_node, Dom};
+use dominator::{clone, html, with_node, Dom, EventOptions};
 use futures_signals::signal::{Signal, SignalExt};
 use shared::domain::user::UserProfile;
 use utils::{
@@ -14,6 +14,7 @@ use utils::{
         CommunityCirclesRoute, CommunityMembersRoute, CommunityRoute, CommunitySearchQuery, Route,
         UserRoute,
     },
+    unwrap::UnwrapJiExt,
 };
 use web_sys::HtmlInputElement;
 
@@ -164,6 +165,15 @@ impl Community {
                     .child(html!("fa-icon", {
                         .property("icon", "fa-thin fa-clapperboard-play")
                     }))
+                    .event_with_options(
+                        &EventOptions::preventable(),
+                        |e: events::Click| {
+                            e.prevent_default();
+                            let _ = web_sys::window()
+                                .unwrap_ji()
+                                .alert_with_message("Coming soon");
+                        }
+                    )
                 }),
             ])
         })
