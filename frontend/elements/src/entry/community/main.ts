@@ -22,19 +22,40 @@ export class _ extends LitElement {
                 }
                 header .width-holder {
                     display: grid;
-                    grid-template-columns: auto auto;
-                    justify-content: space-between;
-                    padding: 40px 30px;
+                    justify-content: center;
+                    padding: 40px 14px;
+                    row-gap: 40px;
+                }
+                @media (min-width: 1920px) {
+                    header .width-holder {
+                        justify-content: space-between;
+                        padding: 40px 30px;
+                        row-gap: 10px;
+                        grid-template-columns: auto auto;
+                    }
                 }
                 h2 {
                     margin: 0;
                     color: #fed758;
-                    font-size: 48px;
                     font-weight: 900;
+                    font-size: 36px;
+                    text-align: center;
+                }
+                @media (min-width: 1920px) {
+                    h2 {
+                        font-size: 48px;
+                        text-align: left;
+                    }
                 }
                 ::slotted([slot=nav]) {
                     display: flex;
-                    column-gap: 40px;
+                    justify-content: center;
+                    column-gap: 20px;
+                }
+                @media (min-width: 1920px) {
+                    ::slotted([slot=nav]) {
+                        column-gap: 40px;
+                    }
                 }
                 main {
                     padding: 40px 30px;

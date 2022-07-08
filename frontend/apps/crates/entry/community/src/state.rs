@@ -34,6 +34,7 @@ impl Community {
 
 pub(super) static CIRCLE_LIST_GRID_COLUMNS: Lazy<String> = Lazy::new(|| {
     class! {
+        // 108px 20% 100px 1fr 20%
         .style("grid-template-columns", "108px 200px 50px 400px 138px")
     }
 });

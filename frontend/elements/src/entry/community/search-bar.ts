@@ -26,7 +26,7 @@ export class _ extends LitElement {
                     box-shadow: 0 0px 2px 0 rgba(0, 0, 0, 0.16);
                 }
                 ::slotted([slot=search-input]) {
-                    width: 420px;
+                    width: 300px;
                     height: 48px;
                     padding: 0 20px;
                     border-radius: 24px;
