@@ -373,6 +373,19 @@ impl<'de> serde::Deserialize<'de> for UserOrMe {
     }
 }
 
+/// Sort browse results by timestamp
+#[derive(Serialize, Deserialize, Copy, Clone, Eq, PartialEq, Debug)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[serde(rename_all = "camelCase")]
+#[repr(i16)]
+pub enum OrderBy {
+    /// Order Asset results by timestamp created_at
+    CreatedAt = 0,
+
+    /// Order Asset results by timestamp published_at
+    PublishedAt = 1,
+}
+
 /// Access level for the jig.
 #[derive(Serialize, Deserialize, Copy, Clone, Eq, PartialEq, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]

@@ -3,7 +3,7 @@ use anyhow::Context;
 use serde_json::value::Value;
 use shared::domain::{
     additional_resource::{AdditionalResource, AdditionalResourceId as AddId, ResourceContent},
-    asset::{DraftOrLive, PrivacyLevel},
+    asset::{DraftOrLive, OrderBy, PrivacyLevel},
     category::CategoryId,
     jig::{
         AudioBackground, AudioEffects, AudioFeedbackNegative, AudioFeedbackPositive,
@@ -531,6 +531,7 @@ pub async fn browse(
     page: i32,
     page_limit: u32,
     resource_types: Vec<Uuid>,
+    order_by: Option<OrderBy>,
 ) -> sqlx::Result<Vec<JigResponse>> {
     let mut txn = db.begin().await?;
 
@@ -552,7 +553,11 @@ with cte as (
         and (blocked = $4 or $4 is null)
         and (jd.privacy_level = any($5) or $5 = array[]::smallint[])
         and (resource.resource_type_id = any($8) or $8 = array[]::uuid[])
-    order by coalesce(updated_at, created_at) desc, jig_id) as id
+    order by case when $9 = 0 then created_at  
+        when $9 = 1 then published_at
+        else coalesce(updated_at, created_at)
+  end desc, jig_id
+) as id
 ),
 cte1 as (
     select * from unnest((select distinct id from cte)) with ordinality t(id
@@ -636,6 +641,7 @@ limit $7
     page,
     page_limit as i32,
     &resource_types[..],
+    order_by.map(|it| it as i32)
 )
     .fetch_all(&mut txn)
     .instrument(tracing::info_span!("query jig_data"))
