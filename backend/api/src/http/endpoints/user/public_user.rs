@@ -139,6 +139,7 @@ pub async fn browse_user_jigs(
         query.page.unwrap_or(0) as i32,
         page_limit,
         resource_types.to_owned(),
+        None,
     );
 
     let total_count_future = db::jig::filtered_count(

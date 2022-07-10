@@ -17,7 +17,7 @@ use uuid::Uuid;
 
 use super::{
     additional_resource::AdditionalResource,
-    asset::{DraftOrLive, PrivacyLevel, UserOrMe},
+    asset::{DraftOrLive, OrderBy, PrivacyLevel, UserOrMe},
     category::CategoryId,
     meta::{AffiliationId, AgeRangeId, ResourceTypeId},
     module::LiteModule,
@@ -653,6 +653,11 @@ pub struct JigBrowseQuery {
     #[serde(deserialize_with = "super::from_csv")]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub resource_types: Vec<ResourceTypeId>,
+
+    /// The hits per page to be returned
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub order_by: Option<OrderBy>,
 }
 
 /// Response for [`Browse`](crate::api::endpoints::jig::Browse).
