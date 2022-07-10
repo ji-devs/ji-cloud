@@ -85,8 +85,6 @@ impl ApiEndpoint for GetDraft {
 /// * [`GetLive`] fetches live copies
 /// * [`Search`]
 ///
-/// See [`JigData`](crate::domain::jig::JigData) for the over-the-wire representation.
-///
 /// # Authorization
 /// * One of `Admin`, `AdminJig`,, or `ManageSelfJig` for owned JIGs
 pub struct UpdateDraftData;

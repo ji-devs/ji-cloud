@@ -12,35 +12,33 @@ expression: body
   "likes": 0,
   "plays": 0,
   "jigFocus": "modules",
-  "jigData": {
-    "draftOrLive": "draft",
-    "displayName": "draft name",
-    "modules": [],
-    "ageRanges": [],
-    "affiliations": [],
-    "language": "he",
-    "categories": [],
-    "additionalResources": "[ids]",
-    "description": "draft test description",
-    "lastEdited": "[last_edited]",
-    "defaultPlayerSettings": {
-      "direction": "rtl",
-      "displayScore": false,
-      "trackAssessments": false,
-      "dragAssist": false
-    },
-    "theme": "Jigzi",
-    "audioBackground": "funForKids",
-    "audioEffects": {
-      "feedbackPositive": [],
-      "feedbackNegative": []
-    },
-    "privacyLevel": "unlisted",
-    "locked": false,
-    "otherKeywords": "",
-    "translatedKeywords": "",
-    "translatedDescription": {}
+  "draftOrLive": "draft",
+  "displayName": "draft name",
+  "modules": [],
+  "ageRanges": [],
+  "affiliations": [],
+  "language": "he",
+  "categories": [],
+  "additionalResources": "[ids]",
+  "description": "draft test description",
+  "lastEdited": "[last_edited]",
+  "defaultPlayerSettings": {
+    "direction": "rtl",
+    "displayScore": false,
+    "trackAssessments": false,
+    "dragAssist": false
   },
+  "theme": "Jigzi",
+  "audioBackground": "funForKids",
+  "audioEffects": {
+    "feedbackPositive": [],
+    "feedbackNegative": []
+  },
+  "privacyLevel": "unlisted",
+  "locked": false,
+  "otherKeywords": "",
+  "translatedKeywords": "",
+  "translatedDescription": {},
   "adminData": {
     "rating": null,
     "blocked": false,

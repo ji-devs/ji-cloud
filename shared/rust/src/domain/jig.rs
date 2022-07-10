@@ -32,7 +32,7 @@ pub struct JigId(pub Uuid);
 
 /// Request to create a new JIG.
 ///
-/// This creates the draft and live [JigData](JigData) copies with the requested info.
+/// This creates the draft and live metadata copies with the requested info.
 #[derive(Serialize, Deserialize, Debug, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct JigCreateRequest {
@@ -73,73 +73,6 @@ pub struct JigCreateRequest {
     /// Primary material for jig
     #[serde(default)]
     pub jig_focus: JigFocus,
-}
-
-/// The over-the-wire representation of a JIG's data. This can either be the live copy or the draft copy.
-#[derive(Serialize, Deserialize, Clone, Debug)]
-#[serde(rename_all = "camelCase")]
-pub struct JigData {
-    /// Whether the JIG data is the live copy or the draft.
-    pub draft_or_live: DraftOrLive,
-
-    /// The JIG's name.
-    pub display_name: String,
-
-    /// The JIG's remaining modules.
-    ///
-    /// NOTE: the first module will always exist and will always be of type cover
-    pub modules: Vec<LiteModule>,
-
-    /// This jig's age ranges.
-    pub age_ranges: Vec<AgeRangeId>,
-
-    /// This jig's affiliations.
-    pub affiliations: Vec<AffiliationId>,
-
-    /// The language the jig uses.
-    ///
-    /// NOTE: in the format `en`, `eng`, `en-US`, `eng-US` or `eng-USA`. To be replaced with a struct that enforces this.
-    pub language: String,
-
-    /// The jig's categories.
-    pub categories: Vec<CategoryId>,
-
-    /// Additional resources of this JIG.
-    pub additional_resources: Vec<AdditionalResource>,
-
-    /// Description of the jig.
-    pub description: String,
-
-    /// When the jig was last edited
-    pub last_edited: Option<DateTime<Utc>>,
-
-    /// Default player settings for this jig.
-    pub default_player_settings: JigPlayerSettings,
-
-    /// Theme for this jig, identified by `[ThemeId](module::body::ThemeId)`.
-    pub theme: ThemeId,
-
-    /// Background audio
-    pub audio_background: Option<AudioBackground>,
-
-    /// Audio effects
-    pub audio_effects: AudioEffects,
-
-    /// The privacy level on the JIG.
-    pub privacy_level: PrivacyLevel,
-
-    /// Lock this jig
-    pub locked: bool,
-
-    /// Other keywords used to searched for jigs
-    pub other_keywords: String,
-
-    /// translated keywords used to searched for jigs
-    pub translated_keywords: String,
-
-    /// translated descriptions
-    #[serde(default)]
-    pub translated_description: HashMap<String, String>,
 }
 
 /// Access level for the jig.
@@ -517,8 +450,67 @@ pub struct JigResponse {
     /// Number of plays Jig
     pub jig_focus: JigFocus,
 
-    /// The data of the requested JIG.
-    pub jig_data: JigData,
+    /// Whether the JIG data is the live copy or the draft.
+    pub draft_or_live: DraftOrLive,
+
+    /// The JIG's name.
+    pub display_name: String,
+
+    /// The JIG's remaining modules.
+    ///
+    /// NOTE: the first module will always exist and will always be of type cover
+    pub modules: Vec<LiteModule>,
+
+    /// This jig's age ranges.
+    pub age_ranges: Vec<AgeRangeId>,
+
+    /// This jig's affiliations.
+    pub affiliations: Vec<AffiliationId>,
+
+    /// The language the jig uses.
+    ///
+    /// NOTE: in the format `en`, `eng`, `en-US`, `eng-US` or `eng-USA`. To be replaced with a struct that enforces this.
+    pub language: String,
+
+    /// The jig's categories.
+    pub categories: Vec<CategoryId>,
+
+    /// Additional resources of this JIG.
+    pub additional_resources: Vec<AdditionalResource>,
+
+    /// Description of the jig.
+    pub description: String,
+
+    /// When the jig was last edited
+    pub last_edited: Option<DateTime<Utc>>,
+
+    /// Default player settings for this jig.
+    pub default_player_settings: JigPlayerSettings,
+
+    /// Theme for this jig, identified by `[ThemeId](module::body::ThemeId)`.
+    pub theme: ThemeId,
+
+    /// Background audio
+    pub audio_background: Option<AudioBackground>,
+
+    /// Audio effects
+    pub audio_effects: AudioEffects,
+
+    /// The privacy level on the JIG.
+    pub privacy_level: PrivacyLevel,
+
+    /// Lock this jig
+    pub locked: bool,
+
+    /// Other keywords used to searched for jigs
+    pub other_keywords: String,
+
+    /// translated keywords used to searched for jigs
+    pub translated_keywords: String,
+
+    /// translated descriptions
+    #[serde(default)]
+    pub translated_description: HashMap<String, String>,
 
     /// Admin data for Jig
     pub admin_data: JigAdminData,

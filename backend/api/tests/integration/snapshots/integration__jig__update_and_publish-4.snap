@@ -12,44 +12,42 @@ expression: body
   "likes": 0,
   "plays": 0,
   "jigFocus": "modules",
-  "jigData": {
-    "draftOrLive": "live",
-    "displayName": "name",
-    "modules": [
-      {
-        "id": "[id]",
-        "kind": "Cover",
-        "is_complete": true
-      }
-    ],
-    "ageRanges": [],
-    "affiliations": [],
-    "language": "en-us",
-    "categories": [
-      "7fe19326-e883-11ea-93f0-5343493c17c4",
-      "81c4796a-e883-11ea-93f0-df2484ab6b11"
-    ],
-    "additionalResources": [],
-    "description": "asdasdasd",
-    "lastEdited": "[last_edited]",
-    "defaultPlayerSettings": {
-      "direction": "ltr",
-      "displayScore": true,
-      "trackAssessments": true,
-      "dragAssist": true
-    },
-    "theme": "Blank",
-    "audioBackground": null,
-    "audioEffects": {
-      "feedbackPositive": "[audio]",
-      "feedbackNegative": "[audio]"
-    },
-    "privacyLevel": "unlisted",
-    "locked": false,
-    "otherKeywords": "",
-    "translatedKeywords": "",
-    "translatedDescription": {}
+  "draftOrLive": "live",
+  "displayName": "name",
+  "modules": [
+    {
+      "id": "[id]",
+      "kind": "Cover",
+      "is_complete": true
+    }
+  ],
+  "ageRanges": [],
+  "affiliations": [],
+  "language": "en-us",
+  "categories": [
+    "7fe19326-e883-11ea-93f0-5343493c17c4",
+    "81c4796a-e883-11ea-93f0-df2484ab6b11"
+  ],
+  "additionalResources": [],
+  "description": "asdasdasd",
+  "lastEdited": "[last_edited]",
+  "defaultPlayerSettings": {
+    "direction": "ltr",
+    "displayScore": true,
+    "trackAssessments": true,
+    "dragAssist": true
   },
+  "theme": "Blank",
+  "audioBackground": null,
+  "audioEffects": {
+    "feedbackPositive": "[audio]",
+    "feedbackNegative": "[audio]"
+  },
+  "privacyLevel": "unlisted",
+  "locked": false,
+  "otherKeywords": "",
+  "translatedKeywords": "",
+  "translatedDescription": {},
   "adminData": {
     "rating": null,
     "blocked": false,
