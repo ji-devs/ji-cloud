@@ -12,7 +12,7 @@ use shared::domain::{
     },
     meta::{AffiliationId, AgeRangeId, ResourceTypeId as TypeId},
     module::{body::ThemeId, LiteModule, ModuleId, ModuleKind},
-    user::UserScope,
+    user::{UserId, UserScope},
 };
 use sqlx::{types::Json, PgConnection, PgPool};
 use std::collections::HashMap;
@@ -1484,12 +1484,12 @@ select exists (
     Ok(exists)
 }
 
-pub async fn is_admin(db: &PgPool, user_id: Uuid) -> Result<bool, error::Auth> {
+pub async fn is_admin(db: &PgPool, user_id: UserId) -> Result<bool, error::Auth> {
     let authed = sqlx::query!(
         r#"
 select exists(select 1 from user_scope where user_id = $1 and scope = any($2)) as "authed!"
 "#,
-        user_id,
+        user_id.0,
         &[UserScope::Admin as i16, UserScope::AdminJig as i16][..],
     )
     .fetch_one(db)

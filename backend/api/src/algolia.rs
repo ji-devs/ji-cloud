@@ -21,6 +21,7 @@ use shared::{
         image::{ImageId, ImageSize},
         jig::{JigFocus, JigId},
         meta::{AffiliationId, AgeRangeId, ImageStyleId, ImageTagIndex, ResourceTypeId},
+        user::UserId,
     },
     media::MediaGroupKind,
 };
@@ -1372,7 +1373,7 @@ impl Client {
         affiliations: &[AffiliationId],
         resource_types: &[ResourceTypeId],
         categories: &[CategoryId],
-        author_id: Option<Uuid>,
+        author_id: Option<UserId>,
         author_name: Option<String>,
         jig_focus: Option<JigFocus>,
         other_keywords: Option<String>,
@@ -1392,7 +1393,7 @@ impl Client {
             and_filters.filters.push(Box::new(CommonFilter {
                 filter: FacetFilter {
                     facet_name: "author_id".to_owned(),
-                    value: author_id.to_string(),
+                    value: author_id.0.to_string(),
                 },
                 invert: false,
             }))
@@ -1606,7 +1607,7 @@ impl Client {
     pub async fn search_circle(
         &self,
         query: &str,
-        creator_id: Option<Uuid>,
+        creator_id: Option<UserId>,
         creator_name: Option<String>,
         page_limit: u32,
         page: Option<u32>,
@@ -1617,7 +1618,7 @@ impl Client {
             and_filters.filters.push(Box::new(CommonFilter {
                 filter: FacetFilter {
                     facet_name: "creator_id".to_owned(),
-                    value: creator_id.to_string(),
+                    value: creator_id.0.to_string(),
                 },
                 invert: false,
             }))

@@ -1,7 +1,7 @@
 use shared::domain::{
     circle::{Circle, CircleId},
     image::ImageId,
-    user::UserScope,
+    user::{UserId, UserScope},
 };
 use sqlx::{PgConnection, PgPool};
 use uuid::Uuid;
@@ -13,7 +13,7 @@ pub async fn create(
     display_name: &str,
     description: &str,
     image: Option<ImageId>,
-    creator_id: Uuid,
+    creator_id: UserId,
 ) -> sqlx::Result<CircleId> {
     let image_id = if let Some(id) = image {
         Some(id.0)
@@ -29,7 +29,7 @@ returning id as "id: CircleId"
         display_name,
         description,
         image_id,
-        creator_id,
+        creator_id.0,
     )
     .fetch_one(&mut *conn)
     .await?
@@ -125,7 +125,7 @@ select id            as "circle_id: CircleId",
        description,
        image         as "image?: ImageId",
        member_count,
-       creator_id,
+       creator_id    as "creator_id: UserId",
        created_at,
        updated_at
 from circle
@@ -150,13 +150,13 @@ where id = $1
     Ok(circle)
 }
 
-pub async fn join_circle(db: &PgPool, user_id: Uuid, id: CircleId) -> anyhow::Result<()> {
+pub async fn join_circle(db: &PgPool, user_id: UserId, id: CircleId) -> anyhow::Result<()> {
     sqlx::query!(
         r#"
 insert into circle_member(id, user_id) values($1, $2)
 "#,
         id.0,
-        user_id
+        user_id.0
     )
     .execute(db)
     .await
@@ -165,11 +165,11 @@ insert into circle_member(id, user_id) values($1, $2)
     Ok(())
 }
 
-pub async fn leave_circle(db: &PgPool, user_id: Uuid, id: CircleId) -> anyhow::Result<()> {
+pub async fn leave_circle(db: &PgPool, user_id: UserId, id: CircleId) -> anyhow::Result<()> {
     sqlx::query!(
         "delete from circle_member where id = $1 and user_id = $2",
         id.0,
-        user_id
+        user_id.0
     )
     .execute(db)
     .await
@@ -180,7 +180,7 @@ pub async fn leave_circle(db: &PgPool, user_id: Uuid, id: CircleId) -> anyhow::R
 
 pub async fn browse(
     db: &PgPool,
-    creator_id: Option<Uuid>,
+    creator_id: Option<UserId>,
     page_limit: u32,
     page: i32,
 ) -> sqlx::Result<Vec<Circle>> {
@@ -203,7 +203,7 @@ pub async fn browse(
                 description         as "description!",
                 image               as "image?: ImageId",
                 member_count        as "member_count!",
-                creator_id          as "creator_id!",
+                creator_id          as "creator_id!: UserId",
                 created_at,
                 updated_at   
         from "circle"
@@ -212,7 +212,7 @@ pub async fn browse(
             order by ord 
             limit $3
             "#,
-        creator_id,
+        creator_id.map(|x| x.0),
         page as i32,
         page_limit as i32,
     )
@@ -249,7 +249,7 @@ select  id            as "circle_id!: CircleId",
         description   as "description!",
         image         as "image?: ImageId",
         member_count  as "member_count!: u32",
-        creator_id    as "creator_id!",
+        creator_id    as "creator_id!: UserId",
         created_at    as "created_at!",
         updated_at   
 from circle
@@ -280,13 +280,13 @@ with ordinality t(id, ord) using (id)
     Ok(v)
 }
 
-pub async fn browse_circle_members(db: &PgPool, id: CircleId) -> anyhow::Result<Vec<Uuid>> {
+pub async fn browse_circle_members(db: &PgPool, id: CircleId) -> anyhow::Result<Vec<UserId>> {
     let mut txn = db.begin().await?;
 
     let res = sqlx::query!(
         //language=SQL
         r#"
-select user_id  
+select user_id  "user_id: UserId"
 from circle_member
 where id = $1
 "#,
@@ -315,7 +315,7 @@ select exists(select 1 from circle where id = $1) as "valid!"
 
 pub async fn authz(
     db: &PgPool,
-    user_id: Uuid,
+    user_id: UserId,
     circle_id: Option<CircleId>,
 ) -> Result<(), error::Auth> {
     let authed = match circle_id {
@@ -324,7 +324,7 @@ pub async fn authz(
                 r#"
 select exists(select 1 from user_scope where user_id = $1 and scope = any($2)) as "authed!"
 "#,
-                user_id,
+                user_id.0,
                 &[
                     UserScope::Admin as i16,
                     UserScope::AdminJig as i16,
@@ -346,7 +346,7 @@ select exists (
     not exists (select 1 from circle where id = $4 and circle.creator_id <> $1)
 ) as "authed!"
 "#,
-                user_id,
+                user_id.0,
                 &[UserScope::Admin as i16, UserScope::AdminJig as i16,][..],
                 UserScope::ManageSelfJig as i16,
                 id.0
@@ -364,7 +364,7 @@ select exists (
     Ok(())
 }
 
-pub async fn filtered_count(db: &PgPool, creator_id: Option<Uuid>) -> sqlx::Result<u64> {
+pub async fn filtered_count(db: &PgPool, creator_id: Option<UserId>) -> sqlx::Result<u64> {
     let circle = sqlx::query!(
         //language=SQL
         r#"
@@ -372,7 +372,7 @@ select count(distinct id) as "count!: i64"
     from circle
     where creator_id = $1 or $1 is null
 "#,
-        creator_id,
+        creator_id.map(|x| x.0),
     )
     .fetch_one(db)
     .await?;

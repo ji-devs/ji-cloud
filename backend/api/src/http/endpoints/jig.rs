@@ -12,6 +12,7 @@ use shared::{
             DeleteUserJigs, JigBrowseResponse, JigCountResponse, JigCreateRequest, JigId,
             JigLikedResponse, JigSearchResponse,
         },
+        user::UserId,
         CreateResponse,
     },
 };
@@ -481,13 +482,13 @@ async fn auth_claims(
     author_id: Option<UserOrMe>,
     privacy_level: Vec<PrivacyLevel>,
     blocked: Option<bool>,
-) -> Result<(Option<Uuid>, Vec<PrivacyLevel>, Option<bool>), error::Auth> {
+) -> Result<(Option<UserId>, Vec<PrivacyLevel>, Option<bool>), error::Auth> {
     if claims.is_none() && author_id == Some(UserOrMe::Me) {
         return Err(error::Auth::Forbidden);
     };
 
     if let Some(user) = claims {
-        let is_admin = db::jig::is_admin(&*db, user.0.user_id).await?;
+        let is_admin = db::jig::is_admin(&*db, user_id).await?;
 
         if let Some(author) = author_id {
             let (author_id, privacy, blocked) = match author {

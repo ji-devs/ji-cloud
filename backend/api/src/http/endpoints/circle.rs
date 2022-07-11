@@ -8,6 +8,7 @@ use shared::{
     domain::{
         asset::UserOrMe,
         circle::{BrowseMembersResponse, CircleBrowseResponse, CircleId, CircleSearchResponse},
+        user::UserId,
         CreateResponse,
     },
 };
@@ -37,7 +38,7 @@ async fn create(
         &req.display_name,
         &req.description,
         req.image,
-        claims.0.user_id,
+        UserId(claims.0.user_id),
     )
     .await?;
 
@@ -55,7 +56,7 @@ async fn update(
 ) -> Result<HttpResponse, error::UpdateWithMetadata> {
     let id = path.into_inner();
 
-    db::circle::authz(&*db, claims.0.user_id, Some(id)).await?;
+    db::circle::authz(&*db, UserId(claims.0.user_id), Some(id)).await?;
 
     let req = req.map_or_else(Default::default, Json::into_inner);
 
@@ -80,7 +81,7 @@ async fn delete(
 ) -> Result<HttpResponse, error::Delete> {
     let id = path.into_inner();
 
-    db::circle::authz(&*db, claims.0.user_id, Some(id)).await?;
+    db::circle::authz(&*db, UserId(claims.0.user_id), Some(id)).await?;
 
     db::circle::delete(&*db, id).await?;
 
@@ -111,7 +112,7 @@ async fn join(
         .await
         .map_err(|_| error::NotFound::ResourceNotFound)?;
 
-    db::circle::join_circle(&db, claims.0.user_id, id)
+    db::circle::join_circle(&db, UserId(claims.0.user_id), id)
         .await
         .map_err(|e| error::NotFound::InternalServerError(e))?;
 
@@ -129,7 +130,7 @@ async fn leave(
         .await
         .map_err(|_| error::NotFound::ResourceNotFound)?;
 
-    db::circle::leave_circle(&db, claims.0.user_id, id)
+    db::circle::leave_circle(&db, UserId(claims.0.user_id), id)
         .await
         .map_err(|e| error::NotFound::InternalServerError(e))?;
 
@@ -229,7 +230,7 @@ async fn auth_claims(
     db: &PgPool,
     claims: Option<TokenUser>,
     creator_id: Option<UserOrMe>,
-) -> Result<Option<Uuid>, error::Auth> {
+) -> Result<Option<UserId>, error::Auth> {
     //Check if user is logged in. If not, users cannot use UserOrMe::Me
     let id = if let Some(token) = claims {
         let id = if let Some(creator) = creator_id {
@@ -259,7 +260,7 @@ async fn auth_claims(
         } else {
             None
         };
-        id
+        id.map(|x| UserId(x))
     } else {
         let id = if let Some(creator) = creator_id {
             let creator = match creator {
@@ -288,7 +289,7 @@ async fn auth_claims(
         } else {
             None
         };
-        id
+        id.map(|x| UserId(x))
     };
 
     Ok(id)
