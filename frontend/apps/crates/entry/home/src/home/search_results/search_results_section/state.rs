@@ -7,42 +7,31 @@ use futures_signals::{
     signal_vec::{MutableVec, SignalVecExt},
 };
 use shared::domain::{
-    jig::{JigFocus, JigId, JigResponse, JigSearchResponse},
+    jig::{JigFocus, JigResponse, JigSearchResponse},
     user::UserProfile,
 };
 
-use crate::home::state::SearchSelected;
-
-use super::super::super::state::SearchOptions;
+use crate::home::state::Home;
 
 pub struct SearchResultsSection {
+    pub home_state: Rc<Home>,
     pub focus: JigFocus,
     pub loader: AsyncLoader,
     pub list: Rc<MutableVec<JigResponse>>,
     pub total: Mutable<u64>,
     pub next_page: Mutable<u32>,
-    pub search_options: Rc<SearchOptions>,
-    pub search_selected: Rc<SearchSelected>,
-    pub play_jig: Mutable<Option<JigId>>,
     pub user: Mutable<Option<UserProfile>>,
 }
 
 impl SearchResultsSection {
-    pub fn new(
-        focus: JigFocus,
-        search_options: Rc<SearchOptions>,
-        search_selected: Rc<SearchSelected>,
-        play_jig: Mutable<Option<JigId>>,
-    ) -> Rc<Self> {
+    pub fn new(home_state: Rc<Home>, focus: JigFocus) -> Rc<Self> {
         Rc::new(Self {
+            home_state,
             focus,
             loader: AsyncLoader::new(),
             list: Rc::new(MutableVec::new()),
             total: Mutable::new(0),
             next_page: Mutable::new(0),
-            search_options,
-            search_selected,
-            play_jig,
             user: Mutable::new(None),
         })
     }

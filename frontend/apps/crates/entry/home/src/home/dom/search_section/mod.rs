@@ -9,7 +9,7 @@ use web_sys::HtmlInputElement;
 
 use super::super::{
     actions::{fetch_data, search},
-    state::State,
+    state::Home,
 };
 
 #[allow(dead_code)] // TODO: remove once advanced search is enabled again
@@ -21,7 +21,7 @@ const STR_ALL_AGES: &str = "All ages";
 const STR_SEARCH: &str = "Search";
 const STR_WHAT_ARE_YOU_LOOKING_FOR: &str = "What are you looking for?";
 
-pub fn render(state: Rc<State>, auto_search: bool) -> Dom {
+pub fn render(state: Rc<Home>, auto_search: bool) -> Dom {
     fetch_data(state.clone(), auto_search);
 
     html!("home-search-section", {
@@ -139,7 +139,7 @@ pub fn render(state: Rc<State>, auto_search: bool) -> Dom {
     })
 }
 
-fn age_value_signal(state: Rc<State>) -> impl Signal<Item = String> {
+fn age_value_signal(state: Rc<Home>) -> impl Signal<Item = String> {
     map_ref! {
         let selected_ages = state.search_selected.age_ranges.signal_cloned(),
         let available_ages = state.search_options.age_ranges.signal_cloned() => {
@@ -160,7 +160,7 @@ fn age_value_signal(state: Rc<State>) -> impl Signal<Item = String> {
     }
 }
 
-fn language_value_signal(state: Rc<State>) -> impl Signal<Item = &'static str> {
+fn language_value_signal(state: Rc<Home>) -> impl Signal<Item = &'static str> {
     state
         .search_selected
         .language

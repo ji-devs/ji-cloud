@@ -7,12 +7,12 @@ use futures_signals::{
 use std::rc::Rc;
 use utils::unwrap::UnwrapJiExt;
 
-use super::super::super::state::State;
+use super::super::super::state::Home;
 
 const STR_CATEGORIES_LABEL: &str = "Categories";
 const STR_CATEGORIES_PLACEHOLDER: &str = "Select one or more from the list";
 
-pub fn render(state: Rc<State>) -> Dom {
+pub fn render(state: Rc<Home>) -> Dom {
     html!("input-wrapper", {
         .property("slot", "categories")
         .property("label", STR_CATEGORIES_LABEL)
@@ -27,7 +27,7 @@ pub fn render(state: Rc<State>) -> Dom {
     })
 }
 
-fn category_value_signal(state: Rc<State>) -> impl Signal<Item = String> {
+fn category_value_signal(state: Rc<Home>) -> impl Signal<Item = String> {
     map_ref! {
         let selected_categories = state.search_selected.categories.signal_cloned(),
         let category_label_lookup = state.search_options.category_label_lookup.signal_cloned() => {

@@ -1,4 +1,7 @@
-pub mod actions;
-pub mod dom;
+mod actions;
+mod dom;
 mod search_results;
-pub mod state;
+mod state;
+
+pub use dom::*;
+pub use state::*;

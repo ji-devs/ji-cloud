@@ -12,7 +12,7 @@ use strum_macros::Display;
 mod search_state;
 pub use search_state::*;
 
-pub struct State {
+pub struct Home {
     pub loader: AsyncLoader,
     pub mode: Mutable<HomePageMode>,
     pub is_logged_in: Mutable<bool>,
@@ -23,25 +23,20 @@ pub struct State {
     pub parents_testimonials: Vec<Testimonial>,
     pub teachers_testimonials: Vec<Testimonial>,
     pub total_jigs_count: Mutable<u64>,
+    pub play_login_popup_shown: Mutable<bool>,
     pub play_jig: Mutable<Option<JigId>>,
 }
 
-impl Default for State {
-    fn default() -> Self {
-        Self::new_with_search_selected(SearchSelected::default())
+impl Home {
+    pub fn new() -> Rc<Self> {
+        Rc::new(Self::new_with_search_selected(SearchSelected::default()))
     }
-}
-
-impl State {
-    pub fn new() -> Self {
-        Default::default()
-    }
-    pub fn new_search(query_params: Option<JigSearchQuery>) -> Self {
+    pub fn new_search(query_params: Option<JigSearchQuery>) -> Rc<Self> {
         let search_selected = match query_params {
             Some(query_params) => SearchSelected::from_search_request(query_params),
             None => SearchSelected::default(),
         };
-        Self::new_with_search_selected(search_selected)
+        Rc::new(Self::new_with_search_selected(search_selected))
     }
     fn new_with_search_selected(search_selected: SearchSelected) -> Self {
         Self {
@@ -55,6 +50,7 @@ impl State {
             parents_testimonials: Self::get_parents_testimonials(),
             teachers_testimonials: Self::get_teachers_testimonials(),
             total_jigs_count: Mutable::new(0),
+            play_login_popup_shown: Mutable::new(false),
             play_jig: Mutable::new(None),
         }
     }

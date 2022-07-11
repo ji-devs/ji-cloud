@@ -8,7 +8,7 @@ use utils::{events, unwrap::UnwrapJiExt};
 
 use super::categories_select;
 
-use super::super::super::{actions::search, state::State};
+use super::super::super::{actions::search, state::Home};
 
 const STR_SEARCH: &str = "Advanced Search";
 const STR_GOAL_LABEL: &str = "Teaching Goal";
@@ -16,7 +16,7 @@ const STR_GOAL_PLACEHOLDER: &str = "";
 const STR_AFFILIATION_LABEL: &str = "Affiliation";
 const STR_AFFILIATION_PLACEHOLDER: &str = "Select one or more from the list";
 
-pub fn render(state: Rc<State>) -> Dom {
+pub fn render(state: Rc<Home>) -> Dom {
     html!("home-search-section-advanced", {
         .property("slot", "advanced")
         .children(&mut [
@@ -71,7 +71,7 @@ pub fn render(state: Rc<State>) -> Dom {
     })
 }
 
-fn affiliation_value_signal(state: Rc<State>) -> impl Signal<Item = String> {
+fn affiliation_value_signal(state: Rc<Home>) -> impl Signal<Item = String> {
     map_ref! {
         let selected_affiliations = state.search_selected.affiliations.signal_cloned(),
         let available_affiliations = state.search_options.affiliations.signal_cloned() => {

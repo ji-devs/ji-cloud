@@ -54,7 +54,7 @@ impl SearchResultsSection {
                             .text(STR_LOAD_MORE)
                             .event(clone!(state => move |_: events::Click| {
                                 state.loader.load(clone!(state => async move {
-                                    let req = state.search_selected.to_search_request();
+                                    let req = state.home_state.search_selected.to_search_request();
                                     state.load_items(req).await;
                                 }));
                             }))
@@ -88,7 +88,7 @@ impl SearchResultsSection {
                     None => String::new(),
                 }
             })
-            .child_signal(state.search_options.age_ranges.signal_cloned().map(move |age_ranges| {
+            .child_signal(state.home_state.search_options.age_ranges.signal_cloned().map(move |age_ranges| {
                 let range = age_ranges.range(&jig_ages);
                 Some(html!("age-range", {
                     .property("slot", "ages")
@@ -115,7 +115,7 @@ impl SearchResultsSection {
                             html!("home-search-result-category", {
                                 .property("filled", matches!(state.focus, JigFocus::Modules))
                                 .property_signal("label", {
-                                    state.search_options.category_label_lookup.signal_cloned().map(clone!(category_id => move |category_label_lookup| {
+                                    state.home_state.search_options.category_label_lookup.signal_cloned().map(clone!(category_id => move |category_label_lookup| {
                                         match category_label_lookup.get(&category_id) {
                                             Some(label) => label.to_owned(),
                                             None => String::new(),
@@ -189,7 +189,11 @@ impl SearchResultsSection {
                                 .event({
                                     let jig_id = jig.id;
                                     clone!(state => move |_: events::Click| {
-                                        state.play_jig.set(Some(jig_id));
+                                        // if get_user().is_some() {
+                                            state.home_state.play_jig.set(Some(jig_id));
+                                        // } else {
+                                        //     state.home_state.play_login_popup_shown.set(true);
+                                        // }
                                     })
                                 })
                             }))
@@ -226,7 +230,8 @@ impl SearchResultsSection {
     // byJiTeam
 
     fn resource_type_name(self: &Rc<Self>, id: ResourceTypeId) -> impl Signal<Item = String> {
-        self.search_options
+        self.home_state
+            .search_options
             .resource_types
             .signal_ref(move |resource_types| {
                 let resource_type = resource_types

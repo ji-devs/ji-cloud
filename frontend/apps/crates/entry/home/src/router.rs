@@ -1,8 +1,8 @@
-use super::home;
+use crate::home::Home;
+
 use components::overlay::container::OverlayContainer;
 use dominator::{html, Dom};
 use futures_signals::signal::Signal;
-use std::rc::Rc;
 use utils::routes::{HomeRoute, Route};
 
 pub struct Router {}
@@ -24,13 +24,10 @@ impl Router {
             let route = Route::from_url(url);
             match route {
                 Route::Home(route) => match route {
-                    HomeRoute::Home => {
-                        Some(home::dom::render(Rc::new(home::state::State::new()), false))
-                    }
+                    HomeRoute::Home => Some(Home::new().render(false)),
                     HomeRoute::Search(search_query) => {
-                        let state =
-                            Rc::new(home::state::State::new_search(search_query.map(|x| *x)));
-                        Some(home::dom::render(state, true))
+                        let search_query = search_query.map(|x| *x);
+                        Some(Home::new_search(search_query).render(true))
                     }
                 },
                 _ => None,

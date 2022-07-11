@@ -1,13 +1,12 @@
-use std::rc::{Rc, Weak};
+use std::rc::Rc;
 
 use futures_signals::{
     map_ref,
     signal::{Mutable, Signal},
 };
 use shared::domain::jig::JigFocus;
-use utils::unwrap::UnwrapJiExt;
 
-use super::{super::state::State as HomeState, search_results_section::SearchResultsSection};
+use super::{super::state::Home, search_results_section::SearchResultsSection};
 
 #[derive(Clone)]
 pub struct SearchResults {
@@ -15,35 +14,18 @@ pub struct SearchResults {
     pub query: String,
     pub jigs: Rc<SearchResultsSection>,
     pub resources: Rc<SearchResultsSection>,
-    _home_state: Weak<HomeState>,
 }
 
 impl SearchResults {
-    pub fn new(home_state: &Rc<HomeState>, loading: bool) -> Rc<Self> {
+    pub fn new(home_state: &Rc<Home>, loading: bool) -> Rc<Self> {
         let query = home_state.search_selected.query.get_cloned();
 
         Rc::new(Self {
             loading: Mutable::new(loading),
             query,
-            jigs: SearchResultsSection::new(
-                JigFocus::Modules,
-                Rc::clone(&home_state.search_options),
-                Rc::clone(&home_state.search_selected),
-                home_state.play_jig.clone(),
-            ),
-            resources: SearchResultsSection::new(
-                JigFocus::Resources,
-                Rc::clone(&home_state.search_options),
-                Rc::clone(&home_state.search_selected),
-                home_state.play_jig.clone(),
-            ),
-            _home_state: Rc::downgrade(home_state),
+            jigs: SearchResultsSection::new(Rc::clone(&home_state), JigFocus::Modules),
+            resources: SearchResultsSection::new(Rc::clone(&home_state), JigFocus::Resources),
         })
-    }
-
-    pub fn home_state(&self) -> Rc<HomeState> {
-        // should always be here since parent is the one holding on to search results
-        self._home_state.upgrade().unwrap_ji()
     }
 
     pub fn total_results_count_signal(self: &Rc<Self>) -> impl Signal<Item = u64> {
