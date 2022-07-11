@@ -30,6 +30,7 @@ export class _ extends LitElement {
                 }
                 base-select::part(anchored-overlay) {
                     display: block;
+                    width: 100%;
                 }
                 base-select::part(anchored-overlay_overlay) {
                     border-radius: 0 0 14px 14px;
