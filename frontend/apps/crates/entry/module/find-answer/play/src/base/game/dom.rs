@@ -8,12 +8,19 @@ use std::rc::Rc;
 
 pub fn render(state: Rc<Game>) -> Dom {
     html!("empty-fragment", {
-        .child_signal(state.phase.signal_cloned().map(clone!(state => move |phase| {
-            // TODO find-answer
-            match phase {
-                // Phase::ShowHints => Some(render_hints(Hints::new(state.clone()))),
-                Phase::Playing => Some(render_playing(PlayState::new(state.clone()))),
+        .child_signal(state.question.signal_cloned().map(clone!(state => move |question| {
+            if let Some((_index, question)) = question {
+                Some(render_playing(PlayState::new(state.clone(), question)))
+            } else {
+                None
             }
         })))
+        // TODO Remove this
+        // .child_signal(state.phase.signal_cloned().map(clone!(state => move |phase| {
+        //     match phase {
+        //         // Phase::ShowHints => Some(render_hints(Hints::new(state.clone()))),
+        //         Phase::Playing => Some(render_playing(PlayState::new(state.clone()))),
+        //     }
+        // })))
     })
 }
