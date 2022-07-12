@@ -4,7 +4,7 @@ use shared::domain::{
     module::{
         body::{
             _groups::design::{Backgrounds, Sticker, Trace},
-            find_answer::{Mode, ModuleData as RawData, PlaySettings, Step},
+            find_answer::{Mode, ModuleData as RawData, PlaySettings, Question, Step},
             Instructions,
         },
         ModuleId,
@@ -24,7 +24,8 @@ pub struct Base {
     pub settings: PlaySettings,
     pub backgrounds: Backgrounds,
     pub stickers: Vec<Sticker>,
-    pub traces: Vec<Trace>,
+    pub traces: Vec<Trace>, // TODO content.traces, -- REMOVE THIS
+    pub questions: Vec<Rc<Question>>,
     pub module_phase: Mutable<ModulePlayPhase>,
 }
 
@@ -50,7 +51,12 @@ impl Base {
             settings: content.play_settings,
             backgrounds: content.base.backgrounds,
             stickers: content.base.stickers,
-            traces: vec![], // TODO content.traces,
+            traces: vec![],
+            questions: content
+                .questions
+                .into_iter()
+                .map(|question| Rc::new(question))
+                .collect(),
             module_phase: init_args.play_phase,
         })
     }
