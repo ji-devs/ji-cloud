@@ -4,7 +4,8 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use crate::domain::{
-    additional_resource::AdditionalResource, asset::UserOrMe, circle::CircleId, image::ImageId,
+    additional_resource::AdditionalResource, asset::UserOrMe, circle::CircleId, csv_encode_uuids,
+    from_csv, image::ImageId,
 };
 
 /// A lite profile for other Users to view
@@ -54,9 +55,14 @@ pub struct UserBrowseQuery {
     pub page: Option<u32>,
 
     /// The hits per page to be returned
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub page_limit: Option<u32>,
+
+    /// The hits per page to be returned
+    #[serde(default)]
+    #[serde(serialize_with = "csv_encode_uuids")]
+    #[serde(deserialize_with = "from_csv")]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub circles: Vec<CircleId>,
 }
 
 /// A lite profile for other Users to view
