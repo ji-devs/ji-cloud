@@ -119,6 +119,8 @@ impl TextEditor {
                         font_family.to_string()
                     }).collect();
                     fonts.append(&mut static_fonts);
+                    // Make sure font's are listed alphabetically
+                    fonts.sort_by_key(|font| font.to_lowercase());
                     state.fonts.set(fonts);
                     ready(())
                 })),
