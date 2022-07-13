@@ -7,9 +7,10 @@ use uuid::Uuid;
 use super::{asset::UserOrMe, image::ImageId};
 
 /// Wrapper type around [`Uuid`], represents the ID of a Circle.
-#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
+#[derive(Hash, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
+#[serde(rename_all = "camelCase")]
 pub struct CircleId(pub Uuid);
 
 /// The response returned when a request for `GET`ing a Circle is successful.

@@ -46,15 +46,23 @@ pub async fn browse_users(
     pool: &PgPool,
     page: u32,
     page_limit: u64,
+    circles: Vec<CircleId>,
 ) -> anyhow::Result<Vec<PublicUser>> {
     let mut txn = pool.begin().await?;
+
+    let circle_ids = filters_for_ids_or(&circles[..]);
+
+    println!("ids: {:?}", circle_ids);
 
     let user_data = sqlx::query!(
         r#"
         with cte as (
-            select array(select id  as "id!"
+            select array(select "user".id  as "id!"
             from "user"
-            inner join user_profile "up" on "user".id = up.user_id
+            left join user_profile "up" on up.user_id = "user".id 
+            left join circle_member "cm" on cm.user_id = "user".id
+            left join circle on circle.id = cm.id 
+            where cm.id = any($1) or $1 = array[]::uuid[]
             order by "user".created_at desc) as id
         ),
         cte1 as (
@@ -79,10 +87,11 @@ pub async fn browse_users(
             from "user"
             inner join user_profile on "user".id = user_profile.user_id
             inner join cte1 on cte1.id = "user".id
-            where ord > (1 * $1 * $2)
+            where ord > (1 * $2 * $3)
             order by ord
-            limit $2
+            limit $3
             "#,
+            &circle_ids[..],
             page as i32,
             page_limit as i32,
         )
@@ -518,13 +527,19 @@ pub async fn browse_following(
     Ok(res)
 }
 
-pub async fn total_user_count(db: &PgPool) -> anyhow::Result<u64> {
+pub async fn total_user_count(db: &PgPool, circles: Vec<CircleId>) -> anyhow::Result<u64> {
+    let circle_ids = filters_for_ids_or(&circles[..]);
+
     let user = sqlx::query!(
         r#"
         select count(*)             as "count!: i64"
             from "user"
-        inner join user_profile on "user".id = user_profile.user_id
-            "#
+        left join user_profile "up" on up.user_id = "user".id 
+        left join circle_member "cm" on cm.user_id = "user".id
+        left join circle on circle.id = cm.id 
+        where cm.id = any($1) or $1 = array[]::uuid[]
+        "#,
+        &circle_ids[..]
     )
     .fetch_one(db)
     .await?;
@@ -594,4 +609,14 @@ pub async fn total_following_count(db: &PgPool, follower_id: Uuid) -> sqlx::Resu
     .await?;
 
     Ok(total_following.count as u64)
+}
+
+fn filters_for_ids_or<T: Into<Uuid> + Copy>(ids: &[T]) -> Vec<Uuid> {
+    let mut vect: Vec<Uuid> = vec![];
+    for id in ids.iter().copied() {
+        let id: Uuid = id.into();
+        vect.push(id);
+    }
+
+    vect
 }

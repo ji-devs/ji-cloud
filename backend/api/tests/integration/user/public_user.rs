@@ -41,6 +41,44 @@ async fn browse_public_user() -> anyhow::Result<()> {
 }
 
 #[actix_rt::test]
+async fn browse_users_with_circles() -> anyhow::Result<()> {
+    let app = initialize_server(
+        &[
+            Fixture::User,
+            Fixture::Image,
+            Fixture::PublicUser,
+            Fixture::Circle,
+        ],
+        &[],
+    )
+    .await;
+
+    let port = app.port();
+
+    let client = reqwest::Client::new();
+
+    let resp = client
+        .get(&format!(
+            "http://0.0.0.0:{}/v1/user/public/browse?circles=829606d0-f185-11ec-b9e4-5fadfd7252f6",
+            port
+        ))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    assert_eq!(resp.status(), StatusCode::OK);
+
+    let body: serde_json::Value = resp.json().await?;
+
+    insta::assert_json_snapshot!(body);
+
+    app.stop(false).await;
+
+    Ok(())
+}
+
+#[actix_rt::test]
 async fn browse_user_jigs() -> anyhow::Result<()> {
     let app = initialize_server(
         &[

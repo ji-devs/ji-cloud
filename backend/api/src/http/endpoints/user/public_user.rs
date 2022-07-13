@@ -2,6 +2,7 @@ use actix_web::{
     web::{Data, Json, Path, Query},
     HttpResponse,
 };
+
 use futures::try_join;
 use shared::{
     api::{endpoints::user, ApiEndpoint},
@@ -87,16 +88,23 @@ pub async fn browse(
     _auth: Option<TokenUser>,
     query: Option<Query<<user::BrowsePublicUser as ApiEndpoint>::Req>>,
 ) -> Result<Json<<user::BrowsePublicUser as ApiEndpoint>::Res>, error::NotFound> {
+    println!("query before: {:?}", query);
+
     let query = query.map_or_else(Default::default, Query::into_inner);
 
     let page_limit = page_limit(query.page_limit)
         .await
         .map_err(|e| error::NotFound::InternalServerError(e))?;
 
-    let browse_future =
-        db::user::public_user::browse_users(&db, query.page.unwrap_or(0), page_limit as u64);
+    let browse_future = db::user::public_user::browse_users(
+        &db,
+        query.page.unwrap_or(0),
+        page_limit as u64,
+        query.circles.to_owned(),
+    );
 
-    let total_count_future = db::user::public_user::total_user_count(db.as_ref());
+    let total_count_future =
+        db::user::public_user::total_user_count(db.as_ref(), query.circles.to_owned());
 
     let (users, total_user_count) = try_join!(browse_future, total_count_future,)?;
 
