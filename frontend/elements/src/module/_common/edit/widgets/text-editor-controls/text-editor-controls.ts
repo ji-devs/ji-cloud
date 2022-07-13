@@ -43,26 +43,26 @@ export class _ extends LitElement {
                     grid-template-columns: 1fr min-content;
                 }
                 .second {
-                    grid-template-columns: 1fr 1fr;
-                }
-                .second .alignment {
-                    grid-column: 1 / -1;
+                    grid-template-columns: 3fr 2fr;
                 }
                 .third {
-                    grid-template-columns: 3fr 2fr;
+                    grid-template-columns: 1fr 1fr;
+                }
+                .third .alignment {
+                    grid-column: 1 / -1;
                 }
                 @media (min-width: 1920px) {
                     .first {
                         grid-template-columns: 1fr 1fr;
                     }
                     .second {
-                        grid-template-columns: 124px 124px 200px;
-                    }
-                    .second .alignment {
-                        grid-column: unset;
+                        grid-template-columns: 1fr 1fr;
                     }
                     .third {
-                        grid-template-columns: 1fr 1fr;
+                        grid-template-columns: 124px 124px 200px;
+                    }
+                    .third .alignment {
+                        grid-column: unset;
                     }
                 }
                 ::slotted(anchored-overlay[slot="colors"]) {
@@ -108,6 +108,10 @@ export class _ extends LitElement {
                     <slot name="font-size"></slot>
                 </div>
                 <div class="row second">
+                    <slot name="font"></slot>
+                    <slot name="weight"></slot>
+                </div>
+                <div class="row third">
                     <div class="button-collection">
                         <slot name="bold"></slot>
                         <slot name="italic"></slot>
@@ -123,10 +127,6 @@ export class _ extends LitElement {
                         <slot name="left-to-right"></slot>
                         <slot name="right-to-left"></slot>
                     </div>
-                </div>
-                <div class="row third">
-                    <slot name="font"></slot>
-                    <slot name="weight"></slot>
                 </div>
             </div>
         `;
