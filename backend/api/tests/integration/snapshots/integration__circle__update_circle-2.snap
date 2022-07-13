@@ -1,13 +1,14 @@
 ---
 source: tests/integration/circle.rs
 expression: body
+
 ---
 {
   "id": "57a1eaaa-f182-11ec-a96e-13f3929f5b22",
   "displayName": "update circle",
   "createdBy": "1f241e1b-b537-493f-a230-075cb16315be",
   "description": "update description",
-  "memberCount": 0,
+  "memberCount": 1,
   "image": "8a473dd6-ffaa-11eb-86a5-dba3538e5a15",
   "createdAt": "[created_at]",
   "lastEdited": "[last_edited]"

@@ -14,7 +14,21 @@ expression: body
       "profileImage": null,
       "organization": "test2 org",
       "circles": [
-        "829606d0-f185-11ec-b9e4-5fadfd7252f6"
+        "829606d0-f185-11ec-b9e4-5fadfd7252f6",
+        "a3126bec-f185-11ec-b9e4-5fa4e257b5a1"
+      ]
+    },
+    {
+      "id": "a641fd6e-e41b-11eb-8176-57df101c2201",
+      "username": "test2",
+      "givenName": "Scrappy",
+      "familyName": "Doo",
+      "bio": "",
+      "profileImage": null,
+      "organization": "test2 org",
+      "circles": [
+        "829606d0-f185-11ec-b9e4-5fadfd7252f6",
+        "a3126bec-f185-11ec-b9e4-5fa4e257b5a1"
       ]
     },
     {
@@ -37,9 +51,26 @@ expression: body
       "profileImage": null,
       "language": "en_US",
       "organization": "test1 org",
-      "circles": []
+      "circles": [
+        "a3126bec-f185-11ec-b9e4-5fa4e257b5a1",
+        "57a1eaaa-f182-11ec-a96e-13f3929f5b22"
+      ]
+    },
+    {
+      "id": "7b96a41c-e406-11eb-8176-efd86dd7f444",
+      "username": "test1",
+      "givenName": "Post",
+      "familyName": "Gres",
+      "bio": "",
+      "profileImage": null,
+      "language": "en_US",
+      "organization": "test1 org",
+      "circles": [
+        "a3126bec-f185-11ec-b9e4-5fa4e257b5a1",
+        "57a1eaaa-f182-11ec-a96e-13f3929f5b22"
+      ]
     }
   ],
   "pages": 1,
-  "totalUserCount": 3
+  "totalUserCount": 5
 }
