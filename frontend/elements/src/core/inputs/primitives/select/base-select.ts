@@ -26,6 +26,9 @@ export class BaseSelect
                 :host(:focus) {
                     outline: 0;
                 }
+                anchored-overlay {
+                    width: 100%;
+                }
             `,
         ];
     }
