@@ -62,16 +62,19 @@ web-sys = { version = "0.3.55", features = [
     'CustomEvent',
     'HtmlAudioElement',
     'HtmlIFrameElement',
+    'HtmlScriptElement',
     'CanvasRenderingContext2d',
     'HtmlSelectElement',
     'Performance',
-    'Path2d'
+    'Path2d',
+    'console',
 ] }
 awsm_web = { version = "0.32.0", features = ["loaders", "serde_iso", "dom", "image", "audio", "canvas"] }
 anyhow = "1.0.45"
 gloo-timers = "0.2.1"
 rgb = "0.8.29"
 regex = "1.5.4"
+futures-channel = "0.3.21"
 
 [features]
 quiet = ["utils/quiet"]

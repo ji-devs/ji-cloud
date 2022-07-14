@@ -5,11 +5,12 @@ import {
     STR_MODULE_DISPLAY_NAME,
 } from "@elements/module/_common/types";
 
-export type Kind = ModuleKind | "print" | "continue" | "publish";
+export type Kind = ModuleKind | "print" | "print-cards" | "continue" | "publish";
 
 const STR_LABEL_LOOKUP: { [key in Kind]: string } = {
     ...STR_MODULE_DISPLAY_NAME,
-    print: "Print the cards",
+    print: "Print",
+    ["print-cards"]: "Print cards",
     continue: "Add new activity",
     publish: "Publish JIG",
 };
@@ -59,15 +60,17 @@ export class _ extends LitElement {
     kind: Kind = "card-quiz";
 
     render() {
-        const { kind } = this;
+        let { kind } = this;
+
+        kind = kind === "print-cards" ? "print" : kind;
 
         const isModule = kind !== "continue" && kind !== "print" && kind !== "publish";
 
         const path = isModule
             ? `module/_common/edit/post-preview/module/${kind}.svg`
-            : `module/_common/edit/post-preview/${this.kind}${
-                  this.kind === "continue" || this.kind === "publish" ? ".png" : ".svg"
-              }`;
+            : `module/_common/edit/post-preview/${kind}${
+                kind === "continue" || kind === "publish" ? ".png" : ".svg"
+            }`;
 
         return html`
             <div class="circle">

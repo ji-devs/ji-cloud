@@ -63,14 +63,14 @@ export class _ extends LitElement {
                     background-color: var(--light-orange-1);
                     display: grid;
                     column-gap: 48px;
-                    justify-content: center;
                     align-items: center;
                     align-content: center;
                     padding: 30px 0;
                 }
                 .bottom-section .actions {
                     display: grid;
-                    grid-template-columns: repeat(3, 116px) 1px repeat(2, 116px);
+                    grid-template-columns: repeat(3, 116px) 1px repeat(auto-fit, 116px);
+                    justify-content: center;
                     column-gap: 48px;
                 }
                 .bottom-section-centered .actions {
