@@ -133,7 +133,7 @@ impl PostPreview {
         #[cfg(feature = "local")]
         let root = "http://localhost:4103";
         #[cfg(not(feature = "local"))]
-        let root = "http://localhost:4103";
+        let root = "";
 
         let scripts = vec![format!("{root}/module/{kind_str}/edit/custom-elements.js")];
 
