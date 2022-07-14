@@ -4,10 +4,7 @@ use futures_signals::signal::SignalExt;
 use std::rc::Rc;
 use utils::prelude::*;
 
-use super::super::{
-    state::TextEditor,
-    wysiwyg_types::{ControlsChange, WysiwygControlsChange},
-};
+use super::super::{state::TextEditor, wysiwyg_types::WysiwygControlsChange};
 
 impl TextEditor {
     pub fn render_wysiwyg(self: &Rc<Self>) -> Dom {
@@ -26,19 +23,18 @@ impl TextEditor {
                 let value = e.value();
                 // log::info!("{:?}", &value);
                 let mut controls = state.controls.lock_mut();
-                match value {
-                    ControlsChange::Font(font) => controls.font = font_from_css(&font),
-                    ControlsChange::Element(element) => controls.element = element,
-                    ControlsChange::Weight(weight) => controls.weight = weight,
-                    ControlsChange::Align(align) => controls.align = align,
-                    ControlsChange::FontSize(font_size) => controls.font_size = font_size,
-                    ControlsChange::Color(color) => controls.color = color,
-                    ControlsChange::HighlightColor(highlight_color) => controls.highlight_color = highlight_color,
-                    ControlsChange::BoxColor(box_color) => controls.box_color = box_color,
-                    ControlsChange::Direction(direction) => controls.direction = direction,
-                    ControlsChange::Italic(italic) => controls.italic = italic,
-                    ControlsChange::Underline(underline) => controls.underline = underline,
-                };
+
+                controls.font = font_from_css(&value.font);
+                controls.element = value.element;
+                controls.weight = value.weight;
+                controls.align = value.align;
+                controls.font_size = value.font_size;
+                controls.color = value.color;
+                controls.highlight_color = value.highlight_color;
+                controls.box_color = value.box_color;
+                controls.direction = value.direction;
+                controls.italic = value.italic;
+                controls.underline = value.underline;
             }))
             .event(clone!(state => move |e: events::CustomChange| {
                 let value = e.value();

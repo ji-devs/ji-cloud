@@ -58,7 +58,8 @@ pub type Color = String;
 pub const BOLD_WEIGHT: Weight = 700;
 pub const REGULAR_WEIGHT: Weight = 400;
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ControlsState {
     pub font: Font,
     pub element: ElementType,
@@ -150,12 +151,12 @@ impl ControlsChange {
 make_custom_event_serde!(
     "wysiwyg-controls-change",
     WysiwygControlsChange,
-    ControlsChange
+    ControlsState
 );
 
 impl WysiwygControlsChange {
-    pub fn value(&self) -> ControlsChange {
-        log::info!("{:#?}", self.detail());
+    pub fn value(&self) -> ControlsState {
+        // log::info!("{:#?}", self.detail());
 
         self.detail().into_serde().unwrap_ji()
     }

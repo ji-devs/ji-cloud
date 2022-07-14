@@ -230,20 +230,6 @@ export class _ extends LitElement {
         }
     }
 
-    private triggerControlsChangeEvent<K extends keyof ControllerState>(
-        key: K,
-        value: ControllerState[K]
-    ) {
-        if (value === undefined) value = null as any; // serde can't handle undefined only null
-        this.dispatchEvent(
-            new CustomEvent("wysiwyg-controls-change", {
-                detail: {
-                    [key]: value,
-                },
-            })
-        );
-    }
-
     private triggerValueChangeEvent() {
         this.dispatchEvent(
             new CustomEvent("custom-change", {
@@ -255,7 +241,7 @@ export class _ extends LitElement {
     }
 
     private onSlateChange(value: Descendant[]) {
-        this.checkForControlsChange();
+        this.triggerControlsChange();
         this.checkForValueChangeChange(value as EditorElement[]);
     }
 
@@ -270,11 +256,12 @@ export class _ extends LitElement {
         }
     }
 
-    private checkForControlsChange() {
+    private triggerControlsChange() {
         const leaf = this.backbone.getSelectedLeaf();
         const element = this.backbone.getSelectedElement();
         const root = this.value;
 
+        let eventData = {} as any;
         for (const key of controlNameList) {
             const keyLevel = getKeyLevel(key);
             const node: any =
@@ -284,12 +271,19 @@ export class _ extends LitElement {
                     ? leaf
                     : root;
 
-            const controlValue = node?.[key] || this.getDefault(key);
-            if (this.controllerState[key] != controlValue) {
-                (this.controllerState as any)[key] = controlValue;
-                this.triggerControlsChangeEvent(key, controlValue);
-            }
+            let controlValue = node?.[key] || this.getDefault(key);
+
+            // serde can't handle undefined only null
+            if (controlValue === undefined) controlValue = null as any;
+
+            eventData[key] = controlValue;
         }
+        
+        this.dispatchEvent(
+            new CustomEvent("wysiwyg-controls-change", {
+                detail: eventData,
+            })
+        );
     }
 
     private onBlur(e: FocusEvent) {
