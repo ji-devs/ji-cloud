@@ -13,6 +13,8 @@ impl JigSelection {
         let state = self;
         state.load_course();
         html!("div", {
+            .style("max-height", "100vh")
+            .style("overflow", "auto")
             .property("slot", "main")
             .children_signal_vec(state.jigs.signal_vec_cloned().map(clone!(state => move|jig| {
                 state.render_jig(&jig, html!("button", {
