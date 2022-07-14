@@ -130,10 +130,20 @@ impl PostPreview {
 
         let html = format!("<{kind_str}-print cards='{texts_json}'></{kind_str}-print>");
 
-        let frontend_url = unsafe { SETTINGS.get_unchecked().remote_target.frontend_url() };
-        let scripts = vec![format!(
-            "{frontend_url}/module/{kind_str}/edit/custom-elements.js"
-        )];
+        let custom_elements_script = web_sys::window()
+            .unwrap_ji()
+            .document()
+            .unwrap_ji()
+            .query_selector("script[src$='/custom-elements.js']")
+            .unwrap_ji()
+            .unwrap_ji();
+
+        let custom_elements_src = Reflect::get(&custom_elements_script, &JsValue::from_str("src"))
+            .unwrap_ji()
+            .as_string()
+            .unwrap_ji();
+
+        let scripts = vec![custom_elements_src];
 
         print(html, scripts);
 
