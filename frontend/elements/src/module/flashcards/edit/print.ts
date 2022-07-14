@@ -15,7 +15,7 @@ export class _ extends LitElement {
                 }
                 .card-wrapper {
                     display: inline-grid;
-                    grid-template-rows: 20px 180px;
+                    grid-template-rows: 20px 30vw;
                     border-right: var(--border);
                     margin-top: 20px;
                 }
@@ -26,7 +26,7 @@ export class _ extends LitElement {
                 }
                 .card {
                     display: grid;
-                    grid-template-columns: 180px 1px 180px;
+                    grid-template-columns: 45vw 1px 45vw;
                     border-top: var(--border);
                     border-bottom: var(--border);
                     border-left: var(--border);
@@ -39,7 +39,7 @@ export class _ extends LitElement {
                     break-inside: avoid;
                 }
                 .card-side .text {
-                    font-size: 64px;
+                    font-size: 40px;
                     color: var(--dark-gray-6);
                     grid-row: 1 / -1;
                     place-self: center;
