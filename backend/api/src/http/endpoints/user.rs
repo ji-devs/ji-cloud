@@ -25,8 +25,8 @@ use shared::{
         image::{ImageId, ImageSize},
         session::{NewSessionResponse, OAuthProvider},
         user::{
-            ChangePasswordRequest, CreateProfileRequest, ResetEmailResponse, UserLookupQuery,
-            VerifyEmailRequest, VerifyResetEmailRequest,
+            ChangePasswordRequest, CreateProfileRequest, ResetEmailResponse, UserId,
+            UserLookupQuery, VerifyEmailRequest, VerifyResetEmailRequest,
         },
     },
     media::MediaLibrary,
@@ -651,6 +651,12 @@ fn validate_patch_profile_req(
             Err(error::UserUpdate::Username(error::Username::Empty))
         }
         _ => Ok(()),
+    }
+}
+
+impl From<TokenUser> for UserId {
+    fn from(token: TokenUser) -> Self {
+        Self(token.0.user_id)
     }
 }
 

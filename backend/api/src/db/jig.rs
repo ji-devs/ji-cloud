@@ -6,9 +6,8 @@ use shared::domain::{
     asset::{DraftOrLive, OrderBy, PrivacyLevel},
     category::CategoryId,
     jig::{
-        AudioBackground, AudioEffects, AudioFeedbackNegative, AudioFeedbackPositive,
-        DeleteUserJigs, JigAdminData, JigData, JigFocus, JigId, JigPlayerSettings, JigRating,
-        JigResponse, TextDirection,
+        AudioBackground, AudioEffects, AudioFeedbackNegative, AudioFeedbackPositive, JigAdminData,
+        JigData, JigFocus, JigId, JigPlayerSettings, JigRating, JigResponse, TextDirection,
     },
     meta::{AffiliationId, AgeRangeId, ResourceTypeId as TypeId},
     module::{body::ThemeId, LiteModule, ModuleId, ModuleKind},
@@ -33,7 +32,7 @@ pub async fn create(
     categories: &[CategoryId],
     age_ranges: &[AgeRangeId],
     affiliations: &[AffiliationId],
-    creator_id: Uuid,
+    creator_id: UserId,
     language: &str,
     description: &str,
     default_player_settings: &JigPlayerSettings,
@@ -70,7 +69,7 @@ pub async fn create(
     let jig = sqlx::query!(
         //language=SQL
         r#"insert into jig (creator_id, author_id, live_id, draft_id, jig_focus) values ($1, $1, $2, $3, $4) returning id"#,
-        creator_id,
+        creator_id.0,
         live_id,
         draft_id,
         (*jig_focus) as i16,
@@ -193,8 +192,8 @@ with cte as (
 )
 select cte.jig_id                                          as "jig_id: JigId",
        display_name,
-       creator_id,
-       author_id,
+       creator_id                                          as "creator_id: UserId",
+       author_id                                           as "author_id: UserId",
        (select given_name || ' '::text || family_name
         from user_profile
         where user_profile.user_id = author_id)            as "author_name",
@@ -339,8 +338,8 @@ pub async fn get_by_ids(
         //language=SQL
         r#"
 select jig.id                                       as "id!: JigId",
-       creator_id,
-       author_id                                as "author_id",
+       creator_id                               as "creator_id: UserId",
+       author_id                                as "author_id: UserId",
        (select given_name || ' '::text || family_name
         from user_profile
         where user_profile.user_id = author_id) as "author_name",
@@ -523,7 +522,7 @@ from jig_data
 #[instrument(skip(db))]
 pub async fn browse(
     db: &sqlx::Pool<sqlx::Postgres>,
-    author_id: Option<Uuid>,
+    author_id: Option<UserId>,
     jig_focus: Option<JigFocus>,
     draft_or_live: Option<DraftOrLive>,
     privacy_level: Vec<PrivacyLevel>,
@@ -566,8 +565,8 @@ cte1 as (
 select jig.id                                              as "jig_id: JigId",
     privacy_level                                       as "privacy_level: PrivacyLevel",
     jig_focus                                           as "jig_focus!: JigFocus",
-    creator_id,
-    author_id,
+    creator_id                                          as "creator_id?: UserId",
+    author_id                                           as "author_id?: UserId",
     (select given_name || ' '::text || family_name
         from user_profile
      where user_profile.user_id = author_id)            as "author_name",
@@ -633,7 +632,7 @@ where ord > (1 * $6 * $7)
 order by ord asc
 limit $7
 "#,
-    author_id,
+    author_id.map(|x| x.0),
     jig_focus.map(|it| it as i16),
     draft_or_live.map(|it| it as i16),
     blocked,
@@ -971,38 +970,13 @@ where id is not distinct from $3
     Ok(())
 }
 
-pub async fn delete_all_jigs(
-    pool: &PgPool,
-    user_id: Uuid,
-) -> Result<Vec<DeleteUserJigs>, error::Delete> {
-    let mut txn = pool.begin().await?;
-
-    let jig_ids: Vec<DeleteUserJigs> = get_user_jig_ids(&mut txn, user_id).await?;
-
-    sqlx::query!(
-        //language=SQL
-        r#"
-delete
-from jig
-where creator_id is not distinct from $1
-"#,
-        user_id
-    )
-    .execute(&mut txn)
-    .await?;
-
-    txn.commit().await?;
-
-    Ok(jig_ids)
-}
-
 // `None` here means do not filter.
 #[instrument(skip(db))]
 pub async fn filtered_count(
     db: &PgPool,
     privacy_level: Vec<PrivacyLevel>,
     blocked: Option<bool>,
-    author_id: Option<Uuid>,
+    author_id: Option<UserId>,
     jig_focus: Option<JigFocus>,
     draft_or_live: Option<DraftOrLive>,
     resource_types: Vec<Uuid>,
@@ -1024,7 +998,7 @@ where (author_id = $1 or $1 is null)
     and (blocked = $5 or $5 is null)
     and (resource.resource_type_id = any($6) or $6 = array[]::uuid[])
 "#,
-        author_id,
+        author_id.map(|it| it.0),
         jig_focus.map(|it| it as i16),
         draft_or_live.map(|it| it as i16),
         &privacy_level[..],
@@ -1050,7 +1024,7 @@ where (author_id = $1 or $1 is null)
     and (blocked = $5 or $5 is null)
     and (resource.resource_type_id = any($6) or $6 = array[]::uuid[])
 "#,
-        author_id,
+        author_id.map(|it| it.0),
         jig_focus.map(|it| it as i16),
         draft_or_live.map(|it| it as i16),
         &privacy_level[..],
@@ -1093,22 +1067,6 @@ select draft_id, live_id from jig where id = $1
     .await
     .ok()?
     .map(|it| (it.draft_id, it.live_id))
-}
-
-pub async fn get_user_jig_ids(
-    txn: &mut PgConnection,
-    user_id: Uuid,
-) -> sqlx::Result<Vec<DeleteUserJigs>> {
-    sqlx::query_as!(
-        //language=SQL
-        DeleteUserJigs,
-        r#"
-select id as "jig_id!: JigId" from jig where creator_id = $1
-"#,
-        user_id
-    )
-    .fetch_all(&mut *txn)
-    .await
 }
 
 /// Clones a copy of the jig data and modules, preserving the module's stable IDs
@@ -1232,7 +1190,7 @@ where jig_data_id = $1
 pub async fn clone_jig(
     db: &PgPool,
     parent: JigId,
-    user_id: Uuid,
+    user_id: UserId,
 ) -> Result<JigId, error::CloneDraft> {
     let mut txn = db.begin().await?;
 
@@ -1253,7 +1211,7 @@ where id = $1
 returning id as "id!: JigId"
 "#,
         parent.0,
-        user_id,
+        user_id.0,
         new_live_id,
         new_draft_id,
     )
@@ -1403,12 +1361,12 @@ where jig_id = $1 and $2 is distinct from curated
     Ok(())
 }
 
-pub async fn jig_like(db: &PgPool, user_id: Uuid, id: JigId) -> anyhow::Result<()> {
+pub async fn jig_like(db: &PgPool, user_id: UserId, id: JigId) -> anyhow::Result<()> {
     let mut txn = db.begin().await?;
 
     let jig = sqlx::query!(
         r#"
-select author_id,
+select author_id    "author_id: UserId",
        published_at  as "published_at?"
 from jig
 where id = $1
@@ -1436,7 +1394,7 @@ insert into jig_like(jig_id, user_id)
 values ($1, $2)
             "#,
         id.0,
-        user_id
+        user_id.0
     )
     .execute(&mut txn)
     .await
@@ -1447,14 +1405,14 @@ values ($1, $2)
     Ok(())
 }
 
-pub async fn jig_unlike(db: &PgPool, user_id: Uuid, id: JigId) -> anyhow::Result<()> {
+pub async fn jig_unlike(db: &PgPool, user_id: UserId, id: JigId) -> anyhow::Result<()> {
     sqlx::query!(
         r#"
 delete from jig_like
 where jig_id = $1 and user_id = $2
     "#,
         id.0,
-        user_id
+        user_id.0
     )
     .execute(db)
     .await
@@ -1463,7 +1421,7 @@ where jig_id = $1 and user_id = $2
     Ok(())
 }
 
-pub async fn jig_is_liked(db: &PgPool, user_id: Uuid, id: JigId) -> sqlx::Result<bool> {
+pub async fn jig_is_liked(db: &PgPool, user_id: UserId, id: JigId) -> sqlx::Result<bool> {
     let exists = sqlx::query!(
         r#"
 select exists (
@@ -1475,7 +1433,7 @@ select exists (
 ) as "exists!"
     "#,
         id.0,
-        user_id
+        user_id.0
     )
     .fetch_one(db)
     .await?
@@ -1502,12 +1460,12 @@ select exists(select 1 from user_scope where user_id = $1 and scope = any($2)) a
 
     Ok(true)
 }
-pub async fn is_logged_in(db: &PgPool, user_id: Uuid) -> Result<(), error::Auth> {
+pub async fn is_logged_in(db: &PgPool, user_id: UserId) -> Result<(), error::Auth> {
     sqlx::query!(
         r#"
 select exists(select 1 from user_scope where user_id = $1) as "authed!"
 "#,
-        user_id,
+        user_id.0,
     )
     .fetch_one(db)
     .await?
@@ -1516,14 +1474,14 @@ select exists(select 1 from user_scope where user_id = $1) as "authed!"
     Ok(())
 }
 
-pub async fn authz(db: &PgPool, user_id: Uuid, jig_id: Option<JigId>) -> Result<(), error::Auth> {
+pub async fn authz(db: &PgPool, user_id: UserId, jig_id: Option<JigId>) -> Result<(), error::Auth> {
     let authed = match jig_id {
         None => {
             sqlx::query!(
                 r#"
 select exists(select 1 from user_scope where user_id = $1 and scope = any($2)) as "authed!"
 "#,
-                user_id,
+                user_id.0,
                 &[
                     UserScope::Admin as i16,
                     UserScope::AdminJig as i16,
@@ -1545,7 +1503,7 @@ select exists (
     not exists (select 1 from jig where jig.id = $4 and jig.author_id <> $1)
 ) as "authed!"
 "#,
-                user_id,
+                user_id.0,
                 &[UserScope::Admin as i16, UserScope::AdminJig as i16,][..],
                 UserScope::ManageSelfJig as i16,
                 id.0

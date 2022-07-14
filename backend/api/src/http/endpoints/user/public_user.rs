@@ -10,11 +10,14 @@ use shared::{
         asset::DraftOrLive,
         course::CourseBrowseResponse,
         jig::JigBrowseResponse,
-        user::public_user::{
-            BrowsePublicUserFollowersResponse as BrowseFollowersResponse,
-            BrowsePublicUserFollowingResponse as BrowseFollowingsResponse,
-            BrowsePublicUserResourcesResponse as BrowseResourcesResponse, BrowsePublicUserResponse,
-            PublicUser, SearchPublicUserResponse,
+        user::{
+            public_user::{
+                BrowsePublicUserFollowersResponse as BrowseFollowersResponse,
+                BrowsePublicUserFollowingResponse as BrowseFollowingsResponse,
+                BrowsePublicUserResourcesResponse as BrowseResourcesResponse,
+                BrowsePublicUserResponse, PublicUser, SearchPublicUserResponse,
+            },
+            UserId,
         },
     },
 };
@@ -122,7 +125,7 @@ pub async fn browse(
 pub async fn browse_user_jigs(
     db: Data<PgPool>,
     _auth: Option<TokenUser>,
-    path: Path<Uuid>,
+    path: Path<UserId>,
     query: Option<Query<<user::BrowseUserJigs as ApiEndpoint>::Req>>,
 ) -> Result<Json<<user::BrowseUserJigs as ApiEndpoint>::Res>, error::NotFound> {
     let (query, user_id) = (
@@ -212,7 +215,7 @@ pub async fn browse_user_resources(
 pub async fn browse_user_courses(
     db: Data<PgPool>,
     _auth: Option<TokenUser>,
-    path: Path<Uuid>,
+    path: Path<UserId>,
     query: Option<Query<<user::BrowseCourses as ApiEndpoint>::Req>>,
 ) -> Result<Json<<user::BrowseCourses as ApiEndpoint>::Res>, error::NotFound> {
     let (query, user_id) = (

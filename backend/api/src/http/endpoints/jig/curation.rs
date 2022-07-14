@@ -6,6 +6,7 @@ use shared::{
     api::{endpoints::jig::curation, ApiEndpoint},
     domain::{
         jig::{curation::CommentId, JigId},
+        user::UserId,
         CreateResponse,
     },
 };
@@ -51,8 +52,9 @@ async fn get_curation(
     path: Path<JigId>,
 ) -> Result<Json<<curation::GetCuration as ApiEndpoint>::Res>, error::NotFound> {
     let jig_id = path.into_inner();
+    let admin_id = UserId(auth.claims.user_id);
 
-    db::jig::authz(&*db, auth.claims.user_id, Some(jig_id)).await?;
+    db::jig::authz(&*db, admin_id, Some(jig_id)).await?;
 
     let curation = db::jig::curation::get_curation(&db, jig_id)
         .await?
@@ -75,8 +77,9 @@ async fn create_comment(
     error::Auth,
 > {
     let jig_id = path.into_inner();
+    let admin_id = UserId(auth.claims.user_id);
 
-    db::jig::authz(&*db, auth.claims.user_id, Some(jig_id)).await?;
+    db::jig::authz(&*db, admin_id, Some(jig_id)).await?;
 
     let req = req.into_inner();
 

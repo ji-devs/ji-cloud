@@ -1504,7 +1504,7 @@ impl Client {
         resource_types: &[ResourceTypeId],
         categories: &[CategoryId],
         items: &[JigId],
-        author_id: Option<Uuid>,
+        author_id: Option<UserId>,
         author_name: Option<String>,
         other_keywords: Option<String>,
         translated_keywords: Option<String>,
@@ -1522,7 +1522,7 @@ impl Client {
             and_filters.filters.push(Box::new(CommonFilter {
                 filter: FacetFilter {
                     facet_name: "author_id".to_owned(),
-                    value: author_id.to_string(),
+                    value: author_id.0.to_string(),
                 },
                 invert: false,
             }))

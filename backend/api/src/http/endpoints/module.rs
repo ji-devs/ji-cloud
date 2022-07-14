@@ -24,15 +24,16 @@ async fn create(
 ) -> Result<HttpResponse, error::Auth> {
     let req = req.into_inner();
     let is_complete = req.body.is_complete();
+    let user_id = auth.user_id();
 
     let (id, _index) = match req.parent_id {
         AssetId::JigId(jig_id) => {
-            db::jig::authz(&*db, auth.0.user_id, Some(jig_id)).await?;
+            db::jig::authz(&*db, user_id, Some(jig_id)).await?;
 
             db::jig::module::create(&*db, jig_id, req.body, is_complete).await?
         }
         AssetId::CourseId(course_id) => {
-            db::course::authz(&*db, auth.0.user_id, Some(course_id)).await?;
+            db::course::authz(&*db, user_id, Some(course_id)).await?;
             db::course::module::create(&*db, course_id, req.body, is_complete).await?
         }
     };
@@ -90,10 +91,11 @@ async fn update(
     req: Json<<module::Update as ApiEndpoint>::Req>,
 ) -> Result<HttpResponse, error::NotFound> {
     let (req, module_id) = (req.into_inner(), path.into_inner());
+    let user_id = auth.user_id();
 
     let exists = match req.parent_id {
         AssetId::JigId(jig_id) => {
-            db::jig::authz(&*db, auth.0.user_id, Some(jig_id)).await?;
+            db::jig::authz(&*db, user_id, Some(jig_id)).await?;
 
             db::jig::module::update(
                 &*db,
@@ -106,7 +108,7 @@ async fn update(
             .await?
         }
         AssetId::CourseId(course_id) => {
-            db::course::authz(&*db, auth.0.user_id, Some(course_id)).await?;
+            db::course::authz(&*db, user_id, Some(course_id)).await?;
 
             db::course::module::update(
                 &*db,
@@ -135,15 +137,16 @@ async fn delete(
     req: Json<<module::Delete as ApiEndpoint>::Req>,
 ) -> Result<HttpResponse, error::Delete> {
     let (module_id, parent_id) = (path.into_inner(), req.parent_id);
+    let user_id = auth.user_id();
 
     match parent_id {
         AssetId::JigId(jig_id) => {
-            db::jig::authz(&*db, auth.0.user_id, Some(jig_id)).await?;
+            db::jig::authz(&*db, user_id, Some(jig_id)).await?;
 
             db::jig::module::delete(&*db, jig_id, module_id).await?;
         }
         AssetId::CourseId(course_id) => {
-            db::course::authz(&*db, auth.0.user_id, Some(course_id)).await?;
+            db::course::authz(&*db, user_id, Some(course_id)).await?;
 
             db::course::module::delete(&*db, course_id, module_id).await?;
         }

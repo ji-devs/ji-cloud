@@ -19,6 +19,12 @@ pub mod public_user;
 #[cfg_attr(feature = "backend", sqlx(transparent))]
 pub struct UserId(pub Uuid);
 
+impl std::fmt::Display for UserId {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
+        write!(fmt, "{}", self.0)
+    }
+}
+
 /// Represents a user's permissions.
 ///
 /// Note: 5 was "ManageModule", and has been deleted, but cannot be replaced(?)
@@ -109,8 +115,8 @@ pub struct ResetEmailResponse {
 }
 
 impl From<Uuid> for UserId {
-    fn from(uuid: Uuid) -> Self {
-        Self(uuid)
+    fn from(id: Uuid) -> Self {
+        Self(id)
     }
 }
 
