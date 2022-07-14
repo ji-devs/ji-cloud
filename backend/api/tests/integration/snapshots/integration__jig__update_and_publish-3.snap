@@ -12,41 +12,39 @@ expression: body
   "likes": 0,
   "plays": 0,
   "jigFocus": "modules",
-  "jigData": {
-    "draftOrLive": "live",
-    "displayName": "name",
-    "modules": [
-      {
-        "id": "865eeae6-f081-49bb-87bb-827296a8a82b",
-        "kind": "Cover",
-        "is_complete": true
-      }
-    ],
-    "ageRanges": [],
-    "affiliations": [],
-    "language": "en",
-    "categories": [],
-    "additionalResources": [],
-    "description": "test description",
-    "lastEdited": "[last_edited]",
-    "defaultPlayerSettings": {
-      "direction": "ltr",
-      "displayScore": true,
-      "trackAssessments": true,
-      "dragAssist": true
-    },
-    "theme": "Blank",
-    "audioBackground": null,
-    "audioEffects": {
-      "feedbackPositive": "[audio]",
-      "feedbackNegative": "[audio]"
-    },
-    "privacyLevel": "public",
-    "locked": false,
-    "otherKeywords": "",
-    "translatedKeywords": "",
-    "translatedDescription": {}
+  "draftOrLive": "live",
+  "displayName": "name",
+  "modules": [
+    {
+      "id": "865eeae6-f081-49bb-87bb-827296a8a82b",
+      "kind": "Cover",
+      "is_complete": true
+    }
+  ],
+  "ageRanges": [],
+  "affiliations": [],
+  "language": "en",
+  "categories": [],
+  "additionalResources": [],
+  "description": "test description",
+  "lastEdited": "[last_edited]",
+  "defaultPlayerSettings": {
+    "direction": "ltr",
+    "displayScore": true,
+    "trackAssessments": true,
+    "dragAssist": true
   },
+  "theme": "Blank",
+  "audioBackground": null,
+  "audioEffects": {
+    "feedbackPositive": "[audio]",
+    "feedbackNegative": "[audio]"
+  },
+  "privacyLevel": "public",
+  "locked": false,
+  "otherKeywords": "",
+  "translatedKeywords": "",
+  "translatedDescription": {},
   "adminData": {
     "rating": null,
     "blocked": false,

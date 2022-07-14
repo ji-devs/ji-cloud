@@ -216,7 +216,7 @@ impl Asset {
     /// get display_name
     pub fn display_name(&self) -> &String {
         match self {
-            Self::Jig(jig) => &jig.jig_data.display_name,
+            Self::Jig(jig) => &jig.display_name,
             Self::Course(course) => &course.course_data.display_name,
         }
     }
@@ -224,7 +224,7 @@ impl Asset {
     /// get language
     pub fn language(&self) -> &String {
         match self {
-            Self::Jig(jig) => &jig.jig_data.language,
+            Self::Jig(jig) => &jig.language,
             Self::Course(course) => &course.course_data.language,
         }
     }
@@ -232,7 +232,7 @@ impl Asset {
     /// get description
     pub fn description(&self) -> &String {
         match self {
-            Self::Jig(jig) => &jig.jig_data.description,
+            Self::Jig(jig) => &jig.description,
             Self::Course(course) => &course.course_data.description,
         }
     }
@@ -240,7 +240,7 @@ impl Asset {
     /// get cover
     pub fn cover(&self) -> Option<&LiteModule> {
         match self {
-            Self::Jig(jig) => jig.jig_data.modules.first(),
+            Self::Jig(jig) => jig.modules.first(),
             Self::Course(course) => course.course_data.cover.as_ref(),
         }
     }
@@ -248,7 +248,7 @@ impl Asset {
     /// get privacy_level
     pub fn privacy_level(&self) -> &PrivacyLevel {
         match self {
-            Self::Jig(jig) => &jig.jig_data.privacy_level,
+            Self::Jig(jig) => &jig.privacy_level,
             Self::Course(course) => &course.course_data.privacy_level,
         }
     }
@@ -256,7 +256,7 @@ impl Asset {
     /// get other_keywords
     pub fn other_keywords(&self) -> &String {
         match self {
-            Self::Jig(jig) => &jig.jig_data.other_keywords,
+            Self::Jig(jig) => &jig.other_keywords,
             Self::Course(course) => &course.course_data.other_keywords,
         }
     }
@@ -264,7 +264,7 @@ impl Asset {
     /// get translated_keywords
     pub fn translated_keywords(&self) -> &String {
         match self {
-            Self::Jig(jig) => &jig.jig_data.translated_keywords,
+            Self::Jig(jig) => &jig.translated_keywords,
             Self::Course(course) => &course.course_data.translated_keywords,
         }
     }
@@ -272,7 +272,7 @@ impl Asset {
     /// get age_ranges
     pub fn age_ranges(&self) -> &Vec<AgeRangeId> {
         match self {
-            Self::Jig(jig) => &jig.jig_data.age_ranges,
+            Self::Jig(jig) => &jig.age_ranges,
             Self::Course(course) => &course.course_data.age_ranges,
         }
     }
@@ -280,7 +280,7 @@ impl Asset {
     /// get affiliations
     pub fn affiliations(&self) -> &Vec<AffiliationId> {
         match self {
-            Self::Jig(jig) => &jig.jig_data.affiliations,
+            Self::Jig(jig) => &jig.affiliations,
             Self::Course(course) => &course.course_data.affiliations,
         }
     }
@@ -288,7 +288,7 @@ impl Asset {
     /// get categories
     pub fn categories(&self) -> &Vec<CategoryId> {
         match self {
-            Self::Jig(jig) => &jig.jig_data.categories,
+            Self::Jig(jig) => &jig.categories,
             Self::Course(course) => &course.course_data.categories,
         }
     }
@@ -303,7 +303,7 @@ impl Asset {
     /// get translated_description
     pub fn translated_description(&self) -> &HashMap<String, String> {
         match self {
-            Self::Jig(jig) => &jig.jig_data.translated_description,
+            Self::Jig(jig) => &jig.translated_description,
             Self::Course(course) => &course.course_data.translated_description,
         }
     }
@@ -311,7 +311,7 @@ impl Asset {
     /// get theme
     pub fn theme(&self) -> ThemeId {
         match self {
-            Self::Jig(jig) => jig.jig_data.theme,
+            Self::Jig(jig) => jig.theme,
             Self::Course(_) => ThemeId::default(),
         }
     }

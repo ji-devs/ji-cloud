@@ -7,8 +7,8 @@ use shared::domain::{
     category::CategoryId,
     jig::{
         AudioBackground, AudioEffects, AudioFeedbackNegative, AudioFeedbackPositive,
-        DeleteUserJigs, JigAdminData, JigData, JigFocus, JigId, JigPlayerSettings, JigRating,
-        JigResponse, TextDirection,
+        DeleteUserJigs, JigAdminData, JigFocus, JigId, JigPlayerSettings, JigRating, JigResponse,
+        TextDirection,
     },
     meta::{AffiliationId, AgeRangeId, ResourceTypeId as TypeId},
     module::{body::ThemeId, LiteModule, ModuleId, ModuleKind},
@@ -258,65 +258,61 @@ from jig_data
         likes: row.liked_count,
         plays: row.play_count,
         jig_focus: row.jig_focus,
-        jig_data: JigData {
-            draft_or_live,
-            display_name: row.display_name,
-            language: row.language,
-            modules: row
-                .modules
-                .into_iter()
-                .map(|(id, kind, is_complete)| LiteModule {
-                    id,
-                    kind,
-                    is_complete,
-                })
-                .collect(),
-            categories: row.categories.into_iter().map(|(it,)| it).collect(),
-            last_edited: row.updated_at,
-            description: row.description,
-            default_player_settings: JigPlayerSettings {
-                direction: row.direction,
-                display_score: row.display_score,
-                track_assessments: row.track_assessments,
-                drag_assist: row.drag_assist,
-            },
-            theme: row.theme,
-            age_ranges: row.age_ranges.into_iter().map(|(it,)| it).collect(),
-            affiliations: row.affiliations.into_iter().map(|(it,)| it).collect(),
-            additional_resources: row
-                .additional_resource
-                .into_iter()
-                .map(
-                    |(id, display_name, resource_type_id, resource_content)| AdditionalResource {
-                        id,
-                        display_name,
-                        resource_type_id,
-                        resource_content: serde_json::from_value::<ResourceContent>(
-                            resource_content,
-                        )
-                        .unwrap(),
-                    },
-                )
-                .collect(),
-            audio_background: row.audio_background,
-            audio_effects: AudioEffects {
-                feedback_positive: row
-                    .audio_feedback_positive
-                    .into_iter()
-                    .map(|(it,)| it)
-                    .collect(),
-                feedback_negative: row
-                    .audio_feedback_negative
-                    .into_iter()
-                    .map(|(it,)| it)
-                    .collect(),
-            },
-            privacy_level: row.privacy_level,
-            locked: row.locked,
-            other_keywords: row.other_keywords,
-            translated_keywords: row.translated_keywords,
-            translated_description: row.translated_description.0,
+        draft_or_live,
+        display_name: row.display_name,
+        language: row.language,
+        modules: row
+            .modules
+            .into_iter()
+            .map(|(id, kind, is_complete)| LiteModule {
+                id,
+                kind,
+                is_complete,
+            })
+            .collect(),
+        categories: row.categories.into_iter().map(|(it,)| it).collect(),
+        last_edited: row.updated_at,
+        description: row.description,
+        default_player_settings: JigPlayerSettings {
+            direction: row.direction,
+            display_score: row.display_score,
+            track_assessments: row.track_assessments,
+            drag_assist: row.drag_assist,
         },
+        theme: row.theme,
+        age_ranges: row.age_ranges.into_iter().map(|(it,)| it).collect(),
+        affiliations: row.affiliations.into_iter().map(|(it,)| it).collect(),
+        additional_resources: row
+            .additional_resource
+            .into_iter()
+            .map(
+                |(id, display_name, resource_type_id, resource_content)| AdditionalResource {
+                    id,
+                    display_name,
+                    resource_type_id,
+                    resource_content: serde_json::from_value::<ResourceContent>(resource_content)
+                        .unwrap(),
+                },
+            )
+            .collect(),
+        audio_background: row.audio_background,
+        audio_effects: AudioEffects {
+            feedback_positive: row
+                .audio_feedback_positive
+                .into_iter()
+                .map(|(it,)| it)
+                .collect(),
+            feedback_negative: row
+                .audio_feedback_negative
+                .into_iter()
+                .map(|(it,)| it)
+                .collect(),
+        },
+        privacy_level: row.privacy_level,
+        locked: row.locked,
+        other_keywords: row.other_keywords,
+        translated_keywords: row.translated_keywords,
+        translated_description: row.translated_description.0,
         admin_data: JigAdminData {
             rating: row.rating,
             blocked: row.blocked,
@@ -436,77 +432,75 @@ from jig_data
             likes: jig_row.liked_count,
             plays: jig_row.play_count,
             jig_focus: jig_row.jig_focus,
-            jig_data: JigData {
-                draft_or_live,
-                display_name: jig_data_row.display_name,
-                language: jig_data_row.language,
-                modules: jig_data_row
-                    .modules
-                    .into_iter()
-                    .map(|(id, kind, is_complete)| LiteModule {
-                        id,
-                        kind,
-                        is_complete,
-                    })
-                    .collect(),
-                categories: jig_data_row
-                    .categories
-                    .into_iter()
-                    .map(|(it,)| it)
-                    .collect(),
-                last_edited: jig_data_row.updated_at,
-                description: jig_data_row.description,
-                default_player_settings: JigPlayerSettings {
-                    direction: jig_data_row.direction,
-                    display_score: jig_data_row.display_score,
-                    track_assessments: jig_data_row.track_assessments,
-                    drag_assist: jig_data_row.drag_assist,
-                },
-                theme: jig_data_row.theme,
-                age_ranges: jig_data_row
-                    .age_ranges
-                    .into_iter()
-                    .map(|(it,)| it)
-                    .collect(),
-                affiliations: jig_data_row
-                    .affiliations
-                    .into_iter()
-                    .map(|(it,)| it)
-                    .collect(),
-                additional_resources: jig_data_row
-                    .additional_resource
-                    .into_iter()
-                    .map(|(id, display_name, resource_type_id, resource_content)| {
-                        AdditionalResource {
-                            id,
-                            display_name,
-                            resource_type_id,
-                            resource_content: serde_json::from_value::<ResourceContent>(
-                                resource_content,
-                            )
-                            .unwrap(),
-                        }
-                    })
-                    .collect(),
-                audio_background: jig_data_row.audio_background,
-                audio_effects: AudioEffects {
-                    feedback_positive: jig_data_row
-                        .audio_feedback_positive
-                        .into_iter()
-                        .map(|(it,)| it)
-                        .collect(),
-                    feedback_negative: jig_data_row
-                        .audio_feedback_negative
-                        .into_iter()
-                        .map(|(it,)| it)
-                        .collect(),
-                },
-                privacy_level: jig_data_row.privacy_level,
-                locked: jig_data_row.locked,
-                other_keywords: jig_data_row.other_keywords,
-                translated_keywords: jig_data_row.translated_keywords,
-                translated_description: jig_data_row.translated_description.0,
+            draft_or_live,
+            display_name: jig_data_row.display_name,
+            language: jig_data_row.language,
+            modules: jig_data_row
+                .modules
+                .into_iter()
+                .map(|(id, kind, is_complete)| LiteModule {
+                    id,
+                    kind,
+                    is_complete,
+                })
+                .collect(),
+            categories: jig_data_row
+                .categories
+                .into_iter()
+                .map(|(it,)| it)
+                .collect(),
+            last_edited: jig_data_row.updated_at,
+            description: jig_data_row.description,
+            default_player_settings: JigPlayerSettings {
+                direction: jig_data_row.direction,
+                display_score: jig_data_row.display_score,
+                track_assessments: jig_data_row.track_assessments,
+                drag_assist: jig_data_row.drag_assist,
             },
+            theme: jig_data_row.theme,
+            age_ranges: jig_data_row
+                .age_ranges
+                .into_iter()
+                .map(|(it,)| it)
+                .collect(),
+            affiliations: jig_data_row
+                .affiliations
+                .into_iter()
+                .map(|(it,)| it)
+                .collect(),
+            additional_resources: jig_data_row
+                .additional_resource
+                .into_iter()
+                .map(
+                    |(id, display_name, resource_type_id, resource_content)| AdditionalResource {
+                        id,
+                        display_name,
+                        resource_type_id,
+                        resource_content: serde_json::from_value::<ResourceContent>(
+                            resource_content,
+                        )
+                        .unwrap(),
+                    },
+                )
+                .collect(),
+            audio_background: jig_data_row.audio_background,
+            audio_effects: AudioEffects {
+                feedback_positive: jig_data_row
+                    .audio_feedback_positive
+                    .into_iter()
+                    .map(|(it,)| it)
+                    .collect(),
+                feedback_negative: jig_data_row
+                    .audio_feedback_negative
+                    .into_iter()
+                    .map(|(it,)| it)
+                    .collect(),
+            },
+            privacy_level: jig_data_row.privacy_level,
+            locked: jig_data_row.locked,
+            other_keywords: jig_data_row.other_keywords,
+            translated_keywords: jig_data_row.translated_keywords,
+            translated_description: jig_data_row.translated_description.0,
             admin_data: JigAdminData {
                 rating: jig_row.rating,
                 blocked: jig_row.blocked,
@@ -658,77 +652,75 @@ limit $7
             likes: jig_data_row.liked_count,
             plays: jig_data_row.play_count,
             jig_focus: jig_data_row.jig_focus,
-            jig_data: JigData {
-                draft_or_live: jig_data_row.draft_or_live,
-                display_name: jig_data_row.display_name,
-                language: jig_data_row.language,
-                modules: jig_data_row
-                    .modules
-                    .into_iter()
-                    .map(|(id, kind, is_complete)| LiteModule {
-                        id,
-                        kind,
-                        is_complete,
-                    })
-                    .collect(),
-                categories: jig_data_row
-                    .categories
-                    .into_iter()
-                    .map(|(it,)| it)
-                    .collect(),
-                last_edited: jig_data_row.updated_at,
-                description: jig_data_row.description,
-                default_player_settings: JigPlayerSettings {
-                    direction: jig_data_row.direction,
-                    display_score: jig_data_row.display_score,
-                    track_assessments: jig_data_row.track_assessments,
-                    drag_assist: jig_data_row.drag_assist,
-                },
-                theme: jig_data_row.theme,
-                age_ranges: jig_data_row
-                    .age_ranges
-                    .into_iter()
-                    .map(|(it,)| it)
-                    .collect(),
-                affiliations: jig_data_row
-                    .affiliations
-                    .into_iter()
-                    .map(|(it,)| it)
-                    .collect(),
-                additional_resources: jig_data_row
-                    .additional_resource
-                    .into_iter()
-                    .map(|(id, display_name, resource_type_id, resource_content)| {
-                        AdditionalResource {
-                            id,
-                            display_name,
-                            resource_type_id,
-                            resource_content: serde_json::from_value::<ResourceContent>(
-                                resource_content,
-                            )
-                            .unwrap(),
-                        }
-                    })
-                    .collect(),
-                audio_background: jig_data_row.audio_background,
-                audio_effects: AudioEffects {
-                    feedback_positive: jig_data_row
-                        .audio_feedback_positive
-                        .into_iter()
-                        .map(|(it,)| it)
-                        .collect(),
-                    feedback_negative: jig_data_row
-                        .audio_feedback_negative
-                        .into_iter()
-                        .map(|(it,)| it)
-                        .collect(),
-                },
-                privacy_level: jig_data_row.privacy_level,
-                locked: jig_data_row.locked,
-                other_keywords: jig_data_row.other_keywords,
-                translated_keywords: jig_data_row.translated_keywords,
-                translated_description: jig_data_row.translated_description.0,
+            draft_or_live: jig_data_row.draft_or_live,
+            display_name: jig_data_row.display_name,
+            language: jig_data_row.language,
+            modules: jig_data_row
+                .modules
+                .into_iter()
+                .map(|(id, kind, is_complete)| LiteModule {
+                    id,
+                    kind,
+                    is_complete,
+                })
+                .collect(),
+            categories: jig_data_row
+                .categories
+                .into_iter()
+                .map(|(it,)| it)
+                .collect(),
+            last_edited: jig_data_row.updated_at,
+            description: jig_data_row.description,
+            default_player_settings: JigPlayerSettings {
+                direction: jig_data_row.direction,
+                display_score: jig_data_row.display_score,
+                track_assessments: jig_data_row.track_assessments,
+                drag_assist: jig_data_row.drag_assist,
             },
+            theme: jig_data_row.theme,
+            age_ranges: jig_data_row
+                .age_ranges
+                .into_iter()
+                .map(|(it,)| it)
+                .collect(),
+            affiliations: jig_data_row
+                .affiliations
+                .into_iter()
+                .map(|(it,)| it)
+                .collect(),
+            additional_resources: jig_data_row
+                .additional_resource
+                .into_iter()
+                .map(
+                    |(id, display_name, resource_type_id, resource_content)| AdditionalResource {
+                        id,
+                        display_name,
+                        resource_type_id,
+                        resource_content: serde_json::from_value::<ResourceContent>(
+                            resource_content,
+                        )
+                        .unwrap(),
+                    },
+                )
+                .collect(),
+            audio_background: jig_data_row.audio_background,
+            audio_effects: AudioEffects {
+                feedback_positive: jig_data_row
+                    .audio_feedback_positive
+                    .into_iter()
+                    .map(|(it,)| it)
+                    .collect(),
+                feedback_negative: jig_data_row
+                    .audio_feedback_negative
+                    .into_iter()
+                    .map(|(it,)| it)
+                    .collect(),
+            },
+            privacy_level: jig_data_row.privacy_level,
+            locked: jig_data_row.locked,
+            other_keywords: jig_data_row.other_keywords,
+            translated_keywords: jig_data_row.translated_keywords,
+            translated_description: jig_data_row.translated_description.0,
             admin_data: JigAdminData {
                 rating: jig_data_row.rating,
                 blocked: jig_data_row.blocked,
