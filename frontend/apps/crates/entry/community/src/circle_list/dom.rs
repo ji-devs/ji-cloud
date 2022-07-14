@@ -118,7 +118,6 @@ impl CirclesList {
                     false => None,
                     true => {
                         Some(html!("empty-fragment", {
-                            .style("display", "none")
                             .apply(OverlayHandle::lifecycle(clone!(state => move || {
                                 CreateCircle::new(Rc::clone(&state)).render()
                             })))
