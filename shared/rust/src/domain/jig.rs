@@ -20,7 +20,8 @@ use super::{
     asset::{DraftOrLive, OrderBy, PrivacyLevel, UserOrMe},
     category::CategoryId,
     meta::{AffiliationId, AgeRangeId, ResourceTypeId},
-    module::LiteModule, user::UserId,
+    module::LiteModule,
+    user::UserId,
 };
 use crate::domain::module::body::ThemeId;
 
