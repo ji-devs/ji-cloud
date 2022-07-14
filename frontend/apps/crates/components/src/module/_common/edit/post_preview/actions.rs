@@ -130,17 +130,10 @@ impl PostPreview {
 
         let html = format!("<{kind_str}-print cards='{texts_json}'></{kind_str}-print>");
 
-        let root = if cfg!(feature = "local") {
-            "http://localhost:4103"
-        } else if cfg!(feature = "sandbox") {
-           "https://frontend.sandbox.jicloud.org/"
-        } else if cfg!(feature = "release") {
-           "https://frontend.jicloud.org/"
-        } else {
-            ""
-        };
-
-        let scripts = vec![format!("{root}/module/{kind_str}/edit/custom-elements.js")];
+        let frontend_url = unsafe { SETTINGS.get_unchecked().remote_target.frontend_url() };
+        let scripts = vec![format!(
+            "{frontend_url}/module/{kind_str}/edit/custom-elements.js"
+        )];
 
         print(html, scripts);
 
