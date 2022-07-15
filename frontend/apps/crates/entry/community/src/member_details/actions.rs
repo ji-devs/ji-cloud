@@ -64,7 +64,7 @@ impl MemberDetails {
         let state = self;
 
         let req = JigBrowseQuery {
-            author_id: Some(UserOrMe::User(state.member_id)),
+            author_id: Some(UserOrMe::User(state.member_id.0)),
             draft_or_live: Some(DraftOrLive::Live),
             jig_focus: Some(JigFocus::Modules),
             ..Default::default()
@@ -80,7 +80,7 @@ impl MemberDetails {
         let state = self;
 
         let req = JigBrowseQuery {
-            author_id: Some(UserOrMe::User(state.member_id)),
+            author_id: Some(UserOrMe::User(state.member_id.0)),
             draft_or_live: Some(DraftOrLive::Live),
             jig_focus: Some(JigFocus::Resources),
             ..Default::default()
@@ -168,7 +168,7 @@ impl MemberDetails {
                 Ok(_) => {
                     let mut followings = state.community_state.followings.lock_mut();
                     if let Some(followings) = &mut *followings {
-                        followings.push(state.member_id);
+                        followings.push(state.member_id.0);
                     }
                 },
                 Err(_) => todo!(),
@@ -189,7 +189,7 @@ impl MemberDetails {
                 Ok(_) => {
                     let mut followings = state.community_state.followings.lock_mut();
                     if let Some(followings) = &mut *followings {
-                        let index = followings.iter().position(|followee| followee == &state.member_id);
+                        let index = followings.iter().position(|followee| followee == &state.member_id.0);
                         if let Some(index) = index {
                             followings.remove(index);
                         }

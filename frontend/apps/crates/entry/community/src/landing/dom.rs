@@ -3,7 +3,10 @@ use std::rc::Rc;
 use dominator::{clone, html, link, Dom};
 use futures_signals::signal::SignalExt;
 use shared::{
-    domain::{circle::Circle, user::public_user::PublicUser},
+    domain::{
+        circle::Circle,
+        user::{public_user::PublicUser, UserId},
+    },
     media::MediaLibrary,
 };
 use utils::routes::{CommunityCirclesRoute, CommunityMembersRoute, CommunityRoute, Route};
@@ -63,7 +66,7 @@ impl CommunityLanding {
     }
 
     fn render_member(self: &Rc<Self>, member: &PublicUser) -> Dom {
-        link!(Route::Community(CommunityRoute::Members(CommunityMembersRoute::Member(member.id))).to_string(), {
+        link!(Route::Community(CommunityRoute::Members(CommunityMembersRoute::Member(UserId(member.id)))).to_string(), {
             .property("slot", "members")
             .child(html!("profile-image", {
                 .style("height", "64px")

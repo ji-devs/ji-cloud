@@ -2,7 +2,10 @@ use std::rc::Rc;
 
 use dominator::{clone, html, Dom};
 use futures_signals::signal_vec::SignalVecExt;
-use shared::{domain::user::public_user::PublicUser, media::MediaLibrary};
+use shared::{
+    domain::user::{public_user::PublicUser, UserId},
+    media::MediaLibrary,
+};
 use utils::{
     events,
     routes::{CommunityMembersRoute, CommunityRoute, Route},
@@ -119,7 +122,7 @@ impl CircleDetails {
                 dom
             })
             .apply(move |dom| dominator::on_click_go_to_url!(dom, {
-                Route::Community(CommunityRoute::Members(CommunityMembersRoute::Member(member.id))).to_string()
+                Route::Community(CommunityRoute::Members(CommunityMembersRoute::Member(UserId(member.id)))).to_string()
             }))
             .child(html!("profile-image", {
                 .property("slot", "img")

@@ -5,7 +5,7 @@ use futures_signals::{signal::Mutable, signal_vec::MutableVec};
 use shared::domain::{
     image::ImageId,
     meta::{AffiliationId, AgeRangeId, MetadataResponse, SubjectId},
-    user::{PatchProfileRequest, UserProfile},
+    user::{PatchProfileRequest, UserId, UserProfile},
 };
 use uuid::Uuid;
 
@@ -52,7 +52,7 @@ pub enum ActivePopup {
 
 #[derive(Debug)]
 pub struct ProfilePageUser {
-    pub id: Mutable<Uuid>,
+    pub id: Mutable<UserId>,
     pub username: Mutable<String>,
     pub email: Mutable<String>,
     pub given_name: Mutable<String>,
@@ -71,7 +71,7 @@ pub struct ProfilePageUser {
 impl ProfilePageUser {
     pub fn empty() -> Self {
         Self {
-            id: Mutable::new(Uuid::from_u128(0)),
+            id: Mutable::new(UserId(Uuid::from_u128(0))),
             username: Mutable::new(String::new()),
             email: Mutable::new(String::new()),
             given_name: Mutable::new(String::new()),

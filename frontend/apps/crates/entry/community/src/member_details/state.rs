@@ -4,14 +4,13 @@ use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::Mutable;
 use shared::domain::{
     jig::{JigId, JigResponse},
-    user::public_user::PublicUser,
+    user::{public_user::PublicUser, UserId},
 };
-use uuid::Uuid;
 
 use crate::state::Community;
 
 pub struct MemberDetails {
-    pub member_id: Uuid,
+    pub member_id: UserId,
     pub member: Mutable<Option<PublicUser>>,
     pub loader: AsyncLoader,
     pub creations: Mutable<Creations>,
@@ -21,7 +20,7 @@ pub struct MemberDetails {
 }
 
 impl MemberDetails {
-    pub fn new(community_state: Rc<Community>, member_id: Uuid) -> Rc<Self> {
+    pub fn new(community_state: Rc<Community>, member_id: UserId) -> Rc<Self> {
         Rc::new(Self {
             member_id,
             member: Mutable::new(None),

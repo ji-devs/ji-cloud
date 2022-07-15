@@ -6,7 +6,11 @@ use components::{
 };
 use dominator::{clone, html, Dom, DomBuilder};
 use futures_signals::signal::{Signal, SignalExt};
-use shared::domain::{asset::DraftOrLive, jig::JigResponse, user::public_user::PublicUser};
+use shared::domain::{
+    asset::DraftOrLive,
+    jig::JigResponse,
+    user::{public_user::PublicUser, UserId},
+};
 use utils::{
     events,
     jig::{JigPlayerOptions, ResourceContentExt},
@@ -91,7 +95,7 @@ impl MemberDetails {
                 let is_following = match users_followings {
                     None => false,
                     Some(users_followings) => {
-                        users_followings.iter().any(|followee| followee == &state.member_id)
+                        users_followings.iter().any(|followee| followee == &state.member_id.0)
                     },
                 };
                 Some(match is_following {
@@ -307,7 +311,7 @@ impl MemberDetails {
             .property("slot", "connection-members")
             .property("name", &member.given_name)
             .apply(move |dom| dominator::on_click_go_to_url!(dom, {
-                Route::Community(CommunityRoute::Members(CommunityMembersRoute::Member(member.id))).to_string()
+                Route::Community(CommunityRoute::Members(CommunityMembersRoute::Member(UserId(member.id)))).to_string()
             }))
             .child(html!("profile-image", {
                 .property("slot", "profile-image")

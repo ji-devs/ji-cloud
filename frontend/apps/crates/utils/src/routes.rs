@@ -8,7 +8,7 @@ use shared::domain::{
     jig::{JigFocus, JigId, JigSearchQuery},
     module::{ModuleId, ModuleKind},
     session::OAuthUserProfile,
-    user::UserScope,
+    user::{UserId, UserScope},
 };
 use std::{
     fmt::{Debug, Display},
@@ -76,7 +76,7 @@ pub struct CommunitySearchQuery {
 #[derive(Debug, Clone)]
 pub enum CommunityMembersRoute {
     List,
-    Member(Uuid),
+    Member(UserId),
 }
 
 #[derive(Debug, Clone)]
@@ -303,7 +303,7 @@ impl Route {
                 Self::Community(CommunityRoute::Members(CommunityMembersRoute::List))
             }
             ["community", "members", user_id] => {
-                let user_id = Uuid::from_str(user_id).unwrap_ji();
+                let user_id = UserId(Uuid::from_str(user_id).unwrap_ji());
                 Self::Community(CommunityRoute::Members(CommunityMembersRoute::Member(
                     user_id,
                 )))
