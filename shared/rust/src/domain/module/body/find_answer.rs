@@ -148,12 +148,19 @@ pub enum QuestionField {
     ///
     /// Note (Ty): We won't make use of the scale field right now, but at some point we should add
     /// the ability to scale the label text
-    Dynamic(Transform),
+    Dynamic(Option<Transform>),
+}
+
+impl QuestionField {
+    /// Whether the current variant is `Dynamic`
+    pub fn is_dynamic(&self) -> bool {
+        matches!(self, Self::Dynamic(_))
+    }
 }
 
 impl Default for QuestionField {
     fn default() -> Self {
-        QuestionField::Dynamic(Transform::default())
+        QuestionField::Dynamic(None)
     }
 }
 
