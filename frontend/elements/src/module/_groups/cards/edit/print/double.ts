@@ -26,10 +26,13 @@ export class _ extends LitElement {
                 }
                 .card {
                     display: grid;
-                    grid-template-columns: 45vw 1px 45vw;
+                    grid-template-columns: 45vw 45vw;
                     border-top: var(--border);
                     border-bottom: var(--border);
                     border-left: var(--border);
+                }
+                .card-side:first-child {
+                    border-right: solid 1px #a1a8ad;
                 }
                 .card-side {
                     display: grid;
@@ -56,9 +59,6 @@ export class _ extends LitElement {
                     height: 10px;
                     filter: grayscale(1);
                 }
-                .divider {
-                    background-color: #a1a8ad;
-                }
             `,
         ];
     }
@@ -79,7 +79,6 @@ export class _ extends LitElement {
                                     <img-ui path="core/page-header/logo.svg"></img-ui> Jigzi.org
                                 </div>
                             </div>
-                            <div class="divider"></div>
                             <div class="card-side">
                                 <div class="text">${card[1]}</div>
                                 <div class="signature">
