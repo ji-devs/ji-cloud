@@ -29,6 +29,7 @@ async fn create(
     req: Json<<circle::Create as ApiEndpoint>::Req>,
 ) -> Result<HttpResponse, error::CreateWithMetadata> {
     let req = req.into_inner();
+    let user_id = claims.user_id();
 
     let mut txn = db.begin().await?;
 
@@ -37,7 +38,7 @@ async fn create(
         &req.display_name,
         &req.description,
         req.image,
-        UserId(claims.0.user_id),
+        user_id,
     )
     .await?;
 
@@ -54,8 +55,9 @@ async fn update(
     path: Path<CircleId>,
 ) -> Result<HttpResponse, error::UpdateWithMetadata> {
     let id = path.into_inner();
+    let user_id = claims.user_id();
 
-    db::circle::authz(&*db, UserId(claims.0.user_id), Some(id)).await?;
+    db::circle::authz(&*db, user_id, Some(id)).await?;
 
     let req = req.map_or_else(Default::default, Json::into_inner);
 
@@ -79,8 +81,9 @@ async fn delete(
     algolia: ServiceData<crate::algolia::Manager>,
 ) -> Result<HttpResponse, error::Delete> {
     let id = path.into_inner();
+    let user_id = claims.user_id();
 
-    db::circle::authz(&*db, UserId(claims.0.user_id), Some(id)).await?;
+    db::circle::authz(&*db, user_id, Some(id)).await?;
 
     db::circle::delete(&*db, id).await?;
 
@@ -106,12 +109,13 @@ async fn join(
     path: Path<CircleId>,
 ) -> Result<HttpResponse, error::NotFound> {
     let id = path.into_inner();
+    let user_id = claims.user_id();
 
     db::circle::valid_circle(&db, id)
         .await
         .map_err(|_| error::NotFound::ResourceNotFound)?;
 
-    db::circle::join_circle(&db, UserId(claims.0.user_id), id)
+    db::circle::join_circle(&db, user_id, id)
         .await
         .map_err(|e| error::NotFound::InternalServerError(e))?;
 
@@ -124,12 +128,13 @@ async fn leave(
     path: Path<CircleId>,
 ) -> Result<HttpResponse, error::NotFound> {
     let id = path.into_inner();
+    let user_id = claims.user_id();
 
     db::circle::valid_circle(&db, id)
         .await
         .map_err(|_| error::NotFound::ResourceNotFound)?;
 
-    db::circle::leave_circle(&db, UserId(claims.0.user_id), id)
+    db::circle::leave_circle(&db, user_id, id)
         .await
         .map_err(|e| error::NotFound::InternalServerError(e))?;
 
@@ -187,11 +192,13 @@ async fn browse(
     let browse_future = db::circle::browse(
         db.as_ref(),
         creator_id,
+        query.users.to_owned(),
         page_limit,
         query.page.unwrap_or(0) as i32,
     );
 
-    let total_count_future = db::circle::filtered_count(db.as_ref(), creator_id);
+    let total_count_future =
+        db::circle::filtered_count(db.as_ref(), query.users.to_owned(), creator_id);
 
     let (circles, total_count) = try_join!(browse_future, total_count_future,)?;
 
