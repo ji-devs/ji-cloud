@@ -128,7 +128,10 @@ impl PostPreview {
 
         let kind_str = RawData::kind().as_str();
 
-        let html = format!("<{kind_str}-print cards='{texts_json}'></{kind_str}-print>");
+        // needed so that a `"` characters don't end the html attribute
+        let texts_json = texts_json.replace("\"", "&quot;");
+
+        let html = format!("<{kind_str}-print cards=\"{texts_json}\"></{kind_str}-print>");
 
         let custom_elements_script = web_sys::window()
             .unwrap_ji()
