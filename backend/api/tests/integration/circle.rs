@@ -295,3 +295,35 @@ async fn update_circle() -> anyhow::Result<()> {
 
     Ok(())
 }
+
+#[actix_rt::test]
+async fn browse_circles_with_users() -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::Circle], &[]).await;
+
+    let port = app.port();
+
+    let client = reqwest::Client::new();
+
+    let resp = client
+        .get(&format!(
+            "http://0.0.0.0:{}/v1/circle/browse?users=7b96a41c-e406-11eb-8176-efd86dd7f444",
+            port
+        ))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    assert_eq!(resp.status(), StatusCode::OK);
+
+    let body: serde_json::Value = resp.json().await?;
+
+    insta::assert_json_snapshot!(body,
+        {".**.createdAt" => "[created_at]",
+         ".**.lastEdited" => "[last_edited]"
+    });
+
+    app.stop(false).await;
+
+    Ok(())
+}

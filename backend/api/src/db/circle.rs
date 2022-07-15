@@ -3,6 +3,7 @@ use shared::domain::{
     image::ImageId,
     user::{UserId, UserScope},
 };
+
 use sqlx::{PgConnection, PgPool};
 use uuid::Uuid;
 
@@ -181,17 +182,22 @@ pub async fn leave_circle(db: &PgPool, user_id: UserId, id: CircleId) -> anyhow:
 pub async fn browse(
     db: &PgPool,
     creator_id: Option<UserId>,
+    users: Vec<UserId>,
     page_limit: u32,
     page: i32,
 ) -> sqlx::Result<Vec<Circle>> {
     let mut txn = db.begin().await?;
 
+    let user_ids = filters_for_ids_or(&users[..]);
+
     let circle_data = sqlx::query!(
         r#"
         with cte as (
-            select array(select id  as "id!"
-            from "circle"
-            where creator_id = $1 or $1 is null
+            select array(select circle.id  as "id!"
+            from circle
+            left join circle_member "cm" on cm.id = circle.id
+            where (creator_id = $1 or $1 is null)
+            and (cm.user_id = any($2) or $2 = array[]::uuid[])
             order by created_at desc) as id
         ),
         cte1 as (
@@ -208,11 +214,12 @@ pub async fn browse(
                 updated_at   
         from "circle"
             inner join cte1 on cte1.id = "circle".id
-            where ord > (1 * $2 * $3)
+            where ord > (1 * $3 * $4)
             order by ord 
-            limit $3
+            limit $4
             "#,
         creator_id.map(|x| x.0),
+        &user_ids[..],
         page as i32,
         page_limit as i32,
     )
@@ -364,18 +371,37 @@ select exists (
     Ok(())
 }
 
-pub async fn filtered_count(db: &PgPool, creator_id: Option<UserId>) -> sqlx::Result<u64> {
+pub async fn filtered_count(
+    db: &PgPool,
+    users: Vec<UserId>,
+    creator_id: Option<UserId>,
+) -> sqlx::Result<u64> {
+    let user_ids = filters_for_ids_or(&users[..]);
+
     let circle = sqlx::query!(
         //language=SQL
         r#"
-select count(distinct id) as "count!: i64"
+select count(distinct circle.id) as "count!: i64"
     from circle
-    where creator_id = $1 or $1 is null
+    left join circle_member "cm" on cm.id = circle.id
+    where (creator_id = $1 or $1 is null)
+    and (cm.user_id = any($2) or $2 = array[]::uuid[])
 "#,
         creator_id.map(|x| x.0),
+        &user_ids[..]
     )
     .fetch_one(db)
     .await?;
 
     Ok(circle.count as u64)
+}
+
+fn filters_for_ids_or<T: Into<Uuid> + Copy>(ids: &[T]) -> Vec<Uuid> {
+    let mut vect: Vec<Uuid> = vec![];
+    for id in ids.iter().copied() {
+        let id: Uuid = id.into();
+        vect.push(id);
+    }
+
+    vect
 }

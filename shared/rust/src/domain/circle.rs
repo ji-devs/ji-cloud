@@ -94,6 +94,14 @@ pub struct CircleBrowseQuery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub creator_id: Option<UserOrMe>,
 
+    /// creator of circles
+    /// The hits per page to be returned
+    #[serde(default)]
+    #[serde(serialize_with = "super::csv_encode_uuids")]
+    #[serde(deserialize_with = "super::from_csv")]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub users: Vec<UserId>,
+
     /// The page number to get.
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
