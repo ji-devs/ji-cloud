@@ -114,12 +114,6 @@ pub struct ResetEmailResponse {
     pub paseto_token: String,
 }
 
-impl From<Uuid> for UserId {
-    fn from(id: Uuid) -> Self {
-        Self(id)
-    }
-}
-
 /// A user's profile.
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct UserProfile {

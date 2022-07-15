@@ -1,11 +1,13 @@
 use futures::stream::BoxStream;
-use shared::domain::image::{user::UserImage, ImageId, ImageSize};
+use shared::domain::{
+    image::{user::UserImage, ImageId, ImageSize},
+    user::UserId,
+};
 use sqlx::{PgConnection, PgPool};
 use tracing::{instrument, Instrument};
-use uuid::Uuid;
 
 #[instrument(skip(pool))]
-pub async fn create(pool: &PgPool, user_id: &Uuid, size: ImageSize) -> sqlx::Result<ImageId> {
+pub async fn create(pool: &PgPool, user_id: &UserId, size: ImageSize) -> sqlx::Result<ImageId> {
     let mut txn = pool.begin().await?;
     let id: ImageId = sqlx::query!(
         //language=SQL
@@ -14,7 +16,7 @@ insert into user_image_library (user_id, size)
 values ($1, $2)
 returning id as "id: ImageId"
 "#,
-        user_id,
+        user_id.0,
         size as i16,
     )
     .fetch_one(&mut txn)
@@ -32,10 +34,10 @@ returning id as "id: ImageId"
     Ok(id)
 }
 
-pub async fn delete(db: &PgPool, user_id: Uuid, image_id: ImageId) -> sqlx::Result<()> {
+pub async fn delete(db: &PgPool, user_id: UserId, image_id: ImageId) -> sqlx::Result<()> {
     sqlx::query!(
         "delete from user_image_library where user_id = $1 and id = $2",
-        user_id,
+        user_id.0,
         image_id.0
     )
     .execute(db)
@@ -43,7 +45,11 @@ pub async fn delete(db: &PgPool, user_id: Uuid, image_id: ImageId) -> sqlx::Resu
     .map(drop)
 }
 
-pub async fn get(db: &PgPool, user_id: Uuid, image_id: ImageId) -> sqlx::Result<Option<UserImage>> {
+pub async fn get(
+    db: &PgPool,
+    user_id: UserId,
+    image_id: ImageId,
+) -> sqlx::Result<Option<UserImage>> {
     sqlx::query_as!(
         UserImage,
         // language=SQL
@@ -56,7 +62,7 @@ where user_id = $1
   and id = $2
   and processing_result is true
         "#,
-        user_id,
+        user_id.0,
         image_id.0,
     )
     .fetch_optional(db)
@@ -65,7 +71,7 @@ where user_id = $1
 
 pub fn list(
     db: &PgPool,
-    user_id: Uuid,
+    user_id: UserId,
     size: Option<ImageSize>,
 ) -> BoxStream<'_, sqlx::Result<UserImage>> {
     sqlx::query_as!(
@@ -81,7 +87,7 @@ where processing_result is true
   and (size is not distinct from $2 or $2 is null)
 order by created_at desc
 "#,
-        user_id,
+        user_id.0,
         size.map(|it| it as i16)
     )
     .fetch(db)
@@ -92,7 +98,7 @@ order by created_at desc
 /// Returns ResourceNotFound even if the image exists but the user does not h
 pub async fn auth_user_image(
     txn: &mut PgConnection,
-    user_id: &Uuid,
+    user_id: &UserId,
     image_id: &ImageId,
 ) -> anyhow::Result<(), crate::error::Upload> {
     let exists = sqlx::query!(
@@ -100,7 +106,7 @@ pub async fn auth_user_image(
         r#"
 select exists(select 1 from user_image_library where user_id = $1 and id = $2) as "exists!"
     "#,
-        user_id,
+        user_id.0,
         image_id.0
     )
     .fetch_one(txn)

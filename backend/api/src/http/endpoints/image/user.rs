@@ -30,7 +30,7 @@ pub(super) async fn create(
 ) -> Result<HttpResponse, error::Server> {
     let size = query.size;
 
-    let user_id = claims.0.user_id;
+    let user_id = claims.user_id();
 
     let id = db::image::user::create(db.as_ref(), &user_id, size).await?;
 
@@ -48,10 +48,10 @@ pub(super) async fn upload(
     req: Json<<endpoints::image::user::Upload as ApiEndpoint>::Req>,
 ) -> Result<Json<<endpoints::image::user::Upload as ApiEndpoint>::Res>, error::Upload> {
     let id = path.into_inner();
-
+    let user_id = claims.user_id();
     let mut txn = db.begin().await?;
 
-    db::image::user::auth_user_image(&mut txn, &claims.0.user_id, &id).await?;
+    db::image::user::auth_user_image(&mut txn, &user_id, &id).await?;
 
     let upload_content_length = req.into_inner().file_size;
 
@@ -94,8 +94,9 @@ pub(super) async fn delete(
     s3: ServiceData<s3::Client>,
 ) -> Result<HttpResponse, error::Delete> {
     let id = path.into_inner();
+    let user_id = claims.user_id();
 
-    db::image::user::delete(&db, claims.0.user_id, id)
+    db::image::user::delete(&db, user_id, id)
         .await
         .map_err(super::check_conflict_delete)?;
 
@@ -117,8 +118,9 @@ pub(super) async fn get(
     path: Path<ImageId>,
 ) -> Result<Json<<endpoints::image::user::Get as ApiEndpoint>::Res>, error::NotFound> {
     let image_id = path.into_inner();
+    let user_id = claims.user_id();
 
-    let metadata = db::image::user::get(&db, claims.0.user_id, image_id)
+    let metadata = db::image::user::get(&db, user_id, image_id)
         .await?
         .ok_or(error::NotFound::ResourceNotFound)?;
 
@@ -131,7 +133,9 @@ pub(super) async fn list(
     claims: TokenUser,
     query: Query<<endpoints::image::user::List as ApiEndpoint>::Req>,
 ) -> Result<Json<<endpoints::image::user::List as ApiEndpoint>::Res>, error::Server> {
-    let images: Vec<_> = db::image::user::list(db.as_ref(), claims.0.user_id, query.kind)
+    let user_id = claims.user_id();
+
+    let images: Vec<_> = db::image::user::list(db.as_ref(), user_id, query.kind)
         .err_into::<error::Server>()
         .and_then(|metadata: UserImage| async { Ok(UserImageResponse { metadata }) })
         .try_collect()

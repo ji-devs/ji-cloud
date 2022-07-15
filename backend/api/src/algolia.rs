@@ -1669,7 +1669,7 @@ impl Client {
         query: &str,
         username: Option<String>,
         name: Option<String>,
-        user_id: Option<Uuid>,
+        user_id: Option<UserId>,
         language: Option<String>,
         organization: Option<String>,
         persona: Option<Vec<String>>,

@@ -13,7 +13,6 @@ use shared::{
     },
 };
 use sqlx::PgPool;
-use uuid::Uuid;
 
 use crate::{
     db::{self},

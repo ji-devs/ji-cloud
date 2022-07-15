@@ -33,7 +33,6 @@ use shared::{
 };
 use sqlx::{postgres::PgDatabaseError, Acquire, PgConnection, PgPool};
 use tracing::{instrument, Instrument};
-use uuid::Uuid;
 
 use crate::token::{create_update_email_token, validate_token};
 use crate::{
@@ -52,7 +51,7 @@ pub mod public_user;
 #[instrument(skip(txn, email_address, mail))]
 async fn send_verification_email(
     txn: &mut PgConnection,
-    user_id: Uuid,
+    user_id: UserId,
     email_address: String,
     mail: &mail::Client,
     pages_url: &str,
@@ -81,7 +80,7 @@ async fn send_verification_email(
 #[instrument(skip(txn, email_address, mail))]
 async fn send_welcome_jigzi_email(
     txn: &mut PgConnection,
-    user_id: Uuid,
+    user_id: UserId,
     email_address: String,
     mail: &mail::Client,
     pages_url: &str,
@@ -107,7 +106,7 @@ async fn send_welcome_jigzi_email(
 #[instrument(skip(txn, email_address, mail))]
 async fn send_password_email(
     txn: &mut PgConnection,
-    user_id: Uuid,
+    user_id: UserId,
     email_address: String,
     mail: &mail::Client,
     pages_url: &str,
@@ -144,7 +143,7 @@ async fn send_password_email(
 #[instrument(skip(txn, mail))]
 async fn send_reset_email(
     txn: &mut PgConnection,
-    user_id: Uuid,
+    user_id: UserId,
     email_address: String,
     mail: &mail::Client,
     pages_url: &str,
@@ -254,7 +253,7 @@ async fn create_user(
 
     send_verification_email(
         &mut txn,
-        user.id,
+        UserId(user.id),
         req.email,
         &mail,
         &config.remote_target().pages_url(),
@@ -285,7 +284,7 @@ async fn verify_email(
 
             let user = sqlx::query!(
                 r#"
-select user_id
+select user_id          "id!: UserId"
 from user_auth_basic
 where
     lower(email) = lower($1::text) and
@@ -303,11 +302,11 @@ where
             };
 
             // make sure they can't use the old link anymore
-            db::session::clear_any(&mut txn, user.user_id, SessionMask::VERIFY_EMAIL).await?;
+            db::session::clear_any(&mut txn, user.id, SessionMask::VERIFY_EMAIL).await?;
 
             send_verification_email(
                 &mut txn,
-                user.user_id,
+                user.id,
                 email,
                 &mail,
                 &config.remote_target().pages_url(),
@@ -345,7 +344,7 @@ where
     session.token = $1 and
     session.expires_at > now() and
     (session.scope_mask & $2) = $2
-returning user_id
+returning user_id as "id!: UserId"
 "#,
                 token,
                 SessionMask::VERIFY_EMAIL.bits(),
@@ -367,7 +366,7 @@ returning user_id
             ))?;
 
             // make sure they can't use the link, now that they're verified.
-            db::session::clear_any(&mut txn, user.user_id, SessionMask::VERIFY_EMAIL).await?;
+            db::session::clear_any(&mut txn, user.id, SessionMask::VERIFY_EMAIL).await?;
 
             let login_ttl = config
                 .login_token_valid_duration
@@ -377,7 +376,7 @@ returning user_id
 
             let session = db::session::create(
                 &mut txn,
-                user.user_id,
+                user.id,
                 Some(&valid_until),
                 SessionMask::PUT_PROFILE,
                 None,
@@ -432,8 +431,10 @@ async fn create_profile(
 
     let req = req.into_inner();
 
+    let user_id = UserId(signup_user.claims.user_id);
+
     let profile_image_id: Option<ImageId> = match req.profile_image_url {
-        Some(ref url) => create_user_profile_image(&db, &s3, &url, &signup_user.claims.user_id)
+        Some(ref url) => create_user_profile_image(&db, &s3, &url, &user_id)
             .await
             .ok(),
         None => None,
@@ -443,13 +444,7 @@ async fn create_profile(
 
     let mut upsert_txn = txn.begin().await?;
 
-    upsert_profile(
-        &mut upsert_txn,
-        &req,
-        profile_image_id,
-        signup_user.claims.user_id,
-    )
-    .await?;
+    upsert_profile(&mut upsert_txn, &req, profile_image_id, user_id).await?;
 
     db::session::delete(&mut upsert_txn, &signup_user.claims.token).await?;
 
@@ -461,7 +456,7 @@ async fn create_profile(
 
     let session = db::session::create(
         &mut txn,
-        signup_user.claims.user_id,
+        user_id,
         Some(&(Utc::now() + login_ttl)),
         SessionMask::GENERAL,
         None,
@@ -475,11 +470,11 @@ async fn create_profile(
         &session,
     )?;
 
-    let email = db::user::get_email(&mut txn, signup_user.claims.user_id).await?;
+    let email = db::user::get_email(&mut txn, user_id).await?;
 
     send_welcome_jigzi_email(
         &mut txn,
-        signup_user.claims.user_id,
+        user_id,
         email,
         &mail,
         &settings.remote_target().pages_url(),
@@ -504,7 +499,7 @@ async fn create_user_profile_image(
     pool: &PgPool,
     s3: &s3::Client,
     url: &str,
-    user_id: &Uuid,
+    user_id: &UserId,
 ) -> anyhow::Result<ImageId> {
     // create entry in user library library -> ID
     let profile_image_id = db::image::user::create(&*pool, user_id, ImageSize::UserProfile).await?;
@@ -583,6 +578,7 @@ async fn email_reset(
 ) -> Result<Json<<ResetEmail as ApiEndpoint>::Res>, error::Register> {
     // add authorized user to get user id
     let req = req.into_inner();
+    let user_id = claims.user_id();
 
     let mut txn = db.begin().await?;
 
@@ -624,13 +620,13 @@ async fn email_reset(
         Duration::hours(1),
         &req.email,
         Utc::now(),
-        &claims.0.user_id,
+        &user_id.0,
     )?;
 
     // 2. Send email reset email with token
     send_reset_email(
         &mut txn,
-        claims.0.user_id,
+        user_id,
         req.email,
         &mail,
         &settings.remote_target().pages_url(),
@@ -667,7 +663,7 @@ pub struct EmailToken {
     pub email: String,
 
     /// The uuid instance this token is for.
-    pub user_id: Uuid,
+    pub user_id: UserId,
 }
 
 /// Verify email reset email
@@ -692,7 +688,7 @@ async fn verify_email_reset(
                 Duration::hours(1),
                 &token.email,
                 Utc::now(),
-                &token.user_id,
+                &token.user_id.into(),
             )?;
 
             // make sure they can't use the old link anymore
@@ -734,7 +730,7 @@ async fn verify_email_reset(
             // Check if email exists
             let email = sqlx::query!(
                 r#"select email::text as "email!" from user_email where user_id = $1 for share"#,
-                token.user_id
+                token.user_id.0
             )
             .fetch_optional(&mut txn)
             .instrument(tracing::info_span!("email exists"))
@@ -755,7 +751,7 @@ async fn verify_email_reset(
         set email = $3::text
         where user_id = $1 and lower(email) = lower($2::text)
         "#,
-                token.user_id,
+                token.user_id.0,
                 &email,
                 token.email
             )
@@ -770,7 +766,7 @@ async fn verify_email_reset(
         set email = $3::text
         where user_id = $1 and lower(email) = lower($2::text)
         "#,
-                token.user_id,
+                token.user_id.0,
                 &email,
                 token.email
             )
@@ -779,7 +775,7 @@ async fn verify_email_reset(
             .await?;
 
             if force_logout {
-                sqlx::query!("delete from session where user_id = $1", &token.user_id)
+                sqlx::query!("delete from session where user_id = $1", token.user_id.0)
                     .execute(&mut txn)
                     .instrument(tracing::info_span!("force logout"))
                     .await?;
@@ -801,7 +797,7 @@ pub fn validate_email_token(
         .map_err(|_| error::VerifyEmail::Email(error::Email::Empty))?;
 
     let (user_id, new_email) = (
-        serde_json::from_value::<Uuid>(token["id"].clone())?,
+        serde_json::from_value::<UserId>(token["id"].clone())?,
         serde_json::from_value::<String>(token["sub"].clone())?,
     );
 
@@ -819,8 +815,9 @@ async fn patch_profile(
     req: Json<<PatchProfile as ApiEndpoint>::Req>,
 ) -> Result<HttpResponse, error::UserUpdate> {
     validate_patch_profile_req(&req)?;
+    let user_id = claims.user_id();
 
-    db::user::update_profile(&*db, claims.0.user_id, req.into_inner()).await?;
+    db::user::update_profile(&*db, user_id, req.into_inner()).await?;
 
     Ok(HttpResponse::NoContent().finish())
 }
@@ -832,8 +829,9 @@ async fn get_profile(
     claims: TokenUser,
 ) -> Result<Json<<Profile as ApiEndpoint>::Res>, error::UserNotFound> {
     // todo: figure out how to do `<Profile as ApiEndpoint>::Err`
+    let user_id = claims.user_id();
 
-    db::user::get_profile(db.as_ref(), claims.0.user_id)
+    db::user::get_profile(db.as_ref(), user_id)
         .await?
         .map(Json)
         .ok_or(error::UserNotFound::UserNotFound)
@@ -873,7 +871,7 @@ async fn reset_password(
     // includes check for oauth email
     let user = sqlx::query!(
         r#"
-        select user_id,
+        select user_id "user_id: UserId",
         (
            select
              case 
@@ -893,7 +891,7 @@ async fn reset_password(
         Some(user) => (user.user_id, user.is_oauth),
         None => return Ok(HttpResponse::NoContent().finish()),
     };
-    //select exists(select 1 from user_email where email = lower($1)
+
     send_password_email(
         &mut txn,
         user_id,
@@ -935,7 +933,7 @@ async fn put_password(
 
     let email = sqlx::query!(
         r#"select email::text as "email!" from user_email where user_id = $1 for share"#,
-        user_id
+        user_id.0
     )
     .fetch_optional(&mut txn)
     .instrument(tracing::info_span!("get email address"))
@@ -948,14 +946,14 @@ async fn put_password(
 
     let pass_hash = hash_password(password).await?;
 
-    sqlx::query!("delete from user_auth_basic where user_id = $1", user_id)
+    sqlx::query!("delete from user_auth_basic where user_id = $1", user_id.0)
         .execute(&mut txn)
         .instrument(tracing::info_span!("delete user_auth_basic"))
         .await?;
 
     let user_to_delete = sqlx::query!(
-        r#"select user_id from user_auth_basic where user_id <> $1 and lower(email) = lower($2) for update"#,
-        user_id,
+        r#"select user_id "id!: UserId" from user_auth_basic where user_id <> $1 and lower(email) = lower($2) for update"#,
+        user_id.0,
         email as _
     )
     .fetch_optional(&mut txn)
@@ -963,13 +961,10 @@ async fn put_password(
     .await?;
 
     if let Some(user_to_delete) = user_to_delete {
-        sqlx::query!(
-            r#"delete from "user" where id = $1"#,
-            user_to_delete.user_id
-        )
-        .execute(&mut txn)
-        .instrument(tracing::info_span!("delete user_to_delete"))
-        .await?;
+        sqlx::query!(r#"delete from "user" where id = $1"#, user_to_delete.id.0)
+            .execute(&mut txn)
+            .instrument(tracing::info_span!("delete user_to_delete"))
+            .await?;
     }
 
     sqlx::query!(
@@ -977,7 +972,7 @@ async fn put_password(
 insert into user_auth_basic (user_id, email, password)
 values ($1, $2::text, $3)
 "#,
-        user_id,
+        user_id.0,
         &email,
         pass_hash.to_string(),
     )
@@ -986,7 +981,7 @@ values ($1, $2::text, $3)
     .await?;
 
     if force_logout {
-        sqlx::query!("delete from session where user_id = $1", user_id)
+        sqlx::query!("delete from session where user_id = $1", user_id.0)
             .execute(&mut txn)
             .instrument(tracing::info_span!("delete session"))
             .await?;

@@ -11,10 +11,10 @@ use shared::{
     domain::{
         admin::{ExportDataRequest, ExportType},
         session::NewSessionResponse,
+        user::UserId,
     },
 };
 use sqlx::PgPool;
-use uuid::Uuid;
 
 use crate::{
     db, error,
@@ -27,7 +27,7 @@ async fn impersonate(
     auth: TokenUserWithScope<ScopeAdmin>,
     settings: Data<RuntimeSettings>,
     db: Data<PgPool>,
-    user: Path<Uuid>,
+    user: Path<UserId>,
 ) -> actix_web::Result<HttpResponse, error::UserNotFound> {
     let user_id = user.into_inner();
 

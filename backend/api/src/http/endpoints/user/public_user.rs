@@ -37,7 +37,7 @@ use crate::{
 pub async fn get(
     db: Data<PgPool>,
     _auth: Option<TokenUser>,
-    path: Path<Uuid>,
+    path: Path<UserId>,
 ) -> Result<Json<<user::GetPublicUser as ApiEndpoint>::Res>, error::NotFound> {
     let user_id = path.into_inner();
 
@@ -178,7 +178,7 @@ pub async fn browse_user_jigs(
 pub async fn browse_user_resources(
     db: Data<PgPool>,
     _auth: Option<TokenUser>,
-    path: Path<Uuid>,
+    path: Path<UserId>,
     query: Option<Query<<user::BrowseResources as ApiEndpoint>::Req>>,
 ) -> Result<Json<<user::BrowseResources as ApiEndpoint>::Res>, error::NotFound> {
     let (query, user_id) = (
@@ -263,9 +263,9 @@ pub async fn browse_user_courses(
 pub async fn follow(
     db: Data<PgPool>,
     claims: TokenUser,
-    path: Path<Uuid>,
+    path: Path<UserId>,
 ) -> Result<HttpResponse, error::NotFound> {
-    let (user_id, follower_id) = (path.into_inner(), claims.0.user_id);
+    let (user_id, follower_id) = (path.into_inner(), claims.user_id());
 
     if user_id == follower_id {
         return Err(error::NotFound::InternalServerError(anyhow::anyhow!(
@@ -282,9 +282,9 @@ pub async fn follow(
 pub async fn unfollow(
     db: Data<PgPool>,
     claims: TokenUser,
-    path: Path<Uuid>,
+    path: Path<UserId>,
 ) -> Result<HttpResponse, error::NotFound> {
-    let (user_id, follower_id) = (path.into_inner(), claims.0.user_id);
+    let (user_id, follower_id) = (path.into_inner(), claims.user_id());
 
     db::user::public_user::unfollow(&db, user_id, follower_id).await?;
 
@@ -295,7 +295,7 @@ pub async fn unfollow(
 pub async fn browse_user_followers(
     db: Data<PgPool>,
     _auth: Option<TokenUser>,
-    path: Path<Uuid>,
+    path: Path<UserId>,
     query: Option<Query<<user::BrowseFollowers as ApiEndpoint>::Req>>,
 ) -> Result<Json<<user::BrowseFollowers as ApiEndpoint>::Res>, error::NotFound> {
     let (query, user_id) = (
@@ -332,7 +332,7 @@ pub async fn browse_user_followers(
 pub async fn browse_user_followings(
     db: Data<PgPool>,
     _auth: Option<TokenUser>,
-    path: Path<Uuid>,
+    path: Path<UserId>,
     query: Option<Query<<user::BrowseFollowing as ApiEndpoint>::Req>>,
 ) -> Result<Json<<user::BrowseFollowing as ApiEndpoint>::Res>, error::NotFound> {
     let (query, user_id) = (

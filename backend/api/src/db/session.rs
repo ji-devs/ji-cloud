@@ -1,4 +1,5 @@
 use chrono::{DateTime, Utc};
+use shared::domain::user::UserId;
 use sqlx::PgConnection;
 use tracing::instrument;
 use uuid::Uuid;
@@ -17,7 +18,7 @@ fn generate_session_token() -> String {
 #[instrument(skip(conn))]
 pub async fn create(
     conn: &mut PgConnection,
-    user_id: Uuid,
+    user_id: UserId,
     valid_until: Option<&DateTime<Utc>>,
     mask: SessionMask,
     impersonator_id: Option<Uuid>,
@@ -26,7 +27,7 @@ pub async fn create(
     sqlx::query!(
         "insert into session (token, user_id, impersonator_id, expires_at, scope_mask) values ($1, $2, $3, $4, $5)",
         &session,
-        user_id,
+        user_id.0,
         impersonator_id,
         valid_until,
         mask.bits()
@@ -39,12 +40,12 @@ pub async fn create(
 #[instrument(skip(conn))]
 pub async fn clear_any(
     conn: &mut PgConnection,
-    user_id: Uuid,
+    user_id: UserId,
     mask: SessionMask,
 ) -> sqlx::Result<()> {
     sqlx::query!(
         "delete from session where user_id = $1 and (scope_mask | $2) <> 0",
-        user_id,
+        user_id.0,
         mask.bits(),
     )
     .execute(conn)
@@ -59,7 +60,7 @@ pub async fn get_onetime(
     txn: &mut PgConnection,
     min_mask: SessionMask,
     token: &str,
-) -> sqlx::Result<Option<Uuid>> {
+) -> sqlx::Result<Option<UserId>> {
     let res = sqlx::query!(
         r#"delete from session where token = $1 and (scope_mask & $2) = $2 returning user_id"#,
         token,
@@ -68,7 +69,7 @@ pub async fn get_onetime(
     .fetch_optional(txn)
     .await?;
 
-    Ok(res.map(|it| it.user_id))
+    Ok(res.map(|it| UserId(it.user_id)))
 }
 
 #[instrument(skip_all)]

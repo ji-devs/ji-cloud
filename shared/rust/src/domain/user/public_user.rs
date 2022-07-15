@@ -1,11 +1,10 @@
 //! Types for public users.
 
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 
 use crate::domain::{
     additional_resource::AdditionalResource, asset::UserOrMe, circle::CircleId, csv_encode_uuids,
-    from_csv, image::ImageId,
+    from_csv, image::ImageId, user::UserId,
 };
 
 /// A lite profile for other Users to view
@@ -13,7 +12,7 @@ use crate::domain::{
 #[serde(rename_all = "camelCase")]
 pub struct PublicUser {
     /// User Id
-    pub id: Uuid,
+    pub id: UserId,
     /// Username of User
     pub username: String,
     /// First name of User
