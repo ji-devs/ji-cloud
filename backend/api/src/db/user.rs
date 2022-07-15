@@ -39,7 +39,7 @@ pub async fn lookup(
 }
 
 #[instrument(skip(db))]
-pub async fn get_profile(db: &sqlx::PgPool, id: Uuid) -> anyhow::Result<Option<UserProfile>> {
+pub async fn get_profile(db: &sqlx::PgPool, id: UserId) -> anyhow::Result<Option<UserProfile>> {
     log::warn!("in get_profile: {:?}", id);
     let row = sqlx::query!(
         //language=SQL
@@ -79,7 +79,7 @@ from "user"
     inner join user_profile on "user".id = user_profile.user_id
     inner join user_email using(user_id)
 where id = $1"#,
-        id
+        id.0
     )
     .fetch_optional(db)
     .await?;
@@ -231,10 +231,10 @@ where
         .collect())
 }
 
-pub async fn exists(db: &sqlx::PgPool, id: Uuid) -> sqlx::Result<bool> {
+pub async fn exists(db: &sqlx::PgPool, id: UserId) -> sqlx::Result<bool> {
     sqlx::query!(
         r#"select exists (select 1 from "user" where id = $1) as "exists!""#,
-        id,
+        id.0,
     )
     .fetch_one(db)
     .await
@@ -246,7 +246,7 @@ pub async fn upsert_profile(
     txn: &mut sqlx::Transaction<'_, sqlx::Postgres>,
     req: &CreateProfileRequest,
     profile_image_id: Option<ImageId>,
-    user_id: Uuid,
+    user_id: UserId,
 ) -> Result<(), error::UserUpdate> {
     sqlx::query!(
         //language=SQL
@@ -269,7 +269,7 @@ set
     persona = $12,
     location = $13
 "#,
-        user_id,
+        user_id.0,
         &req.username,
         req.over_18,
         &req.given_name,
@@ -289,7 +289,7 @@ set
 
     sqlx::query!(
         "insert into user_scope (user_id, scope) values ($1, $2)",
-        user_id,
+        user_id.0,
         UserScope::ManageSelfJig as i16
     )
     .execute(&mut *txn)
@@ -311,7 +311,7 @@ set
 #[instrument(skip(db, req))]
 pub async fn update_profile(
     db: &PgPool,
-    user_id: Uuid,
+    user_id: UserId,
     req: PatchProfileRequest,
 ) -> Result<(), error::UserUpdate> {
     let mut txn = db.begin().await?;
@@ -321,7 +321,7 @@ pub async fn update_profile(
         r#"
 select exists(select 1 from user_profile where user_id = $1 for update) as "exists!"
     "#,
-        user_id
+        user_id.0
     )
     .fetch_one(&mut txn)
     .instrument(tracing::info_span!("user exists"))
@@ -339,7 +339,7 @@ update user_profile
 set organization = $2,
     updated_at = now()
 where user_id = $1 and organization is distinct from $2"#,
-            user_id,
+            user_id.0,
             organization
         )
         .execute(&mut txn)
@@ -355,7 +355,7 @@ update user_profile
 set location = $2,
     updated_at = now()
 where user_id = $1 and location is distinct from $2"#,
-            user_id,
+            user_id.0,
             location
         )
         .execute(&mut txn)
@@ -372,7 +372,7 @@ set profile_image_id = $2,
     updated_at = now()
 where user_id = $1 and profile_image_id is distinct from $2
         "#,
-            user_id,
+            user_id.0,
             profile_image.map(|it| it.0),
         )
         .execute(&mut txn)
@@ -389,7 +389,7 @@ set persona = $2,
     updated_at = now()
 where user_id = $1 and persona is distinct from $2
         "#,
-            user_id,
+            user_id.0,
             &persona
         )
         .execute(&mut txn)
@@ -429,7 +429,7 @@ where user_id = $1
        ($13::text is not null and $13 is distinct from bio)
     )
     "#,
-        user_id,
+        user_id.0,
         req.username,
         req.given_name,
         req.family_name,
@@ -464,7 +464,7 @@ where user_id = $1
 #[instrument(skip(conn))]
 pub async fn update_metadata(
     conn: &mut PgConnection,
-    user_id: Uuid,
+    user_id: UserId,
     subjects: Option<&[SubjectId]>,
     affiliations: Option<&[AffiliationId]>,
     age_ranges: Option<&[AgeRangeId]>,
@@ -472,15 +472,15 @@ pub async fn update_metadata(
     const TABLE: &str = r#"user"#;
 
     if let Some(affiliations) = affiliations {
-        recycle_metadata(&mut *conn, TABLE, user_id, affiliations).await?;
+        recycle_metadata(&mut *conn, TABLE, user_id.0, affiliations).await?;
     }
 
     if let Some(age_ranges) = age_ranges {
-        recycle_metadata(&mut *conn, TABLE, user_id, age_ranges).await?;
+        recycle_metadata(&mut *conn, TABLE, user_id.0, age_ranges).await?;
     }
 
     if let Some(subjects) = subjects {
-        recycle_metadata(&mut *conn, TABLE, user_id, subjects).await?;
+        recycle_metadata(&mut *conn, TABLE, user_id.0, subjects).await?;
     }
 
     Ok(())
@@ -496,7 +496,7 @@ fn color_to_rgba(color: i32) -> rgb::RGBA8 {
 
 pub async fn create_color(
     db: &sqlx::PgPool,
-    user_id: Uuid,
+    user_id: UserId,
     color: rgb::RGBA8,
 ) -> sqlx::Result<Vec<rgb::RGBA8>> {
     let color = rgba_to_i32(color);
@@ -517,7 +517,7 @@ select color as "color!" from colors
 union all
 select color as "color!" from cte
     "#,
-        user_id,
+        user_id.0,
         color
     )
     .fetch_all(db)
@@ -532,7 +532,7 @@ select color as "color!" from cte
 
 pub async fn update_color(
     db: &sqlx::PgPool,
-    user_id: Uuid,
+    user_id: UserId,
     index: u16,
     color: rgb::RGBA8,
 ) -> sqlx::Result<bool> {
@@ -548,7 +548,7 @@ select exists(
             and index = $2
         for update
 ) as "exists!""#,
-        user_id,
+        user_id.0,
         index as i16
     )
     .fetch_one(&mut txn)
@@ -561,7 +561,7 @@ select exists(
 
     sqlx::query!(
         "update user_color set color = $3 where user_id = $1 and index = $2",
-        user_id,
+        user_id.0,
         index as i16,
         color
     )
@@ -573,7 +573,7 @@ select exists(
     Ok(true)
 }
 
-pub async fn get_colors(db: &sqlx::PgPool, user_id: Uuid) -> sqlx::Result<Vec<rgb::RGBA8>> {
+pub async fn get_colors(db: &sqlx::PgPool, user_id: UserId) -> sqlx::Result<Vec<rgb::RGBA8>> {
     let colors = sqlx::query!(
         r#"
 select color
@@ -581,7 +581,7 @@ from user_color
 where user_id = $1
 order by index
 "#,
-        user_id
+        user_id.0
     )
     .fetch_all(db)
     .await?;
@@ -593,7 +593,7 @@ order by index
         .collect())
 }
 
-pub async fn delete_color(db: &sqlx::PgPool, user_id: Uuid, index: u16) -> sqlx::Result<()> {
+pub async fn delete_color(db: &sqlx::PgPool, user_id: UserId, index: u16) -> sqlx::Result<()> {
     let mut txn = db.begin().await?;
     let _ = sqlx::query!(
         r#"
@@ -606,7 +606,7 @@ from user_color
 where user_id = $1 and index > $2
 for update
 "#,
-        user_id,
+        user_id.0,
         index as i16
     )
     .fetch_optional(&mut txn)
@@ -618,7 +618,7 @@ update user_color
 set index = index - 1
 where index > $2 and user_id = $1
 "#,
-        user_id,
+        user_id.0,
         index as i16
     )
     .execute(&mut txn)
@@ -631,7 +631,7 @@ where index > $2 and user_id = $1
 
 pub async fn create_font(
     db: &sqlx::PgPool,
-    user_id: Uuid,
+    user_id: UserId,
     name: String,
 ) -> sqlx::Result<Vec<String>> {
     let font_names = sqlx::query!(
@@ -650,7 +650,7 @@ select name as "name!" from names
 union all
 select name as "name!" from cte
         "#,
-        user_id,
+        user_id.0,
         name
     )
     .fetch_all(db)
@@ -661,7 +661,7 @@ select name as "name!" from cte
 
 pub async fn update_font(
     db: &sqlx::PgPool,
-    user_id: Uuid,
+    user_id: UserId,
     index: u16,
     name: String,
 ) -> sqlx::Result<bool> {
@@ -677,7 +677,7 @@ select exists(
         for update
 ) as "exists!"
         "#,
-        user_id,
+        user_id.0,
         index as i16
     )
     .fetch_one(&mut txn)
@@ -695,7 +695,7 @@ update user_font
     where user_id = $1
     and index = $2
         "#,
-        user_id,
+        user_id.0,
         index as i16,
         name
     )
@@ -707,14 +707,14 @@ update user_font
     Ok(true)
 }
 
-pub async fn get_first_name(txn: &mut PgConnection, user_id: Uuid) -> sqlx::Result<String> {
+pub async fn get_first_name(txn: &mut PgConnection, user_id: UserId) -> sqlx::Result<String> {
     let given_name = sqlx::query!(
         r#"
 select given_name
 from user_profile
 where user_id = $1
         "#,
-        user_id
+        user_id.0
     )
     .fetch_one(txn)
     .await?
@@ -723,14 +723,14 @@ where user_id = $1
     Ok(given_name)
 }
 
-pub async fn get_email(txn: &mut PgConnection, user_id: Uuid) -> sqlx::Result<String> {
+pub async fn get_email(txn: &mut PgConnection, user_id: UserId) -> sqlx::Result<String> {
     let email: Option<String> = sqlx::query!(
         r#"
 select email::text
 from user_email
 where user_id = $1
         "#,
-        user_id
+        user_id.0
     )
     .fetch_one(txn)
     .await?
@@ -745,7 +745,7 @@ where user_id = $1
     Ok(email)
 }
 
-pub async fn get_fonts(db: &sqlx::PgPool, user_id: Uuid) -> sqlx::Result<Vec<String>> {
+pub async fn get_fonts(db: &sqlx::PgPool, user_id: UserId) -> sqlx::Result<Vec<String>> {
     let font_names = sqlx::query!(
         r#"
 select name
@@ -753,7 +753,7 @@ from user_font
 where user_id = $1
 order by index
         "#,
-        user_id
+        user_id.0
     )
     .fetch_all(db)
     .await?;
@@ -761,7 +761,7 @@ order by index
     Ok(font_names.into_iter().map(|it| it.name).collect())
 }
 
-pub async fn delete_font(db: &sqlx::PgPool, user_id: Uuid, index: u16) -> sqlx::Result<()> {
+pub async fn delete_font(db: &sqlx::PgPool, user_id: UserId, index: u16) -> sqlx::Result<()> {
     let mut txn = db.begin().await?;
 
     let _ = sqlx::query!(
@@ -775,7 +775,7 @@ from user_font
 where user_id = $1 and index > $2
 for update
         "#,
-        user_id,
+        user_id.0,
         index as i16
     )
     .fetch_optional(&mut txn)
@@ -787,7 +787,7 @@ update user_font
 set index = index - 1
 where index > $2 and user_id = $1
         "#,
-        user_id,
+        user_id.0,
         index as i16
     )
     .execute(&mut txn)

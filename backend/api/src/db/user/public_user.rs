@@ -6,16 +6,16 @@ use shared::domain::{
     circle::CircleId,
     image::ImageId,
     meta::ResourceTypeId as TypeId,
-    user::public_user::PublicUser,
+    user::{public_user::PublicUser, UserId},
 };
 use sqlx::PgPool;
 use uuid::Uuid;
 
-pub async fn get(db: &PgPool, user_id: Uuid) -> sqlx::Result<PublicUser> {
+pub async fn get(db: &PgPool, user_id: UserId) -> sqlx::Result<PublicUser> {
     let res = sqlx::query_as!(
         PublicUser,
         r#"
-    select  user_id as "id",
+    select  user_id as "id: UserId",
             username,
             given_name,
             family_name,
@@ -34,7 +34,7 @@ pub async fn get(db: &PgPool, user_id: Uuid) -> sqlx::Result<PublicUser> {
             inner join user_profile on "user".id = user_profile.user_id
         where id = $1
         "#,
-        user_id,
+        user_id.0
     )
     .fetch_one(db)
     .await?;
@@ -52,8 +52,6 @@ pub async fn browse_users(
 
     let circle_ids = filters_for_ids_or(&circles[..]);
 
-    println!("ids: {:?}", circle_ids);
-
     let user_data = sqlx::query!(
         r#"
         with cte as (
@@ -69,7 +67,7 @@ pub async fn browse_users(
             select * from unnest((select distinct id from cte)) with ordinality t(id
            , ord) order by ord
         )
-        select  user_id                as "id!",
+        select  user_id                as "id!: UserId",
                 username               as "username!",
                 given_name             as "given_name!",
                 family_name            as "family_name!",
@@ -122,7 +120,7 @@ pub async fn browse_users(
 
 pub async fn browse_user_resources(
     db: &PgPool,
-    user_id: Uuid,
+    user_id: UserId,
     page: u32,
     page_limit: u64,
 ) -> sqlx::Result<Vec<AdditionalResource>> {
@@ -171,7 +169,7 @@ pub async fn browse_user_resources(
         order by ord asc
         limit $3
             "#,
-        user_id,
+        user_id.0,
         page as i32,
         page_limit as i32
     )
@@ -194,8 +192,8 @@ pub async fn browse_user_resources(
 
 pub async fn follow(
     pool: &PgPool,
-    user_id: Uuid,
-    follower_id: Uuid,
+    user_id: UserId,
+    follower_id: UserId,
 ) -> anyhow::Result<(), error::NotFound> {
     let mut txn = pool.begin().await?;
 
@@ -203,8 +201,8 @@ pub async fn follow(
         r#"
     select exists(select 1 from user_follow where user_id = $1 and follower_id = $2) as "exists!"
         "#,
-        user_id,
-        follower_id
+        user_id.0,
+        follower_id.0
     )
     .fetch_one(&mut txn)
     .await?
@@ -221,8 +219,8 @@ pub async fn follow(
     insert into user_follow(user_id, follower_id, followed_at)
     values($1, $2, now())
             "#,
-        user_id,
-        follower_id
+        user_id.0,
+        follower_id.0
     )
     .execute(&mut txn)
     .await
@@ -235,8 +233,8 @@ pub async fn follow(
 
 pub async fn unfollow(
     pool: &PgPool,
-    user_id: Uuid,
-    follower_id: Uuid,
+    user_id: UserId,
+    follower_id: UserId,
 ) -> anyhow::Result<(), error::NotFound> {
     let mut txn = pool.begin().await?;
 
@@ -244,8 +242,8 @@ pub async fn unfollow(
         r#"
     select exists(select 1 from user_follow where user_id = $1 and follower_id = $2) as "exists!"
         "#,
-        user_id,
-        follower_id
+        user_id.0,
+        follower_id.0
     )
     .fetch_one(&mut txn)
     .await?
@@ -261,8 +259,8 @@ pub async fn unfollow(
         r#"
     delete from user_follow where user_id = $1 and follower_id = $2
             "#,
-        user_id,
-        follower_id
+        user_id.0,
+        follower_id.0
     )
     .execute(&mut txn)
     .await
@@ -279,7 +277,7 @@ pub async fn get_by_ids(db: &PgPool, ids: &[Uuid]) -> sqlx::Result<Vec<PublicUse
     let res: Vec<_> = sqlx::query!(
         //language=SQL
         r#"
-        select  user_id                as "id!",
+        select  user_id                as "id!: UserId",
                 username               as "username!",
                 given_name             as "given_name!",
                 family_name            as "family_name!",
@@ -330,7 +328,7 @@ pub(crate) async fn auth_claims(
     db: &PgPool,
     claims: Option<TokenUser>,
     user_id: Option<UserOrMe>,
-) -> Result<Option<Uuid>, error::Auth> {
+) -> Result<Option<UserId>, error::Auth> {
     //Check if user is logged in. If not, users cannot use UserOrMe::Me
     let id = if let Some(token) = claims {
         let id = if let Some(user) = user_id {
@@ -356,7 +354,7 @@ pub(crate) async fn auth_claims(
                     Some(id)
                 }
             };
-            user_id
+            user_id.map(|x| UserId(x))
         } else {
             None
         };
@@ -385,7 +383,7 @@ pub(crate) async fn auth_claims(
                     Some(id)
                 }
             };
-            user
+            user.map(|x| UserId(x))
         } else {
             None
         };
@@ -397,7 +395,7 @@ pub(crate) async fn auth_claims(
 
 pub async fn browse_followers(
     pool: &PgPool,
-    user_id: Uuid,
+    user_id: UserId,
     page: u32,
     page_limit: u64,
 ) -> sqlx::Result<Vec<PublicUser>> {
@@ -411,7 +409,7 @@ pub async fn browse_followers(
             where user_id = $1
             order by coalesce(followed_at) desc
         )
-        select  id         as "id!",
+        select  id         as "id!: UserId",
                 username               as "username!",
                 given_name             as "given_name!",
                 family_name            as "family_name!",
@@ -432,7 +430,7 @@ pub async fn browse_followers(
             offset $2
             limit $3
             "#,
-            user_id,
+            user_id.0,
             page as i32,
             page_limit as i32,
         )
@@ -463,7 +461,7 @@ pub async fn browse_followers(
 
 pub async fn browse_following(
     pool: &PgPool,
-    user_id: Uuid,
+    user_id: UserId,
     page: u32,
     page_limit: u64,
 ) -> sqlx::Result<Vec<PublicUser>> {
@@ -477,7 +475,7 @@ pub async fn browse_following(
             where follower_id = $1
             order by coalesce(followed_at) desc
         )
-        select  id                     as "id!",
+        select  id                     as "id!: UserId",
                 username               as "username!",
                 given_name             as "given_name!",
                 family_name            as "family_name!",
@@ -498,7 +496,7 @@ pub async fn browse_following(
             offset $2
             limit $3
             "#,
-            user_id,
+            user_id.0,
             page as i32,
             page_limit as i32,
         )
@@ -547,7 +545,7 @@ pub async fn total_user_count(db: &PgPool, circles: Vec<CircleId>) -> anyhow::Re
     Ok(user.count as u64)
 }
 
-pub async fn total_resource_count(db: &PgPool, user_id: Uuid) -> sqlx::Result<u64> {
+pub async fn total_resource_count(db: &PgPool, user_id: UserId) -> sqlx::Result<u64> {
     let total_resource = sqlx::query!(
         r#"
         with cte as (
@@ -573,7 +571,7 @@ pub async fn total_resource_count(db: &PgPool, user_id: Uuid) -> sqlx::Result<u6
           (select * from cte
           union all
           select * from cte1) resources"#,
-        user_id
+        user_id.0
     )
     .fetch_one(db)
     .await?;
@@ -581,14 +579,14 @@ pub async fn total_resource_count(db: &PgPool, user_id: Uuid) -> sqlx::Result<u6
     Ok(total_resource.count as u64)
 }
 
-pub async fn total_follower_count(db: &PgPool, user_id: Uuid) -> sqlx::Result<u64> {
+pub async fn total_follower_count(db: &PgPool, user_id: UserId) -> sqlx::Result<u64> {
     let total_follower = sqlx::query!(
         r#"
         select count(follower_id)  as "count!: i64"
         from user_follow
         where user_id = $1
             "#,
-        user_id
+        user_id.0
     )
     .fetch_one(db)
     .await?;
@@ -596,14 +594,14 @@ pub async fn total_follower_count(db: &PgPool, user_id: Uuid) -> sqlx::Result<u6
     Ok(total_follower.count as u64)
 }
 
-pub async fn total_following_count(db: &PgPool, follower_id: Uuid) -> sqlx::Result<u64> {
+pub async fn total_following_count(db: &PgPool, follower_id: UserId) -> sqlx::Result<u64> {
     let total_following = sqlx::query!(
         r#"
         select count(user_id)  as "count!: i64"
         from user_follow
         where follower_id = $1
             "#,
-        follower_id
+        follower_id.0
     )
     .fetch_one(db)
     .await?;

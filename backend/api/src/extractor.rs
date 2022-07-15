@@ -27,7 +27,6 @@ use shared::domain::{
 };
 use sqlx::postgres::PgPool;
 use std::{borrow::Cow, marker::PhantomData};
-use uuid::Uuid;
 
 fn token_from_query(query_string: &str) -> Option<String> {
     serde_urlencoded::from_str::<SessionTokenQuery>(query_string)
@@ -437,7 +436,7 @@ impl<S: SessionMaskRequirement> FromRequest for TokenSessionOf<S> {
 }
 
 pub struct EmailBasicUser {
-    pub id: Uuid,
+    pub id: UserId,
     pub registration_status: RegistrationStatus,
 }
 
@@ -466,7 +465,7 @@ impl FromRequest for EmailBasicUser {
             let user = sqlx::query!(
                 r#"
 select
-    user_id,
+    user_id     as "id!: UserId",
     password,
     exists(select 1 from user_profile where user_id = user_auth_basic.user_id) as "has_profile!",
     exists(select 1 from user_email where user_id = user_auth_basic.user_id) as "has_verified_email!"
@@ -513,7 +512,7 @@ from user_auth_basic where email = $1::text
                     (true, true) => RegistrationStatus::Complete,
                 };
 
-                Ok(Self { id: user.user_id, registration_status })
+                Ok(Self { id: user.id, registration_status })
             })
             .await;
 

@@ -10,9 +10,12 @@ use sqlx::{postgres::PgDatabaseError, PgPool};
 use core::settings::{GoogleOAuth, RuntimeSettings};
 use shared::{
     config::RemoteTarget,
-    domain::session::{
-        CreateSessionOAuthRequest, CreateSessionResponse, GetOAuthUrlResponse,
-        GetOAuthUrlServiceKind, NewSessionResponse, OAuthUrlKind,
+    domain::{
+        session::{
+            CreateSessionOAuthRequest, CreateSessionResponse, GetOAuthUrlResponse,
+            GetOAuthUrlServiceKind, NewSessionResponse, OAuthUrlKind,
+        },
+        user::UserId,
     },
 };
 
@@ -196,7 +199,8 @@ async fn handle_google_oauth(
             login_ttl
         };
 
-    let session = db::session::create(&mut txn, user_id, Some(&valid_until), mask, None).await?;
+    let session =
+        db::session::create(&mut txn, UserId(user_id), Some(&valid_until), mask, None).await?;
 
     txn.commit().await?;
 

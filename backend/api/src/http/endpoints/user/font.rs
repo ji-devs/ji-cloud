@@ -15,7 +15,7 @@ pub async fn create(
     claims: TokenUser,
     req: Json<UserFontNameRequest>,
 ) -> Result<HttpResponse, error::Server> {
-    let user_id = claims.0.user_id;
+    let user_id = claims.user_id();
 
     let names = db::user::create_font(db.as_ref(), user_id, req.into_inner().name).await?;
     Ok(HttpResponse::Created().json(UserFontResponse { names }))
@@ -27,7 +27,7 @@ pub async fn update(
     req: Json<UserFontNameRequest>,
     index: Path<u16>,
 ) -> Result<HttpResponse, error::NotFound> {
-    let user_id = claims.0.user_id;
+    let user_id = claims.user_id();
 
     let exists = db::user::update_font(db.as_ref(), user_id, *index, req.into_inner().name).await?;
 
@@ -42,7 +42,7 @@ pub async fn get(
     db: Data<PgPool>,
     claims: TokenUser,
 ) -> Result<Json<<user::GetFonts as ApiEndpoint>::Res>, error::Server> {
-    let user_id = claims.0.user_id;
+    let user_id = claims.user_id();
 
     let names = db::user::get_fonts(db.as_ref(), user_id).await?;
     Ok(Json(UserFontResponse { names }))
@@ -53,7 +53,7 @@ pub async fn delete(
     claims: TokenUser,
     index: Path<u16>,
 ) -> Result<HttpResponse, error::Delete> {
-    let user_id = claims.0.user_id;
+    let user_id = claims.user_id();
 
     db::user::delete_font(db.as_ref(), user_id, *index).await?;
 
