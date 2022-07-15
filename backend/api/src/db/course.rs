@@ -9,7 +9,7 @@ use shared::domain::{
     jig::JigId,
     meta::{AffiliationId, AgeRangeId, ResourceTypeId as TypeId},
     module::{LiteModule, ModuleId, ModuleKind},
-    user::UserScope,
+    user::{UserId, UserScope},
 };
 use sqlx::{types::Json, PgConnection, PgPool};
 use std::collections::HashMap;
@@ -27,7 +27,7 @@ pub async fn create(
     categories: &[CategoryId],
     age_ranges: &[AgeRangeId],
     affiliations: &[AffiliationId],
-    creator_id: Uuid,
+    creator_id: UserId,
     language: &str,
     description: &str,
 ) -> Result<CourseId, CreateCourseError> {
@@ -60,7 +60,7 @@ pub async fn create(
     let course = sqlx::query!(
         //language=SQL
         r#"insert into course (creator_id, author_id, live_id, draft_id) values ($1, $1, $2, $3) returning id"#,
-        creator_id,
+        creator_id.0,
         live_id,
         draft_id,
     )
@@ -397,7 +397,7 @@ from course_data
 #[instrument(skip(db))]
 pub async fn browse(
     db: &sqlx::Pool<sqlx::Postgres>,
-    author_id: Option<Uuid>,
+    author_id: Option<UserId>,
     draft_or_live: Option<DraftOrLive>,
     privacy_level: Vec<PrivacyLevel>,
     page: i32,
@@ -482,7 +482,7 @@ inner join course on (
 where ord > (1 * $5 * $6)
 limit $6
 "#,
-    author_id,
+    author_id.map(|it| it.0),
     draft_or_live.map(|it| it as i16),
     &privacy_level[..],
     &resource_types[..],
@@ -724,7 +724,7 @@ where id is not distinct from $3
 pub async fn filtered_count(
     db: &PgPool,
     privacy_level: Vec<PrivacyLevel>,
-    author_id: Option<Uuid>,
+    author_id: Option<UserId>,
     draft_or_live: Option<DraftOrLive>,
     resource_types: Vec<Uuid>,
 ) -> sqlx::Result<(u64, u64)> {
@@ -743,7 +743,7 @@ where (author_id = $1 or $1 is null)
     and (resource.resource_type_id = any($4) or $4 = array[]::uuid[])
 
 "#,
-        author_id,
+        author_id.map(|it| it.0),
         draft_or_live.map(|it| it as i16),
         &privacy_level[..],
         &resource_types[..]
@@ -763,7 +763,7 @@ where (author_id = $1 or $1 is null)
     and (course_data.privacy_level = any($3) or $3 = array[]::smallint[])
     and (resource.resource_type_id = any($4) or $4 = array[]::uuid[])
 "#,
-        author_id,
+        author_id.map(|it| it.0),
         draft_or_live.map(|it| it as i16),
         &privacy_level[..],
         &resource_types[..]
@@ -898,12 +898,12 @@ where course_data_id = $1
     Ok(new_id)
 }
 
-pub async fn is_admin(db: &PgPool, user_id: Uuid) -> Result<bool, error::Auth> {
+pub async fn is_admin(db: &PgPool, user_id: UserId) -> Result<bool, error::Auth> {
     let authed = sqlx::query!(
         r#"
 select exists(select 1 from user_scope where user_id = $1 and scope = any($2)) as "authed!"
 "#,
-        user_id,
+        user_id.0,
         &[UserScope::Admin as i16, UserScope::AdminJig as i16][..],
     )
     .fetch_one(db)
@@ -919,7 +919,7 @@ select exists(select 1 from user_scope where user_id = $1 and scope = any($2)) a
 
 pub async fn authz(
     db: &PgPool,
-    user_id: Uuid,
+    user_id: UserId,
     course_id: Option<CourseId>,
 ) -> Result<(), error::Auth> {
     let authed = match course_id {
@@ -928,7 +928,7 @@ pub async fn authz(
                 r#"
 select exists(select 1 from user_scope where user_id = $1 and scope = any($2)) as "authed!"
 "#,
-                user_id,
+                user_id.0,
                 &[
                     UserScope::Admin as i16,
                     UserScope::AdminJig as i16,
@@ -950,7 +950,7 @@ select exists (
     not exists (select 1 from course where course.id = $4 and course.author_id <> $1)
 ) as "authed!"
 "#,
-                user_id,
+                user_id.0,
                 &[UserScope::Admin as i16, UserScope::AdminJig as i16,][..],
                 UserScope::ManageSelfJig as i16,
                 id.0

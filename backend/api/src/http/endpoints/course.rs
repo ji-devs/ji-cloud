@@ -9,6 +9,7 @@ use shared::{
     domain::{
         asset::{DraftOrLive, PrivacyLevel, UserOrMe},
         course::{CourseBrowseResponse, CourseCreateRequest, CourseId, CourseSearchResponse},
+        user::UserId,
         CreateResponse,
     },
 };
@@ -39,18 +40,18 @@ async fn create(
     error::CreateWithMetadata,
 > {
     let db = db.as_ref();
+    let creator_id = auth.user_id();
 
-    db::course::authz(db, auth.0.user_id, None).await?;
+    db::course::authz(db, creator_id, None).await?;
 
     let req = req.map_or_else(CourseCreateRequest::default, Json::into_inner);
-    let creator_id = auth.0.user_id;
 
     let language = match req.language {
         Some(lang) => lang,
         None => {
             sqlx::query!(
                 "select language from user_profile where user_id = $1",
-                auth.0.user_id
+                creator_id.0
             )
             .fetch_one(db)
             .await?
@@ -115,8 +116,9 @@ async fn update_draft(
 ) -> Result<HttpResponse, error::UpdateWithMetadata> {
     let id = path.into_inner();
     let api_key = &settings.google_api_key;
+    let user_id = claims.user_id();
 
-    db::course::authz(&*db, claims.0.user_id, Some(id)).await?;
+    db::course::authz(&*db, user_id, Some(id)).await?;
 
     let req = req.map_or_else(Default::default, Json::into_inner);
 
@@ -147,8 +149,9 @@ async fn delete(
     algolia: ServiceData<crate::algolia::Manager>,
 ) -> Result<HttpResponse, error::Delete> {
     let id = path.into_inner();
+    let user_id = claims.user_id();
 
-    db::course::authz(&*db, claims.0.user_id, Some(id)).await?;
+    db::course::authz(&*db, user_id, Some(id)).await?;
 
     db::course::delete(&*db, id).await?;
 
@@ -220,8 +223,9 @@ pub(super) async fn publish_draft_to_live(
     course_id: Path<CourseId>,
 ) -> Result<HttpResponse, error::CloneDraft> {
     let course_id = course_id.into_inner();
+    let user_id = claims.user_id();
 
-    db::course::authz(&*db, claims.0.user_id, Some(course_id)).await?;
+    db::course::authz(&*db, user_id, Some(course_id)).await?;
 
     let mut txn = db.begin().await?;
 
@@ -265,7 +269,6 @@ async fn search(
     query: Option<Query<<course::Search as ApiEndpoint>::Req>>,
 ) -> Result<Json<<course::Search as ApiEndpoint>::Res>, error::Service> {
     let query = query.map_or_else(Default::default, Query::into_inner);
-
     let page_limit = page_limit(query.page_limit)
         .await
         .map_err(|e| error::Service::InternalServerError(e))?;
@@ -320,22 +323,27 @@ async fn auth_claims(
     claims: Option<TokenUser>,
     author_id: Option<UserOrMe>,
     privacy_level: Vec<PrivacyLevel>,
-) -> Result<(Option<Uuid>, Vec<PrivacyLevel>), error::Auth> {
+) -> Result<(Option<UserId>, Vec<PrivacyLevel>), error::Auth> {
     if claims.is_none() && author_id == Some(UserOrMe::Me) {
         return Err(error::Auth::Forbidden);
     };
 
     if let Some(user) = claims {
-        let is_admin = db::course::is_admin(&*db, user.0.user_id).await?;
+        let user_id = user.user_id();
+        let is_admin = db::course::is_admin(&*db, user_id).await?;
 
         if let Some(author) = author_id {
+            let user_id = user.user_id();
+
             let (author_id, privacy) = match author {
-                UserOrMe::Me => (Some(user.0.user_id), privacy_level),
+                UserOrMe::Me => (Some(user_id), privacy_level),
                 UserOrMe::User(id) => {
+                    let user_id = UserId(id);
+
                     if is_admin {
-                        (Some(id), privacy_level)
+                        (Some(user_id), privacy_level)
                     } else {
-                        (Some(id), vec![PrivacyLevel::Public])
+                        (Some(user_id), vec![PrivacyLevel::Public])
                     }
                 }
             };
@@ -350,7 +358,7 @@ async fn auth_claims(
     } else {
         let author_id = author_id.map(|it| match it {
             UserOrMe::Me => None,
-            UserOrMe::User(id) => Some(id),
+            UserOrMe::User(id) => Some(UserId(id)),
         });
 
         if let Some(id) = author_id {

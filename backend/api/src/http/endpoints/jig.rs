@@ -12,6 +12,7 @@ use shared::{
             DeleteUserJigs, JigBrowseResponse, JigCountResponse, JigCreateRequest, JigId,
             JigLikedResponse, JigSearchResponse,
         },
+        user::UserId,
         CreateResponse,
     },
 };
@@ -47,17 +48,18 @@ async fn create(
 > {
     let db = db.as_ref();
 
-    db::jig::authz(db, auth.0.user_id, None).await?;
+    let creator_id = auth.user_id();
+
+    db::jig::authz(db, creator_id, None).await?;
 
     let req = req.map_or_else(JigCreateRequest::default, Json::into_inner);
-    let creator_id = auth.0.user_id;
 
     let language = match req.language {
         Some(lang) => lang,
         None => {
             sqlx::query!(
                 "select language from user_profile where user_id = $1",
-                auth.0.user_id
+                creator_id.0
             )
             .fetch_one(db)
             .await?
@@ -127,8 +129,9 @@ async fn update_draft(
 ) -> Result<HttpResponse, error::UpdateWithMetadata> {
     let id = path.into_inner();
     let api_key = &settings.google_api_key;
+    let user_id = claims.user_id();
 
-    db::jig::authz(&*db, claims.0.user_id, Some(id)).await?;
+    db::jig::authz(&*db, user_id, Some(id)).await?;
 
     let req = req.map_or_else(Default::default, Json::into_inner);
 
@@ -162,39 +165,14 @@ async fn delete(
     algolia: ServiceData<crate::algolia::Manager>,
 ) -> Result<HttpResponse, error::Delete> {
     let id = path.into_inner();
+    let user_id = claims.user_id();
 
-    db::jig::authz(&*db, claims.0.user_id, Some(id)).await?;
+    db::jig::authz(&*db, user_id, Some(id)).await?;
 
     db::jig::delete(&*db, id).await?;
 
     algolia.delete_jig(id).await;
 
-    Ok(HttpResponse::NoContent().finish())
-}
-
-/// Delete all jigs associated with user.
-async fn delete_all(
-    db: Data<PgPool>,
-    claims: TokenUser,
-    algolia: ServiceData<crate::algolia::Manager>,
-) -> Result<HttpResponse, error::Delete> {
-    db::jig::authz(&*db, claims.0.user_id, None).await?;
-
-    let id: Vec<DeleteUserJigs> = db::jig::delete_all_jigs(&*db, claims.0.user_id).await?;
-
-    let mut ids = id.into_iter();
-
-    loop {
-        match ids.next() {
-            Some(id) => match id {
-                jig_id => algolia.delete_jig(jig_id.jig_id).await,
-            },
-            None => {
-                log::warn!("Done with delete");
-                break;
-            }
-        }
-    }
     Ok(HttpResponse::NoContent().finish())
 }
 
@@ -273,7 +251,9 @@ pub(super) async fn publish_draft_to_live(
 ) -> Result<HttpResponse, error::CloneDraft> {
     let jig_id = jig_id.into_inner();
 
-    db::jig::authz(&*db, claims.0.user_id, Some(jig_id)).await?;
+    let user_id = claims.user_id();
+
+    db::jig::authz(&*db, user_id, Some(jig_id)).await?;
 
     let mut txn = db.begin().await?;
 
@@ -338,9 +318,11 @@ async fn clone(
     claims: TokenUser,
     parent: web::Path<JigId>,
 ) -> Result<HttpResponse, error::CloneDraft> {
-    db::jig::authz(&*db, claims.0.user_id, None).await?;
+    let user_id = claims.user_id();
 
-    let id = db::jig::clone_jig(db.as_ref(), parent.into_inner(), claims.0.user_id).await?;
+    db::jig::authz(&*db, user_id, None).await?;
+
+    let id = db::jig::clone_jig(db.as_ref(), parent.into_inner(), user_id).await?;
 
     Ok(HttpResponse::Created().json(CreateResponse { id }))
 }
@@ -428,7 +410,9 @@ async fn like(
     claims: TokenUser,
     path: web::Path<JigId>,
 ) -> Result<HttpResponse, error::Server> {
-    db::jig::jig_like(&*db, claims.0.user_id, path.into_inner()).await?;
+    let user_id = claims.user_id();
+
+    db::jig::jig_like(&*db, user_id, path.into_inner()).await?;
 
     Ok(HttpResponse::NoContent().finish())
 }
@@ -439,7 +423,9 @@ async fn liked(
     claims: TokenUser,
     path: web::Path<JigId>,
 ) -> Result<Json<<jig::Liked as ApiEndpoint>::Res>, error::Server> {
-    let is_liked = db::jig::jig_is_liked(&*db, claims.0.user_id, path.into_inner()).await?;
+    let user_id = claims.user_id();
+
+    let is_liked = db::jig::jig_is_liked(&*db, user_id, path.into_inner()).await?;
 
     Ok(Json(JigLikedResponse { is_liked }))
 }
@@ -450,7 +436,9 @@ async fn unlike(
     claims: TokenUser,
     path: web::Path<JigId>,
 ) -> Result<HttpResponse, error::Server> {
-    db::jig::jig_unlike(&*db, claims.0.user_id, path.into_inner()).await?;
+    let user_id = claims.user_id();
+
+    db::jig::jig_unlike(&*db, user_id, path.into_inner()).await?;
 
     Ok(HttpResponse::NoContent().finish())
 }
@@ -481,27 +469,31 @@ async fn auth_claims(
     author_id: Option<UserOrMe>,
     privacy_level: Vec<PrivacyLevel>,
     blocked: Option<bool>,
-) -> Result<(Option<Uuid>, Vec<PrivacyLevel>, Option<bool>), error::Auth> {
+) -> Result<(Option<UserId>, Vec<PrivacyLevel>, Option<bool>), error::Auth> {
     if claims.is_none() && author_id == Some(UserOrMe::Me) {
         return Err(error::Auth::Forbidden);
     };
 
     if let Some(user) = claims {
-        let is_admin = db::jig::is_admin(&*db, user.0.user_id).await?;
+        let is_admin = db::jig::is_admin(&*db, UserId(user.0.user_id)).await?;
+        let user_id = user.user_id();
 
         if let Some(author) = author_id {
             let (author_id, privacy, blocked) = match author {
-                UserOrMe::Me => (Some(user.0.user_id), privacy_level, blocked),
+                UserOrMe::Me => (Some(user_id), privacy_level, blocked),
                 UserOrMe::User(id) => {
+                    let user_id = UserId(id);
+
                     if is_admin {
                         let block = if let Some(block) = blocked {
                             Some(block)
                         } else {
                             None
                         };
-                        (Some(id), privacy_level, block)
+
+                        (Some(user_id), privacy_level, block)
                     } else {
-                        (Some(id), vec![PrivacyLevel::Public], Some(false))
+                        (Some(user_id), vec![PrivacyLevel::Public], Some(false))
                     }
                 }
             };
@@ -516,7 +508,7 @@ async fn auth_claims(
     } else {
         let author_id = author_id.map(|it| match it {
             UserOrMe::Me => None,
-            UserOrMe::User(id) => Some(id),
+            UserOrMe::User(id) => Some(UserId(id)),
         });
 
         if let Some(id) = author_id {
@@ -549,10 +541,6 @@ pub fn configure(cfg: &mut ServiceConfig) {
             jig::UpdateDraftData::METHOD.route().to(update_draft),
         )
         .route(jig::Delete::PATH, jig::Delete::METHOD.route().to(delete))
-        .route(
-            jig::DeleteAll::PATH,
-            jig::DeleteAll::METHOD.route().to(delete_all),
-        )
         .route(
             jig::JigAdminDataUpdate::PATH,
             jig::JigAdminDataUpdate::METHOD

@@ -13,6 +13,18 @@ use crate::domain::{
 
 pub mod public_user;
 
+/// Wrapper type around [`Uuid`], represents the ID of a User.
+#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[cfg_attr(feature = "backend", sqlx(transparent))]
+pub struct UserId(pub Uuid);
+
+impl std::fmt::Display for UserId {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
+        write!(fmt, "{}", self.0)
+    }
+}
+
 /// Represents a user's permissions.
 ///
 /// Note: 5 was "ManageModule", and has been deleted, but cannot be replaced(?)
@@ -74,7 +86,7 @@ impl TryFrom<i16> for UserScope {
 pub struct UserLookupQuery {
     /// The user ID we're filtering by.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub id: Option<Uuid>,
+    pub id: Option<UserId>,
 
     /// The name we're filtering by.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -85,7 +97,7 @@ pub struct UserLookupQuery {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct OtherUser {
     /// The user's id.
-    pub id: Uuid,
+    pub id: UserId,
 }
 
 /// Update user email request
@@ -102,11 +114,17 @@ pub struct ResetEmailResponse {
     pub paseto_token: String,
 }
 
+impl From<Uuid> for UserId {
+    fn from(id: Uuid) -> Self {
+        Self(id)
+    }
+}
+
 /// A user's profile.
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct UserProfile {
     /// The user's id.
-    pub id: Uuid,
+    pub id: UserId,
 
     /// The user's username.
     pub username: String,
@@ -213,7 +231,7 @@ pub struct UserProfile {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct UserProfileExport {
     /// The user's id.
-    pub id: Uuid,
+    pub id: UserId,
     /// The user's username.
     pub username: String,
     /// The user's email address.
@@ -563,3 +581,5 @@ pub struct UserFontResponse {
     /// Names of the user's fonts.
     pub names: Vec<String>,
 }
+
+into_uuid![UserId];

@@ -21,6 +21,7 @@ use super::{
     category::CategoryId,
     meta::{AffiliationId, AgeRangeId, ResourceTypeId},
     module::LiteModule,
+    user::UserId,
 };
 use crate::domain::module::body::ThemeId;
 
@@ -500,10 +501,10 @@ pub struct JigResponse {
     pub published_at: Option<DateTime<Utc>>,
 
     /// The ID of the JIG's original creator ([`None`] if unknown).
-    pub creator_id: Option<Uuid>,
+    pub creator_id: Option<UserId>,
 
     /// The current author
-    pub author_id: Option<Uuid>,
+    pub author_id: Option<UserId>,
 
     /// The author's name, as "{given_name} {family_name}".
     pub author_name: Option<String>,
@@ -558,7 +559,7 @@ pub struct JigUpdateDraftDataRequest {
     /// The current author
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
-    pub author_id: Option<Uuid>,
+    pub author_id: Option<UserId>,
 
     /// Description of the jig.
     #[serde(skip_serializing_if = "Option::is_none")]

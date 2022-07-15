@@ -8,8 +8,8 @@ use shared::domain::{
         SubjectId,
     },
     user::{
-        CreateProfileRequest, OtherUser, PatchProfileRequest, UserProfile, UserProfileExport,
-        UserScope,
+        CreateProfileRequest, OtherUser, PatchProfileRequest, UserId, UserProfile,
+        UserProfileExport, UserScope,
     },
 };
 use sqlx::{PgConnection, PgPool};
@@ -25,13 +25,13 @@ use crate::error;
 #[instrument(skip(db))]
 pub async fn lookup(
     db: &sqlx::PgPool,
-    id: Option<Uuid>,
+    id: Option<UserId>,
     name: Option<&str>,
 ) -> anyhow::Result<Option<OtherUser>> {
     Ok(sqlx::query_as!(
         OtherUser,
-        r#"select user_id as "id" from user_profile where (user_id = $1 and $1 is not null) or (username = $2 and $2 is not null)"#,
-        id,
+        r#"select user_id as "id: UserId" from user_profile where (user_id = $1 and $1 is not null) or (username = $2 and $2 is not null)"#,
+        id.map(|x| x.0),
         name
     )
     .fetch_optional(db)
@@ -44,7 +44,7 @@ pub async fn get_profile(db: &sqlx::PgPool, id: Uuid) -> anyhow::Result<Option<U
     let row = sqlx::query!(
         //language=SQL
         r#"
-select user_id as "id",
+select user_id as "id: UserId",
     username,
     user_email.email::text as "email!",
     given_name,
@@ -134,7 +134,7 @@ pub async fn user_profiles_by_date_range(
     let rows = sqlx::query!(
         //language=SQL
         r#"
-select user_id              as "id!",
+select user_id              as "id!: UserId",
     username                as "username!",
     user_email.email::text  as "email!",
     given_name              as "given_name!",

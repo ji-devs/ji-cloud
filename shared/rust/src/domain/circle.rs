@@ -4,7 +4,7 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use super::{asset::UserOrMe, image::ImageId};
+use super::{asset::UserOrMe, image::ImageId, user::UserId};
 
 /// Wrapper type around [`Uuid`], represents the ID of a Circle.
 #[derive(Hash, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
@@ -24,7 +24,7 @@ pub struct Circle {
     pub display_name: String,
 
     /// Creator of Circle
-    pub created_by: Uuid,
+    pub created_by: UserId,
 
     /// Description of the Circle. Defaults to empty string.
     pub description: String,
@@ -72,7 +72,7 @@ pub struct CircleUpdateRequest {
     /// The current author to be updated
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
-    pub creator_id: Option<Uuid>,
+    pub creator_id: Option<UserId>,
 
     /// Description of the Circle to be updated.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -167,7 +167,7 @@ pub struct CircleSearchResponse {
 #[derive(Serialize, Deserialize)]
 pub struct BrowseMembersResponse {
     /// user id of member
-    pub members: Vec<Uuid>,
+    pub members: Vec<UserId>,
 
     /// user id of member
     pub count: u32,

@@ -23,7 +23,7 @@ use http::StatusCode;
 use rand::thread_rng;
 use shared::domain::{
     session::{SessionTokenQuery, AUTH_COOKIE_NAME, CSRF_HEADER_NAME},
-    user::UserScope,
+    user::{UserId, UserScope},
 };
 use sqlx::postgres::PgPool;
 use std::{borrow::Cow, marker::PhantomData};
@@ -131,6 +131,13 @@ async fn claims_for_scope(
 
 #[repr(transparent)]
 pub struct TokenUser(pub SessionClaims);
+
+impl TokenUser {
+    /// check if jig
+    pub fn user_id(&self) -> UserId {
+        UserId(self.0.user_id)
+    }
+}
 
 impl FromRequest for TokenUser {
     type Config = ();

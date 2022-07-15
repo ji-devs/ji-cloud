@@ -336,7 +336,7 @@ impl serde::Serialize for UserOrMe {
     {
         match self {
             UserOrMe::Me => serializer.serialize_str("me"),
-            UserOrMe::User(id) => serializer.collect_str(&id.to_hyphenated()),
+            UserOrMe::User(id) => serializer.collect_str(&id),
         }
     }
 }

@@ -20,8 +20,9 @@ pub async fn create(
     req: Json<<player::Create as ApiEndpoint>::Req>,
 ) -> Result<HttpResponse, error::JigCode> {
     let req = req.into_inner();
+    let user_id = claims.user_id();
 
-    db::jig::is_logged_in(&*db, claims.0.user_id).await?;
+    db::jig::is_logged_in(&*db, user_id).await?;
 
     let (index, expires_at) = db::jig::player::create(&db, req.jig_id, &req.settings).await?;
 
